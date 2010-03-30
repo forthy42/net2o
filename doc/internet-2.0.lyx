@@ -1,0 +1,1535 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{Warsaw}
+% or ...
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\language ngerman
+\inputencoding auto
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\defskip medskip
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Rebuild from Scratch: Internet 2.0
+\begin_inset OptArg
+status open
+
+\begin_layout Plain Layout
+Internet 2.0
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+Forth--Tagung 2010, Rostock
+\end_layout
+
+\begin_layout BeginFrame
+Übersicht
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Subsection
+30 Jahre angehäufter Krempel
+\end_layout
+
+\begin_layout BeginFrame
+Ausmisten dringend nötig
+\end_layout
+
+\begin_layout Itemize
+Das Internet zeigt langsam sein Alter --- viele Dinge funktionieren nicht
+ mehr so gut, wie sie sollen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Gleichzeitig nimmt unsere Abhängigkeit davon stark zu
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+IPv6 löst einige Probleme, erzeugt andere, und ignoriert viele
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Zu komplex, folgt teilweise nicht mal der Spezifikation (RFCs), zu viele
+ Protokolle
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Postel--Problem: Wenn man jeden Dreck akzeptiert, gibt es irgendwann nur
+ noch Dreck
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Lösung: Wegwerfen und neu bauen
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Anforderungen
+\end_layout
+
+\begin_layout BeginFrame
+Anforderungen
+\end_layout
+
+\begin_layout Description
+Skalierbar Muss mit mit niedriger und hoher Bandbreite gut funktionieren,
+ mit losen und eng gekoppelten Systemen, wenigen und vielen Hosts, die miteinand
+er verbunden sind, über kurze und große Entfernungen --- vom On--Chip--Netzwerk
+ bis zum weltweiten Verbund.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Einfach
+\begin_inset space ~
+\end_inset
+
+zu
+\begin_inset space ~
+\end_inset
+
+implementieren Muss mit minimalem Aufwand arbeiten, kleine und billige Geräte
+ müssen sich verbinden können.
+ Eine Idee ist, 
+\begin_inset Quotes gld
+\end_inset
+
+Busse
+\begin_inset Quotes grd
+\end_inset
+
+ wie USB und Firewire durch billige LAN--Links zu ersetzen.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Anforderungen II
+\end_layout
+
+\begin_layout Description
+Sicherheit Benutzer wollen Authentisierung und Autorisierung, aber auch
+ Anonymität und Datenschutz.
+ Firewalls und ähnliche Torwächter (Lastverteiler, etc.) sind weit verbreitet.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Medien--Fähigkeit Das erfordert Echtzeit--Fähigkeit, vorher allozierte Bandbreit
+e und andere QoS--Features, end-to-end.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Transparenz Muss mit anderen Netzwerken zusammenarbeiten (insbesondere 
+\begin_inset Quotes gld
+\end_inset
+
+Internet 1.0
+\begin_inset Quotes grd
+\end_inset
+
+).
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Topologie
+\end_layout
+
+\begin_layout BeginFrame
+Switchen, nicht Routen
+\end_layout
+
+\begin_layout Itemize
+Das Internet ist verbunden über Router, die jedes Packet einzeln routen
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Der Trend geht aber zu MPLS, das Routing auf Randknoten beschränkt
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der größte Teil des Internetverkehrs ist verbindungsorientiert, selbst bei
+ DNS wird hauptsächlich ein lokaler Cache abgefragt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+IPv6 vergrößert die Routing--Tabellen weiter
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Source routed path
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Nimm die ersten 
+\begin_inset Formula $n$
+\end_inset
+
+ Bits der Adresse und wähle Ziel
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Schiebe Adresse um 
+\begin_inset Formula $n$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Füge bit--reverse Quelle in Adress--Feld
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Routing Server
+\end_layout
+
+\begin_layout Itemize
+Routing Server löst Name 
+\begin_inset Formula $\to$
+\end_inset
+
+ Ziel auf.
+ Der Service ist eine gecachete, verteilte Datenbank wie DNS.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing findet einmal pro Host und Ziel statt, und wird gecachet
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Netzknoten und Endknoten sind getrennt --- kein Missbrauch von Endknoten
+ wie bei IPv4 source routing
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der Rückweg eines Packets kann nicht gefälscht werden, er teilt sich den
+ Platz mit der Zieladresse
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Packet Header
+\end_layout
+
+\begin_layout BeginFrame
+Packet Header
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Size
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Flags
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Path
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Address
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Junk
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+0/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+32/128/512/2k
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+ECC
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+L1 dependent
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename header64.fig
+	lyxscale 50
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename header16.fig
+	lyxscale 50
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Flusskontrolle
+\end_layout
+
+\begin_layout BeginFrame
+Flusskontrolle
+\end_layout
+
+\begin_layout ColumnsTopAligned
+
+\end_layout
+
+\begin_deeper
+\begin_layout Column
+6cm
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+TCP/IP
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Flusskontrolle am Endpunkt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+\begin_inset Quotes gld
+\end_inset
+
+Slow start
+\begin_inset Quotes grd
+\end_inset
+
+ (ein Skalierungsproblem, Workaround: Mehrere parallel Verbindungen)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Zufällig verworfene Packets bei Überlast
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Retransmit und falsche oder künstlich verzögerte Acknowledges machen Probleme
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Nicht vergessen: Endpunkt ist möglicherweise feindlich!
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Column
+4cm
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Flusskontrolle im Netzwerk
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Bilde Statistiken
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Sende 
+\begin_inset Quotes gld
+\end_inset
+
+Stau
+\begin_inset Quotes grd
+\end_inset
+
+--Messages zurück an Verursacher
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Informiere frühzeitig über verfügbare Resourcen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Topologische Fairness, nicht pro Verbindung
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+1:n--Verbindungen
+\end_layout
+
+\begin_layout BeginFrame
+1:n--Verbindungen
+\end_layout
+
+\begin_layout ColumnsTopAligned
+
+\end_layout
+
+\begin_deeper
+\begin_layout Column
+5cm
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Multicasting
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Route ist ein Baum, kein Pfad
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Benutze eine Tabelle, um mehrere Ziele zu wählen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Ein Host, der einem Multicast beitritt sucht aufwärts im Baum und fügt seine
+ Adresse zur Tabelle hinzu
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Multicasting ist eine begrenzte Resource --- nutze sie nur, wenn angemessen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Keine Regulierung nötig
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Column
+5cm
+\end_layout
+
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Broadcasting
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Benutze eine Bitmap, um die Ziele zu wählen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Kleine Endknoten--Switches können ein CAM
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Content Addressed Memory
+\end_layout
+
+\end_inset
+
+ nutzen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\size footnotesize
+Broadcasts nutzen globale/regionale Nummern: Regulierung nötig
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Legacy
+\end_layout
+
+\begin_layout BeginFrame
+Legacy
+\end_layout
+
+\begin_layout Description
+Internet
+\begin_inset space ~
+\end_inset
+
+2.0
+\begin_inset space ~
+\end_inset
+
+over
+\begin_inset space ~
+\end_inset
+
+Ethernet Packets in normale Ethernet--Frames verpacken --- 2k--Packets brauchen
+ Jumbo--Frames
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Internet
+\begin_inset space ~
+\end_inset
+
+2.0
+\begin_inset space ~
+\end_inset
+
+over
+\begin_inset space ~
+\end_inset
+
+IP Packets in UDP--Datagramme packen, VoIP/P2P--Techniken nutzen, um durch
+ NAT--Router zu routen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+IP
+\begin_inset space ~
+\end_inset
+
+over
+\begin_inset space ~
+\end_inset
+
+Internet
+\begin_inset space ~
+\end_inset
+
+2.0 Ähnlich wie MPLS:
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Multi Protocol Label Switching
+\end_layout
+
+\end_inset
+
+ Tunnel pro Zielgruppe bilden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Access
+\begin_inset space ~
+\end_inset
+
+to
+\begin_inset space ~
+\end_inset
+
+Content Protokoll--Übersetzung (verschiedene Implementierungen möglich)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Abstraktionen
+\end_layout
+
+\begin_layout BeginFrame
+Abstraktionen
+\end_layout
+
+\begin_layout FrameSubtitle
+Vermeide unnötige Abstraktionen
+\end_layout
+
+\begin_layout Description
+Distributed
+\begin_inset space ~
+\end_inset
+
+Shared
+\begin_inset space ~
+\end_inset
+
+Memory Packets transportieren Daten von einem Knoten zum anderen --- auf
+ dieser Ebene sind es nur Adressen und Daten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Active
+\begin_inset space ~
+\end_inset
+
+Messages Trenne Daten und Metadaten.
+ Metadaten sind wirklich Code --- in einer (gesandboxten) Stack--VM die
+ dem Abstraktions--Modell entspricht und Erweiterungen erlaubt.
+ Es gibt eine Protokollhierarchie auf Basis gemeinsamer Kommandos
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Dateien
+\begin_inset space ~
+\end_inset
+
+mit
+\begin_inset space ~
+\end_inset
+
+Attributen Die meisten Internet--Protokolle behandeln Dateien oder ähnliches.
+ Dateien haben oft Attribute (z.B.
+ Sender/Empfänger und Betreff bei E--Mails, Datentyp, Name, Referenzliste
+ bei Hypertextdateien).
+ Füge Eigenschaften zu den Dateien hinzu und erlaube Abfragen danach.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Abstraktionen II
+\end_layout
+
+\begin_layout Description
+Caching,
+\begin_inset space ~
+\end_inset
+
+P2P,
+\begin_inset space ~
+\end_inset
+
+Clouds Verteiltes Dateisystem: Nutze einen kryptographischen Hash (
+\begin_inset Quotes gld
+\end_inset
+
+URI
+\begin_inset Quotes grd
+\end_inset
+
+) um Dokumente zu identifizieren, und suche, wo sie am billigsten zu bekommen
+ sind --- am Nachbarrechner, vom Cloud cohosting, oder aus dem P2P--Netzwerk.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Text--Formatierung Wikis zeigen: HTML ist zu kompliziert.
+ Besser gleich eine Wiki--artige Formatierung mit separaten Style--Sheets
+ für's Layout benutzen.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Einfaches
+\begin_inset space ~
+\end_inset
+
+Frontend Mit den konsolidierten Protokollen kann der Browser wirklich alles
+ machen --- ohne Verrenkungen.
+ AJAX--artige Fähigkeiten fügt man am besten direkt zum Daten--Modell des
+ Browsers dazu
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Beispiele
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Öffne Verbindung
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+s
+\begin_inset Quotes erd
+\end_inset
+
+ http
+\begin_inset Quotes erd
+\end_inset
+
+ protocol s
+\begin_inset Quotes erd
+\end_inset
+
+ foo.com
+\begin_inset Quotes erd
+\end_inset
+
+ host
+\end_layout
+
+\begin_layout LyX-Code
+<addr> <len> data-window
+\end_layout
+
+\begin_layout LyX-Code
+<addr'> <len'>
+\emph on
+ 
+\emph default
+command-window
+\end_layout
+
+\begin_layout LyX-Code
+open-port
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Hole Hypertextdokument
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+:? expand-preload  BEGIN  dup list-len >r
+\end_layout
+
+\begin_layout LyX-Code
+  dup s
+\begin_inset Quotes erd
+\end_inset
+
+ preload
+\begin_inset Quotes erd
+\end_inset
+
+ get-attribute-list append
+\end_layout
+
+\begin_layout LyX-Code
+  uniquify-list  dup list-len r> =  UNTIL ;
+\end_layout
+
+\begin_layout LyX-Code
+[[ s
+\begin_inset Quotes erd
+\end_inset
+
+ bar/url.wiki
+\begin_inset Quotes erd
+\end_inset
+
+ ]] expand-preload
+\end_layout
+
+\begin_layout LyX-Code
+' send-mime-file map-list
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Sicherheit
+\end_layout
+
+\begin_layout BeginFrame
+Sicherheitsanforderungen
+\end_layout
+
+\begin_layout Itemize
+Verschlüsselung, um Überwachung zu vermeiden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Authentifizierung und Autorisierung für Zugangskontrolle
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Schlüsselaustausch und Vertrauensnetzwerk (PKI
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Public Key Infrastructure
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Anonymisieren wenn nötig (Zwiebelrouting)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout BeginFrame
+Zusammenfassung
+\end_layout
+
+\begin_layout Itemize
+Es gibt ganz wenig Code um UDP--Packete zu routen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Pfad zur Realisierung: Referenzimplementierung, RFC, Diskussion im Rahmen
+ der IETF
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+Literatur
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+Literatur
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+Bernd Paysan 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+Internet 2.0 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.jwdt.com/~paysan/internet-2.0.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document
