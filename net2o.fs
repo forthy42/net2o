@@ -13,8 +13,8 @@ require string.fs
 : new-server ( -- )
     net2o-udp create-udp-server s" w+" c-string fdopen to net2o-srv ;
 
-: new-client ( hostaddr u -- )
-    net2o-udp open-udp-socket to net2o-sock ;
+: new-client ( -- )
+    new-udp-socket to net2o-sock ;
 
 $81A Constant maxpacket
 
@@ -33,7 +33,7 @@ end-struct net2o-header
     net2o-srv inbuf maxpacket read-socket-from ;
 
 : send-a-packet ( addr u -- n )
-    net2o-sock fileno -rot 0 sockaddr-tmp 16 sendto ;
+    net2o-sock -rot 0 sockaddr-tmp 16 sendto ;
 
 \ clients routing table
 
@@ -50,13 +50,20 @@ end-struct net2o-header
 : route-hash ( addr -- hash )
     /address route-bits (hashkey1) ;
 
+: sock-route" ( -- addr dest u )
+    sockaddr-tmp dup route-hash addresses routes + /address ;
 : insert-address ( -- )
-    sockaddr-tmp route-hash addresses routes + /address move ;
+     sock-route" move ;
 \ FIXME: doesn't check for collissons
 
+: host:port>addr ( addr u port -- )
+    -rot host>addr swap sockaddr-tmp >inetaddr ;
+
+: insert-dest ( addr u port -- )
+    host:port>addr insert-address ;
+
 : address>route ( -- n/-1 )
-    sockaddr-tmp route-hash dup addresses routes + /address tuck
-    str= 0= IF  drop -1  THEN ;
+    sock-route" tuck str= 0= IF  drop -1  THEN ;
 : route>address ( n -- )
     addresses routes + sockaddr-tmp /address move ;
 
@@ -140,3 +147,6 @@ Create dest-mapping  0 , 0 , 0 ,
     r@ @ 0= IF  s" " r@ $!  THEN
     dest-mapping 2 cells + ! dest-mapping 2!
     dest-mapping 3 cells r> $+! ;
+
+\ send commands
+
