@@ -18,7 +18,8 @@ require string.fs
 
 $81A Constant maxpacket
 
-Create inbuf maxpacket allot
+Create inbuf  maxpacket allot
+Create outbuf maxpacket allot
 
 2 8 2Constant address%
 
@@ -63,7 +64,7 @@ end-struct net2o-header
     host:port insert-address ;
 
 : address>route ( -- n/-1 )
-    sock-route" tuck str= 0= IF  drop -1  THEN ;
+    sock-route" tuck str= 0= IF  -1  ELSE  sockaddr-tmp route-hash  THEN ;
 : route>address ( n -- )
     addresses routes + sockaddr-tmp /address move ;
 
@@ -148,5 +149,29 @@ Create dest-mapping  0 , 0 , 0 ,
     dest-mapping 2 cells + ! dest-mapping 2!
     dest-mapping 3 cells r> $+! ;
 
-\ send commands
+\ client initializer
 
+: init-client ( -- )
+    new-client init-route ;
+
+: init-server ( -- )
+    new-server init-delivery-table ;
+
+\ send blocks of memory
+
+: set-dest ( addr target -- )
+    outbuf dest !  outbuf addr ! ;
+
+: set-flags ( -- )  0 outbuf 1+ c!  destsize# addrsize# or outbuf c! ;
+
+: c+!  ( n addr -- )  dup >r c@ + r> c! ;
+
+: >sendA ( addr -- )  outbuf header-size + $020 move ;
+: >sendB ( addr -- )  outbuf header-size + $080 move $2 outbuf c+! ;
+: >sendC ( addr -- )  outbuf header-size + $200 move $4 outbuf c+! ;
+: >sendD ( addr -- )  outbuf header-size + $800 move $6 outbuf c+! ;
+
+: sendA ( addr taddr target -- )  set-dest  set-flags  >sendA ;
+: sendB ( addr taddr target -- )  set-dest  set-flags  >sendB ;
+: sendC ( addr taddr target -- )  set-dest  set-flags  >sendC ;
+: sendD ( addr taddr target -- )  set-dest  set-flags  >sendD ;
