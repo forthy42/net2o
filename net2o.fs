@@ -56,11 +56,11 @@ end-struct net2o-header
      sock-route" move ;
 \ FIXME: doesn't check for collissons
 
-: host:port>addr ( addr u port -- )
+: host:port ( addr u port -- )
     -rot host>addr swap sockaddr-tmp >inetaddr ;
 
-: insert-dest ( addr u port -- )
-    host:port>addr insert-address ;
+: insert-ipv4 ( addr u port -- )
+    host:port insert-address ;
 
 : address>route ( -- n/-1 )
     sock-route" tuck str= 0= IF  drop -1  THEN ;
