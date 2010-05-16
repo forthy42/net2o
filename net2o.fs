@@ -51,20 +51,20 @@ end-struct net2o-header
 : route-hash ( addr -- hash )
     /address route-bits (hashkey1) ;
 
-: sock-route" ( -- addr dest u )
-    sockaddr-tmp dup route-hash addresses routes + /address ;
-: insert-address ( -- )
-     sock-route" move ;
+: sock-route" ( -- addr dest u hash )
+    sockaddr-tmp dup route-hash dup >r addresses routes + /address r> ;
+: insert-address ( -- net2o-addr )
+     sock-route" >r move r> $38 lshift ;
 \ FIXME: doesn't check for collissons
 
 : host:port ( addr u port -- )
     -rot host>addr swap sockaddr-tmp >inetaddr ;
 
-: insert-ipv4 ( addr u port -- )
+: insert-ipv4 ( addr u port -- net2o-addr )
     host:port insert-address ;
 
 : address>route ( -- n/-1 )
-    sock-route" tuck str= 0= IF  -1  ELSE  sockaddr-tmp route-hash  THEN ;
+    sock-route" >r tuck str= 0= IF  rdrop -1  ELSE  r>  THEN ;
 : route>address ( n -- )
     addresses routes + sockaddr-tmp /address move ;
 
@@ -76,17 +76,20 @@ end-struct net2o-header
 Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reversex ( x1 -- x2 )
+: reverse64 ( x1 -- x2 )
     0 8 0 DO  8 lshift over $FF and reverse8 or
 	swap 8 rshift swap  LOOP ;
 
-\ route a packet
+\ route an incoming packet
 
-: packet-route ( -- flag )
-    inbuf dest c@ 0= IF  true  EXIT  THEN \ local packet
-    address>route reverse8  inbuf dest c@ route>address
-    inbuf dest dup 1+ swap /address 1- move
-    inbuf dest /address 1- + c!  false ;
+: packet-route ( orig-addr addr -- flag ) >r
+    r@ dest c@ 0= IF  true  rdrop EXIT  THEN \ local packet
+    r@ dest c@ route>address
+    r@ dest dup 1+ swap /address 1- move
+    r> dest /address 1- + c!  false ;
+
+: in-route ( -- flag )  address>route reverse8  inbuf packet-route ;
+: out-route ( -- flag )  0  outbuf packet-route ;
 
 \ packet&header size
 
@@ -95,20 +98,20 @@ $40 Constant addrsize#
 $20 Constant junksize#
 $06 Constant datasize#
 
-: header-size ( x -- u ) >r 2
+: (header-size ( x -- u ) >r 2
     r@ destsize# and IF  8  ELSE  2  THEN +
     r@ addrsize# and IF  8  ELSE  2  THEN +
     r@ junksize# and IF  8  ELSE  0  THEN +
     rdrop ;
 
-Create header-sizes  $100 0 [DO] [I] header-size c, $20 [+LOOP]
+Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
 
-: body-size ( -- ) $20 inbuf c@ datasize# and lshift ;
-: packet-size ( -- n )
-    inbuf c@ 5 rshift header-sizes + c@
-    body-size + ;
-: packet-body ( -- addr )
-    inbuf dup c@ 5 rshift header-sizes + c@ + ;
+: header-size ( addr -- n )  c@ 5 rshift header-sizes + c@ ;
+: body-size ( addr -- n ) $20 swap c@ datasize# and lshift ;
+: packet-size ( addr -- n )
+    dup header-size swap body-size + ;
+: packet-body ( addr -- addr )
+    dup header-size + ;
 
 \ packet delivery table
 
@@ -125,10 +128,10 @@ Variable dest-addr
     delivery-table swap erase ;
 
 : >ret-addr ( -- )
-    inbuf dest @ reversex return-addr ! ;
+    inbuf dest @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
     0 inbuf addr 8 bounds ?DO  8 lshift I c@ or  LOOP
-    body-size 1- invert and dest-addr ! ;
+    inbuf body-size 1- invert and dest-addr ! ;
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
@@ -152,26 +155,29 @@ Create dest-mapping  0 , 0 , 0 ,
 \ client initializer
 
 : init-client ( -- )
-    new-client init-route ;
+    new-client init-route init-delivery-table ;
 
 : init-server ( -- )
-    new-server init-delivery-table ;
+    new-server new-client init-route init-delivery-table ;
 
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf dest !  outbuf addr ! ;
+    outbuf dest x!be  outbuf addr x!be ;
 
 : set-flags ( -- )  0 outbuf 1+ c!  destsize# addrsize# or outbuf c! ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
-: >sendA ( addr -- )  outbuf header-size + $020 move ;
-: >sendB ( addr -- )  outbuf header-size + $080 move $2 outbuf c+! ;
-: >sendC ( addr -- )  outbuf header-size + $200 move $4 outbuf c+! ;
-: >sendD ( addr -- )  outbuf header-size + $800 move $6 outbuf c+! ;
+: outbody ( -- addr ) outbuf packet-body ;
+: send-packet ( -- )  out-route outbuf dup packet-size send-a-packet ;
 
-: sendA ( addr taddr target -- )  set-dest  set-flags  >sendA ;
-: sendB ( addr taddr target -- )  set-dest  set-flags  >sendB ;
-: sendC ( addr taddr target -- )  set-dest  set-flags  >sendC ;
-: sendD ( addr taddr target -- )  set-dest  set-flags  >sendD ;
+: >sendA ( addr -- )  outbody $020 move ;
+: >sendB ( addr -- )  outbody $080 move $2 outbuf c+! ;
+: >sendC ( addr -- )  outbody $200 move $4 outbuf c+! ;
+: >sendD ( addr -- )  outbody $800 move $6 outbuf c+! ;
+
+: sendA ( addr taddr target -- )  set-dest  set-flags  >sendA send-packet ;
+: sendB ( addr taddr target -- )  set-dest  set-flags  >sendB send-packet ;
+: sendC ( addr taddr target -- )  set-dest  set-flags  >sendC send-packet ;
+: sendD ( addr taddr target -- )  set-dest  set-flags  >sendD send-packet ;
