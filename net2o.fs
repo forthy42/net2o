@@ -112,6 +112,8 @@ Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
     dup header-size swap body-size + ;
 : packet-body ( addr -- addr )
     dup header-size + ;
+: packet-data ( addr -- addr u )
+    >r r@ header-size r@ + r> body-size ;
 
 \ packet delivery table
 
@@ -130,8 +132,7 @@ Variable dest-addr
 : >ret-addr ( -- )
     inbuf dest @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
-    0 inbuf addr 8 bounds ?DO  8 lshift I c@ or  LOOP
-    inbuf body-size 1- invert and dest-addr ! ;
+    inbuf addr x@be  inbuf body-size 1- invert and dest-addr ! ;
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
@@ -193,4 +194,21 @@ Create pollfds   pollfd %size allot
     pollfds 1 ptimeout poll 0> ;
 
 : next-srv-packet ( -- addr u )
-    BEGIN  poll-srv  UNTIL  read-a-packet ;
+    BEGIN  poll-srv  UNTIL  read-a-packet
+    over packet-size over <> abort" Wrong packet size" ;
+
+: queue-command ( addr u -- )
+    dump ;
+
+: handle-packet ( -- ) \ handle local packet
+    >ret-addr >dest-addr
+    dest-addr @ 0= IF  inbuf packet-data queue-command
+    ELSE  check-dest  IF  >r inbuf packet-data r> swap move  THEN
+    THEN ;
+
+: route-packet ( -- )  inbuf dup packet-size send-a-packet ;
+
+: server-loop ( -- )
+    BEGIN  next-srv-packet 2drop in-route
+	IF  handle-packet  ELSE  route-packet  THEN
+    AGAIN ;
