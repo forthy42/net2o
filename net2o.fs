@@ -18,8 +18,8 @@ require string.fs
 
 $81A Constant maxpacket
 
-Create inbuf  maxpacket allot
-Create outbuf maxpacket allot
+here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
+here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
 
 2 8 2Constant address%
 
@@ -181,3 +181,16 @@ Create dest-mapping  0 , 0 , 0 ,
 : sendB ( addr taddr target -- )  set-dest  set-flags  >sendB send-packet ;
 : sendC ( addr taddr target -- )  set-dest  set-flags  >sendC send-packet ;
 : sendD ( addr taddr target -- )  set-dest  set-flags  >sendD send-packet ;
+
+\ poll loop
+
+100 Value ptimeout \ milliseconds
+
+Create pollfds   pollfd %size allot
+
+: poll-srv ( -- flag )  net2o-srv fileno pollfds fd l!
+    POLLIN pollfds events w!
+    pollfds 1 ptimeout poll 0> ;
+
+: next-srv-packet ( -- addr u )
+    BEGIN  poll-srv  UNTIL  read-a-packet ;
