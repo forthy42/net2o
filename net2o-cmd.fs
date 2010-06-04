@@ -13,15 +13,18 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 Variable cmd
 Variable cmd' 0 cmd' !
 
-: prefetch ( addr u -- addr' u' n )
-    dup 1 cells < abort" Command space exhausted"
+: ?lit-space ( addr u -- addr u )
+    dup 1 cells < abort" Command space exhausted" ;
+: prefetch ( addr u -- addr' u' n ) ?lit-space
     over @ >r 1 cells /string r> ;
 : byte-fetch ( -- n )
     cmd' @ 0= IF  prefetch cmd !  THEN
     cmd cmd' @ + c@  1 cmd' +! ;
 
+2Variable buf-state
+
 : cmd-dispatch ( addr u -- addr' u' )
-    byte-fetch cells cmd-base-table + perform ;
+    byte-fetch >r buf-state 2! cells cmd-base-table + perform buf-state 2@ ;
 
 : extend-cmds ( -- xt ) noname Create lastxt $40 0 DO ['] net2o-crash , LOOP
   DOES>  >r byte-fetch $80 - $3F umin cells r> + perform ;
@@ -37,3 +40,45 @@ Create 'cmd-buf 6 allot
 	    @ >body $80 cells - >r
     REPEAT
     drop c@ cells r> + ! ;
+
+: cmd-loop ( addr u -- )  sp@ >r
+    BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
+
+\ commands
+
+: safe/string ( c-addr u n -- c-addr' u' )
+\G protect /string against overflows.
+    dup negate >r  dup 0> IF
+        /string dup r> u>= IF  + 0  THEN
+    ELSE
+        /string dup r> u< IF  + 1+ -1  THEN
+    THEN ;
+
+: net2o-does  DOES> ( stub ) ;
+: net2o: ( number "name" -- )
+    ['] noop over >cmd \ allocate space in table
+    Create dup >r , here >r 0 , net2o-does noname :
+    lastxt dup r> ! r> >cmd ;
+
+Vocabulary net2o-base
+
+also net2o-base definitions previous
+
+0 net2o: end-cmd ( -- ) 0 cmd' !  0 buf-state ! ;
+1 net2o: lit ( -- x )  buf-state 2@ prefetch >r buf-state 2! r> ;
+2 net2o: string ( -- addr u )  buf-state 2@
+    2dup over xc@+ aligned safe/string buf-state 2!
+    >r xc@+ r> umin ;
+3 net2o: char ( -- xc )
+    byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
+    dup $C2 u< IF  UTF-8-err throw  THEN  \ malformed character
+    $7F and  $40 >r
+    BEGIN  dup r@ and  WHILE  r@ xor
+	    6 lshift r> 5 lshift >r >r byte-fetch
+	    dup $C0 and $80 <> IF   UTF-8-err throw  THEN
+	    $3F and r> or
+    REPEAT  rdrop ;
+4 net2o: emit ( xc -- ) xemit ;
+5 net2o: type ( addr u -- )  type ;
+
+definitions
