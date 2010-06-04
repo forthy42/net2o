@@ -197,8 +197,8 @@ Create pollfds   pollfd %size allot
     BEGIN  poll-srv  UNTIL  read-a-packet
     over packet-size over <> abort" Wrong packet size" ;
 
-: queue-command ( addr u -- )
-    dump ;
+Defer queue-command ( addr u -- )
+' dump IS queue-command
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
@@ -212,3 +212,7 @@ Create pollfds   pollfd %size allot
     BEGIN  next-srv-packet 2drop in-route
 	IF  handle-packet  ELSE  route-packet  THEN
     AGAIN ;
+
+\ load net2o commands
+
+include net2o-cmd.fs
