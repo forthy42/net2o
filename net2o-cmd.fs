@@ -28,12 +28,12 @@ Variable cmd' 0 cmd' !
 
 Create 'cmd-buf 6 allot
 
-: >cmd ( xt u -- ) 'cmd-buf xc!+  'cmd-buf tuck -
+: >cmd ( xt u -- ) 'cmd-buf 6 xc!+? 2drop  'cmd-buf tuck -
     cmd-base-table >r
     BEGIN  dup 1 >  WHILE  over c@ >r 1 /string r>
 	    cells r> + dup @ ['] net2o-crash = IF
-		dup extend-cmds over !
+		extend-cmds over !
 	    THEN
-	    @ >body >r
+	    @ >body $80 cells - >r
     REPEAT
     drop c@ cells r> + ! ;
