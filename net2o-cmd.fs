@@ -17,14 +17,14 @@ Variable cmd' 0 cmd' !
     dup 1 cells < abort" Command space exhausted" ;
 : prefetch ( addr u -- addr' u' n ) ?lit-space
     over @ >r 1 cells /string r> ;
-: byte-fetch ( -- n )
+: byte-fetch ( addr u -- addr' u' n )
     cmd' @ 0= IF  prefetch cmd !  THEN
     cmd cmd' @ + c@  1 cmd' +! ;
 
 2Variable buf-state
 
 : cmd-dispatch ( addr u -- addr' u' )
-    byte-fetch >r buf-state 2! cells cmd-base-table + perform buf-state 2@ ;
+    byte-fetch >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
 
 : extend-cmds ( -- xt ) noname Create lastxt $40 0 DO ['] net2o-crash , LOOP
   DOES>  >r byte-fetch $80 - $3F umin cells r> + perform ;
@@ -41,7 +41,7 @@ Create 'cmd-buf 6 allot
     REPEAT
     drop c@ cells r> + ! ;
 
-: cmd-loop ( addr u -- )  sp@ >r
+: cmd-loop ( addr u -- )  cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
 \ commands
@@ -54,7 +54,13 @@ Create 'cmd-buf 6 allot
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 
-: net2o-does  DOES> ( stub ) ;
+Defer net2o-do
+: net2o-exec  cell+ perform ;
+
+: executer ['] net2o-exec IS net2o-do ;
+executer
+
+: net2o-does  DOES> net2o-do ;
 : net2o: ( number "name" -- )
     ['] noop over >cmd \ allocate space in table
     Create dup >r , here >r 0 , net2o-does noname :
@@ -64,10 +70,10 @@ Vocabulary net2o-base
 
 also net2o-base definitions previous
 
-0 net2o: end-cmd ( -- ) 0 cmd' !  0 buf-state ! ;
+0 net2o: end-cmd ( -- ) 0 cmd' !  0. buf-state 2! ;
 1 net2o: lit ( -- x )  buf-state 2@ prefetch >r buf-state 2! r> ;
 2 net2o: string ( -- addr u )  buf-state 2@
-    2dup over xc@+ aligned safe/string buf-state 2!
+    2dup over xc@+ nip aligned safe/string buf-state 2!
     >r xc@+ r> umin ;
 3 net2o: char ( -- xc )
     byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
@@ -82,3 +88,42 @@ also net2o-base definitions previous
 5 net2o: type ( addr u -- )  type ;
 
 definitions
+
+\ net2o assembler
+
+Variable cmdbuf $800 allot  here Constant endcmdbuf
+Variable cmdaccu 0 ,
+Variable cmdslot
+Variable cmdextras
+
+: cmdreset  cmdbuf off  cmdslot off  cmdextras off ;
+
+cmdreset
+
+: @+ ( addr -- n addr' )  dup @ swap cell+ ;
+
+: cmdflush
+    cmdaccu @ cmdbuf @+ + ! cmdextras @ 1 cells + cmdbuf +!
+    cmdslot @ 8 - 0 max cmdslot !
+    cmdaccu cell+ @ cmdaccu ! cmdextras off ;
+: cmdflush?  cmdslot @ 8 u>= IF
+	cmdflush
+    THEN ;
+: cmd, ( n -- )  cmdaccu 2 cells cmdslot @ /string xc!+? 2drop
+    cmdaccu - cmdslot ! cmdflush? ;
+
+: net2o, @ cmd, ;
+
+: net2o-code  ['] net2o, IS net2o-do also net2o-base ;
+
+also net2o-base definitions
+
+: $, ( addr u -- )  dup >r cmdbuf @+ + cmdextras @ + cell+
+    endcmdbuf over - xc!+? 0= abort" didn't fit"
+    r@ min move
+    r> aligned cmdextras +!  string ;
+: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ !  1 cells cmdextras +!  lit ;
+: char, ( xc -- )  char cmd, ;
+: end-code  cmdflush previous ;
+
+previous definitions
