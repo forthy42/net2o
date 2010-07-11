@@ -72,6 +72,8 @@ Vocabulary net2o-base
 
 also net2o-base definitions previous
 
+\ Command numbers preliminary and subject to change
+
 0 net2o: end-cmd ( -- ) 0 cmd' !  0. buf-state 2! ;
 1 net2o: lit ( -- x )  buf-state 2@ prefetch >r buf-state 2! r> ;
 2 net2o: string ( -- addr u )  buf-state 2@
@@ -86,6 +88,9 @@ also net2o-base definitions previous
 	    dup $C0 and $80 <> IF   UTF-8-err throw  THEN
 	    $3F and r> or
     REPEAT  rdrop ;
+
+\ these functions are only there to test the server
+
 4 net2o: emit ( xc -- ) xemit ;
 5 net2o: type ( addr u -- )  type ;
 6 net2o: cr ( -- ) cr ;

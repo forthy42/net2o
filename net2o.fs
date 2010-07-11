@@ -153,6 +153,8 @@ Create dest-mapping  0 , 0 , 0 ,
     dest-mapping 2 cells + ! dest-mapping 2!
     dest-mapping 3 cells r> $+! ;
 
+: new-map ( addr u -- )  dup allocate throw map-dest ;
+
 \ client initializer
 
 : init-client ( -- )
