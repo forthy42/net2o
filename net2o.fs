@@ -132,7 +132,7 @@ Variable dest-addr
 : >ret-addr ( -- )
     inbuf dest @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
-    inbuf addr x@be  inbuf body-size 1- invert and dest-addr ! ;
+    inbuf addr be-x@  inbuf body-size 1- invert and dest-addr ! ;
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
@@ -164,7 +164,7 @@ Create dest-mapping  0 , 0 , 0 ,
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf dest x!be  outbuf addr x!be ;
+    outbuf dest be-x!  outbuf addr be-x! ;
 
 : set-flags ( -- )  0 outbuf 1+ c!  destsize# addrsize# or outbuf c! ;
 
