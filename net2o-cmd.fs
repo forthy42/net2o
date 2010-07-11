@@ -44,6 +44,8 @@ Create 'cmd-buf 6 allot
 : cmd-loop ( addr u -- )  cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
+' cmd-loop is queue-command
+
 \ commands
 
 : safe/string ( c-addr u n -- c-addr' u' )
@@ -86,6 +88,7 @@ also net2o-base definitions previous
     REPEAT  rdrop ;
 4 net2o: emit ( xc -- ) xemit ;
 5 net2o: type ( addr u -- )  type ;
+6 net2o: cr ( -- ) cr ;
 
 definitions
 
