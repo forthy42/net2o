@@ -124,6 +124,8 @@ cmdreset
 
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
+\ net2o assembler stuff
+
 also net2o-base definitions
 
 : $, ( addr u -- )  dup >r cmdbuf @+ + cmdextras @ + cell+
@@ -135,3 +137,12 @@ also net2o-base definitions
 : end-code  cmdflush previous ;
 
 previous definitions
+
+\ commands to read and write files
+
+also net2o-base definitions
+
+7 net2o: throw ( error -- )  throw ;
+
+previous definitions
+
