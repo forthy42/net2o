@@ -117,6 +117,8 @@ Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
 
 \ packet delivery table
 
+Variable job-context
+
 \ each source has multiple destination spaces
 
 0 Value delivery-table
@@ -132,26 +134,35 @@ Variable dest-addr
 : >ret-addr ( -- )
     inbuf dest @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
-    inbuf addr be-x@  inbuf body-size 1- invert and dest-addr ! ;
+    inbuf addr be-ux@  inbuf body-size 1- invert and dest-addr ! ;
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
-: check-dest ( -- addr t / f )
+: check-dest ( -- addr t / f )  job-context off
     ret-hash cells delivery-table +
     dup @ 0= IF  drop false  EXIT  THEN
     $@ bounds ?DO
 	I 2@ 1- bounds dest-addr @ within
-	0= IF  I cell+ 2@ dest-addr @ swap - + true UNLOOP  EXIT  THEN
+	0= IF
+	    I cell+ 2@ dest-addr @ swap - + true
+	    I 3 cells + @ ?dup-IF  job-context !  THEN
+	    UNLOOP  EXIT  THEN
     3 cells +LOOP
     false ;
 
-Create dest-mapping  0 , 0 , 0 ,
+\ Destination mapping contains
+\ addr u - range of virtal addresses
+\ addr' - real start address
+\ context - for exec regions, this is the job context
+
+Create dest-mapping  0 , 0 , 0 , 0 ,
 
 : map-dest ( addr u addr' -- )
     ret-hash cells delivery-table + >r
     r@ @ 0= IF  s" " r@ $!  THEN
     dest-mapping 2 cells + ! dest-mapping 2!
-    dest-mapping 3 cells r> $+! ;
+    job-context @ dest-mapping 3 cells + !
+    dest-mapping 4 cells r> $+! ;
 
 : new-map ( addr u -- )  dup allocate throw map-dest ;
 
@@ -205,7 +216,9 @@ Defer queue-command ( addr u -- )
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
     dest-addr @ 0= IF  inbuf packet-data queue-command
-    ELSE  check-dest  IF  >r inbuf packet-data r> swap move  THEN
+    ELSE  check-dest  IF  >r inbuf packet-data r@ swap move
+	    job-context @ IF  r@ inbuf packet-size queue-command  THEN
+	    rdrop  THEN
     THEN ;
 
 : route-packet ( -- )  inbuf dup packet-size send-a-packet ;
