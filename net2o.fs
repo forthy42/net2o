@@ -25,7 +25,7 @@ here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
 
 struct
     short% field flags
-    address% field dest
+    address% field destination
     address% field addr
     address% field junk
 end-struct net2o-header
@@ -83,10 +83,10 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 \ route an incoming packet
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ dest c@ 0= IF  true  rdrop EXIT  THEN \ local packet
-    r@ dest c@ route>address
-    r@ dest dup 1+ swap /address 1- move
-    r> dest /address 1- + c!  false ;
+    r@ destination c@ 0= IF  true  rdrop EXIT  THEN \ local packet
+    r@ destination c@ route>address
+    r@ destination dup 1+ swap /address 1- move
+    r> destination /address 1- + c!  false ;
 
 : in-route ( -- flag )  address>route reverse8  inbuf packet-route ;
 : out-route ( -- flag )  0  outbuf packet-route ;
@@ -132,7 +132,7 @@ Variable dest-addr
     delivery-table swap erase ;
 
 : >ret-addr ( -- )
-    inbuf dest @ reverse64 return-addr ! ;
+    inbuf destination @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
     inbuf addr be-ux@  inbuf body-size 1- invert and dest-addr ! ;
 
@@ -177,7 +177,7 @@ Create dest-mapping  0 , 0 , 0 , 0 ,
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf dest be-x!  outbuf addr be-x! ;
+    outbuf destination be-x!  outbuf addr be-x! ;
 
 : set-flags ( -- )  0 outbuf 1+ c!  destsize# addrsize# or outbuf c! ;
 
