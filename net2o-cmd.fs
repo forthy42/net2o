@@ -48,14 +48,6 @@ Create 'cmd-buf 6 allot
 
 \ commands
 
-: safe/string ( c-addr u n -- c-addr' u' )
-\G protect /string against overflows.
-    dup negate >r  dup 0> IF
-        /string dup r> u>= IF  + 0  THEN
-    ELSE
-        /string dup r> u< IF  + 1+ -1  THEN
-    THEN ;
-
 Defer net2o-do
 : net2o-exec  cell+ perform ;
 
@@ -124,6 +116,13 @@ cmdreset
 
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
+: send-cmd ( dest addr -- ) 2>r  cmdbuf cell+ 2r> swap
+    cmdbuf @ $20  <= IF  sendA  cmdbuf off  EXIT  THEN
+    cmdbuf @ $80  <= IF  sendB  cmdbuf off  EXIT  THEN
+    cmdbuf @ $200 <= IF  sendC  cmdbuf off  EXIT  THEN
+    cmdbuf @ $800 <= IF  sendD  cmdbuf off  EXIT  THEN
+    true abort" too many commands" ;
+
 \ net2o assembler stuff
 
 also net2o-base definitions
@@ -143,6 +142,9 @@ previous definitions
 also net2o-base definitions
 
 7 net2o: throw ( error -- )  throw ;
+8 net2o: new-map ( addr u -- )  new-map ;
+9 net2o: new-context ( -- ) new-context job-context ! ;
+10 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 
 previous definitions
 

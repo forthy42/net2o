@@ -145,7 +145,7 @@ Variable dest-addr
 	I 2@ 1- bounds dest-addr @ within
 	0= IF
 	    I cell+ 2@ dest-addr @ swap - + true
-	    I 3 cells + @ ?dup-IF  job-context !  THEN
+	    I 3 cells + @ job-context !
 	    UNLOOP  EXIT  THEN
     3 cells +LOOP
     false ;
@@ -165,6 +165,39 @@ Create dest-mapping  0 , 0 , 0 , 0 ,
     dest-mapping 4 cells r> $+! ;
 
 : new-map ( addr u -- )  dup allocate throw map-dest ;
+
+\ job context structure
+
+require struct0x.fs
+
+begin-structure context-struct
+field: file-handles
+field: crypto-keys
+field: auth-info
+field: status
+end-structure
+
+: new-context ( -- addr )  context-struct allocate throw
+    dup context-struct erase ;
+
+\ file handling
+
+: safe/string ( c-addr u n -- c-addr' u' )
+\G protect /string against overflows.
+    dup negate >r  dup 0> IF
+        /string dup r> u>= IF  + 0  THEN
+    ELSE
+        /string dup r> u< IF  + 1+ -1  THEN
+    THEN ;
+
+: >throw ( error -- ) throw ( stub! ) ;
+
+: n2o:open-file ( addr u mode id -- )
+    >r 
+    IF  dup @ ?dup-IF  close-file >throw  THEN  dup off
+    ELSE  r@ 1+ cells job-context @ file-handles $!len
+          job-context @ file-handles $@ drop r@ cells +  THEN rdrop >r
+    open-file >throw r> ! ;
 
 \ client initializer
 

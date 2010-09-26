@@ -106,7 +106,15 @@ Looking for a challange
 
 \begin_layout Itemize
 As presented last year on EuroForth, the challange I'm looking at is a clean
- slate reimplementation of the internet
+ slate reimplementation of 
+\begin_inset Quotes eld
+\end_inset
+
+the Internet
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -792,6 +800,10 @@ Discussion: offsets to literals as UTF-8 code?
 
 \end_layout
 
+\begin_layout Subsection
+Working Stuff
+\end_layout
+
 \begin_layout BeginFrame
 Working Testcase
 \end_layout
@@ -807,10 +819,7 @@ status open
 
 \end_inset
 
-
 Server loop
-\lang english
-
 \begin_inset ERT
 status open
 
@@ -849,10 +858,7 @@ status open
 
 \end_inset
 
-
 Debugging output
-\lang english
-
 \begin_inset ERT
 status open
 
@@ -880,7 +886,11 @@ s
 \begin_inset Quotes erd
 \end_inset
 
- net2o-udp insert-ipv4 constant lserver
+ net2o-udp insert-ipv4
+\end_layout
+
+\begin_layout LyX-Code
+           constant lserver
 \end_layout
 
 \begin_layout LyX-Code
@@ -892,7 +902,11 @@ net2o-code s
 \begin_inset Quotes erd
 \end_inset
 
- $, type '!' char, emit cr end-code
+ $, type
+\end_layout
+
+\begin_layout LyX-Code
+           '!' char, emit cr end-code
 \end_layout
 
 \begin_layout LyX-Code
@@ -906,6 +920,10 @@ cmdbuf cell+ 0 lserver sendA
 
 \begin_layout Section
 Todo-List
+\end_layout
+
+\begin_layout Subsection
+Flow Control
 \end_layout
 
 \begin_layout BeginFrame
@@ -959,8 +977,12 @@ Fast start:
 
 \end_layout
 
+\begin_layout Subsection
+Cryptography
+\end_layout
+
 \begin_layout BeginFrame
-Encryption
+Cryptography
 \end_layout
 
 \begin_layout Itemize
@@ -990,6 +1012,10 @@ Ubiquituous encryption is very important for network neutrality!
 
 \begin_layout EndFrame
 
+\end_layout
+
+\begin_layout Subsection
+Browser
 \end_layout
 
 \begin_layout BeginFrame
@@ -1039,7 +1065,7 @@ There is already a little bit of code
 
 \end_deeper
 \begin_layout Itemize
-Work for long dark winter evenings
+A lot more work for long dark winter evenings
 \end_layout
 
 \begin_deeper
