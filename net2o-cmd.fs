@@ -6,10 +6,6 @@
 \ commands come in junks of 8 bytes
 \ Commands are zero-terminated
 
-: net2o-crash true abort" Unimplemented net2o function" ;
-
-Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
-
 Variable cmd
 Variable cmd' 0 cmd' !
 
@@ -18,10 +14,17 @@ Variable cmd' 0 cmd' !
 : prefetch ( addr u -- addr' u' n ) ?lit-space
     over @ >r 1 cells /string r> ;
 : byte-fetch ( addr u -- addr' u' n )
-    cmd' @ 0= IF  prefetch cmd !  THEN
+    cmd' @ 7 and 0= IF  prefetch cmd ! cmd' off  THEN
     cmd cmd' @ + c@  1 cmd' +! ;
 
 2Variable buf-state
+
+: net2o-crash  base @ >r hex
+    cmd @ 8 .r cmd' ? buf-state 2@ swap 8 u.r 8 u.r cr
+    r> base !
+    true abort" Unimplemented net2o function" ;
+
+Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
 : cmd-dispatch ( addr u -- addr' u' )
     byte-fetch >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
@@ -85,7 +88,8 @@ also net2o-base definitions previous
 
 4 net2o: emit ( xc -- ) xemit ;
 5 net2o: type ( addr u -- )  type ;
-6 net2o: cr ( -- ) cr ;
+6 net2o: . ( -- ) . ;
+7 net2o: cr ( -- ) cr ;
 
 definitions
 
@@ -139,12 +143,13 @@ previous definitions
 
 \ commands to read and write files
 
-also net2o-base definitions
+also net2o-base definitions forth
 
-7 net2o: throw ( error -- )  throw ;
-8 net2o: new-map ( addr u -- )  n2o:new-map ;
-9 net2o: new-context ( -- ) n2o:new-context job-context ! ;
-10 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+8 net2o: throw ( error -- )  throw ;
+9 net2o: new-map ( addr u -- )  n2o:new-map ;
+10 net2o: new-context ( -- ) n2o:new-context job-context ! ;
+11 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+12 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
 
 previous definitions
 

@@ -197,6 +197,12 @@ end-structure
 	s" " job-context @ file-handles $!
     THEN ;    
 
+\ open a file - this needs *way more checking*!
+
+: id>file ( id -- fid )
+    >r job-context @ file-handles $@ r> cells safe/string
+    0= >throw  @ ;
+
 : n2o:open-file ( addr u mode id -- )
     ?handles
     >r job-context @ file-handles $@ r@ cells safe/string
