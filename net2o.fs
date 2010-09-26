@@ -164,7 +164,7 @@ Create dest-mapping  0 , 0 , 0 , 0 ,
     job-context @ dest-mapping 3 cells + !
     dest-mapping 4 cells r> $+! ;
 
-: new-map ( addr u -- )  dup allocate throw map-dest ;
+: n2o:new-map ( addr u -- )  dup allocate throw map-dest ;
 
 \ job context structure
 
@@ -177,7 +177,7 @@ field: auth-info
 field: status
 end-structure
 
-: new-context ( -- addr )  context-struct allocate throw
+: n2o:new-context ( -- addr )  context-struct allocate throw
     dup context-struct erase ;
 
 \ file handling
@@ -192,11 +192,18 @@ end-structure
 
 : >throw ( error -- ) throw ( stub! ) ;
 
+: ?handles ( -- )
+    job-context @ file-handles @ 0= IF
+	s" " job-context @ file-handles $!
+    THEN ;    
+
 : n2o:open-file ( addr u mode id -- )
-    >r 
-    IF  dup @ ?dup-IF  close-file >throw  THEN  dup off
-    ELSE  r@ 1+ cells job-context @ file-handles $!len
-          job-context @ file-handles $@ drop r@ cells +  THEN rdrop >r
+    ?handles
+    >r job-context @ file-handles $@ r@ cells safe/string
+    IF    dup @ ?dup-IF  close-file >throw  THEN  dup off
+    ELSE  drop r@ 1+ cells job-context @ file-handles $!len
+	job-context @ file-handles $@ drop r@ cells +  THEN rdrop >r
+    dup 2over ." open file: " type ."  with mode " . cr
     open-file >throw r> ! ;
 
 \ client initializer

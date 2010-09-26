@@ -69,7 +69,7 @@ also net2o-base definitions previous
 0 net2o: end-cmd ( -- ) 0 cmd' !  0. buf-state 2! ;
 1 net2o: lit ( -- x )  buf-state 2@ prefetch >r buf-state 2! r> ;
 2 net2o: string ( -- addr u )  buf-state 2@
-    2dup over xc@+ nip aligned safe/string buf-state 2!
+    2dup over xc@+ nip dup xc-size + aligned safe/string buf-state 2!
     >r xc@+ r> umin ;
 3 net2o: char ( -- xc )
     byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
@@ -130,7 +130,7 @@ also net2o-base definitions
 : $, ( addr u -- )  dup >r cmdbuf @+ + cmdextras @ + cell+
     endcmdbuf over - xc!+? 0= abort" didn't fit"
     r@ min move
-    r> aligned cmdextras +!  string ;
+    r> dup xc-size + aligned cmdextras +!  string ;
 : lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ !  1 cells cmdextras +!  lit ;
 : char, ( xc -- )  char cmd, ;
 : end-code  cmdflush previous ;
@@ -142,8 +142,8 @@ previous definitions
 also net2o-base definitions
 
 7 net2o: throw ( error -- )  throw ;
-8 net2o: new-map ( addr u -- )  new-map ;
-9 net2o: new-context ( -- ) new-context job-context ! ;
+8 net2o: new-map ( addr u -- )  n2o:new-map ;
+9 net2o: new-context ( -- ) n2o:new-context job-context ! ;
 10 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 
 previous definitions
