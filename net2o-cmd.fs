@@ -49,6 +49,18 @@ Create 'cmd-buf 6 allot
 
 ' cmd-loop is queue-command
 
+\ command helper
+
+: utf8-byte@ ( -- xc )
+    byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
+    dup $C2 u< IF  UTF-8-err throw  THEN  \ malformed character
+    $7F and  $40 >r
+    BEGIN  dup r@ and  WHILE  r@ xor
+	    6 lshift r> 5 lshift >r >r byte-fetch
+	    dup $C0 and $80 <> IF   UTF-8-err throw  THEN
+	    $3F and r> or
+    REPEAT  rdrop ;
+
 \ commands
 
 Defer net2o-do
@@ -75,14 +87,7 @@ also net2o-base definitions previous
     2dup over xc@+ nip dup xc-size + aligned safe/string buf-state 2!
     >r xc@+ r> umin ;
 3 net2o: char ( -- xc )
-    byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
-    dup $C2 u< IF  UTF-8-err throw  THEN  \ malformed character
-    $7F and  $40 >r
-    BEGIN  dup r@ and  WHILE  r@ xor
-	    6 lshift r> 5 lshift >r >r byte-fetch
-	    dup $C0 and $80 <> IF   UTF-8-err throw  THEN
-	    $3F and r> or
-    REPEAT  rdrop ;
+    utf8-byte@ ;
 
 \ these functions are only there to test the server
 
@@ -145,11 +150,27 @@ previous definitions
 
 also net2o-base definitions forth
 
-8 net2o: throw ( error -- )  throw ;
-9 net2o: new-map ( addr u -- )  n2o:new-map ;
-10 net2o: new-context ( -- ) n2o:new-context job-context ! ;
-11 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-12 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
+10 net2o: throw ( error -- )  throw ;
+11 net2o: new-map ( addr u -- )  n2o:new-map ;
+12 net2o: new-context ( -- ) n2o:new-context job-context ! ;
+13 net2o: new-data ( addr u -- ) n2o:new-data ;
+14 net2o: new-code ( addr u -- ) n2o:new-code ;
+15 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
+
+\ create commands to send back
+
+also net2o-base
+
+20 net2o: push-$    $, ;
+21 net2o: push-lit  lit, ;
+22 net2o: push-char char, ;
+
+previous
+
+23 net2o: push:     utf8-byte@ cmd, ;
+24 net2o: start-cmd cmdreset ;
+25 net2o: end-cmd   cmdflush ;
 
 previous definitions
 

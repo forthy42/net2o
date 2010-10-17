@@ -2,6 +2,7 @@
 
 require unix/socket.fs
 require string.fs
+require struct0x.fs
 
 \ Create udp socket
 
@@ -155,30 +156,44 @@ Variable dest-addr
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-Create dest-mapping  0 , 0 , 0 , 0 ,
+                    \  u   addr real-addr job head tail
+Create dest-mapping    0 , 0 ,  0 ,       0 ,
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 ,  0 ,
+
+: map-string ( addr u addr' addrx -- addrx u2 )
+    >r r@ 2 cells + ! r@ 2!
+    job-context @ r@ 3 cells + !
+    r> 4 cells ;
 
 : map-dest ( addr u addr' -- )
     ret-hash cells delivery-table + >r
     r@ @ 0= IF  s" " r@ $!  THEN
-    dest-mapping 2 cells + ! dest-mapping 2!
-    job-context @ dest-mapping 3 cells + !
-    dest-mapping 4 cells r> $+! ;
+    dest-mapping map-string r> $+! ;
+
+: map-source ( addr u addr' -- addr u )
+    source-mapping map-string 2 cells + ;
 
 : n2o:new-map ( addr u -- )  dup allocate throw map-dest ;
 
 \ job context structure
 
-require struct0x.fs
-
 begin-structure context-struct
+field: return-address
 field: file-handles
 field: crypto-keys
 field: auth-info
 field: status
+field: data-map
+field: code-map
 end-structure
 
 : n2o:new-context ( -- addr )  context-struct allocate throw
-    dup context-struct erase ;
+    dup context-struct erase  return-addr @ over return-address ! ;
+
+: n2o:new-data ( addr u -- )  dup allocate throw map-source
+    job-context data-map $! ;
+: n2o:new-code ( addr u -- )  dup allocate throw map-source
+    job-context code-map $! ;
 
 \ file handling
 
