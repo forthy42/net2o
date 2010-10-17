@@ -191,9 +191,9 @@ end-structure
     dup context-struct erase  return-addr @ over return-address ! ;
 
 : n2o:new-data ( addr u -- )  dup allocate throw map-source
-    job-context data-map $! ;
+    job-context @ data-map $! ;
 : n2o:new-code ( addr u -- )  dup allocate throw map-source
-    job-context code-map $! ;
+    job-context @ code-map $! ;
 
 \ file handling
 
@@ -286,7 +286,9 @@ Defer queue-command ( addr u -- )
 
 : server-loop ( -- )
     BEGIN  next-srv-packet 2drop in-route
-	IF  handle-packet  ELSE  route-packet  THEN
+	IF  ['] handle-packet catch IF
+		inbuf packet-data dump  THEN
+	ELSE  route-packet  THEN
     AGAIN ;
 
 \ load net2o commands
