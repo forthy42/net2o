@@ -12,5 +12,6 @@ $8000 lit, $8000 lit, new-data
 $10000 lit, $1000 lit, new-code
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
+0 lit, slurp-chunk send-chunks
 end-code lserver 0 send-cmd
 

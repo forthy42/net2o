@@ -4,6 +4,14 @@ require unix/socket.fs
 require string.fs
 require struct0x.fs
 
+: safe/string ( c-addr u n -- c-addr' u' )
+\G protect /string against overflows.
+    dup negate >r  dup 0> IF
+        /string dup r> u>= IF  + 0  THEN
+    ELSE
+        /string dup r> u< IF  + 1+ -1  THEN
+    THEN ;
+
 \ Create udp socket
 
 4242 Constant net2o-udp
@@ -15,7 +23,7 @@ require struct0x.fs
     net2o-udp create-udp-server s" w+" c-string fdopen to net2o-srv ;
 
 : new-client ( -- )
-    new-udp-socket to net2o-sock ;
+    new-udp-socket s" w+" c-string fdopen to net2o-sock ;
 
 $81A Constant maxpacket
 
@@ -34,8 +42,11 @@ end-struct net2o-header
 : read-a-packet ( -- addr u )
     net2o-srv inbuf maxpacket read-socket-from ;
 
+: read-cli-packet ( -- addr u )
+    net2o-sock inbuf maxpacket read-socket-from ;
+
 : send-a-packet ( addr u -- n )
-    net2o-sock -rot 0 sockaddr-tmp 16 sendto ;
+    net2o-sock fileno -rot 0 sockaddr-tmp 16 sendto ;
 
 \ clients routing table
 
@@ -84,7 +95,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 \ route an incoming packet
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ destination c@ 0= IF  true  rdrop EXIT  THEN \ local packet
+    r@ destination c@ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
     r@ destination c@ route>address
     r@ destination dup 1+ swap /address 1- move
     r> destination /address 1- + c!  false ;
@@ -160,6 +171,15 @@ Variable dest-addr
 Create dest-mapping    0 , 0 ,  0 ,       0 ,
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 ,  0 ,
 
+begin-structure data-struct
+field: data-size
+field: data-vaddr
+field: data-raddr
+field: data-job
+field: data-head
+field: data-tail
+end-structure
+
 : map-string ( addr u addr' addrx -- addrx u2 )
     >r r@ 2 cells + ! r@ 2!
     job-context @ r@ 3 cells + !
@@ -195,15 +215,21 @@ end-structure
 : n2o:new-code ( addr u -- )  dup allocate throw map-source
     job-context @ code-map $! ;
 
-\ file handling
+: data$@ ( -- addr u )
+    job-context @ data-map $@ drop >r
+    r@ data-raddr @  r@ data-size @ r> data-head @ safe/string ;
+: /data ( u -- )
+    job-context @ data-map $@ drop data-head +! ;
+: data-tail$@ ( -- addr u )
+    job-context @ data-map $@ drop >r
+    r@ data-raddr @  r@ data-head @ r> data-tail @ safe/string ;
+: /data-tail ( u -- )
+    job-context @ data-map $@ drop data-tail +! ;
+: data-dest ( -- addr )
+    job-context @ data-map $@ drop >r
+    r@ data-vaddr @ r> data-tail @ + ;
 
-: safe/string ( c-addr u n -- c-addr' u' )
-\G protect /string against overflows.
-    dup negate >r  dup 0> IF
-        /string dup r> u>= IF  + 0  THEN
-    ELSE
-        /string dup r> u< IF  + 1+ -1  THEN
-    THEN ;
+\ file handling
 
 : >throw ( error -- ) throw ( stub! ) ;
 
@@ -257,18 +283,43 @@ end-structure
 : sendC ( addr taddr target -- )  set-dest  set-flags  >sendC send-packet ;
 : sendD ( addr taddr target -- )  set-dest  set-flags  >sendD send-packet ;
 
+\ send chunk
+
+: net2o:get-dest ( taddr target -- )
+    data-dest job-context @ return-address @ ;
+
+: net2o:send-chunk ( -- )
+    data-tail$@
+    dup $800 >= IF  drop net2o:get-dest  sendD  $800 /data-tail  EXIT  THEN
+    dup $200 >= IF  drop net2o:get-dest  sendC  $200 /data-tail  EXIT  THEN
+    dup $080 >= IF  drop net2o:get-dest  sendB  $080 /data-tail  EXIT  THEN
+    dup $020 >= IF  drop net2o:get-dest  sendA  $020 /data-tail  EXIT  THEN
+    2drop ;
+
+: net2o:send-chunks ( -- )
+    BEGIN  data-tail$@ nip $20 >=  WHILE  net2o:send-chunk  REPEAT ;
+
 \ poll loop
 
 100 Value ptimeout \ milliseconds
 
-Create pollfds   pollfd %size allot
+Create srv:pollfds   pollfd %size allot
+Create cli:pollfds   pollfd %size allot
 
-: poll-srv ( -- flag )  net2o-srv fileno pollfds fd l!
-    POLLIN pollfds events w!
-    pollfds 1 ptimeout poll 0> ;
+: poll-srv ( -- flag )  net2o-srv fileno srv:pollfds fd l!
+    POLLIN srv:pollfds events w!
+    srv:pollfds 1 ptimeout poll 0> ;
+
+: poll-cli ( -- flag )  net2o-sock fileno cli:pollfds fd l!
+    POLLIN cli:pollfds events w!
+    cli:pollfds 1 ptimeout poll 0> ;
 
 : next-srv-packet ( -- addr u )
     BEGIN  poll-srv  UNTIL  read-a-packet
+    over packet-size over <> abort" Wrong packet size" ;
+
+: next-cli-packet ( -- addr u )
+    BEGIN  poll-cli  UNTIL  read-cli-packet
     over packet-size over <> abort" Wrong packet size" ;
 
 Defer queue-command ( addr u -- )
@@ -284,12 +335,20 @@ Defer queue-command ( addr u -- )
 
 : route-packet ( -- )  inbuf dup packet-size send-a-packet ;
 
+: server-event ( -- )
+    next-srv-packet 2drop in-route
+    IF  ['] handle-packet catch IF
+	    inbuf packet-data dump  THEN
+    ELSE  route-packet  THEN ;
+
+: client-event ( -- )
+    next-cli-packet 2drop in-route
+    IF  ['] handle-packet catch IF
+	    inbuf packet-data dump  THEN
+    ELSE  route-packet  THEN ;
+
 : server-loop ( -- )
-    BEGIN  next-srv-packet 2drop in-route
-	IF  ['] handle-packet catch IF
-		inbuf packet-data dump  THEN
-	ELSE  route-packet  THEN
-    AGAIN ;
+    BEGIN  server-event  AGAIN ;
 
 \ load net2o commands
 
