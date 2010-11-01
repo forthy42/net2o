@@ -17,10 +17,9 @@ require struct0x.fs
 4242 Constant net2o-udp
 
 0 Value net2o-sock
-0 Value net2o-srv
 
 : new-server ( -- )
-    net2o-udp create-udp-server s" w+" c-string fdopen to net2o-srv ;
+    net2o-udp create-udp-server s" w+" c-string fdopen to net2o-sock ;
 
 : new-client ( -- )
     new-udp-socket s" w+" c-string fdopen to net2o-sock ;
@@ -40,9 +39,6 @@ struct
 end-struct net2o-header
 
 : read-a-packet ( -- addr u )
-    net2o-srv inbuf maxpacket read-socket-from ;
-
-: read-cli-packet ( -- addr u )
     net2o-sock inbuf maxpacket read-socket-from ;
 
 : send-a-packet ( addr u -- n )
@@ -66,7 +62,7 @@ end-struct net2o-header
 : sock-route" ( -- addr dest u hash )
     sockaddr-tmp dup route-hash dup >r addresses routes + /address r> ;
 : insert-address ( -- net2o-addr )
-     sock-route" >r move r> $38 lshift ;
+    sock-route" >r move r> $38 lshift ;
 \ FIXME: doesn't check for collissons
 
 : host:port ( addr u port -- )
@@ -90,7 +86,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
 : reverse64 ( x1 -- x2 )
     0 8 0 DO  8 lshift over $FF and reverse8 or
-	swap 8 rshift swap  LOOP ;
+	swap 8 rshift swap  LOOP  nip ;
 
 \ route an incoming packet
 
@@ -101,6 +97,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     r> destination /address 1- + c!  false ;
 
 : in-route ( -- flag )  address>route reverse8  inbuf packet-route ;
+: in-check ( -- flag )  address>route 0>= ;
 : out-route ( -- flag )  0  outbuf packet-route ;
 
 \ packet&header size
@@ -259,7 +256,7 @@ end-structure
     new-client init-route init-delivery-table ;
 
 : init-server ( -- )
-    new-server new-client init-route init-delivery-table ;
+    new-server init-route init-delivery-table ;
 
 \ send blocks of memory
 
@@ -303,23 +300,14 @@ end-structure
 
 100 Value ptimeout \ milliseconds
 
-Create srv:pollfds   pollfd %size allot
-Create cli:pollfds   pollfd %size allot
+Create pollfds   pollfd %size allot
 
-: poll-srv ( -- flag )  net2o-srv fileno srv:pollfds fd l!
-    POLLIN srv:pollfds events w!
-    srv:pollfds 1 ptimeout poll 0> ;
+: poll-sock ( -- flag )  net2o-sock fileno pollfds fd l!
+    POLLIN pollfds events w!
+    pollfds 1 ptimeout poll 0> ;
 
-: poll-cli ( -- flag )  net2o-sock fileno cli:pollfds fd l!
-    POLLIN cli:pollfds events w!
-    cli:pollfds 1 ptimeout poll 0> ;
-
-: next-srv-packet ( -- addr u )
-    BEGIN  poll-srv  UNTIL  read-a-packet
-    over packet-size over <> abort" Wrong packet size" ;
-
-: next-cli-packet ( -- addr u )
-    BEGIN  poll-cli  UNTIL  read-cli-packet
+: next-packet ( -- addr u )
+    BEGIN  poll-sock  UNTIL  read-a-packet
     over packet-size over <> abort" Wrong packet size" ;
 
 Defer queue-command ( addr u -- )
@@ -336,16 +324,16 @@ Defer queue-command ( addr u -- )
 : route-packet ( -- )  inbuf dup packet-size send-a-packet ;
 
 : server-event ( -- )
-    next-srv-packet 2drop in-route
+    next-packet 2drop in-route
     IF  ['] handle-packet catch IF
 	    inbuf packet-data dump  THEN
     ELSE  route-packet  THEN ;
 
 : client-event ( -- )
-    next-cli-packet 2drop in-route
-    IF  ['] handle-packet catch IF
-	    inbuf packet-data dump  THEN
-    ELSE  route-packet  THEN ;
+    next-packet 2drop in-check
+    IF  ['] handle-packet catch
+	IF  inbuf packet-data dump  THEN
+    ELSE  ( drop packet )  THEN ;
 
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
