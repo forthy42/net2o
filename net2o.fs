@@ -63,6 +63,8 @@ end-struct net2o-header
     sockaddr-tmp dup route-hash dup >r addresses routes + /address r> ;
 : insert-address ( -- net2o-addr )
     sock-route" >r move r> $38 lshift ;
+: check-address ( -- net2o-addr flag )
+    sock-route" >r tuck str= r> $38 lshift swap ;
 \ FIXME: doesn't check for collissons
 
 : host:port ( addr u port -- )
@@ -124,6 +126,19 @@ Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
 : packet-data ( addr -- addr u )
     >r r@ header-size r@ + r> body-size ;
 
+\ short packet information
+
+: chunk@ ( addr flag -- value addr' )
+    IF  dup be-ux@ swap 8 +  ELSE  dup be-uw@ swap 2 +  THEN ;
+
+: .header ( addr -- )
+    dup c@ >r 2 +
+    r@ datasize# and 2/ 'A' + emit
+    r@ destsize# and chunk@
+    r> addrsize# and chunk@
+    drop swap
+    ."  to " hex. ."  @ " hex. cr ;
+
 \ packet delivery table
 
 Variable job-context
@@ -141,7 +156,7 @@ Variable dest-addr
     delivery-table swap erase ;
 
 : >ret-addr ( -- )
-    inbuf destination @ reverse64 return-addr ! ;
+    inbuf destination be-ux@ reverse64 return-addr ! ;
 : >dest-addr ( -- )
     inbuf addr be-ux@  inbuf body-size 1- invert and dest-addr ! ;
 
@@ -268,7 +283,10 @@ end-structure
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
 : outbody ( -- addr ) outbuf packet-body ;
-: send-packet ( -- )  out-route outbuf dup packet-size send-a-packet ;
+: send-packet ( -- )
+    ." send " outbuf .header
+    out-route outbuf dup packet-size
+    send-a-packet ;
 
 : >sendA ( addr -- )  outbody $020 move ;
 : >sendB ( addr -- )  outbody $080 move $2 outbuf c+! ;
@@ -308,17 +326,29 @@ Create pollfds   pollfd %size allot
 
 : next-packet ( -- addr u )
     BEGIN  poll-sock  UNTIL  read-a-packet
+    insert-address reverse64
+    inbuf destination be-ux@ -$100 and or inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
+
+: next-client-packet ( -- addr u )
+    BEGIN  poll-sock  UNTIL  read-a-packet
+    check-address IF
+	reverse64
+	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
+	over packet-size over <> abort" Wrong packet size"
+    ELSE  hex.  ." Unknown source"  THEN ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
+    inbuf .header
     dest-addr @ 0= IF  inbuf packet-data queue-command
     ELSE  check-dest  IF  >r inbuf packet-data r@ swap move
-	    job-context @ IF  r@ inbuf packet-size queue-command  THEN
-	    rdrop  THEN
+	    job-context @ IF  r@ inbuf packet-size type  THEN
+	    rdrop
+	THEN
     THEN ;
 
 : route-packet ( -- )  inbuf dup packet-size send-a-packet ;
@@ -330,13 +360,16 @@ Defer queue-command ( addr u -- )
     ELSE  route-packet  THEN ;
 
 : client-event ( -- )
-    next-packet 2drop in-check
+    next-client-packet 2drop in-check
     IF  ['] handle-packet catch
 	IF  inbuf packet-data dump  THEN
     ELSE  ( drop packet )  THEN ;
 
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
+
+: client-loop ( -- )
+    BEGIN  poll-sock  WHILE  client-event  REPEAT ;
 
 \ load net2o commands
 
