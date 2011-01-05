@@ -19,3 +19,4 @@ end-code lserver 0 send-cmd
 
 $8000 $8000 n2o:new-map
 client-loop
+cmdflush cmdbuf @+ swap dump

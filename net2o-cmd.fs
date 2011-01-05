@@ -12,9 +12,9 @@ Variable cmd' 0 cmd' !
 : ?lit-space ( addr u -- addr u )
     dup 1 cells < abort" Command space exhausted" ;
 : prefetch ( addr u -- addr' u' n ) ?lit-space
-    over @ >r 1 cells /string r> ;
+    over be-ux@ >r 1 cells /string r> ;
 : byte-fetch ( addr u -- addr' u' n )
-    cmd' @ 7 and 0= IF  prefetch cmd ! cmd' off  THEN
+    cmd' @ 7 and 0= IF  prefetch cmd be-x! cmd' off  THEN
     cmd cmd' @ + c@  1 cmd' +! ;
 
 2Variable buf-state
@@ -139,7 +139,7 @@ also net2o-base definitions
     endcmdbuf over - xc!+? 0= abort" didn't fit"
     r@ min move
     r> dup xc-size + aligned cmdextras +!  string ;
-: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ !  1 cells cmdextras +!  lit ;
+: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ be-x!  1 cells cmdextras +!  lit ;
 : char, ( xc -- )  char cmd, ;
 : end-code  cmdflush previous ;
 
@@ -180,3 +180,17 @@ previous
 
 previous definitions
 
+Variable ack#
+
+also net2o-base
+
+: net2o:do-ack ( -- )
+    inbuf 1+ c@ first-ack# and IF  ack# off  THEN
+    utime drop lit,  ack# @  case
+	0 of  firstack endof
+	1 of  secondack endof
+	ack  endcase
+    1 ack# +! ;
+' net2o:do-ack IS do-ack
+
+previous

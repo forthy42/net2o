@@ -383,12 +383,15 @@ Create pollfds   pollfd %size allot
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
+Defer do-ack ( -- )
+' noop IS do-ack
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF  inbuf packet-data queue-command
     ELSE  check-dest  IF  >r inbuf packet-data r@ swap move
+	    do-ack
 	    job-context @ IF  inbuf packet-data type  THEN
 	    rdrop
 	THEN
