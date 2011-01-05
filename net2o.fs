@@ -126,6 +126,19 @@ Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
 : packet-data ( addr -- addr u )
     >r r@ header-size r@ + r> body-size ;
 
+\ second byte constants
+
+$40 Constant multicasting#
+$80 Constant broadcasting#
+
+$00 Constant qos0#
+$10 Constant qos1#
+$20 Constant qos2#
+$30 Constant qos3#
+
+$08 Constant endnode-fc#
+$04 Constant first-ack#
+
 \ short packet information
 
 : chunk@ ( addr flag -- value addr' )
@@ -211,16 +224,30 @@ end-structure
 
 begin-structure context-struct
 field: return-address
+field: cmd-out
 field: file-handles
 field: crypto-keys
 field: auth-info
 field: status
 field: data-map
 field: code-map
+field: last-ack
+field: delta-ack
 end-structure
 
-: n2o:new-context ( -- addr )  context-struct allocate throw
-    dup context-struct erase  return-addr @ over return-address ! ;
+begin-structure cmd-struct
+field: cmd-accu#
+field: cmd-accu
+field: cmd-slot
+field: cmd-extras
+field: cmd-buf#
+$800 +field cmd-buf
+end-structure
+
+: n2o:new-context ( -- addr )  context-struct allocate throw >r
+    r@ context-struct erase  return-addr @ r@ return-address !
+    s" " r@ cmd-out $! cmd-struct r@ cmd-out $!len
+    r@ cmd-out $@ erase r> ;
 
 : n2o:new-data ( addr u -- )  dup allocate throw map-source
     job-context @ data-map $! ;
@@ -240,6 +267,20 @@ end-structure
 : data-dest ( -- addr )
     job-context @ data-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
+
+\ acknowledge handling
+
+: avg! ( n addr -- )
+    >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
+
+: net2o:firstack ( utime -- )
+    job-context @ last-ack ! ;
+: net2o:secondack ( utime -- )
+    dup job-context @ last-ack dup @ >r ! r> -
+    job-context delta-ack ! ;
+: net2o:ack ( utime -- )
+    dup job-context @ last-ack dup @ >r ! r> -
+    job-context delta-ack avg! ;
 
 \ file handling
 
@@ -278,13 +319,16 @@ end-structure
 : set-dest ( addr target -- )
     outbuf destination be-x!  outbuf addr be-x! ;
 
-: set-flags ( -- )  0 outbuf 1+ c!  destsize# addrsize# or outbuf c! ;
+Variable outflag  outflag off
+
+: set-flags ( -- )  outflag @ outbuf 1+ c! outflag off
+    destsize# addrsize# or outbuf c! ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
 : outbody ( -- addr ) outbuf packet-body ;
 : send-packet ( -- )
-    ." send " outbuf .header
+\    ." send " outbuf .header
     out-route outbuf dup packet-size
     send-a-packet ;
 
@@ -308,11 +352,10 @@ end-structure
     dup $800 >= IF  drop net2o:get-dest  sendD  $800 /data-tail  EXIT  THEN
     dup $200 >= IF  drop net2o:get-dest  sendC  $200 /data-tail  EXIT  THEN
     dup $080 >= IF  drop net2o:get-dest  sendB  $080 /data-tail  EXIT  THEN
-    dup $020 >= IF  drop net2o:get-dest  sendA  $020 /data-tail  EXIT  THEN
-    2drop ;
+    drop net2o:get-dest  sendA  $020 /data-tail ;
 
-: net2o:send-chunks ( -- )
-    BEGIN  data-tail$@ nip $20 >=  WHILE  net2o:send-chunk  REPEAT ;
+: net2o:send-chunks ( -- )  first-ack# outflag !
+    BEGIN  data-tail$@ nip 0>  WHILE  net2o:send-chunk  REPEAT ;
 
 \ poll loop
 
@@ -343,10 +386,10 @@ Defer queue-command ( addr u -- )
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
-    inbuf .header
+\    inbuf .header
     dest-addr @ 0= IF  inbuf packet-data queue-command
     ELSE  check-dest  IF  >r inbuf packet-data r@ swap move
-	    job-context @ IF  r@ inbuf packet-size type  THEN
+	    job-context @ IF  inbuf packet-data type  THEN
 	    rdrop
 	THEN
     THEN ;

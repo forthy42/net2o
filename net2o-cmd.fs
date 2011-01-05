@@ -100,14 +100,13 @@ definitions
 
 \ net2o assembler
 
-Variable cmdbuf $800 allot  here Constant endcmdbuf
-Variable cmdaccu 0 ,
-Variable cmdslot
-Variable cmdextras
+: cmdbuf     job-context @ cmd-out $@ drop cmd-buf# ;
+: endcmdbuf  job-context @ cmd-out $@ + ;
+: cmdaccu    job-context @ cmd-out $@ drop cmd-accu# ;
+: cmdslot    job-context @ cmd-out $@ drop cmd-slot ;
+: cmdextras  job-context @ cmd-out $@ drop cmd-extras ;
 
 : cmdreset  cmdbuf off  cmdslot off  cmdextras off ;
-
-cmdreset
 
 : @+ ( addr -- n addr' )  dup @ swap cell+ ;
 
@@ -126,10 +125,10 @@ cmdreset
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
 : send-cmd ( dest addr -- ) 2>r  cmdbuf cell+ 2r> swap
-    cmdbuf @ $20  <= IF  sendA  cmdbuf off  EXIT  THEN
-    cmdbuf @ $80  <= IF  sendB  cmdbuf off  EXIT  THEN
-    cmdbuf @ $200 <= IF  sendC  cmdbuf off  EXIT  THEN
-    cmdbuf @ $800 <= IF  sendD  cmdbuf off  EXIT  THEN
+    cmdbuf @ $20  <= IF  sendA  cmdreset  EXIT  THEN
+    cmdbuf @ $80  <= IF  sendB  cmdreset  EXIT  THEN
+    cmdbuf @ $200 <= IF  sendC  cmdreset  EXIT  THEN
+    cmdbuf @ $800 <= IF  sendD  cmdreset  EXIT  THEN
     true abort" too many commands" ;
 
 \ net2o assembler stuff
@@ -160,7 +159,10 @@ also net2o-base definitions forth
 17 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
 18 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
 19 net2o: send-chunk ( -- ) net2o:send-chunk ;
-19 net2o: send-chunks ( -- ) net2o:send-chunks ;
+20 net2o: send-chunks ( -- ) net2o:send-chunks ;
+21 net2o: firstack ( -- )  net2o:firstack ;
+22 net2o: secondack ( -- )  net2o:secondack ;
+23 net2o: ack ( -- )  net2o:ack ;
 
 \ create commands to send back
 
