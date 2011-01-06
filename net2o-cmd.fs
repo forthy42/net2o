@@ -161,8 +161,7 @@ also net2o-base definitions forth
 19 net2o: send-chunk ( -- ) net2o:send-chunk ;
 20 net2o: send-chunks ( -- ) net2o:send-chunks ;
 21 net2o: firstack ( -- )  net2o:firstack ;
-22 net2o: secondack ( -- )  net2o:secondack ;
-23 net2o: ack ( -- )  net2o:ack ;
+22 net2o: ack ( -- )  net2o:ack ;
 
 \ create commands to send back
 
@@ -180,17 +179,12 @@ previous
 
 previous definitions
 
-Variable ack#
-
 also net2o-base
 
 : net2o:do-ack ( -- )
-    inbuf 1+ c@ first-ack# and IF  ack# off  THEN
-    utime drop lit,  ack# @  case
-	0 of  firstack endof
-	1 of  secondack endof
-	ack  endcase
-    1 ack# +! ;
+    utime drop lit,
+    inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
+    inbuf 1+ c@ send-ack# and IF ( net2o:sendack ) THEN ;
 ' net2o:do-ack IS do-ack
 
 previous

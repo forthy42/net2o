@@ -12,6 +12,9 @@ require struct0x.fs
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 
+: or! ( value addr -- )
+    >r r@ @ or r> ! ;
+
 \ Create udp socket
 
 4242 Constant net2o-udp
@@ -137,7 +140,8 @@ $20 Constant qos2#
 $30 Constant qos3#
 
 $08 Constant endnode-fc#
-$04 Constant first-ack#
+$01 Constant first-ack#
+$02 Constant send-ack#
 
 \ short packet information
 
@@ -271,13 +275,11 @@ end-structure
 \ acknowledge handling
 
 : avg! ( n addr -- )
+    dup @ 0= IF  !  EXIT  THEN
     >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
 
 : net2o:firstack ( utime -- )
     job-context @ last-ack ! ;
-: net2o:secondack ( utime -- )
-    dup job-context @ last-ack dup @ >r ! r> -
-    job-context delta-ack ! ;
 : net2o:ack ( utime -- )
     dup job-context @ last-ack dup @ >r ! r> -
     job-context delta-ack avg! ;
@@ -347,12 +349,18 @@ Variable outflag  outflag off
 : net2o:get-dest ( taddr target -- )
     data-dest job-context @ return-address @ ;
 
+: net2o:send-packet ( addr u -- len )
+    dup $800 >= IF  $800 = IF  send-ack# outflag or!  THEN
+	net2o:get-dest  sendD  $800  EXIT  THEN
+    dup $200 >= IF  $200 = IF  send-ack# outflag or!  THEN
+	net2o:get-dest  sendC  $200  EXIT  THEN
+    dup $080 >= IF  $80 = IF  send-ack# outflag or!  THEN
+	net2o:get-dest  sendB  $080  EXIT  THEN
+    $20 <= IF  send-ack# outflag or!  THEN
+    net2o:get-dest  sendA  $020 ;
+
 : net2o:send-chunk ( -- )
-    data-tail$@
-    dup $800 >= IF  drop net2o:get-dest  sendD  $800 /data-tail  EXIT  THEN
-    dup $200 >= IF  drop net2o:get-dest  sendC  $200 /data-tail  EXIT  THEN
-    dup $080 >= IF  drop net2o:get-dest  sendB  $080 /data-tail  EXIT  THEN
-    drop net2o:get-dest  sendA  $020 /data-tail ;
+    data-tail$@  net2o:send-packet  /data-tail ;
 
 : net2o:send-chunks ( -- )  first-ack# outflag !
     BEGIN  data-tail$@ nip 0>  WHILE  net2o:send-chunk  REPEAT ;
