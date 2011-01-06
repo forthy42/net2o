@@ -179,16 +179,19 @@ Variable dest-addr
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
-: check-dest ( -- addr t / f )  job-context off
+5 cells Constant /dest
+
+: check-dest ( -- addr 1/t / f )  job-context off
     ret-hash cells delivery-table +
     dup @ 0= IF  drop false  EXIT  THEN
     $@ bounds ?DO
 	I 2@ 1- bounds dest-addr @ within
 	0= IF
-	    I cell+ 2@ dest-addr @ swap - + true
+	    I cell+ 2@ dest-addr @ swap - +
+	    I 4 cells + @ IF  1  ELSE  -1  THEN
 	    I 3 cells + @ job-context !
 	    UNLOOP  EXIT  THEN
-    3 cells +LOOP
+    /dest +LOOP
     false ;
 
 \ Destination mapping contains
@@ -196,8 +199,10 @@ Variable dest-addr
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
+                    \  u   addr real-addr job code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , here 0 ,
+Constant code-flag
                     \  u   addr real-addr job head tail
-Create dest-mapping    0 , 0 ,  0 ,       0 ,
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 ,  0 ,
 
 begin-structure data-struct
@@ -212,7 +217,7 @@ end-structure
 : map-string ( addr u addr' addrx -- addrx u2 )
     >r r@ 2 cells + ! r@ 2!
     job-context @ r@ 3 cells + !
-    r> 4 cells ;
+    r> /dest ;
 
 : map-dest ( addr u addr' -- )
     ret-hash cells delivery-table + >r
@@ -222,7 +227,11 @@ end-structure
 : map-source ( addr u addr' -- addr u )
     source-mapping map-string 2 cells + ;
 
-: n2o:new-map ( addr u -- )  dup allocate throw map-dest ;
+: n2o:new-map ( addr u -- )  code-flag off
+    dup allocate throw map-dest ;
+
+: n2o:new-code-map ( addr u -- )  code-flag on
+    dup allocate throw map-dest ;
 
 \ job context structure
 
@@ -272,6 +281,12 @@ end-structure
     job-context @ data-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
 
+\ code sending around
+
+: code-dest ( -- addr )
+    job-context @ code-map $@ drop >r
+    r@ data-vaddr @ r> data-tail @ + ;
+
 \ acknowledge handling
 
 : avg! ( n addr -- )
@@ -282,7 +297,7 @@ end-structure
     job-context @ last-ack ! ;
 : net2o:ack ( utime -- )
     dup job-context @ last-ack dup @ >r ! r> -
-    job-context delta-ack avg! ;
+    job-context @ delta-ack avg! ;
 
 \ file handling
 
@@ -349,18 +364,18 @@ Variable outflag  outflag off
 : net2o:get-dest ( taddr target -- )
     data-dest job-context @ return-address @ ;
 
-: net2o:send-packet ( addr u -- len )
+: net2o:send-packet ( addr u dest addr -- len )  2>r
     dup $800 >= IF  $800 = IF  send-ack# outflag or!  THEN
-	net2o:get-dest  sendD  $800  EXIT  THEN
+	2r> sendD  $800  EXIT  THEN
     dup $200 >= IF  $200 = IF  send-ack# outflag or!  THEN
-	net2o:get-dest  sendC  $200  EXIT  THEN
+	2r>  sendC  $200  EXIT  THEN
     dup $080 >= IF  $80 = IF  send-ack# outflag or!  THEN
-	net2o:get-dest  sendB  $080  EXIT  THEN
+	2r>  sendB  $080  EXIT  THEN
     $20 <= IF  send-ack# outflag or!  THEN
-    net2o:get-dest  sendA  $020 ;
+    2r>  sendA  $020 ;
 
 : net2o:send-chunk ( -- )
-    data-tail$@  net2o:send-packet  /data-tail ;
+    data-tail$@ net2o:get-dest net2o:send-packet  /data-tail ;
 
 : net2o:send-chunks ( -- )  first-ack# outflag !
     BEGIN  data-tail$@ nip 0>  WHILE  net2o:send-chunk  REPEAT ;
@@ -398,10 +413,13 @@ Defer do-ack ( -- )
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF  inbuf packet-data queue-command
-    ELSE  check-dest  IF  >r inbuf packet-data r@ swap move
+    ELSE  check-dest dup 0< IF drop  >r inbuf packet-data r@ swap move
 	    do-ack
 	    job-context @ IF  inbuf packet-data type  THEN
 	    rdrop
+	ELSE  0>  IF  >r inbuf packet-data r@ swap dup >r move
+		r> r> swap queue-command
+	    THEN
 	THEN
     THEN ;
 

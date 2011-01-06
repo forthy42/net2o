@@ -9,7 +9,9 @@ n2o:new-context job-context !
 net2o-code S" This is a test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
-net2o-code new-context $8000 lit, $8000 lit, new-map
+net2o-code new-context
+$8000 lit, $8000 lit, new-map
+$10000 lit, $1000 lit, new-code-map
 $8000 lit, $8000 lit, new-data
 $10000 lit, $1000 lit, new-code
 s" net2o.fs" $, r/o lit, 0 lit, open-file
@@ -18,5 +20,7 @@ s" file size: " $, type 0 lit, file-size . cr
 end-code lserver 0 send-cmd
 
 $8000 $8000 n2o:new-map
+$10000 $1000 n2o:new-code-map
+$8000 $8000 n2o:new-data
+$10000 $1000 n2o:new-code
 client-loop
-cmdflush cmdbuf @+ swap dump

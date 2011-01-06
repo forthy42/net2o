@@ -151,7 +151,7 @@ also net2o-base definitions forth
 
 10 net2o: throw ( error -- )  throw ;
 11 net2o: new-map ( addr u -- )  n2o:new-map ;
-12 net2o: new-code-map ( addr u -- )  n2o:new-map ( FIXME: stub! ) ;
+12 net2o: new-code-map ( addr u -- )  n2o:new-code-map ;
 13 net2o: new-context ( -- ) n2o:new-context job-context ! ;
 14 net2o: new-data ( addr u -- ) n2o:new-data ;
 15 net2o: new-code ( addr u -- ) n2o:new-code ;
@@ -181,10 +181,15 @@ previous definitions
 
 also net2o-base
 
+: net2o:sendack ( -- )
+    cmdflush cmdbuf @+ swap
+    code-dest job-context @ return-address @
+    net2o:send-packet drop ;
+
 : net2o:do-ack ( -- )
     utime drop lit,
     inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
-    inbuf 1+ c@ send-ack# and IF ( net2o:sendack ) THEN ;
+    inbuf 1+ c@ send-ack# and IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
 
 previous
