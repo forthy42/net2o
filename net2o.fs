@@ -109,13 +109,13 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 $80 Constant destsize#
 $40 Constant addrsize#
-$20 Constant junksize#
+$20 Constant noncesize#
 $06 Constant datasize#
 
 : (header-size ( x -- u ) >r 2
-    r@ destsize# and IF  8  ELSE  2  THEN +
-    r@ addrsize# and IF  8  ELSE  2  THEN +
-    r@ junksize# and IF  8  ELSE  0  THEN +
+    r@ destsize#  and IF  8  ELSE  2  THEN +
+    r@ addrsize#  and IF  8  ELSE  2  THEN +
+    r@ noncesize# and IF  8  ELSE  0  THEN +
     rdrop ;
 
 Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
