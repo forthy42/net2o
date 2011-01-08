@@ -3,6 +3,7 @@
 require unix/socket.fs
 require string.fs
 require struct0x.fs
+require nacl.fs
 
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
@@ -244,6 +245,8 @@ field: auth-info
 field: status
 field: data-map
 field: code-map
+field: data-ack
+field: code-ack
 field: last-ack
 field: delta-ack
 end-structure
@@ -259,7 +262,10 @@ end-structure
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
-    s" " r@ cmd-out $! cmd-struct r@ cmd-out $!len
+    s" " r@ cmd-out $!
+    s" " r@ data-ack $!
+    s" " r@ code-ack $!
+    cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
 : n2o:new-data ( addr u -- )  dup allocate throw map-source
@@ -287,6 +293,40 @@ end-structure
     job-context @ code-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
 
+\ acknowledge map
+
+2Variable 'range
+
+[IFUNDEF] umax
+    : umax ( u1 u2 -- u )
+	2dup u<
+	if
+	    swap
+	then
+	drop ;
+[THEN]
+
+: add-range ( addr u map -- )
+    >r 1+ bounds r@ $@ bounds ?DO
+	over I 2@ 1+ bounds within
+	over I 2@ 1+ bounds within and 0=  IF
+	    I 2@ 1+ bounds rot umin >r umax r> tuck - 1- I 2!
+	    I UNLOOP
+	    r@ $@ drop -
+	    r@ $@ 2 pick /string 2 cells > IF
+		dup 2@ 1+ bounds 2 pick cell+ cell+ 2@
+		1+ bounds rot umin >r umax r> tuck - 1-
+		rot 2!
+		cell+ cell+ 2 cells r> -rot $del
+	    ELSE  2drop  rdrop  THEN
+	    EXIT  THEN
+	over I 2@ drop u< IF
+	    I  UNLOOP  r@ $@ drop - >r tuck - 1- 'range 2!
+	    'range 2 cells r> r> swap $ins  EXIT
+	THEN
+    2 cells +LOOP
+    tuck - 1- 'range 2! 'range 2 cells r> $+! ;
+
 \ acknowledge handling
 
 : avg! ( n addr -- )
@@ -298,6 +338,8 @@ end-structure
 : net2o:ack ( utime -- )
     dup job-context @ last-ack dup @ >r ! r> -
     job-context @ delta-ack avg! ;
+: net2o:ack-range ( addr u -- )
+    ." Acknowledge range: " swap . . cr ;
 
 \ file handling
 
@@ -373,6 +415,13 @@ Variable outflag  outflag off
 	2r>  sendB  $080  EXIT  THEN
     $20 <= IF  send-ack# outflag or!  THEN
     2r>  sendA  $020 ;
+
+: net2o:send-code-packet ( addr u dest addr -- len )  2>r
+    send-ack# outflag or!
+    dup $200 > IF  drop	2r> sendD  $800  EXIT  THEN
+    dup  $80 > IF  drop	2r> sendC  $200  EXIT  THEN
+    dup  $20 > IF  drop 2r> sendB  $080  EXIT  THEN
+    drop 2r>  sendA  $020 ;
 
 : net2o:send-chunk ( -- )
     data-tail$@ net2o:get-dest net2o:send-packet  /data-tail ;

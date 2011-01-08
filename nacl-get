@@ -1,7 +1,11 @@
 #!/bin/bash
-wget http://hyperelliptic.org/nacl/nacl-20100830.tar.bz2
-bunzip2 < nacl-20100830.tar.bz2 | tar -xf -
-patch -p0 -s nacl.diff
+set -v
+if [ ! -f nacl-20100830.tar.bz2 ]
+then
+    wget http://hyperelliptic.org/nacl/nacl-20100830.tar.bz2
+    bunzip2 < nacl-20100830.tar.bz2 | tar -xf -
+    patch -p0 -s <nacl.diff
+fi
 cd nacl-20100830
 ./do
 cd build/$HOST/lib/amd64

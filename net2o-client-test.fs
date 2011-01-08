@@ -1,5 +1,7 @@
 \ net2o tests - client side
 
+require net2o.fs
+
 init-client
 
 s" localhost" net2o-udp insert-ipv4 constant lserver

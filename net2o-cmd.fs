@@ -160,8 +160,9 @@ also net2o-base definitions forth
 18 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
 19 net2o: send-chunk ( -- ) net2o:send-chunk ;
 20 net2o: send-chunks ( -- ) net2o:send-chunks ;
-21 net2o: firstack ( -- )  net2o:firstack ;
-22 net2o: ack ( -- )  net2o:ack ;
+21 net2o: firstack ( time -- )  net2o:firstack ;
+22 net2o: ack ( time -- )  net2o:ack ;
+23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 
 \ create commands to send back
 
@@ -182,11 +183,15 @@ previous definitions
 also net2o-base
 
 : net2o:sendack ( -- )
+    job-context @ data-ack $@ 2 cells = IF
+	2@ swap lit, lit, ack-range
+	s" " job-context @ data-ack $!  THEN
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
-    net2o:send-packet drop ;
+    net2o:send-code-packet drop ;
 
 : net2o:do-ack ( -- )
+    dest-addr @ inbuf body-size job-context @ data-ack add-range
     utime drop lit,
     inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
     inbuf 1+ c@ send-ack# and IF  net2o:sendack  THEN ;
