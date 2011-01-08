@@ -39,7 +39,7 @@ struct
     short% field flags
     address% field destination
     address% field addr
-    address% field junk
+    address% field nonce
 end-struct net2o-header
 
 : read-a-packet ( -- addr u )
@@ -423,11 +423,40 @@ Variable outflag  outflag off
     dup  $20 > IF  drop 2r> sendB  $080  EXIT  THEN
     drop 2r>  sendA  $020 ;
 
+\ synchronous sending
+
 : net2o:send-chunk ( -- )
     data-tail$@ net2o:get-dest net2o:send-packet  /data-tail ;
 
-: net2o:send-chunks ( -- )  first-ack# outflag !
+: net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-tail$@ nip 0>  WHILE  net2o:send-chunk  REPEAT ;
+
+\ asynchronous sending
+
+begin-structure chunks-struct
+field: chunk-context
+field: chunk-count
+end-structure
+
+Variable chunks s" " chunks $!
+Variable chunks+
+Create chunk-adder chunks-struct allot
+
+: net2o:send-chunks ( -- )
+    job-context @ chunk-adder chunk-context !
+    0 chunk-adder chunk-count !
+    chunk-adder chunks-struct chunks $+! ;
+
+: send-chunks-async ( -- )
+    chunks $@ chunks+ @ chunks-struct * safe/string
+    IF
+	dup chunk-context @ job-context !
+	chunk-count dup @ 0= If  first-ack# outflag !  THEN  1 swap +!
+	data-tail$@ nip 0> IF  net2o:send-chunk  1 chunks+ +!
+	ELSE  chunks chunks+ @ chunks-struct * chunks-struct $del  THEN
+    ELSE  chunks+ off  THEN ;
+
+: send? ( -- flag )  chunks $@len 0> ;
 
 \ poll loop
 
@@ -436,12 +465,14 @@ Variable outflag  outflag off
 Create pollfds   pollfd %size allot
 
 : poll-sock ( -- flag )  net2o-sock fileno pollfds fd l!
-    POLLIN pollfds events w!
+    POLLIN send? IF  POLLOUT or  THEN  pollfds events w!
     pollfds 1 ptimeout poll 0> ;
 
 : next-packet ( -- addr u )
-    BEGIN  poll-sock  UNTIL  read-a-packet
-    insert-address reverse64
+    BEGIN  BEGIN  poll-sock  UNTIL
+	pollfds revents w@ POLLOUT = IF  send-chunks-async  THEN
+	pollfds revents w@ POLLIN =  UNTIL
+    read-a-packet insert-address reverse64
     inbuf destination be-ux@ -$100 and or inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
