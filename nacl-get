@@ -1,0 +1,11 @@
+#!/bin/bash
+wget http://hyperelliptic.org/nacl/nacl-20100830.tar.bz2
+bunzip2 < nacl-20100830.tar.bz2 | tar -xf -
+patch -p0 -s nacl.diff
+cd nacl-20100830
+./do
+cd build/$HOST/lib/amd64
+ar r libnacl.a cpucycles.o randombytes.o
+sudo cp libnacl.a /usr/local/lib64
+cd ../../include
+sudo cp -r amd64 /usr/local/include
