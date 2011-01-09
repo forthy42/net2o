@@ -460,13 +460,13 @@ Create chunk-adder chunks-struct allot
 
 \ poll loop
 
-100 Value ptimeout \ milliseconds
+2Variable ptimeout &100000000 0 ptimeout 2! ( 100 ms )
 
 Create pollfds   pollfd %size allot
 
 : poll-sock ( -- flag )  net2o-sock fileno pollfds fd l!
     POLLIN send? IF  POLLOUT or  THEN  pollfds events w!
-    pollfds 1 ptimeout poll 0> ;
+    pollfds 1 ptimeout 0 ppoll 0> ;
 
 : next-packet ( -- addr u )
     BEGIN  BEGIN  poll-sock  UNTIL
