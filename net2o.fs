@@ -28,7 +28,7 @@ require nacl.fs
 : new-client ( -- )
     new-udp-socket s" w+" c-string fdopen to net2o-sock ;
 
-$81A Constant maxpacket
+$101A Constant maxpacket
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
@@ -111,7 +111,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 $80 Constant destsize#
 $40 Constant addrsize#
 $20 Constant noncesize#
-$06 Constant datasize#
+$07 Constant datasize#
 
 : (header-size ( x -- u ) >r 2
     r@ destsize#  and IF  8  ELSE  2  THEN +
@@ -151,7 +151,7 @@ $02 Constant send-ack#
 
 : .header ( addr -- )
     dup c@ >r 2 +
-    r@ datasize# and 2/ 'A' + emit
+    r@ datasize# and 'A' + emit
     r@ destsize# and chunk@
     r> addrsize# and chunk@
     drop swap
@@ -418,15 +418,23 @@ Variable outflag  outflag off
     out-route outbuf dup packet-size
     send-a-packet ;
 
-: >sendA ( addr -- )  outbody $020 move ;
-: >sendB ( addr -- )  outbody $080 move $2 outbuf c+! ;
-: >sendC ( addr -- )  outbody $200 move $4 outbuf c+! ;
-: >sendD ( addr -- )  outbody $800 move $6 outbuf c+! ;
+: >sendA ( addr -- )  outbody  $020 move ;
+: >sendB ( addr -- )  outbody  $040 move $1 outbuf c+! ;
+: >sendC ( addr -- )  outbody  $080 move $2 outbuf c+! ;
+: >sendD ( addr -- )  outbody  $100 move $3 outbuf c+! ;
+: >sendE ( addr -- )  outbody  $200 move $4 outbuf c+! ;
+: >sendF ( addr -- )  outbody  $400 move $5 outbuf c+! ;
+: >sendG ( addr -- )  outbody  $800 move $6 outbuf c+! ;
+: >sendH ( addr -- )  outbody $1000 move $7 outbuf c+! ;
 
 : sendA ( addr taddr target -- )  set-dest  set-flags  >sendA send-packet ;
 : sendB ( addr taddr target -- )  set-dest  set-flags  >sendB send-packet ;
 : sendC ( addr taddr target -- )  set-dest  set-flags  >sendC send-packet ;
 : sendD ( addr taddr target -- )  set-dest  set-flags  >sendD send-packet ;
+: sendE ( addr taddr target -- )  set-dest  set-flags  >sendE send-packet ;
+: sendF ( addr taddr target -- )  set-dest  set-flags  >sendF send-packet ;
+: sendG ( addr taddr target -- )  set-dest  set-flags  >sendG send-packet ;
+: sendH ( addr taddr target -- )  set-dest  set-flags  >sendH send-packet ;
 
 \ send chunk
 
@@ -434,20 +442,32 @@ Variable outflag  outflag off
     data-dest job-context @ return-address @ ;
 
 : net2o:send-packet ( addr u dest addr -- len )  2>r
+    dup $1000 >= IF  $1000 = IF  send-ack# outflag or!  THEN
+	2r> sendH  $1000  EXIT  THEN
     dup $800 >= IF  $800 = IF  send-ack# outflag or!  THEN
-	2r> sendD  $800  EXIT  THEN
+	2r> sendG  $800  EXIT  THEN
+    dup $400 >= IF  $400 = IF  send-ack# outflag or!  THEN
+	2r> sendF  $400  EXIT  THEN
     dup $200 >= IF  $200 = IF  send-ack# outflag or!  THEN
-	2r>  sendC  $200  EXIT  THEN
-    dup $080 >= IF  $80 = IF  send-ack# outflag or!  THEN
-	2r>  sendB  $080  EXIT  THEN
+	2r> sendE  $200  EXIT  THEN
+    dup $100 >= IF  $100 = IF  send-ack# outflag or!  THEN
+	2r> sendD  $100  EXIT  THEN
+    dup $080 >= IF  $080 = IF  send-ack# outflag or!  THEN
+	2r>  sendC  $080  EXIT  THEN
+    dup $040 >= IF  $40 = IF  send-ack# outflag or!  THEN
+	2r>  sendB  $040  EXIT  THEN
     $20 <= IF  send-ack# outflag or!  THEN
     2r>  sendA  $020 ;
 
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
     send-ack# outflag or!
-    dup $200 > IF  drop	2r> sendD  $800  EXIT  THEN
-    dup  $80 > IF  drop	2r> sendC  $200  EXIT  THEN
-    dup  $20 > IF  drop 2r> sendB  $080  EXIT  THEN
+    dup $800 > IF  drop	2r> sendH  $1000  EXIT  THEN
+    dup $400 > IF  drop	2r> sendG  $800  EXIT  THEN
+    dup $200 > IF  drop	2r> sendF  $400  EXIT  THEN
+    dup $100 > IF  drop	2r> sendE  $200  EXIT  THEN
+    dup $080 > IF  drop	2r> sendD  $100  EXIT  THEN
+    dup  $40 > IF  drop	2r> sendC  $080  EXIT  THEN
+    dup  $20 > IF  drop 2r> sendB  $040  EXIT  THEN
     drop 2r>  sendA  $020 ;
 
 \ synchronous sending
