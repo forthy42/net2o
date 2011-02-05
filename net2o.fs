@@ -416,7 +416,7 @@ Variable outflag  outflag off
 : send-packet ( -- )
 \    ." send " outbuf .header
     out-route outbuf dup packet-size
-    send-a-packet ;
+    send-a-packet drop ;
 
 : >send ( addr n -- )  >r outbody $20 r@ lshift move r> outbuf c+! ;
 : sendX ( addr taddr target n -- )
@@ -470,10 +470,12 @@ Create chunk-adder chunks-struct allot
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
 	dup chunk-context @ job-context !
-	chunk-count dup @ 0= If  first-ack# outflag !  THEN  1 swap +!
+	chunk-count dup @
+	dup 0= IF  first-ack# outflag +!  THEN
+	3 = IF  send-ack# outflag +!  THEN  1 swap +!
 	data-tail$@ nip 0> IF  net2o:send-chunk  1 chunks+ +!
 	ELSE  chunks chunks+ @ chunks-struct * chunks-struct $del  THEN
-    ELSE  chunks+ off  THEN ;
+    ELSE  drop chunks+ off  THEN ;
 
 : send? ( -- flag )  chunks $@len 0> ;
 
