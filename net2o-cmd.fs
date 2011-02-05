@@ -125,15 +125,9 @@ definitions
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
 : send-cmd ( dest addr -- ) 2>r  cmdbuf cell+ 2r> swap
-    cmdbuf @ $20   <= IF  sendA  cmdreset  EXIT  THEN
-    cmdbuf @ $40   <= IF  sendB  cmdreset  EXIT  THEN
-    cmdbuf @ $80   <= IF  sendC  cmdreset  EXIT  THEN
-    cmdbuf @ $100  <= IF  sendD  cmdreset  EXIT  THEN
-    cmdbuf @ $200  <= IF  sendE  cmdreset  EXIT  THEN
-    cmdbuf @ $400  <= IF  sendF  cmdreset  EXIT  THEN
-    cmdbuf @ $800  <= IF  sendG  cmdreset  EXIT  THEN
-    cmdbuf @ $1000 <= IF  sendH  cmdreset  EXIT  THEN
-    true abort" too many commands" ;
+    8 0 DO
+	cmdbuf @ $20 I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
+    LOOP  true abort" too many commands" ;
 
 \ net2o assembler stuff
 

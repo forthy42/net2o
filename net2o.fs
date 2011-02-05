@@ -418,57 +418,29 @@ Variable outflag  outflag off
     out-route outbuf dup packet-size
     send-a-packet ;
 
-: >sendA ( addr -- )  outbody  $020 move ;
-: >sendB ( addr -- )  outbody  $040 move $1 outbuf c+! ;
-: >sendC ( addr -- )  outbody  $080 move $2 outbuf c+! ;
-: >sendD ( addr -- )  outbody  $100 move $3 outbuf c+! ;
-: >sendE ( addr -- )  outbody  $200 move $4 outbuf c+! ;
-: >sendF ( addr -- )  outbody  $400 move $5 outbuf c+! ;
-: >sendG ( addr -- )  outbody  $800 move $6 outbuf c+! ;
-: >sendH ( addr -- )  outbody $1000 move $7 outbuf c+! ;
-
-: sendA ( addr taddr target -- )  set-dest  set-flags  >sendA send-packet ;
-: sendB ( addr taddr target -- )  set-dest  set-flags  >sendB send-packet ;
-: sendC ( addr taddr target -- )  set-dest  set-flags  >sendC send-packet ;
-: sendD ( addr taddr target -- )  set-dest  set-flags  >sendD send-packet ;
-: sendE ( addr taddr target -- )  set-dest  set-flags  >sendE send-packet ;
-: sendF ( addr taddr target -- )  set-dest  set-flags  >sendF send-packet ;
-: sendG ( addr taddr target -- )  set-dest  set-flags  >sendG send-packet ;
-: sendH ( addr taddr target -- )  set-dest  set-flags  >sendH send-packet ;
+: >send ( addr n -- )  >r outbody $20 r@ lshift move r> outbuf c+! ;
+: sendX ( addr taddr target n -- )
+    >r set-dest  set-flags r> >send send-packet ;
 
 \ send chunk
 
 : net2o:get-dest ( taddr target -- )
     data-dest job-context @ return-address @ ;
 
-: net2o:send-packet ( addr u dest addr -- len )  2>r
-    dup $1000 >= IF  $1000 = IF  send-ack# outflag or!  THEN
-	2r> sendH  $1000  EXIT  THEN
-    dup $800 >= IF  $800 = IF  send-ack# outflag or!  THEN
-	2r> sendG  $800  EXIT  THEN
-    dup $400 >= IF  $400 = IF  send-ack# outflag or!  THEN
-	2r> sendF  $400  EXIT  THEN
-    dup $200 >= IF  $200 = IF  send-ack# outflag or!  THEN
-	2r> sendE  $200  EXIT  THEN
-    dup $100 >= IF  $100 = IF  send-ack# outflag or!  THEN
-	2r> sendD  $100  EXIT  THEN
-    dup $080 >= IF  $080 = IF  send-ack# outflag or!  THEN
-	2r>  sendC  $080  EXIT  THEN
-    dup $040 >= IF  $40 = IF  send-ack# outflag or!  THEN
-	2r>  sendB  $040  EXIT  THEN
-    $20 <= IF  send-ack# outflag or!  THEN
-    2r>  sendA  $020 ;
+: net2o:send-packet ( addr u dest addr -- len )  2>r  0 7 DO
+	dup $20 I lshift u>= IF  $20 I lshift = IF  send-ack# outflag or!  THEN
+		I UNLOOP  2r> rot dup >r sendX $20 r> lshift   EXIT  THEN
+    -1 +LOOP
+    $20 u<= IF  send-ack# outflag or!  THEN
+    2r> 0 sendX  $020 ;
 
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
     send-ack# outflag or!
-    dup $800 > IF  drop	2r> sendH  $1000  EXIT  THEN
-    dup $400 > IF  drop	2r> sendG  $800  EXIT  THEN
-    dup $200 > IF  drop	2r> sendF  $400  EXIT  THEN
-    dup $100 > IF  drop	2r> sendE  $200  EXIT  THEN
-    dup $080 > IF  drop	2r> sendD  $100  EXIT  THEN
-    dup  $40 > IF  drop	2r> sendC  $080  EXIT  THEN
-    dup  $20 > IF  drop 2r> sendB  $040  EXIT  THEN
-    drop 2r>  sendA  $020 ;
+    0 7 DO
+	dup $10 I lshift $-20 and u> IF
+	    drop I UNLOOP  2r> rot dup >r sendX  $20 r> lshift  EXIT  THEN
+    -1 +LOOP
+    drop 2r>  0 sendX  $020 ;
 
 \ synchronous sending
 
