@@ -366,7 +366,8 @@ end-structure
     dup job-context @ last-ack dup @ >r ! r> -
     job-context @ delta-ack avg! ;
 : net2o:ack-range ( addr u -- )
-    ." Acknowledge range: " swap . . cr ;
+    ." Acknowledge range: " swap . . cr
+    ." Ack delta: " job-context @ delta-ack @ . cr ;
 
 \ file handling
 
@@ -472,7 +473,7 @@ Create chunk-adder chunks-struct allot
 	dup chunk-context @ job-context !
 	chunk-count dup @
 	dup 0= IF  first-ack# outflag +!  THEN
-	3 = IF  send-ack# outflag +!  THEN  1 swap +!
+	1 = IF  send-ack# outflag +!  THEN  1 swap +!
 	data-tail$@ nip 0> IF  net2o:send-chunk  1 chunks+ +!
 	ELSE  chunks chunks+ @ chunks-struct * chunks-struct $del  THEN
     ELSE  drop chunks+ off  THEN ;
@@ -516,7 +517,7 @@ Defer do-ack ( -- )
     dest-addr @ 0= IF  inbuf packet-data queue-command
     ELSE  check-dest dup 0< IF drop  >r inbuf packet-data r@ swap move
 	    do-ack
-	    job-context @ IF  inbuf packet-data type  THEN
+	    job-context @ IF  inbuf packet-data swap . . cr  THEN
 	    rdrop
 	ELSE  0>  IF  >r inbuf packet-data r@ swap dup >r move
 		r> r> swap queue-command
