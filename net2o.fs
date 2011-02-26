@@ -21,12 +21,16 @@ require nacl.fs
 4242 Constant net2o-udp
 
 0 Value net2o-sock
+0 Value net2o-sock6
 
 : new-server ( -- )
-    net2o-udp create-udp-server s" w+" c-string fdopen to net2o-sock ;
+    net2o-udp create-udp-server s" w+" c-string fdopen to net2o-sock
+    net2o-udp create-udp-server6 s" w+" c-string fdopen to net2o-sock6
+;
 
 : new-client ( -- )
-    new-udp-socket s" w+" c-string fdopen to net2o-sock ;
+    new-udp-socket s" w+" c-string fdopen to net2o-sock
+    new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
 $101A Constant maxpacket
 
@@ -45,8 +49,12 @@ end-struct net2o-header
 : read-a-packet ( -- addr u )
     net2o-sock inbuf maxpacket read-socket-from ;
 
+: read-a-packet6 ( -- addr u )
+    net2o-sock6 inbuf maxpacket read-socket-from ;
+
 : send-a-packet ( addr u -- n )
-    net2o-sock fileno -rot 0 sockaddr-tmp 16 sendto ;
+    sockaddr-tmp w@ PF_INET6 = IF  net2o-sock6  ELSE  net2o-sock  THEN
+    fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
 
@@ -60,27 +68,28 @@ end-struct net2o-header
     /address route-bits lshift dup allocate throw to routes
     routes swap erase ;
 
-: route-hash ( addr -- hash )
-    /address route-bits (hashkey1) ;
+: info>string ( addr -- addr u )
+    dup ai_addr @ swap ai_addrlen @ ;
 
-: sock-route" ( -- addr dest u hash )
-    sockaddr-tmp dup route-hash dup >r addresses routes + /address r> ;
-: insert-address ( -- net2o-addr )
-    sock-route" >r move r> $38 lshift ;
-: check-address ( -- net2o-addr flag )
-    sock-route" >r tuck str= r> $38 lshift swap ;
+: route-hash ( addr u -- hash )
+    route-bits (hashkey1) ;
+
+: sock-route! ( addr u -- hash )
+    2dup route-hash dup >r addresses routes + $! r> ;
+: insert-address ( addr u -- net2o-addr )
+    sock-route! $38 lshift ;
+: check-address ( addr u -- net2o-addr flag )
+    2dup route-hash dup >r addresses routes +
+    $@ str= r> $38 lshift swap ;
 \ FIXME: doesn't check for collissons
 
-: host:port ( addr u port -- )
-    -rot host>addr swap sockaddr-tmp >inetaddr ;
-
 : insert-ipv4 ( addr u port -- net2o-addr )
-    host:port insert-address ;
+    get-info info>string insert-address ;
 
 : address>route ( -- n/-1 )
-    sock-route" >r tuck str= 0= IF  rdrop -1  ELSE  r>  THEN ;
+    sockaddr-tmp alen @ check-address 0= IF  drop -1  THEN ;
 : route>address ( n -- )
-    addresses routes + sockaddr-tmp /address move ;
+    addresses routes + $@ dup alen ! sockaddr-tmp swap move ;
 
 \ bit reversing
 
@@ -102,7 +111,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     r@ destination dup 1+ swap /address 1- move
     r> destination /address 1- + c!  false ;
 
-: in-route ( -- flag )  address>route reverse8  inbuf packet-route ;
+: in-route ( -- flag )  address>route reverse64  inbuf packet-route ;
 : in-check ( -- flag )  address>route 0>= ;
 : out-route ( -- flag )  0  outbuf packet-route ;
 
@@ -484,23 +493,34 @@ Create chunk-adder chunks-struct allot
 
 2Variable ptimeout &100000000 0 ptimeout 2! ( 100 ms )
 
-Create pollfds   pollfd %size allot
+Create pollfds   pollfd %size 2* allot
 
-: poll-sock ( -- flag )  net2o-sock fileno pollfds fd l!
-    POLLIN send? IF  POLLOUT or  THEN  pollfds events w!
-    pollfds 1 ptimeout 0 ppoll 0> ;
+: poll-sock ( -- flag )
+    net2o-sock fileno pollfds fd l!
+    net2o-sock6 fileno pollfds pollfd %size + fd l!
+    POLLIN send? IF  POLLOUT or  THEN
+    dup pollfds events w!  pollfds pollfd %size + events w!
+    pollfds 2 ptimeout 0 ppoll 0> ;
+
+: read-a-packet4/6 ( -- )
+    pollfds revents w@ POLLIN = IF  read-a-packet EXIT  THEN
+    pollfds pollfd %size + revents w@ POLLIN = IF  read-a-packet6  THEN ;
 
 : next-packet ( -- addr u )
     BEGIN  BEGIN  poll-sock  UNTIL
-	pollfds revents w@ POLLOUT = IF  send-chunks-async  THEN
-	pollfds revents w@ POLLIN =  UNTIL
-    read-a-packet insert-address reverse64
+	pollfds revents w@ POLLOUT =
+	pollfds pollfd %size + revents w@ POLLOUT = or
+	IF  send-chunks-async  THEN
+	pollfds revents w@ POLLIN =
+    pollfds pollfd %size + revents w@ POLLIN = or UNTIL
+    read-a-packet4/6
+    sockaddr-tmp alen @ insert-address reverse64
     inbuf destination be-ux@ -$100 and or inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
-    BEGIN  poll-sock  UNTIL  read-a-packet
-    check-address IF
+    BEGIN  poll-sock  UNTIL  read-a-packet4/6
+    sockaddr-tmp alen @ check-address IF
 	reverse64
 	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
 	over packet-size over <> abort" Wrong packet size"
