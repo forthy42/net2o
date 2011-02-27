@@ -502,7 +502,11 @@ Create chunk-adder chunks-struct allot
 
 \ poll loop
 
-2Variable ptimeout &100000000 0 ptimeout 2! ( 100 ms )
+environment os-type s" linux" string-prefix? [IF]
+    2Variable ptimeout &100000000 0 ptimeout 2! ( 100 ms )
+[ELSE]
+    &100 Constant ptimeout ( 100 ms )
+[THEN]
 
 Create pollfds   pollfd %size 2* allot
 
@@ -511,7 +515,12 @@ Create pollfds   pollfd %size 2* allot
     net2o-sock6 fileno pollfds pollfd %size + fd l!
     POLLIN send? IF  POLLOUT or  THEN
     dup pollfds events w!  pollfds pollfd %size + events w!
-    pollfds 2 ptimeout 0 ppoll 0> ;
+[ environment os-type s" linux" string-prefix? ] [IF]
+    pollfds 2 ptimeout 0 ppoll 0>
+[ELSE]
+    pollfds 2 ptimeout poll 0>
+[THEN]
+;
 
 : read-a-packet4/6 ( -- )
     pollfds revents w@ POLLIN = IF  read-a-packet EXIT  THEN
