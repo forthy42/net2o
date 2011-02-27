@@ -112,7 +112,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     r> destination /address 1- + c!  false ;
 
 : in-route ( -- flag )  address>route reverse64  inbuf packet-route ;
-: in-check ( -- flag )  address>route 0>= ;
+: in-check ( -- flag )  address>route -1 <> ;
 : out-route ( -- flag )  0  outbuf packet-route ;
 
 \ packet&header size
@@ -438,8 +438,9 @@ Variable outflag  outflag off
     data-dest job-context @ return-address @ ;
 
 : net2o:send-packet ( addr u dest addr -- len )  2>r  0 7 DO
-	dup $20 I lshift u>= IF  $20 I lshift = IF  send-ack# outflag or!  THEN
-		I UNLOOP  2r> rot dup >r sendX $20 r> lshift   EXIT  THEN
+	dup $20 I lshift $1F - u>= IF
+	    $20 I lshift u<= IF  send-ack# outflag or!  THEN
+	    I UNLOOP  2r> rot dup >r sendX $20 r> lshift   EXIT  THEN
     -1 +LOOP
     $20 u<= IF  send-ack# outflag or!  THEN
     2r> 0 sendX  $020 ;
@@ -537,7 +538,7 @@ Defer do-ack ( -- )
     dest-addr @ 0= IF  inbuf packet-data queue-command
     ELSE  check-dest dup 0< IF drop  >r inbuf packet-data r@ swap move
 	    do-ack
-	    job-context @ IF  inbuf packet-data swap . . cr  THEN
+\	    job-context @ IF  inbuf packet-data swap . . cr  THEN
 	    rdrop
 	ELSE  0>  IF  >r inbuf packet-data r@ swap dup >r move
 		r> r> swap queue-command
