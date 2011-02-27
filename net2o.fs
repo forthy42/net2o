@@ -53,7 +53,7 @@ end-struct net2o-header
     net2o-sock6 inbuf maxpacket read-socket-from ;
 
 : send-a-packet ( addr u -- n )
-    sockaddr-tmp w@ PF_INET6 = IF  net2o-sock6  ELSE  net2o-sock  THEN
+    sockaddr-tmp w@ AF_INET6 = IF  net2o-sock6  ELSE  net2o-sock  THEN
     fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
