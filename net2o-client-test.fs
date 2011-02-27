@@ -19,6 +19,11 @@ $10000 lit, $1000 lit, new-code
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
+0 lit, close-file
+s" doc/internet-2.0.pdf" $, r/o lit, 0 lit, open-file
+s" file size: " $, type 0 lit, file-size . cr
+0 lit, slurp-chunk send-chunks
+0 lit, close-file
 end-code lserver 0 send-cmd
 
 $80000 $80000 n2o:new-map

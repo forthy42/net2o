@@ -154,13 +154,14 @@ also net2o-base definitions forth
 14 net2o: new-data ( addr u -- ) n2o:new-data ;
 15 net2o: new-code ( addr u -- ) n2o:new-code ;
 16 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-17 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
-18 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
-19 net2o: send-chunk ( -- ) net2o:send-chunk ;
-20 net2o: send-chunks ( -- ) net2o:send-chunks ;
-21 net2o: firstack ( time -- )  net2o:firstack ;
-22 net2o: ack ( time -- )  net2o:ack ;
-23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+17 net2o: close-file ( id -- )  n2o:close-file ;
+18 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
+19 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
+20 net2o: send-chunk ( -- ) net2o:send-chunk ;
+21 net2o: send-chunks ( -- ) net2o:send-chunks ;
+22 net2o: firstack ( time -- )  net2o:firstack ;
+23 net2o: ack ( time -- )  net2o:ack ;
+24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 
 \ create commands to send back
 

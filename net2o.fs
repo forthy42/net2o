@@ -402,6 +402,14 @@ end-structure
     dup 2over ." open file: " type ."  with mode " . cr
     open-file >throw r> ! ;
 
+: n2o:close-file ( id -- )
+    ?handles
+    >r job-context @ file-handles $@ r@ cells safe/string
+    IF
+	dup @ ?dup-IF  close-file >throw  THEN  dup off
+    THEN
+    drop rdrop ;
+
 \ client initializer
 
 : init-client ( -- )
@@ -425,7 +433,8 @@ Variable outflag  outflag off
 : outbody ( -- addr ) outbuf packet-body ;
 : send-packet ( -- )
 \    ." send " outbuf .header
-    out-route outbuf dup packet-size
+    out-route drop
+    outbuf dup packet-size
     send-a-packet drop ;
 
 : >send ( addr n -- )  >r outbody $20 r@ lshift move r> outbuf c+! ;
@@ -440,7 +449,8 @@ Variable outflag  outflag off
 : net2o:send-packet ( addr u dest addr -- len )  2>r  0 7 DO
 	dup $20 I lshift $1F - u>= IF
 	    $20 I lshift u<= IF  send-ack# outflag or!  THEN
-	    I UNLOOP  2r> rot dup >r sendX $20 r> lshift   EXIT  THEN
+	    I UNLOOP  2r> rot dup >r sendX
+	    $20 r> lshift   EXIT  THEN
     -1 +LOOP
     $20 u<= IF  send-ack# outflag or!  THEN
     2r> 0 sendX  $020 ;
