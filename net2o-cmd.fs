@@ -182,9 +182,14 @@ previous definitions
 also net2o-base
 
 : net2o:sendack ( -- )
-    job-context @ data-ack $@ 2 cells u>= IF
-	2@ swap lit, lit, ack-range
-	job-context @ data-ack 0 2 cells $del  THEN
+    BEGIN
+	job-context @ data-ack $@ 2 cells u>= WHILE
+	    2@ swap lit, lit, ack-range
+	    job-context @ data-ack $@ 2 cells u> IF
+		dup 2@ + swap 2@ drop over -
+		job-context @ ack-holes add-range
+	    ELSE  drop  THEN
+	    job-context @ data-ack 0 2 cells $del  REPEAT
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;

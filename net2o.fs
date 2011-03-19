@@ -258,6 +258,7 @@ field: data-ack
 field: code-ack
 field: last-ack
 field: delta-ack
+field: ack-holes
 end-structure
 
 begin-structure cmd-struct
@@ -274,6 +275,7 @@ end-structure
     s" " r@ cmd-out $!
     s" " r@ data-ack $!
     s" " r@ code-ack $!
+    s" " r@ ack-holes $!
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
