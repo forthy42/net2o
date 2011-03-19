@@ -185,10 +185,13 @@ also net2o-base
 : net2o:sendack ( -- )
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
-	2 cells +LOOP
+    2 cells +LOOP
     job-context @ data-ack $@ dup 2 cells - 0 max /string bounds ?DO
 	I 2@ swap lit, lit, ack-range
-	2 cells +LOOP
+    2 cells +LOOP
+    job-context @ data-ack $@ nip 2 cells > IF
+	send-chunks
+    THEN
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;

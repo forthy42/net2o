@@ -253,6 +253,7 @@ field: crypto-keys
 field: auth-info
 field: status
 field: data-map
+field: data-resend
 field: code-map
 field: data-ack
 field: code-ack
@@ -273,6 +274,7 @@ end-structure
     r@ context-struct erase  return-addr @ r@ return-address !
     s" " r@ cmd-out $!
     s" " r@ data-ack $!
+    s" " r@ data-resend $!
     s" " r@ code-ack $!
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
@@ -292,6 +294,11 @@ end-structure
     r@ data-raddr @  r@ data-head @ r> data-tail @ safe/string ;
 : /data-tail ( u -- )
     job-context @ data-map $@ drop data-tail +! ;
+: resend$@ ( -- addr u )
+    job-context @ data-resend $@  IF
+	2@ swap job-context @ data-map $@ drop data-raddr @ + swap
+    ELSE  drop 0 0  THEN ;
+: /resend ( -- )  job-context @ data-resend 0 2 cells $del ;
 : data-dest ( -- addr )
     job-context @ data-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
@@ -379,6 +386,7 @@ end-structure
     ." Acknowledge range: " swap . . cr
     ." Ack delta: " job-context @ delta-ack @ . cr ;
 : net2o:resend ( addr u -- )
+    2dup job-context @ data-resend add-range
     ." Resend: " swap . . cr ;
 
 \ file handling
@@ -469,10 +477,20 @@ Variable outflag  outflag off
 \ synchronous sending
 
 : net2o:send-chunk ( -- )
-    data-tail$@ net2o:get-dest net2o:send-packet  /data-tail ;
+    resend$@ dup IF
+	/resend resend$@ nip 0= IF
+	    send-ack# outflag or!
+	THEN
+	net2o:get-dest net2o:send-packet drop
+    ELSE
+	2drop
+	data-tail$@ net2o:get-dest net2o:send-packet  /data-tail
+    THEN ;
+
+: data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
-    BEGIN  data-tail$@ nip 0>  WHILE  net2o:send-chunk  REPEAT ;
+    BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
 \ asynchronous sending
 
@@ -497,8 +515,11 @@ Create chunk-adder chunks-struct allot
 	chunk-count dup @
 	dup 0= IF  first-ack# outflag +!  THEN
 	1 = IF  send-ack# outflag +!  THEN  1 swap +!
-	data-tail$@ nip 0> IF  net2o:send-chunk  1 chunks+ +!
-	ELSE  chunks chunks+ @ chunks-struct * chunks-struct $del  THEN
+	data-to-send IF
+	    net2o:send-chunk  1 chunks+ +!
+	ELSE
+	    chunks chunks+ @ chunks-struct * chunks-struct $del
+	THEN
     ELSE  drop chunks+ off  THEN ;
 
 : send? ( -- flag )  chunks $@len 0> ;
