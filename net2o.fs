@@ -374,7 +374,7 @@ end-structure
 : net2o:ack ( utime -- )
     dup job-context @ last-ack dup @ >r ! r> -
     job-context @ delta-ack avg! ;
-: net2o:unacked ( addr u -- )  job-context @ data-ack add-range ;
+: net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
     ." Acknowledge range: " swap . . cr
     ." Ack delta: " job-context @ delta-ack @ . cr ;
