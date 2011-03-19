@@ -30,4 +30,5 @@ $80000 $80000 n2o:new-map
 $10000 $1000 n2o:new-code-map
 $80000 $80000 n2o:new-data
 $10000 $1000 n2o:new-code
+$80000 $80000 net2o:unacked
 client-loop

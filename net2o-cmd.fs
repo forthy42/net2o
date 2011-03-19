@@ -162,6 +162,7 @@ also net2o-base definitions forth
 22 net2o: firstack ( time -- )  net2o:firstack ;
 23 net2o: ack ( time -- )  net2o:ack ;
 24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+25 net2o: resend ( addr u -- )  net2o:resend ;
 
 \ create commands to send back
 
@@ -182,20 +183,18 @@ previous definitions
 also net2o-base
 
 : net2o:sendack ( -- )
-    BEGIN
-	job-context @ data-ack $@ 2 cells u>= WHILE
-	    2@ swap lit, lit, ack-range
-	    job-context @ data-ack $@ 2 cells u> IF
-		dup 2@ + swap 2@ drop over -
-		job-context @ ack-holes add-range
-	    ELSE  drop  THEN
-	    job-context @ data-ack 0 2 cells $del  REPEAT
+    job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
+	I 2@ swap lit, lit, resend
+	2 cells +LOOP
+    job-context @ data-ack $@ dup 2 cells - 0 max /string bounds ?DO
+	I 2@ swap lit, lit, ack-range
+	2 cells +LOOP
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
 
 : net2o:do-ack ( -- )
-    dest-addr @ inbuf body-size job-context @ data-ack add-range
+    dest-addr @ inbuf body-size job-context @ data-ack del-range
     utime drop lit,
     inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
     inbuf 1+ c@ send-ack# and IF  net2o:sendack  THEN ;

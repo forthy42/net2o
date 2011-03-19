@@ -258,7 +258,6 @@ field: data-ack
 field: code-ack
 field: last-ack
 field: delta-ack
-field: ack-holes
 end-structure
 
 begin-structure cmd-struct
@@ -275,7 +274,6 @@ end-structure
     s" " r@ cmd-out $!
     s" " r@ data-ack $!
     s" " r@ code-ack $!
-    s" " r@ ack-holes $!
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -376,9 +374,12 @@ end-structure
 : net2o:ack ( utime -- )
     dup job-context @ last-ack dup @ >r ! r> -
     job-context @ delta-ack avg! ;
+: net2o:unacked ( addr u -- )  job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
     ." Acknowledge range: " swap . . cr
     ." Ack delta: " job-context @ delta-ack @ . cr ;
+: net2o:resend ( addr u -- )
+    ." Resend: " swap . . cr ;
 
 \ file handling
 
