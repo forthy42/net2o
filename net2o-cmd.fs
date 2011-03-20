@@ -186,9 +186,9 @@ also net2o-base
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
-    job-context @ data-ack $@ dup 2 cells - 0 max /string bounds ?DO
-	I 2@ swap lit, lit, ack-range
-    2 cells +LOOP
+    job-context @ data-ack $@ dup IF
+	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
+    ELSE  2drop  THEN
     job-context @ data-ack $@ nip 2 cells > IF
 	send-chunks
     THEN
