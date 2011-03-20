@@ -6,7 +6,8 @@ init-client
 
 s" localhost" net2o-udp insert-ipv4 constant lserver
 lserver return-addr !
-n2o:new-context job-context !
+n2o:new-context constant lcontext
+lcontext job-context !
 
 net2o-code S" This is a test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd

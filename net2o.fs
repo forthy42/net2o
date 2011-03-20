@@ -389,6 +389,8 @@ end-structure
     job-context @ data-resend $@  IF
 	2@ swap >real-range swap
     ELSE  drop 0 0  THEN ;
+: resend-dest ( -- addr )
+    job-context @ data-resend $@ drop 2@ drop ;
 : /resend ( u -- )  job-context @ data-resend dup $@ drop 2@ drop
     -rot del-range ;
 
@@ -459,15 +461,21 @@ Variable outflag  outflag off
 
 : net2o:get-dest ( taddr target -- )
     data-dest job-context @ return-address @ ;
+: net2o:get-resend ( taddr target -- )
+    resend-dest job-context @ return-address @ ;
 
-: net2o:send-packet ( addr u dest addr -- len )  2>r  0 7 DO
+: net2o:prep-send ( addr u dest addr -- addr taddr target n len )
+    2>r  0 7 DO
 	dup $20 I lshift $1F - u>= IF
 	    $20 I lshift u<= IF  send-ack# outflag or!  THEN
-	    I UNLOOP  2r> rot dup >r sendX
+	    I UNLOOP  2r> rot dup >r
 	    $20 r> lshift   EXIT  THEN
     -1 +LOOP
     $20 u<= IF  send-ack# outflag or!  THEN
-    2r> 0 sendX  $020 ;
+    2r> 0 $020 ;
+
+: net2o:send-packet ( addr u dest addr -- len )
+    net2o:prep-send >r sendX r> ;
 
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
     send-ack# outflag or!
@@ -479,15 +487,16 @@ Variable outflag  outflag off
 
 \ synchronous sending
 
+: data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
+
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-	net2o:get-dest net2o:send-packet /resend
+	net2o:get-resend net2o:prep-send /resend
     ELSE
 	2drop
-	data-tail$@ net2o:get-dest net2o:send-packet  /data-tail
-    THEN ;
-
-: data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
+	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
+    THEN
+    data-to-send 0= IF  send-ack# outflag or!  THEN  sendX ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
