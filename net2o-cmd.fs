@@ -194,13 +194,19 @@ also net2o-base
     THEN
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
-    net2o:send-code-packet drop cmdreset ;
+    net2o:send-code-packet drop cmdreset
+    job-context @ pending-ack off ;
 
 : net2o:do-ack ( -- )
     dest-addr @ inbuf body-size job-context @ data-ack del-range
     utime drop lit,
     inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
-    inbuf 1+ c@ send-ack# and IF  net2o:sendack  THEN ;
+    inbuf 1+ c@ send-ack# and IF
+	job-context @ pending-ack @ 0= IF
+	    ['] net2o:sendack 10000 add-queue
+	THEN
+	job-context @ pending-ack on
+    THEN ;
 ' net2o:do-ack IS do-ack
 
 previous

@@ -259,6 +259,7 @@ field: data-ack
 field: code-ack
 field: last-ack
 field: delta-ack
+field: pending-ack
 end-structure
 
 begin-structure cmd-struct
@@ -360,7 +361,7 @@ end-structure
 	    THEN
 	THEN
     2 cells +LOOP  2drop r> dup $@len 0  ?DO
-	dup $@ I /string drop 2@ d0= IF
+	dup $@ I safe/string drop 2@ d0= IF
 	    dup I 2 cells $del  0
 	ELSE  2 cells  THEN
     +LOOP  drop ;
@@ -533,17 +534,52 @@ Create chunk-adder chunks-struct allot
 
 : send? ( -- flag )  chunks $@len 0> ;
 
+\ schedule delayed events
+
+begin-structure queue-struct
+field: queue-timestamp
+field: queue-job
+field: queue-xt
+end-structure
+
+Variable queue s" " queue $!
+Create queue-adder  queue-struct allot
+
+: add-queue ( xt us -- )
+    utime drop +  queue-adder queue-timestamp !
+    job-context @ queue-adder queue-job !
+    queue-adder queue-xt !
+    queue-adder queue-struct queue $+! ;
+
+: eval-queue ( -- )
+    queue $@len 0= ?EXIT  utime drop
+    queue $@ bounds ?DO
+	dup I queue-timestamp @ u> IF
+	    I queue-job @ job-context !
+	    I queue-xt @ execute
+	    0 I queue-timestamp !
+	THEN
+    queue-struct +LOOP  drop
+    0 >r BEGIN  r@ queue $@len u<  WHILE
+	    queue $@ r@ safe/string drop queue-timestamp @ 0= IF
+		queue r@ queue-struct $del
+	    ELSE
+		r> queue-struct + >r
+	    THEN
+    REPEAT  rdrop ;
+
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout &100000000 0 ptimeout 2! ( 100 ms )
+    2Variable ptimeout #10.000000 ptimeout 2! ( 10 ms )
 [ELSE]
-    &100 Constant ptimeout ( 100 ms )
+    &10 Constant ptimeout ( 10 ms )
 [THEN]
 
 Create pollfds   pollfd %size 2* allot
 
 : poll-sock ( -- flag )
+    eval-queue
     net2o-sock fileno pollfds fd l!
     net2o-sock6 fileno pollfds pollfd %size + fd l!
     POLLIN send? IF  POLLOUT or  THEN
@@ -607,6 +643,7 @@ Defer do-ack ( -- )
     ELSE  route-packet  THEN ;
 
 : client-event ( -- )
+    poll-sock 0= ?EXIT
     next-client-packet 2drop in-check
     IF  ['] handle-packet catch
 	IF  inbuf packet-data dump  THEN
@@ -616,7 +653,7 @@ Defer do-ack ( -- )
     BEGIN  server-event  AGAIN ;
 
 : client-loop ( -- )
-    BEGIN  poll-sock  WHILE  client-event  REPEAT ;
+    BEGIN  poll-sock queue $@len 0<> or  WHILE  client-event  REPEAT ;
 
 \ load net2o commands
 
