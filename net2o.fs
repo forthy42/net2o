@@ -294,11 +294,6 @@ end-structure
     r@ data-raddr @  r@ data-head @ r> data-tail @ safe/string ;
 : /data-tail ( u -- )
     job-context @ data-map $@ drop data-tail +! ;
-: resend$@ ( -- addr u )
-    job-context @ data-resend $@  IF
-	2@ swap job-context @ data-map $@ drop data-raddr @ + swap
-    ELSE  drop 0 0  THEN ;
-: /resend ( -- )  job-context @ data-resend 0 2 cells $del ;
 : data-dest ( -- addr )
     job-context @ data-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
@@ -388,6 +383,14 @@ end-structure
 : net2o:resend ( addr u -- )
     2dup job-context @ data-resend add-range
     ." Resend: " swap . . cr ;
+: >real-range ( addr -- addr' )
+    job-context @ data-map $@ drop data-raddr @ + ;
+: resend$@ ( -- addr u )
+    job-context @ data-resend $@  IF
+	2@ swap >real-range swap
+    ELSE  drop 0 0  THEN ;
+: /resend ( u -- )  job-context @ data-resend dup $@ drop 2@ drop
+    -rot del-range ;
 
 \ file handling
 
@@ -478,10 +481,7 @@ Variable outflag  outflag off
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-	/resend resend$@ nip 0= IF
-	    send-ack# outflag or!
-	THEN
-	net2o:get-dest net2o:send-packet drop
+	net2o:get-dest net2o:send-packet /resend
     ELSE
 	2drop
 	data-tail$@ net2o:get-dest net2o:send-packet  /data-tail
