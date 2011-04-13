@@ -69,7 +69,7 @@ end-struct net2o-header
     routes swap erase ;
 
 : info>string ( addr -- addr u )
-    dup ai_addr @ swap ai_addrlen @ ;
+    dup ai_addr @ swap ai_addrlen l@ ;
 
 : route-hash ( addr u -- hash )
     route-bits (hashkey1) ;
