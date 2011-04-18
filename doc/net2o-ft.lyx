@@ -1,0 +1,1088 @@
+#LyX 1.6.9 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{Warsaw}
+% or ...
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\language ngerman
+\inputencoding auto
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\defskip medskip
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net2o: Fort(h)schritte
+\begin_inset OptArg
+status open
+
+\begin_layout Plain Layout
+net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+Forth--Tagung 2011, Goslar
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Subsection
+Jetzt doch Semi--Sabbatical
+\end_layout
+
+\begin_layout BeginFrame
+Hirntraining, um wieder richtig in Form zu kommen
+\end_layout
+
+\begin_layout Itemize
+Ohne Aufgabe kein Spaß im Leben
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der Frust im Job hat sich so zugespitzt, dass ich gegangen bin --- Sabbatical!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Wieder Status--Report und Todo--Liste
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Geändert: Packet Header
+\end_layout
+
+\begin_layout BeginFrame
+Geändert: Packet Header
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Size
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Flags
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Path
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Address
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+2/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Junk
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+0/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+32/64/128/256/512/1k/2k/4k
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+checksum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+0/8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename ../../../doc/euroforth2009/internet-2.0/header64.fig
+	lyxscale 50
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename ../../../doc/euroforth2009/internet-2.0/header16.fig
+	lyxscale 50
+	scale 25
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Implementierungs--Status
+\end_layout
+
+\begin_layout BeginFrame
+Ein Anfang ist gemacht
+\end_layout
+
+\begin_layout Itemize
+net2o über UDP (IPv4/IPv6) als 
+\begin_inset Quotes gld
+\end_inset
+
+physical layer
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+UDP stellt ein einfaches Interface zur Verfügung, das auch viele Verbindungen
+ gleichzeitig beherrscht.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+IPv4 komplett, IPv6 bisher nur ohne Packet fragmentation
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Zwei Teile: Packet--Handler und Kommando--Interpreter
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Datenstrukturen
+\end_layout
+
+\begin_layout BeginFrame
+Switching
+\end_layout
+
+\begin_layout Itemize
+Ein Hash wird benutzt, um IP--Addressen zu switchen: Hash=Prefix
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Noch zu tun: Kolissionen mit längerem Prefix vermeiden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Prefixgranularität: Byte
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+MSB=0 Direkt routebar
+\end_layout
+
+\begin_layout Description
+MSB=1 Längerer Prefix, nächstes Byte angucken
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+ Shared Memory
+\end_layout
+
+\begin_layout Itemize
+Map von Adresse zum Kontext funktioniert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Context enthält
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Returnaddresse
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Commando--Buffer
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+cryptographic keys
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Data&Code Maps
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Achnowledge--Informationen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+und noch mehr (noch nicht fertig)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Kommandos
+\end_layout
+
+\begin_layout Itemize
+UTF--8--encodedete Kommandos: Einfaches ist ASCII, ein Byte, komplexeres
+ kann länger sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kommandos in 8--Byte--Blöcke gepackt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Literals (8 Bytes) und Strings in Kommandostrom eingebaut
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kommando--Assembler erlaubt direktes Einbinden in normalen Forth--Code
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Was schon funktioniert
+\end_layout
+
+\begin_layout BeginFrame
+Testcase
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Server loop
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+init-server
+\end_layout
+
+\begin_layout LyX-Code
+server-loop
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Debugging output
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+init-client
+\end_layout
+
+\begin_layout LyX-Code
+s
+\begin_inset Quotes erd
+\end_inset
+
+ localhost
+\begin_inset Quotes erd
+\end_inset
+
+ net2o-udp insert-ipv4
+\end_layout
+
+\begin_layout LyX-Code
+           constant lserver
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code s
+\begin_inset Quotes erd
+\end_inset
+
+ This is a test
+\begin_inset Quotes erd
+\end_inset
+
+ $, type
+\end_layout
+
+\begin_layout LyX-Code
+           '!' char, emit cr end-code
+\end_layout
+
+\begin_layout LyX-Code
+lserver 0 send-cmd
+\end_layout
+
+\end_deeper
+\begin_layout BeginFrame
+Testcase 2
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Datei--Transfer
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+net2o-code new-context
+\end_layout
+
+\begin_layout LyX-Code
+$80000 lit, $80000 lit, new-map
+\end_layout
+
+\begin_layout LyX-Code
+$10000 lit, $1000 lit, new-code-map
+\end_layout
+
+\begin_layout LyX-Code
+$80000 lit, $80000 lit, new-data
+\end_layout
+
+\begin_layout LyX-Code
+$10000 lit, $1000 lit, new-code
+\end_layout
+
+\begin_layout LyX-Code
+s" net2o.fs" $, r/o lit, 0 lit, open-file
+\end_layout
+
+\begin_layout LyX-Code
+s" file size: " $, type 0 lit, file-size .
+ cr
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, slurp-chunk send-chunks
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, close-file
+\end_layout
+
+\begin_layout LyX-Code
+s" doc/internet-2.0.pdf" $, r/o lit, 0 lit, open-file
+\end_layout
+
+\begin_layout LyX-Code
+s" file size: " $, type 0 lit, file-size .
+ cr
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, slurp-chunk send-chunks
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, close-file
+\end_layout
+
+\begin_layout LyX-Code
+end-code
+\end_layout
+
+\begin_layout LyX-Code
+lserver 0 send-cmd 
+\end_layout
+
+\end_deeper
+\begin_layout BeginFrame
+Testcase 3
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Client Loop
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+$80000 $80000 n2o:new-map
+\end_layout
+
+\begin_layout LyX-Code
+$10000 $1000 n2o:new-code-map
+\end_layout
+
+\begin_layout LyX-Code
+$80000 $80000 n2o:new-data
+\end_layout
+
+\begin_layout LyX-Code
+$10000 $1000 n2o:new-code
+\end_layout
+
+\begin_layout LyX-Code
+$80000 $80000 net2o:unacked
+\end_layout
+
+\begin_layout LyX-Code
+client-loop 
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Todo-List
+\end_layout
+
+\begin_layout Subsection
+Flusskontrolle: Zuverlässigkeit und Bandbreite
+\end_layout
+
+\begin_layout BeginFrame
+Flusskontrolle
+\end_layout
+
+\begin_layout Itemize
+UDP ist per Definition unzuverlässig
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Zuverlässigkeit durch Resend--Kommandos --- größtenteils implementiert.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Flusskontrollen--Idee: PLL--basiert, Auswertung der 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+s ist eingebaut, Senderlimitierung fehlt noch.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Cryptography
+\end_layout
+
+\begin_layout BeginFrame
+Cryptography
+\end_layout
+
+\begin_layout Itemize
+Ellyptic Curve Cryptography: Dan Bernsteins NaCl--Library wird verwendets
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+NaCl hat zwar einen brauchbaren Stream Cipher, aber noch keinen Hash ---
+ doch Wurstkessel?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Verschlüsselung überall ist wichtig --- die Alternative ist das chinesische
+ Internet
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Browser
+\end_layout
+
+\begin_layout BeginFrame
+Presentation/Browser
+\end_layout
+
+\begin_layout Itemize
+Typesetting engine
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Bilder, Audio, Video einbetten --- aber keine Plugins!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Scripting vermeiden, wo's geht, z.B.
+ sollte Aggregation aus Seitenteilen schon eine Grundfunktion sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Events beim Server registrieren statt ständiges Pollen
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout BeginFrame
+Summary
+\end_layout
+
+\begin_layout Itemize
+Es gibt schon fast 1000 Zeilen Code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Immer noch viel zu tun, aber dafür jetzt auch mehr Zeit
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Wenn's fertig ist: RFC, IETF--Diskussionen, Präsentation auf Netzwerk--orientier
+ten Konferenzen
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+For Further Reading
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+Bernd Paysan 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+Internet 2.0 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.jwdt.com/~paysan/internet-2.0.html
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document
