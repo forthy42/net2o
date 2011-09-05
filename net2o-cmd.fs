@@ -159,10 +159,9 @@ also net2o-base definitions forth
 19 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
 20 net2o: send-chunk ( -- ) net2o:send-chunk ;
 21 net2o: send-chunks ( -- ) net2o:send-chunks ;
-22 net2o: firstack ( time -- )  net2o:firstack ;
-23 net2o: ack ( time -- )  net2o:ack ;
-24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-25 net2o: resend ( addr u -- )  net2o:resend ;
+22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
+23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+24 net2o: resend ( addr u -- )  net2o:resend ;
 
 \ create commands to send back
 
@@ -186,6 +185,9 @@ also net2o-base
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
+    job-context @ first-ack-addr @ lit,
+    job-context @ first-ack-time @ lit,
+    job-context @ last-ack-time @ lit, ack-addrtime
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN
@@ -199,8 +201,9 @@ also net2o-base
 
 : net2o:do-ack ( -- )
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    utime drop lit,
-    inbuf 1+ c@ first-ack# and IF  firstack  ELSE  ack  THEN
+    utime drop job-context @
+    inbuf 1+ c@ first-ack# and
+    IF  first-ack-time  ELSE  last-ack-time  THEN  !
     inbuf 1+ c@ send-ack# and IF
 	job-context @ pending-ack @ 0= IF
 	    ['] net2o:sendack 10000 add-queue

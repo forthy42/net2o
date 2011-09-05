@@ -120,7 +120,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 $80 Constant destsize#
 $40 Constant addrsize#
 $20 Constant noncesize#
-$07 Constant datasize#
+$0F Constant datasize#
 
 : (header-size ( x -- u ) >r 2
     r@ destsize#  and IF  8  ELSE  2  THEN +
@@ -257,7 +257,15 @@ field: data-resend
 field: code-map
 field: data-ack
 field: code-ack
-field: last-ack
+field: first-ack-addr
+field: first-ack-time
+field: last-ack-time
+field: first-sack-addr
+field: first-sack-time
+field: last-sack-time
+field: sack-backlog
+field: min-ack
+field: max-ack
 field: delta-ack
 field: pending-ack
 end-structure
@@ -277,6 +285,8 @@ end-structure
     s" " r@ data-ack $!
     s" " r@ data-resend $!
     s" " r@ code-ack $!
+    s" " r@ sack-backlog $!
+    -1   r@ min-ack !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -372,11 +382,21 @@ end-structure
     dup @ 0= IF  !  EXIT  THEN
     >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
 
-: net2o:firstack ( utime -- )
-    job-context @ last-ack ! ;
-: net2o:ack ( utime -- )
-    dup job-context @ last-ack dup @ >r ! r> -
-    job-context @ delta-ack avg! ;
+: net2o:ack-addrtime ( addr utime1 utime2 -- ) rot
+    job-context @ sack-backlog $@ bounds ?DO
+	dup I @ = IF
+	    drop  swap I cell+ @ - swap I cell+ cell+ @ -
+	    2dup job-context @ min-ack >r r@ @ umin umin r> !
+	    2dup job-context @ max-ack >r r@ @ umax umax r> !
+	    swap - job-context @ delta-ack !
+	    job-context @ sack-backlog I over $@ drop - 3 cells $del
+	    ." Acknowledge time: "
+	    job-context @ min-ack @ .
+	    job-context @ max-ack @ .
+	    job-context @ delta-ack @ . cr
+	    UNLOOP  EXIT  THEN
+    3 cells +LOOP  drop 2drop ( acknowledge not found ) ;
+
 : net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
     ." Acknowledge range: " swap . . cr
@@ -442,7 +462,14 @@ end-structure
 
 Variable outflag  outflag off
 
-: set-flags ( -- )  outflag @ outbuf 1+ c! outflag off
+: set-flags ( -- )
+    utime drop job-context @ dup >r
+    outflag @ first-ack# and
+    IF  first-sack-time  ELSE  last-sack-time  THEN !
+    outflag @ send-ack# and
+    IF  r@ first-sack-addr 3 cells r@ sack-backlog $+!  THEN
+    rdrop
+    outflag @ outbuf 1+ c! outflag off
     destsize# addrsize# or outbuf c! ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
@@ -532,7 +559,8 @@ Create chunk-adder chunks-struct allot
 	THEN
     ELSE  drop chunks+ off  THEN ;
 
-: send? ( -- flag )  chunks $@len 0> ;
+Variable timeslip  timeslip off
+: send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
 
 \ schedule delayed events
 
@@ -571,9 +599,9 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #10.000000 ptimeout 2! ( 10 ms )
+    2Variable ptimeout #1.000000 ptimeout 2! ( 1 ms )
 [ELSE]
-    &10 Constant ptimeout ( 10 ms )
+    &1 Constant ptimeout ( 1 ms )
 [THEN]
 
 Create pollfds   pollfd %size 2* allot
@@ -653,7 +681,8 @@ Defer do-ack ( -- )
     BEGIN  server-event  AGAIN ;
 
 : client-loop ( -- )
-    BEGIN  poll-sock queue $@len 0<> or  WHILE  client-event  REPEAT ;
+    BEGIN  10 0 DO  poll-sock ?LEAVE  LOOP
+	poll-sock queue $@len 0<> or  WHILE  client-event  REPEAT ;
 
 \ load net2o commands
 
