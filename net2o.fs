@@ -268,6 +268,7 @@ field: min-ack
 field: max-ack
 field: delta-ack
 field: pending-ack
+field: send-tick
 end-structure
 
 begin-structure cmd-struct
@@ -279,6 +280,8 @@ field: cmd-buf#
 $800 +field cmd-buf
 end-structure
 
+$10 Constant tick-init
+
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
     s" " r@ cmd-out $!
@@ -287,6 +290,7 @@ end-structure
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
     -1   r@ min-ack !
+    tick-init r@ send-tick !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -385,7 +389,7 @@ end-structure
 : net2o:ack-addrtime ( addr utime1 utime2 -- ) rot
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
-	    drop  swap I cell+ @ - swap I cell+ cell+ @ -
+	    drop  swap I cell+ 2@  >r swap r> - >r - r>
 	    2dup job-context @ min-ack >r r@ @ umin umin r> !
 	    2dup job-context @ max-ack >r r@ @ umax umax r> !
 	    swap - job-context @ delta-ack !
@@ -551,7 +555,9 @@ Create chunk-adder chunks-struct allot
 	dup chunk-context @ job-context !
 	chunk-count dup @
 	dup 0= IF  first-ack# outflag +!  THEN
-	1 = IF  send-ack# outflag +!  THEN  1 swap +!
+	job-context @ send-tick @ = IF
+	    send-ack# outflag +!  off
+	ELSE  1 swap +!  THEN
 	data-to-send IF
 	    net2o:send-chunk  1 chunks+ +!
 	ELSE
@@ -599,7 +605,7 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #1.000000 ptimeout 2! ( 1 ms )
+    2Variable ptimeout #0.000050 ptimeout 2! ( 1 ms )
 [ELSE]
     &1 Constant ptimeout ( 1 ms )
 [THEN]

@@ -181,13 +181,14 @@ previous definitions
 
 also net2o-base
 
+: net2o:acktime ( -- )
+    job-context @ first-ack-addr @ lit,
+    job-context @ first-ack-time @ lit,
+    job-context @ last-ack-time @ lit, ack-addrtime ;
 : net2o:sendack ( -- )
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
-    job-context @ first-ack-addr @ lit,
-    job-context @ first-ack-time @ lit,
-    job-context @ last-ack-time @ lit, ack-addrtime
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN
@@ -203,8 +204,9 @@ also net2o-base
     dest-addr @ inbuf body-size job-context @ data-ack del-range
     utime drop job-context @
     inbuf 1+ c@ first-ack# and
-    IF  first-ack-time  ELSE  last-ack-time  THEN  !
+    IF  first-ack-time !   ELSE  last-ack-time !  THEN
     inbuf 1+ c@ send-ack# and IF
+	net2o:acktime
 	job-context @ pending-ack @ 0= IF
 	    ['] net2o:sendack 10000 add-queue
 	THEN
