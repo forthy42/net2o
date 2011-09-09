@@ -605,7 +605,7 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #0.000050 ptimeout 2! ( 1 ms )
+    2Variable ptimeout #0.050000 ptimeout 2! ( 1 ms )
 [ELSE]
     &1 Constant ptimeout ( 1 ms )
 [THEN]

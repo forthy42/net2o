@@ -185,19 +185,22 @@ also net2o-base
     job-context @ first-ack-addr @ lit,
     job-context @ first-ack-time @ lit,
     job-context @ last-ack-time @ lit, ack-addrtime ;
-: net2o:sendack ( -- )
+: net2o:ackrange ( -- )
+    job-context @ data-ack $@ dup IF
+	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
+    ELSE  2drop  THEN ;
+: net2o:sendack ( -- )  net2o:acktime net2o:ackrange
+    cmdflush cmdbuf @+ swap
+    code-dest job-context @ return-address @
+    net2o:send-code-packet drop cmdreset ;
+: net2o:resend ( -- )
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
-    job-context @ data-ack $@ dup IF
-	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
-    ELSE  2drop  THEN
     job-context @ data-ack $@ nip 2 cells > IF
 	send-chunks
     THEN
-    cmdflush cmdbuf @+ swap
-    code-dest job-context @ return-address @
-    net2o:send-code-packet drop cmdreset
+    net2o:sendack
     job-context @ pending-ack off ;
 
 : net2o:do-ack ( -- )
@@ -206,9 +209,9 @@ also net2o-base
     inbuf 1+ c@ first-ack# and
     IF  first-ack-time !   ELSE  last-ack-time !  THEN
     inbuf 1+ c@ send-ack# and IF
-	net2o:acktime
+	net2o:sendack
 	job-context @ pending-ack @ 0= IF
-	    ['] net2o:sendack 10000 add-queue
+	    ['] net2o:resend 10000 add-queue
 	THEN
 	job-context @ pending-ack on
     THEN ;
