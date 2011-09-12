@@ -27,7 +27,7 @@
 \font_tt_scale 100
 
 \graphics default
-\default_output_format default
+\default_output_format pdf5
 \output_sync 0
 \bibtex_command default
 \index_command default
@@ -73,7 +73,7 @@ net2o: Application Layer
 status open
 
 \begin_layout Plain Layout
-net2o AL
+net2o app layer
 \end_layout
 
 \end_inset
@@ -119,7 +119,15 @@ net2o Recap: Lower--Level Parts
 \end_layout
 
 \begin_layout Itemize
-Shared memory datagrams with short headers, packet size a power of two.
+Shared memory datagrams with short headers, packet size a power of two,
+ see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "In20"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_deeper
@@ -129,11 +137,11 @@ Shared memory datagrams with short headers, packet size a power of two.
 
 \end_deeper
 \begin_layout Itemize
-Abstraction: files and attributes (name
+Abstraction: files and attributes (name 
 \begin_inset Formula $\longrightarrow$
 \end_inset
 
-value pairs)
+ value pairs)
 \end_layout
 
 \begin_deeper
@@ -182,6 +190,79 @@ Real--time ability allows data streaming
 Legacy implementation based on UDP
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+P2P principle: access data by cryptographic hash (Merkle trees for larger
+ data)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Status: Legacy Flow Control
+\end_layout
+
+\begin_layout Itemize
+TCP flow control too aggressive, fills buffers until packet drops occur
+ --- huge delays (in the order of 4s for a typical DSL account)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Somebody did my homework: LEDBAT flow control adds constant delay --- not
+ so aggressive
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Can't use LEDBAT in naive form, needs adaption --- I like to have a bandwidth
+ control, not a window or even packet size control
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+BitTorrent already implements LEDBAT, seems to be a good idea 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "btledbat"
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Assumption is single bottleneck with few shared connections
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
@@ -228,6 +309,16 @@ Longer, structured documents
 \end_deeper
 \begin_layout Itemize
 Two--way real--time (chat, telephony, video conferencing)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Collaborative gaming
 \end_layout
 
 \begin_layout EndFrame
@@ -288,20 +379,49 @@ page rank
 )
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+By preference (
+\begin_inset Quotes eld
+\end_inset
+
+like it
+\begin_inset Quotes erd
+\end_inset
+
+--button, visited regularly.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+hate it
+\begin_inset Quotes erd
+\end_inset
+
+--button to rate annoying pages down)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+By date or geographic location
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
 
 \begin_layout Section
-Analysis of Web 2.0 
-\begin_inset Quotes eld
-\end_inset
-
-Pages
-\begin_inset Quotes erd
-\end_inset
-
-
+Requirements
 \end_layout
 
 \begin_layout BeginFrame
@@ -350,6 +470,17 @@ Graphics and photos
 Videos
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Games\SpecialChar \ldots{}
+
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
@@ -392,8 +523,74 @@ Separated JavaScript for application logic
 Separated graphics and videos
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Plugins for games and videos
+\end_layout
+
 \begin_layout EndFrame
 
+\end_layout
+
+\begin_layout BeginFrame
+Browser as Application Environment
+\end_layout
+
+\begin_layout Standard
+Remember: The browser is meant as application environment for net--centric
+ applications!
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Requires a general purpose language to write the applications in
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Requires a good development and debugging environment
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Must be fast/low power budget (performance is key on mobile devices, PCs
+ are fast enough)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+HTML5+CSS+JavaScript doesn't cut the mustard
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Solutions
 \end_layout
 
 \begin_layout BeginFrame
@@ -411,7 +608,7 @@ Dynamic web pages use AJAX to partially replace elements of the page
 
 \end_deeper
 \begin_layout Itemize
-Why put everything into a single file, and then start tearing it apart?
+Why put everything into a single file first, and then start tearing it apart?
 \end_layout
 
 \begin_deeper
@@ -421,7 +618,536 @@ Why put everything into a single file, and then start tearing it apart?
 
 \end_deeper
 \begin_layout Itemize
-Use the <object> tag (or similar) for textual content, too!
+Put each element (article, comment, message, navigation bar, images, videos,
+ sound) into a file of its own, and 
+\emph on
+refer
+\emph default
+ to embedded objects, regardless of their type
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use scripts to generate dynamic references (
+\begin_inset Quotes eld
+\end_inset
+
+the last three comments to that article
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Provide low--level services, and let the application logic and libraries
+ do the rest
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Downsides
+\end_layout
+
+\begin_layout Itemize
+Client has to pull data together, more network traffic
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Data assembly may be pretty static
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Smart queries work in a client--server environment, but not in a P2P environment
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Some Basic Insights
+\end_layout
+
+\begin_layout BeginFrame
+ACID vs.
+ Data Cloud
+\end_layout
+
+\begin_layout Itemize
+You want your data to be in shape, thus you need the ACID
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Atomicity, Consistency, Isolation, and Durability.
+\end_layout
+
+\end_inset
+
+ properties of the data repository
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+You can't do read--modify--write on data clouds.
+ You can push new data, that's it.
+ Forget about 
+\begin_inset Quotes eld
+\end_inset
+
+delete,
+\begin_inset Quotes erd
+\end_inset
+
+ there's no easy way to call your data back.
+ You can't implement locks.
+ All you get is durability: 
+\begin_inset Quotes eld
+\end_inset
+
+the net will not forget.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+However, you can say 
+\begin_inset Quotes eld
+\end_inset
+
+this is the next revision of document 
+\begin_inset Formula $x$
+\end_inset
+
+.
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Two concurrent edits will produce a fork.
+ It's up to the authors to decide how to merge forks back.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+When you publish something, you can't guarantee that it's available in order.
+ If the reader gets an incomplete transaction, he must either retry or fall
+ back to the previous version.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Privacy
+\end_layout
+
+\begin_layout Itemize
+You can control with whom you share (cryptography)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Recalling information requires cooperation (
+\begin_inset Quotes eld
+\end_inset
+
+the net will not forget
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+You can't control with whom your receivers re--share (impossibly of DRM)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+There is no real anonymity, but your traces can be lost in the clouds
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Secure Execution Environment
+\end_layout
+
+\begin_layout Itemize
+Any sufficiently powerful language let you write malware
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The libraries of any sufficiently powerful environment (even with a very
+ restricted language) contain enough exploits to write malware
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Sandbox the process, and allow only network connections outside?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+Same origin
+\begin_inset Quotes erd
+\end_inset
+
+--policy doesn't work for a data cloud --- the destination is again 
+\begin_inset Quotes eld
+\end_inset
+
+the cloud
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Signed scripts and social control can help to some extend
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Push vs.
+ Polling
+\end_layout
+
+\begin_layout Itemize
+Polling is stupid
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Push--style solutions require open connections or ports
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Stored procedures in the cloud? Spammer's dream!
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Source Code vs.
+ tokenized Binaries
+\end_layout
+
+\begin_layout Itemize
+We can compile source code quickly
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Source code distribution allows to inspect software, and reduce the malware
+ threat (reduce, not eliminate!)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Secretive companies like binaries, more difficult to reverse engineer
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Everybody can build his own VM compiler, if he likes to
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Factor Data
+\end_layout
+
+\begin_layout BeginFrame
+Factor Data
+\end_layout
+
+\begin_layout FrameSubtitle
+scalability of graphics --- bandwidth and detail reduction for small and
+ slow devices
+\end_layout
+
+\begin_layout Description
+Images Use progressive formats where scaled--down versions of the same image
+ are transferred first (progressive JPEG, wavelet compression)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Video Encode streams with a lowres, low--FPS base video, and additional
+ streams which add spatial and temporal resolution
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Geometries Use level--of--detail algorithms to provide approximations of
+ complex geometries (2D and 3D)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Distribute the Code
+\end_layout
+
+\begin_layout BeginFrame
+Factor the Code
+\end_layout
+
+\begin_layout Itemize
+Provide a way to distribute common libraries
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use the version control system to request the right dependencies, if you
+ need those
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Allow precompiled basic functions to speed up rendering startup
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Basic Libraries
+\end_layout
+
+\begin_layout Itemize
+Canvas and OpenGL for 2D and 3D rendering
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+HarfBuzz for text layout and shaping engine
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A typesetting engine (codename 
+\begin_inset Quotes eld
+\end_inset
+
+B
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+lower.7ex
+\backslash
+hbox{U}
+\end_layout
+
+\end_inset
+
+X
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+JPEG/PNG decoding
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Video engine
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Audio engine
 \end_layout
 
 \begin_layout EndFrame
@@ -459,9 +1185,13 @@ key "In20"
 
 \end_inset
 
-Bernd Paysan 
+
+\noun on
+Bernd Paysan
+\noun default
+ 
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -491,7 +1221,7 @@ newblock
 
  
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -511,9 +1241,13 @@ key "swift"
 
 \end_inset
 
+
+\noun on
 Pouwelse, Grishchenko, Bakker
+\noun default
+
 \begin_inset ERT
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
@@ -526,9 +1260,13 @@ newblock
 
 
 \emph on
-swift 
+swift,
 \emph default
-the multiparty transport protocol 
+ 
+\emph on
+the multiparty transport protocol
+\emph default
+ 
 \begin_inset ERT
 status collapsed
 
@@ -543,11 +1281,69 @@ newblock
 
  
 \begin_inset Flex URL
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
 http://libswift.org/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring Literaturverzeichnis
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "btledbat"
+
+\end_inset
+
+
+\noun on
+Dario Rossi, Claudio Testa, Silvio Valen
+ti
+\noun default
+\lang american
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+Yes, we LEDBAT
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.pam2010.ethz.ch/papers/full-length/4.pdf
 \end_layout
 
 \end_inset
