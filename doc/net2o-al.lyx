@@ -4,8 +4,9 @@
 \begin_header
 \textclass beamer
 \begin_preamble
-\usetheme{Warsaw}
+%\usetheme{Warsaw}
 % or ...
+\usetheme{lankton-keynote}
 
 \setbeamercovered{transparent}
 % or whatever (possibly just delete it)
@@ -425,7 +426,11 @@ Requirements
 \end_layout
 
 \begin_layout BeginFrame
-Web Pages as Application --- How to Present
+Web Pages as Application
+\end_layout
+
+\begin_layout FrameSubtitle
+How to Present
 \end_layout
 
 \begin_layout Standard
@@ -684,7 +689,8 @@ Data assembly may be pretty static
 
 \end_deeper
 \begin_layout Itemize
-Smart queries work in a client--server environment, but not in a P2P environment
+Collated queries work in a client--server environment, but not in a P2P
+ environment
 \end_layout
 
 \begin_layout EndFrame
@@ -868,8 +874,34 @@ The libraries of any sufficiently powerful environment (even with a very
 \end_layout
 
 \end_deeper
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Sandbox}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
 \begin_layout Itemize
-Sandbox the process, and allow only network connections outside?
+Sandbox the process, restrict network access (read is ok, write needs user
+ permit)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Using your keys (decyption, encryption, signing) must be outside the sandbox
 \end_layout
 
 \begin_deeper
@@ -897,7 +929,6 @@ the cloud
 
 \end_layout
 
-\begin_deeper
 \begin_layout Pause
 
 \end_layout
@@ -905,6 +936,17 @@ the cloud
 \end_deeper
 \begin_layout Itemize
 Signed scripts and social control can help to some extend
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The boundary to malware is non--trivial to define.
+ Is Farmville malware?
 \end_layout
 
 \begin_layout EndFrame
@@ -937,7 +979,15 @@ Push--style solutions require open connections or ports
 
 \end_deeper
 \begin_layout Itemize
-Stored procedures in the cloud? Spammer's dream!
+Stored procedures in the cloud --- or better call them 
+\begin_inset Quotes eld
+\end_inset
+
+callbacks,
+\begin_inset Quotes erd
+\end_inset
+
+ because they can only call the originator
 \end_layout
 
 \begin_layout EndFrame
@@ -950,7 +1000,7 @@ Source Code vs.
 \end_layout
 
 \begin_layout Itemize
-We can compile source code quickly
+We (Forth) can compile source code quickly
 \end_layout
 
 \begin_deeper
@@ -1150,6 +1200,62 @@ Video engine
 Audio engine
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+GUI library (MINOS--like, but using the rendering infrastructure)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Most Stupid Mistakes of the Net 1.0
+\end_layout
+
+\begin_layout Itemize
+There really must be an easy to use (i.e.
+ WYSIWYG) in--browser editor for the content!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Client--server instead of peer to peer --- the original idea behind the
+ Internet was peer to peer, but it was soon forgotten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Postel principle --- do not be liberal in what you receive, do explicit
+ consistency checks even if that is costly (Rose principle)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Unencrypted by default (was too costly; but then, cryptographic protocols
+ such as SSL are really ugly and full of mistakes)
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
@@ -1164,16 +1270,6 @@ For Further Reading
 \end_layout
 
 \begin_layout BeginFrame
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-[allowframebreaks]
-\end_layout
-
-\end_inset
-
 For Further Reading
 \end_layout
 
@@ -1233,6 +1329,12 @@ http://net2o.de/
 
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
 \begin_layout Bibliography
 \labelwidthstring Literaturverzeichnis
 \begin_inset CommandInset bibitem
@@ -1293,6 +1395,12 @@ http://libswift.org/
 
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
 \begin_layout Bibliography
 \labelwidthstring Literaturverzeichnis
 \begin_inset CommandInset bibitem
@@ -1303,10 +1411,8 @@ key "btledbat"
 
 
 \noun on
-Dario Rossi, Claudio Testa, Silvio Valen
-ti
+Rossi, Testa, Valenti
 \noun default
-\lang american
 
 \begin_inset ERT
 status collapsed
