@@ -1,3 +1,6 @@
 *.bak
 *.pdf
-nacl-20100830*
+nacl-201*
+.git
+_FOSSIL_
+*.fossil
