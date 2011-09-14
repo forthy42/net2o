@@ -1,12 +1,17 @@
 #!/bin/bash
 set -v
-if [ ! -f nacl-20100830.tar.bz2 ]
+NACLREV=20110221
+NACLPATCH=
+if [ ! -f nacl-$NACLREV.tar.bz2 ]
 then
-    wget http://hyperelliptic.org/nacl/nacl-20100830.tar.bz2
-    bunzip2 < nacl-20100830.tar.bz2 | tar -xf -
-    patch -p0 -s <nacl.diff
+    wget http://hyperelliptic.org/nacl/nacl-$NACLREV.tar.bz2
+    bunzip2 < nacl-$NACLREV.tar.bz2 | tar -xf -
+    if [ -f "$NACLPATCH" ]
+    then
+	patch -p0 -s <$NACLPATCH
+    fi
 fi
-cd nacl-20100830
+cd nacl-$NACLREV
 ./do
 cd build/$HOST/lib/amd64
 ar r libnacl.a cpucycles.o randombytes.o
