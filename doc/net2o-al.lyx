@@ -1367,7 +1367,11 @@ Most Stupid Mistakes of the Net 1.0
 
 \begin_layout Itemize
 There really must be an easy to use (i.e.
- WYSIWYG) in--browser editor for the content!
+ WYSIWYG) 
+\emph on
+in--browser editor
+\emph default
+ for the content!
 \end_layout
 
 \begin_deeper
@@ -1377,8 +1381,12 @@ There really must be an easy to use (i.e.
 
 \end_deeper
 \begin_layout Itemize
-Client--server instead of peer to peer --- the original idea behind the
- Internet was peer to peer, but it was soon forgotten
+
+\emph on
+Client--server
+\emph default
+ instead of peer to peer --- the original idea behind the Internet was peer
+ to peer, but it was soon forgotten
 \end_layout
 
 \begin_deeper
@@ -1388,8 +1396,12 @@ Client--server instead of peer to peer --- the original idea behind the
 
 \end_deeper
 \begin_layout Itemize
-Postel principle --- do not be liberal in what you receive, do explicit
- consistency checks even if that is costly (Rose principle)
+
+\emph on
+Postel principle
+\emph default
+ --- do not be liberal in what you receive, do explicit consistency checks
+ even if that is costly (Rose principle)
 \end_layout
 
 \begin_deeper
@@ -1399,8 +1411,12 @@ Postel principle --- do not be liberal in what you receive, do explicit
 
 \end_deeper
 \begin_layout Itemize
-Unencrypted by default (was too costly; but then, cryptographic protocols
- such as SSL are really ugly and full of mistakes)
+
+\emph on
+Unencrypted
+\emph default
+ by default (was too costly; but then, cryptographic protocols such as SSL
+ are really ugly and full of mistakes)
 \end_layout
 
 \begin_layout EndFrame
