@@ -69,7 +69,45 @@
 \begin_body
 
 \begin_layout Title
-net2o: Application Layer
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-.8ex
+\backslash
+lower1.5ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+: Application Layer
 \begin_inset Argument
 status open
 
@@ -92,6 +130,51 @@ Bernd Paysan
 
 \begin_layout Date
 EuroForth 2011, Vienna
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout BeginFrame
@@ -702,8 +785,7 @@ Some Basic Insights
 \end_layout
 
 \begin_layout BeginFrame
-ACID vs.
- Data Cloud
+ACID on Data Clouds
 \end_layout
 
 \begin_layout Itemize
@@ -793,6 +875,71 @@ Two concurrent edits will produce a fork.
 When you publish something, you can't guarantee that it's available in order.
  If the reader gets an incomplete transaction, he must either retry or fall
  back to the previous version.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Hash--Indexed Content
+\end_layout
+
+\begin_layout Standard
+Hashes as 
+\begin_inset Quotes eld
+\end_inset
+
+handle
+\begin_inset Quotes erd
+\end_inset
+
+ to actual content are the key to data management
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Formula $h(data)\longrightarrow hash$
+\end_inset
+
+ produces a unique hash for each data file
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $d(hash)\longrightarrow data$
+\end_inset
+
+ allows to retrieve the data when the hash is known
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Hash trees provide a mean to distribute large files
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Relationships between data revisions are stored as graph, using the hashes
+ as symbol for the actual data
 \end_layout
 
 \begin_layout EndFrame
