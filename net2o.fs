@@ -46,14 +46,23 @@ struct
     address% field nonce
 end-struct net2o-header
 
+Variable packet4r
+Variable packet4s
+Variable packet6r
+Variable packet6s
+
 : read-a-packet ( -- addr u )
-    net2o-sock inbuf maxpacket read-socket-from ;
+    net2o-sock inbuf maxpacket read-socket-from  1 packet4r +! ;
 
 : read-a-packet6 ( -- addr u )
-    net2o-sock6 inbuf maxpacket read-socket-from ;
+    net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
 : send-a-packet ( addr u -- n )
-    sockaddr-tmp w@ AF_INET6 = IF  net2o-sock6  ELSE  net2o-sock  THEN
+    sockaddr-tmp w@ AF_INET6 = IF
+	net2o-sock6  1 packet6s +!
+    ELSE
+	net2o-sock  1 packet4s +!
+    THEN
     fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
@@ -629,7 +638,7 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #1.000000 ptimeout 2! ( 1 ms )
+    2Variable ptimeout #0.001000 ptimeout 2! ( 1 ms )
 [ELSE]
     &1 Constant ptimeout ( 1 ms )
 [THEN]
@@ -674,7 +683,7 @@ Create pollfds   pollfd %size 2* allot
 	reverse64
 	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
 	over packet-size over <> abort" Wrong packet size"
-    ELSE  hex.  ." Unknown source"  THEN ;
+    ELSE  hex.  ." Unknown source"  0 0  THEN ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
