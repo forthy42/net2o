@@ -269,6 +269,9 @@ field: max-ack
 field: delta-ack
 field: pending-ack
 field: send-tick
+field: bandwidth-target
+field: bandwidth-acc
+field: bandwidth-tick
 end-structure
 
 begin-structure cmd-struct
@@ -281,6 +284,7 @@ $800 +field cmd-buf
 end-structure
 
 $10 Constant tick-init
+$100000 Constant bandwidth-init
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
@@ -291,6 +295,8 @@ $10 Constant tick-init
     s" " r@ sack-backlog $!
     -1   r@ min-ack !
     tick-init r@ send-tick !
+    bandwidth-init r@ bandwidth-target !
+    utime drop r@ bandwidth-tick !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -479,6 +485,7 @@ Variable outflag  outflag off
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
 : outbody ( -- addr ) outbuf packet-body ;
+: outsize ( -- n )    outbuf packet-size ;
 : send-packet ( -- )
 \    ." send " outbuf .header
     out-route drop
@@ -521,6 +528,9 @@ Variable outflag  outflag off
 
 : data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
 
+: bandwidth+ ( -- )
+    outsize job-context @ bandwidth-acc +! ;
+
 : net2o:send-chunk ( -- )
     resend$@ dup IF
 	net2o:get-resend net2o:prep-send /resend
@@ -528,10 +538,15 @@ Variable outflag  outflag off
 	2drop
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
-    data-to-send 0= IF  send-ack# outflag or!  THEN  sendX ;
+    data-to-send 0= IF  send-ack# outflag or!  THEN  sendX  bandwidth+ ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
+
+: bandwidth? ( -- flag ) job-context @ >r
+    r@ bandwidth-acc @
+    utime drop  r@ bandwidth-tick @ - 1 umax /
+    r> bandwidth-target @ u<= ;
 
 \ asynchronous sending
 
@@ -549,7 +564,7 @@ Create chunk-adder chunks-struct allot
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+! ;
 
-: send-chunks-async ( -- )
+: send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
 	dup chunk-context @ job-context !
@@ -559,14 +574,23 @@ Create chunk-adder chunks-struct allot
 	    send-ack# outflag +!  off
 	ELSE  1 swap +!  THEN
 	data-to-send IF
-	    net2o:send-chunk  1 chunks+ +!
+	    bandwidth? dup  IF  net2o:send-chunk  THEN  1 chunks+ +!
 	ELSE
-	    chunks chunks+ @ chunks-struct * chunks-struct $del
+	    chunks chunks+ @ chunks-struct * chunks-struct $del  false
 	THEN
-    ELSE  drop chunks+ off  THEN ;
+    ELSE  drop chunks+ off false  THEN ;
 
-Variable timeslip  timeslip off
-: send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
+: send-another-chunk ( -- flag )  0 >r
+    BEGIN  send-chunks-async 0= WHILE
+	    chunks+ @ 0= IF  r> 1+ >r  THEN
+	r@ 2 u>=  UNTIL  false  ELSE  true  THEN  rdrop ;
+
+Variable sendflag  sendflag off
+: send?  ( -- flag )  sendflag @ ;
+: send-anything? ( -- flag )  chunks $@len 0> ;
+
+\ Variable timeslip  timeslip off
+\ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
 
 \ schedule delayed events
 
@@ -605,7 +629,7 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #0.050000 ptimeout 2! ( 1 ms )
+    2Variable ptimeout #1.000000 ptimeout 2! ( 1 ms )
 [ELSE]
     &1 Constant ptimeout ( 1 ms )
 [THEN]
@@ -625,24 +649,27 @@ Create pollfds   pollfd %size 2* allot
 [THEN]
 ;
 
-: read-a-packet4/6 ( -- )
+: read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF  read-a-packet EXIT  THEN
-    pollfds pollfd %size + revents w@ POLLIN = IF  read-a-packet6  THEN ;
+    pollfds pollfd %size + revents w@ POLLIN = IF  read-a-packet6 EXIT  THEN
+    0 0 ;
 
 : next-packet ( -- addr u )
-    BEGIN  BEGIN  poll-sock  UNTIL
+    BEGIN  send-anything? sendflag !  BEGIN  poll-sock  UNTIL
 	pollfds revents w@ POLLOUT =
 	pollfds pollfd %size + revents w@ POLLOUT = or
-	IF  send-chunks-async  THEN
+	IF  send-another-chunk sendflag !  THEN
 	pollfds revents w@ POLLIN =
-    pollfds pollfd %size + revents w@ POLLIN = or UNTIL
+	pollfds pollfd %size + revents w@ POLLIN =
+    or UNTIL
     read-a-packet4/6
     sockaddr-tmp alen @ insert-address reverse64
     inbuf destination be-ux@ -$100 and or inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
-    BEGIN  poll-sock  UNTIL  read-a-packet4/6
+    BEGIN  BEGIN  poll-sock  UNTIL  read-a-packet4/6  2dup d0= WHILE
+	    2drop  REPEAT
     sockaddr-tmp alen @ check-address IF
 	reverse64
 	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
@@ -678,7 +705,7 @@ Defer do-ack ( -- )
 
 : client-event ( -- )
     poll-sock 0= ?EXIT
-    next-client-packet 2drop in-check
+    next-client-packet  2drop in-check
     IF  ['] handle-packet catch
 	IF  inbuf packet-data dump  THEN
     ELSE  ( drop packet )  THEN ;
@@ -686,9 +713,12 @@ Defer do-ack ( -- )
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( -- )
-    BEGIN  10 0 DO  poll-sock ?LEAVE  LOOP
-	poll-sock queue $@len 0<> or  WHILE  client-event  REPEAT ;
+$100000 Constant min-timeout
+
+: client-loop ( -- ) utime drop min-timeout + >r
+    BEGIN  poll-sock queue $@len 0<> or
+	utime drop r@ u< or
+    WHILE  client-event  REPEAT  rdrop ;
 
 \ load net2o commands
 
