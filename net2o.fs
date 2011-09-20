@@ -293,7 +293,7 @@ field: cmd-buf#
 $800 +field cmd-buf
 end-structure
 
-$F Constant tick-init
+$1F Constant tick-init
 #10000000 Constant bandwidth-init \ 1MB/s
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
@@ -574,22 +574,25 @@ Create chunk-adder chunks-struct allot
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+! ;
 
-: chunk-count+ ( -- )
-    job-context @ chunk-count dup @
-    dup 0= IF  first-ack# outflag +!  THEN
+: chunk-count+ ( counter -- )
+    dup @
+    dup 0= IF  first-ack# outflag or!  THEN
     job-context @ send-tick @ = IF
-	send-ack# outflag +!  off
+	send-ack# outflag or!  off
     ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
-	chunk-context @ job-context !
+	dup chunk-context @ job-context !
+	chunk-count
 	data-to-send IF
 	    bandwidth? dup  IF
-		chunk-count+  net2o:send-chunk
+		swap chunk-count+  net2o:send-chunk
+	    ELSE  drop
 	    THEN  1 chunks+ +!
 	ELSE
+	    drop
 	    chunks chunks+ @ chunks-struct * chunks-struct $del  false
 	THEN
     ELSE  drop chunks+ off false  THEN ;
