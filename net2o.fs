@@ -32,7 +32,8 @@ require nacl.fs
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$101A Constant maxpacket
+$5 Constant max-size^2 \ 1k, to avoid fragmentation
+$20 max-size^2 lshift $1A + Constant maxpacket
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
@@ -292,8 +293,8 @@ field: cmd-buf#
 $800 +field cmd-buf
 end-structure
 
-$10 Constant tick-init
-$100000 Constant bandwidth-init
+$F Constant tick-init
+#10000000 Constant bandwidth-init \ 1MB/s
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
@@ -513,7 +514,7 @@ Variable outflag  outflag off
     resend-dest job-context @ return-address @ ;
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
-    2>r  0 7 DO
+    2>r  0 max-size^2 DO
 	dup $20 I lshift $1F - u>= IF
 	    $20 I lshift u<= IF  send-ack# outflag or!  THEN
 	    I UNLOOP  2r> rot dup >r
@@ -527,7 +528,7 @@ Variable outflag  outflag off
 
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
     send-ack# outflag or!
-    0 7 DO
+    0 max-size^2 DO
 	dup $10 I lshift $-20 and u> IF
 	    drop I UNLOOP  2r> rot dup >r sendX  $20 r> lshift  EXIT  THEN
     -1 +LOOP
@@ -553,8 +554,8 @@ Variable outflag  outflag off
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
 : bandwidth? ( -- flag ) job-context @ >r
-    r@ bandwidth-acc @
-    utime drop  r@ bandwidth-tick @ - 1 umax /
+    r@ bandwidth-acc @ #1000000
+    utime drop  r@ bandwidth-tick @ - 1 umax */
     r> bandwidth-target @ u<= ;
 
 \ asynchronous sending
@@ -573,17 +574,21 @@ Create chunk-adder chunks-struct allot
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+! ;
 
+: chunk-count+ ( -- )
+    job-context @ chunk-count dup @
+    dup 0= IF  first-ack# outflag +!  THEN
+    job-context @ send-tick @ = IF
+	send-ack# outflag +!  off
+    ELSE  1 swap +!  THEN ;
+
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
-	dup chunk-context @ job-context !
-	chunk-count dup @
-	dup 0= IF  first-ack# outflag +!  THEN
-	job-context @ send-tick @ = IF
-	    send-ack# outflag +!  off
-	ELSE  1 swap +!  THEN
+	chunk-context @ job-context !
 	data-to-send IF
-	    bandwidth? dup  IF  net2o:send-chunk  THEN  1 chunks+ +!
+	    bandwidth? dup  IF
+		chunk-count+  net2o:send-chunk
+	    THEN  1 chunks+ +!
 	ELSE
 	    chunks chunks+ @ chunks-struct * chunks-struct $del  false
 	THEN
