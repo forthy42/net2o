@@ -183,8 +183,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     job-context @ first-ack-addr @ lit,
-    job-context @ first-ack-time @ lit,
-    job-context @ last-ack-time @ lit, ack-addrtime ;
+    job-context @ ack-time @ lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
@@ -203,18 +202,20 @@ also net2o-base
     net2o:sendack
     job-context @ pending-ack off ;
 
-: net2o:do-ack ( -- )
+: net2o:do-ack ( -- )  job-context @ >r
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    utime drop job-context @
-    inbuf 1+ c@ first-ack# and
-    IF  first-ack-time !   ELSE  last-ack-time !  THEN
+    r@ first-ack-addr @ 0= IF
+	dest-addr @ r@ first-ack-addr !
+    THEN
+    utime drop r@ ack-time !
     inbuf 1+ c@ send-ack# and IF
 	net2o:sendack
-	job-context @ pending-ack @ 0= IF
+	r@ first-ack-addr off
+	r@ pending-ack @ 0= IF
 	    ['] net2o:resend 10000 add-queue
 	THEN
-	job-context @ pending-ack on
-    THEN ;
+	r@ pending-ack on
+    THEN  rdrop ;
 ' net2o:do-ack IS do-ack
 
 previous

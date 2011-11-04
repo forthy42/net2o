@@ -268,11 +268,9 @@ field: code-map
 field: data-ack
 field: code-ack
 field: first-ack-addr
-field: first-ack-time
-field: last-ack-time
+field: ack-time
 field: first-sack-addr
-field: first-sack-time
-field: last-sack-time
+field: sack-time
 field: sack-backlog
 field: min-ack
 field: max-ack
@@ -403,20 +401,21 @@ $1F Constant tick-init
     dup @ 0= IF  !  EXIT  THEN
     >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
 
-: net2o:ack-addrtime ( addr utime1 utime2 -- ) rot
+: net2o:ack-addrtime ( addr utime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
-	    drop  swap I cell+ 2@  >r swap r> - >r - r>
-	    2dup job-context @ min-ack >r r@ @ min min r> !
-	    2dup job-context @ max-ack >r r@ @ max max r> !
-	    swap - job-context @ delta-ack !
-	    job-context @ sack-backlog I over $@ drop - 3 cells $del
+	    drop  I cell+ @ -
+	    dup job-context @ min-ack >r r@ @ min r> !
+	    dup job-context @ max-ack >r r@ @ max r> !
+	    job-context @ delta-ack !
+	    job-context @ sack-backlog I over $@ drop - 2 cells $del
 	    ." Acknowledge time: "
 	    job-context @ min-ack @ .
 	    job-context @ max-ack @ .
-	    job-context @ delta-ack @ . cr
+	    job-context @ delta-ack @ .
+	    cr
 	    UNLOOP  EXIT  THEN
-    3 cells +LOOP  drop 2drop ( acknowledge not found ) ;
+    2 cells +LOOP  2drop ( acknowledge not found ) ;
 
 : net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
@@ -478,16 +477,18 @@ $1F Constant tick-init
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf destination be-x!  outbuf addr be-x! ;
+    outbuf destination be-x!  dup dest-addr !  outbuf addr be-x! ;
 
 Variable outflag  outflag off
 
-: set-flags ( -- )
-    utime drop job-context @ dup >r
-    outflag @ first-ack# and
-    IF  first-sack-time  ELSE  last-sack-time  THEN !
+: set-flags ( -- )  job-context @ >r
+    utime drop r@ sack-time !
+    r@ first-sack-addr @ 0= IF
+	dest-addr @ r@ first-sack-addr !
+    THEN
     outflag @ send-ack# and
-    IF  r@ first-sack-addr 3 cells r@ sack-backlog $+!  THEN
+    IF  r@ first-sack-addr 2 cells r@ sack-backlog $+!
+	r@ first-sack-addr off  THEN
     rdrop
     outflag @ outbuf 1+ c! outflag off
     destsize# addrsize# or outbuf c! ;
