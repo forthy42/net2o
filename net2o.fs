@@ -419,8 +419,7 @@ $1F Constant tick-init
 
 : net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
-    ." Acknowledge range: " swap . . cr
-    ." Ack delta: " job-context @ delta-ack @ . cr ;
+    ." Acknowledge range: " swap . . cr ;
 : net2o:resend ( addr u -- )
     2dup job-context @ data-resend add-range
     ." Resend: " swap . . cr ;
