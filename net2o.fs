@@ -294,7 +294,7 @@ $800 +field cmd-buf
 end-structure
 
 $1F Constant tick-init
-#10000000 Constant bandwidth-init \ 1MB/s
+#1000000 Constant bandwidth-init \ 1MB/s
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
