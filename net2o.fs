@@ -406,8 +406,8 @@ $1F Constant tick-init
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
 	    drop  swap I cell+ 2@  >r swap r> - >r - r>
-	    2dup job-context @ min-ack >r r@ @ umin umin r> !
-	    2dup job-context @ max-ack >r r@ @ umax umax r> !
+	    2dup job-context @ min-ack >r r@ @ min min r> !
+	    2dup job-context @ max-ack >r r@ @ max max r> !
 	    swap - job-context @ delta-ack !
 	    job-context @ sack-backlog I over $@ drop - 3 cells $del
 	    ." Acknowledge time: "
