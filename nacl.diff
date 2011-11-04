@@ -1,6 +1,6 @@
-diff -u -r nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/auth.s nacl-20100830/crypto_onetimeauth/poly1305/amd64/auth.s
---- nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/auth.s	2010-08-30 04:25:19.000000000 +0200
-+++ nacl-20100830/crypto_onetimeauth/poly1305/amd64/auth.s	2011-01-07 23:54:07.000000000 +0100
+diff -u -r nacl-20110221.orig/crypto_onetimeauth/poly1305/amd64/auth.s nacl-20110221/crypto_onetimeauth/poly1305/amd64/auth.s
+--- nacl-20110221.orig/crypto_onetimeauth/poly1305/amd64/auth.s	2010-08-30 04:25:19.000000000 +0200
++++ nacl-20110221/crypto_onetimeauth/poly1305/amd64/auth.s	2011-01-07 23:54:07.000000000 +0100
 @@ -2785,3 +2785,86 @@
  xor %rax,%rax
  xor %rdx,%rdx
@@ -88,10 +88,10 @@ diff -u -r nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/auth.s nacl-2010
 +crypto_onetimeauth_poly1305_amd64_rounding:
 +.byte 0x7f
 +.byte 0x13
-Nur in nacl-20100830/crypto_onetimeauth/poly1305/amd64: auth.s~.
-diff -u -r nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/constants.s nacl-20100830/crypto_onetimeauth/poly1305/amd64/constants.s
---- nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/constants.s	2010-08-30 04:25:19.000000000 +0200
-+++ nacl-20100830/crypto_onetimeauth/poly1305/amd64/constants.s	2011-01-07 22:44:37.000000000 +0100
+Nur in nacl-20110221/crypto_onetimeauth/poly1305/amd64: auth.s~.
+diff -u -r nacl-20110221.orig/crypto_onetimeauth/poly1305/amd64/constants.s nacl-20110221/crypto_onetimeauth/poly1305/amd64/constants.s
+--- nacl-20110221.orig/crypto_onetimeauth/poly1305/amd64/constants.s	2010-08-30 04:25:19.000000000 +0200
++++ nacl-20110221/crypto_onetimeauth/poly1305/amd64/constants.s	2011-01-07 22:44:37.000000000 +0100
 @@ -1,85 +0,0 @@
 -# version 20080913
 -# D. J. Bernstein
@@ -178,23 +178,23 @@ diff -u -r nacl-20100830.orig/crypto_onetimeauth/poly1305/amd64/constants.s nacl
 -crypto_onetimeauth_poly1305_amd64_rounding:
 -.byte 0x7f
 -.byte 0x13
-diff -u -r nacl-20100830.orig/okcompilers/c nacl-20100830/okcompilers/c
---- nacl-20100830.orig/okcompilers/c	2010-08-30 04:25:19.000000000 +0200
-+++ nacl-20100830/okcompilers/c	2011-01-07 22:30:33.000000000 +0100
+diff -u -r nacl-20110221.orig/okcompilers/c nacl-20110221/okcompilers/c
+--- nacl-20110221.orig/okcompilers/c	2010-08-30 04:25:19.000000000 +0200
++++ nacl-20110221/okcompilers/c	2011-01-07 22:30:33.000000000 +0100
 @@ -1,8 +1,8 @@
--gcc -m64 -fomit-frame-pointer
--gcc -m64 -O -fomit-frame-pointer
 -gcc -m64 -O3 -fomit-frame-pointer -funroll-loops
--gcc -m32 -fomit-frame-pointer
--gcc -m32 -O -fomit-frame-pointer
+-gcc -m64 -O -fomit-frame-pointer
+-gcc -m64 -fomit-frame-pointer
 -gcc -m32 -O3 -fomit-frame-pointer -funroll-loops
--spu-gcc -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
+-gcc -m32 -O -fomit-frame-pointer
+-gcc -m32 -fomit-frame-pointer
 -spu-gcc -mstdmain -march=cell -O3 -funroll-loops -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
-+gcc -fPIC -m64 -fomit-frame-pointer
-+gcc -fPIC -m64 -O -fomit-frame-pointer
+-spu-gcc -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
 +gcc -fPIC -m64 -O3 -fomit-frame-pointer -funroll-loops
-+gcc -fPIC -m32 -fomit-frame-pointer
-+gcc -fPIC -m32 -O -fomit-frame-pointer
++gcc -fPIC -m64 -O -fomit-frame-pointer
++gcc -fPIC -m64 -fomit-frame-pointer
 +gcc -fPIC -m32 -O3 -fomit-frame-pointer -funroll-loops
-+spu-gcc -fPIC -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
++gcc -fPIC -m32 -O -fomit-frame-pointer
++gcc -fPIC -m32 -fomit-frame-pointer
 +spu-gcc -fPIC -mstdmain -march=cell -O3 -funroll-loops -fomit-frame-pointer -Drandom=rand -Dsrandom=srand
++spu-gcc -fPIC -mstdmain -march=cell -O -fomit-frame-pointer -Drandom=rand -Dsrandom=srand

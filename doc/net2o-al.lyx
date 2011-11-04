@@ -928,7 +928,11 @@ handle
 
 \end_deeper
 \begin_layout Itemize
-Hash trees provide a mean to distribute large files
+
+\emph on
+Hash trees
+\emph default
+ provide a mean to distribute large files
 \end_layout
 
 \begin_deeper
@@ -938,8 +942,15 @@ Hash trees provide a mean to distribute large files
 
 \end_deeper
 \begin_layout Itemize
-Relationships between data revisions are stored as graph, using the hashes
- as symbol for the actual data
+
+\emph on
+Relationships
+\emph default
+ between data revisions are stored as 
+\emph on
+graph,
+\emph default
+ using the hashes as symbol for the actual data
 \end_layout
 
 \begin_layout EndFrame
@@ -951,7 +962,11 @@ Privacy
 \end_layout
 
 \begin_layout Itemize
-You can control with whom you share (cryptography)
+You can control 
+\emph on
+with whom you share
+\emph default
+ (cryptography)
 \end_layout
 
 \begin_deeper
@@ -961,7 +976,9 @@ You can control with whom you share (cryptography)
 
 \end_deeper
 \begin_layout Itemize
-Recalling information requires cooperation (
+Recalling information requires cooperation 
+\emph on
+(
 \begin_inset Quotes eld
 \end_inset
 
@@ -979,7 +996,15 @@ the net will not forget
 
 \end_deeper
 \begin_layout Itemize
-You can't control with whom your receivers re--share (impossibly of DRM)
+You 
+\emph on
+can't control
+\emph default
+ with whom your receivers 
+\emph on
+re--share
+\emph default
+ (impossibly of DRM)
 \end_layout
 
 \begin_deeper
@@ -989,7 +1014,11 @@ You can't control with whom your receivers re--share (impossibly of DRM)
 
 \end_deeper
 \begin_layout Itemize
-There is no real anonymity, but your traces can be lost in the clouds
+There is no real anonymity, but your 
+\emph on
+traces can be lost
+\emph default
+ in the clouds
 \end_layout
 
 \begin_layout EndFrame

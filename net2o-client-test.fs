@@ -4,7 +4,8 @@ require net2o.fs
 
 init-client
 
-s" localhost" net2o-udp insert-ipv4 constant lserver
+1 arg net2o-udp insert-ipv4 constant lserver
+shift-args
 lserver return-addr !
 n2o:new-context constant lcontext
 lcontext job-context !
