@@ -303,7 +303,8 @@ $1F Constant tick-init
     s" " r@ data-resend $!
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
-    -1   r@ min-ack !
+    $7FFFFFFFFFFFFFFF r@ min-ack !
+    $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
     bandwidth-init r@ bandwidth-target !
     utime drop r@ bandwidth-tick !
