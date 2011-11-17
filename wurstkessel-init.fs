@@ -1,5 +1,8 @@
 \ init wurstkessel to be actually useful
 
-s" /dev/random" r/o open-file throw value randfd
-wurst-salt state# randfd read-file throw drop
-randfd close-file throw
+: salt-init ( -- )
+    s" /dev/random" r/o open-file throw >r
+    wurst-salt state# r@ read-file throw drop
+    r> close-file throw ;
+
+salt-init

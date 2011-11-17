@@ -52,7 +52,11 @@ Create wurst-key
 $20799FEC4B2E86C7. 64, $9F5454CDBDF51F76. 64, $EE1905FFF4B24C3D. 64, $9841F78BA1E0A3B7. 64,
 $B6C33E39C326A161. 64, $FD4E8C0EAA7C4362. 64, $839E0910FFD9401A. 64, $2785F5C10D610C68. 64,
 
-Create wurst-salt
+Create rnd-init \ for testing only! This is salt, should not be guessable!
+$FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
+$9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
+
+Create wurst-salt \ for testing only! This is salt, should not be guessable!
 $39A157A31F7D62BC. 64, $51C3BD3BA4F4F803. 64, $21D7D0ED16A5243A. 64, $3C80195D8D80874F. 64,
 $6DF5EF6205D55E03. 64, $8859C59812F47028. 64, $F7795F00874ACED7. 64, $5FBE66944DBECB7F. 64,
 
@@ -485,9 +489,9 @@ Create 'round-flags
 
 \ wurstkessel hash
 
-: hash-init
-    source-init wurst-source state# move
-    state-init  wurst-state  state# move ;
+: hash-init ( source state -- ) swap
+    wurst-source state# move
+    wurst-state  state# move ;
 
 : wurst-size ( -- )
     [ cell 4 = ] [IF]
@@ -503,8 +507,8 @@ Create 'round-flags
 : read-first ( flags -- n )  wurst-size  >reads >r
     message state# r> * 2 64s /string wurst-in read-file throw  2 64s + ;
 
-: wurst-hash ( final-rounds rounds -- )
-    hash-init dup read-first
+: wurst-hash ( source state final-rounds rounds -- )
+    2swap hash-init dup read-first
     BEGIN  0>  WHILE
 	    dup rounds
 	    dup encrypt-read
@@ -542,12 +546,12 @@ Create 'round-flags
 : message> ( flags -- ) >reads
     message swap state# * wurst-out write-file throw ;
 
-: encrypt-init ( -- )
-    wurst-key   wurst-state  state# move
-    wurst-salt  wurst-source state# move
-    wurst-salt  state# wurst-out write-file throw ;
+: encrypt-init ( key salt -- )  swap
+    wurst-state  state# move
+    wurst-source state# move
+    wurst-source state# wurst-out write-file throw ;
 
-: wurst-encrypt ( first-rounds rounds -- )
+: wurst-encrypt ( key salt first-rounds rounds -- )
     >r >r encrypt-init
     r> rounds  r@ read-first
     BEGIN  0>  WHILE
@@ -555,8 +559,8 @@ Create 'round-flags
 	    r@ encrypt-read  REPEAT
     rdrop wurst-close ;
 
-: decrypt-init ( -- )
-    wurst-key   wurst-state  state# move
+: decrypt-init ( key -- )
+    wurst-state  state# move
     wurst-source state# wurst-in read-file throw drop ;
 
 2Variable outsize
@@ -594,3 +598,23 @@ Create 'round-flags
 $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
+
+: rng-step ( -- )
+    rng-init  rounds# wurst-rng
+    wurst-source wurst-salt state# move
+    wurst-state  state-init state# move ;
+
+\ buffered random numbers to output 64 bit at a time
+
+Variable rng-buffer state# allot
+8 rng-buffer !
+
+: rng@ ( -- x )
+    rng-buffer @ 8 = IF
+	rng-buffer off
+	rng-step
+	wurst-salt rng-buffer cell+ state# move
+	state-init rng-buffer cell+ state# xors
+    THEN
+    rng-buffer dup @ 1+ cells + @
+    1 rng-buffer +! ;

@@ -1,11 +1,14 @@
 \ wurstkessel tests
 
 : test-hash
-    s" wurstkessel.fs" wurst-file roundse# roundsh# wurst-hash ;
+    s" wurstkessel.fs" wurst-file
+    source-init state-init  roundse# roundsh# wurst-hash ;
 : test-encrypt
-    s" wurstkessel.fs" wurst-file s" wurstkessel.wurst" wurst-outfile roundse# rounds# wurst-encrypt ;
+    s" wurstkessel.fs" wurst-file s" wurstkessel.wurst" wurst-outfile
+    wurst-key wurst-salt roundse# rounds# wurst-encrypt ;
 : test-decrypt
-    s" wurstkessel.wurst" wurst-file s" wurstkessel.fs2" wurst-outfile roundse# rounds# wurst-decrypt ;
+    s" wurstkessel.wurst" wurst-file s" wurstkessel.fs2" wurst-outfile
+    wurst-key roundse# rounds# wurst-decrypt ;
 : test-rng ( n -- ) s" wurst.random" wurst-outfile rng-init
     rounds# >reads state# * swap
     0 ?DO
@@ -22,36 +25,37 @@
 \ test for quality
 
 [IFDEF] 'rounds
-: wurst-break  s" wurstkessel.fs" wurst-file s" wurstkessel.wurst2" wurst-outfile roundse# roundsh# wurst-encrypt
-    s" wurstkessel.fs" wurst-file roundsh# read-first drop
-    s" wurstkessel.wurst2" wurst-file
-    wurst-source state# wurst-in read-file throw drop
-    s" wurstkessel.wurst2" wurst-file
-    wurst-source state# wurst-in read-file throw drop
-    wurst-state state# wurst-in read-file throw drop
-    wurst-state wurst-source state# xors
-    message wurst-source state# xors
-    wurst-source wurst-state state# xors
-    wurst-state wurst-source state# xors
-    wurst-state state# wurst-in read-file throw drop
-    wurst-source wurst-state state# xors
-    message state# + wurst-state state# xors
-    message wurst-source state# xors
-    state# 0 wurst-in reposition-file throw
-    s" wurstkessel.fs3" wurst-outfile roundsh# >r
-    r@ encrypt-read
-    r@  message swap  dup $F and 8 umin 0 ?DO
-	I 0> IF 'rounds I cells + @ execute THEN
-	dup 'round-flags Ith and IF
-	    swap -entropy swap
-	THEN
-    LOOP 2drop
-    r@ .xormsg-size
-    BEGIN  0>  WHILE
+    : wurst-break  s" wurstkessel.fs" wurst-file s" wurstkessel.wurst2" wurst-outfile
+	wurst-key wurst-salt roundse# roundsh# wurst-encrypt
+	s" wurstkessel.fs" wurst-file roundsh# read-first drop
+	s" wurstkessel.wurst2" wurst-file
+	wurst-source state# wurst-in read-file throw drop
+	s" wurstkessel.wurst2" wurst-file
+	wurst-source state# wurst-in read-file throw drop
+	wurst-state state# wurst-in read-file throw drop
+	wurst-state wurst-source state# xors
+	message wurst-source state# xors
+	wurst-source wurst-state state# xors
+	wurst-state wurst-source state# xors
+	wurst-state state# wurst-in read-file throw drop
+	wurst-source wurst-state state# xors
+	message state# + wurst-state state# xors
+	message wurst-source state# xors
+	state# 0 wurst-in reposition-file throw
+	s" wurstkessel.fs3" wurst-outfile roundsh# >r
 	r@ encrypt-read
-	r@ rounds-decrypt  r@ message>'
-    REPEAT
-    rdrop  wurst-close ;
+	r@  message swap  dup $F and 8 umin 0 ?DO
+	    I 0> IF 'rounds I cells + @ execute THEN
+	    dup 'round-flags Ith and IF
+		swap -entropy swap
+	    THEN
+	LOOP 2drop
+	r@ .xormsg-size
+	BEGIN  0>  WHILE
+		r@ encrypt-read
+		r@ rounds-decrypt  r@ message>'
+	REPEAT
+	rdrop  wurst-close ;
 [THEN]
 
 Create rng-histogram $100 0 [DO] 0 , [LOOP]
