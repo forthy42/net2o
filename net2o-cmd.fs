@@ -182,7 +182,7 @@ previous definitions
 also net2o-base
 
 : net2o:acktime ( -- )
-    job-context @ first-ack-addr @ lit,
+    job-context @ ack-addr @ lit,
     job-context @ ack-time @ lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     job-context @ data-ack $@ dup IF
@@ -204,13 +204,13 @@ also net2o-base
 
 : net2o:do-ack ( -- )  job-context @ >r
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    r@ first-ack-addr @ 0= IF
-	dest-addr @ r@ first-ack-addr !
+    r@ ack-addr @ 0= IF
+	dest-addr @ r@ ack-addr !
     THEN
     utime drop r@ ack-time !
     inbuf 1+ c@ send-ack# and IF
 	net2o:sendack
-	r@ first-ack-addr off
+	r@ ack-addr off
 	r@ pending-ack @ 0= IF
 	    ['] net2o:resend 10000 add-queue
 	THEN

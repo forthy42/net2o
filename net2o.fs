@@ -267,9 +267,9 @@ field: data-resend
 field: code-map
 field: data-ack
 field: code-ack
-field: first-ack-addr
+field: ack-addr
 field: ack-time
-field: first-sack-addr
+field: sack-addr
 field: sack-time
 field: sack-backlog
 field: min-ack
@@ -483,12 +483,12 @@ Variable outflag  outflag off
 
 : set-flags ( -- )  job-context @ >r
     utime drop r@ sack-time !
-    r@ first-sack-addr @ 0= IF
-	dest-addr @ r@ first-sack-addr !
+    r@ sack-addr @ 0= IF
+	dest-addr @ r@ sack-addr !
     THEN
     outflag @ send-ack# and
-    IF  r@ first-sack-addr 2 cells r@ sack-backlog $+!
-	r@ first-sack-addr off  THEN
+    IF  r@ sack-addr 2 cells r@ sack-backlog $+!
+	r@ sack-addr off  THEN
     rdrop
     outflag @ outbuf 1+ c! outflag off
     destsize# addrsize# or outbuf c! ;
