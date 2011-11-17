@@ -4,6 +4,7 @@ require unix/socket.fs
 require string.fs
 require struct0x.fs
 require nacl.fs
+require wurstkessel.fs
 
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
