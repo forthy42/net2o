@@ -471,6 +471,33 @@ $1F Constant tick-init
 : init-server ( -- )
     new-server init-route init-delivery-table ;
 
+\ encryption and decryption
+
+: wurst-outbuf-init ( -- )
+    rng@ wurst-source state# bounds ?DO  dup I !  cell +LOOP
+    outbuf nonce !
+    job-context crypt-keys $@ wurst-state swap move ;
+
+: mem-rounds# ( size -- n )
+    case
+	$20 of  $22  endof
+	$40 of  $24  endof
+	drop $28
+    endcase ;
+
+: mem-message> ( addr u rounds -- addr u )  >reads state# *
+    >r over message r> move ;
+
+: wurst-outbuf-encrypt ( -- )
+    wurst-outbuf-init
+    outbuf body-size mem-rounds# >r  roundse# rounds
+    outbuf packet-body outbuf body-size 
+    r@ mem-message>
+    BEGIN  0>  WHILE
+	    r@ rounds  r@ mem-message>
+	    r@ encrypt-read  REPEAT
+    rdrop wurst-close ;
+
 \ send blocks of memory
 
 : set-dest ( addr target -- )
