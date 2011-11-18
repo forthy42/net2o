@@ -128,20 +128,15 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ packet&header size
 
-$80 Constant destsize#
-$40 Constant addrsize#
-$20 Constant noncesize#
+$C0 Constant headersize#
+$00 Constant 16bit#
+$40 Constant 64bit#
 $0F Constant datasize#
 
-: (header-size ( x -- u ) >r 2
-    r@ destsize#  and IF  8  ELSE  2  THEN +
-    r@ addrsize#  and IF  8  ELSE  2  THEN +
-    r@ noncesize# and IF  8  ELSE  0  THEN +
-    rdrop ;
+Create header-sizes  $06 c, $1A c, $FF c, $FF c,
+\ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
-Create header-sizes  $100 0 [DO] [I] (header-size c, $20 [+LOOP]
-
-: header-size ( addr -- n )  c@ 5 rshift header-sizes + c@ ;
+: header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
 : body-size ( addr -- n ) $20 swap c@ datasize# and lshift ;
 : packet-size ( addr -- n )
     dup header-size swap body-size + ;
@@ -172,9 +167,9 @@ $02 Constant send-ack#
 : .header ( addr -- )
     dup c@ >r 2 +
     r@ datasize# and 'A' + emit
-    r@ destsize# and chunk@
-    r> addrsize# and chunk@
-    drop swap
+    r@ headersize# and chunk@
+    r@ headersize# and chunk@
+    rdrop swap
     ."  to " hex. ."  @ " hex. cr ;
 
 \ packet delivery table
@@ -302,6 +297,7 @@ $1F Constant tick-init
     s" " r@ data-resend $!
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
+    wurst-key state# r@ crypto-keys $!
     $7FFFFFFFFFFFFFFF r@ min-ack !
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
@@ -492,7 +488,7 @@ Variable outflag  outflag off
 	r@ sack-addr off  THEN
     rdrop
     outflag @ outbuf 1+ c! outflag off
-    destsize# addrsize# or outbuf c! ;
+    64bit# outbuf c! ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
