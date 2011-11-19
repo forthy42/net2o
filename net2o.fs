@@ -33,8 +33,9 @@ require wurstkessel.fs
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$5 Constant max-size^2 \ 1k, to avoid fragmentation
-$20 max-size^2 lshift $1A + Constant maxpacket
+$4 Constant max-size^2 \ 1k, to avoid fragmentation
+$40 Constant min-size
+min-size max-size^2 lshift $22 + Constant maxpacket
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
@@ -134,12 +135,14 @@ $40 Constant 64bit#
 $0F Constant datasize#
 
 Create header-sizes  $06 c, $1A c, $FF c, $FF c,
+Create tail-sizes    $00 c, $08 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
 : header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
-: body-size ( addr -- n ) $20 swap c@ datasize# and lshift ;
+: tail-size ( addr -- n )  c@ 6 rshift tail-sizes + c@ ;
+: body-size ( addr -- n ) min-size swap c@ datasize# and lshift ;
 : packet-size ( addr -- n )
-    dup header-size swap body-size + ;
+    dup header-size over body-size + swap tail-size + ;
 : packet-body ( addr -- addr )
     dup header-size + ;
 : packet-data ( addr -- addr u )
@@ -492,30 +495,33 @@ $1F Constant tick-init
 
 : mem-rounds# ( size -- n )
     case
-	$20 of  $22  endof
-	$40 of  $24  endof
+	min-size of  $22  endof
+	min-size 2* of  $24  endof
 	$28 swap
     endcase ;
+
+: wurst-crc ( -- x )
+    0 wurst-state state# bounds ?DO  I @ xor cell +LOOP ;
 
 : wurst-outbuf-encrypt ( -- )
     wurst-outbuf-init
     outbuf body-size mem-rounds# >r
-    outbuf packet-body outbuf body-size
+    outbuf packet-data
     over roundse# rounds
     BEGIN  dup 0>  WHILE
 	    over r@ rounds  r@ >reads state# * /string
     REPEAT
-    rdrop 2drop ;
+    rdrop drop wurst-crc swap le-x! ;
 
-: wurst-inbuf-decrypt ( -- )
+: wurst-inbuf-decrypt ( -- flag )
     wurst-inbuf-init
     inbuf body-size mem-rounds# >r
-    inbuf packet-body inbuf body-size
+    inbuf packet-data
     over roundse# rounds
     BEGIN  dup 0>  WHILE
 	    over r@ rounds-decrypt  r@ >reads state# * /string
     REPEAT
-    rdrop 2drop ;
+    rdrop drop le-ux@ wurst-crc = ;
 
 \ send blocks of memory
 
@@ -547,7 +553,7 @@ Variable outflag  outflag off
     outbuf dup packet-size
     send-a-packet drop ;
 
-: >send ( addr n -- )  >r outbody $20 r@ lshift move r> outbuf c+! ;
+: >send ( addr n -- )  >r outbody min-size r@ lshift move r> outbuf c+! ;
 : sendX ( addr taddr target n -- )
     >r set-dest  set-flags r> >send send-packet ;
 
@@ -560,13 +566,13 @@ Variable outflag  outflag off
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  0 max-size^2 DO
-	dup $20 I lshift $1F - u>= IF
-	    $20 I lshift u<= IF  send-ack# outflag or!  THEN
+	dup min-size I lshift min-size 1- - u>= IF
+	    min-size I lshift u<= IF  send-ack# outflag or!  THEN
 	    I UNLOOP  2r> rot dup >r
-	    $20 r> lshift   EXIT  THEN
+	    min-size r> lshift   EXIT  THEN
     -1 +LOOP
-    $20 u<= IF  send-ack# outflag or!  THEN
-    2r> 0 $020 ;
+    min-size u<= IF  send-ack# outflag or!  THEN
+    2r> 0 min-size ;
 
 : net2o:send-packet ( addr u dest addr -- len )
     net2o:prep-send >r sendX r> ;
@@ -574,10 +580,10 @@ Variable outflag  outflag off
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
     send-ack# outflag or!
     0 max-size^2 DO
-	dup $10 I lshift $-20 and u> IF
-	    drop I UNLOOP  2r> rot dup >r sendX  $20 r> lshift  EXIT  THEN
+	dup min-size 2/ I lshift min-size negate and u> IF
+	    drop I UNLOOP  2r> rot dup >r sendX  min-size r> lshift  EXIT  THEN
     -1 +LOOP
-    drop 2r>  0 sendX  $020 ;
+    drop 2r>  0 sendX  min-size ;
 
 \ synchronous sending
 
@@ -747,11 +753,11 @@ Defer do-ack ( -- )
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF
-	wurst-inbuf-decrypt
+	wurst-inbuf-decrypt 0= IF  EXIT  THEN
 	inbuf packet-data queue-command
     ELSE
 	check-dest
-	wurst-inbuf-decrypt
+	wurst-inbuf-decrypt 0= IF  2drop  EXIT  THEN
 	dup 0< IF
 	    drop  >r inbuf packet-data r@ swap move
 	    do-ack

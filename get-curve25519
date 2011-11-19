@@ -1,0 +1,8 @@
+#!/bin/bash
+
+REV=20050915
+
+wget http://cr.yp.to/ecdh/curve25519-$REV.tar.gz
+gunzip < curve25519-$REV.tar.gz | tar -xf -
+cd curve25519-$REV
+env CC='gcc -O2 -fPIC' make

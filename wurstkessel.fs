@@ -341,55 +341,55 @@ s" gforth" environment? [IF] 2drop
     \c a[7] ^= b[7]; b[7] ^= a[7];
     \c }
     \c void rounds_ind(unsigned int n, unsigned char * states, unsigned char * message, uint64_t * rnds) {
-    \c if((n&15)>=1) round0_ind(states, rnds);
+    \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=2) round1_ind(states, rnds);
+    \c } if((n&15)>=2) { round1_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x20) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=3) round2_ind(states, rnds);
+    \c } if((n&15)>=3) { round2_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*2),(uint64_t *)(states));
-    \c if((n&15)>=4) round3_ind(states, rnds);
+    \c } if((n&15)>=4) { round3_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*3),(uint64_t *)(states));
     \c if(n&0x20) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x40) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=5) round4_ind(states, rnds);
+    \c } if((n&15)>=5) { round4_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*4),(uint64_t *)(states));
-    \c if((n&15)>=6) round5_ind(states, rnds);
+    \c } if((n&15)>=6) { round5_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*5),(uint64_t *)(states));
     \c if(n&0x20) add_entropy((uint64_t *)(message+64*2),(uint64_t *)(states));
-    \c if((n&15)>=7) round6_ind(states, rnds);
+    \c } if((n&15)>=7) { round6_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*6),(uint64_t *)(states));
-    \c if((n&15)>=8) round7_ind(states, rnds);
+    \c } if((n&15)>=8) { round7_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*7),(uint64_t *)(states));
     \c if(n&0x20) add_entropy((uint64_t *)(message+64*3),(uint64_t *)(states));
     \c if(n&0x40) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c }
+    \c } }
     \c void rounds_decrypt(unsigned int n, unsigned char * states, unsigned char * message, uint64_t * rnds) {
-    \c if((n&15)>=1) round0_ind(states, rnds);
+    \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=2) round1_ind(states, rnds);
+    \c } if((n&15)>=2) { round1_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x20) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=3) round2_ind(states, rnds);
+    \c } if((n&15)>=3) { round2_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*2),(uint64_t *)(states));
-    \c if((n&15)>=4) round3_ind(states, rnds);
+    \c } if((n&15)>=4) { round3_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*3),(uint64_t *)(states));
     \c if(n&0x20) set_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x40) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c if((n&15)>=5) round4_ind(states, rnds);
+    \c } if((n&15)>=5) { round4_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*4),(uint64_t *)(states));
-    \c if((n&15)>=6) round5_ind(states, rnds);
+    \c } if((n&15)>=6) { round5_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*5),(uint64_t *)(states));
     \c if(n&0x20) set_entropy((uint64_t *)(message+64*2),(uint64_t *)(states));
-    \c if((n&15)>=7) round6_ind(states, rnds);
+    \c } if((n&15)>=7) { round6_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*6),(uint64_t *)(states));
-    \c if((n&15)>=8) round7_ind(states, rnds);
+    \c } if((n&15)>=8) { round7_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*7),(uint64_t *)(states));
     \c if(n&0x20) set_entropy((uint64_t *)(message+64*3),(uint64_t *)(states));
     \c if(n&0x40) set_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
-    \c }
+    \c } }
     c-function rounds_ind rounds_ind n a a a -- void
     c-function rounds_decrypt rounds_decrypt n a a a -- void
     end-c-library
@@ -563,13 +563,13 @@ Create 'round-flags
     wurst-state  state# move
     wurst-source state# wurst-in read-file throw drop ;
 
-2Variable outsize
+2Variable wurst-outsize
 
 : out- ( n -- n' )
-    0 outsize 2@ dmin outsize 2@ 2over d- outsize 2! drop ;
+    0 wurst-outsize 2@ dmin wurst-outsize 2@ 2over d- wurst-outsize 2! drop ;
 
 : .xormsg-size ( flags -- )  >reads
-    message 64@ [ cell 8 = ] [IF] 0 [THEN] outsize 2!
+    message 64@ [ cell 8 = ] [IF] 0 [THEN] wurst-outsize 2!
     message swap state# * 2 64s /string out-
     wurst-out write-file throw ;
 
