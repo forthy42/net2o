@@ -255,7 +255,7 @@ begin-structure context-struct
 field: return-address
 field: cmd-out
 field: file-handles
-field: crypto-keys
+field: crypto-key
 field: auth-info
 field: status
 field: data-map
@@ -297,7 +297,7 @@ $1F Constant tick-init
     s" " r@ data-resend $!
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
-    wurst-key state# r@ crypto-keys $!
+    wurst-key state# r@ crypto-key $!
     $7FFFFFFFFFFFFFFF r@ min-ack !
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
@@ -473,30 +473,49 @@ $1F Constant tick-init
 
 \ encryption and decryption
 
+: >wurst-source ( u -- )
+    wurst-source state# bounds ?DO  dup I !  cell +LOOP  drop ;
+
+: >wurst-key ( -- )
+    job-context @ dup 0= IF
+	drop wurst-key state#
+    ELSE
+	crypto-key $@
+    THEN
+    wurst-state swap move ;
+
 : wurst-outbuf-init ( -- )
-    rng@ wurst-source state# bounds ?DO  dup I !  cell +LOOP
-    outbuf nonce !
-    job-context crypt-keys $@ wurst-state swap move ;
+    rng@ dup >wurst-source outbuf nonce ! >wurst-key ;
+
+: wurst-inbuf-init ( -- )
+    inbuf nonce @ >wurst-source >wurst-key ;
 
 : mem-rounds# ( size -- n )
     case
 	$20 of  $22  endof
 	$40 of  $24  endof
-	drop $28
+	$28 swap
     endcase ;
-
-: mem-message> ( addr u rounds -- addr u )  >reads state# *
-    >r over message r> move ;
 
 : wurst-outbuf-encrypt ( -- )
     wurst-outbuf-init
-    outbuf body-size mem-rounds# >r  roundse# rounds
-    outbuf packet-body outbuf body-size 
-    r@ mem-message>
-    BEGIN  0>  WHILE
-	    r@ rounds  r@ mem-message>
-	    r@ encrypt-read  REPEAT
-    rdrop wurst-close ;
+    outbuf body-size mem-rounds# >r
+    outbuf packet-body outbuf body-size
+    over roundse# rounds
+    BEGIN  dup 0>  WHILE
+	    over r@ rounds  r@ >reads state# * /string
+    REPEAT
+    rdrop 2drop ;
+
+: wurst-inbuf-decrypt ( -- )
+    wurst-inbuf-init
+    inbuf body-size mem-rounds# >r
+    inbuf packet-body inbuf body-size
+    over roundse# rounds
+    BEGIN  dup 0>  WHILE
+	    over r@ rounds-decrypt  r@ >reads state# * /string
+    REPEAT
+    rdrop 2drop ;
 
 \ send blocks of memory
 
@@ -523,6 +542,7 @@ Variable outflag  outflag off
 : outsize ( -- n )    outbuf packet-size ;
 : send-packet ( -- )
 \    ." send " outbuf .header
+    wurst-outbuf-encrypt
     out-route drop
     outbuf dup packet-size
     send-a-packet drop ;
@@ -726,12 +746,20 @@ Defer do-ack ( -- )
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
 \    inbuf .header
-    dest-addr @ 0= IF  inbuf packet-data queue-command
-    ELSE  check-dest dup 0< IF drop  >r inbuf packet-data r@ swap move
+    dest-addr @ 0= IF
+	wurst-inbuf-decrypt
+	inbuf packet-data queue-command
+    ELSE
+	check-dest
+	wurst-inbuf-decrypt
+	dup 0< IF
+	    drop  >r inbuf packet-data r@ swap move
 	    do-ack
 \	    job-context @ IF  inbuf packet-data swap . . cr  THEN
 	    rdrop
-	ELSE  0>  IF  >r inbuf packet-data r@ swap dup >r move
+	ELSE
+	    0>  IF
+		>r inbuf packet-data r@ swap dup >r move
 		r> r> swap queue-command
 	    THEN
 	THEN
