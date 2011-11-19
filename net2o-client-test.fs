@@ -2,6 +2,8 @@
 
 require net2o.fs
 
+pkc skc crypto_box_keypair \ create a random key pair
+
 init-client
 
 1 arg net2o-udp insert-ipv4 constant lserver
@@ -13,7 +15,7 @@ lcontext job-context !
 net2o-code S" This is a test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
-net2o-code new-context
+net2o-code new-context pks send-key
 $80000 lit, $80000 lit, new-map
 $10000 lit, $1000 lit, new-code-map
 $80000 lit, $80000 lit, new-data

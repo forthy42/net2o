@@ -162,10 +162,12 @@ also net2o-base definitions forth
 22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
 23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 24 net2o: resend ( addr u -- )  net2o:resend ;
+25 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
 
 \ create commands to send back
 
 also net2o-base
+: send-key ( pk -- )  net2o:send-key $, receive-key ;
 
 30 net2o: push-$    $, ;
 31 net2o: push-lit  lit, ;

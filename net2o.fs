@@ -474,7 +474,7 @@ $1F Constant tick-init
 : init-server ( -- )
     new-server init-route init-delivery-table ;
 
-\ encryption and decryption
+\ symmetric encryption and decryption
 
 : >wurst-source ( u -- )
     wurst-source state# bounds ?DO  dup I !  cell +LOOP  drop ;
@@ -523,6 +523,45 @@ $1F Constant tick-init
     REPEAT
     rdrop drop le-ux@ wurst-crc = ;
 
+\ public key encryption
+
+\ these are dummy keys for testing!!!
+
+$20 Constant keysize \ our shared secred is only 32 bytes long
+\ server keys
+Create pks $21982058BCCB3476. 64, $36623B3840D9F393. 64, $B4B038E18F007E95. 64, $79CAED9D9F043F9B. 64,
+Create sks $EFDA8C1AE4F04358. 64, $4320CCB35C5F6C27. 64, $CE16D65418EA8575. 64, $127701E350CC537F. 64,
+\ client keys
+Create pkc keysize allot
+Create skc keysize allot
+\ shared secred
+Create keypad keysize allot
+Variable do-keypad
+
+\ the theory here is that sks*pkc = skc*pks
+\ we send our public key and know the server's public key.
+
+: set-key ( addr -- )
+    keysize 2* job-context @ crypto-key $!
+    \ double key to get 512 bits
+    job-context @ crypto-key $@ 2/ 2dup + swap move
+    ( ." set key to:" job-context @ crypto-key $@ dump ) ;
+
+: net2o:receive-key ( addr u -- )
+    keysize <> abort" key+pubkey: expected 32 bytes"
+    pkc keysize move
+    keypad sks pkc crypto_scalarmult_curve25519 ;
+
+: net2o:send-key ( pk -- addr u )
+    keypad skc rot crypto_scalarmult_curve25519
+    pkc keysize  do-keypad on ;
+
+: update-key ( -- )
+    do-keypad @ IF
+	keypad set-key
+	do-keypad off
+    THEN ;
+
 \ send blocks of memory
 
 : set-dest ( addr target -- )
@@ -555,7 +594,8 @@ Variable outflag  outflag off
 
 : >send ( addr n -- )  >r outbody min-size r@ lshift move r> outbuf c+! ;
 : sendX ( addr taddr target n -- )
-    >r set-dest  set-flags r> >send send-packet ;
+    >r set-dest  set-flags r> >send send-packet
+    update-key ;
 
 \ send chunk
 
