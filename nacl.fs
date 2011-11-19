@@ -5,6 +5,7 @@ c-library nacl
     \c #include <amd64/crypto_box.h>
     c-function crypto_box_keypair crypto_box_keypair a a -- void ( pk sk -- )
     c-function crypto_box crypto_box a a n a a a -- void ( c m mlen n pk sk -- )
+    c-function crypto_box_beforenm crypto_box_beforenm a a a -- void ( k pk sk -- )
     c-function crypto_box_open crypto_box_open a a n a a a -- void ( m c clen n pk sk -- )
     \c #include <amd64/crypto_secretbox.h>
     c-function crypto_secretbox crypto_secretbox a a n a a -- void ( c m mlen n k -- )

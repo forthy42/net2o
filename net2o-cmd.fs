@@ -77,7 +77,7 @@ executer
 
 Vocabulary net2o-base
 
-also net2o-base definitions previous
+forth also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
@@ -192,7 +192,7 @@ also net2o-base
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
-: net2o:resend ( -- )
+: net2o:do-resend ( -- )
     job-context @ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
@@ -212,7 +212,7 @@ also net2o-base
 	net2o:sendack
 	r@ ack-addr off
 	r@ pending-ack @ 0= IF
-	    ['] net2o:resend 10000 add-queue
+	    ['] net2o:do-resend 10000 add-queue
 	THEN
 	r@ pending-ack on
     THEN  rdrop ;
