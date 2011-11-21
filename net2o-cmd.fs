@@ -209,14 +209,21 @@ also net2o-base
     r@ ack-addr @ 0= IF
 	dest-addr @ r@ ack-addr !
     THEN
-    utime drop r@ ack-time !
-    inbuf 1+ c@ send-ack# and IF
+    ntime drop r@ ack-time !
+    inbuf 1+ c@ acks# and
+    r@ ack-receive dup @ >r over swap !
+    r@ <> IF
+	r>
 	net2o:sendack
 	r@ ack-addr off
-	r@ pending-ack @ 0= IF
-	    ['] net2o:do-resend 10000 add-queue
+	send-ack# and IF
+	    r@ pending-ack @ 0= IF
+		['] net2o:do-resend #10000000 add-queue
+	    THEN
+	    r@ pending-ack on
 	THEN
-	r@ pending-ack on
+    ELSE
+	rdrop
     THEN  rdrop ;
 ' net2o:do-ack IS do-ack
 

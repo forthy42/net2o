@@ -158,9 +158,11 @@ $10 Constant qos1#
 $20 Constant qos2#
 $30 Constant qos3#
 
-$08 Constant endnode-fc#
-$01 Constant first-ack#
+$03 Constant acks#
+$00 Constant first-ack#
+$01 Constant second-ack#
 $02 Constant send-ack#
+$100 Constant ack-change#
 
 \ short packet information
 
@@ -253,6 +255,7 @@ end-structure
     dup allocate throw map-dest ;
 
 \ job context structure
+\ !!!FIXME!!! needs to be split in sender/receiver
 
 begin-structure context-struct
 field: return-address
@@ -264,6 +267,8 @@ field: status
 field: data-map
 field: data-resend
 field: code-map
+field: ack-state
+field: ack-receive
 field: data-ack
 field: code-ack
 field: ack-addr
@@ -301,11 +306,13 @@ $1F Constant tick-init
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
     wurst-key state# r@ crypto-key $!
+    -1 r@ ack-state !
+    -1 r@ ack-receive !
     $7FFFFFFFFFFFFFFF r@ min-ack !
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
     bandwidth-init r@ bandwidth-target !
-    utime drop r@ bandwidth-tick !
+    ntime drop r@ bandwidth-tick !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -401,7 +408,7 @@ $1F Constant tick-init
     dup @ 0= IF  !  EXIT  THEN
     >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
 
-: net2o:ack-addrtime ( addr utime -- ) swap
+: net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
 	    drop  I cell+ @ -
@@ -570,11 +577,11 @@ Variable do-keypad
 Variable outflag  outflag off
 
 : set-flags ( -- )  job-context @ >r
-    utime drop r@ sack-time !
+    ntime drop r@ sack-time !
     r@ sack-addr @ 0= IF
 	dest-addr @ r@ sack-addr !
     THEN
-    outflag @ send-ack# and
+    outflag @ ack-change# and
     IF  r@ sack-addr 2 cells r@ sack-backlog $+!
 	r@ sack-addr off  THEN
     rdrop
@@ -645,8 +652,8 @@ Variable outflag  outflag off
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
 : bandwidth? ( -- flag ) job-context @ >r
-    r@ bandwidth-acc @ #1000000
-    utime drop  r@ bandwidth-tick @ - 1 umax */
+    r@ bandwidth-acc @ #1000000000
+    ntime drop  r@ bandwidth-tick @ - 1 umax */
     r> bandwidth-target @ u<= ;
 
 \ asynchronous sending
@@ -665,11 +672,19 @@ Create chunk-adder chunks-struct allot
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+! ;
 
+: ack-get ( -- ack )
+    job-context @ ack-state @ ;
+
+: ack-change ( -- state )
+    job-context @ ack-state >r
+    r@ @ first-ack# <> IF  first-ack#  ELSE  second-ack#  THEN
+    dup r> ! ack-change# or ;
+
 : chunk-count+ ( counter -- )
     dup @
-    dup 0= IF  first-ack# outflag or!  THEN
+    dup 0= IF  ack-change outflag or!  THEN
     job-context @ send-tick @ = IF
-	send-ack# outflag or!  off
+	ack-change outflag or! 1 swap !
     ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
@@ -712,13 +727,13 @@ Variable queue s" " queue $!
 Create queue-adder  queue-struct allot
 
 : add-queue ( xt us -- )
-    utime drop +  queue-adder queue-timestamp !
+    ntime drop +  queue-adder queue-timestamp !
     job-context @ queue-adder queue-job !
     queue-adder queue-xt !
     queue-adder queue-struct queue $+! ;
 
 : eval-queue ( -- )
-    queue $@len 0= ?EXIT  utime drop
+    queue $@len 0= ?EXIT  ntime drop
     queue $@ bounds ?DO
 	dup I queue-timestamp @ u> IF
 	    I queue-job @ job-context !
@@ -829,11 +844,11 @@ Defer do-ack ( -- )
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
 
-$100000 Constant min-timeout
+#1000000000 Constant min-timeout
 
-: client-loop ( -- ) utime drop min-timeout + >r
+: client-loop ( -- ) ntime drop min-timeout + >r
     BEGIN  poll-sock queue $@len 0<> or
-	utime drop r@ u< or
+	ntime drop r@ u< or
     WHILE  client-event  REPEAT  rdrop ;
 
 \ load net2o commands
