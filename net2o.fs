@@ -808,11 +808,12 @@ Defer do-ack ( -- )
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF
-	wurst-inbuf-decrypt 0= IF  EXIT  THEN
+	job-context off \ address 0 has no job context!
+	wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
 	inbuf packet-data queue-command
     ELSE
 	check-dest
-	wurst-inbuf-decrypt 0= IF  2drop  EXIT  THEN
+	wurst-inbuf-decrypt 0= IF  ." invalid packet to " drop hex. cr  EXIT  THEN
 	dup 0< IF
 	    drop  >r inbuf packet-data r@ swap move
 	    do-ack
