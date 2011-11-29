@@ -207,7 +207,7 @@ also net2o-base
     dest-addr @ inbuf body-size job-context @ data-ack del-range
     net2o:acktime 
 
-    inbuf 1+ c@ acks# and dup IF '+ ELSE '- THEN emit
+    inbuf 1+ c@ acks# and
     r@ ack-receive dup @ >r over swap !
     r@ <> IF
 	r>

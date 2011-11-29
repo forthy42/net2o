@@ -16,6 +16,8 @@ require wurstkessel.fs
 
 : or! ( value addr -- )
     >r r@ @ or r> ! ;
+: and! ( value addr -- )
+    >r r@ @ and r> ! ;
 
 \ Create udp socket
 
@@ -583,9 +585,8 @@ Variable outflag  outflag off
     r@ sack-addr @ 0= IF
 	dest-addr @ r@ sack-addr !
     THEN
-    \ outflag @ ack-change# and  IF
     r@ sack-addr 2 cells r@ sack-backlog $+!
-    r@ sack-addr off \ THEN
+    r@ sack-addr off
     rdrop
     outflag @ outbuf 1+ c! outflag off
     64bit# outbuf c! ;
@@ -670,6 +671,11 @@ Variable chunks+
 Create chunk-adder chunks-struct allot
 
 : net2o:send-chunks ( -- )
+    chunks $@ bounds ?DO
+	I chunk-context @ job-context @ = IF
+	    UNLOOP  EXIT
+	THEN
+    chunks-struct %size +LOOP
     job-context @ chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+! ;
@@ -684,10 +690,10 @@ Create chunk-adder chunks-struct allot
 
 : chunk-count+ ( counter -- )
     dup @
-    dup 0= IF  ack-change outflag or!  THEN
-    job-context @ send-tick @ = IF
-	ack-change outflag or! 1 swap !
-    ELSE  1 swap +!  THEN ;
+    dup 0= IF  acks# invert outflag and!  ack-change
+    ELSE  job-context @ ack-state @  THEN
+    outflag or!
+    job-context @ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
