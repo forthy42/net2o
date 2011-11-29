@@ -184,13 +184,12 @@ previous definitions
 also net2o-base
 
 : net2o:acktime ( -- )
-    job-context @ ack-addr @ lit,
-    job-context @ ack-time @ lit, ack-addrtime ;
+    dest-addr @ lit, ticks lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
-: net2o:sendack ( -- )  net2o:acktime net2o:ackrange
+: net2o:sendack ( -- )  net2o:ackrange
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
@@ -206,16 +205,13 @@ also net2o-base
 
 : net2o:do-ack ( -- )  job-context @ >r
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    r@ ack-addr @ 0= IF
-	dest-addr @ r@ ack-addr !
-    THEN
-    ntime drop r@ ack-time !
+    net2o:acktime 
+
     inbuf 1+ c@ acks# and
     r@ ack-receive dup @ >r over swap !
     r@ <> IF
 	r>
 	net2o:sendack
-	r@ ack-addr off
 	send-ack# and IF
 	    r@ pending-ack @ 0= IF
 		['] net2o:do-resend #10000000 add-queue

@@ -295,8 +295,10 @@ field: cmd-buf#
 $800 +field cmd-buf
 end-structure
 
-$1F Constant tick-init
+$F Constant tick-init \ ticks without ack
 #1000000 Constant bandwidth-init \ 1MB/s
+
+: ticks ( -- u )  ntime drop ;
 
 : n2o:new-context ( -- addr )  context-struct allocate throw >r
     r@ context-struct erase  return-addr @ r@ return-address !
@@ -312,7 +314,7 @@ $1F Constant tick-init
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
     bandwidth-init r@ bandwidth-target !
-    ntime drop r@ bandwidth-tick !
+    ticks r@ bandwidth-tick !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -577,13 +579,13 @@ Variable do-keypad
 Variable outflag  outflag off
 
 : set-flags ( -- )  job-context @ >r
-    ntime drop r@ sack-time !
+    ticks r@ sack-time !
     r@ sack-addr @ 0= IF
 	dest-addr @ r@ sack-addr !
     THEN
-    outflag @ ack-change# and
-    IF  r@ sack-addr 2 cells r@ sack-backlog $+!
-	r@ sack-addr off  THEN
+    \ outflag @ ack-change# and  IF
+    r@ sack-addr 2 cells r@ sack-backlog $+!
+    r@ sack-addr off \ THEN
     rdrop
     outflag @ outbuf 1+ c! outflag off
     64bit# outbuf c! ;
@@ -653,7 +655,7 @@ Variable outflag  outflag off
 
 : bandwidth? ( -- flag ) job-context @ >r
     r@ bandwidth-acc @ #1000000000
-    ntime drop  r@ bandwidth-tick @ - 1 umax */
+    ticks  r@ bandwidth-tick @ - 1 umax */
     r> bandwidth-target @ u<= ;
 
 \ asynchronous sending
@@ -727,13 +729,13 @@ Variable queue s" " queue $!
 Create queue-adder  queue-struct allot
 
 : add-queue ( xt us -- )
-    ntime drop +  queue-adder queue-timestamp !
+    ticks +  queue-adder queue-timestamp !
     job-context @ queue-adder queue-job !
     queue-adder queue-xt !
     queue-adder queue-struct queue $+! ;
 
 : eval-queue ( -- )
-    queue $@len 0= ?EXIT  ntime drop
+    queue $@len 0= ?EXIT  ticks
     queue $@ bounds ?DO
 	dup I queue-timestamp @ u> IF
 	    I queue-job @ job-context !
@@ -847,9 +849,9 @@ Defer do-ack ( -- )
 
 #1000000000 Constant min-timeout
 
-: client-loop ( -- ) ntime drop min-timeout + >r
+: client-loop ( -- ) ticks min-timeout + >r
     BEGIN  poll-sock queue $@len 0<> or
-	ntime drop r@ u< or
+	ticks r@ u< or
     WHILE  client-event  REPEAT  rdrop ;
 
 \ load net2o commands
