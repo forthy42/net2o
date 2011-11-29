@@ -415,16 +415,17 @@ $F Constant tick-init \ ticks without ack
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
+	    I cell+ @ . over . ." acktime" cr
 	    drop  I cell+ @ -
 	    dup job-context @ min-ack >r r@ @ min r> !
 	    dup job-context @ max-ack >r r@ @ max r> !
 	    job-context @ delta-ack !
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
-	    ." Acknowledge time: "
-	    job-context @ min-ack @ .
-	    job-context @ max-ack @ .
-	    job-context @ delta-ack @ .
-	    cr
+\	    ." Acknowledge delta: "
+\	    job-context @ min-ack @ .
+\	    job-context @ max-ack @ .
+\	    job-context @ delta-ack @ .
+\	    cr
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
