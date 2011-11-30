@@ -283,9 +283,8 @@ field: max-ack
 field: delta-ack
 field: pending-ack
 field: send-tick
-field: bandwidth-target
-field: bandwidth-acc
-field: bandwidth-tick
+field: ps/byte
+field: bandwidth-tick \ ns
 end-structure
 
 begin-structure cmd-struct
@@ -298,7 +297,7 @@ $800 +field cmd-buf
 end-structure
 
 $F Constant tick-init \ ticks without ack
-#1000000 Constant bandwidth-init \ 1MB/s
+#1000000 Constant bandwidth-init \ 1µs/byte
 
 : ticks ( -- u )  ntime drop ;
 
@@ -315,8 +314,7 @@ $F Constant tick-init \ ticks without ack
     $7FFFFFFFFFFFFFFF r@ min-ack !
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
-    bandwidth-init r@ bandwidth-target !
-    ticks r@ bandwidth-tick !
+    bandwidth-init r@ ps/byte !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -640,8 +638,8 @@ Variable outflag  outflag off
 
 : data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
 
-: bandwidth+ ( -- )
-    outsize job-context @ bandwidth-acc +! ;
+: bandwidth+ ( -- )  job-context @ >r
+    outsize r@ ps/byte @ #1000000 */ r> bandwidth-tick +! ;
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
@@ -656,9 +654,7 @@ Variable outflag  outflag off
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
 : bandwidth? ( -- flag ) job-context @ >r
-    r@ bandwidth-acc @ #1000000000
-    ticks  r@ bandwidth-tick @ - 1 umax */
-    r> bandwidth-target @ u<= ;
+    ticks r> bandwidth-tick @ - 0>= ;
 
 \ asynchronous sending
 
@@ -679,7 +675,8 @@ Create chunk-adder chunks-struct allot
     chunks-struct %size +LOOP
     job-context @ chunk-adder chunk-context !
     0 chunk-adder chunk-count !
-    chunk-adder chunks-struct chunks $+! ;
+    chunk-adder chunks-struct chunks $+!
+    ticks job-context @ bandwidth-tick ! ;
 
 : ack-get ( -- ack )
     job-context @ ack-state @ ;
