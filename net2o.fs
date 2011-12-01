@@ -297,7 +297,7 @@ $800 +field cmd-buf
 end-structure
 
 $F Constant tick-init \ ticks without ack
-#1000000 Constant bandwidth-init \ 1µs/byte
+#1000000 Value bandwidth-init \ 1µs/byte
 
 : ticks ( -- u )  ntime drop ;
 
