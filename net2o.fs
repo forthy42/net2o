@@ -285,6 +285,7 @@ field: pending-ack
 field: send-tick
 field: ps/byte
 field: bandwidth-tick \ ns
+field: next-tick \ ns
 end-structure
 
 begin-structure cmd-struct
@@ -298,6 +299,7 @@ end-structure
 
 $F Constant tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
+-1 Constant never
 
 : ticks ( -- u )  ntime drop ;
 
@@ -315,6 +317,7 @@ $F Constant tick-init \ ticks without ack
     $8000000000000000 r@ max-ack !
     tick-init r@ send-tick !
     bandwidth-init r@ ps/byte !
+    never          r@ next-tick !
     cmd-struct r@ cmd-out $!len
     r@ cmd-out $@ erase r> ;
 
@@ -639,7 +642,8 @@ Variable outflag  outflag off
 : data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
 
 : bandwidth+ ( -- )  job-context @ >r
-    outsize r@ ps/byte @ #1000000 */ r> bandwidth-tick +! ;
+    outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
+    dup 2/ + 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
@@ -648,13 +652,15 @@ Variable outflag  outflag off
 	2drop
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
-    data-to-send 0= IF  send-ack# outflag or!  THEN  sendX  bandwidth+ ;
+    data-to-send 0= IF
+	send-ack# outflag or!  sendX  never job-context @ next-tick !
+    ELSE  sendX  bandwidth+  THEN ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
 : bandwidth? ( -- flag ) job-context @ >r
-    ticks r> bandwidth-tick @ - 0>= ;
+    ticks r> next-tick @ - 0>= ;
 
 \ asynchronous sending
 
@@ -676,7 +682,7 @@ Create chunk-adder chunks-struct allot
     job-context @ chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
-    ticks job-context @ bandwidth-tick ! ;
+    ticks dup job-context @ bandwidth-tick !  job-context @ next-tick ! ;
 
 : ack-get ( -- ack )
     job-context @ ack-state @ ;
@@ -708,6 +714,11 @@ Create chunk-adder chunks-struct allot
 	    chunks chunks+ @ chunks-struct * chunks-struct $del  false
 	THEN
     ELSE  drop chunks+ off false  THEN ;
+
+: next-chunk-tick ( -- tick )
+    -1 chunks $@ bounds ?DO
+	I chunk-context @ next-tick @ umin
+    chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  0 >r
     BEGIN  send-chunks-async 0= WHILE
@@ -758,7 +769,7 @@ Create queue-adder  queue-struct allot
 \ poll loop
 
 environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #0.001000 ptimeout 2! ( 1 ms )
+    2Variable ptimeout #1000000 ptimeout cell+ ! ( 1 ms )
 [ELSE]
     &1 Constant ptimeout ( 1 ms )
 [THEN]
@@ -769,7 +780,9 @@ Create pollfds   pollfd %size 2* allot
     eval-queue
     net2o-sock fileno pollfds fd l!
     net2o-sock6 fileno pollfds pollfd %size + fd l!
-    POLLIN send? IF  POLLOUT or  THEN
+    next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
+    IF    0 max ptimeout cell+ ! [ POLLOUT POLLIN or ]L
+    ELSE  drop #500000000 ptimeout cell+ ! POLLIN  THEN
     dup pollfds events w!  pollfds pollfd %size + events w!
 [ environment os-type s" linux" string-prefix? ] [IF]
     pollfds 2 ptimeout 0 ppoll 0>
