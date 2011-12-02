@@ -768,11 +768,7 @@ Create queue-adder  queue-struct allot
 
 \ poll loop
 
-environment os-type s" linux" string-prefix? [IF]
-    2Variable ptimeout #1000000 ptimeout cell+ ! ( 1 ms )
-[ELSE]
-    &1 Constant ptimeout ( 1 ms )
-[THEN]
+2Variable ptimeout #1000000 ptimeout cell+ ! ( 1 ms )
 
 Create pollfds   pollfd %size 2* allot
 
@@ -787,7 +783,7 @@ Create pollfds   pollfd %size 2* allot
 [ environment os-type s" linux" string-prefix? ] [IF]
     pollfds 2 ptimeout 0 ppoll 0>
 [ELSE]
-    pollfds 2 ptimeout poll 0>
+    pollfds 2 ptimeout cell+ @ #1000000 / poll 0>
 [THEN]
 ;
 

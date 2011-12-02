@@ -2,15 +2,17 @@
 
 variable oldserv
 variable oldclient
-variable first  first on
 variable clientavg
+variable clientavg#
 variable firstdiff
 
 : acktime ( serv client -- )
-    first @ 0=
+    clientavg# @
     IF
 	over oldserv @ - .
-	dup oldclient @ - dup . clientavg @ 4 rshift dup . - clientavg +!
+	dup oldclient @ - dup . clientavg @
+	clientavg# @ / dup . clientavg# @ $10 = IF - ELSE drop THEN clientavg +!
 	2dup swap - firstdiff @ - . cr
     ELSE  2dup swap - firstdiff !  THEN
-    oldclient ! oldserv !  first off ;
+    clientavg# @ 1+ $10 min clientavg# !
+    oldclient ! oldserv ! ;
