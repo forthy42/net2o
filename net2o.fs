@@ -516,6 +516,10 @@ $F Constant tick-init \ ticks without ack
 : wurst-crc ( -- x )
     0 wurst-state state# bounds ?DO  I @ xor cell +LOOP ;
 
+[IFDEF] nocrypt \ dummy for test
+: wurst-outbuf-encrypt ;
+true constant wurst-inbuf-decrypt
+[ELSE]
 : wurst-outbuf-encrypt ( -- )
     wurst-outbuf-init
     outbuf body-size mem-rounds# >r
@@ -535,6 +539,7 @@ $F Constant tick-init \ ticks without ack
 	    over r@ rounds-decrypt  r@ >reads state# * /string
     REPEAT
     rdrop drop le-ux@ wurst-crc = ;
+[THEN]
 
 \ public key encryption
 
