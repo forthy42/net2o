@@ -307,7 +307,7 @@ s" gforth" environment? [IF] 2drop
 	LOOP
 	%> memcpy(states+64, states+128, 64); }<% %c, ;
 	
-    c-library libwurst
+    c-library wurstkessel
     \c #include <stdint.h>
     \c #include <string.h>
     \c #define ROL(x, n) (n==0)?x:((x << n) | (x >> (64-n)))
@@ -320,25 +320,13 @@ s" gforth" environment? [IF] 2drop
     5 round_ind,
     6 round_ind,
     7 round_ind,
-    \c static inline void add_entropy(uint64_t * a, uint64_t * b) {
-    \c a[0] = b[0] = a[0] ^ b[0];
-    \c a[1] = b[1] = a[1] ^ b[1];
-    \c a[2] = b[2] = a[2] ^ b[2];
-    \c a[3] = b[3] = a[3] ^ b[3];
-    \c a[4] = b[4] = a[4] ^ b[4];
-    \c a[5] = b[5] = a[5] ^ b[5];
-    \c a[6] = b[6] = a[6] ^ b[6];
-    \c a[7] = b[7] = a[7] ^ b[7];
+    \c static inline void add_entropy(uint64_t * m, uint64_t * s) {
+    \c    int i;
+    \c    for(i=0; i<8; i++) { s[i] ^= m[i]; m[i] ^= s[i+8]; }
     \c }
-    \c static inline void set_entropy(uint64_t * a, uint64_t * b) {
-    \c a[0] ^= b[0]; b[0] ^= a[0];
-    \c a[1] ^= b[1]; b[1] ^= a[1];
-    \c a[2] ^= b[2]; b[2] ^= a[2];
-    \c a[3] ^= b[3]; b[3] ^= a[3];
-    \c a[4] ^= b[4]; b[4] ^= a[4];
-    \c a[5] ^= b[5]; b[5] ^= a[5];
-    \c a[6] ^= b[6]; b[6] ^= a[6];
-    \c a[7] ^= b[7]; b[7] ^= a[7];
+    \c static inline void set_entropy(uint64_t * m, uint64_t * s) {
+    \c    int i;
+    \c    for(i=0; i<8; i++) { m[i] ^= s[i+8]; s[i] ^= m[i]; }
     \c }
     \c void rounds_ind(unsigned int n, unsigned char * states, unsigned char * message, uint64_t * rnds) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
@@ -412,12 +400,14 @@ Create 'round-flags
     $10 , $30 , $10 , $70 , $10 , $30 , $10 , $F0 ,
 
 : +entropy ( message -- message' )
-    dup wurst-source state# xors  wurst-source over state# move
+    dup wurst-source state# xors
+    wurst-state over state# xors
     state# + ;
 
 : -entropy ( message -- message' )
-    wurst-source over state# xors
-    dup wurst-source state# xors state# + ;
+    wurst-state over state# xors
+    dup wurst-source state# xors
+    state# + ;
 
 : rounds ( addr n -- )  dup $F and 8 umin 0 ?DO
 	'rounds Ith execute
@@ -459,7 +449,8 @@ Create 'round-flags
     \ Naive implementation - for benchmarking only
     [IFUNDEF] +entropy
 	: +entropy ( message -- message' )
-	    dup wurst-source state# xors  wurst-source over state# move
+	    dup wurst-source state# xors
+	    wurst-state swap state# xors
 	    state# + ;
     [THEN]
     : rounds ( n -- )  message swap  dup $F and 8 umin 0 ?DO
