@@ -45,7 +45,7 @@ Create 'cmd-buf 6 allot
     drop c@ cells r> + ! ;
 
 : cmd-loop ( addr u -- )
-    ticks u. ." do-cmd" cr
+\    ticks u. ." do-cmd" cr
     cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
@@ -217,7 +217,7 @@ also net2o-base
 \	net2o:sendack
 \	send-ack# and IF
 \	    r@ pending-ack @ 0= IF
-\		['] net2o:do-resend #10000000 add-queue
+\		['] net2o:do-resend #1000000 add-queue
 \	    THEN
 \	    r@ pending-ack on
 \	THEN

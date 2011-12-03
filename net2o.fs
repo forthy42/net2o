@@ -416,7 +416,7 @@ $F Constant tick-init \ ticks without ack
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
-	    I cell+ @ . over . ." acktime" cr
+\	    I cell+ @ . over . ." acktime" cr
 	    drop  I cell+ @ -
 	    dup job-context @ min-ack >r r@ @ min r> !
 	    dup job-context @ max-ack >r r@ @ max r> !
@@ -605,7 +605,7 @@ Variable outflag  outflag off
 
 : bandwidth+ ( -- )  job-context @ >r
     outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
-    dup 2/ + 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
+    ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
 
 : sendX ( addr taddr target n -- )
     >r set-dest  set-flags r> >send  bandwidth+  send-packet
@@ -645,11 +645,11 @@ Variable outflag  outflag off
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-	." resending" cr
+\	." resending" cr
 	net2o:get-resend net2o:prep-send /resend
     ELSE
 	2drop
-	." sending" cr
+\	." sending" cr
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
     data-to-send 0= IF
@@ -707,7 +707,7 @@ Create chunk-adder chunks-struct allot
 	data-to-send IF
 	    bandwidth? dup  IF
 		swap chunk-count+  net2o:send-chunk
-	    ELSE  drop
+	    ELSE  nip
 	    THEN  1 chunks+ +!
 	ELSE
 	    drop ." nothing to send" cr
@@ -806,8 +806,8 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     BEGIN  send-anything? sendflag !  BEGIN  poll-sock  UNTIL
 	pollfds pollfd %size 2* + revents w@ POLLOUT =
 	pollfds pollfd %size 3 * + revents w@ POLLOUT = or
-	IF  send-chunks-async sendflag !  THEN
-\	IF  send-another-chunk sendflag !  THEN
+\	IF  send-chunks-async sendflag !  THEN
+	IF  send-another-chunk sendflag !  THEN
 	pollfds revents w@ POLLIN =
 	pollfds pollfd %size + revents w@ POLLIN =
     or UNTIL
