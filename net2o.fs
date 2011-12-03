@@ -479,14 +479,6 @@ $F Constant tick-init \ ticks without ack
     THEN
     drop rdrop ;
 
-\ client initializer
-
-: init-client ( -- )
-    new-client init-route init-delivery-table ;
-
-: init-server ( -- )
-    new-server init-route init-delivery-table ;
-
 \ symmetric encryption and decryption
 
 : >wurst-source ( u -- )
@@ -610,8 +602,13 @@ Variable outflag  outflag off
     send-a-packet drop ;
 
 : >send ( addr n -- )  >r outbody min-size r@ lshift move r> outbuf c+! ;
+
+: bandwidth+ ( -- )  job-context @ >r
+    outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
+    dup 2/ + 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
+
 : sendX ( addr taddr target n -- )
-    >r set-dest  set-flags r> >send send-packet
+    >r set-dest  set-flags r> >send  bandwidth+  send-packet
     update-key ;
 
 \ send chunk
@@ -646,20 +643,18 @@ Variable outflag  outflag off
 
 : data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
 
-: bandwidth+ ( -- )  job-context @ >r
-    outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
-    dup 2/ + 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
-
 : net2o:send-chunk ( -- )
     resend$@ dup IF
+	." resending" cr
 	net2o:get-resend net2o:prep-send /resend
     ELSE
 	2drop
+	." sending" cr
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
     data-to-send 0= IF
 	send-ack# outflag or!  sendX  never job-context @ next-tick !
-    ELSE  sendX  bandwidth+  THEN ;
+    ELSE  sendX  THEN ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
@@ -715,8 +710,9 @@ Create chunk-adder chunks-struct allot
 	    ELSE  drop
 	    THEN  1 chunks+ +!
 	ELSE
-	    drop
-	    chunks chunks+ @ chunks-struct * chunks-struct $del  false
+	    drop ." nothing to send" cr
+	    chunks chunks+ @ chunks-struct * chunks-struct $del
+	    false
 	THEN
     ELSE  drop chunks+ off false  THEN ;
 
@@ -775,20 +771,29 @@ Create queue-adder  queue-struct allot
 
 2Variable ptimeout #1000000 ptimeout cell+ ! ( 1 ms )
 
-Create pollfds   pollfd %size 2* allot
+Create pollfds   here pollfd %size 4 * dup allot erase
+
+: fds!+ ( fileno flag addr -- addr' )
+     >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
+
+: prep-socks ( -- )  pollfds >r
+    net2o-sock  fileno POLLIN  r> fds!+ >r
+    net2o-sock6 fileno POLLIN  r> fds!+ >r
+    net2o-sock  fileno POLLOUT r> fds!+ >r
+    net2o-sock6 fileno POLLOUT r> fds!+ drop ;
+
+: clear-events ( -- )  pollfds
+    4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : poll-sock ( -- flag )
-    eval-queue
-    net2o-sock fileno pollfds fd l!
-    net2o-sock6 fileno pollfds pollfd %size + fd l!
+    eval-queue  clear-events
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
-    IF    0 max ptimeout cell+ ! [ POLLOUT POLLIN or ]L
-    ELSE  drop #500000000 ptimeout cell+ ! POLLIN  THEN
-    dup pollfds events w!  pollfds pollfd %size + events w!
+    IF    0 max ptimeout cell+ !  pollfds 4
+    ELSE  drop #500000000 ptimeout cell+ !  pollfds 2  THEN
 [ environment os-type s" linux" string-prefix? ] [IF]
-    pollfds 2 ptimeout 0 ppoll 0>
+    ptimeout 0 ppoll 0>
 [ELSE]
-    pollfds 2 ptimeout cell+ @ #1000000 / poll 0>
+    ptimeout cell+ @ #1000000 / poll 0>
 [THEN]
 ;
 
@@ -799,9 +804,10 @@ Create pollfds   pollfd %size 2* allot
 
 : next-packet ( -- addr u )
     BEGIN  send-anything? sendflag !  BEGIN  poll-sock  UNTIL
-	pollfds revents w@ POLLOUT =
-	pollfds pollfd %size + revents w@ POLLOUT = or
-	IF  send-another-chunk sendflag !  THEN
+	pollfds pollfd %size 2* + revents w@ POLLOUT =
+	pollfds pollfd %size 3 * + revents w@ POLLOUT = or
+	IF  send-chunks-async sendflag !  THEN
+\	IF  send-another-chunk sendflag !  THEN
 	pollfds revents w@ POLLIN =
 	pollfds pollfd %size + revents w@ POLLIN =
     or UNTIL
@@ -871,6 +877,14 @@ Defer do-ack ( -- )
     BEGIN  poll-sock queue $@len 0<> or
 	ticks r@ u< or
     WHILE  client-event  REPEAT  rdrop ;
+
+\ client/server initializer
+
+: init-client ( -- )
+    new-client init-route init-delivery-table prep-socks ;
+
+: init-server ( -- )
+    new-server init-route init-delivery-table prep-socks ;
 
 \ load net2o commands
 

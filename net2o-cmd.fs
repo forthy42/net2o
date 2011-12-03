@@ -44,7 +44,9 @@ Create 'cmd-buf 6 allot
     REPEAT
     drop c@ cells r> + ! ;
 
-: cmd-loop ( addr u -- )  cmd' off  sp@ >r
+: cmd-loop ( addr u -- )
+    ticks u. ." do-cmd" cr
+    cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
 ' cmd-loop is queue-command
@@ -161,7 +163,7 @@ also net2o-base definitions forth
 21 net2o: send-chunks ( -- ) net2o:send-chunks ;
 22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
 23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-24 net2o: resend ( addr u -- )  net2o:resend ;
+24 net2o: resend ( addr u -- )  net2o:resend net2o:send-chunks ;
 25 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
 
 \ create commands to send back
@@ -211,13 +213,14 @@ also net2o-base
     r@ ack-receive dup @ >r over swap !
     r@ <> IF
 	r>
-	net2o:sendack
-	send-ack# and IF
-	    r@ pending-ack @ 0= IF
-		['] net2o:do-resend #10000000 add-queue
-	    THEN
-	    r@ pending-ack on
-	THEN
+	net2o:do-resend
+\	net2o:sendack
+\	send-ack# and IF
+\	    r@ pending-ack @ 0= IF
+\		['] net2o:do-resend #10000000 add-queue
+\	    THEN
+\	    r@ pending-ack on
+\	THEN
     ELSE
 	rdrop
     THEN  rdrop ;
