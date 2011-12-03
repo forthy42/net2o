@@ -35,7 +35,7 @@ require wurstkessel.fs
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$4 Constant max-size^2 \ 1k, to avoid fragmentation
+$4 Value max-size^2 \ 1k, to avoid fragmentation
 $40 Constant min-size
 min-size max-size^2 lshift $22 + Constant maxpacket
 
