@@ -412,21 +412,25 @@ $F Constant tick-init \ ticks without ack
 
 : avg! ( n addr -- )
     dup @ 0= IF  !  EXIT  THEN
-    >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
+    >r 2/ 2/ r@ @ dup 2/ 2/ - + dup . ." rate" cr r> ! ;
 
 Variable oldserv
 Variable oldclient
 Variable clientavg
 Variable clientavg#
 Variable firstdiff
+Variable lastdiff
 
 : statinit ( -- )  clientavg off  clientavg# off ;
 
 : timestat ( client serv bytes -- )  >r swap
     clientavg# @
     IF
+	2dup swap - lastdiff !
 	dup oldclient @ - clientavg +!  r> clientavg# +!
-    ELSE  2dup swap - firstdiff !  1 clientavg# +! rdrop  THEN
+    ELSE
+	2dup swap - firstdiff !
+	1 clientavg# +! rdrop  THEN
     oldclient ! oldserv ! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
@@ -442,8 +446,8 @@ Variable firstdiff
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
 	clientavg @ #1000 clientavg# @ 1- */
-	dup . ." rate" cr
 	job-context @ ps/byte avg!
+	lastdiff @ . ." slack" cr
 	statinit
     THEN ;
 
