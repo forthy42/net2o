@@ -279,9 +279,7 @@ field: ack-time
 field: sack-addr
 field: sack-time
 field: sack-backlog
-field: min-ack
-field: max-ack
-field: delta-ack
+field: min-slack
 field: pending-ack
 field: send-tick
 field: ps/byte
@@ -314,8 +312,7 @@ $F Constant tick-init \ ticks without ack
     wurst-key state# r@ crypto-key $!
     -1 r@ ack-state !
     -1 r@ ack-receive !
-    $7FFFFFFFFFFFFFFF r@ min-ack !
-    $8000000000000000 r@ max-ack !
+    $7fffffffffffffff r@ min-slack !
     tick-init r@ send-tick !
     bandwidth-init r@ ps/byte !
     never          r@ next-tick !
@@ -412,24 +409,24 @@ $F Constant tick-init \ ticks without ack
 
 : avg! ( n addr -- )
     dup @ 0= IF  !  EXIT  THEN
-    >r 2/ 2/ r@ @ dup 2/ 2/ - + dup . ." rate" cr r> ! ;
+    >r 2/ 2/ r@ @ dup 2/ 2/ - + ( dup . ." rate" cr ) r> ! ;
 
 Variable oldserv
 Variable oldclient
 Variable clientavg
 Variable clientavg#
-Variable firstdiff
 Variable lastdiff
 
 : statinit ( -- )  clientavg off  clientavg# off ;
 
+: min! ( n addr -- ) >r  r@ @ min r> ! ;
+
 : timestat ( client serv bytes -- )  >r swap
+    2dup swap - dup lastdiff !  job-context @ min-slack min!
     clientavg# @
     IF
-	2dup swap - lastdiff !
 	dup oldclient @ - clientavg +!  r> clientavg# +!
     ELSE
-	2dup swap - firstdiff !
 	1 clientavg# +! rdrop  THEN
     oldclient ! oldserv ! ;
 
@@ -445,15 +442,17 @@ Variable lastdiff
 
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
-	clientavg @ #1000 clientavg# @ 1- */
+	clientavg @ #1000 clientavg# @ 1- */ dup
+	lastdiff @ job-context @ min-slack @ - ( dup . ." slack" cr )
+	#1000000 min #500000 - \ 0.5 ms slack is allowed
+	#2000000 */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
-	lastdiff @ . ." slack" cr
 	statinit
     THEN ;
 
 : net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
-    ." Acknowledge range: " swap . . cr ;
+    ( 2dup ." Acknowledge range: " swap . . cr ) 2drop ;
 : net2o:resend ( addr u -- )
     2dup job-context @ data-resend add-range
     ." Resend: " swap . . cr ;
@@ -733,7 +732,7 @@ Create chunk-adder chunks-struct allot
 	    ELSE  nip
 	    THEN  1 chunks+ +!
 	ELSE
-	    drop ." nothing to send" cr
+	    drop ." done, rate: " job-context @ ps/byte ? cr
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
 	THEN
@@ -811,7 +810,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : poll-sock ( -- flag )
     eval-queue  clear-events
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
-    IF    0 max ptimeout cell+ !  pollfds 4
+    IF    0 max ptimeout cell+ !  pollfds 2
     ELSE  drop #500000000 ptimeout cell+ !  pollfds 2  THEN
 [ environment os-type s" linux" string-prefix? ] [IF]
     ptimeout 0 ppoll 0>
@@ -826,14 +825,8 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     0 0 ;
 
 : next-packet ( -- addr u )
-    BEGIN  send-anything? sendflag !  BEGIN  poll-sock  UNTIL
-	pollfds pollfd %size 2* + revents w@ POLLOUT =
-	pollfds pollfd %size 3 * + revents w@ POLLOUT = or
-\	IF  send-chunks-async sendflag !  THEN
-	IF  send-another-chunk sendflag !  THEN
-	pollfds revents w@ POLLIN =
-	pollfds pollfd %size + revents w@ POLLIN =
-    or UNTIL
+    send-anything? sendflag !
+    BEGIN  poll-sock 0= WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
     sockaddr-tmp alen @ insert-address reverse64
     inbuf destination be-ux@ -$100 and or inbuf destination be-x!
