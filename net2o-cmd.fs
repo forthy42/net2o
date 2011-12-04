@@ -162,9 +162,10 @@ also net2o-base definitions forth
 20 net2o: send-chunk ( -- ) net2o:send-chunk ;
 21 net2o: send-chunks ( -- ) net2o:send-chunks ;
 22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
-23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-24 net2o: resend ( addr u -- )  net2o:resend net2o:send-chunks ;
-25 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+23 net2o: rate-adjust ( -- )  net2o:rate-adjust ;
+24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+25 net2o: resend ( addr u -- )  net2o:resend ;
+26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
 
 \ create commands to send back
 
@@ -186,12 +187,12 @@ previous definitions
 also net2o-base
 
 : net2o:acktime ( -- )
-    dest-addr @ lit, ticks lit, ack-addrtime ;
+    dest-addr @ -$10 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
-: net2o:sendack ( -- )  net2o:ackrange
+: net2o:sendack ( -- )  rate-adjust   net2o:ackrange
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
@@ -207,7 +208,7 @@ also net2o-base
 
 : net2o:do-ack ( -- )  job-context @ >r
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    net2o:acktime 
+    net2o:acktime
 
     inbuf 1+ c@ acks# and
     r@ ack-receive dup @ >r over swap !

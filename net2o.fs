@@ -139,6 +139,7 @@ $0F Constant datasize#
 Create header-sizes  $06 c, $1A c, $FF c, $FF c,
 Create tail-sizes    $00 c, $08 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
+$1A $08 + Constant overhead \ constant overhead
 
 : header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
 : tail-size ( addr -- n )  c@ 6 rshift tail-sizes + c@ ;
@@ -413,22 +414,38 @@ $F Constant tick-init \ ticks without ack
     dup @ 0= IF  !  EXIT  THEN
     >r 2/ 2/ r@ @ dup 2/ 2/ - + r> ! ;
 
+Variable oldserv
+Variable oldclient
+Variable clientavg
+Variable clientavg#
+Variable firstdiff
+
+: statinit ( -- )  clientavg off  clientavg# off ;
+
+: timestat ( client serv bytes -- )  >r swap
+    clientavg# @
+    IF
+	dup oldclient @ - clientavg +!  r> clientavg# +!
+    ELSE  2dup swap - firstdiff !  1 clientavg# +! rdrop  THEN
+    oldclient ! oldserv ! ;
+
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
 \	    I cell+ @ . over . ." acktime" cr
-	    drop  I cell+ @ -
-	    dup job-context @ min-ack >r r@ @ min r> !
-	    dup job-context @ max-ack >r r@ @ max r> !
-	    job-context @ delta-ack !
+	    datasize# and min-size swap lshift overhead +
+	    I cell+ @ swap timestat
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
-\	    ." Acknowledge delta: "
-\	    job-context @ min-ack @ .
-\	    job-context @ max-ack @ .
-\	    job-context @ delta-ack @ .
-\	    cr
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
+
+: net2o:rate-adjust ( -- )
+    clientavg# @ 1 u> IF
+	clientavg @ #1000 clientavg# @ 1- */
+	dup . ." rate" cr
+	job-context @ ps/byte avg!
+	statinit
+    THEN ;
 
 : net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
@@ -506,7 +523,7 @@ $F Constant tick-init \ ticks without ack
     endcase ;
 
 : wurst-crc ( -- x )
-    0 wurst-state state# bounds ?DO  I @ xor cell +LOOP ;
+    0 wurst-state state# 2* bounds ?DO  I @ xor cell +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
 : wurst-outbuf-encrypt ;
@@ -520,7 +537,8 @@ true constant wurst-inbuf-decrypt
     BEGIN  dup 0>  WHILE
 	    over r@ rounds  r@ >reads state# * /string
     REPEAT
-    rdrop drop wurst-crc swap le-x! ;
+    over roundse# rounds  drop
+    rdrop wurst-crc swap le-x! ;
 
 : wurst-inbuf-decrypt ( -- flag )
     wurst-inbuf-init
@@ -530,7 +548,8 @@ true constant wurst-inbuf-decrypt
     BEGIN  dup 0>  WHILE
 	    over r@ rounds-decrypt  r@ >reads state# * /string
     REPEAT
-    rdrop drop le-ux@ wurst-crc = ;
+    over roundse# rounds  drop
+    rdrop le-ux@ wurst-crc = ;
 [THEN]
 
 \ public key encryption
@@ -582,13 +601,12 @@ Variable outflag  outflag off
 : set-flags ( -- )  job-context @ >r
     ticks r@ sack-time !
     r@ sack-addr @ 0= IF
-	dest-addr @ r@ sack-addr !
+	dest-addr @ -$10 and outbuf c@ $F and or r@ sack-addr !
     THEN
     r@ sack-addr 2 cells r@ sack-backlog $+!
     r@ sack-addr off
     rdrop
-    outflag @ outbuf 1+ c! outflag off
-    64bit# outbuf c! ;
+    outflag @ outbuf 1+ c! outflag off ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 
@@ -601,14 +619,15 @@ Variable outflag  outflag off
     outbuf dup packet-size
     send-a-packet drop ;
 
-: >send ( addr n -- )  >r outbody min-size r@ lshift move r> outbuf c+! ;
+: >send ( addr n -- )
+    >r outbody min-size r@ lshift move r> 64bit# or outbuf c! ;
 
 : bandwidth+ ( -- )  job-context @ >r
     outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
     ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
 
 : sendX ( addr taddr target n -- )
-    >r set-dest  set-flags r> >send  bandwidth+  send-packet
+    >r set-dest  r> >send  set-flags  bandwidth+  send-packet
     update-key ;
 
 \ send chunk
