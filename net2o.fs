@@ -35,9 +35,10 @@ require wurstkessel.fs
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
+$1A $08 + Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, to avoid fragmentation
 $40 Constant min-size
-min-size max-size^2 lshift $22 + Constant maxpacket
+min-size max-size^2 lshift overhead + Constant maxpacket
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
@@ -139,7 +140,6 @@ $0F Constant datasize#
 Create header-sizes  $06 c, $1A c, $FF c, $FF c,
 Create tail-sizes    $00 c, $08 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
-$1A $08 + Constant overhead \ constant overhead
 
 : header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
 : tail-size ( addr -- n )  c@ 6 rshift tail-sizes + c@ ;
@@ -526,7 +526,7 @@ Variable lastdiff
     endcase ;
 
 : wurst-crc ( -- x )
-    0 wurst-state state# 2* bounds ?DO  I @ xor cell +LOOP ;
+    0 wurst-state state# bounds ?DO  I @ xor cell +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
 : wurst-outbuf-encrypt ;
