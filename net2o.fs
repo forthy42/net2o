@@ -36,7 +36,7 @@ require wurstkessel.fs
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
 $22 $10 + Constant overhead \ constant overhead
-$7 Value max-size^2 \ 8k, to try jumbo frames
+$4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
 
