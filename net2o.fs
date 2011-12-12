@@ -35,7 +35,7 @@ require wurstkessel.fs
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$1A $08 + Constant overhead \ constant overhead
+$22 $10 + Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, to avoid fragmentation
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
@@ -49,7 +49,7 @@ struct
     short% field flags
     address% field destination
     address% field addr
-    address% field nonce
+    address% 2* field nonce
 end-struct net2o-header
 
 Variable packet4r
@@ -137,8 +137,8 @@ $00 Constant 16bit#
 $40 Constant 64bit#
 $0F Constant datasize#
 
-Create header-sizes  $06 c, $1A c, $FF c, $FF c,
-Create tail-sizes    $00 c, $08 c, $FF c, $FF c,
+Create header-sizes  $06 c, $22 c, $FF c, $FF c,
+Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
 : header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
@@ -501,8 +501,8 @@ Variable lastdiff
 
 \ symmetric encryption and decryption
 
-: >wurst-source ( u -- )
-    wurst-source state# bounds ?DO  dup I !  cell +LOOP  drop ;
+: >wurst-source ( d -- )
+    wurst-source state# bounds ?DO  2dup I 2!  2 cells +LOOP  2drop ;
 
 : >wurst-key ( -- )
     job-context @ dup 0= IF
@@ -513,10 +513,10 @@ Variable lastdiff
     wurst-state swap move ;
 
 : wurst-outbuf-init ( -- )
-    rng@ dup >wurst-source outbuf nonce ! >wurst-key ;
+    rng@ rng@ 2dup >wurst-source outbuf nonce 2! >wurst-key ;
 
 : wurst-inbuf-init ( -- )
-    inbuf nonce @ >wurst-source >wurst-key ;
+    inbuf nonce 2@ >wurst-source >wurst-key ;
 
 : mem-rounds# ( size -- n )
     case
@@ -525,8 +525,10 @@ Variable lastdiff
 	$28 swap
     endcase ;
 
-: wurst-crc ( -- x )
-    0 wurst-state state# bounds ?DO  I @ xor cell +LOOP ;
+: 2xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
+
+: wurst-crc ( -- xd )
+    0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
 : wurst-outbuf-encrypt ;
@@ -541,7 +543,7 @@ true constant wurst-inbuf-decrypt
 	    over r@ rounds  r@ >reads state# * /string
     REPEAT
     over roundse# rounds  drop
-    rdrop wurst-crc swap le-x! ;
+    rdrop wurst-crc rot 2! ;
 
 : wurst-inbuf-decrypt ( -- flag )
     wurst-inbuf-init
@@ -552,7 +554,7 @@ true constant wurst-inbuf-decrypt
 	    over r@ rounds-decrypt  r@ >reads state# * /string
     REPEAT
     over roundse# rounds  drop
-    rdrop le-ux@ wurst-crc = ;
+    rdrop 2@ wurst-crc d= ;
 [THEN]
 
 \ public key encryption
