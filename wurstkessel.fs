@@ -6,6 +6,7 @@ cell 8 = [IF]
     ' ! Alias 64!
     ' rot Alias 64swap
     ' -rot Alias -64swap
+    : 64+  + ;
     ' cells Alias 64s
     ' l@ Alias 32@
 [ELSE]
@@ -14,6 +15,7 @@ cell 8 = [IF]
     : 64,  swap 2, ;
     : 64@  2@ swap ; macro
     : 64!  >r swap r> 2! ; macro
+    : 64+  d+ ;
     ' 8* Alias 64s
     ' @ Alias 32@
 [THEN]
@@ -199,10 +201,12 @@ DOES> swap 7 and cells + @ ;
 
 : xors ( addr1 addr2 n -- ) bounds ?DO
     dup @ I @ xor I ! cell+  cell +LOOP  drop ;
+: +!s ( addr1 addr2 n -- ) bounds ?DO
+    dup 64@ I 64@ 64+ I 64! 64+  1 64s +LOOP  drop ;
 
 : update-state ( -- )
     wurst-state wurst-source state# xors
-    nextstate wurst-state state# move ;
+    nextstate wurst-state state# +!s ;
 : round ( n -- ) dup 1- swap  8 0 DO
 	wurst-state I permut# 64s + 64@ -64swap
 	I mix2bytes 2>r bytes2sum 2r> 64swap nextstate I 64s + 64!
@@ -299,13 +303,13 @@ s" gforth" environment? [IF] 2drop
 	LOOP
 	2drop
 	8 0 DO
-	    %> *((uint64_t *)(states+<% I 16 + 64s #$ %> )) = a<% I #$ %> ;<% %c,
-	LOOP
-	8 0 DO
 	    %> *((uint64_t *)(states+<% I 64s #$ %> )) ^= *((uint64_t *)(states+<% I 8 + 64s #$ %> ));<%
 	    %c,
 	LOOP
-	%> memcpy(states+64, states+128, 64); }<% %c, ;
+	8 0 DO
+	    %> *((uint64_t *)(states+<% I 8 + 64s #$ %> )) += a<% I #$ %> ;<% %c,
+	LOOP
+	%> }<% %c, ;
 	
     c-library wurstkessel
     \c #include <stdint.h>
