@@ -36,7 +36,7 @@ require wurstkessel.fs
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
 $22 $10 + Constant overhead \ constant overhead
-$9 Value max-size^2 \ 1k, to avoid fragmentation
+$7 Value max-size^2 \ 8k, to try jumbo frames
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
 
@@ -617,14 +617,20 @@ Variable outflag  outflag off
 
 : outbody ( -- addr ) outbuf packet-body ;
 : outsize ( -- n )    outbuf packet-size ;
+
+#90 Constant EMSGSIZE
+
 : send-packet ( -- )
 \    ." send " outbuf .header
     wurst-outbuf-encrypt
     out-route drop
     outbuf dup packet-size
     send-a-packet 0< IF
-	errno . ." could not send" cr
-	max-size^2 1- to max-size^2
+	errno EMSGSIZE = IF
+	    max-size^2 1- to max-size^2
+	ELSE
+	    true abort" could not send"
+	THEN
     THEN ;
 
 : >send ( addr n -- )
