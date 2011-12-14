@@ -367,7 +367,7 @@ $F Constant tick-init \ ticks without ack
 	    I 2@ range+ I 2!
 	    I UNLOOP
 	    r@ $@ drop -
-	    r@ $@ 2 pick /string 2 cells > IF
+	    r@ $@ 2 pick safe/string 2 cells > IF
 		dup 2@ 1+ bounds 2 pick cell+ cell+ 2@
 		range+ rot 2!
 		cell+ cell+ 2 cells r> -rot $del
@@ -540,7 +540,7 @@ true constant wurst-inbuf-decrypt
     outbuf packet-data
     over roundse# rounds
     BEGIN  dup 0>  WHILE
-	    over r@ rounds  r@ >reads state# * /string
+	    over r@ rounds  r@ >reads state# * safe/string
     REPEAT
     over roundse# rounds  drop
     rdrop wurst-crc rot 2! ;
@@ -551,7 +551,7 @@ true constant wurst-inbuf-decrypt
     inbuf packet-data
     over roundse# rounds
     BEGIN  dup 0>  WHILE
-	    over r@ rounds-decrypt  r@ >reads state# * /string
+	    over r@ rounds-decrypt  r@ >reads state# * safe/string
     REPEAT
     over roundse# rounds  drop
     rdrop 2@ wurst-crc d= ;
@@ -586,7 +586,7 @@ Variable do-keypad
     pkc keysize move
     keypad sks pkc crypto_scalarmult_curve25519 ;
 
-: net2o:send-key ( pk -- addr u )
+: net2o:send-key ( pks -- pkc-addr u )
     keypad skc rot crypto_scalarmult_curve25519
     pkc keysize  do-keypad on ;
 
@@ -866,7 +866,10 @@ Defer do-ack ( -- )
 	inbuf packet-data queue-command
     ELSE
 	check-dest
-	wurst-inbuf-decrypt 0= IF  ." invalid packet to " drop hex. cr  EXIT  THEN
+	wurst-inbuf-decrypt 0= IF
+	    inbuf .header
+	    ." invalid packet to " dest-addr @ hex. cr
+	    IF  drop  THEN  EXIT  THEN
 	dup 0< IF
 	    drop  >r inbuf packet-data r@ swap move
 	    do-ack

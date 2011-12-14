@@ -45,7 +45,7 @@ Create 'cmd-buf 6 allot
     drop c@ cells r> + ! ;
 
 : cmd-loop ( addr u -- )
-\    ticks u. ." do-cmd" cr
+    ticks u. ." do-cmd" cr
     cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
@@ -127,8 +127,8 @@ definitions
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
 : send-cmd ( dest addr -- ) 2>r  cmdbuf cell+ 2r> swap
-    8 0 DO
-	cmdbuf @ $20 I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
+    max-size^2 1+ 0 DO
+	cmdbuf @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
 
 \ net2o assembler stuff
@@ -141,7 +141,7 @@ also net2o-base definitions
     r> dup xc-size + aligned cmdextras +!  string ;
 : lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ be-x!  1 cells cmdextras +!  lit ;
 : char, ( xc -- )  char cmd, ;
-: end-code  cmdflush previous ;
+: end-code ( -- ) cmdflush previous ;
 
 previous definitions
 
@@ -213,7 +213,7 @@ also net2o-base
     inbuf 1+ c@ acks# and
     r@ ack-receive dup @ >r over swap !
     r@ <> IF
-	r>
+	rdrop
 	net2o:do-resend
 \	net2o:sendack
 \	send-ack# and IF

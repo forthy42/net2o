@@ -601,15 +601,13 @@ $28 Value rounds#
 
 \ buffered random numbers to output 64 bit at a time
 
-Variable rng-buffer state# allot
+Variable rng-buffer
 8 rng-buffer !
 
 : rng@ ( -- x )
     rng-buffer @ 8 = IF
 	rng-buffer off
 	rng-step
-	wurst-salt rng-buffer cell+ state# move
-	state-init rng-buffer cell+ state# xors
     THEN
-    rng-buffer dup @ 1+ cells + @
+    rng-buffer @ cells wurst-salt + @
     1 rng-buffer +! ;
