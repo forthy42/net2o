@@ -12,17 +12,17 @@ lserver return-addr !
 n2o:new-context constant lcontext
 lcontext job-context !
 
-10 ms
+\ 10 ms
 ." Sending first test" cr
 net2o-code S" This is the first test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
-10 ms
+\ 10 ms
 ." Sending second test" cr
 net2o-code S" This is the second test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
-10 ms
+\ 10 ms
 ." Sending more complex test" cr
 net2o-code new-context
 S" This is a test" $, type '!' char, emit cr

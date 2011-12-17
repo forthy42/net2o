@@ -409,7 +409,7 @@ $F Constant tick-init \ ticks without ack
 
 : avg! ( n addr -- )
     dup @ 0= IF  !  EXIT  THEN
-    >r 2/ 2/ r@ @ dup 2/ 2/ - + ( dup . ." rate" cr ) r> ! ;
+    >r 2/ r@ @ dup 2/ - +  dup . ." rate" cr  r> ! ;
 
 Variable oldserv
 Variable oldclient
