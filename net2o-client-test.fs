@@ -12,12 +12,18 @@ lserver return-addr !
 n2o:new-context constant lcontext
 lcontext job-context !
 
+10 ms
+." Sending first test" cr
 net2o-code S" This is the first test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
+10 ms
+." Sending second test" cr
 net2o-code S" This is the second test" $, type '!' char, emit cr
 end-code lserver 0 send-cmd
 
+10 ms
+." Sending more complex test" cr
 net2o-code new-context
 S" This is a test" $, type '!' char, emit cr
 pks send-key
@@ -45,3 +51,5 @@ client-loop
 ." IP4 packets sent:     " packet4s ? cr
 ." IP6 packets received: " packet6r ? cr
 ." IP6 packets sent:     " packet6s ? cr
+
+bye

@@ -177,7 +177,7 @@ $100 Constant ack-change#
     r@ datasize# and 'A' + emit
     r@ headersize# and chunk@
     r@ headersize# and chunk@
-    rdrop swap
+    drop rdrop swap
     ."  to " hex. ."  @ " hex. cr ;
 
 \ packet delivery table
@@ -633,8 +633,8 @@ Variable outflag  outflag off
 	THEN
     THEN ;
 
-: >send ( addr n -- )
-    >r outbody min-size r@ lshift move r> 64bit# or outbuf c! ;
+: >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
+    outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  job-context @ >r
     outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
@@ -886,10 +886,10 @@ Defer do-ack ( -- )
 : route-packet ( -- )  inbuf dup packet-size send-a-packet drop ;
 
 : server-event ( -- )
-    next-packet 2drop in-route
+    next-packet 2drop  in-route
     IF  ['] handle-packet catch IF
 	    inbuf packet-data dump  THEN
-    ELSE  route-packet  THEN ;
+    ELSE  ." route a packet" cr route-packet  THEN ;
 
 : client-event ( -- )
     poll-sock 0= ?EXIT

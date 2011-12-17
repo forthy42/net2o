@@ -45,7 +45,7 @@ Create 'cmd-buf 6 allot
     drop c@ cells r> + ! ;
 
 : cmd-loop ( addr u -- )
-    ticks u. ." do-cmd" cr
+\    ticks u. ." do-cmd" cr
     cmd' off  sp@ >r
     BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
 
