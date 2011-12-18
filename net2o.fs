@@ -443,7 +443,7 @@ Variable lastdiff
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
 	clientavg @ #1000 clientavg# @ 1- */ dup
-	lastdiff @ job-context @ min-slack @ - ( dup . ." slack" cr )
+	lastdiff @ job-context @ min-slack @ - \ dup . ." slack" cr
 	#1000000 min #500000 - \ 0.5 ms slack is allowed
 	#2000000 */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
