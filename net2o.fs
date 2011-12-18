@@ -433,19 +433,21 @@ Variable lastdiff
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
-\	    I cell+ @ . over . ." acktime" cr
+	    I cell+ @ . over . ." acktime" cr
 	    datasize# and min-size swap lshift overhead +
 	    I cell+ @ swap timestat
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
+#500000 2* Value slack#
+
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
 	clientavg @ #1000 clientavg# @ 1- */ dup
 	lastdiff @ job-context @ min-slack @ - \ dup . ." slack" cr
-	#1000000 min #500000 - \ 0.5 ms slack is allowed
-	#2000000 */ ( dup . ." adjust" cr ) +
+	slack# 2* min slack# - \ 0.5 ms slack is allowed
+	slack# 2* 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
 	statinit
     THEN ;
@@ -732,15 +734,16 @@ Create chunk-adder chunks-struct allot
     outflag or!
     job-context @ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
 
+8 value b2b-chunk#
+
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
 	dup chunk-context @ job-context !
 	chunk-count
 	data-to-send IF
-	    bandwidth? dup  IF
-		swap chunk-count+  net2o:send-chunk
-	    ELSE  nip
+	    { ck# } bandwidth? dup  IF
+		b2b-chunk# 0 ?DO  ck# chunk-count+  net2o:send-chunk  LOOP
 	    THEN  1 chunks+ +!
 	ELSE
 	    drop ." done, rate: " job-context @ ps/byte ? cr
