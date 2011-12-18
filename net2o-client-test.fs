@@ -27,25 +27,25 @@ end-code lserver 0 send-cmd
 net2o-code new-context
 S" This is a test" $, type '!' char, emit cr
 pks send-key
-$80000 lit, $80000 lit, new-map
+$80000 lit, $400000 lit, new-map
 $10000 lit, $1000 lit, new-code-map
-$80000 lit, $80000 lit, new-data
+$80000 lit, $400000 lit, new-data
 $10000 lit, $1000 lit, new-code
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-s" doc/internet-2.0.pdf" $, r/o lit, 0 lit, open-file
+s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
 end-code lserver 0 send-cmd
 
-$80000 $80000 n2o:new-map
+$80000 $400000 n2o:new-map
 $10000 $1000 n2o:new-code-map
-$80000 $80000 n2o:new-data
+$80000 $400000 n2o:new-data
 $10000 $1000 n2o:new-code
-$80000 $80000 net2o:unacked
+$80000 $400000 net2o:unacked
 client-loop
 ." IP4 packets received: " packet4r ? cr
 ." IP4 packets sent:     " packet4s ? cr
