@@ -27,6 +27,7 @@ require wurstkessel.fs
 debug: timing(
 debug: rate(
 debug: slack(
+debug: slk(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -424,13 +425,15 @@ Variable clientavg#
 Variable lastdiff
 Variable rtdelay
 
-: statinit ( -- )  clientavg off  clientavg# off ;
+: statinit ( -- )
+    clientavg off  clientavg# off ;
 
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
 : timestat ( client serv bytes -- )  >r
-    ntime over - rtdelay ! swap
-    2dup - dup lastdiff !  job-context @ min-slack min!
+    ( ntime drop over - rtdelay ! ) swap
+    2dup - negate dup lastdiff !  job-context @ min-slack min!
+    slk( lastdiff @ job-context @ min-slack @ - . ." slk" cr )
     clientavg# @
     IF
 	dup oldclient @ - clientavg +!  r> clientavg# +!
@@ -452,9 +455,9 @@ Variable rtdelay
 
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
-	clientavg @ #1000 clientavg# @ 1- */ dup rate( dup . ." clientavg" cr )
-	abs \ negative rate means packet reordering
-	lastdiff @ job-context @ min-slack @ - slack( dup . ." slack" cr )
+	clientavg @ #1000 clientavg# @ 1- */ abs dup rate( dup . ." clientavg" cr )
+	\ negative rate means packet reordering
+	lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
 	slack# 2* min 0 max slack# - \ 1ms slack is allowed
 	slack# 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
