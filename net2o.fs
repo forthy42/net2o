@@ -19,6 +19,20 @@ require wurstkessel.fs
 : and! ( value addr -- )
     >r r@ @ and r> ! ;
 
+\ debugging aids
+
+: debug: ( -- ) Create immediate false ,  DOES>
+    ]] Literal @ IF [[ ')' parse evaluate ]] THEN [[ ;
+
+debug: timing(
+debug: rate(
+debug: slack(
+
+: +db ( "word" -- ) ' >body on ;
+
++db rate(
++db slack(
+
 \ Create udp socket
 
 4242 Constant net2o-udp
@@ -405,24 +419,26 @@ $F Constant tick-init \ ticks without ack
 	ELSE  2 cells  THEN
     +LOOP  drop ;
 
-\ acknowledge handling
+\ acknowledge handling, flow control
 
 : avg! ( n addr -- )
     dup @ 0= IF  !  EXIT  THEN
-    >r 2/ r@ @ dup 2/ - +  dup . ." rate" cr  r> ! ;
+    >r 2/ r@ @ dup 2/ - + rate( dup . ." rate" cr )  r> ! ;
 
 Variable oldserv
 Variable oldclient
 Variable clientavg
 Variable clientavg#
 Variable lastdiff
+Variable rtdelay
 
 : statinit ( -- )  clientavg off  clientavg# off ;
 
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
-: timestat ( client serv bytes -- )  >r swap
-    2dup swap - dup lastdiff !  job-context @ min-slack min!
+: timestat ( client serv bytes -- )  >r
+    ntime over - rtdelay ! swap
+    2dup - dup lastdiff !  job-context @ min-slack min!
     clientavg# @
     IF
 	dup oldclient @ - clientavg +!  r> clientavg# +!
@@ -433,21 +449,21 @@ Variable lastdiff
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ = IF
-	    I cell+ @ . over . ." acktime" cr
+	    timing( I cell+ @ . over . ." acktime" cr )
 	    datasize# and min-size swap lshift overhead +
 	    I cell+ @ swap timestat
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
-#500000 2* Value slack#
+#1000000 Value slack# \ 1ms
 
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
-	clientavg @ #1000 clientavg# @ 1- */ dup
-	lastdiff @ job-context @ min-slack @ - \ dup . ." slack" cr
-	slack# 2* min slack# - \ 0.5 ms slack is allowed
-	slack# 2* 2* */ ( dup . ." adjust" cr ) +
+	clientavg @ #1000 clientavg# @ 1- */ dup rate( dup . ." clientavg" cr )
+	lastdiff @ job-context @ min-slack @ - slack( dup . ." slack" cr )
+	slack# 2* min 0 max slack# - \ 1ms slack is allowed
+	slack# 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
 	statinit
     THEN ;
