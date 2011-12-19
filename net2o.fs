@@ -310,7 +310,8 @@ field: cmd-buf#
 $800 +field cmd-buf
 end-structure
 
-$F Constant tick-init \ ticks without ack
+8 Value b2b-chunk#
+b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
 
@@ -361,15 +362,6 @@ $F Constant tick-init \ ticks without ack
 \ acknowledge map
 
 2Variable 'range
-
-[IFUNDEF] umax
-    : umax ( u1 u2 -- u )
-	2dup u<
-	if
-	    swap
-	then
-	drop ;
-[THEN]
 
 : range+ ( addr1 addr2 addr u -- addr1' addr2' )
     1+ bounds rot umin >r umax r> tuck - 1- ;
@@ -461,6 +453,7 @@ Variable rtdelay
 : net2o:rate-adjust ( -- )
     clientavg# @ 1 u> IF
 	clientavg @ #1000 clientavg# @ 1- */ dup rate( dup . ." clientavg" cr )
+	abs \ negative rate means packet reordering
 	lastdiff @ job-context @ min-slack @ - slack( dup . ." slack" cr )
 	slack# 2* min 0 max slack# - \ 1ms slack is allowed
 	slack# 2* */ ( dup . ." adjust" cr ) +
@@ -749,8 +742,6 @@ Create chunk-adder chunks-struct allot
     ELSE  job-context @ ack-state @  THEN
     outflag or!
     job-context @ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
-
-8 value b2b-chunk#
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
