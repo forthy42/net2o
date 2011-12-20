@@ -416,7 +416,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 : avg! ( n addr -- )
     dup @ 0= IF  !  EXIT  THEN
-    >r 2/ r@ @ dup 2/ - + rate( dup . ." rate" cr )  r> ! ;
+    >r 2/ 2/ r@ @ dup 2/ 2/ - + rate( dup . ." rate" cr )  r> ! ;
 
 Variable oldserv
 Variable oldclient
@@ -459,7 +459,7 @@ Variable rtdelay
 	\ negative rate means packet reordering
 	lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
 	slack# 2* 2* min 0 max slack# - \ 1ms slack is allowed
-	slack# 2* */ ( dup . ." adjust" cr ) +
+	slack# 2* 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
 	statinit
     THEN ;
