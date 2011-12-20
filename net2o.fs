@@ -312,7 +312,7 @@ $800 +field cmd-buf
 end-structure
 
 8 Value b2b-chunk#
-b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
+b2b-chunk# 2* 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
 
