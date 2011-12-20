@@ -602,12 +602,20 @@ $28 Value rounds#
 \ buffered random numbers to output 64 bit at a time
 
 Variable rng-buffer
-8 rng-buffer !
+64 rng-buffer !
 
 : rng@ ( -- x )
-    rng-buffer @ 8 = IF
+    rng-buffer @ 64 = IF
 	rng-buffer off
 	rng-step
     THEN
-    rng-buffer @ cells wurst-salt + @
-    1 rng-buffer +! ;
+    rng-buffer @ wurst-salt + @
+    1 cells rng-buffer +! ;
+
+: rng32 ( -- x )
+    rng-buffer @ 64 = IF
+	rng-buffer off
+	rng-step
+    THEN
+    rng-buffer @ wurst-salt + l@
+    4 rng-buffer +! ;

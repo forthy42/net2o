@@ -443,8 +443,9 @@ Variable rtdelay
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
-	dup I @ = IF
-	    timing( I cell+ @ . over . ." acktime" cr )
+	dup I @ -$11 and = IF
+	    timing( I cell+ @ . over . ." acktime"
+	    dup b2b# and IF  ." -first"  THEN  cr )
 	    datasize# and min-size swap lshift overhead +
 	    I cell+ @ swap timestat
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
@@ -616,11 +617,16 @@ Variable do-keypad
     outbuf destination be-x!  dup dest-addr !  outbuf addr be-x! ;
 
 Variable outflag  outflag off
+Variable b2b-first  b2b-first on
+$10 Constant b2b#
 
 : set-flags ( -- )  job-context @ >r
     ticks r@ sack-time !
     r@ sack-addr @ 0= IF
-	dest-addr @ -$10 and outbuf c@ $F and or r@ sack-addr !
+	dest-addr @ -$20 and
+	outbuf c@ $F and or
+	b2b-first @ b2b# and or
+	r@ sack-addr !
     THEN
     r@ sack-addr 2 cells r@ sack-backlog $+!
     r@ sack-addr off

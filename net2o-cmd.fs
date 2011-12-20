@@ -187,7 +187,7 @@ previous definitions
 also net2o-base
 
 : net2o:acktime ( -- )
-    dest-addr @ -$10 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
+    dest-addr @ -$20 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
