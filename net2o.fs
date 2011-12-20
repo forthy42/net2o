@@ -431,7 +431,7 @@ Variable rtdelay
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
 : timestat ( client serv bytes -- )  >r
-    ( ntime drop over - rtdelay ! ) swap
+    ticks over - rtdelay !  swap
     2dup - negate dup lastdiff !  job-context @ min-slack min!
     slk( lastdiff @ job-context @ min-slack @ - . ." slk" cr )
     clientavg# @
@@ -458,7 +458,7 @@ Variable rtdelay
 	clientavg @ #1000 clientavg# @ 1- */ abs dup rate( dup . ." clientavg" cr )
 	\ negative rate means packet reordering
 	lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
-	slack# 2* min 0 max slack# - \ 1ms slack is allowed
+	slack# 2* 2* min 0 max slack# - \ 1ms slack is allowed
 	slack# 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
 	statinit
