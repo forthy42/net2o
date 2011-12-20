@@ -33,6 +33,7 @@ debug: slk(
 
 +db rate(
 +db slack(
++db timing(
 
 \ Create udp socket
 
@@ -422,11 +423,19 @@ Variable oldserv
 Variable oldclient
 Variable clientavg
 Variable clientavg#
+Variable clientavg'
+Variable clientavg'#
 Variable lastdiff
 Variable rtdelay
 
+$10 Constant b2b#
+
 : statinit ( -- )
     clientavg off  clientavg# off ;
+
+: statinit' ( -- )
+    clientavg' @ clientavg +!  clientavg'# @ clientavg# +!
+    clientavg' off  clientavg'# off ;
 
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
@@ -434,19 +443,19 @@ Variable rtdelay
     ticks over - rtdelay !  swap
     2dup - negate dup lastdiff !  job-context @ min-slack min!
     slk( lastdiff @ job-context @ min-slack @ - . ." slk" cr )
-    clientavg# @
+    clientavg'# @
     IF
-	dup oldclient @ - clientavg +!  r> clientavg# +!
+	dup oldclient @ - clientavg' +!  r> clientavg'# +!
     ELSE
-	1 clientavg# +! rdrop  THEN
+	1 clientavg'# +! rdrop  THEN
     oldclient ! oldserv ! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     job-context @ sack-backlog $@ bounds ?DO
 	dup I @ -$11 and = IF
-	    timing( I cell+ @ . over . ." acktime"
-	    dup b2b# and IF  ." -first"  THEN  cr )
+	    timing( I cell+ @ . over . ." acktime" I @ b2b# and IF  ." -first"  THEN  cr )
 	    datasize# and min-size swap lshift overhead +
+	    I @ b2b# and IF  statinit'  THEN
 	    I cell+ @ swap timestat
 	    job-context @ sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
@@ -455,11 +464,12 @@ Variable rtdelay
 #1000000 Value slack# \ 1ms
 
 : net2o:rate-adjust ( -- )
+    statinit'
     clientavg# @ 1 u> IF
 	clientavg @ #1000 clientavg# @ 1- */ abs dup rate( dup . ." clientavg" cr )
 	\ negative rate means packet reordering
 	lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
-	slack# 2* 2* min 0 max slack# - \ 1ms slack is allowed
+	slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
 	slack# 2* 2* */ ( dup . ." adjust" cr ) +
 	job-context @ ps/byte avg!
 	statinit
@@ -618,7 +628,6 @@ Variable do-keypad
 
 Variable outflag  outflag off
 Variable b2b-first  b2b-first on
-$10 Constant b2b#
 
 : set-flags ( -- )  job-context @ >r
     ticks r@ sack-time !
@@ -627,6 +636,7 @@ $10 Constant b2b#
 	outbuf c@ $F and or
 	b2b-first @ b2b# and or
 	r@ sack-addr !
+	b2b-first off
     THEN
     r@ sack-addr 2 cells r@ sack-backlog $+!
     r@ sack-addr off
@@ -759,6 +769,7 @@ Create chunk-adder chunks-struct allot
 	chunk-count
 	data-to-send IF
 	    { ck# } bandwidth? dup  IF
+		b2b-first on
 		b2b-chunk# 0 ?DO  ck# chunk-count+  net2o:send-chunk  LOOP
 	    THEN  1 chunks+ +!
 	ELSE
