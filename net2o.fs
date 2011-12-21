@@ -18,6 +18,8 @@ require wurstkessel.fs
     >r r@ @ or r> ! ;
 : and! ( value addr -- )
     >r r@ @ and r> ! ;
+: !@ ( value addr -- old-value )
+    dup @ >r ! r> ;
 
 \ debugging aids
 
@@ -177,10 +179,14 @@ $10 Constant qos1#
 $20 Constant qos2#
 $30 Constant qos3#
 
-$03 Constant acks#
+$07 Constant acks#
+$06 Constant ack-class#
+$01 Constant ack-toggle#
 $00 Constant first-ack#
 $01 Constant second-ack#
-$02 Constant send-ack#
+$02 Constant firstb-ack#
+$04 Constant lastb-ack#
+$06 Constant send-ack#
 $100 Constant ack-change#
 
 \ short packet information
@@ -668,7 +674,7 @@ Variable b2b-first  b2b-first on
 
 : bandwidth+ ( -- )  job-context @ >r
     outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
-    ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ max r> next-tick ! ;
+    ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ umax r> next-tick ! ;
 
 : sendX ( addr taddr target n -- )
     >r set-dest  r> >send  set-flags  bandwidth+  send-packet
@@ -747,9 +753,6 @@ Create chunk-adder chunks-struct allot
     chunk-adder chunks-struct chunks $+!
     ticks dup job-context @ bandwidth-tick !  job-context @ next-tick ! ;
 
-: ack-get ( -- ack )
-    job-context @ ack-state @ ;
-
 : ack-change ( -- state )
     job-context @ ack-state >r
     r@ @ first-ack# <> IF  first-ack#  ELSE  second-ack#  THEN
@@ -757,8 +760,8 @@ Create chunk-adder chunks-struct allot
 
 : chunk-count+ ( counter -- )
     dup @
-    dup 0= IF  acks# invert outflag and!  ack-change
-    ELSE  job-context @ ack-state @  THEN
+    dup 0= IF  ack-toggle# invert outflag and!  ack-change
+    ELSE  job-context @ ack-state @ ack-toggle# and  THEN
     outflag or!
     job-context @ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
 
@@ -770,7 +773,11 @@ Create chunk-adder chunks-struct allot
 	data-to-send IF
 	    { ck# } bandwidth? dup  IF
 		b2b-first on
-		b2b-chunk# 0 ?DO  ck# chunk-count+  net2o:send-chunk  LOOP
+		firstb-ack# outflag or!  ck# chunk-count+  net2o:send-chunk
+		b2b-chunk# 2 - 0 +DO  ck# chunk-count+  net2o:send-chunk  LOOP
+		b2b-chunk# 1 > IF
+		    lastb-ack# outflag or!  ck# chunk-count+  net2o:send-chunk
+		THEN
 	    THEN  1 chunks+ +!
 	ELSE
 	    drop ." done, rate: " job-context @ ps/byte ? cr

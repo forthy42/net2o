@@ -184,6 +184,29 @@ previous
 
 previous definitions
 
+\ client side timing
+
+Variable firstb-ticks
+Variable delta-ticks
+Variable ack-sizes
+
+: ack-size ( -- )  inbuf packet-size ack-sizes +! ;
+: ack-firstb ( -- )  ticks firstb-ticks !  ack-sizes off  ack-size ;
+: ack-lastb ( -- )  ticks firstb-ticks @ - delta-ticks +! ;
+
+: >rate ( -- )
+    delta-ticks @ #1000 ack-sizes @ 1 max */ . ." rate" cr
+    delta-ticks off  ack-sizes off ;
+
+Create ack-timetable
+' ack-size ,
+' ack-firstb ,
+' ack-lastb ,
+' ack-lastb ,
+
+: ack-timing ( n -- )
+    2/ 3 and cells ack-timetable + perform ;
+
 also net2o-base
 
 : net2o:acktime ( -- )
@@ -192,7 +215,8 @@ also net2o-base
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
-: net2o:sendack ( -- )  rate-adjust   net2o:ackrange
+: net2o:sendack ( -- )
+    >rate  rate-adjust   net2o:ackrange
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
@@ -210,10 +234,9 @@ also net2o-base
     dest-addr @ inbuf body-size job-context @ data-ack del-range
     net2o:acktime
 
-    inbuf 1+ c@ acks# and
-    r@ ack-receive dup @ >r over swap !
-    r@ <> IF
-	rdrop
+    inbuf 1+ c@ acks# and  dup ack-timing
+    dup r@ ack-receive !@ xor ack-toggle# and
+    IF
 	net2o:do-resend
 \	net2o:sendack
 \	send-ack# and IF
@@ -222,8 +245,6 @@ also net2o-base
 \	    THEN
 \	    r@ pending-ack on
 \	THEN
-    ELSE
-	rdrop
     THEN  rdrop ;
 ' net2o:do-ack IS do-ack
 
