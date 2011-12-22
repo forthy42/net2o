@@ -191,10 +191,10 @@ Variable delta-ticks
 Variable ack-sizes
 
 : ack-size ( -- )  inbuf packet-size ack-sizes +! ;
-: ack-firstb ( -- )  ticks firstb-ticks !  ack-sizes off  ack-size ;
+: ack-firstb ( -- )  ticks firstb-ticks !  ack-size ;
 : ack-lastb ( -- )  ticks firstb-ticks @ - delta-ticks +! ;
 
-: >rate ( -- )
+: >rate ( -- )  ack-sizes @ 0= ?EXIT
     delta-ticks @ #1000 ack-sizes @ 1 max */ . ." rate" cr
     delta-ticks off  ack-sizes off ;
 
@@ -234,7 +234,7 @@ also net2o-base
     dest-addr @ inbuf body-size job-context @ data-ack del-range
     net2o:acktime
 
-    inbuf 1+ c@ acks# and  dup ack-timing
+    inbuf 1+ c@ acks# and
     dup r@ ack-receive !@ xor ack-toggle# and
     IF
 	net2o:do-resend
@@ -245,7 +245,8 @@ also net2o-base
 \	    THEN
 \	    r@ pending-ack on
 \	THEN
-    THEN  rdrop ;
+    THEN  rdrop
+    inbuf 1+ c@ ack-timing ;
 ' net2o:do-ack IS do-ack
 
 previous
