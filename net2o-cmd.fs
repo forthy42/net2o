@@ -163,9 +163,10 @@ also net2o-base definitions forth
 21 net2o: send-chunks ( -- ) net2o:send-chunks ;
 22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
 23 net2o: rate-adjust ( -- )  net2o:rate-adjust ;
-24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-25 net2o: resend ( addr u -- )  net2o:resend ;
-26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+24 net2o: set-rate ( ticks )  net2o:set-rate ;
+25 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+26 net2o: resend ( addr u -- )  net2o:resend ;
+27 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
 
 \ create commands to send back
 
@@ -194,10 +195,6 @@ Variable ack-sizes
 : ack-firstb ( -- )  ticks firstb-ticks !  ack-size ;
 : ack-lastb ( -- )  ticks firstb-ticks @ - delta-ticks +! ;
 
-: >rate ( -- )  ack-sizes @ 0= ?EXIT
-    delta-ticks @ #1000 ack-sizes @ 1 max */ . ." rate" cr
-    delta-ticks off  ack-sizes off ;
-
 Create ack-timetable
 ' ack-size ,
 ' ack-firstb ,
@@ -208,6 +205,9 @@ Create ack-timetable
     2/ 3 and cells ack-timetable + perform ;
 
 also net2o-base
+: >rate ( -- )  ack-sizes @ 0= ?EXIT
+    delta-ticks @ #1000 ack-sizes @ 1 max */ lit, set-rate
+    delta-ticks off  ack-sizes off ;
 
 : net2o:acktime ( -- )
     dest-addr @ -$20 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
@@ -216,7 +216,7 @@ also net2o-base
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
 : net2o:sendack ( -- )
-    >rate  rate-adjust   net2o:ackrange
+    net2o:acktime  >rate  ( rate-adjust )  net2o:ackrange
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
@@ -232,7 +232,7 @@ also net2o-base
 
 : net2o:do-ack ( -- )  job-context @ >r
     dest-addr @ inbuf body-size job-context @ data-ack del-range
-    net2o:acktime
+\    net2o:acktime
 
     inbuf 1+ c@ acks# and
     dup r@ ack-receive !@ xor ack-toggle# and

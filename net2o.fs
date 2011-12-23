@@ -35,7 +35,7 @@ debug: slk(
 
 +db rate(
 +db slack(
-+db timing(
+\ +db timing(
 
 \ Create udp socket
 
@@ -469,15 +469,18 @@ $10 Constant b2b#
 
 #1000000 Value slack# \ 1ms
 
+: net2o:set-rate ( rate -- )
+    dup rate( dup . ." clientavg" cr )
+    \ negative rate means packet reordering
+    lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
+    slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
+    slack# 2* 2* */ ( dup . ." adjust" cr ) +
+    job-context @ ps/byte avg! ;
+
 : net2o:rate-adjust ( -- )
     statinit'
     clientavg# @ 1 u> IF
-	clientavg @ #1000 clientavg# @ 1- */ abs dup rate( dup . ." clientavg" cr )
-	\ negative rate means packet reordering
-	lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
-	slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
-	slack# 2* 2* */ ( dup . ." adjust" cr ) +
-	job-context @ ps/byte avg!
+	clientavg @ #1000 clientavg# @ 1- */ abs net2o:set-rate
 	statinit
     THEN ;
 
@@ -882,7 +885,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 
 : next-client-packet ( -- addr u )
     BEGIN  BEGIN  poll-sock  UNTIL  read-a-packet4/6  2dup d0= WHILE
-	    2drop  REPEAT
+	   2drop  REPEAT
     sockaddr-tmp alen @ check-address IF
 	reverse64
 	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
