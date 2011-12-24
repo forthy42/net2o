@@ -215,8 +215,9 @@ also net2o-base
     job-context @ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
+: net2o:genack ( -- )
+    net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
-    net2o:acktime  >rate  ( rate-adjust )  net2o:ackrange
     cmdflush cmdbuf @+ swap
     code-dest job-context @ return-address @
     net2o:send-code-packet drop cmdreset ;
@@ -237,6 +238,8 @@ also net2o-base
     inbuf 1+ c@ acks# and
     dup r@ ack-receive !@ xor ack-toggle# and
     IF
+	net2o:genack
+	inbuf 1+ c@ ack-timing
 	net2o:do-resend
 \	net2o:sendack
 \	send-ack# and IF
@@ -244,7 +247,8 @@ also net2o-base
 \		['] net2o:do-resend #1000000 add-queue
 \	    THEN
 \	    r@ pending-ack on
-\	THEN
+	\	THEN
+	rdrop  EXIT
     THEN  rdrop
     inbuf 1+ c@ ack-timing ;
 ' net2o:do-ack IS do-ack
