@@ -300,7 +300,6 @@ field: ack-addr
 field: ack-time
 field: sack-backlog
 field: min-slack
-field: pending-ack
 field: send-tick
 field: ps/byte
 field: bandwidth-tick \ ns
