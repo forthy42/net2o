@@ -16,6 +16,8 @@ require wurstkessel.fs
 
 : or! ( value addr -- )
     >r r@ @ or r> ! ;
+: xor! ( value addr -- )
+    >r r@ @ xor r> ! ;
 : and! ( value addr -- )
     >r r@ @ and r> ! ;
 : !@ ( value addr -- old-value )
@@ -677,18 +679,20 @@ Variable b2b-first  b2b-first on
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  0 max-size^2 DO
 	dup min-size I lshift min-size 1- - u>= IF
-	    min-size I lshift u<= IF  send-ack# outflag or!  THEN
+	    min-size I lshift u<= IF
+		send-ack# outflag or!  ack-toggle# outflag xor!
+	    THEN
 	    I UNLOOP  2r> rot dup >r
 	    min-size r> lshift   EXIT  THEN
     -1 +LOOP
-    min-size u<= IF  send-ack# outflag or!  THEN
+    min-size u<= IF  send-ack# outflag or!  ack-toggle# outflag xor!  THEN
     2r> 0 min-size ;
 
 : net2o:send-packet ( addr u dest addr -- len )
     net2o:prep-send >r sendX r> ;
 
 : net2o:send-code-packet ( addr u dest addr -- len )  2>r
-    send-ack# outflag or!
+    send-ack# outflag or!  ack-toggle# outflag xor!
     0 max-size^2 DO
 	dup min-size 2/ I lshift min-size negate and u> IF
 	    drop I UNLOOP  2r> rot dup >r sendX  min-size r> lshift  EXIT  THEN
@@ -709,7 +713,8 @@ Variable b2b-first  b2b-first on
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
     data-to-send 0= IF
-	send-ack# outflag or!  sendX  never j^ next-tick !
+	send-ack# outflag or!  ack-toggle# outflag xor!
+	sendX  never j^ next-tick !
     ELSE  sendX  THEN ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !

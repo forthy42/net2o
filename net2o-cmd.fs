@@ -206,7 +206,7 @@ also net2o-base
     j^ delta-ticks off  j^ ack-sizes off ;
 
 : net2o:acktime ( -- )
-    dest-addr @ -$20 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
+    dest-addr @ lit, ticks lit, ack-addrtime ;
 : net2o:ackrange ( -- )
     j^ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
@@ -235,8 +235,8 @@ also net2o-base
     IF
 	net2o:genack
 	inbuf 1+ c@ ack-timing
-	net2o:do-resend
-\	net2o:sendack
+	inbuf 1+ c@ send-ack# and send-ack# =
+	IF  net2o:do-resend  ELSE  net2o:sendack  THEN
 \	send-ack# and IF
 \	    r@ pending-ack @ 0= IF
 \		['] net2o:do-resend #1000000 add-queue
