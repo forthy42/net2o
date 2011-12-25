@@ -10,7 +10,7 @@ init-client
 shift-args
 lserver return-addr !
 n2o:new-context constant lcontext
-lcontext job-context !
+lcontext to j:
 
 \ 10 ms
 ." Sending first test" cr

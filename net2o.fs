@@ -204,7 +204,7 @@ $100 Constant ack-change#
 
 \ packet delivery table
 
-Variable job-context
+0 Value j:
 
 \ each source has multiple destination spaces
 
@@ -227,7 +227,7 @@ Variable dest-addr
 
 5 cells Constant /dest
 
-: check-dest ( -- addr 1/t / f )  job-context off
+: check-dest ( -- addr 1/t / f )  0 to j:
     ret-hash cells delivery-table +
     dup @ 0= IF  drop false  EXIT  THEN
     $@ bounds ?DO
@@ -235,7 +235,7 @@ Variable dest-addr
 	0= IF
 	    I cell+ 2@ dest-addr @ swap - +
 	    I 4 cells + @ IF  1  ELSE  -1  THEN
-	    I 3 cells + @ job-context !
+	    I 3 cells + @ to j:
 	    UNLOOP  EXIT  THEN
     /dest +LOOP
     false ;
@@ -262,7 +262,7 @@ end-structure
 
 : map-string ( addr u addr' addrx -- addrx u2 )
     >r r@ 2 cells + ! r@ 2!
-    job-context @ r@ 3 cells + !
+    j: r@ 3 cells + !
     r> /dest ;
 
 : map-dest ( addr u addr' -- )
@@ -343,28 +343,28 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     r@ cmd-out $@ erase r> ;
 
 : n2o:new-data ( addr u -- )  dup allocate throw map-source
-    job-context @ data-map $! ;
+    j: data-map $! ;
 : n2o:new-code ( addr u -- )  dup allocate throw map-source
-    job-context @ code-map $! ;
+    j: code-map $! ;
 
 : data$@ ( -- addr u )
-    job-context @ data-map $@ drop >r
+    j: data-map $@ drop >r
     r@ data-raddr @  r@ data-size @ r> data-head @ safe/string ;
 : /data ( u -- )
-    job-context @ data-map $@ drop data-head +! ;
+    j: data-map $@ drop data-head +! ;
 : data-tail$@ ( -- addr u )
-    job-context @ data-map $@ drop >r
+    j: data-map $@ drop >r
     r@ data-raddr @  r@ data-head @ r> data-tail @ safe/string ;
 : /data-tail ( u -- )
-    job-context @ data-map $@ drop data-tail +! ;
+    j: data-map $@ drop data-tail +! ;
 : data-dest ( -- addr )
-    job-context @ data-map $@ drop >r
+    j: data-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
 
 \ code sending around
 
 : code-dest ( -- addr )
-    job-context @ code-map $@ drop >r
+    j: code-map $@ drop >r
     r@ data-vaddr @ r> data-tail @ + ;
 
 \ acknowledge map
@@ -446,8 +446,8 @@ $10 Constant b2b#
 
 : timestat ( client serv bytes -- )  >r
     ticks over - rtdelay !  swap
-    2dup - negate dup lastdiff !  job-context @ min-slack min!
-    slk( lastdiff @ job-context @ min-slack @ - . ." slk" cr )
+    2dup - negate dup lastdiff !  j: min-slack min!
+    slk( lastdiff @ j: min-slack @ - . ." slk" cr )
     clientavg'# @
     IF
 	dup oldclient @ - clientavg' +!  r> clientavg'# +!
@@ -456,13 +456,13 @@ $10 Constant b2b#
     oldclient ! oldserv ! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
-    job-context @ sack-backlog $@ bounds ?DO
+    j: sack-backlog $@ bounds ?DO
 	dup I @ -$11 and = IF
 	    timing( I cell+ @ . over . ." acktime" I @ b2b# and IF  ." -first"  THEN  cr )
 	    datasize# and min-size swap lshift overhead +
 	    I @ b2b# and IF  statinit'  THEN
 	    I cell+ @ swap timestat
-	    job-context @ sack-backlog I over $@ drop - 2 cells $del
+	    j: sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
@@ -471,10 +471,10 @@ $10 Constant b2b#
 : net2o:set-rate ( rate -- )
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
-    lastdiff @ job-context @ min-slack @ - slack( dup . job-context @ min-slack ? ." slack" cr )
+    lastdiff @ j: min-slack @ - slack( dup . j: min-slack ? ." slack" cr )
     slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
     slack# 2* 2* */ ( dup . ." adjust" cr ) +
-    job-context @ ps/byte rate! ;
+    j: ps/byte rate! ;
 
 : net2o:rate-adjust ( -- )
     statinit'
@@ -483,21 +483,21 @@ $10 Constant b2b#
 	statinit
     THEN ;
 
-: net2o:unacked ( addr u -- )  1+ job-context @ data-ack add-range ;
+: net2o:unacked ( addr u -- )  1+ j: data-ack add-range ;
 : net2o:ack-range ( addr u -- )
     ( 2dup ." Acknowledge range: " swap . . cr ) 2drop ;
 : net2o:resend ( addr u -- )
-    2dup job-context @ data-resend add-range
+    2dup j: data-resend add-range
     ." Resend: " swap . . cr ;
 : >real-range ( addr -- addr' )
-    job-context @ data-map $@ drop data-raddr @ + ;
+    j: data-map $@ drop data-raddr @ + ;
 : resend$@ ( -- addr u )
-    job-context @ data-resend $@  IF
+    j: data-resend $@  IF
 	2@ swap >real-range swap
     ELSE  drop 0 0  THEN ;
 : resend-dest ( -- addr )
-    job-context @ data-resend $@ drop 2@ drop ;
-: /resend ( u -- )  job-context @ data-resend dup $@ drop 2@ drop
+    j: data-resend $@ drop 2@ drop ;
+: /resend ( u -- )  j: data-resend dup $@ drop 2@ drop
     -rot del-range ;
 
 \ file handling
@@ -505,28 +505,28 @@ $10 Constant b2b#
 : >throw ( error -- ) throw ( stub! ) ;
 
 : ?handles ( -- )
-    job-context @ file-handles @ 0= IF
-	s" " job-context @ file-handles $!
+    j: file-handles @ 0= IF
+	s" " j: file-handles $!
     THEN ;    
 
 \ open a file - this needs *way more checking*!
 
 : id>file ( id -- fid )
-    >r job-context @ file-handles $@ r> cells safe/string
+    >r j: file-handles $@ r> cells safe/string
     0= >throw  @ ;
 
 : n2o:open-file ( addr u mode id -- )
     ?handles
-    >r job-context @ file-handles $@ r@ cells safe/string
+    >r j: file-handles $@ r@ cells safe/string
     IF    dup @ ?dup-IF  close-file >throw  THEN  dup off
-    ELSE  drop r@ 1+ cells job-context @ file-handles $!len
-	job-context @ file-handles $@ drop r@ cells +  THEN rdrop >r
+    ELSE  drop r@ 1+ cells j: file-handles $!len
+	j: file-handles $@ drop r@ cells +  THEN rdrop >r
     dup 2over ." open file: " type ."  with mode " . cr
     open-file >throw r> ! ;
 
 : n2o:close-file ( id -- )
     ?handles
-    >r job-context @ file-handles $@ r@ cells safe/string
+    >r j: file-handles $@ r@ cells safe/string
     IF
 	dup @ ?dup-IF  close-file >throw  THEN  dup off
     THEN
@@ -538,7 +538,7 @@ $10 Constant b2b#
     wurst-source state# bounds ?DO  2dup I 2!  2 cells +LOOP  2drop ;
 
 : >wurst-key ( -- )
-    job-context @ dup 0= IF
+    j: dup 0= IF
 	drop wurst-key state#
     ELSE
 	crypto-key $@
@@ -609,10 +609,10 @@ Variable do-keypad
 \ we send our public key and know the server's public key.
 
 : set-key ( addr -- )
-    keysize 2* job-context @ crypto-key $!
+    keysize 2* j: crypto-key $!
     \ double key to get 512 bits
-    job-context @ crypto-key $@ 2/ 2dup + swap move
-    ( ." set key to:" job-context @ crypto-key $@ dump ) ;
+    j: crypto-key $@ 2/ 2dup + swap move
+    ( ." set key to:" j: crypto-key $@ dump ) ;
 
 : net2o:receive-key ( addr u -- )
     keysize <> abort" key+pubkey: expected 32 bytes"
@@ -637,7 +637,7 @@ Variable do-keypad
 Variable outflag  outflag off
 Variable b2b-first  b2b-first on
 
-: set-flags ( -- )  job-context @ >r
+: set-flags ( -- )  j: >r
     ticks r@ sack-time !
     r@ sack-addr @ 0= IF
 	dest-addr @ -$20 and
@@ -674,7 +674,7 @@ Variable b2b-first  b2b-first on
 : >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
-: bandwidth+ ( -- )  job-context @ >r
+: bandwidth+ ( -- )  j: >r
     outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
     ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ umax r> next-tick ! ;
 
@@ -685,9 +685,9 @@ Variable b2b-first  b2b-first on
 \ send chunk
 
 : net2o:get-dest ( taddr target -- )
-    data-dest job-context @ return-address @ ;
+    data-dest j: return-address @ ;
 : net2o:get-resend ( taddr target -- )
-    resend-dest job-context @ return-address @ ;
+    resend-dest j: return-address @ ;
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  0 max-size^2 DO
@@ -724,13 +724,13 @@ Variable b2b-first  b2b-first on
 	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
     THEN
     data-to-send 0= IF
-	send-ack# outflag or!  sendX  never job-context @ next-tick !
+	send-ack# outflag or!  sendX  never j: next-tick !
     ELSE  sendX  THEN ;
 
 : net2o:send-chunks-sync ( -- )  first-ack# outflag !
     BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
 
-: bandwidth? ( -- flag ) job-context @ >r
+: bandwidth? ( -- flag ) j: >r
     ticks r> next-tick @ - 0>= ;
 
 \ asynchronous sending
@@ -746,31 +746,31 @@ Create chunk-adder chunks-struct allot
 
 : net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
-	I chunk-context @ job-context @ = IF
+	I chunk-context @ j: = IF
 	    UNLOOP  EXIT
 	THEN
     chunks-struct %size +LOOP
-    job-context @ chunk-adder chunk-context !
+    j: chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
-    ticks dup job-context @ bandwidth-tick !  job-context @ next-tick ! ;
+    ticks dup j: bandwidth-tick !  j: next-tick ! ;
 
 : ack-change ( -- state )
-    job-context @ ack-state >r
+    j: ack-state >r
     r@ @ first-ack# <> IF  first-ack#  ELSE  second-ack#  THEN
     dup r> ! ack-change# or ;
 
 : chunk-count+ ( counter -- )
     dup @
     dup 0= IF  ack-toggle# invert outflag and!  ack-change
-    ELSE  job-context @ ack-state @ ack-toggle# and  THEN
+    ELSE  j: ack-state @ ack-toggle# and  THEN
     outflag or!
-    job-context @ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
+    j: send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
-	dup chunk-context @ job-context !
+	dup chunk-context @ to j:
 	chunk-count
 	data-to-send IF
 	    { ck# } bandwidth? dup  IF
@@ -782,7 +782,7 @@ Create chunk-adder chunks-struct allot
 		THEN
 	    THEN  1 chunks+ +!
 	ELSE
-	    drop ." done, rate: " job-context @ ps/byte ? cr
+	    drop ." done, rate: " j: ps/byte ? cr
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
 	THEN
@@ -818,7 +818,7 @@ Create queue-adder  queue-struct allot
 
 : add-queue ( xt us -- )
     ticks +  queue-adder queue-timestamp !
-    job-context @ queue-adder queue-job !
+    j: queue-adder queue-job !
     queue-adder queue-xt !
     queue-adder queue-struct queue $+! ;
 
@@ -826,7 +826,7 @@ Create queue-adder  queue-struct allot
     queue $@len 0= ?EXIT  ticks
     queue $@ bounds ?DO
 	dup I queue-timestamp @ u> IF
-	    I queue-job @ job-context !
+	    I queue-job @ to j:
 	    I queue-xt @ execute
 	    0 I queue-timestamp !
 	THEN
@@ -900,7 +900,7 @@ Defer do-ack ( -- )
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF
-	job-context off \ address 0 has no job context!
+	0 to j: \ address 0 has no job context!
 	wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
 	inbuf packet-data queue-command
     ELSE
@@ -912,7 +912,7 @@ Defer do-ack ( -- )
 	dup 0< IF
 	    drop  >r inbuf packet-data r@ swap move
 	    do-ack
-\	    job-context @ IF  inbuf packet-data swap . . cr  THEN
+\	    j: IF  inbuf packet-data swap . . cr  THEN
 	    rdrop
 	ELSE
 	    0>  IF
