@@ -298,8 +298,6 @@ field: data-ack
 field: code-ack
 field: ack-addr
 field: ack-time
-field: sack-addr
-field: sack-time
 field: sack-backlog
 field: min-slack
 field: pending-ack
@@ -627,15 +625,12 @@ Variable do-keypad
 
 Variable outflag  outflag off
 Variable b2b-first  b2b-first on
+2Variable sack-addrtime
 
 : set-flags ( -- )  j: >r
     b2b-first @ IF
-	ticks r@ sack-time !
-	dest-addr @ -$20 and
-	outbuf c@ $F and or
-	b2b-first @ b2b# and or
-	r@ sack-addr !
-	r@ sack-addr 2 cells r@ sack-backlog $+!
+	ticks r@ dest-addr @ sack-addrtime !
+	sack-addrtime 2 cells r@ sack-backlog $+!
     THEN
     b2b-first off
     rdrop
