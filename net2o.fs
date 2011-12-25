@@ -447,23 +447,21 @@ $10 Constant b2b#
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j: sack-backlog $@ bounds ?DO
-	dup I @ -$11 and = IF
-	    timing( I cell+ @ . over . ." acktime" I @ b2b# and IF  ." -first"  THEN  cr )
+	dup I @ = IF
+	    timing( I cell+ @ . over . ." acktime" cr )
 	    drop
 	    I cell+ @ timestat
 	    j: sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
-#1000000 Value slack# \ 1ms
+#4000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
 : net2o:set-rate ( rate -- )
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j: min-slack @ - slack( dup . j: min-slack ? ." slack" cr )
-    slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
-    slack# 2* 2* */ ( dup . ." adjust" cr ) +
-    j: ps/byte ! ;
+    0 max slack# */ + j: ps/byte ! ;
 
 : net2o:rate-adjust ( -- )
     statinit'
@@ -629,7 +627,7 @@ Variable b2b-first  b2b-first on
 
 : set-flags ( -- )  j: >r
     b2b-first @ IF
-	ticks r@ dest-addr @ sack-addrtime !
+	ticks dest-addr @ sack-addrtime 2!
 	sack-addrtime 2 cells r@ sack-backlog $+!
     THEN
     b2b-first off
