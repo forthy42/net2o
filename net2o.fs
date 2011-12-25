@@ -30,6 +30,7 @@ require wurstkessel.fs
 
 debug: timing(
 debug: rate(
+debug: ratex(
 debug: slack(
 debug: slk(
 
@@ -37,7 +38,7 @@ debug: slk(
 
 \ +db rate(
 \ +db slack(
-+db timing(
+\ +db timing(
 
 \ Create udp socket
 

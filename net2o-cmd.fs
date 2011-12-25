@@ -197,12 +197,14 @@ Create ack-timetable
 ' ack-lastb ,
 ' ack-lastb ,
 
-: ack-timing ( n -- )
+: ack-timing ( n -- )  ratex( dup 2/ s" .<>!" drop + c@ emit )
     2/ 3 and cells ack-timetable + perform ;
 
+: .rate ( n -- n ) dup . ." rate" cr ;
 also net2o-base
 : >rate ( -- )  j^ ack-sizes @ 0= ?EXIT  j^ delta-ticks @ 0= ?EXIT
-    j^ delta-ticks @ #1000 j^ ack-sizes @ lit, set-rate
+    j^ delta-ticks @ #1000 j^ ack-sizes @ */
+    rate( .rate ) lit, set-rate
     j^ delta-ticks off  j^ ack-sizes off ;
 
 : net2o:acktime ( -- )
@@ -234,7 +236,7 @@ also net2o-base
     dup r@ ack-receive !@ xor ack-toggle# and
     IF
 	net2o:genack
-	inbuf 1+ c@ ack-timing
+\	inbuf 1+ c@ ack-timing
 	inbuf 1+ c@ send-ack# and send-ack# =
 	IF  net2o:do-resend  ELSE  net2o:sendack  THEN
 \	send-ack# and IF
@@ -243,7 +245,7 @@ also net2o-base
 \	    THEN
 \	    r@ pending-ack on
 	\	THEN
-	rdrop  EXIT
+\	rdrop  EXIT
     THEN  rdrop
     inbuf 1+ c@ ack-timing ;
 ' net2o:do-ack IS do-ack
