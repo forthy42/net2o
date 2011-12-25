@@ -187,13 +187,9 @@ previous definitions
 
 \ client side timing
 
-Variable firstb-ticks
-Variable delta-ticks
-Variable ack-sizes
-
-: ack-size ( -- )  inbuf packet-size ack-sizes +! ;
-: ack-firstb ( -- )  ticks firstb-ticks !  ack-size ;
-: ack-lastb ( -- )  ticks firstb-ticks @ - delta-ticks +! ;
+: ack-size ( -- )  inbuf packet-size j^ ack-sizes +! ;
+: ack-firstb ( -- )  ticks j^ firstb-ticks !  ack-size ;
+: ack-lastb ( -- )  ticks j^ firstb-ticks @ - j^ delta-ticks +! ;
 
 Create ack-timetable
 ' ack-size ,
@@ -205,9 +201,9 @@ Create ack-timetable
     2/ 3 and cells ack-timetable + perform ;
 
 also net2o-base
-: >rate ( -- )  ack-sizes @ 0= ?EXIT
-    delta-ticks @ #1000 ack-sizes @ 1 max */ lit, set-rate
-    delta-ticks off  ack-sizes off ;
+: >rate ( -- )  j^ ack-sizes @ 0= ?EXIT  j^ delta-ticks @ 0= ?EXIT
+    j^ delta-ticks @ #1000 j^ ack-sizes @ lit, set-rate
+    j^ delta-ticks off  j^ ack-sizes off ;
 
 : net2o:acktime ( -- )
     dest-addr @ -$20 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;

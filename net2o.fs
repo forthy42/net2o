@@ -304,6 +304,9 @@ field: send-tick
 field: ps/byte
 field: bandwidth-tick \ ns
 field: next-tick \ ns
+field: firstb-ticks
+field: delta-ticks
+field: ack-sizes
 end-structure
 
 begin-structure cmd-struct
