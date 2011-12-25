@@ -228,8 +228,7 @@ also net2o-base
     j: data-ack $@ nip 2 cells > IF
 	send-chunks
     THEN
-    net2o:sendack
-    j: pending-ack off ;
+    net2o:sendack ;
 
 : net2o:do-ack ( -- )  j: >r
     dest-addr @ inbuf body-size j: data-ack del-range
