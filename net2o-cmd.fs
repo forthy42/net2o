@@ -102,11 +102,11 @@ definitions
 
 \ net2o assembler
 
-: cmdbuf     j: cmd-out $@ drop cmd-buf# ;
-: endcmdbuf  j: cmd-out $@ + ;
-: cmdaccu    j: cmd-out $@ drop cmd-accu# ;
-: cmdslot    j: cmd-out $@ drop cmd-slot ;
-: cmdextras  j: cmd-out $@ drop cmd-extras ;
+: cmdbuf     j^ cmd-out $@ drop cmd-buf# ;
+: endcmdbuf  j^ cmd-out $@ + ;
+: cmdaccu    j^ cmd-out $@ drop cmd-accu# ;
+: cmdslot    j^ cmd-out $@ drop cmd-slot ;
+: cmdextras  j^ cmd-out $@ drop cmd-extras ;
 
 : cmdreset  cmdbuf off  cmdslot off  cmdextras off ;
 
@@ -152,7 +152,7 @@ also net2o-base definitions forth
 10 net2o: throw ( error -- )  throw ;
 11 net2o: new-map ( addr u -- )  n2o:new-map ;
 12 net2o: new-code-map ( addr u -- )  n2o:new-code-map ;
-13 net2o: new-context ( -- ) n2o:new-context to j: ;
+13 net2o: new-context ( -- ) n2o:new-context to j^ ;
 14 net2o: new-data ( addr u -- ) n2o:new-data ;
 15 net2o: new-code ( addr u -- ) n2o:new-code ;
 16 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
@@ -212,26 +212,26 @@ also net2o-base
 : net2o:acktime ( -- )
     dest-addr @ -$20 and inbuf c@ $F and or lit, ticks lit, ack-addrtime ;
 : net2o:ackrange ( -- )
-    j: data-ack $@ dup IF
+    j^ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
 : net2o:genack ( -- )
     net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
     cmdflush cmdbuf @+ swap
-    code-dest j: return-address @
+    code-dest j^ return-address @
     net2o:send-code-packet drop cmdreset ;
 : net2o:do-resend ( -- )
-    j: data-ack $@ 2 cells - 0 max bounds ?DO
+    j^ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend
     2 cells +LOOP
-    j: data-ack $@ nip 2 cells > IF
+    j^ data-ack $@ nip 2 cells > IF
 	send-chunks
     THEN
     net2o:sendack ;
 
-: net2o:do-ack ( -- )  j: >r
-    dest-addr @ inbuf body-size j: data-ack del-range
+: net2o:do-ack ( -- )  j^ >r
+    dest-addr @ inbuf body-size j^ data-ack del-range
 \    net2o:acktime
 
     inbuf 1+ c@ acks# and
