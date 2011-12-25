@@ -421,9 +421,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 \ acknowledge handling, flow control
 
-: rate! ( n addr -- )
-    rate( over . ." rate" cr )  ! ;
-
 Variable oldserv
 Variable oldclient
 Variable clientavg
@@ -474,7 +471,7 @@ $10 Constant b2b#
     lastdiff @ j: min-slack @ - slack( dup . j: min-slack ? ." slack" cr )
     slack# 2* 2* min 0 max ( slack# - ) \ 1ms slack is allowed
     slack# 2* 2* */ ( dup . ." adjust" cr ) +
-    j: ps/byte rate! ;
+    j: ps/byte ! ;
 
 : net2o:rate-adjust ( -- )
     statinit'
