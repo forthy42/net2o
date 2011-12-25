@@ -33,9 +33,9 @@ debug: slk(
 
 : +db ( "word" -- ) ' >body on ;
 
-+db rate(
-+db slack(
-\ +db timing(
+\ +db rate(
+\ +db slack(
++db timing(
 
 \ Create udp socket
 
@@ -441,24 +441,18 @@ $10 Constant b2b#
 
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
-: timestat ( client serv bytes -- )  >r
+: timestat ( client serv bytes -- )
     ticks over - rtdelay !  swap
     2dup - negate dup lastdiff !  j: min-slack min!
     slk( lastdiff @ j: min-slack @ - . ." slk" cr )
-    clientavg'# @
-    IF
-	dup oldclient @ - clientavg' +!  r> clientavg'# +!
-    ELSE
-	1 clientavg'# +! rdrop  THEN
     oldclient ! oldserv ! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j: sack-backlog $@ bounds ?DO
 	dup I @ -$11 and = IF
 	    timing( I cell+ @ . over . ." acktime" I @ b2b# and IF  ." -first"  THEN  cr )
-	    datasize# and min-size swap lshift overhead +
-	    I @ b2b# and IF  statinit'  THEN
-	    I cell+ @ swap timestat
+	    drop
+	    I cell+ @ timestat
 	    j: sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
@@ -635,16 +629,15 @@ Variable outflag  outflag off
 Variable b2b-first  b2b-first on
 
 : set-flags ( -- )  j: >r
-    ticks r@ sack-time !
-    r@ sack-addr @ 0= IF
+    b2b-first @ IF
+	ticks r@ sack-time !
 	dest-addr @ -$20 and
 	outbuf c@ $F and or
 	b2b-first @ b2b# and or
 	r@ sack-addr !
-	b2b-first off
+	r@ sack-addr 2 cells r@ sack-backlog $+!
     THEN
-    r@ sack-addr 2 cells r@ sack-backlog $+!
-    r@ sack-addr off
+    b2b-first off
     rdrop
     outflag @ outbuf 1+ c! outflag off ;
 
