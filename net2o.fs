@@ -33,6 +33,7 @@ debug: slk(
 : +db ( "word" -- ) ' >body on ;
 
 \ +db rate(
+\ +db ratex(
 \ +db slack(
 \ +db timing(
 
@@ -181,12 +182,8 @@ $30 Constant qos3#
 $07 Constant acks#
 $06 Constant ack-class#
 $01 Constant ack-toggle#
-$00 Constant first-ack#
-$01 Constant second-ack#
-$02 Constant firstb-ack#
-$04 Constant lastb-ack#
-$06 Constant send-ack#
-$100 Constant ack-change#
+$02 Constant b2b-toggle#
+$04 Constant send-ack#
 
 \ short packet information
 
@@ -304,6 +301,7 @@ field: ps/byte
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: firstb-ticks
+field: lastb-ticks
 field: delta-ticks
 field: ack-sizes
 end-structure
@@ -332,8 +330,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " r@ code-ack $!
     s" " r@ sack-backlog $!
     wurst-key state# r@ crypto-key $!
-    -1 r@ ack-state !
-    -1 r@ ack-receive !
     $7fffffffffffffff r@ min-slack !
     tick-init r@ send-tick !
     bandwidth-init r@ ps/byte !
@@ -688,9 +684,6 @@ Variable b2b-first  b2b-first on
 	sendX  never j^ next-tick !
     ELSE  sendX  THEN ;
 
-: net2o:send-chunks-sync ( -- )  first-ack# outflag !
-    BEGIN  data-to-send  WHILE  net2o:send-chunk  REPEAT ;
-
 : bandwidth? ( -- flag ) j^ >r
     ticks r> next-tick @ - 0>= ;
 
@@ -716,16 +709,10 @@ Create chunk-adder chunks-struct allot
     chunk-adder chunks-struct chunks $+!
     ticks dup j^ bandwidth-tick !  j^ next-tick ! ;
 
-: ack-change ( -- state )
-    j^ ack-state >r
-    r@ @ first-ack# <> IF  first-ack#  ELSE  second-ack#  THEN
-    dup r> ! ack-change# or ;
-
 : chunk-count+ ( counter -- )
     dup @
-    dup 0= IF  ack-toggle# invert outflag and!  ack-change
-    ELSE  j^ ack-state @ ack-toggle# and  THEN
-    outflag or!
+    dup 0= IF  ack-toggle# j^ ack-state xor!  THEN
+    j^ ack-state @ outflag or!
     j^ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
@@ -735,12 +722,8 @@ Create chunk-adder chunks-struct allot
 	chunk-count
 	data-to-send IF
 	    { ck# } bandwidth? dup  IF
-		b2b-first on
-		firstb-ack# outflag or!  ck# chunk-count+  net2o:send-chunk
-		b2b-chunk# 2 - 0 +DO  ck# chunk-count+  net2o:send-chunk  LOOP
-		b2b-chunk# 1 > IF
-		    lastb-ack# outflag or!  ck# chunk-count+  net2o:send-chunk
-		THEN
+		b2b-first on  b2b-toggle# j^ ack-state xor!
+		b2b-chunk# 0 +DO  ck# chunk-count+  net2o:send-chunk  LOOP
 	    THEN  1 chunks+ +!
 	ELSE
 	    drop ." done, rate: " j^ ps/byte ? cr

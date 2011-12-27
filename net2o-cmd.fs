@@ -186,18 +186,13 @@ previous definitions
 
 \ client side timing
 
-: ack-size ( -- )  inbuf packet-size j^ ack-sizes +! ;
-: ack-firstb ( -- )  ticks j^ firstb-ticks !  ack-size ;
-: ack-lastb ( -- )  ticks j^ firstb-ticks @ - j^ delta-ticks +! ;
+: ack-size ( -- )  inbuf packet-size j^ ack-sizes +!  ticks j^ lastb-ticks ! ;
+: ack-first ( -- )
+    j^ lastb-ticks @ ?dup-IF  j^ firstb-ticks @ - j^ delta-ticks +!  THEN
+    ticks j^ firstb-ticks !  j^ lastb-ticks off ;
 
-Create ack-timetable
-' ack-size ,
-' ack-firstb ,
-' ack-lastb ,
-' ack-lastb ,
-
-: ack-timing ( n -- )  ratex( dup 2/ s" .<>!" drop + c@ emit )
-    2/ 3 and cells ack-timetable + perform ;
+: ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
+    b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
 
 : .rate ( n -- n ) dup . ." rate" cr ;
 also net2o-base
@@ -232,11 +227,11 @@ also net2o-base
 \    net2o:acktime
 
     inbuf 1+ c@ acks# and
-    dup r@ ack-receive !@ xor ack-toggle# and
+    dup r@ ack-receive !@ xor dup >r ack-toggle# and
     IF
 	net2o:genack
 \	inbuf 1+ c@ ack-timing
-	inbuf 1+ c@ send-ack# and send-ack# =
+	inbuf 1+ c@ send-ack# and
 	IF  net2o:do-resend  ELSE  net2o:sendack  THEN
 \	send-ack# and IF
 \	    r@ pending-ack @ 0= IF
@@ -245,8 +240,7 @@ also net2o-base
 \	    r@ pending-ack on
 	\	THEN
 \	rdrop  EXIT
-    THEN  rdrop
-    inbuf 1+ c@ ack-timing ;
+    THEN  r> rdrop ack-timing ;
 ' net2o:do-ack IS do-ack
 
 previous
