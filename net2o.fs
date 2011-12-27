@@ -426,13 +426,12 @@ Variable rtdelay
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
 : timestat ( client serv -- )
+    timing( over . dup . ." acktime" cr )
     ticks over - rtdelay ! - dup lastdiff !  j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j^ sack-backlog $@ bounds ?DO
-	dup I @ = IF
-	    timing( I cell+ @ . over . ." acktime" cr )
-	    drop
+	dup I @ = IF  drop
 	    I cell+ @ timestat
 	    j^ sack-backlog I over $@ drop - 2 cells $del
 	    UNLOOP  EXIT  THEN
