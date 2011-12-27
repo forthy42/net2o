@@ -14,14 +14,10 @@ require wurstkessel.fs
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 
-: or! ( value addr -- )
-    >r r@ @ or r> ! ;
-: xor! ( value addr -- )
-    >r r@ @ xor r> ! ;
-: and! ( value addr -- )
-    >r r@ @ and r> ! ;
-: !@ ( value addr -- old-value )
-    dup @ >r ! r> ;
+: or!  ( value addr -- )   >r r@ @ or  r> ! ;
+: xor! ( value addr -- )   >r r@ @ xor r> ! ;
+: and! ( value addr -- )   >r r@ @ and r> ! ;
+: !@ ( value addr -- old-value )   dup @ >r ! r> ;
 
 \ debugging aids
 
@@ -424,31 +420,13 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 \ acknowledge handling, flow control
 
-Variable oldserv
-Variable oldclient
-Variable clientavg
-Variable clientavg#
-Variable clientavg'
-Variable clientavg'#
 Variable lastdiff
 Variable rtdelay
 
-$10 Constant b2b#
-
-: statinit ( -- )
-    clientavg off  clientavg# off ;
-
-: statinit' ( -- )
-    clientavg' @ clientavg +!  clientavg'# @ clientavg# +!
-    clientavg' off  clientavg'# off ;
-
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
-: timestat ( client serv bytes -- )
-    ticks over - rtdelay !  swap
-    2dup - negate dup lastdiff !  j^ min-slack min!
-    slk( lastdiff @ j^ min-slack @ - . ." slk" cr )
-    oldclient ! oldserv ! ;
+: timestat ( client serv -- )
+    ticks over - rtdelay ! - dup lastdiff !  j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j^ sack-backlog $@ bounds ?DO
@@ -467,13 +445,6 @@ $10 Constant b2b#
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
     0 max slack# */ + j^ ps/byte ! ;
-
-: net2o:rate-adjust ( -- )
-    statinit'
-    clientavg# @ 1 u> IF
-	clientavg @ #1000 clientavg# @ 1- */ abs net2o:set-rate
-	statinit
-    THEN ;
 
 : net2o:unacked ( addr u -- )  1+ j^ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
