@@ -139,7 +139,8 @@ also net2o-base definitions
     endcmdbuf over - xc!+? 0= abort" didn't fit"
     r@ min move
     r> dup xc-size + aligned cmdextras +!  string ;
-: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ be-x!  1 cells cmdextras +!  lit ;
+: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ be-x!
+    1 cells cmdextras +!  lit ;
 : char, ( xc -- )  char cmd, ;
 : end-code ( -- ) cmdflush previous ;
 
@@ -222,25 +223,15 @@ also net2o-base
     THEN
     net2o:sendack ;
 
-: net2o:do-ack ( -- )  j^ >r
+: net2o:do-ack ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
-\    net2o:acktime
-
     inbuf 1+ c@ acks# and
-    dup r@ ack-receive !@ xor dup >r ack-toggle# and
+    dup j^ ack-receive !@ xor dup >r ack-toggle# and
     IF
 	net2o:genack
-\	inbuf 1+ c@ ack-timing
 	inbuf 1+ c@ send-ack# and
 	IF  net2o:do-resend  ELSE  net2o:sendack  THEN
-\	send-ack# and IF
-\	    r@ pending-ack @ 0= IF
-\		['] net2o:do-resend #1000000 add-queue
-\	    THEN
-\	    r@ pending-ack on
-	\	THEN
-\	rdrop  EXIT
-    THEN  r> rdrop ack-timing ;
+    THEN  r> ack-timing ;
 ' net2o:do-ack IS do-ack
 
 previous
