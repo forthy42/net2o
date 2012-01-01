@@ -659,13 +659,7 @@ Variable b2b-first  b2b-first on
 : net2o:send-packet ( addr u dest addr -- len )
     net2o:prep-send >r sendX r> ;
 
-: net2o:send-code-packet ( addr u dest addr -- len )  2>r
-    send-ack# outflag or!  ack-toggle# outflag xor!
-    0 max-size^2 DO
-	dup min-size 2/ I lshift min-size negate and u> IF
-	    drop I UNLOOP  2r> rot dup >r sendX  min-size r> lshift  EXIT  THEN
-    -1 +LOOP
-    drop 2r>  0 sendX  min-size ;
+: net2o:send-code-packet ( addr u dest addr -- len )  net2o:send-packet ;
 
 \ synchronous sending
 
