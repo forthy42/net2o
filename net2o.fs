@@ -322,20 +322,20 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 : ticks ( -- u )  ntime drop ;
 
-: n2o:new-context ( -- addr )  context-struct allocate throw >r
-    r@ context-struct erase  return-addr @ r@ return-address !
-    s" " r@ cmd-out $!
-    s" " r@ data-ack $!
-    s" " r@ data-resend $!
-    s" " r@ code-ack $!
-    s" " r@ sack-backlog $!
-    wurst-key state# r@ crypto-key $!
-    $7fffffffffffffff r@ min-slack !
-    tick-init r@ send-tick !
-    bandwidth-init r@ ps/byte !
-    never          r@ next-tick !
-    cmd-struct r@ cmd-out $!len
-    r@ cmd-out $@ erase r> ;
+: n2o:new-context ( -- )  context-struct allocate throw to j^
+    j^ context-struct erase  return-addr @ j^ return-address !
+    s" " j^ cmd-out $!
+    s" " j^ data-ack $!
+    s" " j^ data-resend $!
+    s" " j^ code-ack $!
+    s" " j^ sack-backlog $!
+    wurst-key state# j^ crypto-key $!
+    $7fffffffffffffff j^ min-slack !
+    tick-init j^ send-tick !
+    bandwidth-init j^ ps/byte !
+    never          j^ next-tick !
+    cmd-struct j^ cmd-out $!len
+    j^ cmd-out $@ erase ;
 
 : n2o:new-data ( addr u -- )  dup allocate throw map-source
     j^ data-map $! ;

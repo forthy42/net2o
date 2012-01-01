@@ -9,8 +9,7 @@ init-client
 1 arg net2o-udp insert-ipv4 constant lserver
 shift-args
 lserver return-addr !
-n2o:new-context constant lcontext
-lcontext to j^
+n2o:new-context
 
 \ 10 ms
 ." Sending first test" cr
