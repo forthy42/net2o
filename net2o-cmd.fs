@@ -213,7 +213,7 @@ also net2o-base
 : net2o:sendack ( -- )
     cmdflush cmdbuf @+ swap
     code-dest j^ return-address @
-    net2o:send-code-packet drop cmdreset ;
+    net2o:send-packet drop cmdreset ;
 : net2o:do-resend ( -- )
     j^ data-ack $@ 2 cells - 0 max bounds ?DO
 	I 2@ swap lit, lit, resend

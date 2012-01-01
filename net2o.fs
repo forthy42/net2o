@@ -659,8 +659,6 @@ Variable b2b-first  b2b-first on
 : net2o:send-packet ( addr u dest addr -- len )
     net2o:prep-send >r sendX r> ;
 
-: net2o:send-code-packet ( addr u dest addr -- len )  net2o:send-packet ;
-
 \ synchronous sending
 
 : data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
