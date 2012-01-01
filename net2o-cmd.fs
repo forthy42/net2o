@@ -167,11 +167,15 @@ also net2o-base definitions forth
 24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 25 net2o: resend ( addr u -- )  net2o:resend ;
 26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+27 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+28 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
 
 \ create commands to send back
 
 also net2o-base
 : send-key ( pk -- )  net2o:send-key $, receive-key ;
+: data-ivs ( -- )   rng$ 2dup $, gen-data-ivs net2o:gen-data-ivs ;
+: code-ivs ( -- )   rng$ 2dup $, gen-code-ivs net2o:gen-code-ivs ;
 
 30 net2o: push-$    $, ;
 31 net2o: push-lit  lit, ;

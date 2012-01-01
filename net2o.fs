@@ -221,7 +221,14 @@ Variable dest-addr
 
 : ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
-5 cells Constant /dest
+begin-structure dest-struct
+field: dest-size
+field: dest-vaddr
+field: dest-raddr
+field: dest-job
+field: dest-flag
+field: dest-ivs
+end-structure
 
 : check-dest ( -- addr 1/t / f )  0 to j^
     ret-hash cells delivery-table +
@@ -229,11 +236,11 @@ Variable dest-addr
     $@ bounds ?DO
 	I 2@ 1- bounds dest-addr @ within
 	0= IF
-	    I cell+ 2@ dest-addr @ swap - +
-	    I 4 cells + @ IF  1  ELSE  -1  THEN
-	    I 3 cells + @ to j^
+	    I dest-vaddr 2@ dest-addr @ swap - +
+	    I dest-flag @ IF  1  ELSE  -1  THEN
+	    I dest-job @ to j^
 	    UNLOOP  EXIT  THEN
-    /dest +LOOP
+    dest-struct +LOOP
     false ;
 
 \ Destination mapping contains
@@ -242,7 +249,7 @@ Variable dest-addr
 \ context - for exec regions, this is the job context
 
                     \  u   addr real-addr job code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , here 0 ,
+Create dest-mapping    0 , 0 ,  0 ,       0 , here 0 , 0 ,
 Constant code-flag
                     \  u   addr real-addr job head tail
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 ,  0 ,
@@ -257,9 +264,9 @@ field: data-tail
 end-structure
 
 : map-string ( addr u addr' addrx -- addrx u2 )
-    >r r@ 2 cells + ! r@ 2!
-    j^ r@ 3 cells + !
-    r> /dest ;
+    >r r@ dest-raddr ! r@ dest-size 2!
+    j^ r@ dest-job !
+    r> dest-struct ;
 
 : map-dest ( addr u addr' -- )
     ret-hash cells delivery-table + >r
@@ -267,7 +274,7 @@ end-structure
     dest-mapping map-string r> $+! ;
 
 : map-source ( addr u addr' -- addr u )
-    source-mapping map-string 2 cells + ;
+    source-mapping map-string cell+ ;
 
 : n2o:new-map ( addr u -- )  code-flag off
     dup allocate throw map-dest ;
@@ -284,10 +291,11 @@ field: cmd-out
 field: file-handles
 field: crypto-key
 field: auth-info
-field: status
 field: data-map
+field: data-ivs
 field: data-resend
 field: code-map
+field: code-ivs
 field: ack-state
 field: ack-receive
 field: data-ack
@@ -494,6 +502,8 @@ Variable rtdelay
 
 \ symmetric encryption and decryption
 
+: >wurst-source' ( addr -- )  wurst-source state# move ;
+
 : >wurst-source ( d -- )
     wurst-source state# bounds ?DO  2dup I 2!  2 cells +LOOP  2drop ;
 
@@ -524,30 +534,32 @@ Variable rtdelay
     0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
-: wurst-outbuf-encrypt ;
-true constant wurst-inbuf-decrypt
+    : wurst-outbuf-encrypt ;
+    true constant wurst-inbuf-decrypt
 [ELSE]
-: wurst-outbuf-encrypt ( -- )
-    wurst-outbuf-init
-    outbuf body-size mem-rounds# >r
-    outbuf packet-data
-    over roundse# rounds
-    BEGIN  dup 0>  WHILE
-	    over r@ rounds  r@ >reads state# * safe/string
-    REPEAT
-    over roundse# rounds  drop
-    rdrop wurst-crc rot 2! ;
+    : encrypt-buffer ( addr u n -- addr 0 ) >r
+	over roundse# rounds
+	BEGIN  dup 0>  WHILE
+		over r@ rounds  r@ >reads state# * safe/string
+	REPEAT  rdrop ;
+    
+    : wurst-outbuf-encrypt ( -- )
+	wurst-outbuf-init
+	outbuf body-size mem-rounds# >r
+	outbuf packet-data r@ encrypt-buffer
+	over roundse# rounds  drop
+	rdrop wurst-crc rot 2! ;
 
-: wurst-inbuf-decrypt ( -- flag )
-    wurst-inbuf-init
-    inbuf body-size mem-rounds# >r
-    inbuf packet-data
-    over roundse# rounds
-    BEGIN  dup 0>  WHILE
-	    over r@ rounds-decrypt  r@ >reads state# * safe/string
-    REPEAT
-    over roundse# rounds  drop
-    rdrop 2@ wurst-crc d= ;
+    : wurst-inbuf-decrypt ( -- flag )
+	wurst-inbuf-init
+	inbuf body-size mem-rounds# >r
+	inbuf packet-data
+	over roundse# rounds
+	BEGIN  dup 0>  WHILE
+		over r@ rounds-decrypt  r@ >reads state# * safe/string
+	REPEAT
+	over roundse# rounds  drop
+	rdrop 2@ wurst-crc d= ;
 [THEN]
 
 \ public key encryption
@@ -567,6 +579,20 @@ Variable do-keypad
 
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and know the server's public key.
+
+: ivs-string ( addr u n addr -- ) ~~ >r r@ $!len
+    >wurst-key
+    state# <> abort" 64 byte ivs!" >wurst-source'
+    r@ $@ erase
+    r> $@ mem-rounds# encrypt-buffer 2drop ;
+
+: ivs-size@ ( map -- n ) $@ drop data-size @ max-size^2 rshift ;
+
+: net2o:gen-data-ivs ( addr u -- )
+    j^ data-map ivs-size@ j^ data-ivs ivs-string ;
+
+: net2o:gen-code-ivs ( addr u -- )
+    j^ code-map ivs-size@ j^ code-ivs ivs-string ;
 
 : set-key ( addr -- )
     keysize 2* j^ crypto-key $!

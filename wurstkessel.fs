@@ -602,7 +602,7 @@ $28 Value rounds#
 \ buffered random numbers to output 64 bit at a time
 
 Variable rng-buffer
-64 rng-buffer !
+state# rng-buffer !
 
 : rng@ ( -- x )
     rng-buffer @ 64 = IF
@@ -611,6 +611,10 @@ Variable rng-buffer
     THEN
     rng-buffer @ wurst-salt + @
     1 cells rng-buffer +! ;
+
+: rng$ ( -- addr u )
+    rng-step  state# rng-buffer !
+    wurst-salt state# ;
 
 : rng32 ( -- x )
     rng-buffer @ 64 = IF
