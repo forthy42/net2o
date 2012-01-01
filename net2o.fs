@@ -643,17 +643,18 @@ Variable b2b-first  b2b-first on
 : net2o:get-resend ( taddr target -- )
     resend-dest j^ return-address @ ;
 
-: net2o:prep-send ( addr u dest addr -- addr taddr target n len )
-    2>r  0 max-size^2 DO
-	dup min-size I lshift min-size 1- - u>= IF
-	    min-size I lshift u<= IF
-		send-ack# outflag or!  ack-toggle# outflag xor!
-	    THEN
-	    I UNLOOP  2r> rot dup >r
-	    min-size r> lshift   EXIT  THEN
+: send-size ( u -- n )
+    0 max-size^2 DO
+	dup min-size 2/ I lshift u>= IF
+	    drop I  UNLOOP  EXIT
+	THEN
     -1 +LOOP
-    min-size u<= IF  send-ack# outflag or!  ack-toggle# outflag xor!  THEN
-    2r> 0 min-size ;
+    drop 0 ;
+
+: net2o:prep-send ( addr u dest addr -- addr taddr target n len )
+    2>r  dup >r send-size min-size over lshift
+    dup r> u>= IF  send-ack# outflag or!  ack-toggle# outflag xor!  THEN
+    2r> 2swap ;
 
 : net2o:send-packet ( addr u dest addr -- len )
     net2o:prep-send >r sendX r> ;
