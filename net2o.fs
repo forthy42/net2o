@@ -322,8 +322,10 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 : ticks ( -- u )  ntime drop ;
 
-: n2o:new-context ( -- )  context-struct allocate throw to j^
-    j^ context-struct erase  return-addr @ j^ return-address !
+: n2o:new-context ( addr -- )
+    context-struct allocate throw to j^
+    j^ context-struct erase
+    dup return-addr !  j^ return-address !
     s" " j^ cmd-out $!
     s" " j^ data-ack $!
     s" " j^ data-resend $!

@@ -153,7 +153,7 @@ also net2o-base definitions forth
 10 net2o: throw ( error -- )  throw ;
 11 net2o: new-map ( addr u -- )  n2o:new-map ;
 12 net2o: new-code-map ( addr u -- )  n2o:new-code-map ;
-13 net2o: new-context ( -- ) n2o:new-context ;
+13 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 14 net2o: new-data ( addr u -- ) n2o:new-data ;
 15 net2o: new-code ( addr u -- ) n2o:new-code ;
 16 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
