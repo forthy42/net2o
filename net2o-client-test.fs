@@ -6,20 +6,19 @@ pkc skc crypto_box_keypair \ create a random key pair
 
 init-client
 
-1 arg net2o-udp insert-ipv4 constant lserver
-shift-args
+next-arg net2o-udp insert-ipv4 constant lserver
 lserver return-addr !
 n2o:new-context
 
 \ 10 ms
 ." Sending first test" cr
 net2o-code S" This is the first test" $, type '!' char, emit cr
-end-code lserver 0 send-cmd
+end-code 0 send-cmd
 
 \ 10 ms
 ." Sending second test" cr
 net2o-code S" This is the second test" $, type '!' char, emit cr
-end-code lserver 0 send-cmd
+end-code 0 send-cmd
 
 \ 10 ms
 ." Sending more complex test" cr
@@ -38,7 +37,7 @@ s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-end-code lserver 0 send-cmd
+end-code 0 send-cmd
 
 $80000 $800000 n2o:new-map
 $10000 $1000 n2o:new-code-map
