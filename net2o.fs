@@ -584,7 +584,7 @@ Variable do-keypad
     >wurst-key
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
-    r> $@ dup mem-rounds# encrypt-buffer 2drop ;
+    r> $@ dup mem-rounds# encrypt-buffer 2drop wurst-crc xor hex. cr ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
     r@ dest-size @ max-size^2 rshift r> dest-ivs ;
