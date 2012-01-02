@@ -242,44 +242,14 @@ end-structure
     ret-hash cells delivery-table +
     dup @ 0= IF  drop false  EXIT  THEN
     $@ bounds ?DO
-	I 2@ 1- bounds dest-addr @ within
+	I @ 2@ 1- bounds dest-addr @ within
 	0= IF
-	    I dest-vaddr 2@ dest-addr @ swap - +
-	    I code-flag @ IF  1  ELSE  -1  THEN
-	    I dest-job @ to j^
+	    I @ dest-vaddr 2@ dest-addr @ swap - +
+	    I @ code-flag @ IF  1  ELSE  -1  THEN
+	    I @ dest-job @ to j^
 	    UNLOOP  EXIT  THEN
-    code-struct +LOOP
+    cell +LOOP
     false ;
-
-\ Destination mapping contains
-\ addr u - range of virtal addresses
-\ addr' - real start address
-\ context - for exec regions, this is the job context
-
-                    \  u   addr real-addr job ivs code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , here 0 ,
-Constant >code-flag
-                    \  u   addr real-addr job ivs head tail
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 ,  0 ,
-
-: map-string ( addr u addr' addrx -- addrx u2 )
-    >r r@ dest-raddr ! r@ dest-size 2!
-    j^ r@ dest-job !
-    r> code-struct ;
-
-: map-dest ( addr u addr' -- )
-    ret-hash cells delivery-table + >r
-    r@ @ 0= IF  s" " r@ $!  THEN
-    dest-mapping map-string r> $+! ;
-
-: map-source ( addr u addr' -- addr u )
-    source-mapping map-string drop data-struct ;
-
-: n2o:new-map ( addr u -- )  >code-flag off
-    dup allocate throw map-dest ;
-
-: n2o:new-code-map ( addr u -- )  >code-flag on
-    dup allocate throw map-dest ;
 
 \ job context structure
 \ !!!FIXME!!! needs to be split in sender/receiver
@@ -291,10 +261,12 @@ field: file-handles
 field: crypto-key
 
 field: data-map
+field: data-rmap
 field: data-ack
 field: data-resend
 
 field: code-map
+field: code-rmap
 
 field: ack-state
 field: ack-receive
@@ -319,6 +291,40 @@ field: cmd-extras
 field: cmd-buf#
 min-size max-size^2 lshift +field cmd-buf
 end-structure
+
+\ Destination mapping contains
+\ addr u - range of virtal addresses
+\ addr' - real start address
+\ context - for exec regions, this is the job context
+
+                    \  u   addr real-addr job ivs code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , here 0 ,
+Constant >code-flag
+                    \  u   addr real-addr job ivs head tail
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 ,  0 ,
+Variable mapping-addr
+
+: map-string ( addr u addr' addrx -- addrx u2 )
+    >r r@ dest-raddr ! r@ dest-size 2!
+    j^ r@ dest-job !
+    r> code-struct ;
+
+: map-dest ( addr u addr' addr -- )
+    ret-hash cells delivery-table + >r
+    r@ @ 0= IF  s" " r@ $!  THEN  >r
+    dest-mapping map-string  r@ $!
+    r> $@ drop mapping-addr tuck ! cell r> $+! ;
+
+: map-source ( addr u addr' -- addr u )
+    source-mapping map-string drop data-struct ;
+
+: n2o:new-map ( addr u -- )  >code-flag off
+    dup allocate throw j^ data-rmap map-dest ;
+
+: n2o:new-code-map ( addr u -- )  >code-flag on
+    dup allocate throw j^ code-rmap map-dest ;
+
+\ create context
 
 8 Value b2b-chunk#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
