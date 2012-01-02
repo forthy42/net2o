@@ -226,8 +226,16 @@ field: dest-size
 field: dest-vaddr
 field: dest-raddr
 field: dest-job
-field: dest-flag
 field: dest-ivs
+end-structure
+
+dest-struct extend-structure code-struct
+field: code-flag
+end-structure
+
+dest-struct extend-structure data-struct
+field: data-head
+field: data-tail
 end-structure
 
 : check-dest ( -- addr 1/t / f )  0 to j^
@@ -237,10 +245,10 @@ end-structure
 	I 2@ 1- bounds dest-addr @ within
 	0= IF
 	    I dest-vaddr 2@ dest-addr @ swap - +
-	    I dest-flag @ IF  1  ELSE  -1  THEN
+	    I code-flag @ IF  1  ELSE  -1  THEN
 	    I dest-job @ to j^
 	    UNLOOP  EXIT  THEN
-    dest-struct +LOOP
+    code-struct +LOOP
     false ;
 
 \ Destination mapping contains
@@ -248,25 +256,16 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , here 0 , 0 ,
-Constant code-flag
-                    \  u   addr real-addr job head tail
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 ,  0 ,
-
-begin-structure data-struct
-field: data-size
-field: data-vaddr
-field: data-raddr
-field: data-job
-field: data-head
-field: data-tail
-end-structure
+                    \  u   addr real-addr job ivs code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , here 0 ,
+Constant >code-flag
+                    \  u   addr real-addr job ivs head tail
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 ,  0 ,
 
 : map-string ( addr u addr' addrx -- addrx u2 )
     >r r@ dest-raddr ! r@ dest-size 2!
     j^ r@ dest-job !
-    r> dest-struct ;
+    r> code-struct ;
 
 : map-dest ( addr u addr' -- )
     ret-hash cells delivery-table + >r
@@ -274,12 +273,12 @@ end-structure
     dest-mapping map-string r> $+! ;
 
 : map-source ( addr u addr' -- addr u )
-    source-mapping map-string cell+ ;
+    source-mapping map-string drop data-struct ;
 
-: n2o:new-map ( addr u -- )  code-flag off
+: n2o:new-map ( addr u -- )  >code-flag off
     dup allocate throw map-dest ;
 
-: n2o:new-code-map ( addr u -- )  code-flag on
+: n2o:new-code-map ( addr u -- )  >code-flag on
     dup allocate throw map-dest ;
 
 \ job context structure
@@ -290,20 +289,22 @@ field: return-address
 field: cmd-out
 field: file-handles
 field: crypto-key
+
 field: data-map
-field: data-ivs
+field: data-ack
 field: data-resend
+
 field: code-map
-field: code-ivs
+
 field: ack-state
 field: ack-receive
-field: data-ack
+\ flow control, sender part
 field: sack-backlog
 field: min-slack
-field: send-tick
 field: ps/byte
 field: bandwidth-tick \ ns
 field: next-tick \ ns
+\ flow control, receiver part
 field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
@@ -336,7 +337,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ sack-backlog $!
     wurst-key state# j^ crypto-key $!
     $7fffffffffffffff j^ min-slack !
-    tick-init j^ send-tick !
     bandwidth-init j^ ps/byte !
     never          j^ next-tick !
     cmd-struct j^ cmd-out $!len
@@ -349,23 +349,23 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r
-    r@ data-raddr @  r@ data-size @ r> data-head @ safe/string ;
+    r@ dest-raddr @  r@ dest-size @ r> data-head @ safe/string ;
 : /data ( u -- )
     j^ data-map $@ drop data-head +! ;
 : data-tail$@ ( -- addr u )
     j^ data-map $@ drop >r
-    r@ data-raddr @  r@ data-head @ r> data-tail @ safe/string ;
+    r@ dest-raddr @  r@ data-head @ r> data-tail @ safe/string ;
 : /data-tail ( u -- )
     j^ data-map $@ drop data-tail +! ;
 : data-dest ( -- addr )
     j^ data-map $@ drop >r
-    r@ data-vaddr @ r> data-tail @ + ;
+    r@ dest-vaddr @ r> data-tail @ + ;
 
 \ code sending around
 
 : code-dest ( -- addr )
     j^ code-map $@ drop >r
-    r@ data-vaddr @ r> data-tail @ + ;
+    r@ dest-vaddr @ r> data-tail @ + ;
 
 \ acknowledge map
 
@@ -453,7 +453,7 @@ Variable rtdelay
     2dup j^ data-resend add-range
     ." Resend: " swap . . cr ;
 : >real-range ( addr -- addr' )
-    j^ data-map $@ drop data-raddr @ + ;
+    j^ data-map $@ drop dest-raddr @ + ;
 : resend$@ ( -- addr u )
     j^ data-resend $@  IF
 	2@ swap >real-range swap
@@ -526,6 +526,7 @@ Variable rtdelay
 : 2xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
 
 : wurst-crc ( -- xd )
+    pad roundse# rounds  \ another key diffusion round
     0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
@@ -542,8 +543,7 @@ Variable rtdelay
 	wurst-outbuf-init
 	outbuf body-size mem-rounds# >r
 	outbuf packet-data r@ encrypt-buffer
-	over roundse# rounds  drop
-	rdrop wurst-crc rot 2! ;
+	rdrop drop wurst-crc rot 2! ;
 
     : wurst-inbuf-decrypt ( -- flag )
 	wurst-inbuf-init
@@ -553,8 +553,7 @@ Variable rtdelay
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
-	over roundse# rounds  drop
-	rdrop 2@ wurst-crc d= ;
+	rdrop drop 2@ wurst-crc d= ;
 [THEN]
 
 \ public key encryption
@@ -575,19 +574,20 @@ Variable do-keypad
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and know the server's public key.
 
-: ivs-string ( addr u n addr -- ) ~~ >r r@ $!len
+: ivs-string ( addr u n addr -- ) >r r@ $!len
     >wurst-key
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
     r> $@ mem-rounds# encrypt-buffer 2drop ;
 
-: ivs-size@ ( map -- n ) $@ drop data-size @ max-size^2 rshift ;
+: ivs-size@ ( map -- n addr ) $@ drop >r
+    r@ dest-size @ max-size^2 rshift r> dest-ivs ;
 
 : net2o:gen-data-ivs ( addr u -- )
-    j^ data-map ivs-size@ j^ data-ivs ivs-string ;
+    j^ data-map ivs-size@ ivs-string ;
 
 : net2o:gen-code-ivs ( addr u -- )
-    j^ code-map ivs-size@ j^ code-ivs ivs-string ;
+    j^ code-map ivs-size@ ivs-string ;
 
 : set-key ( addr -- )
     keysize 2* j^ crypto-key $!
@@ -729,7 +729,7 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF  ack-toggle# j^ ack-state xor!  THEN
     j^ ack-state @ outflag or!
-    j^ send-tick @ = IF  off  ELSE  1 swap +!  THEN ;
+    tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
@@ -886,15 +886,15 @@ Defer do-ack ( -- )
 
 : server-event ( -- )
     next-packet 2drop  in-route
-    IF  ['] handle-packet catch IF
-	    inbuf packet-data dump  THEN
+    IF  ['] handle-packet catch
+	?dup-IF  ( inbuf packet-data dump ) DoError  THEN
     ELSE  ." route a packet" cr route-packet  THEN ;
 
 : client-event ( -- )
     poll-sock 0= ?EXIT
     next-client-packet  2drop in-check
     IF  ['] handle-packet catch
-	IF  inbuf packet-data dump  THEN
+	?dup-IF  ( inbuf packet-data dump ) DoError  THEN
     ELSE  ( drop packet )  THEN ;
 
 : server-loop ( -- )
