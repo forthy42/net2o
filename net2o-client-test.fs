@@ -27,6 +27,9 @@ $80000 lit, $800000 lit, new-map
 $10000 lit, $400 lit, new-code-map
 $80000 lit, $800000 lit, new-data
 $10000 lit, $400 lit, new-code
+end-code 0 send-cmd
+
+net2o-code
 \ data-ivs code-ivs
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
@@ -36,7 +39,7 @@ s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-end-code 0 send-cmd
+end-code $10000 send-cmd
 
 $80000 $800000 n2o:new-map
 $10000 $400 n2o:new-code-map

@@ -299,9 +299,6 @@ field: code-ivs
 field: ack-state
 field: ack-receive
 field: data-ack
-field: code-ack
-field: ack-addr
-field: ack-time
 field: sack-backlog
 field: min-slack
 field: send-tick
@@ -337,7 +334,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ cmd-out $!
     s" " j^ data-ack $!
     s" " j^ data-resend $!
-    s" " j^ code-ack $!
     s" " j^ sack-backlog $!
     wurst-key state# j^ crypto-key $!
     $7fffffffffffffff j^ min-slack !
