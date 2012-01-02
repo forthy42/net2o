@@ -290,7 +290,6 @@ field: return-address
 field: cmd-out
 field: file-handles
 field: crypto-key
-field: auth-info
 field: data-map
 field: data-ivs
 field: data-resend
@@ -317,7 +316,7 @@ field: cmd-accu
 field: cmd-slot
 field: cmd-extras
 field: cmd-buf#
-$800 +field cmd-buf
+min-size max-size^2 lshift +field cmd-buf
 end-structure
 
 8 Value b2b-chunk#
