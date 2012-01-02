@@ -584,16 +584,19 @@ Variable do-keypad
     >wurst-key
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
-    r> $@ mem-rounds# encrypt-buffer 2drop ;
+    r> $@ dup mem-rounds# encrypt-buffer 2drop ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
     r@ dest-size @ max-size^2 rshift r> dest-ivs ;
 
 : net2o:gen-data-ivs ( addr u -- )
     j^ data-map ivs-size@ ivs-string ;
-
 : net2o:gen-code-ivs ( addr u -- )
     j^ code-map ivs-size@ ivs-string ;
+: net2o:gen-rdata-ivs ( addr u -- )
+    j^ data-rmap ivs-size@ ivs-string ;
+: net2o:gen-rcode-ivs ( addr u -- )
+    j^ code-rmap ivs-size@ ivs-string ;
 
 : set-key ( addr -- )
     keysize 2* j^ crypto-key $!

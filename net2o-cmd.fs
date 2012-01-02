@@ -174,8 +174,8 @@ also net2o-base definitions forth
 
 also net2o-base
 : send-key ( pk -- )  net2o:send-key $, receive-key ;
-: data-ivs ( -- )   rng$ 2dup $, gen-data-ivs net2o:gen-data-ivs ;
-: code-ivs ( -- )   rng$ 2dup $, gen-code-ivs net2o:gen-code-ivs ;
+: data-ivs ( -- )   rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs ;
+: code-ivs ( -- )   rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs ;
 
 30 net2o: push-$    $, ;
 31 net2o: push-lit  lit, ;
