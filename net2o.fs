@@ -276,6 +276,8 @@ field: ps/byte
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
+field: lastack \ ns
+field: flybursts
 \ flow control, receiver part
 field: firstb-ticks
 field: lastb-ticks
@@ -330,7 +332,8 @@ Variable mapping-addr
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
--1 1 rshift Constant min-int64
+-1 1 rshift Constant max-int64
+2 Value flybursts#
 
 : ticks ( -- u )  ntime drop ;
 
@@ -343,8 +346,10 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ data-resend $!
     s" " j^ sack-backlog $!
     wurst-key state# j^ crypto-key $!
-    min-int64 j^ min-slack !
-    min-int64 j^ rtdelay !
+    max-int64 j^ min-slack !
+    max-int64 j^ rtdelay !
+    flybursts# j^ flybursts !
+    ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ps/byte !
     never          j^ next-tick !
     cmd-struct j^ cmd-out $!len
@@ -435,7 +440,11 @@ Variable lastdiff
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks over - j^ rtdelay min! - dup lastdiff !  j^ min-slack min! ;
+    flybursts# j^ flybursts ! \ reset bursts in flight
+    ticks dup j^ lastack !
+    over - j^ rtdelay min!
+    - dup lastdiff !
+    j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j^ sack-backlog $@ bounds ?DO
@@ -734,8 +743,8 @@ Variable b2b-first  b2b-first on
 	sendX  never j^ next-tick !
     ELSE  sendX  THEN ;
 
-: bandwidth? ( -- flag ) j^ >r
-    ticks r> next-tick @ - 0>= ;
+: bandwidth? ( -- flag )  ticks j^ next-tick @ - 0>=
+    j^ flybursts @ 0> and  ;
 
 \ asynchronous sending
 
@@ -761,7 +770,10 @@ Create chunk-adder chunks-struct allot
 
 : chunk-count+ ( counter -- )
     dup @
-    dup 0= IF  ack-toggle# j^ ack-state xor!  THEN
+    dup 0= IF
+	ack-toggle# j^ ack-state xor!
+	-1 j^ flybursts +!
+    THEN
     j^ ack-state @ outflag or!
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
