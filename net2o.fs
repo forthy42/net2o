@@ -53,7 +53,7 @@ debug: slk(
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$22 $10 + Constant overhead \ constant overhead
+$22 Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
@@ -67,7 +67,6 @@ struct
     short% field flags
     address% field destination
     address% field addr
-    address% 2* field nonce
 end-struct net2o-header
 
 Variable packet4r
@@ -155,7 +154,7 @@ $00 Constant 16bit#
 $40 Constant 64bit#
 $0F Constant datasize#
 
-Create header-sizes  $06 c, $22 c, $FF c, $FF c,
+Create header-sizes  $06 c, $12 c, $FF c, $FF c,
 Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
@@ -516,11 +515,35 @@ Variable rtdelay
     THEN
     wurst-state swap move ;
 
+: ivs>source? ( addr -- )
+    dup @ 0= IF  drop  EXIT  THEN
+    $@ drop >r
+    r@ 2@ 1- bounds dest-addr @ within 0=
+    IF
+	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
+	r@ dest-ivs @ IF
+	    r@ dest-ivs $@ rot safe/string drop >wurst-source'
+	ELSE
+	    drop
+	THEN
+    THEN
+    rdrop ;
+
 : wurst-outbuf-init ( -- )
-    rng@ rng@ 2dup >wurst-source outbuf nonce 2! >wurst-key ;
+    rnd-init >wurst-source'
+    j^ IF
+	j^ data-map ivs>source?
+	j^ code-map ivs>source?
+    THEN
+    >wurst-key ;
 
 : wurst-inbuf-init ( -- )
-    inbuf nonce 2@ >wurst-source >wurst-key ;
+    rnd-init >wurst-source'
+    j^ IF
+	j^ data-rmap ivs>source?
+	j^ code-rmap ivs>source?
+    THEN
+    >wurst-key ;
 
 : mem-rounds# ( size -- n )
     case
@@ -584,7 +607,7 @@ Variable do-keypad
     >wurst-key
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
-    r> $@ dup mem-rounds# encrypt-buffer 2drop wurst-crc xor hex. cr ;
+    r> $@ dup mem-rounds# encrypt-buffer 2drop ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
     r@ dest-size @ max-size^2 rshift r> dest-ivs ;
