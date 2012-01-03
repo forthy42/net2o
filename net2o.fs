@@ -949,7 +949,7 @@ Defer do-ack ( -- )
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
 
-#100000000 Value min-timeout
+#200000000 Value min-timeout
 
 : client-loop ( -- ) ticks min-timeout + >r
     BEGIN  poll-sock queue $@len 0<> or
