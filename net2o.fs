@@ -330,6 +330,7 @@ Variable mapping-addr
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
+-1 1 rshift Constant min-int64
 
 : ticks ( -- u )  ntime drop ;
 
@@ -342,7 +343,8 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ data-resend $!
     s" " j^ sack-backlog $!
     wurst-key state# j^ crypto-key $!
-    $7fffffffffffffff j^ min-slack !
+    min-int64 j^ min-slack !
+    min-int64 j^ rtdelay !
     bandwidth-init j^ ps/byte !
     never          j^ next-tick !
     cmd-struct j^ cmd-out $!len
@@ -433,7 +435,7 @@ Variable lastdiff
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks over - j^ rtdelay ! - dup lastdiff !  j^ min-slack min! ;
+    ticks over - j^ rtdelay min! - dup lastdiff !  j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j^ sack-backlog $@ bounds ?DO
@@ -776,6 +778,7 @@ Create chunk-adder chunks-struct allot
 	ELSE
 	    drop ." done,"
 	    ." rate: " j^ ps/byte ? cr
+	    ." slack: " j^ min-slack ? cr
 	    ." rtdelay: " j^ rtdelay ? cr
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
