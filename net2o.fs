@@ -866,11 +866,13 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
+#100000000 Value poll-timeout#
+
 : poll-sock ( -- flag )
     eval-queue  clear-events
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
     IF    0 max ptimeout cell+ !  pollfds 2
-    ELSE  drop #500000000 ptimeout cell+ !  pollfds 2  THEN
+    ELSE  drop poll-timeout# ptimeout cell+ !  pollfds 2  THEN
 [ environment os-type s" linux" string-prefix? ] [IF]
     ptimeout 0 ppoll 0>
 [ELSE]
