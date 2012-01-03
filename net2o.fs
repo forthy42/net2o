@@ -275,6 +275,7 @@ field: min-slack
 field: ps/byte
 field: bandwidth-tick \ ns
 field: next-tick \ ns
+field: rtdelay \ ns
 \ flow control, receiver part
 field: firstb-ticks
 field: lastb-ticks
@@ -427,13 +428,12 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 \ acknowledge handling, flow control
 
 Variable lastdiff
-Variable rtdelay
 
 : min! ( n addr -- ) >r  r@ @ min r> ! ;
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks over - rtdelay ! - dup lastdiff !  j^ min-slack min! ;
+    ticks over - j^ rtdelay ! - dup lastdiff !  j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ntime -- ) swap
     j^ sack-backlog $@ bounds ?DO
@@ -774,7 +774,9 @@ Create chunk-adder chunks-struct allot
 		b2b-chunk# 0 +DO  ck# chunk-count+  net2o:send-chunk  LOOP
 	    THEN  1 chunks+ +!
 	ELSE
-	    drop ." done, rate: " j^ ps/byte ? cr
+	    drop ." done,"
+	    ." rate: " j^ ps/byte ? cr
+	    ." rtdelay: " j^ rtdelay ? cr
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
 	THEN
