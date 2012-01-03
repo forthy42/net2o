@@ -942,7 +942,6 @@ Defer do-ack ( -- )
     ELSE  ." route a packet" cr route-packet  THEN ;
 
 : client-event ( -- )
-\    poll-sock 0= ?EXIT
     next-client-packet  2drop in-check
     IF  ['] handle-packet catch
 	?dup-IF  ( inbuf packet-data dump ) DoError  THEN
@@ -951,12 +950,8 @@ Defer do-ack ( -- )
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
 
-#200000000 Value min-timeout
-
-: client-loop ( -- ) ticks min-timeout + >r
-    BEGIN  poll-sock ( queue $@len 0<> or
-	ticks r@ u< or )
-    WHILE  client-event  REPEAT  rdrop ;
+: client-loop ( -- )
+    BEGIN  poll-sock  WHILE  client-event  REPEAT ;
 
 \ client/server initializer
 
