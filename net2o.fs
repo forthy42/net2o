@@ -328,8 +328,8 @@ Variable mapping-addr
 
 \ create context
 
-8 Value b2b-chunk#
-b2b-chunk# 2* 1- Value tick-init \ ticks without ack
+4 Value b2b-chunk#
+b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
 -1 1 rshift Constant max-int64
@@ -949,7 +949,7 @@ Defer do-ack ( -- )
 : server-loop ( -- )
     BEGIN  server-event  AGAIN ;
 
-#1000000000 Constant min-timeout
+#100000000 Value min-timeout
 
 : client-loop ( -- ) ticks min-timeout + >r
     BEGIN  poll-sock queue $@len 0<> or
