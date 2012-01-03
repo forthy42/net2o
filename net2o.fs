@@ -329,11 +329,11 @@ Variable mapping-addr
 \ create context
 
 8 Value b2b-chunk#
-b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
+b2b-chunk# 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
 -1 1 rshift Constant max-int64
-2 Value flybursts#
+4 Value flybursts#
 
 : ticks ( -- u )  ntime drop ;
 
