@@ -14,9 +14,12 @@ require wurstkessel.fs
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 
-: or!  ( value addr -- )   >r r@ @ or  r> ! ;
-: xor! ( value addr -- )   >r r@ @ xor r> ! ;
-: and! ( value addr -- )   >r r@ @ and r> ! ;
+: or!  ( x addr -- )   >r r@ @ or  r> ! ;
+: xor! ( x addr -- )   >r r@ @ xor r> ! ;
+: and! ( x addr -- )   >r r@ @ and r> ! ;
+: min! ( n addr -- )   >r r@ @ min r> ! ;
+: max! ( n addr -- )   >r r@ @ max r> ! ;
+
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 
 \ debugging aids
@@ -29,9 +32,11 @@ debug: rate(
 debug: ratex(
 debug: slack(
 debug: slk(
+debug: bursts(
 
 : +db ( "word" -- ) ' >body on ;
 
++db bursts(
 \ +db rate(
 \ +db ratex(
 \ +db slack(
@@ -333,7 +338,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
 -1 1 rshift Constant max-int64
-2 Value flybursts#
+4 Value flybursts#
 
 : ticks ( -- u )  ntime drop ;
 
@@ -436,11 +441,9 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 Variable lastdiff
 
-: min! ( n addr -- ) >r  r@ @ min r> ! ;
-
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    flybursts# j^ flybursts ! \ reset bursts in flight
+    flybursts# j^ flybursts max! \ reset bursts in flight
     ticks dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
@@ -460,7 +463,11 @@ Variable lastdiff
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
-    0 max slack# */ + j^ ps/byte ! ;
+    0 max slack# */ + j^ ps/byte !@
+    bandwidth-init = IF  \ first acknowledge
+	j^ rtdelay @ #1000 j^ ps/byte @ */ max-size^2 6 + rshift
+	tick-init 1+ / bursts( dup . ." flybursts" cr ) j^ flybursts max!
+    THEN ;
 
 : net2o:unacked ( addr u -- )  1+ j^ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
