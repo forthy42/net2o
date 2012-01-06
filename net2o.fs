@@ -268,6 +268,7 @@ field: data-map
 field: data-rmap
 field: data-ack
 field: data-resend
+field: data-b2b
 
 field: code-map
 field: code-rmap
@@ -459,14 +460,17 @@ Variable lastdiff
 
 #4000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
+: net2o:set-flyburst ( -- )
+    j^ rtdelay @ #1000 j^ ps/byte @ */ max-size^2 6 + rshift
+    tick-init 1+ / bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
+
 : net2o:set-rate ( rate -- )
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
     0 max slack# */ + j^ ps/byte !@
     bandwidth-init = IF  \ first acknowledge
-	j^ rtdelay @ #1000 j^ ps/byte @ */ max-size^2 6 + rshift
-	tick-init 1+ / bursts( dup . ." flybursts" cr ) j^ flybursts max!
+	net2o:set-flyburst
     THEN ;
 
 : net2o:unacked ( addr u -- )  1+ j^ data-ack add-range ;
@@ -734,7 +738,8 @@ Variable b2b-first  b2b-first on
 
 \ synchronous sending
 
-: data-to-send ( -- flag )  resend$@ nip 0> data-tail$@ nip 0> or ;
+: data-to-send ( -- flag )
+    resend$@ nip 0> data-tail$@ nip 0> or ;
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
@@ -790,9 +795,18 @@ Create chunk-adder chunks-struct allot
 	dup chunk-context @ to j^
 	chunk-count
 	data-to-send IF
-	    { ck# } bandwidth? dup  IF
-		b2b-first on  b2b-toggle# j^ ack-state xor!
-		b2b-chunk# 0 +DO  ck# chunk-count+  net2o:send-chunk  LOOP
+	    { ck# }
+	    j^ data-b2b @ 0<= IF
+		bandwidth? IF
+		    b2b-first on  b2b-toggle# j^ ack-state xor!
+		    b2b-chunk# 1- j^ data-b2b !
+		    ck# chunk-count+  net2o:send-chunk  true
+		ELSE
+		    false
+		THEN
+	    ELSE
+		-1 j^ data-b2b +!
+		ck# chunk-count+  net2o:send-chunk  true
 	    THEN  1 chunks+ +!
 	ELSE
 	    drop ." done,"
@@ -809,10 +823,10 @@ Create chunk-adder chunks-struct allot
 	I chunk-context @ next-tick @ umin
     chunks-struct +LOOP ;
 
-: send-another-chunk ( -- flag )  0 >r
-    BEGIN  send-chunks-async 0= WHILE
+: send-another-chunk ( -- flag )  false  0 >r
+    BEGIN  BEGIN  send-chunks-async  WHILE  drop rdrop true 0 >r  REPEAT
 	    chunks+ @ 0= IF  r> 1+ >r  THEN
-	r@ 2 u>=  UNTIL  false  ELSE  true  THEN  rdrop ;
+	r@ 2 u>=  UNTIL  rdrop ;
 
 Variable sendflag  sendflag off
 : send?  ( -- flag )  sendflag @ ;
@@ -873,7 +887,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#100000000 Value poll-timeout#
+#200000000 Value poll-timeout#
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
