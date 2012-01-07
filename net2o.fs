@@ -36,7 +36,7 @@ debug: bursts(
 
 : +db ( "word" -- ) ' >body on ;
 
-+db bursts(
+\ +db bursts(
 \ +db rate(
 \ +db ratex(
 \ +db slack(
@@ -789,30 +789,32 @@ Create chunk-adder chunks-struct allot
     j^ ack-state @ outflag or!
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
+: send-a-chunk ( chunk -- flag )  >r
+    j^ data-b2b @ 0<= IF
+	bandwidth? dup  IF
+	    b2b-first on  b2b-toggle# j^ ack-state xor!
+	    b2b-chunk# 1- j^ data-b2b !
+	THEN
+    ELSE
+	-1 j^ data-b2b +!  true
+    THEN
+    dup IF  r@ chunk-count+  net2o:send-chunk  THEN
+    rdrop  1 chunks+ +! ;
+
+: .nosend ( -- ) ." done,"
+    ." rate: " j^ ps/byte ? cr
+    ." slack: " j^ min-slack ? cr
+    ." rtdelay: " j^ rtdelay ? cr ;
+
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
 	dup chunk-context @ to j^
 	chunk-count
 	data-to-send IF
-	    { ck# }
-	    j^ data-b2b @ 0<= IF
-		bandwidth? IF
-		    b2b-first on  b2b-toggle# j^ ack-state xor!
-		    b2b-chunk# 1- j^ data-b2b !
-		    ck# chunk-count+  net2o:send-chunk  true
-		ELSE
-		    false
-		THEN
-	    ELSE
-		-1 j^ data-b2b +!
-		ck# chunk-count+  net2o:send-chunk  true
-	    THEN  1 chunks+ +!
+	    send-a-chunk
 	ELSE
-	    drop ." done,"
-	    ." rate: " j^ ps/byte ? cr
-	    ." slack: " j^ min-slack ? cr
-	    ." rtdelay: " j^ rtdelay ? cr
+	    drop .nosend
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
 	THEN
