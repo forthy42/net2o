@@ -334,7 +334,7 @@ Variable mapping-addr
 
 \ create context
 
-4 Value b2b-chunk#
+8 Value b2b-chunk#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 Value bandwidth-init \ 1µs/byte
 -1 Constant never
@@ -438,7 +438,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 	ELSE  2 cells  THEN
     +LOOP  drop ;
 
-\ acknowledge handling, flow control
+\ flow control
 
 Variable lastdiff
 
@@ -458,7 +458,7 @@ Variable lastdiff
 	    UNLOOP  EXIT  THEN
     2 cells +LOOP  2drop ( acknowledge not found ) ;
 
-#4000000 Value slack# \ 4ms slack leads to backdrop of factor 2
+#1000000 Value slack# \ 1ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
     j^ rtdelay @ #1000 j^ ps/byte @ */ max-size^2 6 + rshift
@@ -472,6 +472,8 @@ Variable lastdiff
     bandwidth-init = IF  \ first acknowledge
 	net2o:set-flyburst
     THEN ;
+
+\ acknowledge
 
 : net2o:unacked ( addr u -- )  1+ j^ data-ack add-range ;
 : net2o:ack-range ( addr u -- )
@@ -889,7 +891,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#200000000 Value poll-timeout#
+#500000000 Value poll-timeout#
 
 : poll-sock ( -- flag )
     eval-queue  clear-events

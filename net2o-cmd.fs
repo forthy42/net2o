@@ -208,6 +208,9 @@ also net2o-base
 
 : net2o:acktime ( -- )
     dest-addr @ lit, ticks lit, ack-addrtime ;
+
+\ client side acknowledge
+
 : net2o:ackrange ( -- )
     j^ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
