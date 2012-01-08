@@ -21,6 +21,7 @@ require wurstkessel.fs
 : max! ( n addr -- )   >r r@ @ max r> ! ;
 
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
+: max!@ ( n addr -- )   >r r@ @ max r> !@ ;
 
 \ debugging aids
 
@@ -440,12 +441,17 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 \ flow control
 
+: ticks-init ( ticks -- )
+    dup j^ bandwidth-tick !  j^ next-tick ! ;
+
 Variable lastdiff
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    flybursts# j^ flybursts max! \ reset bursts in flight
-    ticks dup j^ lastack !
+    ticks
+    flybursts# j^ flybursts max!@ \ reset bursts in flight
+    0= IF  dup ticks-init  THEN
+    dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
     j^ min-slack min! ;
@@ -780,7 +786,7 @@ Create chunk-adder chunks-struct allot
     j^ chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
-    ticks dup j^ bandwidth-tick !  j^ next-tick ! ;
+    ticks ticks-init ;
 
 : chunk-count+ ( counter -- )
     dup @
