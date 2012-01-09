@@ -814,8 +814,8 @@ Create chunk-adder chunks-struct allot
     dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  THEN
     rdrop  1 chunks+ +! ;
 
-: .nosend ( -- ) ." done,"
-    ." rate: " j^ ns/burst ? cr
+: .nosend ( -- ) ." done,"  4 set-precision
+    ." rate: " j^ ns/burst @ s>f tick-init s>f 1e9 f* fswap f/ fe. cr
     ." slack: " j^ min-slack ? cr
     ." rtdelay: " j^ rtdelay ? cr ;
 
