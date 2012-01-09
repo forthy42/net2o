@@ -6,6 +6,8 @@ require struct0x.fs
 require nacl.fs
 require wurstkessel.fs
 
+\ helper words
+
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
     dup negate >r  dup 0> IF
@@ -22,6 +24,8 @@ require wurstkessel.fs
 
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
+
+: ticks ( -- u )  ntime drop ;
 
 \ debugging aids
 
@@ -279,7 +283,6 @@ field: code-rmap
 field: ack-state
 field: ack-receive
 \ flow control, sender part
-field: sack-backlog
 field: min-slack
 field: ps/byte
 field: bandwidth-tick \ ns
@@ -335,7 +338,7 @@ Variable mapping-addr
 : map-source ( addr u addr' -- addr u )
     source-mapping map-string drop data-struct ;
 
-: n2o:new-map      ( addr u -- )  >code-flag off   j^ data-rmap map-dest ;
+: n2o:new-map      ( addr u -- )  >code-flag off  j^ data-rmap map-dest ;
 
 : n2o:new-code-map ( addr u -- )  >code-flag on   j^ code-rmap map-dest ;
 
@@ -348,8 +351,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 -1 1 rshift Constant max-int64
 4 Value flybursts#
 
-: ticks ( -- u )  ntime drop ;
-
 : n2o:new-context ( addr -- )
     context-struct allocate throw to j^
     j^ context-struct erase
@@ -357,7 +358,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ cmd-out $!
     s" " j^ data-ack $!
     s" " j^ data-resend $!
-    s" " j^ sack-backlog $!
     wurst-key state# j^ crypto-key $!
     max-int64 j^ min-slack !
     max-int64 j^ rtdelay !
@@ -460,13 +460,12 @@ Variable lastdiff
     - dup lastdiff !
     j^ min-slack min! ;
 
-: net2o:ack-addrtime ( addr ntime -- ) swap
-    j^ sack-backlog $@ bounds ?DO
-	dup I @ = IF  drop
-	    I cell+ @ timestat
-	    j^ sack-backlog I over $@ drop - 2 cells $del
-	    UNLOOP  EXIT  THEN
-    2 cells +LOOP  2drop ( acknowledge not found ) ;
+: net2o:ack-addrtime ( addr ticks -- )  swap
+    j^ data-map $@ drop >r
+    r@ dest-vaddr @ -  dup r@ dest-size @ u<
+    IF  chunk-p2 rshift timestamp *
+	r> dest-timestamps @ + @ timestat
+    ELSE  2drop rdrop  THEN ;
 
 #1000000 Value slack# \ 1ms slack leads to backdrop of factor 2
 
@@ -682,16 +681,8 @@ Variable do-keypad
     outbuf destination be-x!  dup dest-addr !  outbuf addr be-x! ;
 
 Variable outflag  outflag off
-Variable b2b-first  b2b-first on
-2Variable sack-addrtime
 
-: set-flags ( -- )  j^ >r
-    b2b-first @ IF
-	ticks dest-addr @ sack-addrtime 2!
-	sack-addrtime 2 cells r@ sack-backlog $+!
-    THEN
-    b2b-first off
-    rdrop
+: set-flags ( -- )
     outflag @ outbuf 1+ c! outflag off ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
@@ -740,8 +731,16 @@ Variable b2b-first  b2b-first on
     -1 +LOOP
     drop 0 ;
 
+: net2o:send-tick ( addr -- )
+    j^ data-map $@ drop >r
+    r@ dest-raddr @ - dup r@ dest-size @ u<
+    IF  chunk-p2 rshift timestamp *
+	r> dest-timestamps @ + ticks swap ts-ticks !
+    ELSE  drop rdrop  THEN ;
+
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
-    2>r  dup >r send-size min-size over lshift
+    2>r  over  net2o:send-tick
+    dup >r send-size min-size over lshift
     dup r> u>= IF  send-ack# outflag or!  ack-toggle# outflag xor!  THEN
     2r> 2swap ;
 
@@ -804,7 +803,7 @@ Create chunk-adder chunks-struct allot
 : send-a-chunk ( chunk -- flag )  >r
     j^ data-b2b @ 0<= IF
 	bandwidth? dup  IF
-	    b2b-first on  b2b-toggle# j^ ack-state xor!
+	    b2b-toggle# j^ ack-state xor!
 	    b2b-chunk# 1- j^ data-b2b !
 	THEN
     ELSE
