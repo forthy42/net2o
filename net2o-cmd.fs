@@ -163,7 +163,7 @@ also net2o-base definitions forth
 20 net2o: send-chunk ( -- ) net2o:send-chunk ;
 21 net2o: send-chunks ( -- ) net2o:send-chunks ;
 22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
-23 net2o: set-rate ( ticks )  net2o:set-rate ;
+23 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
 24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 25 net2o: resend ( addr u -- )  net2o:resend ;
 26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
@@ -200,10 +200,16 @@ previous definitions
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
 
 : .rate ( n -- n ) dup . ." rate" cr ;
+: .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
 : >rate ( -- )  j^ delta-ticks 2@ or 0= ?EXIT
-    j^ delta-ticks @ tick-init 1+ j^ acks @ */
-    rate( .rate ) lit, set-rate
+    ticks dup j^ burst-ticks !@ dup IF
+	- rate( .eff ) >r
+	j^ delta-ticks @ tick-init 1+ j^ acks @ */
+	rate( .rate ) lit, r> lit, set-rate
+    ELSE
+	2drop
+    THEN
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )

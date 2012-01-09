@@ -42,9 +42,9 @@ debug: bursts(
 : +db ( "word" -- ) ' >body on ;
 
 \ +db bursts(
-\ +db rate(
++db rate(
 \ +db ratex(
-\ +db slack(
++db slack(
 \ +db timing(
 
 \ Create udp socket
@@ -291,6 +291,7 @@ field: rtdelay \ ns
 field: lastack \ ns
 field: flybursts
 \ flow control, receiver part
+field: burst-ticks
 field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
@@ -473,7 +474,8 @@ Variable lastdiff
     j^ rtdelay @ j^ ns/burst @ /
     bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
 
-: net2o:set-rate ( rate -- )
+: net2o:set-rate ( rate deltat -- )
+    rate( dup . ." deltat" cr ) drop \ dummy
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
