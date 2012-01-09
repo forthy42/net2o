@@ -63,6 +63,7 @@ $22 Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
+: chunk-p2 ( -- n )  max-size^2 6 + ;
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
@@ -232,6 +233,7 @@ field: dest-vaddr
 field: dest-raddr
 field: dest-job
 field: dest-ivs
+field: dest-timestamps
 end-structure
 
 dest-struct extend-structure code-struct
@@ -301,24 +303,30 @@ field: cmd-buf#
 min-size max-size^2 lshift +field cmd-buf
 end-structure
 
+begin-structure timestamp
+field: ts-ticks
+end-structure
+
 \ Destination mapping contains
 \ addr u - range of virtal addresses
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job ivs code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , here 0 ,
+                    \  u   addr real-addr job ivs tst code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , here 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs head tail
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 ,  0 ,
+                    \  u   addr real-addr job ivs tst head tail
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 ,  0 ,
 Variable mapping-addr
 
-: map-string ( addr u addr' addrx -- addrx u2 )
-    >r r@ dest-raddr ! r@ dest-size 2!
+: map-string ( addr u addrx -- addrx u2 )
+    >r tuck r@ dest-size 2!
+    dup allocate throw r@ dest-raddr !
+    chunk-p2 rshift timestamp * allocate throw r@ dest-timestamps !
     j^ r@ dest-job !
     r> code-struct ;
 
-: map-dest ( addr u addr' addr -- )
+: map-dest ( vaddr u addr -- )
     ret-hash cells delivery-table + >r
     r@ @ 0= IF  s" " r@ $!  THEN  >r
     dest-mapping map-string  r@ $!
@@ -327,11 +335,9 @@ Variable mapping-addr
 : map-source ( addr u addr' -- addr u )
     source-mapping map-string drop data-struct ;
 
-: n2o:new-map ( addr u -- )  >code-flag off
-    dup allocate throw j^ data-rmap map-dest ;
+: n2o:new-map      ( addr u -- )  >code-flag off   j^ data-rmap map-dest ;
 
-: n2o:new-code-map ( addr u -- )  >code-flag on
-    dup allocate throw j^ code-rmap map-dest ;
+: n2o:new-code-map ( addr u -- )  >code-flag on   j^ code-rmap map-dest ;
 
 \ create context
 
@@ -362,10 +368,8 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     cmd-struct j^ cmd-out $!len
     j^ cmd-out $@ erase ;
 
-: n2o:new-data ( addr u -- )  dup allocate throw map-source
-    j^ data-map $! ;
-: n2o:new-code ( addr u -- )  dup allocate throw map-source
-    j^ code-map $! ;
+: n2o:new-data ( addr u -- )  map-source  j^ data-map $! ;
+: n2o:new-code ( addr u -- )  map-source  j^ code-map $! ;
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r
