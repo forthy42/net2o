@@ -815,7 +815,7 @@ Create chunk-adder chunks-struct allot
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done,"  4 set-precision
-    ." rate: " j^ ns/burst @ s>f tick-init s>f 1e9 f* fswap f/ fe. cr
+    ." rate: " j^ ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
     ." slack: " j^ min-slack ? cr
     ." rtdelay: " j^ rtdelay ? cr ;
 
