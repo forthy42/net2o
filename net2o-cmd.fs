@@ -191,7 +191,7 @@ previous definitions
 
 \ client side timing
 
-: ack-size ( -- )  inbuf packet-size j^ ack-sizes +!  ticks j^ lastb-ticks ! ;
+: ack-size ( -- )  1 j^ acks +!  ticks j^ lastb-ticks ! ;
 : ack-first ( -- )
     j^ lastb-ticks @ ?dup-IF  j^ firstb-ticks @ - j^ delta-ticks +!  THEN
     ticks j^ firstb-ticks !  j^ lastb-ticks off ;
@@ -201,10 +201,10 @@ previous definitions
 
 : .rate ( n -- n ) dup . ." rate" cr ;
 also net2o-base
-: >rate ( -- )  j^ ack-sizes @ 0= ?EXIT  j^ delta-ticks @ 0= ?EXIT
-    j^ delta-ticks @ #1000 j^ ack-sizes @ */
+: >rate ( -- )  j^ delta-ticks 2@ or 0= ?EXIT
+    j^ delta-ticks @ tick-init 1+ j^ acks @ */
     rate( .rate ) lit, set-rate
-    j^ delta-ticks off  j^ ack-sizes off ;
+    j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
     dest-addr @ lit, ticks lit, ack-addrtime ;

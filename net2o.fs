@@ -284,7 +284,7 @@ field: ack-state
 field: ack-receive
 \ flow control, sender part
 field: min-slack
-field: ps/byte
+field: ns/burst
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
@@ -294,7 +294,7 @@ field: flybursts
 field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
-field: ack-sizes
+field: acks
 end-structure
 
 begin-structure cmd-struct
@@ -346,7 +346,7 @@ Variable mapping-addr
 
 8 Value b2b-chunk#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
-#1000000 Value bandwidth-init \ 1µs/byte
+#32000 Value bandwidth-init \ 32µs/burst=1MB/s
 -1 Constant never
 -1 1 rshift Constant max-int64
 4 Value flybursts#
@@ -363,7 +363,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     max-int64 j^ rtdelay !
     flybursts# j^ flybursts !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
-    bandwidth-init j^ ps/byte !
+    bandwidth-init j^ ns/burst !
     never          j^ next-tick !
     cmd-struct j^ cmd-out $!len
     j^ cmd-out $@ erase ;
@@ -470,14 +470,14 @@ Variable lastdiff
 #1000000 Value slack# \ 1ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
-    j^ rtdelay @ #1000 j^ ps/byte @ */ max-size^2 6 + rshift
-    tick-init 1+ / bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
+    j^ rtdelay @ j^ ns/burst @ /
+    bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
 
 : net2o:set-rate ( rate -- )
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
-    0 max slack# */ + j^ ps/byte !@
+    0 max slack# */ + j^ ns/burst !@
     bandwidth-init = IF  \ first acknowledge
 	net2o:set-flyburst
     THEN ;
@@ -708,9 +708,11 @@ Variable outflag  outflag off
 : >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
-: bandwidth+ ( -- )  j^ >r
-    outsize r@ ps/byte @ #1000 */ dup r@ bandwidth-tick +!
-    ( dup 2/ + ) 2/ ticks + r@ bandwidth-tick @ umax r> next-tick ! ;
+: bandwidth+ ( -- )
+    j^ ns/burst @ tick-init 1+ / j^ bandwidth-tick +! ;
+
+: burst-end ( -- )  j^ data-b2b @ ?EXIT
+    ticks j^ bandwidth-tick @ umax j^ next-tick ! ;
 
 : sendX ( addr taddr target n -- )
     >r set-dest  r> >send  set-flags  bandwidth+  send-packet
@@ -809,11 +811,11 @@ Create chunk-adder chunks-struct allot
     ELSE
 	-1 j^ data-b2b +!  true
     THEN
-    dup IF  r@ chunk-count+  net2o:send-chunk  THEN
+    dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  THEN
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done,"
-    ." rate: " j^ ps/byte ? cr
+    ." rate: " j^ ns/burst ? cr
     ." slack: " j^ min-slack ? cr
     ." rtdelay: " j^ rtdelay ? cr ;
 
