@@ -58,7 +58,7 @@ warnings @ warnings off \ hash-bang will be redefined
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash hash@ + #!? IF
 	    UNLOOP  EXIT  THEN
-	I c@ $80 or $80 + cells hash + hash@  to hash
+	I c@ $80 or $80 + cells hash hash@ + to hash
     LOOP  2drop 2drop true abort" hash exhausted, please reboot universe" ;
 
 warnings !
@@ -78,3 +78,33 @@ warnings !
 	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
 	to hash
     LOOP  2drop ;
+
+: #key ( addrkey u hash -- path / -1 ) 0 { hash key }
+    2dup string-hash  wurst-state state# bounds ?DO
+	I c@ $7F and 2* cells hash @ dup 0= IF  2drop LEAVE  THEN
+	+ #@? IF  2drop  key 8 lshift I c@ $7F and or  UNLOOP  EXIT  THEN
+	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
+	to hash  key 8 lshift I c@ $80 or or to key
+    LOOP  2drop -1 ;
+
+: #map  { hash xt -- } \ xt: ( ... node -- ... )
+    hash @ $100 cells bounds DO
+	I @ IF  I xt execute  THEN
+    2 cells +LOOP
+    hash @ $100 cells + $80 cells bounds DO
+	I @ IF  xt I recurse  THEN
+    cell +LOOP ;
+
+: #.entry ( hash-entry -- ) dup $@ type ."  -> " cell+ $@ type cr ;
+
+: #. ( hash -- )  ['] #.entry #map ;
+
+\ test: move dictionary to hash
+
+0 [IF]
+variable ht
+: test ( -- )
+    context @ cell+ BEGIN  @ dup  WHILE
+	    dup name>string 2dup ht #!
+    REPEAT  drop ;
+[THEN]
