@@ -44,9 +44,9 @@ debug: bursts(
 : +db ( "word" -- ) ' >body on ;
 
 \ +db bursts(
-+db rate(
+\ +db rate(
 \ +db ratex(
-+db slack(
+\ +db slack(
 \ +db timing(
 
 \ Create udp socket
@@ -66,7 +66,7 @@ debug: bursts(
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
 $22 Constant overhead \ constant overhead
-$4 Value max-size^2 \ 1k, don't fragment by default
+$6 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
 : chunk-p2 ( -- n )  max-size^2 6 + ;
@@ -703,7 +703,7 @@ Variable outflag  outflag off
     outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
-	    max-size^2 1- to max-size^2
+	    max-size^2 1- to max-size^2  ." pmtu/2" cr
 	ELSE
 	    true abort" could not send"
 	THEN

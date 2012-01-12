@@ -24,15 +24,15 @@ net2o-code new-context
 S" This is a test" $, type '!' char, emit cr
 pks send-key
 $80000 lit, $800000 lit, new-map
-$10000 lit, $400 lit, new-code-map
+$10000 lit, $2000 lit, new-code-map
 $80000 lit, $800000 lit, new-data
-$10000 lit, $400 lit, new-code
+$10000 lit, $2000 lit, new-code
 end-code 0 send-cmd
 
 $80000 $800000 n2o:new-map
-$10000 $400 n2o:new-code-map
+$10000 $2000 n2o:new-code-map
 $80000 $800000 n2o:new-data
-$10000 $400 n2o:new-code
+$10000 $2000 n2o:new-code
 $80000 $800000 net2o:unacked
 
 net2o-code
