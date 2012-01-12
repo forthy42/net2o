@@ -14,6 +14,9 @@ state# 8 * Constant message#
 
 hash-init-rng
 
+\ this computes a cryptographic secure hash over the input string -
+\ of the first 510 bytes of the input string
+
 : string-hash ( addr u -- )
     'hashinit wurst-source state# 2* move
     message message# erase
