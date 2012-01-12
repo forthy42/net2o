@@ -5,6 +5,8 @@ require string.fs
 require struct0x.fs
 require nacl.fs
 require wurstkessel.fs
+require wurstkessel-init.fs
+require hash-table.fs
 
 \ helper words
 

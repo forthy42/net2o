@@ -32,7 +32,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : extend-cmds ( -- xt ) noname Create lastxt $40 0 DO ['] net2o-crash , LOOP
   DOES>  >r byte-fetch $80 - $3F umin cells r> + perform ;
 
-Create 'cmd-buf 6 allot
+6 buffer: 'cmd-buf
 
 : >cmd ( xt u -- ) 'cmd-buf 6 xc!+? 2drop  'cmd-buf tuck -
     cmd-base-table >r
