@@ -92,7 +92,7 @@ warnings !
 	I @ IF  I xt execute  THEN
     2 cells +LOOP
     hash @ $100 cells + $80 cells bounds DO
-	I @ IF  xt I recurse  THEN
+	I @ IF  I xt recurse  THEN
     cell +LOOP ;
 
 : #.entry ( hash-entry -- ) dup $@ type ."  -> " cell+ $@ type cr ;
