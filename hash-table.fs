@@ -58,7 +58,7 @@ warnings @ warnings off \ hash-bang will be redefined
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash hash@ + #!? IF
 	    UNLOOP  EXIT  THEN
-	I c@ $80 or $100 + cells hash + hash@  to hash
+	I c@ $80 or $80 + cells hash + hash@  to hash
     LOOP  2drop 2drop true abort" hash exhausted, please reboot universe" ;
 
 warnings !
@@ -67,7 +67,7 @@ warnings !
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  UNLOOP  EXIT  THEN
-	I c@ $80 or $100 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
+	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
 	to hash
     LOOP  2drop 0 0 ;
 
@@ -75,6 +75,6 @@ warnings !
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #off? IF  UNLOOP  EXIT  THEN
-	I c@ $80 or $100 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
+	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
 	to hash
     LOOP  2drop ;
