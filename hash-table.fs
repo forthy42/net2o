@@ -1,5 +1,6 @@
 \ generic hash table functions
 
+require string.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
 
