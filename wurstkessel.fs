@@ -618,32 +618,27 @@ $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
 
+Variable rng-buffer state# 8 * allot
+state# 4 * rng-buffer !
+
 : rng-step ( -- )
     rng-init  rounds# wurst-rng
     wurst-source wurst-salt state# move
-    wurst-state  state-init state# move ;
+    wurst-state  state-init state# move
+    message rng-buffer cell+ state# 8 * move
+    rng-buffer off ;
 
 \ buffered random numbers to output 64 bit at a time
 
-Variable rng-buffer
-state# rng-buffer !
-
 : rng@ ( -- x )
-    rng-buffer @ 64 = IF
-	rng-buffer off
-	rng-step
-    THEN
-    rng-buffer @ wurst-salt + @
-    1 cells rng-buffer +! ;
+    rng-buffer @ dfaligned state# 4 * u>= IF  rng-step  THEN
+    rng-buffer dup @ cell+ dfaligned dup rng-buffer ! + @ ;
 
 : rng$ ( -- addr u )
-    rng-step  state# rng-buffer !
-    wurst-salt state# ;
+    rng-buffer @ state# 3 * u>= IF  rng-step  THEN
+    rng-buffer dup @ + cell+ state# dup rng-buffer +! ;
 
 : rng32 ( -- x )
-    rng-buffer @ 64 = IF
-	rng-buffer off
-	rng-step
-    THEN
-    rng-buffer @ wurst-salt + l@
+    rng-buffer @ state# 4 * = IF  rng-step  THEN
+    rng-buffer dup @ + cell+ l@
     4 rng-buffer +! ;
