@@ -92,7 +92,7 @@ warnings !
 
 : #.key ( path hash -- item ) { hash }
     BEGIN
-	hash @ 0= abort" can't follow"
+	hash @ 0= IF  drop 0  EXIT  THEN
 	$100 um* dup $80 and WHILE
 	    $80 + cells hash @ + to hash
     REPEAT

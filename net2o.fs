@@ -204,22 +204,13 @@ $04 Constant send-ack#
 
 \ each source has multiple destination spaces
 
-0 Value delivery-table
 Variable return-addr
 Variable dest-addr
-8 Value delivery-bits
-
-: init-delivery-table ( -- )
-    delivery-table IF  delivery-table free  0 to delivery-table  throw  THEN
-    1 cells delivery-bits lshift dup allocate throw to delivery-table
-    delivery-table swap erase ;
 
 : >ret-addr ( -- )
     inbuf destination be-ux@ reverse64 return-addr ! ;
 : >dest-addr ( -- )
     inbuf addr be-ux@  inbuf body-size 1- invert and dest-addr ! ;
-
-: ret-hash ( -- n )  return-addr 1 cells delivery-bits (hashkey1) ;
 
 begin-structure dest-struct
 field: dest-size
@@ -240,9 +231,8 @@ field: data-tail
 end-structure
 
 : check-dest ( -- addr 1/t / f )  0 to j^
-    ret-hash cells delivery-table +
-    dup @ 0= IF  drop false  EXIT  THEN
-    $@ bounds ?DO
+    return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN
+    cell+ $@ bounds ?DO
 	I @ 2@ 1- bounds dest-addr @ within
 	0= IF
 	    I @ dest-vaddr 2@ dest-addr @ swap - +
@@ -321,7 +311,7 @@ Variable mapping-addr
     r> code-struct ;
 
 : map-dest ( vaddr u addr -- )
-    ret-hash cells delivery-table + >r
+    return-addr @ routes #.key cell+ >r
     r@ @ 0= IF  s" " r@ $!  THEN  >r
     dest-mapping map-string  r@ $!
     r> $@ drop mapping-addr tuck ! cell r> $+! ;
@@ -983,10 +973,10 @@ Defer do-ack ( -- )
 \ client/server initializer
 
 : init-client ( -- )
-    new-client init-route init-delivery-table prep-socks ;
+    new-client init-route prep-socks ;
 
 : init-server ( -- )
-    new-server init-route init-delivery-table prep-socks ;
+    new-server init-route prep-socks ;
 
 \ load net2o commands
 
