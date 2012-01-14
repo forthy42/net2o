@@ -6,7 +6,7 @@ pkc skc crypto_box_keypair \ create a random key pair
 
 init-client
 
-next-arg net2o-udp insert-ipv4 n2o:new-context
+next-arg net2o-udp insert-ip n2o:new-context
 
 \ 10 ms
 ." Sending first test" cr

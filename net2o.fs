@@ -66,7 +66,7 @@ debug: bursts(
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
 $22 Constant overhead \ constant overhead
-$6 Value max-size^2 \ 1k, don't fragment by default
+$4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 min-size max-size^2 lshift overhead + Constant maxpacket
 : chunk-p2 ( -- n )  max-size^2 6 + ;
@@ -113,26 +113,23 @@ Variable routes
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 
-: route-hash ( addr u -- hash )
-    routes #key ;
+: leftalign ( key -- net2o-addr )
+    BEGIN  dup $FF00000000000000 and 0= WHILE  8 lshift  REPEAT ;
+: rightalign ( net2o-addr -- key )
+    BEGIN  dup $80FF and 0= WHILE  8 rshift  REPEAT ;
 
-: leftaling ( key -- net2o-addr )
-    BEGIN  dup $FF0000000000000 and 0= WHILE  8 lshift  REPEAT ;
-
-: sock-route! ( addr u -- hash )
-    s" " routes #! routes #key ;
 : insert-address ( addr u -- net2o-addr )
-    sock-route! leftalign ;
-: check-address ( addr u -- net2o-addr flag )
-    routes #key dup -1 <> ;
+    s" " 2over routes #! routes #key leftalign ;
+: check-address ( addr u -- net2o-addr / -1 )
+    routes #key leftalign ;
 
-: insert-ipv4 ( addr u port -- net2o-addr )
+: insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
 
 : address>route ( -- n/-1 )
-    sockaddr-tmp alen @ check-address 0= IF  drop -1  THEN ;
+    sockaddr-tmp alen @ check-address ;
 : route>address ( n -- )
-    routes #.key $@ sockaddr-tmp swap move ;
+    rightalign routes #.key $@ sockaddr-tmp swap dup alen ! move ;
 
 \ bit reversing
 
@@ -149,10 +146,9 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 \ route an incoming packet
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ destination c@ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ destination c@ route>address
-    r@ destination dup 1+ swap /address 1- move
-    r> destination /address 1- + c!  false ;
+    r@ destination @ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ destination be-ux@ route>address
+    reverse64 r> destination be-x!  false ;
 
 : in-route ( -- flag )  address>route reverse64  inbuf packet-route ;
 : in-check ( -- flag )  address>route -1 <> ;
@@ -703,6 +699,7 @@ Variable outflag  outflag off
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
 	ELSE
+	    errno . cr
 	    true abort" could not send"
 	THEN
     THEN ;
@@ -927,14 +924,14 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     send-anything? sendflag !
     BEGIN  poll-sock 0= WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
-    sockaddr-tmp alen @ insert-address reverse64
-    inbuf destination be-ux@ -$100 and or inbuf destination be-x!
+    sockaddr-tmp alen @ insert-address reverse64 $FFFFFFFF00000000 and
+    inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
     BEGIN  BEGIN  poll-sock  UNTIL  read-a-packet4/6  2dup d0= WHILE
 	   2drop  REPEAT
-    sockaddr-tmp alen @ check-address IF
+    sockaddr-tmp alen @ check-address dup -1 <> IF
 	reverse64
 	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
 	over packet-size over <> abort" Wrong packet size"
