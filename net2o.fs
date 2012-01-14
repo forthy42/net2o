@@ -106,27 +106,25 @@ Variable packet6s
 8 Value route-bits
 8 Constant /address
 ' dfloats Alias addresses
-0 Value routes
+Variable routes
 
-: init-route ( -- )
-    routes IF  routes free  0 to routes  throw  THEN
-    /address route-bits lshift dup allocate throw to routes
-    routes swap erase ;
+: init-route ( -- )  s" " routes hash@ $! ; \ field 0 is no good
 
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 
 : route-hash ( addr u -- hash )
-    route-bits (hashkey1) ;
+    routes #key ;
+
+: leftaling ( key -- net2o-addr )
+    BEGIN  dup $FF0000000000000 and 0= WHILE  8 lshift  REPEAT ;
 
 : sock-route! ( addr u -- hash )
-    2dup route-hash dup >r addresses routes + $! r> ;
+    s" " routes #! routes #key ;
 : insert-address ( addr u -- net2o-addr )
-    sock-route! $38 lshift ;
+    sock-route! leftalign ;
 : check-address ( addr u -- net2o-addr flag )
-    2dup route-hash dup >r addresses routes +
-    $@ str= r> $38 lshift swap ;
-\ FIXME: doesn't check for collissons
+    routes #key dup -1 <> ;
 
 : insert-ipv4 ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
@@ -134,7 +132,7 @@ Variable packet6s
 : address>route ( -- n/-1 )
     sockaddr-tmp alen @ check-address 0= IF  drop -1  THEN ;
 : route>address ( n -- )
-    addresses routes + $@ dup alen ! sockaddr-tmp swap move ;
+    routes #.key $@ sockaddr-tmp swap move ;
 
 \ bit reversing
 

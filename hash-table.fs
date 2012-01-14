@@ -49,7 +49,7 @@ hash-init-rng
 $180 cells Constant table-size#
 
 : hash@ ( bucket -- addr )  >r
-    r@ @ 0= IF  table-size# allocate throw dup r> !
+    r@ @ 0= IF  table-size# allocate throw dup r> ! dup table-size# erase
     ELSE  r> @  THEN ;
 
 warnings @ warnings off \ hash-bang will be redefined
@@ -67,25 +67,31 @@ warnings !
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  UNLOOP  EXIT  THEN
-	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
-	to hash
+	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop 0 0 ;
 
 : #off ( addrkey u hash -- )  { hash }
     2dup string-hash  wurst-state state# bounds ?DO
-	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
+	I c@ $7F and 2* cells hash + @ dup 0= IF  2drop  LEAVE  THEN
 	+ #off? IF  UNLOOP  EXIT  THEN
-	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
-	to hash
+	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
 : #key ( addrkey u hash -- path / -1 ) 0 { hash key }
     2dup string-hash  wurst-state state# bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop LEAVE  THEN
 	+ #@? IF  2drop  key 8 lshift I c@ $7F and or  UNLOOP  EXIT  THEN
-	I c@ $80 or $80 + cells hash + @ dup 0= IF  drop  LEAVE  THEN
-	to hash  key 8 lshift I c@ $80 or or to key
+	I c@ $80 or $80 + cells hash @ + to hash
+	key 8 lshift I c@ $80 or or to key
     LOOP  2drop -1 ;
+
+: #.key ( path hash -- item ) { hash }
+    0 >r  BEGIN  dup $FF and  swap 8 rshift r> 1+ >r  dup 0= UNTIL
+    drop r> 1- 0 ?DO
+	$80 or $80 + cells hash @ + dup @ 0= abort" can't follow"
+	to hash
+    LOOP
+    $7F and 2* cells hash @ + ;
 
 : #map  { hash xt -- } \ xt: ( ... node -- ... )
     hash @ $100 cells bounds DO
