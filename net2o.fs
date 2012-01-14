@@ -108,7 +108,7 @@ Variable packet6s
 ' dfloats Alias addresses
 Variable routes
 
-: init-route ( -- )  s" " routes hash@ $! ; \ field 0 is no good
+: init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;

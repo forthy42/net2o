@@ -20,7 +20,7 @@ end-code 0 send-cmd
 
 \ 10 ms
 ." Sending more complex test" cr
-rng@ $20 lshift Constant uniq#
+( rng@ $20 lshift ) 0 Constant uniq#
 uniq# $10000 + Constant code#
 uniq# $20000 + Constant data#
 
