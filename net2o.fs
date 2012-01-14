@@ -113,13 +113,9 @@ Variable routes
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 
-: rightalign ( net2o-addr -- key )
-    BEGIN  dup $80FF and 0= WHILE  8 rshift  REPEAT ;
-
+: check-address ( addr u -- net2o-addr / -1 ) routes #key ;
 : insert-address ( addr u -- net2o-addr )
-    s" " 2over routes #! routes #key leftalign ;
-: check-address ( addr u -- net2o-addr / -1 )
-    routes #key leftalign ;
+    s" " 2over routes #! routes #key ;
 
 : insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
@@ -127,7 +123,7 @@ Variable routes
 : address>route ( -- n/-1 )
     sockaddr-tmp alen @ check-address ;
 : route>address ( n -- )
-    rightalign routes #.key $@ sockaddr-tmp swap dup alen ! move ;
+    routes #.key $@ sockaddr-tmp swap dup alen ! move ;
 
 \ bit reversing
 
@@ -333,9 +329,10 @@ Variable mapping-addr
 : map-source ( addr u addr' -- addr u )
     source-mapping map-string drop data-struct ;
 
-: n2o:new-map      ( addr u -- )  >code-flag off  j^ data-rmap map-dest ;
-
-: n2o:new-code-map ( addr u -- )  >code-flag on   j^ code-rmap map-dest ;
+: n2o:new-data ( addr u -- )  >code-flag off
+    2dup  j^ data-rmap map-dest  map-source  j^ data-map $! ;
+: n2o:new-code ( addr u -- )  >code-flag on
+    2dup  j^ code-rmap map-dest  map-source  j^ code-map $! ;
 
 \ create context
 
@@ -362,9 +359,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     never          j^ next-tick !
     cmd-struct j^ cmd-out $!len
     j^ cmd-out $@ erase ;
-
-: n2o:new-data ( addr u -- )  map-source  j^ data-map $! ;
-: n2o:new-code ( addr u -- )  map-source  j^ code-map $! ;
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r

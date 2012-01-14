@@ -151,24 +151,23 @@ previous definitions
 also net2o-base definitions forth
 
 10 net2o: throw ( error -- )  throw ;
-11 net2o: new-map ( addr u -- )  n2o:new-map ;
-12 net2o: new-code-map ( addr u -- )  n2o:new-code-map ;
-13 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-14 net2o: new-data ( addr u -- ) n2o:new-data ;
-15 net2o: new-code ( addr u -- ) n2o:new-code ;
-16 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-17 net2o: close-file ( id -- )  n2o:close-file ;
-18 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
-19 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
-20 net2o: send-chunk ( -- ) net2o:send-chunk ;
-21 net2o: send-chunks ( -- ) net2o:send-chunks ;
-22 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
-23 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
-24 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-25 net2o: resend ( addr u -- )  net2o:resend ;
-26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
-27 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-28 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+11 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
+12 net2o: new-data ( addr u -- ) n2o:new-data ;
+13 net2o: new-code ( addr u -- ) n2o:new-code ;
+14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+15 net2o: close-file ( id -- )  n2o:close-file ;
+16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
+
+20 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
+21 net2o: send-chunk ( -- ) net2o:send-chunk ;
+22 net2o: send-chunks ( -- ) net2o:send-chunks ;
+23 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
+24 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
+25 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+26 net2o: resend ( addr u -- )  net2o:resend ;
+27 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+28 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+29 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
 
 \ create commands to send back
 

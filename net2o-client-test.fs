@@ -20,20 +20,20 @@ end-code 0 send-cmd
 
 \ 10 ms
 ." Sending more complex test" cr
+rng@ $20 lshift Constant uniq#
+uniq# $10000 + Constant code#
+uniq# $20000 + Constant data#
+
 net2o-code new-context
 S" This is a test" $, type '!' char, emit cr
 pks send-key
-$80000 lit, $800000 lit, new-map
-$10000 lit, $2000 lit, new-code-map
-$80000 lit, $800000 lit, new-data
-$10000 lit, $2000 lit, new-code
+data# lit, $800000 lit, new-data
+code# lit, $2000 lit, new-code
 end-code 0 send-cmd
 
-$80000 $800000 n2o:new-map
-$10000 $2000 n2o:new-code-map
-$80000 $800000 n2o:new-data
-$10000 $2000 n2o:new-code
-$80000 $800000 net2o:unacked
+data# $800000 n2o:new-data
+code# $2000 n2o:new-code
+data# $800000 net2o:unacked
 
 net2o-code
 data-ivs code-ivs
@@ -45,7 +45,7 @@ s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-end-code $10000 send-cmd
+end-code code# send-cmd
 
 ticks client-loop ticks - negate s>f 1e-9 f* f. ." s" cr
 ." IP4 packets received: " packet4r ? cr
