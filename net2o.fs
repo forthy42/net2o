@@ -113,8 +113,6 @@ Variable routes
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 
-: leftalign ( key -- net2o-addr )
-    BEGIN  dup $FF00000000000000 and 0= WHILE  8 lshift  REPEAT ;
 : rightalign ( net2o-addr -- key )
     BEGIN  dup $80FF and 0= WHILE  8 rshift  REPEAT ;
 

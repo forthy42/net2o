@@ -72,26 +72,31 @@ warnings !
 
 : #off ( addrkey u hash -- )  { hash }
     2dup string-hash  wurst-state state# bounds ?DO
-	I c@ $7F and 2* cells hash + @ dup 0= IF  2drop  LEAVE  THEN
+	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #off? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
+-1 8 rshift invert Constant msbyte#
+
+: leftalign ( key -- key' )
+    BEGIN  dup msbyte# and 0= WHILE  8 lshift  dup 0= UNTIL  THEN ;
+
 : #key ( addrkey u hash -- path / -1 ) 0 { hash key }
-    2dup string-hash  wurst-state state# bounds ?DO
-	I c@ $7F and 2* cells hash @ dup 0= IF  2drop LEAVE  THEN
-	+ #@? IF  2drop  key 8 lshift I c@ $7F and or  UNLOOP  EXIT  THEN
+    2dup string-hash  wurst-state cell bounds ?DO
+	key 8 lshift I c@ $80 or or  to key
+	I c@ $7F and 2* cells hash @ dup 0= ?LEAVE
+	+ #@? IF  2drop key -$81 and leftalign   UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
-	key 8 lshift I c@ $80 or or to key
     LOOP  2drop -1 ;
 
 : #.key ( path hash -- item ) { hash }
-    0 >r  BEGIN  dup $FF and  swap 8 rshift r> 1+ >r  dup 0= UNTIL
-    drop r> 1- 0 ?DO
-	$80 or $80 + cells hash @ + dup @ 0= abort" can't follow"
-	to hash
-    LOOP
-    $7F and 2* cells hash @ + ;
+    BEGIN
+	hash @ 0= abort" can't follow"
+	$100 um* dup $80 and WHILE
+	    $80 + cells hash @ + to hash
+    REPEAT
+    nip 2* cells hash @ + ;
 
 : #map  { hash xt -- } \ xt: ( ... node -- ... )
     hash @ $100 cells bounds DO
