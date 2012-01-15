@@ -333,7 +333,7 @@ Variable mapping-addr
 
 8 Value b2b-chunk#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
-#32000 Value bandwidth-init \ 32µs/burst=1MB/s
+#2000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=1MB/s
 -1 Constant never
 -1 1 rshift Constant max-int64
 4 Value flybursts#
@@ -451,7 +451,7 @@ Variable lastdiff
 	r> dest-timestamps @ + @ timestat
     ELSE  2drop rdrop  THEN ;
 
-#1000000 Value slack# \ 1ms slack leads to backdrop of factor 2
+#4000000 Value slack# \ 1ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
     j^ rtdelay @ j^ ns/burst @ /
@@ -462,7 +462,7 @@ Variable lastdiff
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
-    0 max slack# */ + j^ ns/burst !@
+    0 max slack# min slack# */ + j^ ns/burst !@
     bandwidth-init = IF  \ first acknowledge
 	net2o:set-flyburst
     THEN ;
