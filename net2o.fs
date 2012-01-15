@@ -115,7 +115,11 @@ Variable routes
 
 : check-address ( addr u -- net2o-addr / -1 ) routes #key ;
 : insert-address ( addr u -- net2o-addr )
-    s" " 2over routes #! routes #key ;
+    2dup routes #key dup -1 = IF
+	drop s" " 2over routes #! routes #key
+    ELSE
+	nip nip
+    THEN ;
 
 : insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
@@ -139,8 +143,10 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ route an incoming packet
 
+Variable return-addr
+
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ destination @ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ destination c@ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
     r@ destination be-ux@ route>address
     reverse64 r> destination be-x!  false ;
 
@@ -196,7 +202,7 @@ $04 Constant send-ack#
     r@ headersize# and chunk@
     r@ headersize# and chunk@
     drop rdrop swap
-    ."  to " hex. ."  @ " hex. cr ;
+    ."  to " hex. ."  @ " hex. ." from " return-addr @ hex. cr ;
 
 \ packet delivery table
 
@@ -204,7 +210,6 @@ $04 Constant send-ack#
 
 \ each source has multiple destination spaces
 
-Variable return-addr
 Variable dest-addr
 
 : >ret-addr ( -- )
@@ -906,8 +911,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     send-anything? sendflag !
     BEGIN  poll-sock 0= WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
-    sockaddr-tmp alen @ insert-address reverse64 $FFFFFFFF00000000 and
-    inbuf destination be-x!
+    sockaddr-tmp alen @ insert-address  reverse64 inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )

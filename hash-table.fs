@@ -85,7 +85,7 @@ warnings !
 : #key ( addrkey u hash -- path / -1 ) 0 { hash key }
     2dup string-hash  wurst-state cell bounds ?DO
 	key 8 lshift I c@ $80 or or  to key
-	I c@ $7F and 2* cells hash @ dup 0= ?LEAVE
+	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  2drop key -$81 and leftalign   UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop -1 ;
