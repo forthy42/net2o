@@ -18,7 +18,7 @@
     r> close-file throw ;
 
 : salt-init ( -- )
-    s" ~/.wurstrng" r/o open-file IF  drop 2drop random-init
+    s" ~/.wurstrng" r/o open-file IF  2drop random-init
     ELSE  read-wurstrng  THEN  rng-step write-wurstrng ;
 
 salt-init
