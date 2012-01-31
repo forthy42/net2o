@@ -204,7 +204,7 @@ also net2o-base
 : >rate ( -- )  j^ delta-ticks 2@ 0= swap 0= or ?EXIT
     ticks dup j^ burst-ticks !@ dup IF
 	- rate( .eff ) >r
-	j^ delta-ticks @ tick-init 1+ j^ acks @ */
+	j^ delta-ticks @ \ tick-init 1+ j^ acks @ */
 	rate( .rate ) lit, r> lit, set-rate
     ELSE
 	2drop
