@@ -201,7 +201,7 @@ previous definitions
 : .rate ( n -- n ) dup . ." rate" cr ;
 : .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
-: >rate ( -- )  j^ delta-ticks 2@ or 0= ?EXIT
+: >rate ( -- )  j^ delta-ticks 2@ 0= swap 0= or ?EXIT
     ticks dup j^ burst-ticks !@ dup IF
 	- rate( .eff ) >r
 	j^ delta-ticks @ tick-init 1+ j^ acks @ */
