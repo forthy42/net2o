@@ -42,6 +42,7 @@ warnings on
 debug: timing(
 debug: rate(
 debug: ratex(
+debug: deltat(
 debug: slack(
 debug: slk(
 debug: bursts(
@@ -53,6 +54,7 @@ debug: bursts(
 \ +db ratex(
 \ +db slack(
 \ +db timing(
+\ +db deltat(
 
 \ Create udp socket
 
@@ -313,10 +315,13 @@ Constant >code-flag
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 ,  0 ,
 Variable mapping-addr
 
+: addr>ts ( addr -- ts-offset )
+    chunk-p2 rshift timestamp * ;
+
 : map-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocate throw r@ dest-raddr !
-    chunk-p2 rshift timestamp * allocate throw r@ dest-timestamps !
+    addr>ts allocate throw r@ dest-timestamps !
     j^ r@ dest-job !
     r> code-struct ;
 
@@ -438,6 +443,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     dup j^ bandwidth-tick !  j^ next-tick ! ;
 
 Variable lastdiff
+Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
@@ -452,8 +458,12 @@ Variable lastdiff
 : net2o:ack-addrtime ( addr ticks -- )  swap
     j^ data-map $@ drop >r
     r@ dest-vaddr @ -  dup r@ dest-size @ u<
-    IF  chunk-p2 rshift timestamp *
-	r> dest-timestamps @ + @ timestat
+    IF  addr>ts r> dest-timestamps @
+	over tick-init 1+ timestamp * - 0>
+	IF  + dup ts-ticks @
+	    over tick-init 1+ timestamp * - ts-ticks @ - lastdeltat !
+	ELSE  +  THEN 
+	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
 #4000000 Value slack# \ 1ms slack leads to backdrop of factor 2
@@ -463,7 +473,8 @@ Variable lastdiff
     bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
 
 : net2o:set-rate ( rate deltat -- )
-    rate( dup . ." deltat" cr ) drop \ dummy
+    deltat( dup . lastdeltat ? ." deltat" cr )
+    lastdeltat @ over min */
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
@@ -727,7 +738,7 @@ Variable outflag  outflag off
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
     r@ dest-raddr @ - dup r@ dest-size @ u<
-    IF  chunk-p2 rshift timestamp *
+    IF  addr>ts
 	r> dest-timestamps @ + ticks swap ts-ticks !
     ELSE  drop rdrop  THEN ;
 
