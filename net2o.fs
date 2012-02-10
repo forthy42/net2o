@@ -32,7 +32,12 @@ require hash-table.fs
 \ debugging aids
 
 : debug: ( -- ) Create immediate false ,  DOES>
-    ]] Literal @ IF [[ ')' parse evaluate ]] THEN [[ ;
+    ]] Literal @ IF [[ ;
+
+\ this is already defined in assertions
+warnings off    
+: )  ]] THEN [[ ;  immediate
+warnings on
 
 debug: timing(
 debug: rate(
@@ -51,14 +56,14 @@ debug: bursts(
 
 \ Create udp socket
 
-4242 Constant net2o-udp
+4242 Value net2o-port
 
 0 Value net2o-sock
 0 Value net2o-sock6
 
 : new-server ( -- )
-    net2o-udp create-udp-server s" w+" c-string fdopen to net2o-sock
-    net2o-udp create-udp-server6 s" w+" c-string fdopen to net2o-sock6
+    net2o-port create-udp-server s" w+" c-string fdopen to net2o-sock
+    net2o-port create-udp-server6 s" w+" c-string fdopen to net2o-sock6
 ;
 
 : new-client ( -- )
