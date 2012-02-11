@@ -471,7 +471,7 @@ Variable lastdeltat
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
-    IF  lastdeltat @ over min swap */  ELSE  drop  THEN
+    IF  lastdeltat @ over max swap */  ELSE  drop  THEN
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
