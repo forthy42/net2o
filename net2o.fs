@@ -475,11 +475,12 @@ Variable lastdeltat
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
-    IF  lastdeltat @ over min */  ELSE  drop  THEN
+    IF  lastdeltat @ over min swap */  ELSE  drop  THEN
     dup rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
-    0 max slack# min slack# */ + j^ ns/burst !@
+    0 max slack# min slack# */ +
+    j^ ns/burst !@
     bandwidth-init = IF  \ first acknowledge
 	net2o:set-flyburst
     THEN ;
