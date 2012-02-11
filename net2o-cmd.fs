@@ -1,82 +1,72 @@
 \ generic net2o command interpreter
 
-\ net2o commands are UTF-8 coded, not byte coded.
+\ net2o commands are protobuf coded, not byte coded.
 
-\ rewrite this to use protobuf-like encoding!
+\ command helper
+
+2Variable buf-state
+
+: u>n ( u -- n )
+    dup 2/ swap 1 and IF negate THEN ;
+: n>u ( n -- u )
+    dup 0< 1 and swap abs 2* or ;
 
 : p@+ ( addr -- u addr' )  >r 0
     BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
-	    r> 1+ >r  REPEAT  r> ;
+	    r> 1+ >r  REPEAT  r> 1+ ;
 : p!+ ( u addr -- addr' )  >r
     <<#  dup $7F and hold  7 rshift
     BEGIN  dup  WHILE  dup $7F and $80 or hold 7 rshift  REPEAT
     0 #> tuck r@ swap move r> + #>> ;
 : ps!+ ( n addr -- addr' )
-    >r dup 0< 1 and swap abs 2* or r> p!+ ;
+    >r n>u r> p!+ ;
 : ps@+ ( addr -- n addr' )
-    p@+ >r dup 2/ swap 1 and IF negate THEN r> ;
+    p@+ >r u>n r> ;
+
+: p@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
+: ps@ ( -- n ) p@ u>n ;
+
+: byte@ ( addr u -- addr' u' b )
+    >r count r> 1- swap ;
 
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
 \ commands come in junks of 8 bytes
 \ Commands are zero-terminated
 
-Variable cmd
-Variable cmd' 0 cmd' !
-
-: ?lit-space ( addr u -- addr u )
-    dup 1 cells < abort" Command space exhausted" ;
-: prefetch ( addr u -- addr' u' n ) ?lit-space
-    over be-ux@ >r 1 cells /string r> ;
-: byte-fetch ( addr u -- addr' u' n )
-    cmd' @ 7 and 0= IF  prefetch cmd be-x! cmd' off  THEN
-    cmd cmd' @ + c@  1 cmd' +! ;
-
-2Variable buf-state
-
 : net2o-crash  base @ >r hex
-    cmd @ 8 .r cmd' ? buf-state 2@ swap 8 u.r 8 u.r cr
-    r> base !
+    buf-state 2@ swap 8 u.r 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
+    r> base !  buf-state 2@ dump
     true abort" Unimplemented net2o function" ;
 
 Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
 : cmd-dispatch ( addr u -- addr' u' )
-    byte-fetch >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
+    byte@ >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
 
-: extend-cmds ( -- xt ) noname Create lastxt $40 0 DO ['] net2o-crash , LOOP
-  DOES>  >r byte-fetch $80 - $3F umin cells r> + perform ;
+: cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
-6 buffer: 'cmd-buf
+: extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
+  DOES>  >r cmd@ cells r> + perform ;
 
-: >cmd ( xt u -- ) 'cmd-buf 6 xc!+? 2drop  'cmd-buf tuck -
+8 buffer: 'cmd-buf
+
+: >cmd ( xt u -- ) 'cmd-buf p!+  'cmd-buf tuck -
     cmd-base-table >r
     BEGIN  dup 1 >  WHILE  over c@ >r 1 /string r>
 	    cells r> + dup @ ['] net2o-crash = IF
 		extend-cmds over !
 	    THEN
-	    @ >body $80 cells - >r
+	    @ >body >r
     REPEAT
     drop c@ cells r> + ! ;
 
 : cmd-loop ( addr u -- )
 \    ticks u. ." do-cmd" cr
-    cmd' off  sp@ >r
-    BEGIN  cmd-dispatch  dup 0= cmd' @ 0= and  UNTIL  r> sp! 2drop ;
+    sp@ >r
+    BEGIN  cmd-dispatch  dup 0=  UNTIL  r> sp! 2drop ;
 
 ' cmd-loop is queue-command
-
-\ command helper
-
-: utf8-byte@ ( -- xc )
-    byte-fetch  dup $80 u< ?EXIT  \ special case ASCII
-    dup $C2 u< IF  UTF-8-err throw  THEN  \ malformed character
-    $7F and  $40 >r
-    BEGIN  dup r@ and  WHILE  r@ xor
-	    6 lshift r> 5 lshift >r >r byte-fetch
-	    dup $C0 and $80 <> IF   UTF-8-err throw  THEN
-	    $3F and r> or
-    REPEAT  rdrop ;
 
 \ commands
 
@@ -98,13 +88,11 @@ forth also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
-0 net2o: end-cmd ( -- ) 0 cmd' !  0. buf-state 2! ;
-1 net2o: lit ( -- x )  buf-state 2@ prefetch >r buf-state 2! r> ;
-2 net2o: string ( -- addr u )  buf-state 2@
-    2dup over xc@+ nip dup xc-size + aligned safe/string buf-state 2!
-    >r xc@+ r> umin ;
-3 net2o: char ( -- xc )
-    utf8-byte@ ;
+0 net2o: end-cmd ( -- ) 0. buf-state 2! ;
+1 net2o: ulit ( -- x ) p@ ;
+2 net2o: slit ( -- x ) ps@ ;
+3 net2o: string ( -- addr u )  buf-state 2@ over + >r
+    p@+ swap 2dup + r> over - buf-state 2! ;
 
 \ these functions are only there to test the server
 
@@ -119,23 +107,12 @@ definitions
 
 : cmdbuf     j^ cmd-out $@ drop cmd-buf# ;
 : endcmdbuf  j^ cmd-out $@ + ;
-: cmdaccu    j^ cmd-out $@ drop cmd-accu# ;
-: cmdslot    j^ cmd-out $@ drop cmd-slot ;
-: cmdextras  j^ cmd-out $@ drop cmd-extras ;
 
-: cmdreset  cmdbuf off  cmdslot off  cmdextras off ;
+: cmdreset  cmdbuf off ;
 
 : @+ ( addr -- n addr' )  dup @ swap cell+ ;
 
-: cmdflush
-    cmdaccu @ cmdbuf @+ + ! cmdextras @ 1 cells + cmdbuf +!
-    cmdslot @ 8 - 0 max cmdslot !
-    cmdaccu cell+ @ cmdaccu ! cmdextras off ;
-: cmdflush?  cmdslot @ 8 u>= IF
-	cmdflush
-    THEN ;
-: cmd, ( n -- )  cmdaccu 2 cells cmdslot @ /string xc!+? 2drop
-    cmdaccu - cmdslot ! cmdflush? ;
+: cmd, ( n -- )  cmdbuf @+ + dup >r p!+ r> - cmdbuf +! ;
 
 : net2o, @ cmd, ;
 
@@ -150,14 +127,12 @@ definitions
 
 also net2o-base definitions
 
-: $, ( addr u -- )  dup >r cmdbuf @+ + cmdextras @ + cell+
-    endcmdbuf over - xc!+? 0= abort" didn't fit"
-    r@ min move
-    r> dup xc-size + aligned cmdextras +!  string ;
-: lit, ( n -- )  cmdbuf @+ + cmdextras @ + cell+ be-x!
-    1 cells cmdextras +!  lit ;
-: char, ( xc -- )  char cmd, ;
-: end-code ( -- ) cmdflush previous ;
+: $, ( addr u -- )  string  >r r@ cmd,
+    r@ endcmdbuf cmdbuf @+ + - u>= abort" didn't fit"
+    cmdbuf @+ + r@ move   r> cmdbuf +! ;
+: lit, ( u -- )  ulit cmd, ;
+: slit, ( n -- )  slit cmd, ;
+: end-code ( -- ) previous ;
 
 previous definitions
 
@@ -192,14 +167,14 @@ also net2o-base
 : code-ivs ( -- )   rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs ;
 
 30 net2o: push-$    $, ;
-31 net2o: push-lit  lit, ;
-32 net2o: push-char char, ;
+31 net2o: push-lit  slit, ;
+32 net2o: push-char lit, ;
 
 previous
 
-33 net2o: push'     utf8-byte@ cmd, ;
+33 net2o: push'     p@ cmd, ;
 34 net2o: cmd:      cmdreset ;
-35 net2o: cmd;      cmdflush ;
+35 net2o: cmd;      ;
 
 previous definitions
 
@@ -238,7 +213,7 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
-    cmdflush cmdbuf @+ swap
+    end-cmd  cmdbuf @+ swap
     code-dest j^ return-address @
     net2o:send-packet drop cmdreset ;
 : net2o:do-resend ( -- )

@@ -291,10 +291,6 @@ field: acks
 end-structure
 
 begin-structure cmd-struct
-field: cmd-accu#
-field: cmd-accu
-field: cmd-slot
-field: cmd-extras
 field: cmd-buf#
 min-size max-size^2 lshift +field cmd-buf
 end-structure
