@@ -33,9 +33,13 @@ require hash-table.fs
 
 : debug)  ]] THEN [[ ;
 
-: debug: ( -- ) Create immediate false ,  DOES>
-    ]] Literal @ IF [[ ['] debug) assert-canary ;
-
+true [IF]
+    : debug: ( -- ) Create immediate false ,  DOES>
+	]] Literal @ IF [[ ['] debug) assert-canary ;
+[ELSE]
+    : debug: ( -- )  Create immediate DOES> postpone ( ;
+[THEN]
+    
 \ this is already defined in assertions
 
 debug: timing(
