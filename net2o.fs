@@ -31,13 +31,12 @@ require hash-table.fs
 
 \ debugging aids
 
+: debug)  ]] THEN [[ ;
+
 : debug: ( -- ) Create immediate false ,  DOES>
-    ]] Literal @ IF [[ ;
+    ]] Literal @ IF [[ ['] debug) assert-canary ;
 
 \ this is already defined in assertions
-warnings off    
-: )  ]] THEN [[ ;  immediate
-warnings on
 
 debug: timing(
 debug: rate(
