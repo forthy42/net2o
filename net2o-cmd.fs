@@ -151,7 +151,7 @@ also net2o-base definitions forth
 20 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
 21 net2o: send-chunk ( -- ) net2o:send-chunk ;
 22 net2o: send-chunks ( -- ) net2o:send-chunks ;
-23 net2o: ack-addrtime ( addr time1 time2 -- )  net2o:ack-addrtime ;
+23 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
 24 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
 25 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 26 net2o: resend ( addr u -- )  net2o:resend ;
@@ -202,7 +202,9 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    dest-addr @ lit, ticks lit, ack-addrtime ;
+    ticks dest-addr @
+    timing( [ also forth ] 2dup . . ." acktime" cr [ previous ] )
+    lit, lit, ack-addrtime ;
 
 \ client side acknowledge
 

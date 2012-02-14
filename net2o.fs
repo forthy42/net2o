@@ -483,6 +483,7 @@ Variable lastdeltat
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
+    rate( dup . ." rate" cr )
     j^ ns/burst !@
     bandwidth-init = IF  \ first acknowledge
 	net2o:set-flyburst
