@@ -455,6 +455,7 @@ Variable lastdeltat
     j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ticks -- )  swap
+    timing( over . dup . ." addrtick" cr )
     j^ data-map $@ drop >r
     r@ dest-vaddr @ -  dup r@ dest-size @ u<
     IF  addr>ts r> dest-timestamps @
