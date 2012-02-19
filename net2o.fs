@@ -195,11 +195,11 @@ $10 Constant qos1#
 $20 Constant qos2#
 $30 Constant qos3#
 
-$07 Constant acks#
-$06 Constant ack-class#
+$0F Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
-$04 Constant send-ack#
+$04 Constant resend-toggle#
+$08 Constant send-ack#
 
 \ short packet information
 
@@ -497,12 +497,15 @@ Variable lastdeltat
 : net2o:resend ( addr u -- )
     2dup j^ data-resend add-range
     ." Resend: " swap . . cr ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and
+    j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
 : >real-range ( addr -- addr' )
     j^ data-map $@ drop dest-raddr @ + ;
 : resend$@ ( -- addr u )
     j^ data-resend $@  IF
 	2@ swap >real-range swap
     ELSE  drop 0 0  THEN ;
+
 : resend-dest ( -- addr )
     j^ data-resend $@ drop 2@ drop ;
 : /resend ( u -- )  j^ data-resend dup $@ drop 2@ drop

@@ -147,17 +147,18 @@ also net2o-base definitions forth
 14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 15 net2o: close-file ( id -- )  n2o:close-file ;
 16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
+17 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
+18 net2o: send-chunk ( -- ) net2o:send-chunk ;
+19 net2o: send-chunks ( -- ) net2o:send-chunks ;
 
-20 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
-21 net2o: send-chunk ( -- ) net2o:send-chunk ;
-22 net2o: send-chunks ( -- ) net2o:send-chunks ;
-23 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
-24 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
-25 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-26 net2o: resend ( addr u -- )  net2o:resend ;
-27 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
-28 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-29 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+20 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
+21 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
+22 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
+23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
+24 net2o: resend ( addr u -- )  net2o:resend ;
+25 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+26 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+27 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
 
 \ create commands to send back
 
@@ -212,8 +213,11 @@ also net2o-base
     j^ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
+: net2o:gen-resend ( -- ) [ also forth ]
+    inbuf 1+ c@ resend-toggle# and  IF  '+'  ELSE  '-'  THEN  emit [ previous ]
+    inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )
-    net2o:acktime  >rate  net2o:ackrange ;
+    net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
     end-cmd  cmdbuf @+ swap
     code-dest j^ return-address @
