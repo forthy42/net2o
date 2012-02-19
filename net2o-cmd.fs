@@ -213,8 +213,7 @@ also net2o-base
     j^ data-ack $@ dup IF
 	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
     ELSE  2drop  THEN ;
-: net2o:gen-resend ( -- ) [ also forth ]
-    inbuf 1+ c@ resend-toggle# and  IF  '+'  ELSE  '-'  THEN  emit [ previous ]
+: net2o:gen-resend ( -- )
     inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )
     net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
