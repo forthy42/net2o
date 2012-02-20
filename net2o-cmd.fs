@@ -230,8 +230,16 @@ also net2o-base
     THEN
     net2o:sendack ;
 
-: net2o:do-ack ( -- )
+: received! ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
+    j^ data-map $@ drop >r
+    dest-addr @ r@ dest-vaddr @ - addr>bits
+    r@ data-ackbits @ over +bit
+    inbuf 1+ c@ resend-toggle# and 0<>
+    r> data-ackpol @ swap bit! ;
+    
+: net2o:do-ack ( -- )
+    received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor dup >r ack-toggle# and
     IF
