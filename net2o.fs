@@ -845,7 +845,7 @@ Create chunk-adder chunks-struct allot
 	I chunk-context @ j^ = IF
 	    UNLOOP  EXIT
 	THEN
-    chunks-struct %size +LOOP
+    chunks-struct +LOOP
     j^ chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
