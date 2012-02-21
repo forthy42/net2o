@@ -221,32 +221,32 @@ also net2o-base
     end-cmd  cmdbuf @+ swap
     code-dest j^ return-address @
     net2o:send-packet drop cmdreset ;
+
+: receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
+: data-ackbit ( flag -- addr )
+    IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
 : net2o:do-resend ( -- )
-    j^ data-ack $@ 2 cells - 0 max bounds ?DO
-	I 2@ swap lit, lit, resend
-    2 cells +LOOP
-    j^ data-ack $@ nip 2 cells > IF
-	send-chunks
-    THEN
-    net2o:sendack ;
+    j^ data-map $@ drop >r
+    dest-addr @ r@ dest-vaddr @ - addr>bits
+    resend( r@ receive-flag data-ackbit @ over 3 rshift dump )
+    drop rdrop ;
 
 : received! ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
+\   ^^^ legacy code!!!
     j^ data-map $@ drop >r
     dest-addr @ r@ dest-vaddr @ - addr>bits
-    r@ data-ackbits @ over +bit
-    inbuf 1+ c@ resend-toggle# and 0<>
-    r> data-ackpol @ swap bit! ;
+    r@ receive-flag data-ackbit @ over +bit
+    dup r@ data-lastack# !@  r@ receive-flag 0= data-ackbit @ -rot
+    swap 1+ swap +DO  dup I +bit  LOOP  drop rdrop ;
     
 : net2o:do-ack ( -- )
     received!
     inbuf 1+ c@ acks# and
-    dup j^ ack-receive !@ xor dup >r ack-toggle# and
-    IF
-	net2o:genack
-	inbuf 1+ c@ send-ack# and
-	IF  net2o:do-resend  ELSE  net2o:sendack  THEN
-    THEN  r> ack-timing ;
+    dup j^ ack-receive !@ xor >r
+    r@ resend-toggle# and IF  net2o:do-resend  THEN
+    r@ ack-toggle# and IF  net2o:genack net2o:sendack  THEN
+    r> ack-timing ;
 ' net2o:do-ack IS do-ack
 
 previous

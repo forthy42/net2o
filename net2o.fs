@@ -29,13 +29,14 @@ require hash-table.fs
 
 \ bit vectors
 
-CREATE Bittable 80 c, 40 c, 20 c, 10 c, 8 c, 4 c, 2 c, 1 c,
+CREATE Bittable $80 c, $40 c, $20 c, $10 c, $08 c, $04 c, $02 c, $01 c,
 : bits ( n -- n ) chars Bittable + c@ ;
 
 : >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
 : +bit ( addr n -- )  >bit over c@ or swap c! ;
 : -bit ( addr n -- )  >bit invert over c@ and swap c! ;
 : bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
+: bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
 
 \ timing ticks
 
@@ -61,6 +62,7 @@ debug: deltat(
 debug: slack(
 debug: slk(
 debug: bursts(
+debug: resend(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -70,6 +72,7 @@ debug: bursts(
 \ +db slack(
 \ +db timing(
 \ +db deltat(
+\ +db resend(
 
 \ Create udp socket
 
@@ -255,8 +258,9 @@ end-structure
 dest-struct extend-structure data-struct
 field: data-head
 field: data-tail
-field: data-ackbits
-field: data-ackpol
+field: data-ackbits0
+field: data-ackbits1
+field: data-lastack#
 end-structure
 
 : check-dest ( -- addr 1/t / f )  0 to j^
@@ -324,14 +328,14 @@ end-structure
                     \  u   addr real-addr job ivs tst code-flag
 Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , here 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs tst head tail ab as
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 ,  0 , 0 , 0 ,
+                    \  u   addr real-addr job ivs tst head tail ab0 ab1 lab
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
 Variable mapping-addr
 
 : addr>ts ( addr -- ts-offset )
     chunk-p2 rshift timestamp * ;
 : addr>bits ( addr -- bits )
-    chunk-p2 3 + rshift ;
+    chunk-p2 rshift ;
 
 : allocatez ( size -- addr )
     dup >r allocate throw dup r> erase ;
@@ -348,8 +352,8 @@ Variable mapping-addr
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     dup addr>ts allocatez r@ dest-timestamps !
-    dup addr>bits allocatez r@ data-ackbits !
-    dup addr>bits allocatez r@ data-ackpol !
+    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
+    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
     drop
     j^ r@ dest-job !
     r> code-struct ;
