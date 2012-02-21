@@ -29,7 +29,7 @@ require hash-table.fs
 
 \ bit vectors
 
-CREATE Bittable $80 c, $40 c, $20 c, $10 c, $08 c, $04 c, $02 c, $01 c,
+CREATE Bittable 8 0 [DO] 1 [I] lshift c, [LOOP]
 : bits ( n -- n ) chars Bittable + c@ ;
 
 : >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
@@ -93,7 +93,8 @@ debug: resend(
 $22 Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
-min-size max-size^2 lshift overhead + Constant maxpacket
+: maxdata ( -- n ) min-size max-size^2 lshift ;
+maxdata overhead + Constant maxpacket
 : chunk-p2 ( -- n )  max-size^2 6 + ;
 
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
@@ -313,7 +314,7 @@ end-structure
 
 begin-structure cmd-struct
 field: cmd-buf#
-min-size max-size^2 lshift +field cmd-buf
+maxdata +field cmd-buf
 end-structure
 
 begin-structure timestamp
@@ -531,10 +532,17 @@ Variable lastdeltat
 : net2o:resend ( addr u -- )
     2dup j^ data-resend add-range
     ." Resend: " swap . . cr ;
+: net2o:resend-mask ( addr mask -- )
+    2dup
+    BEGIN  dup  WHILE
+	    2dup 1 and
+	    IF  maxdata j^ data-resend add-range  ELSE  drop  THEN
+	    2/ >r maxdata + r>  REPEAT  2drop
+    resend( ." Resend-mask: " over . dup . cr ) 2drop ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
 : >real-range ( addr -- addr' )
-    j^ data-map $@ drop dest-raddr @ + ;
+    j^ data-map $@ drop >r r@ dest-vaddr @ - r> dest-raddr @ + ;
 : resend$@ ( -- addr u )
     j^ data-resend $@  IF
 	2@ swap >real-range swap
@@ -765,9 +773,9 @@ Variable outflag  outflag off
 
 \ send chunk
 
-: net2o:get-dest ( taddr target -- )
+: net2o:get-dest ( -- taddr target )
     data-dest j^ return-address @ ;
-: net2o:get-resend ( taddr target -- )
+: net2o:get-resend ( -- taddr target )
     resend-dest j^ return-address @ ;
 
 : send-size ( u -- n )
@@ -802,12 +810,16 @@ Variable outflag  outflag off
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-\	." resending" cr
-	net2o:get-resend net2o:prep-send /resend
+\	." resending " 
+	net2o:get-resend
+\	over . dup . cr
+	net2o:prep-send /resend
     ELSE
 	2drop
-\	." sending" cr
-	data-tail$@ net2o:get-dest net2o:prep-send /data-tail
+\	." sending "
+	data-tail$@ net2o:get-dest
+\	over . dup . cr
+	net2o:prep-send /data-tail
     THEN
     data-to-send 0= IF
 	send-ack# outflag or!  ack-toggle# outflag xor!

@@ -156,9 +156,13 @@ also net2o-base definitions forth
 22 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
 23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
 24 net2o: resend ( addr u -- )  net2o:resend ;
-25 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
-26 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-27 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+25 net2o: resend-mask ( addr mask -- ) net2o:resend-mask ;
+
+\ crypto functions
+
+26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+27 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+28 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
 
 \ create commands to send back
 
@@ -226,19 +230,33 @@ also net2o-base
 : data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
 : net2o:do-resend ( -- )
-    j^ data-map $@ drop >r
-    dest-addr @ r@ dest-vaddr @ - addr>bits
-    resend( r@ receive-flag data-ackbit @ over 3 rshift dump )
-    drop rdrop ;
+    j^ data-map $@ drop { dmap }
+    dest-addr @ dmap dest-vaddr @ - addr>bits
+    dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
+    0 ?DO  dup I + c@ $FF <> IF
+	    dup I + c@ $FF xor
+	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
+	    lit, lit, resend-mask  LEAVE
+	THEN  LOOP  drop
+    drop ;
 
 : received! ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
 \   ^^^ legacy code!!!
     j^ data-map $@ drop >r
     dest-addr @ r@ dest-vaddr @ - addr>bits
+    \ set bucket as received in current polarity bitmap
     r@ receive-flag data-ackbit @ over +bit
-    dup r@ data-lastack# !@  r@ receive-flag 0= data-ackbit @ -rot
-    swap 1+ swap +DO  dup I +bit  LOOP  drop rdrop ;
+    dup r@ data-lastack# @ u> IF
+	\ if we are at head, fill other polarity with 1s
+	dup r@ data-lastack# !@
+	r@ receive-flag 0= data-ackbit @ -rot
+	swap 1+ swap +DO  dup I +bit  LOOP
+    ELSE
+	\ otherwise, set only this specific bucket
+	r@ receive-flag 0= data-ackbit @ over +bit
+    THEN
+    drop rdrop ;
     
 : net2o:do-ack ( -- )
     received!
