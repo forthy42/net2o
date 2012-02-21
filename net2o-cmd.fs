@@ -251,7 +251,7 @@ also net2o-base
 	\ if we are at head, fill other polarity with 1s
 	dup r@ data-lastack# !@
 	r@ receive-flag 0= data-ackbit @ -rot
-	swap 1+ swap +DO  dup I +bit  LOOP
+	+DO  dup I 1+ +bit  LOOP
     ELSE
 	\ otherwise, set only this specific bucket
 	r@ receive-flag 0= data-ackbit @ over +bit
