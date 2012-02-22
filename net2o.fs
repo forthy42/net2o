@@ -858,7 +858,7 @@ Create chunk-adder chunks-struct allot
 	ack-toggle# j^ ack-state xor!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
-	    ." no bursts in flight" cr
+	    ." no bursts in flight " j^ ns/burst ? cr
 \ 	    1 j^ flybursts !
 \	    j^ ns/burst @ 2* j^ ns/burst ! \ reduce rate to 50%
 	THEN
