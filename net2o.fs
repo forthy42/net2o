@@ -856,7 +856,10 @@ Create chunk-adder chunks-struct allot
     dup 0= IF
 	ack-toggle# j^ ack-state xor!
 	-1 j^ flybursts +!
-	j^ flybursts @ 0= IF  ." no bursts in flight" cr  THEN
+	j^ flybursts @ 0<= IF  ." no bursts in flight" cr
+	    1 j^ flybursts !
+	    j^ ns/burst @ 2* j^ ns/burst ! \ reduce rate to 50%
+	THEN
     THEN
     j^ ack-state @ outflag or!
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
