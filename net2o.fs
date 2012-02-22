@@ -507,7 +507,7 @@ Variable lastdeltat
 #3000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
-    j^ rtdelay @ j^ ns/burst @ / 1+ 2*
+    j^ rtdelay @ j^ ns/burst @ / 2* flybursts# +
     bursts( dup . ." flybursts" cr ) j^ flybursts max!@
     0= IF  ." start bursts" cr  THEN ;
 
