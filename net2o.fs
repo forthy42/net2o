@@ -507,8 +507,9 @@ Variable lastdeltat
 #3000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
-    j^ rtdelay @ j^ ns/burst @ / 1 max
-    bursts( dup . ." flybursts" cr ) j^ flybursts max! ;
+    j^ rtdelay @ j^ ns/burst @ / 1+ 2*
+    bursts( dup . ." flybursts" cr ) j^ flybursts max!@
+    0= IF  ." restart bursts" cr  THEN ;
 
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
@@ -856,9 +857,10 @@ Create chunk-adder chunks-struct allot
     dup 0= IF
 	ack-toggle# j^ ack-state xor!
 	-1 j^ flybursts +!
-	j^ flybursts @ 0<= IF  ." no bursts in flight" cr
-	    1 j^ flybursts !
-	    j^ ns/burst @ 2* j^ ns/burst ! \ reduce rate to 50%
+	j^ flybursts @ 0<= IF
+	    ." no bursts in flight" cr
+\ 	    1 j^ flybursts !
+\	    j^ ns/burst @ 2* j^ ns/burst ! \ reduce rate to 50%
 	THEN
     THEN
     j^ ack-state @ outflag or!
