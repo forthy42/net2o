@@ -509,7 +509,7 @@ Variable lastdeltat
 : net2o:set-flyburst ( -- )
     j^ rtdelay @ j^ ns/burst @ / 1+ 2*
     bursts( dup . ." flybursts" cr ) j^ flybursts max!@
-    0= IF  ." restart bursts" cr  THEN ;
+    0= IF  ." start bursts" cr  THEN ;
 
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
