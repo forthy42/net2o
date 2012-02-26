@@ -250,6 +250,8 @@ field: dest-raddr
 field: dest-job
 field: dest-ivs
 field: dest-timestamps
+field: dest-ivsgen
+field: dest-ivslastgen
 end-structure
 
 dest-struct extend-structure code-struct
@@ -326,11 +328,11 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job ivs tst code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , here 0 ,
+                    \  u   addr real-addr job ivs tst ig  ilg code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , here 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs tst head tail ab0 ab1 lab
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
+                    \  u   addr real-addr job ivs tst ig  ilg head tail ab0 ab1 lab
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
 Variable mapping-addr
 
 : addr>ts ( addr -- ts-offset )
@@ -344,6 +346,7 @@ Variable mapping-addr
 : map-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
+    state# 2* allocatez r@ dest-ivsgen !
     dup addr>ts allocatez r@ dest-timestamps !
     drop
     j^ r@ dest-job !
@@ -352,6 +355,7 @@ Variable mapping-addr
 : map-source-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
+    state# 2* allocatez r@ dest-ivsgen !
     dup addr>ts allocatez r@ dest-timestamps !
     dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
     dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
@@ -677,13 +681,15 @@ Variable lastdeltat
 
 $20 Constant keysize \ our shared secred is only 32 bytes long
 \ server keys
-Create pks $21982058BCCB3476. 64, $36623B3840D9F393. 64, $B4B038E18F007E95. 64, $79CAED9D9F043F9B. 64,
-Create sks $EFDA8C1AE4F04358. 64, $4320CCB35C5F6C27. 64, $CE16D65418EA8575. 64, $127701E350CC537F. 64,
+Create pks
+$21982058BCCB3476. 64, $36623B3840D9F393. 64, $B4B038E18F007E95. 64, $79CAED9D9F043F9B. 64,
+Create sks
+$EFDA8C1AE4F04358. 64, $4320CCB35C5F6C27. 64, $CE16D65418EA8575. 64, $127701E350CC537F. 64,
 \ client keys
-Create pkc keysize allot
-Create skc keysize allot
+keysize buffer: pkc
+keysize buffer: skc
 \ shared secred
-Create keypad keysize allot
+keysize buffer: keypad
 Variable do-keypad
 
 \ the theory here is that sks*pkc = skc*pks
