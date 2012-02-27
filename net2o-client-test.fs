@@ -28,13 +28,13 @@ uniq# $20000 + Constant data#
 net2o-code new-context
 S" This is a test" $, type '!' lit, emit cr
 pks send-key
-data# lit, $800000 lit, new-data
+data# lit, $400000 lit, new-data
 code# lit, $2000 lit, new-code
 end-code 0 send-cmd
 
-data# $800000 n2o:new-data
+data# $400000 n2o:new-data
 code# $2000 n2o:new-code
-data# $800000 net2o:unacked
+data# $400000 net2o:unacked
 
 net2o-code
 data-ivs code-ivs

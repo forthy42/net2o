@@ -249,9 +249,9 @@ field: dest-vaddr
 field: dest-raddr
 field: dest-job
 field: dest-ivs
-field: dest-timestamps
 field: dest-ivsgen
 field: dest-ivslastgen
+field: dest-timestamps
 end-structure
 
 dest-struct extend-structure code-struct
@@ -328,10 +328,10 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job ivs tst ig  ilg code-flag
+                    \  u   addr real-addr job ivs ig  ilg tst code-flag
 Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , here 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs tst ig  ilg head tail ab0 ab1 lab
+                    \  u   addr real-addr job ivs ig  ilg tst head tail ab0 ab1 lab
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
 Variable mapping-addr
 
@@ -593,6 +593,8 @@ Variable lastdeltat
 \ symmetric encryption and decryption
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
+: wurst-source-state> ( addr -- )  wurst-source swap state# 2* move ;
+: >wurst-source-state ( addr -- )  wurst-source state# 2* move ;
 
 : >wurst-source ( d -- )
     wurst-source state# bounds ?DO  2dup I 2!  2 cells +LOOP  2drop ;
@@ -605,6 +607,12 @@ Variable lastdeltat
     THEN
     wurst-state swap move ;
 
+\ regenerate ivs is a buffer swapping function:
+\ regenerate half of the ivs per time, when you reach the middle of the other half
+\ of the ivs buffer.
+
+Defer regen-ivs
+
 : ivs>source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
@@ -612,7 +620,8 @@ Variable lastdeltat
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
 	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ rot safe/string drop >wurst-source'
+	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
+	    r@ regen-ivs
 	ELSE
 	    drop
 	THEN
@@ -695,11 +704,29 @@ Variable do-keypad
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and know the server's public key.
 
+: (regen-ivs) ( offset map -- ) >r
+    dup r@ dest-ivs $@len
+    r@ dest-ivslastgen @ IF \ check if in quarter 2
+	2/ 2/ dup
+    ELSE \ check if in quarter 4
+	2/ dup 2/ dup >r + r>
+    THEN  bounds within 0=  IF
+\	." regenerate ivs stub " dup . cr
+	r@ dest-ivsgen @ >wurst-source-state
+	r@ dest-ivs $@
+	r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
+	dup mem-rounds# encrypt-buffer 2drop
+	r@ dest-ivsgen @ wurst-source-state>
+	-1 r@ dest-ivslastgen xor!
+    THEN  drop rdrop ;
+' (regen-ivs) IS regen-ivs
+
 : ivs-string ( addr u n addr -- ) >r r@ $!len
     >wurst-key
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
-    r> $@ dup mem-rounds# encrypt-buffer 2drop ;
+    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
+    r> cell+ @ wurst-source-state> ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
     r@ dest-size @ max-size^2 rshift r> dest-ivs ;
