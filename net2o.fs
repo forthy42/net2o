@@ -625,22 +625,33 @@ Defer regen-ivs
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
 	r@ dest-ivs @ IF
 	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
-	    r@ regen-ivs
-	ELSE
-	    drop
+	    dup r@ regen-ivs
 	THEN
+	drop
     THEN
     rdrop ;
 
 : ivs>source? ( addr -- )
-    what's regen-ivs >r  ['] 2drop IS regen-ivs  ivs>code-source?
-    r> IS regen-ivs ;
+    dup @ 0= IF  drop  EXIT  THEN
+    $@ drop >r
+    dest-addr @ r@ 2@ bounds within 0=
+    IF
+	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
+	r@ dest-ivs @ IF
+	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
+	THEN
+	drop
+    THEN
+    rdrop ;
 
-: wurst-outbuf-init ( -- )
+: wurst-outbuf-init ( flag -- )
     rnd-init >wurst-source'
     j^ IF
-	j^ data-map ivs>source?
-	j^ code-map ivs>code-source?
+	IF
+	    j^ code-map ivs>code-source?
+	ELSE
+	    j^ data-map ivs>source?
+	THEN
     THEN
     >wurst-key ;
 
@@ -672,7 +683,7 @@ Defer regen-ivs
 
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
-    : wurst-outbuf-encrypt ;
+    : wurst-outbuf-encrypt drop ;
     : wurst-inbuf-decrypt drop true ;
 [ELSE]
     : encrypt-buffer ( addr u n -- addr 0 ) >r
@@ -681,7 +692,7 @@ Defer regen-ivs
 		over r@ rounds  r@ >reads state# * safe/string
 	REPEAT  rdrop ;
     
-    : wurst-outbuf-encrypt ( -- )
+    : wurst-outbuf-encrypt ( flag -- )
 	wurst-outbuf-init
 	outbuf body-size mem-rounds# >r
 	outbuf packet-data r@ encrypt-buffer
@@ -794,9 +805,11 @@ Variable outflag  outflag off
 
 #90 Constant EMSGSIZE
 
-: send-packet ( -- )
+Variable code-packet
+
+: send-packet ( flag -- )
 \    ." send " outbuf .header
-    wurst-outbuf-encrypt
+    code-packet @ wurst-outbuf-encrypt  code-packet off
     out-route drop
     outbuf dup packet-size
     send-a-packet 0< IF

@@ -118,7 +118,8 @@ definitions
 
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
 
-: send-cmd ( addr -- ) cmdbuf cell+ swap j^ return-address @
+: send-cmd ( addr -- )  code-packet on
+    cmdbuf cell+ swap j^ return-address @
     max-size^2 1+ 0 DO
 	cmdbuf @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
