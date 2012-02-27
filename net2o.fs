@@ -305,6 +305,7 @@ field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
 field: lastack \ ns
+field: flyburst
 field: flybursts
 \ flow control, receiver part
 field: burst-ticks
@@ -397,7 +398,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     wurst-key state# j^ crypto-key $!
     max-int64 slackgrow# - j^ min-slack !
     max-int64 j^ rtdelay !
-    flybursts# j^ flybursts !
+    flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
     never          j^ next-tick !
@@ -487,9 +488,8 @@ Variable lastdeltat
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
     ticks
-    flybursts# j^ flybursts max!@ \ reset bursts in flight
-    0= IF  dup ticks-init  ." restart bursts" cr  THEN
-    1 j^ flybursts +!
+    j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
+    0= IF  dup ticks-init  bursts( ." restart bursts" cr )  THEN
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
@@ -512,8 +512,8 @@ Variable lastdeltat
 #3000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- )
-    j^ rtdelay @ j^ ns/burst @ / 2* flybursts# +
-    bursts( dup . ." flybursts" cr ) j^ flybursts max!@
+    j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
+    bursts( dup . ." flybursts" cr ) dup j^ flyburst ! j^ flybursts max!@
     0= IF  ." start bursts" cr  THEN ;
 
 : net2o:set-rate ( rate deltat -- )
@@ -892,9 +892,7 @@ Create chunk-adder chunks-struct allot
 	ack-toggle# j^ ack-state xor!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
-	    ." no bursts in flight " j^ ns/burst ? cr
-\ 	    1 j^ flybursts !
-\	    j^ ns/burst @ 2* j^ ns/burst ! \ reduce rate to 50%
+	    bursts( ." no bursts in flight " j^ ns/burst ? cr )
 	THEN
     THEN
     j^ ack-state @ outflag or!
