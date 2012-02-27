@@ -266,7 +266,10 @@ field: data-ackbits1
 field: data-lastack#
 end-structure
 
-: check-dest ( -- addr 1/t / f )  0 to j^
+: check-dest ( -- addr 1/t / f )
+    \G return false if invalid destination
+    \G return 1 if code, -1 if data, plus destination address
+    0 to j^
     return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN
     cell+ $@ bounds ?DO
 	I @ 2@ 1- bounds dest-addr @ within
@@ -641,11 +644,16 @@ Defer regen-ivs
     THEN
     >wurst-key ;
 
-: wurst-inbuf-init ( -- )
+: wurst-inbuf-init ( flag -- )
     rnd-init >wurst-source'
     j^ IF
-	j^ data-rmap ivs>source?
-	j^ code-rmap ivs>code-source?
+	IF
+	    j^ code-rmap ivs>code-source?
+	ELSE
+	    j^ data-rmap ivs>source?
+	THEN
+    ELSE
+	drop
     THEN
     >wurst-key ;
 
@@ -665,7 +673,7 @@ Defer regen-ivs
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
     : wurst-outbuf-encrypt ;
-    true constant wurst-inbuf-decrypt
+    : wurst-inbuf-decrypt drop true ;
 [ELSE]
     : encrypt-buffer ( addr u n -- addr 0 ) >r
 	over roundse# rounds
@@ -679,7 +687,8 @@ Defer regen-ivs
 	outbuf packet-data r@ encrypt-buffer
 	rdrop drop wurst-crc rot 2! ;
 
-    : wurst-inbuf-decrypt ( -- flag )
+    : wurst-inbuf-decrypt ( flag1 -- flag2 )
+	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
 	inbuf body-size mem-rounds# >r
 	inbuf packet-data
@@ -1049,24 +1058,21 @@ Defer do-ack ( -- )
 \    inbuf .header
     dest-addr @ 0= IF
 	0 to j^ \ address 0 has no job context!
-	wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
+	true wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
 	inbuf packet-data queue-command
     ELSE
-	check-dest
-	wurst-inbuf-decrypt 0= IF
+	check-dest dup 0= IF  drop  EXIT  THEN
+	dup 0> wurst-inbuf-decrypt 0= IF
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
 	    IF  drop  THEN  EXIT  THEN
-	dup 0< IF
-	    drop  >r inbuf packet-data r@ swap move
+	dup 0< IF \ data packet
+	    drop  >r inbuf packet-data r> swap move
 	    do-ack
-\	    j^ IF  inbuf packet-data swap . . cr  THEN
-	    rdrop
-	ELSE
-	    0>  IF
-		>r inbuf packet-data r@ swap dup >r move
-		r> r> swap queue-command
-	    THEN
+	ELSE \ command packet
+	    drop
+	    >r inbuf packet-data r@ swap dup >r move
+	    r> r> swap queue-command
 	THEN
     THEN ;
 
