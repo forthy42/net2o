@@ -27,7 +27,7 @@ require hash-table.fs
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
 
-\ bit vectors
+\ bit vectors, lsb first
 
 CREATE Bittable 8 0 [DO] 1 [I] lshift c, [LOOP]
 : bits ( n -- n ) chars Bittable + c@ ;
@@ -614,7 +614,7 @@ Variable lastdeltat
 
 Defer regen-ivs
 
-: ivs>source? ( addr -- )
+: ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
     r@ 2@ 1- bounds dest-addr @ within 0=
@@ -629,11 +629,15 @@ Defer regen-ivs
     THEN
     rdrop ;
 
+: ivs>source? ( addr -- )
+    what's regen-ivs >r  ['] 2drop IS regen-ivs  ivs>code-source?
+    r> IS regen-ivs ;
+
 : wurst-outbuf-init ( -- )
     rnd-init >wurst-source'
     j^ IF
 	j^ data-map ivs>source?
-	j^ code-map ivs>source?
+	j^ code-map ivs>code-source?
     THEN
     >wurst-key ;
 
@@ -641,7 +645,7 @@ Defer regen-ivs
     rnd-init >wurst-source'
     j^ IF
 	j^ data-rmap ivs>source?
-	j^ code-rmap ivs>source?
+	j^ code-rmap ivs>code-source?
     THEN
     >wurst-key ;
 
@@ -659,6 +663,7 @@ Defer regen-ivs
     0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
+    : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
     : wurst-outbuf-encrypt ;
     true constant wurst-inbuf-decrypt
 [ELSE]
@@ -716,6 +721,7 @@ Variable do-keypad
 	r@ dest-ivsgen @ >wurst-source-state
 	r@ dest-ivs $@
 	r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
+	2dup erase
 	dup mem-rounds# encrypt-buffer 2drop
 	r@ dest-ivsgen @ wurst-source-state>
 	-1 r@ dest-ivslastgen xor!
