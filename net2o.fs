@@ -489,6 +489,7 @@ Variable lastdeltat
     ticks
     flybursts# j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  ." restart bursts" cr  THEN
+    1 j^ flybursts +!
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
