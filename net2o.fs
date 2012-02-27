@@ -617,7 +617,7 @@ Defer regen-ivs
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
-    dest-addr @ r@ 2@ 1- bounds within 0=
+    dest-addr @ r@ 2@ bounds within 0=
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
 	r@ dest-ivs @ IF
