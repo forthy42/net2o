@@ -48,7 +48,7 @@ s" file size: " $, type 0 lit, file-size . cr
 0 lit, close-file
 end-code code# send-cmd
 
-ticks client-loop ticks - poll-timeout# - negate s>f 1e-9 f* f. ." s" cr
+ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
 ." IP4 packets received: " packet4r ? cr
 ." IP4 packets sent:     " packet4s ? cr
 ." IP6 packets received: " packet6r ? cr
