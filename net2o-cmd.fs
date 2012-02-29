@@ -149,6 +149,14 @@ also net2o-base definitions forth
 11 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 12 net2o: new-data ( addr u -- ) n2o:new-data ;
 13 net2o: new-code ( addr u -- ) n2o:new-code ;
+
+net2o-base
+
+: data-map, ( addr u -- )  2dup n2o:new-data swap lit, lit, new-data ;
+: code-map, ( addr u -- )  2dup n2o:new-code swap lit, lit, new-code ;
+
+forth
+
 14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 15 net2o: close-file ( id -- )  n2o:close-file ;
 16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
