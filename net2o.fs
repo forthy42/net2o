@@ -517,10 +517,11 @@ Variable lastdeltat
 
 #3000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
-: net2o:set-flyburst ( -- )
+: net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
-    bursts( dup . ." flybursts" cr ) dup j^ flyburst ! j^ flybursts max!@
-    0= IF  ." start bursts" cr  THEN ;
+    bursts( dup . ." flybursts" cr ) dup j^ flyburst ! ;
+: net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
+    0= IF  bursts( ." start bursts" cr ) THEN ;
 
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
@@ -531,10 +532,11 @@ Variable lastdeltat
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
     rate( dup . ." rate" cr )
-    j^ ns/burst !@
-    bandwidth-init = IF  \ first acknowledge
-	net2o:set-flyburst
-    THEN ;
+    j^ ns/burst !@ >r
+    net2o:set-flyburst
+    r> bandwidth-init = IF \ first acknowledge
+	net2o:max-flyburst
+    ELSE  drop  THEN ;
 
 \ acknowledge
 
