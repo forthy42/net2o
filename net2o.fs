@@ -667,6 +667,7 @@ Defer regen-ivs
 	    j^ data-rmap ivs>source?
 	THEN
     ELSE
+	." no iv mapping" cr
 	drop
     THEN
     >wurst-key ;
@@ -733,6 +734,19 @@ Variable do-keypad
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and know the server's public key.
 
+: >wurst-key-ivs ( -- )
+    j^ dup 0= IF
+	drop wurst-key state# wurst-state swap move
+    ELSE
+	do-keypad @ IF
+	    drop
+	    keypad wurst-state keysize move
+	    keypad wurst-state keysize + keysize move
+	ELSE
+	    crypto-key $@ wurst-state swap move
+	THEN
+    THEN ;
+
 : (regen-ivs) ( offset map -- ) >r
     dup r@ dest-ivs $@len
     r@ dest-ivslastgen @ IF \ check if in quarter 2
@@ -740,7 +754,7 @@ Variable do-keypad
     ELSE \ check if in quarter 4
 	2/ dup 2/ dup >r + r>
     THEN  bounds within 0=  IF
-\	." regenerate ivs stub " dup . cr
+\	." regenerate ivs " dup . cr
 	r@ dest-ivsgen @ >wurst-source-state
 	r@ dest-ivs $@
 	r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
@@ -751,8 +765,9 @@ Variable do-keypad
     THEN  drop rdrop ;
 ' (regen-ivs) IS regen-ivs
 
-: ivs-string ( addr u n addr -- ) >r r@ $!len
-    >wurst-key
+: ivs-string ( addr u n addr -- )
+    >r r@ $!len
+    >wurst-key-ivs
     state# <> abort" 64 byte ivs!" >wurst-source'
     r@ $@ erase
     r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop

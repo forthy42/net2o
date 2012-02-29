@@ -136,7 +136,7 @@ also net2o-base definitions
     cmdbuf @+ + r@ move   r> cmdbuf +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit cmd, ;
-: end-code ( -- ) previous ;
+: end-code ( -- ) end-cmd previous ;
 
 previous definitions
 
@@ -167,23 +167,29 @@ also net2o-base definitions forth
 26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
 27 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
 28 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+29 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
+30 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
 
 \ create commands to send back
 
 also net2o-base
 : send-key ( pk -- )  net2o:send-key $, receive-key ;
-: data-ivs ( -- )   rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs ;
-: code-ivs ( -- )   rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs ;
+: data-ivs ( -- )
+    rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs
+    rng$ 2dup $, gen-rdata-ivs net2o:gen-data-ivs ;
+: code-ivs ( -- )
+    rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs
+    rng$ 2dup $, gen-rcode-ivs net2o:gen-code-ivs ;
 
-30 net2o: push-$    $, ;
-31 net2o: push-lit  slit, ;
-32 net2o: push-char lit, ;
+31 net2o: push-$    $, ;
+32 net2o: push-lit  slit, ;
+33 net2o: push-char lit, ;
 
 previous
 
-33 net2o: push'     p@ cmd, ;
-34 net2o: cmd:      cmdreset ;
-35 net2o: cmd;      ;
+34 net2o: push'     p@ cmd, ;
+35 net2o: cmd:      cmdreset ;
+36 net2o: cmd;      ;
 
 previous definitions
 

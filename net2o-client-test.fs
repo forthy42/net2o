@@ -29,15 +29,15 @@ net2o-code new-context
 S" This is a test" $, type '!' lit, emit cr
 pks send-key
 data# lit, $400000 lit, new-data
+data# $400000 n2o:new-data
 code# lit, $2000 lit, new-code
+code# $2000 n2o:new-code
+data-ivs code-ivs
 end-code 0cmd
 
-data# $400000 n2o:new-data
-code# $2000 n2o:new-code
 data# $400000 net2o:unacked
 
 net2o-code
-data-ivs code-ivs
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
@@ -46,7 +46,7 @@ s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 s" file size: " $, type 0 lit, file-size . cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-end-code code# send-cmd
+end-code jcmd
 
 ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
 ." IP4 packets received: " packet4r ? cr
