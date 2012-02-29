@@ -231,9 +231,9 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
-    end-cmd  cmdbuf @+ swap
+    end-cmd  jcmd ( cmdbuf @+ swap
     code-dest j^ return-address @
-    net2o:send-packet drop cmdreset ;
+    net2o:send-packet drop cmdreset ) ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
