@@ -252,6 +252,7 @@ field: dest-ivs
 field: dest-ivsgen
 field: dest-ivslastgen
 field: dest-timestamps
+field: dest-tail
 end-structure
 
 dest-struct extend-structure code-struct
@@ -260,7 +261,6 @@ end-structure
 
 dest-struct extend-structure data-struct
 field: data-head
-field: data-tail
 field: data-ackbits0
 field: data-ackbits1
 field: data-lastack#
@@ -332,10 +332,10 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job ivs ig  ilg tst code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , here 0 ,
+                    \  u   addr real-addr job ivs ig  ilg tst tail code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  here 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs ig  ilg tst head tail ab0 ab1 lab
+                    \  u   addr real-addr job ivs ig  ilg tst tail head ab0 ab1 lab
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
 Variable mapping-addr
 
@@ -413,20 +413,20 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     r@ dest-raddr @  r@ dest-size @ r> data-head @ safe/string ;
 : /data ( u -- )
     j^ data-map $@ drop data-head +! ;
-: data-tail$@ ( -- addr u )
+: dest-tail$@ ( -- addr u )
     j^ data-map $@ drop >r
-    r@ dest-raddr @  r@ data-head @ r> data-tail @ safe/string ;
-: /data-tail ( u -- )
-    j^ data-map $@ drop data-tail +! ;
+    r@ dest-raddr @  r@ data-head @ r> dest-tail @ safe/string ;
+: /dest-tail ( u -- )
+    j^ data-map $@ drop dest-tail +! ;
 : data-dest ( -- addr )
     j^ data-map $@ drop >r
-    r@ dest-vaddr @ r> data-tail @ + ;
+    r@ dest-vaddr @ r> dest-tail @ + ;
 
 \ code sending around
 
 : code-dest ( -- addr )
     j^ code-map $@ drop >r
-    r@ dest-vaddr @ r> data-tail @ + ;
+    r@ dest-vaddr @ r> dest-tail @ + ;
 
 \ acknowledge map
 
@@ -869,7 +869,7 @@ Variable code-packet
 \ synchronous sending
 
 : data-to-send ( -- flag )
-    resend$@ nip 0> data-tail$@ nip 0> or ;
+    resend$@ nip 0> dest-tail$@ nip 0> or ;
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
@@ -880,9 +880,9 @@ Variable code-packet
     ELSE
 	2drop
 \	." sending "
-	data-tail$@ net2o:get-dest
+	dest-tail$@ net2o:get-dest
 \	over . dup . cr
-	net2o:prep-send /data-tail
+	net2o:prep-send /dest-tail
     THEN
     data-to-send 0= IF
 	send-ack# outflag or!  ack-toggle# outflag xor!

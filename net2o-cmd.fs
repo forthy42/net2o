@@ -124,6 +124,8 @@ definitions
 	cmdbuf @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
 
+: 0cmd ( -- )  0 send-cmd ;
+
 \ net2o assembler stuff
 
 also net2o-base definitions

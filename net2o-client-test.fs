@@ -12,12 +12,12 @@ insert-ip n2o:new-context
 \ 10 ms
 ." Sending first test" cr
 net2o-code S" This is the first test" $, type '!' lit, emit cr
-end-code 0 send-cmd
+end-code 0cmd
 
 \ 10 ms
 ." Sending second test" cr
 net2o-code S" This is the second test" $, type '!' lit, emit cr
-end-code 0 send-cmd
+end-code 0cmd
 
 \ 10 ms
 ." Sending more complex test" cr
@@ -30,7 +30,7 @@ S" This is a test" $, type '!' lit, emit cr
 pks send-key
 data# lit, $400000 lit, new-data
 code# lit, $2000 lit, new-code
-end-code 0 send-cmd
+end-code 0cmd
 
 data# $400000 n2o:new-data
 code# $2000 n2o:new-code
