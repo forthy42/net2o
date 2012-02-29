@@ -125,6 +125,11 @@ definitions
     LOOP  true abort" too many commands" ;
 
 : 0cmd ( -- )  0 send-cmd ;
+: jcmd ( -- )
+    j^ dest-size 2@ >r
+    j^ dest-tail @ + send-cmd
+    maxdata j^ dest-tail +!
+    j^ dest-tail @ r> u>= IF  j^ dest-tail off  THEN ;
 
 \ net2o assembler stuff
 
@@ -135,7 +140,7 @@ also net2o-base definitions
     cmdbuf @+ + r@ move   r> cmdbuf +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit cmd, ;
-: end-code ( -- ) previous ;
+: end-code ( -- ) end-cmd previous ;
 
 previous definitions
 
@@ -225,9 +230,7 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
-    end-cmd  cmdbuf @+ swap
-    code-dest j^ return-address @
-    net2o:send-packet drop cmdreset ;
+    end-cmd  jcmd ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
