@@ -669,7 +669,7 @@ Defer regen-ivs
 	    j^ data-rmap ivs>source?
 	THEN
     ELSE
-	." no iv mapping" cr
+\	." no iv mapping" cr
 	drop
     THEN
     >wurst-key ;

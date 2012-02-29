@@ -117,6 +117,7 @@ definitions
 : net2o, @ cmd, ;
 
 : net2o-code  ['] net2o, IS net2o-do also net2o-base ;
+net2o-code previous
 
 : send-cmd ( addr -- )  code-packet on
     cmdbuf cell+ swap j^ return-address @
@@ -125,7 +126,7 @@ definitions
     LOOP  true abort" too many commands" ;
 
 : 0cmd ( -- )  0 send-cmd ;
-: jcmd ( -- )  code-dest send-cmd ;
+: scmd ( -- )  code-dest send-cmd ;
 
 \ net2o assembler stuff
 
@@ -135,7 +136,7 @@ also net2o-base definitions
     r@ endcmdbuf cmdbuf @+ + - u>= abort" didn't fit"
     cmdbuf @+ + r@ move   r> cmdbuf +! ;
 : lit, ( u -- )  ulit cmd, ;
-: slit, ( n -- )  slit cmd, ;
+: slit, ( n -- )  slit n>u cmd, ;
 : end-code ( -- ) end-cmd previous ;
 
 previous definitions
@@ -185,11 +186,11 @@ also net2o-base
 32 net2o: push-lit  slit, ;
 33 net2o: push-char lit, ;
 
-previous
-
 34 net2o: push'     p@ cmd, ;
 35 net2o: cmd:      cmdreset ;
-36 net2o: cmd;      ;
+36 net2o: cmd;      end-cmd  scmd ;
+
+previous
 
 previous definitions
 
@@ -232,7 +233,7 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
 : net2o:sendack ( -- )
-    end-cmd  jcmd ;
+    end-cmd  scmd ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )

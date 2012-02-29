@@ -38,15 +38,17 @@ end-code 0cmd
 data# $400000 net2o:unacked
 
 net2o-code
+cmd:
 s" net2o.fs" $, r/o lit, 0 lit, open-file
-s" file size: " $, type 0 lit, file-size . cr
+s" file size: " $, push-$ push' type 0 lit, file-size push-lit push' . push' cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
 s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
-s" file size: " $, type 0 lit, file-size . cr
+s" file size: " $, push-$ push' type 0 lit, file-size push-char push' . push' cr
 0 lit, slurp-chunk send-chunks
 0 lit, close-file
-end-code jcmd
+cmd;
+end-code scmd
 
 ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
 ." IP4 packets received: " packet4r ? cr
