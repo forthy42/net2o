@@ -426,7 +426,10 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 : code-dest ( -- addr )
     j^ code-map $@ drop >r
-    r@ dest-vaddr @ r> dest-tail @ + ;
+    r@ dest-vaddr @ r@ dest-tail @ +
+    maxdata r@ dest-tail +!
+    r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
+    rdrop ;
 
 \ acknowledge map
 
