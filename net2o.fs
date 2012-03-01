@@ -63,6 +63,7 @@ debug: slack(
 debug: slk(
 debug: bursts(
 debug: resend(
+debug: track(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -73,6 +74,7 @@ debug: resend(
 \ +db timing(
 \ +db deltat(
 \ +db resend(
++db track(
 
 \ Create udp socket
 
@@ -289,6 +291,7 @@ begin-structure context-struct
 field: return-address
 field: cmd-out
 field: file-handles
+field: file-state
 field: crypto-key
 
 field: data-map
@@ -570,33 +573,50 @@ Variable lastdeltat
 
 \ file handling
 
-: >throw ( error -- ) throw ( stub! ) ;
+: nogap ( -- )  abort" Gap in file handles" ;
 
 : ?handles ( -- )
-    j^ file-handles @ 0= IF
-	s" " j^ file-handles $!
-    THEN ;    
+    j^ file-handles @ 0= IF  s" " j^ file-handles $!  THEN ;    
+
+\ file states
+
+begin-structure file-state-struct
+field: fs-size
+field: fs-seek
+end-structure
+
+: ?state ( -- )
+    j^ file-state @ 0= IF  s" " j^ file-state $!  THEN ;
+
+: state-addr ( id -- addr )  ?state
+    >r j^ file-state $@ r@ file-state-struct * /string dup 0< nogap
+    0= IF  drop r@ 1+ 2* cells j^ file-state $!len
+	j^ file-state $@ drop r@ file-state-struct * +
+	dup 2 cells erase  THEN  rdrop ;
+
+: size! ( n id -- )  state-addr  fs-size ! ;
+: seek! ( n id -- )  state-addr  fs-seek ! ;
 
 \ open a file - this needs *way more checking*!
 
 : id>file ( id -- fid )
     >r j^ file-handles $@ r> cells safe/string
-    0= >throw  @ ;
+    0= throw  @ ;
 
 : n2o:open-file ( addr u mode id -- )
     ?handles
-    >r j^ file-handles $@ r@ cells safe/string
-    IF    dup @ ?dup-IF  close-file >throw  THEN  dup off
+    >r j^ file-handles $@ r@ cells /string  dup 0< nogap
+    IF    dup @ ?dup-IF  close-file throw  THEN  dup off
     ELSE  drop r@ 1+ cells j^ file-handles $!len
 	j^ file-handles $@ drop r@ cells +  THEN rdrop >r
     dup 2over ." open file: " type ."  with mode " . cr
-    open-file >throw r> ! ;
+    open-file throw r> ! ;
 
 : n2o:close-file ( id -- )
     ?handles
     >r j^ file-handles $@ r@ cells safe/string
     IF
-	dup @ ?dup-IF  close-file >throw  THEN  dup off
+	dup @ ?dup-IF  close-file throw  THEN  dup off
     THEN
     drop rdrop ;
 
@@ -1115,19 +1135,21 @@ Defer do-ack ( -- )
 : server-event ( -- )
     next-packet 2drop  in-route
     IF  ['] handle-packet catch
-	?dup-IF  ( inbuf packet-data dump ) DoError  THEN
+	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
     ELSE  ." route a packet" cr route-packet  THEN ;
 
 : client-event ( -- )
     next-client-packet  2drop in-check
     IF  ['] handle-packet catch
-	?dup-IF  ( inbuf packet-data dump ) DoError  THEN
+	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
     ELSE  ( drop packet )  THEN ;
 
-: server-loop ( -- )
+0 Value server?
+
+: server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( -- )
+: client-loop ( -- )  false to server?
     BEGIN  poll-sock  WHILE  client-event  REPEAT ;
 
 \ client/server initializer

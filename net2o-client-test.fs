@@ -40,13 +40,13 @@ cmd:
 s" Download test" $, type cr
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, push-$ push' type 0 lit, file-size push-lit push' . push' cr
-0 lit, slurp-chunk send-chunks
-s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 1 lit, open-file
-s" file size: " $, push-$ push' type 1 lit, file-size push-char push' . push' cr
-0 lit, $400000 lit, 1 lit, slurp-block send-chunks
-s" block size: " $, push-$ push' type push-char push' . push' cr
+0 lit, slurp-chunk
 0 lit, close-file
-1 lit, close-file
+s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
+0 lit, file-size push-lit 0 lit< push' track-size
+0 lit, $400000 lit, 0 lit, slurp-block send-chunks
+push-lit 0 lit< push' track-seek
+send-chunks
 cmd;
 end-code scmd
 

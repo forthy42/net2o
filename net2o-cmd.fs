@@ -61,10 +61,13 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
     REPEAT
     drop c@ cells r> + ! ;
 
+Defer >throw
+
 : cmd-loop ( addr u -- )
 \    ticks u. ." do-cmd" cr
     sp@ >r
-    BEGIN  cmd-dispatch  dup 0=  UNTIL  r> sp! 2drop ;
+    TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
+	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop ;
 
 ' cmd-loop is queue-command
 
@@ -145,7 +148,6 @@ previous definitions
 
 also net2o-base definitions forth
 
-10 net2o: throw ( error -- )  throw ;
 11 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 12 net2o: new-data ( addr u -- ) n2o:new-data ;
 13 net2o: new-code ( addr u -- ) n2o:new-code ;
@@ -159,8 +161,8 @@ forth
 
 14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 15 net2o: close-file ( id -- )  n2o:close-file ;
-16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
-17 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file >throw /data ;
+16 net2o: file-size ( id -- size )  id>file file-size throw drop ;
+17 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
 18 net2o: send-chunk ( -- ) net2o:send-chunk ;
 19 net2o: send-chunks ( -- ) net2o:send-chunks ;
 
@@ -191,8 +193,9 @@ also net2o-base
     rng$ 2dup $, gen-rcode-ivs net2o:gen-code-ivs ;
 
 31 net2o: push-$    $, ;
-32 net2o: push-lit  slit, ;
+32 net2o: push-slit slit, ;
 33 net2o: push-char lit, ;
+' push-char alias push-lit
 
 34 net2o: push'     p@ cmd, ;
 35 net2o: cmd:      cmdreset ;
@@ -200,13 +203,33 @@ also net2o-base
 
 \ better slurping
 
-37 net2o: slurp-block ( seek umaxlen id -- ulen )
-          id>file >r swap 0 r@ reposition-file >throw
-          data$@ rot umin r> read-file >throw dup /data ;
+37 net2o: slurp-block ( seek maxlen id -- nextseek )
+          id>file >r over 0 r@ reposition-file throw
+          data$@ rot umin r> read-file throw dup /data + ;
 
-previous
+also forth
+
+38 net2o: track-size ( size id -- )
+      track( 2dup ." file <" 0 .r ." > size: " . cr ) size! ;
+39 net2o: track-seek ( seek id -- )
+      track( 2dup ." file <" 0 .r ." > seek: " . cr ) seek! ;
+
+\ This must be defined last, otherwise dangerous name-clash!
+
+40 net2o: throw ( error -- )  throw ;
+
+net2o-base
+
+: lit<   lit, push-lit ;
+: slit<  slit, push-slit ;
+:noname  server? IF
+	dup  IF  dup lit, throw end-cmd scmd  THEN
+    THEN  throw ; IS >throw
+
+previous previous
 
 previous definitions
+
 
 \ client side timing
 
