@@ -160,7 +160,7 @@ forth
 14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 15 net2o: close-file ( id -- )  n2o:close-file ;
 16 net2o: file-size ( id -- size )  id>file file-size >throw drop ;
-17 net2o: slurp-chunk ( id -- )  id>file data$@ rot read-file >throw /data ;
+17 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file >throw /data ;
 18 net2o: send-chunk ( -- ) net2o:send-chunk ;
 19 net2o: send-chunks ( -- ) net2o:send-chunks ;
 
@@ -197,6 +197,12 @@ also net2o-base
 34 net2o: push'     p@ cmd, ;
 35 net2o: cmd:      cmdreset ;
 36 net2o: cmd;      end-cmd  scmd ;
+
+\ better slurping
+
+37 net2o: slurp-block ( seek umaxlen id -- ulen )
+          id>file >r swap 0 r@ reposition-file >throw
+          data$@ rot umin r> read-file >throw dup /data ;
 
 previous
 
