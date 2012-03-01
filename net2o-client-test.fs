@@ -26,7 +26,7 @@ uniq# $10000 + Constant code#
 uniq# $20000 + Constant data#
 
 net2o-code new-context
-S" This is a test" $, type '!' lit, emit cr
+S" Connection init" $, type cr
 pks send-key
 data# $400000 data-map,
 code# $2000   code-map,
@@ -37,6 +37,7 @@ data# $400000 net2o:unacked
 
 net2o-code
 cmd:
+s" Download test" $, type cr
 s" net2o.fs" $, r/o lit, 0 lit, open-file
 s" file size: " $, push-$ push' type 0 lit, file-size push-lit push' . push' cr
 0 lit, slurp-chunk send-chunks
@@ -49,9 +50,7 @@ cmd;
 end-code scmd
 
 ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
-." IP4 packets received: " packet4r ? cr
-." IP4 packets sent:     " packet4s ? cr
-." IP6 packets received: " packet6r ? cr
-." IP6 packets sent:     " packet6s ? cr
+." IP4 packets send/received: " packet4s ? packet4r ? cr
+." IP6 packets send/received: " packet6s ? packet6r ? cr
 
 bye

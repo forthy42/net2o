@@ -263,6 +263,7 @@ dest-struct extend-structure data-struct
 field: data-head
 field: data-ackbits0
 field: data-ackbits1
+field: data-firstack#
 field: data-lastack#
 end-structure
 

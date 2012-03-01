@@ -250,12 +250,12 @@ also net2o-base
     j^ data-map $@ drop { dmap }
     dest-addr @ dmap dest-vaddr @ - addr>bits
     dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
-    0 ?DO  dup I + c@ $FF <> IF
+    dmap data-firstack# @ +DO  dup I + c@ $FF <> IF
 	    dup I + c@ $FF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
-	    lit, lit, resend-mask  LEAVE
-	THEN  LOOP  drop
-    drop ;
+	    lit, lit, resend-mask
+	    I dmap data-firstack# !  LEAVE
+	THEN  LOOP  2drop ;
 
 : received! ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
