@@ -44,7 +44,7 @@ s" file size: " $, push-$ push' type 0 lit, file-size push-lit push' . push' cr
 0 lit, close-file
 s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-file
 0 lit, file-size push-lit 0 lit< push' track-size
-0 lit, $400000 lit, 0 lit, slurp-block send-chunks
+0 lit, -1 slit, 0 lit, slurp-block send-chunks
 push-lit 0 lit< push' track-seek
 send-chunks
 cmd;
