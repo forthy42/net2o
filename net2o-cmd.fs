@@ -85,6 +85,8 @@ executer
     Create dup >r , here >r 0 , net2o-does noname :
     lastxt dup r> ! r> >cmd ;
 
+: F also forth parse-name parser1 execute previous ; immediate
+
 Vocabulary net2o-base
 
 forth also net2o-base definitions previous
@@ -157,11 +159,9 @@ net2o-base
 : data-map, ( addr u -- )  2dup n2o:new-data swap lit, lit, new-data ;
 : code-map, ( addr u -- )  2dup n2o:new-code swap lit, lit, new-code ;
 
-forth
-
 14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 15 net2o: close-file ( id -- )  n2o:close-file ;
-16 net2o: file-size ( id -- size )  id>file file-size throw drop ;
+16 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
 17 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
 18 net2o: send-chunk ( -- ) net2o:send-chunk ;
 19 net2o: send-chunks ( -- ) net2o:send-chunks ;
@@ -183,7 +183,6 @@ forth
 
 \ create commands to send back
 
-also net2o-base
 : send-key ( pk -- )  net2o:send-key $, receive-key ;
 : data-ivs ( -- )
     rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs
@@ -204,19 +203,20 @@ also net2o-base
 \ better slurping
 
 37 net2o: slurp-block ( seek maxlen id -- nextseek )
-          id>file >r over 0 r@ reposition-file throw
-          data$@ rot umin r> read-file throw dup /data + ;
-
-also forth
-
+          n2o:slurp-block ;
 38 net2o: track-size ( size id -- )
-      track( 2dup ." file <" 0 .r ." > size: " . cr ) size! ;
+          track( 2dup ." file <" 0 .r ." > size: " F . F cr ) size! ;
 39 net2o: track-seek ( seek id -- )
-      track( 2dup ." file <" 0 .r ." > seek: " . cr ) seek! ;
+          track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seek! ;
+40 net2o: open-tracked-file ( addr u mode id -- )
+          dup >r n2o:open-file
+          r@ id>file F file-size throw drop lit, r> lit, track-size ;
+41 net2o: slurp-tracked-block ( seek maxlen id -- )
+          dup >r n2o:slurp-block lit, r> lit, track-seek ;
 
 \ This must be defined last, otherwise dangerous name-clash!
 
-40 net2o: throw ( error -- )  throw ;
+42 net2o: throw ( error -- )  throw ;
 
 net2o-base
 
@@ -225,8 +225,6 @@ net2o-base
 :noname  server? IF
 	dup  IF  dup lit, throw end-cmd scmd  THEN
     THEN  throw ; IS >throw
-
-previous previous
 
 previous definitions
 
@@ -256,7 +254,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     ticks dest-addr @
-    timing( [ also forth ] 2dup . . ." acktime" cr [ previous ] )
+    timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 
 \ client side acknowledge

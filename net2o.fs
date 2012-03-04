@@ -620,6 +620,10 @@ end-structure
     THEN
     drop rdrop ;
 
+: n2o:slurp-block ( seek maxlen id -- nextseek )
+    id>file >r over 0 r@ reposition-file throw
+    data$@ rot umin r> read-file throw dup /data + ;
+
 \ symmetric encryption and decryption
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
