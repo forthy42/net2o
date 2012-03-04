@@ -30,20 +30,19 @@ S" Connection init" $, type cr
 pks send-key
 data# $400000 data-map,
 code# $2000   code-map,
-data-ivs code-ivs
+code-ivs
 end-code 0cmd
 
 data# $400000 net2o:unacked
 
 net2o-code
 cmd:
+data-ivs
 s" Download test" $, type cr
-s" net2o.fs" $, r/o lit, 0 lit, open-file
-s" file size: " $, push-$ push' type 0 lit, file-size push-lit push' . push' cr
-0 lit, slurp-chunk
-0 lit, close-file
-s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 0 lit, open-tracked-file
+s" net2o.fs" $, r/o lit, 0 lit, open-tracked-file
 0 lit, -1 slit, 0 lit, slurp-tracked-block
+s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 1 lit, open-tracked-file
+0 lit, -1 slit, 1 lit, slurp-tracked-block
 send-chunks
 cmd;
 end-code scmd

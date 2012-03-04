@@ -597,6 +597,9 @@ end-structure
 : size! ( n id -- )  state-addr  fs-size ! ;
 : seek! ( n id -- )  state-addr  fs-seek ! ;
 
+: size@ ( id -- n )  state-addr  fs-size @ ;
+: seek@ ( id -- n )  state-addr  fs-seek @ ;
+
 \ open a file - this needs *way more checking*!
 
 : id>file ( id -- fid )
