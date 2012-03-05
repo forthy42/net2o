@@ -33,8 +33,6 @@ code# $2000   code-map,
 code-ivs
 end-code 0cmd
 
-data# $400000 net2o:unacked
-
 net2o-code
 cmd:
 data-ivs
@@ -48,6 +46,7 @@ cmd;
 end-code scmd
 
 ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
+." Data total/expected/received: " j^ total ? j^ expected ? j^ received ? cr
 ." IP4 packets send/received: " packet4s ? packet4r ? cr
 ." IP6 packets send/received: " packet6s ? packet6r ? cr
 

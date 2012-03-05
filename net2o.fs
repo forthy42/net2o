@@ -34,7 +34,11 @@ CREATE Bittable 8 0 [DO] 1 [I] lshift c, [LOOP]
 
 : >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
 : +bit ( addr n -- )  >bit over c@ or swap c! ;
+: +bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
+    or swap c! r> 0<> ;
 : -bit ( addr n -- )  >bit invert over c@ and swap c! ;
+: -bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
+    invert or invert swap c! r> 0<> ;
 : bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
 : bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
 
@@ -217,7 +221,6 @@ $0F Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
 $04 Constant resend-toggle#
-$08 Constant send-ack#
 
 \ short packet information
 
@@ -263,6 +266,9 @@ end-structure
 
 dest-struct extend-structure data-struct
 field: data-head
+end-structure
+
+code-struct extend-structure rdata-struct
 field: data-ackbits0
 field: data-ackbits1
 field: data-firstack#
@@ -320,6 +326,10 @@ field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
 field: acks
+\ state machine
+field: expected
+field: total
+field: received
 end-structure
 
 begin-structure cmd-struct
@@ -338,9 +348,11 @@ end-structure
 
                     \  u   addr real-addr job ivs ig  ilg tst tail code-flag
 Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  here 0 ,
+                    \  ab0 ab1  fa  la
+                       0 , 0 ,  0 , 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs ig  ilg tst tail head ab0 ab1 lab
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,  0 , 0 , 0 ,
+                    \  u   addr real-addr job ivs ig  ilg tst tail head
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,
 Variable mapping-addr
 
 : addr>ts ( addr -- ts-offset )
@@ -356,17 +368,17 @@ Variable mapping-addr
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
     dup addr>ts allocatez r@ dest-timestamps !
+    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
+    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
     drop
     j^ r@ dest-job !
-    r> code-struct ;
+    r> rdata-struct ;
 
 : map-source-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
     dup addr>ts allocatez r@ dest-timestamps !
-    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
-    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
     drop
     j^ r@ dest-job !
     r> code-struct ;
@@ -594,8 +606,8 @@ end-structure
 	j^ file-state $@ drop r@ file-state-struct * +
 	dup 2 cells erase  THEN  rdrop ;
 
-: size! ( n id -- )  state-addr  fs-size ! ;
-: seek! ( n id -- )  state-addr  fs-seek ! ;
+: size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
+: seek! ( n id -- )  over j^ expected +!  state-addr  fs-seek +! ;
 
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
@@ -777,6 +789,21 @@ Variable do-keypad
 	THEN
     THEN ;
 
+: regen-ivs/2 ( map -- ) >r
+    r@ dest-ivsgen @ >wurst-source-state
+    r@ dest-ivs $@
+    r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
+    2dup erase
+    dup mem-rounds# encrypt-buffer 2drop
+    r@ dest-ivsgen @ wurst-source-state>
+    -1 r> dest-ivslastgen xor! ;
+
+: regen-ivs-all ( map -- )  >r
+    r@ dest-ivsgen @ >wurst-source-state
+    r@ dest-ivs $@  2dup erase
+    dup 2/ mem-rounds# encrypt-buffer 2drop
+    r> dest-ivsgen @ wurst-source-state> ;
+
 : (regen-ivs) ( offset map -- ) >r
     dup r@ dest-ivs $@len
     r@ dest-ivslastgen @ IF \ check if in quarter 2
@@ -785,13 +812,7 @@ Variable do-keypad
 	2/ dup 2/ dup >r + r>
     THEN  bounds within 0=  IF
 \	." regenerate ivs " dup . cr
-	r@ dest-ivsgen @ >wurst-source-state
-	r@ dest-ivs $@
-	r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
-	2dup erase
-	dup mem-rounds# encrypt-buffer 2drop
-	r@ dest-ivsgen @ wurst-source-state>
-	-1 r@ dest-ivslastgen xor!
+	r@ regen-ivs/2
     THEN  drop rdrop ;
 ' (regen-ivs) IS regen-ivs
 
@@ -814,6 +835,10 @@ Variable do-keypad
     j^ data-rmap ivs-size@ ivs-string ;
 : net2o:gen-rcode-ivs ( addr u -- )
     j^ code-rmap ivs-size@ ivs-string ;
+
+: net2o:regen-data-ivs ( -- )
+    j^ data-map  $@ drop regen-ivs-all
+    j^ data-rmap $@ drop regen-ivs-all ;
 
 : set-key ( addr -- )
     keysize 2* j^ crypto-key $!
@@ -908,7 +933,7 @@ Variable code-packet
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  over  net2o:send-tick
     dup >r send-size min-size over lshift
-    dup r> u>= IF  send-ack# outflag or!  ack-toggle# outflag xor!  THEN
+    dup r> u>= IF  ack-toggle# outflag xor!  THEN
     2r> 2swap ;
 
 : net2o:send-packet ( addr u dest addr -- len )
@@ -933,7 +958,7 @@ Variable code-packet
 	net2o:prep-send /dest-tail
     THEN
     data-to-send 0= IF
-	send-ack# outflag or!  ack-toggle# outflag xor!
+	resend-toggle# outflag xor!  ack-toggle# outflag xor!
 	sendX  never j^ next-tick !
     ELSE  sendX  THEN ;
 
@@ -1018,6 +1043,21 @@ Create chunk-adder chunks-struct allot
 Variable sendflag  sendflag off
 : send?  ( -- flag )  sendflag @ ;
 : send-anything? ( -- flag )  chunks $@len 0> ;
+
+\ rewind buffer to send further packets
+
+: rewind-buffer ( map -- ) >r
+    r@ dest-tail off  r@ data-head off
+    r@ dest-size @ addr>bits 1- 3 rshift 1+
+    r@ data-ackbits0 @ over erase
+    r@ data-ackbits1 @ swap erase
+    r> regen-ivs-all ;
+
+: net2o:rewind-sender ( -- )
+    j^ data-map $@ drop rewind-buffer ;
+
+: net2o:rewind-receiver ( -- )
+    j^ data-rmap $@ drop rewind-buffer ;
 
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;

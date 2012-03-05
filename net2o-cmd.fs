@@ -184,10 +184,10 @@ net2o-base
 \ create commands to send back
 
 : send-key ( pk -- )  net2o:send-key $, receive-key ;
-: data-ivs ( -- )
+: data-ivs ( -- ) \ two IV seeds for send and receive data
     rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs
     rng$ 2dup $, gen-rdata-ivs net2o:gen-data-ivs ;
-: code-ivs ( -- )
+: code-ivs ( -- ) \ two IV seeds for send and receive code
     rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs
     rng$ 2dup $, gen-rcode-ivs net2o:gen-code-ivs ;
 
@@ -213,10 +213,13 @@ net2o-base
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
 41 net2o: slurp-tracked-block ( seek maxlen id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
+42 net2o: rewind-sender ( -- )  net2o:rewind-sender ;
+
+: rewind ( -- )  net2o:rewind-receiver rewind-sender ;
 
 \ This must be defined last, otherwise dangerous name-clash!
 
-42 net2o: throw ( error -- )  throw ;
+43 net2o: throw ( error -- )  throw ;
 
 net2o-base
 
@@ -274,23 +277,46 @@ also net2o-base
 : data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
 : net2o:do-resend ( -- )
-    j^ data-map $@ drop { dmap }
+    j^ data-rmap $@ drop { dmap }
     dest-addr @ dmap dest-vaddr @ - addr>bits
     dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
     dmap data-firstack# @ +DO  dup I + c@ $FF <> IF
 	    dup I + c@ $FF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
-	    lit, lit, resend-mask
-	    I dmap data-firstack# !  LEAVE
-	THEN  LOOP  2drop ;
+	    lit, lit, resend-mask  LEAVE
+	ELSE
+	    I dmap data-firstack# !
+	THEN
+    LOOP  2drop ;
+
+: restart-transfer ( -- )
+    j^ file-state $@ bounds +DO
+	I fs-size @ I fs-seek @ u> IF
+	    ." restart <" I 0 .r ." >: " I fs-seek ? F cr
+	THEN
+    file-state-struct +LOOP ;
+
+: rewind-transfer ( -- )
+    j^ expected @ negate j^ total +!
+    j^ expected off  j^ received off
+    rewind  restart-transfer
+    j^ total @ 0<= IF  ." Chunk transfer done!" F cr  EXIT  THEN
+;
+
+: expected? ( -- )  maxdata j^ received +!
+    j^ received @  j^ expected @ u>= IF
+	." Block transfer done!" F cr
+	rewind-transfer
+    THEN ;
 
 : received! ( -- )
     dest-addr @ inbuf body-size j^ data-ack del-range
 \   ^^^ legacy code!!!
-    j^ data-map $@ drop >r
+    j^ data-rmap $@ drop >r
     dest-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
-    r@ receive-flag data-ackbit @ over +bit
+    r@ receive-flag data-ackbit @ over +bit@
+    0= IF  expected?  THEN
     dup r@ data-lastack# @ u> IF
 	\ if we are at head, fill other polarity with 1s
 	dup r@ data-lastack# !@
