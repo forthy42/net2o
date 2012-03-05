@@ -312,7 +312,7 @@ also net2o-base
 : expected? ( -- )  maxdata j^ received +!
     j^ received @ j^ expected @ tuck u>= and IF
 	." Block transfer done!" F cr
-	rewind-transfer
+	safe-blocks  rewind-transfer
     THEN ;
 
 : received! ( -- )

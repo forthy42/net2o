@@ -597,6 +597,7 @@ Variable lastdeltat
 begin-structure file-state-struct
 field: fs-size
 field: fs-seek
+field: local-id
 end-structure
 
 : ?state ( -- )
