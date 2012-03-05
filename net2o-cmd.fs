@@ -276,16 +276,18 @@ also net2o-base
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
+: data-firstack# ( flag -- addr )
+    IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( -- )
     j^ data-rmap $@ drop { dmap }
     dest-addr @ dmap dest-vaddr @ - addr>bits
     dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
-    dmap data-firstack# @ +DO  dup I + c@ $FF <> IF
+    dmap receive-flag data-firstack# @ +DO  dup I + c@ $FF <> IF
 	    dup I + c@ $FF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
 	    lit, lit, resend-mask  LEAVE
 	ELSE
-	    I dmap data-firstack# !
+	    I dmap receive-flag data-firstack# !
 	THEN
     LOOP  2drop ;
 
@@ -320,8 +322,8 @@ also net2o-base
     dest-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
     r@ receive-flag data-ackbit @ over +bit@
-    0= IF  expected?  THEN
-    dup r@ data-lastack# @ u> IF
+    r> swap >r >r
+    dup r@ data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup r@ data-lastack# !@
 	r@ receive-flag 0= data-ackbit @ -rot
@@ -330,7 +332,7 @@ also net2o-base
 	\ otherwise, set only this specific bucket
 	r@ receive-flag 0= data-ackbit @ over +bit
     THEN
-    drop rdrop ;
+    drop rdrop r> 0= IF  expected?  THEN ;
     
 : net2o:do-ack ( -- )
     cmdbuf @ >r

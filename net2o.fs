@@ -271,7 +271,8 @@ end-structure
 code-struct extend-structure rdata-struct
 field: data-ackbits0
 field: data-ackbits1
-field: data-firstack#
+field: data-firstack0#
+field: data-firstack1#
 field: data-lastack#
 end-structure
 
@@ -370,6 +371,7 @@ Variable mapping-addr
     dup addr>ts allocatez r@ dest-timestamps !
     dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
     dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
+    r@ data-lastack# on
     drop
     j^ r@ dest-job !
     r> rdata-struct ;
@@ -1049,6 +1051,8 @@ Variable sendflag  sendflag off
     r> regen-ivs-all ;
 
 : rewind-ackbits ( map -- ) >r
+    r@ data-firstack0# off  r@ data-firstack1# off
+    r@ data-lastack# on
     r@ dest-size @ addr>bits 1- 3 rshift 1+
     r@ data-ackbits0 @ over erase
     r> data-ackbits1 @ swap erase ;
