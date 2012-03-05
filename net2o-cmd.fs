@@ -290,6 +290,7 @@ also net2o-base
     LOOP  2drop ;
 
 : restart-transfer ( -- )
+    cmd:
     0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
 	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
@@ -297,7 +298,7 @@ also net2o-base
 	    slurp-tracked-block
 	THEN  1+
     file-state-struct +LOOP  drop
-    send-chunks ;
+    send-chunks cmd; ;
 
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!

@@ -607,7 +607,7 @@ end-structure
 	dup 2 cells erase  THEN  rdrop ;
 
 : size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
-: seek! ( n id -- )  over j^ expected +!  state-addr  fs-seek +! ;
+: seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap - ~~ j^ expected +! ;
 
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
