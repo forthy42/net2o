@@ -597,7 +597,8 @@ Variable lastdeltat
 begin-structure file-state-struct
 field: fs-size
 field: fs-seek
-field: local-id
+field: fs-oldseek
+field: fs-fid
 end-structure
 
 : ?state ( -- )
@@ -605,15 +606,32 @@ end-structure
 
 : state-addr ( id -- addr )  ?state
     >r j^ file-state $@ r@ file-state-struct * /string dup 0< nogap
-    0= IF  drop r@ 1+ 2* cells j^ file-state $!len
+    0= IF  drop r@ 1+ file-state-struct * j^ file-state $!len
 	j^ file-state $@ drop r@ file-state-struct * +
-	dup 2 cells erase  THEN  rdrop ;
+	dup file-state-struct erase  THEN  rdrop ;
 
 : size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
 : seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap - j^ expected +! ;
 
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
+
+: save-blocks ( -- ) ?state
+    0  j^ data-rmap $@ drop dest-raddr @
+    j^ file-state $@ bounds ?DO
+	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
+	ELSE
+	    over I fs-oldseek ! -
+	    ." flush file <" 2 pick 0 .r ." >: " dup . cr
+	    I fs-fid @ IF
+		2dup I fs-fid @ write-file throw
+	    THEN  +
+	THEN
+	swap 1+ swap
+    file-state-struct +LOOP 2drop ;
+
+: save-to ( addr u n -- )  state-addr >r
+    r/w create-file throw r> fs-fid ! ;
 
 \ open a file - this needs *way more checking*!
 
