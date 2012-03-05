@@ -290,11 +290,14 @@ also net2o-base
     LOOP  2drop ;
 
 : restart-transfer ( -- )
-    j^ file-state $@ bounds +DO
+    0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
-	    ." restart <" I 0 .r ." >: " I fs-seek ? F cr
-	THEN
-    file-state-struct +LOOP ;
+	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
+	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
+	    slurp-tracked-block
+	THEN  1+
+    file-state-struct +LOOP  drop
+    send-chunks ;
 
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!
@@ -304,7 +307,7 @@ also net2o-base
 ;
 
 : expected? ( -- )  maxdata j^ received +!
-    j^ received @  j^ expected @ u>= IF
+    j^ received @ j^ expected @ tuck u>= and IF
 	." Block transfer done!" F cr
 	rewind-transfer
     THEN ;
@@ -329,12 +332,14 @@ also net2o-base
     drop rdrop ;
     
 : net2o:do-ack ( -- )
+    cmdbuf @ >r
     received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  net2o:do-resend  THEN
-    r@ ack-toggle# and IF  net2o:genack net2o:sendack  THEN
-    r> ack-timing ;
+    r@ ack-toggle# and IF  net2o:genack  THEN
+    r> ack-timing
+    r> cmdbuf @ <> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
 
 previous

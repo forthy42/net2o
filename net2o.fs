@@ -798,11 +798,15 @@ Variable do-keypad
     r@ dest-ivsgen @ wurst-source-state>
     -1 r> dest-ivslastgen xor! ;
 
-: regen-ivs-all ( map -- )  >r
+: gen-ivs ( ivs-addr -- ) >r
+    r@ $@ erase
+    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
+    r> cell+ @ wurst-source-state> ;
+
+: regen-ivs-all ( map -- ) >r
     r@ dest-ivsgen @ >wurst-source-state
-    r@ dest-ivs $@  2dup erase
-    dup 2/ mem-rounds# encrypt-buffer 2drop
-    r> dest-ivsgen @ wurst-source-state> ;
+\    wurst-source state# 2* dump
+    r> dest-ivs gen-ivs ;
 
 : (regen-ivs) ( offset map -- ) >r
     dup r@ dest-ivs $@len
@@ -820,9 +824,7 @@ Variable do-keypad
     >r r@ $!len
     >wurst-key-ivs
     state# <> abort" 64 byte ivs!" >wurst-source'
-    r@ $@ erase
-    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
-    r> cell+ @ wurst-source-state> ;
+    r> gen-ivs ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
     r@ dest-size @ max-size^2 rshift r> dest-ivs ;
@@ -835,10 +837,6 @@ Variable do-keypad
     j^ data-rmap ivs-size@ ivs-string ;
 : net2o:gen-rcode-ivs ( addr u -- )
     j^ code-rmap ivs-size@ ivs-string ;
-
-: net2o:regen-data-ivs ( -- )
-    j^ data-map  $@ drop regen-ivs-all
-    j^ data-rmap $@ drop regen-ivs-all ;
 
 : set-key ( addr -- )
     keysize 2* j^ crypto-key $!
@@ -1048,16 +1046,18 @@ Variable sendflag  sendflag off
 
 : rewind-buffer ( map -- ) >r
     r@ dest-tail off  r@ data-head off
+    r> regen-ivs-all ;
+
+: rewind-ackbits ( map -- ) >r
     r@ dest-size @ addr>bits 1- 3 rshift 1+
     r@ data-ackbits0 @ over erase
-    r@ data-ackbits1 @ swap erase
-    r> regen-ivs-all ;
+    r> data-ackbits1 @ swap erase ;
 
 : net2o:rewind-sender ( -- )
     j^ data-map $@ drop rewind-buffer ;
 
 : net2o:rewind-receiver ( -- )
-    j^ data-rmap $@ drop rewind-buffer ;
+    j^ data-rmap $@ drop dup rewind-ackbits rewind-buffer ;
 
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
