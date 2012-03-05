@@ -47,7 +47,7 @@ send-chunks
 cmd;
 end-code scmd
 
-ticks client-loop ticks - negate poll-timeout# - s>f 1e-9 f* f. ." s" cr
+ticks 1 client-loop ticks - negate s>f 1e-9 f* f. ." s" cr
 ." IP4 packets send/received: " packet4s ? packet4r ? cr
 ." IP6 packets send/received: " packet6s ? packet6r ? cr
 

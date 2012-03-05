@@ -1137,7 +1137,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#900000000 Value poll-timeout#
+#100000000 Value poll-timeout#
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
@@ -1214,13 +1214,16 @@ Defer do-ack ( -- )
 	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
     ELSE  ( drop packet )  THEN ;
 
+\ loops for server and client
+
 0 Value server?
+Variable requests
 
 : server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( -- )  false to server?
-    BEGIN  poll-sock  WHILE  client-event  REPEAT ;
+: client-loop ( requests -- )  requests ! false to server?
+    BEGIN  poll-sock  IF  client-event  THEN  requests @ 0=  UNTIL ;
 
 \ client/server initializer
 

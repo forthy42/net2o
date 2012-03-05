@@ -306,8 +306,10 @@ also net2o-base
     j^ expected @ negate j^ total +!
     j^ expected off  j^ received off
     rewind  restart-transfer
-    j^ total @ 0<= IF  ." Chunk transfer done!" F cr  EXIT  THEN
-;
+    j^ total @ 0<= IF
+	." Chunk transfer done!" F cr
+	-1 requests +!  EXIT
+    THEN ;
 
 : expected? ( -- )  maxdata j^ received +!
     j^ received @ j^ expected @ tuck u>= and IF
