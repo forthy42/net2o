@@ -294,6 +294,7 @@ end-structure
 \ !!!FIXME!!! needs to be split in sender/receiver
 
 begin-structure context-struct
+field: context#
 field: return-address
 field: cmd-out
 field: file-handles
@@ -340,6 +341,10 @@ end-structure
 begin-structure timestamp
 field: ts-ticks
 end-structure
+
+\
+
+: .j ( -- ) j^ context# ? ;
 
 \ Destination mapping contains
 \ addr u - range of virtal addresses
@@ -409,9 +414,12 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 -1 1 rshift Constant max-int64
 4 Value flybursts#
 
+Variable init-context#
+
 : n2o:new-context ( addr -- )
     context-struct allocate throw to j^
     j^ context-struct erase
+    init-context# @ j^ context# !  1 init-context# +!
     dup return-addr !  j^ return-address !
     s" " j^ cmd-out $!
     s" " j^ data-resend $!
@@ -484,19 +492,19 @@ Variable lastdeltat
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
-    bursts( dup . ." flybursts" cr ) dup j^ flyburst ! ;
+    bursts( dup . .j ." flybursts" cr ) dup j^ flyburst ! ;
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
-    0= IF  bursts( ." start bursts" cr ) THEN ;
+    0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : net2o:set-rate ( rate deltat -- )
-    deltat( dup . lastdeltat ? ." deltat" cr )
+    deltat( dup . lastdeltat ? .j ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
     IF  lastdeltat @ over max swap 2dup 2>r */ 2r> */  ELSE  drop  THEN
-    rate( dup . ." clientavg" cr )
+    rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
-    lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
+    lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
-    rate( dup . ." rate" cr )
+    rate( dup . .j ." rate" cr )
     j^ ns/burst !@ >r
     net2o:set-flyburst
     r> bandwidth-init = IF \ first acknowledge
@@ -1172,12 +1180,12 @@ Defer do-ack ( -- )
 0 Value server?
 Variable requests
 Variable timeouts
-10 timeouts ! \ 1s timeout
+20 timeouts ! \ 2s timeout
 
 : server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( requests -- )  requests !  10 timeouts !  false to server?
+: client-loop ( requests -- )  requests !  20 timeouts !  false to server?
     BEGIN  poll-sock  IF  client-event ELSE  -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
