@@ -71,7 +71,7 @@ debug: track(
 : +db ( "word" -- ) ' >body on ;
 
 \ +db bursts(
-\ +db rate(
++db rate(
 \ +db ratex(
 \ +db slack(
 \ +db timing(
