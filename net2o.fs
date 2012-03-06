@@ -489,7 +489,7 @@ Variable lastdeltat
 	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
-#2000000 Value slack# \ 4ms slack leads to backdrop of factor 2
+#3000000 Value slack# \ 3ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
@@ -504,7 +504,7 @@ Variable lastdeltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
-    0 max slack# 2* 2* min slack# / lshift
+    0 max slack# 2* min slack# / lshift
 \    j^ last-ns/burst @
 \    ?dup-IF  tuck 2* 2* min swap 2/ 2/ max  THEN
 \    dup j^ last-ns/burst !
@@ -1102,7 +1102,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#100000000 Value poll-timeout# \ 100ms
+#300000000 Value poll-timeout# \ 300ms
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
