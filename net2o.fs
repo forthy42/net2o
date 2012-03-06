@@ -314,6 +314,7 @@ field: ack-receive
 \ flow control, sender part
 field: min-slack
 field: ns/burst
+field: last-ns/burst
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
@@ -504,6 +505,8 @@ Variable lastdeltat
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
+    dup j^ last-ns/burst !@
+    ?dup-IF  tuck 2* min swap 2/ max  THEN
     rate( dup . .j ." rate" cr )
     j^ ns/burst !@ >r
     net2o:set-flyburst
