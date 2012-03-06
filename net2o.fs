@@ -970,9 +970,9 @@ Variable code-packet
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-	." resending " 
+\	." resending " 
 	net2o:get-resend
-	over hex. dup hex. cr
+\	over hex. dup hex. cr
 	net2o:prep-send /resend
     ELSE
 	2drop
