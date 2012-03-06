@@ -506,7 +506,7 @@ Variable lastdeltat
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
     j^ last-ns/burst @
-    ?dup-IF  dup 2* + 2/ 2/ max  THEN \ not to quickly go faster!
+    ?dup-IF  dup 2* + 2/ 2/ max  THEN \ not too quickly go faster!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
     j^ ns/burst !@ >r
