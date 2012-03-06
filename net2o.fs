@@ -410,7 +410,7 @@ Variable mapping-addr
 
 8 Value b2b-chunk#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
-#2000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=1MB/s
+#20000000 max-size^2 lshift Value bandwidth-init \ 320µs/burst=0.1MB/s
 -1 Constant never
 -1 1 rshift Constant max-int64
 4 Value flybursts#
