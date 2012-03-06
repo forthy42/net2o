@@ -247,9 +247,9 @@ also net2o-base
     ticks dup j^ burst-ticks !@ dup IF
 	- rate( .eff ) >r
 	j^ delta-ticks @ tick-init 1+ j^ acks @ */
-\	j^ last-rate @
+	j^ last-rate @
 	\ do not change requested rate by more than a factor 2
-\	?dup-IF  tuck 2* min swap 2/ max  THEN
+	?dup-IF  tuck 2* min swap 2/ max  THEN
 	dup j^ last-rate !
 	rate( .rate ) lit, r> lit, set-rate
     ELSE
