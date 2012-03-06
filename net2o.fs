@@ -77,7 +77,7 @@ debug: track(
 \ +db timing(
 \ +db deltat(
 \ +db resend(
-+db track(
+\ +db track(
 
 \ Create udp socket
 
@@ -446,58 +446,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     maxdata r@ dest-tail +!
     r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
     rdrop ;
-
-\ acknowledge map
-
-2Variable 'range
-
-: range+ ( addr1 addr2 addr u -- addr1' addr2' )
-    1+ bounds rot umin >r umax r> tuck - 1- ;
-
-: add-range ( addr u map -- )
-    >r 1+ bounds r@ $@ bounds ?DO
-	over I 2@ 1+ bounds within
-	over I 2@ 1+ bounds within and 0=  IF
-	    I 2@ range+ I 2!
-	    I UNLOOP
-	    r@ $@ drop -
-	    r@ $@ 2 pick safe/string 2 cells > IF
-		dup 2@ 1+ bounds 2 pick cell+ cell+ 2@
-		range+ rot 2!
-		cell+ cell+ 2 cells r> -rot $del
-	    ELSE  2drop  rdrop  THEN
-	    EXIT  THEN
-	over I 2@ drop u< IF
-	    I  UNLOOP  r@ $@ drop - >r tuck - 1- 'range 2!
-	    'range 2 cells r> r> swap $ins  EXIT
-	THEN
-    2 cells +LOOP
-    tuck - 1- 'range 2! 'range 2 cells r> $+! ;
-
-: del-range ( addr u map -- )
-    >r 1+ bounds r@ $@ bounds ?DO
-	over I 2@ 1+ bounds within
-	over I 2@ 1+ bounds within and 0=  IF
-	    2dup I 2@ 1+ bounds rot u>= IF
-		u>= IF  0. I 2!
-		ELSE
-		    over I 2@ 1+ bounds drop 1- swap 1- tuck - I 2!
-		THEN
-	    ELSE
-		u>= IF  dup I 2@ 1+ bounds nip tuck - I 2!
-		ELSE
-		    swap 1- swap  I UNLOOP
-		    dup r@ $@ drop - 2 cells + >r >r r@ 2@ 1+ bounds
-		    rot over - r> 2! over - 1- 'range 2!
-		    'range 2 cells r> r> swap $ins  EXIT
-		THEN
-	    THEN
-	THEN
-    2 cells +LOOP  2drop r> dup $@len 0  ?DO
-	dup $@ I safe/string drop 2@ d0= IF
-	    dup I 2 cells $del  0
-	ELSE  2 cells  THEN
-    +LOOP  drop ;
 
 \ flow control
 
