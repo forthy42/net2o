@@ -407,7 +407,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 -1 Constant never
 -1 1 rshift Constant max-int64
 4 Value flybursts#
-#200000 Value slackgrow#
 
 : n2o:new-context ( addr -- )
     context-struct allocate throw to j^
@@ -416,7 +415,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     s" " j^ cmd-out $!
     s" " j^ data-resend $!
     wurst-key state# j^ crypto-key $!
-    max-int64 slackgrow# - j^ min-slack !
+    max-int64 2/ j^ min-slack !
     max-int64 j^ rtdelay !
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
@@ -516,7 +515,7 @@ Variable lastdeltat
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
-    slackgrow# j^ min-slack +!
+    lastdeltat @ 4 rshift j^ min-slack +!
     j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ticks -- )  swap
