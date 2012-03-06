@@ -515,7 +515,7 @@ Variable lastdeltat
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
-    lastdeltat @ 4 rshift j^ min-slack +!
+    lastdeltat @ 8 rshift j^ min-slack +!
     j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ticks -- )  swap
@@ -542,7 +542,7 @@ Variable lastdeltat
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
-    IF  lastdeltat @ over max swap */  ELSE  drop  THEN
+    IF  lastdeltat @ over max swap 2dup 2>r */ 2r> */  ELSE  drop  THEN
     rate( dup . ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? ." slack" cr )
