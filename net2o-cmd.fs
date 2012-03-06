@@ -248,7 +248,8 @@ also net2o-base
 	- rate( .eff ) >r
 	j^ delta-ticks @ tick-init 1+ j^ acks @ */
 	dup j^ last-rate !@
-	?dup-IF  2* min  THEN \ do not go down by more than a factor of 2
+	\ do not change requested rate by more than a factor 2
+	?dup-IF  tuck 2* min swap 2/ max  THEN
 	rate( .rate ) lit, r> lit, set-rate
     ELSE
 	2drop

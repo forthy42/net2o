@@ -324,8 +324,8 @@ field: burst-ticks
 field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
-field: last-rate
 field: acks
+field: last-rate
 \ state machine
 field: expected
 field: total
