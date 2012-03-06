@@ -28,7 +28,7 @@ uniq# $20000 + Constant data#
 net2o-code new-context
 S" Connection init" $, type cr
 pks send-key
-data# $200000 data-map,
+data# $100000 data-map,
 code# $2000   code-map,
 code-ivs
 end-code 0cmd
