@@ -500,13 +500,13 @@ Variable lastdeltat
 : net2o:set-rate ( rate deltat -- )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
-    IF  lastdeltat @ over max swap ( 2dup 2>r */ 2r> ) */  ELSE  drop  THEN
+    IF  lastdeltat @ over max swap 2dup 2>r */ 2r> */  ELSE  drop  THEN
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
     j^ last-ns/burst @
-    ?dup-IF  2/ max  THEN \ not to quickly go faster!
+    ?dup-IF  dup 2* + 2/ 2/ max  THEN \ not to quickly go faster!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
     j^ ns/burst !@ >r
