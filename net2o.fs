@@ -504,7 +504,7 @@ Variable lastdeltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
-    0 max slack# 2* min slack# / lshift
+    0 max slack# 2* 2* min slack# / lshift
 \    j^ last-ns/burst @
 \    ?dup-IF  tuck 2* 2* min swap 2/ 2/ max  THEN
 \    dup j^ last-ns/burst !
