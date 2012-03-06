@@ -489,7 +489,7 @@ Variable lastdeltat
 	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
-#3000000 Value slack# \ 4ms slack leads to backdrop of factor 2
+#2000000 Value slack# \ 4ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
