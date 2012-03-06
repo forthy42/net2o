@@ -29,8 +29,7 @@ require hash-table.fs
 
 \ bit vectors, lsb first
 
-CREATE Bittable 8 0 [DO] 1 [I] lshift c, [LOOP]
-: bits ( n -- n ) chars Bittable + c@ ;
+: bits ( n -- n ) 1 swap lshift ;
 
 : >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
 : +bit ( addr n -- )  >bit over c@ or swap c! ;
@@ -303,7 +302,6 @@ field: crypto-key
 
 field: data-map
 field: data-rmap
-field: data-ack
 field: data-resend
 field: data-b2b
 
@@ -363,14 +361,16 @@ Variable mapping-addr
 
 : allocatez ( size -- addr )
     dup >r allocate throw dup r> erase ;
+: allocateFF ( size -- addr )
+    dup >r allocate throw dup r> -1 fill ;
 
 : map-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
     dup addr>ts allocatez r@ dest-timestamps !
-    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits0 !
-    dup addr>bits 1- 3 rshift 1+ allocatez r@ data-ackbits1 !
+    dup addr>bits 1- 3 rshift 1+ allocateFF r@ data-ackbits0 !
+    dup addr>bits 1- 3 rshift 1+ allocateFF r@ data-ackbits1 !
     r@ data-lastack# on
     drop
     j^ r@ dest-job !
@@ -414,7 +414,6 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
     j^ context-struct erase
     dup return-addr !  j^ return-address !
     s" " j^ cmd-out $!
-    s" " j^ data-ack $!
     s" " j^ data-resend $!
     wurst-key state# j^ crypto-key $!
     max-int64 slackgrow# - j^ min-slack !
@@ -558,32 +557,32 @@ Variable lastdeltat
 
 \ acknowledge
 
-: net2o:unacked ( addr u -- )  1+ j^ data-ack add-range ;
-: net2o:ack-range ( addr u -- )
-    ( 2dup ." Acknowledge range: " swap . . cr ) 2drop ;
-: net2o:resend ( addr u -- )
-    2dup j^ data-resend add-range
-    ." Resend: " swap . . cr ;
-: net2o:resend-mask ( addr mask -- )
-    2dup
-    BEGIN  dup  WHILE
-	    2dup 1 and
-	    IF  maxdata j^ data-resend add-range  ELSE  drop  THEN
-	    2/ >r maxdata + r>  REPEAT  2drop
-    resend( ." Resend-mask: " over . dup . cr ) 2drop ;
+Create resend-buf  0 , 0 ,
+: >mask0 ( addr mask -- addr' mask' )
+    BEGIN  dup 1 and 0= WHILE  2/ >r maxdata + r>  dup 0= UNTIL  THEN ;
+: net2o:resend-mask ( addr mask -- )  >mask0
+    resend( ." Resend-mask: " over . dup . cr )
+    resend-buf 2!  resend-buf 2 cells j^ data-resend $+! ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
 : >real-range ( addr -- addr' )
     j^ data-map $@ drop >r r@ dest-vaddr @ - r> dest-raddr @ + ;
 : resend$@ ( -- addr u )
     j^ data-resend $@  IF
-	2@ swap >real-range swap
+	2@ 1 and IF  maxdata  ELSE  0  THEN
+	swap >real-range swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
     j^ data-resend $@ drop 2@ drop ;
-: /resend ( u -- )  j^ data-resend dup $@ drop 2@ drop
-    -rot del-range ;
+: /resend ( u -- )
+    0 +DO  j^ data-resend $@ 0= IF  drop  LEAVE  THEN
+	dup >r 2@ -2 and >mask0  dup 0= IF
+	    2drop j^ data-resend 0 2 cells $del
+	ELSE
+	    r@ 2!
+	THEN  rdrop
+    maxdata +LOOP ;
 
 \ file handling
 
@@ -610,8 +609,14 @@ end-structure
 	j^ file-state $@ drop r@ file-state-struct * +
 	dup file-state-struct erase  THEN  rdrop ;
 
+: +expected ( n -- ) j^ expected @ tuck + dup j^ expected !
+    j^ data-rmap $@ drop data-ackbits0 2@  2swap
+    maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
+	dup I -bit  over I -bit  LOOP  2drop ;
+
 : size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
-: seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap - j^ expected +! ;
+: seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap -
+    +expected ;
 
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
@@ -965,9 +970,9 @@ Variable code-packet
 
 : net2o:send-chunk ( -- )
     resend$@ dup IF
-\	." resending " 
+	." resending " 
 	net2o:get-resend
-\	over . dup . cr
+	over hex. dup hex. cr
 	net2o:prep-send /resend
     ELSE
 	2drop
@@ -1073,8 +1078,8 @@ Variable sendflag  sendflag off
     r@ data-firstack0# off  r@ data-firstack1# off
     r@ data-lastack# on
     r@ dest-size @ addr>bits 1- 3 rshift 1+
-    r@ data-ackbits0 @ over erase
-    r> data-ackbits1 @ swap erase ;
+    r@ data-ackbits0 @ over -1 fill
+    r> data-ackbits1 @ swap -1 fill ;
 
 : net2o:rewind-sender ( -- )
     j^ data-map $@ drop rewind-buffer ;

@@ -169,9 +169,7 @@ net2o-base
 20 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
 21 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
 22 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
-23 net2o: ack-range ( addr u -- )  net2o:ack-range ;
-24 net2o: resend ( addr u -- )  net2o:resend ;
-25 net2o: resend-mask ( addr mask -- ) net2o:resend-mask ;
+23 net2o: resend-mask ( addr mask -- ) net2o:resend-mask ;
 
 \ crypto functions
 
@@ -262,14 +260,10 @@ also net2o-base
 
 \ client side acknowledge
 
-: net2o:ackrange ( -- )
-    j^ data-ack $@ dup IF
-	over 2@ drop >r + 2 cells - 2@ + r> tuck - swap lit, lit, ack-range
-    ELSE  2drop  THEN ;
 : net2o:gen-resend ( -- )
     inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )
-    net2o:gen-resend  net2o:acktime  >rate  net2o:ackrange ;
+    net2o:gen-resend  net2o:acktime  >rate ;
 : net2o:sendack ( -- )
     end-cmd  scmd ;
 
@@ -318,8 +312,6 @@ also net2o-base
     THEN ;
 
 : received! ( -- )
-    dest-addr @ inbuf body-size j^ data-ack del-range
-\   ^^^ legacy code!!!
     j^ data-rmap $@ drop >r
     dest-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
