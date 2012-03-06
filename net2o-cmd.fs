@@ -247,6 +247,8 @@ also net2o-base
     ticks dup j^ burst-ticks !@ dup IF
 	- rate( .eff ) >r
 	j^ delta-ticks @ tick-init 1+ j^ acks @ */
+	dup j^ last-rate !@
+	?dup-IF  2* min  THEN \ do not go down by more than a factor of 2
 	rate( .rate ) lit, r> lit, set-rate
     ELSE
 	2drop

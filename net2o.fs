@@ -324,6 +324,7 @@ field: burst-ticks
 field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
+field: last-rate
 field: acks
 \ state machine
 field: expected
@@ -1089,7 +1090,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#100000000 Value poll-timeout#
+#100000000 Value poll-timeout# \ 100ms
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
@@ -1170,12 +1171,15 @@ Defer do-ack ( -- )
 
 0 Value server?
 Variable requests
+Variable timeouts
+10 timeouts ! \ 1s timeout
 
 : server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( requests -- )  requests ! false to server?
-    BEGIN  poll-sock  IF  client-event  THEN  requests @ 0=  UNTIL ;
+: client-loop ( requests -- )  requests !  10 timeouts !  false to server?
+    BEGIN  poll-sock  IF  client-event ELSE  -1 timeouts +!  THEN
+     timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 \ client/server initializer
 
