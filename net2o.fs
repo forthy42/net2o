@@ -1102,7 +1102,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-#300000000 Value poll-timeout# \ 300ms
+#100000000 Value poll-timeout# \ 100ms
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
