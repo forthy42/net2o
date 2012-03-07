@@ -247,6 +247,32 @@ rundum sorglos
 
 \end_deeper
 \begin_layout Itemize
+UDP ist nur ein 
+\begin_inset Quotes gld
+\end_inset
+
+einfacher Zugang
+\begin_inset Quotes grd
+\end_inset
+
+ zu IP, und ansonsten 
+\begin_inset Quotes gld
+\end_inset
+
+do it yourself
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
 Die SSL--PKI, mit den 
 \begin_inset Quotes gld
 \end_inset
@@ -356,12 +382,55 @@ Buffer bloat
 
 \end_layout
 
-\begin_deeper
-\begin_layout Pause
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
 
 \end_layout
 
-\end_deeper
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferbloat.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Buffer Bloat
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Alternativen?
+\end_layout
+
 \begin_layout Itemize
 LEDBAT versucht, einen konstanten Delay hinzuzufügen: Funktioniert nur sehr
  beschränkt --- keine faire Konkurrenz
@@ -386,6 +455,39 @@ CurveCP hat auch einen Ansatz, der aber nicht dokumentiert ist\SpecialChar \ldot
 \end_deeper
 \begin_layout Itemize
 Also muss etwas neues her
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferused.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+So sollte das aussehen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout EndFrame
@@ -565,6 +667,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename vdsl.png
+	lyxscale 50
 	width 100text%
 
 \end_inset
@@ -610,6 +713,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename wlan.png
+	lyxscale 50
 	width 100text%
 
 \end_inset
