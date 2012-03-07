@@ -1198,6 +1198,110 @@ shared secrets
 
 \end_layout
 
+\begin_layout BeginFrame
+PKI
+\end_layout
+
+\begin_layout Standard
+Zur Zeit werden drei verschiedene Verfahren benutzt:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Hierarchisch mit Certification Authorities (z.B.
+ SSL): Das Vertrauen wird auf 
+\begin_inset Quotes gld
+\end_inset
+
+Notare
+\begin_inset Quotes grd
+\end_inset
+
+, also die CAs übertragen, die dann eben vertrauenswürdig sein müssen (alle,
+ da jede CA jedem ein Zertifikat ausstellen kann).
+ Zertifiziert wird der Server, d.h.
+ der Besucher weiß dann, dass er dieser Seite so viel vertrauen kann wie
+ dem übelsten der 600 CAs.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Peer to Peer (z.B.
+ PGP): Das Vertrauen wird durch ein 
+\begin_inset Quotes gld
+\end_inset
+
+Network of Trust
+\begin_inset Quotes grd
+\end_inset
+
+ erworben, hier muss man entweder selbst nachprüfen, oder man vertraut nur,
+ wenn sich mehrere einig sind
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Änderungen beobachten (z.B.
+ SSH): Das Vertrauen wird durch wiederholte Kontakte bestärkt, und solange
+ sich nichts ändert, fühlt man sich sicher
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Was will man eigentlich überhaupt?
+\end_layout
+
+\begin_layout Standard
+Die typische Anwendung ist, ein sicheres Login zu bekommen.
+ Das wirft eine Frage auf:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Ist es nicht eigentlich der Client, der vertrauenswürdig sein sollte?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Die Verbindung ist für beide hinreichend abgesichert, wenn einer erfolgreich
+ eine Vertrauensprüfung durchgeführt hat.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Dreht man die Vertrauensrelation um, kann man schon mit dem SSH--Ansatz
+ gute Ergebnisse erzielen.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section*
 \start_of_appendix
 Appendix
@@ -1238,7 +1342,7 @@ newblock
 
 
 \emph on
-Internet 2.0 
+Fossil Repository und Wiki
 \emph default
 
 \begin_inset ERT
@@ -1255,11 +1359,11 @@ newblock
 
  
 \begin_inset Flex URL
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
-http://net2o.de/
+http://fossil.net2o.de/
 \end_layout
 
 \end_inset
