@@ -121,7 +121,7 @@ net2o layer 2
 \end_layout
 
 \begin_layout Subtitle
-Tame the Net
+Zähme das Netz
 \end_layout
 
 \begin_layout Author
@@ -280,6 +280,60 @@ zu komplex, zu schwierig,
 
 \end_layout
 
+\begin_layout BeginFrame
+Änderungen gegenüber dem Entwurf
+\end_layout
+
+\begin_layout Itemize
+Paketgröße jetzt 
+\begin_inset Formula $64*2^{n},\quad n\in\{0,\ldots,15\}$
+\end_inset
+
+, also bis zu 2MB in Zweierpotenzen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kein embedded--Protokoll implementiert, nur die 64--Bit--Variante
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Verschlüsselung ist immer aktiv, nicht optional
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kein 
+\begin_inset Quotes gld
+\end_inset
+
+Salt
+\begin_inset Quotes grd
+\end_inset
+
+ am Anfang des verschlüsselten Pakets, dafür ein Hash (128 Bits) am Ende
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section
 Datenflusssteuerung
 \end_layout
@@ -332,6 +386,58 @@ CurveCP hat auch einen Ansatz, der aber nicht dokumentiert ist\SpecialChar \ldot
 \end_deeper
 \begin_layout Itemize
 Also muss etwas neues her
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset Quotes gld
+\end_inset
+
+Buffer Bloat
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Retransmits kosten Netzwerkresourcen, sollen vermieden werden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Wie groß muss der Buffer sein, unter der Annahme, dass die Bandbreite optimal
+ genutzt wird, der Flaschenhals am anderen Ende der Verbindung ist und ein
+ zweiter Datenstrom dazugeschaltet wird?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Antwort: Ca.
+ die Hälfte des Round--Trip--Delays, denn die werden unausweichlich gefüllt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Buffer sind gut, man muss sie ja nicht bis zum Rand füllen!
 \end_layout
 
 \begin_layout EndFrame
@@ -484,7 +590,7 @@ Beispiel--Transport über VDSL
 \end_layout
 
 \begin_layout BeginFrame
-Test zusätzlich noch über WLAN
+Unzuverlässiges Luftkabel
 \end_layout
 
 \begin_layout Standard
@@ -526,6 +632,394 @@ Beispiel--Transport über VDSL+WLAN
 \end_inset
 
 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Mehrere parallele Verbindungen
+\end_layout
+
+\begin_layout Itemize
+Der Burst erkennt nur die Geschwindigkeit für eine Verbindung
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Exponentielle Verlangsamung durch Beobachtung des aufgebauten Slacks hilft
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Lösung zwar fair, aber noch nicht stabil --- es werden reihum Bandbreiten
+ vergeben
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Manchmal ist der Slack so groß, dass es zu Paketverlusten kommt (unerwünscht)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Noch etwas mehr Finetuning nötig!
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Zuverlässigkeit
+\end_layout
+
+\begin_layout BeginFrame
+Zuverlässigkeit des Transports
+\end_layout
+
+\begin_layout Itemize
+Paket--Reihenfolge spielt keine Rolle, da die Pakete gemäß ihrer Adresse
+ im Puffer abgelegt werden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Angeforderte Pakete werden in zwei Bitmaps 
+\begin_inset Quotes gld
+\end_inset
+
+nicht vorhanden
+\begin_inset Quotes grd
+\end_inset
+
+ markiert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Empfangene Pakete werden in jeweils einer der beiden Bitmaps als empfangen
+ markiert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die andere Bitmap wird aufgefüllt, wenn sie nicht für die Retransmits zuständig
+ ist
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Es wird einen Round--Trip--Delay gewartet, bis ein Retransmit angefordert
+ wird.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Retransmits werden bevorzugt behandelt
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Kryptographie
+\end_layout
+
+\begin_layout BeginFrame
+Kryptographie
+\end_layout
+
+\begin_layout Standard
+Die ersten drei Ziele sollen bei der Kommunikation erfüllt werden, das vierte
+ nicht:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+Vertraulichkeit Dritte sollen nicht in der Lage sein, die Nachrichten abzuhören
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Integrität Die Daten müssen nachweislich vollständig und unverändert sein.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Authentizität Der Absender der Nachrichten soll eindeutig identifizierbar
+ sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Verbindlichkeit ist nicht für die Kommunikation selbst wichtig --- gegenüber
+ dritten nachweisbare Urheberschaft ist für eine 2--Wege--Kommunikation
+ nicht nötig
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Eingesetzte Technik: Curve25519
+\end_layout
+
+\begin_layout Itemize
+Elliptic Curve Cryptography basiert nicht auf Faktorisierung, sondern auf
+ natürlichen Logarithmen in elliptischen Kurven
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Sicherheit von Curve25519 entspricht 128 Bits eines symmetrischen Schlüssels
+ --- im Moment reicht das noch dicke.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Curve25519 ist effizient implementiert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Es ist für eine 1:1--Verbindung optimiert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Jeder Teilnehmer 
+\begin_inset Quotes gld
+\end_inset
+
+multipliziert
+\begin_inset Quotes grd
+\end_inset
+
+ seinen geheimen Schlüssel mit dem öffentlichen des Partners, die beiden
+ Produkte sind identisch.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Wurstkessel
+\end_layout
+
+\begin_layout Standard
+Im Moment setze ich ausschließlich Wurstkessel ein, obwohl das Verfahren
+ noch nicht sorgfältig genug geprüft ist:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Wurstkessel kann Ver/Entschlüsselung und Authentifizierung in einem Durchgang
+ machen, weil am Ende der Verschlüsselung auch ein valider Hash herauskommt,
+ der am Ende der Entschlüsselung ebenfalls verifiziert wird
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Damit löst ein einziger Wurstkesseldurchgang die drei Probleme Vertraulichkeit,
+ Integrität und Authentizität
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+die Daten sind verschlüsselt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+der korrekte Hash belegt ihre Integrität
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+und die Berechnung des Hashes bedarf, ebenso wie die Verschlüsselung, die
+ Kenntnis des Schlüssels, wodurch die Authentizität des Senders belegt ist
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Man kann das wahrscheinlich auch mit einer geschickten Anwendung von AES
+ machen, aber AES ist nicht dafür konstruiert.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Verdeckte Initialisierungsvektoren
+\end_layout
+
+\begin_layout Itemize
+Der Schlüssels soll nicht wiederverwendet werden (nur für eine 1:1 Retransmissio
+n), weil sonst ein Klartextangriff möglich ist
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Übliches Vorgehen: Initialisierungsvektor mit jedem Paket mit übertragen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Nachteil: Damit wird 
+\begin_inset Quotes gld
+\end_inset
+
+der andere Teil
+\begin_inset Quotes grd
+\end_inset
+
+ des Schlüssels bekannt.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Lösung: Generierung der Initialisierungsvektoren mit einem PRNG (wieder:
+ Wurstkessel) auf beiden Seiten --- diese IVs sind 
+\begin_inset Quotes gld
+\end_inset
+
+shared secrets
+\begin_inset Quotes grd
+\end_inset
+
+, und nicht bekannt.
+ Nur der Startwert wird übertragen --- der geht zusammen mit dem gemeinsamen
+ Schlüssel in die Generierung der IVs ein (Idee von Helmar Wodke).
 \end_layout
 
 \begin_layout EndFrame
@@ -594,134 +1088,6 @@ status collapsed
 \begin_layout Plain Layout
 
 http://net2o.de/
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Bibliography
-\labelwidthstring Literaturverzeichnis
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-key "swift"
-
-\end_inset
-
-
-\noun on
-Pouwelse, Grishchenko, Bakker
-\noun default
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
-
-\emph on
-swift,
-\emph default
- 
-\emph on
-the multiparty transport protocol
-\emph default
- 
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
- 
-\begin_inset Flex URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://libswift.org/
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Bibliography
-\labelwidthstring Literaturverzeichnis
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-key "btledbat"
-
-\end_inset
-
-
-\noun on
-Rossi, Testa, Valenti
-\noun default
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
-
-\emph on
-Yes, we LEDBAT
-\emph default
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
-
-\begin_inset Flex URL
-status collapsed
-
-\begin_layout Plain Layout
-
-http://www.pam2010.ethz.ch/papers/full-length/4.pdf
 \end_layout
 
 \end_inset
