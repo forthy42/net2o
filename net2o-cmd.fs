@@ -232,10 +232,10 @@ previous definitions
 
 \ client side timing
 
-: ack-size ( -- )  1 j^ acks +!  ticks j^ lastb-ticks ! ;
+: ack-size ( -- )  1 j^ acks +!  j^ recv-tick @ j^ lastb-ticks ! ;
 : ack-first ( -- )
     j^ lastb-ticks @ ?dup-IF  j^ firstb-ticks @ - j^ delta-ticks +!  THEN
-    ticks j^ firstb-ticks !  j^ lastb-ticks off ;
+    j^ recv-tick @ j^ firstb-ticks !  j^ lastb-ticks off ;
 
 : ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
@@ -244,7 +244,7 @@ previous definitions
 : .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
 : >rate ( -- )  j^ delta-ticks 2@ 0= swap 0= or ?EXIT
-    ticks dup j^ burst-ticks !@ dup IF
+    j^ recv-tick @ dup j^ burst-ticks !@ dup IF
 	- rate( .eff ) >r
 	j^ delta-ticks @ tick-init 1+ j^ acks @ */
 	j^ last-rate @
@@ -258,7 +258,7 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    ticks dest-addr @
+    j^ recv-tick @ dest-addr @
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 
@@ -333,6 +333,7 @@ also net2o-base
     drop rdrop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
     
 : net2o:do-ack ( -- )
+    ticks j^ recv-tick ! \ time stamp of arrival
     cmdbuf @ >r
     received!
     inbuf 1+ c@ acks# and
@@ -346,7 +347,7 @@ also net2o-base
 : net2o:do-timeout ( -- )
     cmdbuf @ >r
     net2o:do-resend  expected?  net2o:genack
-    r> cmdbuf @ <> IF  net2o:sendack  THEN ;
+    r> cmdbuf @ <> IF  net2o:sendack  ELSE  ." Nothing to do" cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
 previous
