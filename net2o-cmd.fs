@@ -347,11 +347,11 @@ also net2o-base
 : rewind? ( -- )
     j^ data-rmap $@ drop dest-round @ lit, rewind-sender
     j^ expected @ 0= j^ total @ 0> and  IF
-	restart-transfer
+\	restart-transfer \ !!!FIXME!!!
     THEN ;
 
 : net2o:do-timeout ( -- )
-    cmdreset  net2o:do-resend  rewind?  net2o:genack
+    cmdreset  net2o:do-resend ( rewind? ) net2o:genack
     cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 

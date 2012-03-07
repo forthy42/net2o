@@ -494,8 +494,12 @@ Client misst, Server setzt Rate
 \end_layout
 
 \begin_layout Description
-Client erfasst Zeit des ersten und letzten Pakets im Burst, und zählt die
- Anzahl der Pakete nach dem ersten.
+Client erfasst die 
+\emph on
+Zeit
+\emph default
+ des ersten und letzten Pakets im Burst, und zählt die Anzahl der Pakete
+ nach dem ersten.
  Daraus ergibt sich die gewünschte Rate:
 \end_layout
 
@@ -560,7 +564,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename vdsl.pdf
+	filename vdsl.png
 	width 100text%
 
 \end_inset
@@ -605,7 +609,7 @@ status open
 
 \begin_layout Plain Layout
 \begin_inset Graphics
-	filename wlan.pdf
+	filename wlan.png
 	width 100text%
 
 \end_inset
@@ -625,10 +629,6 @@ Beispiel--Transport über VDSL+WLAN
 
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 
@@ -643,7 +643,11 @@ Mehrere parallele Verbindungen
 \end_layout
 
 \begin_layout Itemize
-Der Burst erkennt nur die Geschwindigkeit für eine Verbindung
+Der Burst erkennt nur die Geschwindigkeit für eine Verbindung --- das liegt
+ daran, dass die existierenden Buffers als FIFO für den gesamten Verkehr
+ implementiert sind.
+ Besser wäre: Parallele FIFOs, in der jede Verbindung getrennt behandelt
+ wird, und dann round robin zwischen diesen FIFOs.
 \end_layout
 
 \begin_deeper
@@ -763,6 +767,70 @@ Es wird einen Round--Trip--Delay gewartet, bis ein Retransmit angefordert
 \end_deeper
 \begin_layout Itemize
 Retransmits werden bevorzugt behandelt
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Zuverlässiges Ausführen von Kommandos
+\end_layout
+
+\begin_layout Standard
+Dieser Bereich ist noch eine Baustelle
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Das Kommando ist noch nicht ausgeführt worden 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ ausführen, zugehörige Antwort merken
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das Kommando ist schon ausgeführt worden 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ zugehörige Antwort nochmal verschicken
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Nicht alle Kommandos werden beantwortet 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ Was tun mit diesen?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Acknowledges noch nicht fälschungssicher: Bedarf einer Kenntnis der empfangenen
+ Pakete (Checksumme über die Checksummen plus Bitmap, auf welche Pakete
+ sich das Acknowledge bezieht)
 \end_layout
 
 \begin_layout EndFrame
