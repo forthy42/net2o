@@ -252,6 +252,7 @@ field: dest-size
 field: dest-vaddr
 field: dest-raddr
 field: dest-job
+field: dest-round
 field: dest-ivs
 field: dest-ivsgen
 field: dest-ivslastgen
@@ -354,13 +355,13 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job ivs ig  ilg tst tail code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  here 0 ,
+                    \  u   addr real-addr job rnd ivs ig  ilg tst tail code-flag
+Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 , 0 ,  here 0 ,
                     \  ab0 ab1  fa  la
                        0 , 0 ,  0 , 0 ,
 Constant >code-flag
-                    \  u   addr real-addr job ivs ig  ilg tst tail head
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 ,  0 ,
+                    \  u   addr real-addr job rnd ivs ig  ilg tst tail head
+Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 , 0 ,  0 ,
 Variable mapping-addr
 
 : addr>ts ( addr -- ts-offset )
@@ -1033,6 +1034,7 @@ Variable sendflag  sendflag off
 \ rewind buffer to send further packets
 
 : rewind-buffer ( map -- ) >r
+    1 r@ dest-round +!
     r@ dest-tail off  r@ data-head off
     r> regen-ivs-all ;
 
@@ -1043,11 +1045,13 @@ Variable sendflag  sendflag off
     r@ data-ackbits0 @ over -1 fill
     r> data-ackbits1 @ swap -1 fill ;
 
-: net2o:rewind-sender ( -- )
-    j^ data-map $@ drop rewind-buffer ;
+: net2o:rewind-sender ( n -- )
+    j^ data-map $@ drop
+    tuck dest-round @ +DO  dup rewind-buffer  LOOP  drop ;
 
 : net2o:rewind-receiver ( -- )
-    j^ data-rmap $@ drop dup rewind-ackbits rewind-buffer ;
+    j^ data-rmap $@ drop
+    tuck dest-round @ +DO  dup rewind-buffer  LOOP  rewind-ackbits ;
 
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;

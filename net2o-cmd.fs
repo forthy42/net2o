@@ -211,13 +211,15 @@ net2o-base
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
 41 net2o: slurp-tracked-block ( seek maxlen id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-42 net2o: rewind-sender ( -- )  net2o:rewind-sender ;
+42 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
+43 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
 
-: rewind ( -- )  net2o:rewind-receiver rewind-sender ;
+: rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
+    dup net2o:rewind-receiver lit, rewind-sender ;
 
 \ This must be defined last, otherwise dangerous name-clash!
 
-43 net2o: throw ( error -- )  throw ;
+44 net2o: throw ( error -- )  throw ;
 
 net2o-base
 
@@ -344,8 +346,11 @@ also net2o-base
     cmdbuf @ 0<> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
 
+: rewind? ( -- )
+    j^ data-rmap $@ drop dest-round @ lit, rewind-sender ;
+
 : net2o:do-timeout ( -- )
-    cmdreset  net2o:do-resend  expected?  net2o:genack
+    cmdreset  net2o:do-resend  expected?  rewind?  net2o:genack
     cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
