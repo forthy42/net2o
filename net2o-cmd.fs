@@ -258,7 +258,7 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    j^ recv-tick @ dest-addr @
+    j^ recv-tick @ j^ recv-addr @
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 
@@ -278,7 +278,7 @@ also net2o-base
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( -- )
     j^ data-rmap $@ drop { dmap }
-    dest-addr @ dmap dest-vaddr @ - addr>bits
+    j^ recv-addr @ dmap dest-vaddr @ - addr>bits
     dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
     dmap receive-flag data-firstack# @ +DO  dup I + c@ $FF <> IF
 	    dup I + c@ $FF xor
@@ -317,7 +317,7 @@ also net2o-base
 
 : received! ( -- )
     j^ data-rmap $@ drop >r
-    dest-addr @ r@ dest-vaddr @ - addr>bits
+    j^ recv-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
     r@ receive-flag data-ackbit @ over +bit@
     r> swap >r >r
@@ -333,7 +333,8 @@ also net2o-base
     drop rdrop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
     
 : net2o:do-ack ( -- )
-    ticks j^ recv-tick ! \ time stamp of arrival
+    ticks       j^ recv-tick ! \ time stamp of arrival
+    dest-addr @ j^ recv-addr ! \ last received packet
     cmdreset  received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
@@ -345,7 +346,8 @@ also net2o-base
 
 : net2o:do-timeout ( -- )
     cmdreset  net2o:do-resend  expected?  net2o:genack
-    cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
+    cmdbuf @ 0<> IF  cmdbuf @+ swap dump
+	net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
 previous
