@@ -347,7 +347,10 @@ also net2o-base
 ' net2o:do-ack IS do-ack
 
 : rewind? ( -- )
-    j^ data-rmap $@ drop dest-round @ lit, rewind-sender ;
+    j^ data-rmap $@ drop dest-round @ lit, rewind-sender
+    j^ expected @ 0= j^ total @ 0> and  IF
+	restart-transfer
+    THEN ;
 
 : net2o:do-timeout ( -- )
     cmdreset  net2o:do-resend  expected?  rewind?  net2o:genack
