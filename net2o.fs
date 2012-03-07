@@ -71,7 +71,7 @@ debug: track(
 : +db ( "word" -- ) ' >body on ;
 
 \ +db bursts(
-+db rate(
+\ +db rate(
 \ +db ratex(
 \ +db slack(
 \ +db timing(
@@ -1186,11 +1186,13 @@ Variable requests
 Variable timeouts
 20 timeouts ! \ 2s timeout
 
+Defer do-timeout  ' noop IS do-timeout
+
 : server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
 : client-loop ( requests -- )  requests !  20 timeouts !  false to server?
-    BEGIN  poll-sock  IF  client-event ELSE  -1 timeouts +!  THEN
+    BEGIN  poll-sock  IF  client-event ELSE  do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 \ client/server initializer

@@ -309,7 +309,7 @@ also net2o-base
 	-1 requests +!  EXIT
     THEN ;
 
-: expected? ( -- )  maxdata j^ received +!
+: expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
 	." Block transfer done!" F cr
 	save-blocks  rewind-transfer
@@ -330,7 +330,7 @@ also net2o-base
 	\ otherwise, set only this specific bucket
 	r@ receive-flag 0= data-ackbit @ over +bit
     THEN
-    drop rdrop r> 0= IF  expected?  THEN ;
+    drop rdrop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
     
 : net2o:do-ack ( -- )
     cmdbuf @ >r
@@ -342,5 +342,11 @@ also net2o-base
     r> ack-timing
     r> cmdbuf @ <> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
+
+: net2o:do-timeout ( -- )
+    cmdbuf @ >r
+    net2o:do-resend  expected?  net2o:genack
+    r> cmdbuf @ <> IF  net2o:sendack  THEN ;
+' net2o:do-timeout IS do-timeout
 
 previous
