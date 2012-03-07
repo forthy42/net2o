@@ -268,10 +268,8 @@ also net2o-base
 
 : net2o:gen-resend ( -- )
     inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
-: net2o:genack ( -- )
-    net2o:gen-resend  net2o:acktime  >rate ;
-: net2o:sendack ( -- )
-    end-cmd  scmd ;
+: net2o:genack ( -- )  net2o:acktime  >rate ;
+: net2o:sendack ( -- )   end-cmd  scmd ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -341,7 +339,7 @@ also net2o-base
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  net2o:do-resend  THEN
-    r@ ack-toggle# and IF  net2o:genack  THEN
+    r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     r> ack-timing
     cmdbuf @ 0<> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
@@ -353,7 +351,7 @@ also net2o-base
     THEN ;
 
 : net2o:do-timeout ( -- )
-    cmdreset  net2o:do-resend  expected?  rewind?  net2o:genack
+    cmdreset  net2o:do-resend  rewind?  net2o:genack
     cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 

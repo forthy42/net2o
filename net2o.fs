@@ -472,7 +472,7 @@ Variable lastdeltat
     timing( over . dup . ." acktime" cr )
     ticks
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
-    0= IF  dup ticks-init  bursts( ." restart bursts" cr )  THEN
+    0= IF  dup ticks-init  bursts( .j ." restart bursts" cr )  THEN
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
@@ -980,7 +980,7 @@ Create chunk-adder chunks-struct allot
 	ack-toggle# j^ ack-state xor!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
-	    bursts( ." no bursts in flight " j^ ns/burst ? cr )
+	    bursts( .j ." no bursts in flight " j^ ns/burst ? cr )
 	THEN
     THEN
     j^ ack-state @ outflag or!
