@@ -346,8 +346,7 @@ also net2o-base
 
 : net2o:do-timeout ( -- )
     cmdreset  net2o:do-resend  expected?  net2o:genack
-    cmdbuf @ 0<> IF  cmdbuf @+ swap dump
-	net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
+    cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
 previous
