@@ -334,20 +334,18 @@ also net2o-base
     
 : net2o:do-ack ( -- )
     ticks j^ recv-tick ! \ time stamp of arrival
-    cmdbuf @ >r
-    received!
+    cmdreset  received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:genack  THEN
     r> ack-timing
-    r> cmdbuf @ <> IF  net2o:sendack  THEN ;
+    cmdbuf @ 0<> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
 
 : net2o:do-timeout ( -- )
-    cmdbuf @ >r
-    net2o:do-resend  expected?  net2o:genack
-    r> cmdbuf @ <> IF  net2o:sendack  ELSE  ." Nothing to do" cr  THEN ;
+    cmdreset  net2o:do-resend  expected?  net2o:genack
+    cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
 previous
