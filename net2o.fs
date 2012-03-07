@@ -472,7 +472,7 @@ Variable lastdeltat
     timing( over . dup . ." acktime" cr )
     ticks
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
-    0= IF  dup ticks-init  bursts( .j ." restart bursts" j^ flybursts ? cr )  THEN
+    0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
@@ -495,7 +495,7 @@ Variable lastdeltat
 #3000000 Value slack# \ 3ms slack leads to backdrop of factor 2
 
 : net2o:set-flyburst ( -- bursts )
-    j^ rtdelay @ j^ ns/burst @ / 1+ \ flybursts# +
+    j^ rtdelay @ j^ ns/burst @ / flybursts# +
     bursts( dup . .j ." flybursts" cr ) dup j^ flyburst ! ;
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
@@ -1190,15 +1190,17 @@ Defer do-ack ( -- )
 0 Value server?
 Variable requests
 Variable timeouts
-20 timeouts ! \ 2s timeout
+: reset-timeout  20 timeouts ! ; \ 2s timeout
 
 Defer do-timeout  ' noop IS do-timeout
 
 : server-loop ( -- )  true to server?
     BEGIN  server-event  AGAIN ;
 
-: client-loop ( requests -- )  requests !  20 timeouts !  false to server?
-    BEGIN  poll-sock  IF  client-event ELSE  do-timeout -1 timeouts +!  THEN
+: client-loop ( requests -- )  requests !  reset-timeout  false to server?
+    BEGIN  poll-sock
+	IF  client-event reset-timeout
+	ELSE  do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 \ client/server initializer
