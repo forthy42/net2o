@@ -1128,8 +1128,7 @@ und die Berechnung des Hashes bedarf, ebenso wie die Verschlüsselung, die
 
 \end_deeper
 \begin_layout Itemize
-Man kann das wahrscheinlich auch mit einer geschickten Anwendung von AES
- machen, aber AES ist nicht dafür konstruiert.
+Man kann das auch mit AES machen, im CBC--Mode mit CBC--MAC als Absicherung
 \end_layout
 
 \begin_layout EndFrame
