@@ -177,9 +177,9 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 Variable return-addr
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ destination c@ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ destination be-ux@ route>address
-    reverse64 r> destination be-x!  false ;
+    r@ destination @ $38 rshift 0= IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ destination @ route>address
+    reverse64 r> destination !  false ;
 
 : in-route ( -- flag )  address>route reverse64  inbuf packet-route ;
 : in-check ( -- flag )  address>route -1 <> ;
@@ -224,7 +224,7 @@ $04 Constant resend-toggle#
 \ short packet information
 
 : chunk@ ( addr flag -- value addr' )
-    IF  dup be-ux@ swap 8 +  ELSE  dup be-uw@ swap 2 +  THEN ;
+    IF  dup @ swap 8 +  ELSE  dup w@ swap 2 +  THEN ;
 
 : .header ( addr -- )
     dup c@ >r 2 +
@@ -243,9 +243,9 @@ $04 Constant resend-toggle#
 Variable dest-addr
 
 : >ret-addr ( -- )
-    inbuf destination be-ux@ reverse64 return-addr ! ;
+    inbuf destination @ reverse64 return-addr ! ;
 : >dest-addr ( -- )
-    inbuf addr be-ux@  inbuf body-size 1- invert and dest-addr ! ;
+    inbuf addr @  inbuf body-size 1- invert and dest-addr ! ;
 
 begin-structure dest-struct
 field: dest-size
@@ -851,7 +851,7 @@ Variable do-keypad
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf destination be-x!  dup dest-addr !  outbuf addr be-x! ;
+    outbuf destination !  dup dest-addr !  outbuf addr ! ;
 
 Variable outflag  outflag off
 
@@ -1131,7 +1131,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     send-anything? sendflag !
     BEGIN  poll-sock 0= WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
-    sockaddr-tmp alen @ insert-address  reverse64 inbuf destination be-x!
+    sockaddr-tmp alen @ insert-address  reverse64 inbuf destination !
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
@@ -1139,7 +1139,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 	   2drop  REPEAT
     sockaddr-tmp alen @ check-address dup -1 <> IF
 	reverse64
-	inbuf destination be-ux@ -$100 and or inbuf destination be-x!
+	inbuf destination @ -$100 and or inbuf destination !
 	over packet-size over <> abort" Wrong packet size"
     ELSE  hex.  ." Unknown source"  0 0  THEN ;
 
