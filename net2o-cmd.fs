@@ -44,6 +44,10 @@
 : byte@ ( addr u -- addr' u' b )
     >r count r> 1- swap ;
 
+: string@ ( -- addr u )
+    buf-state 2@ over + >r
+    p@+ swap 2dup + r> over - buf-state 2! ;
+
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
 \ commands come in junks of 8 bytes
@@ -56,10 +60,40 @@
 
 Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
+: cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
+
+: (net2o-see) ( addr -- )  @ 2 cells - body> >name .name ;
+
+: printable? ( addr u -- flag )
+    true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
+
+: xtype ( addr u -- )  base @ >r hex
+    bounds ?DO  I c@ 0 <# # # #> type  LOOP  r> base ! ;
+
+: n2o.string ( addr u -- )
+    2dup printable? IF
+	.\" s\" " type
+    ELSE
+	.\" x\" " xtype
+    THEN  .\" \" $, " ;
+
+: net2o-see ( -- )
+    case
+	0 of  ." end-code" cr 0. buf-state 2!  endof
+	1 of  p@ . ." lit, "  endof
+	2 of  ps@ . ." slit, " endof
+	3 of  string@ n2o.string  endof
+	cells cmd-base-table + (net2o-see)
+	0 endcase ;
+
+: cmd-see ( addr u -- addr' u' )
+    byte@ >r buf-state 2! r> net2o-see buf-state 2@ ;
+
+: n2o:see ( addr u -- )  ." net2o-code " 
+    BEGIN  cmd-see  dup 0= UNTIL  2drop ;
+
 : cmd-dispatch ( addr u -- addr' u' )
     byte@ >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
-
-: cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
 : extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
   DOES>  >r cmd@ cells r> + perform ;
@@ -79,7 +113,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 Defer >throw
 
 : cmd-loop ( addr u -- )
-\    ticks u. ." do-cmd" cr
+    cmd( 2dup n2o:see )
     sp@ >r
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop ;
@@ -90,9 +124,6 @@ Defer >throw
 
 Defer net2o-do
 : net2o-exec  cell+ perform ;
-
-: executer ['] net2o-exec IS net2o-do ;
-executer
 
 : net2o-does  DOES> net2o-do ;
 : net2o: ( number "name" -- )
@@ -111,8 +142,7 @@ forth also net2o-base definitions previous
 0 net2o: end-cmd ( -- ) 0. buf-state 2! ;
 1 net2o: ulit ( -- x ) p@ ;
 2 net2o: slit ( -- x ) ps@ ;
-3 net2o: string ( -- addr u )  buf-state 2@ over + >r
-    p@+ swap 2dup + r> over - buf-state 2! ;
+3 net2o: string ( -- addr u )  string@ ;
 
 \ these functions are only there to test the server
 

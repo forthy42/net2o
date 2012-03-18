@@ -82,6 +82,7 @@ debug: slk(
 debug: bursts(
 debug: resend(
 debug: track(
+debug: cmd(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -93,6 +94,7 @@ debug: track(
 \ +db deltat(
 \ +db resend(
 \ +db track(
+\ +db cmd(
 
 \ Create udp socket
 
