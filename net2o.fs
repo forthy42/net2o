@@ -1,4 +1,19 @@
-\ Internet 2.0 experiments
+\ net2o protocol stack
+
+\ Copyright (C) 2010,2011,2012   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require unix/socket.fs
 require string.fs
@@ -1123,8 +1138,10 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 ;
 
 : read-a-packet4/6 ( -- addr u )
-    pollfds revents w@ POLLIN = IF  read-a-packet EXIT  THEN
-    pollfds pollfd %size + revents w@ POLLIN = IF  read-a-packet6 EXIT  THEN
+    pollfds revents w@ POLLIN = IF
+	read-a-packet  0 pollfds revents w! EXIT  THEN
+    pollfds pollfd %size + revents w@ POLLIN = IF
+	read-a-packet6  0 pollfds pollfd %size + revents w! EXIT  THEN
     0 0 ;
 
 : next-packet ( -- addr u )
@@ -1135,8 +1152,8 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
-    BEGIN  BEGIN  poll-sock  UNTIL  read-a-packet4/6  2dup d0= WHILE
-	   2drop  REPEAT
+    BEGIN  read-a-packet4/6  2dup d0= WHILE
+	   BEGIN  poll-sock  UNTIL  2drop  REPEAT
     sockaddr-tmp alen @ check-address dup -1 <> IF
 	reverse64
 	inbuf destination @ -$100 and or inbuf destination !
