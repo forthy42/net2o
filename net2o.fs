@@ -1146,7 +1146,8 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  poll-sock 0= WHILE  send-another-chunk sendflag !  REPEAT
+    BEGIN  sendflag @ 0= IF  poll-sock 0=  ELSE  true  THEN
+    WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
     sockaddr-tmp alen @ insert-address  reverse64 inbuf destination !
     over packet-size over <> abort" Wrong packet size" ;
