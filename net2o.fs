@@ -56,6 +56,34 @@ require hash-table.fs
 : bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
 : bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
 
+\ variable length integers
+
+: p@+ ( addr -- u addr' )  >r 0
+    BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
+	    r> 1+ >r  REPEAT  r> 1+ ;
+: p!+ ( u addr -- addr' )  >r
+    <<#  dup $7F and hold  7 rshift
+    BEGIN  dup  WHILE  dup $7F and $80 or hold 7 rshift  REPEAT
+    0 #> tuck r@ swap move r> + #>> ;
+
+Create sizes $7F cell 1+ 0 [DO] dup , 7 lshift $7F or [LOOP] drop
+
+: p-size ( u -- n )
+    cell 1+ 0 DO  dup sizes I cells + @ u<= IF
+	    drop I 1+ unloop  EXIT  THEN  LOOP  drop #10 ;
+
+\ bit reversing
+
+: bitreverse8 ( u1 -- u2 )
+    0 8 0 DO  2* over 1 and + swap 2/ swap  LOOP  nip ;
+
+Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
+
+: reverse8 ( c1 -- c2 ) reverse-table + c@ ;
+: reverse64 ( x1 -- x2 )
+    0 8 0 DO  8 lshift over $FF and reverse8 or
+	swap 8 rshift swap  LOOP  nip ;
+
 \ timing ticks
 
 : ticks ( -- u )  ntime drop ;
@@ -112,7 +140,7 @@ debug: cmd(
     new-udp-socket s" w+" c-string fdopen to net2o-sock
     new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
 
-$22 Constant overhead \ constant overhead
+$2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 : maxdata ( -- n ) min-size max-size^2 lshift ;
@@ -123,10 +151,11 @@ here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
 here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
 
 2 8 2Constant address%
+2 $10 2Constant path%
 
 struct
-    short% field flags
-    address% field destination
+    short%   field flags
+    path%    field destination
     address% field addr
 end-struct net2o-header
 
@@ -151,9 +180,6 @@ Variable packet6s
 
 \ clients routing table
 
-8 Value route-bits
-8 Constant /address
-' dfloats Alias addresses
 Variable routes
 
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
@@ -177,28 +203,16 @@ Variable routes
 : route>address ( n -- )
     routes #.key $@ sockaddr-tmp swap dup alen ! move ;
 
-\ bit reversing
-
-: bitreverse8 ( u1 -- u2 )
-    0 8 0 DO  2* over 1 and + swap 2/ swap  LOOP  nip ;
-
-Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
-
-: reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reverse64 ( x1 -- x2 )
-    0 8 0 DO  8 lshift over $FF and reverse8 or
-	swap 8 rshift swap  LOOP  nip ;
-
 \ route an incoming packet
 
 Variable return-addr
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ destination @ $38 rshift 0= IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ destination @ route>address
-    reverse64 r> destination !  false ;
+    r@ destination c@ 0= IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ destination be-ux@ route>address
+    reverse64 r> destination cell+ be-x!  false ;
 
-: in-route ( -- flag )  address>route reverse64  inbuf packet-route ;
+: in-route ( -- flag )  address>route inbuf packet-route ;
 : in-check ( -- flag )  address>route -1 <> ;
 : out-route ( -- flag )  0  outbuf packet-route ;
 
@@ -209,7 +223,7 @@ $00 Constant 16bit#
 $40 Constant 64bit#
 $0F Constant datasize#
 
-Create header-sizes  $06 c, $12 c, $FF c, $FF c,
+Create header-sizes  $06 c, $1a c, $FF c, $FF c,
 Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
@@ -260,7 +274,7 @@ $04 Constant resend-toggle#
 Variable dest-addr
 
 : >ret-addr ( -- )
-    inbuf destination @ reverse64 return-addr ! ;
+    inbuf destination be-ux@ reverse64 return-addr ! ;
 : >dest-addr ( -- )
     inbuf addr @  inbuf body-size 1- invert and dest-addr ! ;
 
@@ -868,7 +882,7 @@ Variable do-keypad
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf destination !  dup dest-addr !  outbuf addr ! ;
+    outbuf destination be-x!  dup dest-addr !  outbuf addr ! ;
 
 Variable outflag  outflag off
 
@@ -1151,15 +1165,14 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     BEGIN  sendflag @ 0= IF  poll-sock 0=  ELSE  true  THEN
     WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
-    sockaddr-tmp alen @ insert-address  reverse64 inbuf destination !
+    sockaddr-tmp alen @ insert-address  reverse64 inbuf destination be-x!
     over packet-size over <> abort" Wrong packet size" ;
 
 : next-client-packet ( -- addr u )
     BEGIN  read-a-packet4/6  2dup d0= WHILE
 	   BEGIN  poll-sock  UNTIL  2drop  REPEAT
     sockaddr-tmp alen @ check-address dup -1 <> IF
-	reverse64
-	inbuf destination @ -$100 and or inbuf destination !
+	reverse64  inbuf destination be-x!
 	over packet-size over <> abort" Wrong packet size"
     ELSE  hex.  ." Unknown source"  0 0  THEN ;
 

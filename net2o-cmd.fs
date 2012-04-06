@@ -26,13 +26,6 @@
 : n>u ( n -- u )
     dup 0< 1 and swap abs 2* or ;
 
-: p@+ ( addr -- u addr' )  >r 0
-    BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
-	    r> 1+ >r  REPEAT  r> 1+ ;
-: p!+ ( u addr -- addr' )  >r
-    <<#  dup $7F and hold  7 rshift
-    BEGIN  dup  WHILE  dup $7F and $80 or hold 7 rshift  REPEAT
-    0 #> tuck r@ swap move r> + #>> ;
 : ps!+ ( n addr -- addr' )
     >r n>u r> p!+ ;
 : ps@+ ( addr -- n addr' )
