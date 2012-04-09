@@ -91,7 +91,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
   DOES>  >r cmd@ cells r> + perform ;
 
-8 buffer: 'cmd-buf
+10 buffer: 'cmd-buf
 
 : >cmd ( xt u -- ) 'cmd-buf p!+  'cmd-buf tuck -
     cmd-base-table >r
@@ -148,36 +148,41 @@ definitions
 
 \ net2o assembler
 
-: cmdbuf     j^ cmd-out $@ drop cmd-buf# ;
-: endcmdbuf  j^ cmd-out $@ + ;
+maxdata buffer: cmd0buf
 
-: cmdreset  cmdbuf off ;
+Variable cmd0source
 
-: @+ ( addr -- n addr' )  dup @ swap cell+ ;
+: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest  ELSE  cmd0buf  THEN ;
+: cmdbuf#     ( -- addr ) j^ cmd-buf# ;
+: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
+: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 
-: cmd, ( n -- )  cmdbuf @+ + dup >r p!+ r> - cmdbuf +! ;
+: cmdreset  cmdbuf# off ;
+
+: cmd, ( n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf# +! ;
 
 : net2o, @ cmd, ;
 
-: net2o-code  ['] net2o, IS net2o-do also net2o-base ;
-net2o-code previous
+: net2o-code   cmd0source on   ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code0  cmd0source off  ['] net2o, IS net2o-do also net2o-base ;
+net2o-code0 previous
 
 : send-cmd ( addr -- )  code-packet on
-    cmdbuf cell+ swap j^ return-address @
+    cmdbuf swap j^ return-address @
     max-size^2 1+ 0 DO
-	cmdbuf @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
+	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
 
-: 0cmd ( -- )  0 send-cmd ;
-: scmd ( -- )  code-dest send-cmd ;
+: cmd ( -- )  cmd0source @ IF  code-vdest  ELSE  0  THEN  send-cmd
+    cmd0source @ IF  code+  THEN ;
 
 \ net2o assembler stuff
 
 also net2o-base definitions
 
 : $, ( addr u -- )  string  >r r@ cmd,
-    r@ endcmdbuf cmdbuf @+ + - u>= abort" didn't fit"
-    cmdbuf @+ + r@ move   r> cmdbuf +! ;
+    r@ endcmdbuf cmdbuf$ + - u>= abort" didn't fit"
+    cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;
 : end-code ( -- ) end-cmd previous ;
@@ -233,8 +238,8 @@ net2o-base
 ' push-char alias push-lit
 
 34 net2o: push'     p@ cmd, ;
-35 net2o: cmd:      cmdreset ;
-36 net2o: cmd;      end-cmd  scmd ;
+35 net2o: cmd:      cmd0source on  cmdreset ;
+36 net2o: cmd;      end-cmd  cmd ;
 
 \ better slurping
 
@@ -264,7 +269,7 @@ net2o-base
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname  server? IF
-	dup  IF  dup lit, throw end-cmd scmd  THEN
+	dup  IF  dup lit, throw end-cmd cmd  THEN
     THEN  throw ; IS >throw
 
 previous definitions
@@ -307,7 +312,7 @@ also net2o-base
 : net2o:gen-resend ( -- )
     inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )  net2o:acktime  >rate ;
-: net2o:sendack ( -- )   end-cmd  scmd ;
+: net2o:sendack ( -- )   end-cmd  cmd ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -379,7 +384,7 @@ also net2o-base
     r@ resend-toggle# and IF  net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     r> ack-timing
-    cmdbuf @ 0<> IF  net2o:sendack  THEN ;
+    cmdbuf# @ 0<> IF  net2o:sendack  THEN ;
 ' net2o:do-ack IS do-ack
 
 : rewind? ( -- )
@@ -390,7 +395,7 @@ also net2o-base
 
 : net2o:do-timeout ( -- )
     cmdreset  net2o:do-resend ( rewind? ) net2o:genack
-    cmdbuf @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
+    cmdbuf# @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
 ' net2o:do-timeout IS do-timeout
 
 previous

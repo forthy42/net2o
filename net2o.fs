@@ -209,6 +209,8 @@ Variable routes
 
 Variable return-addr
 
+\ these are all stubs for now
+
 : ins-source ( addr packet -- )  >r
     reverse64 0  r> destination 2! ;
 : get-source ( packet -- addr )
@@ -338,7 +340,7 @@ field: context#
 field: return-address
 field: recv-tick
 field: recv-addr
-field: cmd-out
+field: cmd-buf#
 field: file-handles
 field: file-state
 field: crypto-key
@@ -374,11 +376,6 @@ field: last-rate
 field: expected
 field: total
 field: received
-end-structure
-
-begin-structure cmd-struct
-field: cmd-buf#
-maxdata +field cmd-buf
 end-structure
 
 begin-structure timestamp
@@ -464,7 +461,6 @@ Variable init-context#
     j^ context-struct erase
     init-context# @ j^ context# !  1 init-context# +!
     dup return-addr !  j^ return-address !
-    s" " j^ cmd-out $!
     s" " j^ data-resend $!
     wurst-key state# j^ crypto-key $!
     max-int64 2/ j^ min-slack !
@@ -472,9 +468,7 @@ Variable init-context#
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
-    never          j^ next-tick !
-    cmd-struct j^ cmd-out $!len
-    j^ cmd-out $@ erase ;
+    never          j^ next-tick ! ;
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r
@@ -494,7 +488,14 @@ Variable init-context#
 
 : code-dest ( -- addr )
     j^ code-map $@ drop >r
-    r@ dest-vaddr @ r@ dest-tail @ +
+    r@ dest-raddr @ r> dest-tail @ + ;
+
+: code-vdest ( -- addr )
+    j^ code-map $@ drop >r
+    r@ dest-vaddr @ r> dest-tail @ + ;
+
+: code+ ( -- )
+    j^ code-map $@ drop >r
     maxdata r@ dest-tail +!
     r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
     rdrop ;

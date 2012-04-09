@@ -11,13 +11,13 @@ insert-ip n2o:new-context
 
 \ 10 ms
 ." Sending first test" cr
-net2o-code S" This is the first test" $, type '!' lit, emit cr
-end-code 0cmd
+net2o-code0 S" This is the first test" $, type '!' lit, emit cr
+end-code cmd
 
 \ 10 ms
 ." Sending second test" cr
-net2o-code S" This is the second test" $, type '!' lit, emit cr
-end-code 0cmd
+net2o-code0 S" This is the second test" $, type '!' lit, emit cr
+end-code cmd
 
 \ 10 ms
 ." Sending more complex test" cr
@@ -25,13 +25,13 @@ end-code 0cmd
 uniq# $10000 + Constant code#
 uniq# $20000 + Constant data#
 
-net2o-code new-context
+net2o-code0 new-context
 S" Connection init" $, type cr
 pks send-key
 data# $100000 data-map,
 code# $8000   code-map,
 code-ivs
-end-code 0cmd
+end-code cmd
 
 net2o-code
 cmd:
@@ -45,7 +45,7 @@ s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 1 lit, open-tracked-file
 s" .cache/photo.jpg" 1 save-to
 send-chunks
 cmd;
-end-code scmd
+end-code cmd
 
 ticks 1 client-loop ticks - negate s>f 1e-9 f* f. ." s" cr
 ." IP4 packets send/received: " packet4s ? packet4r ? cr
