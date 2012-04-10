@@ -105,14 +105,6 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
 Defer >throw
 
-: cmd-loop ( addr u -- )
-    cmd( 2dup n2o:see )
-    sp@ >r
-    TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
-	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop ;
-
-' cmd-loop is queue-command
-
 \ commands
 
 Defer net2o-do
@@ -176,6 +168,22 @@ net2o-code0 previous
 : cmd ( -- )  cmd0source @ IF  code-vdest  ELSE  0  THEN  send-cmd
     cmd0source @ IF  code+  THEN ;
 
+also net2o-base
+
+: cmd-send? ( -- )
+    j^ IF  cmdbuf# @ IF  end-cmd  cmd  THEN  THEN ;
+
+previous
+
+: cmd-loop ( addr u -- )
+    cmd( 2dup n2o:see )
+    j^ IF  cmd0source on  cmdreset  THEN  sp@ >r
+    TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
+	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop
+    cmd-send? ;
+
+' cmd-loop is queue-command
+
 \ net2o assembler stuff
 
 also net2o-base definitions
@@ -185,7 +193,7 @@ also net2o-base definitions
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;
-: end-code ( -- ) end-cmd previous ;
+: end-code ( -- ) end-cmd previous cmd ;
 
 previous definitions
 
@@ -238,8 +246,6 @@ net2o-base
 ' push-char alias push-lit
 
 34 net2o: push'     p@ cmd, ;
-35 net2o: cmd:      cmd0source on  cmdreset ;
-36 net2o: cmd;      end-cmd  cmd ;
 
 \ better slurping
 
@@ -312,7 +318,6 @@ also net2o-base
 : net2o:gen-resend ( -- )
     inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )  net2o:acktime  >rate ;
-: net2o:sendack ( -- )   end-cmd  cmd ;
 
 : receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -333,7 +338,6 @@ also net2o-base
     LOOP  2drop ;
 
 : restart-transfer ( -- )
-    cmd:
     0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
 	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
@@ -341,7 +345,7 @@ also net2o-base
 	    slurp-tracked-block
 	THEN  1+
     file-state-struct +LOOP  drop
-    send-chunks cmd; ;
+    send-chunks ;
 
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!
@@ -378,13 +382,14 @@ also net2o-base
 : net2o:do-ack ( -- )
     ticks       j^ recv-tick ! \ time stamp of arrival
     dest-addr @ j^ recv-addr ! \ last received packet
-    cmdreset  received!
+    cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     r> ack-timing
-    cmdbuf# @ 0<> IF  net2o:sendack  THEN ;
+    cmd-send? ;
+
 ' net2o:do-ack IS do-ack
 
 : rewind? ( -- )
@@ -395,7 +400,7 @@ also net2o-base
 
 : net2o:do-timeout ( -- )
     cmdreset  net2o:do-resend ( rewind? ) net2o:genack
-    cmdbuf# @ 0<> IF  net2o:sendack  ELSE  ." Nothing to do" F cr  THEN ;
+    cmd-send? ;
 ' net2o:do-timeout IS do-timeout
 
 previous
