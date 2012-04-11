@@ -541,7 +541,7 @@ Variable lastdeltat
 	over tick-init 1+ timestamp * - 0>
 	IF  + dup ts-ticks @
 	    over tick-init 1+ timestamp * - ts-ticks @ - lastdeltat !
-	ELSE  ~~ + ~~  THEN 
+	ELSE  +  THEN 
 	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
