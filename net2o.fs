@@ -155,11 +155,11 @@ here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
 2 8 2Constant address%
 2 $10 2Constant path%
 
-struct
-    short%   field flags
-    path%    field destination
-    address% field addr
-end-struct net2o-header
+begin-structure net2o-header
+    2 +field flags
+   16 +field destination
+    8 +field addr
+end-structure
 
 Variable packet4r
 Variable packet4s
@@ -352,6 +352,7 @@ field: data-b2b
 
 field: code-map
 field: code-rmap
+field: code-answers
 
 field: ack-state
 field: ack-receive
@@ -382,7 +383,12 @@ begin-structure timestamp
 field: ts-ticks
 end-structure
 
-\
+begin-structure reply
+field: reply-offset
+field: reply-len
+end-structure
+
+\ context debugging
 
 : .j ( -- ) j^ context# ? ;
 
@@ -400,10 +406,14 @@ Constant >code-flag
 Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 , 0 ,  0 ,
 Variable mapping-addr
 
-: addr>ts ( addr -- ts-offset )
-    chunk-p2 rshift timestamp * ;
 : addr>bits ( addr -- bits )
     chunk-p2 rshift ;
+: bits>bytes ( bits -- bytes )
+    1- 2/ 2/ 2/ 1+ ;
+: addr>ts ( addr -- ts-offset )
+    addr>bits timestamp * ;
+: addr>replies ( addr -- replies )
+    addr>bits reply * ;
 
 : allocatez ( size -- addr )
     dup >r allocate throw dup r> erase ;
@@ -414,9 +424,11 @@ Variable mapping-addr
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
-    dup addr>ts allocatez r@ dest-timestamps !
-    dup addr>bits 1- 3 rshift 1+ allocateFF r@ data-ackbits0 !
-    dup addr>bits 1- 3 rshift 1+ allocateFF r@ data-ackbits1 !
+    >code-flag @ 0= IF
+	dup addr>ts allocatez r@ dest-timestamps !
+	dup addr>bits bits>bytes allocateFF r@ data-ackbits0 !
+	dup addr>bits bits>bytes allocateFF r@ data-ackbits1 !
+    THEN
     r@ data-lastack# on
     drop
     j^ r@ dest-job !
@@ -462,6 +474,7 @@ Variable init-context#
     init-context# @ j^ context# !  1 init-context# +!
     dup return-addr !  j^ return-address !
     s" " j^ data-resend $!
+    s" " j^ code-answers $!
     wurst-key state# j^ crypto-key $!
     max-int64 2/ j^ min-slack !
     max-int64 j^ rtdelay !
@@ -1081,7 +1094,7 @@ Variable sendflag  sendflag off
 : rewind-ackbits ( map -- ) >r
     r@ data-firstack0# off  r@ data-firstack1# off
     r@ data-lastack# on
-    r@ dest-size @ addr>bits 1- 3 rshift 1+
+    r@ dest-size @ addr>bits bits>bytes
     r@ data-ackbits0 @ over -1 fill
     r> data-ackbits1 @ swap -1 fill ;
 
