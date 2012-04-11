@@ -176,12 +176,17 @@ also net2o-base
 
 previous
 
+: tag-reply ( -- )  cmdbuf# @ 0= ?EXIT  j^ 0= ?EXIT
+    dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
+    addr>replies r> dest-timestamps @ + >r
+    cmdbuf$ r> 2! ;
+
 : cmd-loop ( addr u -- )
     cmd( 2dup n2o:see )
     j^ IF  cmd0source on  ELSE  cmd0source off  THEN  cmdreset sp@ >r
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop
-    cmd-send? ;
+    tag-reply  cmd-send? ;
 
 ' cmd-loop is queue-command
 
