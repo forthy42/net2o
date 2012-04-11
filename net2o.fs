@@ -352,7 +352,6 @@ field: data-b2b
 
 field: code-map
 field: code-rmap
-field: code-answers
 
 field: ack-state
 field: ack-receive
@@ -424,7 +423,9 @@ Variable mapping-addr
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
-    >code-flag @ 0= IF
+    >code-flag @ IF
+	dup addr>replies allocatez r@ dest-timestamps !
+    ELSE
 	dup addr>ts allocatez r@ dest-timestamps !
 	dup addr>bits bits>bytes allocateFF r@ data-ackbits0 !
 	dup addr>bits bits>bytes allocateFF r@ data-ackbits1 !
@@ -474,7 +475,6 @@ Variable init-context#
     init-context# @ j^ context# !  1 init-context# +!
     dup return-addr !  j^ return-address !
     s" " j^ data-resend $!
-    s" " j^ code-answers $!
     wurst-key state# j^ crypto-key $!
     max-int64 2/ j^ min-slack !
     max-int64 j^ rtdelay !
@@ -541,7 +541,7 @@ Variable lastdeltat
 	over tick-init 1+ timestamp * - 0>
 	IF  + dup ts-ticks @
 	    over tick-init 1+ timestamp * - ts-ticks @ - lastdeltat !
-	ELSE  +  THEN 
+	ELSE  ~~ + ~~  THEN 
 	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
