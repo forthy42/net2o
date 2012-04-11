@@ -143,9 +143,10 @@ definitions
 maxdata buffer: cmd0buf
 
 Variable cmd0source
+Variable cmd0buf#
 
-: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest  ELSE  cmd0buf  THEN ;
-: cmdbuf#     ( -- addr ) j^ cmd-buf# ;
+: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest    ELSE  cmd0buf  THEN ;
+: cmdbuf#     ( -- addr ) cmd0source @ IF  j^ cmd-buf#  ELSE  cmd0buf#  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 
@@ -171,13 +172,13 @@ net2o-code0 previous
 also net2o-base
 
 : cmd-send? ( -- )
-    j^ IF  cmdbuf# @ IF  end-cmd  cmd  THEN  THEN ;
+    cmdbuf# @ IF  end-cmd  cmd  THEN ;
 
 previous
 
 : cmd-loop ( addr u -- )
     cmd( 2dup n2o:see )
-    j^ IF  cmd0source on  cmdreset  THEN  sp@ >r
+    j^ IF  cmd0source on  ELSE  cmd0source off  THEN  cmdreset sp@ >r
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop
     cmd-send? ;
