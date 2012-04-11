@@ -160,13 +160,13 @@ Variable cmd0buf#
 : net2o-code0  cmd0source off  ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
-: send-cmd ( addr -- )  code-packet on
-    cmdbuf swap j^ return-address @
+: send-cmd ( addr dest -- )  code-packet on
+    j^ return-address @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
 
-: cmd ( -- )  cmd0source @ IF  code-vdest  ELSE  0  THEN  send-cmd
+: cmd ( -- )  cmdbuf cmd0source @ IF  code-vdest  ELSE  0  THEN send-cmd
     cmd0source @ IF  code+  THEN ;
 
 also net2o-base
@@ -176,13 +176,22 @@ also net2o-base
 
 previous
 
-: tag-reply ( -- )  cmdbuf# @ 0= ?EXIT  j^ 0= ?EXIT
+: tag-addr ( -- addr )
     dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
-    addr>replies r> dest-timestamps @ + >r
-    cmdbuf$ r> 2! ;
+    addr>replies r> dest-timestamps @ + ;
+
+: tag-reply ( -- )  cmdbuf# @ 0= ?EXIT  j^ 0= ?EXIT
+    tag-addr >r cmdbuf$ r> 2! ;
+
+: tag-addr? ( -- flag )  j^ 0= IF  false  EXIT  THEN
+    tag-addr 2@ 2dup d0<> IF
+	cmdbuf# ! code-vdest send-cmd  true
+	." Resend canned code reply" cr
+    ELSE  2drop  false  THEN ;
 
 : cmd-loop ( addr u -- )
     cmd( 2dup n2o:see )
+    tag-addr?  ?EXIT
     j^ IF  cmd0source on  ELSE  cmd0source off  THEN  cmdreset sp@ >r
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop

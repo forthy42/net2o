@@ -704,6 +704,15 @@ end-structure
 
 Defer regen-ivs
 
+: clear-replies ( addr -- )  >r
+    r@ code-flag @ IF
+	r@ dest-timestamps @
+	r@ dest-size @ 2/ addr>replies
+	r@ dest-ivslastgen @ 0= IF
+	    dup >r + r>
+	THEN  erase
+    THEN  rdrop ;
+
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
@@ -711,6 +720,7 @@ Defer regen-ivs
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
 	r@ dest-ivs @ IF
+	    r@ clear-replies
 	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
 	    dup r@ regen-ivs
 	THEN
