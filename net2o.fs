@@ -113,6 +113,7 @@ debug: bursts(
 debug: resend(
 debug: track(
 debug: cmd(
+debug: send(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -125,6 +126,7 @@ debug: cmd(
 \ +db resend(
 \ +db track(
 \ +db cmd(
+\ +db send(
 
 \ Create udp socket
 
@@ -345,6 +347,7 @@ field: context#
 field: return-address
 field: recv-tick
 field: recv-addr
+field: recv-flag
 field: cmd-buf#
 field: file-handles
 field: file-state
@@ -401,13 +404,10 @@ end-structure
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-                    \  u   addr real-addr job rnd ivs ig  ilg tst tail code-flag
-Create dest-mapping    0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 , 0 ,  here 0 ,
-                    \  ab0 ab1  fa  la
-                       0 , 0 ,  0 , 0 ,
-Constant >code-flag
-                    \  u   addr real-addr job rnd ivs ig  ilg tst tail head
-Create source-mapping  0 , 0 ,  0 ,       0 , 0 , 0 , 0 , 0 , 0 , 0 ,  0 ,
+Create dest-mapping    here rdata-struct dup allot erase
+dest-mapping code-flag Constant >code-flag
+
+Create source-mapping  here data-struct dup allot erase
 Variable mapping-addr
 
 : addr>bits ( addr -- bits )
@@ -582,8 +582,10 @@ Create resend-buf  0 , 0 ,
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  2/ >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )  >mask0
-    resend( ." Resend-mask: " over . dup . cr )
-    resend-buf 2!  resend-buf 2 cells j^ data-resend $+! ;
+    resend-buf 2!
+    resend-buf 2 cells j^ data-resend $@ dup 2 cells - 0 max /string str= 0= IF
+	resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
+	resend-buf 2 cells j^ data-resend $+!  THEN ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
 : >real-range ( addr -- addr' )
@@ -1002,17 +1004,16 @@ Variable code-packet
     resend$@ nip 0> dest-tail$@ nip 0> or ;
 
 : net2o:send-chunk ( -- )
+    j^ ack-state @ outflag or!
     resend$@ dup IF
-\	." resending " 
-	net2o:get-resend
-\	over hex. dup hex. cr
+	net2o:get-resend 2dup 2>r
 	net2o:prep-send /resend
+	2r> send( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop
     ELSE
 	2drop
-\	." sending "
-	dest-tail$@ net2o:get-dest
-\	over . dup . cr
+	dest-tail$@ net2o:get-dest 2dup 2>r
 	net2o:prep-send /dest-tail
+	2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop
     THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
@@ -1053,7 +1054,6 @@ Create chunk-adder chunks-struct allot
 	    bursts( .j ." no bursts in flight " j^ ns/burst ? dest-tail$@ swap hex. hex. cr )
 	THEN
     THEN
-    j^ ack-state @ outflag or!
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-a-chunk ( chunk -- flag )  >r
@@ -1214,6 +1214,9 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 	inbuf ins-source
 	over packet-size over <> abort" Wrong packet size"
     ELSE  hex.  ." Unknown source"  0 0  THEN ;
+
+: net2o:timeout ( ticks -- ) \ print why there is nothing to send
+    ." timeout? " . send-anything? . chunks+ ? next-chunk-tick . cr ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command

@@ -235,7 +235,7 @@ net2o-base
 20 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
 21 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
 22 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
-23 net2o: resend-mask ( addr mask -- ) net2o:resend-mask ;
+23 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
 
 \ crypto functions
 
@@ -277,13 +277,14 @@ net2o-base
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
 42 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
 43 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+44 net2o: timeout ( ticks -- ) net2o:timeout ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;
 
 \ This must be defined last, otherwise dangerous name-clash!
 
-44 net2o: throw ( error -- )  throw ;
+8 net2o: throw ( error -- )  throw ;
 
 net2o-base
 
@@ -331,18 +332,19 @@ also net2o-base
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
-    inbuf 1+ c@ invert resend-toggle# and lit, ack-resend ;
+    j^ recv-flag @ invert resend-toggle# and lit, ack-resend ;
 : net2o:genack ( -- )  net2o:acktime  >rate ;
 
-: receive-flag ( -- flag )  inbuf 1+ c@ resend-toggle# and 0<> ;
+: receive-flag ( -- flag )  j^ recv-flag @ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( -- )
+    j^ recv-addr @ 0= ?EXIT
     j^ data-rmap $@ drop { dmap }
     j^ recv-addr @ dmap dest-vaddr @ - addr>bits
-    dmap receive-flag data-ackbit @ over 1- 2/ 2/ 2/ 1+ resend( 2dup dump )
+    dmap receive-flag data-ackbit @ over bits>bytes
     dmap receive-flag data-firstack# @ +DO  dup I + c@ $FF <> IF
 	    dup I + c@ $FF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
@@ -378,6 +380,7 @@ also net2o-base
     THEN ;
 
 : received! ( -- )
+    j^ recv-addr @ 0= ?EXIT
     j^ data-rmap $@ drop >r
     j^ recv-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
@@ -397,6 +400,7 @@ also net2o-base
 : net2o:do-ack ( -- )
     ticks       j^ recv-tick ! \ time stamp of arrival
     dest-addr @ j^ recv-addr ! \ last received packet
+    inbuf 1+ c@ j^ recv-flag ! \ last receive flag
     cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
@@ -414,7 +418,8 @@ also net2o-base
     THEN ;
 
 : net2o:do-timeout ( -- )
-    cmdreset  net2o:do-resend ( rewind? ) net2o:genack
+    resend-toggle# j^ recv-flag xor!
+    cmdreset  ticks lit, timeout  net2o:do-resend ( rewind? ) net2o:genack
     cmd-send? ;
 ' net2o:do-timeout IS do-timeout
 
