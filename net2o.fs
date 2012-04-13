@@ -172,7 +172,12 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
+$0000000 Value droprate#
+
 : send-a-packet ( addr u -- n )
+    droprate# IF  rng32 droprate# u< IF
+	    ." dropping packet" cr
+	    2drop 0  EXIT  THEN  THEN
     sockaddr-tmp w@ AF_INET6 = IF
 	net2o-sock6  1 packet6s +!
     ELSE
@@ -749,6 +754,8 @@ Defer regen-ivs
 	ELSE
 	    j^ data-map ivs>source?
 	THEN
+    ELSE
+	drop
     THEN
     >wurst-key ;
 
