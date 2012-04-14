@@ -125,7 +125,7 @@ debug: send(
 \ +db deltat(
 \ +db resend(
 \ +db track(
-+db cmd(
+\ +db cmd(
 \ +db send(
 
 \ Create udp socket
@@ -174,7 +174,7 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$0000000 Value droprate#
+$000000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
@@ -517,9 +517,12 @@ Variable init-context#
     j^ code-map $@ drop >r
     r@ dest-tail @ addr>replies r> dest-timestamps @ + ;
 
+reply buffer: dummy-reply
+
 : reply[] ( index -- addr )
     j^ code-map $@ drop >r
-    addr>replies r> dest-timestamps @ + ;
+    dup r@ dest-size @ addr>bits u<
+    IF  reply * r@ dest-timestamps @ +  ELSE  dummy-reply  THEN  rdrop ;
 
 : reply-index ( -- index )
     j^ code-map $@ drop dest-tail @ addr>bits ;

@@ -171,8 +171,11 @@ net2o-code0 previous
 
 also net2o-base
 
+Defer expect-reply?
+' end-cmd IS expect-reply?
+
 : cmd-send? ( -- )
-    cmdbuf# @ IF  end-cmd  cmd  THEN ;
+    cmdbuf# @ IF  expect-reply?  cmd  THEN ;
 
 previous
 
@@ -182,9 +185,10 @@ previous
 
 : net2o:tag-reply ( -- )  j^ 0= ?EXIT
     tag-addr >r cmdbuf$ r> 2! ;
-: net2o:ack-reply ( index -- )  j^ 0= ?EXIT
-    0. rot reply * reply[] 2! ; \ clear request
+: net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
+    0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j^ 0= ?EXIT
+    cmd( ." expect: " cmdbuf$ n2o:see cr )
     cmdbuf$ code-reply 2! ;
 
 : tag-addr? ( -- flag )  j^ 0= IF  false  EXIT  THEN
@@ -360,15 +364,18 @@ also net2o-base
 	THEN
     LOOP  2drop ;
 
-: expect-reply ( -- )
-    reply-index lit, tag-reply net2o:expect-reply ;
+: do-expect-reply ( -- )
+    reply-index lit, tag-reply  end-cmd  net2o:expect-reply
+    ['] end-cmd IS expect-reply? ;
+
+: expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
 : restart-transfer ( -- )
     0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
 	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
 	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
-	    slurp-tracked-block  expect-reply
+	    slurp-tracked-block
 	THEN  1+
     file-state-struct +LOOP  drop
     send-chunks ;
@@ -385,7 +392,7 @@ also net2o-base
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
 	." Block transfer done!" F cr
-	save-blocks  rewind-transfer
+	save-blocks  rewind-transfer  expect-reply
     THEN ;
 
 : received! ( -- )
@@ -426,9 +433,19 @@ also net2o-base
 \	restart-transfer \ !!!FIXME!!!
     THEN ;
 
-: net2o:do-timeout ( -- )
+: resend? ( -- )
+    j^ code-map $@ drop >r
+    r@ dest-timestamps @
+    r@ dest-size @ addr>replies bounds ?DO
+	I 2@ d0<> IF
+	    ." resend: " I 2@ n2o:see F cr
+	THEN
+    reply +LOOP
+    rdrop ;
+
+: net2o:do-timeout ( -- )  resend?
     resend-toggle# j^ recv-flag xor!
-    cmdreset  ticks lit, timeout  net2o:do-resend ( rewind? ) net2o:genack
+    cmdreset  ticks lit, timeout  net2o:do-resend  net2o:genack
     cmd-send? ;
 ' net2o:do-timeout IS do-timeout
 
