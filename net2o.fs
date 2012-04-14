@@ -125,7 +125,7 @@ debug: send(
 \ +db deltat(
 \ +db resend(
 \ +db track(
-\ +db cmd(
++db cmd(
 \ +db send(
 
 \ Create udp socket
@@ -444,7 +444,8 @@ Variable mapping-addr
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
-    dup addr>ts allocatez r@ dest-timestamps !
+    dup >code-flag @ IF  addr>replies  ELSE  addr>ts  THEN
+    allocatez r@ dest-timestamps !
     drop
     j^ r@ dest-job !
     r> code-struct ;
@@ -512,10 +513,22 @@ Variable init-context#
     j^ code-map $@ drop >r
     r@ dest-vaddr @ r> dest-tail @ + ;
 
+: code-reply ( -- addr )
+    j^ code-map $@ drop >r
+    r@ dest-tail @ addr>replies r> dest-timestamps @ + ;
+
+: reply[] ( index -- addr )
+    j^ code-map $@ drop >r
+    addr>replies r> dest-timestamps @ + ;
+
+: reply-index ( -- index )
+    j^ code-map $@ drop dest-tail @ addr>bits ;
+
 : code+ ( -- )
     j^ code-map $@ drop >r
     maxdata r@ dest-tail +!
     r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
+\    cmd( ." set dest-tail to " r@ dest-tail @ hex. cr )
     rdrop ;
 
 \ flow control

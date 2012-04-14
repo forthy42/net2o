@@ -180,8 +180,12 @@ previous
     dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
     addr>replies r> dest-timestamps @ + ;
 
-: tag-reply ( -- )  cmdbuf# @ 0= ?EXIT  j^ 0= ?EXIT
+: net2o:tag-reply ( -- )  j^ 0= ?EXIT
     tag-addr >r cmdbuf$ r> 2! ;
+: net2o:ack-reply ( index -- )  j^ 0= ?EXIT
+    0. rot reply * reply[] 2! ; \ clear request
+: net2o:expect-reply ( -- )  j^ 0= ?EXIT
+    cmdbuf$ code-reply 2! ;
 
 : tag-addr? ( -- flag )  j^ 0= IF  false  EXIT  THEN
     tag-addr 2@ 2dup d0<> IF
@@ -195,7 +199,7 @@ previous
     j^ IF  cmd0source on  ELSE  cmd0source off  THEN  cmdreset sp@ >r
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY  drop  r> sp! 2drop
-    tag-reply  cmd-send? ;
+    cmd-send? ;
 
 ' cmd-loop is queue-command
 
@@ -278,6 +282,8 @@ net2o-base
 42 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
 43 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
 44 net2o: timeout ( ticks -- ) net2o:timeout ;
+45 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+46 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;
@@ -354,12 +360,15 @@ also net2o-base
 	THEN
     LOOP  2drop ;
 
+: expect-reply ( -- )
+    reply-index lit, tag-reply net2o:expect-reply ;
+
 : restart-transfer ( -- )
     0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
 	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
 	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
-	    slurp-tracked-block
+	    slurp-tracked-block  expect-reply
 	THEN  1+
     file-state-struct +LOOP  drop
     send-chunks ;
