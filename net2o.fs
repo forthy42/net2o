@@ -174,7 +174,7 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$000000 Value droprate#
+$400000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
@@ -575,9 +575,13 @@ Variable lastdeltat
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : net2o:set-rate ( rate deltat -- )
+    rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
-    IF  lastdeltat @ over max swap 2dup 2>r */ 2r> */  ELSE  drop  THEN
+    IF  over >r
+	lastdeltat @ over max swap 2dup 2>r */ 2r> */
+	r> 2* min \ no more than a factor two!
+    ELSE  drop  THEN
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
@@ -1007,8 +1011,8 @@ Variable code-packet
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  over  net2o:send-tick
-    dup >r send-size min-size over lshift
-    dup r> u>= IF  ack-toggle# outflag xor!  THEN
+    ( dup >r ) send-size min-size over lshift
+    \ dup r> u>= IF  ack-toggle# outflag xor!  THEN
     2r> 2swap ;
 
 : net2o:send-packet ( addr u dest addr -- len )

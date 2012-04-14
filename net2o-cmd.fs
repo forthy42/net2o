@@ -405,13 +405,14 @@ also net2o-base
     dup r@ data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup r@ data-lastack# !@
-	r@ receive-flag 0= data-ackbit @ -rot
+	r> receive-flag 0= data-ackbit @ -rot
 	+DO  dup I 1+ +bit  LOOP
     ELSE
 	\ otherwise, set only this specific bucket
-	r@ receive-flag 0= data-ackbit @ over +bit
+	r> receive-flag 0= data-ackbit @ over +bit@
+	r> and >r
     THEN
-    drop rdrop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
+    drop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
     
 : net2o:do-ack ( -- )
     ticks       j^ recv-tick ! \ time stamp of arrival
@@ -443,8 +444,15 @@ also net2o-base
     reply +LOOP
     rdrop ;
 
+: .expected ( -- )
+    ." expected/received: " j^ recv-addr @ hex.
+    j^ data-rmap $@ drop receive-flag data-firstack# @ hex.
+    j^ expected @ hex. j^ received @ hex.
+    j^ data-rmap $@ drop { dmap }
+    dmap receive-flag data-ackbit @ dmap dest-size @ addr>bits bits>bytes dump ;
+
 : net2o:do-timeout ( -- )  resend?
-    resend-toggle# j^ recv-flag xor!
+    resend-toggle# j^ recv-flag xor!  .expected
     cmdreset  ticks lit, timeout  net2o:do-resend  net2o:genack
     cmd-send? ;
 ' net2o:do-timeout IS do-timeout
