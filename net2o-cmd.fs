@@ -353,6 +353,7 @@ also net2o-base
 : net2o:do-resend ( -- )
     j^ recv-addr @ 0= ?EXIT
     j^ data-rmap $@ drop { dmap }
+    dmap data-lastack# @ 0< ?EXIT \ we have not yet received anything
     j^ recv-addr @ dmap dest-vaddr @ - addr>bits
     dmap receive-flag data-ackbit @ over bits>bytes
     dmap receive-flag data-firstack# @ +DO  dup I + c@ $FF <> IF
@@ -361,6 +362,7 @@ also net2o-base
 	    lit, lit, resend-mask  LEAVE
 	ELSE
 	    I dmap receive-flag data-firstack# !
+	    firstack( ." data-fistack" receive-flag negate 1 .r ." # = " I F . F cr )
 	THEN
     LOOP  2drop ;
 

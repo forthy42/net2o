@@ -92,11 +92,12 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : debug)  ]] THEN [[ ;
 
-true [IF]
+false [IF]
     : debug: ( -- ) Create immediate false ,  DOES>
 	]] Literal @ IF [[ ['] debug) assert-canary ;
 [ELSE]
-    : debug: ( -- )  Create immediate DOES> postpone ( ;
+    : debug: ( -- )  Create immediate false , DOES>
+	@ IF  ['] noop assert-canary  ELSE  postpone (  THEN ;
 [THEN]
 
 : x~~ ]] base @ >r hex ~~ r> base ! [[ ; immediate
@@ -114,6 +115,7 @@ debug: resend(
 debug: track(
 debug: cmd(
 debug: send(
+debug: firstack(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -127,6 +129,7 @@ debug: send(
 \ +db track(
 \ +db cmd(
 \ +db send(
+\ +db firstack(
 
 \ Create udp socket
 
@@ -174,7 +177,7 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$400000 Value droprate#
+$000000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
@@ -655,7 +658,8 @@ end-structure
 : +expected ( n -- ) j^ expected @ tuck + dup j^ expected !
     j^ data-rmap $@ drop data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
-	dup I -bit  over I -bit  LOOP  2drop ;
+	dup I -bit  over I -bit  LOOP  2drop
+    firstack( ." expect more data" cr ) ;
 
 : size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
 : seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap -
@@ -1130,6 +1134,7 @@ Variable sendflag  sendflag off
 
 : rewind-ackbits ( map -- ) >r
     r@ data-firstack0# off  r@ data-firstack1# off
+    firstack( ." rewind firstacks" cr )
     r@ data-lastack# on
     r@ dest-size @ addr>bits bits>bytes
     r@ data-ackbits0 @ over -1 fill
