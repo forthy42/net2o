@@ -33,11 +33,13 @@ require hash-table.fs
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 
-: or!  ( x addr -- )   >r r@ @ or  r> ! ;
-: xor! ( x addr -- )   >r r@ @ xor r> ! ;
-: and! ( x addr -- )   >r r@ @ and r> ! ;
-: min! ( n addr -- )   >r r@ @ min r> ! ;
-: max! ( n addr -- )   >r r@ @ max r> ! ;
+: or!   ( x addr -- )   >r r@ @ or   r> ! ;
+: xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
+: and!  ( x addr -- )   >r r@ @ and  r> ! ;
+: min!  ( n addr -- )   >r r@ @ min  r> ! ;
+: max!  ( n addr -- )   >r r@ @ max  r> ! ;
+: umin! ( n addr -- )   >r r@ @ umin r> ! ;
+: umax! ( n addr -- )   >r r@ @ umax r> ! ;
 
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
@@ -177,11 +179,11 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$000000 Value droprate#
+$00000000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
-	    ." dropping packet" cr
+\	    ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
     sockaddr-tmp w@ AF_INET6 = IF
 	net2o-sock6  1 packet6s +!
@@ -351,6 +353,7 @@ field: return-address
 field: recv-tick
 field: recv-addr
 field: recv-flag
+field: recv-high
 field: cmd-buf#
 field: file-handles
 field: file-state
@@ -656,9 +659,10 @@ end-structure
 	dup file-state-struct erase  THEN  rdrop ;
 
 : +expected ( n -- ) j^ expected @ tuck + dup j^ expected !
-    j^ data-rmap $@ drop data-ackbits0 2@  2swap
+    j^ data-rmap $@ drop >r r@ data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
 	dup I -bit  over I -bit  LOOP  2drop
+    r@ data-firstack0# off  r> data-firstack1# off
     firstack( ." expect more data" cr ) ;
 
 : size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
@@ -1145,6 +1149,7 @@ Variable sendflag  sendflag off
     tuck dest-round @ +DO  dup rewind-buffer  LOOP  drop ;
 
 : net2o:rewind-receiver ( -- )
+    j^ recv-high on
     j^ data-rmap $@ drop
     tuck dest-round @ +DO  dup rewind-buffer  LOOP  rewind-ackbits ;
 

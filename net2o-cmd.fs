@@ -166,7 +166,9 @@ net2o-code0 previous
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
 
-: cmd ( -- )  cmdbuf cmd0source @ IF  code-vdest  ELSE  0  THEN send-cmd
+: cmddest ( -- dest ) cmd0source @ IF  code-vdest  ELSE  0  THEN ;
+
+: cmd ( -- )  cmdbuf cmddest send-cmd
     cmd0source @ IF  code+  THEN ;
 
 also net2o-base
@@ -351,20 +353,27 @@ also net2o-base
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( -- )
-    j^ recv-addr @ 0= ?EXIT
+    j^ recv-high @ -1 = ?EXIT
     j^ data-rmap $@ drop { dmap }
     dmap data-lastack# @ 0< ?EXIT \ we have not yet received anything
-    j^ recv-addr @ dmap dest-vaddr @ - addr>bits
-    dmap receive-flag data-ackbit @ over bits>bytes
-    dmap receive-flag data-firstack# @ +DO  dup I + c@ $FF <> IF
-	    dup I + c@ $FF xor
-	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
-	    lit, lit, resend-mask  LEAVE
-	ELSE
+    j^ recv-high @ dmap dest-vaddr @ - addr>bits
+    dmap receive-flag data-ackbit @
+    over bits>bytes dmap receive-flag data-firstack# @ +DO
+	dup I + c@ $FF = IF
 	    I dmap receive-flag data-firstack# !
 	    firstack( ." data-fistack" receive-flag negate 1 .r ." # = " I F . F cr )
+	ELSE
+	    LEAVE
 	THEN
-    LOOP  2drop ;
+    LOOP
+    over bits>bytes dmap receive-flag data-firstack# @ +DO
+	dup I + c@ $FF <> IF
+    	    dup I + c@ $FF xor
+	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
+	    lit, lit, resend-mask
+	THEN
+    LOOP
+    2drop ;
 
 : do-expect-reply ( -- )
     reply-index lit, tag-reply  end-cmd  net2o:expect-reply
@@ -398,7 +407,7 @@ also net2o-base
     THEN ;
 
 : received! ( -- )
-    j^ recv-addr @ 0= ?EXIT
+    j^ recv-addr @ -1 = ?EXIT
     j^ data-rmap $@ drop >r
     j^ recv-addr @ r@ dest-vaddr @ - addr>bits
     \ set bucket as received in current polarity bitmap
@@ -419,6 +428,11 @@ also net2o-base
 : net2o:do-ack ( -- )
     ticks       j^ recv-tick ! \ time stamp of arrival
     dest-addr @ j^ recv-addr ! \ last received packet
+    j^ recv-high @ -1 = IF
+	dest-addr @ j^ recv-high !
+    ELSE
+	dest-addr @ j^ recv-high umax!
+    THEN
     inbuf 1+ c@ j^ recv-flag ! \ last receive flag
     cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
@@ -442,6 +456,7 @@ also net2o-base
     r@ dest-size @ addr>replies bounds ?DO
 	I 2@ d0<> IF
 	    ." resend: " I 2@ n2o:see F cr
+	    I 2@ cmdbuf# ! code-vdest send-cmd
 	THEN
     reply +LOOP
     rdrop ;
@@ -449,9 +464,11 @@ also net2o-base
 : .expected ( -- )
     ." expected/received: " j^ recv-addr @ hex.
     j^ data-rmap $@ drop receive-flag data-firstack# @ hex.
-    j^ expected @ hex. j^ received @ hex.
-    j^ data-rmap $@ drop { dmap }
-    dmap receive-flag data-ackbit @ dmap dest-size @ addr>bits bits>bytes dump ;
+    j^ expected @ hex. j^ received @ hex. F cr
+    \ j^ data-rmap $@ drop { dmap }
+    \ dmap receive-flag data-ackbit @
+    \ dmap dest-size @ addr>bits bits>bytes dump
+;
 
 : net2o:do-timeout ( -- )  resend?
     resend-toggle# j^ recv-flag xor!  .expected
