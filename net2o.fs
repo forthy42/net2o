@@ -179,7 +179,7 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$00000000 Value droprate#
+$20000000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
@@ -607,11 +607,17 @@ Variable lastdeltat
 Create resend-buf  0 , 0 ,
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  2/ >r maxdata + r>  dup 0= UNTIL  THEN ;
-: net2o:resend-mask ( addr mask -- )  >mask0
-    resend-buf 2!
-    resend-buf 2 cells j^ data-resend $@ dup 2 cells - 0 max /string str= 0= IF
-	resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
-	resend-buf 2 cells j^ data-resend $+!  THEN ;
+: net2o:resend-mask ( addr mask -- ) 
+    j^ data-resend $@ bounds ?DO
+	over I cell+ @ swap dup maxdata 8 * + within IF
+	    over I 2@ rot >r
+	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
+	    rdrop nip or >mask0 I 2!  UNLOOP  EXIT
+	THEN
+    2 cells +LOOP
+    >mask0 resend-buf 2!
+    resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
+    resend-buf 2 cells j^ data-resend $+! ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
 : >real-range ( addr -- addr' )
