@@ -179,7 +179,7 @@ Variable packet6s
 : read-a-packet6 ( -- addr u )
     net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
 
-$20000000 Value droprate#
+$00000000 Value droprate#
 
 : send-a-packet ( addr u -- n )
     droprate# IF  rng32 droprate# u< IF
