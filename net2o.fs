@@ -173,11 +173,16 @@ Variable packet4s
 Variable packet6r
 Variable packet6s
 
+: read-socket-quick ( socket -- addr u )
+    fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
+    dup 0< IF  errno 512 + negate throw  THEN
+    inbuf swap ;
+
 : read-a-packet ( -- addr u )
-    net2o-sock inbuf maxpacket read-socket-from  1 packet4r +! ;
+    net2o-sock read-socket-quick  1 packet4r +! ;
 
 : read-a-packet6 ( -- addr u )
-    net2o-sock6 inbuf maxpacket read-socket-from  1 packet6r +! ;
+    net2o-sock6 read-socket-quick  1 packet6r +! ;
 
 $00000000 Value droprate#
 
