@@ -610,11 +610,12 @@ Variable lastdeltat
 \ acknowledge
 
 Create resend-buf  0 , 0 ,
+$20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  2/ >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- ) 
     j^ data-resend $@ bounds ?DO
-	over I cell+ @ swap dup maxdata 8 * + within IF
+	over I cell+ @ swap dup maxdata mask-bits# * + within IF
 	    over I 2@ rot >r
 	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
 	    rdrop nip or >mask0 I 2!  UNLOOP  EXIT

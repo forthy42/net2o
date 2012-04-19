@@ -352,27 +352,30 @@ also net2o-base
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
-: net2o:do-resend ( -- )
-    j^ recv-high @ -1 = ?EXIT
+: net2o:do-resend ( flag -- )
+    j^ recv-high @ -1 = IF  drop  EXIT  THEN
     j^ data-rmap $@ drop { dmap }
-    dmap data-lastack# @ 0< ?EXIT \ we have not yet received anything
+    \ we have not yet received anything
+    dmap data-lastack# @ 0< IF  drop  EXIT  THEN
     j^ recv-high @ dmap dest-vaddr @ - addr>bits
+    swap IF  $20 - 0 max  THEN
     dmap receive-flag data-ackbit @
     over bits>bytes dmap receive-flag data-firstack# @ +DO
-	dup I + c@ $FF = IF
+	dup I + l@ $FFFFFFFF = IF
 	    I dmap receive-flag data-firstack# !
 	    firstack( ." data-fistack" receive-flag negate 1 .r ." # = " I F . F cr )
 	ELSE
 	    LEAVE
 	THEN
-    LOOP
+    4 +LOOP
     over bits>bytes dmap receive-flag data-firstack# @ +DO
-	dup I + c@ $FF <> IF
-    	    dup I + c@ $FF xor
+	dup I + l@ $FFFFFFFF <> IF
+    	    dup I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
+	    resend( ." resend: " dup hex. over hex. cr )
 	    lit, lit, resend-mask
 	THEN
-    LOOP
+    4 +LOOP
     2drop ;
 
 : do-expect-reply ( -- )
@@ -437,7 +440,7 @@ also net2o-base
     cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
-    r@ resend-toggle# and IF  net2o:do-resend  THEN
+    r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     r> ack-timing
     cmd-send? ;
@@ -451,11 +454,12 @@ also net2o-base
     THEN ;
 
 : resend? ( -- )
+    j^ 0= ?EXIT
     j^ code-map $@ drop >r
     r@ dest-timestamps @
     r@ dest-size @ addr>replies bounds ?DO
 	I 2@ d0<> IF
-	    ." resend: " I 2@ n2o:see F cr
+	    resend( ." resend: " I 2@ n2o:see F cr )
 	    I 2@ cmdbuf# ! code-vdest send-cmd
 	THEN
     reply +LOOP
@@ -472,7 +476,7 @@ also net2o-base
 
 : net2o:do-timeout ( -- )  resend?
     resend-toggle# j^ recv-flag xor!  .expected
-    cmdreset  ticks lit, timeout  net2o:do-resend  net2o:genack
+    cmdreset  ticks lit, timeout  false net2o:do-resend  net2o:genack
     cmd-send? ;
 ' net2o:do-timeout IS do-timeout
 
