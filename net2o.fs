@@ -1035,12 +1035,15 @@ Defer queue-command ( addr u -- )
 Defer do-ack ( -- )
 ' noop IS do-ack
 
+Variable validated
+
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
 \    inbuf .header
     dest-addr @ 0= IF
 	0 to j^ \ address 0 has no job context!
 	true wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
+	validated off \ packets to address 0 are not really validated
 	inbuf packet-data queue-command
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN
@@ -1048,6 +1051,7 @@ Defer do-ack ( -- )
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
 	    IF  drop  THEN  EXIT  THEN
+	validated on \ ok, we have a validated connection
 	dup 0< IF \ data packet
 	    drop  >r inbuf packet-data r> swap move
 	    do-ack
