@@ -4,16 +4,19 @@
 : wurst-source-state> ( addr -- )  wurst-source swap state# 2* move ;
 : >wurst-source-state ( addr -- )  wurst-source state# 2* move ;
 
-: >wurst-source ( d -- )
-    wurst-source state# bounds ?DO  2dup I 2!  2 cells +LOOP  2drop ;
-
-: >wurst-key ( -- )
+: wurst-key$ ( -- addr u )
     j^ dup 0= IF
 	drop wurst-key state#
     ELSE
 	crypto-key $@
-    THEN
+    THEN ;
+
+: >wurst-key ( addr u -- )
     wurst-state swap move ;
+: >wurst-source ( addr u -- )
+    wurst-source state# bounds ?DO
+	2dup I swap move
+    dup +LOOP  2drop ;
 
 \ regenerate ivs is a buffer swapping function:
 \ regenerate half of the ivs per time, when you reach the middle of the other half
@@ -69,7 +72,7 @@ Defer regen-ivs
     ELSE
 	drop
     THEN
-    >wurst-key ;
+    wurst-key$ >wurst-key ;
 
 : wurst-inbuf-init ( flag -- )
     rnd-init >wurst-source'
@@ -83,7 +86,19 @@ Defer regen-ivs
 \	." no iv mapping" cr
 	drop
     THEN
-    >wurst-key ;
+    wurst-key$ >wurst-key ;
+
+$10 Constant mykey-salt#
+state# buffer: mykey \ server's private key
+rng$ mykey swap move
+
+: wurst-mykey-init ( addr u -- addr' u' )
+    over mykey-salt# >wurst-source
+    mykey state# >wurst-key
+    mykey-salt# safe/string ;
+
+: wurst-mykey-setup ( addr u -- addr' u' )
+    over >r  rng@ rng@ r> 2! wurst-mykey-init ;
 
 : mem-rounds# ( size -- n )
     case
@@ -102,6 +117,9 @@ Defer regen-ivs
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
     : wurst-outbuf-encrypt drop ;
     : wurst-inbuf-decrypt drop true ;
+    : wurst-encrypt$ ( addr u -- ) 2drop ;
+    : wurst-decrypt$ ( addr u -- addr' u' flag )
+	mykey-salt# safe/string 2 cells - true ;
 [ELSE]
     : encrypt-buffer ( addr u n -- addr 0 ) >r
 	over roundse# rounds
@@ -125,6 +143,19 @@ Defer regen-ivs
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
 	rdrop drop 2@ wurst-crc d= ;
+
+    : wurst-encrypt$ ( addr u -- )
+	wurst-mykey-setup 2 cells - dup mem-rounds# >r
+	r@ encrypt-buffer
+	rdrop drop wurst-crc rot 2! ;
+
+    : wurst-decrypt$ ( addr u -- addr' u' flag )
+	wurst-mykey-init 2 cells - dup mem-rounds# >r
+	2dup  over roundse# rounds
+	BEGIN  dup 0>  WHILE
+		over r@ rounds-decrypt  r@ >reads state# * safe/string
+	REPEAT
+	rdrop drop 2@ wurst-crc d= ;
 [THEN]
 
 \ public key encryption
@@ -132,7 +163,7 @@ Defer regen-ivs
 \ these are dummy keys for testing!!!
 
 $20 Constant keysize \ our shared secred is only 32 bytes long
-\ server keys
+\ server keys - these keys are example keys
 Create pks
 $21982058BCCB3476. 64, $36623B3840D9F393. 64, $B4B038E18F007E95. 64, $79CAED9D9F043F9B. 64,
 Create sks

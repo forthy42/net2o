@@ -51,7 +51,7 @@ Create state-init
 $FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
 $9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
 
-Create wurst-key
+Create wurst-key \ default key
 $20799FEC4B2E86C7. 64, $9F5454CDBDF51F76. 64, $EE1905FFF4B24C3D. 64, $9841F78BA1E0A3B7. 64,
 $B6C33E39C326A161. 64, $FD4E8C0EAA7C4362. 64, $839E0910FFD9401A. 64, $2785F5C10D610C68. 64,
 
@@ -618,27 +618,31 @@ $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
 
-Variable rng-buffer state# 8 * allot
-state# 4 * rng-buffer !
+8 Constant rngs#
+
+Variable rng-buffer state# rngs# * allot
+state# rngs# * rng-buffer !
 
 : rng-step ( -- )
     rng-init  rounds# wurst-rng
     wurst-source wurst-salt state# move
     wurst-state  state-init state# move
-    message rng-buffer cell+ state# 8 * move
+    message rng-buffer cell+ state# rngs# * move
     rng-buffer off ;
 
 \ buffered random numbers to output 64 bit at a time
 
+: rng-step? ( n -- ) state# rngs# * u> IF  rng-step  THEN ;
+
 : rng@ ( -- x )
-    rng-buffer @ dfaligned state# 4 * u>= IF  rng-step  THEN
-    rng-buffer dup @ cell+ dfaligned dup rng-buffer ! + @ ;
+    rng-buffer @ aligned cell+ rng-step?
+    rng-buffer dup @ aligned cell+ dup rng-buffer ! + @ ;
 
 : rng$ ( -- addr u )
-    rng-buffer @ state# 3 * u>= IF  rng-step  THEN
+    rng-buffer @ state# + rng-step?
     rng-buffer dup @ + cell+ state# dup rng-buffer +! ;
 
 : rng32 ( -- x )
-    rng-buffer @ state# 4 * = IF  rng-step  THEN
+    rng-buffer @ 4 + rng-step?
     rng-buffer dup @ + cell+ l@
     4 rng-buffer +! ;
