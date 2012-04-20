@@ -358,7 +358,7 @@ also net2o-base
     \ we have not yet received anything
     dmap data-lastack# @ 0< IF  drop  EXIT  THEN
     j^ recv-high @ dmap dest-vaddr @ - addr>bits
-    swap IF  $20 - 0 max  THEN
+    swap IF  mask-bits# - 0 max  THEN
     dmap receive-flag data-ackbit @
     over bits>bytes dmap receive-flag data-firstack# @ +DO
 	dup I + l@ $FFFFFFFF = IF
