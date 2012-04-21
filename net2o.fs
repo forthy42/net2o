@@ -129,7 +129,7 @@ debug: firstack(
 \ +db deltat(
 \ +db resend(
 \ +db track(
-\ +db cmd(
++db cmd(
 \ +db send(
 \ +db firstack(
 
@@ -152,6 +152,8 @@ debug: firstack(
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
+$400000 Value max-data#
+$10000 Value max-code#
 : maxdata ( -- n ) min-size max-size^2 lshift ;
 maxdata overhead + Constant maxpacket
 : chunk-p2 ( -- n )  max-size^2 6 + ;
@@ -470,10 +472,13 @@ Variable mapping-addr
 : map-source ( addr u addr' -- addr u )
     source-mapping map-source-string drop data-struct ;
 
-: n2o:new-data ( addr u -- )  >code-flag off
-    2dup  j^ data-rmap map-dest  map-source  j^ data-map $! ;
-: n2o:new-code ( addr u -- )  >code-flag on
-    2dup  j^ code-rmap map-dest  map-source  j^ code-map $! ;
+Variable mapstart $10000 mapstart !
+
+: n2o:new-map ( u -- addr )  mapstart @ swap mapstart +! ; 
+: n2o:new-data ( addrs addrd u -- )  >code-flag off
+    tuck  j^ data-rmap map-dest  map-source  j^ data-map $! ;
+: n2o:new-code ( addrs addrd u -- )  >code-flag on
+    tuck  j^ code-rmap map-dest  map-source  j^ code-map $! ;
 
 \ create context
 
@@ -766,7 +771,7 @@ Variable code-packet
 : >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
-: bandwidth+ ( -- )
+: bandwidth+ ( -- )  j^ 0= ?EXIT
     j^ ns/burst @ tick-init 1+ / j^ bandwidth-tick +! ;
 
 : burst-end ( -- )  j^ data-b2b @ ?EXIT

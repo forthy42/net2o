@@ -21,15 +21,18 @@ end-code
 
 \ 10 ms
 ." Sending more complex test" cr
-( rng@ $20 lshift ) 0 Constant uniq#
-uniq# $10000 + Constant code#
-uniq# $20000 + Constant data#
 
-net2o-code0 new-context
+net2o-code0
+S" Connection request" $, type cr
+$8000 $100000 map-request,
+end-code
+
+1 client-loop
+
+net2o-code0
 S" Connection init" $, type cr
+new-context
 pks send-key
-data# $100000 data-map,
-code# $8000   code-map,
 code-ivs
 end-code
 

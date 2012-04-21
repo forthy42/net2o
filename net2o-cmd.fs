@@ -162,7 +162,7 @@ Variable cmd0buf#
 net2o-code0 previous
 
 : send-cmd ( addr dest -- )  code-packet on
-    j^ return-address @
+    j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
     LOOP  true abort" too many commands" ;
@@ -216,12 +216,19 @@ previous
 
 \ nested commands
 
+: >initbuf ( addr u -- addr' u' ) tuck
+    init0buf mykey-salt# + swap move
+    maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
+    nip init0buf swap mykey-salt# + 2 cells + 2dup wurst-encrypt$ ;
+
+Variable neststart#
+
+: neststart ( -- )  cmdbuf# @ neststart# ! ;
+
 : cmd>init ( -- addr u )
-    init0buf mykey-salt# maxdata 2/ erase
-    cmdbuf$ init0buf mykey-salt# + swap move
-    cmdbuf# @ maxdata  BEGIN  2dup 2/ u>  WHILE  2/ dup min-size = UNTIL  THEN
-    nip init0buf swap mykey-salt# + 2 cells + 2dup wurst-encrypt$
-    cmdreset ;
+    init0buf mykey-salt# + maxdata 2/ erase
+    cmdbuf$ neststart# @ safe/string  >initbuf
+    neststart# @ cmdbuf# ! ;
 
 : cmdnest ( addr u -- )
     wurst-decrypt$ 0= IF  2drop  ( invalid >throw )  EXIT  THEN
@@ -242,36 +249,59 @@ previous definitions
 
 \ commands to read and write files
 
-also net2o-base definitions forth
+also net2o-base definitions
 
-11 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-12 net2o: new-data ( addr u -- ) n2o:new-data ;
-13 net2o: new-code ( addr u -- ) n2o:new-code ;
+10 net2o: push-$    $, ;
+11 net2o: push-slit slit, ;
+12 net2o: push-char lit, ;
+' push-char alias push-lit
+
+13 net2o: push'     p@ cmd, ;
+
+14 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
+15 net2o: new-data ( addr u -- ) n2o:new-data ;
+16 net2o: new-code ( addr u -- ) n2o:new-code ;
+17 net2o: request-done ( -- )  -1 requests +! ;
+
+: n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
+    2 pick lit, r@ lit, over lit, new-code
+    2 pick over + lit, 2dup swap r@ + lit, lit, new-data
+    r> ;
+
+18 net2o: nest ( addr u -- )  cmdnest ;
+19 net2o: map-request ( addrs ucode udata -- )
+    neststart
+    max-data# umin swap max-code# umin swap
+    2dup + n2o:new-map n2o:create-map
+    cmd>init $, push-$ push' nest n2o:create-map
+    2drop 2drop request-done ;
 
 net2o-base
 
-: data-map, ( addr u -- )  2dup n2o:new-data swap lit, lit, new-data ;
-: code-map, ( addr u -- )  2dup n2o:new-code swap lit, lit, new-code ;
+: map-request, ( ucode udata -- )
+    2dup + n2o:new-map lit, swap lit, lit,
+    ( insert return token here! )
+    map-request ;
 
-14 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-15 net2o: close-file ( id -- )  n2o:close-file ;
-16 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
-17 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
-18 net2o: send-chunk ( -- ) net2o:send-chunk ;
-19 net2o: send-chunks ( -- ) net2o:send-chunks ;
+20 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+21 net2o: close-file ( id -- )  n2o:close-file ;
+22 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
+23 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
+24 net2o: send-chunk ( -- ) net2o:send-chunk ;
+25 net2o: send-chunks ( -- ) net2o:send-chunks ;
 
-20 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
-21 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
-22 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
-23 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
+30 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
+31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
+32 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
+33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
 
 \ crypto functions
 
-26 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
-27 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-28 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
-29 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
-30 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
+40 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+41 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+42 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+43 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
+44 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
 
 \ create commands to send back
 
@@ -283,38 +313,29 @@ net2o-base
     rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs
     rng$ 2dup $, gen-rcode-ivs net2o:gen-code-ivs ;
 
-31 net2o: push-$    $, ;
-32 net2o: push-slit slit, ;
-33 net2o: push-char lit, ;
-' push-char alias push-lit
-
-34 net2o: push'     p@ cmd, ;
-
 \ better slurping
 
-37 net2o: slurp-block ( seek maxlen id -- nextseek )
+50 net2o: slurp-block ( seek maxlen id -- nextseek )
           n2o:slurp-block ;
-38 net2o: track-size ( size id -- )
+51 net2o: track-size ( size id -- )
           track( 2dup ." file <" 0 .r ." > size: " F . F cr ) size! ;
-39 net2o: track-seek ( seek id -- )
+52 net2o: track-seek ( seek id -- )
           track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seek! ;
-40 net2o: open-tracked-file ( addr u mode id -- )
+53 net2o: open-tracked-file ( addr u mode id -- )
           dup >r n2o:open-file
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
-41 net2o: slurp-tracked-block ( seek maxlen id -- )
+54 net2o: slurp-tracked-block ( seek maxlen id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-42 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
-43 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
-44 net2o: timeout ( ticks -- ) net2o:timeout ;
-45 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-46 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+55 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
+56 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+57 net2o: timeout ( ticks -- ) net2o:timeout ;
+58 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+59 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;
 
 \ safe initialization
-
-47 net2o: nest ( addr u -- )  cmdnest ;
 
 \ This must be defined last, otherwise dangerous name-clash!
 
