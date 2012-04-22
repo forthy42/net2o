@@ -367,6 +367,18 @@ also net2o-base
     ['] end-cmd IS expect-reply? ;] IS expect-reply?
     1 client-loop ;
 
+Variable file-reg#
+
+: n2o:copy ( addrsrc us addrdest ud -- )
+    2swap $, r/o lit, file-reg# @ lit, open-tracked-file
+    0 lit, -1 slit, file-reg# @ lit, slurp-tracked-block
+    file-reg# @ save-to
+    1 file-reg# +! ;
+
+: n2o:done ( -- )  file-reg# off ;
+
+n2o:done
+
 previous
 
 \ client side timing

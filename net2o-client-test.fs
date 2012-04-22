@@ -15,12 +15,9 @@ insert-ip n2o:connect
 net2o-code
 data-ivs
 s" Download test" $, type cr
-s" net2o.fs" $, r/o lit, 0 lit, open-tracked-file
-0 lit, -1 slit, 0 lit, slurp-tracked-block
-s" .cache/net2o.fs" 0 save-to
-s" data/2011-05-13_11-26-57.jpg" $, r/o lit, 1 lit, open-tracked-file
-0 lit, -1 slit, 1 lit, slurp-tracked-block
-s" .cache/photo.jpg" 1 save-to
+s" net2o.fs" s" .cache/net2o.fs" n2o:copy
+s" data/2011-05-13_11-26-57.jpg" s" .cache/photo.jpg" n2o:copy
+n2o:done
 send-chunks
 end-code
 
