@@ -118,6 +118,7 @@ debug: track(
 debug: cmd(
 debug: send(
 debug: firstack(
+debug: msg(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -132,6 +133,7 @@ debug: firstack(
 \ +db cmd(
 \ +db send(
 \ +db firstack(
+\ +db msg(
 
 \ Create udp socket
 
@@ -697,7 +699,7 @@ end-structure
 	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
 	ELSE
 	    over I fs-oldseek ! -
-	    ." flush file <" 2 pick 0 .r ." >: " dup . cr
+	    msg( ." flush file <" 2 pick 0 .r ." >: " dup . cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
 	    THEN  +
@@ -720,7 +722,7 @@ end-structure
     IF    dup @ ?dup-IF  close-file throw  THEN  dup off
     ELSE  drop r@ 1+ cells j^ file-handles $!len
 	j^ file-handles $@ drop r@ cells +  THEN rdrop >r
-    dup 2over ." open file: " type ."  with mode " . cr
+    msg( dup 2over ." open file: " type ."  with mode " . cr )
     open-file throw r> ! ;
 
 : n2o:close-file ( id -- )
@@ -898,7 +900,7 @@ Create chunk-adder chunks-struct allot
 	data-to-send IF
 	    send-a-chunk
 	ELSE
-	    drop .nosend
+	    drop msg( .nosend )
 	    chunks chunks+ @ chunks-struct * chunks-struct $del
 	    false
 	THEN

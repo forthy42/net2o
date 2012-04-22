@@ -436,7 +436,7 @@ also net2o-base
 : restart-transfer ( -- )
     0 j^ file-state $@ bounds +DO
 	I fs-size @ I fs-seek @ u> IF
-	    ." restart <" dup 0 .r ." >: " I fs-seek ? F cr
+	    msg( ." restart <" dup 0 .r ." >: " I fs-seek ? F cr )
 	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
 	    slurp-tracked-block
 	THEN  1+
@@ -448,13 +448,13 @@ also net2o-base
     j^ expected off  j^ received off
     rewind  restart-transfer
     j^ total @ 0<= IF
-	." Chunk transfer done!" F cr
+	msg( ." Chunk transfer done!" F cr )
 	-1 requests +!  EXIT
     THEN ;
 
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
-	." Block transfer done!" F cr
+	msg( ." Block transfer done!" F cr )
 	save-blocks  rewind-transfer  expect-reply
     THEN ;
 
