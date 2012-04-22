@@ -6,40 +6,11 @@ pkc skc crypto_box_keypair \ create a random key pair
 
 init-client
 
+$8000 $100000
 next-arg argc @ 1 > [IF] next-arg s>number drop [ELSE] net2o-port [THEN]
-insert-ip n2o:new-context
+insert-ip n2o:connect
 
-\ 10 ms
-." Sending first test" cr
-net2o-code0 S" This is the first test" $, type '!' lit, emit cr
-end-code
-
-\ 10 ms
-." Sending second test" cr
-net2o-code0 S" This is the second test" $, type '!' lit, emit cr
-end-code
-
-\ 10 ms
-." Sending more complex test" cr
-
-net2o-code0
-S" Connection request" $, type cr
-nest[ j^ lit, set-j^ ]nest
-$8000 $100000 map-request,
-end-code
-
-also net2o-base
-:noname
-    S" Connection init" $, type cr
-    pks send-key
-    code-ivs
-    end-cmd
-    ['] end-cmd IS expect-reply? ; IS expect-reply?
-previous
-
-1 client-loop
-." Received reply" cr
-
+." Connected" cr
 
 net2o-code
 data-ivs

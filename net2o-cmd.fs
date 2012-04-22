@@ -356,6 +356,18 @@ net2o-base
 
 previous definitions
 
+\ higher level functions
+
+also net2o-base
+
+: n2o:connect ( ucode udata return-addr -- )
+    n2o:new-context
+    net2o-code0  nest[ j^ lit, set-j^ ]nest  map-request,  end-code
+    [: pks send-key code-ivs end-cmd
+    ['] end-cmd IS expect-reply? ;] IS expect-reply?
+    1 client-loop ;
+
+previous
 
 \ client side timing
 
