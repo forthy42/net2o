@@ -278,7 +278,7 @@ also net2o-base definitions
     new-context
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
-    ]nest n2o:create-map
+    ]nest  >r rot r> swap >r -rot r> n2o:create-map
     2drop 2drop request-done ;
 
 net2o-base
