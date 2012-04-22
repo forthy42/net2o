@@ -129,7 +129,7 @@ debug: firstack(
 \ +db deltat(
 \ +db resend(
 \ +db track(
-+db cmd(
+\ +db cmd(
 \ +db send(
 \ +db firstack(
 

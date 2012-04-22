@@ -618,7 +618,7 @@ $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
 
-8 Constant rngs#
+4 Constant rngs#
 
 Variable rng-buffer state# rngs# * allot
 state# rngs# * rng-buffer !

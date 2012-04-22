@@ -28,15 +28,18 @@ nest[ j^ lit, set-j^ ]nest
 $8000 $100000 map-request,
 end-code
 
+also net2o-base
+:noname
+    S" Connection init" $, type cr
+    pks send-key
+    code-ivs
+    end-cmd
+    ['] end-cmd IS expect-reply? ; IS expect-reply?
+previous
+
 1 client-loop
 ." Received reply" cr
 
-net2o-code0
-S" Connection init" $, type cr
-new-context
-pks send-key
-code-ivs
-end-code
 
 net2o-code
 data-ivs
