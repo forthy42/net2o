@@ -223,7 +223,7 @@ previous
 
 Variable neststart#
 
-: neststart ( -- )  cmdbuf# @ neststart# ! ;
+: nest[ ( -- )  cmdbuf# @ neststart# ! ;
 
 : cmd>init ( -- addr u )
     init0buf mykey-salt# + maxdata 2/ erase
@@ -232,7 +232,7 @@ Variable neststart#
 
 : cmdnest ( addr u -- )
     wurst-decrypt$ 0= IF  2drop  ( invalid >throw )  EXIT  THEN
-    validated @ >r  validated on  do-cmd-loop  r> validated ! ;
+    validated @ >r  2 validated !  do-cmd-loop  r> validated ! ;
 
 \ net2o assembler stuff
 
@@ -257,23 +257,26 @@ also net2o-base definitions
 ' push-char alias push-lit
 
 13 net2o: push'     p@ cmd, ;
+14 net2o: nest ( addr u -- )  cmdnest ;
 
-14 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-15 net2o: new-data ( addr u -- ) n2o:new-data ;
-16 net2o: new-code ( addr u -- ) n2o:new-code ;
-17 net2o: request-done ( -- )  -1 requests +! ;
+: ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
+
+15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
+16 net2o: new-data ( addr u -- ) n2o:new-data ;
+17 net2o: new-code ( addr u -- ) n2o:new-code ;
+18 net2o: request-done ( -- )  -1 requests +! ;
+19 net2o: set-j^ ( addr -- )  validated @ 2 >= IF  to j^  ELSE  drop  THEN ;
 
 : n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
     2 pick lit, r@ lit, over lit, new-code
-    2 pick over + lit, 2dup swap r@ + lit, lit, new-data
+    2 pick 2 pick + lit, 2dup swap r@ + lit, lit, new-data
     r> ;
 
-18 net2o: nest ( addr u -- )  cmdnest ;
-19 net2o: map-request ( addrs ucode udata -- )
-    neststart
+20 net2o: map-request ( addrs ucode udata -- )
+    nest[
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
-    cmd>init $, push-$ push' nest n2o:create-map
+    ]nest n2o:create-map
     2drop 2drop request-done ;
 
 net2o-base
@@ -283,12 +286,12 @@ net2o-base
     ( insert return token here! )
     map-request ;
 
-20 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-21 net2o: close-file ( id -- )  n2o:close-file ;
-22 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
-23 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
-24 net2o: send-chunk ( -- ) net2o:send-chunk ;
-25 net2o: send-chunks ( -- ) net2o:send-chunks ;
+21 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
+22 net2o: close-file ( id -- )  n2o:close-file ;
+23 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
+24 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
+25 net2o: send-chunk ( -- ) net2o:send-chunk ;
+26 net2o: send-chunks ( -- ) net2o:send-chunks ;
 
 30 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
 31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
@@ -347,7 +350,7 @@ net2o-base
 : slit<  slit, push-slit ;
 :noname  server? IF
 	dup  IF  dup lit, throw end-cmd cmd  THEN
-    THEN  throw ; IS >throw
+    THEN  F throw ; IS >throw
 
 previous definitions
 
@@ -396,6 +399,7 @@ also net2o-base
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( flag -- )
+    j^ 0= IF  drop EXIT  THEN  j^ data-rmap @ 0= IF  drop EXIT  THEN
     j^ recv-high @ -1 = IF  drop  EXIT  THEN
     j^ data-rmap $@ drop { dmap }
     \ we have not yet received anything
@@ -497,7 +501,7 @@ also net2o-base
     THEN ;
 
 : resend? ( -- )
-    j^ 0= ?EXIT
+    j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT
     j^ code-map $@ drop >r
     r@ dest-timestamps @
     r@ dest-size @ addr>replies bounds ?DO
@@ -509,6 +513,7 @@ also net2o-base
     rdrop ;
 
 : .expected ( -- )
+    j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT
     ." expected/received: " j^ recv-addr @ hex.
     j^ data-rmap $@ drop receive-flag data-firstack# @ hex.
     j^ expected @ hex. j^ received @ hex. F cr

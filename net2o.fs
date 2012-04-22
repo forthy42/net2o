@@ -570,6 +570,8 @@ Variable lastdeltat
     j^ min-slack min! ;
 
 : net2o:ack-addrtime ( addr ticks -- )  swap
+    j^ 0= IF  2drop EXIT  THEN
+    j^ data-map @ 0= IF  2drop  EXIT  THEN
     j^ data-map $@ drop >r
     r@ dest-vaddr @ -
     timing( over . dup . ." addrtick" cr )
@@ -1056,7 +1058,7 @@ Variable validated
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
 	    IF  drop  THEN  EXIT  THEN
-	validated on \ ok, we have a validated connection
+	1 validated ! \ ok, we have a validated connection
 	dup 0< IF \ data packet
 	    drop  >r inbuf packet-data r> swap move
 	    do-ack

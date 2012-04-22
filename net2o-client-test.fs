@@ -24,10 +24,12 @@ end-code
 
 net2o-code0
 S" Connection request" $, type cr
+nest[ j^ lit, set-j^ ]nest
 $8000 $100000 map-request,
 end-code
 
 1 client-loop
+." Received reply" cr
 
 net2o-code0
 S" Connection init" $, type cr
