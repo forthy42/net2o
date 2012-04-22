@@ -469,7 +469,7 @@ Variable mapping-addr
     dest-mapping map-string  r@ $!
     r> $@ drop mapping-addr tuck ! cell r> $+! ;
 
-: map-source ( addr u addr' -- addr u )
+: map-source ( addr u -- addr u )
     source-mapping map-source-string drop data-struct ;
 
 Variable mapstart $10000 mapstart !

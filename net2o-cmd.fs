@@ -231,8 +231,9 @@ Variable neststart#
     neststart# @ cmdbuf# ! ;
 
 : cmdnest ( addr u -- )
-    wurst-decrypt$ 0= IF  2drop  ( invalid >throw )  EXIT  THEN
-    validated @ >r  2 validated !  do-cmd-loop  r> validated ! ;
+    wurst-decrypt$ 0= IF  2drop ." Invalid nest" cr ( invalid >throw )  EXIT  THEN
+    buf-state 2@ 2>r validated @ >r  2 validated !  do-cmd-loop
+    r> validated ! 2r> buf-state 2! ;
 
 \ net2o assembler stuff
 
@@ -262,8 +263,8 @@ also net2o-base definitions
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
 
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-16 net2o: new-data ( addr u -- ) n2o:new-data ;
-17 net2o: new-code ( addr u -- ) n2o:new-code ;
+16 net2o: new-data ( addr addr u -- ) n2o:new-data ;
+17 net2o: new-code ( addr addr u -- ) n2o:new-code ;
 18 net2o: request-done ( -- )  -1 requests +! ;
 19 net2o: set-j^ ( addr -- )  validated @ 2 >= IF  to j^  ELSE  drop  THEN ;
 
