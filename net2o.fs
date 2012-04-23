@@ -1046,6 +1046,10 @@ Defer do-ack ( -- )
 
 Variable validated
 
+$01 Constant crypt-val
+$02 Constant own-crypt-val
+$04 Constant login-val
+
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
 \    inbuf .header
@@ -1060,7 +1064,7 @@ Variable validated
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
 	    IF  drop  THEN  EXIT  THEN
-	1 validated ! \ ok, we have a validated connection
+	crypt-val validated ! \ ok, we have a validated connection
 	dup 0< IF \ data packet
 	    drop  >r inbuf packet-data r> swap move
 	    do-ack

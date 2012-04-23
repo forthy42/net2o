@@ -160,8 +160,6 @@ rng$ mykey swap move
 
 \ public key encryption
 
-\ these are dummy keys for testing!!!
-
 $20 Constant keysize \ our shared secred is only 32 bytes long
 \ client keys
 keysize buffer: pkc
@@ -171,7 +169,7 @@ keysize buffer: keypad
 Variable do-keypad
 
 \ the theory here is that sks*pkc = skc*pks
-\ we send our public key and know the server's public key.
+\ we send our public key and query the server's public key.
 
 : >wurst-key-ivs ( -- )
     j^ dup 0= IF
