@@ -163,11 +163,6 @@ rng$ mykey swap move
 \ these are dummy keys for testing!!!
 
 $20 Constant keysize \ our shared secred is only 32 bytes long
-\ server keys - these keys are example keys
-Create pks
-$21982058BCCB3476. 64, $36623B3840D9F393. 64, $B4B038E18F007E95. 64, $79CAED9D9F043F9B. 64,
-Create sks
-$EFDA8C1AE4F04358. 64, $4320CCB35C5F6C27. 64, $CE16D65418EA8575. 64, $127701E350CC537F. 64,
 \ client keys
 keysize buffer: pkc
 keysize buffer: skc
@@ -246,16 +241,13 @@ Variable do-keypad
     j^ crypto-key $@ 2/ 2dup + swap move
     ( ." set key to:" j^ crypto-key $@ dump ) ;
 
-: net2o:receive-key ( addr u -- )
-    keysize <> abort" key+pubkey: expected 32 bytes"
-    pkc keysize move
-    keypad sks pkc crypto_scalarmult_curve25519 ;
+: ?keysize ( u -- )
+    keysize <> abort" key+pubkey: expected 32 bytes" ;
 
-: net2o:send-key ( pks -- pkc-addr u )
-    keypad skc rot crypto_scalarmult_curve25519
-    pkc keysize  do-keypad on ;
+: net2o:receive-key ( addr u -- ) ?keysize
+    keypad skc rot crypto_scalarmult_curve25519 ;
 
-: update-key ( -- )
+: net2o:update-key ( -- )
     do-keypad @ IF
 	keypad set-key
 	do-keypad off

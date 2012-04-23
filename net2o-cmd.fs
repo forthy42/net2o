@@ -283,17 +283,14 @@ also net2o-base definitions
 
 net2o-base
 
-: map-request, ( ucode udata -- )
-    2dup + n2o:new-map lit, swap lit, lit,
-    ( insert return token here! )
-    map-request ;
-
 21 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 22 net2o: close-file ( id -- )  n2o:close-file ;
 23 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
 24 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
+
+\ flow control functions
 
 30 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
 31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
@@ -302,15 +299,16 @@ net2o-base
 
 \ crypto functions
 
-40 net2o: receive-key ( addr u -- )  net2o:receive-key  keypad set-key ;
+40 net2o: receive-key ( addr u -- )  net2o:receive-key  do-keypad on ;
 41 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
 42 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
 43 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
 44 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
+45 net2o: key-request ( -- addr u )  pkc keysize $, receive-key ;
+46 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
 
-: send-key ( pk -- )  net2o:send-key $, receive-key ;
 : data-ivs ( -- ) \ two IV seeds for send and receive data
     rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs
     rng$ 2dup $, gen-rdata-ivs net2o:gen-data-ivs ;
@@ -360,10 +358,15 @@ previous definitions
 
 also net2o-base
 
+: map-request, ( ucode udata -- )
+    2dup + n2o:new-map lit, swap lit, lit,
+    map-request ;
+
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
-    net2o-code0  nest[ j^ lit, set-j^ ]nest  map-request,  end-code
-    [: pks send-key code-ivs end-cmd
+    net2o-code0  nest[ j^ lit, set-j^ ]nest  map-request,  key-request
+    end-code
+    [: pkc keysize $, receive-key update-key code-ivs end-cmd
     ['] end-cmd IS expect-reply? ;] IS expect-reply?
     1 client-loop ;
 
