@@ -347,7 +347,6 @@ field: recv-addr
 field: recv-flag
 field: recv-high
 field: cmd-buf#
-field: file-handles
 field: file-state
 field: crypto-key
 
@@ -663,9 +662,6 @@ $20 Value mask-bits#
 
 : nogap ( -- )  abort" Gap in file handles" ;
 
-: ?handles ( -- )
-    j^ file-handles @ 0= IF  s" " j^ file-handles $!  THEN ;    
-
 \ file states
 
 begin-structure file-state-struct
@@ -717,26 +713,17 @@ end-structure
 
 \ open a file - this needs *way more checking*!
 
-: id>file ( id -- fid )
-    >r j^ file-handles $@ r> cells safe/string
-    0= throw  @ ;
+: id>file ( id -- fid )  state-addr fs-fid @ ;
 
 : n2o:open-file ( addr u mode id -- )
-    ?handles
-    >r j^ file-handles $@ r@ cells /string  dup 0< nogap
-    IF    dup @ ?dup-IF  close-file throw  THEN  dup off
-    ELSE  drop r@ 1+ cells j^ file-handles $!len
-	j^ file-handles $@ drop r@ cells +  THEN rdrop >r
+    ?state  state-addr >r
+    r@ fs-fid @ ?dup-IF  close-file throw  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
-    open-file throw r> ! ;
+    open-file throw r> fs-fid ! ;
 
 : n2o:close-file ( id -- )
-    ?handles
-    >r j^ file-handles $@ r@ cells safe/string
-    IF
-	dup @ ?dup-IF  close-file throw  THEN  dup off
-    THEN
-    drop rdrop ;
+    ?state  state-addr
+    fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
 : n2o:slurp-block ( seek maxlen id -- nextseek )
     id>file >r over 0 r@ reposition-file throw
