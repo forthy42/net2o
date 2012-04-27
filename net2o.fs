@@ -337,24 +337,7 @@ field: data-firstack0#
 field: data-firstack1#
 field: data-lastack#
 end-structure
-
-: check-dest ( -- addr 1/t / f )
-    \G return false if invalid destination
-    \G return 1 if code, -1 if data, plus destination address
-    0 to j^
-    return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN
-    cell+ $@ bounds ?DO
-	I @ 2@ 1- bounds dest-addr @ within
-	0= IF
-	    I @ dest-vaddr 2@ dest-addr @ swap - +
-	    I @ code-flag @ IF  1  ELSE  -1  THEN
-	    I @ dest-job @ to j^
-	    UNLOOP  EXIT  THEN
-    cell +LOOP
-    false ;
-
 \ job context structure
-\ !!!FIXME!!! needs to be split in sender/receiver
 
 begin-structure context-struct
 field: context#
@@ -409,6 +392,28 @@ begin-structure reply
 field: reply-offset
 field: reply-len
 end-structure
+
+\ check for valid destination
+
+Variable dest-map s" " dest-map $!
+
+: check-dest ( -- addr 1/t / f )
+    \G return false if invalid destination
+    \G return 1 if code, -1 if data, plus destination address
+    0 to j^
+\    return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN  cell+
+    dest-map
+    $@ bounds ?DO
+	I @ 2@ 1- bounds dest-addr @ within
+	0= IF
+	    I @ dest-vaddr 2@ dest-addr @ swap - +
+	    I @ code-flag @ IF  1  ELSE  -1  THEN
+	    I @ dest-job @ to j^
+	    return-addr @ dup j^ return-address !@ <>
+	    IF  msg( ." handover" cr )  THEN
+	    UNLOOP  EXIT  THEN
+    cell +LOOP
+    false ;
 
 \ context debugging
 
@@ -466,9 +471,9 @@ Variable mapping-addr
     r> code-struct ;
 
 : map-dest ( vaddr u addr -- )
-    return-addr @ routes #.key cell+ >r
-    r@ @ 0= IF  s" " r@ $!  THEN  >r
-    dest-mapping map-string  r@ $!
+\    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
+    dest-map >r
+    >r  dest-mapping map-string  r@ $!
     r> $@ drop mapping-addr tuck ! cell r> $+! ;
 
 : map-source ( addr u -- addr u )
@@ -736,6 +741,27 @@ end-structure
 : n2o:slurp-block ( seek maxlen id -- nextseek )
     id>file >r over 0 r@ reposition-file throw
     data$@ rot umin r> read-file throw dup /data + ;
+
+8 cells cells buffer: nextseeks
+
+: n2o:slurp-blocks-once ( seek maxlen idbits -- sum ) 0 { idbits sum }
+    8 cells 0 DO
+	1 I lshift idbits and IF
+	    2dup I n2o:slurp-block  dup  nextseeks I cells + +!
+	    sum + to sum
+	THEN
+    LOOP  2drop sum ;
+
+: n2o:slurp-blocks ( seek maxlen idbits -- )
+    nextseeks 8 cells cells erase
+    BEGIN  data$@ nip  WHILE
+	dup 2over rot n2o:slurp-blocks-once  0= UNTIL  THEN
+    drop 2drop ;
+
+: n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
+    8 cells 0 DO
+	dup 1 and IF  I  dup nextseeks cells + @  xt execute  THEN  2/
+    LOOP  drop ;
 
 include net2o-crypt.fs
 

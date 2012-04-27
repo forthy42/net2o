@@ -329,11 +329,16 @@ net2o-base
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
 54 net2o: slurp-tracked-block ( seek maxlen id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-55 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
-56 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
-57 net2o: timeout ( ticks -- ) net2o:timeout ;
-58 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-59 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+55 net2o: slurp-tracked-blocks ( seek maxlen idbits -- )
+          dup >r n2o:slurp-blocks
+          r> [: dup IF  swap lit, lit, track-seek  ELSE  2drop  THEN ;]
+          n2o:track-seeks ;
+56 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
+57 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+
+60 net2o: timeout ( ticks -- ) net2o:timeout ;
+61 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+62 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;
