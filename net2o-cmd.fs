@@ -285,7 +285,7 @@ net2o-base
 
 21 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
 22 net2o: close-file ( id -- )  n2o:close-file ;
-23 net2o: file-size ( id -- size )  id>file F file-size throw drop ;
+23 net2o: file-size ( id -- size )  id>addr? fs-size @ ;
 24 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;

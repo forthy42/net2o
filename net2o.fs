@@ -729,7 +729,9 @@ file-state-struct buffer: new-file-state
     ?state  state-addr >r
     r@ fs-fid @ ?dup-IF  close-file throw  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
-    open-file throw r> fs-fid ! ;
+    open-file throw r@ fs-fid !
+    r@ fs-fid @ file-size throw drop r@ fs-size !
+    0. r> fs-seek 2! ;
 
 : n2o:close-file ( id -- )
     ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
