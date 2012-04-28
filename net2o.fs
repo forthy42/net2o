@@ -63,10 +63,21 @@ require hash-table.fs
 : p@+ ( addr -- u addr' )  >r 0
     BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
 	    r> 1+ >r  REPEAT  r> 1+ ;
-: p!+ ( u addr -- addr' )  >r
-    <<#  dup $7F and hold  7 rshift
-    BEGIN  dup  WHILE  dup $7F and $80 or hold 7 rshift  REPEAT
-    0 #> tuck r@ swap move r> + #>> ;
+: psize ( u -- n ) \ to speed up: binary tree comparison
+    \ flag IF  1  ELSE  2  THEN  equals  flag 2 +
+    dup    $FFFFFFFFFFFFFF u<= IF
+	dup       $FFFFFFF u<= IF
+	    dup      $3FFF u<= IF
+		$00000007F u<= 2 +  EXIT  THEN
+	    $00000001FFFFF u<= 4 +  EXIT  THEN
+	dup   $3FFFFFFFFFF u<= IF
+	    $00007FFFFFFFF u<= 6 +  EXIT  THEN
+	$00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
+    $000007FFFFFFFFFFFFFFF u<= 10 + ;
+: p!+ ( u addr -- addr' )  over psize + dup >r >r
+    dup $7F and r> 1- dup >r c!  7 rshift
+    BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
+    drop rdrop r> ;
 
 Create sizes $7F cell 1+ 0 [DO] dup , 7 lshift $7F or [LOOP] drop
 
@@ -671,14 +682,19 @@ field: fs-oldseek
 field: fs-fid
 end-structure
 
+file-state-struct buffer: new-file-state
+
 : ?state ( -- )
     j^ file-state @ 0= IF  s" " j^ file-state $!  THEN ;
 
+: id>addr ( id -- addr remainder )  ?state
+    >r j^ file-state $@ r> file-state-struct * /string ;
+: id>addr? ( id -- addr )
+    id>addr file-state-struct < abort" invalid file id" ;
 : state-addr ( id -- addr )  ?state
-    >r j^ file-state $@ r@ file-state-struct * /string dup 0< nogap
-    0= IF  drop r@ 1+ file-state-struct * j^ file-state $!len
-	j^ file-state $@ drop r@ file-state-struct * +
-	dup file-state-struct erase  THEN  rdrop ;
+    id>addr dup 0< nogap
+    0= IF  drop new-file-state file-state-struct j^ file-state $+!
+	j^ file-state $@ + file-state-struct -  THEN ;
 
 : +expected ( n -- ) j^ expected @ tuck + dup j^ expected !
     j^ data-rmap $@ drop >r r@ data-ackbits0 2@  2swap
@@ -713,7 +729,7 @@ end-structure
 
 \ open a file - this needs *way more checking*!
 
-: id>file ( id -- fid )  state-addr fs-fid @ ;
+: id>file ( id -- fid )  id>addr? fs-fid @ ;
 
 : n2o:open-file ( addr u mode id -- )
     ?state  state-addr >r
@@ -722,8 +738,7 @@ end-structure
     open-file throw r> fs-fid ! ;
 
 : n2o:close-file ( id -- )
-    ?state  state-addr
-    fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
+    ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
 : n2o:slurp-block ( seek maxlen id -- nextseek )
     id>file >r over 0 r@ reposition-file throw
