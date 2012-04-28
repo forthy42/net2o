@@ -706,18 +706,17 @@ file-state-struct buffer: new-file-state
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
 
 : save-blocks ( -- ) ?state
-    0  j^ data-rmap $@ drop dest-raddr @
+    j^ data-rmap $@ drop dest-raddr @
     j^ file-state $@ bounds ?DO
 	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
 	ELSE
-	    over I fs-oldseek ! -
-	    msg( ." flush file <" 2 pick 0 .r ." >: " dup . cr )
+	    - j^ blocksize @ umin dup I fs-oldseek +!
+	    msg( ." flush file <" I j^ file-state $@ drop - file-state-struct / 0 .r ." >: " dup . cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
 	    THEN  +
 	THEN
-	swap 1+ swap
-    file-state-struct +LOOP 2drop ;
+    file-state-struct +LOOP  drop ;
 
 : save-to ( addr u n -- )  state-addr >r
     r/w create-file throw r> fs-fid ! ;
