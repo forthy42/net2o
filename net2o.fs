@@ -742,26 +742,41 @@ file-state-struct buffer: new-file-state
     data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
     dup r> fs-seek ! ;
 
-8 cells cells buffer: nextseeks
-
 : n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
 	1 I lshift idbits and IF
-	    I n2o:slurp-block  dup  nextseeks I cells + +!
-	    sum + to sum
+	    I n2o:slurp-block  sum + to sum
 	THEN
     LOOP  sum ;
 
 : n2o:slurp-blocks ( idbits -- )
-    nextseeks 8 cells cells erase
     BEGIN  data$@ nip  WHILE
 	dup n2o:slurp-blocks-once  0= UNTIL  THEN
     drop ;
 
+: n2o:slurp-all-blocks-once ( -- sum ) 0 { sum }
+    0 j^ file-state $@ bounds DO
+	dup n2o:slurp-block  dup sum + to sum  1+
+    file-state-struct +LOOP  drop sum ;
+
+: n2o:slurp-all-blocks ( -- )
+    BEGIN  data$@ nip  WHILE
+	n2o:slurp-all-blocks-once  0= UNTIL  THEN ;
+
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
-	dup 1 and IF  I  dup nextseeks cells + @  xt execute  THEN  2/
+	dup 1 and IF  I id>addr? fs-seek 2@ <> IF
+		I dup id>addr? dup >r fs-seek @ dup r> fs-oldseek !
+		xt execute  THEN
+	THEN  2/
     LOOP  drop ;
+
+: n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
+    j^ file-state $@len file-state-struct / 0 DO
+	I id>addr? fs-seek 2@ <> IF
+	    I dup id>addr? dup >r fs-seek @ dup r> fs-oldseek !
+	    xt execute  THEN
+    LOOP ;
 
 include net2o-crypt.fs
 

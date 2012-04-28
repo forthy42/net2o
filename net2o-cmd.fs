@@ -334,10 +334,12 @@ net2o-base
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
 55 net2o: slurp-tracked-blocks ( idbits -- )
           dup >r n2o:slurp-blocks
-          r> [: dup IF  swap lit, lit, track-seek  ELSE  2drop  THEN ;]
-          n2o:track-seeks ;
-56 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
-57 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+          r> [: swap lit, lit, track-seek ;] n2o:track-seeks ;
+56 net2o: slurp-all-tracked-blocks ( -- )
+          n2o:slurp-all-blocks
+          [: swap lit, lit, track-seek ;] n2o:track-all-seeks ;
+57 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
+58 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
 
 60 net2o: timeout ( ticks -- ) net2o:timeout ;
 61 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
