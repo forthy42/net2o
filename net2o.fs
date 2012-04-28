@@ -63,7 +63,7 @@ require hash-table.fs
 : p@+ ( addr -- u addr' )  >r 0
     BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
 	    r> 1+ >r  REPEAT  r> 1+ ;
-: psize ( u -- n ) \ to speed up: binary tree comparison
+: p-size ( u -- n ) \ to speed up: binary tree comparison
     \ flag IF  1  ELSE  2  THEN  equals  flag 2 +
     dup    $FFFFFFFFFFFFFF u<= IF
 	dup       $FFFFFFF u<= IF
@@ -74,16 +74,10 @@ require hash-table.fs
 	    $00007FFFFFFFF u<= 6 +  EXIT  THEN
 	$00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
     $000007FFFFFFFFFFFFFFF u<= 10 + ;
-: p!+ ( u addr -- addr' )  over psize + dup >r >r
+: p!+ ( u addr -- addr' )  over p-size + dup >r >r
     dup $7F and r> 1- dup >r c!  7 rshift
     BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
     drop rdrop r> ;
-
-Create sizes $7F cell 1+ 0 [DO] dup , 7 lshift $7F or [LOOP] drop
-
-: p-size ( u -- n )
-    cell 1+ 0 DO  dup sizes I cells + @ u<= IF
-	    drop I 1+ unloop  EXIT  THEN  LOOP  drop #10 ;
 
 \ bit reversing
 
