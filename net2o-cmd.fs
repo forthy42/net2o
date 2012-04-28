@@ -492,7 +492,7 @@ also net2o-base
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
 	msg( ." Block transfer done!" F cr )
-	save-blocks  rewind-transfer  expect-reply
+	save-all-blocks  rewind-transfer  expect-reply
     THEN ;
 
 : received! ( -- )
