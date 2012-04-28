@@ -737,26 +737,26 @@ file-state-struct buffer: new-file-state
 : n2o:close-file ( id -- )
     ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
-: n2o:slurp-block ( maxlen id -- nextseek )
-    id>addr? >r r@ fs-seek @ tuck 0 r@ fs-fid @ reposition-file throw
-    data$@ rot umin r@ fs-fid @ read-file throw dup /data +
+: n2o:slurp-block ( id -- nextseek )
+    id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
+    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
     dup r> fs-seek ! ;
 
 8 cells cells buffer: nextseeks
 
-: n2o:slurp-blocks-once ( maxlen idbits -- sum ) 0 { idbits sum }
+: n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
 	1 I lshift idbits and IF
-	    dup I n2o:slurp-block  dup  nextseeks I cells + +!
+	    I n2o:slurp-block  dup  nextseeks I cells + +!
 	    sum + to sum
 	THEN
-    LOOP  drop sum ;
+    LOOP  sum ;
 
-: n2o:slurp-blocks ( maxlen idbits -- )
+: n2o:slurp-blocks ( idbits -- )
     nextseeks 8 cells cells erase
     BEGIN  data$@ nip  WHILE
-	2dup n2o:slurp-blocks-once  0= UNTIL  THEN
-    2drop ;
+	dup n2o:slurp-blocks-once  0= UNTIL  THEN
+    drop ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO

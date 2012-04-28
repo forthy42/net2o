@@ -330,9 +330,9 @@ net2o-base
 53 net2o: open-tracked-file ( addr u mode id -- )
           dup >r n2o:open-file
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
-54 net2o: slurp-tracked-block ( maxlen id -- )
+54 net2o: slurp-tracked-block ( id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-55 net2o: slurp-tracked-blocks ( maxlen idbits -- )
+55 net2o: slurp-tracked-blocks ( idbits -- )
           dup >r n2o:slurp-blocks
           r> [: dup IF  swap lit, lit, track-seek  ELSE  2drop  THEN ;]
           n2o:track-seeks ;
@@ -382,7 +382,7 @@ Variable file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o lit, file-reg# @ lit, open-tracked-file
-    -1 slit, file-reg# @ lit, slurp-tracked-block
+    file-reg# @ lit, slurp-tracked-block
     file-reg# @ save-to
     1 file-reg# +! ;
 
@@ -447,7 +447,7 @@ also net2o-base
     over bits>bytes dmap receive-flag data-firstack# @ +DO
 	dup I + l@ $FFFFFFFF = IF
 	    I dmap receive-flag data-firstack# !
-	    firstack( ." data-fistack" receive-flag negate 1 .r ." # = " I F . F cr )
+	    firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	ELSE
 	    LEAVE
 	THEN
@@ -456,7 +456,7 @@ also net2o-base
 	dup I + l@ $FFFFFFFF <> IF
     	    dup I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
-	    resend( ." resend: " dup hex. over hex. cr )
+	    resend( ." resend: " dup hex. over hex. F cr )
 	    lit, lit, resend-mask
 	THEN
     4 +LOOP
