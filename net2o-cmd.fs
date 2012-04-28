@@ -289,6 +289,9 @@ net2o-base
 24 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
+27 net2o: set-blocksize ( n -- )  j^ blocksize ! ;
+
+: blocksize! ( n -- )  dup lit, set-blocksize j^ blocksize ! ;
 
 \ flow control functions
 
@@ -327,9 +330,9 @@ net2o-base
 53 net2o: open-tracked-file ( addr u mode id -- )
           dup >r n2o:open-file
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
-54 net2o: slurp-tracked-block ( seek maxlen id -- )
+54 net2o: slurp-tracked-block ( maxlen id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-55 net2o: slurp-tracked-blocks ( seek maxlen idbits -- )
+55 net2o: slurp-tracked-blocks ( maxlen idbits -- )
           dup >r n2o:slurp-blocks
           r> [: dup IF  swap lit, lit, track-seek  ELSE  2drop  THEN ;]
           n2o:track-seeks ;
@@ -379,7 +382,7 @@ Variable file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o lit, file-reg# @ lit, open-tracked-file
-    0 lit, -1 slit, file-reg# @ lit, slurp-tracked-block
+    -1 slit, file-reg# @ lit, slurp-tracked-block
     file-reg# @ save-to
     1 file-reg# +! ;
 

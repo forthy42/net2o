@@ -353,6 +353,7 @@ field: recv-flag
 field: recv-high
 field: cmd-buf#
 field: file-state
+field: blocksize
 field: crypto-key
 
 field: data-map
@@ -514,7 +515,8 @@ Variable init-context#
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
-    never          j^ next-tick ! ;
+    never          j^ next-tick !
+    -1 j^ blocksize ! ;
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r
@@ -615,8 +617,7 @@ Variable lastdeltat
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     0 max slack# 2* 2* min slack# / lshift
-\    j^ last-ns/burst @
-\    ?dup-IF  dup 2* + 2/ 2/ max  THEN \ not too quickly go faster!
+    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
     j^ ns/burst !@ >r
@@ -736,25 +737,26 @@ file-state-struct buffer: new-file-state
 : n2o:close-file ( id -- )
     ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
-: n2o:slurp-block ( seek maxlen id -- nextseek )
-    id>file >r over 0 r@ reposition-file throw
-    data$@ rot umin r> read-file throw dup /data + ;
+: n2o:slurp-block ( maxlen id -- nextseek )
+    id>addr? >r r@ fs-seek @ tuck 0 r@ fs-fid @ reposition-file throw
+    data$@ rot umin r@ fs-fid @ read-file throw dup /data +
+    dup r> fs-seek ! ;
 
 8 cells cells buffer: nextseeks
 
-: n2o:slurp-blocks-once ( seek maxlen idbits -- sum ) 0 { idbits sum }
+: n2o:slurp-blocks-once ( maxlen idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
 	1 I lshift idbits and IF
-	    2dup I n2o:slurp-block  dup  nextseeks I cells + +!
+	    dup I n2o:slurp-block  dup  nextseeks I cells + +!
 	    sum + to sum
 	THEN
-    LOOP  2drop sum ;
+    LOOP  drop sum ;
 
-: n2o:slurp-blocks ( seek maxlen idbits -- )
+: n2o:slurp-blocks ( maxlen idbits -- )
     nextseeks 8 cells cells erase
     BEGIN  data$@ nip  WHILE
-	dup 2over rot n2o:slurp-blocks-once  0= UNTIL  THEN
-    drop 2drop ;
+	2dup n2o:slurp-blocks-once  0= UNTIL  THEN
+    2drop ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
