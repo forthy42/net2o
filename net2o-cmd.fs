@@ -49,7 +49,7 @@
 : net2o-crash  base @ >r hex
     buf-state 2@ swap 8 u.r 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
     r> base !  buf-state 2@ dump
-    true abort" Unimplemented net2o function" ;
+    !!function!! throw ;
 
 Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
@@ -165,7 +165,7 @@ net2o-code0 previous
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
-    LOOP  true abort" too many commands" ;
+    LOOP  !!commands!! throw ;
 
 : cmddest ( -- dest ) cmd0source @ IF  code-vdest  ELSE  0  THEN ;
 
@@ -240,7 +240,7 @@ Variable neststart#
 also net2o-base definitions
 
 : $, ( addr u -- )  string  >r r@ cmd,
-    r@ endcmdbuf cmdbuf$ + - u>= abort" didn't fit"
+    r@ endcmdbuf cmdbuf$ + - u>= !!stringfit!! and throw
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;

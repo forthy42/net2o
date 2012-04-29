@@ -109,6 +109,19 @@ false [IF]
 
 : x~~ ]] base @ >r hex ~~ r> base ! [[ ; immediate
 
+\ defined exceptions
+
+s" gap in file handles"          exception Constant !!gap!!
+s" invalid file id"              exception Constant !!fileid!!
+s" could not send"               exception Constant !!send!!
+s" wrong packet size"            exception Constant !!size!!
+s" no power of two"              exception Constant !!pow2!!
+s" unimplemented net2o function" exception Constant !!function!!
+s" too many commands"            exception Constant !!commands!!
+s" string does not fit"          exception Constant !!stringfit!!
+s" ivs must be 64 bytes"         exception Constant !!ivs!!
+s" key+pubkey must be 32 bytes"  exception Constant !!keysize!!
+
 \ this is already defined in assertions
 
 debug: timing(
@@ -668,7 +681,7 @@ $20 Value mask-bits#
 
 \ file handling
 
-: nogap ( -- )  abort" Gap in file handles" ;
+: ?nogap ( flag -- )  !!gap!! and throw ;
 
 \ file states
 
@@ -687,9 +700,9 @@ file-state-struct buffer: new-file-state
 : id>addr ( id -- addr remainder )  ?state
     >r j^ file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
-    id>addr file-state-struct < abort" invalid file id" ;
+    id>addr file-state-struct < !!fileid!! and throw ;
 : state-addr ( id -- addr )  ?state
-    id>addr dup 0< nogap
+    id>addr dup 0< ?nogap
     0= IF  drop new-file-state file-state-struct j^ file-state $+!
 	j^ file-state $@ + file-state-struct -  THEN ;
 
@@ -825,8 +838,7 @@ Variable code-packet
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
 	ELSE
-	    errno . cr
-	    true abort" could not send"
+	    errno 512 + negate throw
 	THEN
     THEN ;
 
@@ -1084,14 +1096,14 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     WHILE  send-another-chunk sendflag !  REPEAT
     read-a-packet4/6
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> abort" Wrong packet size" ;
+    over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
     BEGIN  read-a-packet4/6  2dup d0= WHILE
 	   BEGIN  poll-sock  UNTIL  2drop  REPEAT
     sockaddr-tmp alen @ check-address dup -1 <> IF
 	inbuf ins-source
-	over packet-size over <> abort" Wrong packet size"
+	over packet-size over <> !!size!! and throw
     ELSE  hex.  ." Unknown source"  0 0  THEN ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
@@ -1102,7 +1114,7 @@ Defer queue-command ( addr u -- )
 Defer do-ack ( -- )
 ' noop IS do-ack
 
-: pow2? ( n -- n )  dup dup 1- and 0<> abort" no power of 2" ;
+: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! and throw ;
 
 Variable validated
 

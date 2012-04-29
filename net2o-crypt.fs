@@ -218,7 +218,7 @@ Variable do-keypad
 : ivs-string ( addr u n addr -- )
     >r r@ $!len
     >wurst-key-ivs
-    state# <> abort" 64 byte ivs!" >wurst-source'
+    state# <> !!ivs!! and throw >wurst-source'
     r> gen-ivs ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
@@ -240,7 +240,7 @@ Variable do-keypad
     ( ." set key to:" j^ crypto-key $@ dump ) ;
 
 : ?keysize ( u -- )
-    keysize <> abort" key+pubkey: expected 32 bytes" ;
+    keysize <> !!keysize!! and throw ;
 
 : net2o:receive-key ( addr u -- ) ?keysize
     keypad skc rot crypto_scalarmult_curve25519 ;
