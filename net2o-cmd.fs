@@ -337,7 +337,7 @@ net2o-base
           r> [: swap lit, lit, track-seek ;] n2o:track-seeks ;
 56 net2o: slurp-all-tracked-blocks ( -- )
           n2o:slurp-all-blocks
-          [: swap lit, lit, track-seek ;] n2o:track-all-seeks ;
+          [: lit, lit, track-seek ;] n2o:track-all-seeks ;
 57 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
 58 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
 
@@ -384,13 +384,15 @@ Variable file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o lit, file-reg# @ lit, open-tracked-file
-    file-reg# @ lit, slurp-tracked-block
+\    file-reg# @ lit, slurp-tracked-block
     file-reg# @ save-to
     1 file-reg# +! ;
 
-: n2o:done ( -- )  file-reg# off ;
+: n2o:done ( -- )
+    slurp-all-tracked-blocks
+    file-reg# off ;
 
-n2o:done
+file-reg# off
 
 previous
 
@@ -471,13 +473,14 @@ also net2o-base
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
 : restart-transfer ( -- )
-    0 j^ file-state $@ bounds +DO
-	I fs-size @ I fs-seek @ u> IF
-	    msg( ." restart <" dup 0 .r ." >: " I fs-seek ? F cr )
-	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
-	    slurp-tracked-block
-	THEN  1+
-    file-state-struct +LOOP  drop
+    slurp-all-tracked-blocks
+\    0 j^ file-state $@ bounds +DO
+\	I fs-size @ I fs-seek @ u> IF
+\	    msg( ." restart <" dup 0 .r ." >: " I fs-seek ? F cr )
+\	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
+\	    slurp-tracked-block
+\	THEN  1+
+\    file-state-struct +LOOP  drop
     send-chunks ;
 
 : rewind-transfer ( -- )

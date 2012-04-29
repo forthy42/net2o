@@ -747,10 +747,15 @@ file-state-struct buffer: new-file-state
     data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
     dup r> fs-seek ! ;
 
+: n2o:slurp-block' ( id -- delta )
+    id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
+    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
+    dup r> fs-seek !@ - ;
+
 : n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
 	1 I lshift idbits and IF
-	    I n2o:slurp-block  sum + to sum
+	    I n2o:slurp-block'  sum + to sum
 	THEN
     LOOP  sum ;
 
@@ -761,7 +766,7 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-all-blocks-once ( -- sum ) 0 { sum }
     0 j^ file-state $@ bounds DO
-	dup n2o:slurp-block  dup sum + to sum  1+
+	dup n2o:slurp-block'  sum + to sum  1+
     file-state-struct +LOOP  drop sum ;
 
 : n2o:slurp-all-blocks ( -- )
