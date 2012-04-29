@@ -290,8 +290,10 @@ net2o-base
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
 27 net2o: set-blocksize ( n -- )  j^ blocksize ! ;
+28 net2o: set-blockalign ( n -- ) pow2?  j^ blockalign ! ;
 
 : blocksize! ( n -- )  dup lit, set-blocksize j^ blocksize ! ;
+: blockalign! ( n -- )  dup lit, set-blockalign pow2? j^ blockalign ! ;
 
 \ flow control functions
 

@@ -15,9 +15,10 @@ insert-ip n2o:connect
 net2o-code
 data-ivs
 s" Download test" $, type cr
-$400 blocksize!
+$400 blocksize! $400 blockalign!
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy
-s" data/2011-05-13_11-26-57.jpg" s" .cache/photo.jpg" n2o:copy
+s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
+s" data/2011-05-20_17-01-12.jpg" s" .cache/photo001.jpg" n2o:copy
 n2o:done
 send-chunks
 end-code

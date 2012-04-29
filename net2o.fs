@@ -354,6 +354,7 @@ field: recv-high
 field: cmd-buf#
 field: file-state
 field: blocksize
+field: blockalign
 field: crypto-key
 
 field: data-map
@@ -516,7 +517,8 @@ Variable init-context#
     ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
     never          j^ next-tick !
-    -1 j^ blocksize ! ;
+    -1 j^ blocksize !
+    1 j^ blockalign ! ;
 
 : data$@ ( -- addr u )
     j^ data-map $@ drop >r
@@ -705,6 +707,9 @@ file-state-struct buffer: new-file-state
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
 
+: >blockalign ( n -- block )
+    j^ blockalign @ dup >r 1- + r> negate and ;
+
 : save-blocks ( -- ) ?state
     j^ data-rmap $@ drop >r r@ dest-raddr @ r@ dest-tail @ +
     j^ file-state $@ bounds ?DO
@@ -714,7 +719,7 @@ file-state-struct buffer: new-file-state
 	    msg( ." flush file <" I j^ file-state $@ drop - file-state-struct / 0 .r ." >: " dup . cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
-	    THEN  +
+	    THEN  >blockalign +
 	THEN
     file-state-struct +LOOP
     r@ dest-raddr @ - r> dest-tail ! ;
@@ -744,12 +749,14 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-block ( id -- nextseek )
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
-    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
+    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw
+    dup >blockalign /data +
     dup r> fs-seek ! ;
 
 : n2o:slurp-block' ( id -- delta )
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
-    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw dup /data +
+    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw
+    dup >blockalign /data +
     dup r> fs-seek !@ - ;
 
 : n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
@@ -1094,6 +1101,8 @@ Defer queue-command ( addr u -- )
 ' dump IS queue-command
 Defer do-ack ( -- )
 ' noop IS do-ack
+
+: pow2? ( n -- n )  dup dup 1- and 0<> abort" no power of 2" ;
 
 Variable validated
 
