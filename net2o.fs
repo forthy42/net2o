@@ -1203,10 +1203,11 @@ Create pollfds   here pollfd %size 2 * dup allot erase
 
 : next-client-packet ( -- addr u )
     try-read-packet  2dup d0= ?EXIT
-    sockaddr-tmp alen @ check-address dup -1 <> IF
-	inbuf ins-source
-	over packet-size over <> !!size!! and throw
-    ELSE  hex.  ." Unknown source"  0 0  THEN ;
+    sockaddr-tmp alen @ insert-address \ check-address dup -1 <> IF
+    inbuf ins-source
+    over packet-size over <> !!size!! and throw
+    \ ELSE  hex.  ." Unknown source"  0 0  THEN
+;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     ." timeout? " . send-anything? . chunks+ ? next-chunk-tick . cr ;
