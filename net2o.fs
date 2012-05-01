@@ -160,14 +160,25 @@ debug: msg(
 0 Value net2o-sock
 0 Value net2o-sock6
 
+true Value sock46 immediate
+
 : new-server ( -- )
-    net2o-port create-udp-server s" w+" c-string fdopen to net2o-sock
-    net2o-port create-udp-server6 s" w+" c-string fdopen to net2o-sock6
-;
+    sock46 [IF]
+	net2o-port create-udp-server46 s" w+" c-string fdopen
+	dup to net2o-sock to net2o-sock6
+    [ELSE]
+	net2o-port create-udp-server s" w+" c-string fdopen to net2o-sock
+	net2o-port create-udp-server6 s" w+" c-string fdopen to net2o-sock6
+    [THEN] ;
 
 : new-client ( -- )
+    sock46 [IF]
+	new-udp-socket46 s" w+" c-string fdopen
+	dup to net2o-sock to net2o-sock6
+    [ELSE]
     new-udp-socket s" w+" c-string fdopen to net2o-sock
-    new-udp-socket6 s" w+" c-string fdopen to net2o-sock6 ;
+	new-udp-socket6 s" w+" c-string fdopen to net2o-sock6
+    [THEN] ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -212,11 +223,15 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 \	    ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
-    sockaddr-tmp w@ AF_INET6 = IF
-	net2o-sock6  1 packet6s +!
-    ELSE
+    sock46 [IF]
 	net2o-sock  1 packet4s +!
-    THEN
+    [ELSE]
+	sockaddr-tmp w@ AF_INET6 = IF
+	    net2o-sock6  1 packet6s +!
+	ELSE
+	    net2o-sock  1 packet4s +!
+	THEN
+    [THEN]
     fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
@@ -1074,8 +1089,9 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : poll-sock ( -- flag )
     eval-queue  clear-events
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
-    IF    0 max ptimeout cell+ !  pollfds 2
+    IF    0 max ptimeout cell+ !  pollfds  2
     ELSE  drop poll-timeout# ptimeout cell+ !  pollfds 2  THEN
+    postpone sock46 +
 [ environment os-type s" linux" string-prefix? ] [IF]
     ptimeout 0 ppoll 0>
 [ELSE]
@@ -1086,8 +1102,10 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF
 	read-a-packet  0 pollfds revents w! EXIT  THEN
-    pollfds pollfd %size + revents w@ POLLIN = IF
-	read-a-packet6  0 pollfds pollfd %size + revents w! EXIT  THEN
+    sock46 [IF] [ELSE]
+	pollfds pollfd %size + revents w@ POLLIN = IF
+	    read-a-packet6  0 pollfds pollfd %size + revents w! EXIT  THEN
+    [THEN]
     0 0 ;
 
 : next-packet ( -- addr u )
