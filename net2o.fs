@@ -185,15 +185,16 @@ $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 $400000 Value max-data#
 $10000 Value max-code#
+8 Value buffers#
 : maxdata ( -- n ) min-size max-size^2 lshift ;
 maxdata overhead + Constant maxpacket
+maxpacket $F + -$10 and Constant maxpacket-aligned
 : chunk-p2 ( -- n )  max-size^2 6 + ;
 
-here 1+ -8 and 6 + here - allot here maxpacket allot Constant inbuf
-here 1+ -8 and 6 + here - allot here maxpacket allot Constant outbuf
-
-2 8 2Constant address%
-2 $10 2Constant path%
+here 1+ -8 and 6 + here - allot
+here maxpacket-aligned buffers# * allot
+here maxpacket-aligned buffers# * allot
+Constant outbuf Constant inbuf
 
 begin-structure net2o-header
     2 +field flags
@@ -211,21 +212,34 @@ Variable packet6s
 poll-timeout# 0 ptimeout 2!
 
 [IFDEF] recvmmsg
-    iovec   %size     buffer: iovecbuf
-    mmsghdr %size     buffer: hdr
-    inbuf             iovecbuf iov_base !
-    maxpacket         iovecbuf iov_len !
-    iovecbuf          hdr msg_iov !
-    1                 hdr msg_iovlen !
-    sockaddr-tmp      hdr msg_name !
-    sockaddr_in %size hdr msg_namelen !
+    iovec   %size     buffers# * buffer: iovecbuf
+    mmsghdr %size     buffers# * buffer: hdr
+    sockaddr_in %size buffers# * buffer: sockaddrs
+
+    : setup-iov ( -- )
+	inbuf  iovecbuf iovec %size buffers# * bounds ?DO
+	    dup I iov_base !  maxpacket I iov_len !  maxpacket-aligned +
+	iovec %size +LOOP  drop ;
+    setup-iov
+
+    : setup-msg ( -- )
+	iovecbuf sockaddrs  hdr mmsghdr %size buffers# * bounds ?DO
+	    over              I msg_iov !
+	    1                 I msg_iovlen !
+	    dup               I msg_name !
+	    sockaddr_in %size I msg_namelen !
+	    swap iovec %size + swap sockaddr_in %size +
+	mmsghdr %size +LOOP  2drop ;
+    setup-msg
+    
+    : timeout-init ( -- ) 	poll-timeout# 0 ptimeout 2! ;
     
     : read-socket-quick ( socket -- addr u )
-	poll-timeout# 0 ptimeout 2!
 	fileno hdr 1 MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
 	dup 0< IF  errno 512 + negate throw  THEN
 	0= IF  0 0
-	ELSE  inbuf hdr msg_len @ hdr msg_namelen @ alen !  THEN
+	ELSE  inbuf hdr msg_len @
+	    sockaddrs sockaddr-tmp hdr msg_namelen @ dup alen ! move  THEN
     ;
 [ELSE]
     : read-socket-quick ( socket -- addr u )
@@ -1105,12 +1119,14 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
-: poll-sock ( -- flag )
-    eval-queue  clear-events
+: timeout! ( -- )
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
-    IF    0 max ptimeout cell+ !  pollfds  2
-    ELSE  drop poll-timeout# ptimeout cell+ !  pollfds 2  THEN
-    postpone sock46 +
+    IF    0 max 0 ptimeout 2!
+    ELSE  drop poll-timeout# 0 ptimeout 2!  THEN ;
+
+: poll-sock ( -- flag )
+    eval-queue  clear-events  timeout!
+    pollfds 2  postpone sock46 +
 [ environment os-type s" linux" string-prefix? ] [IF]
     ptimeout 0 ppoll 0>
 [ELSE]
@@ -1127,17 +1143,24 @@ Create pollfds   here pollfd %size 4 * dup allot erase
     [THEN]
     0 0 ;
 
+[IFDEF] recvmmsg
+    : try-read-packet ( -- addr u / 0 0 )
+	eval-queue  timeout!  read-a-packet ;
+[ELSE]
+    : try-read-packet ( -- addr u / 0 0 )
+	poll-sock drop read-a-packet4/6 ;
+[THEN]
+    
+
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  poll-sock 0=  ELSE  true  THEN
-    WHILE  send-another-chunk sendflag !  REPEAT
-    read-a-packet4/6
+    BEGIN  sendflag @ 0= IF  poll-sock drop read-a-packet4/6 dup 0=  ELSE  0. true  THEN
+    WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
-    BEGIN  read-a-packet4/6  2dup d0= WHILE
-	   BEGIN  poll-sock  UNTIL  2drop  REPEAT
+    try-read-packet  2dup d0= ?EXIT
     sockaddr-tmp alen @ check-address dup -1 <> IF
 	inbuf ins-source
 	over packet-size over <> !!size!! and throw
@@ -1192,8 +1215,8 @@ $04 Constant login-val
 	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
     ELSE  ." route a packet" cr route-packet  THEN ;
 
-: client-event ( -- )
-    next-client-packet  2drop in-check
+: client-event ( addr u -- )
+    2drop in-check
     IF  ['] handle-packet catch
 	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
     ELSE  ( drop packet )  THEN ;
@@ -1211,9 +1234,9 @@ Defer do-timeout  ' noop IS do-timeout
     BEGIN  server-event  AGAIN ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
-    BEGIN  poll-sock
-	IF  client-event reset-timeout
-	ELSE  do-timeout -1 timeouts +!  THEN
+    BEGIN  next-client-packet dup
+	IF    client-event reset-timeout
+	ELSE  2drop do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 \ client/server initializer
