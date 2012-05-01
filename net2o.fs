@@ -206,10 +206,33 @@ Variable packet4s
 Variable packet6r
 Variable packet6s
 
-: read-socket-quick ( socket -- addr u )
-    fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
-    dup 0< IF  errno 512 + negate throw  THEN
-    inbuf swap ;
+2Variable ptimeout
+#100000000 Value poll-timeout# \ 100ms
+poll-timeout# 0 ptimeout 2!
+
+[IFDEF] recvmmsg
+    iovec   %size     buffer: iovecbuf
+    mmsghdr %size     buffer: hdr
+    inbuf             iovecbuf iov_base !
+    maxpacket         iovecbuf iov_len !
+    iovecbuf          hdr msg_iov !
+    1                 hdr msg_iovlen !
+    sockaddr-tmp      hdr msg_name !
+    sockaddr_in %size hdr msg_namelen !
+    
+    : read-socket-quick ( socket -- addr u )
+	poll-timeout# 0 ptimeout 2!
+	fileno hdr 1 MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
+	dup 0< IF  errno 512 + negate throw  THEN
+	0= IF  0 0
+	ELSE  inbuf hdr msg_len @ hdr msg_namelen @ alen !  THEN
+    ;
+[ELSE]
+    : read-socket-quick ( socket -- addr u )
+	fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
+	dup 0< IF  errno 512 + negate throw  THEN
+	inbuf swap ;
+[THEN]
 
 : read-a-packet ( -- addr u )
     net2o-sock read-socket-quick  1 packet4r +! ;
@@ -1068,8 +1091,6 @@ Create queue-adder  queue-struct allot
 
 \ poll loop
 
-2Variable ptimeout #1000000 ptimeout cell+ ! ( 1 ms )
-
 Create pollfds   here pollfd %size 4 * dup allot erase
 
 : fds!+ ( fileno flag addr -- addr' )
@@ -1083,8 +1104,6 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 
 : clear-events ( -- )  pollfds
     4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
-
-#100000000 Value poll-timeout# \ 100ms
 
 : poll-sock ( -- flag )
     eval-queue  clear-events
