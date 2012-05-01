@@ -176,7 +176,7 @@ true Value sock46 immediate
 	new-udp-socket46 s" w+" c-string fdopen
 	dup to net2o-sock to net2o-sock6
     [ELSE]
-    new-udp-socket s" w+" c-string fdopen to net2o-sock
+	new-udp-socket s" w+" c-string fdopen to net2o-sock
 	new-udp-socket6 s" w+" c-string fdopen to net2o-sock6
     [THEN] ;
 
@@ -306,7 +306,20 @@ Variable routes
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
 : info>string ( addr -- addr u )
-    dup ai_addr @ swap ai_addrlen l@ ;
+    dup ai_addr @ swap ai_addrlen l@
+    sock46 [IF]
+	over w@ AF_INET = IF
+	    drop >r
+	    AF_INET6 sockaddr-tmp family w!
+	    r@ port w@ sockaddr-tmp port w!
+	    0     sockaddr-tmp sin6_flowinfo l!
+	    r> sin_addr l@ sockaddr-tmp sin6_addr 12 + l!
+	    $FFFF0000 sockaddr-tmp sin6_addr 8 + l!
+	    0 sockaddr-tmp sin6_addr !
+	    0 sockaddr-tmp sin6_scope_id l!
+	    sockaddr-tmp sockaddr_in6 %size
+	THEN
+    [THEN] ;
 
 : check-address ( addr u -- net2o-addr / -1 ) routes #key ;
 : insert-address ( addr u -- net2o-addr )
@@ -1133,19 +1146,17 @@ Create queue-adder  queue-struct allot
 
 \ poll loop
 
-Create pollfds   here pollfd %size 4 * dup allot erase
+Create pollfds   here pollfd %size 2 * dup allot erase
 
 : fds!+ ( fileno flag addr -- addr' )
      >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
     net2o-sock  fileno POLLIN  r> fds!+ >r
-    net2o-sock6 fileno POLLIN  r> fds!+ >r
-    net2o-sock  fileno POLLOUT r> fds!+ >r
-    net2o-sock6 fileno POLLOUT r> fds!+ drop ;
+    net2o-sock6 fileno POLLIN  r> fds!+ drop ;
 
 : clear-events ( -- )  pollfds
-    4 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
+    2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
     next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
@@ -1163,9 +1174,12 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 ;
 
 : read-a-packet4/6 ( -- addr u )
-    pollfds revents w@ POLLIN = IF
-	read-a-packet  0 pollfds revents w! EXIT  THEN
-    sock46 [IF] [ELSE]
+    sock46 [IF]
+	pollfds revents w@ POLLIN = IF
+	    read-a-packet6  0 pollfds revents w! EXIT  THEN
+    [ELSE]
+	pollfds revents w@ POLLIN = IF
+	    read-a-packet   0 pollfds revents w! EXIT  THEN
 	pollfds pollfd %size + revents w@ POLLIN = IF
 	    read-a-packet6  0 pollfds pollfd %size + revents w! EXIT  THEN
     [THEN]
