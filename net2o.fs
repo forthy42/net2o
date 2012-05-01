@@ -185,7 +185,7 @@ $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 $400000 Value max-data#
 $10000 Value max-code#
-[IFDEF] recvmmsg 8 [ELSE] 1 [THEN] Value buffers#
+[IFDEF] recvmmsg- 8 [ELSE] 1 [THEN] Value buffers#
 : maxdata ( -- n ) min-size max-size^2 lshift ;
 maxdata overhead + Constant maxpacket
 maxpacket $F + -$10 and Constant maxpacket-aligned
@@ -211,7 +211,7 @@ Variable packet6s
 #100000000 Value poll-timeout# \ 100ms
 poll-timeout# 0 ptimeout 2!
 
-[IFDEF] recvmmsg
+[IFDEF] recvmmsg-
     iovec   %size     buffers# * buffer: iovecbuf
     mmsghdr %size     buffers# * buffer: hdr
     sockaddr_in %size buffers# * buffer: sockaddrs
@@ -257,7 +257,7 @@ poll-timeout# 0 ptimeout 2!
 	1 read-ptr +!
 	read-remain @ read-ptr @ u>  IF  drop sock@  EXIT  THEN
 	dup sock-timeout!
-	hdr buffers# MSG_WAITFORONE ( MSG_WAITALL or ) ptimeout recvmmsg
+	hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
 	dup 0< IF
 	    errno 11 <> IF  errno 512 + negate throw  THEN
 	    drop 0 0  EXIT  THEN
@@ -1185,7 +1185,7 @@ Create pollfds   here pollfd %size 2 * dup allot erase
     [THEN]
     0 0 ;
 
-[IFDEF] recvmmsg
+[IFDEF] recvmmsg-
     : try-read-packet ( -- addr u / 0 0 )
 	eval-queue  timeout!  read-a-packet ;
 [ELSE]
