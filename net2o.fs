@@ -233,6 +233,7 @@ poll-timeout# 0 ptimeout 2!
     setup-msg
     
     : timeout-init ( -- ) 	poll-timeout# 0 ptimeout 2! ;
+    2Variable socktimeout
 
     Variable read-remain
     Variable read-ptr
@@ -247,12 +248,19 @@ poll-timeout# 0 ptimeout 2!
 	sockaddrs sockaddr_in %size rd[]
 	sockaddr-tmp hdr mmsghdr %size rd[]
 	msg_namelen @ dup alen ! move ;
+
+    : sock-timeout! ( fid -- )
+	ptimeout 2@ >r 1000 / r> socktimeout 2!
+	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt drop ;
     
-    : read-socket-quick ( socket -- addr u )
+    : read-socket-quick ( socket -- addr u )  fileno
 	1 read-ptr +!
 	read-remain @ read-ptr @ u>  IF  drop sock@  EXIT  THEN
-	fileno hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
-	dup 0< IF  errno 512 + negate throw  THEN
+	dup sock-timeout!
+	hdr buffers# MSG_WAITFORONE ( MSG_WAITALL or ) ptimeout recvmmsg
+	dup 0< IF
+	    errno 11 <> IF  errno 512 + negate throw  THEN
+	    drop 0 0  EXIT  THEN
 	dup read-remain !  0 read-ptr !
 	0= IF  0 0  ELSE  sock@  THEN ;
 [ELSE]
@@ -272,20 +280,24 @@ poll-timeout# 0 ptimeout 2!
 
 $00000000 Value droprate#
 
-: send-a-packet ( addr u -- n )
-    droprate# IF  rng32 droprate# u< IF
-\	    ." dropping packet" cr
-	    2drop 0  EXIT  THEN  THEN
-    sock46 [IF]
-	net2o-sock  1 packet4s +!
-    [ELSE]
-	sockaddr-tmp w@ AF_INET6 = IF
-	    net2o-sock6  1 packet6s +!
-	ELSE
+[IFDEF] sendmmsg-
+[ELSE]
+    : send-a-packet ( addr u -- n )
+	droprate# IF  rng32 droprate# u< IF
+		\ ." dropping packet" cr
+		2drop 0  EXIT  THEN  THEN
+	sock46 [IF]
 	    net2o-sock  1 packet4s +!
-	THEN
-    [THEN]
-    fileno -rot 0 sockaddr-tmp alen @ sendto ;
+	[ELSE]
+	    sockaddr-tmp w@ AF_INET6 = IF
+		net2o-sock6  1 packet6s +!
+	    ELSE
+		net2o-sock  1 packet4s +!
+	    THEN
+	[THEN]
+	fileno -rot 0 sockaddr-tmp alen @ sendto ;
+    : send-flush ( -- ) ;
+[THEN]
 
 \ clients routing table
 
@@ -1170,7 +1182,7 @@ Create pollfds   here pollfd %size 4 * dup allot erase
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  poll-sock drop read-a-packet4/6 dup 0=  ELSE  0. true  THEN
+    BEGIN  sendflag @ 0= IF  try-read-packet dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! and throw ;
