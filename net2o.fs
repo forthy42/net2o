@@ -185,7 +185,7 @@ $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 $400000 Value max-data#
 $10000 Value max-code#
-8 Value buffers#
+[IFDEF] recvmmsg 8 [ELSE] 1 [THEN] Value buffers#
 : maxdata ( -- n ) min-size max-size^2 lshift ;
 maxdata overhead + Constant maxpacket
 maxpacket $F + -$10 and Constant maxpacket-aligned
@@ -194,7 +194,7 @@ maxpacket $F + -$10 and Constant maxpacket-aligned
 here 1+ -8 and 6 + here - allot
 here maxpacket-aligned buffers# * allot
 here maxpacket-aligned buffers# * allot
-Constant outbuf Constant inbuf
+Constant outbuf' Constant inbuf'
 
 begin-structure net2o-header
     2 +field flags
@@ -217,7 +217,7 @@ poll-timeout# 0 ptimeout 2!
     sockaddr_in %size buffers# * buffer: sockaddrs
 
     : setup-iov ( -- )
-	inbuf  iovecbuf iovec %size buffers# * bounds ?DO
+	inbuf'  iovecbuf iovec %size buffers# * bounds ?DO
 	    dup I iov_base !  maxpacket I iov_len !  maxpacket-aligned +
 	iovec %size +LOOP  drop ;
     setup-iov
@@ -236,23 +236,28 @@ poll-timeout# 0 ptimeout 2!
 
     Variable read-remain
     Variable read-ptr
+    Variable write-ptr
     : rd[] ( base size -- addr )  read-ptr @ * + ;
+    : wr[] ( base size -- addr )  write-ptr @ * + ;
+    : inbuf  ( -- addr ) inbuf'  maxpacket-aligned rd[] ;
+    : outbuf ( -- addr ) outbuf' maxpacket-aligned wr[] ;
 
     : sock@ ( -- addr u )
-	inbuf maxpacket-aligned rd[] inbuf maxpacket move
 	inbuf hdr mmsghdr %size rd[] msg_len @
 	sockaddrs sockaddr_in %size rd[]
 	sockaddr-tmp hdr mmsghdr %size rd[]
-	msg_namelen @ dup alen ! move
-	1 read-ptr +! ;
+	msg_namelen @ dup alen ! move ;
     
     : read-socket-quick ( socket -- addr u )
+	1 read-ptr +!
 	read-remain @ read-ptr @ u>  IF  drop sock@  EXIT  THEN
 	fileno hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
 	dup 0< IF  errno 512 + negate throw  THEN
 	dup read-remain !  0 read-ptr !
 	0= IF  0 0  ELSE  sock@  THEN ;
 [ELSE]
+    inbuf'  Constant inbuf
+    outbuf' Constant outbuf
     : read-socket-quick ( socket -- addr u )
 	fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
 	dup 0< IF  errno 512 + negate throw  THEN
@@ -1198,7 +1203,10 @@ $04 Constant login-val
 \    inbuf .header
     dest-addr @ 0= IF
 	0 to j^ \ address 0 has no job context!
-	true wurst-inbuf-decrypt 0= IF  ." invalid packet to 0" cr EXIT  THEN
+	true wurst-inbuf-decrypt 0= IF
+	    inbuf' dup packet-size dump
+	    inbuf dup packet-size dump
+	    ." invalid packet to 0" cr EXIT  THEN
 	validated off \ packets to address 0 are not really validated
 	inbuf packet-data queue-command
     ELSE
