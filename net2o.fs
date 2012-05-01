@@ -247,7 +247,7 @@ poll-timeout# 0 ptimeout 2!
 	1 read-ptr +! ;
     
     : read-socket-quick ( socket -- addr u )
-	read-remain @ read-ptr @ u>  IF  sock@  EXIT  THEN
+	read-remain @ read-ptr @ u>  IF  drop sock@  EXIT  THEN
 	fileno hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
 	dup 0< IF  errno 512 + negate throw  THEN
 	dup read-remain !  0 read-ptr !
