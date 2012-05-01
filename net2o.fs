@@ -233,14 +233,25 @@ poll-timeout# 0 ptimeout 2!
     setup-msg
     
     : timeout-init ( -- ) 	poll-timeout# 0 ptimeout 2! ;
+
+    Variable read-remain
+    Variable read-ptr
+    : rd[] ( base size -- addr )  read-ptr @ * + ;
+
+    : sock@ ( -- addr u )
+	inbuf maxpacket-aligned rd[] inbuf maxpacket move
+	inbuf hdr mmsghdr %size rd[] msg_len @
+	sockaddrs sockaddr_in %size rd[]
+	sockaddr-tmp hdr mmsghdr %size rd[]
+	msg_namelen @ dup alen ! move
+	1 read-ptr +! ;
     
     : read-socket-quick ( socket -- addr u )
-	fileno hdr 1 MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
+	read-remain @ read-ptr @ u>  IF  sock@  EXIT  THEN
+	fileno hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
 	dup 0< IF  errno 512 + negate throw  THEN
-	0= IF  0 0
-	ELSE  inbuf hdr msg_len @
-	    sockaddrs sockaddr-tmp hdr msg_namelen @ dup alen ! move  THEN
-    ;
+	dup read-remain !  0 read-ptr !
+	0= IF  0 0  ELSE  sock@  THEN ;
 [ELSE]
     : read-socket-quick ( socket -- addr u )
 	fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
