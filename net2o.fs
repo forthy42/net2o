@@ -227,24 +227,20 @@ outbuf' Constant outbuf
 
 $00000000 Value droprate#
 
-[IFDEF] sendmmsg-
-[ELSE]
-    : send-a-packet ( addr u -- n )
-	droprate# IF  rng32 droprate# u< IF
-		\ ." dropping packet" cr
-		2drop 0  EXIT  THEN  THEN
-	sock46 [IF]
+: send-a-packet ( addr u -- n )
+    droprate# IF  rng32 droprate# u< IF
+	    \ ." dropping packet" cr
+	    2drop 0  EXIT  THEN  THEN
+    sock46 [IF]
+	net2o-sock  1 packet4s +!
+    [ELSE]
+	sockaddr-tmp w@ AF_INET6 = IF
+	    net2o-sock6  1 packet6s +!
+	ELSE
 	    net2o-sock  1 packet4s +!
-	[ELSE]
-	    sockaddr-tmp w@ AF_INET6 = IF
-		net2o-sock6  1 packet6s +!
-	    ELSE
-		net2o-sock  1 packet4s +!
-	    THEN
-	[THEN]
-	fileno -rot 0 sockaddr-tmp alen @ sendto ;
-    : send-flush ( -- ) ;
-[THEN]
+	THEN
+    [THEN]
+    fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
 
