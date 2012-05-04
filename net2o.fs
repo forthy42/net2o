@@ -185,7 +185,7 @@ $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
 $400000 Value max-data#
 $10000 Value max-code#
-[IFDEF] recvmmsg- 8 [ELSE] 1 [THEN] Value buffers#
+1 Value buffers#
 : maxdata ( -- n ) min-size max-size^2 lshift ;
 maxdata overhead + Constant maxpacket
 maxpacket $F + -$10 and Constant maxpacket-aligned
@@ -211,67 +211,13 @@ Variable packet6s
 #100000000 Value poll-timeout# \ 100ms
 poll-timeout# 0 ptimeout 2!
 
-[IFDEF] recvmmsg-
-    iovec   %size     buffers# * buffer: iovecbuf
-    mmsghdr %size     buffers# * buffer: hdr
-    sockaddr_in %size buffers# * buffer: sockaddrs
-
-    : setup-iov ( -- )
-	inbuf'  iovecbuf iovec %size buffers# * bounds ?DO
-	    dup I iov_base !  maxpacket I iov_len !  maxpacket-aligned +
-	iovec %size +LOOP  drop ;
-    setup-iov
-
-    : setup-msg ( -- )
-	iovecbuf sockaddrs  hdr mmsghdr %size buffers# * bounds ?DO
-	    over              I msg_iov !
-	    1                 I msg_iovlen !
-	    dup               I msg_name !
-	    sockaddr_in %size I msg_namelen !
-	    swap iovec %size + swap sockaddr_in %size +
-	mmsghdr %size +LOOP  2drop ;
-    setup-msg
-    
-    : timeout-init ( -- ) 	poll-timeout# 0 ptimeout 2! ;
-    2Variable socktimeout
-
-    Variable read-remain
-    Variable read-ptr
-    Variable write-ptr
-    : rd[] ( base size -- addr )  read-ptr @ * + ;
-    : wr[] ( base size -- addr )  write-ptr @ * + ;
-    : inbuf  ( -- addr ) inbuf'  maxpacket-aligned rd[] ;
-    : outbuf ( -- addr ) outbuf' maxpacket-aligned wr[] ;
-
-    : sock@ ( -- addr u )
-	inbuf hdr mmsghdr %size rd[] msg_len @
-	sockaddrs sockaddr_in %size rd[]
-	sockaddr-tmp hdr mmsghdr %size rd[]
-	msg_namelen @ dup alen ! move ;
-
-    : sock-timeout! ( fid -- )
-	ptimeout 2@ >r 1000 / r> socktimeout 2!
-	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt drop ;
-    
-    : read-socket-quick ( socket -- addr u )  fileno
-	1 read-ptr +!
-	read-remain @ read-ptr @ u>  IF  drop sock@  EXIT  THEN
-	dup sock-timeout!
-	hdr buffers# MSG_WAITFORONE MSG_WAITALL or ptimeout recvmmsg
-	dup 0< IF
-	    errno 11 <> IF  errno 512 + negate throw  THEN
-	    drop 0 0  EXIT  THEN
-	dup read-remain !  0 read-ptr !
-	0= IF  0 0  ELSE  sock@  THEN ;
-[ELSE]
-    inbuf'  Constant inbuf
-    outbuf' Constant outbuf
-    : read-socket-quick ( socket -- addr u )
-	sockaddr_in6 %size alen !
-	fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
-	dup 0< IF  errno 512 + negate throw  THEN
-	inbuf swap ;
-[THEN]
+inbuf'  Constant inbuf
+outbuf' Constant outbuf
+: read-socket-quick ( socket -- addr u )
+    sockaddr_in6 %size alen !
+    fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
+    dup 0< IF  errno 512 + negate throw  THEN
+    inbuf swap ;
 
 : read-a-packet ( -- addr u )
     net2o-sock read-socket-quick  1 packet4r +! ;
@@ -1186,14 +1132,8 @@ Create pollfds   here pollfd %size 2 * dup allot erase
     [THEN]
     0 0 ;
 
-[IFDEF] recvmmsg-
-    : try-read-packet ( -- addr u / 0 0 )
-	eval-queue  timeout!  read-a-packet ;
-[ELSE]
-    : try-read-packet ( -- addr u / 0 0 )
-	poll-sock drop read-a-packet4/6 ;
-[THEN]
-    
+: try-read-packet ( -- addr u / 0 0 )
+    poll-sock drop read-a-packet4/6 ;
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
