@@ -573,3 +573,13 @@ also net2o-base
 ' net2o:do-timeout IS do-timeout
 
 previous
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("net2o:") definition-starter (font-lock-keyword-face . 1)
+       "[ \t\n]" t name (font-lock-function-name-face . 3))
+    )
+End:
+[THEN]

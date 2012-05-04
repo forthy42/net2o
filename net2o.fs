@@ -267,7 +267,7 @@ poll-timeout# 0 ptimeout 2!
     inbuf'  Constant inbuf
     outbuf' Constant outbuf
     : read-socket-quick ( socket -- addr u )
-        sockaddr_in6 %size alen !
+	sockaddr_in6 %size alen !
 	fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
 	dup 0< IF  errno 512 + negate throw  THEN
 	inbuf swap ;
