@@ -127,13 +127,13 @@ rng$ mykey swap move
 		over r@ rounds  r@ >reads state# * safe/string
 	REPEAT  rdrop ;
     
-    : wurst-outbuf-encrypt ( flag -- )
+    : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
 	outbuf body-size mem-rounds# >r
 	outbuf packet-data r@ encrypt-buffer
-	rdrop drop wurst-crc rot 2! ;
+	rdrop drop wurst-crc rot 2! +enc ;
 
-    : wurst-inbuf-decrypt ( flag1 -- flag2 )
+    : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
 	inbuf body-size mem-rounds# >r
@@ -142,20 +142,20 @@ rng$ mykey swap move
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
-	rdrop drop 2@ wurst-crc d= ;
+	rdrop drop 2@ wurst-crc d= +enc ;
 
-    : wurst-encrypt$ ( addr u -- )
+    : wurst-encrypt$ ( addr u -- ) +calc
 	wurst-mykey-setup 2 cells - dup mem-rounds# >r
 	r@ encrypt-buffer
-	rdrop drop wurst-crc rot 2! ;
+	rdrop drop wurst-crc rot 2! +enc ;
 
-    : wurst-decrypt$ ( addr u -- addr' u' flag )
+    : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc
 	wurst-mykey-init 2 cells - dup mem-rounds# >r
 	2dup  over roundse# rounds
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
-	rdrop drop 2@ wurst-crc d= ;
+	rdrop drop 2@ wurst-crc d= +enc ;
 [THEN]
 
 \ public key encryption

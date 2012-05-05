@@ -160,28 +160,31 @@ Variable last-tick
 : delta-t ( -- n )
     ticks dup last-tick !@ - ;
 
-Variable calc-time
-Variable calc1-time
-Variable send-time
-Variable rec-time
-Variable wait-time
-
 : timing ;
 [IFDEF] timing
-    : +calc  delta-t calc-time +! ;
-    : +calc1 delta-t calc1-time +! ;
-    : +send  delta-t send-time +! ;
-    : +rec   delta-t rec-time +! ;
-    : +wait  delta-t wait-time +! ;
+    Variable calc-time
+    Variable calc1-time
+    Variable send-time
+    Variable rec-time
+    Variable enc-time
+    Variable wait-time
     
     : init-timer ( -- )
 	ticks last-tick ! calc-time off send-time off rec-time off wait-time off
-	calc1-time off ;
+	calc1-time off enc-time off ;
+    
+    : +calc  delta-t calc-time +! ;
+    : +calc1 delta-t calc1-time +! ;
+    : +send  delta-t send-time +! ;
+    : +enc   delta-t enc-time +! ;
+    : +rec   delta-t rec-time +! ;
+    : +wait  delta-t wait-time +! ;
     
     : .times ( -- )
 	." wait: " wait-time @ s>f 1e-9 f* f. cr
 	." send: " send-time @ s>f 1e-9 f* f. cr
 	." rec : " rec-time  @ s>f 1e-9 f* f. cr
+	." enc : " enc-time  @ s>f 1e-9 f* f. cr
 	." calc: " calc-time @ s>f 1e-9 f* f. cr
 	." calc1: " calc1-time @ s>f 1e-9 f* f. cr ;
 [ELSE]
@@ -190,6 +193,7 @@ Variable wait-time
     ' noop alias +send immediate
     ' noop alias +rec immediate
     ' noop alias +wait immediate
+    ' noop alias +enc immediate
     ' noop alias init-timer
     ' noop alias .times
 [THEN]
@@ -1157,8 +1161,8 @@ Create pollfds   here pollfd %size dup allot erase
 
 : next-client-packet ( -- addr u )
     try-read-packet  2dup d0= ?EXIT
-+calc    sockaddr-tmp alen @ insert-address
-+calc1    inbuf ins-source
+    sockaddr-tmp alen @ insert-address
+    inbuf ins-source
     over packet-size over <> IF  !!size!! throw  THROW  THEN
     \ ELSE  hex.  ." Unknown source"  0 0  THEN
 ;
@@ -1231,11 +1235,11 @@ Variable timeouts
 Defer do-timeout  ' noop IS do-timeout
 
 : server-loop ( -- ) true to server?
-    BEGIN  server-event +calc  AGAIN ;
+    BEGIN  server-event +calc1  AGAIN ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
     BEGIN  next-client-packet dup
-	IF    client-event +calc reset-timeout
+	IF    client-event +calc1 reset-timeout
 	ELSE  2drop do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
