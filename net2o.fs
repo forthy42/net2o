@@ -213,6 +213,13 @@ poll-timeout# 0 ptimeout 2!
 
 inbuf'  Constant inbuf
 outbuf' Constant outbuf
+
+2Variable socktimeout
+
+: sock-timeout! ( socket -- )  fileno
+    ptimeout 2@ >r 1000 / r> socktimeout 2!
+    SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt drop ;
+
 : read-socket-quick ( socket -- addr u )
     sockaddr_in6 %size alen !
     fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
