@@ -161,11 +161,13 @@ Variable last-tick
     ticks dup last-tick !@ - ;
 
 Variable calc-time
+Variable calc1-time
 Variable send-time
 Variable rec-time
 Variable wait-time
 
 : +calc  delta-t calc-time +! ;
+: +calc1 delta-t calc1-time +! ;
 : +send  delta-t send-time +! ;
 : +rec   delta-t rec-time +! ;
 : +wait  delta-t wait-time +! ;
@@ -177,7 +179,8 @@ Variable wait-time
     ." wait: " wait-time @ s>f 1e-9 f* f. cr
     ." send: " send-time @ s>f 1e-9 f* f. cr
     ." rec : " rec-time  @ s>f 1e-9 f* f. cr
-    ." calc: " calc-time @ s>f 1e-9 f* f. cr ;
+    ." calc: " calc-time @ s>f 1e-9 f* f. cr
+    ." calc1: " calc1-time @ s>f 1e-9 f* f. cr ;
 
 \ Create udp socket
 
@@ -1133,7 +1136,7 @@ Create pollfds   here pollfd %size dup allot erase
     BEGIN  sendflag @ 0= IF  try-read-packet dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! and throw ;
+    over packet-size over <> !!size!! and throw +calc1 ;
 
 : next-client-packet ( -- addr u )
     try-read-packet  2dup d0= ?EXIT
