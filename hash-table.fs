@@ -5,7 +5,6 @@ require wurstkessel.fs
 require wurstkessel-init.fs
 
 state# 2* buffer: 'hashinit
-state# 8 * Constant message#
 
 \ random initializer for hash
 
@@ -16,14 +15,27 @@ state# 8 * Constant message#
 hash-init-rng
 
 \ this computes a cryptographic secure hash over the input string -
-\ of the first 510 bytes of the input string
+\ in two variants: a fast 64 bit hash, and a slow 512 bit hash
 
-: string-hash ( addr u -- )
-    'hashinit wurst-source state# 2* move
-    message message# erase
-    dup message message# xc!+? drop
-    rot umin dup >r move
-    message r> 1- 6 rshift $11 + rounds  message 2 rounds ;
+true [IF]
+    Variable hash-state
+    
+    : string-hash ( addr u -- )  'hashinit hash64 hash-state ! ;
+    
+    : hash$ ( -- addr u )  hash-state cell ;
+[ELSE]
+\ hash of the first 510 bytes of the input string, 3 times slower
+    state# 8 * Constant message#
+
+    : string-hash ( addr u -- )
+	'hashinit wurst-source state# 2* move
+	message message# erase
+	dup message message# xc!+? drop
+	rot umin dup >r move
+	message r> 6 rshift $11 + rounds  message 2 rounds ;
+
+    : hash$ ( -- addr u )  wurst-state state# ;
+[THEN]
 
 \ hierarchical hash table
 
@@ -55,7 +67,7 @@ $180 cells Constant table-size#
 warnings @ warnings off \ hash-bang will be redefined
 
 : #! ( addrval u addrkey u hash -- ) { hash }
-    2dup string-hash  wurst-state state# bounds ?DO
+    2dup string-hash  hash$ bounds ?DO
 	I c@ $7F and 2* cells hash hash@ + #!? IF
 	    UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash hash@ + to hash
@@ -64,14 +76,14 @@ warnings @ warnings off \ hash-bang will be redefined
 warnings !
 
 : #@ ( addrkey u hash -- addrval u / 0 0 ) { hash }
-    2dup string-hash  wurst-state state# bounds ?DO
+    2dup string-hash  hash$ bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop 0 0 ;
 
 : #off ( addrkey u hash -- )  { hash }
-    2dup string-hash  wurst-state state# bounds ?DO
+    2dup string-hash  hash$ bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #off? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
@@ -83,7 +95,7 @@ warnings !
     BEGIN  dup msbyte# and 0= WHILE  8 lshift  dup 0= UNTIL  THEN ;
 
 : #key ( addrkey u hash -- path / -1 ) 0 { hash key }
-    2dup string-hash  wurst-state cell bounds ?DO
+    2dup string-hash  hash$ drop cell bounds ?DO
 	key 8 lshift I c@ $80 or or  to key
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  2drop key -$81 and leftalign   UNLOOP  EXIT  THEN
@@ -112,10 +124,18 @@ warnings !
 
 \ test: move dictionary to hash
 
-0 [IF]
+1 [IF]
 variable ht
 : test ( -- )
     context @ cell+ BEGIN  @ dup  WHILE
 	    dup name>string 2dup ht #!
+    REPEAT  drop ;
+: test1 ( -- )
+    context @ cell+ BEGIN  @ dup  WHILE
+	    dup name>string 2dup ht #@ str= 0= IF ." unequal" cr THEN
+    REPEAT  drop ;
+: test2 ( -- )
+    context @ cell+ BEGIN  @ dup  WHILE
+	    dup name>string 2dup ht #key dup hex. cr ht #.key $@ str= 0= IF ." unequal" cr THEN
     REPEAT  drop ;
 [THEN]

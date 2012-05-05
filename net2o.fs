@@ -166,21 +166,33 @@ Variable send-time
 Variable rec-time
 Variable wait-time
 
-: +calc  delta-t calc-time +! ;
-: +calc1 delta-t calc1-time +! ;
-: +send  delta-t send-time +! ;
-: +rec   delta-t rec-time +! ;
-: +wait  delta-t wait-time +! ;
-
-: init-timer ( -- )
-    ticks last-tick ! calc-time off send-time off rec-time off wait-time off ;
-
-: .times ( -- )
-    ." wait: " wait-time @ s>f 1e-9 f* f. cr
-    ." send: " send-time @ s>f 1e-9 f* f. cr
-    ." rec : " rec-time  @ s>f 1e-9 f* f. cr
-    ." calc: " calc-time @ s>f 1e-9 f* f. cr
-    ." calc1: " calc1-time @ s>f 1e-9 f* f. cr ;
+: timing ;
+[IFDEF] timing
+    : +calc  delta-t calc-time +! ;
+    : +calc1 delta-t calc1-time +! ;
+    : +send  delta-t send-time +! ;
+    : +rec   delta-t rec-time +! ;
+    : +wait  delta-t wait-time +! ;
+    
+    : init-timer ( -- )
+	ticks last-tick ! calc-time off send-time off rec-time off wait-time off
+	calc1-time off ;
+    
+    : .times ( -- )
+	." wait: " wait-time @ s>f 1e-9 f* f. cr
+	." send: " send-time @ s>f 1e-9 f* f. cr
+	." rec : " rec-time  @ s>f 1e-9 f* f. cr
+	." calc: " calc-time @ s>f 1e-9 f* f. cr
+	." calc1: " calc1-time @ s>f 1e-9 f* f. cr ;
+[ELSE]
+    ' noop alias +calc immediate
+    ' noop alias +calc1 immediate
+    ' noop alias +send immediate
+    ' noop alias +rec immediate
+    ' noop alias +wait immediate
+    ' noop alias init-timer
+    ' noop alias .times
+[THEN]
 
 \ Create udp socket
 
@@ -272,10 +284,14 @@ Variable routes
 	sockaddr-tmp sockaddr_in6 %size
     THEN ;
 
-: check-address ( addr u -- net2o-addr / -1 ) routes #key ;
+sockaddr_in %size buffer: lastaddr
+Variable lastn2oaddr
+
 : insert-address ( addr u -- net2o-addr )
+    2dup lastaddr over str= IF  2drop lastn2oaddr @  EXIT  THEN
     2dup routes #key dup -1 = IF
-	drop s" " 2over routes #! routes #key
+	drop 2dup lastaddr swap move
+	s" " 2over routes #! routes #key  dup lastn2oaddr !
     ELSE
 	nip nip
     THEN ;
@@ -284,9 +300,10 @@ Variable routes
     get-info info>string insert-address ;
 
 : address>route ( -- n/-1 )
-    sockaddr-tmp alen @ check-address ;
-: route>address ( n -- )
-    routes #.key $@ sockaddr-tmp swap dup alen ! move ;
+    sockaddr-tmp alen @ insert-address ;
+: route>address ( n -- ) dup >r
+    routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
+    $@ sockaddr-tmp swap dup alen ! move  rdrop ;
 
 \ route an incoming packet
 
@@ -1136,13 +1153,13 @@ Create pollfds   here pollfd %size dup allot erase
     BEGIN  sendflag @ 0= IF  try-read-packet dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! and throw +calc1 ;
+    over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
     try-read-packet  2dup d0= ?EXIT
-    sockaddr-tmp alen @ insert-address \ check-address dup -1 <> IF
-    inbuf ins-source
-    over packet-size over <> !!size!! and throw
++calc    sockaddr-tmp alen @ insert-address
++calc1    inbuf ins-source
+    over packet-size over <> IF  !!size!! throw  THROW  THEN
     \ ELSE  hex.  ." Unknown source"  0 0  THEN
 ;
 

@@ -406,11 +406,22 @@ s" gforth" environment? [IF] 2drop
     \c if(n&0x40) set_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } }
+    \c uint64_t wurst_hash64(unsigned char * addr, unsigned int len,
+    \c                       unsigned char * pad, uint64_t * rnds) {
+    \c   uint64_t result=0;
+    \c   unsigned int i=0;
+    \c   for(i=0; i<len; i++) {
+    \c     result = ROL(result, 1) ^ rnds[addr[i] ^ pad[i & 0x7F]];
+    \c   }
+    \c   return result;
+    \c }
     c-function rounds_ind rounds_ind n a a a -- void
     c-function rounds_decrypt rounds_decrypt n a a a -- void
+    c-function wurst_hash64 wurst_hash64 a n a a -- n
     end-c-library
     : rounds ( addr n -- ) wurst-source rot 'rngs rounds_ind ;
     : rounds-decrypt ( addr n -- ) wurst-source rot 'rngs rounds_decrypt ;
+    : hash64 ( addr n init -- hash ) 'rngs wurst_hash64 ;
 [ELSE]
 : round0 ( -- )  [ 0 round# round, ] ; 
 : round1 ( -- )  [ 1 round# round, ] ; 
