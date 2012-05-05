@@ -153,6 +153,32 @@ debug: msg(
 \ +db firstack(
 \ +db msg(
 
+\ timing measurements
+
+Variable last-tick
+
+: delta-t ( -- n )
+    ticks dup last-tick !@ - ;
+
+Variable calc-time
+Variable send-time
+Variable rec-time
+Variable wait-time
+
+: +calc  delta-t calc-time +! ;
+: +send  delta-t send-time +! ;
+: +rec   delta-t rec-time +! ;
+: +wait  delta-t wait-time +! ;
+
+: init-timer ( -- )
+    ticks last-tick ! calc-time off send-time off rec-time off wait-time off ;
+
+: .times ( -- )
+    ." wait: " wait-time @ s>f 1e-9 f* f. cr
+    ." send: " send-time @ s>f 1e-9 f* f. cr
+    ." rec : " rec-time  @ s>f 1e-9 f* f. cr
+    ." calc: " calc-time @ s>f 1e-9 f* f. cr ;
+
 \ Create udp socket
 
 4242 Value net2o-port
@@ -216,12 +242,12 @@ outbuf' Constant outbuf
 
 $00000000 Value droprate#
 
-: send-a-packet ( addr u -- n )
+: send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
     net2o-sock  1 packets +!
-    fileno -rot 0 sockaddr-tmp alen @ sendto ;
+    fileno -rot 0 sockaddr-tmp alen @ sendto +send ;
 
 \ clients routing table
 
@@ -1091,12 +1117,12 @@ Create pollfds   here pollfd %size dup allot erase
     ptimeout 0 ppoll 0>
 [ELSE]
     ptimeout cell+ @ #1000000 / poll 0>
-[THEN]
+[THEN] +wait
 ;
 
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF
-	read-a-packet  0 pollfds revents w! EXIT  THEN
+	read-a-packet  0 pollfds revents w! +rec EXIT  THEN
     0 0 ;
 
 : try-read-packet ( -- addr u / 0 0 )
@@ -1184,22 +1210,22 @@ Variable timeouts
 
 Defer do-timeout  ' noop IS do-timeout
 
-: server-loop ( -- )  true to server?
-    BEGIN  server-event  AGAIN ;
+: server-loop ( -- ) true to server?
+    BEGIN  server-event +calc  AGAIN ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
     BEGIN  next-client-packet dup
-	IF    client-event reset-timeout
+	IF    client-event +calc reset-timeout
 	ELSE  2drop do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 \ client/server initializer
 
 : init-client ( -- )
-    new-client init-route prep-socks ;
+    init-timer new-client init-route prep-socks ;
 
 : init-server ( -- )
-    new-server init-route prep-socks ;
+    init-timer new-server init-route prep-socks ;
 
 \ load net2o commands
 

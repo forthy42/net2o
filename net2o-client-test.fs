@@ -14,7 +14,7 @@ insert-ip n2o:connect
 
 net2o-code
 data-ivs
-s" Download test" $, type cr
+s" Download test" $, type cr !time
 $400 blocksize! $400 blockalign!
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy
 s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
@@ -25,5 +25,8 @@ end-code
 
 ticks 1 client-loop ticks - negate s>f 1e-9 f* f. ." s" cr
 ." IP packets send/received: " packets ? packetr ? cr
+.times
+
+net2o-code .time end-code
 
 bye

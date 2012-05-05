@@ -347,6 +347,11 @@ net2o-base
 61 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
 62 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
+\ profiling
+
+70 net2o: !time ( -- ) init-timer ;
+71 net2o: .time ( -- ) .times ;
+
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;
 
