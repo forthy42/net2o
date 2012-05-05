@@ -158,27 +158,14 @@ debug: msg(
 4242 Value net2o-port
 
 0 Value net2o-sock
-0 Value net2o-sock6
-
-true Value sock46 immediate
 
 : new-server ( -- )
-    sock46 [IF]
-	net2o-port create-udp-server46 s" w+" c-string fdopen
-	dup to net2o-sock to net2o-sock6
-    [ELSE]
-	net2o-port create-udp-server s" w+" c-string fdopen to net2o-sock
-	net2o-port create-udp-server6 s" w+" c-string fdopen to net2o-sock6
-    [THEN] ;
+    net2o-port create-udp-server46 s" w+" c-string fdopen
+    to net2o-sock ;
 
 : new-client ( -- )
-    sock46 [IF]
-	new-udp-socket46 s" w+" c-string fdopen
-	dup to net2o-sock to net2o-sock6
-    [ELSE]
-	new-udp-socket s" w+" c-string fdopen to net2o-sock
-	new-udp-socket6 s" w+" c-string fdopen to net2o-sock6
-    [THEN] ;
+    new-udp-socket46 s" w+" c-string fdopen
+    to net2o-sock ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -202,10 +189,8 @@ begin-structure net2o-header
     8 +field addr
 end-structure
 
-Variable packet4r
-Variable packet4s
-Variable packet6r
-Variable packet6s
+Variable packetr
+Variable packets
 
 2Variable ptimeout
 #100000000 Value poll-timeout# \ 100ms
@@ -227,10 +212,7 @@ outbuf' Constant outbuf
     inbuf swap ;
 
 : read-a-packet ( -- addr u )
-    net2o-sock read-socket-quick  1 packet4r +! ;
-
-: read-a-packet6 ( -- addr u )
-    net2o-sock6 read-socket-quick  1 packet6r +! ;
+    net2o-sock read-socket-quick  1 packetr +! ;
 
 $00000000 Value droprate#
 
@@ -238,15 +220,7 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
-    sock46 [IF]
-	net2o-sock  1 packet4s +!
-    [ELSE]
-	sockaddr-tmp w@ AF_INET6 = IF
-	    net2o-sock6  1 packet6s +!
-	ELSE
-	    net2o-sock  1 packet4s +!
-	THEN
-    [THEN]
+    net2o-sock  1 packets +!
     fileno -rot 0 sockaddr-tmp alen @ sendto ;
 
 \ clients routing table
@@ -257,19 +231,17 @@ Variable routes
 
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@
-    sock46 [IF]
-	over w@ AF_INET = IF
-	    drop >r
-	    AF_INET6 sockaddr-tmp family w!
-	    r@ port w@ sockaddr-tmp port w!
-	    0     sockaddr-tmp sin6_flowinfo l!
-	    r> sin_addr l@ sockaddr-tmp sin6_addr 12 + l!
-	    $FFFF0000 sockaddr-tmp sin6_addr 8 + l!
-	    0 sockaddr-tmp sin6_addr !
-	    0 sockaddr-tmp sin6_scope_id l!
-	    sockaddr-tmp sockaddr_in6 %size
-	THEN
-    [THEN] ;
+    over w@ AF_INET = IF
+	drop >r
+	AF_INET6 sockaddr-tmp family w!
+	r@ port w@ sockaddr-tmp port w!
+	0     sockaddr-tmp sin6_flowinfo l!
+	r> sin_addr l@ sockaddr-tmp sin6_addr 12 + l!
+	$FFFF0000 sockaddr-tmp sin6_addr 8 + l!
+	0 sockaddr-tmp sin6_addr !
+	0 sockaddr-tmp sin6_scope_id l!
+	sockaddr-tmp sockaddr_in6 %size
+    THEN ;
 
 : check-address ( addr u -- net2o-addr / -1 ) routes #key ;
 : insert-address ( addr u -- net2o-addr )
@@ -1096,14 +1068,13 @@ Create queue-adder  queue-struct allot
 
 \ poll loop
 
-Create pollfds   here pollfd %size 2 * dup allot erase
+Create pollfds   here pollfd %size dup allot erase
 
 : fds!+ ( fileno flag addr -- addr' )
      >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
-    net2o-sock  fileno POLLIN  r> fds!+ >r
-    net2o-sock6 fileno POLLIN  r> fds!+ drop ;
+    net2o-sock  fileno POLLIN  r> fds!+ drop ;
 
 : clear-events ( -- )  pollfds
     2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
@@ -1115,7 +1086,7 @@ Create pollfds   here pollfd %size 2 * dup allot erase
 
 : poll-sock ( -- flag )
     eval-queue  clear-events  timeout!
-    pollfds 2  postpone sock46 +
+    pollfds 1
 [ environment os-type s" linux" string-prefix? ] [IF]
     ptimeout 0 ppoll 0>
 [ELSE]
@@ -1124,15 +1095,8 @@ Create pollfds   here pollfd %size 2 * dup allot erase
 ;
 
 : read-a-packet4/6 ( -- addr u )
-    sock46 [IF]
-	pollfds revents w@ POLLIN = IF
-	    read-a-packet6  0 pollfds revents w! EXIT  THEN
-    [ELSE]
-	pollfds revents w@ POLLIN = IF
-	    read-a-packet   0 pollfds revents w! EXIT  THEN
-	pollfds pollfd %size + revents w@ POLLIN = IF
-	    read-a-packet6  0 pollfds pollfd %size + revents w! EXIT  THEN
-    [THEN]
+    pollfds revents w@ POLLIN = IF
+	read-a-packet  0 pollfds revents w! EXIT  THEN
     0 0 ;
 
 : try-read-packet ( -- addr u / 0 0 )
