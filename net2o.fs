@@ -1215,14 +1215,12 @@ $04 Constant login-val
 
 : server-event ( -- )
     next-packet 2drop  in-route
-    IF  ['] handle-packet catch
-	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
+    IF    handle-packet
     ELSE  ." route a packet" cr route-packet  THEN ;
 
 : client-event ( addr u -- )
     2drop in-check
-    IF  ['] handle-packet catch
-	?dup-IF  ( inbuf packet-data dump ) DoError nothrow  THEN
+    IF    handle-packet
     ELSE  ( drop packet )  THEN ;
 
 \ loops for server and client
@@ -1234,14 +1232,22 @@ Variable timeouts
 
 Defer do-timeout  ' noop IS do-timeout
 
-: server-loop ( -- ) true to server?
+: server-loop-nocatch ( -- )
     BEGIN  server-event +calc1  AGAIN ;
 
-: client-loop ( requests -- )  requests !  reset-timeout  false to server?
+: server-loop ( -- ) true to server?
+    BEGIN  ['] server-loop-nocatch catch  dup  WHILE
+	    DoError nothrow  REPEAT  drop ;
+
+: client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
 	IF    client-event +calc1 reset-timeout
 	ELSE  2drop do-timeout -1 timeouts +!  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
+
+: client-loop ( requests -- )  requests !  reset-timeout  false to server?
+    BEGIN  ['] client-loop-nocatch catch  dup  WHILE
+	    DoError nothrow  REPEAT  drop ;
 
 \ client/server initializer
 
