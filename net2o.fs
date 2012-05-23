@@ -160,7 +160,7 @@ Variable last-tick
 : delta-t ( -- n )
     ticks dup last-tick !@ - ;
 
-: timing ;
+\ : timing ;
 [IFDEF] timing
     Variable calc-time
     Variable calc1-time
@@ -447,6 +447,7 @@ field: ack-state
 field: ack-receive
 \ flow control, sender part
 field: min-slack
+field: max-slack
 field: ns/burst
 field: last-ns/burst
 field: bandwidth-tick \ ns
@@ -590,6 +591,7 @@ Variable init-context#
     s" " j^ data-resend $!
     wurst-key state# j^ crypto-key $!
     max-int64 2/ j^ min-slack !
+    max-int64 2/ negate j^ max-slack !
     max-int64 j^ rtdelay !
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack ! \ asking for context creation is as good as an ack
@@ -660,7 +662,9 @@ Variable lastdeltat
     over - j^ rtdelay min!
     - dup lastdiff !
     lastdeltat @ 8 rshift j^ min-slack +!
-    j^ min-slack min! ;
+    lastdeltat @ 8 rshift negate j^ max-slack +!
+    dup j^ min-slack min!
+    j^ max-slack max! ;
 
 : net2o:ack-addrtime ( addr ticks -- )  swap
     j^ 0= IF  2drop EXIT  THEN
@@ -677,7 +681,9 @@ Variable lastdeltat
 	ts-ticks @ timestat
     ELSE  2drop rdrop  THEN ;
 
-#3000000 Value slack# \ 3ms slack leads to backdrop of factor 2
+#3000000 Value slack-default# \ 3ms slack leads to backdrop of factor 2
+
+: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / flybursts# +
