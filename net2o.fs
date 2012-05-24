@@ -661,8 +661,8 @@ Variable lastdeltat
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
-    lastdeltat @ 8 rshift j^ min-slack +!
-\    lastdeltat @ 8 rshift negate j^ max-slack +!
+    lastdeltat @ 16 rshift j^ min-slack +!
+    lastdeltat @ 16 rshift negate j^ max-slack +!
     dup j^ min-slack min!
     j^ max-slack max! ;
 
@@ -683,7 +683,7 @@ Variable lastdeltat
 
 #3000000 Value slack-default# \ 3ms slack leads to backdrop of factor 2
 
-: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
+: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / flybursts# +
