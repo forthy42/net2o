@@ -662,7 +662,7 @@ Variable lastdeltat
     over - j^ rtdelay min!
     - dup lastdiff !
     lastdeltat @ 8 rshift j^ min-slack +!
-    lastdeltat @ 8 rshift negate j^ max-slack +!
+\    lastdeltat @ 8 rshift negate j^ max-slack +!
     dup j^ min-slack min!
     j^ max-slack max! ;
 
