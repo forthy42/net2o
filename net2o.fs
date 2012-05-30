@@ -575,6 +575,7 @@ Variable mapstart $10000 mapstart !
 \ create context
 
 8 Value b2b-chunk#
+8 Value delta-damp#
 b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
 -1 Constant never
@@ -661,8 +662,8 @@ Variable lastdeltat
     dup j^ lastack !
     over - j^ rtdelay min!
     - dup lastdiff !
-    lastdeltat @ 16 rshift j^ min-slack +!
-    lastdeltat @ 16 rshift negate j^ max-slack +!
+    lastdeltat @ delta-damp# rshift j^ min-slack +!
+    lastdeltat @ delta-damp# rshift negate j^ max-slack +!
     dup j^ min-slack min!
     j^ max-slack max! ;
 
