@@ -99,7 +99,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : debug)  ]] THEN [[ ;
 
-false [IF]
+true [IF]
     : debug: ( -- ) Create immediate false ,  DOES>
 	]] Literal @ IF [[ ['] debug) assert-canary ;
 [ELSE]
@@ -152,6 +152,17 @@ debug: msg(
 \ +db send(
 \ +db firstack(
 \ +db msg(
+
+Variable debug-eval
+
+: +debug ( -- )
+    BEGIN  argc @ 1 > WHILE
+	    1 arg s" +" string-prefix?  WHILE
+		1 arg debug-eval $!
+		s" db " debug-eval 1 $ins  s" (" debug-eval $+!
+		debug-eval $@ evaluate
+		shift-args
+	REPEAT  THEN ;
 
 \ timing measurements
 
