@@ -1247,8 +1247,10 @@ Defer do-timeout  ' noop IS do-timeout
 : server-loop-nocatch ( -- )
     BEGIN  server-event +calc1  AGAIN ;
 
+: ?int ( throw-code -- throw-code )  dup -28 = IF  throw  THEN ;
+
 : server-loop ( -- ) true to server?
-    BEGIN  ['] server-loop-nocatch catch  dup  WHILE
+    BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
 : client-loop-nocatch ( -- )
@@ -1258,7 +1260,7 @@ Defer do-timeout  ' noop IS do-timeout
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
-    BEGIN  ['] client-loop-nocatch catch  dup  WHILE
+    BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
 \ client/server initializer
