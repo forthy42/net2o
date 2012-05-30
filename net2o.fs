@@ -692,6 +692,11 @@ Variable lastdeltat
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
+: >slack-exp ( rate slack -- rate' )
+    0 max slack# 2* 2* min
+    s>f slack# s>f f/ 2e fln f* fexp fm* f>s
+    ( slack# / lshift ) ;
+
 : net2o:set-rate ( rate deltat -- )
     rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
@@ -703,7 +708,7 @@ Variable lastdeltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
-    0 max slack# 2* 2* min slack# / lshift
+    >slack-exp
     j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
