@@ -101,7 +101,9 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 true [IF]
     : debug: ( -- ) Create immediate false ,  DOES>
-	]] Literal @ IF [[ ['] debug) assert-canary ;
+	state @ IF  ]] Literal @ IF [[ ['] debug) assert-canary
+	ELSE  @ IF ['] noop assert-canary ELSE postpone (  THEN
+	THEN  ;
 [ELSE]
     : debug: ( -- )  Create immediate false , DOES>
 	@ IF  ['] noop assert-canary  ELSE  postpone (  THEN ;
@@ -138,6 +140,7 @@ debug: send(
 debug: firstack(
 debug: msg(
 debug: profile(
+debug: stat(
 
 : +db ( "word" -- ) ' >body on ;
 
