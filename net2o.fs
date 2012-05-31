@@ -137,6 +137,7 @@ debug: cmd(
 debug: send(
 debug: firstack(
 debug: msg(
+debug: profile(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -171,7 +172,7 @@ Variable last-tick
 : delta-t ( -- n )
     ticks dup last-tick !@ - ;
 
-\ : timing ;
+: timing ;
 [IFDEF] timing
     Variable calc-time
     Variable calc1-time
@@ -184,20 +185,20 @@ Variable last-tick
 	ticks last-tick ! calc-time off send-time off rec-time off wait-time off
 	calc1-time off enc-time off ;
     
-    : +calc  delta-t calc-time +! ;
-    : +calc1 delta-t calc1-time +! ;
-    : +send  delta-t send-time +! ;
-    : +enc   delta-t enc-time +! ;
-    : +rec   delta-t rec-time +! ;
-    : +wait  delta-t wait-time +! ;
+    : +calc  profile( delta-t calc-time +! ) ;
+    : +calc1 profile( delta-t calc1-time +! ) ;
+    : +send  profile( delta-t send-time +! ) ;
+    : +enc   profile( delta-t enc-time +! ) ;
+    : +rec   profile( delta-t rec-time +! ) ;
+    : +wait  profile( delta-t wait-time +! ) ;
     
-    : .times ( -- )
-	." wait: " wait-time @ s>f 1e-9 f* f. cr
-	." send: " send-time @ s>f 1e-9 f* f. cr
-	." rec : " rec-time  @ s>f 1e-9 f* f. cr
-	." enc : " enc-time  @ s>f 1e-9 f* f. cr
-	." calc: " calc-time @ s>f 1e-9 f* f. cr
-	." calc1: " calc1-time @ s>f 1e-9 f* f. cr ;
+    : .times ( -- ) profile(
+	." wait: " wait-time @ s>f 1n f* f. cr
+	." send: " send-time @ s>f 1n f* f. cr
+	." rec : " rec-time  @ s>f 1n f* f. cr
+	." enc : " enc-time  @ s>f 1n f* f. cr
+	." calc: " calc-time @ s>f 1n f* f. cr
+	." calc1: " calc1-time @ s>f 1n f* f. cr ) ;
 [ELSE]
     ' noop alias +calc immediate
     ' noop alias +calc1 immediate
@@ -478,6 +479,9 @@ field: last-rate
 field: expected
 field: total
 field: received
+\ statistics
+field: first-time
+field: timing-stat
 end-structure
 
 begin-structure timestamp
@@ -657,6 +661,31 @@ reply buffer: dummy-reply
 \    cmd( ." set dest-tail to " r@ dest-tail @ hex. cr )
     rdrop ;
 
+\ timing records
+
+: net2o:track-timing ( -- ) \ initialize timing records
+    s" " j^ timing-stat $!
+    j^ first-time @ 0= IF  ticks j^ first-time !  THEN ;
+
+: )stats ]] THEN [[ ;
+: stats( ]] j^ timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+
+: net2o:timing$ ( -- addr u )
+    stats( j^ timing-stat $@  EXIT ) s" " ;
+
+: net2o:rec-timing ( addr u -- ) \ do some dumps
+    bounds ?DO
+	I l@ s>f 1n f* f.
+	I 4 + l@ s>f 1n f* f.
+	tick-init 1+ maxdata * 1k fm* fdup
+	I 8 + l@ s>f f/ f.
+	I $C + l@ s>f f/ f. ." timing" cr
+    $10 +LOOP ;
+
+$10 buffer: stat-tuple
+
+: stat+ ( addr -- )  stat-tuple $10  j^ timing-stat $+! ;
+
 \ flow control
 
 : ticks-init ( ticks -- )
@@ -667,7 +696,7 @@ Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks
+    ticks stats( dup j^ first-time @ - stat-tuple l! )
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
@@ -709,6 +738,7 @@ Variable lastdeltat
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
+    stats( over stat-tuple 8 + l! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
@@ -719,10 +749,12 @@ Variable lastdeltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
+    stats( dup stat-tuple 4 + l! )
     >slack-exp
     j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
+    stats( dup stat-tuple $C + l! stat+ )
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst

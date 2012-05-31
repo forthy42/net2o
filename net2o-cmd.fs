@@ -301,6 +301,9 @@ net2o-base
 31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
 32 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
 33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
+34 net2o: track-timing ( -- )  net2o:track-timing ;
+35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
+36 net2o: send-timing ( -- )  net2o:timing$ $, rec-timing ;
 
 \ crypto functions
 
@@ -342,6 +345,8 @@ net2o-base
           [: lit, lit, track-seek ;] n2o:track-all-seeks ;
 57 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
 58 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+
+\ acknowledges
 
 60 net2o: timeout ( ticks -- ) net2o:timeout ;
 61 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
@@ -480,24 +485,23 @@ also net2o-base
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
 : restart-transfer ( -- )
-    slurp-all-tracked-blocks
-\    0 j^ file-state $@ bounds +DO
-\	I fs-size @ I fs-seek @ u> IF
-\	    msg( ." restart <" dup 0 .r ." >: " I fs-seek ? F cr )
-\	    I fs-seek @ I fs-size @ over - swap lit, lit, dup lit,
-\	    slurp-tracked-block
-\	THEN  1+
-\    file-state-struct +LOOP  drop
-    send-chunks ;
+    slurp-all-tracked-blocks send-chunks ;
+
+0 Value request-stats?
 
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!
     j^ expected off  j^ received off
     rewind  restart-transfer
+    request-stats? IF
+	send-timing  track-timing
+    THEN
     j^ total @ 0<= IF
 	msg( ." Chunk transfer done!" F cr )
 	-1 requests +!  EXIT
     THEN ;
+
+: request-stats   true to request-stats?  track-timing ;
 
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
