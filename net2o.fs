@@ -482,6 +482,8 @@ field: received
 \ statistics
 field: first-time
 field: timing-stat
+field: last-time
+field: time-offset
 end-structure
 
 begin-structure timestamp
@@ -675,8 +677,9 @@ reply buffer: dummy-reply
 
 : net2o:rec-timing ( addr u -- ) \ do some dumps
     bounds ?DO
-	I l@ s>f 1n f* f.
-	I 4 + l@ s>f 1n f* f.
+	I l@ dup dup j^ last-time !@ u< IF  $100000000 j^ time-offset +!  THEN
+	j^ time-offset @ + s>f 1n f* f.
+	I 4 + l@ s>f 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I 8 + l@ s>f f/ f.
 	I $C + l@ s>f f/ f. ." timing" cr
