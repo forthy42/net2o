@@ -483,7 +483,6 @@ field: expected
 field: total
 field: received
 \ statistics
-field: first-time
 field: timing-stat
 field: last-time
 field: time-offset
@@ -496,6 +495,13 @@ end-structure
 begin-structure reply
 field: reply-offset
 field: reply-len
+end-structure
+
+begin-structure timestats
+sffield: ts-delta
+sffield: ts-slack
+sffield: ts-reqrate
+sffield: ts-rate
 end-structure
 
 \ check for valid destination
@@ -670,7 +676,7 @@ reply buffer: dummy-reply
 
 : net2o:track-timing ( -- ) \ initialize timing records
     s" " j^ timing-stat $!
-    j^ first-time @ 0= IF  ticks j^ first-time !  THEN ;
+    j^ last-time @ 0= IF  ticks j^ last-time !  THEN ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] j^ timing-stat @ IF [[ ['] )stats assert-canary ; immediate
@@ -680,17 +686,17 @@ reply buffer: dummy-reply
 
 : net2o:rec-timing ( addr u -- ) \ do some dumps
     bounds ?DO
-	I l@ dup dup j^ last-time !@ u< IF  $100000000 j^ time-offset +!  THEN
-	j^ time-offset @ + s>f 1n f* f.
-	I 4 + l@ s>f 1u f* f.
+	I ts-delta sf@ f>s j^ last-time +!
+	j^ last-time @ s>f 1n f* f.
+	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
-	I 8 + l@ s>f f/ f.
-	I $C + l@ s>f f/ f. ." timing" cr
+	I ts-reqrate sf@ f/ f.
+	I ts-rate sf@ f/ f. ." timing" cr
     $10 +LOOP ;
 
-$10 buffer: stat-tuple
+timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple $10  j^ timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  j^ timing-stat $+! ;
 
 \ flow control
 
@@ -702,7 +708,7 @@ Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks stats( dup j^ first-time @ - stat-tuple l! )
+    ticks stats( dup dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
@@ -744,7 +750,7 @@ Variable lastdeltat
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
-    stats( over stat-tuple 8 + l! )
+    stats( over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
     dup 0<> lastdeltat @ 0<> and
@@ -755,12 +761,12 @@ Variable lastdeltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
-    stats( dup stat-tuple 4 + l! )
+    stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
     j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
-    stats( dup stat-tuple $C + l! stat+ )
+    stats( dup s>f stat-tuple ts-rate sf! stat+ )
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
@@ -1296,7 +1302,7 @@ Defer do-timeout  ' noop IS do-timeout
 : server-loop-nocatch ( -- )
     BEGIN  server-event +calc1  AGAIN ;
 
-: ?int ( throw-code -- throw-code )  dup -28 = IF  throw  THEN ;
+: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
