@@ -16,6 +16,6 @@ set style line 3 lc rgbcolor "blue"
 set xlabel "time [s]"
 set ylabel "Rate [MB/s]"
 set y2label "Slack [ms]"
-plot "timing" using 1:3 title "Requested",\
- "timing" using 1:4 title "Rate",\
- "timing" using 1:2 axis x1y2 title "Slack"
+plot "timing" using 1:4 title "Requested",\
+ "timing" using 1:5 title "Rate",\
+ "timing" using 1:3 axis x1y2 title "Slack"

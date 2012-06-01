@@ -478,6 +478,9 @@ field: lastb-ticks
 field: delta-ticks
 field: acks
 field: last-rate
+\ experiment: track previous b2b-start
+field: last-rtick
+field: last-raddr
 \ state machine
 field: expected
 field: total
@@ -485,6 +488,7 @@ field: received
 \ statistics
 field: timing-stat
 field: last-time
+\ make timestamps smaller
 field: time-offset
 end-structure
 
@@ -686,7 +690,8 @@ reply buffer: dummy-reply
 : net2o:rec-timing ( addr u -- ) \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>s j^ last-time +!
-	j^ last-time @ s>f 1n f* f.
+	j^ last-time @ s>f 1n f* fdup f.
+	j^ time-offset @ &10000000000 mod s>f 1n f* f+ f. 
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
@@ -707,7 +712,7 @@ Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks
+    ticks \ j^ time-offset @ -
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
@@ -718,20 +723,27 @@ Variable lastdeltat
     dup j^ min-slack min!
     j^ max-slack max! ;
 
-: net2o:ack-addrtime ( addr ticks -- )  swap
-    j^ 0= IF  2drop EXIT  THEN
-    j^ data-map @ 0= IF  2drop  EXIT  THEN
-    j^ data-map $@ drop >r
+: map@ ( -- addr/0 )
+    0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
+    drop j^ data-map $@ drop ;
+
+: >timestamp ( addr -- ts-array index / 0 0 )
+    map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ dest-vaddr @ -
-    timing( over . dup . ." addrtick" cr )
-    dup r@ dest-size @ u<
-    IF  addr>ts r> dest-timestamps @
-	over tick-init 1+ timestamp * - 0>
+    dup r@ dest-size @ u<  IF
+	addr>ts r> dest-timestamps @ swap
+    ELSE  drop rdrop 0 0  THEN ;
+
+: net2o:ack-addrtime ( addr ticks -- )  swap >timestamp
+    over  IF  
+	dup tick-init 1+ timestamp * u>
 	IF  + dup ts-ticks @
 	    over tick-init 1+ timestamp * - ts-ticks @ - lastdeltat !
-	ELSE  +  THEN 
+	ELSE  +  THEN
 	ts-ticks @ timestat
-    ELSE  2drop rdrop  THEN ;
+    ELSE  2drop drop  THEN ;
+
+: net2o:ack-b2btime ( addr ticks -- )  2drop EXIT swap >timestamp ;
 
 #3000000 Value slack-default# \ 3ms slack leads to backdrop of factor 2
 
@@ -749,7 +761,7 @@ Variable lastdeltat
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
-    stats( ticks dup j^ last-time !@ - &10000000000 mod s>f stat-tuple ts-delta sf! )
+    stats( ticks j^ time-offset @ - dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
     stats( over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
@@ -1263,6 +1275,7 @@ $04 Constant login-val
 	inbuf packet-data queue-command
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN
+        ticks j^ time-offset @ - j^ recv-tick ! \ time stamp of arrival
 	dup 0> wurst-inbuf-decrypt 0= IF
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr

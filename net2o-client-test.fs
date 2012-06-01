@@ -15,7 +15,7 @@ insert-ip n2o:connect
 ." Connected" cr
 
 net2o-code
-data-ivs
+data-ivs time-offset!
 s" Download test" $, type cr !time
 $400 blocksize! $400 blockalign! stat( request-stats )
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy

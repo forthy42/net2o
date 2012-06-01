@@ -306,6 +306,9 @@ net2o-base
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
 36 net2o: send-timing ( -- )  net2o:timing$ maxstring $10 - -$10 and umin $,
     rec-timing ;
+37 net2o: >time-offset ( n -- )  j^ time-offset ! ;
+: time-offset! ( -- )  ticks dup lit, >time-offset j^ time-offset ! ;
+38 net2o: ack-b2btime ( addr time -- )  net2o:ack-b2btime ;
 
 \ crypto functions
 
@@ -415,7 +418,8 @@ previous
 : ack-size ( -- )  1 j^ acks +!  j^ recv-tick @ j^ lastb-ticks ! ;
 : ack-first ( -- )
     j^ lastb-ticks @ ?dup-IF  j^ firstb-ticks @ - j^ delta-ticks +!  THEN
-    j^ recv-tick @ j^ firstb-ticks !  j^ lastb-ticks off ;
+    j^ recv-tick @ j^ firstb-ticks !  j^ lastb-ticks off
+    j^ recv-tick @ j^ last-rtick !  j^ recv-addr @ j^ last-raddr ! ;
 
 : ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
@@ -441,12 +445,15 @@ also net2o-base
     j^ recv-tick @ j^ recv-addr @
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
+: net2o:b2btime
+    j^ last-rtick @ j^ last-raddr @
+    lit, lit, ack-b2btime ;
 
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
     j^ recv-flag @ invert resend-toggle# and lit, ack-resend ;
-: net2o:genack ( -- )  net2o:acktime  >rate ;
+: net2o:genack ( -- )  net2o:b2btime  net2o:acktime  >rate ;
 
 : receive-flag ( -- flag )  j^ recv-flag @ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -531,7 +538,6 @@ also net2o-base
     drop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
     
 : net2o:do-ack ( -- )
-    ticks       j^ recv-tick ! \ time stamp of arrival
     dest-addr @ j^ recv-addr ! \ last received packet
     j^ recv-high @ -1 = IF
 	dest-addr @ j^ recv-high !
@@ -544,8 +550,8 @@ also net2o-base
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    r> ack-timing
-    cmd-send? ;
+    cmd-send?
+    r> ack-timing ;
 
 ' net2o:do-ack IS do-ack
 
@@ -591,6 +597,10 @@ forth-local-words:
     (
      (("net2o:") definition-starter (font-lock-keyword-face . 1)
        "[ \t\n]" t name (font-lock-function-name-face . 3))
+    )
+forth-local-indent-words:
+    (
+     (("net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]
