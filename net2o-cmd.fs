@@ -239,8 +239,9 @@ Variable neststart#
 
 also net2o-base definitions
 
+: maxstring ( n -- )  endcmdbuf cmdbuf$ + - ;
 : $, ( addr u -- )  string  >r r@ cmd,
-    r@ endcmdbuf cmdbuf$ + - u>= !!stringfit!! and throw
+    r@ maxstring u>= !!stringfit!! and throw
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;
@@ -303,7 +304,8 @@ net2o-base
 33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
-36 net2o: send-timing ( -- )  net2o:timing$ $, rec-timing ;
+36 net2o: send-timing ( -- )  net2o:timing$ maxstring $10 - -$10 and umin $,
+    rec-timing ;
 
 \ crypto functions
 
