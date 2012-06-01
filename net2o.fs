@@ -675,8 +675,7 @@ reply buffer: dummy-reply
 \ timing records
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    s" " j^ timing-stat $!
-    j^ last-time @ 0= IF  ticks j^ last-time !  THEN ;
+    s" " j^ timing-stat $! ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] j^ timing-stat @ IF [[ ['] )stats assert-canary ; immediate
@@ -708,7 +707,7 @@ Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    ticks stats( dup dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
+    ticks
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
@@ -750,6 +749,7 @@ Variable lastdeltat
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
+    stats( ticks dup j^ last-time !@ - &10000000000 mod s>f stat-tuple ts-delta sf! )
     stats( over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . lastdeltat ? .j ." deltat" cr )
