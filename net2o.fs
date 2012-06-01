@@ -692,7 +692,7 @@ reply buffer: dummy-reply
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
 	I ts-rate sf@ f/ f. ." timing" cr
-    $10 +LOOP ;
+    timestats +LOOP ;
 
 timestats buffer: stat-tuple
 
