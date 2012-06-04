@@ -740,15 +740,17 @@ timestats buffer: stat-tuple
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
     drop j^ data-map $@ drop ;
 
-: >timestamp ( addr -- ts-array index / 0 0 )
+: >timestamp ( time addr -- ts-array index / 0 0 )
+    >r j^ time-offset @ + r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ dest-vaddr @ -
     dup r@ dest-size @ u<  IF
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
 
-: net2o:ack-addrtime ( ticks addr -- )  >timestamp
-    over  IF  
+: net2o:ack-addrtime ( ticks addr -- )
+    >timestamp
+    over  IF
 	dup tick-init 1+ timestamp * u>
 	IF  + dup ts-ticks @
 	    over tick-init 1+ timestamp * - ts-ticks @ - j^ lastdeltat !

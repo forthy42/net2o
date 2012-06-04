@@ -442,11 +442,11 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    j^ recv-addr @ j^ recv-tick @
+    j^ recv-addr @ j^ recv-tick @ j^ time-offset @ -
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime
-    j^ last-raddr @ j^ last-rtick @
+    j^ last-raddr @ j^ last-rtick @ j^ time-offset @ -
     lit, lit, ack-b2btime ;
 
 \ client side acknowledge
