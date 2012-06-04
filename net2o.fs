@@ -475,6 +475,7 @@ field: flybursts
 field: lastslack
 field: lastdeltat
 field: slackgrow
+field: slackgrow'
 \ flow control, receiver part
 field: burst-ticks
 field: firstb-ticks
@@ -734,7 +735,8 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
+    - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow !
+    j^ slackgrow @ j^ slackgrow' +! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -797,9 +799,9 @@ timestats buffer: stat-tuple
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
-    j^ slackgrow @ 2* 0 max +
-    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
-    j^ last-ns/burst @  ?dup-IF  2/ 2/ umax  THEN \ not too quickly go faster!
+    j^ slackgrow' @ 2* 0 max +
+    j^ last-ns/burst @  ?dup-IF  2* 2* min  THEN \ not too quickly go slower!
+    j^ last-ns/burst @  ?dup-IF  2/ 2/ max  THEN \ not too quickly go faster!
     rate( dup . .j ." rate" cr )
     stats( dup s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
