@@ -710,14 +710,16 @@ timestats buffer: stat-tuple
 Variable lastdiff
 Variable lastdeltat
 
-: timestat ( client serv -- )
-    timing( over . dup . ." acktime" cr )
-    ticks \ j^ time-offset @ -
+: >rtdelay ( client serv -- client serv )
+    j^ recv-tick @ j^ time-offset @ +
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
-    over - j^ rtdelay min!
-    - dup lastdiff !
+    over - j^ rtdelay min! ;
+
+: timestat ( client serv -- )
+    timing( over . dup . ." acktime" cr )
+    >rtdelay  - dup lastdiff !
     lastdeltat @ delta-damp# rshift j^ min-slack +!
     lastdeltat @ delta-damp# rshift negate j^ max-slack +!
     dup j^ min-slack min!
