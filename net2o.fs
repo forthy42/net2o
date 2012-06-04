@@ -736,7 +736,7 @@ timestats buffer: stat-tuple
 
 : b2b-timestat ( client serv -- )
     - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow !
-    j^ slackgrow @ j^ slackgrow' +! ;
+    j^ slackgrow @ j^ slackgrow' @ 2/ - j^ slackgrow' +! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
