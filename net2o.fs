@@ -797,13 +797,13 @@ timestats buffer: stat-tuple
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
+    j^ slackgrow @ 2* 0 max +
+    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
+    j^ last-ns/burst @  ?dup-IF  2/ 2/ umax  THEN \ not too quickly go faster!
     rate( dup . .j ." rate" cr )
     stats( dup s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ )
-    j^ slackgrow @ 2* 0 max +
-    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
-    j^ last-ns/burst @  ?dup-IF  2/ 2/ umax  THEN \ not too quickly go faster!
     dup 2/ 2/ j^ extra-ns !
     dup j^ last-ns/burst !
     j^ ns/burst !@ >r
