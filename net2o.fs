@@ -777,29 +777,35 @@ timestats buffer: stat-tuple
     s>f slack# s>f f/ 2e fln f* fexp fm* f>s
     ( slack# / lshift ) ;
 
+: >deltat ( rate deltat -- rate' )
+    drop EXIT
+    dup 0<> j^ lastdeltat @ 0<> and
+    IF  over >r
+	j^ lastdeltat @ over max swap 2dup 2>r */ 2r> */
+	r> 2* min \ no more than a factor two!
+    ELSE  drop  THEN ;
+
 : net2o:set-rate ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
            dup j^ last-time !@ - s>f stat-tuple ts-delta sf!
            over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
-    dup 0<> j^ lastdeltat @ 0<> and
-    IF  over >r
-	j^ lastdeltat @ over max swap 2dup 2>r */ 2r> */
-	r> 2* min \ no more than a factor two!
-    ELSE  drop  THEN
+    >deltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
-    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
-    dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
     stats( dup s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ )
+    j^ slackgrow @ 2* 0 max +
+    j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
+    j^ last-ns/burst @  ?dup-IF  2/ 2/ umax  THEN \ not too quickly go faster!
     dup 2/ 2/ j^ extra-ns !
+    dup j^ last-ns/burst !
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
