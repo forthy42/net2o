@@ -298,7 +298,7 @@ net2o-base
 
 \ flow control functions
 
-30 net2o: ack-addrtime ( addr time -- )  net2o:ack-addrtime ;
+30 net2o: ack-addrtime ( time addr -- )  net2o:ack-addrtime ;
 31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
 32 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
 33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
@@ -442,11 +442,11 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    j^ recv-tick @ j^ recv-addr @
+    j^ recv-addr @ j^ recv-tick @
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime
-    j^ last-rtick @ j^ last-raddr @
+    j^ last-raddr @ j^ last-rtick @
     lit, lit, ack-b2btime ;
 
 \ client side acknowledge

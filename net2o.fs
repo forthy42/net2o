@@ -734,7 +734,7 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ - slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
+    - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -747,7 +747,7 @@ timestats buffer: stat-tuple
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
 
-: net2o:ack-addrtime ( addr ticks -- )  swap >timestamp
+: net2o:ack-addrtime ( ticks addr -- )  >timestamp
     over  IF  
 	dup tick-init 1+ timestamp * u>
 	IF  + dup ts-ticks @
@@ -756,8 +756,7 @@ timestats buffer: stat-tuple
 	ts-ticks @ timestat
     ELSE  2drop drop  THEN ;
 
-: net2o:ack-b2btime ( addr ticks -- )
-    swap >timestamp
+: net2o:ack-b2btime ( ticks addr -- )  >timestamp
     over  IF  + ts-ticks @ b2b-timestat
     ELSE  2drop drop  THEN ;
 
