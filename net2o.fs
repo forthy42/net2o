@@ -736,7 +736,7 @@ timestats buffer: stat-tuple
 
 : b2b-timestat ( client serv -- )
     - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow !
-    j^ slackgrow @ j^ slackgrow' @ 2/ - j^ slackgrow' +! ;
+    j^ slackgrow @ j^ slackgrow' @ 2/ 2/ - j^ slackgrow' +! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -796,7 +796,7 @@ timestats buffer: stat-tuple
     >deltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
-    j^ slackgrow' @ 2* 0 max +
+    j^ slackgrow' @ 0 max +
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
