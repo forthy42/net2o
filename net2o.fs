@@ -796,12 +796,11 @@ timestats buffer: stat-tuple
     >deltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
+    j^ slackgrow' @ 2* 0 max +
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
-    j^ slackgrow' @ 2* 0 max +
-    j^ last-ns/burst @  ?dup-IF  2* 2* min  THEN \ not too quickly go slower!
-    j^ last-ns/burst @  ?dup-IF  2/ 2/ max  THEN \ not too quickly go faster!
+    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* min r> 2/ max  THEN \ not too quickly go slower or faster!
     rate( dup . .j ." rate" cr )
     stats( dup s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
