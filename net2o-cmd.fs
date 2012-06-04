@@ -596,7 +596,9 @@ Local Variables:
 forth-local-words:
     (
      (("net2o:") definition-starter (font-lock-keyword-face . 1)
-       "[ \t\n]" t name (font-lock-function-name-face . 3))
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     ("[a-z]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (

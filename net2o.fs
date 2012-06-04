@@ -465,6 +465,7 @@ field: min-slack
 field: max-slack
 field: ns/burst
 field: last-ns/burst
+field: extra-ns
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
@@ -509,6 +510,7 @@ sffield: ts-delta
 sffield: ts-slack
 sffield: ts-reqrate
 sffield: ts-rate
+sffield: ts-grow
 end-structure
 
 \ check for valid destination
@@ -617,13 +619,7 @@ b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
 
 Variable init-context#
 
-: n2o:new-context ( addr -- )
-    context-struct allocate throw to j^
-    j^ context-struct erase
-    init-context# @ j^ context# !  1 init-context# +!
-    dup return-addr !  j^ return-address !
-    s" " j^ data-resend $!
-    wurst-key state# j^ crypto-key $!
+: init-flow-control ( -- )
     max-int64 2/ j^ min-slack !
     max-int64 2/ negate j^ max-slack !
     max-int64 j^ rtdelay !
@@ -631,6 +627,16 @@ Variable init-context#
     ticks j^ lastack ! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
     never          j^ next-tick !
+    0              j^ extra-ns ! ;
+
+: n2o:new-context ( addr -- )
+    context-struct allocate throw to j^
+    j^ context-struct erase
+    init-context# @ j^ context# !  1 init-context# +!
+    dup return-addr !  j^ return-address !
+    s" " j^ data-resend $!
+    wurst-key state# j^ crypto-key $!
+    init-flow-control
     -1 j^ blocksize !
     1 j^ blockalign ! ;
 
@@ -698,7 +704,9 @@ reply buffer: dummy-reply
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
-	I ts-rate sf@ f/ f. ." timing" cr
+	I ts-rate sf@ f/ f.
+	I ts-grow sf@ 1u f* f.
+	." timing" cr
     timestats +LOOP ;
 
 timestats buffer: stat-tuple
@@ -726,7 +734,7 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ - slack( dup . .j ." slackgrow" cr ) j^ slackgrow ! ;
+    - j^ lastslack @ - slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -769,8 +777,9 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
-    stats( j^ recv-tick @ j^ time-offset @ - dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
-    stats( over s>f stat-tuple ts-reqrate sf! )
+    stats( j^ recv-tick @ j^ time-offset @ -
+           dup j^ last-time !@ - s>f stat-tuple ts-delta sf!
+           over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
     dup 0<> j^ lastdeltat @ 0<> and
@@ -786,7 +795,10 @@ timestats buffer: stat-tuple
     j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
     dup j^ last-ns/burst !
     rate( dup . .j ." rate" cr )
-    stats( dup s>f stat-tuple ts-rate sf! stat+ )
+    stats( dup s>f stat-tuple ts-rate sf!
+           j^ slackgrow @ s>f stat-tuple ts-grow sf! 
+           stat+ )
+    dup 2/ 2/ j^ extra-ns !
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
@@ -998,7 +1010,7 @@ Variable code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j^ 0= ?EXIT
-    j^ ns/burst @ tick-init 1+ / j^ bandwidth-tick +! ;
+    j^ ns/burst @ j^ extra-ns @ - tick-init 1+ / j^ bandwidth-tick +! ;
 
 : burst-end ( -- )  j^ data-b2b @ ?EXIT
     ticks j^ bandwidth-tick @ umax j^ next-tick ! ;
@@ -1090,6 +1102,7 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF
 	ack-toggle# j^ ack-state xor!
+	j^ extra-ns @ j^ bandwidth-tick +!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " j^ ns/burst ? dest-tail$@ swap hex. hex. cr )
@@ -1350,3 +1363,13 @@ Defer do-timeout  ' noop IS do-timeout
 \ load net2o commands
 
 include net2o-cmd.fs
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     ("[a-z]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+End:
+[THEN]

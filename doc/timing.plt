@@ -18,5 +18,6 @@ set ylabel "Rate [MB/s]"
 set y2label "Slack [ms]"
 plot "timing" using 1:4 title "Requested",\
  "timing" using 1:5 title "Rate",\
- "timing" using 1:3 axis x1y2 title "Slack"
+ "timing" using 1:3 axis x1y2 title "Slack", \
+ "timing" using 1:6 axis x1y2 title "Grow"
 
