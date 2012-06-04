@@ -471,6 +471,9 @@ field: rtdelay \ ns
 field: lastack \ ns
 field: flyburst
 field: flybursts
+field: lastslack
+field: lastdeltat
+field: slackgrow
 \ flow control, receiver part
 field: burst-ticks
 field: firstb-ticks
@@ -707,11 +710,8 @@ timestats buffer: stat-tuple
 : ticks-init ( ticks -- )
     dup j^ bandwidth-tick !  j^ next-tick ! ;
 
-Variable lastdiff
-Variable lastdeltat
-
 : >rtdelay ( client serv -- client serv )
-    j^ recv-tick @ j^ time-offset @ +
+    j^ recv-tick @
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
     dup j^ lastack !
@@ -719,11 +719,14 @@ Variable lastdeltat
 
 : timestat ( client serv -- )
     timing( over . dup . ." acktime" cr )
-    >rtdelay  - dup lastdiff !
-    lastdeltat @ delta-damp# rshift j^ min-slack +!
-    lastdeltat @ delta-damp# rshift negate j^ max-slack +!
+    >rtdelay  - dup j^ lastslack !
+    j^ lastdeltat @ delta-damp# rshift j^ min-slack +!
+    j^ lastdeltat @ delta-damp# rshift negate j^ max-slack +!
     dup j^ min-slack min!
     j^ max-slack max! ;
+
+: b2b-timestat ( client serv -- )
+    - j^ lastslack @ - slack( dup . .j ." slackgrow" cr ) j^ slackgrow ! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -740,12 +743,15 @@ Variable lastdeltat
     over  IF  
 	dup tick-init 1+ timestamp * u>
 	IF  + dup ts-ticks @
-	    over tick-init 1+ timestamp * - ts-ticks @ - lastdeltat !
+	    over tick-init 1+ timestamp * - ts-ticks @ - j^ lastdeltat !
 	ELSE  +  THEN
 	ts-ticks @ timestat
     ELSE  2drop drop  THEN ;
 
-: net2o:ack-b2btime ( addr ticks -- )  2drop EXIT swap >timestamp ;
+: net2o:ack-b2btime ( addr ticks -- )
+    swap >timestamp
+    over  IF  + ts-ticks @ b2b-timestat
+    ELSE  2drop drop  THEN ;
 
 #3000000 Value slack-default# \ 3ms slack leads to backdrop of factor 2
 
@@ -763,18 +769,18 @@ Variable lastdeltat
     ( slack# / lshift ) ;
 
 : net2o:set-rate ( rate deltat -- )
-    stats( ticks j^ time-offset @ - dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
+    stats( j^ recv-tick @ j^ time-offset @ - dup j^ last-time !@ - s>f stat-tuple ts-delta sf! )
     stats( over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
-    deltat( dup . lastdeltat ? .j ." deltat" cr )
-    dup 0<> lastdeltat @ 0<> and
+    deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
+    dup 0<> j^ lastdeltat @ 0<> and
     IF  over >r
-	lastdeltat @ over max swap 2dup 2>r */ 2r> */
+	j^ lastdeltat @ over max swap 2dup 2>r */ 2r> */
 	r> 2* min \ no more than a factor two!
     ELSE  drop  THEN
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
-    lastdiff @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
+    j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
     j^ last-ns/burst @  ?dup-IF  2* 2* umin  THEN \ not too quickly go slower!
@@ -1277,7 +1283,7 @@ $04 Constant login-val
 	inbuf packet-data queue-command
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN
-        ticks j^ time-offset @ - j^ recv-tick ! \ time stamp of arrival
+        ticks j^ recv-tick ! \ time stamp of arrival
 	dup 0> wurst-inbuf-decrypt 0= IF
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
