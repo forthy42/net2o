@@ -766,7 +766,7 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks @ b2b-timestat
     ELSE  2drop drop  THEN ;
 
-#30000000 Value slack-default# \ 30ms slack leads to backdrop of factor 2
+#10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
 
 : slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ slack-default# max ;
 
@@ -795,8 +795,8 @@ timestats buffer: stat-tuple
 : slackext ( -- slack )
     j^ slackgrow @ tick-init 1+ j^ window-size @ bounds */ ;
 
-: slackfilter ( rate -- rate' )
-    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 2 lshift */ - max
+: slackfilter ( rate extra-ns -- rate' )
+    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 0 lshift */ - max
     j^ extra-ns ! ;
 
 : >extra-ns ( rate -- rate' )
