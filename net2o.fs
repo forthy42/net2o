@@ -805,7 +805,8 @@ timestats buffer: stat-tuple
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
-    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* min r> 2/ max  THEN ;
+    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* umin r> 2/ umax  THEN
+    dup j^ last-ns/burst ! ;
 
 : net2o:set-rate ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
@@ -820,7 +821,6 @@ timestats buffer: stat-tuple
     stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ )
-    dup j^ last-ns/burst !
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
