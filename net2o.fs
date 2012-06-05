@@ -764,7 +764,7 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks @ b2b-timestat
     ELSE  2drop drop  THEN ;
 
-#3000000 Value slack-default# \ 3ms slack leads to backdrop of factor 2
+#30000000 Value slack-default# \ 30ms slack leads to backdrop of factor 2
 
 : slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ slack-default# max ;
 
