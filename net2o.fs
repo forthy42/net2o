@@ -735,7 +735,7 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ swap - slack( dup . .j ." grow" cr ) j^ slackgrow !
+    - j^ lastslack @ - slack( dup . .j ." grow" cr ) j^ slackgrow !
     j^ slackgrow @ j^ slackgrow' @ 2/ 2/ - j^ slackgrow' +! ;
 
 : map@ ( -- addr/0 )
@@ -787,6 +787,11 @@ timestats buffer: stat-tuple
 	r> 2* min \ no more than a factor two!
     ELSE  drop  THEN ;
 
+: >extra-ns ( -- )
+    j^ slackgrow @
+    j^ extra-ns @ dup j^ rtdelay @ j^ ns/burst @ 2* */ - max
+    0 max j^ extra-ns ! ;
+
 : net2o:set-rate ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
            dup j^ last-time !@ - s>f stat-tuple ts-delta sf!
@@ -796,16 +801,15 @@ timestats buffer: stat-tuple
     >deltat
     rate( dup . .j ." clientavg" cr )
     \ negative rate means packet reordering
-    j^ slackgrow' @ 0 max +
+    >extra-ns
     j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     >slack-exp
     j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* min r> 2/ max  THEN \ not too quickly go slower or faster!
     rate( dup . .j ." rate" cr )
-    stats( dup s>f stat-tuple ts-rate sf!
+    stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ )
-    dup 2/ 2/ j^ extra-ns !
     dup j^ last-ns/burst !
     j^ ns/burst !@ >r
     r> bandwidth-init = IF \ first acknowledge
@@ -1018,7 +1022,7 @@ Variable code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j^ 0= ?EXIT
-    j^ ns/burst @ j^ extra-ns @ - tick-init 1+ / j^ bandwidth-tick +! ;
+    j^ ns/burst @ tick-init 1+ / j^ bandwidth-tick +! ;
 
 : burst-end ( -- )  j^ data-b2b @ ?EXIT
     ticks j^ bandwidth-tick @ umax j^ next-tick ! ;
