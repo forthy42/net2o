@@ -466,6 +466,7 @@ field: max-slack
 field: ns/burst
 field: last-ns/burst
 field: extra-ns
+field: window-size \ packets in flight
 field: bandwidth-tick \ ns
 field: next-tick \ ns
 field: rtdelay \ ns
@@ -747,6 +748,7 @@ timestats buffer: stat-tuple
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ dest-vaddr @ -
     dup r@ dest-size @ u<  IF
+	r@ dest-tail @ over - 0 max addr>bits j^ window-size !
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
 
@@ -790,11 +792,16 @@ timestats buffer: stat-tuple
 	r> 2* min \ no more than a factor two!
     ELSE  drop  THEN ;
 
-: >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck
-    j^ slackgrow @ 2* rot */ 0 max
-    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 3 lshift */ - max
+: slackext ( -- slack )
+    j^ slackgrow @ tick-init 1+ j^ window-size @ bounds */ ;
+
+: slackfilter ( rate -- rate' )
+    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 2 lshift */ - max
     j^ extra-ns ! ;
+
+: >extra-ns ( rate -- rate' )
+    dup >slack-exp tuck slackext rot */ 0 max
+    slackfilter ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
