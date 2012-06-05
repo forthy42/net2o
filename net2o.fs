@@ -774,7 +774,10 @@ timestats buffer: stat-tuple
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
-: >slack-exp ( rate slack -- rate' )
+: >slack-exp ( rate -- rate' )
+    j^ lastslack @ j^ min-slack @ -
+    slack( dup . j^ min-slack ? .j ." slack" cr )
+    stats( dup s>f stat-tuple ts-slack sf! )
     0 max slack# 2* 2* min
     s>f slack# s>f f/ 2e fln f* fexp fm* f>s
     ( slack# / lshift ) ;
@@ -787,10 +790,15 @@ timestats buffer: stat-tuple
 	r> 2* min \ no more than a factor two!
     ELSE  drop  THEN ;
 
-: >extra-ns ( -- )
-    j^ slackgrow @ 2* 0 max
-    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 4 lshift */ - max
+: >extra-ns ( rate -- rate' )
+    dup >slack-exp tuck
+    j^ slackgrow @ 2* rot */ 0 max
+    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 3 lshift */ - max
     j^ extra-ns ! ;
+
+: rate-limit ( rate -- rate' )
+    \ not too quickly go slower or faster!
+    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* min r> 2/ max  THEN ;
 
 : net2o:set-rate ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
@@ -800,12 +808,7 @@ timestats buffer: stat-tuple
     deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
     >deltat
     rate( dup . .j ." clientavg" cr )
-    \ negative rate means packet reordering
-    >extra-ns
-    j^ lastslack @ j^ min-slack @ - slack( dup . j^ min-slack ? .j ." slack" cr )
-    stats( dup s>f stat-tuple ts-slack sf! )
-    >slack-exp
-    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* min r> 2/ max  THEN \ not too quickly go slower or faster!
+    >extra-ns rate-limit
     rate( dup . .j ." rate" cr )
     stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
