@@ -796,7 +796,10 @@ timestats buffer: stat-tuple
     j^ slackgrow @ tick-init 1+ j^ window-size @ bounds */ ;
 
 : slackfilter ( rate extra-ns -- rate' )
-    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 0 lshift */ - max
+\    j^ extra-ns @ dup j^ ns/burst @
+\    j^ rtdelay @ \ 2* 2*
+\    j^ ns/burst @ IF  j^ ns/burst @ j^ extra-ns @ bounds */  THEN
+\    */ - max
     j^ extra-ns ! ;
 
 : >extra-ns ( rate -- rate' )
