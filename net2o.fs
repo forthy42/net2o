@@ -788,9 +788,9 @@ timestats buffer: stat-tuple
     ELSE  drop  THEN ;
 
 : >extra-ns ( -- )
-    j^ slackgrow @
-    j^ extra-ns @ dup j^ rtdelay @ j^ ns/burst @ 2* */ - max
-    0 max j^ extra-ns ! ;
+    j^ slackgrow @ 2* 0 max
+    j^ extra-ns @ dup j^ ns/burst @ j^ rtdelay @ 4 lshift */ - max
+    j^ extra-ns ! ;
 
 : net2o:set-rate ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
