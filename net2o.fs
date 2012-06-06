@@ -736,7 +736,7 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ - slack( dup . .j ." grow" cr ) j^ slackgrow !
+    - j^ lastslack @ - negate slack( dup . .j ." grow" cr ) j^ slackgrow !
     j^ slackgrow @ j^ slackgrow' @ 2/ 2/ - j^ slackgrow' +! ;
 
 : map@ ( -- addr/0 )
@@ -801,12 +801,12 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @ 2* 0 max j^ lastslack @ j^ min-slack @ - +
+    j^ slackgrow @ 0 max  j^ lastslack @ j^ min-slack @ - 2* +
     tick-init 1+ j^ window-size @ bounds */ ;
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */ 0 max
-    j^ extra-ns @ 3 4 */ min j^ extra-ns ! ;
+    j^ extra-ns @ j^ window-size @ tick-init 1+ over + */ min j^ extra-ns ! ;
 \    slackfilter ;
 
 : rate-limit ( rate -- rate' )
