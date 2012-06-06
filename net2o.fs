@@ -253,7 +253,7 @@ Variable packetr
 Variable packets
 
 2Variable ptimeout
-#100000000 Value poll-timeout# \ 100ms
+#200000000 Value poll-timeout# \ 100ms
 poll-timeout# 0 ptimeout 2!
 
 inbuf'  Constant inbuf
@@ -801,10 +801,12 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @ tick-init 1+ j^ window-size @ bounds */ ;
+    j^ slackgrow @ j^ lastslack @ j^ min-slack @ - +
+    tick-init 1+ j^ window-size @ bounds */ ;
 
 : >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck slackext rot */ 0 max 2/ dup j^ extra-ns ! + ;
+    dup >slack-exp tuck slackext rot */ 0 max
+    j^ extra-ns @ 2/ min j^ extra-ns ! ;
 \    slackfilter ;
 
 : rate-limit ( rate -- rate' )
