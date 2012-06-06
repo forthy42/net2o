@@ -806,7 +806,9 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */ 0 max
-    j^ extra-ns @ j^ window-size @ tick-init 1+ over + */ min j^ extra-ns ! ;
+    j^ extra-ns @ j^ window-size @ tick-init 1+ over + */
+    dup rng@ m* nip + \ randomize
+    min j^ extra-ns ! ;
 \    slackfilter ;
 
 : rate-limit ( rate -- rate' )
