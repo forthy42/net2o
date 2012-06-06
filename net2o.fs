@@ -825,8 +825,8 @@ timestats buffer: stat-tuple
     stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ )
-    j^ ns/burst !@ >r
-    r> bandwidth-init = IF \ first acknowledge
+    j^ ns/burst !@
+    bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
     THEN ;
