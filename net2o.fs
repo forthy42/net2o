@@ -776,22 +776,6 @@ timestats buffer: stat-tuple
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
-0 [IF]
-: >deltat ( rate deltat -- rate' )
-    dup 0<> j^ lastdeltat @ 0<> and
-    IF  over >r
-	j^ lastdeltat @ over max swap 2dup 2>r */ 2r> */
-	r> 2* min \ no more than a factor two!
-    ELSE  drop  THEN ;
-
-: slackfilter ( rate extra-ns -- rate' )
-    j^ extra-ns @ dup j^ ns/burst @
-    j^ rtdelay @ \ 2* 2*
-    j^ ns/burst @ IF  j^ ns/burst @ j^ extra-ns @ bounds */  THEN
-    */ - max
-    j^ extra-ns ! ;
-[THEN]
-
 : >slack-exp ( rate -- rate' )
     j^ lastslack @ j^ min-slack @ -
     slack( dup . j^ min-slack ? .j ." slack" cr )
@@ -801,19 +785,16 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @ 0 max  j^ lastslack @ j^ min-slack @ - 2* +
-    tick-init 1+ j^ window-size @ bounds */ ;
+    j^ slackgrow @ 0 max \ j^ lastslack @ j^ min-slack @ - +
+    j^ window-size @ tick-init 1+ */ ;
 
 : >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck slackext rot */ 0 max
-    j^ extra-ns @ j^ window-size @ tick-init 1+ over + */
-    dup rng@ m* nip + \ randomize
-    min j^ extra-ns ! ;
-\    slackfilter ;
+    dup >slack-exp tuck slackext rot */
+    2/ dup j^ extra-ns ! + ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
-    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* umin r> 2/ umax  THEN
+    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
     dup j^ last-ns/burst ! ;
 
 : net2o:set-rate ( rate deltat -- )
