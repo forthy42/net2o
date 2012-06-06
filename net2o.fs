@@ -804,7 +804,7 @@ timestats buffer: stat-tuple
     j^ slackgrow @ tick-init 1+ j^ window-size @ bounds */ ;
 
 : >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck slackext rot */ 0 max j^ extra-ns ! ;
+    dup >slack-exp tuck slackext rot */ 0 max 2/ dup j^ extra-ns ! + ;
 \    slackfilter ;
 
 : rate-limit ( rate -- rate' )
