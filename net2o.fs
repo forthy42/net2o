@@ -768,7 +768,7 @@ timestats buffer: stat-tuple
 
 #10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
 
-: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ slack-default# max ;
+: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay @ j^ ns/burst @ / flybursts# +
@@ -801,12 +801,12 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @ j^ lastslack @ j^ min-slack @ - +
+    j^ slackgrow @ 2* 0 max j^ lastslack @ j^ min-slack @ - +
     tick-init 1+ j^ window-size @ bounds */ ;
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */ 0 max
-    j^ extra-ns @ 2/ min j^ extra-ns ! ;
+    j^ extra-ns @ 3 4 */ min j^ extra-ns ! ;
 \    slackfilter ;
 
 : rate-limit ( rate -- rate' )
