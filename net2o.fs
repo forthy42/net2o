@@ -611,9 +611,9 @@ Variable mapstart $10000 mapstart !
 
 \ create context
 
-8 Value b2b-chunk#
+8 Value bursts# \ number of 
 8 Value delta-damp#
-b2b-chunk# 2* 2* 1- Value tick-init \ ticks without ack
+bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
 -1 Constant never
 -1 1 rshift Constant max-int64
@@ -782,12 +782,12 @@ timestats buffer: stat-tuple
     slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     0 max slack# 2* 2* min slack-bias# -
-    s>f slack# s>f f/ 2e fln f* fexp fm* f>s
+    s>f slack# fm/ 2e fswap f** fm* f>s
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
     j^ slackgrow @ 0 max \ j^ lastslack @ j^ min-slack @ - +
-    j^ window-size @ tick-init 1+ */ ;
+    j^ window-size @ tick-init 1+ bursts# - */ ;
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */
@@ -804,7 +804,7 @@ timestats buffer: stat-tuple
            over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
     deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
-    drop \ >deltat
+    drop
     rate( dup . .j ." clientavg" cr )
     >extra-ns rate-limit
     rate( dup . .j ." rate" cr )
@@ -1126,7 +1126,7 @@ Create chunk-adder chunks-struct allot
     j^ data-b2b @ 0<= IF
 	bandwidth? dup  IF
 	    b2b-toggle# j^ ack-state xor!
-	    b2b-chunk# 1- j^ data-b2b !
+	    bursts# 1- j^ data-b2b !
 	THEN
     ELSE
 	-1 j^ data-b2b +!  true
