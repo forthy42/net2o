@@ -595,8 +595,8 @@ also net2o-base
       ['] end-cmd IS expect-reply? ;]  IS expect-reply?
     ['] connecting-timeout j^ timeout-xt !
     1 client-loop
-    ['] connected-timeout j^ timeout-xt !
-    timeouts @ 0<= !!contimeout!! and F throw ;
+    timeouts @ 0<= !!contimeout!! and F throw
+    ['] connected-timeout j^ timeout-xt ! ;
 
 : rewind? ( -- )
     j^ data-rmap $@ drop dest-round @ lit, rewind-sender
