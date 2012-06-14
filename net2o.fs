@@ -142,21 +142,9 @@ debug: firstack(
 debug: msg(
 debug: profile(
 debug: stat(
+debug: timeout(
 
 : +db ( "word" -- ) ' >body on ;
-
-\ +db bursts(
-\ +db rate(
-\ +db ratex(
-\ +db slack(
-\ +db timing(
-\ +db deltat(
-\ +db resend(
-\ +db track(
-\ +db cmd(
-\ +db send(
-\ +db firstack(
-\ +db msg(
 
 Variable debug-eval
 
@@ -450,6 +438,7 @@ field: file-state
 field: blocksize
 field: blockalign
 field: crypto-key
+field: timeout-xt
 
 field: data-map
 field: data-rmap
@@ -461,6 +450,9 @@ field: code-rmap
 
 field: ack-state
 field: ack-receive
+
+field: req-codesize
+field: req-datasize
 \ flow control, sender part
 field: min-slack
 field: max-slack
@@ -1281,7 +1273,7 @@ Create pollfds   here pollfd %size dup allot erase
 ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
-    ." timeout? " . send-anything? . chunks+ ? next-chunk-tick . cr ;
+    timeout( ." timeout? " . send-anything? . chunks+ ? next-chunk-tick . cr ) ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command

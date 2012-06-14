@@ -161,7 +161,9 @@ Variable cmd0buf#
 : net2o-code0  cmd0source off  ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
-: send-cmd ( addr dest -- )  code-packet on
+: send-cmd ( addr dest -- )
+    cmd( ." send: " cmdbuf$ n2o:see cr )
+    code-packet on
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
@@ -280,7 +282,7 @@ also net2o-base definitions
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     ]nest  >r rot r> swap >r -rot r> n2o:create-map
-    2drop 2drop request-done ;
+    2drop 2drop ;
 
 net2o-base
 
@@ -309,6 +311,7 @@ net2o-base
 37 net2o: >time-offset ( n -- )  j^ time-offset ! ;
 : time-offset! ( -- )  ticks dup lit, >time-offset j^ time-offset ! ;
 38 net2o: ack-b2btime ( addr time -- )  net2o:ack-b2btime ;
+39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
 
 \ crypto functions
 
@@ -381,21 +384,7 @@ net2o-base
 
 previous definitions
 
-\ higher level functions
-
 also net2o-base
-
-: map-request, ( ucode udata -- )
-    2dup + n2o:new-map lit, swap lit, lit,
-    map-request ;
-
-: n2o:connect ( ucode udata return-addr -- )
-    n2o:new-context
-    net2o-code0  nest[ j^ lit, set-j^ ]nest  map-request,  key-request
-    end-code
-    [: pkc keysize $, receive-key update-key code-ivs end-cmd
-    ['] end-cmd IS expect-reply? ;] IS expect-reply?
-    1 client-loop  timeouts @ 0<= !!contimeout!! and F throw ;
 
 Variable file-reg#
 
@@ -555,15 +544,21 @@ also net2o-base
 
 ' net2o:do-ack IS do-ack
 
-: rewind? ( -- )
-    j^ data-rmap $@ drop dest-round @ lit, rewind-sender
-    j^ expected @ 0= j^ total @ 0> and  IF
-\	restart-transfer \ !!!FIXME!!!
-    THEN ;
+\ higher level functions
+
+: map-request, ( ucode udata -- )
+    2dup + n2o:new-map lit, swap lit, lit,
+    map-request ;
+
+: gen-request ( -- )
+    net2o-code0  nest[ j^ lit, set-j^ ticks lit, set-rtdelay request-done ]nest
+    j^ req-codesize @  j^ req-datasize @ map-request,
+    key-request
+    end-code ;
 
 : ?j ]] j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT [[ ; immediate
 
-: resend? ( -- )
+: cmd-resend? ( -- )
     j^ code-map $@ drop >r
     r@ dest-timestamps @
     r@ dest-size @ addr>replies bounds ?DO
@@ -583,10 +578,33 @@ also net2o-base
     \ dmap dest-size @ addr>bits bits>bytes dump
 ;
 
-: net2o:do-timeout ( -- )  ?j  resend?
-    resend-toggle# j^ recv-flag xor!  .expected
+: transfer-keepalive? ( -- )
+    j^ received @ j^ expected @ u>= ?EXIT
+    resend-toggle# j^ recv-flag xor! timeout( .expected )
     cmdreset  ticks lit, timeout  false net2o:do-resend  net2o:genack
     cmd-send? ;
+
+: connecting-timeout ( -- ) gen-request ;
+: connected-timeout ( -- )  cmd-resend? transfer-keepalive? ;
+
+: n2o:connect ( ucode udata return-addr -- )
+    n2o:new-context
+    j^ req-datasize !  j^ req-codesize !
+    gen-request
+    [: pkc keysize $, receive-key update-key code-ivs end-cmd
+      ['] end-cmd IS expect-reply? ;]  IS expect-reply?
+    ['] connecting-timeout j^ timeout-xt !
+    1 client-loop
+    ['] connected-timeout j^ timeout-xt !
+    timeouts @ 0<= !!contimeout!! and F throw ;
+
+: rewind? ( -- )
+    j^ data-rmap $@ drop dest-round @ lit, rewind-sender
+    j^ expected @ 0= j^ total @ 0> and  IF
+\	restart-transfer \ !!!FIXME!!!
+    THEN ;
+
+: net2o:do-timeout ( -- )  j^ 0= ?EXIT  j^ timeout-xt perform ;
 ' net2o:do-timeout IS do-timeout
 
 previous
@@ -603,6 +621,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("[:") (0 . 1) (0 . 1) immediate)
+     ((";]") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]
