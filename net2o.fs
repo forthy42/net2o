@@ -123,6 +123,7 @@ s" too many commands"            exception Constant !!commands!!
 s" string does not fit"          exception Constant !!stringfit!!
 s" ivs must be 64 bytes"         exception Constant !!ivs!!
 s" key+pubkey must be 32 bytes"  exception Constant !!keysize!!
+s" connection attempt timed out" exception Constant !!contimeout!!
 
 \ this is already defined in assertions
 

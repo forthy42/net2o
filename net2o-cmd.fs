@@ -395,7 +395,7 @@ also net2o-base
     end-code
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
     ['] end-cmd IS expect-reply? ;] IS expect-reply?
-    1 client-loop ;
+    1 client-loop  timeouts @ 0<= !!contimeout!! and F throw ;
 
 Variable file-reg#
 
@@ -561,8 +561,9 @@ also net2o-base
 \	restart-transfer \ !!!FIXME!!!
     THEN ;
 
+: ?j ]] j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT [[ ; immediate
+
 : resend? ( -- )
-    j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT
     j^ code-map $@ drop >r
     r@ dest-timestamps @
     r@ dest-size @ addr>replies bounds ?DO
@@ -574,7 +575,6 @@ also net2o-base
     rdrop ;
 
 : .expected ( -- )
-    j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT
     ." expected/received: " j^ recv-addr @ hex.
     j^ data-rmap $@ drop receive-flag data-firstack# @ hex.
     j^ expected @ hex. j^ received @ hex. F cr
@@ -583,7 +583,7 @@ also net2o-base
     \ dmap dest-size @ addr>bits bits>bytes dump
 ;
 
-: net2o:do-timeout ( -- )  resend?
+: net2o:do-timeout ( -- )  ?j  resend?
     resend-toggle# j^ recv-flag xor!  .expected
     cmdreset  ticks lit, timeout  false net2o:do-resend  net2o:genack
     cmd-send? ;
