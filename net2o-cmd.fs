@@ -293,7 +293,7 @@ net2o-base
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
 27 net2o: set-blocksize ( n -- )  j^ blocksize ! ;
-28 net2o: set-blockalign ( n -- ) pow2?  j^ blockalign ! ;
+28 net2o: set-blockalign ( n -- )  pow2?  j^ blockalign ! ;
 
 : blocksize! ( n -- )  dup lit, set-blocksize j^ blocksize ! ;
 : blockalign! ( n -- )  dup lit, set-blockalign pow2? j^ blockalign ! ;
@@ -312,16 +312,18 @@ net2o-base
 : time-offset! ( -- )  ticks dup lit, >time-offset j^ time-offset ! ;
 38 net2o: ack-b2btime ( addr time -- )  net2o:ack-b2btime ;
 39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
+40 net2o: ack-cookies ( cookie addr mask -- )
+    map@ -rot cookie+ = cookie-val validated or! ;
 
 \ crypto functions
 
-40 net2o: receive-key ( addr u -- )  net2o:receive-key  do-keypad on ;
-41 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-42 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
-43 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
-44 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
-45 net2o: key-request ( -- addr u )  pkc keysize $, receive-key ;
-46 net2o: update-key ( -- )  net2o:update-key ;
+50 net2o: receive-key ( addr u -- )  net2o:receive-key  do-keypad on ;
+51 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
+52 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
+53 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
+54 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
+55 net2o: key-request ( -- addr u )  pkc keysize $, receive-key ;
+56 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
 
@@ -334,36 +336,36 @@ net2o-base
 
 \ better slurping
 
-50 net2o: slurp-block ( seek maxlen id -- nextseek )
+60 net2o: slurp-block ( seek maxlen id -- nextseek )
           n2o:slurp-block ;
-51 net2o: track-size ( size id -- )
+61 net2o: track-size ( size id -- )
           track( 2dup ." file <" 0 .r ." > size: " F . F cr ) size! ;
-52 net2o: track-seek ( seek id -- )
+62 net2o: track-seek ( seek id -- )
           track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seek! ;
-53 net2o: open-tracked-file ( addr u mode id -- )
+63 net2o: open-tracked-file ( addr u mode id -- )
           dup >r n2o:open-file
           r@ id>file F file-size throw drop lit, r> lit, track-size ;
-54 net2o: slurp-tracked-block ( id -- )
+64 net2o: slurp-tracked-block ( id -- )
           dup >r n2o:slurp-block lit, r> lit, track-seek ;
-55 net2o: slurp-tracked-blocks ( idbits -- )
+65 net2o: slurp-tracked-blocks ( idbits -- )
           dup >r n2o:slurp-blocks
           r> [: swap lit, lit, track-seek ;] n2o:track-seeks ;
-56 net2o: slurp-all-tracked-blocks ( -- )
+66 net2o: slurp-all-tracked-blocks ( -- )
           n2o:slurp-all-blocks
           [: lit, lit, track-seek ;] n2o:track-all-seeks ;
-57 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
-58 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
+67 net2o: rewind-sender ( n -- )  net2o:rewind-sender ;
+68 net2o: rewind-receiver ( n -- )  net2o:rewind-receiver ;
 
 \ acknowledges
 
-60 net2o: timeout ( ticks -- ) net2o:timeout ;
-61 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-62 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+70 net2o: timeout ( ticks -- ) net2o:timeout ;
+71 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+72 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 \ profiling
 
-70 net2o: !time ( -- ) init-timer ;
-71 net2o: .time ( -- ) .times ;
+80 net2o: !time ( -- ) init-timer ;
+81 net2o: .time ( -- ) .times ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver lit, rewind-sender ;

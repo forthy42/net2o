@@ -999,8 +999,8 @@ include net2o-crypt.fs
 : cookie+ ( map addr bitmap -- sum )  >r
     addr>ts swap dest-cookies @ +  0
     BEGIN  r@ 1 and IF  over @ +  THEN
-    >r cell+ r> 2/ dup 0= UNTIL
-    drop nip ;
+    >r cell+ r> r> 2/ dup >r 0= UNTIL
+    rdrop nip ;
 
 \ send blocks of memory
 
@@ -1312,6 +1312,7 @@ Variable validated
 $01 Constant crypt-val
 $02 Constant own-crypt-val
 $04 Constant login-val
+$08 Constant cookie-val
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
