@@ -406,6 +406,7 @@ field: dest-ivs
 field: dest-ivsgen
 field: dest-ivslastgen
 field: dest-timestamps
+field: dest-cookies
 field: dest-tail
 end-structure
 
@@ -567,6 +568,7 @@ Variable mapping-addr
 	dup addr>replies allocatez r@ dest-timestamps !
     ELSE
 	dup addr>ts allocatez r@ dest-timestamps !
+	dup addr>ts allocatez r@ dest-cookies !
 	dup addr>bits bits>bytes allocateFF r@ data-ackbits0 !
 	dup addr>bits bits>bytes allocateFF r@ data-ackbits1 !
     THEN
@@ -735,12 +737,17 @@ timestats buffer: stat-tuple
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
     drop j^ data-map $@ drop ;
+: rmap@ ( -- addr/0 )
+    0 j^ 0= ?EXIT  j^ data-rmap @ 0= ?EXIT
+    drop j^ data-rmap $@ drop ;
+
+: >real ( addr map -- addr' flag ) >r
+    r@ dest-vaddr @ - dup r> dest-size @ u< ;
 
 : >timestamp ( time addr -- ts-array index / 0 0 )
     >r j^ time-offset @ + r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
-    r@ dest-vaddr @ -
-    dup r@ dest-size @ u<  IF
+    r@ >real  IF
 	r@ dest-tail @ over - 0 max addr>bits j^ window-size !
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
@@ -979,6 +986,22 @@ file-state-struct buffer: new-file-state
 
 include net2o-crypt.fs
 
+\ cookie stuff
+
+: cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >r
+    wurst-cookie
+    dest-addr @ r@ >real 0= IF  rdrop 2drop  EXIT  THEN
+    addr>ts r> dest-cookies @ + ! ;
+
+: send-cookie ( -- )  map@ cookie! ;
+: recv-cookie ( -- ) rmap@ cookie! ;
+
+: cookie+ ( map addr bitmap -- sum )  >r
+    addr>ts swap dest-cookies @ +  0
+    BEGIN  r@ 1 and IF  over @ +  THEN
+    >r cell+ r> 2/ dup 0= UNTIL
+    drop nip ;
+
 \ send blocks of memory
 
 : set-dest ( addr target -- )
@@ -1000,7 +1023,9 @@ Variable code-packet
 
 : send-packet ( flag -- )
 \    ." send " outbuf .header
-    code-packet @ wurst-outbuf-encrypt  code-packet off
+    code-packet @ wurst-outbuf-encrypt
+    code-packet @ IF  send-cookie  THEN
+    code-packet off
     out-route drop
     outbuf dup packet-size
     send-a-packet 0< IF

@@ -525,14 +525,14 @@ also net2o-base
 	r> and >r
     THEN
     drop r> 0= IF  maxdata j^ received +!  expected?  THEN ;
-    
+
+: recv-high! ( -- )
+    dest-addr @ j^ recv-high
+    j^ recv-high @ -1 = IF  !  ELSE  umax!  THEN ;
+
 : net2o:do-ack ( -- )
     dest-addr @ j^ recv-addr ! \ last received packet
-    j^ recv-high @ -1 = IF
-	dest-addr @ j^ recv-high !
-    ELSE
-	dest-addr @ j^ recv-high umax!
-    THEN
+    recv-high!
     inbuf 1+ c@ j^ recv-flag ! \ last receive flag
     cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
@@ -599,10 +599,7 @@ also net2o-base
     ['] connected-timeout j^ timeout-xt ! ;
 
 : rewind? ( -- )
-    j^ data-rmap $@ drop dest-round @ lit, rewind-sender
-    j^ expected @ 0= j^ total @ 0> and  IF
-\	restart-transfer \ !!!FIXME!!!
-    THEN ;
+    j^ data-rmap $@ drop dest-round @ lit, rewind-sender ;
 
 : net2o:do-timeout ( -- )  j^ 0= ?EXIT  j^ timeout-xt perform ;
 ' net2o:do-timeout IS do-timeout

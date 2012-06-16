@@ -112,6 +112,8 @@ rng$ mykey swap move
 : wurst-crc ( -- xd )
     pad roundse# rounds  \ another key diffusion round
     0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
+: wurst-cookie ( -- x )
+    0 wurst-source state# bounds ?DO  I @ xor  cell +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
