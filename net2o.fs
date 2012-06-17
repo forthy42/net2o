@@ -481,6 +481,8 @@ field: last-rate
 \ experiment: track previous b2b-start
 field: last-rtick
 field: last-raddr
+\ cookies
+field: last-ackaddr
 \ state machine
 field: expected
 field: total
@@ -580,6 +582,7 @@ Variable mapping-addr
 : map-source-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
     dup allocatez r@ dest-raddr !
+    dup addr>ts allocatez r@ dest-cookies !
     state# 2* allocatez r@ dest-ivsgen !
     dup >code-flag @ IF  addr>replies  ELSE  addr>ts  THEN
     allocatez r@ dest-timestamps !
@@ -741,13 +744,13 @@ timestats buffer: stat-tuple
     0 j^ 0= ?EXIT  j^ data-rmap @ 0= ?EXIT
     drop j^ data-rmap $@ drop ;
 
-: >real ( addr map -- addr' flag ) >r
+: >offset ( addr map -- addr' flag ) >r
     r@ dest-vaddr @ - dup r> dest-size @ u< ;
 
 : >timestamp ( time addr -- ts-array index / 0 0 )
     >r j^ time-offset @ + r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
-    r@ >real  IF
+    r@ >offset  IF
 	r@ dest-tail @ over - 0 max addr>bits j^ window-size !
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
@@ -990,14 +993,14 @@ include net2o-crypt.fs
 
 : cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >r
     wurst-cookie
-    dest-addr @ r@ >real 0= IF  rdrop 2drop  EXIT  THEN
+    dest-addr @ r@ >offset 0= IF  rdrop 2drop  EXIT  THEN
     addr>ts r> dest-cookies @ + ! ;
 
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
 
-: cookie+ ( map addr bitmap -- sum )  >r
-    addr>ts swap dest-cookies @ +  0
+: cookie+ ( map addr bitmap -- sum ) >r
+    addr>ts swap dest-cookies @ + 0
     BEGIN  r@ 1 and IF  over @ +  THEN
     >r cell+ r> r> 2/ dup >r 0= UNTIL
     rdrop nip ;
@@ -1024,7 +1027,7 @@ Variable code-packet
 : send-packet ( flag -- )
 \    ." send " outbuf .header
     code-packet @ wurst-outbuf-encrypt
-    code-packet @ IF  send-cookie  THEN
+    code-packet @ 0= IF  send-cookie  THEN
     code-packet off
     out-route drop
     outbuf dup packet-size
@@ -1313,6 +1316,11 @@ $01 Constant crypt-val
 $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
+
+: crypt?     ( -- flag )  validated @ crypt-val     and ;
+: own-crypt? ( -- flag )  validated @ own-crypt-val and ;
+: login?     ( -- flag )  validated @ login-val     and ;
+: cookie?    ( -- flag )  validated @ cookie-val    and ;
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr

@@ -269,7 +269,7 @@ also net2o-base definitions
 16 net2o: new-data ( addr addr u -- ) n2o:new-data ;
 17 net2o: new-code ( addr addr u -- ) n2o:new-code ;
 18 net2o: request-done ( -- )  -1 requests +! ;
-19 net2o: set-j^ ( addr -- )  validated @ own-crypt-val and IF  to j^  ELSE  drop  THEN ;
+19 net2o: set-j^ ( addr -- )  own-crypt? IF  to j^  ELSE  drop  THEN ;
 
 : n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
     2 pick lit, r@ lit, over lit, new-code
@@ -302,7 +302,9 @@ net2o-base
 
 30 net2o: ack-addrtime ( time addr -- )  net2o:ack-addrtime ;
 31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
-32 net2o: set-rate ( ticks1 ticks2 -- )  net2o:set-rate ;
+32 net2o: set-rate ( ticks1 ticks2 -- )
+    cookie? IF  net2o:set-rate
+    ELSE  2drop j^ ns/burst dup @ 2* 2* swap !  THEN ;
 33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
@@ -432,19 +434,31 @@ also net2o-base
     THEN
     j^ delta-ticks off  j^ acks off ;
 
+: mask@ ( addr bit -- mask )
+    dup 7 and >r 3 rshift + le-ux@ r> rshift ;
+
+: net2o:ack-cookies ( -- )  rmap@ { map }
+    j^ recv-addr @ map >offset 0= IF  drop  EXIT  THEN
+    maxdata + j^ last-ackaddr !@
+    dup addr>bits >r
+    map data-ackbits0 @ r@ mask@ map data-ackbits1 @ r@ mask@ and
+    -2 map data-lastack# @ r> - lshift invert and
+    >r map over r@ cookie+ lit,
+    lit, r> lit, ack-cookies ;
+
 : net2o:acktime ( -- )
     j^ recv-addr @ j^ recv-tick @ j^ time-offset @ -
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime
-    j^ last-raddr @ j^ last-rtick @ j^ time-offset @ -
-    lit, lit, ack-b2btime ;
+    j^ last-raddr @ j^ last-rtick @ dup
+    IF  j^ time-offset @ - lit, lit, ack-b2btime  ELSE  2drop  THEN ;
 
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
     j^ recv-flag @ invert resend-toggle# and lit, ack-resend ;
-: net2o:genack ( -- )  net2o:b2btime  net2o:acktime  >rate ;
+: net2o:genack ( -- )  net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
 : receive-flag ( -- flag )  j^ recv-flag @ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -534,7 +548,7 @@ also net2o-base
 
 : net2o:do-ack ( -- )
     dest-addr @ j^ recv-addr ! \ last received packet
-    recv-high!
+    recv-high!  recv-cookie
     inbuf 1+ c@ j^ recv-flag ! \ last receive flag
     cmd0source on  cmdreset  received!
     inbuf 1+ c@ acks# and
