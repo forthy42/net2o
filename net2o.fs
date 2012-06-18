@@ -794,7 +794,7 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */
-    2/ dup j^ extra-ns ! + ;
+    2* dup j^ extra-ns ! + ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
@@ -809,7 +809,7 @@ timestats buffer: stat-tuple
     deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
     drop
     rate( dup . .j ." clientavg" cr )
-    >extra-ns rate-limit
+    >extra-ns \ rate-limit
     rate( dup . .j ." rate" cr )
     stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
