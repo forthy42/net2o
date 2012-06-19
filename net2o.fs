@@ -770,7 +770,7 @@ timestats buffer: stat-tuple
     ELSE  2drop drop  THEN ;
 
 #10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
-#0 Value slack-bias#
+slack-default# Value slack-bias#
 
 : slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
 
@@ -784,7 +784,7 @@ timestats buffer: stat-tuple
     j^ lastslack @ j^ min-slack @ -
     slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
-    0 max slack# 2* 2* min slack-bias# -
+    slack-bias# - 0 max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f** fm* f>s
     ( slack# / lshift ) ;
 
@@ -794,7 +794,7 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */
-    2* dup j^ extra-ns ! + ;
+    dup j^ extra-ns ! + ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
