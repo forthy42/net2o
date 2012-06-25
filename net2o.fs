@@ -1072,7 +1072,8 @@ Variable no-ticks
 
 : ts-ticks! ( addr map -- )
 \    no-ticks @ IF  2drop EXIT  THEN
-    >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks ! ;
+    >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks
+    dup @ IF  2drop  EXIT  THEN ! ;
 
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
