@@ -801,20 +801,21 @@ slack-default# Value slack-bias#
     j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
     dup j^ last-ns/burst ! ;
 
-: net2o:set-rate ( rate deltat -- )
+: rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick @ j^ time-offset @ -
            dup j^ last-time !@ - s>f stat-tuple ts-delta sf!
            over s>f stat-tuple ts-reqrate sf! )
     rate( over . .j ." clientrate" cr )
-    deltat( dup . j^ lastdeltat ? .j ." deltat" cr )
-    drop
-    rate( dup . .j ." clientavg" cr )
-    >extra-ns \ rate-limit
+    deltat( dup . j^ lastdeltat ? .j ." deltat" cr ) ;
+
+: rate-stat2 ( rate -- )
     rate( dup . .j ." rate" cr )
     stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
-           stat+ )
-    j^ ns/burst !@
+           stat+ ) ;
+
+: net2o:set-rate ( rate deltat -- )  rate-stat1
+    drop >extra-ns rate-stat2 j^ ns/burst !@
     bandwidth-init = IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
@@ -1070,7 +1071,7 @@ Variable code-packet
 Variable no-ticks
 
 : ts-ticks! ( addr map -- )
-    no-ticks @ IF  2drop EXIT  THEN
+\    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks ! ;
 
 : net2o:send-tick ( addr -- )
