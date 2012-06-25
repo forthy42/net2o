@@ -1067,7 +1067,10 @@ Variable code-packet
     -1 +LOOP
     drop 0 ;
 
+Variabe no-ticks
+
 : ts-ticks! ( addr map -- )
+    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks ! ;
 
 : net2o:send-tick ( addr -- )
@@ -1077,8 +1080,7 @@ Variable code-packet
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  over  net2o:send-tick
-    ( dup >r ) send-size min-size over lshift
-    \ dup r> u>= IF  ack-toggle# outflag xor!  THEN
+    send-size min-size over lshift
     2r> 2swap ;
 
 : net2o:send-packet ( addr u dest addr -- len )
@@ -1089,17 +1091,23 @@ Variable code-packet
 : data-to-send ( -- flag )
     resend$@ nip 0> dest-tail$@ nip 0> or ;
 
+: net2o:resend ( -- )
+    resend$@ net2o:get-resend 2dup 2>r
+    net2o:prep-send /resend
+    2r> send( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
+
+: net2o:send ( -- )
+    dest-tail$@ net2o:get-dest 2dup 2>r
+    net2o:prep-send /dest-tail
+    2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
+
 : net2o:send-chunk ( -- )
     j^ ack-state @ outflag or!
-    resend$@ dup IF
-	net2o:get-resend 2dup 2>r
-	net2o:prep-send /resend
-	2r> send( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop
+    bursts# 1- j^ data-b2b @ = IF
+	\ send a new packet for timing path
+	dest-tail$@ nip IF  net2o:send  ELSE  net2o:resend  THEN
     ELSE
-	2drop
-	dest-tail$@ net2o:get-dest 2dup 2>r
-	net2o:prep-send /dest-tail
-	2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop
+	resend$@ nip IF  net2o:resend  ELSE  net2o:send  THEN
     THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
@@ -1189,6 +1197,9 @@ Variable sendflag  sendflag off
 : send-anything? ( -- flag )  chunks $@len 0> ;
 
 \ rewind buffer to send further packets
+
+: rewind-timestamps ( map -- ) >r
+    r@ dest-timestamps @ r> dest-size @ addr>ts erase ;
 
 : rewind-buffer ( map -- ) >r
     1 r@ dest-round +!
