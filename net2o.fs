@@ -1092,12 +1092,12 @@ Variable no-ticks
     resend$@ nip 0> dest-tail$@ nip 0> or ;
 
 : net2o:resend ( -- )
-    resend$@ net2o:get-resend 2dup 2>r
+    no-ticks on resend$@ net2o:get-resend 2dup 2>r
     net2o:prep-send /resend
     2r> send( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send ( -- )
-    dest-tail$@ net2o:get-dest 2dup 2>r
+    no-ticks off dest-tail$@ net2o:get-dest 2dup 2>r
     net2o:prep-send /dest-tail
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
