@@ -1004,7 +1004,8 @@ include net2o-crypt.fs
 : recv-cookie ( -- ) rmap@ cookie! ;
 
 : cookie+ ( map addr bitmap -- sum ) >r
-    addr>ts swap dest-cookies @ + 0
+    addr>ts over dest-size @ addr>ts umin
+    swap dest-cookies @ + 0
     BEGIN  r@ 1 and IF  over @ +  THEN
     >r cell+ r> r> 2/ dup >r 0= UNTIL
     rdrop nip ;
