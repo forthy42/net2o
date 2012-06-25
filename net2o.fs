@@ -561,6 +561,8 @@ Variable mapping-addr
     dup >r allocate throw dup r> erase ;
 : allocateFF ( size -- addr )
     dup >r allocate throw dup r> -1 fill ;
+: allocate-bits ( size -- addr )
+    dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
 : map-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
@@ -571,8 +573,8 @@ Variable mapping-addr
     ELSE
 	dup addr>ts allocatez r@ dest-timestamps !
 	dup addr>ts allocatez r@ dest-cookies !
-	dup addr>bits bits>bytes allocateFF r@ data-ackbits0 !
-	dup addr>bits bits>bytes allocateFF r@ data-ackbits1 !
+	dup addr>bits bits>bytes allocate-bits r@ data-ackbits0 !
+	dup addr>bits bits>bytes allocate-bits r@ data-ackbits1 !
     THEN
     r@ data-lastack# on
     drop
