@@ -727,7 +727,7 @@ timestats buffer: stat-tuple
     over - j^ rtdelay min! ;
 
 : timestat ( client serv -- )
-    dup 0= IF  2drop EXIT  THEN
+    dup 0= over -1 = or IF  2drop EXIT  THEN
     timing( over . dup . ." acktime" cr )
     >rtdelay  - dup j^ lastslack !
     j^ lastdeltat @ delta-damp# rshift j^ min-slack +!
@@ -736,7 +736,7 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    dup 0= IF  2drop EXIT  THEN
+    dup 0= over -1 = or IF  2drop EXIT  THEN
     - j^ lastslack @ - negate slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
 
 : map@ ( -- addr/0 )
@@ -1077,7 +1077,7 @@ Variable no-ticks
 : ts-ticks! ( addr map -- )
 \    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks
-    dup @ IF  2drop  EXIT  THEN ! ;
+    dup @ IF  on drop  EXIT  THEN ! ;
 
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
