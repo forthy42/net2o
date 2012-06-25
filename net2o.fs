@@ -1067,7 +1067,7 @@ Variable code-packet
     -1 +LOOP
     drop 0 ;
 
-Variabe no-ticks
+Variable no-ticks
 
 : ts-ticks! ( addr map -- )
     no-ticks @ IF  2drop EXIT  THEN
