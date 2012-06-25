@@ -435,7 +435,8 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : mask@ ( addr bit -- mask )
-    dup 7 and >r 3 rshift + le-ux@ r> rshift ;
+    dup [ cell 3 lshift 1- ]L and >r
+    3 rshift [ cell negate ]L and + le-ux@ r> rshift ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     j^ recv-addr @ map >offset 0= IF  drop  EXIT  THEN
