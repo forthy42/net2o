@@ -791,8 +791,9 @@ slack-default# Value slack-bias#
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @  j^ extra-ns @ - 0 max
-    j^ window-size @ tick-init 1+ bursts# - */ ;
+    j^ slackgrow @ j^ extra-ns @ - 0 max
+    j^ window-size @ tick-init 1+ bursts# - */
+    j^ slackgrow @ j^ extra-ns @ min max ;
 
 : >extra-ns ( rate -- rate' )
     dup >slack-exp tuck slackext rot */
