@@ -550,12 +550,12 @@ also net2o-base
     dest-addr @ j^ recv-addr ! \ last received packet
     recv-high!  recv-cookie
     inbuf 1+ c@ j^ recv-flag ! \ last receive flag
-    cmd0source on  cmdreset  received!
+    cmd0source on  cmdreset
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    cmd-send?
+    received!  cmd-send?
     r> ack-timing ;
 
 ' net2o:do-ack IS do-ack

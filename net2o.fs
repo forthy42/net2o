@@ -1199,13 +1199,14 @@ Variable sendflag  sendflag off
 
 \ rewind buffer to send further packets
 
-: rewind-timestamps ( map -- ) >r
+: rewind-timestamps ( map -- )  >r
+    r@ code-flag @ IF  rdrop  EXIT  THEN
     r@ dest-timestamps @ r> dest-size @ addr>ts erase ;
 
 : rewind-buffer ( map -- ) >r
     1 r@ dest-round +!
     r@ dest-tail off  r@ data-head off
-    r> regen-ivs-all ;
+    r@ regen-ivs-all  r> rewind-timestamps ;
 
 : rewind-ackbits ( map -- ) >r
     r@ data-firstack0# off  r@ data-firstack1# off
