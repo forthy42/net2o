@@ -470,7 +470,6 @@ field: flybursts
 field: lastslack
 field: lastdeltat
 field: slackgrow
-field: slackgrow'
 \ flow control, receiver part
 field: burst-ticks
 field: firstb-ticks
@@ -728,6 +727,7 @@ timestats buffer: stat-tuple
     over - j^ rtdelay min! ;
 
 : timestat ( client serv -- )
+    dup 0= IF  2drop EXIT  THEN
     timing( over . dup . ." acktime" cr )
     >rtdelay  - dup j^ lastslack !
     j^ lastdeltat @ delta-damp# rshift j^ min-slack +!
@@ -736,8 +736,8 @@ timestats buffer: stat-tuple
     j^ max-slack max! ;
 
 : b2b-timestat ( client serv -- )
-    - j^ lastslack @ - negate slack( dup . .j ." grow" cr ) j^ slackgrow !
-    j^ slackgrow @ j^ slackgrow' @ 2/ 2/ - j^ slackgrow' +! ;
+    dup 0= IF  2drop EXIT  THEN
+    - j^ lastslack @ - negate slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
