@@ -833,7 +833,7 @@ slack-default# Value slack-bias#
 Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
-    BEGIN  dup 1 and 0= WHILE  2/ >r maxdata + r>  dup 0= UNTIL  THEN ;
+    BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- ) 
     j^ data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
@@ -1427,6 +1427,8 @@ include net2o-cmd.fs
 Local Variables:
 forth-local-words:
     (
+     (("debug:" "field:" "sffield:") non-immediate (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
