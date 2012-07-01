@@ -440,6 +440,7 @@ field: blocksize
 field: blockalign
 field: crypto-key
 field: timeout-xt
+field: ack-xt
 
 field: data-map
 field: data-rmap
@@ -1323,8 +1324,6 @@ Create pollfds   here pollfd %size dup allot erase
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
-Defer do-ack ( -- )
-' noop IS do-ack
 
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! and throw ;
 
@@ -1361,7 +1360,7 @@ $08 Constant cookie-val
 	crypt-val validated ! \ ok, we have a validated connection
 	dup 0< IF \ data packet
 	    drop  >r inbuf packet-data r> swap move
-	    do-ack
+	    j^ ack-xt perform
 	ELSE \ command packet
 	    drop
 	    >r inbuf packet-data r@ swap dup >r move

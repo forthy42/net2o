@@ -558,7 +558,8 @@ also net2o-base
     received!  cmd-send?
     r> ack-timing ;
 
-' net2o:do-ack IS do-ack
+: +flow-control ['] net2o:do-ack j^ ack-xt ! ;
+: -flow-control ['] noop         j^ ack-xt ! ;
 
 \ higher level functions
 
@@ -603,16 +604,20 @@ also net2o-base
 : connecting-timeout ( -- ) gen-request ;
 : connected-timeout ( -- )  cmd-resend? transfer-keepalive? ;
 
+: +connecting   ['] connecting-timeout j^ timeout-xt ! ;
+: +resend       ['] connected-timeout  j^ timeout-xt ! ;
+: -timeout      ['] noop               j^ timeout-xt ! ;
+
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
     j^ req-datasize !  j^ req-codesize !
     gen-request
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply?
-    ['] connecting-timeout j^ timeout-xt !
+    +connecting
     1 client-loop
     timeouts @ 0<= !!contimeout!! and F throw
-    ['] connected-timeout j^ timeout-xt ! ;
+    -timeout ;
 
 : rewind? ( -- )
     j^ data-rmap $@ drop dest-round @ lit, rewind-sender ;
