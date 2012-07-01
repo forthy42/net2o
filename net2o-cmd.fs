@@ -437,15 +437,6 @@ also net2o-base
 : mask@ ( addr bit -- mask )
     dup 7 and >r 3 rshift + le-ux@ r> rshift ;
 
-: net2o:ack-cookies ( -- )  rmap@ { map }
-    j^ recv-addr @ map >offset 0= IF  drop  EXIT  THEN
-    maxdata + j^ last-ackaddr !@
-    dup addr>bits >r
-    map data-ackbits0 @ r@ mask@ map data-ackbits1 @ r@ mask@ and
-    -2 map data-lastack# @ r> - lshift invert and
-    >r map over r@ cookie+ lit,
-    lit, r> lit, ack-cookies ;
-
 : net2o:acktime ( -- )
     j^ recv-addr @ j^ recv-tick @ j^ time-offset @ -
     timing( 2dup F . F . ." acktime" F cr )
@@ -454,11 +445,22 @@ also net2o-base
     j^ last-raddr @ j^ last-rtick @ dup
     IF  j^ time-offset @ - lit, lit, ack-b2btime  ELSE  2drop  THEN ;
 
+\ ack bits, new code
+
+: ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
+    2dup 2>r cookie+ lit, 2r> swap lit, lit, ack-cookies ;
+
+: net2o:ack-cookies ( -- )  rmap@ { map }
+    map data-ackbits-buf $@
+    bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
+    s" " map data-ackbits-buf $! ;
+
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
     j^ recv-flag @ invert resend-toggle# and lit, ack-resend ;
-: net2o:genack ( -- )  net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
+: net2o:genack ( -- )
+    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
 : receive-flag ( -- flag )  j^ recv-flag @ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
@@ -523,10 +525,23 @@ also net2o-base
 	save-all-blocks  rewind-transfer  expect-reply
     THEN ;
 
+cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
+
+2 cells buffer: new-ackbit
+
+: +ackbit ( bit rmap -- ) { rmap }
+    dup cell>> rshift swap [ 8 cells 1- ]L and
+    rmap data-ackbits-buf $@ bounds ?DO
+	over I @ = IF
+	    I cell+ swap +bit  drop unloop  EXIT  THEN
+    2 cells +LOOP
+    0 rot new-ackbit 2! new-ackbit cell+ swap +bit
+    new-ackbit 2 cells rmap data-ackbits-buf $+! ;
+
 : received! ( -- )
     j^ recv-addr @ -1 = ?EXIT
     j^ data-rmap $@ drop >r
-    j^ recv-addr @ r@ dest-vaddr @ - addr>bits
+    j^ recv-addr @ r@ dest-vaddr @ - addr>bits dup r@ +ackbit
     \ set bucket as received in current polarity bitmap
     r@ receive-flag data-ackbit @ over +bit@
     r> swap >r >r

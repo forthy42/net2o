@@ -143,6 +143,7 @@ debug: msg(
 debug: profile(
 debug: stat(
 debug: timeout(
+debug: ack(
 
 : +db ( "word" -- ) ' >body on ;
 
@@ -421,6 +422,7 @@ end-structure
 code-struct extend-structure rdata-struct
 field: data-ackbits0
 field: data-ackbits1
+field: data-ackbits-buf
 field: data-firstack0#
 field: data-firstack1#
 field: data-lastack#
@@ -575,6 +577,7 @@ Variable mapping-addr
 	dup addr>ts allocatez r@ dest-cookies !
 	dup addr>bits bits>bytes allocate-bits r@ data-ackbits0 !
 	dup addr>bits bits>bytes allocate-bits r@ data-ackbits1 !
+	s" " r@ data-ackbits-buf $!
     THEN
     r@ data-lastack# on
     drop
@@ -1004,11 +1007,11 @@ include net2o-crypt.fs
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
 
-: cookie+ ( map addr bitmap -- sum ) >r
+: cookie+ ( map addr bitmap -- sum )  >r
     addr>ts over dest-size @ addr>ts umin
     swap dest-cookies @ + 0
     BEGIN  r@ 1 and IF  over @ +  THEN
-    >r cell+ r> r> 2/ dup >r 0= UNTIL
+    >r cell+ r> r> 1 rshift dup >r 0= UNTIL
     rdrop nip ;
 
 \ send blocks of memory
