@@ -23,6 +23,13 @@ require wurstkessel.fs
 require wurstkessel-init.fs
 require hash-table.fs
 
+cell 8 = [IF]
+    : 64Constant ( d -- ) drop Constant ;
+[ELSE]
+    : 64Constant ( d -- ) 2Constant ;
+[THEN]
+
+
 \ helper words
 
 : safe/string ( c-addr u n -- c-addr' u' )

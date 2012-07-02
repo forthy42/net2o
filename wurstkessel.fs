@@ -1,24 +1,30 @@
 \ Wurstkessel data from www.random.org                 26jan09py
 
 cell 8 = [IF]
+    : 64bit ;
     : 64, drop , ;
     ' @ Alias 64@
     ' ! Alias 64!
     ' rot Alias 64swap
     ' -rot Alias -64swap
     : 64+  + ;
-    ' cells Alias 64s
     ' l@ Alias 32@
+    ' Variable Alias 64Variable
+    0 Constant 64#0
 [ELSE]
     ' 2swap alias 64swap
     ' 2swap alias -64swap
     : 64,  swap 2, ;
-    : 64@  2@ swap ; macro
-    : 64!  >r swap r> 2! ; macro
+    : 64@  2@ swap ; [IFDEF] macro macro [THEN]
+    : 64!  >r swap r> 2! ; [IFDEF] macro macro [THEN]
     : 64+  d+ ;
-    ' 8* Alias 64s
     ' @ Alias 32@
+    ' 2Variable Alias 64Variable
+    0. 2Constant 64#0
 [THEN]
+' dfloats Alias 64s
+' dfloat+ Alias 64'+
+' dfaligned Alias 64aligned
 
 8 64s Constant state#
 2 2*  Constant state#32
@@ -147,7 +153,7 @@ cell 8 = [IF]
 	Code rngs  'rngs AX *8 I#) push  'rngs cell+ AX *8 I#) AX mov
 	    Next end-code  macro
     [ELSE]
-	: rngs 64s 'rngs + 64@ ; macro
+	: rngs 64s 'rngs + 64@ ;
 	: wurst ( ud1 ud2 -- ud3 )  2>r
 	    dup 0< >r d2* r> dup d- 2r>
 	    rot xor >r xor r> ;
@@ -417,7 +423,11 @@ s" gforth" environment? [IF] 2drop
     \c }
     c-function rounds_ind rounds_ind n a a a -- void
     c-function rounds_decrypt rounds_decrypt n a a a -- void
-    c-function wurst_hash64 wurst_hash64 a n a a -- n
+	[IFDEF] 64bit
+	    c-function wurst_hash64 wurst_hash64 a n a a -- n
+	[ELSE]
+	    c-function wurst_hash64 wurst_hash64 a n a a -- d
+	[THEN]
     end-c-library
     : rounds ( addr n -- ) wurst-source rot 'rngs rounds_ind ;
     : rounds-decrypt ( addr n -- ) wurst-source rot 'rngs rounds_decrypt ;
@@ -646,8 +656,8 @@ state# rngs# * rng-buffer !
 : rng-step? ( n -- ) state# rngs# * u> IF  rng-step  THEN ;
 
 : rng@ ( -- x )
-    rng-buffer @ aligned cell+ rng-step?
-    rng-buffer dup @ aligned cell+ dup rng-buffer ! + @ ;
+    rng-buffer @ 64aligned 64'+ rng-step?
+    rng-buffer dup @ 64aligned dup 64'+ rng-buffer ! cell+ + 64@ ;
 
 : rng$ ( -- addr u )
     rng-buffer @ state# + rng-step?

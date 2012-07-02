@@ -18,11 +18,11 @@ hash-init-rng
 \ in two variants: a fast 64 bit hash, and a slow 512 bit hash
 
 true [IF]
-    Variable hash-state
+    64Variable hash-state
     
-    : string-hash ( addr u -- )  'hashinit hash64 hash-state ! ;
+    : string-hash ( addr u -- )  'hashinit hash64 hash-state 64! ;
     
-    : hash$ ( -- addr u )  hash-state cell ;
+    : hash$ ( -- addr u )  hash-state [ 1 64s ]L ;
 [ELSE]
 \ hash of the first 510 bytes of the input string, 3 times slower
     state# 8 * Constant message#
