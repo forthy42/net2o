@@ -441,7 +441,7 @@ Variable dest-addr
 
 begin-structure dest-struct
 field: dest-size
-64field: dest-vaddr
+field: dest-vaddr
 field: dest-raddr
 field: dest-job
 field: dest-round
@@ -535,11 +535,11 @@ field: received
 field: timing-stat
 field: last-time
 \ make timestamps smaller
-dffield: time-offset
+64field: time-offset
 end-structure
 
 begin-structure timestamp
-field: ts-ticks
+64field: ts-ticks
 end-structure
 
 begin-structure reply
