@@ -60,7 +60,7 @@ require hash-table.fs
 
 \ variable length integers
 
-cell 8 = [IF]
+[IFDEF] 64bit
     : p@+ ( addr -- u64 addr' )  >r 0
 	BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
 		r> 1+ >r  REPEAT  r> 1+ ;
@@ -115,13 +115,25 @@ cell 8 = [IF]
 Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reverse64 ( x1 -- x2 )
-    0 8 0 DO  8 lshift over $FF and reverse8 or
-	swap 8 rshift swap  LOOP  nip ;
+[IFDEF] 64bit
+    : reverse64 ( x1 -- x2 )
+	0 8 0 DO  8 lshift over $FF and reverse8 or
+	    swap 8 rshift swap  LOOP  nip ;
+[ELSE]
+    : reverse64 ( x1 -- x2 )
+	0. 8 0 DO  8 dlshift 2over drop $FF and reverse8 0 64or
+	    2swap 8 drshift 2swap  LOOP  2nip ;
+[THEN]
 
 \ timing ticks
 
-: ticks ( -- u )  ntime drop ;
+[IFDEF] 64bit
+    : ticks ( -- u )  ntime drop ;
+    ' ticks Alias ticks-u
+[ELSE]
+    ' ntime Alias ticks
+    : ticks-u ( -- u )  ntime drop ;
+[THEN]
 
 \ debugging aids
 
@@ -191,7 +203,7 @@ Variable debug-eval
 Variable last-tick
 
 : delta-t ( -- n )
-    ticks dup last-tick !@ - ;
+    ticks-u dup last-tick !@ - ;
 
 : timing ;
 [IFDEF] timing
@@ -203,7 +215,7 @@ Variable last-tick
     Variable wait-time
     
     : init-timer ( -- )
-	ticks last-tick ! calc-time off send-time off rec-time off wait-time off
+	ticks-u last-tick ! calc-time off send-time off rec-time off wait-time off
 	calc1-time off enc-time off ;
     
     : +calc  profile( delta-t calc-time +! ) ;
@@ -425,9 +437,11 @@ Variable dest-addr
 : >dest-addr ( -- )
     inbuf addr @  inbuf body-size 1- invert and dest-addr ! ;
 
+' dffield: Alias 64field:
+
 begin-structure dest-struct
 field: dest-size
-field: dest-vaddr
+64field: dest-vaddr
 field: dest-raddr
 field: dest-job
 field: dest-round
@@ -521,7 +535,7 @@ field: received
 field: timing-stat
 field: last-time
 \ make timestamps smaller
-field: time-offset
+dffield: time-offset
 end-structure
 
 begin-structure timestamp
