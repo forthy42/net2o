@@ -93,7 +93,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
 10 buffer: 'cmd-buf
 
-: >cmd ( xt u -- ) 'cmd-buf p!+  'cmd-buf tuck -
+: >cmd ( xt u -- ) u>64 'cmd-buf p!+  'cmd-buf tuck -
     cmd-base-table >r
     BEGIN  dup 1 >  WHILE  over c@ >r 1 /string r>
 	    cells r> + dup @ ['] net2o-crash = IF
@@ -433,9 +433,6 @@ also net2o-base
 	2drop
     THEN
     j^ delta-ticks off  j^ acks off ;
-
-: mask@ ( addr bit -- mask )
-    dup 7 and >r 3 rshift + le-ux@ r> rshift ;
 
 : net2o:acktime ( -- )
     j^ recv-addr @ j^ recv-tick @ j^ time-offset @ -

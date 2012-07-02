@@ -124,7 +124,7 @@ warnings !
 
 \ test: move dictionary to hash
 
-1 [IF]
+0 [IF]
 variable ht
 : test ( -- )
     context @ cell+ BEGIN  @ dup  WHILE

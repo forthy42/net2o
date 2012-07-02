@@ -23,13 +23,6 @@ require wurstkessel.fs
 require wurstkessel-init.fs
 require hash-table.fs
 
-cell 8 = [IF]
-    : 64Constant ( d -- ) drop Constant ;
-[ELSE]
-    : 64Constant ( d -- ) 2Constant ;
-[THEN]
-
-
 \ helper words
 
 : safe/string ( c-addr u n -- c-addr' u' )
@@ -67,24 +60,52 @@ cell 8 = [IF]
 
 \ variable length integers
 
-: p@+ ( addr -- u addr' )  >r 0
-    BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
-	    r> 1+ >r  REPEAT  r> 1+ ;
-: p-size ( u -- n ) \ to speed up: binary tree comparison
-    \ flag IF  1  ELSE  2  THEN  equals  flag 2 +
-    dup    $FFFFFFFFFFFFFF u<= IF
-	dup       $FFFFFFF u<= IF
-	    dup      $3FFF u<= IF
-		$00000007F u<= 2 +  EXIT  THEN
-	    $00000001FFFFF u<= 4 +  EXIT  THEN
-	dup   $3FFFFFFFFFF u<= IF
-	    $00007FFFFFFFF u<= 6 +  EXIT  THEN
-	$00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
-    $000007FFFFFFFFFFFFFFF u<= 10 + ;
-: p!+ ( u addr -- addr' )  over p-size + dup >r >r
-    dup $7F and r> 1- dup >r c!  7 rshift
-    BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
-    drop rdrop r> ;
+cell 8 = [IF]
+    : p@+ ( addr -- u64 addr' )  >r 0
+	BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
+		r> 1+ >r  REPEAT  r> 1+ ;
+    : p-size ( u64 -- n ) \ to speed up: binary tree comparison
+	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
+	dup    $FFFFFFFFFFFFFF u<= IF
+	    dup       $FFFFFFF u<= IF
+		dup      $3FFF u<= IF
+		    $00000007F u<= 2 +  EXIT  THEN
+		$00000001FFFFF u<= 4 +  EXIT  THEN
+	    dup   $3FFFFFFFFFF u<= IF
+		$00007FFFFFFFF u<= 6 +  EXIT  THEN
+	    $00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
+	$000007FFFFFFFFFFFFFFF u<= 10 + ;
+    : p!+ ( u64 addr -- addr' )  over p-size + dup >r >r
+	dup $7F and r> 1- dup >r c!  7 rshift
+	BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
+	drop rdrop r> ;
+[ELSE]
+    : dlshift ( u64 u -- u64' )  >r
+	r@ lshift over 8 cells r@ - rshift or
+	swap r> lshift swap ;
+    : drshift ( u64 u -- u64' )  >r swap
+	r@ rshift over 8 cells r@ - lshift or
+	swap r> rshift ;
+
+    : p@+ ( addr -- u64 addr' )  >r 0.
+	BEGIN  7 dlshift r@ c@ $7F and 0 64or r@ c@ $80 and  WHILE
+		r> 1+ >r  REPEAT  r> 1+ ;
+    : p-size ( x64 -- n ) \ to speed up: binary tree comparison
+	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
+	2dup   $FFFFFFFFFFFFFF. du<= IF
+	    2dup      $FFFFFFF. du<= IF
+		2dup     $3FFF. du<= IF
+		    $00000007F. du<= 2 +  EXIT  THEN
+		$00000001FFFFF. du<= 4 +  EXIT  THEN
+	    2dup  $3FFFFFFFFFF. du<= IF
+		$00007FFFFFFFF. du<= 6 +  EXIT  THEN
+	    $00001FFFFFFFFFFFF. du<= 8 +  EXIT  THEN
+	$000007FFFFFFFFFFFFFFF. du<= 10 + ;
+    : p!+ ( u64 addr -- addr' )  >r 2dup p-size r> + dup >r >r
+	over $7F and r> 1- dup >r c!  7 drshift
+	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 drshift  REPEAT
+	2drop rdrop r> ;
+[THEN]
 
 \ bit reversing
 

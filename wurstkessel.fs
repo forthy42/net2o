@@ -8,8 +8,12 @@ cell 8 = [IF]
     ' rot Alias 64swap
     ' -rot Alias -64swap
     : 64+  + ;
+    : 64or  or ;
+    : 64and and ;
+    : 64xor xor ;
     ' l@ Alias 32@
     ' Variable Alias 64Variable
+    ' noop Alias u>64 immediate
     0 Constant 64#0
 [ELSE]
     ' 2swap alias 64swap
@@ -18,8 +22,12 @@ cell 8 = [IF]
     : 64@  2@ swap ; [IFDEF] macro macro [THEN]
     : 64!  >r swap r> 2! ; [IFDEF] macro macro [THEN]
     : 64+  d+ ;
+    : 64or rot or >r or r> ;
+    : 64and rot and >r and r> ;
+    : 64xor rot xor >r xor r> ;
     ' @ Alias 32@
     ' 2Variable Alias 64Variable
+    ' false Alias u>64
     0. 2Constant 64#0
 [THEN]
 ' dfloats Alias 64s
@@ -156,7 +164,7 @@ cell 8 = [IF]
 	: rngs 64s 'rngs + 64@ ;
 	: wurst ( ud1 ud2 -- ud3 )  2>r
 	    dup 0< >r d2* r> dup d- 2r>
-	    rot xor >r xor r> ;
+	    64xor ;
     [THEN]
 [THEN]
 
