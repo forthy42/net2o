@@ -86,15 +86,8 @@ require hash-table.fs
 	BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
 	drop rdrop r> ;
 [ELSE]
-    : dlshift ( u64 u -- u64' )  >r
-	r@ lshift over 8 cells r@ - rshift or
-	swap r> lshift swap ;
-    : drshift ( u64 u -- u64' )  >r swap
-	r@ rshift over 8 cells r@ - lshift or
-	swap r> rshift ;
-
     : p@+ ( addr -- u64 addr' )  >r 0.
-	BEGIN  7 dlshift r@ c@ $7F and 0 64or r@ c@ $80 and  WHILE
+	BEGIN  7 64lshift r@ c@ $7F and 0 64or r@ c@ $80 and  WHILE
 		r> 1+ >r  REPEAT  r> 1+ ;
     : p-size ( x64 -- n ) \ to speed up: binary tree comparison
 	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
@@ -108,8 +101,8 @@ require hash-table.fs
 	    $00001FFFFFFFFFFFF. du<= 8 +  EXIT  THEN
 	$000007FFFFFFFFFFFFFFF. du<= 10 + ;
     : p!+ ( u64 addr -- addr' )  >r 2dup p-size r> + dup >r >r
-	over $7F and r> 1- dup >r c!  7 drshift
-	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 drshift  REPEAT
+	over $7F and r> 1- dup >r c!  7 64rshift
+	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 64rshift  REPEAT
 	2drop rdrop r> ;
 [THEN]
 
@@ -127,8 +120,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 	    swap 8 rshift swap  LOOP  nip ;
 [ELSE]
     : reverse64 ( x1 -- x2 )
-	0. 8 0 DO  8 dlshift 2over drop $FF and reverse8 0 64or
-	    2swap 8 drshift 2swap  LOOP  2nip ;
+	0. 8 0 DO  8 64lshift 2over drop $FF and reverse8 0 64or
+	    2swap 8 64rshift 2swap  LOOP  2nip ;
 [THEN]
 
 \ timing ticks
@@ -666,20 +659,19 @@ Variable mapstart $10000 mapstart !
 8 Value delta-damp#
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
--1 Constant never
--1 1 rshift Constant max-int64
+64#-1 64Constant never
 2 Value flybursts#
 
 Variable init-context#
 
 : init-flow-control ( -- )
-    max-int64 2/ j^ min-slack !
-    max-int64 2/ negate j^ max-slack !
-    max-int64 j^ rtdelay !
+    max-int64 64-2/ j^ min-slack 64!
+    max-int64 64-2/ 64negate j^ max-slack 64!
+    max-int64 j^ rtdelay 64!
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
-    never          j^ next-tick !
+    never          j^ next-tick 64!
     0              j^ extra-ns ! ;
 
 : n2o:new-context ( addr -- )
