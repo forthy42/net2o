@@ -191,8 +191,8 @@ DOES> swap 7 and cells + @ ;
     wurst-state wurst-source state# xors
     nextstate wurst-state state# +!s ;
 : round ( n -- ) dup 1- swap  8 0 DO
-	wurst-state I permut# 64s + 64@ -64swap
-	I mix2bytes 2>r bytes2sum 2r> 64swap nextstate I 64s + 64!
+	wurst-state I permut# 64s + 64@ -64rot
+	I mix2bytes 2>r bytes2sum 2r> 64rot nextstate I 64s + 64!
     LOOP 2drop update-state ;
 
 \ wurstkessel32 primitives

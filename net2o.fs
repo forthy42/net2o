@@ -41,14 +41,16 @@ require hash-table.fs
 : umin! ( n addr -- )   >r r@ @ umin r> ! ;
 : umax! ( n addr -- )   >r r@ @ umax r> ! ;
 
-[IFDEF] 64bit
-    ' min! Alias 64min!
-[ELSE]
-    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
-[THEN]
-
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
+
+[IFDEF] 64bit
+    ' min! Alias 64min!
+    ' !@ Alias 64!@
+[ELSE]
+    : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
+    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
+[THEN]
 
 \ bit vectors, lsb first
 
@@ -849,21 +851,21 @@ slack-default# Value slack-bias#
     dup j^ last-ns/burst ! ;
 
 : rate-stat1 ( rate deltat -- )
-    stats( j^ recv-tick @ j^ time-offset @ -
-           dup j^ last-time !@ - s>f stat-tuple ts-delta sf!
-           over s>f stat-tuple ts-reqrate sf! )
-    rate( over . .j ." clientrate" cr )
-    deltat( dup . j^ lastdeltat ? .j ." deltat" cr ) ;
+    stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
+           64dup j^ last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+           64over 64>f stat-tuple ts-reqrate sf! )
+    rate( 64over 64. .j ." clientrate" cr )
+    deltat( 64dup 64. j^ lastdeltat ? .j ." deltat" cr ) ;
 
 : rate-stat2 ( rate -- )
-    rate( dup . .j ." rate" cr )
-    stats( dup j^ extra-ns @ + s>f stat-tuple ts-rate sf!
+    rate( 64dup 64. .j ." rate" cr )
+    stats( 64dup j^ extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
            j^ slackgrow @ s>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    drop >extra-ns rate-stat2 j^ ns/burst !@
-    bandwidth-init = IF \ first acknowledge
+    64drop >extra-ns rate-stat2 j^ ns/burst 64!@
+    bandwidth-init 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
     THEN ;
