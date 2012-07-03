@@ -41,6 +41,12 @@ require hash-table.fs
 : umin! ( n addr -- )   >r r@ @ umin r> ! ;
 : umax! ( n addr -- )   >r r@ @ umax r> ! ;
 
+[IFDEF] 64bit
+    ' min! Alias 64min!
+[ELSE]
+    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
+[THEN]
+
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
 
@@ -474,7 +480,7 @@ end-structure
 begin-structure context-struct
 field: context#
 field: return-address
-field: recv-tick
+64field: recv-tick
 field: recv-addr
 field: recv-flag
 field: recv-high
@@ -506,10 +512,10 @@ field: ns/burst
 field: last-ns/burst
 field: extra-ns
 field: window-size \ packets in flight
-field: bandwidth-tick \ ns
-field: next-tick \ ns
-field: rtdelay \ ns
-field: lastack \ ns
+64field: bandwidth-tick \ ns
+64field: next-tick \ ns
+64field: rtdelay \ ns
+64field: lastack \ ns
 field: flyburst
 field: flybursts
 field: lastslack
@@ -521,9 +527,9 @@ field: firstb-ticks
 field: lastb-ticks
 field: delta-ticks
 field: acks
-field: last-rate
+\ field: last-rate
 \ experiment: track previous b2b-start
-field: last-rtick
+64field: last-rtick
 field: last-raddr
 \ cookies
 field: last-ackaddr
@@ -671,7 +677,7 @@ Variable init-context#
     max-int64 2/ negate j^ max-slack !
     max-int64 j^ rtdelay !
     flybursts# dup j^ flybursts ! j^ flyburst !
-    ticks j^ lastack ! \ asking for context creation is as good as an ack
+    ticks j^ lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
     never          j^ next-tick !
     0              j^ extra-ns ! ;
@@ -763,21 +769,21 @@ timestats buffer: stat-tuple
 \ flow control
 
 : ticks-init ( ticks -- )
-    dup j^ bandwidth-tick !  j^ next-tick ! ;
+    64dup j^ bandwidth-tick 64!  j^ next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    j^ recv-tick @
+    j^ recv-tick 64@
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
-    0= IF  dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
-    dup j^ lastack !
-    over - j^ rtdelay min! ;
+    0= IF  64dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
+    64dup j^ lastack 64!
+    64over 64- j^ rtdelay 64min! ;
 
 : timestat ( client serv -- )
     dup 0= over -1 = or IF  2drop EXIT  THEN
     timing( over . dup . ." acktime" cr )
     >rtdelay  - dup j^ lastslack !
-    j^ lastdeltat @ delta-damp# rshift j^ min-slack +!
-    j^ lastdeltat @ delta-damp# rshift negate j^ max-slack +!
+    j^ lastdeltat @ delta-damp# rshift
+    dup j^ min-slack +! negate j^ max-slack +!
     dup j^ min-slack min!
     j^ max-slack max! ;
 
@@ -1469,7 +1475,7 @@ include net2o-cmd.fs
 Local Variables:
 forth-local-words:
     (
-     (("debug:" "field:" "sffield:") non-immediate (font-lock-type-face . 2)
+     (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
