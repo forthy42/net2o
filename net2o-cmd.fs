@@ -228,7 +228,7 @@ previous
 : >initbuf ( addr u -- addr' u' ) tuck
     init0buf mykey-salt# + swap move
     maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
-    nip init0buf swap mykey-salt# + 2 cells + 2dup wurst-encrypt$ ;
+    nip init0buf swap mykey-salt# + 2 64s + 2dup wurst-encrypt$ ;
 
 Variable neststart#
 

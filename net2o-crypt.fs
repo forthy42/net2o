@@ -110,9 +110,8 @@ rng$ mykey swap move
     ' d= Alias 128= ( d1 d2 -- flag )
     ' 2! Alias 128! ( d addr -- )
 [ELSE]
-    : 128xor ( x1..x4 y1..y4 -- z1..z4 )
-	swap 2swap swap >r >r >r >r
-	r> xor swap r> xor 2swap r> xor swap r> xor swap 2swap swap ;
+    : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }
+	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
     : 128@ ( addr -- x1..x4 )
 	>r
 	r@ 3 cells + @
@@ -143,7 +142,7 @@ rng$ mykey swap move
     : wurst-inbuf-decrypt drop true ;
     : wurst-encrypt$ ( addr u -- ) 2drop ;
     : wurst-decrypt$ ( addr u -- addr' u' flag )
-	mykey-salt# safe/string 2 cells - true ;
+	mykey-salt# safe/string 2 64s - true ;
 [ELSE]
     : encrypt-buffer ( addr u n -- addr 0 ) >r
 	over roundse# rounds
@@ -169,12 +168,12 @@ rng$ mykey swap move
 	rdrop drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- ) +calc
-	wurst-mykey-setup 2 cells - dup mem-rounds# >r
+	wurst-mykey-setup 2 64s - dup mem-rounds# >r
 	r@ encrypt-buffer
 	rdrop drop >r wurst-crc r> 128! +enc ;
 
     : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc
-	wurst-mykey-init 2 cells - dup mem-rounds# >r
+	wurst-mykey-init 2 64s - dup mem-rounds# >r
 	2dup  over roundse# rounds
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
