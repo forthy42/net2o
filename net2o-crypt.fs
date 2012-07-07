@@ -97,9 +97,6 @@ rng$ mykey swap move
     mykey state# >wurst-key
     mykey-salt# safe/string ;
 
-: wurst-mykey-setup ( addr u -- addr' u' )
-    over >r  rng@ rng@ r> 2! wurst-mykey-init ;
-
 : mem-rounds# ( size -- n )
     case
 	min-size of  $22  endof
@@ -130,6 +127,9 @@ rng$ mykey swap move
 	r@ 2 cells + !
 	r> 3 cells + ! ;
 [THEN]
+
+: wurst-mykey-setup ( addr u -- addr' u' )
+    over >r  rng@ rng@ r> 128! wurst-mykey-init ;
 
 : wurst-crc ( -- xd )
     pad roundse# rounds  \ another key diffusion round
