@@ -82,7 +82,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	0 of  ." end-code" cr 0. buf-state 2!  endof
 	1 of  p@ 64. ." lit, "  endof
 	2 of  ps@ 64. ." slit, " endof
-	3 of  string@ n2o.string  endof
+	3 of  string@  n2o.string  endof
 	cells cmd-base-table + (net2o-see)
 	0 endcase ;
 
@@ -249,7 +249,7 @@ Variable neststart#
 also net2o-base definitions
 
 : maxstring ( n -- )  endcmdbuf cmdbuf$ + - ;
-: $, ( addr u -- )  string  >r r@ cmd,
+: $, ( addr u -- )  string  >r r@ n>64 cmd,
     r@ maxstring u>= !!stringfit!! and throw
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
@@ -403,7 +403,7 @@ net2o-base
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname  server? IF
-	dup  IF  dup lit, throw end-cmd cmd  THEN
+	dup  IF  dup nlit, throw end-cmd cmd  THEN
     THEN  F throw ; IS >throw
 
 previous definitions
@@ -413,7 +413,7 @@ also net2o-base
 Variable file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
-    2swap $, r/o lit, file-reg# @ lit, open-tracked-file
+    2swap $, r/o ulit, file-reg# @ ulit, open-tracked-file
 \    file-reg# @ lit, slurp-tracked-block
     file-reg# @ save-to
     1 file-reg# +! ;
@@ -466,7 +466,7 @@ also net2o-base
 \ ack bits, new code
 
 : ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r rot cookie+ lit, 2r> swap lit, lit, ack-cookies ;
+    2dup 2>r rot cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@

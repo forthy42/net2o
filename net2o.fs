@@ -1043,12 +1043,21 @@ include net2o-crypt.fs
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
 
-: cookie+ ( addr bitmap map -- sum ) -rot >r
-    addr>ts over dest-size @ addr>ts umin
-    swap dest-cookies @ + 0
-    BEGIN  r@ 1 and IF  over @ +  THEN
-    >r cell+ r> r> 1 rshift dup >r 0= UNTIL
-    rdrop nip ;
+[IFDEF] 64bit
+    : cookie+ ( addr bitmap map -- sum ) -rot >r
+	addr>ts over dest-size @ addr>ts umin
+	swap dest-cookies @ + 0
+	BEGIN  r@ 1 and IF  over @ +  THEN
+	>r cell+ r> r> 1 rshift dup >r 0= UNTIL
+	rdrop nip ;
+[ELSE]
+    : cookie+ ( addr bitmap map -- sum ) { map } >r >r
+	addr>ts map dest-size @ addr>ts umin
+	map dest-cookies @ + { addr } 64#0
+	BEGIN  r@ 1 and IF  addr 64@ 64+  THEN
+	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r d0= UNTIL
+	64r> 64drop ;
+[THEN]
 
 \ send blocks of memory
 
