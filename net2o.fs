@@ -116,15 +116,9 @@ require hash-table.fs
 Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-[IFDEF] 64bit
-    : reverse64 ( x1 -- x2 )
-	0 8 0 DO  8 lshift over $FF and reverse8 or
-	    swap 8 rshift swap  LOOP  nip ;
-[ELSE]
-    : reverse64 ( x1 -- x2 )
-	0. 8 0 DO  8 64lshift 2over drop $FF and reverse8 0 64or
-	    2swap 8 64rshift 2swap  LOOP  2nip ;
-[THEN]
+: reverse ( x1 -- x2 )
+    0 cell 0 DO  8 lshift over $FF and reverse8 or
+	swap 8 rshift swap  LOOP  nip ;
 
 \ timing ticks
 
@@ -362,9 +356,9 @@ Variable return-addr
 \ these are all stubs for now
 
 : ins-source ( addr packet -- )  >r
-    reverse64 0  r> destination 2! ;
+    reverse 0  r> destination 2! ;
 : get-source ( packet -- addr )
-    destination 2@ drop  reverse64 ;
+    destination 2@ drop  reverse ;
 : ins-dest ( addr packet -- )  0 -rot destination 2! ;
 : get-dest ( packet -- addr )  destination 2@ nip ;
 
@@ -501,11 +495,11 @@ field: ack-receive
 field: req-codesize
 field: req-datasize
 \ flow control, sender part
-field: min-slack
-field: max-slack
-field: ns/burst
-field: last-ns/burst
-field: extra-ns
+64field: min-slack
+64field: max-slack
+64field: ns/burst
+64field: last-ns/burst
+64field: extra-ns
 field: window-size \ packets in flight
 64field: bandwidth-tick \ ns
 64field: next-tick \ ns
@@ -513,14 +507,14 @@ field: window-size \ packets in flight
 64field: lastack \ ns
 field: flyburst
 field: flybursts
-field: lastslack
-field: lastdeltat
-field: slackgrow
+64field: lastslack
+64field: lastdeltat
+64field: slackgrow
 \ flow control, receiver part
-field: burst-ticks
-field: firstb-ticks
-field: lastb-ticks
-field: delta-ticks
+64field: burst-ticks
+64field: firstb-ticks
+64field: lastb-ticks
+64field: delta-ticks
 field: acks
 \ field: last-rate
 \ experiment: track previous b2b-start
@@ -1327,7 +1321,7 @@ Create pollfds   here pollfd %size dup allot erase
     2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    next-chunk-tick dup -1 <> >r ticks - dup 0>= r> or
+    next-chunk-tick dup -1 <> >r ticks-u - dup 0>= r> or
     IF    0 max 0 ptimeout 2!
     ELSE  drop poll-timeout# 0 ptimeout 2!  THEN ;
 

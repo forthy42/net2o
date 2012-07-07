@@ -107,13 +107,35 @@ rng$ mykey swap move
 	$28 swap
     endcase ;
 
-: 2xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
+[IFDEF] 64bit
+    : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
+    ' 2@ Alias 128@ ( addr -- d )
+    ' d= Alias 128= ( d1 d2 -- flag )
+    ' 2! Alias 128! ( d addr -- )
+[ELSE]
+    : 128xor ( x1..x4 y1..y4 -- z1..z4 )
+	swap 2swap swap >r >r >r >r
+	r> xor swap r> xor 2swap r> xor swap r> xor swap 2swap swap ;
+    : 128@ ( addr -- x1..x4 )
+	>r
+	r@ 3 cells + @
+	r@ 2 cells + @
+	r@ cell+ @
+	r> @ ;
+    : 128= ( x1..y4 y1..y4 -- flag )  128xor  or or or 0= ;
+    : 128! ( x1..x4 addr -- )
+	>r
+	r@ !
+	r@ cell+ !
+	r@ 2 cells + !
+	r> 3 cells + ! ;
+[THEN]
 
 : wurst-crc ( -- xd )
     pad roundse# rounds  \ another key diffusion round
-    0. wurst-state state# bounds ?DO  I 2@ 2xor 2 cells +LOOP ;
+    64#0 64#0 wurst-state state# bounds ?DO  I 128@ 128xor 2 64s +LOOP ;
 : wurst-cookie ( -- x )
-    0 wurst-source state# bounds ?DO  I @ xor  cell +LOOP ;
+    64#0 wurst-source state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
@@ -133,7 +155,7 @@ rng$ mykey swap move
 	wurst-outbuf-init
 	outbuf body-size mem-rounds# >r
 	outbuf packet-data r@ encrypt-buffer
-	rdrop drop wurst-crc rot 2! +enc ;
+	rdrop drop >r wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
@@ -144,12 +166,12 @@ rng$ mykey swap move
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
-	rdrop drop 2@ wurst-crc d= +enc ;
+	rdrop drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- ) +calc
 	wurst-mykey-setup 2 cells - dup mem-rounds# >r
 	r@ encrypt-buffer
-	rdrop drop wurst-crc rot 2! +enc ;
+	rdrop drop >r wurst-crc r> 128! +enc ;
 
     : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc
 	wurst-mykey-init 2 cells - dup mem-rounds# >r
@@ -157,7 +179,7 @@ rng$ mykey swap move
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
-	rdrop drop 2@ wurst-crc d= +enc ;
+	rdrop drop 128@ wurst-crc 128= +enc ;
 [THEN]
 
 \ public key encryption

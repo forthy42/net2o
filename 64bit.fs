@@ -11,6 +11,7 @@ cell 8 = [IF]
     ' dup Alias 64dup
     ' over Alias 64over
     ' drop Alias 64drop
+    ' swap Alias 64swap
     ' + Alias 64+
     ' - Alias 64-
     ' or Alias 64or
@@ -29,12 +30,14 @@ cell 8 = [IF]
     ' s>f Alias 64>f
     ' = Alias 64=
     -1 1 64rshift Constant max-int64
+    ' . alias 64.
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
     ' 2drop alias 64drop
     ' 2dup Alias 64dup
     ' 2over Alias 64over
+    ' 2swap Alias 64swap
     : 64,  swap 2, ;
     : 64@  2@ swap ; [IFDEF] macro macro [THEN]
     : 64!  >r swap r> 2! ; [IFDEF] macro macro [THEN]
@@ -50,7 +53,7 @@ cell 8 = [IF]
     ' d2/ Alias 64-2/
     ' dnegate Alias 64negate
     0. 2Constant 64#0
-    1-. 2Constant 64#-1
+    -1. 2Constant 64#-1
     : 64lshift ( u64 u -- u64' )  >r
 	r@ lshift over 8 cells r@ - rshift or
 	swap r> lshift swap ;
@@ -60,6 +63,7 @@ cell 8 = [IF]
     ' d>f Alias 64>f
     ' d= Alias 64=
     -1. 1 64rshift 64Constant max-int64
+    ' d. alias 64.
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+

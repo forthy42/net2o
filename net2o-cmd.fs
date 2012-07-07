@@ -21,25 +21,32 @@
 
 2Variable buf-state
 
-: u>n ( u -- n )
-    dup 2/ swap 1 and IF negate THEN ;
-: n>u ( n -- u )
-    dup 0< 1 and swap abs 2* or ;
-
-: ps!+ ( n addr -- addr' )
+[IFDEF] 64bit
+    : u>n ( 64u -- 64n )
+	dup 2/ swap 1 and IF negate THEN ;
+    : n>u ( 64n -- 64u )
+	dup 0< 1 and swap abs 2* or ;
+[ELSE]
+    : u>n ( 64u -- 64n )
+	2dup d2/ 2swap drop 1 and IF  dnegate  THEN ;
+    : n>u ( 64n -- 64u )
+	dup 0< 1 and -rot dabs d2* >r or r> ;
+[THEN]
+    
+: ps!+ ( 64n addr -- addr' )
     >r n>u r> p!+ ;
-: ps@+ ( addr -- n addr' )
+: ps@+ ( addr -- 64n addr' )
     p@+ >r u>n r> ;
 
-: p@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
-: ps@ ( -- n ) p@ u>n ;
+: p@ ( -- 64u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
+: ps@ ( -- 64n ) p@ u>n ;
 
 : byte@ ( addr u -- addr' u' b )
     >r count r> 1- swap ;
 
 : string@ ( -- addr u )
     buf-state 2@ over + >r
-    p@+ swap 2dup + r> over - buf-state 2! ;
+    p@+ [IFUNDEF] 64bit nip [THEN] swap 2dup + r> over - buf-state 2! ;
 
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
@@ -73,8 +80,8 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : net2o-see ( -- )
     case
 	0 of  ." end-code" cr 0. buf-state 2!  endof
-	1 of  p@ . ." lit, "  endof
-	2 of  ps@ . ." slit, " endof
+	1 of  p@ 64. ." lit, "  endof
+	2 of  ps@ 64. ." slit, " endof
 	3 of  string@ n2o.string  endof
 	cells cmd-base-table + (net2o-see)
 	0 endcase ;
