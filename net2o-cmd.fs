@@ -260,6 +260,14 @@ also net2o-base definitions
 
 previous definitions
 
+[IFDEF] 64bit
+    ' noop Alias 2*64>n immediate
+    ' noop Alias 3*64>n immediate
+[ELSE]
+    : 2*64>n ( 64a 64b -- na nb ) 64>n >r 64>n r> ;
+    : 3*64>n ( 64a 64b 64c -- na nb nc ) 64>n >r 64>n >r 64>n r> r> ;
+[THEN]
+
 \ commands to read and write files
 
 also net2o-base definitions
@@ -275,17 +283,17 @@ also net2o-base definitions
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
 
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-16 net2o: new-data ( addr addr u -- ) n2o:new-data ;
-17 net2o: new-code ( addr addr u -- ) n2o:new-code ;
+16 net2o: new-data ( addr addr u -- )  3*64>n  n2o:new-data ;
+17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  -1 requests +! ;
-19 net2o: set-j^ ( addr -- )  own-crypt? IF  to j^  ELSE  drop  THEN ;
+19 net2o: set-j^ ( addr -- ) 64>n own-crypt? IF  to j^  ELSE  drop  THEN ;
 
 : n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
     2 pick ulit, r@ ulit, over ulit, new-code
     2 pick 2 pick + ulit, 2dup swap r@ + ulit, ulit, new-data
     r> ;
 
-20 net2o: map-request ( addrs ucode udata -- )
+20 net2o: map-request ( addrs ucode udata -- )  3*64>n
     nest[
     new-context
     max-data# umin swap max-code# umin swap
@@ -295,36 +303,39 @@ also net2o-base definitions
 
 net2o-base
 
-21 net2o: open-file ( addr u mode id -- )  n2o:open-file ;
-22 net2o: close-file ( id -- )  n2o:close-file ;
-23 net2o: file-size ( id -- size )  id>addr? fs-size @ ;
-24 net2o: slurp-chunk ( id -- ) id>file data$@ rot read-file throw /data ;
+21 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
+22 net2o: close-file ( id -- )  64>n n2o:close-file ;
+23 net2o: file-size ( id -- size )  id>addr? fs-size @ u>64 ;
+24 net2o: slurp-chunk ( id -- ) 64>n id>file data$@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
-27 net2o: set-blocksize ( n -- )  j^ blocksize ! ;
-28 net2o: set-blockalign ( n -- )  pow2?  j^ blockalign ! ;
+27 net2o: set-blocksize ( n -- )  64>n j^ blocksize ! ;
+28 net2o: set-blockalign ( n -- )  64>n pow2?  j^ blockalign ! ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize j^ blocksize ! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? j^ blockalign ! ;
 
 \ flow control functions
 
-30 net2o: ack-addrtime ( time addr -- )  net2o:ack-addrtime ;
-31 net2o: ack-resend ( flag -- )  net2o:ack-resend ;
+30 net2o: ack-addrtime ( time addr -- ) 64>n  net2o:ack-addrtime ;
+31 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
 32 net2o: set-rate ( ticks1 ticks2 -- )
     cookie? IF  net2o:set-rate
-    ELSE  2drop j^ ns/burst dup @ 2* 2* swap !  THEN ;
-33 net2o: resend-mask ( addr mask -- ) net2o:resend-mask net2o:send-chunks ;
+    ELSE  64drop 64drop j^ ns/burst dup @ 2* 2* swap !  THEN ;
+33 net2o: resend-mask ( addr mask -- )
+    [IFUNDEF] 64bit  64>r 64>n 64r> [THEN]
+    net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
 36 net2o: send-timing ( -- )  net2o:timing$ maxstring $10 - -$10 and umin $,
     rec-timing ;
 37 net2o: >time-offset ( n -- )  j^ time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset j^ time-offset 64! ;
-38 net2o: ack-b2btime ( addr time -- )  net2o:ack-b2btime ;
+38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
 39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
-    map@ cookie+ = cookie-val validated or! ;
+    [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
+    map@ cookie+ 64= cookie-val validated or! ;
 
 \ crypto functions
 
@@ -448,8 +459,9 @@ also net2o-base
     timing( 2dup F . F . ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime
-    j^ last-raddr @ j^ last-rtick @ dup
-    IF  j^ time-offset @ - lit, lit, ack-b2btime  ELSE  2drop  THEN ;
+    j^ last-raddr @ j^ last-rtick 64@ 64dup 64#0 64=
+    IF  64drop drop
+    ELSE  j^ time-offset 64@ 64- lit, ulit, ack-b2btime  THEN ;
 
 \ ack bits, new code
 

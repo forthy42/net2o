@@ -34,6 +34,8 @@ cell 8 = [IF]
     ' noop Alias n>64 immediate
     ' noop Alias u>64 immediate
     ' s>d Alias 64>d
+    ' >r Alias 64>r
+    ' r> Alias 64r>
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -70,6 +72,8 @@ cell 8 = [IF]
     ' noop Alias 64>d immediate
     ' s>d Alias n>64
     ' false Alias u>64
+    ' 2>r Alias 64>r
+    ' 2r> Alias 64r>
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+
