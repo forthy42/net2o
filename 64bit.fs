@@ -20,7 +20,6 @@ cell 8 = [IF]
     ' l@ Alias 32@
     ' Variable Alias 64Variable
     ' Constant Alias 64Constant
-    ' noop Alias u>64 immediate
     ' 2/ Alias 64-2/
     ' negate Alias 64negate
     0 Constant 64#0
@@ -31,6 +30,10 @@ cell 8 = [IF]
     ' = Alias 64=
     -1 1 64rshift Constant max-int64
     ' . alias 64.
+    ' noop Alias 64>n immediate
+    ' noop Alias n>64 immediate
+    ' noop Alias u>64 immediate
+    ' s>d Alias 64>d
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -49,7 +52,6 @@ cell 8 = [IF]
     ' @ Alias 32@
     ' 2Variable Alias 64Variable
     ' 2Constant Alias 64Constant
-    ' false Alias u>64
     ' d2/ Alias 64-2/
     ' dnegate Alias 64negate
     0. 2Constant 64#0
@@ -64,6 +66,10 @@ cell 8 = [IF]
     ' d= Alias 64=
     -1. 1 64rshift 64Constant max-int64
     ' d. alias 64.
+    ' drop Alias 64>n
+    ' noop Alias 64>d immediate
+    ' s>d Alias n>64
+    ' false Alias u>64
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+

@@ -1043,7 +1043,7 @@ include net2o-crypt.fs
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
 
-: cookie+ ( map addr bitmap -- sum )  >r
+: cookie+ ( addr bitmap map -- sum ) -rot >r
     addr>ts over dest-size @ addr>ts umin
     swap dest-cookies @ + 0
     BEGIN  r@ 1 and IF  over @ +  THEN

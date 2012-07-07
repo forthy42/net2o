@@ -138,9 +138,9 @@ forth also net2o-base definitions previous
 
 \ these functions are only there to test the server
 
-4 net2o: emit ( xc -- ) xemit ;
+4 net2o: emit ( xc -- ) 64>n xemit ;
 5 net2o: type ( addr u -- )  type ;
-6 net2o: . ( -- ) . ;
+6 net2o: . ( -- ) 64. ;
 7 net2o: cr ( -- ) cr ;
 
 definitions
@@ -160,9 +160,9 @@ Variable cmd0buf#
 
 : cmdreset  cmdbuf# off ;
 
-: cmd, ( n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf# +! ;
+: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf# +! ;
 
-: net2o, @ cmd, ;
+: net2o, @ n>64 cmd, ;
 
 : net2o-code   cmd0source on   ['] net2o, IS net2o-do also net2o-base ;
 : net2o-code0  cmd0source off  ['] net2o, IS net2o-do also net2o-base ;
@@ -254,6 +254,8 @@ also net2o-base definitions
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;
+: nlit, ( n -- )  n>64 slit, ;
+: ulit, ( n -- )  u>64 lit, ;
 : end-code ( -- ) end-cmd previous cmd ;
 
 previous definitions
@@ -279,8 +281,8 @@ also net2o-base definitions
 19 net2o: set-j^ ( addr -- )  own-crypt? IF  to j^  ELSE  drop  THEN ;
 
 : n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
-    2 pick lit, r@ lit, over lit, new-code
-    2 pick 2 pick + lit, 2dup swap r@ + lit, lit, new-data
+    2 pick ulit, r@ ulit, over ulit, new-code
+    2 pick 2 pick + ulit, 2dup swap r@ + ulit, ulit, new-data
     r> ;
 
 20 net2o: map-request ( addrs ucode udata -- )
@@ -302,8 +304,8 @@ net2o-base
 27 net2o: set-blocksize ( n -- )  j^ blocksize ! ;
 28 net2o: set-blockalign ( n -- )  pow2?  j^ blockalign ! ;
 
-: blocksize! ( n -- )  dup lit, set-blocksize j^ blocksize ! ;
-: blockalign! ( n -- )  dup lit, set-blockalign pow2? j^ blockalign ! ;
+: blocksize! ( n -- )  dup ulit, set-blocksize j^ blocksize ! ;
+: blockalign! ( n -- )  dup ulit, set-blockalign pow2? j^ blockalign ! ;
 
 \ flow control functions
 
@@ -317,12 +319,12 @@ net2o-base
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
 36 net2o: send-timing ( -- )  net2o:timing$ maxstring $10 - -$10 and umin $,
     rec-timing ;
-37 net2o: >time-offset ( n -- )  j^ time-offset ! ;
-: time-offset! ( -- )  ticks dup lit, >time-offset j^ time-offset ! ;
+37 net2o: >time-offset ( n -- )  j^ time-offset 64! ;
+: time-offset! ( -- )  ticks 64dup lit, >time-offset j^ time-offset 64! ;
 38 net2o: ack-b2btime ( addr time -- )  net2o:ack-b2btime ;
 39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
-    map@ -rot cookie+ = cookie-val validated or! ;
+    map@ cookie+ = cookie-val validated or! ;
 
 \ crypto functions
 
@@ -452,7 +454,7 @@ also net2o-base
 \ ack bits, new code
 
 : ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r cookie+ lit, 2r> swap lit, lit, ack-cookies ;
+    2dup 2>r rot cookie+ lit, 2r> swap lit, lit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@
