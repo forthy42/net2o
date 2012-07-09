@@ -804,7 +804,7 @@ timestats buffer: stat-tuple
     >timestamp
     over  IF
 	dup tick-init 1+ timestamp * u>
-	IF  + dup >r ts-ticks 64@
+	IF  + dup >r  dup ts-ticks 64@
 	    r> tick-init 1+ timestamp * - ts-ticks 64@ 64- j^ lastdeltat 64!
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
@@ -1129,7 +1129,7 @@ Variable no-ticks
 : ts-ticks! ( addr map -- )
 \    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + >r ticks r> ts-ticks
-    dup 64@ 64-0= IF  64on 64drop  EXIT  THEN 64! ;
+    dup 64@ 64-0= 0= IF  64on 64drop  EXIT  THEN 64! ;
 
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
