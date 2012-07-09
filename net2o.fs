@@ -670,7 +670,7 @@ Variable init-context#
     ticks j^ lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init j^ ns/burst !
     never          j^ next-tick 64!
-    0              j^ extra-ns ! ;
+    64#0           j^ extra-ns 64! ;
 
 : n2o:new-context ( addr -- )
     context-struct allocate throw to j^
@@ -779,8 +779,10 @@ timestats buffer: stat-tuple
     j^ max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
-    dup 0= over -1 = or IF  2drop EXIT  THEN
-    - j^ lastslack @ - negate slack( dup . .j ." grow" cr ) j^ slackgrow ! ;
+    64dup 64-0=     IF  64drop 64drop  EXIT  THEN
+    64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
+    64- j^ lastslack 64@ 64- 64negate slack( 64dup 64. .j ." grow" cr )
+    j^ slackgrow 64! ;
 
 : map@ ( -- addr/0 )
     0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
@@ -834,13 +836,13 @@ slack-default# Value slack-bias#
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow @ j^ extra-ns @ - 0 max
-    j^ window-size @ tick-init 1+ bursts# - */
-    j^ slackgrow @ j^ extra-ns @ min max ;
+    j^ slackgrow 64@ j^ extra-ns 64@ 64- 64#0 64max 64>n
+    j^ window-size @ tick-init 1+ bursts# - */ n>64
+    j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ;
 
 : >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck slackext rot */
-    dup j^ extra-ns ! + ;
+    dup >slack-exp tuck slackext 64>n rot */
+    dup n>64 j^ extra-ns 64! + ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go slower or faster!
