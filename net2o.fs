@@ -1102,14 +1102,14 @@ Variable code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j^ 0= ?EXIT
-    j^ ns/burst @ tick-init 1+ / j^ bandwidth-tick +! ;
+    j^ ns/burst 64@ 64>n tick-init 1+ / n>64 j^ bandwidth-tick 64+! ;
 
 : burst-end ( -- )  j^ data-b2b @ ?EXIT
-    ticks j^ bandwidth-tick @ umax j^ next-tick ! ;
+    ticks j^ bandwidth-tick 64@ 64max j^ next-tick 64! ;
 
 : sendX ( addr taddr target n -- )
     >r set-dest  r> >send  set-flags  bandwidth+  send-packet
-    net2o:update-key ;
+   net2o:update-key ;
 
 \ send chunk
 
@@ -1171,7 +1171,7 @@ Variable no-ticks
     THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
-	sendX  never j^ next-tick !
+	sendX  never j^ next-tick 64!
     ELSE  sendX  THEN ;
 
 : bandwidth? ( -- flag )  ticks j^ next-tick @ - 0>=
