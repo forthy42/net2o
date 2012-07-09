@@ -1400,7 +1400,7 @@ $08 Constant cookie-val
 	inbuf packet-data queue-command
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN
-        ticks j^ recv-tick ! \ time stamp of arrival
+        ticks j^ recv-tick 64! \ time stamp of arrival
 	dup 0> wurst-inbuf-decrypt 0= IF
 	    inbuf .header
 	    ." invalid packet to " dest-addr @ hex. cr
