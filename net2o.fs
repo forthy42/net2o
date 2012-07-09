@@ -46,10 +46,12 @@ require hash-table.fs
 
 [IFDEF] 64bit
     ' min! Alias 64min!
+    ' max! Alias 64max!
     ' !@ Alias 64!@
 [ELSE]
     : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
     : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
+    : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
 [THEN]
 
 \ bit vectors, lsb first
@@ -767,13 +769,14 @@ timestats buffer: stat-tuple
     64over 64- j^ rtdelay 64min! ;
 
 : timestat ( client serv -- )
-    dup 0= over -1 = or IF  2drop EXIT  THEN
+    64dup 64-0=     IF  64drop 64drop  EXIT  THEN
+    64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
     timing( over . dup . ." acktime" cr )
-    >rtdelay  - dup j^ lastslack !
-    j^ lastdeltat @ delta-damp# rshift
-    dup j^ min-slack +! negate j^ max-slack +!
-    dup j^ min-slack min!
-    j^ max-slack max! ;
+    >rtdelay  64- 64dup j^ lastslack 64!
+    j^ lastdeltat 64@ delta-damp# 64rshift
+    64dup j^ min-slack 64+! 64negate j^ max-slack 64+!
+    64dup j^ min-slack 64min!
+    j^ max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
     dup 0= over -1 = or IF  2drop EXIT  THEN
@@ -801,11 +804,11 @@ timestats buffer: stat-tuple
     >timestamp
     over  IF
 	dup tick-init 1+ timestamp * u>
-	IF  + dup ts-ticks @
-	    over tick-init 1+ timestamp * - ts-ticks @ - j^ lastdeltat !
+	IF  + dup >r ts-ticks 64@
+	    r> tick-init 1+ timestamp * - ts-ticks 64@ 64- j^ lastdeltat 64!
 	ELSE  +  THEN
-	ts-ticks @ timestat
-    ELSE  2drop drop  THEN ;
+	ts-ticks 64@ timestat
+    ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )  >timestamp
     over  IF  + ts-ticks @ b2b-timestat
@@ -1125,8 +1128,8 @@ Variable no-ticks
 
 : ts-ticks! ( addr map -- )
 \    no-ticks @ IF  2drop EXIT  THEN
-    >r addr>ts r> dest-timestamps @ + ticks swap ts-ticks
-    dup @ IF  on drop  EXIT  THEN ! ;
+    >r addr>ts r> dest-timestamps @ + >r ticks r> ts-ticks
+    dup 64@ 64-0= IF  64on 64drop  EXIT  THEN 64! ;
 
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
