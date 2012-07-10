@@ -754,8 +754,7 @@ reply buffer: dummy-reply
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- ) ." Adding stat" cr
-    stat-tuple timestats  j^ timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  j^ timing-stat $+! ;
 
 \ flow control
 
