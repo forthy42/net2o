@@ -37,6 +37,7 @@ cell 8 = [IF]
     ' >r Alias 64>r
     ' r> Alias 64r>
     ' 0= Alias 64-0=
+    ' 0>= Alias 64-0>=
     ' on Alias 64on
     ' +! Alias 64+!
     ' min Alias 64min
@@ -80,6 +81,7 @@ cell 8 = [IF]
     ' 2>r Alias 64>r
     ' 2r> Alias 64r>
     ' d0= Alias 64-0=
+    ' d0>= Alias 64-0>=
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
     ' dmin Alias 64min

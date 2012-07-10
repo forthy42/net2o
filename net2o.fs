@@ -1174,7 +1174,7 @@ Variable no-ticks
 	sendX  never j^ next-tick 64!
     ELSE  sendX  THEN ;
 
-: bandwidth? ( -- flag )  ticks j^ next-tick @ - 0>=
+: bandwidth? ( -- flag )  ticks j^ next-tick 64@ 64- 64-0>=
     j^ flybursts @ 0> and  ;
 
 \ asynchronous sending
