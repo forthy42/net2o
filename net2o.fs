@@ -1243,8 +1243,8 @@ Create chunk-adder chunks-struct allot
     ELSE  drop chunks+ off false  THEN ;
 
 : next-chunk-tick ( -- tick )
-    -1 chunks $@ bounds ?DO
-	I chunk-context @ next-tick @ umin
+    64#-1 chunks $@ bounds ?DO
+	I chunk-context @ next-tick 64@ 64umin
     chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  false  0 >r
@@ -1335,7 +1335,7 @@ Create pollfds   here pollfd %size dup allot erase
     2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    next-chunk-tick dup -1 <> >r ticks-u - dup 0>= r> or
+    next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64>n dup 0>= r> or
     IF    0 max 0 ptimeout 2!
     ELSE  drop poll-timeout# 0 ptimeout 2!  THEN ;
 
