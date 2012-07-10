@@ -391,7 +391,7 @@ net2o-base
 81 net2o: .time ( -- ) .times ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
-    dup net2o:rewind-receiver lit, rewind-sender ;
+    dup net2o:rewind-receiver ulit, rewind-sender ;
 
 \ safe initialization
 
@@ -514,7 +514,7 @@ also net2o-base
     2drop ;
 
 : do-expect-reply ( -- )
-    reply-index lit, tag-reply  end-cmd  net2o:expect-reply
+    reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
     ['] end-cmd IS expect-reply? ;
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
