@@ -27,6 +27,7 @@ cell 8 = [IF]
     ' rshift Alias 64rshift
     ' lshift Alias 64lshift
     ' s>f Alias 64>f
+    ' f>s Alias f>64
     ' = Alias 64=
     -1 1 64rshift Constant max-int64
     ' . alias 64.
@@ -44,6 +45,7 @@ cell 8 = [IF]
     ' max Alias 64max
     ' umin Alias 64umin
     ' umax Alias 64umax
+    ' off Alias 64off
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -73,6 +75,7 @@ cell 8 = [IF]
 	r@ rshift over 8 cells r@ - lshift or
 	swap r> rshift ;
     ' d>f Alias 64>f
+    ' f>d Alias f>64
     ' d= Alias 64=
     -1. 1 64rshift 64Constant max-int64
     ' d. alias 64.
@@ -90,6 +93,7 @@ cell 8 = [IF]
     ' dmax Alias 64max
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;
     : 64umax  2over 2over du< IF  2swap  THEN  2drop ;
+    : 64off 0. rot 64! ;
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+

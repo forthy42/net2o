@@ -530,7 +530,7 @@ field: total
 field: received
 \ statistics
 field: timing-stat
-field: last-time
+64field: last-time
 \ make timestamps smaller
 64field: time-offset
 end-structure
@@ -737,13 +737,13 @@ reply buffer: dummy-reply
 : stats( ]] j^ timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
-    stats( j^ timing-stat $@  EXIT ) s" " ;
+    stats( j^ timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
 
 : net2o:rec-timing ( addr u -- ) \ do some dumps
     bounds ?DO
-	I ts-delta sf@ f>s j^ last-time +!
-	j^ last-time @ s>f 1n f* fdup f.
-	j^ time-offset @ &10000000000 mod s>f 1n f* f+ f. 
+	I ts-delta sf@ f>64 j^ last-time 64+!
+	j^ last-time 64@ 64>f 1n f* fdup f.
+	j^ time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
@@ -754,7 +754,8 @@ reply buffer: dummy-reply
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple timestats  j^ timing-stat $+! ;
+: stat+ ( addr -- ) ." Adding stat" cr
+    stat-tuple timestats  j^ timing-stat $+! ;
 
 \ flow control
 
@@ -813,8 +814,8 @@ timestats buffer: stat-tuple
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )  >timestamp
-    over  IF  + ts-ticks @ b2b-timestat
-    ELSE  2drop drop  THEN ;
+    over  IF  + ts-ticks 64@ b2b-timestat
+    ELSE  2drop 64drop  THEN ;
 
 #10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
 slack-default# Value slack-bias#
@@ -859,7 +860,7 @@ slack-default# Value slack-bias#
 : rate-stat2 ( rate -- )
     rate( 64dup 64. .j ." rate" cr )
     stats( 64dup j^ extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
-           j^ slackgrow @ s>f stat-tuple ts-grow sf! 
+           j^ slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1

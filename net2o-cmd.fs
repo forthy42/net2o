@@ -335,7 +335,7 @@ net2o-base
 39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
-    map@ cookie+ 64= cookie-val validated or! ;
+    map@ cookie+ 64= cookie-val and validated or! ;
 
 \ crypto functions
 
@@ -429,11 +429,11 @@ previous
 
 \ client side timing
 
-: ack-size ( -- )  1 j^ acks +!  j^ recv-tick @ j^ lastb-ticks ! ;
+: ack-size ( -- )  1 j^ acks +!  j^ recv-tick 64@ j^ lastb-ticks 64! ;
 : ack-first ( -- )
-    j^ lastb-ticks @ ?dup-IF  j^ firstb-ticks @ - j^ delta-ticks +!  THEN
-    j^ recv-tick @ j^ firstb-ticks !  j^ lastb-ticks off
-    j^ recv-tick @ j^ last-rtick !  j^ recv-addr @ j^ last-raddr ! ;
+    j^ lastb-ticks 64@ 64dup 64-0= 0= IF  j^ firstb-ticks 64@ 64- j^ delta-ticks 64+!  THEN
+    j^ recv-tick 64@ j^ firstb-ticks 64!  j^ lastb-ticks 64off
+    j^ recv-tick 64@ j^ last-rtick 64!  j^ recv-addr @ j^ last-raddr ! ;
 
 : ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
@@ -441,19 +441,19 @@ previous
 : .rate ( n -- n ) dup . ." rate" cr ;
 : .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
-: >rate ( -- )  j^ delta-ticks 2@ 0= swap 0= or ?EXIT
-    j^ recv-tick @ dup j^ burst-ticks !@ dup IF
-	- rate( .eff ) >r
-	j^ delta-ticks @ tick-init 1+ j^ acks @ */
+: >rate ( -- )  j^ delta-ticks 64@ 64-0= j^ acks @ 0= or ?EXIT
+    j^ recv-tick 64@ 64dup j^ burst-ticks 64!@ 64dup 64-0= 0= IF
+	64- 64>n rate( .eff ) >r
+	j^ delta-ticks 64@ 64>n tick-init 1+ j^ acks @ */
 \	j^ last-rate @
 \	\ do not change requested rate by more than a factor 2
 \	?dup-IF  tuck 2* min swap 2/ max  THEN
 \	dup j^ last-rate !
-	rate( .rate ) lit, r> lit, set-rate
+	rate( .rate ) ulit, r> ulit, set-rate
     ELSE
-	2drop
+	64drop 64drop
     THEN
-    j^ delta-ticks off  j^ acks off ;
+    j^ delta-ticks 64off  j^ acks off ;
 
 : net2o:acktime ( -- )
     j^ recv-addr @ j^ recv-tick 64@ j^ time-offset 64@ 64-
@@ -467,7 +467,7 @@ also net2o-base
 \ ack bits, new code
 
 : ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r rot >r n>64 r> cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
+    2dup 2>r rot >r u>64 r> cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@
