@@ -431,7 +431,9 @@ previous
 
 : ack-size ( -- )  1 j^ acks +!  j^ recv-tick 64@ j^ lastb-ticks 64! ;
 : ack-first ( -- )
-    j^ lastb-ticks 64@ 64dup 64-0= 0= IF  j^ firstb-ticks 64@ 64- j^ delta-ticks 64+!  THEN
+    j^ lastb-ticks 64@ 64dup 64-0= 0= IF
+	j^ firstb-ticks 64@ 64- j^ delta-ticks 64+!
+    ELSE  64drop  THEN
     j^ recv-tick 64@ j^ firstb-ticks 64!  j^ lastb-ticks 64off
     j^ recv-tick 64@ j^ last-rtick 64!  j^ recv-addr @ j^ last-raddr ! ;
 

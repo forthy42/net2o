@@ -25,7 +25,7 @@ n2o:done
 send-chunks
 end-code
 
-ticks 1 client-loop ticks - negate s>f 1e-9 f* f. ." s" cr
+ticks 1 client-loop ticks 64- 64negate 64>f 1e-9 f* f. ." s" cr
 ." IP packets send/received: " packets ? packetr ? cr
 .times
 
