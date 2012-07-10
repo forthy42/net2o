@@ -668,9 +668,9 @@ Variable init-context#
     max-int64 j^ rtdelay 64!
     flybursts# dup j^ flybursts ! j^ flyburst !
     ticks j^ lastack 64! \ asking for context creation is as good as an ack
-    bandwidth-init j^ ns/burst !
-    never          j^ next-tick 64!
-    64#0           j^ extra-ns 64! ;
+    bandwidth-init n>64 j^ ns/burst 64!
+    never               j^ next-tick 64!
+    64#0                j^ extra-ns 64! ;
 
 : n2o:new-context ( addr -- )
     context-struct allocate throw to j^
@@ -822,13 +822,13 @@ slack-default# Value slack-bias#
 : slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
-    j^ rtdelay @ j^ ns/burst @ / flybursts# +
+    j^ rtdelay 64@ 64>n j^ ns/burst 64@ 64>n / flybursts# +
     bursts( dup . .j ." flybursts" cr ) dup j^ flyburst ! ;
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : >slack-exp ( rate -- rate' )
-    j^ lastslack @ j^ min-slack @ -
+    j^ lastslack 64@ j^ min-slack 64@ 64- 64>n
     slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - 0 max slack# 2* 2* min
@@ -841,13 +841,13 @@ slack-default# Value slack-bias#
     j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ;
 
 : >extra-ns ( rate -- rate' )
-    dup >slack-exp tuck slackext 64>n rot */
-    dup n>64 j^ extra-ns 64! + ;
+    64>n dup >slack-exp tuck slackext 64>n rot */
+    dup n>64 j^ extra-ns 64! + n>64 ;
 
-: rate-limit ( rate -- rate' )
+: rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
-    j^ last-ns/burst @  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
-    dup j^ last-ns/burst ! ;
+    j^ last-ns/burst 64@ 64>n  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
+    dup n>64 j^ last-ns/burst 64! ;
 
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
@@ -864,7 +864,7 @@ slack-default# Value slack-bias#
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64drop >extra-ns rate-stat2 j^ ns/burst 64!@
-    bandwidth-init 64= IF \ first acknowledge
+    bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
     THEN ;
@@ -1043,7 +1043,7 @@ include net2o-crypt.fs
 : cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >r
     wurst-cookie
     dest-addr @ r@ >offset 0= IF  rdrop 2drop  EXIT  THEN
-    addr>ts r> dest-cookies @ + ! ;
+    addr>ts r> dest-cookies @ + 64! ;
 
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
