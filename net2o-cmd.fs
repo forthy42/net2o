@@ -456,9 +456,9 @@ also net2o-base
     j^ delta-ticks off  j^ acks off ;
 
 : net2o:acktime ( -- )
-    j^ recv-addr @ j^ recv-tick @ j^ time-offset @ -
+    j^ recv-addr @ j^ recv-tick 64@ j^ time-offset 64@ 64-
     timing( 2dup F . F . ." acktime" F cr )
-    lit, lit, ack-addrtime ;
+    lit, ulit, ack-addrtime ;
 : net2o:b2btime
     j^ last-raddr @ j^ last-rtick 64@ 64dup 64#0 64=
     IF  64drop drop
@@ -467,7 +467,7 @@ also net2o-base
 \ ack bits, new code
 
 : ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r rot cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
+    2dup 2>r rot >r n>64 r> cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@
@@ -477,7 +477,7 @@ also net2o-base
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
-    j^ recv-flag @ invert resend-toggle# and lit, ack-resend ;
+    j^ recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
@@ -508,7 +508,7 @@ also net2o-base
     	    dup I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
 	    resend( ." resend: " dup hex. over hex. F cr )
-	    lit, lit, resend-mask
+	    ulit, ulit, resend-mask
 	THEN
     4 +LOOP
     2drop ;
@@ -598,11 +598,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ higher level functions
 
 : map-request, ( ucode udata -- )
-    2dup + n2o:new-map lit, swap lit, lit,
+    2dup + n2o:new-map ulit, swap ulit, ulit,
     map-request ;
 
 : gen-request ( -- )
-    net2o-code0  nest[ j^ lit, set-j^ ticks lit, set-rtdelay request-done ]nest
+    net2o-code0  nest[ j^ ulit, set-j^ ticks lit, set-rtdelay request-done ]nest
     j^ req-codesize @  j^ req-datasize @ map-request,
     key-request
     end-code ;

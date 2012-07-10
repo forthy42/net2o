@@ -1060,7 +1060,7 @@ include net2o-crypt.fs
 	addr>ts map dest-size @ addr>ts umin
 	map dest-cookies @ + { addr } 64#0
 	BEGIN  r@ 1 and IF  addr 64@ 64+  THEN
-	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r d0= UNTIL
+	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r 64-0= UNTIL
 	64r> 64drop ;
 [THEN]
 
