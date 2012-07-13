@@ -146,7 +146,9 @@ true [IF]
 	@ IF  ['] noop assert-canary  ELSE  postpone (  THEN ;
 [THEN]
 
-: x~~ ]] base @ >r hex ~~ r> base ! [[ ; immediate
+: hex[ ]] base @ >r hex [[ ; immediate
+: ]hex ]] r> base ! [[ ; immediate
+: x~~ ]] hex[ ~~ ]hex [[ ; immediate
 
 \ defined exceptions
 
@@ -173,6 +175,7 @@ debug: slk(
 debug: bursts(
 debug: resend(
 debug: track(
+debug: data(
 debug: cmd(
 debug: send(
 debug: firstack(
@@ -410,16 +413,11 @@ $04 Constant resend-toggle#
 
 \ short packet information
 
-: chunk@ ( addr flag -- value addr' )
-    IF  dup @ swap 8 +  ELSE  dup w@ swap 2 +  THEN ;
-
-: .header ( addr -- )
-    dup c@ >r 2 +
-    r@ datasize# and 'A' + emit
-    r@ headersize# and chunk@
-    r@ headersize# and chunk@
-    drop rdrop swap
-    ."  to " hex. ."  @ " hex. ." from " return-addr @ hex. cr ;
+: .header ( addr -- ) base @ >r hex
+    dup c@ >r
+    min-size r> datasize# and lshift hex. ." bytes to "
+    addr 64@ 64. cr
+    r> base ! ;
 
 \ packet delivery table
 
@@ -762,10 +760,7 @@ timestats buffer: stat-tuple
     64dup j^ bandwidth-tick 64!  j^ next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    j^ recv-tick 64@
-    j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
-    0= IF  64dup ticks-init  bursts( .j ." restart bursts " j^ flybursts ? cr )  THEN
-    64dup j^ lastack 64!
+    j^ recv-tick 64@ 64dup j^ lastack 64!
     64over 64- j^ rtdelay 64min! ;
 
 : timestat ( client serv -- )
@@ -794,7 +789,14 @@ timestats buffer: stat-tuple
 : >offset ( addr map -- addr' flag ) >r
     r@ dest-vaddr @ - dup r> dest-size @ u< ;
 
+: >flyburst ( -- )
+    j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
+    0= IF  j^ recv-tick 64@ ticks-init
+	bursts( .j ." restart bursts " j^ flybursts ? cr )
+    THEN ;
+
 : >timestamp ( time addr -- ts-array index / 0 0 )
+    >flyburst
     >r j^ time-offset @ + r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ >offset  IF
@@ -875,12 +877,16 @@ Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
-: net2o:resend-mask ( addr mask -- ) 
+: net2o:resend-mask ( addr mask -- )
+    resend( ." mask: " hex[ 64>r dup . 64r> 64dup 64. ]hex cr )
     j^ data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
 	    over I 2@ rot >r
 	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
-	    rdrop nip or >mask0 I 2!  UNLOOP  EXIT
+	    rdrop nip or >mask0
+	    resend( I 2@ hex[ ." replace: " swap . . ." -> "
+	    64>r dup . 64r> 64dup 64. cr ]hex )
+	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP
     >mask0 resend-buf 2!
@@ -1154,7 +1160,7 @@ Variable no-ticks
 : net2o:resend ( -- )
     no-ticks on resend$@ net2o:get-resend 2dup 2>r
     net2o:prep-send /resend
-    2r> send( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
+    2r> resend( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send ( -- )
     no-ticks off dest-tail$@ net2o:get-dest 2dup 2>r
@@ -1234,6 +1240,7 @@ Create chunk-adder chunks-struct allot
 	dup chunk-context @ to j^
 	chunk-count
 	data-to-send IF
+	    msg( ." send a chunk" cr )
 	    send-a-chunk
 	ELSE
 	    drop msg( .nosend )
@@ -1373,7 +1380,9 @@ Create pollfds   here pollfd %size dup allot erase
 ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
-    timeout( ." timeout? " . send-anything? . chunks+ ? next-chunk-tick . cr ) ;
+    >flyburst
+    timeout( ." timeout? " . send-anything? . chunks+ ? next-chunk-tick dup . cr )
+    drop ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
@@ -1412,6 +1421,7 @@ $08 Constant cookie-val
 	    IF  drop  THEN  EXIT  THEN
 	crypt-val validated ! \ ok, we have a validated connection
 	dup 0< IF \ data packet
+	    data( ." received: " inbuf .header cr )
 	    drop  >r inbuf packet-data r> swap move
 	    j^ ack-xt perform
 	ELSE \ command packet

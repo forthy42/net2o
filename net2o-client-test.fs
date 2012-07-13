@@ -15,6 +15,7 @@ insert-ip n2o:connect +flow-control +resend
 ." Connected" cr
 
 net2o-code
+expect-reply
 data-ivs time-offset!
 s" Download test" $, type cr !time
 $400 blocksize! $400 blockalign! stat( request-stats )

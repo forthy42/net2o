@@ -67,8 +67,8 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
 
-: xtype ( addr u -- )  base @ >r hex
-    bounds ?DO  I c@ 0 <# # # #> type  LOOP  r> base ! ;
+: xtype ( addr u -- )  hex[
+    bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
 
 : n2o.string ( addr u -- )
     2dup printable? IF
@@ -77,14 +77,14 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: net2o-see ( -- )
+: net2o-see ( -- ) hex[
     case
 	0 of  ." end-code" cr 0. buf-state 2!  endof
 	1 of  p@ 64. ." lit, "  endof
 	2 of  ps@ 64. ." slit, " endof
 	3 of  string@  n2o.string  endof
 	cells cmd-base-table + (net2o-see)
-	0 endcase ;
+	0 endcase ]hex ;
 
 : cmd-see ( addr u -- addr' u' )
     byte@ >r buf-state 2! r> net2o-see buf-state 2@ ;
@@ -256,7 +256,7 @@ also net2o-base definitions
 : slit, ( n -- )  slit n>u cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( n -- )  u>64 lit, ;
-: end-code ( -- ) end-cmd previous cmd ;
+: end-code ( -- ) expect-reply? previous cmd ;
 
 previous definitions
 
@@ -517,6 +517,7 @@ also net2o-base
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
+    msg( ." Expect reply" cr )
     ['] end-cmd IS expect-reply? ;
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
@@ -616,7 +617,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     r@ dest-timestamps @
     r@ dest-size @ addr>replies bounds ?DO
 	I 2@ d0<> IF
-	    resend( ." resend: " I 2@ n2o:see F cr )
+	    timeout( ." resend: " I 2@ n2o:see F cr )
 	    I 2@ cmdbuf# ! code-vdest send-cmd
 	THEN
     reply +LOOP
@@ -633,12 +634,16 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : transfer-keepalive? ( -- )
     j^ received @ j^ expected @ u>= ?EXIT
-    resend-toggle# j^ recv-flag xor! timeout( .expected )
-    cmdreset  ticks lit, timeout  false net2o:do-resend  net2o:genack
-    cmd-send? ;
+    timeout( .expected )
+    cmdreset  ticks lit, timeout
+    resend-toggle# j^ recv-flag xor!  false net2o:do-resend
+    resend-toggle# j^ recv-flag xor!  false net2o:do-resend
+    net2o:genack  cmd-send? ;
 
-: connecting-timeout ( -- ) gen-request ;
-: connected-timeout ( -- )  cmd-resend? transfer-keepalive? ;
+: connecting-timeout ( -- ) ." connecting timeout" F cr
+    gen-request ;
+: connected-timeout ( -- )  ." connected timeout" F cr
+    cmd-resend? transfer-keepalive? ;
 
 : +connecting   ['] connecting-timeout j^ timeout-xt ! ;
 : +resend       ['] connected-timeout  j^ timeout-xt ! ;
