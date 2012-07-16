@@ -2,8 +2,7 @@ TOP        = $(HOME)/proj/swig-2.0.1-bernd
 NDK        = $(HOME)/proj/android-toolchain/sysroot
 CC         = arm-linux-androideabi-gcc
 SWIG       = $(TOP)/preinst-swig
-TARGETS    = gles.fs egl.fs glext.fs
-DEMO       = demo.fs
+TARGETS    = gles.fsx egl.fsx glext.fsx
 OPTIONS    = -forth -no-sectioncomments -stackcomments -I$(NDK)/usr/include -I$(NDK)/usr/include/GLES -I$(NDK)/usr/include/EGL
 
 all: $(TARGETS)

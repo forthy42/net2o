@@ -4,7 +4,7 @@
 #include <GLES2/gl2.h>
 %}
 %apply float { GLfloat, GLclampf };
-%apply long { GLintptr, GLsizeiptr };
+%apply SWIGTYPE * { GLintptr, GLsizeiptr };
 
 #define __ANDROID__
 #define GL_APICALL

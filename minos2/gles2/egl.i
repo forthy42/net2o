@@ -4,7 +4,7 @@
 #include <EGL/egl.h>
 %}
 %apply int { EGLint };
-%apply long { EGLNativeDisplayType, EGLNativeWindowType, EGLNativePixmapType };
+%apply SWIGTYPE * { EGLNativeDisplayType, EGLNativeWindowType, EGLNativePixmapType };
 
 #define __ANDROID__
 #define ANDROID
