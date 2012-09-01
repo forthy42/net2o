@@ -91,7 +91,7 @@ end-class heap
 	I heap heap@ heap .h
     heap hcell +LOOP ;
 
-true [IF] \ tests
+false [IF] \ tests
     hnew constant heap1
     1 heap1 hinsert
     5 heap1 hinsert
