@@ -11,15 +11,18 @@ object class
     cell var hsize
     cell var hmaxsize
     method hless
-    method .h
+    method hswap
     method hcell
     method heap@
     method heap!
+    method .h
 end-class heap
 
 :noname { i1 i2 heap -- flag }
     i1 heap harray @ + @
     i2 heap harray @ + @ < ; heap defines hless
+:noname ( i1 i2 heap -- ) harray @ tuck + >r + r> { i1 i2 }
+    i1 @ i2 @  i1 ! i2 ! ; heap defines hswap
 :noname drop . ; heap defines .h
 :noname drop cell ; heap defines hcell
 :noname drop @ ; heap defines heap@
@@ -44,11 +47,6 @@ end-class heap
 	r@ harray !
     THEN rdrop ;
 
-: hswap ( i1 i2 heap -- ) { heap }
-    heap harray @ +  swap heap harray @ + { i1 i2 }
-    i1 heap heap@ i2 heap heap@
-    i1 heap heap! i2 heap heap! ;
-
 : bubble-up ( index heap -- )
     dup hcell { index heap size }
     BEGIN
@@ -65,18 +63,18 @@ end-class heap
     r> heap bubble-up ;
 
 : bubble-down ( heap -- ) 0 swap
-    dup hcell { index heap size }
+    dup hcell over hsize @ { index heap size hsize }
     BEGIN
 	index dup 2* size + { index*2 }
-	index*2 heap hsize @ u<  WHILE
+	index*2 hsize u<  WHILE
 	    index index*2 heap hless 0= IF
 		drop index*2  THEN
-	    index*2 size + heap hsize @ u<  WHILE
+	    index*2 size + hsize u<  IF
 		dup index*2 size + heap hless 0= IF
-		    drop index*2 size +  THEN
-		index over  heap hswap
-		dup index = swap to index
-	    UNTIL EXIT  THEN THEN drop ;
+		    drop index*2 size +  THEN  THEN
+	    index over  heap hswap
+	    dup index = swap to index
+	UNTIL EXIT  THEN drop ;
 
 : hdelete ( heap -- ... ) >r
     r@ hsize @ 0= abort" heap empty"
