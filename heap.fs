@@ -74,7 +74,7 @@ end-class heap
 		    drop index*2 size +  THEN  THEN
 	    index over  heap hswap
 	    dup index = swap to index
-	UNTIL EXIT  THEN drop ;
+	UNTIL  EXIT  THEN drop ;
 
 : hdelete ( heap -- ... ) >r
     r@ hsize @ 0= abort" heap empty"
@@ -84,23 +84,10 @@ end-class heap
     r@ hresize<
     r> bubble-down ;
 
+: hsize@ ( heap -- )
+    dup hsize @ swap hcell / ;
+
 : .heap { heap -- }
     heap harray @ heap hsize @ bounds ?DO
 	I heap heap@ heap .h
     heap hcell +LOOP ;
-
-false [IF] \ tests
-    hnew constant heap1
-    1 heap1 hinsert
-    5 heap1 hinsert
-    3 heap1 hinsert 
-    -1 heap1 hinsert
-    2 heap1 hinsert
-    17 heap1 hinsert
-    32 heap1 hinsert
-    15 heap1 hinsert
-    8 heap1 hinsert
-    23 heap1 hinsert
-    heap1 .heap cr
-    heap1 hsize @ heap1 hcell / 0 [DO] heap1 hdelete . [LOOP] cr
-[THEN]
