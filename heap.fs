@@ -18,10 +18,10 @@ object class
     method .h
 end-class heap
 
-:noname { i1 i2 heap -- flag }
-    i1 heap harray @ + @
-    i2 heap harray @ + @ < ; heap defines hless
-:noname ( i1 i2 heap -- ) harray @ tuck + >r + r> { i1 i2 }
+:noname ( i1 i2 heap -- flag )
+    harray @ tuck + @ >r + @ r> < ; heap defines hless
+:noname ( i1 i2 heap -- )
+    harray @ tuck + >r + r> { i1 i2 }
     i1 @ i2 @  i1 ! i2 ! ; heap defines hswap
 :noname drop . ; heap defines .h
 :noname drop cell ; heap defines hcell
