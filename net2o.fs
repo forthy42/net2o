@@ -841,7 +841,7 @@ slack-default# Value slack-bias#
 
 : slackext ( -- slack )
     j^ slackgrow 64@ j^ extra-ns 64@ 64- 64#0 64max 64>n
-    j^ window-size @ tick-init 1+ bursts# - */ n>64
+    j^ window-size @ 2* tick-init 1+ bursts# - */ n>64
     j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
