@@ -871,7 +871,6 @@ slack-default# Value slack-bias#
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64drop >extra-ns rate-limit rate-stat2
-    dup $100000 < IF ." Small rate?" cr  THEN
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
