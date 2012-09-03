@@ -844,8 +844,9 @@ slack-default# Value slack-bias#
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
-    j^ last-ns/burst 64@ 64>n  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
-    dup n>64 j^ last-ns/burst 64! ;
+    64>n j^ last-ns/burst 64@ 64>n
+    ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
+    dup n>64 j^ last-ns/burst 64! n>64 ;
 
 : >extra-ns ( rate -- rate' )
     64>n dup >slack-exp tuck slackext 64>n rot */
@@ -853,7 +854,6 @@ slack-default# Value slack-bias#
     dup j^ extra-ns 64@ 64>n 2* 2* u> IF
 	j^ extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 j^ extra-ns 64! -
     THEN
-    rate-limit
     n>64 ;
 
 : rate-stat1 ( rate deltat -- )
