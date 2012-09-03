@@ -327,7 +327,8 @@ net2o-base
     net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
-36 net2o: send-timing ( -- )  net2o:timing$ maxstring $10 - -$10 and umin $,
+36 net2o: send-timing ( -- )  net2o:timing$
+    [ maxstring timestats - dup timestats mod - ]L umin $,
     rec-timing ;
 37 net2o: >time-offset ( n -- )  j^ time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset j^ time-offset 64! ;
