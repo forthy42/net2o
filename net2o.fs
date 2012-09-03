@@ -845,7 +845,7 @@ slack-default# Value slack-bias#
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
     64>n j^ last-ns/burst 64@ 64>n
-    ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
+    ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
     dup n>64 j^ last-ns/burst 64! n>64 ;
 
 : >extra-ns ( rate -- rate' )
