@@ -856,7 +856,7 @@ slack-default# Value slack-bias#
     THEN ;
 
 : >extra-ns ( rate -- rate' )
-    64>n dup ( >slack-exp ) tuck slackext 64>n rot */
+    64>n dup >slack-exp drop dup tuck slackext 64>n rot */
     dup n>64 j^ extra-ns 64! +  extra-limit  n>64 ;
 
 : rate-stat1 ( rate deltat -- )
