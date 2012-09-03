@@ -1,6 +1,7 @@
 \ test heap, run with -d 1M
 
-require heap.fs
+[defined] maxdepth-.s 0= [IF] Variable maxdepth-.s [THEN]
+[defined] clearstack 0= [IF] : clearstack s0 @ sp! ; [THEN]
 
 hnew constant heap1
 2variable time
