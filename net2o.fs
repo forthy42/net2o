@@ -850,6 +850,11 @@ slack-default# Value slack-bias#
     THEN
     n>64 ;
 
+: rate-limit ( rate -- rate' ) \ obsolete
+    \ not too quickly go slower or faster!
+    j^ last-ns/burst 64@ 64>n  ?dup-IF  dup >r 2* 2* umin r> 2/ 2/ umax  THEN
+    dup n>64 j^ last-ns/burst 64! ;
+
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
            64dup j^ last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
@@ -864,7 +869,7 @@ slack-default# Value slack-bias#
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64drop >extra-ns rate-stat2 j^ ns/burst 64!@
+    64drop >extra-ns rate-limit rate-stat2 j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
