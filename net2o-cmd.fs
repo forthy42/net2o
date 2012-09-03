@@ -445,14 +445,17 @@ previous
 : .rate ( n -- n ) dup . ." rate" cr ;
 : .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
+: setrate-limit ( rate -- rate' )
+    \ do not change requested rate by more than a factor 4
+    j^ last-rate 64@ 64>n
+    ?dup-IF  tuck 2* 2* min swap 2/ 2/ max  THEN
+    dup n>64 j^ last-rate 64! ;
+
 : >rate ( -- )  j^ delta-ticks 64@ 64-0= j^ acks @ 0= or ?EXIT
     j^ recv-tick 64@ 64dup j^ burst-ticks 64!@ 64dup 64-0= 0= IF
 	64- 64>n rate( .eff ) >r
 	j^ delta-ticks 64@ 64>n tick-init 1+ j^ acks @ */
-\	j^ last-rate @
-\	\ do not change requested rate by more than a factor 2
-\	?dup-IF  tuck 2* min swap 2/ max  THEN
-\	dup j^ last-rate !
+	setrate-limit
 	rate( .rate ) ulit, r> ulit, set-rate
     ELSE
 	64drop 64drop

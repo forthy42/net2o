@@ -516,7 +516,7 @@ field: flybursts
 64field: lastb-ticks
 64field: delta-ticks
 field: acks
-\ field: last-rate
+field: last-rate
 \ experiment: track previous b2b-start
 64field: last-rtick
 field: last-raddr
@@ -873,7 +873,7 @@ slack-default# Value slack-bias#
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64drop >extra-ns  rate-limit  rate-stat2
+    64drop >extra-ns ( rate-limit ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
