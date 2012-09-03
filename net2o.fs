@@ -736,6 +736,8 @@ reply buffer: dummy-reply
 
 : net2o:timing$ ( -- addr u )
     stats( j^ timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
+: net2o:/timing ( n -- )
+    stats( j^ timing-stat 0 rot $del ) ;
 
 : net2o:rec-timing ( addr u -- ) \ do some dumps
     bounds ?DO
@@ -848,13 +850,14 @@ slack-default# Value slack-bias#
     ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
     dup n>64 j^ last-ns/burst 64! n>64 ;
 
-: >extra-ns ( rate -- rate' )
-    64>n dup >slack-exp tuck slackext 64>n rot */
-    dup n>64 j^ extra-ns 64! +
+: extra-limit ( rate -- rate' )
     dup j^ extra-ns 64@ 64>n 2* 2* u> IF
 	j^ extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 j^ extra-ns 64! -
-    THEN
-    n>64 ;
+    THEN ;
+
+: >extra-ns ( rate -- rate' )
+    64>n dup >slack-exp tuck slackext 64>n rot */
+    dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
 
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
@@ -870,7 +873,7 @@ slack-default# Value slack-bias#
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64drop >extra-ns rate-limit rate-stat2
+    64drop >extra-ns ( rate-limit ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst

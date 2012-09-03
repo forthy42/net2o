@@ -248,7 +248,8 @@ Variable neststart#
 
 also net2o-base definitions
 
-: maxstring ( n -- )  endcmdbuf cmdbuf$ + - ;
+: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
+: maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : $, ( addr u -- )  string  >r r@ n>64 cmd,
     r@ maxstring u>= !!stringfit!! and throw
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
@@ -327,9 +328,9 @@ net2o-base
     net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
-36 net2o: send-timing ( -- )  net2o:timing$
-    [ maxstring timestats - dup timestats mod - ]L umin $,
-    rec-timing ;
+36 net2o: send-timing ( -- )
+    net2o:timing$ maxtiming umin tuck $,
+    net2o:/timing rec-timing ;
 37 net2o: >time-offset ( n -- )  j^ time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset j^ time-offset 64! ;
 38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
@@ -533,7 +534,7 @@ also net2o-base
     j^ expected off  j^ received off
     rewind  restart-transfer
     request-stats? IF
-	send-timing  track-timing
+	send-timing
     THEN
     j^ total @ 0<= IF
 	msg( ." Chunk transfer done!" F cr )
