@@ -820,8 +820,8 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
-#10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
-slack-default# Value slack-bias#
+#100000000 Value slack-default# \ 100ms slack leads to backdrop of factor 2
+0 Value slack-bias#
 
 : slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
 
@@ -856,7 +856,7 @@ slack-default# Value slack-bias#
     THEN ;
 
 : >extra-ns ( rate -- rate' )
-    64>n dup >slack-exp drop dup tuck slackext 64>n rot */
+    64>n dup >slack-exp  tuck slackext 64>n rot */
     dup n>64 j^ extra-ns 64! +  extra-limit  n>64 ;
 
 : rate-stat1 ( rate deltat -- )
