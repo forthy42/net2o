@@ -164,8 +164,8 @@ Variable cmd0buf#
 
 : net2o, @ n>64 cmd, ;
 
-: net2o-code   cmd0source on   ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0  cmd0source off  ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code   cmd0source on   cmdreset ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code0  cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
 : send-cmd ( addr dest -- )
