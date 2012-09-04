@@ -448,7 +448,7 @@ also net2o-base
 : setrate-limit ( rate -- rate' )
     \ do not change requested rate by more than a factor 4
     j^ last-rate 64@ 64>n
-    ?dup-IF  tuck 2* min swap 2/ max  THEN
+    ?dup-IF  tuck 2* min swap 2/ 2/ 2/ max  THEN
     dup n>64 j^ last-rate 64! ;
 
 : >rate ( -- )  j^ delta-ticks 64@ 64-0= j^ acks @ 0= or ?EXIT
