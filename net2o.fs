@@ -858,7 +858,7 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     64>n dup >slack-exp  tuck slackext 64>n rot */
-    dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
+    2/ dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
 
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
