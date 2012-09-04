@@ -779,6 +779,7 @@ timestats buffer: stat-tuple
     64dup 64-0=     IF  64drop 64drop  EXIT  THEN
     64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
     64- j^ lastslack 64@ 64- 64negate slack( 64dup 64. .j ." grow" cr )
+    64>n j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */ n>64
     j^ slackgrow 64! ;
 
 : map@ ( -- addr/0 )
