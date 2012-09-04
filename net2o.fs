@@ -283,7 +283,7 @@ Variable packetr
 Variable packets
 
 2Variable ptimeout
-#50000000 Value poll-timeout# \ 50ms
+#100000000 Value poll-timeout# \ 100ms
 poll-timeout# 0 ptimeout 2!
 
 inbuf'  Constant inbuf
@@ -468,6 +468,7 @@ end-structure
 
 begin-structure context-struct
 field: context#
+field: context-state
 field: return-address
 64field: recv-tick
 field: recv-addr
