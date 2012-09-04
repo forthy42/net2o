@@ -852,8 +852,8 @@ timestats buffer: stat-tuple
     dup n>64 j^ last-ns/burst 64! n>64 ;
 
 : extra-limit ( rate -- rate' )
-    dup j^ extra-ns 64@ 64>n 2* 2* u> IF
-	j^ extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 j^ extra-ns 64! -
+    dup j^ extra-ns 64@ 64>n 2* u> IF
+	j^ extra-ns 64@ 64>n + dup 2/ dup n>64 j^ extra-ns 64! -
     THEN ;
 
 : >extra-ns ( rate -- rate' )
