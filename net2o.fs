@@ -516,7 +516,7 @@ field: flybursts
 64field: lastb-ticks
 64field: delta-ticks
 field: acks
-field: last-rate
+64field: last-rate
 \ experiment: track previous b2b-start
 64field: last-rtick
 field: last-raddr
