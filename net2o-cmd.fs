@@ -610,10 +610,13 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     map-request ;
 
 : gen-request ( -- )
+    ['] end-cmd IS expect-reply?
     net2o-code0  nest[ j^ ulit, set-j^ ticks lit, set-rtdelay request-done ]nest
     j^ req-codesize @  j^ req-datasize @ map-request,
     key-request
-    end-code ;
+    end-code
+    [: pkc keysize $, receive-key update-key code-ivs end-cmd
+      ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
 
 : ?j ]] j^ 0= ?EXIT  j^ code-map @ 0= ?EXIT [[ ; immediate
 
@@ -658,8 +661,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     n2o:new-context
     j^ req-datasize !  j^ req-codesize !
     gen-request
-    [: pkc keysize $, receive-key update-key code-ivs end-cmd
-      ['] end-cmd IS expect-reply? ;]  IS expect-reply?
     +connecting
     1 client-loop
     timeouts @ 0<= !!contimeout!! and F throw
