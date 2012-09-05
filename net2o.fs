@@ -844,7 +844,8 @@ timestats buffer: stat-tuple
 : slackext ( -- slack )
     j^ slackgrow 64@
     j^ slackgrow' 64@ 64+ 64dup 3 4 64*/ j^ slackgrow' 64!
-    64dup 64+ 64#0 64max ;
+    j^ window-size @ tick-init 1+ bursts# - 64*/
+    64#0 64max ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
