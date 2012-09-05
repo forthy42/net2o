@@ -779,7 +779,7 @@ timestats buffer: stat-tuple
 : b2b-timestat ( client serv -- )
     64dup 64-0=     IF  64drop 64drop  EXIT  THEN
     64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
-    64- j^ lastslack 64@ 64- 64negate slack( 64dup 64. .j ." grow" cr )
+    64- j^ lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
     j^ slackgrow 64! ;
 
 : map@ ( -- addr/0 )
@@ -841,12 +841,10 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow 64@ j^ extra-ns 64@
-    64>n tick-init 1+ dup bursts# - swap */ n>64
-    64+ 64#0 64max
-\    j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */
-    ( 64>n j^ window-size @ tick-init 1+ bursts# - */ n>64 )
-    ( j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ) ;
+    j^ slackgrow 64@ j^ extra-ns 64@ 64-
+    \ 64>n j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */ n>64
+    64>n j^ window-size @ tick-init 1+ bursts# - */ n>64
+    j^ extra-ns 64@ 64+ 64#0 64max ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
