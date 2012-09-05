@@ -843,7 +843,7 @@ timestats buffer: stat-tuple
 
 : slackext ( -- slack )
     j^ slackgrow 64@ 64#0 64max
-    j^ slackgrow' 64@ 64+ 64dup 64-2/ j^ slackgrow' 64! ;
+    j^ slackgrow' 64@ 64+ 64dup 64>n 3 4 */ n>64 j^ slackgrow' 64! ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
