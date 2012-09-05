@@ -511,6 +511,7 @@ field: flybursts
 64field: lastslack
 64field: lastdeltat
 64field: slackgrow
+64field: slackgrow'
 \ flow control, receiver part
 64field: burst-ticks
 64field: firstb-ticks
@@ -841,11 +842,8 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow 64@ \ j^ extra-ns 64@ 64-
-    \ 64>n j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */ n>64
-    \ 64>n j^ window-size @ tick-init 1+ bursts# - */ n>64
-    \ j^ extra-ns 64@ 64+
-    64#0 64max ;
+    j^ slackgrow 64@ 64#0 64max
+    j^ slackgrow' 64@ 64+ 64dup 64-2/ j^ slackgrow' 64! ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
