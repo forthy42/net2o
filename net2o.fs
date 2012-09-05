@@ -841,10 +841,12 @@ timestats buffer: stat-tuple
     ( slack# / lshift ) ;
 
 : slackext ( -- slack )
-    j^ slackgrow 64@ j^ extra-ns 64@ 64- 64#0 64max 64>n
-    j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */
-    j^ window-size @ tick-init 1+ bursts# - */ n>64
-    j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ;
+    j^ slackgrow 64@ j^ extra-ns 64@
+    64>n tick-init 1+ dup bursts# - swap */ n>64
+    64+ 64#0 64max
+\    j^ ns/burst 64@ 64>n j^ extra-ns 64@ 64>n bounds */
+    ( 64>n j^ window-size @ tick-init 1+ bursts# - */ n>64 )
+    ( j^ slackgrow 64@ j^ extra-ns 64@ 64min 64max ) ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
@@ -859,7 +861,7 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     64>n dup >slack-exp  tuck slackext 64>n rot */
-    2/ dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
+    dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
 
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
