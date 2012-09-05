@@ -833,17 +833,18 @@ timestats buffer: stat-tuple
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
-: >slack-exp ( rate -- rate' )
+: >slack-exp ( -- rfactor )
     j^ lastslack 64@ j^ min-slack 64@ 64- 64>n
     slack( dup . j^ min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - 0 max slack# 2* 2* min
-    s>f slack# fm/ 2e fswap f** fm* f>s
+    s>f slack# fm/ 2e fswap f**
     ( slack# / lshift ) ;
 
-: slackext ( -- slack )
+: slackext ( rfactor -- slack )
     j^ slackgrow 64@
     j^ window-size @ tick-init 1+ bursts# - 64*/
+    64>f f* f>64
     j^ slackgrow' 64@ 64+ 64dup 3 4 64*/ j^ slackgrow' 64!
     64#0 64max ;
 
@@ -859,7 +860,7 @@ timestats buffer: stat-tuple
     THEN ;
 
 : >extra-ns ( rate -- rate' )
-    64>n dup >slack-exp  tuck slackext 64>n rot */
+    >slack-exp fdup 64>f f* f>64 slackext
     dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
 
 : rate-stat1 ( rate deltat -- )
