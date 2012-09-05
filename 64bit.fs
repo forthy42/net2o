@@ -46,6 +46,7 @@ cell 8 = [IF]
     ' umin Alias 64umin
     ' umax Alias 64umax
     ' off Alias 64off
+    ' */ Alias 64*/
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -94,6 +95,7 @@ cell 8 = [IF]
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;
     : 64umax  2over 2over du< IF  2swap  THEN  2drop ;
     : 64off 0. rot 64! ;
+    ' m*/ Alias 64*/
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+
