@@ -46,7 +46,7 @@ end-structure
 : bubble-up ( index heap -- )
     0 { index heap index/2 }
     BEGIN
-	index cell / 1- 2/ cells dup to index/2 0< 0= WHILE
+	index 2/ cell negate and dup to index/2 0< 0= WHILE
 	    index index/2 heap hless  WHILE
 		index index/2 heap hswap
 		index index/2 to index

@@ -1,7 +1,15 @@
 \ binary heap
 
-require string.fs
 require mini-oof.fs
+
+[defined] ntime 0= [IF]
+    library: librt.so.1
+    extern: int clock_gettime ( int , int );
+
+    2Variable timespec
+    : ntime ( -- d )  0 timespec clock_gettime drop
+	timespec 2@ #1000000000 um* rot 0 d+ ;
+[THEN]
 
 \ a binary heap is a structure to keep a partially sorted set
 \ so that you can easily insert elements, and extract the least element
@@ -38,19 +46,19 @@ end-class heap
 	r@ harray @
 	r@ hmaxsize @ 2* dup r@ hmaxsize ! resize throw
 	r@ harray !
-    THEN rdrop ;
+    THEN r> drop ;
 
 : hresize< ( heap -- ) >r
     r@ hmaxsize @ 2/ r@ hsize @ u> IF
 	r@ harray @
 	r@ hmaxsize @ 2/ dup r@ hmaxsize ! resize throw
 	r@ harray !
-    THEN rdrop ;
+    THEN r> drop ;
 
 : bubble-up ( index heap -- )
-    dup hcell { index heap size }
+    dup hcell 0 { index heap size index/2 }
     BEGIN
-	index size / 1- 2/ size * dup { index/2 } 0>= WHILE
+	index size / 1- 2/ size * dup to index/2 0< 0= WHILE
 	    index index/2 heap hless  WHILE
 		index index/2 heap hswap
 		index index/2 to index
@@ -63,9 +71,9 @@ end-class heap
     r> heap bubble-up ;
 
 : bubble-down ( heap -- ) 0 swap
-    dup hcell over hsize @ { index heap size hsize }
+    dup hcell over hsize @ 0 { index heap size hsize index*2 }
     BEGIN
-	index dup 2* size + { index*2 }
+	index dup 2* size + to index*2
 	index*2 hsize u<  WHILE
 	    index index*2 heap hless 0= IF
 		drop index*2  THEN
