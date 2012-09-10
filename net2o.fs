@@ -283,7 +283,7 @@ Variable packetr
 Variable packets
 
 2Variable ptimeout
-#100000000 Value poll-timeout# \ 100ms
+#200000000 Value poll-timeout# \ 200ms
 poll-timeout# 0 ptimeout 2!
 
 inbuf'  Constant inbuf
