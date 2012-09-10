@@ -824,9 +824,10 @@ timestats buffer: stat-tuple
 
 #10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
-slack-bias# negate Value slack-min# \ minimum effect limit
+#0 Value slack-min# \ minimum effect limit
 
-: slack# ( -- n )  j^ max-slack @ j^ min-slack @ - 2/ 2/ slack-default# max ;
+: slack-max# ( -- n ) j^ max-slack 64@ j^ min-slack 64@ 64- ;
+: slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay 64@ 64>n j^ ns/burst 64@ 64>n / flybursts# +
@@ -847,7 +848,8 @@ slack-bias# negate Value slack-min# \ minimum effect limit
     j^ window-size @ tick-init 1+ bursts# - 64*/
     64>f f* f>64
     j^ slackgrow' 64@ 64+ 64dup 3 4 64*/ j^ slackgrow' 64!
-    64#0 64max ;
+    64#0 64max
+    slack-max# 64>n slack-default# 64*/ ; \ agressivity rate
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
