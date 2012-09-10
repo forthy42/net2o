@@ -849,7 +849,7 @@ timestats buffer: stat-tuple
     64>f f* f>64
     j^ slackgrow' 64@ 64+ 64dup 3 4 64*/ j^ slackgrow' 64!
     64#0 64max
-    slack-max# 64>n 2/ slack-default# 64*/ ; \ agressivity rate
+    slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ; \ agressivity rate
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
