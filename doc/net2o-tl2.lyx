@@ -1,0 +1,1710 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+%\usetheme{Warsaw}
+% or ...
+\usetheme{lankton-keynote}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\end_preamble
+\use_default_options false
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman times
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Stichwortverzeichnis
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-.8ex
+\backslash
+lower1.5ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+: Transport Layer --- Implemented
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+net2o layer 2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subtitle
+Tame the Net
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+EuroForth 2012, Oxford
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Overview
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout BeginFrame
+Recap: What's Broken?
+\end_layout
+
+\begin_layout Itemize
+TCP--Flow Control: 
+\begin_inset Quotes eld
+\end_inset
+
+Buffer Bloat
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+TCP as 
+\begin_inset Quotes eld
+\end_inset
+
+carefree protocol
+\begin_inset Quotes erd
+\end_inset
+
+ is not even remotely real--time capable, so far from 
+\begin_inset Quotes eld
+\end_inset
+
+carefree
+\begin_inset Quotes erd
+\end_inset
+
+ for media use
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+UDP is only a 
+\begin_inset Quotes eld
+\end_inset
+
+easy
+\begin_inset Quotes erd
+\end_inset
+
+ access to raw IP, and otherwise 
+\begin_inset Quotes eld
+\end_inset
+
+do it yourself
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The SSL--PKI with their 
+\begin_inset Quotes eld
+\end_inset
+
+honest Achmeds
+\begin_inset Quotes erd
+\end_inset
+
+ as certification authorities
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Encryption 
+\begin_inset Quotes eld
+\end_inset
+
+too complicated, too difficult
+\begin_inset Quotes erd
+\end_inset
+
+, usually added late, and therefore way too often not done
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Changes from the Draft
+\end_layout
+
+\begin_layout Itemize
+Packet size now 
+\begin_inset Formula $64*2^{n},\quad n\in\{0,\ldots,15\}$
+\end_inset
+
+, so up to 2MB in powers of 2
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+No 
+\begin_inset Quotes eld
+\end_inset
+
+embedded
+\begin_inset Quotes erd
+\end_inset
+
+ variant implemented, only 64 bit addresses
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing address length changed to 128 bits
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Encryption always active
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+No 
+\begin_inset Quotes eld
+\end_inset
+
+salt
+\begin_inset Quotes erd
+\end_inset
+
+ at the start of a packet, but a cryptographic checksum (128 bit) at the
+ end
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Datenflusssteuerung
+\end_layout
+
+\begin_layout BeginFrame
+Status: TCP Flow Control
+\end_layout
+
+\begin_layout Itemize
+TCP fills the buffer, until a packet has to be dropped, instead of reducing
+ rate before.
+ Name of the symptom: 
+\begin_inset Quotes eld
+\end_inset
+
+Buffer bloat
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But buffering is essential for good network performance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferbloat.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Buffer Bloat
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Alternatives?
+\end_layout
+
+\begin_layout Itemize
+LEDBAT tries to achieve a low, constant delay: Works, but not good on fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+CurveCP has a similar approach, which is not even documented (but 
+\noun on
+Dan Bernstein
+\noun default
+'s code is by definition 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, something new has to be done
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferused.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+That's how proper flow control should look like
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset Quotes gld
+\end_inset
+
+Buffer Bloat
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Retransmits are making the situation worse in case of congestions and therefore
+ should be avoided
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Riddle: How big should the buffer be, under the assumption that the bandwidth
+ is used optimally,the bottleneck is on the other side of the connection,
+ and a second data stream is opened up?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Answer: about half the round trip delay, which are inevitably filled before
+ any reaction is possible
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Buffers are good, but you shouldn't fill them up to the brim
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The problem is inherent in the TCP protocol, but since Windows XP did not
+ provide window scaling, the per--connection buffer limit was 64k for most
+ connections on the Internet for quite a long time.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Measure the bottleneck using a burst of packets
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Client Measures, Server Sets Rate
+\end_layout
+
+\begin_layout Description
+Client recores the 
+\emph on
+time
+\emph default
+ of the first and last packet in a burst, and calculates the achieved rate
+ for received packets, extrapolating to the achievable rate including the
+ dropped packets.
+ This results in the requested 
+\emph on
+rate
+\emph default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+: calc-rate ( -- )
+\end_layout
+
+\begin_layout LyX-Code
+  delta-ticks @ tick-init 1+ acks @ */
+\end_layout
+
+\begin_layout LyX-Code
+  lit, set-rate ;
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Server would simply use this rate 
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+: set-rate ( rate -- )  ns/burst ! ;
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness
+\end_layout
+
+\begin_layout Standard
+Fairness means that concurrent connections achieve about the same data rate,
+ sharing the same line in a fair way.
+\end_layout
+
+\begin_layout Itemize
+Ideally, a router/switch would schedule buffered packets round--robin, giving
+ each connection a fair share of the bandwidth.
+ That would change the calculated rate appropriately, and also be a big
+ relieve for current TCP buffer bloat symptoms, as each connection would
+ have its private buffer to fill up.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Unfortunately, routers use a single FIFO policy for all connections
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Finding a sufficiently stable algorithm to provide fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We want to adopt to new situations as fast as possible, there's no point
+ in anything slow.
+ Especially on wireless connections, achievable rate changes are not only
+ related to traffic.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- Fair Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-fair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Fair queuing results in correct measurement of available bandwidth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- FIFO Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-unfair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Unfair FIFO queuing results in twice the available bandwidth calculated
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness I
+\end_layout
+
+\begin_layout Itemize
+To improve stability of unfair queued packets, we need to improve that P
+ regulator (proportional to measured rate) to a full PID regulator
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The integral part is the accumulated slack (in the buffer), which we want
+ to keep low, and the D part is growing/reducing this slack from one measurement
+ to the next
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We use both parts to decrease the sending rate, and thereby achieve better
+ fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The I part is used to exponentially lengthen the rate 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ with increasing slack up to a maximum factor of 16.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s_{exp}=2^{\frac{slack}{T}}\quad\mathrm{where\,}T=\max(10ms,\max(slacks))
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness D
+\end_layout
+
+\begin_layout Itemize
+To measure the differential term, we measure how much the slack grows (a
+ 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ value) from the first to the last burst we do for one measurement cycle
+ (4 bursts by default, first packet to first packet of each burst)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This is multiplied by the total packets in flight (head of the sender queue
+ vs.
+ acknowledged packet), divided by the packets within the measured interval
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A low--pass filter is applied to the obtained D to prevent from speeding
+ up too fast, with one round trip delay as time constant
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $\max(slacks)/10ms$
+\end_inset
+
+ is used to determine how aggressive this algorithm is
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Add the obtained 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ both to the rate's 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ for one burst sequence and wait that time before starting the next burst
+ sequence.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename vdsl1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One connection on a VDSL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename vdsl1-1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections on a VDSL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable (WLAN)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename wlan1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Single connection using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename wlan1-2.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Reliability
+\end_layout
+
+\begin_layout BeginFrame
+Transport Reliability
+\end_layout
+
+\begin_layout Itemize
+Packet ordering is dealt with the address each packet carries
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The receiver tracks received packets in two alternating bitmaps
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Received packets are marked as received in the active bitmap
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The other bitmap is filled up, until the bitmaps are swapped (twice per
+ round trip delay RTD)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Wait one RTD for retransmits
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Retransmits are preferred, but no timing measurement on retransmits (two
+ identical packets in flight)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Reliable Execution of Commands
+\end_layout
+
+\begin_layout Itemize
+The command block at that address is received first time 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ execute, remember the reply command
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The command block has already been received 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ send the reply again (don't execute the command)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+No replies requested 
+\begin_inset Formula $\longrightarrow$
+\end_inset
+
+ Do nothing
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Acknowledges are amended by a checksum, which only the sender or the receiver
+ can compute, so no fake acknowledge for dropped packets is possible.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Cryptography
+\end_layout
+
+\begin_layout BeginFrame
+Cryptography
+\end_layout
+
+\begin_layout Standard
+Communication needs the first three goals, the fourth one isn't
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+Confidentiality no third party (Eve) should eavesdrop the communication
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Integrity The data is complete and unmodified
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Authentication The sender of the data can be identified
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Non--repudiation is not necessary for two--way communication
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Used Technology: Curve25519
+\end_layout
+
+\begin_layout Itemize
+Elliptic Curve Cryptography doesn't base on large number factoring (as hard
+ to solve problems), but on natural logarithms of elliptic curves
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Security level of Curve25519 corresponds to 128 bits in a symmetric key
+ --- that's sufficient today
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Curve25519 has a very efficient implementation
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+It is optimized for 1:1 connections
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Each participant 
+\begin_inset Quotes eld
+\end_inset
+
+multiplies
+\begin_inset Quotes erd
+\end_inset
+
+ his secret key with the public key of the other side, both products are
+ identical
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Wurstkessel
+\end_layout
+
+\begin_layout Standard
+At the moment, I'm using Wurstkessel as symmetric encryption, even though
+ there hasn't been a thorough review:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Wurstkessel provides en/decryption and authentication in a single pass,
+ computing a key--dependent secure hash
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Thus a single run of Wurstkessel solves all three tasks: confidentiality,
+ integrity, and authentication.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+the data is encrypted
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+the correct hash proves its integrity
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+the hash can only be calculated knowing the key, therefore proving the authentic
+ation of the sender
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+AES has something similar, the CBC--MAC.
+ However, in AES, it is necessary to use different keys for encryption and
+ MAC, i.e.
+ no single run possible
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Hidden Initialization Vectors
+\end_layout
+
+\begin_layout Itemize
+No key reuse allowed (only for retransmissions), otherwise a known--plaintext
+ attack is possible
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Usual approach: initialization vector (IV) transmitted with each packet
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Disadvantage: Overhead and the 
+\begin_inset Quotes eld
+\end_inset
+
+other
+\begin_inset Quotes erd
+\end_inset
+
+ part of the key is known to the attacker
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Solution: Generate the IVs using a PRNG (with Wurstkessel in PRNG mode)
+ on both sides --- these IVs are 
+\begin_inset Quotes eld
+\end_inset
+
+shared secrets
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Only the seed for the PRNG is transmitted, and used together with the shared
+ key to generate the IVs (Idea: 
+\noun on
+Helmar Wodke
+\noun default
+).
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Public Key Infrastructure (PKI)
+\end_layout
+
+\begin_layout Standard
+At the moment, three approaches are used:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Hierarchical Certification Authorities (e.g.
+ SSL): The trust is delegated to 
+\begin_inset Quotes eld
+\end_inset
+
+notaries
+\begin_inset Quotes erd
+\end_inset
+
+, i.e.
+ the CAs, which then must be trustworthy (all of them, since each CA can
+ create a certificate for anybody).
+ The server is certified, i.e.
+ the user knows that he can trust this connection as much as the worst of
+ those 600 CAs.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Peer to Peer (e.g.
+ PGP): trust is obtained through a 
+\begin_inset Quotes eld
+\end_inset
+
+web of trust
+\begin_inset Quotes erd
+\end_inset
+
+, i.e.
+ you either trust directly or by using several people you trust.
+ It is not sufficient to corrupt a single person in your trust network to
+ obtain trust.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Observing changes (e.g.
+ SSH): trust is reiterated by repeated contacts, and as long as keys don't
+ change, trust is assumed.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+What Was the Problem?
+\end_layout
+
+\begin_layout Standard
+The typical reason to use a trusted connection is to obtain a secure login,
+ and then access private data.
+ This begs a question:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Isn't it actually the 
+\emph on
+client,
+\emph default
+ which should be trusted?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+The connection is a trusted connection, if 
+\emph on
+one
+\emph default
+ participant has successfully evaluated the trust of the other.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore, by inverting the trust relation, the SSH approach is sufficient
+ in most cases.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+For Further Reading
+\end_layout
+
+\begin_layout Bibliography
+\labelwidthstring Literaturverzeichnis
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan
+\noun default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+Fossil Repository und Wiki
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document
