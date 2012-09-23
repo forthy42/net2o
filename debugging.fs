@@ -3,13 +3,19 @@
 : debug)  ]] THEN [[ ;
 
 true [IF]
-    : debug: ( -- ) Create immediate false ,  DOES>
-	state @ IF  ]] Literal @ IF [[ ['] debug) assert-canary
-	ELSE  @ IF ['] noop assert-canary ELSE postpone (  THEN
+    : debug: ( -- ) Create immediate false ,
+      DOES>
+	state @ IF  ]] Literal @ IF [[
+		['] debug) assert-canary
+	    ELSE  @ IF ['] noop assert-canary
+		ELSE postpone (
+		THEN
 	THEN  ;
 [ELSE]
-    : debug: ( -- )  Create immediate false , DOES>
-	@ IF  ['] noop assert-canary  ELSE  postpone (  THEN ;
+    : debug: ( -- )  Create immediate false ,
+      DOES>
+	@ IF  ['] noop assert-canary
+	ELSE  postpone (  THEN ;
 [THEN]
 
 : hex[ ]] base @ >r hex [[ ; immediate
@@ -45,7 +51,8 @@ Variable debug-eval
     BEGIN  argc @ 1 > WHILE
 	    1 arg s" +" string-prefix?  WHILE
 		1 arg debug-eval $!
-		s" db " debug-eval 1 $ins  s" (" debug-eval $+!
+		s" db " debug-eval 1 $ins
+		s" (" debug-eval $+!
 		debug-eval $@ evaluate
 		shift-args
 	REPEAT  THEN ;
@@ -70,8 +77,10 @@ Variable last-tick
     Variable wait-time
     
     : init-timer ( -- )
-	ticks-u last-tick ! calc-time off send-time off rec-time off wait-time off
-	calc1-time off enc-time off ;
+	ticks-u last-tick !
+	calc-time  off  send-time off
+	rec-time   off  wait-time off
+	calc1-time off  enc-time  off ;
     
     : +calc  profile( delta-t calc-time +! ) ;
     : +calc1 profile( delta-t calc1-time +! ) ;
@@ -102,7 +111,8 @@ Variable last-tick
 Local Variables:
 forth-local-words:
     (
-     (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+     (("debug:" "field:" "sffield:" "dffield:" "64field:")
+      non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
