@@ -64,8 +64,8 @@ Variable last-tick
 : ticks-u ( -- u )  ntime drop ;
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
 
-: delta-t ( -- n )
-    ticks-u dup last-tick !@ - ;
+: +t ( addr -- )
+    ticks-u dup last-tick !@ - swap +! ;
 
 : timing ;
 [IFDEF] timing
@@ -82,12 +82,12 @@ Variable last-tick
 	rec-time   off  wait-time off
 	calc1-time off  enc-time  off ;
     
-    : +calc  profile( delta-t calc-time +! ) ;
-    : +calc1 profile( delta-t calc1-time +! ) ;
-    : +send  profile( delta-t send-time +! ) ;
-    : +enc   profile( delta-t enc-time +! ) ;
-    : +rec   profile( delta-t rec-time +! ) ;
-    : +wait  profile( delta-t wait-time +! ) ;
+    : +calc  profile( calc-time +t ) ;
+    : +calc1 profile( calc1-time +t ) ;
+    : +send  profile( send-time +t ) ;
+    : +enc   profile( enc-time +t ) ;
+    : +rec   profile( rec-time +t ) ;
+    : +wait  profile( wait-time +t ) ;
     
     : .times ( -- ) profile(
 	." wait: " wait-time @ s>f 1n f* f. cr
