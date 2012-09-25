@@ -393,7 +393,9 @@ s" gforth" environment? [IF] 2drop
     \c   uint64_t result=0;
     \c   unsigned int i=0;
     \c   for(i=0; i<len; i++) {
-    \c     result = ROL(result, 1) ^ rnds[addr[i] ^ pad[i & 0x7F]];
+    \c     result = ROL(result, 1) ^ rnds[addr[i] ^ pad[i & 0x7F] ^ (result && 0xFF)];
+    \c     /* the result feedback kills parallelism, but makes sure
+    \c        the hash cannot easily be attacked */
     \c   }
     \c   return result;
     \c }

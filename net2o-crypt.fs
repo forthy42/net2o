@@ -152,9 +152,9 @@ rng$ mykey swap move
     
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
-	outbuf body-size mem-rounds# >r
-	outbuf packet-data r@ encrypt-buffer
-	rdrop drop >r wurst-crc r> 128! +enc ;
+	outbuf packet-data
+	outbuf body-size mem-rounds# encrypt-buffer
+	drop >r wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
@@ -168,9 +168,9 @@ rng$ mykey swap move
 	rdrop drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- ) +calc
-	wurst-mykey-setup 2 64s - dup mem-rounds# >r
-	r@ encrypt-buffer
-	rdrop drop >r wurst-crc r> 128! +enc ;
+	wurst-mykey-setup 2 64s - dup mem-rounds#
+	encrypt-buffer
+	drop >r wurst-crc r> 128! +enc ;
 
     : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc
 	wurst-mykey-init 2 64s - dup mem-rounds# >r
