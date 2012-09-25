@@ -265,7 +265,9 @@ Variable do-keypad
 : ?keysize ( u -- )
     keysize <> !!keysize!! and throw ;
 
-: net2o:receive-key ( addr u -- ) ?keysize
+: net2o:receive-key ( addr u -- )
+    j^ 0= IF  2drop EXIT  THEN
+    ?keysize
     keypad skc rot crypto_scalarmult_curve25519 ;
 
 : net2o:update-key ( -- )

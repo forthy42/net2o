@@ -478,6 +478,7 @@ Variable dest-map s" " dest-map $!
 \ context debugging
 
 : .j ( -- ) j^ context# ? ;
+: j? ( -- ) ]] j^ 0= ?EXIT [[ ; immediate
 
 \ Destination mapping contains
 \ addr u - range of virtal addresses
@@ -547,9 +548,13 @@ Variable mapping-addr
 Variable mapstart $10000 mapstart !
 
 : n2o:new-map ( u -- addr )  mapstart @ swap mapstart +! ; 
-: n2o:new-data ( addrs addrd u -- )  >code-flag off
+: n2o:new-data ( addrs addrd u -- )
+    j^ 0= IF drop 2drop EXIT THEN
+    >code-flag off
     tuck  j^ data-rmap map-dest  map-source  j^ data-map $! ;
-: n2o:new-code ( addrs addrd u -- )  >code-flag on
+: n2o:new-code ( addrs addrd u -- )
+    j^ 0= IF drop 2drop EXIT THEN
+    >code-flag on
     tuck  j^ code-rmap map-dest  map-source  j^ code-map $! ;
 
 \ create context
@@ -685,10 +690,10 @@ timestats buffer: stat-tuple
     j^ slackgrow 64! ;
 
 : map@ ( -- addr/0 )
-    0 j^ 0= ?EXIT  j^ data-map @ 0= ?EXIT
+    0 j?  j^ data-map @ 0= ?EXIT
     drop j^ data-map $@ drop ;
 : rmap@ ( -- addr/0 )
-    0 j^ 0= ?EXIT  j^ data-rmap @ 0= ?EXIT
+    0 j?  j^ data-rmap @ 0= ?EXIT
     drop j^ data-rmap $@ drop ;
 
 : >offset ( addr map -- addr' flag ) >r
@@ -1024,7 +1029,7 @@ Variable code-packet
 : >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
-: bandwidth+ ( -- )  j^ 0= ?EXIT
+: bandwidth+ ( -- )  j?
     j^ ns/burst 64@ 64>n tick-init 1+ / n>64 j^ bandwidth-tick 64+! ;
 
 : burst-end ( -- )  j^ data-b2b @ ?EXIT

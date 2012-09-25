@@ -290,7 +290,7 @@ also net2o-base definitions
 19 net2o: set-j^ ( addr -- ) 64>n own-crypt? IF
 	to j^  1 j^ context-state !@ 0= ?EXIT
     ELSE  drop  THEN
-    0. buf-state 2! ;
+    0. buf-state 2!  0 to j^ ;
 
 : n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
     2 pick ulit, r@ ulit, over ulit, new-code
