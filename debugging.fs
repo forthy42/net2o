@@ -67,46 +67,41 @@ Variable last-tick
 : +t ( addr -- )
     ticks-u dup last-tick !@ - swap +! ;
 
-: timing ;
-[IFDEF] timing
+true [IF]
     Variable timer-list
     : timer: Create 0 , here timer-list !@ ,
       DOES> profile( +t EXIT ) drop ;
     : map-timer { xt -- }
 	timer-list BEGIN  @ dup  WHILE dup >r
-		xt execute r> REPEAT drop ;
+		cell - xt execute r> REPEAT drop ;
     
     : init-timer ( -- )
-	ticks-u last-tick ! [: cell - off ;] map-timer ;
-    
-    timer: +calc1
-    timer: +calc
-    timer: +enc
-    timer: +rec
-    timer: +send
-    timer: +wait
+	ticks-u last-tick ! [: off ;] map-timer ;
     
     : .times ( -- ) profile(
-	[: cell -
-	dup body> >name name>string 1 /string
-	tuck type 8 swap - 0 max spaces ." : "
-	@ s>f 1n f* f. cr ;] map-timer ) ;
+	[: dup body> >name name>string 1 /string
+	   tuck type 8 swap - 0 max spaces ." : "
+	   @ s>f 1n f* f. cr ;] map-timer ) ;
 [ELSE]
-    ' noop alias +calc immediate
-    ' noop alias +calc1 immediate
-    ' noop alias +send immediate
-    ' noop alias +rec immediate
-    ' noop alias +wait immediate
-    ' noop alias +enc immediate
     ' noop alias init-timer
     ' noop alias .times
+    : timer: ['] noop alias immediate ;
 [THEN]
+
+timer: +calc1
+timer: +calc
+timer: +enc
+timer: +rec
+timer: +send
+timer: +wait
+
+\ Emacs fontlock mode: Highlight more stuff
 
 0 [IF]
 Local Variables:
 forth-local-words:
     (
-     (("debug:" "field:" "sffield:" "dffield:" "64field:")
+     (("debug:" "timer:")
       non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z]+(" immediate (font-lock-comment-face . 1)
