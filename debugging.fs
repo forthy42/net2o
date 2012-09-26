@@ -69,33 +69,28 @@ Variable last-tick
 
 : timing ;
 [IFDEF] timing
-    Variable calc-time
-    Variable calc1-time
-    Variable send-time
-    Variable rec-time
-    Variable enc-time
-    Variable wait-time
+    Variable timer-list
+    : timer: Create 0 , here timer-list !@ ,
+      DOES> profile( +t EXIT ) drop ;
+    : map-timer { xt -- }
+	timer-list BEGIN  @ dup  WHILE dup >r
+		xt execute r> REPEAT drop ;
     
     : init-timer ( -- )
-	ticks-u last-tick !
-	calc-time  off  send-time off
-	rec-time   off  wait-time off
-	calc1-time off  enc-time  off ;
+	ticks-u last-tick ! [: cell - off ;] map-timer ;
     
-    : +calc  profile( calc-time +t ) ;
-    : +calc1 profile( calc1-time +t ) ;
-    : +send  profile( send-time +t ) ;
-    : +enc   profile( enc-time +t ) ;
-    : +rec   profile( rec-time +t ) ;
-    : +wait  profile( wait-time +t ) ;
+    timer: +calc1
+    timer: +calc
+    timer: +enc
+    timer: +rec
+    timer: +send
+    timer: +wait
     
     : .times ( -- ) profile(
-	." wait: " wait-time @ s>f 1n f* f. cr
-	." send: " send-time @ s>f 1n f* f. cr
-	." rec : " rec-time  @ s>f 1n f* f. cr
-	." enc : " enc-time  @ s>f 1n f* f. cr
-	." calc: " calc-time @ s>f 1n f* f. cr
-	." calc1: " calc1-time @ s>f 1n f* f. cr ) ;
+	[: cell -
+	dup body> >name name>string 1 /string
+	tuck type 8 swap - 0 max spaces ." : "
+	@ s>f 1n f* f. cr ;] map-timer ) ;
 [ELSE]
     ' noop alias +calc immediate
     ' noop alias +calc1 immediate
