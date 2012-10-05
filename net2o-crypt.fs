@@ -2,7 +2,9 @@
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 : wurst-source-state> ( addr -- )  wurst-source swap state# 2* move ;
-: >wurst-source-state ( addr -- )  wurst-source state# 2* move ;
+: >wurst-source-state ( addr -- )
+    crypt( dup state# 2* 0 skip nip 0= IF ." zero key injected!" cr THEN )
+    wurst-source state# 2* move ;
 
 : wurst-key$ ( -- addr u )
     j^ dup 0= IF
@@ -38,11 +40,13 @@ Defer regen-ivs
     $@ drop >r
     dest-addr @ r@ 2@ bounds within 0=
     IF
-	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
+	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
 	    r@ clear-replies
-	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
+	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
 	    dup r@ regen-ivs
+	ELSE
+	    crypt( ." No code source IVS" cr )
 	THEN
 	drop
     THEN
@@ -53,9 +57,11 @@ Defer regen-ivs
     $@ drop >r
     dest-addr @ r@ 2@ bounds within 0=
     IF
-	dest-addr @  r@ dest-vaddr @ -  max-size^2 rshift
+	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source'
+	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
+	ELSE
+	    crypt( ." No source IVS" cr )
 	THEN
 	drop
     THEN
@@ -63,6 +69,7 @@ Defer regen-ivs
 
 : wurst-outbuf-init ( flag -- )
     rnd-init >wurst-source'
+    wurst-key$ >wurst-key
     j^ IF
 	IF
 	    j^ code-map ivs>code-source?
@@ -71,11 +78,11 @@ Defer regen-ivs
 	THEN
     ELSE
 	drop
-    THEN
-    wurst-key$ >wurst-key ;
+    THEN ;
 
 : wurst-inbuf-init ( flag -- )
     rnd-init >wurst-source'
+    wurst-key$ >wurst-key
     j^ IF
 	IF
 	    j^ code-rmap ivs>code-source?
@@ -83,19 +90,20 @@ Defer regen-ivs
 	    j^ data-rmap ivs>source?
 	THEN
     ELSE
-\	." no iv mapping" cr
 	drop
-    THEN
-    wurst-key$ >wurst-key ;
+    THEN ;
 
 $10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
 rng$ mykey swap move
 
+: start-diffuse ( -- )  pad roundse# rounds ;
+
 : wurst-mykey-init ( addr u -- addr' u' )
     over mykey-salt# >wurst-source
     mykey state# >wurst-key
-    mykey-salt# safe/string ;
+    mykey-salt# safe/string
+    start-diffuse ;
 
 : mem-rounds# ( size -- n )
     case
@@ -131,7 +139,7 @@ rng$ mykey swap move
     over >r  rng@ rng@ r> 128! wurst-mykey-init ;
 
 : wurst-crc ( -- xd )
-    pad roundse# rounds  \ another key diffusion round
+    start-diffuse  \ another key diffusion round
     64#0 64#0 wurst-state state# bounds ?DO  I 128@ 128xor 2 64s +LOOP ;
 : wurst-cookie ( -- x )
     64#0 wurst-source state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
@@ -145,7 +153,6 @@ rng$ mykey swap move
 	mykey-salt# safe/string 2 64s - true ;
 [ELSE]
     : encrypt-buffer ( addr u n -- addr 0 ) >r
-	over roundse# rounds
 	BEGIN  dup 0>  WHILE
 		over r@ rounds  r@ >reads state# * safe/string
 	REPEAT  rdrop ;
@@ -161,7 +168,6 @@ rng$ mykey swap move
 	wurst-inbuf-init
 	inbuf body-size mem-rounds# >r
 	inbuf packet-data
-	over roundse# rounds
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
@@ -174,7 +180,7 @@ rng$ mykey swap move
 
     : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc
 	wurst-mykey-init 2 64s - dup mem-rounds# >r
-	2dup  over roundse# rounds
+	2dup
 	BEGIN  dup 0>  WHILE
 		over r@ rounds-decrypt  r@ >reads state# * safe/string
 	REPEAT
@@ -196,6 +202,7 @@ Variable do-keypad
 
 : >wurst-key-ivs ( -- )
     j^ dup 0= IF
+	crypt( ." IVS generated for non-connection!" cr )
 	drop wurst-key state# wurst-state swap move
     ELSE
 	do-keypad @ IF
@@ -216,8 +223,8 @@ Variable do-keypad
     r@ dest-ivsgen @ wurst-source-state>
     -1 r> dest-ivslastgen xor! ;
 
-: gen-ivs ( ivs-addr -- ) >r
-    r@ $@ erase
+: gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
+    start-diffuse
     r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
     r> cell+ @ wurst-source-state> ;
 
@@ -245,7 +252,7 @@ Variable do-keypad
     r> gen-ivs ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
-    r@ dest-size @ max-size^2 rshift r> dest-ivs ;
+    r@ dest-size @ max-size^2 1- rshift r> dest-ivs ;
 
 : net2o:gen-data-ivs ( addr u -- )
     j^ data-map ivs-size@ ivs-string ;

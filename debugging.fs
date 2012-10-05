@@ -42,6 +42,7 @@ debug: profile(
 debug: stat(
 debug: timeout(
 debug: ack(
+debug: crypt(
 
 : +db ( "word" -- ) ' >body on ;
 
