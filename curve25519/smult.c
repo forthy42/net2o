@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#if __WORDSIZE == 32
+#if INTPTR_MAX == INT32_MAX
 /*
 version 20081011
 Matthew Dempsky
@@ -289,7 +289,7 @@ int crypto_scalarmult(unsigned char *q,
   for (i = 0;i < 32;++i) q[i] = work[64 + i];
   return 0;
 }
-#elif __WORDSIZE == 64
+#elif INTPTR_MAX == INT64_MAX
 typedef uint8_t u8;
 typedef uint64_t felem;
 // This is a special gcc mode for 128-bit integers. It's implemented on 64-bit
@@ -740,5 +740,5 @@ crypto_scalarmult(u8 *mypublic, const u8 *secret, const u8 *basepoint) {
   return 0;
 }
 #else
-#error "__WORDSIZE undefined, don't know what to do"
+#error "INTPTR_MAX neither 32 or 64 bit integer type, don't know what to do"
 #endif

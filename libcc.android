@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ENGINE=gforth
+KERNL=$(gforth --debug -e bye 2>&1 |grep "Opened image file: "|sed -e 's/Opened image file: //g' -e 's/gforth.fi/kernl*.fi/g')
+VERSION=$($ENGINE --version 2>&1 | tr ' ' '/')
+srcdir=.
+DESTDIR=/home/bernd/proj/net2o
+prefix= 
+exec_prefix=${prefix}
+libexecdir=$package${exec_prefix}/lib
+libccdir=$libexecdir/gforth$ARCH/$VERSION/libcc-named/
+LIBRARY="curve25519.fs"
+
+for i in $LIBRARY
+do
+    $ENGINE -i $KERNL -p ".:~+:~/proj/gforths/gforth-android" exboot.fs startup.fs -e ": android ;" -e "s\" `pwd`/lib/gforth$ARCH/$VERSION/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $DESTDIR$libccdir\" ; is replace-rpath" $srcdir/$i -e bye
+done
