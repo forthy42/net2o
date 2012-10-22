@@ -189,7 +189,7 @@ rng$ mykey swap move
 
 \ public key encryption
 
-$20 Constant keysize \ our shared secred is only 32 bytes long
+KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 \ client keys
 keysize buffer: pkc
 keysize buffer: skc
@@ -197,6 +197,9 @@ keysize buffer: skc
 keysize buffer: keypad
 Variable do-keypad
 
+: gen-keys ( -- )
+    rng$ keysize umin skc swap move
+    pkc skc base9 crypto_scalarmult ;
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.
 
@@ -275,7 +278,7 @@ Variable do-keypad
 : net2o:receive-key ( addr u -- )
     j^ 0= IF  2drop EXIT  THEN
     ?keysize
-    keypad skc rot crypto_scalarmult_curve25519 ;
+    keypad skc rot crypto_scalarmult ;
 
 : net2o:update-key ( -- )
     do-keypad @ IF

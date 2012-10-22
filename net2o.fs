@@ -18,7 +18,7 @@
 require unix/socket.fs
 require string.fs
 require struct0x.fs
-require nacl.fs
+require curve25519.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
 require hash-table.fs

@@ -4,7 +4,7 @@ require net2o.fs
 
 +debug
 
-pkc skc crypto_box_keypair \ create a random key pair
+gen-keys \ create a random key pair
 
 init-client
 
