@@ -209,11 +209,14 @@ previous
 	." Resend canned code reply" cr
     ELSE  2drop  false  THEN ;
 
+Variable throwcount
+
 : do-cmd-loop ( addr u -- )
     cmd( 2dup n2o:see )
-    sp@ >r
+    sp@ >r throwcount off
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
-	IFERROR  dup DoError nothrow >throw  THEN  ENDTRY
+	IFERROR  1 throwcount +! dup DoError nothrow
+	    throwcount @ 4 < IF  >throw  THEN  THEN  ENDTRY
     drop  r> sp! 2drop ;
 
 : cmd-loop ( addr u -- )

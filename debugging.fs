@@ -60,7 +60,16 @@ Variable debug-eval
 
 \ timing measurements
 
+64Variable timer-tick
 Variable last-tick
+
+\ timing ticks
+
+[IFDEF] 64bit
+    : ticks ( -- u )  ntime drop ;
+[ELSE]
+    ' ntime Alias ticks
+[THEN]
 
 : ticks-u ( -- u )  ntime drop ;
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
@@ -83,6 +92,10 @@ true [IF]
 	[: dup body> >name name>string 1 /string
 	   tuck type 8 swap - 0 max spaces ." : "
 	   @ s>f 1n f* f. cr ;] map-timer ) ;
+
+    : !time ( -- ) ticks timer-tick 64! ;
+    : @time ( -- f ) ticks timer-tick 64@ 64- 64>f 1e-9 f* ;
+    : .time ( -- ) @time f. ." s" ;
 [ELSE]
     ' noop alias init-timer
     ' noop alias .times
@@ -107,6 +120,8 @@ forth-local-words:
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
+     (("[:") definition-starter (font-lock-keyword-face . 1))
+     ((";]") definition-ender (font-lock-keyword-face . 1))
     )
 End:
 [THEN]

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-ENGINE=gforth
-KERNL=$(gforth --debug -e bye 2>&1 |grep "Opened image file: "|sed -e 's/Opened image file: //g' -e 's/gforth.fi/kernl*.fi/g')
+ENGINE=gforth-x32
+KERNL=$(gforth-x32 --debug -e bye 2>&1 |grep "Opened image file: "|sed -e 's/Opened image file: //g' -e 's/gforth.fi/kernl*.fi/g')
 VERSION=$($ENGINE --version 2>&1 | tr ' ' '/')
 srcdir=.
 DESTDIR=/home/bernd/proj/net2o

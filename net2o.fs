@@ -122,14 +122,6 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     0 cell 0 DO  8 lshift over $FF and reverse8 or
 	swap 8 rshift swap  LOOP  nip ;
 
-\ timing ticks
-
-[IFDEF] 64bit
-    : ticks ( -- u )  ntime drop ;
-[ELSE]
-    ' ntime Alias ticks
-[THEN]
-
 \ defined exceptions
 
 s" gap in file handles"          exception Constant !!gap!!
@@ -229,7 +221,8 @@ Variable routes
 	0     sockaddr-tmp sin6_flowinfo l!
 	r> sin_addr l@ sockaddr-tmp sin6_addr 12 + l!
 	$FFFF0000 sockaddr-tmp sin6_addr 8 + l!
-	0 sockaddr-tmp sin6_addr !
+	0 sockaddr-tmp sin6_addr 4 + l!
+	0 sockaddr-tmp sin6_addr l!
 	0 sockaddr-tmp sin6_scope_id l!
 	sockaddr-tmp sockaddr_in6 %size
     THEN ;
@@ -269,7 +262,8 @@ Variable return-addr
 : get-dest ( packet -- addr )  destination 2@ nip ;
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ get-dest $38 rshift 0=  IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ get-dest [IFDEF] 64bit $38 [ELSE] $18 [THEN] rshift
+    0=  IF  drop  true  rdrop EXIT  THEN \ local packet
     r@ get-dest route>address  r> ins-source  false ;
 
 : in-route ( -- flag )  address>route inbuf packet-route ;
@@ -869,7 +863,8 @@ file-state-struct buffer: new-file-state
     r@ data-firstack0# off  r> data-firstack1# off
     firstack( ." expect more data" cr ) ;
 
-: size! ( n id -- )  over j^ total    +!  state-addr  fs-size ! ;
+: size! ( n id -- )  over j^ total    +!  state-addr >r
+    r@ fs-size !  0 r@ fs-oldseek ! 0 r> fs-seek ! ;
 : seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap -
     +expected ;
 
@@ -885,7 +880,7 @@ file-state-struct buffer: new-file-state
 	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
 	ELSE
 	    - j^ blocksize @ umin dup I fs-oldseek +!
-	    msg( ." flush file <" I j^ file-state $@ drop - file-state-struct / 0 .r ." >: " dup . cr )
+	    msg( ." flush file <" 2dup swap hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." >: " dup . cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
 	    THEN  >blockalign +
@@ -916,15 +911,20 @@ file-state-struct buffer: new-file-state
 : n2o:close-file ( id -- )
     ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
-: n2o:slurp-block ( id -- nextseek )
+: n2o:slurp-block ( id -- nextseek ) dup { id }
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
-    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw
+    data$@ j^ blocksize @ umin
+    msg( ." Read <" id . 2dup swap hex. hex. ." >" cr )
+    r@ fs-fid @ read-file throw
     dup >blockalign /data +
     dup r> fs-seek ! ;
 
-: n2o:slurp-block' ( id -- delta )
+: n2o:slurp-block' ( id -- delta ) dup { id }
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
-    data$@ j^ blocksize @ umin r@ fs-fid @ read-file throw
+    data$@ j^ blocksize @ umin
+    msg( ." Read <" id . over hex. )
+    r@ fs-fid @ read-file throw
+    msg( dup hex. ." >" cr )
     dup >blockalign /data +
     dup r> fs-seek !@ - ;
 
@@ -1162,7 +1162,7 @@ Create chunk-adder chunks-struct allot
 	dup chunk-context @ to j^
 	chunk-count
 	data-to-send IF
-	    msg( ." send a chunk" cr )
+	    \ msg( ." send a chunk" cr )
 	    send-a-chunk
 	ELSE
 	    drop msg( .nosend )
