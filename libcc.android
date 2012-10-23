@@ -6,12 +6,13 @@ VERSION=$($ENGINE --version 2>&1 | tr ' ' '/')
 srcdir=.
 DESTDIR=/home/bernd/proj/net2o
 prefix= 
+ARCH=""
 exec_prefix=${prefix}
 libexecdir=$package${exec_prefix}/lib
-libccdir=$libexecdir/gforth$ARCH/$VERSION/libcc-named/
-LIBRARY="curve25519.fs"
+libccdir=$libexecdir/$VERSION/libcc-named/
+LIBRARY="curve25519.fs wurstkessel.fs"
 
 for i in $LIBRARY
 do
-    $ENGINE -i $KERNL -p ".:~+:~/proj/gforths/gforth-android" exboot.fs startup.fs -e ": android ;" -e "s\" `pwd`/lib/gforth$ARCH/$VERSION/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $DESTDIR$libccdir\" ; is replace-rpath" $srcdir/$i -e bye
+    $ENGINE -i $KERNL -p ".:~+:~/proj/gforths/gforth-android" exboot.fs startup.fs -e ": android ;" -e "s\" `pwd`/lib/$VERSION/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $DESTDIR$libccdir\" ; is replace-rpath" $srcdir/$i -e bye
 done
