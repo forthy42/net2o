@@ -1271,7 +1271,7 @@ Create pollfds   here pollfd %size dup allot erase
 : poll-sock ( -- flag )
     eval-queue  clear-events  timeout!
     pollfds 1
-[ environment os-type s" linux" string-prefix? ] [IF]
+[IFDEF] ppoll
     ptimeout 0 ppoll 0>
 [ELSE]
     ptimeout cell+ @ #1000000 / poll 0>
