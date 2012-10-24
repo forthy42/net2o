@@ -24,7 +24,7 @@ insert-ip n2o:connect +flow-control +resend
 net2o-code
 expect-reply
 data-ivs time-offset!
-s" Download test" $, type cr !time
+s" Download test" $, type cr
 $400 blocksize! $400 blockalign! stat( request-stats )
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy
 s" data/2011-05-13_11-26-57-small.jpg" s" .cache/photo000s.jpg" n2o:copy
@@ -34,10 +34,11 @@ send-chunks
 end-code
 
 1 client-loop .time cr
-@time 1e f< [IF]
+@time 2e f< [IF]
     ." Request more photos because it was so fast" cr
     net2o-code
     expect-reply
+    s" Download test 2" $, type cr
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38-small.jpg" ".cache/photo002s.jpg" n2o:copy
     "data/2011-06-03_10-26-49-small.jpg" ".cache/photo003s.jpg" n2o:copy
@@ -51,10 +52,13 @@ end-code
 end-code
 
 1 client-loop .time cr
-@time 1e f< [IF]
+[THEN]
+
+@time 5e f< [IF]
     ." Request big photos because it was so fast" cr
     net2o-code
     expect-reply
+    s" Download test 3" $, type cr
     $10000 blocksize! $400 blockalign! stat( request-stats )
     s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
     s" data/2011-05-20_17-01-12.jpg" s" .cache/photo001.jpg" n2o:copy
