@@ -13,7 +13,8 @@ s" .cache" file-status nip #-514 = [IF]
 [THEN]
 
 $8000 $100000
-next-arg argc @ 1 > [IF] next-arg s>number drop [ELSE] net2o-port [THEN]
+argc @ 1 > [IF] next-arg [ELSE] "net2o.de" [THEN] \ default
+argc @ 1 > [IF] next-arg s>number drop [ELSE] net2o-port [THEN]
 insert-ip n2o:connect +flow-control +resend
 
 ." Connected" cr
