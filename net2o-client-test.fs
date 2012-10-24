@@ -12,6 +12,8 @@ s" .cache" file-status nip #-514 = [IF]
     s" .cache" $1FF =mkdir throw
 [THEN]
 
+!time
+
 $8000 $100000
 argc @ 1 > [IF] next-arg [ELSE] "net2o.de" [THEN] \ default
 argc @ 1 > [IF] next-arg s>number drop [ELSE] net2o-port [THEN]
@@ -31,7 +33,24 @@ n2o:done
 send-chunks
 end-code
 
-!time 1 client-loop .time cr
+1 client-loop .time cr
+@time 1e f< [IF]
+    ." Request more photos because it was so fast" cr
+    net2o-code
+    expect-reply
+    $10000 blocksize! $400 blockalign! stat( request-stats )
+    "data/2011-06-02_15-02-38-small.jpg" ".cache/photo002s.jpg" n2o:copy
+    "data/2011-06-03_10-26-49-small.jpg" ".cache/photo003s.jpg" n2o:copy
+    "data/2011-06-15_12-27-03-small.jpg" ".cache/photo004s.jpg" n2o:copy
+    "data/2011-06-24_11-26-36-small.jpg" ".cache/photo005s.jpg" n2o:copy
+    "data/2011-06-27_19-33-04-small.jpg" ".cache/photo006s.jpg" n2o:copy
+    "data/2011-06-27_19-55-48-small.jpg" ".cache/photo007s.jpg" n2o:copy
+    "data/2011-06-28_06-54-09-small.jpg" ".cache/photo008s.jpg" n2o:copy
+    n2o:done
+    send-chunks
+end-code
+
+1 client-loop .time cr
 @time 1e f< [IF]
     ." Request big photos because it was so fast" cr
     net2o-code
