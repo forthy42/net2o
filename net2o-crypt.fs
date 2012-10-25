@@ -178,12 +178,7 @@ rng$ mykey swap move
 	encrypt-buffer
 	drop >r wurst-crc r> 128! +enc ;
 
-    \ aligned buffer to make encryption/decryption fast
-    $400 buffer: encrypt$
-    : >encrypt$ ( addr u -- addr' u ) dup $400 u> ?EXIT
-	tuck encrypt$ swap move encrypt$ swap ;
-    
-    : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc >encrypt$
+    : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
 	wurst-mykey-init 2 64s - dup mem-rounds# >r
 	2dup
 	BEGIN  dup 0>  WHILE

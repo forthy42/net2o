@@ -1,21 +1,21 @@
 \ debugging aids
 
-: debug)  ]] THEN [[ ;
+: else( ['] noop assert-canary ; immediate
 
 true [IF]
-    : debug: ( -- ) Create immediate false ,
-      DOES>
-	state @ IF  ]] Literal @ IF [[
-		['] debug) assert-canary
-	    ELSE  @ IF ['] noop assert-canary
-		ELSE postpone (
-		THEN
-	THEN  ;
+    : debug-does>  DOES>  @
+	IF ['] noop assert-canary  ELSE  postpone (  THEN ;
+    : debug: ( -- ) Create false ,
+	debug-does>  COMPILE>  >body
+	]] Literal @ IF [[ [: ]] THEN [[ ;] assert-canary ;
+    : )else(  ]] ) ( [[ ;
+    compile> drop 2>r ]] ELSE [[ 2r> ;
 [ELSE]
     : debug: ( -- )  Create immediate false ,
       DOES>
 	@ IF  ['] noop assert-canary
 	ELSE  postpone (  THEN ;
+    : )else(  ]] ) ( [[ ; immediate
 [THEN]
 
 : hex[ ]] base @ >r hex [[ ; immediate
@@ -43,14 +43,21 @@ debug: stat(
 debug: timeout(
 debug: ack(
 debug: crypt(
+debug: ens(
 
 : +db ( "word" -- ) ' >body on ;
+: -db ( "word" -- ) ' >body off ;
+
++db ens(
 
 Variable debug-eval
 
+: +-? ( addr u -- flag )  0= IF  drop  EXIT  THEN
+    c@ ',' - abs 1 = ; \ hehe, ',' is in the middle between '+' and '-'
+
 : +debug ( -- )
     BEGIN  argc @ 1 > WHILE
-	    1 arg s" +" string-prefix?  WHILE
+	    1 arg +-?  WHILE
 		1 arg debug-eval $!
 		s" db " debug-eval 1 $ins
 		s" (" debug-eval $+!
@@ -80,7 +87,7 @@ Variable last-tick
 true [IF]
     Variable timer-list
     : timer: Create 0 , here timer-list !@ ,
-      DOES> profile( +t EXIT ) drop ;
+      DOES> profile( +t )else( drop ) ;
     : map-timer { xt -- }
 	timer-list BEGIN  @ dup  WHILE dup >r
 		cell - xt execute r> REPEAT drop ;

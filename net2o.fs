@@ -628,6 +628,11 @@ reply buffer: dummy-reply
 \    cmd( ." set dest-tail to " r@ dest-tail @ hex. cr )
     rdrop ;
 
+\ aligned buffer to make encryption/decryption fast
+$400 buffer: aligned$
+: $>align ( addr u -- addr' u ) dup $400 u> ?EXIT
+    tuck aligned$ swap move aligned$ swap ;
+    
 \ timing records
 
 : net2o:track-timing ( -- ) \ initialize timing records
@@ -641,7 +646,7 @@ reply buffer: dummy-reply
 : net2o:/timing ( n -- )
     stats( j^ timing-stat 0 rot $del ) ;
 
-: net2o:rec-timing ( addr u -- ) \ do some dumps
+: net2o:rec-timing ( addr u -- ) $>align \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 j^ last-time 64+!
 	j^ last-time 64@ 64>f 1n f* fdup f.
@@ -780,7 +785,7 @@ timestats buffer: stat-tuple
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64drop >extra-ns ( rate-limit ) rate-stat2
+    64drop dup >extra-ns ens( nip )else( drop ) ( rate-limit ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
