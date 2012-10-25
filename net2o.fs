@@ -140,6 +140,8 @@ s" connection attempt timed out" exception Constant !!contimeout!!
 
 4242 Value net2o-port
 
+Variable net2o-host "net2o.de" net2o-host $!
+
 0 Value net2o-sock
 
 : new-server ( -- )

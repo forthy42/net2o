@@ -16,7 +16,7 @@ s" .cache" file-status nip #-514 = [IF]
 !time
 
 $8000 $100000
-argc @ 1 > [IF] next-arg [ELSE] "sunwukong" [THEN] \ default
+argc @ 1 > [IF] next-arg [ELSE] net2o-host $@ [THEN] \ default
 argc @ 1 > [IF] next-arg s>number drop [ELSE] net2o-port [THEN]
 insert-ip n2o:connect +flow-control +resend
 
