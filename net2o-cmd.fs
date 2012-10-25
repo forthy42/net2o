@@ -220,7 +220,7 @@ Variable throwcount
     drop  r> sp! 2drop ;
 
 : cmd-loop ( addr u -- )
-    tag-addr?  ?EXIT
+    tag-addr?  IF  2drop  EXIT  THEN
     j^ IF  cmd0source on  ELSE  cmd0source off  THEN
     cmdreset  do-cmd-loop  cmd-send? ;
 
