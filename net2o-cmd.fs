@@ -217,7 +217,7 @@ Variable throwcount
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  1 throwcount +! dup DoError nothrow
 	    throwcount @ 4 < IF  >throw  THEN  THEN  ENDTRY
-    drop  r> sp! 2drop ;
+    drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
     tag-addr?  IF  2drop  EXIT  THEN

@@ -187,17 +187,21 @@ outbuf' Constant outbuf
 2Variable socktimeout
 
 : sock-timeout! ( socket -- )  fileno
-    ptimeout 2@ >r 1000 / r> socktimeout 2!
-    SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt drop ;
+    socktimeout 2@
+    ptimeout 2@ >r 1000 / r> 2dup socktimeout 2! d<> IF
+	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt THEN
+    drop ;
 
-: read-socket-quick ( socket -- addr u )
-    sockaddr_in6 %size alen !
-    fileno inbuf maxpacket MSG_WAITALL sockaddr-tmp alen recvfrom
-    dup 0< IF  errno 512 + negate throw  THEN
-    inbuf swap ;
+MSG_WAITALL   Constant do-block
+MSG_DONTWAIT  Constant don't-block
 
-: read-a-packet ( -- addr u )
-    net2o-sock read-socket-quick  1 packetr +! ;
+: read-a-packet ( blockage -- addr u / 0 0 )
+    >r sockaddr_in6 %size alen !
+    net2o-sock fileno inbuf maxpacket r> sockaddr-tmp alen recvfrom
+    dup 0< IF
+	errno dup 11 = IF  2drop 0. EXIT  THEN
+	512 + negate throw  THEN
+    inbuf swap  1 packetr +! ;
 
 $00000000 Value droprate#
 
@@ -1287,21 +1291,33 @@ Create pollfds   here pollfd %size dup allot erase
 
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF
-	read-a-packet  0 pollfds revents w! +rec EXIT  THEN
+	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
     0 0 ;
 
-: try-read-packet ( -- addr u / 0 0 )
+: try-read-packet-wait ( -- addr u / 0 0 )
     poll-sock drop read-a-packet4/6 ;
+
+: try-read-packet ( -- addr u / 0 0 )
+    don't-block read-a-packet +rec ;
+
+Variable tries# 0 tries# !
+
+: try-read-packet8 ( -- addr u / 0 0 )
+    tries# @ 0<= IF  try-read-packet-wait  7 tries# !  EXIT  THEN
+    -1 tries# +!  try-read-packet ;
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  try-read-packet dup 0=  ELSE  0. true  THEN
+    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! and throw ;
 
+7 Value try-read#
+
 : next-client-packet ( -- addr u )
-    try-read-packet  2dup d0= ?EXIT
+    0. try-read# 0 DO  2drop try-read-packet dup ?LEAVE LOOP
+    dup 0= IF  2drop try-read-packet-wait  THEN  2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
     over packet-size over <> IF  !!size!! throw  THROW  THEN
