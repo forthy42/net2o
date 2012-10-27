@@ -35,7 +35,7 @@ send-chunks
 end-code
 
 1 client-loop .time cr
-@time 2e f< [IF]
+2e @time f> [IF]
     ." Request more photos because it was so fast" cr
     net2o-code
     expect-reply
@@ -53,9 +53,12 @@ end-code
 end-code
 
 1 client-loop .time cr
+3e
+[ELSE]
+    2e
 [THEN]
 
-@time 5e f< [IF]
+@time f> [IF]
     ." Request big photos because it was so fast" cr
     net2o-code
     expect-reply
@@ -70,10 +73,9 @@ end-code
 1 client-loop .time cr
 [THEN]
 
-
 ." IP packets send/received: " packets ? packetr ? cr
 .times
 
-net2o-code .time end-code
+net2o-code s" Download end" $, type cr .time  end-code
 
 script? [IF] bye [THEN]

@@ -1301,19 +1301,18 @@ Create pollfds   here pollfd %size dup allot erase
     don't-block read-a-packet +rec ;
 
 Variable tries# 0 tries# !
+50 Value try-read#
 
-: try-read-packet8 ( -- addr u / 0 0 )
-    tries# @ 0<= IF  try-read-packet-wait  7 tries# !  EXIT  THEN
+: try-read-packetX ( -- addr u / 0 0 )
+    tries# @ 0<= IF  try-read-packet-wait  try-read# tries# !  EXIT  THEN
     -1 tries# +!  try-read-packet ;
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
+    BEGIN  sendflag @ 0= IF  try-read-packetX dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! and throw ;
-
-7 Value try-read#
 
 : next-client-packet ( -- addr u )
     0. try-read# 0 DO  2drop try-read-packet dup ?LEAVE LOOP
@@ -1346,34 +1345,37 @@ $08 Constant cookie-val
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 
+: handle-cmd0 ( -- ) \ handle packet to address 0
+    0 to j^ \ address 0 has no job context!
+    true wurst-inbuf-decrypt 0= IF
+	." invalid packet to 0" cr EXIT  THEN
+    validated off \ packets to address 0 are not really validated
+    inbuf packet-data queue-command ;
+
+: handle-dest ( -- ) \ handle packet to valid destinations
+    ticks j^ recv-tick 64! \ time stamp of arrival
+    dup 0> wurst-inbuf-decrypt 0= IF
+	inbuf .header
+	." invalid packet to " dest-addr @ hex. cr
+	IF  drop  THEN  EXIT  THEN
+    crypt-val validated ! \ ok, we have a validated connection
+    dup 0< IF \ data packet
+	data( ." received: " inbuf .header cr )
+	drop  >r inbuf packet-data r> swap move
+	+calc j^ ack-xt perform +ack
+    ELSE \ command packet
+	drop
+	>r inbuf packet-data r@ swap dup >r move
+	r> r> swap queue-command
+    THEN ;
+
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr
 \    inbuf .header
-    dest-addr @ 0= IF
-	0 to j^ \ address 0 has no job context!
-	true wurst-inbuf-decrypt 0= IF
-	    inbuf' dup packet-size dump
-	    inbuf dup packet-size dump
-	    ." invalid packet to 0" cr EXIT  THEN
-	validated off \ packets to address 0 are not really validated
-	inbuf packet-data queue-command
+    dest-addr @ 0= IF  handle-cmd0
     ELSE
-	check-dest dup 0= IF  drop  EXIT  THEN
-        ticks j^ recv-tick 64! \ time stamp of arrival
-	dup 0> wurst-inbuf-decrypt 0= IF
-	    inbuf .header
-	    ." invalid packet to " dest-addr @ hex. cr
-	    IF  drop  THEN  EXIT  THEN
-	crypt-val validated ! \ ok, we have a validated connection
-	dup 0< IF \ data packet
-	    data( ." received: " inbuf .header cr )
-	    drop  >r inbuf packet-data r> swap move
-	    j^ ack-xt perform
-	ELSE \ command packet
-	    drop
-	    >r inbuf packet-data r@ swap dup >r move
-	    r> r> swap queue-command
-	THEN
+	+calc check-dest dup 0= IF  drop  EXIT  THEN +dest
+	handle-dest
     THEN ;
 
 : route-packet ( -- )  inbuf dup packet-size send-a-packet drop ;

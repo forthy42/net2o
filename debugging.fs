@@ -116,6 +116,8 @@ timer: +rec
 timer: +send
 timer: +wait
 timer: +cmd
+timer: +dest
+timer: +ack
 
 \ Emacs fontlock mode: Highlight more stuff
 
