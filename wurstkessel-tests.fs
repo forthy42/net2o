@@ -21,6 +21,9 @@
 	rounds# wurst-rng
 	message over wurst-out write-file throw
 	message over erase  LOOP wurst-close ;
+: benchmark ( n -- ) >r cputime d+
+    r@ 0 ?DO  rounds# wurst-rng  LOOP  cputime d+ d- d>f -1e-6 f*
+    1/f 256e r> fm* f* 1024e fdup f* f/ f. ." MB/s" ;
 
 \ test for quality
 
