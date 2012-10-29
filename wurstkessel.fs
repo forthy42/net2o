@@ -301,7 +301,9 @@ s" gforth" environment? [IF] 2drop
 	    I permut# 8 + 64s #$ %> )),8);<% %c,
 	LOOP
 	8 0 DO
-	    %> asm volatile("# line break" : : "g" (a0), "g" (a1), "g" (a2), "g" (a3), "g" (a4), "g" (a5), "g" (a6), "g" (a7));<% %c,
+	    cell 8 = IF
+		%> asm volatile("# line break" : : "g" (a0), "g" (a1), "g" (a2), "g" (a3), "g" (a4), "g" (a5), "g" (a6), "g" (a7));<% %c,
+	    THEN \ slight improvement for 64 bit CPUs only
 	    %> t=*((uint64_t*)(states+<% I 8 * 64 + #$ %> ));<% %c,
 	    8 0 DO  I J 8 * + J mix2bytes_ind,
 		dup >r 8 * + $3F and r>
