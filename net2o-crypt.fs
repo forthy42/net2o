@@ -156,22 +156,23 @@ rng$ mykey swap move
 	BEGIN  dup 0>  WHILE
 		over rnd rounds  reads /string
 	REPEAT ;
+    : decrypt-buffer ( addr u n -- addr 0 ) dup >reads state# * { rnd reads }
+	BEGIN  dup 0>  WHILE
+		over rnd rounds-decrypt  reads /string
+	REPEAT ;
     
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
 	outbuf packet-data
-	outbuf body-size mem-rounds# encrypt-buffer
+	outbuf body-size mem-rounds# +calc1 encrypt-buffer
 	drop >r wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
-	inbuf body-size mem-rounds# >r
 	inbuf packet-data
-	BEGIN  dup 0>  WHILE
-		over r@ rounds-decrypt  r@ >reads state# * safe/string
-	REPEAT
-	rdrop drop 128@ wurst-crc 128= +enc ;
+	inbuf body-size mem-rounds# +calc1 decrypt-buffer
+	drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- )  +calc
 	wurst-mykey-setup 2 64s - dup mem-rounds#
