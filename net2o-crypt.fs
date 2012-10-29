@@ -97,7 +97,7 @@ $10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
 rng$ mykey swap move
 
-: start-diffuse ( -- )  pad roundse# rounds ;
+: start-diffuse ( -- )  message roundse# rounds ;
 
 : wurst-mykey-init ( addr u -- addr' u' )
     over mykey-salt# >wurst-source
@@ -152,10 +152,10 @@ rng$ mykey swap move
     : wurst-decrypt$ ( addr u -- addr' u' flag )
 	mykey-salt# safe/string 2 64s - true ;
 [ELSE]
-    : encrypt-buffer ( addr u n -- addr 0 ) >r
+    : encrypt-buffer ( addr u n -- addr 0 ) dup >reads state# * { rnd reads }
 	BEGIN  dup 0>  WHILE
-		over r@ rounds  r@ >reads state# * safe/string
-	REPEAT  rdrop ;
+		over rnd rounds  reads /string
+	REPEAT ;
     
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
@@ -173,7 +173,7 @@ rng$ mykey swap move
 	REPEAT
 	rdrop drop 128@ wurst-crc 128= +enc ;
 
-    : wurst-encrypt$ ( addr u -- ) +calc
+    : wurst-encrypt$ ( addr u -- )  +calc
 	wurst-mykey-setup 2 64s - dup mem-rounds#
 	encrypt-buffer
 	drop >r wurst-crc r> 128! +enc ;

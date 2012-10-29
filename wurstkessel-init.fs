@@ -21,4 +21,5 @@
     s" ~/.wurstrng" r/o open-file IF  drop random-init
     ELSE  read-wurstrng  THEN  rng-step write-wurstrng ;
 
+wurst-init
 salt-init

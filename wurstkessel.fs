@@ -340,7 +340,13 @@ s" gforth" environment? [IF] 2drop
     \c    int i;
     \c    for(i=0; i<8; i++) { m[i] ^= s[i+8]; s[i] ^= m[i]; }
     \c }
-    \c void rounds_ind(unsigned int n, unsigned char * states, unsigned char * message, uint64_t * rnds) {
+    \c static unsigned char * states;
+    \c static uint64_t * rnds;
+    \c void rounds_init(unsigned char * statesi, uint64_t * rndsi) {
+    \c    states=statesi;
+    \c    rnds=rndsi;
+    \c }
+    \c void rounds_ind(unsigned char* message, unsigned int n) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -365,7 +371,7 @@ s" gforth" environment? [IF] 2drop
     \c if(n&0x40) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } }
-    \c void rounds_decrypt(unsigned int n, unsigned char * states, unsigned char * message, uint64_t * rnds) {
+    \c void rounds_decrypt(unsigned char* message, unsigned int n) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -401,16 +407,16 @@ s" gforth" environment? [IF] 2drop
     \c   }
     \c   return result;
     \c }
-    c-function rounds_ind rounds_ind n a a a -- void
-    c-function rounds_decrypt rounds_decrypt n a a a -- void
+    c-function rounds_init rounds_init a a -- void
+    c-function rounds rounds_ind a n -- void
+    c-function rounds-decrypt rounds_decrypt a n -- void
 	[IFDEF] 64bit
 	    c-function wurst_hash64 wurst_hash64 a n a a -- n
 	[ELSE]
 	    c-function wurst_hash64 wurst_hash64 a n a a -- d
 	[THEN]
     end-c-library
-    : rounds ( addr n -- ) wurst-source rot 'rngs rounds_ind ;
-    : rounds-decrypt ( addr n -- ) wurst-source rot 'rngs rounds_decrypt ;
+    : wurst-init ( -- )  wurst-source 'rngs rounds_init ;
     : hash64 ( addr n init -- hash ) 'rngs wurst_hash64 ;
 [ELSE]
 : round0 ( -- )  [ 0 round# round, ] ; 
@@ -420,7 +426,8 @@ s" gforth" environment? [IF] 2drop
 : round4 ( -- )  [ 4 round# round, ] ; 
 : round5 ( -- )  [ 5 round# round, ] ; 
 : round6 ( -- )  [ 6 round# round, ] ; 
-: round7 ( -- )  [ 7 round# round, ] ; 
+: round7 ( -- )  [ 7 round# round, ] ;
+: wurst-init ;
 
 Create 'rounds
     ' round0 A, ' round1 A, ' round2 A, ' round3 A,
@@ -445,14 +452,14 @@ Create 'round-flags
 	THEN
     LOOP 2drop ;
 
-\ : rounds' ( n -- )  message swap  dup $F and 8 umin 0 ?DO
+\ : rounds' ( n -- )  dup $F and 8 umin 0 ?DO
 \ 	'rounds Ith execute .source cr .state cr cr
 \ 	dup 'round-flags Ith and IF
 \ 	    swap +entropy swap
 \ 	THEN
 \     LOOP 2drop ;
 
-: rounds-decrypt ( addr n -- )  dup $F and 8 umin 0 ?DO
+: rounds-decrypt ( n -- )  dup $F and 8 umin 0 ?DO
 	'rounds Ith execute
 	dup 'round-flags Ith and IF
 	    swap -entropy swap
@@ -467,7 +474,7 @@ Create 'round-flags
     $10 , $30 , $10 , $70 , $10 , $30 , $10 , $F0 ,
 [THEN]
 
-: rounds32 ( n -- )  message swap  dup $F and 8 umin 0 ?DO
+: rounds32 ( addr n -- )  dup $F and 8 umin 0 ?DO
 	I round# round32
 	dup 'round-flags I cells + @ and IF
 	    swap +entropy32 swap
@@ -482,7 +489,7 @@ Create 'round-flags
 	    wurst-state swap state# xors
 	    state# + ;
     [THEN]
-    : rounds ( n -- )  message swap  dup $F and 8 umin 0 ?DO
+    : rounds ( n -- )  dup $F and 8 umin 0 ?DO
 	I round# round
 	dup 'round-flags I cells + @ and IF
 	    swap +entropy swap
@@ -556,10 +563,10 @@ Create 'round-flags
 : wurst-hash32 ( final-rounds rounds -- )
     hash-init dup read-first32
     BEGIN  0>  WHILE
-	    dup rounds32
+	    message over rounds32
 	    dup encrypt-read32
     REPEAT
-    drop rounds32 .source32 wurst-close ;
+    drop message swap rounds32 .source32 wurst-close ;
 
 \ wurstkessel encryption
 
@@ -601,8 +608,8 @@ Create 'round-flags
     message r> rounds
     r@ encrypt-read message r@ rounds-decrypt r@ .xormsg-size
     BEGIN  0>  WHILE
-	r@ encrypt-read
-	message r@ rounds-decrypt  r@ message>'
+	    r@ encrypt-read
+	    message r@ rounds-decrypt  r@ message>'
     REPEAT
     rdrop  wurst-close ;
 
@@ -612,8 +619,6 @@ Create 'round-flags
     wurst-salt  wurst-source state# move
     state-init  wurst-state  state# move
     message     state# 8 * erase ;
-
-: wurst-rng ( rounds -- ) message swap rounds ;
 
 $18 Value roundsh#
 $28 Value rounds#
@@ -625,10 +630,9 @@ Variable rng-buffer state# rngs# * allot
 state# rngs# * rng-buffer !
 
 : rng-step ( -- )
-    rng-init  rounds# wurst-rng
+    rng-init  rng-buffer cell+ rounds# rounds
     wurst-source wurst-salt state# move
     wurst-state  state-init state# move
-    message rng-buffer cell+ state# rngs# * move
     rng-buffer off ;
 
 \ buffered random numbers to output 64 bit at a time
@@ -651,5 +655,5 @@ state# rngs# * rng-buffer !
 \ benchmark to evaluate quality of the compiled code
 
 : wurst-bench ( n -- ) >r cputime d+
-    r@ 0 ?DO  rounds# wurst-rng  LOOP  cputime d+ d- d>f -1e-6 f*
+    r@ 0 ?DO  message rounds# rounds  LOOP  cputime d+ d- d>f -1e-6 f*
     1/f 256e r> fm* f* 1024e fdup f* f/ f. ." MB/s" ;
