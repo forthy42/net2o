@@ -647,3 +647,9 @@ state# rngs# * rng-buffer !
     rng-buffer @ 4 + rng-step?
     rng-buffer dup @ + cell+ l@
     4 rng-buffer +! ;
+
+\ benchmark to evaluate quality of the compiled code
+
+: wurst-bench ( n -- ) >r cputime d+
+    r@ 0 ?DO  rounds# wurst-rng  LOOP  cputime d+ d- d>f -1e-6 f*
+    1/f 256e r> fm* f* 1024e fdup f* f/ f. ." MB/s" ;
