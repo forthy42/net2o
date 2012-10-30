@@ -22,8 +22,10 @@ Constant message
     [ cell 8 = ] [IF] 0 [THEN]
     base @ >r hex <<# 16 0 DO # LOOP #> type #>> r> base ! ;
 
-: .state  ( -- ) 8 0 DO  wurst-state  I 64s + 64@ .16  LOOP ;
-: .source ( -- ) 8 0 DO  wurst-source I 64s + 64@ .16  LOOP ;
+: .64b ( addr -- ) 64 bounds  DO  I 64@ .16 space  1 64s +LOOP ;
+
+: .state  ( -- ) wurst-state  .64b ;
+: .source ( -- ) wurst-source .64b ;
 
 Create source-init
 $6C5F6F6CBE627172. 64, $7164C30603661C2E. 64, $CE5009401B441346. 64, $454FA335A6E63AD2. 64,

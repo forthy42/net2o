@@ -9,8 +9,12 @@
 	crypto-key $@
     THEN ;
 
+0 Value @key
+: !key ( key -- )  dup to @key rounds-setkey ;
+: wurst-source-state> ( addr -- )  @key swap state# 2* move ;
+
 : >wurst-key ( addr u -- )
-    wurst-source rounds-setkey \ if we use wurst-state, we should set the key
+    wurst-source !key \ if we use wurst-state, we should set the key
     wurst-state swap move ;
 : >wurst-source ( addr u -- )
     wurst-source state# bounds ?DO
@@ -40,8 +44,8 @@ Defer regen-ivs
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
 	    r@ clear-replies
-	    r@ dest-ivs $@ 2 pick safe/string drop rounds-setkey
-	    dup r@ regen-ivs
+	    r@ dest-ivs $@ 2 pick safe/string drop
+	    over r@ regen-ivs !key
 	ELSE
 	    crypt( ." No code source IVS" cr )
 	THEN
@@ -56,7 +60,7 @@ Defer regen-ivs
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop rounds-setkey
+	    r@ dest-ivs $@ 2 pick safe/string drop !key
 	ELSE
 	    crypt( ." No source IVS" cr )
 	THEN
@@ -64,9 +68,14 @@ Defer regen-ivs
     THEN
     rdrop ;
 
+: default-key ( -- )
+    @key 0= IF
+	rnd-init >wurst-source'
+	wurst-key$ >wurst-key
+    THEN ;
+
 : wurst-outbuf-init ( flag -- )
-    rnd-init >wurst-source'
-    wurst-key$ >wurst-key
+    0 to @key
     j^ IF
 	IF
 	    j^ code-map ivs>code-source?
@@ -75,11 +84,12 @@ Defer regen-ivs
 	THEN
     ELSE
 	drop
-    THEN ;
+    THEN
+    default-key
+    key( @key .64b cr @key state# + .64b cr ) ;
 
 : wurst-inbuf-init ( flag -- )
-    rnd-init >wurst-source'
-    wurst-key$ >wurst-key
+    0 to @key
     j^ IF
 	IF
 	    j^ code-rmap ivs>code-source?
@@ -88,7 +98,9 @@ Defer regen-ivs
 	THEN
     ELSE
 	drop
-    THEN ;
+    THEN
+    default-key
+    key( @key .64b cr @key state# + .64b cr ) ;
 
 $10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
@@ -137,9 +149,9 @@ rng$ mykey swap move
 
 : wurst-crc ( -- xd )
     start-diffuse  \ another key diffusion round
-    64#0 64#0 wurst-state state# bounds ?DO  I 128@ 128xor 2 64s +LOOP ;
+    64#0 64#0 @key state# + state# bounds ?DO  I 128@ 128xor 2 64s +LOOP ;
 : wurst-cookie ( -- x )
-    64#0 wurst-source state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
+    64#0 @key state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
@@ -202,6 +214,7 @@ Variable do-keypad
 \ we send our public key and query the server's public key.
 
 : >wurst-key-ivs ( -- )
+    wurst-source !key
     j^ dup 0= IF
 	crypt( ." IVS generated for non-connection!" cr )
 	drop wurst-key state# wurst-state swap move
@@ -216,7 +229,7 @@ Variable do-keypad
     THEN ;
 
 : regen-ivs/2 ( map -- ) >r
-    r@ dest-ivsgen @ rounds-setkey
+    r@ dest-ivsgen @ !key
     r@ dest-ivs $@
     r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
     2dup erase
@@ -225,11 +238,12 @@ Variable do-keypad
 
 : gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
     start-diffuse
-    r> $@ dup 2/ mem-rounds# encrypt-buffer 2drop ;
+    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
+    r> cell+ @ wurst-source-state> ;
 
 : regen-ivs-all ( map -- ) >r
-    r@ dest-ivsgen @ rounds-setkey
-\    wurst-source state# 2* dump
+    r@ dest-ivsgen @ !key
+\    @key state# 2* dump
     r> dest-ivs gen-ivs ;
 
 : (regen-ivs) ( offset map -- ) >r

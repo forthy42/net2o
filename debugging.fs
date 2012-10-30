@@ -44,6 +44,7 @@ debug: timeout(
 debug: ack(
 debug: crypt(
 debug: ens(
+debug: key(
 
 : +db ( "word" -- ) ' >body on ;
 : -db ( "word" -- ) ' >body off ;
