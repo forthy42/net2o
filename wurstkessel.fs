@@ -29,10 +29,6 @@ Create source-init
 $6C5F6F6CBE627172. 64, $7164C30603661C2E. 64, $CE5009401B441346. 64, $454FA335A6E63AD2. 64,
 $ABE9D0D648C15F6E. 64, $B90FD4060D7935D6. 64, $F7EDA8E2E8D6CB32. 64, $6230D90DBE8E061B. 64,
 
-Create state-init
-$FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
-$9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
-
 Create wurst-key \ default key
 $20799FEC4B2E86C7. 64, $9F5454CDBDF51F76. 64, $EE1905FFF4B24C3D. 64, $9841F78BA1E0A3B7. 64,
 $B6C33E39C326A161. 64, $FD4E8C0EAA7C4362. 64, $839E0910FFD9401A. 64, $2785F5C10D610C68. 64,
@@ -44,6 +40,10 @@ $9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502
 Create wurst-salt \ for testing only! This is salt, should not be guessable!
 $39A157A31F7D62BC. 64, $51C3BD3BA4F4F803. 64, $21D7D0ED16A5243A. 64, $3C80195D8D80874F. 64,
 $6DF5EF6205D55E03. 64, $8859C59812F47028. 64, $F7795F00874ACED7. 64, $5FBE66944DBECB7F. 64,
+here
+$FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
+$9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
+Constant state-init
 
 Create 'rngs \ this is essentially Wurstkessel's S-box
 $EA576B15A7AFBA08. 64, $BF4888DC02131EF7. 64, $5F49A40B1DAAF5FD. 64, $7798975E5233C89D. 64, 
@@ -346,6 +346,9 @@ s" gforth" environment? [IF] 2drop
     \c    states=statesi;
     \c    rnds=rndsi;
     \c }
+    \c void rounds_setkey( unsigned char * statesi) {
+    \c    states=statesi;
+    \c }
     \c void rounds_ind(unsigned char* message, unsigned int n) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
@@ -408,6 +411,7 @@ s" gforth" environment? [IF] 2drop
     \c   return result;
     \c }
     c-function rounds_init rounds_init a a -- void
+    c-function rounds-setkey rounds_setkey a -- void
     c-function rounds rounds_ind a n -- void
     c-function rounds-decrypt rounds_decrypt a n -- void
 	[IFDEF] 64bit
@@ -615,24 +619,21 @@ Create 'round-flags
 
 \ wurstkessel rng
 
+4 Constant rngs#
+
 : rng-init
-    wurst-salt  wurst-source state# move
-    state-init  wurst-state  state# move
-    message     state# 8 * erase ;
+    wurst-salt rounds-setkey
+    message state# rngs# * erase ;
 
 $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
-
-4 Constant rngs#
 
 Variable rng-buffer state# rngs# * allot
 state# rngs# * rng-buffer !
 
 : rng-step ( -- )
     rng-init  rng-buffer cell+ rounds# rounds
-    wurst-source wurst-salt state# move
-    wurst-state  state-init state# move
     rng-buffer off ;
 
 \ buffered random numbers to output 64 bit at a time

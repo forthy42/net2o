@@ -1301,7 +1301,7 @@ Create pollfds   here pollfd %size dup allot erase
     don't-block read-a-packet +rec ;
 
 Variable tries# 0 tries# !
-50 Value try-read#
+5 Value try-read#
 
 : try-read-packetX ( -- addr u / 0 0 )
     tries# @ 0<= IF  try-read-packet-wait  try-read# tries# !  EXIT  THEN

@@ -1,10 +1,6 @@
 \ symmetric encryption and decryption
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
-: wurst-source-state> ( addr -- )  wurst-source swap state# 2* move ;
-: >wurst-source-state ( addr -- )
-    crypt( dup state# 2* 0 skip nip 0= IF ." zero key injected!" cr THEN )
-    wurst-source state# 2* move ;
 
 : wurst-key$ ( -- addr u )
     j^ dup 0= IF
@@ -14,6 +10,7 @@
     THEN ;
 
 : >wurst-key ( addr u -- )
+    wurst-source rounds-setkey \ if we use wurst-state, we should set the key
     wurst-state swap move ;
 : >wurst-source ( addr u -- )
     wurst-source state# bounds ?DO
@@ -43,7 +40,7 @@ Defer regen-ivs
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
 	    r@ clear-replies
-	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
+	    r@ dest-ivs $@ 2 pick safe/string drop rounds-setkey
 	    dup r@ regen-ivs
 	ELSE
 	    crypt( ." No code source IVS" cr )
@@ -59,7 +56,7 @@ Defer regen-ivs
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
+	    r@ dest-ivs $@ 2 pick safe/string drop rounds-setkey
 	ELSE
 	    crypt( ." No source IVS" cr )
 	THEN
@@ -219,21 +216,19 @@ Variable do-keypad
     THEN ;
 
 : regen-ivs/2 ( map -- ) >r
-    r@ dest-ivsgen @ >wurst-source-state
+    r@ dest-ivsgen @ rounds-setkey
     r@ dest-ivs $@
     r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
     2dup erase
     dup mem-rounds# encrypt-buffer 2drop
-    r@ dest-ivsgen @ wurst-source-state>
     -1 r> dest-ivslastgen xor! ;
 
 : gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
     start-diffuse
-    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
-    r> cell+ @ wurst-source-state> ;
+    r> $@ dup 2/ mem-rounds# encrypt-buffer 2drop ;
 
 : regen-ivs-all ( map -- ) >r
-    r@ dest-ivsgen @ >wurst-source-state
+    r@ dest-ivsgen @ rounds-setkey
 \    wurst-source state# 2* dump
     r> dest-ivs gen-ivs ;
 
