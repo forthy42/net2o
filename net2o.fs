@@ -1313,14 +1313,15 @@ Variable tries# 0 tries# !
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  try-read-packetX dup 0=  ELSE  0. true  THEN
+    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
-    0. try-read# 0 ?DO  2drop try-read-packet dup ?LEAVE LOOP
-    dup 0= IF  2drop try-read-packet-wait  THEN  2dup d0= ?EXIT
+\    0. try-read# 0 ?DO  2drop try-read-packet dup ?LEAVE LOOP
+\    dup 0= IF  2drop try-read-packet-wait  THEN
+    try-read-packet-wait 2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
     over packet-size over <> IF  !!size!! throw  THROW  THEN
