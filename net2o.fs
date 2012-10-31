@@ -1305,7 +1305,7 @@ Create pollfds   here pollfd %size dup allot erase
     don't-block read-a-packet +rec ;
 
 Variable tries# 0 tries# !
-5 Value try-read#
+0 Value try-read#
 
 : try-read-packetX ( -- addr u / 0 0 )
     tries# @ 0<= IF  try-read-packet-wait  try-read# tries# !  EXIT  THEN
@@ -1319,7 +1319,7 @@ Variable tries# 0 tries# !
     over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
-    0. try-read# 0 DO  2drop try-read-packet dup ?LEAVE LOOP
+    0. try-read# 0 ?DO  2drop try-read-packet dup ?LEAVE LOOP
     dup 0= IF  2drop try-read-packet-wait  THEN  2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
