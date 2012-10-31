@@ -1304,13 +1304,6 @@ Create pollfds   here pollfd %size dup allot erase
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
 
-Variable tries# 0 tries# !
-0 Value try-read#
-
-: try-read-packetX ( -- addr u / 0 0 )
-    tries# @ 0<= IF  try-read-packet-wait  try-read# tries# !  EXIT  THEN
-    -1 tries# +!  try-read-packet ;
-
 : next-packet ( -- addr u )
     send-anything? sendflag !
     BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
@@ -1319,8 +1312,6 @@ Variable tries# 0 tries# !
     over packet-size over <> !!size!! and throw ;
 
 : next-client-packet ( -- addr u )
-\    0. try-read# 0 ?DO  2drop try-read-packet dup ?LEAVE LOOP
-\    dup 0= IF  2drop try-read-packet-wait  THEN
     try-read-packet-wait 2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
@@ -1330,8 +1321,7 @@ Variable tries# 0 tries# !
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
-    timeout( ." timeout? " . send-anything? . chunks+ ? next-chunk-tick dup . cr )
-    drop ;
+    timeout( ." timeout? " . send-anything? . chunks+ ? bandwidth? . next-chunk-tick ticks-u - . cr ) ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
