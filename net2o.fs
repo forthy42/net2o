@@ -1146,7 +1146,7 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF
 	ack-toggle# j^ ack-state xor!
-	j^ extra-ns @ j^ bandwidth-tick +!
+\	j^ extra-ns @ j^ bandwidth-tick +!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " j^ ns/burst ? dest-tail$@ swap hex. hex. cr )

@@ -281,7 +281,7 @@ Variable do-keypad
 : net2o:gen-rcode-ivs ( addr u -- )
     j^ code-rmap ivs-size@ ivs-string ;
 
-: set-key ( addr -- )
+: set-key ( addr -- ) j^ 0= IF drop  ." key, no context!" cr  EXIT  THEN
     keysize 2* j^ crypto-key $!
     \ double key to get 512 bits
     j^ crypto-key $@ 2/ 2dup + swap move
