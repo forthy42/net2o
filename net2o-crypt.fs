@@ -12,6 +12,8 @@
 0 Value @key
 : !key ( key -- )  dup to @key rounds-setkey ;
 : wurst-source-state> ( addr -- )  @key swap state# 2* move ;
+: >wurst-source-state ( addr -- )  wurst-source state# 2* move
+    wurst-source !key ;
 
 : >wurst-key ( addr u -- )
     wurst-source !key \ if we use wurst-state, we should set the key
@@ -60,7 +62,7 @@ Defer regen-ivs
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop !key
+	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
 	ELSE
 	    crypt( ." No source IVS" cr )
 	THEN
@@ -229,7 +231,8 @@ Variable do-keypad
     THEN ;
 
 : regen-ivs/2 ( map -- ) >r
-    r@ dest-ivsgen @ !key
+    r@ dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr )
+    !key
     r@ dest-ivs $@
     r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
     2dup erase
