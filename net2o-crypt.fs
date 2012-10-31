@@ -14,6 +14,8 @@
 : wurst-source-state> ( addr -- )  @key swap state# 2* move ;
 : >wurst-source-state ( addr -- )  wurst-source state# 2* move
     wurst-source !key ;
+: copy-key ( -- )
+    @key ?dup-IF  >wurst-source-state  THEN ;
 
 : >wurst-key ( addr u -- )
     wurst-source !key \ if we use wurst-state, we should set the key
@@ -80,7 +82,7 @@ Defer regen-ivs
     0 to @key
     j^ IF
 	IF
-	    j^ code-map ivs>code-source?
+	    j^ code-map ivs>code-source?  copy-key
 	ELSE
 	    j^ data-map ivs>source?
 	THEN
