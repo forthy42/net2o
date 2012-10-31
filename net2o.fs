@@ -737,7 +737,7 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
-#30000000 Value slack-default# \ 30ms slack leads to backdrop of factor 2
+#20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
 #0 Value slack-min# \ minimum effect limit
 
