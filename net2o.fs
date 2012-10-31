@@ -737,7 +737,7 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
-#10000000 Value slack-default# \ 10ms slack leads to backdrop of factor 2
+#30000000 Value slack-default# \ 30ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
 #0 Value slack-min# \ minimum effect limit
 
@@ -1146,7 +1146,6 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF
 	ack-toggle# j^ ack-state xor!
-\	j^ extra-ns @ j^ bandwidth-tick +!
 	-1 j^ flybursts +!
 	j^ flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " j^ ns/burst ? dest-tail$@ swap hex. hex. cr )
