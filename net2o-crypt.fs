@@ -49,7 +49,7 @@ Defer regen-ivs
 	r@ dest-ivs @ IF
 	    r@ clear-replies
 	    r@ dest-ivs $@ 2 pick safe/string drop
-	    over r@ regen-ivs !key
+	    over r@ regen-ivs >wurst-source-state
 	ELSE
 	    crypt( ." No code source IVS" cr )
 	THEN
@@ -82,7 +82,7 @@ Defer regen-ivs
     0 to @key
     j^ IF
 	IF
-	    j^ code-map ivs>code-source?  copy-key
+	    j^ code-map ivs>code-source?
 	ELSE
 	    j^ data-map ivs>source?
 	THEN

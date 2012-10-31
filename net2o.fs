@@ -617,6 +617,10 @@ Variable init-context#
     j^ code-map $@ drop >r
     r@ dest-tail @ addr>replies r> dest-timestamps @ + ;
 
+: tag-addr ( -- addr )
+    dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
+    addr>replies r> dest-timestamps @ + ;
+
 reply buffer: dummy-reply
 
 : reply[] ( index -- addr )
@@ -1352,6 +1356,15 @@ $08 Constant cookie-val
     validated off \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
 
+: handle-data ( addr -- )
+    data( ." received: " inbuf .header cr )
+    >r inbuf packet-data r> swap move
+    +calc j^ ack-xt perform +ack ;
+
+: handle-cmd ( addr -- )
+    >r inbuf packet-data r@ swap dup >r move
+    r> r> swap queue-command ;
+
 : handle-dest ( -- ) \ handle packet to valid destinations
     ticks j^ recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
@@ -1359,15 +1372,7 @@ $08 Constant cookie-val
 	." invalid packet to " dest-addr @ hex. cr
 	IF  drop  THEN  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
-    dup 0< IF \ data packet
-	data( ." received: " inbuf .header cr )
-	drop  >r inbuf packet-data r> swap move
-	+calc j^ ack-xt perform +ack
-    ELSE \ command packet
-	drop
-	>r inbuf packet-data r@ swap dup >r move
-	r> r> swap queue-command
-    THEN ;
+    0< IF  handle-data  ELSE  handle-cmd  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr

@@ -191,10 +191,6 @@ Defer expect-reply?
 
 previous
 
-: tag-addr ( -- addr )
-    dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
-    addr>replies r> dest-timestamps @ + ;
-
 : net2o:tag-reply ( -- )  j^ 0= ?EXIT
     tag-addr >r cmdbuf$ r> 2! ;
 : net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
@@ -203,11 +199,11 @@ previous
     cmd( ." expect: " cmdbuf$ n2o:see cr )
     cmdbuf$ code-reply 2! ;
 
-: tag-addr? ( -- flag )  j^ 0= IF  false  EXIT  THEN
-    tag-addr 2@ 2dup d0<> IF
-	cmdbuf# ! code-vdest send-cmd  true
+: tag-addr? ( -- flag )
+    tag-addr 2@ dup IF
 	." Resend canned code reply" cr
-    ELSE  2drop  false  THEN ;
+	cmdbuf# ! code-vdest send-cmd true
+    ELSE  d0<>  THEN ;
 
 Variable throwcount
 
@@ -220,8 +216,13 @@ Variable throwcount
     drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
-    tag-addr?  IF  2drop  EXIT  THEN
-    j^ IF  cmd0source on  ELSE  cmd0source off  THEN
+    j^ IF
+	cmd0source on
+	tag-addr?  IF  2drop  >flyburst  EXIT  THEN
+	-1 0 tag-addr 2! \ prevent re-interpretation
+    ELSE
+	cmd0source off
+    THEN
     cmdreset  do-cmd-loop  cmd-send? ;
 
 ' cmd-loop is queue-command
