@@ -740,6 +740,7 @@ timestats buffer: stat-tuple
 #20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
 #0 Value slack-min# \ minimum effect limit
+3 4 2Constant ext-damp# \ 75% damping
 
 : slack-max# ( -- n ) j^ max-slack 64@ j^ min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
@@ -758,13 +759,15 @@ timestats buffer: stat-tuple
     s>f slack# fm/ 2e fswap f**
     ( slack# / lshift ) ;
 
+: aggressivity-rate ( slack -- slack' )
+    slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ;
+
 : slackext ( rfactor -- slack )
     j^ slackgrow 64@
     j^ window-size @ tick-init 1+ bursts# - 64*/
     64>f f* f>64
-    j^ slackgrow' 64@ 64+ 64dup 3 4 64*/ j^ slackgrow' 64!
-    64#0 64max
-    slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ; \ agressivity rate
+    j^ slackgrow' 64@ 64+ 64dup ext-damp# 64*/ j^ slackgrow' 64!
+    64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
@@ -795,7 +798,8 @@ timestats buffer: stat-tuple
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64drop dup >extra-ns ens( nip )else( drop ) ( rate-limit ) rate-stat2
+    64>r dup >extra-ns ens( nip )else( drop )
+    64r> 64dup 64+ 64min ( no more than 2*deltat ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst

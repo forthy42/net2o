@@ -11,8 +11,9 @@ exec_prefix=${prefix}
 libexecdir=$package${exec_prefix}/lib
 libccdir=$libexecdir/$VERSION/libcc-named/
 LIBRARY="curve25519.fs wurstkessel.fs"
+ANDROID=${ANDROID-~/proj/gforths/gforth-android}
 
 for i in $LIBRARY
 do
-    $ENGINE -i $KERNL -p ".:~+:~/proj/gforths/gforth-android" exboot.fs startup.fs -e ": android ;" -e "s\" `pwd`/lib/$VERSION/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $DESTDIR$libccdir\" ; is replace-rpath" $srcdir/$i -e bye
+    $ENGINE -i $KERNL -p ".:~+:$ANDROID" exboot.fs startup.fs -e ": android ;" -e "s\" `pwd`/lib/$VERSION/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $DESTDIR$libccdir\" ; is replace-rpath" $srcdir/$i -e bye
 done
