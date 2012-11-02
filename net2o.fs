@@ -728,7 +728,8 @@ timestats buffer: stat-tuple
     over  IF
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  dup ts-ticks 64@
-	    r> tick-init 1+ timestamp * - ts-ticks 64@ 64- j^ lastdeltat 64!
+	    r> tick-init 1+ timestamp * - ts-ticks 64@
+	    64dup 64-0= 0= IF  64- j^ lastdeltat 64!  ELSE  64drop 64drop  THEN
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
@@ -789,7 +790,7 @@ timestats buffer: stat-tuple
            64dup j^ last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! )
     rate( 64over 64. .j ." clientrate" cr )
-    deltat( 64dup 64. j^ lastdeltat ? .j ." deltat" cr ) ;
+    deltat( 64dup 64. j^ lastdeltat 64@ 64. .j ." deltat" cr ) ;
 
 : rate-stat2 ( rate -- )
     rate( 64dup 64. .j ." rate" cr )
