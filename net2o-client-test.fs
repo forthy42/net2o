@@ -71,6 +71,29 @@ end-code
 end-code
 
 1 client-loop .time cr
+4e
+[ELSE]
+    2e
+[THEN]
+
+@time f> [IF]
+    ." Request more big photos because it was so fast" cr
+    net2o-code
+    expect-reply
+    s" Download test 4" $, type cr
+    $10000 blocksize! $400 blockalign! stat( request-stats )
+    "data/2011-06-02_15-02-38.jpg" ".cache/photo002.jpg" n2o:copy
+    "data/2011-06-03_10-26-49.jpg" ".cache/photo003.jpg" n2o:copy
+    "data/2011-06-15_12-27-03.jpg" ".cache/photo004.jpg" n2o:copy
+    "data/2011-06-24_11-26-36.jpg" ".cache/photo005.jpg" n2o:copy
+    "data/2011-06-27_19-33-04.jpg" ".cache/photo006.jpg" n2o:copy
+    "data/2011-06-27_19-55-48.jpg" ".cache/photo007.jpg" n2o:copy
+    "data/2011-06-28_06-54-09.jpg" ".cache/photo008.jpg" n2o:copy
+    n2o:done
+    send-chunks
+end-code
+
+1 client-loop .time cr
 [THEN]
 
 ." IP packets send/received: " packets ? packetr ? cr

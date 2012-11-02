@@ -1,4 +1,4 @@
-set terminal wxt font ",12" size 1280, 720
+set terminal qt font ",12" size 1280, 720
 set style data lines
 set grid #lc rgbcolor "green"
 set title "Transfer" #textcolor rgbcolor "green"
