@@ -748,7 +748,9 @@ timestats buffer: stat-tuple
 
 : net2o:set-flyburst ( -- bursts )
     j^ rtdelay 64@ 64>n rt-bias# + j^ ns/burst 64@ 64>n / flybursts# +
-    bursts( dup . .j ." flybursts " j^ rtdelay 64@ 64. ." rtdelay" cr ) dup j^ flyburst ! ;
+    bursts( dup . .j ." flybursts "
+    j^ rtdelay 64@ 64. j^ ns/burst 64@ 64. ." rtdelay" cr )
+    dup j^ flyburst ! ;
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
