@@ -729,6 +729,7 @@ timestats buffer: stat-tuple
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  dup ts-ticks 64@
 	    r> tick-init 1+ timestamp * - ts-ticks 64@
+	    deltat( 2dup - abs 1000000000 > IF ." Excessive deltat " 2dup . . cr THEN )
 	    64dup 64-0= 0= IF  64- j^ lastdeltat 64!  ELSE  64drop 64drop  THEN
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
