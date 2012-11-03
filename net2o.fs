@@ -706,10 +706,21 @@ timestats buffer: stat-tuple
 : >offset ( addr map -- addr' flag ) >r
     r@ dest-vaddr @ - dup r> dest-size @ u< ;
 
+#5000000 Value rt-bias# \ 5ms additional flybursts allowed
+
+: net2o:set-flyburst ( -- bursts )
+    j^ rtdelay 64@ 64>n rt-bias# + j^ ns/burst 64@ 64>n / flybursts# +
+    bursts( dup . .j ." flybursts "
+    j^ rtdelay 64@ 64. j^ ns/burst 64@ 64. ." rtdelay" cr )
+    dup j^ flyburst ! ;
+: net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
+    0= IF  bursts( .j ." start bursts" cr ) THEN ;
+
 : >flyburst ( -- )
     j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
     0= IF  j^ recv-tick 64@ ticks-init
 	bursts( .j ." restart bursts " j^ flybursts ? cr )
+	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
 : >timestamp ( time addr -- ts-array index / 0 0 )
@@ -739,20 +750,11 @@ timestats buffer: stat-tuple
 
 #40000000 Value slack-default# \ 40ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
-#5000000 Value rt-bias# \ 5ms additional flybursts allowed
 #0 Value slack-min# \ minimum effect limit
 1 4 2Constant ext-damp# \ 75% damping
 
 : slack-max# ( -- n ) j^ max-slack 64@ j^ min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
-
-: net2o:set-flyburst ( -- bursts )
-    j^ rtdelay 64@ 64>n rt-bias# + j^ ns/burst 64@ 64>n / flybursts# +
-    bursts( dup . .j ." flybursts "
-    j^ rtdelay 64@ 64. j^ ns/burst 64@ 64. ." rtdelay" cr )
-    dup j^ flyburst ! ;
-: net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
-    0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : >slack-exp ( -- rfactor )
     j^ lastslack 64@ j^ min-slack 64@ 64- 64>n
