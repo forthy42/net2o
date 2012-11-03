@@ -683,8 +683,7 @@ timestats buffer: stat-tuple
     64over 64- j^ rtdelay 64min! ;
 
 : timestat ( client serv -- )
-    64dup 64-0=     IF  64drop 64drop  EXIT  THEN
-    64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
+    64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( over . dup . ." acktime" cr )
     >rtdelay  64- 64dup j^ lastslack 64!
     j^ lastdeltat 64@ delta-damp# 64rshift
@@ -693,8 +692,7 @@ timestats buffer: stat-tuple
     j^ max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
-    64dup 64-0=     IF  64drop 64drop  EXIT  THEN
-    64dup 64#-1 64= IF  64drop 64drop  EXIT  THEN
+    64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     64- j^ lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
     j^ slackgrow 64! ;
 
@@ -729,7 +727,6 @@ timestats buffer: stat-tuple
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  dup ts-ticks 64@
 	    r> tick-init 1+ timestamp * - ts-ticks 64@
-	    deltat( 2dup - abs 1000000000 > IF ." Excessive deltat " 2dup . . cr THEN )
 	    64dup 64-0<= >r 64over 64-0<= r> or
 	    IF  64drop 64drop  ELSE  64- j^ lastdeltat 64!  THEN
 	ELSE  +  THEN
@@ -1082,6 +1079,7 @@ Variable no-ticks
 \    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + >r ticks r> ts-ticks
     dup 64@ 64-0= 0= IF  64on 64drop  EXIT  THEN 64! ;
+\ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
     j^ data-map $@ drop >r
