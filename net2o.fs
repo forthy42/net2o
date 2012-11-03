@@ -739,6 +739,7 @@ timestats buffer: stat-tuple
 
 #40000000 Value slack-default# \ 40ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
+#5000000 Value rt-bias# \ 5ms additional flybursts allowed
 #0 Value slack-min# \ minimum effect limit
 1 4 2Constant ext-damp# \ 75% damping
 
@@ -746,7 +747,7 @@ timestats buffer: stat-tuple
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : net2o:set-flyburst ( -- bursts )
-    j^ rtdelay 64@ 64>n j^ ns/burst 64@ 64>n / flybursts# +
+    j^ rtdelay 64@ 64>n rt-bias# + j^ ns/burst 64@ 64>n / flybursts# +
     bursts( dup . .j ." flybursts" cr ) dup j^ flyburst ! ;
 : net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
