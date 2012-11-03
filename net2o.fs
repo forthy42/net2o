@@ -748,10 +748,11 @@ timestats buffer: stat-tuple
     over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
-#40000000 Value slack-default# \ 40ms slack leads to backdrop of factor 2
+#20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
 #0 Value slack-min# \ minimum effect limit
-1 4 2Constant ext-damp# \ 75% damping
+3 4 2Constant ext-damp# \ 75% damping
+5 2 2Constant delta-t-grow# \ 4 times delta-t
 
 : slack-max# ( -- n ) j^ max-slack 64@ j^ min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
@@ -804,7 +805,7 @@ timestats buffer: stat-tuple
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r dup >extra-ns ens( nip )else( drop )
-    64r> 64dup 64+ 64min ( no more than 2*deltat ) rate-stat2
+    64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
