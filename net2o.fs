@@ -26,6 +26,7 @@ require debugging.fs
 
 \ helper words
 
+[IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
     dup negate >r  dup 0> IF
@@ -33,6 +34,7 @@ require debugging.fs
     ELSE
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
+[THEN]
 
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;
 : xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
@@ -124,17 +126,20 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ defined exceptions
 
-s" gap in file handles"          exception Constant !!gap!!
-s" invalid file id"              exception Constant !!fileid!!
-s" could not send"               exception Constant !!send!!
-s" wrong packet size"            exception Constant !!size!!
-s" no power of two"              exception Constant !!pow2!!
-s" unimplemented net2o function" exception Constant !!function!!
-s" too many commands"            exception Constant !!commands!!
-s" string does not fit"          exception Constant !!stringfit!!
-s" ivs must be 64 bytes"         exception Constant !!ivs!!
-s" key+pubkey must be 32 bytes"  exception Constant !!keysize!!
-s" connection attempt timed out" exception Constant !!contimeout!!
+: throwcode ( addr u -- )  exception Create , DOES> @ and throw ;
+
+s" gap in file handles"          throwcode !!gap!!
+s" invalid file id"              throwcode !!fileid!!
+s" could not send"               throwcode !!send!!
+s" wrong packet size"            throwcode !!size!!
+s" no power of two"              throwcode !!pow2!!
+s" unimplemented net2o function" throwcode !!function!!
+s" too many commands"            throwcode !!commands!!
+s" string does not fit"          throwcode !!stringfit!!
+s" ivs must be 64 bytes"         throwcode !!ivs!!
+s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
+s" connection attempt timed out" throwcode !!contimeout!!
+s" no key file"                  throwcode !!nokey!!
 
 \ Create udp socket
 
@@ -856,8 +861,6 @@ $20 Value mask-bits#
 
 \ file handling
 
-: ?nogap ( flag -- )  !!gap!! and throw ;
-
 \ file states
 
 begin-structure file-state-struct
@@ -875,9 +878,9 @@ file-state-struct buffer: new-file-state
 : id>addr ( id -- addr remainder )  ?state
     >r j^ file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
-    id>addr file-state-struct < !!fileid!! and throw ;
+    id>addr file-state-struct < !!fileid!! ;
 : state-addr ( id -- addr )  ?state
-    id>addr dup 0< ?nogap
+    id>addr dup 0< !!gap!!
     0= IF  drop new-file-state file-state-struct j^ file-state $+!
 	j^ file-state $@ + file-state-struct -  THEN ;
 
@@ -1319,14 +1322,13 @@ Create pollfds   here pollfd %size dup allot erase
     BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! and throw ;
+    over packet-size over <> !!size!! ;
 
 : next-client-packet ( -- addr u )
     try-read-packet-wait 2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
-    over packet-size over <> IF  !!size!! throw  THROW  THEN
-    \ ELSE  hex.  ." Unknown source"  0 0  THEN
+    over packet-size over <> !!size!!
 ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
@@ -1336,7 +1338,7 @@ Create pollfds   here pollfd %size dup allot erase
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
 
-: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! and throw ;
+: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
 Variable validated
 

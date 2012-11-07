@@ -266,7 +266,7 @@ Variable do-keypad
 : ivs-string ( addr u n addr -- )
     >r r@ $!len
     >wurst-key-ivs
-    state# <> !!ivs!! and throw >wurst-source'
+    state# <> !!ivs!! >wurst-source'
     r> gen-ivs ;
 
 : ivs-size@ ( map -- n addr ) $@ drop >r
@@ -288,7 +288,7 @@ Variable do-keypad
     ( ." set key to:" j^ crypto-key $@ dump ) ;
 
 : ?keysize ( u -- )
-    keysize <> !!keysize!! and throw ;
+    keysize <> !!keysize!! ;
 
 : net2o:receive-key ( addr u -- )
     j^ 0= IF  2drop EXIT  THEN

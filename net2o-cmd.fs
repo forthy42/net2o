@@ -56,7 +56,7 @@
 : net2o-crash  base @ >r hex
     buf-state 2@ swap 8 u.r 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
     r> base !  buf-state 2@ dump
-    !!function!! throw ;
+    true !!function!! ;
 
 Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
@@ -174,7 +174,7 @@ net2o-code0 previous
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
-    LOOP  !!commands!! throw ;
+    LOOP  true !!commands!! ;
 
 : cmddest ( -- dest ) cmd0source @ IF  code-vdest  ELSE  0  THEN ;
 
@@ -255,7 +255,7 @@ also net2o-base definitions
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : $, ( addr u -- )  string  >r r@ n>64 cmd,
-    r@ maxstring u>= !!stringfit!! and throw
+    r@ maxstring u>= !!stringfit!!
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>u cmd, ;
@@ -670,7 +670,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     gen-request
     +connecting
     1 client-loop
-    timeouts @ 0<= !!contimeout!! and F throw
+    timeouts @ 0<= !!contimeout!!
     -timeout ;
 
 : rewind? ( -- )
