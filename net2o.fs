@@ -1409,7 +1409,7 @@ Defer do-timeout  ' noop IS do-timeout
 #10 Value timeouts#
 
 : >next-timeout ( -- )  j^ 0= ?EXIT
-    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+ 64dup 64+
+    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
     j^ next-timeout ! ;
 : ?timeout ( -- flag )  j^ 0= IF  false  EXIT  THEN
