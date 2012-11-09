@@ -1408,10 +1408,12 @@ Defer do-timeout  ' noop IS do-timeout
 #200000000 Value timeout-max#
 #10 Value timeouts#
 
-: >next-timeout ( -- )
-    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+ timeout-max# n>64 64min 64+
+: >next-timeout ( -- )  j^ 0= ?EXIT
+    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+ 64dup 64+
+    timeout-max# n>64 64min 64+
     j^ next-timeout ! ;
-: ?timeout ( -- flag )  j^ next-timeout 64@ 64-0= IF  false  EXIT  THEN
+: ?timeout ( -- flag )  j^ 0= IF  false  EXIT  THEN
+    j^ next-timeout 64@ 64-0= IF  false  EXIT  THEN
     ticks j^ next-timeout 64@ 64- 64-0>= ;
 : reset-timeout  timeouts# timeouts ! >next-timeout ; \ 2s timeout
 
@@ -1433,7 +1435,8 @@ Variable requests
     BEGIN  next-client-packet dup
 	IF    client-event +calc1 reset-timeout
 	ELSE  2drop ?timeout IF
-		j^ rtdelay 64@ 64dup 64+ j^ rtdelay 64!
+		j^ rtdelay 64@ 64dup max-int64 64= 0=
+		IF  64dup 64+ j^ rtdelay 64!  ELSE  64drop  THEN
 		>next-timeout do-timeout -1 timeouts +!
 	    THEN  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
