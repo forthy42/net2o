@@ -292,7 +292,8 @@ also net2o-base definitions
 17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  -1 requests +! ;
 19 net2o: set-j^ ( addr -- ) 64>n own-crypt? IF
-	to j^  1 j^ context-state !@ 0= ?EXIT
+	to j^  ticks j^ recv-tick 64! \ time stamp of arrival
+	1 j^ context-state !@ 0= ?EXIT
     ELSE  drop  THEN
     0. buf-state 2!  0 to j^ ;
 
@@ -341,7 +342,7 @@ net2o-base
 37 net2o: >time-offset ( n -- )  j^ time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset j^ time-offset 64! ;
 38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
-39 net2o: set-rtdelay ( time -- )  j^ recv-tick @ swap - j^ rtdelay ! ;
+39 net2o: set-rtdelay ( time -- )  j^ recv-tick 64@ 64swap 64- j^ rtdelay 64min! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     map@ cookie+ 64= cookie-val and validated or! ;
@@ -539,6 +540,9 @@ also net2o-base
 
 0 Value request-stats?
 
+: update-rtdelay ( -- )
+    ticks lit, push-lit push' set-rtdelay ;
+    
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!
     j^ expected off  j^ received off
@@ -556,7 +560,8 @@ also net2o-base
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
 	msg( ." Block transfer done!" F cr )
-	save-all-blocks  rewind-transfer  expect-reply
+	save-all-blocks  rewind-transfer
+	expect-reply
     THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
@@ -658,7 +663,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : connecting-timeout ( -- ) ." connecting timeout" F cr
     gen-request ;
 : connected-timeout ( -- )  ." connected timeout" F cr
-    cmd-resend? transfer-keepalive? ;
+    cmd-resend? transfer-keepalive? update-rtdelay ;
 
 : +connecting   ['] connecting-timeout j^ timeout-xt ! ;
 : +resend       ['] connected-timeout  j^ timeout-xt ! ;

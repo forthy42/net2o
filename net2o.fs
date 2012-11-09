@@ -183,7 +183,7 @@ Variable packetr
 Variable packets
 
 2Variable ptimeout
-#200000000 Value poll-timeout# \ 200ms
+#10000000 Value poll-timeout# \ 10ms, don't sleep too long
 poll-timeout# 0 ptimeout 2!
 
 inbuf'  Constant inbuf
@@ -410,6 +410,7 @@ field: req-datasize
 field: window-size \ packets in flight
 64field: bandwidth-tick \ ns
 64field: next-tick \ ns
+64field: next-timeout \ ns
 64field: rtdelay \ ns
 64field: lastack \ ns
 field: flyburst
@@ -1398,14 +1399,26 @@ $08 Constant cookie-val
     IF    handle-packet
     ELSE  ( drop packet )  THEN ;
 
+\ timeout handling
+
+Variable timeouts
+
+Defer do-timeout  ' noop IS do-timeout
+
+#200000000 Value timeout-max#
+#10 Value timeouts#
+
+: >next-timeout ( -- )
+    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+ timeout-max# n>64 64min 64+
+    j^ next-timeout ! ;
+: ?timeout ( -- flag )  j^ next-timeout 64@ 64-0= IF  false  EXIT  THEN
+    ticks j^ next-timeout 64@ 64- 64-0>= ;
+: reset-timeout  timeouts# timeouts ! >next-timeout ; \ 2s timeout
+
 \ loops for server and client
 
 0 Value server?
 Variable requests
-Variable timeouts
-: reset-timeout  20 timeouts ! ; \ 2s timeout
-
-Defer do-timeout  ' noop IS do-timeout
 
 : server-loop-nocatch ( -- )
     BEGIN  server-event +calc1  AGAIN ;
@@ -1419,7 +1432,10 @@ Defer do-timeout  ' noop IS do-timeout
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
 	IF    client-event +calc1 reset-timeout
-	ELSE  2drop do-timeout -1 timeouts +!  THEN
+	ELSE  2drop ?timeout IF
+		j^ rtdelay 64@ 64dup 64+ j^ rtdelay 64!
+		>next-timeout do-timeout -1 timeouts +!
+	    THEN  THEN
      timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
