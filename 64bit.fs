@@ -11,6 +11,7 @@ cell 8 = [IF]
     ' dup Alias 64dup
     ' over Alias 64over
     ' drop Alias 64drop
+    ' nip Alias 64nip
     ' swap Alias 64swap
     ' + Alias 64+
     ' - Alias 64-
@@ -40,6 +41,7 @@ cell 8 = [IF]
     ' 0= Alias 64-0=
     ' 0>= Alias 64-0>=
     ' 0<= Alias 64-0<=
+    ' < Alias 64<
     ' on Alias 64on
     ' +! Alias 64+!
     ' min Alias 64min
@@ -52,6 +54,7 @@ cell 8 = [IF]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
     ' 2drop alias 64drop
+    ' 2nip alias 64nip
     ' 2dup Alias 64dup
     ' 2over Alias 64over
     ' 2swap Alias 64swap
@@ -90,6 +93,7 @@ cell 8 = [IF]
     ' d0= Alias 64-0=
     ' d0>= Alias 64-0>=
     ' d0<= Alias 64-0<=
+    ' d< Alias 64<
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
     ' dmin Alias 64min

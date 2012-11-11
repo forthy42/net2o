@@ -675,7 +675,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     gen-request
     +connecting
     1 client-loop
-    timeouts @ 0<= !!contimeout!!
+    j^ timeouts @ 0<= !!contimeout!!
     -timeout ;
 
 : rewind? ( -- )

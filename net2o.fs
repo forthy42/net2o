@@ -411,6 +411,7 @@ field: window-size \ packets in flight
 64field: bandwidth-tick \ ns
 64field: next-tick \ ns
 64field: next-timeout \ ns
+field: timeouts
 64field: rtdelay \ ns
 64field: lastack \ ns
 field: flyburst
@@ -1401,21 +1402,31 @@ $08 Constant cookie-val
 
 \ timeout handling
 
-Variable timeouts
-
 Defer do-timeout  ' noop IS do-timeout
 
 #200000000 Value timeout-max#
 #10 Value timeouts#
 
+Variable timeout-tasks s" " timeout-tasks $!
+Variable timeout-task
+
+: j+timeout ( -- )
+    timeout-tasks $@ bounds ?DO  I @ j^ = IF  UNLOOP  EXIT  THEN
+    cell +LOOP
+    j^ timeout-task !  timeout-task cell timeout-tasks $+! ;
 : >next-timeout ( -- )  j^ 0= ?EXIT
     j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
-    j^ next-timeout ! ;
-: ?timeout ( -- flag )  j^ 0= IF  false  EXIT  THEN
-    j^ next-timeout 64@ 64-0= IF  false  EXIT  THEN
-    ticks j^ next-timeout 64@ 64- 64-0>= ;
-: reset-timeout  timeouts# timeouts ! >next-timeout ; \ 2s timeout
+    j^ next-timeout !  j+timeout ;
+: 64min? ( a b -- min flag )
+    64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
+: next-timeout? ( -- time context ) 0 max-int64
+    timeout-tasks $@ bounds ?DO
+	I @ next-timeout 64@ 64min? IF  nip I @ swap  THEN
+    cell +LOOP  swap ;
+: ?timeout ( -- context/0 )
+    ticks next-timeout? >r 64- 64-0>= r> and ;
+: reset-timeout  timeouts# j^ timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
 
@@ -1434,12 +1445,13 @@ Variable requests
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
 	IF    client-event +calc1 reset-timeout
-	ELSE  2drop ?timeout IF
+	ELSE  2drop ?timeout ?dup-IF  to j^
 		j^ rtdelay 64@ 64dup max-int64 64= 0=
 		IF  64dup 64+ j^ rtdelay 64!  ELSE  64drop  THEN
-		>next-timeout do-timeout -1 timeouts +!
+		ticks j^ recv-tick 64! >next-timeout
+		do-timeout -1 j^ timeouts +!
 	    THEN  THEN
-     timeouts @ 0<=  requests @ 0= or  UNTIL ;
+     j^ timeouts @ 0<=  requests @ 0= or  UNTIL ;
 
 : client-loop ( requests -- )  requests !  reset-timeout  false to server?
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
