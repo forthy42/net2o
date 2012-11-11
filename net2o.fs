@@ -448,8 +448,9 @@ begin-structure timestamp
 end-structure
 
 begin-structure reply
-field: reply-offset
 field: reply-len
+field: reply-offset
+field: reply-dest
 end-structure
 
 begin-structure timestats
@@ -691,7 +692,7 @@ timestats buffer: stat-tuple
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    timing( over . dup . ." acktime" cr )
+    timing( 64over 64. 64dup 64. ." acktime" cr )
     >rtdelay  64- 64dup j^ lastslack 64!
     j^ lastdeltat 64@ delta-damp# 64rshift
     64dup j^ min-slack 64+! 64negate j^ max-slack 64+!
@@ -1066,7 +1067,7 @@ Variable code-packet
     ticks j^ bandwidth-tick 64@ 64max j^ next-tick 64! ;
 
 : sendX ( addr taddr target n -- )
-    >r set-dest  r> >send  set-flags  bandwidth+  send-packet
+    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
    net2o:update-key ;
 
 \ send chunk
@@ -1371,7 +1372,10 @@ $08 Constant cookie-val
     r> r> swap queue-command ;
 
 : handle-dest ( -- ) \ handle packet to valid destinations
-    ticks j^ recv-tick 64! \ time stamp of arrival
+    ticks
+    timing( dest-addr @ hex.
+            64dup  j^ time-offset 64@ 64- 64. ." recv timing" cr )
+    j^ recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr @ hex. cr

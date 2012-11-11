@@ -53,16 +53,17 @@
 \ commands come in junks of 8 bytes
 \ Commands are zero-terminated
 
-: net2o-crash  base @ >r hex
+: net2o-crash hex[
     buf-state 2@ swap 8 u.r 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
-    r> base !  buf-state 2@ dump
+    ]hex  buf-state 2@ dump
     true !!function!! ;
 
 Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 
 : cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
-: (net2o-see) ( addr -- )  @ 2 cells - body> >name .name ;
+: (net2o-see) ( addr -- )  @
+    dup ['] net2o-crash <> IF  2 cells - body>  THEN  >name .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
@@ -169,7 +170,7 @@ Variable cmd0buf#
 net2o-code0 previous
 
 : send-cmd ( addr dest -- )
-    cmd( ." send: " cmdbuf$ n2o:see cr )
+    cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
@@ -192,23 +193,23 @@ Defer expect-reply?
 previous
 
 : net2o:tag-reply ( -- )  j^ 0= ?EXIT
-    tag-addr >r cmdbuf$ r> 2! ;
+    tag-addr >r cmdbuf$ r@ 2! code-vdest r> reply-dest !  ;
 : net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j^ 0= ?EXIT
     cmd( ." expect: " cmdbuf$ n2o:see cr )
-    cmdbuf$ code-reply 2! ;
+    cmdbuf$ code-reply 2! code-vdest code-reply reply-dest ! ;
 
 : tag-addr? ( -- flag )
-    tag-addr 2@ dup IF
+    tag-addr dup >r 2@ dup IF
 	." Resend canned code reply" cr
-	cmdbuf# ! code-vdest send-cmd true
-    ELSE  d0<>  THEN ;
+	cmdbuf# ! r> reply-dest @ send-cmd true
+    ELSE  d0<> rdrop  THEN ;
 
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( 2dup n2o:see )
+    cmd( 2dup dest-addr @ hex. n2o:see )
     sp@ >r throwcount off
     TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
 	IFERROR  1 throwcount +! dup DoError nothrow
@@ -472,7 +473,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     j^ recv-addr @ j^ recv-tick 64@ j^ time-offset 64@ 64-
-    timing( 2dup F . F . ." acktime" F cr )
+    timing( 64>r dup hex. 64r> 64dup 64. ." acktime" F cr )
     lit, ulit, ack-addrtime ;
 : net2o:b2btime
     j^ last-raddr @ j^ last-rtick 64@ 64dup 64#0 64=
@@ -638,7 +639,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     r@ dest-size @ addr>replies bounds ?DO
 	I 2@ d0<> IF
 	    timeout( ." resend: " I 2@ n2o:see F cr )
-	    I 2@ cmdbuf# ! code-vdest send-cmd
+	    I 2@ cmdbuf# ! I reply-dest @ send-cmd
 	THEN
     reply +LOOP
     rdrop ;
@@ -655,7 +656,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : transfer-keepalive? ( -- )
     j^ received @ j^ expected @ u>= ?EXIT
     timeout( .expected )
-    cmdreset  ticks lit, timeout
+    cmdreset update-rtdelay  ticks lit, timeout
     resend-toggle# j^ recv-flag xor!  false net2o:do-resend
     resend-toggle# j^ recv-flag xor!  false net2o:do-resend
     net2o:genack  cmd-send? ;
@@ -663,7 +664,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : connecting-timeout ( -- ) ." connecting timeout" F cr
     gen-request ;
 : connected-timeout ( -- )  ." connected timeout" F cr
-    cmd-resend? transfer-keepalive? update-rtdelay ;
+    cmd-resend? transfer-keepalive? ;
 
 : +connecting   ['] connecting-timeout j^ timeout-xt ! ;
 : +resend       ['] connected-timeout  j^ timeout-xt ! ;
