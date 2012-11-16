@@ -13,9 +13,6 @@ s" .cache" file-status nip #-514 = [IF]
     s" .cache" $1FF =mkdir throw
 [THEN]
 
-: ?nextarg ( -- addr u noarg-flag )
-    argc @ 1 > IF  next-arg false  ELSE  true  THEN ;
-
 !time
 
 $8000 $100000

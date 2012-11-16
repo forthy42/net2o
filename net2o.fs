@@ -26,6 +26,9 @@ require debugging.fs
 
 \ helper words
 
+: ?nextarg ( -- addr u noarg-flag )
+    argc @ 1 > IF  next-arg false  ELSE  true  THEN ;
+
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
@@ -1430,7 +1433,8 @@ Variable timeout-task
     cell +LOOP  swap ;
 : ?timeout ( -- context/0 )
     ticks next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout  timeouts# j^ timeouts ! >next-timeout ; \ 2s timeout
+: reset-timeout  j^ 0= ?EXIT
+    timeouts# j^ timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
 

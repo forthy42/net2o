@@ -346,7 +346,8 @@ net2o-base
 39 net2o: set-rtdelay ( time -- )  j^ recv-tick 64@ 64swap 64- j^ rtdelay 64min! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
-    map@ cookie+ 64= cookie-val and validated or! ;
+    map@ cookie+ 64= dup 0= IF ." cookies don't match!" cr THEN
+    cookie-val and validated or! ;
 
 \ crypto functions
 
