@@ -393,9 +393,10 @@ net2o-base
 
 \ acknowledges
 
-70 net2o: timeout ( ticks -- ) net2o:timeout ;
-71 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-72 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+70 net2o: set-tail ( addr -- ) j^ recv-high umax! ;
+71 net2o: timeout ( ticks -- ) net2o:timeout data-dest ulit, set-tail ;
+72 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+73 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 \ profiling
 
@@ -499,9 +500,9 @@ also net2o-base
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
 : receive-flag ( -- flag )  j^ recv-flag @ resend-toggle# and 0<> ;
-: data-ackbit ( flag -- addr )
+: data-ackbit ( map flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
-: data-firstack# ( flag -- addr )
+: data-firstack# ( map flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( flag -- )
     j^ 0= IF  drop EXIT  THEN  j^ data-rmap @ 0= IF  drop EXIT  THEN
@@ -600,7 +601,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : recv-high! ( -- )
     dest-addr @ j^ recv-high
-    j^ recv-high @ -1 = IF  !  ELSE  umax!  THEN ;
+    dup @ -1 = IF  !  ELSE  umax!  THEN ;
 
 : net2o:do-ack ( -- )
     dest-addr @ j^ recv-addr ! \ last received packet
@@ -646,8 +647,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     rdrop ;
 
 : .expected ( -- )
-    ." expected/received: " j^ recv-addr @ hex.
-    j^ data-rmap $@ drop receive-flag data-firstack# @ hex.
+    ." expected/received: " j^ recv-addr @ hex. j^ recv-high @ hex.
+    j^ data-rmap $@ drop
+    dup false data-firstack# @ hex. true data-firstack# @ hex.
     j^ expected @ hex. j^ received @ hex. F cr
     \ j^ data-rmap $@ drop { dmap }
     \ dmap receive-flag data-ackbit @
