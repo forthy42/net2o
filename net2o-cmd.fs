@@ -518,11 +518,11 @@ also net2o-base
     	    acks I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
 	    resend( ." resend: " dup hex. over hex. F cr )
-	    ulit, ulit, resend-mask
+	    ulit, ulit, resend-mask  drop false
 	ELSE
-	    IF  I dmap rf data-firstack# !
+	    dup IF  I dmap rf data-firstack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
-	    THEN  false
+	    THEN
 	THEN
     4 +LOOP  drop ;
 
