@@ -511,25 +511,20 @@ also net2o-base
     \ we have not yet received anything
     dmap data-lastack# @ 0< IF  drop  EXIT  THEN
     j^ recv-high @ dmap dest-vaddr @ - addr>bits
-    swap IF  mask-bits# - 0 max  THEN
-    dmap rf data-ackbit @
-    over bits>bytes dmap rf data-firstack# @ +DO
-	dup I + l@ $FFFFFFFF = IF
-	    I dmap rf data-firstack# !
-	    firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
-	ELSE
-	    LEAVE
-	THEN
-    4 +LOOP
-    over bits>bytes dmap rf data-firstack# @ +DO
-	dup I + l@ $FFFFFFFF <> IF
-    	    dup I + l@ $FFFFFFFF xor
+    swap IF  mask-bits# - 0 max  THEN  bits>bytes
+    dmap rf data-ackbit @ { acks }
+    true swap dmap rf data-firstack# @ +DO
+	acks I + l@ $FFFFFFFF <> IF
+    	    acks I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask
+	ELSE
+	    IF  I dmap rf data-firstack# !
+		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
+	    THEN  false
 	THEN
-    4 +LOOP
-    2drop ;
+    4 +LOOP  drop ;
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
