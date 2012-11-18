@@ -1011,19 +1011,21 @@ include net2o-crypt.fs
 : recv-cookie ( -- ) rmap@ cookie! ;
 
 [IFDEF] 64bit
-    : cookie+ ( addr bitmap map -- sum ) -rot >r
-	addr>ts over dest-size @ addr>ts umin
-	swap dest-cookies @ + 0
-	BEGIN  r@ 1 and IF  over @ +  THEN
-	>r cell+ r> r> 1 rshift dup >r 0= UNTIL
-	rdrop nip ;
-[ELSE]
-    : cookie+ ( addr bitmap map -- sum ) { map } >r >r
+    : cookie+ ( addr bitmap map -- sum ) { map }
+	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r
 	addr>ts map dest-size @ addr>ts umin
-	map dest-cookies @ + { addr } 64#0
-	BEGIN  r@ 1 and IF  addr 64@ 64+  THEN
+	map dest-cookies @ + 0
+	BEGIN  r@ 1 and IF  over @ cookie( 64dup .16 space ) +  THEN
+	>r cell+ r> r> 1 rshift dup >r 0= UNTIL
+	rdrop nip cookie( ." => " 64dup .16 cr ) ;
+[ELSE]
+    : cookie+ ( addr bitmap map -- sum ) { map }
+	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r >r
+	addr>ts map dest-size @ addr>ts umin
+	map dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
+	BEGIN  r@ 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
 	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r 64-0= UNTIL
-	64r> 64drop ;
+	64r> 64drop cookie( ." => " 64dup .16 space cr ) ;
 [THEN]
 
 \ send blocks of memory
@@ -1220,6 +1222,9 @@ Variable sendflag  sendflag off
 : send-anything? ( -- flag )  chunks $@len 0> ;
 
 \ rewind buffer to send further packets
+
+: clear-cookies ( -- )
+    s" " rmap@ data-ackbits-buf $! ;
 
 : rewind-timestamps ( map -- )  >r
     r@ code-flag @ IF  rdrop  EXIT  THEN

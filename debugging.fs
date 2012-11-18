@@ -45,6 +45,7 @@ debug: ack(
 debug: crypt(
 debug: ens(
 debug: key(
+debug: cookie(
 
 : +db ( "word" -- ) ' >body on ;
 : -db ( "word" -- ) ' >body off ;

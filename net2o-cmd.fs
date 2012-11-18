@@ -347,7 +347,7 @@ net2o-base
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     map@ cookie+ 64over 64over 64= 0= IF
-	." cookies don't match!" 64over 64. 64dup 64. F cr
+	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
 
@@ -492,7 +492,7 @@ also net2o-base
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@
     bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
-    s" " map data-ackbits-buf $! ;
+    clear-cookies ;
 
 \ client side acknowledge
 
@@ -577,13 +577,15 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     0 rot new-ackbit 2! new-ackbit cell+ swap +bit
     new-ackbit 2 cells rmap data-ackbits-buf $+! ;
 
-: received! ( -- )
-    j^ recv-addr @ -1 = ?EXIT
+: +cookie ( -- bit flag map )
+    j^ recv-addr @ -1 = IF  0 0 0 EXIT  THEN
     j^ data-rmap $@ drop >r
     j^ recv-addr @ r@ dest-vaddr @ - addr>bits dup r@ +ackbit
     \ set bucket as received in current polarity bitmap
-    r@ receive-flag data-ackbit @ over +bit@
-    r> swap >r >r
+    r@ receive-flag data-ackbit @ over +bit@ r> ;
+
+: received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
+    swap >r >r
     dup r@ data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup r@ data-lastack# !@
@@ -607,6 +609,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     cmd0source on  cmdreset
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
+    +cookie
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     received!  cmd-send?
