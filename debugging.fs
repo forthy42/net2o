@@ -18,6 +18,8 @@ true [IF]
     : )else(  ]] ) ( [[ ; immediate
 [THEN]
 
+: nodebug: ['] ( Alias immediate ;
+	
 : hex[ ]] base @ >r hex [[ ; immediate
 : ]hex ]] r> base ! [[ ; immediate
 : x~~ ]] hex[ ~~ ]hex [[ ; immediate
@@ -45,7 +47,7 @@ debug: ack(
 debug: crypt(
 debug: ens(
 debug: key(
-debug: cookie(
+nodebug: cookie(
 
 : +db ( "word" -- ) ' >body on ;
 : -db ( "word" -- ) ' >body off ;
