@@ -54,7 +54,7 @@
 \ Commands are zero-terminated
 
 : net2o-crash hex[
-    buf-state 2@ swap 8 u.r 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
+    buf-state 2@ swap 8 u.r space 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
     ]hex  buf-state 2@ dump
     true !!function!! ;
 
@@ -204,6 +204,7 @@ previous
     tag-addr dup >r 2@ dup IF
 	." Resend canned code reply" cr
 	cmdbuf# ! r> reply-dest @ send-cmd true
+	1 packets2 +!
     ELSE  d0<> rdrop  THEN ;
 
 Variable throwcount
@@ -219,7 +220,7 @@ Variable throwcount
 : cmd-loop ( addr u -- )
     j^ IF
 	cmd0source on
-	tag-addr?  IF  2drop  >flyburst  EXIT  THEN
+	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
 	-1 0 tag-addr 2! \ prevent re-interpretation
     ELSE
 	cmd0source off
@@ -403,7 +404,7 @@ net2o-base
 \ profiling
 
 80 net2o: !time ( -- ) init-timer ;
-81 net2o: .time ( -- ) .times ;
+81 net2o: .time ( -- ) .packets .times ;
 
 : rewind ( -- )  j^ data-rmap $@ drop dest-round @ 1+
     dup net2o:rewind-receiver ulit, rewind-sender ;
@@ -516,7 +517,9 @@ also net2o-base
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
     dmap rf data-ackbit @ { acks }
     true swap dmap rf data-firstack# @ +DO
-	acks I + l@ $FFFFFFFF <> IF
+	ack( ." acks: " dmap hex. rf F . acks hex. I hex. )
+	acks I + l@ ack( dup hex. F cr )
+	$FFFFFFFF <> IF
     	    acks I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
 	    resend( ." resend: " dup hex. over hex. F cr )
@@ -582,7 +585,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     j^ data-rmap $@ drop >r
     j^ recv-addr @ r@ dest-vaddr @ - addr>bits dup r@ +ackbit
     \ set bucket as received in current polarity bitmap
-    r@ receive-flag data-ackbit @ over +bit@ r> ;
+    r@ receive-flag data-ackbit @ over +bit@
+    dup IF  1 packetr2 +!  THEN r> ;
 
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
     swap >r >r
@@ -642,6 +646,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	I 2@ d0<> IF
 	    timeout( ." resend: " I 2@ n2o:see F cr )
 	    I 2@ cmdbuf# ! I reply-dest @ send-cmd
+	    1 packets2 +!
 	THEN
     reply +LOOP
     rdrop ;
@@ -684,9 +689,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : rewind? ( -- )
     j^ data-rmap $@ drop dest-round @ lit, rewind-sender ;
-
-: net2o:do-timeout ( -- )  j^ 0= ?EXIT  j^ timeout-xt perform ;
-' net2o:do-timeout IS do-timeout
 
 previous
 

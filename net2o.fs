@@ -184,6 +184,13 @@ end-structure
 
 Variable packetr
 Variable packets
+Variable packetr2 \ double received
+Variable packets2 \ double send
+
+: .packets ( -- )
+    ." IP packets send/received: " packets ? packetr ? cr
+    ." Duplets send/received: " packets2 ? packetr2 ? cr
+    packets off packetr off packets2 off packetr2 off ;
 
 2Variable ptimeout
 #10000000 Value poll-timeout# \ 10ms, don't sleep too long
@@ -1095,7 +1102,7 @@ Variable no-ticks
 : ts-ticks! ( addr map -- )
 \    no-ticks @ IF  2drop EXIT  THEN
     >r addr>ts r> dest-timestamps @ + >r ticks r> ts-ticks
-    dup 64@ 64-0= 0= IF  64on 64drop  EXIT  THEN 64! ;
+    dup 64@ 64-0= 0= IF  64on 64drop 1 packets2 +!  EXIT  THEN 64! ;
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
@@ -1247,7 +1254,7 @@ Variable sendflag  sendflag off
     j^ data-map $@ drop
     tuck dest-round @ +DO  dup rewind-buffer  LOOP  drop ;
 
-: net2o:rewind-receiver ( -- )
+: net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
     j^ recv-high on
     j^ data-rmap $@ drop
     tuck dest-round @ +DO  dup rewind-buffer  LOOP  rewind-ackbits ;
@@ -1414,7 +1421,7 @@ $08 Constant cookie-val
 
 \ timeout handling
 
-Defer do-timeout  ' noop IS do-timeout
+: do-timeout ( -- )  j^ 0= ?EXIT  j^ timeout-xt perform ;
 
 #200000000 Value timeout-max#
 #10 Value timeouts#

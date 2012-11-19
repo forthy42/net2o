@@ -96,8 +96,7 @@ end-code
 1 client-loop .time cr
 [THEN]
 
-." IP packets send/received: " packets ? packetr ? cr
-.times
+.packets .times
 
 net2o-code s" Download end" $, type cr .time  end-code
 
