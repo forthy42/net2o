@@ -1471,9 +1471,10 @@ Variable requests
 		ticks j^ recv-tick 64! >next-timeout
 		do-timeout -1 j^ timeouts +!
 	    THEN  THEN
-     j^ timeouts @ 0<=  requests @ 0= or  UNTIL ;
+     requests @ 0= j^ IF  j^ timeouts @ 0<=  or  THEN  UNTIL ;
 
-: client-loop ( requests -- )  requests !  reset-timeout  false to server?
+: client-loop ( requests -- )
+    requests !  reset-timeout  false to server?
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 

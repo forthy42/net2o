@@ -516,9 +516,9 @@ also net2o-base
     j^ recv-high @ dmap dest-vaddr @ - addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
     dmap rf data-ackbit @ { acks }
+    acks 0= IF ." ackzero: " dmap hex. rf F . acks hex. hex. F cr  EXIT  THEN
     true swap dmap rf data-firstack# @ +DO
-	ack( ." acks: " dmap hex. rf F . acks hex. I hex. )
-	acks I + l@ ack( dup hex. F cr )
+	acks I + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	$FFFFFFFF <> IF
     	    acks I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
@@ -669,9 +669,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     resend-toggle# j^ recv-flag xor!  false net2o:do-resend
     net2o:genack  cmd-send? ;
 
-: connecting-timeout ( -- ) ." connecting timeout" F cr
+: connecting-timeout ( -- ) F .time ."  connecting timeout" F cr
     gen-request ;
-: connected-timeout ( -- )  ." connected timeout" F cr
+: connected-timeout ( -- )  F .time ."  connected timeout" F cr
     cmd-resend? transfer-keepalive? ;
 
 : +connecting   ['] connecting-timeout j^ timeout-xt ! ;
