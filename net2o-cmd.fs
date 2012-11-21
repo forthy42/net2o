@@ -158,6 +158,9 @@ Variable cmd0buf#
 : cmdbuf#     ( -- addr ) cmd0source @ IF  j^ cmd-buf#  ELSE  cmd0buf#  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
+: n2o:see-me ( -- )
+    buf-state 2@ 2>r dest-addr @ hex. inbuf packet-data n2o:see
+    2r> buf-state 2! ;
 
 : cmdreset  cmdbuf# off ;
 
@@ -197,7 +200,7 @@ previous
 : net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j^ 0= ?EXIT
-    cmd( ." expect: " cmdbuf$ n2o:see cr )
+    cmd( ." expect: " n2o:see-me )
     cmdbuf$ code-reply 2! code-vdest code-reply reply-dest ! ;
 
 : tag-addr? ( -- flag )
@@ -278,6 +281,7 @@ previous definitions
 \ commands to read and write files
 
 also net2o-base definitions
+9 net2o: see-me ( -- ) n2o:see-me ;
 
 10 net2o: push-$    $, ;
 11 net2o: push-slit slit, ;
