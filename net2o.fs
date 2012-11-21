@@ -1080,7 +1080,7 @@ Variable code-packet
 
 : sendX ( addr taddr target n -- )
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
-   net2o:update-key ;
+    net2o:update-key ;
 
 \ send chunk
 

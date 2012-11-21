@@ -172,13 +172,15 @@ Variable cmd0buf#
 : net2o-code0  cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
-: send-cmd ( addr dest -- )
+: send-cmd ( addr dest -- )  dest-addr @ >r
     cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
-	cmdbuf# @ min-size I lshift u<= IF  I sendX  cmdreset  UNLOOP  EXIT  THEN
-    LOOP  true !!commands!! ;
+	cmdbuf# @ min-size I lshift u<= IF
+	    I sendX  cmdreset  UNLOOP
+	    r> dest-addr ! EXIT  THEN
+    LOOP  r> dest-addr !  true !!commands!! ;
 
 : cmddest ( -- dest ) cmd0source @ IF  code-vdest  ELSE  0  THEN ;
 
