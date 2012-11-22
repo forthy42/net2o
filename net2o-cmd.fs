@@ -494,7 +494,8 @@ also net2o-base
 \ ack bits, new code
 
 : ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r rot >r u>64 r> cookie+ lit, 2r> swap ulit, ulit, ack-cookies ;
+    2dup 2>r rot >r u>64 r> cookie+ cookie( ." cookie, " 64dup .16 space )
+    lit, 2r> swap cookie( 2dup hex. hex. F cr ) ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
     map data-ackbits-buf $@
@@ -569,7 +570,7 @@ also net2o-base
 : expected? ( -- )
     j^ received @ j^ expected @ tuck u>= and IF
 	msg( ." Block transfer done!" F cr )
-	save-all-blocks  rewind-transfer
+	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
     THEN ;
 
@@ -619,10 +620,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     cmd0source on  cmdreset
     inbuf 1+ c@ acks# and
     dup j^ ack-receive !@ xor >r
-    +cookie
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    received!  cmd-send?
+    +cookie  received!  cmd-send?
     r> ack-timing ;
 
 : +flow-control ['] net2o:do-ack j^ ack-xt ! ;
