@@ -1257,7 +1257,8 @@ Variable sendflag  sendflag off
 : net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
     j^ recv-high on
     j^ data-rmap $@ drop
-    tuck dest-round @ +DO  dup rewind-buffer  LOOP  rewind-ackbits ;
+    tuck dest-round @ +DO  dup rewind-buffer  LOOP
+    rewind-ackbits ( clear-cookies ) ;
 
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
@@ -1310,9 +1311,9 @@ Create pollfds   here pollfd %size dup allot erase
     2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64>n dup 0>= r> or
-    IF    0 max 0 ptimeout 2!
-    ELSE  drop poll-timeout# 0 ptimeout 2!  THEN ;
+    next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64dup 64-0>= r> or
+    IF    64>n 0 max #999999999 min 0 ptimeout 2!
+    ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN ;
 
 : poll-sock ( -- flag )
     eval-queue  clear-events  timeout!
@@ -1436,7 +1437,7 @@ Variable timeout-task
 : >next-timeout ( -- )  j^ 0= ?EXIT
     j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
-    j^ next-timeout !  j+timeout ;
+    j^ next-timeout 64!  j+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64

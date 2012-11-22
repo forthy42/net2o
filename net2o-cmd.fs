@@ -612,7 +612,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     dest-addr @ j^ recv-high
     dup @ -1 = IF  !  ELSE  umax!  THEN ;
 
-: net2o:do-ack ( -- )
+: net2o:do-ack ( -- ) 
     dest-addr @ j^ recv-addr ! \ last received packet
     recv-high!  recv-cookie
     inbuf 1+ c@ j^ recv-flag ! \ last receive flag
