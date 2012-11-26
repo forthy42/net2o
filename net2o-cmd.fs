@@ -206,12 +206,12 @@ previous
 : net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j^ 0= ?EXIT
-    cmd( ." expect: " n2o:see-me )
+    cmd( ." expect: " cmdbuf$ n2o:see )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest ! ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
-	." Resend canned code reply" cr
+	cmd( dest-addr @ hex. ." resend canned code reply " tag-addr hex. cr )
 	cmdbuf# ! r> reply-dest @ send-cmd true
 	1 packets2 +!
     ELSE  d0<> rdrop  THEN ;

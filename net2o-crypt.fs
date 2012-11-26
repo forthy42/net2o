@@ -35,9 +35,10 @@ Defer regen-ivs
     r@ code-flag @ IF
 	r@ dest-replies @
 	r@ dest-size @ 2/ addr>replies
-	r@ dest-ivslastgen @ 0= IF
+	r@ dest-ivslastgen @ IF
 	    dup >r + r>
-	THEN  erase
+	THEN  cmd( ." Clear replies " over hex. dup hex. cr )
+	erase
     THEN  rdrop ;
 
 : ivs>code-source? ( addr -- )
@@ -47,7 +48,6 @@ Defer regen-ivs
     IF
 	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
 	r@ dest-ivs @ IF
-	    r@ clear-replies
 	    r@ dest-ivs $@ 2 pick safe/string drop
 	    over r@ regen-ivs >wurst-source-state
 	ELSE
@@ -233,6 +233,7 @@ Variable do-keypad
     THEN ;
 
 : regen-ivs/2 ( map -- ) >r
+    r@ clear-replies
     r@ dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr )
     !key
     r@ dest-ivs $@

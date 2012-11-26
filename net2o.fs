@@ -1238,9 +1238,7 @@ Variable sendflag  sendflag off
     s" " rmap@ data-ackbits-buf $! ;
 
 : rewind-timestamps ( map -- )  >r
-    r@ code-flag @ IF
-	r@ dest-replies @ r> dest-size @ addr>replies erase
-    ELSE
+    r@ code-flag @ 0= IF
 	r@ dest-timestamps @ r> dest-size @ addr>ts erase
     THEN ;
 
