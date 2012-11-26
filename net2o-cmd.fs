@@ -159,7 +159,9 @@ Variable cmd0buf#
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
-    buf-state 2@ 2>r dest-addr @ hex. inbuf packet-data n2o:see
+    buf-state 2@ 2>r
+    ." see-me: " dest-addr @ hex. tag-addr dup hex. 2@ swap hex. hex. F cr
+    inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
 : cmdreset  cmdbuf# off ;
@@ -198,12 +200,14 @@ Defer expect-reply?
 previous
 
 : net2o:tag-reply ( -- )  j^ 0= ?EXIT
-    tag-addr >r cmdbuf$ r@ 2! code-vdest r> reply-dest !  ;
+    tag-addr >r cmdbuf$ r@ 2!
+    tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
+    code-vdest r> reply-dest !  ;
 : net2o:ack-reply ( index -- )  j^ 0= IF  drop EXIT  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j^ 0= ?EXIT
     cmd( ." expect: " n2o:see-me )
-    cmdbuf$ code-reply 2! code-vdest code-reply reply-dest ! ;
+    cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest ! ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
@@ -226,11 +230,14 @@ Variable throwcount
     j^ IF
 	cmd0source on
 	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
-	-1 0 tag-addr 2! \ prevent re-interpretation
     ELSE
 	cmd0source off
     THEN
-    cmdreset  do-cmd-loop  cmd-send? ;
+    cmdreset  do-cmd-loop
+    cmd0source @ IF  tag-addr dup >r 2@ d0= IF
+	    -1 0 r@ 2! \ prevent re-interpretation
+	THEN rdrop  THEN
+    cmd-send? ;
 
 ' cmd-loop is queue-command
 
@@ -647,7 +654,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : cmd-resend? ( -- )
     j^ code-map $@ drop >r
-    r@ dest-timestamps @
+    r@ dest-replies @
     r@ dest-size @ addr>replies bounds ?DO
 	I 2@ d0<> IF
 	    timeout( ." resend: " I 2@ n2o:see F cr )

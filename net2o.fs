@@ -360,6 +360,7 @@ field: dest-ivs
 field: dest-ivsgen
 field: dest-ivslastgen
 field: dest-timestamps
+field: dest-replies
 field: dest-cookies
 field: dest-tail
 end-structure
@@ -530,7 +531,7 @@ Variable mapping-addr
     dup allocatez r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
     >code-flag @ IF
-	dup addr>replies allocatez r@ dest-timestamps !
+	dup addr>replies allocatez r@ dest-replies !
     ELSE
 	dup addr>ts allocatez r@ dest-timestamps !
 	dup addr>ts allocatez r@ dest-cookies !
@@ -548,8 +549,11 @@ Variable mapping-addr
     dup allocatez r@ dest-raddr !
     dup addr>ts allocatez r@ dest-cookies !
     state# 2* allocatez r@ dest-ivsgen !
-    dup >code-flag @ IF  addr>replies  ELSE  addr>ts  THEN
-    allocatez r@ dest-timestamps !
+    dup >code-flag @ IF
+	addr>replies  allocatez r@ dest-replies !
+    ELSE
+	addr>ts       allocatez r@ dest-timestamps !
+    THEN
     drop
     j^ r@ dest-job !
     r> code-struct ;
@@ -633,18 +637,18 @@ Variable init-context#
 
 : code-reply ( -- addr )
     j^ code-map $@ drop >r
-    r@ dest-tail @ addr>replies r> dest-timestamps @ + ;
+    r@ dest-tail @ addr>replies r> dest-replies @ + ;
 
 : tag-addr ( -- addr )
     dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
-    addr>replies r> dest-timestamps @ + ;
+    addr>replies r> dest-replies @ + ;
 
 reply buffer: dummy-reply
 
 : reply[] ( index -- addr )
     j^ code-map $@ drop >r
     dup r@ dest-size @ addr>bits u<
-    IF  reply * r@ dest-timestamps @ +  ELSE  dummy-reply  THEN  rdrop ;
+    IF  reply * r@ dest-replies @ +  ELSE  dummy-reply  THEN  rdrop ;
 
 : reply-index ( -- index )
     j^ code-map $@ drop dest-tail @ addr>bits ;
@@ -986,7 +990,7 @@ file-state-struct buffer: new-file-state
 	dup n2o:slurp-block'  sum + to sum  1+
     file-state-struct +LOOP  drop sum ;
 
-: n2o:slurp-all-blocks ( -- )
+: n2o:slurp-all-blocks ( -- ) delay( 10 ms )
     BEGIN  data$@ nip  WHILE
 	n2o:slurp-all-blocks-once  0= UNTIL  THEN ;
 
@@ -1234,8 +1238,11 @@ Variable sendflag  sendflag off
     s" " rmap@ data-ackbits-buf $! ;
 
 : rewind-timestamps ( map -- )  >r
-    r@ code-flag @ IF  rdrop  EXIT  THEN
-    r@ dest-timestamps @ r> dest-size @ addr>ts erase ;
+    r@ code-flag @ IF
+	r@ dest-replies @ r> dest-size @ addr>replies erase
+    ELSE
+	r@ dest-timestamps @ r> dest-size @ addr>ts erase
+    THEN ;
 
 : rewind-buffer ( map -- ) >r
     1 r@ dest-round +!

@@ -33,7 +33,7 @@ Defer regen-ivs
 
 : clear-replies ( addr -- )  >r
     r@ code-flag @ IF
-	r@ dest-timestamps @
+	r@ dest-replies @
 	r@ dest-size @ 2/ addr>replies
 	r@ dest-ivslastgen @ 0= IF
 	    dup >r + r>
