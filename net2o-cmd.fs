@@ -214,7 +214,7 @@ previous
 	cmd( dest-addr @ hex. ." resend canned code reply " tag-addr hex. cr )
 	cmdbuf# ! r> reply-dest @ send-cmd true
 	1 packets2 +!
-    ELSE  d0<> rdrop  THEN ;
+    ELSE  d0<> -1 0 r> 2!  THEN ;
 
 Variable throwcount
 
@@ -233,11 +233,7 @@ Variable throwcount
     ELSE
 	cmd0source off
     THEN
-    cmdreset  do-cmd-loop
-    cmd0source @ IF  tag-addr dup >r 2@ d0= IF
-	    -1 0 r@ 2! \ prevent re-interpretation
-	THEN rdrop  THEN
-    cmd-send? ;
+    cmdreset  do-cmd-loop  cmd-send? ;
 
 ' cmd-loop is queue-command
 
