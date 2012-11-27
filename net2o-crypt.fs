@@ -31,15 +31,13 @@
 
 Defer regen-ivs
 
+: dest-a/b ( addr u map -- addr1 u1 )
+    dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN ;
+
 : clear-replies ( addr -- )  >r
-    r@ code-flag @ IF
-	r@ dest-replies @
-	r@ dest-size @ 2/ addr>replies
-	r@ dest-ivslastgen @ IF
-	    dup >r + r>
-	THEN  cmd( ." Clear replies " over hex. dup hex. cr )
-	erase
-    THEN  rdrop ;
+    r@ dest-replies @ r@ dest-size @ addr>replies r@ dest-a/b
+    cmd( ." Clear replies " over hex. dup hex. cr )
+    erase  rdrop ;
 
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
@@ -233,12 +231,9 @@ Variable do-keypad
     THEN ;
 
 : regen-ivs/2 ( map -- ) >r
+    r@ dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) !key
     r@ clear-replies
-    r@ dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr )
-    !key
-    r@ dest-ivs $@
-    r@ dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN
-    2dup erase
+    r@ dest-ivs $@ r@ dest-a/b 2dup erase
     dup mem-rounds# encrypt-buffer 2drop
     -1 r> dest-ivslastgen xor! ;
 
