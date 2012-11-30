@@ -901,7 +901,10 @@ file-state-struct buffer: new-file-state
     0= IF  drop new-file-state file-state-struct j^ file-state $+!
 	j^ file-state $@ + file-state-struct -  THEN ;
 
-: +expected ( n -- ) j^ expected @ tuck + dup j^ expected !
+: >blockalign ( n -- block )
+    j^ blockalign @ dup >r 1- + r> negate and ;
+
+: +expected ( n -- ) >blockalign j^ expected @ tuck + dup j^ expected !
     j^ data-rmap $@ drop >r r@ data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
 	dup I -bit  over I -bit  LOOP  2drop
@@ -916,22 +919,19 @@ file-state-struct buffer: new-file-state
 : size@ ( id -- n )  state-addr  fs-size @ ;
 : seek@ ( id -- n )  state-addr  fs-seek @ ;
 
-: >blockalign ( n -- block )
-    j^ blockalign @ dup >r 1- + r> negate and ;
-
 : save-blocks ( -- ) ?state
-    j^ data-rmap $@ drop >r r@ dest-raddr @ r@ dest-tail @ +
+    j^ data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
     j^ file-state $@ bounds ?DO
 	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
 	ELSE
 	    - j^ blocksize @ umin dup I fs-oldseek +!
-	    msg( ." flush file <" 2dup swap hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." >: " dup . cr )
+	    msg( ." flush file <" 2dup swap map dest-raddr @ - hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." > " cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
 	    THEN  >blockalign +
 	THEN
     file-state-struct +LOOP
-    r@ dest-raddr @ - r> dest-tail ! ;
+    map dest-raddr @ - map dest-tail ! ;
 
 : save-all-blocks ( -- )  j^ data-rmap $@ drop >r 
     BEGIN
@@ -959,7 +959,8 @@ file-state-struct buffer: new-file-state
 : n2o:slurp-block ( id -- nextseek ) dup { id }
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
     data$@ j^ blocksize @ umin
-    msg( ." Read <" id . 2dup swap hex. hex. ." >" cr )
+    msg( ." Read <" 2dup swap
+         j^ data-map $@ drop dest-raddr @ - hex. hex. id 0 .r ." >" cr )
     r@ fs-fid @ read-file throw
     dup >blockalign /data +
     dup r> fs-seek ! ;
@@ -967,9 +968,9 @@ file-state-struct buffer: new-file-state
 : n2o:slurp-block' ( id -- delta ) dup { id }
     id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
     data$@ j^ blocksize @ umin
-    msg( ." Read <" id . over hex. )
+    msg( ." Read <" over j^ data-map $@ drop dest-raddr @ - hex. )
     r@ fs-fid @ read-file throw
-    msg( dup hex. ." >" cr )
+    msg( dup hex. id 0 .r ." >" cr )
     dup >blockalign /data +
     dup r> fs-seek !@ - ;
 

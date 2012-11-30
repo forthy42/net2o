@@ -1,16 +1,6 @@
 \ debugging aids
 
-: else( ['] noop assert-canary ; immediate
-
-true [IF]
-    : debug-does>  DOES>  @
-	IF ['] noop assert-canary  ELSE  postpone (  THEN ;
-    : debug: ( -- ) Create false ,
-	debug-does>  COMPILE>  >body
-	]] Literal @ IF [[ [: ]] THEN [[ ;] assert-canary ;
-    : )else(  ]] ) ( [[ ;
-    compile> drop 2>r ]] ELSE [[ 2r> ;
-[ELSE]
+false [IF]
     : debug: ( -- )  Create immediate false ,
       DOES>
 	@ IF  ['] noop assert-canary
@@ -51,25 +41,7 @@ debug: cookie(
 debug: delay( \ used to add delays at performance critical places
 debug: tag(
 
-: +db ( "word" -- ) ' >body on ;
-: -db ( "word" -- ) ' >body off ;
-
 +db ens(
-
-Variable debug-eval
-
-: +-? ( addr u -- flag )  0= IF  drop  EXIT  THEN
-    c@ ',' - abs 1 = ; \ hehe, ',' is in the middle between '+' and '-'
-
-: +debug ( -- )
-    BEGIN  argc @ 1 > WHILE
-	    1 arg +-?  WHILE
-		1 arg debug-eval $!
-		s" db " debug-eval 1 $ins
-		s" (" debug-eval $+!
-		debug-eval $@ evaluate
-		shift-args
-	REPEAT  THEN ;
 
 \ timing measurements
 
