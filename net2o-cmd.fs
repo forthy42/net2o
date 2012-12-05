@@ -388,20 +388,22 @@ net2o-base
     2*64>n track( 2dup ." file <" 0 .r ." > size: " F . F cr ) size! ;
 62 net2o: track-seek ( seek id -- )
     2*64>n track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seek! ;
-63 net2o: open-tracked-file ( addr u mode id -- )
+63 net2o: track-limit ( seek id -- )
+    2*64>n track( 2dup ." file <" 0 .r ." > limit: " F . F cr ) limit! ;
+64 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
     r@ id>file F file-size throw [IFDEF] 64bit drop [THEN] lit,
     r> ulit, track-size ;
-64 net2o: slurp-tracked-block ( id -- )
-    64>n dup >r n2o:slurp-block ulit, r> ulit, track-seek ;
-65 net2o: slurp-tracked-blocks ( idbits -- )
+65 net2o: slurp-tracked-block ( id -- )
+    64>n dup >r n2o:slurp-block ulit, r> ulit, track-limit ;
+66 net2o: slurp-tracked-blocks ( idbits -- )
     64>n dup >r n2o:slurp-blocks
-    r> [: swap ulit, ulit, track-seek ;] n2o:track-seeks ;
-66 net2o: slurp-all-tracked-blocks ( -- )
+    r> [: swap ulit, ulit, track-limit ;] n2o:track-seeks ;
+67 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
-    [: ulit, ulit, track-seek ;] n2o:track-all-seeks ;
-67 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
-68 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
+    [: ulit, ulit, track-limit ;] n2o:track-all-seeks ;
+68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
+69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
 \ acknowledges
 

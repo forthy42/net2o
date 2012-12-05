@@ -883,7 +883,7 @@ $20 Value mask-bits#
 begin-structure file-state-struct
 field: fs-size
 field: fs-seek
-field: fs-oldseek
+field: fs-limit
 field: fs-fid
 end-structure
 
@@ -912,19 +912,23 @@ file-state-struct buffer: new-file-state
     firstack( ." expect more data" cr ) ;
 
 : size! ( n id -- )  over j^ total    +!  state-addr >r
-    r@ fs-size !  0 r@ fs-oldseek ! 0 r> fs-seek ! ;
-: seek! ( n id -- )  over >r state-addr  fs-seek !@ r> swap -
-    +expected ;
+    r@ fs-size !  0 r@ fs-limit ! 0 r> fs-seek ! ;
+: seek! ( n id -- )   state-addr >r
+    r@ fs-size @ umin dup r@ fs-seek ! ;
+: limit! ( n id -- )  state-addr >r
+    r@ fs-size @ umin dup r@ fs-limit !
+    r> fs-seek @ - +expected ;
 
-: size@ ( id -- n )  state-addr  fs-size @ ;
-: seek@ ( id -- n )  state-addr  fs-seek @ ;
+: size@  ( id -- n )  state-addr  fs-size @ ;
+: seek@  ( id -- n )  state-addr  fs-seek @ ;
+: limit@ ( id -- n )  state-addr  fs-seek @ ;
 
 : save-blocks ( -- ) ?state
     j^ data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
     j^ file-state $@ bounds ?DO
-	I fs-seek @ I fs-oldseek @ 2dup = IF  2drop
+	I fs-limit @ I fs-seek @ 2dup u<= IF  2drop
 	ELSE
-	    - j^ blocksize @ umin dup I fs-oldseek +!
+	    - j^ blocksize @ umin dup I fs-seek +!
 	    msg( ." flush file <" 2dup swap map dest-raddr @ - hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." > " cr )
 	    I fs-fid @ IF
 		2dup I fs-fid @ write-file throw
@@ -957,22 +961,22 @@ file-state-struct buffer: new-file-state
     ?state  id>addr?  fs-fid dup @ ?dup-IF  close-file throw  THEN  off ;
 
 : n2o:slurp-block ( id -- nextseek ) dup { id }
-    id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
+    id>addr? >r r@ fs-limit @ dup 0 r@ fs-fid @ reposition-file throw
     data$@ j^ blocksize @ umin
     msg( ." Read <" 2dup swap
          j^ data-map $@ drop dest-raddr @ - hex. hex. id 0 .r ." >" cr )
     r@ fs-fid @ read-file throw
     dup >blockalign /data +
-    dup r> fs-seek ! ;
+    dup r> fs-limit ! ;
 
 : n2o:slurp-block' ( id -- delta ) dup { id }
-    id>addr? >r r@ fs-seek @ dup 0 r@ fs-fid @ reposition-file throw
+    id>addr? >r r@ fs-limit @ dup 0 r@ fs-fid @ reposition-file throw
     data$@ j^ blocksize @ umin
     msg( ." Read <" over j^ data-map $@ drop dest-raddr @ - hex. )
     r@ fs-fid @ read-file throw
     msg( dup hex. id 0 .r ." >" cr )
     dup >blockalign /data +
-    dup r> fs-seek !@ - ;
+    dup r> fs-limit !@ - ;
 
 : n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
@@ -998,7 +1002,7 @@ file-state-struct buffer: new-file-state
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
 	dup 1 and IF  I id>addr? fs-seek 2@ <> IF
-		I dup id>addr? dup >r fs-seek @ dup r> fs-oldseek !
+		I dup id>addr? dup >r fs-limit @ dup r> fs-seek !
 		xt execute  THEN
 	THEN  2/
     LOOP  drop ;
@@ -1006,7 +1010,7 @@ file-state-struct buffer: new-file-state
 : n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
     j^ file-state $@len file-state-struct / 0 DO
 	I id>addr? fs-seek 2@ <> IF
-	    I dup id>addr? dup >r fs-seek @ dup r> fs-oldseek !
+	    I dup id>addr? dup >r fs-limit @ dup r> fs-seek !
 	    xt execute  THEN
     LOOP ;
 
