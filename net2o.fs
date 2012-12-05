@@ -921,7 +921,7 @@ file-state-struct buffer: new-file-state
 
 : size@  ( id -- n )  state-addr  fs-size @ ;
 : seek@  ( id -- n )  state-addr  fs-seek @ ;
-: limit@ ( id -- n )  state-addr  fs-seek @ ;
+: limit@ ( id -- n )  state-addr  fs-limit @ ;
 
 : save-blocks ( -- ) ?state
     j^ data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
