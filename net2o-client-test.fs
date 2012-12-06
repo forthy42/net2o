@@ -89,8 +89,31 @@ end-code
     "data/2011-06-27_19-33-04.jpg" ".cache/photo006.jpg" n2o:copy
     "data/2011-06-27_19-55-48.jpg" ".cache/photo007.jpg" n2o:copy
     "data/2011-06-28_06-54-09.jpg" ".cache/photo008.jpg" n2o:copy
+    $10000 ulit, 0 ulit, track-limit
+    $20000 ulit, 1 ulit, track-limit
+    $30000 ulit, 2 ulit, track-limit
+    $40000 ulit, 3 ulit, track-limit
+    $50000 ulit, 4 ulit, track-limit
+    $60000 ulit, 5 ulit, track-limit
+    $70000 ulit, 6 ulit, track-limit
     n2o:done
     send-chunks
+end-code
+
+1 client-loop .time cr
+
+." Request rest of big photos because it was so fast" cr
+net2o-code
+expect-reply
+s" Download test 4b" $, type cr see-me
+-1 slit, 0 ulit, track-limit
+-1 slit, 1 ulit, track-limit
+-1 slit, 2 ulit, track-limit
+-1 slit, 3 ulit, track-limit
+-1 slit, 4 ulit, track-limit
+-1 slit, 5 ulit, track-limit
+-1 slit, 6 ulit, track-limit
+gen-total slurp-all-tracked-blocks send-chunks
 end-code
 
 1 client-loop .time cr

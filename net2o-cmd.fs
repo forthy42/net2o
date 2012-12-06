@@ -82,7 +82,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
     case
 	0 of  ." end-code" cr 0. buf-state 2!  endof
 	1 of  p@ 64. ." lit, "  endof
-	2 of  ps@ 64. ." slit, " endof
+	2 of  ps@ s64. ." slit, " endof
 	3 of  string@  n2o.string  endof
 	cells cmd-base-table + (net2o-see)
 	0 endcase ]hex ;
@@ -160,7 +160,7 @@ Variable cmd0buf#
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
-    ." see-me: " dest-addr @ hex. tag-addr dup hex. 2@ swap hex. hex. F cr
+    ." see-me: " dest-addr @ hex. \ tag-addr dup hex. 2@ swap hex. hex. F cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
@@ -387,23 +387,26 @@ net2o-base
 61 net2o: track-size ( size id -- )
     2*64>n track( 2dup ." file <" 0 .r ." > size: " F . F cr ) size! ;
 62 net2o: track-seek ( seek id -- )
-    2*64>n track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seek! ;
+    2*64>n track( 2dup ." file <" 0 .r ." > seek: " F . F cr ) seekto! ;
 63 net2o: track-limit ( seek id -- )
-    2*64>n track( 2dup ." file <" 0 .r ." > limit: " F . F cr ) limit! ;
+    2*64>n track( 2dup ." file <" 0 .r ." > seek to: " F . F cr ) limit! ;
 64 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
     r@ id>file F file-size throw [IFDEF] 64bit drop [THEN] lit,
     r> ulit, track-size ;
 65 net2o: slurp-tracked-block ( id -- )
-    64>n dup >r n2o:slurp-block ulit, r> ulit, track-limit ;
+    64>n dup >r n2o:slurp-block ulit, r> ulit, track-seek ;
 66 net2o: slurp-tracked-blocks ( idbits -- )
     64>n dup >r n2o:slurp-blocks
-    r> [: swap ulit, ulit, track-limit ;] n2o:track-seeks ;
+    r> [: swap ulit, ulit, track-seek ;] n2o:track-seeks ;
 67 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
-    [: ulit, ulit, track-limit ;] n2o:track-all-seeks ;
+    [: ulit, ulit, track-seek ;] n2o:track-all-seeks ;
 68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
+
+90 net2o: set-total ( u -- )  total! ;
+91 net2o: gen-total ( -- )  net2o:gen-total ulit, set-total ;
 
 \ acknowledges
 
@@ -447,7 +450,7 @@ Variable file-reg#
     1 file-reg# +! ;
 
 : n2o:done ( -- )
-    slurp-all-tracked-blocks
+    gen-total slurp-all-tracked-blocks
     file-reg# off ;
 
 file-reg# off
@@ -561,7 +564,9 @@ also net2o-base
 : rewind-transfer ( -- )
     j^ expected @ negate j^ total +!
     j^ expected off  j^ received off
-    rewind  restart-transfer
+    rewind  j^ total @ 0> IF
+	restart-transfer
+    THEN
     request-stats? IF
 	send-timing
     THEN
@@ -680,9 +685,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     resend-toggle# j^ recv-flag xor!  false net2o:do-resend
     net2o:genack  cmd-send? ;
 
-: connecting-timeout ( -- ) F .time ."  connecting timeout" F cr
+: connecting-timeout ( -- )
+    F .time ."  connecting timeout" F cr
     gen-request ;
-: connected-timeout ( -- )  F .time ."  connected timeout" F cr
+: connected-timeout ( -- )
+    F .time ."  connected timeout " j^ received @ hex. j^ expected @ hex. F cr
     cmd-resend? transfer-keepalive? ;
 
 : +connecting   ['] connecting-timeout j^ timeout-xt ! ;

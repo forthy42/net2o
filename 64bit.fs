@@ -32,6 +32,7 @@ cell 8 = [IF]
     ' = Alias 64=
     -1 1 64rshift Constant max-int64
     ' u. alias 64.
+    ' . alias s64.
     ' noop Alias 64>n immediate
     ' noop Alias n>64 immediate
     ' noop Alias u>64 immediate
@@ -84,6 +85,7 @@ cell 8 = [IF]
     ' d= Alias 64=
     -1. 1 64rshift 64Constant max-int64
     ' ud. alias 64.
+    ' d. alias s64.
     ' drop Alias 64>n
     ' noop Alias 64>d immediate
     ' s>d Alias n>64
