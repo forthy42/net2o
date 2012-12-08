@@ -102,10 +102,12 @@ end-code
 
 1 client-loop .time cr
 
-." Request rest of big photos because it was so fast" cr
+." Request second stage big photos" cr
 net2o-code
 expect-reply
-s" Download test 4b" $, type cr see-me
+s" Download test 4a" $, type cr see-me
+\ $40000 ulit, 0 ulit, track-limit
+\ $30000 0 n2o:seek
 -1 slit, 0 ulit, track-limit
 -1 slit, 1 ulit, track-limit
 -1 slit, 2 ulit, track-limit
@@ -115,6 +117,17 @@ s" Download test 4b" $, type cr see-me
 -1 slit, 6 ulit, track-limit
 gen-total slurp-all-tracked-blocks send-chunks
 end-code
+
+\ 1 client-loop .time cr
+\ 
+\ ." Request third stage big photos" cr
+\ net2o-code
+\ expect-reply
+\ s" Download test 4b" $, type cr see-me
+\ $30000 ulit, 0 ulit, track-limit
+\ $10000 0 n2o:seek
+\ gen-total slurp-all-tracked-blocks send-chunks
+\ end-code
 
 1 client-loop .time cr
 [THEN]
