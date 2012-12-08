@@ -343,8 +343,7 @@ net2o-base
     cookie? IF  net2o:set-rate
     ELSE  64drop 64drop j^ ns/burst dup @ 2* 2* swap !  THEN ;
 33 net2o: resend-mask ( addr mask -- )
-    [IFUNDEF] 64bit  64>r 64>n 64r> [THEN]
-    net2o:resend-mask net2o:send-chunks ;
+    2*64>n net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
 35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
 36 net2o: send-timing ( -- )
