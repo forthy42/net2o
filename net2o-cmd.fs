@@ -337,7 +337,7 @@ net2o-base
 
 \ flow control functions
 
-30 net2o: ack-addrtime ( time addr -- ) 64>n  net2o:ack-addrtime ;
+30 net2o: ack-addrtime ( time addr -- ) 64>n net2o:ack-addrtime ;
 31 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
 32 net2o: set-rate ( ticks1 ticks2 -- )
     cookie? IF  net2o:set-rate
@@ -382,14 +382,14 @@ net2o-base
 
 \ better slurping
 
-60 net2o: slurp-block ( seek maxlen id -- 64nextseek )
-    3*64>n n2o:slurp-block' 64drop ;
+60 net2o: slurp-block ( id -- 64nextseek )
+    64>n n2o:slurp-block' 64drop ;
 61 net2o: track-size ( size id -- )
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
 62 net2o: track-seek ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
 63 net2o: track-limit ( seek id -- )
-    2*64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
+    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
 64 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
     r@ id>file F file-size throw d>64 lit, r> ulit, track-size ;
@@ -404,7 +404,7 @@ net2o-base
 68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-90 net2o: set-total ( u -- )  total! ;
+90 net2o: set-total ( u -- )  64>n total! ;
 91 net2o: gen-total ( -- )  net2o:gen-total lit, set-total ;
 
 \ acknowledges

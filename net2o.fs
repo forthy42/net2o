@@ -745,9 +745,9 @@ timestats buffer: stat-tuple
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
-: >timestamp ( time addr -- ts-array index / 0 0 )
+: >timestamp ( time addr -- time' ts-array index / 0 0 )
     >flyburst
-    >r j^ time-offset @ + r>
+    >r j^ time-offset 64@ 64+ r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ >offset  IF
 	r@ dest-tail @ over - 0 max addr>bits j^ window-size !
@@ -810,7 +810,7 @@ timestats buffer: stat-tuple
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
-    dup n>64 j^ extra-ns 64! + ( extra-limit ) n>64 ;
+    64dup j^ extra-ns 64! 64+ ( extra-limit ) ;
 
 : rate-stat1 ( rate deltat -- )
     stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
@@ -826,7 +826,7 @@ timestats buffer: stat-tuple
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
-    64>r dup >extra-ns ens( nip )else( drop )
+    64>r 64dup >extra-ns ens( 64nip )else( 64drop )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat ) rate-stat2
     j^ ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge

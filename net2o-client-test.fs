@@ -108,13 +108,13 @@ expect-reply
 s" Download test 4a" $, type cr see-me
 \ $40000 ulit, 0 ulit, track-limit
 \ $30000 0 n2o:seek
--1 slit, 0 ulit, track-limit
--1 slit, 1 ulit, track-limit
--1 slit, 2 ulit, track-limit
--1 slit, 3 ulit, track-limit
--1 slit, 4 ulit, track-limit
--1 slit, 5 ulit, track-limit
--1 slit, 6 ulit, track-limit
+-1 nlit, 0 ulit, track-limit
+-1 nlit, 1 ulit, track-limit
+-1 nlit, 2 ulit, track-limit
+-1 nlit, 3 ulit, track-limit
+-1 nlit, 4 ulit, track-limit
+-1 nlit, 5 ulit, track-limit
+-1 nlit, 6 ulit, track-limit
 gen-total slurp-all-tracked-blocks send-chunks
 end-code
 
