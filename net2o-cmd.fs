@@ -449,6 +449,9 @@ Variable file-reg#
     file-reg# @ save-to
     1 file-reg# +! ;
 
+: n2o:seek ( pos id -- )
+    2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
+
 : n2o:done ( -- )
     gen-total slurp-all-tracked-blocks
     file-reg# off ;

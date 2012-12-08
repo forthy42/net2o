@@ -936,11 +936,11 @@ file-state-struct buffer: new-file-state
     j^ file-state $@ bounds ?DO
 	I fs-seekto @ I fs-seek @ 2dup u<= IF  2drop
 	ELSE
+	    I fs-seek @ 0 I fs-fid @ reposition-file throw
 	    - j^ blocksize @ umin dup I fs-seek +!
 	    msg( ." flush file <" 2dup swap map dest-raddr @ - hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." > " cr )
-	    I fs-fid @ IF
-		2dup I fs-fid @ write-file throw
-	    THEN  >blockalign +
+	    2dup I fs-fid @ write-file throw
+	    >blockalign +
 	THEN
     file-state-struct +LOOP
     map dest-raddr @ - map dest-tail ! ;
