@@ -30,6 +30,7 @@ cell 8 = [IF]
     ' s>f Alias 64>f
     ' f>s Alias f>64
     ' = Alias 64=
+    ' <> Alias 64<>
     -1 1 64rshift Constant max-int64
     ' u. alias 64.
     ' . alias s64.
@@ -37,12 +38,15 @@ cell 8 = [IF]
     ' noop Alias n>64 immediate
     ' noop Alias u>64 immediate
     ' s>d Alias 64>d
+    ' drop Alias d>64
     ' >r Alias 64>r
     ' r> Alias 64r>
     ' 0= Alias 64-0=
     ' 0>= Alias 64-0>=
     ' 0<= Alias 64-0<=
     ' < Alias 64<
+    ' u< Alias 64u<
+    ' u<= Alias 64u<=
     ' on Alias 64on
     ' +! Alias 64+!
     ' min Alias 64min
@@ -83,11 +87,13 @@ cell 8 = [IF]
     ' d>f Alias 64>f
     ' f>d Alias f>64
     ' d= Alias 64=
+    ' d<> Alias 64<>
     -1. 1 64rshift 64Constant max-int64
     ' ud. alias 64.
     ' d. alias s64.
     ' drop Alias 64>n
     ' noop Alias 64>d immediate
+    ' noop Alias d>64 immediate
     ' s>d Alias n>64
     ' false Alias u>64
     ' 2>r Alias 64>r
@@ -96,6 +102,8 @@ cell 8 = [IF]
     ' d0>= Alias 64-0>=
     ' d0<= Alias 64-0<=
     ' d< Alias 64<
+    ' du< Alias 64u<
+    ' du<= Alias 64u<=
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
     ' dmin Alias 64min
