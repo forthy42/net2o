@@ -5,7 +5,7 @@ require net2o.fs
 +debug
 +db stat(
 
-gen-keys \ create a random key pair
+"anonymous" >key-name ?keypair \ get our anonymous key
 
 init-client
 

@@ -23,16 +23,6 @@ require mkdir.fs
 	s" ~/.net2o" $1C0 mkdir-parents throw
     THEN ;
 
-: key-in ( dest addr u -- )
-    r/o open-file throw { fd }
-    keysize fd read-file throw keysize <> !!nokey!!
-    fd close-file throw ;
-
-: key-out ( source addr u -- )
-    r/w create-file throw { fd }
-    keysize fd write-file throw
-    fd close-file throw ;
-
 : keys-in ( pkc skc addr u -- )
     r/o open-file throw { fd } swap
     keysize fd read-file throw keysize <> !!nokey!!
