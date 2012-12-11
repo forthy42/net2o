@@ -68,9 +68,6 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
 
-: xtype ( addr u -- )  hex[
-    bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
-
 : n2o.string ( addr u -- )
     2dup printable? IF
 	.\" s\" " type

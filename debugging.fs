@@ -10,8 +10,8 @@ false [IF]
 
 : nodebug: ['] ( Alias immediate ;
 	
-: hex[ ]] base @ >r hex [[ ; immediate
-: ]hex ]] r> base ! [[ ; immediate
+: hex[ ]] [: [[ ; immediate
+: ]hex ]] ;] $10 base-execute [[ ; immediate
 : x~~ ]] hex[ ~~ ]hex [[ ; immediate
 
 \ debugging switches

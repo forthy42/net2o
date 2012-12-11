@@ -29,6 +29,9 @@ require debugging.fs
 : ?nextarg ( -- addr u noarg-flag )
     argc @ 1 > IF  next-arg false  ELSE  true  THEN ;
 
+: xtype ( addr u -- )  hex[
+    bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
+
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.

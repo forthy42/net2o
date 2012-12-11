@@ -111,6 +111,7 @@ warnings !
     nip 2* cells hash @ + ;
 
 : #map  { hash xt -- } \ xt: ( ... node -- ... )
+    hash @ 0= ?EXIT
     hash @ $100 cells bounds DO
 	I @ IF  I xt execute  THEN
     2 cells +LOOP

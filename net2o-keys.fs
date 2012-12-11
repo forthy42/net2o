@@ -2,6 +2,80 @@
 
 require mkdir.fs
 
+\ hashed key data base
+
+begin-structure key-entry
+field: ke-sk
+field: ke-nick
+field: ke-name
+field: ke-sigs
+64field: ke-created
+64field: ke-expires
+end-structure
+
+key-entry buffer: sample-key
+
+Variable key-table
+Variable this-key
+sample-key this-key ! \ dummy
+
+: new-key ( addr u -- )
+    \ addr u is the public key
+    sample-key key-entry 2dup erase
+    2over key-table #! key-table #@ drop this-key ! ;
+
+: (digits>$) ( addr u -- addr' u' ) save-mem
+    >r dup dup r> bounds ?DO
+	I 2 s>number drop over c! char+ 
+    2 +LOOP  over - ;
+
+: hex>$ ( addr u -- addr' u' )
+    ['] (digits>$) $10 base-execute ;
+
+: x" ( "hexstring" -- addr u )
+    '"' parse hex>$ ;
+compile> execute postpone SLiteral ;
+
+Vocabulary key-parser
+
+also key-parser definitions
+
+: id: ( "id" -- ) 0 parse hex>$ new-key ;
+: sk: ( "sk" -- ) 0 parse hex>$ this-key @ ke-sk $! ;
+: nick: ( "sk" -- ) 0 parse this-key @ ke-nick $! ;
+: name: ( "sk" -- ) 0 parse this-key @ ke-name $! ;
+: created: ( "number" -- )  parse-name s>number d>64 this-key @ ke-created 64! ;
+: expires: ( "number" -- )  parse-name s>number d>64 this-key @ ke-expires 64! ;
+
+previous definitions
+
+: .key ( addr -- )  dup @ 0= IF  drop  EXIT  THEN
+    ." id: "   dup $@ xtype cr cell+ $@ drop >r
+    r@ ke-sk   @ IF  ." sk: "   r@ ke-sk $@ xtype cr  THEN
+    r@ ke-nick @ IF  ." nick: " r@ ke-nick $@ type cr  THEN
+    r@ ke-name @ IF  ." name: " r@ ke-name $@ type cr  THEN
+    r@ ke-created 64@ 64dup 64-0= IF  64drop
+    ELSE  ." created: " 64>d d. cr  THEN
+    r@ ke-expires 64@ 64dup 64-0= IF  64drop
+    ELSE  ." expires: " 64>d d. cr  THEN
+    rdrop cr ;
+
+: dump-keys ( fd -- ) [: key-table ['] .key #map ;] swap outfile-execute ;
+
+: n>r ( x1 .. xn n -- r:xn..x1 r:n )
+    r> { n ret }
+    0  BEGIN  dup n <  WHILE  swap >r 1+  REPEAT  >r
+    ret >r ;
+: nr> ( r:xn..x1 r:n -- x1 .. xn n )
+    r> r> { ret n }
+    0  BEGIN  dup n <  WHILE  r> swap 1+  REPEAT
+    ret >r ;
+
+: scan-keys ( fd -- )  get-order n>r
+    only previous  key-parser  include-file  nr> set-order ;
+
+\ accept for password entry
+
 : accept* ( addr u -- u' )
     \ accept-like input, but types * instead of the character
     dup >r
