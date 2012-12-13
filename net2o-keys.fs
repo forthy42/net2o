@@ -17,12 +17,18 @@ key-entry buffer: sample-key
 
 Variable key-table
 Variable this-key
+Variable this-keyid
 sample-key this-key ! \ dummy
+
+: current-key ( addr u -- )
+    key-table #@ drop this-key ! ;
+: make-thiskey ( addr -- )
+    dup $@ drop this-keyid !  cell+ $@ drop this-key ! ;
 
 : new-key ( addr u -- )
     \ addr u is the public key
     sample-key key-entry 2dup erase
-    2over key-table #! key-table #@ drop this-key ! ;
+    2over key-table #! current-key ;
 
 : (digits>$) ( addr u -- addr' u' ) save-mem
     >r dup dup r> bounds ?DO
@@ -38,14 +44,16 @@ compile> execute postpone SLiteral ;
 
 Vocabulary key-parser
 
+: ^key ( -- fstart )  this-key @ ;
+
 also key-parser definitions
 
 : id: ( "id" -- ) 0 parse hex>$ new-key ;
-: sk: ( "sk" -- ) 0 parse hex>$ this-key @ ke-sk $! ;
-: nick: ( "sk" -- ) 0 parse this-key @ ke-nick $! ;
-: name: ( "sk" -- ) 0 parse this-key @ ke-name $! ;
-: created: ( "number" -- )  parse-name s>number d>64 this-key @ ke-created 64! ;
-: expires: ( "number" -- )  parse-name s>number d>64 this-key @ ke-expires 64! ;
+: sk: ( "sk" -- ) 0 parse hex>$ ^key ke-sk $! ;
+: nick: ( "sk" -- ) 0 parse ^key ke-nick $! ;
+: name: ( "sk" -- ) 0 parse ^key ke-name $! ;
+: created: ( "number" -- )  parse-name s>number d>64 ^key ke-created 64! ;
+: expires: ( "number" -- )  parse-name s>number d>64 ^key ke-expires 64! ;
 
 previous definitions
 
@@ -60,7 +68,24 @@ previous definitions
     ELSE  ." expires: " 64>d d. cr  THEN
     rdrop cr ;
 
-: dump-keys ( fd -- ) [: key-table ['] .key #map ;] swap outfile-execute ;
+: .skey ( addr -- )  dup ke-sk @    IF  .key  ELSE  drop  THEN ;
+: .pkey ( addr -- )  dup ke-sk @ 0= IF  .key  ELSE  drop  THEN ;
+
+: dump-skeys ( fd -- )
+    [: key-table ['] .skey #map ;] swap outfile-execute ;
+: dump-pkeys ( fd -- )
+    [: key-table ['] .pkey #map ;] swap outfile-execute ;
+
+: ?.net2o ( -- )
+    s" ~/.net2o" r/o open-file nip IF
+	s" ~/.net2o" $1C0 mkdir-parents throw
+    THEN ;
+
+: dump-keys ( -- )  ?.net2o
+    s" ~/.net2o/seckeys.n2o" r/w open-file throw
+    dup >r dump-skeys r> close-file throw 
+    s" ~/.net2o/pubkeys.n2o" r/w open-file throw
+    dup >r dump-pkeys r> close-file throw ;
 
 : n>r ( x1 .. xn n -- r:xn..x1 r:n )
     r> { n ret }
@@ -73,6 +98,29 @@ previous definitions
 
 : scan-keys ( fd -- )  get-order n>r
     only previous  key-parser  include-file  nr> set-order ;
+
+: ?scan-keys ( addr u -- )
+    r/w open-file 0= IF scan-keys ELSE drop THEN ;
+
+: read-keys ( -- )
+    s" default.n2o" ?scan-keys
+    s" ~/.net2o/seckeys.n2o" ?scan-keys
+    s" ~/.net2o/pubkeys.n2o" ?scan-keys ;
+
+\ search for keys by name and nick
+\ !!FIXME!! not optimized
+
+: nick-key ( addr u -- ) \ search for key nickname and make current
+    key-table 
+    [: dup >r cell+ $@ drop ke-nick $@ 2over str= IF
+	r@ make-thiskey
+    THEN  rdrop ;] #map ;
+
+: name-key ( addr u -- ) \ search for key name and make current
+    key-table 
+    [: dup >r cell+ $@ drop ke-name $@ 2over str= IF
+	r@ make-thiskey
+    THEN  rdrop ;] #map ;
 
 \ accept for password entry
 
@@ -91,23 +139,6 @@ previous definitions
 		-rot xc!+? 0= IF  bell  ELSE  '*' emit  THEN
 	    THEN
     REPEAT  drop  nip r> swap - ;
-
-: ?.net2o ( -- )
-    s" ~/.net2o" r/o open-file nip IF
-	s" ~/.net2o" $1C0 mkdir-parents throw
-    THEN ;
-
-: keys-in ( pkc skc addr u -- )
-    r/o open-file throw { fd } swap
-    keysize fd read-file throw keysize <> !!nokey!!
-    keysize fd read-file throw keysize <> !!nokey!!
-    fd close-file throw ;
-
-: keys-out ( pkc skc addr u -- )
-    r/w create-file throw { fd } swap
-    keysize fd write-file throw
-    keysize fd write-file throw
-    fd close-file throw ;
 
 keysize buffer: testkey
 keysize buffer: testskc
@@ -132,23 +163,6 @@ $100 Value passphrase-diffuse#
 	wurst-state keysize + passskc keysize xors
     THEN  passskc ;
 
-Variable keyfile
-
-: >key-name ( addr u -- )
-    s" ~/.net2o/" keyfile $! 
-    keyfile $+! s" .ecc" keyfile $+! ;
-
-: key-name ( -- )  keyfile @ ?EXIT
-    ." ID name: " pad 100 accept pad swap >key-name ;
-
-: read-keys ( -- )  ?.net2o key-name
-    pkc testskc keyfile $@ keys-in
-    testskc check-key? ?EXIT
-    passphrase-retry# 0 ?DO
-	cr ." Passphrase: "
-	testskc get-passphrase check-key? IF  unloop  EXIT  THEN
-    LOOP  !!nokey!! ;
-
 : new-passphrase ( -- )
     passphrase-retry# 0 ?DO
 	cr ." Enter Passphrase: "       skc get-passphrase
@@ -157,10 +171,15 @@ Variable keyfile
 	testskc keysize tuck str= IF  unloop  EXIT  THEN
     LOOP  !!nokey!! ;
 
-: write-keys ( -- )  ?.net2o key-name
-    new-passphrase
-    pkc testskc keyfile $@ keys-out ;
+: decrypt-skc  ( -- )
+    testskc check-key? ?EXIT
+    passphrase-retry# 0 ?DO
+       cr ." Passphrase: "
+       testskc get-passphrase check-key? IF  unloop  EXIT  THEN
+    LOOP  !!nokey!! ;
 
-: ?keypair ( -- )
-    ['] read-keys catch IF  nothrow gen-keys write-keys  THEN ;
-
+: >key ( addr u -- )
+    key-table @ 0= IF  read-keys  THEN
+    nick-key
+    this-keyid @ pkc keysize move
+    ^key ke-sk $@ testskc swap move  decrypt-skc ;

@@ -5,7 +5,7 @@ require net2o.fs
 +debug
 +db stat(
 
-"anonymous" >key-name ?keypair \ get our anonymous key
+"anonymous" >key \ get our anonymous key
 
 init-client
 
