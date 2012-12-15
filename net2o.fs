@@ -16,6 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require unix/socket.fs
+require unix/mmap.fs
 require string.fs
 require struct0x.fs
 require curve25519.fs
@@ -524,6 +525,9 @@ Variable mapping-addr
 
 : allocatez ( size -- addr )
     dup >r allocate throw dup r> erase ;
+[IFUNDEF] alloc+guard
+    ' allocatez alias alloc+guard
+[THEN]
 : allocateFF ( size -- addr )
     dup >r allocate throw dup r> -1 fill ;
 : allocate-bits ( size -- addr )
@@ -531,7 +535,7 @@ Variable mapping-addr
 
 : map-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
-    dup allocatez r@ dest-raddr !
+    dup alloc+guard r@ dest-raddr !
     state# 2* allocatez r@ dest-ivsgen !
     >code-flag @ IF
 	dup addr>replies allocatez r@ dest-replies !
@@ -549,7 +553,7 @@ Variable mapping-addr
 
 : map-source-string ( addr u addrx -- addrx u2 )
     >r tuck r@ dest-size 2!
-    dup allocatez r@ dest-raddr !
+    dup alloc+guard r@ dest-raddr !
     dup addr>ts allocatez r@ dest-cookies !
     state# 2* allocatez r@ dest-ivsgen !
     dup >code-flag @ IF
@@ -1254,6 +1258,7 @@ Variable sendflag  sendflag off
 : rewind-buffer ( map -- ) >r
     1 r@ dest-round +!
     r@ dest-tail off  r@ data-head off
+    r@ dest-raddr @ r@ dest-size @ clearpages
     r@ regen-ivs-all  r> rewind-timestamps ;
 
 : rewind-ackbits ( map -- ) >r
