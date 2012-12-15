@@ -127,9 +127,19 @@ require debugging.fs
 Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reverse ( x1 -- x2 )
+: reverse64 ( x1 -- x2 )
     0 cell 0 DO  8 lshift over $FF and reverse8 or
-	swap 8 rshift swap  LOOP  nip ;
+       swap 8 rshift swap  LOOP  nip ;
+: reverse$ ( addr u -- )
+    BEGIN
+	over c@ reverse8 >r
+	1- dup WHILE
+	    2dup + dup c@ r> rot c! reverse8 >r over r> swap c!
+	1 /string dup 0= UNTIL
+    ELSE
+	over r> swap c!
+    THEN
+    2drop ;
 
 \ defined exceptions
 
@@ -280,11 +290,11 @@ Variable return-addr
 \ these are all stubs for now
 
 : ins-source ( addr packet -- )  >r
-    reverse 0  r> destination 2! ;
+    reverse64 0  r> destination 2! ;
 : get-source ( packet -- addr )
-    destination 2@ drop  reverse ;
+    destination 2@ drop  reverse64 ;
 : ins-dest ( addr packet -- )  0 -rot destination 2! ;
-: get-dest ( packet -- addr )  destination 2@ nip ;
+: get-dest ( packet -- addr )  destination @ ;
 
 : packet-route ( orig-addr addr -- flag ) >r
     r@ get-dest [IFDEF] 64bit $38 [ELSE] $18 [THEN] rshift
