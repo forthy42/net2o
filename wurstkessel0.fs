@@ -83,13 +83,10 @@ $450FC24B306136AE , $DBE8614B7E18115C , $A4CD66811B0F87FC , $31984500099D06F5 ,
 : wurst ( x1 i -- x2 )
     cells 'rngs + @ >r dup 2* swap 0< - r> xor ;
 
-: mix2bytes ( index n k -- b1 .. b8 index' n ) wurst-state + 8 0 DO
-	>r over wurst-source + c@ r@ c@ xor -rot dup >r + $3F and r> r> 8 + LOOP
+: mix ( x1 index n k -- x2 index' n ) wurst-state + 8 0 DO
+	>r over wurst-source + c@ r@ c@ xor -rot
+	>r >r  wurst r> r@ + $3F and r> r> cell+ LOOP
     drop ;
-
-: bytes2sum ( x b1 .. b8 -- x' ) >r >r >r >r  >r >r >r >r
-    r> wurst  r> wurst  r> wurst  r> wurst
-    r> wurst  r> wurst  r> wurst  r> wurst ;
 
 Create round# 13 c, 29 c, 19 c, 23 c, 31 c, 47 c, 17 c, 37 c, \ rounds
 Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
@@ -97,14 +94,14 @@ Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
 : xors ( addr1 addr2 n -- ) bounds ?DO
     dup @ I @ xor I ! cell+  cell +LOOP  drop ;
 : +!s ( addr1 addr2 n -- ) bounds ?DO
-    dup @ I @ + I ! cell+  1 cells +LOOP  drop ;
+    dup @ I +! cell+  cell +LOOP  drop ;
 
 : update-state ( -- )
     wurst-state wurst-source state# xors
     nextstate wurst-state state# +!s ;
 : round ( n -- ) dup 1- swap  8 0 DO
 	wurst-state I permut# + c@ cells + @ -rot
-	I mix2bytes 2>r bytes2sum 2r> rot nextstate I cells + !
+	I mix rot nextstate I cells + !
     LOOP 2drop update-state ;
 
 Create 'round-flags

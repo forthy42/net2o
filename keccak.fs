@@ -1,5 +1,4 @@
-\ keccak.fs
-\ Forth version derived from "readable keccak" by Bernd Paysan
+\ Keccak: Forth version derived from "readable keccak" by Bernd Paysan
 \ 19-Nov-11  Markku-Juhani O. Saarinen <mjos@iki.fi>
 \ A baseline Keccak (3rd round) implementation.
 
@@ -28,8 +27,8 @@ Create keccakf-piln
 Create bc 5 cells allot
 Create st 25 cells allot
 
-: 64rot1 ( x1 -- x2 )  dup 2* swap 0< - ;
-: 64rot ( x1 n -- x2 )  2dup lshift >r 64 swap - rshift r> or ;
+: lrot1 ( x1 -- x2 )  dup 2* swap 0< - ;
+: lrot ( x1 n -- x2 )  2dup lshift >r 64 swap - rshift r> or ;
 : xor! ( x addr -- )  dup >r @ xor r> ! ;
 
 : theta1 ( -- )
@@ -41,7 +40,7 @@ Create st 25 cells allot
 : theta2 ( -- )
     5 0 DO
 	bc I 4 + 5 mod cells + @
-	bc I 1 + 5 mod cells + @ 64rot1 xor
+	bc I 1 + 5 mod cells + @ lrot1 xor
 	st i cells + 25 cells bounds DO  dup I xor!  [ 5 cells ]L +LOOP
 	drop
     LOOP ;
@@ -51,7 +50,7 @@ Create st 25 cells allot
     24 0 DO
 	keccakf-piln I + c@
 	cells st + dup @
-	rot keccakf-rotc I + c@ 64rot
+	rot keccakf-rotc I + c@ lrot
 	rot !
     LOOP drop ;
 
