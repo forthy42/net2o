@@ -187,7 +187,7 @@ DOES> swap 7 and cells + @ ;
 : xors ( addr1 addr2 n -- ) bounds ?DO
     dup @ I @ xor I ! cell+  cell +LOOP  drop ;
 : +!s ( addr1 addr2 n -- ) bounds ?DO
-    dup 64@ I 64@ 64+ I 64! 64+  1 64s +LOOP  drop ;
+    dup 64@ I 64@ 64+ I 64! 64'+  1 64s +LOOP  drop ;
 
 : update-state ( -- )
     wurst-state wurst-source state# xors
