@@ -5,7 +5,6 @@
 state# buffer: wurst-source
 state# buffer: wurst-state
 state# buffer: nextstate
-state# 8 * buffer: message
 
 Create 'rngs \ this is essentially Wurstkessel's S-box
 $EA576B15A7AFBA08 , $BF4888DC02131EF7 , $5F49A40B1DAAF5FD , $7798975E5233C89D ,
@@ -78,8 +77,7 @@ $450FC24B306136AE , $DBE8614B7E18115C , $A4CD66811B0F87FC , $31984500099D06F5 ,
 
 : mix ( x1 index n k -- x2 index' n ) wurst-state + 8 0 DO
 	>r over wurst-source + c@ r@ c@ xor -rot
-	>r >r  wurst r> r@ + $3F and r> r> cell+ LOOP
-    drop ;
+	>r >r  wurst r> r@ + $3F and r> r> cell+ LOOP  drop ;
 
 Create round# 13 c, 29 c, 19 c, 23 c, 31 c, 47 c, 17 c, 37 c, \ rounds
 Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
