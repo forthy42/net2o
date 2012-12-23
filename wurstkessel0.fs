@@ -109,28 +109,24 @@ Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
 	I mix2bytes 2>r bytes2sum 2r> rot nextstate I cells + !
     LOOP 2drop update-state ;
 
+Create 'round-flags
+    $10 c, $30 c, $10 c, $70 c, $10 c, $30 c, $10 c, $F0 c,
+
 : +entropy ( message -- message' )
     dup wurst-source state# xors
-    wurst-state swap state# xors
+    wurst-state over state# xors
     state# + ;
 : -entropy ( message -- message' )
     wurst-state over state# xors
     dup wurst-source state# xors
     state# + ;
 
-Create 'round-flags
-    $10 , $30 , $10 , $70 , $10 , $30 , $10 , $F0 ,
+: rounds ( addr n -- )  dup $F0 and ?DO
+	I $F and round# + c@ round
+	I 'round-flags I $F and + c@ and IF  +entropy  THEN
+    LOOP drop ;
 
-: rounds ( n -- )  dup $F and 8 umin 0 ?DO
-	I round# + c@ round
-	dup 'round-flags I cells + @ and IF
-	    swap +entropy swap
-	THEN
-    LOOP 2drop ;
-
-: rounds-decrypt ( n -- )  dup $F and 8 umin 0 ?DO
-	'rounds Ith execute
-	dup 'round-flags Ith and IF
-	    swap -entropy swap
-	THEN
-    LOOP 2drop ;
+: rounds-decrypt ( addr n -- )  dup $F0 and ?DO
+	I $F and round# + c@ round
+	I 'round-flags I $F and + c@ and IF  -entropy  THEN
+    LOOP drop ;
