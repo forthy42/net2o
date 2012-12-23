@@ -80,18 +80,16 @@ $168A44E4E0FA0504 , $42A75FDDE3BA8C01 , $FB48A92AE2DAD4D1 , $86121899DC7429C7 ,
 $10F72AA5B40A344A , $E4926B1781F8C90C , $4F4C3F28EDAD7518 , $744C57C4DB14A013 ,
 $450FC24B306136AE , $DBE8614B7E18115C , $A4CD66811B0F87FC , $31984500099D06F5 ,
 
-: rngs cells 'rngs + @ ;
-: wurst ( ud1 ud2 -- ud3 )  2>r
-    dup 0< >r d2* r> dup d- 2r>
-    xor ;
+: wurst ( x1 i -- x2 )
+    cells 'rngs + @ >r dup 2* swap 0< - r> xor ;
 
 : mix2bytes ( index n k -- b1 .. b8 index' n ) wurst-state + 8 0 DO
 	>r over wurst-source + c@ r@ c@ xor -rot dup >r + $3F and r> r> 8 + LOOP
     drop ;
 
-: bytes2sum ( ud b1 .. b8 -- ud' ) >r >r >r >r  >r >r >r >r
-    r> rngs wurst  r> rngs wurst  r> rngs wurst  r> rngs wurst
-    r> rngs wurst  r> rngs wurst  r> rngs wurst  r> rngs wurst ;
+: bytes2sum ( x b1 .. b8 -- x' ) >r >r >r >r  >r >r >r >r
+    r> wurst  r> wurst  r> wurst  r> wurst
+    r> wurst  r> wurst  r> wurst  r> wurst ;
 
 Create round# 13 c, 29 c, 19 c, 23 c, 31 c, 47 c, 17 c, 37 c, \ rounds
 Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
