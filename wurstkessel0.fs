@@ -89,32 +89,25 @@ Create permut# 2 c, 6 c, 1 c, 4 c, 7 c, 0 c, 5 c, 3 c, \ permut length 15
 : +!s ( addr1 addr2 n -- ) bounds ?DO
     dup @ I +! cell+  cell +LOOP  drop ;
 
+Create 'round-flags
+    $10 c, $30 c, $10 c, $70 c, $10 c, $30 c, $10 c, $F0 c,
+
+: >source ( m -- m )  dup wurst-source state# xors ;
+: >state ( m -- m )   wurst-state over state# xors ;
+: +entropy ( m -- m' )  >source >state state# + ;
+: -entropy ( m -- m' )  >state >source state# + ;
+
 : update-state ( -- )
-    wurst-state wurst-source state# xors
-    nextstate wurst-state state# +!s ;
+    wurst-state >source  nextstate swap state# +!s ;
 : round ( n -- ) dup 1- swap  8 0 DO
 	wurst-state I permut# + c@ cells + @ -rot
 	I mix rot nextstate I cells + !
     LOOP 2drop update-state ;
 
-Create 'round-flags
-    $10 c, $30 c, $10 c, $70 c, $10 c, $30 c, $10 c, $F0 c,
-
-: +entropy ( message -- message' )
-    dup wurst-source state# xors
-    wurst-state over state# xors
-    state# + ;
-: -entropy ( message -- message' )
-    wurst-state over state# xors
-    dup wurst-source state# xors
-    state# + ;
-
-: rounds ( addr n -- )  dup $F0 and ?DO
+: rounds-e ( addr n xt -- ) { xt } dup $F0 and ?DO
 	I $F and round# + c@ round
-	I 'round-flags I $F and + c@ and IF  +entropy  THEN
+	I 'round-flags I $F and + c@ and IF  xt execute  THEN
     LOOP drop ;
 
-: rounds-decrypt ( addr n -- )  dup $F0 and ?DO
-	I $F and round# + c@ round
-	I 'round-flags I $F and + c@ and IF  -entropy  THEN
-    LOOP drop ;
+: rounds ( addr n -- )          ['] +entropy rounds-e ;
+: rounds-decrypt ( addr n -- )  ['] -entropy rounds-e ;
