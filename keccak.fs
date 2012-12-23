@@ -24,8 +24,8 @@ Create keccakf-piln
 
 \ update the state with given number of rounds
 
-Create bc 5 cells allot
-Create st 25 cells allot
+5 cells buffer: bc
+25 cells buffer: st
 
 : lrot1 ( x1 -- x2 )  dup 2* swap 0< - ;
 : lrot ( x1 n -- x2 )  2dup lshift >r 64 swap - rshift r> or ;
@@ -75,7 +75,7 @@ Create st 25 cells allot
     \ fill in sponge function
     st swap bounds DO  dup @ I xor!  cell+  cell +LOOP  drop ;
 
-Create kpad 144 allot
+144 buffer: kpad
 
 : padded>sponge ( addr u1 u2 -- )  >r
     \ pad last round

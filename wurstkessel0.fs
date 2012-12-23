@@ -2,17 +2,10 @@
 
 8 cells Constant state#
 
-$10 here $F and - allot 
-here state# allot \ source
-here state# allot \ state
-here state# allot \ nextstate
-here state# 8 * allot \ message
-swap 2swap swap
-
-Constant wurst-source
-Constant wurst-state
-Constant nextstate
-Constant message
+state# buffer: wurst-source
+state# buffer: wurst-state
+state# buffer: nextstate
+state# 8 * buffer: message
 
 Create 'rngs \ this is essentially Wurstkessel's S-box
 $EA576B15A7AFBA08 , $BF4888DC02131EF7 , $5F49A40B1DAAF5FD , $7798975E5233C89D ,
