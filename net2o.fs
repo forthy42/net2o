@@ -1105,7 +1105,7 @@ Variable code-packet
 : burst-end ( -- )  j^ data-b2b @ ?EXIT
     ticks j^ bandwidth-tick 64@ 64max j^ next-tick 64! ;
 
-: sendX ( addr taddr target n -- )
+: sendX ( addr taddr target n -- ) +calc10
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
     net2o:update-key ;
 

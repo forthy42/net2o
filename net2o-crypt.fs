@@ -42,33 +42,31 @@ Defer regen-ivs
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
-    dest-addr @ r@ 2@ bounds within 0=
+    dest-addr @ r@ 2@ >r - dup r> u<
     IF
-	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
+	max-size^2 1- rshift
 	r@ dest-ivs @ IF
 	    r@ dest-ivs $@ 2 pick safe/string drop
 	    over r@ regen-ivs >wurst-source-state
 	ELSE
 	    crypt( ." No code source IVS" cr )
 	THEN
-	drop
     THEN
-    rdrop ;
+    drop rdrop ;
 
 : ivs>source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     $@ drop >r
-    dest-addr @ r@ 2@ bounds within 0=
+    dest-addr @ r@ 2@ >r - dup r> u<
     IF
-	dest-addr @  r@ dest-vaddr @ -  max-size^2 1- rshift
+	max-size^2 1- rshift
 	r@ dest-ivs @ IF
 	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
 	ELSE
 	    crypt( ." No source IVS" cr )
 	THEN
-	drop
     THEN
-    rdrop ;
+    drop rdrop ;
 
 : default-key ( -- )
     @key 0= IF
