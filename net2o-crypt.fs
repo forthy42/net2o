@@ -175,14 +175,14 @@ rng$ mykey swap move
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
 	outbuf packet-data
-	outbuf body-size mem-rounds# +calc1 encrypt-buffer
+	outbuf body-size mem-rounds# +calc6 encrypt-buffer
 	drop >r wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
 	inbuf packet-data
-	inbuf body-size mem-rounds# +calc1 decrypt-buffer
+	inbuf body-size mem-rounds# +calc6 decrypt-buffer
 	drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- )  +calc

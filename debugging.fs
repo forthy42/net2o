@@ -87,6 +87,14 @@ true [IF]
     : timer: ['] noop alias immediate ;
 [THEN]
 
+timer: +calc9
+timer: +calc8
+timer: +calc7
+timer: +calc6
+timer: +calc5
+timer: +calc4
+timer: +calc3
+timer: +calc2
 timer: +calc1
 timer: +calc
 timer: +enc

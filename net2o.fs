@@ -1081,7 +1081,7 @@ Variable outflag  outflag off
 
 Variable code-packet
 
-: send-packet ( flag -- )
+: send-packet ( flag -- ) +calc7
 \    ." send " outbuf .header
     code-packet @ wurst-outbuf-encrypt
     code-packet @ 0= IF  send-cookie  THEN
@@ -1160,7 +1160,7 @@ Variable no-ticks
     net2o:prep-send /dest-tail
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
-: net2o:send-chunk ( -- )
+: net2o:send-chunk ( -- )  +calc9
     j^ ack-state @ outflag or!
     bursts# 1- j^ data-b2b @ = IF
 	\ send a new packet for timing path
@@ -1370,14 +1370,13 @@ Create pollfds   here pollfd %size dup allot erase
     BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! ;
+    over packet-size over <> !!size!! +calc3 ;
 
 : next-client-packet ( -- addr u )
     try-read-packet-wait 2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
-    over packet-size over <> !!size!!
-;
+    over packet-size over <> !!size!! +calc3 ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
@@ -1410,7 +1409,7 @@ $08 Constant cookie-val
 : handle-data ( addr -- )
     data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
-    +calc j^ ack-xt perform +ack ;
+    +calc4 j^ ack-xt perform +ack ;
 
 : handle-cmd ( addr -- )
     >r inbuf packet-data r@ swap dup >r move
@@ -1420,7 +1419,7 @@ $08 Constant cookie-val
     ticks
     timing( dest-addr @ hex.
             64dup  j^ time-offset 64@ 64- 64. ." recv timing" cr )
-    j^ recv-tick 64! \ time stamp of arrival
+    j^ recv-tick 64! +calc8 \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr @ hex. cr
@@ -1433,7 +1432,7 @@ $08 Constant cookie-val
 \    inbuf .header
     dest-addr @ 0= IF  handle-cmd0
     ELSE
-	+calc check-dest dup 0= IF  drop  EXIT  THEN +dest
+	+calc5 check-dest dup 0= IF  drop  EXIT  THEN +dest
 	handle-dest
     THEN ;
 
@@ -1494,7 +1493,7 @@ Variable requests
 
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
-	IF    client-event +calc1 reset-timeout
+	IF    client-event +calc1 reset-timeout +calc2
 	ELSE  2drop ?timeout ?dup-IF  to j^
 		j^ rtdelay 64@ 64dup max-int64 64= 0=
 		IF  64dup 64+ j^ rtdelay 64!  ELSE  64drop  THEN

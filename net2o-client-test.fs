@@ -2,8 +2,8 @@
 
 require net2o.fs
 
-+debug
 +db stat(
++debug
 
 "anonymous" >key \ get our anonymous key
 

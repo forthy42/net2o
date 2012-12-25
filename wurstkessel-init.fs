@@ -13,14 +13,13 @@
 
 : write-wurstrng ( -- )
     s" ~/.wurstrng" r/w create-file throw >r
-    wurst-salt state# r@ write-file throw
-    state-init state# r@ write-file throw
+    rng-buffer cell+ state# 2* r@ write-file throw
     r> close-file throw ;
 
 : salt-init ( -- )
     s" ~/.wurstrng" r/o open-file IF  drop random-init
     ELSE  read-wurstrng  0= IF  random-init  THEN  THEN
-    rng-step write-wurstrng ;
+    rng-step write-wurstrng rng-step ;
 
 wurst-init
 salt-init
