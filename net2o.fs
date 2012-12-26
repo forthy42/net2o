@@ -262,14 +262,17 @@ Variable routes
 	sockaddr-tmp sockaddr_in6 %size
     THEN ;
 
-sockaddr_in %size buffer: lastaddr
+0 Value lastaddr
 Variable lastn2oaddr
 
 : insert-address ( addr u -- net2o-addr )
-    2dup lastaddr over str= IF  2drop lastn2oaddr @  EXIT  THEN
+    lastaddr IF  2dup lastaddr over str=
+	IF  2drop lastn2oaddr @  EXIT  THEN
+    THEN
     2dup routes #key dup -1 = IF
-	drop 2dup lastaddr swap move
-	s" " 2over routes #! routes #key  dup lastn2oaddr !
+	drop s" " 2over routes #!
+	last# $@ drop to lastaddr
+	routes #key  dup lastn2oaddr !
     ELSE
 	nip nip
     THEN ;
@@ -946,7 +949,7 @@ file-state-struct buffer: new-file-state
 	I fs-limit 64@ I fs-seekto 64@ 64- 64>blockalign 64#0 64max 64+
     file-state-struct +LOOP ;
 
-: save-blocks ( -- ) ?state
+: save-blocks ( -- ) +calc ?state
     j^ data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
     j^ file-state $@ bounds ?DO
 	I fs-seekto 64@ I fs-seek 64@ 64over 64over 64u<= IF
@@ -959,7 +962,7 @@ file-state-struct buffer: new-file-state
 	    >blockalign +
 	THEN
     file-state-struct +LOOP
-    map dest-raddr @ - map dest-tail ! ;
+    map dest-raddr @ - map dest-tail ! +file ;
 
 : save-all-blocks ( -- )  j^ data-rmap $@ drop >r 
     BEGIN
@@ -1012,9 +1015,9 @@ file-state-struct buffer: new-file-state
 	dup n2o:slurp-block  sum + to sum  1+
     file-state-struct +LOOP  drop sum ;
 
-: n2o:slurp-all-blocks ( -- ) delay( 10 ms ) msg( ." Slurp all blocks" cr )
+: n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
     BEGIN  data$@ nip  WHILE
-	n2o:slurp-all-blocks-once  0= UNTIL  THEN ;
+	n2o:slurp-all-blocks-once  0= UNTIL  THEN +file ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
@@ -1081,7 +1084,7 @@ Variable outflag  outflag off
 
 Variable code-packet
 
-: send-packet ( flag -- ) +calc7
+: send-packet ( flag -- ) +sendX
 \    ." send " outbuf .header
     code-packet @ wurst-outbuf-encrypt
     code-packet @ 0= IF  send-cookie  THEN
@@ -1105,7 +1108,7 @@ Variable code-packet
 : burst-end ( -- )  j^ data-b2b @ ?EXIT
     ticks j^ bandwidth-tick 64@ 64max j^ next-tick 64! ;
 
-: sendX ( addr taddr target n -- ) +calc10
+: sendX ( addr taddr target n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
     net2o:update-key ;
 
@@ -1124,11 +1127,10 @@ Variable code-packet
     -1 +LOOP
     drop 0 ;
 
-Variable no-ticks
+64Variable last-ticks
 
 : ts-ticks! ( addr map -- )
-\    no-ticks @ IF  2drop EXIT  THEN
-    >r addr>ts r> dest-timestamps @ + >r ticks r> ts-ticks
+    >r addr>ts r> dest-timestamps @ + >r last-ticks 64@ r> ts-ticks
     dup 64@ 64-0= 0= IF  64on 64drop 1 packets2 +!  EXIT  THEN 64! ;
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
@@ -1151,16 +1153,16 @@ Variable no-ticks
     resend$@ nip 0> dest-tail$@ nip 0> or ;
 
 : net2o:resend ( -- )
-    no-ticks on resend$@ net2o:get-resend 2dup 2>r
+    resend$@ net2o:get-resend 2dup 2>r
     net2o:prep-send /resend
     2r> resend( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send ( -- )
-    no-ticks off dest-tail$@ net2o:get-dest 2dup 2>r
+    dest-tail$@ net2o:get-dest 2dup 2>r
     net2o:prep-send /dest-tail
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
-: net2o:send-chunk ( -- )  +calc9
+: net2o:send-chunk ( -- )  +chunk
     j^ ack-state @ outflag or!
     bursts# 1- j^ data-b2b @ = IF
 	\ send a new packet for timing path
@@ -1173,7 +1175,8 @@ Variable no-ticks
 	sendX  never j^ next-tick 64!
     ELSE  sendX  THEN ;
 
-: bandwidth? ( -- flag )  ticks j^ next-tick 64@ 64- 64-0>=
+: bandwidth? ( -- flag )
+    ticks 64dup last-ticks 64! j^ next-tick 64@ 64- 64-0>=
     j^ flybursts @ 0> and  ;
 
 \ asynchronous sending
@@ -1370,13 +1373,13 @@ Create pollfds   here pollfd %size dup allot erase
     BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
     sockaddr-tmp alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! +calc3 ;
+    over packet-size over <> !!size!! +next ;
 
 : next-client-packet ( -- addr u )
     try-read-packet-wait 2dup d0= ?EXIT
     sockaddr-tmp alen @ insert-address
     inbuf ins-source
-    over packet-size over <> !!size!! +calc3 ;
+    over packet-size over <> !!size!! +next ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
@@ -1409,7 +1412,7 @@ $08 Constant cookie-val
 : handle-data ( addr -- )
     data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
-    +calc4 j^ ack-xt perform +ack ;
+    +inmove j^ ack-xt perform +ack ;
 
 : handle-cmd ( addr -- )
     >r inbuf packet-data r@ swap dup >r move
@@ -1419,7 +1422,7 @@ $08 Constant cookie-val
     ticks
     timing( dest-addr @ hex.
             64dup  j^ time-offset 64@ 64- 64. ." recv timing" cr )
-    j^ recv-tick 64! +calc8 \ time stamp of arrival
+    j^ recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr @ hex. cr
@@ -1428,11 +1431,11 @@ $08 Constant cookie-val
     0< IF  handle-data  ELSE  handle-cmd  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
-    >ret-addr >dest-addr
+    >ret-addr >dest-addr +desta
 \    inbuf .header
     dest-addr @ 0= IF  handle-cmd0
     ELSE
-	+calc5 check-dest dup 0= IF  drop  EXIT  THEN +dest
+	check-dest dup 0= IF  drop  EXIT  THEN +dest
 	handle-dest
     THEN ;
 
@@ -1483,7 +1486,7 @@ Variable timeout-task
 Variable requests
 
 : server-loop-nocatch ( -- )
-    BEGIN  server-event +calc1  AGAIN ;
+    BEGIN  server-event +event  AGAIN ;
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
@@ -1493,7 +1496,7 @@ Variable requests
 
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
-	IF    client-event +calc1 reset-timeout +calc2
+	IF    client-event +event reset-timeout +reset
 	ELSE  2drop ?timeout ?dup-IF  to j^
 		j^ rtdelay 64@ 64dup max-int64 64= 0=
 		IF  64dup 64+ j^ rtdelay 64!  ELSE  64drop  THEN

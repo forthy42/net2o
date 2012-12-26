@@ -45,12 +45,9 @@ Defer regen-ivs
     dest-addr @ r@ 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop
-	    over r@ regen-ivs >wurst-source-state
-	ELSE
-	    crypt( ." No code source IVS" cr )
-	THEN
+	r@ dest-ivs @ over +
+	swap r> regen-ivs >wurst-source-state
+	EXIT
     THEN
     drop rdrop ;
 
@@ -60,11 +57,8 @@ Defer regen-ivs
     dest-addr @ r@ 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	r@ dest-ivs @ IF
-	    r@ dest-ivs $@ 2 pick safe/string drop >wurst-source-state
-	ELSE
-	    crypt( ." No source IVS" cr )
-	THEN
+	r> dest-ivs @ + >wurst-source-state
+	EXIT
     THEN
     drop rdrop ;
 
@@ -173,14 +167,14 @@ rng$ mykey swap move
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
 	outbuf packet-data
-	outbuf body-size mem-rounds# +calc6 encrypt-buffer
+	outbuf body-size mem-rounds# +cryptsu encrypt-buffer
 	drop >r wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
 	inbuf packet-data
-	inbuf body-size mem-rounds# +calc6 decrypt-buffer
+	inbuf body-size mem-rounds# +cryptsu decrypt-buffer
 	drop 128@ wurst-crc 128= +enc ;
 
     : wurst-encrypt$ ( addr u -- )  +calc
@@ -248,11 +242,10 @@ Variable do-keypad
 : (regen-ivs) ( offset map -- ) >r
     dup r@ dest-ivs $@len
     r@ dest-ivslastgen @ IF \ check if in quarter 2
-	2/ 2/ dup
+	2/ 2/ dup bounds within 0=
     ELSE \ check if in quarter 4
-	2/ dup 2/ dup >r + r>
-    THEN  bounds within 0=  IF
-\	." regenerate ivs " dup . cr
+	2/ dup 2/ + u>
+    THEN  IF
 	r@ regen-ivs/2
     THEN  drop rdrop ;
 ' (regen-ivs) IS regen-ivs

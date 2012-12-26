@@ -536,7 +536,8 @@ state# rngs# * rng-buffer !
 
 : rng-step ( -- )
     rng-init  rng-buffer cell+ rounds# rounds
-    rng-buffer off ;
+    rng-buffer off
+    wurst-source rounds-setkey ;
 
 \ buffered random numbers to output 64 bit at a time
 

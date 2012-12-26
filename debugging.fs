@@ -87,17 +87,18 @@ true [IF]
     : timer: ['] noop alias immediate ;
 [THEN]
 
-timer: +calc10
-timer: +calc9
-timer: +calc8
-timer: +calc7
-timer: +calc6
-timer: +calc5
-timer: +calc4
-timer: +calc3
-timer: +calc2
-timer: +calc1
+timer: +file
+timer: +send-cmd
+timer: +sendX2
+timer: +sendX
+timer: +chunk
+timer: +desta
+timer: +inmove
+timer: +next
+timer: +reset
+timer: +event
 timer: +calc
+timer: +cryptsu
 timer: +enc
 timer: +rec
 timer: +send

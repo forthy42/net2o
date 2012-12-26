@@ -171,7 +171,7 @@ Variable cmd0buf#
 : net2o-code0  cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
-: send-cmd ( addr dest -- )  +calc9 dest-addr @ >r
+: send-cmd ( addr dest -- )  +send-cmd dest-addr @ >r
     cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
     j^ IF  j^ return-address  ELSE  return-addr  THEN  @
