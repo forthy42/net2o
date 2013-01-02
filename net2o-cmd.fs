@@ -22,24 +22,24 @@
 2Variable buf-state
 
 [IFDEF] 64bit
-    : u>n ( 64u -- 64n )
-	dup 2/ swap 1 and IF negate THEN ;
-    : n>u ( 64n -- 64u )
-	dup 0< 1 and swap abs 2* or ;
+    : zz>n ( zigzag -- n )
+	dup 1 rshift swap 1 and negate xor ;    
+    : n>zz ( n -- zigzag )
+	dup 0< swap 2* xor ;
 [ELSE]
-    : u>n ( 64u -- 64n )
-	2dup d2/ 2swap drop 1 and IF  dnegate  THEN ;
-    : n>u ( 64n -- 64u )
-	dup 0< 1 and -rot dabs d2* >r or r> ;
+    : zz>n ( 64u -- 64n )
+	64dup 1 64rshift 64swap 64>n 1 and negate rot xor swap ;
+    : n>zz ( 64n -- 64u )
+	64dup 64-0< >r 64dup 64+ r> n>64 64xor ;
 [THEN]
     
 : ps!+ ( 64n addr -- addr' )
-    >r n>u r> p!+ ;
+    >r n>zz r> p!+ ;
 : ps@+ ( addr -- 64n addr' )
-    p@+ >r u>n r> ;
+    p@+ >r zz>n r> ;
 
 : p@ ( -- 64u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
-: ps@ ( -- 64n ) p@ u>n ;
+: ps@ ( -- 64n ) p@ zz>n ;
 
 : byte@ ( addr u -- addr' u' b )
     >r count r> 1- swap ;
@@ -265,7 +265,7 @@ also net2o-base definitions
     r@ maxstring u>= !!stringfit!!
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
-: slit, ( n -- )  slit n>u cmd, ;
+: slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( n -- )  u>64 lit, ;
 : end-code ( -- ) expect-reply? previous cmd ;
