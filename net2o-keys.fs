@@ -153,11 +153,11 @@ keysize buffer: passskc
 $100 Value passphrase-diffuse#
 
 : get-passphrase ( addrin -- addrout )
-    passskc keysize move   wurst-source !key
+    passskc keysize move   wurst-source rounds-setkey
     message state# 8 * 2dup accept* dup >r safe/string erase
     r> IF
 	source-init wurst-key hash-init
-	message roundsh# rounds
+	message roundsh# rounds-encrypt
 	passphrase-diffuse# 0 ?DO  start-diffuse  LOOP \ just to waste time ;-)
 	wurst-state passskc keysize xors
 	wurst-state keysize + passskc keysize xors

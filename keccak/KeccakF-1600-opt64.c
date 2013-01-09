@@ -14,10 +14,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <string.h>
 #include "brg_endian.h"
 #include "KeccakF-1600-opt64-settings.h"
-#include "KeccakF-1600-interface.h"
-
-typedef unsigned char UINT8;
-typedef unsigned long long int UINT64;
+#include "KeccakF-1600.h"
 
 #if defined(__GNUC__)
 #define ALIGN __attribute__ ((aligned(32)))
@@ -174,7 +171,7 @@ ALIGN const UINT64 rot_39_41[2] = {39, 41};
 
 #include "KeccakF-1600-unrolling.macros"
 
-void KeccakPermutationOnWords(UINT64 *state)
+void KeccakF(keccak_state state)
 {
     declareABCDE
 #if (Unrolling != 24)
@@ -188,140 +185,9 @@ void KeccakPermutationOnWords(UINT64 *state)
 #endif
 }
 
-void KeccakPermutationOnWordsAfterXoring(UINT64 *state, const UINT64 *input, unsigned int laneCount)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-	unsigned int j;
-
-    for(j=0; j<laneCount; j++)
-        state[j] ^= input[j];	
-    copyFromState(A, state)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-
-#ifdef ProvideFast576
-void KeccakPermutationOnWordsAfterXoring576bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor576bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-#ifdef ProvideFast832
-void KeccakPermutationOnWordsAfterXoring832bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor832bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-#ifdef ProvideFast1024
-void KeccakPermutationOnWordsAfterXoring1024bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor1024bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-#ifdef ProvideFast1088
-void KeccakPermutationOnWordsAfterXoring1088bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor1088bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-#ifdef ProvideFast1152
-void KeccakPermutationOnWordsAfterXoring1152bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor1152bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-#ifdef ProvideFast1344
-void KeccakPermutationOnWordsAfterXoring1344bits(UINT64 *state, const UINT64 *input)
-{
-    declareABCDE
-#if (Unrolling != 24)
-    unsigned int i;
-#endif
-
-    copyFromStateAndXor1344bits(A, state, input)
-    rounds
-#if defined(UseMMX)
-    _mm_empty();
-#endif
-}
-#endif
-
-void KeccakInitialize()
-{
-}
-
-void KeccakInitializeState(unsigned char *state)
+void KeccakInitializeState(keccak_state state)
 {
     memset(state, 0, 200);
-#ifdef UseBebigokimisa
-    ((UINT64*)state)[ 1] = ~(UINT64)0;
-    ((UINT64*)state)[ 2] = ~(UINT64)0;
-    ((UINT64*)state)[ 8] = ~(UINT64)0;
-    ((UINT64*)state)[12] = ~(UINT64)0;
-    ((UINT64*)state)[17] = ~(UINT64)0;
-    ((UINT64*)state)[20] = ~(UINT64)0;
-#endif
-}
-
-void KeccakPermutation(unsigned char *state)
-{
-    // We assume the state is always stored as words
-    KeccakPermutationOnWords((UINT64*)state);
 }
 
 void fromBytesToWord(UINT64 *word, const UINT8 *bytes)
@@ -333,116 +199,6 @@ void fromBytesToWord(UINT64 *word, const UINT8 *bytes)
         *word |= (UINT64)(bytes[i]) << (8*i);
 }
 
-#ifdef ProvideFast576
-void KeccakAbsorb576bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring576bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[9];
-    unsigned int i;
-
-    for(i=0; i<9; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring576bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-#ifdef ProvideFast832
-void KeccakAbsorb832bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring832bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[13];
-    unsigned int i;
-
-    for(i=0; i<13; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring832bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-#ifdef ProvideFast1024
-void KeccakAbsorb1024bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring1024bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[16];
-    unsigned int i;
-
-    for(i=0; i<16; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring1024bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-#ifdef ProvideFast1088
-void KeccakAbsorb1088bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring1088bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[17];
-    unsigned int i;
-
-    for(i=0; i<17; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring1088bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-#ifdef ProvideFast1152
-void KeccakAbsorb1152bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring1152bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[18];
-    unsigned int i;
-
-    for(i=0; i<18; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring1152bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-#ifdef ProvideFast1344
-void KeccakAbsorb1344bits(unsigned char *state, const unsigned char *data)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring1344bits((UINT64*)state, (const UINT64*)data);
-#else
-    UINT64 dataAsWords[21];
-    unsigned int i;
-
-    for(i=0; i<21; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring1344bits((UINT64*)state, dataAsWords);
-#endif
-}
-#endif
-
-void KeccakAbsorb(unsigned char *state, const unsigned char *data, unsigned int laneCount)
-{
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    KeccakPermutationOnWordsAfterXoring((UINT64*)state, (const UINT64*)data, laneCount);
-#else
-    UINT64 dataAsWords[25];
-    unsigned int i;
-
-    for(i=0; i<laneCount; i++)
-        fromBytesToWord(dataAsWords+i, data+(i*8));
-    KeccakPermutationOnWordsAfterXoring((UINT64*)state, dataAsWords, laneCount);
-#endif
-}
-
 void fromWordToBytes(UINT8 *bytes, const UINT64 word)
 {
     unsigned int i;
@@ -451,25 +207,9 @@ void fromWordToBytes(UINT8 *bytes, const UINT64 word)
         bytes[i] = (word >> (8*i)) & 0xFF;
 }
 
-#ifdef ProvideFast1024
-void KeccakExtract1024bits(const unsigned char *state, unsigned char *data)
+void KeccakInitialize()
 {
-#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    memcpy(data, state, 128);
-#else
-    unsigned int i;
-
-    for(i=0; i<16; i++)
-        fromWordToBytes(data+(i*8), ((const UINT64*)state)[i]);
-#endif
-#ifdef UseBebigokimisa
-    ((UINT64*)data)[ 1] = ~((UINT64*)data)[ 1];
-    ((UINT64*)data)[ 2] = ~((UINT64*)data)[ 2];
-    ((UINT64*)data)[ 8] = ~((UINT64*)data)[ 8];
-    ((UINT64*)data)[12] = ~((UINT64*)data)[12];
-#endif
 }
-#endif
 
 void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int laneCount)
 {
@@ -481,24 +221,52 @@ void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int
     for(i=0; i<laneCount; i++)
         fromWordToBytes(data+(i*8), ((const UINT64*)state)[i]);
 #endif
-#ifdef UseBebigokimisa
-    if (laneCount > 1) {
-        ((UINT64*)data)[ 1] = ~((UINT64*)data)[ 1];
-        if (laneCount > 2) {
-            ((UINT64*)data)[ 2] = ~((UINT64*)data)[ 2];
-            if (laneCount > 8) {
-                ((UINT64*)data)[ 8] = ~((UINT64*)data)[ 8];
-                if (laneCount > 12) {
-                    ((UINT64*)data)[12] = ~((UINT64*)data)[12];
-                    if (laneCount > 17) {
-                        ((UINT64*)data)[17] = ~((UINT64*)data)[17];
-                        if (laneCount > 20) {
-                            ((UINT64*)data)[20] = ~((UINT64*)data)[20];
-                        }
-                    }
-                }
-            }
-        }
-    }
+}
+
+void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount)
+{
+  unsigned int i;
+  for(i=0; i<laneCount; i++) {
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+    state[i] ^= data[i];
+#else
+    UINT64 tmp;
+    fromWordToBytes(&tmp, data[i]);
+    state[i] ^= tmp;
 #endif
+  }
+}
+
+void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+{
+  unsigned int i;
+  for(i=0; i<laneCount; i++) {
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+    data[i] = state[i] ^= data[i];
+#else
+    UINT64 tmp;
+    fromWordToBytes(&tmp, data[i]);
+    tmp = state[i] ^= tmp;
+    fromWordToBytes(data+i, tmp);
+#endif
+  }
+}
+
+void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+{
+  unsigned int i;
+  for(i=0; i<laneCount; i++) {
+    UINT64 tmp;
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+    tmp = data[i] ^ state[i];
+    state[i] = data[i];
+    data[i] = tmp;
+#else
+    UINT64 tmp1;
+    fromWordToBytes(&tmp, data[i]);
+    tmp1 = tmp ^ state[i];
+    state[i] = tmp;
+    fromWordToBytes(data+i, tmp1);
+#endif
+  }
 }

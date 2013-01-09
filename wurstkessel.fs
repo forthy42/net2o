@@ -291,16 +291,11 @@ s" gforth" environment? [IF] 2drop
     \c    int i;
     \c    for(i=0; i<8; i++) { m[i] ^= s[i+8]; s[i] ^= m[i]; }
     \c }
-    \c static unsigned char * states;
     \c static uint64_t * rnds;
-    \c void rounds_init(unsigned char * statesi, uint64_t * rndsi) {
-    \c    states=statesi;
+    \c void rounds_init(uint64_t * rndsi) {
     \c    rnds=rndsi;
     \c }
-    \c void rounds_setkey( unsigned char * statesi) {
-    \c    states=statesi;
-    \c }
-    \c void rounds_ind(unsigned char* message, unsigned int n) {
+    \c void rounds_encrypt(unsigned char* message, unsigned int n, unsigned char * states) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -325,7 +320,7 @@ s" gforth" environment? [IF] 2drop
     \c if(n&0x40) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } }
-    \c void rounds_decrypt(unsigned char* message, unsigned int n) {
+    \c void rounds_decrypt(unsigned char* message, unsigned int n, unsigned char * states) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -361,17 +356,20 @@ s" gforth" environment? [IF] 2drop
     \c   }
     \c   return result;
     \c }
-    c-function rounds_init rounds_init a a -- void
-    c-function rounds-setkey rounds_setkey a -- void
-    c-function rounds rounds_ind a n -- void
-    c-function rounds-decrypt rounds_decrypt a n -- void
+    c-function rounds-init rounds_init a -- void
+    c-function (rounds-encrypt) rounds_encrypt a n a -- void
+    c-function (rounds-decrypt) rounds_decrypt a n a -- void
 	[IFDEF] 64bit
 	    c-function wurst_hash64 wurst_hash64 a n a a -- n
 	[ELSE]
 	    c-function wurst_hash64 wurst_hash64 a n a a -- d
 	[THEN]
     end-c-library
-    : wurst-init ( -- )  wurst-source 'rngs rounds_init ;
+    wurst-source Value @state
+    : rounds-setkey ( addr -- )  to @state ;
+    : rounds-encrypt ( addr u -- ) @state (rounds-encrypt) ;
+    : rounds-decrypt ( addr u -- ) @state (rounds-decrypt) ;
+    : wurst-init ( -- )  'rngs rounds-init ;
     : hash64 ( addr n init -- hash ) 'rngs wurst_hash64 ;
 [ELSE]
 : round0 ( -- )  [ 0 round# round, ] ; 
@@ -400,7 +398,7 @@ Create 'round-flags
     dup wurst-source state# xors
     state# + ;
 
-: rounds ( addr n -- )  dup $F and 8 umin 0 ?DO
+: rounds-encrypt ( addr n -- )  dup $F and 8 umin 0 ?DO
 	'rounds Ith execute
 	dup 'round-flags Ith and IF
 	    swap +entropy swap
@@ -461,10 +459,10 @@ Create 'round-flags
 : wurst-hash ( source state final-rounds rounds -- )
     2swap hash-init dup read-first
     BEGIN  0>  WHILE
-	    message over rounds
+	    message over rounds-encrypt
 	    dup encrypt-read
     REPEAT
-    drop message swap rounds .source wurst-close ;
+    drop message swap rounds-encrypt .source wurst-close ;
 
 \ padding
 
@@ -486,9 +484,9 @@ Create 'round-flags
 
 : wurst-encrypt ( key salt first-rounds rounds -- )
     >r >r encrypt-init
-    message r> rounds  r@ read-first
+    message r> rounds-encrypt  r@ read-first
     BEGIN  0>  WHILE
-	    message r@ rounds  r@ message>
+	    message r@ rounds-encrypt  r@ message>
 	    r@ encrypt-read  REPEAT
     rdrop wurst-close ;
 
@@ -511,7 +509,7 @@ Create 'round-flags
 
 : wurst-decrypt ( first-rounds rounds -- )
     >r >r decrypt-init
-    message r> rounds
+    message r> rounds-encrypt
     r@ encrypt-read message r@ rounds-decrypt r@ .xormsg-size
     BEGIN  0>  WHILE
 	    r@ encrypt-read
@@ -535,7 +533,7 @@ Variable rng-buffer state# rngs# * allot
 state# rngs# * rng-buffer !
 
 : rng-step ( -- )
-    rng-init  rng-buffer cell+ rounds# rounds
+    rng-init  rng-buffer cell+ rounds# rounds-encrypt
     rng-buffer off
     wurst-source rounds-setkey ;
 
@@ -559,5 +557,5 @@ state# rngs# * rng-buffer !
 \ benchmark to evaluate quality of the compiled code
 
 : wurst-bench ( n -- ) >r cputime d+
-    r@ 0 ?DO  message rounds# rounds  LOOP  cputime d+ d- d>f -1e-6 f*
+    r@ 0 ?DO  message rounds# rounds-encrypt  LOOP  cputime d+ d- d>f -1e-6 f*
     1/f 256e r> fm* f* 1024e fdup f* f/ f. ." MB/s" ;

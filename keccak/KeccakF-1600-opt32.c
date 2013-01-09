@@ -14,12 +14,7 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include <string.h>
 #include "brg_endian.h"
 #include "KeccakF-1600-opt32-settings.h"
-#include "KeccakF-1600-interface.h"
-
-typedef unsigned char UINT8;
-typedef unsigned short UINT16;
-typedef unsigned int UINT32;
-typedef unsigned long long int UINT64;
+#include "KeccakF-1600.h"
 
 #ifdef UseInterleaveTables
 int interleaveTablesBuilt = 0;
@@ -240,68 +235,7 @@ void setInterleavedWordsInto8bytes(UINT8* dest, UINT32* evenAndOdd)
 #error "Only unrolling 2 is supported by schedule 3."
 #endif
 
-void KeccakPermutationOnWords(UINT32 *state)
-{
-    rounds
-}
-
-void KeccakPermutationOnWordsAfterXoring(UINT32 *state, const UINT8 *input, unsigned int laneCount)
-{
-    xorLanesIntoState(laneCount, state, input)
-    rounds
-}
-
-#ifdef ProvideFast576
-void KeccakPermutationOnWordsAfterXoring576bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(9, state, input)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast832
-void KeccakPermutationOnWordsAfterXoring832bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(13, state, input)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1024
-void KeccakPermutationOnWordsAfterXoring1024bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(16, state, input)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1088
-void KeccakPermutationOnWordsAfterXoring1088bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(17, state, input)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1152
-void KeccakPermutationOnWordsAfterXoring1152bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(18, state, input)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1344
-void KeccakPermutationOnWordsAfterXoring1344bits(UINT32 *state, const UINT8 *input)
-{
-    xorLanesIntoState(21, state, input)
-    rounds
-}
-#endif
-
-#else // (Schedule != 3)
-
-void KeccakPermutationOnWords(UINT32 *state)
+void KeccakF(UINT32 *state)
 {
     declareABCDE
 #if (Unrolling != 24)
@@ -311,90 +245,6 @@ void KeccakPermutationOnWords(UINT32 *state)
     copyFromState(A, state)
     rounds
 }
-
-void KeccakPermutationOnWordsAfterXoring(UINT32 *state, const UINT8 *input, unsigned int laneCount)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(laneCount, state, input)
-    copyFromState(A, state)
-    rounds
-}
-
-#ifdef ProvideFast576
-void KeccakPermutationOnWordsAfterXoring576bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(9, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast832
-void KeccakPermutationOnWordsAfterXoring832bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(13, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1024
-void KeccakPermutationOnWordsAfterXoring1024bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(16, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1088
-void KeccakPermutationOnWordsAfterXoring1088bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(17, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1152
-void KeccakPermutationOnWordsAfterXoring1152bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(18, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#ifdef ProvideFast1344
-void KeccakPermutationOnWordsAfterXoring1344bits(UINT32 *state, const UINT8 *input)
-{
-    declareABCDE
-    unsigned int i;
-
-    xorLanesIntoState(21, state, input)
-    copyFromState(A, state)
-    rounds
-}
-#endif
-
-#endif
 
 void KeccakInitialize()
 {
@@ -406,119 +256,32 @@ void KeccakInitialize()
 void KeccakInitializeState(unsigned char *state)
 {
     memset(state, 0, 200);
-#ifdef UseBebigokimisa
-    ((UINT32*)state)[ 2] = ~(UINT32)0;
-    ((UINT32*)state)[ 3] = ~(UINT32)0;
-    ((UINT32*)state)[ 4] = ~(UINT32)0;
-    ((UINT32*)state)[ 5] = ~(UINT32)0;
-    ((UINT32*)state)[16] = ~(UINT32)0;
-    ((UINT32*)state)[17] = ~(UINT32)0;
-    ((UINT32*)state)[24] = ~(UINT32)0;
-    ((UINT32*)state)[25] = ~(UINT32)0;
-    ((UINT32*)state)[34] = ~(UINT32)0;
-    ((UINT32*)state)[35] = ~(UINT32)0;
-    ((UINT32*)state)[40] = ~(UINT32)0;
-    ((UINT32*)state)[41] = ~(UINT32)0;
-#endif
 }
-
-void KeccakPermutation(unsigned char *state)
-{
-    // We assume the state is always stored as interleaved 32-bit words
-    KeccakPermutationOnWords((UINT32*)state);
-}
-
-#ifdef ProvideFast576
-void KeccakAbsorb576bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring576bits((UINT32*)state, data);
-}
-#endif
-
-#ifdef ProvideFast832
-void KeccakAbsorb832bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring832bits((UINT32*)state, data);
-}
-#endif
-
-#ifdef ProvideFast1024
-void KeccakAbsorb1024bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring1024bits((UINT32*)state, data);
-}
-#endif
-
-#ifdef ProvideFast1088
-void KeccakAbsorb1088bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring1088bits((UINT32*)state, data);
-}
-#endif
-
-#ifdef ProvideFast1152
-void KeccakAbsorb1152bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring1152bits((UINT32*)state, data);
-}
-#endif
-
-#ifdef ProvideFast1344
-void KeccakAbsorb1344bits(unsigned char *state, const unsigned char *data)
-{
-    KeccakPermutationOnWordsAfterXoring1344bits((UINT32*)state, data);
-}
-#endif
-
-void KeccakAbsorb(unsigned char *state, const unsigned char *data, unsigned int laneCount)
-{
-    KeccakPermutationOnWordsAfterXoring((UINT32*)state, data, laneCount);
-}
-
-#ifdef ProvideFast1024
-void KeccakExtract1024bits(const unsigned char *state, unsigned char *data)
-{
-    extractLanes(16, state, data)
-#ifdef UseBebigokimisa
-    ((UINT32*)data)[ 2] = ~((UINT32*)data)[ 2];
-    ((UINT32*)data)[ 3] = ~((UINT32*)data)[ 3];
-    ((UINT32*)data)[ 4] = ~((UINT32*)data)[ 4];
-    ((UINT32*)data)[ 5] = ~((UINT32*)data)[ 5];
-    ((UINT32*)data)[16] = ~((UINT32*)data)[16];
-    ((UINT32*)data)[17] = ~((UINT32*)data)[17];
-    ((UINT32*)data)[24] = ~((UINT32*)data)[24];
-    ((UINT32*)data)[25] = ~((UINT32*)data)[25];
-#endif
-}
-#endif
 
 void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int laneCount)
 {
     extractLanes(laneCount, state, data)
-#ifdef UseBebigokimisa
-    if (laneCount > 1) {
-        ((UINT32*)data)[ 2] = ~((UINT32*)data)[ 2];
-        ((UINT32*)data)[ 3] = ~((UINT32*)data)[ 3];
-        if (laneCount > 2) {
-            ((UINT32*)data)[ 4] = ~((UINT32*)data)[ 4];
-            ((UINT32*)data)[ 5] = ~((UINT32*)data)[ 5];
-            if (laneCount > 8) {
-                ((UINT32*)data)[16] = ~((UINT32*)data)[16];
-                ((UINT32*)data)[17] = ~((UINT32*)data)[17];
-                if (laneCount > 12) {
-                    ((UINT32*)data)[24] = ~((UINT32*)data)[24];
-                    ((UINT32*)data)[25] = ~((UINT32*)data)[25];
-                    if (laneCount > 17) {
-                        ((UINT32*)data)[34] = ~((UINT32*)data)[34];
-                        ((UINT32*)data)[35] = ~((UINT32*)data)[35];
-                        if (laneCount > 20) {
-                            ((UINT32*)data)[40] = ~((UINT32*)data)[40];
-                            ((UINT32*)data)[41] = ~((UINT32*)data)[41];
-                        }
-                    }
-                }
-            }
-        }
-    }
-#endif
+}
+
+void KeccakAbsorb(UINT32 *state, const UINT8 *input, unsigned int laneCount)
+{
+    xorLanesIntoState(laneCount, state, input)
+}
+
+void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+{
+  xorLanesIntoState(laneCount, state, data);
+  extractLanes(laneCount, state, data);
+}
+
+void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+{
+  UINT64 tmp[laneCount];
+  int i;
+
+  extractLanes(laneCount, state, tmp);
+  for(i=0; i<laneCount; i++) {
+    data[i] ^= tmp[i];
+  }
+  xorLanesIntoState(laneCount, state, data);
 }
