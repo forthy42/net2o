@@ -346,11 +346,11 @@ s" gforth" environment? [IF] 2drop
     \c if(n&0x80) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } }
     \c uint64_t wurst_hash64(unsigned char * addr, unsigned int len,
-    \c                       unsigned char * pad, uint64_t * rnds) {
-    \c   uint64_t result=0;
+    \c                       uint64_t startval, uint64_t * rnds) {
+    \c   uint64_t result=startval;
     \c   unsigned int i=0;
     \c   for(i=0; i<len; i++) {
-    \c     result = ROL(result, 1) ^ rnds[addr[i] ^ pad[i & 0x7F] ^ (result && 0xFF)];
+    \c     result = ROL(result, 1) ^ rnds[addr[i] ^ (result && 0xFF)];
     \c     /* the result feedback kills parallelism, but makes sure
     \c        the hash cannot easily be attacked */
     \c   }
@@ -360,9 +360,9 @@ s" gforth" environment? [IF] 2drop
     c-function (rounds-encrypt) rounds_encrypt a n a -- void
     c-function (rounds-decrypt) rounds_decrypt a n a -- void
 	[IFDEF] 64bit
-	    c-function wurst_hash64 wurst_hash64 a n a a -- n
+	    c-function wurst_hash64 wurst_hash64 a n n a -- n
 	[ELSE]
-	    c-function wurst_hash64 wurst_hash64 a n a a -- d
+	    c-function wurst_hash64 wurst_hash64 a n d a -- d
 	[THEN]
     end-c-library
     wurst-source Value @state

@@ -4,13 +4,11 @@ require string.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
 
-state# 2* buffer: 'hashinit
+64Variable hashinit
 
 \ random initializer for hash
 
-: hash-init-rng ( -- )
-    rng$ 'hashinit swap move
-    rng$ 'hashinit over + swap move ;
+: hash-init-rng ( -- )  rng@ hashinit 64! ;
 
 hash-init-rng
 
@@ -20,7 +18,7 @@ hash-init-rng
 true [IF]
     64Variable hash-state
     
-    : string-hash ( addr u -- )  'hashinit hash64 hash-state 64! ;
+    : string-hash ( addr u -- )  hashinit 64@ hash64 hash-state 64! ;
     
     : hash$ ( -- addr u )  hash-state [ 1 64s ]L ;
 [ELSE]

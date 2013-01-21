@@ -63,7 +63,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
 : (net2o-see) ( addr -- )  @
-    dup ['] net2o-crash <> IF  2 cells - body>  THEN  >name .name ;
+    dup ['] net2o-crash <> IF  3 cells - body>  THEN  >name .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
