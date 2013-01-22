@@ -24,6 +24,17 @@ require wurstkessel.fs
 require wurstkessel-init.fs
 require hash-table.fs
 require debugging.fs
+require mini-oof2.fs
+
+\ porting helper to mini-oof2
+
+Variable do-stackrel
+
+Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
+compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
+
+' o-sp to var-xt
+do-stackrel on
 
 \ helper words
 
@@ -352,10 +363,6 @@ $04 Constant resend-toggle#
     addr 64@ 64. cr
     r> base ! ;
 
-\ packet delivery table
-
-0 Value j^
-
 \ each source has multiple destination spaces
 
 Variable dest-addr
@@ -367,7 +374,7 @@ Variable dest-addr
 
 ' dffield: Alias 64field:
 
-begin-structure dest-struct
+object class
 field: dest-size
 field: dest-vaddr
 field: dest-raddr
@@ -380,24 +387,29 @@ field: dest-timestamps
 field: dest-replies
 field: dest-cookies
 field: dest-tail
-end-structure
+end-class dest-class
+dest-class @ Constant dest-struct
 
-dest-struct extend-structure code-struct
+dest-class class
 field: code-flag
-end-structure
+end-class code-class
+code-class @ Constant code-struct
 
-dest-struct extend-structure data-struct
+dest-class class
 field: data-head
-end-structure
+end-class data-class
+data-class @ Constant data-struct
 
-code-struct extend-structure rdata-struct
+code-class class
 field: data-ackbits0
 field: data-ackbits1
 field: data-ackbits-buf
 field: data-firstack0#
 field: data-firstack1#
 field: data-lastack#
-end-structure
+end-class rdata-class
+rdata-class @ Constant rdata-struct
+
 \ job context structure
 
 begin-structure context-struct
@@ -496,7 +508,7 @@ Variable dest-map s" " dest-map $!
 : check-dest ( -- addr 1/t / f )
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
-    0 to j^
+    0 >o rdrop
 \    return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN  cell+
     dest-map
     $@ bounds ?DO
@@ -504,8 +516,8 @@ Variable dest-map s" " dest-map $!
 	0= IF
 	    I @ dest-vaddr 2@ dest-addr @ swap - +
 	    I @ code-flag @ IF  1  ELSE  -1  THEN
-	    I @ dest-job @ to j^
-	    return-addr @ dup j^ return-address !@ <>
+	    I @ dest-job @ >o rdrop
+	    return-addr @ dup o return-address !@ <>
 	    IF  msg( ." handover" cr )  THEN
 	    UNLOOP  EXIT  THEN
     cell +LOOP
@@ -513,8 +525,8 @@ Variable dest-map s" " dest-map $!
 
 \ context debugging
 
-: .j ( -- ) j^ context# ? ;
-: j? ( -- ) ]] j^ 0= ?EXIT [[ ; immediate
+: .j ( -- ) o context# ? ;
+: j? ( -- ) ]] o 0= ?EXIT [[ ; immediate
 
 \ Destination mapping contains
 \ addr u - range of virtal addresses
@@ -561,7 +573,7 @@ Variable mapping-addr
     THEN
     r@ data-lastack# on
     drop
-    j^ r@ dest-job !
+    o r@ dest-job !
     r> rdata-struct ;
 
 : map-source-string ( addr u addrx -- addrx u2 )
@@ -575,7 +587,7 @@ Variable mapping-addr
 	addr>ts       allocatez r@ dest-timestamps !
     THEN
     drop
-    j^ r@ dest-job !
+    o r@ dest-job !
     r> code-struct ;
 
 : map-dest ( vaddr u addr -- )
@@ -591,13 +603,13 @@ Variable mapstart $10000 mapstart !
 
 : n2o:new-map ( u -- addr )  mapstart @ swap mapstart +! ; 
 : n2o:new-data ( addrs addrd u -- )
-    j^ 0= IF drop 2drop EXIT THEN
+    o 0= IF drop 2drop EXIT THEN
     >code-flag off
-    tuck  j^ data-rmap map-dest  map-source  j^ data-map $! ;
+    tuck  o data-rmap map-dest  map-source  o data-map $! ;
 : n2o:new-code ( addrs addrd u -- )
-    j^ 0= IF drop 2drop EXIT THEN
+    o 0= IF drop 2drop EXIT THEN
     >code-flag on
-    tuck  j^ code-rmap map-dest  map-source  j^ code-map $! ;
+    tuck  o code-rmap map-dest  map-source  o code-map $! ;
 
 \ create context
 
@@ -611,70 +623,70 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 Variable init-context#
 
 : init-flow-control ( -- )
-    max-int64 64-2/ j^ min-slack 64!
-    max-int64 64-2/ 64negate j^ max-slack 64!
-    max-int64 j^ rtdelay 64!
-    flybursts# dup j^ flybursts ! j^ flyburst !
-    ticks j^ lastack 64! \ asking for context creation is as good as an ack
-    bandwidth-init n>64 j^ ns/burst 64!
-    never               j^ next-tick 64!
-    64#0                j^ extra-ns 64! ;
+    max-int64 64-2/ o min-slack 64!
+    max-int64 64-2/ 64negate o max-slack 64!
+    max-int64 o rtdelay 64!
+    flybursts# dup o flybursts ! o flyburst !
+    ticks o lastack 64! \ asking for context creation is as good as an ack
+    bandwidth-init n>64 o ns/burst 64!
+    never               o next-tick 64!
+    64#0                o extra-ns 64! ;
 
 : n2o:new-context ( addr -- )
-    context-struct allocate throw to j^
-    j^ context-struct erase
-    init-context# @ j^ context# !  1 init-context# +!
-    dup return-addr !  j^ return-address !
-    s" " j^ data-resend $!
-    wurst-key state# j^ crypto-key $!
+    context-struct allocate throw >o rdrop
+    o context-struct erase
+    init-context# @ o context# !  1 init-context# +!
+    dup return-addr !  o return-address !
+    s" " o data-resend $!
+    wurst-key state# o crypto-key $!
     init-flow-control
-    -1 j^ blocksize !
-    1 j^ blockalign ! ;
+    -1 o blocksize !
+    1 o blockalign ! ;
 
 : data$@ ( -- addr u )
-    j^ data-map $@ drop >r
+    o data-map $@ drop >r
     r@ dest-raddr @  r@ dest-size @ r> data-head @ safe/string ;
 : /data ( u -- )
-    j^ data-map $@ drop data-head +! ;
+    o data-map $@ drop data-head +! ;
 : dest-tail$@ ( -- addr u )
-    j^ data-map $@ drop >r
+    o data-map $@ drop >r
     r@ dest-raddr @  r@ data-head @ r> dest-tail @ safe/string ;
 : /dest-tail ( u -- )
-    j^ data-map $@ drop dest-tail +! ;
+    o data-map $@ drop dest-tail +! ;
 : data-dest ( -- addr )
-    j^ data-map $@ drop >r
+    o data-map $@ drop >r
     r@ dest-vaddr @ r> dest-tail @ + ;
 
 \ code sending around
 
 : code-dest ( -- addr )
-    j^ code-map $@ drop >r
+    o code-map $@ drop >r
     r@ dest-raddr @ r> dest-tail @ + ;
 
 : code-vdest ( -- addr )
-    j^ code-map $@ drop >r
+    o code-map $@ drop >r
     r@ dest-vaddr @ r> dest-tail @ + ;
 
 : code-reply ( -- addr )
-    j^ code-map $@ drop >r
+    o code-map $@ drop >r
     r@ dest-tail @ addr>replies r> dest-replies @ + ;
 
 : tag-addr ( -- addr )
-    dest-addr @ j^ code-rmap $@ drop >r r@ dest-vaddr @ -
+    dest-addr @ o code-rmap $@ drop >r r@ dest-vaddr @ -
     addr>replies r> dest-replies @ + ;
 
 reply buffer: dummy-reply
 
 : reply[] ( index -- addr )
-    j^ code-map $@ drop >r
+    o code-map $@ drop >r
     dup r@ dest-size @ addr>bits u<
     IF  reply * r@ dest-replies @ +  ELSE  dummy-reply  THEN  rdrop ;
 
 : reply-index ( -- index )
-    j^ code-map $@ drop dest-tail @ addr>bits ;
+    o code-map $@ drop dest-tail @ addr>bits ;
 
 : code+ ( -- )
-    j^ code-map $@ drop >r
+    o code-map $@ drop >r
     maxdata r@ dest-tail +!
     r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
 \    cmd( ." set dest-tail to " r@ dest-tail @ hex. cr )
@@ -688,21 +700,21 @@ $400 buffer: aligned$
 \ timing records
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    s" " j^ timing-stat $! ;
+    s" " o timing-stat $! ;
 
 : )stats ]] THEN [[ ;
-: stats( ]] j^ timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+: stats( ]] o timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
-    stats( j^ timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
+    stats( o timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
 : net2o:/timing ( n -- )
-    stats( j^ timing-stat 0 rot $del ) ;
+    stats( o timing-stat 0 rot $del ) ;
 
 : net2o:rec-timing ( addr u -- ) $>align \ do some dumps
     bounds ?DO
-	I ts-delta sf@ f>64 j^ last-time 64+!
-	j^ last-time 64@ 64>f 1n f* fdup f.
-	j^ time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
+	I ts-delta sf@ f>64 o last-time 64+!
+	o last-time 64@ 64>f 1n f* fdup f.
+	o time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
@@ -713,37 +725,37 @@ $400 buffer: aligned$
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple timestats  j^ timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  o timing-stat $+! ;
 
 \ flow control
 
 : ticks-init ( ticks -- )
-    64dup j^ bandwidth-tick 64!  j^ next-tick 64! ;
+    64dup o bandwidth-tick 64!  o next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    j^ recv-tick 64@ 64dup j^ lastack 64!
-    64over 64- j^ rtdelay 64min! ;
+    o recv-tick 64@ 64dup o lastack 64!
+    64over 64- o rtdelay 64min! ;
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
-    >rtdelay  64- 64dup j^ lastslack 64!
-    j^ lastdeltat 64@ delta-damp# 64rshift
-    64dup j^ min-slack 64+! 64negate j^ max-slack 64+!
-    64dup j^ min-slack 64min!
-    j^ max-slack 64max! ;
+    >rtdelay  64- 64dup o lastslack 64!
+    o lastdeltat 64@ delta-damp# 64rshift
+    64dup o min-slack 64+! 64negate o max-slack 64+!
+    64dup o min-slack 64min!
+    o max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- j^ lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
-    j^ slackgrow 64! ;
+    64- o lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
+    o slackgrow 64! ;
 
 : map@ ( -- addr/0 )
-    0 j?  j^ data-map @ 0= ?EXIT
-    drop j^ data-map $@ drop ;
+    0 j?  o data-map @ 0= ?EXIT
+    drop o data-map $@ drop ;
 : rmap@ ( -- addr/0 )
-    0 j?  j^ data-rmap @ 0= ?EXIT
-    drop j^ data-rmap $@ drop ;
+    0 j?  o data-rmap @ 0= ?EXIT
+    drop o data-rmap $@ drop ;
 
 : >offset ( addr map -- addr' flag ) >r
     r@ dest-vaddr @ - dup r> dest-size @ u< ;
@@ -751,26 +763,26 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    j^ rtdelay 64@ 64>n rt-bias# + j^ ns/burst 64@ 64>n / flybursts# +
+    o rtdelay 64@ 64>n rt-bias# + o ns/burst 64@ 64>n / flybursts# +
     bursts( dup . .j ." flybursts "
-    j^ rtdelay 64@ 64. j^ ns/burst 64@ 64. ." rtdelay" cr )
-    dup j^ flyburst ! ;
-: net2o:max-flyburst ( bursts -- ) j^ flybursts max!@
+    o rtdelay 64@ 64. o ns/burst 64@ 64. ." rtdelay" cr )
+    dup o flyburst ! ;
+: net2o:max-flyburst ( bursts -- ) o flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : >flyburst ( -- )
-    j^ flyburst @ j^ flybursts max!@ \ reset bursts in flight
-    0= IF  j^ recv-tick 64@ ticks-init
-	bursts( .j ." restart bursts " j^ flybursts ? cr )
+    o flyburst @ o flybursts max!@ \ reset bursts in flight
+    0= IF  o recv-tick 64@ ticks-init
+	bursts( .j ." restart bursts " o flybursts ? cr )
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
 : >timestamp ( time addr -- time' ts-array index / 0 0 )
     >flyburst
-    >r j^ time-offset 64@ 64+ r>
+    >r o time-offset 64@ 64+ r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ >offset  IF
-	r@ dest-tail @ over - 0 max addr>bits j^ window-size !
+	r@ dest-tail @ over - 0 max addr>bits o window-size !
 	addr>ts r> dest-timestamps @ swap
     ELSE  drop rdrop 0 0  THEN ;
 
@@ -781,7 +793,7 @@ timestats buffer: stat-tuple
 	IF  + dup >r  dup ts-ticks 64@
 	    r> tick-init 1+ timestamp * - ts-ticks 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
-	    IF  64drop 64drop  ELSE  64- j^ lastdeltat 64!  THEN
+	    IF  64drop 64drop  ELSE  64- o lastdeltat 64!  THEN
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
@@ -796,12 +808,12 @@ timestats buffer: stat-tuple
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
 
-: slack-max# ( -- n ) j^ max-slack 64@ j^ min-slack 64@ 64- ;
+: slack-max# ( -- n ) o max-slack 64@ o min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : >slack-exp ( -- rfactor )
-    j^ lastslack 64@ j^ min-slack 64@ 64- 64>n
-    slack( dup . j^ min-slack ? .j ." slack" cr )
+    o lastslack 64@ o min-slack 64@ 64- 64>n
+    slack( dup . o min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f**
@@ -811,44 +823,44 @@ timestats buffer: stat-tuple
     slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ;
 
 : slackext ( rfactor -- slack )
-    j^ slackgrow 64@
-    j^ window-size @ tick-init 1+ bursts# - 64*/
+    o slackgrow 64@
+    o window-size @ tick-init 1+ bursts# - 64*/
     64>f f* f>64
-    j^ slackgrow' 64@ 64+ 64dup ext-damp# 64*/ j^ slackgrow' 64!
+    o slackgrow' 64@ 64+ 64dup ext-damp# 64*/ o slackgrow' 64!
     64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
-    64>n j^ last-ns/burst 64@ 64>n
+    64>n o last-ns/burst 64@ 64>n
     ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
-    dup n>64 j^ last-ns/burst 64! n>64 ;
+    dup n>64 o last-ns/burst 64! n>64 ;
 
 : extra-limit ( rate -- rate' )
-    dup j^ extra-ns 64@ 64>n 2* 2* u> IF
-	j^ extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 j^ extra-ns 64! -
+    dup o extra-ns 64@ 64>n 2* 2* u> IF
+	o extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 o extra-ns 64! -
     THEN ;
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
-    64dup j^ extra-ns 64! 64+ ( extra-limit ) ;
+    64dup o extra-ns 64! 64+ ( extra-limit ) ;
 
 : rate-stat1 ( rate deltat -- )
-    stats( j^ recv-tick 64@ j^ time-offset 64@ 64-
-           64dup j^ last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+    stats( o recv-tick 64@ o time-offset 64@ 64-
+           64dup o last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! )
     rate( 64over 64. .j ." clientrate" cr )
-    deltat( 64dup 64. j^ lastdeltat 64@ 64. .j ." deltat" cr ) ;
+    deltat( 64dup 64. o lastdeltat 64@ 64. .j ." deltat" cr ) ;
 
 : rate-stat2 ( rate -- )
     rate( 64dup 64. .j ." rate" cr )
-    stats( 64dup j^ extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
-           j^ slackgrow 64@ 64>f stat-tuple ts-grow sf! 
+    stats( 64dup o extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
+           o slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns ens( 64nip )else( 64drop )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat ) rate-stat2
-    j^ ns/burst 64!@
+    o ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
@@ -862,7 +874,7 @@ $20 Value mask-bits#
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )
     resend( ." mask: " hex[ 64>r dup . 64r> 64dup 64. ]hex cr )
-    j^ data-resend $@ bounds ?DO
+    o data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
 	    over I 2@ rot >r
 	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
@@ -874,23 +886,23 @@ $20 Value mask-bits#
     2 cells +LOOP
     >mask0 resend-buf 2!
     resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
-    resend-buf 2 cells j^ data-resend $+! ;
+    resend-buf 2 cells o data-resend $+! ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
-    j^ ack-state @ resend-toggle# invert and or j^ ack-state ! ;
+    o ack-state @ resend-toggle# invert and or o ack-state ! ;
 : >real-range ( addr -- addr' )
-    j^ data-map $@ drop >r r@ dest-vaddr @ - r> dest-raddr @ + ;
+    o data-map $@ drop >r r@ dest-vaddr @ - r> dest-raddr @ + ;
 : resend$@ ( -- addr u )
-    j^ data-resend $@  IF
+    o data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
 	swap >real-range swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
-    j^ data-resend $@ drop 2@ drop ;
+    o data-resend $@ drop 2@ drop ;
 : /resend ( u -- )
-    0 +DO  j^ data-resend $@ 0= IF  drop  LEAVE  THEN
+    0 +DO  o data-resend $@ 0= IF  drop  LEAVE  THEN
 	dup >r 2@ -2 and >mask0  dup 0= IF
-	    2drop j^ data-resend 0 2 cells $del
+	    2drop o data-resend 0 2 cells $del
 	ELSE
 	    r@ 2!
 	THEN  rdrop
@@ -911,24 +923,24 @@ end-structure
 file-state-struct buffer: new-file-state
 
 : ?state ( -- )
-    j^ file-state @ 0= IF  s" " j^ file-state $!  THEN ;
+    o file-state @ 0= IF  s" " o file-state $!  THEN ;
 
 : id>addr ( id -- addr remainder )  ?state
-    >r j^ file-state $@ r> file-state-struct * /string ;
+    >r o file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
     id>addr file-state-struct < !!fileid!! ;
 : state-addr ( id -- addr )  ?state
     id>addr dup 0< !!gap!!
-    0= IF  drop new-file-state file-state-struct j^ file-state $+!
-	j^ file-state $@ + file-state-struct -  THEN ;
+    0= IF  drop new-file-state file-state-struct o file-state $+!
+	o file-state $@ + file-state-struct -  THEN ;
 
 : >blockalign ( n -- block )
-    j^ blockalign @ dup >r 1- + r> negate and ;
+    o blockalign @ dup >r 1- + r> negate and ;
 : 64>blockalign ( 64 -- block )
-    j^ blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
+    o blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
-: +expected ( n -- ) >blockalign j^ expected @ tuck + dup j^ expected !
-    j^ data-rmap $@ drop >r r@ data-ackbits0 2@  2swap
+: +expected ( n -- ) >blockalign o expected @ tuck + dup o expected !
+    o data-rmap $@ drop >r r@ data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
 	dup I -bit  over I -bit  LOOP  2drop
     r@ data-firstack0# off  r> data-firstack1# off
@@ -942,29 +954,29 @@ file-state-struct buffer: new-file-state
     r> fs-seek 64@ 64- 64>n +expected ;
 : limit! ( 64 id -- )  state-addr >r
     r@ fs-size 64@ 64umin r> fs-limit 64! ;
-: total! ( n -- )  j^ total ! ;
+: total! ( n -- )  o total ! ;
 
 : net2o:gen-total ( -- 64u ) 64#0
-    j^ file-state $@ bounds ?DO
+    o file-state $@ bounds ?DO
 	I fs-limit 64@ I fs-seekto 64@ 64- 64>blockalign 64#0 64max 64+
     file-state-struct +LOOP ;
 
 : save-blocks ( -- ) +calc ?state
-    j^ data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
-    j^ file-state $@ bounds ?DO
+    o data-rmap $@ drop { map } map dest-raddr @ map dest-tail @ +
+    o file-state $@ bounds ?DO
 	I fs-seekto 64@ I fs-seek 64@ 64over 64over 64u<= IF
 	    64drop 64drop
 	ELSE
 	    I fs-seek 64@ 64>d I fs-fid @ reposition-file throw
-	    64- j^ blocksize @ n>64 64umin 64dup I fs-seek 64+! 64>n
-	    msg( ." flush file <" 2dup swap map dest-raddr @ - hex. hex. I j^ file-state $@ drop - file-state-struct / 0 .r ." > " cr )
+	    64- o blocksize @ n>64 64umin 64dup I fs-seek 64+! 64>n
+	    msg( ." flush file <" 2dup swap map dest-raddr @ - hex. hex. I o file-state $@ drop - file-state-struct / 0 .r ." > " cr )
 	    2dup I fs-fid @ write-file throw
 	    >blockalign +
 	THEN
     file-state-struct +LOOP
     map dest-raddr @ - map dest-tail ! +file ;
 
-: save-all-blocks ( -- )  j^ data-rmap $@ drop >r 
+: save-all-blocks ( -- )  o data-rmap $@ drop >r 
     BEGIN
 	r@ dest-tail @ >r  save-blocks  r>
 	r@ dest-tail @ =  UNTIL  rdrop ;
@@ -989,9 +1001,9 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-block' ( id -- nextseek oldseek ) dup { id }
     id>addr? >r r@ fs-seekto 64@ 64dup 64>d r@ fs-fid @ reposition-file throw
-    data$@ j^ blocksize @ umin r@ fs-limit 64@ r@ fs-seekto 64@ 64- 64>n umin
+    data$@ o blocksize @ umin r@ fs-limit 64@ r@ fs-seekto 64@ 64- 64>n umin
     msg( ." Read <" 2dup swap
-         j^ data-map $@ drop dest-raddr @ - hex. hex. id 0 .r ." >" cr )
+         o data-map $@ drop dest-raddr @ - hex. hex. id 0 .r ." >" cr )
     r@ fs-fid @ read-file throw
     dup >blockalign /data
     n>64 64+ 64dup r> fs-seekto 64!@ ;
@@ -1011,7 +1023,7 @@ file-state-struct buffer: new-file-state
     drop ;
 
 : n2o:slurp-all-blocks-once ( -- sum ) 0 { sum }
-    0 j^ file-state $@ bounds DO
+    0 o file-state $@ bounds DO
 	dup n2o:slurp-block  sum + to sum  1+
     file-state-struct +LOOP  drop sum ;
 
@@ -1028,7 +1040,7 @@ file-state-struct buffer: new-file-state
     LOOP  drop ;
 
 : n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
-    j^ file-state $@len file-state-struct / 0 DO
+    o file-state $@len file-state-struct / 0 DO
 	I id>addr? dup >r fs-seek 64@ r> fs-seekto 64@ 64<> IF
 	    I dup id>addr? dup >r fs-seekto 64@ 64dup r> fs-seek 64!
 	    xt execute  THEN
@@ -1103,10 +1115,10 @@ Variable code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j?
-    j^ ns/burst 64@ 64>n tick-init 1+ / n>64 j^ bandwidth-tick 64+! ;
+    o ns/burst 64@ 64>n tick-init 1+ / n>64 o bandwidth-tick 64+! ;
 
-: burst-end ( -- )  j^ data-b2b @ ?EXIT
-    ticks j^ bandwidth-tick 64@ 64max j^ next-tick 64! ;
+: burst-end ( -- )  o data-b2b @ ?EXIT
+    ticks o bandwidth-tick 64@ 64max o next-tick 64! ;
 
 : sendX ( addr taddr target n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
@@ -1115,9 +1127,9 @@ Variable code-packet
 \ send chunk
 
 : net2o:get-dest ( -- taddr target )
-    data-dest j^ return-address @ ;
+    data-dest o return-address @ ;
 : net2o:get-resend ( -- taddr target )
-    resend-dest j^ return-address @ ;
+    resend-dest o return-address @ ;
 
 : send-size ( u -- n )
     0 max-size^2 DO
@@ -1135,7 +1147,7 @@ Variable code-packet
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
-    j^ data-map $@ drop >r
+    o data-map $@ drop >r
     r@ dest-raddr @ - dup r@ dest-size @ u<
     IF  r> ts-ticks!  ELSE  drop rdrop  THEN ;
 
@@ -1163,8 +1175,8 @@ Variable code-packet
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send-chunk ( -- )  +chunk
-    j^ ack-state @ outflag or!
-    bursts# 1- j^ data-b2b @ = IF
+    o ack-state @ outflag or!
+    bursts# 1- o data-b2b @ = IF
 	\ send a new packet for timing path
 	dest-tail$@ nip IF  net2o:send  ELSE  net2o:resend  THEN
     ELSE
@@ -1172,12 +1184,12 @@ Variable code-packet
     THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
-	sendX  never j^ next-tick 64!
+	sendX  never o next-tick 64!
     ELSE  sendX  THEN ;
 
 : bandwidth? ( -- flag )
-    ticks 64dup last-ticks 64! j^ next-tick 64@ 64- 64-0>=
-    j^ flybursts @ 0> and  ;
+    ticks 64dup last-ticks 64! o next-tick 64@ 64- 64-0>=
+    o flybursts @ 0> and  ;
 
 \ asynchronous sending
 
@@ -1192,11 +1204,11 @@ Create chunk-adder chunks-struct allot
 
 : net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
-	I chunk-context @ j^ = IF
+	I chunk-context @ o = IF
 	    UNLOOP  EXIT
 	THEN
     chunks-struct +LOOP
-    j^ chunk-adder chunk-context !
+    o chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
     ticks ticks-init ;
@@ -1204,35 +1216,35 @@ Create chunk-adder chunks-struct allot
 : chunk-count+ ( counter -- )
     dup @
     dup 0= IF
-	ack-toggle# j^ ack-state xor!
-	-1 j^ flybursts +!
-	j^ flybursts @ 0<= IF
-	    bursts( .j ." no bursts in flight " j^ ns/burst ? dest-tail$@ swap hex. hex. cr )
+	ack-toggle# o ack-state xor!
+	-1 o flybursts +!
+	o flybursts @ 0<= IF
+	    bursts( .j ." no bursts in flight " o ns/burst ? dest-tail$@ swap hex. hex. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-a-chunk ( chunk -- flag )  >r
-    j^ data-b2b @ 0<= IF
+    o data-b2b @ 0<= IF
 	bandwidth? dup  IF
-	    b2b-toggle# j^ ack-state xor!
-	    bursts# 1- j^ data-b2b !
+	    b2b-toggle# o ack-state xor!
+	    bursts# 1- o data-b2b !
 	THEN
     ELSE
-	-1 j^ data-b2b +!  true
+	-1 o data-b2b +!  true
     THEN
     dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  THEN
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
-    .j ." rate: " j^ ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .j ." slack: " j^ min-slack ? cr
-    .j ." rtdelay: " j^ rtdelay ? cr ;
+    .j ." rate: " o ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
+    .j ." slack: " o min-slack ? cr
+    .j ." rtdelay: " o rtdelay ? cr ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
     IF
-	dup chunk-context @ to j^
+	dup chunk-context @ >o rdrop
 	chunk-count
 	data-to-send IF
 	    \ msg( ." send a chunk" cr )
@@ -1283,12 +1295,12 @@ Variable sendflag  sendflag off
     r> data-ackbits1 @ swap -1 fill ;
 
 : net2o:rewind-sender ( n -- )
-    j^ data-map $@ drop
+    o data-map $@ drop
     tuck dest-round @ +DO  dup rewind-buffer  LOOP  drop ;
 
 : net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
-    j^ recv-high on
-    j^ data-rmap $@ drop
+    o recv-high on
+    o data-rmap $@ drop
     tuck dest-round @ +DO  dup rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) ;
 
@@ -1308,7 +1320,7 @@ Create queue-adder  queue-struct allot
 
 : add-queue ( xt us -- )
     ticks +  queue-adder queue-timestamp !
-    j^ queue-adder queue-job !
+    o queue-adder queue-job !
     queue-adder queue-xt !
     queue-adder queue-struct queue $+! ;
 
@@ -1316,7 +1328,7 @@ Create queue-adder  queue-struct allot
     queue $@len 0= ?EXIT  ticks
     queue $@ bounds ?DO
 	dup I queue-timestamp @ u> IF
-	    I queue-job @ to j^
+	    I queue-job @ >o rdrop
 	    I queue-xt @ execute
 	    0 I queue-timestamp !
 	THEN
@@ -1403,7 +1415,7 @@ $08 Constant cookie-val
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
-    0 to j^ \ address 0 has no job context!
+    0 >o rdrop \ address 0 has no job context!
     true wurst-inbuf-decrypt 0= IF
 	." invalid packet to 0" cr EXIT  THEN
     validated off \ packets to address 0 are not really validated
@@ -1412,7 +1424,7 @@ $08 Constant cookie-val
 : handle-data ( addr -- )
     data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
-    +inmove j^ ack-xt perform +ack ;
+    +inmove o ack-xt perform +ack ;
 
 : handle-cmd ( addr -- )
     >r inbuf packet-data r@ swap dup >r move
@@ -1421,8 +1433,8 @@ $08 Constant cookie-val
 : handle-dest ( -- ) \ handle packet to valid destinations
     ticks
     timing( dest-addr @ hex.
-            64dup  j^ time-offset 64@ 64- 64. ." recv timing" cr )
-    j^ recv-tick 64! \ time stamp of arrival
+            64dup  o time-offset 64@ 64- 64. ." recv timing" cr )
+    o recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr @ hex. cr
@@ -1453,7 +1465,7 @@ $08 Constant cookie-val
 
 \ timeout handling
 
-: do-timeout ( -- )  j^ 0= ?EXIT  j^ timeout-xt perform ;
+: do-timeout ( -- )  o 0= ?EXIT  o timeout-xt perform ;
 
 #200000000 Value timeout-max#
 #10 Value timeouts#
@@ -1462,13 +1474,13 @@ Variable timeout-tasks s" " timeout-tasks $!
 Variable timeout-task
 
 : j+timeout ( -- )
-    timeout-tasks $@ bounds ?DO  I @ j^ = IF  UNLOOP  EXIT  THEN
+    timeout-tasks $@ bounds ?DO  I @ o = IF  UNLOOP  EXIT  THEN
     cell +LOOP
-    j^ timeout-task !  timeout-task cell timeout-tasks $+! ;
-: >next-timeout ( -- )  j^ 0= ?EXIT
-    j^ recv-tick 64@  j^ rtdelay 64@ 64dup 64+
+    o timeout-task !  timeout-task cell timeout-tasks $+! ;
+: >next-timeout ( -- )  o 0= ?EXIT
+    o recv-tick 64@  o rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
-    j^ next-timeout 64!  j+timeout ;
+    o next-timeout 64!  j+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
@@ -1477,8 +1489,8 @@ Variable timeout-task
     cell +LOOP  swap ;
 : ?timeout ( -- context/0 )
     ticks next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout  j^ 0= ?EXIT
-    timeouts# j^ timeouts ! >next-timeout ; \ 2s timeout
+: reset-timeout  o 0= ?EXIT
+    timeouts# o timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
 
@@ -1497,13 +1509,13 @@ Variable requests
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
-	ELSE  2drop ?timeout ?dup-IF  to j^
-		j^ rtdelay 64@ 64dup max-int64 64= 0=
-		IF  64dup 64+ j^ rtdelay 64!  ELSE  64drop  THEN
-		ticks j^ recv-tick 64! >next-timeout
-		do-timeout -1 j^ timeouts +!
+	ELSE  2drop ?timeout ?dup-IF  >o rdrop
+		o rtdelay 64@ 64dup max-int64 64= 0=
+		IF  64dup 64+ o rtdelay 64!  ELSE  64drop  THEN
+		ticks o recv-tick 64! >next-timeout
+		do-timeout -1 o timeouts +!
 	    THEN  THEN
-     requests @ 0= j^ IF  j^ timeouts @ 0<=  or  THEN  UNTIL ;
+     requests @ 0= o IF  o timeouts @ 0<=  or  THEN  UNTIL ;
 
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?

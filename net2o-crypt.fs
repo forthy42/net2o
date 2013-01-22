@@ -3,7 +3,7 @@
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 
 : wurst-key$ ( -- addr u )
-    j^ dup 0= IF
+    o dup 0= IF
 	drop wurst-key state#
     ELSE
 	crypto-key $@
@@ -68,11 +68,11 @@ Defer regen-ivs
 
 : wurst-outbuf-init ( flag -- )
     0 to @state
-    j^ IF
+    o IF
 	IF
-	    j^ code-map ivs>code-source?
+	    o code-map ivs>code-source?
 	ELSE
-	    j^ data-map ivs>source?
+	    o data-map ivs>source?
 	THEN
     ELSE
 	drop
@@ -82,11 +82,11 @@ Defer regen-ivs
 
 : wurst-inbuf-init ( flag -- )
     0 to @state
-    j^ IF
+    o IF
 	IF
-	    j^ code-rmap ivs>code-source?
+	    o code-rmap ivs>code-source?
 	ELSE
-	    j^ data-rmap ivs>source?
+	    o data-rmap ivs>source?
 	THEN
     ELSE
 	drop
@@ -207,7 +207,7 @@ Variable do-keypad
 
 : >wurst-key-ivs ( -- )
     wurst-source rounds-setkey
-    j^ dup 0= IF
+    o dup 0= IF
 	crypt( ." IVS generated for non-connection!" cr )
 	drop wurst-key state# wurst-state swap move
     ELSE
@@ -258,25 +258,25 @@ Variable do-keypad
     r@ dest-size @ max-size^2 1- rshift r> dest-ivs ;
 
 : net2o:gen-data-ivs ( addr u -- )
-    j^ data-map ivs-size@ ivs-string ;
+    o data-map ivs-size@ ivs-string ;
 : net2o:gen-code-ivs ( addr u -- )
-    j^ code-map ivs-size@ ivs-string ;
+    o code-map ivs-size@ ivs-string ;
 : net2o:gen-rdata-ivs ( addr u -- )
-    j^ data-rmap ivs-size@ ivs-string ;
+    o data-rmap ivs-size@ ivs-string ;
 : net2o:gen-rcode-ivs ( addr u -- )
-    j^ code-rmap ivs-size@ ivs-string ;
+    o code-rmap ivs-size@ ivs-string ;
 
-: set-key ( addr -- ) j^ 0= IF drop  ." key, no context!" cr  EXIT  THEN
-    keysize 2* j^ crypto-key $!
+: set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
+    keysize 2* o crypto-key $!
     \ double key to get 512 bits
-    j^ crypto-key $@ 2/ 2dup + swap move
-    ( ." set key to:" j^ crypto-key $@ dump ) ;
+    o crypto-key $@ 2/ 2dup + swap move
+    ( ." set key to:" o crypto-key $@ dump ) ;
 
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
 
 : net2o:receive-key ( addr u -- )
-    j^ 0= IF  2drop EXIT  THEN
+    o 0= IF  2drop EXIT  THEN
     ?keysize
     keypad skc rot crypto_scalarmult ;
 
