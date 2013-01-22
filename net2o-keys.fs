@@ -4,16 +4,16 @@ require mkdir.fs
 
 \ hashed key data base
 
-begin-structure key-entry
+object class
 field: ke-sk
 field: ke-nick
 field: ke-name
 field: ke-sigs
 64field: ke-created
 64field: ke-expires
-end-structure
+end-class key-entry
 
-key-entry buffer: sample-key
+key-entry @ buffer: sample-key
 
 Variable key-table
 Variable this-key
@@ -27,7 +27,7 @@ sample-key this-key ! \ dummy
 
 : new-key ( addr u -- )
     \ addr u is the public key
-    sample-key key-entry 2dup erase
+    sample-key key-entry @ 2dup erase
     2over key-table #! current-key ;
 
 : (digits>$) ( addr u -- addr' u' ) save-mem
