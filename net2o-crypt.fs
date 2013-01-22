@@ -29,36 +29,36 @@
 
 Defer regen-ivs
 
-: dest-a/b ( addr u map -- addr1 u1 )
+: dest-a/b ( addr u -- addr1 u1 )
     dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN ;
 
-: clear-replies ( addr -- )  >r
-    r@ dest-replies @ r@ dest-size @ addr>replies r@ dest-a/b
+: clear-replies ( -- )
+    dest-replies @ dest-size @ addr>replies dest-a/b
     cmd( ." Clear replies " over hex. dup hex. cr )
-    erase  rdrop ;
+    erase ;
 
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
-    $@ drop >r
-    dest-addr @ r@ 2@ >r - dup r> u<
+    $@ drop >o
+    dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	r@ dest-ivs @ over +
-	swap r> regen-ivs >wurst-source-state
+	dest-ivs @ over +
+	swap o regen-ivs >wurst-source-state o>
 	EXIT
     THEN
-    drop rdrop ;
+    drop o> ;
 
 : ivs>source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
-    $@ drop >r
-    dest-addr @ r@ 2@ >r - dup r> u<
+    $@ drop >o
+    dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	r> dest-ivs @ + >wurst-source-state
+	dest-ivs @ + >wurst-source-state o>
 	EXIT
     THEN
-    drop rdrop ;
+    drop o> ;
 
 : default-key ( -- )
     @state 0= IF
@@ -70,9 +70,9 @@ Defer regen-ivs
     0 to @state
     o IF
 	IF
-	    o code-map ivs>code-source?
+	    code-map ivs>code-source?
 	ELSE
-	    o data-map ivs>source?
+	    data-map ivs>source?
 	THEN
     ELSE
 	drop
@@ -84,9 +84,9 @@ Defer regen-ivs
     0 to @state
     o IF
 	IF
-	    o code-rmap ivs>code-source?
+	    code-rmap ivs>code-source?
 	ELSE
-	    o data-rmap ivs>source?
+	    data-rmap ivs>source?
 	THEN
     ELSE
 	drop
@@ -207,12 +207,11 @@ Variable do-keypad
 
 : >wurst-key-ivs ( -- )
     wurst-source rounds-setkey
-    o dup 0= IF
+    o 0= IF
 	crypt( ." IVS generated for non-connection!" cr )
-	drop wurst-key state# wurst-state swap move
+	wurst-key state# wurst-state swap move
     ELSE
 	do-keypad @ IF
-	    drop
 	    keypad wurst-state keysize move
 	    keypad wurst-state keysize + keysize move
 	ELSE
@@ -220,32 +219,32 @@ Variable do-keypad
 	THEN
     THEN ;
 
-: regen-ivs/2 ( map -- ) >r
-    r@ dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) rounds-setkey
-    r@ clear-replies
-    r@ dest-ivs $@ r@ dest-a/b 2dup erase
+: regen-ivs/2 ( -- )
+    dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) rounds-setkey
+    clear-replies
+    dest-ivs $@ dest-a/b 2dup erase
     dup mem-rounds# encrypt-buffer 2drop
-    -1 r> dest-ivslastgen xor! ;
+    -1 dest-ivslastgen xor! ;
 
 : gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
     start-diffuse
     r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
     r> cell+ @ wurst-source-state> ;
 
-: regen-ivs-all ( map -- ) >r
-    r@ dest-ivsgen @ rounds-setkey
+: regen-ivs-all ( map -- ) >o
+    dest-ivsgen @ rounds-setkey
 \    @state state# 2* dump
-    r> dest-ivs gen-ivs ;
+    dest-ivs gen-ivs o> ;
 
-: (regen-ivs) ( offset map -- ) >r
-    dup r@ dest-ivs $@len
-    r@ dest-ivslastgen @ IF \ check if in quarter 2
+: (regen-ivs) ( offset map -- ) >o
+    dup dest-ivs $@len
+    dest-ivslastgen @ IF \ check if in quarter 2
 	2/ 2/ dup bounds within 0=
     ELSE \ check if in quarter 4
 	2/ dup 2/ + u>
     THEN  IF
-	r@ regen-ivs/2
-    THEN  drop rdrop ;
+	regen-ivs/2
+    THEN  drop o> ;
 ' (regen-ivs) IS regen-ivs
 
 : ivs-string ( addr u n addr -- )
@@ -254,22 +253,22 @@ Variable do-keypad
     state# <> !!ivs!! >wurst-source'
     r> gen-ivs ;
 
-: ivs-size@ ( map -- n addr ) $@ drop >r
-    r@ dest-size @ max-size^2 1- rshift r> dest-ivs ;
+: ivs-size@ ( map -- n addr ) $@ drop >o
+    dest-size @ max-size^2 1- rshift dest-ivs o> ;
 
 : net2o:gen-data-ivs ( addr u -- )
-    o data-map ivs-size@ ivs-string ;
+    data-map ivs-size@ ivs-string ;
 : net2o:gen-code-ivs ( addr u -- )
-    o code-map ivs-size@ ivs-string ;
+    code-map ivs-size@ ivs-string ;
 : net2o:gen-rdata-ivs ( addr u -- )
-    o data-rmap ivs-size@ ivs-string ;
+    data-rmap ivs-size@ ivs-string ;
 : net2o:gen-rcode-ivs ( addr u -- )
-    o code-rmap ivs-size@ ivs-string ;
+    code-rmap ivs-size@ ivs-string ;
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
-    keysize 2* o crypto-key $!
+    keysize 2* crypto-key $!
     \ double key to get 512 bits
-    o crypto-key $@ 2/ 2dup + swap move
+    crypto-key $@ 2/ 2dup + swap move
     ( ." set key to:" o crypto-key $@ dump ) ;
 
 : ?keysize ( u -- )
@@ -285,4 +284,3 @@ Variable do-keypad
 	keypad set-key
 	do-keypad off
     THEN ;
-

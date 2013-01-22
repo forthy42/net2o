@@ -1051,8 +1051,9 @@ file-state-struct buffer: new-file-state
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
-o]
+
 include net2o-crypt.fs
+o]
 include net2o-keys.fs
 
 \ cookie stuff
