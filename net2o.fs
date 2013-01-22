@@ -759,35 +759,34 @@ timestats buffer: stat-tuple
 : rmap@ ( -- addr/0 )
     0 j?  data-rmap @ 0= ?EXIT
     drop data-rmap $@ drop ;
-o]
 
-: >offset ( addr map -- addr' flag ) >r
-    r@ dest-vaddr @ - dup r> dest-size @ u< ;
+: >offset ( addr map -- addr' flag ) >o
+    dest-vaddr @ - dup dest-size @ u< o> ;
 
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    o rtdelay 64@ 64>n rt-bias# + o ns/burst 64@ 64>n / flybursts# +
+    rtdelay 64@ 64>n rt-bias# + ns/burst 64@ 64>n / flybursts# +
     bursts( dup . .j ." flybursts "
-    o rtdelay 64@ 64. o ns/burst 64@ 64. ." rtdelay" cr )
-    dup o flyburst ! ;
-: net2o:max-flyburst ( bursts -- ) o flybursts max!@
+    rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
+    dup flyburst ! ;
+: net2o:max-flyburst ( bursts -- ) flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : >flyburst ( -- )
-    o flyburst @ o flybursts max!@ \ reset bursts in flight
-    0= IF  o recv-tick 64@ ticks-init
-	bursts( .j ." restart bursts " o flybursts ? cr )
+    flyburst @ flybursts max!@ \ reset bursts in flight
+    0= IF  recv-tick 64@ ticks-init
+	bursts( .j ." restart bursts " flybursts ? cr )
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
 : >timestamp ( time addr -- time' ts-array index / 0 0 )
     >flyburst
-    >r o time-offset 64@ 64+ r>
+    >r time-offset 64@ 64+ r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ >offset  IF
-	r@ dest-tail @ over - 0 max addr>bits o window-size !
-	addr>ts r> dest-timestamps @ swap
+	r@ >o dest-tail @ o> over - 0 max addr>bits window-size !
+	addr>ts r> >o dest-timestamps @ o> swap
     ELSE  drop rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
@@ -797,7 +796,7 @@ o]
 	IF  + dup >r  dup ts-ticks 64@
 	    r> tick-init 1+ timestamp * - ts-ticks 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
-	    IF  64drop 64drop  ELSE  64- o lastdeltat 64!  THEN
+	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
@@ -812,17 +811,17 @@ o]
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
 
-: slack-max# ( -- n ) o max-slack 64@ o min-slack 64@ 64- ;
+: slack-max# ( -- n ) max-slack 64@ min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : >slack-exp ( -- rfactor )
-    o lastslack 64@ o min-slack 64@ 64- 64>n
-    slack( dup . o min-slack ? .j ." slack" cr )
+    lastslack 64@ min-slack 64@ 64- 64>n
+    slack( dup . min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f**
     ( slack# / lshift ) ;
-
+o]
 : aggressivity-rate ( slack -- slack' )
     slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ;
 
