@@ -821,49 +821,49 @@ timestats buffer: stat-tuple
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f**
     ( slack# / lshift ) ;
-o]
+
 : aggressivity-rate ( slack -- slack' )
     slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ;
 
 : slackext ( rfactor -- slack )
-    o slackgrow 64@
-    o window-size @ tick-init 1+ bursts# - 64*/
+    slackgrow 64@
+    window-size @ tick-init 1+ bursts# - 64*/
     64>f f* f>64
-    o slackgrow' 64@ 64+ 64dup ext-damp# 64*/ o slackgrow' 64!
+    slackgrow' 64@ 64+ 64dup ext-damp# 64*/ slackgrow' 64!
     64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
     \ not too quickly go slower or faster!
-    64>n o last-ns/burst 64@ 64>n
+    64>n last-ns/burst 64@ 64>n
     ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
-    dup n>64 o last-ns/burst 64! n>64 ;
+    dup n>64 last-ns/burst 64! n>64 ;
 
 : extra-limit ( rate -- rate' )
-    dup o extra-ns 64@ 64>n 2* 2* u> IF
-	o extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 o extra-ns 64! -
+    dup extra-ns 64@ 64>n 2* 2* u> IF
+	extra-ns 64@ 64>n + dup 2/ 2/ dup n>64 extra-ns 64! -
     THEN ;
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
-    64dup o extra-ns 64! 64+ ( extra-limit ) ;
+    64dup extra-ns 64! 64+ ( extra-limit ) ;
 
 : rate-stat1 ( rate deltat -- )
-    stats( o recv-tick 64@ o time-offset 64@ 64-
-           64dup o last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+    stats( recv-tick 64@ time-offset 64@ 64-
+           64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! )
     rate( 64over 64. .j ." clientrate" cr )
-    deltat( 64dup 64. o lastdeltat 64@ 64. .j ." deltat" cr ) ;
+    deltat( 64dup 64. lastdeltat 64@ 64. .j ." deltat" cr ) ;
 
 : rate-stat2 ( rate -- )
     rate( 64dup 64. .j ." rate" cr )
-    stats( 64dup o extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
-           o slackgrow 64@ 64>f stat-tuple ts-grow sf! 
+    stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
+           slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns ens( 64nip )else( 64drop )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat ) rate-stat2
-    o ns/burst 64!@
+    ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
@@ -877,7 +877,7 @@ $20 Value mask-bits#
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )
     resend( ." mask: " hex[ 64>r dup . 64r> 64dup 64. ]hex cr )
-    o data-resend $@ bounds ?DO
+    data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
 	    over I 2@ rot >r
 	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
@@ -889,28 +889,28 @@ $20 Value mask-bits#
     2 cells +LOOP
     >mask0 resend-buf 2!
     resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
-    resend-buf 2 cells o data-resend $+! ;
+    resend-buf 2 cells data-resend $+! ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
-    o ack-state @ resend-toggle# invert and or o ack-state ! ;
+    ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
-    o data-map $@ drop >r r@ dest-vaddr @ - r> dest-raddr @ + ;
+    data-map $@ drop >o dest-vaddr @ - dest-raddr @ + o> ;
 : resend$@ ( -- addr u )
-    o data-resend $@  IF
+    data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
 	swap >real-range swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
-    o data-resend $@ drop 2@ drop ;
+    data-resend $@ drop 2@ drop ;
 : /resend ( u -- )
-    0 +DO  o data-resend $@ 0= IF  drop  LEAVE  THEN
+    0 +DO  data-resend $@ 0= IF  drop  LEAVE  THEN
 	dup >r 2@ -2 and >mask0  dup 0= IF
-	    2drop o data-resend 0 2 cells $del
+	    2drop data-resend 0 2 cells $del
 	ELSE
 	    r@ 2!
 	THEN  rdrop
     maxdata +LOOP ;
-
+o]
 \ file handling
 
 \ file states
