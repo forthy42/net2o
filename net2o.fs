@@ -34,9 +34,9 @@ Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
 compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 
 ' o-sp to var-xt
-: [o  do-stackrel off ; immediate
-: o]  do-stackrel on ;  immediate
-o]
+: [o  do-stackrel @ do-stackrel off ; immediate
+: o]  do-stackrel ! ;  immediate
+do-stackrel on
 
 \ helper words
 
@@ -637,8 +637,7 @@ Variable init-context#
     64#0                extra-ns 64! o] ;
 
 : n2o:new-context ( addr -- ) [o
-    context-struct allocate throw >o rdrop
-    o context-struct erase
+    context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
     dup return-addr !  return-address !
     s" " data-resend $!
@@ -704,10 +703,10 @@ $400 buffer: aligned$
 \ timing records
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    s" " o timing-stat $! ;
+    [o s" " timing-stat $! o] ;
 
 : )stats ]] THEN [[ ;
-: stats( ]] o timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+: stats( ]] [o timing-stat @ o] IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
     stats( o timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
@@ -715,51 +714,52 @@ $400 buffer: aligned$
     stats( o timing-stat 0 rot $del ) ;
 
 : net2o:rec-timing ( addr u -- ) $>align \ do some dumps
-    bounds ?DO
-	I ts-delta sf@ f>64 o last-time 64+!
-	o last-time 64@ 64>f 1n f* fdup f.
-	o time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
+    bounds ?DO [o
+	I ts-delta sf@ f>64 last-time 64+!
+	last-time 64@ 64>f 1n f* fdup f.
+	time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
 	I ts-rate sf@ f/ f.
 	I ts-grow sf@ 1u f* f.
-	." timing" cr
+	." timing" cr o]
     timestats +LOOP ;
 
 timestats buffer: stat-tuple
-
-: stat+ ( addr -- )  stat-tuple timestats  o timing-stat $+! ;
+[o
+: stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
 \ flow control
 
 : ticks-init ( ticks -- )
-    64dup o bandwidth-tick 64!  o next-tick 64! ;
+    64dup bandwidth-tick 64!  next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    o recv-tick 64@ 64dup o lastack 64!
-    64over 64- o rtdelay 64min! ;
+    recv-tick 64@ 64dup lastack 64!
+    64over 64- rtdelay 64min! ;
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
-    >rtdelay  64- 64dup o lastslack 64!
-    o lastdeltat 64@ delta-damp# 64rshift
-    64dup o min-slack 64+! 64negate o max-slack 64+!
-    64dup o min-slack 64min!
-    o max-slack 64max! ;
+    >rtdelay  64- 64dup lastslack 64!
+    lastdeltat 64@ delta-damp# 64rshift
+    64dup min-slack 64+! 64negate max-slack 64+!
+    64dup min-slack 64min!
+    max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- o lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
-    o slackgrow 64! ;
+    64- lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
+    slackgrow 64! ;
 
 : map@ ( -- addr/0 )
-    0 j?  o data-map @ 0= ?EXIT
-    drop o data-map $@ drop ;
+    0 j?  data-map @ 0= ?EXIT
+    drop data-map $@ drop ;
 : rmap@ ( -- addr/0 )
-    0 j?  o data-rmap @ 0= ?EXIT
-    drop o data-rmap $@ drop ;
+    0 j?  data-rmap @ 0= ?EXIT
+    drop data-rmap $@ drop ;
+o]
 
 : >offset ( addr map -- addr' flag ) >r
     r@ dest-vaddr @ - dup r> dest-size @ u< ;
