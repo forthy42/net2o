@@ -21,9 +21,9 @@ Variable this-keyid
 sample-key this-key ! \ dummy
 
 : current-key ( addr u -- )
-    key-table #@ drop this-key ! ;
+    key-table #@ drop dup this-key ! >o rdrop ;
 : make-thiskey ( addr -- )
-    dup $@ drop this-keyid !  cell+ $@ drop this-key ! ;
+    dup $@ drop this-keyid !  cell+ $@ drop dup this-key ! >o rdrop ;
 
 : new-key ( addr u -- )
     \ addr u is the public key
@@ -49,27 +49,27 @@ Vocabulary key-parser
 also key-parser definitions
 
 : id: ( "id" -- ) 0 parse hex>$ new-key ;
-: sk: ( "sk" -- ) 0 parse hex>$ ^key ke-sk $! ;
-: nick: ( "sk" -- ) 0 parse ^key ke-nick $! ;
-: name: ( "sk" -- ) 0 parse ^key ke-name $! ;
-: created: ( "number" -- )  parse-name s>number d>64 ^key ke-created 64! ;
-: expires: ( "number" -- )  parse-name s>number d>64 ^key ke-expires 64! ;
+: sk: ( "sk" -- ) 0 parse hex>$ ke-sk $! ;
+: nick: ( "sk" -- ) 0 parse ke-nick $! ;
+: name: ( "sk" -- ) 0 parse ke-name $! ;
+: created: ( "number" -- )  parse-name s>number d>64 ke-created 64! ;
+: expires: ( "number" -- )  parse-name s>number d>64 ke-expires 64! ;
 
 previous definitions
 
 : .key ( addr -- )  dup @ 0= IF  drop  EXIT  THEN
-    ." id: "   dup $@ xtype cr cell+ $@ drop >r
-    r@ ke-sk   @ IF  ." sk: "   r@ ke-sk $@ xtype cr  THEN
-    r@ ke-nick @ IF  ." nick: " r@ ke-nick $@ type cr  THEN
-    r@ ke-name @ IF  ." name: " r@ ke-name $@ type cr  THEN
-    r@ ke-created 64@ 64dup 64-0= IF  64drop
+    ." id: "   dup $@ xtype cr cell+ $@ drop >o
+    ke-sk   @ IF  ." sk: "   ke-sk $@ xtype cr  THEN
+    ke-nick @ IF  ." nick: " ke-nick $@ type cr  THEN
+    ke-name @ IF  ." name: " ke-name $@ type cr  THEN
+    ke-created 64@ 64dup 64-0= IF  64drop
     ELSE  ." created: " 64>d d. cr  THEN
-    r@ ke-expires 64@ 64dup 64-0= IF  64drop
+    ke-expires 64@ 64dup 64-0= IF  64drop
     ELSE  ." expires: " 64>d d. cr  THEN
-    rdrop cr ;
+    o> cr ;
 
-: .skey ( addr -- )  dup ke-sk @    IF  .key  ELSE  drop  THEN ;
-: .pkey ( addr -- )  dup ke-sk @ 0= IF  .key  ELSE  drop  THEN ;
+: .skey ( addr -- )  dup cell+ $@ drop @    IF  .key  ELSE  drop  THEN ;
+: .pkey ( addr -- )  dup cell+ $@ drop @ 0= IF  .key  ELSE  drop  THEN ;
 
 : dump-skeys ( fd -- )
     [: key-table ['] .skey #map ;] swap outfile-execute ;
@@ -96,8 +96,8 @@ previous definitions
     0  BEGIN  dup n <  WHILE  r> swap 1+  REPEAT
     ret >r ;
 
-: scan-keys ( fd -- )  get-order n>r
-    only previous  key-parser  include-file  nr> set-order ;
+: scan-keys ( fd -- )  0 >o get-order n>r
+    only previous  key-parser  include-file  nr> set-order o> ;
 
 : ?scan-keys ( addr u -- )
     r/w open-file 0= IF scan-keys ELSE drop THEN ;
@@ -112,13 +112,13 @@ previous definitions
 
 : nick-key ( addr u -- ) \ search for key nickname and make current
     key-table 
-    [: dup >r cell+ $@ drop ke-nick $@ 2over str= IF
+    [: dup >r cell+ $@ drop >o ke-nick $@ o> 2over str= IF
 	r@ make-thiskey
-    THEN  rdrop ;] #map ;
+    THEN  rdrop ;] #map 2drop ;
 
 : name-key ( addr u -- ) \ search for key name and make current
     key-table 
-    [: dup >r cell+ $@ drop ke-name $@ 2over str= IF
+    [: dup >r cell+ $@ drop >o ke-name $@ o> 2over str= IF
 	r@ make-thiskey
     THEN  rdrop ;] #map ;
 
@@ -182,4 +182,4 @@ $100 Value passphrase-diffuse#
     key-table @ 0= IF  read-keys  THEN
     nick-key
     this-keyid @ pkc keysize move
-    ^key ke-sk $@ testskc swap move  decrypt-skc ;
+    ke-sk $@ testskc swap move  decrypt-skc ;

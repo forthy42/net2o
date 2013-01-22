@@ -1053,8 +1053,8 @@ file-state-struct buffer: new-file-state
     LOOP ;
 
 include net2o-crypt.fs
-o]
 include net2o-keys.fs
+o]
 
 \ cookie stuff
 
