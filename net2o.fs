@@ -34,7 +34,9 @@ Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
 compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 
 ' o-sp to var-xt
-do-stackrel on
+: [o  do-stackrel off ; immediate
+: o]  do-stackrel on ;  immediate
+o]
 
 \ helper words
 
@@ -412,7 +414,7 @@ rdata-class @ Constant rdata-struct
 
 \ job context structure
 
-begin-structure context-struct
+object class
 field: context#
 field: context-state
 field: return-address
@@ -481,7 +483,8 @@ field: timing-stat
 64field: last-time
 \ make timestamps smaller
 64field: time-offset
-end-structure
+end-class context-class
+context-class @ constant context-struct
 
 begin-structure timestamp
 64field: ts-ticks
@@ -514,10 +517,11 @@ Variable dest-map s" " dest-map $!
     $@ bounds ?DO
 	I @ 2@ 1- bounds dest-addr @ within
 	0= IF
-	    I @ dest-vaddr 2@ dest-addr @ swap - +
-	    I @ code-flag @ IF  1  ELSE  -1  THEN
-	    I @ dest-job @ >o rdrop
-	    return-addr @ dup o return-address !@ <>
+	    [o I @ >o
+	    dest-vaddr 2@ dest-addr @ swap - +
+	    code-flag @ IF  1  ELSE  -1  THEN
+	    dest-job @ o> >o rdrop
+	    return-addr @ dup return-address !@ <> o]
 	    IF  msg( ." handover" cr )  THEN
 	    UNLOOP  EXIT  THEN
     cell +LOOP
@@ -525,7 +529,7 @@ Variable dest-map s" " dest-map $!
 
 \ context debugging
 
-: .j ( -- ) o context# ? ;
+: .j ( -- ) [o context# ? o] ;
 : j? ( -- ) ]] o 0= ?EXIT [[ ; immediate
 
 \ Destination mapping contains
@@ -605,11 +609,11 @@ Variable mapstart $10000 mapstart !
 : n2o:new-data ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag off
-    tuck  o data-rmap map-dest  map-source  o data-map $! ;
+    tuck [o data-rmap map-dest  map-source  data-map $! o] ;
 : n2o:new-code ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag on
-    tuck  o code-rmap map-dest  map-source  o code-map $! ;
+    tuck [o code-rmap map-dest  map-source  code-map $! o] ;
 
 \ create context
 
@@ -622,26 +626,26 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 
 Variable init-context#
 
-: init-flow-control ( -- )
-    max-int64 64-2/ o min-slack 64!
-    max-int64 64-2/ 64negate o max-slack 64!
-    max-int64 o rtdelay 64!
-    flybursts# dup o flybursts ! o flyburst !
-    ticks o lastack 64! \ asking for context creation is as good as an ack
-    bandwidth-init n>64 o ns/burst 64!
-    never               o next-tick 64!
-    64#0                o extra-ns 64! ;
+: init-flow-control ( -- ) [o
+    max-int64 64-2/ min-slack 64!
+    max-int64 64-2/ 64negate max-slack 64!
+    max-int64 rtdelay 64!
+    flybursts# dup flybursts ! flyburst !
+    ticks lastack 64! \ asking for context creation is as good as an ack
+    bandwidth-init n>64 ns/burst 64!
+    never               next-tick 64!
+    64#0                extra-ns 64! o] ;
 
-: n2o:new-context ( addr -- )
+: n2o:new-context ( addr -- ) [o
     context-struct allocate throw >o rdrop
     o context-struct erase
-    init-context# @ o context# !  1 init-context# +!
-    dup return-addr !  o return-address !
-    s" " o data-resend $!
-    wurst-key state# o crypto-key $!
+    init-context# @ context# !  1 init-context# +!
+    dup return-addr !  return-address !
+    s" " data-resend $!
+    wurst-key state# crypto-key $!
     init-flow-control
-    -1 o blocksize !
-    1 o blockalign ! ;
+    -1 blocksize !
+    1 blockalign ! o] ;
 
 : data$@ ( -- addr u )
     o data-map $@ drop >r
