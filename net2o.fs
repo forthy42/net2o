@@ -37,7 +37,7 @@ compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 : [o  do-stackrel @ do-stackrel off ; immediate
 : o]  do-stackrel ! ;  immediate
 do-stackrel on
-
+[o
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
@@ -517,11 +517,11 @@ Variable dest-map s" " dest-map $!
     $@ bounds ?DO
 	I @ 2@ 1- bounds dest-addr @ within
 	0= IF
-	    [o I @ >o
+	    I @ >o
 	    dest-vaddr 2@ dest-addr @ swap - +
 	    code-flag @ IF  1  ELSE  -1  THEN
 	    dest-job @ o> >o rdrop
-	    return-addr @ dup return-address !@ <> o]
+	    return-addr @ dup return-address !@ <>
 	    IF  msg( ." handover" cr )  THEN
 	    UNLOOP  EXIT  THEN
     cell +LOOP
@@ -529,7 +529,7 @@ Variable dest-map s" " dest-map $!
 
 \ context debugging
 
-: .j ( -- ) [o context# ? o] ;
+: .j ( -- ) context# ? ;
 : j? ( -- ) ]] o 0= ?EXIT [[ ; immediate
 
 \ Destination mapping contains
@@ -538,7 +538,7 @@ Variable dest-map s" " dest-map $!
 \ context - for exec regions, this is the job context
 
 Create dest-mapping    here rdata-struct dup allot erase
-dest-mapping code-flag Constant >code-flag
+dest-mapping >o code-flag o> Constant >code-flag
 
 Create source-mapping  here data-struct dup allot erase
 Variable mapping-addr
@@ -563,36 +563,36 @@ Variable mapping-addr
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
 : map-string ( addr u addrx -- addrx u2 )
-    >r tuck r@ dest-size 2!
-    dup alloc+guard r@ dest-raddr !
-    state# 2* allocatez r@ dest-ivsgen !
+    o swap >o dest-job !
+    tuck dest-size 2!
+    dup alloc+guard dest-raddr !
+    state# 2* allocatez dest-ivsgen !
     >code-flag @ IF
-	dup addr>replies allocatez r@ dest-replies !
+	dup addr>replies allocatez dest-replies !
     ELSE
-	dup addr>ts allocatez r@ dest-timestamps !
-	dup addr>ts allocatez r@ dest-cookies !
-	dup addr>bits bits>bytes allocate-bits r@ data-ackbits0 !
-	dup addr>bits bits>bytes allocate-bits r@ data-ackbits1 !
-	s" " r@ data-ackbits-buf $!
+	dup addr>ts allocatez dest-timestamps !
+	dup addr>ts allocatez dest-cookies !
+	dup addr>bits bits>bytes allocate-bits data-ackbits0 !
+	dup addr>bits bits>bytes allocate-bits data-ackbits1 !
+	s" " data-ackbits-buf $!
     THEN
-    r@ data-lastack# on
+    data-lastack# on
     drop
-    o r@ dest-job !
-    r> rdata-struct ;
+    o rdata-struct  o> ;
 
 : map-source-string ( addr u addrx -- addrx u2 )
-    >r tuck r@ dest-size 2!
-    dup alloc+guard r@ dest-raddr !
-    dup addr>ts allocatez r@ dest-cookies !
-    state# 2* allocatez r@ dest-ivsgen !
+    o swap >o dest-job !
+    tuck dest-size 2!
+    dup alloc+guard dest-raddr !
+    dup addr>ts allocatez dest-cookies !
+    state# 2* allocatez dest-ivsgen !
     dup >code-flag @ IF
-	addr>replies  allocatez r@ dest-replies !
+	addr>replies  allocatez dest-replies !
     ELSE
-	addr>ts       allocatez r@ dest-timestamps !
+	addr>ts       allocatez dest-timestamps !
     THEN
     drop
-    o r@ dest-job !
-    r> code-struct ;
+    o code-struct o> ;
 
 : map-dest ( vaddr u addr -- )
 \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
@@ -609,11 +609,11 @@ Variable mapstart $10000 mapstart !
 : n2o:new-data ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag off
-    tuck [o data-rmap map-dest  map-source  data-map $! o] ;
+    tuck data-rmap map-dest  map-source  data-map $! ;
 : n2o:new-code ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag on
-    tuck [o code-rmap map-dest  map-source  code-map $! o] ;
+    tuck code-rmap map-dest  map-source  code-map $! ;
 
 \ create context
 
@@ -626,7 +626,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 
 Variable init-context#
 
-: init-flow-control ( -- ) [o
+: init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
     max-int64 64-2/ 64negate max-slack 64!
     max-int64 rtdelay 64!
@@ -634,9 +634,9 @@ Variable init-context#
     ticks lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init n>64 ns/burst 64!
     never               next-tick 64!
-    64#0                extra-ns 64! o] ;
+    64#0                extra-ns 64! ;
 
-: n2o:new-context ( addr -- ) [o
+: n2o:new-context ( addr -- )
     context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
     dup return-addr !  return-address !
@@ -644,56 +644,56 @@ Variable init-context#
     wurst-key state# crypto-key $!
     init-flow-control
     -1 blocksize !
-    1 blockalign ! o] ;
+    1 blockalign ! ;
 
 : data$@ ( -- addr u )
-    o data-map $@ drop >r
-    r@ dest-raddr @  r@ dest-size @ r> data-head @ safe/string ;
+    data-map $@ drop >o
+    dest-raddr @  dest-size @ data-head @ safe/string o> ;
 : /data ( u -- )
-    o data-map $@ drop data-head +! ;
+    data-map $@ drop >o data-head +! o> ;
 : dest-tail$@ ( -- addr u )
-    o data-map $@ drop >r
-    r@ dest-raddr @  r@ data-head @ r> dest-tail @ safe/string ;
+    data-map $@ drop >o
+    dest-raddr @  data-head @ dest-tail @ safe/string o> ;
 : /dest-tail ( u -- )
-    o data-map $@ drop dest-tail +! ;
+    data-map $@ drop >o dest-tail +! o> ;
 : data-dest ( -- addr )
-    o data-map $@ drop >r
-    r@ dest-vaddr @ r> dest-tail @ + ;
+    data-map $@ drop >o
+    dest-vaddr @ dest-tail @ + o> ;
 
 \ code sending around
 
 : code-dest ( -- addr )
-    o code-map $@ drop >r
-    r@ dest-raddr @ r> dest-tail @ + ;
+    code-map $@ drop >o
+    dest-raddr @ dest-tail @ + o> ;
 
 : code-vdest ( -- addr )
-    o code-map $@ drop >r
-    r@ dest-vaddr @ r> dest-tail @ + ;
+    code-map $@ drop >o
+    dest-vaddr @ dest-tail @ + o> ;
 
 : code-reply ( -- addr )
-    o code-map $@ drop >r
-    r@ dest-tail @ addr>replies r> dest-replies @ + ;
+    code-map $@ drop >o
+    dest-tail @ addr>replies dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
-    dest-addr @ o code-rmap $@ drop >r r@ dest-vaddr @ -
-    addr>replies r> dest-replies @ + ;
+    dest-addr @ code-rmap $@ drop >o dest-vaddr @ -
+    addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
 
 : reply[] ( index -- addr )
-    o code-map $@ drop >r
-    dup r@ dest-size @ addr>bits u<
-    IF  reply * r@ dest-replies @ +  ELSE  dummy-reply  THEN  rdrop ;
+    code-map $@ drop >o
+    dup dest-size @ addr>bits u<
+    IF  reply * dest-replies @ +  ELSE  dummy-reply  THEN  o> ;
 
 : reply-index ( -- index )
-    o code-map $@ drop dest-tail @ addr>bits ;
+    code-map $@ drop >o dest-tail @ addr>bits o> ;
 
 : code+ ( -- )
-    o code-map $@ drop >r
-    maxdata r@ dest-tail +!
-    r@ dest-tail @ r@ dest-size @ u>= IF  r@ dest-tail off  THEN
-\    cmd( ." set dest-tail to " r@ dest-tail @ hex. cr )
-    rdrop ;
+    code-map $@ drop >o
+    maxdata dest-tail +!
+    dest-tail @ dest-size @ u>= IF  dest-tail off  THEN
+\    cmd( ." set dest-tail to " dest-tail @ hex. cr )
+    o> ;
 
 \ aligned buffer to make encryption/decryption fast
 $400 buffer: aligned$
@@ -703,18 +703,18 @@ $400 buffer: aligned$
 \ timing records
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    [o s" " timing-stat $! o] ;
+    s" " timing-stat $! ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] [o timing-stat @ o] IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
-    stats( o timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
+    stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
 : net2o:/timing ( n -- )
-    stats( o timing-stat 0 rot $del ) ;
+    stats( timing-stat 0 rot $del ) ;
 
 : net2o:rec-timing ( addr u -- ) $>align \ do some dumps
-    bounds ?DO [o
+    bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
 	time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
@@ -723,11 +723,11 @@ $400 buffer: aligned$
 	I ts-reqrate sf@ f/ f.
 	I ts-rate sf@ f/ f.
 	I ts-grow sf@ 1u f* f.
-	." timing" cr o]
+	." timing" cr
     timestats +LOOP ;
 
 timestats buffer: stat-tuple
-[o
+
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
 \ flow control
@@ -1052,8 +1052,8 @@ file-state-struct buffer: new-file-state
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
 
-include net2o-crypt.fs
-include net2o-keys.fs
+require net2o-crypt.fs
+require net2o-keys.fs
 
 \ cookie stuff
 
@@ -1538,7 +1538,7 @@ Variable requests
 
 \ load net2o commands
 
-include net2o-cmd.fs
+require net2o-cmd.fs
 
 0 [IF]
 Local Variables:
