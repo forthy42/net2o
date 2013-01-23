@@ -1309,35 +1309,33 @@ Variable sendflag  sendflag off
     data-rmap $@ drop >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;
-o]
+
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
 
 \ schedule delayed events
 
-begin-structure queue-struct
+object class
 field: queue-timestamp
 field: queue-job
 field: queue-xt
-end-structure
+end-class queue-class
+queue-class @ Constant queue-struct
 
 Variable queue s" " queue $!
 Create queue-adder  queue-struct allot
 
 : add-queue ( xt us -- )
-    ticks +  queue-adder queue-timestamp !
-    o queue-adder queue-job !
-    queue-adder queue-xt !
-    queue-adder queue-struct queue $+! ;
+    ticks +  o queue-adder >o queue-job !  queue-timestamp !
+    queue-xt !  o queue-struct queue $+! o> ;
 
 : eval-queue ( -- )
     queue $@len 0= ?EXIT  ticks
-    queue $@ bounds ?DO
-	dup I queue-timestamp @ u> IF
-	    I queue-job @ >o rdrop
-	    I queue-xt @ execute
-	    0 I queue-timestamp !
-	THEN
+    queue $@ bounds ?DO  I >o
+	dup queue-timestamp @ u> IF
+	    queue-xt @ queue-job @ >o execute o>
+	    0 queue-timestamp !
+	THEN o>
     queue-struct +LOOP  drop
     0 >r BEGIN  r@ queue $@len u<  WHILE
 	    queue $@ r@ safe/string drop queue-timestamp @ 0= IF
@@ -1430,7 +1428,7 @@ $08 Constant cookie-val
 : handle-data ( addr -- )
     data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
-    +inmove o ack-xt perform +ack ;
+    +inmove ack-xt perform +ack ;
 
 : handle-cmd ( addr -- )
     >r inbuf packet-data r@ swap dup >r move
@@ -1439,8 +1437,8 @@ $08 Constant cookie-val
 : handle-dest ( -- ) \ handle packet to valid destinations
     ticks
     timing( dest-addr @ hex.
-            64dup  o time-offset 64@ 64- 64. ." recv timing" cr )
-    o recv-tick 64! \ time stamp of arrival
+            64dup  time-offset 64@ 64- 64. ." recv timing" cr )
+    recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr @ hex. cr
@@ -1471,7 +1469,7 @@ $08 Constant cookie-val
 
 \ timeout handling
 
-: do-timeout ( -- )  o 0= ?EXIT  o timeout-xt perform ;
+: do-timeout ( -- )  o IF timeout-xt perform THEN ;
 
 #200000000 Value timeout-max#
 #10 Value timeouts#
@@ -1484,19 +1482,19 @@ Variable timeout-task
     cell +LOOP
     o timeout-task !  timeout-task cell timeout-tasks $+! ;
 : >next-timeout ( -- )  o 0= ?EXIT
-    o recv-tick 64@  o rtdelay 64@ 64dup 64+
+    recv-tick 64@  rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
-    o next-timeout 64!  j+timeout ;
+    next-timeout 64!  j+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
     timeout-tasks $@ bounds ?DO
-	I @ next-timeout 64@ 64min? IF  nip I @ swap  THEN
+	I @ >O next-timeout 64@ O> 64min? IF  nip I @ swap  THEN
     cell +LOOP  swap ;
 : ?timeout ( -- context/0 )
     ticks next-timeout? >r 64- 64-0>= r> and ;
 : reset-timeout  o 0= ?EXIT
-    timeouts# o timeouts ! >next-timeout ; \ 2s timeout
+    timeouts# timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
 
@@ -1516,12 +1514,12 @@ Variable requests
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
 	ELSE  2drop ?timeout ?dup-IF  >o rdrop
-		o rtdelay 64@ 64dup max-int64 64= 0=
-		IF  64dup 64+ o rtdelay 64!  ELSE  64drop  THEN
-		ticks o recv-tick 64! >next-timeout
-		do-timeout -1 o timeouts +!
+		rtdelay 64@ 64dup max-int64 64= 0=
+		IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
+		ticks recv-tick 64! >next-timeout
+		do-timeout -1 timeouts +!
 	    THEN  THEN
-     requests @ 0= o IF  o timeouts @ 0<=  or  THEN  UNTIL ;
+     requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
 
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?
@@ -1537,7 +1535,7 @@ Variable requests
     init-timer new-server init-route prep-socks ;
 
 \ load net2o commands
-
+o]
 require net2o-cmd.fs
 
 0 [IF]
