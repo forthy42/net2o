@@ -231,10 +231,10 @@ Variable do-keypad
     r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
     r> cell+ @ wurst-source-state> ;
 
-: regen-ivs-all ( map -- ) >o
+: regen-ivs-all ( o:map -- )
     dest-ivsgen @ rounds-setkey
 \    @state state# 2* dump
-    dest-ivs gen-ivs o> ;
+    dest-ivs gen-ivs ;
 
 : (regen-ivs) ( offset map -- ) >o
     dup dest-ivs $@len

@@ -1054,34 +1054,33 @@ file-state-struct buffer: new-file-state
 
 include net2o-crypt.fs
 include net2o-keys.fs
-o]
 
 \ cookie stuff
 
-: cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >r
+: cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >o
     wurst-cookie
-    dest-addr @ r@ >offset 0= IF  rdrop 2drop  EXIT  THEN
-    addr>ts r> dest-cookies @ + 64! ;
+    dest-addr @ o >offset 0= IF  rdrop 2drop  EXIT  THEN
+    addr>ts dest-cookies @ + 64! o> ;
 
 : send-cookie ( -- )  map@ cookie! ;
 : recv-cookie ( -- ) rmap@ cookie! ;
 
 [IFDEF] 64bit
-    : cookie+ ( addr bitmap map -- sum ) { map }
+    : cookie+ ( addr bitmap map -- sum ) >o
 	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r
-	addr>ts map dest-size @ addr>ts umin
-	map dest-cookies @ + 0
+	addr>ts dest-size @ addr>ts umin
+	dest-cookies @ + 0
 	BEGIN  r@ 1 and IF  over @ cookie( 64dup .16 space ) +  THEN
 	>r cell+ r> r> 1 rshift dup >r 0= UNTIL
-	rdrop nip cookie( ." => " 64dup .16 cr ) ;
+	rdrop nip cookie( ." => " 64dup .16 cr ) o> ;
 [ELSE]
-    : cookie+ ( addr bitmap map -- sum ) { map }
+    : cookie+ ( addr bitmap map -- sum ) >o
 	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r >r
-	addr>ts map dest-size @ addr>ts umin
-	map dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
+	addr>ts dest-size @ addr>ts umin
+	dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
 	BEGIN  r@ 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
 	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r 64-0= UNTIL
-	64r> 64drop cookie( ." => " 64dup .16 space cr ) ;
+	64r> 64drop cookie( ." => " 64dup .16 space cr ) o> ;
 [THEN]
 
 \ send blocks of memory
@@ -1122,10 +1121,10 @@ Variable code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j?
-    o ns/burst 64@ 64>n tick-init 1+ / n>64 o bandwidth-tick 64+! ;
+    ns/burst 64@ 64>n tick-init 1+ / n>64 bandwidth-tick 64+! ;
 
-: burst-end ( -- )  o data-b2b @ ?EXIT
-    ticks o bandwidth-tick 64@ 64max o next-tick 64! ;
+: burst-end ( -- )  data-b2b @ ?EXIT
+    ticks bandwidth-tick 64@ 64max next-tick 64! ;
 
 : sendX ( addr taddr target n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
@@ -1134,9 +1133,9 @@ Variable code-packet
 \ send chunk
 
 : net2o:get-dest ( -- taddr target )
-    data-dest o return-address @ ;
+    data-dest return-address @ ;
 : net2o:get-resend ( -- taddr target )
-    resend-dest o return-address @ ;
+    resend-dest return-address @ ;
 
 : send-size ( u -- n )
     0 max-size^2 DO
@@ -1149,14 +1148,14 @@ Variable code-packet
 64Variable last-ticks
 
 : ts-ticks! ( addr map -- )
-    >r addr>ts r> dest-timestamps @ + >r last-ticks 64@ r> ts-ticks
+    >o addr>ts dest-timestamps @ o> + >r last-ticks 64@ r> ts-ticks
     dup 64@ 64-0= 0= IF  64on 64drop 1 packets2 +!  EXIT  THEN 64! ;
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
-    o data-map $@ drop >r
-    r@ dest-raddr @ - dup r@ dest-size @ u<
-    IF  r> ts-ticks!  ELSE  drop rdrop  THEN ;
+    data-map $@ drop >o
+    dest-raddr @ - dup dest-size @ u<
+    IF  o ts-ticks!  ELSE  drop  THEN  o> ;
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  over  net2o:send-tick
@@ -1182,8 +1181,8 @@ Variable code-packet
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send-chunk ( -- )  +chunk
-    o ack-state @ outflag or!
-    bursts# 1- o data-b2b @ = IF
+    ack-state @ outflag or!
+    bursts# 1- data-b2b @ = IF
 	\ send a new packet for timing path
 	dest-tail$@ nip IF  net2o:send  ELSE  net2o:resend  THEN
     ELSE
@@ -1191,12 +1190,12 @@ Variable code-packet
     THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
-	sendX  never o next-tick 64!
+	sendX  never next-tick 64!
     ELSE  sendX  THEN ;
 
 : bandwidth? ( -- flag )
-    ticks 64dup last-ticks 64! o next-tick 64@ 64- 64-0>=
-    o flybursts @ 0> and  ;
+    ticks 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
+    flybursts @ 0> and  ;
 
 \ asynchronous sending
 
@@ -1223,30 +1222,30 @@ Create chunk-adder chunks-struct allot
 : chunk-count+ ( counter -- )
     dup @
     dup 0= IF
-	ack-toggle# o ack-state xor!
-	-1 o flybursts +!
-	o flybursts @ 0<= IF
-	    bursts( .j ." no bursts in flight " o ns/burst ? dest-tail$@ swap hex. hex. cr )
+	ack-toggle# ack-state xor!
+	-1 flybursts +!
+	flybursts @ 0<= IF
+	    bursts( .j ." no bursts in flight " ns/burst ? dest-tail$@ swap hex. hex. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
 
 : send-a-chunk ( chunk -- flag )  >r
-    o data-b2b @ 0<= IF
+    data-b2b @ 0<= IF
 	bandwidth? dup  IF
-	    b2b-toggle# o ack-state xor!
-	    bursts# 1- o data-b2b !
+	    b2b-toggle# ack-state xor!
+	    bursts# 1- data-b2b !
 	THEN
     ELSE
-	-1 o data-b2b +!  true
+	-1 data-b2b +!  true
     THEN
     dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  THEN
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
-    .j ." rate: " o ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .j ." slack: " o min-slack ? cr
-    .j ." rtdelay: " o rtdelay ? cr ;
+    .j ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
+    .j ." slack: " min-slack ? cr
+    .j ." rtdelay: " rtdelay ? cr ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
@@ -1265,7 +1264,7 @@ Create chunk-adder chunks-struct allot
 
 : next-chunk-tick ( -- tick )
     64#-1 chunks $@ bounds ?DO
-	I chunk-context @ next-tick 64@ 64umin
+	I chunk-context @ >o next-tick 64@ o> 64umin
     chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  false  0 >r
@@ -1280,37 +1279,37 @@ Variable sendflag  sendflag off
 \ rewind buffer to send further packets
 
 : clear-cookies ( -- )
-    s" " rmap@ data-ackbits-buf $! ;
+    s" " rmap@ >o data-ackbits-buf $! o> ;
 
-: rewind-timestamps ( map -- )  >r
-    r@ code-flag @ 0= IF
-	r@ dest-timestamps @ r> dest-size @ addr>ts erase
+: rewind-timestamps ( o:map -- )
+    code-flag @ 0= IF
+	dest-timestamps @ dest-size @ addr>ts erase
     THEN ;
 
-: rewind-buffer ( map -- ) >r
-    1 r@ dest-round +!
-    r@ dest-tail off  r@ data-head off
-    r@ dest-raddr @ r@ dest-size @ clearpages
-    r@ regen-ivs-all  r> rewind-timestamps ;
+: rewind-buffer ( o:map -- )
+    1 dest-round +!
+    dest-tail off  data-head off
+    dest-raddr @ dest-size @ clearpages
+    regen-ivs-all  rewind-timestamps ;
 
-: rewind-ackbits ( map -- ) >r
-    r@ data-firstack0# off  r@ data-firstack1# off
+: rewind-ackbits ( o:map -- )
+    data-firstack0# off  data-firstack1# off
     firstack( ." rewind firstacks" cr )
-    r@ data-lastack# on
-    r@ dest-size @ addr>bits bits>bytes
-    r@ data-ackbits0 @ over -1 fill
-    r> data-ackbits1 @ swap -1 fill ;
+    data-lastack# on
+    dest-size @ addr>bits bits>bytes
+    data-ackbits0 @ over -1 fill
+    data-ackbits1 @ swap -1 fill ;
 
 : net2o:rewind-sender ( n -- )
-    o data-map $@ drop
-    tuck dest-round @ +DO  dup rewind-buffer  LOOP  drop ;
+    data-map $@ drop >o
+    dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
-    o recv-high on
-    o data-rmap $@ drop
-    tuck dest-round @ +DO  dup rewind-buffer  LOOP
-    rewind-ackbits ( clear-cookies ) ;
-
+    recv-high on
+    data-rmap $@ drop >o
+    dest-round @ +DO  rewind-buffer  LOOP
+    rewind-ackbits ( clear-cookies ) o> ;
+o]
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
 
