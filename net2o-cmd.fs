@@ -28,7 +28,7 @@
 	dup 0< swap 2* xor ;
 [ELSE]
     : zz>n ( 64u -- 64n )
-	64dup 1 64rshift 64swap 64>n 1 and negate rot xor swap ;
+	64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
     : n>zz ( 64n -- 64u )
 	64dup 64-0< >r 64dup 64+ r> n>64 64xor ;
 [THEN]

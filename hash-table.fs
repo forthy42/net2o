@@ -13,7 +13,8 @@ require wurstkessel-init.fs
 hash-init-rng
 
 \ this computes a cryptographic secure hash over the input string -
-\ in two variants: a fast 64 bit hash, and a slow 512 bit hash
+\ in three variants: a medium speed 64 bit hash, a very fast 128 bit hash,
+\ and a slow cryptographically secure 512 bit hash
 
 : use-hash-128 ;
 

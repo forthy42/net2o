@@ -45,6 +45,7 @@ cell 8 = [IF]
     ' 0= Alias 64-0=
     ' 0>= Alias 64-0>=
     ' 0<= Alias 64-0<=
+    ' 0< Alias 64-0<
     ' < Alias 64<
     ' u< Alias 64u<
     ' u<= Alias 64u<=
@@ -103,6 +104,7 @@ cell 8 = [IF]
     ' d0= Alias 64-0=
     ' d0>= Alias 64-0>=
     ' d0<= Alias 64-0<=
+    ' d0< Alias 64-0<
     ' d< Alias 64<
     ' du< Alias 64u<
     ' du<= Alias 64u<=
