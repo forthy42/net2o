@@ -4,24 +4,34 @@ require string.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
 
-64Variable hashinit
+2 64s buffer: hashinit
 
 \ random initializer for hash
 
-: hash-init-rng ( -- )  rng@ hashinit 64! ;
+: hash-init-rng ( -- )  rng@ hashinit 64! rng@ hashinit 64'+ 64! ;
 
 hash-init-rng
 
 \ this computes a cryptographic secure hash over the input string -
 \ in two variants: a fast 64 bit hash, and a slow 512 bit hash
 
-true [IF]
+: use-hash-128 ;
+
+[IFDEF] use-hash-64
     64Variable hash-state
     
     : string-hash ( addr u -- )  hashinit 64@ hash64 hash-state 64! ;
     
     : hash$ ( -- addr u )  hash-state [ 1 64s ]L ;
-[ELSE]
+[THEN]
+[IFDEF] use-hash-128
+    2 64s buffer: hash-state
+    
+    : string-hash ( addr u -- )  hashinit hash-state [ 2 64s ]L move
+	hash-state hash128 ;
+    
+    : hash$ ( -- addr u )  hash-state [ 2 64s ]L ;
+[IFDEF] use-hash-wurst
 \ hash of the first 510 bytes of the input string, 3 times slower
     state# 8 * Constant message#
 
