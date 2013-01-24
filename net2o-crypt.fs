@@ -43,7 +43,7 @@ Defer regen-ivs
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs @ over +
+	dest-ivs $@ drop over +
 	swap o regen-ivs >wurst-source-state o>
 	EXIT
     THEN
@@ -55,7 +55,7 @@ Defer regen-ivs
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs @ + >wurst-source-state o>
+	dest-ivs $@ drop + >wurst-source-state o>
 	EXIT
     THEN
     drop o> ;
