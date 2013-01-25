@@ -18,7 +18,7 @@
 \ net2o commands are protobuf coded, not byte coded.
 
 \ command helper
-
+[o
 2Variable buf-state
 
 [IFDEF] 64bit
@@ -151,8 +151,8 @@ maxdata 2/ mykey-salt# + 2 cells + buffer: init0buf
 Variable cmd0source
 Variable cmd0buf#
 
-: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest    ELSE  cmd0buf  THEN ;
-: cmdbuf#     ( -- addr ) cmd0source @ IF  o cmd-buf#  ELSE  cmd0buf#  THEN ;
+: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest  ELSE  cmd0buf  THEN ;
+: cmdbuf#     ( -- addr ) cmd0source @ IF  cmd-buf#   ELSE  cmd0buf#  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -174,7 +174,7 @@ net2o-code0 previous
 : send-cmd ( addr dest -- )  +send-cmd dest-addr @ >r
     cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
-    o IF  o return-address  ELSE  return-addr  THEN  @
+    o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF
 	    I sendX  cmdreset  UNLOOP
@@ -300,8 +300,8 @@ also net2o-base definitions
 17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  -1 requests +! ;
 19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
-	>o rdrop  ticks o recv-tick 64! \ time stamp of arrival
-	1 o context-state !@ 0= ?EXIT
+	>o rdrop  ticks recv-tick 64! \ time stamp of arrival
+	1 context-state !@ 0= ?EXIT
     ELSE  drop  THEN
     0. buf-state 2!  0 >o rdrop ;
 
@@ -326,11 +326,11 @@ net2o-base
 24 net2o: slurp-chunk ( id -- ) 64>n id>file data$@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
-27 net2o: set-blocksize ( n -- )  64>n o blocksize ! ;
-28 net2o: set-blockalign ( n -- )  64>n pow2?  o blockalign ! ;
+27 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
+28 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
 
-: blocksize! ( n -- )  dup ulit, set-blocksize o blocksize ! ;
-: blockalign! ( n -- )  dup ulit, set-blockalign pow2? o blockalign ! ;
+: blocksize! ( n -- )  dup ulit, set-blocksize blocksize ! ;
+: blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
 
 \ flow control functions
 
@@ -338,7 +338,7 @@ net2o-base
 31 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
 32 net2o: set-rate ( ticks1 ticks2 -- )
     cookie? IF  net2o:set-rate
-    ELSE  64drop 64drop o ns/burst dup @ 2* 2* swap !  THEN ;
+    ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
 33 net2o: resend-mask ( addr mask -- )
     2*64>n net2o:resend-mask net2o:send-chunks ;
 34 net2o: track-timing ( -- )  net2o:track-timing ;
@@ -346,10 +346,10 @@ net2o-base
 36 net2o: send-timing ( -- )
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-37 net2o: >time-offset ( n -- )  o time-offset 64! ;
-: time-offset! ( -- )  ticks 64dup lit, >time-offset o time-offset 64! ;
+37 net2o: >time-offset ( n -- )  time-offset 64! ;
+: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
 38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
-39 net2o: set-rtdelay ( time -- )  o recv-tick 64@ 64swap 64- o rtdelay 64min! ;
+39 net2o: set-rtdelay ( time -- )  recv-tick 64@ 64swap 64- rtdelay 64min! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     map@ cookie+ 64over 64over 64= 0= IF
@@ -405,7 +405,7 @@ net2o-base
 
 \ acknowledges
 
-70 net2o: set-tail ( addr -- ) o recv-high umax! ;
+70 net2o: set-tail ( addr -- ) recv-high umax! ;
 71 net2o: timeout ( ticks -- ) net2o:timeout data-dest ulit, set-tail ;
 72 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
 73 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
@@ -415,7 +415,7 @@ net2o-base
 80 net2o: !time ( -- ) init-timer ;
 81 net2o: .time ( -- ) .packets .times ;
 
-: rewind ( -- )  o data-rmap $@ drop dest-round @ 1+
+: rewind ( -- )  data-rmap $@ drop >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
 
 \ safe initialization
@@ -457,13 +457,13 @@ previous
 
 \ client side timing
 
-: ack-size ( -- )  1 o acks +!  o recv-tick 64@ o lastb-ticks 64! ;
+: ack-size ( -- )  1 acks +!  recv-tick 64@ lastb-ticks 64! ;
 : ack-first ( -- )
-    o lastb-ticks 64@ 64dup 64-0= 0= IF
-	o firstb-ticks 64@ 64- o delta-ticks 64+!
+    lastb-ticks 64@ 64dup 64-0= 0= IF
+	firstb-ticks 64@ 64- delta-ticks 64+!
     ELSE  64drop  THEN
-    o recv-tick 64@ o firstb-ticks 64!  o lastb-ticks 64off
-    o recv-tick 64@ o last-rtick 64!  o recv-addr @ o last-raddr ! ;
+    recv-tick 64@ firstb-ticks 64!  lastb-ticks 64off
+    recv-tick 64@ last-rtick 64!  recv-addr @ last-raddr ! ;
 
 : ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
@@ -473,29 +473,29 @@ previous
 also net2o-base
 : setrate-limit ( rate -- rate' )
     \ do not change requested rate by more than a factor 4
-    o last-rate 64@ 64>n
+    last-rate 64@ 64>n
     ?dup-IF  tuck 2* min swap 2/ max  THEN
-    dup n>64 o last-rate 64! ;
+    dup n>64 last-rate 64! ;
 
-: >rate ( -- )  o delta-ticks 64@ 64-0= o acks @ 0= or ?EXIT
-    o recv-tick 64@ 64dup o burst-ticks 64!@ 64dup 64-0= 0= IF
+: >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
+    recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0= 0= IF
 	64- 64>n rate( .eff ) >r
-	o delta-ticks 64@ 64>n tick-init 1+ o acks @ */
+	delta-ticks 64@ 64>n tick-init 1+ acks @ */
 	setrate-limit
 	rate( .rate ) ulit, r> ulit, set-rate
     ELSE
 	64drop 64drop
     THEN
-    o delta-ticks 64off  o acks off ;
+    delta-ticks 64off  acks off ;
 
 : net2o:acktime ( -- )
-    o recv-addr @ o recv-tick 64@ o time-offset 64@ 64-
+    recv-addr @ recv-tick 64@ time-offset 64@ 64-
     timing( 64>r dup hex. 64r> 64dup 64. ." acktime" F cr )
     lit, ulit, ack-addrtime ;
 : net2o:b2btime
-    o last-raddr @ o last-rtick 64@ 64dup 64#0 64=
+    last-raddr @ last-rtick 64@ 64dup 64#0 64=
     IF  64drop drop
-    ELSE  o time-offset 64@ 64- lit, ulit, ack-b2btime  THEN ;
+    ELSE  time-offset 64@ 64- lit, ulit, ack-b2btime  THEN ;
 
 \ ack bits, new code
 
@@ -504,10 +504,10 @@ also net2o-base
     lit, 2r> swap cookie( 2dup hex. hex. F cr ) ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  rmap@ { map }
-    map data-ackbits-buf $@
+    map >o data-ackbits-buf $@ o>
     bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
     clear-cookies ;
-
+o]
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
