@@ -415,7 +415,7 @@ net2o-base
 80 net2o: !time ( -- ) init-timer ;
 81 net2o: .time ( -- ) .packets .times ;
 
-: rewind ( -- )  data-rmap $@ drop >o dest-round @ 1+ o>
+: rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
 
 \ safe initialization
@@ -523,7 +523,7 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     recv-high @ -1 = IF  drop  EXIT  THEN
-    receive-flag { rf } recv-high @ data-rmap $@ drop >o
+    receive-flag { rf } recv-high @ data-rmap @ >o
     \ we have not yet received anything
     data-lastack# @ 0< IF  2drop o>  EXIT  THEN
     dest-vaddr @ - addr>bits
@@ -599,7 +599,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : +cookie ( -- bit flag map )
     recv-addr @ -1 = IF  0 0 0 EXIT  THEN
-    recv-addr @ receive-flag { rf } data-rmap $@ drop >o
+    recv-addr @ receive-flag { rf } data-rmap @ >o
     dest-vaddr @ - addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
     rf data-ackbit @ over +bit@
@@ -657,7 +657,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : ?j ]] o 0= ?EXIT  code-map @ 0= ?EXIT [[ ; immediate
 
 : cmd-resend? ( -- )
-    code-map $@ drop >o
+    code-map @ >o
     dest-replies @
     dest-size @ addr>replies bounds o> ?DO
 	I 2@ d0<> IF
@@ -669,10 +669,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : .expected ( -- )
     ." expected/received: " recv-addr @ hex. recv-high @ hex.
-    data-rmap $@ drop >o
+    data-rmap @ >o
     false data-firstack# @ hex. true data-firstack# @ hex. o>
     expected @ hex. received @ hex. F cr
-    \ receive-flag data-rmap $@ drop >o
+    \ receive-flag data-rmap @ >o
     \ data-ackbit @ dest-size @ addr>bits bits>bytes dump o>
 ;
 
@@ -705,7 +705,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     -timeout ;
 
 : rewind? ( -- )
-    data-rmap $@ drop >o dest-round @ o> lit, rewind-sender ;
+    data-rmap @ >o dest-round @ o> lit, rewind-sender ;
 
 previous
 

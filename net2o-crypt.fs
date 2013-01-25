@@ -39,11 +39,11 @@ Defer regen-ivs
 
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
-    $@ drop >o
+    @ >o
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs $@ drop over +
+	dest-ivs @ over +
 	swap o regen-ivs >wurst-source-state o>
 	EXIT
     THEN
@@ -51,11 +51,11 @@ Defer regen-ivs
 
 : ivs>source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
-    $@ drop >o
+    @ >o
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs $@ drop + >wurst-source-state o>
+	dest-ivs @ + >wurst-source-state o>
 	EXIT
     THEN
     drop o> ;
@@ -253,7 +253,7 @@ Variable do-keypad
     state# <> !!ivs!! >wurst-source'
     r> gen-ivs ;
 
-: ivs-size@ ( map -- n addr ) $@ drop >o
+: ivs-size@ ( map -- n addr ) @ >o
     dest-size @ max-size^2 1- rshift dest-ivs o> ;
 
 : net2o:gen-data-ivs ( addr u -- )

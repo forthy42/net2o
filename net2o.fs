@@ -537,10 +537,7 @@ Variable dest-map s" " dest-map $!
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-Create dest-mapping    here rdata-struct dup allot erase
-dest-mapping >o code-flag o> Constant >code-flag
-
-Create source-mapping  here data-struct dup allot erase
+Variable >code-flag
 Variable mapping-addr
 
 : addr>bits ( addr -- bits )
@@ -562,12 +559,13 @@ Variable mapping-addr
 : allocate-bits ( size -- addr )
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
-: map-string ( addr u addrx -- addrx u2 )
-    o swap >o dest-job !
+: map-data ( addr u -- o )
+    o rdata-class new >o dest-job !
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     state# 2* allocatez dest-ivsgen !
-    >code-flag @ IF
+    >code-flag @ dup code-flag !
+    IF
 	dup addr>replies allocatez dest-replies !
     ELSE
 	dup addr>ts allocatez dest-timestamps !
@@ -578,30 +576,28 @@ Variable mapping-addr
     THEN
     data-lastack# on
     drop
-    o rdata-struct  o> ;
+    o o> ;
 
-: map-source-string ( addr u addrx -- addrx u2 )
-    o swap >o dest-job !
+: map-source ( addr u addrx -- o )
+    o code-class new >o dest-job !
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     dup addr>ts allocatez dest-cookies !
     state# 2* allocatez dest-ivsgen !
-    dup >code-flag @ IF
+    dup >code-flag @ dup code-flag ! IF
 	addr>replies  allocatez dest-replies !
     ELSE
 	addr>ts       allocatez dest-timestamps !
     THEN
     drop
-    o code-struct o> ;
+    o o> ;
+
+' @ Alias m@
 
 : map-dest ( vaddr u addr -- )
 \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
-    dest-map >r
-    >r  dest-mapping map-string  r@ $!
-    r> $@ drop mapping-addr tuck ! cell r> $+! ;
-
-: map-source ( addr u -- addr u )
-    source-mapping map-source-string drop data-struct ;
+    dest-map >r  >r  map-data  dup r> !
+    mapping-addr tuck ! cell r> $+! ;
 
 Variable mapstart $10000 mapstart !
 
@@ -609,11 +605,11 @@ Variable mapstart $10000 mapstart !
 : n2o:new-data ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag off
-    tuck data-rmap map-dest  map-source  data-map $! ;
+    tuck data-rmap map-dest  map-source  data-map ! ;
 : n2o:new-code ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag on
-    tuck code-rmap map-dest  map-source  code-map $! ;
+    tuck code-rmap map-dest  map-source  code-map ! ;
 
 \ create context
 
@@ -647,49 +643,49 @@ Variable init-context#
     1 blockalign ! ;
 
 : data$@ ( -- addr u )
-    data-map $@ drop >o
+    data-map @ >o
     dest-raddr @  dest-size @ data-head @ safe/string o> ;
 : /data ( u -- )
-    data-map $@ drop >o data-head +! o> ;
+    data-map @ >o data-head +! o> ;
 : dest-tail$@ ( -- addr u )
-    data-map $@ drop >o
+    data-map @ >o
     dest-raddr @  data-head @ dest-tail @ safe/string o> ;
 : /dest-tail ( u -- )
-    data-map $@ drop >o dest-tail +! o> ;
+    data-map @ >o dest-tail +! o> ;
 : data-dest ( -- addr )
-    data-map $@ drop >o
+    data-map @ >o
     dest-vaddr @ dest-tail @ + o> ;
 
 \ code sending around
 
 : code-dest ( -- addr )
-    code-map $@ drop >o
+    code-map @ >o
     dest-raddr @ dest-tail @ + o> ;
 
 : code-vdest ( -- addr )
-    code-map $@ drop >o
+    code-map @ >o
     dest-vaddr @ dest-tail @ + o> ;
 
 : code-reply ( -- addr )
-    code-map $@ drop >o
+    code-map @ >o
     dest-tail @ addr>replies dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
-    dest-addr @ code-rmap $@ drop >o dest-vaddr @ -
+    dest-addr @ code-rmap @ >o dest-vaddr @ -
     addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
 
 : reply[] ( index -- addr )
-    code-map $@ drop >o
+    code-map @ >o
     dup dest-size @ addr>bits u<
     IF  reply * dest-replies @ +  ELSE  dummy-reply  THEN  o> ;
 
 : reply-index ( -- index )
-    code-map $@ drop >o dest-tail @ addr>bits o> ;
+    code-map @ >o dest-tail @ addr>bits o> ;
 
 : code+ ( -- )
-    code-map $@ drop >o
+    code-map @ >o
     maxdata dest-tail +!
     dest-tail @ dest-size @ u>= IF  dest-tail off  THEN
 \    cmd( ." set dest-tail to " dest-tail @ hex. cr )
@@ -755,10 +751,10 @@ timestats buffer: stat-tuple
 
 : map@ ( -- addr/0 )
     0 j?  data-map @ 0= ?EXIT
-    drop data-map $@ drop ;
+    drop data-map @ ;
 : rmap@ ( -- addr/0 )
     0 j?  data-rmap @ 0= ?EXIT
-    drop data-rmap $@ drop ;
+    drop data-rmap @ ;
 
 : >offset ( addr map -- addr' flag ) >o
     dest-vaddr @ - dup dest-size @ u< o> ;
@@ -893,7 +889,7 @@ $20 Value mask-bits#
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
-    data-map $@ drop >o dest-vaddr @ - dest-raddr @ + o> ;
+    data-map @ >o dest-vaddr @ - dest-raddr @ + o> ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
@@ -944,7 +940,7 @@ file-state-struct buffer: new-file-state
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
-    data-rmap $@ drop >o data-ackbits0 2@  2swap
+    data-rmap @ >o data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
 	dup I -bit  over I -bit  LOOP  2drop
     data-firstack0# off  data-firstack1# off o>
@@ -967,7 +963,7 @@ file-state-struct buffer: new-file-state
     file-state-struct +LOOP ;
 
 : save-blocks ( -- ) +calc ?state
-    data-rmap $@ drop { map } map >o dest-raddr @ dest-tail @ + o>
+    data-rmap @ { map } map >o dest-raddr @ dest-tail @ + o>
     file-state $@ bounds ?DO
 	blocksize @ n>64
 	I >o fs-seekto 64@ fs-seek 64@ 64over 64over 64u<= IF
@@ -982,7 +978,7 @@ file-state-struct buffer: new-file-state
     file-state-struct +LOOP
     map >o dest-raddr @ - dest-tail ! o> +file ;
 
-: save-all-blocks ( -- )  data-rmap $@ drop >o dest-tail o> >r 
+: save-all-blocks ( -- )  data-rmap @ >o dest-tail o> >r 
     BEGIN  r@ @ >r  save-blocks  r> r@ @ =  UNTIL  rdrop ;
 
 : save-to ( addr u n -- )  state-addr >o
@@ -1004,7 +1000,7 @@ file-state-struct buffer: new-file-state
     ?state  id>addr? >o fs-fid o> dup @ ?dup-IF  close-file throw  THEN  off ;
 
 : n2o:slurp-block' ( id -- nextseek oldseek ) 0 { id roff }
-    msg( data-map $@ drop dest-raddr @ to roff )
+    msg( data-map @ dest-raddr @ to roff )
     data$@ blocksize @ umin
     id id>addr? >o fs-seekto 64@ 64dup 64>d fs-fid @ reposition-file throw
     -64rot fs-limit 64@ fs-seekto 64@ 64- 64>n umin
@@ -1153,7 +1149,7 @@ Variable code-packet
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
-    data-map $@ drop >o
+    data-map @ >o
     dest-raddr @ - dup dest-size @ u<
     IF  o ts-ticks!  ELSE  drop  THEN  o> ;
 
@@ -1301,12 +1297,12 @@ Variable sendflag  sendflag off
     data-ackbits1 @ swap -1 fill ;
 
 : net2o:rewind-sender ( n -- )
-    data-map $@ drop >o
+    data-map @ >o
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
     recv-high on
-    data-rmap $@ drop >o
+    data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;
 
