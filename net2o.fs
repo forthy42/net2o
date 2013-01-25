@@ -27,7 +27,7 @@ require debugging.fs
 require mini-oof2.fs
 
 \ porting helper to mini-oof2
-
+0 [IF]
 Variable do-stackrel
 
 Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
@@ -36,8 +36,8 @@ compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 ' o-sp to var-xt
 : [o  do-stackrel @ do-stackrel off ; immediate
 : o]  do-stackrel ! ;  immediate
-do-stackrel on
-[o
+do-stackrel off
+[THEN]
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
@@ -706,7 +706,7 @@ $400 buffer: aligned$
     s" " timing-stat $! ;
 
 : )stats ]] THEN [[ ;
-: stats( ]] [o timing-stat @ o] IF [[ ['] )stats assert-canary ; immediate
+: stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
@@ -1537,7 +1537,7 @@ Variable requests
 \ load net2o commands
 
 require net2o-cmd.fs
-o]
+
 0 [IF]
 Local Variables:
 forth-local-words:
