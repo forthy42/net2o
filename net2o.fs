@@ -390,17 +390,14 @@ field: dest-replies
 field: dest-cookies
 field: dest-tail
 end-class dest-class
-dest-class @ Constant dest-struct
 
 dest-class class
 field: code-flag
 end-class code-class
-code-class @ Constant code-struct
 
 dest-class class
 field: data-head
 end-class data-class
-data-class @ Constant data-struct
 
 code-class class
 field: data-ackbits0
@@ -410,7 +407,6 @@ field: data-firstack0#
 field: data-firstack1#
 field: data-lastack#
 end-class rdata-class
-rdata-class @ Constant rdata-struct
 
 \ job context structure
 
@@ -484,7 +480,6 @@ field: timing-stat
 \ make timestamps smaller
 64field: time-offset
 end-class context-class
-context-class @ constant context-struct
 
 begin-structure timestamp
 64field: ts-ticks
