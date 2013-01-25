@@ -18,7 +18,7 @@
 \ net2o commands are protobuf coded, not byte coded.
 
 \ command helper
-[o
+
 2Variable buf-state
 
 [IFDEF] 64bit
@@ -507,38 +507,40 @@ also net2o-base
     map >o data-ackbits-buf $@ o>
     bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
     clear-cookies ;
-o]
+
 \ client side acknowledge
 
 : net2o:gen-resend ( -- )
-    o recv-flag @ invert resend-toggle# and ulit, ack-resend ;
+    recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
-: receive-flag ( -- flag )  o recv-flag @ resend-toggle# and 0<> ;
-: data-ackbit ( map flag -- addr )
+: receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
+: data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
-: data-firstack# ( map flag -- addr )
+: data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( flag -- )
-    o 0= IF  drop EXIT  THEN  o data-rmap @ 0= IF  drop EXIT  THEN
-    o recv-high @ -1 = IF  drop  EXIT  THEN
-    o data-rmap $@ drop receive-flag { dmap rf }
+    o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
+    recv-high @ -1 = IF  drop  EXIT  THEN
+    receive-flag { rf } recv-high @ data-rmap $@ drop >o
     \ we have not yet received anything
-    dmap data-lastack# @ 0< IF  drop  EXIT  THEN
-    o recv-high @ dmap dest-vaddr @ - addr>bits
+    data-lastack# @ 0< IF  2drop o>  EXIT  THEN
+    dest-vaddr @ - addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
-    dmap rf data-ackbit @ { acks }
-    acks 0= IF ." ackzero: " dmap hex. rf F . acks hex. hex. F cr  EXIT  THEN
-    true swap dmap rf data-firstack# @ +DO
+    rf data-ackbit @ { acks }
+    acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
+    dest-vaddr @ rf data-firstack# { vaddr first-ack# }
+    true swap first-ack# @ o>
+    +DO
 	acks I + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	$FFFFFFFF <> IF
     	    acks I + l@ $FFFFFFFF xor
-	    I chunk-p2 3 + lshift dmap dest-vaddr @ +
+	    I chunk-p2 3 + lshift vaddr +
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  drop false
 	ELSE
-	    dup IF  I dmap rf data-firstack# !
+	    dup IF  I first-ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
@@ -558,17 +560,17 @@ o]
 
 : update-rtdelay ( -- )
     ticks lit, push-lit push' set-rtdelay ;
-    
+
 : rewind-transfer ( -- )
-    o expected @ negate o total +!
-    o expected off  o received off
-    rewind  o total @ 0> IF
+    expected @ negate total +!
+    expected off  received off
+    rewind  total @ 0> IF
 	restart-transfer
     THEN
     request-stats? IF
 	send-timing
     THEN
-    o total @ 0<= IF
+    total @ 0<= IF
 	msg( ." Chunk transfer done!" F cr )
 	-1 requests +!  EXIT
     THEN ;
@@ -576,7 +578,7 @@ o]
 : request-stats   true to request-stats?  track-timing ;
 
 : expected? ( -- )
-    o received @ o expected @ tuck u>= and IF
+    received @ expected @ tuck u>= and IF
 	msg( ." Block transfer done!" F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
@@ -586,55 +588,56 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 2 cells buffer: new-ackbit
 
-: +ackbit ( bit rmap -- ) { rmap }
+: +ackbit ( bit -- )
     dup cell>> rshift swap [ 8 cells 1- ]L and
-    rmap data-ackbits-buf $@ bounds ?DO
+    data-ackbits-buf $@ bounds ?DO
 	over I @ = IF
-	    I cell+ swap +bit  drop unloop  EXIT  THEN
+	    I cell+ swap +bit  drop unloop EXIT  THEN
     2 cells +LOOP
     0 rot new-ackbit 2! new-ackbit cell+ swap +bit
-    new-ackbit 2 cells rmap data-ackbits-buf $+! ;
+    new-ackbit 2 cells data-ackbits-buf $+! ;
 
 : +cookie ( -- bit flag map )
-    o recv-addr @ -1 = IF  0 0 0 EXIT  THEN
-    o data-rmap $@ drop >r
-    o recv-addr @ r@ dest-vaddr @ - addr>bits dup r@ +ackbit
+    recv-addr @ -1 = IF  0 0 0 EXIT  THEN
+    recv-addr @ receive-flag { rf } data-rmap $@ drop >o
+    dest-vaddr @ - addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
-    r@ receive-flag data-ackbit @ over +bit@
-    dup IF  1 packetr2 +!  THEN r> ;
+    rf data-ackbit @ over +bit@
+    dup IF  1 packetr2 +!  THEN o o> ;
 
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
-    swap >r >r
-    dup r@ data-lastack# @ > IF
+    receive-flag 0= { !rf }
+    swap >r >o
+    dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
-	dup r@ data-lastack# !@
-	r> receive-flag 0= data-ackbit @ -rot
-	+DO  dup I 1+ +bit  LOOP
+	dup data-lastack# !@
+	!rf data-ackbit @ -rot
+	+DO  dup I 1+ +bit  LOOP o>
     ELSE
 	\ otherwise, set only this specific bucket
-	r> receive-flag 0= data-ackbit @ over +bit@
+	!rf data-ackbit @ over +bit@ o>
 	r> and >r
     THEN
-    drop r> 0= IF  maxdata o received +!  expected?  THEN ;
+    drop r> 0= IF  maxdata received +!  expected?  THEN ;
 
 : recv-high! ( -- )
-    dest-addr @ o recv-high
+    dest-addr @ recv-high
     dup @ -1 = IF  !  ELSE  umax!  THEN ;
 
 : net2o:do-ack ( -- ) 
-    dest-addr @ o recv-addr ! \ last received packet
+    dest-addr @ recv-addr ! \ last received packet
     recv-high!  recv-cookie
-    inbuf 1+ c@ o recv-flag ! \ last receive flag
+    inbuf 1+ c@ recv-flag ! \ last receive flag
     cmd0source on  cmdreset
     inbuf 1+ c@ acks# and
-    dup o ack-receive !@ xor >r
+    dup ack-receive !@ xor >r
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
     +cookie  received!  cmd-send?
     r> ack-timing ;
 
-: +flow-control ['] net2o:do-ack o ack-xt ! ;
-: -flow-control ['] noop         o ack-xt ! ;
+: +flow-control ['] net2o:do-ack ack-xt ! ;
+: -flow-control ['] noop         ack-xt ! ;
 
 \ higher level functions
 
@@ -645,66 +648,64 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : gen-request ( -- )
     ['] end-cmd IS expect-reply?
     net2o-code0  nest[ o ulit, set-o ticks lit, set-rtdelay request-done ]nest
-    o req-codesize @  o req-datasize @ map-request,
+    req-codesize @  req-datasize @ map-request,
     key-request
     end-code
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
 
-: ?j ]] o 0= ?EXIT  o code-map @ 0= ?EXIT [[ ; immediate
+: ?j ]] o 0= ?EXIT  code-map @ 0= ?EXIT [[ ; immediate
 
 : cmd-resend? ( -- )
-    o code-map $@ drop >r
-    r@ dest-replies @
-    r@ dest-size @ addr>replies bounds ?DO
+    code-map $@ drop >o
+    dest-replies @
+    dest-size @ addr>replies bounds o> ?DO
 	I 2@ d0<> IF
 	    timeout( ." resend: " I 2@ n2o:see F cr )
 	    I 2@ cmdbuf# ! I reply-dest @ send-cmd
 	    1 packets2 +!
 	THEN
-    reply +LOOP
-    rdrop ;
+    reply +LOOP ;
 
 : .expected ( -- )
-    ." expected/received: " o recv-addr @ hex. o recv-high @ hex.
-    o data-rmap $@ drop
-    dup false data-firstack# @ hex. true data-firstack# @ hex.
-    o expected @ hex. o received @ hex. F cr
-    \ o data-rmap $@ drop { dmap }
-    \ dmap receive-flag data-ackbit @
-    \ dmap dest-size @ addr>bits bits>bytes dump
+    ." expected/received: " recv-addr @ hex. recv-high @ hex.
+    data-rmap $@ drop >o
+    false data-firstack# @ hex. true data-firstack# @ hex. o>
+    expected @ hex. received @ hex. F cr
+    \ receive-flag data-rmap $@ drop >o
+    \ data-ackbit @ dest-size @ addr>bits bits>bytes dump o>
 ;
 
 : transfer-keepalive? ( -- )
-    o received @ o expected @ u>= ?EXIT
+    received @ expected @ u>= ?EXIT
     timeout( .expected )
     cmdreset update-rtdelay  ticks lit, timeout
-    resend-toggle# o recv-flag xor!  false net2o:do-resend
-    resend-toggle# o recv-flag xor!  false net2o:do-resend
+    resend-toggle# recv-flag xor!  false net2o:do-resend
+    resend-toggle# recv-flag xor!  false net2o:do-resend
     net2o:genack  cmd-send? ;
 
 : connecting-timeout ( -- )
     F .time ."  connecting timeout" F cr
     gen-request ;
 : connected-timeout ( -- )
-    F .time ."  connected timeout " o received @ hex. o expected @ hex. F cr
+    F .time ."  connected timeout " received @ hex. expected @ hex. F cr
     cmd-resend? transfer-keepalive? ;
 
-: +connecting   ['] connecting-timeout o timeout-xt ! ;
-: +resend       ['] connected-timeout  o timeout-xt ! ;
-: -timeout      ['] noop               o timeout-xt ! ;
+: +connecting   ['] connecting-timeout timeout-xt ! ;
+: +resend       ['] connected-timeout  timeout-xt ! ;
+: -timeout      ['] noop               timeout-xt ! ;
 
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
-    o req-datasize !  o req-codesize !
+    req-datasize !  req-codesize !
     gen-request
     +connecting
     1 client-loop
-    o timeouts @ 0<= !!contimeout!!
+    timeouts @ 0<= !!contimeout!!
     -timeout ;
 
 : rewind? ( -- )
-    o data-rmap $@ drop dest-round @ lit, rewind-sender ;
+    data-rmap $@ drop >o dest-round @ o> lit, rewind-sender ;
 
 previous
 

@@ -1535,9 +1535,9 @@ Variable requests
     init-timer new-server init-route prep-socks ;
 
 \ load net2o commands
-o]
-require net2o-cmd.fs
 
+require net2o-cmd.fs
+o]
 0 [IF]
 Local Variables:
 forth-local-words:
