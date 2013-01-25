@@ -750,14 +750,12 @@ timestats buffer: stat-tuple
     slackgrow 64! ;
 
 : map@ ( -- addr/0 )
-    0 j?  data-map @ 0= ?EXIT
-    drop data-map @ ;
+    o IF data-map @ ELSE 0 THEN ;
 : rmap@ ( -- addr/0 )
-    0 j?  data-rmap @ 0= ?EXIT
-    drop data-rmap @ ;
+    o IF data-rmap @ ELSE 0 THEN ;
 
-: >offset ( addr map -- addr' flag ) >o
-    dest-vaddr @ - dup dest-size @ u< o> ;
+: >offset ( addr -- addr' flag )
+    dest-vaddr @ - dup dest-size @ u< ;
 
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
@@ -780,10 +778,10 @@ timestats buffer: stat-tuple
     >flyburst
     >r time-offset 64@ 64+ r>
     map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
-    r@ >offset  IF
-	r@ >o dest-tail @ o> over - 0 max addr>bits window-size !
+    r@ >o >offset  IF
+	dest-tail @ o> over - 0 max addr>bits window-size !
 	addr>ts r> >o dest-timestamps @ o> swap
-    ELSE  drop rdrop 0 0  THEN ;
+    ELSE  o> drop rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
     >timestamp
@@ -1055,7 +1053,7 @@ require net2o-keys.fs
 
 : cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >o
     wurst-cookie
-    dest-addr @ o >offset 0= IF  rdrop 2drop  EXIT  THEN
+    dest-addr @ >offset 0= IF  rdrop 2drop  EXIT  THEN
     addr>ts dest-cookies @ + 64! o> ;
 
 : send-cookie ( -- )  map@ cookie! ;
@@ -1275,7 +1273,7 @@ Variable sendflag  sendflag off
 \ rewind buffer to send further packets
 
 : clear-cookies ( -- )
-    s" " rmap@ >o data-ackbits-buf $! o> ;
+    s" " data-rmap @ >o data-ackbits-buf $! o> ;
 
 : rewind-timestamps ( o:map -- )
     code-flag @ 0= IF
