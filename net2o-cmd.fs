@@ -196,13 +196,13 @@ Defer expect-reply?
 
 previous
 
-: net2o:tag-reply ( -- )  o 0= ?EXIT
+: net2o:tag-reply ( -- )  j?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
     code-vdest r> reply-dest !  ;
 : net2o:ack-reply ( index -- )  o 0= IF  drop EXIT  THEN
     0. rot reply[] 2! ; \ clear request
-: net2o:expect-reply ( -- )  o 0= ?EXIT
+: net2o:expect-reply ( -- )  j?
     cmd( ." expect: " cmdbuf$ n2o:see )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest ! ;
 
@@ -654,7 +654,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
 
-: ?j ]] o 0= ?EXIT  code-map @ 0= ?EXIT [[ ; immediate
+: ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
 
 : cmd-resend? ( -- )
     code-map @ >o

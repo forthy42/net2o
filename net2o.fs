@@ -1475,7 +1475,7 @@ Variable timeout-task
     timeout-tasks $@ bounds ?DO  I @ o = IF  UNLOOP  EXIT  THEN
     cell +LOOP
     o timeout-task !  timeout-task cell timeout-tasks $+! ;
-: >next-timeout ( -- )  o 0= ?EXIT
+: >next-timeout ( -- )  j?
     recv-tick 64@  rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
     next-timeout 64!  j+timeout ;
@@ -1487,7 +1487,7 @@ Variable timeout-task
     cell +LOOP  swap ;
 : ?timeout ( -- context/0 )
     ticks next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout  o 0= ?EXIT
+: reset-timeout  j?
     timeouts# timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
