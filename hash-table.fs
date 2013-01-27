@@ -29,7 +29,7 @@ hash-init-rng
     2 64s buffer: hash-state
     
     : string-hash ( addr u -- )  hashinit hash-state [ 2 64s ]L move
-	hash-state hash128 ;
+	false hash-state hashkey2 ;
     
     : hash$ ( -- addr u )  hash-state [ 2 64s ]L ;
 [IFDEF] use-hash-wurst

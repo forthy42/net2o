@@ -106,13 +106,6 @@ rng$ mykey swap move
     mykey-salt# safe/string
     start-diffuse ;
 
-: mem-rounds# ( size -- n )
-    case
-	min-size of  $22  endof
-	min-size 2* of  $24  endof
-	$28 swap
-    endcase ;
-
 [IFDEF] 64bit
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
     ' 2@ Alias 128@ ( addr -- d )

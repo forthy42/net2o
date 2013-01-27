@@ -356,45 +356,6 @@ s" gforth" environment? [IF] 2drop
     \c   }
     \c   return result;
     \c }
-    \c #include <string.h>
-    \c 
-    \c typedef struct _hash128 {
-    \c   uint64_t a;
-    \c   uint64_t b;
-    \c } hash128;
-    \c 
-    \c #define MIXER \
-    \c   a1=ROL((a+(b^x1))*c1,37)+x3; \
-    \c   b1=ROL(((b-ROL(a,13))^x2)*c2,23)+x4;		\
-    \c   a^=a1; b^=b1
-    \c 
-    \c void wurst_hash128(char* addr, int len, hash128 *h)
-    \c {
-    \c   uint64_t a=h->a, b=h->b;
-    \c   int i;
-    \c   const uint64_t
-    \c     c1=0x87c37b91114253d5L, c2=0x4cf5ad432745937fL,
-    \c     x1=0x6c5f6f6cbe627173L, x2=0x7164c30603661c2fL,
-    \c     x3=0xce5009401b441347L, x4=0x454fa335a6e63ad3L;
-    \c   uint64_t mixin, a1, b1;
-    \c 
-    \c   for(i=0; i<(len>>3); i++) {
-    \c     memcpy(&mixin, addr+i*sizeof(uint64_t), sizeof(uint64_t));
-    \c     // printf("+%lx\n", mixin);
-    \c     a ^= mixin;
-    \c     MIXER;
-    \c   }
-    \c   mixin = 0;
-    \c   memcpy(&mixin, addr+i*sizeof(uint64_t), sizeof(uint64_t));
-    \c   mixin &= 0x00ffffffffffffffL >> 8*(7-(len&7));
-    \c   mixin |= (uint64_t)(len&7) << 56;
-    \c   // printf("+%lx\n", mixin);
-    \c   a ^= mixin;
-    \c   MIXER;
-    \c   MIXER; // finalizing round
-    \c 
-    \c   h->a = a; h->b = b;
-    \c }
 	c-function rounds-init rounds_init a -- void
 	c-function (rounds-encrypt) rounds_encrypt a n a -- void
 	c-function (rounds-decrypt) rounds_decrypt a n a -- void
@@ -403,7 +364,6 @@ s" gforth" environment? [IF] 2drop
 	[ELSE]
 	    c-function wurst_hash64 wurst_hash64 a n d a -- d
 	[THEN]
-	c-function hash128 wurst_hash128 a n a -- void
     end-c-library
     wurst-source Value @state
     : rounds-setkey ( addr -- )  to @state ;
@@ -599,3 +559,47 @@ state# rngs# * rng-buffer !
 : wurst-bench ( n -- ) >r cputime d+
     r@ 0 ?DO  message rounds# rounds-encrypt  LOOP  cputime d+ d- d>f -1e-6 f*
     1/f 256e r> fm* f* 1024e fdup f* f/ f. ." MB/s" ;
+
+: mem-rounds# ( size -- n )
+    case
+	state# of  $22  endof
+	state# 2* of  $24  endof
+	$28 swap
+    endcase ;
+
+\ OOP crypto api class
+
+require crypto-api.fs
+
+crypto class
+end-class wurstkessel
+
+:noname to @state ; wurstkessel to c:key!
+' @state wurstkessel to c:key@
+state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
+:noname ( addr -- )
+    @state swap state# 2* move ; wurstkessel to c:key>
+:noname ( addr -- )
+    wurst-source state# 2* move wurst-source rounds-setkey ; wurstkessel to >c:key
+:noname ( -- )
+    message roundse# rounds-encrypt ; wurstkessel to c:diffuse
+:noname ( addr u -- ) dup mem-rounds#
+    dup >reads state# * { rnd reads }
+    BEGIN  dup 0>  WHILE
+	    over rnd rounds-encrypt  reads /string
+    REPEAT 2drop ; wurstkessel to c:encrypt
+:noname ( addr u -- ) dup mem-rounds#
+    dup >reads state# * { rnd reads }
+    BEGIN  dup 0>  WHILE
+	    over rnd rounds-decrypt  reads /string
+    REPEAT 2drop ; wurstkessel to c:decrypt
+:noname ( addr u -- ) dup roundsh#
+    dup >reads state# * { rnd reads }
+    BEGIN  dup 0>  WHILE
+	    over rnd rounds-encrypt  reads /string
+    REPEAT drop roundse# rounds-encrypt ; wurstkessel to c:hash
+:noname ( addr u -- )  c:encrypt ; wurstkessel to c:prng
+
+static-a to allocater
+wurstkessel new Constant wurstkessel-o
+dynamic-a to allocater
