@@ -3,17 +3,17 @@
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 
 : wurst-key$ ( -- addr u )
-    o dup 0= IF
-	drop wurst-key state#
+    o 0= IF
+	wurst-key state#
     ELSE
 	crypto-key $@
     THEN ;
 
+: crypto-o@ ( -- o )  o 0= IF  wurstkessel-o  ELSE  crypto-o @  THEN ;
+
 : wurst-source-state> ( addr -- )  @state swap state# 2* move ;
 : >wurst-source-state ( addr -- )  wurst-source state# 2* move
     wurst-source rounds-setkey ;
-: copy-key ( -- )
-    @state ?dup-IF  >wurst-source-state  THEN ;
 
 : >wurst-key ( addr u -- )
     wurst-source rounds-setkey \ if we use wurst-state, we should set the key
@@ -139,47 +139,43 @@ rng$ mykey swap move
     64#0 @state state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
-    : encrypt-buffer  ( addr u n -- addr' 0 )  drop + 0 ;
+    : encrypt-buffer  ( addr u -- )  2drop ;
+    : decrypt-buffer  ( addr u -- )  2drop ;
     : wurst-outbuf-encrypt drop ;
     : wurst-inbuf-decrypt drop true ;
     : wurst-encrypt$ ( addr u -- ) 2drop ;
     : wurst-decrypt$ ( addr u -- addr' u' flag )
 	mykey-salt# safe/string 2 64s - true ;
 [ELSE]
-    : encrypt-buffer ( addr u n -- addr 0 ) dup >reads state# * { rnd reads }
+    : encrypt-buffer ( addr u -- ) dup mem-rounds#
+	dup >reads state# * { rnd reads }
 	BEGIN  dup 0>  WHILE
 		over rnd rounds-encrypt  reads /string
-	REPEAT ;
-    : decrypt-buffer ( addr u n -- addr 0 ) dup >reads state# * { rnd reads }
+	REPEAT 2drop ;
+    : decrypt-buffer ( addr u -- ) dup mem-rounds#
+	dup >reads state# * { rnd reads }
 	BEGIN  dup 0>  WHILE
 		over rnd rounds-decrypt  reads /string
-	REPEAT ;
+	REPEAT 2drop ;
     
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
-	outbuf packet-data
-	outbuf body-size mem-rounds# +cryptsu encrypt-buffer
-	drop >r wurst-crc r> 128! +enc ;
+	outbuf packet-data +cryptsu 2dup + >r encrypt-buffer
+	wurst-crc r> 128! +enc ;
 
     : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
 	\G flag1 is true if code, flag2 is true if decrypt succeeded
 	wurst-inbuf-init
-	inbuf packet-data
-	inbuf body-size mem-rounds# +cryptsu decrypt-buffer
-	drop 128@ wurst-crc 128= +enc ;
+	inbuf packet-data +cryptsu 2dup decrypt-buffer
+	+ 128@ wurst-crc 128= +enc ;
 
-    : wurst-encrypt$ ( addr u -- )  +calc
-	wurst-mykey-setup 2 64s - dup mem-rounds#
-	encrypt-buffer
-	drop >r wurst-crc r> 128! +enc ;
+    : wurst-encrypt$ ( addr u -- ) +calc
+	wurst-mykey-setup 2 64s -
+	2dup + >r encrypt-buffer wurst-crc r> 128! +enc ;
 
     : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-	wurst-mykey-init 2 64s - dup mem-rounds# >r
-	2dup
-	BEGIN  dup 0>  WHILE
-		over r@ rounds-decrypt  r@ >reads state# * safe/string
-	REPEAT
-	rdrop drop 128@ wurst-crc 128= +enc ;
+	wurst-mykey-init 2 64s -
+	2dup decrypt-buffer 2dup + 128@ wurst-crc 128= +enc ;
 [THEN]
 
 \ public key encryption
@@ -215,13 +211,12 @@ Variable do-keypad
 : regen-ivs/2 ( -- )
     dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) rounds-setkey
     clear-replies
-    dest-ivs $@ dest-a/b 2dup erase
-    dup mem-rounds# encrypt-buffer 2drop
+    dest-ivs $@ dest-a/b 2dup erase encrypt-buffer
     -1 dest-ivslastgen xor! ;
 
 : gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
     start-diffuse
-    r@ $@ dup 2/ mem-rounds# encrypt-buffer 2drop
+    r@ $@ encrypt-buffer
     r> cell+ @ wurst-source-state> ;
 
 : regen-ivs-all ( o:map -- )

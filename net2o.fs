@@ -411,74 +411,75 @@ end-class rdata-class
 \ job context structure
 
 object class
-field: context#
-field: context-state
-field: return-address
-64field: recv-tick
-field: recv-addr
-field: recv-flag
-field: recv-high
-field: cmd-buf#
-field: file-state
-field: blocksize
-field: blockalign
-field: crypto-key
-field: timeout-xt
-field: ack-xt
-
-field: data-map
-field: data-rmap
-field: data-resend
-field: data-b2b
-
-field: code-map
-field: code-rmap
-
-field: ack-state
-field: ack-receive
-
-field: req-codesize
-field: req-datasize
-\ flow control, sender part
-64field: min-slack
-64field: max-slack
-64field: ns/burst
-64field: last-ns/burst
-64field: extra-ns
-field: window-size \ packets in flight
-64field: bandwidth-tick \ ns
-64field: next-tick \ ns
-64field: next-timeout \ ns
-field: timeouts
-64field: rtdelay \ ns
-64field: lastack \ ns
-field: flyburst
-field: flybursts
-64field: lastslack
-64field: lastdeltat
-64field: slackgrow
-64field: slackgrow'
-\ flow control, receiver part
-64field: burst-ticks
-64field: firstb-ticks
-64field: lastb-ticks
-64field: delta-ticks
-field: acks
-64field: last-rate
-\ experiment: track previous b2b-start
-64field: last-rtick
-field: last-raddr
-\ cookies
-field: last-ackaddr
-\ state machine
-field: expected
-field: total
-field: received
-\ statistics
-field: timing-stat
-64field: last-time
-\ make timestamps smaller
-64field: time-offset
+    field: context#
+    field: context-state
+    field: return-address
+    64field: recv-tick
+    field: recv-addr
+    field: recv-flag
+    field: recv-high
+    field: cmd-buf#
+    field: file-state
+    field: blocksize
+    field: blockalign
+    field: crypto-key
+    field: crypto-o
+    field: timeout-xt
+    field: ack-xt
+    
+    field: data-map
+    field: data-rmap
+    field: data-resend
+    field: data-b2b
+    
+    field: code-map
+    field: code-rmap
+    
+    field: ack-state
+    field: ack-receive
+    
+    field: req-codesize
+    field: req-datasize
+    \ flow control, sender part
+    64field: min-slack
+    64field: max-slack
+    64field: ns/burst
+    64field: last-ns/burst
+    64field: extra-ns
+    field: window-size \ packets in flight
+    64field: bandwidth-tick \ ns
+    64field: next-tick \ ns
+    64field: next-timeout \ ns
+    field: timeouts
+    64field: rtdelay \ ns
+    64field: lastack \ ns
+    field: flyburst
+    field: flybursts
+    64field: lastslack
+    64field: lastdeltat
+    64field: slackgrow
+    64field: slackgrow'
+    \ flow control, receiver part
+    64field: burst-ticks
+    64field: firstb-ticks
+    64field: lastb-ticks
+    64field: delta-ticks
+    field: acks
+    64field: last-rate
+    \ experiment: track previous b2b-start
+    64field: last-rtick
+    field: last-raddr
+    \ cookies
+    field: last-ackaddr
+    \ state machine
+    field: expected
+    field: total
+    field: received
+    \ statistics
+    field: timing-stat
+    64field: last-time
+    \ make timestamps smaller
+    64field: time-offset
 end-class context-class
 
 begin-structure timestamp
@@ -633,6 +634,7 @@ Variable init-context#
     dup return-addr !  return-address !
     s" " data-resend $!
     wurst-key state# crypto-key $!
+    wurstkessel-o crypto-o !
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
