@@ -617,6 +617,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 
 Variable init-context#
+wurstkessel-o Value crypto@
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!

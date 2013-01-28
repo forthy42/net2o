@@ -598,7 +598,7 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
     BEGIN  dup 0>  WHILE
 	    over rnd rounds-encrypt  reads /string
     REPEAT drop roundse# rounds-encrypt ; wurstkessel to c:hash
-:noname ( addr u -- )  c:encrypt ; wurstkessel to c:prng
+:noname ( addr u -- )  2dup erase c:encrypt ; wurstkessel to c:prng
 
 static-a to allocater
 wurstkessel new Constant wurstkessel-o

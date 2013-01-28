@@ -1,5 +1,14 @@
 \ symmetric encryption and decryption
 
+\ generics from the crypto api
+
+: encrypt-buffer ( addr u -- ) crypto@ >o c:encrypt o> ;
+: decrypt-buffer ( addr u -- ) crypto@ >o c:decrypt o> ;
+: start-diffuse ( -- )  crypto@ >o c:diffuse o> ;
+: source-state> ( addr -- )  crypto@ >o c:key> o> ;
+: >source-state ( addr -- )  crypto@ >o >c:key o> ;
+: prng-buffer ( addr u -- ) crypto@ >o c:prng o> ;
+
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 
 : wurst-key$ ( -- addr u )
@@ -8,12 +17,6 @@
     ELSE
 	crypto-key $@
     THEN ;
-
-: crypto-o@ ( -- o )  o 0= IF  wurstkessel-o  ELSE  crypto-o @  THEN ;
-
-: wurst-source-state> ( addr -- )  @state swap state# 2* move ;
-: >wurst-source-state ( addr -- )  wurst-source state# 2* move
-    wurst-source rounds-setkey ;
 
 : >wurst-key ( addr u -- )
     wurst-source rounds-setkey \ if we use wurst-state, we should set the key
@@ -44,7 +47,7 @@ Defer regen-ivs
     IF
 	max-size^2 1- rshift
 	dest-ivs @ over +
-	swap o regen-ivs >wurst-source-state o>
+	swap o regen-ivs >source-state o>
 	EXIT
     THEN
     drop o> ;
@@ -55,7 +58,7 @@ Defer regen-ivs
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs @ + >wurst-source-state o>
+	dest-ivs @ + >source-state o>
 	EXIT
     THEN
     drop o> ;
@@ -97,8 +100,6 @@ Defer regen-ivs
 $10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
 rng$ mykey swap move
-
-: start-diffuse ( -- )  message roundse# rounds-encrypt ;
 
 : wurst-mykey-init ( addr u -- addr' u' )
     over mykey-salt# >wurst-source
@@ -147,17 +148,6 @@ rng$ mykey swap move
     : wurst-decrypt$ ( addr u -- addr' u' flag )
 	mykey-salt# safe/string 2 64s - true ;
 [ELSE]
-    : encrypt-buffer ( addr u -- ) dup mem-rounds#
-	dup >reads state# * { rnd reads }
-	BEGIN  dup 0>  WHILE
-		over rnd rounds-encrypt  reads /string
-	REPEAT 2drop ;
-    : decrypt-buffer ( addr u -- ) dup mem-rounds#
-	dup >reads state# * { rnd reads }
-	BEGIN  dup 0>  WHILE
-		over rnd rounds-decrypt  reads /string
-	REPEAT 2drop ;
-    
     : wurst-outbuf-encrypt ( flag -- ) +calc
 	wurst-outbuf-init
 	outbuf packet-data +cryptsu 2dup + >r encrypt-buffer
@@ -211,13 +201,13 @@ Variable do-keypad
 : regen-ivs/2 ( -- )
     dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) rounds-setkey
     clear-replies
-    dest-ivs $@ dest-a/b 2dup erase encrypt-buffer
+    dest-ivs $@ dest-a/b prng-buffer
     -1 dest-ivslastgen xor! ;
 
-: gen-ivs ( ivs-addr -- ) >r  r@ $@ erase
+: gen-ivs ( ivs-addr -- ) >r
     start-diffuse
-    r@ $@ encrypt-buffer
-    r> cell+ @ wurst-source-state> ;
+    r@ $@ prng-buffer
+    r> cell+ @ source-state> ;
 
 : regen-ivs-all ( o:map -- )
     dest-ivsgen @ rounds-setkey
