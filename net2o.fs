@@ -1050,7 +1050,7 @@ require net2o-keys.fs
 \ cookie stuff
 
 : cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >o
-    wurst-cookie
+    cookie
     dest-addr @ >offset 0= IF  rdrop 2drop  EXIT  THEN
     addr>ts dest-cookies @ + 64! o> ;
 

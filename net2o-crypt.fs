@@ -4,12 +4,14 @@
 
 : encrypt-buffer ( addr u -- ) crypto@ >o c:encrypt o> ;
 : decrypt-buffer ( addr u -- ) crypto@ >o c:decrypt o> ;
+: encrypt-auth ( addr u -- ) crypto@ >o c:encrypt+auth o> ;
+: decrypt-auth ( addr u -- flag ) crypto@ >o c:decrypt+auth o> ;
 : start-diffuse ( -- )  crypto@ >o c:diffuse o> ;
 : source-state> ( addr -- )  crypto@ >o c:key> o> ;
 : >source-state ( addr -- )  crypto@ >o >c:key o> ;
 : prng-buffer ( addr u -- ) crypto@ >o c:prng o> ;
-: wurst-crc ( -- xd )  crypto@ >o c:checksum o> ;
-: wurst-cookie ( -- x )  crypto@ >o c:cookie o> ;
+: checksum ( -- xd )  crypto@ >o c:checksum o> ;
+: cookie ( -- x )  crypto@ >o c:cookie o> ;
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 
@@ -49,18 +51,18 @@ Defer regen-ivs
     IF
 	max-size^2 1- rshift
 	dest-ivs @ over +
-	swap o regen-ivs >source-state o>
+	swap regen-ivs o> >source-state
 	EXIT
     THEN
     drop o> ;
 
 : ivs>source? ( addr -- )
-    dup @ 0= IF  drop  EXIT  THEN
+\    dup @ 0= IF  drop  EXIT  THEN
     @ >o
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift
-	dest-ivs @ + >source-state o>
+	dest-ivs @ + o> >source-state
 	EXIT
     THEN
     drop o> ;
@@ -109,60 +111,23 @@ rng$ mykey swap move
     mykey-salt# safe/string
     start-diffuse ;
 
-[IFDEF] 64bit
-    : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
-    ' 2@ Alias 128@ ( addr -- d )
-    ' d= Alias 128= ( d1 d2 -- flag )
-    ' 2! Alias 128! ( d addr -- )
-[ELSE]
-    : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }
-	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
-    : 128@ ( addr -- x1..x4 )
-	>r
-	r@ 3 cells + @
-	r@ 2 cells + @
-	r@ cell+ @
-	r> @ ;
-    : 128= ( x1..y4 y1..y4 -- flag )  128xor  or or or 0= ;
-    : 128! ( x1..x4 addr -- )
-	>r
-	r@ !
-	r@ cell+ !
-	r@ 2 cells + !
-	r> 3 cells + ! ;
-[THEN]
-
 : wurst-mykey-setup ( addr u -- addr' u' )
     over >r  rng@ rng@ r> 128! wurst-mykey-init ;
 
-[IFDEF] nocrypt \ dummy for test
-    : encrypt-buffer  ( addr u -- )  2drop ;
-    : decrypt-buffer  ( addr u -- )  2drop ;
-    : wurst-outbuf-encrypt drop ;
-    : wurst-inbuf-decrypt drop true ;
-    : wurst-encrypt$ ( addr u -- ) 2drop ;
-    : wurst-decrypt$ ( addr u -- addr' u' flag )
-	mykey-salt# safe/string 2 64s - true ;
-[ELSE]
-    : wurst-outbuf-encrypt ( flag -- ) +calc
-	wurst-outbuf-init
-	outbuf packet-data +cryptsu 2dup + >r encrypt-buffer
-	wurst-crc r> 128! +enc ;
+: wurst-outbuf-encrypt ( flag -- ) +calc
+    wurst-outbuf-init
+    outbuf packet-data +cryptsu encrypt-auth +enc ;
 
-    : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
-	\G flag1 is true if code, flag2 is true if decrypt succeeded
-	wurst-inbuf-init
-	inbuf packet-data +cryptsu 2dup decrypt-buffer
-	+ 128@ wurst-crc 128= +enc ;
+: wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
+    \G flag1 is true if code, flag2 is true if decrypt succeeded
+    wurst-inbuf-init
+    inbuf packet-data +cryptsu decrypt-auth +enc ;
 
-    : wurst-encrypt$ ( addr u -- ) +calc
-	wurst-mykey-setup 2 64s -
-	2dup + >r encrypt-buffer wurst-crc r> 128! +enc ;
+: wurst-encrypt$ ( addr u -- ) +calc
+    wurst-mykey-setup 2 64s - encrypt-auth +enc ;
 
-    : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-	wurst-mykey-init 2 64s -
-	2dup decrypt-buffer 2dup + 128@ wurst-crc 128= +enc ;
-[THEN]
+: wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
+    wurst-mykey-init 2 64s - 2dup decrypt-auth +enc ;
 
 \ public key encryption
 
@@ -210,15 +175,15 @@ Variable do-keypad
 \    @state state# 2* dump
     dest-ivs gen-ivs ;
 
-: (regen-ivs) ( offset map -- ) >o
-    dup dest-ivs $@len
-    dest-ivslastgen @ IF \ check if in quarter 2
+: (regen-ivs) ( offset o:map -- )
+    dup dest-ivs $@len dest-ivslastgen @
+    IF \ check if in quarter 2
 	2/ 2/ dup bounds within 0=
     ELSE \ check if in quarter 4
 	2/ dup 2/ + u>
     THEN  IF
 	regen-ivs/2
-    THEN  drop o> ;
+    THEN  drop ;
 ' (regen-ivs) IS regen-ivs
 
 : ivs-string ( addr u n addr -- )

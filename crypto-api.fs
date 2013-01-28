@@ -23,6 +23,10 @@ object class
     \G Encrypt message in buffer addr u
     method c:decrypt ( addr u -- )
     \G Decrypt message in buffer addr u
+    method c:encrypt+auth ( addr u -- )
+    \G Encrypt message in buffer addr u
+    method c:decrypt+auth ( addr u -- flag )
+    \G Decrypt message in buffer addr u
     method c:hash ( addr u -- )
     \G Hash message in buffer addr u
     method c:prng ( addr u -- )

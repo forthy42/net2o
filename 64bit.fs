@@ -57,6 +57,10 @@ cell 8 = [IF]
     ' umax Alias 64umax
     ' off Alias 64off
     ' */ Alias 64*/
+    : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
+    ' 2@ Alias 128@ ( addr -- d )
+    ' d= Alias 128= ( d1 d2 -- flag )
+    ' 2! Alias 128! ( d addr -- )
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -116,6 +120,21 @@ cell 8 = [IF]
     : 64umax  2over 2over du< IF  2swap  THEN  2drop ;
     : 64off 0. rot 64! ;
     ' m*/ Alias 64*/
+    : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }
+	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
+    : 128@ ( addr -- x1..x4 )
+	>r
+	r@ 3 cells + @
+	r@ 2 cells + @
+	r@ cell+ @
+	r> @ ;
+    : 128= ( x1..y4 y1..y4 -- flag )  128xor  or or or 0= ;
+    : 128! ( x1..x4 addr -- )
+	>r
+	r@ !
+	r@ cell+ !
+	r@ 2 cells + !
+	r> 3 cells + ! ;
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+

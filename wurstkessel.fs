@@ -569,6 +569,12 @@ state# rngs# * rng-buffer !
 
 \ OOP crypto api class
 
+: wurst-crc ( -- xd )
+    message roundse# rounds-encrypt \ another key diffusion round
+    64#0 64#0 @state state# + state# bounds ?DO
+	I 128@ 128xor
+    [ 2 64s ]L +LOOP ;
+
 require crypto-api.fs
 
 crypto class
@@ -593,20 +599,25 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
     BEGIN  dup 0>  WHILE
 	    over rnd rounds-decrypt  reads /string
     REPEAT 2drop ; wurstkessel to c:decrypt
+:noname ( addr u -- ) dup mem-rounds#
+    dup >reads state# * { rnd reads }
+    BEGIN  dup 0>  WHILE
+	    over rnd rounds-encrypt  reads /string
+    REPEAT drop >r wurst-crc r> 128! ; wurstkessel to c:encrypt+auth
+:noname ( addr u -- ) dup mem-rounds#
+    dup >reads state# * { rnd reads }
+    BEGIN  dup 0>  WHILE
+	    over rnd rounds-decrypt  reads /string
+    REPEAT drop 128@ wurst-crc 128= ; wurstkessel to c:decrypt+auth
 :noname ( addr u -- ) dup roundsh#
     dup >reads state# * { rnd reads }
     BEGIN  dup 0>  WHILE
 	    over rnd rounds-encrypt  reads /string
     REPEAT drop roundse# rounds-encrypt ; wurstkessel to c:hash
 :noname ( addr u -- )  2dup erase c:encrypt ; wurstkessel to c:prng
-:noname ( -- xd )
-    c:diffuse  \ another key diffusion round
-    64#0 64#0 c:key@ state# + state# bounds ?DO
-	I 64@ 64xor 64swap
-    [ 1 64s ]L +LOOP ;
-wurstkessel to c:checksum
+:noname ( -- xd )  wurst-crc ;  wurstkessel to c:checksum
 :noname ( -- x )
-    64#0 c:key@ state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
+    64#0 @state state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
 wurstkessel to c:cookie
 
 static-a to allocater
