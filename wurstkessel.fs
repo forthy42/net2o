@@ -599,6 +599,15 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
 	    over rnd rounds-encrypt  reads /string
     REPEAT drop roundse# rounds-encrypt ; wurstkessel to c:hash
 :noname ( addr u -- )  2dup erase c:encrypt ; wurstkessel to c:prng
+:noname ( -- xd )
+    c:diffuse  \ another key diffusion round
+    64#0 64#0 c:key@ state# + state# bounds ?DO
+	I 64@ 64xor 64swap
+    [ 1 64s ]L +LOOP ;
+wurstkessel to c:checksum
+:noname ( -- x )
+    64#0 c:key@ state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
+wurstkessel to c:cookie
 
 static-a to allocater
 wurstkessel new Constant wurstkessel-o

@@ -8,6 +8,8 @@
 : source-state> ( addr -- )  crypto@ >o c:key> o> ;
 : >source-state ( addr -- )  crypto@ >o >c:key o> ;
 : prng-buffer ( addr u -- ) crypto@ >o c:prng o> ;
+: wurst-crc ( -- xd )  crypto@ >o c:checksum o> ;
+: wurst-cookie ( -- x )  crypto@ >o c:cookie o> ;
 
 : >wurst-source' ( addr -- )  wurst-source state# move ;
 
@@ -132,12 +134,6 @@ rng$ mykey swap move
 
 : wurst-mykey-setup ( addr u -- addr' u' )
     over >r  rng@ rng@ r> 128! wurst-mykey-init ;
-
-: wurst-crc ( -- xd )
-    start-diffuse  \ another key diffusion round
-    64#0 64#0 @state state# + state# bounds ?DO  I 128@ 128xor 2 64s +LOOP ;
-: wurst-cookie ( -- x )
-    64#0 @state state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
 
 [IFDEF] nocrypt \ dummy for test
     : encrypt-buffer  ( addr u -- )  2drop ;
