@@ -360,21 +360,21 @@ net2o-base
 \ crypto functions
 
 50 net2o: receive-key ( addr u -- )  net2o:receive-key  do-keypad on ;
-51 net2o: gen-data-ivs ( addr u -- ) net2o:gen-data-ivs ;
-52 net2o: gen-code-ivs ( addr u -- ) net2o:gen-code-ivs ;
-53 net2o: gen-rdata-ivs ( addr u -- ) net2o:gen-rdata-ivs ;
-54 net2o: gen-rcode-ivs ( addr u -- ) net2o:gen-rcode-ivs ;
+51 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
+52 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
+53 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
+54 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
 55 net2o: key-request ( -- addr u )  pkc keysize $, receive-key ;
 56 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
 
 : data-ivs ( -- ) \ two IV seeds for send and receive data
-    rng$ 2dup $, gen-data-ivs net2o:gen-rdata-ivs
-    rng$ 2dup $, gen-rdata-ivs net2o:gen-data-ivs ;
+    rng$ 2dup $, gen-data-ivs data-rmap ivs-string
+    rng$ 2dup $, gen-rdata-ivs data-map ivs-string ;
 : code-ivs ( -- ) \ two IV seeds for send and receive code
-    rng$ 2dup $, gen-code-ivs net2o:gen-rcode-ivs
-    rng$ 2dup $, gen-rcode-ivs net2o:gen-code-ivs ;
+    rng$ 2dup $, gen-code-ivs code-rmap ivs-string
+    rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
 
 \ better slurping
 

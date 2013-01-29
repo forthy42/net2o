@@ -423,7 +423,6 @@ object class
     field: blocksize
     field: blockalign
     field: crypto-key
-    field: crypto-o
     field: timeout-xt
     field: ack-xt
     
@@ -617,7 +616,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 
 Variable init-context#
-wurstkessel-o Value crypto@
+wurstkessel-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -635,7 +634,6 @@ wurstkessel-o Value crypto@
     dup return-addr !  return-address !
     s" " data-resend $!
     wurst-key state# crypto-key $!
-    wurstkessel-o crypto-o !
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
@@ -1050,7 +1048,7 @@ require net2o-keys.fs
 \ cookie stuff
 
 : cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >o
-    cookie
+    c:cookie
     dest-addr @ >offset 0= IF  rdrop 2drop  EXIT  THEN
     addr>ts dest-cookies @ + 64! o> ;
 

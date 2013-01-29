@@ -6,6 +6,14 @@ require mini-oof2.fs
 \ If the cryptosystem has more internal state, it may copy the key+iv there.
 \ If it has less, it should use a suitable fraction of the key and the iv
 
+User crypto-o
+
+Create crypto-m 0 ,  DOES> @ crypto-o @ cell- @ + perform ;
+compile> >body @ cell/ postpone u#exec crypto-o next-task - , , ;
+' to-m !to
+
+' crypto-m to method-xt
+
 object class
     method c:key! ( addr -- )
     \G use addr as key storage

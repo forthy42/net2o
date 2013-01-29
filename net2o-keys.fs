@@ -158,7 +158,7 @@ $100 Value passphrase-diffuse#
     r> IF
 	source-init wurst-key hash-init
 	message roundsh# rounds-encrypt
-	passphrase-diffuse# 0 ?DO  start-diffuse  LOOP \ just to waste time ;-)
+	passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
 	wurst-state passskc keysize xors
 	wurst-state keysize + passskc keysize xors
     THEN  passskc ;

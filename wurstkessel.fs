@@ -571,9 +571,7 @@ state# rngs# * rng-buffer !
 
 : wurst-crc ( -- xd )
     message roundse# rounds-encrypt \ another key diffusion round
-    64#0 64#0 @state state# + state# bounds ?DO
-	I 128@ 128xor
-    [ 2 64s ]L +LOOP ;
+    @state 128@ ;
 
 require crypto-api.fs
 
@@ -615,10 +613,8 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
 	    over rnd rounds-encrypt  reads /string
     REPEAT drop roundse# rounds-encrypt ; wurstkessel to c:hash
 :noname ( addr u -- )  2dup erase c:encrypt ; wurstkessel to c:prng
-:noname ( -- xd )  wurst-crc ;  wurstkessel to c:checksum
-:noname ( -- x )
-    64#0 @state state# bounds ?DO  I 64@ 64xor  1 64s +LOOP ;
-wurstkessel to c:cookie
+' wurst-crc wurstkessel to c:checksum
+:noname ( -- x ) @state $10 + 64@ ; wurstkessel to c:cookie
 
 static-a to allocater
 wurstkessel new Constant wurstkessel-o

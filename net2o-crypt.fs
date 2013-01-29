@@ -1,20 +1,5 @@
 \ symmetric encryption and decryption
 
-\ generics from the crypto api
-
-: encrypt-buffer ( addr u -- ) crypto@ >o c:encrypt o> ;
-: decrypt-buffer ( addr u -- ) crypto@ >o c:decrypt o> ;
-: encrypt-auth ( addr u -- ) crypto@ >o c:encrypt+auth o> ;
-: decrypt-auth ( addr u -- flag ) crypto@ >o c:decrypt+auth o> ;
-: start-diffuse ( -- )  crypto@ >o c:diffuse o> ;
-: source-state> ( addr -- )  crypto@ >o c:key> o> ;
-: >source-state ( addr -- )  crypto@ >o >c:key o> ;
-: prng-buffer ( addr u -- ) crypto@ >o c:prng o> ;
-: checksum ( -- xd )  crypto@ >o c:checksum o> ;
-: cookie ( -- x )  crypto@ >o c:cookie o> ;
-
-: >wurst-source' ( addr -- )  wurst-source state# move ;
-
 : wurst-key$ ( -- addr u )
     o 0= IF
 	wurst-key state#
@@ -22,11 +7,15 @@
 	crypto-key $@
     THEN ;
 
+128 buffer: key-assembly
 : >wurst-key ( addr u -- )
-    wurst-source rounds-setkey \ if we use wurst-state, we should set the key
-    wurst-state swap move ;
+    key-assembly state# + state# bounds DO
+	2dup I swap move
+    dup +LOOP  2drop
+    key-assembly key( ." >wurst-key " dup .64b ." :" dup state# + .64b cr ) >c:key ;
+: >wurst-source' ( addr -- )  key-assembly state# move ;
 : >wurst-source ( addr u -- )
-    wurst-source state# bounds ?DO
+    key-assembly state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop ;
 
@@ -49,9 +38,9 @@ Defer regen-ivs
     @ >o
     dest-addr @ o 2@ >r - dup r> u<
     IF
-	max-size^2 1- rshift
-	dest-ivs @ over +
-	swap regen-ivs o> >source-state
+	max-size^2 1- rshift key( ." ivsc# " dup . cr )
+	dest-ivs $@ drop over +
+	swap regen-ivs o> key( ." ivs>code-s? " dup .64b ." :" dup state# + .64b cr ) >c:key
 	EXIT
     THEN
     drop o> ;
@@ -61,14 +50,15 @@ Defer regen-ivs
     @ >o
     dest-addr @ o 2@ >r - dup r> u<
     IF
-	max-size^2 1- rshift
-	dest-ivs @ + o> >source-state
+	max-size^2 1- rshift key( ." ivss# " dup . cr )
+	dest-ivs $@ drop + o> key( ." ivs>source? " dup .64b ." :" dup state# + .64b cr ) >c:key
 	EXIT
     THEN
     drop o> ;
 
 : default-key ( -- )
     @state 0= IF
+	key( ." Default-key " cr )
 	rnd-init >wurst-source'
 	wurst-key$ >wurst-key
     THEN ;
@@ -85,7 +75,7 @@ Defer regen-ivs
 	drop
     THEN
     default-key
-    key( @state .64b cr @state state# + .64b cr ) ;
+    key( ." outbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
 : wurst-inbuf-init ( flag -- )
     0 to @state
@@ -99,7 +89,7 @@ Defer regen-ivs
 	drop
     THEN
     default-key
-    key( @state .64b cr @state state# + .64b cr ) ;
+    key( ." inbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
 $10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
@@ -109,25 +99,25 @@ rng$ mykey swap move
     over mykey-salt# >wurst-source
     mykey state# >wurst-key
     mykey-salt# safe/string
-    start-diffuse ;
+    c:diffuse ;
 
 : wurst-mykey-setup ( addr u -- addr' u' )
     over >r  rng@ rng@ r> 128! wurst-mykey-init ;
 
 : wurst-outbuf-encrypt ( flag -- ) +calc
     wurst-outbuf-init
-    outbuf packet-data +cryptsu encrypt-auth +enc ;
+    outbuf packet-data +cryptsu c:encrypt+auth +enc ;
 
 : wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
     wurst-inbuf-init
-    inbuf packet-data +cryptsu decrypt-auth +enc ;
+    inbuf packet-data +cryptsu c:decrypt+auth +enc ;
 
 : wurst-encrypt$ ( addr u -- ) +calc
-    wurst-mykey-setup 2 64s - encrypt-auth +enc ;
+    wurst-mykey-setup 2 64s - c:encrypt+auth +enc ;
 
 : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-    wurst-mykey-init 2 64s - 2dup decrypt-auth +enc ;
+    wurst-mykey-init 2 64s - 2dup c:decrypt+auth +enc ;
 
 \ public key encryption
 
@@ -146,34 +136,32 @@ Variable do-keypad
 \ we send our public key and query the server's public key.
 
 : >wurst-key-ivs ( -- )
-    wurst-source rounds-setkey
     o 0= IF
 	crypt( ." IVS generated for non-connection!" cr )
-	wurst-key state# wurst-state swap move
+	wurst-key state#
     ELSE
 	do-keypad @ IF
-	    keypad wurst-state keysize move
-	    keypad wurst-state keysize + keysize move
+	    keypad keysize
 	ELSE
-	    crypto-key $@ wurst-state swap move
+	    crypto-key $@
 	THEN
-    THEN ;
+    THEN  >wurst-key ;
 
 : regen-ivs/2 ( -- )
-    dest-ivsgen @ msg( dup .64b cr dup state# + .64b cr ) rounds-setkey
+    c:key@ >r
+    dest-ivsgen @ key( ." regen-ivs/2 " dup .64b ." :" dup state# + .64b cr ) c:key!
     clear-replies
-    dest-ivs $@ dest-a/b prng-buffer
-    -1 dest-ivslastgen xor! ;
+    dest-ivs $@ dest-a/b c:prng
+    -1 dest-ivslastgen xor! r> c:key! ;
 
-: gen-ivs ( ivs-addr -- ) >r
-    start-diffuse
-    r@ $@ prng-buffer
-    r> cell+ @ source-state> ;
+: gen-ivs ( ivs-addr -- )
+    c:diffuse $@ c:prng ;
 
 : regen-ivs-all ( o:map -- )
-    dest-ivsgen @ rounds-setkey
+    c:key@ >r
+    dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
 \    @state state# 2* dump
-    dest-ivs gen-ivs ;
+    dest-ivs gen-ivs r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
     dup dest-ivs $@len dest-ivslastgen @
@@ -186,23 +174,12 @@ Variable do-keypad
     THEN  drop ;
 ' (regen-ivs) IS regen-ivs
 
-: ivs-string ( addr u n addr -- )
+: ivs-string ( addr u map -- )
+    @ >o dest-size @ max-size^2 1- rshift dest-ivs o>
     >r r@ $!len
-    >wurst-key-ivs
     state# <> !!ivs!! >wurst-source'
+    >wurst-key-ivs
     r> gen-ivs ;
-
-: ivs-size@ ( map -- n addr ) @ >o
-    dest-size @ max-size^2 1- rshift dest-ivs o> ;
-
-: net2o:gen-data-ivs ( addr u -- )
-    data-map ivs-size@ ivs-string ;
-: net2o:gen-code-ivs ( addr u -- )
-    code-map ivs-size@ ivs-string ;
-: net2o:gen-rdata-ivs ( addr u -- )
-    data-rmap ivs-size@ ivs-string ;
-: net2o:gen-rcode-ivs ( addr u -- )
-    code-rmap ivs-size@ ivs-string ;
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
     keysize 2* crypto-key $!
