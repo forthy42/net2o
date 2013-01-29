@@ -22,6 +22,7 @@ require struct0x.fs
 require curve25519.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
+require keccak/libkeccak.fs
 require hash-table.fs
 require debugging.fs
 require mini-oof2.fs
@@ -558,7 +559,7 @@ Variable mapping-addr
     o rdata-class new >o dest-job !
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
-    state# 2* allocatez dest-ivsgen !
+    state# 2* 2* allocatez dest-ivsgen !
     >code-flag @ dup code-flag !
     IF
 	dup addr>replies allocatez dest-replies !
@@ -578,7 +579,7 @@ Variable mapping-addr
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     dup addr>ts allocatez dest-cookies !
-    state# 2* allocatez dest-ivsgen !
+    state# 2* 2* allocatez dest-ivsgen !
     dup >code-flag @ dup code-flag ! IF
 	addr>replies  allocatez dest-replies !
     ELSE
@@ -616,7 +617,8 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 
 Variable init-context#
-wurstkessel-o crypto-o !
+\ wurstkessel-o crypto-o !
+keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!

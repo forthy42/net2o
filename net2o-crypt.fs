@@ -57,14 +57,14 @@ Defer regen-ivs
     drop o> ;
 
 : default-key ( -- )
-    @state 0= IF
+    c:key@ 0= IF
 	key( ." Default-key " cr )
 	rnd-init >wurst-source'
 	wurst-key$ >wurst-key
     THEN ;
 
 : wurst-outbuf-init ( flag -- )
-    0 to @state
+    0 c:key!
     o IF
 	IF
 	    code-map ivs>code-source?
@@ -78,7 +78,7 @@ Defer regen-ivs
     key( ." outbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
 : wurst-inbuf-init ( flag -- )
-    0 to @state
+    0 c:key!
     o IF
 	IF
 	    code-rmap ivs>code-source?
