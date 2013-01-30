@@ -378,35 +378,30 @@ Variable dest-addr
 ' dffield: Alias 64field:
 
 object class
-field: dest-size
-field: dest-vaddr
-field: dest-raddr
-field: dest-job
-field: dest-round
-field: dest-ivs
-field: dest-ivsgen
-field: dest-ivslastgen
-field: dest-timestamps
-field: dest-replies
-field: dest-cookies
-field: dest-tail
-end-class dest-class
-
-dest-class class
-field: code-flag
+    field: dest-size
+    field: dest-vaddr
+    field: dest-raddr
+    field: code-flag
+    field: dest-job
+    field: dest-ivs
+    field: dest-ivsgen
+    field: dest-ivslastgen
+    field: dest-timestamps
+    field: dest-replies
+    field: dest-cookies
+    field: dest-round \ going to be obsoleted
+    field: dest-head  \ read up to here
+    field: dest-tail  \ send from here
+    field: dest-back  \ part we no longer need, flushed on destination
 end-class code-class
 
-dest-class class
-field: data-head
-end-class data-class
-
 code-class class
-field: data-ackbits0
-field: data-ackbits1
-field: data-ackbits-buf
-field: data-firstack0#
-field: data-firstack1#
-field: data-lastack#
+    field: data-ackbits0
+    field: data-ackbits1
+    field: data-ackbits-buf
+    field: data-firstack0#
+    field: data-firstack1#
+    field: data-lastack#
 end-class rdata-class
 
 \ job context structure
@@ -515,7 +510,7 @@ Variable dest-map s" " dest-map $!
 	0= IF
 	    I @ >o
 	    dest-vaddr 2@ dest-addr @ swap - +
-	    code-flag @ IF  1  ELSE  -1  THEN
+	    code-flag @ 2* 1+
 	    dest-job @ o> >o rdrop
 	    return-addr @ dup return-address !@ <>
 	    IF  msg( ." handover" cr )  THEN
@@ -640,19 +635,39 @@ wurstkessel-o crypto-o !
     -1 blocksize !
     1 blockalign ! ;
 
+\ data sending around
+
 : data$@ ( -- addr u )
     data-map @ >o
-    dest-raddr @  dest-size @ data-head @ safe/string o> ;
+    dest-raddr @  dest-size @ dest-head @ safe/string o> ;
 : /data ( u -- )
-    data-map @ >o data-head +! o> ;
+    data-map @ >o dest-head +! o> ;
 : dest-tail$@ ( -- addr u )
     data-map @ >o
-    dest-raddr @  data-head @ dest-tail @ safe/string o> ;
+    dest-raddr @  dest-head @ dest-tail @ safe/string o> ;
 : /dest-tail ( u -- )
     data-map @ >o dest-tail +! o> ;
 : data-dest ( -- addr )
     data-map @ >o
     dest-vaddr @ dest-tail @ + o> ;
+
+\ new data sending around stuff, with front+back
+
+: data-head@ ( -- addr u )
+    \ you can read into this, but only a block at a time (wraparound!)
+    data-map @ >o
+    dest-raddr @ dest-head @
+    dest-back @ dest-size @ + over - >r
+    dest-size @ 1- and + r> o> ;
+: data-tail@ ( -- addr u )
+    data-map @ >o
+    dest-raddr @ dest-tail @ dest-head @ over - >r
+    dest-size @ 1- and + r> o> ;
+
+: data-head? ( -- flag )
+    data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
+: data-tail? ( -- flag )
+    data-map @ >o dest-tail @ dest-head @ u< o> ;
 
 \ code sending around
 
@@ -1280,7 +1295,7 @@ Variable sendflag  sendflag off
 
 : rewind-buffer ( o:map -- )
     1 dest-round +!
-    dest-tail off  data-head off
+    dest-tail off  dest-head off
     dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 
