@@ -1175,7 +1175,7 @@ Variable code-packet
 \ synchronous sending
 
 : data-to-send ( -- flag )
-    resend$@ nip 0> dest-tail$@ nip 0> or ;
+    resend$@ nip 0> data-tail? or ;
 
 : net2o:resend ( -- )
     resend$@ net2o:get-resend 2dup 2>r
