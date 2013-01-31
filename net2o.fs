@@ -510,7 +510,7 @@ Variable dest-map s" " dest-map $!
 	0= IF
 	    I @ >o
 	    dest-vaddr 2@ dest-addr @ swap - +
-	    code-flag @ 2* 1+
+	    code-flag @ invert 2* 1+
 	    dest-job @ o> >o rdrop
 	    return-addr @ dup return-address !@ <>
 	    IF  msg( ." handover" cr )  THEN
