@@ -356,6 +356,7 @@ net2o-base
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
+41 net2o: ack-flush ( addr -- )  dest-back ! ;
 
 \ crypto functions
 

@@ -390,9 +390,10 @@ object class
     field: dest-replies
     field: dest-cookies
     field: dest-round \ going to be obsoleted
-    field: dest-head  \ read up to here
-    field: dest-tail  \ send from here
-    field: dest-back  \ part we no longer need, flushed on destination
+    \                   sender:                receiver:
+    field: dest-head  \ read up to here        received some
+    field: dest-tail  \ send from here         received all
+    field: dest-back  \ flushed on destination flushed
 end-class code-class
 
 code-class class
@@ -637,11 +638,16 @@ wurstkessel-o crypto-o !
 
 \ data sending around
 
+: >blockalign ( n -- block )
+    blockalign @ dup >r 1- + r> negate and ;
+: 64>blockalign ( 64 -- block )
+    blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
+
 : data$@ ( -- addr u )
     data-map @ >o
     dest-raddr @  dest-size @ dest-head @ safe/string o> ;
 : /data ( u -- )
-    data-map @ >o dest-head +! o> ;
+    >blockalign data-map @ >o dest-head +! o> ;
 : dest-tail$@ ( -- addr u )
     data-map @ >o
     dest-raddr @  dest-head @ dest-tail @ safe/string o> ;
@@ -654,11 +660,11 @@ wurstkessel-o crypto-o !
 \ new data sending around stuff, with front+back
 
 : data-head@ ( -- addr u )
-    \ you can read into this, but only a block at a time (wraparound!)
+    \ you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
     dest-raddr @ dest-head @
     dest-back @ dest-size @ + over - >r
-    dest-size @ 1- and + r> o> ;
+    dest-size @ 1- and + r> o> blocksize @ umin ;
 : data-tail@ ( -- addr u )
     data-map @ >o
     dest-raddr @ dest-tail @ dest-head @ over - >r
@@ -945,11 +951,6 @@ file-state-struct buffer: new-file-state
     0= IF  drop new-file-state file-state-struct file-state $+!
 	file-state $@ + file-state-struct -  THEN ;
 
-: >blockalign ( n -- block )
-    blockalign @ dup >r 1- + r> negate and ;
-: 64>blockalign ( 64 -- block )
-    blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
-
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
     data-rmap @ >o data-ackbits0 2@  2swap
     maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
@@ -1018,7 +1019,7 @@ file-state-struct buffer: new-file-state
     msg( ." Read <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
     fs-fid @ read-file throw dup { size }
     n>64 64+ 64dup fs-seekto 64!@ o>
-    size >blockalign /data ;
+    size /data ;
 
 : n2o:slurp-block ( id -- delta )  n2o:slurp-block' 64- 64>n ;
 
@@ -1030,7 +1031,7 @@ file-state-struct buffer: new-file-state
     LOOP  sum ;
 
 : n2o:slurp-blocks ( idbits -- )
-    BEGIN  data$@ nip  WHILE
+    BEGIN  data-head?  WHILE
 	dup n2o:slurp-blocks-once  0= UNTIL  THEN
     drop ;
 
@@ -1040,7 +1041,7 @@ file-state-struct buffer: new-file-state
     file-state-struct +LOOP  drop sum ;
 
 : n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
-    BEGIN  data$@ nip  WHILE
+    BEGIN  data-head?  WHILE
 	n2o:slurp-all-blocks-once  0= UNTIL  THEN +file ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
