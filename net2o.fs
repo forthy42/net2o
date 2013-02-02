@@ -414,7 +414,6 @@ object class
     64field: recv-tick
     field: recv-addr
     field: recv-flag
-    field: recv-high  \ replace by dest-head
     field: cmd-buf#
     field: file-state
     field: blocksize
@@ -1308,7 +1307,6 @@ Variable sendflag  sendflag off
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
-    recv-high on
     data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;

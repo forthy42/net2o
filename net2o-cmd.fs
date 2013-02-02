@@ -406,8 +406,7 @@ net2o-base
 
 \ acknowledges
 
-70 net2o: set-tail ( addr -- ) recv-high umax! ;
-71 net2o: timeout ( ticks -- ) net2o:timeout data-dest ulit, set-tail ;
+71 net2o: timeout ( ticks -- ) net2o:timeout ;
 72 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
 73 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
@@ -523,7 +522,6 @@ also net2o-base
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
-    recv-high @ -1 = IF  drop  EXIT  THEN
     receive-flag { rf } data-rmap @ >o
     \ we have not yet received anything
     data-lastack# @ 0< IF  drop o>  EXIT  THEN
@@ -532,19 +530,20 @@ also net2o-base
     rf data-ackbit @ { acks }
     acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
     rf data-firstack# { first-ack# }
-    true swap first-ack# @ o>
+    0 swap first-ack# @ o>
     +DO
 	acks I + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	$FFFFFFFF <> IF
     	    acks I + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift
 	    resend( ." resend: " dup hex. over hex. F cr )
-	    ulit, ulit, resend-mask  drop false
+	    ulit, ulit, resend-mask  1+
 	ELSE
-	    dup IF  I first-ack# !
+	    dup 0= IF  I first-ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
+	dup 8 >= ?LEAVE \ no more than 8 resends
     4 +LOOP  drop ;
 
 : do-expect-reply ( -- )
@@ -621,13 +620,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     THEN
     drop r> 0= IF  maxdata received +!  expected?  THEN ;
 
-: recv-high! ( -- )
-    dest-addr @ recv-high
-    dup @ -1 = IF  !  ELSE  umax!  THEN ;
-
 : net2o:do-ack ( -- ) 
     dest-addr @ recv-addr ! \ last received packet
-    recv-high!  recv-cookie
+    recv-cookie
     inbuf 1+ c@ recv-flag ! \ last receive flag
     cmd0source on  cmdreset
     inbuf 1+ c@ acks# and
@@ -669,8 +664,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     reply +LOOP ;
 
 : .expected ( -- )
-    ." expected/received: " recv-addr @ hex. recv-high @ hex.
-    data-rmap @ >o
+    ." expected/received: " recv-addr @ hex.
+    data-rmap @ >o dest-head @ hex.
     false data-firstack# @ hex. true data-firstack# @ hex. o>
     expected @ hex. received @ hex. F cr
     \ receive-flag data-rmap @ >o
