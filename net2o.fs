@@ -883,14 +883,14 @@ $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )
-    resend( ." mask: " hex[ 64>r dup . 64r> 64dup 64. ]hex cr )
+    resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
     data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
 	    over I 2@ rot >r
 	    BEGIN  over r@ u>  WHILE  2* >r maxdata - r>  REPEAT
 	    rdrop nip or >mask0
 	    resend( I 2@ hex[ ." replace: " swap . . ." -> "
-	    64>r dup . 64r> 64dup 64. cr ]hex )
+	    >r dup u. r> dup u. cr ]hex )
 	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP
@@ -900,7 +900,7 @@ $20 Value mask-bits#
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
-    data-map @ >o dest-vaddr @ - dest-raddr @ + o> ;
+    data-map @ >o dest-raddr @ + o> ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
@@ -908,7 +908,7 @@ $20 Value mask-bits#
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop ;
+    data-resend $@ drop 2@ drop data-map @ >o dest-vaddr @ + o> ;
 : /resend ( u -- )
     0 +DO  data-resend $@ 0= IF  drop  LEAVE  THEN
 	dup >r 2@ -2 and >mask0  dup 0= IF

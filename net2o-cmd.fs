@@ -524,20 +524,20 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     recv-high @ -1 = IF  drop  EXIT  THEN
-    receive-flag { rf } recv-high @ data-rmap @ >o
+    receive-flag { rf } data-rmap @ >o
     \ we have not yet received anything
-    data-lastack# @ 0< IF  2drop o>  EXIT  THEN
-    dest-vaddr @ - addr>bits
+    data-lastack# @ 0< IF  drop o>  EXIT  THEN
+    dest-head @ addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
     rf data-ackbit @ { acks }
     acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
-    dest-vaddr @ rf data-firstack# { vaddr first-ack# }
+    rf data-firstack# { first-ack# }
     true swap first-ack# @ o>
     +DO
 	acks I + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	$FFFFFFFF <> IF
     	    acks I + l@ $FFFFFFFF xor
-	    I chunk-p2 3 + lshift vaddr +
+	    I chunk-p2 3 + lshift
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  drop false
 	ELSE
@@ -622,7 +622,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     drop r> 0= IF  maxdata received +!  expected?  THEN ;
 
 : recv-high! ( -- )
-    dest-addr @ dest-vaddr @ - recv-high
+    dest-addr @ recv-high
     dup @ -1 = IF  !  ELSE  umax!  THEN ;
 
 : net2o:do-ack ( -- ) 
