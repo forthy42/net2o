@@ -622,7 +622,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     drop r> 0= IF  maxdata received +!  expected?  THEN ;
 
 : recv-high! ( -- )
-    dest-addr @ recv-high
+    dest-addr @ dest-vaddr @ - recv-high
     dup @ -1 = IF  !  ELSE  umax!  THEN ;
 
 : net2o:do-ack ( -- ) 

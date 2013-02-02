@@ -414,7 +414,7 @@ object class
     64field: recv-tick
     field: recv-addr
     field: recv-flag
-    field: recv-high
+    field: recv-high  \ replace by dest-head
     field: cmd-buf#
     field: file-state
     field: blocksize
@@ -470,7 +470,7 @@ object class
     \ state machine
     field: expected
     field: total
-    field: received
+    field: received  \ to be replaced with dest-tail
     \ statistics
     field: timing-stat
     64field: last-time
@@ -498,6 +498,10 @@ end-structure
 
 \ check for valid destination
 
+: >data-head ( addr o:map -- )
+    dest-back @ dest-size @ 1- and - dup 0< IF  dest-size @ +  THEN
+    dest-back @ + dest-head umax! ;
+
 Variable dest-map s" " dest-map $!
 
 : check-dest ( -- addr 1/t / f )
@@ -510,7 +514,7 @@ Variable dest-map s" " dest-map $!
 	I @ 2@ 1- bounds dest-addr @ within
 	0= IF
 	    I @ >o
-	    dest-vaddr 2@ dest-addr @ swap - +
+	    dest-vaddr 2@ dest-addr @ swap - dup >data-head +
 	    code-flag @ invert 2* 1+
 	    dest-job @ o> >o rdrop
 	    return-addr @ dup return-address !@ <>
@@ -1433,7 +1437,7 @@ $08 Constant cookie-val
     >r inbuf packet-data r@ swap dup >r move
     r> r> swap queue-command ;
 
-: handle-dest ( -- ) \ handle packet to valid destinations
+: handle-dest ( addr f -- ) \ handle packet to valid destinations
     ticks
     timing( dest-addr @ hex.
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
