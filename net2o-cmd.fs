@@ -406,7 +406,8 @@ net2o-base
 
 \ acknowledges
 
-71 net2o: timeout ( ticks -- ) net2o:timeout ;
+70 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
+71 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
 72 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
 73 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 

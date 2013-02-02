@@ -1400,7 +1400,7 @@ Create pollfds   here pollfd %size dup allot erase
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
-    timeout( ." timeout? " . send-anything? . chunks+ ? bandwidth? . next-chunk-tick ticks-u - . cr ) ;
+    timeout( ." timeout? " . send-anything? . chunks+ ? bandwidth? . next-chunk-tick ( ticks-u - ) . cr ) ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
