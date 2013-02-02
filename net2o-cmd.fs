@@ -323,7 +323,7 @@ net2o-base
 21 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
 22 net2o: close-file ( id -- )  64>n n2o:close-file ;
 23 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
-24 net2o: slurp-chunk ( id -- ) 64>n id>file data$@ rot read-file throw /data ;
+24 net2o: slurp-chunk ( id -- ) 64>n id>file data-head@ rot read-file throw /data ;
 25 net2o: send-chunk ( -- ) net2o:send-chunk ;
 26 net2o: send-chunks ( -- ) net2o:send-chunks ;
 27 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
@@ -352,7 +352,7 @@ net2o-base
 39 net2o: set-rtdelay ( time -- )  recv-tick 64@ 64swap 64- rtdelay 64min! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
-    map@ cookie+ 64over 64over 64= 0= IF
+    data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
@@ -504,7 +504,7 @@ also net2o-base
     2dup 2>r rot >r u>64 r> cookie+ cookie( ." cookie, " 64dup .16 space )
     lit, 2r> swap cookie( 2dup hex. hex. F cr ) ulit, ulit, ack-cookies ;
 
-: net2o:ack-cookies ( -- )  rmap@ { map }
+: net2o:ack-cookies ( -- )  data-rmap @ { map }
     map >o data-ackbits-buf $@ o>
     bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
     clear-cookies ;

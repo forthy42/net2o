@@ -643,19 +643,13 @@ wurstkessel-o crypto-o !
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
-: data$@ ( -- addr u )
-    data-map @ >o
-    dest-raddr @  dest-size @ dest-head @ safe/string o> ;
 : /data ( u -- )
     >blockalign data-map @ >o dest-head +! o> ;
-: dest-tail$@ ( -- addr u )
-    data-map @ >o
-    dest-raddr @  dest-head @ dest-tail @ safe/string o> ;
 : /dest-tail ( u -- )
     data-map @ >o dest-tail +! o> ;
 : data-dest ( -- addr )
     data-map @ >o
-    dest-vaddr @ dest-tail @ + o> ;
+    dest-vaddr @ dest-tail @ dest-size @ 1- and + o> ;
 
 \ new data sending around stuff, with front+back
 
@@ -666,9 +660,10 @@ wurstkessel-o crypto-o !
     dest-back @ dest-size @ + over - >r
     dest-size @ 1- and + r> o> blocksize @ umin ;
 : data-tail@ ( -- addr u )
+    \ you can write from this, also a block at a time
     data-map @ >o
     dest-raddr @ dest-tail @ dest-head @ over - >r
-    dest-size @ 1- and + r> o> ;
+    dest-size @ 1- and + r> o> blocksize @ umin ;
 
 : data-head? ( -- flag )
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
@@ -768,11 +763,6 @@ timestats buffer: stat-tuple
     64- lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
     slackgrow 64! ;
 
-: map@ ( -- addr/0 )
-    o IF data-map @ ELSE 0 THEN ;
-: rmap@ ( -- addr/0 )
-    o IF data-rmap @ ELSE 0 THEN ;
-
 : >offset ( addr -- addr' flag )
     dest-vaddr @ - dup dest-size @ u< ;
 
@@ -796,7 +786,7 @@ timestats buffer: stat-tuple
 : >timestamp ( time addr -- time' ts-array index / 0 0 )
     >flyburst
     >r time-offset 64@ 64+ r>
-    map@ dup 0= IF  2drop 0 0  EXIT  THEN  >r
+    data-map @ dup 0= IF  2drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
 	dest-tail @ o> over - 0 max addr>bits window-size !
 	addr>ts r> >o dest-timestamps @ o> swap
@@ -1013,7 +1003,7 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-block' ( id -- nextseek oldseek ) 0 { id roff }
     msg( data-map @ dest-raddr @ to roff )
-    data$@ blocksize @ umin
+    data-head@
     id id>addr? >o fs-seekto 64@ 64dup 64>d fs-fid @ reposition-file throw
     -64rot fs-limit 64@ fs-seekto 64@ 64- 64>n umin
     msg( ." Read <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
@@ -1070,8 +1060,8 @@ require net2o-keys.fs
     dest-addr @ >offset 0= IF  rdrop 2drop  EXIT  THEN
     addr>ts dest-cookies @ + 64! o> ;
 
-: send-cookie ( -- )  map@ cookie! ;
-: recv-cookie ( -- ) rmap@ cookie! ;
+: send-cookie ( -- )  data-map  @ cookie! ;
+: recv-cookie ( -- )  data-rmap @ cookie! ;
 
 [IFDEF] 64bit
     : cookie+ ( addr bitmap map -- sum ) >o
@@ -1184,7 +1174,7 @@ Variable code-packet
     2r> resend( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send ( -- )
-    dest-tail$@ net2o:get-dest 2dup 2>r
+    data-tail@ net2o:get-dest 2dup 2>r
     net2o:prep-send /dest-tail
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
@@ -1192,7 +1182,7 @@ Variable code-packet
     ack-state @ outflag or!
     bursts# 1- data-b2b @ = IF
 	\ send a new packet for timing path
-	dest-tail$@ nip IF  net2o:send  ELSE  net2o:resend  THEN
+	data-tail? IF  net2o:send  ELSE  net2o:resend  THEN
     ELSE
 	resend$@ nip IF  net2o:resend  ELSE  net2o:send  THEN
     THEN
@@ -1233,7 +1223,7 @@ Create chunk-adder chunks-struct allot
 	ack-toggle# ack-state xor!
 	-1 flybursts +!
 	flybursts @ 0<= IF
-	    bursts( .j ." no bursts in flight " ns/burst ? dest-tail$@ swap hex. hex. cr )
+	    bursts( .j ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
@@ -1296,6 +1286,7 @@ Variable sendflag  sendflag off
 
 : rewind-buffer ( o:map -- )
     1 dest-round +!
+    \ dest-size @ dest-back +!
     dest-tail off  dest-head off
     dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
@@ -1312,7 +1303,7 @@ Variable sendflag  sendflag off
     data-map @ >o
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
-: net2o:rewind-receiver ( -- ) cookie( ." rewind" cr )
+: net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
     recv-high on
     data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
