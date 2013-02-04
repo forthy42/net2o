@@ -588,10 +588,10 @@ also net2o-base
 : expected? ( -- )
     received @ expected @ tuck u>= and IF
 	resend-all
-	." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
+	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
 	data-ackbits1 @ data-firstack1# @ dup hex. + l@ hex.
-	o> received @ hex. F cr
+	o> received @ hex. F cr )
 	msg( ." Block transfer done: " received @ hex. expected @ hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
