@@ -401,8 +401,8 @@ net2o-base
 68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-90 net2o: set-total ( u -- )  64>n total! ;
-91 net2o: gen-total ( -- )  net2o:gen-total lit, set-total ;
+90 net2o: set-total ( u -- )  write-file# off 64>n total! ;
+91 net2o: gen-total ( -- ) read-file# off net2o:gen-total lit, set-total ;
 
 \ acknowledges
 
@@ -520,8 +520,8 @@ also net2o-base
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
     chunk-p2 3 + lshift dest-head @ umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
-: data-ackbit ( flag -- addr )
-    IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
+: data-ackbit ( flag -- bit )
+    IF  data-ackbits1  ELSE  data-ackbits0  THEN @ ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 : net2o:do-resend ( flag -- )
@@ -531,14 +531,15 @@ also net2o-base
     data-lastack# @ 0< IF  drop o>  EXIT  THEN
     dest-head @ addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
-    rf data-ackbit @ { acks }
+    rf data-ackbit 
+    dest-size @ chunk-p2 3 + rshift 1- { acks ackm }
     acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
     rf data-firstack# { first-ack# }
     0 swap first-ack# @ o>
     +DO
-	acks I + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
+	acks I ackm and + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	$FFFFFFFF <> IF
-    	    acks I + l@ $FFFFFFFF xor
+    	    acks I ackm and + l@ $FFFFFFFF xor
 	    I chunk-p2 3 + lshift
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  1+
@@ -606,7 +607,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     recv-addr @ receive-flag { rf } data-rmap @ >o
     dest-vaddr @ - addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
-    rf data-ackbit @ over +bit@
+    rf data-ackbit over +bit@
     dup IF  1 packetr2 +!  THEN o o> ;
 
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
@@ -615,11 +616,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup data-lastack# !@
-	!rf data-ackbit @ -rot
+	!rf data-ackbit -rot
 	+DO  dup I 1+ +bit  LOOP o>
     ELSE
 	\ otherwise, set only this specific bucket
-	!rf data-ackbit @ over +bit@ o>
+	!rf data-ackbit over +bit@ o>
 	r> and >r
     THEN
     drop r> 0= IF  maxdata received +!  expected?  THEN ;
@@ -673,7 +674,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     false data-firstack# @ hex. true data-firstack# @ hex. o>
     expected @ hex. received @ hex. F cr
     \ receive-flag data-rmap @ >o
-    \ data-ackbit @ dest-size @ addr>bits bits>bytes dump o>
+    \ data-ackbit dest-size @ addr>bits bits>bytes dump o>
 ;
 
 : transfer-keepalive? ( -- )
