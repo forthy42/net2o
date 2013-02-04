@@ -669,13 +669,18 @@ wurstkessel-o crypto-o !
     data-map @ >o
     dest-raddr @ dest-tail @ dest-head @ over - >r
     dest-size @ 1- and + r> o> blocksize @ umin ;
+: rdata-back@ ( -- addr u )
+    \ you can write from this, also a block at a time
+    data-rmap @ >o
+    dest-raddr @ dest-back @ dest-tail @ over - >r
+    dest-size @ 1- and + r> o> blocksize @ umin ;
 
 : data-head? ( -- flag )
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
 : data-tail? ( -- flag )
     data-map @ >o dest-tail @ dest-head @ u< o> ;
-: rdata-tail? ( -- flag )
-    data-rmap @ >o dest-tail @ dest-head @ u< o> ;
+: rdata-back? ( -- flag )
+    data-rmap @ >o dest-back @ dest-tail @ u< o> ;
 
 \ code sending around
 
@@ -978,11 +983,11 @@ file-state-struct buffer: new-file-state
     64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
 
 : save-all-blocks ( -- ) +calc ?state
-    data-rmap @ { map } map >o dest-raddr @ dest-tail @ + o>
+    data-rmap @ { map } map >o dest-raddr @ dest-back @ + o>
     dup file-state $@ file-state-struct / 0 { tail fstate size fails }
     write-file# @ { wf0 } msg( ." Write from " wf0 . size . cr )
     BEGIN
-	rdata-tail?  WHILE
+	rdata-back?  WHILE
 	    blocksize @
 	    fstate write-file# @ file-state-struct * +
 	    >o fs-seekto 64@ fs-seek 64@
@@ -991,10 +996,10 @@ file-state-struct buffer: new-file-state
 	    o o> write-file# @ 0 .r ." >" cr >o )
 	    2dup fs-fid @ write-file throw  o>
 	    dup IF  0  ELSE  fails 1+  THEN to fails
-	    >blockalign +
+	    >blockalign map >o dup dest-tail +! o> +
 	    write-file# file+
 	fails size u>= UNTIL  THEN
-    map >o dest-raddr @ - dest-tail ! o> +file
+    drop +file
     msg( ." Write file " write-file# ? cr ) ;
 
 : save-to ( addr u n -- )  state-addr >o
@@ -1303,7 +1308,7 @@ Variable sendflag  sendflag off
 : rewind-buffer ( o:map -- )
     1 dest-round +!
     \ dest-size @ dest-back +!
-    dest-tail off  dest-head off
+    dest-tail off  dest-head off  dest-back off
     dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 

@@ -516,6 +516,9 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
+: !rdata-tail ( -- )
+    data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
+    chunk-p2 3 + lshift dest-head @ umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-ackbit ( flag -- addr )
     IF  data-ackbits1  ELSE  data-ackbits0  THEN ;
@@ -545,7 +548,7 @@ also net2o-base
 	    THEN
 	THEN
 	dup 8 >= ?LEAVE \ no more than 8 resends
-    4 +LOOP  drop ;
+    4 +LOOP  drop !rdata-tail ;
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
