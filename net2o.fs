@@ -990,7 +990,7 @@ file-state-struct buffer: new-file-state
 	    dup IF  0  ELSE  fails 1+  THEN to fails  >blockalign +
 	THEN
 	write-file# @ 1+ size mod write-file# !
-    fails size u>= UNTIL
+    fails size u>= write-file# @ wf0 = and UNTIL
     map >o dest-raddr @ - dest-tail ! o> +file ;
 
 : save-to ( addr u n -- )  state-addr >o
