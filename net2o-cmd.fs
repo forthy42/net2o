@@ -380,7 +380,7 @@ net2o-base
 \ better slurping
 
 60 net2o: slurp-block ( id -- 64nextseek )
-    64>n n2o:slurp-block' 64drop ;
+    64>n n2o:slurp-block' ;
 61 net2o: track-size ( size id -- )
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
 62 net2o: track-seek ( seek id -- )

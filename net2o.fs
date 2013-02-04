@@ -674,6 +674,8 @@ wurstkessel-o crypto-o !
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
 : data-tail? ( -- flag )
     data-map @ >o dest-tail @ dest-head @ u< o> ;
+: rdata-tail? ( -- flag )
+    data-rmap @ >o dest-tail @ dest-head @ u< o> ;
 
 \ code sending around
 
@@ -972,26 +974,31 @@ file-state-struct buffer: new-file-state
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
 
+: >seek ( 64seek -- 64seek )
+    64dup 64>d fs-fid @ reposition-file throw ;
+
 : save-all-blocks ( -- ) +calc ?state
     data-rmap @ { map } map >o dest-raddr @ dest-tail @ + o>
     dup file-state $@ file-state-struct / 0 { tail fstate size fails }
-    write-file# @ { wf0 }
+    write-file# @ { wf0 } ." Write from " wf0 . size . cr
     BEGIN
-	blocksize @ n>64
-	fstate write-file# @ file-state-struct * +
-	>o fs-seekto 64@ fs-seek 64@ 64over 64over 64u<= IF
-	    64drop 64drop 64drop o> fails 1+ to fails
-	ELSE
-	    fs-seek 64@ 64>d fs-fid @ reposition-file throw
-	    64- 64umin 64dup fs-seek 64+! 64>n
-	    msg( ." flush file <" 2dup swap map >o dest-raddr @ o> - hex. hex.
-	         o o> write-file# @ 0 .r ." >" cr >o )
-	    2dup fs-fid @ write-file throw  o>
-	    dup IF  0  ELSE  fails 1+  THEN to fails  >blockalign +
-	THEN
-	write-file# @ 1+ size mod write-file# !
-    fails size u>= write-file# @ wf0 = and UNTIL
-    map >o dest-raddr @ - dest-tail ! o> +file ;
+	rdata-tail?  WHILE
+	    blocksize @ n>64
+	    fstate write-file# @ file-state-struct * +
+	    >o fs-seekto 64@ fs-seek 64@ 64over 64over 64u<= IF
+		64drop 64drop 64drop o> fails 1+ to fails
+	    ELSE
+		>seek 64- 64umin 64dup fs-seek 64+! 64>n
+		msg( ." flush file <" 2dup swap map >o dest-raddr @ o> - hex. hex.
+		o o> write-file# @ 0 .r ." >" cr >o )
+		2dup fs-fid @ write-file throw  o>
+		dup IF  0  ELSE  fails 1+  THEN to fails
+		>blockalign +
+	    THEN
+	    write-file# @ 1+ size mod write-file# !
+	fails size u>= UNTIL  THEN
+    map >o dest-raddr @ - dest-tail ! o> +file
+    ." Write file " write-file# ? cr ;
 
 : save-to ( addr u n -- )  state-addr >o
     r/w create-file throw fs-fid ! o> ;
@@ -1011,17 +1018,17 @@ file-state-struct buffer: new-file-state
 : n2o:close-file ( id -- )
     ?state  id>addr? >o fs-fid o> dup @ ?dup-IF  close-file throw  THEN  off ;
 
-: n2o:slurp-block' ( id -- nextseek oldseek ) 0 { id roff }
+: n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ dest-raddr @ to roff )
     data-head@
-    id id>addr? >o fs-seekto 64@ 64dup 64>d fs-fid @ reposition-file throw
-    -64rot fs-limit 64@ fs-seekto 64@ 64- 64>n umin
+    id id>addr? >o fs-limit 64@ fs-seekto 64@ >seek 64- 64>n umin
     msg( ." Read <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
-    fs-fid @ read-file throw dup { size }
-    n>64 64+ 64dup fs-seekto 64!@ o>
-    size /data ;
+    fs-fid @ read-file throw
+    dup n>64 fs-seekto 64+! o>
+    dup /data ;
 
-: n2o:slurp-block ( id -- delta )  n2o:slurp-block' 64- 64>n ;
+: n2o:slurp-block' ( id -- seek )
+    dup n2o:slurp-block drop id>addr? >o fs-seekto 64@ o> ;
 
 : n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
     8 cells 0 DO
@@ -1036,12 +1043,15 @@ file-state-struct buffer: new-file-state
     drop ;
 
 : n2o:slurp-all-blocks-once ( -- sum )  read-file# @ >r
-    BEGIN  read-file# @ n2o:slurp-block read-file# file+
-    read-file# @ r@ = UNTIL  rdrop ;
+    0 BEGIN  data-head?  WHILE
+	    read-file# @ n2o:slurp-block + read-file# file+
+    read-file# @ r@ = UNTIL  THEN  rdrop ;
 
 : n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
+    ." Read from " read-file# ? file-state $@len file-state-struct / . cr
     BEGIN  data-head?  WHILE
-	n2o:slurp-all-blocks-once  0= UNTIL  THEN +file ;
+	n2o:slurp-all-blocks-once  0= UNTIL  THEN +file
+    ." Read file " read-file# ? cr ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
