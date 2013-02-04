@@ -416,6 +416,8 @@ object class
     field: recv-flag
     field: cmd-buf#
     field: file-state
+    field: read-file#
+    field: write-file#
     field: blocksize
     field: blockalign
     field: crypto-key
@@ -967,24 +969,29 @@ file-state-struct buffer: new-file-state
 	64>blockalign 64#0 64max 64+
     file-state-struct +LOOP ;
 
-: save-blocks ( -- ) +calc ?state
+: file+ ( addr -- ) >r 1 r@ +!
+    r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
+
+: save-all-blocks ( -- ) +calc ?state
     data-rmap @ { map } map >o dest-raddr @ dest-tail @ + o>
-    file-state $@ bounds ?DO
+    dup file-state $@ file-state-struct / 0 { tail fstate size fails }
+    write-file# @ { wf0 }
+    BEGIN
 	blocksize @ n>64
-	I >o fs-seekto 64@ fs-seek 64@ 64over 64over 64u<= IF
-	    64drop 64drop 64drop o>
+	fstate write-file# @ file-state-struct * +
+	>o fs-seekto 64@ fs-seek 64@ 64over 64over 64u<= IF
+	    64drop 64drop 64drop o> fails 1+ to fails
 	ELSE
 	    fs-seek 64@ 64>d fs-fid @ reposition-file throw
 	    64- 64umin 64dup fs-seek 64+! 64>n
-	    msg( ." flush file <" 2dup swap map >o dest-raddr @ o> - hex. hex. I file-state $@ drop - file-state-struct / 0 .r ." > " cr )
+	    msg( ." flush file <" 2dup swap map >o dest-raddr @ o> - hex. hex.
+	         o o> write-file# @ 0 .r ." >" cr >o )
 	    2dup fs-fid @ write-file throw  o>
-	    >blockalign +
+	    dup IF  0  ELSE  fails 1+  THEN to fails  >blockalign +
 	THEN
-    file-state-struct +LOOP
+	write-file# @ 1+ size mod write-file# !
+    fails size u>= UNTIL
     map >o dest-raddr @ - dest-tail ! o> +file ;
-
-: save-all-blocks ( -- )  data-rmap @ >o dest-tail o> >r 
-    BEGIN  r@ @ >r  save-blocks  r> r@ @ =  UNTIL  rdrop ;
 
 : save-to ( addr u n -- )  state-addr >o
     r/w create-file throw fs-fid ! o> ;
@@ -1028,10 +1035,9 @@ file-state-struct buffer: new-file-state
 	dup n2o:slurp-blocks-once  0= UNTIL  THEN
     drop ;
 
-: n2o:slurp-all-blocks-once ( -- sum ) 0 { sum }
-    0 file-state $@ bounds DO
-	dup n2o:slurp-block  sum + to sum  1+
-    file-state-struct +LOOP  drop sum ;
+: n2o:slurp-all-blocks-once ( -- sum )  read-file# @ >r
+    BEGIN  read-file# @ n2o:slurp-block read-file# file+
+    read-file# @ r@ = UNTIL  rdrop ;
 
 : n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
     BEGIN  data-head?  WHILE

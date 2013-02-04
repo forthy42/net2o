@@ -549,7 +549,7 @@ also net2o-base
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
-    msg( ." Expect reply" cr )
+    msg( ." Expect reply" F cr )
     ['] end-cmd IS expect-reply? ;
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
@@ -580,7 +580,7 @@ also net2o-base
 
 : expected? ( -- )
     received @ expected @ tuck u>= and IF
-	msg( ." Block transfer done!" F cr )
+	msg( ." Block transfer done: " received @ hex. expected @ hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
     THEN ;
