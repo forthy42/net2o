@@ -501,7 +501,7 @@ end-structure
 
 : >data-head ( addr o:map -- )
     dest-back @ dest-size @ 1- and - dup 0< IF  dest-size @ +  THEN
-    dest-back @ + dest-head umax! ;
+    maxdata + dest-back @ + dest-head umax! ;
 
 Variable dest-map s" " dest-map $!
 
@@ -955,7 +955,7 @@ file-state-struct buffer: new-file-state
 
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
     data-rmap @ >o data-ackbits0 2@  2swap
-    maxdata 1- + chunk-p2 rshift 1+ swap chunk-p2 rshift +DO
+    maxdata 1- + chunk-p2 rshift swap chunk-p2 rshift +DO
 	dup I -bit  over I -bit  LOOP  2drop
     data-firstack0# off  data-firstack1# off o>
     firstack( ." expect more data" cr ) ;
@@ -996,7 +996,7 @@ file-state-struct buffer: new-file-state
 	    o o> write-file# @ 0 .r ." >" cr >o )
 	    2dup fs-fid @ write-file throw  o>
 	    dup IF  0  ELSE  fails 1+  THEN to fails
-	    >blockalign map >o dup dest-tail +! o> +
+	    >blockalign map >o dup dest-back +! o> +
 	    write-file# file+
 	fails size u>= UNTIL  THEN
     drop +file

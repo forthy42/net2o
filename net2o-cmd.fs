@@ -544,12 +544,15 @@ also net2o-base
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  1+
 	ELSE
-	    dup 0= IF  I first-ack# !
+	    dup 0= IF  I 4 + first-ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
 	dup 8 >= ?LEAVE \ no more than 8 resends
     4 +LOOP  drop !rdata-tail ;
+: resend-all ( -- )
+    resend-toggle# recv-flag xor!  false net2o:do-resend
+    resend-toggle# recv-flag xor!  false net2o:do-resend ;
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
@@ -584,6 +587,11 @@ also net2o-base
 
 : expected? ( -- )
     received @ expected @ tuck u>= and IF
+	resend-all
+	." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
+	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
+	data-ackbits1 @ data-firstack1# @ dup hex. + l@ hex.
+	o> received @ hex. F cr
 	msg( ." Block transfer done: " received @ hex. expected @ hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
@@ -681,9 +689,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     received @ expected @ u>= ?EXIT
     timeout( .expected )
     cmdreset update-rtdelay  ticks lit, timeout
-    resend-toggle# recv-flag xor!  false net2o:do-resend
-    resend-toggle# recv-flag xor!  false net2o:do-resend
-    net2o:genack  cmd-send? ;
+    resend-all  net2o:genack  cmd-send? ;
 
 : connecting-timeout ( -- )
     F .time ."  connecting timeout" F cr
