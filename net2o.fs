@@ -661,19 +661,21 @@ wurstkessel-o crypto-o !
 : data-head@ ( -- addr u )
     \ you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
-    dest-raddr @ dest-head @
-    dest-back @ dest-size @ + over - >r
-    dest-size @ 1- and + r> o> blocksize @ umin ;
+    dest-raddr @ dest-head @ dest-back @ dest-size @ + over -
+    >r dest-size @ 1- and + r>
+    o> blocksize @ umin ;
 : data-tail@ ( -- addr u )
     \ you can write from this, also a block at a time
     data-map @ >o
-    dest-raddr @ dest-tail @ dest-head @ over - >r
-    dest-size @ 1- and + r> o> blocksize @ umin ;
+    dest-raddr @ dest-tail @ dest-head @ over -
+    >r dest-size @ 1- and + r>
+    o> blocksize @ umin ;
 : rdata-back@ ( -- addr u )
     \ you can write from this, also a block at a time
     data-rmap @ >o
-    dest-raddr @ dest-back @ dest-tail @ over - >r
-    dest-size @ 1- and + r> o> blocksize @ umin ;
+    dest-raddr @ dest-back @ dest-tail @ over -
+    >r dest-size @ 1- and + r>
+    o> blocksize @ umin ;
 
 : data-head? ( -- flag )
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
