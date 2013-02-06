@@ -513,8 +513,10 @@ also net2o-base
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
+: net2o:ackflush ( -- )
+    data-rmap @ >o dest-back @ o> ulit, ack-flush ;
 : net2o:genack ( -- )
-    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
+    net2o:ack-cookies  net2o:b2btime  net2o:acktime  net2o:ackflush  >rate ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
