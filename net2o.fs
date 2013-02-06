@@ -1159,9 +1159,14 @@ Variable code-packet
 : net2o:get-resend ( -- taddr target )
     resend-dest return-address @ ;
 
+\ branchless version using floating point
+
+FVariable <size-lb>
+
 : send-size ( u -- n )
-    [ 0 max-size^2 ] [DO] dup [ min-size 2/ [I] lshift ]L u>= IF drop [I] EXIT THEN [ -1 ] [+LOOP]
-    drop 0 ;
+    min-size umax maxdata umin 1-
+    [ min-size 2/ 2/ s>f 1/f ] FLiteral fm*
+    <size-lb> df!  <size-lb> 6 + c@ 4 rshift ;
 
 64Variable last-ticks
 
