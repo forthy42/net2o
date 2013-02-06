@@ -1078,13 +1078,13 @@ require net2o-keys.fs
 
 \ cookie stuff
 
-: cookie! ( map -- ) dup 0= IF  drop  EXIT  THEN  >o
+: cookie! ( -- )
     c:cookie
-    dest-addr @ >offset 0= IF  rdrop 2drop  EXIT  THEN
-    addr>ts dest-cookies @ + 64! o> ;
+    dest-addr @ >offset 0= IF  2drop  EXIT  THEN
+    addr>ts dest-cookies @ + 64! ;
 
-: send-cookie ( -- )  data-map  @ cookie! ;
-: recv-cookie ( -- )  data-rmap @ cookie! ;
+: send-cookie ( -- )  data-map  @ >o cookie! o> ;
+: recv-cookie ( -- )  data-rmap @ >o cookie! o> ;
 
 [IFDEF] 64bit
     : cookie+ ( addr bitmap map -- sum ) >o
@@ -1138,7 +1138,8 @@ Variable code-packet
 	THEN
     THEN ;
 
-: >send ( addr n -- )  >r  r@ 64bit# or outbuf c!
+: >send ( addr n -- )
+    >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  j?
@@ -1159,24 +1160,20 @@ Variable code-packet
     resend-dest return-address @ ;
 
 : send-size ( u -- n )
-    0 max-size^2 DO
-	dup min-size 2/ I lshift u>= IF
-	    drop I  UNLOOP  EXIT
-	THEN
-    -1 +LOOP
+    [ 0 max-size^2 ] [DO] dup [ min-size 2/ [I] lshift ]L u>= IF drop [I] EXIT THEN [ -1 ] [+LOOP]
     drop 0 ;
 
 64Variable last-ticks
 
-: ts-ticks! ( addr map -- )
-    >o addr>ts dest-timestamps @ o> + >r last-ticks 64@ r> ts-ticks
-    dup 64@ 64-0= 0= IF  64on 64drop 1 packets2 +!  EXIT  THEN 64! ;
+: ts-ticks! ( addr -- )
+    addr>ts dest-timestamps @ + >r last-ticks 64@ r> ts-ticks
+    dup 64@ 64-0= IF  64!  EXIT  THEN  64on 64drop 1 packets2 +! ;
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
 : net2o:send-tick ( addr -- )
     data-map @ >o
     dest-raddr @ - dup dest-size @ u<
-    IF  o ts-ticks!  ELSE  drop  THEN  o> ;
+    IF  ts-ticks!  ELSE  drop  THEN  o> ;
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
     2>r  over  net2o:send-tick
@@ -1209,6 +1206,7 @@ Variable code-packet
     ELSE
 	resend$@ nip IF  net2o:resend  ELSE  net2o:send  THEN
     THEN
+    dup 0= IF  2drop 2drop  EXIT  THEN
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
 	sendX  never next-tick 64!
