@@ -545,6 +545,8 @@ Variable mapping-addr
     addr>bits timestamp * ;
 : addr>replies ( addr -- replies )
     addr>bits reply * ;
+: addr>keys ( addr -- keys )
+    max-size^2 1- rshift ;
 
 : allocatez ( size -- addr )
     dup >r allocate throw dup r> erase ;

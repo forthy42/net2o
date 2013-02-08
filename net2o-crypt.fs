@@ -157,11 +157,14 @@ Variable do-keypad
 : gen-ivs ( ivs-addr -- )
     c:diffuse $@ c:prng ;
 
-: regen-ivs-all ( o:map -- )
-    c:key@ >r
+: regen-ivs-all ( o:map -- )  c:key@ >r
     dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
 \    @state state# 2* dump
     dest-ivs gen-ivs r> c:key! ;
+
+: regen-ivs-part ( new-back -- )  c:key@ >r
+    
+    r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
     dup dest-ivs $@len dest-ivslastgen @
@@ -174,12 +177,13 @@ Variable do-keypad
     THEN  drop ;
 ' (regen-ivs) IS regen-ivs
 
-: ivs-string ( addr u map -- )
-    @ >o dest-size @ max-size^2 1- rshift dest-ivs o>
-    >r r@ $!len
+: ivs-string ( addr u map -- )  c:key@ >r
+    @ >o dest-size @ addr>keys dest-ivs o o> >r >r r@ $!len
     state# <> !!ivs!! >wurst-source'
     >wurst-key-ivs
-    r> gen-ivs ;
+    r> gen-ivs
+    r> >o dest-ivsgen @ c:key> o>
+    r> c:key! ;
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
     keysize 2* crypto-key $!
