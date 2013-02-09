@@ -515,9 +515,16 @@ also net2o-base
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:ackflush ( -- )
     data-rmap @ >o dest-back @ o> ulit, ack-flush ;
+: net2o:flush-blocks ( -- )
+    data-rmap @ >o dest-back @ dest-tail @ over - dest-size @ o> 2/ 2/ > IF
+	save-all-blocks  data-rmap @ >o dest-back !@ o>
+	net2o:rewind-receiver-partial net2o:ackflush
+    ELSE
+	2drop
+    THEN ;
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime
-    ( save-all-blocks ) net2o:ackflush  >rate ;
+    ( net2o:flush-blocks )  >rate ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
