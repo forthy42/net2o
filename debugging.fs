@@ -40,6 +40,7 @@ debug: key(
 debug: cookie(
 debug: delay( \ used to add delays at performance critical places
 debug: tag(
+debug: flush(
 
 +db ens(
 

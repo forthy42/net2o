@@ -356,7 +356,7 @@ net2o-base
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
-41 net2o: ack-flush ( addr -- )  dest-back ! ;
+41 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
 
 \ crypto functions
 
@@ -517,14 +517,17 @@ also net2o-base
     data-rmap @ >o dest-back @ o> ulit, ack-flush ;
 : net2o:flush-blocks ( -- )
     data-rmap @ >o dest-back @ dest-tail @ over - dest-size @ o> 2/ 2/ > IF
+	flush( ." flush partial " dup hex. data-rmap @ >o dest-job @ hex. o> F cr )
 	save-all-blocks  data-rmap @ >o dest-back !@ o>
 	net2o:rewind-receiver-partial net2o:ackflush
+	slurp-all-tracked-blocks
+	flush( ." partial rewind completed " data-rmap @ >o dest-job @ hex. o>  F cr )
     ELSE
-	2drop
+	drop
     THEN ;
 : net2o:genack ( -- )
-    net2o:ack-cookies  net2o:b2btime  net2o:acktime
-    ( net2o:flush-blocks )  >rate ;
+    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate
+    ( net2o:flush-blocks ) ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin

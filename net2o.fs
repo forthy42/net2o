@@ -1371,9 +1371,11 @@ Variable sendflag  sendflag off
     rewind-ackbits ( clear-cookies ) o> ;
 
 : net2o:rewind-sender-partial ( new-back -- )
+    flush( ." rewind partial " dup hex. cr )
     data-map @ >o dup rewind-partial dest-back ! o> ;
 
-: net2o:rewind-receiver-partial ( new-back -- ) cookie( ." rewind" cr )
+: net2o:rewind-receiver-partial ( new-back -- )
+    flush( ." rewind partial " dup hex. cr )
     data-rmap @ >o
     dup rewind-partial  dup rewind-ackbits-partial  dest-back ! o> ;
 
