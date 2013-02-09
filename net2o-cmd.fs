@@ -517,17 +517,19 @@ also net2o-base
     data-rmap @ >o dest-back @ o> ulit, ack-flush ;
 : net2o:flush-blocks ( -- )
     data-rmap @ >o dest-back @ dest-tail @ over - dest-size @ o> 2/ 2/ > IF
-	flush( ." flush partial " dup hex. data-rmap @ >o dest-job @ hex. o> F cr )
-	save-all-blocks  data-rmap @ >o dest-back !@ o>
-	net2o:rewind-receiver-partial net2o:ackflush
-	slurp-all-tracked-blocks
-	flush( ." partial rewind completed " data-rmap @ >o dest-job @ hex. o>  F cr )
+	flush( ." flush partial " dup hex. data-rmap @ >o dest-tail @ hex. o> F cr )
+	\ save-all-blocks
+	\ data-rmap @ >o dest-back !@ o>
+	\ net2o:rewind-receiver-partial net2o:ackflush
+	\ slurp-all-tracked-blocks
+	drop
+	flush( ." partial rewind completed " data-rmap @ >o dest-back @ hex. o>  F cr )
     ELSE
 	drop
     THEN ;
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate
-    ( net2o:flush-blocks ) ;
+    net2o:flush-blocks ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
