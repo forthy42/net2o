@@ -154,16 +154,16 @@ Variable do-keypad
     dest-ivs $@ dest-a/b c:prng
     -1 dest-ivslastgen xor! r> c:key! ;
 
-: gen-ivs ( ivs-addr -- )
-    c:diffuse $@ c:prng ;
-
 : regen-ivs-all ( o:map -- )  c:key@ >r
     dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
-\    @state state# 2* dump
-    dest-ivs gen-ivs r> c:key! ;
+    dest-ivs $@ c:prng r> c:key! ;
 
 : regen-ivs-part ( new-back -- )  c:key@ >r
-    
+    dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
+    dest-back @ - addr>keys >r
+    dest-ivs $@ dest-back @ dest-size @ 1- and
+    addr>keys /string r@ umin dup >r c:prng
+    dest-ivs $@ r> r> - umin c:prng
     r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
@@ -179,9 +179,8 @@ Variable do-keypad
 
 : ivs-string ( addr u map -- )  c:key@ >r
     @ >o dest-size @ addr>keys dest-ivs o o> >r >r r@ $!len
-    state# <> !!ivs!! >wurst-source'
-    >wurst-key-ivs
-    r> gen-ivs
+    state# <> !!ivs!! >wurst-source' >wurst-key-ivs c:diffuse
+    r> $@ c:prng
     r> >o dest-ivsgen @ c:key> o>
     r> c:key! ;
 

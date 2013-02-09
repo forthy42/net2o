@@ -1312,6 +1312,27 @@ Variable sendflag  sendflag off
 	dest-timestamps @ dest-size @ addr>ts erase
     THEN ;
 
+: rewind-timestamps-partial ( new-back o:map -- )
+    code-flag @ 0= IF
+	dest-back @ - addr>ts >r
+	dest-timestamps @ dest-size @ addr>ts dest-back @ addr>ts over 1- and
+	/string r@ umin dup >r erase
+	dest-timestamps @ r> r> - erase
+    ELSE
+	drop
+    THEN ;
+
+: clearpages-partial ( new-back o:map -- )
+    dest-back @ - >r
+    dest-raddr @ dest-size @ dest-back @ over 1- and
+    /string r@ umin dup >r clearpages
+    dest-raddr @ r> r> - clearpages ;
+
+: rewind-partial ( new-back o:map -- )
+    dup clearpages-partial
+    dup rewind-timestamps-partial
+    regen-ivs-part ;
+
 : rewind-buffer ( o:map -- )
     1 dest-round +!
     \ dest-size @ dest-back +!
@@ -1327,6 +1348,19 @@ Variable sendflag  sendflag off
     data-ackbits0 @ over -1 fill
     data-ackbits1 @ swap -1 fill ;
 
+: rewind-ackbits-partial ( new-back o:map -- )
+    dest-back @ - addr>bits bits>bytes >r
+    data-ackbits0 @
+    dest-size @ addr>bits bits>bytes
+    dest-back @ addr>bits bits>bytes over 1- and /string
+    r@ umin dup >r -1 fill
+    data-ackbits0 @ r> r@ - -1 fill
+    data-ackbits1 @
+    dest-size @ addr>bits bits>bytes
+    dest-back @ addr>bits bits>bytes over 1- and /string
+    r@ umin dup >r -1 fill
+    data-ackbits1 @ r> r> - -1 fill ;
+
 : net2o:rewind-sender ( n -- )
     data-map @ >o
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
@@ -1335,6 +1369,13 @@ Variable sendflag  sendflag off
     data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;
+
+: net2o:rewind-sender-partial ( new-back -- )
+    data-map @ >o dup rewind-partial dest-back ! o> ;
+
+: net2o:rewind-receiver-partial ( new-back -- ) cookie( ." rewind" cr )
+    data-rmap @ >o
+    dup rewind-partial  dup rewind-ackbits-partial  dest-back ! o> ;
 
 \ Variable timeslip  timeslip off
 \ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
