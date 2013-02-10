@@ -520,9 +520,8 @@ also net2o-base
 	flush( ." flush partial " dup hex. data-rmap @ >o dest-tail @ hex. o> F cr )
 	\ save-all-blocks
 	\ data-rmap @ >o dest-back !@ o>
-	\ net2o:rewind-receiver-partial net2o:ackflush
-	\ slurp-all-tracked-blocks
-	drop
+	\ net2o:rewind-receiver-partial
+	\ net2o:ackflush slurp-all-tracked-blocks
 	flush( ." partial rewind completed " data-rmap @ >o dest-back @ hex. o>  F cr )
     ELSE
 	drop

@@ -987,7 +987,6 @@ file-state-struct buffer: new-file-state
     64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
 
 : save-all-blocks ( -- ) +calc ?state
-    data-rmap @ { map }
     file-state $@ file-state-struct / 0 { fstate size fails }
     write-file# @ { wf0 } msg( ." Write from " wf0 . size . cr )
     BEGIN
@@ -995,11 +994,11 @@ file-state-struct buffer: new-file-state
 	    fstate write-file# @ file-state-struct * +
 	    >o fs-seekto 64@ fs-seek 64@
 	    >seek dup n>64 fs-seek 64+!
-	    msg( ." flush file <" 2dup swap map >o dest-raddr @ o> - hex. hex.
+	    msg( ." flush file <" 2dup swap data-rmap @ >o dest-raddr @ o> - hex. hex.
 	    o o> write-file# @ 0 .r ." >" cr >o )
 	    tuck fs-fid @ write-file throw  o>
 	    dup IF  0  ELSE  fails 1+  THEN to fails
-	    >blockalign map >o dest-back +! o>
+	    >blockalign data-rmap @ >o dest-back +! o>
 	    write-file# file+
 	fails size u>= UNTIL  ELSE  2drop  THEN
     +file
