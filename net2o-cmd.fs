@@ -518,10 +518,11 @@ also net2o-base
 : net2o:flush-blocks ( -- )
     data-rmap @ >o dest-back @ dest-tail @ over - dest-size @ o> 2/ 2/ > IF
 	flush( ." flush partial " dup hex. data-rmap @ >o dest-tail @ hex. o> F cr )
-	\ save-all-blocks
-	\ data-rmap @ >o dest-back !@ o>
-	\ net2o:rewind-receiver-partial
-	\ net2o:ackflush slurp-all-tracked-blocks
+	flush1( save-all-blocks )
+	flush2( data-rmap @ >o dest-back !@ o>
+	net2o:rewind-receiver-partial
+	net2o:ackflush
+	slurp-all-tracked-blocks )
 	flush( ." partial rewind completed " data-rmap @ >o dest-back @ hex. o>  F cr )
     ELSE
 	drop
@@ -736,7 +737,7 @@ forth-local-words:
     (
      (("net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     ("[a-z]+(" immediate (font-lock-comment-face . 1)
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:

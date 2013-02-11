@@ -418,6 +418,8 @@ object class
     field: file-state
     field: read-file#
     field: write-file#
+    field: residualread
+    field: residualwrite
     field: blocksize
     field: blockalign
     field: crypto-key
@@ -660,24 +662,23 @@ wurstkessel-o crypto-o !
 
 \ new data sending around stuff, with front+back
 
+: fix-size ( base offset1 offset2 -- addr len )
+    over - >r dest-size @ 1- and r> over + dest-size @ umin over - >r + r> ;
 : data-head@ ( -- addr u )
     \ you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
-    dest-raddr @ dest-head @ dest-back @ dest-size @ + over -
-    >r dest-size @ 1- and + r>
-    o> blocksize @ umin ;
+    dest-raddr @ dest-head @ dest-back @ dest-size @ +
+    fix-size o> blocksize @ umin ;
 : data-tail@ ( -- addr u )
     \ you can write from this, also a block at a time
     data-map @ >o
-    dest-raddr @ dest-tail @ dest-head @ over -
-    >r dest-size @ 1- and + r>
-    o> blocksize @ umin ;
+    dest-raddr @ dest-tail @ dest-head @
+    fix-size o> blocksize @ umin ;
 : rdata-back@ ( -- addr u )
     \ you can write from this, also a block at a time
     data-rmap @ >o
-    dest-raddr @ dest-back @ dest-tail @ over -
-    >r dest-size @ 1- and + r>
-    o> blocksize @ umin ;
+    dest-raddr @ dest-back @ dest-tail @
+    fix-size o> blocksize @ umin ;
 
 : data-head? ( -- flag )
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
@@ -991,15 +992,15 @@ file-state-struct buffer: new-file-state
     write-file# @ { wf0 } msg( ." Write from " wf0 . size . cr )
     BEGIN
 	rdata-back@ dup  WHILE
+	    blocksize @ over - residualwrite !@ ?dup-IF  umin  THEN
 	    fstate write-file# @ file-state-struct * +
-	    >o fs-seekto 64@ fs-seek 64@
-	    >seek dup n>64 fs-seek 64+!
+	    >o fs-seekto 64@ fs-seek 64@ >seek dup n>64 fs-seek 64+!
 	    msg( ." flush file <" 2dup swap data-rmap @ >o dest-raddr @ o> - hex. hex.
 	    o o> write-file# @ 0 .r ." >" cr >o )
 	    tuck fs-fid @ write-file throw  o>
 	    dup IF  0  ELSE  fails 1+  THEN to fails
 	    >blockalign data-rmap @ >o dest-back +! o>
-	    write-file# file+
+	    residualwrite @ 0= IF   write-file# file+  THEN
 	fails size u>= UNTIL  ELSE  2drop  THEN
     +file
     msg( ." Write file " write-file# ? cr ) ;
@@ -1024,7 +1025,7 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ >o dest-raddr @ o> to roff )
-    data-head@
+    data-head@ blocksize @ over - residualread !@ ?dup-IF  umin  THEN
     id id>addr? >o fs-limit 64@ fs-seekto 64@ >seek
     msg( ." Read <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
     fs-fid @ read-file throw
@@ -1048,7 +1049,8 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-all-blocks-once ( -- sum )  read-file# @ >r
     0 BEGIN  data-head?  WHILE
-	    read-file# @ n2o:slurp-block + read-file# file+
+	    read-file# @ n2o:slurp-block +
+	    residualread @ 0= IF  read-file# file+  THEN
     read-file# @ r@ = UNTIL  THEN  rdrop ;
 
 : n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
@@ -1611,7 +1613,7 @@ forth-local-words:
     (
      (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
-     ("[a-z]+(" immediate (font-lock-comment-face . 1)
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 End:

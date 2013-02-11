@@ -5,7 +5,7 @@ false [IF]
       DOES>
 	@ IF  ['] noop assert-canary
 	ELSE  postpone (  THEN ;
-    : )else(  ]] ) ( [[ ; immediate
+    : )else(  ]] ) ( [[ ; immediate \ )
 [THEN]
 
 : nodebug: ['] ( Alias immediate ;
@@ -41,6 +41,8 @@ debug: cookie(
 debug: delay( \ used to add delays at performance critical places
 debug: tag(
 debug: flush(
+debug: flush1(
+debug: flush2(
 
 +db ens(
 
