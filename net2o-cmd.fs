@@ -401,8 +401,8 @@ net2o-base
 68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-90 net2o: set-total ( u -- )  write-file# off 64>n total! ;
-91 net2o: gen-total ( -- ) read-file# off net2o:gen-total lit, set-total ;
+90 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
+91 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ acknowledges
 
