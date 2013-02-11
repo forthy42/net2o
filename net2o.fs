@@ -999,8 +999,9 @@ file-state-struct buffer: new-file-state
 	    o o> write-file# @ 0 .r ." >" cr >o )
 	    tuck fs-fid @ write-file throw  o>
 	    dup IF  0  ELSE  fails 1+  THEN to fails
-	    >blockalign data-rmap @ >o dest-back +! o>
-	    residualwrite @ 0= IF   write-file# file+  THEN
+	    >blockalign data-rmap @ >o dest-back +!
+	    dest-back @ dest-size @ 1- and o>
+	    residualwrite @ 0= or IF   write-file# file+  THEN
 	fails size u>= UNTIL  ELSE  2drop  THEN
     +file
     msg( ." Write file " write-file# ? cr ) ;
@@ -1047,11 +1048,14 @@ file-state-struct buffer: new-file-state
 	dup n2o:slurp-blocks-once  0= UNTIL  THEN
     drop ;
 
-: n2o:slurp-all-blocks-once ( -- sum )  read-file# @ >r
+: fstates ( -- n )  file-state $@len file-state-struct / ;
+
+: n2o:slurp-all-blocks-once ( -- sum )  fstates 0 { size fails }
     0 BEGIN  data-head?  WHILE
-	    read-file# @ n2o:slurp-block +
-	    residualread @ 0= IF  read-file# file+  THEN
-    read-file# @ r@ = UNTIL  THEN  rdrop ;
+	    read-file# @ n2o:slurp-block dup IF 0 ELSE fails 1+ THEN to fails +
+	    data-map @ >o dest-head @ dest-size @ 1- and o>
+	    residualread @ 0= or  IF  read-file# file+  THEN
+    fails size u>= UNTIL  THEN ;
 
 : n2o:slurp-all-blocks ( -- ) +calc msg( ." Slurp all blocks" cr )
     msg( ." Read from " read-file# ? file-state $@len file-state-struct / . cr )

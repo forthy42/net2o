@@ -1,0 +1,7 @@
+#!/bin/bash
+
+function check {
+    md5sum $1/*.jpg | sort | cut -c1-$2 | tr '\n' ':'; echo " $1"
+}
+check .cache ${1-2}
+check data ${1-2}
