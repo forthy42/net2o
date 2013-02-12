@@ -991,11 +991,15 @@ file-state-struct buffer: new-file-state
 
 : fstates ( -- n )  file-state $@len file-state-struct / ;
 
+: ?residual ( addr len resaddr -- addr len' ) >r
+    r@ @ 0= IF  blocksize @ over -
+    ELSE  r@ @ umin  r@ @ over - THEN  r> ! ;
+
 : n2o:save-block ( id -- delta ) 0 { id roff }
     msg( data-rmap @ >o dest-raddr @ o> to roff )
-    rdata-back@ blocksize @ over - residualwrite !@ ?dup-IF  umin  THEN
+    rdata-back@ residualwrite ?residual
     id id>addr? >o fs-seekto 64@ fs-seek 64@ >seek
-    msg( ." Write <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
+    msg( ." Write <" 2dup swap roff - hex. hex. o o> residualwrite @ hex. >o id 0 .r ." >" cr )
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+! o>
     dup /back ;
@@ -1003,9 +1007,9 @@ file-state-struct buffer: new-file-state
 : save-all-blocks ( -- )  +calc fstates 0 { size fails }
     0 BEGIN  rdata-back?  WHILE
 	    write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
-	    data-rmap @ >o dest-back @ dest-size @ 1- and o>
-	    residualwrite @ 0= or  IF  write-file# file+  THEN
-    fails size u>= UNTIL  THEN +file ;
+	    rdata-back? residualwrite @ 0= or  IF
+		write-file# file+ residualwrite off  THEN
+    fails size u>= UNTIL  THEN msg( ." Write end" cr ) +file ;
 
 : save-to ( addr u n -- )  state-addr >o
     r/w create-file throw fs-fid ! o> ;
@@ -1027,9 +1031,9 @@ file-state-struct buffer: new-file-state
 
 : n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ >o dest-raddr @ o> to roff )
-    data-head@ blocksize @ over - residualread !@ ?dup-IF  umin  THEN
+    data-head@ residualread ?residual
     id id>addr? >o fs-limit 64@ fs-seekto 64@ >seek
-    msg( ." Read <" 2dup swap roff - hex. hex. id 0 .r ." >" cr )
+    msg( ." Read <" 2dup swap roff - hex. hex. o o> residualread @ hex. >o id 0 .r ." >" cr )
     fs-fid @ read-file throw
     dup n>64 fs-seekto 64+! o>
     dup /data ;
@@ -1052,9 +1056,9 @@ file-state-struct buffer: new-file-state
 : n2o:slurp-all-blocks ( -- )  +calc fstates 0 { size fails }
     0 BEGIN  data-head?  WHILE
 	    read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
-	    data-map @ >o dest-head @ dest-size @ 1- and o>
-	    residualread @ 0= or  IF  read-file# file+  THEN
-    fails size u>= UNTIL  THEN +file ;
+	    data-head? residualread @ 0= or  IF
+		read-file# file+  residualread off  THEN
+    fails size u>= UNTIL  THEN msg( ." Read end" cr ) +file ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
