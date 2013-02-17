@@ -16,13 +16,13 @@ exec_prefix = ${prefix}
 libexecdir = $(package)${exec_prefix}/lib
 libccdir = $(subst $(DESTDIR),,$(libexecdir)/gforth$(ARCH)/$(VERSION)/libcc-named/)
 srcdir = .
-DESTDIR = /home/bernd/proj/minos2/gles2
+DESTDIR = /home/bernd/proj/net2o
 
 all: $(TARGETS)
 
 build-libcc-named: $(LIBRARY) $(TARGETS)
 		$(RMTREE) lib/gforth$(ARCH)/$(VERSION)/libcc-named/
-		-for i in $(LIBRARY); do ./libforth$SUFFIX -e "s\" `pwd`/lib/gforth$(ARCH)/$(VERSION)/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(DESTDIR)$(libccdir)\" ; is replace-rpath" $(srcdir)/$$i -e bye; done
+		-for i in $(LIBRARY); do ./libforth$(SUFFIX) -e "s\" `pwd`/lib/gforth$(ARCH)/$(VERSION)/libcc-named/\" libcc-named-dir-v 2! libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(DESTDIR)$(libccdir)\" ; is replace-rpath" $(srcdir)/$$i -e bye; done
 
 libs: build-libcc-named $(LIBRARY)
 	for i in $(LIBRARY); do \

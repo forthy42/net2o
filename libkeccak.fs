@@ -31,7 +31,7 @@ KeccakInitialize
 
 \ crypto api integration
 
-require ../crypto-api.fs
+require crypto-api.fs
 
 crypto class end-class keccak
 
