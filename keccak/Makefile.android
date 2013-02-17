@@ -1,0 +1,8 @@
+NDK        = $(HOME)/proj/android-toolchain/sysroot
+GFORTH     = $(HOME)/proj/gforths/gforth-android
+CC         = arm-linux-androideabi-gcc
+LIBTOOL    = arm-linux-androideabi-libtool
+SUFFIX     = .android
+
+include Makefile.forth
+

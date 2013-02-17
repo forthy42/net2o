@@ -211,7 +211,7 @@ void KeccakInitialize()
 {
 }
 
-void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int laneCount)
+void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
     memcpy(data, state, laneCount*8);
@@ -219,7 +219,7 @@ void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int
     unsigned int i;
 
     for(i=0; i<laneCount; i++)
-        fromWordToBytes(data+(i*8), ((const UINT64*)state)[i]);
+        fromWordToBytes(data+i, ((const UINT64*)state)[i]);
 #endif
 }
 

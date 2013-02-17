@@ -235,7 +235,9 @@ void setInterleavedWordsInto8bytes(UINT8* dest, UINT32* evenAndOdd)
 #error "Only unrolling 2 is supported by schedule 3."
 #endif
 
-void KeccakF(UINT32 *state)
+#endif
+
+void KeccakF(keccak_state state)
 {
     declareABCDE
 #if (Unrolling != 24)
@@ -253,19 +255,19 @@ void KeccakInitialize()
 #endif
 }
 
-void KeccakInitializeState(unsigned char *state)
+void KeccakInitializeState(keccak_state state)
 {
     memset(state, 0, 200);
 }
 
-void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int laneCount)
+void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
     extractLanes(laneCount, state, data)
 }
 
-void KeccakAbsorb(UINT32 *state, const UINT8 *input, unsigned int laneCount)
+void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
-    xorLanesIntoState(laneCount, state, input)
+    xorLanesIntoState(laneCount, state, data)
 }
 
 void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)

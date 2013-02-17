@@ -22,7 +22,7 @@ require struct0x.fs
 require curve25519.fs
 require wurstkessel.fs
 require wurstkessel-init.fs
-require keccak/libkeccak.fs
+require libkeccak.fs
 require hash-table.fs
 require debugging.fs
 require mini-oof2.fs

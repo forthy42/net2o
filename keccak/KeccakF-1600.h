@@ -12,7 +12,7 @@ typedef unsigned long keccak_state[25*sizeof(UINT64)/sizeof(unsigned long)];
 void KeccakInitialize();
 void KeccakF(keccak_state state);
 void KeccakInitializeState(keccak_state state);
-void KeccakExtract(const unsigned char *state, unsigned char *data, unsigned int laneCount);
+void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount);
 void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount);
 void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount);
 void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount);
