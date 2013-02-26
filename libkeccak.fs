@@ -6,6 +6,7 @@ s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop
 c-library keccak
 \    s" keccak/.libs" add-libpath
     s" keccak" add-lib
+    s" ./keccak" add-libpath
     \c #include <KeccakF-1600.h>
 
     include keccak.fs
