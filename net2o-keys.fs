@@ -40,7 +40,7 @@ sample-key this-key ! \ dummy
 
 : x" ( "hexstring" -- addr u )
     '"' parse hex>$ ;
-compile> execute postpone SLiteral ;
+comp: execute postpone SLiteral ;
 
 Vocabulary key-parser
 

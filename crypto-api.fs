@@ -9,8 +9,8 @@ require mini-oof2.fs
 User crypto-o
 
 Create crypto-m 0 ,  DOES> @ crypto-o @ cell- @ + perform ;
-compile> >body @ cell/ postpone u#exec crypto-o next-task - , , ;
-' to-m !to
+comp: >body @ cell/ postpone u#exec crypto-o next-task - , , ;
+' to-m set-to
 
 ' crypto-m to method-xt
 

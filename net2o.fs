@@ -32,7 +32,7 @@ require mini-oof2.fs
 Variable do-stackrel
 
 Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
-compile> >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
+comp: >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 
 ' o-sp to var-xt
 : [o  do-stackrel @ do-stackrel off ; immediate
