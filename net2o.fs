@@ -422,6 +422,7 @@ end-class rdata-class
 
 object class
     field: context#
+    field: wait-task
     field: context-state
     field: return-address
     64field: recv-tick
@@ -1604,10 +1605,19 @@ Variable requests
 	    THEN  THEN
      requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
 
+: ->request ( -- ) -1 requests +! ;
+
+Variable client-task
+
+: client-loop-task ( -- )  client-task @ ?EXIT
+    stacksize4 NewTask4 activate  up@ client-task !
+    BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
+	    DoError nothrow  REPEAT  drop client-task off ;
+
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?
-    BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
-	    DoError nothrow  REPEAT  drop ;
+    up@ wait-task !  client-loop-task
+    BEGIN  stop  requests @ 0= UNTIL ;
 
 \ client/server initializer
 

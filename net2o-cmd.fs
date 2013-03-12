@@ -295,7 +295,7 @@ also net2o-base definitions
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 16 net2o: new-data ( addr addr u -- )  3*64>n  n2o:new-data ;
 17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
-18 net2o: request-done ( -- )  -1 requests +! ;
+18 net2o: request-done ( -- )  <event ->request wait-task @ event> ;
 19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
 	>o rdrop  ticks recv-tick 64! \ time stamp of arrival
 	1 context-state !@ 0= ?EXIT
