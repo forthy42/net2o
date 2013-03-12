@@ -145,9 +145,6 @@ definitions
 
 \ net2o assembler
 
-maxdata buffer: cmd0buf
-maxdata 2/ mykey-salt# + 2 cells + buffer: init0buf
-
 Variable cmd0source
 Variable cmd0buf#
 

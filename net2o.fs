@@ -17,6 +17,7 @@
 
 require unix/socket.fs
 require unix/mmap.fs
+require unix/pthread.fs
 require string.fs
 require struct0x.fs
 require curve25519.fs
@@ -198,11 +199,26 @@ $10000 Value max-code#
 maxdata overhead + Constant maxpacket
 maxpacket $F + -$10 and Constant maxpacket-aligned
 : chunk-p2 ( -- n )  max-size^2 6 + ;
+$10 Constant mykey-salt#
 
-here 1+ -8 and 6 + here - allot
-here maxpacket-aligned buffers# * allot
-here maxpacket-aligned buffers# * allot
-Constant outbuf' Constant inbuf'
+User inbuf'
+User outbuf'
+User cmd0buf'
+User init0buf'
+
+: inbuf   inbuf' @ ;
+: outbuf  outbuf' @ ;
+: cmd0buf cmd0buf' @ ;
+: init0buf init0buf' @ ;
+
+: alloc-buf ( addr -- )
+    maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
+
+: alloc-io ( -- )  inbuf' alloc-buf  outbuf' alloc-buf
+    maxdata allocate throw cmd0buf' !
+    maxdata 2/ mykey-salt# + 2 cells + allocate throw init0buf' ! ;
+
+alloc-io
 
 begin-structure net2o-header
     2 +field flags
@@ -223,9 +239,6 @@ Variable packets2 \ double send
 2Variable ptimeout
 #10000000 Value poll-timeout# \ 10ms, don't sleep too long
 poll-timeout# 0 ptimeout 2!
-
-inbuf'  Constant inbuf
-outbuf' Constant outbuf
 
 2Variable socktimeout
 

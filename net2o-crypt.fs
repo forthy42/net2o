@@ -91,7 +91,6 @@ Defer regen-ivs
     default-key
     key( ." inbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
-$10 Constant mykey-salt#
 state# buffer: mykey \ server's private key
 rng$ mykey swap move
 
