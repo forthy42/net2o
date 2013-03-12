@@ -1601,7 +1601,7 @@ Variable requests
 	    DoError nothrow  REPEAT  drop ;
 
 : client-loop-nocatch ( -- )
-    BEGIN  next-client-packet dup
+    BEGIN  <event next-client-packet dup
 	IF    client-event +event reset-timeout +reset
 	ELSE  2drop ?timeout ?dup-IF  >o rdrop
 		rtdelay 64@ 64dup max-int64 64= 0=
@@ -1609,6 +1609,7 @@ Variable requests
 		ticks recv-tick 64! >next-timeout
 		do-timeout -1 timeouts +!
 	    THEN  THEN
+	eventbuf# @ 0> IF  wait-task @ event>  THEN
      requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
 
 event: ->request ( -- ) -1 requests +! ;
@@ -1619,14 +1620,11 @@ Variable client-task
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
-event: ->client-loop ( -- ) do-client-loop ;
-
 : create-client-task ( -- )
-    o 1 stacksize4 NewTask4 dup client-task ! ~~ pass ~~ >o rdrop   alloc-io
-    event-loop ;
+    o 1 stacksize4 NewTask4 dup client-task ! pass
+    >o rdrop  alloc-io wurst-task-init  BEGIN  do-client-loop  AGAIN ;
 
-: client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN
-    <event ->client-loop client-task @ event> ;
+: client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN ;
 
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?

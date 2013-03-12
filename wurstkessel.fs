@@ -1,22 +1,30 @@
 \ Wurstkessel data from www.random.org                 26jan09py
 
 require 64bit.fs
+require mini-oof2.fs
 
 8 64s Constant state#
 2 2*  Constant state#32
 1     Constant state#16
 
-$10 here $F and - allot 
-here state# allot \ source
-here state# allot \ state
-here state# allot \ nextstate
-here state# 8 * allot \ message
-swap 2swap swap
+User wurst'
 
-Constant wurst-source
-Constant wurst-state
-Constant nextstate
-Constant message
+Create wurst-o 0 ,  DOES> @ o#+ [ 0 , ] wurst' @ + ;
+comp: >body @ ]] wurst' @ lit+ [[ , ;
+
+' wurst-o to var-xt
+
+object class
+    state# +field wurst-source
+    state# +field wurst-state
+    state# +field nextstate
+    state# 8 * +field message
+end-class wurst-class
+
+current-o
+
+: wurst-task-init ( -- )
+    wurst-class @ allocate throw wurst' ! ;
 
 : .16 ( u[d] -- )
     [ cell 8 = ] [IF] 0 [THEN]

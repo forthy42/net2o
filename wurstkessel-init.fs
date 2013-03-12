@@ -22,4 +22,5 @@
     rng-step write-wurstrng rng-step ;
 
 wurst-init
+wurst-task-init
 salt-init
