@@ -218,6 +218,12 @@ User init0buf'
     maxdata allocate throw cmd0buf' !
     maxdata 2/ mykey-salt# + 2 cells + allocate throw init0buf' ! ;
 
+: free-io ( -- )
+    inbuf free throw
+    outbuf free throw
+    cmd0buf free throw
+    init0buf free throw ;
+
 alloc-io
 
 begin-structure net2o-header
@@ -1605,19 +1611,27 @@ Variable requests
 	    THEN  THEN
      requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
 
-: ->request ( -- ) -1 requests +! ;
+event: ->request ( -- ) -1 requests +! ;
 
 Variable client-task
 
-: client-loop-task ( -- )  client-task @ ?EXIT
-    stacksize4 NewTask4 activate  up@ client-task !
+: do-client-loop ( -- )
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
-	    DoError nothrow  REPEAT  drop client-task off ;
+	    DoError nothrow  REPEAT  drop ;
+
+event: ->client-loop ( -- ) do-client-loop ;
+
+: create-client-task ( -- )
+    o 1 stacksize4 NewTask4 dup client-task ! ~~ pass ~~ >o rdrop   alloc-io
+    event-loop ;
+
+: client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN
+    <event ->client-loop client-task @ event> ;
 
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?
-    up@ wait-task !  client-loop-task
-    BEGIN  stop  requests @ 0= UNTIL ;
+    up@ wait-task ! client-loop-task
+    BEGIN  stop requests @ 0<= UNTIL ;
 
 \ client/server initializer
 
