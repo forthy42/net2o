@@ -15,6 +15,7 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ require smartdots.fs
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
@@ -158,7 +159,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ defined exceptions
 
-: throwcode ( addr u -- )  exception Create , DOES> @ and throw ;
+: throwcode ( addr u -- )  exception Create , DOES> ( flag -- ) @ and throw ;
 
 s" gap in file handles"          throwcode !!gap!!
 s" invalid file id"              throwcode !!fileid!!
@@ -170,7 +171,7 @@ s" too many commands"            throwcode !!commands!!
 s" string does not fit"          throwcode !!stringfit!!
 s" ivs must be 64 bytes"         throwcode !!ivs!!
 s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
-s" connection attempt timed out" throwcode !!contimeout!!
+s" net2o timed out"              throwcode !!timeout!!
 s" no key file"                  throwcode !!nokey!!
 
 \ Create udp socket
@@ -1038,7 +1039,7 @@ file-state-struct buffer: new-file-state
 
 : id>file ( id -- fid )  id>addr? >o fs-fid @ o> ;
 
-: n2o:open-file ( addr u mode id -- )
+: n2o:open-file ( addr u mode id -- ) ~~
     ?state  state-addr >o
     fs-fid @ ?dup-IF  close-file throw  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
@@ -1571,6 +1572,12 @@ Variable timeout-task
     timeout-tasks $@ bounds ?DO  I @ o = IF  UNLOOP  EXIT  THEN
     cell +LOOP
     o timeout-task !  timeout-task cell timeout-tasks $+! ;
+: j-timeout ( -- )
+    timeout-tasks $@len 0 ?DO
+	timeout-tasks $@ I /string drop @ o =  IF
+	    timeout-tasks I cell $del
+	LEAVE  THEN
+    cell +LOOP ;
 : >next-timeout ( -- )  j?
     recv-tick 64@  rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
@@ -1600,19 +1607,24 @@ Variable requests
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
+event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
+event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
+true !!timeout!! ;
+
 : client-loop-nocatch ( -- )
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
-	ELSE  2drop ?timeout ?dup-IF  >o rdrop
-		rtdelay 64@ 64dup max-int64 64= 0=
-		IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
-		ticks recv-tick 64! >next-timeout
-		do-timeout -1 timeouts +!
-	    THEN  THEN
-	wait-task @ event>
-     requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
+	ELSE  2drop requests @ IF  ?timeout ?dup-IF  >o rdrop
+		    rtdelay 64@ 64dup max-int64 64= 0=
+		    IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
+		    ticks recv-tick 64! >next-timeout
+		    do-timeout -1 timeouts +!
+		    timeouts @ 0<= IF  ->timeout  THEN
+		THEN  THEN  THEN
+	wait-task @ event>  AGAIN ;
 
-event: ->request ( -- ) -1 requests +! ;
+: n2o:request-done ( -- )
+    j-timeout ->request ;
 
 Variable client-task
 
@@ -1623,7 +1635,7 @@ Variable client-task
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
     >o rdrop  alloc-io wurst-task-init
-    BEGIN  do-client-loop ->request wait-task @ event>  AGAIN ;
+    BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
 : client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN ;
 
