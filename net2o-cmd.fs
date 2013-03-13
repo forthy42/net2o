@@ -145,11 +145,10 @@ definitions
 
 \ net2o assembler
 
-Variable cmd0source
-Variable cmd0buf#
+User cmd0source
+User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ IF  code-dest  ELSE  cmd0buf  THEN ;
-: cmdbuf#     ( -- addr ) cmd0source @ IF  cmd-buf#   ELSE  cmd0buf#  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )

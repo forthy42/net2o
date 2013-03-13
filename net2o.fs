@@ -207,10 +207,10 @@ User outbuf'
 User cmd0buf'
 User init0buf'
 
-: inbuf   inbuf' @ ;
-: outbuf  outbuf' @ ;
-: cmd0buf cmd0buf' @ ;
-: init0buf init0buf' @ ;
+: inbuf    ( -- addr ) inbuf' @ ;
+: outbuf   ( -- addr ) outbuf' @ ;
+: cmd0buf  ( -- addr ) cmd0buf' @ ;
+: init0buf ( -- addr ) init0buf' @ ;
 
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
@@ -435,7 +435,6 @@ object class
     64field: recv-tick
     field: recv-addr
     field: recv-flag
-    field: cmd-buf#
     field: file-state
     field: read-file#
     field: write-file#
@@ -1039,7 +1038,7 @@ file-state-struct buffer: new-file-state
 
 : id>file ( id -- fid )  id>addr? >o fs-fid @ o> ;
 
-: n2o:open-file ( addr u mode id -- ) ~~
+: n2o:open-file ( addr u mode id -- )
     ?state  state-addr >o
     fs-fid @ ?dup-IF  close-file throw  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
