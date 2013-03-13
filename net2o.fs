@@ -1609,7 +1609,7 @@ Variable requests
 		ticks recv-tick 64! >next-timeout
 		do-timeout -1 timeouts +!
 	    THEN  THEN
-	eventbuf# @ 0> IF  wait-task @ event>  THEN
+	wait-task @ event>
      requests @ 0= o IF  timeouts @ 0<=  or  THEN  UNTIL ;
 
 event: ->request ( -- ) -1 requests +! ;
