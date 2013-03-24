@@ -148,7 +148,7 @@ definitions
 User cmd0source
 User cmdbuf#
 
-: cmdbuf     ( -- addr )  cmd0source @ IF  code-dest  ELSE  cmd0buf  THEN ;
+: cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf  ELSE  code-dest  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -163,8 +163,8 @@ User cmdbuf#
 
 : net2o, @ n>64 cmd, ;
 
-: net2o-code   cmd0source on   cmdreset ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0  cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code   cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code0  cmd0source on   cmdreset ['] net2o, IS net2o-do also net2o-base ;
 net2o-code0 previous
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr @ >r
@@ -294,7 +294,7 @@ also net2o-base definitions
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 16 net2o: new-data ( addr addr u -- )  3*64>n  n2o:new-data ;
 17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
-18 net2o: request-done ( -- )  n2o:request-done ;
+18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
 19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
 	>o rdrop  ticks recv-tick 64! \ time stamp of arrival
 	1 context-state !@ 0= ?EXIT
