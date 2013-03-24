@@ -177,10 +177,10 @@ net2o-code0 previous
 	    r> dest-addr ! EXIT  THEN
     LOOP  r> dest-addr !  true !!commands!! ;
 
-: cmddest ( -- dest ) cmd0source @ IF  code-vdest  ELSE  0  THEN ;
+: cmddest ( -- dest ) cmd0source @ IF  0  ELSE  code-vdest  THEN ;
 
 : cmd ( -- )  cmdbuf cmddest send-cmd
-    cmd0source @ IF  code+  THEN ;
+    cmd0source @ 0= IF  code+  THEN ;
 
 also net2o-base
 
@@ -221,10 +221,10 @@ Variable throwcount
 
 : cmd-loop ( addr u -- )
     o IF
-	cmd0source on
+	cmd0source off
 	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
-	cmd0source off
+	cmd0source on
     THEN
     cmdreset  do-cmd-loop  cmd-send? ;
 
@@ -648,7 +648,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     dest-addr @ recv-addr ! \ last received packet
     recv-cookie
     inbuf 1+ c@ recv-flag ! \ last receive flag
-    cmd0source on  cmdreset
+    cmd0source off  cmdreset
     inbuf 1+ c@ acks# and
     dup ack-receive !@ xor >r
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
