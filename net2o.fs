@@ -540,8 +540,6 @@ Variable dest-map s" " dest-map $!
 	    dest-vaddr 2@ dest-addr @ swap - dup >data-head +
 	    code-flag @ invert 2* 1+
 	    dest-job @ o> >o rdrop
-	    return-addr @ dup return-address !@ <>
-	    IF  msg( ." handover" cr )  THEN
 	    UNLOOP  EXIT  THEN
     cell +LOOP
     false ;
@@ -1534,6 +1532,8 @@ $08 Constant cookie-val
 	." invalid packet to " dest-addr @ hex. cr
 	IF  drop  THEN  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
+    return-addr @ dup return-address !@
+    msg( <> IF  ." handover" cr THEN )else( 2drop )
     0< IF  handle-data  ELSE  handle-cmd  THEN ;
 
 : handle-packet ( -- ) \ handle local packet

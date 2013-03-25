@@ -77,6 +77,7 @@ end-code
 [THEN]
 
 @time f> [IF]
+    waitkey( ." Press key to continue" key drop cr )
     ." Request more big photos because it was so fast" cr
     net2o-code
     expect-reply
