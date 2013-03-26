@@ -212,6 +212,8 @@ User init0buf'
 : cmd0buf  ( -- addr ) cmd0buf' @ ;
 : init0buf ( -- addr ) init0buf' @ ;
 
+sema cmd0lock
+
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
 
@@ -432,6 +434,7 @@ object class
     field: dest-head  \ read up to here        received some
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
+    1 pthread-mutexes +field dest-lock
 end-class code-class
 
 code-class class
@@ -617,6 +620,7 @@ Variable mapping-addr
 
 : map-source ( addr u addrx -- o )
     o code-class new >o dest-job !
+    dest-lock 0 pthread_mutex_init drop
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     dup addr>ts allocatez dest-cookies !

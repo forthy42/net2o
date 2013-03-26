@@ -148,7 +148,10 @@ definitions
 User cmd0source
 User cmdbuf#
 
-: cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf  ELSE  code-dest  THEN ;
+: cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf   ELSE  code-dest  THEN ;
+: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+	code-map @ >o dest-lock o>
+    THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -163,9 +166,11 @@ User cmdbuf#
 
 : net2o, @ n>64 cmd, ;
 
-: net2o-code   cmd0source off  cmdreset ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0  cmd0source on   cmdreset ['] net2o, IS net2o-do also net2o-base ;
-net2o-code0 previous
+: net2o-code   cmd0source off cmdlock lock
+    cmdreset ['] net2o, IS net2o-do also net2o-base ;
+: net2o-code0  cmd0source on  cmdlock lock
+    cmdreset ['] net2o, IS net2o-do also net2o-base ;
+' net2o, IS net2o-do
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr @ >r
     cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
@@ -264,7 +269,7 @@ also net2o-base definitions
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( n -- )  u>64 lit, ;
-: end-code ( -- ) expect-reply? previous cmd ;
+: end-code ( -- ) expect-reply? previous cmd  cmdlock unlock ;
 
 previous definitions
 
