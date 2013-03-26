@@ -300,7 +300,7 @@ Variable routes
 Variable lastn2oaddr
 
 : insert-address ( addr u -- net2o-addr )
-    msg( ." Insert address " dump cr )
+    msg( ." Insert address " 2dup dump cr )
     lastaddr IF  2dup lastaddr over str=
 	IF  2drop lastn2oaddr @  EXIT  THEN
     THEN
