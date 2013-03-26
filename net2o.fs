@@ -299,8 +299,25 @@ Variable routes
 0 Value lastaddr
 Variable lastn2oaddr
 
+
+: .ipv6 ( addr u -- ) 
+    drop dup sin6_addr $10 bounds DO
+	I be-w@ 0 .r ':' emit
+    2 +LOOP
+    sin6_port be-uw@ decimal 0 .r ;
+
+: .ipv4 ( addr u -- )
+    drop dup sin_addr 4 bounds DO
+	I c@ 0 <# #s #> type I 1+ I' <> IF  '.' emit  THEN
+    LOOP  ." :"
+    port be-uw@ decimal 0 .r ;
+
+: .address ( addr u -- )
+	over w@ AF_INET6 = IF ['] .ipv6 $10  ELSE  ['] .ipv4 #10 THEN
+	base-execute ; 
+
 : insert-address ( addr u -- net2o-addr )
-    msg( ." Insert address " 2dup dump cr )
+    msg( ." Insert address " 2dup .address cr )
     lastaddr IF  2dup lastaddr over str=
 	IF  2drop lastn2oaddr @  EXIT  THEN
     THEN
