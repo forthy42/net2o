@@ -57,7 +57,7 @@ end-code
 [ELSE]
     bye
 [THEN]
-
+waitkey( fdrop 8e )
 @time f> [IF]
     ." Request big photos because it was so fast" cr
     net2o-code
@@ -75,7 +75,7 @@ end-code
 [ELSE]
     bye
 [THEN]
-
+waitkey( fdrop 16e )
 @time f> [IF]
     waitkey( ." Press key to continue" key drop cr )
     ." Request more big photos because it was so fast" cr

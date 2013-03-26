@@ -317,7 +317,7 @@ Variable lastn2oaddr
 	base-execute ; 
 
 : insert-address ( addr u -- net2o-addr )
-    msg( ." Insert address " 2dup .address cr )
+    address( ." Insert address " 2dup .address cr )
     lastaddr IF  2dup lastaddr over str=
 	IF  2drop lastn2oaddr @  EXIT  THEN
     THEN
@@ -1551,7 +1551,7 @@ $08 Constant cookie-val
 	IF  drop  THEN  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@
-    msg( <> IF  ." handover" cr THEN )else( 2drop )
+    address( <> IF  ." handover" cr THEN )else( 2drop )
     0< IF  handle-data  ELSE  handle-cmd  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
