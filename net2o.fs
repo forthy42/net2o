@@ -302,7 +302,7 @@ Variable lastn2oaddr
 
 : .ipv6 ( addr u -- ) 
     drop dup sin6_addr $10 bounds DO
-	I be-w@ 0 .r ':' emit
+	I be-uw@ 0 .r ':' emit
     2 +LOOP
     sin6_port be-uw@ decimal 0 .r ;
 
