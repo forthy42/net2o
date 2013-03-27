@@ -869,6 +869,7 @@ timestats buffer: stat-tuple
 
 #20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
+slack-bias# 100 * Value slack-ignore# \ above 100ms is ignored
 #0 Value slack-min# \ minimum effect limit
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
@@ -878,6 +879,10 @@ timestats buffer: stat-tuple
 
 : >slack-exp ( -- rfactor )
     lastslack 64@ min-slack 64@ 64- 64>n
+    dup abs slack-ignore# u> IF
+	msg( ." slack ignored: " dup . cr )
+	drop 0 lastslack 64@ min-slack 64!
+    THEN
     slack( dup . min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
