@@ -869,7 +869,7 @@ timestats buffer: stat-tuple
 
 #20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
-slack-bias# 100 * Value slack-ignore# \ above 100ms is ignored
+slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 #0 Value slack-min# \ minimum effect limit
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
