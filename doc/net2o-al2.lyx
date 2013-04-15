@@ -306,7 +306,7 @@ Wie stellt man etwas dar?
 \align center
 \begin_inset Graphics
 	filename formate+ausgabe.fig
-	scale 44
+	scale 40
 	rotateAngle 270
 
 \end_inset
@@ -319,51 +319,7 @@ Wie stellt man etwas dar?
 \end_layout
 
 \begin_layout BeginFrame
-Factoring 1.0
-\end_layout
 
-\begin_layout Itemize
-HTML packt die ganzen Texte und die User--Interface--Elemente in eine Seite
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Getrenntes CSS für das Layout
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Getrenntes JavaScript für die Anwe
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Separated graphics and videos
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Plugins for games and videos
 \end_layout
 
 \begin_layout EndFrame
