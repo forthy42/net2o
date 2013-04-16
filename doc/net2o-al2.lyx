@@ -10,15 +10,22 @@
 
 \setbeamercovered{transparent}
 % or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
 \end_preamble
-\options aspectratio=1610
+\options aspectratio=169
 \use_default_options false
 \maintain_unincluded_children false
 \language ngerman
 \language_package default
-\inputencoding auto
+\inputencoding utf8
 \fontencoding global
-\font_roman times
+\font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
@@ -33,7 +40,7 @@
 \output_sync 0
 \bibtex_command default
 \index_command default
-\paperfontsize default
+\paperfontsize 12
 \spacing single
 \use_hyperref false
 \papersize default
@@ -122,7 +129,7 @@ net2o app layer
 \end_layout
 
 \begin_layout Subtitle
-Faktorisiere den Inhalt
+Bausteine für einen Browser
 \end_layout
 
 \begin_layout Author
@@ -212,9 +219,9 @@ Die Leute möchten Informationen teilen (
 \emph on
 teilen 
 \emph default
-bedeutet kopieren
+bedeutet 
 \emph on
-)
+kopieren)
 \end_layout
 
 \begin_layout Pause
@@ -263,27 +270,50 @@ Zusammen spielen
 Was möchte ich zeigen?
 \end_layout
 
-\begin_layout Standard
+\begin_layout Itemize
 Einen Vortrag des Titels habe ich schon 2011 in Wien gehalten --- da war
- das noch komplett Vaporware.
+ das noch komplett Vaporware: Das war der Plan.
  
 \end_layout
 
+\begin_deeper
 \begin_layout Pause
 
 \end_layout
 
-\begin_layout Standard
+\end_deeper
+\begin_layout Itemize
 Inzwischen gibt's was, nämlich funktionierende Teile, die zusammengebaut
  werden müssen.
 \end_layout
 
+\begin_deeper
 \begin_layout Pause
 
 \end_layout
 
-\begin_layout Standard
+\end_deeper
+\begin_layout Itemize
 Und ein Konzept, wie das Zusammenbauen aussieht.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Muss neben PCs auch auf mobilen Plattformen wie Android laufen, deren Umgebung
+ 
+\begin_inset Quotes gld
+\end_inset
+
+etwas komisch
+\begin_inset Quotes grd
+\end_inset
+
+ ist.
 \end_layout
 
 \begin_layout EndFrame
@@ -306,7 +336,7 @@ Wie stellt man etwas dar?
 \align center
 \begin_inset Graphics
 	filename formate+ausgabe.fig
-	scale 40
+	scale 36
 	rotateAngle 270
 
 \end_inset
@@ -319,28 +349,23 @@ Wie stellt man etwas dar?
 \end_layout
 
 \begin_layout BeginFrame
-
+Warum OpenGL?
 \end_layout
 
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Browser as Application Environment
+\begin_layout FrameSubtitle
+OpenGL kann alles
 \end_layout
 
 \begin_layout Standard
-Remember: The browser is meant as application environment for net--centric
- applications!
+OpenGL rendert:
 \end_layout
 
 \begin_layout Pause
 
 \end_layout
 
-\begin_layout Itemize
-Requires a general purpose language to write the applications in
+\begin_layout Enumerate
+Dreiecke, Linien und Punkte --- simple Grundformen
 \end_layout
 
 \begin_deeper
@@ -349,8 +374,8 @@ Requires a general purpose language to write the applications in
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-Requires a good development and debugging environment
+\begin_layout Enumerate
+Texturen und Farbverläufe
 \end_layout
 
 \begin_deeper
@@ -359,299 +384,22 @@ Requires a good development and debugging environment
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-Must be fast/low power budget (performance is key on mobile devices, PCs
- are fast enough)
+\begin_layout Enumerate
+und nutzt dazu Shader--Programme --- und das ist das eigentlich Mächtige
+ an OpenGL ab 2.0
 \end_layout
 
-\begin_deeper
 \begin_layout Pause
 
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-HTML5+CSS+JavaScript doesn't cut the mustard
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Section
-Solutions
-\end_layout
-
-\begin_layout BeginFrame
-Factor the Text!
-\end_layout
-
-\begin_layout Itemize
-Dynamic web pages use AJAX to partially replace elements of the page
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Why put everything into a single file first, and then start tearing it apart?
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Put each element (article, comment, message, navigation bar, images, videos,
- sound) into a file of its own, and 
-\emph on
-refer
-\emph default
- to embedded objects, regardless of their type
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Use scripts to generate dynamic references (
-\begin_inset Quotes eld
-\end_inset
-
-the last three comments to that article
-\begin_inset Quotes erd
-\end_inset
-
-)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Provide low--level services, and let the application logic and libraries
- do the rest
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Downsides
-\end_layout
-
-\begin_layout Itemize
-Client has to pull data together, more network traffic
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Data assembly may be pretty static
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Collated queries work in a client--server environment, but not in a P2P
- environment
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Subsection
-Some Basic Insights
-\end_layout
-
-\begin_layout BeginFrame
-ACID on Data Clouds
-\end_layout
-
-\begin_layout Itemize
-You want your data to be in shape, thus you need the ACID
-\begin_inset Foot
-status open
-
-\begin_layout Plain Layout
-Atomicity, Consistency, Isolation, and Durability.
-\end_layout
-
-\end_inset
-
- properties of the data repository
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-You can't do read--modify--write on data clouds.
- You can push new data, that's it.
- Forget about 
-\begin_inset Quotes eld
-\end_inset
-
-delete,
-\begin_inset Quotes erd
-\end_inset
-
- there's no easy way to call your data back.
- You can't implement locks.
- All you get is durability: 
-\begin_inset Quotes eld
-\end_inset
-
-the net will not forget.
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-However, you can say 
-\begin_inset Quotes eld
-\end_inset
-
-this is the next revision of document 
-\begin_inset Formula $x$
-\end_inset
-
-.
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Two concurrent edits will produce a fork.
- It's up to the authors to decide how to merge forks back.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-When you publish something, you can't guarantee that it's available in order.
- If the reader gets an incomplete transaction, he must either retry or fall
- back to the previous version.
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Hash--Indexed Content
 \end_layout
 
 \begin_layout Standard
-Hashes as 
-\begin_inset Quotes eld
-\end_inset
-
-handle
-\begin_inset Quotes erd
-\end_inset
-
- to actual content are the key to data management
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Itemize
-\begin_inset Formula $h(data)\longrightarrow hash$
-\end_inset
-
- produces a unique hash for each data file
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-\begin_inset Formula $d(hash)\longrightarrow data$
-\end_inset
-
- allows to retrieve the data when the hash is known
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-
+Die eigentliche Anforderung ist: Visualisierung von 
 \emph on
-Hash trees
+irgendwelchen
 \emph default
- provide a mean to distribute large files
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-
-\emph on
-Relationships
-\emph default
- between data revisions are stored as 
-\emph on
-graph,
-\emph default
- using the hashes as symbol for the actual data
+ Daten.
+ OpenGL kann das.
 \end_layout
 
 \begin_layout EndFrame
@@ -659,15 +407,15 @@ graph,
 \end_layout
 
 \begin_layout BeginFrame
-Privacy
+Wie verbindet man die Medien?
+\end_layout
+
+\begin_layout FrameSubtitle
+Lemma: Jede Glue--Logik wird Turing--complete
 \end_layout
 
 \begin_layout Itemize
-You can control 
-\emph on
-with whom you share
-\emph default
- (cryptography)
+Bisher benutzer Glue: HTML+CSS+JavaScript
 \end_layout
 
 \begin_deeper
@@ -677,17 +425,8 @@ with whom you share
 
 \end_deeper
 \begin_layout Itemize
-Recalling information requires cooperation 
-\emph on
-(
-\begin_inset Quotes eld
-\end_inset
+Und als Container für Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
 
-the net will not forget
-\begin_inset Quotes erd
-\end_inset
-
-)
 \end_layout
 
 \begin_deeper
@@ -697,15 +436,7 @@ the net will not forget
 
 \end_deeper
 \begin_layout Itemize
-You 
-\emph on
-can't control
-\emph default
- with whom your receivers 
-\emph on
-re--share
-\emph default
- (impossibly of DRM)
+Schussfolgerung: Von vornherein auf ein mächtiges Werkzeug setzen
 \end_layout
 
 \begin_deeper
@@ -715,11 +446,7 @@ re--share
 
 \end_deeper
 \begin_layout Itemize
-There is no real anonymity, but your 
-\emph on
-traces can be lost
-\emph default
- in the clouds
+Der Browser ist eine Laufzeit- und Entwicklungsumgebung für Anwendungen
 \end_layout
 
 \begin_layout EndFrame
@@ -727,30 +454,31 @@ traces can be lost
 \end_layout
 
 \begin_layout BeginFrame
-Secure Execution Environment
+Sicherheit
 \end_layout
 
-\begin_layout Itemize
-Any sufficiently powerful language let you write malware
+\begin_layout FrameSubtitle
+Lemma: Jedes hinreichend komplizierte Format lässt sich für einen Exploit
+ ausnutzen
 \end_layout
 
-\begin_deeper
+\begin_layout Standard
+Javas Ansatz, eine Sprache 
+\begin_inset Quotes gld
+\end_inset
+
+von innen
+\begin_inset Quotes grd
+\end_inset
+
+ heraus zu sichern, kann als gescheitert betrachtet werden.
+ Java ist heute Einfallstor Nummer 1 für Schädlinge.
+\end_layout
+
 \begin_layout Pause
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-The libraries of any sufficiently powerful environment (even with a very
- restricted language) contain enough exploits to write malware
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
 \begin_layout Block
 \begin_inset ERT
 status open
@@ -767,8 +495,7 @@ status open
 
 \begin_deeper
 \begin_layout Itemize
-Sandbox the process, restrict network access (read is ok, write needs user
- permit)
+Den Prozess, der Netzwerkdaten interpretiert, in eine Sandbox sperren
 \end_layout
 
 \begin_deeper
@@ -778,7 +505,8 @@ Sandbox the process, restrict network access (read is ok, write needs user
 
 \end_deeper
 \begin_layout Itemize
-Using your keys (decyption, encryption, signing) must be outside the sandbox
+Netzwerkverbindungen über einen Proxy leiten --- da fehlt noch ein shared--memor
+y--Modul für net2o
 \end_layout
 
 \begin_deeper
@@ -788,31 +516,7 @@ Using your keys (decyption, encryption, signing) must be outside the sandbox
 
 \end_deeper
 \begin_layout Itemize
-\begin_inset Quotes eld
-\end_inset
-
-Same origin
-\begin_inset Quotes erd
-\end_inset
-
---policy doesn't work for a data cloud --- the destination is again 
-\begin_inset Quotes eld
-\end_inset
-
-the cloud
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Signed scripts and social control can help to some extend
+Der Zugriff auf Schlüssel muss außerhalb der Sandbox stattfinden
 \end_layout
 
 \begin_deeper
@@ -822,269 +526,353 @@ Signed scripts and social control can help to some extend
 
 \end_deeper
 \begin_layout Itemize
-The boundary to malware is non--trivial to define.
- Is Farmville malware?
+\begin_inset Quotes gld
+\end_inset
+
+Same--Origin
+\begin_inset Quotes grd
+\end_inset
+
+--Policies funktionieren in der Cloud nicht.
 \end_layout
 
+\end_deeper
 \begin_layout EndFrame
 
 \end_layout
 
-\begin_layout BeginFrame
-Push vs.
- Polling
-\end_layout
-
-\begin_layout Itemize
-Polling is stupid
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Push--style solutions require open connections or ports
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Stored procedures in the cloud --- or better call them 
-\begin_inset Quotes eld
-\end_inset
-
-callbacks,
-\begin_inset Quotes erd
-\end_inset
-
- because they can only call the originator
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Source Code vs.
- tokenized Binaries
-\end_layout
-
-\begin_layout Itemize
-We (Forth) can compile source code quickly
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Source code distribution allows to inspect software, and reduce the malware
- threat (reduce, not eliminate!)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Secretive companies like binaries, more difficult to reverse engineer
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Everybody can build his own VM compiler, if he likes to
-\end_layout
-
-\begin_layout EndFrame
-
+\begin_layout Section
+Ein paar kleine Demos
 \end_layout
 
 \begin_layout Subsection
-Factor Data
+Slideshow
 \end_layout
 
 \begin_layout BeginFrame
-Factor Data
+Slideshow
 \end_layout
 
 \begin_layout FrameSubtitle
-scalability of graphics --- bandwidth and detail reduction for small and
- slow devices
+Die Slide--Show verwende ich für diese Präsentation
 \end_layout
 
-\begin_layout Description
-Images Use progressive formats where scaled--down versions of the same image
- are transferred first (progressive JPEG, wavelet compression)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Description
-Video Encode streams with a lowres, low--FPS base video, and additional
- streams which add spatial and temporal resolution
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Description
-Geometries Use level--of--detail algorithms to provide approximations of
- complex geometries (2D and 3D)
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Subsection
-Distribute the Code
-\end_layout
-
-\begin_layout BeginFrame
-Factor the Code
-\end_layout
-
-\begin_layout Itemize
-Provide a way to distribute common libraries
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Use the version control system to request the right dependencies, if you
- need those
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Allow precompiled basic functions to speed up rendering startup
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Basic Libraries
-\end_layout
-
-\begin_layout Itemize
-Canvas and OpenGL for 2D and 3D rendering
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-HarfBuzz for text layout and shaping engine
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-A typesetting engine (codename 
-\begin_inset Quotes eld
-\end_inset
-
-B
+\begin_layout ExampleBlock
 \begin_inset ERT
 status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-lower.7ex
-\backslash
-hbox{U}
+{Fader}
 \end_layout
 
 \end_inset
 
-X
-\begin_inset Quotes erd
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+
+\color cyan
+:
+\color inherit
+ 
+\color cyan
+fade 
+\color green
+{ n1 n2 f: delta-time -- }
+\color inherit
+ n1 n2 = 
+\color yellow
+?EXIT
+\end_layout
+
+\begin_layout LyX-Code
+    ftime 
+\color green
+{ f: startt }
+\end_layout
+
+\begin_layout LyX-Code
+    
+\color yellow
+BEGIN
+\color inherit
+  ftime startt f- delta-time f/ fdup 
+\color red
+1e
+\color inherit
+ f<  
+\color yellow
+WHILE
+\end_layout
+
+\begin_layout LyX-Code
+            <draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            
+\color red
+1e
+\color inherit
+ blend n1 draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            
+\color blue
+( time )
+\color inherit
+ blend n2 draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            draw-slide>  
+\color yellow
+REPEAT
+\end_layout
+
+\begin_layout LyX-Code
+    <draw-slide 
+\color red
+1e
+\color inherit
+ blend n2 draw-slide draw-slide>
+\end_layout
+
+\begin_layout LyX-Code
+    fdrop 
+\color cyan
+;
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Slideshow 2
+\end_layout
+
+\begin_layout FrameSubtitle
+Noch mehr Effekte
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Hslide}
+\end_layout
+
 \end_inset
 
-)
+
 \end_layout
 
 \begin_deeper
+\begin_layout LyX-Code
+
+\color cyan
+: hslide
+\color inherit
+ 
+\color green
+{ n1 n2 f: delta-time -- }
+\color inherit
+ n1 n2 = 
+\color yellow
+?EXIT
+\end_layout
+
+\begin_layout LyX-Code
+    ftime 
+\color green
+{ f: startt }
+\end_layout
+
+\begin_layout LyX-Code
+    
+\color yellow
+BEGIN
+\color inherit
+  ftime startt f- delta-time f/ fdup 
+\color red
+1e
+\color inherit
+ f<  
+\color yellow
+WHILE
+\end_layout
+
+\begin_layout LyX-Code
+            <draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            pi f* fcos 1e f- 
+\end_layout
+
+\begin_layout LyX-Code
+
+\color yellow
+            [
+\color inherit
+ 
+\color magenta
+pi f2/ fnegate
+\color inherit
+ 
+\color yellow
+]
+\color inherit
+ FLiteral f* fcos 1e f-
+\end_layout
+
+\begin_layout LyX-Code
+            fdup n1 n2 > 
+\color yellow
+IF
+\color inherit
+ fnegate  
+\color yellow
+THEN
+\color inherit
+ xshift n1 draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            
+\color red
+2e
+\color inherit
+ f+ n1 n2 > 
+\color yellow
+IF
+\color inherit
+ fnegate  
+\color yellow
+THEN
+\color inherit
+ xshift n2 draw-slide
+\end_layout
+
+\begin_layout LyX-Code
+            draw-slide>  
+\color yellow
+REPEAT
+\end_layout
+
+\begin_layout LyX-Code
+    <draw-slide n2 draw-slide draw-slide>
+\end_layout
+
+\begin_layout LyX-Code
+    fdrop 
+\color cyan
+;
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Vorgehen und Probleme
+\end_layout
+
+\begin_layout FrameSubtitle
+libSOIL: Einfache API zum Bilder--Laden
+\end_layout
+
+\begin_layout Standard
+Die APIs von libjpeg und libpng sind ausgesprochen kompliziert.
+\end_layout
+
 \begin_layout Pause
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-JPEG/PNG decoding
+\begin_layout Standard
+Alternative: libSOIL:
 \end_layout
 
-\begin_deeper
 \begin_layout Pause
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-Video engine
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{libSOIL Textur laden}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
-\begin_layout Pause
+\begin_layout LyX-Code
 
+\color cyan
+: load-texture
+\color inherit
+ 
+\color blue
+( addr u -- )
+\end_layout
+
+\begin_layout LyX-Code
+    open-fpath-file throw rot close-file throw tilde_cstr
+\end_layout
+
+\begin_layout LyX-Code
+    SOIL_LOAD_AUTO current-tex SOIL_FLAG_TEXTURE_REPEATS
+\end_layout
+
+\begin_layout LyX-Code
+    SOIL_load_OGL_texture drop 
+\color cyan
+;
 \end_layout
 
 \end_deeper
-\begin_layout Itemize
-Audio engine
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
+\begin_layout EndFrame
 
 \end_layout
 
-\end_deeper
-\begin_layout Itemize
-GUI library (MINOS--like, but using the rendering infrastructure)
+\begin_layout Subsection
+Videos
+\end_layout
+
+\begin_layout BeginFrame
+Zwiebel--Programmierung
+\end_layout
+
+\begin_layout FrameSubtitle
+Von außen ziemlich groß
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename zwiebel/2013-04-16 18.31.34.jpg
+	lyxscale 10
+	height 75theight%
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout EndFrame
@@ -1092,16 +880,72 @@ GUI library (MINOS--like, but using the rendering infrastructure)
 \end_layout
 
 \begin_layout BeginFrame
-Most Stupid Mistakes of the Net 1.0
+Zwiebel--Programmierung
+\end_layout
+
+\begin_layout FrameSubtitle
+Martialisches Werkzeug wird empfohlen
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename zwiebel/2013-04-16 18.32.14.jpg
+	lyxscale 10
+	height 75theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Zwiebel--Programmierung
+\end_layout
+
+\begin_layout FrameSubtitle
+Zwiebel 
+\begin_inset Quotes gld
+\end_inset
+
+all the way down
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename zwiebel/2013-04-16 18.32.30.jpg
+	lyxscale 10
+	height 75theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Video
+\end_layout
+
+\begin_layout FrameSubtitle
+OpenMAX AL
 \end_layout
 
 \begin_layout Itemize
-There really must be an easy to use (i.e.
- WYSIWYG) 
-\emph on
-in--browser editor
-\emph default
- for the content!
+Auf Android ist OpenMAX AL das Video--Framework --- ähnlich wie gstreamer,
+ aber doch anders.
 \end_layout
 
 \begin_deeper
@@ -1111,12 +955,7 @@ in--browser editor
 
 \end_deeper
 \begin_layout Itemize
-
-\emph on
-Client--server
-\emph default
- instead of peer to peer --- the original idea behind the Internet was peer
- to peer, but it was soon forgotten
+Kann Videos in eine Textur rendern, aber auch aufzeichnen (von der Kamera)
 \end_layout
 
 \begin_deeper
@@ -1126,12 +965,7 @@ Client--server
 
 \end_deeper
 \begin_layout Itemize
-
-\emph on
-Postel principle
-\emph default
- --- do not be liberal in what you receive, do explicit consistency checks
- even if that is costly (Rose principle)
+Input: MPEG Transport Stream
 \end_layout
 
 \begin_deeper
@@ -1141,12 +975,675 @@ Postel principle
 
 \end_deeper
 \begin_layout Itemize
+C--API ist C++--artig (Struktur von Funktionspointern, also eine vtable)
+\end_layout
 
-\emph on
-Unencrypted
-\emph default
- by default (was too costly; but then, cryptographic protocols such as SSL
- are really ugly and full of mistakes)
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Native--API ist nur halb implementiert, zum Starten muss man Java via
+ JNI bemühen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Videoplayer verwendet dann vier Sprachen: Forth, C, Java, OpenGL Shader
+ Language
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+JNI--Deklarationen
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+MediaPlayer
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+jni-class: android/media/MediaPlayer
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+jni-new: new-MediaPlayer ()V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: prepare prepare ()V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: start start ()V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: setSurface setSurface (Landroid/view/Surface;)V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: setVolume setVolume (FF)V
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+JNI--Deklarationen II
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+SurfaceTexture
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+jni-class: android/graphics/SurfaceTexture
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+jni-new: new-SurfaceTexture (I)V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: updateTexImage updateTexImage ()V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: getTimestamp getTimestamp ()J
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: setDefaultBufferSize setDefaultBufferSize (II)V
+\end_layout
+
+\begin_layout LyX-Code
+jni-method: getTransformMatrix getTransformMatrix ([F)V
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+JNI--Aufruf
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Timestamp abholen
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+: get-deltat ( -- f )
+\end_layout
+
+\begin_layout LyX-Code
+    media-sft >o getTimestamp o> d>f 1e-9 f*
+\end_layout
+
+\begin_layout LyX-Code
+    first-timestamp f@ f- ;
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Java--Calls fügen sich nahtlos in Mini--OOF2 ein (Mini--OOF mit aktuellem
+ Objekt)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+MTS? Alle Videos sind heute MKV!
+\end_layout
+
+\begin_layout FrameSubtitle
+\begin_inset Quotes gld
+\end_inset
+
+Matroska
+\begin_inset Quotes grd
+\end_inset
+
+ klingt schon auch nach Zwiebel--Programmierung\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Standard
+Wozu überhaupt einen Container?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Übliche Begründung: Mehrere Dateien zu 
+\begin_inset Quotes gld
+\end_inset
+
+unhandlich.
+\begin_inset Quotes grd
+\end_inset
+
+ Ich finde Verzeichnisse mit mehreren Dateien eigentlich handlicher als
+ noch eine Möglichkeit, Container zu bilden.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Container bricht Video und Audio in einzelne Bilder und kurze Pakete auf
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Zeitstempel für synchronisierte Wiedergabe
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Index für das schnelle 
+\begin_inset Quotes gld
+\end_inset
+
+Spulen
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Matroska--Interpreter
+\end_layout
+
+\begin_layout FrameSubtitle
+Binäres XML--Format
+\end_layout
+
+\begin_layout Standard
+Lösung: MKV einlesen, MTS ausspucken.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Matroska--Parser hat eine Hash--Table für die binären Tags
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Jedem Tag ist noch eine Methode (mit Klarnamen) eines Mini--OOF2--Objekts
+ zugeordnet
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Konkrete Parser können unterschiedliche Methoden haben, Beispiel: Dump zur
+ Inspektion, und MTS--Konverter--Klasse.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Text
+\end_layout
+
+\begin_layout BeginFrame
+Fonts rendern
+\end_layout
+
+\begin_layout FrameSubtitle
+Freetype--GL rendert OpenType--Fonts in OpenGL--Texturen
+\end_layout
+
+\begin_layout Itemize
+Stand der Technik für Vektorfonts ist das OpenType--Format
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Gerendert werden Texturen, also muss der Vektorfont in die Textur
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+FreeType--GL packt Zeichen in eine Textur (Cache), und macht aus jedem Zeichen
+ einen Glyph
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Diese Glyphen verwandelt man in zwei Dreiecke und rendert sie
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Text rendern Demo--Code
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Fonts und Texte}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+48e 
+\color cyan
+FConstant fontsize#
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+atlas 
+\color red
+"/system/fonts/DroidSans.ttf
+\backslash
+0"
+\color inherit
+ drop
+\end_layout
+
+\begin_layout LyX-Code
+fontsize# texture_font_new 
+\color cyan
+Value font1
+\end_layout
+
+\begin_layout LyX-Code
+atlas 
+\color red
+"/system/fonts/DroidSansFallback.ttf
+\backslash
+0"
+\color inherit
+ drop
+\end_layout
+
+\begin_layout LyX-Code
+fontsize# texture_font_new 
+\color cyan
+Value font2
+\end_layout
+
+\begin_layout LyX-Code
+
+\end_layout
+
+\begin_layout LyX-Code
+
+\color cyan
+Variable text1$
+\color inherit
+ 
+\color red
+"Dös isch a Tägscht."
+\color inherit
+ text1$ $!
+\end_layout
+
+\begin_layout LyX-Code
+
+\color cyan
+Variable text2$
+\color inherit
+ 
+\color red
+"
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\backslash
+cjk 
+\end_layout
+
+\end_inset
+
+这是一个文本：我爱彭秀清。
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+"
+\color inherit
+ text2$ $!
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Text rendern Demo--Code II
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{Fonts und Texte}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+
+\color cyan
+: glyph-demo
+\color inherit
+ 
+\color blue
+( -- )
+\color inherit
+  hidekb
+\end_layout
+
+\begin_layout LyX-Code
+    
+\color red
+1
+\color inherit
+ level# +!  
+\color yellow
+BEGIN
+\end_layout
+
+\begin_layout LyX-Code
+        <render
+\end_layout
+
+\begin_layout LyX-Code
+        
+\color red
+0.
+
+\color inherit
+ penxy 2!
+\end_layout
+
+\begin_layout LyX-Code
+        font1 to font  text1$ $@ render-string
+\end_layout
+
+\begin_layout LyX-Code
+        
+\color red
+-100e
+\color inherit
+ penxy sf! 
+\color red
+-60e
+\color inherit
+ penxy sfloat+ sf!
+\end_layout
+
+\begin_layout LyX-Code
+        font2 to font  text2$ $@ render-string
+\end_layout
+
+\begin_layout LyX-Code
+        render>
+\end_layout
+
+\begin_layout LyX-Code
+        sync >looper
+\end_layout
+
+\begin_layout LyX-Code
+    level# @ 0= 
+\color yellow
+UNTIL
+\color inherit
+ 
+\color cyan
+;
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Ausblick
+\end_layout
+
+\begin_layout BeginFrame
+Ausblick
+\end_layout
+
+\begin_layout FrameSubtitle
+Diese Präsentation ist mit LaTeX Beamer gerendert\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Itemize
+Die nächste Präsentation muss komplett in MINOS2 gerendert sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Dazu fehlt noch eine Typesetting--Engine mit Boxes und Glues, Absatzumbruch
+ und Silbentrennung
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Viel weniger Klassen als in MINOS --- dafür dann mehr Objekte
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Neben der hbox und vbox noch eine zbox für übereinander gestapeltes
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Animationen integriert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die einzelnen GLSL--Programme müssen in einem Programm sein, mit Switch--Stateme
+nt
 \end_layout
 
 \begin_layout EndFrame
@@ -1159,18 +1656,18 @@ Appendix
 \end_layout
 
 \begin_layout Subsection*
-For Further Reading
+Literatur&Links
 \end_layout
 
 \begin_layout BeginFrame
-For Further Reading
+Literatur&Links
 \end_layout
 
 \begin_layout Bibliography
 \labelwidthstring Literaturverzeichnis
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
-key "In20"
+key "net2o"
 
 \end_inset
 
@@ -1193,7 +1690,7 @@ newblock
 
 
 \emph on
-Internet 2.0 
+net2o fossil repository
 \emph default
 
 \begin_inset ERT
@@ -1210,10 +1707,11 @@ newblock
 
  
 \begin_inset Flex URL
-status collapsed
+status open
 
 \begin_layout Plain Layout
-http://net2o.de/
+
+http://fossil.net2o.de/net2o/
 \end_layout
 
 \end_inset
@@ -1221,25 +1719,19 @@ http://net2o.de/
 
 \end_layout
 
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
 \begin_layout Bibliography
 \labelwidthstring Literaturverzeichnis
+
+\noun on
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
-key "swift"
+key "minos2"
 
 \end_inset
 
-
-\noun on
-Pouwelse, Grishchenko, Bakker
+Bernd Paysan
 \noun default
-
+ 
 \begin_inset ERT
 status collapsed
 
@@ -1254,13 +1746,11 @@ newblock
 
 
 \emph on
-swift,
+\color white
+minos2 fossil repository
 \emph default
- 
-\emph on
-the multiparty transport protocol
-\emph default
- 
+\color inherit
+
 \begin_inset ERT
 status collapsed
 
@@ -1275,71 +1765,11 @@ newblock
 
  
 \begin_inset Flex URL
-status collapsed
-
-\begin_layout Plain Layout
-http://libswift.org/
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Bibliography
-\labelwidthstring Literaturverzeichnis
-\begin_inset CommandInset bibitem
-LatexCommand bibitem
-key "btledbat"
-
-\end_inset
-
-
-\noun on
-Rossi, Testa, Valenti
-\noun default
-
-\begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
-
-\emph on
-Yes, we LEDBAT
-\emph default
-
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-
-\backslash
-newblock
-\end_layout
-
-\end_inset
-
-
-\begin_inset Flex URL
-status collapsed
-
-\begin_layout Plain Layout
-http://www.pam2010.ethz.ch/papers/full-length/4.pdf
+http://fossil.net2o.de/minos2/
 \end_layout
 
 \end_inset
