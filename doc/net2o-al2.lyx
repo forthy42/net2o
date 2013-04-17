@@ -22,8 +22,8 @@
 \use_default_options false
 \maintain_unincluded_children false
 \language ngerman
-\language_package default
-\inputencoding utf8
+\language_package auto
+\inputencoding utf8x
 \fontencoding global
 \font_roman default
 \font_sans default
@@ -1591,7 +1591,18 @@ Diese Präsentation ist mit LaTeX Beamer gerendert\SpecialChar \ldots{}
 \end_layout
 
 \begin_layout Itemize
-Die nächste Präsentation muss komplett in MINOS2 gerendert sein
+Die nächste Präsentation muss komplett in MINOΣ2 gerendert sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Texte und Videos müssen über net2o geholt werden, und nicht schon vorbereitet
+ auf dem Gerät sein
 \end_layout
 
 \begin_deeper
@@ -1612,7 +1623,7 @@ Dazu fehlt noch eine Typesetting--Engine mit Boxes und Glues, Absatzumbruch
 
 \end_deeper
 \begin_layout Itemize
-Viel weniger Klassen als in MINOS --- dafür dann mehr Objekte
+Viel weniger Klassen als in MINOΣ --- dafür dann mehr Objekte
 \end_layout
 
 \begin_deeper
