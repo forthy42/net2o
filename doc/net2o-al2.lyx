@@ -18,7 +18,7 @@
 %\newfontface\cjk{ShanHeiSun-Light}
 %\newfontface\cjk{ZenKai-Uni}
 \end_preamble
-\options aspectratio=169
+\options aspectratio=169,handout
 \use_default_options false
 \maintain_unincluded_children false
 \language ngerman
@@ -337,7 +337,6 @@ Wie stellt man etwas dar?
 \begin_inset Graphics
 	filename formate+ausgabe.fig
 	scale 36
-	rotateAngle 270
 
 \end_inset
 
