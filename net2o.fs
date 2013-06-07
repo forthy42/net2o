@@ -206,26 +206,32 @@ User inbuf'
 User outbuf'
 User cmd0buf'
 User init0buf'
+User sockaddr'
 
 : inbuf    ( -- addr ) inbuf' @ ;
 : outbuf   ( -- addr ) outbuf' @ ;
 : cmd0buf  ( -- addr ) cmd0buf' @ ;
 : init0buf ( -- addr ) init0buf' @ ;
+: sockaddr ( -- addr ) sockaddr' @ ;
 
-sema cmdlock
+sema cmd0lock
 
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
 
 : alloc-io ( -- )  inbuf' alloc-buf  outbuf' alloc-buf
     maxdata allocate throw cmd0buf' !
-    maxdata 2/ mykey-salt# + 2 cells + allocate throw init0buf' ! ;
+    maxdata 2/ mykey-salt# + 2 cells + allocate throw init0buf' !
+    sockaddr_in %size dup allocate throw dup sockaddr' ! swap erase
+;
 
 : free-io ( -- )
     inbuf free throw
     outbuf free throw
     cmd0buf free throw
-    init0buf free throw ;
+    init0buf free throw
+    sockaddr free throw
+;
 
 alloc-io
 
@@ -262,7 +268,7 @@ MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in6 %size alen !
-    net2o-sock fileno inbuf maxpacket r> sockaddr-tmp alen recvfrom
+    net2o-sock fileno inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
 	512 + negate throw  THEN
@@ -275,7 +281,7 @@ $00000000 Value droprate#
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
     net2o-sock  1 packets +!
-    fileno -rot 0 sockaddr-tmp alen @ sendto +send ;
+    fileno -rot 0 sockaddr alen @ sendto +send ;
 
 \ clients routing table
 
@@ -287,15 +293,15 @@ Variable routes
     dup ai_addr @ swap ai_addrlen l@
     over w@ AF_INET = IF
 	drop >r
-	AF_INET6 sockaddr-tmp family w!
-	r@ port w@ sockaddr-tmp port w!
-	0     sockaddr-tmp sin6_flowinfo l!
-	r> sin_addr l@ sockaddr-tmp sin6_addr 12 + l!
-	$FFFF0000 sockaddr-tmp sin6_addr 8 + l!
-	0 sockaddr-tmp sin6_addr 4 + l!
-	0 sockaddr-tmp sin6_addr l!
-	0 sockaddr-tmp sin6_scope_id l!
-	sockaddr-tmp sockaddr_in6 %size
+	AF_INET6 sockaddr family w!
+	r@ port w@ sockaddr port w!
+	0     sockaddr sin6_flowinfo l!
+	r> sin_addr l@ sockaddr sin6_addr 12 + l!
+	$FFFF0000 sockaddr sin6_addr 8 + l!
+	0 sockaddr sin6_addr 4 + l!
+	0 sockaddr sin6_addr l!
+	0 sockaddr sin6_scope_id l!
+	sockaddr sockaddr_in6 %size
     THEN ;
 
 0 Value lastaddr
@@ -335,10 +341,10 @@ Variable lastn2oaddr
     get-info info>string insert-address ;
 
 : address>route ( -- n/-1 )
-    sockaddr-tmp alen @ insert-address ;
+    sockaddr alen @ insert-address ;
 : route>address ( n -- ) dup >r
     routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
-    $@ sockaddr-tmp swap dup alen ! move  rdrop ;
+    $@ sockaddr swap dup alen ! move  rdrop ;
 
 \ route an incoming packet
 
@@ -1503,12 +1509,12 @@ Create pollfds   here pollfd %size dup allot erase
     send-anything? sendflag !
     BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
     WHILE  2drop send-another-chunk sendflag !  REPEAT
-    sockaddr-tmp alen @ insert-address  inbuf ins-source
+    sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
 : next-client-packet ( -- addr u )
     try-read-packet-wait 2dup d0= ?EXIT
-    sockaddr-tmp alen @ insert-address
+    sockaddr alen @ insert-address
     inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
