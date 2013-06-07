@@ -149,9 +149,9 @@ User cmd0source
 User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf   ELSE  code-dest  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	code-map @ >o dest-lock o>
-    THEN ;
+\ : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+\ 	code-map @ >o dest-lock o>
+\     THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )

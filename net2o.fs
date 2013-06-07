@@ -214,7 +214,7 @@ User sockaddr'
 : init0buf ( -- addr ) init0buf' @ ;
 : sockaddr ( -- addr ) sockaddr' @ ;
 
-sema cmd0lock
+sema cmdlock
 
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
