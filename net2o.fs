@@ -79,6 +79,14 @@ do-stackrel off
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
 [THEN]
 
+\ User deferred words
+
+: UDefer ( "name" -- )
+    : postpone useraddr cell uallot , postpone perform postpone ;
+    [: >body cell+ @ next-task + ! ;
+    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
+    [: >body cell+ @ postpone useraddr , postpone perform ;] set-compiler ;
+
 \ bit vectors, lsb first
 
 : bits ( n -- n ) 1 swap lshift ;
@@ -214,7 +222,7 @@ User sockaddr'
 : init0buf ( -- addr ) init0buf' @ ;
 : sockaddr ( -- addr ) sockaddr' @ ;
 
-sema cmdlock
+sema cmd0lock
 
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;

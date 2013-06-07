@@ -149,9 +149,9 @@ User cmd0source
 User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf   ELSE  code-dest  THEN ;
-\ : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-\ 	code-map @ >o dest-lock o>
-\     THEN ;
+: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+	code-map @ >o dest-lock o>
+    THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -166,9 +166,9 @@ User cmdbuf#
 
 : net2o, @ n>64 cmd, ;
 
-: net2o-code    cmdlock lock  cmd0source off
+: net2o-code    cmd0source off  cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0   cmdlock lock  cmd0source on
+: net2o-code0   cmd0source on   cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
 ' net2o, IS net2o-do
 
@@ -189,7 +189,7 @@ User cmdbuf#
 
 also net2o-base
 
-Defer expect-reply?
+UDefer expect-reply?
 ' end-cmd IS expect-reply?
 
 : cmd-send? ( -- )
