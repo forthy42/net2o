@@ -1,7 +1,9 @@
 \ keccak wrapper
 
 \ dummy load for Android
-s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop
+[IFDEF] android
+    s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop
+[THEN]
 
 c-library keccak
 \    s" keccak/.libs" add-libpath
