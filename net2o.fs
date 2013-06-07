@@ -212,7 +212,7 @@ User init0buf'
 : cmd0buf  ( -- addr ) cmd0buf' @ ;
 : init0buf ( -- addr ) init0buf' @ ;
 
-sema cmd0lock
+sema cmdlock
 
 : alloc-buf ( addr -- )
     maxpacket-aligned buffers# * allocate throw 6 + swap ! ;

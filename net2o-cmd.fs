@@ -149,9 +149,9 @@ User cmd0source
 User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf   ELSE  code-dest  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	code-map @ >o dest-lock o>
-    THEN ;
+\ : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+\ 	code-map @ >o dest-lock o>
+\     THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -166,9 +166,9 @@ User cmdbuf#
 
 : net2o, @ n>64 cmd, ;
 
-: net2o-code   cmd0source off cmdlock lock
+: net2o-code    cmdlock lock  cmd0source off
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0  cmd0source on  cmdlock lock
+: net2o-code0   cmdlock lock  cmd0source on
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
 ' net2o, IS net2o-do
 
@@ -671,8 +671,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     map-request ;
 
 : gen-request ( -- )
+    net2o-code0
     ['] end-cmd IS expect-reply?
-    net2o-code0  nest[ o ulit, set-o ticks lit, set-rtdelay request-done ]nest
+    nest[ o ulit, set-o ticks lit, set-rtdelay request-done ]nest
     req-codesize @  req-datasize @ map-request,
     key-request
     end-code
