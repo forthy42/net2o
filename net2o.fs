@@ -672,6 +672,7 @@ Variable mapstart $10000 mapstart !
 8 Value delta-damp#
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
+#30000 max-size^2 lshift Value bandwidth-max
 64#-1 64Constant never
 2 Value flybursts#
 
@@ -943,8 +944,8 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns ens( 64nip )else( 64drop )
-    64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat ) rate-stat2
-    ns/burst 64!@
+    64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
+    bandwidth-max n>64 64max rate-stat2 ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
