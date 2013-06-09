@@ -672,13 +672,13 @@ Variable mapstart $10000 mapstart !
 8 Value delta-damp#
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
-#30000 max-size^2 lshift Value bandwidth-max
+#2000 max-size^2 lshift Value bandwidth-max
 64#-1 64Constant never
 2 Value flybursts#
 
 Variable init-context#
-\ wurstkessel-o crypto-o !
-keccak-o crypto-o !
+wurstkessel-o crypto-o !
+\ keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -1506,13 +1506,18 @@ Create pollfds   here pollfd %size dup allot erase
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF
 	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
-    0 0 ;
-
-: try-read-packet-wait ( -- addr u / 0 0 )
-    poll-sock drop read-a-packet4/6 ;
+    don't-block read-a-packet +rec ;
 
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
+
+20 Value try-read#
+
+: try-read-packet-wait ( -- addr u / 0 0 )
+    try-read# 0 DO
+	don't-block read-a-packet
+	2dup d0<> IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+    poll-sock drop read-a-packet4/6 ;
 
 : next-packet ( -- addr u )
     send-anything? sendflag !
@@ -1675,6 +1680,7 @@ Variable client-task
 
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
+    \ 0 stick-to-core
     >o rdrop  alloc-io wurst-task-init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
