@@ -151,7 +151,7 @@ do-stackrel off
 Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reverse64 ( x1 -- x2 )
+: reverse ( x1 -- x2 )
     0 cell 0 DO  8 lshift over $FF and reverse8 or
        swap 8 rshift swap  LOOP  nip ;
 : reverse$ ( addr u -- )
@@ -361,9 +361,9 @@ Variable return-addr
 \ these are all stubs for now
 
 : ins-source ( addr packet -- )  >r
-    reverse64 0  r> destination 2! ;
+    reverse 0  r> destination 2! ;
 : get-source ( packet -- addr )
-    destination 2@ drop  reverse64 ;
+    destination 2@ drop  reverse ;
 : ins-dest ( addr packet -- )  0 -rot destination 2! ;
 : get-dest ( packet -- addr )  destination @ ;
 
@@ -422,12 +422,12 @@ $04 Constant resend-toggle#
 
 \ each source has multiple destination spaces
 
-Variable dest-addr
+64Variable dest-addr
 
 : >ret-addr ( -- )
     inbuf get-source return-addr ! ;
 : >dest-addr ( -- )
-    inbuf addr @  inbuf body-size 1- invert and dest-addr ! ;
+    inbuf addr 64@  inbuf body-size 1- invert n>64 64and dest-addr 64! ;
 
 ' dffield: Alias 64field:
 
@@ -468,7 +468,10 @@ object class
     field: context-state
     field: return-address
     64field: recv-tick
-    field: recv-addr
+    64field: recv-addr
+    cell 4 = [IF]
+	field: dest-high
+    [THEN]
     field: recv-flag
     field: file-state
     field: read-file#
@@ -522,7 +525,7 @@ object class
     64field: last-rate
     \ experiment: track previous b2b-start
     64field: last-rtick
-    field: last-raddr
+    64field: last-raddr
     \ cookies
     field: last-ackaddr
     \ state machine
@@ -562,20 +565,32 @@ end-structure
 
 Variable dest-map s" " dest-map $!
 
+$100 Value dests#
+56 Value dests>>
+
+: set-dests# ( bits -- )
+    1 over lshift to dests#
+    64 swap - to dests>>
+    dests# 2* cells dest-map $!len
+    dest-map $@ erase ;
+
+8 set-dests#
+
+: >dest-map ( vaddr -- addr )
+    dests>> 64rshift 64>n 2* cells dest-map $@ drop + ;
+: dest-index ( -- addr ) dest-addr 64@ >dest-map ;
+
 : check-dest ( -- addr 1/t / f )
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
-    0 >o rdrop
-\    return-addr @ routes #.key dup 0= IF  drop false  EXIT  THEN  cell+
-    dest-map
-    $@ bounds ?DO
-	I @ 2@ 1- bounds dest-addr @ within
-	0= IF
-	    I @ >o
-	    dest-vaddr 2@ dest-addr @ swap - dup >data-head +
-	    code-flag @ invert 2* 1+
-	    dest-job @ o> >o rdrop
-	    UNLOOP  EXIT  THEN
+    dest-index 2 cells bounds ?DO
+       I @ 2@ 1- bounds dest-addr 64@ 64>n within
+       0= IF
+           I @ >o
+           dest-vaddr 2@ dest-addr 64@ 64>n swap - dup >data-head +
+           code-flag @ invert 2* 1+
+           dest-job @ o> >o rdrop
+           UNLOOP  EXIT  THEN
     cell +LOOP
     false ;
 
@@ -590,7 +605,6 @@ Variable dest-map s" " dest-map $!
 \ context - for exec regions, this is the job context
 
 Variable >code-flag
-Variable mapping-addr
 
 : addr>bits ( addr -- bits )
     chunk-p2 rshift ;
@@ -615,6 +629,9 @@ Variable mapping-addr
 
 : map-data ( addr u -- o )
     o rdata-class new >o dest-job !
+    [ cell 4 = ] [IF]
+	nip
+    [THEN]
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     state# 2* 2* allocatez dest-ivsgen !
@@ -635,11 +652,15 @@ Variable mapping-addr
 : map-source ( addr u addrx -- o )
     o code-class new >o dest-job !
     dest-lock 0 pthread_mutex_init drop
+    [ cell 4 = ] [IF]
+	nip
+    [THEN]
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
-    dup addr>ts allocatez dest-cookies !
     state# 2* 2* allocatez dest-ivsgen !
-    dup >code-flag @ dup code-flag ! IF
+    dup addr>ts allocatez dest-cookies !
+    dup >code-flag @ dup code-flag !
+    IF
 	addr>replies  allocatez dest-replies !
     ELSE
 	addr>ts       allocatez dest-timestamps !
@@ -649,22 +670,26 @@ Variable mapping-addr
 
 ' @ Alias m@
 
-: map-dest ( vaddr u addr -- )
-\    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
-    dest-map >r  >r  map-data  dup r> !
-    mapping-addr tuck ! cell r> $+! ;
+: map-data-dest ( vaddr u addr -- )
+    \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
+    >r >r 64dup 64>n r> map-data r@ ! >dest-map r> @ swap ! ;
+: map-code-dest ( vaddr u addr -- )
+    \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
+    >r >r 64dup 64>n r> map-data r@ ! >dest-map cell+ r> @ swap ! ;
 
-Variable mapstart $10000 mapstart !
+Variable mapstart $1 mapstart !
 
-: n2o:new-map ( u -- addr )  mapstart @ swap mapstart +! ; 
+: n2o:new-map ( u -- addr )
+    drop mapstart @ 1 mapstart +! reverse
+    [ cell 4 = ] [IF]  0 swap  [THEN] ; 
 : n2o:new-data ( addrs addrd u -- )
-    o 0= IF drop 2drop EXIT THEN
+    o 0= IF drop 64drop 64drop EXIT THEN
     >code-flag off
-    tuck data-rmap map-dest  map-source  data-map ! ;
+    dup >r data-rmap map-data-dest r> map-source  data-map ! ;
 : n2o:new-code ( addrs addrd u -- )
     o 0= IF drop 2drop EXIT THEN
     >code-flag on
-    tuck code-rmap map-dest  map-source  code-map ! ;
+    dup >r code-rmap map-code-dest r> map-source  code-map ! ;
 
 \ create context
 
@@ -759,7 +784,7 @@ wurstkessel-o crypto-o !
     dest-tail @ addr>replies dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
-    dest-addr @ code-rmap @ >o dest-vaddr @ -
+    dest-addr 64@ 64>n code-rmap @ >o dest-vaddr @ -
     addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
@@ -1143,7 +1168,7 @@ require net2o-keys.fs
 
 : cookie! ( -- )
     c:cookie
-    dest-addr @ >offset 0= IF  2drop  EXIT  THEN
+    dest-addr 64@ 64>n >offset 0= IF  2drop  EXIT  THEN
     addr>ts dest-cookies @ + 64! ;
 
 : send-cookie ( -- )  data-map  @ >o cookie! o> ;
@@ -1169,8 +1194,14 @@ require net2o-keys.fs
 
 \ send blocks of memory
 
-: set-dest ( addr target -- )
-    outbuf ins-dest  dup dest-addr !  outbuf addr ! ;
+cell 4 = [IF]
+    : set-dest ( addr target -- )
+	outbuf ins-dest  o IF  dest-high @  ELSE  0  THEN
+	2dup dest-addr 64!  outbuf addr 64! ;
+[ELSE]
+    : set-dest ( addr target -- )
+	outbuf ins-dest  dup dest-addr !  outbuf addr ! ;
+[THEN]
 
 Variable outflag  outflag off
 
@@ -1571,12 +1602,12 @@ $08 Constant cookie-val
 
 : handle-dest ( addr f -- ) \ handle packet to valid destinations
     ticks
-    timing( dest-addr @ hex.
+    timing( dest-addr 64@ 64.
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
     recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
-	." invalid packet to " dest-addr @ hex. cr
+	." invalid packet to " dest-addr 64@ 64. cr
 	IF  drop  THEN  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@
@@ -1586,7 +1617,7 @@ $08 Constant cookie-val
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta
 \    inbuf .header
-    dest-addr @ 0= IF  handle-cmd0
+    dest-addr 64@ 64-0= IF  handle-cmd0
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN +dest
 	handle-dest
@@ -1673,6 +1704,7 @@ true !!timeout!! ;
     j-timeout ->request ;
 
 Variable client-task
+Defer init-reply
 
 : do-client-loop ( -- )
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
@@ -1681,6 +1713,7 @@ Variable client-task
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
     \ 0 stick-to-core
+    init-reply
     >o rdrop  alloc-io wurst-task-init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 

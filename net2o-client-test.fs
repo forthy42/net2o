@@ -20,7 +20,7 @@ $8000 $100000
 ?nextarg [IF] net2o-port [ELSE] s>number drop [THEN]
 insert-ip n2o:connect +flow-control +resend
 
-." Connected" cr
+." Connected, o=" o hex. cr
 
 net2o-code
 expect-reply

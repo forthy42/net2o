@@ -156,7 +156,7 @@ User cmdbuf#
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
-    ." see-me: " dest-addr @ hex. \ tag-addr dup hex. 2@ swap hex. hex. F cr
+    ." see-me: " dest-addr 64@ 64. \ tag-addr dup hex. 2@ swap hex. hex. F cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
@@ -172,15 +172,15 @@ User cmdbuf#
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
 ' net2o, IS net2o-do
 
-: send-cmd ( addr dest -- )  +send-cmd dest-addr @ >r
+: send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
     cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
     o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF
 	    I sendX  cmdreset  UNLOOP
-	    r> dest-addr ! EXIT  THEN
-    LOOP  r> dest-addr !  true !!commands!! ;
+	    64r> dest-addr 64! EXIT  THEN
+    LOOP  64r> dest-addr 64!  true !!commands!! ;
 
 : cmddest ( -- dest ) cmd0source @ IF  0  ELSE  code-vdest  THEN ;
 
@@ -192,8 +192,10 @@ also net2o-base
 UDefer expect-reply?
 ' end-cmd IS expect-reply?
 
+:noname  ['] end-cmd IS expect-reply? ; is init-reply
+
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply?  cmd  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd  THEN ;
 
 previous
 
@@ -209,7 +211,7 @@ previous
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
-	cmd( dest-addr @ hex. ." resend canned code reply " tag-addr hex. cr )
+	cmd( dest-addr 64@ 64. ." resend canned code reply " tag-addr hex. cr )
 	cmdbuf# ! r> reply-dest @ send-cmd true
 	1 packets2 +!
     ELSE  d0<> -1 0 r> 2!  THEN ;
@@ -217,11 +219,11 @@ previous
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( 2dup dest-addr @ hex. n2o:see )
+    cmd( 2dup dest-addr 64@ 64. n2o:see )
     sp@ >r throwcount off
-    TRY  BEGIN  cmd-dispatch  dup 0=  UNTIL
-	IFERROR  1 throwcount +! dup DoError nothrow
-	    throwcount @ 4 < IF  >throw  THEN  THEN  ENDTRY
+    [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
+    dup IF   1 throwcount +! dup DoError nothrow
+	throwcount @ 4 < IF  >throw  THEN  THEN
     drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
@@ -297,8 +299,8 @@ also net2o-base definitions
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
 
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
-16 net2o: new-data ( addr addr u -- )  3*64>n  n2o:new-data ;
-17 net2o: new-code ( addr addr u -- )  3*64>n  n2o:new-code ;
+16 net2o: new-data ( addr addr u -- )  64>n  n2o:new-data ;
+17 net2o: new-code ( addr addr u -- )  64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
 19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
 	>o rdrop  ticks recv-tick 64! \ time stamp of arrival
@@ -306,18 +308,22 @@ also net2o-base definitions
     ELSE  drop  THEN
     0. buf-state 2!  0 >o rdrop ;
 
-: n2o:create-map ( addrs ucode udata addrd -- addrs ucode udata addrd ) >r
-    2 pick ulit, r@ ulit, over ulit, new-code
-    2 pick 2 pick + ulit, 2dup swap r@ + ulit, ulit, new-data
-    r> ;
+: n2o:create-map
+    [ cell 4 = ] [IF]
+	{ d: addrs ucode udata d: addrd -- addrd ucode udata addrs }
+    [ELSE]
+	{ addrs ucode udata addrd -- addrd ucode udata addrs }
+    [THEN]
+    addrs lit, addrd lit, ucode ulit, new-code
+    addrs ucode n>64 64+ lit, addrs ucode n>64 64+ lit, udata ulit, new-data
+    addrd ucode udata addrs ;
 
-20 net2o: map-request ( addrs ucode udata -- )  3*64>n
+20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
     new-context
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
-    ]nest  >r rot r> swap >r -rot r> n2o:create-map
-    2drop 2drop ;
+    ]nest  n2o:create-map  64drop 2drop 64drop ;
 
 net2o-base
 
@@ -378,6 +384,10 @@ net2o-base
     rng$ 2dup $, gen-code-ivs code-rmap ivs-string
     rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
 
+57 net2o: gen-reply ( -- )
+    [: pkc keysize $, receive-key update-key code-ivs end-cmd
+      ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
+
 \ better slurping
 
 60 net2o: slurp-block ( id -- 64nextseek )
@@ -424,15 +434,17 @@ net2o-base
 
 \ This must be defined last, otherwise dangerous name-clash!
 
-8 net2o: throw ( error -- )  throw ;
+8 net2o: throw ( error -- )  F throw ;
 
 net2o-base
 
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
-:noname  server? IF
-	dup  IF  dup nlit, throw end-cmd cmd  THEN
-    THEN  F throw ; IS >throw
+:noname
+    server? IF
+	dup  IF  dup nlit, throw
+	    ['] end-cmd IS expect-reply? also end-code  THEN
+	F throw  THEN  drop ; IS >throw
 
 previous definitions
 
@@ -465,7 +477,7 @@ previous
 	firstb-ticks 64@ 64- delta-ticks 64+!
     ELSE  64drop  THEN
     recv-tick 64@ firstb-ticks 64!  lastb-ticks 64off
-    recv-tick 64@ last-rtick 64!  recv-addr @ last-raddr ! ;
+    recv-tick 64@ last-rtick 64!  recv-addr 64@ last-raddr 64! ;
 
 : ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
@@ -495,9 +507,9 @@ also net2o-base
     timing( 64>r dup hex. 64r> 64dup 64. ." acktime" F cr )
     lit, ulit, ack-addrtime ;
 : net2o:b2btime
-    last-raddr @ last-rtick 64@ 64dup 64#0 64=
-    IF  64drop drop
-    ELSE  time-offset 64@ 64- lit, ulit, ack-b2btime  THEN ;
+    last-raddr 64@ last-rtick 64@ 64dup 64#0 64=
+    IF  64drop 64drop
+    ELSE  time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
 
 \ ack bits, new code
 
@@ -650,7 +662,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     drop r> 0= IF  maxdata received +!  expected?  THEN ;
 
 : net2o:do-ack ( -- ) 
-    dest-addr @ recv-addr ! \ last received packet
+    dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ recv-flag ! \ last receive flag
     cmd0source off  cmdreset
@@ -673,12 +685,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : gen-request ( -- )
     net2o-code0
     ['] end-cmd IS expect-reply?
-    nest[ o ulit, set-o ticks lit, set-rtdelay request-done ]nest
+    nest[ o ulit, set-o ticks lit, set-rtdelay gen-reply request-done ]nest
     req-codesize @  req-datasize @ map-request,
     key-request
-    end-code
-    [: pkc keysize $, receive-key update-key code-ivs end-cmd
-      ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
+    end-code ;
 
 : ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
 
