@@ -314,8 +314,8 @@ also net2o-base definitions
     [ELSE]
 	{ addrs ucode udata addrd -- addrd ucode udata addrs }
     [THEN]
-    addrs lit, addrd lit, ucode ulit, new-code
-    addrs ucode n>64 64+ lit, addrs ucode n>64 64+ lit, udata ulit, new-data
+    addrd lit, addrs lit, ucode ulit, new-code
+    addrd ucode n>64 64+ lit, addrs ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
