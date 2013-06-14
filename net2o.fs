@@ -79,13 +79,19 @@ do-stackrel off
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
 [THEN]
 
-\ User deferred words
+\ User deferred words, user values
 
 : UDefer ( "name" -- )
     : postpone useraddr cell uallot , postpone perform postpone ;
     [: >body cell+ @ next-task + ! ;
     comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
     [: >body cell+ @ postpone useraddr , postpone perform ;] set-compiler ;
+
+: UValue ( "name" -- )
+    : postpone useraddr cell uallot , postpone @ postpone ;
+    [: >body cell+ @ next-task + ! ;
+    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
+    [: >body cell+ @ postpone useraddr , postpone @ ;] set-compiler ;
 
 \ bit vectors, lsb first
 
@@ -210,32 +216,26 @@ maxpacket $F + -$10 and Constant maxpacket-aligned
 : chunk-p2 ( -- n )  max-size^2 6 + ;
 $10 Constant mykey-salt#
 
-User inbuf'
-User outbuf'
-User cmd0buf'
-User init0buf'
-User sockaddr'
-
-: inbuf    ( -- addr ) inbuf' @ ;
-: outbuf   ( -- addr ) outbuf' @ ;
-: cmd0buf  ( -- addr ) cmd0buf' @ ;
-: init0buf ( -- addr ) init0buf' @ ;
-: sockaddr ( -- addr ) sockaddr' @ ;
+UValue inbuf    ( -- addr )
+UValue outbuf   ( -- addr )
+UValue cmd0buf  ( -- addr )
+UValue init0buf ( -- addr )
+UValue sockaddr ( -- addr )
 
 sema cmd0lock
 
-: alloc-buf ( addr -- )
-    maxpacket-aligned buffers# * allocate throw 6 + swap ! ;
+: alloc-buf ( addr -- addr' )
+    maxpacket-aligned buffers# * alloc+guard 6 + ;
 
-: alloc-io ( -- )  inbuf' alloc-buf  outbuf' alloc-buf
-    maxdata allocate throw cmd0buf' !
-    maxdata 2/ mykey-salt# + 2 cells + allocate throw init0buf' !
-    sockaddr_in %size dup allocate throw dup sockaddr' ! swap erase
+: alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
+    maxdata allocate throw to cmd0buf
+    maxdata 2/ mykey-salt# + 2 cells + allocate throw to init0buf
+    sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
 ;
 
 : free-io ( -- )
-    inbuf free throw
-    outbuf free throw
+    inbuf  maxpacket-aligned buffers# * free+guard
+    outbuf maxpacket-aligned buffers# * free+guard
     cmd0buf free throw
     init0buf free throw
     sockaddr free throw
@@ -584,13 +584,15 @@ $100 Value dests#
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
     dest-index 2 cells bounds ?DO
-       I @ 2@ 1- bounds dest-addr 64@ 64>n within
-       0= IF
-           I @ >o
-           dest-vaddr 2@ dest-addr 64@ 64>n swap - dup >data-head +
-           code-flag @ invert 2* 1+
-           dest-job @ o> >o rdrop
-           UNLOOP  EXIT  THEN
+	I @ ?dup-IF
+	    2@ 1- bounds dest-addr 64@ 64>n within
+	    0= IF
+		I @ >o
+		dest-vaddr 2@ dest-addr 64@ 64>n swap - dup >data-head +
+		code-flag @ invert 2* 1+
+		dest-job @ o> >o rdrop
+		UNLOOP  EXIT  THEN
+	THEN
     cell +LOOP
     false ;
 
@@ -1421,7 +1423,7 @@ Variable sendflag  sendflag off
     dest-raddr @ r> r> - clearpages ;
 
 : rewind-partial ( new-back o:map -- )
-    dup clearpages-partial
+    \ dup clearpages-partial
     dup rewind-timestamps-partial
     regen-ivs-part ;
 
@@ -1429,7 +1431,7 @@ Variable sendflag  sendflag off
     1 dest-round +!
     \ dest-size @ dest-back +!
     dest-tail off  dest-head off  dest-back off
-    dest-raddr @ dest-size @ clearpages
+    \ dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 
 : rewind-ackbits ( o:map -- )

@@ -223,7 +223,7 @@ Variable throwcount
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
     dup IF   1 throwcount +! dup DoError nothrow
-	throwcount @ 4 < IF  >throw  THEN  THEN
+	n2o:see-me  throwcount @ 4 < IF  >throw  THEN  THEN
     drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
@@ -442,7 +442,7 @@ net2o-base
 : slit<  slit, push-slit ;
 :noname
     server? IF
-	dup  IF  dup nlit, throw
+	dup  IF  dup nlit, throw end-cmd
 	    ['] end-cmd IS expect-reply? also end-code  THEN
 	F throw  THEN  drop ; IS >throw
 
