@@ -665,12 +665,12 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ recv-flag ! \ last receive flag
-    cmd0source off  cmdreset
+    cmd0source off  cmdlock lock  cmdreset
     inbuf 1+ c@ acks# and
     dup ack-receive !@ xor >r
     r@ resend-toggle# and IF  true net2o:do-resend  THEN
     r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    +cookie  received!  cmd-send?
+    +cookie  received!  cmd-send?  cmdlock unlock
     r> ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;

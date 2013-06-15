@@ -661,13 +661,12 @@ Variable >code-flag
     dup alloc+guard dest-raddr !
     state# 2* 2* allocatez dest-ivsgen !
     dup addr>ts allocatez dest-cookies !
-    dup >code-flag @ dup code-flag !
+    >code-flag @ dup code-flag !
     IF
 	addr>replies  allocatez dest-replies !
     ELSE
 	addr>ts       allocatez dest-timestamps !
     THEN
-    drop
     o o> ;
 
 ' @ Alias m@
