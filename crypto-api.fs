@@ -15,6 +15,8 @@ comp: >body @ cell/ postpone u#exec crypto-o next-task - , , ;
 ' crypto-m to method-xt
 
 object class
+    method c:init ( -- )
+    \G initialize crypto function for a task
     method c:key! ( addr -- )
     \G use addr as key storage
     method c:key@ ( -- addr )

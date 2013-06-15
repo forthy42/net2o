@@ -24,7 +24,7 @@ end-class wurst-class
 current-o
 
 : wurst-task-init ( -- )
-    wurst-class @ allocate throw wurst' ! ;
+    [ wurst-class @ ]L allocate throw wurst' ! ;
 
 : .16 ( u[d] -- )
     [ cell 8 = ] [IF] 0 [THEN]
@@ -586,6 +586,7 @@ require crypto-api.fs
 crypto class
 end-class wurstkessel
 
+' wurst-task-init wurstkessel to c:init
 :noname to @state ; wurstkessel to c:key!
 ' @state wurstkessel to c:key@
 state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#

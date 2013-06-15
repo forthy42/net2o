@@ -18,11 +18,16 @@ end-c-library
 128 Constant keccak#max
 24 Constant keccak#cks
 
-keccak# buffer: keccak-state
-keccak-state Value @keccak
-keccak#cks buffer: keccak-checksums
+UValue @keccak
+UValue keccak-state
+UValue keccak-checksums
 
-KeccakInitialize
+: keccak-init ( -- )
+    keccak# allocate throw to keccak-state
+    keccak#cks allocate throw to keccak-checksums
+    keccak-state to @keccak ;
+
+keccak-init
 
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
@@ -38,6 +43,7 @@ require crypto-api.fs
 
 crypto class end-class keccak
 
+' keccak-init keccak to c:init
 :noname to @keccak ; keccak to c:key! ( addr -- )
 \G use addr as key storage
 ' @keccak keccak to c:key@ ( -- addr )

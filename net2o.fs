@@ -15,6 +15,22 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ User deferred words, user values
+
+: UDefer ( "name" -- )
+    : postpone useraddr cell uallot , postpone perform postpone ;
+    [: >body cell+ @ next-task + ! ;
+    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
+    [: >body cell+ @ postpone useraddr , postpone perform ;] set-compiler ;
+
+: UValue ( "name" -- )
+    : postpone useraddr cell uallot , postpone @ postpone ;
+    [: >body cell+ @ next-task + ! ;
+    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
+    [: >body cell+ @ postpone useraddr , postpone @ ;] set-compiler ;
+
+\ required tools
+
 \ require smartdots.fs
 require unix/socket.fs
 require unix/mmap.fs
@@ -78,20 +94,6 @@ do-stackrel off
     : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
 [THEN]
-
-\ User deferred words, user values
-
-: UDefer ( "name" -- )
-    : postpone useraddr cell uallot , postpone perform postpone ;
-    [: >body cell+ @ next-task + ! ;
-    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
-    [: >body cell+ @ postpone useraddr , postpone perform ;] set-compiler ;
-
-: UValue ( "name" -- )
-    : postpone useraddr cell uallot , postpone @ postpone ;
-    [: >body cell+ @ next-task + ! ;
-    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
-    [: >body cell+ @ postpone useraddr , postpone @ ;] set-compiler ;
 
 \ bit vectors, lsb first
 
@@ -1715,7 +1717,7 @@ Defer init-reply
     o 1 stacksize4 NewTask4 dup client-task ! pass
     \ 0 stick-to-core
     init-reply
-    >o rdrop  alloc-io wurst-task-init
+    >o rdrop  alloc-io c:init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
 : client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN ;
