@@ -615,6 +615,7 @@ also net2o-base
 
 : expected? ( -- )
     received @ expected @ tuck u>= and IF
+	net2o-code
 	resend-all
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
@@ -623,6 +624,7 @@ also net2o-base
 	msg( ." Block transfer done: " received @ hex. expected @ hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
+	end-code
     THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
@@ -665,12 +667,15 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ recv-flag ! \ last receive flag
-    cmd0source off  cmdlock lock  cmdreset
     inbuf 1+ c@ acks# and
     dup ack-receive !@ xor >r
-    r@ resend-toggle# and IF  true net2o:do-resend  THEN
-    r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    +cookie  received!  cmd-send?  cmdlock unlock
+    r@ [ resend-toggle# ack-toggle# or ]L and  IF
+	cmd0source off  cmdlock lock  cmdreset
+	r@ resend-toggle# and IF  true net2o:do-resend  THEN
+	r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
+    cmd-send?  cmdlock unlock
+    THEN
+    +cookie received!
     r> ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
