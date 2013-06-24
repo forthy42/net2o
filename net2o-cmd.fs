@@ -156,7 +156,8 @@ User cmdbuf#
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
-    ." see-me: " dest-addr 64@ 64. \ tag-addr dup hex. 2@ swap hex. hex. F cr
+    ." see-me: " dest-addr 64@ ['] 64. $10 base-execute
+    \ tag-addr dup hex. 2@ swap hex. hex. F cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
@@ -314,8 +315,8 @@ also net2o-base definitions
     [ELSE]
 	{ addrs ucode udata addrd -- addrd ucode udata addrs }
     [THEN]
-    addrd lit, addrs lit, ucode ulit, new-code
-    addrd ucode n>64 64+ lit, addrs ucode n>64 64+ lit, udata ulit, new-data
+    addrs lit, addrd lit, ucode ulit, new-code
+    addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n

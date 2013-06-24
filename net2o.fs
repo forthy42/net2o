@@ -15,20 +15,6 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ User deferred words, user values
-
-: UDefer ( "name" -- )
-    : postpone useraddr cell uallot , postpone perform postpone ;
-    [: >body cell+ @ next-task + ! ;
-    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
-    [: >body cell+ @ postpone useraddr , postpone perform ;] set-compiler ;
-
-: UValue ( "name" -- )
-    : postpone useraddr cell uallot , postpone @ postpone ;
-    [: >body cell+ @ next-task + ! ;
-    comp: drop >body cell+ @ postpone useraddr , postpone ! ;] set-to
-    [: >body cell+ @ postpone useraddr , postpone @ ;] set-compiler ;
-
 \ required tools
 
 \ require smartdots.fs
@@ -703,6 +689,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #2000 max-size^2 lshift Value bandwidth-max
 64#-1 64Constant never
 2 Value flybursts#
+$100 Value flybursts-max#
 
 Variable init-context#
 wurstkessel-o crypto-o !
@@ -829,7 +816,8 @@ $400 buffer: aligned$
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
-	time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f. 
+	time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f.
+	\ I ts-delta sf@ f.
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
 	I ts-reqrate sf@ f/ f.
@@ -871,11 +859,12 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    rtdelay 64@ 64>n rt-bias# + ns/burst 64@ 64>n / flybursts# +
+    rtdelay 64@ 64>n rt-bias# + ns/burst 64@ 64>n /
+    flybursts# +
     bursts( dup . .j ." flybursts "
     rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
-    dup flyburst ! ;
-: net2o:max-flyburst ( bursts -- ) flybursts max!@
+    dup flybursts-max# min flyburst ! ;
+: net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
     0= IF  bursts( .j ." start bursts" cr ) THEN ;
 
 : >flyburst ( -- )
@@ -958,7 +947,7 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
     64dup extra-ns 64! 64+ ( extra-limit ) ;
 
 : rate-stat1 ( rate deltat -- )
-    stats( recv-tick 64@ time-offset 64@ 64-
+    stats( ticks time-offset 64@ 64-
            64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! )
     rate( 64over 64. .j ." clientrate" cr )
@@ -1242,8 +1231,8 @@ Variable code-packet
 : bandwidth+ ( -- )  j?
     ns/burst 64@ 64>n tick-init 1+ / n>64 bandwidth-tick 64+! ;
 
-: burst-end ( -- )  data-b2b @ ?EXIT
-    ticks bandwidth-tick 64@ 64max next-tick 64! ;
+: burst-end ( flag -- flag )  data-b2b @ ?EXIT
+    ticks bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
 : sendX ( addr taddr target n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
@@ -1344,7 +1333,7 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF
 	ack-toggle# ack-state xor!
-	-1 flybursts +!
+	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
 	THEN
@@ -1545,12 +1534,12 @@ Create pollfds   here pollfd %size dup allot erase
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
 
-20 Value try-read#
+200 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
     try-read# 0 DO
 	don't-block read-a-packet
-	2dup d0<> IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
 
 : next-packet ( -- addr u )
@@ -1645,28 +1634,31 @@ $08 Constant cookie-val
 #200000000 Value timeout-max#
 #10 Value timeouts#
 
+Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 Variable timeout-task
 
-: j+timeout ( -- )
-    timeout-tasks $@ bounds ?DO  I @ o = IF  UNLOOP  EXIT  THEN
+: o+timeout ( -- )  timeout-sema lock
+    timeout-tasks $@ bounds ?DO  I @ o = IF
+	    UNLOOP   timeout-sema unlock  EXIT  THEN
     cell +LOOP
-    o timeout-task !  timeout-task cell timeout-tasks $+! ;
-: j-timeout ( -- )
+    o timeout-task !  timeout-task cell timeout-tasks $+!
+    timeout-sema unlock ;
+: o-timeout ( -- )  timeout-sema lock
     timeout-tasks $@len 0 ?DO
 	timeout-tasks $@ I /string drop @ o =  IF
 	    timeout-tasks I cell $del
 	LEAVE  THEN
-    cell +LOOP ;
+    cell +LOOP  timeout-sema unlock ;
 : >next-timeout ( -- )  j?
-    recv-tick 64@  rtdelay 64@ 64dup 64+
+    ticks  rtdelay 64@ 64dup 64+
     timeout-max# n>64 64min 64+
-    next-timeout 64!  j+timeout ;
+    next-timeout 64!  o+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
     timeout-tasks $@ bounds ?DO
-	I @ >O next-timeout 64@ O> 64min? IF  nip I @ swap  THEN
+	I @ >o next-timeout 64@ o> 64min? IF  nip I @ swap  THEN
     cell +LOOP  swap ;
 : ?timeout ( -- context/0 )
     ticks next-timeout? >r 64- 64-0>= r> and ;
@@ -1678,7 +1670,7 @@ Variable timeout-task
 0 Value server?
 Variable requests
 
-: server-loop-nocatch ( -- )
+: server-loop-nocatch ( -- )  0 stick-to-core
     BEGIN  server-event +event  AGAIN ;
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
@@ -1691,20 +1683,20 @@ event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
 
-: client-loop-nocatch ( -- )
+: client-loop-nocatch ( -- )  1 stick-to-core
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
 	ELSE  2drop requests @ IF  ?timeout ?dup-IF  >o rdrop
 		    rtdelay 64@ 64dup max-int64 64= 0=
 		    IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
-		    ticks recv-tick 64! >next-timeout
+		    >next-timeout
 		    do-timeout -1 timeouts +!
 		    timeouts @ 0<= IF  ->timeout  THEN
 		THEN  THEN  THEN
 	wait-task @ event>  AGAIN ;
 
 : n2o:request-done ( -- )
-    j-timeout ->request ;
+    o-timeout ->request ;
 
 Variable client-task
 Defer init-reply
@@ -1715,12 +1707,12 @@ Defer init-reply
 
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
-    \ 0 stick-to-core
     init-reply
     >o rdrop  alloc-io c:init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
-: client-loop-task ( -- )  client-task @ 0= IF  create-client-task  THEN ;
+: client-loop-task ( -- )
+    client-task @ 0= IF  create-client-task  THEN ;
 
 : client-loop ( requests -- )
     requests !  reset-timeout  false to server?
