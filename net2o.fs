@@ -1557,9 +1557,9 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    try-read# 0 ?DO
-	don't-block read-a-packet
-	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+\    try-read# 0 ?DO
+\	don't-block read-a-packet
+\	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
 
 : send-loop ( -- )
