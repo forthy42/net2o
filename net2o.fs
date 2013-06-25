@@ -970,7 +970,6 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 
 \ acknowledge
 
-sema resend-lock
 Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
@@ -987,11 +986,11 @@ $20 Value mask-bits#
 	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP
-    resend-lock lock
+    resize-lock lock
     >mask0 resend-buf 2!
     resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
     resend-buf 2 cells data-resend $+!
-    resend-lock unlock ;
+    resize-lock unlock ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
@@ -1323,15 +1322,19 @@ Variable chunks+
 Create chunk-adder chunks-struct allot
 \ Variable sender-task
 
+sema resize-lock
+
 : net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
 	I chunk-context @ o = IF
 	    UNLOOP o>  EXIT
 	THEN
     chunks-struct +LOOP
+    resize-lock lock
     o chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
+    resize-lock unlock
     ticks ticks-init ;
 
 \ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
