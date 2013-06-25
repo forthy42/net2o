@@ -1320,7 +1320,7 @@ Variable chunks+
 Create chunk-adder chunks-struct allot
 Variable sender-task
 
-event: ->send-chunks ( o -- ) >o
+: do-send-chunks ( -- )
     chunks $@ bounds ?DO
 	I chunk-context @ o = IF
 	    UNLOOP o>  EXIT
@@ -1329,9 +1329,12 @@ event: ->send-chunks ( o -- ) >o
     o chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
-    ticks ticks-init o> ;
+    ticks ticks-init ;
 
-: net2o:send-chunks  <event o elit, ->send-chunks sender-task @ event> ;
+event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
+
+: net2o:send-chunks  sender-task @ 0= IF  do-send-chunks  EXIT  THEN
+    <event o elit, ->send-chunks sender-task @ event> ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1528,7 +1531,7 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
 : poll-sock ( -- flag )
-    eval-queue  clear-events  max-timeout!
+    eval-queue  clear-events  timeout!
     pollfds pollfd#
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
@@ -1557,10 +1560,15 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-\    try-read# 0 ?DO
-\	don't-block read-a-packet
-\	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+    try-read# 0 ?DO
+	don't-block read-a-packet
+	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
+
+: send-read-packet ( -- addr u )
+    send-anything? sendflag !
+    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
+    WHILE  2drop send-another-chunk sendflag !  REPEAT ;
 
 : send-loop ( -- )
     send-anything? sendflag !
@@ -1577,7 +1585,11 @@ Defer init-reply
     send-loop ;
 
 : next-packet ( -- addr u )
-    0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
+    sender-task @ 0= IF
+	send-read-packet
+    ELSE
+	0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
+    THEN
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
@@ -1708,7 +1720,7 @@ Variable requests
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
-    sender-task @ 0= IF  create-sender-task  THEN
+\    sender-task @ 0= IF  create-sender-task  THEN
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
