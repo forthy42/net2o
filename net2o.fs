@@ -247,7 +247,7 @@ Variable packets2 \ double send
     ." Duplets send/received: " packets2 ? packetr2 ? cr
     packets off packetr off packets2 off packetr2 off ;
 
-2Variable ptimeout
+User ptimeout  cell uallot drop
 #10000000 Value poll-timeout# \ 10ms, don't sleep too long
 poll-timeout# 0 ptimeout 2!
 
@@ -344,7 +344,7 @@ Variable lastn2oaddr
 
 \ route an incoming packet
 
-Variable return-addr
+User return-addr
 
 \ these are all stubs for now
 
@@ -410,7 +410,7 @@ $04 Constant resend-toggle#
 
 \ each source has multiple destination spaces
 
-64Variable dest-addr
+64User dest-addr
 
 : >ret-addr ( -- )
     inbuf get-source return-addr ! ;
@@ -692,8 +692,8 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 $100 Value flybursts-max#
 
 Variable init-context#
-wurstkessel-o crypto-o !
-\ keccak-o crypto-o !
+\ wurstkessel-o crypto-o !
+keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -1161,7 +1161,8 @@ require net2o-keys.fs
 : cookie! ( -- )
     c:cookie
     dest-addr 64@ 64>n >offset 0= IF  2drop  EXIT  THEN
-    addr>ts dest-cookies @ + 64! ;
+    addr>ts cookie( ." Cookie: " dup hex. >r 64dup .16 cr r> )
+    dest-cookies @ + 64! ;
 
 : send-cookie ( -- )  data-map  @ >o cookie! o> ;
 : recv-cookie ( -- )  data-rmap @ >o cookie! o> ;
@@ -1176,7 +1177,7 @@ require net2o-keys.fs
 	rdrop nip cookie( ." => " 64dup .16 cr ) o> ;
 [ELSE]
     : cookie+ ( addr bitmap map -- sum ) >o
-	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r >r
+	cookie( ." cookies: " 64>r dup hex. 64r> 64dup .16 space space ) >r >r
 	addr>ts dest-size @ addr>ts umin
 	dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
 	BEGIN  r@ 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
@@ -1207,7 +1208,7 @@ Variable outflag  outflag off
 
 #90 Constant EMSGSIZE
 
-Variable code-packet
+User code-packet
 
 : send-packet ( flag -- ) +sendX
 \    ." send " outbuf .header
@@ -1317,17 +1318,20 @@ end-structure
 Variable chunks s" " chunks $!
 Variable chunks+
 Create chunk-adder chunks-struct allot
+Variable sender-task
 
-: net2o:send-chunks ( -- )
+event: ->send-chunks ( o -- ) >o
     chunks $@ bounds ?DO
 	I chunk-context @ o = IF
-	    UNLOOP  EXIT
+	    UNLOOP o>  EXIT
 	THEN
     chunks-struct +LOOP
     o chunk-adder chunk-context !
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
-    ticks ticks-init ;
+    ticks ticks-init o> ;
+
+: net2o:send-chunks  <event o elit, ->send-chunks sender-task @ event> ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1500,7 +1504,9 @@ Create queue-adder  queue-struct allot
 
 \ poll loop
 
-Create pollfds   here pollfd %size dup allot erase
+1 Value pollfd#
+User pollfds
+pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 : fds!+ ( fileno flag addr -- addr' )
      >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
@@ -1508,23 +1514,37 @@ Create pollfds   here pollfd %size dup allot erase
 : prep-socks ( -- )  pollfds >r
     net2o-sock  fileno POLLIN  r> fds!+ drop ;
 
+: prep-evsocks ( -- )  pollfds >r
+    epiper @  fileno POLLIN  r> fds!+ drop ;
+
 : clear-events ( -- )  pollfds
-    2 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
+    pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
     next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64dup 64-0>= r> or
     IF    64>n 0 max #999999999 min 0 ptimeout 2!
     ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN ;
 
+: max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
+
 : poll-sock ( -- flag )
-    eval-queue  clear-events  timeout!
-    pollfds 1
+    clear-events  max-timeout!
+    pollfds pollfd#
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
 [ELSE]
     ptimeout cell+ @ #1000000 / poll 0>
 [THEN] +wait
 ;
+
+: wait-send ( -- flag )
+    eval-queue  clear-events  timeout!
+    pollfds pollfd#
+[IFDEF] ppoll
+    ptimeout 0 ppoll 0>
+[ELSE]
+    ptimeout cell+ @ #1000000 / poll 0>
+[THEN] ;
 
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF
@@ -1534,18 +1554,30 @@ Create pollfds   here pollfd %size dup allot erase
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
 
-200 Value try-read#
+4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    try-read# 0 DO
+    try-read# 0 ?DO
 	don't-block read-a-packet
 	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
 
-: next-packet ( -- addr u )
+: send-loop ( -- )
     send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
-    WHILE  2drop send-another-chunk sendflag !  REPEAT
+    BEGIN  sendflag @ 0= IF   wait-send drop
+	pollfds revents w@ POLLIN = IF  ?events  THEN  THEN
+	send-another-chunk sendflag !  AGAIN ;
+
+Defer init-reply
+
+: create-sender-task ( -- )
+    o 1 stacksize4 NewTask4 dup sender-task ! pass
+    init-reply
+    >o rdrop  alloc-io c:init
+    send-loop ;
+
+: next-packet ( -- addr u )
+    0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
@@ -1676,6 +1708,7 @@ Variable requests
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
+    sender-task @ 0= IF  create-sender-task  THEN
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    DoError nothrow  REPEAT  drop ;
 
@@ -1699,7 +1732,6 @@ true !!timeout!! ;
     o-timeout ->request ;
 
 Variable client-task
-Defer init-reply
 
 : do-client-loop ( -- )
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE

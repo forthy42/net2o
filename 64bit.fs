@@ -21,6 +21,7 @@ cell 8 = [IF]
     ' xor Alias 64xor
     ' l@ Alias 32@
     ' Variable Alias 64Variable
+    ' User Alias 64User
     ' Constant Alias 64Constant
     ' 2/ Alias 64-2/
     ' negate Alias 64negate
@@ -80,6 +81,7 @@ cell 8 = [IF]
     : 64xor rot xor >r xor r> ;
     ' @ Alias 32@
     ' 2Variable Alias 64Variable
+    : 64User  User cell uallot drop ;
     ' 2Constant Alias 64Constant
     ' d2/ Alias 64-2/
     ' dnegate Alias 64negate
