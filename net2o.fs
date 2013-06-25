@@ -993,12 +993,10 @@ $20 Value mask-bits#
     2 cells +LOOP  2drop ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
-: >real-range ( addr -- addr' )
-    data-map @ >o dest-raddr @ + o> ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
-	swap >real-range swap
+	swap data-map @ cell+ cell+ @ + ( >o dest-raddr @ + o> ) swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
@@ -1008,7 +1006,7 @@ $20 Value mask-bits#
 	data-resend $@ drop
 	dup >r 2@ -2 and >mask0 tuck r> 2!
 	0= IF  data-resend $@ 2 cells - >r dup 2 cells + swap r> move
-	    data-resend $@ dup 2 cells - /string erase
+	    0. data-resend $@ 2 cells - + 2!
 	THEN
     maxdata +LOOP ;
 
