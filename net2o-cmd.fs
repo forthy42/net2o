@@ -553,6 +553,9 @@ also net2o-base
     IF  data-ackbits1  ELSE  data-ackbits0  THEN @ ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
+
+4 Value max-resend#
+
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     receive-flag { rf } data-rmap @ >o
@@ -577,7 +580,7 @@ also net2o-base
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
-	dup 8 >= ?LEAVE \ no more than 8 resends
+	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
 : resend-all ( -- )
     resend-toggle# recv-flag xor!  false net2o:do-resend

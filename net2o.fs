@@ -690,10 +690,11 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 64#-1 64Constant never
 2 Value flybursts#
 $100 Value flybursts-max#
+$10 cells Value resend-size#
 
 Variable init-context#
-\ wurstkessel-o crypto-o !
-keccak-o crypto-o !
+wurstkessel-o crypto-o !
+\ keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -710,6 +711,8 @@ keccak-o crypto-o !
     init-context# @ context# !  1 init-context# +!
     dup return-addr !  return-address !
     s" " data-resend $!
+    resend-size# data-resend $!len
+    data-resend $@ erase
     wurst-key state# crypto-key $!
     init-flow-control
     -1 blocksize !
@@ -972,7 +975,6 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 
 sema resize-lock
 
-Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
@@ -987,12 +989,8 @@ $20 Value mask-bits#
 	    >r dup u. r> dup u. cr ]hex )
 	    I 2!  UNLOOP  EXIT
 	THEN
-    2 cells +LOOP
-    resize-lock lock
-    >mask0 resend-buf 2!
-    resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
-    resend-buf 2 cells data-resend $+!
-    resize-lock unlock ;
+	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
+    2 cells +LOOP  2drop ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
@@ -1006,12 +1004,12 @@ $20 Value mask-bits#
 : resend-dest ( -- addr )
     data-resend $@ drop 2@ drop data-map @ >o dest-vaddr @ + o> ;
 : /resend ( u -- )
-    0 +DO  data-resend $@ 0= IF  drop  LEAVE  THEN
-	dup >r 2@ -2 and >mask0  dup 0= IF
-	    2drop data-resend 0 2 cells $del
-	ELSE
-	    r@ 2!
-	THEN  rdrop
+    0 +DO
+	data-resend $@ drop
+	dup >r 2@ -2 and >mask0 tuck r> 2!
+	0= IF  data-resend $@ 2 cells - >r dup 2 cells + swap r> move
+	    data-resend $@ dup 2 cells - /string erase
+	THEN
     maxdata +LOOP ;
 
 \ file handling
