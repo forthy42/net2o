@@ -1565,10 +1565,17 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
 
+2 Value sends#
+
 : send-read-packet ( -- addr u )
-    send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF  try-read-packet-wait dup 0=  ELSE  0. true  THEN
-    WHILE  2drop send-another-chunk sendflag !  REPEAT ;
+    0. BEGIN  2drop
+	send-anything? sendflag !
+	sends# 0 ?DO
+	    sendflag @ 0= IF  try-read-packet-wait dup
+		IF  UNLOOP  EXIT  THEN  2drop  THEN
+	    send-another-chunk sendflag !  LOOP
+	don't-block read-a-packet
+    dup UNTIL ;
 
 : send-loop ( -- )
     send-anything? sendflag !
