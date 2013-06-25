@@ -970,6 +970,8 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 
 \ acknowledge
 
+sema resize-lock
+
 Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
@@ -1321,8 +1323,6 @@ Variable chunks s" " chunks $!
 Variable chunks+
 Create chunk-adder chunks-struct allot
 \ Variable sender-task
-
-sema resize-lock
 
 : net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
