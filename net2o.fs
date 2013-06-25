@@ -1318,9 +1318,9 @@ end-structure
 Variable chunks s" " chunks $!
 Variable chunks+
 Create chunk-adder chunks-struct allot
-Variable sender-task
+\ Variable sender-task
 
-: do-send-chunks ( -- )
+: net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
 	I chunk-context @ o = IF
 	    UNLOOP o>  EXIT
@@ -1331,10 +1331,10 @@ Variable sender-task
     chunk-adder chunks-struct chunks $+!
     ticks ticks-init ;
 
-event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
+\ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 
-: net2o:send-chunks  sender-task @ 0= IF  do-send-chunks  EXIT  THEN
-    <event o elit, ->send-chunks sender-task @ event> ;
+\ : net2o:send-chunks  sender-task @ 0= IF  do-send-chunks  EXIT  THEN
+\     <event o elit, ->send-chunks sender-task @ event> ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1585,18 +1585,18 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 Defer init-reply
 
-: create-sender-task ( -- )
-    o 1 stacksize4 NewTask4 dup sender-task ! pass
-    init-reply
-    >o rdrop  alloc-io c:init
-    send-loop ;
+\ : create-sender-task ( -- )
+\     o 1 stacksize4 NewTask4 dup sender-task ! pass
+\     init-reply
+\     >o rdrop  alloc-io c:init
+\     send-loop ;
 
 : next-packet ( -- addr u )
-    sender-task @ 0= IF
+\    sender-task @ 0= IF
 	send-read-packet
-    ELSE
-	0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
-    THEN
+\    ELSE
+\	0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
+\    THEN
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
