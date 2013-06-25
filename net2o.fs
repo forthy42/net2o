@@ -692,8 +692,8 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 $100 Value flybursts-max#
 
 Variable init-context#
-wurstkessel-o crypto-o !
-\ keccak-o crypto-o !
+\ wurstkessel-o crypto-o !
+keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -970,6 +970,7 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 
 \ acknowledge
 
+sema resend-lock
 Create resend-buf  0 , 0 ,
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
@@ -986,9 +987,11 @@ $20 Value mask-bits#
 	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP
+    resend-lock lock
     >mask0 resend-buf 2!
     resend( ." Resend-mask: " resend-buf 2@ swap hex. hex. cr )
-    resend-buf 2 cells data-resend $+! ;
+    resend-buf 2 cells data-resend $+!
+    resend-lock unlock ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and
     ack-state @ resend-toggle# invert and or ack-state ! ;
 : >real-range ( addr -- addr' )
