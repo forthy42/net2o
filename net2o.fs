@@ -692,8 +692,8 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 $100 Value flybursts-max#
 
 Variable init-context#
-\ wurstkessel-o crypto-o !
-keccak-o crypto-o !
+wurstkessel-o crypto-o !
+\ keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -1528,7 +1528,7 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
 : poll-sock ( -- flag )
-    clear-events  max-timeout!
+    eval-queue  clear-events  max-timeout!
     pollfds pollfd#
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
@@ -1538,7 +1538,7 @@ pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 ;
 
 : wait-send ( -- flag )
-    eval-queue  clear-events  timeout!
+    clear-events  timeout!
     pollfds pollfd#
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>

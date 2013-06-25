@@ -23,9 +23,6 @@ end-class wurst-class
 
 current-o
 
-: wurst-task-init ( -- )
-    [ wurst-class @ ]L allocate throw wurst' ! ;
-
 : .16 ( u[d] -- )
     [ cell 8 = ] [IF] 0 [THEN]
     base @ >r hex <<# 16 0 DO # LOOP #> type #>> r> base ! ;
@@ -299,11 +296,7 @@ s" gforth" environment? [IF] 2drop
     \c    int i;
     \c    for(i=0; i<8; i++) { m[i] ^= s[i+8]; s[i] ^= m[i]; }
     \c }
-    \c static uint64_t * rnds;
-    \c void rounds_init(uint64_t * rndsi) {
-    \c    rnds=rndsi;
-    \c }
-    \c void rounds_encrypt(unsigned char* message, unsigned int n, unsigned char * states) {
+    \c void rounds_encrypt(unsigned char* message, unsigned int n, unsigned char * states, uint64_t * rnds) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -328,7 +321,7 @@ s" gforth" environment? [IF] 2drop
     \c if(n&0x40) add_entropy((uint64_t *)(message+64*1),(uint64_t *)(states));
     \c if(n&0x80) add_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } }
-    \c void rounds_decrypt(unsigned char* message, unsigned int n, unsigned char * states) {
+    \c void rounds_decrypt(unsigned char* message, unsigned int n, unsigned char * states, uint64_t * rnds) {
     \c if((n&15)>=1) { round0_ind(states, rnds);
     \c if(n&0x10) set_entropy((uint64_t *)(message+64*0),(uint64_t *)(states));
     \c } if((n&15)>=2) { round1_ind(states, rnds);
@@ -364,20 +357,20 @@ s" gforth" environment? [IF] 2drop
     \c   }
     \c   return result;
     \c }
-	c-function rounds-init rounds_init a -- void
-	c-function (rounds-encrypt) rounds_encrypt a n a -- void
-	c-function (rounds-decrypt) rounds_decrypt a n a -- void
+	c-function (rounds-encrypt) rounds_encrypt a n a a -- void
+	c-function (rounds-decrypt) rounds_decrypt a n a a -- void
 	[IFDEF] 64bit
 	    c-function wurst_hash64 wurst_hash64 a n n a -- n
 	[ELSE]
 	    c-function wurst_hash64 wurst_hash64 a n d a -- d
 	[THEN]
     end-c-library
-    wurst-source Value @state
+    UValue @state
+    wurst-source to @state
     : rounds-setkey ( addr -- )  to @state ;
-    : rounds-encrypt ( addr u -- ) @state (rounds-encrypt) ;
-    : rounds-decrypt ( addr u -- ) @state (rounds-decrypt) ;
-    : wurst-init ( -- )  'rngs rounds-init ;
+    : rounds-encrypt ( addr u -- ) @state 'rngs (rounds-encrypt) ;
+    : rounds-decrypt ( addr u -- ) @state 'rngs (rounds-decrypt) ;
+    : wurst-init ( -- ) ;
     : hash64 ( addr n init -- hash ) 'rngs wurst_hash64 ;
 [ELSE]
 : round0 ( -- )  [ 0 round# round, ] ; 
@@ -585,6 +578,9 @@ require crypto-api.fs
 
 crypto class
 end-class wurstkessel
+
+: wurst-task-init ( -- )
+    [ wurst-class @ ]L allocate throw wurst' !  wurst-source rounds-setkey ;
 
 ' wurst-task-init wurstkessel to c:init
 :noname to @state ; wurstkessel to c:key!
