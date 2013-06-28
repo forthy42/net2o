@@ -303,7 +303,6 @@ Variable routes
 0 Value lastaddr
 Variable lastn2oaddr
 
-
 : .ipv6 ( addr u -- ) 
     drop dup sin6_addr $10 bounds DO
 	I be-uw@ 0 .r ':' emit
@@ -617,19 +616,22 @@ Variable >code-flag
 : allocate-bits ( size -- addr )
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
-: map-data ( addr u -- o )
-    o rdata-class new >o dest-job !
-    [ cell 4 = ] [IF]
-	nip
-    [THEN]
+: alloc-data ( addr u -- u flag )
+    [ cell 4 = ] [IF]  nip  [THEN]
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
     state# 2* 2* allocatez dest-ivsgen !
     >code-flag @ dup code-flag !
     IF
-	dup addr>replies allocatez dest-replies !
+	dup addr>replies  allocatez dest-replies !
     ELSE
-	dup addr>ts allocatez dest-timestamps !
+	dup addr>ts       allocatez dest-timestamps !
+    THEN ;
+
+: map-data ( addr u -- o )
+    o rdata-class new >o dest-job !
+    alloc-data
+    code-flag @ 0= IF
 	dup addr>ts allocatez dest-cookies !
 	dup addr>bits bits>bytes allocate-bits data-ackbits0 !
 	dup addr>bits bits>bytes allocate-bits data-ackbits1 !
@@ -642,19 +644,9 @@ Variable >code-flag
 : map-source ( addr u addrx -- o )
     o code-class new >o dest-job !
     dest-lock 0 pthread_mutex_init drop
-    [ cell 4 = ] [IF]
-	nip
-    [THEN]
-    tuck dest-size 2!
-    dup alloc+guard dest-raddr !
-    state# 2* 2* allocatez dest-ivsgen !
+    alloc-data
     dup addr>ts allocatez dest-cookies !
-    >code-flag @ dup code-flag !
-    IF
-	addr>replies  allocatez dest-replies !
-    ELSE
-	addr>ts       allocatez dest-timestamps !
-    THEN
+    drop
     o o> ;
 
 ' @ Alias m@
