@@ -668,7 +668,7 @@ Variable mapstart $1 mapstart !
     >code-flag off
     dup >r data-rmap map-data-dest r> map-source  data-map ! ;
 : n2o:new-code ( addrs addrd u -- )
-    o 0= IF drop 2drop EXIT THEN
+    o 0= IF drop 64drop 64drop EXIT THEN
     >code-flag on
     dup >r code-rmap map-code-dest r> map-source  code-map ! ;
 
