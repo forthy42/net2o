@@ -29,11 +29,11 @@ wurstkessel-o crypto-o !
 
 3 Value passphrase-retry#
 $100 Value passphrase-diffuse#
+128 Constant max-passphrase#
+max-passphrase# buffer: passphrase
 
 : get-passphrase ( -- addr u )
-    wurst-source rounds-setkey
-    message state# 8 * 2dup accept* safe/string erase
-    source-init wurst-key hash-init
-    message roundsh# rounds-encrypt
+    passphrase max-passphrase# 2dup accept* safe/string erase
+    message max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
-    wurst-state state# ;
+    c:key@ c:key# ;
