@@ -9,7 +9,7 @@ require mini-oof2.fs
 
 User wurst'
 
-Create wurst-o 0 ,  DOES> @ o#+ [ 0 , ] wurst' @ + ;
+Create wurst-o 0 ,  DOES> @ o#+ [ 0 , ] + wurst' @ + ;
 comp: >body @ ]] wurst' @ lit+ [[ , ;
 
 ' wurst-o to var-xt
@@ -612,7 +612,7 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
     BEGIN  dup 0>  WHILE
 	    over rnd rounds-decrypt  reads /string
     REPEAT drop 128@ wurst-crc 128= ; wurstkessel to c:decrypt+auth
-:noname ( addr u -- ) dup roundsh#
+:noname ( addr u -- ) dup mem-rounds#
     dup >reads state# * { rnd reads }
     BEGIN  dup 0>  WHILE
 	    over rnd rounds-encrypt  reads /string

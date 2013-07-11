@@ -34,6 +34,7 @@ max-passphrase# buffer: passphrase
 
 : get-passphrase ( -- addr u )
     passphrase max-passphrase# 2dup accept* safe/string erase
-    message max-passphrase# c:hash
+    source-init wurst-key hash-init
+    passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
     c:key@ c:key# ;
