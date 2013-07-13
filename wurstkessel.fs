@@ -32,25 +32,30 @@ current-o
 : .state  ( -- ) wurst-state  .64b ;
 : .source ( -- ) wurst-source .64b ;
 
-Create source-init
+align here
 $6C5F6F6CBE627172. 64, $7164C30603661C2E. 64, $CE5009401B441346. 64, $454FA335A6E63AD2. 64,
 $ABE9D0D648C15F6E. 64, $B90FD4060D7935D6. 64, $F7EDA8E2E8D6CB32. 64, $6230D90DBE8E061B. 64,
 
-Create wurst-key \ default key
+here
 $20799FEC4B2E86C7. 64, $9F5454CDBDF51F76. 64, $EE1905FFF4B24C3D. 64, $9841F78BA1E0A3B7. 64,
 $B6C33E39C326A161. 64, $FD4E8C0EAA7C4362. 64, $839E0910FFD9401A. 64, $2785F5C10D610C68. 64,
 
-Create rnd-init \ for testing only! This is salt, should not be guessable!
+here
 $FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
 $9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
 
-Create wurst-salt \ for testing only! This is salt, should not be guessable!
+here
 $39A157A31F7D62BC. 64, $51C3BD3BA4F4F803. 64, $21D7D0ED16A5243A. 64, $3C80195D8D80874F. 64,
 $6DF5EF6205D55E03. 64, $8859C59812F47028. 64, $F7795F00874ACED7. 64, $5FBE66944DBECB7F. 64,
+
 here
 $FEC967C32E46440F. 64, $3F63157E14F89982. 64, $F7364A7F8083EFFA. 64, $FC62572A44559951. 64,
 $9915714DB7397949. 64, $AE4180D53650E38C. 64, $C53813781DFF0C2E. 64, $A579435502F22741. 64,
 Constant state-init
+Constant wurst-salt \ for testing only! This is salt, should not be guessable!
+Constant rnd-init \ for testing only! This is salt, should not be guessable!
+Constant wurst-key \ default key
+Constant source-init
 
 Create 'rngs \ this is essentially Wurstkessel's S-box
 $EA576B15A7AFBA08. 64, $BF4888DC02131EF7. 64, $5F49A40B1DAAF5FD. 64, $7798975E5233C89D. 64, 
