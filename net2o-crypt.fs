@@ -1,18 +1,12 @@
 \ symmetric encryption and decryption
 
-: wurst-key$ ( -- addr u )
-    o 0= IF
-	wurst-key state#
-    ELSE
-	crypto-key $@
-    THEN ;
-
 128 buffer: key-assembly
 : >wurst-key ( addr u -- )
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
-    key-assembly key( ." >wurst-key " dup .64b ." :" dup state# + .64b cr ) >c:key ;
+    key-assembly key( ." >wurst-key " dup .64b ." :" dup state# + .64b cr )
+    >c:key ;
 : >wurst-source' ( addr -- )  key-assembly state# move ;
 : >wurst-source ( addr u -- )
     key-assembly state# bounds DO
@@ -40,7 +34,8 @@ Defer regen-ivs
     IF
 	max-size^2 1- rshift key( ." ivsc# " dup . cr )
 	dest-ivs $@ drop over +
-	swap regen-ivs o> key( ." ivs>code-s? " dup .64b ." :" dup state# + .64b cr ) >c:key
+	swap regen-ivs o> key( ." ivs>code-s? " dup .64b ." :" dup state# + .64b cr )
+	>c:key
 	EXIT
     THEN
     drop o> ;
@@ -51,10 +46,18 @@ Defer regen-ivs
     dest-addr @ o 2@ >r - dup r> u<
     IF
 	max-size^2 1- rshift key( ." ivss# " dup . cr )
-	dest-ivs $@ drop + o> key( ." ivs>source? " dup .64b ." :" dup state# + .64b cr ) >c:key
+	dest-ivs $@ drop + o> key( ." ivs>source? " dup .64b ." :" dup state# + .64b cr )
+	>c:key
 	EXIT
     THEN
     drop o> ;
+
+: wurst-key$ ( -- addr u )
+    o 0= IF
+	wurst-key state#
+    ELSE
+	crypto-key $@
+    THEN ;
 
 : default-key ( -- )
     c:key@ 0= IF
@@ -103,6 +106,12 @@ rng$ mykey swap move
 : wurst-mykey-setup ( addr u -- addr' u' )
     over >r  rng@ rng@ r> 128! wurst-mykey-init ;
 
+: wurst-encrypt$ ( addr u -- ) +calc
+    wurst-mykey-setup 2 64s - c:encrypt+auth +enc ;
+
+: wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
+    wurst-mykey-init 2 64s - 2dup c:decrypt+auth +enc ;
+
 : wurst-outbuf-encrypt ( flag -- ) +calc
     wurst-outbuf-init
     outbuf packet-data +cryptsu c:encrypt+auth +enc ;
@@ -111,12 +120,6 @@ rng$ mykey swap move
     \G flag1 is true if code, flag2 is true if decrypt succeeded
     wurst-inbuf-init
     inbuf packet-data +cryptsu c:decrypt+auth +enc ;
-
-: wurst-encrypt$ ( addr u -- ) +calc
-    wurst-mykey-setup 2 64s - c:encrypt+auth +enc ;
-
-: wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-    wurst-mykey-init 2 64s - 2dup c:decrypt+auth +enc ;
 
 \ public key encryption
 

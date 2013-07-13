@@ -428,6 +428,8 @@ net2o-base
 80 net2o: !time ( -- ) init-timer ;
 81 net2o: .time ( -- ) .packets .times ;
 
+\ ids 100..120 reserved for key exchange/strage
+
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
 

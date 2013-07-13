@@ -1775,6 +1775,7 @@ Variable client-task
 \ load net2o commands
 
 require net2o-cmd.fs
+require net2o-keys1.fs
 
 0 [IF]
 Local Variables:
