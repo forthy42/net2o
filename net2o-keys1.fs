@@ -68,8 +68,8 @@ also net2o-base definitions
 105 net2o: keyprofile ( addr u -- ) 2drop ;
 106 net2o: newkeysig ( addr u -- ) 2drop ;
 107 net2o: keymask ( x -- ) 64drop ;
-108 net2o: keyfirst ( date -- ) 64drop ;
-109 net2o: keylast ( date -- ) 64drop ;
+108 net2o: keyfirst ( date-ns -- ) 64drop ;
+109 net2o: keylast ( date-ns -- ) 64drop ;
 
 previous definitions
 

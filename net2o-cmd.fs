@@ -148,7 +148,7 @@ definitions
 User cmd0source
 User cmdbuf#
 
-: cmdbuf     ( -- addr )  cmd0source @ IF  cmd0buf   ELSE  code-dest  THEN ;
+: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
 	code-map @ >o dest-lock o>
     THEN ;
@@ -169,7 +169,7 @@ User cmdbuf#
 
 : net2o-code    cmd0source off  cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
-: net2o-code0   cmd0source on   cmdlock lock
+: net2o-code0   cmd0buf cmd0source !   cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
 ' net2o, IS net2o-do
 
@@ -232,7 +232,7 @@ Variable throwcount
 	cmd0source off
 	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
-	cmd0source on
+	cmd0buf cmd0source !
     THEN
     cmdreset  do-cmd-loop  cmd-send? ;
 
