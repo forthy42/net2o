@@ -103,14 +103,16 @@ rng$ mykey swap move
     mykey-salt# safe/string
     c:diffuse ;
 
-: wurst-key-setup ( addr u key u -- addr' u' )
+: wurst-key-setup ( addr u1 key u2 -- addr' u' )
     2>r over >r  rng@ rng@ r> 128! 2r> wurst-key-init ;
-
-: wurst-encrypt$ ( addr u -- ) +calc
-    mykey state# wurst-key-setup 2 64s - c:encrypt+auth +enc ;
 
 : encrypt$ ( addr u1 key u2 -- )
     wurst-key-setup 2 64s - c:encrypt+auth ;
+
+: decrypt$ ( addr u1 key u2 -- addr' u' flag )
+    wurst-key-init 2 64s - 2dup c:decrypt+auth ;
+
+: wurst-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
 : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
     mykey state# wurst-key-init 2 64s - 2dup c:decrypt+auth +enc ;

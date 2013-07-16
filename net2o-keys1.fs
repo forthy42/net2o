@@ -33,10 +33,10 @@ max-passphrase# buffer: passphrase
 
 : get-passphrase ( -- addr u )
     passphrase max-passphrase# 2dup accept* safe/string erase
-    state-init >c:key
+    wurst-key >c:key
     passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
-    c:key@ c:key# save-mem ;
+    c:key@ $40 save-mem ;
 
 \ a secret key just needs a nick and a type.
 \ Secret keys can be persons and groups.
@@ -58,6 +58,7 @@ $100 Constant keypack#
 keypack# mykey-salt# + $10 + Constant keypack-all#
 
 keypack-all# buffer: keypack
+keypack-all# buffer: keypack-d
 
 2Variable key+len \ current key + len
 
@@ -83,7 +84,8 @@ also net2o-base definitions
 
 : end:key ( -- )
     end-cmd previous
-    keypack keypack-all# key+len 2@ encrypt$
+    keypack keypack-all#
+    key+len 2@ encrypt$
     cmdlock unlock ;
 
 previous definitions
@@ -109,7 +111,7 @@ Variable keys "" keys $!
 
 : append-file ( addr u fd -- ) >r
     r@ file-size throw  r@ reposition-file throw
-    r> write-file throw ;
+    r@ write-file throw  r> flush-file throw ;
 
 : +keypair ( nick u -- )
     +passphrase gen-keys ticks 64>r
@@ -119,10 +121,31 @@ Variable keys "" keys $!
     keypack keypack-all# ?key-fd append-file
     keypad skc pkc crypto_scalarmult keypad keysize +key
     key:code [ also net2o-base ]
-    newkey pkc keysize $, pubkey 2dup $, keynick 64r> lit, keyfirst
+    newkey pkc keysize $, pubkey $, keynick 64r> lit, keyfirst
     end:key [ previous ]
     keypack keypack-all# ?key-fd append-file ;
-    
+
+\ read key file
+
+: try-decrypt ( -- addr u / 0 0 )
+    keys $@ bounds ?DO
+	keypack keypack-d keypack-all# move
+	keypack-d keypack-all# I 2@
+	decrypt$ IF  unloop  EXIT  THEN
+	2drop
+    2 cells +LOOP  0 0 ;
+
+: do-key ( addr u / 0 0  -- )
+    dup 0= IF  2drop  EXIT  THEN
+    n2o:see ;
+
+: read-keys ( -- addr u / 0 0 )
+    0. ?key-fd reposition-file throw
+    BEGIN
+	keypack keypack-all# ?key-fd read-file throw
+	keypack-all# = WHILE  try-decrypt do-key
+    REPEAT ;
+
 \ revert
 
 previous definitions
