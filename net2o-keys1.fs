@@ -59,6 +59,8 @@ keypack# mykey-salt# + $10 + Constant keypack-all#
 
 keypack-all# buffer: keypack
 
+2Variable key+len \ current key + len
+
 also net2o-base definitions
 100 net2o: newkey ( -- ) ; \ stub
 101 net2o: privkey ( addr u -- ) 2drop ; \ stub
@@ -73,6 +75,54 @@ also net2o-base definitions
 
 previous definitions
 
+: key:code ( -- )
+    net2o-code0 keypack keypack-all# erase
+    keypack mykey-salt# + cmd0source ! ;
+
+also net2o-base definitions
+
+: end:key ( -- )
+    end-cmd previous
+    keypack keypack-all# key+len 2@ encrypt$
+    cmdlock unlock ;
+
+previous definitions
+
+Variable keys "" keys $!
+
+: +key ( addr u -- ) key+len 2! key+len 2 cells keys $+! ;
+: +passphrase ( -- )  get-passphrase +key ;
+
+0 Value key-fd
+
+: ?.net2o ( -- )
+    s" ~/.net2o" r/o open-file nip IF
+	s" ~/.net2o" $1C0 mkdir-parents throw
+    THEN ;
+
+: ?key-fd ( -- fd ) key-fd dup ?EXIT drop
+    ?.net2o
+    "~/.net2o/keyfile.n2o" r/w open-file dup -514 = IF
+	2drop "~/.net2o/keyfile.n2o" r/w create-file
+    THEN  throw
+    dup to key-fd ;
+
+: append-file ( addr u fd -- ) >r
+    r@ file-size throw  r@ reposition-file throw
+    r> write-file throw ;
+
+: +keypair ( nick u -- )
+    +passphrase gen-keys ticks 64>r
+    key:code [ also net2o-base ]
+    newkey skc keysize $, privkey 2dup $, keynick 64r@ lit, keyfirst
+    end:key [ previous ]
+    keypack keypack-all# ?key-fd append-file
+    keypad skc pkc crypto_scalarmult keypad keysize +key
+    key:code [ also net2o-base ]
+    newkey pkc keysize $, pubkey 2dup $, keynick 64r> lit, keyfirst
+    end:key [ previous ]
+    keypack keypack-all# ?key-fd append-file ;
+    
 \ revert
 
 previous definitions

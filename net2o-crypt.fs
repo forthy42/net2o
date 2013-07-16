@@ -1,6 +1,6 @@
 \ symmetric encryption and decryption
 
-128 buffer: key-assembly
+256 buffer: key-assembly
 : >wurst-key ( addr u -- )
     key-assembly state# + state# bounds DO
 	2dup I swap move
@@ -97,20 +97,23 @@ Defer regen-ivs
 state# buffer: mykey \ server's private key
 rng$ mykey swap move
 
-: wurst-mykey-init ( addr u -- addr' u' )
+: wurst-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >wurst-source
-    mykey state# >wurst-key
+    2r> >wurst-key 
     mykey-salt# safe/string
     c:diffuse ;
 
-: wurst-mykey-setup ( addr u -- addr' u' )
-    over >r  rng@ rng@ r> 128! wurst-mykey-init ;
+: wurst-key-setup ( addr u key u -- addr' u' )
+    2>r over >r  rng@ rng@ r> 128! 2r> wurst-key-init ;
 
 : wurst-encrypt$ ( addr u -- ) +calc
-    wurst-mykey-setup 2 64s - c:encrypt+auth +enc ;
+    mykey state# wurst-key-setup 2 64s - c:encrypt+auth +enc ;
+
+: encrypt$ ( addr u1 key u2 -- )
+    wurst-key-setup 2 64s - c:encrypt+auth ;
 
 : wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-    wurst-mykey-init 2 64s - 2dup c:decrypt+auth +enc ;
+    mykey state# wurst-key-init 2 64s - 2dup c:decrypt+auth +enc ;
 
 : wurst-outbuf-encrypt ( flag -- ) +calc
     wurst-outbuf-init

@@ -42,6 +42,7 @@ cell 8 = [IF]
     ' s>d Alias 64>d
     ' drop Alias d>64
     ' >r Alias 64>r
+    ' r@ Alias 64r@
     ' r> Alias 64r>
     ' 0= Alias 64-0=
     ' 0>= Alias 64-0>=
@@ -107,6 +108,7 @@ cell 8 = [IF]
     ' false Alias u>64
     ' 2>r Alias 64>r
     ' 2r> Alias 64r>
+    ' 2r@ Alias 64r@
     ' d0= Alias 64-0=
     ' d0>= Alias 64-0>=
     ' d0<= Alias 64-0<=
