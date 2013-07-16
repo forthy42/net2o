@@ -79,6 +79,7 @@ previous definitions
 : key:code ( -- )
     net2o-code0 keypack keypack-all# erase
     keypack mykey-salt# + cmd0source ! ;
+comp: :, also net2o-base ;
 
 also net2o-base definitions
 
@@ -87,6 +88,7 @@ also net2o-base definitions
     keypack keypack-all#
     key+len 2@ encrypt$
     cmdlock unlock ;
+comp: :, previous ;
 
 previous definitions
 
@@ -113,17 +115,19 @@ Variable keys "" keys $!
     r@ file-size throw  r@ reposition-file throw
     r@ write-file throw  r> flush-file throw ;
 
+: key>file ( -- )
+    keypack keypack-all# ?key-fd append-file ;
+
 : +keypair ( nick u -- )
     +passphrase gen-keys ticks 64>r
-    key:code [ also net2o-base ]
-    newkey skc keysize $, privkey 2dup $, keynick 64r@ lit, keyfirst
-    end:key [ previous ]
-    keypack keypack-all# ?key-fd append-file
+    key:code
+        newkey skc keysize $, privkey 2dup $, keynick 64r@ lit, keyfirst
+    end:key key>file
+    
     keypad skc pkc crypto_scalarmult keypad keysize +key
-    key:code [ also net2o-base ]
-    newkey pkc keysize $, pubkey $, keynick 64r> lit, keyfirst
-    end:key [ previous ]
-    keypack keypack-all# ?key-fd append-file ;
+    key:code
+        newkey pkc keysize $, pubkey $, keynick 64r> lit, keyfirst
+    end:key key>file ;
 
 \ read key file
 
