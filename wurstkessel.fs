@@ -555,6 +555,11 @@ state# rngs# * rng-buffer !
     rng-buffer @ state# + rng-step?
     rng-buffer dup @ + cell+ state# dup rng-buffer +! ;
 
+: >rng$ ( addr u -- )  \ fill buffer with random stuff
+    bounds ?DO
+	rng$ I' I - umin I swap dup >r move r>
+    +LOOP ;
+
 : rng32 ( -- x )
     rng-buffer @ 4 + rng-step?
     rng-buffer dup @ + cell+ l@

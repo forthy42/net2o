@@ -24,6 +24,55 @@ also new-keys definitions
 	    THEN
     REPEAT  drop  nip r> swap - ;
 
+\ hashed key data base
+
+object class
+    field: ke-sk
+    field: ke-pk
+    field: ke-nick
+    field: ke-prof
+    field: ke-sigs
+    field: ke-type
+    64field: ke-first
+    64field: ke-last
+end-class key-entry
+
+0 Constant key#anon
+1 Constant key#user
+2 Constant key#group
+
+key-entry @ buffer: sample-key
+
+Variable key-table
+Variable this-key
+Variable this-keyid
+2Variable addsig
+sample-key this-key ! \ dummy
+
+: current-key ( addr u -- )
+    2dup key-table #@ drop dup this-key ! >o rdrop ke-pk $! ;
+: make-thiskey ( addr -- )
+    dup $@ drop this-keyid !  cell+ $@ drop dup this-key ! >o rdrop ;
+
+: key:new ( addr u -- )
+    \ addr u is the public key
+    sample-key key-entry @ 2dup erase
+    2over key-table #! current-key ;
+
+\ search for keys - not optimized
+
+: nick-key ( addr u -- ) \ search for key nickname and make current
+    key-table 
+    [: dup >r cell+ $@ drop >o ke-nick $@ o> 2over str= IF
+	r@ make-thiskey
+    THEN  rdrop ;] #map 2drop ;
+
+: name-key ( addr u -- ) \ search for key name and make current
+    key-table 
+    [: dup >r cell+ $@ drop >o ke-name $@ o> 2over str= IF
+	r@ make-thiskey
+    THEN  rdrop ;] #map ;
+
 \ get passphrase
 
 3 Value passphrase-retry#
@@ -37,6 +86,14 @@ max-passphrase# buffer: passphrase
     passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
     c:key@ $40 save-mem ;
+
+Variable keys "" keys $!
+2Variable key+len \ current key + len
+
+: +key ( addr u -- ) key+len 2! key+len 2 cells keys $+! ;
+: +passphrase ( -- )  get-passphrase +key ;
+: +seckey ( -- )
+    keypad ke-sk $@ drop ke-pk $@ drop crypto_scalarmult keypad keysize +key ;
 
 \ a secret key just needs a nick and a type.
 \ Secret keys can be persons and groups.
@@ -60,19 +117,18 @@ keypack# mykey-salt# + $10 + Constant keypack-all#
 keypack-all# buffer: keypack
 keypack-all# buffer: keypack-d
 
-2Variable key+len \ current key + len
-
 also net2o-base definitions
-100 net2o: newkey ( -- ) ; \ stub
-101 net2o: privkey ( addr u -- ) 2drop ; \ stub
-102 net2o: pubkey ( addr u -- ) 2drop ; \ stub
-103 net2o: keytype ( n -- ) 64drop ;
-104 net2o: keynick ( addr u -- )  2drop ;
-105 net2o: keyprofile ( addr u -- ) 2drop ;
-106 net2o: newkeysig ( addr u -- ) 2drop ;
-107 net2o: keymask ( x -- ) 64drop ;
-108 net2o: keyfirst ( date-ns -- ) 64drop ;
-109 net2o: keylast ( date-ns -- ) 64drop ;
+
+100 net2o: newkey ( addr u -- ) key:new ;
+101 net2o: privkey ( addr u -- ) ke-sk $! +seckey ;
+102 net2o: keytype ( n -- ) 64>n ke-type ! ; \ default: anonymous
+103 net2o: keynick ( addr u -- )  ke-nick $! ;
+104 net2o: keyprofile ( addr u -- ) ke-prof $! ;
+105 net2o: newkeysig ( addr u -- ) save-mem addsig 2!
+    addsig 2 cells ke-sigs $+! ;
+106 net2o: keymask ( x -- ) 64drop ;
+107 net2o: keyfirst ( date-ns -- ) ke-first 64! ;
+108 net2o: keylast ( date-ns -- ) ke-last 64! ;
 
 previous definitions
 
@@ -91,11 +147,6 @@ also net2o-base definitions
 comp: :, previous ;
 
 previous definitions
-
-Variable keys "" keys $!
-
-: +key ( addr u -- ) key+len 2! key+len 2 cells keys $+! ;
-: +passphrase ( -- )  get-passphrase +key ;
 
 0 Value key-fd
 
@@ -118,16 +169,18 @@ Variable keys "" keys $!
 : key>file ( -- )
     keypack keypack-all# ?key-fd append-file ;
 
-: +keypair ( nick u -- )
-    +passphrase gen-keys ticks 64>r
+: rnd>file ( -- )
+    keypack keypack-all# >rng$ key>file ;
+
+: >keys ( -- )
+    keypad skc pkc crypto_scalarmult keypad keysize +key ;
+
+: +keypair ( type nick u -- )
+    +passphrase gen-keys
     key:code
-        newkey skc keysize $, privkey 2dup $, keynick 64r@ lit, keyfirst
-    end:key key>file
-    
-    keypad skc pkc crypto_scalarmult keypad keysize +key
-    key:code
-        newkey pkc keysize $, pubkey $, keynick 64r> lit, keyfirst
-    end:key key>file ;
+        pkc keysize $, newkey skc keysize $, privkey
+        $, keynick lit, keytype ticks lit, keyfirst
+    end:key key>file >keys ;
 
 \ read key file
 
@@ -137,13 +190,13 @@ Variable keys "" keys $!
 	keypack-d keypack-all# I 2@
 	decrypt$ IF  unloop  EXIT  THEN
 	2drop
-    2 cells +LOOP  0 0 ;
+    2 cells +LOOP  ." Can't decrypt" cr  0 0 ;
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    n2o:see ;
+    2dup n2o:see  do-cmd-loop ;
 
-: read-keys ( -- addr u / 0 0 )
+: read-keys ( -- )
     0. ?key-fd reposition-file throw
     BEGIN
 	keypack keypack-all# ?key-fd read-file throw
