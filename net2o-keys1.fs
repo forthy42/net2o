@@ -190,11 +190,11 @@ previous definitions
 	keypack-d keypack-all# I 2@
 	decrypt$ IF  unloop  EXIT  THEN
 	2drop
-    2 cells +LOOP  ." Can't decrypt" cr  0 0 ;
+    2 cells +LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    2dup n2o:see  do-cmd-loop ;
+    ( 2dup n2o:see ) do-cmd-loop ;
 
 : read-keys ( -- )
     0. ?key-fd reposition-file throw
