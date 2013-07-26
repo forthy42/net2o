@@ -524,6 +524,8 @@ object class
     64field: last-time
     \ make timestamps smaller
     64field: time-offset
+    KEYBYTES +field tpkc
+    KEYBYTES +field tskc
 end-class context-class
 
 begin-structure timestamp

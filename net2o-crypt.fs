@@ -142,6 +142,10 @@ Variable do-keypad
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.
 
+: gen-tmpkeys ( -- )
+    rng$ keysize umin tskc swap move
+    tpkc tskc base9 crypto_scalarmult ;
+
 : >wurst-key-ivs ( -- )
     o 0= IF
 	crypt( ." IVS generated for non-connection!" cr )

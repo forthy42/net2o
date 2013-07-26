@@ -80,20 +80,31 @@ $100 Value passphrase-diffuse#
 $100 Constant max-passphrase# \ 256 characters should be enough...
 max-passphrase# buffer: passphrase
 
-: get-passphrase ( -- addr u )
-    passphrase max-passphrase# 2dup accept* safe/string erase
+: passphrase-in ( -- addr u )
+    passphrase dup max-passphrase# accept* ;
+
+: >passphrase ( addr u -- addr u )
+    >r passphrase r@ max-passphrase# umin move
+    passphrase max-passphrase# r> safe/string erase
     wurst-key >c:key
     passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
     c:key@ $40 save-mem ;
+
+: get-passphrase ( -- addr u )
+    passphrase-in >passphrase ;
 
 Variable keys "" keys $!
 2Variable key+len \ current key + len
 
 : +key ( addr u -- ) key+len 2! key+len 2 cells keys $+! ;
 : +passphrase ( -- )  get-passphrase +key ;
+: ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
     keypad ke-sk $@ drop ke-pk $@ drop crypto_scalarmult keypad keysize +key ;
+
+"" ">passphrase \ following the encrypt-everything paradigm,
+\ no password is the empty string!  It's still encrypted!
 
 \ a secret key just needs a nick and a type.
 \ Secret keys can be persons and groups.
