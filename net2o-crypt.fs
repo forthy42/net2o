@@ -132,19 +132,20 @@ KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 \ client keys
 keysize buffer: pkc
 keysize buffer: skc
+keysize buffer: stpkc \ server temporary keypair - once per connection setup
+keysize buffer: stskc
 \ shared secred
 keysize buffer: keypad
 Variable do-keypad
 
-: gen-keys ( -- )
+: (gen-keys) { skc pkc -- }
     rng$ keysize umin skc swap move
     pkc skc base9 crypto_scalarmult ;
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.
-
-: gen-tmpkeys ( -- )
-    rng$ keysize umin tskc swap move
-    tpkc tskc base9 crypto_scalarmult ;
+: gen-keys ( -- ) skc pkc (gen-keys) ;
+: gen-tmpkeys ( -- ) tskc tpkc (gen-keys) ;
+: gen-stkeys ( -- ) stskc stpkc (gen-keys) ;
 
 : >wurst-key-ivs ( -- )
     o 0= IF

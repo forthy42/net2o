@@ -388,7 +388,7 @@ net2o-base
 57 net2o: gen-reply ( -- )
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
-58 net2o: receive-tmpkey ( addr u -- ) 2drop ;
+58 net2o: receive-tmpkey ( addr u -- ) n2o:receive-tmpkey ;
 59 net2o: tmpkey-request ( -- ) ;
 
 \ better slurping
@@ -698,7 +698,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : gen-request ( -- )  gen-tmpkeys
     net2o-code0
     ['] end-cmd IS expect-reply?
-    tpkc keysize $, receive-tmpkey
+    tpkc keysize $, receive-tmpkey tmpkey-request
     nest[ o ulit, set-o ticks lit, set-rtdelay gen-reply request-done ]nest
     key-request
     req-codesize @  req-datasize @ map-request,
