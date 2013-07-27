@@ -211,7 +211,7 @@ Variable do-keypad
     keypad skc rot crypto_scalarmult ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN
-    keypad swap rot crypto_scalarmult ;
+    keypad swap rot crypto_scalarmult keypad keysize dump ;
 
 : net2o:update-key ( -- )
     do-keypad @ IF
