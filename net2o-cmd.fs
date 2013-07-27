@@ -388,8 +388,8 @@ net2o-base
 57 net2o: gen-reply ( -- )
     [: pkc keysize $, receive-key update-key code-ivs end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
-58 net2o: receive-tmpkey ( addr u -- ) n2o:receive-tmpkey ;
-59 net2o: tmpkey-request ( -- ) ;
+58 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
+59 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
 
 \ better slurping
 

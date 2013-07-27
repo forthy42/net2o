@@ -209,6 +209,9 @@ Variable do-keypad
     o 0= IF  2drop EXIT  THEN
     ?keysize
     keypad skc rot crypto_scalarmult ;
+: net2o:receive-tmpkey ( addr u -- )  ?keysize
+    o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN
+    keypad swap rot crypto_scalarmult ;
 
 : net2o:update-key ( -- )
     do-keypad @ IF
