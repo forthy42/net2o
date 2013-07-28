@@ -698,9 +698,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : gen-request ( -- )  gen-tmpkeys
     net2o-code0
     ['] end-cmd IS expect-reply?
-    tpkc keysize $, receive-tmpkey tmpkey-request
+    tpkc keysize $, receive-tmpkey
     nest[ o ulit, set-o ticks lit, set-rtdelay gen-reply request-done ]nest
-    key-request
+    tmpkey-request key-request
     req-codesize @  req-datasize @ map-request,
     end-code ;
 

@@ -144,8 +144,12 @@ Variable do-keypad
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.
 : gen-keys ( -- ) skc pkc (gen-keys) ;
-: gen-tmpkeys ( -- ) tskc tpkc (gen-keys) ;
-: gen-stkeys ( -- ) stskc stpkc (gen-keys) ;
+: gen-tmpkeys ( -- ) tskc tpkc (gen-keys)
+\    tskc keysize .nnb cr  tpkc keysize .nnb cr cr
+;
+: gen-stkeys ( -- ) stskc stpkc (gen-keys)
+\    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
+;
 
 : >wurst-key-ivs ( -- )
     o 0= IF
@@ -209,9 +213,9 @@ Variable do-keypad
     o 0= IF  2drop EXIT  THEN
     ?keysize
     keypad skc rot crypto_scalarmult ;
-: net2o:receive-tmpkey ( addr u -- )  ?keysize
-    o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN
-    keypad swap rot crypto_scalarmult keypad keysize dump ;
+: net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
+    o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
+    keypad swap rot crypto_scalarmult keypad keysize .nnb cr ;
 
 : net2o:update-key ( -- )
     do-keypad @ IF
