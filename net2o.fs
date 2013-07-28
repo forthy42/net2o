@@ -707,7 +707,7 @@ wurstkessel-o crypto-o !
     s" " data-resend $!
     resend-size# data-resend $!len
     data-resend $@ erase
-    wurst-key state# crypto-key $!
+    "" crypto-key $!
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
@@ -1646,7 +1646,7 @@ $08 Constant cookie-val
     recv-tick 64! \ time stamp of arrival
     dup 0> wurst-inbuf-decrypt 0= IF
 	inbuf .header
-	." invalid packet to " dest-addr 64@ 64. cr
+	." invalid packet to " dest-addr 64@ .16 cr
 	IF  drop  THEN  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@

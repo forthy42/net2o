@@ -2,12 +2,15 @@
 
 256 buffer: key-assembly
 : >wurst-key ( addr u -- )
+    dup 0= IF  2drop wurst-key state#  THEN
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
     key-assembly key( ." >wurst-key " dup .64b ." :" dup state# + .64b cr )
     >c:key ;
-: >wurst-source' ( addr -- )  key-assembly state# move ;
+: >wurst-source' ( addr -- )
+    crypt( ." ivs iv: "  dup state# .nnb cr )
+    key-assembly state# move ;
 : >wurst-source ( addr u -- )
     key-assembly state# bounds DO
 	2dup I swap move
@@ -136,7 +139,7 @@ keysize buffer: stpkc \ server temporary keypair - once per connection setup
 keysize buffer: stskc
 \ shared secred
 keysize buffer: keypad
-Variable do-keypad
+Variable do-keypad "" do-keypad $!
 
 : (gen-keys) { skc pkc -- }
     rng$ keysize umin skc swap move
@@ -156,12 +159,11 @@ Variable do-keypad
 	crypt( ." IVS generated for non-connection!" cr )
 	wurst-key state#
     ELSE
-	do-keypad @ IF
-	    keypad keysize
-	ELSE
+	do-keypad $@ dup 0= IF  2drop
 	    crypto-key $@
 	THEN
-    THEN  >wurst-key ;
+    THEN crypt( ." ivs key: " 2dup .nnb cr )
+    >wurst-key ;
 
 : regen-ivs/2 ( -- )
     c:key@ >r
@@ -200,10 +202,10 @@ Variable do-keypad
     r> >o dest-ivsgen @ c:key> o>
     r> c:key! ;
 
+\ : ivs-key ( addr u map -- )  @ >o  dest-ivsgen @ swap move o> ;
+
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
-    keysize 2* crypto-key $!
-    \ double key to get 512 bits
-    crypto-key $@ 2/ 2dup + swap move
+    keysize crypto-key $!
     ( ." set key to:" o crypto-key $@ dump ) ;
 
 : ?keysize ( u -- )
@@ -212,13 +214,18 @@ Variable do-keypad
 : net2o:receive-key ( addr u -- )
     o 0= IF  2drop EXIT  THEN
     ?keysize
-    keypad skc rot crypto_scalarmult ;
+    keypad skc rot crypto_scalarmult
+    keypad keysize do-keypad $+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
-    keypad swap rot crypto_scalarmult keypad keysize .nnb cr ;
+    keypad swap rot crypto_scalarmult
+    o IF  keypad keysize do-keypad $+!  THEN
+    ( keypad keysize .nnb cr ) ;
 
 : net2o:update-key ( -- )
-    do-keypad @ IF
-	keypad set-key
-	do-keypad off
-    THEN ;
+    do-keypad $@ dup IF
+	crypto-key $+!
+	"" do-keypad $!
+	EXIT
+    THEN
+    2drop ;

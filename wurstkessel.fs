@@ -27,7 +27,7 @@ current-o
     [ cell 8 = ] [IF] 0 [THEN]
     base @ >r hex <<# 16 0 DO # LOOP #> type #>> r> base ! ;
 
-: .nnb ( addr n -- )  bounds  DO  I 64@ .16 space  1 64s +LOOP ;
+: .nnb ( addr n -- )  bounds  ?DO  I 64@ .16 space  1 64s +LOOP ;
 : .64b ( addr -- ) 64 .nnb ;
 
 : .state  ( -- ) wurst-state  .64b ;

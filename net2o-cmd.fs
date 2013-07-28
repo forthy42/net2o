@@ -174,7 +174,9 @@ User cmdbuf#
 ' net2o, IS net2o-do
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
-    cmd( ." send: " dup hex. over cmdbuf# @ n2o:see cr )
+    cmd(
+    o IF  ." key: " crypto-key $@ .nnb cr  THEN
+    ." send: " dup hex. over cmdbuf# @ n2o:see cr )
     code-packet on
     o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
@@ -319,9 +321,12 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
+92 net2o: store-key ( addr u -- )  crypto-key $+! ;
+
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
     new-context
+    keypad keysize $, store-key
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     ]nest  n2o:create-map  64drop 2drop 64drop ;
@@ -368,7 +373,7 @@ net2o-base
 
 \ crypto functions
 
-50 net2o: receive-key ( addr u -- )  net2o:receive-key  do-keypad on ;
+50 net2o: receive-key ( addr u -- )  net2o:receive-key ;
 51 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
 52 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
 53 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
