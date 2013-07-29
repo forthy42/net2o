@@ -251,15 +251,15 @@ Variable neststart#
 : cmd>init ( -- addr u ) cmd> >initbuf 2dup wurst-encrypt$ ;
 : cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
 
-: do-nest ( addr u -- )
-    buf-state 2@ 2>r validated @ >r  own-crypt-val validated or!  do-cmd-loop
+: do-nest ( addr u flag -- )
+    buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
     r> validated ! 2r> buf-state 2! ;
 
 : cmdnest ( addr u -- )  wurst-decrypt$
-    0= IF  2drop ." Invalid nest" cr  EXIT  THEN do-nest ;
+    0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
 : cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
-    0= IF  2drop ." Invalid nest" cr  EXIT  THEN do-nest ;
+    0= IF  2drop ." Invalid nest" cr  EXIT  THEN tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
 
@@ -328,7 +328,8 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-92 net2o: store-key ( addr u -- )  crypto-key $+! ;
+92 net2o: store-key ( addr u -- )
+    own-crypt? IF  crypto-key $+!  ELSE  2drop  THEN ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
@@ -382,7 +383,7 @@ net2o-base
 
 50 net2o: receive-key ( addr u -- )
     crypt( ." Received key: " tmpkey@ .nnb F cr )
-    net2o:receive-key ;
+    tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
 51 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
 52 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
 53 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;

@@ -1617,11 +1617,13 @@ $01 Constant crypt-val
 $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
+$10 Constant tmp-crypt-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
+: tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     0 >o rdrop \ address 0 has no job context!
