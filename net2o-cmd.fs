@@ -134,13 +134,6 @@ forth also net2o-base definitions previous
 2 net2o: slit ( -- x ) ps@ ;
 3 net2o: string ( -- addr u )  string@ ;
 
-\ these functions are only there to test the server
-
-4 net2o: emit ( xc -- ) 64>n xemit ;
-5 net2o: type ( addr u -- )  type ;
-6 net2o: . ( -- ) 64. ;
-7 net2o: cr ( -- ) cr ;
-
 definitions
 
 \ net2o assembler
@@ -289,6 +282,13 @@ previous definitions
 \ commands to read and write files
 
 also net2o-base definitions
+\ these functions are only there to test the server
+
+4 net2o: emit ( xc -- ) 64>n xemit ;
+5 net2o: type ( addr u -- )  F type ;
+6 net2o: . ( -- ) 64. ;
+7 net2o: cr ( -- ) F cr ;
+
 9 net2o: see-me ( -- ) n2o:see-me ;
 
 10 net2o: push-$    $, ;
