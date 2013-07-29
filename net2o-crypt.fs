@@ -117,8 +117,8 @@ rng$ mykey swap move
 
 : wurst-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
-: wurst-decrypt$ ( addr u -- addr' u' flag ) +calc $>align
-    mykey state# wurst-key-init 2 64s - 2dup c:decrypt+auth +enc ;
+: wurst-decrypt$ ( addr u -- addr' u' flag )
+    +calc $>align mykey state# decrypt$ +enc ;
 
 : wurst-outbuf-encrypt ( flag -- ) +calc
     wurst-outbuf-init
@@ -221,6 +221,9 @@ Variable do-keypad "" do-keypad $!
     keypad swap rot crypto_scalarmult
     o IF  keypad keysize do-keypad $+!  THEN
     ( keypad keysize .nnb cr ) ;
+
+: tmpkey@ ( -- addr u )
+   do-keypad $@  dup 0= IF  2drop  keypad keysize  THEN ;
 
 : net2o:update-key ( -- )
     do-keypad $@ dup IF

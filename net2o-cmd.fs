@@ -66,7 +66,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
     dup ['] net2o-crash <> IF  3 cells - body>  THEN  >name .name ;
 
 : printable? ( addr u -- flag )
-    true -rot bounds ?DO  I c@ bl < IF  drop false  LEAVE  THEN  LOOP ;
+    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
 
 : n2o.string ( addr u -- )
     2dup printable? IF
@@ -238,21 +238,28 @@ Variable throwcount
 : >initbuf ( addr u -- addr' u' ) tuck
     init0buf mykey-salt# + swap move
     maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
-    nip init0buf swap mykey-salt# + 2 64s + 2dup wurst-encrypt$ ;
+    nip init0buf swap mykey-salt# + 2 64s + ;
 
 Variable neststart#
 
 : nest[ ( -- )  cmdbuf# @ neststart# ! ;
 
-: cmd>init ( -- addr u )
+: cmd> ( -- addr u )
     init0buf mykey-salt# + maxdata 2/ erase
-    cmdbuf$ neststart# @ safe/string  >initbuf
-    neststart# @ cmdbuf# ! ;
+    cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# ! ;
 
-: cmdnest ( addr u -- )
-    wurst-decrypt$ 0= IF  2drop ." Invalid nest" cr ( invalid >throw )  EXIT  THEN
+: cmd>init ( -- addr u ) cmd> >initbuf 2dup wurst-encrypt$ ;
+: cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
+
+: do-nest ( addr u -- )
     buf-state 2@ 2>r validated @ >r  own-crypt-val validated or!  do-cmd-loop
     r> validated ! 2r> buf-state 2! ;
+
+: cmdnest ( addr u -- )  wurst-decrypt$
+    0= IF  2drop ." Invalid nest" cr  EXIT  THEN do-nest ;
+
+: cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
+    0= IF  2drop ." Invalid nest" cr  EXIT  THEN do-nest ;
 
 \ net2o assembler stuff
 
@@ -282,8 +289,6 @@ previous definitions
 \ commands to read and write files
 
 also net2o-base definitions
-\ these functions are only there to test the server
-
 4 net2o: emit ( xc -- ) 64>n xemit ;
 5 net2o: type ( addr u -- )  F type ;
 6 net2o: . ( -- ) 64. ;
@@ -298,8 +303,10 @@ also net2o-base definitions
 
 13 net2o: push'     p@ cmd, ;
 14 net2o: nest ( addr u -- )  cmdnest ;
+93 net2o: tmpnest ( addr u -- )  cmdtmpnest ;
 
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
+: ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 16 net2o: new-data ( addr addr u -- )  64>n  n2o:new-data ;
@@ -373,12 +380,16 @@ net2o-base
 
 \ crypto functions
 
-50 net2o: receive-key ( addr u -- )  net2o:receive-key ;
+50 net2o: receive-key ( addr u -- )
+    crypt( ." Received key: " tmpkey@ .nnb F cr )
+    net2o:receive-key ;
 51 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
 52 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
 53 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
 54 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
-55 net2o: key-request ( -- addr u )  pkc keysize $, receive-key ;
+55 net2o: key-request ( -- addr u )
+    crypt( ." Nested key: " tmpkey@ .nnb F cr )
+    nest[ pkc keysize $, receive-key ]tmpnest ;
 56 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
@@ -391,7 +402,8 @@ net2o-base
     rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
 
 57 net2o: gen-reply ( -- )
-    [: pkc keysize $, receive-key update-key code-ivs end-cmd
+    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+      nest[ pkc keysize $, receive-key update-key code-ivs ]tmpnest end-cmd
       ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
 58 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
 59 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
