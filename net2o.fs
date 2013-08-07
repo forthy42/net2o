@@ -450,6 +450,7 @@ end-class rdata-class
 \ job context structure
 
 object class
+    64field: magic#
     field: context#
     field: wait-task
     field: context-state
@@ -685,6 +686,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
+$6E6574326F637478 64Constant init-magic#
 
 Variable init-context#
 wurstkessel-o crypto-o !
@@ -702,6 +704,7 @@ wurstkessel-o crypto-o !
 
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
+    init-magic# magic# 64!
     init-context# @ context# !  1 init-context# +!
     dup return-addr !  return-address !
     s" " data-resend $!

@@ -63,7 +63,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
 : (net2o-see) ( addr -- )  @
-    dup ['] net2o-crash <> IF  3 cells - body>  THEN  >name .name ;
+    dup ['] net2o-crash <> IF  4 cells - body>  THEN  >name .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
@@ -313,8 +313,10 @@ also net2o-base definitions
 17 net2o: new-code ( addr addr u -- )  64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
 19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
-	>o rdrop  ticks recv-tick 64! \ time stamp of arrival
-	1 context-state !@ 0= ?EXIT
+	>o magic# 64@ init-magic# 64= IF
+	    ticks recv-tick 64! \ time stamp of arrival
+	    1 context-state !@ 0= IF  rdrop  EXIT  THEN
+	THEN
     ELSE  drop  THEN
     0. buf-state 2!  0 >o rdrop ;
 
@@ -370,7 +372,8 @@ net2o-base
 37 net2o: >time-offset ( n -- )  time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
 38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
-39 net2o: set-rtdelay ( time -- )  recv-tick 64@ 64swap 64- rtdelay 64min! ;
+39 net2o: set-rtdelay ( time -- ) \ !!TBD!! check for timeout
+    recv-tick 64@ 64swap 64- rtdelay 64min! ;
 40 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
