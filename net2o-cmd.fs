@@ -23,7 +23,7 @@
 
 [IFDEF] 64bit
     : zz>n ( zigzag -- n )
-	dup 1 rshift swap 1 and negate xor ;    
+	dup 1 rshift swap 1 and negate xor ;
     : n>zz ( n -- zigzag )
 	dup 0< swap 2* xor ;
 [ELSE]
@@ -312,12 +312,12 @@ also net2o-base definitions
 16 net2o: new-data ( addr addr u -- )  64>n  n2o:new-data ;
 17 net2o: new-code ( addr addr u -- )  64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
-19 net2o: set-o ( addr -- ) 64>n own-crypt? IF
-	>o magic# 64@ init-magic# 64= IF
-	    ticks recv-tick 64! \ time stamp of arrival
+19 net2o: set-cookie ( cookie -- ) own-crypt? IF
+	cookie>context?
+	IF  >o ticks recv-tick 64! \ time stamp of arrival
 	    1 context-state !@ 0= IF  rdrop  EXIT  THEN
 	THEN
-    ELSE  drop  THEN
+    ELSE  64drop  THEN
     0. buf-state 2!  0 >o rdrop ;
 
 : n2o:create-map
@@ -335,7 +335,7 @@ also net2o-base definitions
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
-    new-context
+    0 >o add-cookie o> lit, set-cookie
     keypad keysize $, store-key
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
@@ -720,7 +720,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     net2o-code0
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
-    nest[ o ulit, set-o ticks lit, set-rtdelay gen-reply request-done ]nest
+    nest[ add-cookie lit, set-cookie
+    ticks lit, set-rtdelay gen-reply request-done ]nest
     tmpkey-request key-request
     req-codesize @  req-datasize @ map-request,
     end-code ;

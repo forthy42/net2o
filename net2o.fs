@@ -217,7 +217,7 @@ sema cmd0lock
 
 : alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
-    maxdata 2/ mykey-salt# + 2 cells + allocate throw to init0buf
+    maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
 ;
 
@@ -450,7 +450,6 @@ end-class rdata-class
 \ job context structure
 
 object class
-    64field: magic#
     field: context#
     field: wait-task
     field: context-state
@@ -623,7 +622,7 @@ Variable >code-flag
     [ cell 4 = ] [IF]  nip  [THEN]
     tuck dest-size 2!
     dup alloc+guard dest-raddr !
-    state# 2* 2* allocatez dest-ivsgen !
+    c:key# allocatez dest-ivsgen !
     >code-flag @ dup code-flag !
     IF
 	dup addr>replies  allocatez dest-replies !
@@ -686,7 +685,6 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
-$6E6574326F637478 64Constant init-magic#
 
 Variable init-context#
 wurstkessel-o crypto-o !
@@ -702,15 +700,15 @@ wurstkessel-o crypto-o !
     never               next-tick 64!
     64#0                extra-ns 64! ;
 
+resend-size# buffer: resend-init
+
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
-    init-magic# magic# 64!
     init-context# @ context# !  1 init-context# +!
     dup return-addr !  return-address !
-    s" " data-resend $!
-    resend-size# data-resend $!len
-    data-resend $@ erase
-    "" crypto-key $!
+    resend-init resend-size# data-resend $!
+    s" " crypto-key $!
+    data-resend @ crypto-key @ o 2drop
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
@@ -1482,7 +1480,7 @@ end-class queue-class
 queue-class @ Constant queue-struct
 
 Variable queue s" " queue $!
-Create queue-adder  queue-struct allot
+queue-class @ buffer: queue-adder  
 
 : add-queue ( xt us -- )
     ticks +  o queue-adder >o queue-job !  queue-timestamp !
@@ -1778,6 +1776,45 @@ Variable client-task
 
 : init-server ( -- )
     init-timer new-server init-route prep-socks ;
+
+\ connection cookies
+
+object class
+    64field: cc-cookie
+    64field: cc-timeout
+    field: cc-context
+end-class con-cookie
+
+con-cookie @ Constant cookie-size#
+
+Variable cookies s" " cookies $!
+con-cookie @ buffer: cookie-adder
+
+#5000000000. 2Constant connect-timeout#
+
+: add-cookie ( -- cookie )
+    o cookie-adder >o cc-context !
+    ntime connect-timeout# d+ d>64 cc-timeout 64!
+    rng@ 64dup cc-cookie 64! o o> cookie-size#  cookies $+! ;
+
+: ?cookie ( cookie -- context true / false ) ntime { d: timeout }
+    0 >r BEGIN  r@ cookies $@len u<  WHILE
+	    cookies $@ r@ /string drop >o
+	    64dup cc-cookie 64@ 64= IF
+		64drop cc-context @ o>
+		cookies r> cookie-size# $del
+		true  EXIT  THEN
+	    cc-timeout 64@ timeout d>64 64u< IF
+		cookies r@ cookie-size# $del
+	    ELSE
+		r> cookie-size# + >r
+	    THEN
+    REPEAT  64drop rdrop false ;
+
+: cookie>context? ( cookie -- context true / false )
+    ?cookie over 0= over and IF
+	nip return-addr @ n2o:new-context o 0 >o rdrop swap
+    THEN ;
 
 \ load net2o commands
 
