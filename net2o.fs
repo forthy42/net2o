@@ -175,6 +175,8 @@ s" ivs must be 64 bytes"         throwcode !!ivs!!
 s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
 s" net2o timed out"              throwcode !!timeout!!
 s" no key file"                  throwcode !!nokey!!
+s" maximum nesting reached"      throwcode !!maxnest!!
+s" nesting stack empty"          throwcode !!minnest!!
 
 \ Create udp socket
 
@@ -708,7 +710,6 @@ resend-size# buffer: resend-init
     dup return-addr !  return-address !
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
-    data-resend @ crypto-key @ o 2drop
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
@@ -1800,13 +1801,14 @@ con-cookie @ buffer: cookie-adder
 : ?cookie ( cookie -- context true / false ) ntime { d: timeout }
     0 >r BEGIN  r@ cookies $@len u<  WHILE
 	    cookies $@ r@ /string drop >o
-	    64dup cc-cookie 64@ 64= IF
-		64drop cc-context @ o>
-		cookies r> cookie-size# $del
-		true  EXIT  THEN
 	    cc-timeout 64@ timeout d>64 64u< IF
 		cookies r@ cookie-size# $del
 	    ELSE
+		64dup cc-cookie 64@ 64= IF
+		    64drop cc-context @ o>
+		    cookies r> cookie-size# $del
+		    true  EXIT
+		THEN
 		r> cookie-size# + >r
 	    THEN
     REPEAT  64drop rdrop false ;

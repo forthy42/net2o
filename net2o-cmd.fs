@@ -240,13 +240,20 @@ Variable throwcount
     maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
     nip init0buf swap mykey-salt# + 2 64s + ;
 
+$10 Constant maxnest#
 Variable neststart#
+Variable neststack maxnest# cells allot \ nest up to 10 levels
 
-: nest[ ( -- )  cmdbuf# @ neststart# ! ;
+: @+ ( addr -- n addr' )  dup @ swap cell+ ;
+: nest[ ( -- ) neststart# @ neststack @+ swap cells + !
+    1 neststack +! neststack @ maxnest# u>= !!maxnest!!
+    cmdbuf# @ neststart# ! ;
 
 : cmd> ( -- addr u )
     init0buf mykey-salt# + maxdata 2/ erase
-    cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# ! ;
+    cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# !
+    -1 neststack +! neststack @ 0< !!minnest!!
+    neststack @+ swap cells + @ neststart# ! ;
 
 : cmd>init ( -- addr u ) cmd> >initbuf 2dup wurst-encrypt$ ;
 : cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
@@ -293,7 +300,7 @@ also net2o-base definitions
 5 net2o: type ( addr u -- )  F type ;
 6 net2o: . ( -- ) 64. ;
 7 net2o: cr ( -- ) F cr ;
-
+\ 8 is throw, but will be defined last
 9 net2o: see-me ( -- ) n2o:see-me ;
 
 10 net2o: push-$    $, ;
@@ -303,12 +310,11 @@ also net2o-base definitions
 
 13 net2o: push'     p@ cmd, ;
 14 net2o: nest ( addr u -- )  cmdnest ;
-93 net2o: tmpnest ( addr u -- )  cmdtmpnest ;
+15 net2o: tmpnest ( addr u -- )  cmdtmpnest ;
 
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
-15 net2o: new-context ( -- ) return-addr @ n2o:new-context ;
 16 net2o: new-data ( addr addr u -- )  64>n  n2o:new-data ;
 17 net2o: new-code ( addr addr u -- )  64>n  n2o:new-code ;
 18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
@@ -339,7 +345,8 @@ also net2o-base definitions
     keypad keysize $, store-key
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
-    ]nest  n2o:create-map  64drop 2drop 64drop ;
+    ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
+    64drop 2drop 64drop ;
 
 net2o-base
 
@@ -393,7 +400,7 @@ net2o-base
 54 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
 55 net2o: key-request ( -- addr u )
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
-    nest[ pkc keysize $, receive-key ]tmpnest ;
+    nest[ pkc keysize $, receive-key ;
 56 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
@@ -723,7 +730,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     nest[ add-cookie lit, set-cookie
     ticks lit, set-rtdelay gen-reply request-done ]nest
     tmpkey-request key-request
-    req-codesize @  req-datasize @ map-request,
+    req-codesize @  req-datasize @  map-request,
     end-code ;
 
 : ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
