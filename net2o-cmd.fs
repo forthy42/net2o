@@ -342,7 +342,7 @@ also net2o-base definitions
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
     0 >o add-cookie o> lit, set-cookie
-    keypad keysize $, store-key
+    keypad keysize $, store-key  stskc KEYSIZE erase
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
@@ -778,7 +778,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     gen-request
     +connecting
     1 client-loop
-    -timeout ;
+    -timeout tskc KEYBYTES erase ;
 
 : rewind? ( -- )
     data-rmap @ >o dest-round @ o> lit, rewind-sender ;
