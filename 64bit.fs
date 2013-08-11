@@ -63,6 +63,9 @@ cell 8 = [IF]
     ' 2@ Alias 128@ ( addr -- d )
     ' d= Alias 128= ( d1 d2 -- flag )
     ' 2! Alias 128! ( d addr -- )
+    also locals-types definitions
+    ' w: alias 64:
+    previous definitions
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -139,6 +142,9 @@ cell 8 = [IF]
 	r@ cell+ !
 	r@ 2 cells + !
 	r> 3 cells + ! ;
+    also locals-types definitions
+    ' d: alias 64:
+    previous definitions
 [THEN]
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+

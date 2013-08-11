@@ -1781,7 +1781,6 @@ Variable client-task
 \ connection cookies
 
 object class
-    64field: cc-cookie
     64field: cc-timeout
     field: cc-context
 end-class con-cookie
@@ -1795,8 +1794,8 @@ con-cookie @ buffer: cookie-adder
 
 : add-cookie ( -- cookie )
     o cookie-adder >o cc-context !
-    ntime connect-timeout# d+ d>64 cc-timeout 64!
-    rng@ 64dup cc-cookie 64! o o> cookie-size#  cookies $+! ;
+    ntime connect-timeout# d+ d>64 64dup cc-timeout 64!
+    o o> cookie-size#  cookies $+! ;
 
 : ?cookie ( cookie -- context true / false ) ntime { d: timeout }
     0 >r BEGIN  r@ cookies $@len u<  WHILE
@@ -1804,7 +1803,7 @@ con-cookie @ buffer: cookie-adder
 	    cc-timeout 64@ timeout d>64 64u< IF
 		cookies r@ cookie-size# $del
 	    ELSE
-		64dup cc-cookie 64@ 64= IF
+		64dup cc-timeout 64@ 64= IF
 		    64drop cc-context @ o>
 		    cookies r> cookie-size# $del
 		    true  EXIT

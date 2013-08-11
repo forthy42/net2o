@@ -327,11 +327,7 @@ also net2o-base definitions
     0. buf-state 2!  0 >o rdrop ;
 
 : n2o:create-map
-    [ cell 4 = ] [IF]
-	{ d: addrs ucode udata d: addrd -- addrd ucode udata addrs }
-    [ELSE]
-	{ addrs ucode udata addrd -- addrd ucode udata addrs }
-    [THEN]
+    { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
     addrs lit, addrd lit, ucode ulit, new-code
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
