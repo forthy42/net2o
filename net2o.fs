@@ -454,7 +454,6 @@ end-class rdata-class
 object class
     field: context#
     field: wait-task
-    field: context-state
     field: return-address
     64field: recv-tick
     64field: recv-addr
@@ -1794,10 +1793,11 @@ con-cookie @ buffer: cookie-adder
 
 : add-cookie ( -- cookie )
     o cookie-adder >o cc-context !
-    ntime connect-timeout# d+ d>64 64dup cc-timeout 64!
+    ntime d>64 64dup cc-timeout 64!
     o o> cookie-size#  cookies $+! ;
 
-: ?cookie ( cookie -- context true / false ) ntime { d: timeout }
+: ?cookie ( cookie -- context true / false )
+    ntime connect-timeout# d- { d: timeout }
     0 >r BEGIN  r@ cookies $@len u<  WHILE
 	    cookies $@ r@ /string drop >o
 	    cc-timeout 64@ timeout d>64 64u< IF
@@ -1816,6 +1816,8 @@ con-cookie @ buffer: cookie-adder
     ?cookie over 0= over and IF
 	nip return-addr @ n2o:new-context o 0 >o rdrop swap
     THEN ;
+
+: rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64min! ;
 
 \ load net2o commands
 
