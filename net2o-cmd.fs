@@ -198,8 +198,9 @@ previous
 : net2o:tag-reply ( -- )  j?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
-    code-vdest r> reply-dest !  ;
+    code-vdest r> reply-dest ! ;
 : net2o:ack-reply ( index -- )  o 0= IF  drop EXIT  THEN
+    resend0 @ IF  resend0 $off  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j?
     cmd( ." expect: " cmdbuf$ n2o:see )
@@ -411,7 +412,7 @@ net2o-base
 57 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key code-ivs ]tmpnest end-cmd
-      ['] end-cmd IS expect-reply? ;]  IS expect-reply? ;
+      ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;]  IS expect-reply? ;
 58 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
 59 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
 
@@ -731,6 +732,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
 
 : cmd-resend? ( -- )
+    resend0 @ IF
+	\ ." Resend to 0" cr
+	resend0 $@ tuck cmdbuf swap move
+	cmdbuf 0 send-cmd  1 packets2 +!
+    THEN
     code-map @ >o
     dest-replies @
     dest-size @ addr>replies bounds o> ?DO

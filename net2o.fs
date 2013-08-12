@@ -471,6 +471,7 @@ object class
     field: crypto-key
     field: timeout-xt
     field: ack-xt
+    field: resend0
     
     field: data-map
     field: data-rmap
@@ -1004,6 +1005,10 @@ $20 Value mask-bits#
 	    0. data-resend $@ 2 cells - + 2!
 	THEN
     maxdata +LOOP ;
+
+\ resend third handshake
+
+: push-reply ( addr u -- )  resend0 $! ;
 
 \ file handling
 
