@@ -316,9 +316,13 @@ also net2o-base definitions
 : ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
-16 net2o: new-data ( addr addr u -- )  64>n  n2o:new-data ;
-17 net2o: new-code ( addr addr u -- )  64>n  n2o:new-code ;
-18 net2o: request-done ( -- )  own-crypt? IF n2o:request-done THEN ;
+16 net2o: new-data ( addr addr u -- )
+    o own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
+    64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
+17 net2o: new-code ( addr addr u -- )
+    o own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
+    64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
+18 net2o: request-done ( -- )  own-crypt? IF  n2o:request-done  THEN ;
 19 net2o: set-rtdelay ( timestamp -- )
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
@@ -341,9 +345,9 @@ also net2o-base definitions
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
     0 >o add-cookie o> lit, set-rtdelay
-    keypad keysize $, store-key  stskc KEYSIZE erase
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
+    keypad keysize $, store-key  stskc KEYSIZE erase
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 

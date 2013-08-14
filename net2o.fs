@@ -662,20 +662,6 @@ Variable >code-flag
     \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
     >r >r 64dup 64>n r> map-data r@ ! >dest-map cell+ r> @ swap ! ;
 
-Variable mapstart $1 mapstart !
-
-: n2o:new-map ( u -- addr )
-    drop mapstart @ 1 mapstart +! reverse
-    [ cell 4 = ] [IF]  0 swap  [THEN] ; 
-: n2o:new-data ( addrs addrd u -- )
-    o 0= IF drop 64drop 64drop EXIT THEN
-    >code-flag off
-    dup >r data-rmap map-data-dest r> map-source  data-map ! ;
-: n2o:new-code ( addrs addrd u -- )
-    o 0= IF drop 64drop 64drop EXIT THEN
-    >code-flag on
-    dup >r code-rmap map-code-dest r> map-source  code-map ! ;
-
 \ create context
 
 8 Value bursts# \ number of 
@@ -713,6 +699,26 @@ resend-size# buffer: resend-init
     init-flow-control
     -1 blocksize !
     1 blockalign ! ;
+
+\ create new maps
+
+Variable mapstart $1 mapstart !
+
+: n2o:new-map ( u -- addr )
+    drop mapstart @ 1 mapstart +! reverse
+    [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
+: n2o:new-data { 64: addrs 64: addrd u -- }
+    o 0= IF
+\	addrd >dest-map @ ?EXIT
+	return-addr @ n2o:new-context  THEN
+    >code-flag off
+    addrd u data-rmap map-data-dest addrs u map-source  data-map ! ;
+: n2o:new-code { 64: addrs 64: addrd u -- }
+    o 0= IF
+\	addrd >dest-map @ ?EXIT
+	return-addr @ n2o:new-context  THEN
+    >code-flag on
+    addrd u code-rmap map-code-dest addrs u map-source  code-map ! ;
 
 \ data sending around
 
@@ -1323,7 +1329,7 @@ Create chunk-adder chunks-struct allot
 : net2o:send-chunks ( -- )
     chunks $@ bounds ?DO
 	I chunk-context @ o = IF
-	    UNLOOP o>  EXIT
+	    UNLOOP  EXIT
 	THEN
     chunks-struct +LOOP
     resize-lock lock
