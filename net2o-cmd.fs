@@ -317,10 +317,10 @@ also net2o-base definitions
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 16 net2o: new-data ( addr addr u -- )
-    o own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
+    o 0<> tmp-crypt? own-crypt? or and IF  64>n  n2o:new-data  EXIT  THEN
     64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
 17 net2o: new-code ( addr addr u -- )
-    o own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
+    o 0<> tmp-crypt? own-crypt? or and IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
 18 net2o: request-done ( -- )  own-crypt? IF  n2o:request-done  THEN ;
 19 net2o: set-rtdelay ( timestamp -- )
