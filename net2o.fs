@@ -709,13 +709,13 @@ Variable mapstart $1 mapstart !
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
 : n2o:new-data { 64: addrs 64: addrd u -- }
     o 0= IF
-\	addrd >dest-map @ ?EXIT
+	addrd >dest-map @ ?EXIT
 	return-addr @ n2o:new-context  THEN
     >code-flag off
     addrd u data-rmap map-data-dest addrs u map-source  data-map ! ;
 : n2o:new-code { 64: addrs 64: addrd u -- }
     o 0= IF
-\	addrd >dest-map @ ?EXIT
+	addrd >dest-map @ ?EXIT
 	return-addr @ n2o:new-context  THEN
     >code-flag on
     addrd u code-rmap map-code-dest addrs u map-source  code-map ! ;
@@ -1800,7 +1800,7 @@ con-cookie @ Constant cookie-size#
 Variable cookies s" " cookies $!
 con-cookie @ buffer: cookie-adder
 
-#5000000000. 2Constant connect-timeout#
+#5000000000. d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie )
     o cookie-adder >o cc-context !
@@ -1808,10 +1808,10 @@ con-cookie @ buffer: cookie-adder
     o o> cookie-size#  cookies $+! ;
 
 : ?cookie ( cookie -- context true / false )
-    ntime connect-timeout# d- { d: timeout }
+    ticks connect-timeout# 64- { 64: timeout }
     0 >r BEGIN  r@ cookies $@len u<  WHILE
 	    cookies $@ r@ /string drop >o
-	    cc-timeout 64@ timeout d>64 64u< IF
+	    cc-timeout 64@ timeout 64u< IF
 		cookies r@ cookie-size# $del
 	    ELSE
 		64dup cc-timeout 64@ 64= IF

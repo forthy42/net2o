@@ -123,6 +123,8 @@ Defer net2o-do
 
 : F also forth parse-name parser1 execute previous ; immediate
 
+: un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
+
 Vocabulary net2o-base
 
 forth also net2o-base definitions previous
@@ -317,11 +319,11 @@ also net2o-base definitions
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 16 net2o: new-data ( addr addr u -- )
-    o 0<> tmp-crypt? own-crypt? or and IF  64>n  n2o:new-data  EXIT  THEN
-    64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
+    o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
+    64drop 64drop 64drop  un-cmd ;
 17 net2o: new-code ( addr addr u -- )
-    o 0<> tmp-crypt? own-crypt? or and IF  64>n  n2o:new-code  EXIT  THEN
-    64drop 64drop 64drop  0. buf-state 2!  0 >o rdrop ;
+    o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
+    64drop 64drop 64drop  un-cmd ;
 18 net2o: request-done ( -- )  own-crypt? IF  n2o:request-done  THEN ;
 19 net2o: set-rtdelay ( timestamp -- )
     o IF  rtdelay!  EXIT  THEN
@@ -330,8 +332,11 @@ also net2o-base definitions
 	IF  >o rdrop
 	    ticks recv-tick 64! rtdelay! \ time stamp of arrival
 	    EXIT
+	ELSE \ just check if timeout didn't expire
+	    ticks connect-timeout# 64- 64u< 0= ?EXIT
+	    64#0
 	THEN
-    THEN  64drop  0. buf-state 2!  0 >o rdrop ;
+    THEN  64drop  un-cmd ;
 
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
@@ -340,11 +345,12 @@ also net2o-base definitions
     addrd ucode udata addrs ;
 
 92 net2o: store-key ( addr u -- )
+    o 0= IF  un-cmd  EXIT  THEN
     own-crypt? IF  crypto-key $+!  ELSE  2drop  THEN ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
-    0 >o add-cookie o> lit, set-rtdelay
+    ( 0 >o add-cookie o> ) ticks lit, set-rtdelay
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize $, store-key  stskc KEYSIZE erase
