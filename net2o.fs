@@ -25,13 +25,16 @@ require string.fs
 require struct0x.fs
 require curve25519.fs
 require wurstkessel.fs
-require wurstkessel-init.fs
 require libkeccak.fs
+keccak-o crypto-o !
+\ wurstkessel-o crypto-o !
+require rng.fs
 require hash-table.fs
 require debugging.fs
 require mini-oof2.fs
 
 \ porting helper to mini-oof2
+
 0 [IF]
 Variable do-stackrel
 
@@ -43,6 +46,7 @@ comp: >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
 : o]  do-stackrel ! ;  immediate
 do-stackrel off
 [THEN]
+
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
@@ -675,8 +679,6 @@ $100 Value flybursts-max#
 $10 cells Value resend-size#
 
 Variable init-context#
-wurstkessel-o crypto-o !
-\ keccak-o crypto-o !
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
@@ -1731,7 +1733,7 @@ Variable timeout-task
 0 Value server?
 Variable requests
 
-: server-loop-nocatch ( -- )  0 stick-to-core
+: server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  server-event +event  AGAIN ;
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
@@ -1745,7 +1747,7 @@ event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
 
-: client-loop-nocatch ( -- )  1 stick-to-core
+: client-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
 	ELSE  2drop requests @ IF  ?timeout ?dup-IF  >o rdrop

@@ -1,6 +1,6 @@
 \ symmetric encryption and decryption
 
-256 buffer: key-assembly
+128 buffer: key-assembly
 : >wurst-key ( addr u -- )
     dup 0= IF  2drop wurst-key state#  THEN
     key-assembly state# + state# bounds DO
@@ -98,7 +98,7 @@ Defer regen-ivs
     key( ." inbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
 state# buffer: mykey \ server's private key
-rng$ mykey swap move
+state# rng$ mykey swap move
 
 : wurst-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >wurst-source
@@ -112,7 +112,7 @@ rng$ mykey swap move
     2>r over >r  rng@ rng@ r> 128! 2r> wurst-key-init ;
 
 : encrypt$ ( addr u1 key u2 -- )
-    wurst-key-setup 2 64s - c:encrypt+auth ;
+    wurst-key-setup  2 64s - c:encrypt+auth ;
 
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
     wurst-key-init 2 64s - 2dup c:decrypt+auth ;
@@ -144,7 +144,7 @@ keysize buffer: keypad
 Variable do-keypad "" do-keypad $!
 
 : (gen-keys) { skc pkc -- }
-    rng$ keysize umin skc swap move
+    keysize rng$ skc swap move
     pkc skc base9 crypto_scalarmult ;
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.

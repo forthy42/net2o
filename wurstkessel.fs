@@ -524,49 +524,11 @@ Create 'round-flags
     REPEAT
     rdrop  wurst-close ;
 
-\ wurstkessel rng
-
-4 Constant rngs#
-
-: rng-init
-    wurst-salt rounds-setkey
-    message state# rngs# * erase ;
+\ benchmark to evaluate quality of the compiled code
 
 $18 Value roundsh#
 $28 Value rounds#
 4 Value roundse#
-
-Variable rng-buffer state# rngs# * allot
-state# rngs# * rng-buffer !
-
-: rng-step ( -- )
-    rng-init  rng-buffer cell+ rounds# rounds-encrypt
-    rng-buffer off
-    wurst-source rounds-setkey ;
-
-\ buffered random numbers to output 64 bit at a time
-
-: rng-step? ( n -- ) state# rngs# * u> IF  rng-step  THEN ;
-
-: rng@ ( -- x )
-    rng-buffer @ 64aligned 64'+ rng-step?
-    rng-buffer dup @ 64aligned dup 64'+ rng-buffer ! cell+ + 64@ ;
-
-: rng$ ( -- addr u )
-    rng-buffer @ state# + rng-step?
-    rng-buffer dup @ + cell+ state# dup rng-buffer +! ;
-
-: >rng$ ( addr u -- )  \ fill buffer with random stuff
-    bounds ?DO
-	rng$ I' I - umin I swap dup >r move r>
-    +LOOP ;
-
-: rng32 ( -- x )
-    rng-buffer @ 4 + rng-step?
-    rng-buffer dup @ + cell+ l@
-    4 rng-buffer +! ;
-
-\ benchmark to evaluate quality of the compiled code
 
 : wurst-bench ( n -- ) >r cputime d+
     r@ 0 ?DO  message rounds# rounds-encrypt  LOOP  cputime d+ d- d>f -1e-6 f*

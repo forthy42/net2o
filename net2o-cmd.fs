@@ -269,7 +269,7 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
 : cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
-    0= IF  2drop ." Invalid nest" cr  EXIT  THEN tmp-crypt-val do-nest ;
+    0= IF  2drop ." Invalid tmpnest" cr  EXIT  THEN tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
 
@@ -334,9 +334,8 @@ also net2o-base definitions
 	    EXIT
 	ELSE \ just check if timeout didn't expire
 	    ticks connect-timeout# 64- 64u< 0= ?EXIT
-	    64#0
 	THEN
-    THEN  64drop  un-cmd ;
+    ELSE  64drop  THEN  un-cmd ;
 
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
@@ -413,11 +412,11 @@ net2o-base
 \ create commands to send back
 
 : data-ivs ( -- ) \ two IV seeds for send and receive data
-    rng$ 2dup $, gen-data-ivs data-rmap ivs-string
-    rng$ 2dup $, gen-rdata-ivs data-map ivs-string ;
+    state# rng$ 2dup $, gen-data-ivs data-rmap ivs-string
+    state# rng$ 2dup $, gen-rdata-ivs data-map ivs-string ;
 : code-ivs ( -- ) \ two IV seeds for send and receive code
-    rng$ 2dup $, gen-code-ivs code-rmap ivs-string
-    rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
+    state# rng$ 2dup $, gen-code-ivs code-rmap ivs-string
+    state# rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
 
 57 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
