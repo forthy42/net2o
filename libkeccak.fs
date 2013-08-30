@@ -8,7 +8,9 @@
 c-library keccak
 \    s" keccak/.libs" add-libpath
     s" keccak" add-lib
+[IFDEF] android
     s" ./keccak" add-libpath
+[THEN]
     \c #include <KeccakF-1600.h>
 
     include keccak.fs

@@ -239,7 +239,9 @@ s" bigFORTH" environment? [IF] 2drop
 s" gforth" environment? [IF] 2drop
     require libcc.fs
     require string.fs
+    also c-lib
     : \c, ( addr u -- ) save-c-prefix-line ;
+    previous
     Variable %string  s" " %string $!
     : %> ( -- )
 	BEGIN  source >in @ /string s" <%" search  0= WHILE
@@ -597,3 +599,6 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
 static-a to allocater
 wurstkessel new Constant wurstkessel-o
 dynamic-a to allocater
+
+wurst-init
+wurst-task-init

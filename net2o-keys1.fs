@@ -181,7 +181,7 @@ previous definitions
     keypack keypack-all# ?key-fd append-file ;
 
 : rnd>file ( -- )
-    keypack keypack-all# >rng$ key>file ;
+    ( keypack keypack-all# >rng$ ) key>file ;
 
 : >keys ( -- )
     keypad skc pkc crypto_scalarmult keypad keysize +key ;
