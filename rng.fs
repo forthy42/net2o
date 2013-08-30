@@ -11,6 +11,7 @@ User rng-buffer
 User rng-pid
 User rng-task
 User rng-key
+rngbuf# rng-pos !
 
 : rng-allot ( -- )
     rngbuf# allocate throw rng-buffer !
@@ -53,8 +54,10 @@ User rng-key
 \ buffered random numbers to output 64 bit at a time
 
 : rng-step? ( n -- )
-    up@ rng-task @ <> getpid rng-pid @ <> or IF  rng-allot salt-init  THEN
-    rngbuf# u> IF  rng-step  THEN ;
+    rngbuf# u> IF
+	up@ rng-task @ <> getpid rng-pid @ <> or
+	IF  rng-allot salt-init  THEN
+	rng-step  THEN ;
 
 : rng@ ( -- x )
     rng-pos @ 64aligned 64'+ rng-step?
