@@ -54,10 +54,9 @@ rngbuf# rng-pos !
 \ buffered random numbers to output 64 bit at a time
 
 : rng-step? ( n -- )
-    rngbuf# u> IF
-	up@ rng-task @ <> getpid rng-pid @ <> or
-	IF  rng-allot salt-init  THEN
-	rng-step  THEN ;
+    up@ rng-task @ <> getpid rng-pid @ <> or
+    IF  rng-allot salt-init  THEN
+    rngbuf# u> IF  rng-step  THEN ;
 
 : rng@ ( -- x )
     rng-pos @ 64aligned 64'+ rng-step?
