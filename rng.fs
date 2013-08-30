@@ -8,14 +8,15 @@ s" /dev/urandom" r/o open-file throw Value rng-fd
 
 User rng-pos
 User rng-buffer
-User rng-tid
+User rng-pid
+User rng-task
 User rng-key
 
 : rng-allot ( -- )
     rngbuf# allocate throw rng-buffer !
     c:key# allocate throw rng-key !
     rngbuf# rng-pos !
-    pthread_self rng-tid ! ;
+    getpid rng-pid ! up@ rng-task ! ;
 
 : rng-exec ( xt -- )  c:key@ >r  rng-key @ c:key!  execute  r> c:key! ;
 
@@ -52,7 +53,7 @@ User rng-key
 \ buffered random numbers to output 64 bit at a time
 
 : rng-step? ( n -- )
-    pthread_self rng-tid @ <> IF  rng-allot salt-init  THEN
+    up@ rng-task @ <> getpid rng-pid @ <> or IF  rng-allot salt-init  THEN
     rngbuf# u> IF  rng-step  THEN ;
 
 : rng@ ( -- x )
