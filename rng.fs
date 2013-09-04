@@ -19,7 +19,8 @@ rngbuf# rng-pos !
     rngbuf# rng-pos !
     getpid rng-pid ! up@ rng-task ! ;
 
-: rng-exec ( xt -- )  c:key@ >r  rng-key @ c:key!  execute  r> c:key! ;
+: rng-exec ( xt -- )  c:key@ >r  rng-key @ c:key!
+    execute  r> c:key! ;
 
 : rng-init ( -- )
     rng-buffer @ rngbuf# rng-fd read-file throw drop ;
@@ -38,8 +39,8 @@ rngbuf# rng-pos !
 
 : read-initrng ( fd -- flag )  { fd }
     0. fd reposition-file throw
-    rng-key @ c:key# fd read-file throw c:key# =  c:diffuse
-    fd close-file throw ;
+    rng-key @ c:key# fd read-file throw c:key# =
+    c:diffuse  fd close-file throw ;
 
 : write-initrng ( -- )
     s" ~/.initrng" r/w create-file throw >r
@@ -60,7 +61,8 @@ rngbuf# rng-pos !
 
 : rng@ ( -- x )
     rng-pos @ 64aligned 64'+ rng-step?
-    rng-pos @ 64aligned dup 64'+ rng-pos ! rng-buffer @ + 64@ ;
+    rng-pos @ 64aligned dup 64'+ rng-pos !
+    rng-buffer @ + 64@ ;
 
 : rng$ ( u -- addr u ) >r
     rng-pos @ r@ + rng-step?

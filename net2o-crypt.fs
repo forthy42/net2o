@@ -169,17 +169,17 @@ Variable do-keypad "" do-keypad $!
 
 : regen-ivs/2 ( -- )
     c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs/2 " dup .64b ." :" dup state# + .64b cr ) c:key!
+    dest-ivsgen @ key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
     clear-replies
     dest-ivs $@ dest-a/b c:prng
     -1 dest-ivslastgen xor! r> c:key! ;
 
 : regen-ivs-all ( o:map -- )  c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
+    dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
     dest-ivs $@ c:prng r> c:key! ;
 
 : regen-ivs-part ( new-back -- )  c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs " dup .64b ." :" dup state# + .64b cr ) c:key!
+    dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
     dest-back @ - addr>keys >r
     dest-ivs $@ dest-back @ dest-size @ 1- and
     addr>keys /string r@ umin dup >r c:prng
