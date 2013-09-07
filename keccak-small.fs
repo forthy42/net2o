@@ -26,7 +26,7 @@ carray keccakf-rotc
 : cc,  cells c, ;
 
 carray keccakf-piln
-10 cc, 7 cc,  11 cc, 17 cc, 18 cc, 3 cc,5 cc,  16 cc, 8 cc,  21 cc, 24 cc, 4 cc,
+10 cc, 7 cc,  11 cc, 17 cc, 18 cc, 3 cc, 5 cc,  16 cc, 8 cc,  21 cc, 24 cc, 4 cc,
 15 cc, 23 cc, 19 cc, 13 cc, 12 cc, 2 cc, 20 cc, 14 cc, 22 cc, 9 cc,  6 cc,  1 cc,
 
 carray mod5

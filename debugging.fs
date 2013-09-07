@@ -46,6 +46,7 @@ debug: flush2(
 debug: flush3(
 debug: waitkey(
 debug: address(
+debug: dump(
 
 +db ens(
 

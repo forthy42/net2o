@@ -1610,11 +1610,14 @@ Defer init-reply
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
+0 Value dump-fd
+
 : next-client-packet ( -- addr u )
     try-read-packet-wait 2dup d0= ?EXIT
     sockaddr alen @ insert-address
     inbuf ins-source
-    over packet-size over <> !!size!! +next ;
+    over packet-size over <> !!size!! +next
+    dump( 2dup dump-fd write-file throw ) ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
@@ -1785,6 +1788,7 @@ Variable client-task
 \ client/server initializer
 
 : init-client ( -- )
+    dump( "n2o.dump" r/w create-file throw to dump-fd )
     init-timer new-client init-route prep-socks ;
 
 : init-server ( -- )
