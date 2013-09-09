@@ -2,10 +2,6 @@
 
 require mkdir.fs
 
-Vocabulary new-keys
-
-also new-keys definitions
-
 \ accept for password entry
 
 : accept* ( addr u -- u' )
@@ -212,16 +208,10 @@ previous definitions
 	read-key-loop  key-fd close-file throw  0 to key-fd  THEN
     0. ?key-fd reposition-file throw  read-key-loop ;
 
-\ revert
-
-previous definitions
-
-also new-keys
+\ select key by nick
 
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
     nick-key  this-keyid @ 0= ?EXIT
     this-keyid @ pkc keysize move
     ke-sk $@ skc swap move ;
-
-previous
