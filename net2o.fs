@@ -1162,7 +1162,7 @@ file-state-struct buffer: new-file-state
     LOOP ;
 
 require net2o-crypt.fs
-require net2o-keys.fs
+\ require net2o-keys.fs
 
 \ cookie stuff
 
@@ -1839,7 +1839,7 @@ con-cookie @ buffer: cookie-adder
 \ load net2o commands
 
 require net2o-cmd.fs
-require net2o-keys1.fs
+require net2o-keys.fs
 
 0 [IF]
 Local Variables:
