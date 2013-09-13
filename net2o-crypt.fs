@@ -208,7 +208,7 @@ Variable do-keypad "" do-keypad $!
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
     keysize crypto-key $!
-    ( ." set key to:" o crypto-key $@ dump ) ;
+    ." set key to:" o crypto-key $@ .nnb cr ;
 
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
