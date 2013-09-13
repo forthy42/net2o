@@ -269,7 +269,7 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
 : cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
-    0= IF  2drop ." Invalid tmpnest: " tmpkey@ .nnb cr  EXIT  THEN tmp-crypt-val do-nest ;
+    0= IF  2drop ." Invalid tmpnest: o=" o hex. tmpkey@ .nnb cr  EXIT  THEN tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
 
@@ -344,11 +344,11 @@ also net2o-base definitions
     addrd ucode udata addrs ;
 
 92 net2o: store-key ( addr u -- )
-    o 0= IF  ." don't store key, o=0: " .nnb cr un-cmd  EXIT  THEN
+    o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
-	." store key: " 2dup .nnb cr
+	." store key: o=" o hex. 2dup .nnb F cr
 	crypto-key $+!
-    ELSE  ." don't store key: " .nnb cr  THEN ;
+    ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
