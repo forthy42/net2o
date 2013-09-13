@@ -1,17 +1,17 @@
 \ symmetric encryption and decryption
 
 128 buffer: key-assembly
-: >wurst-key ( addr u -- )
+: >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop wurst-key state#  THEN
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
-    key-assembly key( ." >wurst-key " dup .64b ." :" dup state# + .64b cr )
+    key-assembly key( ." >crypt-key " dup .64b ." :" dup state# + .64b cr )
     >c:key ;
-: >wurst-source' ( addr -- )
+: >crypt-source' ( addr -- )
     crypt( ." ivs iv: "  dup state# .nnb cr )
     key-assembly state# move ;
-: >wurst-source ( addr u -- )
+: >crypt-source ( addr u -- )
     key-assembly state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop ;
@@ -65,8 +65,8 @@ Defer regen-ivs
 : default-key ( -- )
     c:key@ 0= IF
 	key( ." Default-key " cr )
-	rnd-init >wurst-source'
-	wurst-key$ >wurst-key
+	rnd-init >crypt-source'
+	wurst-key$ >crypt-key
     THEN ;
 
 : wurst-outbuf-init ( flag -- )
@@ -101,8 +101,8 @@ state# buffer: mykey \ server's private key
 state# rng$ mykey swap move
 
 : wurst-key-init ( addr u key u -- addr' u' ) 2>r
-    over mykey-salt# >wurst-source
-    2r> >wurst-key 
+    over mykey-salt# >crypt-source
+    2r> >crypt-key 
     mykey-salt# safe/string
     c:diffuse ;
 
@@ -156,7 +156,7 @@ Variable do-keypad "" do-keypad $!
 \    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
 ;
 
-: >wurst-key-ivs ( -- )
+: >crypt-key-ivs ( -- )
     o 0= IF
 	crypt( ." IVS generated for non-connection!" cr )
 	wurst-key state#
@@ -165,7 +165,7 @@ Variable do-keypad "" do-keypad $!
 	    crypto-key $@
 	THEN
     THEN crypt( ." ivs key: " 2dup .nnb cr )
-    >wurst-key ;
+    >crypt-key ;
 
 : regen-ivs/2 ( -- )
     c:key@ >r
@@ -199,7 +199,7 @@ Variable do-keypad "" do-keypad $!
 
 : ivs-string ( addr u map -- )  c:key@ >r
     @ >o dest-size @ addr>keys dest-ivs o o> >r >r r@ $!len
-    state# <> !!ivs!! >wurst-source' >wurst-key-ivs c:diffuse
+    state# <> !!ivs!! >crypt-source' >crypt-key-ivs c:diffuse
     r> $@ c:prng
     r> >o dest-ivsgen @ c:key> o>
     r> c:key! ;
@@ -221,7 +221,7 @@ Variable do-keypad "" do-keypad $!
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     keypad swap rot crypto_scalarmult
-    o IF  keypad keysize do-keypad $+!  THEN
+    o IF  keypad keysize do-keypad $!  THEN
     ( keypad keysize .nnb cr ) ;
 
 : tmpkey@ ( -- addr u )
@@ -230,7 +230,7 @@ Variable do-keypad "" do-keypad $!
 
 : net2o:update-key ( -- )
     do-keypad $@ dup IF
-	." store key, o=" o hex. 2dup .nnb cr crypto-key $+!
+	." store key, o=" o hex. 2dup .nnb cr crypto-key $!
 	"" do-keypad $!
 	EXIT
     THEN
