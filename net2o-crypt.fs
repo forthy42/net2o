@@ -225,7 +225,8 @@ Variable do-keypad "" do-keypad $!
     ( keypad keysize .nnb cr ) ;
 
 : tmpkey@ ( -- addr u )
-   do-keypad $@  dup 0= IF  2drop  keypad keysize  THEN ;
+    do-keypad $@  dup ?EXIT  2drop
+    keypad keysize ;
 
 : net2o:update-key ( -- )
     do-keypad $@ dup IF
