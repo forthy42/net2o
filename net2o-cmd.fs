@@ -346,7 +346,7 @@ also net2o-base definitions
 92 net2o: store-key ( addr u -- )
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
-	." store key: o=" o hex. 2dup .nnb F cr
+	key( ." store key: o=" o hex. 2dup .nnb F cr )
 	2dup do-keypad $!
 	crypto-key $!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;

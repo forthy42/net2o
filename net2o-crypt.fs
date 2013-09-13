@@ -230,7 +230,7 @@ Variable do-keypad "" do-keypad $!
 
 : net2o:update-key ( -- )
     do-keypad $@ dup IF
-	." store key, o=" o hex. 2dup .nnb cr crypto-key $!
+	key( ." store key, o=" o hex. 2dup .nnb cr ) crypto-key $!
 	"" do-keypad $!
 	EXIT
     THEN
