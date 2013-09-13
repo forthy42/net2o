@@ -33,9 +33,7 @@ rngbuf# rng-pos !
 \ init rng to be actually useful
 
 : random-init ( -- )
-    s" /dev/random" r/o open-file throw >r
-    rng-key @ c:key# r@ read-file throw drop
-    r> close-file throw ;
+    rng-key @ c:key# rng-fd read-file throw drop ;
 
 : read-initrng ( fd -- flag )  { fd }
     0. fd reposition-file throw

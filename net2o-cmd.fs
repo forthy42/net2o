@@ -269,7 +269,7 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
 : cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
-    0= IF  2drop ." Invalid tmpnest" cr  EXIT  THEN tmp-crypt-val do-nest ;
+    0= IF  2drop ." Invalid tmpnest: " tmpkey@ .nnb cr  EXIT  THEN tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
 
@@ -773,7 +773,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : connecting-timeout ( -- )
     F .time ."  connecting timeout" F cr
-    gen-request ;
+    cmdbuf 0 send-cmd  1 packets2 +! ;
 : connected-timeout ( -- )
     F .time ."  connected timeout " received @ hex. expected @ hex. F cr
     cmd-resend? transfer-keepalive? ;
