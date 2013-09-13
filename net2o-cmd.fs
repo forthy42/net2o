@@ -344,7 +344,7 @@ also net2o-base definitions
     addrd ucode udata addrs ;
 
 92 net2o: store-key ( addr u -- )
-    o 0= IF  un-cmd  EXIT  THEN
+    o 0= IF  ." don't store key, o=0: " .nnb cr un-cmd  EXIT  THEN
     own-crypt? IF  crypto-key $+!  ELSE  ." don't store key: " .nnb cr  THEN ;
 
 20 net2o: map-request ( addrs ucode udata -- )  2*64>n
