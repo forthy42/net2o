@@ -1750,16 +1750,19 @@ event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
 
+: request-timeout ( -- )
+    ?timeout ?dup-IF  >o rdrop
+	rtdelay 64@ 64dup max-int64 64= 0=
+	IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
+	>next-timeout
+	do-timeout -1 timeouts +!
+	timeouts @ 0<= IF  ->timeout  THEN
+    THEN ;
+
 : client-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  next-client-packet dup
 	IF    client-event +event reset-timeout +reset
-	ELSE  2drop requests @ IF  ?timeout ?dup-IF  >o rdrop
-		    rtdelay 64@ 64dup max-int64 64= 0=
-		    IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
-		    >next-timeout
-		    do-timeout -1 timeouts +!
-		    timeouts @ 0<= IF  ->timeout  THEN
-		THEN  THEN  THEN
+	ELSE  2drop requests @ IF  request-timeout  THEN  THEN
 	o IF  wait-task @ event>  THEN  AGAIN ;
 
 : n2o:request-done ( -- )
