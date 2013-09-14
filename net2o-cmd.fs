@@ -221,7 +221,7 @@ Variable throwcount
     cmd( 2dup dest-addr 64@ 64. n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
-    dup IF   1 throwcount +! dup DoError nothrow
+    dup IF   1 throwcount +! dup s" do-cmd-loop: " etype DoError nothrow
 	n2o:see-me  throwcount @ 4 < IF  >throw  THEN  THEN
     drop  r> sp! 2drop +cmd ;
 
@@ -744,21 +744,27 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
 
-: cmd-resend? ( -- )
+: 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
-	resend0 $@ tuck cmdbuf swap move
-	cmdbuf 0 send-cmd  1 packets2 +!
-    THEN
-    code-map @ >o
-    dest-replies @
-    dest-size @ addr>replies bounds o> ?DO
-	I 2@ d0<> IF
-	    timeout( ." resend: " I 2@ n2o:see F cr )
-	    I 2@ cmdbuf# ! I reply-dest @ send-cmd
-	    1 packets2 +!
-	THEN
-    reply +LOOP ;
+	resend0 $@ cmdbuf swap move
+	cmdbuf 0 send-cmd 1 packets2 +!
+    THEN ;
+
+: map-resend? ( -- )
+    code-map @ ?dup-IF  >o
+	dest-replies @
+	dest-size @ addr>replies bounds o> ?DO
+	    I 2@ d0<> IF
+		timeout( ." resend: " I 2@ n2o:see F cr )
+		I 2@ cmdbuf# ! I reply-dest @ send-cmd
+		1 packets2 +!
+	    THEN
+	reply +LOOP
+    THEN ;
+
+: cmd-resend? ( -- )
+    0-resend? map-resend? ;
 
 : .expected ( -- )
     ." expected/received: " recv-addr @ hex.
@@ -779,7 +785,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     F .time ."  connecting timeout" F cr
     cmdbuf 0 send-cmd  1 packets2 +! ;
 : connected-timeout ( -- )
-    F .time ."  connected timeout " received @ hex. expected @ hex. F cr
+    F .time ."  connected timeout, o=" o hex.
+    received @ hex. expected @ hex. F cr
     cmd-resend? transfer-keepalive? ;
 
 : +connecting   ['] connecting-timeout timeout-xt ! ;
@@ -789,8 +796,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
     req-datasize !  req-codesize !
-    gen-request
-    +connecting
+    gen-request cmdbuf$ resend0 $!
+    +resend
     1 client-loop
     -timeout tskc KEYBYTES erase ;
 

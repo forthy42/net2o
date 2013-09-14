@@ -114,6 +114,10 @@ timer: +cmd
 timer: +dest
 timer: +ack
 
+\ misc
+
+: etype ( addr u -- ) >stderr type ;
+
 \ Emacs fontlock mode: Highlight more stuff
 
 0 [IF]

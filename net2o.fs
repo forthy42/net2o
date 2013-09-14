@@ -1744,7 +1744,7 @@ Variable requests
 : server-loop ( -- ) true to server?
 \    sender-task @ 0= IF  create-sender-task  THEN
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
-	    DoError nothrow  REPEAT  drop ;
+	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
 
 event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
@@ -1760,7 +1760,7 @@ true !!timeout!! ;
 		    do-timeout -1 timeouts +!
 		    timeouts @ 0<= IF  ->timeout  THEN
 		THEN  THEN  THEN
-	wait-task @ event>  AGAIN ;
+	o IF  wait-task @ event>  THEN  AGAIN ;
 
 : n2o:request-done ( -- )
     o-timeout ->request ;
@@ -1769,7 +1769,7 @@ Variable client-task
 
 : do-client-loop ( -- )
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
-	    DoError nothrow  REPEAT  drop ;
+	    s" client-loop: " etype DoError nothrow  REPEAT  drop ;
 
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
