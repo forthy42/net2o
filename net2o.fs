@@ -424,6 +424,8 @@ $04 Constant resend-toggle#
 
 ' dffield: Alias 64field:
 
+current-o
+
 object class
     field: dest-size
     field: dest-vaddr
@@ -442,6 +444,7 @@ object class
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
     1 pthread-mutexes +field dest-lock
+    method free-data
 end-class code-class
 
 code-class class
@@ -721,6 +724,40 @@ Variable mapstart $1 mapstart !
 	return-addr @ n2o:new-context  THEN
     >code-flag on
     addrd u code-rmap map-code-dest addrs u map-source  code-map ! ;
+
+\ dispose connection
+
+: ?free ( addr -- )
+    dup @ IF  dup @ free throw off  ELSE  drop  THEN ;
+
+: ?free+guard ( addr u -- )
+    over @ IF  over @ swap  free+guard  off  ELSE  2drop  THEN ;
+
+: free-code ( o:data -- ) o 0= ?EXIT
+    dest-raddr dest-size @ ?free+guard
+    dest-ivsgen ?free
+    dest-replies ?free
+    dest-timestamps ?free
+    dest-cookies ?free
+    dispose ;
+' free-code code-class to free-data
+
+:noname ( o:data --- )
+    data-ackbits0 ?free
+    data-ackbits1 ?free
+    data-ackbits-buf $off
+    free-code ; rdata-class to free-data
+
+: n2o:dispose-context ( o:addr -- o:0 )
+    ." Disposing context... " 
+    0. data-map @ >o dest-vaddr 64@ o> >dest-map 2!
+    data-map @ >o free-data o>
+    data-rmap @ >o free-data o>
+    code-map @ >o free-data o>
+    code-rmap @ >o free-data o>
+    crypto-key $off
+    data-resend $off
+    dispose  ." disposed" cr ;
 
 \ data sending around
 

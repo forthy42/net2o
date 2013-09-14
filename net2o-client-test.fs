@@ -135,6 +135,6 @@ end-code
 
 .packets .times
 
-net2o-code s" Download end" $, type cr .time  end-code
+net2o-code s" Download end" $, type cr .time disconnect  end-code
 
 script? [IF] bye [THEN]

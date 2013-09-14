@@ -343,7 +343,7 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-92 net2o: store-key ( addr u -- )
+20 net2o: store-key ( addr u -- )
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
@@ -351,7 +351,7 @@ also net2o-base definitions
 	crypto-key $!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
-20 net2o: map-request ( addrs ucode udata -- )  2*64>n
+21 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
     ( 0 >o add-cookie o> ) ticks lit, set-rtdelay
     max-data# umin swap max-code# umin swap
@@ -360,58 +360,60 @@ also net2o-base definitions
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
+22 net2o: disconnect ( -- )  o 0= ?EXIT n2o:dispose-context un-cmd ;
+
 net2o-base
 
-21 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
-22 net2o: close-file ( id -- )  64>n n2o:close-file ;
-23 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
-24 net2o: slurp-chunk ( id -- ) 64>n id>file data-head@ rot read-file throw /data ;
-25 net2o: send-chunk ( -- ) net2o:send-chunk ;
-26 net2o: send-chunks ( -- ) net2o:send-chunks ;
-27 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
-28 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
+30 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
+31 net2o: close-file ( id -- )  64>n n2o:close-file ;
+32 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
+33 net2o: slurp-chunk ( id -- ) 64>n id>file data-head@ rot read-file throw /data ;
+34 net2o: send-chunk ( -- ) net2o:send-chunk ;
+35 net2o: send-chunks ( -- ) net2o:send-chunks ;
+36 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
+37 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize ! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
 
 \ flow control functions
 
-30 net2o: ack-addrtime ( time addr -- ) 64>n net2o:ack-addrtime ;
-31 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
-32 net2o: set-rate ( ticks1 ticks2 -- )
+40 net2o: ack-addrtime ( time addr -- ) 64>n net2o:ack-addrtime ;
+41 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
+42 net2o: set-rate ( ticks1 ticks2 -- )
     cookie? IF  net2o:set-rate
     ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
-33 net2o: resend-mask ( addr mask -- )
+43 net2o: resend-mask ( addr mask -- )
     2*64>n net2o:resend-mask net2o:send-chunks ;
-34 net2o: track-timing ( -- )  net2o:track-timing ;
-35 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
-36 net2o: send-timing ( -- )
+44 net2o: track-timing ( -- )  net2o:track-timing ;
+45 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
+46 net2o: send-timing ( -- )
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-37 net2o: >time-offset ( n -- )  time-offset 64! ;
+47 net2o: >time-offset ( n -- )  time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
-38 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
-40 net2o: ack-cookies ( cookie addr mask -- )
+48 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
+49 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
-41 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
+50 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
 
 \ crypto functions
 
-50 net2o: receive-key ( addr u -- )
+60 net2o: receive-key ( addr u -- )
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
-51 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
-52 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
-53 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
-54 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
-55 net2o: key-request ( -- addr u )
+61 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
+62 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
+63 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
+64 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
+65 net2o: key-request ( -- addr u )
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-56 net2o: update-key ( -- )  net2o:update-key ;
+66 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
 
@@ -422,53 +424,53 @@ net2o-base
     state# rng$ 2dup $, gen-code-ivs code-rmap ivs-string
     state# rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
 
-57 net2o: gen-reply ( -- )
+67 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key code-ivs ]tmpnest end-cmd
       ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;]  IS expect-reply? ;
-58 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
-59 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
+68 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
+69 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
 
 \ better slurping
 
-60 net2o: slurp-block ( id -- 64nextseek )
+70 net2o: slurp-block ( id -- 64nextseek )
     64>n n2o:slurp-block' ;
-61 net2o: track-size ( size id -- )
+71 net2o: track-size ( size id -- )
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-62 net2o: track-seek ( seek id -- )
+72 net2o: track-seek ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-63 net2o: track-limit ( seek id -- )
+73 net2o: track-limit ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
-64 net2o: open-tracked-file ( addr u mode id -- )
+74 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
     r@ id>file F file-size throw d>64 lit, r> ulit, track-size ;
-65 net2o: slurp-tracked-block ( id -- )
+75 net2o: slurp-tracked-block ( id -- )
     64>n dup >r n2o:slurp-block' 64drop lit, r> ulit, track-seek ;
-66 net2o: slurp-tracked-blocks ( idbits -- )
+76 net2o: slurp-tracked-blocks ( idbits -- )
     64>n dup >r n2o:slurp-blocks
     r> [: lit, ulit, track-seek ;] n2o:track-seeks ;
-67 net2o: slurp-all-tracked-blocks ( -- )
+77 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
     [: lit, ulit, track-seek ;] n2o:track-all-seeks ;
-68 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
-69 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
+78 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
+79 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-90 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
-91 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
+80 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
+81 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ acknowledges
 
-70 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
-71 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
-72 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-73 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+90 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
+91 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
+92 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+93 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+
+\ ids 100..120 reserved for key exchange/strage
 
 \ profiling
 
-80 net2o: !time ( -- ) init-timer ;
-81 net2o: .time ( -- ) .packets .times ;
-
-\ ids 100..120 reserved for key exchange/strage
+120 net2o: !time ( -- ) init-timer ;
+121 net2o: .time ( -- ) .packets .times ;
 
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
