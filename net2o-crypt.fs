@@ -213,9 +213,11 @@ Variable do-keypad "" do-keypad $!
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
 
+Defer check-key
+
 : net2o:receive-key ( addr u -- )
     o 0= IF  2drop EXIT  THEN
-    ?keysize
+    ?keysize dup keysize check-key
     keypad skc rot crypto_scalarmult
     keypad keysize do-keypad $+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr

@@ -63,6 +63,16 @@ sample-key this-key ! \ dummy
 	r@ make-thiskey
     THEN  rdrop ;] #map 2drop ;
 
+: key-exist? ( addr u -- flag )
+    key-table #@ d0<> ; 
+
+:noname ( addr u -- )
+    2dup key-exist? 0= IF
+	." Unknown key"  2dup .nnb cr
+    ELSE
+	." Key ok" cr
+    THEN  2drop ; IS check-key
+
 \ get passphrase
 
 3 Value passphrase-retry#
@@ -120,16 +130,16 @@ keypack-all# buffer: keypack-d
 
 also net2o-base definitions
 
-100 net2o: newkey ( addr u -- ) key:new ;
-101 net2o: privkey ( addr u -- ) ke-sk $! +seckey ;
-102 net2o: keytype ( n -- ) 64>n ke-type ! ; \ default: anonymous
-103 net2o: keynick ( addr u -- )  ke-nick $! ;
-104 net2o: keyprofile ( addr u -- ) ke-prof $! ;
-105 net2o: newkeysig ( addr u -- ) save-mem addsig 2!
-    addsig 2 cells ke-sigs $+! ;
+100 net2o: newkey ( addr u -- ) keys? IF  key:new  ELSE  2drop  THEN ;
+101 net2o: privkey ( addr u -- ) keys? IF  ke-sk $! +seckey   ELSE  2drop  THEN ;
+102 net2o: keytype ( n -- ) keys? IF  64>n ke-type !  ELSE  64drop  THEN ; \ default: anonymous
+103 net2o: keynick ( addr u -- ) keys? IF  ke-nick $!  ELSE  2drop  THEN ;
+104 net2o: keyprofile ( addr u -- ) keys? IF ke-prof $!  ELSE  2drop  THEN ;
+105 net2o: newkeysig ( addr u -- ) keys? IF save-mem addsig 2!
+    addsig 2 cells ke-sigs $+!  ELSE  2drop  THEN ;
 106 net2o: keymask ( x -- ) 64drop ;
-107 net2o: keyfirst ( date-ns -- ) ke-first 64! ;
-108 net2o: keylast ( date-ns -- ) ke-last 64! ;
+107 net2o: keyfirst ( date-ns -- ) keys? IF ke-first 64!  ELSE  64drop  THEN ;
+108 net2o: keylast ( date-ns -- ) keys? IF ke-last 64!  ELSE  64drop  THEN ;
 
 previous definitions
 
@@ -194,8 +204,8 @@ previous definitions
     2 cells +LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )
-    dup 0= IF  2drop  EXIT  THEN
-    ( 2dup n2o:see ) do-cmd-loop ;
+    dup 0= IF  2drop  EXIT  THEN  validated @ >r  keys-val validated !
+    ( 2dup n2o:see ) do-cmd-loop  r> validated ! ;
 
 : read-key-loop ( -- )
     BEGIN
@@ -215,3 +225,21 @@ previous definitions
     nick-key  this-keyid @ 0= ?EXIT
     this-keyid @ pkc keysize move
     ke-sk $@ skc swap move ;
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("net2o:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("[:") (0 . 1) (0 . 1) immediate)
+     ((";]") (-1 . 0) (0 . -1) immediate)
+    )
+End:
+[THEN]

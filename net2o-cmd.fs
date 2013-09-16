@@ -783,15 +783,15 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     cmdreset update-rtdelay  ticks lit, timeout
     resend-all  net2o:genack  cmd-send? ;
 
-: connecting-timeout ( -- )
-    F .time ."  connecting timeout" F cr
-    cmdbuf 0 send-cmd  1 packets2 +! ;
+\ : connecting-timeout ( -- )
+\     F .time ."  connecting timeout" F cr
+\     cmdbuf 0 send-cmd  1 packets2 +! ;
 : connected-timeout ( -- )
     F .time ."  connected timeout, o=" o hex.
     received @ hex. expected @ hex. F cr
     cmd-resend? transfer-keepalive? ;
 
-: +connecting   ['] connecting-timeout timeout-xt ! ;
+\ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
 : -timeout      ['] noop               timeout-xt ! ;
 

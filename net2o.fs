@@ -755,6 +755,10 @@ Variable mapstart $1 mapstart !
     data-rmap @ >o free-data o>
     code-map @ >o free-data o>
     code-rmap @ >o free-data o>
+    \ erase crypto keys
+    crypto-key $@ erase
+    tskc KEYBYTES erase
+    resend0 $off
     crypto-key $off
     data-resend $off
     dispose  ." disposed" cr ;
@@ -1672,12 +1676,14 @@ $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
 $10 Constant tmp-crypt-val
+$20 Constant keys-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
+: keys?      ( -- flag )  validated @ keys-val      and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     0 >o rdrop \ address 0 has no job context!
