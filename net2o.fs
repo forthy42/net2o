@@ -1131,7 +1131,7 @@ file-state-struct buffer: new-file-state
     dup /back ;
 
 : save-all-blocks ( -- )  +calc fstates 0 { size fails }
-    0 BEGIN  rdata-back?  WHILE
+    BEGIN  rdata-back?  WHILE
 	    write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
 	    rdata-back? residualwrite @ 0= or  IF
 		write-file# file+ residualwrite off  THEN
