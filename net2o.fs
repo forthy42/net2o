@@ -21,6 +21,7 @@
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
+require unix/filestat.fs
 require string.fs
 require struct0x.fs
 require curve25519.fs
@@ -215,6 +216,9 @@ UValue outbuf   ( -- addr )
 UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
+User statbuf
+
+: init-statbuf ( -- ) "" statbuf $! file-stat statbuf $!len ;
 
 sema cmd0lock
 
@@ -225,6 +229,7 @@ sema cmd0lock
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
+    init-statbuf
 ;
 
 : free-io ( -- )
@@ -233,6 +238,7 @@ sema cmd0lock
     cmd0buf free throw
     init0buf free throw
     sockaddr free throw
+    statbuf $off
 ;
 
 alloc-io
@@ -1201,6 +1207,29 @@ file-state-struct buffer: new-file-state
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
+
+\ file status stuff
+
+: ?ior ( r -- )
+    \G use errno to generate throw when failing
+    IF  errno negate 512 - throw  THEN ;
+
+: n2o:get-stat ( id -- atime mtime mod )
+    id>addr? fs-fid @ fileno statbuf fstat ?ior
+    statbuf st_atime ntime@ d>64
+    statbuf st_mtime ntime@ d>64
+    statbuf st_mode @ ;
+
+: n2o:track-time ( atime mtime id -- )
+    id>addr fs-fid @ fileno >r
+    statbuf st_mtime ntime!
+    statbuf st_atime ntime!
+    r> statbuf st_atime futimes ?ior ;
+
+: n2o:track-mod ( mod id -- )
+    id>addr fs-fid @ fileno swap fchmod ?ior ;
+
+\ load crypto here
 
 require net2o-crypt.fs
 \ require net2o-keys.fs
