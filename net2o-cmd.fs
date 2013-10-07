@@ -457,7 +457,7 @@ net2o-base
 
 80 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
 81 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
-82 net2o: track-time ( atime mtime id -- ) n2o:track-time ;
+82 net2o: track-time ( mtime id -- ) n2o:track-time ;
 83 net2o: track-mod ( mod id -- ) n2o:track-mod ;
 84 net2o: get-time+mod ( id -- ) 64>n { fd }
     fd n2o:get-stat
