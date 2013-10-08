@@ -216,9 +216,10 @@ UValue outbuf   ( -- addr )
 UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
-User statbuf
+User 'statbuf
+: statbuf 'statbuf $@ drop ;
 
-: init-statbuf ( -- ) "" statbuf $! file-stat statbuf $!len ;
+: init-statbuf ( -- ) "" 'statbuf $! file-stat 'statbuf $!len ;
 
 sema cmd0lock
 
@@ -238,7 +239,7 @@ sema cmd0lock
     cmd0buf free throw
     init0buf free throw
     sockaddr free throw
-    statbuf $off
+    'statbuf $off
 ;
 
 alloc-io
@@ -1070,11 +1071,12 @@ $20 Value mask-bits#
 \ file states
 
 object class
-64field: fs-size
-64field: fs-seek
-64field: fs-seekto
-64field: fs-limit
-field: fs-fid
+    64field: fs-size
+    64field: fs-seek
+    64field: fs-seekto
+    64field: fs-limit
+    64field: fs-time
+    field: fs-fid
 end-class file-state-class
 file-state-class @ Constant file-state-struct
 
@@ -1146,20 +1148,50 @@ file-state-struct buffer: new-file-state
 : save-to ( addr u n -- )  state-addr >o
     r/w create-file throw fs-fid ! o> ;
 
-\ open a file - this needs *way more checking*!
+\ file status stuff
+
+: ?ior ( r -- )
+    \G use errno to generate throw when failing
+    IF  errno negate 512 - throw  THEN ;
+
+: fstat-fake ( fileno buf -- ior ) >r drop
+    $1A4 r@ st_mode l! ntime r> st_mtime ntime!  0 ;
+
+: n2o:get-stat ( id -- mtime mod )
+    id>addr? >o fs-fid @ fileno statbuf fstat o> ?ior
+    statbuf st_mtime ntime@ d>64
+    statbuf st_mode l@ $FFF and ;
+
+: n2o:track-time ( mtime fileno -- ) >r
+    64>d 2dup statbuf st_mtime ntime!
+    statbuf st_atime ntime!
+    r> statbuf st_atime futimes ?ior ;
+
+: n2o:track-mod ( mod fileno -- )
+    swap fchmod ?ior ;
+
+: n2o:set-stat ( mtime mod id -- )
+    id>addr? >o fs-fid @ fileno n2o:track-mod fs-time 64! o> ;
+
+\ open a file - this needs *way more checking*! !!FIXME!!
 
 : id>file ( id -- fid )  id>addr? >o fs-fid @ o> ;
 
+: (n2o:close-file) ( o:file -- )
+    fs-time 64@ 64dup 64-0= IF  64drop
+    ELSE  64drop ( fs-fid @ fileno n2o:track-time )  THEN
+    fs-fid @ close-file throw  fs-fid off ;
+
+: n2o:close-file ( id -- )
+    ?state  id>addr? >o fs-fid @ IF  (n2o:close-file)  THEN  o> ;
+
 : n2o:open-file ( addr u mode id -- )
     ?state  state-addr >o
-    fs-fid @ ?dup-IF  close-file throw  THEN
+    fs-fid @ IF  (n2o:close-file)  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
     open-file throw fs-fid !
     fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
-    64#0 fs-seek 64! 64#0 fs-seekto 64! o> ;
-
-: n2o:close-file ( id -- )
-    ?state  id>addr? >o fs-fid o> dup @ ?dup-IF  close-file throw  THEN  off ;
+    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! o> ;
 
 : n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ >o dest-raddr @ o> to roff )
@@ -1207,26 +1239,6 @@ file-state-struct buffer: new-file-state
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
-
-\ file status stuff
-
-: ?ior ( r -- )
-    \G use errno to generate throw when failing
-    IF  errno negate 512 - throw  THEN ;
-
-: n2o:get-stat ( id -- mtime mod )
-    id>addr? fs-fid @ fileno statbuf fstat ?ior
-    statbuf st_mtime ntime@ d>64
-    statbuf st_mode @ ;
-
-: n2o:track-time ( mtime id -- )
-    id>addr fs-fid @ fileno >r
-    64>d 2dup statbuf st_mtime ntime!
-    statbuf st_atime ntime!
-    r> statbuf st_atime futimes ?ior ;
-
-: n2o:track-mod ( mod id -- )
-    id>addr fs-fid @ fileno swap fchmod ?ior ;
 
 \ load crypto here
 

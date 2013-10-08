@@ -441,28 +441,27 @@ net2o-base
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
 73 net2o: track-limit ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
-74 net2o: open-tracked-file ( addr u mode id -- )
+74 net2o: set-stat ( mtime mod id -- ) n2o:set-stat ;
+75 net2o: get-stat ( id -- ) 64>n { fd }
+    fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
+76 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
-    r@ id>file F file-size throw d>64 lit, r> ulit, track-size ;
-75 net2o: slurp-tracked-block ( id -- )
+    r@ id>file F file-size throw
+    d>64 lit, r@ ulit, track-size
+    r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
+77 net2o: slurp-tracked-block ( id -- )
     64>n dup >r n2o:slurp-block' 64drop lit, r> ulit, track-seek ;
-76 net2o: slurp-tracked-blocks ( idbits -- )
+78 net2o: slurp-tracked-blocks ( idbits -- )
     64>n dup >r n2o:slurp-blocks
     r> [: lit, ulit, track-seek ;] n2o:track-seeks ;
-77 net2o: slurp-all-tracked-blocks ( -- )
+79 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
     [: lit, ulit, track-seek ;] n2o:track-all-seeks ;
-78 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
-79 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
+80 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
+81 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-80 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
-81 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
-82 net2o: track-time ( mtime id -- ) n2o:track-time ;
-83 net2o: track-mod ( mod id -- ) n2o:track-mod ;
-84 net2o: get-time+mod ( id -- ) 64>n { fd }
-    fd n2o:get-stat
-    ulit, fd ulit, track-mod
-    64swap lit, lit, fd ulit, track-time ;
+82 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
+83 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ acknowledges
 
@@ -505,7 +504,6 @@ Variable file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o ulit, file-reg# @ ulit, open-tracked-file
-\    file-reg# @ lit, slurp-tracked-block
     file-reg# @ save-to
     1 file-reg# +! ;
 
@@ -513,8 +511,12 @@ Variable file-reg#
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
 
 : n2o:done ( -- )
-    gen-total slurp-all-tracked-blocks
-    file-reg# off ;
+    gen-total slurp-all-tracked-blocks ;
+
+: n2o:close-all ( -- )
+    file-reg# @ 0 ?DO
+	I n2o:close-file
+    LOOP  file-reg# off  file-state $off ;
 
 file-reg# off
 

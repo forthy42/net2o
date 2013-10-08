@@ -34,7 +34,7 @@ n2o:done
 send-chunks
 end-code
 
-1 client-loop .time cr
+1 client-loop n2o:close-all .time cr
 2e @time f> [IF]
     ." Request more photos because it was so fast" cr
     net2o-code
@@ -52,7 +52,7 @@ end-code
     send-chunks
 end-code
 
-1 client-loop .time cr
+1 client-loop n2o:close-all .time cr
 3e
 [ELSE]
     bye
@@ -70,7 +70,7 @@ waitkey( fdrop 8e )
     send-chunks
 end-code
 
-1 client-loop .time cr
+1 client-loop n2o:close-all .time cr
 4e
 [ELSE]
     bye
@@ -130,7 +130,7 @@ end-code
 \ gen-total slurp-all-tracked-blocks send-chunks
 \ end-code
 
-1 client-loop .time cr
+1 client-loop n2o:close-all .time cr
 [THEN]
 
 .packets .times
