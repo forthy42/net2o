@@ -729,7 +729,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	cmd0source off  cmdlock lock  cmdreset
 	r@ resend-toggle# and IF  true net2o:do-resend  THEN
 	r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-    cmd-send?  cmdlock unlock
+	cmd-send?  cmdlock unlock
     THEN
     +cookie received!
     r> ack-timing ;

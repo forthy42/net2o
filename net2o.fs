@@ -1089,7 +1089,7 @@ file-state-struct buffer: new-file-state
     >r file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
     id>addr file-state-struct < !!fileid!! ;
-: state-addr ( id -- addr )  ?state
+: state-addr ( id -- addr )
     id>addr dup 0< !!gap!!
     0= IF  drop new-file-state file-state-struct file-state $+!
 	file-state $@ + file-state-struct -  THEN ;
@@ -1162,10 +1162,13 @@ file-state-struct buffer: new-file-state
     statbuf st_mtime ntime@ d>64
     statbuf st_mode l@ $FFF and ;
 
+User timebuf 3 cells uallot drop
+
 : n2o:track-time ( mtime fileno -- ) >r
-    64>d 2dup statbuf st_mtime ntime!
-    statbuf st_atime ntime!
-    r> statbuf st_atime futimes ?ior ;
+\    ." Set time: " r@ . 64dup 64>d d. cr
+    64>d 2dup timebuf ntime!
+    timebuf 2 cells + ntime!
+    r> timebuf futimes ?ior ;
 
 : n2o:track-mod ( mod fileno -- )
     swap fchmod ?ior ;
@@ -1179,11 +1182,14 @@ file-state-struct buffer: new-file-state
 
 : (n2o:close-file) ( o:file -- )
     fs-time 64@ 64dup 64-0= IF  64drop
-    ELSE  64drop ( fs-fid @ fileno n2o:track-time )  THEN
+    ELSE
+	fs-fid @ flush-file throw
+	fs-fid @ fileno n2o:track-time
+    THEN
     fs-fid @ close-file throw  fs-fid off ;
 
 : n2o:close-file ( id -- )
-    ?state  id>addr? >o fs-fid @ IF  (n2o:close-file)  THEN  o> ;
+    id>addr? >o fs-fid @ IF  (n2o:close-file)  THEN  o> ;
 
 : n2o:open-file ( addr u mode id -- )
     ?state  state-addr >o
