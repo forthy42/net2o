@@ -219,7 +219,7 @@ UValue sockaddr ( -- addr )
 User 'statbuf
 : statbuf 'statbuf $@ drop ;
 
-: init-statbuf ( -- ) "" 'statbuf $! file-stat 'statbuf $!len ;
+: init-statbuf ( -- ) 'statbuf off "" 'statbuf $! file-stat 'statbuf $!len ;
 
 sema cmd0lock
 
@@ -1162,13 +1162,11 @@ file-state-struct buffer: new-file-state
     statbuf st_mtime ntime@ d>64
     statbuf st_mode l@ $FFF and ;
 
-User timebuf 3 cells uallot drop
-
 : n2o:track-time ( mtime fileno -- ) >r
 \    ." Set time: " r@ . 64dup 64>d d. cr
-    64>d 2dup timebuf ntime!
-    timebuf 2 cells + ntime!
-    r> timebuf futimes ?ior ;
+    64>d 2dup statbuf ntime!
+    statbuf 2 cells + ntime!
+    r> statbuf futimes ?ior ;
 
 : n2o:track-mod ( mod fileno -- )
     swap fchmod ?ior ;
