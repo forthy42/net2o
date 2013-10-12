@@ -434,9 +434,9 @@ $04 Constant resend-toggle#
 current-o
 
 object class
+    field: dest-size
     64field: dest-vaddr
     field: dest-raddr
-    field: dest-size
     field: code-flag
     field: dest-job
     field: dest-ivs
@@ -589,9 +589,10 @@ $100 Value dests#
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
     dest-index 2 cells bounds ?DO
-	I @ ?dup-IF
-	    2@ 1- bounds dest-addr 64@ 64>n within
-	    0= IF
+	I @ IF
+	    dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n
+	    dest-size @ o> u<
+	    IF
 		I @ >o
 		dest-raddr @ dest-vaddr 64@ dest-addr 64@ 64>n swap -
 		dup >data-head +
