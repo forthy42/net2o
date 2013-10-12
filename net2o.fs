@@ -1166,7 +1166,7 @@ file-state-struct buffer: new-file-state
 \    ." Set time: " r@ . 64dup 64>d d. cr
     64>d 2dup statbuf ntime!
     statbuf 2 cells + ntime!
-    r> statbuf futimes ?ior ;
+    r> statbuf futimens ?ior ;
 
 : n2o:track-mod ( mod fileno -- )
     swap fchmod ?ior ;

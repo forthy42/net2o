@@ -262,18 +262,18 @@ void KeccakInitializeState(keccak_state state)
 
 void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
-    extractLanes(laneCount, state, data)
+    extractLanes(laneCount, state, (char*)data)
 }
 
 void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
-    xorLanesIntoState(laneCount, state, data)
+    xorLanesIntoState(laneCount, state, (char*)data)
 }
 
 void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
-  xorLanesIntoState(laneCount, state, data);
-  extractLanes(laneCount, state, data);
+  xorLanesIntoState(laneCount, state, (char*)data);
+  extractLanes(laneCount, state, (char*)data);
 }
 
 void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
@@ -281,9 +281,9 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
   UINT64 tmp[laneCount];
   int i;
 
-  extractLanes(laneCount, state, tmp);
+  extractLanes(laneCount, state, (char*)tmp);
   for(i=0; i<laneCount; i++) {
     data[i] ^= tmp[i];
   }
-  xorLanesIntoState(laneCount, state, data);
+  xorLanesIntoState(laneCount, state, (char*)data);
 }
