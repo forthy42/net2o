@@ -434,9 +434,9 @@ $04 Constant resend-toggle#
 current-o
 
 object class
-    field: dest-size
     64field: dest-vaddr
     field: dest-raddr
+    field: dest-size
     field: code-flag
     field: dest-job
     field: dest-ivs
