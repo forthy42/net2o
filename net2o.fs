@@ -434,9 +434,9 @@ $04 Constant resend-toggle#
 current-o
 
 object class
-    field: dest-size
     64field: dest-vaddr
     field: dest-raddr
+    field: dest-size
     field: code-flag
     field: dest-job
     field: dest-ivs
@@ -787,7 +787,7 @@ Variable mapstart $1 mapstart !
     data-map @ >o dest-tail +! o> ;
 : data-dest ( -- addr )
     data-map @ >o
-    dest-vaddr @ dest-tail @ dest-size @ 1- and + o> ;
+    dest-vaddr 64@ dest-tail @ dest-size @ 1- and n>64 64+ o> ;
 
 \ new data sending around stuff, with front+back
 
