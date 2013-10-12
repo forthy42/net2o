@@ -471,9 +471,6 @@ object class
     field: return-address
     64field: recv-tick
     64field: recv-addr
-    cell 4 = [IF]
-	field: dest-high
-    [THEN]
     field: recv-flag
     field: file-state
     field: read-file#
@@ -1283,14 +1280,8 @@ require net2o-crypt.fs
 
 \ send blocks of memory
 
-cell 4 = [IF]
-    : set-dest ( addr target -- )
-	outbuf ins-dest  o IF  dest-high @  ELSE  0  THEN
-	2dup dest-addr 64!  outbuf addr 64! ;
-[ELSE]
-    : set-dest ( addr target -- )
-	outbuf ins-dest  dup dest-addr !  outbuf addr ! ;
-[THEN]
+: set-dest ( addr target -- )
+    outbuf ins-dest  64dup dest-addr 64!  outbuf addr 64! ;
 
 Variable outflag  outflag off
 
@@ -1364,12 +1355,9 @@ FVariable <size-lb>
     IF  ts-ticks!  ELSE  drop  THEN  o> ;
 
 : net2o:prep-send ( addr u dest addr -- addr taddr target n len )
-    2>r  over  net2o:send-tick
+    { 64: dest addr }  over  net2o:send-tick
     send-size min-size over lshift
-    2r> 2swap ;
-
-: net2o:send-packet ( addr u dest addr -- len )
-    net2o:prep-send >r sendX r> ;
+    2>r dest addr 2r> ;
 
 \ synchronous sending
 

@@ -177,7 +177,8 @@ User cmdbuf#
 : send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
     cmd(
     o IF  ." key: " crypto-key $@ .nnb cr  THEN
-    ." send: " dup hex. over cmdbuf# @ n2o:see cr )
+    ." send: " 64dup ['] 64. $10 base-execute 64>r
+    dup cmdbuf# @ n2o:see cr 64r> )
     code-packet on
     o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
@@ -186,7 +187,7 @@ User cmdbuf#
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: cmddest ( -- dest ) cmd0source @ IF  0  ELSE  code-vdest  THEN ;
+: cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest  THEN ;
 
 : cmd ( -- )  cmdbuf cmddest send-cmd
     cmd0source @ 0= IF  code+  THEN ;
@@ -764,7 +765,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     resend0 @ IF
 	\ ." Resend to 0" cr
 	resend0 $@ cmdbuf swap move
-	cmdbuf 0 send-cmd 1 packets2 +!
+	cmdbuf 64#0 send-cmd 1 packets2 +!
     THEN ;
 
 : map-resend? ( -- )
