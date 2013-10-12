@@ -435,7 +435,7 @@ current-o
 
 object class
     field: dest-size
-    field: dest-vaddr
+    64field: dest-vaddr
     field: dest-raddr
     field: code-flag
     field: dest-job
@@ -593,7 +593,8 @@ $100 Value dests#
 	    2@ 1- bounds dest-addr 64@ 64>n within
 	    0= IF
 		I @ >o
-		dest-vaddr 2@ dest-addr 64@ 64>n swap - dup >data-head +
+		dest-raddr @ dest-vaddr 64@ dest-addr 64@ 64>n swap -
+		dup >data-head +
 		code-flag @ invert 2* 1+
 		dest-job @ o> >o rdrop
 		UNLOOP  EXIT  THEN
@@ -636,7 +637,7 @@ Variable >code-flag
 
 : alloc-data ( addr u -- u flag )
     [ cell 4 = ] [IF]  nip  [THEN]
-    tuck dest-size 2!
+    dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
     c:key# allocatez dest-ivsgen !
     >code-flag @ dup code-flag !
@@ -671,10 +672,10 @@ Variable >code-flag
 
 : map-data-dest ( vaddr u addr -- )
     \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
-    >r >r 64dup 64>n r> map-data r@ ! >dest-map r> @ swap ! ;
+    >r >r 64dup r> map-data r@ ! >dest-map r> @ swap ! ;
 : map-code-dest ( vaddr u addr -- )
     \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
-    >r >r 64dup 64>n r> map-data r@ ! >dest-map cell+ r> @ swap ! ;
+    >r >r 64dup r> map-data r@ ! >dest-map cell+ r> @ swap ! ;
 
 \ create context
 
@@ -730,7 +731,8 @@ Variable mapstart $1 mapstart !
 	addrd >dest-map @ ?EXIT
 	return-addr @ n2o:new-context  THEN
     >code-flag on
-    addrd u code-rmap map-code-dest addrs u map-source  code-map ! ;
+    addrd u code-rmap map-code-dest
+    addrs u map-source code-map ! ;
 
 \ dispose connection
 
@@ -822,14 +824,14 @@ Variable mapstart $1 mapstart !
 
 : code-vdest ( -- addr )
     code-map @ >o
-    dest-vaddr @ dest-tail @ + o> ;
+    dest-vaddr 64@ dest-tail @ n>64 64+ o> ;
 
 : code-reply ( -- addr )
     code-map @ >o
     dest-tail @ addr>replies dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
-    dest-addr 64@ 64>n code-rmap @ >o dest-vaddr @ -
+    dest-addr 64@ code-rmap @ >o dest-vaddr 64@ 64- 64>n
     addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
@@ -909,7 +911,7 @@ timestats buffer: stat-tuple
     slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
-    dest-vaddr @ - dup dest-size @ u< ;
+    dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
 
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
@@ -1052,7 +1054,7 @@ $20 Value mask-bits#
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop data-map @ >o dest-vaddr @ + o> ;
+    data-resend $@ drop 2@ drop data-map @ >o n>64 dest-vaddr 64@ 64+ o> ;
 : /resend ( u -- )
     0 +DO
 	data-resend $@ drop
@@ -1253,7 +1255,7 @@ require net2o-crypt.fs
 
 : cookie! ( -- )
     c:cookie
-    dest-addr 64@ 64>n >offset 0= IF  2drop  EXIT  THEN
+    dest-addr 64@ >offset 0= IF  2drop  EXIT  THEN
     addr>ts cookie( ." Cookie: " dup hex. >r 64dup .16 cr r> )
     dest-cookies @ + 64! ;
 

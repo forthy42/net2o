@@ -63,7 +63,13 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 : cmd@ ( -- u ) buf-state 2@ byte@ >r buf-state 2! r> ;
 
 : (net2o-see) ( addr -- )  @
-    dup ['] net2o-crash <> IF  4 cells - body>  THEN  >name .name ;
+    dup ['] net2o-crash <> IF
+	[ 4 cell = ] [IF]
+	    5 cells - body>
+	[ELSE]
+	    4 cells - body>
+	[THEN]
+    THEN  >name .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
@@ -218,7 +224,7 @@ previous
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( 2dup dest-addr 64@ 64. n2o:see )
+    cmd( 2dup dest-addr 64@ ['] 64. $10 base-execute n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
     dup IF   1 throwcount +! dup s" do-cmd-loop: " etype DoError nothrow
@@ -283,7 +289,7 @@ also net2o-base definitions
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
-: ulit, ( n -- )  u>64 lit, ;
+: ulit, ( u -- )  u>64 lit, ;
 : end-code ( -- ) expect-reply? previous cmd  cmdlock unlock ;
 
 previous definitions
@@ -378,7 +384,7 @@ net2o-base
 
 \ flow control functions
 
-40 net2o: ack-addrtime ( time addr -- ) 64>n net2o:ack-addrtime ;
+40 net2o: ack-addrtime ( time addr -- ) net2o:ack-addrtime ;
 41 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
 42 net2o: set-rate ( ticks1 ticks2 -- )
     cookie? IF  net2o:set-rate
@@ -556,10 +562,10 @@ also net2o-base
     delta-ticks 64off  acks off ;
 
 : net2o:acktime ( -- )
-    recv-addr @ recv-tick 64@ time-offset 64@ 64-
-    timing( 64>r dup hex. 64r> 64dup 64. ." acktime" F cr )
-    lit, ulit, ack-addrtime ;
-: net2o:b2btime
+    recv-addr 64@ recv-tick 64@ time-offset 64@ 64-
+    timing( 64>r 64dup ['] 64. $10 base-execute 64r> 64dup 64. ." acktime" F cr )
+    lit, lit, ack-addrtime ;
+: net2o:b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64#0 64=
     IF  64drop 64drop
     ELSE  time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
@@ -697,9 +703,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     new-ackbit 2 cells data-ackbits-buf $+! ;
 
 : +cookie ( -- bit flag map )
-    recv-addr @ -1 = IF  0 0 0 EXIT  THEN
-    recv-addr @ receive-flag { rf } data-rmap @ >o
-    dest-vaddr @ - addr>bits dup +ackbit
+    recv-addr 64@ 64#-1 64= IF  0 0 0 EXIT  THEN
+    recv-addr 64@ receive-flag { rf } data-rmap @ >o
+    dest-vaddr 64@ 64- 64>n addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
     rf data-ackbit over +bit@
     dup IF  1 packetr2 +!  THEN o o> ;
@@ -740,7 +746,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ higher level functions
 
 : map-request, ( ucode udata -- )
-    2dup + n2o:new-map ulit, swap ulit, ulit,
+    2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
 : gen-request ( -- )  gen-tmpkeys
