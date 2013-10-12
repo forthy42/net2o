@@ -435,8 +435,8 @@ current-o
 
 object class
     64field: dest-vaddr
-    field: dest-raddr
     field: dest-size
+    field: dest-raddr
     field: code-flag
     field: dest-job
     field: dest-ivs
@@ -1051,7 +1051,7 @@ $20 Value mask-bits#
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
-	swap data-map @ cell+ cell+ @ + ( >o dest-raddr @ + o> ) swap
+	swap data-map @ >o dest-raddr @ + o> swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
