@@ -1751,7 +1751,7 @@ $20 Constant keys-val
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta
-\    inbuf .header
+    header( inbuf .header )
     dest-addr 64@ 64-0= IF  handle-cmd0
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN +dest

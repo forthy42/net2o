@@ -89,7 +89,7 @@ max-passphrase# buffer: passphrase
     wurst-key >c:key
     passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
-    c:key@ $40 save-mem ;
+    pad c:key> pad $40 save-mem ;
 
 : get-passphrase ( -- addr u )
     passphrase-in >passphrase ;

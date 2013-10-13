@@ -33,27 +33,27 @@ Defer regen-ivs
 : ivs>code-source? ( addr -- )
     dup @ 0= IF  drop  EXIT  THEN
     @ >o
-    dest-addr 64@ dest-vaddr 64@ 64- 64>n dup dest-size @ u<
+    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF
-	max-size^2 1- rshift key( ." ivsc# " dup . cr )
+	64>n max-size^2 1- rshift key( ." ivsc# " dup . cr )
 	dest-ivs $@ drop over +
 	swap regen-ivs o> key( ." ivs>code-s? " dup .64b ." :" dup state# + .64b cr )
 	>c:key
 	EXIT
     THEN
-    drop o> ;
+    64drop o> ;
 
 : ivs>source? ( addr -- )
 \    dup @ 0= IF  drop  EXIT  THEN
     @ >o
-    dest-addr @ dest-vaddr 64@ 64- 64>n dup dest-size @ u<
+    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF
-	max-size^2 1- rshift key( ." ivss# " dup . cr )
+	64>n max-size^2 1- rshift key( ." ivss# " dup . cr )
 	dest-ivs $@ drop + o> key( ." ivs>source? " dup .64b ." :" dup state# + .64b cr )
 	>c:key
 	EXIT
     THEN
-    drop o> ;
+    64drop o> ;
 
 : wurst-key$ ( -- addr u )
     o 0= IF

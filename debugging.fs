@@ -48,6 +48,7 @@ debug: waitkey(
 debug: address(
 debug: dump(
 debug: trace(
+debug: header(
 
 +db ens(
 
