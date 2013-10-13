@@ -69,7 +69,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	[ELSE]
 	    4 cells - body>
 	[THEN]
-    THEN  >name .name ;
+    THEN  .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
@@ -81,13 +81,16 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
+: .net2o-name ( n -- )
+    cells cmd-base-table + (net2o-see) ;
+
 : net2o-see ( -- ) hex[
     case
 	0 of  ." end-code" cr 0. buf-state 2!  endof
 	1 of  p@ 64. ." lit, "  endof
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@  n2o.string  endof
-	cells cmd-base-table + (net2o-see)
+	.net2o-name
 	0 endcase ]hex ;
 
 : cmd-see ( addr u -- addr' u' )
@@ -97,7 +100,8 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
     BEGIN  cmd-see  dup 0= UNTIL  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
-    byte@ >r buf-state 2! r> cells cmd-base-table + perform buf-state 2@ ;
+    byte@ >r buf-state 2! trace( r@ dup . .net2o-name .s cr )
+    r> cells cmd-base-table + perform buf-state 2@ ;
 
 : extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
   DOES>  >r cmd@ cells r> + perform ;
@@ -137,6 +141,7 @@ forth also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
+0 net2o: dummy ( -- ) ; \ just as dummy... never used
 0 net2o: end-cmd ( -- ) 0. buf-state 2! ;
 1 net2o: ulit ( -- x ) p@ ;
 2 net2o: slit ( -- x ) ps@ ;

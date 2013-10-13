@@ -634,7 +634,6 @@ Variable >code-flag
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
 : alloc-data ( addr u -- u flag )
-    [ cell 4 = ] [IF]  nip  [THEN]
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
     c:key# allocatez dest-ivsgen !
