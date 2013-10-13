@@ -212,18 +212,18 @@ previous
 : net2o:tag-reply ( -- )  j?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
-    code-vdest r> reply-dest ! ;
+    code-vdest r> reply-dest 64! ;
 : net2o:ack-reply ( index -- )  o 0= IF  drop EXIT  THEN
     resend0 @ IF  resend0 $off  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  j?
     cmd( ." expect: " cmdbuf$ n2o:see )
-    cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest ! ;
+    cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
 	cmd( dest-addr 64@ 64. ." resend canned code reply " tag-addr hex. cr )
-	cmdbuf# ! r> reply-dest @ send-cmd true
+	cmdbuf# ! r> reply-dest 64@ send-cmd true
 	1 packets2 +!
     ELSE  d0<> -1 0 r> 2!  THEN ;
 
@@ -779,7 +779,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	dest-size @ addr>replies bounds o> ?DO
 	    I 2@ d0<> IF
 		timeout( ." resend: " I 2@ n2o:see F cr )
-		I 2@ cmdbuf# ! I reply-dest @ send-cmd
+		I 2@ cmdbuf# ! I reply-dest 64@ send-cmd
 		1 packets2 +!
 	    THEN
 	reply +LOOP

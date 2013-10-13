@@ -548,7 +548,7 @@ end-structure
 begin-structure reply
 field: reply-len
 field: reply-offset
-field: reply-dest
+64field: reply-dest
 end-structure
 
 begin-structure timestats
