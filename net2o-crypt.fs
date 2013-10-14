@@ -198,10 +198,10 @@ Variable do-keypad "" do-keypad $!
 ' (regen-ivs) IS regen-ivs
 
 : ivs-string ( addr u map -- )  c:key@ >r
-    @ >o dest-size @ addr>keys dest-ivs o o> >r >r r@ $!len
+    @ >o dest-ivsgen @ c:key!
+    dest-size @ addr>keys dest-ivs o> >r r@ $!len
     state# <> !!ivs!! >crypt-source' >crypt-key-ivs c:diffuse
     r> $@ c:prng
-    r> >o dest-ivsgen @ c:key> o>
     r> c:key! ;
 
 \ : ivs-key ( addr u map -- )  @ >o  dest-ivsgen @ swap move o> ;
