@@ -453,7 +453,7 @@ net2o-base
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
 73 net2o: track-limit ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
-74 net2o: set-stat ( mtime mod id -- ) n2o:set-stat ;
+74 net2o: set-stat ( mtime mod id -- ) 2*64>n n2o:set-stat ;
 75 net2o: get-stat ( id -- ) 64>n { fd }
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
 76 net2o: open-tracked-file ( addr u mode id -- )
