@@ -117,16 +117,16 @@ state# rng$ mykey swap move
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
     crypt-key-init 2 64s - 2dup c:decrypt+auth ;
 
-: crypt-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
+: mykey-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
-: crypt-decrypt$ ( addr u -- addr' u' flag )
+: mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc $>align mykey state# decrypt$ +enc ;
 
-: crypt-outbuf-encrypt ( flag -- ) +calc
+: outbuf-encrypt ( flag -- ) +calc
     crypt-outbuf-init
     outbuf packet-data +cryptsu c:encrypt+auth +enc ;
 
-: crypt-inbuf-decrypt ( flag1 -- flag2 ) +calc
+: inbuf-decrypt ( flag1 -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
     crypt-inbuf-init
     inbuf packet-data +cryptsu c:decrypt+auth +enc ;
@@ -237,3 +237,15 @@ Defer check-key
 	EXIT
     THEN
     2drop ;
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+End:
+[THEN]

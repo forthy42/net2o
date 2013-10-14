@@ -1298,7 +1298,7 @@ User code-packet
 
 : send-packet ( flag -- ) +sendX
 \    ." send " outbuf .header
-    code-packet @ crypt-outbuf-encrypt
+    code-packet @ outbuf-encrypt
     code-packet @ 0= IF  send-cookie  THEN
     code-packet off
     out-route drop
@@ -1721,7 +1721,7 @@ $20 Constant keys-val
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     0 >o rdrop \ address 0 has no job context!
-    true crypt-inbuf-decrypt 0= IF
+    true inbuf-decrypt 0= IF
 	." invalid packet to 0" cr EXIT  THEN
     validated off \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
@@ -1740,7 +1740,7 @@ $20 Constant keys-val
     timing( dest-addr 64@ 64.
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
     recv-tick 64! \ time stamp of arrival
-    dup 0> crypt-inbuf-decrypt 0= IF
+    dup 0> inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr 64@ .16 cr
 	IF  drop  THEN  EXIT  THEN
