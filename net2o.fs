@@ -1077,7 +1077,7 @@ object class
     64field: fs-time
     field: fs-fid
 end-class file-state-class
-file-state-class @ Constant file-state-struct
+file-state-class >osize @ Constant file-state-struct
 
 file-state-struct buffer: new-file-state
 
@@ -1132,7 +1132,8 @@ file-state-struct buffer: new-file-state
     msg( data-rmap @ >o dest-raddr @ o> to roff )
     rdata-back@ residualwrite ?residual
     id id>addr? >o fs-seekto 64@ fs-seek 64@ >seek
-    msg( ." Write <" 2dup swap roff - hex. hex. o o> residualwrite @ hex. >o id 0 .r ." >" cr )
+    msg( ." Write <" 2dup swap roff - hex. hex. o o>
+         residualwrite @ hex. >o id 0 .r ." >" cr )
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+! o>
     dup /back ;
@@ -1565,10 +1566,10 @@ field: queue-timestamp
 field: queue-job
 field: queue-xt
 end-class queue-class
-queue-class @ Constant queue-struct
+queue-class >osize @ Constant queue-struct
 
 Variable queue s" " queue $!
-queue-class @ buffer: queue-adder  
+queue-class >osize @ buffer: queue-adder  
 
 : add-queue ( xt us -- )
     ticks +  o queue-adder >o queue-job !  queue-timestamp !
@@ -1881,10 +1882,10 @@ object class
     field: cc-context
 end-class con-cookie
 
-con-cookie @ Constant cookie-size#
+con-cookie >osize @ Constant cookie-size#
 
 Variable cookies s" " cookies $!
-con-cookie @ buffer: cookie-adder
+con-cookie >osize @ buffer: cookie-adder
 
 #5000000000. d>64 64Constant connect-timeout#
 

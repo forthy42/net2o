@@ -37,7 +37,7 @@ end-class key-entry
 1 Constant key#user
 2 Constant key#group
 
-key-entry @ buffer: sample-key
+key-entry >osize @ buffer: sample-key
 
 Variable key-table
 Variable this-key
@@ -52,7 +52,7 @@ sample-key this-key ! \ dummy
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key key-entry @ 2dup erase
+    sample-key key-entry >osize @ 2dup erase
     2over key-table #! current-key ;
 
 \ search for keys - not optimized

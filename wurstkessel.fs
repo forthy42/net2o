@@ -555,7 +555,7 @@ crypto class
 end-class wurstkessel
 
 : wurst-task-init ( -- )
-    [ wurst-class @ ]L allocate throw wurst' !  wurst-source rounds-setkey ;
+    [ wurst-class >osize @ ]L allocate throw wurst' !  wurst-source rounds-setkey ;
 
 ' wurst-task-init wurstkessel to c:init
 :noname to @state ; wurstkessel to c:key!
