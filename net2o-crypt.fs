@@ -55,7 +55,7 @@ Defer regen-ivs
     THEN
     64drop o> ;
 
-: wurst-key$ ( -- addr u )
+: crypt-key$ ( -- addr u )
     o 0= IF
 	wurst-key state#
     ELSE
@@ -66,10 +66,10 @@ Defer regen-ivs
     c:key@ 0= IF
 	key( ." Default-key " cr )
 	rnd-init >crypt-source'
-	wurst-key$ >crypt-key
+	crypt-key$ >crypt-key
     THEN ;
 
-: wurst-outbuf-init ( flag -- )
+: crypt-outbuf-init ( flag -- )
     0 c:key!
     o IF
 	IF
@@ -83,7 +83,7 @@ Defer regen-ivs
     default-key
     key( ." outbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
-: wurst-inbuf-init ( flag -- )
+: crypt-inbuf-init ( flag -- )
     0 c:key!
     o IF
 	IF
@@ -100,7 +100,7 @@ Defer regen-ivs
 state# buffer: mykey \ server's private key
 state# rng$ mykey swap move
 
-: wurst-key-init ( addr u key u -- addr' u' ) 2>r
+: crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source
     2r> >crypt-key 
     mykey-salt# safe/string
@@ -108,27 +108,27 @@ state# rng$ mykey swap move
 
 \ !!TBD!! use a nonce to setup and make sure each such string
 \ can be decrypted only once!
-: wurst-key-setup ( addr u1 key u2 -- addr' u' )
-    2>r over >r  rng@ rng@ r> 128! 2r> wurst-key-init ;
+: crypt-key-setup ( addr u1 key u2 -- addr' u' )
+    2>r over >r  rng@ rng@ r> 128! 2r> crypt-key-init ;
 
 : encrypt$ ( addr u1 key u2 -- )
-    wurst-key-setup  2 64s - c:encrypt+auth ;
+    crypt-key-setup  2 64s - c:encrypt+auth ;
 
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
-    wurst-key-init 2 64s - 2dup c:decrypt+auth ;
+    crypt-key-init 2 64s - 2dup c:decrypt+auth ;
 
-: wurst-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
+: crypt-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
-: wurst-decrypt$ ( addr u -- addr' u' flag )
+: crypt-decrypt$ ( addr u -- addr' u' flag )
     +calc $>align mykey state# decrypt$ +enc ;
 
-: wurst-outbuf-encrypt ( flag -- ) +calc
-    wurst-outbuf-init
+: crypt-outbuf-encrypt ( flag -- ) +calc
+    crypt-outbuf-init
     outbuf packet-data +cryptsu c:encrypt+auth +enc ;
 
-: wurst-inbuf-decrypt ( flag1 -- flag2 ) +calc
+: crypt-inbuf-decrypt ( flag1 -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
-    wurst-inbuf-init
+    crypt-inbuf-init
     inbuf packet-data +cryptsu c:decrypt+auth +enc ;
 
 \ public key encryption

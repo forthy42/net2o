@@ -270,14 +270,14 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     -1 neststack +! neststack @ 0< !!minnest!!
     neststack @+ swap cells + @ neststart# ! ;
 
-: cmd>init ( -- addr u ) cmd> >initbuf 2dup wurst-encrypt$ ;
+: cmd>init ( -- addr u ) cmd> >initbuf 2dup crypt-encrypt$ ;
 : cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
 
 : do-nest ( addr u flag -- )
     buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
     r> validated ! 2r> buf-state 2! ;
 
-: cmdnest ( addr u -- )  wurst-decrypt$
+: cmdnest ( addr u -- )  crypt-decrypt$
     0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
 : cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
