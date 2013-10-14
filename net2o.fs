@@ -587,15 +587,14 @@ $100 Value dests#
     \G return 1 if code, -1 if data, plus destination address
     dest-index 2 cells bounds ?DO
 	I @ IF
-	    dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n
-	    dest-size @ o> u<
+	    dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n dup
+	    dest-size @ u<
 	    IF
-		I @ >o
-		dest-raddr @ dest-vaddr 64@ dest-addr 64@ 64>n swap -
-		dup >data-head +
+		dest-raddr @ swap dup >data-head +
 		code-flag @ invert 2* 1+
 		dest-job @ o> >o rdrop
 		UNLOOP  EXIT  THEN
+	    drop o>
 	THEN
     cell +LOOP
     false ;
