@@ -50,13 +50,16 @@ cell 8 = [IF]
     ' 0< Alias 64-0<
     ' < Alias 64<
     ' u< Alias 64u<
+    ' u> Alias 64u>
     ' u<= Alias 64u<=
+    ' u>= Alias 64u>=
     ' on Alias 64on
     ' +! Alias 64+!
     ' min Alias 64min
     ' max Alias 64max
     ' umin Alias 64umin
     ' umax Alias 64umax
+    ' abs Alias 64abs
     ' off Alias 64off
     ' */ Alias 64*/
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
@@ -118,13 +121,16 @@ cell 8 = [IF]
     ' d0< Alias 64-0<
     ' d< Alias 64<
     ' du< Alias 64u<
+    ' du> Alias 64u>
     ' du<= Alias 64u<=
+    ' du>= Alias 64u>=
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
     ' dmin Alias 64min
     ' dmax Alias 64max
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;
     : 64umax  2over 2over du< IF  2swap  THEN  2drop ;
+    ' dabs Alias 64abs
     : 64off 0. rot 64! ;
     ' m*/ Alias 64*/
     : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }

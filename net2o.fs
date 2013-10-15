@@ -869,7 +869,7 @@ $400 buffer: aligned$
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
-	time-offset 64@ &10000000000 [IFDEF] 64bit mod [ELSE] um/mod drop [THEN] s>f 1n f* f+ f.
+	time-offset 64@ 64>f 1n f* 10e fmod f+ f.
 	\ I ts-delta sf@ f.
 	I ts-slack sf@ 1u f* f.
 	tick-init 1+ maxdata * 1k fm* fdup
@@ -927,23 +927,23 @@ timestats buffer: stat-tuple
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
-: >timestamp ( time addr -- time' ts-array index / 0 0 )
+: >timestamp ( time addr -- time' ts-array index / time' 0 0 )
     >flyburst
-    >r time-offset 64@ 64+ r>
-    data-map @ dup 0= IF  2drop 0 0  EXIT  THEN  >r
+    64>r time-offset 64@ 64+ 64r>
+    data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
 	dest-tail @ o> over - 0 max addr>bits window-size !
 	addr>ts r> >o dest-timestamps @ o> swap
-    ELSE  o> drop rdrop 0 0  THEN ;
+    ELSE  o> rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
     >timestamp
     over  IF
 	dup tick-init 1+ timestamp * u>
-	IF  + dup >r  dup ts-ticks 64@
-	    r> tick-init 1+ timestamp * - ts-ticks 64@
+	IF  + dup >r  ts-ticks 64@
+	    r@ tick-init 1+ timestamp * - ts-ticks 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
-	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN
+	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN  r>
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
@@ -954,7 +954,7 @@ timestats buffer: stat-tuple
 
 #20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2
 #1000000 Value slack-bias# \ 1ms without effect
-slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
+slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 #0 Value slack-min# \ minimum effect limit
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
@@ -963,12 +963,12 @@ slack-default# 2* 2* Value slack-ignore# \ above 80ms is ignored
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : >slack-exp ( -- rfactor )
-    lastslack 64@ min-slack 64@ 64- 64>n
-    dup abs slack-ignore# u> IF
-	msg( ." slack ignored: " dup . cr )
-	drop 0 lastslack 64@ min-slack 64!
+    lastslack 64@ min-slack 64@ 64-
+    64dup 64abs slack-ignore# 64u> IF
+	msg( ." slack ignored: " 64dup 64. cr )
+	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    slack( dup . min-slack ? .j ." slack" cr )
+    64>n  slack( dup . min-slack ? .j ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f**
