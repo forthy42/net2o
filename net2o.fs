@@ -937,8 +937,7 @@ timestats buffer: stat-tuple
     ELSE  o> rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
-    >timestamp
-    over  IF
+    >timestamp over  IF
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  ts-ticks 64@
 	    r@ tick-init 1+ timestamp * - ts-ticks 64@
@@ -948,8 +947,8 @@ timestats buffer: stat-tuple
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
 
-: net2o:ack-b2btime ( ticks addr -- )  >timestamp
-    over  IF  + ts-ticks 64@ b2b-timestat
+: net2o:ack-b2btime ( ticks addr -- )
+    >timestamp over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
 #20000000 Value slack-default# \ 20ms slack leads to backdrop of factor 2

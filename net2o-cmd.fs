@@ -404,7 +404,7 @@ net2o-base
     net2o:/timing rec-timing ;
 47 net2o: >time-offset ( n -- )  time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
-48 net2o: ack-b2btime ( time addr -- ) 64>n  net2o:ack-b2btime ;
+48 net2o: ack-b2btime ( time addr -- ) net2o:ack-b2btime ;
 49 net2o: ack-cookies ( cookie addr mask -- )
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
@@ -572,7 +572,7 @@ also net2o-base
     timing( 64>r 64dup ['] 64. $10 base-execute 64r> 64dup 64. ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
-    last-raddr 64@ last-rtick 64@ 64dup 64#0 64=
+    last-raddr 64@ last-rtick 64@ 64dup 64-0=
     IF  64drop 64drop
     ELSE  time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
 
