@@ -1161,13 +1161,15 @@ file-state-struct buffer: new-file-state
     statbuf st_mode l@ $FFF and ;
 
 : n2o:track-time ( mtime fileno -- ) >r
-\    ." Set time: " r@ . 64dup 64>d d. cr
-    64>d 2dup statbuf ntime!
-    statbuf 2 cells + ntime!
-    r> statbuf futimens ?ior ;
+    [IFDEF] android  rdrop 64drop
+    [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
+	64>d 2dup statbuf ntime!
+	statbuf 2 cells + ntime!
+	r> statbuf futimens ?ior [THEN] ;
 
 : n2o:track-mod ( mod fileno -- )
-    swap fchmod ?ior ;
+    [IFDEF] android 2drop
+    [ELSE] swap fchmod ?ior [THEN] ;
 
 : n2o:set-stat ( mtime mod id -- )
     id>addr? >o fs-fid @ fileno n2o:track-mod fs-time 64! o> ;
