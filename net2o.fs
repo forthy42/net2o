@@ -1593,9 +1593,9 @@ queue-class >osize @ buffer: queue-adder
 
 \ poll loop
 
-1 Value pollfd#
+UValue pollfd#  1 to pollfd#
 User pollfds
-pollfds  pollfds pollfd %size pollfd# * dup cell- uallot drop erase
+pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 : fds!+ ( fileno flag addr -- addr' )
      >r r@ events w!  r@ fd l!  r> pollfd %size + ; 

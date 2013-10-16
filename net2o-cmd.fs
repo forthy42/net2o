@@ -492,6 +492,8 @@ net2o-base
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
 
+\ ids 130..140 reserved for DHT
+
 \ safe initialization
 
 \ This must be defined last, otherwise dangerous name-clash!
