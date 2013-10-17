@@ -49,7 +49,7 @@ hash-init-rng
 \ hierarchical hash table
 
 \ hash tables store key,value-pairs.
-\ Each hierarchy uses one byte of wurst-state as index (only lower 7 bits)
+\ Each hierarchy uses one byte of state as index (only lower 7 bits)
 \ if there is a collission, add another indirection
 
 0 value last#

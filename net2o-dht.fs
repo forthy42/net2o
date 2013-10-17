@@ -17,6 +17,7 @@
 
 keccak# buffer: keyed-hash-buf
 keccak#max buffer: keyed-hash-out
+\ specify strength, not length!
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
 
@@ -39,20 +40,24 @@ keccak#max buffer: keyed-hash-out
     >keyed-hash  keyed-hash-out hash#256 2dup keccak> ;
 
 \ For speed reasons, the DHT is in-memory
-\ we keep a log of changes on disk
-\ might not be saved too frequently...
-\ keys are predefined small integers
+\ we may keep a log of changes on disk if we want persistence
+\ might not be saved too frequently... robustness comes from distribution
+\ This is actually a PHT, a prefix hash tree; base 256 (bytes)
 
-: dht:id ( addr u -- )  2drop ;
-: dht:key ( n -- )  drop ;
-: dht:value+ ( addr u time -- )  64drop 2drop ;
-: dht:have? ( start end n -- )  drop 64drop 64drop ;
+$200 cells Constant dht-size# \ $100 entris + $100 chains
 
-\ keys
+
+: dht@ ( bucket -- addr )  >r
+    r@ @ 0= IF  dht-size# allocate throw dup r> ! dup dht-size# erase
+    ELSE  r> @  THEN ;
+
+\ keys are enumerated small integers
 
 : enum ( n -- n+1 )  dup Constant 1+ ;
 
 0
+enum k#hash     \ hash itself is item 0
+enum k#peers    \ peers who have copies of that entry - private
 enum k#n2ohost  \ n2o network id+routing from there
 enum k#ipv4host \ 6 bytes: addr:port
 enum k#ipv6host \ 18 bytes: addr:port
@@ -61,7 +66,27 @@ enum k#filename \ path+file for object
 enum k#person   \ person associated
 enum k#object   \ object associated
 \ more to come
-drop
+cells Constant k#size
+
+\ some primitives
+
+: d#? ( addrkey u bucket -- addr u bucket/0 )
+    dup @ 0= ?EXIT
+    >r 2dup r@ @ $@ str=  IF  r>  EXIT  THEN
+    rdrop false ;
+
+: d# ( addr u hash -- bucket ) { hash }
+    bounds ?DO
+	I c@ cells hash dht@ + d#? ?dup-IF
+	    UNLOOP  EXIT  THEN
+	I c@ $100 + cells hash dht@ + to hash
+    LOOP  true abort" dht exhausted - this should not happen" ;
+
+
+: dht:id ( addr u -- )  2drop ;
+: dht:key ( n -- )  drop ;
+: dht:value+ ( addr u time -- )  64drop 2drop ;
+: dht:have? ( start end n -- )  drop 64drop 64drop ;
 
 \ commands for DHT
 
