@@ -182,6 +182,7 @@ s" net2o timed out"              throwcode !!timeout!!
 s" no key file"                  throwcode !!nokey!!
 s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
+s" invalid DHT key"              throwcode !!no-dht-key!!
 
 \ Create udp socket
 

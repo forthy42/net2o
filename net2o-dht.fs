@@ -46,6 +46,7 @@ keccak#max buffer: keyed-hash-out
 
 $200 cells Constant dht-size# \ $100 entris + $100 chains
 
+Variable d#public
 
 : dht@ ( bucket -- addr )  >r
     r@ @ 0= IF  dht-size# allocate throw dup r> ! dup dht-size# erase
@@ -57,7 +58,7 @@ $200 cells Constant dht-size# \ $100 entris + $100 chains
 
 0
 enum k#hash     \ hash itself is item 0
-enum k#peers    \ peers who have copies of that entry - private
+enum k#peers    \ peers who have copies of that entry - private, pointers
 enum k#n2ohost  \ n2o network id+routing from there
 enum k#ipv4host \ 6 bytes: addr:port
 enum k#ipv6host \ 18 bytes: addr:port
@@ -69,6 +70,9 @@ enum k#object   \ object associated
 cells Constant k#size
 
 \ some primitives
+
+UValue d#id
+User d#hashkey cell uallot drop
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
@@ -82,21 +86,30 @@ cells Constant k#size
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true abort" dht exhausted - this should not happen" ;
 
-
-: dht:id ( addr u -- )  2drop ;
-: dht:key ( n -- )  drop ;
-: dht:value+ ( addr u time -- )  64drop 2drop ;
-: dht:have? ( start end n -- )  drop 64drop 64drop ;
+: >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
+: d#value+ ( addr u key -- )
+    cells dup k#size u>= !!no-dht-key!!
+    d#id @ 0= IF
+	k#size allocatez d#id !
+	d#hashkey 2@ d#id @ $!
+    THEN
+    d#id @ + $+[]! ;
+: d#. ( -- )
+    d#id @ $@ xtype ." :" cr
+    k#size cell DO
+	I cell/ 0 .r ." : "
+	d#id @ I + [: type ." , " ;] $[]map cr
+    cell +LOOP ;
+: d#value? ( mask n -- ) drop 64drop ;
 
 \ commands for DHT
 
-130 net2o: dht-id ( addr u -- ) dht:id ;
+130 net2o: dht-id ( addr u -- ) >d#id ;
 \g set dht id for further operations on it
-131 net2o: dht-key ( n -- ) 64>n dht:key ;
-\g set the dht key for the current dht id
-132 net2o: dht-value+ ( addr u time -- ) dht:value+ ;
-\g add a value plus expire time to the given dht key
-133 net2o: dht-values? ( n -- ) 64>n drop ;
-\g query the dht values and send back up to n items with dht-value+
-134 net2o: dht-have? ( start end n -- ) 64>n dht:have? ;
+131 net2o: dht-value+ ( addr u n -- ) 64>n d#value+ ;
+\g add a value to the given dht key
+132 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
+\g query the dht values mask selects which) and send back up to n
+\g items with dht-value+
+133 net2o: dht-have? ( start end n -- ) 64>n drop 64drop 64drop ;
 \g send a list of hashes back to determine what you have
