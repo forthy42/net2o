@@ -1585,7 +1585,7 @@ Variable sendflag  sendflag off
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
 	'4' of  .ip4  endof
-	'6' of  .ip4  endof
+	'6' of  .ip6  endof
 	-rot dump endcase cr ;
 
 : >sockaddr ( -- addr len )
