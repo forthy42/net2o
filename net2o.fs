@@ -1557,8 +1557,39 @@ Variable sendflag  sendflag off
     data-rmap @ >o
     dup rewind-partial  dup rewind-ackbits-partial  dest-back ! o> ;
 
-\ Variable timeslip  timeslip off
-\ : send? ( -- flag )  timeslip @ chunks $@len 0> and dup 0= timeslip ! ;
+\ NAT traversal stuff
+
+: .sockaddr { addr alen -- }
+    case addr family w@
+	AF_INET of
+	    '4' emit addr sin_addr 4 type addr port 2 type
+	endof
+	AF_INET6 of
+	    '6' emit addr sin6_addr $10 type addr sin6_port 2 type
+	endof
+    endcase ;
+
+: .port ( addr len -- )
+    drop be-uw@ 0 ['] .r #10 base-execute ;
+: .ip4b ( addr len -- addr' len' )
+    over c@ 0 ['] .r #10 base-execute 1 /string ;
+: .ip4 ( addr len -- )
+    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
+: .ip6w ( addr len -- addr' len' )
+    over be-uw@ [: 0 <# # # # # #> type ;] $10 base-execute
+    2 /string ;
+: .ip6 ( addr len -- )
+    ." [" .ip6w ." :" .ip6w ." :" .ip6w ." :" .ip6w ." :"
+    .ip6w ." :" .ip6w ." :" .ip6w ." :" .ip6w ." ]:" .port ;
+
+: .ipaddr ( addr len -- )
+    case  over c@ >r 1 /string r>
+	'4' of  .ip4  endof
+	'6' of  .ip4  endof
+	-rot dump endcase cr ;
+
+: >sockaddr ( -- addr len )
+    return-address @ routes #.key $@ ['] .sockaddr $tmp ;
 
 \ schedule delayed events
 

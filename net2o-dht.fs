@@ -58,18 +58,21 @@ Variable d#public
 
 0
 enum k#hash     \ hash itself is item 0
-enum k#peers    \ peers who have copies of that entry - private, pointers
-enum k#n2ohost  \ n2o network id+routing from there
-enum k#ipv4host \ 6 bytes: addr:port
-enum k#ipv6host \ 18 bytes: addr:port
-enum k#dnshost  \ name+2 bytes port
-enum k#filename \ path+file for object
+enum k#owner    \ owner of the object (pubkey)
+enum k#peers    \ peers who have copies of that entry - private?, pointers
 enum k#person   \ person associated
 enum k#object   \ object associated
+enum k#filename \ path+file for object
+enum k#map      \ I have those parts of the object
+enum k#host     \ network id+routing from there
 \ more to come
 cells Constant k#size
 
-\ some primitives
+\ map primitives
+\ map layout: offset, bitmap pairs (64 bits each)
+\ string array: starts with base map (32kB per bit)
+
+\ some hash storage primitives
 
 UValue d#id
 User d#hashkey cell uallot drop

@@ -25,7 +25,7 @@ insert-ip n2o:connect +flow-control +resend
 net2o-code
 expect-reply
 data-ivs time-offset!
-s" Download test" $, type cr  see-me
+s" Download test" $, type cr  see-me  get-ip
 $400 blocksize! $400 blockalign! stat( request-stats )
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy
 s" data/2011-05-13_11-26-57-small.jpg" s" .cache/photo000s.jpg" n2o:copy

@@ -412,6 +412,10 @@ net2o-base
     THEN
     64= cookie-val and validated or! ;
 50 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
+51 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
+52 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
+53 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 
 \ crypto functions
 
@@ -475,19 +479,14 @@ net2o-base
 82 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
 83 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
-\ acknowledges
-
-90 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
-91 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
-92 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
-93 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
-
 \ ids 100..120 reserved for key exchange/strage
 
-\ profiling
+\ profiling, nat traversal
 
 120 net2o: !time ( -- ) init-timer ;
 121 net2o: .time ( -- ) .packets .times ;
+122 net2o: set-ip ( addr u -- ) .ipaddr ;
+123 net2o: get-ip ( -- ) >sockaddr $, set-ip ;
 
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
