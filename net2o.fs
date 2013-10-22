@@ -623,11 +623,14 @@ Variable >code-flag
 : addr>keys ( addr -- keys )
     max-size^2 1- rshift ;
 
-: allocatez ( size -- addr )
+: alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
 [IFUNDEF] alloc+guard
-    ' allocatez alias alloc+guard
+    ' alloz alias alloc+guard
 [THEN]
+: freez ( addr size -- )
+    \g erase and then free - for secret stuff
+    over swap erase free throw ;
 : allocateFF ( size -- addr )
     dup >r allocate throw dup r> -1 fill ;
 : allocate-bits ( size -- addr )
@@ -636,19 +639,19 @@ Variable >code-flag
 : alloc-data ( addr u -- u flag )
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
-    c:key# allocatez dest-ivsgen !
+    c:key# alloz dest-ivsgen !
     >code-flag @ dup code-flag !
     IF
-	dup addr>replies  allocatez dest-replies !
+	dup addr>replies  alloz dest-replies !
     ELSE
-	dup addr>ts       allocatez dest-timestamps !
+	dup addr>ts       alloz dest-timestamps !
     THEN ;
 
 : map-data ( addr u -- o )
     o rdata-class new >o dest-job !
     alloc-data
     code-flag @ 0= IF
-	dup addr>ts allocatez dest-cookies !
+	dup addr>ts alloz dest-cookies !
 	dup addr>bits bits>bytes allocate-bits data-ackbits0 !
 	dup addr>bits bits>bytes allocate-bits data-ackbits1 !
 	s" " data-ackbits-buf $!
@@ -661,7 +664,7 @@ Variable >code-flag
     o code-class new >o dest-job !
     dest-lock 0 pthread_mutex_init drop
     alloc-data
-    dup addr>ts allocatez dest-cookies !
+    dup addr>ts alloz dest-cookies !
     drop
     o o> ;
 

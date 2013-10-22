@@ -1,7 +1,7 @@
 \ Interface to the Curve25519 primitive of the NaCL library
 
 \ for ease to deploy, there is just the crypto_scalarmult primitive
-\ everything else is done with Wurstkessel, anyways
+\ everything else is done with Keccak, anyways
 
 c-library curve25519
     \c /* Copyright 2008, Google Inc.

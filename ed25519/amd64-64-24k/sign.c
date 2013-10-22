@@ -30,6 +30,10 @@ int crypto_sign(
     sm[32 + i] = extsk[32+i];
 
   crypto_hash_sha512(hmg, sm+32, mlen+32); /* Generate k as h(extsk[32],...,extsk[63],m) */
+  // this really is hash(hash(sk)[second part]+message).
+  // Seems to be one hash too much
+  // is actually not random, but deterministic, though unique per message
+  // and secret
 
   /* Computation of R */
   sc25519_from64bytes(&sck, hmg);
@@ -41,6 +45,7 @@ int crypto_sign(
     sm[i] = r[i];
 
   get_hram(hram, sm, sk+32, sm, mlen+64);
+  // really: hram := hash(r, pk, message)
 
   sc25519_from64bytes(&scs, hram);
   sc25519_from32bytes(&scsk, extsk);
