@@ -65,6 +65,7 @@ enum k#object   \ object associated
 enum k#filename \ path+file for object
 enum k#map      \ I have those parts of the object
 enum k#host     \ network id+routing from there
+enum k#tags     \ tags added
 \ more to come
 cells Constant k#size
 
