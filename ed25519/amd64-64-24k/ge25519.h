@@ -12,6 +12,7 @@
 #define ge25519_add                       crypto_sign_ed25519_amd64_64_24k_batch_ge25519_add
 #define ge25519_double                    crypto_sign_ed25519_amd64_64_24k_batch_ge25519_double
 #define ge25519_double_scalarmult_vartime crypto_sign_ed25519_amd64_64_24k_batch_double_scalarmult_vartime
+#define ge25519_scalarmult_vartime        crypto_sign_ed25519_amd64_64_24k_batch_scalarmult_vartime
 #define ge25519_multi_scalarmult_vartime  crypto_sign_ed25519_amd64_64_24k_batch_ge25519_multi_scalarmult_vartime
 #define ge25519_scalarmult_base           crypto_sign_ed25519_amd64_64_24k_batch_scalarmult_base
 #define ge25519_p1p1_to_p2 crypto_sign_ed25519_amd64_64_24k_batch_ge25519_p1p1_to_p2
@@ -87,6 +88,8 @@ extern void ge25519_double(ge25519 *r, const ge25519 *p);
 
 /* computes [s1]p1 + [s2]ge25519_base */
 extern void ge25519_double_scalarmult_vartime(ge25519 *r, const ge25519 *p1, const sc25519 *s1, const sc25519 *s2);
+
+extern void ge25519_scalarmult_vartime(ge25519 *r, const ge25519 *p1, const sc25519 *s1);
 
 extern void ge25519_multi_scalarmult_vartime(ge25519 *r, ge25519 *p, sc25519 *s, const unsigned long long npoints);
 
