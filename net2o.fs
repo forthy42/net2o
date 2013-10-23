@@ -183,6 +183,7 @@ s" no key file"                  throwcode !!nokey!!
 s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
+s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 
 \ Create udp socket
 

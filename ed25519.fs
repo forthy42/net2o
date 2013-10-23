@@ -79,7 +79,7 @@ $80 buffer: get1
     sig pk ed-check? ;
 
 : ed-dh { sk pk -- secret len }
-    get0 pk ge25519-unpack- abort" No public key"
+    get0 pk ge25519-unpack- !!no-ed-key!!
     sct0 sk 32b>sc25519
     get1 get0 sct0 ge25519*
     sct0 get1 ge25519-pack
@@ -90,11 +90,15 @@ false [IF] \ test stuff
     skc pkc ed-keypair
     keccak0 "Test 123" >keccak keccak*
     skc pkc ed-sign
-    dup $40 xtype cr
     keccak0 "Test 123" >keccak keccak*
-    pkc ed-verify . cr
+    dup pkc ed-verify [IF] ." passed" [ELSE] ." failed" [THEN] cr
+    keccak0 "Test 124" >keccak keccak*
+    dup pkc ed-verify 0= [IF] ." forge detected" [ELSE] ." failed" [THEN] cr
+    $40 xtype cr
     ." Test EdDH" cr
     stskc stpkc ed-keypair
-    skc stpkc ed-dh xtype cr
-    stskc pkc ed-dh xtype cr
+    skc stpkc ed-dh pad swap move
+    stskc pkc ed-dh
+    2dup pad over str= [IF] ." passed" [ELSE] ." failed" [THEN] cr
+    xtype cr
 [THEN]
