@@ -78,26 +78,10 @@ $80 buffer: get1
     get0 pk ge25519-unpack- IF  false  EXIT  THEN \ bad pubkey
     sig pk ed-check? ;
 
-: ed-dh { sk pk -- secret len }
+: ed-dhv { sk pk -- secret len }
     get0 pk ge25519-unpack- !!no-ed-key!!
     get1 get0 sk ge25519*
     sct0 get1 ge25519-pack
     sct0 $20 ;
 
-true [IF] \ test stuff
-    ." Test signing" cr
-    skc pkc ed-keypair
-    keccak0 "Test 123" >keccak keccak*
-    skc pkc ed-sign
-    keccak0 "Test 123" >keccak keccak*
-    dup pkc ed-verify [IF] ." passed" [ELSE] ." failed" [THEN] cr
-    keccak0 "Test 124" >keccak keccak*
-    dup pkc ed-verify 0= [IF] ." forge detected" [ELSE] ." failed" [THEN] cr
-    $40 xtype cr
-    ." Test EdDH" cr
-    stskc stpkc ed-keypair
-    skc stpkc ed-dh pad swap move
-    stskc pkc ed-dh
-    2dup pad over str= [IF] ." passed" [ELSE] ." failed" [THEN] cr
-    xtype cr
-[THEN]
+' ed-dhv Alias ed-dh \ no real non-variable version available
