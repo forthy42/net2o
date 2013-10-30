@@ -70,7 +70,7 @@ $80 buffer: get1
     hashtmp $40 >keccak keccak* hashtmp $40 keccak> \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
     sct3 sig $20 + 32b>sc25519     \ sct3 is s
-    get1 get0 sct2 sct3 ge25519*+ \ s*pk+z*pk
+    get1 get0 sct2 sct3 ge25519*+  \ s*pk+z*pk
     sct2 get1 ge25519-pack         \ =r
     sig sct2 32b= ;
 
@@ -80,12 +80,11 @@ $80 buffer: get1
 
 : ed-dh { sk pk -- secret len }
     get0 pk ge25519-unpack- !!no-ed-key!!
-    sct0 sk 32b>sc25519
-    get1 get0 sct0 ge25519*
+    get1 get0 sk ge25519*
     sct0 get1 ge25519-pack
     sct0 $20 ;
 
-false [IF] \ test stuff
+true [IF] \ test stuff
     ." Test signing" cr
     skc pkc ed-keypair
     keccak0 "Test 123" >keccak keccak*

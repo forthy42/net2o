@@ -4,10 +4,6 @@
 
 #define S1_SWINDOWSIZE 5
 #define PRE1_SIZE (1<<(S1_SWINDOWSIZE-2))
-#define S2_SWINDOWSIZE 7
-#define PRE2_SIZE (1<<(S2_SWINDOWSIZE-2))
-
-extern ge25519_niels pre2[PRE2_SIZE];
 
 static const fe25519 ec2d = {{0xEBD69B9426B2F146, 0x00E0149A8283B156, 0x198E80F2EEF3D130, 0xA406D9DC56DFFCE7}};
 
@@ -26,7 +22,6 @@ void ge25519_scalarmult_vartime(ge25519_p3 *r, const ge25519_p3 *p1, const sc255
   ge25519_pniels pre1[PRE1_SIZE], neg;
   ge25519_p3 d1;
   ge25519_p1p1 t;
-  ge25519_niels nneg;
   fe25519 d;
   int i;
   
@@ -59,7 +54,7 @@ void ge25519_scalarmult_vartime(ge25519_p3 *r, const ge25519_p3 *p1, const sc255
   for(;i>=0;i--)
   {
     firstbit:
-
+    // this stuff needs to be secret-independent!
     ge25519_dbl_p1p1(&t, (ge25519_p2 *)r);
 
     if(slide1[i]>0)
