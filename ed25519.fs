@@ -81,9 +81,10 @@ $80 buffer: get1
     sig pk ed-check? ;
 
 : ed-dhv { sk pk -- secret len }
+    key( ." sk: " sk $20 xtype cr ." pk: " pk $20 xtype cr )
     get0 pk ge25519-unpack- !!no-ed-key!!
     get1 get0 sk ge25519*
     sct0 get1 ge25519-pack
-    sct0 $20 ;
+    sct0 $20 key( 2dup ." ss: " 2dup xtype cr ) ;
 
 ' ed-dhv Alias ed-dh \ no real non-variable version available

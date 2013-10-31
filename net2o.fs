@@ -39,6 +39,8 @@ s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 \ required tools
 
 \ require smartdots.fs
+require 64bit.fs
+require debugging.fs
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
@@ -54,7 +56,6 @@ require rng.fs
 require ed25519-donna.fs
 \ require ed25519.fs
 require hash-table.fs
-require debugging.fs
 require mini-oof2.fs
 
 \ porting helper to mini-oof2
@@ -75,9 +76,6 @@ do-stackrel off
 
 : ?nextarg ( -- addr u noarg-flag )
     argc @ 1 > IF  next-arg false  ELSE  true  THEN ;
-
-: xtype ( addr u -- )  hex[
-    bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
 
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
