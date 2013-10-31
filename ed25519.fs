@@ -26,6 +26,8 @@ c-library ed25519
     c-function 32b= str32eq a a -- n ( addr1 addr2 -- flag )
 end-c-library
 
+$20 Constant KEYBYTES
+
 $80 buffer: sct0
 sct0 $20 + Constant sct1
 sct1 $20 + Constant sct2

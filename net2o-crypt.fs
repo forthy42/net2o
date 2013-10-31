@@ -119,7 +119,8 @@ state# rng$ mykey swap move
     over mykey-salt# >crypt-source
     2r> >crypt-key 
     mykey-salt# safe/string
-    c:diffuse ;
+    key( ." key init: " c:key@ c:key# .nnb cr )
+    c:diffuse key( ." diffused: " c:key@ c:key# .nnb cr ) ;
 
 \ !!TBD!! use a nonce to setup and make sure each such string
 \ can be decrypted only once!
@@ -158,16 +159,13 @@ keysize buffer: stskc
 keysize buffer: keypad
 Variable do-keypad "" do-keypad $!
 
-: (gen-keys) { skc pkc -- }
-    keysize rng$ skc swap move
-    pkc skc base9 crypto_scalarmult ;
 \ the theory here is that sks*pkc = skc*pks
 \ we send our public key and query the server's public key.
-: gen-keys ( -- ) skc pkc (gen-keys) ;
-: gen-tmpkeys ( -- ) tskc tpkc (gen-keys)
+: gen-keys ( -- ) skc pkc ed-keypair ;
+: gen-tmpkeys ( -- ) tskc tpkc ed-keypair
 \    tskc keysize .nnb cr  tpkc keysize .nnb cr cr
 ;
-: gen-stkeys ( -- ) stskc stpkc (gen-keys)
+: gen-stkeys ( -- ) stskc stpkc ed-keypair
 \    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
 ;
 
@@ -233,12 +231,11 @@ Defer check-key
 : net2o:receive-key ( addr u -- )
     o 0= IF  2drop EXIT  THEN
     ?keysize dup keysize check-key
-    keypad skc rot crypto_scalarmult
-    keypad keysize do-keypad $+! ;
+    skc swap ed-dh 2dup keypad swap move do-keypad $+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
-    keypad swap rot crypto_scalarmult
-    o IF  keypad keysize do-keypad $!  THEN
+    swap ed-dh 2dup keypad swap move
+    o IF  do-keypad $!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
 
 : tmpkey@ ( -- addr u )

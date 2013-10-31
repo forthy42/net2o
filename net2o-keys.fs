@@ -116,7 +116,7 @@ Variable keys "" keys $!
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
-    keypad ke-sk $@ drop ke-pk $@ drop crypto_scalarmult keypad keysize +key ;
+    ke-sk $@ drop ke-pk $@ drop ed-dh +key ;
 
 "" ">passphrase \ following the encrypt-everything paradigm,
 \ no password is the empty string!  It's still encrypted!
@@ -199,7 +199,7 @@ previous definitions
     ( keypack keypack-all# >rng$ ) key>file ;
 
 : >keys ( -- )
-    keypad skc pkc crypto_scalarmult keypad keysize +key ;
+    skc pkc ed-dh +key ;
 
 : +keypair ( type nick u -- )
     +passphrase gen-keys

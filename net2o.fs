@@ -15,6 +15,27 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ defined exceptions
+
+: throwcode ( addr u -- )  exception Create , DOES> ( flag -- ) @ and throw ;
+
+s" gap in file handles"          throwcode !!gap!!
+s" invalid file id"              throwcode !!fileid!!
+s" could not send"               throwcode !!send!!
+s" wrong packet size"            throwcode !!size!!
+s" no power of two"              throwcode !!pow2!!
+s" unimplemented net2o function" throwcode !!function!!
+s" too many commands"            throwcode !!commands!!
+s" string does not fit"          throwcode !!stringfit!!
+s" ivs must be 64 bytes"         throwcode !!ivs!!
+s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
+s" net2o timed out"              throwcode !!timeout!!
+s" no key file"                  throwcode !!nokey!!
+s" maximum nesting reached"      throwcode !!maxnest!!
+s" nesting stack empty"          throwcode !!minnest!!
+s" invalid DHT key"              throwcode !!no-dht-key!!
+s" invalid Ed25519 key"          throwcode !!no-ed-key!!
+
 \ required tools
 
 \ require smartdots.fs
@@ -24,12 +45,14 @@ require unix/pthread.fs
 require unix/filestat.fs
 require string.fs
 require struct0x.fs
-require curve25519.fs
+\ require curve25519.fs
 require wurstkessel.fs
 require libkeccak.fs
 keccak-o crypto-o !
 \ wurstkessel-o crypto-o !
 require rng.fs
+require ed25519-donna.fs
+\ require ed25519.fs
 require hash-table.fs
 require debugging.fs
 require mini-oof2.fs
@@ -163,27 +186,6 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 	over r> swap c!
     THEN
     2drop ;
-
-\ defined exceptions
-
-: throwcode ( addr u -- )  exception Create , DOES> ( flag -- ) @ and throw ;
-
-s" gap in file handles"          throwcode !!gap!!
-s" invalid file id"              throwcode !!fileid!!
-s" could not send"               throwcode !!send!!
-s" wrong packet size"            throwcode !!size!!
-s" no power of two"              throwcode !!pow2!!
-s" unimplemented net2o function" throwcode !!function!!
-s" too many commands"            throwcode !!commands!!
-s" string does not fit"          throwcode !!stringfit!!
-s" ivs must be 64 bytes"         throwcode !!ivs!!
-s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
-s" net2o timed out"              throwcode !!timeout!!
-s" no key file"                  throwcode !!nokey!!
-s" maximum nesting reached"      throwcode !!maxnest!!
-s" nesting stack empty"          throwcode !!minnest!!
-s" invalid DHT key"              throwcode !!no-dht-key!!
-s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 
 \ Create udp socket
 
