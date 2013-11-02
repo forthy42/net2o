@@ -51,7 +51,7 @@ $80 buffer: get1
 : >hash ( addr u -- ) \ output is in hashtmp
     >keccak keccak* hashtmp $40 keccak> ;
 
-: ed-sign { sk pk -- sig } \ message digest is in keccak state
+: ed-sign { sk pk -- sig u } \ message digest is in keccak state
     @keccak keccaktmp keccak# move \ we need this twice - move away
     sk $20 >hash \ gen "random number" from secret to hashtmp
     keccaktmp @keccak keccak# move \ restore state
@@ -64,7 +64,7 @@ $80 buffer: get1
     sct2 sk 32b>sc25519      \ sct2 is sk
     sct1 sct1 sct2 sc25519*
     sct1 sct1 sct3 sc25519+  \ s=z*sk+k
-    sct0 ; \ r,s
+    sct0 $40 ; \ r,s
 
 : ed-check? { sig pk -- flag } \ message digest is in keccak state
     \ unpacked negated pk is in get0, can be used for batch checking
@@ -81,10 +81,9 @@ $80 buffer: get1
     sig pk ed-check? ;
 
 : ed-dhv { sk pk -- secret len }
-    key( ." sk: " sk $20 xtype cr ." pk: " pk $20 xtype cr )
     get0 pk ge25519-unpack- !!no-ed-key!!
     get1 get0 sk ge25519*
     sct0 get1 ge25519-pack
-    sct0 $20 key( 2dup ." ss: " 2dup xtype cr ) ;
+    sct0 $20 ;
 
 ' ed-dhv Alias ed-dh \ no real non-variable version available

@@ -47,14 +47,12 @@ require unix/pthread.fs
 require unix/filestat.fs
 require string.fs
 require struct0x.fs
-\ require curve25519.fs
-require wurstkessel.fs
 require libkeccak.fs
 keccak-o crypto-o !
+\ require wurstkessel.fs
 \ wurstkessel-o crypto-o !
 require rng.fs
 require ed25519-donna.fs
-\ require ed25519.fs
 require hash-table.fs
 require mini-oof2.fs
 
