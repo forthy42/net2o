@@ -10,7 +10,7 @@ ARCH=""
 exec_prefix=${prefix}
 libexecdir=$package${exec_prefix}/lib
 libccdir=$libexecdir/$VERSION/libcc-named/
-LIBRARY="curve25519.fs wurstkessel.fs libkeccak.fs"
+LIBRARY="ed25519-donna.fs wurstkessel.fs libkeccak.fs"
 ANDROID=${ANDROID-~/proj/gforths/gforth-android}
 
 for i in $LIBRARY

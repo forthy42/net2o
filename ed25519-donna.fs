@@ -1,6 +1,11 @@
 \ Interface to the ed25519 primitives from donna     23oct2013py
 \ The high level stuff is all in Forth
 
+\ dummy load for Android
+[IFDEF] android
+    s" /data/data/gnu.gforth/lib/libed25519-prims.so" open-lib drop
+[THEN]
+
 c-library ed25519_donna
     "ed25519-prims" add-lib
     \c #include <stdint.h>
