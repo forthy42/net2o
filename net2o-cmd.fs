@@ -373,7 +373,6 @@ also net2o-base definitions
     64drop 2drop 64drop ;
 
 22 net2o: disconnect ( -- )  o 0= ?EXIT n2o:dispose-context un-cmd ;
-23 net2o: gen-ivs ( addr u -- )  ivs-strings receive-ivs ;
 
 net2o-base
 
@@ -426,20 +425,21 @@ net2o-base
 61 net2o: key-request ( -- addr u )
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-62 net2o: update-key ( -- )  net2o:update-key ;
+62 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
+63 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
+64 net2o: update-key ( -- )  net2o:update-key ;
+65 net2o: gen-ivs ( addr u -- )  ivs-strings receive-ivs ;
 
 \ create commands to send back
 
 : all-ivs ( -- ) \ Seed and gen all IVS
     state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
 
-63 net2o: gen-reply ( -- )
+66 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key all-ivs time-offset! ]tmpnest
       end-cmd
       ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;]  IS expect-reply? ;
-64 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
-65 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
 
 \ better slurping
 
