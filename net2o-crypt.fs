@@ -210,12 +210,23 @@ Variable do-keypad "" do-keypad $!
     THEN  drop ;
 ' (regen-ivs) IS regen-ivs
 
-: ivs-string ( addr u map -- )  c:key@ >r
-    @ >o dest-ivsgen @ c:key!
-    dest-size @ addr>keys dest-ivs o> >r r@ $!len
-    state# <> !!ivs!! >crypt-source' >crypt-key-ivs c:diffuse
-    r> $@ c:prng
+: one-ivs ( addr -- )  c:key@ >r
+    @ >o dest-ivsgen @ c:key# c:prng
+    dest-ivsgen @ c:key! c:diffuse
+    dest-size @ addr>keys dest-ivs $!len
+    dest-ivs $@ c:prng o>
     r> c:key! ;
+
+: receive-ivs ( -- )
+    code-map one-ivs   code-rmap one-ivs
+    data-map one-ivs   data-rmap one-ivs ;
+
+: send-ivs ( -- )
+    code-rmap one-ivs  code-map one-ivs
+    data-rmap one-ivs  data-map one-ivs ;
+
+: ivs-strings ( addr u -- )
+    state# <> !!ivs!! >crypt-source' >crypt-key-ivs ;
 
 \ : ivs-key ( addr u map -- )  @ >o  dest-ivsgen @ swap move o> ;
 

@@ -373,6 +373,7 @@ also net2o-base definitions
     64drop 2drop 64drop ;
 
 22 net2o: disconnect ( -- )  o 0= ?EXIT n2o:dispose-context un-cmd ;
+23 net2o: gen-ivs ( addr u -- )  ivs-strings receive-ivs ;
 
 net2o-base
 
@@ -422,30 +423,23 @@ net2o-base
 60 net2o: receive-key ( addr u -- )
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
-61 net2o: gen-data-ivs ( addr u -- ) data-map ivs-string ;
-62 net2o: gen-code-ivs ( addr u -- ) code-map ivs-string ;
-63 net2o: gen-rdata-ivs ( addr u -- ) data-rmap ivs-string ;
-64 net2o: gen-rcode-ivs ( addr u -- ) code-rmap ivs-string ;
-65 net2o: key-request ( -- addr u )
+61 net2o: key-request ( -- addr u )
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-66 net2o: update-key ( -- )  net2o:update-key ;
+62 net2o: update-key ( -- )  net2o:update-key ;
 
 \ create commands to send back
 
-: data-ivs ( -- ) \ two IV seeds for send and receive data
-    state# rng$ 2dup $, gen-data-ivs data-rmap ivs-string
-    state# rng$ 2dup $, gen-rdata-ivs data-map ivs-string ;
-: code-ivs ( -- ) \ two IV seeds for send and receive code
-    state# rng$ 2dup $, gen-code-ivs code-rmap ivs-string
-    state# rng$ 2dup $, gen-rcode-ivs code-map ivs-string ;
+: all-ivs ( -- ) \ Seed and gen all IVS
+    state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
 
-67 net2o: gen-reply ( -- )
+63 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key code-ivs ]tmpnest end-cmd
+      nest[ pkc keysize $, receive-key update-key all-ivs time-offset! ]tmpnest
+      end-cmd
       ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;]  IS expect-reply? ;
-68 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
-69 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
+64 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
+65 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
 
 \ better slurping
 
