@@ -15,9 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-128 buffer: key-assembly
+64 Constant state#
+state# 2* buffer: key-assembly
+state# buffer: no-key \ just zeros for no key
+
 : >crypt-key ( addr u -- ) key( dup . )
-    dup 0= IF  2drop wurst-key state#  THEN
+    dup 0= IF  2drop no-key state#  THEN
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
@@ -71,16 +74,12 @@ Defer regen-ivs
     64drop o> ;
 
 : crypt-key$ ( -- addr u )
-    o 0= IF
-	wurst-key state#
-    ELSE
-	crypto-key $@
-    THEN ;
+    o 0= IF  no-key state#  ELSE  crypto-key $@  THEN ;
 
 : default-key ( -- )
     c:key@ 0= IF
 	key( ." Default-key " cr )
-	rnd-init >crypt-source'
+	no-key >crypt-source'
 	crypt-key$ >crypt-key
     THEN ;
 
@@ -169,15 +168,12 @@ Variable do-keypad "" do-keypad $!
 \    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
 ;
 
+: keypad$ ( -- addr u )
+    do-keypad $@ dup 0= IF  2drop  crypto-key $@  THEN ;
+
 : >crypt-key-ivs ( -- )
-    o 0= IF
-	crypt( ." IVS generated for non-connection!" cr )
-	wurst-key state#
-    ELSE
-	do-keypad $@ dup 0= IF  2drop
-	    crypto-key $@
-	THEN
-    THEN crypt( ." ivs key: " 2dup .nnb cr )
+    o 0= IF  no-key state#  ELSE  keypad$  THEN
+    crypt( ." ivs key: " 2dup .nnb cr )
     >crypt-key ;
 
 : regen-ivs/2 ( -- )
@@ -211,7 +207,7 @@ Variable do-keypad "" do-keypad $!
 ' (regen-ivs) IS regen-ivs
 
 : one-ivs ( addr -- )  c:key@ >r
-    @ >o key-assembly 128 c:prng
+    @ >o key-assembly state# 2* c:prng
     dest-ivsgen @ c:key! key-assembly >c:key c:diffuse
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng o>

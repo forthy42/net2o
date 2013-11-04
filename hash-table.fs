@@ -1,7 +1,7 @@
 \ generic hash table functions
 
 require string.fs
-require wurstkessel.fs
+\ require wurstkessel.fs
 require rng.fs
 
 2 64s buffer: hashinit

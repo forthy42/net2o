@@ -101,7 +101,7 @@ max-passphrase# buffer: passphrase
 : >passphrase ( addr u -- addr u )
     >r passphrase r@ max-passphrase# umin move
     passphrase max-passphrase# r> safe/string erase
-    wurst-key >c:key
+    no-key >c:key
     passphrase max-passphrase# c:hash
     passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
     pad c:key> pad $40 save-mem ;
