@@ -18,6 +18,8 @@
 64 Constant state#
 state# 2* buffer: key-assembly
 state# buffer: no-key \ just zeros for no key
+state# buffer: mykey \ instance's private key
+state# rng$ mykey swap move
 
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
@@ -111,9 +113,6 @@ Defer regen-ivs
     default-key
     key( ." inbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
 
-state# buffer: mykey \ server's private key
-state# rng$ mykey swap move
-
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source
     2r> >crypt-key 
@@ -146,27 +145,9 @@ state# rng$ mykey swap move
     crypt-inbuf-init
     inbuf packet-data +cryptsu c:decrypt+auth +enc ;
 
-\ public key encryption
+\ IVS
 
-KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
-\ client keys
-keysize buffer: pkc
-keysize buffer: skc
-keysize buffer: stpkc \ server temporary keypair - once per connection setup
-keysize buffer: stskc
-\ shared secred
-keysize buffer: keypad
 Variable do-keypad "" do-keypad $!
-
-\ the theory here is that sks*pkc = skc*pks
-\ we send our public key and query the server's public key.
-: gen-keys ( -- ) skc pkc ed-keypair ;
-: gen-tmpkeys ( -- ) tskc tpkc ed-keypair
-\    tskc keysize .nnb cr  tpkc keysize .nnb cr cr
-;
-: gen-stkeys ( -- ) stskc stpkc ed-keypair
-\    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
-;
 
 : keypad$ ( -- addr u )
     do-keypad $@ dup 0= IF  2drop  crypto-key $@  THEN ;
@@ -224,7 +205,28 @@ Variable do-keypad "" do-keypad $!
 : ivs-strings ( addr u -- )
     state# <> !!ivs!! >crypt-source' >crypt-key-ivs ;
 
-\ : ivs-key ( addr u map -- )  @ >o  dest-ivsgen @ swap move o> ;
+\ public key encryption
+
+KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
+\ client keys
+keysize buffer: pkc
+keysize buffer: skc
+keysize buffer: stpkc \ server temporary keypair - once per connection setup
+keysize buffer: stskc
+\ shared secred
+keysize buffer: keypad
+
+\ the theory here is that sks*pkc = skc*pks
+\ we send our public key and query the server's public key.
+: gen-keys ( -- ) skc pkc ed-keypair ;
+: gen-tmpkeys ( -- ) tskc tpkc ed-keypair
+\    tskc keysize .nnb cr  tpkc keysize .nnb cr cr
+;
+: gen-stkeys ( -- ) stskc stpkc ed-keypair
+\    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
+;
+
+\ setting of keys
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
     keysize crypto-key $!
