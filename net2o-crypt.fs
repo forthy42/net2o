@@ -211,8 +211,8 @@ Variable do-keypad "" do-keypad $!
 ' (regen-ivs) IS regen-ivs
 
 : one-ivs ( addr -- )  c:key@ >r
-    @ >o dest-ivsgen @ c:key# c:prng
-    dest-ivsgen @ c:key! c:diffuse
+    @ >o key-assembly 128 c:prng
+    dest-ivsgen @ c:key! key-assembly >c:key c:diffuse
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng o>
     r> c:key! ;
