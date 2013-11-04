@@ -216,15 +216,13 @@ keysize buffer: stskc
 \ shared secred
 keysize buffer: keypad
 
-\ the theory here is that sks*pkc = skc*pks
+\ the theory here is that pkc*sks = pks*skc
+\ because pk=base*sk, so base*skc*sks = base*sks*skc
+\ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
 : gen-keys ( -- ) skc pkc ed-keypair ;
-: gen-tmpkeys ( -- ) tskc tpkc ed-keypair
-\    tskc keysize .nnb cr  tpkc keysize .nnb cr cr
-;
-: gen-stkeys ( -- ) stskc stpkc ed-keypair
-\    stskc keysize .nnb cr  stpkc keysize .nnb cr cr
-;
+: gen-tmpkeys ( -- ) tskc tpkc ed-keypair ;
+: gen-stkeys ( -- ) stskc stpkc ed-keypair ;
 
 \ setting of keys
 
@@ -235,7 +233,7 @@ keysize buffer: keypad
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
 
-Defer check-key
+Defer check-key \ check if we know that key
 
 : net2o:receive-key ( addr u -- )
     o 0= IF  2drop EXIT  THEN

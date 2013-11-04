@@ -241,6 +241,11 @@ previous definitions
     this-keyid @ pkc keysize move
     ke-sk $@ skc swap move ;
 
+0 [IF] \ generate keypairs
+    key#anon "test" +keypair
+    key#anon "anonymous" +keypair
+[THEN]
+
 0 [IF]
 Local Variables:
 forth-local-words:
