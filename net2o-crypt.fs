@@ -17,7 +17,7 @@
 
 64 Constant state#
 state# 2* buffer: key-assembly
-state# buffer: no-key \ just zeros for no key
+state# 2* buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
 state# rng$ mykey swap move
 

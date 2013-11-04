@@ -201,12 +201,14 @@ previous definitions
 : >keys ( -- )
     skc pkc ed-dh +key ;
 
-: +keypair ( type nick u -- )
-    +passphrase gen-keys
+: +gen-keys ( type nick u -- )
+    gen-keys
     key:code
         pkc keysize $, newkey skc keysize $, privkey
         $, keynick lit, keytype ticks lit, keyfirst
     end:key key>file >keys ;
+
+: +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
 \ read key file
 
@@ -242,8 +244,8 @@ previous definitions
     ke-sk $@ skc swap move ;
 
 0 [IF] \ generate keypairs
-    key#anon "test" +keypair
-    key#anon "anonymous" +keypair
+    keys $@ drop 2@ key+len 2! key#anon "test" +gen-keys
+    keys $@ drop 2@ key+len 2! key#anon "anonymous" +gen-keys
 [THEN]
 
 0 [IF]
