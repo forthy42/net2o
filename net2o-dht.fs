@@ -17,11 +17,11 @@
 
 keccak# buffer: keyed-hash-buf
 keccak#max buffer: keyed-hash-out
-\ specify strength, not length!
+\ specify strength, not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
 
-\ Idea: set "r" to the hashed value, and "c" to the key, diffuse
+\ Idea: set "r" first half to the value, "r" second half to the key, diffuse
 \ we use explicitely Keccak here, this needs to be globally the same!
 \ Keyed hashs are there for unique handles
 
@@ -30,9 +30,9 @@ keccak#max buffer: keyed-hash-out
     addr2 u1 u2 >pad 2drop ;
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
-    keyed-hash-buf keccak# keccak#max /string >padded
-    keyed-hash-buf keccak#max >padded
-    keccak0 keyed-hash-buf keccak# >keccak keccak* ;
+    keyed-hash-buf keccak#max keccak#max 2/ /string >padded
+    keyed-hash-buf keccak#max 2/ >padded
+    keccak0 keyed-hash-buf keccak#max >keccak keccak* ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
     >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
@@ -58,7 +58,7 @@ Variable d#public
 
 0
 enum k#hash     \ hash itself is item 0
-enum k#owner    \ owner of the object (pubkey)
+enum k#owner    \ owner(s) of the object (pubkey+signature)
 enum k#peers    \ peers who have copies of that entry - private?, pointers
 enum k#person   \ person associated
 enum k#object   \ object associated

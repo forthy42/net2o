@@ -480,6 +480,7 @@ object class
     field: blocksize
     field: blockalign
     field: crypto-key
+    field: pubkey
     field: timeout-xt
     field: ack-xt
     field: resend0

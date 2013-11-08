@@ -732,11 +732,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     inbuf 1+ c@ recv-flag ! \ last receive flag
     inbuf 1+ c@ acks# and
     dup ack-receive !@ xor >r
-    r@ [ resend-toggle# ack-toggle# or ]L and  IF
+    r@ ack-toggle# and IF
 	cmd0source off  cmdlock lock  cmdreset
 	r@ resend-toggle# and IF  true net2o:do-resend  THEN
-	r@ ack-toggle# and IF  net2o:gen-resend  net2o:genack  THEN
-	cmd-send?  cmdlock unlock
+	net2o:gen-resend  net2o:genack
+    	cmd-send?  cmdlock unlock
     THEN
     +cookie received!
     r> ack-timing ;

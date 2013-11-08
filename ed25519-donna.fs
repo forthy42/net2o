@@ -35,15 +35,19 @@ end-c-library
 
 $20 Constant KEYBYTES
 
-$60 buffer: sigbuf
-$30 4 * buffer: sct0
-sct0 $30 + Constant sct1
-sct1 $30 + Constant sct2
-sct2 $30 + Constant sct3
-$40 buffer: hashtmp
-$30 4 * buffer: get0
-$30 4 * buffer: get1
-200 buffer: keccaktmp
+$40 12 * $60 + $40 + 200 + $10 + Constant edbuf#
+
+here edbuf# allot $F + -$10 and \ align for SSE
+
+dup Constant sct0 $40 +
+dup Constant sct1 $40 +
+dup Constant sct2 $40 +
+dup Constant sct3 $40 + \ can be between $20 and $30
+dup Constant get0 $100 +
+dup Constant get1 $100 + \ can be between $80 and $C0
+dup Constant sigbuf $60 +
+dup Constant hashtmp $40 +
+Constant keccaktmp
 
 : gen-sk ( sk -- ) >r
     \G generate a secret key with the right bits set and cleared
@@ -89,7 +93,7 @@ $30 4 * buffer: get1
     hashtmp $40 >keccak keccak* hashtmp $40 keccak> \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
     sct3 sig $20 + raw>sc25519     \ sct3 is s
-    get1 get0 sct2 sct3 ge25519*+  \ s*pk+z*pk
+    get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
     sigbuf $40 + get1 ge25519-pack         \ =r
     sig sigbuf $40 + 32b= ;
 
