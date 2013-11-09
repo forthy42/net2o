@@ -87,6 +87,7 @@ do-stackrel off
 
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;
 : xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
+: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
 : and!  ( x addr -- )   >r r@ @ and  r> ! ;
 : min!  ( n addr -- )   >r r@ @ min  r> ! ;
 : max!  ( n addr -- )   >r r@ @ max  r> ! ;
@@ -493,7 +494,8 @@ object class
     field: code-map
     field: code-rmap
     
-    field: ack-state
+    cfield: ack-state
+    cfield: ack-resend~
     field: ack-receive
     
     field: req-codesize
@@ -1044,8 +1046,7 @@ $20 Value mask-bits#
 	THEN
 	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
     2 cells +LOOP  2drop ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and
-    ack-state @ resend-toggle# invert and or ack-state ! ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
@@ -1379,7 +1380,7 @@ FVariable <size-lb>
     2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
 
 : net2o:send-chunk ( -- )  +chunk
-    ack-state @ outflag or!
+    ack-state c@ outflag or!
     bursts# 1- data-b2b @ = IF
 	\ send a new packet for timing path
 	data-tail? IF  net2o:send  ELSE  net2o:resend  THEN
@@ -1429,7 +1430,8 @@ Create chunk-adder chunks-struct allot
 : chunk-count+ ( counter -- )
     dup @
     dup 0= IF
-	ack-toggle# ack-state xor!
+	ack-toggle# ack-state xorc!
+	ack-resend~ @ ack-state c@ resend-toggle# invert and or ack-state c!
 	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
@@ -1440,7 +1442,7 @@ Create chunk-adder chunks-struct allot
 : send-a-chunk ( chunk -- flag )  >r
     data-b2b @ 0<= IF
 	bandwidth? dup  IF
-	    b2b-toggle# ack-state xor!
+	    b2b-toggle# ack-state xorc!
 	    bursts# 1- data-b2b !
 	THEN
     ELSE
