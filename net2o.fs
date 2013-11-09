@@ -496,6 +496,7 @@ object class
     
     cfield: ack-state
     cfield: ack-resend~
+    cfield: ack-resend#
     field: ack-receive
     
     field: req-codesize
@@ -681,6 +682,7 @@ Variable >code-flag
 
 \ create context
 
+8 Value resend-delay# ( 8 * 32 = 256kB before trigger resend )
 8 Value bursts# \ number of 
 8 Value delta-damp#
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
@@ -1046,7 +1048,7 @@ $20 Value mask-bits#
 	THEN
 	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
     2 cells +LOOP  2drop ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! resend-delay# ack-resend# c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
@@ -1431,7 +1433,8 @@ Create chunk-adder chunks-struct allot
     dup @
     dup 0= IF
 	ack-toggle# ack-state xorc!
-	ack-resend~ @ ack-state c@ resend-toggle# invert and or ack-state c!
+	ack-resend# c@ 1- 0 max dup ack-resend# c!
+	0= IF  ack-resend~ @ ack-state c@ resend-toggle# invert and or ack-state c!  THEN
 	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
 	    bursts( .j ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
