@@ -992,10 +992,11 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' ) \ obsolete
-    \ not too quickly go slower or faster!
-    64>n last-ns/burst 64@ 64>n
-    ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
-    dup n>64 last-ns/burst 64! n>64 ;
+    \ not too quickly go faster!
+    64dup last-ns/burst 64!@ 64max ;
+\    64>n last-ns/burst 64@ 64>n
+\    ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
+\    dup n>64 last-ns/burst 64! n>64 ;
 
 : extra-limit ( rate -- rate' )
     dup extra-ns 64@ 64>n 2* 2* u> IF
@@ -1013,7 +1014,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     rate( 64over 64. .j ." clientrate" cr )
     deltat( 64dup 64. lastdeltat 64@ 64. .j ." deltat" cr ) ;
 
-: rate-stat2 ( rate -- )
+: rate-stat2 ( rate -- rate )
     rate( 64dup 64. .j ." rate" cr )
     stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
            slackgrow 64@ 64>f stat-tuple ts-grow sf! 
@@ -1022,7 +1023,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns ens( 64nip )else( 64drop )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
-    bandwidth-max n>64 64max rate-stat2 ns/burst 64!@
+    bandwidth-max n>64 64max rate-limit rate-stat2 ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst

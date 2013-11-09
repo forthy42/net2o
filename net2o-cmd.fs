@@ -546,7 +546,7 @@ previous
 : .eff ( n -- n ) dup . ." eff" cr ;
 also net2o-base
 : setrate-limit ( rate -- rate' )
-    \ do not change requested rate by more than a factor 4
+    \ do not change requested rate by more than a factor 2
     last-rate 64@ 64>n
     ?dup-IF  tuck 2* min swap 2/ max  THEN
     dup n>64 last-rate 64! ;
