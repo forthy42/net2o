@@ -682,9 +682,8 @@ Variable >code-flag
 
 \ create context
 
-8 Value resend-delay# ( 8 * 32 = 256kB before trigger resend )
 8 Value bursts# \ number of 
-8 Value delta-damp#
+8 Value delta-damp# \ for clocks with a slight drift
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
 #2000 max-size^2 lshift Value bandwidth-max
@@ -761,8 +760,8 @@ Variable mapstart $1 mapstart !
     data-ackbits-buf $off
     free-code ; rdata-class to free-data
 
-: n2o:dispose-context ( o:addr -- o:0 )
-    ." Disposing context... " 
+: n2o:dispose-context ( o:addr -- o:addr )
+    cmd( ." Disposing context... " )
     0. data-map @ >o dest-vaddr 64@ o> >dest-map 2!
     data-map @ >o free-data o>
     data-rmap @ >o free-data o>
@@ -774,7 +773,7 @@ Variable mapstart $1 mapstart !
     resend0 $off
     crypto-key $off
     data-resend $off
-    dispose  ." disposed" cr ;
+    cmd( dispose  ." disposed" cr ) ;
 
 \ data sending around
 
@@ -991,10 +990,10 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     slackgrow' 64@ 64+ 64dup ext-damp# 64*/ slackgrow' 64!
     64#0 64max aggressivity-rate ;
 
-: rate-limit ( rate -- rate' ) \ obsolete
+: rate-limit ( rate -- rate' )
     \ not too quickly go faster!
     64dup last-ns/burst 64!@ 64max ;
-\    64>n last-ns/burst 64@ 64>n
+\    64>n last-ns/burst 64@ 64>n \ obsolete
 \    ?dup-IF  dup >r 2* 2* min r> 2/ 2/ max  THEN
 \    dup n>64 last-ns/burst 64! n>64 ;
 
@@ -1049,7 +1048,8 @@ $20 Value mask-bits#
 	THEN
 	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
     2 cells +LOOP  2drop ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! resend-delay# ack-resend# c! ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c!
+    flybursts @ ack-resend# c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
