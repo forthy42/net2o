@@ -23,7 +23,9 @@ cell 8 = [IF]
     ' Variable Alias 64Variable
     ' User Alias 64User
     ' Constant Alias 64Constant
+    ' Value Alias 64Value
     ' 2/ Alias 64-2/
+    ' 2* Alias 64-2*
     ' negate Alias 64negate
     0 Constant 64#0
     -1 Constant 64#-1
@@ -90,7 +92,9 @@ cell 8 = [IF]
     ' 2Variable Alias 64Variable
     : 64User  User cell uallot drop ;
     ' 2Constant Alias 64Constant
+    ' 2Value Alias 64Value
     ' d2/ Alias 64-2/
+    ' d2* Alias 64-2*
     ' dnegate Alias 64negate
     0. 2Constant 64#0
     -1. 2Constant 64#-1

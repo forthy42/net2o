@@ -17,7 +17,9 @@
 
 \ defined exceptions
 
-: throwcode ( addr u -- )  exception Create , DOES> ( flag -- ) @ and throw ;
+: throwcode ( addr u -- )  exception Create ,
+    [: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-compiler
+  DOES> ( flag -- ) @ and throw ;
 
 s" gap in file handles"          throwcode !!gap!!
 s" invalid file id"              throwcode !!fileid!!
@@ -691,13 +693,14 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
+#100.000.000 d>64 64Constant init-delay# \ 100ms initial timeout step
 
 Variable init-context#
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
     max-int64 64-2/ 64negate max-slack 64!
-    max-int64 rtdelay 64!
+    init-delay# rtdelay 64!
     flybursts# dup flybursts ! flyburst !
     ticks lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init n>64 ns/burst 64!
@@ -1652,7 +1655,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 : timeout! ( -- )
     next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64dup 64-0>= r> or
-    IF    64>n 0 max #999999999 min 0 ptimeout 2!
+    IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
     ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN ;
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
@@ -1816,7 +1819,7 @@ $20 Constant keys-val
 
 : do-timeout ( -- )  o IF timeout-xt perform THEN ;
 
-#200000000 Value timeout-max#
+#2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #10 Value timeouts#
 
 Sema timeout-sema
@@ -1836,9 +1839,8 @@ Variable timeout-task
 	LEAVE  THEN
     cell +LOOP  timeout-sema unlock ;
 : >next-timeout ( -- )  j?
-    ticks  rtdelay 64@ 64dup 64+
-    timeout-max# n>64 64min 64+
-    next-timeout 64!  o+timeout ;
+    rtdelay 64@ timeout-max# 64min timeout( ." timeout setting: " 64dup 64. cr )
+    ticks 64+ next-timeout 64!  o+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
@@ -1871,9 +1873,8 @@ true !!timeout!! ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	rtdelay 64@ 64dup max-int64 64= 0=
-	IF  64dup 64+ rtdelay 64!  ELSE  64drop  THEN
 	>next-timeout
+	rtdelay 64@ rtdelay 64+!
 	do-timeout -1 timeouts +!
 	timeouts @ 0<= IF  ->timeout  THEN
     THEN ;
@@ -1956,7 +1957,7 @@ con-cookie >osize @ buffer: cookie-adder
 	nip return-addr @ n2o:new-context o 0 >o rdrop swap
     THEN ;
 
-: rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64min! ;
+: rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
 
 \ load net2o commands
 
