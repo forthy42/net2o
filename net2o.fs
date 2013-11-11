@@ -1625,7 +1625,7 @@ queue-class >osize @ buffer: queue-adder
     queue-xt !  o queue-struct queue $+! o> ;
 
 : eval-queue ( -- )
-    queue $@len 0= ?EXIT  ticks
+    queue $@len 0= ?EXIT  ticker 64@
     queue $@ bounds ?DO  I >o
 	dup queue-timestamp @ u> IF
 	    queue-xt @ queue-job @ >o execute o>
@@ -1944,7 +1944,7 @@ con-cookie >osize @ buffer: cookie-adder
     o o> cookie-size#  cookies $+! ;
 
 : ?cookie ( cookie -- context true / false )
-    ticks connect-timeout# 64- { 64: timeout }
+    ticker 64@ connect-timeout# 64- { 64: timeout }
     0 >r BEGIN  r@ cookies $@len u<  WHILE
 	    cookies $@ r@ /string drop >o
 	    cc-timeout 64@ timeout 64u< IF
