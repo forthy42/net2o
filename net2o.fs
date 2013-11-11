@@ -895,6 +895,11 @@ timestats buffer: stat-tuple
 
 \ flow control
 
+64Variable ticker
+
+: !ticks ( -- )
+    ticks ticker 64! ;
+
 : ticks-init ( ticks -- )
     64dup bandwidth-tick 64!  next-tick 64! ;
 
@@ -1331,7 +1336,7 @@ User code-packet
     ns/burst 64@ 64>n tick-init 1+ / n>64 bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
-    ticks bandwidth-tick 64@ 64max next-tick 64! drop false ;
+    ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
 : sendX ( addr taddr target n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
@@ -1426,7 +1431,7 @@ Create chunk-adder chunks-struct allot
     0 chunk-adder chunk-count !
     chunk-adder chunks-struct chunks $+!
     resize-lock unlock
-    ticks ticks-init ;
+    ticker 64@ ticks-init ;
 
 \ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 
@@ -1616,7 +1621,7 @@ Variable queue s" " queue $!
 queue-class >osize @ buffer: queue-adder  
 
 : add-queue ( xt us -- )
-    ticks +  o queue-adder >o queue-job !  queue-timestamp !
+    ticker 64@ +  o queue-adder >o queue-job !  queue-timestamp !
     queue-xt !  o queue-struct queue $+! o> ;
 
 : eval-queue ( -- )
@@ -1654,7 +1659,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    next-chunk-tick 64dup 64#-1 64= 0= >r ticks 64- 64dup 64-0>= r> or
+    next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
     IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
     ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN ;
 
@@ -1781,7 +1786,7 @@ $20 Constant keys-val
     r> r> swap queue-command ;
 
 : handle-dest ( addr f -- ) \ handle packet to valid destinations
-    ticks
+    ticker 64@
     timing( dest-addr 64@ 64.
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
     recv-tick 64! \ time stamp of arrival
@@ -1806,7 +1811,7 @@ $20 Constant keys-val
 : route-packet ( -- )  inbuf dup packet-size send-a-packet drop ;
 
 : server-event ( -- )
-    next-packet 2drop  in-route
+    next-packet !ticks 2drop in-route
     IF    handle-packet
     ELSE  ." route a packet" cr route-packet  THEN ;
 
@@ -1838,19 +1843,22 @@ Variable timeout-task
 	    timeout-tasks I cell $del
 	LEAVE  THEN
     cell +LOOP  timeout-sema unlock ;
+: sq2** ( 64n n -- 64n' )
+    dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >next-timeout ( -- )  j?
-    rtdelay 64@ timeout-max# 64min timeout( ." timeout setting: " 64dup 64. cr )
-    ticks 64+ next-timeout 64!  o+timeout ;
+    rtdelay 64@ timeouts @ sq2**
+    timeout-max# 64min timeout( ." timeout setting: " 64dup 64. cr )
+    ticker 64@ 64+ next-timeout 64!  o+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
     timeout-tasks $@ bounds ?DO
-	I @ >o next-timeout 64@ o> 64min? IF  nip I @ swap  THEN
-    cell +LOOP  swap ;
+	I @ >o next-timeout 64@ o> 64min? IF  n64-swap drop I @ 64n-swap  THEN
+    cell +LOOP  n64-swap ;
 : ?timeout ( -- context/0 )
-    ticks next-timeout? >r 64- 64-0>= r> and ;
+    ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 : reset-timeout  j?
-    timeouts# timeouts ! >next-timeout ; \ 2s timeout
+    0 timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
 
@@ -1874,13 +1882,12 @@ true !!timeout!! ;
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	>next-timeout
-	rtdelay 64@ rtdelay 64+!
-	do-timeout -1 timeouts +!
-	timeouts @ 0<= IF  ->timeout  THEN
+	do-timeout 1 timeouts +!
+	timeouts @ timeouts# > IF  ->timeout  THEN
     THEN ;
 
 : client-loop-nocatch ( -- ) \ 1 stick-to-core
-    BEGIN  next-client-packet dup
+    BEGIN  next-client-packet !ticks dup
 	IF    client-event +event reset-timeout +reset
 	ELSE  2drop requests @ IF  request-timeout  THEN  THEN
 	o IF  wait-task @ event>  THEN  AGAIN ;
@@ -1904,7 +1911,7 @@ Variable client-task
     client-task @ 0= IF  create-client-task  THEN ;
 
 : client-loop ( requests -- )
-    requests !  reset-timeout  false to server?
+    requests !  !ticks reset-timeout  false to server?
     up@ wait-task ! client-loop-task
     BEGIN  stop requests @ 0<= UNTIL ;
 

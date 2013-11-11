@@ -8,6 +8,8 @@ cell 8 = [IF]
     ' ! Alias 64!
     ' rot Alias 64rot
     ' -rot Alias -64rot
+    ' swap alias n64-swap
+    ' swap alias 64n-swap
     ' dup Alias 64dup
     ' over Alias 64over
     ' drop Alias 64drop
@@ -74,6 +76,8 @@ cell 8 = [IF]
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
+    ' rot alias n64-swap
+    ' -rot alias 64n-swap
     ' 2drop alias 64drop
     ' 2nip alias 64nip
     ' 2dup Alias 64dup
