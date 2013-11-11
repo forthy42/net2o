@@ -607,8 +607,8 @@ $100 Value dests#
 
 \ context debugging
 
-: .j ( -- ) context# ? ;
-: j? ( -- ) ]] o 0= ?EXIT [[ ; immediate
+: .o ( -- ) context# ? ;
+: o? ( -- ) ]] o 0= ?EXIT [[ ; immediate
 
 \ Destination mapping contains
 \ addr u - range of virtal addresses
@@ -918,7 +918,7 @@ timestats buffer: stat-tuple
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- lastslack 64@ 64- slack( 64dup 64. .j ." grow" cr )
+    64- lastslack 64@ 64- slack( 64dup 64. .o ." grow" cr )
     slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
@@ -929,16 +929,16 @@ timestats buffer: stat-tuple
 : net2o:set-flyburst ( -- bursts )
     rtdelay 64@ 64>n rt-bias# + ns/burst 64@ 64>n /
     flybursts# +
-    bursts( dup . .j ." flybursts "
+    bursts( dup . .o ." flybursts "
     rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
     dup flybursts-max# min flyburst ! ;
 : net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
-    0= IF  bursts( .j ." start bursts" cr ) THEN ;
+    0= IF  bursts( .o ." start bursts" cr ) THEN ;
 
 : >flyburst ( -- )
     flyburst @ flybursts max!@ \ reset bursts in flight
     0= IF  recv-tick 64@ ticks-init
-	bursts( .j ." restart bursts " flybursts ? cr )
+	bursts( .o ." restart bursts " flybursts ? cr )
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
@@ -982,7 +982,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 	msg( ." slack ignored: " 64dup 64. cr )
 	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    64>n  slack( dup . min-slack ? .j ." slack" cr )
+    64>n  slack( dup . min-slack ? .o ." slack" cr )
     stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f**
@@ -1018,11 +1018,11 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     stats( ticks time-offset 64@ 64-
            64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! )
-    rate( 64over 64. .j ." clientrate" cr )
-    deltat( 64dup 64. lastdeltat 64@ 64. .j ." deltat" cr ) ;
+    rate( 64over 64. .o ." clientrate" cr )
+    deltat( 64dup 64. lastdeltat 64@ 64. .o ." deltat" cr ) ;
 
 : rate-stat2 ( rate -- rate )
-    rate( 64dup 64. .j ." rate" cr )
+    rate( 64dup 64. .o ." rate" cr )
     stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
            slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
@@ -1332,7 +1332,7 @@ User code-packet
     >r  r@ 64bit# or outbuf c!
     outbody min-size r> lshift move ;
 
-: bandwidth+ ( -- )  j?
+: bandwidth+ ( -- )  o?
     ns/burst 64@ 64>n tick-init 1+ / n>64 bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
@@ -1446,7 +1446,7 @@ Create chunk-adder chunks-struct allot
 	0= IF  ack-resend~ @ ack-state c@ resend-toggle# invert and or ack-state c!  THEN
 	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
-	    bursts( .j ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
+	    bursts( .o ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
@@ -1464,9 +1464,9 @@ Create chunk-adder chunks-struct allot
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
-    .j ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .j ." slack: " min-slack ? cr
-    .j ." rtdelay: " rtdelay ? cr ;
+    .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
+    .o ." slack: " min-slack ? cr
+    .o ." rtdelay: " rtdelay ? cr ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
@@ -1825,7 +1825,7 @@ $20 Constant keys-val
 : do-timeout ( -- )  o IF timeout-xt perform THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
-#12 Value timeouts#
+#12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
@@ -1845,7 +1845,7 @@ Variable timeout-task
     cell +LOOP  timeout-sema unlock ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- )  j?
+: >next-timeout ( -- )  o?
     rtdelay 64@ timeouts @ sq2**
     timeout-max# 64min timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
@@ -1857,7 +1857,7 @@ Variable timeout-task
     cell +LOOP  n64-swap ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout  j?
+: reset-timeout ( -- ) o?
     0 timeouts ! >next-timeout ; \ 2s timeout
 
 \ loops for server and client
@@ -1879,16 +1879,25 @@ event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
 
+#10.000.000 d>64 64Constant watch-timeout#
+64Variable watch-timeout ticks watch-timeout# 64+ watch-timeout 64!
+
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	>next-timeout
 	do-timeout 1 timeouts +!
 	timeouts @ timeouts# > IF  ->timeout  THEN
+    THEN
+    watch-timeout# watch-timeout 64+! ;
+
+: watch-timeout? ( -- )
+    watch-timeout 64@ ticker 64@ 64- 64-0< IF
+	request-timeout
     THEN ;
 
 : client-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  next-client-packet !ticks dup
-	IF    client-event +event reset-timeout +reset
+	IF    client-event +event reset-timeout +reset  watch-timeout?
 	ELSE  2drop requests @ IF  request-timeout  THEN  THEN
 	o IF  wait-task @ event>  THEN  AGAIN ;
 

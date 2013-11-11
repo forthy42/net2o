@@ -209,14 +209,14 @@ UDefer expect-reply?
 
 previous
 
-: net2o:tag-reply ( -- )  j?
+: net2o:tag-reply ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
     code-vdest r> reply-dest 64! ;
 : net2o:ack-reply ( index -- )  o 0= IF  drop EXIT  THEN
     resend0 @ IF  resend0 $off  THEN
     0. rot reply[] 2! ; \ clear request
-: net2o:expect-reply ( -- )  j?
+: net2o:expect-reply ( -- )  o?
     cmd( ." expect: " cmdbuf$ n2o:see )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
 
@@ -758,8 +758,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     tmpkey-request key-request
     req-codesize @  req-datasize @  map-request,
     end-code ;
-
-: ?j ]] j?  code-map @ 0= ?EXIT [[ ; immediate
 
 : 0-resend? ( -- )
     resend0 @ IF
