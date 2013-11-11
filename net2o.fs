@@ -1405,7 +1405,7 @@ FVariable <size-lb>
     ELSE  sendX  THEN ;
 
 : bandwidth? ( -- flag )
-    ticks 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
+    ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
     flybursts @ 0> and  ;
 
 \ asynchronous sending
@@ -1488,7 +1488,7 @@ Create chunk-adder chunks-struct allot
 	I chunk-context @ >o next-tick 64@ o> 64umin
     chunks-struct +LOOP ;
 
-: send-another-chunk ( -- flag )  false  0 >r
+: send-another-chunk ( -- flag )  false  0 >r  !ticks
     BEGIN  BEGIN  send-chunks-async  WHILE  drop rdrop true 0 >r  REPEAT
 	    chunks+ @ 0= IF  r> 1+ >r  THEN
 	r@ 2 u>=  UNTIL  rdrop ;
