@@ -1879,7 +1879,7 @@ event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
 
-#10.000.000 d>64 64Constant watch-timeout#
+#2.000.000 d>64 64Constant watch-timeout# \ 2ms timeout check interval
 64Variable watch-timeout ticks watch-timeout# 64+ watch-timeout 64!
 
 : request-timeout ( -- )
