@@ -24,7 +24,7 @@ insert-ip n2o:connect +flow-control +resend
 
 net2o-code
 expect-reply
-s" Download test" $, type cr  see-me  get-ip
+s" Download test" $, type cr ( see-me ) get-ip
 $400 blocksize! $400 blockalign! stat( request-stats )
 s" net2o.fs" s" .cache/net2o.fs" n2o:copy
 s" data/2011-05-13_11-26-57-small.jpg" s" .cache/photo000s.jpg" n2o:copy
@@ -38,7 +38,7 @@ end-code
     ." Request more photos because it was so fast" cr
     net2o-code
     expect-reply
-    s" Download test 2" $, type cr  see-me
+    s" Download test 2" $, type cr ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38-small.jpg" ".cache/photo002s.jpg" n2o:copy
     "data/2011-06-03_10-26-49-small.jpg" ".cache/photo003s.jpg" n2o:copy
@@ -61,7 +61,7 @@ waitkey( fdrop 8e )
     ." Request big photos because it was so fast" cr
     net2o-code
     expect-reply
-    s" Download test 3" $, type cr  see-me
+    s" Download test 3" $, type cr  ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
     s" data/2011-05-20_17-01-12.jpg" s" .cache/photo001.jpg" n2o:copy
@@ -80,7 +80,7 @@ waitkey( fdrop 16e )
     ." Request more big photos because it was so fast" cr
     net2o-code
     expect-reply
-    s" Download test 4" $, type cr  see-me
+    s" Download test 4" $, type cr  ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38.jpg" ".cache/photo002.jpg" n2o:copy
     "data/2011-06-03_10-26-49.jpg" ".cache/photo003.jpg" n2o:copy
@@ -105,7 +105,7 @@ end-code
 ." Request second stage big photos" cr
 net2o-code
 expect-reply
-s" Download test 4a" $, type cr  see-me
+s" Download test 4a" $, type cr  ( see-me )
 \ $40000 ulit, 0 ulit, track-limit
 \ $30000 0 n2o:seek
 -1 nlit, 0 ulit, track-limit
@@ -123,7 +123,7 @@ end-code
 \ ." Request third stage big photos" cr
 \ net2o-code
 \ expect-reply
-\ s" Download test 4b" $, type cr see-me
+\ s" Download test 4b" $, type cr ( see-me )
 \ $30000 ulit, 0 ulit, track-limit
 \ $10000 0 n2o:seek
 \ gen-total slurp-all-tracked-blocks send-chunks
