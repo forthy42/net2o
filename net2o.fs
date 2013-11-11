@@ -693,7 +693,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
-#100.000.000 d>64 64Constant init-delay# \ 100ms initial timeout step
+#30.000.000 d>64 64Constant init-delay# \ 20ms initial timeout step
 
 Variable init-context#
 
@@ -1825,7 +1825,7 @@ $20 Constant keys-val
 : do-timeout ( -- )  o IF timeout-xt perform THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
-#10 Value timeouts#
+#12 Value timeouts#
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
