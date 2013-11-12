@@ -432,8 +432,6 @@ $04 Constant resend-toggle#
 : >dest-addr ( -- )
     inbuf addr 64@  inbuf body-size 1- invert n>64 64and dest-addr 64! ;
 
-' dffield: Alias 64field:
-
 current-o
 
 object class
@@ -1489,12 +1487,13 @@ Create chunk-adder chunks-struct allot
     chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  false  0 >r  !ticks
-    BEGIN  BEGIN  send-chunks-async  WHILE  drop rdrop true 0 >r  REPEAT
-	    chunks+ @ 0= IF  r> 1+ >r  THEN
-	r@ 2 u>=  UNTIL  rdrop ;
+    BEGIN  BEGIN  drop send-chunks-async dup  WHILE  rdrop 0 >r  REPEAT
+	chunks+ @ 0= IF  r> 1+ >r  THEN
+    r@ 2 u>=  UNTIL  rdrop ;
 
 Variable sendflag  sendflag off
-: send?  ( -- flag )  sendflag @ ;
+Variable recvflag  recvflag off
+    
 : send-anything? ( -- flag )  chunks $@len 0> ;
 
 \ rewind buffer to send further packets
@@ -1701,22 +1700,26 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     poll-sock drop read-a-packet4/6 ;
 
 2 Value sends#
+16 Value recvs# \ balance receive and send
+
+: read-a-packet? ( -- addr u )
+    don't-block read-a-packet dup IF  1 recvflag +!  THEN ;
 
 : send-read-packet ( -- addr u )
-    0. BEGIN  2drop
-	send-anything? sendflag !
+    recvs# recvflag @ > IF  read-a-packet? dup ?EXIT  2drop  THEN
+    recvflag off
+    0. BEGIN  2drop  send-anything?
 	sends# 0 ?DO
-	    sendflag @ 0= IF  try-read-packet-wait dup
+	    0= IF  try-read-packet-wait dup
 		IF  UNLOOP  EXIT  THEN  2drop  THEN
-	    send-another-chunk sendflag !  LOOP
-	don't-block read-a-packet
-    dup UNTIL ;
+	    send-another-chunk  LOOP  drop
+    read-a-packet? dup UNTIL ;
 
 : send-loop ( -- )
-    send-anything? sendflag !
-    BEGIN  sendflag @ 0= IF   wait-send drop
-	pollfds revents w@ POLLIN = IF  ?events  THEN  THEN
-	send-another-chunk sendflag !  AGAIN ;
+    send-anything?
+    BEGIN  0= IF   wait-send drop
+	    pollfds revents w@ POLLIN = IF  ?events  THEN  THEN
+	send-another-chunk  AGAIN ;
 
 Defer init-reply
 

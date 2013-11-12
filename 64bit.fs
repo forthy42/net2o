@@ -1,6 +1,5 @@
 \ portable functions for 64 bit numbers
 
-
 cell 8 = [IF]
     : 64bit ;
     : 64, drop , ;
@@ -67,9 +66,9 @@ cell 8 = [IF]
     ' off Alias 64off
     ' */ Alias 64*/
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
-    ' 2@ Alias 128@ ( addr -- d )
+    : 128@ ( addr -- d ) 2@ swap ;
     ' d= Alias 128= ( d1 d2 -- flag )
-    ' 2! Alias 128! ( d addr -- )
+    : 128! ( d addr -- ) >r swap r> 2! ;
     also locals-types definitions
     ' w: alias 64:
     previous definitions
@@ -160,6 +159,8 @@ cell 8 = [IF]
     ' d: alias 64:
     previous definitions
 [THEN]
+\ independent of cell size, using dfloats:
 ' dfloats Alias 64s
 ' dfloat+ Alias 64'+
 ' dfaligned Alias 64aligned
+' dffield: Alias 64field:
