@@ -1693,7 +1693,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
 
-16 Value try-read#
+4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
     try-read# 0 ?DO
@@ -1735,7 +1735,7 @@ Defer init-reply
     sender-task @ 0= IF
 	send-read-packet
     ELSE
-	0.  BEGIN  2drop try-read-packet-wait dup  UNTIL
+	0.  BEGIN  2drop do-block read-a-packet +rec dup  UNTIL
     THEN
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
