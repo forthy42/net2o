@@ -1658,9 +1658,11 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
-    IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
-    ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN ;
+    sender-task @ up@ = IF
+	next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
+	IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
+	ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN
+    ELSE  poll-timeout# 0 ptimeout 2!  THEN ;
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
@@ -1874,7 +1876,7 @@ Variable requests
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
-\    sender-task @ 0= IF  create-sender-task  THEN
+    sender-task @ 0= IF  create-sender-task  THEN
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
 
