@@ -1693,14 +1693,12 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 : try-read-packet ( -- addr u / 0 0 )
     don't-block read-a-packet +rec ;
 
-4 Value try-read#
+16 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    sender-task @ 0= IF
-	try-read# 0 ?DO
-	    don't-block read-a-packet
-	    dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
-    THEN
+    try-read# 0 ?DO
+	don't-block read-a-packet
+	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
     poll-sock drop read-a-packet4/6 ;
 
 2 Value sends#
