@@ -1727,7 +1727,7 @@ Defer init-reply
 
 : create-sender-task ( -- )
     o 1 stacksize4 NewTask4 dup sender-task ! pass
-    init-reply
+    init-reply prep-evsocks
     >o rdrop  alloc-io c:init
     send-loop ;
 
@@ -1917,7 +1917,7 @@ Variable client-task
 
 : create-client-task ( -- )
     o 1 stacksize4 NewTask4 dup client-task ! pass
-    init-reply
+    init-reply  prep-socks
     >o rdrop  alloc-io c:init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
