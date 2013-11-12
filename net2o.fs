@@ -1658,7 +1658,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    sender-task @ up@ = IF
+    sender-task @ dup IF  up@ =  ELSE  0=  THEN  IF
 	next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
 	IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
 	ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN
@@ -1696,9 +1696,11 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    try-read# 0 ?DO
-	don't-block read-a-packet
-	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+    sender-task @ 0= IF
+	try-read# 0 ?DO
+	    don't-block read-a-packet
+	    dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+    THEN
     poll-sock drop read-a-packet4/6 ;
 
 2 Value sends#
@@ -1876,7 +1878,7 @@ Variable requests
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
-    sender-task @ 0= IF  create-sender-task  THEN
+    sender( sender-task @ 0= IF  create-sender-task  THEN )
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
 
