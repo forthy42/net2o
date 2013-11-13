@@ -1712,6 +1712,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     poll-sock drop read-a-packet4/6 ;
 
 2 Value sends#
+16 Value sendbs#
 16 Value recvs# \ balance receive and send
 
 : read-a-packet? ( -- addr u )
@@ -1720,11 +1721,13 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 : send-read-packet ( -- addr u )
     recvs# recvflag @ > IF  read-a-packet? dup ?EXIT  2drop  THEN
     recvflag off
-    0. BEGIN  2drop  send-anything?
+    0. sendbs# 0 DO
+	2drop  send-anything?
 	sends# 0 ?DO
-	    0= IF  try-read-packet-wait  UNLOOP  EXIT  THEN
+	    0= IF  try-read-packet-wait
+		dup IF  UNLOOP  UNLOOP  EXIT  THEN  2drop  THEN
 	    send-another-chunk  LOOP  drop
-    read-a-packet? dup UNTIL ;
+    read-a-packet? dup ?LEAVE LOOP ;
 
 : send-loop ( -- )
     send-anything?
