@@ -497,6 +497,7 @@ object class
     cfield: ack-state
     cfield: ack-resend~
     cfield: ack-resend#
+    cfield: is-server
     field: ack-receive
     
     field: req-codesize
@@ -724,19 +725,22 @@ resend-size# buffer: resend-init
 
 Variable mapstart $1 mapstart !
 
+: server? ( -- flag )  is-server c@ negate ;
+: server! ( -- )  1 is-server c! ;
+
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
 : n2o:new-data { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr @ n2o:new-context  THEN
+	return-addr @ n2o:new-context  server!  THEN
     >code-flag off
     addrd u data-rmap map-data-dest addrs u map-source  data-map ! ;
 : n2o:new-code { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr @ n2o:new-context  THEN
+	return-addr @ n2o:new-context  server!  THEN
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
@@ -1854,7 +1858,6 @@ Variable timeout-task
 
 \ loops for server and client
 
-0 Value server?
 Variable requests
 
 : packet-event ( -- )
@@ -1908,16 +1911,11 @@ true !!timeout!! ;
     receiver-task 0= IF  create-receiver-task  THEN ;
 
 : client-loop ( requests -- )
-    requests !  !ticks reset-timeout  false to server?
+    requests !  !ticks reset-timeout
     o IF  up@ wait-task !  THEN  client-loop-task
     BEGIN  stop requests @ 0<= UNTIL ;
 
-: server-loop ( -- )
-    !ticks reset-timeout  true to server?
-    o IF  ['] noop timeout-xt !  THEN  \ no timeouts for servers
-    sender( sender-task 0= IF  create-sender-task  THEN )
-    BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
-	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
+: server-loop ( -- )  0 >o rdrop  1 client-loop ;
 
 \ client/server initializer
 
