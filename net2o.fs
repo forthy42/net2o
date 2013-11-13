@@ -707,6 +707,8 @@ Variable init-context#
 
 resend-size# buffer: resend-init
 
+: -timeout      ['] noop               timeout-xt ! ;
+
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
@@ -714,6 +716,7 @@ resend-size# buffer: resend-init
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
     init-flow-control
+    -timeout
     -1 blocksize !
     1 blockalign ! ;
 
@@ -1864,11 +1867,6 @@ Variable requests
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
-: server-loop ( -- ) true to server?
-    sender( sender-task 0= IF  create-sender-task  THEN )
-    BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
-	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
-
 event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
@@ -1891,7 +1889,7 @@ true !!timeout!! ;
 
 : client-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  +event  watch-timeout?
-	o IF  wait-task @ event>  THEN  AGAIN ;
+	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
 : n2o:request-done ( -- )
     o-timeout ->request ;
@@ -1911,8 +1909,15 @@ true !!timeout!! ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout  false to server?
-    up@ wait-task ! client-loop-task
+    o IF  up@ wait-task !  THEN  client-loop-task
     BEGIN  stop requests @ 0<= UNTIL ;
+
+: server-loop ( -- )
+    !ticks reset-timeout  true to server?
+    o IF  ['] noop timeout-xt !  THEN  \ no timeouts for servers
+    sender( sender-task 0= IF  create-sender-task  THEN )
+    BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
+	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
 
 \ client/server initializer
 

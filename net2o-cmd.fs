@@ -806,7 +806,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
-: -timeout      ['] noop               timeout-xt ! ;
 
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
