@@ -1602,9 +1602,11 @@ Variable recvflag  recvflag off
 : .ip6w ( addr len -- addr' len' )
     over be-uw@ [: 0 <# # # # # #> type ;] $10 base-execute
     2 /string ;
+: w, ( w -- )  here w! 2 allot ;
+Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 : .ip6 ( addr len -- )
-    ." [" .ip6w ." :" .ip6w ." :" .ip6w ." :" .ip6w ." :"
-    .ip6w ." :" .ip6w ." :" .ip6w ." :" .ip6w ." ]:" .port ;
+    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
+    '[' 8 0 DO  emit .ip6w ':'  LOOP  drop ." ]:" .port ;
 
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
@@ -1720,8 +1722,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     recvflag off
     0. BEGIN  2drop  send-anything?
 	sends# 0 ?DO
-	    0= IF  try-read-packet-wait dup
-		IF  UNLOOP  EXIT  THEN  2drop  THEN
+	    0= IF  try-read-packet-wait  UNLOOP  EXIT  THEN
 	    send-another-chunk  LOOP  drop
     read-a-packet? dup UNTIL ;
 
@@ -1743,8 +1744,9 @@ Defer init-reply
     sender-task 0= IF
 	send-read-packet
     ELSE
-	0.  BEGIN  2drop do-block read-a-packet +rec dup  UNTIL
-    THEN
+	try-read-packet-wait
+	\ 0.  BEGIN  2drop do-block read-a-packet +rec dup  UNTIL
+    THEN  dup 0= ?EXIT
     sockaddr alen @ insert-address  inbuf ins-source
     over packet-size over <> !!size!! +next ;
 
@@ -1861,7 +1863,7 @@ Variable timeout-task
 Variable requests
 
 : packet-event ( -- )
-    next-packet !ticks 2drop in-route
+    next-packet !ticks nip 0= ?EXIT  in-route
     IF    handle-packet  reset-timeout
     ELSE  ." route a packet" cr route-packet  THEN ;
 
@@ -1890,29 +1892,30 @@ true !!timeout!! ;
 	request-timeout
     THEN ;
 
-: client-loop-nocatch ( -- ) \ 1 stick-to-core
+: event-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  +event  watch-timeout?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
 : n2o:request-done ( -- )
     o-timeout ->request ;
 
-: do-client-loop ( -- )
-    BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
-	    s" client-loop: " etype DoError nothrow  REPEAT  drop ;
+: do-event-loop ( -- )
+    BEGIN  ['] event-loop-nocatch catch ?int dup  WHILE
+	    s" event-loop: " etype DoError nothrow  REPEAT  drop ;
 
 : create-receiver-task ( -- )
     o 1 stacksize4 NewTask4 dup to receiver-task pass
     init-reply  prep-socks
     >o rdrop  alloc-io c:init
-    BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
+    BEGIN  do-event-loop
+	wait-task @ ?dup-IF  ->timeout event>  THEN  AGAIN ;
 
-: client-loop-task ( -- )
+: event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout
-    o IF  up@ wait-task !  THEN  client-loop-task
+    o IF  up@ wait-task !  THEN  event-loop-task
     BEGIN  stop requests @ 0<= UNTIL ;
 
 : server-loop ( -- )  0 >o rdrop  1 client-loop ;
