@@ -1722,7 +1722,8 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     recvflag off
     0. BEGIN  2drop  send-anything?
 	sends# 0 ?DO
-	    0= IF  try-read-packet-wait  UNLOOP  EXIT  THEN
+	    0= IF  try-read-packet-wait
+		dup IF  UNLOOP  EXIT  THEN  2drop  THEN
 	    send-another-chunk  LOOP  drop
     read-a-packet? dup UNTIL ;
 
