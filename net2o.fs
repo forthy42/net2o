@@ -1712,7 +1712,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     poll-sock drop read-a-packet4/6 ;
 
 2 Value sends#
-16 Value sendbs#
+4 Value sendbs#
 16 Value recvs# \ balance receive and send
 
 : read-a-packet? ( -- addr u )
