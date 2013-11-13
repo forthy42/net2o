@@ -1416,7 +1416,8 @@ end-structure
 Variable chunks s" " chunks $!
 Variable chunks+
 Create chunk-adder chunks-struct allot
-Variable sender-task
+0 Value sender-task
+0 Value receiver-task
 
 : do-send-chunks ( -- )
     chunks $@ bounds ?DO
@@ -1433,8 +1434,8 @@ Variable sender-task
 
 event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 
-: net2o:send-chunks  sender-task @ 0= IF  do-send-chunks  EXIT  THEN
-    <event o elit, ->send-chunks sender-task @ event> ;
+: net2o:send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
+    <event o elit, ->send-chunks sender-task event> ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1658,7 +1659,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
 
 : timeout! ( -- )
-    sender-task @ dup IF  up@ =  ELSE  0=  THEN  IF
+    sender-task dup IF  up@ =  ELSE  0=  THEN  IF
 	next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
 	IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
 	ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN
@@ -1726,13 +1727,13 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 Defer init-reply
 
 : create-sender-task ( -- )
-    o 1 stacksize4 NewTask4 dup sender-task ! pass
+    o 1 stacksize4 NewTask4 dup to sender-task pass
     init-reply prep-evsocks
     >o rdrop  alloc-io c:init
     send-loop ;
 
 : next-packet ( -- addr u )
-    sender-task @ 0= IF
+    sender-task 0= IF
 	send-read-packet
     ELSE
 	0.  BEGIN  2drop do-block read-a-packet +rec dup  UNTIL
@@ -1741,13 +1742,6 @@ Defer init-reply
     over packet-size over <> !!size!! +next ;
 
 0 Value dump-fd
-
-: next-client-packet ( -- addr u )
-    try-read-packet-wait 2dup d0= ?EXIT
-    sockaddr alen @ insert-address
-    inbuf ins-source
-    over packet-size over <> !!size!! +next
-    dump( 2dup dump-fd write-file throw ) ;
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
@@ -1815,16 +1809,6 @@ $20 Constant keys-val
 
 : route-packet ( -- )  inbuf dup packet-size send-a-packet drop ;
 
-: server-event ( -- )
-    next-packet !ticks 2drop in-route
-    IF    handle-packet
-    ELSE  ." route a packet" cr route-packet  THEN ;
-
-: client-event ( addr u -- )
-    2drop in-check
-    IF    handle-packet
-    ELSE  ( drop packet )  THEN ;
-
 \ timeout handling
 
 : do-timeout ( -- )  o IF timeout-xt perform THEN ;
@@ -1870,13 +1854,18 @@ Variable timeout-task
 0 Value server?
 Variable requests
 
+: packet-event ( -- )
+    next-packet !ticks 2drop in-route
+    IF    handle-packet  reset-timeout
+    ELSE  ." route a packet" cr route-packet  THEN ;
+
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
-    BEGIN  server-event +event  AGAIN ;
+    BEGIN  packet-event +event  AGAIN ;
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : server-loop ( -- ) true to server?
-    sender( sender-task @ 0= IF  create-sender-task  THEN )
+    sender( sender-task 0= IF  create-sender-task  THEN )
     BEGIN  ['] server-loop-nocatch catch ?int dup  WHILE
 	    s" server-loop: " etype DoError nothrow  REPEAT  drop ;
 
@@ -1901,28 +1890,24 @@ true !!timeout!! ;
     THEN ;
 
 : client-loop-nocatch ( -- ) \ 1 stick-to-core
-    BEGIN  next-client-packet !ticks dup
-	IF    client-event +event reset-timeout +reset  watch-timeout?
-	ELSE  2drop requests @ IF  request-timeout  THEN  THEN
+    BEGIN  packet-event  +event  watch-timeout?
 	o IF  wait-task @ event>  THEN  AGAIN ;
 
 : n2o:request-done ( -- )
     o-timeout ->request ;
 
-Variable client-task
-
 : do-client-loop ( -- )
     BEGIN  ['] client-loop-nocatch catch ?int dup  WHILE
 	    s" client-loop: " etype DoError nothrow  REPEAT  drop ;
 
-: create-client-task ( -- )
-    o 1 stacksize4 NewTask4 dup client-task ! pass
+: create-receiver-task ( -- )
+    o 1 stacksize4 NewTask4 dup to receiver-task pass
     init-reply  prep-socks
     >o rdrop  alloc-io c:init
     BEGIN  do-client-loop ->timeout wait-task @ event>  AGAIN ;
 
 : client-loop-task ( -- )
-    client-task @ 0= IF  create-client-task  THEN ;
+    receiver-task 0= IF  create-receiver-task  THEN ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout  false to server?
