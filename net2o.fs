@@ -1886,7 +1886,7 @@ true !!timeout!! ;
     ?timeout ?dup-IF  >o rdrop
 	>next-timeout
 	do-timeout 1 timeouts +!
-	timeouts @ timeouts# > IF  ->timeout  THEN
+	timeouts @ timeouts# > wait-task @ and  IF  ->timeout  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
 
