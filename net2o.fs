@@ -526,6 +526,7 @@ object class
     64field: firstb-ticks
     64field: lastb-ticks
     64field: delta-ticks
+    64field: max-dticks
     field: acks
     64field: last-rate
     \ experiment: track previous b2b-start

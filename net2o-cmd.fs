@@ -531,7 +531,9 @@ previous
 
 \ client side timing
 
-: ack-size ( -- )  1 acks +!  recv-tick 64@ lastb-ticks 64! ;
+: ack-size ( -- )  1 acks +!  recv-tick 64@ 64dup lastb-ticks 64!@
+    64dup 64-0= IF  64drop 64drop  EXIT  THEN
+    64- max-dticks 64max! ;
 : ack-first ( -- )
     lastb-ticks 64@ 64dup 64-0= 0= IF
 	firstb-ticks 64@ 64- delta-ticks 64+!
@@ -555,12 +557,13 @@ also net2o-base
     recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0= 0= IF
 	64- 64>n rate( .eff ) >r
 	delta-ticks 64@ 64>n tick-init 1+ acks @ */
+	max-dticks 64@ 64>n tick-init 1+ * max
 	setrate-limit
 	rate( .rate ) ulit, r> ulit, set-rate
     ELSE
 	64drop 64drop
     THEN
-    delta-ticks 64off  acks off ;
+    delta-ticks 64off  max-dticks 64off  acks off ;
 
 : net2o:acktime ( -- )
     recv-addr 64@ recv-tick 64@ time-offset 64@ 64-
