@@ -555,8 +555,9 @@ also net2o-base
 
 : >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
     recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0= 0= IF
-	64- 64>n max-dticks 64@ 64>n tick-init 1+ * max rate( .eff ) >r
-	delta-ticks 64@ 64>n tick-init 1+ acks @ */ setrate-limit
+	64- 64>n rate( .eff ) >r
+	delta-ticks 64@ 64>n tick-init 1+ acks @ */
+	max-dticks 64@ 64>n tick-init 1+ * max setrate-limit
 	rate( .rate ) ulit, r> ulit, set-rate
     ELSE
 	64drop 64drop
