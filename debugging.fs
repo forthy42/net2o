@@ -54,6 +54,7 @@ debug: ack(
 debug: crypt(
 debug: ens(
 debug: key(
+debug: genkey( \ See generated keys - never let this go to a log file!
 debug: cookie(
 debug: delay( \ used to add delays at performance critical places
 debug: tag(

@@ -270,7 +270,7 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     -1 neststack +! neststack @ 0< !!minnest!!
     neststack @+ swap cells + @ neststart# ! ;
 
-: cmd>init ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
+: cmd>nest ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
 
 : do-nest ( addr u flag -- )
@@ -280,7 +280,7 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
 : cmdnest ( addr u -- )  mykey-decrypt$
     0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
 
-: cmdtmpnest ( addr u -- )  $>align tmpkey@ keysize umin decrypt$
+: cmdtmpnest ( addr u -- )  $>align tmpkey@ drop keysize decrypt$
     0= IF  2drop ." Invalid tmpnest: o=" o hex. tmpkey@ .nnb cr  EXIT  THEN tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
@@ -327,7 +327,7 @@ also net2o-base definitions
 14 net2o: nest ( addr u -- )  cmdnest ;
 15 net2o: tmpnest ( addr u -- )  cmdtmpnest ;
 
-: ]nest  ( -- )  end-cmd cmd>init $, push-$ push' nest ;
+: ]nest  ( -- )  end-cmd cmd>nest $, push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 16 net2o: new-data ( addr addr u -- )
@@ -365,7 +365,7 @@ also net2o-base definitions
 
 21 net2o: map-request ( addrs ucode udata -- )  2*64>n
     nest[
-    ( 0 >o add-cookie o> ) ticks lit, set-rtdelay
+    ?new-mykey ticker 64@ lit, set-rtdelay
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize $, store-key  stskc KEYSIZE erase
@@ -751,10 +751,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-: gen-request ( -- )  gen-tmpkeys
+: gen-request ( -- )
     net2o-code0
     ['] end-cmd IS expect-reply?
-    tpkc keysize $, receive-tmpkey
+    gen-tmpkeys $, receive-tmpkey
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
     tmpkey-request key-request
     req-codesize @  req-datasize @  map-request,

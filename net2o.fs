@@ -777,8 +777,6 @@ Variable mapstart $1 mapstart !
     code-map @ >o free-data o>
     code-rmap @ >o free-data o>
     \ erase crypto keys
-    crypto-key $@ erase
-    tskc KEYBYTES erase
     resend0 $off
     crypto-key $off
     data-resend $off
@@ -1926,11 +1924,11 @@ true !!timeout!! ;
 
 \ client/server initializer
 
-: init-client ( -- )
+: init-client ( -- )  init-mykey init-mykey \ two keys
     dump( "n2o.dump" r/w create-file throw to dump-fd )
     init-timer new-client init-route prep-socks ;
 
-: init-server ( -- )
+: init-server ( -- )  init-mykey init-mykey \ two keys
     init-timer new-server init-route prep-socks ;
 
 \ connection cookies

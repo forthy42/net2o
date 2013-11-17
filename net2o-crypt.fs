@@ -19,7 +19,28 @@
 state# 2* buffer: key-assembly
 state# 2* buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
-state# rng$ mykey swap move
+state# buffer: oldmykey \ previous private key
+
+\ key storage
+KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
+\ client keys
+keysize buffer: pkc
+keysize buffer: skc
+keysize buffer: stpkc \ server temporary keypair - once per connection setup
+keysize buffer: stskc
+\ shared secred
+keysize buffer: keypad
+64Variable last-mykey
+#10.000.000.000 d>64 64Value delta-mykey# \ new mykey every 10 seconds
+
+: init-mykey ( -- )
+    ticks delta-mykey# 64+ last-mykey 64!
+    mykey oldmykey state# move
+    state# rng$ mykey swap move
+    genkey( ." mykey: " mykey state# xtype cr ) ;
+
+: ?new-mykey ( -- )
+    last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
 
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
@@ -134,7 +155,9 @@ Defer regen-ivs
 : mykey-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
-    +calc $>align mykey state# decrypt$ +enc ;
+    +calc 2dup $>align mykey state# decrypt$
+    IF  +enc 2nip true  EXIT  THEN  2drop
+    $>align oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( flag -- ) +calc
     crypt-outbuf-init
@@ -194,35 +217,44 @@ Variable do-keypad "" do-keypad $!
     dest-ivs $@ c:prng o>
     r> c:key! ;
 
+: clear-keys ( -- )
+    crypto-key $@ erase  tskc KEYBYTES erase  stskc KEYBYTES erase ;
+
+\ We generate a shared secret out of three parts:
+\ 64 bytes IV, 32 bytes from the one-time-keys and
+\ 32 bytes from the permanent keys
+
+$60 Constant rndkey#
+
 : receive-ivs ( -- )
+    genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
+            ." con key: " rndkey# /string xtype cr )
     code-map one-ivs   code-rmap one-ivs
-    data-map one-ivs   data-rmap one-ivs ;
+    data-map one-ivs   data-rmap one-ivs
+    clear-keys ;
 
 : send-ivs ( -- )
+    genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
+            ." con key: " rndkey# /string xtype cr )
     code-rmap one-ivs  code-map one-ivs
-    data-rmap one-ivs  data-map one-ivs ;
+    data-rmap one-ivs  data-map one-ivs
+    clear-keys ;
 
 : ivs-strings ( addr u -- )
     state# <> !!ivs!! >crypt-source' >crypt-key-ivs ;
 
 \ public key encryption
 
-KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
-\ client keys
-keysize buffer: pkc
-keysize buffer: skc
-keysize buffer: stpkc \ server temporary keypair - once per connection setup
-keysize buffer: stskc
-\ shared secred
-keysize buffer: keypad
-
 \ the theory here is that pkc*sks = pks*skc
 \ because pk=base*sk, so base*skc*sks = base*sks*skc
 \ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
-: gen-keys ( -- ) skc pkc ed-keypair ;
-: gen-tmpkeys ( -- ) tskc tpkc ed-keypair ;
-: gen-stkeys ( -- ) stskc stpkc ed-keypair ;
+: gen-keys ( -- ) skc pkc ed-keypair
+    genkey( ." gen key: " skc keysize xtype cr ) ;
+: gen-tmpkeys ( -- pk addr ) tskc tpkc ed-keypair tpkc keysize
+    genkey( ." tmp key: " tskc keysize xtype cr ) ;
+: gen-stkeys ( -- ) stskc stpkc ed-keypair
+    genkey( ." tmpskey: " stskc keysize xtype cr ) ;
 
 \ setting of keys
 
