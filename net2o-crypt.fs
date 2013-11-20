@@ -47,7 +47,7 @@ keysize buffer: keypad
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
-    key-assembly key( ." >crypt-key " dup .64b ." :" dup state# + .64b cr )
+    key-assembly key( ." >crypt-key " dup state# 2* xtype cr )
     >c:key ;
 : >crypt-source' ( addr -- )
     crypt( ." ivs iv: "  dup state# .nnb cr )
@@ -78,7 +78,7 @@ Defer regen-ivs
     IF
 	64>n max-size^2 1- rshift key( ." ivsc# " dup . cr )
 	dest-ivs $@ drop over +
-	swap regen-ivs o> key( ." ivs>code-s? " dup .64b ." :" dup state# + .64b cr )
+	swap regen-ivs o> key( ." ivs>code-s? " dup state# 2* xtype cr )
 	>c:key
 	EXIT
     THEN
@@ -90,7 +90,7 @@ Defer regen-ivs
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF
 	64>n max-size^2 1- rshift key( ." ivss# " dup . cr )
-	dest-ivs $@ drop + o> key( ." ivs>source? " dup .64b ." :" dup state# + .64b cr )
+	dest-ivs $@ drop + o> key( ." ivs>source? " dup state# 2* xtype cr )
 	>c:key
 	EXIT
     THEN
@@ -106,10 +106,10 @@ Defer regen-ivs
 	crypt-key$ >crypt-key
     THEN ;
 
-: crypt-outbuf-init ( flag -- )
+: crypt-outbuf-init ( flag -- )  >r
     0 c:key!
     o IF
-	IF
+	r@ IF
 	    code-map ivs>code-source?
 	ELSE
 	    data-map ivs>source?
@@ -118,7 +118,7 @@ Defer regen-ivs
 	drop
     THEN
     default-key
-    key( ." outbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
+    r> IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
 
 : crypt-inbuf-init ( flag -- )
     0 c:key!

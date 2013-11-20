@@ -181,7 +181,6 @@ User cmdbuf#
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
     cmd(
-    o IF  ." key: " crypto-key $@ .nnb cr  THEN
     ." send: " 64dup ['] 64. $10 base-execute 64>r
     dup cmdbuf# @ n2o:see cr 64r> )
     code-packet on
@@ -413,7 +412,7 @@ net2o-base
     64= cookie-val and validated or! ;
 50 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
 51 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
-52 net2o: timeout ( ticks -- ) net2o:timeout data-map @ >o dest-tail @ o> ulit, set-head ;
+52 net2o: timeout ( ticks -- ) net2o:timeout ( data-map @ >o dest-tail @ o> ulit, set-head ) ;
 53 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
 54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 

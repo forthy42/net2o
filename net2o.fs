@@ -1743,20 +1743,17 @@ Defer init-reply
     send-loop ;
 
 : next-packet ( -- addr u )
-    sender-task 0= IF
-	send-read-packet
-    ELSE
-	try-read-packet-wait
-	\ 0.  BEGIN  2drop do-block read-a-packet +rec dup  UNTIL
-    THEN  dup 0= ?EXIT
-    sockaddr alen @ insert-address  inbuf ins-source
-    over packet-size over <> !!size!! +next ;
+    sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
+    dup IF
+	sockaddr alen @ insert-address  inbuf ins-source
+	over packet-size over <> !!size!! +next
+    THEN ;
 
 0 Value dump-fd
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
-    timeout( ." timeout? " . send-anything? . chunks+ ? bandwidth? . next-chunk-tick ( ticks-u - ) . cr ) ;
+    timeout( ." timeout? " 64. send-anything? . chunks+ ? bandwidth? . next-chunk-tick . cr )else( 64drop ) ;
 
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
@@ -1847,7 +1844,7 @@ Variable timeout-task
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >next-timeout ( -- )  o?
     rtdelay 64@ timeouts @ sq2**
-    timeout-max# 64min timeout( ." timeout setting: " 64dup 64. cr )
+    timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
