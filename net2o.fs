@@ -1172,9 +1172,6 @@ file-state-struct buffer: new-file-state
     \G use errno to generate throw when failing
     IF  errno negate 512 - throw  THEN ;
 
-: fstat-fake ( fileno buf -- ior ) >r drop
-    $1A4 r@ st_mode l! ntime r> st_mtime ntime!  0 ;
-
 : n2o:get-stat ( id -- mtime mod )
     id>addr? >o fs-fid @ fileno statbuf fstat o> ?ior
     statbuf st_mtime ntime@ d>64

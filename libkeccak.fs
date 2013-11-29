@@ -6,14 +6,44 @@
 [THEN]
 
 c-library keccak
-\    s" keccak/.libs" add-libpath
+    \    s" keccak/.libs" add-libpath
     s" keccak" add-lib
-[IFDEF] android
-    s" ./keccak" add-libpath
-[THEN]
+    [IFDEF] android
+	s" ./keccak" add-libpath
+    [THEN]
     \c #include <KeccakF-1600.h>
+    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, unsigned int n)
+    \c {
+    \c   while(n>0) {
+    \c     unsigned int p = n >= 128 ? 128 : n;
+    \c     KeccakF(state);
+    \c     KeccakEncrypt(state, data, p>>3);
+    \c     data += p>>3; n-=p;
+    \c   }
+    \c   return data;
+    \c }
+    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, unsigned int n)
+    \c {
+    \c   while(n>0) {
+    \c     unsigned int p = n >= 128 ? 128 : n;
+    \c     KeccakF(state);
+    \c     KeccakDecrypt(state, data, p>>3);
+    \c     data += p>>3; n-=p;
+    \c   }
+    \c   return data;
+    \c }
 
-    include keccak.fs
+\ ------===< functions >===-------
+c-function KeccakInitialize KeccakInitialize  -- void
+c-function KeccakF KeccakF a -- void
+c-function KeccakInitializeState KeccakInitializeState a -- void
+c-function KeccakExtract KeccakExtract a a n -- void
+c-function KeccakAbsorb KeccakAbsorb a a n -- void
+c-function KeccakEncrypt KeccakEncrypt a a n -- void
+c-function KeccakDecrypt KeccakDecrypt a a n -- void
+c-function KeccakEncryptLoop KeccakEncryptLoop a a n -- a
+c-function KeccakDecryptLoop KeccakDecryptLoop a a n -- a
+
 end-c-library
 
 25 8 * Constant keccak#
@@ -61,24 +91,30 @@ crypto class end-class keccak
 \G perform a diffuse round
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
-    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
-    /string dup 0= UNTIL  2drop
+    @keccak -rot KeccakEncryptLoop  drop
+\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
+\    /string dup 0= UNTIL  2drop
 ; keccak to c:encrypt
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u
-    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
-    /string dup 0= UNTIL  2drop
+    @keccak -rot KeccakDecryptLoop  drop
+\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
+\    /string dup 0= UNTIL  2drop
 ; keccak to c:decrypt ( addr u -- )
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u with auth
-    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
-    /string dup 0= UNTIL  drop @keccak KeccakF
+\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
+\    /string dup 0= UNTIL  drop
+    @keccak -rot KeccakEncryptLoop
+    @keccak KeccakF
     >r keccak-checksums keccak#cks keccak> keccak-checksums 128@ r> 128!
 ; keccak to c:encrypt+auth ( addr u -- )
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u, with auth check
-    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
-    /string dup 0= UNTIL  drop @keccak KeccakF
+\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
+\    /string dup 0= UNTIL  drop
+    @keccak -rot KeccakDecryptLoop
+    @keccak KeccakF
     128@ keccak-checksums keccak#cks keccak> keccak-checksums 128@ 128=
 ; keccak to c:decrypt+auth ( addr u -- flag )
 :noname ( addr u -- )
