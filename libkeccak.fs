@@ -123,9 +123,8 @@ crypto class end-class keccak
     /string dup 0= UNTIL  2drop
 ; keccak to c:hash
 :noname ( addr u -- )
-    @keccak -rot KeccakEncryptLoop  drop
-\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck keccak>
-\    /string dup 0= UNTIL  2drop
+    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck keccak>
+    /string dup 0= UNTIL  2drop
 ; keccak to c:prng
 \G Fill buffer addr u with PRNG sequence
 :noname @keccak KeccakF
