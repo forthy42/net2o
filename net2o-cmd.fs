@@ -758,7 +758,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     tmpkey-request key-request
     req-codesize @  req-datasize @  map-request,
     cmdbuf# @ 1+ >r
-    end-code cmdbuf$ drop r> resend0 $! ;
+    end-code cmdbuf$ drop r> push-reply ;
 
 : 0-resend? ( -- )
     resend0 @ IF
