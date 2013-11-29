@@ -757,12 +757,13 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
     tmpkey-request key-request
     req-codesize @  req-datasize @  map-request,
-    end-code ;
+    cmdbuf# @ 1+ >r
+    end-code cmdbuf$ drop r> resend0 $! ;
 
 : 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
-	resend0 $@ cmdbuf swap move
+	resend0 $@ >r cmdbuf r@ move r> cmdbuf# !
 	cmdbuf 64#0 send-cmd 1 packets2 +!
     THEN ;
 
@@ -810,7 +811,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
     req-datasize !  req-codesize !
-    gen-request cmdbuf$ resend0 $!
+    gen-request
     +resend
     1 client-loop
     -timeout tskc KEYBYTES erase ;
