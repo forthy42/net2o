@@ -648,6 +648,7 @@ Variable >code-flag
     >code-flag @ dup code-flag !
     IF
 	dup addr>replies  alloz dest-replies !
+	3 dest-ivslastgen !
     ELSE
 	dup addr>ts       alloz dest-timestamps !
     THEN ;

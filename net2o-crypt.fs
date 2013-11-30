@@ -64,7 +64,7 @@ keysize buffer: keypad
 Defer regen-ivs
 
 : dest-a/b ( addr u -- addr1 u1 )
-    dest-ivslastgen @ IF  dup 2/ safe/string  ELSE  2/  THEN ;
+    dest-ivslastgen @ 1 = IF  dup 2/ safe/string  ELSE  2/  THEN ;
 
 : clear-replies ( -- )
     dest-replies @ dest-size @ addr>replies dest-a/b
@@ -184,7 +184,7 @@ Variable do-keypad "" do-keypad $!
     dest-ivsgen @ key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
     clear-replies
     dest-ivs $@ dest-a/b c:prng
-    -1 dest-ivslastgen xor! r> c:key! ;
+    2 dest-ivslastgen xor! r> c:key! ;
 
 : regen-ivs-all ( o:map -- )  c:key@ >r
     dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
@@ -199,14 +199,8 @@ Variable do-keypad "" do-keypad $!
     r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
-    dup dest-ivs $@len dest-ivslastgen @
-    IF \ check if in quarter 2
-	2/ 2/ dup bounds within 0=
-    ELSE \ check if in quarter 4
-	2/ dup 2/ + u>
-    THEN  IF
-	regen-ivs/2
-    THEN  drop ;
+    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
+    IF	regen-ivs/2  THEN ;
 ' (regen-ivs) IS regen-ivs
 
 : one-ivs ( addr -- )  c:key@ >r
