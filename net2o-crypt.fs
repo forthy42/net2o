@@ -80,7 +80,7 @@ Defer regen-ivs
 	dest-ivs $@ drop over +
 	swap regen-ivs o> key( ." ivs>code-s? " dup state# 2* xtype cr )
 	>c:key
-	EXIT
+	rdrop  EXIT
     THEN
     64drop o> ;
 
@@ -92,7 +92,7 @@ Defer regen-ivs
 	64>n max-size^2 1- rshift key( ." ivss# " dup . cr )
 	dest-ivs $@ drop + o> key( ." ivs>source? " dup state# 2* xtype cr )
 	>c:key
-	EXIT
+	rdrop  EXIT
     THEN
     64drop o> ;
 
