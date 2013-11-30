@@ -453,7 +453,12 @@ object class
     field: dest-back  \ flushed on destination flushed
     1 pthread-mutexes +field dest-lock
     method free-data
+    method regen-ivs
+    method handle
 end-class code-class
+' drop code-class to regen-ivs
+
+code-class class end-class data-class
 
 code-class class
     field: data-ackbits0
@@ -462,7 +467,9 @@ code-class class
     field: data-firstack0#
     field: data-firstack1#
     field: data-lastack#
-end-class rdata-class
+end-class rcode-class
+
+rcode-class class end-class rdata-class
 
 \ job context structure
 
@@ -486,13 +493,13 @@ object class
     field: ack-xt
     field: resend0
     
-    field: data-map
-    field: data-rmap
-    field: data-resend
-    field: data-b2b
-    
     field: code-map
     field: code-rmap
+    field: data-map
+    field: data-rmap
+
+    field: data-resend
+    field: data-b2b
     
     cfield: ack-state
     cfield: ack-resend~
@@ -588,7 +595,7 @@ $100 Value dests#
     dests>> 64rshift 64>n 2* cells dest-map $@ drop + ;
 : dest-index ( -- addr ) dest-addr 64@ >dest-map ;
 
-: check-dest ( -- addr 1/t / f )
+: check-dest ( -- addr map o:job / f )
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
     dest-index 2 cells bounds ?DO
@@ -597,8 +604,7 @@ $100 Value dests#
 	    dest-size @ u<
 	    IF
 		dest-raddr @ swap dup >data-head +
-		code-flag @ invert 2* 1+
-		dest-job @ o> >o rdrop
+		o dest-job @ o> >o rdrop
 		UNLOOP  EXIT  THEN
 	    drop o>
 	THEN
@@ -654,7 +660,7 @@ Variable >code-flag
     THEN ;
 
 : map-data ( addr u -- o )
-    o rdata-class new >o dest-job !
+    o >code-flag @ IF rcode-class ELSE rdata-class THEN new >o dest-job !
     alloc-data
     code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
@@ -667,7 +673,7 @@ Variable >code-flag
     o o> ;
 
 : map-source ( addr u addrx -- o )
-    o code-class new >o dest-job !
+    o >code-flag @ IF code-class ELSE data-class THEN new >o dest-job !
     dest-lock 0 pthread_mutex_init drop
     alloc-data
     dup addr>ts alloz dest-cookies !
@@ -738,7 +744,8 @@ Variable mapstart $1 mapstart !
 	addrd >dest-map @ ?EXIT
 	return-addr @ n2o:new-context  server!  THEN
     >code-flag off
-    addrd u data-rmap map-data-dest addrs u map-source  data-map ! ;
+    addrd u data-rmap map-data-dest
+    addrs u map-source  data-map ! ;
 : n2o:new-code { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
@@ -763,12 +770,15 @@ Variable mapstart $1 mapstart !
     dest-cookies ?free
     dispose ;
 ' free-code code-class to free-data
+' free-code data-class to free-data
 
-:noname ( o:data --- )
+: free-rcode ( o:data --- )
     data-ackbits0 ?free
     data-ackbits1 ?free
     data-ackbits-buf $off
-    free-code ; rdata-class to free-data
+    free-code ;
+' free-rcode rdata-class to free-data
+' free-rcode rcode-class to free-data
 
 : n2o:dispose-context ( o:addr -- o:addr )
     cmd( ." Disposing context... " )
@@ -1171,7 +1181,7 @@ file-state-struct buffer: new-file-state
 
 : ?ior ( r -- )
     \G use errno to generate throw when failing
-    IF  errno negate 512 - throw  THEN ;
+    IF  -512 errno - throw  THEN ;
 
 : n2o:get-stat ( id -- mtime mod )
     id>addr? >o fs-fid @ fileno statbuf fstat o> ?ior
@@ -1315,18 +1325,17 @@ Variable outflag  outflag off
 
 User code-packet
 
-: send-packet ( flag -- ) +sendX
+: send-packet ( -- ) +sendX
 \    ." send " outbuf .header
-    code-packet @ outbuf-encrypt
-    code-packet @ 0= IF  send-cookie  THEN
-    code-packet off
+    code-packet @ dup IF  @  THEN  outbuf-encrypt
+    code-packet @ data-map = IF  send-cookie  THEN
     out-route drop
     outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
 	ELSE
-	    errno 512 + negate throw
+	    -512 errno - throw
 	THEN
     THEN ;
 
@@ -1394,6 +1403,7 @@ FVariable <size-lb>
 
 : net2o:send-chunk ( -- )  +chunk
     ack-state c@ outflag or!
+    data-map code-packet !
     bursts# 1- data-b2b @ = IF
 	\ send a new packet for timing path
 	data-tail? IF  net2o:send  ELSE  net2o:resend  THEN
@@ -1776,33 +1786,37 @@ $20 Constant keys-val
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     0 >o rdrop \ address 0 has no job context!
-    true inbuf-decrypt 0= IF
+    0 inbuf-decrypt 0= IF
 	." invalid packet to 0" cr EXIT  THEN
     validated off \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
 
-: handle-data ( addr -- )
+: handle-data ( addr -- )  dest-job @ >o
     data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
-    +inmove ack-xt perform +ack ;
+    +inmove ack-xt perform +ack o> ;
+' handle-data rdata-class to handle
+' drop data-class to handle
 
-: handle-cmd ( addr -- )
+: handle-cmd ( addr -- )  dest-job @ >o
     >r inbuf packet-data r@ swap dup >r move
-    r> r> swap queue-command ;
+    r> r> swap queue-command o> ;
+' handle-cmd rcode-class to handle
+' drop code-class to handle
 
-: handle-dest ( addr f -- ) \ handle packet to valid destinations
+: handle-dest ( addr map -- ) \ handle packet to valid destinations
     ticker 64@
     timing( dest-addr 64@ 64.
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
     recv-tick 64! \ time stamp of arrival
-    dup 0> inbuf-decrypt 0= IF
+    dup >r inbuf-decrypt 0= IF
 	inbuf .header
 	." invalid packet to " dest-addr 64@ .16 cr
-	IF  drop  THEN  EXIT  THEN
+	rdrop EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@
     address( <> IF  ." handover" cr THEN )else( 2drop )
-    0< IF  handle-data  ELSE  handle-cmd  THEN ;
+    r> >o handle o> ;
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta

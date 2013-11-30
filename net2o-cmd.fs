@@ -183,7 +183,7 @@ User cmdbuf#
     cmd(
     ." send: " 64dup ['] 64. $10 base-execute 64>r
     dup cmdbuf# @ n2o:see cr 64r> )
-    code-packet on
+    o IF  code-map  ELSE  0  THEN  code-packet !
     o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
 	cmdbuf# @ min-size I lshift u<= IF

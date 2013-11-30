@@ -61,8 +61,6 @@ keysize buffer: keypad
 \ regenerate half of the ivs per time, when you reach the middle of the other half
 \ of the ivs buffer.
 
-Defer regen-ivs
-
 : dest-a/b ( addr u -- addr1 u1 )
     dest-ivslastgen @ 1 = IF  dup 2/ safe/string  ELSE  2/  THEN ;
 
@@ -71,27 +69,13 @@ Defer regen-ivs
     cmd( ." Clear replies " over hex. dup hex. cr )
     erase ;
 
-: ivs>code-source? ( addr -- )
-    dup @ 0= IF  drop  EXIT  THEN
-    @ >o
-    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF
-	64>n max-size^2 1- rshift key( ." ivsc# " dup . cr )
-	dest-ivs $@ drop over +
-	swap regen-ivs o> key( ." ivs>code-s? " dup state# 2* xtype cr )
-	>c:key
-	EXIT
-    THEN
-    64drop o> ;
-
 : ivs>source? ( addr -- )
-\    dup @ 0= IF  drop  EXIT  THEN
-    @ >o
+    dup 0= IF  drop  EXIT  THEN
+    >o
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF
-	64>n max-size^2 1- rshift key( ." ivss# " dup . cr )
-	dest-ivs $@ drop + o> key( ." ivs>source? " dup state# 2* xtype cr )
-	>c:key
+	64>n max-size^2 1- rshift
+	dest-ivs $@ drop over +	>c:key regen-ivs o>
 	EXIT
     THEN
     64drop o> ;
@@ -106,33 +90,10 @@ Defer regen-ivs
 	crypt-key$ >crypt-key
     THEN ;
 
-: crypt-outbuf-init ( flag -- )  >r
+: crypt-buf-init ( map -- ) >r
     0 c:key!
-    o IF
-	r@ IF
-	    code-map ivs>code-source?
-	ELSE
-	    data-map ivs>source?
-	THEN
-    ELSE
-	drop
-    THEN
-    default-key
-    r> IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
-
-: crypt-inbuf-init ( flag -- )
-    0 c:key!
-    o IF
-	IF
-	    code-rmap ivs>code-source?
-	ELSE
-	    data-rmap ivs>source?
-	THEN
-    ELSE
-	drop
-    THEN
-    default-key
-    key( ." inbuf-init " c:key@ .64b ." :" c:key@ state# + .64b cr ) ;
+    o IF  r@ ivs>source?  THEN  default-key
+    r> code-map = IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source
@@ -158,13 +119,13 @@ Defer regen-ivs
     IF  +enc 2nip true  EXIT  THEN  2drop
     $>align oldmykey state# decrypt$ +enc ;
 
-: outbuf-encrypt ( flag -- ) +calc
-    crypt-outbuf-init
+: outbuf-encrypt ( map -- ) +calc
+    crypt-buf-init
     outbuf packet-data +cryptsu c:encrypt+auth +enc ;
 
-: inbuf-decrypt ( flag1 -- flag2 ) +calc
+: inbuf-decrypt ( map -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
-    crypt-inbuf-init
+    crypt-buf-init
     inbuf packet-data +cryptsu c:decrypt+auth +enc ;
 
 \ IVS
@@ -201,7 +162,8 @@ Variable do-keypad "" do-keypad $!
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
     IF	regen-ivs/2  THEN ;
-' (regen-ivs) IS regen-ivs
+' (regen-ivs) code-class to regen-ivs
+' (regen-ivs) rcode-class to regen-ivs
 
 : one-ivs ( addr -- )  c:key@ >r
     @ >o key-assembly state# 2* c:prng
