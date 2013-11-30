@@ -138,8 +138,7 @@ Defer regen-ivs
     over mykey-salt# >crypt-source
     2r> >crypt-key 
     mykey-salt# safe/string
-    key( ." key init: " c:key@ c:key# .nnb cr )
-    c:diffuse key( ." diffused: " c:key@ c:key# .nnb cr ) ;
+    key( ." key init: " c:key@ c:key# .nnb cr ) c:diffuse ;
 
 \ !!TBD!! use a nonce to setup and make sure each such string
 \ can be decrypted only once!
@@ -212,7 +211,7 @@ Variable do-keypad "" do-keypad $!
 
 : one-ivs ( addr -- )  c:key@ >r
     @ >o key-assembly state# 2* c:prng
-    dest-ivsgen @ c:key! key-assembly >c:key c:diffuse
+    dest-ivsgen @ c:key! key-assembly >c:key
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng o>
     r> c:key! ;
