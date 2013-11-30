@@ -438,7 +438,6 @@ object class
     64field: dest-vaddr
     field: dest-size
     field: dest-raddr
-    field: code-flag
     field: dest-job
     field: dest-ivs
     field: dest-ivsgen
@@ -455,8 +454,12 @@ object class
     method free-data
     method regen-ivs
     method handle
+    method rewind-timestamps
+    method rewind-timestamps-partial
 end-class code-class
 ' drop code-class to regen-ivs
+' noop code-class to rewind-timestamps
+' drop code-class to rewind-timestamps-partial
 
 code-class class end-class data-class
 
@@ -651,7 +654,7 @@ Variable >code-flag
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
     c:key# alloz dest-ivsgen !
-    >code-flag @ dup code-flag !
+    >code-flag @
     IF
 	dup addr>replies  alloz dest-replies !
 	3 dest-ivslastgen !
@@ -662,7 +665,7 @@ Variable >code-flag
 : map-data ( addr u -- o )
     o >code-flag @ IF rcode-class ELSE rdata-class THEN new >o dest-job !
     alloc-data
-    code-flag @ 0= IF
+    >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
 	dup addr>bits bits>bytes allocate-bits data-ackbits0 !
 	dup addr>bits bits>bytes allocate-bits data-ackbits1 !
@@ -1516,20 +1519,18 @@ Variable recvflag  recvflag off
 : clear-cookies ( -- )
     s" " data-rmap @ >o data-ackbits-buf $! o> ;
 
-: rewind-timestamps ( o:map -- )
-    code-flag @ 0= IF
-	dest-timestamps @ dest-size @ addr>ts erase
-    THEN ;
+:noname ( o:map -- )
+    dest-timestamps @ dest-size @ addr>ts erase ;
+dup data-class to rewind-timestamps
+rdata-class to rewind-timestamps
 
-: rewind-timestamps-partial ( new-back o:map -- )
-    code-flag @ 0= IF
-	dest-back @ - addr>ts >r
-	dest-timestamps @ dest-size @ addr>ts dest-back @ addr>ts over 1- and
-	/string r@ umin dup >r erase
-	dest-timestamps @ r> r> - erase
-    ELSE
-	drop
-    THEN ;
+:noname ( new-back o:map -- )
+    dest-back @ - addr>ts >r
+    dest-timestamps @ dest-size @ addr>ts dest-back @ addr>ts over 1- and
+    /string r@ umin dup >r erase
+    dest-timestamps @ r> r> - erase ;
+dup data-class to rewind-timestamps-partial
+rdata-class to rewind-timestamps-partial
 
 : clearpages-partial ( new-back o:map -- )
     dest-back @ - >r
