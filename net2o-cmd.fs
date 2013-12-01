@@ -296,6 +296,8 @@ also net2o-base definitions
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
 : end-code ( -- ) expect-reply? previous cmd  cmdlock unlock ;
+: push-cmd ( -- )
+    end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
 
 previous definitions
 
@@ -437,8 +439,7 @@ net2o-base
 66 net2o: gen-reply ( -- )
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key all-ivs time-offset! ]tmpnest
-      end-cmd
-      ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;]  IS expect-reply? ;
+      push-cmd ;]  IS expect-reply? ;
 
 \ better slurping
 
@@ -757,8 +758,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
     tmpkey-request key-request
     req-codesize @  req-datasize @  map-request,
-    cmdbuf# @ 1+ >r
-    end-code cmdbuf$ drop r> push-reply ;
+    ['] push-cmd IS expect-reply?
+    end-code ;
 
 : 0-resend? ( -- )
     resend0 @ IF
