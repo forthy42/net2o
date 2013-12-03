@@ -82,7 +82,12 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
     THEN  .\" \" $, " ;
 
 : .net2o-name ( n -- )
-    cells cmd-base-table + (net2o-see) ;
+    dup $80 < IF
+	cells cmd-base-table +
+    ELSE
+	dup 7 rshift $80 + cells cmd-base-table + @ >body
+	swap $7F and cells +
+    THEN  (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -94,7 +99,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	0 endcase ]hex ;
 
 : cmd-see ( addr u -- addr' u' )
-    byte@ >r buf-state 2! r> net2o-see buf-state 2@ ;
+    buf-state 2! p@ net2o-see buf-state 2@ ;
 
 : n2o:see ( addr u -- )  ." net2o-code " 
     BEGIN  cmd-see  dup 0= UNTIL  2drop ;
@@ -479,7 +484,7 @@ net2o-base
 
 120 net2o: !time ( -- ) init-timer ;
 121 net2o: .time ( -- ) .packets .times ;
-122 net2o: set-ip ( addr u -- ) .ipaddr ;
+122 net2o: set-ip ( addr u -- ) setip-xt perform ;
 123 net2o: get-ip ( -- ) >sockaddr $, set-ip ;
 
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
@@ -820,7 +825,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : rewind? ( -- )
     data-rmap @ >o dest-round @ o> lit, rewind-sender ;
 
+\ higher level stuff
+
 previous
+
+require net2o-dht.fs
 
 0 [IF]
 Local Variables:

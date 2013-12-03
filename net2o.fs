@@ -35,7 +35,6 @@ s" net2o timed out"              throwcode !!timeout!!
 s" no key file"                  throwcode !!nokey!!
 s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
-s" invalid DHT key"              throwcode !!no-dht-key!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 
 \ required tools
@@ -357,6 +356,39 @@ Variable lastn2oaddr
     routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
     $@ sockaddr swap dup alen ! move  rdrop ;
 
+\ NAT traversal stuff: print IP addresses
+
+: .sockaddr { addr alen -- }
+    case addr family w@
+	AF_INET of
+	    '4' emit addr sin_addr 4 type addr port 2 type
+	endof
+	AF_INET6 of
+	    '6' emit addr sin6_addr $10 type addr sin6_port 2 type
+	endof
+    endcase ;
+
+: .port ( addr len -- )
+    drop be-uw@ 0 ['] .r #10 base-execute ;
+: .ip4b ( addr len -- addr' len' )
+    over c@ 0 ['] .r #10 base-execute 1 /string ;
+: .ip4 ( addr len -- )
+    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
+: .ip6w ( addr len -- addr' len' )
+    over be-uw@ [: 0 <# # # # # #> type ;] $10 base-execute
+    2 /string ;
+: w, ( w -- )  here w! 2 allot ;
+Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
+: .ip6 ( addr len -- )
+    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
+    '[' 8 0 DO  emit .ip6w ':'  LOOP  drop ." ]:" .port ;
+
+: .ipaddr ( addr len -- )
+    case  over c@ >r 1 /string r>
+	'4' of  .ip4  endof
+	'6' of  .ip6  endof
+	-rot dump endcase cr ;
+
 \ route an incoming packet
 
 User return-addr
@@ -492,7 +524,8 @@ object class
     field: blockalign
     field: crypto-key
     field: pubkey
-    field: timeout-xt
+    field: timeout-xt \ callback for timeout
+    field: setip-xt   \ callback for set-ip
     field: ack-xt
     field: resend0
     
@@ -728,7 +761,7 @@ resend-size# buffer: resend-init
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
     init-flow-control
-    -timeout
+    -timeout ['] .ipaddr setip-xt !
     -1 blocksize !
     1 blockalign ! ;
 
@@ -1275,6 +1308,9 @@ file-state-struct buffer: new-file-state
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
 
+: >sockaddr ( -- addr len )
+    return-address @ routes #.key $@ ['] .sockaddr $tmp ;
+
 \ load crypto here
 
 require net2o-crypt.fs
@@ -1588,42 +1624,6 @@ rdata-class to rewind-timestamps-partial
     flush( ." rewind partial " dup hex. cr )
     data-rmap @ >o
     dup rewind-partial  dup rewind-ackbits-partial  dest-back ! o> ;
-
-\ NAT traversal stuff
-
-: .sockaddr { addr alen -- }
-    case addr family w@
-	AF_INET of
-	    '4' emit addr sin_addr 4 type addr port 2 type
-	endof
-	AF_INET6 of
-	    '6' emit addr sin6_addr $10 type addr sin6_port 2 type
-	endof
-    endcase ;
-
-: .port ( addr len -- )
-    drop be-uw@ 0 ['] .r #10 base-execute ;
-: .ip4b ( addr len -- addr' len' )
-    over c@ 0 ['] .r #10 base-execute 1 /string ;
-: .ip4 ( addr len -- )
-    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
-: .ip6w ( addr len -- addr' len' )
-    over be-uw@ [: 0 <# # # # # #> type ;] $10 base-execute
-    2 /string ;
-: w, ( w -- )  here w! 2 allot ;
-Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
-: .ip6 ( addr len -- )
-    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
-    '[' 8 0 DO  emit .ip6w ':'  LOOP  drop ." ]:" .port ;
-
-: .ipaddr ( addr len -- )
-    case  over c@ >r 1 /string r>
-	'4' of  .ip4  endof
-	'6' of  .ip6  endof
-	-rot dump endcase cr ;
-
-: >sockaddr ( -- addr len )
-    return-address @ routes #.key $@ ['] .sockaddr $tmp ;
 
 \ schedule delayed events
 

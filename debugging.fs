@@ -68,6 +68,7 @@ debug: dump(
 debug: trace(
 debug: header(
 debug: sender( \ extra sender task
+debug: dht( \ debuggin for dht functions
 
 +db ens(
 
