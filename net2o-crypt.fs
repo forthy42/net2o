@@ -74,10 +74,10 @@ keysize buffer: keypad
     o 0= IF  no-key state#  ELSE  crypto-key $@  THEN ;
 
 : default-key ( -- )
-    key( ." Default-key " cr )
+    cmd( ." Default-key " cr )
     no-key >crypt-source'  crypt-key$ >crypt-key ;
 
-: ivs>source? ( o:map -- )  o 0= ?EXIT
+: ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF  64>n addr>keys dest-ivs $@ drop over + >c:key regen-ivs
 	EXIT  THEN
@@ -85,7 +85,7 @@ keysize buffer: keypad
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
-    r> code-map = IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
+    r> code-map = true or IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source

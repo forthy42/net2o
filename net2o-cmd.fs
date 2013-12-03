@@ -99,10 +99,10 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	0 endcase ]hex ;
 
 : cmd-see ( addr u -- addr' u' )
-    buf-state 2! p@ net2o-see buf-state 2@ ;
+    buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
 : n2o:see ( addr u -- )  ." net2o-code " 
-    BEGIN  cmd-see  dup 0= UNTIL  2drop ;
+    BEGIN  cmd-see dup 0= UNTIL  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     byte@ >r buf-state 2! trace( r@ dup . .net2o-name .s cr )
@@ -185,8 +185,7 @@ User cmdbuf#
 ' net2o, IS net2o-do
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
-    cmd(
-    ." send: " 64dup ['] 64. $10 base-execute 64>r
+    cmd( ." send: " 64dup ['] 64. $10 base-execute 64>r
     dup cmdbuf# @ n2o:see cr 64r> )
     o IF  code-map  ELSE  0  THEN  code-packet !
     o IF  return-address  ELSE  return-addr  THEN  @
@@ -234,7 +233,7 @@ previous
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( 2dup dest-addr 64@ ['] 64. $10 base-execute n2o:see )
+    cmd( dest-addr 64@ ['] 64. $10 base-execute 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
     dup IF   1 throwcount +! dup s" do-cmd-loop: " etype DoError nothrow

@@ -827,7 +827,8 @@ Variable mapstart $1 mapstart !
     resend0 $off
     crypto-key $off
     data-resend $off
-    cmd( dispose  ." disposed" cr ) ;
+    dispose
+    cmd( ." disposed" cr ) ;
 
 \ data sending around
 
