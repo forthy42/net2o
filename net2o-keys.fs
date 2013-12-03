@@ -231,9 +231,15 @@ previous definitions
     REPEAT ;
 
 : read-keys ( -- )
-    key-fd 0= IF  "default.n2o" r/o open-file throw to key-fd
-	read-key-loop  key-fd close-file throw  0 to key-fd  THEN
-    0. ?key-fd reposition-file throw  read-key-loop ;
+    key-fd 0= IF
+	x" 21C1630881777E0EE03D49465F954AC894EC4D76C025BEF314BAC285DDD545B5" key:new
+	x" 103D146E41B255702B33852CC6EFD93ED0F741D75D3676FDF987F269B69BCE77" ke-sk $! +seckey
+	"test" ke-nick $! $133377705D76F4EA. d>64 ke-first 64!
+	x" F2C614B1780CB86B6407D0AA0DE99449A7EA484AC1D2D0ADA8B9D092C7B3C497" key:new
+	x" F8901E8A71FEA32B4E18656E68986EC414A5782935F5CF504998E79B507F1B59" ke-sk $! +seckey
+	"anonymous" ke-nick $! $133377705D8E53AD. d>64 ke-first 64!
+    THEN
+    [: 0. ?key-fd reposition-file throw  read-key-loop ;] catch drop nothrow ;
 
 \ select key by nick
 
