@@ -16,8 +16,9 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 64 Constant state#
-state# 2* buffer: key-assembly
-state# 2* buffer: no-key \ just zeros for no key
+state# 2* Constant state2#
+state2# buffer: key-assembly
+state2# buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
 state# buffer: oldmykey \ previous private key
 
@@ -47,7 +48,7 @@ keysize buffer: keypad
     key-assembly state# + state# bounds DO
 	2dup I swap move
     dup +LOOP  2drop
-    key-assembly key( ." >crypt-key " dup state# 2* xtype cr )
+    key-assembly key( ." >crypt-key " dup state2# xtype cr )
     >c:key ;
 : >crypt-source' ( addr -- )
     crypt( ." ivs iv: "  dup state# .nnb cr )
@@ -62,37 +63,28 @@ keysize buffer: keypad
 \ of the ivs buffer.
 
 : dest-a/b ( addr u -- addr1 u1 )
-    dest-ivslastgen @ 1 = IF  dup 2/ safe/string  ELSE  2/  THEN ;
+    2/  dest-ivslastgen @ 1 = IF  dup >r + r>  THEN ;
 
 : clear-replies ( -- )
     dest-replies @ dest-size @ addr>replies dest-a/b
     cmd( ." Clear replies " over hex. dup hex. cr )
     erase ;
 
-: ivs>source? ( addr -- )
-    dup 0= IF  drop  EXIT  THEN
-    >o
-    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF
-	64>n max-size^2 1- rshift
-	dest-ivs $@ drop over +	>c:key regen-ivs o>
-	EXIT
-    THEN
-    64drop o> ;
-
 : crypt-key$ ( -- addr u )
     o 0= IF  no-key state#  ELSE  crypto-key $@  THEN ;
 
 : default-key ( -- )
-    c:key@ 0= IF
-	key( ." Default-key " cr )
-	no-key >crypt-source'
-	crypt-key$ >crypt-key
-    THEN ;
+    key( ." Default-key " cr )
+    no-key >crypt-source'  crypt-key$ >crypt-key ;
+
+: ivs>source? ( o:map -- )  o 0= ?EXIT
+    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
+    IF  64>n addr>keys dest-ivs $@ drop over + >c:key regen-ivs
+	EXIT  THEN
+    64drop default-key ;
 
 : crypt-buf-init ( map -- ) >r
-    0 c:key!
-    o IF  r@ ivs>source?  THEN  default-key
+    o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
     r> code-map = IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
@@ -144,7 +136,7 @@ Variable do-keypad "" do-keypad $!
     c:key@ >r
     dest-ivsgen @ key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
     clear-replies
-    dest-ivs $@ dest-a/b c:prng
+    dest-ivs $@ state2# - dest-a/b state2# + c:prng
     2 dest-ivslastgen xor! r> c:key! ;
 
 : regen-ivs-all ( o:map -- )  c:key@ >r
@@ -160,15 +152,15 @@ Variable do-keypad "" do-keypad $!
     r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
-    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
+    dest-ivs $@len state2# - 2/ 2/ / dest-ivslastgen @ =
     IF	regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
 
 : one-ivs ( addr -- )  c:key@ >r
-    @ >o key-assembly state# 2* c:prng
+    @ >o key-assembly state2# c:prng
     dest-ivsgen @ c:key! key-assembly >c:key
-    dest-size @ addr>keys dest-ivs $!len
+    dest-size @ addr>keys state2# + dest-ivs $!len
     dest-ivs $@ c:prng o>
     r> c:key! ;
 
