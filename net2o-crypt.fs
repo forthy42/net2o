@@ -76,7 +76,7 @@ keysize buffer: keypad
 
 : default-key ( -- )
     cmd( ." Default-key " cr )
-    no-key >crypt-source'  no-key state# >crypt-key ;
+    no-key >c:key ;
 
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
