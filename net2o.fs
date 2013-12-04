@@ -668,7 +668,7 @@ Variable >code-flag
 : addr>replies ( addr -- replies )
     addr>bits reply * ;
 : addr>keys ( addr -- keys )
-    max-size^2 1- rshift ;
+    max-size^2 rshift [ min-size negate ]L and ;
 
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;

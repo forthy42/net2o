@@ -18,6 +18,7 @@
 64 Constant state#
 state# 2* Constant state2#
 state2# buffer: key-assembly
+state2# buffer: ivs-assembly
 state2# buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
 state# buffer: oldmykey \ previous private key
@@ -75,17 +76,18 @@ keysize buffer: keypad
 
 : default-key ( -- )
     cmd( ." Default-key " cr )
-    no-key >crypt-source'  crypt-key$ >crypt-key ;
+    no-key >crypt-source'  no-key state# >crypt-key ;
 
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF  64>n addr>keys dest-ivs $@ drop over + >c:key regen-ivs
-	EXIT  THEN
+    IF  64dup [ ivs-assembly state# + ]L 64! \ the address is part of the key
+	64>n addr>keys dest-ivs $@ drop over + ivs-assembly state# move
+	ivs-assembly >c:key  regen-ivs  EXIT  THEN
     64drop default-key ;
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
-    r> code-map = true or IF  cmd( ." key: " c:key@ c:key# xtype cr )  THEN ;
+    cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source
@@ -136,7 +138,7 @@ Variable do-keypad "" do-keypad $!
     c:key@ >r
     dest-ivsgen @ key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
     clear-replies
-    dest-ivs $@ state2# - dest-a/b state2# + c:prng
+    dest-ivs $@ dest-a/b c:prng
     2 dest-ivslastgen xor! r> c:key! ;
 
 : regen-ivs-all ( o:map -- )  c:key@ >r
@@ -152,7 +154,7 @@ Variable do-keypad "" do-keypad $!
     r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
-    dest-ivs $@len state2# - 2/ 2/ / dest-ivslastgen @ =
+    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
     IF	regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
@@ -160,7 +162,7 @@ Variable do-keypad "" do-keypad $!
 : one-ivs ( addr -- )  c:key@ >r
     @ >o key-assembly state2# c:prng
     dest-ivsgen @ c:key! key-assembly >c:key
-    dest-size @ addr>keys state2# + dest-ivs $!len
+    dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng o>
     r> c:key! ;
 
