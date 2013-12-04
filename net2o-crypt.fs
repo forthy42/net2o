@@ -95,8 +95,6 @@ keysize buffer: keypad
     mykey-salt# safe/string
     key( ." key init: " c:key@ c:key# .nnb cr ) c:diffuse ;
 
-\ !!TBD!! use a nonce to setup and make sure each such string
-\ can be decrypted only once!
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
     2>r over >r  rng@ rng@ r> 128! 2r> crypt-key-init ;
 

@@ -30,6 +30,5 @@ s" DHT test" $, type cr get-ip
 end-code
 
 1 client-loop
-
--setip
+-setip o-timeout
 bye
