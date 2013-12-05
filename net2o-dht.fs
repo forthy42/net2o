@@ -122,22 +122,23 @@ User d#hashkey cell uallot drop
 
 Variable ins$
 
+: >pow2 ( n -- n' ) dup IF 1 BEGIN  2* 2dup u<  UNTIL  2/ nip  THEN ;
+
 : $ins[] ( addr u $array -- )
     \G insert sort into pre-sorted array
-    dup $[]# { $a $a# } $a# 2/ dup 2/ 2over ins$ $!
+    dup $[]# { $a $a# } $a# >pow2 $a# dup 0> + min dup 1+ 2/
     BEGIN  { $# $step }
 	$step 0>  WHILE
-	    2dup $# $a $[]@ str= IF
-		$# $a $[]! ins$ $off  EXIT  THEN
-	    2dup $# $a $[]@ str<
-	    IF    $# $step - 0 max
-	    ELSE  $# $step + $a# dup 0> + min  THEN
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[]! EXIT  THEN
+	    0< IF  $# $step - 0 max
+	    ELSE   $# $step + $a# dup 0> + min  THEN
 	    $step 2/
     REPEAT
     $a# 0> IF
-	2dup $# $a $[]@ str< 0= IF  $# 1+ $a# dup 0> + min to $#  THEN
+	2dup $# $a $[]@ str< 0= IF  $# 1+ $a# min to $#  THEN
     THEN
-    ins$ cell $a $# cells $ins 2drop  ins$ off ;
+    ins$ cell $a $# cells $ins $# $a $[]! ;
 
 : >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
