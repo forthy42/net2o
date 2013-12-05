@@ -120,6 +120,25 @@ User d#hashkey cell uallot drop
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true abort" dht exhausted - this should not happen" ;
 
+Variable ins$
+
+: $ins[] ( addr u $array -- )
+    \G insert sort into pre-sorted array
+    dup $[]# { $a $a# } $a# 2/ dup 2/ 2over ins$ $!
+    BEGIN  { $# $step }
+	$step 0>  WHILE
+	    2dup $# $a $[]@ str= IF
+		$# $a $[]! ins$ $off  EXIT  THEN
+	    2dup $# $a $[]@ str<
+	    IF    $# $step - 0 max
+	    ELSE  $# $step + $a# dup 0> + min  THEN
+	    $step 2/
+    REPEAT
+    $a# 0> IF
+	2dup $# $a $[]@ str< 0= IF  $# 1+ $a# dup 0> + min to $#  THEN
+    THEN
+    ins$ cell $a $# cells $ins 2drop  ins$ off ;
+
 : >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
     cells dup k#size u>= !!no-dht-key!!
@@ -127,7 +146,7 @@ User d#hashkey cell uallot drop
 	k#size alloz d#id !
 	d#hashkey 2@ d#id @ $!
     THEN
-    d#id @ + $+[]! ;
+    d#id @ + $ins[] ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO

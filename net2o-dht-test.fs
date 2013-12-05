@@ -9,10 +9,6 @@ require net2o.fs
 
 init-client
 
-s" .cache" file-status nip #-514 = [IF]
-    s" .cache" $1FF =mkdir throw
-[THEN]
-
 !time
 
 $8000 $100000

@@ -1935,9 +1935,14 @@ true !!timeout!! ;
 
 \ client/server initializer
 
+: init-cache ( -- )
+    s" .cache" file-status nip #-514 = IF
+	s" .cache" $1FF =mkdir throw
+    THEN ;
+
 : init-client ( -- )  init-mykey init-mykey \ two keys
     dump( "n2o.dump" r/w create-file throw to dump-fd )
-    init-timer new-client init-route prep-socks ;
+    init-timer init-cache new-client init-route prep-socks ;
 
 : init-server ( -- )  init-mykey init-mykey \ two keys
     init-timer new-server init-route prep-socks ;
