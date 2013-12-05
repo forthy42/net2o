@@ -95,16 +95,25 @@ User d#hashkey cell uallot drop
 
 \ checks for signatures
 
-: check-host ( addr u -- addr u )
-    dup $40 u< !!no-sig!!
-    keccak0 2dup $40 - "addr" >keyed-hash \ hash from address
-    2dup $40 - +
-    d#hashkey 2@ drop ed-verify 0= !!wrong-sig!! ;
-: check-tag ( addr u -- addr u )
+: check-delete ( addr u type u2 -- addr u )
+    "delete" >keyed-hash ;
+: check-host1 ( addr u -- addr u )  dup $40 u< !!no-sig!!
+    keccak0 2dup $40 - "addr" >keyed-hash ; \ hash from address
+: check-host2 ( addr u -- addr u flag )
+    2dup $40 - + d#hashkey 2@ drop ed-verify ;
+: check-host ( addr u -- addr u ) check-host1 check-host2 0= !!wrong-sig!! ;
+: check-tag1 ( addr u -- addr u )
     dup $60 u< !!no-sig!!
     keccak0 d#hashkey 2@ "hash" >keyed-hash
-    2dup $60 - ':' $split 2swap >keyed-hash
-    2dup $60 - + dup $40 + ed-verify 0= !!wrong-sig!! ;
+    2dup $60 - ':' $split 2swap >keyed-hash ;
+: check-tag2 ( addr u -- addr u flag )
+    2dup $60 - + dup $20 + swap ed-verify ;
+: check-tag ( addr u -- addr u )
+    check-tag1 check-tag2 0= !!wrong-sig!! ;
+: delete-tag? ( addr u -- addr u flag )
+    check-tag1 "tag" check-delete check-tag2 ;
+: delete-host? ( addr u -- addr u flag )
+    check-host1 "host" check-delete check-host2 ;
 
 \ some hash storage primitives
 
@@ -120,25 +129,38 @@ User d#hashkey cell uallot drop
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true abort" dht exhausted - this should not happen" ;
 
-Variable ins$
-
-: >pow2 ( n -- n' ) dup IF 1 BEGIN  2* 2dup u<  UNTIL  2/ nip  THEN ;
+Variable ins$0 \ just a null pointer
 
 : $ins[] ( addr u $array -- )
-    \G insert sort into pre-sorted array
-    dup $[]# { $a $a# } $a# >pow2 $a# dup 0> + min dup 1+ 2/
-    BEGIN  { $# $step }
-	$step 0>  WHILE
+    \G insert O(log(n)) into pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup $# $a $[]@ compare dup 0= IF
 		drop $# $a $[]! EXIT  THEN
-	    0< IF  $# $step - 0 max
-	    ELSE   $# $step + $a# dup 0> + min  THEN
-	    $step 2/
-    REPEAT
-    $a# 0> IF
-	2dup $# $a $[]@ str< 0= IF  $# 1+ $a# min to $#  THEN
-    THEN
-    ins$ cell $a $# cells $ins $# $a $[]! ;
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    ins$0 cell $a r@ cells $ins r> $a $[]! ;
+: $del[] ( addr u $array -- )
+    \G delete O(log(n)) from pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
+
+: $del[]sig ( addr u $array -- )
+    \G delete O(log(n)) from pre-sorted array, check sigs
+    { $a } delete-tag? 0= ?EXIT  0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $40 - $# $a $[]@ $40 - compare dup 0= IF
+		$# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
 
 : >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
@@ -152,7 +174,7 @@ Variable ins$
     d#id @ $@ xtype ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
-	d#id @ I + [: xtype ." , " ;] $[]map cr
+	d#id @ I + [: cr xtype ." , " ;] $[]map cr
     cell +LOOP ;
 : d#value+ ( addr u key -- ) \ with sanity checks
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
@@ -179,8 +201,8 @@ Variable ins$
 
 : gen-tag ( addr u hash-addr uh -- addr' u' )
     [: keccak0 "hash" >keyed-hash
-        2dup ':' $split 2swap >keyed-hash
-        skc pkc ed-sign type pkc keysize type ;] $tmp ;
+        2dup type 2dup ':' $split 2swap >keyed-hash
+        pkc keysize type skc pkc ed-sign type ;] $tmp ;
 
 also net2o-base
 : addme ( addr u -- ) gen-host
