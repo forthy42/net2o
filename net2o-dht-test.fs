@@ -6,7 +6,6 @@ require net2o.fs
 +debug
 
 "anonymous" >key \ get our anonymous key
-pkc keysize xtype
 
 init-client
 
@@ -24,7 +23,7 @@ insert-ip n2o:connect +flow-control +resend
 net2o-code
 expect-reply
 s" DHT test" $, type cr get-ip
-pkc keysize $, dht-id "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
+pkc keysize $, dht-id forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
 end-code
 
 1 client-loop

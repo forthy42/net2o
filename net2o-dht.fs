@@ -95,25 +95,27 @@ User d#hashkey cell uallot drop
 
 \ checks for signatures
 
-: check-delete ( addr u type u2 -- addr u )
+: >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
-: check-host1 ( addr u -- addr u )  dup $40 u< !!no-sig!!
-    keccak0 2dup $40 - "addr" >keyed-hash ; \ hash from address
-: check-host2 ( addr u -- addr u flag )
+: >host ( addr u -- addr u )  dup $40 u< !!no-sig!!
+    keccak0 2dup $50 - "addr" >keyed-hash
+    2dup + $50 - $10 "date" >keyed-hash ; \ hash from address
+: verify-host ( addr u -- addr u flag )
     2dup $40 - + d#hashkey 2@ drop ed-verify ;
-: check-host ( addr u -- addr u ) check-host1 check-host2 0= !!wrong-sig!! ;
-: check-tag1 ( addr u -- addr u )
-    dup $60 u< !!no-sig!!
+: check-host ( addr u -- addr u ) >host verify-host 0= !!wrong-sig!! ;
+: >tag ( addr u -- addr u )
+    dup $70 u< !!no-sig!!
     keccak0 d#hashkey 2@ "hash" >keyed-hash
-    2dup $60 - ':' $split 2swap >keyed-hash ;
-: check-tag2 ( addr u -- addr u flag )
+    2dup + $70 - $10 "date" >keyed-hash
+    2dup $70 - ':' $split 2swap >keyed-hash ;
+: verify-tag ( addr u -- addr u flag )
     2dup $60 - + dup $20 + swap ed-verify ;
 : check-tag ( addr u -- addr u )
-    check-tag1 check-tag2 0= !!wrong-sig!! ;
+    >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
-    check-tag1 "tag" check-delete check-tag2 ;
+    >tag "tag" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
-    check-host1 "host" check-delete check-host2 ;
+    >host "host" >delete verify-host ;
 
 \ some hash storage primitives
 
@@ -153,7 +155,7 @@ Variable ins$0 \ just a null pointer
 
 : $del[]sig ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array, check sigs
-    { $a } delete-tag? 0= ?EXIT  0 $a $[]#
+    { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup $40 - $# $a $[]@ $40 - compare dup 0= IF
 		$# $a $[] $off
@@ -170,6 +172,15 @@ Variable ins$0 \ just a null pointer
 	d#hashkey 2@ d#id @ $!
     THEN
     d#id @ + $ins[] ;
+: d#value- ( addr u key -- ) \ without sanity checks
+    cells dup k#size u>= !!no-dht-key!!
+    d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
+    dup >r d#id @ +
+    r@ k#host = IF  >r delete-host?  IF  r> $del[]sig
+	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
+    r@ k#tags = IF  >r delete-tag?   IF  r> $del[]sig
+	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
+    rdrop drop 2drop ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO
@@ -189,23 +200,32 @@ Variable ins$0 \ just a null pointer
 \g set dht id for further operations on it
 131 net2o: dht-value+ ( addr u n -- ) 64>n d#value+ ;
 \g add a value to the given dht key
-132 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
+132 net2o: dht-value- ( addr u n -- ) 64>n d#value- ;
+\g remove a value from the given dht key
+133 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
 \g query the dht values mask selects which) and send back up to n
 \g items with dht-value+
 
 \ facilitate stuff
 
+$10 buffer: sigdate \ date+expire date
+: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
+
 : gen-host ( addr u -- addr' u' )
     2dup keccak0 "addr" >keyed-hash
-    [: type skc pkc ed-sign type ;] $tmp ;
+    sigdate $10 "date" >keyed-hash
+    [: type sigdate $10 type skc pkc ed-sign type ;] $tmp ;
 
 : gen-tag ( addr u hash-addr uh -- addr' u' )
-    [: keccak0 "hash" >keyed-hash
-        2dup type 2dup ':' $split 2swap >keyed-hash
-        pkc keysize type skc pkc ed-sign type ;] $tmp ;
+    keccak0 "hash" >keyed-hash
+    sigdate $10 "date" >keyed-hash
+    2dup ':' $split 2swap >keyed-hash
+    [: type sigdate $10 type pkc keysize type skc pkc ed-sign type ;] $tmp ;
 
 also net2o-base
-: addme ( addr u -- ) gen-host
+: addme ( addr u -- ) now>never gen-host
     net2o-code expect-reply
     pkc keysize $, dht-id
     $, k#host ulit, dht-value+ nest[ request-done ]nest end-code ;
