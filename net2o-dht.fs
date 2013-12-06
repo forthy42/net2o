@@ -172,21 +172,21 @@ Variable ins$0 \ just a null pointer
 	d#hashkey 2@ d#id @ $!
     THEN
     d#id @ + $ins[] ;
-: d#value- ( addr u key -- ) \ without sanity checks
-    cells dup k#size u>= !!no-dht-key!!
-    d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
-    dup >r d#id @ +
-    r@ k#host = IF  >r delete-host?  IF  r> $del[]sig
-	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    r@ k#tags = IF  >r delete-tag?   IF  r> $del[]sig
-	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    rdrop drop 2drop ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
 	d#id @ I + [: cr xtype ." , " ;] $[]map cr
     cell +LOOP ;
+: d#value- ( addr u key -- ) \ without sanity checks
+    cells dup k#size u>= !!no-dht-key!!
+    d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
+    dup >r d#id @ +
+    r@ k#host = IF  >r delete-host?  IF  r> $del[]sig
+	ELSE  2drop rdrop  THEN  rdrop dht( d#. ) EXIT  THEN
+    r@ k#tags = IF  >r delete-tag?   IF  r> $del[]sig
+	ELSE  2drop rdrop  THEN  rdrop dht( d#. ) EXIT  THEN
+    rdrop drop 2drop dht( d#. ) ;
 : d#value+ ( addr u key -- ) \ with sanity checks
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
     r@ k#host = IF  check-host  THEN
