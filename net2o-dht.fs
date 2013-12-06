@@ -38,9 +38,11 @@ keccak#max buffer: keyed-hash-out
     addr2 u1 u2 >pad 2drop ;
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
+    hash( ." hashing: " 2over xtype ':' emit 2dup xtype F cr )
     keyed-hash-buf keccak#max keccak#max 2/ /string >padded
     keyed-hash-buf keccak#max 2/ >padded
-    keyed-hash-buf keccak#max >keccak keccak* ;
+    keyed-hash-buf keccak#max >keccak keccak*
+    hash( @keccak 200 xtype F cr F cr ) ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
     keccak0 >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
@@ -98,18 +100,18 @@ User d#hashkey cell uallot drop
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
 : >host ( addr u -- addr u )  dup $40 u< !!no-sig!!
-    keccak0 2dup $50 - "addr" >keyed-hash
+    keccak0 2dup $50 - "host" >keyed-hash
     2dup + $50 - $10 "date" >keyed-hash ; \ hash from address
 : verify-host ( addr u -- addr u flag )
     2dup $40 - + d#hashkey 2@ drop ed-verify ;
 : check-host ( addr u -- addr u ) >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
     dup $70 u< !!no-sig!!
-    keccak0 d#hashkey 2@ "hash" >keyed-hash
+    keccak0 d#hashkey 2@ "tag" >keyed-hash
     2dup + $70 - $10 "date" >keyed-hash
     2dup $70 - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
-    2dup $60 - + dup $20 + swap ed-verify ;
+    2dup + $60 - dup $20 + swap ed-verify ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -178,15 +180,15 @@ Variable ins$0 \ just a null pointer
 	I cell/ 0 .r ." : "
 	d#id @ I + [: cr xtype ." , " ;] $[]map cr
     cell +LOOP ;
-: d#value- ( addr u key -- ) \ without sanity checks
+: d#value- ( addr u key -- )
     cells dup k#size u>= !!no-dht-key!!
     d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
     dup >r d#id @ +
-    r@ k#host = IF  >r delete-host?  IF  r> $del[]sig
-	ELSE  2drop rdrop  THEN  rdrop dht( d#. ) EXIT  THEN
-    r@ k#tags = IF  >r delete-tag?   IF  r> $del[]sig
-	ELSE  2drop rdrop  THEN  rdrop dht( d#. ) EXIT  THEN
-    rdrop drop 2drop dht( d#. ) ;
+    r@ k#host cells = IF  >r delete-host? IF  r> $del[]sig dht( d#. )
+	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
+    r@ k#tags cells = IF  >r delete-tag?  IF  r> $del[]sig dht( d#. )
+	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
+    rdrop drop 2drop ;
 : d#value+ ( addr u key -- ) \ with sanity checks
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
     r@ k#host = IF  check-host  THEN
@@ -213,16 +215,27 @@ $10 buffer: sigdate \ date+expire date
 : forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
 
-: gen-host ( addr u -- addr' u' )
-    2dup keccak0 "addr" >keyed-hash
-    sigdate $10 "date" >keyed-hash
+: gen>host ( addr u -- addr u )
+    2dup keccak0 "host" >keyed-hash
+    sigdate $10 "date" >keyed-hash ;
+: host$ ( addr u -- hsotaddr host-u )
     [: type sigdate $10 type skc pkc ed-sign type ;] $tmp ;
+: gen-host ( addr u -- addr' u' )
+    gen>host host$ ;
+: gen-host-del ( addr u -- addr' u' )
+    gen>host "host" >delete host$ ;
+
+: gen>tag ( addr u hash-addr uh -- addr u )
+    keccak0 "tag" >keyed-hash
+    sigdate $10 "date" >keyed-hash
+    2dup ':' $split 2swap >keyed-hash ;
+: tag$ ( addr u -- tagaddr tag-u )
+    [: type sigdate $10 type pkc keysize type skc pkc ed-sign type ;] $tmp ;
 
 : gen-tag ( addr u hash-addr uh -- addr' u' )
-    keccak0 "hash" >keyed-hash
-    sigdate $10 "date" >keyed-hash
-    2dup ':' $split 2swap >keyed-hash
-    [: type sigdate $10 type pkc keysize type skc pkc ed-sign type ;] $tmp ;
+    gen>tag tag$ ;
+: gen-tag-del ( addr u hash-addr uh -- addr' u' )
+    gen>tag "tag" >delete tag$ ;
 
 also net2o-base
 : addme ( addr u -- ) now>never gen-host

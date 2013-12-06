@@ -24,7 +24,7 @@ net2o-code
 expect-reply
 s" DHT test" $, type cr get-ip
 pkc keysize $, dht-id
-forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value-
+forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
 forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
 end-code
 
