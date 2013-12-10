@@ -20,6 +20,8 @@ case "$ac_cv_sizeof_void_p" in
     ;;
 esac
 
+LIBTOOL=${CC%gcc}libtool
 AC_SUBST(ws)
+AC_SUBST(LIBTOOL)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

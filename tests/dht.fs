@@ -1,6 +1,6 @@
 \ net2o tests - client side
 
-require net2o.fs
+require ../net2o.fs
 
 +db stat(
 +debug

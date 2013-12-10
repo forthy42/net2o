@@ -237,8 +237,6 @@ s" bigFORTH" environment? [IF] 2drop
     LOOP 2drop ]] update-state [[ ;
 
 s" gforth" environment? [IF] 2drop
-    require libcc.fs
-    require string.fs
     also c-lib
     : \c, ( addr u -- ) save-c-prefix-line ;
     previous
