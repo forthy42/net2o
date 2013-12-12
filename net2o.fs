@@ -413,17 +413,26 @@ User return-addr
 
 \ packet&header size
 
-$C0 Constant headersize#
-$00 Constant 16bit#
-$40 Constant 64bit#
+\ The first byte is organized in a way that works on wired-or busses,
+\ e.g. CAN bus, i.e. higher priority and smaller header and data size
+\ wins arbitration.  Use MSB first, 0 as dominant bit.
+
+$00 Constant qos0# \ highest priority
+$40 Constant qos1#
+$80 Constant qos2#
+$C0 Constant qos3# \ lowest
+
+$30 Constant headersize#
+$00 Constant 16bit# \ unencrypted protocol for very small networks
+$10 Constant 64bit# \ standard, encrypted protocol
 $0F Constant datasize#
 
 Create header-sizes  $06 c, $1a c, $FF c, $FF c,
 Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
-: header-size ( addr -- n )  c@ 6 rshift header-sizes + c@ ;
-: tail-size ( addr -- n )  c@ 6 rshift tail-sizes + c@ ;
+: header-size ( addr -- n )  c@ headersize# and 4 rshift header-sizes + c@ ;
+: tail-size ( addr -- n )  c@ headersize# and 4 rshift tail-sizes + c@ ;
 : body-size ( addr -- n ) min-size swap c@ datasize# and lshift ;
 : packet-size ( addr -- n )
     dup header-size over body-size + swap tail-size + ;
@@ -434,15 +443,12 @@ Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
 
 \ second byte constants
 
+$80 Constant broadcasting# \ special flags for switches
 $40 Constant multicasting#
-$80 Constant broadcasting#
 
-$00 Constant qos0#
-$10 Constant qos1#
-$20 Constant qos2#
-$30 Constant qos3#
+\ $38 Constant net2o-reserved# - should be 0
 
-$0F Constant acks#
+$07 Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
 $04 Constant resend-toggle#
@@ -1380,7 +1386,7 @@ User code-packet
     THEN ;
 
 : >send ( addr n -- )
-    >r  r@ 64bit# or outbuf c!
+    >r  r@ [ 64bit# qos3# or ]L or outbuf c!
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  o?
