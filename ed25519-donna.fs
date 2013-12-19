@@ -108,6 +108,15 @@ Constant keccaktmp
     sct0 get1 ge25519-pack
     sct0 $20 ;
 
+: ed-dhx { offset sk pk -- secret len }
+    get0 pk ge25519-unpack- 0= !!no-ed-key!!
+    sct2 sk raw>sc25519
+    sct1 offset 32b>sc25519
+    sct2 sct2 sct1 sc25519*
+    get1 get0 sct2 ge25519*
+    sct0 get1 ge25519-pack
+    sct0 $20 ;
+
 : ed-dhv { sk pk -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519

@@ -218,7 +218,8 @@ Defer check-key \ check if we know that key
     o 0= IF  2drop EXIT  THEN
     ?keysize dup keysize check-key
     dup keysize pubkey $!
-    skc swap ed-dh 2dup keypad swap move do-keypad $+! ;
+    keypad$ keysize <> !!no-tmpkey!!
+    skc rot ed-dhx 2dup keypad swap move do-keypad $+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap ed-dh 2dup keypad swap move

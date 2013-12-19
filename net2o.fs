@@ -36,6 +36,7 @@ s" no key file"                  throwcode !!nokey!!
 s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
+s" no temporary key"             throwcode !!no-tmpkey!!
 
 \ required tools
 
