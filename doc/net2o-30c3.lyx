@@ -1,0 +1,2627 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{lankton-keynote}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=169
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8x
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+\lang american
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-.8ex
+\backslash
+lower1.5ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+
+\lang english
+: Reinventing the Internet
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+30C3, Hamburg
+\end_layout
+
+\begin_layout Standard
+
+\lang american
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Subsection
+Somebody Broke the Internet\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout BeginFrame
+Somebody Broke the Internet\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Itemize
+My thoughts about reinventing the Internet started in 2005.
+ Yes, in 2005.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Things broken in 2005: IE6 won the browser war, Windows XP 
+\begin_inset Quotes eld
+\end_inset
+
+naked
+\begin_inset Quotes erd
+\end_inset
+
+ on the Internet was infected within 30 seconds with Sasser\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Back then I had a new responsibility: do the IT of my (former) employer
+ on top of the IC design duties.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+1000 competing protocols and standards for 100 things, none of them really
+ good\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Then we got Facebook and Cloud computing\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Fast forward: in June 2013 
+\noun on
+Edward Snowden
+\noun default
+ revealed that it's worse than the worst conspiracy theory
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+The Problem of 1000 Standards
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename standards.png
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Solution: Start from Scratch
+\end_layout
+
+\begin_layout FrameSubtitle
+Pretty radical step
+\end_layout
+
+\begin_layout Standard
+What to keep from the current Internet, and what to throw away:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+The
+\begin_inset space ~
+\end_inset
+
+Good Packet--oriented protocol, open and free standards, connect everybody
+ with everybody else
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+The
+\begin_inset space ~
+\end_inset
+
+Bad Unencrypted by default, not enough addresses in IPv4, very slow adaption
+ of IPv6, Postel principle leads to pretty bad implementations
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+The
+\begin_inset space ~
+\end_inset
+
+Ugly Complex protocol stacks requires lots of resources to be fast, layering
+ violations e.g.
+ in encryption, many protocols doing similar stuff
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Requirements
+\end_layout
+
+\begin_layout BeginFrame
+Requirements
+\end_layout
+
+\begin_layout Description
+Scalability Must work well with low and high bandwidths, loose and tightly
+ coupled systems, few and many hosts connected together over short to far
+ distances.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Easy
+\begin_inset space ~
+\end_inset
+
+to
+\begin_inset space ~
+\end_inset
+
+implement Must work with a minimum of effort, must allow small and cheap
+ devices to connect.
+ One idea is to replace 
+\begin_inset Quotes eld
+\end_inset
+
+busses
+\begin_inset Quotes erd
+\end_inset
+
+ like USB or even Display Port with LAN links.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Security Users want authentication and authorization, but also anonymity
+ and privacy.
+ Firewalls and similar gatekeepers (load balancers, etc.) are common.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Media
+\begin_inset space ~
+\end_inset
+
+capable This requires real--time capabilities, maybe pre--allocated bandwidth
+ and other QoS features, end-to-end.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Transparency Must be able to work together with other networks (especially
+ Internet 1.0, using UDP).
+ 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+My Background
+\end_layout
+
+\begin_layout Itemize
+I've done hardware development from analog to digital, and software development
+ from embedded control, compilers to GUIs
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+I therefore think I can comprehend an network stack from top to bottom
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+I hate bloated, complex solutions, and I like simple, elegant ones
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The rule #1 of empowering the strong is 
+\begin_inset Quotes eld
+\end_inset
+
+If you want it done right, you have to do it yourself
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Avoid unnecessary abstractions: Abstractions serve a purpose, they are not
+ a value of their own
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+This is a lot of Research
+\end_layout
+
+\begin_layout Standard
+My usual approach is:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Look at what's out there
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Evaluate or at least judge it
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Conclude that it is broken
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Go back to rule #1: 
+\begin_inset Quotes eld
+\end_inset
+
+If you want it done right, you have to do it yourself
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Sometimes, there's something out there that does work, though.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Abstractions
+\end_layout
+
+\begin_layout Itemize
+Network: Lines connected by switches
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Nodes: shared memory buffers --- remote write, local read (of course, the
+ network stack can only access the memory that it is assigned to!)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Separation of commands and (bulk) data packets
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Event--driven design: command packets are executed remotely and drive the
+ protocol
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+P2P: all nodes are equal, no client--server distinction, content--oriented
+ file 
+\begin_inset Quotes eld
+\end_inset
+
+objects
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Topology
+\end_layout
+
+\begin_layout BeginFrame
+Switching Packets, Routing Connections
+\end_layout
+
+\begin_layout Itemize
+Switches are faster and easier to implement than routers --- LANs (Ethernet)
+ and backbones (MPLS) already use switching; use the concept of MPLS label
+ stacks to use switching everywhere
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing then is a combination of DNS--like destination resolution and routing
+ calculation (destination path lookup)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Path Switching
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Take first 
+\begin_inset Formula $n$
+\end_inset
+
+ bits of path field and select destination
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Shift target address by 
+\begin_inset Formula $n$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Insert bit-reversed source into the rear end of the path field to mark the
+ way back
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+The receiver bit--flips the path field, and gets the return address
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Low--Overhead Packet Format
+\end_layout
+
+\begin_layout BeginFrame
+Packet Format
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Bytes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Comment
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Flags
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+priority, length, flow control flags
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Path
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internet 1.0 terminology: 
+\begin_inset Quotes eld
+\end_inset
+
+address
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Address
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+address in memory, 
+\begin_inset Formula $\approx$
+\end_inset
+
+port+sequence number
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $64*2^{0..15}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+up to 2MB packet size, enough for the next 40 years
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Chksum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cryptographic checksum
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename header64.fig
+	lyxscale 50
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Encryption
+\end_layout
+
+\begin_layout BeginFrame
+Indirect Attacks are Cheaper
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename cryptonerd.png
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Key Exchange
+\end_layout
+
+\begin_layout BeginFrame
+Key Exchange
+\end_layout
+
+\begin_layout FrameSubtitle
+Evaluation of encryption algorithms
+\end_layout
+
+\begin_layout Description
+RSA Pubkeys for reasonable strength are 4kbit or more; factoring is no longer
+ 
+\begin_inset Quotes eld
+\end_inset
+
+that hard
+\begin_inset Quotes erd
+\end_inset
+
+; further breakthroughs can be expected (RSA challenge withdrew the prices).
+ 4kbit is 512 bytes, for the session invocation protocol this is above the
+ 
+\begin_inset Formula $\sim$
+\end_inset
+
+1kB limit I've on current Internet.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Diffie--Hellman Key strength to length relation is about the same as with
+ RSA, so the same problem applies.
+ Breakthroughs require non--linear expansion of key size; archived encryption
+ can be decrypted later
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+ECC Elliptic Curve Cryptography has still only a much more generic attack
+ (i.e.
+ can be considered 
+\begin_inset Quotes eld
+\end_inset
+
+unscratched
+\begin_inset Quotes erd
+\end_inset
+
+, as this attack is generic for this problem), and therefore 256 bit keys
+ (32 bytes) have a strength of 128 bits
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice now is Ed25519, a variant of Curve25519 from 
+\noun on
+Dan Bernstein
+\noun default
+ that supports signatures, too.
+ This is a curve where the parameters are of high quality.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Ephemeral Key Exchange+Validation
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename connection-setup.fig
+	lyxscale 50
+	height 80theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Challenge: Side--Channel Attacks
+\end_layout
+
+\begin_layout Itemize
+ECC Diffie--Hellman key exchange formula is 
+\begin_inset Formula $s_{1}=pk_{1}*[sk_{2}]=pk_{2}*[sk_{1}]$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Operations with secret constants and variables under control of the attacker
+ may leak information, especially if they are lengthy operations.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Constant time and no data dependent operation mitigates computational side--chan
+nel attacks; Ed25519's pre--computed base 16 exponentiation helps further,
+ current--measuring side--channel attacks still maybe possible
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Phase 1 (ephemeral key exchange) is not a big problem, as we choose a random
+ secret for each connection
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Phase 2 is modified to use the shared secret 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ to dilute the operation: 
+\begin_inset Formula $s_{2}=pk_{a}*[sk_{b}*s_{1}]=pk_{b}*[sk_{a}*s_{1}]$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The secret ring multiplication is a short operation (multiplication mod
+ 
+\begin_inset Formula $l$
+\end_inset
+
+ instead of curve point by scalar) with much less leakage impact
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+DH is faster and transmits less data than signature+verification
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Achieved: 3--Way Handshake
+\end_layout
+
+\begin_layout Itemize
+The setup for an encrypted communication is done with three packets exchanged,
+ no latency overhead to TCP
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The identifying pubkeys are encrypted, so they don't reveal the identity
+ of Alice and Bob to Eve
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+All state for Bob is 
+\begin_inset Quotes eld
+\end_inset
+
+stored
+\begin_inset Quotes erd
+\end_inset
+
+ in packets on the net, so the third packet is the one that actually opens
+ the connection at Bob.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The third packet also contains a random initialization vector, so if you
+ want to continue a communication with Bob, a single packet is sufficient.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The time window for re--connecting is currently set to 10s, but can be made
+ significantly longer
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Both sides use 
+\begin_inset Quotes eld
+\end_inset
+
+tickets
+\begin_inset Quotes erd
+\end_inset
+
+ with self--encrypted messages to store state in the network
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The key for self--encryption is rotated frequently (the mentioned 10s) to
+ invalidate old tickets
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Trust&PKI
+\end_layout
+
+\begin_layout BeginFrame
+Trust&PKI
+\end_layout
+
+\begin_layout Itemize
+Certification Authorities are a broken PKI and trust model
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The simple 
+\begin_inset Quotes eld
+\end_inset
+
+remember the key
+\begin_inset Quotes erd
+\end_inset
+
+ strategy of SSH is actually better
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+First connection requires more attention, e.g.
+ ask the other side to solve a captcha to prove human
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Social networks can provide a network of trust: Trust your friends, and
+ use them to connect you further
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Pubkeys don't need (nor should) to be public if you only want to be connected
+ with your friends or peers
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use the pubkey authentication for logins and alike, instead of passwords
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Symmetric Crypto
+\end_layout
+
+\begin_layout BeginFrame
+Symmetric Crypto
+\end_layout
+
+\begin_layout FrameSubtitle
+Evaluation of encryption algorithms
+\end_layout
+
+\begin_layout Itemize
+Must do AEAD encryption --- authenticate and encrypt/decrypt together
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Widely used candidate: AES in GCM
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Caveats: Galois counter is not a secure hash, but 
+\begin_inset Quotes eld
+\end_inset
+
+only
+\begin_inset Quotes erd
+\end_inset
+
+ a polynom checksum, which is known to be fragile 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "aescgm"
+
+\end_inset
+
+, and security is 
+\begin_inset Formula $\le64$
+\end_inset
+
+ bits 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gcm"
+
+\end_inset
+
+, that paper suggests using GF(p) with 
+\begin_inset Formula $p=2^{128}+12451$
+\end_inset
+
+ to improve the situation
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+AES uses a constant key --- makes side channel attacks more feasible
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Counter mode is actually a stream cipher, suggests using other steam ciphers
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+However, e.g.
+ 
+\noun on
+Dan Bernstein
+\noun default
+'s xsalsa+poly1305 also only uses a polynom for checksum
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Keccak
+\end_layout
+
+\begin_layout Itemize
+Suggestion: Use a strong hash for authentication instead
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Obvious candidate is the SHA--3 winner, Keccak, as this has a very good
+ cryptanalysis
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Even better: Keccak in duplex mode can encrypt while computing the hash
+ (at almost no cost)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+There's no constant key, either: Perfect side--channel protected AEAD operation
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Strength >256 bits, whereas AES--256 suffers from related--key attacks:
+ very good security margin
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak is a universal crypto primitive, with AES in GCM we need three primitives
+: hash+AES+GHASH
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Cipher Algorithm Replacement
+\end_layout
+
+\begin_layout Standard
+General idea: Have a selection of cipher suits and replace weak or broken
+ when identified.
+ But this has problems:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+All past encrypted communication is stored away in Utah --- if the NSA finds
+ a weakness, they can decrypt the history
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+People are lazy and only implement the easiest and fastest cipher --- this
+ is the one broken first
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Hardware accellerators and even software is often very difficult to update
+ due to the 
+\begin_inset Quotes eld
+\end_inset
+
+never change a running system
+\begin_inset Quotes erd
+\end_inset
+
+ principle
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The operator or the end user does not have the know--how to make the right
+ choice of a cipher algorithm --- this is guru level
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore, the chosen cipher algorithm must last for a long time, and all
+ systems must have an upgrade path
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Key Usage
+\end_layout
+
+\begin_layout FrameSubtitle
+All keys are one--time--use only!
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename keyusage.fig
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Flow Control
+\end_layout
+
+\begin_layout BeginFrame
+Broken: TCP Flow Control
+\end_layout
+
+\begin_layout Itemize
+TCP fills the buffer, until a packet has to be dropped, instead of reducing
+ rate before.
+ Name of the symptom: 
+\begin_inset Quotes eld
+\end_inset
+
+Buffer bloat
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But buffering is essential for good network performance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferbloat.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\lang american
+Buffer Bloat
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Alternatives?
+\end_layout
+
+\begin_layout Itemize
+LEDBAT tries to achieve a low, constant delay: Works, but not good on fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+CurveCP's flow control is still 
+\begin_inset Quotes eld
+\end_inset
+
+a lot of research
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, something new has to be done
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferused.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+That's how proper flow control should look like
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset Quotes gld
+\end_inset
+
+Buffer Bloat
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Retransmits are making the situation worse in case of congestions and therefore
+ should be avoided
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Riddle: How big should the buffer be, under the assumption that the bandwidth
+ is used optimally, the bottleneck is on the other side of the connection,
+ and a second data stream is opened up?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Answer: about half the round trip delay, which are inevitably filled before
+ any reaction is possible
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Buffers are good, but you shouldn't fill them up to the brim
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The problem is inherent in the TCP protocol, but since Windows XP did not
+ provide window scaling, the per--connection buffer limit was 64k for most
+ connections on the Internet for quite a long time.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\lang american
+Measure the bottleneck using a burst of packets
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Client Measures, Server Sets Rate
+\end_layout
+
+\begin_layout Description
+Client recores the 
+\emph on
+time
+\emph default
+ of the first and last packet in a burst, and calculates the achieved rate
+ for received packets, extrapolating to the achievable rate including the
+ dropped packets.
+ This results in the requested 
+\emph on
+rate
+\emph default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Formula 
+\[
+rate:=\Delta t*\frac{burstlen}{packets}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Server would simply use this rate
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness
+\end_layout
+
+\begin_layout Standard
+Fairness means that concurrent connections achieve about the same data rate,
+ sharing the same line in a fair way.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Ideally, a router/switch would schedule buffered packets round--robin, giving
+ each connection a fair share of the bandwidth.
+ That would change the calculated rate appropriately, and also be a big
+ relief for current TCP buffer bloat symptoms, as each connection would
+ have its private buffer to fill up.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Unfortunately, routers use a single FIFO policy for all connections
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Finding a sufficiently stable algorithm to provide fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We want to adopt to new situations as fast as possible, there's no point
+ in anything slow.
+ Especially on wireless connections, achievable rate changes are not only
+ related to traffic.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- Fair Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-fair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\lang american
+Fair queuing results in correct measurement of available bandwidth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- FIFO Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-unfair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\lang american
+Unfair FIFO queuing results in twice the available bandwidth calculated
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness I
+\end_layout
+
+\begin_layout Itemize
+To improve stability of unfair queued packets, we need to improve that P
+ regulator (proportional to measured rate) to a full PID regulator
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The integral part is the accumulated slack (in the buffer), which we want
+ to keep low, and the D part is growing/reducing this slack from one measurement
+ to the next
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We use both parts to decrease the sending rate, and thereby achieve better
+ fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The I part is used to exponentially lengthen the rate 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ with increasing slack up to a maximum factor of 16.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s_{exp}=2^{\frac{slack}{T}}\quad\mathrm{where\,}T=\max(10ms,\max(slacks))
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness D
+\end_layout
+
+\begin_layout Itemize
+To measure the differential term, we measure how much the slack grows (a
+ 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ value) from the first to the last burst we do for one measurement cycle
+ (4 bursts by default, first packet to first packet of each burst)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This is multiplied by the total packets in flight (head of the sender queue
+ vs.
+ acknowledged packet), divided by the packets within the measured interval
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A low--pass filter is applied to the obtained D to prevent from speeding
+ up too fast, with one round trip delay as time constant
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $\max(slacks)/10ms$
+\end_inset
+
+ is used to determine how aggressive this algorithm is
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Add the obtained 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ both to the rate's 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ for one burst sequence and wait that time before starting the next burst
+ sequence.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename vdsl1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One connection on a VDSL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename vdsl1-1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections on a VDSL
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable (WLAN)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename wlan1.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Single connection using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename wlan1-2.png
+	lyxscale 50
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+Summary
+\end_layout
+
+\begin_layout BeginFrame
+Summary
+\end_layout
+
+\begin_layout Itemize
+There is already a little bit of code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A lot more work for long dark winter evenings
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+After completion of reference implementation: RFC, IETF discussions, presentatio
+ns at larger network-related conferences
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+For Further Reading
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o source repository 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "aescgm"
+
+\end_inset
+
+
+\noun on
+Shay Gueron, Vlad Krasnov
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+The fragility of AES-GCM authentication algorithm
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://eprint.iacr.org/2013/157.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "gcm"
+
+\end_inset
+
+
+\noun on
+Markku-Juhani O.
+ Saarinen 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+GCM, GHASH and Weak Keys
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.ecrypt.eu.org/hash2011/proceedings/hash2011_03.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document

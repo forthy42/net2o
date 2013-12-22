@@ -48,7 +48,7 @@ end-code
 end-code
 
 1 client-loop n2o:close-all .time cr
-3e
+4e
 [ELSE]
     bye
 [THEN]
@@ -66,7 +66,7 @@ waitkey( fdrop 8e )
 end-code
 
 1 client-loop n2o:close-all .time cr
-5e
+8e
 [ELSE]
     bye
 [THEN]
