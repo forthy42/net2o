@@ -1830,7 +1830,8 @@ $20 Constant keys-val
 
 \ timeout handling
 
-: do-timeout ( -- )  o IF  timeout-xt perform  THEN ;
+: do-timeout ( -- )  timeout-xt perform ;
+\ o IF  timeout-xt ~~ @ ?dup-IF ~~ execute ~~ ELSE ~~ THEN ELSE ~~ THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
@@ -1849,8 +1850,8 @@ Variable timeout-task
     timeout-tasks $@len 0 ?DO
 	timeout-tasks $@ I /string drop @ o =  IF
 	    timeout-tasks I cell $del
-	LEAVE  THEN
-    cell +LOOP  timeout-sema unlock ;
+	    0  ELSE  cell  THEN
+    +LOOP  timeout-sema unlock ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >next-timeout ( -- )  o?
@@ -1871,15 +1872,15 @@ Variable timeout-task
 \ dispose context
 
 : n2o:dispose-context ( o:addr -- o:addr )
-    cmd( ." Disposing context... " o . cr )
-    0. data-map @ >o dest-vaddr 64@ o> >dest-map 2!
+    [: ." Disposing context... " o . cr ;] $tmp cmd( etype )else( 2drop )
+    0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
     data-map @ >o free-data o>
     data-rmap @ >o free-data o>
     code-map @ >o free-data o>
     code-rmap @ >o free-data o>
-    \ erase crypto keys
     resend0 $off
-    crypto-key $off
+    \ erase crypto keys
+    crypto-key $@ erase  crypto-key $off
     data-resend $off
     o-timeout
     dispose
