@@ -934,7 +934,9 @@ $400 buffer: aligned$
 : net2o:/timing ( n -- )
     stats( timing-stat 0 rot $del ) ;
 
-: net2o:rec-timing ( addr u -- ) $>align \ do some dumps
+Variable rec-timing
+
+: .rec-timing ( addr u -- ) rec-timing $@ \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
@@ -946,7 +948,9 @@ $400 buffer: aligned$
 	I ts-rate sf@ f/ f.
 	I ts-grow sf@ 1u f* f.
 	." timing" cr
-    timestats +LOOP ;
+    timestats +LOOP  rec-timing $off ;
+
+: net2o:rec-timing ( addr u -- )  rec-timing $+! ;
 
 timestats buffer: stat-tuple
 

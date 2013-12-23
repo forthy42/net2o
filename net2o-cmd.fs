@@ -558,7 +558,7 @@ also net2o-base
     dup n>64 last-rate 64! ;
 
 : >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
-    recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0= 0= IF
+    recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0<> IF
 	64- 64>n max-dticks 64@ 64>n tick-init 1+ * max rate( .eff ) >r
 	delta-ticks 64@ 64>n tick-init 1+ acks @ */ setrate-limit
 	rate( .rate ) ulit, r> ulit, set-rate
@@ -693,6 +693,7 @@ also net2o-base
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
 	end-code
+	64#0 burst-ticks 64!
     THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>

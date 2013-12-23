@@ -132,4 +132,6 @@ end-code
 
 net2o-code s" Download end" $, type cr .time disconnect  end-code
 
+.rec-timing
+
 script? [IF] bye [THEN]

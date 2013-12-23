@@ -87,7 +87,7 @@ keysize buffer: keypad
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
-    cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
+    ( cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over mykey-salt# >crypt-source

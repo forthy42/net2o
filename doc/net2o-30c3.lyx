@@ -87,7 +87,7 @@ status open
 \backslash
 kern-.8ex
 \backslash
-lower1.5ex
+lower1.8ex
 \backslash
 hbox{
 \end_layout
@@ -998,7 +998,7 @@ Encryption
 \end_layout
 
 \begin_layout BeginFrame
-Indirect Attacks are Cheaper
+Security: Indirect Attacks are Cheaper
 \end_layout
 
 \begin_layout Standard
@@ -1445,7 +1445,7 @@ key "gcm"
 \begin_inset Formula $p=2^{128}+12451$
 \end_inset
 
- to improve the situation
+ to improve the weak key situation
 \end_layout
 
 \begin_deeper
@@ -1475,12 +1475,13 @@ Counter mode is actually a stream cipher, suggests using other steam ciphers
 
 \end_deeper
 \begin_layout Itemize
-However, e.g.
- 
+Compare 
 \noun on
 Dan Bernstein
 \noun default
-'s xsalsa+poly1305 also only uses a polynom for checksum
+'s xsalsa+poly1305: uses a prime field for the polynome, so this would be
+ a better candidate.
+ Poly1305 still relies on the encryption for security.
 \end_layout
 
 \begin_layout EndFrame
@@ -1549,6 +1550,25 @@ Keccak is a universal crypto primitive, with AES in GCM we need three primitives
 : hash+AES+GHASH
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak is both NIST--approved and (still) NSA--independent.
+ I use Keccak with 
+\begin_inset Formula $r=1024$
+\end_inset
+
+ and capacity 
+\begin_inset Formula $c=576$
+\end_inset
+
+ as suggested by the Keccak authors.
+\end_layout
+
 \begin_layout EndFrame
 
 \end_layout
@@ -1568,7 +1588,7 @@ General idea: Have a selection of cipher suits and replace weak or broken
 \end_layout
 
 \begin_layout Enumerate
-All past encrypted communication is stored away in Utah --- if the NSA finds
+All encrypted communication is stored away in Utah --- if the NSA finds
  a weakness, they can decrypt the history
 \end_layout
 
@@ -1655,7 +1675,7 @@ Flow Control
 \end_layout
 
 \begin_layout BeginFrame
-Broken: TCP Flow Control
+Flow Control (Broken)
 \end_layout
 
 \begin_layout Itemize
@@ -2127,12 +2147,10 @@ The I part is used to exponentially lengthen the rate
  with increasing slack up to a maximum factor of 16.
 \end_layout
 
-\begin_deeper
 \begin_layout Pause
 
 \end_layout
 
-\end_deeper
 \begin_layout Standard
 \begin_inset Formula 
 \[
@@ -2234,9 +2252,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename vdsl1.png
+	filename 30c3-1.png
 	lyxscale 50
-	width 100text%
+	width 80text%
 
 \end_inset
 
@@ -2247,7 +2265,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-One connection on a VDSL
+One connection on a VDSL--50 line
 \end_layout
 
 \end_inset
@@ -2277,9 +2295,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename vdsl1-1.png
+	filename 30c3-2.png
 	lyxscale 50
-	width 100text%
+	width 80text%
 
 \end_inset
 
@@ -2290,7 +2308,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-One of four connections on a VDSL
+One of four connections on a VDSL--50 line
 \end_layout
 
 \end_inset
@@ -2320,9 +2338,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename wlan1.png
+	filename 30c3-3.png
 	lyxscale 50
-	width 100text%
+	width 80text%
 
 \end_inset
 
@@ -2363,9 +2381,9 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename wlan1-2.png
+	filename 30c3-4.png
 	lyxscale 50
-	width 100text%
+	width 80text%
 
 \end_inset
 
@@ -2377,6 +2395,135 @@ status open
 
 \begin_layout Plain Layout
 One of four connections using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN, 1GBE
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-5.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Single connection using 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (4 servers)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-6.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (1 server)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-7.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using 1GBE, fair queuing
 \end_layout
 
 \end_inset
