@@ -2540,37 +2540,69 @@ One of four connections using 1GBE, fair queuing
 
 \end_layout
 
+\begin_layout BeginFrame
+Flow Control Conclusion
+\end_layout
+
+\begin_layout Itemize
+Flow control works, but a change in the router FIFO policy can help things
+ a lot
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The primary flow control approach is completely different from other approaches:
+ Measure the available bandwidth!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Scalability to very slow connections is still lacking: bursts are 8 packets
+ long.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Congested traffic without fair queuing not satisfying
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Commands
+\end_layout
+
+\begin_layout Section
+Application Layer
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
 \begin_layout Section*
 Summary
 \end_layout
 
 \begin_layout BeginFrame
 Summary
-\end_layout
-
-\begin_layout Itemize
-There is already a little bit of code
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-A lot more work for long dark winter evenings
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-After completion of reference implementation: RFC, IETF discussions, presentatio
-ns at larger network-related conferences
 \end_layout
 
 \begin_layout EndFrame
