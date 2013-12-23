@@ -823,20 +823,6 @@ Variable mapstart $1 mapstart !
 ' free-rcode rdata-class to free-data
 ' free-rcode rcode-class to free-data
 
-: n2o:dispose-context ( o:addr -- o:addr )
-    cmd( ." Disposing context... " )
-    0. data-map @ >o dest-vaddr 64@ o> >dest-map 2!
-    data-map @ >o free-data o>
-    data-rmap @ >o free-data o>
-    code-map @ >o free-data o>
-    code-rmap @ >o free-data o>
-    \ erase crypto keys
-    resend0 $off
-    crypto-key $off
-    data-resend $off
-    dispose
-    cmd( ." disposed" cr ) ;
-
 \ data sending around
 
 : >blockalign ( n -- block )
@@ -1844,7 +1830,7 @@ $20 Constant keys-val
 
 \ timeout handling
 
-: do-timeout ( -- )  o IF timeout-xt perform THEN ;
+: do-timeout ( -- )  o IF  timeout-xt perform  THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
@@ -1881,6 +1867,23 @@ Variable timeout-task
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 : reset-timeout ( -- ) o?
     0 timeouts ! >next-timeout ; \ 2s timeout
+
+\ dispose context
+
+: n2o:dispose-context ( o:addr -- o:addr )
+    cmd( ." Disposing context... " o . cr )
+    0. data-map @ >o dest-vaddr 64@ o> >dest-map 2!
+    data-map @ >o free-data o>
+    data-rmap @ >o free-data o>
+    code-map @ >o free-data o>
+    code-rmap @ >o free-data o>
+    \ erase crypto keys
+    resend0 $off
+    crypto-key $off
+    data-resend $off
+    o-timeout
+    dispose
+    cmd( ." disposed" cr ) ;
 
 \ loops for server and client
 
@@ -1923,9 +1926,10 @@ true !!timeout!! ;
 : n2o:request-done ( -- )
     o-timeout ->request ;
 
-: do-event-loop ( -- )
+: do-event-loop ( -- )  o >r
     BEGIN  ['] event-loop-nocatch catch ?int dup  WHILE
-	    s" event-loop: " etype DoError nothrow  REPEAT  drop ;
+	    [: ." event-loop: " dup . cr DoError ;] $err nothrow
+	r@ >o rdrop  REPEAT  drop rdrop ;
 
 : create-receiver-task ( -- )
     o 1 stacksize4 NewTask4 dup to receiver-task pass

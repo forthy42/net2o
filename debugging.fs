@@ -140,6 +140,7 @@ timer: +ack
 \ misc
 
 : etype ( addr u -- ) >stderr type ;
+: $err ( xt -- )  $tmp stderr write-file throw ;
 
 \ Emacs fontlock mode: Highlight more stuff
 
