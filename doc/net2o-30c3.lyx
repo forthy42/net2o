@@ -75,8 +75,6 @@
 \begin_body
 
 \begin_layout Title
-
-\lang american
 net
 \begin_inset ERT
 status open
@@ -115,8 +113,6 @@ kern-.5ex
 
 \end_inset
 
-
-\lang english
 : Reinventing the Internet
 \begin_inset Argument
 status open
@@ -139,8 +135,6 @@ Bernd Paysan
 \end_layout
 
 \begin_layout Standard
-
-\lang american
 \begin_inset ERT
 status open
 
@@ -513,6 +507,17 @@ If you want it done right, you have to do it yourself
 \begin_layout Itemize
 Avoid unnecessary abstractions: Abstractions serve a purpose, they are not
  a value of their own
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+I like to program in Forth, as this is simple, elegant, malleable, and close
+ to hardware
 \end_layout
 
 \begin_layout EndFrame
@@ -1713,8 +1718,6 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-
-\lang american
 Buffer Bloat
 \end_layout
 
@@ -1894,8 +1897,6 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-
-\lang american
 Measure the bottleneck using a burst of packets
 \end_layout
 
@@ -2039,8 +2040,6 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-
-\lang american
 Fair queuing results in correct measurement of available bandwidth
 \end_layout
 
@@ -2082,8 +2081,6 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-
-\lang american
 Unfair FIFO queuing results in twice the available bandwidth calculated
 \end_layout
 
@@ -2589,8 +2586,772 @@ Congested traffic without fair queuing not satisfying
 Commands
 \end_layout
 
+\begin_layout BeginFrame
+Data and Commands
+\end_layout
+
+\begin_layout Itemize
+Data of several files/streams can be transferred interleaving, so a single
+ connection can do multiple things in parallel
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Commands are send in command blocks, i.e.
+ there is not just one command per block, but a sequence of commands!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Commands are encoded like protobuf, i.e.
+ 7 bits per byte, and if the MSB of the byte is 1, there's another byte
+ to follow (allowing arbitrary many commands)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The command 
+\begin_inset Quotes eld
+\end_inset
+
+machine
+\begin_inset Quotes erd
+\end_inset
+
+ is a stack architecture.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Example: Connection Request
+\end_layout
+
+\begin_layout LyX-Code
+
+\emph on
+"pk1"
+\emph default
+ $, receive-tmpkey
+\end_layout
+
+\begin_layout LyX-Code
+nest[
+\emph on
+ timestamp1
+\emph default
+ lit, set-rtdelay gen-reply request-done ]nest $,
+\end_layout
+
+\begin_layout LyX-Code
+push-$ push' nest
+\end_layout
+
+\begin_layout LyX-Code
+tmpkey-request key-request
+\end_layout
+
+\begin_layout LyX-Code
+
+\emph on
+base
+\emph default
+ lit, 
+\emph on
+csize
+\emph default
+ lit, 
+\emph on
+dsize
+\emph default
+ lit, map-request
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Example: Download three files
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code
+\end_layout
+
+\begin_layout LyX-Code
+"Download test" $, type cr ( see-me )
+\end_layout
+
+\begin_layout LyX-Code
+get-ip $400 blocksize! $400 blockalign! stat( request-stats )
+\end_layout
+
+\begin_layout LyX-Code
+"net2o.fs" 0 lit, 0 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-13_11-26-57-small.jpg" 0 lit, 1 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-20_17-01-12-small.jpg" 0 lit, 2 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+gen-total slurp-all-tracked-blocks send-chunks
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, tag-reply
+\end_layout
+
+\begin_layout LyX-Code
+end-code 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Example: Answer to this request
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code
+\end_layout
+
+\begin_layout LyX-Code
+x" 36000000000000000000000000000000019ED2" $, set-ip
+\end_layout
+
+\begin_layout LyX-Code
+ $E373 lit, 0 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$134299FF6F829E62 lit, $1A4 lit, 0 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$9C65C lit, 1 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$130AFDAE900C649E lit, $1A4 lit, 1 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$9D240 lit, 2 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$130AFDAE92CA4E25 lit, $1A4 lit, 2 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$148000 lit, set-total
+\end_layout
+
+\begin_layout LyX-Code
+ $E373 lit, 0 lit, track-seek
+\end_layout
+
+\begin_layout LyX-Code
+$79000 lit, 1 lit, track-seek 
+\end_layout
+
+\begin_layout LyX-Code
+$78C00 lit, 2 lit, track-seek
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, ack-reply
+\end_layout
+
+\begin_layout LyX-Code
+end-code
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section
-Application Layer
+Applications
+\end_layout
+
+\begin_layout Subsection
+Apps in a Sandbox
+\end_layout
+
+\begin_layout BeginFrame
+Content or Apps?
+\end_layout
+
+\begin_layout Itemize
+The current web is defined by content --- web apps (JavaScript) are an afterthou
+gh
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, the application logic is usually on the server side
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This doesn't work for a P2P network!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Content is structured text, images, videos, music, etc.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+App--Centric World
+\end_layout
+
+\begin_layout Itemize
+There's a phenomenon I call 
+\begin_inset Quotes eld
+\end_inset
+
+Turing creep
+\begin_inset Quotes erd
+\end_inset
+
+: Every sufficiently complex system contains a user--accessible Turing--complete
+ language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Corollary: Every efficient sufficiently complex system can execute native
+ machine code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The application logic is to present the data; data itself is as above: structure
+d text, images, videos, music, etc.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Executing (especially efficient) code from the net raises obvious questions
+ about security
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to securely execute code?
+\end_layout
+
+\begin_layout Standard
+There are several options tried; as usual, things are broken:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Execute code in a controlled secure VM, see for example Java.
+ This is broken by design, as securing something from the inside doesn't
+ work.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Execute code in a sandbox.
+ This has shown as more robust, depending on how complex the outside of
+ the sandbox is.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Public inspection of code.
+ This is how the open source world works, but the underhanded C contest
+ shows that inspection is tricky.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Scan for known evil code.
+ This is the security industry's approach, and it is not working.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Code signing can work together with public inspection --- but using it for
+ accountability doesn't work
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice is to sandbox public inspected code.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+API Basics
+\end_layout
+
+\begin_layout BeginFrame
+Formats&Requirements
+\end_layout
+
+\begin_layout FrameSubtitle
+How to display things
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename formats+io.fig
+	scale 36
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Why OpenGL?
+\end_layout
+
+\begin_layout FrameSubtitle
+OpenGL can do everything
+\end_layout
+
+\begin_layout Standard
+OpenGL renders:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Triangles, lines, points --- simple components
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Textures and gradients
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+and uses shader programs --- the most powerful thing in OpenGL from 2.0.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Real requirement: visualization of 
+\emph on
+any 
+\emph default
+data.
+ OpenGL can do that.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to connect the media?
+\end_layout
+
+\begin_layout FrameSubtitle
+Lemma: every glue logic will become Turing complete
+\end_layout
+
+\begin_layout Itemize
+currently used glue: HTML+CSS+JavaScript
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+conclusion: use a powerful tool right from start!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+browser: run--time and development tool for applications
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Use Cases, Funding&Law
+\end_layout
+
+\begin_layout BeginFrame
+Use Cases, Funding&Law
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Layer 8
+\begin_inset Quotes erd
+\end_inset
+
+ is the human in front of the screen.
+ What will people use this for?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Sharing photos and videos
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Chat & video telephony
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+News, opinions, scientific papers, sharing knowledge
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Online shopping
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+What's the problem with those?
+\end_layout
+
+\begin_layout Standard
+From the point of view of Hans--Peter Uhl
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+Pirated
+\begin_inset Quotes erd
+\end_inset
+
+ videos and music, child 
+\begin_inset Quotes eld
+\end_inset
+
+porn
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Molested children
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Dissident opinions, leaks
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Sex, Drugs & Rock'n'Roll
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+What to do about it?
+\end_layout
+
+\begin_layout Itemize
+I don't want to know what my users want to do, nor do they want me to know
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Public shared stuff is possible to track down --- copyright is a political
+ problem, the technology we build is there for making copies
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+net2o is not primarily targeted at people who have 
+\begin_inset Quotes eld
+\end_inset
+
+something to hide
+\begin_inset Quotes erd
+\end_inset
+
+, it is intended to offer state--of--the--art privacy protection to everybody
+ without performance and usability downsides
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Normal criminal investigation has still a very good chance to catch criminals
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to fund it
+\end_layout
+
+\begin_layout Itemize
+Companies are not very trustworthy: If the NSA pays the bill, they do whatever
+ the NSA wants.
+ However, this problem also exists for FOSS projects to some extent (e.g.
+ Dual_EC_DRBG was implemented in OpenSSL after receiving funding from an
+ unnamed company).
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kickstarter funding looks a lot more interesting, and can work for FOSS
+ projects, too
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ad--based funding is pretty problematic if you don't want to sell customer's
+ data one way or another
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Storage space 
+\begin_inset Quotes eld
+\end_inset
+
+in the cloud
+\begin_inset Quotes erd
+\end_inset
+
+ comes with the responsibility to take copyright violations down
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The whole economy behind such a network is huge; the cost for developing
+ are tiny compared to that
+\end_layout
+
+\begin_layout EndFrame
+
 \end_layout
 
 \begin_layout Section
