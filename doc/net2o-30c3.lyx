@@ -626,6 +626,32 @@ Separation of commands and (bulk) data packets
 
 \end_deeper
 \begin_layout Itemize
+Every
+\emph on
+thing
+\emph default
+ is a file --- with metadata (
+\begin_inset Quotes eld
+\end_inset
+
+tags
+\begin_inset Quotes erd
+\end_inset
+
+) in a hash table, every
+\emph on
+one
+\emph default
+ is a key (with metadata)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
 Event--driven design: command packets are executed remotely and drive the
  protocol
 \end_layout
@@ -992,6 +1018,50 @@ cryptographic checksum
 \end_inset
 
 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Handover
+\end_layout
+
+\begin_layout Itemize
+Typical problem in our mobile world: Devices hop from one network into another
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+To avoid connection loss, you need a handover
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+net2o handover works with the assumption that properly authenticated packets
+ are ok, and then accepts a change in the return path
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The remaining problem are two simultaneous handovers, and the suggestion
+ therefore is: Keep using both networks for the transition period.
 \end_layout
 
 \begin_layout EndFrame
@@ -2797,6 +2867,352 @@ end-code
 \end_layout
 
 \begin_layout Section
+Distributed Data
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Data
+\end_layout
+
+\begin_layout Itemize
+Following the 
+\begin_inset Quotes eld
+\end_inset
+
+everything is a file
+\begin_inset Quotes erd
+\end_inset
+
+ principle, every data object is a file
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Data objects are accessed by their hash.
+ The associated metadata are 
+\begin_inset Quotes eld
+\end_inset
+
+tags
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Metadata is organized as a distributed prefix hash tree
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Efficient distribution of data is important!
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Efficient Data Distribution
+\end_layout
+
+\begin_layout Standard
+Puzzle: How efficient can you distribute data (e.g.
+ a video stream) in a P2P network? Assume all peers are equal, and have
+ the capacity to upload one stream in realtime.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Obvious topology: The bucket chain --- this shows that each node feeds the
+ data through --- a 1:1 relation of what you get to what you send
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+bucket chain: 
+\begin_inset Formula $O(n)$
+\end_inset
+
+ latency, 
+\begin_inset Formula $O\left(\frac{1}{n}\right)$
+\end_inset
+
+ robustness (each node can break the chain)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Suggestion: Tree structure instead of chain, e.g.
+ a quad--tree.
+ The root divides the data into four parts, each going down one branch of
+ the tree.
+ The leafs distribute the data to the other three branches of the tree
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+For the quad--tree case, each node has only 8 neighbors: 4 sources and 4
+ sinks
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Tree Distribution Network
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename avalanche.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Avalanche distribution with quad--tree of depth 2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Possible Performance
+\end_layout
+
+\begin_layout Itemize
+Trees with a bigger base reduce latency.
+ Example: To transfer a Justin Bieber tweet to 50 million followers, a binary
+ tree needs 25.5 hops on average, a quad--tree 12.8 hops, and an oct--tree
+ 8.5 hops.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A typical domestic (inside e.g.
+ Germany) hop--to--hop time is just 20ms.
+ International hops can be in the order of 250ms.
+ Assuming there is only one international hop in the chain, the latency
+ to distribute Justin Bieber's babbling is typically just 500ms in a quad--tree.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Rule of thumb: 
+\begin_inset Formula $bandwidth=latency$
+\end_inset
+
+, i.e.
+ if it takes 20ms from hop to hop, each node should replicate data for 20ms
+ --- if we make the tree wider, the linear effort of replicating data will
+ dominate transfer time, if we make the tree more narrow, the hop--to--hop
+ time will dominate.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The tree--like graph greatly reduces the number of nodes to know
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Prefix Hash Tree
+\end_layout
+
+\begin_layout Itemize
+Most DHT approaches have poor performanc
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Prefix Hash Trees use a quite large base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Only a few queries necessary to query an extremely large data base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Suggestion: Active instantaneous replication of all changed data using the
+ avalanche tree mentioned above
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Metadata Privacy
+\end_layout
+
+\begin_layout Itemize
+A global distributed hash tree is 100% observable by anybody with enough
+ money
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Private trees shared only between a group of people: 
+\begin_inset Quotes eld
+\end_inset
+
+dark trees in a dark forrest
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use different identities for distinct groups (one for your friends, one
+ for your work, one for sharing pr0n), each one only known to that group:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+dark social graph
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Your public ID is only for first contacts and the things you want to publish
+ (i.e.
+ PR)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use neighborhood relationships to limit spread of data --- e.g.
+ a node participating in a data distribution tree may only be known to the
+ peer nodes in that tree
+\end_layout
+
+\begin_layout Section
 Applications
 \end_layout
 
@@ -3108,8 +3524,51 @@ browser: run--time and development tool for applications
 
 \end_layout
 
+\begin_layout BeginFrame
+Frameworks
+\end_layout
+
+\begin_layout Itemize
+libsoil for images (PNG+JPEG loading into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+freetype-gl for fonts (TrueType/OpenType into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+OpenMAX on Android, gstreamer on Linux: videos into a texture
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+ work in progress)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section
-Use Cases, Funding&Law
+Use Cases, Funding&Law, Adoption
 \end_layout
 
 \begin_layout BeginFrame
@@ -3190,15 +3649,7 @@ Pirated
 \begin_inset Quotes erd
 \end_inset
 
- videos and music, child 
-\begin_inset Quotes eld
-\end_inset
-
-porn
-\begin_inset Quotes erd
-\end_inset
-
-
+ videos and music (Hollywood will sue me), child porn+terrorism
 \end_layout
 
 \begin_deeper
@@ -3228,7 +3679,7 @@ Dissident opinions, leaks
 
 \end_deeper
 \begin_layout Enumerate
-Sex, Drugs & Rock'n'Roll
+Sex, Drugs & Weapons (Rock'n'Roll see 1.)
 \end_layout
 
 \begin_layout EndFrame
@@ -3251,7 +3702,8 @@ I don't want to know what my users want to do, nor do they want me to know
 \end_deeper
 \begin_layout Itemize
 Public shared stuff is possible to track down --- copyright is a political
- problem, the technology we build is there for making copies
+ problem, the technology we build is there for making copies, primarily
+ for cat videos and duck--face selfies
 \end_layout
 
 \begin_deeper
@@ -3270,7 +3722,7 @@ something to hide
 \end_inset
 
 , it is intended to offer state--of--the--art privacy protection to everybody
- without performance and usability downsides
+ without performance and usability drawbacks
 \end_layout
 
 \begin_deeper
@@ -3354,16 +3806,87 @@ The whole economy behind such a network is huge; the cost for developing
 
 \end_layout
 
-\begin_layout Section
-Conclusion
-\end_layout
-
-\begin_layout Section*
-Summary
-\end_layout
-
 \begin_layout BeginFrame
-Summary
+Adoption
+\end_layout
+
+\begin_layout Itemize
+People have nothing to hide, so security is 
+\emph on
+not
+\emph default
+ a primary feature
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ease of use is a key for success
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Adoption rate usually is exponential with a quite constant replication factor,
+ i.e.
+ people will complain about 
+\begin_inset Quotes eld
+\end_inset
+
+empty wasteland
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+People like to feel good --- that's why Facebook has only a 
+\begin_inset Quotes eld
+\end_inset
+
+like
+\begin_inset Quotes erd
+\end_inset
+
+ button
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Censorship is not liked: Platforms like Facebook&Co.
+ take down sexual content and copyrighted stuff.
+ I won't (because I can't, by design)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Filter bubble instead of censorship: Don't be friend with people who share
+ things you don't like
 \end_layout
 
 \begin_layout EndFrame
