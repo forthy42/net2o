@@ -1042,7 +1042,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : slackext ( rfactor -- slack )
     slackgrow 64@
-    window-size @ tick-init 1+ bursts# - 64*/
+    window-size @ ( tick-init 1+ umin ) tick-init 1+ bursts# - 64*/
     64>f f* f>64
     slackgrow' 64@ 64+ 64dup ext-damp# 64*/ slackgrow' 64!
     64#0 64max aggressivity-rate ;
