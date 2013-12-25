@@ -313,16 +313,22 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
   switch(laneCount) {
   case 25: case 24: case 23: case 22: case 21:
     data[20] = ~data[20];
+    state[20] = ~state[20];
   case 20: case 19: case 18:
     data[17] = ~data[17];
+    state[17] = ~state[17];
   case 17: case 16: case 15: case 14: case 13:
     data[12] = ~data[12];
+    state[12] = ~state[12];
   case 12: case 11: case 10: case 9:
     data[ 8] = ~data[ 8];
+    state[ 8] = ~state[ 8];
   case 8: case 7: case 6: case 5: case 4: case 3:
     data[ 2] = ~data[ 2];
+    state[ 2] = ~state[ 2];
   case 2:
     data[ 1] = ~data[ 1];
+    state[ 1] = ~state[ 1];
   }
 #endif
 }
