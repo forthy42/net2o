@@ -679,6 +679,99 @@ objects
 
 \end_layout
 
+\begin_layout Subsection
+In a Nutshell
+\end_layout
+
+\begin_layout BeginFrame
+net2o in a nutshell
+\end_layout
+
+\begin_layout Standard
+net2o consists of the following 6 layers:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[
+\backslash
+setcounter{enumi}{2}
+\backslash
+usebeamertemplate{enumerate item}]
+\end_layout
+
+\end_inset
+
+Path switched packets with 
+\begin_inset Formula $2^{n}$
+\end_inset
+
+ size writing into shared memory buffers
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Ephemeral key exchange and signatures with Ed25519, symmetric authenticated
+ encryption+hash+prng with Keccak
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Timing driven delay minimizing flow control
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Stack--oriented tokenized command language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Distributed data (files) and distributed metadata (prefix hash trie)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Apps in a sandboxed environment for displaying content
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section
 Topology
 \end_layout
@@ -1142,8 +1235,7 @@ Diffie--Hellman Key strength to length relation is about the same as with
 
 \end_deeper
 \begin_layout Description
-ECC Elliptic Curve Cryptography has still only a much more generic attack
- (i.e.
+ECC Elliptic Curve Cryptography has still only a generic attack (i.e.
  can be considered 
 \begin_inset Quotes eld
 \end_inset
@@ -1152,8 +1244,8 @@ unscratched
 \begin_inset Quotes erd
 \end_inset
 
-, as this attack is generic for this problem), and therefore 256 bit keys
- (32 bytes) have a strength of 128 bits
+, as the attack uses a fundamental property of the problem), and therefore
+ 256 bit keys (32 bytes) have a strength of 128 bits
 \end_layout
 
 \begin_layout Pause

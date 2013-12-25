@@ -1,4 +1,4 @@
-#define Unrolling 24
+#define Unrolling 2
 //#define UseBebigokimisa
 //#define UseSSE
 //#define UseOnlySIMD64
