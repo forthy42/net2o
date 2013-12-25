@@ -188,6 +188,14 @@ void KeccakF(keccak_state state)
 void KeccakInitializeState(keccak_state state)
 {
     memset(state, 0, 200);
+#ifdef UseBebigokimisa
+    ((UINT64*)state)[ 1] = ~(UINT64)0;
+    ((UINT64*)state)[ 2] = ~(UINT64)0;
+    ((UINT64*)state)[ 8] = ~(UINT64)0;
+    ((UINT64*)state)[12] = ~(UINT64)0;
+    ((UINT64*)state)[17] = ~(UINT64)0;
+    ((UINT64*)state)[20] = ~(UINT64)0;
+#endif
 }
 
 void fromBytesToWord(UINT64 *word, const UINT8 *bytes)
@@ -214,12 +222,28 @@ void KeccakInitialize()
 void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
 {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    memcpy(data, state, laneCount*8);
+  memcpy(data, state, laneCount*8);
 #else
-    unsigned int i;
-
-    for(i=0; i<laneCount; i++)
-        fromWordToBytes(data+i, ((const UINT64*)state)[i]);
+  unsigned int i;
+  
+  for(i=0; i<laneCount; i++)
+    fromWordToBytes(data+i, ((const UINT64*)state)[i]);
+#endif
+#ifdef UseBebigokimisa
+  switch(laneCount) {
+  case 25: case 24: case 23: case 22: case 21:
+    data[20] = ~data[20];
+  case 20: case 19: case 18:
+    data[17] = ~data[17];
+  case 17: case 16: case 15: case 14: case 13:
+    data[12] = ~data[12];
+  case 12: case 11: case 10: case 9:
+    data[ 8] = ~data[ 8];
+  case 8: case 7: case 6: case 5: case 4: case 3:
+    data[ 2] = ~data[ 2];
+  case 2:
+    data[ 1] = ~data[ 1];
+  }
 #endif
 }
 
@@ -250,6 +274,22 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
     fromWordToBytes(data+i, tmp);
 #endif
   }
+#ifdef UseBebigokimisa
+  switch(laneCount) {
+  case 25: case 24: case 23: case 22: case 21:
+    data[20] = ~data[20];
+  case 20: case 19: case 18:
+    data[17] = ~data[17];
+  case 17: case 16: case 15: case 14: case 13:
+    data[12] = ~data[12];
+  case 12: case 11: case 10: case 9:
+    data[ 8] = ~data[ 8];
+  case 8: case 7: case 6: case 5: case 4: case 3:
+    data[ 2] = ~data[ 2];
+  case 2:
+    data[ 1] = ~data[ 1];
+  }
+#endif
 }
 
 void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
@@ -269,4 +309,20 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
     fromWordToBytes(data+i, tmp1);
 #endif
   }
+#ifdef UseBebigokimisa
+  switch(laneCount) {
+  case 25: case 24: case 23: case 22: case 21:
+    data[20] = ~data[20];
+  case 20: case 19: case 18:
+    data[17] = ~data[17];
+  case 17: case 16: case 15: case 14: case 13:
+    data[12] = ~data[12];
+  case 12: case 11: case 10: case 9:
+    data[ 8] = ~data[ 8];
+  case 8: case 7: case 6: case 5: case 4: case 3:
+    data[ 2] = ~data[ 2];
+  case 2:
+    data[ 1] = ~data[ 1];
+  }
+#endif
 }
