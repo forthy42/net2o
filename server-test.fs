@@ -1,6 +1,6 @@
 \ test file for net2o - server side
 
-require ../net2o.fs
+require net2o.fs
 
 +debug
 
