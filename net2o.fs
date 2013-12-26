@@ -1483,6 +1483,15 @@ Create chunk-adder chunks-struct allot
     resize-lock unlock
     ticker 64@ ticks-init ;
 
+: o-chunks ( -- )
+    resize-lock lock
+    chunks $@len 0 ?DO
+	chunks $@ I /string drop chunk-context @ o = IF
+	    chunks I chunks-struct $del
+	    r> r> chunks-struct - 2dup >r >r = ?LEAVE
+	0  ELSE  chunks-struct  THEN  +LOOP
+    resize-lock unlock ;
+
 event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 
 : net2o:send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
@@ -1799,7 +1808,7 @@ $20 Constant keys-val
 
 : handle-cmd ( addr -- )  dest-job @ >o
     >r inbuf packet-data r@ swap dup >r move
-    r> r> swap queue-command o> ;
+    r> r> swap queue-command o IF  o>  ELSE  rdrop  THEN ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
 
@@ -1815,7 +1824,7 @@ $20 Constant keys-val
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@
     address( <> IF  ." handover" cr THEN )else( 2drop )
-    r> >o handle o> ;
+    r> >o handle o IF  o>  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta
@@ -1850,6 +1859,8 @@ Variable timeout-task
     timeout-tasks $@len 0 ?DO
 	timeout-tasks $@ I /string drop @ o =  IF
 	    timeout-tasks I cell $del
+	    timeout-tasks $@len drop
+	    r> r> cell- 2dup >r >r = ?LEAVE
 	    0  ELSE  cell  THEN
     +LOOP  timeout-sema unlock ;
 : sq2** ( 64n n -- 64n' )
@@ -1872,7 +1883,8 @@ Variable timeout-task
 \ dispose context
 
 : n2o:dispose-context ( o:addr -- o:addr )
-    [: ." Disposing context... " o . cr ;] $tmp cmd( etype )else( 2drop )
+    cmd( ." Disposing context... " o . cr )
+    o-timeout o-chunks
     0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
     data-map @ >o free-data o>
     data-rmap @ >o free-data o>
@@ -1882,7 +1894,6 @@ Variable timeout-task
     \ erase crypto keys
     crypto-key $@ erase  crypto-key $off
     data-resend $off
-    o-timeout
     dispose
     cmd( ." disposed" cr ) ;
 
