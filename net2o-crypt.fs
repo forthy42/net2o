@@ -22,6 +22,7 @@ state2# buffer: ivs-assembly
 state2# buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
 state# buffer: oldmykey \ previous private key
+c:key# buffer: safekey \ store key away
 
 \ key storage
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
@@ -157,13 +158,18 @@ Variable do-keypad "" do-keypad $!
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
 
-: one-ivs ( addr -- )  c:key@ >r
-    @ >o key-assembly state2# c:prng
-    key-assembly >c:key c:key@ dest-ivsgen @ c:key# move
+: one-ivs ( addr -- )
+    @ >o c:key@ >r
+    key-assembly state2# c:prng
+    r@ safekey c:key# move
+    key-assembly >c:key
+    c:key@ dest-ivsgen @ c:key# move
+    safekey r@ c:key# move
     dest-ivsgen @ c:key!
+    key-assembly state2# c:hash
     dest-size @ addr>keys dest-ivs $!len
-    dest-ivs $@ c:prng o>
-    r> c:key! ;
+    dest-ivs $@ c:prng
+    r> c:key! o> ;
 
 : clear-keys ( -- )
     crypto-key $@ erase  tskc KEYBYTES erase  stskc KEYBYTES erase ;
