@@ -82,8 +82,7 @@ crypto class end-class keccak
 \G obtain the key storage
 ' keccak# keccak to c:key# ( -- n )
 \G obtain key storage size
-:noname keccak-state to @keccak
-    keccak0 keccak#max >keccak ; keccak to >c:key ( addr -- )
+:noname keccak0 keccak#max >keccak ; keccak to >c:key ( addr -- )
 \G move 128 bytes from addr to the state
 :noname keccak#max keccak> ; keccak to c:key> ( addr -- )
 \G get 128 bytes from the state to addr

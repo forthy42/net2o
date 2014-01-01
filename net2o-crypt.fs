@@ -161,11 +161,7 @@ Variable do-keypad "" do-keypad $!
 : one-ivs ( addr -- )
     @ >o c:key@ >r
     key-assembly state2# c:prng
-    r@ safekey c:key# move
-    key-assembly >c:key
-    c:key@ dest-ivsgen @ c:key# move
-    safekey r@ c:key# move
-    dest-ivsgen @ c:key!
+    dest-ivsgen @ c:key!  key-assembly >c:key
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng
     r> c:key! o> ;

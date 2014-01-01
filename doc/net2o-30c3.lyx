@@ -1161,6 +1161,98 @@ The remaining problem are two simultaneous handovers, and the suggestion
 
 \end_layout
 
+\begin_layout BeginFrame
+Routing Example
+\end_layout
+
+\begin_layout Standard
+Assumption: Somewhat hierarchical structure: backbones, ISPs, LANs.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+My symbolic path to a backbone: laptop.net2o.1und1.level3
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Destination's path to a backbone: foobar.webhoster.bay-net.alter-net
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Connect paths together (reverse second): laptop.net2o.1und1.level3.alter-net.bay-net.w
+ebhoster.foobar
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Neighboring entities know the path from one to the other, e.g.
+ 
+\begin_inset Quotes eld
+\end_inset
+
+1und1
+\begin_inset Quotes erd
+\end_inset
+
+ knows how to connect 
+\begin_inset Quotes eld
+\end_inset
+
+net2o
+\begin_inset Quotes erd
+\end_inset
+
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+level3
+\begin_inset Quotes erd
+\end_inset
+
+, so you ask them (and cache the result in the DHT)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Splice the labels together, and you get a path: 
+\begin_inset Newline newline
+\end_inset
+
+
+\size scriptsize
+<1010><1101.0001.0101.1000.1011.0011><0110.1010><0111.1010><1010.0010.0001.1001.1010.0100>
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
 \begin_layout Section
 Encryption
 \end_layout
