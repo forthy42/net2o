@@ -22,7 +22,6 @@ state2# buffer: ivs-assembly
 state2# buffer: no-key \ just zeros for no key
 state# buffer: mykey \ instance's private key
 state# buffer: oldmykey \ previous private key
-c:key# buffer: safekey \ store key away
 
 \ key storage
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long

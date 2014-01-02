@@ -30,7 +30,7 @@ send-chunks
 end-code
 
 1 client-loop n2o:close-all .time cr
-2e @time f> [IF]
+3e @time f> [IF]
     ." Request more photos because it was so fast" cr
     net2o-code
     expect-reply
@@ -48,10 +48,7 @@ end-code
 end-code
 
 1 client-loop n2o:close-all .time cr
-4e
-[ELSE]
-    bye
-[THEN]
+6e
 waitkey( fdrop 8e )
 @time f> [IF]
     ." Request big photos because it was so fast" cr
@@ -67,9 +64,6 @@ end-code
 
 1 client-loop n2o:close-all .time cr
 8e
-[ELSE]
-    bye
-[THEN]
 waitkey( fdrop 16e )
 @time f> [IF]
     waitkey( ." Press key to continue" key drop cr )
@@ -126,6 +120,8 @@ end-code
 \ end-code
 
 1 client-loop n2o:close-all .time cr
+[THEN]
+[THEN]
 [THEN]
 
 .packets .times

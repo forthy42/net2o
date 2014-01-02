@@ -562,7 +562,7 @@ state# 2* Constant wurst-key# ' wurst-key# wurstkessel to c:key#
 :noname ( addr -- )
     @state swap state# 2* move ; wurstkessel to c:key>
 :noname ( addr -- )
-    wurst-source state# 2* move wurst-source rounds-setkey ; wurstkessel to >c:key
+    wurst-source state# 2* move ; wurstkessel to >c:key
 :noname ( -- )
     message roundse# rounds-encrypt ; wurstkessel to c:diffuse
 :noname ( addr u -- ) dup mem-rounds#

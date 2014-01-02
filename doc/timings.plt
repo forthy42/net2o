@@ -18,10 +18,6 @@ set ylabel "Rate [MB/s]"
 set y2label "Slack [ms]"
 set multiplot layout 2, 2 rowsfirst
 #set term wxt 0
-plot "timing4" using 1:4 title "Requested",\
- "timing4" using 1:5 title "Rate",\
- "timing4" using 1:3 axis x1y2 title "Slack", \
- "timing4" using 1:6 axis x1y2 title "Grow"
 #set term wxt 1
 plot "timing1" using 1:4 title "Requested",\
  "timing1" using 1:5 title "Rate",\
@@ -38,3 +34,7 @@ plot "timing3" using 1:4 title "Requested",\
  "timing3" using 1:3 axis x1y2 title "Slack", \
  "timing3" using 1:6 axis x1y2 title "Grow"
 #unset multiplot
+plot "timing4" using 1:4 title "Requested",\
+ "timing4" using 1:5 title "Rate",\
+ "timing4" using 1:3 axis x1y2 title "Slack", \
+ "timing4" using 1:6 axis x1y2 title "Grow"
