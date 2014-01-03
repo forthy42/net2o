@@ -52,7 +52,7 @@ debug: stat(
 debug: timeout(
 debug: ack(
 debug: crypt(
-debug: ens(
+debug: noens(
 debug: key(
 debug: genkey( \ See generated keys - never let this go to a log file!
 debug: cookie(
@@ -70,8 +70,6 @@ debug: header(
 debug: sender( \ extra sender task
 debug: dht( \ debuggin for dht functions
 debug: hash( \ dht hasing function debug
-
-+db ens( \ )
 
 \ timing measurements
 
