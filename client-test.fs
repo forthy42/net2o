@@ -132,6 +132,6 @@ init-client
     0 ?DO  c:test& req-ms# ms  LOOP
     requests->0 ;
 
-2 c:tests
+1 c:tests
 
 script? [IF] bye [THEN]
