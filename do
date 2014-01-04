@@ -6,8 +6,11 @@ GFORTH=gforth-0.7.9_20131227
 
 # get net2o itself
 
-fossil clone http://fossil.net2o.de/net2o net2o.fossil
-fossil open net2o.fossil
+if [ ! -f net2o.fossil ]
+then
+    fossil clone http://fossil.net2o.de/net2o net2o.fossil
+    fossil open net2o.fossil
+fi
 
 # get, build, and install Gforth
 
