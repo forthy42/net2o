@@ -17,7 +17,7 @@ fi
 
 which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
 (which gforth 1>/dev/null 2>/dev/null && gforth-fast net2o.fs -e bye && test "$GF" == "$GFORTH") || (
-    wget http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
+    wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
     (tar zxf $GFORTH.tar.gz; cd $GFORTH; ./configure && make && sudo make install)
 )
 
