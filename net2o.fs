@@ -767,6 +767,7 @@ resend-size# buffer: resend-init
     dup return-addr !  return-address !
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
+    s" " file-state $!
     init-flow-control
     -timeout ['] .ipaddr setip-xt !
     -1 blocksize !
@@ -1134,10 +1135,7 @@ file-state-class >osize @ Constant file-state-struct
 
 file-state-struct buffer: new-file-state
 
-: ?state ( -- )
-    file-state @ 0= IF  s" " file-state $!  THEN ;
-
-: id>addr ( id -- addr remainder )  ?state
+: id>addr ( id -- addr remainder )
     >r file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
     id>addr file-state-struct < !!fileid!! ;
@@ -1242,7 +1240,7 @@ file-state-struct buffer: new-file-state
     id>addr? >o fs-fid @ IF  (n2o:close-file)  THEN  o> ;
 
 : n2o:open-file ( addr u mode id -- )
-    ?state  state-addr >o
+    state-addr >o
     fs-fid @ IF  (n2o:close-file)  THEN
     msg( dup 2over ." open file: " type ."  with mode " . cr )
     open-file throw fs-fid !
