@@ -4,7 +4,7 @@ require net2o.fs
 
 +debug
 
-argc @ 1 > [IF]  1 arg s>number drop to net2o-port shift-args [THEN]
+?nextarg [IF] s>number drop to net2o-port [THEN]
 
 "test" >key \ use our server test key
 init-server

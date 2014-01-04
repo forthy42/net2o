@@ -143,7 +143,7 @@ keypack# mykey-salt# + $10 + Constant keypack-all#
 keypack-all# buffer: keypack
 keypack-all# buffer: keypack-d
 
-also net2o-base definitions
+get-current also net2o-base definitions
 
 100 net2o: newkey ( addr u -- ) keys? IF  key:new  ELSE  2drop  THEN ;
 101 net2o: privkey ( addr u -- ) keys? IF  ke-sk $! +seckey   ELSE  2drop  THEN ;
@@ -156,7 +156,7 @@ also net2o-base definitions
 107 net2o: keyfirst ( date-ns -- ) keys? IF ke-first 64!  ELSE  64drop  THEN ;
 108 net2o: keylast ( date-ns -- ) keys? IF ke-last 64!  ELSE  64drop  THEN ;
 
-previous definitions
+dup set-current previous
 
 : key:code ( -- )
     net2o-code0 keypack keypack-all# erase
@@ -172,7 +172,7 @@ also net2o-base definitions
     cmdlock unlock ;
 comp: :, previous ;
 
-previous definitions
+set-current previous previous
 
 0 Value key-fd
 

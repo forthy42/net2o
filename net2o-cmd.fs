@@ -142,7 +142,7 @@ Defer net2o-do
 
 Vocabulary net2o-base
 
-forth also net2o-base definitions previous
+get-current also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
@@ -152,7 +152,7 @@ forth also net2o-base definitions previous
 2 net2o: slit ( -- x ) ps@ ;
 3 net2o: string ( -- addr u )  string@ ;
 
-definitions
+dup set-current
 
 \ net2o assembler
 
@@ -180,8 +180,10 @@ User cmdbuf#
 
 : net2o-code    cmd0source off  cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
+comp: :, also net2o-base ;
 : net2o-code0   cmd0buf cmd0source !   cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
+comp: :, also net2o-base ;
 ' net2o, IS net2o-do
 
 : send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
@@ -299,11 +301,13 @@ also net2o-base definitions
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
-: end-code ( -- ) expect-reply? previous cmd  cmdlock unlock ;
+: (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
+: end-code ( -- )  (end-code) previous ;
+comp: :, previous ;
 : push-cmd ( -- )
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
 
-previous definitions
+dup set-current previous
 
 [IFDEF] 64bit
     ' noop Alias 2*64>n immediate
@@ -504,10 +508,10 @@ net2o-base
 :noname
     server? IF
 	dup  IF  dup nlit, throw end-cmd
-	    ['] end-cmd IS expect-reply? also end-code  THEN
+	    ['] end-cmd IS expect-reply? (end-code)  THEN
 	F throw  THEN  drop ; IS >throw
 
-previous definitions
+set-current previous
 
 also net2o-base
 
@@ -550,7 +554,9 @@ previous
 
 : .rate ( n -- n ) dup . ." rate" cr ;
 : .eff ( n -- n ) dup . ." eff" cr ;
+
 also net2o-base
+
 : setrate-limit ( rate -- rate' )
     \ do not change requested rate by more than a factor 2
     last-rate 64@ 64>n

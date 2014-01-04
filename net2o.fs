@@ -75,7 +75,7 @@ do-stackrel off
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
-    argc @ 1 > IF  next-arg false  ELSE  true  THEN ;
+    argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
 
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
@@ -1889,7 +1889,7 @@ Variable timeout-task
 
 \ loops for server and client
 
-Variable requests
+User requests
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  in-route
@@ -1943,10 +1943,12 @@ true !!timeout!! ;
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
+: requests->0 ( -- ) BEGIN  stop requests @ 0<= UNTIL ;
+
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout
     o IF  up@ wait-task !  THEN  event-loop-task
-    BEGIN  stop requests @ 0<= UNTIL ;
+    requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  1 client-loop ;
 
