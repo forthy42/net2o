@@ -11,8 +11,13 @@ fossil open net2o.fossil
 
 # get, build, and install Gforth
 
-wget http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
-(tar zxf $GFORTH.tar.gz; cd $GFORTH; ./configure && make && sudo make install)
+which gforth 1>/dev/null 2>/dev/null || (\
+GF=$(gforth --version 2>&1 | tr ' ' '-')
+if [ "$GF" != "GFORTH" ]
+then
+    wget http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
+    (tar zxf $GFORTH.tar.gz; cd $GFORTH; ./configure && make && sudo make install)
+fi)
 
 # get, build, and install ed25519-donna
 
