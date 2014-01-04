@@ -132,6 +132,6 @@ init-client
     0 ?DO  c:test& req-ms# ms  LOOP
     requests->0 ;
 
-1 c:tests
+?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
 
 script? [IF] bye [THEN]
