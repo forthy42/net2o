@@ -564,15 +564,15 @@ also net2o-base
 
 : setrate-limit ( rate -- rate' )
     \ do not change requested rate by more than a factor 2
-    last-rate 64@ 64>n
-    ?dup-IF  tuck 2* min swap 2/ max  THEN
-    dup n>64 last-rate 64! ;
+    last-rate 64@
+    64dup 64-0<> IF  64tuck 64-2* 64min 64swap 64-2/ 64max  ELSE  64drop  THEN
+    64dup last-rate 64! ;
 
 : >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
     recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0<> IF
 	64- 64>n max-dticks 64@ 64>n tick-init 1+ * max rate( .eff ) >r
-	delta-ticks 64@ 64>n tick-init 1+ acks @ */ setrate-limit
-	rate( .rate ) ulit, r> ulit, set-rate
+	delta-ticks 64@ tick-init 1+ acks @ 64*/ setrate-limit
+	rate( .rate ) lit, r> ulit, set-rate
     ELSE
 	64drop 64drop
     THEN

@@ -15,6 +15,7 @@ cell 8 = [IF]
     ' nip Alias 64nip
     ' swap Alias 64swap
     ' over Alias over64 ( n 64 -- n 64 n )
+    ' tuck Alias 64tuck
     ' + Alias 64+
     ' - Alias 64-
     ' or Alias 64or
@@ -83,6 +84,7 @@ cell 8 = [IF]
     ' 2dup Alias 64dup
     ' 2over Alias 64over
     ' 2swap Alias 64swap
+    ' 2tuck Alias 64tuck
     : over64 ( n 64 -- n 64 n ) 2 pick ;
     : 64,  swap 2, ;
     : 64@  2@ swap ; [IFDEF] macro macro [THEN]

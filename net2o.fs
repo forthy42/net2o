@@ -977,7 +977,7 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    rtdelay 64@ 64>n rt-bias# + ns/burst 64@ 64>n /
+    rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
     rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
@@ -1039,7 +1039,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     s>f slack# fm/ 2e fswap f** ;
 
 : aggressivity-rate ( slack -- slack' )
-    slack-max# 64>n 2/ slack-default# tuck min swap 64*/ ;
+    slack-max# 64-2/ 64>n slack-default# tuck min swap 64*/ ;
 
 : slackext ( rfactor -- slack )
     slackgrow 64@
@@ -1369,7 +1369,7 @@ User code-packet
     outbody min-size r> lshift move ;
 
 : bandwidth+ ( -- )  o?
-    ns/burst 64@ 64>n tick-init 1+ / n>64 bandwidth-tick 64+! ;
+    ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
