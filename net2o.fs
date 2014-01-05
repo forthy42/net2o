@@ -390,6 +390,8 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 	'6' of  .ip6  endof
 	-rot dump endcase cr ;
 
+: .iperr ( addr len -- ) [: ." connected from: " .ipaddr ;] $err ;
+
 \ route an incoming packet
 
 User return-addr
@@ -769,7 +771,7 @@ resend-size# buffer: resend-init
     s" " crypto-key $!
     s" " file-state $!
     init-flow-control
-    -timeout ['] .ipaddr setip-xt !
+    -timeout ['] .iperr setip-xt !
     -1 blocksize !
     1 blockalign ! ;
 
@@ -968,8 +970,7 @@ timestats buffer: stat-tuple
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- lastslack 64@ 64- slack( 64dup 64. .o ." grow" cr )
-    slackgrow 64! ;
+    64- lastslack 64@ 64- slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
     dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
@@ -983,7 +984,7 @@ timestats buffer: stat-tuple
     rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
     dup flybursts-max# min flyburst ! ;
 : net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
-    0= IF  bursts( .o ." start bursts" cr ) THEN ;
+    bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
 : >flyburst ( -- )
     flyburst @ flybursts max!@ \ reset bursts in flight
@@ -1054,13 +1055,13 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
-    64over 64-2* 64-2* 64min 64dup extra-ns 64! 64+ ;
+    64over 64-2* 64-2* 64min \ limit to 4* rate
+    64dup extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
-    stats( ticks time-offset 64@ 64-
+    stats( recv-tick 64@ time-offset 64@ 64-
            64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
-           64over 64>f stat-tuple ts-reqrate sf! )
-    deltat( 64dup 64. lastdeltat 64@ 64. .o ." deltat" cr ) ;
+           64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
     stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!

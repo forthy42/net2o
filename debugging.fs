@@ -34,11 +34,6 @@ comp: execute postpone SLiteral ;
 \ debugging switches
 
 debug: timing(
-debug: rate(
-debug: ratex(
-debug: deltat(
-debug: slack(
-debug: slk(
 debug: bursts(
 debug: resend(
 debug: track(
@@ -108,7 +103,7 @@ true [IF]
 
     : !time ( -- ) ticks timer-tick 64! ;
     : @time ( -- f ) ticks timer-tick 64@ 64- 64>f 1e-9 f* ;
-    : .time ( -- ) @time f. ." s" ;
+    : .time ( -- ) @time 13 9 6 f.rdp ." s " ;
 [ELSE]
     ' noop alias init-timer
     ' noop alias .times

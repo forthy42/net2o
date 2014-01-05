@@ -520,7 +520,7 @@ set-current previous
 
 also net2o-base
 
-Variable file-reg#
+User file-reg#
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o ulit, file-reg# @ ulit, open-tracked-file
@@ -544,21 +544,15 @@ previous
 
 \ client side timing
 
-: ack-size ( -- )  1 acks +!  recv-tick 64@ 64dup lastb-ticks 64!@
-    64dup 64-0= IF  64drop 64drop  EXIT  THEN
-    64- max-dticks 64max! ;
+: ack-size ( -- )  1 acks +!
+    recv-tick 64@ 64dup lastb-ticks 64!@ 64- max-dticks 64max! ;
 : ack-first ( -- )
-    lastb-ticks 64@ 64dup 64-0= 0= IF
-	firstb-ticks 64@ 64- delta-ticks 64+!
-    ELSE  64drop  THEN
-    recv-tick 64@ firstb-ticks 64!  lastb-ticks 64off
-    recv-tick 64@ last-rtick 64!  recv-addr 64@ last-raddr 64! ;
+    lastb-ticks 64@ firstb-ticks 64@ 64- delta-ticks 64+!
+    recv-tick 64@ 64dup firstb-ticks 64!  64dup lastb-ticks 64!
+    last-rtick 64!  recv-addr 64@ last-raddr 64! ;
 
-: ack-timing ( n -- )  ratex( dup 3 and s" .[+(" drop + c@ emit )
+: ack-timing ( n -- )
     b2b-toggle# and  IF  ack-first  ELSE  ack-size  THEN ;
-
-: .rate ( n -- n ) dup . ." rate" cr ;
-: .eff ( n -- n ) dup . ." eff" cr ;
 
 also net2o-base
 
@@ -570,9 +564,9 @@ also net2o-base
 
 : >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
     recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0<> IF
-	64- 64>n max-dticks 64@ 64>n tick-init 1+ * max rate( .eff ) >r
+	64- max-dticks 64@ tick-init 1+ n>64 64* 64max 64>r
 	delta-ticks 64@ tick-init 1+ acks @ 64*/ setrate-limit
-	rate( .rate ) lit, r> ulit, set-rate
+	lit, 64r> lit, set-rate
     ELSE
 	64drop 64drop
     THEN
@@ -746,9 +740,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : net2o:do-ack ( -- ) 
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
-    inbuf 1+ c@ recv-flag ! \ last receive flag
-    inbuf 1+ c@ acks# and
-    dup ack-receive !@ xor >r
+    inbuf 1+ c@ dup recv-flag ! \ last receive flag
+    acks# and dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	cmd0source off  cmdlock lock  cmdreset
 	r@ resend-toggle# and IF  true net2o:do-resend  THEN
