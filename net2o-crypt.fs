@@ -122,6 +122,8 @@ keysize buffer: keypad
 
 \ IVS
 
+Variable do-keypad
+
 : keypad$ ( -- addr u )
     do-keypad $@ dup 0= IF  2drop  crypto-key $@  THEN ;
 

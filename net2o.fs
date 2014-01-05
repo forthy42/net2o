@@ -530,7 +530,6 @@ object class
     field: blocksize
     field: blockalign
     field: crypto-key
-    field: do-keypad
     field: pubkey
     field: timeout-xt \ callback for timeout
     field: setip-xt   \ callback for set-ip

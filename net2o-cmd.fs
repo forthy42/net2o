@@ -98,7 +98,10 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	.net2o-name
 	0 endcase ]hex ;
 
+Variable show-offset  show-offset on
+
 : cmd-see ( addr u -- addr' u' )
+    dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
 : n2o:see ( addr u -- )  ." net2o-code " 
@@ -239,7 +242,8 @@ Variable throwcount
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0=  UNTIL ;] catch
     dup IF   1 throwcount +! dup s" do-cmd-loop: " etype DoError nothrow
-	n2o:see-me  throwcount @ 4 < IF  >throw  THEN  THEN
+	buf-state @ show-offset !  n2o:see-me  show-offset on
+	throwcount @ 4 < IF  >throw  THEN  THEN
     drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
@@ -276,7 +280,8 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
     neststack @+ swap cells + @ neststart# ! ;
 
 : cmd>nest ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
-: cmd>tmpnest ( -- addr u ) cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
+: cmd>tmpnest ( -- addr u )
+    cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
 
 : do-nest ( addr u flag -- )
     buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
