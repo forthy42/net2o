@@ -19,22 +19,26 @@ set y2label "Slack [ms]"
 set multiplot layout 2, 2 rowsfirst
 #set term wxt 0
 #set term wxt 1
+set title "timing0" #textcolor rgbcolor "green"
+plot "timing0" using 1:4 title "Requested",\
+ "timing0" using 1:5 title "Rate",\
+ "timing0" using 1:3 axis x1y2 title "Slack", \
+ "timing0" using 1:6 axis x1y2 title "Grow"
+#set term wxt 2
+set title "timing1" #textcolor rgbcolor "green"
 plot "timing1" using 1:4 title "Requested",\
  "timing1" using 1:5 title "Rate",\
  "timing1" using 1:3 axis x1y2 title "Slack", \
  "timing1" using 1:6 axis x1y2 title "Grow"
-#set term wxt 2
+#set term wxt 3
+set title "timing2" #textcolor rgbcolor "green"
 plot "timing2" using 1:4 title "Requested",\
  "timing2" using 1:5 title "Rate",\
  "timing2" using 1:3 axis x1y2 title "Slack", \
  "timing2" using 1:6 axis x1y2 title "Grow"
-#set term wxt 3
+#unset multiplot
+set title "timing3" #textcolor rgbcolor "green"
 plot "timing3" using 1:4 title "Requested",\
  "timing3" using 1:5 title "Rate",\
  "timing3" using 1:3 axis x1y2 title "Slack", \
  "timing3" using 1:6 axis x1y2 title "Grow"
-#unset multiplot
-plot "timing4" using 1:4 title "Requested",\
- "timing4" using 1:5 title "Rate",\
- "timing4" using 1:3 axis x1y2 title "Slack", \
- "timing4" using 1:6 axis x1y2 title "Grow"

@@ -144,7 +144,7 @@ init-client
     up@ 1 stacksize4 NewTask4 pass >r
     c:test ->request r> event> ;
 
-#200 Value req-ms#
+#100 Value req-ms#
 
 : c:tests ( n -- )  dup to total-tests  dup requests !
     0 ?DO  c:test& req-ms# ms test# 1+ to test#  LOOP

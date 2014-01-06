@@ -581,6 +581,7 @@ object class
     64field: max-dticks
     field: acks
     64field: last-rate
+    field: rec-timing
     \ experiment: track previous b2b-start
     64field: last-rtick
     64field: last-raddr
@@ -922,8 +923,6 @@ $400 buffer: aligned$
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
 : net2o:/timing ( n -- )
     stats( timing-stat 0 rot $del ) ;
-
-Variable rec-timing
 
 : .rec-timing ( addr u -- ) rec-timing $@ \ do some dumps
     bounds ?DO
