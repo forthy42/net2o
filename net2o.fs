@@ -61,20 +61,6 @@ require ed25519-donna.fs
 require hash-table.fs
 require mini-oof2.fs
 
-\ porting helper to mini-oof2
-
-0 [IF]
-Variable do-stackrel
-
-Create o-sp 0 ,  DOES> @ do-stackrel @ 0= IF  o#+ [ 0 , ] THEN + ;
-comp: >body @ do-stackrel @ IF  postpone lit+  ELSE  postpone o#+ THEN , ;
-
-' o-sp to var-xt
-: [o  do-stackrel @ do-stackrel off ; immediate
-: o]  do-stackrel ! ;  immediate
-do-stackrel off
-[THEN]
-
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
@@ -223,10 +209,10 @@ UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
 UValue aligned$
-User 'statbuf
-: statbuf 'statbuf $@ drop ;
+UValue statbuf
 
-: init-statbuf ( -- ) 'statbuf off "" 'statbuf $! file-stat 'statbuf $!len ;
+: init-statbuf ( -- )
+    file-stat allocate throw to statbuf ;
 
 sema cmd0lock
 
@@ -244,10 +230,10 @@ sema cmd0lock
 : free-io ( -- )
     inbuf  maxpacket-aligned buffers# * free+guard
     outbuf maxpacket-aligned buffers# * free+guard
-    cmd0buf free throw
+    cmd0buf  free throw
     init0buf free throw
     sockaddr free throw
-    'statbuf $off
+    statbuf  free throw
 ;
 
 alloc-io
