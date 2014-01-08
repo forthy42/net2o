@@ -57,9 +57,10 @@ keccak-o crypto-o !
 \ require wurstkessel.fs
 \ wurstkessel-o crypto-o !
 require rng.fs
+require mini-oof2.fs
+require user-object.fs
 require ed25519-donna.fs
 require hash-table.fs
-require mini-oof2.fs
 
 \ helper words
 
@@ -225,6 +226,7 @@ sema cmd0lock
     sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
     $400 allocate throw to aligned$
     init-statbuf
+    init-ed25519 c:init
 ;
 
 : free-io ( -- )
@@ -1734,7 +1736,7 @@ Defer init-reply
 : create-sender-task ( -- )
     o 1 stacksize4 NewTask4 dup to sender-task pass
     init-reply prep-evsocks
-    >o rdrop  alloc-io c:init
+    >o rdrop  alloc-io
     send-loop ;
 
 : next-packet ( -- addr u )
@@ -1926,7 +1928,7 @@ true !!timeout!! ;
 : create-receiver-task ( -- )
     o 1 stacksize4 NewTask4 dup to receiver-task pass
     init-reply  prep-socks
-    >o rdrop  alloc-io c:init
+    >o rdrop  alloc-io
     BEGIN  do-event-loop
 	wait-task @ ?dup-IF  ->timeout event>  THEN  AGAIN ;
 

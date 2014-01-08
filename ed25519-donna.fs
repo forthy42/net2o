@@ -35,19 +35,21 @@ end-c-library
 
 $20 Constant KEYBYTES
 
-$40 12 * $60 + $40 + 200 + $10 + Constant edbuf#
+user-o edbuf
 
-here edbuf# allot $F + -$10 and \ align for SSE
+object class
+    $30 uvar sct0
+    $30 uvar sct1
+    $30 uvar sct2
+    $30 uvar sct3
+    $C0 uvar get0
+    $C0 uvar get1
+    $60 uvar sigbuf
+    $40 uvar hashtmp
+    #200 uvar keccaktmp
+end-class edbuf-c
 
-dup Constant sct0 $40 +
-dup Constant sct1 $40 +
-dup Constant sct2 $40 +
-dup Constant sct3 $40 + \ can be between $20 and $30
-dup Constant get0 $100 +
-dup Constant get1 $100 + \ can be between $80 and $C0
-dup Constant sigbuf $60 +
-dup Constant hashtmp $40 +
-Constant keccaktmp
+: init-ed25519  edbuf-c new edbuf ! ;
 
 : gen-sk ( sk -- ) >r
     \G generate a secret key with the right bits set and cleared

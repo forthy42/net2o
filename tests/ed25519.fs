@@ -1,5 +1,7 @@
 \ test for ed25519 - first fuzzed, then deterministic test
 
+init-ed25519
+
 : gen-pairs ( -- )
     skc pkc ed-keypair
     stskc stpkc ed-keypair ;
