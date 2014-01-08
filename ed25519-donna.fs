@@ -89,7 +89,7 @@ end-class edbuf-c
     sigbuf $40 ; \ r,s
 
 : ed-check? { sig pk -- flag }
-    \G check a message: the keccak state ontaints the hash of the message.
+    \G check a message: the keccak state contains the hash of the message.
     \G The unpacked pk is in get0, so this word can be used for batch checking.
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
     hashtmp $40 >keccak keccak* hashtmp $40 keccak> \ z=hash(r+pk+message)

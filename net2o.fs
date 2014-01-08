@@ -40,6 +40,7 @@ s" no temporary key"             throwcode !!no-tmpkey!!
 s" invalid nest"                 throwcode !!nest!!
 s" invalid tmpnest"              throwcode !!tmpnest!!
 s" cookie recieved twice"        throwcode !!double-cookie!!
+s" code destination is 0"        throwcode !!no-dest!!
 
 \ required tools
 
@@ -1457,21 +1458,19 @@ Create chunk-adder chunks-struct allot
 	    UNLOOP  EXIT
 	THEN
     chunks-struct +LOOP
-    resize-lock lock
-    o chunk-adder chunk-context !
-    0 chunk-adder chunk-count !
-    chunk-adder chunks-struct chunks $+!
-    resize-lock unlock
+    [: o chunk-adder chunk-context !
+      0 chunk-adder chunk-count !
+      chunk-adder chunks-struct chunks $+! ;]
+    resize-lock c-section
     ticker 64@ ticks-init ;
 
 : o-chunks ( -- )
-    resize-lock lock
-    chunks $@len 0 ?DO
-	chunks $@ I /string drop chunk-context @ o = IF
-	    chunks I chunks-struct $del
-	    r> r> chunks-struct - 2dup >r >r = ?LEAVE
-	0  ELSE  chunks-struct  THEN  +LOOP
-    resize-lock unlock ;
+    [: chunks $@len 0 ?DO
+	  chunks $@ I /string drop chunk-context @ o = IF
+	      chunks I chunks-struct $del
+	      r> r> chunks-struct - 2dup >r >r = ?LEAVE
+	  0  ELSE  chunks-struct  THEN  +LOOP ;]
+    resize-lock c-section ;
 
 event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 
@@ -1799,8 +1798,8 @@ $20 Constant keys-val
             64dup  time-offset 64@ 64- 64. ." recv timing" cr )
     recv-tick 64! \ time stamp of arrival
     dup >r inbuf-decrypt 0= IF
-	inbuf .header
-	." invalid packet to " dest-addr 64@ .16 cr
+	." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
+	." size " min-size inbuf c@ datasize# and lshift hex. cr
 	rdrop EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr @ dup return-address !@
@@ -1831,20 +1830,20 @@ Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 Variable timeout-task
 
-: o+timeout ( -- )  timeout-sema lock
-    timeout-tasks $@ bounds ?DO  I @ o = IF
-	    UNLOOP   timeout-sema unlock  EXIT  THEN
-    cell +LOOP
-    o timeout-task !  timeout-task cell timeout-tasks $+!
-    timeout-sema unlock ;
-: o-timeout ( -- )  timeout-sema lock
-    timeout-tasks $@len 0 ?DO
-	timeout-tasks $@ I /string drop @ o =  IF
-	    timeout-tasks I cell $del
-	    timeout-tasks $@len drop
-	    r> r> cell- 2dup >r >r = ?LEAVE
-	    0  ELSE  cell  THEN
-    +LOOP  timeout-sema unlock ;
+: o+timeout ( -- )
+    [: timeout-tasks $@ bounds ?DO  I @ o = IF
+	      UNLOOP  EXIT  THEN
+      cell +LOOP
+      o timeout-task !  timeout-task cell timeout-tasks $+! ;]
+    timeout-sema c-section ;
+: o-timeout ( -- )
+    [: timeout-tasks $@len 0 ?DO
+	  timeout-tasks $@ I /string drop @ o =  IF
+	      timeout-tasks I cell $del
+	      timeout-tasks $@len drop
+	      r> r> cell- 2dup >r >r = ?LEAVE
+	      0  ELSE  cell  THEN
+      +LOOP ;] timeout-sema c-section ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >next-timeout ( -- )  o?
@@ -1973,25 +1972,26 @@ con-cookie >osize @ buffer: cookie-adder
 #5000000000. d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie )
-    o cookie-adder >o cc-context !
-    ntime d>64 64dup cc-timeout 64!
-    o o> cookie-size#  cookies $+! ;
+    [: o cookie-adder >o cc-context !
+      ntime d>64 64dup cc-timeout 64!
+      o o> cookie-size#  cookies $+! ;]
+    resize-lock c-section ;
 
 : ?cookie ( cookie -- context true / false )
-    ticker 64@ connect-timeout# 64- { 64: timeout }
-    0 >r BEGIN  r@ cookies $@len u<  WHILE
-	    cookies $@ r@ /string drop >o
-	    cc-timeout 64@ timeout 64u< IF
-		cookies r@ cookie-size# $del
-	    ELSE
-		64dup cc-timeout 64@ 64= IF
-		    64drop cc-context @ o>
-		    cookies r> cookie-size# $del
-		    true  EXIT
-		THEN
-		r> cookie-size# + >r
-	    THEN
-    REPEAT  64drop rdrop false ;
+    [: ticker 64@ connect-timeout# 64- { 64: timeout }
+      0 >r BEGIN  r@ cookies $@len u<  WHILE
+	      cookies $@ r@ /string drop >o
+	      cc-timeout 64@ timeout 64u< IF
+		  cookies r@ cookie-size# $del
+	      ELSE
+		  64dup cc-timeout 64@ 64= IF
+		      64drop cc-context @ o>
+		      cookies r> cookie-size# $del
+		      true EXIT
+		  THEN
+		  r> cookie-size# + >r
+	      THEN
+      REPEAT  64drop rdrop false ;] resize-lock c-section ;
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF

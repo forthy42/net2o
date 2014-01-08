@@ -200,7 +200,8 @@ comp: :, also net2o-base ;
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest  THEN ;
+: cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
+    64dup 64-0= !!no-dest!! THEN ;
 
 : cmd ( -- )  cmdbuf cmddest send-cmd
     cmd0source @ 0= IF  code+  THEN ;
