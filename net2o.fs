@@ -37,6 +37,9 @@ s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 s" no temporary key"             throwcode !!no-tmpkey!!
+s" invalid nest"                 throwcode !!nest!!
+s" invalid tmpnest"              throwcode !!tmpnest!!
+s" cookie recieved twice"        throwcode !!double-cookie!!
 
 \ required tools
 
@@ -219,6 +222,7 @@ UValue outbuf   ( -- addr )
 UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
+UValue aligned$
 User 'statbuf
 : statbuf 'statbuf $@ drop ;
 
@@ -233,6 +237,7 @@ sema cmd0lock
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
+    $400 allocate throw to aligned$
     init-statbuf
 ;
 
@@ -907,7 +912,7 @@ reply buffer: dummy-reply
     o> ;
 
 \ aligned buffer to make encryption/decryption fast
-$400 buffer: aligned$
+
 : $>align ( addr u -- addr' u ) dup $400 u> ?EXIT
     tuck aligned$ swap move aligned$ swap ;
     
@@ -1831,6 +1836,7 @@ $20 Constant keys-val
 \ o IF  timeout-xt ~~ @ ?dup-IF ~~ execute ~~ ELSE ~~ THEN ELSE ~~ THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
+#10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
 #12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
 
 Sema timeout-sema
@@ -1854,7 +1860,7 @@ Variable timeout-task
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >next-timeout ( -- )  o?
-    rtdelay 64@ timeouts @ sq2**
+    rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
 : 64min? ( a b -- min flag )

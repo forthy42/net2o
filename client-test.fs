@@ -142,7 +142,7 @@ init-client
 
 : c:test& ( -- ) \ in background
     up@ 1 stacksize4 NewTask4 pass >r
-    c:test ->request r> event> ;
+    alloc-io c:test ->request r> event> ;
 
 #100 Value req-ms#
 

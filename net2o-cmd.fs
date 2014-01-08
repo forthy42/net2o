@@ -114,7 +114,7 @@ Variable show-offset  show-offset on
 : extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
   DOES>  >r cmd@ cells r> + perform ;
 
-10 buffer: 'cmd-buf
+User 'cmd-buf $10 cell- uallot drop
 
 : >cmd ( xt u -- ) u>64 'cmd-buf p!+  'cmd-buf tuck -
     cmd-base-table >r
@@ -285,13 +285,14 @@ Variable neststack maxnest# cells allot \ nest up to 10 levels
 
 : do-nest ( addr u flag -- )
     buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
-    r> validated ! 2r> buf-state 2! ;
+    r> validated !  2r> buf-state 2! ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
-    0= IF  2drop ." Invalid nest" cr  EXIT  THEN own-crypt-val do-nest ;
+    IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
 
-: cmdtmpnest ( addr u -- )  $>align tmpkey@ drop keysize decrypt$
-    0= IF  2drop ." Invalid tmpnest: o=" o hex. tmpkey@ .nnb cr  EXIT  THEN tmp-crypt-val do-nest ;
+: cmdtmpnest ( addr u -- )
+    $>align tmpkey@ drop keysize decrypt$
+    IF  tmp-crypt-val do-nest  ELSE  un-cmd  THEN ;
 
 \ net2o assembler stuff
 
@@ -743,10 +744,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
-	cmd0source off  cmdlock lock  cmdreset
+	net2o-code
 	r@ resend-toggle# and IF  true net2o:do-resend  THEN
 	net2o:gen-resend  net2o:genack
-    	cmd-send?  cmdlock unlock
+	end-code
     THEN
     +cookie received!
     r> ack-timing ;
@@ -804,8 +805,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : transfer-keepalive? ( -- )
     received @ expected @ u>= ?EXIT
     timeout( .expected )
-    cmdreset update-rtdelay  ticks lit, timeout
-    resend-all  net2o:genack  cmd-send? ;
+    net2o-code
+    update-rtdelay  ticks lit, timeout
+    resend-all  net2o:genack
+    end-code ;
 
 \ : connecting-timeout ( -- )
 \     F .time ."  connecting timeout" F cr

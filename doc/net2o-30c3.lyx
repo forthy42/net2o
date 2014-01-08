@@ -131,7 +131,9 @@ Bernd Paysan (forthy)
 \end_layout
 
 \begin_layout Date
-YBTI in depth session, 30C3, Hamburg
+YBTI in depth session, 30C3, Hamburg 
+\emph on
+(later added stuff in italics)
 \end_layout
 
 \begin_layout Standard
@@ -1162,7 +1164,9 @@ The remaining problem are two simultaneous handovers, and the suggestion
 \end_layout
 
 \begin_layout BeginFrame
-Routing Example
+Routing Example 
+\emph on
+(added for cjdns)
 \end_layout
 
 \begin_layout Standard
@@ -1246,7 +1250,113 @@ Splice the labels together, and you get a path:
 
 
 \size scriptsize
-<1010><1101.0001.0101.1000.1011.0011><0110.1010><0111.1010><1010.0010.0001.1001.1010.0100>
+1010 || 1101.0001.0101.1000.1011.0011 || 0110.1010 || 0111.1010 || 1010.0010.0001.1001.1010.
+0100 || 0110.1011.0111
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+
+\emph on
+Why Source Routing
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Three possible schemes
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+switched circuit (POTS, virtual: ATM, MPLS)
+\end_layout
+
+\begin_layout Enumerate
+unique identifier (IP)
+\end_layout
+
+\begin_layout Enumerate
+source routing
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Separation of network gear and computers: Fast, dumb, stateless equipment
+ for routing/switching
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The hierarchical topology is a derived 
+\begin_inset Quotes eld
+\end_inset
+
+law of nature
+\begin_inset Quotes erd
+\end_inset
+
+: people cluster together and connect clusters
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Attack vector is only bandwidth--based, and this can be mitigated (see 
+\begin_inset Quotes eld
+\end_inset
+
+fair routing
+\begin_inset Quotes erd
+\end_inset
+
+ below)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing slice is an implementation detail of each network segment (i.e.
+ is a unique identifier within each subnet)
 \end_layout
 
 \begin_layout EndFrame
@@ -1299,6 +1409,19 @@ that hard
 \end_inset
 
 ; further breakthroughs can be expected (RSA challenge withdrew the prices).
+ 
+\emph on
+See 
+\begin_inset Quotes eld
+\end_inset
+
+the year on crypto
+\begin_inset Quotes erd
+\end_inset
+
+ presentation from djb et al for more worrying stuff.
+
+\emph default
  4kbit is 512 bytes, for the session invocation protocol this is above the
  
 \begin_inset Formula $\sim$
@@ -1635,6 +1758,20 @@ Pubkeys don't need (nor should) to be public if you only want to be connected
 \end_deeper
 \begin_layout Itemize
 Use the pubkey authentication for logins and alike, instead of passwords
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+Shared secrets (e.g.
+ for Socialist Millionaire Protocol) are usually not available: If you have
+ a shared secret, please use symmetric crypto directly.
 \end_layout
 
 \begin_layout EndFrame
@@ -2830,6 +2967,56 @@ Scalability to very slow connections is still lacking: bursts are 8 packets
 \end_deeper
 \begin_layout Itemize
 Congested traffic without fair queuing not satisfying
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+
+\emph on
+Why change the FIFO policy?
+\end_layout
+
+\begin_layout Itemize
+Pushing the problem to the place where it occurs --- the router/switch ---
+ makes the solution much easier
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Fair queuing solves the problem of TCP buffer bloat 
+\emph on
+now
+\emph default
+ (for connections competing with the bloated TCP connection) 
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Mitigates DoS attacks (flooding a node with traffic)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Not essential to deployment, but this result help people who work on improving
+ router algorithms
 \end_layout
 
 \begin_layout EndFrame
