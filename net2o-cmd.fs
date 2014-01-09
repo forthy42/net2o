@@ -19,7 +19,7 @@
 
 \ command helper
 
-2Variable buf-state
+User buf-state cell uallot drop
 
 [IFDEF] 64bit
     : zz>n ( zigzag -- n )
@@ -163,9 +163,8 @@ User cmd0source
 User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	code-map @ >o dest-lock o>
-    THEN ;
+\ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
+: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : n2o:see-me ( -- )
@@ -266,9 +265,9 @@ Variable throwcount
     maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
     nip init0buf swap mykey-salt# + 2 64s + ;
 
-$10 Constant maxnest#
-Variable neststart#
-Variable neststack maxnest# cells allot \ nest up to 10 levels
+4 Constant maxnest#
+User neststart#
+User neststack maxnest# cells uallot drop \ nest up to 10 levels
 
 : @+ ( addr -- n addr' )  dup @ swap cell+ ;
 : nest[ ( -- ) neststart# @ neststack @+ swap cells + !
@@ -459,35 +458,31 @@ net2o-base
 
 \ better slurping
 
-70 net2o: slurp-block ( id -- 64nextseek )
-    64>n n2o:slurp-block' ;
-71 net2o: track-size ( size id -- )
+70 net2o: track-size ( size id -- )
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-72 net2o: track-seek ( seek id -- )
+71 net2o: track-seek ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-73 net2o: track-limit ( seek id -- )
+72 net2o: track-limit ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
-74 net2o: set-stat ( mtime mod id -- ) 2*64>n n2o:set-stat ;
-75 net2o: get-stat ( id -- ) 64>n { fd }
+
+:noname lit, ulit, track-seek ; is do-track-seek
+
+73 net2o: set-stat ( mtime mod id -- ) 2*64>n n2o:set-stat ;
+74 net2o: get-stat ( id -- ) 64>n { fd }
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-76 net2o: open-tracked-file ( addr u mode id -- )
+75 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
     r@ id>file F file-size throw
     d>64 lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
-77 net2o: slurp-tracked-block ( id -- )
-    64>n dup >r n2o:slurp-block' 64drop lit, r> ulit, track-seek ;
-78 net2o: slurp-tracked-blocks ( idbits -- )
-    64>n dup >r n2o:slurp-blocks
-    r> [: lit, ulit, track-seek ;] n2o:track-seeks ;
-79 net2o: slurp-all-tracked-blocks ( -- )
+76 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
-    [: lit, ulit, track-seek ;] n2o:track-all-seeks ;
-80 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
-81 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
+    ['] do-track-seek n2o:track-all-seeks ;
+77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
+78 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-82 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
-83 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
+79 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
+80 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ ids 100..120 reserved for key exchange/strage
 

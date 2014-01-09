@@ -485,7 +485,6 @@ object class
     field: dest-head  \ read up to here        received some
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
-    1 pthread-mutexes +field dest-lock
     method free-data
     method regen-ivs
     method handle
@@ -531,6 +530,8 @@ object class
     field: setip-xt   \ callback for set-ip
     field: ack-xt
     field: resend0
+    field: codebuf#
+    1 pthread-mutexes +field code-lock
     
     field: code-map
     field: code-rmap
@@ -714,7 +715,6 @@ m: addr>keys ( addr -- keys )
 
 : map-source ( addr u addrx -- o )
     o >code-flag @ IF code-class ELSE data-class THEN new >o dest-job !
-    dest-lock 0 pthread_mutex_init drop
     alloc-data
     dup addr>ts alloz dest-cookies !
     drop
@@ -768,7 +768,8 @@ resend-size# buffer: resend-init
     init-flow-control
     -timeout ['] .iperr setip-xt !
     -1 blocksize !
-    1 blockalign ! ;
+    1 blockalign !
+    code-lock 0 pthread_mutex_init drop ;
 
 \ create new maps
 
@@ -1250,21 +1251,6 @@ file-state-struct buffer: new-file-state
     dup n>64 fs-seekto 64+! o>
     dup /data ;
 
-: n2o:slurp-block' ( id -- seek )
-    dup n2o:slurp-block drop id>addr? >o fs-seekto 64@ o> ;
-
-: n2o:slurp-blocks-once ( idbits -- sum ) 0 { idbits sum }
-    8 cells 0 DO
-	1 I lshift idbits and IF
-	    I n2o:slurp-block  sum + to sum
-	THEN
-    LOOP  sum ;
-
-: n2o:slurp-blocks ( idbits -- )
-    BEGIN  data-head?  WHILE
-	dup n2o:slurp-blocks-once  0= UNTIL  THEN
-    drop ;
-
 : n2o:slurp-all-blocks ( -- )  +calc fstates 0 { size fails }
     0 BEGIN  data-head?  WHILE
 	    read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
@@ -1287,6 +1273,13 @@ file-state-struct buffer: new-file-state
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
+
+Defer do-track-seek
+
+event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
+
+event: ->slurp ( task o -- )  >o n2o:slurp-all-blocks
+    o elit, ->track event> o> ;
 
 : >sockaddr ( -- addr len )
     return-address @ routes #.key $@ ['] .sockaddr $tmp ;
