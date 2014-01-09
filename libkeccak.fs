@@ -1,5 +1,8 @@
 \ keccak wrapper
 
+require 64bit.fs
+require crypto-api.fs
+
 \ dummy load for Android
 [IFDEF] android
     s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop
@@ -51,15 +54,6 @@ end-c-library
 24 Constant keccak#cks
 
 UValue @keccak
-UValue keccak-state
-UValue keccak-checksums
-
-: keccak-init ( -- )
-    keccak# allocate throw to keccak-state
-    keccak#cks allocate throw to keccak-checksums
-    keccak-state to @keccak ;
-
-keccak-init
 
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
@@ -73,33 +67,42 @@ keccak-init
 
 require crypto-api.fs
 
-crypto class end-class keccak
+crypto class
+    keccak# uvar keccak-state
+    keccak#cks uvar keccak-checksums
+    cell uvar keccak-up
+end-class keccak
 
-' keccak-init keccak to c:init
-:noname to @keccak ; keccak to c:key! ( addr -- )
+: keccak-init crypto-o @ IF  keccak-up @ next-task = ?EXIT  THEN
+    keccak new crypto-o ! next-task keccak-up ! keccak-state to @keccak ;
+
+keccak-init
+
+' keccak-init to c:init
+:noname to @keccak ; to c:key! ( addr -- )
 \G use addr as key storage
-' @keccak keccak to c:key@ ( -- addr )
+' @keccak to c:key@ ( -- addr )
 \G obtain the key storage
-' keccak# keccak to c:key# ( -- n )
+' keccak# to c:key# ( -- n )
 \G obtain key storage size
-:noname keccak0 keccak#max >keccak ; keccak to >c:key ( addr -- )
+:noname keccak0 keccak#max >keccak ; to >c:key ( addr -- )
 \G move 128 bytes from addr to the state
-:noname keccak#max keccak> ; keccak to c:key> ( addr -- )
+:noname keccak#max keccak> ; to c:key> ( addr -- )
 \G get 128 bytes from the state to addr
-:noname @keccak KeccakF ; keccak to c:diffuse ( -- )
+:noname @keccak KeccakF ; to c:diffuse ( -- )
 \G perform a diffuse round
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
     @keccak -rot KeccakEncryptLoop  drop
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
 \    /string dup 0= UNTIL  2drop
-; keccak to c:encrypt
+; to c:encrypt
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u
     @keccak -rot KeccakDecryptLoop  drop
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
 \    /string dup 0= UNTIL  2drop
-; keccak to c:decrypt ( addr u -- )
+; to c:decrypt ( addr u -- )
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u with auth
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
@@ -107,7 +110,7 @@ crypto class end-class keccak
     @keccak -rot KeccakEncryptLoop
     @keccak KeccakF
     >r keccak-checksums keccak#cks keccak> keccak-checksums 128@ r> 128!
-; keccak to c:encrypt+auth ( addr u -- )
+; to c:encrypt+auth ( addr u -- )
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u, with auth check
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
@@ -115,21 +118,21 @@ crypto class end-class keccak
     @keccak -rot KeccakDecryptLoop
     @keccak KeccakF
     128@ keccak-checksums keccak#cks keccak> keccak-checksums 128@ 128=
-; keccak to c:decrypt+auth ( addr u -- flag )
+; to c:decrypt+auth ( addr u -- flag )
 :noname ( addr u -- )
 \G Hash message in buffer addr u
     BEGIN  2dup keccak#max umin tuck >keccak  @keccak KeccakF
     /string dup 0= UNTIL  2drop
-; keccak to c:hash
+; to c:hash
 :noname ( addr u -- )
     BEGIN  @keccak KeccakF  2dup keccak#max umin tuck keccak>
     /string dup 0= UNTIL  2drop
-; keccak to c:prng
+; to c:prng
 \G Fill buffer addr u with PRNG sequence
 :noname @keccak KeccakF
-    keccak-checksums keccak#cks keccak> keccak-checksums 128@ ; keccak to c:checksum ( -- xd )
+    keccak-checksums keccak#cks keccak> keccak-checksums 128@ ; to c:checksum ( -- xd )
 \G compute a 128 bit checksum
-:noname keccak-checksums keccak#cks keccak> keccak-checksums $10 + 64@ ; keccak to c:cookie ( -- x )
+:noname keccak-checksums keccak#cks keccak> keccak-checksums $10 + 64@ ; to c:cookie ( -- x )
 \G obtain a different 64 bit checksum part
 
 static-a to allocater

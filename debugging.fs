@@ -135,6 +135,15 @@ timer: +ack
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
 
+\ extra hints for last word executed
+
+: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
+
+User last-exe-xt
+: .exe ( -- ) last-exe-xt @ .name ;
+: : ( "name" -- colon-sys )
+    : lastxt ]]L last-exe-xt ! [[ ;
+
 \ Emacs fontlock mode: Highlight more stuff
 
 0 [IF]

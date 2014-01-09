@@ -1,27 +1,21 @@
 \ Wurstkessel data from www.random.org                 26jan09py
 
 require 64bit.fs
-require mini-oof2.fs
+require crypto-api.fs
 
 8 64s Constant state#
 2 2*  Constant state#32
 1     Constant state#16
 
-User wurst'
+crypto-o next-task - class-o !
 
-Create wurst-o 0 ,  DOES> @ o#+ [ 0 , ] + wurst' @ + ;
-comp: >body @ ]] wurst' @ lit+ [[ , ;
-
-' wurst-o to var-xt
-
-object class
-    state# +field wurst-source
-    state# +field wurst-state
-    state# +field nextstate
-    state# 8 * +field message
-end-class wurst-class
-
-current-o
+crypto class
+    state# uvar wurst-source
+    state# uvar wurst-state
+    state# uvar nextstate
+    state# 8 * uvar message
+    cell uvar wurst-up
+end-class wurstkessel
 
 : .16 ( u[d] -- )
     [ cell 8 = ] [IF] 0 [THEN]
@@ -547,13 +541,10 @@ $28 Value rounds#
     message roundse# rounds-encrypt \ another key diffusion round
     @state 128@ ;
 
-require crypto-api.fs
-
-crypto class
-end-class wurstkessel
-
 : wurst-task-init ( -- )
-    [ wurst-class >osize @ ]L allocate throw wurst' !  wurst-source rounds-setkey ;
+    crypto-o @ IF  wurst-up @ next-task = ?EXIT  THEN
+    wurstkessel new crypto-o ! next-task wurst-up !
+    wurst-source rounds-setkey ;
 
 ' wurst-task-init wurstkessel to c:init
 :noname to @state ; wurstkessel to c:key!

@@ -47,9 +47,14 @@ object class
     $60 uvar sigbuf
     $40 uvar hashtmp
     #200 uvar keccaktmp
+    cell uvar task-id
 end-class edbuf-c
 
-: init-ed25519  edbuf-c new edbuf ! ;
+: init-ed25519
+    edbuf @ IF  task-id @ up@ = ?EXIT  THEN
+    edbuf-c new edbuf !  up@ task-id ! ;
+
+init-ed25519
 
 : gen-sk ( sk -- ) >r
     \G generate a secret key with the right bits set and cleared

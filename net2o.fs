@@ -45,21 +45,21 @@ s" code destination is 0"        throwcode !!no-dest!!
 \ required tools
 
 \ require smartdots.fs
+require mini-oof2.fs
+require user-object.fs
 require 64bit.fs
-require debugging.fs
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
 require string.fs
 require struct0x.fs
+require debugging.fs
 require libkeccak.fs
 keccak-o crypto-o !
 \ require wurstkessel.fs
 \ wurstkessel-o crypto-o !
 require rng.fs
-require mini-oof2.fs
-require user-object.fs
 require ed25519-donna.fs
 require hash-table.fs
 
@@ -1890,8 +1890,6 @@ User requests
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  packet-event +event  AGAIN ;
 
-: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
-
 event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 true !!timeout!! ;
@@ -1921,7 +1919,7 @@ true !!timeout!! ;
 
 : do-event-loop ( -- )  o >r
     BEGIN  ['] event-loop-nocatch catch ?int dup  WHILE
-	    [: ." event-loop: " dup . cr DoError ;] $err nothrow
+	    [: ." event-loop: " dup . .exe cr DoError ;] $err nothrow
 	r@ >o rdrop  REPEAT  drop rdrop ;
 
 : create-receiver-task ( -- )
