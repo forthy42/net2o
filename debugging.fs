@@ -140,7 +140,7 @@ timer: +ack
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : m: : ;
-0 [IF]
+false [IF]
     User last-exe-xt
     : .exe ( -- ) last-exe-xt @ .name ;
     : : ( "name" -- colon-sys )

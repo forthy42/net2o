@@ -1329,7 +1329,7 @@ require net2o-crypt.fs
 : set-dest ( addr target -- )
     outbuf ins-dest  64dup dest-addr 64!  outbuf addr 64! ;
 
-Variable outflag  outflag off
+User outflag  outflag off
 
 : set-flags ( -- )
     outflag @ outbuf 1+ c! outflag off ;
@@ -1380,7 +1380,7 @@ User code-packet
 
 \ branchless version using floating point
 
-FVariable <size-lb>
+User <size-lb> 1 floats cell- uallot drop
 
 : send-size ( u -- n )
     min-size umax maxdata umin 1-
@@ -1531,9 +1531,6 @@ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
 	chunks+ @ 0= IF  r> 1+ >r  THEN
     r@ 2 u>=  UNTIL  rdrop ;
 
-Variable sendflag  sendflag off
-Variable recvflag  recvflag off
-    
 : send-anything? ( -- flag )  chunks $@len 0> ;
 
 \ rewind buffer to send further packets
@@ -1708,6 +1705,7 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 4 Value sends#
 4 Value sendbs#
 16 Value recvs# \ balance receive and send
+Variable recvflag  recvflag off
 
 : read-a-packet? ( -- addr u )
     don't-block read-a-packet dup IF  1 recvflag +!  THEN ;
@@ -1755,7 +1753,7 @@ Defer queue-command ( addr u -- )
 
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
-Variable validated
+User validated
 
 $01 Constant crypt-val
 $02 Constant own-crypt-val

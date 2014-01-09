@@ -15,7 +15,7 @@ fi
 # get, build, and install Gforth
 
 which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
-(which gforth 1>/dev/null 2>/dev/null && test "$GF" == "$GFORTH") || (
+(which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
     wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
     (tar zxf $GFORTH.tar.gz; cd $GFORTH; ./configure && make && sudo make install)
 )
