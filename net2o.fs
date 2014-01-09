@@ -1789,23 +1789,19 @@ $20 Constant keys-val
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
 
+: .inv-packet ( -- )
+    ." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
+    ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
+
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
-    ticker 64@
-    timing( dest-addr 64@ 64.
-            64dup  time-offset 64@ 64- 64. ." recv timing" cr )
-    recv-tick 64! \ time stamp of arrival
-    dup >r inbuf-decrypt 0= IF
-	." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
-	." size " min-size inbuf c@ datasize# and lshift hex. cr
-	rdrop EXIT  THEN
+    ticker 64@  recv-tick 64! \ time stamp of arrival
+    dup >r inbuf-decrypt 0= IF  .inv-packet  rdrop EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
-    return-addr @ dup return-address !@
-    address( <> IF  ." handover" cr THEN )else( 2drop )
+    return-addr @ return-address !
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta
-    header( inbuf .header )
     dest-addr 64@ 64-0= IF  handle-cmd0
     ELSE
 	check-dest dup 0= IF  drop  EXIT  THEN +dest
