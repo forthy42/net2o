@@ -139,10 +139,15 @@ timer: +ack
 
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
-User last-exe-xt
-: .exe ( -- ) last-exe-xt @ .name ;
-: : ( "name" -- colon-sys )
-    : lastxt ]]L last-exe-xt ! [[ ;
+: m: : ;
+0 [IF]
+    User last-exe-xt
+    : .exe ( -- ) last-exe-xt @ .name ;
+    : : ( "name" -- colon-sys )
+	: lastxt ]]L last-exe-xt ! [[ ;
+[ELSE]
+    : .exe ;
+[THEN]
 
 \ Emacs fontlock mode: Highlight more stuff
 

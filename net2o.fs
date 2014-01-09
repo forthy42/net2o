@@ -663,15 +663,15 @@ $100 Value dests#
 
 Variable >code-flag
 
-: addr>bits ( addr -- bits )
+m: addr>bits ( addr -- bits )
     chunk-p2 rshift ;
-: bits>bytes ( bits -- bytes )
+m: bits>bytes ( bits -- bytes )
     1- 2/ 2/ 2/ 1+ ;
-: addr>ts ( addr -- ts-offset )
+m: addr>ts ( addr -- ts-offset )
     addr>bits timestamp * ;
-: addr>replies ( addr -- replies )
+m: addr>replies ( addr -- replies )
     addr>bits reply * ;
-: addr>keys ( addr -- keys )
+m: addr>keys ( addr -- keys )
     max-size^2 rshift [ min-size negate ]L and ;
 
 : alloz ( size -- addr )
