@@ -261,7 +261,7 @@ User ptimeout  cell uallot drop
 #10000000 Value poll-timeout# \ 10ms, don't sleep too long
 poll-timeout# 0 ptimeout 2!
 
-2Variable socktimeout
+User socktimeout cell uallot drop
 
 : sock-timeout! ( socket -- )  fileno
     socktimeout 2@
@@ -532,6 +532,7 @@ object class
     field: resend0
     field: codebuf#
     1 pthread-mutexes +field code-lock
+    1 pthread-mutexes +field filestate-lock
     
     field: code-map
     field: code-rmap
@@ -662,7 +663,7 @@ $100 Value dests#
 \ addr' - real start address
 \ context - for exec regions, this is the job context
 
-Variable >code-flag
+User >code-flag
 
 m: addr>bits ( addr -- bits )
     chunk-p2 rshift ;
@@ -769,7 +770,8 @@ resend-size# buffer: resend-init
     -timeout ['] .iperr setip-xt !
     -1 blocksize !
     1 blockalign !
-    code-lock 0 pthread_mutex_init drop ;
+    code-lock 0 pthread_mutex_init drop
+    filestate-lock 0 pthread_mutex_init drop ;
 
 \ create new maps
 
@@ -1128,15 +1130,19 @@ object class
 end-class file-state-class
 file-state-class >osize @ Constant file-state-struct
 
-file-state-struct buffer: new-file-state
+User new-file-state file-state-struct cell- uallot drop
 
 : id>addr ( id -- addr remainder )
     >r file-state $@ r> file-state-struct * /string ;
 : id>addr? ( id -- addr )
     id>addr file-state-struct < !!fileid!! ;
+: new>file ( -- )
+    [: new-file-state file-state-struct file-state $+! ;]
+    filestate-lock c-section ;
+
 : state-addr ( id -- addr )
     id>addr dup 0< !!gap!!
-    0= IF  drop new-file-state file-state-struct file-state $+!
+    0= IF  drop  new>file
 	file-state $@ + file-state-struct -  THEN ;
 
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
