@@ -1647,7 +1647,7 @@ User pollfds
 pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 : fds!+ ( fileno flag addr -- addr' )
-     >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
+    >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
     net2o-sock  fileno POLLIN  r> fds!+ drop ;
