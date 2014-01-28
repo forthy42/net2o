@@ -532,9 +532,9 @@ User file-reg#
     gen-total slurp-all-tracked-blocks ;
 
 : n2o:close-all ( -- )
-    file-reg# @ 0 ?DO
+    fstates 0 ?DO
 	I n2o:close-file
-    LOOP  file-reg# off  file-state $off ;
+    LOOP  file-reg# off  fstate-off ;
 
 file-reg# off
 

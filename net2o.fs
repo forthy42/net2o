@@ -1125,23 +1125,35 @@ object class
     64field: fs-limit
     64field: fs-time
     field: fs-fid
-end-class file-state-class
-file-state-class >osize @ Constant file-state-struct
+    method fs-read
+    method fs-write
+end-class fs-class
 
-User new-file-state file-state-struct cell- uallot drop
+: >seek ( size 64to 64seek -- size' )
+    64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
+
+:noname ( addr u -- n )
+    fs-limit 64@ fs-seekto 64@ >seek
+    fs-fid @ read-file throw
+    dup n>64 fs-seekto 64+!
+; fs-class to fs-read
+:noname ( addr u -- n )
+    fs-seekto 64@ fs-seek 64@ >seek
+    tuck fs-fid @ write-file throw
+    dup n>64 fs-seek 64+!
+; fs-class to fs-write
 
 : id>addr ( id -- addr remainder )
-    >r file-state $@ r> file-state-struct * /string ;
+    >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
 : id>addr? ( id -- addr )
-    id>addr file-state-struct < !!fileid!! ;
+    id>addr cell < !!fileid!! ;
 : new>file ( -- )
-    [: new-file-state file-state-struct file-state $+! ;]
+    [: fs-class new sp@ cell file-state $+! drop ;]
     filestate-lock c-section ;
 
 : state-addr ( id -- addr )
     id>addr dup 0< !!gap!!
-    0= IF  drop  new>file
-	file-state $@ + file-state-struct -  THEN ;
+    0= IF  drop  new>file file-state $@ + cell- @  THEN ;
 
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
     data-rmap @ >o data-ackbits0 2@  2swap
@@ -1162,27 +1174,21 @@ User new-file-state file-state-struct cell- uallot drop
 
 : net2o:gen-total ( -- 64u ) 64#0
     file-state $@ bounds ?DO
-	I >o fs-limit 64@ fs-seekto 64@ 64- o>
+	I @ >o fs-limit 64@ fs-seekto 64@ 64- o>
 	64>blockalign 64#0 64max 64+
-    file-state-struct +LOOP ;
+    cell +LOOP ;
 
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
 
-: >seek ( size 64to 64seek -- size' )
-    64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
+: fstates ( -- n )  file-state $@len cell/ ;
 
-: fstates ( -- n )  file-state $@len file-state-struct / ;
-
+: fstate-off ( -- )  file-state @ 0= ?EXIT
+    file-state $@ bounds DO  I @ >o dispose o>  cell +LOOP
+    file-state $off ;
 : n2o:save-block ( id -- delta ) 0 { id roff }
     msg( data-rmap @ >o dest-raddr @ o> to roff )
-    rdata-back@
-    id id>addr? >o fs-seekto 64@ fs-seek 64@ >seek
-    msg( ." Write <" 2dup swap roff - hex. hex. o o>
-         residualwrite @ hex. >o id 0 .r ." >" cr )
-    tuck fs-fid @ write-file throw
-    dup n>64 fs-seek 64+! o>
-    dup /back ;
+    rdata-back@ id id>addr? >o fs-write o> dup /back ;
 
 : save-all-blocks ( -- )  +calc fstates 0 { size fails }
     BEGIN  rdata-back?  WHILE
@@ -1246,12 +1252,7 @@ User new-file-state file-state-struct cell- uallot drop
 
 : n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ >o dest-raddr @ o> to roff )
-    data-head@
-    id id>addr? >o fs-limit 64@ fs-seekto 64@ >seek
-    msg( ." Read <" 2dup swap roff - hex. hex. o o> residualread @ hex. >o id 0 .r ." >" cr )
-    fs-fid @ read-file throw
-    dup n>64 fs-seekto 64+! o>
-    dup /data ;
+    data-head@ id id>addr? >o fs-read o> dup /data ;
 
 : n2o:slurp-all-blocks ( -- )  +calc fstates 0 { size fails }
     0 BEGIN  data-head?  WHILE
@@ -1270,7 +1271,7 @@ User new-file-state file-state-struct cell- uallot drop
     LOOP  drop ;
 
 : n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
-    file-state $@len file-state-struct / 0 DO
+    fstates 0 DO
 	I dup id>addr? >o fs-seek 64@ fs-seekto 64@ 64<> IF
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
@@ -1853,7 +1854,7 @@ Variable timeout-task
     data-rmap @ >o free-data o>
     code-map @ >o free-data o>
     code-rmap @ >o free-data o>
-    resend0 $off
+    resend0 $off  fstate-off
     \ erase crypto keys
     crypto-key $@ erase  crypto-key $off
     data-resend $off
