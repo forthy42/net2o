@@ -829,11 +829,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : rewind? ( -- )
     data-rmap @ >o dest-round @ o> lit, rewind-sender ;
 
-\ higher level stuff
-
 previous
-
-require net2o-dht.fs
 
 0 [IF]
 Local Variables:

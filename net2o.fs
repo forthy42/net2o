@@ -845,21 +845,24 @@ Variable mapstart $1 mapstart !
 
 : fix-size ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and r> over + dest-size @ umin over - >r + r> ;
+: fix-size' ( base offset1 offset2 -- addr len )
+    over - >r dest-size @ 1- and + r> ;
+: ?residual ( addr len resaddr -- addr len' ) >r
+    r@ @ ?dup-IF  tuck umin swap  ELSE  blocksize @  THEN
+    over -  r> ! ;
 : data-head@ ( -- addr u )
-    \ you can read into this, it's a block at a time (wraparound!)
+    \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
     dest-raddr @ dest-head @ dest-back @ dest-size @ +
-    fix-size o> blocksize @ umin ;
-: data-tail@ ( -- addr u )
-    \ you can write from this, also a block at a time
-    data-map @ >o
-    dest-raddr @ dest-tail @ dest-head @
-    fix-size o> blocksize @ umin ;
+    fix-size o> blocksize @ umin residualread ?residual ;
 : rdata-back@ ( -- addr u )
-    \ you can write from this, also a block at a time
+    \g you can write from this, also a block at a time
     data-rmap @ >o
     dest-raddr @ dest-back @ dest-tail @
-    fix-size o> blocksize @ umin ;
+    fix-size o> blocksize @ umin residualwrite ?residual ;
+: data-tail@ ( -- addr u )
+    \g you can send from this - as long as you stay block aligned
+    data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
 
 : data-head? ( -- flag )
     data-map @ >o dest-head @ dest-back @ dest-size @ + u< o> ;
@@ -871,16 +874,11 @@ Variable mapstart $1 mapstart !
 \ code sending around
 
 : code-dest ( -- addr )
-    code-map @ >o
-    dest-raddr @ dest-tail @ + o> ;
-
+    code-map @ >o dest-raddr @ dest-tail @ + o> ;
 : code-vdest ( -- addr )
-    code-map @ >o
-    dest-vaddr 64@ dest-tail @ n>64 64+ o> ;
-
+    code-map @ >o dest-vaddr 64@ dest-tail @ n>64 64+ o> ;
 : code-reply ( -- addr )
-    code-map @ >o
-    dest-tail @ addr>replies dest-replies @ + o> ;
+    code-map @ >o dest-tail @ addr>replies dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
     dest-addr 64@ code-rmap @ >o dest-vaddr 64@ 64- 64>n
@@ -1176,13 +1174,9 @@ User new-file-state file-state-struct cell- uallot drop
 
 : fstates ( -- n )  file-state $@len file-state-struct / ;
 
-: ?residual ( addr len resaddr -- addr len' ) >r
-    r@ @ 0= IF  blocksize @ over -
-    ELSE  r@ @ umin  r@ @ over - THEN  r> ! ;
-
 : n2o:save-block ( id -- delta ) 0 { id roff }
     msg( data-rmap @ >o dest-raddr @ o> to roff )
-    rdata-back@ residualwrite ?residual
+    rdata-back@
     id id>addr? >o fs-seekto 64@ fs-seek 64@ >seek
     msg( ." Write <" 2dup swap roff - hex. hex. o o>
          residualwrite @ hex. >o id 0 .r ." >" cr )
@@ -1248,9 +1242,11 @@ User new-file-state file-state-struct cell- uallot drop
     fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
     64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! o> ;
 
+\ read in from files
+
 : n2o:slurp-block ( id -- delta ) 0 { id roff }
     msg( data-map @ >o dest-raddr @ o> to roff )
-    data-head@ residualread ?residual
+    data-head@
     id id>addr? >o fs-limit 64@ fs-seekto 64@ >seek
     msg( ." Read <" 2dup swap roff - hex. hex. o o> residualread @ hex. >o id 0 .r ." >" cr )
     fs-fid @ read-file throw
@@ -1279,6 +1275,8 @@ User new-file-state file-state-struct cell- uallot drop
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
+
+\ separate thread loading... !!TBD!!
 
 Defer do-track-seek
 
@@ -1409,30 +1407,24 @@ User <size-lb> 1 floats cell- uallot drop
 : data-to-send ( -- flag )
     resend$@ nip 0> data-tail? or ;
 
-: net2o:resend ( -- )
-    resend$@ net2o:get-resend 2dup 2>r
-    net2o:prep-send /resend
-    2r> resend( ." resending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
+: net2o:resend ( -- addr taddr target n )
+    resend$@ net2o:get-resend net2o:prep-send /resend ;
 
-: net2o:send ( -- )
-    data-tail@ net2o:get-dest 2dup 2>r
-    net2o:prep-send /dest-tail
-    2r> send( ." sending " over hex. dup hex. outflag @ hex. cr ) 2drop ;
+: net2o:send ( -- addr taddr target n )
+    data-tail@ net2o:get-dest net2o:prep-send /dest-tail ;
 
-: net2o:send-chunk ( -- )  +chunk
-    ack-state c@ outflag or!
-    data-map code-packet !
-    bursts# 1- data-b2b @ = IF
-	\ send a new packet for timing path
-	data-tail? IF  net2o:send  ELSE  net2o:resend  THEN
-    ELSE
-	resend$@ nip IF  net2o:resend  ELSE  net2o:send  THEN
-    THEN
-    dup 0= IF  2drop 2drop  EXIT  THEN
+: ?toggle-ack ( -- )
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
-	sendX  never next-tick 64!
-    ELSE  sendX  THEN ;
+	never next-tick 64!
+    THEN ;
+
+: net2o:send-chunk ( -- )  +chunk
+    ack-state c@ outflag or!  data-map code-packet !
+    bursts# 1- data-b2b @ = IF data-tail? ELSE resend$@ nip 0= THEN
+    IF  net2o:send  ELSE  net2o:resend  THEN
+    dup 0= IF  2drop 2drop  EXIT  THEN
+    ?toggle-ack sendX ;
 
 : bandwidth? ( -- flag )
     ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
@@ -1458,17 +1450,17 @@ Create chunk-adder chunks-struct allot
 	THEN
     chunks-struct +LOOP
     [: o chunk-adder chunk-context !
-      0 chunk-adder chunk-count !
-      chunk-adder chunks-struct chunks $+! ;]
+	0 chunk-adder chunk-count !
+	chunk-adder chunks-struct chunks $+! ;]
     resize-lock c-section
     ticker 64@ ticks-init ;
 
 : o-chunks ( -- )
     [: chunks $@len 0 ?DO
-	  chunks $@ I /string drop chunk-context @ o = IF
-	      chunks I chunks-struct $del
-	      r> r> chunks-struct - 2dup >r >r = ?LEAVE
-	  0  ELSE  chunks-struct  THEN  +LOOP ;]
+	    chunks $@ I /string drop chunk-context @ o = IF
+		chunks I chunks-struct $del
+		r> r> chunks-struct - 2dup >r >r = ?LEAVE
+	    0  ELSE  chunks-struct  THEN  +LOOP ;]
     resize-lock c-section ;
 
 event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
@@ -1577,18 +1569,15 @@ rdata-class to rewind-timestamps-partial
     data-ackbits0 @ over -1 fill
     data-ackbits1 @ swap -1 fill ;
 
+: fill-bits ( addr bytes -- ) >r dup
+    dest-size @ addr>bits bits>bytes
+    dest-back @ addr>bits bits>bytes over 1- and /string
+    r@ umin dup >r -1 fill r> r> - -1 fill ;
+
 : rewind-ackbits-partial ( new-back o:map -- )
     dest-back @ - addr>bits bits>bytes >r
-    data-ackbits0 @
-    dest-size @ addr>bits bits>bytes
-    dest-back @ addr>bits bits>bytes over 1- and /string
-    r@ umin dup >r -1 fill
-    data-ackbits0 @ r> r@ - -1 fill
-    data-ackbits1 @
-    dest-size @ addr>bits bits>bytes
-    dest-back @ addr>bits bits>bytes over 1- and /string
-    r@ umin dup >r -1 fill
-    data-ackbits1 @ r> r> - -1 fill ;
+    data-ackbits0 @ r@ fill-bits
+    data-ackbits1 @ r> fill-bits ;
 
 : net2o:rewind-sender ( n -- )
     data-map @ >o
@@ -1991,9 +1980,10 @@ con-cookie >osize @ buffer: cookie-adder
 
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
 
-\ load net2o commands
+\ load net2o plugins
 
 require net2o-cmd.fs
+require net2o-dht.fs
 require net2o-keys.fs
 
 0 [IF]
