@@ -1127,10 +1127,23 @@ object class
     field: fs-fid
     method fs-read
     method fs-write
+    method fs-open
+    method fs-close
 end-class fs-class
 
 : >seek ( size 64to 64seek -- size' )
     64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
+
+: ?ior ( r -- )
+    \G use errno to generate throw when failing
+    IF  -512 errno - throw  THEN ;
+
+: fs-timestamp! ( mtime fileno -- ) >r
+    [IFDEF] android  rdrop 64drop
+    [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
+	64>d 2dup statbuf ntime!
+	statbuf 2 cells + ntime!
+	r> statbuf futimens ?ior [THEN] ;
 
 :noname ( addr u -- n )
     fs-limit 64@ fs-seekto 64@ >seek
@@ -1142,6 +1155,21 @@ end-class fs-class
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
 ; fs-class to fs-write
+:noname ( -- )
+    fs-fid @ 0= ?EXIT
+    fs-time 64@ 64dup 64-0= IF  64drop
+    ELSE
+	fs-fid @ flush-file throw
+	fs-fid @ fileno fs-timestamp!
+    THEN
+    fs-fid @ close-file throw  fs-fid off
+; fs-class to fs-close
+:noname ( addr u mode -- ) fs-close
+    msg( dup 2over ." open file: " type ."  with mode " . cr )
+    open-file throw fs-fid !
+    fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
+    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64!
+; fs-class to fs-open
 
 : id>addr ( id -- addr remainder )
     >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
@@ -1202,21 +1230,10 @@ end-class fs-class
 
 \ file status stuff
 
-: ?ior ( r -- )
-    \G use errno to generate throw when failing
-    IF  -512 errno - throw  THEN ;
-
 : n2o:get-stat ( id -- mtime mod )
     id>addr? >o fs-fid @ fileno statbuf fstat o> ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode l@ $FFF and ;
-
-: n2o:track-time ( mtime fileno -- ) >r
-    [IFDEF] android  rdrop 64drop
-    [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
-	64>d 2dup statbuf ntime!
-	statbuf 2 cells + ntime!
-	r> statbuf futimens ?ior [THEN] ;
 
 : n2o:track-mod ( mod fileno -- )
     [IFDEF] android 2drop
@@ -1227,26 +1244,10 @@ end-class fs-class
 
 \ open a file - this needs *way more checking*! !!FIXME!!
 
-: id>file ( id -- fid )  id>addr? >o fs-fid @ o> ;
-
-: (n2o:close-file) ( o:file -- )
-    fs-time 64@ 64dup 64-0= IF  64drop
-    ELSE
-	fs-fid @ flush-file throw
-	fs-fid @ fileno n2o:track-time
-    THEN
-    fs-fid @ close-file throw  fs-fid off ;
-
 : n2o:close-file ( id -- )
-    id>addr? >o fs-fid @ IF  (n2o:close-file)  THEN  o> ;
-
+    id>addr? >o fs-close  o> ;
 : n2o:open-file ( addr u mode id -- )
-    state-addr >o
-    fs-fid @ IF  (n2o:close-file)  THEN
-    msg( dup 2over ." open file: " type ."  with mode " . cr )
-    open-file throw fs-fid !
-    fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
-    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! o> ;
+    state-addr >o fs-open o> ;
 
 \ read in from files
 

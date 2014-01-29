@@ -395,11 +395,9 @@ net2o-base
 30 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
 31 net2o: close-file ( id -- )  64>n n2o:close-file ;
 32 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
-33 net2o: slurp-chunk ( id -- ) 64>n id>file data-head@ rot read-file throw /data ;
-34 net2o: send-chunk ( -- ) net2o:send-chunk ;
-35 net2o: send-chunks ( -- ) net2o:send-chunks ;
-36 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
-37 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
+33 net2o: send-chunks ( -- ) net2o:send-chunks ;
+34 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
+35 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize ! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
@@ -472,8 +470,7 @@ net2o-base
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
 75 net2o: open-tracked-file ( addr u mode id -- )
     2*64>n dup >r n2o:open-file
-    r@ id>file F file-size throw
-    d>64 lit, r@ ulit, track-size
+    r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 76 net2o: slurp-all-tracked-blocks ( -- )
     n2o:slurp-all-blocks
