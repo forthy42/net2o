@@ -194,19 +194,32 @@ Variable ins$0 \ just a null pointer
     r@ k#host = IF  check-host  THEN
     r@ k#tags = IF  check-tag   THEN
     r> (d#value+) dht( d#. ) ;
-: d#value? ( mask n -- ) drop 64drop ;
+Defer d#value? ( key -- )
+: d#values? ( mask n -- ) drop 64drop ;
 
 \ commands for DHT
 
 130 net2o: dht-id ( addr u -- ) >d#id ;
 \g set dht id for further operations on it
-131 net2o: dht-value+ ( addr u n -- ) 64>n d#value+ ;
+131 net2o: dht-value+ ( addr u key -- ) 64>n d#value+ ;
 \g add a value to the given dht key
-132 net2o: dht-value- ( addr u n -- ) 64>n d#value- ;
+132 net2o: dht-value- ( addr u key -- ) 64>n d#value- ;
 \g remove a value from the given dht key
-133 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
+133 net2o: dht-value? ( type -- ) 64>n d#value? ;
+134 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
 \g query the dht values mask selects which) and send back up to n
 \g items with dht-value+
+
+\ value reading requires constructing answer packet
+
+also net2o-base
+
+:noname ( key -- )  d#id @ 0= ?EXIT
+    d#id @ $@ $, dht-id \ this is the id we send
+    k#tags umin dup cells d#id @ + [: $, dup ulit, dht-value+ ;] $[]map
+    drop ; IS d#value?
+
+previous
 
 \ facilitate stuff
 
