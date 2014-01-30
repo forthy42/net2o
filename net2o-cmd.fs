@@ -188,21 +188,27 @@ comp: :, also net2o-base ;
 comp: :, also net2o-base ;
 ' net2o, IS net2o-do
 
-: send-cmd ( addr dest -- )  +send-cmd dest-addr 64@ 64>r
+: send-cmd ( addr u dest -- ) n64-swap { buf# }
+    +send-cmd dest-addr 64@ 64>r
     cmd( ." send: " 64dup ['] 64. $10 base-execute 64>r
-    dup cmdbuf# @ n2o:see cr 64r> )
+    dup buf# n2o:see cr 64r> )
     o IF  code-map  ELSE  0  THEN  code-packet !
     o IF  return-address  ELSE  return-addr  THEN  @
     max-size^2 1+ 0 DO
-	cmdbuf# @ min-size I lshift u<= IF
+	buf# min-size I lshift u<= IF
 	    I sendX  cmdreset  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
+: net2o:punch ( addr u -- )  $>sock insert-address
+    o IF  return-address  ELSE  return-addr  THEN  ! ;
+
+: net2o:bounce ( packet u -- )  64#0 send-cmd ;    
+
 : cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
 
-: cmd ( -- )  cmdbuf cmddest send-cmd
+: cmd ( -- )  cmdbuf cmdbuf# @ cmddest send-cmd
     cmd0source @ 0= IF  code+  THEN ;
 
 also net2o-base
@@ -231,7 +237,7 @@ previous
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
 	cmd( dest-addr 64@ 64. ." resend canned code reply " tag-addr hex. cr )
-	cmdbuf# ! r> reply-dest 64@ send-cmd true
+	r> reply-dest 64@ send-cmd true
 	1 packets2 +!
     ELSE  d0<> -1 0 r> 2!  THEN ;
 
@@ -463,7 +469,7 @@ net2o-base
 72 net2o: track-limit ( seek id -- )
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
 
-:noname lit, ulit, track-seek ; is do-track-seek
+:noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
 
 73 net2o: set-stat ( mtime mod id -- ) 2*64>n n2o:set-stat ;
 74 net2o: get-stat ( id -- ) 64>n { fd }
@@ -489,6 +495,8 @@ net2o-base
 121 net2o: .time ( -- ) .packets .times ;
 122 net2o: set-ip ( addr u -- ) setip-xt perform ;
 123 net2o: get-ip ( -- ) >sockaddr $, set-ip ;
+124 net2o: punch ( addr u -- )  net2o:punch ;
+125 net2o: bounce ( addr u -- ) net2o:bounce ;
 
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
     dup net2o:rewind-receiver ulit, rewind-sender ;
@@ -768,7 +776,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
-	resend0 $@ >r cmdbuf r@ move r> cmdbuf# !
+	resend0 $@ >r cmdbuf r@ move r>
 	cmdbuf 64#0 send-cmd 1 packets2 +!
     THEN ;
 
@@ -778,7 +786,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	dest-size @ addr>replies bounds o> ?DO
 	    I 2@ d0<> IF
 		timeout( ." resend: " I 2@ n2o:see F cr )
-		I 2@ cmdbuf# ! I reply-dest 64@ send-cmd
+		I 2@ I reply-dest 64@ send-cmd
 		1 packets2 +!
 	    THEN
 	reply +LOOP
@@ -804,9 +812,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     resend-all  net2o:genack
     end-code ;
 
-\ : connecting-timeout ( -- )
-\     F .time ."  connecting timeout" F cr
-\     cmdbuf 0 send-cmd  1 packets2 +! ;
 : connected-timeout ( -- )
     [: F .time ."  connected timeout, o=" o hex.
     received @ hex. expected @ hex. F cr ;] $err

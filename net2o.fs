@@ -41,6 +41,7 @@ s" invalid nest"                 throwcode !!nest!!
 s" invalid tmpnest"              throwcode !!tmpnest!!
 s" cookie recieved twice"        throwcode !!double-cookie!!
 s" code destination is 0"        throwcode !!no-dest!!
+s" no IP addr"                   throwcode !!no-addr!!
 
 \ required tools
 
@@ -295,19 +296,24 @@ Variable routes
 
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
+: !ipv4 ( -- )
+    $FFFF0000 sockaddr sin6_addr 8 + l!
+    0 sockaddr sin6_addr 4 + l!
+    0 sockaddr sin6_addr l! ;
+
+: sock-rest ( -- addr u )
+    AF_INET6 sockaddr family w!
+    0        sockaddr sin6_flowinfo l!
+    0        sockaddr sin6_scope_id l!
+    sockaddr sockaddr_in6 %size ;
+
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@
     over w@ AF_INET = IF
 	drop >r
-	AF_INET6 sockaddr family w!
 	r@ port w@ sockaddr port w!
-	0     sockaddr sin6_flowinfo l!
-	r> sin_addr l@ sockaddr sin6_addr 12 + l!
-	$FFFF0000 sockaddr sin6_addr 8 + l!
-	0 sockaddr sin6_addr 4 + l!
-	0 sockaddr sin6_addr l!
-	0 sockaddr sin6_scope_id l!
-	sockaddr sockaddr_in6 %size
+	r> sin_addr l@ sockaddr sin6_addr 12 + l! !ipv4
+	sock-rest
     THEN ;
 
 0 Value lastaddr
@@ -344,6 +350,20 @@ Variable lastn2oaddr
 
 : insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
+
+: 6>sock ( addr u -- sockaddr u )
+    2dup + 2 - w@ sockaddr port w!
+    2 - sockaddr sin6_addr swap move sock-rest ;
+
+: 4>sock ( addr u -- sockaddr u )
+    2dup + 2 - w@ sockaddr port w!
+    drop l@ sockaddr sin6_addr 12 + l! !ipv4 sock-rest ;
+
+: $>sock ( addr u -- sockaddr u )
+    case  over c@ >r 1 /string r>
+	'4' of  4>sock  endof
+	'6' of  6>sock  endof
+	!!no-addr!!  endcase ;
 
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
