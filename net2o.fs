@@ -242,7 +242,7 @@ $20 c, $01 c, $48 c, $60 c, $48 c, $60 c, $0000 w,
 $0000 w, $0000 w, $0000 w, $88 c, $88 c,
 
 : my-ip6 ( -- ip6addr u )
-    new-udp-socket46 >r
+    new-udp-socket6 >r
     sockaddr_in6 %size alen !
     dummy-ipv6 sockaddr-tmp sin6_addr $10 move
     r@ sock-rest connect ?ior
