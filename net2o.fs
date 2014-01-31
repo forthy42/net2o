@@ -211,7 +211,8 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 	endof
     endcase ;
 
-: !ipv4 ( -- )
+: ipv4! ( ipv4 -- )
+    sockaddr sin6_addr 12 + be-l!
     $FFFF sockaddr sin6_addr 8 + be-l!
     0 sockaddr sin6_addr 4 + l!
     0 sockaddr sin6_addr l! ;
@@ -222,28 +223,46 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
     0        sockaddr sin6_scope_id l!
     sockaddr sockaddr_in6 %size ;
 
-: my-ip ( -- ) my-ip$ $off
-    53 sockaddr port be-w!  sockaddr sin6_addr $10 erase
-    sock-rest alen ! drop
-    net2o-sock fileno sockaddr alen @ connect ?ior
+: my-port ( -- port )
+    sockaddr_in6 %size alen !
     net2o-sock fileno sockaddr-tmp alen getsockname ?ior
-    sockaddr-tmp alen @ ['] .sockaddr my-ip$ $exec
-    sockaddr alen @ erase PF_UNSPEC sockaddr family w!
-    net2o-sock fileno sockaddr sockaddr_in4 %size connect ?ior ;
+    sockaddr-tmp port be-uw@ ;
+
+: my-ip4 ( -- ip4add )
+    new-udp-socket46 >r
+    sockaddr_in6 %size alen !
+    $08080808 ipv4!
+    r@ sock-rest connect ?ior
+    r@ sockaddr-tmp alen getsockname ?ior
+    sockaddr-tmp sin6_addr 12 + be-ul@
+    r> closesocket ?ior ;
+
+Create dummy-ipv6
+$20 c, $01 c, $48 c, $60 c, $48 c, $60 c, $0000 w,
+$0000 w, $0000 w, $0000 w, $88 c, $88 c,
+
+: my-ip6 ( -- ip6addr u )
+    new-udp-socket46 >r
+    sockaddr_in6 %size alen !
+    dummy-ipv6 sockaddr-tmp sin6_addr $10 move
+    r@ sock-rest connect ?ior
+    r@ sockaddr-tmp alen getsockname ?ior
+    sockaddr-tmp sin6_addr $10
+    r> closesocket ?ior ;
 
 \ Create udp socket
 
 4242 Value net2o-port
+0 Value my-port#
 
 Variable net2o-host "net2o.de" net2o-host $!
 
 : new-server ( -- )
-    net2o-port create-udp-server46 s" w+" c-string fdopen
-    to net2o-sock ( my-ip ) ;
+    net2o-port create-udp-server46 fd>file to net2o-sock
+    my-port to my-port# ;
 
 : new-client ( -- )
-    new-udp-socket46 s" w+" c-string fdopen
-    to net2o-sock ( my-ip ) ;
+    0 create-udp-server46 fd>file to net2o-sock my-port to my-port# ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -344,7 +363,7 @@ Variable routes
     over w@ AF_INET = IF
 	drop >r
 	r@ port be-uw@ sockaddr port be-w!
-	r> sin_addr be-ul@ sockaddr sin6_addr 12 + be-l! !ipv4
+	r> sin_addr be-ul@ ipv4!
 	sock-rest
     THEN ;
 
@@ -389,7 +408,7 @@ Variable lastn2oaddr
 
 : 4>sock ( addr u -- sockaddr u )
     2dup + 2 - w@ sockaddr port w!
-    drop l@ sockaddr sin6_addr 12 + l! !ipv4 sock-rest ;
+    drop be-ul@ ipv4! sock-rest ;
 
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
