@@ -231,23 +231,27 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 : my-ip4 ( -- ip4add )
     new-udp-socket46 >r
     sockaddr_in6 %size alen !
-    $08080808 ipv4!
+    $25DDC249 ipv4!
     r@ sock-rest connect ?ior
     r@ sockaddr-tmp alen getsockname ?ior
     sockaddr-tmp sin6_addr 12 + be-ul@
     r> closesocket ?ior ;
 
 Create dummy-ipv6
-$20 c, $01 c, $48 c, $60 c, $48 c, $60 c, $0000 w,
-$0000 w, $0000 w, $0000 w, $88 c, $88 c,
+$2A c, $03 c, $40 c, $00 c, $00 c, $02 c, $01 c, $88 c,
+$0000 w, $0000 w, $0000 w, $00 c, $01 c,
 
 : my-ip6 ( -- ip6addr u )
+    \G return IPv6 address - if length is 0, not reachable with IPv6
     new-udp-socket6 >r
     sockaddr_in6 %size alen !
     dummy-ipv6 sockaddr sin6_addr $10 move
-    r@ sock-rest connect ?ior
-    r@ sockaddr-tmp alen getsockname ?ior
-    sockaddr-tmp sin6_addr $10
+    r@ sock-rest connect dup 0< errno 101 = and
+    IF  drop s" "
+    ELSE  ?ior
+	r@ sockaddr-tmp alen getsockname ?ior
+	sockaddr-tmp sin6_addr $10
+    THEN
     r> closesocket ?ior ;
 
 \ Create udp socket
