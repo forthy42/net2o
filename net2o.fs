@@ -64,6 +64,16 @@ require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
 
+\ user values
+
+UValue inbuf    ( -- addr )
+UValue outbuf   ( -- addr )
+UValue cmd0buf  ( -- addr )
+UValue init0buf ( -- addr )
+UValue sockaddr ( -- addr )
+UValue aligned$
+UValue statbuf
+
 \ helper words
 
 : ?nextarg ( -- addr u noarg-flag )
@@ -156,6 +166,8 @@ require hash-table.fs
 	2drop rdrop r> ;
 [THEN]
 
+: w, ( w -- )  here w! 2 allot ;
+
 \ bit reversing
 
 : bitreverse8 ( u1 -- u2 )
@@ -178,21 +190,58 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     THEN
     2drop ;
 
+\ look up my own IP address
+
+0 Value net2o-sock
+Variable my-ip$
+
+Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
+
+: .sockaddr { addr alen -- }
+    case addr family w@
+	AF_INET of
+	    '4' emit addr sin_addr 4 type addr port 2 type
+	endof
+	AF_INET6 of
+	    addr sin6_addr 12 fake-ip4 over str= IF
+		'4' emit addr sin6_addr 12 + 4 type
+	    ELSE
+		'6' emit addr sin6_addr $10 type
+	    THEN  addr sin6_port 2 type
+	endof
+    endcase ;
+
+: !ipv4 ( -- )
+    $FFFF sockaddr sin6_addr 8 + be-l!
+    0 sockaddr sin6_addr 4 + l!
+    0 sockaddr sin6_addr l! ;
+
+: sock-rest ( -- addr u )
+    AF_INET6 sockaddr family w!
+    0        sockaddr sin6_flowinfo l!
+    0        sockaddr sin6_scope_id l!
+    sockaddr sockaddr_in6 %size ;
+
+: my-ip ( -- ) my-ip$ $off
+    53 sockaddr port be-w!  $08080808 sockaddr sin6_addr 12 + be-l!
+    !ipv4 sock-rest alen ! drop
+    net2o-sock fileno sockaddr alen @ connect drop
+    net2o-sock fileno sockaddr-tmp alen getsockname drop
+    sockaddr-tmp alen @ ['] .sockaddr my-ip$ $exec ;
+
 \ Create udp socket
 
 4242 Value net2o-port
 
 Variable net2o-host "net2o.de" net2o-host $!
 
-0 Value net2o-sock
-
 : new-server ( -- )
     net2o-port create-udp-server46 s" w+" c-string fdopen
-    to net2o-sock ;
+    to net2o-sock my-ip ;
 
 : new-client ( -- )
     new-udp-socket46 s" w+" c-string fdopen
-    to net2o-sock ;
+    to net2o-sock my-ip ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -205,14 +254,6 @@ maxdata overhead + Constant maxpacket
 maxpacket $F + -$10 and Constant maxpacket-aligned
 : chunk-p2 ( -- n )  max-size^2 6 + ;
 $10 Constant mykey-salt#
-
-UValue inbuf    ( -- addr )
-UValue outbuf   ( -- addr )
-UValue cmd0buf  ( -- addr )
-UValue init0buf ( -- addr )
-UValue sockaddr ( -- addr )
-UValue aligned$
-UValue statbuf
 
 : init-statbuf ( -- )
     file-stat allocate throw to statbuf ;
@@ -296,23 +337,12 @@ Variable routes
 
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
-: !ipv4 ( -- )
-    $FFFF0000 sockaddr sin6_addr 8 + l!
-    0 sockaddr sin6_addr 4 + l!
-    0 sockaddr sin6_addr l! ;
-
-: sock-rest ( -- addr u )
-    AF_INET6 sockaddr family w!
-    0        sockaddr sin6_flowinfo l!
-    0        sockaddr sin6_scope_id l!
-    sockaddr sockaddr_in6 %size ;
-
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@
     over w@ AF_INET = IF
 	drop >r
-	r@ port w@ sockaddr port w!
-	r> sin_addr l@ sockaddr sin6_addr 12 + l! !ipv4
+	r@ port be-uw@ sockaddr port be-w!
+	r> sin_addr be-ul@ sockaddr sin6_addr 12 + be-l! !ipv4
 	sock-rest
     THEN ;
 
@@ -373,16 +403,6 @@ Variable lastn2oaddr
 
 \ NAT traversal stuff: print IP addresses
 
-: .sockaddr { addr alen -- }
-    case addr family w@
-	AF_INET of
-	    '4' emit addr sin_addr 4 type addr port 2 type
-	endof
-	AF_INET6 of
-	    '6' emit addr sin6_addr $10 type addr sin6_port 2 type
-	endof
-    endcase ;
-
 : .port ( addr len -- )
     drop be-uw@ 0 ['] .r #10 base-execute ;
 : .ip4b ( addr len -- addr' len' )
@@ -390,10 +410,9 @@ Variable lastn2oaddr
 : .ip4 ( addr len -- )
     .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
 : .ip6w ( addr len -- addr' len' )
-    over be-uw@ [: 0 <# # # # # #> type ;] $10 base-execute
+    over be-uw@ [: 0 .r ;] $10 base-execute
     2 /string ;
-: w, ( w -- )  here w! 2 allot ;
-Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
+
 : .ip6 ( addr len -- )
     2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
     '[' 8 0 DO  emit .ip6w ':'  LOOP  drop ." ]:" .port ;
