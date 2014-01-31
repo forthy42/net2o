@@ -244,7 +244,7 @@ $0000 w, $0000 w, $0000 w, $88 c, $88 c,
 : my-ip6 ( -- ip6addr u )
     new-udp-socket6 >r
     sockaddr_in6 %size alen !
-    dummy-ipv6 sockaddr-tmp sin6_addr $10 move
+    dummy-ipv6 sockaddr sin6_addr $10 move
     r@ sock-rest connect ?ior
     r@ sockaddr-tmp alen getsockname ?ior
     sockaddr-tmp sin6_addr $10
