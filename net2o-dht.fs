@@ -254,7 +254,9 @@ also net2o-base
 : addme ( addr u -- ) now>never gen-host
     net2o-code expect-reply
     pkc keysize $, dht-id
-    $, k#host ulit, dht-value+ nest[ request-done ]nest end-code ;
+    $, k#host ulit, dht-value+
+    my-ip$ $@ gen-host $, k#host ulit, dht-value+ \ also add my IP
+    nest[ request-done ]nest end-code ;
 previous
 
 : +addme ['] addme setip-xt ! ;

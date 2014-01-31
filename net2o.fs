@@ -223,11 +223,13 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
     sockaddr sockaddr_in6 %size ;
 
 : my-ip ( -- ) my-ip$ $off
-    53 sockaddr port be-w!  $08080808 sockaddr sin6_addr 12 + be-l!
-    !ipv4 sock-rest alen ! drop
-    net2o-sock fileno sockaddr alen @ connect drop
-    net2o-sock fileno sockaddr-tmp alen getsockname drop
-    sockaddr-tmp alen @ ['] .sockaddr my-ip$ $exec ;
+    53 sockaddr port be-w!  sockaddr sin6_addr $10 erase
+    sock-rest alen ! drop
+    net2o-sock fileno sockaddr alen @ connect ?ior
+    net2o-sock fileno sockaddr-tmp alen getsockname ?ior
+    sockaddr-tmp alen @ ['] .sockaddr my-ip$ $exec
+    sockaddr alen @ erase PF_UNSPEC sockaddr family w!
+    net2o-sock fileno sockaddr sockaddr_in4 %size connect ?ior ;
 
 \ Create udp socket
 
@@ -237,11 +239,11 @@ Variable net2o-host "net2o.de" net2o-host $!
 
 : new-server ( -- )
     net2o-port create-udp-server46 s" w+" c-string fdopen
-    to net2o-sock my-ip ;
+    to net2o-sock ( my-ip ) ;
 
 : new-client ( -- )
     new-udp-socket46 s" w+" c-string fdopen
-    to net2o-sock my-ip ;
+    to net2o-sock ( my-ip ) ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -1172,10 +1174,6 @@ end-class fs-class
 
 : >seek ( size 64to 64seek -- size' )
     64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
-
-: ?ior ( r -- )
-    \G use errno to generate throw when failing
-    IF  -512 errno - throw  THEN ;
 
 : fs-timestamp! ( mtime fileno -- ) >r
     [IFDEF] android  rdrop 64drop
