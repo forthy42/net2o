@@ -353,7 +353,7 @@ Variable lastn2oaddr
 
 : 6>sock ( addr u -- sockaddr u )
     2dup + 2 - w@ sockaddr port w!
-    2 - sockaddr sin6_addr swap move sock-rest ;
+    drop $10 sockaddr sin6_addr swap move sock-rest ;
 
 : 4>sock ( addr u -- sockaddr u )
     2dup + 2 - w@ sockaddr port w!
