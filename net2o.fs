@@ -454,7 +454,7 @@ Variable lastn2oaddr
 
 \ route an incoming packet
 
-User return-addr
+User return-addr $10 cell- uallot drop
 
 \ these are all stubs for now
 
@@ -462,6 +462,8 @@ User return-addr
     reverse 0  r> destination 2! ;
 : get-source ( packet -- addr )
     destination 2@ drop  reverse ;
+\    dup destination reverse$16
+\    destination [IFDEF] 64bit be-ux@ [ELSE] be-ul@ [THEN] ;
 : ins-dest ( addr packet -- )  0 -rot destination 2! ;
 : get-dest ( packet -- addr )  destination @ ;
 
@@ -579,7 +581,7 @@ rcode-class class end-class rdata-class
 object class
     field: context#
     field: wait-task
-    field: return-address
+    $10 +field return-address
     64field: recv-tick
     64field: recv-addr
     field: recv-flag
@@ -1850,7 +1852,7 @@ $20 Constant keys-val
     ticker 64@  recv-tick 64! \ time stamp of arrival
     dup >r inbuf-decrypt 0= IF  .inv-packet  rdrop EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
-    return-addr @ return-address !
+    return-addr return-address $10 move
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
