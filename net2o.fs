@@ -179,23 +179,24 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : reverse ( x1 -- x2 )
     0 cell 0 DO  8 lshift over $FF and reverse8 or
        swap 8 rshift swap  LOOP  nip ;
-: reverse$ ( addr u -- )
-    BEGIN
-	over c@ reverse8 >r
-	1- dup WHILE
-	    2dup + dup c@ r> rot c! reverse8 >r over r> swap c!
-	1 /string dup 0= UNTIL
-    ELSE
-	over r> swap c!
-    THEN
-    2drop ;
+: reverse$16 ( addr -- ) >r
+    r@     c@ reverse8 r@ $F + c@ reverse8 r@     c! r@ $F + c!
+    r@ 1+  c@ reverse8 r@ $E + c@ reverse8 r@ 1+  c! r@ $E + c!
+    r@ 2 + c@ reverse8 r@ $D + c@ reverse8 r@ 2 + c! r@ $D + c!
+    r@ 3 + c@ reverse8 r@ $C + c@ reverse8 r@ 3 + c! r@ $C + c!
+    r@ 4 + c@ reverse8 r@ $B + c@ reverse8 r@ 4 + c! r@ $B + c!
+    r@ 5 + c@ reverse8 r@ $A + c@ reverse8 r@ 5 + c! r@ $A + c!
+    r@ 6 + c@ reverse8 r@ $9 + c@ reverse8 r@ 6 + c! r@ $9 + c!
+    r@ 7 + c@ reverse8 r@ $8 + c@ reverse8 r@ 7 + c! r> $8 + c! ;
 
-\ look up my own IP address
+\ IP address stuff
 
 0 Value net2o-sock
+0 Value query-sock
 Variable my-ip$
 
 Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
+\ prefix for IPv4 addresses encoded as IPv6
 
 : .sockaddr { addr alen -- }
     case addr family w@
@@ -210,6 +211,36 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 	    THEN  addr sin6_port 2 type
 	endof
     endcase ;
+
+: .port ( addr len -- )
+    drop be-uw@ 0 ['] .r #10 base-execute ;
+: .ip4b ( addr len -- addr' len' )
+    over c@ 0 ['] .r #10 base-execute 1 /string ;
+: .ip4 ( addr len -- )
+    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
+User ip6:#
+: .ip6w ( addr len -- addr' len' )
+    over be-uw@ [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
+    2 /string ;
+
+: .ip6 ( addr len -- )
+    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
+    -1 ip6:# !
+    '[' 8 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
+    drop ." ]:" .port ;
+
+: .address ( addr u -- )
+    over w@ AF_INET6 = IF  .ip6  ELSE  .ip4  THEN ; 
+
+\ NAT traversal stuff: print IP addresses
+
+: .ipaddr ( addr len -- )
+    case  over c@ >r 1 /string r>
+	'4' of  .ip4  endof
+	'6' of  .ip6  endof
+	-rot dump endcase cr ;
+
+: .iperr ( addr len -- ) [: ." connected from: " .ipaddr ;] $err ;
 
 : ipv4! ( ipv4 -- )
     sockaddr sin6_addr 12 + be-l!
@@ -228,31 +259,43 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
     net2o-sock fileno sockaddr-tmp alen getsockname ?ior
     sockaddr-tmp port be-uw@ ;
 
-: my-ip4 ( -- ip4add )
-    new-udp-socket46 >r
-    sockaddr_in6 %size alen !
-    $25DDC249 ipv4!
-    r@ sock-rest connect ?ior
-    r@ sockaddr-tmp alen getsockname ?ior
-    sockaddr-tmp sin6_addr 12 + be-ul@
-    r> closesocket ?ior ;
+: sock[ ( -- )  query-sock ?EXIT
+    new-udp-socket46 to query-sock ;
+: ]sock ( -- )  query-sock 0= ?EXIT
+    query-sock closesocket 0 to query-sock ?ior ;
 
-Create dummy-ipv6
+: check-ip4 ( ip4addr -- my-ip4addr ) sock[
+    sockaddr_in6 %size alen !
+    sockaddr sin6_addr $10 move
+    ipv4! query-sock sock-rest connect ?ior
+    query-sock sockaddr-tmp alen getsockname dup 0< errno 101 = and
+    IF  drop 0 \ 0 is an invalid result
+    ELSE  ?ior
+	sockaddr-tmp dup family w@ AF_INET6 =
+	IF  sin6_addr 12 +  ELSE  sin_addr  THEN be-ul@
+    THEN ;
+
+$25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
+Create dummy-ipv6 \ this is my net2o ipv6 address
 $2A c, $03 c, $40 c, $00 c, $00 c, $02 c, $01 c, $88 c,
 $0000 w, $0000 w, $0000 w, $00 c, $01 c,
+Create local-ipv6
+$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w,
 
-: my-ip6 ( -- ip6addr u )
+: check-ip6 ( dummy -- ip6addr u ) sock[
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    new-udp-socket6 >r
     sockaddr_in6 %size alen !
-    dummy-ipv6 sockaddr sin6_addr $10 move
-    r@ sock-rest connect dup 0< errno 101 = and
+    sockaddr sin6_addr $10 move
+    query-sock sock-rest connect dup 0< errno 101 = and
     IF  drop s" "
     ELSE  ?ior
-	r@ sockaddr-tmp alen getsockname ?ior
+	query-sock sockaddr-tmp alen getsockname ?ior
 	sockaddr-tmp sin6_addr $10
-    THEN
-    r> closesocket ?ior ;
+    THEN ;
+
+: global-ip4 ( -- ip4addr )  dummy-ipv4 check-ip4 ;
+: global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
+: local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 ;
 
 \ Create udp socket
 
@@ -261,12 +304,11 @@ $0000 w, $0000 w, $0000 w, $00 c, $01 c,
 
 Variable net2o-host "net2o.de" net2o-host $!
 
-: new-server ( -- )
-    net2o-port create-udp-server46 fd>file to net2o-sock
-    my-port to my-port# ;
+: net2o-socket ( port -- )
+    create-udp-server46 fd>file to net2o-sock my-port to my-port# ;
 
-: new-client ( -- )
-    0 create-udp-server46 fd>file to net2o-sock my-port to my-port# ;
+: new-server ( -- )  net2o-port net2o-socket ;
+: new-client ( -- )  0 net2o-socket ;
 
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
@@ -274,10 +316,10 @@ $40 Constant min-size
 $400000 Value max-data#
 $10000 Value max-code#
 1 Value buffers#
-: maxdata ( -- n ) min-size max-size^2 lshift ;
-maxdata overhead + Constant maxpacket
-maxpacket $F + -$10 and Constant maxpacket-aligned
-: chunk-p2 ( -- n )  max-size^2 6 + ;
+min-size max-size^2 lshift Value maxdata ( -- n )
+maxdata overhead + Value maxpacket
+maxpacket $F + -$10 and Value maxpacket-aligned
+max-size^2 6 + Value chunk-p2
 $10 Constant mykey-salt#
 
 : init-statbuf ( -- )
@@ -374,22 +416,6 @@ Variable routes
 0 Value lastaddr
 Variable lastn2oaddr
 
-: .ipv6 ( addr u -- ) 
-    drop dup sin6_addr $10 bounds DO
-	I be-uw@ 0 .r ':' emit
-    2 +LOOP
-    sin6_port be-uw@ decimal 0 .r ;
-
-: .ipv4 ( addr u -- )
-    drop dup sin_addr 4 bounds DO
-	I c@ 0 <# #s #> type I 1+ I' <> IF  '.' emit  THEN
-    LOOP  ." :"
-    port be-uw@ decimal 0 .r ;
-
-: .address ( addr u -- )
-	over w@ AF_INET6 = IF ['] .ipv6 $10  ELSE  ['] .ipv4 #10 THEN
-	base-execute ; 
-
 : insert-address ( addr u -- net2o-addr )
     address( ." Insert address " 2dup .address cr )
     lastaddr IF  2dup lastaddr over str=
@@ -426,30 +452,6 @@ Variable lastn2oaddr
     routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
     $@ sockaddr swap dup alen ! move  rdrop ;
 
-\ NAT traversal stuff: print IP addresses
-
-: .port ( addr len -- )
-    drop be-uw@ 0 ['] .r #10 base-execute ;
-: .ip4b ( addr len -- addr' len' )
-    over c@ 0 ['] .r #10 base-execute 1 /string ;
-: .ip4 ( addr len -- )
-    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
-: .ip6w ( addr len -- addr' len' )
-    over be-uw@ [: 0 .r ;] $10 base-execute
-    2 /string ;
-
-: .ip6 ( addr len -- )
-    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
-    '[' 8 0 DO  emit .ip6w ':'  LOOP  drop ." ]:" .port ;
-
-: .ipaddr ( addr len -- )
-    case  over c@ >r 1 /string r>
-	'4' of  .ip4  endof
-	'6' of  .ip6  endof
-	-rot dump endcase cr ;
-
-: .iperr ( addr len -- ) [: ." connected from: " .ipaddr ;] $err ;
-
 \ route an incoming packet
 
 User return-addr
@@ -484,7 +486,7 @@ $80 Constant qos2#
 $C0 Constant qos3# \ lowest
 
 $30 Constant headersize#
-$00 Constant 16bit# \ unencrypted protocol for very small networks
+$00 Constant 16bit# \ protocol for very small networks
 $10 Constant 64bit# \ standard, encrypted protocol
 $0F Constant datasize#
 
