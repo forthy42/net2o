@@ -460,20 +460,49 @@ User return-addr $10 cell- uallot drop
 [IFDEF] 64bit ' be-ux@ [ELSE] ' be-ul@ [THEN] alias be@
 [IFDEF] 64bit ' be-x! [ELSE] ' be-l! [THEN] alias be!
 
+: >rpath-len ( rpath -- rpath len )
+    dup $100 u< IF  1  EXIT  THEN
+    dup $10000 u< IF  2  EXIT  THEN
+    dup $1000000 u< IF  3  EXIT  THEN
+    [IFDEF] 64bit
+	dup $100000000 u< IF  4  EXIT  THEN
+	dup $10000000000 u< IF  5  EXIT  THEN
+	dup $1000000000000 u< IF  6  EXIT  THEN
+	dup $100000000000000 u< IF  7  EXIT  THEN
+	8
+    [ELSE]
+	4
+    [THEN] ;
+
+: <0string ( endaddr -- addr u )
+    $11 1 DO  1- dup c@ WHILE  LOOP  $10  ELSE  I  UNLOOP  THEN ;
+
 : ins-source ( addr packet -- )
-    >r reverse r> destination $10 + cell- be! ;
+    >r reverse dup >rpath-len { w^ rpath rplen } rpath be!
+    r@ destination $10 + <0string
+    over rplen - swap move
+    rpath cell+ rplen - r> destination $10 + rplen - rplen move ;
 : get-source ( packet -- addr )
     destination $10 + cell- be@ reverse ;
 : ins-dest ( addr packet -- )  destination be! ;
-: get-dest ( packet -- addr )  destination dup be@ 0 rot be! ;
-: local? ( packet -- flag )  destination c@ 0= ;
+: skip-dest ( addr -- )
+    $10 2dup 0 scan nip -
+    2dup bounds ?DO
+	I c@ $80 u< IF
+	    2dup I 1+ -rot >r 2dup - r> swap - dup >r move
+	    r> /string  LEAVE  THEN
+    LOOP  erase ;
 
-: packet-route ( orig-addr addr -- flag ) >r
-    r@ local?  IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ get-dest  route>address  r> ins-source  false ;
+: get-dest ( packet -- addr )  destination dup be@ swap skip-dest ;
+: route? ( packet -- flag )  destination c@  ;
+
+: packet-route ( orig-addr addr -- flag )
+    dup route?  IF
+	>r r@ get-dest  route>address  r> ins-source  false  EXIT  THEN
+    2drop true ; \ local packet
 
 : in-check ( -- flag )  address>route -1 <> ;
-: out-route ( -- flag )  0  outbuf packet-route ;
+: out-route ( -- )  0 outbuf packet-route drop ;
 
 \ packet&header size
 
@@ -1410,8 +1439,7 @@ User code-packet
 \    ." send " outbuf .header
     code-packet @ dup IF  @  THEN  outbuf-encrypt
     code-packet @ data-map = IF  send-cookie  THEN
-    out-route drop
-    outbuf dup packet-size
+    out-route  outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
@@ -1926,9 +1954,8 @@ Variable timeout-task
 User requests
 
 : packet-event ( -- )
-    next-packet !ticks nip 0= ?EXIT  inbuf local?
-    IF    handle-packet  reset-timeout
-    ELSE  ." route a packet" cr route-packet  THEN ;
+    next-packet !ticks nip 0= ?EXIT  inbuf route?
+    IF  route-packet  ELSE  handle-packet  reset-timeout  THEN ;
 
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  packet-event +event  AGAIN ;
