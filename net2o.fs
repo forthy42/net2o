@@ -179,15 +179,15 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : reverse ( x1 -- x2 )
     0 cell 0 DO  8 lshift over $FF and reverse8 or
        swap 8 rshift swap  LOOP  nip ;
-: reverse$16 ( addr -- ) >r
-    r@     c@ reverse8 r@ $F + c@ reverse8 r@     c! r@ $F + c!
-    r@ 1+  c@ reverse8 r@ $E + c@ reverse8 r@ 1+  c! r@ $E + c!
-    r@ 2 + c@ reverse8 r@ $D + c@ reverse8 r@ 2 + c! r@ $D + c!
-    r@ 3 + c@ reverse8 r@ $C + c@ reverse8 r@ 3 + c! r@ $C + c!
-    r@ 4 + c@ reverse8 r@ $B + c@ reverse8 r@ 4 + c! r@ $B + c!
-    r@ 5 + c@ reverse8 r@ $A + c@ reverse8 r@ 5 + c! r@ $A + c!
-    r@ 6 + c@ reverse8 r@ $9 + c@ reverse8 r@ 6 + c! r@ $9 + c!
-    r@ 7 + c@ reverse8 r@ $8 + c@ reverse8 r@ 7 + c! r> $8 + c! ;
+: reverse$16 ( addr -- ) dup >r
+    count reverse8 r@ $F + c@ reverse8 r@     c! r@ $F + c!
+    count reverse8 r@ $E + c@ reverse8 r@ 1+  c! r@ $E + c!
+    count reverse8 r@ $D + c@ reverse8 r@ 2 + c! r@ $D + c!
+    count reverse8 r@ $C + c@ reverse8 r@ 3 + c! r@ $C + c!
+    count reverse8 r@ $B + c@ reverse8 r@ 4 + c! r@ $B + c!
+    count reverse8 r@ $A + c@ reverse8 r@ 5 + c! r@ $A + c!
+    count reverse8 r@ $9 + c@ reverse8 r@ 6 + c! r@ $9 + c!
+       c@ reverse8 r@ $8 + c@ reverse8 r@ 7 + c! r> $8 + c! ;
 
 \ IP address stuff
 
