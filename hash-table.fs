@@ -118,9 +118,9 @@ warnings !
     BEGIN
 	hash 0= IF  drop 0  EXIT  THEN
 	$100 um* dup $80 and WHILE
-	    dup $80 + cells hash + @
-	    dup 0= IF  drop nip $80 - 2* cells hash +  EXIT
-	    ELSE  to hash drop  THEN
+	    ( dup ) $80 + cells hash + @ to hash
+\	    dup 0= IF  drop nip $80 - 2* cells hash +  EXIT
+\	    ELSE  to hash drop  THEN
     REPEAT
     nip 2* cells hash + ;
 
