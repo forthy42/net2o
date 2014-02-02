@@ -776,8 +776,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
-	resend0 $@ >r cmdbuf r@ move r>
-	cmdbuf 64#0 send-cmd 1 packets2 +!
+	resend0 $@ >r cmdbuf r@ move
+	cmdbuf r> 64#0 send-cmd 1 packets2 +!
     THEN ;
 
 : map-resend? ( -- )
