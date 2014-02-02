@@ -193,7 +193,7 @@ comp: :, also net2o-base ;
     cmd( ." send: " 64dup ['] 64. $10 base-execute 64>r
     dup buf# n2o:see cr 64r> )
     o IF  code-map  ELSE  0  THEN  code-packet !
-    o IF  return-address  ELSE  return-addr  THEN  @
+    o IF  return-address  ELSE  return-addr  THEN  be@
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I sendX  cmdreset  UNLOOP
@@ -201,7 +201,7 @@ comp: :, also net2o-base ;
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
 : net2o:punch ( addr u -- )  $>sock insert-address
-    o IF  return-address  ELSE  return-addr  THEN  ! ;
+    o IF  return-address  ELSE  return-addr  THEN  be! ;
 
 : net2o:bounce ( packet u -- )  64#0 send-cmd ;    
 

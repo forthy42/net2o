@@ -432,19 +432,18 @@ Variable lastn2oaddr
 : insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
 
-: 6>sock ( addr u -- sockaddr u )
-    2dup + 2 - w@ sockaddr port w!
-    drop $10 sockaddr sin6_addr swap move sock-rest ;
+: 6>sock ( addr u -- )
+    $10 umin sockaddr sin6_addr swap move ;
 
-: 4>sock ( addr u -- sockaddr u )
-    2dup + 2 - w@ sockaddr port w!
-    drop be-ul@ ipv4! sock-rest ;
+: 4>sock ( addr u -- )
+    drop be-ul@ ipv4! ;
 
 : $>sock ( addr u -- sockaddr u )
+    2 - 2dup + w@ sockaddr port w!
     case  over c@ >r 1 /string r>
 	'4' of  4>sock  endof
 	'6' of  6>sock  endof
-	!!no-addr!!  endcase ;
+	!!no-addr!!  endcase  sock-rest ;
 
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
@@ -458,19 +457,20 @@ User return-addr $10 cell- uallot drop
 
 \ these are all stubs for now
 
-: ins-source ( addr packet -- )  >r
-    reverse 0  r> destination 2! ;
+[IFDEF] 64bit ' be-ux@ [ELSE] ' be-ul@ [THEN] alias be@
+[IFDEF] 64bit ' be-x! [ELSE] ' be-l! [THEN] alias be!
+
+: ins-source ( addr packet -- )
+    >r reverse r> destination $10 + cell- be! ;
 : get-source ( packet -- addr )
-    destination 2@ drop  reverse ;
-\    dup destination reverse$16
-\    destination [IFDEF] 64bit be-ux@ [ELSE] be-ul@ [THEN] ;
-: ins-dest ( addr packet -- )  0 -rot destination 2! ;
-: get-dest ( packet -- addr )  destination @ ;
+    destination $10 + cell- be@ reverse ;
+: ins-dest ( addr packet -- )  destination be! ;
+: get-dest ( packet -- addr )  destination be@ ;
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ get-dest [IFDEF] 64bit $38 [ELSE] $18 [THEN] rshift
+    r@ get-dest \ [IFDEF] 64bit $38 [ELSE] $18 [THEN] rshift
     0=  IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ get-dest route>address  r> ins-source  false ;
+    r@ get-dest  route>address  r@ ins-source  0 r> ins-dest  false ;
 
 : in-route ( -- flag )  address>route inbuf packet-route ;
 : in-check ( -- flag )  address>route -1 <> ;
@@ -531,7 +531,7 @@ $04 Constant resend-toggle#
 64User dest-addr
 
 : >ret-addr ( -- )
-    inbuf get-source return-addr ! ;
+    inbuf get-source return-addr be! ;
 : >dest-addr ( -- )
     inbuf addr 64@  inbuf body-size 1- invert n>64 64and dest-addr 64! ;
 
@@ -830,7 +830,7 @@ resend-size# buffer: resend-init
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
-    dup return-addr !  return-address !
+    dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
     s" " file-state $!
@@ -854,14 +854,14 @@ Variable mapstart $1 mapstart !
 : n2o:new-data { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr @ n2o:new-context  server!  THEN
+	return-addr be@ n2o:new-context  server!  THEN
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source  data-map ! ;
 : n2o:new-code { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr @ n2o:new-context  server!  THEN
+	return-addr be@ n2o:new-context  server!  THEN
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
@@ -1352,7 +1352,7 @@ event: ->slurp ( task o -- )  >o n2o:slurp-all-blocks
     o elit, ->track event> o> ;
 
 : >sockaddr ( -- addr len )
-    return-address @ routes #.key $@ ['] .sockaddr $tmp ;
+    return-address be@ routes #.key $@ ['] .sockaddr $tmp ;
 
 \ load crypto here
 
@@ -1438,9 +1438,9 @@ User code-packet
 \ send chunk
 
 : net2o:get-dest ( -- taddr target )
-    data-dest return-address @ ;
+    data-dest return-address be@ ;
 : net2o:get-resend ( -- taddr target )
-    resend-dest return-address @ ;
+    resend-dest return-address be@ ;
 
 \ branchless version using floating point
 
@@ -1868,7 +1868,6 @@ $20 Constant keys-val
 \ timeout handling
 
 : do-timeout ( -- )  timeout-xt perform ;
-\ o IF  timeout-xt ~~ @ ?dup-IF ~~ execute ~~ ELSE ~~ THEN ELSE ~~ THEN ;
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
@@ -2041,7 +2040,7 @@ con-cookie >osize @ buffer: cookie-adder
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
-	nip return-addr @ n2o:new-context o 0 >o rdrop swap
+	nip return-addr be@ n2o:new-context o 0 >o rdrop swap
     THEN ;
 
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
