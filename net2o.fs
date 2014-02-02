@@ -465,14 +465,13 @@ User return-addr $10 cell- uallot drop
 : get-source ( packet -- addr )
     destination $10 + cell- be@ reverse ;
 : ins-dest ( addr packet -- )  destination be! ;
-: get-dest ( packet -- addr )  destination be@ ;
+: get-dest ( packet -- addr )  destination dup be@ 0 rot be! ;
+: local? ( packet -- flag )  destination c@ 0= ;
 
 : packet-route ( orig-addr addr -- flag ) >r
-    r@ get-dest \ [IFDEF] 64bit $38 [ELSE] $18 [THEN] rshift
-    0=  IF  drop  true  rdrop EXIT  THEN \ local packet
-    r@ get-dest  route>address  r@ ins-source  0 r> ins-dest  false ;
+    r@ local?  IF  drop  true  rdrop EXIT  THEN \ local packet
+    r@ get-dest  route>address  r> ins-source  false ;
 
-: in-route ( -- flag )  address>route inbuf packet-route ;
 : in-check ( -- flag )  address>route -1 <> ;
 : out-route ( -- flag )  0  outbuf packet-route ;
 
@@ -1746,9 +1745,6 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
     don't-block read-a-packet +rec ;
 
-: try-read-packet ( -- addr u / 0 0 )
-    don't-block read-a-packet +rec ;
-
 4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
@@ -1930,7 +1926,7 @@ Variable timeout-task
 User requests
 
 : packet-event ( -- )
-    next-packet !ticks nip 0= ?EXIT  in-route
+    next-packet !ticks nip 0= ?EXIT  inbuf local?
     IF    handle-packet  reset-timeout
     ELSE  ." route a packet" cr route-packet  THEN ;
 
