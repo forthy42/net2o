@@ -114,13 +114,15 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop -1 ;
 
-: #.key ( path hash -- item ) { hash }
+: #.key ( path hash -- item ) @ { hash }
     BEGIN
-	hash @ 0= IF  drop 0  EXIT  THEN
+	hash 0= IF  drop 0  EXIT  THEN
 	$100 um* dup $80 and WHILE
-	    $80 + cells hash @ + to hash
+	    dup $80 + cells hash + @
+	    dup 0= IF  drop nip $80 - 2* cells hash +  EXIT
+	    ELSE  to hash drop  THEN
     REPEAT
-    nip 2* cells hash @ + ;
+    nip 2* cells hash + ;
 
 : #map  { hash xt -- } \ xt: ( ... node -- ... )
     hash @ 0= ?EXIT
