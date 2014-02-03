@@ -303,7 +303,10 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : +my-ip ( addr u port -- ) over 0= IF  drop 2drop  EXIT  THEN
     [: >r dup 4 = IF '4' emit ELSE '6' emit THEN type
-	r@ 8 rshift emit r> $FF and emit ;] $tmp my-ip$ $+[]! ;
+	r@ 8 rshift emit r> $FF and emit ;] $tmp
+    my-ip$ $[]# ?dup-IF  1- my-ip$ $[]@
+	2over str= IF  2drop  EXIT  THEN
+    THEN  my-ip$ $+[]! ;
 
 : !my-ips ( -- )  my-port >r
     global-ip4 r@ +my-ip
