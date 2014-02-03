@@ -286,6 +286,8 @@ $0000 w, $0000 w, $0000 w, $00 c, $01 c,
 Create local-ipv6
 $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
+0 Value my-port#
+
 : check-ip6 ( dummy -- ip6addr u ) sock[
     \G return IPv6 address - if length is 0, not reachable with IPv6
     sockaddr_in6 %size alen !
@@ -299,29 +301,27 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : global-ip4 ( -- ip4addr )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
-: local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 ;
+: local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;
 
-: +my-ip ( addr u port -- ) over 0= IF  drop 2drop  EXIT  THEN
-    [: >r dup 4 = IF '4' emit ELSE '6' emit THEN type
-	r@ 8 rshift emit r> $FF and emit ;] $tmp
-    my-ip$ $[]# ?dup-IF  1- my-ip$ $[]@
-	2over str= IF  2drop  EXIT  THEN
-    THEN  my-ip$ $+[]! ;
+: +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
+    [: dup 4 = IF '4' emit ELSE '6' emit THEN type
+	r@ 8 rshift emit my-port# $FF and emit ;] $tmp
+    my-ip$ $+[]! ;
 
-: !my-ips ( -- )  my-port >r
-    global-ip4 r@ +my-ip
-    global-ip6 r@ +my-ip
-    local-ip6  r> +my-ip ;
+: !my-ips ( -- )
+    global-ip4 +my-ip
+    global-ip6 +my-ip
+    local-ip6  +my-ip ;
 
 \ Create udp socket
 
 4242 Value net2o-port
-0 Value my-port#
 
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- )
-    create-udp-server46 fd>file to net2o-sock my-port to my-port# ;
+    create-udp-server46 fd>file to net2o-sock my-port to my-port#
+    !my-ips ;
 
 : new-server ( -- )  net2o-port net2o-socket ;
 : new-client ( -- )  0 net2o-socket ;
