@@ -265,23 +265,26 @@ User ip6:#
 : ]sock ( -- )  query-sock 0= ?EXIT
     query-sock closesocket 0 to query-sock ?ior ;
 
-: check-ip4 ( ip4addr -- my-ip4addr ) sock[
+: ?fake-ip4 ( -- addr u )
+    sockaddr-tmp sin6_addr dup $C fake-ip4 over
+    str= IF  12 + 4  ELSE  $10   THEN ;
+
+: check-ip4 ( ip4addr -- my-ip4addr 4 ) sock[
     sockaddr_in6 %size alen !
-    sockaddr sin6_addr $10 move
     ipv4! query-sock sock-rest connect ?ior
     query-sock sockaddr-tmp alen getsockname dup 0< errno 101 = and
-    IF  drop 0 \ 0 is an invalid result
+    IF  drop s" " \ 0 is an invalid result
     ELSE  ?ior
-	sockaddr-tmp dup family w@ AF_INET6 =
-	IF  sin6_addr 12 +  ELSE  sin_addr  THEN be-ul@
-    THEN ;
+	sockaddr-tmp family w@ AF_INET6 =
+	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+    THEN ]sock ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address
 $2A c, $03 c, $40 c, $00 c, $00 c, $02 c, $01 c, $88 c,
 $0000 w, $0000 w, $0000 w, $00 c, $01 c,
 Create local-ipv6
-$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w,
+$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : check-ip6 ( dummy -- ip6addr u ) sock[
     \G return IPv6 address - if length is 0, not reachable with IPv6
@@ -291,12 +294,21 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w,
     IF  drop s" "
     ELSE  ?ior
 	query-sock sockaddr-tmp alen getsockname ?ior
-	sockaddr-tmp sin6_addr $10
-    THEN ;
+	?fake-ip4
+    THEN ]sock ;
 
 : global-ip4 ( -- ip4addr )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 ;
+
+: +my-ip ( addr u port -- ) over 0= IF  drop 2drop  EXIT  THEN
+    [: >r dup 4 = IF '4' emit ELSE '6' emit THEN type
+	r@ 8 rshift emit r> $FF and emit ;] $tmp my-ip$ $+[]! ;
+
+: !my-ips ( -- )  my-port >r
+    global-ip4 r@ +my-ip
+    global-ip6 r@ +my-ip
+    local-ip6  r> +my-ip ;
 
 \ Create udp socket
 
