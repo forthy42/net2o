@@ -179,15 +179,15 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : reverse ( x1 -- x2 )
     0 cell 0 DO  8 lshift over $FF and reverse8 or
        swap 8 rshift swap  LOOP  nip ;
-: reverse$16 ( addr -- ) dup >r
-    count reverse8 r@ $F + c@ reverse8 r@     c! r@ $F + c!
-    count reverse8 r@ $E + c@ reverse8 r@ 1+  c! r@ $E + c!
-    count reverse8 r@ $D + c@ reverse8 r@ 2 + c! r@ $D + c!
-    count reverse8 r@ $C + c@ reverse8 r@ 3 + c! r@ $C + c!
-    count reverse8 r@ $B + c@ reverse8 r@ 4 + c! r@ $B + c!
-    count reverse8 r@ $A + c@ reverse8 r@ 5 + c! r@ $A + c!
-    count reverse8 r@ $9 + c@ reverse8 r@ 6 + c! r@ $9 + c!
-       c@ reverse8 r@ $8 + c@ reverse8 r@ 7 + c! r> $8 + c! ;
+: reverse$16 ( addrsrc addrdst -- ) { dst } dup >r
+    count reverse8 r@ $F + c@ reverse8 dst     c! dst $F + c!
+    count reverse8 r@ $E + c@ reverse8 dst 1+  c! dst $E + c!
+    count reverse8 r@ $D + c@ reverse8 dst 2 + c! dst $D + c!
+    count reverse8 r@ $C + c@ reverse8 dst 3 + c! dst $C + c!
+    count reverse8 r@ $B + c@ reverse8 dst 4 + c! dst $B + c!
+    count reverse8 r@ $A + c@ reverse8 dst 5 + c! dst $A + c!
+    count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
+       c@ reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
 
 \ IP address stuff
 
@@ -236,6 +236,7 @@ User ip6:#
 
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
+	'2' of  ." ^" xtype  endof
 	'4' of  .ip4  endof
 	'6' of  .ip6  endof
 	-rot dump endcase cr ;
@@ -482,9 +483,7 @@ User return-addr $10 cell- uallot drop
     r@ destination $10 + <0string
     over rplen - swap move
     rpath cell+ rplen - r> destination $10 + rplen - rplen move ;
-: get-source ( packet -- addr )
-    destination $10 + cell- be@ reverse ;
-: ins-dest ( addr packet -- )  destination be! ;
+: >dest ( addr packet -- )  destination $10 move ;
 : skip-dest ( addr -- )
     $10 2dup 0 scan nip -
     2dup bounds ?DO
@@ -559,7 +558,7 @@ $04 Constant resend-toggle#
 64User dest-addr
 
 : >ret-addr ( -- )
-    inbuf get-source return-addr be! ;
+    inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
     inbuf addr 64@  inbuf body-size 1- invert n>64 64and dest-addr 64! ;
 
@@ -820,10 +819,8 @@ m: addr>keys ( addr -- keys )
 ' @ Alias m@
 
 : map-data-dest ( vaddr u addr -- )
-    \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
     >r >r 64dup r> map-data r@ ! >dest-map r> @ swap ! ;
 : map-code-dest ( vaddr u addr -- )
-    \    return-addr @ routes #.key cell+ >r  r@ @ 0= IF  s" " r@ $!  THEN
     >r >r 64dup r> map-data r@ ! >dest-map cell+ r> @ swap ! ;
 
 \ create context
@@ -1379,8 +1376,12 @@ event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp-all-blocks
     o elit, ->track event> o> ;
 
+: -skip ( addr u char -- ) >r
+    BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : >sockaddr ( -- addr len )
     return-address be@ routes #.key $@ ['] .sockaddr $tmp ;
+: >n2oaddr ( -- addr len )
+    [: '2' emit return-address $10 0 -skip type ;] $tmp ;
 
 \ load crypto here
 
@@ -1419,7 +1420,7 @@ require net2o-crypt.fs
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf ins-dest  64dup dest-addr 64!  outbuf addr 64! ;
+    outbuf >dest  64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
 
@@ -1465,9 +1466,9 @@ User code-packet
 \ send chunk
 
 : net2o:get-dest ( -- taddr target )
-    data-dest return-address be@ ;
+    data-dest return-address ;
 : net2o:get-resend ( -- taddr target )
-    resend-dest return-address be@ ;
+    resend-dest return-address ;
 
 \ branchless version using floating point
 

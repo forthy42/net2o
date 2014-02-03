@@ -251,13 +251,15 @@ $10 buffer: sigdate \ date+expire date
     gen>tag "tag" >delete tag$ ;
 
 also net2o-base
-: addme ( addr u -- ) now>never gen-host
-    net2o-code expect-reply
-    pkc keysize $, dht-id
-    $, k#host ulit, dht-value+
-    my-ip$ $@ gen-host $, k#host ulit, dht-value+ \ also add my IP
-    nest[ request-done ]nest end-code ;
+: addme-end nest[ request-done ]nest ;
+: addme ( addr u -- ) 2dup .iperr  now>never
+    what's expect-reply? ['] addme-end <> IF
+	expect-reply pkc keysize $, dht-id
+	\ my-ip$ $@ gen-host $, k#host ulit, dht-value+ \ also add my IP
+    THEN
+    gen-host $, k#host ulit, dht-value+
+    ['] addme-end IS expect-reply? ;
 previous
 
 : +addme ['] addme setip-xt ! ;
-: -setip ['] .ipaddr setip-xt ! ;
+: -setip ['] .iperr setip-xt ! ;

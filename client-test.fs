@@ -46,7 +46,7 @@ init-client
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all [: .time ;] $err ;
+    1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Request more photos because it was so fast" cr ;] $err
@@ -64,7 +64,7 @@ init-client
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all [: .time ;] $err ;
+    1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
     [: ." Request big photos because it was so fast" cr ;] $err
@@ -77,7 +77,7 @@ init-client
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all [: .time ;] $err ;
+    1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
     [: ." Request more big photos because it was so fast" cr ;] $err
@@ -102,7 +102,7 @@ init-client
     n2o:done
     send-chunks
     end-code
-    1 client-loop [: .time ;] $err ;
+    1 client-loop ['] .time $err ;
 
 : c:download4a ( -- )
     [: ." Request second stage big photos" cr ;] $err
@@ -118,7 +118,7 @@ init-client
     -1 nlit, 6 ulit, track-limit
     gen-total slurp-all-tracked-blocks send-chunks
     end-code
-    1 client-loop n2o:close-all [: .time ;] $err ;
+    1 client-loop n2o:close-all ['] .time $err ;
 
 : c:downloadend ( -- )    
     net2o-code s" Download end" $, type cr .time disconnect  end-code ;
