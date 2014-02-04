@@ -40,6 +40,6 @@ init-client
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code ;
 
-: c:dht ( -- ) c:connect c:add-tag c:fetch-tag c:dhtend ;
+: c:dht ( n -- ) c:connect 0 ?DO c:add-tag c:fetch-tag LOOP c:dhtend ;
 
-script? [IF] c:dht bye [THEN]
+script? [IF] 1 c:dht bye [THEN]

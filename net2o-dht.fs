@@ -94,26 +94,28 @@ s" invalid signature"            throwcode !!wrong-sig!!
 
 UValue d#id
 User d#hashkey cell uallot drop
-User d#sigsize \ size for signature, temporary value
+$50 Constant sigsize#
+$70 Constant sigpksize#
+$10 Constant datesize#
 
 \ checks for signatures
 
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
-: >host ( addr u -- addr u )  dup $40 u< !!no-sig!!
-    keccak0 2dup $50 - "host" >keyed-hash
-    2dup + $50 - $10 "date" >keyed-hash ; \ hash from address
+: >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
+    keccak0 2dup sigsize# - "host" >keyed-hash
+    2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
 : verify-host ( addr u -- addr u flag )
-    2dup $40 - + d#hashkey 2@ drop ed-verify $50 d#sigsize ! ;
+    2dup + $40 - d#hashkey 2@ drop ed-verify ;
 : check-host ( addr u -- addr u )
     >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
-    dup $70 u< !!no-sig!!
+    dup sigpksize# u< !!no-sig!!
     keccak0 d#hashkey 2@ "tag" >keyed-hash
-    2dup + $70 - $10 "date" >keyed-hash
-    2dup $70 - ':' $split 2swap >keyed-hash ;
+    2dup + sigsize# - datesize# "date" >keyed-hash
+    2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
-    2dup + $60 - dup $20 + swap ed-verify $70 d#sigsize ! ;
+    2dup + $40 - dup $30 - ed-verify ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -161,7 +163,7 @@ Variable ins$0 \ just a null pointer
     \G insert O(log(n)) into pre-sorted array
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup d#sigsize @ - $# $a $[]@ d#sigsize @ - compare dup 0= IF
+	    2dup sigsize# - $# $a $[]@ sigsize# - compare dup 0= IF
 		drop $# $a $[]! EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
@@ -170,7 +172,7 @@ Variable ins$0 \ just a null pointer
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup d#sigsize @ - $# $a $[]@ d#sigsize @ - compare dup 0= IF
+	    2dup sigsize# - $# $a $[]@ sigsize# - compare dup 0= IF
 		$# $a $[] $off
 		$a $# cells cell $del
 		2drop EXIT  THEN
@@ -234,16 +236,17 @@ previous
 
 \ facilitate stuff
 
-$10 buffer: sigdate \ date+expire date
+datesize# buffer: sigdate \ date+expire date
 : now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
 
 : gen>host ( addr u -- addr u )
     2dup keccak0 "host" >keyed-hash
-    sigdate $10 "date" >keyed-hash ;
-: host$ ( addr u -- hsotaddr host-u )
-    [: type sigdate $10 type skc pkc ed-sign type ;] $tmp ;
+    sigdate datesize# "date" >keyed-hash ;
+: .sig ( -- )  sigdate datesize# type skc pkc ed-sign type ;
+: .pk ( -- )  pkc keysize type ;
+: host$ ( addr u -- hsotaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
     gen>host host$ ;
 : gen-host-del ( addr u -- addr' u' )
@@ -251,10 +254,9 @@ $10 buffer: sigdate \ date+expire date
 
 : gen>tag ( addr u hash-addr uh -- addr u )
     keccak0 "tag" >keyed-hash
-    sigdate $10 "date" >keyed-hash
+    sigdate datesize# "date" >keyed-hash
     2dup ':' $split 2swap >keyed-hash ;
-: tag$ ( addr u -- tagaddr tag-u )
-    [: type sigdate $10 type pkc keysize type skc pkc ed-sign type ;] $tmp ;
+: tag$ ( addr u -- tagaddr tag-u ) [: type .pk .sig ;] $tmp ;
 
 : gen-tag ( addr u hash-addr uh -- addr' u' )
     gen>tag tag$ ;
