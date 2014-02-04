@@ -1316,7 +1316,7 @@ end-class fs-class
 : fstates ( -- n )  file-state $@len cell/ ;
 
 : fstate-off ( -- )  file-state @ 0= ?EXIT
-    file-state $@ bounds DO  I @ >o dispose o>  cell +LOOP
+    file-state $@ bounds ?DO  I @ >o dispose o>  cell +LOOP
     file-state $off ;
 : n2o:save-block ( id -- delta ) 0 { id roff }
     msg( data-rmap @ >o dest-raddr @ o> to roff )
@@ -1954,10 +1954,10 @@ Variable timeout-task
     cmd( ." Disposing context... " o . cr )
     o-timeout o-chunks
     0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
-    data-map @ >o free-data o>
-    data-rmap @ >o free-data o>
-    code-map @ >o free-data o>
-    code-rmap @ >o free-data o>
+    data-map  @ ?dup-IF  >o free-data o>  THEN
+    data-rmap @ ?dup-IF  >o free-data o>  THEN
+    code-map  @ ?dup-IF  >o free-data o>  THEN
+    code-rmap @ ?dup-IF  >o free-data o>  THEN
     resend0 $off  fstate-off
     \ erase crypto keys
     crypto-key $@ erase  crypto-key $off

@@ -94,6 +94,7 @@ s" invalid signature"            throwcode !!wrong-sig!!
 
 UValue d#id
 User d#hashkey cell uallot drop
+User d#sigsize \ size for signature, temporary value
 
 \ checks for signatures
 
@@ -103,15 +104,16 @@ User d#hashkey cell uallot drop
     keccak0 2dup $50 - "host" >keyed-hash
     2dup + $50 - $10 "date" >keyed-hash ; \ hash from address
 : verify-host ( addr u -- addr u flag )
-    2dup $40 - + d#hashkey 2@ drop ed-verify ;
-: check-host ( addr u -- addr u ) >host verify-host 0= !!wrong-sig!! ;
+    2dup $40 - + d#hashkey 2@ drop ed-verify $50 d#sigsize ! ;
+: check-host ( addr u -- addr u )
+    >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
     dup $70 u< !!no-sig!!
     keccak0 d#hashkey 2@ "tag" >keyed-hash
     2dup + $70 - $10 "date" >keyed-hash
     2dup $70 - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
-    2dup + $60 - dup $20 + swap ed-verify ;
+    2dup + $60 - dup $20 + swap ed-verify $70 d#sigsize ! ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -155,11 +157,20 @@ Variable ins$0 \ just a null pointer
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 
+: $ins[]sig ( addr u $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup d#sigsize @ - $# $a $[]@ d#sigsize @ - compare dup 0= IF
+		drop $# $a $[]! EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    ins$0 cell $a r@ cells $ins r> $a $[]! ;
 : $del[]sig ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $40 - $# $a $[]@ $40 - compare dup 0= IF
+	    2dup d#sigsize @ - $# $a $[]@ d#sigsize @ - compare dup 0= IF
 		$# $a $[] $off
 		$a $# cells cell $del
 		2drop EXIT  THEN
@@ -173,7 +184,7 @@ Variable ins$0 \ just a null pointer
 	k#size alloz d#id !
 	d#hashkey 2@ d#id @ $!
     THEN
-    d#id @ + $ins[] ;
+    d#id @ + $ins[]sig ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO
@@ -255,7 +266,7 @@ also net2o-base
 : addme ( addr u -- ) 2dup .iperr  now>never
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize $, dht-id
-	\ my-ip$ $@ gen-host $, k#host ulit, dht-value+ \ also add my IP
+	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
     THEN
     gen-host $, k#host ulit, dht-value+
     ['] addme-end IS expect-reply? ;

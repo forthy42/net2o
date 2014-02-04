@@ -19,30 +19,28 @@ $8000 $100000
 : c:connect ( -- )
     $8000 $100000
     net2o-host $@ net2o-port insert-ip n2o:connect +flow-control +resend
-    [: .time ." Connected, o=" o hex. cr ;] $err ;
+    o-timeout [: .time ." Connected, o=" o hex. cr ;] $err ;
 
-c:connect
+: c:add-tag ( -- ) +addme
+    net2o-code
+    expect-reply
+    s" DHT test" $, type cr get-ip
+    pkc keysize $, dht-id
+    forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
+    forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
+    end-code  1 client-loop -setip ;
 
-+addme
+: c:fetch-tag ( -- )
+    net2o-code
+    expect-reply
+    pkc keysize $, dht-id
+    k#host ulit, dht-value? k#tags ulit, dht-value?
+    nest[ add-cookie lit, set-rtdelay request-done ]nest
+    end-code  1 client-loop ;
 
-net2o-code
-expect-reply
-s" DHT test" $, type cr get-ip
-pkc keysize $, dht-id
-forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
-forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
-end-code
+: c:dhtend ( -- )    
+    net2o-code s" DHT end" $, type cr .time disconnect  end-code ;
 
-1 client-loop
--setip
+: c:dht ( -- ) c:connect c:add-tag c:fetch-tag c:dhtend ;
 
-net2o-code
-expect-reply
-pkc keysize $, dht-id
-k#host ulit, dht-value? k#tags ulit, dht-value?
-nest[ add-cookie lit, set-rtdelay request-done ]nest
-end-code
-
-1 client-loop
-o-timeout
-bye
+script? [IF] c:dht bye [THEN]
