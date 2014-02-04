@@ -12,7 +12,6 @@ init-client
 
 !time
 
-$8000 $100000
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
