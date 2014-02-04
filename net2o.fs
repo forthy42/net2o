@@ -212,12 +212,13 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 	endof
     endcase ;
 
-: .port ( addr len -- )
-    drop be-uw@ 0 ['] .r #10 base-execute ;
+: .port ( addr len -- addr' len' )
+    over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
+: .net2o ( addr u -- ) ." ->" xtype ;
 : .ip4b ( addr len -- addr' len' )
     over c@ 0 ['] .r #10 base-execute 1 /string ;
 : .ip4 ( addr len -- )
-    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port ;
+    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port .net2o ;
 User ip6:#
 : .ip6w ( addr len -- addr' len' )
     over be-uw@ [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
@@ -227,7 +228,7 @@ User ip6:#
     2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
     -1 ip6:# !
     '[' 8 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
-    drop ." ]:" .port ;
+    drop ." ]:" .port .net2o ;
 
 : .address ( addr u -- )
     over w@ AF_INET6 = IF  .ip6  ELSE  .ip4  THEN ; 
@@ -305,7 +306,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     [: dup 4 = IF '4' emit ELSE '6' emit THEN type
-	r@ 8 rshift emit my-port# $FF and emit ;] $tmp
+	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
     my-ip$ $+[]! ;
 
 : !my-ips ( -- )
@@ -319,8 +320,9 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 Variable net2o-host "net2o.de" net2o-host $!
 
-: net2o-socket ( port -- )
-    create-udp-server46 fd>file to net2o-sock my-port to my-port#
+: net2o-socket ( port -- ) dup >r
+    create-udp-server46 fd>file to net2o-sock
+    r> ?dup-0=-IF  my-port  THEN to my-port#
     !my-ips ;
 
 : new-server ( -- )  net2o-port net2o-socket ;
@@ -449,13 +451,14 @@ Variable lastn2oaddr
     get-info info>string insert-address ;
 
 : 6>sock ( addr u -- )
+    over $10 + w@ sockaddr port w!
     $10 umin sockaddr sin6_addr swap move ;
 
 : 4>sock ( addr u -- )
+    over $4 + w@ sockaddr port w!
     drop be-ul@ ipv4! ;
 
 : $>sock ( addr u -- sockaddr u )
-    2 - 2dup + w@ sockaddr port w!
     case  over c@ >r 1 /string r>
 	'4' of  4>sock  endof
 	'6' of  6>sock  endof
@@ -1395,13 +1398,13 @@ event: ->slurp ( task o -- )  >o n2o:slurp-all-blocks
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : >sockaddr ( -- addr len )
     return-address be@ routes #.key $@ ['] .sockaddr $tmp ;
-: >n2oaddr ( -- addr len )
-    [: '2' emit return-address $10 0 -skip type ;] $tmp ;
+: n2oaddrs ( xt -- )
+    my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
+      rot dup >r execute r> ;] $[]map drop ;
 
 \ load crypto here
 
 require net2o-crypt.fs
-\ require net2o-keys.fs
 
 \ cookie stuff
 

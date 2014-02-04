@@ -492,7 +492,7 @@ net2o-base
 120 net2o: !time ( -- ) init-timer ;
 121 net2o: .time ( -- ) .packets .times ;
 122 net2o: set-ip ( addr u -- ) setip-xt perform ;
-123 net2o: get-ip ( -- ) >sockaddr $, set-ip >n2oaddr $, set-ip ;
+123 net2o: get-ip ( -- ) >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 124 net2o: punch ( addr u -- )  net2o:punch ;
 
 : rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
