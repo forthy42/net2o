@@ -94,6 +94,7 @@ s" invalid signature"            throwcode !!wrong-sig!!
 
 UValue d#id
 User d#hashkey cell uallot drop
+$40 Constant sigonlysize#
 $50 Constant sigsize#
 $70 Constant sigpksize#
 $10 Constant datesize#
@@ -172,7 +173,7 @@ Variable ins$0 \ just a null pointer
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigsize# - $# $a $[]@ sigsize# - compare dup 0= IF
+	    2dup sigonlysize# - $# $a $[]@ sigonlysize# - compare dup 0= IF
 		$# $a $[] $off
 		$a $# cells cell $del
 		2drop EXIT  THEN
