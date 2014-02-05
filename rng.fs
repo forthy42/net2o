@@ -1,5 +1,29 @@
 \ generic rng
 
+\ Copyright (C) 2010-2014   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+\ The general idea here is: You use an entropy source to initialize your PRNG.
+\ The entropy source used here is /dev/urandom.  After initializing the PRNG,
+\ you make sure that no observer can influence your PRNG, i.e. you stop
+\ reading entropy.
+
+\ The PRNG itself works by repeatedly encrypting the same block of memory
+\ using Keccak in duplex mode.  This is a huge amount of state (1.2kB),
+\ of which the 200 bytes Keccak state is kept hidden.
+
 require unix/pthread.fs
 
 $400 Constant rngbuf#
