@@ -101,13 +101,19 @@ $10 Constant datesize#
 
 \ checks for signatures
 
+: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
+: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     keccak0 2dup sigsize# - "host" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
+: check-date ( addr u -- addr u flag )
+    2dup + sigsize# - >r ticks r@ 64@ r> 64'+ 64@ 64within ;
 : verify-host ( addr u -- addr u flag )
-    2dup + $40 - d#hashkey 2@ drop ed-verify ;
+    check-date >r
+    2dup + sigonlysize# - d#hashkey 2@ drop ed-verify r> and ;
 : check-host ( addr u -- addr u )
     >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
@@ -116,7 +122,8 @@ $10 Constant datesize#
     2dup + sigsize# - datesize# "date" >keyed-hash
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
-    2dup + $40 - dup $30 - ed-verify ;
+    check-date >r
+    2dup + sigonlysize# - dup $30 - ed-verify r> and ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -165,7 +172,10 @@ Variable ins$0 \ just a null pointer
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup sigsize# - $# $a $[]@ sigsize# - compare dup 0= IF
-		drop $# $a $[]! EXIT  THEN
+		drop
+		2dup startdate@
+		$# $a $[]@ startdate@ 64u>=
+		IF  $# $a $[]!  ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     ins$0 cell $a r@ cells $ins r> $a $[]! ;
@@ -190,10 +200,19 @@ Variable ins$0 \ just a null pointer
     d#id @ + $ins[]sig ;
 
 : .check ( flag -- ) '✓' '⚡' rot select xemit ;
-: .tag ( addr u -- )
-    >tag verify-tag >r sigpksize# - type r> .check ;
-: .host ( addr u -- )
-    >host 2dup + $40 - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr r> .check ;
+: .sigdate ( tick -- )
+    64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
+    64dup 64#-1 64= IF  ." never"  64drop  EXIT  THEN
+    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
+	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
+    ELSE  64drop .ticks  THEN ;
+: .sigdates ( addr u -- )
+    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
+: .tag ( addr u -- ) 2dup 2>r 
+    >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
+: .host ( addr u -- ) 2dup 2>r
+    >host 2dup + $40 - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr
+    r> 2r> .sigdates .check ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO

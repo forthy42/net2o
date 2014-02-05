@@ -102,13 +102,24 @@ true [IF]
 	   @ s>f 1n f* f. cr ;] map-timer ) ;
 
     : !time ( -- ) ticks timer-tick 64! ;
-    : @time ( -- f ) ticks timer-tick 64@ 64- 64>f 1e-9 f* ;
+    : @time ( -- delta-f ) ticks timer-tick 64@ 64- 64>f 1e-9 f* ;
     : .time ( -- ) @time 13 9 6 f.rdp ." s " ;
 [ELSE]
     ' noop alias init-timer
     ' noop alias .times
     : timer: ['] noop alias immediate ;
 [THEN]
+
+require date.fs
+1970 1 1 ymd2day Constant unix-day0
+
+: fsplit ( r -- r n )  fdup floor fdup f>s f- ;
+
+: .ticks ( ticks -- )
+    64>f 1e-9 f* 86400e f/ fsplit unix-day0 + day2ymd
+    rot 0 .r '-' emit swap 0 .r '-' emit 0 .r 'T' emit
+    24e f* fsplit 0 .r ':' emit 60e f* fsplit 0 .r ':' emit
+    60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
 
 timer: +file
 timer: +send-cmd

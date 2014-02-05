@@ -68,6 +68,7 @@ cell 8 = [IF]
     ' off Alias 64off
     ' */ Alias 64*/
     ' * Alias 64*
+    ' within alias 64within
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
     : 128@ ( addr -- d ) 2@ swap ;
     ' d= Alias 128= ( d1 d2 -- flag )
@@ -147,6 +148,8 @@ cell 8 = [IF]
     ' m*/ Alias 64*/
     : 64* ( d1 d2 -- d3 ) { l1 h1 l2 h2 }
 	l1 l2 um* l1 h2 um* l2 h1 um* d+ drop + ;
+    : 64within ( d1 d2 d3 -- flag )
+	2over d- 2>r d- 2r> du< ;
     : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }
 	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
     : 128@ ( addr -- x1..x4 )
