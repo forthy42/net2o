@@ -19,14 +19,14 @@ rngbuf# rng-pos !
     rngbuf# rng-pos !
     getpid rng-pid ! up@ rng-task ! ;
 
-: rng-exec ( xt -- )  c:key@ >r  rng-key @ c:key!
-    execute  r> c:key! ;
+: rng-exec ( xt -- )
+    c:key@ >r  rng-key @ c:key!  catch  r> c:key!  throw ;
 
 : rng-init ( -- )
     rng-buffer @ rngbuf# rng-fd read-file throw drop ;
 
 : rng-step ( -- )
-    [: rng-init
+    [: ( rng-init ) \ djb advices *not* to do this here
        rng-buffer @ rngbuf# c:encrypt
        rng-pos off ;] rng-exec ;
 
@@ -48,7 +48,7 @@ rngbuf# rng-pos !
 : salt-init ( -- )
     s" ~/.initrng" r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
-    rng-step write-initrng rng-step ;
+    rng-init rng-step write-initrng rng-init rng-step ;
 
 \ buffered random numbers to output 64 bit at a time
 
