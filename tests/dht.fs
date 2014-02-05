@@ -27,7 +27,7 @@ init-client
     pkc keysize $, dht-id
     forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
-    end-code  1 client-loop -setip ;
+    end-code  1 client-loop -setip o-timeout ;
 
 : c:fetch-tag ( -- )
     net2o-code
@@ -35,10 +35,11 @@ init-client
     pkc keysize $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
     nest[ add-cookie lit, set-rtdelay request-done ]nest
-    end-code  1 client-loop ;
+    end-code  1 client-loop o-timeout ;
 
 : c:dhtend ( -- )    
-    net2o-code s" DHT end" $, type cr .time disconnect  end-code ;
+    net2o-code s" DHT end" $, type cr .time disconnect  end-code
+    o-timeout ;
 
 : c:dht ( n -- ) c:connect 0 ?DO c:add-tag c:fetch-tag LOOP c:dhtend ;
 

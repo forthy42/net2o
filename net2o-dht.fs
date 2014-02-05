@@ -294,7 +294,8 @@ datesize# buffer: sigdate \ date+expire date
     gen>tag "tag" >delete tag$ ;
 
 also net2o-base
-: addme-end nest[ request-done ]nest end-cmd ;
+: addme-end nest[ request-done ]nest end-cmd
+    ['] end-cmd IS expect-reply? ;
 : addme ( addr u -- ) 2dup .iperr  now>never
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize $, dht-id
