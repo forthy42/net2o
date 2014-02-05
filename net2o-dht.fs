@@ -187,11 +187,21 @@ Variable ins$0 \ just a null pointer
 	d#hashkey 2@ d#id @ $!
     THEN
     d#id @ + $ins[]sig ;
+
+: .check ( flag -- ) '✓' '⚡' rot select xemit ;
+: .tag ( addr u -- )
+    >tag verify-tag >r sigpksize# - type r> .check ;
+: .host ( addr u -- )
+    >host 2dup + $40 - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr r> .check ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
-	d#id @ I + [: cr xtype ." , " ;] $[]map cr
+	d#id @ I +  I k#host cells = IF
+	    [: cr .host ." ," ;]
+	ELSE
+	    [: cr .tag ." , " ;]
+	THEN $[]map cr
     cell +LOOP ;
 : d#value- ( addr u key -- )
     cells dup k#size u>= !!no-dht-key!!

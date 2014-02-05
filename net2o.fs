@@ -214,7 +214,7 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 
 : .port ( addr len -- addr' len' )
     over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
-: .net2o ( addr u -- ) ." ->" xtype ;
+: .net2o ( addr u -- ) dup IF  ." ->" xtype  ELSE  2drop  THEN ;
 : .ip4b ( addr len -- addr' len' )
     over c@ 0 ['] .r #10 base-execute 1 /string ;
 : .ip4 ( addr len -- )
@@ -240,9 +240,9 @@ User ip6:#
 	'2' of  ." ^" xtype  endof
 	'4' of  .ip4  endof
 	'6' of  .ip6  endof
-	-rot dump endcase cr ;
+	-rot dump endcase ;
 
-: .iperr ( addr len -- ) [: ." connected from: " .ipaddr ;] $err ;
+: .iperr ( addr len -- ) [: ." connected from: " .ipaddr cr ;] $err ;
 
 : ipv4! ( ipv4 -- )
     sockaddr sin6_addr 12 + be-l!
