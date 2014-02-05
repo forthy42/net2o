@@ -450,20 +450,6 @@ Variable lastn2oaddr
 : insert-ip ( addr u port -- net2o-addr )
     get-info info>string insert-address ;
 
-: 6>sock ( addr u -- )
-    over $10 + w@ sockaddr port w!
-    $10 umin sockaddr sin6_addr swap move ;
-
-: 4>sock ( addr u -- )
-    over $4 + w@ sockaddr port w!
-    drop be-ul@ ipv4! ;
-
-: $>sock ( addr u -- sockaddr u )
-    case  over c@ >r 1 /string r>
-	'4' of  4>sock  endof
-	'6' of  6>sock  endof
-	!!no-addr!!  endcase  sock-rest ;
-
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
 : route>address ( n -- ) dup >r
@@ -492,16 +478,38 @@ User return-addr $10 cell- uallot drop
     [ELSE]
 	4
     [THEN] ;
+: >path-len ( path -- path len )
+    dup 0= IF  0  EXIT  THEN
+    [IFDEF] 64bit
+	dup $00FFFFFFFFFFFFFF and 0= IF  1  EXIT  THEN
+	dup $0000FFFFFFFFFFFF and 0= IF  2  EXIT  THEN
+	dup $000000FFFFFFFFFF and 0= IF  3  EXIT  THEN
+	dup $00000000FFFFFFFF and 0= IF  4  EXIT  THEN
+	dup $0000000000FFFFFF and 0= IF  5  EXIT  THEN
+	dup $000000000000FFFF and 0= IF  6  EXIT  THEN
+	dup $00000000000000FF and 0= IF  7  EXIT  THEN
+	8
+    [ELSE]
+	dup $00FFFFFF and 0= IF  1  EXIT  THEN
+	dup $0000FFFF and 0= IF  2  EXIT  THEN
+	dup $000000FF and 0= IF  3  EXIT  THEN
+	4
+    [THEN] ;
 
 : <0string ( endaddr -- addr u )
     $11 1 DO  1- dup c@ WHILE  LOOP  $10  ELSE  I  UNLOOP  THEN ;
 
 : ins-source ( addr packet -- )
-    >r reverse dup >rpath-len { w^ rpath rplen } rpath be!
-    r@ destination $10 + <0string
+    destination >r reverse
+    dup >rpath-len { w^ rpath rplen } rpath be!
+    r@ $10 + <0string
     over rplen - swap move
-    rpath cell+ rplen - r> destination $10 + rplen - rplen move ;
+    rpath cell+ rplen - r> $10 + rplen - rplen move ;
 : >dest ( addr packet -- )  destination $10 move ;
+: ins-dest ( n2oaddr destaddr -- )
+    >r dup >path-len { w^ path plen } path be!
+    r@ cstring>sstring over plen + swap move
+    path r> plen move ;
 : skip-dest ( addr -- )
     $10 2dup 0 scan nip -
     2dup bounds ?DO
@@ -883,6 +891,28 @@ resend-size# buffer: resend-init
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
     filestate-lock 0 pthread_mutex_init drop ;
+
+\ insert address for punching
+
+: ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
+
+: !ret-addr ( addr u -- )  ret-addr dup $10 erase  swap move ;
+
+: 6>sock ( addr u -- )
+    over $10 + w@ sockaddr port w!
+    over $10 sockaddr sin6_addr swap move
+    $12 /string !ret-addr ;
+
+: 4>sock ( addr u -- )
+    over $4 + w@ sockaddr port w!
+    over be-ul@ ipv4!
+    6 /string !ret-addr ;
+
+: $>sock ( addr u -- sockaddr u )
+    case  over c@ >r 1 /string r>
+	'4' of  4>sock  endof
+	'6' of  6>sock  endof
+	!!no-addr!!  endcase  sock-rest ;
 
 \ create new maps
 

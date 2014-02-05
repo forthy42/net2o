@@ -16,7 +16,7 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:connect ( -- )
-    $8000 $100000
+    $2000 $10000
     net2o-host $@ net2o-port insert-ip n2o:connect +flow-control +resend
     o-timeout [: .time ." Connected, o=" o hex. cr ;] $err ;
 

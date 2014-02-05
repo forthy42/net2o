@@ -192,16 +192,15 @@ comp: :, also net2o-base ;
     +send-cmd dest-addr 64@ 64>r
     cmd( ." send: " 64dup ['] 64. $10 base-execute 64>r
     dup buf# n2o:see cr 64r> )
-    o IF  code-map  ELSE  0  THEN  code-packet !
-    o IF  return-address  ELSE  return-addr  THEN
+    o IF  code-map  ELSE  0  THEN  code-packet !  ret-addr
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I sendX  cmdreset  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: net2o:punch ( addr u -- )  $>sock insert-address
-    o IF  return-address  ELSE  return-addr  THEN  be! ;
+: net2o:punch ( addr u -- )
+    $>sock insert-address  ret-addr ins-dest ;
 
 : cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
