@@ -104,13 +104,18 @@ $10 Constant datesize#
 : startdate@ ( addr u -- date ) + sigsize# - 64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
 
+#10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
+
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     keccak0 2dup sigsize# - "host" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
 : check-date ( addr u -- addr u flag )
-    2dup + sigsize# - >r ticks r@ 64@ r> 64'+ 64@ 64within ;
+    2dup + sigsize# - >r
+    ticks r@ fuzzedtime# 64+ 64@ r> 64'+ 64@
+    64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
+    64within ;
 : verify-host ( addr u -- addr u flag )
     check-date >r
     2dup + sigonlysize# - d#hashkey 2@ drop ed-verify r> and ;
