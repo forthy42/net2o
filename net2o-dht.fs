@@ -113,7 +113,7 @@ $10 Constant datesize#
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
 : check-date ( addr u -- addr u flag )
     2dup + sigsize# - >r
-    ticks r@ fuzzedtime# 64+ 64@ r> 64'+ 64@
+    ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
 : verify-host ( addr u -- addr u flag )
