@@ -76,6 +76,9 @@ end-class keccak
 : keccak-init crypto-o @ IF  keccak-up @ next-task = ?EXIT  THEN
     keccak new crypto-o ! next-task keccak-up ! keccak-state to @keccak ;
 
+: keccak-free crypto-o @ ?dup-IF  dispose  THEN
+    0 to @keccak crypto-o off ;
+
 keccak-init
 
 ' keccak-init to c:init

@@ -392,6 +392,8 @@ also net2o-base definitions
     64drop 2drop 64drop ;
 
 22 net2o: disconnect ( -- )  o 0= ?EXIT n2o:dispose-context un-cmd ;
+23 net2o: set-tick ( ticks -- )  adjust-ticks ;
+24 net2o: get-tick ( -- )  ticks lit, set-tick ;
 
 net2o-base
 
@@ -764,7 +766,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
-    tmpkey-request key-request
+    tmpkey-request key-request get-tick
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;

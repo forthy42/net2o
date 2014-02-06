@@ -364,7 +364,7 @@ sema cmd0lock
     init0buf free throw
     sockaddr free throw
     statbuf  free throw
-;
+    free-ed25519 c:free ;
 
 alloc-io
 
@@ -2094,21 +2094,24 @@ con-cookie >osize @ buffer: cookie-adder
       o o> cookie-size#  cookies $+! ;]
     resize-lock c-section ;
 
-: ?cookie ( cookie -- context true / false )
-    [: ticker 64@ connect-timeout# 64- { 64: timeout }
+: do-?cookie ( cookie -- context true / false )
+    ticker 64@ connect-timeout# 64- { 64: timeout }
       0 >r BEGIN  r@ cookies $@len u<  WHILE
 	      cookies $@ r@ /string drop >o
 	      cc-timeout 64@ timeout 64u< IF
-		  cookies r@ cookie-size# $del
+		  o> cookies r@ cookie-size# $del
 	      ELSE
 		  64dup cc-timeout 64@ 64= IF
 		      64drop cc-context @ o>
 		      cookies r> cookie-size# $del
 		      true EXIT
 		  THEN
-		  r> cookie-size# + >r
+		  o> r> cookie-size# + >r
 	      THEN
-      REPEAT  64drop rdrop false ;] resize-lock c-section ;
+      REPEAT  64drop rdrop false ;
+  
+: ?cookie ( cookie -- context true / false )
+    ['] do-?cookie resize-lock c-section ;
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
@@ -2116,6 +2119,10 @@ con-cookie >osize @ buffer: cookie-adder
     THEN ;
 
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
+: adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
+    recv-tick 64@ 64- rtdelay 64@ 64-2/
+    64over 64abs 64over 64> IF  64+ tick-adjust 64!
+    ELSE  64drop 64drop  THEN ;
 
 \ load net2o plugins
 

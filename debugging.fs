@@ -73,11 +73,8 @@ Variable last-tick
 
 \ timing ticks
 
-[IFDEF] 64bit
-    : ticks ( -- u )  ntime drop ;
-[ELSE]
-    ' ntime Alias ticks
-[THEN]
+64Variable tick-adjust
+: ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
 
 : ticks-u ( -- u )  ntime drop ;
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;

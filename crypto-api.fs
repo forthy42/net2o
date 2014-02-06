@@ -12,6 +12,8 @@ User-o crypto-o
 object class
     umethod c:init ( -- )
     \G initialize crypto function for a task
+    umethod c:free ( -- )
+    \G free crypto function for a task
     umethod c:key! ( addr -- )
     \G use addr as key storage
     umethod c:key@ ( -- addr )

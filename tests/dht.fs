@@ -39,7 +39,7 @@ init-client
 
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
-    o-timeout ;
+    o-timeout n2o:dispose-context ;
 
 : c:dht ( n -- ) c:connect 0 ?DO c:add-tag c:fetch-tag LOOP c:dhtend ;
 

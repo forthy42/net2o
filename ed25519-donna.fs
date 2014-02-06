@@ -59,6 +59,9 @@ end-class edbuf-c
 
 init-ed25519
 
+: free-ed25519 ( -- )
+    edbuf @ ?dup-IF  dispose  THEN  edbuf off ;
+
 : gen-sk ( sk -- ) >r
     \G generate a secret key with the right bits set and cleared
     $20 rng$ r@ swap move  r@ c@ $F8 and r@ c!
