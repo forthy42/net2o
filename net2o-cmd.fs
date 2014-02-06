@@ -761,12 +761,14 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
+User other-xt ' noop other-xt !
+
 : gen-request ( -- )
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
-    tmpkey-request key-request get-tick
+    tmpkey-request key-request other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
@@ -817,6 +819,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
+
+: +get-time     ['] get-tick other-xt ! ;
+: -other        ['] noop other-xt ! ;
 
 : n2o:connect ( ucode udata return-addr -- )
     n2o:new-context
