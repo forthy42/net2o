@@ -42,6 +42,7 @@ s" invalid tmpnest"              throwcode !!tmpnest!!
 s" cookie recieved twice"        throwcode !!double-cookie!!
 s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
+s" absolute path not allowed!"   throwcode !!abs-path!!
 
 \ required tools
 
@@ -1259,6 +1260,9 @@ $20 Value mask-bits#
 
 \ file states
 
+Variable net2o-path
+pad 200 get-dir net2o-path $!
+
 object class
     64field: fs-size
     64field: fs-seek
@@ -1266,6 +1270,7 @@ object class
     64field: fs-limit
     64field: fs-time
     field: fs-fid
+    field: fs-path
     method fs-read
     method fs-write
     method fs-open
@@ -1303,7 +1308,10 @@ end-class fs-class
 ; fs-class to fs-close
 :noname ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " type ."  with mode " . cr )
-    open-file throw fs-fid !
+    >r 2dup absolut-path?  !!abs-path!!
+    net2o-path open-path-file throw fs-path $! fs-fid !
+    r@ r/o <> IF  0 fs-fid !@ close-file throw
+	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
     64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64!
 ; fs-class to fs-open
@@ -1316,9 +1324,10 @@ end-class fs-class
     [: fs-class new sp@ cell file-state $+! drop ;]
     filestate-lock c-section ;
 
+: lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
 : state-addr ( id -- addr )
     id>addr dup 0< !!gap!!
-    0= IF  drop  new>file file-state $@ + cell- @  THEN ;
+    0= IF  drop  new>file lastfile@  THEN ;
 
 : +expected ( n -- ) >blockalign expected @ tuck + dup expected !
     data-rmap @ >o data-ackbits0 2@  2swap

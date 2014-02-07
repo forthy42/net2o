@@ -242,8 +242,6 @@ Variable ins$0 \ just a null pointer
     r@ k#host = IF  check-host  THEN
     r@ k#tags = IF  check-tag   THEN
     r> (d#value+) dht( d#. ) ;
-Defer d#value? ( key -- )
-: d#values? ( mask n -- ) drop 64drop ;
 
 \ commands for DHT
 
@@ -253,21 +251,60 @@ Defer d#value? ( key -- )
 \g add a value to the given dht key
 132 net2o: dht-value- ( addr u key -- ) 64>n d#value- ;
 \g remove a value from the given dht key
-133 net2o: dht-value? ( type -- ) 64>n d#value? ;
-134 net2o: dht-values? ( mask n -- ) 64>n drop 64drop ;
-\g query the dht values mask selects which) and send back up to n
-\g items with dht-value+
 
-\ value reading requires constructing answer packet
+\ queries
 
 also net2o-base
 
-:noname ( key -- )  d#id @ 0= ?EXIT
+: d#value? ( key -- )  d#id @ 0= ?EXIT
     d#id @ $@ $, dht-id \ this is the id we send
-    k#tags umin dup cells d#id @ + [: $, dup ulit, dht-value+ ;] $[]map
-    drop ; IS d#value?
+    k#tags umin dup cells d#id @ +
+    [: dup $A0 + maxstring <
+	IF  $, dup ulit, dht-value+  ELSE  2drop  THEN ;] $[]map
+    drop ;
+
+fs-class class
+    field: dht-queries
+end-class dht-class
+
+: d#c, ( addr u c -- addr' u' )  -rot xc!+? drop ; 
+: d#$, ( addr1 u1 addr2 u2 -- addr' u' )
+    2over 2 pick d#c,
+    2over rot umin dup >r move r> /string ;
+: d#id, ( addr u -- addr' u' )
+    0 d#c, d#id @ $@ d#$, ;
+: d#values, ( addr u mask -- addr' u' ) { mask }
+    k#size cell/ 1 DO
+	mask 1 and IF
+	    I dup cells d#id @ +
+	    [: rot dup >r d#c, d#$, r> ;] $[]map drop
+	THEN  mask 2/ to mask
+    LOOP ;
+
+:noname $FFFFFFFF n>64 64dup fs-limit 64! fs-size 64! ; dht-class to fs-open
+:noname ( addr u -- n )  dup >r
+    dht-queries $@ bounds ?DO
+	I 1+ I c@ 2dup >d#id + c@ >r
+	d#id, r> d#values,
+    I c@ 2 + +LOOP  nip r> swap - ;
+
+: new>dht ( -- )
+    [: dht-class new sp@ cell file-state $+! drop ;]
+    filestate-lock c-section ;
+
+: d#open ( fid -- )  new>dht lastfile@ >o fs-open o> ;
+: d#query ( addr u mask fid -- )  state-addr >o
+    >r dup dht-queries c$+! dht-queries $+! r> dht-queries c$+! o> ;
 
 previous
+
+133 net2o: dht-value? ( type -- ) 64>n d#value? ;
+\g query the dht values of this type, and send back as many
+\g as fit into the answer packet
+134 net2o: dht-open ( fid -- ) 64>n d#open ;
+135 net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
+
+\ value reading requires constructing answer packet
 
 \ facilitate stuff
 
