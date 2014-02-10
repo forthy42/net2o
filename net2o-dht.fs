@@ -174,23 +174,23 @@ Variable ins$0 \ just a null pointer
 
 : $ins[]sig ( addr u $array -- )
     \G insert O(log(n)) into pre-sorted array
-    { $a } 0 $a $[]#
+    { $arr } 0 $arr $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigsize# - $# $a $[]@ sigsize# - compare dup 0= IF
+	    2dup sigsize# - $# $arr $[]@ sigsize# - compare dup 0= IF
 		drop
 		2dup startdate@
-		$# $a $[]@ startdate@ 64u>=
-		IF  $# $a $[]!  ELSE  2drop  THEN EXIT  THEN
+		$# $arr $[]@ startdate@ 64u>=
+		IF   $# $arr $[]!  ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    ins$0 cell $a r@ cells $ins r> $a $[]! ;
-: $del[]sig ( addr u $array -- )
+    ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
+: $del[]sig ( addr u $arrrray -- )
     \G delete O(log(n)) from pre-sorted array, check sigs
-    { $a } 0 $a $[]#
+    { $arr } 0 $arr $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigonlysize# - $# $a $[]@ sigonlysize# - compare dup 0= IF
-		$# $a $[] $off
-		$a $# cells cell $del
+	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# - compare dup 0= IF
+		$# $arr $[] $off
+		$arr $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
@@ -267,9 +267,9 @@ fs-class class
     field: dht-queries
 end-class dht-class
 
-: d#c, ( addr u c -- addr' u' )  -rot xc!+? drop ; 
+: d#c, ( addr u c -- addr' u' ) -rot xc!+? drop ; 
 : d#$, ( addr1 u1 addr2 u2 -- addr' u' )
-    2over 2 pick d#c,
+    2swap 2 pick d#c, 2swap
     2over rot umin dup >r move r> /string ;
 : d#id, ( addr u -- addr' u' )
     0 d#c, d#id @ $@ d#$, ;
@@ -277,7 +277,7 @@ end-class dht-class
     k#size cell/ 1 DO
 	mask 1 and IF
 	    I dup cells d#id @ +
-	    [: rot dup >r d#c, d#$, r> ;] $[]map drop
+	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
 
@@ -286,7 +286,7 @@ end-class dht-class
     dht-queries $@ bounds ?DO
 	I 1+ I c@ 2dup >d#id + c@ >r
 	d#id, r> d#values,
-    I c@ 2 + +LOOP  nip r> swap - ;
+    I c@ 2 + +LOOP  nip r> swap - ; dht-class to fs-read
 
 : new>dht ( -- )
     [: dht-class new sp@ cell file-state $+! drop ;]
