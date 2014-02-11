@@ -37,10 +37,19 @@ init-client
     nest[ add-cookie lit, set-rtdelay request-done ]nest
     end-code  1 client-loop o-timeout ;
 
+: c:fetch-tags ( -- )
+    net2o-code
+    expect-reply
+    0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
+    slurp-all-tracked-blocks gen-total send-chunks
+    end-code  1 client-loop o-timeout ;
+
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
     o-timeout n2o:dispose-context ;
 
-: c:dht ( n -- ) c:connect 0 ?DO c:add-tag c:fetch-tag LOOP c:dhtend ;
+: c:dht ( n -- ) c:connect 0 ?DO
+	c:add-tag c:fetch-tag \ c:fetch-tags
+    LOOP c:dhtend ;
 
 script? [IF] 1 c:dht bye [THEN]

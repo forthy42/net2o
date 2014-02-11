@@ -477,9 +477,8 @@ net2o-base
     2*64>n dup >r n2o:open-file
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
-76 net2o: slurp-all-tracked-blocks ( -- )
-    n2o:slurp-all-blocks
-    ['] do-track-seek n2o:track-all-seeks ;
+76 net2o: slurp ( -- )
+    n2o:slurp ['] do-track-seek n2o:track-all-seeks ;
 77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 78 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
@@ -532,7 +531,7 @@ User file-reg#
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
 
 : n2o:done ( -- )
-    gen-total slurp-all-tracked-blocks ;
+    gen-total slurp ;
 
 : n2o:close-all ( -- )
     fstates 0 ?DO
@@ -605,8 +604,7 @@ also net2o-base
 	flush1( save-all-blocks )
 	flush2( data-rmap @ >o dest-back !@ o>
 	net2o:rewind-receiver-partial )else( drop )
-	flush3( net2o:ackflush
-	slurp-all-tracked-blocks )
+	flush3( net2o:ackflush slurp )
 	flush( ." partial rewind completed " data-rmap @ >o dest-back @ hex. o>  F cr )
     ELSE
 	drop
@@ -664,7 +662,7 @@ also net2o-base
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
 : restart-transfer ( -- )
-    slurp-all-tracked-blocks send-chunks ;
+    slurp send-chunks ;
 
 0 Value request-stats?
 

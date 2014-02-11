@@ -1401,7 +1401,7 @@ end-class fs-class
     msg( data-map @ >o dest-raddr @ o> to roff )
     data-head@ id id>addr? >o fs-read o> dup /data ;
 
-: n2o:slurp-all-blocks ( -- )  +calc fstates 0 { size fails }
+: n2o:slurp ( -- )  +calc fstates 0 { size fails }
     0 BEGIN  data-head?  WHILE
 	    read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
 	    data-head? residualread @ 0= or  IF
@@ -1430,8 +1430,7 @@ Defer do-track-seek
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 
-event: ->slurp ( task o -- )  >o n2o:slurp-all-blocks
-    o elit, ->track event> o> ;
+event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
