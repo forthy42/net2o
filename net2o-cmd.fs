@@ -485,7 +485,7 @@ net2o-base
 77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 78 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
-79 net2o: set-total ( u -- )  write-file# off residualwrite off 64>n total! ;
+79 net2o: set-total ( u -- )  write-file# off residualwrite off 64drop ;
 80 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ ids 100..120 reserved for key exchange/strage
@@ -676,7 +676,7 @@ also net2o-base
     data-rmap @ >o dest-end @ o> ;
 
 : rewind-transfer ( -- )
-    expected off  received off
+    expected off
     request-stats? IF
 	send-timing
     THEN
@@ -698,8 +698,8 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
 	data-ackbits1 @ data-firstack1# @ dup hex. + l@ hex.
-	o> received @ hex. F cr )
-	msg( ." Block transfer done: " received @ hex. expected @ hex. F cr )
+	o> F cr )
+	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	expect-reply
 	end-code
@@ -740,7 +740,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	!rf data-ackbit over +bit@ o>
 	r> and >r
     THEN
-    drop r> 0= IF  maxdata received +!  expected?  THEN ;
+    drop r> 0= IF  ( maxdata received +! )  expected?  THEN ;
 
 : net2o:do-ack ( -- ) 
     dest-addr 64@ recv-addr 64! \ last received packet
@@ -818,7 +818,7 @@ previous
 
 : connected-timeout ( -- )
     [: F .time ."  connected timeout, o=" o hex.
-      received @ hex. expected @ hex. F cr ;] $err
+      expected@ hex. hex. F cr ;] $err
     net2o-code
     cmd-resend? transfer-keepalive?
     end-code ;

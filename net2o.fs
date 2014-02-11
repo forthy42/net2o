@@ -709,8 +709,6 @@ object class
     field: last-ackaddr
     \ state machine
     field: expected
-    field: total
-    field: received  \ to be replaced with dest-tail
     \ statistics
     field: timing-stat
     64field: last-time
@@ -1346,7 +1344,6 @@ end-class fs-class
     fs-seek 64@ 64- 64>n o> +expected ;
 : limit! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-limit 64! o> ;
-: total! ( n -- )  total ! ;
 
 : net2o:gen-total ( -- 64u ) 64#0
     file-state $@ bounds ?DO
