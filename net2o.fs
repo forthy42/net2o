@@ -607,6 +607,8 @@ object class
     field: dest-head  \ read up to here        received some
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
+    field: dest-top   \ -/-                    sender read up to here
+    field: dest-end   \ -/-                    true if last chunk
     method free-data
     method regen-ivs
     method handle
@@ -992,6 +994,7 @@ Variable mapstart $1 mapstart !
 : ?residual ( addr len resaddr -- addr len' ) >r
     r@ @ ?dup-IF  tuck umin swap  ELSE  blocksize @  THEN
     over -  r> ! ;
+: head@ ( -- head )  data-map @ >o dest-head @ o> ;
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
@@ -1233,8 +1236,7 @@ $20 Value mask-bits#
 	THEN
 	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
     2 cells +LOOP  2drop ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c!
-    flybursts @ ack-resend# c! ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
@@ -1401,12 +1403,14 @@ end-class fs-class
     msg( data-map @ >o dest-raddr @ o> to roff )
     data-head@ id id>addr? >o fs-read o> dup /data ;
 
-: n2o:slurp ( -- )  +calc fstates 0 { size fails }
+: n2o:slurp ( -- advance-head end-flag )  +calc head@ fstates 0
+    { dhead states fails }
     0 BEGIN  data-head?  WHILE
 	    read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
 	    data-head? residualread @ 0= or  IF
 		read-file# file+  residualread off  THEN
-    fails size u>= UNTIL  THEN msg( ." Read end" cr ) +file ;
+	fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
+    head@ dhead - fails states u>= ;
 
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
@@ -1623,7 +1627,8 @@ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
     dup 0= IF
 	ack-toggle# ack-state xorc!
 	ack-resend# c@ 1- 0 max dup ack-resend# c!
-	0= IF  ack-resend~ @ ack-state c@ resend-toggle# invert and or ack-state c!  THEN
+	0= IF  ack-resend~ @ ack-state c@ resend-toggle# invert and or
+	    ack-state c!  flybursts @ ack-resend# c!  THEN
 	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
 	    bursts( .o ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )

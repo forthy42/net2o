@@ -430,11 +430,13 @@ net2o-base
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
-50 net2o: ack-flush ( addr -- )  net2o:rewind-sender-partial ;
-51 net2o: set-head ( offset -- ) data-rmap @ >o dest-head umax! o> ;
+50 net2o: ack-flush ( addr -- )  64>n net2o:rewind-sender-partial ;
+51 net2o: set-head ( offset -- ) 64>n data-rmap @ >o dest-head umax! o> ;
 52 net2o: timeout ( ticks -- ) net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
-53 net2o: ack-reply ( tag -- ) net2o:ack-reply ;
+53 net2o: ack-reply ( tag -- ) 64>n net2o:ack-reply ;
 54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+55 net2o: set-top ( offset flag -- ) 2*64>n
+    data-rmap @ >o dest-end ! dest-top ! o> ;
 
 \ crypto functions
 
@@ -478,7 +480,8 @@ net2o-base
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 76 net2o: slurp ( -- )
-    n2o:slurp ['] do-track-seek n2o:track-all-seeks ;
+    n2o:slurp swap ulit, ulit, set-top
+    ['] do-track-seek n2o:track-all-seeks ;
 77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 78 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
 
@@ -669,24 +672,27 @@ also net2o-base
 : update-rtdelay ( -- )
     ticks lit, push-lit push' set-rtdelay ;
 
+: data-end? ( -- flag )
+    data-rmap @ >o dest-end @ o> ;
+
 : rewind-transfer ( -- )
-    expected @ negate total +!
     expected off  received off
-    rewind  total @ 0> IF
-	restart-transfer
-    THEN
     request-stats? IF
 	send-timing
     THEN
-    total @ 0<= IF
+    rewind data-end? IF
 	msg( ." Chunk transfer done!" F cr )
-	n2o:request-done  EXIT
+	n2o:request-done
+    ELSE
+	restart-transfer
     THEN ;
 
 : request-stats   true to request-stats?  track-timing ;
 
+: expected@ ( -- head top ) data-rmap @ >o dest-head @ dest-top @ o> ;
+
 : expected? ( -- )
-    received @ expected @ tuck u>= and IF
+    expected@ tuck u>= and IF
 	net2o-code
 	resend-all
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
@@ -795,25 +801,27 @@ User other-xt ' noop other-xt !
 
 : .expected ( -- )
     ." expected/received: " recv-addr @ hex.
-    data-rmap @ >o dest-head @ hex.
+    data-rmap @ >o
     false data-firstack# @ hex. true data-firstack# @ hex. o>
-    expected @ hex. received @ hex. F cr
+    expected@ hex. hex. F cr
     \ receive-flag data-rmap @ >o
     \ data-ackbit dest-size @ addr>bits bits>bytes dump o>
 ;
 
+also net2o-base
 : transfer-keepalive? ( -- )
-    received @ expected @ u>= ?EXIT
+    expected@ u>= ?EXIT
     timeout( .expected )
-    net2o-code
     update-rtdelay  ticks lit, timeout
-    resend-all  net2o:genack
-    end-code ;
+    resend-all  net2o:genack ;
+previous
 
 : connected-timeout ( -- )
     [: F .time ."  connected timeout, o=" o hex.
-    received @ hex. expected @ hex. F cr ;] $err
-    cmd-resend? transfer-keepalive? ;
+      received @ hex. expected @ hex. F cr ;] $err
+    net2o-code
+    cmd-resend? transfer-keepalive?
+    end-code ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
