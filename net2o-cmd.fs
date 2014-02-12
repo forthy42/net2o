@@ -483,10 +483,6 @@ net2o-base
     n2o:slurp swap ulit, ulit, set-top
     ['] do-track-seek n2o:track-all-seeks ;
 77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
-78 net2o: rewind-receiver ( n -- )  64>n net2o:rewind-receiver ;
-
-79 net2o: set-total ( u -- )  write-file# off residualwrite off 64drop ;
-80 net2o: gen-total ( -- ) read-file# off residualread off net2o:gen-total lit, set-total ;
 
 \ ids 100..120 reserved for key exchange/strage
 
@@ -533,8 +529,7 @@ User file-reg#
 : n2o:seek ( pos id -- )
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
 
-: n2o:done ( -- )
-    gen-total slurp ;
+: n2o:done ( -- )  slurp ;
 
 : n2o:close-all ( -- )
     fstates 0 ?DO

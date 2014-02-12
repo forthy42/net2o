@@ -92,12 +92,15 @@ UValue statbuf
 
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;
 : xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
-: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
 : and!  ( x addr -- )   >r r@ @ and  r> ! ;
 : min!  ( n addr -- )   >r r@ @ min  r> ! ;
 : max!  ( n addr -- )   >r r@ @ max  r> ! ;
 : umin! ( n addr -- )   >r r@ @ umin r> ! ;
 : umax! ( n addr -- )   >r r@ @ umax r> ! ;
+
+: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
+: andc! ( x c-addr -- )   >r r@ c@ and  r> c! ;
+: orc!  ( x c-addr -- )   >r r@ c@ or   r> c! ;
 
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
 
@@ -124,6 +127,23 @@ UValue statbuf
     invert or invert swap c! r> 0<> ;
 : bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
 : bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
+
+
+: bit-erase ( addr off len -- )
+    dup 8 u>= IF
+	>r dup 7 and >r 3 rshift + r@ bits 1- over andc!
+	1+ 8 r> - r> swap -
+	dup 7 and >r 3 rshift 2dup erase +
+	0 r> THEN
+    bounds ?DO  dup I -bit  LOOP  drop ;
+
+: bit-fill ( addr off len -- )
+    dup 8 u>= IF
+	>r dup 7 and >r 3 rshift + r@ bits 1- invert over orc!
+	1+ 8 r> - r> swap -
+	dup 7 and >r 3 rshift 2dup $FF fill +
+	0 r> THEN
+    bounds ?DO  dup I +bit  LOOP  drop ;
 
 \ variable length integers
 
@@ -1345,12 +1365,6 @@ end-class fs-class
 : limit! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-limit 64! o> ;
 
-: net2o:gen-total ( -- 64u ) 64#0
-    file-state $@ bounds ?DO
-	I @ >o fs-limit 64@ fs-seekto 64@ 64- o>
-	64>blockalign 64#0 64max 64+
-    cell +LOOP ;
-
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
 
@@ -1623,8 +1637,10 @@ event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
     dup @
     dup 0= IF
 	ack-toggle# ack-state xorc!
-	ack-resend# c@ 1- 0 max dup ack-resend# c!
-	0= IF  ack-resend~ @ ack-state c@ resend-toggle# invert and or
+	ack-resend# c@
+	ack-resend~ c@ ack-state c@ xor resend-toggle# and 0<> +
+	0 max dup ack-resend# c!
+	0= IF  ack-resend~ c@ ack-state c@ resend-toggle# invert and or
 	    ack-state c!  flybursts @ ack-resend# c!  THEN
 	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
 	flybursts @ 0<= IF
@@ -1732,10 +1748,12 @@ rdata-class to rewind-timestamps-partial
     data-ackbits1 @ r> fill-bits ;
 
 : net2o:rewind-sender ( n -- )
+    read-file# off residualread off
     data-map @ >o
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
+    write-file# off residualwrite off
     data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;

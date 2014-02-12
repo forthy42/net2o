@@ -116,7 +116,7 @@ init-client
     -1 nlit, 4 ulit, track-limit
     -1 nlit, 5 ulit, track-limit
     -1 nlit, 6 ulit, track-limit
-    gen-total slurp send-chunks
+    slurp send-chunks
     end-code
     1 client-loop n2o:close-all ['] .time $err ;
 
