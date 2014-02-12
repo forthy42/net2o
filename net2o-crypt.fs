@@ -145,11 +145,10 @@ Variable do-keypad
 
 : regen-ivs-part ( new-back -- )  c:key@ >r
     dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
-    dest-back @ - addr>keys >r
-    dest-ivs $@ dest-back @ dest-size @ 1- and
-    addr>keys /string r@ umin dup >r c:prng
-    dest-ivs $@ r> r> - umin c:prng
-    r> c:key! ;
+    dest-back @ U+DO
+	I I' fix-size dup { len }
+	addr>keys >r addr>keys dest-ivs $@ drop + r> c:prng
+    len +LOOP  r> c:key! ;
 
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =

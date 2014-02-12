@@ -1000,8 +1000,8 @@ Variable mapstart $1 mapstart !
 
 \ new data sending around stuff, with front+back
 
-: fix-size ( base offset1 offset2 -- addr len )
-    over - >r dest-size @ 1- and r> over + dest-size @ umin over - >r + r> ;
+: fix-size ( offset1 offset2 -- addr len )
+    over - >r dest-size @ 1- and r> over + dest-size @ umin over - ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
 : ?residual ( addr len resaddr -- addr len' ) >r
@@ -1011,13 +1011,13 @@ Variable mapstart $1 mapstart !
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
-    dest-raddr @ dest-head @ dest-back @ dest-size @ +
-    fix-size o> blocksize @ umin residualread ?residual ;
+    dest-head @ dest-back @ dest-size @ +
+    fix-size >r dest-raddr @ + r> o> blocksize @ umin residualread ?residual ;
 : rdata-back@ ( -- addr u )
     \g you can write from this, also a block at a time
     data-rmap @ >o
-    dest-raddr @ dest-back @ dest-tail @
-    fix-size o> blocksize @ umin residualwrite ?residual ;
+    dest-back @ dest-tail @
+    fix-size >r dest-raddr @ + r> o> blocksize @ umin residualwrite ?residual ;
 : data-tail@ ( -- addr u )
     \g you can send from this - as long as you stay block aligned
     data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
@@ -1345,10 +1345,20 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dup dest-top !@ swap  data-ackbits0 2@  2swap
-    maxdata 1- + chunk-p2 rshift swap chunk-p2 rshift
-    tuck - 2dup 2>r bit-erase 2r> bit-erase
-    data-firstack0# off  data-firstack1# off ;
+    dup dest-top !@ U+DO
+	data-ackbits0 2@
+	I I' fix-size dup { len }
+	chunk-p2 rshift swap chunk-p2 rshift swap
+	2dup 2>r bit-erase 2r> bit-erase
+    len +LOOP ;
+
+: dest-back! ( offset -- )
+    dup dest-back !@ U+DO
+	data-ackbits0 2@
+	I I' fix-size dup { len }
+	chunk-p2 rshift swap chunk-p2 rshift swap
+	2dup 2>r bit-fill 2r> bit-fill
+    len +LOOP ;
 
 : size! ( 64 id -- )  state-addr >o
     64dup fs-size 64!  fs-limit 64!
@@ -1697,18 +1707,17 @@ dup data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 
 :noname ( new-back o:map -- )
-    dest-back @ - addr>ts >r
-    dest-timestamps @ dest-size @ addr>ts dest-back @ addr>ts over 1- and
-    /string r@ umin dup >r erase
-    dest-timestamps @ r> r> - erase ;
+    dest-back @ U+DO
+	I I' fix-size dup { len }
+	addr>ts swap addr>ts swap >r dest-timestamps @ + r> erase
+    len +LOOP ;
 dup data-class to rewind-timestamps-partial
 rdata-class to rewind-timestamps-partial
 
 : clearpages-partial ( new-back o:map -- )
-    dest-back @ - >r
-    dest-raddr @ dest-size @ dest-back @ over 1- and
-    /string r@ umin dup >r clearpages
-    dest-raddr @ r> r> - clearpages ;
+    dest-back @ U+DO
+	I I' fix-size >r dest-raddr @ + r> dup { len } clearpages
+    len +LOOP ;
 
 : rewind-partial ( new-back o:map -- )
     \ dup clearpages-partial
@@ -1730,16 +1739,6 @@ rdata-class to rewind-timestamps-partial
     data-ackbits0 @ over -1 fill
     data-ackbits1 @ swap -1 fill ;
 
-: fill-bits ( addr bytes -- ) >r dup
-    dest-size @ addr>bits bits>bytes
-    dest-back @ addr>bits bits>bytes over 1- and /string
-    r@ umin dup >r -1 fill r> r> - -1 fill ;
-
-: rewind-ackbits-partial ( new-back o:map -- )
-    dest-back @ - addr>bits bits>bytes >r
-    data-ackbits0 @ r@ fill-bits
-    data-ackbits1 @ r> fill-bits ;
-
 : net2o:rewind-sender ( n -- )
     read-file# off residualread off
     data-map @ >o
@@ -1758,7 +1757,7 @@ rdata-class to rewind-timestamps-partial
 : net2o:rewind-receiver-partial ( new-back -- )
     flush( ." rewind partial " dup hex. cr )
     data-rmap @ >o
-    dup rewind-partial  dup rewind-ackbits-partial  dest-back ! o> ;
+    dup rewind-partial  dest-back! o> ;
 
 \ schedule delayed events
 
