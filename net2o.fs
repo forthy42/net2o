@@ -2089,7 +2089,8 @@ true !!timeout!! ;
     THEN ;
 
 : init-rest ( port -- )  init-mykey init-mykey \ two keys
-    init-timer net2o-socket init-route prep-socks create-sender-task ;
+    init-timer net2o-socket init-route prep-socks
+    sender( create-sender-task ) ;
 
 : init-client ( -- )  init-cache 0 init-rest ;
 : init-server ( -- )  net2o-port init-rest ;
