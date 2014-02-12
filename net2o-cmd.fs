@@ -671,15 +671,8 @@ also net2o-base
     data-rmap @ >o dest-end @ o> ;
 
 : rewind-transfer ( -- )
-    request-stats? IF
-	send-timing
-    THEN
-    rewind data-end? IF
-	msg( ." Chunk transfer done!" F cr )
-	n2o:request-done
-    ELSE
-	restart-transfer
-    THEN ;
+    rewind data-end? IF  n2o:request-done  ELSE  restart-transfer  THEN
+    request-stats? IF  send-timing  THEN ;
 
 : request-stats   true to request-stats?  track-timing ;
 
@@ -688,6 +681,7 @@ also net2o-base
 : expected? ( -- )
     expected@ tuck u>= and IF
 	net2o-code
+	expect-reply
 	resend-all
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
@@ -695,7 +689,6 @@ also net2o-base
 	o> F cr )
 	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
-	expect-reply
 	end-code
 	64#0 burst-ticks 64!
     THEN ;

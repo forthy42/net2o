@@ -346,9 +346,6 @@ Variable net2o-host "net2o.de" net2o-host $!
     r> ?dup-0=-IF  my-port  THEN to my-port#
     !my-ips ;
 
-: new-server ( -- )  net2o-port net2o-socket ;
-: new-client ( -- )  0 net2o-socket ;
-
 $2A Constant overhead \ constant overhead
 $4 Value max-size^2 \ 1k, don't fragment by default
 $40 Constant min-size
@@ -2018,7 +2015,7 @@ Variable timeout-task
     resend0 $off  fstate-off
     \ erase crypto keys
     crypto-key $@ erase  crypto-key $off
-    data-resend $off
+    data-resend $off  timing-stat $off
     dispose
     cmd( ." disposed" cr ) ;
 
@@ -2091,12 +2088,11 @@ true !!timeout!! ;
 	s" .cache" $1FF =mkdir throw
     THEN ;
 
-: init-client ( -- )  init-mykey init-mykey \ two keys
-    dump( "n2o.dump" r/w create-file throw to dump-fd )
-    init-timer init-cache new-client init-route prep-socks ;
+: init-rest ( port -- )  init-mykey init-mykey \ two keys
+    init-timer net2o-socket init-route prep-socks create-sender-task ;
 
-: init-server ( -- )  init-mykey init-mykey \ two keys
-    init-timer new-server init-route prep-socks ;
+: init-client ( -- )  init-cache 0 init-rest ;
+: init-server ( -- )  net2o-port init-rest ;
 
 \ connection cookies
 
