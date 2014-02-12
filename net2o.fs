@@ -727,8 +727,6 @@ object class
     64field: last-raddr
     \ cookies
     field: last-ackaddr
-    \ state machine
-    field: expected
     \ statistics
     field: timing-stat
     64field: last-time
@@ -1349,19 +1347,17 @@ end-class fs-class
     id>addr dup 0< !!gap!!
     0= IF  drop  new>file lastfile@  THEN ;
 
-: +expected ( n -- ) >blockalign expected @ tuck + dup expected !
-    data-rmap @ >o data-ackbits0 2@  2swap
-    maxdata 1- + chunk-p2 rshift swap chunk-p2 rshift +DO
-	dup I -bit  over I -bit  LOOP  2drop
-    data-firstack0# off  data-firstack1# off o>
-    firstack( ." expect more data" cr ) ;
+: dest-top! ( offset -- )
+    dup dest-top !@ swap  data-ackbits0 2@  2swap
+    maxdata 1- + chunk-p2 rshift swap chunk-p2 rshift
+    tuck - 2dup 2>r bit-erase 2r> bit-erase
+    data-firstack0# off  data-firstack1# off ;
 
 : size! ( 64 id -- )  state-addr >o
     64dup fs-size 64!  fs-limit 64!
     64#0 fs-seekto 64! 64#0 fs-seek 64! o> ;
 : seekto! ( 64 id -- )  state-addr >o
-    fs-size 64@ 64umin 64dup fs-seekto 64!
-    fs-seek 64@ 64- 64>n o> +expected ;
+    fs-size 64@ 64umin fs-seekto 64! o> ;
 : limit! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-limit 64! o> ;
 
@@ -1725,7 +1721,7 @@ rdata-class to rewind-timestamps-partial
 : rewind-buffer ( o:map -- )
     1 dest-round +!
     \ dest-size @ dest-back +!
-    dest-tail off  dest-head off  dest-back off
+    dest-tail off  dest-head off  dest-back off  dest-top off
     \ dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 
@@ -1928,7 +1924,7 @@ $20 Constant keys-val
 : handle-cmd0 ( -- ) \ handle packet to address 0
     0 >o rdrop \ address 0 has no job context!
     0 inbuf-decrypt 0= IF
-	." invalid packet to 0" cr EXIT  THEN
+	." invalid packet to 0" drop cr EXIT  THEN
     validated off \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
 

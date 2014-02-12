@@ -436,7 +436,7 @@ net2o-base
 53 net2o: ack-reply ( tag -- ) 64>n net2o:ack-reply ;
 54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
 55 net2o: set-top ( offset flag -- ) 2*64>n
-    data-rmap @ >o dest-end ! dest-top ! o> ;
+    data-rmap @ >o dest-end ! dest-top! o> ;
 
 \ crypto functions
 
@@ -671,7 +671,6 @@ also net2o-base
     data-rmap @ >o dest-end @ o> ;
 
 : rewind-transfer ( -- )
-    expected off
     request-stats? IF
 	send-timing
     THEN
@@ -729,13 +728,13 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	\ if we are at head, fill other polarity with 1s
 	dup data-lastack# !@
 	!rf data-ackbit -rot
-	+DO  dup I 1+ +bit  LOOP o>
+	tuck - >r 1+ r> bit-fill o>
     ELSE
 	\ otherwise, set only this specific bucket
-	!rf data-ackbit over +bit@ o>
+	!rf data-ackbit swap +bit@ o>
 	r> and >r
     THEN
-    drop r> 0= IF  ( maxdata received +! )  expected?  THEN ;
+    r> 0= IF  ( maxdata received +! )  expected?  THEN ;
 
 : net2o:do-ack ( -- ) 
     dest-addr 64@ recv-addr 64! \ last received packet
