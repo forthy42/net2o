@@ -941,14 +941,14 @@ Variable mapstart $1 mapstart !
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
-: n2o:new-data { 64: addrs 64: addrd u -- } pow2?
+: n2o:new-data pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source  data-map ! ;
-: n2o:new-code { 64: addrs 64: addrd u -- } pow2?
+: n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
