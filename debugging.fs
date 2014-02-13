@@ -157,6 +157,16 @@ false [IF]
     : .exe ;
 [THEN]
 
+\ more phony throw stuff
+
+0 [IF]
+:noname  ." Store backtrace..." cr defers store-backtrace
+    dobacktrace ; is store-backtrace
+
+:noname  ?dup-IF  ." Throw directly" cr dobacktrace
+	defers throw  THEN ; is throw
+[THEN]
+
 \ Emacs fontlock mode: Highlight more stuff
 
 0 [IF]

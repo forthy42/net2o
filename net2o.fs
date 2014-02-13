@@ -2056,8 +2056,8 @@ true !!timeout!! ;
     o-timeout ->request ;
 
 : do-event-loop ( -- )  o >r
-    BEGIN  ['] event-loop-nocatch catch ?int dup  WHILE
-	    [: ." event-loop: " dup . .exe cr DoError ;] $err nothrow
+    BEGIN   nothrow ['] event-loop-nocatch catch ?int dup  WHILE
+	    [: ." event-loop: " dup . .exe cr DoError cr ;] $err
 	r@ >o rdrop  REPEAT  drop rdrop ;
 
 : create-receiver-task ( -- )

@@ -609,7 +609,7 @@ also net2o-base
     THEN ;
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate
-    net2o:flush-blocks ;
+    ( net2o:flush-blocks ) ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
@@ -676,7 +676,10 @@ also net2o-base
 
 : request-stats   true to request-stats?  track-timing ;
 
-: expected@ ( -- head top ) data-rmap @ >o dest-head @ dest-top @ o> ;
+: expected@ ( -- head top )
+    o IF  data-rmap @ >o
+	o IF  dest-head @ dest-top @  ELSE  0.  THEN o>
+    ELSE  0.  THEN  ;
 
 : expected? ( -- )
     expected@ tuck u>= and IF
@@ -767,6 +770,7 @@ User other-xt ' noop other-xt !
 : 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
+	cmd0buf cmd0source !
 	resend0 $@ >r cmdbuf r@ move
 	cmdbuf r> 64#0 send-cmd 1 packets2 +!
     THEN ;
@@ -798,17 +802,16 @@ User other-xt ' noop other-xt !
 also net2o-base
 : transfer-keepalive? ( -- )
     expected@ u>= ?EXIT
+    net2o-code
     timeout( .expected )
     update-rtdelay  ticks lit, timeout
-    resend-all  net2o:genack ;
+    resend-all  net2o:genack end-code ;
 previous
 
 : connected-timeout ( -- )
     [: F .time ."  connected timeout, o=" o hex.
       expected@ hex. hex. F cr ;] $err
-    net2o-code
-    cmd-resend? transfer-keepalive?
-    end-code ;
+    cmd-resend? transfer-keepalive? ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
