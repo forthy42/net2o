@@ -936,18 +936,19 @@ Variable mapstart $1 mapstart !
 
 : server? ( -- flag )  is-server c@ negate ;
 : server! ( -- )  1 is-server c! ;
+: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
-: n2o:new-data { 64: addrs 64: addrd u -- }
+: n2o:new-data { 64: addrs 64: addrd u -- } pow2?
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source  data-map ! ;
-: n2o:new-code { 64: addrs 64: addrd u -- }
+: n2o:new-code { 64: addrs 64: addrd u -- } pow2?
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
@@ -1002,6 +1003,7 @@ Variable mapstart $1 mapstart !
 
 : fix-size ( offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and r> over + dest-size @ umin over - ;
+: raddr+ ( addr len -- addr' len ) >r dest-raddr @ + r> ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
 : ?residual ( addr len resaddr -- addr len' ) >r
@@ -1011,13 +1013,13 @@ Variable mapstart $1 mapstart !
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
-    dest-head @ dest-back @ dest-size @ +
-    fix-size >r dest-raddr @ + r> o> blocksize @ umin residualread ?residual ;
+    dest-head @ dest-back @ dest-size @ + fix-size raddr+ o>
+    blocksize @ umin residualread ?residual ;
 : rdata-back@ ( -- addr u )
     \g you can write from this, also a block at a time
     data-rmap @ >o
-    dest-back @ dest-tail @
-    fix-size >r dest-raddr @ + r> o> blocksize @ umin residualwrite ?residual ;
+    dest-back @ dest-tail @ fix-size raddr+ o>
+    blocksize @ umin residualwrite ?residual ;
 : data-tail@ ( -- addr u )
     \g you can send from this - as long as you stay block aligned
     data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
@@ -1716,13 +1718,12 @@ rdata-class to rewind-timestamps-partial
 
 : clearpages-partial ( new-back o:map -- )
     dest-back @ U+DO
-	I I' fix-size >r dest-raddr @ + r> dup { len } clearpages
-    len +LOOP ;
+	I I' fix-size raddr+ tuck clearpages
+    +LOOP ;
 
 : rewind-partial ( new-back o:map -- )
     \ dup clearpages-partial
-    dup rewind-timestamps-partial
-    regen-ivs-part ;
+    dup rewind-timestamps-partial regen-ivs-part ;
 
 : rewind-buffer ( o:map -- )
     1 dest-round +!
@@ -1899,8 +1900,6 @@ Defer init-reply
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
 
-: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
-
 User validated
 
 $01 Constant crypt-val
@@ -1986,7 +1985,7 @@ Variable timeout-task
       +LOOP ;] timeout-sema c-section ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- )  o?
+: >next-timeout ( -- ) o?
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
