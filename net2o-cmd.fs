@@ -615,8 +615,6 @@ also net2o-base
     data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
     chunk-p2 3 + lshift dest-head @ umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
-: data-ackbit ( flag -- bit )
-    IF  data-ackbits1  ELSE  data-ackbits0  THEN @ ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
 
@@ -629,20 +627,21 @@ also net2o-base
     data-lastack# @ 0< IF  drop o>  EXIT  THEN
     dest-head @ addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
-    rf data-ackbit 
-    dest-size @ chunk-p2 3 + rshift 1- { acks ackm }
+    data-rfbits @ data-ackbits @
+    dest-size @ chunk-p2 3 + rshift 1- { rfs acks ackm }
     acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
     rf data-firstack# { first-ack# }
     0 swap first-ack# @ o>
     +DO
-	acks I ackm and + l@ ack( ." acks: " acks hex. I hex. dup hex. F cr )
-	$FFFFFFFF <> IF
-    	    acks I ackm and + l@ $FFFFFFFF xor
-	    I chunk-p2 3 + lshift
+	acks I ackm and + l@
+	rfs  I ackm and + l@ rf invert xor or $FFFFFFFF and
+	ack( ." acks: " acks hex. I hex. dup hex. F cr )
+	dup $FFFFFFFF <> IF
+	    $FFFFFFFF xor I chunk-p2 3 + lshift
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  1+
 	ELSE
-	    dup 0= IF  I 4 + first-ack# !
+	    drop dup 0= IF  I 4 + first-ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
@@ -687,8 +686,8 @@ also net2o-base
 	expect-reply
 	resend-all
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
-	data-ackbits0 @ data-firstack0# @ dup hex. + l@ hex.
-	data-ackbits1 @ data-firstack1# @ dup hex. + l@ hex.
+	data-ackbits @ data-firstack0# @ dup hex. + l@ hex.
+	data-rfbits  @ data-firstack1# @ dup hex. + l@ hex.
 	o> F cr )
 	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
@@ -714,23 +713,20 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     recv-addr 64@ receive-flag { rf } data-rmap @ >o
     dest-vaddr 64@ 64- 64>n addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
-    rf data-ackbit over +bit@
+    data-ackbits @ over +bit@
     dup IF  1 packetr2 +!  THEN o o> ;
 
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
-    receive-flag 0= { !rf }
-    swap >r >o
+    receive-flag { rf }
+    >o >r
+    data-ackbits @ over +bit@ r> and >r
     dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup data-lastack# !@
-	!rf data-ackbit -rot
-	tuck - >r 1+ r> bit-fill o>
-    ELSE
-	\ otherwise, set only this specific bucket
-	!rf data-ackbit swap +bit@ o>
-	r> and >r
-    THEN
-    r> 0= IF  ( maxdata received +! )  expected?  THEN ;
+	data-rfbits @ -rot
+	tuck - rf IF  bit-fill  ELSE  bit-erase  THEN
+    ELSE  drop  THEN  r> o>
+    0= IF  ( maxdata received +!  ) expected?  THEN ;
 
 : net2o:do-ack ( -- ) 
     dest-addr 64@ recv-addr 64! \ last received packet

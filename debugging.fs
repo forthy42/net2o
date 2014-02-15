@@ -159,7 +159,7 @@ false [IF]
 
 \ more phony throw stuff
 
-0 [IF]
+1 [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
 

@@ -639,8 +639,8 @@ end-class code-class
 code-class class end-class data-class
 
 code-class class
-    field: data-ackbits0
-    field: data-ackbits1
+    field: data-ackbits
+    field: data-rfbits
     field: data-ackbits-buf
     field: data-firstack0#
     field: data-firstack1#
@@ -719,6 +719,7 @@ object class
     field: acks
     64field: last-rate
     field: rec-timing
+    field: received
     \ experiment: track previous b2b-start
     64field: last-rtick
     64field: last-raddr
@@ -843,8 +844,8 @@ m: addr>keys ( addr -- keys )
     alloc-data
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
-	dup addr>bits bits>bytes allocate-bits data-ackbits0 !
-	dup addr>bits bits>bytes allocate-bits data-ackbits1 !
+	dup addr>bits bits>bytes allocate-bits data-ackbits !
+	dup addr>bits bits>bytes allocate-bits data-rfbits !
 	s" " data-ackbits-buf $!
     THEN
     data-lastack# on
@@ -975,8 +976,8 @@ Variable mapstart $1 mapstart !
 ' free-code data-class to free-data
 
 : free-rcode ( o:data --- )
-    data-ackbits0 ?free
-    data-ackbits1 ?free
+    data-ackbits ?free
+    data-rfbits ?free
     data-ackbits-buf $off
     free-code ;
 ' free-rcode rdata-class to free-data
@@ -1348,7 +1349,7 @@ end-class fs-class
 
 : dest-top! ( offset -- )
     dup dest-top !@ U+DO
-	data-ackbits0 2@
+	data-ackbits 2@
 	I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
 	2dup 2>r bit-erase 2r> bit-erase
@@ -1356,10 +1357,10 @@ end-class fs-class
 
 : dest-back! ( offset -- )
     dup dest-back !@ U+DO
-	data-ackbits0 2@
+	data-ackbits @
 	I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
-	2dup 2>r bit-fill 2r> bit-fill
+	bit-fill
     len +LOOP ;
 
 : size! ( 64 id -- )  state-addr >o
@@ -1737,8 +1738,8 @@ rdata-class to rewind-timestamps-partial
     firstack( ." rewind firstacks" cr )
     data-lastack# on
     dest-size @ addr>bits bits>bytes
-    data-ackbits0 @ over -1 fill
-    data-ackbits1 @ swap -1 fill ;
+    data-ackbits @ over -1 fill
+    data-rfbits @  swap erase ;
 
 : net2o:rewind-sender ( n -- )
     read-file# off residualread off
