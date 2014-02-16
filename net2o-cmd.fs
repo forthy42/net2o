@@ -612,7 +612,7 @@ also net2o-base
     ( net2o:flush-blocks ) ;
 
 : !rdata-tail ( -- )
-    data-rmap @ >o data-firstack0# @ data-firstack1# @ umin
+    data-rmap @ >o data-firstack0# 2@ umin
     chunk-p2 3 + lshift dest-head @ umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-firstack# ( flag -- addr )
@@ -677,14 +677,13 @@ also net2o-base
 
 : expected@ ( -- head top )
     o IF  data-rmap @ >o
-	o IF  dest-head @ dest-top @  ELSE  0.  THEN o>
+	o IF  dest-tail @ dest-top @  ELSE  0.  THEN o>
     ELSE  0.  THEN  ;
 
 : expected? ( -- )
     expected@ tuck u>= and IF
 	net2o-code
 	expect-reply
-	resend-all
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-firstack0# @ dup hex. + l@ hex.
 	data-rfbits  @ data-firstack1# @ dup hex. + l@ hex.
@@ -722,11 +721,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     data-ackbits @ over +bit@ r> and >r
     dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
-	dup data-lastack# !@
+	dup data-lastack# !@ 0 max
 	data-rfbits @ -rot
 	tuck - rf IF  bit-fill  ELSE  bit-erase  THEN
-    ELSE  drop  THEN  r> o>
-    0= IF  ( maxdata received +!  ) expected?  THEN ;
+    ELSE  drop  THEN  dest-head @ dest-top @ r> o>
+    0= IF  u>= IF  resend-all  THEN  expected?  ELSE  2drop  THEN ;
 
 : net2o:do-ack ( -- ) 
     dest-addr 64@ recv-addr 64! \ last received packet

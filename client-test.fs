@@ -146,7 +146,8 @@ init-client
 
 #100 Value req-ms#
 
-: c:tests ( n -- )  dup to total-tests  dup requests !
+: c:tests ( n -- )
+    dup to total-tests  dup requests !  up@ init-to-task !
     0 ?DO  c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
 

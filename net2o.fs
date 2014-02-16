@@ -425,7 +425,7 @@ MSG_DONTWAIT  Constant don't-block
 	512 + negate throw  THEN
     inbuf swap  1 packetr +! ;
 
-$00000000 Value droprate#
+$10000000 Value droprate#
 
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
@@ -654,6 +654,7 @@ rcode-class class end-class rdata-class
 object class
     field: context#
     field: wait-task
+    field: to-task
     $10 +field return-address
     64field: recv-tick
     64field: recv-addr
@@ -895,9 +896,12 @@ resend-size# buffer: resend-init
 
 : -timeout      ['] noop               timeout-xt ! ;
 
+Variable init-to-task
+
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
+    init-to-task @ dup 0= IF  drop up@  THEN  to-task !
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
@@ -1383,7 +1387,10 @@ end-class fs-class
     msg( data-rmap @ >o dest-raddr @ o> to roff )
     rdata-back@ id id>addr? >o fs-write o> dup /back ;
 
-: save-all-blocks ( -- )  +calc fstates 0 { size fails }
+: save-all-blocks ( -- )
+    data-rmap @ >o data-ackbits @ dest-size @ addr>bits bits>bytes $FF skip
+    dup IF  [: dump ;] $err  ELSE  2drop  THEN  o>
+    +calc fstates 0 { size fails }
     BEGIN  rdata-back?  WHILE
 	    write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
 	    rdata-back? residualwrite @ 0= or  IF
@@ -1737,9 +1744,8 @@ rdata-class to rewind-timestamps-partial
     data-firstack0# off  data-firstack1# off
     firstack( ." rewind firstacks" cr )
     data-lastack# on
-    dest-size @ addr>bits bits>bytes
-    data-ackbits @ over -1 fill
-    data-rfbits @  swap erase ;
+    data-ackbits @  data-rfbits @
+    dest-size @ addr>bits bits>bytes  tuck $FF fill  erase ;
 
 : net2o:rewind-sender ( n -- )
     read-file# off residualread off
@@ -1943,7 +1949,7 @@ $20 Constant keys-val
 
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
     ticker 64@  recv-tick 64! \ time stamp of arrival
-    dup >r inbuf-decrypt 0= IF  .inv-packet  rdrop EXIT  THEN
+    dup >r inbuf-decrypt 0= IF  .inv-packet  drop rdrop EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr return-address $10 move
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
@@ -2031,7 +2037,7 @@ User requests
 
 event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
-true !!timeout!! ;
+       true !!timeout!! ;
 
 #2.000.000 d>64 64Constant watch-timeout# \ 2ms timeout check interval
 64Variable watch-timeout ticks watch-timeout# 64+ watch-timeout 64!
@@ -2040,7 +2046,7 @@ true !!timeout!! ;
     ?timeout ?dup-IF  >o rdrop
 	>next-timeout
 	do-timeout 1 timeouts +!
-	timeouts @ timeouts# > wait-task @ and  IF  ->timeout  THEN
+	timeouts @ timeouts# > to-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
 
@@ -2075,8 +2081,8 @@ true !!timeout!! ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout
-    o IF  up@ wait-task !  THEN  event-loop-task
-    requests->0 ;
+    o IF  up@ wait-task !  THEN
+    event-loop-task requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  1 client-loop ;
 
