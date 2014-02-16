@@ -140,14 +140,17 @@ init-client
     >timing
     n2o:dispose-context ;
 
+event: ->throw throw ;
+
 : c:test& ( -- ) \ in background
     up@ 1 stacksize4 NewTask4 pass >r
-    alloc-io c:test ->request r> event> ;
+    alloc-io ['] c:test catch ?dup-IF
+	elit, ->throw  ELSE  ->request  THEN  r> event> ;
 
 #100 Value req-ms#
 
 : c:tests ( n -- )
-    dup to total-tests  dup requests !  up@ init-to-task !
+    dup to total-tests  dup requests !
     0 ?DO  c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
 

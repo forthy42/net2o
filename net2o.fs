@@ -654,7 +654,6 @@ rcode-class class end-class rdata-class
 object class
     field: context#
     field: wait-task
-    field: to-task
     $10 +field return-address
     64field: recv-tick
     64field: recv-addr
@@ -896,12 +895,9 @@ resend-size# buffer: resend-init
 
 : -timeout      ['] noop               timeout-xt ! ;
 
-Variable init-to-task
-
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
     init-context# @ context# !  1 init-context# +!
-    init-to-task @ dup 0= IF  drop up@  THEN  to-task !
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
     s" " crypto-key $!
@@ -2046,7 +2042,7 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
     ?timeout ?dup-IF  >o rdrop
 	>next-timeout
 	do-timeout 1 timeouts +!
-	timeouts @ timeouts# > to-task @ and  ?dup-IF  ->timeout event>  THEN
+	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
 
