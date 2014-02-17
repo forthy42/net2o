@@ -621,10 +621,10 @@ object class
     field: dest-cookies
     field: dest-round \ going to be obsoleted
     \                   sender:                receiver:
+    field: dest-top   \ -/-                    sender read up to here
     field: dest-head  \ read up to here        received some
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
-    field: dest-top   \ -/-                    sender read up to here
     field: dest-end   \ -/-                    true if last chunk
     method free-data
     method regen-ivs
@@ -642,8 +642,8 @@ code-class class
     field: data-ackbits
     field: data-rfbits
     field: data-ackbits-buf
-    field: data-firstack0#
-    field: data-firstack1#
+    field: data-ack0#
+    field: data-ack1#
     field: data-lastack#
 end-class rcode-class
 
@@ -805,6 +805,10 @@ User >code-flag
 
 m: addr>bits ( addr -- bits )
     chunk-p2 rshift ;
+m: addr>bytes ( addr -- bytes )
+    chunk-p2 3 + rshift ;
+m: bytes>addr ( bytes addr -- )
+    chunk-p2 3 + lshift ;
 m: bits>bytes ( bits -- bytes )
     1- 2/ 2/ 2/ 1+ ;
 m: addr>ts ( addr -- ts-offset )
@@ -1737,7 +1741,7 @@ rdata-class to rewind-timestamps-partial
     regen-ivs-all  rewind-timestamps ;
 
 : rewind-ackbits ( o:map -- )
-    data-firstack0# off  data-firstack1# off
+    data-ack0# off  data-ack1# off
     firstack( ." rewind firstacks" cr )
     data-lastack# on
     data-ackbits @  data-rfbits @

@@ -1,6 +1,6 @@
 \ generic net2o command interpreter
 
-\ Copyright (C) 2011-2013   Bernd Paysan
+\ Copyright (C) 2011-2014   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -614,11 +614,12 @@ also net2o-base
     ( net2o:flush-blocks ) ;
 
 : !rdata-tail ( -- )
-    data-rmap @ >o data-firstack0# 2@ umin
-    chunk-p2 3 + lshift dest-head @ umin dest-top @ umin dest-tail ! o> ;
+    data-rmap @ >o
+    data-ack0# 2@ umin bytes>addr
+    dest-top 2@ umin umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
-: data-firstack# ( flag -- addr )
-    IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
+: data-ack# ( flag -- addr )
+    IF  data-ack0#  ELSE  data-ack1#  THEN ;
 
 4 Value max-resend#
 
@@ -630,20 +631,20 @@ also net2o-base
     dest-head @ addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
     data-rfbits @ data-ackbits @
-    dest-size @ chunk-p2 3 + rshift 1- { rfs acks ackm }
+    dest-size @ addr>bytes 1- { rfs acks ackm }
     acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
-    rf data-firstack# { first-ack# }
-    0 swap first-ack# @ o>
+    rf data-ack# { ack# }
+    0 swap ack# @ o>
     +DO
 	acks I ackm and + l@
 	rfs  I ackm and + l@ rf invert xor or $FFFFFFFF and
 	ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	dup $FFFFFFFF <> IF
-	    $FFFFFFFF xor I chunk-p2 3 + lshift
+	    $FFFFFFFF xor I bytes>addr
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    ulit, ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + first-ack# !
+	    drop dup 0= IF  I 4 + ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
 	    THEN
 	THEN
@@ -688,8 +689,8 @@ also net2o-base
 	net2o-code
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
-	data-ackbits @ data-firstack0# @ dup hex. + l@ hex.
-	data-rfbits  @ data-firstack1# @ dup hex. + l@ hex.
+	data-ackbits @ data-ack0# @ dup hex. + l@ hex.
+	data-rfbits  @ data-ack1# @ dup hex. + l@ hex.
 	o> F cr )
 	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
@@ -772,13 +773,10 @@ User other-xt ' noop other-xt !
     0-resend? map-resend? ;
 
 : .expected ( -- )
-    ." expected/received: " recv-addr @ hex.
+    F .time ." expected/received: " recv-addr @ hex.
     data-rmap @ >o
-    false data-firstack# @ hex. true data-firstack# @ hex. o>
-    expected@ hex. hex. F cr
-    \ receive-flag data-rmap @ >o
-    \ data-ackbit dest-size @ addr>bits bits>bytes dump o>
-;
+    false data-ack# @ hex. true data-ack# @ hex. o>
+    expected@ hex. hex. F cr ;
 
 \ acknowledge toplevel
 
@@ -806,14 +804,12 @@ also net2o-base
 : transfer-keepalive? ( -- )
     expected@ u>= ?EXIT
     net2o-code
-    timeout( .expected )
     update-rtdelay  ticks lit, timeout
     resend-all  net2o:genack end-code ;
 previous
 
 : connected-timeout ( -- )
-    [: F .time ."  connected timeout, o=" o hex.
-      expected@ hex. hex. F cr ;] $err
+    timeout( .expected )
     cmd-resend? transfer-keepalive? ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
