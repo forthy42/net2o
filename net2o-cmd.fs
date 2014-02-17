@@ -224,11 +224,13 @@ previous
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
     code-vdest r> reply-dest 64! ;
-: net2o:ack-reply ( index -- )  o 0= IF  drop EXIT  THEN
+: net2o:ack-reply ( index -- )
+    timeout( ." ack: " dup hex. F cr )
+    o 0= IF  drop EXIT  THEN
     resend0 @ IF  resend0 $off  THEN
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
-    cmd( ." expect: " cmdbuf$ n2o:see )
+    timeout( ." expect: " cmdbuf$ n2o:see )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
 
 : tag-addr? ( -- flag )
@@ -613,7 +615,7 @@ also net2o-base
 
 : !rdata-tail ( -- )
     data-rmap @ >o data-firstack0# 2@ umin
-    chunk-p2 3 + lshift dest-head @ umin dest-tail ! o> ;
+    chunk-p2 3 + lshift dest-head @ umin dest-top @ umin dest-tail ! o> ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-firstack# ( flag -- addr )
     IF  data-firstack0#  ELSE  data-firstack1#  THEN ;
@@ -647,9 +649,6 @@ also net2o-base
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
-: resend-all ( -- )
-    resend-toggle# recv-flag xor!  false net2o:do-resend
-    resend-toggle# recv-flag xor!  false net2o:do-resend ;
 
 : do-expect-reply ( -- )
     reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
@@ -657,6 +656,10 @@ also net2o-base
     ['] end-cmd IS expect-reply? ;
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
+
+: resend-all ( -- )
+    resend-toggle# recv-flag xor!  false net2o:do-resend
+    resend-toggle# recv-flag xor!  false net2o:do-resend ;
 
 : restart-transfer ( -- )
     slurp send-chunks ;
@@ -727,23 +730,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     ELSE  drop  THEN  dest-head @ dest-top @ r> o>
     0= IF  u>= IF  resend-all  THEN  expected?  ELSE  2drop  THEN ;
 
-: net2o:do-ack ( -- ) 
-    dest-addr 64@ recv-addr 64! \ last received packet
-    recv-cookie
-    inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    acks# and dup ack-receive !@ xor >r
-    r@ ack-toggle# and IF
-	net2o-code
-	r@ resend-toggle# and IF  true net2o:do-resend  THEN
-	net2o:gen-resend  net2o:genack
-	end-code
-    THEN
-    +cookie received!
-    r> ack-timing ;
-
-: +flow-control ['] net2o:do-ack ack-xt ! ;
-: -flow-control ['] noop         ack-xt ! ;
-
 \ higher level functions
 
 : map-request, ( ucode udata -- )
@@ -773,8 +759,8 @@ User other-xt ' noop other-xt !
 : map-resend? ( -- )
     code-map @ ?dup-IF  >o
 	dest-replies @
-	dest-size @ addr>replies bounds o> ?DO
-	    I 2@ d0<> IF
+	dest-size @ addr>replies bounds o> U+DO
+	    I @ 0<> IF
 		timeout( ." resend: " I 2@ n2o:see F cr )
 		I 2@ I reply-dest 64@ send-cmd
 		1 packets2 +!
@@ -793,6 +779,28 @@ User other-xt ' noop other-xt !
     \ receive-flag data-rmap @ >o
     \ data-ackbit dest-size @ addr>bits bits>bytes dump o>
 ;
+
+\ acknowledge toplevel
+
+: net2o:do-ack ( -- ) 
+    dest-addr 64@ recv-addr 64! \ last received packet
+    recv-cookie
+    inbuf 1+ c@ dup recv-flag ! \ last receive flag
+    acks# and dup ack-receive !@ xor >r
+    r@ ack-toggle# and IF
+	net2o-code
+	r@ resend-toggle# and IF  true net2o:do-resend  THEN
+	net2o:gen-resend  net2o:genack
+	end-code
+	map-resend?
+    THEN
+    +cookie received!
+    r> ack-timing ;
+
+: +flow-control ['] net2o:do-ack ack-xt ! ;
+: -flow-control ['] noop         ack-xt ! ;
+
+\ keepalive
 
 also net2o-base
 : transfer-keepalive? ( -- )

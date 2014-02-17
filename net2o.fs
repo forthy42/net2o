@@ -425,7 +425,7 @@ MSG_DONTWAIT  Constant don't-block
 	512 + negate throw  THEN
     inbuf swap  1 packetr +! ;
 
-$10000000 Value droprate#
+$00000000 Value droprate#
 
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
@@ -1741,7 +1741,7 @@ rdata-class to rewind-timestamps-partial
     firstack( ." rewind firstacks" cr )
     data-lastack# on
     data-ackbits @  data-rfbits @
-    dest-size @ addr>bits bits>bytes  tuck $FF fill  erase ;
+    dest-size @ addr>bits bits>bytes  tuck  erase $FF fill ;
 
 : net2o:rewind-sender ( n -- )
     read-file# off residualread off

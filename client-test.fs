@@ -140,7 +140,7 @@ init-client
     >timing
     n2o:dispose-context ;
 
-event: ->throw throw ;
+event: ->throw dup DoError throw ;
 
 : c:test& ( -- ) \ in background
     up@ 1 stacksize4 NewTask4 pass >r
