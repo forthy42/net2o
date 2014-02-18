@@ -755,7 +755,7 @@ end-structure
 \ check for valid destination
 
 : >data-head ( addr o:map -- )
-    dest-back @ dest-size @ 1- and - dup 0< IF  dest-size @ +  THEN
+    dup dest-back @ dest-size @ 1- and < IF  dest-size @ +  THEN
     maxdata + dest-back @ + dest-head umax! ;
 
 Variable dest-map s" " dest-map $!
@@ -1387,15 +1387,18 @@ end-class fs-class
     msg( data-rmap @ >o dest-raddr @ o> to roff )
     rdata-back@ id id>addr? >o fs-write o> dup /back ;
 
+Sema file-sema
+
 : save-all-blocks ( -- )
-    data-rmap @ >o data-ackbits @ dest-size @ addr>bits bits>bytes $FF skip
-    dup IF  [: dump ;] $err  ELSE  2drop  THEN  o>
-    +calc fstates 0 { size fails }
-    BEGIN  rdata-back?  WHILE
-	    write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
-	    rdata-back? residualwrite @ 0= or  IF
-		write-file# file+ residualwrite off  THEN
-    fails size u>= UNTIL  THEN msg( ." Write end" cr ) +file ;
+    [: timeout( data-rmap @ >o data-ackbits @ dest-size @ addr>bits bits>bytes $FF skip
+	dup IF  [: dump ;] $err  ELSE  2drop  THEN  o> )
+	+calc fstates 0 { size fails }
+	BEGIN  rdata-back?  WHILE
+		write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
+		rdata-back? residualwrite @ 0= or  IF
+		    write-file# file+ residualwrite off  THEN
+	    fails size u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
+    file-sema c-section ;
 
 : save-to ( addr u n -- )  state-addr >o
     r/w create-file throw fs-fid ! o> ;
@@ -1427,15 +1430,17 @@ end-class fs-class
     msg( data-map @ >o dest-raddr @ o> to roff )
     data-head@ id id>addr? >o fs-read o> dup /data ;
 
-: n2o:slurp ( -- advance-head end-flag )  +calc head@ fstates 0
-    { dhead states fails }
-    0 BEGIN  data-head?  WHILE
-	    read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
-	    data-head? residualread @ 0= or  IF
-		read-file# file+  residualread off  THEN
-	fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
-    head@ dhead - fails states u>= ;
-
+: n2o:slurp ( -- advance-head end-flag )
+    [: +calc head@ fstates 0
+	{ dhead states fails }
+	0 BEGIN  data-head?  WHILE
+		read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
+		data-head? residualread @ 0= or  IF
+		    read-file# file+  residualread off  THEN
+	    fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
+	head@ dhead - fails states u>= ;]
+    file-sema c-section ;
+    
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
 	dup 1 and IF
@@ -1452,13 +1457,25 @@ end-class fs-class
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
 
-\ separate thread loading... !!TBD!!
+\ separate thread for loading and saving...
 
 Defer do-track-seek
+Defer do-slurp
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
-
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
+event: ->req-slurp ( o -- )  >o do-slurp o> ;
+event: ->save ( task o -- )
+ >o save-all-blocks o elit, o> ->req-slurp event> ;
+
+0 Value file-task
+
+: create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
+    activate  BEGIN  stop  AGAIN ;
+: save& ( -- )  file-task 0= IF  create-file-task  THEN
+    up@ elit, o elit, ->save file-task event> ;
+
+\ helpers for addresses
 
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
@@ -1931,7 +1948,6 @@ $20 Constant keys-val
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  dest-job @ >o
-    data( ." received: " inbuf .header cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack o> ;
 ' handle-data rdata-class to handle

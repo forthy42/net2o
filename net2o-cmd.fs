@@ -616,7 +616,8 @@ also net2o-base
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack0# 2@ umin bytes>addr
-    dest-top 2@ umin umin dest-tail ! o> ;
+    dest-top 2@ umin umin dup dest-tail !@ o>
+    2drop ( <> IF save& THEN ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-ack# ( flag -- addr )
     IF  data-ack0#  ELSE  data-ack1#  THEN ;
@@ -628,7 +629,7 @@ also net2o-base
     receive-flag { rf } data-rmap @ >o
     \ we have not yet received anything
     data-lastack# @ 0< IF  drop o>  EXIT  THEN
-    dest-head @ addr>bits
+    dest-head @ 1- addr>bits
     swap IF  mask-bits# - 0 max  THEN  bits>bytes
     data-rfbits @ data-ackbits @
     dest-size @ addr>bytes 1- { rfs acks ackm }
@@ -664,6 +665,9 @@ also net2o-base
 
 : restart-transfer ( -- )
     slurp send-chunks ;
+
+:noname ( -- ) net2o-code  expect-reply net2o:ackflush slurp end-code ;
+is do-slurp
 
 0 Value request-stats?
 
