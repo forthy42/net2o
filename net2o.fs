@@ -1464,16 +1464,14 @@ Defer do-slurp
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
-event: ->req-slurp ( o -- )  >o do-slurp o> ;
-event: ->save ( task o -- )
- >o save-all-blocks o elit, o> ->req-slurp event> ;
+event: ->save ( o -- ) >o save-all-blocks o elit, do-slurp o> ;
 
 0 Value file-task
 
 : create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
     activate  BEGIN  stop  AGAIN ;
 : save& ( -- )  file-task 0= IF  create-file-task  THEN
-    up@ elit, o elit, ->save file-task event> ;
+    o elit, ->save file-task event> ;
 
 \ helpers for addresses
 
