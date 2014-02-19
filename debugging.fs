@@ -65,6 +65,7 @@ debug: header(
 debug: sender( \ extra sender task
 debug: dht( \ debuggin for dht functions
 debug: hash( \ dht hasing function debug
+debug: file( \ file read/write debugging
 
 \ timing measurements
 

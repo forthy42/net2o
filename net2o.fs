@@ -1383,9 +1383,10 @@ end-class fs-class
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ >o dispose o>  cell +LOOP
     file-state $off ;
-: n2o:save-block ( id -- delta ) 0 { id roff }
-    msg( data-rmap @ >o dest-raddr @ o> to roff )
-    rdata-back@ id id>addr? >o fs-write o> dup /back ;
+: n2o:save-block ( id -- delta ) >r
+    rdata-back@ file( data-rmap @ >o over dest-raddr @ - o>
+    ." file write: " r@ . hex. )
+    r> id>addr? >o fs-write o> file( dup hex. cr ) dup /back ;
 
 Sema file-sema
 
@@ -1417,18 +1418,29 @@ Sema file-sema
 : n2o:set-stat ( mtime mod id -- )
     id>addr? >o fs-fid @ fileno n2o:track-mod fs-time 64! o> ;
 
-\ open a file - this needs *way more checking*! !!FIXME!!
+\ open/close a file - this needs *way more checking*! !!FIXME!!
+
+User file-reg#
 
 : n2o:close-file ( id -- )
     id>addr? >o fs-close  o> ;
+
+: n2o:close-all ( -- )
+    fstates 0 ?DO
+	I n2o:close-file
+    LOOP  file-reg# off  fstate-off
+    residualread off  residualwrite off
+    read-file# off  write-file# off ;
+
 : n2o:open-file ( addr u mode id -- )
     state-addr >o fs-open o> ;
 
 \ read in from files
 
-: n2o:slurp-block ( id -- delta ) 0 { id roff }
-    msg( data-map @ >o dest-raddr @ o> to roff )
-    data-head@ id id>addr? >o fs-read o> dup /data ;
+: n2o:slurp-block ( id -- delta ) >r
+    data-head@ file( data-map @ >o over dest-raddr @ - o>
+    ." file read: " r@ . hex. )
+    r> id>addr? >o fs-read o> file( dup hex. cr ) dup /data ;
 
 : n2o:slurp ( -- advance-head end-flag )
     [: +calc head@ fstates 0
@@ -1763,12 +1775,10 @@ rdata-class to rewind-timestamps-partial
     dest-size @ addr>bits bits>bytes  tuck  erase $FF fill ;
 
 : net2o:rewind-sender ( n -- )
-    read-file# off residualread off
     data-map @ >o
     dest-round @ +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
-    write-file# off residualwrite off
     data-rmap @ >o
     dest-round @ +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;

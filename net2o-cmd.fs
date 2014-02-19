@@ -405,6 +405,7 @@ net2o-base
 33 net2o: send-chunks ( -- ) net2o:send-chunks ;
 34 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
 35 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
+36 net2o: close-all ( -- )  n2o:close-all ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize ! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
@@ -521,8 +522,6 @@ set-current previous
 
 also net2o-base
 
-User file-reg#
-
 : n2o:copy ( addrsrc us addrdest ud -- )
     2swap $, r/o ulit, file-reg# @ ulit, open-tracked-file
     file-reg# @ save-to
@@ -532,11 +531,6 @@ User file-reg#
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
 
 : n2o:done ( -- )  slurp ;
-
-: n2o:close-all ( -- )
-    fstates 0 ?DO
-	I n2o:close-file
-    LOOP  file-reg# off  fstate-off ;
 
 file-reg# off
 
