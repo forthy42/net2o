@@ -2,7 +2,7 @@
 gforth-fast server-test.fs +file >server &
 SERVER=$!
 gforth-fast client-test.fs +file localhost >client
-kill $SERVER
+kill -2 $SERVER
 grep file.read: server | sed -e s/read//g | grep -v ' \$0' >server.read
 grep file.write: client | sed -e s/write//g | grep -v ' \$0' >client.write
 diff -u server.read client.write

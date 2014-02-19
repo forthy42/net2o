@@ -611,7 +611,7 @@ also net2o-base
     data-rmap @ >o
     data-ack0# 2@ umin bytes>addr
     dest-top 2@ umin umin dup dest-tail !@ o>
-    2drop ( <> IF save& THEN ) ;
+    <> IF save& THEN ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-ack# ( flag -- addr )
     IF  data-ack0#  ELSE  data-ack1#  THEN ;

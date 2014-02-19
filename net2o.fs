@@ -1469,22 +1469,6 @@ User file-reg#
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
 
-\ separate thread for loading and saving...
-
-Defer do-track-seek
-Defer do-slurp
-
-event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
-event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
-event: ->save ( o -- ) >o save-all-blocks o elit, do-slurp o> ;
-
-0 Value file-task
-
-: create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
-    activate  BEGIN  stop  AGAIN ;
-: save& ( -- )  file-task 0= IF  create-file-task  THEN
-    o elit, ->save file-task event> ;
-
 \ helpers for addresses
 
 : -skip ( addr u char -- ) >r
@@ -1791,6 +1775,25 @@ rdata-class to rewind-timestamps-partial
     flush( ." rewind partial " dup hex. cr )
     data-rmap @ >o
     dup rewind-partial  dest-back! o> ;
+
+\ separate thread for loading and saving...
+
+Defer do-track-seek
+Defer do-slurp
+
+event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
+event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
+event: ->save ( o -- ) >o
+    dest-back @ >r save-all-blocks r> dest-back !@
+    net2o:rewind-receiver-partial
+    o elit, do-slurp o> ;
+
+0 Value file-task
+
+: create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
+    activate  BEGIN  stop  AGAIN ;
+: save& ( -- )  file-task 0= IF  create-file-task  THEN
+    o elit, ->save file-task event> ;
 
 \ schedule delayed events
 
@@ -2184,10 +2187,16 @@ require net2o-keys.fs
 Local Variables:
 forth-local-words:
     (
+     (("event:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
      (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("event:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]
