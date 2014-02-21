@@ -497,8 +497,15 @@ net2o-base
 123 net2o: get-ip ( -- ) >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 124 net2o: punch ( addr u -- )  net2o:punch ;
 
-: rewind ( -- )  data-rmap @ >o dest-round @ 1+ o>
-    dup net2o:rewind-receiver ulit, rewind-sender ;
+: net2o:gen-resend ( -- )
+    recv-flag @ invert resend-toggle# and ulit, ack-resend ;
+: net2o:ackflush ( n -- ) ulit, ack-flush ;
+: n2o:done ( -- )  slurp ;
+
+: rewind ( -- )
+    save( data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush )else(
+    data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
+    ulit, rewind-sender ) ;
 
 \ ids 130..140 reserved for DHT
 
@@ -529,8 +536,6 @@ also net2o-base
 
 : n2o:seek ( pos id -- )
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
-
-: n2o:done ( -- )  slurp ;
 
 file-reg# off
 
@@ -588,30 +593,14 @@ also net2o-base
 
 \ client side acknowledge
 
-: net2o:gen-resend ( -- )
-    recv-flag @ invert resend-toggle# and ulit, ack-resend ;
-: net2o:ackflush ( -- )
-    data-rmap @ >o dest-back @ o> ulit, ack-flush ;
-: net2o:flush-blocks ( -- )
-    data-rmap @ >o dest-back @ dest-tail @ over - dest-size @ o> 2/ 2/ > IF
-	flush( ." flush partial " dup hex. data-rmap @ >o dest-tail @ hex. o> F cr )
-	flush1( save-all-blocks )
-	flush2( data-rmap @ >o dest-back !@ o>
-	net2o:rewind-receiver-partial )else( drop )
-	flush3( net2o:ackflush slurp )
-	flush( ." partial rewind completed " data-rmap @ >o dest-back @ hex. o>  F cr )
-    ELSE
-	drop
-    THEN ;
 : net2o:genack ( -- )
-    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate
-    ( net2o:flush-blocks ) ;
+    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack0# 2@ umin bytes>addr
     dest-top 2@ umin umin dup dest-tail !@ o>
-    <> IF save& THEN ;
+    save( > IF  save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 : data-ack# ( flag -- addr )
     IF  data-ack0#  ELSE  data-ack1#  THEN ;
@@ -659,9 +648,6 @@ also net2o-base
 
 : restart-transfer ( -- )
     slurp send-chunks ;
-
-:noname ( -- ) net2o-code  expect-reply net2o:ackflush slurp end-code ;
-is do-slurp
 
 0 Value request-stats?
 
@@ -727,7 +713,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	data-rfbits @ -rot
 	tuck - rf IF  bit-fill  ELSE  bit-erase  THEN
     ELSE  drop  THEN  dest-head @ dest-top @ r> o>
-    0= IF  u>= IF  resend-all  THEN  expected?  ELSE  2drop  THEN ;
+    0= IF  u>= IF  net2o-code resend-all end-code
+	THEN  expected?  ELSE  2drop  THEN ;
 
 \ higher level functions
 
@@ -778,7 +765,8 @@ User other-xt ' noop other-xt !
 
 \ acknowledge toplevel
 
-: net2o:do-ack ( -- ) 
+: net2o:do-ack ( -- )
+\    net2o-code
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
@@ -786,6 +774,8 @@ User other-xt ' noop other-xt !
     r@ ack-toggle# and IF
 	net2o-code
 	r@ resend-toggle# and IF  true net2o:do-resend  THEN
+	data-rmap @ >o 0 do-slurp !@ o>
+	?dup-IF  net2o:ackflush slurp  THEN
 	net2o:gen-resend  net2o:genack
 	end-code
 	map-resend?
@@ -823,9 +813,6 @@ previous
     +resend
     1 client-loop
     -timeout tskc KEYBYTES erase ;
-
-: rewind? ( -- )
-    data-rmap @ >o dest-round @ o> lit, rewind-sender ;
 
 previous
 

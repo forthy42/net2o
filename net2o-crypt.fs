@@ -82,7 +82,7 @@ keysize buffer: keypad
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF  64dup [ ivs-assembly state# + ]L 64! \ the address is part of the key
 	64>n addr>keys dest-ivs $@ drop over + ivs-assembly state# move
-	ivs-assembly >c:key  regen-ivs  EXIT  THEN
+	ivs-assembly >c:key regen-ivs  EXIT  THEN
     64drop default-key ;
 
 : crypt-buf-init ( map -- ) >r
@@ -123,6 +123,7 @@ keysize buffer: keypad
 \ IVS
 
 Variable do-keypad
+Sema regen-sema
 
 : keypad$ ( -- addr u )
     do-keypad $@ dup 0= IF  2drop  crypto-key $@  THEN ;
@@ -139,16 +140,21 @@ Variable do-keypad
     dest-ivs $@ dest-a/b c:prng
     2 dest-ivslastgen xor! r> c:key! ;
 
-: regen-ivs-all ( o:map -- )  c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
-    dest-ivs $@ c:prng r> c:key! ;
+: regen-ivs-all ( o:map -- ) [: c:key@ >r
+      dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
+      save( ." regen all: " c:key@ 8 xtype space )
+      dest-ivs $@ c:prng save( c:key@ 8 xtype cr ) r> c:key! ;]
+    regen-sema c-section ;
 
-: regen-ivs-part ( new-back -- )  c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
-    dest-back @ U+DO
-	I I' fix-size dup { len }
-	addr>keys >r addr>keys dest-ivs $@ drop + r> c:prng
-    len +LOOP  r> c:key! ;
+: regen-ivs-part ( new-back -- ) [: c:key@ >r
+      dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
+      save( ." regen to: " dup hex. c:key@ 8 xtype )
+      dest-back @ U+DO
+	  I I' fix-size dup { len }
+	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin c:prng
+	  save( space len hex. c:key@ 8 xtype ) 
+      len +LOOP
+      save( cr ) r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =

@@ -66,6 +66,7 @@ debug: sender( \ extra sender task
 debug: dht( \ debuggin for dht functions
 debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
+debug: save( \ separate save task
 
 \ timing measurements
 
@@ -79,6 +80,7 @@ Variable last-tick
 
 : ticks-u ( -- u )  ntime drop ;
 : !@ ( value addr -- old-value )   dup @ >r ! r> ;
+: +!@ ( value addr -- old-value )   dup @ >r +! r> ;
 
 : +t ( addr -- )
     ticks-u dup last-tick !@ - swap +! ;
@@ -158,9 +160,9 @@ false [IF]
     : .exe ;
 [THEN]
 
-\ more phony throw stuff
+\ more phony throw stuff, only for debugging engine
 
-1 [IF]
+debugging-method [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
 

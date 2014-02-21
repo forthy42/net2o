@@ -626,6 +626,7 @@ object class
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
     field: dest-end   \ -/-                    true if last chunk
+    field: do-slurp
     method free-data
     method regen-ivs
     method handle
@@ -1352,7 +1353,7 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dup dest-top !@ U+DO
+    dup dest-top +!@ U+DO
 	data-ackbits 2@
 	I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
@@ -1361,8 +1362,7 @@ end-class fs-class
 
 : dest-back! ( offset -- )
     dup dest-back !@ U+DO
-	data-ackbits @
-	I I' fix-size dup { len }
+	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
 	bit-fill
     len +LOOP ;
@@ -1773,26 +1773,24 @@ rdata-class to rewind-timestamps-partial
 
 : net2o:rewind-receiver-partial ( new-back -- )
     flush( ." rewind partial " dup hex. cr )
-    data-rmap @ >o
-    dup rewind-partial  dest-back! o> ;
+    data-rmap @ >o dup rewind-partial  dest-back! o> ;
 
 \ separate thread for loading and saving...
 
 Defer do-track-seek
-Defer do-slurp
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 event: ->save ( o -- ) >o
-    dest-back @ >r save-all-blocks r> dest-back !@
-    net2o:rewind-receiver-partial
-    o elit, do-slurp o> ;
+    data-rmap @ >o dest-back @ o> >r save-all-blocks
+    r> data-rmap @ >o dest-back !@ dup do-slurp !
+    dup rewind-partial dest-back! o> o> ;
 
 0 Value file-task
 
 : create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
-    activate  BEGIN  stop  AGAIN ;
-: save& ( -- )  file-task 0= IF  create-file-task  THEN
+    activate  event-loop ;
+: save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
 \ schedule delayed events
@@ -1829,7 +1827,7 @@ queue-class >osize @ buffer: queue-adder
 
 \ poll loop
 
-UValue pollfd#  1 to pollfd#
+UValue pollfd#  2 to pollfd#
 User pollfds
 pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
@@ -1837,10 +1835,11 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
     >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
-    net2o-sock  fileno POLLIN  r> fds!+ drop ;
+    net2o-sock  fileno POLLIN  r> fds!+ >r
+    epiper @    fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
 
 : prep-evsocks ( -- )  pollfds >r
-    epiper @  fileno POLLIN  r> fds!+ drop ;
+    epiper @    fileno POLLIN  r> fds!+ drop 1 to pollfd# ;
 
 : clear-events ( -- )  pollfds
     pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
@@ -1878,13 +1877,18 @@ pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
     don't-block read-a-packet +rec ;
 
+: read-event ( -- )
+    pollfds [ pollfd %size revents ]L + w@ POLLIN = IF
+	?events  0 pollfds pollfd %size + revents w!
+    THEN ;
+
 4 Value try-read#
 
 : try-read-packet-wait ( -- addr u / 0 0 )
     try-read# 0 ?DO
 	don't-block read-a-packet
 	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
-    poll-sock drop read-a-packet4/6 ;
+    poll-sock drop read-a-packet4/6 read-event ;
 
 4 Value sends#
 4 Value sendbs#
@@ -1907,8 +1911,7 @@ Variable recvflag  recvflag off
 
 : send-loop ( -- )
     send-anything?
-    BEGIN  0= IF   wait-send drop
-	    pollfds revents w@ POLLIN = IF  ?events  THEN  THEN
+    BEGIN  0= IF   wait-send drop read-event  THEN
 	send-another-chunk  AGAIN ;
 
 Defer init-reply
@@ -1971,8 +1974,8 @@ $20 Constant keys-val
 ' drop code-class to handle
 
 : .inv-packet ( -- )
-    ." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
-    ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
+    msg( ." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
+    ." size " min-size inbuf c@ datasize# and lshift hex. cr ) ;
 
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
     ticker 64@  recv-tick 64! \ time stamp of arrival
