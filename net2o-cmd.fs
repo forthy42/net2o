@@ -624,9 +624,8 @@ also net2o-base
 	rfs  I ackm and + l@ rf invert xor or $FFFFFFFF and
 	ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	dup $FFFFFFFF <> IF
-	    $FFFFFFFF xor I bytes>addr dest-size @ 1- and
 	    resend( ." resend: " dup hex. over hex. F cr )
-	    ulit, ulit, resend-mask  1+
+	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF  I 4 + ack# !
 		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )

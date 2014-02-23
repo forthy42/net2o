@@ -1246,6 +1246,9 @@ $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )
+    >r dup data-rmap @ >o dest-size @ o> u>= IF
+	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
+    THEN  r>
     resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
     data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
@@ -1354,11 +1357,13 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dup dest-top +!@ U+DO
+    save( ." dest-top: " dup hex. cr )
+    dest-top @ + dup dest-top !@ U+DO
 	data-ackbits 2@
 	I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
 	2dup 2>r bit-erase 2r> bit-erase
+	save( ." ackbits: " data-ackbits @ dest-size @ addr>bytes xtype cr )
     len +LOOP ;
 
 : dest-back! ( offset -- )
