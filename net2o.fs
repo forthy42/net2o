@@ -43,6 +43,7 @@ s" cookie recieved twice"        throwcode !!double-cookie!!
 s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
 s" absolute path not allowed!"   throwcode !!abs-path!!
+s" invalid packet destination"   throwcode !!inv-dest!!
 
 \ required tools
 

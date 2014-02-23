@@ -82,8 +82,8 @@ keysize buffer: keypad
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF  64dup [ ivs-assembly state# + ]L 64! \ the address is part of the key
 	64>n addr>keys dest-ivs $@ drop over + ivs-assembly state# move
-	ivs-assembly >c:key regen-ivs  EXIT  THEN
-    64drop default-key ;
+	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
+    dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
