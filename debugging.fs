@@ -141,6 +141,16 @@ timer: +cmd
 timer: +dest
 timer: +ack
 
+\ buffered typing
+
+User b$
+
+: btype  b$ $+! ;
+: bemit  b$ c$+! ;
+: bcr    #lf bemit b$ $@ (type) b$ $off ;
+
+' btype ' bemit ' bcr ' form output: b-out
+
 \ misc
 
 : etype ( addr u -- ) >stderr type ;

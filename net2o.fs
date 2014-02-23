@@ -1383,10 +1383,11 @@ end-class fs-class
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ >o dispose o>  cell +LOOP
     file-state $off ;
-: n2o:save-block ( id -- delta ) >r
+: n2o:save-block ( id -- delta )  >r
     rdata-back@ file( data-rmap @ >o over dest-raddr @ - o>
     ." file write: " r@ . hex. )
-    r> id>addr? >o fs-write o> file( dup hex. cr ) dup /back ;
+    r> id>addr? >o fs-write o> file( dup hex. dup >r
+    rdata-back@ $10 umin r> umin xtype cr ) dup /back ;
 
 Sema file-sema
 
@@ -1437,10 +1438,11 @@ User file-reg#
 
 \ read in from files
 
-: n2o:slurp-block ( id -- delta ) >r
+: n2o:slurp-block ( id -- delta )  >r
     data-head@ file( data-map @ >o over dest-raddr @ - o>
     ." file read: " r@ . hex. )
-    r> id>addr? >o fs-read o> file( dup hex. cr ) dup /data ;
+    r> id>addr? >o fs-read o> file( dup hex. dup >r
+    data-head@ $10 umin r> umin xtype cr ) dup /data ;
 
 : n2o:slurp ( -- advance-head end-flag )
     [: +calc head@ fstates 0
@@ -1515,7 +1517,8 @@ require net2o-crypt.fs
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf >dest  64dup dest-addr 64!  outbuf addr 64! ;
+    outbuf >dest save( ." send to: " 64dup ['] 64. $10 base-execute cr )
+    64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
 
@@ -1789,7 +1792,7 @@ event: ->save ( o -- ) >o
 0 Value file-task
 
 : create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
-    activate  event-loop ;
+    activate  b-out event-loop ;
 : save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
@@ -1918,7 +1921,7 @@ Defer init-reply
 
 : create-sender-task ( -- )
     o 1 stacksize4 NewTask4 dup to sender-task pass
-    init-reply prep-evsocks
+    b-out init-reply prep-evsocks
     >o rdrop  alloc-io
     send-loop ;
 
@@ -1962,6 +1965,8 @@ $20 Constant keys-val
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  dest-job @ >o
+    save( ." packet to: " dup data-rmap @ >o dest-raddr @ - o>
+    hex. inbuf packet-data 8 umin xtype cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack o> ;
 ' handle-data rdata-class to handle
@@ -2099,7 +2104,7 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 
 : create-receiver-task ( -- )
     o 1 stacksize4 NewTask4 dup to receiver-task pass
-    init-reply  prep-socks
+    b-out init-reply  prep-socks
     >o rdrop  alloc-io
     BEGIN  do-event-loop
 	wait-task @ ?dup-IF  ->timeout event>  THEN  AGAIN ;

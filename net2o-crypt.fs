@@ -112,13 +112,17 @@ keysize buffer: keypad
     $>align oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    crypt-buf-init
-    outbuf packet-data +cryptsu c:encrypt+auth +enc ;
+    crypt-buf-init save( ." encrypt: "  c:key@ 8 xtype space outbuf packet-data 8 umin xtype space )
+    outbuf packet-data +cryptsu c:encrypt+auth
+    save( outbuf packet-data 8 umin xtype
+    space outbuf packet-data + 8 xtype cr ) +enc ;
 
 : inbuf-decrypt ( map -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
-    crypt-buf-init
-    inbuf packet-data +cryptsu c:decrypt+auth +enc ;
+    crypt-buf-init save( ." decrypt: "  c:key@ 8 xtype space inbuf packet-data 8 umin xtype space )
+    inbuf packet-data +cryptsu c:decrypt+auth
+    save( inbuf packet-data 8 umin xtype space keccak-checksums 8 xtype
+    dup 0= IF ."  fail" THEN cr ) +enc ;
 
 \ IVS
 
@@ -151,8 +155,9 @@ Sema regen-sema
       save( ." regen to: " dup hex. c:key@ 8 xtype )
       dest-back @ U+DO
 	  I I' fix-size dup { len }
-	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin c:prng
-	  save( space len hex. c:key@ 8 xtype ) 
+	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
+	  save( 2dup ) c:prng
+	  save( space 2dup 8 umin xtype ." .." dup 8 - 0 max /string xtype space len hex. c:key@ 8 xtype ) 
       len +LOOP
       save( cr ) r> c:key! ;] regen-sema c-section ;
 
