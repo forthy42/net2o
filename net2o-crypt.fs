@@ -112,17 +112,17 @@ keysize buffer: keypad
     $>align oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    crypt-buf-init save( ." encrypt: "  c:key@ 8 xtype space outbuf packet-data 8 umin xtype space )
-    outbuf packet-data +cryptsu c:encrypt+auth
-    save( outbuf packet-data 8 umin xtype
-    space outbuf packet-data + 8 xtype cr ) +enc ;
+    crypt-buf-init \ save( ." encrypt: "  c:key@ 8 xtype space outbuf packet-data 8 umin xtype space )
+    outbuf packet-data +cryptsu c:encrypt+auth +enc ;
+\    save( outbuf packet-data 8 umin xtype
+\    space outbuf packet-data + 8 xtype cr )
 
 : inbuf-decrypt ( map -- flag2 ) +calc
     \G flag1 is true if code, flag2 is true if decrypt succeeded
-    crypt-buf-init save( ." decrypt: "  c:key@ 8 xtype space inbuf packet-data 8 umin xtype space )
-    inbuf packet-data +cryptsu c:decrypt+auth
-    save( inbuf packet-data 8 umin xtype space keccak-checksums 8 xtype
-    dup 0= IF ."  fail" THEN cr ) +enc ;
+    crypt-buf-init \ save( ." decrypt: "  c:key@ 8 xtype space inbuf packet-data 8 umin xtype space )
+    inbuf packet-data +cryptsu c:decrypt+auth +enc ;
+\    save( inbuf packet-data 8 umin xtype space keccak-checksums 8 xtype
+\    dup 0= IF ."  fail" THEN cr )
 
 \ IVS
 

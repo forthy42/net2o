@@ -705,12 +705,12 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
     receive-flag { rf }
     >o >r
-    data-ackbits @ over +bit@ r> and >r
     dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
-	dup data-lastack# !@ 0 max
-	data-rfbits @ -rot
-	tuck - rf IF  bit-fill  ELSE  bit-erase  THEN
+	dup data-lastack# !@ 0 max U+DO
+	    data-rfbits @ I I' fix-bitsize dup { len }
+	    rf IF  bit-fill  ELSE  bit-erase  THEN
+	len +LOOP
     ELSE  drop  THEN  dest-head @ dest-top @ r> o>
     0= IF  u>= IF  net2o-code resend-all end-code
 	THEN  expected?  ELSE  2drop  THEN ;

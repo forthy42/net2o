@@ -1010,6 +1010,8 @@ Variable mapstart $1 mapstart !
 
 : fix-size ( offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and r> over + dest-size @ umin over - ;
+: fix-bitsize ( offset1 offset2 -- addr len )
+    over - >r dest-size @ addr>bits 1- and r> over + dest-size @ umin over - ;
 : raddr+ ( addr len -- addr' len ) >r dest-raddr @ + r> ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
@@ -1362,15 +1364,18 @@ end-class fs-class
 	data-ackbits 2@
 	I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
+	save( ." ackbits pre: " data-ackbits @ dest-size @ addr>bytes xtype cr )
 	2dup 2>r bit-erase 2r> bit-erase
-	save( ." ackbits: " data-ackbits @ dest-size @ addr>bytes xtype cr )
+	save( ." ackbits top: " data-ackbits @ dest-size @ addr>bytes xtype cr )
     len +LOOP ;
 
-: dest-back! ( offset -- )
+: dest-back! ( offset -- ) \ dest-back ! EXIT
     dup dest-back !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
+\	save( ." ackbits bef: " data-ackbits @ dest-size @ addr>bytes xtype cr )
 	bit-fill
+\	save( ." ackbits bac: " data-ackbits @ dest-size @ addr>bytes xtype cr )
     len +LOOP ;
 
 : size! ( 64 id -- )  state-addr >o
@@ -1523,7 +1528,7 @@ require net2o-crypt.fs
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf >dest save( ." send to: " 64dup ['] 64. $10 base-execute cr )
+    outbuf >dest \ save( ." send to: " 64dup ['] 64. $10 base-execute cr )
     64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
@@ -1792,8 +1797,8 @@ event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 event: ->save ( o -- ) >o
     data-rmap @ >o dest-back @ o> >r save-all-blocks
-    r> data-rmap @ >o dest-back !@ dup do-slurp !
-    dup rewind-partial dest-back! o> o> ;
+    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
+    net2o:rewind-receiver-partial o> ;
 
 0 Value file-task
 
@@ -1971,8 +1976,8 @@ $20 Constant keys-val
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  dest-job @ >o
-    save( ." packet to: " dup data-rmap @ >o dest-raddr @ - o>
-    hex. inbuf packet-data 8 umin xtype cr )
+    \ save( ." packet to: " dup data-rmap @ >o dest-raddr @ - o>
+    \ hex. inbuf packet-data 8 umin xtype cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack o> ;
 ' handle-data rdata-class to handle
