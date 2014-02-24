@@ -702,9 +702,14 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     data-ackbits @ over +bit@
     dup IF  1 packetr2 +!  THEN o o> ;
 
+: bit>stream ( bit -- streambit )  dup
+    dest-back @ addr>bits dest-size @ addr>bits dup >r 1-
+    2dup invert and >r and u< IF  r> r@ + >r  THEN
+    r> + rdrop ;
+
 : received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
     receive-flag { rf }
-    >o >r
+    >o >r save( bit>stream )
     dup data-lastack# @ > IF
 	\ if we are at head, fill other polarity with 1s
 	dup data-lastack# !@ 0 max U+DO
