@@ -642,11 +642,9 @@ code-class class end-class data-class
 
 code-class class
     field: data-ackbits
-    field: data-rfbits
     field: data-ackbits-buf
-    field: data-ack0#
-    field: data-ack1#
-    field: data-lastack#
+    field: data-ack#     \ fully acked bursts
+    field: data-reack#   \ last polarity change was here
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -829,7 +827,7 @@ m: addr>keys ( addr -- keys )
     \g erase and then free - for secret stuff
     over swap erase free throw ;
 : allocateFF ( size -- addr )
-    dup >r allocate throw dup r> -1 fill ;
+    dup >r allocate throw dup r> $FF fill ;
 : allocate-bits ( size -- addr )
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
@@ -850,11 +848,9 @@ m: addr>keys ( addr -- keys )
     alloc-data
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
-	dup addr>bits bits>bytes allocate-bits data-ackbits !
-	dup addr>bits bits>bytes allocate-bits data-rfbits !
+	dup addr>bytes allocate-bits data-ackbits !
 	s" " data-ackbits-buf $!
     THEN
-    data-lastack# on
     drop
     o o> ;
 
@@ -983,7 +979,6 @@ Variable mapstart $1 mapstart !
 
 : free-rcode ( o:data --- )
     data-ackbits ?free
-    data-rfbits ?free
     data-ackbits-buf $off
     free-code ;
 ' free-rcode rdata-class to free-data
@@ -1765,12 +1760,10 @@ rdata-class to rewind-timestamps-partial
     \ dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 
-: rewind-ackbits ( o:map -- )
-    data-ack0# off  data-ack1# off
+: rewind-ackbits ( o:map -- ) ~~
+    data-ack# off
     firstack( ." rewind firstacks" cr )
-    data-lastack# on
-    data-ackbits @  data-rfbits @
-    dest-size @ addr>bits bits>bytes  tuck  erase $FF fill ;
+    data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
 : net2o:rewind-sender ( n -- )
     data-map @ >o

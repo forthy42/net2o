@@ -596,39 +596,30 @@ also net2o-base
 : net2o:genack ( -- )
     net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
 
-: !rdata-tail ( -- )
+: !rdata-tail ( -- ) ~~
     data-rmap @ >o
-    data-ack0# 2@ umin bytes>addr
-    dest-top 2@ umin umin dup dest-tail !@ o>
+    data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
     save( > IF  save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
-: data-ack# ( flag -- addr )
-    IF  data-ack0#  ELSE  data-ack1#  THEN ;
 
 4 Value max-resend#
 
-: net2o:do-resend ( flag -- )
+: net2o:do-resend ( flag -- ) ~~
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
-    receive-flag { rf } data-rmap @ >o
-    \ we have not yet received anything
-    data-lastack# @ 0< IF  drop o>  EXIT  THEN
-    dest-head @ 1- addr>bits
-    swap IF  mask-bits# - 0 max  THEN  bits>bytes
-    data-rfbits @ data-ackbits @
-    dest-size @ addr>bytes 1- { rfs acks ackm }
-    acks 0= IF ." ackzero: " o hex. rf F . acks hex. hex. F cr o>  EXIT  THEN
-    rf data-ack# { ack# }
-    0 swap ack# @ o>
-    +DO
+    data-rmap @ >o
+    IF    data-reack# @ mask-bits# - bits>bytes
+    ELSE  dest-head @ 1- addr>bytes  THEN  0 max
+    data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
+    ackm and dup data-ack# @ u< IF  ackm + 1+  THEN
+    0 swap data-ack# @ o> +DO
 	acks I ackm and + l@
-	rfs  I ackm and + l@ rf invert xor or $FFFFFFFF and
 	ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + ack# !
-		firstack( ." data-firstack" receive-flag negate 1 .r ." # = " I F . F cr )
+	    drop dup 0= IF  I 4 + data-ack# !
+		firstack( ." data-ack# = " I F . F cr )
 	    THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
@@ -641,9 +632,7 @@ also net2o-base
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
-: resend-all ( -- )
-    resend-toggle# recv-flag xor!  false net2o:do-resend
-    resend-toggle# recv-flag xor!  false net2o:do-resend ;
+: resend-all ( -- ) ~~ false net2o:do-resend ;
 
 : restart-transfer ( -- )
     slurp send-chunks ;
@@ -667,13 +656,12 @@ also net2o-base
 	o IF  dest-tail @ dest-top @  ELSE  0.  THEN o>
     ELSE  0.  THEN  ;
 
-: expected? ( -- )
+: expected? ( -- ) ~~
     expected@ tuck u>= and IF
 	net2o-code
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
-	data-ackbits @ data-ack0# @ dup hex. + l@ hex.
-	data-rfbits  @ data-ack1# @ dup hex. + l@ hex.
+	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr )
 	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
@@ -694,9 +682,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     0 rot new-ackbit 2! new-ackbit cell+ swap +bit
     new-ackbit 2 cells data-ackbits-buf $+! ;
 
-: +cookie ( -- bit flag map )
+: +cookie ( -- bit flag map ) ~~
     recv-addr 64@ 64#-1 64= IF  0 0 0 EXIT  THEN
-    recv-addr 64@ receive-flag { rf } data-rmap @ >o
+    recv-addr 64@ data-rmap @ >o
     dest-vaddr 64@ 64- 64>n addr>bits dup +ackbit
     \ set bucket as received in current polarity bitmap
     data-ackbits @ over +bit@
@@ -707,16 +695,10 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup invert and >r and u< IF  r> r@ + >r  THEN
     r> + rdrop ;
 
-: received! ( bit flag map -- ) dup 0= IF  2drop drop  EXIT  THEN
-    receive-flag { rf }
+: received! ( bit flag map -- ) ~~
+    dup 0= IF  2drop drop  EXIT  THEN
     >o >r save( bit>stream )
-    dup data-lastack# @ > IF
-	\ if we are at head, fill other polarity with 1s
-	dup data-lastack# !@ 0 max U+DO
-	    data-rfbits @ I I' fix-bitsize dup { len }
-	    rf IF  bit-fill  ELSE  bit-erase  THEN
-	len +LOOP
-    ELSE  drop  THEN  dest-head @ dest-top @ r> o>
+    drop  dest-head @ dest-top @ r> o>
     0= IF  u>= IF  net2o-code resend-all end-code
 	THEN  expected?  ELSE  2drop  THEN ;
 
@@ -763,13 +745,12 @@ User other-xt ' noop other-xt !
 
 : .expected ( -- )
     F .time ." expected/received: " recv-addr @ hex.
-    data-rmap @ >o
-    false data-ack# @ hex. true data-ack# @ hex. o>
+    data-rmap @ >o data-ack# @ hex. o>
     expected@ hex. hex. F cr ;
 
 \ acknowledge toplevel
 
-: net2o:do-ack ( -- )
+: net2o:do-ack ( -- ) ~~
 \    net2o-code
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
@@ -777,7 +758,9 @@ User other-xt ' noop other-xt !
     acks# and dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o-code
-	r@ resend-toggle# and IF  true net2o:do-resend  THEN
+	r@ resend-toggle# and IF  true net2o:do-resend
+	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
+	THEN
 	data-rmap @ >o 0 do-slurp !@ o>
 	?dup-IF  net2o:ackflush slurp  THEN
 	net2o:gen-resend  net2o:genack
