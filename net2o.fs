@@ -643,9 +643,9 @@ code-class class end-class data-class
 code-class class
     field: data-ackbits
     field: data-ackbits-buf
-    field: data-ack#
-    field: data-lastack#
-    field: data-reack#
+    field: data-ack#     \ fully acked bursts
+    field: data-reack#   \ last polarity change was here
+    field: data-lastack# \ previous acknowledge
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -828,7 +828,7 @@ m: addr>keys ( addr -- keys )
     \g erase and then free - for secret stuff
     over swap erase free throw ;
 : allocateFF ( size -- addr )
-    dup >r allocate throw dup r> -1 fill ;
+    dup >r allocate throw dup r> $FF fill ;
 : allocate-bits ( size -- addr )
     dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
@@ -852,7 +852,6 @@ m: addr>keys ( addr -- keys )
 	dup addr>bytes allocate-bits data-ackbits !
 	s" " data-ackbits-buf $!
     THEN
-    data-lastack# on
     drop
     o o> ;
 
@@ -1764,7 +1763,6 @@ rdata-class to rewind-timestamps-partial
 : rewind-ackbits ( o:map -- )
     data-ack# off
     firstack( ." rewind firstacks" cr )
-    data-lastack# on
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
 : net2o:rewind-sender ( n -- )

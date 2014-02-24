@@ -607,23 +607,18 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     data-rmap @ >o
-    \ we have not yet received anything
-    data-lastack# @ 0< IF  drop o>  EXIT  THEN
-    dest-head @ 1- addr>bits
-    swap IF  mask-bits# - 0 max  THEN  bits>bytes
-    data-ackbits @
-    dest-size @ addr>bytes 1- { acks ackm }
-    acks 0= IF ." ackzero: " o hex. acks hex. hex. F cr o>  EXIT  THEN
-    data-ack# { ack# }
-    0 swap ack# @ o>
-    +DO
+    IF    data-reack# @ mask-bits# - bits>bytes
+    ELSE  dest-head @ 1- addr>bits bits>bytes  THEN  0 max
+    data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
+    ackm and dup data-ack# @ u< IF  ackm + 1+  THEN
+    0 swap data-ack# @ o> +DO
 	acks I ackm and + l@
 	ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + ack# !
+	    drop dup 0= IF  I 4 + data-rmap @ >o data-ack# ! o>
 		firstack( ." data-ack# = " I F . F cr )
 	    THEN
 	THEN
@@ -702,9 +697,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : received! ( bit flag map -- )
     dup 0= IF  2drop drop  EXIT  THEN
-    >o >r save( bit>stream )
-    data-lastack# max!
-    dest-head @ dest-top @ r> o>
+    >o >r data-lastack# max! dest-head @ dest-top @ r> o>
     0= IF  u>= IF  net2o-code resend-all end-code
 	THEN  expected?  ELSE  2drop  THEN ;
 
@@ -764,8 +757,10 @@ User other-xt ' noop other-xt !
     acks# and dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o-code
-	r@ resend-toggle# and IF  true net2o:do-resend
-	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
+	r@ resend-toggle# and IF
+	    data-rmap @ >o dest-head @ addr>bits
+	    dup data-lastack# @ > IF  data-reack# !  true  ELSE  false  THEN o>
+	    IF  true net2o:do-resend  THEN
 	THEN
 	data-rmap @ >o 0 do-slurp !@ o>
 	?dup-IF  net2o:ackflush slurp  THEN
