@@ -642,11 +642,10 @@ code-class class end-class data-class
 
 code-class class
     field: data-ackbits
-    field: data-rfbits
     field: data-ackbits-buf
-    field: data-ack0#
-    field: data-ack1#
+    field: data-ack#
     field: data-lastack#
+    field: data-reack#
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -850,8 +849,7 @@ m: addr>keys ( addr -- keys )
     alloc-data
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
-	dup addr>bits bits>bytes allocate-bits data-ackbits !
-	dup addr>bits bits>bytes allocate-bits data-rfbits !
+	dup addr>bytes allocate-bits data-ackbits !
 	s" " data-ackbits-buf $!
     THEN
     data-lastack# on
@@ -983,7 +981,6 @@ Variable mapstart $1 mapstart !
 
 : free-rcode ( o:data --- )
     data-ackbits ?free
-    data-rfbits ?free
     data-ackbits-buf $off
     free-code ;
 ' free-rcode rdata-class to free-data
@@ -1361,11 +1358,10 @@ end-class fs-class
 : dest-top! ( offset -- )
     save( ." dest-top: " dup hex. cr )
     dest-top @ + dup dest-top !@ U+DO
-	data-ackbits 2@
-	I I' fix-size dup { len }
+	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
 	save( ." ackbits pre: " data-ackbits @ dest-size @ addr>bytes xtype cr )
-	2dup 2>r bit-erase 2r> bit-erase
+	bit-erase
 	save( ." ackbits top: " data-ackbits @ dest-size @ addr>bytes xtype cr )
     len +LOOP ;
 
@@ -1403,7 +1399,7 @@ end-class fs-class
 Sema file-sema
 
 : save-all-blocks ( -- )
-    [: timeout( data-rmap @ >o data-ackbits @ dest-size @ addr>bits bits>bytes $FF skip
+    [: timeout( data-rmap @ >o data-ackbits @ dest-size @ addr>bytes $FF skip
 	dup IF  [: dump ;] $err  ELSE  2drop  THEN  o> )
 	+calc fstates 0 { size fails }
 	BEGIN  rdata-back?  WHILE
@@ -1766,11 +1762,10 @@ rdata-class to rewind-timestamps-partial
     regen-ivs-all  rewind-timestamps ;
 
 : rewind-ackbits ( o:map -- )
-    data-ack0# off  data-ack1# off
+    data-ack# off
     firstack( ." rewind firstacks" cr )
     data-lastack# on
-    data-ackbits @  data-rfbits @
-    dest-size @ addr>bits bits>bytes  tuck  erase $FF fill ;
+    data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
 : net2o:rewind-sender ( n -- )
     data-map @ >o
