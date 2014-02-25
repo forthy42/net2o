@@ -205,7 +205,8 @@ comp: :, also net2o-base ;
 : cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
 
-: cmd ( -- )  cmdbuf cmdbuf# @ cmddest send-cmd
+: cmd ( -- )  cmdbuf# @ 2 u< ?EXIT
+    cmdbuf cmdbuf# @ cmddest send-cmd
     cmd0source @ 0= IF  code+  THEN ;
 
 also net2o-base
@@ -682,24 +683,19 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     0 rot new-ackbit 2! new-ackbit cell+ swap +bit
     new-ackbit 2 cells data-ackbits-buf $+! ;
 
-: +cookie ( -- bit flag map )
-    recv-addr 64@ 64#-1 64= IF  0 0 0 EXIT  THEN
-    recv-addr 64@ data-rmap @ >o
-    dest-vaddr 64@ 64- 64>n addr>bits dup +ackbit
+: +cookie ( -- flag )
+    data-rmap @ >o ack-bit# @ dup +ackbit
     \ set bucket as received in current polarity bitmap
-    data-ackbits @ over +bit@
-    dup IF  1 packetr2 +!  THEN o o> ;
+    data-ackbits @ swap +bit@
+    dup IF  1 packetr2 +!  THEN
+    dest-head @ dest-top @ u>= swap o>
+    0= IF  IF  net2o-code resend-all end-code
+	THEN  expected?  ELSE  drop  THEN ;
 
 : bit>stream ( bit -- streambit )  dup
     dest-back @ addr>bits dest-size @ addr>bits dup >r 1-
     2dup invert and >r and u< IF  r> r@ + >r  THEN
     r> + rdrop ;
-
-: received! ( bit flag map -- )
-    dup 0= IF  2drop drop  EXIT  THEN
-    >o >r data-lastack# max! dest-head @ dest-top @ r> o>
-    0= IF  u>= IF  net2o-code resend-all end-code
-	THEN  expected?  ELSE  2drop  THEN ;
 
 \ higher level functions
 
@@ -758,9 +754,8 @@ User other-xt ' noop other-xt !
     r@ ack-toggle# and IF
 	net2o-code
 	r@ resend-toggle# and IF
-	    data-rmap @ >o dest-head @ addr>bits
-	    dup data-lastack# @ > IF  data-reack# !  true  ELSE  false  THEN o>
-	    IF  true net2o:do-resend  THEN
+	    data-rmap @ >o ack-bit# @ data-reack# ! o>
+	    true net2o:do-resend
 	THEN
 	data-rmap @ >o 0 do-slurp !@ o>
 	?dup-IF  net2o:ackflush slurp  THEN
@@ -768,8 +763,7 @@ User other-xt ' noop other-xt !
 	end-code
 	map-resend?
     THEN
-    +cookie received!
-    r> ack-timing ;
+    +cookie r> ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 : -flow-control ['] noop         ack-xt ! ;

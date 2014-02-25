@@ -359,6 +359,31 @@ maxpacket $F + -$10 and Value maxpacket-aligned
 max-size^2 6 + Value chunk-p2
 $10 Constant mykey-salt#
 
+begin-structure timestamp
+64field: ts-ticks
+end-structure
+
+begin-structure reply
+field: reply-len
+field: reply-offset
+64field: reply-dest
+end-structure
+
+m: addr>bits ( addr -- bits )
+    chunk-p2 rshift ;
+m: addr>bytes ( addr -- bytes )
+    chunk-p2 3 + rshift ;
+m: bytes>addr ( bytes addr -- )
+    chunk-p2 3 + lshift ;
+m: bits>bytes ( bits -- bytes )
+    1- 2/ 2/ 2/ 1+ ;
+m: addr>ts ( addr -- ts-offset )
+    addr>bits timestamp * ;
+m: addr>replies ( addr -- replies )
+    addr>bits reply * ;
+m: addr>keys ( addr -- keys )
+    max-size^2 rshift [ min-size negate ]L and ;
+
 : init-statbuf ( -- )
     file-stat allocate throw to statbuf ;
 
@@ -645,7 +670,7 @@ code-class class
     field: data-ackbits-buf
     field: data-ack#     \ fully acked bursts
     field: data-reack#   \ last polarity change was here
-    field: data-lastack# \ previous acknowledge
+    field: ack-bit#      \ actual ack bit
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -735,16 +760,6 @@ object class
     KEYBYTES +field tskc
 end-class context-class
 
-begin-structure timestamp
-64field: ts-ticks
-end-structure
-
-begin-structure reply
-field: reply-len
-field: reply-offset
-64field: reply-dest
-end-structure
-
 begin-structure timestats
 sffield: ts-delta
 sffield: ts-slack
@@ -784,6 +799,7 @@ $100 Value dests#
 	    dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n dup
 	    dest-size @ u<
 	    IF
+		dup addr>bits ack-bit# !
 		dest-raddr @ swap dup >data-head +
 		o dest-job @ o> >o rdrop
 		UNLOOP  EXIT  THEN
@@ -803,21 +819,6 @@ $100 Value dests#
 \ context - for exec regions, this is the job context
 
 User >code-flag
-
-m: addr>bits ( addr -- bits )
-    chunk-p2 rshift ;
-m: addr>bytes ( addr -- bytes )
-    chunk-p2 3 + rshift ;
-m: bytes>addr ( bytes addr -- )
-    chunk-p2 3 + lshift ;
-m: bits>bytes ( bits -- bytes )
-    1- 2/ 2/ 2/ 1+ ;
-m: addr>ts ( addr -- ts-offset )
-    addr>bits timestamp * ;
-m: addr>replies ( addr -- replies )
-    addr>bits reply * ;
-m: addr>keys ( addr -- keys )
-    max-size^2 rshift [ min-size negate ]L and ;
 
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
