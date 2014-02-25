@@ -4,6 +4,7 @@ require net2o.fs
 
 +db stat(
 +debug
+%droprate
 
 "anonymous" >key \ get our anonymous key
 

@@ -205,7 +205,7 @@ comp: :, also net2o-base ;
 : cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
 
-: cmd ( -- )  cmdbuf# @ 2 u< ?EXIT
+: cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
     cmdbuf cmdbuf# @ cmddest send-cmd
     cmd0source @ 0= IF  code+  THEN ;
 

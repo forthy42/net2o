@@ -209,7 +209,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     count reverse8 r@ $B + c@ reverse8 dst 4 + c! dst $B + c!
     count reverse8 r@ $A + c@ reverse8 dst 5 + c! dst $A + c!
     count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
-       c@ reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
+    c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
 
 \ IP address stuff
 
@@ -452,6 +452,12 @@ MSG_DONTWAIT  Constant don't-block
     inbuf swap  1 packetr +! ;
 
 $00000000 Value droprate#
+
+: %droprate ( -- )
+    1 arg dup 0= IF  2drop  EXIT  THEN
+    + 1- c@ '%' <> ?EXIT
+    1 arg prefix-number IF  1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
+	shift-args  THEN ;
 
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
