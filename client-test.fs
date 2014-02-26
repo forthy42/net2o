@@ -52,7 +52,7 @@ init-client
 : c:download2 ( -- )
     [: ." Request more photos because it was so fast" cr ;] $err
     net2o-code
-    expect-reply close-all rewind-total
+    expect-reply close-all \ rewind-total
     s" Download test 2" $, type cr ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
@@ -70,7 +70,7 @@ init-client
 : c:download3 ( -- )
     [: ." Request big photos because it was so fast" cr ;] $err
     net2o-code
-    expect-reply close-all rewind-total
+    expect-reply close-all \ rewind-total
     s" Download test 3" $, type cr  ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
@@ -83,7 +83,7 @@ init-client
 : c:download4 ( -- )
     [: ." Request more big photos because it was so fast" cr ;] $err
     net2o-code
-    expect-reply close-all rewind-total
+    expect-reply close-all \ rewind-total
     s" Download test 4" $, type cr  ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
@@ -138,8 +138,7 @@ init-client
 	THEN
     THEN
     c:downloadend [: .packets .times cr ;] $err
-    >timing
-    n2o:dispose-context ;
+    >timing n2o:dispose-context ;
 
 event: ->throw dup DoError throw ;
 

@@ -778,7 +778,7 @@ end-structure
 
 : >data-head ( addr o:map -- )
     dup dest-back @ dest-size @ 1- and < IF  dest-size @ +  THEN
-    maxdata + dest-back @ + dest-head umax! ;
+    maxdata + dest-back @ dest-size @ 1- invert and + dest-head umax! ;
 
 Variable dest-map s" " dest-map $!
 
@@ -1019,19 +1019,18 @@ Variable mapstart $1 mapstart !
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
 : ?residual ( addr len resaddr -- addr len' ) >r
-    r@ @ ?dup-IF  tuck umin swap  ELSE  blocksize @  THEN
-    over -  r> ! ;
+    r@ @ umin dup negate r> +! ;
 : head@ ( -- head )  data-map @ >o dest-head @ o> ;
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
     dest-head @ dest-back @ dest-size @ + fix-size raddr+ o>
-    blocksize @ umin residualread ?residual ;
+    residualread ?residual ;
 : rdata-back@ ( -- addr u )
     \g you can write from this, also a block at a time
     data-rmap @ >o
     dest-back @ dest-tail @ fix-size raddr+ o>
-    blocksize @ umin residualwrite ?residual ;
+    residualwrite ?residual ;
 : data-tail@ ( -- addr u )
     \g you can send from this - as long as you stay block aligned
     data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
@@ -1362,7 +1361,7 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dest-top @ + dup dest-top !@ U+DO
+    dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP ;
@@ -1389,11 +1388,12 @@ end-class fs-class
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ >o dispose o>  cell +LOOP
     file-state $off ;
-: n2o:save-block ( id -- delta )  >r
-    rdata-back@ file( data-rmap @ >o over dest-raddr @ - o>
-    ." file write: " r@ . hex. )
-    r> id>addr? >o fs-write o> file( dup hex. dup >r
-    rdata-back@ $10 umin r> umin xtype cr ) dup /back ;
+: n2o:save-block ( id -- delta )
+    rdata-back@ file( 2dup 2>r data-rmap @ >o over dest-raddr @ - o>
+    >r ." file write: " rot dup . -rot r> hex. )
+    rot id>addr? >o
+    fs-write o> file( dup hex. dup
+    2r> rot umin $10 umin xtype cr ) dup /back ;
 
 Sema file-sema
 
@@ -1402,9 +1402,10 @@ Sema file-sema
 	dup IF  [: dump ;] $err  ELSE  2drop  THEN  o> )
 	+calc fstates 0 { size fails }
 	BEGIN  rdata-back?  WHILE
-		write-file# @ n2o:save-block IF 0 ELSE fails 1+ THEN to fails
-		rdata-back? residualwrite @ 0= or  IF
-		    write-file# file+ residualwrite off  THEN
+		write-file# @ n2o:save-block
+		IF 0 ELSE fails 1+ residualwrite off THEN to fails
+		residualwrite @ 0= ( rdata-back? or )  IF
+		    write-file# file+ blocksize @ residualwrite !  THEN
 	    fails size u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
     file-sema c-section ;
 
@@ -1432,11 +1433,14 @@ User file-reg#
 : n2o:close-file ( id -- )
     id>addr? >o fs-close  o> ;
 
+: blocksize! ( n -- )
+    dup blocksize !  dup residualread !  residualwrite ! ;
+
 : n2o:close-all ( -- )
     fstates 0 ?DO
 	I n2o:close-file
     LOOP  file-reg# off  fstate-off
-    residualread off  residualwrite off
+    blocksize @ blocksize!
     read-file# off  write-file# off ;
 
 : n2o:open-file ( addr u mode id -- )
@@ -1444,21 +1448,21 @@ User file-reg#
 
 \ read in from files
 
-: n2o:slurp-block ( id -- delta )  >r
-    data-head@ file( data-map @ >o over dest-raddr @ - o>
-    ." file read: " r@ . hex. )
-    r> id>addr? >o fs-read o> file( dup hex. dup >r
-    data-head@ $10 umin r> umin xtype cr ) dup /data ;
+: n2o:slurp-block ( id -- delta )
+    data-head@ file( 2dup 2>r data-map @ >o over dest-raddr @ - o>
+    >r ." file read: " rot dup . -rot r> hex. )
+    rot id>addr? >o fs-read o> file( dup hex. dup
+    2r> rot umin $10 umin xtype cr ) dup /data ;
 
-: n2o:slurp ( -- advance-head end-flag )
-    [: +calc head@ fstates 0
-	{ dhead states fails }
+: n2o:slurp ( -- head end-flag )
+    [: +calc fstates 0
+	{ states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
-		data-head? residualread @ 0= or  IF
-		    read-file# file+  residualread off  THEN
+		residualread @ 0= ( data-head? or )  IF
+		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
-	head@ dhead - fails states u>= ;]
+	head@ fails states u>= ;]
     file-sema c-section ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )

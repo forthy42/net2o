@@ -404,11 +404,11 @@ net2o-base
 31 net2o: close-file ( id -- )  64>n n2o:close-file ;
 32 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
 33 net2o: send-chunks ( -- ) net2o:send-chunks ;
-34 net2o: set-blocksize ( n -- )  64>n blocksize ! ;
+34 net2o: set-blocksize ( n -- )  64>n blocksize! ;
 35 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
 36 net2o: close-all ( -- )  n2o:close-all ;
 
-: blocksize! ( n -- )  dup ulit, set-blocksize blocksize ! ;
+: blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
 
 \ flow control functions
@@ -439,7 +439,7 @@ net2o-base
 52 net2o: timeout ( ticks -- ) net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
 53 net2o: ack-reply ( tag -- ) 64>n net2o:ack-reply ;
 54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
-55 net2o: set-top ( offset flag -- ) 2*64>n
+55 net2o: set-top ( top flag -- ) 2*64>n
     data-rmap @ >o dest-end ! dest-top! o> ;
 
 \ crypto functions
@@ -484,7 +484,7 @@ net2o-base
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 76 net2o: slurp ( -- )
-    n2o:slurp swap ulit, ulit, set-top
+    n2o:slurp swap ulit, slit, set-top
     ['] do-track-seek n2o:track-all-seeks ;
 77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
 
@@ -614,8 +614,10 @@ also net2o-base
     data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
     IF    data-reack# @ mask-bits# -
     ELSE  dest-head @ 1- addr>bits  THEN  bits>bytes 0 max
-    dup data-ack# @ u< IF  ackm + 1+  THEN
-    0 swap data-ack# @ o> +DO
+    0 swap data-ack# @
+    save( ." resend: " dest-head @ hex. dest-back @ hex.
+    2dup hex. hex. acks ackm 1+ xtype F cr )
+    o> +DO
 	acks I ackm and + l@
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. F cr )
@@ -633,7 +635,8 @@ also net2o-base
 
 : expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
 
-: resend-all ( -- ) false net2o:do-resend ;
+: resend-all ( -- )
+    false net2o:do-resend ;
 
 : restart-transfer ( -- )
     slurp send-chunks ;
@@ -687,10 +690,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     data-rmap @ >o ack-bit# @ dup +ackbit
     \ set bucket as received in current polarity bitmap
     data-ackbits @ swap +bit@
-    dup IF  1 packetr2 +!  THEN
-    dest-head @ dest-top @ u>= swap o>
-    0= IF  IF  net2o-code resend-all end-code
-	THEN  expected?  ELSE  drop  THEN ;
+    IF  1 packetr2 +! o> \ increment duplicate received flag
+    ELSE
+	dest-head @ dest-top @ u>= o>
+	IF  net2o-code resend-all end-code  THEN  expected?
+    THEN ;
 
 : bit>stream ( bit -- streambit )  dup
     dest-back @ addr>bits dest-size @ addr>bits dup >r 1-
@@ -758,7 +762,7 @@ User other-xt ' noop other-xt !
 	    true net2o:do-resend
 	THEN
 	data-rmap @ >o 0 do-slurp !@ o>
-	?dup-IF  net2o:ackflush slurp  THEN
+	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
 	net2o:gen-resend  net2o:genack
 	end-code
 	map-resend?
