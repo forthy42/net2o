@@ -1362,22 +1362,15 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    save( ." dest-top: " dup hex. cr )
     dest-top @ + dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
-	chunk-p2 rshift swap chunk-p2 rshift swap
-	\ save( ." ackbits pre: " data-ackbits @ dest-size @ addr>bytes xtype cr )
-	bit-erase
-	\ save( ." ackbits top: " data-ackbits @ dest-size @ addr>bytes xtype cr )
+	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP ;
 
 : dest-back! ( offset -- ) \ dest-back ! EXIT
     dup dest-back !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
-	chunk-p2 rshift swap chunk-p2 rshift swap
-\	save( ." ackbits bef: " data-ackbits @ dest-size @ addr>bytes xtype cr )
-	bit-fill
-\	save( ." ackbits bac: " data-ackbits @ dest-size @ addr>bytes xtype cr )
+	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP ;
 
 : size! ( 64 id -- )  state-addr >o
@@ -1530,8 +1523,7 @@ require net2o-crypt.fs
 \ send blocks of memory
 
 : set-dest ( addr target -- )
-    outbuf >dest \ save( ." send to: " 64dup ['] 64. $10 base-execute cr )
-    64dup dest-addr 64!  outbuf addr 64! ;
+    outbuf >dest 64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
 
@@ -1976,8 +1968,6 @@ $20 Constant keys-val
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  dest-job @ >o
-    \ save( ." packet to: " dup data-rmap @ >o dest-raddr @ - o>
-    \ hex. inbuf packet-data 8 umin xtype cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack o> ;
 ' handle-data rdata-class to handle

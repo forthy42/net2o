@@ -609,19 +609,16 @@ also net2o-base
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     data-rmap @ >o
     data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
-    IF    data-reack# @ mask-bits# - bits>bytes
-    ELSE  dest-head @ 1- addr>bits bits>bytes  THEN  0 max
-    data-ack# @ ackm mux dup data-ack# @ u< IF  ackm + 1+  THEN
+    IF    data-reack# @ mask-bits# -
+    ELSE  dest-head @ 1- addr>bits  THEN  bits>bytes 0 max
+    dup data-ack# @ u< IF  ackm + 1+  THEN
     0 swap data-ack# @ o> +DO
 	acks I ackm and + l@
-	ack( ." acks: " acks hex. I hex. dup hex. F cr )
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + data-rmap @ >o data-ack# ! o>
-		firstack( ." data-ack# = " I F . F cr )
-	    THEN
+	    drop dup 0= IF  I 4 + data-rmap @ >o data-ack# ! o>  THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
