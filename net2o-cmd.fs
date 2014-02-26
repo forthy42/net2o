@@ -503,10 +503,13 @@ net2o-base
 : net2o:ackflush ( n -- ) ulit, ack-flush ;
 : n2o:done ( -- )  slurp ;
 
+: rewind-total ( -- )
+    data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
+    ulit, rewind-sender ;
+
 : rewind ( -- )
     save( data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush )else(
-    data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
-    ulit, rewind-sender ) ;
+    rewind-total ) ;
 
 \ ids 130..140 reserved for DHT
 

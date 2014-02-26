@@ -1754,23 +1754,21 @@ rdata-class to rewind-timestamps-partial
 
 : rewind-buffer ( o:map -- )
     1 dest-round +!
-    \ dest-size @ dest-back +!
     dest-tail off  dest-head off  dest-back off  dest-top off
-    \ dest-raddr @ dest-size @ clearpages
     regen-ivs-all  rewind-timestamps ;
 
 : rewind-ackbits ( o:map -- )
-    data-ack# off
+    data-ack# off  data-reack# off
     firstack( ." rewind firstacks" cr )
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
 : net2o:rewind-sender ( n -- )
-    data-map @ >o
-    dest-round @ +DO  rewind-buffer  LOOP  o> ;
+    data-map @ >o dest-round @
+    +DO  rewind-buffer  LOOP  o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
-    data-rmap @ >o
-    dest-round @ +DO  rewind-buffer  LOOP
+    data-rmap @ >o dest-round @
+    +DO  rewind-buffer  LOOP
     rewind-ackbits ( clear-cookies ) o> ;
 
 : net2o:rewind-sender-partial ( new-back -- )
