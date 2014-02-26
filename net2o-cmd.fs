@@ -608,10 +608,10 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     data-rmap @ >o
+    data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
     IF    data-reack# @ mask-bits# - bits>bytes
     ELSE  dest-head @ 1- addr>bits bits>bytes  THEN  0 max
-    data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
-    ackm and dup data-ack# @ u< IF  ackm + 1+  THEN
+    data-ack# @ ackm mux dup data-ack# @ u< IF  ackm + 1+  THEN
     0 swap data-ack# @ o> +DO
 	acks I ackm and + l@
 	ack( ." acks: " acks hex. I hex. dup hex. F cr )
@@ -754,7 +754,7 @@ User other-xt ' noop other-xt !
     r@ ack-toggle# and IF
 	net2o-code
 	r@ resend-toggle# and IF
-	    data-rmap @ >o ack-bit# @ data-reack# ! o>
+	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
 	    true net2o:do-resend
 	THEN
 	data-rmap @ >o 0 do-slurp !@ o>

@@ -1366,9 +1366,9 @@ end-class fs-class
     dest-top @ + dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap
-	save( ." ackbits pre: " data-ackbits @ dest-size @ addr>bytes xtype cr )
+	\ save( ." ackbits pre: " data-ackbits @ dest-size @ addr>bytes xtype cr )
 	bit-erase
-	save( ." ackbits top: " data-ackbits @ dest-size @ addr>bytes xtype cr )
+	\ save( ." ackbits top: " data-ackbits @ dest-size @ addr>bytes xtype cr )
     len +LOOP ;
 
 : dest-back! ( offset -- ) \ dest-back ! EXIT
