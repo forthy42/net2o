@@ -1001,11 +1001,11 @@ Variable mapstart $1 mapstart !
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
-: /data ( u -- )
+: /head ( u -- )
     >blockalign data-map @ >o dest-head +! o> ;
 : /back ( u -- )
     >blockalign data-rmap @ >o dest-back +! o> ;
-: /dest-tail ( u -- )
+: /tail ( u -- )
     data-map @ >o dest-tail +! o> ;
 : data-dest ( -- addr )
     data-map @ >o
@@ -1454,7 +1454,7 @@ User file-reg#
     data-head@ file( 2dup 2>r data-map @ >o over dest-raddr @ - o>
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? >o fs-read o> file( dup hex. dup
-    2r> rot umin $10 umin xtype cr ) dup /data ;
+    2r> rot umin $10 umin xtype cr ) dup /head ;
 
 : n2o:slurp ( -- head end-flag )
     [: +calc fstates 0
@@ -1614,7 +1614,7 @@ User <size-lb> 1 floats cell- uallot drop
     resend$@ net2o:get-resend net2o:prep-send /resend ;
 
 : net2o:send ( -- addr taddr target n )
-    data-tail@ net2o:get-dest net2o:prep-send /dest-tail ;
+    data-tail@ net2o:get-dest net2o:prep-send /tail ;
 
 : ?toggle-ack ( -- )
     data-to-send 0= IF

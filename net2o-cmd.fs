@@ -600,7 +600,7 @@ also net2o-base
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
-    save( > IF  save&  THEN )else( 2drop ) ;
+    save( u> IF  save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 4 Value max-resend#
