@@ -1393,8 +1393,7 @@ end-class fs-class
 : n2o:save-block ( id -- delta )
     rdata-back@ file( 2dup 2>r data-rmap @ >o over dest-raddr @ - o>
     >r ." file write: " rot dup . -rot r> hex. )
-    rot id>addr? >o
-    fs-write o> file( dup hex. dup
+    rot id>addr? >o fs-write o> file( dup hex. dup
     2r> rot umin $10 umin xtype cr ) dup /back ;
 
 Sema file-sema
@@ -2118,11 +2117,12 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
 : requests->0 ( -- ) BEGIN  stop requests @ 0<= UNTIL ;
+: back->0 ( -- )  10 0 ?DO  rdata-back? 0= ?LEAVE  1 ms  LOOP ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout
     o IF  up@ wait-task !  THEN
-    event-loop-task requests->0 ;
+    event-loop-task requests->0 back->0 ;
 
 : server-loop ( -- )  0 >o rdrop  1 client-loop ;
 

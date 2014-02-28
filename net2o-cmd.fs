@@ -751,18 +751,22 @@ User other-xt ' noop other-xt !
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    acks# and dup ack-receive !@ xor >r
-    r@ ack-toggle# and IF
-	net2o-code
-	r@ resend-toggle# and IF
-	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
-	    true net2o:do-resend
+    acks# and data-rmap @ >o ack-advance? @ o> IF
+	dup ack-receive !@ xor >r
+	r@ ack-toggle# and IF
+	    net2o-code
+	    r@ resend-toggle# and IF
+		data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
+		true net2o:do-resend
+	    THEN
+	    data-rmap @ >o 0 do-slurp !@ o>
+	    ?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
+	    net2o:gen-resend  net2o:genack
+	    end-code
+	    map-resend?
 	THEN
-	data-rmap @ >o 0 do-slurp !@ o>
-	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
-	net2o:gen-resend  net2o:genack
-	end-code
-	map-resend?
+    ELSE
+	ack-receive @ xor >r
     THEN
     +cookie r> ack-timing ;
 
