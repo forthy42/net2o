@@ -689,8 +689,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     data-ackbits @ swap +bit@
     IF  1 packetr2 +! o> \ increment duplicate received flag
     ELSE
-	dest-head @ dest-top @ u>= o>
-	IF  net2o-code resend-all end-code  THEN  expected?
+	dest-head @ dest-top @ u>= ack-advance? @ and o>
+	IF  net2o-code expect-reply resend-all end-code  THEN  expected?
     THEN ;
 
 : bit>stream ( bit -- streambit )  dup
