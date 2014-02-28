@@ -683,7 +683,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     0 rot new-ackbit 2! new-ackbit cell+ swap +bit
     new-ackbit 2 cells data-ackbits-buf $+! ;
 
-: +cookie ( -- flag )
+: +cookie ( -- )
     data-rmap @ >o ack-bit# @ dup +ackbit
     \ set bucket as received in current polarity bitmap
     data-ackbits @ swap +bit@
@@ -751,6 +751,7 @@ User other-xt ' noop other-xt !
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
+    +cookie
     acks# and data-rmap @ >o ack-advance? @ o> IF
 	dup ack-receive !@ xor >r
 	r@ ack-toggle# and IF
@@ -768,7 +769,7 @@ User other-xt ' noop other-xt !
     ELSE
 	ack-receive @ xor >r
     THEN
-    +cookie r> ack-timing ;
+    r> ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 : -flow-control ['] noop         ack-xt ! ;
