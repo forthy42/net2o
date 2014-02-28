@@ -221,11 +221,11 @@ UDefer expect-reply?
 
 previous
 
-: net2o:tag-reply ( -- )  o?
+: net2o:ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
     code-vdest r> reply-dest 64! ;
-: net2o:ack-reply ( index -- )
+: net2o:ok ( tag -- )
     timeout( ." ack: " dup hex. F cr )
     o 0= IF  drop EXIT  THEN
     resend0 @ IF  resend0 $off  THEN
@@ -337,7 +337,8 @@ also net2o-base definitions
 5 net2o: type ( addr u -- )  F type ;
 6 net2o: . ( -- ) 64. ;
 7 net2o: cr ( -- ) F cr ;
-\ 8 is throw, but will be defined last
+\ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
+8 net2o: ko ( error -- )  throw ;
 9 net2o: see-me ( -- ) n2o:see-me ;
 
 10 net2o: push-$    $, ;
@@ -437,8 +438,8 @@ net2o-base
 50 net2o: ack-flush ( addr -- )  64>n net2o:rewind-sender-partial ;
 51 net2o: set-head ( offset -- ) 64>n data-rmap @ >o dest-head umax! o> ;
 52 net2o: timeout ( ticks -- ) net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
-53 net2o: ack-reply ( tag -- ) 64>n net2o:ack-reply ;
-54 net2o: tag-reply ( tag -- ) net2o:tag-reply lit, ack-reply ;
+53 net2o: ok ( tag -- ) 64>n net2o:ok ;
+54 net2o: ok? ( tag -- ) net2o:ok? lit, ok ;
 55 net2o: set-top ( top flag -- ) 2*64>n
     data-rmap @ >o dest-end ! dest-top! o> ;
 
@@ -515,19 +516,15 @@ net2o-base
 
 \ safe initialization
 
-\ This must be defined last, otherwise dangerous name-clash!
-
-8 net2o: throw ( error -- )  F throw ;
-
 net2o-base
 
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname
     server? IF
-	dup  IF  dup nlit, throw end-cmd
+	dup  IF  dup nlit, ko end-cmd
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
-	F throw  THEN  drop ; IS >throw
+	throw  THEN  drop ; IS >throw
 
 set-current previous
 
@@ -629,7 +626,7 @@ also net2o-base
     4 +LOOP  drop !rdata-tail ;
 
 : do-expect-reply ( -- )
-    reply-index ulit, tag-reply  end-cmd  net2o:expect-reply
+    reply-index ulit, ok?  end-cmd  net2o:expect-reply
     msg( ." Expect reply" F cr )
     ['] end-cmd IS expect-reply? ;
 
