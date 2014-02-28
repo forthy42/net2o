@@ -615,8 +615,8 @@ also net2o-base
     IF    data-reack# @ mask-bits# -
     ELSE  dest-head @ 1- addr>bits  THEN  bits>bytes 0 max
     0 swap data-ack# @
-    save( ." resend: " dest-head @ hex. dest-back @ hex.
-    2dup hex. hex. acks ackm 1+ xtype F cr )
+    \ save( ." resend: " dest-head @ hex. dest-back @ hex.
+    \ 2dup hex. hex. acks ackm 1+ xtype F cr )
     o> +DO
 	acks I ackm and + l@
 	dup $FFFFFFFF <> IF

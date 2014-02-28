@@ -104,6 +104,7 @@ UValue statbuf
 : orc!  ( x c-addr -- )   >r r@ c@ or   r> c! ;
 
 : max!@ ( n addr -- )   >r r@ @ max r> !@ ;
+: umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
 
 [IFDEF] 64bit
     ' min! Alias 64min!
@@ -677,6 +678,7 @@ code-class class
     field: data-ack#     \ fully acked bursts
     field: data-reack#   \ last polarity change was here
     field: ack-bit#      \ actual ack bit
+    field: ack-advance?  \ ack is advancing state
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -776,9 +778,9 @@ end-structure
 
 \ check for valid destination
 
-: >data-head ( addr o:map -- )
-    dup dest-back @ dest-size @ 1- and < IF  dest-size @ +  THEN
-    maxdata + dest-back @ dest-size @ 1- invert and + dest-head umax! ;
+: >data-head ( addr o:map -- flag )  dest-size @ 1- >r
+    dup dest-back @ r@ and < IF  r@ + 1+  THEN
+    maxdata + dest-back @ r> invert and + dup dest-head umax!@ <> ;
 
 Variable dest-map s" " dest-map $!
 
@@ -806,7 +808,7 @@ $100 Value dests#
 	    dest-size @ u<
 	    IF
 		dup addr>bits ack-bit# !
-		dest-raddr @ swap dup >data-head +
+		dest-raddr @ swap dup >data-head ack-advance? ! +
 		o dest-job @ o> >o rdrop
 		UNLOOP  EXIT  THEN
 	    drop o>
@@ -1437,11 +1439,11 @@ User file-reg#
     dup blocksize !  dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )
-    fstates 0 ?DO
-	I n2o:close-file
-    LOOP  file-reg# off  fstate-off
-    blocksize @ blocksize!
-    read-file# off  write-file# off ;
+    [: fstates 0 ?DO
+	    I n2o:close-file
+	LOOP  file-reg# off  fstate-off
+	blocksize @ blocksize!
+	read-file# off  write-file# off ;] file-sema c-section ;
 
 : n2o:open-file ( addr u mode id -- )
     state-addr >o fs-open o> ;
@@ -1797,7 +1799,7 @@ event: ->save ( o -- ) >o
 0 Value file-task
 
 : create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
-    activate  b-out event-loop ;
+    activate  b-out BEGIN  ['] event-loop catch DoError  AGAIN ;
 : save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
@@ -2048,19 +2050,19 @@ Variable timeout-task
 \ dispose context
 
 : n2o:dispose-context ( o:addr -- o:addr )
-    cmd( ." Disposing context... " o . cr )
-    o-timeout o-chunks
-    0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
-    data-map  @ ?dup-IF  >o free-data o>  THEN
-    data-rmap @ ?dup-IF  >o free-data o>  THEN
-    code-map  @ ?dup-IF  >o free-data o>  THEN
-    code-rmap @ ?dup-IF  >o free-data o>  THEN
-    resend0 $off  fstate-off
-    \ erase crypto keys
-    crypto-key $@ erase  crypto-key $off
-    data-resend $off  timing-stat $off
-    dispose
-    cmd( ." disposed" cr ) ;
+    [: cmd( ." Disposing context... " o . cr )
+	o-timeout o-chunks
+	0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
+	data-map  @ ?dup-IF  >o free-data o>  THEN
+	data-rmap @ ?dup-IF  >o free-data o>  THEN
+	code-map  @ ?dup-IF  >o free-data o>  THEN
+	code-rmap @ ?dup-IF  >o free-data o>  THEN
+	resend0 $off  fstate-off
+	\ erase crypto keys
+	crypto-key $@ erase  crypto-key $off
+	data-resend $off  timing-stat $off
+	dispose
+	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client
 
