@@ -149,11 +149,14 @@ get-current also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
-0 net2o: dummy ( -- ) ; \ just as dummy... never used
-0 net2o: end-cmd ( -- ) 0. buf-state 2! ;
-1 net2o: ulit ( -- x ) p@ ;
-2 net2o: slit ( -- x ) ps@ ;
-3 net2o: string ( -- addr u )  string@ ;
+0 net2o: end-cmd ( -- ) \ last command in buffer
+    0. buf-state 2! ;
+1 net2o: ulit ( "u" -- u ) \ unsigned literal
+    p@ ;
+2 net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
+    ps@ ;
+3 net2o: string ( "string" -- addr u ) \ string literal
+    string@ ;
 
 dup set-current
 
@@ -333,34 +336,44 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-4 net2o: emit ( xc -- ) 64>n xemit ;
-5 net2o: type ( addr u -- )  F type ;
-6 net2o: . ( -- ) 64. ;
-7 net2o: cr ( -- ) F cr ;
-\ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
-8 net2o: ko ( error -- )  throw ;
-9 net2o: see-me ( -- ) n2o:see-me ;
+4 net2o: emit ( xc -- ) \ emit character on server log
+    64>n xemit ;
+5 net2o: type ( addr u -- ) \ type string on server log
+    F type ;
+6 net2o: . ( -- ) \ print number on server log
+    64. ;
+7 net2o: cr ( -- ) \ newline on server log
+    F cr ;
+8 net2o: see-me ( -- ) \ see received commands on server log
+    n2o:see-me ;
 
-10 net2o: push-$    $, ;
-11 net2o: push-slit slit, ;
-12 net2o: push-char lit, ;
-' push-char alias push-lit
+10 net2o: push-$ ( addr u -- ) \ push string into answer packet
+    $, ;
+11 net2o: push-slit ( n -- ) \ push singed literal into answer packet
+    slit, ;
+12 net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
+    lit, ;
+' push-lit alias push-char
 
-13 net2o: push'     p@ cmd, ;
-14 net2o: nest ( addr u -- )  cmdnest ;
-15 net2o: tmpnest ( addr u -- )  cmdtmpnest ;
+13 net2o: push' ( "cmd" -- ) \ push command into answer packet
+    p@ cmd, ;
+14 net2o: nest ( addr u -- ) \ nested (self-encrypted) command
+    cmdnest ;
+15 net2o: tmpnest ( addr u -- ) \ nested (temporary encrypted) command
+    cmdtmpnest ;
 
 : ]nest  ( -- )  end-cmd cmd>nest $, push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
-16 net2o: new-data ( addr addr u -- )
+16 net2o: new-data ( addr addr u -- ) \ create new data mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-17 net2o: new-code ( addr addr u -- )
+17 net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-18 net2o: request-done ( -- )  own-crypt? IF  n2o:request-done  THEN ;
-19 net2o: set-rtdelay ( timestamp -- )
+18 net2o: request-done ( -- ) \ signal request is completed
+    own-crypt? IF  n2o:request-done  THEN ;
+19 net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
 	64dup cookie>context?
@@ -378,7 +391,7 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-20 net2o: store-key ( addr u -- )
+20 net2o: store-key ( addr u -- ) \ store key
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
@@ -386,7 +399,8 @@ also net2o-base definitions
 	crypto-key $!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
-21 net2o: map-request ( addrs ucode udata -- )  2*64>n
+21 net2o: map-request ( addrs ucode udata -- ) \ request mapping
+    2*64>n
     nest[
     ?new-mykey ticker 64@ lit, set-rtdelay
     max-data# umin swap max-code# umin swap
@@ -395,109 +409,147 @@ also net2o-base definitions
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
-22 net2o: disconnect ( -- )  o 0= ?EXIT n2o:dispose-context un-cmd ;
-23 net2o: set-tick ( ticks -- )  adjust-ticks ;
-24 net2o: get-tick ( -- )  ticks lit, set-tick ;
+22 net2o: disconnect ( -- ) \ close connection
+    o 0= ?EXIT n2o:dispose-context un-cmd ;
+23 net2o: set-tick ( ticks -- ) \ adjust time
+    adjust-ticks ;
+24 net2o: get-tick ( -- ) \ request time adjust
+    ticks lit, set-tick ;
 
 net2o-base
 
-30 net2o: open-file ( addr u mode id -- )  2*64>n  n2o:open-file ;
-31 net2o: close-file ( id -- )  64>n n2o:close-file ;
-32 net2o: file-size ( id -- size )  id>addr? fs-size 64@ ;
-33 net2o: send-chunks ( -- ) net2o:send-chunks ;
-34 net2o: set-blocksize ( n -- )  64>n blocksize! ;
-35 net2o: set-blockalign ( n -- )  64>n pow2?  blockalign ! ;
-36 net2o: close-all ( -- )  n2o:close-all ;
+30 net2o: open-file ( addr u mode id -- ) \ open file id at path "addr u" with mode
+    2*64>n  n2o:open-file ;
+31 net2o: close-file ( id -- ) \ close file
+    64>n n2o:close-file ;
+32 net2o: file-size ( id -- size ) \ obtain file size
+    id>addr? fs-size 64@ ;
+33 net2o: send-chunks ( -- ) \ start sending chunks
+    net2o:send-chunks ;
+34 net2o: set-blocksize ( n -- ) \ set blocksize
+    64>n blocksize! ;
+35 net2o: set-blockalign ( n -- ) \ set block alignment
+    64>n pow2?  blockalign ! ;
+36 net2o: close-all ( -- ) \ close all files
+    n2o:close-all ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
 
 \ flow control functions
 
-40 net2o: ack-addrtime ( time addr -- ) net2o:ack-addrtime ;
-41 net2o: ack-resend ( flag -- ) 64>n  net2o:ack-resend ;
-42 net2o: set-rate ( ticks1 ticks2 -- )
+40 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
+    net2o:ack-addrtime ;
+41 net2o: ack-resend ( flag -- ) \ set resend toggle flag
+    64>n  net2o:ack-resend ;
+42 net2o: set-rate ( rate delta-t -- ) \ set rate 
     cookie? IF  net2o:set-rate
     ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
-43 net2o: resend-mask ( addr mask -- )
+43 net2o: resend-mask ( addr mask -- ) \ resend mask blocks starting at addr
     2*64>n net2o:resend-mask net2o:send-chunks ;
-44 net2o: track-timing ( -- )  net2o:track-timing ;
-45 net2o: rec-timing ( addr u -- )  net2o:rec-timing ;
-46 net2o: send-timing ( -- )
+44 net2o: track-timing ( -- ) \ track timing
+    net2o:track-timing ;
+45 net2o: rec-timing ( addr u -- ) \ recorded timing
+    net2o:rec-timing ;
+46 net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-47 net2o: >time-offset ( n -- )  time-offset 64! ;
+47 net2o: >time-offset ( n -- ) \ set time offset
+    time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
-48 net2o: ack-b2btime ( time addr -- ) net2o:ack-b2btime ;
-49 net2o: ack-cookies ( cookie addr mask -- )
+48 net2o: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
+    net2o:ack-b2btime ;
+49 net2o: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
-50 net2o: ack-flush ( addr -- )  64>n net2o:rewind-sender-partial ;
-51 net2o: set-head ( offset -- ) 64>n data-rmap @ >o dest-head umax! o> ;
-52 net2o: timeout ( ticks -- ) net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
-53 net2o: ok ( tag -- ) 64>n net2o:ok ;
-54 net2o: ok? ( tag -- ) net2o:ok? lit, ok ;
-55 net2o: set-top ( top flag -- ) 2*64>n
-    data-rmap @ >o dest-end ! dest-top! o> ;
+50 net2o: ack-flush ( addr -- ) \ flushed to addr
+    64>n net2o:rewind-sender-partial ;
+51 net2o: set-head ( addr -- ) \ set head
+    64>n data-rmap @ >o dest-head umax! o> ;
+52 net2o: timeout ( ticks -- ) \ timeout request
+    net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
+53 net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
+    2*64>n data-rmap @ >o dest-end ! dest-top! o> ;
+
+54 net2o: ok ( tag -- ) \ tagged response
+    64>n net2o:ok ;
+55 net2o: ok? ( tag -- ) \ request tagged response
+    net2o:ok? lit, ok ;
+\ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
+56 net2o: ko ( error -- ) \ receive error message
+    throw ;
 
 \ crypto functions
 
-60 net2o: receive-key ( addr u -- )
+60 net2o: receive-key ( addr u -- ) \ receive a key
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
-61 net2o: key-request ( -- addr u )
+61 net2o: key-request ( -- addr u ) \ request a key
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-62 net2o: receive-tmpkey ( addr u -- ) net2o:receive-tmpkey ;
-63 net2o: tmpkey-request ( -- ) stpkc keysize $, receive-tmpkey ;
-64 net2o: update-key ( -- )  net2o:update-key ;
-65 net2o: gen-ivs ( addr u -- )  ivs-strings receive-ivs ;
+62 net2o: receive-tmpkey ( addr u -- ) \ receive emphemeral key
+    net2o:receive-tmpkey ;
+63 net2o: tmpkey-request ( -- ) \ request ephemeral key
+    stpkc keysize $, receive-tmpkey ;
+64 net2o: update-key ( -- ) \ update secrets
+    net2o:update-key ;
+65 net2o: gen-ivs ( addr u -- ) \ generate IVs
+    ivs-strings receive-ivs ;
 
 \ create commands to send back
 
 : all-ivs ( -- ) \ Seed and gen all IVS
     state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
 
-66 net2o: gen-reply ( -- )
+66 net2o: gen-reply ( -- ) \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key all-ivs time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 \ better slurping
 
-70 net2o: track-size ( size id -- )
+70 net2o: track-size ( size id -- ) \ set size attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-71 net2o: track-seek ( seek id -- )
+71 net2o: track-seek ( seek id -- ) \ set seek attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-72 net2o: track-limit ( seek id -- )
+72 net2o: track-limit ( limit id -- ) \ set limit attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
 
 :noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
 
-73 net2o: set-stat ( mtime mod id -- ) 2*64>n n2o:set-stat ;
-74 net2o: get-stat ( id -- ) 64>n { fd }
+73 net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
+    2*64>n n2o:set-stat ;
+74 net2o: get-stat ( id -- ) \ request stat of file id
+    64>n { fd }
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-75 net2o: open-tracked-file ( addr u mode id -- )
+75 net2o: open-tracked-file ( addr u mode id -- ) \ open file in tracked mode
     2*64>n dup >r n2o:open-file
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
-76 net2o: slurp ( -- )
+76 net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, slit, set-top
     ['] do-track-seek n2o:track-all-seeks ;
-77 net2o: rewind-sender ( n -- )  64>n net2o:rewind-sender ;
+77 net2o: rewind-sender ( n -- ) \ rewind buffer
+    64>n net2o:rewind-sender ;
 
-\ ids 100..120 reserved for key exchange/strage
+\ ids 100..120 reserved for key exchange/storage
 
 \ profiling, nat traversal
 
-120 net2o: !time ( -- ) init-timer ;
-121 net2o: .time ( -- ) .packets .times ;
-122 net2o: set-ip ( addr u -- ) setip-xt perform ;
-123 net2o: get-ip ( -- ) >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
-124 net2o: punch ( addr u -- )  net2o:punch ;
+120 net2o: !time ( -- ) \ start timer
+    init-timer ;
+121 net2o: .time ( -- ) \ print timer to server log
+    .packets .times ;
+
+122 net2o: set-ip ( addr u -- ) \ set address information
+    setip-xt perform ;
+123 net2o: get-ip ( -- ) \ request address information
+    >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
+124 net2o: punch ( addr u -- ) \ punch NAT traversal hole
+    net2o:punch ;
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
