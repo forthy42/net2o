@@ -761,11 +761,8 @@ User other-xt ' noop other-xt !
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    acks# and data-rmap @ >o ack-advance? @ o> IF
-	net2o:ack-code
-    ELSE
-	ack-receive @ xor
-    THEN  ack-timing ;
+    acks# and data-rmap @ >o ack-advance? @ o>
+    IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 : -flow-control ['] noop         ack-xt ! ;
@@ -775,14 +772,14 @@ User other-xt ' noop other-xt !
 also net2o-base
 : transfer-keepalive? ( -- )
     expected@ u>= ?EXIT
-    net2o-code
+    net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout
     resend-all  net2o:genack end-code ;
 previous
 
 : connected-timeout ( -- )
     timeout( .expected )
-    cmd-resend? transfer-keepalive? ;
+    packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
