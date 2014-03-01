@@ -508,9 +508,11 @@ net2o-base
     data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
     ulit, rewind-sender ;
 
+: rewind-flush ( -- )
+    data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
+
 : rewind ( -- )
-    save( data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush )else(
-    rewind-total ) ;
+    save( rewind-flush )else( rewind-total ) ;
 
 \ ids 130..140 reserved for DHT
 
@@ -599,7 +601,7 @@ also net2o-base
 
 : !rdata-tail ( -- )
     data-rmap @ >o
-    data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail a!@ o>
+    data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
     save( u> IF  save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
@@ -751,7 +753,7 @@ User other-xt ' noop other-xt !
 	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
 	    true net2o:do-resend
 	THEN
-	data-rmap @ >o 0 do-slurp a!@ o>
+	data-rmap @ >o 0 do-slurp !@ o>
 	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
 	net2o:gen-resend  net2o:genack	map-resend?
     THEN  +expected
@@ -774,7 +776,7 @@ also net2o-base
     expected@ u>= ?EXIT
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout
-    resend-all  net2o:genack end-code ;
+    save( slurp send-chunks )  resend-all  net2o:genack end-code ;
 previous
 
 : connected-timeout ( -- )

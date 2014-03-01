@@ -68,6 +68,16 @@ debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
 debug: save( \ separate save task
 
+\ key debugging task
+
+: toggle ( addr -- )  dup @ 0= swap ! ;
+
+: key-task ( -- )  stacksize4 NewTask4 activate
+    BEGIN  case key
+	    'c' of  ['] cmd( >body toggle  endof
+	endcase
+    AGAIN ;
+
 \ timing measurements
 
 64Variable timer-tick
@@ -79,8 +89,6 @@ Variable last-tick
 : ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
 
 : ticks-u ( -- u )  ntime drop ;
-: !@ ( value addr -- old-value )   dup @ >r ! r> ;
-: +!@ ( value addr -- old-value )   dup @ >r +! r> ;
 
 : +t ( addr -- )
     ticks-u dup last-tick !@ - swap +! ;

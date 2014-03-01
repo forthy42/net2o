@@ -4,6 +4,7 @@ require net2o.fs
 
 +debug
 %droprate
+key-task
 
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 

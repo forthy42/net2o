@@ -5,6 +5,7 @@ require net2o.fs
 +db stat(
 +debug
 %droprate
+key-task
 
 "anonymous" >key \ get our anonymous key
 
@@ -37,6 +38,7 @@ init-client
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:download1 ( -- )
+    [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
     expect-reply
     s" Download test" $, type cr ( see-me ) get-ip
@@ -50,7 +52,7 @@ init-client
     1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
-    [: ." Request more photos because it was so fast" cr ;] $err
+    [: ." Download test 2: 7 medium photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
     s" Download test 2" $, type cr ( see-me )
@@ -68,7 +70,7 @@ init-client
     1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
-    [: ." Request big photos because it was so fast" cr ;] $err
+    [: ." Download test 3: 2 big photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
     s" Download test 3" $, type cr  ( see-me )
@@ -81,7 +83,7 @@ init-client
     1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
-    [: ." Request more big photos because it was so fast" cr ;] $err
+    [: ." Download test 4: 7 big photos, partial files" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
     s" Download test 4" $, type cr  ( see-me )
@@ -106,7 +108,7 @@ init-client
     1 client-loop ['] .time $err ;
 
 : c:download4a ( -- )
-    [: ." Request second stage big photos" cr ;] $err
+    [: ." Download test 4a: 7 big photos, rest" cr ;] $err
     net2o-code
     expect-reply
     s" Download test 4a" $, type cr  ( see-me )

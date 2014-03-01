@@ -1363,13 +1363,13 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dup dest-top a!@ U+DO
+    dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP ;
 
 : dest-back! ( offset -- ) \ dest-back ! EXIT
-    dup dest-back a!@ U+DO
+    dup dest-back !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP ;
@@ -1792,7 +1792,7 @@ event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 event: ->save ( o -- ) >o
     data-rmap @ >o dest-back @ o> >r save-all-blocks
-    r> data-rmap @ >o dest-back a!@ dup do-slurp ! o>
+    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
     net2o:rewind-receiver-partial o> ;
 
 0 Value file-task
@@ -2075,6 +2075,7 @@ User requests
     BEGIN  packet-event +event  AGAIN ;
 
 event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
+event: ->reqsave ( task -- )  ->request event> ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
        true !!timeout!! ;
 
@@ -2098,8 +2099,9 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
     BEGIN  packet-event  +event  watch-timeout?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
-: n2o:request-done ( -- )
-    o-timeout ->request ;
+: n2o:request-done ( -- )  o-timeout
+    file-task ?dup-IF  wait-task @ elit, ->reqsave event>
+    ELSE  ->request  THEN ;
 
 : do-event-loop ( -- )  o >r
     BEGIN   nothrow ['] event-loop-nocatch catch ?int dup  WHILE
@@ -2117,12 +2119,11 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
 : requests->0 ( -- ) BEGIN  stop requests @ 0<= UNTIL ;
-: back->0 ( -- )  10 0 ?DO  rdata-back? 0= ?LEAVE  1 ms  LOOP ;
 
 : client-loop ( requests -- )
     requests !  !ticks reset-timeout
     o IF  up@ wait-task !  THEN
-    event-loop-task requests->0 back->0 ;
+    event-loop-task requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  1 client-loop ;
 
