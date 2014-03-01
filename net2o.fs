@@ -1363,13 +1363,13 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( offset -- )
-    dup dest-top !@ U+DO
+    dup dest-top a!@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP ;
 
 : dest-back! ( offset -- ) \ dest-back ! EXIT
-    dup dest-back !@ U+DO
+    dup dest-back a!@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP ;
@@ -1792,7 +1792,7 @@ event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 event: ->save ( o -- ) >o
     data-rmap @ >o dest-back @ o> >r save-all-blocks
-    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
+    r> data-rmap @ >o dest-back a!@ dup do-slurp ! o>
     net2o:rewind-receiver-partial o> ;
 
 0 Value file-task

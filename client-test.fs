@@ -32,7 +32,7 @@ init-client
     THEN ;
 
 : c:connect ( -- )
-    $8000 $100000
+    $10000 $100000
     net2o-host $@ net2o-port insert-ip n2o:connect +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 

@@ -599,7 +599,7 @@ also net2o-base
 
 : !rdata-tail ( -- )
     data-rmap @ >o
-    data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
+    data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail a!@ o>
     save( u> IF  save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
@@ -659,14 +659,12 @@ also net2o-base
 
 : expected? ( -- )
     expected@ tuck u>= and IF
-	net2o-code
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr )
 	msg( ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
-	end-code
 	64#0 burst-ticks 64!
     THEN ;
 
@@ -686,12 +684,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : +cookie ( -- )
     data-rmap @ >o ack-bit# @ dup +ackbit
     \ set bucket as received in current polarity bitmap
-    data-ackbits @ swap +bit@
-    IF  1 packetr2 +! o> \ increment duplicate received flag
-    ELSE
-	dest-head @ dest-top @ u>= ack-advance? @ and o>
-	IF  net2o-code expect-reply resend-all end-code  THEN  expected?
-    THEN ;
+    data-ackbits @ swap +bit@ o> negate packetr2 +! ;
+
+: +expected ( -- )
+    data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
+    IF   expect-reply resend-all  THEN  expected? ;
 
 : bit>stream ( bit -- streambit )  dup
     dest-back @ addr>bits dest-size @ addr>bits dup >r 1-
@@ -746,30 +743,29 @@ User other-xt ' noop other-xt !
 
 \ acknowledge toplevel
 
-: net2o:do-ack ( -- )
-\    net2o-code
-    dest-addr 64@ recv-addr 64! \ last received packet
-    recv-cookie
-    inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    +cookie
-    acks# and data-rmap @ >o ack-advance? @ o> IF
-	dup ack-receive !@ xor >r
-	r@ ack-toggle# and IF
-	    net2o-code
-	    r@ resend-toggle# and IF
-		data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
-		true net2o:do-resend
-	    THEN
-	    data-rmap @ >o 0 do-slurp !@ o>
-	    ?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
-	    net2o:gen-resend  net2o:genack
-	    end-code
-	    map-resend?
+: net2o:ack-code ( ackflag -- ackflag )
+    net2o-code
+    dup ack-receive !@ xor >r
+    r@ ack-toggle# and IF
+	r@ resend-toggle# and IF
+	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
+	    true net2o:do-resend
 	THEN
+	data-rmap @ >o 0 do-slurp a!@ o>
+	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
+	net2o:gen-resend  net2o:genack	map-resend?
+    THEN  +expected
+    end-code r> ;
+
+: net2o:do-ack ( -- )
+    dest-addr 64@ recv-addr 64! \ last received packet
+    recv-cookie +cookie
+    inbuf 1+ c@ dup recv-flag ! \ last receive flag
+    acks# and data-rmap @ >o ack-advance? @ o> IF
+	net2o:ack-code
     ELSE
-	ack-receive @ xor >r
-    THEN
-    r> ack-timing ;
+	ack-receive @ xor
+    THEN  ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 : -flow-control ['] noop         ack-xt ! ;
