@@ -1362,13 +1362,13 @@ end-class fs-class
     id>addr dup 0< !!gap!!
     0= IF  drop  new>file lastfile@  THEN ;
 
-: dest-top! ( offset -- )
+: dest-top! ( addr -- )
     dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP ;
 
-: dest-back! ( offset -- ) \ dest-back ! EXIT
+: dest-back! ( addr -- )
     dup dest-back !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
@@ -1453,9 +1453,9 @@ User file-reg#
     data-head@ file( 2dup 2>r data-map @ >o over dest-raddr @ - o>
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? >o fs-read o> file( dup hex. dup
-    2r> rot umin $10 umin xtype cr ) dup /head ;
+    2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
 
-: n2o:slurp ( -- head end-flag )
+: n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
     [: +calc fstates 0
 	{ states fails }
 	0 BEGIN  data-head?  WHILE
@@ -1464,7 +1464,7 @@ User file-reg#
 		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
 	head@ fails states u>= ;]
-    file-sema c-section ;
+    file-sema c-section file( dup IF  ." data end" cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
@@ -1786,20 +1786,22 @@ rdata-class to rewind-timestamps-partial
 
 \ separate thread for loading and saving...
 
+: net2o:save ( -- )
+    data-rmap @ >o dest-back @ o> >r save-all-blocks
+    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
+    net2o:rewind-receiver-partial ;
+
 Defer do-track-seek
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
-event: ->save ( o -- ) >o
-    data-rmap @ >o dest-back @ o> >r save-all-blocks
-    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
-    net2o:rewind-receiver-partial o> ;
+event: ->save ( o -- ) >o net2o:save o> ;
 
 0 Value file-task
 
 : create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
     activate  b-out BEGIN  ['] event-loop catch DoError  AGAIN ;
-: save& ( -- ) file-task 0= IF  create-file-task  THEN
+: net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
 \ schedule delayed events

@@ -146,8 +146,7 @@ Sema regen-sema
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
       dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
-      save( ." regen all: " c:key@ 8 xtype space )
-      dest-ivs $@ c:prng save( c:key@ 8 xtype cr ) r> c:key! ;]
+      dest-ivs $@ c:prng r> c:key! ;]
     regen-sema c-section ;
 
 : regen-ivs-part ( new-back -- ) [: c:key@ >r

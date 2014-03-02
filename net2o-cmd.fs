@@ -472,7 +472,7 @@ net2o-base
 52 net2o: timeout ( ticks -- ) \ timeout request
     net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
 53 net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
-    2*64>n data-rmap @ >o dest-end ! dest-top! o> ;
+    2*64>n data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 
 54 net2o: ok ( tag -- ) \ tagged response
     64>n net2o:ok ;
@@ -654,7 +654,7 @@ also net2o-base
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
-    save( u> IF  save&  THEN )else( 2drop ) ;
+    save( u> IF  net2o:save&  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 4 Value max-resend#
@@ -698,7 +698,7 @@ also net2o-base
     ticks lit, push-lit push' set-rtdelay ;
 
 : data-end? ( -- flag )
-    data-rmap @ >o dest-end @ o> ;
+    data-rmap @ >o 0 dest-end !@ o> ;
 
 : rewind-transfer ( -- )
     rewind data-end? IF  n2o:request-done  ELSE  restart-transfer  THEN
@@ -743,11 +743,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : +expected ( -- )
     data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
     IF   expect-reply resend-all  THEN  expected? ;
-
-: bit>stream ( bit -- streambit )  dup
-    dest-back @ addr>bits dest-size @ addr>bits dup >r 1-
-    2dup invert and >r and u< IF  r> r@ + >r  THEN
-    r> + rdrop ;
 
 \ higher level functions
 
