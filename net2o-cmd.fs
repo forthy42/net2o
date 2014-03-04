@@ -654,7 +654,7 @@ also net2o-base
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
-    save( u> IF  net2o:save&  THEN )else( 2drop ) ;
+    save( u> IF  net2o:save& 64#0 burst-ticks 64!  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 4 Value max-resend#
@@ -702,7 +702,7 @@ also net2o-base
 
 : rewind-transfer ( -- )
     rewind data-end? IF  n2o:request-done  ELSE  restart-transfer  THEN
-    request-stats? IF  send-timing  THEN ;
+    save( )else( request-stats? IF  send-timing  THEN ) ;
 
 : request-stats   true to request-stats?  track-timing ;
 
@@ -792,7 +792,7 @@ User other-xt ' noop other-xt !
 
 \ acknowledge toplevel
 
-: net2o:ack-code ( ackflag -- ackflag )
+: net2o:ack-code ( ackflag -- ackflag' )
     net2o-code
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF

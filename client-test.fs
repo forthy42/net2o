@@ -16,10 +16,10 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-0 UValue test#
+-1 UValue test#
 1 Value total-tests
 
-: .test# ( -- ) total-tests 1 > IF  test# 0 .r  THEN ;
+: .test# ( -- ) test# 0>= IF  test# 0 .r  THEN ;
 
 : >timing ( -- )
     [: ." timing" .test# ;] $tmp w/o create-file throw >r
@@ -151,7 +151,7 @@ event: ->throw dup DoError throw ;
 
 #100 Value req-ms#
 
-: c:tests ( n -- )
+: c:tests ( n -- )  dup 0< IF  abs to test#  1  THEN
     dup to total-tests  dup requests !
     0 ?DO  c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
