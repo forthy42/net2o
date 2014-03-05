@@ -44,7 +44,8 @@ s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
 s" absolute path not allowed!"   throwcode !!abs-path!!
 s" invalid packet destination"   throwcode !!inv-dest!!
-
+s" unknown key"                  throwcode !!unknown-key!!
+s" wrong key"                    throwcode !!wrong-key!!
 \ required tools
 
 \ require smartdots.fs
@@ -762,10 +763,10 @@ object class
     \ statistics
     field: timing-stat
     64field: last-time
-    \ make timestamps smaller
-    64field: time-offset
+    64field: time-offset  \ make timestamps smaller
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
+    field: dest-pubkey  \ if not 0, connect only to this key
 end-class context-class
 
 begin-structure timestats

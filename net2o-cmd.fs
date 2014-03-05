@@ -837,8 +837,7 @@ previous
 : +get-time     ['] get-tick other-xt ! ;
 : -other        ['] noop other-xt ! ;
 
-: n2o:connect ( ucode udata return-addr -- )
-    n2o:new-context
+: n2o:connect ( ucode udata -- )
     req-datasize !  req-codesize !
     gen-request
     +resend

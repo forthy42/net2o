@@ -16,8 +16,10 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:connect ( -- ) +get-time
+    net2o-host $@ net2o-port insert-ip
+    n2o:new-context "test" dest-key
     $2000 $10000
-    net2o-host $@ net2o-port insert-ip n2o:connect +flow-control +resend
+    n2o:connect +flow-control +resend
     o-timeout -other [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:add-tag ( -- ) +addme

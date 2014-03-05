@@ -5,7 +5,7 @@ require net2o.fs
 +db stat(
 +debug
 %droprate
-key-task
+debug-task
 
 "anonymous" >key \ get our anonymous key
 
@@ -33,8 +33,10 @@ init-client
     THEN ;
 
 : c:connect ( -- )
+    net2o-host $@ net2o-port insert-ip n2o:new-context
+    "test" dest-key \ get our destination key
     $10000 $100000
-    net2o-host $@ net2o-port insert-ip n2o:connect +flow-control +resend
+    n2o:connect +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:download1 ( -- )

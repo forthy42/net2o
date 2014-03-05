@@ -81,8 +81,14 @@ sample-key this-key ! \ dummy
 : key-exist? ( addr u -- flag )
     key-table #@ d0<> ; 
 
+Variable strict-keys  strict-keys on
+
 :noname ( addr u -- )
+    o IF  dest-pubkey @ IF
+	    dest-pubkey $@ str= 0= !!wrong-key!!  EXIT
+	THEN  THEN
     2dup key-exist? 0= IF
+	strict-keys @ !!unknown-key!!
 	." Unknown key"  2dup .nnb cr
     ELSE
 	." Key ok" cr
@@ -248,6 +254,10 @@ set-current previous previous
     nick-key  this-keyid @ 0= ?EXIT
     this-keyid @ pkc keysize move
     ke-sk $@ skc swap move ;
+
+: dest-key ( addr u -- )
+    0 >o nick-key o>  this-keyid @ 0= !!unknown-key!!
+    this-keyid @ keysize dest-pubkey $! ;
 
 0 [IF] \ generate keypairs
     keys $@ drop 2@ key+len 2! key#anon "test" +gen-keys

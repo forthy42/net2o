@@ -67,14 +67,17 @@ debug: dht( \ debuggin for dht functions
 debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
 debug: save( \ separate save task
+debug: bg( \ started in background mode
 
 \ key debugging task
 
 : toggle ( addr -- )  dup @ 0= swap ! ;
 
-: key-task ( -- )  stacksize4 NewTask4 activate
+: debug-task ( -- )  stacksize4 NewTask4 activate
     BEGIN  case key
 	    'c' of  ['] cmd( >body toggle  endof
+	    'r' of  ['] resend( >body toggle  endof
+	    'f' of  ['] file( >body toggle  endof
 	endcase
     AGAIN ;
 
