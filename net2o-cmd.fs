@@ -263,7 +263,7 @@ Variable throwcount
     ELSE
 	cmd0buf cmd0source !
     THEN
-    cmdreset  do-cmd-loop  cmd-send? ;
+    [: cmdreset  do-cmd-loop  cmd-send? ;] cmdlock c-section ;
 
 ' cmd-loop is queue-command
 
@@ -766,8 +766,9 @@ User other-xt ' noop other-xt !
     resend0 @ IF
 	\ ." Resend to 0" cr
 	cmd0buf cmd0source !
-	resend0 $@ >r cmdbuf r@ move
-	cmdbuf r> 64#0 send-cmd 1 packets2 +!
+	[: resend0 $@ >r cmdbuf r@ move
+	  cmdbuf r> 64#0 send-cmd 1 packets2 +! ;]
+	cmdlock c-section
     THEN ;
 
 : map-resend? ( -- )
