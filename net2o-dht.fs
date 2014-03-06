@@ -17,7 +17,7 @@
 
 keccak# buffer: keyed-hash-buf
 keccak#max buffer: keyed-hash-out
-\ specify strength, not length! length is 2*strength
+\ specify strength (in bytes), not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
 
@@ -149,28 +149,6 @@ $10 Constant datesize#
 	    nip nip UNLOOP  EXIT  THEN
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true abort" dht exhausted - this should not happen" ;
-
-Variable ins$0 \ just a null pointer
-
-: $ins[] ( addr u $array -- )
-    \G insert O(log(n)) into pre-sorted array
-    { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
-		drop $# $a $[]! EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT  drop >r
-    ins$0 cell $a r@ cells $ins r> $a $[]! ;
-: $del[] ( addr u $array -- )
-    \G delete O(log(n)) from pre-sorted array
-    { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
-		drop $# $a $[] $off
-		$a $# cells cell $del
-		2drop EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT 2drop 2drop ; \ not found
 
 : $ins[]sig ( addr u $array -- )
     \G insert O(log(n)) into pre-sorted array
@@ -336,12 +314,26 @@ datesize# buffer: sigdate \ date+expire date
     gen>tag "tag" >delete tag$ ;
 
 also net2o-base
-: addme-end nest[ request-done ]nest end-cmd
+
+: pub? ( addr u -- addr u flag )
+    case over c@
+	'4' of  dup 7 u<=  endof
+	'6' of  dup 19 u<= endof
+	false swap  endcase ;
+
+false Value add-myip
+
+: addme-end
+    add-myip IF
+	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
+    THEN
+    nest[ request-done ]nest end-cmd
     ['] end-cmd IS expect-reply? ;
-: addme ( addr u -- ) 2dup .iperr  now>never
+: addme ( addr u -- ) 2dup .iperr
+    pub? IF  my-ip$ $ins[]  EXIT  THEN
+    now>never
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize $, dht-id
-	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
     THEN
     gen-host $, k#host ulit, dht-value+
     ['] addme-end IS expect-reply? ;

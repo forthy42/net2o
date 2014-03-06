@@ -328,10 +328,32 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;
 
+Variable ins$0 \ just a null pointer
+
+: $ins[] ( addr u $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[]! EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    ins$0 cell $a r@ cells $ins r> $a $[]! ;
+: $del[] ( addr u $array -- )
+    \G delete O(log(n)) from pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
+
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     [: dup 4 = IF '4' emit ELSE '6' emit THEN type
 	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
-    my-ip$ $+[]! ;
+    my-ip$ $ins[] ;
 
 : !my-ips ( -- )
     global-ip4 +my-ip

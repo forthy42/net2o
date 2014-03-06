@@ -236,7 +236,7 @@ set-current previous previous
 	keypack-all# = WHILE  try-decrypt do-key
     REPEAT ;
 
-: read-keys ( -- )
+: read-keys ( -- ) \ dummy keys for testing
     key-fd 0= IF
 	x" 21C1630881777E0EE03D49465F954AC894EC4D76C025BEF314BAC285DDD545B5" key:new
 	x" 103D146E41B255702B33852CC6EFD93ED0F741D75D3676FDF987F269B69BCE77" ke-sk $! +seckey

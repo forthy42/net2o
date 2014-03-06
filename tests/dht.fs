@@ -43,7 +43,7 @@ init-client
     net2o-code
     expect-reply
     0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
-    slurp-all-tracked-blocks gen-total send-chunks
+    slurp send-chunks
     end-code  1 client-loop o-timeout ;
 
 : c:dhtend ( -- )    
