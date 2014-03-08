@@ -1,0 +1,2432 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{lankton-keynote}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=169
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8x
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-.8ex
+\backslash
+lower1.8ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+: Reinventing the Internet
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+YBTI session, TUM, Garching, 8-3
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+net2o in a nutshell
+\end_layout
+
+\begin_layout BeginFrame
+net2o in a nutshell
+\end_layout
+
+\begin_layout Standard
+net2o consists of the following 6 layers (implemented bottom up):
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[
+\backslash
+setcounter{enumi}{2}
+\backslash
+usebeamertemplate{enumerate item}]
+\end_layout
+
+\end_inset
+
+Path switched packets with 
+\begin_inset Formula $2^{n}$
+\end_inset
+
+ size writing into shared memory buffers
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Ephemeral key exchange and signatures with Ed25519, symmetric authenticated
+ encryption+hash+prng with Keccak
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Timing driven delay minimizing flow control
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Stack--oriented tokenized command language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Distributed data (files) and distributed metadata (prefix hash trie)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Apps in a sandboxed environment for displaying content
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Objectives
+\end_layout
+
+\begin_layout Standard
+net2o's design objectives are
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+lightweight, fast, scalable
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+easy to implement
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+secure
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+media capable
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+works as overlay on current networks (UDP/IP), but can replace the entire
+ stack
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Topology
+\end_layout
+
+\begin_layout BeginFrame
+Switching Packets, Routing Connections
+\end_layout
+
+\begin_layout Itemize
+Switches are faster and easier to implement than routers --- LANs (Ethernet)
+ and backbones (MPLS) already use switching; use the concept of MPLS label
+ stacks to use switching everywhere
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing then is a combination of destination resolution and routing calculation
+ (destination path lookup)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Path Switching
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Take first 
+\begin_inset Formula $n$
+\end_inset
+
+ bits of path field and select destination
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Shift target address by 
+\begin_inset Formula $n$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Insert bit-reversed source into the rear end of the path field to mark the
+ way back
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+The receiver bit--flips the path field, and gets the return address
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Easy handover possible
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Low--Overhead Packet Format
+\end_layout
+
+\begin_layout BeginFrame
+Packet Format
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Bytes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Comment
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Flags
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+priority, length, flow control flags
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Path
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internet 1.0 terminology: 
+\begin_inset Quotes eld
+\end_inset
+
+address
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Address
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+address in memory, 
+\begin_inset Formula $\approx$
+\end_inset
+
+port+sequence number
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $64*2^{0..15}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+up to 2MB packet size, enough for the next 40 years
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Chksum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cryptographic checksum
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename header64.fig
+	lyxscale 50
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Encryption
+\end_layout
+
+\begin_layout BeginFrame
+Security: Indirect Attacks are Cheaper
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename cryptonerd.png
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Key Exchange
+\end_layout
+
+\begin_layout BeginFrame
+Key Exchange
+\end_layout
+
+\begin_layout Description
+ECC Elliptic Curve Cryptography has still only a generic attack (i.e.
+ can be considered 
+\begin_inset Quotes eld
+\end_inset
+
+unscratched
+\begin_inset Quotes erd
+\end_inset
+
+, as the attack uses a fundamental property of the problem), and therefore
+ 256 bit keys (32 bytes) have a strength of 128 bits
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice now is Ed25519, a variant of Curve25519 from 
+\noun on
+Dan Bernstein
+\noun default
+ that supports signatures, too.
+ This is a curve where the parameters are of high quality.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Ephemeral Key Exchange+Validation
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename connection-setup.fig
+	lyxscale 50
+	height 80theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Symmetric Crypto
+\end_layout
+
+\begin_layout BeginFrame
+Symmetric Crypto: Keccak
+\end_layout
+
+\begin_layout Standard
+Keccak used for the following reasons:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Good cryptanalysis
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak in duplex mode provides perfect side--channel protected AEAD operation
+ (no constant key to snoop)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Strength >256 bits: very good security margin
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak is a universal crypto primitive (hash+encrypt+authenticate)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak is both NIST--approved and (still) NSA--independent.
+ I use Keccak with 
+\begin_inset Formula $r=1024$
+\end_inset
+
+ and capacity 
+\begin_inset Formula $c=576$
+\end_inset
+
+ as suggested by the Keccak authors.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Key Usage
+\end_layout
+
+\begin_layout FrameSubtitle
+All keys are one--time--use only!
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename keyusage.fig
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Flow Control
+\end_layout
+
+\begin_layout BeginFrame
+Flow Control (Broken)
+\end_layout
+
+\begin_layout Itemize
+TCP fills the buffer, until a packet has to be dropped, instead of reducing
+ rate before.
+ Name of the symptom: 
+\begin_inset Quotes eld
+\end_inset
+
+Buffer bloat
+\begin_inset Quotes erd
+\end_inset
+
+.
+ But buffering is essential for good network performance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferbloat.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Buffer Bloat
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Alternatives?
+\end_layout
+
+\begin_layout Itemize
+LEDBAT tries to achieve a low, constant delay: Works, but not good on fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+CurveCP's flow control is still 
+\begin_inset Quotes eld
+\end_inset
+
+a lot of research
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, something new has to be done
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferused.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+That's how proper flow control should look like
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Measure the bottleneck using a burst of packets
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Client Measures, Server Sets Rate
+\end_layout
+
+\begin_layout Description
+Client recores the 
+\emph on
+time
+\emph default
+ of the first and last packet in a burst, and calculates the achieved rate
+ for received packets, extrapolating to the achievable rate including the
+ dropped packets.
+ This results in the requested 
+\emph on
+rate
+\emph default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Formula 
+\[
+rate:=\Delta t*\frac{burstlen}{packets}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Server would simply use this rate
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness
+\end_layout
+
+\begin_layout Standard
+Fairness means that concurrent connections achieve about the same data rate,
+ sharing the same line in a fair way.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Ideally, a router/switch would schedule buffered packets round--robin, giving
+ each connection a fair share of the bandwidth.
+ That would change the calculated rate appropriately, and also be a big
+ relief for current TCP buffer bloat symptoms, as each connection would
+ have its private buffer to fill up.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Unfortunately, routers use a single FIFO policy for all connections
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Finding a sufficiently stable algorithm to provide fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We want to adopt to new situations as fast as possible, there's no point
+ in anything slow.
+ Especially on wireless connections, achievable rate changes are not only
+ related to traffic.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- Fair Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-fair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Fair queuing results in correct measurement of available bandwidth
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o Flow Control --- FIFO Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-unfair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Unfair FIFO queuing results in twice the available bandwidth calculated
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness I
+\end_layout
+
+\begin_layout Itemize
+To improve stability of unfair queued packets, we need to improve that P
+ regulator (proportional to measured rate) to a full PID regulator
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The integral part is the accumulated slack (in the buffer), which we want
+ to keep low, and the D part is growing/reducing this slack from one measurement
+ to the next
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+We use both parts to decrease the sending rate, and thereby achieve better
+ fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The I part is used to exponentially lengthen the rate 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ with increasing slack up to a maximum factor of 16.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s_{exp}=2^{\frac{slack}{T}}\quad\mathrm{where\,}T=\max(10ms,\max(slacks))
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness D
+\end_layout
+
+\begin_layout Itemize
+To measure the differential term, we measure how much the slack grows (a
+ 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ value) from the first to the last burst we do for one measurement cycle
+ (4 bursts by default, first packet to first packet of each burst)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This is multiplied by the total packets in flight (head of the sender queue
+ vs.
+ acknowledged packet), divided by the packets within the measured interval
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A low--pass filter is applied to the obtained D to prevent from speeding
+ up too fast, with one round trip delay as time constant
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $\max(slacks)/10ms$
+\end_inset
+
+ is used to determine how aggressive this algorithm is
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Add the obtained 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ both to the rate's 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ for one burst sequence and wait that time before starting the next burst
+ sequence.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-1.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One connection on a VDSL--50 line
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-2.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections on a VDSL--50 line
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable (WLAN)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-3.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Single connection using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unreliable Air Cable, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-4.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN, 1GBE
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-5.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Single connection using 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (4 servers)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-6.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (1 server)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-7.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+One of four connections using 1GBE, fair queuing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Commands
+\end_layout
+
+\begin_layout BeginFrame
+Data and Commands
+\end_layout
+
+\begin_layout Itemize
+Data of several files/streams can be transferred interleaving, so a single
+ connection can do multiple things in parallel
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Commands are send in command blocks, i.e.
+ there is not just one command per block, but a sequence of commands!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Commands are encoded like protobuf, i.e.
+ 7 bits per byte, and if the MSB of the byte is 1, there's another byte
+ to follow (allowing arbitrary many commands)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The command 
+\begin_inset Quotes eld
+\end_inset
+
+machine
+\begin_inset Quotes erd
+\end_inset
+
+ is a stack architecture.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Example: Download three files
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code
+\end_layout
+
+\begin_layout LyX-Code
+"Download test" $, type cr ( see-me )
+\end_layout
+
+\begin_layout LyX-Code
+get-ip $400 blocksize! $400 blockalign! stat( request-stats )
+\end_layout
+
+\begin_layout LyX-Code
+"net2o.fs" 0 lit, 0 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-13_11-26-57-small.jpg" 0 lit, 1 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-20_17-01-12-small.jpg" 0 lit, 2 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+gen-total slurp-all-tracked-blocks send-chunks
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, tag-reply
+\end_layout
+
+\begin_layout LyX-Code
+end-code 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Distributed Data
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Data
+\end_layout
+
+\begin_layout Itemize
+Following the 
+\begin_inset Quotes eld
+\end_inset
+
+everything is a file
+\begin_inset Quotes erd
+\end_inset
+
+ principle, every data object is a file
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Data objects are accessed by their hash.
+ The associated metadata are 
+\begin_inset Quotes eld
+\end_inset
+
+tags
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Metadata is organized as a distributed prefix hash tree
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Efficient distribution of data is important!
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Tree Distribution Network
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename avalanche.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Avalanche distribution with quad--tree of depth 2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Possible Performance
+\end_layout
+
+\begin_layout Itemize
+Trees with a bigger base reduce latency.
+ Example: To transfer a Justin Bieber tweet to 50 million followers, a binary
+ tree needs 25.5 hops on average, a quad--tree 12.8 hops, and an oct--tree
+ 8.5 hops.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A typical domestic (inside e.g.
+ Germany) hop--to--hop time is just 20ms.
+ International hops can be in the order of 250ms.
+ Assuming there is only one international hop in the chain, the latency
+ to distribute Justin Bieber's babbling is typically just 500ms in a quad--tree.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Rule of thumb: 
+\begin_inset Formula $bandwidth=latency$
+\end_inset
+
+, i.e.
+ if it takes 20ms from hop to hop, each node should replicate data for 20ms
+ --- if we make the tree wider, the linear effort of replicating data will
+ dominate transfer time, if we make the tree more narrow, the hop--to--hop
+ time will dominate.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The tree--like graph greatly reduces the number of nodes to know
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Prefix Hash Tree
+\end_layout
+
+\begin_layout Itemize
+Most DHT approaches have poor performanc
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Prefix Hash Trees use a quite large base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Only a few queries necessary to query an extremely large data base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Suggestion: Active instantaneous replication of all changed data using the
+ avalanche tree mentioned above
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Applications
+\end_layout
+
+\begin_layout Subsection
+Apps in a Sandbox
+\end_layout
+
+\begin_layout BeginFrame
+Content or Apps?
+\end_layout
+
+\begin_layout Itemize
+The current web is defined by content --- web apps (JavaScript) are an afterthou
+gh
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, the application logic is usually on the server side
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This doesn't work for a P2P network!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Content is structured text, images, videos, music, etc.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+App--Centric World
+\end_layout
+
+\begin_layout Itemize
+There's a phenomenon I call 
+\begin_inset Quotes eld
+\end_inset
+
+Turing creep
+\begin_inset Quotes erd
+\end_inset
+
+: Every sufficiently complex system contains a user--accessible Turing--complete
+ language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Corollary: Every efficient sufficiently complex system can execute native
+ machine code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The application logic is to present the data; data itself is as above: structure
+d text, images, videos, music, etc.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Executing (especially efficient) code from the net raises obvious questions
+ about security
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to securely execute code?
+\end_layout
+
+\begin_layout Standard
+There are several options tried; as usual, things are broken:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Execute code in a controlled secure VM, see for example Java.
+ This is broken by design, as securing something from the inside doesn't
+ work.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Execute code in a sandbox.
+ This has shown as more robust, depending on how complex the outside of
+ the sandbox is.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Public inspection of code.
+ This is how the open source world works, but the underhanded C contest
+ shows that inspection is tricky.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Scan for known evil code.
+ This is the security industry's approach, and it is not working.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Code signing can work together with public inspection --- but using it for
+ accountability doesn't work
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice is to sandbox public inspected code.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+API Basics
+\end_layout
+
+\begin_layout BeginFrame
+Formats&Requirements
+\end_layout
+
+\begin_layout FrameSubtitle
+How to display things
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename formats+io.fig
+	scale 36
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Why OpenGL?
+\end_layout
+
+\begin_layout FrameSubtitle
+OpenGL can do everything
+\end_layout
+
+\begin_layout Standard
+OpenGL renders:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Triangles, lines, points --- simple components
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Textures and gradients
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+and uses shader programs --- the most powerful thing in OpenGL from 2.0.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Real requirement: visualization of 
+\emph on
+any 
+\emph default
+data.
+ OpenGL can do that.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to connect the media?
+\end_layout
+
+\begin_layout FrameSubtitle
+Lemma: every glue logic will become Turing complete
+\end_layout
+
+\begin_layout Itemize
+currently used glue: HTML+CSS+JavaScript
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+conclusion: use a powerful tool right from start!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+browser: run--time and development tool for applications
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Frameworks
+\end_layout
+
+\begin_layout Itemize
+libsoil for images (PNG+JPEG loading into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+freetype-gl for fonts (TrueType/OpenType into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+OpenMAX on Android, gstreamer on Linux: videos into a texture
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+ work in progress)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+For Further Reading
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o source repository and wiki 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document

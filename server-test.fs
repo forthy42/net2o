@@ -5,6 +5,7 @@ require net2o.fs
 +debug
 %droprate
 bg( )else( debug-task )
+test-keys \ we want the test keys - never use this in production!
 
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 

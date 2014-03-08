@@ -6,6 +6,7 @@ require net2o.fs
 +debug
 %droprate
 debug-task
+test-keys \ we want the test keys - never use this in production!
 
 "anonymous" >key \ get our anonymous key
 
