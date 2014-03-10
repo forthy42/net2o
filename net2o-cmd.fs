@@ -63,12 +63,12 @@ User buf-state cell uallot drop
 
 : class>count ( addr -- addr' u ) >osize dup cell+ @ 2 cells + ;
 : >dynamic ( class -- class' ) class>count save-mem drop 2 cells + ;
-: class-resize ( class u -- class' ) >r
+: class-resize ( class u -- class' ) over >methods @ umax >r
     class>count r@ 2 cells + umax resize throw
     r@ over cell+ !@ >r 2 cells + r> r> swap
     U+DO  ['] net2o-crash over I + !  cell +LOOP ;
 
-context-class >dynamic $100 cells class-resize to context-class
+context-class >dynamic to context-class
 
 : cmd-table# ( -- size )  context-class >methods @ ;
 : ?cmd ( u -- u )  dup cmd-table# u>= IF  net2o-crash  THEN ;
@@ -118,7 +118,9 @@ Variable show-offset  show-offset on
     buf-state 2! trace( r@ dup . .net2o-name .s cr )
     cmd@ cells ?cmd context-class + perform buf-state 2@ ;
 
-: >cmd ( xt u -- ) cells ?cmd context-class + ! ;
+: >cmd ( xt u -- ) cells >r
+    context-class r@ cell+ class-resize to context-class
+    context-class r> + ! ;
 
 Defer >throw
 
