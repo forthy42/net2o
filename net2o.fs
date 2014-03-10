@@ -2085,7 +2085,7 @@ Variable timeout-task
 	\ erase crypto keys
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
-	dispose
+	dest-pubkey $off  dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client
