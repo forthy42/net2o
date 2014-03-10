@@ -59,7 +59,19 @@ User buf-state cell uallot drop
     ]hex  buf-state 2@ dump
     true !!function!! ;
 
-Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
+\ make method dispatch table dynamic
+
+: class>count ( addr -- addr' u ) >osize dup cell+ @ 2 cells + ;
+: >dynamic ( class -- class' ) class>count save-mem drop 2 cells + ;
+: class-resize ( class u -- class' ) >r
+    class>count r@ 2 cells + umax resize throw
+    r@ over cell+ !@ >r 2 cells + r> r> swap
+    U+DO  ['] net2o-crash over I + !  cell +LOOP ;
+
+context-class >dynamic $100 cells class-resize to context-class
+
+: cmd-table# ( -- size )  context-class >methods @ ;
+: ?cmd ( u -- u )  dup cmd-table# u>= IF  net2o-crash  THEN ;
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
 
@@ -82,13 +94,7 @@ Create cmd-base-table 256 0 [DO] ' net2o-crash , [LOOP]
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: .net2o-name ( n -- )
-    dup $80 < IF
-	cells cmd-base-table +
-    ELSE
-	dup 7 rshift $80 + cells cmd-base-table + @ >body
-	swap $7F and cells +
-    THEN  (net2o-see) ;
+: .net2o-name ( n -- )  cells ?cmd context-class + (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -109,23 +115,10 @@ Variable show-offset  show-offset on
     BEGIN  cmd-see dup 0= UNTIL  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
-    byte@ >r buf-state 2! trace( r@ dup . .net2o-name .s cr )
-    r> cells cmd-base-table + perform buf-state 2@ ;
+    buf-state 2! trace( r@ dup . .net2o-name .s cr )
+    cmd@ cells ?cmd context-class + perform buf-state 2@ ;
 
-: extend-cmds ( -- xt ) noname Create lastxt $100 0 DO ['] net2o-crash , LOOP
-  DOES>  >r cmd@ cells r> + perform ;
-
-User 'cmd-buf $10 cell- uallot drop
-
-: >cmd ( xt u -- ) u>64 'cmd-buf p!+  'cmd-buf tuck -
-    cmd-base-table >r
-    BEGIN  dup 1 >  WHILE  over c@ >r 1 /string r>
-	    cells r> + dup @ ['] net2o-crash = IF
-		extend-cmds over !
-	    THEN
-	    @ >body >r
-    REPEAT
-    drop c@ cells r> + ! ;
+: >cmd ( xt u -- ) cells ?cmd context-class + ! ;
 
 Defer >throw
 
