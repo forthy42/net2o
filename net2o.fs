@@ -30,13 +30,9 @@ s" unimplemented net2o function" throwcode !!function!!
 s" too many commands"            throwcode !!commands!!
 s" string does not fit"          throwcode !!stringfit!!
 s" ivs must be 64 bytes"         throwcode !!ivs!!
-s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
 s" net2o timed out"              throwcode !!timeout!!
-s" no key file"                  throwcode !!nokey!!
 s" maximum nesting reached"      throwcode !!maxnest!!
 s" nesting stack empty"          throwcode !!minnest!!
-s" invalid Ed25519 key"          throwcode !!no-ed-key!!
-s" no temporary key"             throwcode !!no-tmpkey!!
 s" invalid nest"                 throwcode !!nest!!
 s" invalid tmpnest"              throwcode !!tmpnest!!
 s" cookie recieved twice"        throwcode !!double-cookie!!
@@ -44,8 +40,12 @@ s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
 s" absolute path not allowed!"   throwcode !!abs-path!!
 s" invalid packet destination"   throwcode !!inv-dest!!
+s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
 s" unknown key"                  throwcode !!unknown-key!!
 s" wrong key"                    throwcode !!wrong-key!!
+s" no key file"                  throwcode !!nokey!!
+s" invalid Ed25519 key"          throwcode !!no-ed-key!!
+s" no temporary key"             throwcode !!no-tmpkey!!
 \ required tools
 
 \ require smartdots.fs
@@ -709,6 +709,12 @@ rcode-class class end-class rdata-class
 \ job context structure
 
 object class
+end-class cmd-class \ command interpreter
+
+cmd-class class
+end-class setup-class \ setup connections
+
+setup-class class
     field: context#
     field: wait-task
     $10 +field return-address

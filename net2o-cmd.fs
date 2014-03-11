@@ -63,14 +63,18 @@ User buf-state cell uallot drop
 
 : class>count ( addr -- addr' u ) >osize dup cell+ @ 2 cells + ;
 : >dynamic ( class -- class' ) class>count save-mem drop 2 cells + ;
+: >inherit ( class1 class2 -- class' ) >dynamic swap >osize @ over >osize ! ;
 : class-resize ( class u -- class' ) over >methods @ umax >r
     class>count r@ 2 cells + umax resize throw
     r@ over cell+ !@ >r 2 cells + r> r> swap
     U+DO  ['] net2o-crash over I + !  cell +LOOP ;
 
-context-class >dynamic to context-class
+Defer cmd-table
+' cmd-class IS cmd-table
 
-: cmd-table# ( -- size )  context-class >methods @ ;
+cmd-class >dynamic to cmd-class
+
+: cmd-table# ( -- size )  cmd-table >methods @ ;
 : ?cmd ( u -- u )  dup cmd-table# u>= IF  net2o-crash  THEN ;
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
@@ -94,7 +98,7 @@ context-class >dynamic to context-class
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: .net2o-name ( n -- )  cells ?cmd context-class + (net2o-see) ;
+: .net2o-name ( n -- )  cells ?cmd cmd-table + (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -116,11 +120,11 @@ Variable show-offset  show-offset on
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2! trace( r@ dup . .net2o-name .s cr )
-    cmd@ cells ?cmd context-class + perform buf-state 2@ ;
+    cmd@ cells ?cmd cmd-table + perform buf-state 2@ ;
 
 : >cmd ( xt u -- ) cells >r
-    context-class r@ cell+ class-resize to context-class
-    context-class r> + ! ;
+    cmd-table r@ cell+ class-resize action-of cmd-table (int-to)
+    cmd-table r> + ! ;
 
 Defer >throw
 
@@ -154,6 +158,10 @@ get-current also net2o-base definitions previous
     string@ ;
 
 dup set-current
+
+' setup-class is cmd-table
+
+setup-class cmd-class >inherit to setup-class
 
 \ net2o assembler
 
@@ -429,6 +437,10 @@ net2o-base
     net2o:update-key ;
 35 net2o: gen-ivs ( addr u -- ) \ generate IVs
     ivs-strings receive-ivs ;
+
+' context-class is cmd-table
+
+context-class setup-class >inherit to context-class
 
 \ file functions
 
