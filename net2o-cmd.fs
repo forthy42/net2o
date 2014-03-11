@@ -140,6 +140,7 @@ Defer net2o-do
     ['] noop over >cmd \ allocate space in table
     Create dup >r , here >r 0 , net2o-does noname :
     lastxt dup r> ! r> >cmd ;
+: +net2o: ( "name" -- ) cmd-table >methods @ cell/ net2o: ;
 
 : F also forth parse-name parser1 execute previous ; immediate
 
@@ -153,12 +154,20 @@ get-current also net2o-base definitions previous
 
 0 net2o: end-cmd ( -- ) \ last command in buffer
     0. buf-state 2! ;
-1 net2o: ulit ( "u" -- u ) \ unsigned literal
++net2o: ulit ( "u" -- u ) \ unsigned literal
     p@ ;
-2 net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
++net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
     ps@ ;
-3 net2o: string ( "string" -- addr u ) \ string literal
++net2o: string ( "string" -- addr u ) \ string literal
     string@ ;
++net2o: dflit ( "dfloat" -- r ) \ double float literal
+    buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
++net2o: sflit ( "sfloat" -- r ) \ double float literal
+    buf-state 2@ over + >r dup sf@ sfloat+ r> over - buf-state 2! ;
++net2o: tru ( -- true ) \ true flag literal
+    F true ;
++net2o: fals ( -- false ) \ false flag literal
+    F false ;
 
 dup set-current
 
@@ -319,10 +328,14 @@ also net2o-base definitions
 : $, ( addr u -- )  string  >r r@ n>64 cmd,
     r@ maxstring u>= !!stringfit!!
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
+: cmdbuf+ ( n -- )  dup maxstring u>= !!stringfit!! cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
+: sfloat, ( r -- )  sflit cmdbuf$ + sf! 1 sfloats cmdbuf+ ;
+: dfloat, ( r -- )  sflit cmdbuf$ + df! 1 dfloats cmdbuf+ ;
+: flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- )  (end-code) previous ;
 comp: :, previous ;
@@ -342,44 +355,44 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-4 net2o: emit ( xc -- ) \ emit character on server log
++net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
-5 net2o: type ( addr u -- ) \ type string on server log
++net2o: type ( addr u -- ) \ type string on server log
     F type ;
-6 net2o: . ( -- ) \ print number on server log
++net2o: . ( -- ) \ print number on server log
     64. ;
-7 net2o: cr ( -- ) \ newline on server log
++net2o: cr ( -- ) \ newline on server log
     F cr ;
-8 net2o: see-me ( -- ) \ see received commands on server log
++net2o: see-me ( -- ) \ see received commands on server log
     n2o:see-me ;
 
-10 net2o: push-$ ( addr u -- ) \ push string into answer packet
++net2o: push-$ ( addr u -- ) \ push string into answer packet
     $, ;
-11 net2o: push-slit ( n -- ) \ push singed literal into answer packet
++net2o: push-slit ( n -- ) \ push singed literal into answer packet
     slit, ;
-12 net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
++net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
 
-13 net2o: push' ( "cmd" -- ) \ push command into answer packet
++net2o: push' ( "cmd" -- ) \ push command into answer packet
     p@ cmd, ;
-14 net2o: nest ( addr u -- ) \ nested (self-encrypted) command
++net2o: nest ( addr u -- ) \ nested (self-encrypted) command
     cmdnest ;
-15 net2o: tmpnest ( addr u -- ) \ nested (temporary encrypted) command
++net2o: tmpnest ( addr u -- ) \ nested (temporary encrypted) command
     cmdtmpnest ;
 
 : ]nest  ( -- )  end-cmd cmd>nest $, push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
-16 net2o: new-data ( addr addr u -- ) \ create new data mapping
++net2o: new-data ( addr addr u -- ) \ create new data mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-17 net2o: new-code ( addr addr u -- ) \ crate new code mapping
++net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-18 net2o: request-done ( -- ) \ signal request is completed
++net2o: request-done ( -- ) \ signal request is completed
     own-crypt? IF  n2o:request-done  THEN ;
-19 net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
++net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
 	64dup cookie>context?
@@ -397,7 +410,7 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-20 net2o: store-key ( addr u -- ) \ store key
++net2o: store-key ( addr u -- ) \ store key
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
@@ -405,7 +418,7 @@ also net2o-base definitions
 	crypto-key $!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
-21 net2o: map-request ( addrs ucode udata -- ) \ request mapping
++net2o: map-request ( addrs ucode udata -- ) \ request mapping
     2*64>n
     nest[
     ?new-mykey ticker 64@ lit, set-rtdelay
@@ -415,31 +428,33 @@ also net2o-base definitions
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
-22 net2o: disconnect ( -- ) \ close connection
++net2o: disconnect ( -- ) \ close connection
     o 0= ?EXIT n2o:dispose-context un-cmd ;
-23 net2o: set-tick ( ticks -- ) \ adjust time
++net2o: set-tick ( ticks -- ) \ adjust time
     adjust-ticks ;
-24 net2o: get-tick ( -- ) \ request time adjust
++net2o: get-tick ( -- ) \ request time adjust
     ticks lit, set-tick ;
 
 net2o-base
 
 \ crypto functions
 
-30 net2o: receive-key ( addr u -- ) \ receive a key
++net2o: receive-key ( addr u -- ) \ receive a key
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
-31 net2o: key-request ( -- addr u ) \ request a key
++net2o: key-request ( -- addr u ) \ request a key
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-32 net2o: receive-tmpkey ( addr u -- ) \ receive emphemeral key
++net2o: receive-tmpkey ( addr u -- ) \ receive emphemeral key
     net2o:receive-tmpkey ;
-33 net2o: tmpkey-request ( -- ) \ request ephemeral key
++net2o: tmpkey-request ( -- ) \ request ephemeral key
     stpkc keysize $, receive-tmpkey ;
-34 net2o: update-key ( -- ) \ update secrets
++net2o: update-key ( -- ) \ update secrets
     net2o:update-key ;
-35 net2o: gen-ivs ( addr u -- ) \ generate IVs
++net2o: gen-ivs ( addr u -- ) \ generate IVs
     ivs-strings receive-ivs ;
+
+\ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
 
@@ -501,7 +516,7 @@ context-class setup-class >inherit to context-class
 62 net2o: timeout ( ticks -- ) \ timeout request
     net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
 63 net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
-    2*64>n data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
+    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 
 64 net2o: ok ( tag -- ) \ tagged response
     64>n net2o:ok ;
@@ -542,7 +557,7 @@ context-class setup-class >inherit to context-class
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 76 net2o: slurp ( -- ) \ slurp in tracked files
-    n2o:slurp swap ulit, slit, set-top
+    n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks ;
 77 net2o: rewind-sender ( n -- ) \ rewind buffer
     64>n net2o:rewind-sender ;
@@ -716,7 +731,7 @@ also net2o-base
     rewind data-end? IF  n2o:request-done  ELSE  restart-transfer  THEN
     save( )else( request-stats? IF  send-timing  THEN ) ;
 
-: request-stats   true to request-stats?  track-timing ;
+: request-stats   F true to request-stats?  track-timing ;
 
 : expected@ ( -- head top )
     o IF  data-rmap @ >o
@@ -862,14 +877,14 @@ previous
 Local Variables:
 forth-local-words:
     (
-     (("net2o:") definition-starter (font-lock-keyword-face . 1)
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
-     (("net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
      (("[:") (0 . 1) (0 . 1) immediate)
      ((";]") (-1 . 0) (0 . -1) immediate)
     )
