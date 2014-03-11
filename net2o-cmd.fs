@@ -454,6 +454,16 @@ net2o-base
 +net2o: gen-ivs ( addr u -- ) \ generate IVs
     ivs-strings receive-ivs ;
 
+\ nat traversal functions
+
++net2o: punch ( addr u -- ) \ punch NAT traversal hole
+    net2o:punch ;
+
+: gen-punch ( -- ) my-ip$ [: $, punch ;] $[]map ;
+
++net2o: punch? ( -- ) \ Request punch addresses
+    gen-punch ;
+
 \ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
@@ -464,17 +474,17 @@ context-class setup-class >inherit to context-class
 
 40 net2o: open-file ( addr u mode id -- ) \ open file id at path "addr u" with mode
     2*64>n  n2o:open-file ;
-41 net2o: close-file ( id -- ) \ close file
++net2o: close-file ( id -- ) \ close file
     64>n n2o:close-file ;
-42 net2o: file-size ( id -- size ) \ obtain file size
++net2o: file-size ( id -- size ) \ obtain file size
     id>addr? fs-size 64@ ;
-43 net2o: send-chunks ( -- ) \ start sending chunks
++net2o: send-chunks ( -- ) \ start sending chunks
     net2o:send-chunks ;
-44 net2o: set-blocksize ( n -- ) \ set blocksize
++net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;
-45 net2o: set-blockalign ( n -- ) \ set block alignment
++net2o: set-blockalign ( n -- ) \ set block alignment
     64>n pow2?  blockalign ! ;
-46 net2o: close-all ( -- ) \ close all files
++net2o: close-all ( -- ) \ close all files
     n2o:close-all ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
@@ -484,46 +494,46 @@ context-class setup-class >inherit to context-class
 
 50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
     net2o:ack-addrtime ;
-51 net2o: ack-resend ( flag -- ) \ set resend toggle flag
++net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  net2o:ack-resend ;
-52 net2o: set-rate ( rate delta-t -- ) \ set rate 
++net2o: set-rate ( rate delta-t -- ) \ set rate 
     cookie? IF  net2o:set-rate
     ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
-53 net2o: resend-mask ( addr mask -- ) \ resend mask blocks starting at addr
++net2o: resend-mask ( addr mask -- ) \ resend mask blocks starting at addr
     2*64>n net2o:resend-mask net2o:send-chunks ;
-54 net2o: track-timing ( -- ) \ track timing
++net2o: track-timing ( -- ) \ track timing
     net2o:track-timing ;
-55 net2o: rec-timing ( addr u -- ) \ recorded timing
++net2o: rec-timing ( addr u -- ) \ recorded timing
     net2o:rec-timing ;
-56 net2o: send-timing ( -- ) \ request recorded timing
++net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-57 net2o: >time-offset ( n -- ) \ set time offset
++net2o: >time-offset ( n -- ) \ set time offset
     time-offset 64! ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
-58 net2o: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
++net2o: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
     net2o:ack-b2btime ;
-59 net2o: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
++net2o: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match!" 64over .16 space 64dup .16 F cr
     THEN
     64= cookie-val and validated or! ;
-60 net2o: ack-flush ( addr -- ) \ flushed to addr
++net2o: ack-flush ( addr -- ) \ flushed to addr
     64>n net2o:rewind-sender-partial ;
-61 net2o: set-head ( addr -- ) \ set head
++net2o: set-head ( addr -- ) \ set head
     64>n data-rmap @ >o dest-head umax! o> ;
-62 net2o: timeout ( ticks -- ) \ timeout request
++net2o: timeout ( ticks -- ) \ timeout request
     net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
-63 net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
++net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 
-64 net2o: ok ( tag -- ) \ tagged response
++net2o: ok ( tag -- ) \ tagged response
     64>n net2o:ok ;
-65 net2o: ok? ( tag -- ) \ request tagged response
++net2o: ok? ( tag -- ) \ request tagged response
     net2o:ok? lit, ok ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
-66 net2o: ko ( error -- ) \ receive error message
++net2o: ko ( error -- ) \ receive error message
     throw ;
 
 \ create commands to send back
@@ -531,35 +541,35 @@ context-class setup-class >inherit to context-class
 : all-ivs ( -- ) \ Seed and gen all IVS
     state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
 
-67 net2o: gen-reply ( -- ) \ generate a key request reply reply
++net2o: gen-reply ( -- ) \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs time-offset! ]tmpnest
+      nest[ pkc keysize $, receive-key update-key all-ivs gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 \ better slurping
 
 70 net2o: track-size ( size id -- ) \ set size attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-71 net2o: track-seek ( seek id -- ) \ set seek attribute of file id
++net2o: track-seek ( seek id -- ) \ set seek attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-72 net2o: track-limit ( limit id -- ) \ set limit attribute of file id
++net2o: track-limit ( limit id -- ) \ set limit attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
 
 :noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
 
-73 net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
++net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
     2*64>n n2o:set-stat ;
-74 net2o: get-stat ( id -- ) \ request stat of file id
++net2o: get-stat ( id -- ) \ request stat of file id
     64>n { fd }
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-75 net2o: open-tracked-file ( addr u mode id -- ) \ open file in tracked mode
++net2o: open-tracked-file ( addr u mode id -- ) \ open file in tracked mode
     2*64>n dup >r n2o:open-file
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
-76 net2o: slurp ( -- ) \ slurp in tracked files
++net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks ;
-77 net2o: rewind-sender ( n -- ) \ rewind buffer
++net2o: rewind-sender ( n -- ) \ rewind buffer
     64>n net2o:rewind-sender ;
 
 \ ids 100..120 reserved for key exchange/storage
@@ -568,15 +578,13 @@ context-class setup-class >inherit to context-class
 
 120 net2o: !time ( -- ) \ start timer
     init-timer ;
-121 net2o: .time ( -- ) \ print timer to server log
++net2o: .time ( -- ) \ print timer to server log
     .packets .times ;
 
-122 net2o: set-ip ( addr u -- ) \ set address information
++net2o: set-ip ( addr u -- ) \ set address information
     setip-xt perform ;
-123 net2o: get-ip ( -- ) \ request address information
++net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
-124 net2o: punch ( addr u -- ) \ punch NAT traversal hole
-    net2o:punch ;
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
@@ -784,7 +792,7 @@ User other-xt ' noop other-xt !
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
     nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
-    tmpkey-request key-request other-xt perform
+    tmpkey-request key-request punch? other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
