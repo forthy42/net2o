@@ -74,8 +74,11 @@ Defer cmd-table
 
 cmd-class >dynamic to cmd-class
 
-: cmd-table# ( -- size )  cmd-table >methods @ ;
-: ?cmd ( u -- u )  dup cmd-table# u>= IF  net2o-crash  THEN ;
+: ?cmd  ( u -- u )  dup setup-class >methods @ u>= IF  net2o-crash  THEN ;
+: ?ocmd ( u -- u )  dup o cell- @ >methods @ u>= IF  net2o-crash  THEN ;
+
+: n>cmd ( n -- addr ) cells
+    o IF  ?ocmd o cell- @  ELSE  ?cmd setup-class  THEN + ;
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
 
@@ -98,7 +101,7 @@ cmd-class >dynamic to cmd-class
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: .net2o-name ( n -- )  cells ?cmd cmd-table + (net2o-see) ;
+: .net2o-name ( n -- )  cells context-class + (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -120,7 +123,7 @@ Variable show-offset  show-offset on
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2! trace( r@ dup . .net2o-name .s cr )
-    cmd@ cells ?cmd cmd-table + perform buf-state 2@ ;
+    cmd@ n>cmd perform buf-state 2@ ;
 
 : >cmd ( xt u -- ) cells >r
     cmd-table r@ cell+ class-resize action-of cmd-table (int-to)
