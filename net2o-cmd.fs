@@ -217,9 +217,6 @@ comp: :, also net2o-base ;
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: net2o:punch ( addr u -- )
-    $>sock insert-address  ret-addr ins-dest ;
-
 : cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
 

@@ -972,6 +972,18 @@ resend-size# buffer: resend-init
 	'6' of  6>sock  endof
 	!!no-addr!!  endcase  sock-rest ;
 
+: net2o:ping ( addr u -- ) \ ping a sock address
+    ." ping: " 2dup .ipaddr cr
+    $>sock 2>r net2o-sock fileno "" 0 2r> sendto drop ;
+
+: net2o:dest ( addr u -- )
+    ." dest: " 2dup .ipaddr cr
+    $>sock insert-address  ret-addr ins-dest ;
+
+: net2o:punch ( addr u -- )
+    o IF  is-server c@  ELSE  true  THEN
+    IF  net2o:ping  ELSE  net2o:dest  THEN ;
+
 \ create new maps
 
 Variable mapstart $1 mapstart !
