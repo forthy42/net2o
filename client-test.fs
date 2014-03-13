@@ -34,7 +34,9 @@ init-client
     THEN ;
 
 : c:connect ( -- )
-    net2o-host $@ net2o-port insert-ip n2o:new-context
+    net2o-host $@ net2o-port insert-ip
+    [: .time ." Connect to: " dup hex. cr ;] $err
+    n2o:new-context
     "test" dest-key \ get our destination key
     $10000 $100000
     n2o:connect +flow-control +resend

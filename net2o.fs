@@ -74,6 +74,7 @@ UValue outbuf   ( -- addr )
 UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
+UValue sockaddr1 ( -- addr ) \ temporary buffer
 UValue aligned$
 UValue statbuf
 
@@ -241,49 +242,56 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 : .net2o ( addr u -- ) dup IF  ." ->" xtype  ELSE  2drop  THEN ;
 : .ip4b ( addr len -- addr' len' )
     over c@ 0 ['] .r #10 base-execute 1 /string ;
+: .ip4a ( addr len -- addr' len' )
+    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ;
 : .ip4 ( addr len -- )
-    .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ." :" .port .net2o ;
+    .ip4a ." :" .port .net2o ;
 User ip6:#
 : .ip6w ( addr len -- addr' len' )
     over be-uw@ [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
     2 /string ;
 
-: .ip6 ( addr len -- )
-    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4  EXIT  THEN
+: .ip6a ( addr len -- addr' len' )
+    2dup fake-ip4 12 string-prefix? IF  12 /string .ip4a  EXIT  THEN
     -1 ip6:# !
     '[' 8 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
-    drop ." ]:" .port .net2o ;
+    drop ." ]:" ;
+: .ip6 ( addr len -- )
+    .ip6a .port .net2o ;
 
 : .address ( addr u -- )
-    over w@ AF_INET6 = IF  .ip6  ELSE  .ip4  THEN ; 
+    over w@ AF_INET6 =
+    IF  drop dup sin6_addr $10 .ip6a 2drop
+    ELSE  drop dup sin_addr 4 .ip4a 2drop  THEN
+    ." :" port 2 .port 2drop ; 
 
 \ NAT traversal stuff: print IP addresses
 
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
-	'2' of  ." ^" xtype  endof
+	'2' of  ." ->" xtype  endof
 	'4' of  .ip4  endof
 	'6' of  .ip6  endof
 	-rot dump endcase ;
 
 : .iperr ( addr len -- ) [: ." connected from: " .ipaddr cr ;] $err ;
 
-: ipv4! ( ipv4 -- )
-    sockaddr sin6_addr 12 + be-l!
-    $FFFF sockaddr sin6_addr 8 + be-l!
-    0 sockaddr sin6_addr 4 + l!
-    0 sockaddr sin6_addr l! ;
+: ipv4! ( ipv4 sockaddr -- ) >r
+    r@ sin6_addr 12 + be-l!
+    $FFFF r@ sin6_addr 8 + be-l!
+    0     r@ sin6_addr 4 + l!
+    0     r> sin6_addr l! ;
 
-: sock-rest ( -- addr u )
-    AF_INET6 sockaddr family w!
-    0        sockaddr sin6_flowinfo l!
-    0        sockaddr sin6_scope_id l!
-    sockaddr sockaddr_in6 %size ;
+: sock-rest ( sockaddr -- addr u ) >r
+    AF_INET6 r@ family w!
+    0        r@ sin6_flowinfo l!
+    0        r@ sin6_scope_id l!
+    r> sockaddr_in6 %size ;
 
 : my-port ( -- port )
     sockaddr_in6 %size alen !
-    net2o-sock fileno sockaddr-tmp alen getsockname ?ior
-    sockaddr-tmp port be-uw@ ;
+    net2o-sock fileno sockaddr1 alen getsockname ?ior
+    sockaddr1 port be-uw@ ;
 
 : sock[ ( -- )  query-sock ?EXIT
     new-udp-socket46 to query-sock ;
@@ -291,16 +299,16 @@ User ip6:#
     query-sock closesocket 0 to query-sock ?ior ;
 
 : ?fake-ip4 ( -- addr u )
-    sockaddr-tmp sin6_addr dup $C fake-ip4 over
+    sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
 
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) sock[
     sockaddr_in6 %size alen !
-    ipv4! query-sock sock-rest connect ?ior
-    query-sock sockaddr-tmp alen getsockname dup 0< errno 101 = and
+    sockaddr ipv4! query-sock sockaddr sock-rest connect ?ior
+    query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
     IF  drop s" " \ 0 is an invalid result
     ELSE  ?ior
-	sockaddr-tmp family w@ AF_INET6 =
+	sockaddr1 family w@ AF_INET6 =
 	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
     THEN ]sock ;
 
@@ -317,10 +325,10 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
     \G return IPv6 address - if length is 0, not reachable with IPv6
     sockaddr_in6 %size alen !
     sockaddr sin6_addr $10 move
-    query-sock sock-rest connect dup 0< errno 101 = and
+    query-sock sockaddr sock-rest connect dup 0< errno 101 = and
     IF  drop s" "
     ELSE  ?ior
-	query-sock sockaddr-tmp alen getsockname ?ior
+	query-sock sockaddr1 alen getsockname ?ior
 	?fake-ip4
     THEN ]sock ;
 
@@ -413,13 +421,17 @@ m: addr>keys ( addr -- keys )
 
 sema cmd0lock
 
+: alloz ( size -- addr )
+    dup >r allocate throw dup r> erase ;
+
 : alloc-buf ( addr -- addr' )
     maxpacket-aligned buffers# * alloc+guard 6 + ;
 
 : alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
-    sockaddr_in6 %size dup allocate throw dup to sockaddr swap erase
+    sockaddr_in6 %size alloz to sockaddr
+    sockaddr_in6 %size alloz to sockaddr1
     $400 allocate throw to aligned$
     init-statbuf
     init-ed25519 c:init
@@ -428,10 +440,11 @@ sema cmd0lock
 : free-io ( -- )
     inbuf  maxpacket-aligned buffers# * free+guard
     outbuf maxpacket-aligned buffers# * free+guard
-    cmd0buf  free throw
-    init0buf free throw
-    sockaddr free throw
-    statbuf  free throw
+    cmd0buf   free throw
+    init0buf  free throw
+    sockaddr  free throw
+    sockaddr1 free throw
+    statbuf   free throw
     free-ed25519 c:free ;
 
 alloc-io
@@ -501,8 +514,8 @@ Variable routes
     over w@ AF_INET = IF
 	drop >r
 	r@ port be-uw@ sockaddr port be-w!
-	r> sin_addr be-ul@ ipv4!
-	sock-rest
+	r> sin_addr be-ul@ sockaddr ipv4!
+	sockaddr sock-rest
     THEN ;
 
 0 Value lastaddr
@@ -511,7 +524,7 @@ Variable lastn2oaddr
 : insert-address ( addr u -- net2o-addr )
     address( ." Insert address " 2dup .address cr )
     lastaddr IF  2dup lastaddr over str=
-	IF  2drop lastn2oaddr @  EXIT  THEN
+	IF  2drop lastn2oaddr @ EXIT  THEN
     THEN
     2dup routes #key dup -1 = IF
 	drop s" " 2over routes #!
@@ -857,8 +870,6 @@ $100 Value dests#
 
 User >code-flag
 
-: alloz ( size -- addr )
-    dup >r allocate throw dup r> erase ;
 [IFUNDEF] alloc+guard
     ' alloz alias alloc+guard
 [THEN]
@@ -957,20 +968,26 @@ resend-size# buffer: resend-init
 : !ret-addr ( addr u -- )  ret-addr dup $10 erase  swap move ;
 
 : 6>sock ( addr u -- )
-    over $10 + w@ sockaddr port w!
-    over $10 sockaddr sin6_addr swap move
+    over $10 + w@ sockaddr1 port w!
+    over $10 sockaddr1 sin6_addr swap move
     $12 /string !ret-addr ;
 
 : 4>sock ( addr u -- )
-    over $4 + w@ sockaddr port w!
-    over be-ul@ ipv4!
+    over $4 + w@ sockaddr1 port w!
+    over be-ul@ sockaddr1 ipv4!
     6 /string !ret-addr ;
 
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
 	'4' of  4>sock  endof
 	'6' of  6>sock  endof
-	!!no-addr!!  endcase  sock-rest ;
+	!!no-addr!!  endcase  sockaddr1 sock-rest ;
+
+: $>check ( addr u -- flag )
+    case  over c@ >r drop 1+ r>
+	'4' of  be-ul@ check-ip4 nip 0<>  endof
+	'6' of  check-ip6 nip 0<>  endof
+	>r 2drop false r>  endcase ;
 
 : net2o:ping ( addr u -- ) \ ping a sock address
     ." ping: " 2dup .ipaddr cr
@@ -978,11 +995,13 @@ resend-size# buffer: resend-init
 
 : net2o:dest ( addr u -- )
     ." dest: " 2dup .ipaddr cr
-    $>sock insert-address  ret-addr ins-dest ;
+    $>check IF  sockaddr alen @ ." use: " 2dup .address
+	insert-address space hex. cr  THEN ;
 
 : net2o:punch ( addr u -- )
-    o IF  is-server c@  ELSE  true  THEN
-    IF  net2o:ping  ELSE  net2o:dest  THEN ;
+    o IF  is-server c@
+	IF  net2o:ping  ELSE  net2o:dest  THEN
+    ELSE  2drop  THEN ;
 
 \ create new maps
 
