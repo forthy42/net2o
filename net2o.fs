@@ -546,6 +546,7 @@ Variable lastn2oaddr
 \ route an incoming packet
 
 User return-addr $10 cell- uallot drop
+User temp-addr   $10 cell- uallot drop
 
 \ these are all stubs for now
 
@@ -733,6 +734,7 @@ setup-class class
     $10 +field return-address
     64field: recv-tick
     64field: recv-addr
+    field: punch-list
     field: recv-flag
     field: file-state
     field: read-file#
@@ -792,13 +794,13 @@ setup-class class
     64field: lastb-ticks
     64field: delta-ticks
     64field: max-dticks
-    field: acks
     64field: last-rate
-    field: rec-timing
-    field: received
     \ experiment: track previous b2b-start
     64field: last-rtick
     64field: last-raddr
+    field: acks
+    field: rec-timing
+    field: received
     \ cookies
     field: last-ackaddr
     \ statistics
@@ -995,8 +997,8 @@ resend-size# buffer: resend-init
 
 : net2o:dest ( addr u -- )
     ." dest: " 2dup .ipaddr cr
-    $>check IF  sockaddr alen @ ." use: " 2dup .address
-	insert-address space hex. cr  THEN ;
+    $>check IF  sockaddr alen @ ." use: " 2dup .address cr
+	insert-address temp-addr be!  temp-addr $10 punch-list $+[]!  THEN ;
 
 : net2o:punch ( addr u -- )
     o IF  is-server c@
@@ -2122,7 +2124,8 @@ Variable timeout-task
 	\ erase crypto keys
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
-	dest-pubkey $off  dispose
+	dest-pubkey $off  punch-list $[]off
+	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client
