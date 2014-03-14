@@ -223,6 +223,9 @@ Variable my-ip$
 Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
 
+\ convention: '2' indicates net2o, '3' IPv6, '4' IPv4.
+\ Tags are kept sorted, so you'll try net2o first, then IPv6, and IPv4 last
+
 : .sockaddr { addr alen -- }
     case addr family w@
 	AF_INET of
@@ -232,7 +235,7 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 	    addr sin6_addr 12 fake-ip4 over str= IF
 		'4' emit addr sin6_addr 12 + 4 type
 	    ELSE
-		'6' emit addr sin6_addr $10 type
+		'3' emit addr sin6_addr $10 type
 	    THEN  addr sin6_port 2 type
 	endof
     endcase ;
@@ -270,8 +273,8 @@ User ip6:#
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
 	'2' of  ." ->" xtype  endof
+	'3' of  .ip6  endof
 	'4' of  .ip4  endof
-	'6' of  .ip6  endof
 	-rot dump endcase ;
 
 : .iperr ( addr len -- ) [: ." connected from: " .ipaddr cr ;] $err ;
@@ -359,7 +362,7 @@ Variable ins$0 \ just a null pointer
     REPEAT 2drop 2drop ; \ not found
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [: dup 4 = IF '4' emit ELSE '6' emit THEN type
+    [: dup 4 = IF '4' emit ELSE '3' emit THEN type
 	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
     my-ip$ $ins[] ;
 
@@ -981,14 +984,14 @@ resend-size# buffer: resend-init
 
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
+	'3' of  6>sock  endof
 	'4' of  4>sock  endof
-	'6' of  6>sock  endof
 	!!no-addr!!  endcase  sockaddr1 sock-rest ;
 
 : $>check ( addr u -- flag )
     case  over c@ >r drop 1+ r>
+	'3' of  check-ip6 nip 0<>  endof
 	'4' of  be-ul@ check-ip4 nip 0<>  endof
-	'6' of  check-ip6 nip 0<>  endof
 	>r 2drop false r>  endcase ;
 
 : net2o:ping ( addr u -- ) \ ping a sock address
