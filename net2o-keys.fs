@@ -83,16 +83,20 @@ sample-key this-key ! \ dummy
 
 Variable strict-keys  strict-keys on
 
+: .key ( addr u -- )
+    ." Key '" key-table #@ drop >o ke-nick $@ o> type ." ' ok" cr ;
+
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
-	    dest-pubkey $@ str= 0= !!wrong-key!!  EXIT
+	    2dup dest-pubkey $@ str= 0= !!wrong-key!!
+	    .key  EXIT
 	THEN  THEN
     2dup key-exist? 0= IF
 	strict-keys @ !!unknown-key!!
-	." Unknown key"  2dup .nnb cr
+	." Unknown key "  .nnb cr
     ELSE
-	." Key ok" cr
-    THEN  2drop ; IS check-key
+	.key
+    THEN ; IS check-key
 
 \ get passphrase
 
@@ -242,7 +246,17 @@ set-current previous previous
     "test" ke-nick $! $133377705D76F4EA. d>64 ke-first 64!
     x" F2C614B1780CB86B6407D0AA0DE99449A7EA484AC1D2D0ADA8B9D092C7B3C497" key:new
     x" F8901E8A71FEA32B4E18656E68986EC414A5782935F5CF504998E79B507F1B59" ke-sk $! +seckey
-    "anonymous" ke-nick $! $133377705D8E53AD. d>64 ke-first 64! ;
+    "anonymous" ke-nick $! $133377705D8E53AD. d>64 ke-first 64!
+    x" 9D7D7A65175FCC38384C3B413FC8C0917684C059D3C43C3DE870E075E66C02C9" key:new
+    x" C0A687714048267E1CD78AEC595FBD9481A4175508DDED52B6A37188C0ABD75F" ke-sk $! +seckey
+    "alice" ke-nick $! $135BB8EA6D3F85E5. d>64 ke-first 64!
+    x" 952D6361FFB37EFADA457E32501469B9C4383CC278B7B5D35A87888F7BE7718B" key:new
+    x" 503B4FCBD059094C153BCCA74772E97B24234D3C41CE285A34391B7F14241B4C" ke-sk $! +seckey
+    "bob" ke-nick $! $135BB8FC1BDC81C5. d>64 ke-first 64!
+    x" 4999BFE87C16A2F205C248520CB649852B44AE45707A77958743C22F671892A3" key:new
+    x" D8813EAB8FD4C2028CCBFF29F88325E915C8620190D94BB467F9341D918B4362" ke-sk $! +seckey
+    "eve" ke-nick $! $135BB908EA37210E. d>64 ke-first 64!
+;
 
 : read-keys ( -- )
     [: 0. ?key-fd reposition-file throw  read-key-loop ;] catch drop nothrow ;
