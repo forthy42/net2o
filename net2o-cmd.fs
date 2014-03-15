@@ -576,7 +576,7 @@ context-class setup-class >inherit to context-class
 120 net2o: !time ( -- ) \ start timer
     init-timer ;
 +net2o: .time ( -- ) \ print timer to server log
-    .packets .times ;
+    .packets profile( .times ) ;
 
 +net2o: set-ip ( addr u -- ) \ set address information
     setip-xt perform ;

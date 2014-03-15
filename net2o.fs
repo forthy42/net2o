@@ -464,8 +464,8 @@ Variable packetr2 \ double received
 Variable packets2 \ double send
 
 : .packets ( -- )
-    ." IP packets send/received: " packets ? packetr ? cr
-    ." Duplets send/received: " packets2 ? packetr2 ? cr
+    ." IP packets send/received: " packets ? ." (" packets2 ? ." dupes)/"
+    packetr ? ." (" packetr2 ? ." dupes) " cr
     packets off packetr off packets2 off packetr2 off ;
 
 User ptimeout  cell uallot drop

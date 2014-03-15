@@ -42,7 +42,6 @@ debug: cmd(
 debug: send(
 debug: firstack(
 debug: msg(
-debug: profile(
 debug: stat(
 debug: timeout(
 debug: ack(
@@ -69,6 +68,8 @@ debug: file( \ file read/write debugging
 debug: save( \ separate save task
 debug: bg( \ started in background mode
 
+-db profile(
+
 \ key debugging task
 
 : toggle ( addr -- )  dup @ 0= swap ! ;
@@ -81,41 +82,14 @@ debug: bg( \ started in background mode
 	endcase
     AGAIN ;
 
-\ timing measurements
-
-64Variable timer-tick
-Variable last-tick
-
 \ timing ticks
 
 64Variable tick-adjust
 : ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
 
-: ticks-u ( -- u )  ntime drop ;
+: ticks-u ( -- u )  ticks 64>n ;
 
-: +t ( addr -- )
-    ticks-u dup last-tick !@ - swap +! ;
-
-true [IF]
-    Variable timer-list
-    : timer: Create 0 , here timer-list !@ ,
-      DOES> profile( +t )else( drop ) ;
-    : map-timer { xt -- }
-	timer-list BEGIN  @ dup  WHILE dup >r
-		cell - xt execute r> REPEAT drop ;
-    
-    : init-timer ( -- )
-	ticks-u last-tick ! [: off ;] map-timer ;
-    
-    : .times ( -- ) profile(
-	[: dup body> >name name>string 1 /string
-	   tuck type 8 swap - 0 max spaces ." : "
-	   @ s>f 1n f* f. cr ;] map-timer ) ;
-
-    : !time ( -- ) ticks timer-tick 64! ;
-    : @time ( -- delta-f ) ticks timer-tick 64@ 64- 64>f 1e-9 f* ;
-    : .time ( -- ) @time 13 9 6 f.rdp ." s " ;
-[ELSE]
+false [IF]
     ' noop alias init-timer
     ' noop alias .times
     : timer: ['] noop alias immediate ;

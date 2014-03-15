@@ -144,7 +144,7 @@ init-client
 	    THEN
 	THEN
     THEN
-    c:downloadend [: .packets .times cr ;] $err
+    c:downloadend [: .packets profile( .times ) ;] $err
     >timing n2o:dispose-context ;
 
 event: ->throw dup DoError throw ;
