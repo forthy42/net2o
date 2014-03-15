@@ -1,0 +1,27 @@
+\ net2o tests - client side
+
+require client-tests.fs
+
++db stat(
++debug
+%droprate
+debug-task
+test-keys \ we want the test keys - never use this in production!
+
+init-client
+
+!time
+
+?nextarg [IF] net2o-host $! [THEN]
+?nextarg [IF] s>number drop to net2o-port [THEN]
+
+"bob" >key \ get our anonymous key
+
+: c:bob ( -- )
+    $2000 $10000 "test" c:connect
+    c:add-me ;
+
+c:bob server-loop
+\ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
+
+script? [IF] bye [THEN]
