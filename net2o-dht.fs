@@ -194,8 +194,11 @@ $10 Constant datesize#
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) 2dup 2>r
-    >host 2dup + $40 - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr
+    >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr
     r> 2r> .sigdates .check ;
+: host>$ ( addr u -- addr u' flag )
+    >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# -
+    r> ;
 : d#. ( -- )
     d#id @ $@ xtype ." :" cr
     k#size cell DO

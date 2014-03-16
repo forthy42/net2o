@@ -243,7 +243,7 @@ previous
 : net2o:ok ( tag -- )
     timeout( ." ack: " dup hex. F cr )
     o 0= IF  drop EXIT  THEN
-    resend0 @ IF  resend0 $off  THEN
+    resend0 $off  punch-list $[]off
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( ." expect: " cmdbuf$ n2o:see )

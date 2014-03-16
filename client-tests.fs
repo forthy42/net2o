@@ -73,6 +73,14 @@ require ./net2o.fs
     nest[ add-cookie lit, set-rtdelay request-done ]nest
     end-code  1 client-loop o-timeout ;
 
+: c:addme-fetch-host ( nick u -- ) +addme
+    net2o-code
+    expect-reply get-ip
+    0 >o nick-key ke-pk $@ o> $, dht-id
+    k#host ulit, dht-value?
+    nest[ add-cookie lit, set-rtdelay request-done ]nest
+    end-code  1 client-loop o-timeout ;
+
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
@@ -173,6 +181,8 @@ require ./net2o.fs
     slurp send-chunks
     end-code
     1 client-loop n2o:close-all ['] .time $err ;
+
+: c:disconnect ( -- )  net2o-code close-all disconnect  end-code ;
 
 : c:downloadend ( -- )    
     net2o-code s" Download end" $, type cr .time close-all disconnect  end-code ;

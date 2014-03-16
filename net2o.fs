@@ -970,7 +970,7 @@ resend-size# buffer: resend-init
 
 : ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
 
-: !ret-addr ( addr u -- )  ret-addr dup $10 erase  swap move ;
+: !ret-addr ( addr u -- )  ret-addr dup $10 erase  swap $10 umin move ;
 
 : 6>sock ( addr u -- )
     over $10 + w@ sockaddr1 port w!
