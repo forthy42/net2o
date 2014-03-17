@@ -596,7 +596,6 @@ User temp-addr   $10 cell- uallot drop
     r@ $10 + <0string
     over rplen - swap move
     rpath cell+ rplen - r> $10 + rplen - rplen move ;
-: >dest ( addr packet -- )  destination $10 move ;
 : ins-dest ( n2oaddr destaddr -- )
     >r dup >path-len { w^ path plen } path be!
     r@ cstring>sstring over plen + swap move
@@ -1592,8 +1591,9 @@ require net2o-crypt.fs
 
 \ send blocks of memory
 
+: >dest ( packet -- )  ret-addr outbuf destination $10 move ;
 : set-dest ( addr target -- )
-    outbuf >dest 64dup dest-addr 64!  outbuf addr 64! ;
+    >dest 64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
 
@@ -1632,16 +1632,16 @@ User code-packet
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
-: sendX ( addr taddr target n -- ) +sendX2
+: sendX ( addr taddr n -- ) +sendX2
     >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
     net2o:update-key ;
 
 \ send chunk
 
-: net2o:get-dest ( -- taddr target )
-    data-dest return-address ;
-: net2o:get-resend ( -- taddr target )
-    resend-dest return-address ;
+: net2o:get-dest ( -- taddr )
+    data-dest ;
+: net2o:get-resend ( -- taddr )
+    resend-dest ;
 
 \ branchless version using floating point
 
@@ -1664,10 +1664,10 @@ User <size-lb> 1 floats cell- uallot drop
     dest-raddr @ - dup dest-size @ u<
     IF  ts-ticks!  ELSE  drop  THEN  o> ;
 
-: net2o:prep-send ( addr u dest addr -- addr taddr target n len )
-    { 64: dest addr }  over  net2o:send-tick
+: net2o:prep-send ( addr u dest -- addr taddr n len )
+    { 64: dest }  over  net2o:send-tick
     send-size min-size over lshift
-    2>r dest addr 2r> ;
+    2>r dest 2r> ;
 
 \ synchronous sending
 
