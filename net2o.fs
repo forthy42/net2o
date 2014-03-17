@@ -1593,7 +1593,7 @@ require net2o-crypt.fs
 
 : >dest ( packet -- )  ret-addr outbuf destination $10 move ;
 : set-dest ( addr target -- )
-    >dest 64dup dest-addr 64!  outbuf addr 64! ;
+    64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
 
@@ -1613,7 +1613,7 @@ User code-packet
 \    ." send " outbuf .header
     code-packet @ dup IF  @  THEN  outbuf-encrypt
     code-packet @ data-map = IF  send-cookie  THEN
-    out-route  outbuf dup packet-size
+    >dest out-route  outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
