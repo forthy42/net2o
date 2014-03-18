@@ -187,9 +187,7 @@ require ./net2o.fs
 : c:downloadend ( -- )    
     net2o-code s" Download end" $, type cr .time close-all disconnect  end-code ;
 
-: c:test
-    init-cache'
-    $10000 $100000 "test" c:connect
+: c:test-rest ( -- )
     c:download1
     3e @time f> IF c:download2
 	waitkey( 8e )else( 6e ) @time f> IF  c:download3
@@ -202,6 +200,10 @@ require ./net2o.fs
     THEN
     c:downloadend [: .packets profile( .times ) ;] $err
     >timing n2o:dispose-context ;
+
+: c:test ( -- )
+    init-cache'
+    $10000 $100000 "test" c:connect c:test-rest ;
 
 event: ->throw dup DoError throw ;
 

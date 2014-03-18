@@ -335,6 +335,9 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 	?fake-ip4
     THEN ]sock ;
 
+: try-ip ( addr u -- flag )
+    sock[ query-sock -rot connect 0= ]sock ;
+
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;

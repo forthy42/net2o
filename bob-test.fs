@@ -15,7 +15,7 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-"bob" >key \ get our anonymous key
+"bob" >key \ get our bob key
 
 : c:bob ( -- )
     $2000 $10000 "test" c:connect

@@ -24,16 +24,28 @@ init-client
     o-timeout n2o:dispose-context
     nick-key ke-pk $@ >d#id ;
 : c:insert-host ( addr u -- )
-    host>$ IF $>sock insert-address ret-addr ins-dest
-	ret-addr $10 send-list $+[]!
-    ELSE 2drop THEN ;
+    host>$ IF
+	$>sock 2dup try-ip
+	IF insert-address ret-addr ins-dest
+	    ret-addr $10 nat( ." host: " 2dup xtype cr )
+	    send-list $+[]!  EXIT
+	THEN
+    THEN  2drop ;
 
 : n2o:lookup ( addr u -- )
     2dup c:lookup
     0 n2o:new-context dest-key
     d#id @ k#host cells + ['] c:insert-host $[]map ;
-"bob" n2o:lookup
+
+: nat:connect ( addr u -- )
+    2dup n2o:lookup dest-key
+    0 send-list $[]@ return-addr swap move
+    0 send-list $[]@ return-address swap move
+    ." trying to connect to: " 0 send-list $[]@ xtype cr
+    $10000 $100000 n2o:connect
+    n2o:connect +flow-control +resend
+    c:test-rest ;
 
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
 
-script? [IF] bye [THEN]
+script? [IF] "bob" nat:connect bye [THEN]

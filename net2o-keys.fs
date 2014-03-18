@@ -88,7 +88,11 @@ Variable strict-keys  strict-keys on
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
-	    2dup dest-pubkey $@ str= 0= !!wrong-key!!
+	    2dup dest-pubkey $@ str= 0= IF
+		." want: " dest-pubkey $@ xtype cr
+		." got : " 2dup xtype cr
+		true !!wrong-key!!
+	    THEN
 	    .key  EXIT
 	THEN  THEN
     2dup key-exist? 0= IF
