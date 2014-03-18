@@ -258,12 +258,12 @@ previous
     tag-addr dup >r 2@ dup IF
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
-	inbuf 1+ c@ punching# and IF
-	    msg( ." backup: " return-backup $10 xtype F cr )
-	    return-backup return-address $10 move
-	THEN
 	1 packets2 +!
-    ELSE  d0<> -1 0 r> 2!  THEN ;
+    ELSE  d0<> -1 0 r> 2!  THEN
+    inbuf 1+ c@ punching# and IF
+	msg( ." backup: " return-backup $10 xtype F cr )
+	return-backup return-address $10 move
+    THEN ;
 
 Variable throwcount
 
