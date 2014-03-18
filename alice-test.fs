@@ -42,8 +42,9 @@ init-client
     0 send-list $[]@ return-addr swap move
     0 send-list $[]@ return-address swap move
     ." trying to connect to: " 0 send-list $[]@ xtype cr
-    $10000 $100000 n2o:connect
-    n2o:connect +flow-control +resend
+    0 send-list $[]@ ret-addr swap move  send-list $[]off
+    $10000 $100000 n2o:connect +flow-control +resend
+    ." Connected!" cr
     c:test-rest ;
 
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests

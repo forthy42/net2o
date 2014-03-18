@@ -321,7 +321,7 @@ also net2o-base
 : pub? ( addr u -- addr u flag )
     case over c@
 	'4' of  dup 7 u<=  endof
-	'6' of  dup 19 u<= endof
+	'3' of  dup 19 u<= endof
 	false swap  endcase ;
 
 false Value add-myip

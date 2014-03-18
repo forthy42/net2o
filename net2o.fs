@@ -241,14 +241,14 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
     endcase ;
 
 : .port ( addr len -- addr' len' )
-    over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
-: .net2o ( addr u -- ) dup IF  ." ->" xtype  ELSE  2drop  THEN ;
+    ." :" over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
+: .net2o ( addr u -- ) dup IF  ." |" xtype  ELSE  2drop  THEN ;
 : .ip4b ( addr len -- addr' len' )
     over c@ 0 ['] .r #10 base-execute 1 /string ;
 : .ip4a ( addr len -- addr' len' )
     .ip4b ." ." .ip4b ." ." .ip4b ." ." .ip4b ;
 : .ip4 ( addr len -- )
-    .ip4a ." :" .port .net2o ;
+    .ip4a .port .net2o ;
 User ip6:#
 : .ip6w ( addr len -- addr' len' )
     over be-uw@ [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
@@ -258,7 +258,7 @@ User ip6:#
     2dup fake-ip4 12 string-prefix? IF  12 /string .ip4a  EXIT  THEN
     -1 ip6:# !
     '[' 8 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
-    drop ." ]:" ;
+    drop ." ]" ;
 : .ip6 ( addr len -- )
     .ip6a .port .net2o ;
 
@@ -266,7 +266,7 @@ User ip6:#
     over w@ AF_INET6 =
     IF  drop dup sin6_addr $10 .ip6a 2drop
     ELSE  drop dup sin_addr 4 .ip4a 2drop  THEN
-    ." :" port 2 .port 2drop ; 
+    port 2 .port 2drop ; 
 
 \ NAT traversal stuff: print IP addresses
 
@@ -1006,8 +1006,9 @@ resend-size# buffer: resend-init
 
 : net2o:dest ( addr u -- )
     ." dest: " 2dup .ipaddr cr
-    $>check IF  sockaddr alen @ ." use: " 2dup .address cr
-	insert-address temp-addr be!  temp-addr $10 send-list $+[]!  THEN ;
+    2dup $>check IF  $>sock sockaddr1 alen @ ." use: " 2dup .address cr
+	insert-address temp-addr be!  temp-addr $10 send-list $+[]!
+    ELSE  2drop  THEN ;
 
 : net2o:punch ( addr u -- )
     o IF  is-server c@
