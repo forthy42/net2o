@@ -78,10 +78,13 @@ keysize buffer: keypad
     cmd( ." Default-key " cr )
     no-key >c:key ;
 
+User last-ivskey
+
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF  64dup [ ivs-assembly state# + ]L 64! \ the address is part of the key
-	64>n addr>keys dest-ivs $@ drop over + ivs-assembly state# move
+	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
+	ivs-assembly state# move
 	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
     dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 

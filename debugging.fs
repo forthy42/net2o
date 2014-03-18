@@ -67,6 +67,7 @@ debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
 debug: save( \ separate save task
 debug: bg( \ started in background mode
+debug: nat( \ NAT traversal stuff
 
 -db profile(
 

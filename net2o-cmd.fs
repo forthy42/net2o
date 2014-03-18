@@ -185,9 +185,10 @@ User cmdbuf#
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
+: $64. ( 64n -- ) ['] 64. $10 base-execute ;
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
-    ." see-me: " dest-addr 64@ ['] 64. $10 base-execute
+    ." see-me: " dest-addr 64@ $64.
     \ tag-addr dup hex. 2@ swap hex. hex. F cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
@@ -208,7 +209,7 @@ comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r
-    cmd( ." send: " 64dup ['] 64. $10 base-execute 64>r
+    cmd( ." send: " 64dup $64. 64>r
     dup buf# n2o:see cr 64r> )
     o IF  code-map  ELSE  0  THEN  code-packet !
     max-size^2 1+ 0 DO
@@ -236,6 +237,8 @@ UDefer expect-reply?
 
 previous
 
+: acked ( -- ) \ replace key with random stuff
+    state# rng$ last-ivskey @ swap move ;
 : net2o:ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
@@ -243,7 +246,10 @@ previous
 : net2o:ok ( tag -- )
     timeout( ." ack: " dup hex. F cr )
     o 0= IF  drop EXIT  THEN
-    resend0 $off  punch-list $[]off
+    resend0 $off
+    nat( ." ok from: " ret-addr $10 xtype space dup .
+    dup reply[] 2@ d0= IF ." acked"  THEN cr )
+    send-list $[]off  acked
     0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( ." expect: " cmdbuf$ n2o:see )
@@ -251,15 +257,16 @@ previous
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@ dup IF
-	cmd( dest-addr 64@ 64. ." resend canned code reply " tag-addr hex. cr )
+	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
+	return-backup return-address $10 move
 	1 packets2 +!
     ELSE  d0<> -1 0 r> 2!  THEN ;
 
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( dest-addr 64@ ['] 64. $10 base-execute 2dup n2o:see )
+    cmd( dest-addr 64@ $64. 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!
@@ -455,6 +462,8 @@ net2o-base
 
 +net2o: punch ( addr u -- ) \ punch NAT traversal hole
     net2o:punch ;
++net2o: punching ( -- ) \ multiple senders
+    return-address return-backup $10 move ;
 
 : gen-punch ( -- ) my-ip$ [: $, punch ;] $[]map ;
 
@@ -660,7 +669,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     recv-addr 64@ recv-tick 64@ time-offset 64@ 64-
-    timing( 64>r 64dup ['] 64. $10 base-execute 64r> 64dup 64. ." acktime" F cr )
+    timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64-0=

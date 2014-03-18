@@ -25,7 +25,7 @@ init-client
     nick-key ke-pk $@ >d#id ;
 : c:insert-host ( addr u -- )
     host>$ IF $>sock insert-address ret-addr ins-dest
-	ret-addr $10 punch-list $+[]!
+	ret-addr $10 send-list $+[]!
     ELSE 2drop THEN ;
 
 : n2o:lookup ( addr u -- )

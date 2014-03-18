@@ -637,13 +637,15 @@ $0F Constant datasize#
 
 Create header-sizes  $06 c, $1a c, $FF c, $FF c,
 Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
+Create add-sizes     $06 c, $2a c, $FF c, $FF c,
 \ we don't know the header sizes of protocols 2 and 3 yet ;-)
 
 : header-size ( addr -- n )  c@ headersize# and 4 rshift header-sizes + c@ ;
 : tail-size ( addr -- n )  c@ headersize# and 4 rshift tail-sizes + c@ ;
+: add-size ( addr -- n )  c@ headersize# and 4 rshift add-sizes + c@ ;
 : body-size ( addr -- n ) min-size swap c@ datasize# and lshift ;
 : packet-size ( addr -- n )
-    dup header-size over body-size + swap tail-size + ;
+    dup add-size swap body-size + ;
 : packet-body ( addr -- addr )
     dup header-size + ;
 : packet-data ( addr -- addr u )
@@ -734,9 +736,10 @@ setup-class class
     field: context#
     field: wait-task
     $10 +field return-address
+    $10 +field return-backup \ used for punching
     64field: recv-tick
     64field: recv-addr
-    field: punch-list
+    field: send-list
     field: recv-flag
     field: file-state
     field: read-file#
@@ -1000,7 +1003,7 @@ resend-size# buffer: resend-init
 : net2o:dest ( addr u -- )
     ." dest: " 2dup .ipaddr cr
     $>check IF  sockaddr alen @ ." use: " 2dup .address cr
-	insert-address temp-addr be!  temp-addr $10 punch-list $+[]!  THEN ;
+	insert-address temp-addr be!  temp-addr $10 send-list $+[]!  THEN ;
 
 : net2o:punch ( addr u -- )
     o IF  is-server c@
@@ -1591,7 +1594,7 @@ require net2o-crypt.fs
 
 \ send blocks of memory
 
-: >dest ( packet -- )  ret-addr outbuf destination $10 move ;
+: >dest ( addr -- ) outbuf destination $10 move ;
 : set-dest ( addr target -- )
     64dup dest-addr 64!  outbuf addr 64! ;
 
@@ -1609,10 +1612,7 @@ User outflag  outflag off
 
 User code-packet
 
-: send-packet ( -- ) +sendX
-\    ." send " outbuf .header
-    code-packet @ dup IF  @  THEN  outbuf-encrypt
-    code-packet @ data-map = IF  send-cookie  THEN
+: packet-to ( addr -- )
     >dest out-route  outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
@@ -1621,6 +1621,17 @@ User code-packet
 	    -512 errno - throw
 	THEN
     THEN ;
+
+: send-packet ( -- ) +sendX
+\    ." send " outbuf .header
+    code-packet @ dup IF  @  THEN  outbuf-encrypt
+    code-packet @ data-map = IF  send-cookie  THEN
+    outbuf addr 64@ 64-0<> o and IF
+	send-list $[]# IF
+	    send-list [: nat( ." packet to: " 2dup xtype cr )
+		drop packet-to ;] $[]map  EXIT
+	THEN  THEN
+    ret-addr packet-to ;
 
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!
@@ -2127,7 +2138,7 @@ Variable timeout-task
 	\ erase crypto keys
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
-	dest-pubkey $off  punch-list $[]off
+	dest-pubkey $off  send-list $[]off
 	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
