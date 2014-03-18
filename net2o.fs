@@ -2058,7 +2058,7 @@ $20 Constant keys-val
 : keys?      ( -- flag )  validated @ keys-val      and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
-    ." handle cmd0" cr
+    .time ." handle cmd0" cr
     0 >o rdrop \ address 0 has no job context!
     0 inbuf-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
