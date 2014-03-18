@@ -100,7 +100,7 @@ require ./net2o.fs
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
     expect-reply
-    s" Download test" $, type cr ( see-me ) get-ip
+    !time s" Download test" $, type cr .time ( see-me ) get-ip
     $400 blocksize! $400 blockalign! stat( request-stats )
     "net2o.fs" "net2o.fs" >cache n2o:copy
     "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
@@ -114,7 +114,7 @@ require ./net2o.fs
     [: ." Download test 2: 7 medium photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 2" $, type cr ( see-me )
+    s" Download test 2" $, type cr .time ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
     "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
@@ -132,7 +132,7 @@ require ./net2o.fs
     [: ." Download test 3: 2 big photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 3" $, type cr  ( see-me )
+    s" Download test 3" $, type cr .time ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
     s" data/2011-05-20_17-01-12.jpg" s" .cache/photo001.jpg" n2o:copy
@@ -145,7 +145,7 @@ require ./net2o.fs
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 4" $, type cr  ( see-me )
+    s" Download test 4" $, type cr .time ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
     "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
@@ -170,7 +170,7 @@ require ./net2o.fs
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
     net2o-code
     expect-reply
-    s" Download test 4a" $, type cr  ( see-me )
+    s" Download test 4a" $, type cr .time  ( see-me )
     -1 nlit, 0 ulit, track-limit
     -1 nlit, 1 ulit, track-limit
     -1 nlit, 2 ulit, track-limit

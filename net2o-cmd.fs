@@ -185,7 +185,6 @@ User cmdbuf#
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
 : cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
-: $64. ( 64n -- ) ['] 64. $10 base-execute ;
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
     ." see-me: " dest-addr 64@ $64.
@@ -260,6 +259,7 @@ previous
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
 	inbuf 1+ c@ punching# and IF
+	    msg( ." backup: " return-backup $10 xtype F cr )
 	    return-backup return-address $10 move
 	THEN
 	1 packets2 +!
@@ -586,9 +586,9 @@ context-class setup-class >inherit to context-class
 \ profiling, nat traversal
 
 120 net2o: !time ( -- ) \ start timer
-    init-timer ;
+    F !time init-timer ;
 +net2o: .time ( -- ) \ print timer to server log
-    .packets profile( .times ) ;
+    F .time .packets profile( .times ) ;
 
 +net2o: set-ip ( addr u -- ) \ set address information
     setip-xt perform ;

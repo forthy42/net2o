@@ -176,3 +176,4 @@ cell 8 = [IF]
 ' dfloat+ Alias 64'+
 ' dfaligned Alias 64aligned
 ' dffield: Alias 64field:
+: $64. ( 64n -- ) ['] 64. $10 base-execute ;

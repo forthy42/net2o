@@ -277,7 +277,7 @@ User ip6:#
 	'4' of  .ip4  endof
 	-rot dump endcase ;
 
-: .iperr ( addr len -- ) [: ." connected from: " .ipaddr cr ;] $err ;
+: .iperr ( addr len -- ) [: .time ." connected from: " .ipaddr cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- ) >r
     r@ sin6_addr 12 + be-l!
@@ -1005,8 +1005,9 @@ resend-size# buffer: resend-init
     $>sock 2>r net2o-sock fileno "" 0 2r> sendto drop ;
 
 : net2o:dest ( addr u -- )
-    ." dest: " 2dup .ipaddr cr
-    2dup $>check IF  $>sock sockaddr1 alen @ ." use: " 2dup .address cr
+    nat( ." dest: " 2dup .ipaddr cr )
+    2dup $>check IF  $>sock
+	nat( sockaddr1 alen @ ." use: " 2dup .address cr )
 	insert-address temp-addr be!  temp-addr $10 send-list $+[]!
     ELSE  2drop  THEN ;
 
@@ -1030,6 +1031,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
+    msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source  data-map ! ;
@@ -1037,6 +1039,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context  server!  THEN
+    msg( ." code map: " addrs $64. addrd $64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
@@ -1618,8 +1621,8 @@ User outflag  outflag off
 
 User code-packet
 
-: packet-to ( addr -- )
-    >dest out-route  outbuf dup packet-size
+: packet-to ( addr -- )  >dest
+    out-route  outbuf dup packet-size
     send-a-packet 0< IF
 	errno EMSGSIZE = IF
 	    max-size^2 1- to max-size^2  ." pmtu/2" cr
@@ -1632,13 +1635,18 @@ User code-packet
 \    ." send " outbuf .header
     code-packet @ dup IF  @  THEN  outbuf-encrypt
     code-packet @ data-map = IF  send-cookie  THEN
-    outbuf addr 64@ 64-0<> o and IF
-	send-list $[]# IF
-	    punching# outbuf 1+ cor!
-	    send-list [: nat( ." packet to: " 2dup xtype cr )
-		drop packet-to ;] $[]map  EXIT
-	THEN  THEN
-    ret-addr packet-to ;
+    outbuf addr 64@ 64-0= IF
+	return-addr
+    ELSE
+	o IF
+	    send-list $[]# IF
+		punching# outbuf 1+ cor!
+		send-list [: .time ." packet to: " 2dup xtype cr
+		    drop packet-to ;] $[]map  EXIT
+	    THEN
+	THEN
+	ret-addr
+    THEN   packet-to ;
 
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!
@@ -2082,7 +2090,9 @@ $20 Constant keys-val
     >ret-addr >dest-addr +desta
     dest-addr 64@ 64-0= IF  handle-cmd0
     ELSE
-	check-dest dup 0= IF  drop  EXIT  THEN +dest
+	check-dest dup 0= IF
+	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )
+	    drop  EXIT  THEN +dest
 	handle-dest
     THEN ;
 
