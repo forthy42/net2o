@@ -659,12 +659,13 @@ Create add-sizes     $06 c, $2a c, $FF c, $FF c,
 $80 Constant broadcasting# \ special flags for switches
 $40 Constant multicasting#
 
-\ $38 Constant net2o-reserved# - should be 0
+\ $30 Constant net2o-reserved# - should be 0
 
 $07 Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
 $04 Constant resend-toggle#
+$08 Constant punching#
 
 \ short packet information
 
@@ -1607,6 +1608,7 @@ User outflag  outflag off
     outflag @ outbuf 1+ c! outflag off ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
+: cor!  ( n addr -- )  dup >r c@ or r> c! ;
 
 : outbody ( -- addr ) outbuf packet-body ;
 : outsize ( -- n )    outbuf packet-size ;
@@ -1631,6 +1633,7 @@ User code-packet
     code-packet @ data-map = IF  send-cookie  THEN
     outbuf addr 64@ 64-0<> o and IF
 	send-list $[]# IF
+	    punching# outbuf 1+ cor!
 	    send-list [: nat( ." packet to: " 2dup xtype cr )
 		drop packet-to ;] $[]map  EXIT
 	THEN  THEN
@@ -2082,7 +2085,9 @@ $20 Constant keys-val
 	handle-dest
     THEN ;
 
-: route-packet ( -- )  inbuf dup packet-size send-a-packet drop ;
+: route-packet ( -- ) route( ." route to: " inbuf destination $10 xtype cr )
+    inbuf >r r@ get-dest route>address
+    r> dup packet-size send-a-packet drop ;
 
 \ timeout handling
 

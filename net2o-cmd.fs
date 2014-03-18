@@ -259,7 +259,9 @@ previous
     tag-addr dup >r 2@ dup IF
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
-	return-backup return-address $10 move
+	inbuf 1+ c@ punching# and IF
+	    return-backup return-address $10 move
+	THEN
 	1 packets2 +!
     ELSE  d0<> -1 0 r> 2!  THEN ;
 
@@ -281,6 +283,9 @@ Variable throwcount
 	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
 	cmd0buf cmd0source !
+    THEN
+    inbuf 1+ c@ punching# and IF
+	return-address return-backup $10 move
     THEN
     [: cmdreset  do-cmd-loop  cmd-send? ;] cmdlock c-section ;
 
@@ -462,8 +467,6 @@ net2o-base
 
 +net2o: punch ( addr u -- ) \ punch NAT traversal hole
     net2o:punch ;
-+net2o: punching ( -- ) \ multiple senders
-    return-address return-backup $10 move ;
 
 : gen-punch ( -- ) my-ip$ [: $, punch ;] $[]map ;
 

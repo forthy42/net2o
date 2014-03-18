@@ -62,12 +62,13 @@ debug: dump(
 debug: trace(
 debug: header(
 debug: sender( \ extra sender task
-debug: dht( \ debuggin for dht functions
+debug: dht( \ debugging for dht functions
 debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
 debug: save( \ separate save task
 debug: bg( \ started in background mode
 debug: nat( \ NAT traversal stuff
+debug: route( \ do routing
 
 -db profile(
 
