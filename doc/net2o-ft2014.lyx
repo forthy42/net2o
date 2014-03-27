@@ -1,0 +1,3841 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\usetheme{lankton-keynote}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=169
+\use_default_options false
+\maintain_unincluded_children false
+\language ngerman
+\language_package default
+\inputencoding utf8x
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 2
+\use_esint 0
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-.8ex
+\backslash
+lower1.8ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+: Wie macht man ein neues Internet
+\begin_inset Argument
+status open
+
+\begin_layout Plain Layout
+net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+Forth--Tagung 2014, Bad Vöslau
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout BeginFrame
+Outline
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Überblick
+\end_layout
+
+\begin_layout Subsection
+Die sieben Lagen der Zwiebel\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout BeginFrame
+Die sieben Lagen der Zwiebel\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Standard
+Weil sich eine Menge getan hat, möchte ich mal in aller Ruhe erklären, was
+ so in net2o jetzt alles drin ist (und warum's noch nicht ganz fertig ist).
+\end_layout
+
+\begin_layout Standard
+Diese Elemente braucht man für ein Netzwerk (es sind keine Lagen wie bei
+ ISO/OSI, sondern Komponenten):
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Das physikalische Layer --- das ist unterhalb net2o.
+ Im Moment ist das UDP.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Path switching mit Paketen, die 
+\begin_inset Formula $2^{n}$
+\end_inset
+
+ bytes groß sind, und in shared memory geschrieben werden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Ephemeral key exchange und Signaturen mit Ed25519;
+\begin_inset Newline newline
+\end_inset
+
+symmetrische authentisierte Verschlüsselung+hash+prng mit Keccak
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Timing driven delay minimizing flow control
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Stack--orientierte tokenisierte Kommandos (RPC)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Verteilte Daten (Dateien) und Metadaten (DHT)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Apps in einer Sandbox zum Anzeigen/Bearbeiten von Daten
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Anforderungen
+\end_layout
+
+\begin_layout BeginFrame
+Anforderungen
+\end_layout
+
+\begin_layout Description
+Skalierbar Es muss mit Milliarden Nutzern arbeiten, von denen die Mehrheit
+ nur ein billiges Smartphone hat (und bei 
+\begin_inset Quotes gld
+\end_inset
+
+Internet of Things
+\begin_inset Quotes grd
+\end_inset
+
+ auch mit noch kleinerer Hardware)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Einfach
+\begin_inset space ~
+\end_inset
+
+zu
+\begin_inset space ~
+\end_inset
+
+implementieren Einfach und kompakt, soll auch lokale Busse wie USB und DisplayPo
+rt ersetzen können
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Einfach
+\begin_inset space ~
+\end_inset
+
+einzusetzen Ein vernünftiges Kommunikationssystem aufzusetzen ist mit derzeitige
+r Internettechnologie so kompliziert, dass die meisten Leute das an Google
+ und Facebook 
+\begin_inset Quotes gld
+\end_inset
+
+outsourcen
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Sicher Gegen eine Reihe verschiedener Angriffsszenarien (Sicherheit ist
+ nicht ein Ding)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Multimedia Echtzeitfähigkeit, QoS/allozierte Bandbreite
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Migration Muss einen akzeptablen Mikrationspfad bieten
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Das ist eine Menge Forschung
+\end_layout
+
+\begin_layout Standard
+Mein üblicher Ansatz is:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Kucken, was es schon gibt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Auswerten und bewerten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Schlussfolgern, dass es kaputt ist
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Regel #1: 
+\begin_inset Quotes eld
+\end_inset
+
+If you want it done right, you have to do it yourself
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Manchmal finde ich etwas, was schon funktioniert.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Abstraktionen
+\end_layout
+
+\begin_layout FrameSubtitle
+Vermeide unnötige Abstraktionen
+\end_layout
+
+\begin_layout Itemize
+Netzwerk: Kabel, verbunden mit Switches (hierarchische Sterntopologie)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Knoten: shared memory --- schreiben in entfernte Knoten, lesen nur lokal
+ (und natürlich nur die Bereiche, in die das vereinbart wurde!)
+\end_layout
+
+\begin_layout Itemize
+Trennung zwischen Kommandos und Daten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Jedes 
+\emph on
+Ding
+\emph default
+ ist eine Datei --- mit Metadaten (
+\begin_inset Quotes eld
+\end_inset
+
+tags
+\begin_inset Quotes erd
+\end_inset
+
+) in einer Hashtable, 
+\emph on
+jedermann
+\emph default
+ ist ein Schlüssel (auch mit Metadaten)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Event--driven: Kommandos werden verschickt und beantwortet, sie steuern
+ die Abläufe
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+P2P: Alle Knoten sind gleichberechtigt, Daten sind (redundant) verteilt
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Topologie
+\end_layout
+
+\begin_layout BeginFrame
+Pakete switchen, Verbindungen routen
+\end_layout
+
+\begin_layout Itemize
+Switches sind einfacher, schneller und billiger als Router --- also will
+ ich nicht jedes Paket einzeln routen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing wird dann beim Verbindungsaufbau gemacht --- wir finden heraus,
+ wohin wir die Pakete schicken müssen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Block
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Path Switching
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Die ersten 
+\begin_inset Formula $n$
+\end_inset
+
+ Bits vom Pfad--Feld nehmen und Ziel adressieren
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Den Pfad um 
+\begin_inset Formula $n$
+\end_inset
+
+ nach links schieben
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Den Rückwärtspfad bit--reverse hinten einfügen
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Der Empfänger dreht die ganze Adresse um, und bekommt so den Rückpfad
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Paket--Format mit wenig Overhead
+\end_layout
+
+\begin_layout BeginFrame
+Paketformat
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="left" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Bytes
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Kommentar
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Flags
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+priority, length, flow control flags
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Path
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Internet 1.0 terminology: 
+\begin_inset Quotes eld
+\end_inset
+
+address
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Address
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Adresse im Speicher, 
+\begin_inset Formula $\approx$
+\end_inset
+
+port+sequence number
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Data
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $64*2^{0..15}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+bis zu 2MB Paketgröße, genug für die nächsten 40 Jahre
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\emph on
+Chksum
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+kryptographische Checksumme
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename header64.fig
+	lyxscale 50
+	scale 40
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Handover
+\end_layout
+
+\begin_layout Itemize
+Ein typisches Problem mobiler Internetnomaden: Das Gerät wechselt von einem
+ Netz ins andere
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Damit es weitergeht, braucht man ein 
+\begin_inset Quotes gld
+\end_inset
+
+Handover
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Bei net2o ist das trivial: Solange das Paket eine gültige Checksumme hat,
+ wird die Rückaddresse akzeptiert (und ist dann die neue Zieladresse).
+ Natürlich muss der Sender im neuen Netz ein Routing durchführen.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Damit bei simultanen Handovers die Verbindung nicht verloren geht, gilt:
+ Auf der neuen Adresse senden, auf der alten noch für eine Zeit lang empfangen
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Verschlüsselung
+\end_layout
+
+\begin_layout BeginFrame
+Sicherheit: Indirekte Attacken sind billiger
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename cryptonerd.png
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Schlüsselaustauch
+\end_layout
+
+\begin_layout BeginFrame
+Schlüsselaustausch
+\end_layout
+
+\begin_layout FrameSubtitle
+Welche Algorithmen kann man nehmen?
+\end_layout
+
+\begin_layout Description
+RSA Schlüssel mit sinnvoller Stärke sollten Richtung 4kBit gehen, und es
+ gibt immer mal wieder kleine Durchbrüche beim Faktorisieren großer Zahlen,
+ die dann die effektive Schlüsselstärke weiter reduzieren.
+ 4kBit sind 512 Byte, das ist zu groß für die 1kB-Pakete, mit denen ich
+ den Schlüsselaustausch mache.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Diffie--Hellman Grundsätzlich gilt da das gleiche Problem, der Algorithmus
+ ist nur etwas anders.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+ECC Elliptic Curve Cryptography hat bislang nur ganz generische Attacken,
+ und damit haben 256 Bits immer noch eine Stärke von 128 Bit (also man muss
+ 2^128 komplexe Operationen ausführen und 2^128 Zwischenergebnisse speichern,
+ um den geheimen Schlüssel zu finden)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Deshalb ist die Kryptographie der Wahl 
+\noun on
+Dan Bernstein
+\noun default
+s Ed25519, das ist eine Kurve, die sowohl Signaturen als auch Schlüsselaustausch
+ unterstützt, von den Parametern her sicher ist, und aufgrund der Edwards--Form
+ dem Stand der Technik entspricht.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Ephemeral Schlüsselaustausch+Validation
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename connection-setup.fig
+	lyxscale 50
+	height 80theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Herausforderung: Seitenkanalangriffe
+\end_layout
+
+\begin_layout Itemize
+Beim ECC Diffie--Hellman-Schlüsselaustausch ist die Formel 
+\begin_inset Formula $s_{1}=pk_{1}*[sk_{2}]=pk_{2}*[sk_{1}]$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Alle Operationen, bei der das Geheimnis konstant und der andere Parameter
+ unter Kontrolle des Angreifers sind, können ein Informationsleck bedeuten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Was man dagegen macht, sind Operationen mit konstanter Zeit und keine datenabhän
+gige Zugriffe; bei Ed25519 berechnet man mit Basis 16 Exponenten vor, und
+ verwendet dann die; das hilft weiter.
+ Die Operationen können aber immer noch unterschiedliche Ströme verbrauchen,
+ und die kann man (sogar akustisch!) immer noch messen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Phase 1 ist kein Problem, weil jeder Schlüssel nur einmal verwendet wird
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+In Phase 2 modifiziere ich den geheimen Schlüssel mit 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+: 
+\begin_inset Formula $s_{2}=pk_{a}*[sk_{b}*s_{1}]=pk_{b}*[sk_{a}*s_{1}]$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Diese Operation 
+\begin_inset Formula $sk*s_{1}\mod\, l$
+\end_inset
+
+ ist 
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Üblich ist für Phase 2 übrigens eine digitale Signatur: der erneute Diffie--Hell
+man--Schlüsselaustausch ist schneller und versendet weniger Daten.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Trust&PKI
+\end_layout
+
+\begin_layout BeginFrame
+Trust&PKI: Zookos Dreieck
+\end_layout
+
+\begin_layout FrameSubtitle
+(Ein Teil der) Herausforderung
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename zooko.fig
+	height 80theight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Trust&PKI
+\end_layout
+
+\begin_layout Itemize
+Certification Authorities (SSL) funktionieren nicht: Ein faules Ei, und
+ das System ist kaputt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die viel einfachere Strategie von SSH (Schlüssel merken) funktioniert viel
+ besser
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Damit erfordert nur der erste Kontakt besondere Aufmerksamkeit
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Bei sozialen Netzwerken hat man Freunde von Freunden: Das sind sichere Petnames
+ für sichere Schlüssel
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Pubkeys müssen nicht öffentlich sein, um eindeutig zu sein
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Pubkey--Authentication ist viel besser als Passwörter
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+In der Regel hat man kein gemeinsames Geheimnis, um z.B.
+ das Socialist Millionaire Protocol zu nutzen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das Zooko--Dreieck behandelt das Problem korrekter Zuordnung nicht (Cybersquatte
+r, die sich schon in RL vergebene Namen krallen)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+Symmetrische Kryptographie
+\end_layout
+
+\begin_layout BeginFrame
+Symmetrische Kryptographie
+\end_layout
+
+\begin_layout FrameSubtitle
+Auswahl des Algorithmus
+\end_layout
+
+\begin_layout Standard
+An Anfang war der Wurstkessel\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+AEAD--Verschlüsselung: Authentisierte Ver- und Entschlüsselung
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Üblicherweise benutzt: AES in GCM (Galois Counter--Mode)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Vorsicht: Ein Galois--Feld über 
+\begin_inset Formula $2^{n}$
+\end_inset
+
+ ist kein sicherer Hash, sondern nur eine Polynom--Checksumme, bekannt fragil
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "aescgm"
+
+\end_inset
+
+, und die Sicherheit ist 
+\begin_inset Formula $\le64$
+\end_inset
+
+ Bits 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gcm"
+
+\end_inset
+
+, das Paper schlägt vor, GF(p) with 
+\begin_inset Formula $p=2^{128}+12451$
+\end_inset
+
+ zu nutzen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+AES benutzt einen konstanten Key, und macht damit Seitenkanalangriffe einfach
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ein Counter--Mode ist eigentlich ein Stream--Cipher, also könnte man auch
+ so einen benutzen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Dann käme 
+\noun on
+Dan Bernstein
+\noun default
+'s xsalsa+poly1305 in Frage: Das ist ein Stream--Cipher und es nutzt ein
+ GF(p) als Prüfsumme.
+ Die ist aber auch nur sicher, wenn die Verschlüsselung sicher ist.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Keccak
+\end_layout
+
+\begin_layout Standard
+Hat die Features von Wurstkessel, ist aber aus einem NIST--Wettbewerb als
+ Sieger hervorgegangen
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Vorschlag: Einen starken Hash für die Autentisierung
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der offensichtliche Kandidat ist der SHA--3--Gewinner, Keccak, der eine
+ sehr gute Kryptanalyse hinter sich hat
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Noch besser: Wie Wurstkessel kann Keccak im Duplex--Mode auch ver- und entschlüs
+seln (praktisch ohne zusätzliche Kosten)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Es gibt keinen konstanten Key, also perfekte Sicherheit gegen Seitenkanalangriff
+e
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Stärke ist >256 Bits, während AES--256 mit Related--Key--Attacken zu
+ kämpfen hat, also effektiv deutlich schwächer ist
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak ist ein universelles Krypto--Primitiv, während man bei AES noch zwei
+ weitere braucht: hash+AES+GHASH
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Keccak erfüllt alle Bedingungen an Vertauenswürdigkeit: Die, die dem NIST
+ vertrauen, weil es vom NIST ist, und die, die der NSA misstrauen, weil
+ es aus einem Wettbewerb hervorgegangen ist.
+ I verwende Keccak mit 
+\begin_inset Formula $r=1024$
+\end_inset
+
+ und Kapazität 
+\begin_inset Formula $c=576$
+\end_inset
+
+, so wie von den Autoren ursprünglich vorgeschlagen
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Schlüsselverwendung
+\end_layout
+
+\begin_layout FrameSubtitle
+Alle Schlüssel dürfen nur einmal verwendet werden!
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename keyusage.fig
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Flusskontrolle
+\end_layout
+
+\begin_layout BeginFrame
+Flusskontrolle (kaputt)
+\end_layout
+
+\begin_layout Itemize
+TCP füllt einfach den Puffer auf, bis ein Paket verloren geht, statt die
+ Rate vorher schon zu reduzieren.
+ Name des Symptoms: 
+\begin_inset Quotes eld
+\end_inset
+
+Buffer bloat
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Allerdings sind Puffer essentiell für gute Netzwerkperformance.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferbloat.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Buffer Bloat
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Alternativen?
+\end_layout
+
+\begin_layout Itemize
+LEDBAT versucht, einen konstanten, kleinen Delay zu erzeugen: Geht so-lala,
+ ist aber unfair (der letzte gewinnt)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+CurveCPs Flusskontrolle ist 
+\begin_inset Quotes gld
+\end_inset
+
+eine Menge Forschung,
+\begin_inset Quotes grd
+\end_inset
+
+ haha (es ist nichts da)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Also musste was neues her
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename bufferused.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+So soll es sein bei optimaler Flusskontrolle
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o--Flusskontrolle
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Miss den Flaschenhals mit einem Burst
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Client misst, Server setzt die Rate
+\end_layout
+
+\begin_layout Description
+Client zeichnet die 
+\emph on
+Zeitdifferenz
+\emph default
+ für das erste und letzte Paket in einen Burst, und extrapoliert daraus
+ die mögliche Rate 
+\emph on
+rate
+\emph default
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Formula 
+\[
+rate:=\Delta t*\frac{burstlen}{packets-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Server würde einfach diese Rate nutzen
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness
+\end_layout
+
+\begin_layout Standard
+Fairness bedeutet, dass gleichzeitige Verbindungen in etwa die gleiche Datenrate
+ bekommen, sich also die Leitung fair teilen.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Idealerweise, der Router/Switch würde Pakete verschiedener Verbindungen
+ round--robin senden.
+ Das würde die berechnete Bandbreite entsprechend korrigieren, und wäre
+ auch eine große Erleichterung beim TCP--Buffer--Bloat--Symptom, weil jede
+ Verbindung ihren eigenen Puffer auffüllen würde.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der Vorschlag 
+\begin_inset Quotes gld
+\end_inset
+
+Fair Queuing
+\begin_inset Quotes grd
+\end_inset
+
+ ist von 1985, und es gibt Router, die das auch implementieren (als konfigurierb
+are Option) --- aber leider z.B.
+ nicht für DSLAMs, die haben FIFO--Queuing
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Daraus ergibt sich die Notwendigkeit, auch für FIFO--Queuing einen stabilen
+ Algorithmus zu finden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der Algorithmus muss sich geänderten Bedingungen schnell anpassen.
+ Insbesondere bei drahtlosen Verbindungen ist die erreichbare Datenrate
+ nicht nur vom Traffic abhängig.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o--Flusskontrolle --- Fair Queuing Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-fair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Fair queuing sorgt für korrete Messung der verfügbaren Bandbreite
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+net2o--Flusskontrolle --- FIFO Router
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename flowcontrol-unfair.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Unfaires FIFO queuing sorgt dafür, dass die gemessene Rate doppelt so hoch
+ gemessen wird
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness I
+\end_layout
+
+\begin_layout Itemize
+Um die Stabilität bei unfairem Queuing zu verbessern, muss ich den P--Regulator
+ zu einem echten PID--Regulator ausbauen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der integrale Part ist der aufsummierte 
+\begin_inset Quotes gld
+\end_inset
+
+Slack
+\begin_inset Quotes grd
+\end_inset
+
+ (im Puffer), den ich niedrig halten möchte, und der D--Anteil spiegelt
+ die Veränderung dieses 
+\begin_inset Quotes gld
+\end_inset
+
+Slacks
+\begin_inset Quotes grd
+\end_inset
+
+ von einer Messung zur nächsten wieder
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ich verwende beide Komponenten, um die Rate beim Sender zu reduzieren, das
+ sorgt für deutlich bessere Fairness
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der I--Anteil ist exponentiell (maximal Faktor 16)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+s_{exp}=2^{\frac{slack}{T}}\quad\mathrm{where\,}T=\max(10ms,\max(slacks))
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Fairness D
+\end_layout
+
+\begin_layout Itemize
+Um den differenziellen Anteil zu messen, messe ich, wie der Slack wächst
+ vom ersten zum letzten Burst in einem Messzyklus (das sind 4 Bursts)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das wird dann hochgerechnet auf die Pakete, die insgesamt unterwegs sind
+ (also von den gemessenen Paketen bis zu den gerade eben gesendeten Paketen)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der so errechnete Korrekturfaktor klingt dann langsam ab, mit einem RTD
+ als Zeitkonstante, damit es nicht zu schnell hoch geht mit der Geschwindigkeit
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+\begin_inset Formula $\max(slacks)/10ms$
+\end_inset
+
+ wird benutzt, um den Algorithmus mehr oder weniger aggressiv zu machen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das so ermittelte 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ wird sowohl zur Rate (auch ein 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+) für einen Burst addiert, als auch als zusätzliche Wartezeit bis zum nächsten
+ Burst hinzugefügt
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-1.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine Verbindung über VDSL--50
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+VDSL, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-2.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine von vier Verbindungen über VDSL--50
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unzuverlässiges Luftkabel (WLAN)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-3.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine Verbindung über WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Unzuverlässiges Luftkabel, Congestion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-4.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine von vier Verbindungen über WLAN
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN, 1GBE
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-5.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine Verbindung über 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (4 servers)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-6.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine Verbindung von vier über 1GBE
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+LAN 1GBE, Congestion (1 server)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename 30c3-7.png
+	lyxscale 50
+	width 80text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Eine von vier Verbindungen über 1GBE, fair queuing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Flusskontrolle --- Resümee
+\end_layout
+
+\begin_layout Itemize
+Die Flusskontrolle funktioniert, aber Fair Queuing (überall!) wäre ein echter
+ Fortschritt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der primäre Algorithmus ist komplett anders als die ganze Konkurrenz: Ich
+ messe die verfügbare Bandbreite
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Skalierbarkeit für ganz langsame Verbindungen ist schlecht: Bursts sind
+ 8 Pakete lang
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Traffic bei Stau ohne fair queuing ist nicht voll zufriedenstellend
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Kommandos
+\end_layout
+
+\begin_layout BeginFrame
+Daten und Kommandos
+\end_layout
+
+\begin_layout Itemize
+Daten von mehreren Dateien/Streams können in einer Verbindung gemultiplext
+ werden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kommandos werden in Blöcken gesendet, also gibt es mehr als ein Kommando
+ pro Block
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Kodierung verwendet die von Googles protobuf, also 7 Bits pro Byte;
+ ist das MSB 1, kommt noch ein weiteres Byte
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Kommando--Maschine ist eine Stack--Maschine, also ein Forth--Subset
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Beispiel: Connection Request
+\end_layout
+
+\begin_layout LyX-Code
+
+\emph on
+"pk1"
+\emph default
+ $, receive-tmpkey
+\end_layout
+
+\begin_layout LyX-Code
+nest[
+\emph on
+ timestamp1
+\emph default
+ lit, set-rtdelay gen-reply request-done ]nest $,
+\end_layout
+
+\begin_layout LyX-Code
+push-$ push' nest
+\end_layout
+
+\begin_layout LyX-Code
+tmpkey-request key-request
+\end_layout
+
+\begin_layout LyX-Code
+
+\emph on
+base
+\emph default
+ lit, 
+\emph on
+csize
+\emph default
+ lit, 
+\emph on
+dsize
+\emph default
+ lit, map-request
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Beispiel: Sauge drei Dateien
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code
+\end_layout
+
+\begin_layout LyX-Code
+"Download test" $, type cr ( see-me )
+\end_layout
+
+\begin_layout LyX-Code
+get-ip $400 blocksize! $400 blockalign! stat( request-stats )
+\end_layout
+
+\begin_layout LyX-Code
+"net2o.fs" 0 lit, 0 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-13_11-26-57-small.jpg" 0 lit, 1 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+"data/2011-05-20_17-01-12-small.jpg" 0 lit, 2 lit, open-tracked-file
+\end_layout
+
+\begin_layout LyX-Code
+gen-total slurp-all-tracked-blocks send-chunks
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, ok?
+\end_layout
+
+\begin_layout LyX-Code
+end-code 
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Beispiel: Antwort auf diesen Request
+\end_layout
+
+\begin_layout LyX-Code
+net2o-code
+\end_layout
+
+\begin_layout LyX-Code
+x" 36000000000000000000000000000000019ED2" $, set-ip
+\end_layout
+
+\begin_layout LyX-Code
+ $E373 lit, 0 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$134299FF6F829E62 lit, $1A4 lit, 0 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$9C65C lit, 1 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$130AFDAE900C649E lit, $1A4 lit, 1 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$9D240 lit, 2 lit, track-size
+\end_layout
+
+\begin_layout LyX-Code
+$130AFDAE92CA4E25 lit, $1A4 lit, 2 lit, set-stat
+\end_layout
+
+\begin_layout LyX-Code
+$148000 lit, set-total
+\end_layout
+
+\begin_layout LyX-Code
+ $E373 lit, 0 lit, track-seek
+\end_layout
+
+\begin_layout LyX-Code
+$79000 lit, 1 lit, track-seek 
+\end_layout
+
+\begin_layout LyX-Code
+$78C00 lit, 2 lit, track-seek
+\end_layout
+
+\begin_layout LyX-Code
+0 lit, ok
+\end_layout
+
+\begin_layout LyX-Code
+end-code
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Verteilter Programmablauf über 
+\begin_inset Quotes gld
+\end_inset
+
+Active Messages
+\begin_inset Quotes grd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Die Kommandos sind so der Teil meines Vortrags, den die Nicht--Forther irgendwie
+ gar nicht verstehen, deshalb da etwas mehr dazu:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Das ist stark von Open Network Forth von 
+\noun on
+Heinz Schnitter
+\noun default
+ inspiriert.
+ Nur tokenisiert.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Antworten auf Anfragen sind ihrerseits wieder ausführbare Kommandos,
+ die führt man einfach aus, und dann läuft das Programm weiter
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das ist also asynchron und ohne irgendwelche Hooks und so: Man bastelt eine
+ Message zusammen und schickt die weg
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Wenn die gewünschten Fragen nicht beantwortet werden, dann gibt es irgendwann
+ einen Timeout
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Distributed Data
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Data
+\end_layout
+
+\begin_layout Itemize
+Following the 
+\begin_inset Quotes eld
+\end_inset
+
+everything is a file
+\begin_inset Quotes erd
+\end_inset
+
+ principle, every data object is a file
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Data objects are accessed by their hash.
+ The associated metadata are 
+\begin_inset Quotes eld
+\end_inset
+
+tags
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Metadata is organized as a distributed prefix hash tree
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Efficient distribution of data is important!
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Efficient Data Distribution
+\end_layout
+
+\begin_layout Standard
+Puzzle: How efficient can you distribute data (e.g.
+ a video stream) in a P2P network? Assume all peers are equal, and have
+ the capacity to upload one stream in realtime.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Obvious topology: The bucket chain --- this shows that each node feeds the
+ data through --- a 1:1 relation of what you get to what you send
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+bucket chain: 
+\begin_inset Formula $O(n)$
+\end_inset
+
+ latency, 
+\begin_inset Formula $O\left(\frac{1}{n}\right)$
+\end_inset
+
+ robustness (each node can break the chain)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Suggestion: Tree structure instead of chain, e.g.
+ a quad--tree.
+ The root divides the data into four parts, each going down one branch of
+ the tree.
+ The leafs distribute the data to the other three branches of the tree
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+For the quad--tree case, each node has only 8 neighbors: 4 sources and 4
+ sinks
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Tree Distribution Network
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename avalanche.fig
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Avalanche distribution with quad--tree of depth 2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Possible Performance
+\end_layout
+
+\begin_layout Itemize
+Trees with a bigger base reduce latency.
+ Example: To transfer a Justin Bieber tweet to 50 million followers, a binary
+ tree needs 25.5 hops on average, a quad--tree 12.8 hops, and an oct--tree
+ 8.5 hops.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A typical domestic (inside e.g.
+ Germany) hop--to--hop time is just 20ms.
+ International hops can be in the order of 250ms.
+ Assuming there is only one international hop in the chain, the latency
+ to distribute Justin Bieber's babbling is typically just 500ms in a quad--tree.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Rule of thumb: 
+\begin_inset Formula $bandwidth=latency$
+\end_inset
+
+, i.e.
+ if it takes 20ms from hop to hop, each node should replicate data for 20ms
+ --- if we make the tree wider, the linear effort of replicating data will
+ dominate transfer time, if we make the tree more narrow, the hop--to--hop
+ time will dominate.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The tree--like graph greatly reduces the number of nodes to know
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Distributed Prefix Hash Tree
+\end_layout
+
+\begin_layout Itemize
+Most DHT approaches have poor performanc
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Prefix Hash Trees use a quite large base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Only a few queries necessary to query an extremely large data base
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Suggestion: Active instantaneous replication of all changed data using the
+ avalanche tree mentioned above
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Metadata Privacy
+\end_layout
+
+\begin_layout Itemize
+A global distributed hash tree is 100% observable by anybody with enough
+ money
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Private trees shared only between a group of people: 
+\begin_inset Quotes eld
+\end_inset
+
+dark trees in a dark forrest
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use different identities for distinct groups (one for your friends, one
+ for your work, one for sharing pr0n), each one only known to that group:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+dark social graph
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Your public ID is only for first contacts and the things you want to publish
+ (i.e.
+ PR)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Use neighborhood relationships to limit spread of data --- e.g.
+ a node participating in a data distribution tree may only be known to the
+ peer nodes in that tree
+\end_layout
+
+\begin_layout Section
+Applications
+\end_layout
+
+\begin_layout Subsection
+Apps in a Sandbox
+\end_layout
+
+\begin_layout BeginFrame
+Content or Apps?
+\end_layout
+
+\begin_layout Itemize
+The current web is defined by content --- web apps (JavaScript) are an afterthou
+gh
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, the application logic is usually on the server side
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This doesn't work for a P2P network!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Content is structured text, images, videos, music, etc.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+App--Centric World
+\end_layout
+
+\begin_layout Itemize
+There's a phenomenon I call 
+\begin_inset Quotes eld
+\end_inset
+
+Turing creep
+\begin_inset Quotes erd
+\end_inset
+
+: Every sufficiently complex system contains a user--accessible Turing--complete
+ language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Corollary: Every efficient sufficiently complex system can execute native
+ machine code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The application logic is to present the data; data itself is as above: structure
+d text, images, videos, music, etc.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Executing (especially efficient) code from the net raises obvious questions
+ about security
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to securely execute code?
+\end_layout
+
+\begin_layout Standard
+There are several options tried; as usual, things are broken:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Execute code in a controlled secure VM, see for example Java.
+ This is broken by design, as securing something from the inside doesn't
+ work.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Execute code in a sandbox.
+ This has shown as more robust, depending on how complex the outside of
+ the sandbox is.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Public inspection of code.
+ This is how the open source world works, but the underhanded C contest
+ shows that inspection is tricky.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Scan for known evil code.
+ This is the security industry's approach, and it is not working.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Code signing can work together with public inspection --- but using it for
+ accountability doesn't work
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice is to sandbox public inspected code.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Subsection
+API Basics
+\end_layout
+
+\begin_layout BeginFrame
+Formats&Requirements
+\end_layout
+
+\begin_layout FrameSubtitle
+How to display things
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename formats+io.fig
+	scale 36
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Why OpenGL?
+\end_layout
+
+\begin_layout FrameSubtitle
+OpenGL can do everything
+\end_layout
+
+\begin_layout Standard
+OpenGL renders:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Triangles, lines, points --- simple components
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Textures and gradients
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+and uses shader programs --- the most powerful thing in OpenGL from 2.0.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Real requirement: visualization of 
+\emph on
+any 
+\emph default
+data.
+ OpenGL can do that.
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to connect the media?
+\end_layout
+
+\begin_layout FrameSubtitle
+Lemma: every glue logic will become Turing complete
+\end_layout
+
+\begin_layout Itemize
+currently used glue: HTML+CSS+JavaScript
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+conclusion: use a powerful tool right from start!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+browser: run--time and development tool for applications
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Frameworks
+\end_layout
+
+\begin_layout Itemize
+libsoil for images (PNG+JPEG loading into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+freetype-gl for fonts (TrueType/OpenType into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+OpenMAX on Android, gstreamer on Linux: videos into a texture
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+ work in progress)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section
+Use Cases, Funding&Law, Adoption
+\end_layout
+
+\begin_layout BeginFrame
+Use Cases, Funding&Law
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+Layer 8
+\begin_inset Quotes erd
+\end_inset
+
+ is the human in front of the screen.
+ What will people use this for?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Sharing photos and videos
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Chat & video telephony
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+News, opinions, scientific papers, sharing knowledge
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Online shopping
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+What's the problem with those?
+\end_layout
+
+\begin_layout Standard
+From the point of view of Hans--Peter Uhl
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset Quotes eld
+\end_inset
+
+Pirated
+\begin_inset Quotes erd
+\end_inset
+
+ videos and music (Hollywood will sue me), child porn+terrorism
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Molested children
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Dissident opinions, leaks
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Sex, Drugs & Weapons (Rock'n'Roll see 1.)
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+What to do about it?
+\end_layout
+
+\begin_layout Itemize
+I don't want to know what my users want to do, nor do they want me to know
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Public shared stuff is possible to track down --- copyright is a political
+ problem, the technology we build is there for making copies, primarily
+ for cat videos and duck--face selfies
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+net2o is not primarily targeted at people who have 
+\begin_inset Quotes eld
+\end_inset
+
+something to hide
+\begin_inset Quotes erd
+\end_inset
+
+, it is intended to offer state--of--the--art privacy protection to everybody
+ without performance and usability drawbacks
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Normal criminal investigation has still a very good chance to catch criminals
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+How to fund it
+\end_layout
+
+\begin_layout Itemize
+Companies are not very trustworthy: If the NSA pays the bill, they do whatever
+ the NSA wants.
+ However, this problem also exists for FOSS projects to some extent (e.g.
+ Dual_EC_DRBG was implemented in OpenSSL after receiving funding from an
+ unnamed company).
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Kickstarter funding looks a lot more interesting, and can work for FOSS
+ projects, too
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ad--based funding is pretty problematic if you don't want to sell customer's
+ data one way or another
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Storage space 
+\begin_inset Quotes eld
+\end_inset
+
+in the cloud
+\begin_inset Quotes erd
+\end_inset
+
+ comes with the responsibility to take copyright violations down
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The whole economy behind such a network is huge; the cost for developing
+ are tiny compared to that
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Adoption
+\end_layout
+
+\begin_layout Itemize
+People have nothing to hide, so security is 
+\emph on
+not
+\emph default
+ a primary feature
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ease of use is a key for success
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Adoption rate usually is exponential with a quite constant replication factor,
+ i.e.
+ people will complain about 
+\begin_inset Quotes eld
+\end_inset
+
+empty wasteland
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+People like to feel good --- that's why Facebook has only a 
+\begin_inset Quotes eld
+\end_inset
+
+like
+\begin_inset Quotes erd
+\end_inset
+
+ button
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Censorship is not liked: Platforms like Facebook&Co.
+ take down sexual content and copyrighted stuff.
+ I won't (because I can't, by design)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Filter bubble instead of censorship: Don't be friend with people who share
+ things you don't like
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout BeginFrame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[allowframebreaks]
+\end_layout
+
+\end_inset
+
+For Further Reading
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o source repository 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "aescgm"
+
+\end_inset
+
+
+\noun on
+Shay Gueron, Vlad Krasnov
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+The fragility of AES-GCM authentication algorithm
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://eprint.iacr.org/2013/157.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "gcm"
+
+\end_inset
+
+
+\noun on
+Markku-Juhani O.
+ Saarinen 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+GCM, GHASH and Weak Keys
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+http://www.ecrypt.eu.org/hash2011/proceedings/hash2011_03.pdf
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout EndFrame
+
+\end_layout
+
+\end_body
+\end_document
