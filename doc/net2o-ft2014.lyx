@@ -2618,39 +2618,20 @@ Wenn die gewünschten Fragen nicht beantwortet werden, dann gibt es irgendwann
 \end_layout
 
 \begin_layout Section
-Distributed Data
+Verteilte Daten
 \end_layout
 
 \begin_layout BeginFrame
-Distributed Data
+Verteilte Daten
 \end_layout
 
 \begin_layout Itemize
-Following the 
-\begin_inset Quotes eld
+Jedes Datenobjekt ist eine 
+\begin_inset Quotes gld
 \end_inset
 
-everything is a file
-\begin_inset Quotes erd
-\end_inset
-
- principle, every data object is a file
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Data objects are accessed by their hash.
- The associated metadata are 
-\begin_inset Quotes eld
-\end_inset
-
-tags
-\begin_inset Quotes erd
+Datei
+\begin_inset Quotes grd
 \end_inset
 
 
@@ -2663,7 +2644,16 @@ tags
 
 \end_deeper
 \begin_layout Itemize
-Metadata is organized as a distributed prefix hash tree
+Datenobjekte werden über ihren Hash adressiert, und de zugehörigen Metadaten
+ sind 
+\begin_inset Quotes gld
+\end_inset
+
+Tags
+\begin_inset Quotes grd
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2673,7 +2663,27 @@ Metadata is organized as a distributed prefix hash tree
 
 \end_deeper
 \begin_layout Itemize
-Efficient distribution of data is important!
+Metadaten sind als verteilter Hash--Tree organisiert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die Daten im Hash--Tree werden durch Replikation verteilt
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Effiziente Distribution von Daten ist wichtig!
 \end_layout
 
 \begin_layout EndFrame
@@ -2681,13 +2691,14 @@ Efficient distribution of data is important!
 \end_layout
 
 \begin_layout BeginFrame
-Efficient Data Distribution
+Effiziente Datenverteilung
 \end_layout
 
 \begin_layout Standard
-Puzzle: How efficient can you distribute data (e.g.
- a video stream) in a P2P network? Assume all peers are equal, and have
- the capacity to upload one stream in realtime.
+Puzzle: Wie effizient kann man Daten (z.B.
+ einen Video--Stream) in einem P2P--Netzwerk? Unter der Annahme, dass alle
+ Peers gleich sind, und die Bandbreite haben, einen Stream in Echtzeit hochzulad
+en 
 \end_layout
 
 \begin_layout Pause
@@ -2695,8 +2706,9 @@ Puzzle: How efficient can you distribute data (e.g.
 \end_layout
 
 \begin_layout Itemize
-Obvious topology: The bucket chain --- this shows that each node feeds the
- data through --- a 1:1 relation of what you get to what you send
+Offensichtliche Topologie: Die Eimerkette --- damit sieht man, dass jeder
+ Knoten die Daten durchleitet --- eine 1:1--Relation dessen, was man bekommt
+ und man sendet
 \end_layout
 
 \begin_deeper
@@ -2706,15 +2718,15 @@ Obvious topology: The bucket chain --- this shows that each node feeds the
 
 \end_deeper
 \begin_layout Itemize
-bucket chain: 
+Eimerkette: 
 \begin_inset Formula $O(n)$
 \end_inset
 
- latency, 
+ Latenz, 
 \begin_inset Formula $O\left(\frac{1}{n}\right)$
 \end_inset
 
- robustness (each node can break the chain)
+ Robustheit (jeder Knoten bricht die Kette)
 \end_layout
 
 \begin_deeper
@@ -2724,11 +2736,11 @@ bucket chain:
 
 \end_deeper
 \begin_layout Itemize
-Suggestion: Tree structure instead of chain, e.g.
- a quad--tree.
- The root divides the data into four parts, each going down one branch of
- the tree.
- The leafs distribute the data to the other three branches of the tree
+Vorschlag: Baumstruktur statt Kette, z.B.
+ ein Quad--Tree.
+ Die Wurzel teilt die Daten in vier Teile, jeder wird in einem Zweig des
+ Baums verteilt.
+ Die Blätter verteilen die Daten an die anderen drei Zweite.
 \end_layout
 
 \begin_deeper
@@ -2738,8 +2750,7 @@ Suggestion: Tree structure instead of chain, e.g.
 
 \end_deeper
 \begin_layout Itemize
-For the quad--tree case, each node has only 8 neighbors: 4 sources and 4
- sinks
+Im Quad--Tree--Fall hat jeder Knoten nur 8 Nachbarn: 4 Quellen und 4 Senken
 \end_layout
 
 \begin_layout EndFrame
@@ -2747,7 +2758,7 @@ For the quad--tree case, each node has only 8 neighbors: 4 sources and 4
 \end_layout
 
 \begin_layout BeginFrame
-Tree Distribution Network
+Baum als Verteilernetzwerk
 \end_layout
 
 \begin_layout Standard
@@ -2771,7 +2782,7 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Avalanche distribution with quad--tree of depth 2
+Lawinen--Verteilung mit einem quad--tree der Tiefe 2
 \end_layout
 
 \end_inset
@@ -2793,14 +2804,14 @@ Avalanche distribution with quad--tree of depth 2
 \end_layout
 
 \begin_layout BeginFrame
-Possible Performance
+Mögliche Performance
 \end_layout
 
 \begin_layout Itemize
-Trees with a bigger base reduce latency.
- Example: To transfer a Justin Bieber tweet to 50 million followers, a binary
- tree needs 25.5 hops on average, a quad--tree 12.8 hops, and an oct--tree
- 8.5 hops.
+Ein Baum mit einer größeren Basis reduziert die Latenz.
+ Beispiel: Um einen Justin--Bieber--Tweet an die 50 Millionen Followers
+ zu verteilen, braucht ein Binärbaum 25,5 Hops im Durchschnitt, ein Quad--Tree
+ 12,8 Hops und ein Oct--Tree 8,5 Hops.
 \end_layout
 
 \begin_deeper
@@ -2810,11 +2821,12 @@ Trees with a bigger base reduce latency.
 
 \end_deeper
 \begin_layout Itemize
-A typical domestic (inside e.g.
- Germany) hop--to--hop time is just 20ms.
- International hops can be in the order of 250ms.
- Assuming there is only one international hop in the chain, the latency
- to distribute Justin Bieber's babbling is typically just 500ms in a quad--tree.
+Eine typische hop--zu--hop--Zeit in einem Land (z.B.
+ in Deutschland) ist knapp 20ms.
+ Internationale Hops können bis zu 250ms lang sein.
+ Unter der Annahme, dass nur ein internationaler Hop drin ist, dauert es
+ typischerweise nur 500ms, um Justin Bibers Gebabble in einem Quad--Tree
+ zu verteilen.
 \end_layout
 
 \begin_deeper
@@ -2824,15 +2836,14 @@ A typical domestic (inside e.g.
 
 \end_deeper
 \begin_layout Itemize
-Rule of thumb: 
+Daumenregel: 
 \begin_inset Formula $bandwidth=latency$
 \end_inset
 
-, i.e.
- if it takes 20ms from hop to hop, each node should replicate data for 20ms
- --- if we make the tree wider, the linear effort of replicating data will
- dominate transfer time, if we make the tree more narrow, the hop--to--hop
- time will dominate.
+, wenn es also 20ms braucht, zum nächsten Hop zu kommen, dann repliziert
+ jeder Knoten für 20ms Daten --- wenn wir den Baum breiter machen, dominiert
+ der lineare Aufwand der Replikation, wenn wir den Baum schmaler machen,
+ die Hop--zu--Hop--Zeit dominiert
 \end_layout
 
 \begin_deeper
@@ -2842,7 +2853,7 @@ Rule of thumb:
 
 \end_deeper
 \begin_layout Itemize
-The tree--like graph greatly reduces the number of nodes to know
+Der baumartige Graph reduziert die Anzahl der bekannten Knoten
 \end_layout
 
 \begin_layout EndFrame
@@ -2850,11 +2861,12 @@ The tree--like graph greatly reduces the number of nodes to know
 \end_layout
 
 \begin_layout BeginFrame
-Distributed Prefix Hash Tree
+Metadatenschutz
 \end_layout
 
 \begin_layout Itemize
-Most DHT approaches have poor performanc
+Ein weltweit verteilter Hash--Tree ist von jemanden mit genügend Geld 100%
+ beobachtbar
 \end_layout
 
 \begin_deeper
@@ -2864,56 +2876,13 @@ Most DHT approaches have poor performanc
 
 \end_deeper
 \begin_layout Itemize
-Prefix Hash Trees use a quite large base
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Only a few queries necessary to query an extremely large data base
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Suggestion: Active instantaneous replication of all changed data using the
- avalanche tree mentioned above
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Metadata Privacy
-\end_layout
-
-\begin_layout Itemize
-A global distributed hash tree is 100% observable by anybody with enough
- money
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Private trees shared only between a group of people: 
-\begin_inset Quotes eld
+Private Bäume teilen nur Daten innerhalb einer Gruppe Leute (die alle den
+ Schlüssel kennen): 
+\begin_inset Quotes gld
 \end_inset
 
-dark trees in a dark forrest
-\begin_inset Quotes erd
+Dunkle Bäume in eine dunklen Wald
+\begin_inset Quotes grd
 \end_inset
 
 
@@ -2926,674 +2895,13 @@ dark trees in a dark forrest
 
 \end_deeper
 \begin_layout Itemize
-Use different identities for distinct groups (one for your friends, one
- for your work, one for sharing pr0n), each one only known to that group:
- 
-\begin_inset Quotes eld
+Nutze verschiedene Identitäten für unterschiedliche Gruppen, jede nur der
+ jeweiligen Gruppe bekannt: 
+\begin_inset Quotes gld
 \end_inset
 
-dark social graph
-\begin_inset Quotes erd
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Your public ID is only for first contacts and the things you want to publish
- (i.e.
- PR)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Use neighborhood relationships to limit spread of data --- e.g.
- a node participating in a data distribution tree may only be known to the
- peer nodes in that tree
-\end_layout
-
-\begin_layout Section
-Applications
-\end_layout
-
-\begin_layout Subsection
-Apps in a Sandbox
-\end_layout
-
-\begin_layout BeginFrame
-Content or Apps?
-\end_layout
-
-\begin_layout Itemize
-The current web is defined by content --- web apps (JavaScript) are an afterthou
-gh
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Therefore, the application logic is usually on the server side
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-This doesn't work for a P2P network!
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Content is structured text, images, videos, music, etc.
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-App--Centric World
-\end_layout
-
-\begin_layout Itemize
-There's a phenomenon I call 
-\begin_inset Quotes eld
-\end_inset
-
-Turing creep
-\begin_inset Quotes erd
-\end_inset
-
-: Every sufficiently complex system contains a user--accessible Turing--complete
- language
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Corollary: Every efficient sufficiently complex system can execute native
- machine code
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-The application logic is to present the data; data itself is as above: structure
-d text, images, videos, music, etc.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Executing (especially efficient) code from the net raises obvious questions
- about security
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-How to securely execute code?
-\end_layout
-
-\begin_layout Standard
-There are several options tried; as usual, things are broken:
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Enumerate
-Execute code in a controlled secure VM, see for example Java.
- This is broken by design, as securing something from the inside doesn't
- work.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Execute code in a sandbox.
- This has shown as more robust, depending on how complex the outside of
- the sandbox is.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Public inspection of code.
- This is how the open source world works, but the underhanded C contest
- shows that inspection is tricky.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Scan for known evil code.
- This is the security industry's approach, and it is not working.
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Code signing can work together with public inspection --- but using it for
- accountability doesn't work
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Standard
-Therefore the choice is to sandbox public inspected code.
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Subsection
-API Basics
-\end_layout
-
-\begin_layout BeginFrame
-Formats&Requirements
-\end_layout
-
-\begin_layout FrameSubtitle
-How to display things
-\end_layout
-
-\begin_layout Standard
-\align center
-\begin_inset Graphics
-	filename formats+io.fig
-	scale 36
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Why OpenGL?
-\end_layout
-
-\begin_layout FrameSubtitle
-OpenGL can do everything
-\end_layout
-
-\begin_layout Standard
-OpenGL renders:
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Enumerate
-Triangles, lines, points --- simple components
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Textures and gradients
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-and uses shader programs --- the most powerful thing in OpenGL from 2.0.
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Standard
-Real requirement: visualization of 
-\emph on
-any 
-\emph default
-data.
- OpenGL can do that.
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-How to connect the media?
-\end_layout
-
-\begin_layout FrameSubtitle
-Lemma: every glue logic will become Turing complete
-\end_layout
-
-\begin_layout Itemize
-currently used glue: HTML+CSS+JavaScript
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
-
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-conclusion: use a powerful tool right from start!
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-browser: run--time and development tool for applications
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Frameworks
-\end_layout
-
-\begin_layout Itemize
-libsoil for images (PNG+JPEG loading into a texture)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-freetype-gl for fonts (TrueType/OpenType into a texture)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-OpenMAX on Android, gstreamer on Linux: videos into a texture
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
- work in progress)
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout Section
-Use Cases, Funding&Law, Adoption
-\end_layout
-
-\begin_layout BeginFrame
-Use Cases, Funding&Law
-\end_layout
-
-\begin_layout Standard
-\begin_inset Quotes eld
-\end_inset
-
-Layer 8
-\begin_inset Quotes erd
-\end_inset
-
- is the human in front of the screen.
- What will people use this for?
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Enumerate
-Sharing photos and videos
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Chat & video telephony
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-News, opinions, scientific papers, sharing knowledge
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Online shopping
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-What's the problem with those?
-\end_layout
-
-\begin_layout Standard
-From the point of view of Hans--Peter Uhl
-\end_layout
-
-\begin_layout Pause
-
-\end_layout
-
-\begin_layout Enumerate
-\begin_inset Quotes eld
-\end_inset
-
-Pirated
-\begin_inset Quotes erd
-\end_inset
-
- videos and music (Hollywood will sue me), child porn+terrorism
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Molested children
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Dissident opinions, leaks
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Enumerate
-Sex, Drugs & Weapons (Rock'n'Roll see 1.)
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-What to do about it?
-\end_layout
-
-\begin_layout Itemize
-I don't want to know what my users want to do, nor do they want me to know
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Public shared stuff is possible to track down --- copyright is a political
- problem, the technology we build is there for making copies, primarily
- for cat videos and duck--face selfies
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-net2o is not primarily targeted at people who have 
-\begin_inset Quotes eld
-\end_inset
-
-something to hide
-\begin_inset Quotes erd
-\end_inset
-
-, it is intended to offer state--of--the--art privacy protection to everybody
- without performance and usability drawbacks
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Normal criminal investigation has still a very good chance to catch criminals
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-How to fund it
-\end_layout
-
-\begin_layout Itemize
-Companies are not very trustworthy: If the NSA pays the bill, they do whatever
- the NSA wants.
- However, this problem also exists for FOSS projects to some extent (e.g.
- Dual_EC_DRBG was implemented in OpenSSL after receiving funding from an
- unnamed company).
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Kickstarter funding looks a lot more interesting, and can work for FOSS
- projects, too
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Ad--based funding is pretty problematic if you don't want to sell customer's
- data one way or another
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Storage space 
-\begin_inset Quotes eld
-\end_inset
-
-in the cloud
-\begin_inset Quotes erd
-\end_inset
-
- comes with the responsibility to take copyright violations down
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-The whole economy behind such a network is huge; the cost for developing
- are tiny compared to that
-\end_layout
-
-\begin_layout EndFrame
-
-\end_layout
-
-\begin_layout BeginFrame
-Adoption
-\end_layout
-
-\begin_layout Itemize
-People have nothing to hide, so security is 
-\emph on
-not
-\emph default
- a primary feature
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Ease of use is a key for success
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Adoption rate usually is exponential with a quite constant replication factor,
- i.e.
- people will complain about 
-\begin_inset Quotes eld
-\end_inset
-
-empty wasteland
-\begin_inset Quotes erd
+Dunkler sozialer Graph
+\begin_inset Quotes grd
 \end_inset
 
 
@@ -3606,15 +2914,8 @@ empty wasteland
 
 \end_deeper
 \begin_layout Itemize
-People like to feel good --- that's why Facebook has only a 
-\begin_inset Quotes eld
-\end_inset
-
-like
-\begin_inset Quotes erd
-\end_inset
-
- button
+Die öffentliche ID ist nur für erste Kontakte und Dinge, die man veröffentlichen
+ will (PR)
 \end_layout
 
 \begin_deeper
@@ -3624,20 +2925,10 @@ like
 
 \end_deeper
 \begin_layout Itemize
-Censorship is not liked: Platforms like Facebook&Co.
- take down sexual content and copyrighted stuff.
- I won't (because I can't, by design)
-\end_layout
-
-\begin_deeper
-\begin_layout Pause
-
-\end_layout
-
-\end_deeper
-\begin_layout Itemize
-Filter bubble instead of censorship: Don't be friend with people who share
- things you don't like
+Nutze Nachbarschaftsverhältnisse um das Verteilen von Daten zu begrenzen
+ --- z.B.
+ ein Knoten, der beim Datenverteilen teilnimmt, kennt nur die Nachbaren
+ in diesem Baum
 \end_layout
 
 \begin_layout EndFrame
