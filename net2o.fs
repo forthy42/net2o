@@ -1649,6 +1649,10 @@ User code-packet
 	ret-addr
     THEN   packet-to ;
 
+: send-data-packet ( -- ) +sendX
+    code-packet @ dup IF  @  THEN  outbuf-encrypt
+    send-cookie ret-addr packet-to ;
+
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!
     outbody min-size r> lshift move ;
@@ -1659,9 +1663,13 @@ User code-packet
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
-: sendX ( addr taddr n -- ) +sendX2
-    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+  send-packet
-    net2o:update-key ;
+: send-cX ( addr taddr n -- ) +sendX2
+    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+
+    send-packet  net2o:update-key ;
+
+: send-dX ( addr taddr n -- ) +sendX2
+    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+
+    send-data-packet ;
 
 \ send chunk
 
@@ -1718,7 +1726,7 @@ User <size-lb> 1 floats cell- uallot drop
     bursts# 1- data-b2b @ = IF data-tail? ELSE resend$@ nip 0= THEN
     IF  net2o:send  ELSE  net2o:resend  THEN
     dup 0= IF  2drop 2drop  EXIT  THEN
-    ?toggle-ack sendX ;
+    ?toggle-ack send-dX ;
 
 : bandwidth? ( -- flag )
     ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=

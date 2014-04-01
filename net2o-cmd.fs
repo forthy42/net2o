@@ -213,7 +213,7 @@ comp: :, also net2o-base ;
     o IF  code-map  ELSE  0  THEN  code-packet !
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I sendX  cmdreset  UNLOOP
+	    I send-cX  cmdreset  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
