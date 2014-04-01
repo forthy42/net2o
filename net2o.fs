@@ -1603,7 +1603,7 @@ require net2o-crypt.fs
 \ send blocks of memory
 
 : >dest ( addr -- ) outbuf destination $10 move ;
-: set-dest ( addr target -- )
+: set-dest ( target -- )
     64dup dest-addr 64!  outbuf addr 64! ;
 
 User outflag  outflag off
@@ -1663,13 +1663,11 @@ User code-packet
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
-: send-cX ( addr taddr n -- ) +sendX2
-    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+
-    send-packet  net2o:update-key ;
+: send-cX ( addr n -- ) +sendX2
+    >send  set-flags  send-packet  net2o:update-key ;
 
-: send-dX ( addr taddr n -- ) +sendX2
-    >r set-dest  r> ( addr n -- ) >send  set-flags  bandwidth+
-    send-data-packet ;
+: send-dX ( addr n -- ) +sendX2
+    >send  set-flags  bandwidth+ send-data-packet ;
 
 \ send chunk
 
@@ -1699,20 +1697,19 @@ User <size-lb> 1 floats cell- uallot drop
     dest-raddr @ - dup dest-size @ u<
     IF  ts-ticks!  ELSE  drop  THEN  o> ;
 
-: net2o:prep-send ( addr u dest -- addr taddr n len )
-    { 64: dest }  over  net2o:send-tick
-    send-size min-size over lshift
-    2>r dest 2r> ;
+: net2o:prep-send ( addr u dest -- addr n len )
+    set-dest  over  net2o:send-tick
+    send-size min-size over lshift ;
 
 \ synchronous sending
 
 : data-to-send ( -- flag )
     resend$@ nip 0> data-tail? or ;
 
-: net2o:resend ( -- addr taddr target n )
+: net2o:resend ( -- addr n )
     resend$@ net2o:get-resend net2o:prep-send /resend ;
 
-: net2o:send ( -- addr taddr target n )
+: net2o:send ( -- addr n )
     data-tail@ net2o:get-dest net2o:prep-send /tail ;
 
 : ?toggle-ack ( -- )

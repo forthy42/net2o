@@ -207,7 +207,7 @@ comp: :, also net2o-base ;
 ' net2o, IS net2o-do
 
 : send-cmd ( addr u dest -- ) n64-swap { buf# }
-    +send-cmd dest-addr 64@ 64>r
+    +send-cmd dest-addr 64@ 64>r set-dest
     cmd( ." send: " 64dup $64. 64>r
     dup buf# n2o:see cr 64r> )
     o IF  code-map  ELSE  0  THEN  code-packet !
