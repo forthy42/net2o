@@ -58,6 +58,7 @@ User buf-state cell uallot drop
     buf-state 2@ swap 8 u.r space 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
     ]hex  buf-state 2@ dump
     true !!function!! ;
+' net2o-crash IS default-method
 
 Defer cmd-table
 ' cmd-class IS cmd-table

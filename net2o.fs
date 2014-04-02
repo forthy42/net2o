@@ -1575,7 +1575,7 @@ require net2o-crypt.fs
 
 : cookie! ( -- )
     c:cookie
-    dest-addr 64@ >offset 0= IF  2drop  EXIT  THEN
+    dest-addr 64@ >offset 0= IF  drop 64drop  EXIT  THEN
     addr>ts cookie( ." Cookie: " dup hex. >r 64dup .16 cr r> )
     dest-cookies @ + 64! ;
 
