@@ -38,6 +38,7 @@ init-client
     d#id @ k#host cells + ['] c:insert-host $[]map ;
 
 : nat:connect ( addr u -- )
+    init-cache'
     2dup n2o:lookup dest-key
     0 send-list $[]@ return-addr swap move
     0 send-list $[]@ return-address swap move
