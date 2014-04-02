@@ -59,16 +59,6 @@ User buf-state cell uallot drop
     ]hex  buf-state 2@ dump
     true !!function!! ;
 
-\ make method dispatch table dynamic
-
-: class>count ( addr -- addr' u ) >osize dup cell+ @ 2 cells + ;
-: >dynamic ( class -- class' ) class>count save-mem drop 2 cells + ;
-: >inherit ( class1 class2 -- class' ) >dynamic swap >osize @ over >osize ! ;
-: class-resize ( class u -- class' ) over >methods @ umax >r
-    class>count r@ 2 cells + umax resize throw
-    r@ over cell+ !@ >r 2 cells + r> r> swap
-    U+DO  ['] net2o-crash over I + !  cell +LOOP ;
-
 Defer cmd-table
 ' cmd-class IS cmd-table
 
