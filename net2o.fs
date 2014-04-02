@@ -1582,23 +1582,13 @@ require net2o-crypt.fs
 : send-cookie ( -- )  data-map  @ >o cookie! o> ;
 : recv-cookie ( -- )  data-rmap @ >o cookie! o> ;
 
-[IFDEF] 64bit
-    : cookie+ ( addr bitmap map -- sum ) >o
-	cookie( ." cookie: " 64>r dup hex. 64r> 64dup .16 space space ) >r
-	addr>ts dest-size @ addr>ts umin
-	dest-cookies @ + 0
-	BEGIN  r@ 1 and IF  over @ cookie( 64dup .16 space ) +  THEN
-	>r cell+ r> r> 1 rshift dup >r 0= UNTIL
-	rdrop nip cookie( ." => " 64dup .16 cr ) o> ;
-[ELSE]
-    : cookie+ ( addr bitmap map -- sum ) >o
-	cookie( ." cookies: " 64>r dup hex. 64r> 64dup .16 space space ) >r >r
-	addr>ts dest-size @ addr>ts umin
-	dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
-	BEGIN  r@ 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
-	addr 64'+ to addr r> r> 1 64rshift 64dup >r >r 64-0= UNTIL
-	64r> 64drop cookie( ." => " 64dup .16 space cr ) o> ;
-[THEN]
+: cookie+ ( addr bitmap map -- sum ) >o
+    cookie( ." cookies: " 64>r dup hex. 64r> 64dup .16 space space ) 64>r
+    addr>ts dest-size @ addr>ts umin
+    dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
+    BEGIN  64r@ 64>n 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
+    addr 64'+ to addr 64r> 1 64rshift 64dup 64>r 64-0= UNTIL
+    64r> 64drop cookie( ." => " 64dup .16 space cr ) o> ;
 
 \ send blocks of memory
 

@@ -71,7 +71,7 @@ cmd-class >dynamic to cmd-class
 : n>cmd ( n -- addr ) cells
     o IF  ?ocmd o cell- @  ELSE  ?cmd setup-class  THEN + ;
 
-: cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
+: cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
 : (net2o-see) ( addr -- )  @
     dup ['] net2o-crash <> IF
@@ -113,8 +113,9 @@ Variable show-offset  show-offset on
     BEGIN  cmd-see dup 0= UNTIL  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
-    buf-state 2! trace( r@ dup . .net2o-name .s cr )
-    cmd@ n>cmd perform buf-state 2@ ;
+    buf-state 2!
+    cmd@ trace( .s cr ) n>cmd
+    perform buf-state 2@ ;
 
 : >cmd ( xt u -- ) cells >r
     cmd-table r@ cell+ class-resize action-of cmd-table (int-to)
