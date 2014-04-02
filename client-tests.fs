@@ -134,8 +134,8 @@ require ./net2o.fs
     expect-reply close-all \ rewind-total
     s" Download test 3" $, type cr .time ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
-    s" data/2011-05-13_11-26-57.jpg" s" .cache/photo000.jpg" n2o:copy
-    s" data/2011-05-20_17-01-12.jpg" s" .cache/photo001.jpg" n2o:copy
+    "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
+    "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
     n2o:done
     send-chunks
     end-code
