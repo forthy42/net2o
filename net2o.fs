@@ -223,7 +223,7 @@ Variable my-ip$
 Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
 
-\ convention: '2' indicates net2o, '3' IPv6, '4' IPv4.
+\ convention: '1' indicates net2o, '2' IPv6+IPv4, '3' IPv6, '4' IPv4.
 \ Tags are kept sorted, so you'll try net2o first, then IPv6, and IPv4 last
 
 : .sockaddr { addr alen -- }
@@ -261,6 +261,8 @@ User ip6:#
     drop ." ]" ;
 : .ip6 ( addr len -- )
     .ip6a .port .net2o ;
+: .ip64 ( addr len -- )
+    .ip6a ." /" .ip4a .port .net2o ;
 
 : .address ( addr u -- )
     over w@ AF_INET6 =
@@ -272,7 +274,8 @@ User ip6:#
 
 : .ipaddr ( addr len -- )
     case  over c@ >r 1 /string r>
-	'2' of  ." ->" xtype  endof
+	'1' of  ." |" xtype  endof
+	'2' of  .ip64 endof
 	'3' of  .ip6  endof
 	'4' of  .ip4  endof
 	-rot dump endcase ;
@@ -335,6 +338,10 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 	?fake-ip4
     THEN ]sock ;
 
+: check-ip64 ( dummy -- ipaddr u )
+    >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
+    r> $10 + be-ul@ check-ip4 ;
+
 : try-ip ( addr u -- flag )
     sock[ query-sock -rot connect 0= ]sock ;
 
@@ -365,13 +372,15 @@ Variable ins$0 \ just a null pointer
     REPEAT 2drop 2drop ; \ not found
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [: dup 4 = IF '4' emit ELSE '3' emit THEN type
+    [: dup 4 = IF '4' emit ELSE dup $10 = IF '3' emit ELSE '2' emit THEN THEN type
 	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
     my-ip$ $ins[] ;
 
-: !my-ips ( -- )
-    global-ip4 +my-ip
-    global-ip6 +my-ip
+Variable $tmp2
+
+: !my-ips ( -- )  $tmp2 $off
+    [: global-ip6 type global-ip4 type ;] $tmp2 $exec
+    $tmp2 $@ +my-ip
     local-ip6  +my-ip ;
 
 \ Create udp socket
@@ -988,14 +997,25 @@ resend-size# buffer: resend-init
     over be-ul@ sockaddr1 ipv4!
     6 /string !ret-addr ;
 
+: 64>sock ( addr u -- )
+    over check-ip6 nip IF
+	over $14 + w@ sockaddr1 port w!
+	over $10 sockaddr1 sin6_addr swap move
+    ELSE
+	over $10 + be-ul@ sockaddr1 ipv4!
+    THEN
+    $16 /string !ret-addr ;
+
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
+	'2' of  64>sock endof
 	'3' of  6>sock  endof
 	'4' of  4>sock  endof
 	!!no-addr!!  endcase  sockaddr1 sock-rest ;
 
 : $>check ( addr u -- flag )
     case  over c@ >r drop 1+ r>
+	'2' of  check-ip64 nip 0<>  endof
 	'3' of  check-ip6 nip 0<>  endof
 	'4' of  be-ul@ check-ip4 nip 0<>  endof
 	>r 2drop false r>  endcase ;
