@@ -46,6 +46,8 @@ s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 s" no temporary key"             throwcode !!no-tmpkey!!
+s" String stack full"            throwcode !!string-full!!
+s" String stack empty"           throwcode !!string-empty!!
 \ required tools
 
 \ require smartdots.fs
