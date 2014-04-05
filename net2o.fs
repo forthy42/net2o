@@ -310,7 +310,8 @@ User ip6:#
     sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
 
-: check-ip4 ( ip4addr -- my-ip4addr 4 ) sock[
+: check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
+    sock[
     sockaddr_in6 %size alen !
     sockaddr ipv4! query-sock sockaddr sock-rest connect ?ior
     query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
@@ -341,7 +342,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 	?fake-ip4
     THEN ]sock ;
 
-: check-ip64 ( dummy -- ipaddr u ) noipv4( 0 EXIT )
+: check-ip64 ( dummy -- ipaddr u ) noipv4( check-ip6 EXIT )
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
     2drop r> $10 + be-ul@ check-ip4 ;
 
@@ -1001,8 +1002,8 @@ resend-size# buffer: resend-init
     6 /string !ret-addr ;
 
 : 64>sock ( addr u -- )
+    over $14 + w@ sockaddr1 port w!
     over check-ip6 nip IF
-	over $14 + w@ sockaddr1 port w!
 	over $10 sockaddr1 sin6_addr swap move
     ELSE
 	over $10 + be-ul@ sockaddr1 ipv4!
