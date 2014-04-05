@@ -1064,7 +1064,7 @@ resend-size# buffer: resend-init
 
 : $>ins ( addr u -- )
     case  over c@ >r 1 /string r>
-	'2' of  2dup 6>64sock ins-addr1  4>64sock ins-addr1  endof
+	'2' of  2dup 4>64sock ins-addr1  6>64sock ins-addr1  endof
 	'3' of  6>sock ins-addr1  endof
 	'4' of  4>sock ins-addr1  endof
 	!!no-addr!!  endcase ;
