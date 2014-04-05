@@ -9,14 +9,14 @@ require client-tests.fs
 script? [IF] debug-task [THEN]
 test-keys \ we want the test keys - never use this in production!
 
+"alice" >key \ get our anonymous key
+
 init-client
 
 !time
 
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
-
-"alice" >key \ get our anonymous key
 
 : c:lookup ( addr u -- )
     $2000 $10000 "test" c:connect

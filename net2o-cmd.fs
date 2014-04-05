@@ -126,7 +126,7 @@ Variable show-offset  show-offset on
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see ( addr u -- )  ." net2o-code " 
+: n2o:see ( addr u -- ) ." net2o-code " 
     BEGIN  cmd-see dup 0= UNTIL  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
@@ -217,8 +217,7 @@ comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
-    cmd( ." send: " 64dup $64. 64>r
-    dup buf# n2o:see cr 64r> )
+    cmd( ." send: " dest-addr 64@ $64. dup buf# n2o:see cr )
     o IF  code-map  ELSE  0  THEN  code-packet !
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF

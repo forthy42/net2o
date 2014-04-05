@@ -8,14 +8,14 @@ require client-tests.fs
 debug-task
 test-keys \ we want the test keys - never use this in production!
 
+"bob" >key \ get our bob key
+
 init-client
 
 !time
 
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
-
-"bob" >key \ get our bob key
 
 : c:bob ( -- )
     $2000 $10000 "test" c:connect
