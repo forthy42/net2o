@@ -1006,10 +1006,11 @@ resend-size# buffer: resend-init
     6 /string !ret-addr ;
 
 : 64>sock ( addr u -- )
-    over $14 + w@ sockaddr1 port w!
     over check-ip6 nip IF
+	over $14 + w@ sockaddr1 port w!
 	over $10 sockaddr1 sin6_addr swap move
     ELSE
+	over $14 + w@ sockaddr1 port w!
 	over $10 + be-ul@ sockaddr1 ipv4!
     THEN
     $16 /string !ret-addr ;
