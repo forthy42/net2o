@@ -46,8 +46,8 @@ User buf-state cell uallot drop
 
 : @+ ( addr -- n addr' )  dup @ swap cell+ ;
 
-$10 2* cells Constant string-max#
-Variable string-stack  string-max# allot
+4 2* cells Constant string-max#
+User string-stack  string-max# uallot drop
 
 : >$ ( addr u -- <addr u> )
     string-stack @+ + 2!
@@ -289,6 +289,7 @@ Variable throwcount
     drop  r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
+    string-stack off
     o IF
 	cmd0source off
 	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
