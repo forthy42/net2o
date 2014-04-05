@@ -1038,15 +1038,18 @@ resend-size# buffer: resend-init
     over be-ul@ sockaddr1 ipv4!
     6 /string !ret-addr ;
 
-: 64>sock ( addr u -- )
-    over check-ip6 nip IF
-	over $14 + w@ sockaddr1 port w!
-	over $10 sockaddr1 sin6_addr swap move
-    ELSE
-	over $14 + w@ sockaddr1 port w!
-	over $10 + be-ul@ sockaddr1 ipv4!
-    THEN
+: 6>64sock ( addr u -- )
+    over $14 + w@ sockaddr1 port w!
+    over $10 sockaddr1 sin6_addr swap move
     $16 /string !ret-addr ;
+
+: 4>64sock ( addr u -- )
+    over $14 + w@ sockaddr1 port w!
+    over $10 + be-ul@ sockaddr1 ipv4!
+    $16 /string !ret-addr ;
+
+: 64>sock ( addr u -- )
+    over check-ip6 nip IF  6>64sock  ELSE  4>64sock  THEN ;
 
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
@@ -1054,6 +1057,17 @@ resend-size# buffer: resend-init
 	'3' of  6>sock  endof
 	'4' of  4>sock  endof
 	!!no-addr!!  endcase  sockaddr1 sock-rest ;
+
+: ins-addr1 ( -- )
+    sockaddr1 sock-rest  insert-address temp-addr be!
+    temp-addr $10 send-list $+[]! ;
+
+: $>ins ( addr u -- )
+    case  over c@ >r 1 /string r>
+	'2' of  2dup 6>64sock ins-addr1  4>64sock ins-addr1  endof
+	'3' of  6>sock ins-addr1  endof
+	'4' of  4>sock ins-addr1  endof
+	!!no-addr!!  endcase ;
 
 : $>check ( addr u -- flag )
     case  over c@ >r drop 1+ r>
@@ -1068,10 +1082,7 @@ resend-size# buffer: resend-init
 
 : net2o:dest ( addr u -- )
     nat( ." dest: " 2dup .ipaddr cr )
-    2dup $>check IF  $>sock
-	nat( sockaddr1 alen @ ." use: " 2dup .address cr )
-	insert-address temp-addr be!  temp-addr $10 send-list $+[]!
-    ELSE  2drop  THEN ;
+    2dup $>check IF  $>ins  ELSE  2drop  THEN ;
 
 : net2o:punch ( addr u -- )
     o IF  is-server c@
