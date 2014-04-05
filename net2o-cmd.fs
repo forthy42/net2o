@@ -44,6 +44,9 @@ User buf-state cell uallot drop
 : byte@ ( addr u -- addr' u' b )
     >r count r> 1- swap ;
 
+\ use a string stack to make sure that strings can only originate from
+\ a string inside the command we are just executing
+
 : @+ ( addr -- n addr' )  dup @ swap cell+ ;
 
 4 2* cells Constant string-max#

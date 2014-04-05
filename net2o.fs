@@ -329,7 +329,8 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 0 Value my-port#
 
-: check-ip6 ( dummy -- ip6addr u ) sock[
+: check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
+    sock[
     \G return IPv6 address - if length is 0, not reachable with IPv6
     sockaddr_in6 %size alen !
     sockaddr sin6_addr $10 move
@@ -340,7 +341,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 	?fake-ip4
     THEN ]sock ;
 
-: check-ip64 ( dummy -- ipaddr u )
+: check-ip64 ( dummy -- ipaddr u ) noipv4( 0 EXIT )
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
     r> $10 + be-ul@ check-ip4 ;
 
