@@ -387,9 +387,35 @@ Variable ins$0 \ just a null pointer
 Variable $tmp2
 
 : !my-ips ( -- )  $tmp2 $off
-    [: global-ip6 type global-ip4 type ;] $tmp2 $exec
+    global-ip6 tuck [: type global-ip4 type ;] $tmp2 $exec
     $tmp2 $@ +my-ip
-    local-ip6  +my-ip ;
+    0= IF  local-ip6  +my-ip THEN ;
+
+\ this indicates a problem...
+
+: my-ip= { addr1 u1 addr2 u2 -- flag }
+    case addr2 c@
+	'2' of  case  addr1 c@
+		'2' of  addr1 u1 addr2 u2 str=  endof
+		'3' of  addr1 1+ addr2 1+ $10 tuck str=
+		    addr1 $11 + addr2 $15 + 2 tuck str= and  endof
+		'4' of  addr1 1+ addr2 $11 + 6 tuck str=  endof
+	    false swap  endcase  endof
+	'3' of  case  addr1 c@
+		'2' of  addr1 1+ addr2 1+ $10 tuck str=
+		    addr1 $15 + addr2 $11 + 2 tuck str= and  endof
+		'3' of  addr1 u1 addr2 u2 str=  endof
+		'4' of  false  endof
+	    false swap  endcase endof
+	'4' of  case  addr1 c@
+		'2' of  addr1 $11 + addr2 1+ 6 tuck str=  endof
+		'3' of  false  endof
+		'4' of  addr1 u1 addr2 u2 str=  endof
+	    false swap  endcase endof
+    false swap endcase ;
+
+: my-ip? ( addr u -- flag )
+    0 my-ip$ [: rot >r my-ip= r> or ;] $[]map ;
 
 \ Create udp socket
 

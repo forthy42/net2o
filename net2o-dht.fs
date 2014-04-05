@@ -333,7 +333,9 @@ false Value add-myip
     nest[ request-done ]nest end-cmd
     ['] end-cmd IS expect-reply? ;
 : addme ( addr u -- ) 2dup .iperr
-    pub? IF  my-ip$ $ins[]  EXIT  THEN
+    pub? IF
+	2dup my-ip? IF  2drop  EXIT  THEN
+	my-ip$ $ins[]  EXIT  THEN
     now>never
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize $, dht-id
