@@ -353,6 +353,8 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;
 
+\ insert into sorted string array
+
 Variable ins$0 \ just a null pointer
 
 : $ins[] ( addr u $array -- )
@@ -374,6 +376,8 @@ Variable ins$0 \ just a null pointer
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
+
+\ add IP addresses
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     [: dup 4 = IF '4' emit ELSE dup $10 = IF '3' emit ELSE '2' emit THEN THEN type
