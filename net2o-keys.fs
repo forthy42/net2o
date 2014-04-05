@@ -159,12 +159,12 @@ keypack-all# buffer: keypack-d
 
 get-current also net2o-base definitions
 
-100 net2o: newkey ( addr u -- ) keys? IF  key:new  ELSE  2drop  THEN ;
-101 net2o: privkey ( addr u -- ) keys? IF  ke-sk $! +seckey   ELSE  2drop  THEN ;
+100 net2o: newkey ( addr u -- ) $> keys? IF  key:new  ELSE  2drop  THEN ;
+101 net2o: privkey ( addr u -- ) $> keys? IF  ke-sk $! +seckey   ELSE  2drop  THEN ;
 102 net2o: keytype ( n -- ) keys? IF  64>n ke-type !  ELSE  64drop  THEN ; \ default: anonymous
-103 net2o: keynick ( addr u -- ) keys? IF  ke-nick $!  ELSE  2drop  THEN ;
-104 net2o: keyprofile ( addr u -- ) keys? IF ke-prof $!  ELSE  2drop  THEN ;
-105 net2o: newkeysig ( addr u -- ) keys? IF save-mem addsig 2!
+103 net2o: keynick ( addr u -- ) $> keys? IF  ke-nick $!  ELSE  2drop  THEN ;
+104 net2o: keyprofile ( addr u -- ) $> keys? IF ke-prof $!  ELSE  2drop  THEN ;
+105 net2o: newkeysig ( addr u -- ) $> keys? IF save-mem addsig 2!
     addsig 2 cells ke-sigs $+!  ELSE  2drop  THEN ;
 106 net2o: keymask ( x -- ) 64drop ;
 107 net2o: keyfirst ( date-ns -- ) keys? IF ke-first 64!  ELSE  64drop  THEN ;
