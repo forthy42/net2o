@@ -584,6 +584,13 @@ Variable lastn2oaddr
     THEN ;
 
 : insert-ip ( addr u port -- net2o-addr )
+    SOCK_DGRAM >hints  get-info info>string insert-address ;
+
+: insert-ip4 ( addr u port -- net2o-addr )
+    SOCK_DGRAM >hints  AF_INET hints ai_family l!
+    get-info info>string insert-address ;
+: insert-ip6 ( addr u port -- net2o-addr )
+    SOCK_DGRAM >hints  AF_INET6 hints ai_family l!
     get-info info>string insert-address ;
 
 : address>route ( -- n/-1 )

@@ -36,8 +36,14 @@ require ./net2o.fs
     "eve" ke-nick $! $135BB908EA37210E. d>64 ke-first 64!
 ;
 
-: c:connect ( code data nick u -- )
-    net2o-host $@ net2o-port insert-ip
+: ins-ip ( -- )
+    net2o-host $@ net2o-port insert-ip ;
+: ins-ip4 ( -- )
+    net2o-host $@ net2o-port insert-ip4 ;
+: ins-ip6 ( -- )
+    net2o-host $@ net2o-port insert-ip6 ;
+
+: c:connect ( code data nick u ret -- )
     [: .time ." Connect to: " dup hex. cr ;] $err
     n2o:new-context
     dest-key \ get our destination key
@@ -92,7 +98,7 @@ require ./net2o.fs
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
     o-timeout n2o:dispose-context ;
 
-: c:dht ( n -- )  $2000 $10000 "test" c:connect 0 ?DO
+: c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
     LOOP c:dhtend ;
 
@@ -203,7 +209,7 @@ require ./net2o.fs
 
 : c:test ( -- )
     init-cache'
-    $10000 $100000 "test" c:connect c:test-rest ;
+    $10000 $100000 "test" ins-ip c:connect c:test-rest ;
 
 event: ->throw dup DoError throw ;
 

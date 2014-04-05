@@ -17,8 +17,8 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-: c:bob ( -- )
-    $2000 $10000 "test" c:connect
+: c:bob ( -- ) 
+    $2000 $10000 "test" ins-ip4 c:connect
     c:add-me ;
 
 c:bob server-loop
