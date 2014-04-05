@@ -343,7 +343,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : check-ip64 ( dummy -- ipaddr u ) noipv4( 0 EXIT )
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
-    r> $10 + be-ul@ check-ip4 ;
+    2drop r> $10 + be-ul@ check-ip4 ;
 
 : try-ip ( addr u -- flag )
     sock[ query-sock -rot connect 0= ]sock ;
