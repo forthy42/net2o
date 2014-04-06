@@ -25,11 +25,7 @@ init-client
     nick-key ke-pk $@ >d#id ;
 : c:insert-host ( addr u -- )
     host>$ IF
-	$>sock 2dup try-ip
-	IF insert-address ret-addr ins-dest
-	    ret-addr $10 nat( ." host: " 2dup xtype cr )
-	    send-list $+[]!  EXIT
-	THEN
+	['] ins-addr1 $>sock  EXIT
     THEN  2drop ;
 
 : n2o:lookup ( addr u -- )
