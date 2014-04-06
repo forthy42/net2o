@@ -1671,8 +1671,6 @@ User outflag  outflag off
 
 #90 Constant EMSGSIZE
 
-User code-packet
-
 : packet-to ( addr -- )  >dest
     out-route  outbuf dup packet-size
     send-a-packet 0< IF
@@ -1683,10 +1681,9 @@ User code-packet
 	THEN
     THEN ;
 
-: send-packet ( -- ) +sendX
+: send-code-packet ( -- ) +sendX
 \    ." send " outbuf .header
-    code-packet @ dup IF  @  THEN  outbuf-encrypt
-    code-packet @ data-map = IF  send-cookie  THEN
+    o IF  code-map @  ELSE  0  THEN  outbuf-encrypt
     outbuf addr 64@ 64-0= IF
 	return-addr
 	.time ." cmd0 to: " dup $10 xtype cr
@@ -1702,7 +1699,7 @@ User code-packet
     THEN   packet-to ;
 
 : send-data-packet ( -- ) +sendX
-    code-packet @ dup IF  @  THEN  outbuf-encrypt
+    data-map @  outbuf-encrypt
     send-cookie ret-addr packet-to ;
 
 : >send ( addr n -- )
@@ -1716,7 +1713,7 @@ User code-packet
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
 : send-cX ( addr n -- ) +sendX2
-    >send  set-flags  send-packet  net2o:update-key ;
+    >send  set-flags  send-code-packet  net2o:update-key ;
 
 : send-dX ( addr n -- ) +sendX2
     >send  set-flags  bandwidth+ send-data-packet ;
@@ -1771,7 +1768,7 @@ User <size-lb> 1 floats cell- uallot drop
     THEN ;
 
 : net2o:send-chunk ( -- )  +chunk
-    ack-state c@ outflag or!  data-map code-packet !
+    ack-state c@ outflag or!
     bursts# 1- data-b2b @ = IF data-tail? ELSE resend$@ nip 0= THEN
     IF  net2o:send  ELSE  net2o:resend  THEN
     dup 0= IF  2drop 2drop  EXIT  THEN
