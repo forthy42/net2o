@@ -1048,7 +1048,7 @@ resend-size# buffer: resend-init
     over $10 + be-ul@ sockaddr1 ipv4!
     $16 /string !ret-addr ;
 
-: 64>sock ( addr u -- )
+: 64>sock ( addr u -- ) \ !!fixme: send pings to both!!
     over check-ip6 nip IF  64>6sock  ELSE  64>4sock  THEN ;
 
 : $>sock ( addr u -- sockaddr u )
@@ -1058,28 +1058,36 @@ resend-size# buffer: resend-init
 	'4' of  4>sock  endof
 	!!no-addr!!  endcase  sockaddr1 sock-rest ;
 
-: ins-addr1 ( -- )
-    sockaddr1 sock-rest sock[
-    2dup query-sock -rot connect 0< errno 101 = and
-    ]sock IF  2drop  EXIT  THEN
+: >send-list ( addr u -- )
     insert-address temp-addr be!
     temp-addr $10 send-list $+[]! ;
 
-: net2o:dest ( addr u -- )
-    nat( ." dest: " 2dup .ipaddr cr )
-    case  over c@ >r 1 /string r>
-	'2' of  2dup 64>4sock ins-addr1  64>6sock ins-addr1  endof
-	'3' of  6>sock ins-addr1  endof
-	'4' of  4>sock ins-addr1  endof
-	!!no-addr!!  endcase ;
+: check-addr1 ( -- addr u flag )
+    sockaddr1 sock-rest sock[
+    2dup query-sock -rot connect 0< errno 101 = and
+    ]sock ;
 
-: net2o:ping ( addr u -- ) \ ping a sock address
-    ." ping: " 2dup .ipaddr cr
-    $>sock 2>r net2o-sock fileno "" 0 2r> sendto drop ;
+: ins-addr1 ( -- )
+    check-addr1 IF  2drop  EXIT  THEN
+    nat( ." dest: " 2dup .address cr )
+    >send-list ;
+
+: ping-addr1 ( -- )
+    check-addr1 IF  2drop  EXIT  THEN
+    nat( ." ping: " 2dup .address cr )
+    2>r net2o-sock fileno "" 0 2r> sendto drop ;
+
+: $>sock-do ( addr u xt -- ) { xt }
+    case  over c@ >r 1 /string r>
+	'2' of  2dup 64>4sock xt execute
+	    64>6sock xt execute  endof
+	'3' of  6>sock xt execute  endof
+	'4' of  4>sock xt execute  endof
+	!!no-addr!!  endcase ;
 
 : net2o:punch ( addr u -- )
     o IF  is-server c@
-	IF  net2o:ping  ELSE  net2o:dest  THEN
+	IF  ['] ping-addr1  ELSE  ['] ins-addr1  THEN  $>sock-do
     ELSE  2drop  THEN ;
 
 \ create new maps
