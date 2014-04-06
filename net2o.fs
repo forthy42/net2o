@@ -1049,7 +1049,7 @@ resend-size# buffer: resend-init
     $16 /string !ret-addr ;
 
 : 64>sock ( addr u -- )
-    over check-ip6 nip IF  64>6sock  ELSE  64>6sock  THEN ;
+    over check-ip6 nip IF  64>6sock  ELSE  64>4sock  THEN ;
 
 : $>sock ( addr u -- sockaddr u )
     case  over c@ >r 1 /string r>
