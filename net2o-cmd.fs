@@ -61,10 +61,13 @@ User string-stack  string-max# uallot drop
     -2 cells string-stack +!
     string-stack @+ + 2@ ;
 
-: string@ ( -- $:string )
-    buf-state 2@ bounds p@+ [IFUNDEF] 64bit nip [THEN]
+: @>$ ( addr u -- $:string addr' u' )
+    bounds p@+ [IFUNDEF] 64bit nip [THEN]
     swap $200000 umin bounds ( endbuf endstring startstring )
-    >r over umin dup r> tuck - >$ tuck - buf-state 2! ;
+    >r over umin dup r> tuck - >$ tuck - ;
+
+: string@ ( -- $:string )
+    buf-state 2@ @>$ buf-state 2! ;
 
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
