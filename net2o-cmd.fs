@@ -62,9 +62,9 @@ User string-stack  string-max# uallot drop
     string-stack @+ + 2@ ;
 
 : string@ ( -- addr u )
-    buf-state 2@ over + >r
-    p@+ [IFUNDEF] 64bit nip [THEN] swap 2dup + r> over -
-    tuck buf-state 2! 0 min + >$ ;
+    buf-state 2@ bounds p@+ [IFUNDEF] 64bit nip [THEN]
+    swap $200000 umin bounds ( endbuf endstring startstring )
+    >r over umin dup r> tuck - >$ tuck - buf-state 2! ;
 
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though

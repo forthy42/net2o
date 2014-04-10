@@ -336,6 +336,7 @@ false Value add-myip
     pub? IF
 	2dup my-ip? IF  2drop  EXIT  THEN
 	my-ip$ $ins[]  EXIT  THEN
+\    2dup my-ip? 0= IF  2dup my-ip$ $ins[]  THEN
     now>never
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize $, dht-id

@@ -229,6 +229,7 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ Tags are kept sorted, so you'll try net2o first, then IPv6, and IPv4 last
 
 : .sockaddr { addr alen -- }
+    \ convert socket into net2o address token
     case addr family w@
 	AF_INET of
 	    '4' emit addr sin_addr 4 type addr port 2 type
