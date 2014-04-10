@@ -226,11 +226,11 @@ $10 Constant datesize#
 
 \ commands for DHT
 
-130 net2o: dht-id ( <addr u> -- ) $> >d#id ;
+130 net2o: dht-id ( $:string -- ) $> >d#id ;
 \g set dht id for further operations on it
-131 net2o: dht-value+ ( <addr u> key -- ) 64>n >r $> r> d#value+ ;
+131 net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
 \g add a value to the given dht key
-132 net2o: dht-value- ( <addr u> key -- ) 64>n >r $> r> d#value- ;
+132 net2o: dht-value- ( $:string key -- ) 64>n >r $> r> d#value- ;
 \g remove a value from the given dht key
 
 \ queries

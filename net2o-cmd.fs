@@ -52,16 +52,16 @@ User buf-state cell uallot drop
 4 2* cells Constant string-max#
 User string-stack  string-max# uallot drop
 
-: >$ ( addr u -- <addr u> )
+: >$ ( addr u -- $:string )
     string-stack @+ + 2!
     2 cells string-stack +!
     string-stack @ string-max# u>=  !!string-full!! ;
-: $> ( <addr u> -- addr u )
+: $> ( $:string -- addr u )
     string-stack @ 0<= !!string-empty!!
     -2 cells string-stack +!
     string-stack @+ + 2@ ;
 
-: string@ ( -- addr u )
+: string@ ( -- $:string )
     buf-state 2@ bounds p@+ [IFUNDEF] 64bit nip [THEN]
     swap $200000 umin bounds ( endbuf endstring startstring )
     >r over umin dup r> tuck - >$ tuck - buf-state 2! ;
@@ -102,7 +102,7 @@ cmd-class >dynamic to cmd-class
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
 
-: n2o.string ( <addr u> -- )  $>
+: n2o.string ( $:string -- )  $>
     2dup printable? IF
 	.\" \"" type
     ELSE
@@ -167,7 +167,7 @@ get-current also net2o-base definitions previous
     p@ ;
 +net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
     ps@ ;
-+net2o: string ( "string" -- <addr u> ) \ string literal
++net2o: string ( "string" -- $:string ) \ string literal
     string@ ;
 +net2o: dflit ( "dfloat" -- r ) \ double float literal
     buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
@@ -376,7 +376,7 @@ dup set-current previous
 also net2o-base definitions
 +net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
-+net2o: type ( <addr u> -- ) \ type string on server log
++net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
 +net2o: . ( -- ) \ print number on server log
     64. ;
@@ -385,7 +385,7 @@ also net2o-base definitions
 +net2o: see-me ( -- ) \ see received commands on server log
     n2o:see-me ;
 
-+net2o: push-$ ( <addr u> -- ) \ push string into answer packet
++net2o: push-$ ( $:string -- ) \ push string into answer packet
     $> $, ;
 +net2o: push-slit ( n -- ) \ push singed literal into answer packet
     slit, ;
@@ -395,9 +395,9 @@ also net2o-base definitions
 
 +net2o: push' ( "cmd" -- ) \ push command into answer packet
     p@ cmd, ;
-+net2o: nest ( <addr u> -- ) \ nested (self-encrypted) command
++net2o: nest ( $:string -- ) \ nested (self-encrypted) command
     $> cmdnest ;
-+net2o: tmpnest ( <addr u> -- ) \ nested (temporary encrypted) command
++net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
 : ]nest  ( -- )  end-cmd cmd>nest $, push-$ push' nest ;
@@ -429,7 +429,7 @@ also net2o-base definitions
     addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-+net2o: store-key ( <addr u> -- ) $> \ store key
++net2o: store-key ( $:string -- ) $> \ store key
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
@@ -458,24 +458,24 @@ net2o-base
 
 \ crypto functions
 
-+net2o: receive-key ( <addr u> -- ) $> \ receive a key
++net2o: receive-key ( $:string -- ) $> \ receive a key
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
 +net2o: key-request ( -- ) \ request a key
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     nest[ pkc keysize $, receive-key ;
-+net2o: receive-tmpkey ( <addr u> -- ) $> \ receive emphemeral key
++net2o: receive-tmpkey ( $:string -- ) $> \ receive emphemeral key
     net2o:receive-tmpkey ;
 +net2o: tmpkey-request ( -- ) \ request ephemeral key
     stpkc keysize $, receive-tmpkey ;
 +net2o: update-key ( -- ) \ update secrets
     net2o:update-key ;
-+net2o: gen-ivs ( <addr u> -- ) \ generate IVs
++net2o: gen-ivs ( $:string -- ) \ generate IVs
     $> ivs-strings receive-ivs ;
 
 \ nat traversal functions
 
-+net2o: punch ( <addr u> -- ) \ punch NAT traversal hole
++net2o: punch ( $:string -- ) \ punch NAT traversal hole
     $> net2o:punch ;
 
 : gen-punch ( -- ) my-ip$ [: $, punch ;] $[]map ;
@@ -491,7 +491,7 @@ context-class setup-class >inherit to context-class
 
 \ file functions
 
-40 net2o: open-file ( <addr u> mode id -- ) \ open file id at path "addr u" with mode
+40 net2o: open-file ( $:string mode id -- ) \ open file id at path "addr u" with mode
     2*64>n 2>r $> 2r> n2o:open-file ;
 +net2o: close-file ( id -- ) \ close file
     64>n n2o:close-file ;
@@ -522,7 +522,7 @@ context-class setup-class >inherit to context-class
     2*64>n net2o:resend-mask net2o:send-chunks ;
 +net2o: track-timing ( -- ) \ track timing
     net2o:track-timing ;
-+net2o: rec-timing ( <addr u> -- ) \ recorded timing
++net2o: rec-timing ( $:string -- ) \ recorded timing
     $> net2o:rec-timing ;
 +net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $,
@@ -581,7 +581,7 @@ context-class setup-class >inherit to context-class
 +net2o: get-stat ( id -- ) \ request stat of file id
     64>n { fd }
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-+net2o: open-tracked-file ( <addr u> mode id -- ) \ open file in tracked mode
++net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
     2*64>n 2>r $> 2r> dup >r n2o:open-file
     r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
@@ -600,7 +600,7 @@ context-class setup-class >inherit to context-class
 +net2o: .time ( -- ) \ print timer to server log
     F .time .packets profile( .times ) ;
 
-+net2o: set-ip ( <addr u> -- ) \ set address information
++net2o: set-ip ( $:string -- ) \ set address information
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
