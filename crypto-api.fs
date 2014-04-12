@@ -3,6 +3,18 @@
 require mini-oof2.fs
 require user-object.fs
 
+\ generic padding primitives
+
+: >pad ( addr u u2 -- addr u2 ) \ u <= u2
+    swap >r 2dup r@ safe/string r> fill ;
+: >unpad ( addr u' -- addr u ) over + 1- c@ ;
+: ?padded ( addr u' -- flag )
+    2dup + 1- c@ dup >r safe/string r> skip nip 0= ;
+
+: >padded { addr1 u1 addr2 u2 -- }
+    addr1 addr2 u1 u2 umin move
+    u1 u2 u< IF  addr2 u1 u2 >pad 2drop  THEN ;
+
 \ For wurstkessel compatibility, the states are all 128 bytes
 \ If the cryptosystem has more internal state, it may copy the key+iv there.
 \ If it has less, it should use a suitable fraction of the key and the iv

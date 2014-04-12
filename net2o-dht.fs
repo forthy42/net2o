@@ -15,27 +15,15 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-keccak# buffer: keyed-hash-buf
-keccak#max buffer: keyed-hash-out
 \ specify strength (in bytes), not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
+keccak#max buffer: keyed-hash-buf
+hash#256   buffer: keyed-hash-out
 
 \ Idea: set "r" first half to the value, "r" second half to the key, diffuse
 \ we use explicitely Keccak here, this needs to be globally the same!
 \ Keyed hashs are there for unique handles
-
-\ padding
-
-: >pad ( addr u u2 -- addr u2 )
-    swap >r 2dup r@ /string r> fill ;
-: >unpad ( addr u' -- addr u ) over + 1- c@ ;
-: ?padded ( addr u' -- flag )
-    2dup + 1- c@ dup >r /string r> skip nip 0= ;
-
-: >padded { addr1 u1 addr2 u2 -- }
-    addr1 addr2 u1 u2 umin move
-    addr2 u1 u2 >pad 2drop ;
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
     hash( ." hashing: " 2over xtype ':' emit 2dup xtype F cr )

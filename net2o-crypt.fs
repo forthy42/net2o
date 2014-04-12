@@ -107,6 +107,20 @@ User last-ivskey
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
     crypt-key-init 2 64s - 2dup c:decrypt+auth ;
 
+\ passphraese encryption needs to diffuse a lot after mergin in the salt
+
+$100 Value passphrase-diffuse#
+: pw-diffuse ( -- )
+    passphrase-diffuse# 0 ?DO  c:diffuse  LOOP ; \ just to waste time ;-)
+
+: encrypt-pw$ ( addr u1 key u2 -- )
+    crypt-key-setup  pw-diffuse  2 64s - c:encrypt+auth ;
+
+: decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )
+    crypt-key-init   pw-diffuse  2 64s - 2dup c:decrypt+auth ;
+
+\ encrypt with own key
+
 : mykey-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
@@ -115,17 +129,10 @@ User last-ivskey
     $>align oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    crypt-buf-init \ save( ." encrypt: "  c:key@ 8 xtype space outbuf packet-data 8 umin xtype space )
-    outbuf packet-data +cryptsu c:encrypt+auth +enc ;
-\    save( outbuf packet-data 8 umin xtype
-\    space outbuf packet-data + 8 xtype cr )
+    crypt-buf-init outbuf packet-data +cryptsu c:encrypt+auth +enc ;
 
 : inbuf-decrypt ( map -- flag2 ) +calc
-    \G flag1 is true if code, flag2 is true if decrypt succeeded
-    crypt-buf-init \ save( ." decrypt: "  c:key@ 8 xtype space inbuf packet-data 8 umin xtype space )
-    inbuf packet-data +cryptsu c:decrypt+auth +enc ;
-\    save( inbuf packet-data 8 umin xtype space keccak-checksums 8 xtype
-\    dup 0= IF ."  fail" THEN cr )
+    crypt-buf-init inbuf packet-data +cryptsu c:decrypt+auth +enc ;
 
 \ IVS
 

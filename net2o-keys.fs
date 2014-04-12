@@ -105,7 +105,6 @@ Variable strict-keys  strict-keys on
 \ get passphrase
 
 3 Value passphrase-retry#
-$100 Value passphrase-diffuse#
 $100 Constant max-passphrase# \ 256 characters should be enough...
 max-passphrase# buffer: passphrase
 
@@ -113,20 +112,17 @@ max-passphrase# buffer: passphrase
     passphrase dup max-passphrase# accept* ;
 
 : >passphrase ( addr u -- addr u )
-    >r passphrase r@ max-passphrase# umin move
-    passphrase max-passphrase# r> safe/string erase
-    no-key >c:key
-    passphrase max-passphrase# c:hash
-    passphrase-diffuse# 0 ?DO  c:diffuse  LOOP \ just to waste time ;-)
-    pad c:key> pad $40 save-mem ;
+    \G create a 512 bit hash of the passphrase
+    no-key >c:key c:hash
+    keccak-padded c:key> keccak-padded keccak#max 2/ ;
 
 : get-passphrase ( -- addr u )
     passphrase-in >passphrase ;
 
-Variable keys "" keys $!
+Variable keys
 2Variable key+len \ current key + len
 
-: +key ( addr u -- ) key+len 2! key+len 2 cells keys $+! ;
+: +key ( addr u -- ) keys $+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
@@ -182,7 +178,7 @@ also net2o-base definitions
 : end:key ( -- )
     end-cmd previous
     keypack keypack-all#
-    key+len 2@ encrypt$
+    key+len 2@ encrypt-pw$
     cmdlock unlock ;
 comp: :, previous ;
 
@@ -227,10 +223,10 @@ set-current previous previous
 \ read key file
 
 : try-decrypt ( -- addr u / 0 0 )
-    keys $@ bounds ?DO
+    keys $[]# 0 ?DO
 	keypack keypack-d keypack-all# move
-	keypack-d keypack-all# I 2@
-	decrypt$ IF  unloop  EXIT  THEN
+	keypack-d keypack-all# I keys $[]@
+	decrypt-pw$ IF  unloop  EXIT  THEN
 	2drop
     2 cells +LOOP  0 0 ;
 
@@ -260,8 +256,8 @@ set-current previous previous
     this-keyid @ keysize dest-pubkey $! ;
 
 0 [IF] \ generate keypairs
-    keys $@ drop 2@ key+len 2! key#anon "test" +gen-keys
-    keys $@ drop 2@ key+len 2! key#anon "anonymous" +gen-keys
+    0 keys $[]@ key+len 2! key#anon "test" +gen-keys
+    0 keys $[]@ key+len 2! key#anon "anonymous" +gen-keys
 [THEN]
 
 0 [IF]

@@ -70,6 +70,7 @@ require crypto-api.fs
 crypto class
     keccak# uvar keccak-state
     keccak#cks uvar keccak-checksums
+    keccak#max uvar keccak-padded
     cell uvar keccak-up
 end-class keccak
 
@@ -92,7 +93,7 @@ keccak-init
 \G move 128 bytes from addr to the state
 :noname keccak#max keccak> ; to c:key> ( addr -- )
 \G get 128 bytes from the state to addr
-:noname @keccak KeccakF ; to c:diffuse ( -- )
+' keccak* to c:diffuse ( -- )
 \G perform a diffuse round
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
@@ -124,7 +125,9 @@ keccak-init
 ; to c:decrypt+auth ( addr u -- flag )
 :noname ( addr u -- )
 \G Hash message in buffer addr u
-    BEGIN  2dup keccak#max umin tuck >keccak  @keccak KeccakF
+    BEGIN  2dup keccak#max umin tuck
+	dup keccak#max u< IF  keccak-padded keccak#max >padded
+	    keccak-padded keccak#max  THEN  >keccak  @keccak KeccakF
     /string dup 0= UNTIL  2drop
 ; to c:hash
 :noname ( addr u -- )
