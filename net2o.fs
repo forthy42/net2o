@@ -48,6 +48,7 @@ s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 s" no temporary key"             throwcode !!no-tmpkey!!
 s" String stack full"            throwcode !!string-full!!
 s" String stack empty"           throwcode !!string-empty!!
+s" Unknown crypto function"      throwcode !!unknown-crypt!!
 \ required tools
 
 \ require smartdots.fs
@@ -819,6 +820,7 @@ setup-class class
     64field: recv-tick
     64field: recv-addr
     field: send-list
+    field: punch-load
     field: recv-flag
     field: file-state
     field: read-file#

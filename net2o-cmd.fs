@@ -232,7 +232,7 @@ comp: :, also net2o-base ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
     cmdbuf cmdbuf# @ cmddest send-cmd
-    cmd0source @ 0= IF  code+  THEN ;
+    cmd0source @ 0= IF  code+ punch-load $off  THEN ;
 
 also net2o-base
 
@@ -485,6 +485,8 @@ net2o-base
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
++net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
+    $> punch-load $! ;
 
 \ everything that follows here can assume to have a connection context
 
