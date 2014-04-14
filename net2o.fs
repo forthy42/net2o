@@ -392,7 +392,7 @@ Variable $tmp2
     $tmp2 $@ +my-ip
     0= IF  local-ip6  +my-ip THEN ;
 
-\ this indicates a problem...
+\ this looks too complicated, indicating a problem...
 
 : my-ip= { addr1 u1 addr2 u2 -- flag }
     case addr2 c@
@@ -468,23 +468,37 @@ m: addr>keys ( addr -- keys )
 
 sema cmd0lock
 
+\ the policy on allocation and freeing is that both freshly allocated
+\ and to-be-freed memory is erased.  This makes sure that no unwanted
+\ data will be lurking in that memory, waiting to be leaked out
+
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
 : freez ( addr size -- )
     \g erase and then free - for secret stuff
     over swap erase free throw ;
+: ?free ( addr size -- ) >r
+    dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
+
 : allo1 ( size -- addr )
     dup >r allocate throw dup r> $FF fill ;
 : allocate-bits ( size -- addr )
     dup >r cell+ allo1 dup r> + off ; \ last cell is off
 
+\ for bigger blocks, we use use alloc+guard, i.e. mmap with a
+\ guard page after the end.
+
+: alloc-buf ( addr -- addr' )
+    maxpacket-aligned buffers# * alloc+guard 6 + ;
+
+: ?free+guard ( addr u -- )
+    over @ IF  over @ swap 2dup erase  free+guard  off
+    ELSE  2drop  THEN ;
+
 : init-statbuf ( -- )
     file-stat alloz to statbuf ;
 : free-statbuf ( -- )
     file-stat statbuf freez  0 to statbuf ;
-
-: alloc-buf ( addr -- addr' )
-    maxpacket-aligned buffers# * alloc+guard 6 + ;
 
 : alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
@@ -496,8 +510,8 @@ sema cmd0lock
     init-ed25519 c:init ;
 
 : free-io ( -- )
-    inbuf  maxpacket-aligned buffers# * free+guard
-    outbuf maxpacket-aligned buffers# * free+guard
+    inbuf  maxpacket-aligned buffers# * 2dup erase free+guard
+    outbuf maxpacket-aligned buffers# * 2dup erase free+guard
     cmd0buf maxdata   freez
     init0buf maxdata 2/ mykey-salt# + $10 +  freez
     sockaddr  sockaddr_in6 %size  freez
@@ -506,6 +520,8 @@ sema cmd0lock
     free-ed25519 c:free ;
 
 alloc-io
+
+\ net2o header structure
 
 begin-structure net2o-header
     2 +field flags
@@ -940,10 +956,6 @@ $100 Value dests#
 
 User >code-flag
 
-[IFUNDEF] alloc+guard
-    ' alloz alias alloc+guard
-[THEN]
-
 : alloc-data ( addr u -- u flag )
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
@@ -1109,12 +1121,6 @@ Variable mapstart $1 mapstart !
     addrs u map-source code-map ! ;
 
 \ dispose connection
-
-: ?free ( addr size -- ) >r
-    dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
-
-: ?free+guard ( addr u -- )
-    over @ IF  over @ swap  free+guard  off  ELSE  2drop  THEN ;
 
 : free-code ( o:data -- ) o 0= ?EXIT dest-size @ >r
     dest-raddr r@   ?free+guard
