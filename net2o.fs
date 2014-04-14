@@ -466,13 +466,22 @@ m: addr>replies ( addr -- replies )
 m: addr>keys ( addr -- keys )
     max-size^2 rshift [ min-size negate ]L and ;
 
-: init-statbuf ( -- )
-    file-stat allocate throw to statbuf ;
-
 sema cmd0lock
 
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
+: freez ( addr size -- )
+    \g erase and then free - for secret stuff
+    over swap erase free throw ;
+: allo1 ( size -- addr )
+    dup >r allocate throw dup r> $FF fill ;
+: allocate-bits ( size -- addr )
+    dup >r cell+ allo1 dup r> + off ; \ last cell is off
+
+: init-statbuf ( -- )
+    file-stat alloz to statbuf ;
+: free-statbuf ( -- )
+    file-stat statbuf freez  0 to statbuf ;
 
 : alloc-buf ( addr -- addr' )
     maxpacket-aligned buffers# * alloc+guard 6 + ;
@@ -484,17 +493,16 @@ sema cmd0lock
     sockaddr_in6 %size alloz to sockaddr1
     $400 allocate throw to aligned$
     init-statbuf
-    init-ed25519 c:init
-;
+    init-ed25519 c:init ;
 
 : free-io ( -- )
     inbuf  maxpacket-aligned buffers# * free+guard
     outbuf maxpacket-aligned buffers# * free+guard
-    cmd0buf   free throw
-    init0buf  free throw
-    sockaddr  free throw
-    sockaddr1 free throw
-    statbuf   free throw
+    cmd0buf maxdata   freez
+    init0buf maxdata 2/ mykey-salt# + $10 +  freez
+    sockaddr  sockaddr_in6 %size  freez
+    sockaddr1 sockaddr_in6 %size  freez
+    free-statbuf
     free-ed25519 c:free ;
 
 alloc-io
@@ -935,13 +943,6 @@ User >code-flag
 [IFUNDEF] alloc+guard
     ' alloz alias alloc+guard
 [THEN]
-: freez ( addr size -- )
-    \g erase and then free - for secret stuff
-    over swap erase free throw ;
-: allocateFF ( size -- addr )
-    dup >r allocate throw dup r> $FF fill ;
-: allocate-bits ( size -- addr )
-    dup >r cell+ allocateFF dup r> + off ; \ last cell is off
 
 : alloc-data ( addr u -- u flag )
     dup >r dest-size ! dest-vaddr 64! r>
@@ -1109,24 +1110,24 @@ Variable mapstart $1 mapstart !
 
 \ dispose connection
 
-: ?free ( addr -- )
-    dup @ IF  dup @ free throw off  ELSE  drop  THEN ;
+: ?free ( addr size -- ) >r
+    dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
 
 : ?free+guard ( addr u -- )
     over @ IF  over @ swap  free+guard  off  ELSE  2drop  THEN ;
 
-: free-code ( o:data -- ) o 0= ?EXIT
-    dest-raddr dest-size @ ?free+guard
-    dest-ivsgen ?free
-    dest-replies ?free
-    dest-timestamps ?free
-    dest-cookies ?free
+: free-code ( o:data -- ) o 0= ?EXIT dest-size @ >r
+    dest-raddr r@   ?free+guard
+    dest-ivsgen     c:key# ?free
+    dest-replies    r@ addr>replies ?free
+    dest-timestamps r@ addr>ts      ?free
+    dest-cookies    r> addr>ts      ?free
     dispose ;
 ' free-code code-class to free-data
 ' free-code data-class to free-data
 
 : free-rcode ( o:data --- )
-    data-ackbits ?free
+    data-ackbits dest-size @ addr>bytes ?free
     data-ackbits-buf $off
     free-code ;
 ' free-rcode rdata-class to free-data
