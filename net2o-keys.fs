@@ -70,7 +70,8 @@ Variable this-keyid
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key dup cell- @ >osize @ 2dup erase -1 cells /string
+    sample-key dup cell- @ >osize @ 2dup erase
+    over >o 64#-1 ke-last 64! o> -1 cells /string
     2over key-table #! current-key ;
 
 \ search for keys - not optimized
@@ -90,8 +91,8 @@ Variable strict-keys  strict-keys on
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ xtype cr
     ." ke-sk: " ke-sk $@ xtype cr
-    ." first: " ke-first 64@ .ticks cr
-    ." last: " ke-last 64@ .ticks cr
+    ." first: " ke-first 64@ .sigdate cr
+    ." last: " ke-last 64@ .sigdate cr
     o> ;
 
 : .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
@@ -162,6 +163,11 @@ Variable keys
 $100 Constant keypack#
 
 0 Value pw-level# \ pw-level# 0 is lowest
+\ !!TODO!! we need a way to tell how much we can trust keys
+\ passwords need a pw-level (because they are guessable)
+\ secrets don't, they aren't. We can quickly decrypt all
+\ secret-based stuff, without bothering with slowdowns.
+\ So secrets should use normal string decrypt
 
 keypack# mykey-salt# + $10 + Constant keypack-all#
 
@@ -197,12 +203,14 @@ also net2o-base definitions
 
 : end:key ( -- )
     end-cmd previous
-    keypack keypack-all#
-    key+len 2@ pw-level# encrypt-pw$
     cmdlock unlock ;
 comp: :, previous ;
 
 set-current previous previous
+
+: key-crypt ( -- )
+    keypack keypack-all#
+    key+len 2@ pw-level# encrypt-pw$ ;
 
 0 Value key-fd
 
@@ -229,14 +237,17 @@ set-current previous previous
     ( keypack keypack-all# >rng$ ) key>file ;
 
 : >keys ( -- )
+    \G add shared secret to list of possible keys
     skc pkc ed-dh +key ;
 
-: +gen-keys ( type nick u -- )
-    gen-keys
+: pack-key ( type nick u -- )
     key:code
         pkc keysize $, newkey skc keysize $, privkey
         $, keynick lit, keytype ticks lit, keyfirst
-    end:key key>file >keys ;
+    end:key ;
+
+: +gen-keys ( type nick u -- )
+    gen-keys >keys pack-key key-crypt key>file ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
