@@ -69,6 +69,11 @@ User string-stack  string-max# uallot drop
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
 
+: pdf@ ( -- r )
+    buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
+: psf@ ( -- r )
+    buf-state 2@ over + >r dup sf@ sfloat+ r> over - buf-state 2! ;
+
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
 \ commands come in junks of 8 bytes
@@ -112,7 +117,7 @@ cmd-class >dynamic to cmd-class
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: .net2o-name ( n -- )  cells context-class + (net2o-see) ;
+: .net2o-name ( n -- )  n>cmd (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -120,6 +125,8 @@ cmd-class >dynamic to cmd-class
 	1 of  p@ 64. ." lit, "  endof
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@  n2o.string  endof
+	4 of  pdf@ f. ." dfloat, " endof
+	5 of  psf@ f. ." sfloat, " endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -173,9 +180,9 @@ get-current also net2o-base definitions previous
 +net2o: string ( "string" -- $:string ) \ string literal
     string@ ;
 +net2o: dflit ( "dfloat" -- r ) \ double float literal
-    buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
+    pdf@ ;
 +net2o: sflit ( "sfloat" -- r ) \ double float literal
-    buf-state 2@ over + >r dup sf@ sfloat+ r> over - buf-state 2! ;
+    psf@ ;
 +net2o: tru ( -- true ) \ true flag literal
     true ;
 +net2o: fals ( -- false ) \ false flag literal
@@ -596,11 +603,9 @@ context-class setup-class >inherit to context-class
 +net2o: rewind-sender ( n -- ) \ rewind buffer
     64>n net2o:rewind-sender ;
 
-\ ids 100..120 reserved for key exchange/storage
-
 \ profiling, nat traversal
 
-120 net2o: !time ( -- ) \ start timer
+80 net2o: !time ( -- ) \ start timer
     F !time init-timer ;
 +net2o: .time ( -- ) \ print timer to server log
     F .time .packets profile( .times ) ;
@@ -625,7 +630,7 @@ context-class setup-class >inherit to context-class
 : rewind ( -- )
     save( rewind-flush )else( rewind-total ) ;
 
-\ ids 130..140 reserved for DHT
+\ ids 90..100 reserved for DHT
 
 \ safe initialization
 

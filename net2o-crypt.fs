@@ -109,9 +109,9 @@ User last-ivskey
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
-: crypt-pw-setup ( addr u1 key u2 n -- addr' u' n ) { n }
+: crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
     2>r over >r  rng@ rng@ r@ 128!
-    r@ c@ n $F0 mux r> c! 2r> crypt-key-init n ;
+    r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
 
 : pw-diffuse ( diffuse# -- )
     0 ?DO  c:diffuse  LOOP ; \ just to waste time ;-)

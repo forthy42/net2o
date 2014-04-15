@@ -2112,14 +2112,12 @@ $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
 $10 Constant tmp-crypt-val
-$20 Constant keys-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
-: keys?      ( -- flag )  validated @ keys-val      and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     .time ." handle cmd0 " sockaddr alen @ .address cr
@@ -2355,11 +2353,11 @@ con-cookie >osize @ buffer: cookie-adder
     64over 64abs 64over 64> IF  64+ tick-adjust 64!
     ELSE  64drop 64drop  THEN ;
 
-\ load net2o plugins
+\ load net2o plugins: first one with integraded command space
 
 require net2o-cmd.fs
 require net2o-dht.fs
-require net2o-keys.fs
+require net2o-keys.fs \ extra cmd space
 
 0 [IF]
 Local Variables:

@@ -37,7 +37,7 @@ require mkdir.fs
 
 \ hashed key data base
 
-object class
+cmd-class class
     field: ke-sk
     field: ke-pk
     field: ke-nick
@@ -48,33 +48,36 @@ object class
     64field: ke-last
 end-class key-entry
 
+key-entry >dynamic to key-entry
+
 0 Constant key#anon
 1 Constant key#user
 2 Constant key#group
 
-key-entry >osize @ buffer: sample-key
+0 Value sample-key
+
+' key-entry is cmd-table
 
 Variable key-table
 Variable this-key
 Variable this-keyid
 2Variable addsig
-sample-key this-key ! \ dummy
 
 : current-key ( addr u -- )
-    2dup key-table #@ drop dup this-key ! >o rdrop ke-pk $! ;
+    2dup key-table #@ drop cell+ dup this-key ! >o rdrop ke-pk $! ;
 : make-thiskey ( addr -- )
-    dup $@ drop this-keyid !  cell+ $@ drop dup this-key ! >o rdrop ;
+    dup $@ drop this-keyid !  cell+ $@ drop cell+ dup this-key ! >o rdrop ;
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key key-entry >osize @ 2dup erase
+    sample-key dup cell- @ >osize @ 2dup erase -1 cells /string
     2over key-table #! current-key ;
 
 \ search for keys - not optimized
 
 : nick-key ( addr u -- ) \ search for key nickname and make current
     key-table 
-    [: dup >r cell+ $@ drop >o ke-nick $@ o> 2over str= IF
+    [: dup >r cell+ $@ drop cell+ >o ke-nick $@ o> 2over str= IF
 	r@ make-thiskey
     THEN  rdrop ;] #map 2drop ;
 
@@ -83,8 +86,18 @@ sample-key this-key ! \ dummy
 
 Variable strict-keys  strict-keys on
 
-: .key ( addr u -- )
-    ." Key '" key-table #@ drop >o ke-nick $@ o> type ." ' ok" cr ;
+: .key ( addr u -- ) drop cell+ >o
+    ." nick: " ke-nick $@ type cr
+    ." ke-pk: " ke-pk $@ xtype cr
+    ." ke-sk: " ke-sk $@ xtype cr
+    ." first: " ke-first 64@ .ticks cr
+    ." last: " ke-last 64@ .ticks cr
+    o> ;
+
+: .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
+
+: .key# ( addr u -- )
+    ." Key '" key-table #@ drop cell+ >o ke-nick $@ o> type ." ' ok" cr ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
@@ -93,13 +106,13 @@ Variable strict-keys  strict-keys on
 		." got : " 2dup xtype cr
 		true !!wrong-key!!
 	    THEN
-	    .key  EXIT
+	    .key#  EXIT
 	THEN  THEN
     2dup key-exist? 0= IF
 	strict-keys @ !!unknown-key!!
 	." Unknown key "  .nnb cr
     ELSE
-	.key
+	.key#
     THEN ; IS check-key
 
 \ get passphrase
@@ -157,18 +170,23 @@ keypack-all# buffer: keypack-d
 
 get-current also net2o-base definitions
 
-100 net2o: newkey ( $:string -- ) $> keys? IF  key:new  ELSE  2drop  THEN ;
-101 net2o: privkey ( $:string -- ) $> keys? IF  ke-sk $! +seckey   ELSE  2drop  THEN ;
-102 net2o: keytype ( n -- ) keys? IF  64>n ke-type !  ELSE  64drop  THEN ; \ default: anonymous
-103 net2o: keynick ( $:string -- ) $> keys? IF  ke-nick $!  ELSE  2drop  THEN ;
-104 net2o: keyprofile ( $:string -- ) $> keys? IF ke-prof $!  ELSE  2drop  THEN ;
-105 net2o: newkeysig ( $:string -- ) $> keys? IF save-mem addsig 2!
-    addsig 2 cells ke-sigs $+!  ELSE  2drop  THEN ;
-106 net2o: keymask ( x -- ) 64drop ;
-107 net2o: keyfirst ( date-ns -- ) keys? IF ke-first 64!  ELSE  64drop  THEN ;
-108 net2o: keylast ( date-ns -- ) keys? IF ke-last 64!  ELSE  64drop  THEN ;
+8 net2o: newkey ( $:string -- ) $> key:new ;
++net2o: privkey ( $:string -- ) $> ke-sk $! +seckey ;
++net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
++net2o: keynick ( $:string -- )    $> ke-nick $! ;
++net2o: keyprofile ( $:string -- ) $> ke-prof $! ;
++net2o: newkeysig ( $:string -- )  $> save-mem addsig 2!
+    addsig 2 cells ke-sigs $+! ;
++net2o: keymask ( x -- )  64drop ;
++net2o: keyfirst ( date-ns -- )  ke-first 64! ;
++net2o: keylast  ( date-ns -- )  ke-last 64! ;
 
 dup set-current previous
+
+static-a to allocater
+key-entry new to sample-key
+dynamic-a to allocater
+sample-key this-key ! \ dummy
 
 : key:code ( -- )
     net2o-code0 keypack keypack-all# erase
@@ -224,19 +242,21 @@ set-current previous previous
 
 \ read key file
 
+: try-decrypt-key ( key u1 -- addr u2 true / false )
+    keypack c@ $F and pw-level# u<= IF
+	keypack keypack-d keypack-all# move
+	keypack-d keypack-all# 2swap
+	decrypt-pw$ ?dup-if  EXIT  THEN
+    THEN  2drop false ;
+
 : try-decrypt ( -- addr u / 0 0 )
     keys $[]# 0 ?DO
-	keypack c@ $F and pw-level# u<= IF
-	    keypack keypack-d keypack-all# move
-	    keypack-d keypack-all# I keys $[]@
-	    decrypt-pw$ IF  unloop  EXIT  THEN
-	    2drop
-	THEN
-    2 cells +LOOP  0 0 ;
+	I keys $[]@ try-decrypt-key IF  unloop  EXIT  THEN
+    LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )
-    dup 0= IF  2drop  EXIT  THEN  validated @ >r  keys-val validated !
-    ( 2dup n2o:see ) do-cmd-loop  r> validated ! ;
+    dup 0= IF  2drop  EXIT  THEN
+    sample-key >o do-cmd-loop o> ;
 
 : read-key-loop ( -- )
     BEGIN
@@ -259,23 +279,18 @@ set-current previous previous
     0 >o nick-key o>  this-keyid @ 0= !!unknown-key!!
     this-keyid @ keysize dest-pubkey $! ;
 
-0 [IF] \ generate keypairs
-    0 keys $[]@ key+len 2! key#anon "test" +gen-keys
-    0 keys $[]@ key+len 2! key#anon "anonymous" +gen-keys
-[THEN]
-
 0 [IF]
 Local Variables:
 forth-local-words:
     (
-     (("net2o:") definition-starter (font-lock-keyword-face . 1)
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
-     (("net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
      (("[:") (0 . 1) (0 . 1) immediate)
      ((";]") (-1 . 0) (0 . -1) immediate)
     )

@@ -214,11 +214,11 @@ $10 Constant datesize#
 
 \ commands for DHT
 
-130 net2o: dht-id ( $:string -- ) $> >d#id ;
+90 net2o: dht-id ( $:string -- ) $> >d#id ;
 \g set dht id for further operations on it
-131 net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
++net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
 \g add a value to the given dht key
-132 net2o: dht-value- ( $:string key -- ) 64>n >r $> r> d#value- ;
++net2o: dht-value- ( $:string key -- ) 64>n >r $> r> d#value- ;
 \g remove a value from the given dht key
 
 \ queries
@@ -267,11 +267,11 @@ end-class dht-class
 
 previous
 
-133 net2o: dht-value? ( type -- ) 64>n d#value? ;
++net2o: dht-value? ( type -- ) 64>n d#value? ;
 \g query the dht values of this type, and send back as many
 \g as fit into the answer packet
-134 net2o: dht-open ( fid -- ) 64>n d#open ;
-135 net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
++net2o: dht-open ( fid -- ) 64>n d#open ;
++net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
 \ value reading requires constructing answer packet
 
@@ -335,3 +335,21 @@ previous
 
 : +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("[:") (0 . 1) (0 . 1) immediate)
+     ((";]") (-1 . 0) (0 . -1) immediate)
+    )
+End:
+[THEN]
