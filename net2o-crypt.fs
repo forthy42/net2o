@@ -109,15 +109,21 @@ User last-ivskey
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
-$100 Value passphrase-diffuse#
-: pw-diffuse ( -- )
-    passphrase-diffuse# 0 ?DO  c:diffuse  LOOP ; \ just to waste time ;-)
+: crypt-pw-setup ( addr u1 key u2 n -- addr' u' n ) { n }
+    2>r over >r  rng@ rng@ r@ 128!
+    r@ c@ n $F0 mux r> c! 2r> crypt-key-init n ;
 
-: encrypt-pw$ ( addr u1 key u2 -- )
-    crypt-key-setup  pw-diffuse  2 64s - c:encrypt+auth ;
+: pw-diffuse ( diffuse# -- )
+    0 ?DO  c:diffuse  LOOP ; \ just to waste time ;-)
+: pw-setup ( addr u -- diffuse# )
+    \G compute between 256 and ridiculously many iteratsions
+    drop c@ $F and 2* $100 swap lshift ;
 
-: decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )
-    crypt-key-init   pw-diffuse  2 64s - 2dup c:decrypt+auth ;
+: encrypt-pw$ ( addr u1 key u2 n -- )
+    crypt-pw-setup  pw-diffuse  2 64s - c:encrypt+auth ;
+
+: decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
+    crypt-key-init   r> pw-diffuse  2 64s - 2dup c:decrypt+auth ;
 
 \ encrypt with own key
 

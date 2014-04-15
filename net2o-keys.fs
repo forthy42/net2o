@@ -148,6 +148,8 @@ Variable keys
 
 $100 Constant keypack#
 
+0 Value pw-level# \ pw-level# 0 is lowest
+
 keypack# mykey-salt# + $10 + Constant keypack-all#
 
 keypack-all# buffer: keypack
@@ -178,7 +180,7 @@ also net2o-base definitions
 : end:key ( -- )
     end-cmd previous
     keypack keypack-all#
-    key+len 2@ encrypt-pw$
+    key+len 2@ pw-level# encrypt-pw$
     cmdlock unlock ;
 comp: :, previous ;
 
@@ -224,10 +226,12 @@ set-current previous previous
 
 : try-decrypt ( -- addr u / 0 0 )
     keys $[]# 0 ?DO
-	keypack keypack-d keypack-all# move
-	keypack-d keypack-all# I keys $[]@
-	decrypt-pw$ IF  unloop  EXIT  THEN
-	2drop
+	keypack c@ $F and pw-level# u<= IF
+	    keypack keypack-d keypack-all# move
+	    keypack-d keypack-all# I keys $[]@
+	    decrypt-pw$ IF  unloop  EXIT  THEN
+	    2drop
+	THEN
     2 cells +LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )

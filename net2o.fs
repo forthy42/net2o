@@ -308,20 +308,21 @@ User ip6:#
 : ]sock ( -- )  query-sock 0= ?EXIT
     query-sock closesocket 0 to query-sock ?ior ;
 
+: 'sock ( xt -- )  sock[ catch ]sock throw ;
+
 : ?fake-ip4 ( -- addr u )
     sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
 
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-    sock[
-    sockaddr_in6 %size alen !
-    sockaddr ipv4! query-sock sockaddr sock-rest connect ?ior
-    query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
-    IF  drop s" " \ 0 is an invalid result
-    ELSE  ?ior
-	sockaddr1 family w@ AF_INET6 =
-	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
-    THEN ]sock ;
+    [:  sockaddr_in6 %size alen !
+	sockaddr ipv4! query-sock sockaddr sock-rest connect ?ior
+	query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
+	IF  drop s" " \ 0 is an invalid result
+	ELSE  ?ior
+	    sockaddr1 family w@ AF_INET6 =
+	    IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+	THEN ;] 'sock ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address
@@ -333,23 +334,22 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 0 Value my-port#
 
 : check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
-    sock[
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    sockaddr_in6 %size alen !
-    sockaddr sin6_addr $10 move
-    query-sock sockaddr sock-rest connect dup 0< errno 101 = and
-    IF  drop s" "
-    ELSE  ?ior
-	query-sock sockaddr1 alen getsockname ?ior
-	?fake-ip4
-    THEN ]sock ;
+    [:  sockaddr_in6 %size alen !
+	sockaddr sin6_addr $10 move
+	query-sock sockaddr sock-rest connect dup 0< errno 101 = and
+	IF  drop s" "
+	ELSE  ?ior
+	    query-sock sockaddr1 alen getsockname ?ior
+	    ?fake-ip4
+	THEN ;] 'sock ;
 
 : check-ip64 ( dummy -- ipaddr u ) noipv4( check-ip6 EXIT )
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
     2drop r> $10 + be-ul@ check-ip4 ;
 
 : try-ip ( addr u -- flag )
-    sock[ query-sock -rot connect 0= ]sock ;
+    [: query-sock -rot connect 0= ;] 'sock ;
 
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
