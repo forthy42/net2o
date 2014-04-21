@@ -89,6 +89,7 @@ init-ed25519
     sct1 pkrev raw>sc25519
     sct2 sct2 sct1 sc25519*
     skc sct2 sc25519>32b
+    sk1 KEYBYTES erase  pkrev KEYBYTES erase \ things we don't need anymore
     skc pkc sk>pk ; \ this also cleans up temp stuff
 
 : >hash ( addr u -- )

@@ -230,14 +230,13 @@ $60 Constant rndkey#
 \ we send our public key and query the server's public key.
 : gen-keys ( -- )
     \g generate revocable keypair
+    sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
-    sk1 pk1 ed-keypair \ generate second keypair
-    sk1 pkrev skc pkc ed-keypairx
-    sk1 keysize erase \ we don't need s1 anymore
+    sk1 pkrev skc pkc ed-keypairx \ generate real keypair
     genkey( ." gen key: " skc keysize xtype cr ) ;
 : check-rev? ( -- flag )
     \g check generated key if revocation is possible
-    pkrev pk1 keypad ed-dh pkc keysize str= ;
+    skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
 : gen-tmpkeys ( -- pk addr ) tskc tpkc ed-keypair tpkc keysize
     genkey( ." tmp key: " tskc keysize xtype cr ) ;
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
