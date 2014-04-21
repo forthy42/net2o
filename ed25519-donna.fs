@@ -63,7 +63,7 @@ init-ed25519
     edbuf @ ?dup-IF  dispose  THEN  edbuf off ;
 
 : clean-ed25519 ( -- )
-    \ do this every time you computed something secret
+    \g do this every time you computed using something secret
     sct0 task-id over - erase ;
 
 : sk-mask ( sk -- )  dup c@ $F8 and over c!
@@ -85,11 +85,10 @@ init-ed25519
 
 : ed-keypairx { sk1 pkrev skc pkc -- }
     sct2 sk1 raw>sc25519
-    pkrev sk-mask
-    sct1 pkrev raw>sc25519
+    pkrev sk-mask  sct1 pkrev raw>sc25519
+    sk1 KEYBYTES erase  pkrev KEYBYTES erase \ things we don't need anymore
     sct2 sct2 sct1 sc25519*
     skc sct2 sc25519>32b
-    sk1 KEYBYTES erase  pkrev KEYBYTES erase \ things we don't need anymore
     skc pkc sk>pk ; \ this also cleans up temp stuff
 
 : >hash ( addr u -- )
