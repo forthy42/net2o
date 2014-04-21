@@ -38,8 +38,9 @@ require mkdir.fs
 \ hashed key data base
 
 cmd-class class
-    field: ke-sk
-    field: ke-pk
+    field: ke-sk \ secret key
+    field: ke-pk \ public key
+    field: ke-pk1 \ public revocation key
     field: ke-nick
     field: ke-prof
     field: ke-sigs
@@ -90,7 +91,8 @@ Variable strict-keys  strict-keys on
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ xtype cr
-    ." ke-sk: " ke-sk $@ xtype cr
+    ke-sk $@len IF  ." ke-sk: " ke-sk $@ xtype cr  THEN
+    ke-pk1 $@len IF  ." ke-pk1: " ke-pk1 $@ xtype cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
@@ -140,7 +142,7 @@ Variable keys
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
-    ke-sk $@ drop ke-pk $@ drop ed-dh +key ;
+    ke-sk $@ drop ke-pk $@ drop keypad ed-dh +key ;
 
 "" ">passphrase \ following the encrypt-everything paradigm,
 \ no password is the empty string!  It's still encrypted!
@@ -186,7 +188,7 @@ get-current also net2o-base definitions
 +net2o: keymask ( x -- )  64drop ;
 +net2o: keyfirst ( date-ns -- )  ke-first 64! ;
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
-
++net2o: revkey1 ( $:string -- ) $> ke-pk1 $! ;
 dup set-current previous
 
 static-a to allocater
@@ -210,7 +212,8 @@ set-current previous previous
 
 : key-crypt ( -- )
     keypack keypack-all#
-    key+len 2@ pw-level# encrypt-pw$ ;
+    key+len 2@ dup $20 = \ is a secret, no need to be slow
+    IF  encrypt$  ELSE  pw-level# encrypt-pw$  THEN ;
 
 0 Value key-fd
 
@@ -238,12 +241,15 @@ set-current previous previous
 
 : >keys ( -- )
     \G add shared secret to list of possible keys
-    skc pkc ed-dh +key ;
+    skc pkc keypad ed-dh +key ;
+
+\ key generation
 
 : pack-key ( type nick u -- )
     key:code
         pkc keysize $, newkey skc keysize $, privkey
         $, keynick lit, keytype ticks lit, keyfirst
+        pk1 keysize $, revkey1
     end:key ;
 
 : +gen-keys ( type nick u -- )
@@ -257,7 +263,8 @@ set-current previous previous
     keypack c@ $F and pw-level# u<= IF
 	keypack keypack-d keypack-all# move
 	keypack-d keypack-all# 2swap
-	decrypt-pw$ ?dup-if  EXIT  THEN
+	dup $20 = IF  decrypt$  ELSE  decrypt-pw$  THEN
+	?dup-if  EXIT  THEN
     THEN  2drop false ;
 
 : try-decrypt ( -- addr u / 0 0 )

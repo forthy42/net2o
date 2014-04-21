@@ -41,13 +41,13 @@ $20 Constant KEYBYTES
 user-o edbuf
 
 object class
+    $60 uvar sigbuf
     $30 uvar sct0
     $30 uvar sct1
     $30 uvar sct2
     $30 uvar sct3
     $C0 uvar get0
     $C0 uvar get1
-    $60 uvar sigbuf
     $40 uvar hashtmp
     #200 uvar keccaktmp
     cell uvar task-id
@@ -62,20 +62,34 @@ init-ed25519
 : free-ed25519 ( -- )
     edbuf @ ?dup-IF  dispose  THEN  edbuf off ;
 
+: clean-ed25519 ( -- )
+    \ do this every time you computed something secret
+    sct0 task-id over - erase ;
+
+: sk-mask ( sk -- )  dup c@ $F8 and over c!
+    $1F + dup c@ $7F and $40 or swap c! ;
+
 : gen-sk ( sk -- ) >r
     \G generate a secret key with the right bits set and cleared
-    $20 rng$ r@ swap move  r@ c@ $F8 and r@ c!
-    r> $1F + dup c@ $7F and $40 or swap c! ;
+    $20 rng$ r@ swap move r> sk-mask ;
 
 : sk>pk ( sk pk -- )
     \G convert a secret key to a public key
     sct0 rot raw>sc25519
     get0 sct0 ge25519*base
-    get0 ge25519-pack ;
+    get0 ge25519-pack clean-ed25519 ;
 
 : ed-keypair ( sk pk -- )
     \G generate a keypair
     over gen-sk sk>pk ;
+
+: ed-keypairx { sk1 pkrev skc pkc -- }
+    sct2 sk1 raw>sc25519
+    pkrev sk-mask
+    sct1 pkrev raw>sc25519
+    sct2 sct2 sct1 sc25519*
+    skc sct2 sc25519>32b
+    skc pkc sk>pk ; \ this also cleans up temp stuff
 
 : >hash ( addr u -- )
     \G absorb a short string, perform a hash round
@@ -97,7 +111,7 @@ init-ed25519
     sct1 sct1 sct2 sc25519*
     sct1 sct1 sct3 sc25519+  \ s=z*sk+k
     sigbuf $20 + sct1 sc25519>32b
-    sigbuf $40 ; \ r,s
+    clean-ed25519 sigbuf $40 ; \ r,s
 
 : ed-check? { sig pk -- flag }
     \G check a message: the keccak state contains the hash of the message.
@@ -114,25 +128,25 @@ init-ed25519
     get0 pk ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
     sig pk ed-check? ;
 
-: ed-dh { sk pk -- secret len }
+: ed-dh { sk pk dest -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
     get1 get0 sct2 ge25519*
-    sct0 get1 ge25519-pack
-    sct0 $20 ;
+    dest get1 ge25519-pack
+    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
-: ed-dhx { offset sk pk -- secret len }
+: ed-dhx { offset sk pk dest -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
     sct1 offset 32b>sc25519
     sct2 sct2 sct1 sc25519*
     get1 get0 sct2 ge25519*
-    sct0 get1 ge25519-pack
-    sct0 $20 ;
+    dest get1 ge25519-pack
+    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
-: ed-dhv { sk pk -- secret len }
+: ed-dhv { sk pk dest -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
     get1 get0 sct2 ge25519*v
-    sct0 get1 ge25519-pack
-    sct0 $20 ;
+    dest get1 ge25519-pack
+    clean-ed25519 dest $20  $80 dest $1F + xorc! ;

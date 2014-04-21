@@ -26,8 +26,12 @@ state# buffer: oldmykey \ previous private key
 \ key storage
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 \ client keys
-keysize buffer: pkc
-keysize buffer: skc
+keysize buffer: pkc   \ pubkey
+keysize buffer: skc   \ secret key
+keysize buffer: pk1   \ pubkey 1 for revokation
+keysize buffer: sk1   \ secret key 1 for revokation (will not last)
+keysize buffer: pkrev \ pubkey for revoking keys
+keysize buffer: skrev \ secret for revoking keys
 keysize buffer: stpkc \ server temporary keypair - once per connection setup
 keysize buffer: stskc
 \ shared secred
@@ -224,8 +228,16 @@ $60 Constant rndkey#
 \ because pk=base*sk, so base*skc*sks = base*sks*skc
 \ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
-: gen-keys ( -- ) skc pkc ed-keypair
+: gen-keys ( -- )
+    \g generate revocable keypair
+    skrev pkrev ed-keypair \ generate keypair for recovery
+    sk1 pk1 ed-keypair \ generate second keypair
+    sk1 pkrev skc pkc ed-keypairx
+    sk1 keysize erase \ we don't need s1 anymore
     genkey( ." gen key: " skc keysize xtype cr ) ;
+: check-rev? ( -- flag )
+    \g check generated key if revocation is possible
+    pkrev pk1 keypad ed-dh pkc keysize str= ;
 : gen-tmpkeys ( -- pk addr ) tskc tpkc ed-keypair tpkc keysize
     genkey( ." tmp key: " tskc keysize xtype cr ) ;
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
@@ -247,10 +259,10 @@ Defer check-key \ check if we know that key
     ?keysize dup keysize [: check-key ;] $err
     dup keysize pubkey $!
     keypad$ keysize <> !!no-tmpkey!!
-    skc rot ed-dhx 2dup keypad swap move do-keypad $+! ;
+    skc rot keypad ed-dhx do-keypad $+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
-    swap ed-dh 2dup keypad swap move
+    swap keypad ed-dh
     o IF  do-keypad $!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
 

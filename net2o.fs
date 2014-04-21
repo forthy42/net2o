@@ -15,6 +15,36 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ helper words
+
+: ?nextarg ( -- addr u noarg-flag )
+    argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
+
+[IFUNDEF] safe/string
+: safe/string ( c-addr u n -- c-addr' u' )
+\G protect /string against overflows.
+    dup negate >r  dup 0> IF
+        /string dup r> u>= IF  + 0  THEN
+    ELSE
+        /string dup r> u< IF  + 1+ -1  THEN
+    THEN ;
+[THEN]
+
+: or!   ( x addr -- )   >r r@ @ or   r> ! ;
+: xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
+: and!  ( x addr -- )   >r r@ @ and  r> ! ;
+: min!  ( n addr -- )   >r r@ @ min  r> ! ;
+: max!  ( n addr -- )   >r r@ @ max  r> ! ;
+: umin! ( n addr -- )   >r r@ @ umin r> ! ;
+: umax! ( n addr -- )   >r r@ @ umax r> ! ;
+
+: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
+: andc! ( x c-addr -- )   >r r@ c@ and  r> c! ;
+: orc!  ( x c-addr -- )   >r r@ c@ or   r> c! ;
+
+: max!@ ( n addr -- )   >r r@ @ max r> !@ ;
+: umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
+
 \ defined exceptions
 
 : throwcode ( addr u -- )  exception Create ,
@@ -80,36 +110,6 @@ UValue sockaddr ( -- addr )
 UValue sockaddr1 ( -- addr ) \ temporary buffer
 UValue aligned$
 UValue statbuf
-
-\ helper words
-
-: ?nextarg ( -- addr u noarg-flag )
-    argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
-
-[IFUNDEF] safe/string
-: safe/string ( c-addr u n -- c-addr' u' )
-\G protect /string against overflows.
-    dup negate >r  dup 0> IF
-        /string dup r> u>= IF  + 0  THEN
-    ELSE
-        /string dup r> u< IF  + 1+ -1  THEN
-    THEN ;
-[THEN]
-
-: or!   ( x addr -- )   >r r@ @ or   r> ! ;
-: xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
-: and!  ( x addr -- )   >r r@ @ and  r> ! ;
-: min!  ( n addr -- )   >r r@ @ min  r> ! ;
-: max!  ( n addr -- )   >r r@ @ max  r> ! ;
-: umin! ( n addr -- )   >r r@ @ umin r> ! ;
-: umax! ( n addr -- )   >r r@ @ umax r> ! ;
-
-: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
-: andc! ( x c-addr -- )   >r r@ c@ and  r> c! ;
-: orc!  ( x c-addr -- )   >r r@ c@ or   r> c! ;
-
-: max!@ ( n addr -- )   >r r@ @ max r> !@ ;
-: umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
 
 [IFDEF] 64bit
     ' min! Alias 64min!
