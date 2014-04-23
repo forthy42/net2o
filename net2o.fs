@@ -1729,8 +1729,9 @@ User outflag  outflag off
     temp-addr packet-to ;
 
 : net2o:punch ( addr u -- )
-    o IF  is-server c@
-	IF  ['] ping-addr1  ELSE  ['] ins-addr1  THEN  $>sock
+    o IF
+	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
+	$>sock
     ELSE  2drop  THEN ;
 
 \ send chunk

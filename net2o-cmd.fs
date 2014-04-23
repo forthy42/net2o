@@ -416,7 +416,8 @@ also net2o-base definitions
 +net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
-: ]nest  ( -- )  end-cmd cmd>nest $, push-$ push' nest ;
+: ]nest$  ( -- )  end-cmd cmd>nest $, ;
+: ]nest  ( -- )  ]nest$ push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 +net2o: new-data ( addr addr u -- ) \ create new data mapping
@@ -493,13 +494,14 @@ net2o-base
 
 +net2o: punch ( $:string -- ) \ punch NAT traversal hole
     $> net2o:punch ;
++net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
+    $> punch-load $! ;
 
-: gen-punch ( -- ) my-ip$ [: $, punch ;] $[]map ;
+: gen-punch ( -- ) nest[ request-done ]nest$ punch-load,
+    my-ip$ [: $, punch ;] $[]map ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
-+net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
-    $> punch-load $! ;
 
 \ create commands to send back
 
@@ -827,7 +829,7 @@ User other-xt ' noop other-xt !
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
-    nest[ add-cookie lit, set-rtdelay gen-reply request-done ]nest
+    nest[ add-cookie lit, set-rtdelay gen-reply ]nest
     tmpkey-request key-request punch? other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
