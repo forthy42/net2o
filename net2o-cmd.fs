@@ -90,8 +90,10 @@ Defer cmd-table
 
 cmd-class >dynamic to cmd-class
 
-: ?cmd  ( u -- u )  dup setup-class >methods @ u>= IF  net2o-crash  THEN ;
-: ?ocmd ( u -- u )  dup o cell- @ >methods @ u>= IF  net2o-crash  THEN ;
+: cmd?  ( u -- u flag ) dup setup-class >methods @ u>= ;
+: ocmd? ( u -- u flag ) dup o cell- @ >methods @ u>= ;
+: ?cmd  ( u -- u )  cmd?  IF  net2o-crash  THEN ;
+: ?ocmd ( u -- u )  ocmd? IF  net2o-crash  THEN ;
 
 : n>cmd ( n -- addr ) cells
     o IF  ?ocmd o cell- @  ELSE  ?cmd setup-class  THEN + ;
@@ -117,7 +119,11 @@ cmd-class >dynamic to cmd-class
 	.\" x\" " xtype
     THEN  .\" \" $, " ;
 
-: .net2o-name ( n -- )  n>cmd (net2o-see) ;
+: .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
+: .net2o-name ( n -- )  cells
+    o IF  ocmd? IF  .net2o-num  EXIT  THEN  o cell- @
+    ELSE  cmd?  IF  .net2o-num  EXIT  THEN  setup-class  THEN +
+    (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -495,6 +501,20 @@ net2o-base
 +net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
     $> punch-load $! ;
 
+\ create commands to send back
+
+: all-ivs ( -- ) \ Seed and gen all IVS
+    state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
+
++net2o: >time-offset ( n -- ) \ set time offset
+    o IF  time-offset 64!  ELSE  64drop  THEN ;
+: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
+
++net2o: gen-reply ( -- ) \ generate a key request reply reply
+    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+      nest[ pkc keysize $, receive-key update-key all-ivs gen-punch time-offset! ]tmpnest
+      push-cmd ;]  IS expect-reply? ;
+
 \ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
@@ -539,9 +559,6 @@ context-class setup-class >inherit to context-class
 +net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-+net2o: >time-offset ( n -- ) \ set time offset
-    time-offset 64! ;
-: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
 +net2o: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
     net2o:ack-b2btime ;
 +net2o: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
@@ -566,16 +583,6 @@ context-class setup-class >inherit to context-class
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
 +net2o: ko ( error -- ) \ receive error message
     throw ;
-
-\ create commands to send back
-
-: all-ivs ( -- ) \ Seed and gen all IVS
-    state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
-
-+net2o: gen-reply ( -- ) \ generate a key request reply reply
-    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs gen-punch time-offset! ]tmpnest
-      push-cmd ;]  IS expect-reply? ;
 
 \ better slurping
 

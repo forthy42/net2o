@@ -40,7 +40,7 @@ require mkdir.fs
 cmd-class class
     field: ke-sk \ secret key
     field: ke-pk \ public key
-    field: ke-pk1 \ public revocation key
+    field: ke-rk \ public revocation key
     field: ke-nick
     field: ke-prof
     field: ke-sigs
@@ -92,12 +92,21 @@ Variable strict-keys  strict-keys on
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ xtype cr
     ke-sk $@len IF  ." ke-sk: " ke-sk $@ xtype cr  THEN
-    ke-pk1 $@len IF  ." ke-pk1: " ke-pk1 $@ xtype cr  THEN
+    ke-rk $@len IF  ." ke-rk: " ke-rk $@ xtype cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
 
+: dumpkey ( addr u -- ) drop cell+ >o
+    .\" x\" " ke-pk $@ xtype .\" \" key:new" cr
+    ke-sk $@len IF  .\" x\" " ke-sk $@ xtype .\" \" ke-sk $! +seckey" cr  THEN
+    ke-rk $@len IF  .\" x\" " ke-rk $@ xtype .\" \" ke-rk $!" cr  THEN
+    '"' emit ke-nick $@ type .\" \" ke-nick $! "
+    ke-first 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
+    ." . d>64 ke-first 64! " ke-type @ . ." ke-type !"  cr o> ;
+
 : .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
+: dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
 : .key# ( addr u -- )
     ." Key '" key-table #@ drop cell+ >o ke-nick $@ o> type ." ' ok" cr ;
@@ -188,8 +197,11 @@ get-current also net2o-base definitions
 +net2o: keymask ( x -- )  64drop ;
 +net2o: keyfirst ( date-ns -- )  ke-first 64! ;
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
-+net2o: revkey1 ( $:string -- ) $> ke-pk1 $! ;
++net2o: revkey1 ( $:string -- ) $> ke-rk $! ;
 dup set-current previous
+
+key-entry >static to key-entry \ back to static method table
+' context-class is cmd-table
 
 static-a to allocater
 key-entry new to sample-key
