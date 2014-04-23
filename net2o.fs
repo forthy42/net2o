@@ -1089,11 +1089,6 @@ resend-size# buffer: resend-init
 	'4' of  4>sock xt execute  endof
 	!!no-addr!!  endcase ;
 
-: net2o:punch ( addr u -- )
-    o IF  is-server c@
-	IF  ['] ping-addr1  ELSE  ['] ins-addr1  THEN  $>sock
-    ELSE  2drop  THEN ;
-
 \ create new maps
 
 Variable mapstart $1 mapstart !
@@ -1727,6 +1722,16 @@ User outflag  outflag off
 
 : send-dX ( addr n -- ) +sendX2
     >send  set-flags  bandwidth+ send-data-packet ;
+
+: send-punch ( addr u -- )
+    insert-address temp-addr ins-dest
+    0 set-dest  punch-load $@ >send  set-flags  0 outbuf-encrypt
+    temp-addr packet-to ;
+
+: net2o:punch ( addr u -- )
+    o IF  is-server c@
+	IF  ['] ping-addr1  ELSE  ['] ins-addr1  THEN  $>sock
+    ELSE  2drop  THEN ;
 
 \ send chunk
 
