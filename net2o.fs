@@ -1723,10 +1723,12 @@ User outflag  outflag off
 : send-dX ( addr n -- ) +sendX2
     >send  set-flags  bandwidth+ send-data-packet ;
 
-: send-punch ( addr u -- )
+Defer punch-reply
+
+: send-punch ( -- )
+    check-addr1 0= IF  2drop  EXIT  THEN
     insert-address temp-addr ins-dest
-    0 set-dest  punch-load $@ >send  set-flags  0 outbuf-encrypt
-    temp-addr packet-to ;
+    temp-addr return-addr $10 move  punch-load $@ punch-reply ;
 
 : net2o:punch ( addr u -- )
     o IF

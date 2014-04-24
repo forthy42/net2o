@@ -497,8 +497,10 @@ net2o-base
 +net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
     $> punch-load $! ;
 
-: gen-punch ( -- ) nest[ request-done ]nest$ punch-load,
+: gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
+: gen-punchload ( -- )
+    nest[ add-cookie lit, set-rtdelay request-done ]nest$ punch-load, ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
@@ -514,7 +516,8 @@ net2o-base
 
 +net2o: gen-reply ( -- ) \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs gen-punch time-offset! ]tmpnest
+      nest[ pkc keysize $, receive-key update-key all-ivs
+      gen-punchload gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 \ everything that follows here can assume to have a connection context
@@ -834,6 +837,13 @@ User other-xt ' noop other-xt !
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
+
+:noname ( addr u -- )
+    cmd0buf cmd0source ! cmdreset ['] net2o, IS net2o-do also net2o-base
+    [ also net2o-base ]
+    ['] end-cmd IS expect-reply?
+    $, nest end-code
+; is punch-reply
 
 : 0-resend? ( -- )
     resend0 @ IF
