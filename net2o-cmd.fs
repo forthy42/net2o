@@ -427,7 +427,7 @@ also net2o-base definitions
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
 +net2o: request-done ( -- ) \ signal request is completed
-    own-crypt? IF  n2o:request-done  THEN ;
+    o 0<> own-crypt? and IF  n2o:request-done  THEN ;
 +net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
