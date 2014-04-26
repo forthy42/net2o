@@ -496,11 +496,14 @@ net2o-base
     $> net2o:punch ;
 +net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
     $> punch-load $! ;
++net2o: punch-done ( -- ) \ punch received
+    o 0<> own-crypt? and IF  return-addr return-address $10 move  THEN ;
 
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
 : gen-punchload ( -- )
-    nest[ add-cookie lit, set-rtdelay request-done ]nest$ punch-load, ;
+    nest[ add-cookie lit, set-rtdelay punch-done request-done ]nest$
+    punch-load, ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
