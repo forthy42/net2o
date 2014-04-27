@@ -228,6 +228,13 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 
 \ convention: '1' indicates net2o, '2' IPv6+IPv4, '3' IPv6, '4' IPv4.
 \ Tags are kept sorted, so you'll try net2o first, then IPv6, and IPv4 last
+\ Symbolic name may start with '@'+len followed by the name
+
+Variable myhost
+
+pad $100 gethostname pad cstring>sstring myhost $!
+
+: .myname ( -- )  myhost $@len IF  myhost $@ dup '@' + emit type  THEN ;
 
 : .sockaddr { addr alen -- }
     \ convert socket into net2o address token
@@ -276,7 +283,13 @@ User ip6:#
 
 \ NAT traversal stuff: print IP addresses
 
-: .ipaddr ( addr len -- )
+: skip-symname ( addr u -- addr' u' )
+    over c@ '?' - 0 max safe/string ;
+: .symname ( addr u -- addr' u' )
+    over c@ '?' - 0 max >r r@ IF   '"' emit over r@ 1 /string type '"' emit  THEN
+    r> safe/string ;
+
+: .ipaddr ( addr len -- )  .symname
     case  over c@ >r 1 /string r>
 	'1' of  ." |" xtype  endof
 	'2' of  .ip64 endof
@@ -381,8 +394,11 @@ Variable ins$0 \ just a null pointer
 
 \ add IP addresses
 
+Variable myname
+
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [: dup 4 = IF '4' emit ELSE dup $10 = IF '3' emit ELSE '2' emit THEN THEN type
+    [:  .myname
+	dup 4 = IF '4' emit ELSE dup $10 = IF '3' emit ELSE '2' emit THEN THEN type
 	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
     my-ip$ $ins[] ;
 
@@ -395,7 +411,7 @@ Variable $tmp2
 
 \ this looks too complicated, indicating a problem...
 
-: my-ip= { addr1 u1 addr2 u2 -- flag }
+: my-ip= skip-symname 2swap skip-symname { addr1 u1 addr2 u2 -- flag }
     case addr2 c@
 	'2' of  case  addr1 c@
 		'2' of  addr1 u1 addr2 u2 str=  endof
@@ -1072,6 +1088,7 @@ resend-size# buffer: resend-init
     2>r net2o-sock fileno "" 0 2r> sendto drop ;
 
 : $>sock ( addr u xt -- ) { xt }
+    skip-symname
     case  over c@ >r 1 /string r>
 	'2' of  2dup 64>4sock xt execute
 	    64>6sock xt execute  endof
