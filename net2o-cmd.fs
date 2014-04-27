@@ -831,12 +831,12 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 User other-xt ' noop other-xt !
 
-: gen-request ( -- )
+: gen-request ( nat -- )
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
-    nest[ add-cookie lit, set-rtdelay gen-reply ]nest
-    tmpkey-request key-request punch? other-xt perform
+    nest[ add-cookie lit, set-rtdelay gen-reply dup IF request-done THEN ]nest
+    tmpkey-request key-request 0= IF  punch?  THEN  other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
@@ -923,12 +923,15 @@ previous
 : +get-time     ['] get-tick other-xt ! ;
 : -other        ['] noop other-xt ! ;
 
-: n2o:connect ( ucode udata -- )
-    req-datasize !  req-codesize !
-    gen-request
-    +resend
-    1 client-loop
+: reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
+: tail-connect ( -- )   +resend  1 client-loop
     -timeout tskc KEYBYTES erase ;
+
+: n2o:connect ( ucode udata -- )
+    reqsize!  false gen-request  tail-connect ;
+
+: n2o:connect-nat ( ucode udata -- )
+    reqsize!  true  gen-request  tail-connect ;
 
 previous
 

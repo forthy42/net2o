@@ -40,7 +40,7 @@ init-client
     0 send-list $[]@ return-address swap move
     ." trying to connect to: " 0 send-list $[]@ xtype cr
     0 send-list $[]@ ret-addr swap move  send-list $[]off
-    $10000 $100000 n2o:connect +flow-control +resend
+    $10000 $100000 n2o:connect-nat +flow-control +resend
     ." Connected!" cr
     c:test-rest ;
 
