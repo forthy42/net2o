@@ -271,8 +271,7 @@ previous
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
-    send-list $[]off  acked
-    0. rot reply[] 2! ; \ clear request
+    acked  0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( ." expect: " cmdbuf$ n2o:see )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;

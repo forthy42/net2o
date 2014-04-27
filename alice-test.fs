@@ -25,21 +25,23 @@ init-client
     nick-key ke-pk $@ >d#id ;
 : c:insert-host ( addr u -- )
     host>$ IF
-	['] ins-addr1 $>sock  EXIT
-    THEN  2drop ;
+	[: check-addr1 0= IF  2drop  EXIT  THEN
+	  insert-address temp-addr ins-dest
+	  ." insert host: " temp-addr $10 xtype cr
+	  return-addr $10 0 skip nip 0= IF
+	      temp-addr return-addr $10 move
+	  THEN ;] $>sock
+    ELSE  2drop  THEN ;
 
 : n2o:lookup ( addr u -- )
     2dup c:lookup
-    0 n2o:new-context dest-key
+    0 n2o:new-context dest-key  return-addr $10 erase
     d#id @ k#host cells + ['] c:insert-host $[]map ;
 
 : nat:connect ( addr u -- )
     init-cache'
     2dup n2o:lookup dest-key
-    0 send-list $[]@ return-addr swap move
-    0 send-list $[]@ return-address swap move
-    ." trying to connect to: " 0 send-list $[]@ xtype cr
-    0 send-list $[]@ ret-addr swap move  send-list $[]off
+    ." trying to connect to: " return-addr $10 xtype cr
     $10000 $100000 n2o:connect-nat +flow-control +resend
     ." Connected!" cr
     c:test-rest ;

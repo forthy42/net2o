@@ -819,7 +819,6 @@ setup-class class
     $10 +field return-backup \ used for punching
     64field: recv-tick
     64field: recv-addr
-    field: send-list
     field: punch-load
     field: recv-flag
     field: file-state
@@ -1064,17 +1063,8 @@ resend-size# buffer: resend-init
     over $10 + be-ul@ sockaddr1 ipv4!
     $16 /string !temp-addr ;
 
-: >send-list ( addr u -- )
-    insert-address temp-addr ins-dest
-    temp-addr $10 send-list $+[]! ;
-
 : check-addr1 ( -- addr u flag )
     sockaddr1 sock-rest 2dup try-ip ;
-
-: ins-addr1 ( -- )
-    check-addr1 0= IF  2drop  EXIT  THEN
-    nat( ." dest: " 2dup .address cr )
-    >send-list ;
 
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
@@ -1693,13 +1683,6 @@ User outflag  outflag off
 	return-addr
 	.time ." cmd0 to: " dup $10 xtype cr
     ELSE
-	o IF
-	    send-list $[]# IF
-		punching# outbuf 1+ cor!
-		send-list [: .time ." packet to: " 2dup xtype cr
-		    drop packet-to ;] $[]map  EXIT
-	    THEN
-	THEN
 	ret-addr
     THEN   packet-to ;
 
@@ -2229,7 +2212,7 @@ Variable timeout-task
 	\ erase crypto keys
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
-	dest-pubkey $off  send-list $[]off
+	dest-pubkey $off
 	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
