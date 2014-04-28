@@ -78,7 +78,7 @@ require ./net2o.fs
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    nest[ cookie, request, ]nest
     end-code  client-loop o-timeout ;
 
 : c:fetch-host ( nick u -- )
@@ -86,7 +86,7 @@ require ./net2o.fs
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    nest[ cookie, request, ]nest
     end-code  client-loop o-timeout ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
@@ -94,7 +94,7 @@ require ./net2o.fs
     expect-reply get-ip
     0 >o ~~ nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    nest[ cookie, request, ]nest
     end-code  client-loop o-timeout ;
 
 : c:fetch-tags ( -- )

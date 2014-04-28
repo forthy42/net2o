@@ -832,12 +832,14 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 User other-xt ' noop other-xt !
 
+: cookie, ( -- )  add-cookie lit, set-rtdelay ;
+: request, ( -- )  next-request lit, request-done ;
+
 : gen-request ( nat -- )
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
-    nest[ add-cookie lit, set-rtdelay gen-reply dup IF
-	1 request# +!@ lit, request-done THEN ]nest
+    nest[ cookie, gen-reply dup IF  request,  THEN ]nest
     tmpkey-request key-request 0= IF  punch?  THEN  other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
