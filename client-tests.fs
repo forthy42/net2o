@@ -62,7 +62,7 @@ require ./net2o.fs
 
 : c:add-me ( -- )  +addme
     net2o-code   expect-reply get-ip  end-code
-    1 client-loop -setip o-timeout ;
+    request# @ 1- 1 client-loop -setip o-timeout ;
 
 : c:add-tag ( -- ) +addme
     net2o-code
@@ -71,38 +71,38 @@ require ./net2o.fs
     pkc keysize $, dht-id
     forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
-    end-code  1 client-loop -setip o-timeout ;
+    end-code  request# @ 1- 1 client-loop -setip o-timeout ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay request-done ]nest
-    end-code  1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
+    end-code  request# @ 1- 1 client-loop o-timeout ;
 
 : c:fetch-host ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay request-done ]nest
-    end-code  1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
+    end-code  request# @ 1- 1 client-loop o-timeout ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
     expect-reply get-ip
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay request-done ]nest
-    end-code  1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
+    end-code  request# @ 1- 1 client-loop o-timeout ;
 
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
     0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
     slurp send-chunks
-    end-code  1 client-loop o-timeout ;
+    end-code  -1 1 client-loop o-timeout ;
 
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
@@ -124,7 +124,7 @@ require ./net2o.fs
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all ['] .time $err ;
+    -1 1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Download test 2: 7 medium photos" cr ;] $err
@@ -142,7 +142,7 @@ require ./net2o.fs
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all ['] .time $err ;
+    -1 1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
     [: ." Download test 3: 2 big photos" cr ;] $err
@@ -155,7 +155,7 @@ require ./net2o.fs
     n2o:done
     send-chunks
     end-code
-    1 client-loop n2o:close-all ['] .time $err ;
+    -1 1 client-loop n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
@@ -180,7 +180,7 @@ require ./net2o.fs
     n2o:done
     send-chunks
     end-code
-    1 client-loop ['] .time $err ;
+    -1 1 client-loop ['] .time $err ;
 
 : c:download4a ( -- )
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
@@ -196,7 +196,7 @@ require ./net2o.fs
     -1 nlit, 6 ulit, track-limit
     slurp send-chunks
     end-code
-    1 client-loop n2o:close-all ['] .time $err ;
+    -1 1 client-loop n2o:close-all ['] .time $err ;
 
 : c:disconnect ( -- )  net2o-code close-all disconnect  end-code ;
 

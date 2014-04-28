@@ -425,8 +425,8 @@ also net2o-base definitions
 +net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: request-done ( -- ) \ signal request is completed
-    o 0<> own-crypt? and IF  n2o:request-done  THEN ;
++net2o: request-done ( req -- ) 64>n \ signal request is completed
+    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
 +net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
@@ -501,7 +501,8 @@ net2o-base
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
 : gen-punchload ( -- )
-    nest[ add-cookie lit, set-rtdelay punch-done request-done ]nest$
+    nest[ add-cookie lit, set-rtdelay punch-done
+    1 request# +!@ lit, request-done ]nest$
     punch-load, ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
@@ -779,7 +780,8 @@ also net2o-base
     data-rmap @ >o 0 dest-end !@ o> ;
 
 : rewind-transfer ( -- )
-    rewind data-end? IF  n2o:request-done  ELSE  restart-transfer  THEN
+    rewind data-end? IF  -1 n2o:request-done
+    ELSE  restart-transfer  THEN
     save( )else( request-stats? IF  send-timing  THEN ) ;
 
 : request-stats   F true to request-stats?  track-timing ;
@@ -834,7 +836,8 @@ User other-xt ' noop other-xt !
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
-    nest[ add-cookie lit, set-rtdelay gen-reply dup IF request-done THEN ]nest
+    nest[ add-cookie lit, set-rtdelay gen-reply dup IF
+	1 request# +!@ lit, request-done THEN ]nest
     tmpkey-request key-request 0= IF  punch?  THEN  other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
@@ -923,7 +926,7 @@ previous
 : -other        ['] noop other-xt ! ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend  1 client-loop
+: tail-connect ( -- )   +resend  request# @ 1 client-loop
     -timeout tskc KEYBYTES erase ;
 
 : n2o:connect ( ucode udata -- )

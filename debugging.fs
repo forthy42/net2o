@@ -71,6 +71,7 @@ debug: nat( \ NAT traversal stuff
 debug: route( \ do routing
 debug: noipv6( \ use only ipv4 for routing
 debug: noipv4( \ use only ipv6 for routing
+debug: request( \ track requests
 
 -db profile(
 

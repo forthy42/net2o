@@ -860,6 +860,7 @@ setup-class class
     field: ack-xt
     field: resend0
     field: codebuf#
+    field: request#
     1 pthread-mutexes +field code-lock
     1 pthread-mutexes +field filestate-lock
     
@@ -2245,6 +2246,7 @@ Variable timeout-task
 \ loops for server and client
 
 User requests
+User reqmatch#
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
@@ -2253,8 +2255,9 @@ User requests
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  packet-event +event  AGAIN ;
 
-event: ->request ( -- ) -1 requests +! msg( ." Request completed" cr ) ;
-event: ->reqsave ( task -- )  ->request event> ;
+event: ->request ( n -- ) reqmatch# @ = requests +!
+    msg( ." Request completed" cr ) ;
+event: ->reqsave ( task n -- )  elit, ->request event> ;
 event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
        true !!timeout!! ;
 
@@ -2278,9 +2281,9 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
     BEGIN  packet-event  +event  watch-timeout?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
-: n2o:request-done ( -- )  o-timeout
-    file-task ?dup-IF  wait-task @ elit, ->reqsave event>
-    ELSE  ->request  THEN ;
+: n2o:request-done ( n -- )  o-timeout request( ." Request " dup . ." done" cr )
+    file-task ?dup-IF  wait-task @ elit, elit, ->reqsave event>
+    ELSE  elit, ->request  THEN ;
 
 : do-event-loop ( -- )  o >r
     BEGIN   nothrow ['] event-loop-nocatch catch ?int dup  WHILE
@@ -2299,8 +2302,8 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 
 : requests->0 ( -- ) BEGIN  stop requests @ 0<= UNTIL ;
 
-: client-loop ( requests -- )
-    requests !  !ticks reset-timeout
+: client-loop ( reqmatch requests -- )
+    requests ! reqmatch# !  !ticks reset-timeout
     o IF  up@ wait-task !  THEN
     event-loop-task requests->0 ;
 
