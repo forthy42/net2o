@@ -62,7 +62,7 @@ require ./net2o.fs
 
 : c:add-me ( -- )  +addme
     net2o-code   expect-reply get-ip  end-code
-    request# @ 1- 1 client-loop -setip o-timeout ;
+    client-loop -setip o-timeout ;
 
 : c:add-tag ( -- ) +addme
     net2o-code
@@ -71,38 +71,38 @@ require ./net2o.fs
     pkc keysize $, dht-id
     forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
-    end-code  request# @ 1- 1 client-loop -setip o-timeout ;
+    end-code  client-loop -setip o-timeout ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
-    end-code  request# @ 1- 1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    end-code  client-loop o-timeout ;
 
 : c:fetch-host ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
-    end-code  request# @ 1- 1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    end-code  client-loop o-timeout ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
     expect-reply get-ip
-    0 >o nick-key ke-pk $@ o> $, dht-id
+    0 >o ~~ nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ add-cookie lit, set-rtdelay 1 request# +!@ lit, request-done ]nest
-    end-code  request# @ 1- 1 client-loop o-timeout ;
+    nest[ add-cookie lit, set-rtdelay next-request lit, request-done ]nest
+    end-code  client-loop o-timeout ;
 
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
     0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
-    slurp send-chunks
-    end-code  -1 1 client-loop o-timeout ;
+    n2o:done
+    end-code  client-loop o-timeout ;
 
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
@@ -116,21 +116,20 @@ require ./net2o.fs
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
     expect-reply
-    !time s" Download test" $, type cr .time ( see-me ) get-ip
+    !time .time s" Download test" $, type cr ( see-me ) get-ip
     $400 blocksize! $400 blockalign! stat( request-stats )
     "net2o.fs" "net2o.fs" >cache n2o:copy
     "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
     "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
     n2o:done
-    send-chunks
     end-code
-    -1 1 client-loop n2o:close-all ['] .time $err ;
+    client-loop n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Download test 2: 7 medium photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 2" $, type cr .time ( see-me )
+    .time s" Download test 2" $, type cr ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
     "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
@@ -140,28 +139,26 @@ require ./net2o.fs
     "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
     "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
     n2o:done
-    send-chunks
     end-code
-    -1 1 client-loop n2o:close-all ['] .time $err ;
+    client-loop n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
     [: ." Download test 3: 2 big photos" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 3" $, type cr .time ( see-me )
+    .time s" Download test 3" $, type cr ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
     "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
     n2o:done
-    send-chunks
     end-code
-    -1 1 client-loop n2o:close-all ['] .time $err ;
+    client-loop n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
     net2o-code
     expect-reply close-all \ rewind-total
-    s" Download test 4" $, type cr .time ( see-me )
+    .time s" Download test 4" $, type cr ( see-me )
     $10000 blocksize! $400 blockalign! stat( request-stats )
     "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
     "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
@@ -178,15 +175,14 @@ require ./net2o.fs
     $60000 ulit, 5 ulit, track-limit
     $70000 ulit, 6 ulit, track-limit
     n2o:done
-    send-chunks
     end-code
-    -1 1 client-loop ['] .time $err ;
+    client-loop ['] .time $err ;
 
 : c:download4a ( -- )
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
     net2o-code
     expect-reply
-    s" Download test 4a" $, type cr .time  ( see-me )
+    .time s" Download test 4a" $, type cr  ( see-me )
     -1 nlit, 0 ulit, track-limit
     -1 nlit, 1 ulit, track-limit
     -1 nlit, 2 ulit, track-limit
@@ -194,14 +190,14 @@ require ./net2o.fs
     -1 nlit, 4 ulit, track-limit
     -1 nlit, 5 ulit, track-limit
     -1 nlit, 6 ulit, track-limit
-    slurp send-chunks
+    n2o:done
     end-code
-    -1 1 client-loop n2o:close-all ['] .time $err ;
+    client-loop n2o:close-all ['] .time $err ;
 
 : c:disconnect ( -- )  net2o-code close-all disconnect  end-code ;
 
 : c:downloadend ( -- )    
-    net2o-code s" Download end" $, type cr .time close-all disconnect  end-code ;
+    net2o-code .time s" Download end" $, type cr close-all disconnect  end-code ;
 
 : c:test-rest ( -- )
     c:download1
@@ -223,15 +219,15 @@ require ./net2o.fs
 
 event: ->throw dup DoError throw ;
 
-: c:test& ( -- ) \ in background
-    up@ 1 stacksize4 NewTask4 pass >r
+: c:test& ( n -- ) \ in background
+    up@ 2 stacksize4 NewTask4 pass >r
     alloc-io ['] c:test catch ?dup-IF
-	elit, ->throw  ELSE  ->request  THEN  r> event> ;
+	elit, ->throw drop  ELSE  elit, ->request  THEN  r> event> ;
 
 #100 Value req-ms#
 
 : c:tests ( n -- )  dup 0< IF  abs to test#  1  THEN
-    dup to total-tests  dup requests !
-    0 ?DO  c:test& req-ms# ms test# 1+ to test#  LOOP
+    dup to total-tests  1 swap lshift 1- reqmask !
+    0 ?DO  I c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
 

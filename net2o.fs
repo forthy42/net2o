@@ -861,6 +861,7 @@ setup-class class
     field: resend0
     field: codebuf#
     field: request#
+    field: filereq#
     1 pthread-mutexes +field code-lock
     1 pthread-mutexes +field filestate-lock
     
@@ -2245,8 +2246,11 @@ Variable timeout-task
 
 \ loops for server and client
 
-User requests
-User reqmatch#
+User reqmask
+8 cells 1- Constant maxrequest#
+
+: next-request ( -- n )
+    1 dup request# +!@ maxrequest# and tuck lshift reqmask or! ;
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
@@ -2255,10 +2259,10 @@ User reqmatch#
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  packet-event +event  AGAIN ;
 
-event: ->request ( n -- ) reqmatch# @ = requests +!
-    msg( ." Request completed" cr ) ;
+event: ->request ( n -- ) 1 over lshift invert reqmask and!
+    msg( ." Request completed: " . cr )else( drop ) ;
 event: ->reqsave ( task n -- )  elit, ->request event> ;
-event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
+event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
        true !!timeout!! ;
 
 #2.000.000 d>64 64Constant watch-timeout# \ 2ms timeout check interval
@@ -2300,14 +2304,14 @@ event: ->timeout ( -- ) requests off msg( ." Request timed out" cr )
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) BEGIN  stop requests @ 0<= UNTIL ;
+: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL ;
 
-: client-loop ( reqmatch requests -- )
-    requests ! reqmatch# !  !ticks reset-timeout
+: client-loop ( -- )
+    !ticks reset-timeout
     o IF  up@ wait-task !  THEN
     event-loop-task requests->0 ;
 
-: server-loop ( -- )  0 >o rdrop  1 client-loop ;
+: server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
 
 \ client/server initializer
 

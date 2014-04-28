@@ -502,7 +502,7 @@ net2o-base
     my-ip$ [: $, punch ;] $[]map ;
 : gen-punchload ( -- )
     nest[ add-cookie lit, set-rtdelay punch-done
-    1 request# +!@ lit, request-done ]nest$
+    next-request lit, request-done ]nest$
     punch-load, ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
@@ -633,7 +633,7 @@ context-class setup-class >inherit to context-class
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:ackflush ( n -- ) ulit, ack-flush ;
-: n2o:done ( -- )  slurp ;
+: n2o:done ( -- )  slurp send-chunks next-request filereq# ! ;
 
 : rewind-total ( -- )
     data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
@@ -780,7 +780,7 @@ also net2o-base
     data-rmap @ >o 0 dest-end !@ o> ;
 
 : rewind-transfer ( -- )
-    rewind data-end? IF  -1 n2o:request-done
+    rewind data-end? IF  filereq# @ n2o:request-done
     ELSE  restart-transfer  THEN
     save( )else( request-stats? IF  send-timing  THEN ) ;
 
@@ -926,7 +926,7 @@ previous
 : -other        ['] noop other-xt ! ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend  request# @ 1 client-loop
+: tail-connect ( -- )   +resend  client-loop
     -timeout tskc KEYBYTES erase ;
 
 : n2o:connect ( ucode udata -- )
