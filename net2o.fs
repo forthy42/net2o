@@ -231,10 +231,17 @@ Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ Symbolic name may start with '@'+len followed by the name
 
 Variable myhost
+Variable myprio \ lower is more important, 0 is "no priority"
 
-pad $100 gethostname pad cstring>sstring myhost $!
+: default-host ( -- )
+    pad $100 gethostname pad cstring>sstring myhost $!
+    10 myprio ! ;
 
-: .myname ( -- )  myhost $@len IF  myhost $@ dup '@' + emit type  THEN ;
+default-host
+
+: .myname ( -- )
+    myprio @ IF  '0' emit myprio @ emit  THEN
+    myhost $@len IF  myhost $@ dup '@' + emit type  THEN ;
 
 : .sockaddr { addr alen -- }
     \ convert socket into net2o address token
@@ -284,8 +291,10 @@ User ip6:#
 \ NAT traversal stuff: print IP addresses
 
 : skip-symname ( addr u -- addr' u' )
+    over c@ '0' = IF  2 safe/string  THEN
     over c@ '?' - 0 max safe/string ;
 : .symname ( addr u -- addr' u' )
+    over c@ '0' = IF  over 1+ c@ 0 .r '#' emit  2 safe/string  THEN
     over c@ '?' - 0 max >r r@ IF   '"' emit over r@ 1 /string type '"' emit  THEN
     r> safe/string ;
 
