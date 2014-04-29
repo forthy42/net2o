@@ -2196,13 +2196,13 @@ Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 Variable timeout-task
 
-: o+timeout ( -- )
+: o+timeout ( -- ) timeout( ." +timeout: " o hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
       o timeout-task !  timeout-task cell timeout-tasks $+! ;]
     timeout-sema c-section ;
-: o-timeout ( -- )  \ max-int64 next-timeout 64!
+: o-timeout ( -- ) timeout( ." -timeout: " o hex. cr )
     [: timeout-tasks $@len 0 ?DO
 	  timeout-tasks $@ I /string drop @ o =  IF
 	      timeout-tasks I cell $del
@@ -2212,7 +2212,7 @@ Variable timeout-task
       +LOOP ;] timeout-sema c-section ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- ) o? \ next-timeout 64@ max-int64 64= ?EXIT
+: >next-timeout ( -- ) o?
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
@@ -2242,7 +2242,7 @@ Variable timeout-task
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
-	dispose 0
+	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client

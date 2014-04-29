@@ -132,7 +132,7 @@ $10 Constant datesize#
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
-    2dup bounds ?DO
+    ~~ 2dup bounds ?DO
 	I c@ cells hash dht@ + d#? ?dup-IF
 	    nip nip UNLOOP  EXIT  THEN
 	I c@ $100 + cells hash dht@ + to hash
