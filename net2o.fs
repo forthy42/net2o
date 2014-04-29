@@ -654,6 +654,7 @@ Variable lastn2oaddr
 
 User return-addr $10 cell- uallot drop
 User temp-addr   $10 cell- uallot drop
+User ind-addr
 
 \ these are all stubs for now
 
@@ -1067,7 +1068,8 @@ resend-size# buffer: resend-init
 
 : ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
 
-: !temp-addr ( addr u -- )  temp-addr dup $10 erase  swap $10 umin move ;
+: !temp-addr ( addr u -- ) dup 0<> ind-addr !
+    temp-addr dup $10 erase  swap $10 umin move ;
 
 : 6>sock ( addr u -- )
     over $10 + w@ sockaddr1 port w!

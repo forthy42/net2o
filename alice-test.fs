@@ -43,7 +43,7 @@ init-client
     init-cache'
     2dup n2o:lookup dest-key
     ." trying to connect to: " return-addr $10 xtype cr
-    $10000 $100000 n2o:connect-nat +flow-control +resend
+    $10000 $100000 n2o:connect +flow-control +resend
     ." Connected!" cr
     c:test-rest ;
 

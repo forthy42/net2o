@@ -923,10 +923,7 @@ previous
     -timeout tskc KEYBYTES erase ;
 
 : n2o:connect ( ucode udata -- )
-    reqsize!  false gen-request  tail-connect ;
-
-: n2o:connect-nat ( ucode udata -- )
-    reqsize!  true  gen-request  tail-connect ;
+    reqsize!  ind-addr @ gen-request  tail-connect ;
 
 previous
 
