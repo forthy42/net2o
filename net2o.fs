@@ -766,7 +766,6 @@ $07 Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
 $04 Constant resend-toggle#
-$08 Constant punching#
 
 \ short packet information
 
@@ -843,7 +842,6 @@ setup-class class
     field: resend0
     field: punch-load
     $10 +field return-address \ used as return address
-    $10 +field return-backup \ used for punching
     $10 +field r0-address \ used for resending 0
     64field: recv-tick
     64field: recv-addr
