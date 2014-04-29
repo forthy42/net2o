@@ -61,8 +61,8 @@ require ./net2o.fs
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:add-me ( -- )  +addme
-    net2o-code   expect-reply get-ip  end-code
-    client-loop -setip o-timeout ;
+    net2o-code   expect-reply get-ip cookie+request  end-code
+    client-loop -setip ;
 
 : c:add-tag ( -- ) +addme
     net2o-code
@@ -71,38 +71,38 @@ require ./net2o.fs
     pkc keysize $, dht-id
     forever "test:tag" pkc keysize gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize gen-tag $, k#tags ulit, dht-value+
-    end-code  client-loop -setip o-timeout ;
+    end-code  client-loop -setip ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
-    nest[ cookie, request, ]nest
-    end-code  client-loop o-timeout ;
+    cookie+request
+    end-code  client-loop ;
 
 : c:fetch-host ( nick u -- )
     net2o-code
     expect-reply
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ cookie, request, ]nest
-    end-code  client-loop o-timeout ;
+    cookie+request
+    end-code  client-loop ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
     expect-reply get-ip
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
-    nest[ cookie, request, ]nest
-    end-code  client-loop o-timeout ;
+    cookie+request
+    end-code  client-loop ;
 
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
     0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
     n2o:done
-    end-code  client-loop o-timeout ;
+    end-code  client-loop ;
 
 : c:dhtend ( -- )    
     net2o-code s" DHT end" $, type cr .time disconnect  end-code
@@ -197,7 +197,8 @@ require ./net2o.fs
 : c:disconnect ( -- )  net2o-code close-all disconnect  end-code ;
 
 : c:downloadend ( -- )    
-    net2o-code .time s" Download end" $, type cr close-all disconnect  end-code ;
+    net2o-code .time s" Download end" $, type cr close-all disconnect  end-code
+    o-timeout ;
 
 : c:test-rest ( -- )
     c:download1
@@ -227,7 +228,7 @@ event: ->throw dup DoError throw ;
 #100 Value req-ms#
 
 : c:tests ( n -- )  dup 0< IF  abs to test#  1  THEN
-    dup to total-tests  1 swap lshift 1- reqmask !
+    dup to total-tests  1 over lshift 1- reqmask !
     0 ?DO  I c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
 

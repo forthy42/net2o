@@ -2202,7 +2202,7 @@ Variable timeout-task
       cell +LOOP
       o timeout-task !  timeout-task cell timeout-tasks $+! ;]
     timeout-sema c-section ;
-: o-timeout ( -- )
+: o-timeout ( -- )  \ max-int64 next-timeout 64!
     [: timeout-tasks $@len 0 ?DO
 	  timeout-tasks $@ I /string drop @ o =  IF
 	      timeout-tasks I cell $del
@@ -2212,7 +2212,7 @@ Variable timeout-task
       +LOOP ;] timeout-sema c-section ;
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- ) o?
+: >next-timeout ( -- ) o? \ next-timeout 64@ max-int64 64= ?EXIT
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ next-timeout 64!  o+timeout ;
@@ -2242,7 +2242,7 @@ Variable timeout-task
 	crypto-key $@ erase  crypto-key $off
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
-	dispose
+	dispose 0
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client
@@ -2255,7 +2255,7 @@ User reqmask
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
-    IF  route-packet  ELSE  handle-packet  reset-timeout  THEN ;
+    IF  route-packet  ELSE  reset-timeout  handle-packet  THEN ;
 
 : server-loop-nocatch ( -- ) \ 0 stick-to-core
     BEGIN  packet-event +event  AGAIN ;
@@ -2286,7 +2286,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
     BEGIN  packet-event  +event  watch-timeout?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
-: n2o:request-done ( n -- )  o-timeout request( ." Request " dup . ." done" cr )
+: n2o:request-done ( n -- )  request( ." Request " dup . ." done" cr )
     file-task ?dup-IF  wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 
@@ -2305,7 +2305,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL ;
+: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL  o-timeout ;
 
 : client-loop ( -- )
     !ticks reset-timeout

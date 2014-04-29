@@ -318,7 +318,7 @@ false Value add-myip
     add-myip IF
 	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
     THEN
-    nest[ request-done ]nest end-cmd
+    request,  end-cmd
     ['] end-cmd IS expect-reply? ;
 : addme ( addr u -- ) 2dup .iperr
     pub? IF
