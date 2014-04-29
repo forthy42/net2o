@@ -857,6 +857,7 @@ User other-xt ' noop other-xt !
 	\ ." Resend to 0" cr
 	cmd0buf cmd0source !
 	[: resend0 $@ >r cmdbuf r@ move
+	  return-address return-addr $10 move
 	  cmdbuf r> 64#0 send-cmd 1 packets2 +! ;]
 	cmdlock c-section
     THEN ;
