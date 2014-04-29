@@ -929,8 +929,7 @@ previous
 : -other        ['] noop other-xt ! ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend
-    return-addr r0-address $10 move  client-loop
+: tail-connect ( -- )   +resend  client-loop
     -timeout tskc KEYBYTES erase ;
 
 : n2o:connect ( ucode udata -- )

@@ -1448,7 +1448,7 @@ $20 Value mask-bits#
 
 \ resend third handshake
 
-: push-reply ( addr u -- )  resend0 $! ;
+: push-reply ( addr u -- )  resend0 $!  return-addr r0-address $10 move ;
 
 \ file handling
 

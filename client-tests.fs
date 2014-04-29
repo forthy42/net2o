@@ -92,7 +92,7 @@ require ./net2o.fs
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
     expect-reply get-ip
-    0 >o ~~ nick-key ke-pk $@ o> $, dht-id
+    0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
     nest[ cookie, request, ]nest
     end-code  client-loop o-timeout ;
