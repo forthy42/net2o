@@ -911,6 +911,7 @@ previous
 
 : connected-timeout ( -- )
     timeout( .expected )
+    >next-timeout 1 timeouts +!
     packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;

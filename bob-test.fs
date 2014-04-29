@@ -19,7 +19,7 @@ init-client
 
 : c:bob ( -- ) 
     $2000 $10000 "test" ins-ip4 c:connect
-    c:add-me ;
+    c:add-me -timeout ;
 
 c:bob server-loop
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests

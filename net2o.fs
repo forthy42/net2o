@@ -1048,7 +1048,9 @@ Variable init-context#
 
 resend-size# buffer: resend-init
 
-: -timeout      ['] noop               timeout-xt ! ;
+: no-timeout ( -- )  max-int64 next-timeout 64!  0 timeouts ! ;
+
+: -timeout      ['] no-timeout  timeout-xt ! ;
 
 : n2o:new-context ( addr -- )
     context-class new >o rdrop
@@ -2224,13 +2226,14 @@ Variable timeout-task
     cell +LOOP  n64-swap ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout ( -- ) o?
+: reset-timeout ( -- ) o?  timeout-xt @ ['] no-timeout = ?EXIT
     0 timeouts ! >next-timeout ; \ 2s timeout
 
 \ dispose context
 
 : n2o:dispose-context ( o:addr -- o:addr )
-    [: cmd( ." Disposing context... " o . cr )
+    [: cmd( ." Disposing context... " o hex. cr )
+	timeout( ." Disposing context... " o hex. cr )
 	o-timeout o-chunks
 	0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
 	data-map  @ ?dup-IF  >o free-data o>  THEN
@@ -2271,8 +2274,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	>next-timeout
-	do-timeout 1 timeouts +!
+	do-timeout
 	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
