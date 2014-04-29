@@ -840,12 +840,13 @@ end-class setup-class \ setup connections
 setup-class class
     field: context#
     field: wait-task
-    $10 +field return-address
+    field: resend0
+    field: punch-load
+    $10 +field return-address \ used as return address
     $10 +field return-backup \ used for punching
-    $10 +field r0-address
+    $10 +field r0-address \ used for resending 0
     64field: recv-tick
     64field: recv-addr
-    field: punch-load
     field: recv-flag
     field: file-state
     field: read-file#
@@ -859,7 +860,6 @@ setup-class class
     field: timeout-xt \ callback for timeout
     field: setip-xt   \ callback for set-ip
     field: ack-xt
-    field: resend0
     field: codebuf#
     field: request#
     field: filereq#
