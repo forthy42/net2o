@@ -842,6 +842,7 @@ setup-class class
     field: wait-task
     $10 +field return-address
     $10 +field return-backup \ used for punching
+    $10 +field r0-address
     64field: recv-tick
     64field: recv-addr
     field: punch-load

@@ -857,7 +857,7 @@ User other-xt ' noop other-xt !
 	\ ." Resend to 0" cr
 	cmd0buf cmd0source !
 	[: resend0 $@ >r cmdbuf r@ move
-	  return-address return-addr $10 move
+	  r0-address return-addr $10 move
 	  cmdbuf r> 64#0 send-cmd 1 packets2 +! ;]
 	cmdlock c-section
     THEN ;
@@ -929,7 +929,8 @@ previous
 : -other        ['] noop other-xt ! ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend  client-loop
+: tail-connect ( -- )   +resend
+    return-addr r0-address $10 move  client-loop
     -timeout tskc KEYBYTES erase ;
 
 : n2o:connect ( ucode udata -- )

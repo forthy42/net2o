@@ -30,7 +30,7 @@ init-client
 	  ." insert host: " temp-addr $10 xtype cr
 	  return-addr $10 0 skip nip 0= IF
 	      temp-addr return-addr $10 move
-	      temp-addr return-address $10 move
+\	      temp-addr return-address $10 move
 	  THEN ;] $>sock
     ELSE  2drop  THEN ;
 
