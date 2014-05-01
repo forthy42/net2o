@@ -8,6 +8,12 @@
 compiletoram
 
 $400EC000 constant Ethernet-Base
+$400FE000 constant USB-Base \ for unique device ID
+
+USB-Base $F20 + Constant UNIQUEID0
+USB-Base $F24 + Constant UNIQUEID1
+USB-Base $F28 + Constant UNIQUEID2
+USB-Base $F2C + Constant UNIQUEID3
 
 \ Ethernet MAC (Ethernet Offset)
 Ethernet-Base $000 + constant EMACCFG       \ RW $0000.8000 Ethernet MAC Configuration
@@ -206,7 +212,10 @@ create4> TX-Descriptor \ must have more than two correct descriptors!
 1 5 lshift constant UNF \ Transmit Underflow
 1 2 lshift constant TU \ Transmit Unavailabl
 
-create4> mymac  $00 c, $1A c, $B6 c, $02 c, $B0 c, $34 c, $00 c, $80 c,
+create4> mymac  $00 c, $1A c, $B6 c,
+uniqueid0 @ dup c, 8 rshift dup c,
+uniqueid3 3 + c@ c, \ use unique ID
+$00 c, $80 c,
 
 : tc, ( addr char -- addr' )  over c! 1+ ;
 : tw, ( addr word -- addr' )  >r r@ 8 rshift tc, r> tc, ;
