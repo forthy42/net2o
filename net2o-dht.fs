@@ -306,15 +306,12 @@ datesize# buffer: sigdate \ date+expire date
 
 also net2o-base
 
-: pub? ( addr u -- addr u flag )
-    case over c@
-	'4' of  dup 7 u<=  endof
-	'3' of  dup 19 u<= endof
-	false swap  endcase ;
+: pub? ( addr u -- addr u flag )  skip-symname
+    over c@ '2' = IF  dup $17 u<=  ELSE  false  THEN ;
 
 false Value add-myip
 
-: addme-end
+: addme-end ( -- )
     add-myip IF
 	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
     THEN
@@ -322,7 +319,7 @@ false Value add-myip
     ['] end-cmd IS expect-reply? ;
 : addme ( addr u -- ) 2dup .iperr
     pub? IF
-	2dup my-ip? IF  2drop  EXIT  THEN
+	my-ip-merge IF  2drop  EXIT  THEN
 	my-ip$ $ins[]  EXIT  THEN
 \    2dup my-ip? 0= IF  2dup my-ip$ $ins[]  THEN
     now>never

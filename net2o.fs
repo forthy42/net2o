@@ -226,8 +226,12 @@ Variable my-ip$
 Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
 
-\ convention: '1' indicates net2o, '2' IPv6+IPv4, '3' IPv6, '4' IPv4.
-\ Tags are kept sorted, so you'll try net2o first, then IPv6, and IPv4 last
+\ convention:
+\ '!' is a key revocation, it contains the new key
+\ '0' is a identifier, followed by an address (must be '1' or '2')
+\ '1' indicates net2o
+\ '2' IPv6+IPv4
+\ Tags are kept sorted, so you'll get revocations first, then net2o and IPv6+4
 \ Symbolic name may start with '@'+len followed by the name
 
 Variable myhost
@@ -243,17 +247,21 @@ default-host
     myprio @ IF  '0' emit myprio @ emit  THEN
     myhost $@len IF  myhost $@ dup '@' + emit type  THEN ;
 
+Create ip6::0 16 0 [DO] 0 c, [LOOP]
+: .ip6::0 ( -- )  ip6::0 $10 type ;
+: .ip4::0 ( -- )  ip6::0 4 type ;
+
 : .sockaddr { addr alen -- }
     \ convert socket into net2o address token
     case addr family w@
 	AF_INET of
-	    '4' emit addr sin_addr 4 type addr port 2 type
+	    '2' emit  .ip6::0  addr sin_addr 4 type addr port 2 type
 	endof
 	AF_INET6 of
 	    addr sin6_addr 12 fake-ip4 over str= IF
-		'4' emit addr sin6_addr 12 + 4 type
+		'2' emit  .ip6::0  addr sin6_addr 12 + 4 type
 	    ELSE
-		'3' emit addr sin6_addr $10 type
+		'2' emit addr sin6_addr $10 type  .ip4::0
 	    THEN  addr sin6_port 2 type
 	endof
     endcase ;
@@ -279,8 +287,11 @@ User ip6:#
     drop ." ]" ;
 : .ip6 ( addr len -- )
     .ip6a .port .net2o ;
+
 : .ip64 ( addr len -- )
-    .ip6a ." /" .ip4a .port .net2o ;
+    over $10 ip6::0 over str= IF  16 /string  ELSE  .ip6a  THEN
+    over   4 ip6::0 over str= IF  4 /string   ELSE  .ip4a  THEN
+    .port .net2o ;
 
 : .address ( addr u -- )
     over w@ AF_INET6 =
@@ -302,9 +313,7 @@ User ip6:#
     case  over c@ >r 1 /string r>
 	'1' of  ." |" xtype  endof
 	'2' of  .ip64 endof
-	'3' of  .ip6  endof
-	'4' of  .ip4  endof
-	-rot dump endcase ;
+	dup emit -rot dump endcase ;
 
 : .iperr ( addr len -- ) [: .time ." connected from: " .ipaddr cr ;] $err ;
 
@@ -406,8 +415,8 @@ Variable ins$0 \ just a null pointer
 Variable myname
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [:  .myname
-	dup 4 = IF '4' emit ELSE dup $10 = IF '3' emit ELSE '2' emit THEN THEN type
+    [:  .myname '2' emit
+	dup 4 = IF ip6::0 $10 type ELSE dup $10 = IF type ip6::0 4 THEN THEN type
 	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
     my-ip$ $ins[] ;
 
@@ -418,31 +427,33 @@ Variable $tmp2
     $tmp2 $@ +my-ip
     0= IF  local-ip6  +my-ip THEN ;
 
-\ this looks too complicated, indicating a problem...
+\ this looks ok
+
+: str=?0 ( addr1 u1 addr2 u2 -- )
+    2dup ip6::0 over str= >r
+    2over ip6::0 over str= >r str= r> r> or or ;
+
+: && ( flag -- ) ]] dup 0= ?EXIT drop [[ ; immediate
 
 : my-ip= skip-symname 2swap skip-symname { addr1 u1 addr2 u2 -- flag }
-    case addr2 c@
-	'2' of  case  addr1 c@
-		'2' of  addr1 u1 addr2 u2 str=  endof
-		'3' of  addr1 1+ addr2 1+ $10 tuck str=
-		    addr1 $11 + addr2 $15 + 2 tuck str= and  endof
-		'4' of  addr1 1+ addr2 $11 + 6 tuck str=  endof
-	    false swap  endcase  endof
-	'3' of  case  addr1 c@
-		'2' of  addr1 1+ addr2 1+ $10 tuck str=
-		    addr1 $15 + addr2 $11 + 2 tuck str= and  endof
-		'3' of  addr1 u1 addr2 u2 str=  endof
-		'4' of  false  endof
-	    false swap  endcase endof
-	'4' of  case  addr1 c@
-		'2' of  addr1 $11 + addr2 1+ 6 tuck str=  endof
-		'3' of  false  endof
-		'4' of  addr1 u1 addr2 u2 str=  endof
-	    false swap  endcase endof
-    false swap endcase ;
+    addr1 c@ '2' = addr2 c@ '2' = and &&
+    addr1 u1 $15 safe/string addr2 u2 $15 safe/string str= &&
+    addr1 1+ $10 addr2 1+ over str=?0 &&
+    addr1 $11 + 4 addr2 $11 + over str=?0 ;
 
-: my-ip? ( addr u -- flag )
-    0 my-ip$ [: rot >r my-ip= r> or ;] $[]map ;
+: str>merge ( addr1 u1 addr2 u2 -- )
+    2dup ip6::0 over str= IF  rot umin move  ELSE  2drop 2drop  THEN ;
+
+: my-ip>merge  skip-symname 2swap skip-symname 2swap
+    { addr1 u1 addr2 u2 -- }
+    addr1 1+ $10 addr2 1+ over  str>merge
+    addr1 $11 + 4 addr2 $11 + over str>merge ;
+
+: my-ip? ( addr u -- addr u flag )
+    0 my-ip$ [: rot >r 2over my-ip= r> or ;] $[]map ;
+: my-ip-merge ( addr u -- addr u flag )
+    0 my-ip$ [: rot >r 2over 2over my-ip= IF
+	    2over 2swap my-ip>merge rdrop true  ELSE  r>  THEN ;] $[]map ;
 
 \ Create udp socket
 
@@ -1101,13 +1112,17 @@ resend-size# buffer: resend-init
     nat( ." ping: " 2dup .address cr )
     2>r net2o-sock fileno "" 0 2r> sendto drop ;
 
+: 64-6? ( addr u -- )  $10 umin    ip6::0 over str= 0= ;
+: 64-4? ( addr u -- )  $10 /string 4 umin 64-6? ;
+
 : $>sock ( addr u xt -- ) { xt }
     skip-symname
     case  over c@ >r 1 /string r>
-	'2' of  2dup 64>4sock xt execute
-	    64>6sock xt execute  endof
-	'3' of  6>sock xt execute  endof
-	'4' of  4>sock xt execute  endof
+	'2' of
+	    2dup 64-4? IF  2dup 64>4sock xt execute THEN
+	    2dup 64-6? IF  2dup 64>6sock xt execute THEN
+	    2drop
+	endof
 	!!no-addr!!  endcase ;
 
 \ create new maps
