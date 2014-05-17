@@ -26,9 +26,9 @@ state# buffer: oldmykey \ previous private key
 \ key storage
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 \ client keys
-keysize buffer: pkc   \ pubkey
+keysize 2* buffer: pkc   \ pubkey
 keysize buffer: skc   \ secret key
-keysize buffer: pk1   \ pubkey 1 for revokation
+pkc keysize + Constant pk1   \ pubkey 1 for revokation
 keysize buffer: sk1   \ secret key 1 for revokation (will not last)
 keysize buffer: pkrev \ pubkey for revoking keys
 keysize buffer: skrev \ secret for revoking keys

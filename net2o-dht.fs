@@ -286,7 +286,7 @@ datesize# buffer: sigdate \ date+expire date
     2dup keccak0 "host" >keyed-hash
     sigdate datesize# "date" >keyed-hash ;
 : .sig ( -- )  sigdate datesize# type skc pkc ed-sign type ;
-: .pk ( -- )  pkc keysize type ;
+: .pk ( -- )  pkc keysize 2* type ;
 : host$ ( addr u -- hsotaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
     gen>host host$ ;
@@ -324,7 +324,7 @@ false Value add-myip
 \    2dup my-ip? 0= IF  2dup my-ip$ $ins[]  THEN
     now>never
     what's expect-reply? ['] addme-end <> IF
-	expect-reply pkc keysize $, dht-id
+	expect-reply pkc keysize 2* $, dht-id
     THEN
     gen-host $, k#host ulit, dht-value+
     ['] addme-end IS expect-reply? ;

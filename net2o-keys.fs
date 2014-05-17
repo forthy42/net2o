@@ -64,7 +64,7 @@ Variable this-keyid
 2Variable addsig
 
 : current-key ( addr u -- )
-    2dup key-table #@ drop cell+ dup this-key ! >o rdrop ke-pk $! ;
+    2dup keysize umin key-table #@ drop cell+ dup this-key ! >o rdrop ke-pk $! ;
 : make-thiskey ( addr -- )
     dup $@ drop this-keyid !  cell+ $@ drop cell+ dup this-key ! >o rdrop ;
 
@@ -72,7 +72,7 @@ Variable this-keyid
     \ addr u is the public key
     sample-key dup cell- @ >osize @ 2dup erase
     over >o 64#-1 ke-last 64! o> -1 cells /string
-    2over keysize umin key-table #! keysize umin current-key ;
+    2over keysize umin key-table #! current-key ;
 
 \ search for keys - not optimized
 
@@ -256,7 +256,7 @@ set-current previous previous
 
 : pack-key ( type nick u -- )
     key:code
-        [: pkc keysize type pk1 keysize type ;] $tmp $, newkey
+        pkc keysize 2* $, newkey
 	skc keysize $, privkey
         $, keynick lit, keytype ticks lit, keyfirst
     end:key ;
@@ -299,7 +299,7 @@ set-current previous previous
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
     nick-key  this-keyid @ 0= ?EXIT
-    this-keyid @ pkc keysize move
+    this-key @ >o ke-pk $@ o> pkc swap keysize 2* umin move
     ke-sk $@ skc swap move ;
 
 : dest-key ( addr u -- )
