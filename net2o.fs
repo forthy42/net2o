@@ -238,7 +238,7 @@ Variable myhost
 Variable myprio \ lower is more important, 0 is "no priority"
 
 : default-host ( -- )
-    pad $100 gethostname pad cstring>sstring myhost $!
+    pad $100 gethostname drop pad cstring>sstring myhost $!
     10 myprio ! ;
 
 default-host

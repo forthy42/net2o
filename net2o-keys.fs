@@ -40,7 +40,6 @@ require mkdir.fs
 cmd-class class
     field: ke-sk \ secret key
     field: ke-pk \ public key
-    field: ke-rk \ public revocation key
     field: ke-nick
     field: ke-prof
     field: ke-sigs
@@ -73,7 +72,7 @@ Variable this-keyid
     \ addr u is the public key
     sample-key dup cell- @ >osize @ 2dup erase
     over >o 64#-1 ke-last 64! o> -1 cells /string
-    2over key-table #! current-key ;
+    2over keysize umin key-table #! keysize umin current-key ;
 
 \ search for keys - not optimized
 
@@ -92,7 +91,6 @@ Variable strict-keys  strict-keys on
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ xtype cr
     ke-sk $@len IF  ." ke-sk: " ke-sk $@ xtype cr  THEN
-    ke-rk $@len IF  ." ke-rk: " ke-rk $@ xtype cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
@@ -100,7 +98,6 @@ Variable strict-keys  strict-keys on
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ xtype .\" \" key:new" cr
     ke-sk $@len IF  .\" x\" " ke-sk $@ xtype .\" \" ke-sk $! +seckey" cr  THEN
-    ke-rk $@len IF  .\" x\" " ke-rk $@ xtype .\" \" ke-rk $!" cr  THEN
     '"' emit ke-nick $@ type .\" \" ke-nick $! "
     ke-first 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first 64! " ke-type @ . ." ke-type !"  cr o> ;
@@ -108,13 +105,14 @@ Variable strict-keys  strict-keys on
 : .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
-: .key# ( addr u -- )
-    ." Key '" key-table #@ drop cell+ >o ke-nick $@ o> type ." ' ok" cr ;
+: .key# ( addr u -- ) keysize umin
+    ." Key '" key-table #@ dup 0= IF 2drop EXIT THEN
+    drop cell+ >o ke-nick $@ o> type ." ' ok" cr ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
-	    2dup dest-pubkey $@ str= 0= IF
-		[: ." want: " dest-pubkey $@ xtype cr
+	    2dup dest-pubkey $@ keysize umin str= 0= IF
+		[: ." want: " dest-pubkey $@ keysize umin xtype cr
 		  ." got : " 2dup xtype cr ;] $err
 		true !!wrong-key!!
 	    THEN
@@ -197,7 +195,6 @@ get-current also net2o-base definitions
 +net2o: keymask ( x -- )  64drop ;
 +net2o: keyfirst ( date-ns -- )  ke-first 64! ;
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
-+net2o: revkey1 ( $:string -- ) $> ke-rk $! ;
 dup set-current previous
 
 key-entry >static to key-entry \ back to static method table
@@ -259,9 +256,9 @@ set-current previous previous
 
 : pack-key ( type nick u -- )
     key:code
-        pkc keysize $, newkey skc keysize $, privkey
+        [: pkc keysize type pk1 keysize type ;] $tmp $, newkey
+	skc keysize $, privkey
         $, keynick lit, keytype ticks lit, keyfirst
-        pk1 keysize $, revkey1
     end:key ;
 
 : +gen-keys ( type nick u -- )
