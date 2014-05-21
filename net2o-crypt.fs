@@ -16,31 +16,44 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 64 Constant state#
-state# 2* Constant state2#
-state2# buffer: key-assembly
-state2# buffer: ivs-assembly
-state2# buffer: no-key \ just zeros for no key
-state# buffer: mykey \ instance's private key
-state# buffer: oldmykey \ previous private key
 
-\ key storage
+user-o keybuf
+
+state# 2* Constant state2#
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
-\ client keys
-keysize 2* buffer: pkc   \ pubkey
-keysize buffer: skc   \ secret key
-pkc keysize + Constant pk1   \ pubkey 1 for revokation
-keysize buffer: sk1   \ secret key 1 for revokation (will not last)
-keysize buffer: pkrev \ pubkey for revoking keys
-keysize buffer: skrev \ secret for revoking keys
-keysize buffer: stpkc \ server temporary keypair - once per connection setup
-keysize buffer: stskc
-keysize buffer: oldpkc   \ previous pubkey after revocation
-keysize buffer: oldskc   \ previous secret key after revocation
-keysize buffer: oldpkrev \ previous revocation pubkey after revocation
-keysize buffer: oldskrev \ previous revocation secret after revocation
-\ shared secred
-keysize buffer: keypad
-64Variable last-mykey
+
+object class
+    state2# uvar key-assembly
+    state2# uvar ivs-assembly
+    state2# uvar no-key \ just zeros for no key
+    state# uvar mykey \ instance's private key
+    state# uvar oldmykey \ previous private key
+    
+    \ key storage
+    \ client keys
+    keysize uvar pkc   \ pubkey
+    keysize uvar pk1   \ pubkey 1 for revokation
+    keysize uvar skc   \ secret key
+    keysize uvar sk1   \ secret key 1 for revokation (will not last)
+    keysize uvar pkrev \ pubkey for revoking keys
+    keysize uvar skrev \ secret for revoking keys
+    keysize uvar stpkc \ server temporary keypair - once per connection setup
+    keysize uvar stskc
+    keysize uvar oldpkc   \ previous pubkey after revocation
+    keysize uvar oldskc   \ previous secret key after revocation
+    keysize uvar oldpkrev \ previous revocation pubkey after revocation
+    keysize uvar oldskrev \ previous revocation secret after revocation
+    \ shared secred
+    keysize uvar keypad
+    64Variable last-mykey
+end-class keybuf-c
+
+: init-keybuf ( -- )
+    keybuf @ ?EXIT \ we have only one global keybuf
+    keybuf-c >osize @ alloc+lock keybuf ! ;
+
+init-keybuf
+
 #10.000.000.000 d>64 64Value delta-mykey# \ new mykey every 10 seconds
 
 : init-mykey ( -- )
