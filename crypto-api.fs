@@ -26,6 +26,8 @@ object class
     \G initialize crypto function for a task
     umethod c:free ( -- )
     \G free crypto function for a task
+    umethod c:0key ( -- )
+    \G set zero key
     umethod c:key! ( addr -- )
     \G use addr as key storage
     umethod c:key@ ( -- addr )

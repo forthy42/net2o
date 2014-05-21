@@ -34,6 +34,10 @@ keysize buffer: pkrev \ pubkey for revoking keys
 keysize buffer: skrev \ secret for revoking keys
 keysize buffer: stpkc \ server temporary keypair - once per connection setup
 keysize buffer: stskc
+keysize buffer: oldpkc   \ previous pubkey after revocation
+keysize buffer: oldskc   \ previous secret key after revocation
+keysize buffer: oldpkrev \ previous revocation pubkey after revocation
+keysize buffer: oldskrev \ previous revocation secret after revocation
 \ shared secred
 keysize buffer: keypad
 64Variable last-mykey
@@ -80,7 +84,7 @@ keysize buffer: keypad
 
 : default-key ( -- )
     cmd( ." Default-key " cr )
-    no-key >c:key ;
+    c:0key ;
 
 User last-ivskey
 

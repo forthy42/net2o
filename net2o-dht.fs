@@ -26,16 +26,15 @@ hash#256   buffer: keyed-hash-out
 \ Keyed hashs are there for unique handles
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
+    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
     hash( ." hashing: " 2over xtype ':' emit 2dup xtype F cr )
-    keyed-hash-buf keccak#max keccak#max 2/ /string >padded
-    keyed-hash-buf keccak#max 2/ >padded
-    keyed-hash-buf keccak#max >keccak keccak*
+    c:hash c:hash
     hash( @keccak 200 xtype F cr F cr ) ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
-    keccak0 >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
+    c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
 : keyed-hash#256 ( valaddr uval keyaddr ukey -- hashaddr uhash )
-    keccak0 >keyed-hash  keyed-hash-out hash#256 2dup keccak> ;
+    c:0key >keyed-hash  keyed-hash-out hash#256 2dup keccak> ;
 
 \ For speed reasons, the DHT is in-memory
 \ we may keep a log of changes on disk if we want persistence
@@ -97,7 +96,7 @@ $10 Constant datesize#
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
-    keccak0 2dup sigsize# - "host" >keyed-hash
+    c:0key 2dup sigsize# - "host" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
 : check-date ( addr u -- addr u flag )
     2dup + sigsize# - >r
@@ -105,24 +104,37 @@ $10 Constant datesize#
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
 : verify-host ( addr u -- addr u flag )
-    check-date >r
-    2dup + sigonlysize# - d#hashkey 2@ drop ed-verify r> and ;
+    check-date &&
+    2dup + sigonlysize# - d#hashkey 2@ drop ed-verify ;
 : check-host ( addr u -- addr u )
     >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
-    keccak0 d#hashkey 2@ "tag" >keyed-hash
+    c:0key d#hashkey 2@ "tag" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
+: verify-sig ( addr u -- addr u flag )
+    2dup + sigonlysize# - dup $30 - ed-verify ;
 : verify-tag ( addr u -- addr u flag )
-    check-date >r
-    2dup + sigonlysize# - dup $30 - ed-verify r> and ;
+    check-date && verify-sig ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
     >tag "tag" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
     >host "host" >delete verify-host ;
+
+: keymove ( addr1 addr2 -- )  keysize move ;
+: revoke? ( addr u -- addr u flag )
+    over c@ '!' = over $101 = and &&
+    >host verify-host && 2dup 1 /string sigsize# -
+    check-date 0= IF  2drop false  EXIT  THEN  c:0key
+    2dup sigpksize# - "revoke" >keyed-hash
+    2dup + sigsize# - datesize# "date" >keyed-hash
+    verify-sig 0= IF  2drop false  EXIT  THEN
+    over keysize 2* + pkrev keymove
+    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
+    d#hashkey 2@ drop keysize str= nip nip ;
 
 \ some hash storage primitives
 
@@ -283,18 +295,18 @@ datesize# buffer: sigdate \ date+expire date
 : now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
 
 : gen>host ( addr u -- addr u )
-    2dup keccak0 "host" >keyed-hash
+    2dup c:0key "host" >keyed-hash
     sigdate datesize# "date" >keyed-hash ;
 : .sig ( -- )  sigdate datesize# type skc pkc ed-sign type ;
-: .pk ( -- )  pkc keysize 2* type ;
-: host$ ( addr u -- hsotaddr host-u ) [: type .sig ;] $tmp ;
+: .pk ( -- )  pkc keysize type ;
+: host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
     gen>host host$ ;
 : gen-host-del ( addr u -- addr' u' )
     gen>host "host" >delete host$ ;
 
 : gen>tag ( addr u hash-addr uh -- addr u )
-    keccak0 "tag" >keyed-hash
+    c:0key "tag" >keyed-hash
     sigdate datesize# "date" >keyed-hash
     2dup ':' $split 2swap >keyed-hash ;
 : tag$ ( addr u -- tagaddr tag-u ) [: type .pk .sig ;] $tmp ;
@@ -303,6 +315,32 @@ datesize# buffer: sigdate \ date+expire date
     gen>tag tag$ ;
 : gen-tag-del ( addr u hash-addr uh -- addr' u' )
     gen>tag "tag" >delete tag$ ;
+
+\ revokation
+
+Variable revtoken
+
+: 0oldkey ( -- ) \ pubkeys can stay
+    oldskc keysize erase  oldskrev keysize erase ;
+
+: revoke-key ( skaddr -- addr u )  skrev keymove
+    check-rev? 0= !!not-my-revsk!!
+    now>never \ revokations never expire
+    skc oldskc keymove  pkc oldpkc keymove
+    skrev oldskrev keymove  oldskrev oldpkrev sk>pk
+    gen-keys \ generate new keys
+    pkc keysize 2* revtoken $+! \ my new key
+    c:0key revtoken $@ "revoke" >keyed-hash
+    sigdate datesize# "date" >keyed-hash
+    oldpkrev keysize revtoken $+!
+    sigdate datesize# revtoken $+!
+    oldskrev oldpkrev ed-sign revtoken $+!
+    s" !" revtoken 0 $ins
+    revtoken $@ gen>host
+    [: type sigdate datesize# type oldskc oldpkc ed-sign type ;] $tmp
+    0oldkey ;
+
+\ addme stuff
 
 also net2o-base
 

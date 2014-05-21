@@ -89,6 +89,8 @@ keccak-init
 \G obtain the key storage
 ' keccak# to c:key# ( -- n )
 \G obtain key storage size
+' keccak0 to c:0key ( -- )
+\G set zero key
 :noname keccak0 keccak#max >keccak ; to >c:key ( addr -- )
 \G move 128 bytes from addr to the state
 :noname keccak#max keccak> ; to c:key> ( addr -- )
@@ -126,8 +128,10 @@ keccak-init
 :noname ( addr u -- )
 \G Hash message in buffer addr u
     BEGIN  2dup keccak#max umin tuck
-	dup keccak#max u< IF  keccak-padded keccak#max >padded
-	    keccak-padded keccak#max  THEN  >keccak  @keccak KeccakF
+	dup keccak#max u< IF
+	    keccak-padded keccak#max >padded
+	    keccak-padded keccak#max
+	THEN  >keccak  @keccak KeccakF
     /string dup 0= UNTIL  2drop
 ; to c:hash
 :noname ( addr u -- )
