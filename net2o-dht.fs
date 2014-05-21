@@ -346,6 +346,7 @@ Variable revtoken
     2dup 3 umin "!  " str= over revsize# = and &&  \ verify size and prefix
     >host verify-host &&                           \ verify it's a proper host
     2dup + sigsize# - sigdate datesize# move       \ copy signing date
+    sigdate 64'+ 64@ 64#-1 64= &&                  \ may never expire
     2dup 3 /string sigsize# -                      \ extract actual revoke part
     over "selfsign" revoke-verify &&'              \ verify self signature
     over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
