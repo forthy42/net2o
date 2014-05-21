@@ -431,11 +431,13 @@ Variable $tmp2
 
 \ this looks ok
 
+: && ( flag -- ) ]] dup 0= ?EXIT drop [[ ; immediate compile-only
+: &&' ( addr u addr' u' flag -- addr u false / addr u addr' u' )
+    ]] 0= IF 2drop false EXIT THEN [[ ; immediate compile-only
+
 : str=?0 ( addr1 u1 addr2 u2 -- )
     2dup ip6::0 over str= >r
     2over ip6::0 over str= >r str= r> r> or or ;
-
-: && ( flag -- ) ]] dup 0= ?EXIT drop [[ ; immediate
 
 : my-ip= skip-symname 2swap skip-symname { addr1 u1 addr2 u2 -- flag }
     addr1 c@ '2' = addr2 c@ '2' = and &&

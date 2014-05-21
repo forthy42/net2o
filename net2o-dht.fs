@@ -124,18 +124,6 @@ $10 Constant datesize#
 : delete-host? ( addr u -- addr u flag )
     >host "host" >delete verify-host ;
 
-: keymove ( addr1 addr2 -- )  keysize move ;
-: revoke? ( addr u -- addr u flag )
-    over c@ '!' = over $101 = and &&
-    >host verify-host && 2dup 1 /string sigsize# -
-    check-date 0= IF  2drop false  EXIT  THEN  c:0key
-    2dup sigpksize# - "revoke" >keyed-hash
-    2dup + sigsize# - datesize# "date" >keyed-hash
-    verify-sig 0= IF  2drop false  EXIT  THEN
-    over keysize 2* + pkrev keymove
-    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
-    d#hashkey 2@ drop keysize str= nip nip ;
-
 \ some hash storage primitives
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
@@ -318,28 +306,52 @@ datesize# buffer: sigdate \ date+expire date
 
 \ revokation
 
+3 datesize# + keysize 9 * + Constant revsize#
+
 Variable revtoken
 
 : 0oldkey ( -- ) \ pubkeys can stay
     oldskc keysize erase  oldskrev keysize erase ;
 
+: keymove ( addr1 addr2 -- )  keysize move ;
+
+: revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
+    sigonlysize# - 2dup 2r> >keyed-hash
+    sigdate datesize# "date" >keyed-hash
+    2dup + r> ed-verify ;
+
 : >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
 
-: revoke-key ( -- addr u )
-    now>never \ revokations never expire
-    skc oldskc keymove  pkc oldpkc keymove
-    skrev oldskrev keymove  oldskrev oldpkrev sk>pk
-    gen-keys \ generate new keys
-    pkc keysize 2* revtoken $+! \ my new key
-    c:0key revtoken $@ "revoke" >keyed-hash
+: sign-token, ( sk pk string u2 -- )
+    c:0key revtoken $@ 2swap >keyed-hash
     sigdate datesize# "date" >keyed-hash
-    oldpkrev keysize revtoken $+!
-    sigdate datesize# revtoken $+!
-    oldskrev oldpkrev ed-sign revtoken $+!
-    s" !" revtoken 0 $ins
-    revtoken $@ gen>host
+    ed-sign revtoken $+! ;
+
+: revoke-key ( -- addr u )
+    now>never                              \ revokations never expire
+    skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
+                                           \ backup keys
+    oldskrev oldpkrev sk>pk                \ generate revokation pubkey
+    gen-keys                               \ generate new keys
+    pkc keysize 2* revtoken $!             \ my new key
+    oldpkrev keysize revtoken $+!          \ revoke token
+    oldskrev oldpkrev "revoke" sign-token, \ revoke signature
+    skc pkc "selfsign" sign-token,         \ self signed with new key
+    s" !  " revtoken 0 $ins                \ '!' + oldkeylen+newkeylen to flag revokation
+    revtoken $@ gen>host                   \ sign host information with old key
     [: type sigdate datesize# type oldskc oldpkc ed-sign type ;] $tmp
     0oldkey ;
+
+: revoke? ( addr u -- addr u flag )
+    2dup 3 umin "!  " str= over revsize# = and &&  \ verify size and prefix
+    >host verify-host &&                           \ verify it's a proper host
+    2dup + sigsize# - sigdate datesize# move       \ copy signing date
+    2dup 3 /string sigsize# -                      \ extract actual revoke part
+    over "selfsign" revoke-verify &&'              \ verify self signature
+    over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
+    over keysize 2* + pkrev keymove
+    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
+    d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
 
 \ addme stuff
 
