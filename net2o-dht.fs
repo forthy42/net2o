@@ -323,8 +323,9 @@ Variable revtoken
 : 0oldkey ( -- ) \ pubkeys can stay
     oldskc keysize erase  oldskrev keysize erase ;
 
-: revoke-key ( skaddr -- addr u )  skrev keymove
-    check-rev? 0= !!not-my-revsk!!
+: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
+
+: revoke-key ( -- addr u )
     now>never \ revokations never expire
     skc oldskc keymove  pkc oldpkc keymove
     skrev oldskrev keymove  oldskrev oldpkrev sk>pk
