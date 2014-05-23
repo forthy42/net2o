@@ -290,7 +290,7 @@ Variable throwcount
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!
-	[: ." do-cmd-loop: " dup . .exe cr DoError ;] $err nothrow
+	[: ." do-cmd-loop: " dup . .exe cr dup  DoError ;] $err nothrow
 	buf-state @ show-offset !  n2o:see-me  show-offset on
 	throwcount @ 4 < IF  >throw  THEN  THEN
     drop  r> sp! 2drop +cmd ;
@@ -643,11 +643,11 @@ net2o-base
 
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
-:noname
+:noname ( throwcode -- )
     server? IF
 	dup  IF  dup nlit, ko end-cmd
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
-	throw  THEN  drop ; IS >throw
+    THEN  throw ; IS >throw
 
 set-current previous
 

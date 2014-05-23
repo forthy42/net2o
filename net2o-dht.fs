@@ -104,9 +104,12 @@ $10 Constant datesize#
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
 : check-ed25519 ( addr u -- addr u flag )  2dup + 1- c@ $20 = ;
+: verify-sig ( addr u pk -- )  >r
+    check-date IF  check-ed25519 IF
+	    2dup + sigonlysize# - r> ed-verify
+	    EXIT  THEN THEN  rdrop false ;
 : verify-host ( addr u -- addr u flag )
-    check-date && check-ed25519 &&
-    2dup + sigonlysize# - d#hashkey 2@ drop ed-verify ;
+    d#hashkey 2@ drop verify-sig ;
 : check-host ( addr u -- addr u )
     >host verify-host 0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
@@ -114,10 +117,8 @@ $10 Constant datesize#
     c:0key d#hashkey 2@ "tag" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
-: verify-sig ( addr u -- addr u flag )
-    2dup + sigonlysize# - dup $30 - ed-verify ;
 : verify-tag ( addr u -- addr u flag )
-    check-date && check-ed25519 && verify-sig ;
+    2dup + sigpksize# - verify-sig ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
