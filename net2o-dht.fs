@@ -81,9 +81,9 @@ s" invalid signature"            throwcode !!wrong-sig!!
 
 UValue d#id
 User d#hashkey cell uallot drop
-$40 Constant sigonlysize#
-$50 Constant sigsize#
-$70 Constant sigpksize#
+$41 Constant sigonlysize#
+$51 Constant sigsize#
+$71 Constant sigpksize#
 $10 Constant datesize#
 
 \ checks for signatures
@@ -103,8 +103,9 @@ $10 Constant datesize#
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
+: check-ed25519 ( addr u -- addr u flag )  2dup + 1- c@ $20 = ;
 : verify-host ( addr u -- addr u flag )
-    check-date &&
+    check-date && check-ed25519 &&
     2dup + sigonlysize# - d#hashkey 2@ drop ed-verify ;
 : check-host ( addr u -- addr u )
     >host verify-host 0= !!wrong-sig!! ;
@@ -116,7 +117,7 @@ $10 Constant datesize#
 : verify-sig ( addr u -- addr u flag )
     2dup + sigonlysize# - dup $30 - ed-verify ;
 : verify-tag ( addr u -- addr u flag )
-    check-date && verify-sig ;
+    check-date && check-ed25519 && verify-sig ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -285,7 +286,7 @@ datesize# buffer: sigdate \ date+expire date
 : gen>host ( addr u -- addr u )
     2dup c:0key "host" >keyed-hash
     sigdate datesize# "date" >keyed-hash ;
-: .sig ( -- )  sigdate datesize# type skc pkc ed-sign type ;
+: .sig ( -- )  sigdate datesize# type skc pkc ed-sign type space ;
 : .pk ( -- )  pkc keysize type ;
 : host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
@@ -306,7 +307,7 @@ datesize# buffer: sigdate \ date+expire date
 
 \ revokation
 
-3 datesize# + keysize 9 * + Constant revsize#
+4 datesize# + keysize 9 * + Constant revsize#
 
 Variable revtoken
 
@@ -325,7 +326,7 @@ Variable revtoken
 : sign-token, ( sk pk string u2 -- )
     c:0key revtoken $@ 2swap >keyed-hash
     sigdate datesize# "date" >keyed-hash
-    ed-sign revtoken $+! ;
+    ed-sign revtoken $+! bl revtoken c$+! ;
 
 : revoke-key ( -- addr u )
     now>never                              \ revokations never expire
@@ -337,17 +338,17 @@ Variable revtoken
     oldpkrev keysize revtoken $+!          \ revoke token
     oldskrev oldpkrev "revoke" sign-token, \ revoke signature
     skc pkc "selfsign" sign-token,         \ self signed with new key
-    s" !  " revtoken 0 $ins                \ '!' + oldkeylen+newkeylen to flag revokation
+    "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
     revtoken $@ gen>host                   \ sign host information with old key
-    [: type sigdate datesize# type oldskc oldpkc ed-sign type ;] $tmp
+    [: type sigdate datesize# type oldskc oldpkc ed-sign type space ;] $tmp
     0oldkey ;
 
 : revoke? ( addr u -- addr u flag )
-    2dup 3 umin "!  " str= over revsize# = and &&  \ verify size and prefix
+    2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
     >host verify-host &&                           \ verify it's a proper host
     2dup + sigsize# - sigdate datesize# move       \ copy signing date
     sigdate 64'+ 64@ 64#-1 64= &&                  \ may never expire
-    2dup 3 /string sigsize# -                      \ extract actual revoke part
+    2dup 1 /string sigsize# -                      \ extract actual revoke part
     over "selfsign" revoke-verify &&'              \ verify self signature
     over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
     over keysize 2* + pkrev keymove
