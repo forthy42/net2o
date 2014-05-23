@@ -156,7 +156,8 @@ $10 Constant datesize#
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $arr } 0 $arr $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# - compare dup 0= IF
+	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# -
+	    compare dup 0= IF
 		$# $arr $[] $off
 		$arr $# cells cell $del
 		2drop EXIT  THEN
@@ -203,9 +204,9 @@ $10 Constant datesize#
     cells dup k#size u>= !!no-dht-key!!
     d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
     dup >r d#id @ +
-    r@ k#host cells = IF  >r delete-host? IF  r> $del[]sig dht( d#. )
+    r@ k#host cells = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    r@ k#tags cells = IF  >r delete-tag?  IF  r> $del[]sig dht( d#. )
+    r@ k#tags cells = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
     rdrop drop 2drop ;
 : d#value+ ( addr u key -- ) \ with sanity checks

@@ -59,6 +59,22 @@ UValue test#  -1 to test#
     net2o-code   expect-reply get-ip cookie+request  end-code
     client-loop -setip ;
 
+: c:do-replace ( -- )
+    pkc keysize 2* >d#id d#id @ IF
+	net2o-code   expect-reply
+	pkc keysize 2* $, dht-id
+	d#id @ k#host cells +
+	[: sigsize# - 2dup + sigdate datesize# move
+	  gen-host-del $, k#host ulit, dht-value- ;] $[]map
+	end-code
+    THEN ;
+
+: c:replace-me ( -- )  +addme
+    net2o-code   expect-reply get-ip cookie+request
+    pkc keysize 2* $, dht-id k#host ulit, dht-value?
+    end-code
+    client-loop -setip c:do-replace ;
+
 : c:add-tag ( -- ) +addme
     net2o-code
     expect-reply
@@ -89,13 +105,14 @@ UValue test#  -1 to test#
     expect-reply get-ip
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value?
+    pkc keysize 2* $, dht-id k#host ulit, dht-value?
     cookie+request
-    end-code  client-loop ;
+    end-code  client-loop c:do-replace ;
 
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
-    0 ulit, dht-open  pkc keysize $, $FE ulit, 0 ulit, dht-query
+    0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
     n2o:done
     end-code  client-loop ;
 
