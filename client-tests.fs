@@ -41,11 +41,11 @@ UValue test#  -1 to test#
     "eve" ke-nick $! $1367B086A26B4E42. d>64 ke-first 64! 1 ke-type !
 ;
 
-: ins-ip ( -- )
+: ins-ip ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip ;
-: ins-ip4 ( -- )
+: ins-ip4 ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip4 ;
-: ins-ip6 ( -- )
+: ins-ip6 ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip6 ;
 
 : c:connect ( code data nick u ret -- )
@@ -69,9 +69,13 @@ UValue test#  -1 to test#
 	end-code
     THEN ;
 
+also net2o-base
+: replaceme, ( -- )
+    pkc keysize 2* $, dht-id k#host ulit, dht-value? ;
+previous
+
 : c:replace-me ( -- )  +addme
-    net2o-code   expect-reply get-ip cookie+request
-    pkc keysize 2* $, dht-id k#host ulit, dht-value?
+    net2o-code   expect-reply get-ip replaceme, cookie+request
     end-code
     client-loop -setip c:do-replace ;
 
@@ -92,20 +96,21 @@ UValue test#  -1 to test#
     cookie+request
     end-code  client-loop ;
 
+also net2o-base
+: fetch-host, ( nick u -- )
+    0 >o nick-key ke-pk $@ o> $, dht-id
+    k#host ulit, dht-value? ;
+previous
+
 : c:fetch-host ( nick u -- )
     net2o-code
-    expect-reply
-    0 >o nick-key ke-pk $@ o> $, dht-id
-    k#host ulit, dht-value?
+    expect-reply  fetch-host,
     cookie+request
     end-code  client-loop ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
-    expect-reply get-ip
-    0 >o nick-key ke-pk $@ o> $, dht-id
-    k#host ulit, dht-value?
-    pkc keysize 2* $, dht-id k#host ulit, dht-value?
+    expect-reply get-ip fetch-host, replaceme,
     cookie+request
     end-code  client-loop c:do-replace ;
 

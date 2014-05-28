@@ -72,6 +72,7 @@ debug: route( \ do routing
 debug: noipv6( \ use only ipv4 for routing
 debug: noipv4( \ use only ipv6 for routing
 debug: request( \ track requests
+debug: beacon( \ debug sending beacons
 
 -db profile(
 

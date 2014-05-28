@@ -2286,7 +2286,7 @@ event: ->request ( n -- ) 1 over lshift invert reqmask and!
     msg( ." Request completed: " . cr )else( drop ) ;
 event: ->reqsave ( task n -- )  elit, ->request event> ;
 event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
-       true !!timeout!! ;
+    true !!timeout!! ;
 
 #2.000.000 d>64 64Constant watch-timeout# \ 2ms timeout check interval
 64Variable watch-timeout ticks watch-timeout# 64+ watch-timeout 64!
@@ -2303,8 +2303,42 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 	request-timeout
     THEN ;
 
+\ beacons
+\ UDP connections through a NAT close after timeout,
+\ typically after a minute or so.
+\ To keep connections alive, you have to send a "beacon" a bit before
+\ the connection would expire to refresh the NAT window.
+\ beacons are send regularly regardless if you have any other traffic,
+\ because that's easier to do.
+
+#55.000.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
+64Variable beacon-time ticks beacon-time 64!
+
+: +beacons ( -- )
+    beacon-time 64@ beacon-ticks# 64+ beacon-time 64! ;
+
++beacons
+
+Variable beacons \ destinations to send beacons to
+
+: send-beacons ( -- )
+    beacons [: beacon( ." send beacon to: " 2dup .address cr )
+	2>r net2o-sock fileno s" " 0 2r> sendto +send ;] $[]map ;
+
+: beacon? ( -- )
+    beacon-time 64@ ticker 64@ 64- 64-0< IF
+	send-beacons +beacons
+    THEN ;
+
+: +beacon ( sockaddr len -- )
+    beacon( ." add beacon: " 2dup .address cr )
+    beacons $+[]! ;
+: add-beacon ( net2oaddr -- ) route>address sockaddr alen @ +beacon ;
+
+\ event looop
+
 : event-loop-nocatch ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  +event  watch-timeout?
+    BEGIN  packet-event  +event  watch-timeout?  beacon?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
 : n2o:request-done ( n -- )  request( ." Request " dup . ." done" cr )
