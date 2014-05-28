@@ -2,7 +2,7 @@
 
 require ./net2o.fs
 
-UValue test#  -1 to test#
+UValue test#  0 to test#
 1 Value total-tests
 
 : .test# ( -- ) test# 0>= IF  test# 0 .r  THEN ;
