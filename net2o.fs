@@ -771,6 +771,8 @@ Create add-sizes     $06 c, $2a c, $FF c, $FF c,
 : packet-data ( addr -- addr u )
     >r r@ header-size r@ + r> body-size ;
 
+add-sizes 1+ c@ min-size + Constant minpacket#
+
 \ second byte constants
 
 $80 Constant broadcasting# \ special flags for switches
@@ -2130,12 +2132,17 @@ Defer init-reply
     >o rdrop  alloc-io
     send-loop ;
 
+Defer handle-beacon
+
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
-    dup IF
+    dup minpacket# > IF
 	sockaddr alen @ insert-address  inbuf ins-source
 	over packet-size over <> !!size!! +next
-    THEN ;
+	EXIT
+    THEN
+    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
+;
 
 0 Value dump-fd
 
@@ -2310,6 +2317,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 \ the connection would expire to refresh the NAT window.
 \ beacons are send regularly regardless if you have any other traffic,
 \ because that's easier to do.
+\ beacons are one-byte packets, either space (no-reply) or '?' (reply if new)
 
 #55.000.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
 64Variable beacon-time ticks beacon-time 64!
@@ -2323,7 +2331,7 @@ Variable beacons \ destinations to send beacons to
 
 : send-beacons ( -- )
     beacons [: beacon( ." send beacon to: " 2dup .address cr )
-	2>r net2o-sock fileno s" " 0 2r> sendto +send ;] $[]map ;
+	2>r net2o-sock fileno s" ?" 0 2r> sendto +send ;] $[]map ;
 
 : beacon? ( -- )
     beacon-time 64@ ticker 64@ 64- 64-0< IF

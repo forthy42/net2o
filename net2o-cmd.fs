@@ -927,6 +927,24 @@ previous
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-request  tail-connect ;
 
+\ beacon
+
+:noname ( char -- )
+    case '?' of \ if we don't know that address, send a reply
+	    sockaddr alen @ 2dup routes #key -1 = IF
+		beacon( ." Send reply to: " sockaddr alen @ .address cr )
+		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
+	    THEN
+	endof
+	'!' of \ I got a reply, my address is unknown
+	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
+	    IF
+		beacon( ." Got reply: " sockaddr alen @ .address cr )
+	    THEN
+	    2drop
+	endof
+    endcase ; is handle-beacon
+
 previous
 
 0 [IF]
