@@ -529,8 +529,10 @@ sema cmd0lock
 \ for bigger blocks, we use use alloc+guard, i.e. mmap with a
 \ guard page after the end.
 
-: alloc-buf ( addr -- addr' )
+: alloc-buf ( -- addr )
     maxpacket-aligned buffers# * alloc+guard 6 + ;
+: free-buf ( addr -- )
+    6 - maxpacket-aligned buffers# * 2dup erase free+guard ;
 
 : ?free+guard ( addr u -- )
     over @ IF  over @ swap 2dup erase  free+guard  off
@@ -539,7 +541,7 @@ sema cmd0lock
 : init-statbuf ( -- )
     file-stat alloz to statbuf ;
 : free-statbuf ( -- )
-    file-stat statbuf freez  0 to statbuf ;
+    statbuf file-stat freez  0 to statbuf ;
 
 : alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
@@ -551,14 +553,15 @@ sema cmd0lock
     init-ed25519 c:init ;
 
 : free-io ( -- )
-    inbuf  maxpacket-aligned buffers# * 2dup erase free+guard
-    outbuf maxpacket-aligned buffers# * 2dup erase free+guard
-    cmd0buf maxdata   freez
-    init0buf maxdata 2/ mykey-salt# + $10 +  freez
+    free-ed25519 c:free
+    free-statbuf
+    aligned$ $400 freez
     sockaddr  sockaddr_in6 %size  freez
     sockaddr1 sockaddr_in6 %size  freez
-    free-statbuf
-    free-ed25519 c:free ;
+    init0buf maxdata 2/ mykey-salt# + $10 +  freez
+    cmd0buf maxdata   freez
+    inbuf  free-buf
+    outbuf free-buf ;
 
 alloc-io
 
@@ -2290,7 +2293,7 @@ User reqmask
     BEGIN  packet-event +event  AGAIN ;
 
 event: ->request ( n -- ) 1 over lshift invert reqmask and!
-    msg( ." Request completed: " . cr )else( drop ) ;
+    msg( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
 event: ->reqsave ( task n -- )  elit, ->request event> ;
 event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
     true !!timeout!! ;
@@ -2300,7 +2303,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	do-timeout
+	timeout( ." do timeout: " o hex. cr ) do-timeout
 	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
@@ -2319,7 +2322,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 \ because that's easier to do.
 \ beacons are one-byte packets, either space (no-reply) or '?' (reply if new)
 
-#55.000.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
+#55.00.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
 64Variable beacon-time ticks beacon-time 64!
 
 : +beacons ( -- )
@@ -2349,7 +2352,8 @@ Variable beacons \ destinations to send beacons to
     BEGIN  packet-event  +event  watch-timeout?  beacon?
 	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
 
-: n2o:request-done ( n -- )  request( ." Request " dup . ." done" cr )
+: n2o:request-done ( n -- )
+    request( ." Request " dup . ." done, to task: " wait-task @ hex. cr )
     file-task ?dup-IF  wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 

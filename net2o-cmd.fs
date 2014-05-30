@@ -376,8 +376,6 @@ dup set-current previous
     : 3*64>n ( 64a 64b 64c -- na nb nc ) 64>n >r 64>n >r 64>n r> r> ;
 [THEN]
 
-Defer send-replace,
-
 \ commands to read and write files
 
 also net2o-base definitions
@@ -495,6 +493,9 @@ net2o-base
 
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
+
+: cookie+request ( -- )  nest[ cookie, request, ]nest ;
+
 : gen-punchload ( -- )
     nest[ cookie, punch-done request, ]nest$ punch-load, ;
 
@@ -513,11 +514,14 @@ net2o-base
 +net2o: gen-reply ( -- ) \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key all-ivs
-      gen-punchload gen-punch time-offset! ]tmpnest
+      cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
-+net2o: send-replace ( -- ) \ send replacements, stage 2
-    own-crypt? IF  send-replace,  THEN ;
++net2o: gen-punch-reply ( -- ) \ generate a key request reply reply
+    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+      nest[ pkc keysize $, receive-key update-key all-ivs
+      gen-punchload gen-punch time-offset! ]tmpnest
+      push-cmd ;]  IS expect-reply? ;
 
 \ everything that follows here can assume to have a connection context
 
@@ -828,13 +832,13 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 User other-xt ' noop other-xt !
 
-: cookie+request ( -- )  nest[ cookie, request, ]nest ;
-
 : gen-request ( -- )
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
     gen-tmpkeys $, receive-tmpkey
-    nest[ cookie, gen-reply ind-addr @ 0= IF  request,  THEN ]nest
+    nest[ cookie, ind-addr @ IF  gen-punch-reply
+    ELSE  gen-reply request,  THEN ]nest
     tmpkey-request key-request  ind-addr @  IF  punch?  THEN  other-xt perform
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
@@ -932,28 +936,6 @@ previous
     reqsize!  gen-request  tail-connect ;
 
 previous
-
-\ beacon
-
-Defer beacon-replace
-
-:noname ( char -- )
-    case '?' of \ if we don't know that address, send a reply
-	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
-		beacon( ." Send reply to: " sockaddr alen @ .address cr )
-		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
-	    THEN
-	endof
-	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got reply: " sockaddr alen @ .address cr )
-	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
-	    IF
-		beacon( ." Try replace" cr )
-		beacon-replace
-	    THEN
-	    2drop
-	endof
-    endcase ; is handle-beacon
 
 0 [IF]
 Local Variables:

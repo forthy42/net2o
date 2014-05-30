@@ -402,7 +402,8 @@ previous
 	d#id @ k#host cells +
 	[: sigsize# - 2dup + sigdate datesize# move
 	  gen-host-del $, k#host ulit, dht-value- ;] $[]map
-	end-code
+	cookie+request
+	end-code client-loop
     THEN ;
 
 : replace-me ( -- )  +addme
@@ -410,14 +411,36 @@ previous
     end-code
     client-loop -setip n2o:send-replace ;
 
-:noname ( -- ) -setip 0 >o drop n2o:send-replace ; is send-replace,
+: beacon-replace ( -- )  \ sign on, and do a replace-me
+    sockaddr alen @ save-mem 2 stacksize4 NewTask4 pass
+    -other  ind-addr off  reqmask off  alloc-io
+    msg( ." beacon task: " up@ hex. F cr )
+    over >r insert-address r> free throw
+    n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
+    replace-me msg( ." beacon: replaced" F cr )
+    net2o-code close-all disconnect  end-code msg( ." beacon: disconnected" F cr )
+    n2o:dispose-context msg( ." Disposed context" F cr )
+    free-io msg( ." Freed IO" F cr ) ;
 
-:noname  EXIT \ needs a cookie to sign on with a single packet
-    +addme
-    net2o-code   expect-reply get-ip replaceme,
-    nest[ cookie, send-replace request, ]nest
-    end-code ;
-is beacon-replace
+\ beacon handling
+
+:noname ( char -- )
+    case '?' of \ if we don't know that address, send a reply
+	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
+		beacon( ." Send reply to: " sockaddr alen @ .address cr )
+		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
+	    THEN
+	endof
+	'!' of \ I got a reply, my address is unknown
+	    beacon( ." Got reply: " sockaddr alen @ .address cr )
+	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
+	    IF
+		beacon( ." Try replace" cr )
+		beacon-replace
+	    THEN
+	    2drop
+	endof
+    endcase ; is handle-beacon
 
 0 [IF]
 Local Variables:

@@ -77,12 +77,13 @@ end-class keccak
 : keccak-init crypto-o @ IF  keccak-up @ next-task = ?EXIT  THEN
     keccak new crypto-o ! next-task keccak-up ! keccak-state to @keccak ;
 
-: keccak-free crypto-o @ ?dup-IF  dispose  THEN
+: keccak-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @keccak crypto-o off ;
 
 keccak-init
 
 ' keccak-init to c:init
+' keccak-free to c:free
 :noname to @keccak ; to c:key! ( addr -- )
 \G use addr as key storage
 ' @keccak to c:key@ ( -- addr )
