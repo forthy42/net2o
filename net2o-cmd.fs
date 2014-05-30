@@ -376,6 +376,8 @@ dup set-current previous
     : 3*64>n ( 64a 64b 64c -- na nb nc ) 64>n >r 64>n >r 64>n r> r> ;
 [THEN]
 
+Defer send-replace,
+
 \ commands to read and write files
 
 also net2o-base definitions
@@ -488,12 +490,13 @@ net2o-base
 +net2o: punch-done ( -- ) \ punch received
     o 0<> own-crypt? and IF  return-addr return-address $10 move  THEN ;
 
+: cookie, ( -- )  add-cookie lit, set-rtdelay ;
+: request, ( -- )  next-request lit, request-done ;
+
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
 : gen-punchload ( -- )
-    nest[ add-cookie lit, set-rtdelay punch-done
-    next-request lit, request-done ]nest$
-    punch-load, ;
+    nest[ cookie, punch-done request, ]nest$ punch-load, ;
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
@@ -513,6 +516,9 @@ net2o-base
       gen-punchload gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
++net2o: send-replace ( -- ) \ send replacements, stage 2
+    own-crypt? IF  send-replace,  THEN ;
+
 \ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
@@ -521,7 +527,7 @@ context-class setup-class >inherit to context-class
 
 \ file functions
 
-40 net2o: open-file ( $:string mode id -- ) \ open file id at path "addr u" with mode
+50 net2o: open-file ( $:string mode id -- ) \ open file id at path "addr u" with mode
     2*64>n 2>r $> 2r> n2o:open-file ;
 +net2o: close-file ( id -- ) \ close file
     64>n n2o:close-file ;
@@ -541,7 +547,7 @@ context-class setup-class >inherit to context-class
 
 \ flow control functions
 
-50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
+60 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  net2o:ack-resend ;
@@ -584,7 +590,7 @@ context-class setup-class >inherit to context-class
 
 \ better slurping
 
-70 net2o: track-size ( size id -- ) \ set size attribute of file id
+80 net2o: track-size ( size id -- ) \ set size attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
 +net2o: track-seek ( seek id -- ) \ set seek attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
@@ -610,7 +616,7 @@ context-class setup-class >inherit to context-class
 
 \ profiling, nat traversal
 
-80 net2o: !time ( -- ) \ start timer
+90 net2o: !time ( -- ) \ start timer
     F !time init-timer ;
 +net2o: .time ( -- ) \ print timer to server log
     F .time .packets profile( .times ) ;
@@ -822,8 +828,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 User other-xt ' noop other-xt !
 
-: cookie, ( -- )  add-cookie lit, set-rtdelay ;
-: request, ( -- )  next-request lit, request-done ;
 : cookie+request ( -- )  nest[ cookie, request, ]nest ;
 
 : gen-request ( -- )
@@ -927,25 +931,29 @@ previous
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-request  tail-connect ;
 
+previous
+
 \ beacon
+
+Defer beacon-replace
 
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply
-	    sockaddr alen @ 2dup routes #key -1 = IF
+	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
 		beacon( ." Send reply to: " sockaddr alen @ .address cr )
 		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
 	    THEN
 	endof
 	'!' of \ I got a reply, my address is unknown
+	    beacon( ." Got reply: " sockaddr alen @ .address cr )
 	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
 	    IF
-		beacon( ." Got reply: " sockaddr alen @ .address cr )
+		beacon( ." Try replace" cr )
+		beacon-replace
 	    THEN
 	    2drop
 	endof
     endcase ; is handle-beacon
-
-previous
 
 0 [IF]
 Local Variables:

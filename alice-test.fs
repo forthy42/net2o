@@ -19,7 +19,7 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:lookup ( addr u -- )
-    $2000 $10000 "test" ins-ip4 c:connect
+    $2000 $10000 "test" ins-ip c:connect
     2dup c:addme-fetch-host c:disconnect
     o-timeout n2o:dispose-context
     nick-key ke-pk $@ >d#id ;

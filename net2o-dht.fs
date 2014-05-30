@@ -217,7 +217,7 @@ $10 Constant datesize#
 
 \ commands for DHT
 
-90 net2o: dht-id ( $:string -- ) $> >d#id ;
+100 net2o: dht-id ( $:string -- ) $> >d#id ;
 \g set dht id for further operations on it
 +net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
 \g add a value to the given dht key
@@ -387,6 +387,37 @@ previous
 
 : +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
+
+\ replace me stuff
+
+also net2o-base
+: replaceme, ( -- )
+    pkc keysize 2* $, dht-id k#host ulit, dht-value? ;
+previous
+
+: n2o:send-replace ( -- )
+    pkc keysize 2* >d#id d#id @ IF
+	net2o-code   expect-reply
+	pkc keysize 2* $, dht-id
+	d#id @ k#host cells +
+	[: sigsize# - 2dup + sigdate datesize# move
+	  gen-host-del $, k#host ulit, dht-value- ;] $[]map
+	end-code
+    THEN ;
+
+: replace-me ( -- )  +addme
+    net2o-code   expect-reply get-ip replaceme, cookie+request
+    end-code
+    client-loop -setip n2o:send-replace ;
+
+:noname ( -- ) -setip 0 >o drop n2o:send-replace ; is send-replace,
+
+:noname  EXIT \ needs a cookie to sign on with a single packet
+    +addme
+    net2o-code   expect-reply get-ip replaceme,
+    nest[ cookie, send-replace request, ]nest
+    end-code ;
+is beacon-replace
 
 0 [IF]
 Local Variables:
