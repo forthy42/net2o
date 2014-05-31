@@ -1073,7 +1073,7 @@ resend-size# buffer: resend-init
 : -timeout      ['] no-timeout  timeout-xt ! ;
 
 : n2o:new-context ( addr -- )
-    context-class new >o rdrop
+    context-class new >o rdrop timeout( ." new context: " o hex. cr )
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
@@ -1209,7 +1209,7 @@ Variable mapstart $1 mapstart !
     over - >r dest-size @ 1- and + r> ;
 : ?residual ( addr len resaddr -- addr len' ) >r
     r@ @ umin dup negate r> +! ;
-: head@ ( -- head )  data-map @ >o dest-head @ o> ;
+: head@ ( -- head )  data-map @ .dest-head @ ;
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
@@ -1353,7 +1353,7 @@ timestats buffer: stat-tuple
     data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
 	dest-tail @ o> over - 0 max addr>bits window-size !
-	addr>ts r> >o dest-timestamps @ o> swap
+	addr>ts r> .dest-timestamps @ swap
     ELSE  o> rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
@@ -1439,7 +1439,7 @@ $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- )
-    >r dup data-rmap @ >o dest-size @ o> u>= IF
+    >r dup data-rmap @ .dest-size @ u>= IF
 	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
     THEN  r>
     resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
@@ -1575,12 +1575,12 @@ end-class fs-class
 : fstates ( -- n )  file-state $@len cell/ ;
 
 : fstate-off ( -- )  file-state @ 0= ?EXIT
-    file-state $@ bounds ?DO  I @ >o dispose o>  cell +LOOP
+    file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $off ;
 : n2o:save-block ( id -- delta )
     rdata-back@ file( 2dup 2>r data-rmap @ >o over dest-raddr @ - o>
     >r ." file write: " rot dup . -rot r> hex. )
-    rot id>addr? >o fs-write o> file( dup hex. dup
+    rot id>addr? .fs-write file( dup hex. dup
     2r> rot umin $10 umin xtype cr ) dup /back ;
 
 Sema file-sema
@@ -1632,14 +1632,14 @@ User file-reg#
 	read-file# off  write-file# off ;] file-sema c-section ;
 
 : n2o:open-file ( addr u mode id -- )
-    state-addr >o fs-open o> ;
+    state-addr .fs-open ;
 
 \ read in from files
 
 : n2o:slurp-block ( id -- delta )
     data-head@ file( 2dup 2>r data-map @ >o over dest-raddr @ - o>
     >r ." file read: " rot dup . -rot r> hex. )
-    rot id>addr? >o fs-read o> file( dup hex. dup
+    rot id>addr? .fs-read file( dup hex. dup
     2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
 
 : n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
@@ -1691,8 +1691,8 @@ require net2o-crypt.fs
     addr>ts cookie( ." Cookie: " dup hex. >r 64dup .16 cr r> )
     dest-cookies @ + 64! ;
 
-: send-cookie ( -- )  data-map  @ >o cookie! o> ;
-: recv-cookie ( -- )  data-rmap @ >o cookie! o> ;
+: send-cookie ( -- )  data-map  @ .cookie! ;
+: recv-cookie ( -- )  data-rmap @ .cookie! ;
 
 : cookie+ ( addr bitmap map -- sum ) >o
     cookie( ." cookies: " 64>r dup hex. 64r> 64dup .16 space space ) 64>r
@@ -1867,7 +1867,7 @@ Create chunk-adder chunks-struct allot
 	    0  ELSE  chunks-struct  THEN  +LOOP ;]
     resize-lock c-section ;
 
-event: ->send-chunks ( o -- ) >o do-send-chunks o> ;
+event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : net2o:send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
     <event o elit, ->send-chunks sender-task event> ;
@@ -1989,7 +1989,7 @@ rdata-class to rewind-timestamps-partial
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
-    data-rmap @ >o dest-back @ o> >r save-all-blocks
+    data-rmap @ .dest-back @ >r save-all-blocks
     r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
     net2o:rewind-receiver-partial ;
 
@@ -1997,7 +1997,7 @@ Defer do-track-seek
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
-event: ->save ( o -- ) >o net2o:save o> ;
+event: ->save ( o -- ) .net2o:save ;
 
 0 Value file-task
 
@@ -2026,7 +2026,7 @@ queue-class >osize @ buffer: queue-adder
     queue $@len 0= ?EXIT  ticker 64@
     queue $@ bounds ?DO  I >o
 	dup queue-timestamp @ u> IF
-	    queue-xt @ queue-job @ >o execute o>
+	    queue-xt @ queue-job @ .execute
 	    0 queue-timestamp !
 	THEN o>
     queue-struct +LOOP  drop
@@ -2130,10 +2130,9 @@ Variable recvflag  recvflag off
 Defer init-reply
 
 : create-sender-task ( -- )
-    o 1 stacksize4 NewTask4 dup to sender-task pass
+    stacksize4 NewTask4 dup to sender-task activate
     b-out init-reply prep-evsocks
-    >o rdrop  alloc-io
-    send-loop ;
+    alloc-io send-loop ;
 
 Defer handle-beacon
 
@@ -2227,13 +2226,13 @@ Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 Variable timeout-task
 
-: o+timeout ( -- ) timeout( ." +timeout: " o hex. cr )
+: o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
       o timeout-task !  timeout-task cell timeout-tasks $+! ;]
     timeout-sema c-section ;
-: o-timeout ( -- ) timeout( ." -timeout: " o hex. cr )
+: o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@len 0 ?DO
 	  timeout-tasks $@ I /string drop @ o =  IF
 	      timeout-tasks I cell $del
@@ -2262,13 +2261,13 @@ Variable timeout-task
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
-	timeout( ." Disposing context... " o hex. cr )
+	timeout( ." Disposing context... " o hex. ." task: " up@ hex. cr )
 	o-timeout o-chunks
 	0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
-	data-map  @ ?dup-IF  >o free-data o>  THEN
-	data-rmap @ ?dup-IF  >o free-data o>  THEN
-	code-map  @ ?dup-IF  >o free-data o>  THEN
-	code-rmap @ ?dup-IF  >o free-data o>  THEN
+	data-map  @ ?dup-IF  .free-data  THEN
+	data-rmap @ ?dup-IF  .free-data  THEN
+	code-map  @ ?dup-IF  .free-data  THEN
+	code-rmap @ ?dup-IF  .free-data  THEN
 	resend0 $off  fstate-off
 	\ erase crypto keys
 	crypto-key $@ erase  crypto-key $off
@@ -2322,7 +2321,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 \ because that's easier to do.
 \ beacons are one-byte packets, either space (no-reply) or '?' (reply if new)
 
-#55.00.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
+#55.000.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
 64Variable beacon-time ticks beacon-time 64!
 
 : +beacons ( -- )
@@ -2350,7 +2349,8 @@ Variable beacons \ destinations to send beacons to
 
 : event-loop-nocatch ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  +event  watch-timeout?  beacon?
-	o IF  wait-task @  ?dup-IF  event>  THEN  THEN  AGAIN ;
+	o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN
+    AGAIN ;
 
 : n2o:request-done ( n -- )
     request( ." Request " dup . ." done, to task: " wait-task @ hex. cr )
@@ -2363,11 +2363,10 @@ Variable beacons \ destinations to send beacons to
 	r@ >o rdrop  REPEAT  drop rdrop ;
 
 : create-receiver-task ( -- )
-    o 1 stacksize4 NewTask4 dup to receiver-task pass
-    b-out init-reply  prep-socks
-    >o rdrop  alloc-io
+    stacksize4 NewTask4 dup to receiver-task activate
+    b-out init-reply  prep-socks alloc-io
     BEGIN  do-event-loop
-	wait-task @ ?dup-IF  ->timeout event>  THEN  AGAIN ;
+	( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;
 
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;

@@ -20,8 +20,7 @@ init-client
 
 : c:lookup ( addr u -- )
     $2000 $10000 "test" ins-ip c:connect
-    2dup c:addme-fetch-host c:disconnect
-    o-timeout n2o:dispose-context
+    2dup c:addme-fetch-host do-disconnect
     nick-key ke-pk $@ >d#id ;
 : c:insert-host ( addr u -- )
     host>$ IF

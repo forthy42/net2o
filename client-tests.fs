@@ -101,13 +101,9 @@ previous
     n2o:done
     end-code  client-loop ;
 
-: c:dhtend ( -- )    
-    net2o-code s" DHT end" $, type cr .time disconnect  end-code
-    o-timeout n2o:dispose-context ;
-
 : c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
-    LOOP c:dhtend ;
+    LOOP do-disconnect ;
 
 : c:download1 ( -- )
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
@@ -191,12 +187,6 @@ previous
     end-code
     client-loop n2o:close-all ['] .time $err ;
 
-: c:disconnect ( -- )  net2o-code close-all disconnect  end-code ;
-
-: c:downloadend ( -- )    
-    net2o-code .time s" Download end" $, type cr close-all disconnect  end-code
-    o-timeout ;
-
 : c:test-rest ( -- )
     c:download1
     3e @time f> IF c:download2
@@ -208,8 +198,7 @@ previous
 	    THEN
 	THEN
     THEN
-    c:downloadend [: .packets profile( .times ) ;] $err
-    >timing n2o:dispose-context ;
+    >timing do-disconnect [: .packets profile( .times ) ;] $err ;
 
 : c:test ( -- )
     init-cache'

@@ -580,7 +580,7 @@ context-class setup-class >inherit to context-class
 +net2o: set-head ( addr -- ) \ set head
     64>n data-rmap @ >o dest-head umax! o> ;
 +net2o: timeout ( ticks -- ) \ timeout request
-    net2o:timeout  data-map @ >o dest-tail @ o> ulit, set-head ;
+    net2o:timeout  data-map @ .dest-tail @ ulit, set-head ;
 +net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 
@@ -721,7 +721,7 @@ also net2o-base
     lit, 2r> swap cookie( 2dup hex. hex. F cr ) ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  data-rmap @ { map }
-    map >o data-ackbits-buf $@ o>
+    map .data-ackbits-buf $@
     bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
     clear-cookies ;
 
@@ -901,7 +901,7 @@ User other-xt ' noop other-xt !
     dest-addr 64@ recv-addr 64! \ last received packet
     recv-cookie +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    acks# and data-rmap @ >o ack-advance? @ o>
+    acks# and data-rmap @ .ack-advance? @
     IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;

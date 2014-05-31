@@ -110,7 +110,7 @@ User last-ivskey
     dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 
 : crypt-buf-init ( map -- ) >r
-    o IF  r@ >o ivs>source? o>  ELSE  default-key  THEN
+    o IF  r@ .ivs>source?  ELSE  default-key  THEN
     ( cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r

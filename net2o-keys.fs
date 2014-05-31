@@ -78,7 +78,7 @@ Variable this-keyid
 
 : nick-key ( addr u -- ) \ search for key nickname and make current
     key-table 
-    [: dup >r cell+ $@ drop cell+ >o ke-nick $@ o> 2over str= IF
+    [: dup >r cell+ $@ drop cell+ .ke-nick $@ 2over str= IF
 	r@ make-thiskey
     THEN  rdrop ;] #map 2drop ;
 
@@ -107,7 +107,7 @@ Variable strict-keys  strict-keys on
 
 : .key# ( addr u -- ) keysize umin
     ." Key '" key-table #@ dup 0= IF 2drop EXIT THEN
-    drop cell+ >o ke-nick $@ o> type ." ' ok" cr ;
+    drop cell+ .ke-nick $@ type ." ' ok" cr ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
@@ -283,7 +283,7 @@ set-current previous previous
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key >o do-cmd-loop o> ;
+    sample-key .do-cmd-loop ;
 
 : read-key-loop ( -- )
     BEGIN
@@ -299,11 +299,11 @@ set-current previous previous
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
     nick-key  this-keyid @ 0= ?EXIT
-    this-key @ >o ke-pk $@ o> pkc swap keysize 2* umin move
+    this-key @ .ke-pk $@ pkc swap keysize 2* umin move
     ke-sk $@ skc swap move ;
 
 : dest-key ( addr u -- )
-    0 >o nick-key o>  this-keyid @ 0= !!unknown-key!!
+    0 .nick-key  this-keyid @ 0= !!unknown-key!!
     this-keyid @ keysize dest-pubkey $! ;
 
 0 [IF]

@@ -264,7 +264,7 @@ end-class dht-class
     [: dht-class new sp@ cell file-state $+! drop ;]
     filestate-lock c-section ;
 
-: d#open ( fid -- )  new>dht lastfile@ >o fs-open o> ;
+: d#open ( fid -- )  new>dht lastfile@ .fs-open ;
 : d#query ( addr u mask fid -- )  state-addr >o
     >r dup dht-queries c$+! dht-queries $+! r> dht-queries c$+! o> ;
 
@@ -411,6 +411,11 @@ previous
     end-code
     client-loop -setip n2o:send-replace ;
 
+: do-disconnect ( -- )
+    net2o-code .time s" Disconnect" $, type cr
+    close-all disconnect  end-code msg( ." disconnected" F cr )
+    n2o:dispose-context msg( ." Disposed context" F cr ) ;
+
 : beacon-replace ( -- )  \ sign on, and do a replace-me
     sockaddr alen @ save-mem 2 stacksize4 NewTask4 pass
     -other  ind-addr off  reqmask off  alloc-io
@@ -418,9 +423,7 @@ previous
     over >r insert-address r> free throw
     n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
     replace-me msg( ." beacon: replaced" F cr )
-    net2o-code close-all disconnect  end-code msg( ." beacon: disconnected" F cr )
-    n2o:dispose-context msg( ." Disposed context" F cr )
-    free-io msg( ." Freed IO" F cr ) ;
+    do-disconnect free-io msg( ." Freed IO" F cr ) ;
 
 \ beacon handling
 
