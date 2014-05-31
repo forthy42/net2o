@@ -92,7 +92,7 @@ previous
     net2o-code
     expect-reply get-ip fetch-host, replaceme,
     cookie+request
-    end-code  client-loop -setip n2o:send-replace client-loop ;
+    end-code  client-loop -setip n2o:send-replace ;
 
 : c:fetch-tags ( -- )
     net2o-code
