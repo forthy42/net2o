@@ -2316,7 +2316,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	timeout( ." do timeout: " o hex. cr ) do-timeout
+	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
 	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN
     watch-timeout# watch-timeout 64+! ;
@@ -2368,10 +2368,10 @@ Variable beacons \ destinations to send beacons to
     o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
 
 : >next-ticks ( -- )
-    ticks watch-timeout 64@ beacon-time 64@ 64min 64- stop-ns ;
+    ticker 64@ watch-timeout 64@ beacon-time 64@ 64min 64- stop-ns !ticks ;
 
-: timeout-loop-nocatch ( -- )
-    BEGIN  >next-ticks beacon? watch-timeout? event-send  AGAIN ;
+: timeout-loop-nocatch ( -- ) !ticks
+    BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
 
 : catch-loop ( xt -- ) >r
     BEGIN   nothrow r@ catch ?int dup  WHILE

@@ -916,7 +916,7 @@ also net2o-base
 previous
 
 : connected-timeout ( -- )
-    timeout( .expected )
+    \ timeout( .expected )
     1 timeouts +! >next-timeout
     packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
 
