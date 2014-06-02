@@ -421,7 +421,7 @@ previous
     [: over >r insert-address r> free throw
       n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
       replace-me msg( ." beacon: replaced" F cr )
-      do-disconnect ;] 3 net2o-task ;
+      do-disconnect ;] 3 net2o-task drop ;
 
 \ beacon handling
 

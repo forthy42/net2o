@@ -588,10 +588,11 @@ Defer init-reply
 
 alloc-io
 
-: net2o-task ( params xt n -- )
-    stacksize4 NewTask4 pass
+: net2o-pass ( params xt n task )  pass
     b-out init-reply prep-socks alloc-io catch free-io
     ?dup-IF  DoError  THEN ;
+: net2o-task ( params xt n -- task )
+    stacksize4 NewTask4 dup >r net2o-pass r> ;
 
 \ net2o header structure
 
@@ -2026,8 +2027,8 @@ event: ->save ( o -- ) .net2o:save ;
 0 Value file-task
 
 : create-file-task ( -- )
-    [: up@ to file-task BEGIN  ['] event-loop catch DoError  AGAIN ;]
-    1 net2o-task ;
+    [: BEGIN  ['] event-loop catch DoError  AGAIN ;]
+    1 net2o-task to file-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
@@ -2142,8 +2143,7 @@ Variable recvflag  recvflag off
 	send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )
-    [: up@ to sender-task 
-	prep-evsocks send-loop ;] 1 net2o-task ;
+    [: prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Defer handle-beacon
 
@@ -2371,9 +2371,8 @@ Variable beacons \ destinations to send beacons to
 	    s" task-loop: " .loop-err  REPEAT  drop rdrop ;
 
 : create-timeout-task ( -- )
-    [: up@ to timeout-task
-	BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
-    1 net2o-task ;
+    [: BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
+    1 net2o-task to timeout-task ;
 
 \ event loop
 
@@ -2386,10 +2385,9 @@ Variable beacons \ destinations to send beacons to
     ELSE  elit, ->request  THEN ;
 
 : create-receiver-task ( -- )
-    [: up@ to receiver-task
-	BEGIN  ['] event-loop-nocatch catch-loop
+    [: BEGIN  ['] event-loop-nocatch catch-loop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
-    1 net2o-task ;
+    1 net2o-task to receiver-task ;
 
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
