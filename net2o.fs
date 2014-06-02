@@ -1095,8 +1095,6 @@ resend-size# buffer: resend-init
 
 : no-timeout ( -- )  max-int64 next-timeout 64!  0 timeouts ! ;
 
-: -timeout      ['] no-timeout  timeout-xt ! ;
-
 : n2o:new-context ( addr -- )
     context-class new >o rdrop timeout( ." new context: " o hex. cr )
     init-context# @ context# !  1 init-context# +!
@@ -1105,7 +1103,7 @@ resend-size# buffer: resend-init
     s" " crypto-key $!
     s" " file-state $!
     init-flow-control
-    -timeout ['] .iperr setip-xt !
+    ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     -1 blocksize !
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
@@ -1326,7 +1324,7 @@ timestats buffer: stat-tuple
 
 \ flow control
 
-64Variable ticker
+64User ticker
 
 : !ticks ( -- )
     ticks ticker 64! ;
@@ -1871,6 +1869,7 @@ Variable chunks+
 Create chunk-adder chunks-struct allot
 0 Value sender-task
 0 Value receiver-task
+0 Value timeout-task
 
 : do-send-chunks ( -- )
     chunks $@ bounds ?DO
@@ -2236,14 +2235,14 @@ $10 Constant tmp-crypt-val
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
-Variable timeout-task
+Variable timeout-o
 
 : o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
-      o timeout-task !  timeout-task cell timeout-tasks $+! ;]
-    timeout-sema c-section ;
+      o timeout-o !  timeout-o cell timeout-tasks $+! ;]
+  timeout-sema c-section  timeout-task wake ;
 : o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@len 0 ?DO
 	  timeout-tasks $@ I /string drop @ o =  IF
@@ -2252,12 +2251,17 @@ Variable timeout-task
 	      r> r> cell- 2dup >r >r = ?LEAVE
 	      0  ELSE  cell  THEN
       +LOOP ;] timeout-sema c-section ;
+: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
+
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- ) o?
+: >next-timeout ( -- )
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
-    ticker 64@ 64+ next-timeout 64!  o+timeout ;
+    ticker 64@ 64+ next-timeout 64! ;
+: 0timeout ( -- )
+    rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    0 timeouts !@  IF  timeout-task wake  THEN ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) 0 max-int64
@@ -2266,8 +2270,7 @@ Variable timeout-task
     cell +LOOP  n64-swap ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout ( -- ) o?  timeout-xt @ ['] no-timeout = ?EXIT
-    0 timeouts ! >next-timeout ; \ 2s timeout
+: reset-timeout ( -- ) o? 0timeout ; \ 2s timeout
 
 \ dispose context
 
@@ -2356,26 +2359,42 @@ Variable beacons \ destinations to send beacons to
     beacons $+[]! ;
 : add-beacon ( net2oaddr -- ) route>address sockaddr alen @ +beacon ;
 
-\ event looop
+\ timeout loop
+
+: .loop-err ( throw addr u -- )
+    [: type dup . .exe cr DoError cr ;] $err ;
+
+: event-send ( -- )
+    o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
+
+: >next-ticks ( -- )
+    ticks watch-timeout 64@ beacon-time 64@ 64min 64- stop-ns ;
+
+: timeout-loop-nocatch ( -- )
+    BEGIN  >next-ticks beacon? watch-timeout? event-send  AGAIN ;
+
+: catch-loop ( xt -- ) >r
+    BEGIN   nothrow r@ catch ?int dup  WHILE
+	    s" task-loop: " .loop-err  REPEAT  drop rdrop ;
+
+: create-timeout-task ( -- )
+    [: up@ to timeout-task
+	BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
+    1 net2o-task ;
+
+\ event loop
 
 : event-loop-nocatch ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  +event  watch-timeout?  beacon?
-	o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN
-    AGAIN ;
+    BEGIN  packet-event  event-send  AGAIN ;
 
 : n2o:request-done ( n -- )
     request( ." Request " dup . ." done, to task: " wait-task @ hex. cr )
     file-task ?dup-IF  wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 
-: do-event-loop ( -- )  o >r
-    BEGIN   nothrow ['] event-loop-nocatch catch ?int dup  WHILE
-	    [: ." event-loop: " dup . .exe cr DoError cr ;] $err
-	r@ >o rdrop  REPEAT  drop rdrop ;
-
 : create-receiver-task ( -- )
     [: up@ to receiver-task
-	BEGIN  do-event-loop
+	BEGIN  ['] event-loop-nocatch catch-loop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
     1 net2o-task ;
 
@@ -2400,7 +2419,7 @@ Variable beacons \ destinations to send beacons to
 
 : init-rest ( port -- )  init-mykey init-mykey \ two keys
     init-timer net2o-socket init-route prep-socks
-    sender( create-sender-task ) ;
+    sender( create-sender-task ) create-timeout-task ;
 
 : init-client ( -- )  init-cache 0 init-rest ;
 : init-server ( -- )  net2o-port init-rest ;

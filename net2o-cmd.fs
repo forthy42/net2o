@@ -917,11 +917,11 @@ previous
 
 : connected-timeout ( -- )
     timeout( .expected )
-    >next-timeout 1 timeouts +!
+    1 timeouts +! >next-timeout
     packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
-: +resend       ['] connected-timeout  timeout-xt ! ;
+: +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
 
 : +get-time     ['] get-tick is other ;
 

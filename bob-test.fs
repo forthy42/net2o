@@ -18,7 +18,7 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:bob ( -- ) 
-    $2000 $10000 "test" ins-ip4 dup add-beacon c:connect
+    $2000 $10000 "test" ins-ip dup add-beacon c:connect
     replace-me do-disconnect ;
 
 c:bob server-loop
