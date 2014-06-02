@@ -830,8 +830,6 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-User other-xt ' noop other-xt !
-
 : gen-request ( -- )
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
@@ -839,7 +837,7 @@ User other-xt ' noop other-xt !
     gen-tmpkeys $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
     ELSE  gen-reply request,  THEN ]nest
-    tmpkey-request key-request  ind-addr @  IF  punch?  THEN  other-xt perform
+    tmpkey-request key-request  ind-addr @  IF  punch?  THEN  other
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
@@ -925,8 +923,7 @@ previous
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! ;
 
-: +get-time     ['] get-tick other-xt ! ;
-: -other        ['] noop other-xt ! ;
+: +get-time     ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend  client-loop

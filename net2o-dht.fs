@@ -417,13 +417,11 @@ previous
     n2o:dispose-context msg( ." Disposed context" F cr ) ;
 
 : beacon-replace ( -- )  \ sign on, and do a replace-me
-    sockaddr alen @ save-mem 2 stacksize4 NewTask4 pass
-    -other  ind-addr off  reqmask off  alloc-io
-    msg( ." beacon task: " up@ hex. F cr )
-    over >r insert-address r> free throw
-    n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
-    replace-me msg( ." beacon: replaced" F cr )
-    do-disconnect free-io msg( ." Freed IO" F cr ) ;
+    sockaddr alen @ save-mem
+    [: over >r insert-address r> free throw
+      n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
+      replace-me msg( ." beacon: replaced" F cr )
+      do-disconnect ;] 3 net2o-task ;
 
 \ beacon handling
 

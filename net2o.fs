@@ -509,6 +509,27 @@ m: addr>keys ( addr -- keys )
 
 sema cmd0lock
 
+\ generic hooks and user variables
+
+User ind-addr
+User reqmask
+UDefer other
+UValue pollfd#  2 to pollfd#
+User pollfds
+pollfds pollfd %size pollfd# * dup cell- uallot drop erase
+
+Defer init-reply
+
+: -other        ['] noop is other ;
+-other
+
+: fds!+ ( fileno flag addr -- addr' )
+    >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
+
+: prep-socks ( -- )  pollfds >r
+    net2o-sock  fileno POLLIN  r> fds!+ >r
+    epiper @    fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
+
 \ the policy on allocation and freeing is that both freshly allocated
 \ and to-be-freed memory is erased.  This makes sure that no unwanted
 \ data will be lurking in that memory, waiting to be leaked out
@@ -543,7 +564,9 @@ sema cmd0lock
 : free-statbuf ( -- )
     statbuf file-stat freez  0 to statbuf ;
 
-: alloc-io ( -- )  alloc-buf to inbuf  alloc-buf to outbuf
+: alloc-io ( -- ) \ allocate IO and reset generic user variables
+    -other  ind-addr off  reqmask off
+    alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in6 %size alloz to sockaddr
@@ -564,6 +587,11 @@ sema cmd0lock
     outbuf free-buf ;
 
 alloc-io
+
+: net2o-task ( params xt n -- )
+    stacksize4 NewTask4 pass
+    b-out init-reply prep-socks alloc-io catch free-io
+    ?dup-IF  DoError  THEN ;
 
 \ net2o header structure
 
@@ -672,7 +700,6 @@ Variable lastn2oaddr
 
 User return-addr $10 cell- uallot drop
 User temp-addr   $10 cell- uallot drop
-User ind-addr
 
 \ these are all stubs for now
 
@@ -2001,8 +2028,9 @@ event: ->save ( o -- ) .net2o:save ;
 
 0 Value file-task
 
-: create-file-task ( -- )  stacksize4 NewTask4 dup to file-task
-    activate  b-out BEGIN  ['] event-loop catch DoError  AGAIN ;
+: create-file-task ( -- )
+    [: up@ to file-task BEGIN  ['] event-loop catch DoError  AGAIN ;]
+    1 net2o-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
@@ -2039,17 +2067,6 @@ queue-class >osize @ buffer: queue-adder
     REPEAT  rdrop ;
 
 \ poll loop
-
-UValue pollfd#  2 to pollfd#
-User pollfds
-pollfds pollfd %size pollfd# * dup cell- uallot drop erase
-
-: fds!+ ( fileno flag addr -- addr' )
-    >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
-
-: prep-socks ( -- )  pollfds >r
-    net2o-sock  fileno POLLIN  r> fds!+ >r
-    epiper @    fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
 
 : prep-evsocks ( -- )  pollfds >r
     epiper @    fileno POLLIN  r> fds!+ drop 1 to pollfd# ;
@@ -2127,12 +2144,9 @@ Variable recvflag  recvflag off
     BEGIN  0= IF   wait-send drop read-event  THEN
 	send-another-chunk  AGAIN ;
 
-Defer init-reply
-
 : create-sender-task ( -- )
-    stacksize4 NewTask4 dup to sender-task activate
-    b-out init-reply prep-evsocks
-    alloc-io send-loop ;
+    [: up@ to sender-task 
+	prep-evsocks send-loop ;] 1 net2o-task ;
 
 Defer handle-beacon
 
@@ -2278,7 +2292,6 @@ Variable timeout-task
 
 \ loops for server and client
 
-User reqmask
 8 cells 1- Constant maxrequest#
 
 : next-request ( -- n )
@@ -2363,10 +2376,10 @@ Variable beacons \ destinations to send beacons to
 	r@ >o rdrop  REPEAT  drop rdrop ;
 
 : create-receiver-task ( -- )
-    stacksize4 NewTask4 dup to receiver-task activate
-    b-out init-reply  prep-socks alloc-io
-    BEGIN  do-event-loop
-	( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;
+    [: up@ to receiver-task
+	BEGIN  do-event-loop
+	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
+    1 net2o-task ;
 
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
