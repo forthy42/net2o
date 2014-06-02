@@ -2311,19 +2311,10 @@ event: ->reqsave ( task n -- )  elit, ->request event> ;
 event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
     true !!timeout!! ;
 
-#2.000.000 d>64 64Constant watch-timeout# \ 2ms timeout check interval
-64Variable watch-timeout ticks watch-timeout# 64+ watch-timeout 64!
-
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
 	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
-    THEN
-    watch-timeout# watch-timeout 64+! ;
-
-: watch-timeout? ( -- )
-    watch-timeout 64@ ticker 64@ 64- 64-0< IF
-	request-timeout
     THEN ;
 
 \ beacons
@@ -2367,8 +2358,10 @@ Variable beacons \ destinations to send beacons to
 : event-send ( -- )
     o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
 
+#10000000 Constant watch-timeout# \ 10ms timeout check interval
+
 : >next-ticks ( -- )
-    ticker 64@ watch-timeout 64@ beacon-time 64@ 64min 64- stop-ns !ticks ;
+    watch-timeout# stop-ns !ticks ;
 
 : timeout-loop-nocatch ( -- ) !ticks
     BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
