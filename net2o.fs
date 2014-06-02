@@ -249,7 +249,7 @@ default-host
     myprio @ IF  '0' emit myprio @ emit  THEN
     myhost $@len IF  myhost $@ dup '@' + emit type  THEN ;
 
-Create ip6::0 16 0 [DO] 0 c, [LOOP]
+Create ip6::0 here 16 dup allot erase
 : .ip6::0 ( -- )  ip6::0 $10 type ;
 : .ip4::0 ( -- )  ip6::0 4 type ;
 
@@ -1077,7 +1077,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
-#30.000.000 d>64 64Constant init-delay# \ 20ms initial timeout step
+#30.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
 
 Variable init-context#
 
@@ -2261,13 +2261,13 @@ Variable timeout-o
     ticker 64@ 64+ next-timeout 64! ;
 : 0timeout ( -- )
     rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
-    0 timeouts !@  IF  timeout-task wake  THEN ;
+    0 timeouts ! ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
-: next-timeout? ( -- time context ) 0 max-int64
+: next-timeout? ( -- time context ) [: 0 max-int64
     timeout-tasks $@ bounds ?DO
 	I @ >o next-timeout 64@ o> 64min? IF  n64-swap drop I @ 64n-swap  THEN
-    cell +LOOP  n64-swap ;
+    cell +LOOP  n64-swap ;] timeout-sema c-section ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 : reset-timeout ( -- ) o? 0timeout ; \ 2s timeout
@@ -2314,7 +2314,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
-	timeouts @ timeouts# > wait-task @ and  ?dup-IF  ->timeout event>  THEN
+	timeouts @ timeouts# >= wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN ;
 
 \ beacons
