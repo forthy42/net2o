@@ -2027,7 +2027,7 @@ event: ->save ( o -- ) .net2o:save ;
 0 Value file-task
 
 : create-file-task ( -- )
-    [: BEGIN  ['] event-loop catch DoError  AGAIN ;]
+    [: BEGIN  ['] event-loop catch ?dup-IF  DoError  THEN  AGAIN ;]
     1 net2o-task to file-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
@@ -2301,9 +2301,6 @@ Variable timeout-o
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
     IF  route-packet  ELSE  reset-timeout  handle-packet  THEN ;
-
-: server-loop-nocatch ( -- ) \ 0 stick-to-core
-    BEGIN  packet-event +event  AGAIN ;
 
 event: ->request ( n -- ) 1 over lshift invert reqmask and!
     msg( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
