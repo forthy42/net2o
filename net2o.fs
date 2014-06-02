@@ -680,15 +680,13 @@ Variable lastn2oaddr
 	nip nip
     THEN ;
 
-: insert-ip ( addr u port -- net2o-addr )
-    SOCK_DGRAM >hints  get-info info>string insert-address ;
+: insert-ip* ( addr u port hint -- net2o-addr )
+    >r SOCK_DGRAM >hints r> hints ai_family l!
+    get-info info>string insert-address ;
 
-: insert-ip4 ( addr u port -- net2o-addr )
-    SOCK_DGRAM >hints  AF_INET hints ai_family l!
-    get-info info>string insert-address ;
-: insert-ip6 ( addr u port -- net2o-addr )
-    SOCK_DGRAM >hints  AF_INET6 hints ai_family l!
-    get-info info>string insert-address ;
+: insert-ip ( addr u port -- net2o-addr )  PF_UNSPEC insert-ip* ;
+: insert-ip4 ( addr u port -- net2o-addr ) AF_INET   insert-ip* ;
+: insert-ip6 ( addr u port -- net2o-addr ) AF_INET6  insert-ip* ;
 
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
