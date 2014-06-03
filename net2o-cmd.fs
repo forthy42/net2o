@@ -178,7 +178,7 @@ get-current also net2o-base definitions previous
 \ Command numbers preliminary and subject to change
 
 0 net2o: end-cmd ( -- ) \ last command in buffer
-    0. buf-state 2! ;
+    0 buf-state ! ;
 +net2o: ulit ( "u" -- u ) \ unsigned literal
     p@ ;
 +net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
@@ -334,7 +334,8 @@ User neststack maxnest# cells uallot drop \ nest up to 10 levels
 
 : do-nest ( addr u flag -- )
     buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
-    r> validated !  2r> buf-state 2! ;
+    r> validated !
+    2r> buf-state cell+ @ IF  buf-state 2!  ELSE  2drop  THEN ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
@@ -486,7 +487,9 @@ net2o-base
 +net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
     $> punch-load $! ;
 +net2o: punch-done ( -- ) \ punch received
-    o 0<> own-crypt? and IF  return-addr return-address $10 move  THEN ;
+    o 0<> own-crypt? and IF
+	return-addr return-address $10 move  resend0 $off
+    THEN ;
 
 : cookie, ( -- )  add-cookie lit, set-rtdelay ;
 : request, ( -- )  next-request lit, request-done ;
@@ -517,7 +520,7 @@ net2o-base
       cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
-+net2o: gen-punch-reply ( -- ) \ generate a key request reply reply
++net2o: gen-punch-reply ( -- ) o? \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       nest[ pkc keysize $, receive-key update-key all-ivs
       gen-punchload gen-punch time-offset! ]tmpnest
