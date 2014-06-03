@@ -1078,7 +1078,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $10 cells Value resend-size#
-#30.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
+#50.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
 
 Variable init-context#
 
@@ -1762,7 +1762,7 @@ User outflag  outflag off
 	return-addr
 	.time ." cmd0 to: " dup $10 xtype cr
     ELSE
-	ret-addr
+	return-address
     THEN   packet-to ;
 
 : send-data-packet ( -- ) +sendX
@@ -2149,8 +2149,8 @@ Defer handle-beacon
 
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
-    dup minpacket# > IF
-	sockaddr alen @ insert-address  inbuf ins-source
+    dup minpacket# u>= IF
+	sockaddr alen @ insert-address inbuf ins-source
 	over packet-size over <> !!size!! +next
 	EXIT
     THEN
@@ -2349,8 +2349,8 @@ Variable beacons \ destinations to send beacons to
 
 \ timeout loop
 
-: .loop-err ( throw addr u -- )
-    [: type dup . .exe cr DoError cr ;] $err ;
+: .loop-err ( throw xt -- )
+    .name dup . cr DoError cr ;
 
 : event-send ( -- )
     o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
@@ -2365,7 +2365,7 @@ Variable beacons \ destinations to send beacons to
 
 : catch-loop ( xt -- ) >r
     BEGIN   nothrow r@ catch ?int dup  WHILE
-	    s" task-loop: " .loop-err  REPEAT  drop rdrop ;
+	    r@ .loop-err  REPEAT  drop rdrop ;
 
 : create-timeout-task ( -- )
     [: BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]

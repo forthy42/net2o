@@ -310,9 +310,9 @@ Variable throwcount
 \ nested commands
 
 : >initbuf ( addr u -- addr' u' ) tuck
-    init0buf mykey-salt# + swap move
-    maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup min-size = UNTIL  THEN
-    nip init0buf swap mykey-salt# + 2 64s + ;
+    init0buf mykey-salt# + swap move dfaligned
+    \ maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup $20 = UNTIL  THEN  nip
+    init0buf swap mykey-salt# + 2 64s + ;
 
 4 Constant maxnest#
 User neststart#
@@ -927,7 +927,7 @@ previous
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend  client-loop
-    -timeout tskc KEYBYTES erase ;
+    -timeout tskc KEYBYTES erase resend0 $off ;
 
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-request  tail-connect ;
