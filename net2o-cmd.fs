@@ -266,14 +266,14 @@ previous
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
     code-vdest r> reply-dest 64! ;
 : net2o:ok ( tag -- )
-    timeout( ." ack: " dup hex. F cr )
+    timeout( cmd( ." ack: " dup hex. F cr ) )
     o 0= IF  drop EXIT  THEN
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     acked  0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
-    timeout( ." expect: " cmdbuf$ n2o:see )
+    timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
 
 : tag-addr? ( -- flag )
@@ -918,7 +918,7 @@ also net2o-base
     save( slurp send-chunks )  resend-all  net2o:genack end-code ;
 previous
 
-: connected-timeout ( -- )
+: connected-timeout ( -- ) timeout( ." connected timeout" F cr )
     \ timeout( .expected )
     1 timeouts +! >next-timeout
     packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;

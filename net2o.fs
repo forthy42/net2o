@@ -2300,7 +2300,7 @@ Variable timeout-o
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
-    IF  route-packet  ELSE  reset-timeout  handle-packet  THEN ;
+    IF  route-packet  ELSE  handle-packet reset-timeout  THEN ;
 
 event: ->request ( n -- ) 1 over lshift invert reqmask and!
     msg( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
@@ -2396,7 +2396,7 @@ Variable beacons \ destinations to send beacons to
 
 : client-loop ( -- )
     !ticks reset-timeout
-    o IF  up@ wait-task ! ( o+timeout ) THEN
+    o IF  up@ wait-task !  o+timeout  THEN
     event-loop-task requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
