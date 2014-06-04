@@ -2261,13 +2261,13 @@ Variable timeout-o
     ticker 64@ 64+ next-timeout 64! ;
 : 0timeout ( -- )
     rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
-    0 timeouts ! ;
+    0 timeouts !@ IF  timeout-task wake  THEN ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
-: next-timeout? ( -- time context ) [: 0 max-int64
+: next-timeout? ( -- time context ) [: 0 { ctx } max-int64
     timeout-tasks $@ bounds ?DO
-	I @ >o next-timeout 64@ o> 64min? IF  n64-swap drop I @ 64n-swap  THEN
-    cell +LOOP  n64-swap ;] timeout-sema c-section ;
+	I @ .next-timeout 64@ 64min? IF  I @ to ctx  THEN
+    cell +LOOP  ctx ;] timeout-sema c-section ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 : reset-timeout ( -- ) o? 0timeout ; \ 2s timeout
@@ -2358,7 +2358,10 @@ Variable beacons \ destinations to send beacons to
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 
 : >next-ticks ( -- )
-    watch-timeout# stop-ns !ticks ;
+    next-timeout? drop beacon-time 64@ 64umin ticker 64@ 64-
+    64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr ) stop-ns
+    timeout( ticker 64@ ) !ticks
+    timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
 : timeout-loop-nocatch ( -- ) !ticks
     BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
@@ -2393,7 +2396,7 @@ Variable beacons \ destinations to send beacons to
 
 : client-loop ( -- )
     !ticks reset-timeout
-    o IF  up@ wait-task !  THEN
+    o IF  up@ wait-task ! ( o+timeout ) THEN
     event-loop-task requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
