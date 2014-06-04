@@ -2163,6 +2163,54 @@ Defer handle-beacon
     >flyburst
     timeout( ." timeout? " 64. send-anything? . chunks+ ? bandwidth? . next-chunk-tick . cr )else( 64drop ) ;
 
+\ timeout handling
+
+: do-timeout ( -- )  timeout-xt perform ;
+
+#2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
+#10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
+#12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
+
+Sema timeout-sema
+Variable timeout-tasks s" " timeout-tasks $!
+Variable timeout-o
+
+: o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
+    [: timeout-tasks $@ bounds ?DO  I @ o = IF
+	      UNLOOP  EXIT  THEN
+      cell +LOOP
+      o timeout-o !  timeout-o cell timeout-tasks $+! ;]
+  timeout-sema c-section  timeout-task wake ;
+: o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
+    [: timeout-tasks $@len 0 ?DO
+	  timeout-tasks $@ I /string drop @ o =  IF
+	      timeout-tasks I cell $del
+	      timeout-tasks $@len drop
+	      r> r> cell- 2dup >r >r = ?LEAVE
+	      0  ELSE  cell  THEN
+      +LOOP ;] timeout-sema c-section ;
+: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
+
+: sq2** ( 64n n -- 64n' )
+    dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
+: >next-timeout ( -- )
+    rtdelay 64@ timeout-min# 64max timeouts @ sq2**
+    timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
+    ticker 64@ 64+ next-timeout 64! ;
+: 0timeout ( -- )
+    rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    0 timeouts !@ IF  timeout-task wake  THEN ;
+: 64min? ( a b -- min flag )
+    64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
+: next-timeout? ( -- time context ) [: 0 { ctx } max-int64
+    timeout-tasks $@ bounds ?DO
+	I @ .next-timeout 64@ 64min? IF  I @ to ctx  THEN
+    cell +LOOP  ctx ;] timeout-sema c-section ;
+: ?timeout ( -- context/0 )
+    ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
+
+\ handling packets
+
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
 
@@ -2218,59 +2266,12 @@ $10 Constant tmp-crypt-val
 	check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )
 	    drop  EXIT  THEN +dest
-	handle-dest
+	0timeout handle-dest
     THEN ;
 
 : route-packet ( -- ) route( ." route to: " inbuf destination $10 xtype cr )
     inbuf >r r@ get-dest route>address
     r> dup packet-size send-a-packet drop ;
-
-\ timeout handling
-
-: do-timeout ( -- )  timeout-xt perform ;
-
-#2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
-#10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
-#12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
-
-Sema timeout-sema
-Variable timeout-tasks s" " timeout-tasks $!
-Variable timeout-o
-
-: o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
-    [: timeout-tasks $@ bounds ?DO  I @ o = IF
-	      UNLOOP  EXIT  THEN
-      cell +LOOP
-      o timeout-o !  timeout-o cell timeout-tasks $+! ;]
-  timeout-sema c-section  timeout-task wake ;
-: o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
-    [: timeout-tasks $@len 0 ?DO
-	  timeout-tasks $@ I /string drop @ o =  IF
-	      timeout-tasks I cell $del
-	      timeout-tasks $@len drop
-	      r> r> cell- 2dup >r >r = ?LEAVE
-	      0  ELSE  cell  THEN
-      +LOOP ;] timeout-sema c-section ;
-: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
-
-: sq2** ( 64n n -- 64n' )
-    dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- )
-    rtdelay 64@ timeout-min# 64max timeouts @ sq2**
-    timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
-    ticker 64@ 64+ next-timeout 64! ;
-: 0timeout ( -- )
-    rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
-    0 timeouts !@ IF  timeout-task wake  THEN ;
-: 64min? ( a b -- min flag )
-    64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
-: next-timeout? ( -- time context ) [: 0 { ctx } max-int64
-    timeout-tasks $@ bounds ?DO
-	I @ .next-timeout 64@ 64min? IF  I @ to ctx  THEN
-    cell +LOOP  ctx ;] timeout-sema c-section ;
-: ?timeout ( -- context/0 )
-    ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
-: reset-timeout ( -- ) o? 0timeout ; \ 2s timeout
 
 \ dispose context
 
@@ -2300,7 +2301,7 @@ Variable timeout-o
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
-    IF  route-packet  ELSE  handle-packet reset-timeout  THEN ;
+    IF  route-packet  ELSE  handle-packet  THEN ;
 
 event: ->request ( n -- ) 1 over lshift invert reqmask and!
     msg( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
@@ -2395,8 +2396,8 @@ Variable beacons \ destinations to send beacons to
 : requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL  o-timeout ;
 
 : client-loop ( -- )
-    !ticks reset-timeout
-    o IF  up@ wait-task !  o+timeout  THEN
+    !ticks
+    o IF  up@ wait-task !  0timeout o+timeout  THEN
     event-loop-task requests->0 ;
 
 : server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
