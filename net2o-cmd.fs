@@ -520,12 +520,6 @@ net2o-base
       cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
-+net2o: gen-punch-reply ( -- ) o? \ generate a key request reply reply
-    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs
-      gen-punchload gen-punch time-offset! ]tmpnest
-      push-cmd ;]  IS expect-reply? ;
-
 \ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
@@ -632,6 +626,11 @@ context-class setup-class >inherit to context-class
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
++net2o: gen-punch-reply ( -- ) \ generate a key request reply reply
+    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+      nest[ pkc keysize $, receive-key update-key all-ivs
+      gen-punchload gen-punch time-offset! ]tmpnest
+      push-cmd ;]  IS expect-reply? ;
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
