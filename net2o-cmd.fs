@@ -79,10 +79,7 @@ User string-stack  string-max# uallot drop
 \ commands come in junks of 8 bytes
 \ Commands are zero-terminated
 
-: net2o-crash hex[
-    buf-state 2@ swap 8 u.r space 8 u.r ." :" buf-state 2@ drop 1- c@ 2 u.r cr
-    ]hex  buf-state 2@ dump
-    true !!function!! ;
+: net2o-crash true !!function!! ;
 ' net2o-crash IS default-method
 
 Defer cmd-table
@@ -290,10 +287,11 @@ Variable throwcount
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch  dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!
-	[: ." do-cmd-loop: " dup . .exe cr dup  DoError ;] $err nothrow
+	[: ." do-cmd-loop: " dup . .exe cr ;] $err
+	dup DoError  nothrow
 	buf-state @ show-offset !  n2o:see-me  show-offset on
-	throwcount @ 4 < IF  >throw  THEN  THEN
-    drop  r> sp! 2drop +cmd ;
+	un-cmd  throwcount @ 4 < IF  >throw  THEN  THEN
+    r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
     string-stack off
@@ -520,6 +518,12 @@ net2o-base
       cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
++net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
+    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+      nest[ pkc keysize $, receive-key update-key all-ivs
+      gen-punchload gen-punch time-offset! ]tmpnest
+      push-cmd ;]  IS expect-reply? ;
+
 \ everything that follows here can assume to have a connection context
 
 ' context-class is cmd-table
@@ -626,11 +630,6 @@ context-class setup-class >inherit to context-class
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
-+net2o: gen-punch-reply ( -- ) \ generate a key request reply reply
-    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs
-      gen-punchload gen-punch time-offset! ]tmpnest
-      push-cmd ;]  IS expect-reply? ;
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
