@@ -302,6 +302,8 @@ set-current previous previous
     this-key @ .ke-pk $@ pkc swap keysize 2* umin move
     ke-sk $@ skc swap move ;
 
+: i'm ( "name" -- ) parse-name >key ;
+
 : dest-key ( addr u -- )
     0 .nick-key  this-keyid @ 0= !!unknown-key!!
     this-keyid @ keysize dest-pubkey $! ;

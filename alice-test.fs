@@ -9,7 +9,7 @@ require client-tests.fs
 script? [IF] debug-task [THEN]
 test-keys \ we want the test keys - never use this in production!
 
-"alice" >key \ get our anonymous key
+i'm alice
 
 init-client
 

@@ -8,7 +8,7 @@ require client-tests.fs
 debug-task
 test-keys \ we want the test keys - never use this in production!
 
-"bob" >key \ get our bob key
+i'm bob
 
 init-client
 

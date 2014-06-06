@@ -9,7 +9,7 @@ test-keys \ we want the test keys - never use this in production!
 
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-"test" >key \ use our server test key
+i'm test
 init-server
 server-loop
 

@@ -8,7 +8,7 @@ require client-tests.fs
 debug-task
 test-keys \ we want the test keys - never use this in production!
 
-"anonymous" >key \ get our anonymous key
+i'm anonymous
 
 init-client
 
