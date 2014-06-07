@@ -933,6 +933,8 @@ previous
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-request  tail-connect ;
 
+: end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
+
 previous
 
 0 [IF]

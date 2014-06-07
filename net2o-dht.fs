@@ -86,10 +86,32 @@ $51 Constant sigsize#
 $71 Constant sigpksize#
 $10 Constant datesize#
 
-\ checks for signatures
+\ signature printing
+
+User sigdate datesize# cell- uallot drop \ date+expire date
+
+: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
 
 : startdate@ ( addr u -- date ) + sigsize# - 64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+
+: gen>host ( addr u -- addr u )
+    2dup c:0key "host" >keyed-hash
+    sigdate datesize# "date" >keyed-hash ;
+
+: .check ( flag -- ) '✓' '⚡' rot select xemit ;
+: .sigdate ( tick -- )
+    64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
+    64dup 64#-1 64= IF  ." never"  64drop  EXIT  THEN
+    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
+	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
+    ELSE  64drop .ticks  THEN ;
+: .sigdates ( addr u -- )
+    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
+
+\ checks for signatures
 
 #10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 
@@ -98,6 +120,7 @@ $10 Constant datesize#
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     c:0key 2dup sigsize# - "host" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
+
 : check-date ( addr u -- addr u flag )
     2dup + sigsize# - >r
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
@@ -110,8 +133,66 @@ $10 Constant datesize#
 	    EXIT  THEN THEN  rdrop false ;
 : verify-host ( addr u -- addr u flag )
     d#hashkey 2@ drop verify-sig ;
+
+\ revokation
+
+4 datesize# + keysize 9 * + Constant revsize#
+
+Variable revtoken
+
+: 0oldkey ( -- ) \ pubkeys can stay
+    oldskc keysize erase  oldskrev keysize erase ;
+
+: keymove ( addr1 addr2 -- )  keysize move ;
+
+: revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
+    sigonlysize# - 2dup 2r> >keyed-hash
+    sigdate datesize# "date" >keyed-hash
+    2dup + r> ed-verify ;
+
+: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
+
+: sign-token, ( sk pk string u2 -- )
+    c:0key revtoken $@ 2swap >keyed-hash
+    sigdate datesize# "date" >keyed-hash
+    ed-sign revtoken $+! bl revtoken c$+! ;
+
+: revoke-key ( -- addr u )
+    now>never                              \ revokations never expire
+    skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
+                                           \ backup keys
+    oldskrev oldpkrev sk>pk                \ generate revokation pubkey
+    gen-keys                               \ generate new keys
+    pkc keysize 2* revtoken $!             \ my new key
+    oldpkrev keysize revtoken $+!          \ revoke token
+    oldskrev oldpkrev "revoke" sign-token, \ revoke signature
+    skc pkc "selfsign" sign-token,         \ self signed with new key
+    "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
+    revtoken $@ gen>host                   \ sign host information with old key
+    [: type sigdate datesize# type oldskc oldpkc ed-sign type space ;] $tmp
+    0oldkey ;
+
+: revoke? ( addr u -- addr u flag )
+    2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
+    >host verify-host &&                           \ verify it's a proper host
+    2dup + sigsize# - sigdate datesize# move       \ copy signing date
+    sigdate 64'+ 64@ 64#-1 64= &&                  \ may never expire
+    2dup 1 /string sigsize# -                      \ extract actual revoke part
+    over "selfsign" revoke-verify &&'              \ verify self signature
+    over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
+    over keysize 2* + pkrev keymove
+    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
+    d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
+
+: .revoke ( addr u -- )
+    ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin xtype space
+    revoke? -rot .sigdates .check ;
+
+\ higher level checks
+
 : check-host ( addr u -- addr u )
-    >host verify-host 0= !!wrong-sig!! ;
+    over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
+    0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
     c:0key d#hashkey 2@ "tag" >keyed-hash
@@ -165,26 +246,18 @@ $10 Constant datesize#
     REPEAT 2drop 2drop ; \ not found
 
 : >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
-: (d#value+) ( addr u key -- ) \ without sanity checks
-    cells dup k#size u>= !!no-dht-key!!
+: ?d#id ( -- )
     d#id @ 0= IF \ want to allocate it? check first!
 	k#size alloz d#id !
 	d#hashkey 2@ d#id @ $!
-    THEN
-    d#id @ + $ins[]sig ;
+    THEN ;
+: (d#value+) ( addr u key -- ) \ without sanity checks
+    cells dup k#size u>= !!no-dht-key!!
+    ?d#id  d#id @ + $ins[]sig ;
 
-: .check ( flag -- ) '✓' '⚡' rot select xemit ;
-: .sigdate ( tick -- )
-    64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
-    64dup 64#-1 64= IF  ." never"  64drop  EXIT  THEN
-    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
-	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
-    ELSE  64drop .ticks  THEN ;
-: .sigdates ( addr u -- )
-    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
-: .host ( addr u -- ) 2dup 2>r
+: .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN  2dup 2>r
     >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr
     r> 2r> .sigdates .check ;
 : host>$ ( addr u -- addr u' flag )
@@ -280,14 +353,6 @@ previous
 
 \ facilitate stuff
 
-datesize# buffer: sigdate \ date+expire date
-: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
-
-: gen>host ( addr u -- addr u )
-    2dup c:0key "host" >keyed-hash
-    sigdate datesize# "date" >keyed-hash ;
 : .sig ( -- )  sigdate datesize# type skc pkc ed-sign type space ;
 : .pk ( -- )  pkc keysize type ;
 : host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
@@ -306,56 +371,6 @@ datesize# buffer: sigdate \ date+expire date
     gen>tag tag$ ;
 : gen-tag-del ( addr u hash-addr uh -- addr' u' )
     gen>tag "tag" >delete tag$ ;
-
-\ revokation
-
-4 datesize# + keysize 9 * + Constant revsize#
-
-Variable revtoken
-
-: 0oldkey ( -- ) \ pubkeys can stay
-    oldskc keysize erase  oldskrev keysize erase ;
-
-: keymove ( addr1 addr2 -- )  keysize move ;
-
-: revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
-    sigonlysize# - 2dup 2r> >keyed-hash
-    sigdate datesize# "date" >keyed-hash
-    2dup + r> ed-verify ;
-
-: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
-
-: sign-token, ( sk pk string u2 -- )
-    c:0key revtoken $@ 2swap >keyed-hash
-    sigdate datesize# "date" >keyed-hash
-    ed-sign revtoken $+! bl revtoken c$+! ;
-
-: revoke-key ( -- addr u )
-    now>never                              \ revokations never expire
-    skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
-                                           \ backup keys
-    oldskrev oldpkrev sk>pk                \ generate revokation pubkey
-    gen-keys                               \ generate new keys
-    pkc keysize 2* revtoken $!             \ my new key
-    oldpkrev keysize revtoken $+!          \ revoke token
-    oldskrev oldpkrev "revoke" sign-token, \ revoke signature
-    skc pkc "selfsign" sign-token,         \ self signed with new key
-    "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
-    revtoken $@ gen>host                   \ sign host information with old key
-    [: type sigdate datesize# type oldskc oldpkc ed-sign type space ;] $tmp
-    0oldkey ;
-
-: revoke? ( addr u -- addr u flag )
-    2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
-    >host verify-host &&                           \ verify it's a proper host
-    2dup + sigsize# - sigdate datesize# move       \ copy signing date
-    sigdate 64'+ 64@ 64#-1 64= &&                  \ may never expire
-    2dup 1 /string sigsize# -                      \ extract actual revoke part
-    over "selfsign" revoke-verify &&'              \ verify self signature
-    over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
-    over keysize 2* + pkrev keymove
-    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
-    d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
 
 \ addme stuff
 
@@ -393,27 +408,48 @@ previous
 also net2o-base
 : replaceme, ( -- )
     pkc keysize 2* $, dht-id k#host ulit, dht-value? ;
+
+: remove-me, ( -- )
+    d#id @ k#host cells + dup
+    [: sigsize# - 2dup + sigdate datesize# move
+      gen-host-del $, k#host ulit, dht-value- ;] $[]map
+    $[]off ;
 previous
 
+: me>d#id ( -- ) pkc keysize 2* >d#id ?d#id ;
+
 : n2o:send-replace ( -- )
-    pkc keysize 2* >d#id d#id @ IF
+    me>d#id d#id @ IF
 	net2o-code   expect-reply
-	pkc keysize 2* $, dht-id
-	d#id @ k#host cells +
-	[: sigsize# - 2dup + sigdate datesize# move
-	  gen-host-del $, k#host ulit, dht-value- ;] $[]map
-	cookie+request
-	end-code client-loop
+	  pkc keysize 2* $, dht-id remove-me,
+	  cookie+request
+	end-code|
     THEN ;
+
+: set-revocation ( addr u -- )
+    d#id @ k#host cells + $+[]! ;
+
+: n2o:send-revoke ( addr u -- )
+    net2o-code  expect-reply
+      d#id @ $@ $, dht-id remove-me,
+      keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
+      2dup $, k#host ulit, dht-value+
+      cookie+request end-code|
+    d#id @ k#host cells + $+[]! ;
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replaceme, cookie+request
-    end-code
-    client-loop -setip n2o:send-replace ;
+    end-code| -setip n2o:send-replace ;
+
+: revoke-me ( addr u -- )
+    \G give it your revocation secret
+    +addme
+    net2o-code   expect-reply replaceme, cookie+request  end-code|
+    -setip n2o:send-revoke ;
 
 : do-disconnect ( -- )
     net2o-code .time s" Disconnect" $, type cr
-    close-all disconnect  end-code msg( ." disconnected" F cr )
+      close-all disconnect  end-code msg( ." disconnected" F cr )
     n2o:dispose-context msg( ." Disposed context" F cr ) ;
 
 : beacon-replace ( -- )  \ sign on, and do a replace-me
@@ -455,8 +491,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:") (0 . 1) (0 . 1) immediate)
-     ((";]") (-1 . 0) (0 . -1) immediate)
+     (("[:" "net2o-code") (0 . 1) (0 . 1) immediate)
+     ((";]" "end-code" "end-code|") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]

@@ -56,8 +56,7 @@ UValue test#  0 to test#
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:add-me ( -- )  +addme
-    net2o-code   expect-reply get-ip cookie+request  end-code
-    client-loop -setip ;
+    net2o-code   expect-reply get-ip cookie+request  end-code| -setip ;
 
 : c:add-tag ( -- ) +addme
     net2o-code
@@ -66,7 +65,7 @@ UValue test#  0 to test#
     pkc keysize 2* $, dht-id
     forever "test:tag" pkc keysize 2* gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize 2* gen-tag $, k#tags ulit, dht-value+
-    end-code  client-loop -setip ;
+    end-code| -setip ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
@@ -74,7 +73,7 @@ UValue test#  0 to test#
     0 >o nick-key ke-pk $@ o> $, dht-id
     k#host ulit, dht-value? k#tags ulit, dht-value?
     cookie+request
-    end-code  client-loop ;
+    end-code| ;
 
 also net2o-base
 : fetch-host, ( nick u -- )
@@ -86,20 +85,20 @@ previous
     net2o-code
     expect-reply  fetch-host,
     cookie+request
-    end-code  client-loop ;
+    end-code| ;
 
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
     expect-reply get-ip fetch-host, replaceme,
     cookie+request
-    end-code  client-loop -setip n2o:send-replace ;
+    end-code| -setip n2o:send-replace ;
 
 : c:fetch-tags ( -- )
     net2o-code
     expect-reply
     0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
     n2o:done
-    end-code  client-loop ;
+    end-code| ;
 
 : c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
@@ -115,8 +114,7 @@ previous
     "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
     "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
     n2o:done
-    end-code
-    client-loop n2o:close-all ['] .time $err ;
+    end-code| n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Download test 2: 7 medium photos" cr ;] $err
@@ -132,8 +130,7 @@ previous
     "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
     "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
     n2o:done
-    end-code
-    client-loop n2o:close-all ['] .time $err ;
+    end-code| n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
     [: ." Download test 3: 2 big photos" cr ;] $err
@@ -144,8 +141,7 @@ previous
     "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
     "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
     n2o:done
-    end-code
-    client-loop n2o:close-all ['] .time $err ;
+    end-code| n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
@@ -168,8 +164,7 @@ previous
     $60000 ulit, 5 ulit, track-limit
     $70000 ulit, 6 ulit, track-limit
     n2o:done
-    end-code
-    client-loop ['] .time $err ;
+    end-code| ['] .time $err ;
 
 : c:download4a ( -- )
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
@@ -184,8 +179,7 @@ previous
     -1 nlit, 5 ulit, track-limit
     -1 nlit, 6 ulit, track-limit
     n2o:done
-    end-code
-    client-loop n2o:close-all ['] .time $err ;
+    end-code| n2o:close-all ['] .time $err ;
 
 : c:test-rest ( -- )
     c:download1

@@ -17,9 +17,14 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
+: c:revoke-bob ( -- )
+    me>d#id
+    x" D82AF4AE7CD3DA7316CE6F26BC5792F4F5E6B36B4C14F7D60C49B421AE1D5468"
+    revoke-me ;
+
 : c:bob ( -- ) 
     $2000 $10000 "test" ins-ip dup add-beacon c:connect
-    replace-me do-disconnect ;
+    c:revoke-bob replace-me do-disconnect ;
 
 c:bob server-loop
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
