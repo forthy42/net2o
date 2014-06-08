@@ -308,6 +308,12 @@ set-current previous previous
     0 >o nick-key  this-keyid @ 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
+: replace-key ( addr u -- )
+    this-keyid @ o 2over key:new o key-entry >osize @ move
+    keysize key-table #off ke-pk $!
+    key( ." Replace key of nick '" ke-nick $@ type ." ' with "
+    ke-pk $@ xtype cr ) ;
+
 0 [IF]
 Local Variables:
 forth-local-words:
