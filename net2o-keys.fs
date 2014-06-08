@@ -305,8 +305,8 @@ set-current previous previous
 : i'm ( "name" -- ) parse-name >key ;
 
 : dest-key ( addr u -- )
-    0 .nick-key  this-keyid @ 0= !!unknown-key!!
-    this-keyid @ keysize dest-pubkey $! ;
+    0 >o nick-key  this-keyid @ 0= !!unknown-key!!
+    ke-pk $@ keysize umin o> dest-pubkey $! ;
 
 0 [IF]
 Local Variables:

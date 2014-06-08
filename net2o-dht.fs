@@ -122,15 +122,18 @@ User sigdate datesize# cell- uallot drop \ date+expire date
     2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
 
 : check-date ( addr u -- addr u flag )
+    2dup + 1- c@ keysize = &&
     2dup + sigsize# - >r
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
 : check-ed25519 ( addr u -- addr u flag )  2dup + 1- c@ $20 = ;
 : verify-sig ( addr u pk -- )  >r
-    check-date IF  check-ed25519 IF
+    check-date IF
+	check-ed25519 IF
 	    2dup + sigonlysize# - r> ed-verify
-	    EXIT  THEN THEN  rdrop false ;
+	    EXIT  THEN
+    THEN  rdrop false ;
 : verify-host ( addr u -- addr u flag )
     d#hashkey 2@ drop verify-sig ;
 

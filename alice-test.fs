@@ -20,8 +20,15 @@ init-client
 
 : c:lookup ( addr u -- )
     $2000 $10000 "test" ins-ip c:connect
-    2dup c:addme-fetch-host do-disconnect
-    nick-key ke-pk $@ >d#id ;
+    BEGIN  2dup c:addme-fetch-host  0 >o
+	nick-key ke-pk $@ >d#id
+	0 d#id @ k#host cells + $[]@ over c@ '!' =  WHILE
+	    1 /string 2dup + 1- c@ 2* umin ke-pk $!
+	    ke-nick $@
+	    ." Replace key of nick '" 2dup type ." ' with "
+	    ke-pk $@ xtype cr
+	    o>
+    REPEAT  o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
     host>$ IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
@@ -39,8 +46,7 @@ init-client
     d#id @ k#host cells + ['] c:insert-host $[]map ;
 
 : nat:connect ( addr u -- )
-    init-cache'
-    2dup n2o:lookup dest-key
+    init-cache' n2o:lookup
     ." trying to connect to: " return-addr $10 xtype cr
     $10000 $100000 n2o:connect +flow-control +resend
     ." Connected!" cr
