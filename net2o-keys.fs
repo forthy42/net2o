@@ -309,10 +309,12 @@ set-current previous previous
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
 : replace-key ( addr u -- )
+    ." Replace:" cr o cell- 0 .key
     this-keyid @ o 2over key:new o key-entry >osize @ move
-    keysize key-table #off ke-pk $!
-    key( ." Replace key of nick '" ke-nick $@ type ." ' with "
-    ke-pk $@ xtype cr ) ;
+    keysize key-table #off
+    2dup keysize 2* umin ke-pk $!
+    + 1- dup c@ 2* - $10 - 64@ ke-first 64!
+    ." with:" cr o cell- 0 .key ;
 
 0 [IF]
 Local Variables:

@@ -23,8 +23,7 @@ init-client
     BEGIN  2dup c:addme-fetch-host  0 >o
 	nick-key ke-pk $@ >d#id
 	0 d#id @ k#host cells + $[]@ over c@ '!' =  WHILE
-	    1 /string 2dup + 1- c@ 2* umin replace-key ke-nick $@
-	    o>
+	    1 /string replace-key ke-nick $@ o>
     REPEAT  o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
     host>$ IF
