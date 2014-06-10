@@ -440,7 +440,7 @@ Defer renew-key
       keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
       2dup $, k#host ulit, dht-value+
       cookie+request end-code| \ send revocation upstrem
-    2dup set-revocation d#id @ $@ renew-key ; \ replace key in key storage
+    d#id @ $@ renew-key ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replaceme, cookie+request
