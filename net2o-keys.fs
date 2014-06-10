@@ -308,13 +308,16 @@ set-current previous previous
     0 >o nick-key  this-keyid @ 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
-: replace-key ( addr u -- )
-    ." Replace:" cr o cell- 0 .key
+: replace-key ( addr u -- )  1 /string
+    key( ." Replace:" cr o cell- 0 .key )
     this-keyid @ o 2over key:new o key-entry >osize @ move
     keysize key-table #off
     2dup keysize 2* umin ke-pk $!
     + 1- dup c@ 2* - $10 - 64@ ke-first 64!
-    ." with:" cr o cell- 0 .key ;
+    key( ." with:" cr o cell- 0 .key ) ;
+
+:noname ( revaddr u1 keyaddr u2 -- )
+    0 >o current-key replace-key o> ; is renew-key
 
 0 [IF]
 Local Variables:

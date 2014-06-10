@@ -432,13 +432,15 @@ previous
 : set-revocation ( addr u -- )
     d#id @ k#host cells + $+[]! ;
 
+Defer renew-key
+
 : n2o:send-revoke ( addr u -- )
     net2o-code  expect-reply
       d#id @ $@ $, dht-id remove-me,
       keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
       2dup $, k#host ulit, dht-value+
-      cookie+request end-code|
-    d#id @ k#host cells + $+[]! ;
+      cookie+request end-code| \ send revocation upstrem
+    2dup set-revocation d#id @ $@ renew-key ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replaceme, cookie+request
