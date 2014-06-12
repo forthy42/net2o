@@ -49,7 +49,7 @@ $4000 Constant /kregion
     >r case
 	32 of  r@ kalloc32? dup r@ ! 32 move endof
 	64 of  r@ kalloc64? dup r@ ! 64 move endof
-    nip endcase rdrop ;
+    !!sec-size!! endcase rdrop ;
 
 storage class end-class crypto-alloc
 
