@@ -60,6 +60,7 @@ cmd-class class
     field: ke-prof
     field: ke-sigs
     field: ke-type
+    field: ke-key
     64field: ke-first
     64field: ke-last
     64field: ke-offset \ offset in key file
@@ -164,7 +165,7 @@ max-passphrase# buffer: passphrase
 Variable keys
 2Variable key+len \ current key + len
 
-: +key ( addr u -- ) keys $+[]! ;
+: +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
@@ -279,7 +280,7 @@ set-current previous previous
 
 : try-decrypt ( -- addr u / 0 0 )
     keys $[]# 0 ?DO
-	I keys $[]@ try-decrypt-key IF  unloop  EXIT  THEN
+	I keys sec[]@ try-decrypt-key IF  unloop  EXIT  THEN
     LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )

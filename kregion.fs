@@ -16,7 +16,6 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 2Variable kregion \ current region pointer + remainder
-Variable kfree32' \ free list for 32 bytes keys
 Variable kfree64' \ free list for 64 bytes keys
 
 $4000 Constant /kregion
@@ -28,28 +27,29 @@ $4000 Constant /kregion
 	2drop /kregion alloc+lock /kregion 2dup kregion 2!  THEN
     over swap r> safe/string kregion 2! ;
 
-: kalloc32 ( -- addr )
-    kfree32' @ ?dup-if  dup @ kfree32' ! dup off  exit  then
-    32 kalloc ;
-: kfree32 ( addr -- )
-    dup 32 erase kfree32' @ over ! kfree32' ! ;
+\ fixed size secrets are assumed to be all 64 bytes long
+\ if they are just 32 bytes, the second half is all zero
 
 : kalloc64 ( -- addr )
     kfree64' @ ?dup-if  dup @ kfree64' ! dup off  exit  then
     64 kalloc ;
 : kfree64 ( addr -- )
     dup 64 erase kfree64' @ over ! kfree64' ! ;
-
-: kalloc32? ( addr -- addr' )
-    dup @ IF  @  EXIT  THEN  drop kalloc32 ;
 : kalloc64? ( addr -- addr' )
     dup @ IF  @  EXIT  THEN  drop kalloc64 ;
 
+32 buffer: zero32
+
 : sec! ( addr1 u1 addr2 -- )
-    >r case
-	32 of  r@ kalloc32? dup r@ ! 32 move endof
-	64 of  r@ kalloc64? dup r@ ! 64 move endof
-    !!sec-size!! endcase rdrop ;
+    >r r@ kalloc64? dup r> ! swap $40 umin move ;
+: sec@ ( addr -- addr1 u1 )
+    @ dup IF  $40 over $20 + $20 zero32 over str= IF  2/  THEN
+    ELSE 0 THEN ;
+
+: sec+[]! ( addr1 u1 addr2 -- ) >r
+    0 { w^ sec } sec sec! sec cell r> $+! ;
+
+: sec[]@ ( i addr -- addr u )  $[] sec@ ;
 
 storage class end-class crypto-alloc
 
