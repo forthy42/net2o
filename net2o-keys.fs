@@ -35,6 +35,22 @@ require mkdir.fs
 	    THEN
     REPEAT  drop  nip r> swap - ;
 
+\ Keys are passwords and private keys (self-keyed, i.e. private*public key)
+
+$100 Constant keypack#
+
+0 Value pw-level# \ pw-level# 0 is lowest
+\ !!TODO!! we need a way to tell how much we can trust keys
+\ passwords need a pw-level (because they are guessable)
+\ secrets don't, they aren't. We can quickly decrypt all
+\ secret-based stuff, without bothering with slowdowns.
+\ So secrets should use normal string decrypt
+
+keypack# mykey-salt# + $10 + Constant keypack-all#
+
+keypack-all# buffer: keypack
+keypack-all# buffer: keypack-d
+
 \ hashed key data base
 
 cmd-class class
@@ -46,6 +62,7 @@ cmd-class class
     field: ke-type
     64field: ke-first
     64field: ke-last
+    64field: ke-offset \ offset in key file
 end-class key-entry
 
 key-entry >dynamic to key-entry
@@ -62,6 +79,7 @@ Variable key-table
 Variable this-key
 Variable this-keyid
 2Variable addsig
+64Variable key-read-offset
 
 : current-key ( addr u -- )
     2dup keysize umin key-table #@ drop cell+ dup this-key ! >o rdrop ke-pk $! ;
@@ -71,7 +89,8 @@ Variable this-keyid
 : key:new ( addr u -- )
     \ addr u is the public key
     sample-key dup cell- @ >osize @ 2dup erase
-    over >o 64#-1 ke-last 64! o> -1 cells /string
+    over >o 64#-1 ke-last 64! key-read-offset 64@ ke-offset 64! o>
+    -1 cells /string  keypack-all# n>64 key-read-offset 64+!
     2over keysize umin key-table #! current-key ;
 
 \ search for keys - not optimized
@@ -90,14 +109,14 @@ Variable strict-keys  strict-keys on
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ xtype cr
-    ke-sk $@len IF  ." ke-sk: " ke-sk $@ xtype cr  THEN
+    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize xtype cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ xtype .\" \" key:new" cr
-    ke-sk $@len IF  .\" x\" " ke-sk $@ xtype .\" \" ke-sk $! +seckey" cr  THEN
+    ke-sk @ IF  .\" x\" " ke-sk @ keysize xtype .\" \" ke-sk sec! +seckey" cr  THEN
     '"' emit ke-nick $@ type .\" \" ke-nick $! "
     ke-first 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first 64! " ke-type @ . ." ke-type !"  cr o> ;
@@ -149,7 +168,7 @@ Variable keys
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
-    ke-sk $@ drop ke-pk $@ drop keypad ed-dh +key ;
+    ke-sk @ ke-pk $@ drop keypad ed-dh +key ;
 
 "" ">passphrase \ following the encrypt-everything paradigm,
 \ no password is the empty string!  It's still encrypted!
@@ -167,26 +186,10 @@ Variable keys
 \ we store each item in a 256 bytes encrypted string, i.e. with a 16
 \ byte salt and a 16 byte checksum.
 
-\ Keys are passwords and private keys (self-keyed, i.e. private*public key)
-
-$100 Constant keypack#
-
-0 Value pw-level# \ pw-level# 0 is lowest
-\ !!TODO!! we need a way to tell how much we can trust keys
-\ passwords need a pw-level (because they are guessable)
-\ secrets don't, they aren't. We can quickly decrypt all
-\ secret-based stuff, without bothering with slowdowns.
-\ So secrets should use normal string decrypt
-
-keypack# mykey-salt# + $10 + Constant keypack-all#
-
-keypack-all# buffer: keypack
-keypack-all# buffer: keypack-d
-
 get-current also net2o-base definitions
 
 8 net2o: newkey ( $:string -- ) $> key:new ;
-+net2o: privkey ( $:string -- ) $> ke-sk $! +seckey ;
++net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
 +net2o: keynick ( $:string -- )    $> ke-nick $! ;
 +net2o: keyprofile ( $:string -- ) $> ke-prof $! ;
@@ -200,9 +203,7 @@ dup set-current previous
 key-entry >static to key-entry \ back to static method table
 ' context-class is cmd-table
 
-static-a to allocater
-key-entry new to sample-key
-dynamic-a to allocater
+key-entry ' new static-a with-allocater to sample-key
 sample-key this-key ! \ dummy
 
 : key:code ( -- )
@@ -287,7 +288,8 @@ set-current previous previous
 
 : read-key-loop ( -- )
     BEGIN
-	keypack keypack-all# ?key-fd read-file throw
+	?key-fd file-position throw d>64 key-read-offset 64!
+	keypack keypack-all# key-fd read-file throw
 	keypack-all# = WHILE  try-decrypt do-key
     REPEAT ;
 
@@ -300,7 +302,7 @@ set-current previous previous
     key-table @ 0= IF  read-keys  THEN
     nick-key  this-keyid @ 0= ?EXIT
     this-key @ .ke-pk $@ pkc swap keysize 2* umin move
-    ke-sk $@ skc swap move ;
+    ke-sk @ skc keysize move ;
 
 : i'm ( "name" -- ) parse-name >key ;
 
@@ -317,7 +319,7 @@ set-current previous previous
     key( ." with:" cr o cell- 0 .key ) ;
 
 :noname ( revaddr u1 keyaddr u2 -- )
-    0 >o current-key replace-key o> ; is renew-key
+    0 >o current-key replace-key skc keysize ke-sk sec! o> ; is renew-key
 
 0 [IF]
 Local Variables:

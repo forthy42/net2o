@@ -55,7 +55,8 @@ end-class edbuf-c
 
 : init-ed25519
     edbuf @ IF  task-id @ up@ = ?EXIT  THEN
-    edbuf-c new edbuf !  up@ task-id ! ;
+    [: edbuf-c new edbuf ! ;] crypto-a with-allocater
+    up@ task-id ! ;
 
 init-ed25519
 

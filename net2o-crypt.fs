@@ -50,7 +50,7 @@ end-class keybuf-c
 
 : init-keybuf ( -- )
     keybuf @ ?EXIT \ we have only one global keybuf
-    keybuf-c >osize @ alloc+lock keybuf ! ;
+    keybuf-c >osize @ kalloc keybuf ! ;
 
 init-keybuf
 

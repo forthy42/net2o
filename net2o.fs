@@ -80,6 +80,7 @@ s" String stack full"            throwcode !!string-full!!
 s" String stack empty"           throwcode !!string-empty!!
 s" Unknown crypto function"      throwcode !!unknown-crypt!!
 s" Wrong revocation secret"      throwcode !!not-my-revsk!!
+s" krypto mem request too big "  throwcode !!kr-size!!
 
 \ required tools
 
@@ -91,6 +92,7 @@ require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
+require kregion.fs
 require string.fs
 require struct0x.fs
 require debugging.fs

@@ -75,7 +75,8 @@ crypto class
 end-class keccak
 
 : keccak-init crypto-o @ IF  keccak-up @ next-task = ?EXIT  THEN
-    keccak new crypto-o ! next-task keccak-up ! keccak-state to @keccak ;
+    [: keccak new crypto-o ! ;] crypto-a with-allocater
+    next-task keccak-up ! keccak-state to @keccak ;
 
 : keccak-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @keccak crypto-o off ;
@@ -146,6 +147,4 @@ keccak-init
 :noname keccak-checksums keccak#cks keccak> keccak-checksums $10 + 64@ ; to c:cookie ( -- x )
 \G obtain a different 64 bit checksum part
 
-static-a to allocater
-keccak new Constant keccak-o
-dynamic-a to allocater
+keccak ' new static-a with-allocater Constant keccak-o
