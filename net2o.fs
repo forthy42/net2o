@@ -943,6 +943,7 @@ setup-class class
     field: timeouts
     64field: rtdelay \ ns
     64field: lastack \ ns
+    64field: resend-all-to \ ns
     field: flyburst
     field: flybursts
     64field: lastslack
@@ -2196,10 +2197,11 @@ Variable timeout-o
 
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: >next-timeout ( -- )
+: +timeouts ( -- timeout ) 
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
-    ticker 64@ 64+ next-timeout 64! ;
+    ticker 64@ 64+ ;
+: >next-timeout ( -- )  +timeouts next-timeout 64! ;
 : 0timeout ( -- )
     rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
     0 timeouts !@ IF  timeout-task wake  THEN ;

@@ -764,10 +764,14 @@ also net2o-base
     msg( ." Expect reply" F cr )
     ['] end-cmd IS expect-reply? ;
 
-: expect-reply ( -- ) ['] do-expect-reply IS expect-reply? ;
+: expect-reply ( -- ) cmd( ." expect reply:" F cr )
+    ['] do-expect-reply IS expect-reply? ;
 
 : resend-all ( -- )
-    false net2o:do-resend ;
+    ticker 64@ resend-all-to 64@ u>= IF
+	false net2o:do-resend
+	+timeouts resend-all-to 64!
+    THEN ;
 
 : restart-transfer ( -- )
     slurp send-chunks ;
@@ -823,7 +827,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : +expected ( -- )
     data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
-    IF   expect-reply resend-all  THEN  expected? ;
+    IF   resend-all  THEN  expected? ;
 
 \ higher level functions
 
@@ -883,7 +887,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ acknowledge toplevel
 
 : net2o:ack-code ( ackflag -- ackflag' )
-    net2o-code
+    net2o-code ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	r@ resend-toggle# and IF
@@ -901,7 +905,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     recv-cookie +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
-    IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing ;
+    IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing
+    timeout( ." ack expected: " expected@ hex. hex. F cr )
+;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 : -flow-control ['] noop         ack-xt ! ;
@@ -910,7 +916,8 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 also net2o-base
 : transfer-keepalive? ( -- )
-    expected@ u>= ?EXIT
+    timeout( ." transfer keepalive " expected@ hex. hex. F cr )
+    expected@ u>= IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout
     save( slurp send-chunks )  resend-all  net2o:genack end-code ;
