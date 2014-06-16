@@ -1967,7 +1967,8 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     s" " data-rmap @ >o data-ackbits-buf $! o> ;
 
 :noname ( o:map -- )
-    dest-timestamps @ dest-size @ addr>ts erase ;
+    dest-timestamps @ dest-size @ addr>ts erase
+    dest-cookies @ dest-size @ addr>ts cookies( ." cookies: " 2dup xtype cr ) erase ;
 dup data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 

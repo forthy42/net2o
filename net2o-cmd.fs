@@ -637,7 +637,8 @@ context-class setup-class >inherit to context-class
 : n2o:done ( -- )  slurp send-chunks next-request filereq# ! ;
 
 : rewind-total ( -- )
-    data-rmap @ >o dest-round @ 1+ o> dup net2o:rewind-receiver
+    64#0 resend-all-to 64! \ clear timeout for resend-all
+    data-rmap @ .dest-round @ 1+ dup net2o:rewind-receiver
     ulit, rewind-sender ;
 
 : rewind-flush ( -- )

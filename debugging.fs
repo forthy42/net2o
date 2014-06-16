@@ -49,7 +49,8 @@ debug: crypt(
 debug: noens(
 debug: key(
 debug: genkey( \ See generated keys - never let this go to a log file!
-debug: cookie(
+debug: cookie( 
+debug: cookies( \ dump all cookies on rewinding
 debug: delay( \ used to add delays at performance critical places
 debug: tag(
 debug: flush(
