@@ -27,9 +27,9 @@ hash#256   buffer: keyed-hash-out
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
     \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
-    hash( ." hashing: " 2over xtype ':' emit 2dup xtype F cr )
+    hash( ." hashing: " 2over 64type ':' emit 2dup 64type F cr )
     c:hash c:hash
-    hash( @keccak 200 xtype F cr F cr ) ;
+    hash( @keccak 200 64type F cr F cr ) ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
     c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
@@ -161,7 +161,6 @@ Variable revtoken
     ed-sign revtoken $+! bl revtoken c$+! ;
 
 : revoke-key ( -- addr u )
-    now>never                              \ revokations never expire
     skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
                                            \ backup keys
     oldskrev oldpkrev sk>pk                \ generate revokation pubkey
@@ -179,7 +178,6 @@ Variable revtoken
     2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
     >host verify-host &&                           \ verify it's a proper host
     2dup + sigsize# - sigdate datesize# move       \ copy signing date
-    sigdate 64'+ 64@ 64#-1 64= &&                  \ may never expire
     2dup 1 /string sigsize# -                      \ extract actual revoke part
     over "selfsign" revoke-verify &&'              \ verify self signature
     over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
@@ -188,7 +186,7 @@ Variable revtoken
     d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
 
 : .revoke ( addr u -- )
-    ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin xtype space
+    ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 64type space
     revoke? -rot .sigdates .check ;
 
 \ higher level checks
@@ -267,7 +265,7 @@ Variable revtoken
     >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# -
     r> ;
 : d#. ( -- )
-    d#id @ $@ xtype ." :" cr
+    d#id @ $@ 64type ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
 	d#id @ I +  I k#host cells = IF
