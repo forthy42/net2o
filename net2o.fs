@@ -1614,15 +1614,13 @@ end-class fs-class
 Sema file-sema
 
 : save-all-blocks ( -- )
-    [: timeout( data-rmap @ >o data-ackbits @ dest-size @ addr>bytes $FF skip
-	dup IF  [: dump ;] $err  ELSE  2drop  THEN  o> )
-	+calc fstates 0 { size fails }
+    [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
-		residualwrite @ 0= ( rdata-back? or )  IF
+		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
-	    fails size u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
+	    fails states u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
     file-sema c-section ;
 
 : save-to ( addr u n -- )  state-addr >o
@@ -1671,11 +1669,11 @@ User file-reg#
     2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
 
 : n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
-    [: +calc fstates 0
-	{ states fails }
+    [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
-		read-file# @ n2o:slurp-block IF 0 ELSE fails 1+ THEN to fails
-		residualread @ 0= ( data-head? or )  IF
+		read-file# @ n2o:slurp-block
+		IF 0 ELSE fails 1+ residualread off THEN to fails
+		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
 	head@ fails states u>= ;]
