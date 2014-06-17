@@ -744,8 +744,8 @@ also net2o-base
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     data-rmap @ >o
     data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
-    IF    data-reack# @ mask-bits# -
-    ELSE  dest-head @ 1- addr>bits  THEN  bits>bytes 0 max
+    IF    data-reack# @ mask-bits# - bits>bytes
+    ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
     0 swap data-ack# @
     \ save( ." resend: " dest-head @ hex. dest-back @ hex.
     \ 2dup hex. hex. acks ackm 1+ xtype F cr )
