@@ -1,0 +1,3 @@
+#!/bin/bash
+
+gforth-fast client-tests.fs -e "sha-3-256s bye" "$@"

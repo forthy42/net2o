@@ -212,3 +212,22 @@ event: ->throw dup DoError throw ;
     0 ?DO  I c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
 
+\ some more helpers
+
+: sha-3-256 ( addr u -- )
+    slurp-file c:hash pad c:key> pad $20 64type ;
+
+: sha-3-512 ( addr u -- )
+    slurp-file c:hash pad c:key> pad $40 64type ;
+
+: sha-3-256s ( -- )
+    begin
+	next-arg dup while
+	    2dup sha-3-256 space type cr
+    repeat ;
+
+: sha-3-512s ( -- )
+    begin
+	next-arg dup while
+	    2dup sha-3-512 space type cr
+    repeat ;
