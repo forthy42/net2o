@@ -1613,6 +1613,7 @@ end-class fs-class
 
 Sema file-sema
 
+\ careful: must follow exactpy the same loic as slurp (see below)
 : save-all-blocks ( -- )
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
@@ -1668,6 +1669,7 @@ User file-reg#
     rot id>addr? .fs-read file( dup hex. dup
     2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
 
+\ careful: must follow exactpy the same loic as save-all-blocks (see above)
 : n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
@@ -2308,8 +2310,8 @@ $10 Constant tmp-crypt-val
     IF  route-packet  ELSE  handle-packet  THEN ;
 
 event: ->request ( n -- ) 1 over lshift invert reqmask and!
-    msg( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
-event: ->reqsave ( task n -- )  elit, ->request event> ;
+    request( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
+event: ->reqsave ( task n -- )  <event elit, ->request event> ;
 event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
     true !!timeout!! ;
 
@@ -2386,7 +2388,7 @@ Variable beacons \ destinations to send beacons to
 
 : n2o:request-done ( n -- )
     request( ." Request " dup . ." done, to task: " wait-task @ hex. cr )
-    file-task ?dup-IF  wait-task @ elit, elit, ->reqsave event>
+    file-task ?dup-IF  <event swap wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 
 : create-receiver-task ( -- )

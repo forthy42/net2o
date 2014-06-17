@@ -755,7 +755,7 @@ also net2o-base
 	    resend( ." resend: " dup hex. over hex. F cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + data-rmap @ >o data-ack# ! o>  THEN
+	    drop dup 0= IF  I 4 + data-rmap @ .data-ack# !  THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
@@ -907,7 +907,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
     IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing
-    timeout( ." ack expected: " expected@ hex. hex. F cr )
+    timeout( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. F cr )
 ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
