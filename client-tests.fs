@@ -214,20 +214,17 @@ event: ->throw dup DoError throw ;
 
 \ some more helpers
 
-: sha-3-256 ( addr u -- )
-    slurp-file c:hash pad c:key> pad $20 64type ;
+: sha-3 ( addr u -- )
+    slurp-file 2dup c:hash drop free throw pad c:key> ;
 
-: sha-3-512 ( addr u -- )
-    slurp-file c:hash pad c:key> pad $40 64type ;
+: sha-3-256 ( addr u -- )  sha-3 pad $20 64type ;
+: sha-3-512 ( addr u -- )  sha-3 pad $40 64type ;
+
+: arg-loop { xt -- }
+    begin  next-arg dup while  xt execute  repeat  2drop ;
 
 : sha-3-256s ( -- )
-    begin
-	next-arg dup while
-	    2dup sha-3-256 space type cr
-    repeat ;
+    [: 2dup sha-3-256 space type cr ;] arg-loop ;
 
 : sha-3-512s ( -- )
-    begin
-	next-arg dup while
-	    2dup sha-3-512 space type cr
-    repeat ;
+    [: 2dup sha-3-512 space type cr ;] arg-loop ;
