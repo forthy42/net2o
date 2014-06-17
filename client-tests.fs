@@ -217,8 +217,8 @@ event: ->throw dup DoError throw ;
 : sha-3 ( addr u -- )
     slurp-file 2dup c:hash drop free throw pad c:key> ;
 
-: sha-3-256 ( addr u -- )  sha-3 pad $20 64type ;
-: sha-3-512 ( addr u -- )  sha-3 pad $40 64type ;
+: sha-3-256 ( addr u -- )  sha-3 pad $20 85type ;
+: sha-3-512 ( addr u -- )  sha-3 pad $40 85type ;
 
 : arg-loop { xt -- }
     begin  next-arg dup while  xt execute  repeat  2drop ;

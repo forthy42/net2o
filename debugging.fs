@@ -66,6 +66,30 @@ Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
     '"' parse base64>$ ;
 comp: execute postpone SLiteral ;
 
+\ base85 output (not exactly the same as postscript)
+
+: .b85 ( n -- n' ) 85 /mod swap '#' + emit ;
+: .1base85 ( addr -- ) c@ .b85 .b85 drop ;
+: .2base85 ( addr -- ) le-uw@ .b85 .b85 .b85 drop ;
+: .3base85 ( addr -- ) le-ul@ $FFFFFF and .b85 .b85 .b85 .b85 drop ;
+: .4base85 ( addr -- ) le-ul@ .b85 .b85 .b85 .b85 .b85 drop ;
+Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
+: 85type ( addr u -- )
+    bounds ?DO  I I' over - 4 umin cells .base85s + perform  4 +LOOP ;
+
+: b85digit ( char -- n ) '#' - ;
+    
+: base85>n ( addr u -- n )  0 1 2swap bounds +DO
+	I c@ b85digit over * rot or swap 85 *
+    LOOP  drop ;
+: base85>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO
+	I I' over - 5 umin base85>n over le-l! 4 +
+    5 +LOOP  drop r> 4 5 */ ;
+
+: 85" ( "base85string" -- addr u )
+    '"' parse base85>$ ;
+comp: execute postpone SLiteral ;
+
 \ debugging switches
 
 debug: timing(

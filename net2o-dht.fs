@@ -27,9 +27,9 @@ hash#256   buffer: keyed-hash-out
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
     \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
-    hash( ." hashing: " 2over 64type ':' emit 2dup 64type F cr )
+    hash( ." hashing: " 2over 85type ':' emit 2dup 85type F cr )
     c:hash c:hash
-    hash( @keccak 200 64type F cr F cr ) ;
+    hash( @keccak 200 85type F cr F cr ) ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
     c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
@@ -186,7 +186,7 @@ Variable revtoken
     d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
 
 : .revoke ( addr u -- )
-    ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 64type space
+    ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 85type space
     revoke? -rot .sigdates .check ;
 
 \ higher level checks
@@ -265,7 +265,7 @@ Variable revtoken
     >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# -
     r> ;
 : d#. ( -- )
-    d#id @ $@ 64type ." :" cr
+    d#id @ $@ 85type ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
 	d#id @ I +  I k#host cells = IF

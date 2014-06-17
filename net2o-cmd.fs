@@ -111,9 +111,9 @@ cmd-class >dynamic to cmd-class
 
 : n2o.string ( $:string -- )  $>
     2dup printable? IF
-	.\" \"" type
+	cr .\" \"" type
     ELSE
-	.\" 64\" " 64type
+	cr .\" 85\" " 85type
     THEN  .\" \" $, " ;
 
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
