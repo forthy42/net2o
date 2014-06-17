@@ -113,7 +113,7 @@ cmd-class >dynamic to cmd-class
     2dup printable? IF
 	.\" \"" type
     ELSE
-	.\" x\" " xtype
+	.\" 64\" " 64type
     THEN  .\" \" $, " ;
 
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
