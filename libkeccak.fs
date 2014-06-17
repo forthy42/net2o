@@ -1,7 +1,10 @@
 \ keccak wrapper
 
 require 64bit.fs
+require unix/mmap.fs
 require crypto-api.fs
+require net2o-err.fs
+require kregion.fs
 
 \ dummy load for Android
 [IFDEF] android
@@ -148,3 +151,5 @@ keccak-init
 \G obtain a different 64 bit checksum part
 
 keccak ' new static-a with-allocater Constant keccak-o
+
+keccak-o crypto-o !
