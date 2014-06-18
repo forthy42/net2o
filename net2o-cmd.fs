@@ -804,7 +804,7 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
-	save-all-blocks  net2o:ack-cookies  rewind-transfer
+	net2o:ack-cookies  save( )else( save-all-blocks ) rewind-transfer
 	64#0 burst-ticks 64!
     THEN ;
 
