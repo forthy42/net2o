@@ -718,14 +718,14 @@ also net2o-base
 
 \ ack bits, new code
 
-: ack-cookie, ( map n bits -- ) >r [ 8 cells ]L * maxdata * r>
-    2dup 2>r rot >r u>64 r> cookie+ cookie( ." cookie, " 64dup .16 space )
-    lit, 2r> swap cookie( 2dup hex. hex. F cr ) ulit, ulit, ack-cookies ;
+: ack-cookie, ( map bits n -- ) [ 8 cells ]L * maxdata *
+    2dup 2>r rot >r swap u>64 r> cookie+
+    lit, 2r> ulit, ulit, ack-cookies ;
 
 : net2o:ack-cookies ( -- )  data-rmap @ { map }
     map .data-ackbits-buf $@
-    bounds ?DO  map I 2@ swap ack-cookie,  2 cells +LOOP
-    clear-cookies ;
+    bounds ?DO  map I 2@ ack-cookie,  2 cells +LOOP
+    map .data-ackbits-buf $off ;
 
 \ client side acknowledge
 
@@ -810,12 +810,12 @@ also net2o-base
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : +ackbit ( bit -- ) 0. { d^ new-ackbit }
-    dup cell>> rshift swap [ 8 cells 1- ]L and
+    dup  [ 8 cells 1- ]L and swap cell>> rshift
     data-ackbits-buf $@ bounds ?DO
-	over I @ = IF
-	    I cell+ swap +bit  drop unloop EXIT  THEN
+	dup I @ = IF drop
+	    I cell+ swap +bit unloop EXIT  THEN
     2 cells +LOOP
-    0 rot new-ackbit 2! new-ackbit cell+ swap +bit
+    new-ackbit ! new-ackbit cell+ swap +bit
     new-ackbit 2 cells data-ackbits-buf $+! ;
 
 : +cookie ( -- )
@@ -892,9 +892,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
 	    true net2o:do-resend
 	THEN
+	net2o:gen-resend  net2o:genack	map-resend?
 	0 data-rmap @ .do-slurp !@
 	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
-	net2o:gen-resend  net2o:genack	map-resend?
     THEN  +expected
     end-code r> ;
 

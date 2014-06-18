@@ -1014,7 +1014,6 @@ User >code-flag
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
 	dup addr>bytes allocate-bits data-ackbits !
-	s" " data-ackbits-buf $!
     THEN
     drop
     o o> ;
@@ -1674,22 +1673,27 @@ require net2o-crypt.fs
 
 \ cookie stuff
 
-: cookie! ( -- )
-    c:cookie
-    dest-addr 64@ >offset 0= IF  drop 64drop  EXIT  THEN
-    addr>ts cookie( ." Cookie: " dup hex. >r 64dup .16 cr r> )
-    dest-cookies @ + 64! ;
-
-: send-cookie ( -- )  data-map  @ .cookie! ;
-: recv-cookie ( -- )  data-rmap @ .cookie! ;
+: send-cookie ( -- )  c:cookie  data-map  @ >o
+    dest-addr 64@ >offset 0= IF  drop 64drop o>  EXIT  THEN
+    addr>ts dest-cookies @ + 64! o> ;
+: recv-cookie ( -- )  c:cookie  data-rmap @ >o
+    dest-cookies @ ack-bit# @ 64s + 64! o> ;
 
 : cookie+ ( addr bitmap map -- sum ) >o
-    cookie( ." cookies: " 64>r dup hex. 64r> 64dup .16 space space ) 64>r
+    cookies( ." cookies: " 64>r dup hex. 64r> 64dup $64. space space )  64>r
     addr>ts dest-size @ addr>ts umin
     dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
-    BEGIN  64r@ 64>n 1 and IF  addr 64@ cookie( 64dup .16 space ) 64+  THEN
+    BEGIN  64r@ 64>n 1 and IF
+	    addr 64@ 64dup 64-0= IF
+		." zero cookie @" addr dest-cookies @ - dup hex.
+		." mask: " 64r@ $64. data-ackbits @ IF
+		    3 rshift dup >r 3 rshift data-ackbits @ + 64@
+		    r> 7 and 64rshift $64.
+		ELSE  drop  THEN cr
+	    THEN  cookie( 64dup $64. space ) 64+
+	THEN
     addr 64'+ to addr 64r> 1 64rshift 64dup 64>r 64-0= UNTIL
-    64r> 64drop cookie( ." => " 64dup .16 space cr ) o> ;
+    64r> 64drop cookies( ." => " 64dup $64. space cr ) o> ;
 
 \ send blocks of memory
 
@@ -1924,9 +1928,6 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 \ rewind buffer to send further packets
 
-: clear-cookies ( -- )
-    s" " data-rmap @ .data-ackbits-buf $! ;
-
 :noname ( o:map -- )
     dest-timestamps @ dest-size @ addr>ts erase
     dest-cookies @ dest-size @ addr>ts
@@ -1971,7 +1972,7 @@ rdata-class to rewind-timestamps-partial
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
     data-rmap @ >o dest-round @
     +DO  rewind-buffer  LOOP
-    rewind-ackbits ( clear-cookies ) o> ;
+    rewind-ackbits o> ;
 
 : net2o:rewind-sender-partial ( new-back -- )
     flush( ." rewind partial " dup hex. cr )
@@ -2256,7 +2257,7 @@ $10 Constant tmp-crypt-val
 	code-rmap @ ?dup-IF  .free-data  THEN
 	resend0 $off  fstate-off
 	\ erase crypto keys
-	crypto-key sec@ erase  crypto-key sec-off
+	crypto-key sec-off
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
 	dispose
