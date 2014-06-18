@@ -738,7 +738,7 @@ also net2o-base
     save( u> IF  net2o:save& 64#0 burst-ticks 64!  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
-4 Value max-resend#
+8 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm )
     data-rmap @ >o
@@ -916,7 +916,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 also net2o-base
 : transfer-keepalive? ( -- )
     timeout( ." transfer keepalive " expected@ hex. hex. F cr )
-    expected@ u>= IF  net2o-code  +expected  end-code  EXIT  THEN
+    expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout  net2o:genack
     resend-all save( slurp send-chunks ) end-code ;
