@@ -888,11 +888,11 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     net2o-code ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
+	net2o:gen-resend  net2o:genack	map-resend?
 	r@ resend-toggle# and IF
 	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
 	    true net2o:do-resend
 	THEN
-	net2o:gen-resend  net2o:genack	map-resend?
 	0 data-rmap @ .do-slurp !@
 	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
     THEN  +expected
@@ -917,8 +917,8 @@ also net2o-base
     timeout( ." transfer keepalive " expected@ hex. hex. F cr )
     expected@ u>= IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
-    update-rtdelay  ticks lit, timeout
-    save( slurp send-chunks )  resend-all  net2o:genack end-code ;
+    update-rtdelay  ticks lit, timeout  net2o:genack
+    resend-all save( slurp send-chunks ) end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )
