@@ -1042,7 +1042,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 64#-1 64Constant never
 2 Value flybursts#
 $100 Value flybursts-max#
-$10 cells Value resend-size#
+$20 cells Value resend-size#
 #50.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
 
 Variable init-context#
