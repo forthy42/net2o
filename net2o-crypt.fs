@@ -93,7 +93,7 @@ init-keybuf
     erase ;
 
 : crypt-key$ ( -- addr u )
-    o 0= IF  no-key state#  ELSE  crypto-key $@  THEN ;
+    o 0= IF  no-key state#  ELSE  crypto-key sec@  THEN ;
 
 : default-key ( -- )
     cmd( ." Default-key " cr )
@@ -167,7 +167,7 @@ Variable do-keypad
 Sema regen-sema
 
 : keypad$ ( -- addr u )
-    do-keypad $@ dup 0= IF  2drop  crypto-key $@  THEN ;
+    do-keypad $@ dup 0= IF  2drop  crypto-key sec@  THEN ;
 
 : >crypt-key-ivs ( -- )
     o 0= IF  no-key state#  ELSE  keypad$  THEN
@@ -214,7 +214,7 @@ Sema regen-sema
     r> c:key! o> ;
 
 : clear-keys ( -- )
-    crypto-key $@ erase  tskc KEYBYTES erase  stskc KEYBYTES erase ;
+    crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase ;
 
 \ We generate a shared secret out of three parts:
 \ 64 bytes IV, 32 bytes from the one-time-keys and
@@ -262,8 +262,8 @@ $60 Constant rndkey#
 \ setting of keys
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN
-    keysize crypto-key $!
-    ." set key to:" o crypto-key $@ .nnb cr ;
+    keysize crypto-key sec!
+    ." set key to:" o crypto-key sec@ .nnb cr ;
 
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
@@ -288,7 +288,7 @@ Defer check-key \ check if we know that key
 
 : net2o:update-key ( -- )
     do-keypad $@ dup IF
-	key( ." store key, o=" o hex. 2dup .nnb cr ) crypto-key $!
+	key( ." store key, o=" o hex. 2dup .nnb cr ) crypto-key sec!
 	"" do-keypad $!
 	EXIT
     THEN

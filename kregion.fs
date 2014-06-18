@@ -45,6 +45,7 @@ $4000 Constant /kregion
 : sec@ ( addr -- addr1 u1 )
     @ dup IF  $40 over $20 + $20 zero32 over str= IF  2/  THEN
     ELSE 0 THEN ;
+: sec-off ( addr -- ) >r r@ @ ?dup-IF  kfree64  THEN  r> off ;
 
 : sec+[]! ( addr1 u1 addr2 -- ) >r
     0 { w^ sec } sec sec! sec cell r> $+! ;

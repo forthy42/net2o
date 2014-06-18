@@ -1067,7 +1067,6 @@ resend-size# buffer: resend-init
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
-    s" " crypto-key $!
     s" " file-state $!
     init-flow-control
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
@@ -2257,7 +2256,7 @@ $10 Constant tmp-crypt-val
 	code-rmap @ ?dup-IF  .free-data  THEN
 	resend0 $off  fstate-off
 	\ erase crypto keys
-	crypto-key $@ erase  crypto-key $off
+	crypto-key sec@ erase  crypto-key sec-off
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
 	dispose
