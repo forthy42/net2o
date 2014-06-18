@@ -740,16 +740,17 @@ also net2o-base
 
 4 Value max-resend#
 
-: net2o:do-resend ( flag -- )
-    o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
+: prepare-resend ( flag -- end start acks ackm )
     data-rmap @ >o
-    data-ackbits @ dest-size @ addr>bytes 1- { acks ackm }
     IF    data-reack# @ mask-bits# - bits>bytes
     ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
     0 swap data-ack# @
-    \ save( ." resend: " dest-head @ hex. dest-back @ hex.
-    \ 2dup hex. hex. acks ackm 1+ xtype F cr )
-    o> +DO
+    data-ackbits @ dest-size @ addr>bytes 1- o> ;
+
+: net2o:do-resend ( flag -- )
+    o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
+    prepare-resend { acks ackm }
+    +DO
 	acks I ackm and + l@
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. F cr )
