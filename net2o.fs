@@ -1179,11 +1179,11 @@ Variable mapstart $1 mapstart !
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
 : /head ( u -- )
-    >blockalign data-map @ >o dest-head +! o> ;
+    >blockalign data-map @ .dest-head +! ;
 : /back ( u -- )
-    >blockalign data-rmap @ >o dest-back +! o> ;
+    >blockalign data-rmap @ .dest-back +! ;
 : /tail ( u -- )
-    data-map @ >o dest-tail +! o> ;
+    data-map @ .dest-tail +! ;
 : data-dest ( -- addr )
     data-map @ >o
     dest-vaddr 64@ dest-tail @ dest-size @ 1- and n>64 64+ o> ;
@@ -1242,7 +1242,7 @@ reply buffer: dummy-reply
     IF  reply * dest-replies @ +  ELSE  dummy-reply  THEN  o> ;
 
 : reply-index ( -- index )
-    code-map @ >o dest-tail @ addr>bits o> ;
+    code-map @ .dest-tail @ addr>bits ;
 
 : code+ ( -- )
     code-map @ >o
@@ -1448,11 +1448,11 @@ $20 Value mask-bits#
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ 1 and IF  maxdata  ELSE  0  THEN
-	swap data-map @ >o dest-raddr @ + o> swap
+	swap data-map @ .dest-raddr @ + swap
     ELSE  drop 0 0  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop data-map @ >o n>64 dest-vaddr 64@ 64+ o> ;
+    data-resend $@ drop 2@ drop n>64 data-map @ .dest-vaddr 64@ 64+ ;
 : /resend ( u -- )
     0 +DO
 	data-resend $@ drop
@@ -1592,7 +1592,7 @@ Sema file-sema
 \ file status stuff
 
 : n2o:get-stat ( id -- mtime mod )
-    id>addr? >o fs-fid @ fileno statbuf fstat o> ?ior
+    id>addr? .fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode l@ $FFF and ;
 
@@ -1608,7 +1608,7 @@ Sema file-sema
 User file-reg#
 
 : n2o:close-file ( id -- )
-    id>addr? >o fs-close  o> ;
+    id>addr? .fs-close ;
 
 : blocksize! ( n -- )
     dup blocksize !  dup residualread !  residualwrite ! ;
@@ -1913,7 +1913,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : next-chunk-tick ( -- tick )
     64#-1 chunks $@ bounds ?DO
-	I chunk-context @ >o next-tick 64@ o> 64umin
+	I chunk-context @ .next-tick 64@ 64umin
     chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  false  0 >r  !ticks
@@ -1926,18 +1926,22 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 \ rewind buffer to send further packets
 
 : clear-cookies ( -- )
-    s" " data-rmap @ >o data-ackbits-buf $! o> ;
+    s" " data-rmap @ .data-ackbits-buf $! ;
 
 :noname ( o:map -- )
     dest-timestamps @ dest-size @ addr>ts erase
-    dest-cookies @ dest-size @ addr>ts cookies( ." cookies: " 2dup xtype cr ) erase ;
+    dest-cookies @ dest-size @ addr>ts
+    cookies( ." cookies: " 2dup xtype cr ) erase ;
 dup data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 
 :noname ( new-back o:map -- )
     dest-back @ U+DO
 	I I' fix-size dup { len }
-	addr>ts swap addr>ts swap >r dest-timestamps @ + r> erase
+	addr>ts swap addr>ts swap >r
+	dup dest-timestamps @ + r@ erase
+	dest-cookies @ + r>
+	cookies( ." cookies: " 2dup xtype cr ) erase
     len +LOOP ;
 dup data-class to rewind-timestamps-partial
 rdata-class to rewind-timestamps-partial
@@ -2140,13 +2144,12 @@ Defer handle-beacon
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
-Variable timeout-o
 
 : o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
-      o timeout-o !  timeout-o cell timeout-tasks $+! ;]
+      o { w^ timeout-o }  timeout-o cell timeout-tasks $+! ;]
   timeout-sema c-section  timeout-task wake ;
 : o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@len 0 ?DO
@@ -2247,7 +2250,7 @@ $10 Constant tmp-crypt-val
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " up@ hex. cr )
 	o-timeout o-chunks
-	0. data-rmap @ >o dest-vaddr 64@ o> >dest-map 2!
+	0. data-rmap @ .dest-vaddr 64@ >dest-map 2!
 	data-map  @ ?dup-IF  .free-data  THEN
 	data-rmap @ ?dup-IF  .free-data  THEN
 	code-map  @ ?dup-IF  .free-data  THEN

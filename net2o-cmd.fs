@@ -579,7 +579,7 @@ context-class setup-class >inherit to context-class
 +net2o: ack-flush ( addr -- ) \ flushed to addr
     64>n net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \ set head
-    64>n data-rmap @ >o dest-head umax! o> ;
+    64>n data-rmap @ .dest-head umax! ;
 +net2o: timeout ( ticks -- ) \ timeout request
     net2o:timeout  data-map @ .dest-tail @ ulit, set-head ;
 +net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
@@ -611,7 +611,7 @@ context-class setup-class >inherit to context-class
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
 +net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
     2*64>n 2>r $> 2r> dup >r n2o:open-file
-    r@ id>addr? >o fs-size 64@ o> lit, r@ ulit, track-size
+    r@ id>addr? .fs-size 64@ lit, r@ ulit, track-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
@@ -783,7 +783,7 @@ also net2o-base
     ticks lit, push-lit push' set-rtdelay ;
 
 : data-end? ( -- flag )
-    data-rmap @ >o 0 dest-end !@ o> ;
+    0 data-rmap @ .dest-end !@ ;
 
 : rewind-transfer ( -- )
     rewind data-end? IF  filereq# @ n2o:request-done
@@ -802,17 +802,14 @@ also net2o-base
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
-	o> F cr )
-	msg( ." Block transfer done: " expected@ hex. hex. F cr )
+	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
 	save-all-blocks  net2o:ack-cookies  rewind-transfer
 	64#0 burst-ticks 64!
     THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
-2 cells buffer: new-ackbit
-
-: +ackbit ( bit -- )
+: +ackbit ( bit -- ) 0. { d^ new-ackbit }
     dup cell>> rshift swap [ 8 cells 1- ]L and
     data-ackbits-buf $@ bounds ?DO
 	over I @ = IF
@@ -882,7 +879,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : .expected ( -- )
     F .time ." expected/received: " recv-addr @ hex.
-    data-rmap @ >o data-ack# @ hex. o>
+    data-rmap @ .data-ack# @ hex.
     expected@ hex. hex. F cr ;
 
 \ acknowledge toplevel
@@ -895,7 +892,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	    data-rmap @ >o dest-head @ addr>bits data-reack# ! o>
 	    true net2o:do-resend
 	THEN
-	data-rmap @ >o 0 do-slurp !@ o>
+	0 data-rmap @ .do-slurp !@
 	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
 	net2o:gen-resend  net2o:genack	map-resend?
     THEN  +expected

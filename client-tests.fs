@@ -214,7 +214,7 @@ event: ->throw dup DoError throw ;
 
 \ some more helpers
 
-: sha-3 ( addr u -- )
+: sha-3 ( addr u -- ) c:0key
     slurp-file 2dup c:hash drop free throw pad c:key> ;
 
 : sha-3-256 ( addr u -- )  sha-3 pad $20 85type ;
