@@ -146,6 +146,7 @@ debug: replace-beacon( \ reply to every beacon
 	    'c' of  ['] cmd( >body toggle  endof
 	    'r' of  ['] resend( >body toggle  endof
 	    'f' of  ['] file( >body toggle  endof
+	    't' of  ['] timeout( >body toggle  endof
 	endcase
     AGAIN ;
 
