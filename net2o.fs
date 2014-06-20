@@ -102,6 +102,8 @@ UValue statbuf
 : bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
 : bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
 
+: bittype ( addr base n -- )  bounds +DO
+	dup I bit@ '+' '-' rot select emit  LOOP  drop ;
 
 : bit-erase ( addr off len -- )
     dup 8 u>= IF
@@ -833,7 +835,6 @@ code-class class
     field: data-ackbits
     field: data-ackbits-buf
     field: data-ack#     \ fully acked bursts
-    field: data-reack#   \ last polarity change was here
     field: ack-bit#      \ actual ack bit
     field: ack-advance?  \ ack is advancing state
 end-class rcode-class
@@ -1539,16 +1540,16 @@ end-class fs-class
 
 : dest-top! ( addr -- )
     \ save( ." dest-top: " dup hex. dest-top @ hex. cr )
-    dup dest-top !@ U+DO
+    dup dup dest-top @ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
-    len +LOOP ;
+    len +LOOP  dest-top ! ;
 
 : dest-back! ( addr -- )
-    dup dest-back !@ U+DO
+    dup dup dest-back @ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
-    len +LOOP ;
+    len +LOOP  dest-back ! ;
 
 : size! ( 64 id -- )  state-addr >o
     64dup fs-size 64!  fs-limit 64!
@@ -1567,10 +1568,11 @@ end-class fs-class
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $off ;
 : n2o:save-block ( id -- delta )
-    rdata-back@ file( 2dup 2>r data-rmap @ >o over dest-raddr @ - o>
-    >r ." file write: " rot dup . -rot r> hex. )
-    rot id>addr? .fs-write file( dup hex. dup
-    2r> rot umin $10 umin xtype cr ) dup /back ;
+    rdata-back@ file( over data-rmap @ .dest-raddr @ -
+    >r ." file write: " 2 pick . r@ hex.
+    \ r@ addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
+    data-rmap @ .data-ackbits @ r> addr>bits 2 pick addr>bits bittype space )
+    rot id>addr? .fs-write file( dup hex. cr ) dup /back ;
 
 Sema file-sema
 
@@ -1962,7 +1964,7 @@ rdata-class to rewind-timestamps-partial
     regen-ivs-all  rewind-timestamps ;
 
 : rewind-ackbits ( o:map -- )
-    data-ack# off  data-reack# off
+    data-ack# off
     firstack( ." rewind firstacks" cr )
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
@@ -1984,7 +1986,7 @@ rdata-class to rewind-timestamps-partial
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
     r> data-rmap @ >o dest-back !@ save( ." back: " dest-back @ hex. dup hex. cr )
-    dup rewind-partial  dup dest-back!  do-slurp !@ drop o> ;
+    dup rewind-partial  dup  dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek
 
