@@ -1983,7 +1983,7 @@ rdata-class to rewind-timestamps-partial
 
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
-    r> data-rmap @ >o dest-back !@
+    r> data-rmap @ >o dest-back !@ save( ." back: " dest-back @ hex. dup hex. cr )
     dup rewind-partial  dup dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek
