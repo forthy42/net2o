@@ -745,13 +745,13 @@ also net2o-base
     data-rmap @ >o
     IF    dest-head @ addr>bits mask-bits# - bits>bytes
     ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
-    dest-tail @ addr>bytes -4 and
-    save( ." acks: " data-ack# @ hex. dup hex. F cr )
+    dest-tail @ addr>bytes -4 and dup data-ack# umin!
     data-ackbits @ dest-size @ addr>bytes 1- o> ;
 
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     0 swap  prepare-resend { acks ackm }
+    save( ." acks: " over hex. dup hex. F cr )
     +DO
 	acks I ackm and + l@
 	dup $FFFFFFFF <> IF

@@ -1569,9 +1569,10 @@ end-class fs-class
     file-state $off ;
 : n2o:save-block ( id -- delta )
     rdata-back@ file( over data-rmap @ .dest-raddr @ -
-    >r ." file write: " 2 pick . r@ hex.
-    \ r@ addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
-    data-rmap @ .data-ackbits @ r> addr>bits 2 pick addr>bits bittype space )
+    { os } ." file write: " 2 pick . os hex.
+    os addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
+    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
+    )
     rot id>addr? .fs-write file( dup hex. cr ) dup /back ;
 
 Sema file-sema
