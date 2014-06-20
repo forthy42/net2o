@@ -156,13 +156,13 @@ previous
     "data/2011-06-27_19-33-04.jpg" "photo006.jpg" >cache n2o:copy
     "data/2011-06-27_19-55-48.jpg" "photo007.jpg" >cache n2o:copy
     "data/2011-06-28_06-54-09.jpg" "photo008.jpg" >cache n2o:copy
-    $10000 ulit, 0 ulit, track-limit
-    $20000 ulit, 1 ulit, track-limit
-    $30000 ulit, 2 ulit, track-limit
-    $40000 ulit, 3 ulit, track-limit
-    $50000 ulit, 4 ulit, track-limit
-    $60000 ulit, 5 ulit, track-limit
-    $70000 ulit, 6 ulit, track-limit
+    $10000 0 n2o:track-limit
+    $20000 1 n2o:track-limit
+    $30000 2 n2o:track-limit
+    $40000 3 n2o:track-limit
+    $50000 4 n2o:track-limit
+    $60000 5 n2o:track-limit
+    $70000 6 n2o:track-limit
     n2o:done
     end-code| ['] .time $err ;
 
@@ -171,13 +171,13 @@ previous
     net2o-code
     expect-reply
     .time s" Download test 4a" $, type cr  ( see-me )
-    -1 nlit, 0 ulit, track-limit
-    -1 nlit, 1 ulit, track-limit
-    -1 nlit, 2 ulit, track-limit
-    -1 nlit, 3 ulit, track-limit
-    -1 nlit, 4 ulit, track-limit
-    -1 nlit, 5 ulit, track-limit
-    -1 nlit, 6 ulit, track-limit
+    -1 0 n2o:track-limit
+    -1 1 n2o:track-limit
+    -1 2 n2o:track-limit
+    -1 3 n2o:track-limit
+    -1 4 n2o:track-limit
+    -1 5 n2o:track-limit
+    -1 6 n2o:track-limit
     n2o:done
     end-code| n2o:close-all ['] .time $err ;
 

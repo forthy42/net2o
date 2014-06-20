@@ -81,11 +81,15 @@ UValue statbuf
 [IFDEF] 64bit
     ' min! Alias 64min!
     ' max! Alias 64max!
+    ' umin! Alias 64umin!
+    ' umax! Alias 64umax!
     ' !@ Alias 64!@
 [ELSE]
     : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
     : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
+    : 64umin! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
+    : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
 [THEN]
 
 \ bit vectors, lsb first
@@ -1178,9 +1182,9 @@ Variable mapstart $1 mapstart !
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
 : /head ( u -- )
-    >blockalign data-map @ .dest-head +! ;
+    >blockalign dup negate residualread +! data-map @ .dest-head +! ;
 : /back ( u -- )
-    >blockalign data-rmap @ .dest-back +! ;
+    >blockalign dup negate residualwrite +!  data-rmap @ .dest-back +! ;
 : /tail ( u -- )
     data-map @ .dest-tail +! ;
 : data-dest ( -- addr )
@@ -1196,19 +1200,17 @@ Variable mapstart $1 mapstart !
 : raddr+ ( addr len -- addr' len ) >r dest-raddr @ + r> ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
-: ?residual ( addr len resaddr -- addr len' ) >r
-    r@ @ umin dup negate r> +! ;
 : head@ ( -- head )  data-map @ .dest-head @ ;
 : data-head@ ( -- addr u )
     \g you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
     dest-head @ dest-back @ dest-size @ + fix-size raddr+ o>
-    residualread ?residual ;
+    residualread @ umin ;
 : rdata-back@ ( -- addr u )
     \g you can write from this, also a block at a time
     data-rmap @ >o
     dest-back @ dest-tail @ fix-size raddr+ o>
-    residualwrite ?residual ;
+    residualwrite @ umin ;
 : data-tail@ ( -- addr u )
     \g you can send from this - as long as you stay block aligned
     data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
@@ -1502,7 +1504,8 @@ end-class fs-class
     dup n>64 fs-seekto 64+!
 ; fs-class to fs-read
 :noname ( addr u -- n )
-    fs-seekto 64@ fs-seek 64@ >seek
+    fs-limit 64@ fs-size 64@ 64umin
+    fs-seek 64@ >seek
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
 ; fs-class to fs-write
@@ -1530,7 +1533,8 @@ end-class fs-class
 : id>addr? ( id -- addr )
     id>addr cell < !!fileid!! ;
 : new>file ( -- )
-    [: fs-class new sp@ cell file-state $+! drop ;]
+    [: fs-class new { w^ fsp } fsp cell file-state $+!
+	64#-1 fsp @ .fs-limit 64! ;]
     filestate-lock c-section ;
 
 : lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
@@ -1552,12 +1556,13 @@ end-class fs-class
     len +LOOP  dest-back ! ;
 
 : size! ( 64 id -- )  state-addr >o
-    64dup fs-size 64!  fs-limit 64!
+    64dup fs-size 64!  fs-limit 64umin!
     64#0 fs-seekto 64! 64#0 fs-seek 64! o> ;
 : seekto! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-seekto 64! o> ;
 : limit! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-limit 64! o> ;
+: init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
 
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
@@ -1570,10 +1575,10 @@ end-class fs-class
 : n2o:save-block ( id -- delta )
     rdata-back@ file( over data-rmap @ .dest-raddr @ -
     { os } ." file write: " 2 pick . os hex.
-    os addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
-    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
+\    os addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
+\    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
     )
-    rot id>addr? .fs-write file( dup hex. cr ) dup /back ;
+    rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
 
 Sema file-sema
 
@@ -1613,7 +1618,9 @@ User file-reg#
     id>addr? .fs-close ;
 
 : blocksize! ( n -- )
-    dup blocksize !  dup residualread !  residualwrite ! ;
+    dup blocksize !
+    file( ." file read: ======= " cr ." file write: ======= " cr )
+    dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )
     [: fstates 0 ?DO
@@ -1628,10 +1635,9 @@ User file-reg#
 \ read in from files
 
 : n2o:slurp-block ( id -- delta )
-    data-head@ file( 2dup 2>r data-map @ >o over dest-raddr @ - o>
+    data-head@ file( over data-map @ .dest-raddr @ -
     >r ." file read: " rot dup . -rot r> hex. )
-    rot id>addr? .fs-read file( dup hex. dup
-    2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
+    rot id>addr? .fs-read dup /head file( dup hex. residualread @ hex. cr ) ;
 
 \ careful: must follow exactpy the same loic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
@@ -1986,7 +1992,7 @@ rdata-class to rewind-timestamps-partial
 
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
-    r> data-rmap @ >o dest-back !@ save( ." back: " dest-back @ hex. dup hex. cr )
+    r> data-rmap @ >o dest-back !@ \ save( ." back: " dest-back @ hex. dup hex. cr )
     dup rewind-partial  dup  dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek

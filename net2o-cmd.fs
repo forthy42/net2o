@@ -673,6 +673,9 @@ also net2o-base
 : n2o:seek ( pos id -- )
     2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
 
+: n2o:track-limit ( pos id -- ) over nlit, dup ulit, track-limit
+    >r n>64 r> init-limit! ;
+
 file-reg# off
 
 previous
@@ -735,7 +738,7 @@ also net2o-base
 : !rdata-tail ( -- )
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin dup dest-tail !@ o>
-    save( 2dup u> IF  ." tail: " dup hex. over hex. F cr  THEN
+    save( \ 2dup u> IF  ." tail: " dup hex. over hex. F cr  THEN
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN )else( 2drop ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
@@ -743,7 +746,7 @@ also net2o-base
 
 : prepare-resend ( flag -- end start acks ackm )
     data-rmap @ >o
-    IF    dest-head @ addr>bits mask-bits# - bits>bytes
+    IF    dest-head @ addr>bits ( mask-bits# - ) bits>bytes -4 and
     ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
     dest-tail @ addr>bytes -4 and dup data-ack# umin!
     data-ackbits @ dest-size @ addr>bytes 1- o> ;
@@ -751,7 +754,7 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     0 swap  prepare-resend { acks ackm }
-    save( ." acks: " over hex. dup hex. F cr )
+    \ save( ." acks: " over hex. dup hex. F cr )
     +DO
 	acks I ackm and + l@
 	dup $FFFFFFFF <> IF
