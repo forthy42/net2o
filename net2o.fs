@@ -1538,6 +1538,7 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( addr -- )
+    \ save( ." dest-top: " dup hex. dest-top @ hex. cr )
     dup dest-top !@ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
@@ -1574,7 +1575,7 @@ end-class fs-class
 Sema file-sema
 
 \ careful: must follow exactpy the same loic as slurp (see below)
-: save-all-blocks ( -- )
+: n2o:spit ( -- )
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
@@ -1629,7 +1630,7 @@ User file-reg#
     rot id>addr? .fs-read file( dup hex. dup
     2r> rot umin $10 umin 2drop ( xtype ) cr ) dup /head ;
 
-\ careful: must follow exactpy the same loic as save-all-blocks (see above)
+\ careful: must follow exactpy the same loic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
@@ -1978,16 +1979,12 @@ rdata-class to rewind-timestamps-partial
     flush( ." rewind partial " dup hex. cr )
     data-map @ >o dup rewind-partial dest-back ! o> ;
 
-: net2o:rewind-receiver-partial ( new-back -- )
-    flush( ." rewind partial " dup hex. cr )
-    data-rmap @ >o dup rewind-partial  dest-back! o> ;
-
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
-    data-rmap @ .dest-back @ >r save-all-blocks
-    r> data-rmap @ >o dest-back !@ dup do-slurp ! o>
-    net2o:rewind-receiver-partial ;
+    data-rmap @ .dest-back @ >r n2o:spit
+    r> data-rmap @ >o dest-back !@
+    dup rewind-partial  dup dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek
 
@@ -2132,7 +2129,7 @@ Defer handle-beacon
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst
-    timeout( ." timeout? " 64. send-anything? . chunks+ ? bandwidth? . next-chunk-tick . cr )else( 64drop ) ;
+    timeout( ." timeout? " 64>d d. send-anything? . chunks+ ? bandwidth? . next-chunk-tick 64>d d. cr )else( 64drop ) ;
 
 \ timeout handling
 
@@ -2140,7 +2137,7 @@ Defer handle-beacon
 
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
-#12 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
+#14 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
