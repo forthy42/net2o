@@ -471,6 +471,8 @@ m: bytes>addr ( bytes addr -- )
     chunk-p2 3 + lshift ;
 m: bits>bytes ( bits -- bytes )
     1- 2/ 2/ 2/ 1+ ;
+m: bytes>bits ( bytes -- bits )
+    3 lshift ;
 m: addr>ts ( addr -- ts-offset )
     addr>bits timestamp * ;
 m: addr>replies ( addr -- replies )
@@ -1543,6 +1545,7 @@ end-class fs-class
     0= IF  drop  new>file lastfile@  THEN ;
 
 : dest-top! ( addr -- )
+    \ dest-tail @ dest-size @ + umin
     \ save( ." dest-top: " dup hex. dest-top @ hex. cr )
     dup dup dest-top @ U+DO
 	data-ackbits @ I I' fix-size dup { len }
