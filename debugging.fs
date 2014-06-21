@@ -144,6 +144,7 @@ debug: replace-beacon( \ reply to every beacon
 : debug-task ( -- )  stacksize4 NewTask4 activate
     BEGIN  case key
 	    'c' of  ['] cmd( >body toggle  endof
+	    'm' of  ['] msg( >body toggle  endof
 	    'r' of  ['] resend( >body toggle  endof
 	    'f' of  ['] file( >body toggle  endof
 	    't' of  ['] timeout( >body toggle  endof

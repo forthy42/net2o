@@ -221,7 +221,7 @@ User cmdbuf#
 : net2o, @ n>64 cmd, ;
 
 : net2o-code    cmd0source off  cmdlock lock
-    cmdreset ['] net2o, IS net2o-do also net2o-base ;
+    cmdreset 1 code+ ['] net2o, IS net2o-do also net2o-base ;
 comp: :, also net2o-base ;
 : net2o-code0   cmd0buf cmd0source !   cmdlock lock
     cmdreset ['] net2o, IS net2o-do also net2o-base ;
@@ -242,7 +242,7 @@ comp: :, also net2o-base ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
     cmdbuf cmdbuf# @ cmddest send-cmd
-    cmd0source @ 0= IF  code+ punch-load $off  THEN ;
+    cmd0source @ 0= IF  code-update punch-load $off  THEN ;
 
 also net2o-base
 
@@ -252,7 +252,7 @@ UDefer expect-reply?
 :noname  ['] end-cmd IS expect-reply? ; is init-reply
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd o IF  maxdata code+ code-update THEN  THEN ;
 
 previous
 
@@ -274,11 +274,12 @@ previous
     cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
 
 : tag-addr? ( -- flag )
-    tag-addr dup >r 2@ dup IF
+    tag-addr dup >r 2@
+    ?dup-IF
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
 	1 packets2 +!
-    ELSE  d0<> -1 0 r> 2!  THEN ;
+    ELSE  dest-addr 64@ 64>n dup 0 r> 2! u>=  THEN ;
 
 Variable throwcount
 
@@ -297,7 +298,8 @@ Variable throwcount
     string-stack off
     o IF
 	cmd0source off
-	tag-addr?  IF  2drop  >flyburst  1 packetr2 +!  EXIT  THEN
+	tag-addr?  IF
+	    2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
 	cmd0buf cmd0source !
     THEN
@@ -776,7 +778,7 @@ also net2o-base
     ['] end-cmd IS expect-reply? ;
 
 : expect-reply ( -- ) cmd( ." expect reply:" F cr )
-    ['] do-expect-reply IS expect-reply? ;
+    ['] do-expect-reply IS expect-reply?  maxdata code+ ;
 
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@ u>= IF

@@ -802,7 +802,7 @@ $04 Constant resend-toggle#
 : >ret-addr ( -- )
     inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
-    inbuf addr 64@  inbuf body-size 1- invert n>64 64and dest-addr 64! ;
+    inbuf addr 64@ dest-addr 64! ;
 
 current-o
 
@@ -1227,7 +1227,7 @@ Variable mapstart $1 mapstart !
 \ code sending around
 
 : code-dest ( -- addr )
-    code-map @ >o dest-raddr @ dest-tail @ + o> ;
+    code-map @ >o dest-raddr @ dest-tail @ maxdata negate and + o> ;
 : code-vdest ( -- addr )
     code-map @ >o dest-vaddr 64@ dest-tail @ n>64 64+ o> ;
 : code-reply ( -- addr )
@@ -1235,7 +1235,7 @@ Variable mapstart $1 mapstart !
 
 : tag-addr ( -- addr )
     dest-addr 64@ code-rmap @ >o dest-vaddr 64@ 64- 64>n
-    addr>replies dest-replies @ + o> ;
+    maxdata negate and addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
 
@@ -1247,12 +1247,13 @@ reply buffer: dummy-reply
 : reply-index ( -- index )
     code-map @ .dest-tail @ addr>bits ;
 
-: code+ ( -- )
-    code-map @ >o
-    maxdata dest-tail +!
-    dest-tail @ dest-size @ u>= IF  dest-tail off  THEN
-\    cmd( ." set dest-tail to " dest-tail @ hex. cr )
+: code+ ( n -- )
+    code-map @ >o dup negate dest-tail @ and + dest-back !
+    dest-back @ dest-size @ u>= IF  dest-back off  THEN
     o> ;
+
+: code-update ( -- )
+    code-map @ >o dest-back @ dest-tail ! o> ;
 
 \ aligned buffer to make encryption/decryption fast
 
@@ -2223,7 +2224,8 @@ $10 Constant tmp-crypt-val
 ' drop data-class to handle
 
 : handle-cmd ( addr -- )  dest-job @ >o
-    >r inbuf packet-data r@ swap dup >r move
+    msg( ." Handle command to addr: " dup hex. cr )
+    maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap queue-command o IF  o>  ELSE  rdrop  THEN ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
