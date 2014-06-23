@@ -57,8 +57,6 @@ require unix/pthread.fs
 require unix/filestat.fs
 require net2o-err.fs
 require kregion.fs
-require string.fs
-require struct0x.fs
 require debugging.fs
 require libkeccak.fs
 \ require wurstkessel.fs
