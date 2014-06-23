@@ -931,7 +931,7 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout  net2o:genack
-    resend-all save( slurp send-chunks ) end-code ;
+    resend-all save( rewind-flush slurp send-chunks ) end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )

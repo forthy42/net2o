@@ -1642,7 +1642,8 @@ User file-reg#
     rot id>addr? .fs-read dup /head file( dup hex. residualread @ hex. cr ) ;
 
 \ careful: must follow exactpy the same loic as n2o:spit (see above)
-: n2o:slurp ( -- head end-flag )  data-head? 0= IF  head@ 0  EXIT  THEN
+: n2o:slurp ( -- head end-flag )
+    data-head? 0= IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
@@ -1917,7 +1918,6 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 	dup chunk-context @ >o rdrop
 	chunk-count
 	data-to-send IF
-	    \ msg( ." send a chunk" cr )
 	    send-a-chunk
 	ELSE
 	    drop msg( .nosend )
@@ -1965,6 +1965,7 @@ rdata-class to rewind-timestamps-partial
 
 : rewind-partial ( new-back o:map -- )
     \ dup clearpages-partial
+    msg( ." Rewind to: " dup hex. cr )
     dup rewind-timestamps-partial regen-ivs-part ;
 
 : rewind-buffer ( o:map -- )
@@ -1995,6 +1996,7 @@ rdata-class to rewind-timestamps-partial
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
     r> data-rmap @ >o dest-back !@ \ save( ." back: " dest-back @ hex. dup hex. cr )
+    flush( ." rewind partial " dup hex. cr )
     dup rewind-partial  dup  dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek
@@ -2217,24 +2219,25 @@ $10 Constant tmp-crypt-val
 
 : handle-data ( addr -- )  dest-job @ >o
     >r inbuf packet-data r> swap move
-    +inmove ack-xt perform +ack o> ;
+    +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
 : handle-cmd ( addr -- )  dest-job @ >o
     msg( ." Handle command to addr: " dup hex. cr )
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
-    r> r> swap queue-command o IF  o>  ELSE  rdrop  THEN ;
+    r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
 
 : .inv-packet ( -- )
-    msg( ." invalid packet to " inbuf addr 64@ ['] 64. $10 base-execute
+    flush( ." invalid packet to "
+    dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  $64.
     ." size " min-size inbuf c@ datasize# and lshift hex. cr ) ;
 
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
     ticker 64@  recv-tick 64! \ time stamp of arrival
-    dup >r inbuf-decrypt 0= IF  .inv-packet  drop rdrop EXIT  THEN
+    dup >r inbuf-decrypt 0= IF  r> >o .inv-packet o>  drop  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr return-address $10 move
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
@@ -2246,7 +2249,7 @@ $10 Constant tmp-crypt-val
 	check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )
 	    drop  EXIT  THEN +dest
-	0timeout handle-dest
+	handle-dest
     THEN ;
 
 : route-packet ( -- ) route( ." route to: " inbuf destination $10 xtype cr )

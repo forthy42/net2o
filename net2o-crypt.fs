@@ -190,7 +190,7 @@ Sema regen-sema
 : regen-ivs-part ( new-back -- ) [: c:key@ >r
       dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
       \ save( ." regen to: " dup hex. c:key@ 8 xtype )
-      dest-back @ U+DO
+      maxdata 2* negate dup >r and  dest-back @ r> and U+DO
 	  I I' fix-size dup { len }
 	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
 	  \ save( 2dup )
