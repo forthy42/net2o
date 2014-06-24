@@ -302,7 +302,7 @@ User ip6:#
 
 : my-port ( -- port )
     sockaddr_in6 %size alen !
-    net2o-sock fileno sockaddr1 alen getsockname ?ior
+    net2o-sock sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
 : sock[ ( -- )  query-sock ?EXIT
@@ -435,7 +435,7 @@ Variable $tmp2
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- ) dup >r
-    create-udp-server46 fd>file to net2o-sock
+    create-udp-server46 to net2o-sock
     r> ?dup-0=-IF  my-port  THEN to my-port#
     !my-ips ;
 
@@ -498,7 +498,7 @@ Defer init-reply
     >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
-    net2o-sock  fileno POLLIN  r> fds!+ >r
+    net2o-sock         POLLIN  r> fds!+ >r
     epiper @    fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
 
 \ the policy on allocation and freeing is that both freshly allocated
@@ -600,7 +600,7 @@ MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in6 %size alen !
-    net2o-sock fileno inbuf maxpacket r> sockaddr alen recvfrom
+    net2o-sock inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
 	512 + negate throw  THEN
@@ -618,8 +618,7 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
-    net2o-sock  1 packets +!
-    fileno -rot 0 sockaddr alen @ sendto +send ;
+    net2o-sock -rot 0 sockaddr alen @ sendto +send 1 packets +! ;
 
 \ clients routing table
 
@@ -1112,7 +1111,7 @@ resend-size# buffer: resend-init
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
     nat( ." ping: " 2dup .address cr )
-    2>r net2o-sock fileno "" 0 2r> sendto drop ;
+    2>r net2o-sock "" 0 2r> sendto drop ;
 
 : 64-6? ( addr u -- )  $10 umin    ip6::0 over str= 0= ;
 : 64-4? ( addr u -- )  $10 /string 4 umin 64-6? ;
@@ -2319,7 +2318,7 @@ Variable beacons \ destinations to send beacons to
 
 : send-beacons ( -- )
     beacons [: beacon( ." send beacon to: " 2dup .address cr )
-	2>r net2o-sock fileno s" ?" 0 2r> sendto +send ;] $[]map ;
+	2>r net2o-sock s" ?" 0 2r> sendto +send ;] $[]map ;
 
 : beacon? ( -- )
     beacon-time 64@ ticker 64@ 64- 64-0< IF
