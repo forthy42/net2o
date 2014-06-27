@@ -1755,7 +1755,7 @@ User outflag  outflag off
 
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!
-    outbody min-size r> lshift move ;
+    outbody min-size r> lshift move  set-flags ;
 
 : bandwidth+ ( -- )  o?
     ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
@@ -1764,10 +1764,10 @@ User outflag  outflag off
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
 : send-cX ( addr n -- ) +sendX2
-    >send  set-flags  send-code-packet  net2o:update-key ;
+    >send  send-code-packet  net2o:update-key ;
 
 : send-dX ( addr n -- ) +sendX2
-    >send  set-flags  bandwidth+ send-data-packet ;
+    >send  bandwidth+ send-data-packet ;
 
 Defer punch-reply
 
