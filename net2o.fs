@@ -795,11 +795,13 @@ $04 Constant resend-toggle#
 \ each source has multiple destination spaces
 
 64User dest-addr
+User dest-flags
 
 : >ret-addr ( -- )
     inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
-    inbuf addr 64@ dest-addr 64! ;
+    inbuf addr 64@ dest-addr 64!
+    inbuf flags w@ dest-flags w! ;
 
 current-o
 
@@ -1716,7 +1718,8 @@ require net2o-crypt.fs
 User outflag  outflag off
 
 : set-flags ( -- )
-    outflag @ outbuf 1+ c! outflag off ;
+    outflag @ outbuf 1+ c! outflag off
+    outbuf w@ dest-flags w! ;
 
 : c+!  ( n addr -- )  dup >r c@ + r> c! ;
 : cor!  ( n addr -- )  dup >r c@ or r> c! ;
