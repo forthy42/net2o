@@ -75,15 +75,22 @@ User string-stack  string-max# uallot drop
 
 User object-stack object-max# uallot drop
 
-: n:>o ( o1 o:o2 -- o:o2 o:o1 )
-    >o r> object-stack @+ + !
-    cell object-stack +!
-    object-stack @ object-max# u>= !!object-full!! ;
-: n:o> ( o:o2 o:o1 -- o:o2 )
+: o-pop ( o:o1 o:x -- o1 o:x )
     object-stack @ 0<= !!object-empty!!
     -1 cells object-stack +!
-    object-stack @+ + @ >r o> ;
-    
+    object-stack @+ + @ ;
+: o-push ( o1 o:x -- o:o1 o:x )
+    object-stack @+ + !
+    cell object-stack +!
+    object-stack @ object-max# u>= !!object-full!! ;
+
+: n:>o ( o1 o:o2 -- o:o2 o:o1 )
+    >o r> o-push ;
+: n:o> ( o:o2 o:o1 -- o:o2 )
+    o-pop >r o> ;
+: n:oswap ( o:o1 o:o2 -- o:o2 o:o1 )
+    o-pop >o r> o-push ;
+
 \ floats assume unaligned float access is possible
 \ i.e. so far, they are unused stubs ;-)
 
@@ -210,6 +217,8 @@ get-current also net2o-base definitions previous
     false ;
 +net2o: endwith ( o:current -- ) \ pop object stack
     n:o> ;
++net2o: oswap ( o:nest o:current -- o:current o:nest )
+    n:oswap ;
 
 dup set-current
 
