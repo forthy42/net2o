@@ -1721,12 +1721,6 @@ User outflag  outflag off
     outflag @ outbuf 1+ c! outflag off
     outbuf w@ dest-flags w! ;
 
-: c+!  ( n addr -- )  dup >r c@ + r> c! ;
-: cor!  ( n addr -- )  dup >r c@ or r> c! ;
-
-: outbody ( -- addr ) outbuf packet-body ;
-: outsize ( -- n )    outbuf packet-size ;
-
 #90 Constant EMSGSIZE
 
 : packet-to ( addr -- )  >dest
@@ -1754,8 +1748,8 @@ User outflag  outflag off
     send-cookie ret-addr packet-to ;
 
 : >send ( addr n -- )
-    >r  r@ [ 64bit# qos3# or ]L or outbuf c!
-    outbody min-size r> lshift move  set-flags ;
+    >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
+    outbuf packet-body min-size r> lshift move ;
 
 : bandwidth+ ( -- )  o?
     ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;

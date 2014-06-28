@@ -69,6 +69,24 @@ User string-stack  string-max# uallot drop
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
 
+\ object stack
+
+8 cells Constant object-max#
+
+User object-stack object-max# uallot drop
+
+: n:>o ( o1 o:o2 -- o:o2 o:o1 )
+    >o r> object-stack @+ + !
+    cell object-stack +!
+    object-stack @ object-max# u>= !!object-full!! ;
+: n:o> ( o:o2 o:o1 -- o:o2 )
+    object-stack @ 0<= !!object-empty!!
+    -1 cells object-stack +!
+    object-stack @+ + @ >r o> ;
+    
+\ floats assume unaligned float access is possible
+\ i.e. so far, they are unused stubs ;-)
+
 : pdf@ ( -- r )
     buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
 : psf@ ( -- r )
@@ -190,6 +208,8 @@ get-current also net2o-base definitions previous
     true ;
 +net2o: fals ( -- false ) \ false flag literal
     false ;
++net2o: endwith ( o:current -- ) \ pop object stack
+    n:o> ;
 
 dup set-current
 
@@ -380,7 +400,7 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-+net2o: emit ( xc -- ) \ emit character on server log
+10 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;

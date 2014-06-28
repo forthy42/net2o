@@ -189,7 +189,7 @@ Variable keys
 
 get-current also net2o-base definitions
 
-8 net2o: newkey ( $:string -- ) $> key:new ;
+10 net2o: newkey ( $:string -- ) $> key:new ;
 +net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
 +net2o: keynick ( $:string -- )    $> ke-nick $! ;
