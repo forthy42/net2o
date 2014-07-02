@@ -222,9 +222,9 @@ get-current also net2o-base definitions previous
 
 dup set-current
 
-' setup-class is cmd-table
+' reply-class is cmd-table
 
-setup-class cmd-class >inherit to setup-class
+reply-class cmd-class >inherit to reply-class
 
 \ net2o assembler
 
@@ -409,7 +409,23 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-10 net2o: emit ( xc -- ) \ emit character on server log
+10 net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
+    lit, ;
+' push-lit alias push-char
++net2o: push-slit ( n -- ) \ push singed literal into answer packet
+    slit, ;
++net2o: push-$ ( $:string -- ) \ push string into answer packet
+    $> $, ;
++net2o: push' ( "cmd" -- ) \ push command into answer packet
+    p@ cmd, ;
+
+\ setup connection class
+
+' setup-class is cmd-table
+
+setup-class reply-class >inherit to setup-class
+
+20 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
@@ -420,16 +436,6 @@ also net2o-base definitions
 +net2o: see-me ( -- ) \ see received commands on server log
     n2o:see-me ;
 
-+net2o: push-$ ( $:string -- ) \ push string into answer packet
-    $> $, ;
-+net2o: push-slit ( n -- ) \ push singed literal into answer packet
-    slit, ;
-+net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
-    lit, ;
-' push-lit alias push-char
-
-+net2o: push' ( "cmd" -- ) \ push command into answer packet
-    p@ cmd, ;
 +net2o: nest ( $:string -- ) \ nested (self-encrypted) command
     $> cmdnest ;
 +net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command

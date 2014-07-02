@@ -852,9 +852,18 @@ object class
 end-class cmd-class \ command interpreter
 
 cmd-class class
+    field: code-map
+    field: code-rmap
+    1 pthread-mutexes +field code-lock
+end-class reply-class \ command interpreter with replies
+
+reply-class class
 end-class setup-class \ setup connections
 
 setup-class class
+    field: data-map
+    field: data-rmap
+
     field: context#
     field: wait-task
     field: resend0
@@ -879,14 +888,8 @@ setup-class class
     field: codebuf#
     field: request#
     field: filereq#
-    1 pthread-mutexes +field code-lock
     1 pthread-mutexes +field filestate-lock
     
-    field: code-map
-    field: code-rmap
-    field: data-map
-    field: data-rmap
-
     field: data-resend
     field: data-b2b
     
