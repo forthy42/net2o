@@ -580,10 +580,6 @@ context-class setup-class >inherit to context-class
     2*64>n 2>r $> 2r> n2o:open-file ;
 +net2o: close-file ( id -- ) \ close file
     64>n n2o:close-file ;
-+net2o: file-size ( id -- size ) \ obtain file size
-    id>addr? fs-size 64@ ;
-+net2o: send-chunks ( -- ) \ start sending chunks
-    net2o:send-chunks ;
 +net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;
 +net2o: set-blockalign ( n -- ) \ set block alignment
@@ -592,7 +588,7 @@ context-class setup-class >inherit to context-class
     n2o:close-all ;
 
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
-: blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
+: blockalign! ( n -- )  pow2? dup ulit, set-blockalign blockalign ! ;
 
 \ better slurping
 
@@ -618,7 +614,7 @@ context-class setup-class >inherit to context-class
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
-    ['] do-track-seek n2o:track-all-seeks ;
+    ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
 +net2o: rewind-sender ( n -- ) \ rewind buffer
     64>n net2o:rewind-sender ;
 
@@ -670,7 +666,7 @@ context-class setup-class >inherit to context-class
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:ackflush ( n -- ) ulit, ack-flush ;
-: n2o:done ( -- )  slurp send-chunks next-request filereq# ! ;
+: n2o:done ( -- )  slurp next-request filereq# ! ;
 
 : rewind-total ( -- )
     64#0 resend-all-to 64! \ clear timeout for resend-all
@@ -821,7 +817,7 @@ also net2o-base
     THEN ;
 
 : restart-transfer ( -- )
-    slurp send-chunks ;
+    slurp ;
 
 0 Value request-stats?
 
@@ -965,7 +961,7 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout  net2o:genack
-    resend-all save( rewind-flush slurp send-chunks ) end-code ;
+    resend-all save( rewind-flush slurp ) end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )
