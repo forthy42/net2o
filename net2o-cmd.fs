@@ -234,8 +234,13 @@ User cmdbuf#
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 \ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
-: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
-: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
+: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0  THEN ;
+: cmdbuf$ ( -- addr u )   connection@ >o cmdbuf cmdbuf# @ o> ;
+: endcmdbuf  ( -- addr' ) connection@ >O cmdbuf maxdata + o> ;
+: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
+: cmdbuf+ ( n -- )
+    connection@ >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
+
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
     ." see-me: " dest-addr 64@ $64.
@@ -245,9 +250,7 @@ User cmdbuf#
 
 : cmdreset  cmdbuf# off ;
 
-: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0  THEN ;
-
-: cmd, ( 64n -- )  connection@ >o cmdbuf$ + dup >r p!+ r> - cmdbuf# +! o> ;
+: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -379,13 +382,10 @@ User neststack maxnest# cells uallot drop \ nest up to 10 levels
 
 also net2o-base definitions
 
-: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
-: $, ( addr u -- )  string dup n>64 cmd,
-    connection@ >o >r r@ maxstring u>= !!stringfit!!
-    cmdbuf$ + r@ move   r> cmdbuf# +! o> ;
-: cmdbuf+ ( n -- )
-    connection@ >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
+: $, ( addr u -- )  string dup >r n>64 cmd,
+    r@ maxstring u>= !!stringfit!!
+    cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
