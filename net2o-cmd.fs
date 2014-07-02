@@ -418,6 +418,13 @@ also net2o-base definitions
     $> $, ;
 +net2o: push' ( "cmd" -- ) \ push command into answer packet
     p@ cmd, ;
++net2o: ok ( tag -- ) \ tagged response
+    64>n net2o:ok ;
++net2o: ok? ( tag -- ) \ request tagged response
+    net2o:ok? lit, ok ;
+\ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
++net2o: ko ( error -- ) \ receive error message
+    throw ;
 
 \ setup connection class
 
@@ -587,9 +594,37 @@ context-class setup-class >inherit to context-class
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
 : blockalign! ( n -- )  dup ulit, set-blockalign pow2? blockalign ! ;
 
+\ better slurping
+
++net2o: track-size ( size id -- ) \ set size attribute of file id
+    64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
++net2o: track-seek ( seek id -- ) \ set seek attribute of file id
+    64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
++net2o: track-limit ( limit id -- ) \ set limit attribute of file id
+    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
+
+:noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
+
++net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
+    2*64>n n2o:set-stat ;
++net2o: get-stat ( id -- ) \ request stat of file id
+    64>n { fd }
+    fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
++net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
+    2*64>n 2>r $> 2r> dup >r n2o:open-file
+    r@ id>addr? .fs-size 64@ lit, r@ ulit, track-size
+    r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
++net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
+    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
++net2o: slurp ( -- ) \ slurp in tracked files
+    n2o:slurp swap ulit, flag, set-top
+    ['] do-track-seek n2o:track-all-seeks ;
++net2o: rewind-sender ( n -- ) \ rewind buffer
+    64>n net2o:rewind-sender ;
+
 \ flow control functions
 
-60 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
+70 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  net2o:ack-resend ;
@@ -619,42 +654,6 @@ context-class setup-class >inherit to context-class
     64>n data-rmap @ .dest-head umax! ;
 +net2o: timeout ( ticks -- ) \ timeout request
     net2o:timeout  data-map @ .dest-tail @ ulit, set-head ;
-+net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
-    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
-
-+net2o: ok ( tag -- ) \ tagged response
-    64>n net2o:ok ;
-+net2o: ok? ( tag -- ) \ request tagged response
-    net2o:ok? lit, ok ;
-\ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
-+net2o: ko ( error -- ) \ receive error message
-    throw ;
-
-\ better slurping
-
-80 net2o: track-size ( size id -- ) \ set size attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-+net2o: track-seek ( seek id -- ) \ set seek attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-+net2o: track-limit ( limit id -- ) \ set limit attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
-
-:noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
-
-+net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
-    2*64>n n2o:set-stat ;
-+net2o: get-stat ( id -- ) \ request stat of file id
-    64>n { fd }
-    fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-+net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
-    2*64>n 2>r $> 2r> dup >r n2o:open-file
-    r@ id>addr? .fs-size 64@ lit, r@ ulit, track-size
-    r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
-+net2o: slurp ( -- ) \ slurp in tracked files
-    n2o:slurp swap ulit, flag, set-top
-    ['] do-track-seek n2o:track-all-seeks ;
-+net2o: rewind-sender ( n -- ) \ rewind buffer
-    64>n net2o:rewind-sender ;
 
 \ profiling, nat traversal
 

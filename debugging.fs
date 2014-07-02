@@ -31,7 +31,7 @@ false [IF]
     '"' parse hex>$ ;
 comp: execute postpone SLiteral ;
 
-\ base64 output (not the usual base64)
+\ base64 output (not the usual base64, suitable as filenames)
 
 : .b64 ( n -- n' ) dup >r 6 rshift r> $3F and
     dup #10 u< IF  '0' + emit  EXIT  THEN  #10 -
@@ -66,9 +66,11 @@ Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
     '"' parse base64>$ ;
 comp: execute postpone SLiteral ;
 
-\ base85 output (not exactly the same as postscript)
+\ base85 output (derived from RFC 1924, suitable as file name)
 
-: .b85 ( n -- n' ) 85 /mod swap '#' + emit ;
+: .b85 ( n -- n' ) 85 /mod swap
+    s" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~"
+    drop + c@ emit ;
 : .1base85 ( addr -- ) c@ .b85 .b85 drop ;
 : .2base85 ( addr -- ) le-uw@ .b85 .b85 .b85 drop ;
 : .3base85 ( addr -- ) le-ul@ $FFFFFF and .b85 .b85 .b85 .b85 drop ;

@@ -854,6 +854,10 @@ end-class cmd-class \ command interpreter
 cmd-class class
     field: code-map
     field: code-rmap
+    field: data-map
+    field: data-rmap
+    field: codebuf#
+
     1 pthread-mutexes +field code-lock
 end-class reply-class \ command interpreter with replies
 
@@ -861,9 +865,6 @@ reply-class class
 end-class setup-class \ setup connections
 
 setup-class class
-    field: data-map
-    field: data-rmap
-
     field: context#
     field: wait-task
     field: resend0
@@ -885,7 +886,6 @@ setup-class class
     field: timeout-xt \ callback for timeout
     field: setip-xt   \ callback for set-ip
     field: ack-xt
-    field: codebuf#
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-lock
@@ -1075,7 +1075,6 @@ resend-size# buffer: resend-init
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!
-    s" " file-state $!
     init-flow-control
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     -1 blocksize !
