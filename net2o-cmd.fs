@@ -592,14 +592,14 @@ context-class setup-class >inherit to context-class
 
 \ better slurping
 
-+net2o: track-size ( size id -- ) \ set size attribute of file id
++net2o: set-size ( size id -- ) \ set size attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-+net2o: track-seek ( seek id -- ) \ set seek attribute of file id
++net2o: set-seek ( seek id -- ) \ set seek attribute of file id
     64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-+net2o: track-limit ( limit id -- ) \ set limit attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit! ;
++net2o: set-limit ( limit id -- ) \ set limit attribute of file id
+    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit-min! ;
 
-:noname ( id seek -- ) lit, ulit, track-seek ; is do-track-seek
+:noname ( id seek -- ) lit, ulit, set-seek ; is do-track-seek
 
 +net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
     2*64>n n2o:set-stat ;
@@ -608,7 +608,7 @@ context-class setup-class >inherit to context-class
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
 +net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
     2*64>n 2>r $> 2r> dup >r n2o:open-file
-    r@ id>addr? .fs-size 64@ lit, r@ ulit, track-size
+    r@ id>addr? .fs-size 64@ lit, r@ ulit, set-size
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 +net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
@@ -702,10 +702,10 @@ also net2o-base
     file-reg# @ save-to
     1 file-reg# +! ;
 
-: n2o:seek ( pos id -- )
-    2dup state-addr fs-seek !  swap ulit, ulit, track-seek ;
+: seek! ( pos id -- )
+    2dup state-addr fs-seek !  swap ulit, ulit, set-seek ;
 
-: n2o:track-limit ( pos id -- ) over nlit, dup ulit, track-limit
+: limit! ( pos id -- ) over nlit, dup ulit, set-limit
     >r n>64 r> init-limit! ;
 
 file-reg# off

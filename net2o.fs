@@ -1565,7 +1565,7 @@ end-class fs-class
     64#0 fs-seekto 64! 64#0 fs-seek 64! o> ;
 : seekto! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-seekto 64! o> ;
-: limit! ( 64 id -- )  state-addr >o
+: limit-min! ( 64 id -- )  state-addr >o
     fs-size 64@ 64umin fs-limit 64! o> ;
 : init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
 
