@@ -852,19 +852,18 @@ object class
 end-class cmd-class \ command interpreter
 
 cmd-class class
-    field: code-map
-    field: code-rmap
-    field: data-map
-    field: data-rmap
-    field: codebuf#
-
-    1 pthread-mutexes +field code-lock
+    field: connection
 end-class reply-class \ command interpreter with replies
 
 reply-class class
 end-class setup-class \ setup connections
 
 setup-class class
+    field: code-map
+    field: code-rmap
+    field: data-map
+    field: data-rmap
+    field: codebuf#
     field: context#
     field: wait-task
     field: resend0
@@ -889,6 +888,7 @@ setup-class class
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-lock
+    1 pthread-mutexes +field code-lock
     
     field: data-resend
     field: data-b2b
@@ -1072,6 +1072,7 @@ resend-size# buffer: resend-init
 
 : n2o:new-context ( addr -- )
     context-class new >o rdrop timeout( ." new context: " o hex. cr )
+    o connection ! \ backlink to self
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!

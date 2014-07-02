@@ -245,7 +245,7 @@ User cmdbuf#
 
 : cmdreset  cmdbuf# off ;
 
-: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf# +! ;
+: cmd, ( 64n -- )  connection @ >o cmdbuf$ + dup >r p!+ r> - cmdbuf# +! o> ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -380,9 +380,10 @@ also net2o-base definitions
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : $, ( addr u -- )  string  >r r@ n>64 cmd,
-    r@ maxstring u>= !!stringfit!!
-    cmdbuf$ + r@ move   r> cmdbuf# +! ;
-: cmdbuf+ ( n -- )  dup maxstring u>= !!stringfit!! cmdbuf# +! ;
+    connection @ >o r@ maxstring u>= !!stringfit!!
+    cmdbuf$ + r@ move   r> cmdbuf# +! o> ;
+: cmdbuf+ ( n -- )
+    connection @ >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
 : lit, ( u -- )  ulit cmd, ;
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
