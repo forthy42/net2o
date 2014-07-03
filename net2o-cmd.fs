@@ -107,18 +107,11 @@ User object-stack object-max# uallot drop
 : net2o-crash true !!function!! ;
 ' net2o-crash IS default-method
 
-Defer cmd-table
-' cmd-class IS cmd-table
+Defer gen-table
+' cmd-table IS gen-table
 
-cmd-class >dynamic to cmd-class
-
-: cmd?  ( u -- u flag ) dup setup-class >methods @ u>= ;
-: ocmd? ( u -- u flag ) dup o cell- @ >methods @ u>= ;
-: ?cmd  ( u -- u )  cmd?  IF  net2o-crash  THEN ;
-: ?ocmd ( u -- u )  ocmd? IF  net2o-crash  THEN ;
-
-: n>cmd ( n -- addr ) cells
-    o IF  ?ocmd o cell- @  ELSE  ?cmd setup-class  THEN + ;
+: n>cmd ( n -- addr ) cells >r
+    o IF  token-table  ELSE  setup-table  THEN  $@ r@ u<= !!function!! r> + ;
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
@@ -142,10 +135,9 @@ cmd-class >dynamic to cmd-class
     THEN  .\" \" $, " ;
 
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
-: .net2o-name ( n -- )  cells
-    o IF  ocmd? IF  .net2o-num  EXIT  THEN  o cell- @
-    ELSE  cmd?  IF  .net2o-num  EXIT  THEN  setup-class  THEN +
-    (net2o-see) ;
+: .net2o-name ( n -- )  cells >r
+    o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
+    IF  drop r> .net2o-num  EXIT  THEN  r> + (net2o-see) ;
 
 : net2o-see ( -- ) hex[
     case
@@ -172,9 +164,7 @@ Variable show-offset  show-offset on
     cmd@ trace( .s cr ) n>cmd
     perform buf-state 2@ ;
 
-: >cmd ( xt u -- ) cells >r
-    cmd-table r@ cell+ class-resize action-of cmd-table (int-to)
-    cmd-table r> + ! ;
+: >cmd ( xt u -- ) gen-table $[] ! ;
 
 Defer >throw
 
@@ -187,7 +177,7 @@ Defer net2o-do
     ['] noop over >cmd \ allocate space in table
     Create dup >r , here >r 0 , net2o-does noname :
     lastxt dup r> ! r> >cmd ;
-: +net2o: ( "name" -- ) cmd-table >methods @ cell/ net2o: ;
+: +net2o: ( "name" -- ) gen-table $[]# net2o: ;
 
 : F also forth parse-name parser1 execute previous ; immediate
 
@@ -222,9 +212,8 @@ get-current also net2o-base definitions previous
 
 dup set-current
 
-' reply-class is cmd-table
-
-reply-class cmd-class >inherit to reply-class
+gen-table $@ reply-table $!
+' reply-table is gen-table
 
 \ net2o assembler
 
@@ -234,9 +223,9 @@ User cmdbuf#
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 \ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
-: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0  THEN ;
+: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0 THEN ;
 : cmdbuf$ ( -- addr u )   connection@ >o cmdbuf cmdbuf# @ o> ;
-: endcmdbuf  ( -- addr' ) connection@ >O cmdbuf maxdata + o> ;
+: endcmdbuf  ( -- addr' ) connection@ >o cmdbuf maxdata + o> ;
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : cmdbuf+ ( n -- )
     connection@ >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
@@ -431,9 +420,8 @@ also net2o-base definitions
 
 \ setup connection class
 
-' setup-class is cmd-table
-
-setup-class reply-class >inherit to setup-class
+gen-table $@ setup-table $!
+' setup-table is gen-table
 
 20 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
@@ -573,9 +561,8 @@ net2o-base
 
 \ everything that follows here can assume to have a connection context
 
-' context-class is cmd-table
-
-context-class setup-class >inherit to context-class
+gen-table $@ context-table $!
+' context-table is gen-table
 
 \ file functions
 

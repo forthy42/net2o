@@ -849,14 +849,21 @@ rcode-class class end-class rdata-class
 \ job context structure
 
 object class
+    field: token-table
 end-class cmd-class \ command interpreter
+
+Variable cmd-table
 
 cmd-class class
     field: connection
 end-class reply-class \ command interpreter with replies
 
+Variable reply-table
+
 reply-class class
 end-class setup-class \ setup connections
+
+Variable setup-table
 
 setup-class class
     field: code-map
@@ -944,6 +951,8 @@ setup-class class
     KEYBYTES +field tskc
     field: dest-pubkey  \ if not 0, connect only to this key
 end-class context-class
+
+Variable context-table
 
 begin-structure timestats
 sffield: ts-delta
@@ -1073,6 +1082,7 @@ resend-size# buffer: resend-init
 : n2o:new-context ( addr -- )
     context-class new >o rdrop timeout( ." new context: " o hex. cr )
     o connection ! \ backlink to self
+    context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     resend-init resend-size# data-resend $!

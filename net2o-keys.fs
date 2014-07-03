@@ -66,7 +66,7 @@ cmd-class class
     64field: ke-offset \ offset in key file
 end-class key-entry
 
-key-entry >dynamic to key-entry
+Variable key-entry-table
 
 0 Constant key#anon
 1 Constant key#user
@@ -74,7 +74,8 @@ key-entry >dynamic to key-entry
 
 0 Value sample-key
 
-' key-entry is cmd-table
+cmd-table $@ key-entry-table $!
+' key-entry-table is gen-table
 
 Variable key-table
 Variable this-key
@@ -89,8 +90,9 @@ Variable this-keyid
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key dup cell- @ >osize @ 2dup erase
-    over >o 64#-1 ke-last 64! key-read-offset 64@ ke-offset 64! o>
+    sample-key dup cell- @ >osize @ 2dup cell /string erase
+    over >o 64#-1 ke-last 64! key-read-offset 64@ ke-offset 64!
+    key-entry-table @ token-table ! o>
     -1 cells /string  keypack-all# n>64 key-read-offset 64+!
     2over keysize umin key-table #! current-key ;
 
@@ -201,11 +203,11 @@ get-current also net2o-base definitions
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
 dup set-current previous
 
-key-entry >static to key-entry \ back to static method table
-' context-class is cmd-table
+' context-table is gen-table
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key this-key ! \ dummy
+sample-key >o key-entry-table @ token-table ! o>
 
 : key:code ( -- )
     net2o-code0 keypack keypack-all# erase
