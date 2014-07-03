@@ -74,9 +74,6 @@ Variable key-entry-table
 
 0 Value sample-key
 
-cmd-table $@ key-entry-table $!
-' key-entry-table is gen-table
-
 Variable key-table
 Variable this-key
 Variable this-keyid
@@ -111,15 +108,15 @@ Variable strict-keys  strict-keys on
 
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
-    ." ke-pk: " ke-pk $@ xtype cr
-    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize xtype cr  THEN
+    ." ke-pk: " ke-pk $@ 85type cr
+    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize 85type cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
-    .\" x\" " ke-pk $@ xtype .\" \" key:new" cr
-    ke-sk @ IF  .\" x\" " ke-sk @ keysize xtype .\" \" ke-sk sec! +seckey" cr  THEN
+    .\" x\" " ke-pk $@ 85type .\" \" key:new" cr
+    ke-sk @ IF  .\" x\" " ke-sk @ keysize 85type .\" \" ke-sk sec! +seckey" cr  THEN
     '"' emit ke-nick $@ type .\" \" ke-nick $! "
     ke-first 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first 64! " ke-type @ . ." ke-type !"  cr o> ;
@@ -134,8 +131,8 @@ Variable strict-keys  strict-keys on
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
 	    2dup dest-pubkey $@ keysize umin str= 0= IF
-		[: ." want: " dest-pubkey $@ keysize umin xtype cr
-		  ." got : " 2dup xtype cr ;] $err
+		[: ." want: " dest-pubkey $@ keysize umin 85type cr
+		  ." got : " 2dup 85type cr ;] $err
 		true !!wrong-key!!
 	    THEN
 	    .key#  EXIT
@@ -190,6 +187,9 @@ Variable keys
 \ byte salt and a 16 byte checksum.
 
 get-current also net2o-base definitions
+
+cmd-table $@ key-entry-table $!
+' key-entry-table is gen-table
 
 10 net2o: newkey ( $:string -- ) $> key:new ;
 +net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
