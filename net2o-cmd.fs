@@ -91,6 +91,16 @@ User object-stack object-max# uallot drop
 : n:oswap ( o:o1 o:o2 -- o:o2 o:o1 )
     o-pop >o r> o-push ;
 
+\ token stack - only for decompiling
+
+User t-stack
+
+: t-push ( addr -- )
+    t-stack $[]# t-stack $[] ! ;
+: t-pop ( -- addr )
+    t-stack $[]# 1- dup 0< !!object-empty!!
+    t-stack $[] @ t-stack $@len cell- t-stack $!len ;
+
 \ floats assume unaligned float access is possible
 \ i.e. so far, they are unused stubs ;-)
 
@@ -117,7 +127,7 @@ Defer gen-table
 : (net2o-see) ( addr -- )  @
     dup 0<> IF
 	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
-	dup 2 cells + @ ?dup-IF  @ token-table @ o-push token-table !  THEN
+	dup 2 cells + @ ?dup-IF  @ token-table @ t-push token-table !  THEN
 	body>
     ELSE  drop ['] net2o-crash  THEN  .name ;
 
@@ -144,8 +154,8 @@ Defer gen-table
 	3 of  string@  n2o.string  endof
 	4 of  pdf@ f. ." dfloat, " endof
 	5 of  psf@ f. ." sfloat, " endof
-	6 of  ." endwith " cr  o-pop  token-table !  endof
-	7 of  ." oswap " cr token-table @ o-pop token-table ! o-push  endof
+	6 of  ." endwith " cr  t-pop  token-table !  endof
+	7 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -155,10 +165,10 @@ Variable show-offset  show-offset on
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see ( addr u -- ) ." net2o-code "
+: n2o:see ( addr u -- ) ." net2o-code "  t-stack $off
     o IF  token-table @ >r  THEN
-    BEGIN  cmd-see dup 0= UNTIL  2drop
-    o IF  r> token-table !  THEN ;
+    [: BEGIN  cmd-see dup 0= UNTIL ;] catch
+    o IF  r> token-table !  THEN  throw  2drop ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
