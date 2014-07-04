@@ -105,7 +105,6 @@ User object-stack object-max# uallot drop
 \ Commands are zero-terminated
 
 : net2o-crash true !!function!! ;
-' net2o-crash IS default-method
 
 Defer gen-table
 ' cmd-table IS gen-table
@@ -116,13 +115,11 @@ Defer gen-table
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
 : (net2o-see) ( addr -- )  @
-    dup ['] net2o-crash <> IF
-	[ 4 cell = ] [IF]
-	    5 cells - body>
-	[ELSE]
-	    4 cells - body>
-	[THEN]
-    THEN  .name ;
+    dup 0<> IF
+	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
+	dup 2 cells + @ ?dup-IF  @ token-table @ o-push token-table !  THEN
+	body>
+    ELSE  drop ['] net2o-crash  THEN  .name ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
@@ -147,6 +144,8 @@ Defer gen-table
 	3 of  string@  n2o.string  endof
 	4 of  pdf@ f. ." dfloat, " endof
 	5 of  psf@ f. ." sfloat, " endof
+	6 of  ." endwith " cr  o-pop  token-table !  endof
+	7 of  ." oswap " cr token-table @ o-pop token-table ! o-push  endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -156,13 +155,15 @@ Variable show-offset  show-offset on
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see ( addr u -- ) ." net2o-code " 
-    BEGIN  cmd-see dup 0= UNTIL  2drop ;
+: n2o:see ( addr u -- ) ." net2o-code "
+    o IF  token-table @ >r  THEN
+    BEGIN  cmd-see dup 0= UNTIL  2drop
+    o IF  r> token-table !  THEN ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
     cmd@ trace( .s cr ) n>cmd
-    perform buf-state 2@ ;
+    @ ?dup-IF  execute  ELSE  net2o-crash  THEN  buf-state 2@ ;
 
 : >cmd ( xt u -- ) gen-table $[] ! ;
 
@@ -172,12 +173,16 @@ Defer >throw
 
 Defer net2o-do
 
+0 Value last-2o
+
 : net2o-does  DOES> net2o-do ;
 : net2o: ( number "name" -- )
     ['] noop over >cmd \ allocate space in table
-    Create dup >r , here >r 0 , net2o-does noname :
+    Create  here to last-2o
+    dup >r , here >r 0 , 0 , net2o-does noname :
     lastxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
+: >table ( table -- )  last-2o 2 cells + ! ;
 
 : F also forth parse-name parser1 execute previous ; immediate
 
@@ -201,14 +206,14 @@ get-current also net2o-base definitions previous
     pdf@ ;
 +net2o: sflit ( "sfloat" -- r ) \ double float literal
     psf@ ;
-+net2o: tru ( -- true ) \ true flag literal
-    true ;
-+net2o: fals ( -- false ) \ false flag literal
-    false ;
 +net2o: endwith ( o:current -- ) \ pop object stack
     n:o> ;
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
++net2o: tru ( -- true ) \ true flag literal
+    true ;
++net2o: fals ( -- false ) \ false flag literal
+    false ;
 
 dup set-current
 
@@ -568,6 +573,7 @@ gen-table $@ context-table $!
 
 50 net2o: file-id ( id -- o:file )
     64>n state-addr n:>o ;
+fs-table >table
 
 reply-table $@ fs-table $!
 ' fs-table is gen-table
