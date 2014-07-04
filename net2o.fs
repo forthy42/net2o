@@ -1618,8 +1618,8 @@ Sema file-sema
 
 \ file status stuff
 
-: n2o:get-stat ( id -- mtime mod )
-    id>addr? .fs-fid @ fileno statbuf fstat ?ior
+: n2o:get-stat ( -- mtime mod )
+    fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode l@ $FFF and ;
 
@@ -1627,8 +1627,8 @@ Sema file-sema
     [IFDEF] android 2drop
     [ELSE] swap fchmod ?ior [THEN] ;
 
-: n2o:set-stat ( mtime mod id -- )
-    id>addr? >o fs-fid @ fileno n2o:track-mod fs-time 64! o> ;
+: n2o:set-stat ( mtime mod -- )
+    fs-fid @ fileno n2o:track-mod fs-time 64! ;
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 

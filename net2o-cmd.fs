@@ -582,6 +582,14 @@ reply-table $@ fs-table $!
     track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. F cr ) seekto! ;
 +net2o: set-limit ( limit -- ) \ set limit attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
++net2o: set-stat ( mtime mod -- ) \ set time and mode of current file
+    64>n n2o:set-stat ;
++net2o: get-stat ( -- ) \ request stat of current file
+    fs-id @ ulit, file-id n2o:get-stat >r lit, r> ulit, set-stat endwith ;
++net2o: open-tracked-file ( $:string mode -- ) \ open file in tracked mode
+    64>n $> rot fs-open  fs-id @ ulit, file-id
+    fs-size 64@ lit, set-size
+    n2o:get-stat >r lit, r> ulit, set-stat endwith ;
 
 ' context-table is gen-table
 
@@ -600,15 +608,6 @@ reply-table $@ fs-table $!
 :noname ( id seek -- ) 64>r ulit, file-id
     64r> lit, set-seek endwith ; is do-track-seek
 
-+net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
-    2*64>n n2o:set-stat ;
-+net2o: get-stat ( id -- ) \ request stat of file id
-    64>n { fd }
-    fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
-+net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
-    2*64>n 2>r $> 2r> dup >r n2o:open-file
-    r@ id>addr? .fs-size 64@ r@ ulit, file-id lit, set-size endwith
-    r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 +net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 +net2o: slurp ( -- ) \ slurp in tracked files
@@ -697,7 +696,8 @@ set-current previous
 also net2o-base
 
 : n2o:copy ( addrsrc us addrdest ud -- )
-    2swap $, r/o ulit, file-reg# @ ulit, open-tracked-file
+    file-reg# @ ulit, file-id
+    2swap $, r/o ulit, open-tracked-file  endwith
     file-reg# @ save-to
     1 file-reg# +! ;
 
