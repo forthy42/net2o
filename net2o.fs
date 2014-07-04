@@ -1489,7 +1489,7 @@ $20 Value mask-bits#
 Variable net2o-path
 pad 200 get-dir net2o-path $!
 
-object class
+reply-class class
     64field: fs-size
     64field: fs-seek
     64field: fs-seekto
@@ -1497,11 +1497,14 @@ object class
     64field: fs-time
     field: fs-fid
     field: fs-path
+    field: fs-id
     method fs-read
     method fs-write
     method fs-open
     method fs-close
 end-class fs-class
+
+Variable fs-table
 
 : >seek ( size 64to 64seek -- size' )
     64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
@@ -1547,15 +1550,16 @@ end-class fs-class
     >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
 : id>addr? ( id -- addr )
     id>addr cell < !!fileid!! ;
-: new>file ( -- )
+: new>file ( id -- )
     [: fs-class new { w^ fsp } fsp cell file-state $+!
-	64#-1 fsp @ .fs-limit 64! ;]
+      o fsp @ >o connection ! fs-id !
+      fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
     filestate-lock c-section ;
 
 : lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
 : state-addr ( id -- addr )
-    id>addr dup 0< !!gap!!
-    0= IF  drop  new>file lastfile@  THEN ;
+    dup >r id>addr dup 0< !!gap!!
+    0= IF  drop r@ new>file lastfile@  THEN  rdrop ;
 
 : dest-top! ( addr -- )
     \ dest-tail @ dest-size @ + umin
@@ -1571,13 +1575,13 @@ end-class fs-class
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP  dest-back ! ;
 
-: size! ( 64 id -- )  state-addr >o
+: size! ( 64 -- )
     64dup fs-size 64!  fs-limit 64umin!
-    64#0 fs-seekto 64! 64#0 fs-seek 64! o> ;
-: seekto! ( 64 id -- )  state-addr >o
-    fs-size 64@ 64umin fs-seekto 64! o> ;
-: limit-min! ( 64 id -- )  state-addr >o
-    fs-size 64@ 64umin fs-limit 64! o> ;
+    64#0 fs-seekto 64! 64#0 fs-seek 64! ;
+: seekto! ( 64 -- )
+    fs-size 64@ 64umin fs-seekto 64! ;
+: limit-min! ( 64 id -- )
+    fs-size 64@ 64umin fs-limit 64! ;
 : init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
 
 : file+ ( addr -- ) >r 1 r@ +!

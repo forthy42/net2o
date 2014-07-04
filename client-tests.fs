@@ -156,13 +156,13 @@ previous
     "data/2011-06-27_19-33-04.jpg" "photo006.jpg" >cache n2o:copy
     "data/2011-06-27_19-55-48.jpg" "photo007.jpg" >cache n2o:copy
     "data/2011-06-28_06-54-09.jpg" "photo008.jpg" >cache n2o:copy
-    $10000 0 limit!
-    $20000 1 limit!
-    $30000 2 limit!
-    $40000 3 limit!
-    $50000 4 limit!
-    $60000 5 limit!
-    $70000 6 limit!
+    $10000. 0 limit!
+    $20000. 1 limit!
+    $30000. 2 limit!
+    $40000. 3 limit!
+    $50000. 4 limit!
+    $60000. 5 limit!
+    $70000. 6 limit!
     n2o:done
     end-code| ['] .time $err ;
 
@@ -171,13 +171,13 @@ previous
     net2o-code
     expect-reply
     .time s" Download test 4a" $, type cr  ( see-me )
-    -1 0 limit!
-    -1 1 limit!
-    -1 2 limit!
-    -1 3 limit!
-    -1 4 limit!
-    -1 5 limit!
-    -1 6 limit!
+    -1. 0 limit!
+    -1. 1 limit!
+    -1. 2 limit!
+    -1. 3 limit!
+    -1. 4 limit!
+    -1. 5 limit!
+    -1. 6 limit!
     n2o:done
     end-code| n2o:close-all ['] .time $err ;
 

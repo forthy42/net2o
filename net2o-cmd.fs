@@ -566,10 +566,25 @@ gen-table $@ context-table $!
 
 \ file functions
 
-50 net2o: open-file ( $:string mode id -- ) \ open file id at path "addr u" with mode
-    2*64>n 2>r $> 2r> n2o:open-file ;
-+net2o: close-file ( id -- ) \ close file
-    64>n n2o:close-file ;
+50 net2o: file-id ( id -- o:file )
+    64>n state-addr n:>o ;
+
+reply-table $@ fs-table $!
+' fs-table is gen-table
+
+20 net2o: open-file ( $:string mode -- ) \ open file with mode
+    64>n $> rot fs-open ;
++net2o: close-file ( -- ) \ close file
+    fs-close ;
++net2o: set-size ( size -- ) \ set size attribute of current file
+    track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. F cr ) size! ;
++net2o: set-seek ( seek -- ) \ set seek attribute of current file
+    track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. F cr ) seekto! ;
++net2o: set-limit ( limit -- ) \ set limit attribute of current file
+    track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
+
+' context-table is gen-table
+
 +net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;
 +net2o: set-blockalign ( n -- ) \ set block alignment
@@ -582,14 +597,8 @@ gen-table $@ context-table $!
 
 \ better slurping
 
-+net2o: set-size ( size id -- ) \ set size attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > size: " 64dup 64. F cr r> ) size! ;
-+net2o: set-seek ( seek id -- ) \ set seek attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > seek: " 64dup 64. F cr r> ) seekto! ;
-+net2o: set-limit ( limit id -- ) \ set limit attribute of file id
-    64>n track( >r ." file <" r@ 0 .r ." > seek to: " 64dup 64. F cr r> ) limit-min! ;
-
-:noname ( id seek -- ) lit, ulit, set-seek ; is do-track-seek
+:noname ( id seek -- ) 64>r ulit, file-id
+    64r> lit, set-seek endwith ; is do-track-seek
 
 +net2o: set-stat ( mtime mod id -- ) \ set time and mode of file id
     2*64>n n2o:set-stat ;
@@ -598,7 +607,7 @@ gen-table $@ context-table $!
     fd n2o:get-stat >r lit, r> ulit, fd ulit, set-stat ;
 +net2o: open-tracked-file ( $:string mode id -- ) \ open file in tracked mode
     2*64>n 2>r $> 2r> dup >r n2o:open-file
-    r@ id>addr? .fs-size 64@ lit, r@ ulit, set-size
+    r@ id>addr? .fs-size 64@ r@ ulit, file-id lit, set-size endwith
     r@ n2o:get-stat >r lit, r> ulit, r> ulit, set-stat ;
 +net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
@@ -692,11 +701,13 @@ also net2o-base
     file-reg# @ save-to
     1 file-reg# +! ;
 
-: seek! ( pos id -- )
-    2dup state-addr fs-seek !  swap ulit, ulit, set-seek ;
+: seek! ( pos id -- ) >r d>64
+    64dup r@ state-addr .fs-seek 64!
+    r> ulit, file-id lit, set-seek endwith ;
 
-: limit! ( pos id -- ) over nlit, dup ulit, set-limit
-    >r n>64 r> init-limit! ;
+: limit! ( pos id -- ) >r d>64
+    r@ ulit, file-id 64dup lit, set-limit endwith
+    r> init-limit! ;
 
 file-reg# off
 
