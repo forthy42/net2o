@@ -81,7 +81,7 @@ Variable this-keyid
 64Variable key-read-offset
 
 : current-key ( addr u -- )
-    2dup keysize umin key-table #@ drop cell+ dup this-key ! >o rdrop ke-pk $! ;
+    2dup keysize umin key-table #@ drop cell+ dup this-key ! n:>o ke-pk $! ;
 : make-thiskey ( addr -- )
     dup $@ drop this-keyid !  cell+ $@ drop cell+ dup this-key ! >o rdrop ;
 
@@ -192,6 +192,7 @@ cmd-table $@ key-entry-table $!
 ' key-entry-table is gen-table
 
 10 net2o: newkey ( $:string -- ) $> key:new ;
+key-entry-table >table
 +net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
 +net2o: keynick ( $:string -- )    $> ke-nick $! ;
@@ -217,7 +218,7 @@ comp: :, also net2o-base ;
 also net2o-base definitions
 
 : end:key ( -- )
-    end-cmd previous
+    endwith end-cmd previous
     cmdlock unlock ;
 comp: :, previous ;
 
@@ -319,10 +320,10 @@ set-current previous previous
     keysize key-table #off
     2dup keysize 2* umin ke-pk $!
     + 1- dup c@ 2* - $10 - 64@ ke-first 64!
-    key( ." with:" cr o cell- 0 .key ) ;
+    key( ." with:" cr o cell- 0 .key ) n:o> ;
 
 :noname ( revaddr u1 keyaddr u2 -- )
-    0 >o current-key replace-key skc keysize ke-sk sec! o> ; is renew-key
+    current-key replace-key skc keysize ke-sk sec! n:o> ; is renew-key
 
 0 [IF]
 Local Variables:
