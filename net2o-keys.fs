@@ -320,7 +320,7 @@ set-current previous previous
     keysize key-table #off
     2dup keysize 2* umin ke-pk $!
     + 1- dup c@ 2* - $10 - 64@ ke-first 64!
-    key( ." with:" cr o cell- 0 .key ) n:o> ;
+    key( ." with:" cr o cell- 0 .key ) n:oswap n:o> ;
 
 :noname ( revaddr u1 keyaddr u2 -- )
     current-key replace-key skc keysize ke-sk sec! n:o> ; is renew-key

@@ -268,10 +268,10 @@ dht-table ' new static-a with-allocater constant dht-stub
 	dht-hash $@ connection @
 	dht-class new >o rdrop connection ! dht-hash $!
 	dht-table @ token-table ! o d#id !
-    THEN ;
+    ELSE  connection @ d#id @ >o rdrop connection !  THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
     cells dup k#size u>= !!no-dht-key!!
-    ?d#id dht-hash + dht( dup hex. dup $[]# F . F cr ) $ins[]sig ;
+    dht-hash + dht( dup hex. dup $[]# F . F cr ) $ins[]sig ;
 
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
@@ -439,7 +439,7 @@ also net2o-base
     pkc keysize 2* $, dht-id <req k#host ulit, dht-value? req> endwith ;
 
 : remove-me, ( -- )
-    dht-host dup
+    d#id @ .dht-host dup
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, k#host ulit, dht-value- ;] $[]map
     $[]off ;
@@ -448,7 +448,7 @@ previous
 : me>d#id ( -- ) pkc keysize 2* >d#id ?d#id ;
 
 : n2o:send-replace ( -- )
-    me>d#id dht-hash IF
+    me>d#id o IF
 	net2o-code   expect-reply
 	  pkc keysize 2* $, dht-id remove-me, endwith
 	  cookie+request
@@ -456,17 +456,17 @@ previous
     THEN ;
 
 : set-revocation ( addr u -- )
-    dht-host $+[]! ;
+    d#id @ .dht-host $+[]! ;
 
 Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
     net2o-code  expect-reply
-      dht-hash $@ $, dht-id remove-me,
+      d#id @ .dht-hash $@ $, dht-id remove-me,
       keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
       2dup $, k#host ulit, dht-value+ endwith
       cookie+request end-code| \ send revocation upstrem
-    dht-hash $@ renew-key ; \ replace key in key storage
+    d#id @ .dht-hash $@ renew-key ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replaceme, cookie+request
