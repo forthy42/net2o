@@ -65,20 +65,20 @@ UValue test#  0 to test#
     pkc keysize 2* $, dht-id
     forever "test:tag" pkc keysize 2* gen-tag-del $, k#tags ulit, dht-value-
     forever "test:tag" pkc keysize 2* gen-tag $, k#tags ulit, dht-value+
-    end-code| -setip ;
+    endwith end-code| -setip ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
     expect-reply
-    0 >o nick-key ke-pk $@ o> $, dht-id
-    k#host ulit, dht-value? k#tags ulit, dht-value?
-    cookie+request
+    0 >o nick-key ke-pk $@ o> $, dht-id <req
+    k#host ulit, dht-value? k#tags ulit, dht-value? req>
+    endwith cookie+request
     end-code| ;
 
 also net2o-base
 : fetch-host, ( nick u -- )
     0 >o nick-key ke-pk $@ o> $, dht-id
-    k#host ulit, dht-value? ;
+    <req k#host ulit, dht-value? req> endwith ;
 previous
 
 : c:fetch-host ( nick u -- )

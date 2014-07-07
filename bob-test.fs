@@ -24,7 +24,12 @@ init-client
 
 : c:bob ( -- ) 
     $2000 $10000 "test" ins-ip dup add-beacon c:connect
-    c:revoke-bob replace-me do-disconnect ;
+    ." Bob connected" cr
+    c:revoke-bob
+    ." Bob revoked" cr
+    replace-me
+    ." Bob replaced" cr
+    do-disconnect ;
 
 c:bob server-loop
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests

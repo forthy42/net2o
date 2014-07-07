@@ -120,7 +120,8 @@ Defer gen-table
 ' cmd-table IS gen-table
 
 : n>cmd ( n -- addr ) cells >r
-    o IF  token-table  ELSE  setup-table  THEN  $@ r@ u<= !!function!! r> + ;
+    o IF  token-table  ELSE  setup-table  THEN
+    $@ r@ u<= !!function!! r> + ;
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
@@ -173,7 +174,8 @@ Variable show-offset  show-offset on
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
     cmd@ trace( .s cr ) n>cmd
-    @ ?dup-IF  execute  ELSE  net2o-crash  THEN  buf-state 2@ ;
+    @ ?dup-IF  execute  ELSE
+	trace( ." crashing" cr cr ) net2o-crash  THEN  buf-state 2@ ;
 
 : >cmd ( xt u -- ) gen-table $[] ! ;
 
@@ -416,7 +418,9 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-10 net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
+10 net2o: <req ( -- ) ; \ stub: push own id in reply
++net2o: req> ( -- ) endwith ; \ generic: pop own id in reply
++net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
 +net2o: push-slit ( n -- ) \ push singed literal into answer packet
@@ -588,6 +592,7 @@ fs-table >table
 reply-table $@ fs-table $!
 ' fs-table is gen-table
 
+10 net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
 20 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
@@ -600,12 +605,10 @@ reply-table $@ fs-table $!
     track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
 +net2o: set-stat ( mtime mod -- ) \ set time and mode of current file
     64>n n2o:set-stat ;
++net2o: get-size ( -- )
+    fs-size 64@ lit, set-size ;
 +net2o: get-stat ( -- ) \ request stat of current file
-    fs-id @ ulit, file-id n2o:get-stat >r lit, r> ulit, set-stat endwith ;
-+net2o: open-tracked-file ( $:string mode -- ) \ open file in tracked mode
-    64>n $> rot fs-open  fs-id @ ulit, file-id
-    fs-size 64@ lit, set-size
-    n2o:get-stat >r lit, r> ulit, set-stat endwith ;
+    n2o:get-stat >r lit, r> ulit, set-stat ;
 
 ' context-table is gen-table
 
@@ -710,6 +713,9 @@ net2o-base
 set-current previous
 
 also net2o-base
+
+: open-tracked-file ( addr u mode --)
+    open-file <req get-size get-stat req> ;
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     file-reg# @ ulit, file-id

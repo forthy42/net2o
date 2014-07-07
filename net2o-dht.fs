@@ -64,6 +64,17 @@ enum k#tags     \ tags added
 \ most stuff is added as tag or tag:value pair
 cells Constant k#size
 
+reply-class class
+    field: dht-hash
+    field: dht-peers
+    field: dht-owner
+    field: dht-host
+    field: dht-map
+    field: dht-tags
+end-class dht-class
+
+Variable dht-table
+
 \ map primitives
 \ map layout: offset, bitmap pairs (64 bits each)
 \ string array: starts with base map (32kB per bit)
@@ -80,7 +91,6 @@ s" invalid signature"            throwcode !!wrong-sig!!
 \ Hash state variables
 
 UValue d#id
-User d#hashkey cell uallot drop
 $41 Constant sigonlysize#
 $51 Constant sigsize#
 $71 Constant sigpksize#
@@ -135,7 +145,7 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 	    EXIT  THEN
     THEN  rdrop false ;
 : verify-host ( addr u -- addr u flag )
-    d#hashkey 2@ drop verify-sig ;
+    dht-hash $@ drop verify-sig ;
 
 \ revokation
 
@@ -182,8 +192,8 @@ Variable revtoken
     over "selfsign" revoke-verify &&'              \ verify self signature
     over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
     over keysize 2* + pkrev keymove
-    pkrev dup sk-mask  d#hashkey 2@ drop keysize +  keypad ed-dh
-    d#hashkey 2@ drop keysize str= nip nip ;       \ verify revoke token
+    pkrev dup sk-mask  dht-hash $@ drop keysize +  keypad ed-dh
+    dht-hash $@ drop keysize str= nip nip ;       \ verify revoke token
 
 : .revoke ( addr u -- )
     ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 85type space
@@ -196,7 +206,7 @@ Variable revtoken
     0= !!wrong-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
-    c:0key d#hashkey 2@ "tag" >keyed-hash
+    c:0key dht-hash $@ "tag" >keyed-hash
     2dup + sigsize# - datesize# "date" >keyed-hash
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
@@ -212,7 +222,7 @@ Variable revtoken
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r 2dup r@ @ $@ str= IF  r> EXIT  THEN
+    >r 2dup r@ @ .dht-hash $@ str= IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
@@ -246,29 +256,36 @@ Variable revtoken
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 
-: >d#id ( addr u -- ) 2dup d#hashkey 2! d#public d# to d#id ;
+dht-table ' new static-a with-allocater constant dht-stub
+
+: >d#id ( addr u -- )
+    2dup d#public d# to d#id
+    d#id @ ?dup-IF  nip nip
+    ELSE  dht-stub >o dht-table @ token-table ! dht-hash $! o o>  THEN
+    o swap n:>o connection ! ;
 : ?d#id ( -- )
     d#id @ 0= IF \ want to allocate it? check first!
-	k#size alloz d#id !
-	d#hashkey 2@ d#id @ $!
+	dht-hash $@ connection @
+	dht-class new >o rdrop connection ! dht-hash $!
+	dht-table @ token-table ! o d#id !
     THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
     cells dup k#size u>= !!no-dht-key!!
-    ?d#id  d#id @ + $ins[]sig ;
+    ?d#id dht-hash + dht( dup hex. dup $[]# F . F cr ) $ins[]sig ;
 
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN  2dup 2>r
-    >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# - .ipaddr
+    >host 2dup + sigonlysize# - dht-hash $@ drop ed-verify >r sigsize# - .ipaddr
     r> 2r> .sigdates .check ;
 : host>$ ( addr u -- addr u' flag )
-    >host 2dup + sigonlysize# - d#id @ $@ drop ed-verify >r sigsize# -
+    >host 2dup + sigonlysize# - dht-hash $@ drop ed-verify >r sigsize# -
     r> ;
 : d#. ( -- )
-    d#id @ $@ 85type ." :" cr
+    dht-hash $@ 85type ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
-	d#id @ I +  I k#host cells = IF
+	dht-hash I +  I k#host cells = IF
 	    [: cr .host ." ," ;]
 	ELSE
 	    [: cr .tag ." , " ;]
@@ -276,8 +293,8 @@ Variable revtoken
     cell +LOOP ;
 : d#value- ( addr u key -- )
     cells dup k#size u>= !!no-dht-key!!
-    d#id @ 0= IF  drop 2drop  EXIT  THEN \ we don't have it
-    dup >r d#id @ +
+    o dht-stub = IF  drop 2drop  EXIT  THEN \ we don't have it
+    dup >r dht-hash +
     r@ k#host cells = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
     r@ k#tags cells = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
@@ -291,58 +308,65 @@ Variable revtoken
 
 \ commands for DHT
 
+get-current also net2o-base definitions
+
 100 net2o: dht-id ( $:string -- ) $> >d#id ;
 \g set dht id for further operations on it
-+net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
+dht-table >table
+
+reply-table $@ dht-table $!
+' dht-table is gen-table
+
+10 net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
+20 net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
 \g add a value to the given dht key
 +net2o: dht-value- ( $:string key -- ) 64>n >r $> r> d#value- ;
 \g remove a value from the given dht key
 
+set-current
+
 \ queries
 
-also net2o-base
-
-: d#value? ( key -- )  d#id @ 0= ?EXIT
-    d#id @ $@ $, dht-id \ this is the id we send
-    k#tags umin dup cells d#id @ +
+: d#value? ( key -- )  o dht-stub = IF  drop EXIT  THEN
+    k#tags umin dup cells dht-hash +
     [: dup $A0 + maxstring <
 	IF  $, dup ulit, dht-value+  ELSE  2drop  THEN ;] $[]map
     drop ;
 
 fs-class class
     field: dht-queries
-end-class dht-class
+end-class dht-file-class
 
 : d#c, ( addr u c -- addr' u' ) -rot xc!+? drop ; 
 : d#$, ( addr1 u1 addr2 u2 -- addr' u' )
     2swap 2 pick d#c, 2swap
     2over rot umin dup >r move r> /string ;
 : d#id, ( addr u -- addr' u' )
-    0 d#c, d#id @ $@ d#$, ;
+    0 d#c, dht-hash $@ d#$, ;
 : d#values, ( addr u mask -- addr' u' ) { mask }
     k#size cell/ 1 DO
 	mask 1 and IF
-	    I dup cells d#id @ +
+	    I dup cells dht-hash +
 	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
 
-:noname $FFFFFFFF n>64 64dup fs-limit 64! fs-size 64! ; dht-class to fs-open
+:noname $FFFFFFFF n>64 64dup fs-limit 64! fs-size 64! ; dht-file-class to fs-open
 :noname ( addr u -- n )  dup >r
     dht-queries $@ bounds ?DO
 	I 1+ I c@ 2dup >d#id + c@ >r
 	d#id, r> d#values,
-    I c@ 2 + +LOOP  nip r> swap - ; dht-class to fs-read
+    I c@ 2 + +LOOP  nip r> swap - ; dht-file-class to fs-read
 
 : new>dht ( -- )
-    [: dht-class new sp@ cell file-state $+! drop ;]
+    [: dht-file-class new sp@ cell file-state $+! drop ;]
     filestate-lock c-section ;
 
 : d#open ( fid -- )  new>dht lastfile@ .fs-open ;
 : d#query ( addr u mask fid -- )  state-addr >o
     >r dup dht-queries c$+! dht-queries $+! r> dht-queries c$+! o> ;
 
-previous
+get-current definitions
 
 +net2o: dht-value? ( type -- ) 64>n d#value? ;
 \g query the dht values of this type, and send back as many
@@ -350,9 +374,13 @@ previous
 +net2o: dht-open ( fid -- ) 64>n d#open ;
 +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
+previous set-current
+
 \ value reading requires constructing answer packet
 
-\ facilitate stuff
+' context-table is gen-table
+
+\ facility stuff
 
 : .sig ( -- )  sigdate datesize# type skc pkc ed-sign type space ;
 : .pk ( -- )  pkc keysize type ;
@@ -386,7 +414,7 @@ false Value add-myip
     add-myip IF
 	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
     THEN
-    request,  end-cmd
+    endwith request,  end-cmd
     ['] end-cmd IS expect-reply? ;
 : addme ( addr u -- ) 2dup .iperr
     pub? IF
@@ -408,10 +436,10 @@ previous
 
 also net2o-base
 : replaceme, ( -- )
-    pkc keysize 2* $, dht-id k#host ulit, dht-value? ;
+    pkc keysize 2* $, dht-id <req k#host ulit, dht-value? req> endwith ;
 
 : remove-me, ( -- )
-    d#id @ k#host cells + dup
+    dht-host dup
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, k#host ulit, dht-value- ;] $[]map
     $[]off ;
@@ -420,25 +448,25 @@ previous
 : me>d#id ( -- ) pkc keysize 2* >d#id ?d#id ;
 
 : n2o:send-replace ( -- )
-    me>d#id d#id @ IF
+    me>d#id dht-hash IF
 	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id remove-me,
+	  pkc keysize 2* $, dht-id remove-me, endwith
 	  cookie+request
 	end-code|
     THEN ;
 
 : set-revocation ( addr u -- )
-    d#id @ k#host cells + $+[]! ;
+    dht-host $+[]! ;
 
 Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
     net2o-code  expect-reply
-      d#id @ $@ $, dht-id remove-me,
+      dht-hash $@ $, dht-id remove-me,
       keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
-      2dup $, k#host ulit, dht-value+
+      2dup $, k#host ulit, dht-value+ endwith
       cookie+request end-code| \ send revocation upstrem
-    d#id @ $@ renew-key ; \ replace key in key storage
+    dht-hash $@ renew-key ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replaceme, cookie+request
@@ -467,12 +495,12 @@ Defer renew-key
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply
 	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
-		beacon( ." Send reply to: " sockaddr alen @ .address cr )
+		beacon( ." Send reply to: " sockaddr alen @ .address F cr )
 		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
 	    THEN
 	endof
 	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got reply: " sockaddr alen @ .address cr )
+	    beacon( ." Got reply: " sockaddr alen @ .address F cr )
 	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
 	    IF
 		beacon( ." Try replace" cr )
