@@ -293,7 +293,8 @@ dht-table ' new static-a with-allocater constant dht-stub
     cell +LOOP ;
 : d#value- ( addr u key -- )
     cells dup k#size u>= !!no-dht-key!!
-    o dht-stub = IF  drop 2drop  EXIT  THEN \ we don't have it
+    o dht-stub = IF  dht( ." remove from stub" cr )
+	drop 2drop  EXIT  THEN \ we don't have it
     dup >r dht-hash +
     r@ k#host cells = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
@@ -301,6 +302,7 @@ dht-table ' new static-a with-allocater constant dht-stub
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
     rdrop drop 2drop ;
 : d#value+ ( addr u key -- ) \ with sanity checks
+    ?d#id
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
     r@ k#host = IF  check-host  THEN
     r@ k#tags = IF  check-tag   THEN

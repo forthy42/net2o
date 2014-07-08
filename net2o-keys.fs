@@ -314,16 +314,21 @@ set-current previous previous
     0 >o nick-key  this-keyid @ 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
-: replace-key ( addr u -- )  1 /string
+: replace-key 1 /string { rev-addr u -- } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
-    this-keyid @ o 2over key:new o key-entry >osize @ move
+    s" #revoked" dup >r ke-nick $+!
+    this-keyid @ ke-nick $@ r> - ke-prof $@ ke-sigs $@ ke-type @ ke-key @ 
+    rev-addr keysize 2* key:new
+    ke-key ! ke-type ! ke-sigs $! ke-prof $! ke-nick $!
     keysize key-table #off
-    2dup keysize 2* umin ke-pk $!
-    + 1- dup c@ 2* - $10 - 64@ ke-first 64!
+    rev-addr keysize 2* ke-pk $!
+    rev-addr u + 1- dup c@ 2* - $10 - dup 64@ ke-first 64! 64'+ 64@ ke-last 64!
     key( ." with:" cr o cell- 0 .key ) n:oswap n:o> ;
 
 :noname ( revaddr u1 keyaddr u2 -- )
-    current-key replace-key skc keysize ke-sk sec! n:o> ; is renew-key
+    current-key
+    replace-key skc keysize ke-sk sec! o this-key !
+    n:o> ; is renew-key
 
 0 [IF]
 Local Variables:
