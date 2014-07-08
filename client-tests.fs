@@ -60,44 +60,51 @@ UValue test#  0 to test#
 
 : c:add-tag ( -- ) +addme
     net2o-code
-    expect-reply
-    s" DHT test" $, type cr get-ip
-    pkc keysize 2* $, dht-id
-    forever "test:tag" pkc keysize 2* gen-tag-del $, k#tags ulit, dht-value-
-    forever "test:tag" pkc keysize 2* gen-tag $, k#tags ulit, dht-value+
-    endwith end-code| -setip ;
+      expect-reply
+      s" DHT test" $, type cr get-ip
+      pkc keysize 2* $, dht-id
+      forever "test:tag" pkc keysize 2* gen-tag-del $, k#tags ulit, dht-value-
+      forever "test:tag" pkc keysize 2* gen-tag $, k#tags ulit, dht-value+
+      endwith end-code| -setip ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
-    expect-reply
-    0 >o nick-key ke-pk $@ o> $, dht-id <req
-    k#host ulit, dht-value? k#tags ulit, dht-value? req>
-    endwith cookie+request
+      expect-reply
+      nick-key .ke-pk $@ $, dht-id <req
+      k#host ulit, dht-value? k#tags ulit, dht-value? req>
+      endwith cookie+request
     end-code| ;
 
 also net2o-base
+: fetch-id, ( id-addr u -- )
+    $, dht-id <req k#host ulit, dht-value? req> endwith ;
 : fetch-host, ( nick u -- )
-    0 >o nick-key ke-pk $@ o> $, dht-id
-    <req k#host ulit, dht-value? req> endwith ;
+    nick-key .ke-pk $@ fetch-id, ;
 previous
 
 : c:fetch-host ( nick u -- )
     net2o-code
-    expect-reply  fetch-host,
-    cookie+request
+      expect-reply  fetch-host,
+      cookie+request
     end-code| ;
 
-: c:addme-fetch-host ( nick u -- ) +addme connection @ o ~~ 2drop
-    net2o-code ~~
-    expect-reply get-ip fetch-host, replaceme,
-      ~~ cookie+request
-    end-code| ~~ -setip ~~ n2o:send-replace ~~ ;
+: c:fetch-id ( nick u -- )
+    net2o-code
+      expect-reply  fetch-id,
+      cookie+request
+    end-code| ;
+
+: c:addme-fetch-host ( nick u -- ) +addme
+    net2o-code
+      expect-reply get-ip fetch-host, replaceme,
+      cookie+request
+    end-code| -setip n2o:send-replace ;
 
 : c:fetch-tags ( -- )
     net2o-code
-    expect-reply
-    0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
-    n2o:done
+      expect-reply
+      0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
+      n2o:done
     end-code| ;
 
 : c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
@@ -107,78 +114,78 @@ previous
 : c:download1 ( -- )
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
-    expect-reply
-    !time .time s" Download test" $, type cr ( see-me ) get-ip
-    $400 blocksize! $400 blockalign! stat( request-stats )
-    "net2o.fs" "net2o.fs" >cache n2o:copy
-    "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
-    "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
-    n2o:done
+      expect-reply
+      !time .time s" Download test" $, type cr ( see-me ) get-ip
+      $400 blocksize! $400 blockalign! stat( request-stats )
+      "net2o.fs" "net2o.fs" >cache n2o:copy
+      "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
+      "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
+      n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Download test 2: 7 medium photos" cr ;] $err
     net2o-code
-    expect-reply close-all \ rewind-total
-    .time s" Download test 2" $, type cr ( see-me )
-    $10000 blocksize! $400 blockalign! stat( request-stats )
-    "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
-    "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
-    "data/2011-06-15_12-27-03-small.jpg" "photo004s.jpg" >cache n2o:copy
-    "data/2011-06-24_11-26-36-small.jpg" "photo005s.jpg" >cache n2o:copy
-    "data/2011-06-27_19-33-04-small.jpg" "photo006s.jpg" >cache n2o:copy
-    "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
-    "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
-    n2o:done
+      expect-reply close-all \ rewind-total
+      .time s" Download test 2" $, type cr ( see-me )
+      $10000 blocksize! $400 blockalign! stat( request-stats )
+      "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
+      "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
+      "data/2011-06-15_12-27-03-small.jpg" "photo004s.jpg" >cache n2o:copy
+      "data/2011-06-24_11-26-36-small.jpg" "photo005s.jpg" >cache n2o:copy
+      "data/2011-06-27_19-33-04-small.jpg" "photo006s.jpg" >cache n2o:copy
+      "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
+      "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
+      n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
     [: ." Download test 3: 2 big photos" cr ;] $err
     net2o-code
-    expect-reply close-all \ rewind-total
-    .time s" Download test 3" $, type cr ( see-me )
-    $10000 blocksize! $400 blockalign! stat( request-stats )
-    "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
-    "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
-    n2o:done
+      expect-reply close-all \ rewind-total
+      .time s" Download test 3" $, type cr ( see-me )
+      $10000 blocksize! $400 blockalign! stat( request-stats )
+      "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
+      "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
+      n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
     net2o-code
-    expect-reply close-all \ rewind-total
-    .time s" Download test 4" $, type cr ( see-me )
-    $10000 blocksize! $400 blockalign! stat( request-stats )
-    "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
-    "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
-    "data/2011-06-15_12-27-03.jpg" "photo004.jpg" >cache n2o:copy
-    "data/2011-06-24_11-26-36.jpg" "photo005.jpg" >cache n2o:copy
-    "data/2011-06-27_19-33-04.jpg" "photo006.jpg" >cache n2o:copy
-    "data/2011-06-27_19-55-48.jpg" "photo007.jpg" >cache n2o:copy
-    "data/2011-06-28_06-54-09.jpg" "photo008.jpg" >cache n2o:copy
-    $10000. 0 limit!
-    $20000. 1 limit!
-    $30000. 2 limit!
-    $40000. 3 limit!
-    $50000. 4 limit!
-    $60000. 5 limit!
-    $70000. 6 limit!
-    n2o:done
+      expect-reply close-all \ rewind-total
+      .time s" Download test 4" $, type cr ( see-me )
+      $10000 blocksize! $400 blockalign! stat( request-stats )
+      "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
+      "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
+      "data/2011-06-15_12-27-03.jpg" "photo004.jpg" >cache n2o:copy
+      "data/2011-06-24_11-26-36.jpg" "photo005.jpg" >cache n2o:copy
+      "data/2011-06-27_19-33-04.jpg" "photo006.jpg" >cache n2o:copy
+      "data/2011-06-27_19-55-48.jpg" "photo007.jpg" >cache n2o:copy
+      "data/2011-06-28_06-54-09.jpg" "photo008.jpg" >cache n2o:copy
+      $10000. 0 limit!
+      $20000. 1 limit!
+      $30000. 2 limit!
+      $40000. 3 limit!
+      $50000. 4 limit!
+      $60000. 5 limit!
+      $70000. 6 limit!
+      n2o:done
     end-code| ['] .time $err ;
 
 : c:download4a ( -- )
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
     net2o-code
-    expect-reply
-    .time s" Download test 4a" $, type cr  ( see-me )
-    -1. 0 limit!
-    -1. 1 limit!
-    -1. 2 limit!
-    -1. 3 limit!
-    -1. 4 limit!
-    -1. 5 limit!
-    -1. 6 limit!
-    n2o:done
+      expect-reply
+      .time s" Download test 4a" $, type cr  ( see-me )
+      -1. 0 limit!
+      -1. 1 limit!
+      -1. 2 limit!
+      -1. 3 limit!
+      -1. 4 limit!
+      -1. 5 limit!
+      -1. 6 limit!
+      n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
 : c:test-rest ( -- )

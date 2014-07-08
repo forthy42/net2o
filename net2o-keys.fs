@@ -95,11 +95,11 @@ Variable this-keyid
 
 \ search for keys - not optimized
 
-: nick-key ( addr u -- ) \ search for key nickname and make current
-    key-table 
-    [: dup >r cell+ $@ drop cell+ .ke-nick $@ 2over str= IF
-	r@ make-thiskey
-    THEN  rdrop ;] #map 2drop ;
+: nick-key ( addr u -- o ) \ search for key nickname
+    0 -rot key-table 
+    [: cell+ $@ drop cell+ >o ke-nick $@ 2over str= IF
+	rot drop o -rot
+    THEN  o> ;] #map 2drop ;
 
 : key-exist? ( addr u -- flag )
     key-table #@ d0<> ; 
@@ -304,14 +304,14 @@ set-current previous previous
 
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
-    nick-key  this-keyid @ 0= ?EXIT
-    this-key @ .ke-pk $@ pkc swap keysize 2* umin move
-    ke-sk @ skc keysize move ;
+    nick-key >o o 0= IF  EXIT  THEN
+    ke-pk $@ pkc swap keysize 2* umin move
+    ke-sk @ skc keysize move o> ;
 
 : i'm ( "name" -- ) parse-name >key ;
 
 : dest-key ( addr u -- )
-    0 >o nick-key  this-keyid @ 0= !!unknown-key!!
+    nick-key >o o 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
 : replace-key 1 /string { rev-addr u -- } \ revocation ticket
@@ -320,7 +320,6 @@ set-current previous previous
     this-keyid @ ke-nick $@ r> - ke-prof $@ ke-sigs $@ ke-type @ ke-key @ 
     rev-addr keysize 2* key:new
     ke-key ! ke-type ! ke-sigs $! ke-prof $! ke-nick $!
-    keysize key-table #off
     rev-addr keysize 2* ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - dup 64@ ke-first 64! 64'+ 64@ ke-last 64!
     key( ." with:" cr o cell- 0 .key ) n:oswap n:o> ;

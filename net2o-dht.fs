@@ -444,17 +444,19 @@ also net2o-base
     d#id @ .dht-host dup >r
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, k#host ulit, dht-value- ;] $[]map
-    r> $[]off ;
+    r@ $@ dump r> $[]off ;
 previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ?d#id ;
 
 : n2o:send-replace ( -- )
     me>d#id d#id @ IF
-	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id remove-me, endwith
-	  cookie+request
-	end-code|
+	d#id @ .dht-host $[]# IF
+	    net2o-code   expect-reply
+	      pkc keysize 2* $, dht-id remove-me, endwith
+	      cookie+request
+	    end-code|
+	THEN
     THEN n:o> ;
 
 : set-revocation ( addr u -- )

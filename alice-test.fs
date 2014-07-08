@@ -18,12 +18,13 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-: c:lookup ( addr u -- )
-    $2000 $10000 "test" ins-ip c:connect
-    BEGIN  2dup ~~ c:addme-fetch-host ~~ o >o
-	nick-key ke-pk $@ o> ~~ >d#id
-	0 dht-host $[]@ over c@ '!' =  WHILE
-	    ~~ replace-key ~~ ke-nick $@ ~~ n:o>
+: c:lookup ( addr u -- id u )
+  $2000 $10000 "test" ins-ip c:connect
+    2dup c:addme-fetch-host
+    nick-key .ke-pk $@
+    BEGIN  >d#id 0 dht-host $[]@ over c@ '!' =  WHILE
+	    replace-key ke-pk $@ ." replace key: " 2dup 85type cr
+	    n:o> 2dup c:fetch-id
     REPEAT  n:o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
     host>$ IF
@@ -39,7 +40,7 @@ init-client
 : n2o:lookup ( addr u -- )
     2dup c:lookup
     0 n2o:new-context dest-key  return-addr $10 erase
-    d#id @ k#host cells + ['] c:insert-host $[]map ;
+    d#id @ .dht-host ['] c:insert-host $[]map ;
 
 : nat:connect ( addr u -- )
     init-cache' n2o:lookup
