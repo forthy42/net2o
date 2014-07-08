@@ -18,7 +18,7 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:revoke-bob ( -- )
-    o >o me>d#id o> now>never
+    me>d#id n:o> now>never
     x" D82AF4AE7CD3DA7316CE6F26BC5792F4F5E6B36B4C14F7D60C49B421AE1D5468"
     revoke-me ;
 
@@ -27,7 +27,7 @@ init-client
     ." Bob connected" cr
     c:revoke-bob
     ." Bob revoked" cr
-    o >o me>d#id o> replace-me
+    me>d#id n:o> replace-me
     ." Bob replaced" cr
     do-disconnect ;
 

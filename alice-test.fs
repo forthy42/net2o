@@ -20,11 +20,11 @@ init-client
 
 : c:lookup ( addr u -- )
     $2000 $10000 "test" ins-ip c:connect
-    BEGIN  2dup c:addme-fetch-host  0 >o
-	nick-key ke-pk $@ >d#id
-	0 d#id @ k#host cells + $[]@ over c@ '!' =  WHILE
-	    replace-key ke-nick $@ o>
-    REPEAT  o> 2drop do-disconnect ;
+    BEGIN  2dup ~~ c:addme-fetch-host ~~ o >o
+	nick-key ke-pk $@ o> ~~ >d#id
+	0 dht-host $[]@ over c@ '!' =  WHILE
+	    ~~ replace-key ~~ ke-nick $@ ~~ n:o>
+    REPEAT  n:o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
     host>$ IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN

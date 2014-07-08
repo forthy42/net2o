@@ -239,8 +239,9 @@ User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 \ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE  code-lock  THEN ;
 : connection@ ( -- addr/0 )  o IF  connection @  ELSE  0 THEN ;
+: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+	connection@ .code-lock THEN ;
 : cmdbuf$ ( -- addr u )   connection@ >o cmdbuf cmdbuf# @ o> ;
 : endcmdbuf  ( -- addr' ) connection@ >o cmdbuf maxdata + o> ;
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
@@ -281,8 +282,8 @@ comp: :, also net2o-base ;
     64dup 64-0= !!no-dest!! THEN ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
-    cmdbuf cmdbuf# @ cmddest send-cmd
-    cmd0source @ 0= IF  code-update punch-load $off  THEN ;
+    connection@ >o cmdbuf cmdbuf# @ cmddest send-cmd
+    cmd0source @ 0= IF  code-update punch-load $off  THEN o> ;
 
 also net2o-base
 
@@ -311,7 +312,8 @@ previous
     acked  0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
-    cmdbuf$ code-reply dup >r 2! code-vdest r> reply-dest 64! ;
+    cmdbuf$
+    connection@ >o code-reply dup >r 2! code-vdest r> reply-dest 64! o> ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
@@ -400,7 +402,7 @@ also net2o-base definitions
 : dfloat, ( r -- )  sflit cmdbuf$ + df! 1 dfloats cmdbuf+ ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
-: end-code ( -- )  (end-code) previous ;
+: end-code ( -- ) (end-code) previous ;
 comp: :, previous ;
 : push-cmd ( -- )
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;

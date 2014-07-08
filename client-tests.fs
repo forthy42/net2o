@@ -87,11 +87,11 @@ previous
     cookie+request
     end-code| ;
 
-: c:addme-fetch-host ( nick u -- ) +addme
-    net2o-code
+: c:addme-fetch-host ( nick u -- ) +addme connection @ o ~~ 2drop
+    net2o-code ~~
     expect-reply get-ip fetch-host, replaceme,
-    cookie+request
-    end-code| -setip n2o:send-replace ;
+      ~~ cookie+request
+    end-code| ~~ -setip ~~ n2o:send-replace ~~ ;
 
 : c:fetch-tags ( -- )
     net2o-code
