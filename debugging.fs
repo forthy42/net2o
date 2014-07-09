@@ -140,6 +140,7 @@ debug: noipv4( \ use only ipv6 for routing
 debug: request( \ track requests
 debug: beacon( \ debug sending beacons
 debug: replace-beacon( \ reply to every beacon
+debug: kalloc( \ secure allocate
 
 -db profile( \ )
 

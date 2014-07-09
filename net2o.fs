@@ -56,8 +56,8 @@ require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
 require net2o-err.fs
-require kregion.fs
 require debugging.fs
+require kregion.fs
 require libkeccak.fs
 \ require wurstkessel.fs
 \ wurstkessel-o crypto-o !

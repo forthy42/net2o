@@ -25,7 +25,7 @@ $4000 Constant /kregion
     r@ /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
 	2drop /kregion alloc+lock /kregion 2dup kregion 2!  THEN
-    over swap r> safe/string kregion 2! ;
+    over swap r> safe/string kregion 2! kalloc( ." kalloc: " dup hex. cr ) ;
 
 \ fixed size secrets are assumed to be all 64 bytes long
 \ if they are just 32 bytes, the second half is all zero

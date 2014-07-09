@@ -460,12 +460,13 @@ previous
 Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
+    keysize <> !!keysize!! >revoke me>d#id >o
     net2o-code  expect-reply
       dht-hash $@ $, dht-id remove-me,
-      keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
+      revoke-key 2dup set-revocation
       2dup $, k#host ulit, dht-value+ endwith
       cookie+request end-code| \ send revocation upstrem
-    dht-hash $@ renew-key ; \ replace key in key storage
+    dht-hash $@ renew-key drop o> ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replace-me, cookie+request
