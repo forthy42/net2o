@@ -64,6 +64,7 @@ cmd-class class
     64field: ke-first
     64field: ke-last
     64field: ke-offset \ offset in key file
+    0 +field ke-end
 end-class key-entry
 
 Variable key-entry-table
@@ -75,23 +76,21 @@ Variable key-entry-table
 0 Value sample-key
 
 Variable key-table
-Variable this-key
-Variable this-keyid
-2Variable addsig
+
 64Variable key-read-offset
 
-: current-key ( addr u -- )
-    2dup keysize umin key-table #@ drop cell+ dup this-key ! n:>o ke-pk $! ;
-: make-thiskey ( addr -- )
-    dup $@ drop this-keyid !  cell+ $@ drop cell+ dup this-key ! >o rdrop ;
+: current-key ( addr u -- o )
+    2dup keysize umin key-table #@ drop cell+ >o ke-pk $! o o> ;
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key dup cell- @ >osize @ 2dup cell /string erase
-    over >o 64#-1 ke-last 64! key-read-offset 64@ ke-offset 64!
-    key-entry-table @ token-table ! o>
-    -1 cells /string  keypack-all# n>64 key-read-offset 64+!
-    2over keysize umin key-table #! current-key ;
+    sample-key >o ke-sk ke-end over - erase
+    64#-1 ke-last 64!
+    key-entry-table @ token-table !
+    key-read-offset 64@ ke-offset 64!
+    keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
+    2over keysize umin key-table #! o>
+    current-key ;
 
 \ search for keys - not optimized
 
@@ -191,14 +190,13 @@ get-current also net2o-base definitions
 cmd-table $@ key-entry-table $!
 ' key-entry-table is gen-table
 
-10 net2o: newkey ( $:string -- ) $> key:new ;
+10 net2o: newkey ( $:string -- o:key ) $> key:new n:>o ;
 key-entry-table >table
 +net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
 +net2o: keynick ( $:string -- )    $> ke-nick $! ;
 +net2o: keyprofile ( $:string -- ) $> ke-prof $! ;
-+net2o: newkeysig ( $:string -- )  $> save-mem addsig 2!
-    addsig 2 cells ke-sigs $+! ;
++net2o: newkeysig ( $:string -- )  $> ke-sigs $+[]! ;
 +net2o: keymask ( x -- )  64drop ;
 +net2o: keyfirst ( date-ns -- )  ke-first 64! ;
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
@@ -207,7 +205,6 @@ dup set-current previous
 ' context-table is gen-table
 
 key-entry ' new static-a with-allocater to sample-key
-sample-key this-key ! \ dummy
 sample-key >o key-entry-table @ token-table ! o>
 
 : key:code ( -- )
@@ -314,20 +311,19 @@ set-current previous previous
     nick-key >o o 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
-: replace-key 1 /string { rev-addr u -- } \ revocation ticket
+: replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
     s" #revoked" dup >r ke-nick $+!
-    this-keyid @ ke-nick $@ r> - ke-prof $@ ke-sigs $@ ke-type @ ke-key @ 
-    rev-addr keysize 2* key:new
-    ke-key ! ke-type ! ke-sigs $! ke-prof $! ke-nick $!
+    ke-nick $@ r> - ke-prof $@ ke-sigs ke-type @ ke-key @ 
+    rev-addr keysize 2* key:new >o
+    ke-key ! ke-type ! [: ke-sigs $+[]! ;] $[]map ke-prof $! ke-nick $!
     rev-addr keysize 2* ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - dup 64@ ke-first 64! 64'+ 64@ ke-last 64!
-    key( ." with:" cr o cell- 0 .key ) n:oswap n:o> ;
+    key( ." with:" cr o cell- 0 .key ) o o> ;
 
-:noname ( revaddr u1 keyaddr u2 -- )
-    current-key
-    replace-key skc keysize ke-sk sec! o this-key !
-    n:o> ; is renew-key
+:noname ( revaddr u1 keyaddr u2 -- o )
+    current-key >o replace-key o> >o skc keysize ke-sk sec!
+    o o> ; is renew-key
 
 0 [IF]
 Local Variables:

@@ -696,7 +696,7 @@ reply-table $@ fs-table $!
     data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
 
 : rewind ( -- )
-    save( rewind-flush )else( rewind-total ) ;
+    save( rewind-total )else( rewind-flush ) ;
 
 \ ids 90..100 reserved for DHT
 
@@ -796,8 +796,7 @@ also net2o-base
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin
     dest-tail @ umax dup dest-tail !@ o>
-    save( \ 2dup u> IF  ." tail: " dup hex. over hex. F cr  THEN
-    u> IF  net2o:save& 64#0 burst-ticks 64!  THEN )else( 2drop ) ;
+    save( 2drop )else( u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ) ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 8 Value max-resend#
@@ -855,7 +854,7 @@ also net2o-base
 : rewind-transfer ( -- )
     rewind data-end? IF  filereq# @ n2o:request-done
     ELSE  restart-transfer  THEN
-    save( )else( request-stats? IF  send-timing  THEN ) ;
+    save( request-stats? IF  send-timing  THEN ) ;
 
 : request-stats   F true to request-stats?  track-timing ;
 
@@ -870,7 +869,7 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
-	net2o:ack-cookies  save( )else( n2o:spit ) rewind-transfer
+	net2o:ack-cookies  save( n2o:spit ) rewind-transfer
 	64#0 burst-ticks 64!
     THEN ;
 
@@ -986,7 +985,7 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout  net2o:genack
-    resend-all save( rewind-flush slurp ) end-code ;
+    resend-all save( )else( rewind-flush slurp ) end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )

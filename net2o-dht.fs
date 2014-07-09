@@ -90,7 +90,6 @@ s" invalid signature"            throwcode !!wrong-sig!!
 
 \ Hash state variables
 
-UValue d#id
 $41 Constant sigonlysize#
 $51 Constant sigsize#
 $71 Constant sigpksize#
@@ -258,19 +257,18 @@ Variable revtoken
 
 dht-table ' new static-a with-allocater constant dht-stub
 
-: >d#id ( addr u -- )
-    2dup d#public d# to d#id
-    d#id @ ?dup-IF  nip nip
-    ELSE  dht-stub >o dht-table @ token-table ! dht-hash $! o o>  THEN
-    o swap n:>o connection ! ;
+: >d#id ( addr u -- o ) connection @ { conn }
+    2dup d#public d# @ >o
+    o 0= IF  dht-stub >o rdrop dht-table @ token-table ! dht-hash $!  THEN
+    conn connection ! o o> ;
 : ?d#id ( -- )
-    d#id @ 0= IF \ want to allocate it? check first!
+    o dht-stub = IF \ want to allocate it? check first!
 	dht-hash $@ connection @
 	dht-class new >o rdrop connection ! dht-hash $!
-	dht-table @ token-table ! o d#id !
-    ELSE  connection @ d#id @ >o rdrop connection !  THEN ;
+	dht-table @ token-table ! o dht-hash $@ d#public d# !
+    THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
-    cells dup k#size u>= !!no-dht-key!!
+    cells dup k#size u>= !!no-dht-key!!  ?d#id
     dht-hash + dht( ." ins into: " dup hex. dup $[]# F . F cr ) $ins[]sig ;
 
 : .tag ( addr u -- ) 2dup 2>r 
@@ -302,7 +300,6 @@ dht-table ' new static-a with-allocater constant dht-stub
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
     rdrop drop 2drop ;
 : d#value+ ( addr u key -- ) \ with sanity checks
-    ?d#id
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
     r@ k#host = IF  check-host  THEN
     r@ k#tags = IF  check-tag   THEN
@@ -312,7 +309,7 @@ dht-table ' new static-a with-allocater constant dht-stub
 
 get-current also net2o-base definitions
 
-100 net2o: dht-id ( $:string -- ) $> >d#id ;
+100 net2o: dht-id ( $:string -- o:o ) $> >d#id n:>o ;
 \g set dht id for further operations on it
 dht-table >table
 
@@ -356,8 +353,8 @@ end-class dht-file-class
 :noname $FFFFFFFF n>64 64dup fs-limit 64! fs-size 64! ; dht-file-class to fs-open
 :noname ( addr u -- n )  dup >r
     dht-queries $@ bounds ?DO
-	I 1+ I c@ 2dup >d#id + c@ >r
-	d#id, r> d#values,
+	I 1+ I c@ 2dup >d#id >o + c@ >r
+	d#id, r> d#values, o>
     I c@ 2 + +LOOP  nip r> swap - ; dht-file-class to fs-read
 
 : new>dht ( -- )
@@ -437,50 +434,48 @@ previous
 \ replace me stuff
 
 also net2o-base
-: replaceme, ( -- )
+: replace-me, ( -- )
     pkc keysize 2* $, dht-id <req k#host ulit, dht-value? req> endwith ;
 
 : remove-me, ( -- )
-    d#id @ .dht-host dup >r
+    dht-host dup >r
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, k#host ulit, dht-value- ;] $[]map
     r@ $@ dump r> $[]off ;
 previous
 
-: me>d#id ( -- ) pkc keysize 2* >d#id ?d#id ;
+: me>d#id ( -- ) pkc keysize 2* >d#id >o ?d#id o o> ;
 
 : n2o:send-replace ( -- )
-    me>d#id d#id @ IF
-	d#id @ .dht-host $[]# IF
-	    net2o-code   expect-reply
-	      pkc keysize 2* $, dht-id remove-me, endwith
-	      cookie+request
-	    end-code|
-	THEN
-    THEN n:o> ;
+    me>d#id >o dht-host $[]# IF
+	net2o-code   expect-reply
+	  pkc keysize 2* $, dht-id remove-me, endwith
+	  cookie+request
+	end-code|
+    THEN o> ;
 
 : set-revocation ( addr u -- )
-    d#id @ .dht-host $+[]! ;
+    dht-host $+[]! ;
 
 Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
     net2o-code  expect-reply
-      d#id @ .dht-hash $@ $, dht-id remove-me,
+      dht-hash $@ $, dht-id remove-me,
       keysize <> !!keysize!! >revoke revoke-key 2dup set-revocation
       2dup $, k#host ulit, dht-value+ endwith
       cookie+request end-code| \ send revocation upstrem
-    d#id @ .dht-hash $@ renew-key ; \ replace key in key storage
+    dht-hash $@ renew-key ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
-    net2o-code   expect-reply get-ip replaceme, cookie+request
+    net2o-code   expect-reply get-ip replace-me, cookie+request
     end-code| -setip
     n2o:send-replace ;
 
 : revoke-me ( addr u -- )
     \G give it your revocation secret
     +addme
-    net2o-code   expect-reply replaceme, cookie+request  end-code|
+    net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip n2o:send-revoke ;
 
 : do-disconnect ( -- )

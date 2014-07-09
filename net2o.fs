@@ -1563,7 +1563,6 @@ Variable fs-table
 
 : dest-top! ( addr -- )
     \ dest-tail @ dest-size @ + umin
-    \ save( ." dest-top: " dup hex. dest-top @ hex. cr )
     dup dup dest-top @ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
@@ -2008,7 +2007,7 @@ rdata-class to rewind-timestamps-partial
 
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
-    r> data-rmap @ >o dest-back !@ \ save( ." back: " dest-back @ hex. dup hex. cr )
+    r> data-rmap @ >o dest-back !@
     flush( ." rewind partial " dup hex. cr )
     dup rewind-partial  dup  dest-back!  do-slurp !@ drop o> ;
 
