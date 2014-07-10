@@ -164,10 +164,11 @@ Variable revtoken
 
 : >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
 
+: +revsign ( sk pk -- )  ed-sign revtoken $+! bl revtoken c$+! ;
+
 : sign-token, ( sk pk string u2 -- )
     c:0key revtoken $@ 2swap >keyed-hash
-    sigdate datesize# "date" >keyed-hash
-    ed-sign revtoken $+! bl revtoken c$+! ;
+    sigdate datesize# "date" >keyed-hash +revsign ;
 
 : revoke-key ( -- addr u )
     skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
@@ -179,9 +180,10 @@ Variable revtoken
     oldskrev oldpkrev "revoke" sign-token, \ revoke signature
     skc pkc "selfsign" sign-token,         \ self signed with new key
     "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
-    revtoken $@ gen>host                   \ sign host information with old key
-    [: type sigdate datesize# type oldskc oldpkc ed-sign type space ;] $tmp
-    0oldkey ;
+    revtoken $@ gen>host 2drop             \ sign host information with old key
+    sigdate datesize# revtoken $+!
+    oldskc oldpkc +revsign
+    0oldkey revtoken $@ ;
 
 : revoke? ( addr u -- addr u flag )
     2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
@@ -257,13 +259,13 @@ Variable revtoken
 
 dht-table ' new static-a with-allocater constant dht-stub
 
-: >d#id ( addr u -- o ) connection @ { conn }
+: >d#id ( addr u -- o ) connection@ { conn }
     2dup d#public d# @ >o
     o 0= IF  dht-stub >o rdrop dht-table @ token-table ! dht-hash $!  THEN
     conn connection ! o o> ;
 : ?d#id ( -- )
     o dht-stub = IF \ want to allocate it? check first!
-	dht-hash $@ connection @
+	dht-hash $@ connection@
 	dht-class new >o rdrop connection ! dht-hash $!
 	dht-table @ token-table ! o dht-hash $@ d#public d# !
     THEN ;
@@ -460,7 +462,8 @@ previous
 Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
-    keysize <> !!keysize!! >revoke me>d#id >o
+    keysize <> !!keysize!! >revoke
+    me>d#id >o
     net2o-code  expect-reply
       dht-hash $@ $, dht-id remove-me,
       revoke-key 2dup set-revocation

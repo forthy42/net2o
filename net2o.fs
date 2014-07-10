@@ -1148,6 +1148,7 @@ Variable mapstart $1 mapstart !
 : server? ( -- flag )  is-server c@ negate ;
 : server! ( -- )  1 is-server c! ;
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
+: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0 THEN ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
@@ -1552,7 +1553,7 @@ Variable fs-table
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
     [: fs-class new { w^ fsp } fsp cell file-state $+!
-      o fsp @ >o connection ! fs-id !
+      connection@ fsp @ >o connection ! fs-id !
       fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
     filestate-lock c-section ;
 

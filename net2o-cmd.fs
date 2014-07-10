@@ -239,7 +239,6 @@ User cmdbuf#
 
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 \ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
-: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0 THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
 	connection@ .code-lock THEN ;
 : cmdbuf$ ( -- addr u )   connection@ >o cmdbuf cmdbuf# @ o> ;

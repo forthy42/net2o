@@ -84,9 +84,10 @@ Variable key-table
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    sample-key >o ke-sk ke-end over - erase
-    64#-1 ke-last 64!
+    connection@ sample-key >o connection !
     key-entry-table @ token-table !
+    ke-sk ke-end over - erase
+    64#-1 ke-last 64!
     key-read-offset 64@ ke-offset 64!
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over keysize umin key-table #! o>
