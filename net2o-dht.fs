@@ -266,7 +266,8 @@ dht-table ' new static-a with-allocater constant dht-stub
 : ?d#id ( -- )
     o dht-stub = IF \ want to allocate it? check first!
 	dht-hash $@ connection@
-	dht-class new >o rdrop connection ! dht-hash $!
+	dht-class new >o rdrop dht( ." new dht: " o hex. F cr )
+	connection ! dht-hash $!
 	dht-table @ token-table ! o dht-hash $@ d#public d# !
     THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
@@ -295,12 +296,12 @@ dht-table ' new static-a with-allocater constant dht-stub
     cells dup k#size u>= !!no-dht-key!!
     o dht-stub = IF  dht( ." remove from stub" cr )
 	drop 2drop  EXIT  THEN \ we don't have it
-    dup >r dht-hash +
-    r@ k#host cells = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
+    dht-hash +
+    dup dht-host = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    r@ k#tags cells = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
+    dup dht-tags = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    rdrop drop 2drop ;
+    drop 2drop ;
 : d#value+ ( addr u key -- ) \ with sanity checks
     dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
     r@ k#host = IF  check-host  THEN
