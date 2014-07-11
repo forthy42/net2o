@@ -257,20 +257,13 @@ Variable revtoken
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 
-dht-table ' new static-a with-allocater constant dht-stub
-
 : >d#id ( addr u -- o )
-    2dup d#public d# @ >o
-    o 0= IF  dht-stub >o rdrop dht-hash $!  THEN o> ;
-: ?d#id ( -- )
-    o dht-stub = IF \ want to allocate it? check first!
-	dht-hash $@
-	dht-class new >o rdrop dht( ." new dht: " o hex. F cr )
-	dht-hash  dht( ." set dht-hash: " dup hex. >r 2dup 85type r> F cr ) $!
-	dht-table @ token-table ~~ ! o dht-hash $@ d#public d# ~~ !
-    THEN ;
+    2dup d#public d#
+    dup @ 0= IF  dht-class new >o
+	o swap !  dht-hash $!  dht-table @ token-table !  o o>
+    ELSE  @ nip nip  THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
-    cells dup k#size u>= !!no-dht-key!!  ?d#id
+    cells dup k#size u>= !!no-dht-key!!
     dht-hash dht( ." access dht: " dup hex. over . F cr ) + dht( ." ins into: " dup hex. dup $[]# F . F cr ) $ins[]sig ;
 
 : .tag ( addr u -- ) 2dup 2>r 
@@ -293,8 +286,6 @@ dht-table ' new static-a with-allocater constant dht-stub
     cell +LOOP ;
 : d#value- ( addr u key -- )
     cells dup k#size u>= !!no-dht-key!!
-    o dht-stub = IF  dht( ." remove from stub" cr )
-	drop 2drop  EXIT  THEN \ we don't have it
     dht-hash dht( ." access dht: " dup hex. over . F cr ) +
     dup dht-host = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
@@ -328,7 +319,7 @@ set-current
 
 \ queries
 
-: d#value? ( key -- )  o dht-stub = IF  drop EXIT  THEN
+: d#value? ( key -- )
     k#tags umin dup cells dht-hash dht( ." access dht: " dup hex. over . F cr ) +
     [: dup $A0 + maxstring <
 	IF  $, dup ulit, dht-value+  ELSE  2drop  THEN ;] $[]map
@@ -376,8 +367,6 @@ get-current definitions
 +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
 previous set-current
-
-dht-stub >o dht-table @ token-table ! o>
 
 \ value reading requires constructing answer packet
 
@@ -448,7 +437,7 @@ also net2o-base
     r@ $@ dump r> $[]off ;
 previous
 
-: me>d#id ( -- ) pkc keysize 2* >d#id >o ?d#id o o> ;
+: me>d#id ( -- ) pkc keysize 2* >d#id ;
 
 : n2o:send-replace ( -- )
     me>d#id >o dht-host $[]# IF

@@ -154,6 +154,13 @@ Defer gen-table
 : .net2o-name ( n -- )  cells >r
     o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r> + (net2o-see) ;
+: .net2o-name' ( n -- )  cells >r
+    o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
+    IF  drop r> .net2o-num  EXIT  THEN  r> + @
+    dup 0<> IF
+	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
+	body>
+    ELSE  drop ['] net2o-crash  THEN  .name ;
 
 : net2o-see ( cmd -- ) hex[
     case
@@ -181,7 +188,7 @@ Variable show-offset  show-offset on
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
-    cmd@ trace( dup IF dup .net2o-name THEN >r .s r> $.s cr ) n>cmd
+    cmd@ trace( dup IF dup .net2o-name' THEN >r .s r> $.s cr ) n>cmd
     @ ?dup-IF  execute  ELSE
 	trace( ." crashing" cr cr ) net2o-crash  THEN  buf-state 2@ ;
 
