@@ -307,7 +307,8 @@ UDefer expect-reply?
 :noname  ['] end-cmd IS expect-reply? ; is init-reply
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd o IF  maxdata code+ code-update THEN  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd
+	connection >o o IF  code-update THEN  o>  THEN ;
 
 previous
 
