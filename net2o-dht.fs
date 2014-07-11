@@ -259,20 +259,19 @@ Variable revtoken
 
 dht-table ' new static-a with-allocater constant dht-stub
 
-: >d#id ( addr u -- o ) connection@ { conn }
+: >d#id ( addr u -- o )
     2dup d#public d# @ >o
-    o 0= IF  dht-stub >o rdrop dht-table @ token-table ! dht-hash $!  THEN
-    conn connection ! o o> ;
+    o 0= IF  dht-stub >o rdrop dht-hash $!  THEN o> ;
 : ?d#id ( -- )
     o dht-stub = IF \ want to allocate it? check first!
-	dht-hash $@ connection@
+	dht-hash $@
 	dht-class new >o rdrop dht( ." new dht: " o hex. F cr )
-	connection ! dht-hash $!
-	dht-table @ token-table ! o dht-hash $@ d#public d# !
+	dht-hash  dht( ." set dht-hash: " dup hex. >r 2dup 85type r> F cr ) $!
+	dht-table @ token-table ~~ ! o dht-hash $@ d#public d# ~~ !
     THEN ;
 : (d#value+) ( addr u key -- ) \ without sanity checks
     cells dup k#size u>= !!no-dht-key!!  ?d#id
-    dht-hash + dht( ." ins into: " dup hex. dup $[]# F . F cr ) $ins[]sig ;
+    dht-hash dht( ." access dht: " dup hex. over . F cr ) + dht( ." ins into: " dup hex. dup $[]# F . F cr ) $ins[]sig ;
 
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
@@ -296,7 +295,7 @@ dht-table ' new static-a with-allocater constant dht-stub
     cells dup k#size u>= !!no-dht-key!!
     o dht-stub = IF  dht( ." remove from stub" cr )
 	drop 2drop  EXIT  THEN \ we don't have it
-    dht-hash +
+    dht-hash dht( ." access dht: " dup hex. over . F cr ) +
     dup dht-host = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
 	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
     dup dht-tags = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
@@ -312,7 +311,7 @@ dht-table ' new static-a with-allocater constant dht-stub
 
 get-current also net2o-base definitions
 
-100 net2o: dht-id ( $:string -- o:o ) $> >d#id n:>o ;
+100 net2o: dht-id ( $:string -- o:o ) $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
 \g set dht id for further operations on it
 dht-table >table
 
@@ -330,7 +329,7 @@ set-current
 \ queries
 
 : d#value? ( key -- )  o dht-stub = IF  drop EXIT  THEN
-    k#tags umin dup cells dht-hash +
+    k#tags umin dup cells dht-hash dht( ." access dht: " dup hex. over . F cr ) +
     [: dup $A0 + maxstring <
 	IF  $, dup ulit, dht-value+  ELSE  2drop  THEN ;] $[]map
     drop ;
@@ -348,7 +347,7 @@ end-class dht-file-class
 : d#values, ( addr u mask -- addr' u' ) { mask }
     k#size cell/ 1 DO
 	mask 1 and IF
-	    I dup cells dht-hash +
+	    I dup cells dht-hash dht( ." access dht: " dup hex. over . F cr ) +
 	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
@@ -377,6 +376,8 @@ get-current definitions
 +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
 previous set-current
+
+dht-stub >o dht-table @ token-table ! o>
 
 \ value reading requires constructing answer packet
 

@@ -50,7 +50,7 @@ UValue test#  0 to test#
 
 : c:connect ( code data nick u ret -- )
     [: .time ." Connect to: " dup hex. cr ;] $err
-    n2o:new-context
+    n2o:new-context >o rdrop o to connection
     dest-key \ get our destination key
     n2o:connect +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;

@@ -84,7 +84,7 @@ Variable key-table
 
 : key:new ( addr u -- )
     \ addr u is the public key
-    connection@ sample-key >o connection !
+    sample-key >o
     key-entry-table @ token-table !
     ke-sk ke-end over - erase
     64#-1 ke-last 64!

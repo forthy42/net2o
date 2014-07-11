@@ -855,7 +855,6 @@ end-class cmd-class \ command interpreter
 Variable cmd-table
 
 cmd-class class
-    field: connection
 end-class reply-class \ command interpreter with replies
 
 Variable reply-table
@@ -1079,9 +1078,11 @@ resend-size# buffer: resend-init
 
 : no-timeout ( -- )  max-int64 next-timeout 64!  0 timeouts ! ;
 
-: n2o:new-context ( addr -- )
-    context-class new >o rdrop timeout( ." new context: " o hex. cr )
-    o connection ! \ backlink to self
+UValue connection
+
+: n2o:new-context ( addr -- o )
+    context-class new >o timeout( ." new context: " o hex. cr )
+    o to connection \ current connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
@@ -1091,7 +1092,7 @@ resend-size# buffer: resend-init
     -1 blocksize !
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
-    filestate-lock 0 pthread_mutex_init drop ;
+    filestate-lock 0 pthread_mutex_init drop o o> ;
 
 \ insert address for punching
 
@@ -1148,7 +1149,6 @@ Variable mapstart $1 mapstart !
 : server? ( -- flag )  is-server c@ negate ;
 : server! ( -- )  1 is-server c! ;
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
-: connection@ ( -- addr/0 )  o IF  connection @  ELSE  0 THEN ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
@@ -1156,7 +1156,7 @@ Variable mapstart $1 mapstart !
 : n2o:new-data pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context  server!  THEN
+	return-addr be@ n2o:new-context >o rdrop  server!  THEN
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
@@ -1164,7 +1164,7 @@ Variable mapstart $1 mapstart !
 : n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context  server!  THEN
+	return-addr be@ n2o:new-context >o rdrop  server!  THEN
     msg( ." code map: " addrs $64. addrd $64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
@@ -1553,7 +1553,7 @@ Variable fs-table
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
     [: fs-class new { w^ fsp } fsp cell file-state $+!
-      connection@ fsp @ >o connection ! fs-id !
+      fsp @ >o fs-id !
       fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
     filestate-lock c-section ;
 
@@ -2453,7 +2453,7 @@ con-cookie >osize @ buffer: cookie-adder
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
-	nip return-addr be@ n2o:new-context o 0 >o rdrop swap
+	nip return-addr be@ n2o:new-context swap
     THEN ;
 
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;

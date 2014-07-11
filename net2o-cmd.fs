@@ -69,6 +69,24 @@ User string-stack  string-max# uallot drop
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
 
+\ string debugging
+
+: printable? ( addr u -- flag )
+    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
+
+: n2o:$. ( addr u -- )
+    2dup printable? IF
+	.\" \"" type
+    ELSE
+	.\" 85\" " 85type
+    THEN  '"' emit ;
+: n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
+
+: $.s ( $string1 .. $stringn -- )
+    string-stack @+ swap bounds U+DO
+	cr i 2@ n2o:$.
+    2 cells +LOOP ;
+
 \ object stack
 
 8 cells Constant object-max#
@@ -132,22 +150,12 @@ Defer gen-table
 	body>
     ELSE  drop ['] net2o-crash  THEN  .name ;
 
-: printable? ( addr u -- flag )
-    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
-
-: n2o.string ( $:string -- )  $>
-    2dup printable? IF
-	cr .\" \"" type
-    ELSE
-	cr .\" 85\" " 85type
-    THEN  .\" \" $, " ;
-
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
 : .net2o-name ( n -- )  cells >r
     o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r> + (net2o-see) ;
 
-: net2o-see ( -- ) hex[
+: net2o-see ( cmd -- ) hex[
     case
 	0 of  ." end-code" cr 0. buf-state 2!  endof
 	1 of  p@ 64. ." lit, "  endof
@@ -173,7 +181,7 @@ Variable show-offset  show-offset on
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
-    cmd@ trace( .s cr ) n>cmd
+    cmd@ trace( dup IF dup .net2o-name THEN >r .s r> $.s cr ) n>cmd
     @ ?dup-IF  execute  ELSE
 	trace( ." crashing" cr cr ) net2o-crash  THEN  buf-state 2@ ;
 
@@ -240,12 +248,12 @@ User cmdbuf#
 : cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
 \ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	connection@ .code-lock THEN ;
-: cmdbuf$ ( -- addr u )   connection@ >o cmdbuf cmdbuf# @ o> ;
-: endcmdbuf  ( -- addr' ) connection@ >o cmdbuf maxdata + o> ;
+	connection .code-lock THEN ;
+: cmdbuf$ ( -- addr u )   connection >o cmdbuf cmdbuf# @ o> ;
+: endcmdbuf  ( -- addr' ) connection >o cmdbuf maxdata + o> ;
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : cmdbuf+ ( n -- )
-    connection@ >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
+    connection >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
 
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
@@ -281,7 +289,7 @@ comp: :, also net2o-base ;
     64dup 64-0= !!no-dest!! THEN ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
-    connection@ >o cmdbuf cmdbuf# @ cmddest send-cmd
+    connection >o cmdbuf cmdbuf# @ cmddest send-cmd
     cmd0source @ 0= IF  code-update punch-load $off  THEN o> ;
 
 also net2o-base
@@ -312,7 +320,7 @@ previous
 : net2o:expect-reply ( -- )  o?
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     cmdbuf$
-    connection@ >o code-reply dup >r 2! code-vdest r> reply-dest 64! o> ;
+    connection >o code-reply dup >r 2! code-vdest r> reply-dest 64! o> ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
@@ -336,7 +344,7 @@ Variable throwcount
     r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
-    string-stack off
+    string-stack off  object-stack off  o to connection
     o IF
 	cmd0source off
 	tag-addr?  IF
@@ -475,7 +483,7 @@ gen-table $@ setup-table $!
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
 	64dup cookie>context?
-	IF  >o rdrop
+	IF  >o rdrop  o to connection
 	    ticker 64@ recv-tick 64! rtdelay! \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
@@ -977,7 +985,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ keepalive
 
 also net2o-base
-: transfer-keepalive? ( -- )
+: transfer-keepalive? ( -- )  o to connection
     timeout( ." transfer keepalive " expected@ hex. hex.
     data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
     F cr )
