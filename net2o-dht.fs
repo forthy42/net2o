@@ -262,10 +262,6 @@ Variable revtoken
     dup @ 0= IF  dht-class new >o
 	o swap !  dht-hash $!  dht-table @ token-table !  o o>
     ELSE  @ nip nip  THEN ;
-: (d#value+) ( addr u key -- ) \ without sanity checks
-    cells dup k#size u>= !!no-dht-key!!
-    dht-hash dht( ." access dht: " dup hex. over . F cr ) + dht( ." ins into: " dup hex. dup $[]# F . F cr ) $ins[]sig ;
-
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN  2dup 2>r
@@ -284,19 +280,15 @@ Variable revtoken
 	    [: cr .tag ." , " ;]
 	THEN $[]map cr
     cell +LOOP ;
-: d#value- ( addr u key -- )
-    cells dup k#size u>= !!no-dht-key!!
-    dht-hash dht( ." access dht: " dup hex. over . F cr ) +
-    dup dht-host = IF  >r delete-host?  IF  r> $del[]sig dht( d#. )
-	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    dup dht-tags = IF  >r delete-tag?   IF  r> $del[]sig dht( d#. )
-	ELSE  2drop rdrop  THEN  rdrop EXIT  THEN
-    drop 2drop ;
-: d#value+ ( addr u key -- ) \ with sanity checks
-    dup >r k#peers u<= !!dht-permission!! \ can't change hash+peers
-    r@ k#host = IF  check-host  THEN
-    r@ k#tags = IF  check-tag   THEN
-    r> (d#value+) dht( d#. ) ;
+
+: d#host+ ( addr u -- ) \ with sanity checks
+    check-host dht-host $ins[]sig dht( d#. ) ;
+: d#tags+ ( addr u -- ) \ with sanity checks
+    check-tag dht-tags $ins[]sig dht( d#. ) ;
+: d#host- ( addr u -- ) \ with sanity checks
+    delete-host? IF  dht-host $del[]sig dht( d#. )  ELSE  2drop  THEN ;
+: d#tags- ( addr u -- ) \ with sanity checks
+    delete-tag?  IF  dht-tags $del[]sig dht( d#. )  ELSE  2drop  THEN ;
 
 \ commands for DHT
 
@@ -310,20 +302,19 @@ reply-table $@ dht-table $!
 ' dht-table is gen-table
 
 10 net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
-20 net2o: dht-value+ ( $:string key -- ) 64>n >r $> r> d#value+ ;
-\g add a value to the given dht key
-+net2o: dht-value- ( $:string key -- ) 64>n >r $> r> d#value- ;
-\g remove a value from the given dht key
+20 net2o: dht-host+ ( $:string -- ) $> d#host+ ;
++net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
++net2o: dht-host- ( $:string -- ) $> d#host- ;
++net2o: dht-tags- ( $:string -- ) $> d#tags- ;
 
 set-current
 
 \ queries
 
-: d#value? ( key -- )
-    k#tags umin dup cells dht-hash dht( ." access dht: " dup hex. over . F cr ) +
-    [: dup $A0 + maxstring <
-	IF  $, dup ulit, dht-value+  ELSE  2drop  THEN ;] $[]map
-    drop ;
+: d#host? ( -- )  dht-host
+    [: dup $A0 + maxstring < IF  $, dht-host+  ELSE  2drop  THEN ;] $[]map ;
+: d#tags? ( -- )  dht-tags
+    [: dup $A0 + maxstring < IF  $, dht-tags+  ELSE  2drop  THEN ;] $[]map ;
 
 fs-class class
     field: dht-queries
@@ -360,9 +351,8 @@ end-class dht-file-class
 
 get-current definitions
 
-+net2o: dht-value? ( type -- ) 64>n d#value? ;
-\g query the dht values of this type, and send back as many
-\g as fit into the answer packet
++net2o: dht-host? ( -- ) d#host? ;
++net2o: dht-tags? ( -- ) d#tags? ;
 +net2o: dht-open ( fid -- ) 64>n d#open ;
 +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
@@ -404,7 +394,7 @@ false Value add-myip
 
 : addme-end ( -- )
     add-myip IF
-	my-ip$ [: gen-host $, k#host ulit, dht-value+ ;] $[]map
+	my-ip$ [: gen-host $, dht-host+ ;] $[]map
     THEN
     endwith request,  end-cmd
     ['] end-cmd IS expect-reply? ;
@@ -417,7 +407,7 @@ false Value add-myip
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize 2* $, dht-id
     THEN
-    gen-host $, k#host ulit, dht-value+
+    gen-host $, dht-host+
     ['] addme-end IS expect-reply? ;
 previous
 
@@ -428,12 +418,12 @@ previous
 
 also net2o-base
 : replace-me, ( -- )
-    pkc keysize 2* $, dht-id <req k#host ulit, dht-value? req> endwith ;
+    pkc keysize 2* $, dht-id <req dht-host? req> endwith ;
 
 : remove-me, ( -- )
     dht-host dup >r
     [: sigsize# - 2dup + sigdate datesize# move
-      gen-host-del $, k#host ulit, dht-value- ;] $[]map
+      gen-host-del $, dht-host- ;] $[]map
     r@ $@ dump r> $[]off ;
 previous
 
@@ -458,7 +448,7 @@ Defer renew-key
     net2o-code  expect-reply
       dht-hash $@ $, dht-id remove-me,
       revoke-key 2dup set-revocation
-      2dup $, k#host ulit, dht-value+ endwith
+      2dup $, dht-host+ endwith
       cookie+request end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
 

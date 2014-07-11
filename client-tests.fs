@@ -63,21 +63,20 @@ UValue test#  0 to test#
       expect-reply
       s" DHT test" $, type cr get-ip
       pkc keysize 2* $, dht-id
-      forever "test:tag" pkc keysize 2* gen-tag-del $, k#tags ulit, dht-value-
-      forever "test:tag" pkc keysize 2* gen-tag $, k#tags ulit, dht-value+
+      forever "test:tag" pkc keysize 2* gen-tag-del $, dht-tags-
+      forever "test:tag" pkc keysize 2* gen-tag $, dht-tags+
       endwith end-code| -setip ;
 
 : c:fetch-tag ( nick u -- )
     net2o-code
       expect-reply
-      nick-key .ke-pk $@ $, dht-id <req
-      k#host ulit, dht-value? k#tags ulit, dht-value? req>
+      nick-key .ke-pk $@ $, dht-id <req dht-host? dht-tags? req>
       endwith cookie+request
     end-code| ;
 
 also net2o-base
 : fetch-id, ( id-addr u -- )
-    $, dht-id <req k#host ulit, dht-value? req> endwith ;
+    $, dht-id <req dht-host? req> endwith ;
 : fetch-host, ( nick u -- )
     nick-key .ke-pk $@ fetch-id, ;
 previous
