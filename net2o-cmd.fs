@@ -252,15 +252,15 @@ gen-table $@ reply-table $!
 User cmd0source
 User cmdbuf#
 
-: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF  drop code-dest  THEN ;
-\ : cmdbuf#    ( -- addr )  cmd0source @ IF  cmd0buf#  ELSE  codebuf#  THEN ;
+: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF
+	drop connection .code-dest  THEN ;
 : cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
 	connection .code-lock THEN ;
-: cmdbuf$ ( -- addr u )   connection >o cmdbuf cmdbuf# @ o> ;
-: endcmdbuf  ( -- addr' ) connection >o cmdbuf maxdata + o> ;
+: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
+: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : cmdbuf+ ( n -- )
-    connection >o dup maxstring u>= !!stringfit!! cmdbuf# +! o> ;
+    dup maxstring u>= !!stringfit!! cmdbuf# +! ;
 
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
@@ -307,8 +307,7 @@ UDefer expect-reply?
 :noname  ['] end-cmd IS expect-reply? ; is init-reply
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd
-	connection >o o IF  code-update THEN  o>  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd connection IF  code-update THEN  THEN ;
 
 previous
 
@@ -354,6 +353,7 @@ Variable throwcount
 : cmd-loop ( addr u -- )
     string-stack off  object-stack off  o to connection
     o IF
+	maxdata code+
 	cmd0source off
 	tag-addr?  IF
 	    2drop  >flyburst  1 packetr2 +!  EXIT  THEN

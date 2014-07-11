@@ -1261,12 +1261,12 @@ reply buffer: dummy-reply
     code-map @ .dest-tail @ addr>bits ;
 
 : code+ ( n -- )
-    code-map @ >o dup negate dest-tail @ and + dest-back !
+    connection .code-map @ >o dup negate dest-tail @ and + dest-back !
     dest-back @ dest-size @ u>= IF  dest-back off  THEN
     o> ;
 
 : code-update ( -- )
-    code-map @ >o dest-back @ dest-tail ! o> ;
+    connection .code-map @ >o dest-back @ dest-tail ! o> ;
 
 \ aligned buffer to make encryption/decryption fast
 
