@@ -21,11 +21,11 @@ init-client
 : c:lookup ( addr u -- id u )
   $2000 $10000 "test" ins-ip c:connect
     2dup c:addme-fetch-host
-    nick-key .ke-pk $@
-    BEGIN  >d#id 0 dht-host $[]@ over c@ '!' =  WHILE
-	    replace-key ke-pk $@ ." replace key: " 2dup 85type cr
-	    n:o> 2dup c:fetch-id
-    REPEAT  n:o> 2drop do-disconnect ;
+    nick-key >o ke-pk $@
+    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
+	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
+	    2dup c:fetch-id
+    REPEAT  o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
     host>$ IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
@@ -39,8 +39,8 @@ init-client
 
 : n2o:lookup ( addr u -- )
     2dup c:lookup
-    0 n2o:new-context dest-key  return-addr $10 erase
-    d#id @ .dht-host ['] c:insert-host $[]map ;
+    0 n2o:new-context >o rdrop dest-key  return-addr $10 erase
+    me>d#id .dht-host ['] c:insert-host $[]map ;
 
 : nat:connect ( addr u -- )
     init-cache' n2o:lookup
