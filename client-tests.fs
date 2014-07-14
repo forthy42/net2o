@@ -115,7 +115,7 @@ previous
     net2o-code
       expect-reply
       !time .time s" Download test " $, type 1 lit, . pi float, f. cr
-      ( see-me ) get-ip 0 lit, file-id words push' cr endwith
+      ( see-me ) get-ip 0 lit, file-id 0 lit, words push' cr endwith
       $400 blocksize! $400 blockalign! stat( request-stats )
       "net2o.fs" "net2o.fs" >cache n2o:copy
       "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy

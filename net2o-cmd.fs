@@ -475,14 +475,18 @@ also net2o-base definitions
 
 dup set-current
 
-: net2o:words ( -- )
-    token-table $@ bounds U+DO
-	I @ ?dup-IF >net2o-name 2dup type space $, s" -" $, token  THEN
+: net2o:words ( start -- )
+    token-table $@ rot cells safe/string bounds U+DO
+	I @ ?dup-IF
+	    >net2o-name dup $A0 + maxstring < IF
+		$, s" -" $, token
+	    ELSE  2drop  THEN
+	THEN
     cell +LOOP ;
 
 definitions
 
-+net2o: words ( -- )
++net2o: words ( start -- )  64>n
     net2o:words ;
 
 \ setup connection class
