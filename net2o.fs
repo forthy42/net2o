@@ -1718,11 +1718,7 @@ require net2o-crypt.fs
     dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
     BEGIN  64r@ 64>n 1 and IF
 	    addr 64@ 64dup 64-0= IF
-		." zero cookie @" addr dest-cookies @ - dup hex.
-		." mask: " 64r@ $64. data-ackbits @ IF
-		    3 rshift dup >r 3 rshift data-ackbits @ + 64@
-		    r> 7 and 64rshift $64.
-		ELSE  drop  THEN cr
+		." zero cookie @" addr dest-cookies @ - hex. cr
 	    THEN  cookie( 64dup $64. space ) 64+
 	THEN
     addr 64'+ to addr 64r> 1 64rshift 64dup 64>r 64-0= UNTIL
