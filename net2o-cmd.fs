@@ -475,6 +475,8 @@ gen-table $@ setup-table $!
     $> F type ;
 +net2o: . ( -- ) \ print number on server log
     64. ;
++net2o: f. ( -- ) \ print fp number on server log
+    F f. ;
 +net2o: cr ( -- ) \ newline on server log
     F cr ;
 +net2o: see-me ( -- ) \ see received commands on server log
