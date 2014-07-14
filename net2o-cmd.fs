@@ -156,6 +156,9 @@ Defer gen-table
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
+: >net2o-name ( addr -- addr' u )
+    [ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN] body> name>string ;
+
 : (net2o-see) ( addr -- )  @
     dup 0<> IF
 	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
@@ -233,6 +236,7 @@ get-current also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
+0 net2o: dummy ( -- ) ; \ will be overwritten
 0 net2o: end-cmd ( -- ) \ last command in buffer
     0 buf-state ! ;
 +net2o: ulit ( "u" -- u ) \ unsigned literal
@@ -464,12 +468,29 @@ also net2o-base definitions
 +net2o: ko ( error -- ) \ receive error message
     throw ;
 
+\ inspection
+
++net2o: token ( $:token $:stack -- )
+    $> $> type '(' emit type ')' emit space ; \ stub
+
+dup set-current
+
+: net2o:words ( -- )
+    token-table $@ bounds U+DO
+	I @ ?dup-IF >net2o-name 2dup type space $, s" -" $, token  THEN
+    cell +LOOP ;
+
+definitions
+
++net2o: words ( -- )
+    net2o:words ;
+
 \ setup connection class
 
 gen-table $@ setup-table $!
 ' setup-table is gen-table
 
-20 net2o: emit ( xc -- ) \ emit character on server log
+24 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
@@ -622,7 +643,7 @@ reply-table $@ fs-table $!
 ' fs-table is gen-table
 
 10 net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
-20 net2o: open-file ( $:string mode -- ) \ open file with mode
+24 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
