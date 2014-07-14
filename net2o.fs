@@ -83,6 +83,8 @@ UValue statbuf
     ' umax! Alias 64umax!
     ' !@ Alias 64!@
 [ELSE]
+    : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
+    : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;
     : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
     : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;

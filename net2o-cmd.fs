@@ -119,13 +119,26 @@ User t-stack
     t-stack $[]# 1- dup 0< !!object-empty!!
     t-stack $[] @ t-stack $@len cell- t-stack $!len ;
 
-\ floats assume unaligned float access is possible
-\ i.e. so far, they are unused stubs ;-)
+\ float are stored big endian.
 
-: pdf@ ( -- r )
-    buf-state 2@ over + >r dup df@ dfloat+ r> over - buf-state 2! ;
-: psf@ ( -- r )
-    buf-state 2@ over + >r dup sf@ sfloat+ r> over - buf-state 2! ;
+: pf@+ ( addr u -- addr' u' r )
+    2>r 64 64#0 2r> bounds ?DO
+	7 64lshift I c@ $7F and n>64 64+ 64>r 7 - 64r>
+	I c@ $80 and  0= IF
+	    n64-swap 64lshift
+	    0e { f^ pftmp } pftmp 64! pftmp f@
+	    I 1+ I' over - unloop  EXIT  THEN
+    LOOP   true !!floatfit!!  ;
+
+: pf!+ ( addr r -- addr' ) { f^ pftmp }
+    BEGIN
+	pftmp 64@ 57 64rshift 64>n
+	pftmp 64@ 7 64lshift 64dup pftmp 64!
+	64-0<> WHILE  $80 or over c! 1+  REPEAT
+    over c! 1+ ;
+
+: pf@ ( -- r )
+    buf-state 2@ pf@+ buf-state 2! ;
 
 \ Command streams contain both commands and data
 \ the dispatcher is a byte-wise dispatcher, though
@@ -168,10 +181,9 @@ Defer gen-table
 	1 of  p@ 64. ." lit, "  endof
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@  n2o.string  endof
-	4 of  pdf@ f. ." dfloat, " endof
-	5 of  psf@ f. ." sfloat, " endof
-	6 of  ." endwith " cr  t-pop  token-table !  endof
-	7 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
+	4 of  pf@ f. ." float, " endof
+	5 of  ." endwith " cr  t-pop  token-table !  endof
+	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -229,10 +241,8 @@ get-current also net2o-base definitions previous
     ps@ ;
 +net2o: string ( "string" -- $:string ) \ string literal
     string@ ;
-+net2o: dflit ( "dfloat" -- r ) \ double float literal
-    pdf@ ;
-+net2o: sflit ( "sfloat" -- r ) \ double float literal
-    psf@ ;
++net2o: flit ( "dfloat" -- r ) \ double float literal
+    pf@ ;
 +net2o: endwith ( o:current -- ) \ pop object stack
     n:o> ;
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
@@ -272,6 +282,7 @@ User cmdbuf#
 : cmdreset  cmdbuf# off ;
 
 : cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
+: flit, ( 64n -- )  cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -413,8 +424,7 @@ also net2o-base definitions
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
-: sfloat, ( r -- )  sflit cmdbuf$ + sf! 1 sfloats cmdbuf+ ;
-: dfloat, ( r -- )  sflit cmdbuf$ + df! 1 dfloats cmdbuf+ ;
+: float, ( r -- )  flit flit, ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- ) (end-code) previous ;

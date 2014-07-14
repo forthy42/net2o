@@ -76,6 +76,7 @@ cell 8 = [IF]
     : 128! ( d addr -- ) >r swap r> 2! ;
     also locals-types definitions
     ' w: alias 64:
+    ' w^ alias 64^
     previous definitions
 [ELSE]
     ' 2swap alias 64rot
@@ -107,12 +108,20 @@ cell 8 = [IF]
     ' dnegate Alias 64negate
     0. 2Constant 64#0
     -1. 2Constant 64#-1
-    : 64lshift ( u64 u -- u64' )  >r
-	r@ lshift over 8 cells r@ - rshift or
-	swap r> lshift swap ;
-    : 64rshift ( u64 u -- u64' )  >r swap
-	r@ rshift over 8 cells r@ - lshift or
-	swap r> rshift ;
+    : 64lshift ( u64 u -- u64' )
+	dup $20 u>= IF
+	    nip $20 - lshift 0 swap
+	ELSE  >r
+	    r@ lshift over 8 cells r@ - rshift or
+	    swap r> lshift swap
+	THEN ;
+    : 64rshift ( u64 u -- u64' )
+	dup $20 u>= IF
+	    $20 - rshift nip 0
+	ELSE  >r swap
+	    r@ rshift over 8 cells r@ - lshift or
+	    swap r> rshift
+	THEN ;
     ' d>f Alias 64>f
     ' f>d Alias f>64
     ' d= Alias 64=
@@ -169,6 +178,7 @@ cell 8 = [IF]
 	r> 3 cells + ! ;
     also locals-types definitions
     ' d: alias 64:
+    ' d^ alias 64^
     previous definitions
 [THEN]
 \ independent of cell size, using dfloats:

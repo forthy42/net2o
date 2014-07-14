@@ -26,6 +26,7 @@ s" wrong packet size"            throwcode !!size!!
 s" no power of two"              throwcode !!pow2!!
 s" unimplemented net2o function" throwcode !!function!!
 s" too many commands"            throwcode !!commands!!
+s" float does not fit"           throwcode !!floatfit!!
 s" string does not fit"          throwcode !!stringfit!!
 s" ivs must be 64 bytes"         throwcode !!ivs!!
 s" net2o timed out"              throwcode !!timeout!!
