@@ -24,11 +24,11 @@ init-client
 
 : c:bob ( -- ) 
     $2000 $10000 "test" ins-ip dup add-beacon c:connect
-    ." Bob connected" cr
+    ." Bob connected with: " pkc $20 85type cr
     c:revoke-bob
-    ." Bob revoked" cr
+    ." Bob revoked: " pkc $20 85type  cr
     replace-me
-    ." Bob replaced" cr
+    ." Bob replaced: " pkc $20 85type  cr
     do-disconnect ;
 
 c:bob server-loop

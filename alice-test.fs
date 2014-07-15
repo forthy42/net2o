@@ -24,9 +24,10 @@ init-client
     nick-key >o ke-pk $@
     BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
 	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
-	    2dup c:fetch-id
+	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  o> 2drop do-disconnect ;
 : c:insert-host ( addr u -- )
+    ." check host: " 2dup .host cr
     host>$ IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	  insert-address temp-addr ins-dest
@@ -39,8 +40,8 @@ init-client
 
 : n2o:lookup ( addr u -- )
     2dup c:lookup
-    0 n2o:new-context >o rdrop dest-key  return-addr $10 erase
-    me>d#id .dht-host ['] c:insert-host $[]map ;
+    0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
+    nick-key .ke-pk $@ >d#id >o dht-host ['] c:insert-host $[]map o> ;
 
 : nat:connect ( addr u -- )
     init-cache' n2o:lookup

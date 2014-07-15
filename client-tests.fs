@@ -87,7 +87,7 @@ previous
       cookie+request
     end-code| ;
 
-: c:fetch-id ( nick u -- )
+: c:fetch-id ( pubkey u -- )
     net2o-code
       expect-reply  fetch-id,
       cookie+request
