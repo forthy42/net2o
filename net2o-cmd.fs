@@ -449,7 +449,7 @@ dup set-current previous
 \ commands to read and write files
 
 also net2o-base definitions
-10 net2o: <req ( -- ) ; \ stub: push own id in reply
+$10 net2o: <req ( -- ) ; \ stub: push own id in reply
 +net2o: req> ( -- ) endwith ; \ generic: pop own id in reply
 +net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
     lit, ;
@@ -494,7 +494,7 @@ definitions
 gen-table $@ setup-table $!
 ' setup-table is gen-table
 
-24 net2o: emit ( xc -- ) \ emit character on server log
+$20 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
@@ -639,15 +639,15 @@ gen-table $@ context-table $!
 
 \ file functions
 
-50 net2o: file-id ( id -- o:file )
+$40 net2o: file-id ( id -- o:file )
     64>n state-addr n:>o ;
 fs-table >table
 
 reply-table $@ fs-table $!
 ' fs-table is gen-table
 
-10 net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
-24 net2o: open-file ( $:string mode -- ) \ open file with mode
+$10 net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
+$20 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
@@ -691,7 +691,7 @@ reply-table $@ fs-table $!
 
 \ flow control functions
 
-70 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
+$50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  net2o:ack-resend ;
@@ -724,7 +724,7 @@ reply-table $@ fs-table $!
 
 \ profiling, nat traversal
 
-90 net2o: !time ( -- ) \ start timer
+$60 net2o: !time ( -- ) \ start timer
     F !time init-timer ;
 +net2o: .time ( -- ) \ print timer to server log
     F .time .packets profile( .times ) ;
@@ -749,8 +749,6 @@ reply-table $@ fs-table $!
 
 : rewind ( -- )
     save( rewind-total )else( rewind-flush ) ;
-
-\ ids 90..100 reserved for DHT
 
 \ safe initialization
 

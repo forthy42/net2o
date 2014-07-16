@@ -191,7 +191,7 @@ get-current also net2o-base definitions
 cmd-table $@ key-entry-table $!
 ' key-entry-table is gen-table
 
-10 net2o: newkey ( $:string -- o:key ) $> key:new n:>o ;
+$10 net2o: newkey ( $:string -- o:key ) $> key:new n:>o ;
 key-entry-table >table
 +net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
