@@ -230,31 +230,33 @@ Defer net2o-do
 
 : un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
 
+Defer net2o:words
+
 Vocabulary net2o-base
 
 get-current also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
-0 net2o: dummy ( -- ) ; \ will be overwritten
-0 net2o: end-cmd ( -- ) \ last command in buffer
-    0 buf-state ! ;
-+net2o: ulit ( "u" -- u ) \ unsigned literal
+0 net2o: end-cmd ( -- ) ; \ alias
+0 net2o: endwith ( o:object -- ) \ last command in buffer
+    object-stack @ 0> IF  n:o>  ELSE  0 buf-state !  THEN ;
++net2o: ulit ( #u -- u ) \ unsigned literal
     p@ ;
-+net2o: slit ( "n" -- n ) \ signed literal, zig-zag encoded
++net2o: slit ( #n -- n ) \ signed literal, zig-zag encoded
     ps@ ;
-+net2o: string ( "string" -- $:string ) \ string literal
++net2o: string ( #string -- $:string ) \ string literal
     string@ ;
-+net2o: flit ( "dfloat" -- r ) \ double float literal
++net2o: flit ( #dfloat -- r ) \ double float literal
     pf@ ;
-+net2o: endwith ( o:current -- ) \ pop object stack
-    n:o> ;
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
-+net2o: tru ( -- true ) \ true flag literal
++net2o: tru ( -- f:true ) \ true flag literal
     true ;
-+net2o: fals ( -- false ) \ false flag literal
++net2o: fals ( -- f:false ) \ false flag literal
     false ;
++net2o: words ( ustart -- ) \ reflection
+    64>n net2o:words ;
 
 dup set-current
 
@@ -458,36 +460,31 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
     slit, ;
 +net2o: push-$ ( $:string -- ) \ push string into answer packet
     $> $, ;
-+net2o: push' ( "cmd" -- ) \ push command into answer packet
++net2o: push-float ( r -- ) \ push floating point number
+    float, ;
++net2o: push' ( #cmd -- ) \ push command into answer packet
     p@ cmd, ;
-+net2o: ok ( tag -- ) \ tagged response
++net2o: ok ( utag -- ) \ tagged response
     64>n net2o:ok ;
-+net2o: ok? ( tag -- ) \ request tagged response
++net2o: ok? ( utag -- ) \ request tagged response
     net2o:ok? lit, ok ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
-+net2o: ko ( error -- ) \ receive error message
++net2o: ko ( uerror -- ) \ receive error message
     throw ;
 
 \ inspection
 
-+net2o: token ( $:token $:stack -- )
-    $> $> type '(' emit type ')' emit space ; \ stub
++net2o: token ( $:token n -- )
+    64>n 0 .r ." :" $> type space ; \ stub
 
-dup set-current
-
-: net2o:words ( start -- )
-    token-table $@ rot cells safe/string bounds U+DO
+:noname ( start -- )
+    token-table $@ 2 pick cells safe/string bounds U+DO
 	I @ ?dup-IF
 	    >net2o-name dup $A0 + maxstring < IF
-		$, s" -" $, token
+		2 pick ulit, [: type ." (-)" ;] $tmp $, token
 	    ELSE  2drop  THEN
-	THEN
-    cell +LOOP ;
-
-definitions
-
-+net2o: words ( start -- )  64>n
-    net2o:words ;
+	THEN  1+
+    cell +LOOP  drop ; IS net2o:words
 
 \ setup connection class
 
@@ -522,9 +519,9 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
 +net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: request-done ( req -- ) 64>n \ signal request is completed
++net2o: request-done ( ureq -- ) 64>n \ signal request is completed
     o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
-+net2o: set-rtdelay ( timestamp -- ) \ set round trip delay
++net2o: set-rtdelay ( utimestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
 	64dup cookie>context?
@@ -562,7 +559,7 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
 
 +net2o: disconnect ( -- ) \ close connection
     o 0= ?EXIT n2o:dispose-context un-cmd ;
-+net2o: set-tick ( ticks -- ) \ adjust time
++net2o: set-tick ( uticks -- ) \ adjust time
     adjust-ticks ;
 +net2o: get-tick ( -- ) \ request time adjust
     ticks lit, set-tick ;
@@ -639,7 +636,7 @@ gen-table $@ context-table $!
 
 \ file functions
 
-$40 net2o: file-id ( id -- o:file )
+$40 net2o: file-id ( uid -- o:file )
     64>n state-addr n:>o ;
 fs-table >table
 
@@ -653,11 +650,11 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
     fs-close ;
 +net2o: set-size ( size -- ) \ set size attribute of current file
     track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. F cr ) size! ;
-+net2o: set-seek ( seek -- ) \ set seek attribute of current file
++net2o: set-seek ( useek -- ) \ set seek attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. F cr ) seekto! ;
-+net2o: set-limit ( limit -- ) \ set limit attribute of current file
++net2o: set-limit ( ulimit -- ) \ set limit attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
-+net2o: set-stat ( mtime mod -- ) \ set time and mode of current file
++net2o: set-stat ( umtime umod -- ) \ set time and mode of current file
     64>n n2o:set-stat ;
 +net2o: get-size ( -- )
     fs-size 64@ lit, set-size ;
@@ -678,10 +675,10 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
 
 \ better slurping
 
-:noname ( id seek -- ) 64>r ulit, file-id
+:noname ( uid useek -- ) 64>r ulit, file-id
     64r> lit, set-seek endwith ; is do-track-seek
 
-+net2o: set-top ( top flag -- ) \ set top, flag is true when all data is sent
++net2o: set-top ( utop flag -- ) \ set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
@@ -691,14 +688,14 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
 
 \ flow control functions
 
-$50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
+$50 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  net2o:ack-resend ;
-+net2o: set-rate ( rate delta-t -- ) \ set rate 
++net2o: set-rate ( urate udelta-t -- ) \ set rate 
     cookie? IF  net2o:set-rate
     ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
-+net2o: resend-mask ( addr mask -- ) \ resend mask blocks starting at addr
++net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
     2*64>n net2o:resend-mask net2o:send-chunks ;
 +net2o: track-timing ( -- ) \ track timing
     net2o:track-timing ;
@@ -707,9 +704,9 @@ $50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
 +net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $,
     net2o:/timing rec-timing ;
-+net2o: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
++net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
     net2o:ack-b2btime ;
-+net2o: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
++net2o: ack-cookies ( ucookie addr umask -- ) \ acknowledge cookie
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match! " 64over $64. 64dup $64. F cr
@@ -719,7 +716,7 @@ $50 net2o: ack-addrtime ( time addr -- ) \ packet at addr received at time
     64>n net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \ set head
     64>n data-rmap @ .dest-head umax! ;
-+net2o: timeout ( ticks -- ) \ timeout request
++net2o: timeout ( uticks -- ) \ timeout request
     net2o:timeout  data-map @ .dest-tail @ ulit, set-head ;
 
 \ profiling, nat traversal
