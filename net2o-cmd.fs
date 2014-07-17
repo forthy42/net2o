@@ -948,9 +948,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     new-ackbit [ 2 cells 64'+ ]L data-ackbits-buf $+! ;
 
 : +cookie ( -- )
-    data-rmap @ >o ack-bit# @ dup +ackbit
-    \ set bucket as received in current polarity bitmap
-    data-ackbits @ swap +bit@ o> negate packetr2 +! ;
+    data-rmap @ >o  ack-bit# @ >r
+    data-ackbits @ r@ +bit@  dup 0= IF  r@ +ackbit  THEN  rdrop
+    o> negate packetr2 +! ;
 
 : +expected ( -- )
     data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
