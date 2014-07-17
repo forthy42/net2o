@@ -360,6 +360,7 @@ previous set-current
 
 \ value reading requires constructing answer packet
 
+gen-table $freeze
 ' context-table is gen-table
 
 \ facility stuff

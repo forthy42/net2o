@@ -150,6 +150,11 @@ User t-stack
 Defer gen-table
 ' cmd-table IS gen-table
 
+: $freeze ( addr -- )
+    \G copy string to dictionary
+    >r r@ $@  align here r> !
+    dup , here swap dup allot move align ;
+
 : n>cmd ( n -- addr ) cells >r
     o IF  token-table  ELSE  setup-table  THEN
     $@ r@ u<= !!function!! r> + ;
@@ -260,6 +265,7 @@ get-current also net2o-base definitions previous
 
 dup set-current
 
+gen-table $freeze
 gen-table $@ reply-table $!
 ' reply-table is gen-table
 
@@ -488,6 +494,7 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
 
 \ setup connection class
 
+gen-table $freeze
 gen-table $@ setup-table $!
 ' setup-table is gen-table
 
@@ -631,6 +638,7 @@ net2o-base
 
 \ everything that follows here can assume to have a connection context
 
+gen-table $freeze
 gen-table $@ context-table $!
 ' context-table is gen-table
 
@@ -661,6 +669,7 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
 +net2o: get-stat ( -- ) \ request stat of current file
     n2o:get-stat >r lit, r> ulit, set-stat ;
 
+gen-table $freeze
 ' context-table is gen-table
 
 +net2o: set-blocksize ( n -- ) \ set blocksize

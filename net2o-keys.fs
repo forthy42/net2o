@@ -203,6 +203,7 @@ key-entry-table >table
 +net2o: keylast  ( date-ns -- )  ke-last 64! ;
 dup set-current previous
 
+gen-table $freeze
 ' context-table is gen-table
 
 key-entry ' new static-a with-allocater to sample-key
