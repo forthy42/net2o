@@ -218,11 +218,27 @@ Defer >throw
 
 \ commands
 
-Defer net2o-do
+User cmd0source
+User cmdbuf#
+
+: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF
+	drop connection .code-dest  THEN ;
+: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
+	connection .code-lock THEN ;
+: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
+: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
+: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
+: cmdbuf+ ( n -- )
+    dup maxstring u>= !!stringfit!! cmdbuf# +! ;
+
+: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
+: flit, ( 64n -- )  cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
+
+: net2o, @ n>64 cmd, ;
 
 0 Value last-2o
 
-: net2o-does  DOES> net2o-do ;
+: net2o-does  DOES> net2o, ;
 : net2o: ( number "name" -- )
     ['] noop over >cmd \ allocate space in table
     Create  here to last-2o
@@ -271,19 +287,6 @@ gen-table $@ reply-table $!
 
 \ net2o assembler
 
-User cmd0source
-User cmdbuf#
-
-: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF
-	drop connection .code-dest  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	connection .code-lock THEN ;
-: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
-: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
-: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
-: cmdbuf+ ( n -- )
-    dup maxstring u>= !!stringfit!! cmdbuf# +! ;
-
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
     ." see-me: " dest-addr 64@ $64.
@@ -293,18 +296,12 @@ User cmdbuf#
 
 : cmdreset  cmdbuf# off ;
 
-: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
-: flit, ( 64n -- )  cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
-
-: net2o, @ n>64 cmd, ;
-
 : net2o-code    cmd0source off  cmdlock lock
-    cmdreset 1 code+ ['] net2o, IS net2o-do also net2o-base ;
+    cmdreset 1 code+ also net2o-base ;
 comp: :, also net2o-base ;
 : net2o-code0   cmd0buf cmd0source !   cmdlock lock
-    cmdreset ['] net2o, IS net2o-do also net2o-base ;
+    cmdreset also net2o-base ;
 comp: :, also net2o-base ;
-' net2o, IS net2o-do
 
 : send-cmd ( addr u dest -- ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
@@ -975,7 +972,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     end-code ;
 
 :noname ( addr u -- )
-    cmd0buf cmd0source ! cmdreset ['] net2o, IS net2o-do also net2o-base
+    cmd0buf cmd0source ! cmdreset also net2o-base
     [ also net2o-base ]
     ['] end-cmd IS expect-reply?
     $, nest end-code
