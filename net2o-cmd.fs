@@ -161,12 +161,15 @@ Defer gen-table
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
+-5 cells 0 +field net2o.name
+drop
+
 : >net2o-name ( addr -- addr' u )
-    [ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN] body> name>string ;
+    net2o.name body> name>string ;
 
 : (net2o-see) ( addr -- )  @
     dup 0<> IF
-	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
+	net2o.name
 	dup 2 cells + @ ?dup-IF  @ token-table @ t-push token-table !  THEN
 	body>
     ELSE  drop ['] net2o-crash  THEN  .name ;
@@ -179,8 +182,7 @@ Defer gen-table
     o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r> + @
     dup 0<> IF
-	[ 4 cell = ] [IF]  6 cells -  [ELSE]  5 cells -  [THEN]
-	body>
+	net2o.name body>
     ELSE  drop ['] net2o-crash  THEN  .name ;
 
 : net2o-see ( cmd -- ) hex[
@@ -260,9 +262,8 @@ get-current also net2o-base definitions previous
 
 \ Command numbers preliminary and subject to change
 
-0 net2o: end-cmd ( -- ) ; \ alias
-0 net2o: endwith ( o:object -- ) \ last command in buffer
-    object-stack @ 0> IF  n:o>  ELSE  0 buf-state !  THEN ;
+0 net2o: dummy ( -- ) ; \ alias
+0 net2o: end-cmd ( -- ) 0 buf-state ! ;
 +net2o: ulit ( #u -- u ) \ unsigned literal
     p@ ;
 +net2o: slit ( #n -- n ) \ signed literal, zig-zag encoded
@@ -271,6 +272,8 @@ get-current also net2o-base definitions previous
     string@ ;
 +net2o: flit ( #dfloat -- r ) \ double float literal
     pf@ ;
++net2o: endwith ( o:object -- ) \ last command in buffer
+    n:o> ;
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
 +net2o: tru ( -- f:true ) \ true flag literal

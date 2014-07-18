@@ -2354,7 +2354,8 @@ Variable beacons \ destinations to send beacons to
 
 : >next-ticks ( -- )
     next-timeout? drop beacon-time 64@ 64umin ticker 64@ 64-
-    64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr ) stop-ns
+    64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
+    [ cell 4 = ] [IF]  $7fffffff. 64min  [THEN]  64>n stop-ns
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
