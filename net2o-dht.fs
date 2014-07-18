@@ -301,8 +301,8 @@ dht-table >table
 reply-table $@ dht-table $!
 ' dht-table is gen-table
 
-$10 net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
-$20 net2o: dht-host+ ( $:string -- ) $> d#host+ ;
+net2o' <req net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
+net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
 +net2o: dht-tags- ( $:string -- ) $> d#tags- ;

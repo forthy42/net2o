@@ -246,6 +246,7 @@ User cmdbuf#
     lastxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
 : >table ( table -- )  last-2o 2 cells + ! ;
+: net2o' ( "name" -- ) ' >body @ ;
 
 : F also forth parse-name parser1 execute previous ; immediate
 
@@ -648,8 +649,8 @@ fs-table >table
 reply-table $@ fs-table $!
 ' fs-table is gen-table
 
-$10 net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
-$20 net2o: open-file ( $:string mode -- ) \ open file with mode
+net2o' <req net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
+net2o' emit net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
