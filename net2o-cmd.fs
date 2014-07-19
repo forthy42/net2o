@@ -503,7 +503,7 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
-+net2o: . ( -- ) \ print number on server log
++net2o: . ( u -- ) \ print number on server log
     64. ;
 +net2o: f. ( -- ) \ print fp number on server log
     F f. ;

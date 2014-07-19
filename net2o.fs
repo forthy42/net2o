@@ -50,11 +50,11 @@
 \ require smartdots.fs
 require mini-oof2.fs
 require user-object.fs
-require 64bit.fs
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
+require 64bit.fs
 require net2o-err.fs
 require debugging.fs
 require kregion.fs
@@ -2092,23 +2092,24 @@ queue-class >osize @ buffer: queue-adder
     ptimeout cell+ @ #1000000 / poll 0>
 [THEN] ;
 
+User try-reads
+4 Value try-read#
+
 : read-a-packet4/6 ( -- addr u )
-    pollfds revents w@ POLLIN = IF
+    pollfds revents w@ POLLIN = IF  try-reads off
 	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
-    don't-block read-a-packet +rec ;
+    try-read# try-reads !  0 0 ;
 
 : read-event ( -- )
     pollfds [ pollfd %size revents ]L + w@ POLLIN = IF
 	?events  0 pollfds pollfd %size + revents w!
     THEN ;
 
-4 Value try-read#
-
 : try-read-packet-wait ( -- addr u / 0 0 )
-    try-read# 0 ?DO
+    try-read# try-reads @ ?DO
 	don't-block read-a-packet
 	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
-    poll-sock drop read-a-packet4/6 read-event ;
+    poll-sock IF read-a-packet4/6 read-event ELSE 0 0 THEN ;
 
 4 Value sends#
 4 Value sendbs#
@@ -2229,6 +2230,7 @@ $10 Constant tmp-crypt-val
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  dest-job @ >o
+    msg( ." Handle data to addr: " dup hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle
@@ -2355,7 +2357,7 @@ Variable beacons \ destinations to send beacons to
 : >next-ticks ( -- )
     next-timeout? drop beacon-time 64@ 64umin ticker 64@ 64-
     64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
-    [ cell 4 = ] [IF]  $7fffffff. 64min  [THEN]  64>n stop-ns
+    stop-64ns
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 

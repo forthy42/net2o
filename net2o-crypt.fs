@@ -107,7 +107,7 @@ User last-ivskey
 	dest-flags w@ ivs-assembly state# + 64'+ w! \ the flags, too
 	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
 	ivs-assembly state# move
-	key( ivs-assembly state# 2* xtype cr )
+	key( ." cmd key: " ivs-assembly state# 2* xtype cr )
 	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
     dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 

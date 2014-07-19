@@ -74,6 +74,7 @@ cell 8 = [IF]
     : 128@ ( addr -- d ) 2@ swap ;
     ' d= Alias 128= ( d1 d2 -- flag )
     : 128! ( d addr -- ) >r swap r> 2! ;
+    ' stop-ns alias stop-64ns
     also locals-types definitions
     ' w: alias 64:
     ' w^ alias 64^
@@ -176,6 +177,7 @@ cell 8 = [IF]
 	r@ cell+ !
 	r@ 2 cells + !
 	r> 3 cells + ! ;
+    ' stop-dns alias stop-64ns
     also locals-types definitions
     ' d: alias 64:
     ' d^ alias 64^
