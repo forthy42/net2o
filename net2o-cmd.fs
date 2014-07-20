@@ -603,7 +603,7 @@ net2o-base
     THEN ;
 
 : cookie, ( -- )  add-cookie lit, set-rtdelay ;
-: request, ( -- )  next-request lit, request-done ;
+: request, ( -- )  next-request ulit, request-done ;
 
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;

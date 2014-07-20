@@ -1609,7 +1609,7 @@ Variable fs-table
 Sema file-sema
 
 \ careful: must follow exactpy the same loic as slurp (see below)
-: n2o:spit ( -- )
+: n2o:spit ( -- ) fstates 0= ?EXIT
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
@@ -1667,7 +1667,7 @@ User file-reg#
 
 \ careful: must follow exactpy the same loic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
-    data-head? 0= IF  head@ 0  EXIT  THEN
+    data-head? 0= fstates 0= or IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
@@ -1688,7 +1688,7 @@ User file-reg#
     LOOP  drop ;
 
 : n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
-    fstates 0 DO
+    fstates 0 ?DO
 	I dup id>addr? >o fs-seek 64@ fs-seekto 64@ 64<> IF
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
