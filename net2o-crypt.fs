@@ -190,15 +190,11 @@ Sema regen-sema
 
 : regen-ivs-part ( new-back -- ) [: c:key@ >r
       dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
-      \ save( ." regen to: " dup hex. c:key@ 8 xtype )
       maxdata 2* negate dup >r and  dest-back @ r> and U+DO
 	  I I' fix-size dup { len }
 	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
-	  \ save( 2dup )
 	  c:prng
-	  \ save( space 2dup 8 umin xtype ." .." dup 8 - 0 max /string xtype space len hex. c:key@ 8 xtype ) 
       len +LOOP
-      \ save( cr )
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )

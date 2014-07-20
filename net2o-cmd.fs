@@ -693,8 +693,6 @@ gen-table $freeze
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
-+net2o: rewind-sender ( n -- ) \ rewind buffer
-    64>n net2o:rewind-sender ;
 
 \ flow control functions
 
@@ -746,16 +744,8 @@ $60 net2o: !time ( -- ) \ start timer
 : net2o:ackflush ( n -- ) ulit, ack-flush ;
 : n2o:done ( -- )  slurp next-request filereq# ! ;
 
-: rewind-total ( -- )
-    64#0 resend-all-to 64! \ clear timeout for resend-all
-    data-rmap @ .dest-round @ 1+ dup net2o:rewind-receiver
-    ulit, rewind-sender ;
-
-: rewind-flush ( -- )
-    data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
-
 : rewind ( -- )
-    save( rewind-total )else( rewind-flush ) ;
+    data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
 
 \ safe initialization
 
@@ -857,7 +847,7 @@ also net2o-base
     data-rmap @ >o
     data-ack# @ bytes>addr dest-top 2@ umin umin
     dest-tail @ umax dup dest-tail !@ o>
-    save( 2drop )else( u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ) ;
+    u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 8 Value max-resend#
@@ -914,8 +904,7 @@ also net2o-base
 
 : rewind-transfer ( -- )
     rewind data-end? IF  filereq# @ n2o:request-done
-    ELSE  restart-transfer  THEN
-    save( request-stats? IF  send-timing  THEN ) ;
+    ELSE  restart-transfer  THEN ;
 
 : request-stats   F true to request-stats?  track-timing ;
 
@@ -930,7 +919,7 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
-	net2o:ack-cookies  save( n2o:spit ) rewind-transfer
+	net2o:ack-cookies  rewind-transfer
 	64#0 burst-ticks 64!
     THEN ;
 
@@ -1049,7 +1038,7 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
     net2o-code  expect-reply
     update-rtdelay  ticks lit, timeout  net2o:genack
-    resend-all save( )else( rewind-flush slurp ) end-code ;
+    resend-all rewind slurp  end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )

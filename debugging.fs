@@ -131,7 +131,6 @@ debug: sender( \ extra sender task
 debug: dht( \ debugging for dht functions
 debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
-debug: save( \ save once per round
 debug: bg( \ started in background mode
 debug: nat( \ NAT traversal stuff
 debug: route( \ do routing
