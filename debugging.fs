@@ -210,12 +210,14 @@ User b$
 : bemit  b$ c$+! ;
 : bcr    #lf bemit b$ $@ (type) b$ $off ;
 
-' btype ' bemit ' bcr ' form output: b-out
+\ ' btype ' bemit ' bcr ' form output: b-out
+' noop alias b-out
 
 \ misc
 
 : etype ( addr u -- ) >stderr type ;
-: $err ( xt -- )  $tmp stderr write-file throw ;
+\ : $err ( xt -- )  $tmp stderr write-file throw ;
+: $err ( xt -- ) execute ;
 
 \ extra hints for last word executed
 

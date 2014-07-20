@@ -224,20 +224,24 @@ Create ip6::0 here 16 dup allot erase
 : .ip6::0 ( -- )  ip6::0 $10 type ;
 : .ip4::0 ( -- )  ip6::0 4 type ;
 
-: .sockaddr { addr alen -- }
+Create sockaddr" 2 c, $16 allot
+
+: .sockaddr
     \ convert socket into net2o address token
+    [: { addr alen -- sockaddr u } '2' emit
     case addr family w@
 	AF_INET of
-	    '2' emit  .ip6::0  addr sin_addr 4 type addr port 2 type
+	    .ip6::0 addr sin_addr 4 move type
 	endof
 	AF_INET6 of
 	    addr sin6_addr 12 fake-ip4 over str= IF
-		'2' emit  .ip6::0  addr sin6_addr 12 + 4 type
+		.ip6::0 addr sin6_addr 12 + 4 type
 	    ELSE
-		'2' emit addr sin6_addr $10 type  .ip4::0
-	    THEN  addr sin6_port 2 type
+		addr sin6_addr $10 type .ip4::0
+	    THEN
 	endof
-    endcase ;
+    endcase
+    addr port 2 type ;] $tmp ;
 
 : .port ( addr len -- addr' len' )
     ." :" over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
@@ -542,8 +546,8 @@ Defer init-reply
     alloc-buf to inbuf  alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
-    sockaddr_in6 %size alloz to sockaddr
-    sockaddr_in6 %size alloz to sockaddr1
+    sockaddr_in %size alloz to sockaddr
+    sockaddr_in %size alloz to sockaddr1
     $400 allocate throw to aligned$
     init-statbuf
     init-ed25519 c:init ;
@@ -552,8 +556,8 @@ Defer init-reply
     free-ed25519 c:free
     free-statbuf
     aligned$ $400 freez
-    sockaddr  sockaddr_in6 %size  freez
-    sockaddr1 sockaddr_in6 %size  freez
+    sockaddr  sockaddr_in %size  freez
+    sockaddr1 sockaddr_in %size  freez
     init0buf maxdata 2/ mykey-salt# + $10 +  freez
     cmd0buf maxdata   freez
     inbuf  free-buf
@@ -601,7 +605,7 @@ MSG_WAITALL   Constant do-block
 MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
-    >r sockaddr_in6 %size alen !
+    >r [ sockaddr_in %size ]L alen !
     net2o-sock inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
@@ -1695,7 +1699,7 @@ User file-reg#
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : >sockaddr ( -- addr len )
-    return-address be@ routes #.key $@ ['] .sockaddr $tmp ;
+    return-address be@ routes #.key $@ .sockaddr ;
 : n2oaddrs ( xt -- )
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
@@ -2097,7 +2101,7 @@ User try-reads
 
 : read-a-packet4/6 ( -- addr u )
     pollfds revents w@ POLLIN = IF  try-reads off
-	do-block read-a-packet  0 pollfds revents w! +rec EXIT  THEN
+	do-block read-a-packet 0 pollfds revents w! +rec EXIT  THEN
     try-read# try-reads !  0 0 ;
 
 : read-event ( -- )

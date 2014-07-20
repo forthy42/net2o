@@ -169,7 +169,7 @@ Variable do-keypad
 Sema regen-sema
 
 : keypad$ ( -- addr u )
-    do-keypad $@ dup 0= IF  2drop  crypto-key sec@  THEN ;
+    do-keypad sec@ dup 0= IF  2drop  crypto-key sec@  THEN ;
 
 : >crypt-key-ivs ( -- )
     o 0= IF  no-key state#  ELSE  keypad$  THEN
@@ -277,21 +277,21 @@ Defer check-key \ check if we know that key
     ?keysize dup keysize [: check-key ;] $err
     dup keysize pubkey $!
     keypad$ keysize <> !!no-tmpkey!!
-    skc rot keypad ed-dhx do-keypad $+! ;
+    skc rot keypad ed-dhx do-keypad sec+! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh
-    o IF  do-keypad $!  ELSE  2drop  THEN
+    o IF  do-keypad sec!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
 
 : tmpkey@ ( -- addr u )
-    do-keypad $@  dup ?EXIT  2drop
+    do-keypad sec@  dup ?EXIT  2drop
     keypad keysize ;
 
 : net2o:update-key ( -- )
-    do-keypad $@ dup IF
+    do-keypad sec@ dup IF
 	key( ." store key, o=" o hex. 2dup .nnb cr ) crypto-key sec!
-	"" do-keypad $!
+	do-keypad sec-off
 	EXIT
     THEN
     2drop ;

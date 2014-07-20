@@ -359,14 +359,14 @@ previous
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
 	r> reply-dest 64@ send-cmd true
 	1 packets2 +!
-    ELSE  dest-addr 64@ 64>n dup 0 r> 2! u>=  THEN ;
+    ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
 
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
     cmd( dest-addr 64@ $64. 2dup n2o:see )
     sp@ >r throwcount off
-    [: BEGIN   cmd-dispatch  dup 0<=  UNTIL ;] catch
+    [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!
 	[: ." do-cmd-loop: " dup . .exe cr ;] $err
 	dup DoError  nothrow
@@ -379,7 +379,7 @@ Variable throwcount
     o IF
 	maxdata code+
 	cmd0source off
-	tag-addr?  IF
+	tag-addr? IF
 	    2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
 	cmd0buf cmd0source !
@@ -551,8 +551,8 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
-	2dup do-keypad $!
-	crypto-key $!
+	2dup do-keypad sec!
+	crypto-key sec!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
 +net2o: map-request ( addrs ucode udata -- ) \ request mapping
