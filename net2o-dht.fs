@@ -64,7 +64,7 @@ enum k#tags     \ tags added
 \ most stuff is added as tag or tag:value pair
 cells Constant k#size
 
-reply-class class
+cmd-class class
     field: dht-hash
     field: dht-peers
     field: dht-owner

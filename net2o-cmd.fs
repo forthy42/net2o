@@ -481,8 +481,8 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
     throw ;
 +net2o: nest ( $:string -- ) \ nested (self-encrypted) command
     $> cmdnest ;
-
-: req> ( -- ) push' endwith ;
++net2o: req> ( -- ) \ end of request
+    endwith ;
 
 \ inspection
 
@@ -708,38 +708,49 @@ gen-table $freeze
 
 \ flow control functions
 
-$50 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
-    net2o:ack-addrtime ;
+$50 net2o: ack ( -- )  ack-context @ n:>o ;
+ack-table >table
+
+reply-table $@ inherit-table ack-table
+
+net2o' <req net2o: <req-ack ( -- )  ack ;
+net2o' req> net2o: ack-req> ( -- )
+    cmdbuf# @ 1 = IF  cmdbuf# off  ELSE  endwith  THEN ;
+net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
+    parent @ .net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
-    64>n  net2o:ack-resend ;
+    64>n  parent @ .net2o:ack-resend ;
 +net2o: set-rate ( urate udelta-t -- ) \ set rate 
-    cookie? IF  net2o:set-rate
-    ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN ;
+    parent @ >o cookie? IF  net2o:set-rate
+    ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN o> ;
 +net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
-    2*64>n net2o:resend-mask net2o:send-chunks ;
+    2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
 +net2o: track-timing ( -- ) \ track timing
-    net2o:track-timing ;
+    parent @ .net2o:track-timing ;
 +net2o: rec-timing ( $:string -- ) \ recorded timing
-    $> net2o:rec-timing ;
+    $> parent @ .net2o:rec-timing ;
 +net2o: send-timing ( -- ) \ request recorded timing
-    net2o:timing$ maxtiming umin tuck $,
-    net2o:/timing rec-timing ;
+    parent @ >o net2o:timing$ maxtiming umin tuck $,
+    net2o:/timing rec-timing o> ;
 +net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
-    net2o:ack-b2btime ;
+    parent @ .net2o:ack-b2btime ;
 +net2o: ack-cookies ( ucookie addr umask -- ) \ acknowledge cookie
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
-    data-map @ cookie+ 64over 64over 64= 0= IF
+    parent @ >o data-map @ cookie+ 64over 64over 64= 0= IF
 	." cookies don't match! " 64over $64. 64dup $64. F cr
     THEN
-    64= cookie-val and validated or! ;
+    64= cookie-val and validated or! o> ;
 +net2o: ack-flush ( addr -- ) \ flushed to addr
-    64>n net2o:rewind-sender-partial ;
+    64>n parent @ .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \ set head
-    64>n data-rmap @ .dest-head umax! ;
+    64>n parent @ .data-rmap @ .dest-head umax! ;
 +net2o: timeout ( uticks -- ) \ timeout request
-    net2o:timeout  data-map @ .dest-tail @ ulit, set-head ;
+    parent @ >o net2o:timeout  data-map @ .dest-tail @ ulit, set-head o> ;
 
 \ profiling, nat traversal
+
+gen-table $freeze
+' context-table is gen-table
 
 $60 net2o: !time ( -- ) \ start timer
     F !time init-timer ;
@@ -901,9 +912,6 @@ also net2o-base
 	+timeouts resend-all-to 64!
     THEN ;
 
-: restart-transfer ( -- )
-    slurp ;
-
 0 Value request-stats?
 
 : update-rtdelay ( -- )
@@ -912,18 +920,18 @@ also net2o-base
 : data-end? ( -- flag )
     0 data-rmap @ .dest-end !@ ;
 
-: rewind-transfer ( -- )
-    rewind data-end? IF  filereq# @ n2o:request-done
-    ELSE  restart-transfer  THEN ;
+: rewind-transfer ( -- flag )
+    rewind data-end? IF  filereq# @ n2o:request-done  false
+    ELSE  true  THEN ;
 
-: request-stats   F true to request-stats?  track-timing ;
+: request-stats   F true to request-stats?  ack track-timing endwith ;
 
 : expected@ ( -- head top )
     o IF  data-rmap @ >o
 	o IF  dest-tail @ dest-top @  ELSE  0.  THEN o>
     ELSE  0.  THEN  ;
 
-: expected? ( -- )
+: expected? ( -- flag )
     expected@ tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
@@ -931,7 +939,7 @@ also net2o-base
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
 	net2o:ack-cookies  rewind-transfer
 	64#0 burst-ticks 64!
-    THEN ;
+    ELSE  false  THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
@@ -952,7 +960,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     data-ackbits @ r@ +bit@  dup 0= IF  r@ +ackbit  THEN  rdrop
     o> negate packetr2 +! ;
 
-: +expected ( -- )
+: +expected ( -- flag )
     data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
     IF   resend-all  THEN  expected? ;
 
@@ -1014,17 +1022,21 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ acknowledge toplevel
 
 : net2o:ack-code ( ackflag -- ackflag' )
-    net2o-code ['] end-cmd IS expect-reply?
+    false { slurp? }
+    net2o-code  ack <req ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
-	net2o:gen-resend  net2o:genack	map-resend?
+	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    true net2o:do-resend
 	THEN
 	0 data-rmap @ .do-slurp !@
-	?dup-IF  net2o:ackflush slurp request-stats? IF  send-timing  THEN THEN
-    THEN  +expected
-    end-code r> ;
+	?dup-IF  net2o:ackflush request-stats? IF  send-timing  THEN
+	    true to slurp?  THEN
+    THEN  +expected slurp? or to slurp?
+    req> endwith  cmdbuf# @ 4 = IF  cmdbuf# off  THEN
+    slurp? IF  slurp  THEN
+    end-code r> dup ack-toggle# and IF  map-resend?  THEN ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64! \ last received packet
@@ -1045,10 +1057,12 @@ also net2o-base
     timeout( ." transfer keepalive " expected@ hex. hex.
     data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
     F cr )
-    expected@ tuck u>= and IF  net2o-code  +expected  end-code  EXIT  THEN
+    rewind-transfer 0= ?EXIT
+    expected@ tuck u>= and IF  net2o-code
+	ack <req +expected req> endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply
-    update-rtdelay  ticks lit, timeout  net2o:genack
-    resend-all rewind slurp  end-code ;
+    ack <req update-rtdelay  ticks lit, timeout  net2o:genack
+    resend-all rewind req> endwith slurp  end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )

@@ -815,20 +815,16 @@ current-o
 
 object class
     field: token-table
+    field: parent
 end-class cmd-class \ command interpreter
 
 Variable cmd-table
+Variable reply-table
+Variable log-table
+Variable setup-table
+Variable ack-table
 
 cmd-class class
-end-class reply-class \ command interpreter with replies
-
-Variable reply-table
-
-reply-class class
-    field: parent
-end-class component-class
-
-component-class class
     64field: dest-vaddr
     field: dest-size
     field: dest-raddr
@@ -868,24 +864,15 @@ end-class rcode-class
 
 rcode-class class end-class rdata-class
 
-reply-class class
-end-class log-class
-
-Variable log-table
-
-reply-class class
-end-class setup-class \ setup connections
-
-Variable setup-table
-
-setup-class class
+cmd-class class
     field: code-map
     field: code-rmap
     field: data-map
     field: data-rmap
+    field: log-context
+    field: ack-context
     field: codebuf#
     field: context#
-    field: log-context
     field: wait-task
     field: resend0
     field: punch-load
@@ -1097,7 +1084,9 @@ resend-size# buffer: resend-init
 UValue connection
 
 : n2o:new-log ( -- o )
-    log-class new >o  log-table @ token-table ! o o> ;
+    cmd-class new >o  log-table @ token-table ! o o> ;
+: n2o:new-ack ( -- o )
+    o cmd-class new >o  parent !  ack-table @ token-table ! o o> ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -1113,6 +1102,7 @@ UValue connection
     code-lock 0 pthread_mutex_init drop
     filestate-lock 0 pthread_mutex_init drop
     n2o:new-log log-context !
+    n2o:new-ack ack-context !
     o o> ;
 
 \ insert address for punching
@@ -1511,7 +1501,7 @@ $20 Value mask-bits#
 Variable net2o-path
 pad 200 get-dir net2o-path $!
 
-reply-class class
+cmd-class class
     64field: fs-size
     64field: fs-seek
     64field: fs-seekto
@@ -2300,6 +2290,7 @@ $10 Constant tmp-crypt-val
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
 	log-context @ .dispose
+	ack-context @ .dispose
 	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
