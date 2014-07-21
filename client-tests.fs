@@ -99,12 +99,12 @@ previous
       cookie+request
     end-code| -setip n2o:send-replace ;
 
-: c:fetch-tags ( -- )
-    net2o-code
-      expect-reply
-      0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
-      n2o:done
-    end-code| ;
+\ : c:fetch-tags ( -- )
+\     net2o-code
+\       expect-reply
+\       0 ulit, dht-open  pkc keysize 2* $, $FE ulit, 0 ulit, dht-query
+\       n2o:done
+\     end-code| ;
 
 : c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
@@ -114,20 +114,21 @@ previous
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
       expect-reply
-      !time .time s" Download test " $, type 1 ulit, . pi float, f. cr
-      ( see-me ) get-ip 0 ulit,
+      !time
+      log .time s" Download test " $, type 1 ulit, . pi float, f. cr endwith
+      get-ip 0 ulit,
       $400 blocksize! $400 blockalign! stat( request-stats )
       "net2o.fs" "net2o.fs" >cache n2o:copy
       "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
-      n2o:done words push' cr
+      n2o:done push' log words push' cr push' endwith
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
     [: ." Download test 2: 7 medium photos" cr ;] $err
     net2o-code
       expect-reply close-all \ rewind-total
-      .time s" Download test 2" $, type cr ( see-me )
+      log .time s" Download test 2" $, type cr endwith
       $10000 blocksize! $400 blockalign! stat( request-stats )
       "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
       "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
@@ -143,7 +144,7 @@ previous
     [: ." Download test 3: 2 big photos" cr ;] $err
     net2o-code
       expect-reply close-all \ rewind-total
-      .time s" Download test 3" $, type cr ( see-me )
+      log .time s" Download test 3" $, type cr endwith
       $10000 blocksize! $400 blockalign! stat( request-stats )
       "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
@@ -154,7 +155,7 @@ previous
     [: ." Download test 4: 7 big photos, partial files" cr ;] $err
     net2o-code
       expect-reply close-all \ rewind-total
-      .time s" Download test 4" $, type cr ( see-me )
+      log .time s" Download test 4" $, type cr endwith
       $10000 blocksize! $400 blockalign! stat( request-stats )
       "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
       "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
@@ -177,7 +178,7 @@ previous
     [: ." Download test 4a: 7 big photos, rest" cr ;] $err
     net2o-code
       expect-reply
-      .time s" Download test 4a" $, type cr  ( see-me )
+      log .time s" Download test 4a" $, type cr endwith
       -1. 0 limit!
       -1. 1 limit!
       -1. 2 limit!

@@ -866,6 +866,11 @@ end-class reply-class \ command interpreter with replies
 Variable reply-table
 
 reply-class class
+end-class log-class
+
+Variable log-table
+
+reply-class class
 end-class setup-class \ setup connections
 
 Variable setup-table
@@ -877,6 +882,7 @@ setup-class class
     field: data-rmap
     field: codebuf#
     field: context#
+    field: log-context
     field: wait-task
     field: resend0
     field: punch-load
@@ -901,7 +907,7 @@ setup-class class
     field: filereq#
     1 pthread-mutexes +field filestate-lock
     1 pthread-mutexes +field code-lock
-    
+
     field: data-resend
     field: data-b2b
     
@@ -914,21 +920,22 @@ setup-class class
     field: req-codesize
     field: req-datasize
     \ flow control, sender part
+    field: window-size \ packets in flight
+    field: timeouts
+    field: flyburst
+    field: flybursts
+
     64field: min-slack
     64field: max-slack
     64field: ns/burst
     64field: last-ns/burst
     64field: extra-ns
-    field: window-size \ packets in flight
     64field: bandwidth-tick \ ns
     64field: next-tick \ ns
     64field: next-timeout \ ns
-    field: timeouts
     64field: rtdelay \ ns
     64field: lastack \ ns
     64field: resend-all-to \ ns
-    field: flyburst
-    field: flybursts
     64field: lastslack
     64field: lastdeltat
     64field: slackgrow
@@ -1086,6 +1093,9 @@ resend-size# buffer: resend-init
 
 UValue connection
 
+: n2o:new-log ( -- o )
+    log-class new >o  log-table @ token-table ! o o> ;
+
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     o to connection \ current connection
@@ -1098,7 +1108,9 @@ UValue connection
     -1 blocksize !
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
-    filestate-lock 0 pthread_mutex_init drop o o> ;
+    filestate-lock 0 pthread_mutex_init drop
+    n2o:new-log log-context !
+    o o> ;
 
 \ insert address for punching
 
@@ -1797,11 +1809,6 @@ Defer punch-reply
 
 \ send chunk
 
-: net2o:get-dest ( -- taddr )
-    data-dest ;
-: net2o:get-resend ( -- taddr )
-    resend-dest ;
-
 \ branchless version using floating point
 
 User <size-lb> 1 floats cell- uallot drop
@@ -1833,10 +1840,10 @@ User <size-lb> 1 floats cell- uallot drop
     resend$@ nip 0> data-tail? or ;
 
 : net2o:resend ( -- addr n )
-    resend$@ net2o:get-resend net2o:prep-send /resend ;
+    resend$@ resend-dest net2o:prep-send /resend ;
 
 : net2o:send ( -- addr n )
-    data-tail@ net2o:get-dest net2o:prep-send /tail ;
+    data-tail@ data-dest net2o:prep-send /tail ;
 
 : ?toggle-ack ( -- )
     data-to-send 0= IF
@@ -2289,6 +2296,7 @@ $10 Constant tmp-crypt-val
 	crypto-key sec-off
 	data-resend $off  timing-stat $off
 	dest-pubkey $off
+	log-context @ .dispose
 	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 

@@ -256,6 +256,9 @@ User cmdbuf#
 
 Defer net2o:words
 
+: inherit-table ( addr u "name" -- )
+    ' dup IS gen-table  execute $! ;
+
 Vocabulary net2o-base
 
 get-current also net2o-base definitions previous
@@ -286,8 +289,7 @@ get-current also net2o-base definitions previous
 dup set-current
 
 gen-table $freeze
-gen-table $@ reply-table $!
-' reply-table is gen-table
+gen-table $@ inherit-table reply-table
 
 \ net2o assembler
 
@@ -459,7 +461,6 @@ dup set-current previous
 
 also net2o-base definitions
 $10 net2o: <req ( -- ) ; \ stub: push own id in reply
-+net2o: req> ( -- ) endwith ; \ generic: pop own id in reply
 +net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
@@ -478,11 +479,14 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
 +net2o: ko ( uerror -- ) \ receive error message
     throw ;
++net2o: nest ( $:string -- ) \ nested (self-encrypted) command
+    $> cmdnest ;
+
+: req> ( -- ) push' endwith ;
 
 \ inspection
 
-+net2o: token ( $:token n -- )
-    64>n 0 .r ." :" $> type space ; \ stub
++net2o: token ( $:token n -- ) 64drop $> 2drop ; \ stub
 
 :noname ( start -- )
     token-table $@ 2 pick cells safe/string bounds U+DO
@@ -493,11 +497,14 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
 	THEN  1+
     cell +LOOP  drop ; IS net2o:words
 
-\ setup connection class
-
 gen-table $freeze
-gen-table $@ setup-table $!
-' setup-table is gen-table
+
+\ log dump class
+
+gen-table $@ inherit-table log-table
+
+net2o' token net2o: log-token ( $:token n -- )
+    64>n 0 .r ." :" $> F type space ;
 
 $20 net2o: emit ( xc -- ) \ emit character on server log
     64>n xemit ;
@@ -509,11 +516,18 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
     F f. ;
 +net2o: cr ( -- ) \ newline on server log
     F cr ;
-+net2o: see-me ( -- ) \ see received commands on server log
-    n2o:see-me ;
++net2o: .time ( -- ) \ print timer to server log
+    F .time .packets profile( .times ) ;
 
-+net2o: nest ( $:string -- ) \ nested (self-encrypted) command
-    $> cmdnest ;
+gen-table $freeze
+
+\ setup connection class
+
+reply-table $@ inherit-table setup-table
+
+$20 net2o: log ( -- o:log ) log-context @ n:>o ;
+log-table >table
+
 +net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
@@ -565,8 +579,6 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
     ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
-+net2o: disconnect ( -- ) \ close connection
-    o 0= ?EXIT n2o:dispose-context un-cmd ;
 +net2o: set-tick ( uticks -- ) \ adjust time
     adjust-ticks ;
 +net2o: get-tick ( -- ) \ request time adjust
@@ -640,8 +652,7 @@ net2o-base
 \ everything that follows here can assume to have a connection context
 
 gen-table $freeze
-gen-table $@ context-table $!
-' context-table is gen-table
+gen-table $@ inherit-table context-table
 
 \ file functions
 
@@ -649,8 +660,7 @@ $40 net2o: file-id ( uid -- o:file )
     64>n state-addr n:>o ;
 fs-table >table
 
-reply-table $@ fs-table $!
-' fs-table is gen-table
+reply-table $@ inherit-table fs-table
 
 net2o' <req net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
 net2o' emit net2o: open-file ( $:string mode -- ) \ open file with mode
@@ -693,6 +703,8 @@ gen-table $freeze
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
++net2o: disconnect ( -- ) \ close connection
+    o 0= ?EXIT n2o:dispose-context un-cmd ;
 
 \ flow control functions
 
@@ -731,8 +743,6 @@ $50 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 
 $60 net2o: !time ( -- ) \ start timer
     F !time init-timer ;
-+net2o: .time ( -- ) \ print timer to server log
-    F .time .packets profile( .times ) ;
 
 +net2o: set-ip ( $:string -- ) \ set address information
     $> setip-xt perform ;
@@ -754,7 +764,7 @@ net2o-base
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname ( throwcode -- )
-    server? IF
+    connection @ .server? IF
 	dup  IF  dup nlit, ko end-cmd
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
     THEN  throw ; IS >throw

@@ -188,8 +188,7 @@ Variable keys
 
 get-current also net2o-base definitions
 
-cmd-table $@ key-entry-table $!
-' key-entry-table is gen-table
+cmd-table $@ inherit-table key-entry-table
 
 $10 net2o: newkey ( $:string -- o:key ) $> key:new n:>o ;
 key-entry-table >table

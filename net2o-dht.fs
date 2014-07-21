@@ -298,8 +298,7 @@ $70 net2o: dht-id ( $:string -- o:o ) $> >d#id dht( ." set dht to: " dup hex. F 
 \g set dht id for further operations on it
 dht-table >table
 
-reply-table $@ dht-table $!
-' dht-table is gen-table
+reply-table $@ inherit-table dht-table
 
 net2o' <req net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
@@ -353,8 +352,8 @@ get-current definitions
 
 +net2o: dht-host? ( -- ) d#host? ;
 +net2o: dht-tags? ( -- ) d#tags? ;
-+net2o: dht-open ( fid -- ) 64>n d#open ;
-+net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
+\ +net2o: dht-open ( fid -- ) 64>n d#open ;
+\ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
 previous set-current
 
@@ -465,7 +464,7 @@ Defer renew-key
     -setip n2o:send-revoke ;
 
 : do-disconnect ( -- )
-    net2o-code .time s" Disconnect" $, type cr
+    net2o-code log .time s" Disconnect" $, type cr endwith
       close-all disconnect  end-code msg( ." disconnected" F cr )
     n2o:dispose-context msg( ." Disposed context" F cr ) ;
 
