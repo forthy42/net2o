@@ -865,6 +865,11 @@ end-class rcode-class
 rcode-class class end-class rdata-class
 
 cmd-class class
+    field: timing-stat
+    field: track-timing
+end-class ack-class
+
+cmd-class class
     field: code-map
     field: code-rmap
     field: data-map
@@ -941,12 +946,10 @@ cmd-class class
     64field: last-rtick
     64field: last-raddr
     field: acks
-    field: rec-timing
     field: received
     \ cookies
     field: last-ackaddr
     \ statistics
-    field: timing-stat
     64field: last-time
     64field: time-offset  \ make timestamps smaller
     KEYBYTES +field tpkc
@@ -1086,7 +1089,7 @@ UValue connection
 : n2o:new-log ( -- o )
     cmd-class new >o  log-table @ token-table ! o o> ;
 : n2o:new-ack ( -- o )
-    o cmd-class new >o  parent !  ack-table @ token-table ! o o> ;
+    o ack-class new >o  parent !  ack-table @ token-table ! o o> ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -1297,7 +1300,8 @@ reply buffer: dummy-reply
 : net2o:/timing ( n -- )
     stats( timing-stat 0 rot $del ) ;
 
-: .rec-timing ( addr u -- ) rec-timing $@ \ do some dumps
+: .rec-timing ( addr u -- )
+    ack-context @ >o track-timing $@ \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
@@ -1309,13 +1313,13 @@ reply buffer: dummy-reply
 	I ts-rate sf@ f/ f.
 	I ts-grow sf@ 1u f* f.
 	." timing" cr
-    timestats +LOOP  rec-timing $off ;
+    timestats +LOOP  track-timing $off o> ;
 
-: net2o:rec-timing ( addr u -- )  rec-timing $+! ;
+: net2o:rec-timing ( addr u -- )  track-timing $+! ;
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  ack-context @ .timing-stat $+! ;
 
 \ flow control
 
@@ -2287,10 +2291,10 @@ $10 Constant tmp-crypt-val
 	resend0 $off  fstate-off
 	\ erase crypto keys
 	crypto-key sec-off
-	data-resend $off  timing-stat $off
+	data-resend $off
 	dest-pubkey $off
 	log-context @ .dispose
-	ack-context @ .dispose
+	ack-context @ >o timing-stat $off track-timing $off dispose o>
 	dispose
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 

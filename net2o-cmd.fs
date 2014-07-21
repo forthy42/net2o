@@ -726,12 +726,11 @@ net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at t
 +net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
     2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
 +net2o: track-timing ( -- ) \ track timing
-    parent @ .net2o:track-timing ;
+    net2o:track-timing ;
 +net2o: rec-timing ( $:string -- ) \ recorded timing
-    $> parent @ .net2o:rec-timing ;
+    $> net2o:rec-timing ;
 +net2o: send-timing ( -- ) \ request recorded timing
-    parent @ >o net2o:timing$ maxtiming umin tuck $,
-    net2o:/timing rec-timing o> ;
+    net2o:timing$ maxtiming umin tuck $, net2o:/timing rec-timing ;
 +net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
     parent @ .net2o:ack-b2btime ;
 +net2o: ack-cookies ( ucookie addr umask -- ) \ acknowledge cookie
@@ -1061,7 +1060,7 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code
 	ack <req +expected req> endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply
-    ack <req update-rtdelay  ticks lit, timeout  net2o:genack
+    update-rtdelay  ack <req ticks lit, timeout net2o:genack
     resend-all rewind req> endwith slurp  end-code ;
 previous
 
