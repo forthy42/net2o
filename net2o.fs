@@ -811,11 +811,27 @@ User dest-flags
 
 current-o
 
+\ job context structure and subclasses
+
 object class
+    field: token-table
+end-class cmd-class \ command interpreter
+
+Variable cmd-table
+
+cmd-class class
+end-class reply-class \ command interpreter with replies
+
+Variable reply-table
+
+reply-class class
+    field: parent
+end-class component-class
+
+component-class class
     64field: dest-vaddr
     field: dest-size
     field: dest-raddr
-    field: dest-job
     field: dest-ivs
     field: dest-ivsgen
     field: dest-ivslastgen
@@ -851,19 +867,6 @@ code-class class
 end-class rcode-class
 
 rcode-class class end-class rdata-class
-
-\ job context structure
-
-object class
-    field: token-table
-end-class cmd-class \ command interpreter
-
-Variable cmd-table
-
-cmd-class class
-end-class reply-class \ command interpreter with replies
-
-Variable reply-table
 
 reply-class class
 end-class log-class
@@ -1007,7 +1010,7 @@ $100 Value dests#
 	    IF
 		dup addr>bits ack-bit# !
 		dest-raddr @ swap dup >data-head ack-advance? ! +
-		o dest-job @ o> >o rdrop
+		o parent @ o> >o rdrop
 		UNLOOP  EXIT  THEN
 	    drop o>
 	THEN
@@ -1039,7 +1042,7 @@ User >code-flag
     THEN ;
 
 : map-data ( addr u -- o )
-    o >code-flag @ IF rcode-class ELSE rdata-class THEN new >o dest-job !
+    o >code-flag @ IF rcode-class ELSE rdata-class THEN new >o parent !
     alloc-data
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
@@ -1049,7 +1052,7 @@ User >code-flag
     o o> ;
 
 : map-source ( addr u addrx -- o )
-    o >code-flag @ IF code-class ELSE data-class THEN new >o dest-job !
+    o >code-flag @ IF code-class ELSE data-class THEN new >o parent !
     alloc-data
     dup addr>ts alloz dest-cookies !
     drop
@@ -2240,14 +2243,14 @@ $10 Constant tmp-crypt-val
     validated off \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
 
-: handle-data ( addr -- )  dest-job @ >o
+: handle-data ( addr -- )  parent @ >o
     msg( ." Handle data to addr: " dup hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
-: handle-cmd ( addr -- )  dest-job @ >o
+: handle-cmd ( addr -- )  parent @ >o
     msg( ." Handle command to addr: " dup hex. cr )
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN ;
