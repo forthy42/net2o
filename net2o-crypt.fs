@@ -267,13 +267,19 @@ $60 Constant rndkey#
     keysize <> !!keysize!! ;
 
 Defer check-key \ check if we know that key
+Defer search-key \ search if that is one of our pubkeys
 
-: net2o:receive-key ( addr u -- )
-    o 0= IF  2drop EXIT  THEN
-    ?keysize dup keysize [: check-key ;] $err
-    dup keysize pubkey $!
+: key-stage2 ( pk sk -- ) >r
     keypad$ keysize <> !!no-tmpkey!!
-    skc rot keypad ed-dhx do-keypad sec+! ;
+    r> rot keypad ed-dhx do-keypad sec+! ;
+: key-rest ( addr u sk -- ) >r
+    ?keysize dup keysize [: check-key ;] $err
+    dup keysize pubkey $! r> key-stage2 ;
+: net2o:receive-key ( addr u -- )
+    o 0= IF  2drop EXIT  THEN  skc key-rest ;
+: net2o:keypair ( pkc uc pk u -- )
+    o 0= IF  2drop EXIT  THEN
+    ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh

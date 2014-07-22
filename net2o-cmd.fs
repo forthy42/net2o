@@ -588,16 +588,18 @@ net2o-base
 
 \ crypto functions
 
-+net2o: receive-key ( $:string -- ) $> \ receive a key
++net2o: receive-key ( $:key -- ) $> \ receive a key
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
++net2o: receive-tmpkey ( $:key -- ) $> \ receive emphemeral key
+    net2o:receive-tmpkey ;
 +net2o: key-request ( -- ) \ request a key
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
-    nest[ pkc keysize $, receive-key ;
-+net2o: receive-tmpkey ( $:string -- ) $> \ receive emphemeral key
-    net2o:receive-tmpkey ;
+    pkc keysize $, receive-key ;
 +net2o: tmpkey-request ( -- ) \ request ephemeral key
-    stpkc keysize $, receive-tmpkey ;
+    stpkc keysize $, receive-tmpkey nest[ ;
++net2o: keypair ( $:yourkey $:mykey -- ) $> $> 2swap \ select a pubkey
+    tmp-crypt? IF  net2o:keypair  ELSE  2drop 2drop  THEN ;
 +net2o: update-key ( -- ) \ update secrets
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \ generate IVs
@@ -636,17 +638,22 @@ net2o-base
 +net2o: >time-offset ( n -- ) \ set time offset
     o IF  time-offset 64!  ELSE  64drop  THEN ;
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
+: reply-key, ( -- )
+    nest[ pkc keysize $, dest-pubkey @ IF
+	dest-pubkey $@ $, keypair
+	dest-pubkey $@ drop skc key-stage2
+    ELSE  receive-key  THEN
+    update-key all-ivs ;
 
 +net2o: gen-reply ( -- ) \ generate a key request reply reply
+    own-crypt? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs
-      cookie+request time-offset! ]tmpnest
+      reply-key, cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 +net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      nest[ pkc keysize $, receive-key update-key all-ivs
-      gen-punchload gen-punch time-offset! ]tmpnest
+      reply-key, gen-punchload gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 \ everything that follows here can assume to have a connection context
@@ -976,7 +983,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     gen-tmpkeys $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
     ELSE  gen-reply request,  THEN ]nest
-    tmpkey-request key-request  ind-addr @  IF  punch?  THEN  other
+    tmpkey-request
+    dest-pubkey @ 0= IF  key-request  THEN
+    ind-addr @  IF  punch?  THEN  other
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;

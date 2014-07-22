@@ -127,8 +127,8 @@ Variable strict-keys  strict-keys on
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
 : .key# ( addr u -- ) keysize umin
-    ." Key '" key-table #@ dup 0= IF 2drop EXIT THEN
-    drop cell+ .ke-nick $@ type ." ' ok" cr ;
+    ." Key '" key-table #@ 0= IF drop EXIT THEN
+    cell+ .ke-nick $@ type ." ' ok" cr ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
@@ -145,6 +145,10 @@ Variable strict-keys  strict-keys on
     ELSE
 	.key#
     THEN ; IS check-key
+
+:noname ( pkc -- skc )
+    keysize key-table #@ 0= !!unknown-key!!
+    cell+ .ke-sk sec@ 0= !!unknown-key!! ; is search-key
 
 \ get passphrase
 
