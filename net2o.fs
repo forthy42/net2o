@@ -2295,7 +2295,7 @@ $10 Constant tmp-crypt-val
 	dest-pubkey $off
 	log-context @ .dispose
 	ack-context @ >o timing-stat $off track-timing $off dispose o>
-	dispose
+	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 \ loops for server and client
@@ -2400,12 +2400,13 @@ Variable beacons \ destinations to send beacons to
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL  o-timeout ;
+: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL  o IF  o-timeout  THEN ;
 
 : client-loop ( -- )
     !ticks
+    connection >o
     o IF  up@ wait-task !  0timeout o+timeout  THEN
-    event-loop-task requests->0 ;
+    event-loop-task requests->0 o> ;
 
 : server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
 

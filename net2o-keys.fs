@@ -80,7 +80,9 @@ Variable key-table
 64Variable key-read-offset
 
 : current-key ( addr u -- o )
-    2dup keysize umin key-table #@ drop cell+ >o ke-pk $! o o> ;
+    2dup keysize umin key-table #@ drop
+    dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
+    cell+ >o ke-pk $! o o> ;
 
 : key:new ( addr u -- )
     \ addr u is the public key

@@ -424,7 +424,7 @@ also net2o-base
     dht-host dup >r
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
-    r@ $@ dump r> $[]off ;
+    r> $[]off ;
 previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
@@ -449,7 +449,8 @@ Defer renew-key
       dht-hash $@ $, dht-id remove-me,
       revoke-key 2dup set-revocation
       2dup $, dht-host+ endwith
-      cookie+request end-code| \ send revocation upstrem
+      cookie+request
+    end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
 
 : replace-me ( -- )  +addme
