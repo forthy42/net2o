@@ -1061,11 +1061,12 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ keepalive
 
 also net2o-base
-: transfer-keepalive? ( -- )  o to connection
-    timeout( ." transfer keepalive " expected@ hex. hex.
+: .keepalive ( -- )  ." transfer keepalive " expected@ hex. hex.
     data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
-    F cr )
-    rewind-transfer 0= ?EXIT
+    F cr ;
+: transfer-keepalive? ( -- )  o to connection
+    timeout( .keepalive )
+    rewind-transfer 0= IF  .keepalive  EXIT  THEN
     expected@ tuck u>= and IF  net2o-code
 	ack <req +expected req> endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply

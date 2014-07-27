@@ -179,13 +179,7 @@ previous
     net2o-code
       expect-reply
       log .time s" Download test 4a" $, type cr endwith
-      -1. 0 limit!
-      -1. 1 limit!
-      -1. 2 limit!
-      -1. 3 limit!
-      -1. 4 limit!
-      -1. 5 limit!
-      -1. 6 limit!
+      7 0 DO  -1. I limit!  LOOP
       n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
