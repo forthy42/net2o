@@ -200,7 +200,7 @@ previous
 	    THEN
 	THEN
     THEN
-    >timing do-disconnect .packets profile( .times ) ;
+    >timing do-disconnect [: .packets profile( .times ) ;] $err ;
 
 : c:test ( -- )
     init-cache'
