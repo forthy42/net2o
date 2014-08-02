@@ -831,6 +831,7 @@ cmd-class class
     field: dest-ivs
     field: dest-ivsgen
     field: dest-ivslastgen
+    field: dest-ivsrest
     field: dest-timestamps
     field: dest-replies
     field: dest-cookies

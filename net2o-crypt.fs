@@ -188,14 +188,31 @@ Sema regen-sema
       dest-ivs $@ c:prng r> c:key! ;]
     regen-sema c-section ;
 
-: regen-ivs-part ( new-back -- ) [: c:key@ >r
-      dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
-      maxdata 2* negate dup >r and  dest-back @ r> and U+DO
-	  I I' fix-size dup { len }
-	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
-	  c:prng
-      len +LOOP
-      r> c:key! ;] regen-sema c-section ;
+: rest+ ( addr u -- )
+    dest-ivsrest $@len IF
+	2dup dest-ivsrest $@ rot umin dup >r move
+	r@ safe/string
+	dest-ivsrest 0 r> $del
+    THEN ;
+
+: rest-prng ( addr u -- )
+    rest+
+    2dup dup keccak#max negate and safe/string 2>r
+    keccak#max negate and c:prng
+    2r> dup IF
+	keccak#max dest-ivsrest $!len  dest-ivsrest $@ c:prng
+	rest+
+    ELSE  2drop  THEN ;
+
+: regen-ivs-part ( new-back -- )
+    [: c:key@ >r
+	dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
+	dest-back @ U+DO
+	    I I' fix-size dup { len }
+	    addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
+	    rest-prng
+	len +LOOP
+	r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
