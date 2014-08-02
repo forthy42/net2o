@@ -188,7 +188,7 @@ Sema regen-sema
       dest-ivs $@ c:prng r> c:key! ;]
     regen-sema c-section ;
 
-: rest+ ( addr u -- )
+: rest+ ( addr u -- addr u )
     dest-ivsrest $@len IF
 	2dup dest-ivsrest $@ rot umin dup >r move
 	r@ safe/string
@@ -202,7 +202,7 @@ Sema regen-sema
     2r> dup IF
 	keccak#max dest-ivsrest $!len  dest-ivsrest $@ c:prng
 	rest+
-    ELSE  2drop  THEN ;
+    THEN  2drop ;
 
 : regen-ivs-part ( new-back -- )
     [: c:key@ >r
