@@ -949,16 +949,19 @@ also net2o-base
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
-: +ackbit ( bit -- ) 0. 64#0 { d^ new-ackbit 64^ new-cookie }
+: +ackbit ( bit -- ) 0. c:cookie { d^ new-ackbit 64^ new-cookie }
     dup  [ 8 cells 1- ]L and swap cell>> rshift
     data-ackbits-buf $@ bounds ?DO
 	dup I @ = IF drop
+	    cookie( ." cookie+ " I @ cell>> chunk-p2 + lshift hex. dup hex. new-cookie 64@ $64. )
 	    I cell+ swap +bit
-	    c:cookie I 2 cells + 64+!
+	    new-cookie 64@ I 2 cells + 64+!
+	    cookie( I 2 cells + 64@ $64. I cell+ @ hex. F cr )
 	    unloop EXIT  THEN
     [ 2 cells 64'+ ]L +LOOP
-    new-ackbit ! new-ackbit cell+ swap +bit
-    c:cookie new-cookie 64!
+    cookie( ." cookie= " dup cell>> chunk-p2 + lshift hex. over hex. new-cookie 64@ $64. F cr )
+    new-ackbit !
+    new-ackbit cell+ swap +bit
     new-ackbit [ 2 cells 64'+ ]L data-ackbits-buf $+! ;
 
 : +cookie ( -- )

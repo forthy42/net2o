@@ -1723,6 +1723,7 @@ require net2o-crypt.fs
 
 : send-cookie ( -- )  c:cookie  data-map  @ >o
     dest-addr 64@ >offset 0= IF  drop 64drop o>  EXIT  THEN
+    cookie( ." cookie+ " dup hex. >r 64dup $64. r> cr )
     addr>ts dest-cookies @ + 64! o> ;
 : recv-cookie ( -- )  c:cookie  data-rmap @ >o
     dest-cookies @ ack-bit# @ 64s + 64! o> ;
@@ -1969,6 +1970,7 @@ dup data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 
 :noname ( new-back o:map -- )
+    cookie( ." Rewind cookie to: " dup hex. cr )
     dest-back @ U+DO
 	I I' fix-size dup { len }
 	addr>ts swap addr>ts swap >r

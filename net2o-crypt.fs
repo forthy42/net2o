@@ -104,7 +104,9 @@ User last-ivskey
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
     IF  64dup ivs-assembly state# + 64! \ the address is part of the key
-	dest-flags w@ ivs-assembly state# + 64'+ w! \ the flags, too
+	dest-flags w@ [ acks# invert 8 lshift ]L and
+	ivs-assembly state# + 64'+ w!
+	\ the flags, too, except the ack toggle bits
 	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
 	ivs-assembly state# move
 	key( ." cmd key: " ivs-assembly state# 2* xtype cr )
