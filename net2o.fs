@@ -1303,7 +1303,7 @@ reply buffer: dummy-reply
     stats( timing-stat 0 rot $del ) ;
 
 : .rec-timing ( addr u -- )
-    ack-context @ >o track-timing $@ \ do some dumps
+    ack-context @ .track-timing $@ \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
@@ -1315,7 +1315,8 @@ reply buffer: dummy-reply
 	I ts-rate sf@ f/ f.
 	I ts-grow sf@ 1u f* f.
 	." timing" cr
-    timestats +LOOP  track-timing $off o> ;
+    timestats +LOOP
+    ack-context @ .track-timing $off ;
 
 : net2o:rec-timing ( addr u -- )  track-timing $+! ;
 

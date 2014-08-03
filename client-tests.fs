@@ -9,7 +9,8 @@ UValue test#  0 to test#
 
 : >timing ( -- )
     [: ." timing" .test# ;] $tmp w/o create-file throw >r
-    ['] .rec-timing r@ outfile-execute r> close-file throw ;
+    ['] .rec-timing r@ outfile-execute
+    r> close-file throw ;
 
 : >cache ( addr u -- addr' u' ) [: ." .cache" .test# ." /" type ;] $tmp ;
 
