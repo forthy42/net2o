@@ -109,7 +109,7 @@ User last-ivskey
 	\ the flags, too, except the ack toggle bits
 	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
 	ivs-assembly state# move
-	key( ." cmd key: " ivs-assembly state# 2* xtype cr )
+	key( ." key: " ivs-assembly state# + 64@ $64. ivs-assembly state# 2* xtype cr )
 	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
     dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 
@@ -208,13 +208,16 @@ Sema regen-sema
 
 : regen-ivs-part ( new-back -- )
     [: c:key@ >r
-	dest-ivsgen @ key( ." regen-ivs-part " dup c:key# .nnb cr ) c:key!
-	dest-back @ U+DO
-	    I I' fix-size dup { len }
-	    addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
+      dest-ivsgen @
+      key( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
+      c:key!
+      dest-back @ U+DO
+	  I I' fix-size dup { len }
+	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
 	    rest-prng
-	len +LOOP
-	r> c:key! ;] regen-sema c-section ;
+      len +LOOP
+      key( ." regen-ivs-part' " dest-ivsgen @ c:key# .nnb cr )
+      r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =

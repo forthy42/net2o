@@ -1098,7 +1098,7 @@ UValue connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
-    resend-init resend-size# data-resend $!
+\    resend-init resend-size# data-resend $!
     init-flow-control
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     -1 blocksize !
@@ -1463,7 +1463,7 @@ sema resize-lock
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
-: net2o:resend-mask ( addr mask -- )
+: net2o:resend-mask ( addr mask -- ) >mask0
     >r dup data-rmap @ .dest-size @ u>= IF
 	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
     THEN  r>
@@ -1477,8 +1477,7 @@ $20 Value mask-bits#
 	    >r dup u. r> dup u. cr ]hex )
 	    I 2!  UNLOOP  EXIT
 	THEN
-	I @ 0= IF  >mask0 I 2! UNLOOP EXIT  THEN
-    2 cells +LOOP  2drop ;
+    2 cells +LOOP { d^ mask+ } mask+ 2 cells data-resend $+! ;
 : net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
@@ -1494,9 +1493,7 @@ $20 Value mask-bits#
     0 +DO
 	data-resend $@ drop
 	dup >r 2@ -2 and >mask0 tuck r> 2!
-	0= IF  data-resend $@ 2 cells - >r dup 2 cells + swap r> move
-	    0. data-resend $@ 2 cells - + 2!
-	THEN
+	0= IF  data-resend 0 2 cells $del  THEN
     maxdata +LOOP ;
 
 \ resend third handshake
@@ -1929,7 +1926,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     ELSE
 	-1 data-b2b +!  true
     THEN
-    dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  THEN
+    dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  timeout( '.' emit )  THEN
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
@@ -1990,6 +1987,7 @@ rdata-class to rewind-timestamps-partial
     +LOOP ;
 
 : rewind-partial ( new-back o:map -- )
+    flush( ." rewind partial " dup hex. cr )
     \ dup clearpages-partial
     msg( ." Rewind to: " dup hex. cr )
     dup rewind-timestamps-partial regen-ivs-part ;
@@ -2014,15 +2012,13 @@ rdata-class to rewind-timestamps-partial
     rewind-ackbits o> ;
 
 : net2o:rewind-sender-partial ( new-back -- )
-    flush( ." rewind partial " dup hex. cr )
-    data-map @ >o dup rewind-partial dest-back ! o> ;
+    data-map @ >o dup rewind-partial dest-back umax! o> ;
 
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
     data-rmap @ .dest-back @ >r n2o:spit
     r> data-rmap @ >o dest-back !@
-    flush( ." rewind partial " dup hex. cr )
     dup rewind-partial  dup  dest-back!  do-slurp !@ drop o> ;
 
 Defer do-track-seek
@@ -2170,7 +2166,7 @@ Defer handle-beacon
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
     >flyburst net2o:send-chunks
     timeout( ." timeout? " .ticks space
-    send-anything? . data-to-send . data-head? . fstates .
+    resend? . data-tail? . data-head? . fstates .
     chunks+ ? bandwidth? . next-chunk-tick .ticks cr )else( 64drop ) ;
 
 \ timeout handling

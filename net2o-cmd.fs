@@ -1073,8 +1073,8 @@ also net2o-base
     expected@ tuck u>= and IF  net2o-code
 	ack <req +expected req> endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply
-    update-rtdelay  ack <req ticks lit, timeout net2o:genack
-    resend-all rewind req> endwith slurp  end-code ;
+    update-rtdelay  ack <req net2o:genack
+    resend-all ticks lit, timeout rewind req> endwith slurp  end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )
