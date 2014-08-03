@@ -1482,9 +1482,11 @@ $20 Value mask-bits#
 : net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
-	2@ 1 and IF  maxdata  ELSE  0  THEN
+	2@ >mask0 1 and IF  maxdata  ELSE  0  THEN
 	swap data-map @ .dest-raddr @ + swap
     ELSE  drop 0 0  THEN ;
+: resend? ( -- flag )
+    data-resend $@  IF  @ 0<>  ELSE  drop false  THEN ;
 
 : resend-dest ( -- addr )
     data-resend $@ drop 2@ drop n>64 data-map @ .dest-vaddr 64@ 64+ ;
@@ -1838,7 +1840,7 @@ User <size-lb> 1 floats cell- uallot drop
 \ synchronous sending
 
 : data-to-send ( -- flag )
-    resend$@ nip 0> data-tail? or ;
+    resend? data-tail? or ;
 
 : net2o:resend ( -- addr n )
     resend$@ resend-dest net2o:prep-send /resend ;
@@ -1854,7 +1856,7 @@ User <size-lb> 1 floats cell- uallot drop
 
 : net2o:send-chunk ( -- )  +chunk
     ack-state c@ outflag or!
-    bursts# 1- data-b2b @ = IF data-tail? ELSE resend$@ nip 0= THEN
+    bursts# 1- data-b2b @ = IF data-tail? ELSE resend? 0= THEN
     IF  net2o:send  ELSE  net2o:resend  THEN
     dup 0= IF  2drop 2drop  EXIT  THEN
     ?toggle-ack send-dX ;
@@ -2166,8 +2168,10 @@ Defer handle-beacon
 0 Value dump-fd
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
-    >flyburst
-    timeout( ." timeout? " 64>d d. send-anything? . chunks+ ? bandwidth? . next-chunk-tick 64>d d. cr )else( 64drop ) ;
+    >flyburst net2o:send-chunks
+    timeout( ." timeout? " .ticks space
+    send-anything? . data-to-send . data-head? . fstates .
+    chunks+ ? bandwidth? . next-chunk-tick .ticks cr )else( 64drop ) ;
 
 \ timeout handling
 

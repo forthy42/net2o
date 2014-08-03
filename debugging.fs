@@ -176,6 +176,8 @@ require date.fs
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
 : .ticks ( ticks -- )
+    64dup 64-0= IF  ." never" 64drop EXIT  THEN
+    64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
     64>f 1e-9 f* 86400e f/ fsplit unix-day0 + day2ymd
     rot 0 .r '-' emit swap 0 .r '-' emit 0 .r 'T' emit
     24e f* fsplit 0 .r ':' emit 60e f* fsplit 0 .r ':' emit
