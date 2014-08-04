@@ -2011,8 +2011,8 @@ rdata-class to rewind-timestamps-partial
     +DO  rewind-buffer  LOOP
     rewind-ackbits o> ;
 
-: net2o:rewind-sender-partial ( new-back -- )
-    data-map @ >o dup rewind-partial dest-back umax! o> ;
+: net2o:rewind-sender-partial ( new-back -- ) dest-back @ umax
+    data-map @ >o dup rewind-partial dest-back ! o> ;
 
 \ separate thread for loading and saving...
 
