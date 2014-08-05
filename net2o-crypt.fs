@@ -192,7 +192,7 @@ Sema regen-sema
 
 : rest+ ( addr u -- addr u )
     dest-ivsrest $@len IF
-	2dup dest-ivsrest $@ rot umin dup >r move
+	2dup dest-ivsrest $@ rot umin >r swap r@ move
 	r@ safe/string
 	dest-ivsrest 0 r> $del
     THEN ;
