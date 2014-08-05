@@ -1055,7 +1055,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
     IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing
-    timeout( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. F cr )
+    ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. F cr )
 ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;

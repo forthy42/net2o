@@ -1596,7 +1596,7 @@ Variable fs-table
     64dup fs-size 64!  fs-limit 64umin!
     64#0 fs-seekto 64! 64#0 fs-seek 64! ;
 : seekto! ( 64 -- )
-    fs-size 64@ 64umin fs-seekto 64! ;
+    fs-size 64@ 64umin fs-seekto 64umax! ;
 : limit-min! ( 64 id -- )
     fs-size 64@ 64umin fs-limit 64! ;
 : init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
@@ -2257,7 +2257,7 @@ $10 Constant tmp-crypt-val
 ' drop code-class to handle
 
 : .inv-packet ( -- )
-    flush( ." invalid packet to "
+    invalid( ." invalid packet to "
     dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  $64.
     ." size " min-size inbuf c@ datasize# and lshift hex. cr ) ;
 

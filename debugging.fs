@@ -140,6 +140,7 @@ debug: request( \ track requests
 debug: beacon( \ debug sending beacons
 debug: replace-beacon( \ reply to every beacon
 debug: kalloc( \ secure allocate
+debug: invalid( \ print invalid packets
 
 -db profile( \ )
 
