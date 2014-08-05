@@ -178,9 +178,17 @@ cell 8 = [IF]
 	r@ 2 cells + !
 	r> 3 cells + ! ;
     ' stop-dns alias stop-64ns
+    : compile-pushlocal-64 ( a-addr -- ) ( run-time: w1 w2 -- )
+	locals-size @ alignlp-w cell+ cell+ dup locals-size !
+	swap !
+	postpone >l postpone >l ;
     also locals-types definitions
     ' d: alias 64:
-    ' d^ alias 64^
+    : 64^ ( "name" -- a-addr xt ) \ gforth d-caret
+	create-local
+	['] compile-pushlocal-64
+      does> ( Compilation: -- ) ( Run-time: -- w )
+	postpone laddr# @ lp-offset, ;
     previous definitions
 [THEN]
 \ independent of cell size, using dfloats:
