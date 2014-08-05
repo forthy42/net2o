@@ -949,7 +949,8 @@ also net2o-base
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
-: +ackbit ( bit -- ) 0. c:cookie { d^ new-ackbit 64^ new-cookie }
+: +ackbit ( bit -- ) 0. c:cookie [ cell 4 = ] [IF] swap [THEN]
+    { d^ new-ackbit 64^ new-cookie }
     dup  [ 8 cells 1- ]L and swap cell>> rshift
     data-ackbits-buf $@ bounds ?DO
 	dup I @ = IF drop
