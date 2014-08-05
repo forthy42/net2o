@@ -868,6 +868,7 @@ rcode-class class end-class rdata-class
 cmd-class class
     field: timing-stat
     field: track-timing
+    64field: last-time
 end-class ack-class
 
 cmd-class class
@@ -951,7 +952,6 @@ cmd-class class
     \ cookies
     field: last-ackaddr
     \ statistics
-    64field: last-time
     64field: time-offset  \ make timestamps smaller
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
@@ -1303,7 +1303,7 @@ reply buffer: dummy-reply
     stats( timing-stat 0 rot $del ) ;
 
 : .rec-timing ( addr u -- )
-    ack-context @ .track-timing $@ \ do some dumps
+    ack-context @ >o track-timing $@ \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
@@ -1316,7 +1316,7 @@ reply buffer: dummy-reply
 	I ts-grow sf@ 1u f* f.
 	." timing" cr
     timestats +LOOP
-    ack-context @ .track-timing $off ;
+    track-timing $off o> ;
 
 : net2o:rec-timing ( addr u -- )  track-timing $+! ;
 
@@ -1439,7 +1439,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : rate-stat1 ( rate deltat -- )
     ack-stats( recv-tick 64@ time-offset 64@ 64-
-           64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+           64dup ack-context @ .last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
@@ -2011,8 +2011,8 @@ rdata-class to rewind-timestamps-partial
     +DO  rewind-buffer  LOOP
     rewind-ackbits o> ;
 
-: net2o:rewind-sender-partial ( new-back -- ) dest-back @ umax
-    data-map @ >o dup rewind-partial dest-back ! o> ;
+: net2o:rewind-sender-partial ( new-back -- )
+    data-map @ >o dest-back @ umax dup rewind-partial dest-back ! o> ;
 
 \ separate thread for loading and saving...
 

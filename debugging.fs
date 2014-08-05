@@ -141,6 +141,7 @@ debug: beacon( \ debug sending beacons
 debug: replace-beacon( \ reply to every beacon
 debug: kalloc( \ secure allocate
 debug: invalid( \ print invalid packets
+debug: regen( \ regenerate keys
 
 -db profile( \ )
 

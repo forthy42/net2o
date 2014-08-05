@@ -210,6 +210,7 @@ Sema regen-sema
     [: c:key@ >r
       dest-ivsgen @
       key( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
+      regen( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
       c:key!
       dest-back @ U+DO
 	  I I' fix-size dup { len }
@@ -217,6 +218,7 @@ Sema regen-sema
 	    rest-prng
       len +LOOP
       key( ." regen-ivs-part' " dest-ivsgen @ c:key# .nnb cr )
+      regen( ." regen-ivs-part' " dest-ivsgen @ c:key# .nnb cr )
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
