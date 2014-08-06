@@ -115,8 +115,7 @@ previous
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
     net2o-code
       expect-reply
-      !time
-      log .time s" Download test " $, type 1 ulit, . pi float, f. cr endwith
+      log !time .time s" Download test " $, type 1 ulit, . pi float, f. cr endwith
       get-ip 0 ulit,
       $400 blocksize! $400 blockalign! stat( request-stats )
       "net2o.fs" "net2o.fs" >cache n2o:copy

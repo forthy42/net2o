@@ -7,7 +7,8 @@ typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef unsigned int UINT32;
 typedef unsigned long long int UINT64;
-typedef unsigned long keccak_state[25*sizeof(UINT64)/sizeof(unsigned long)];
+typedef STATEI keccak_state[25*sizeof(UINT64)/sizeof(STATEI)];
+// typedef UINT64 keccak_state[25];
 
 void KeccakInitialize();
 void KeccakF(keccak_state state);

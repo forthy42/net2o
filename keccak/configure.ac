@@ -13,14 +13,17 @@ LT_INIT
 AC_CHECK_SIZEOF(void *)
 case "$ac_cv_sizeof_void_p" in
   4)
-    ws=32
+    ws=${ws-32}
     ;;
   8)
-    ws=64
+    ws=${ws-64}
     ;;
 esac
 
-LIBTOOL=${CC%gcc}libtool
+#x86 on x86_64 plattforms:
+#./configure CC="gcc -m32 -mssse3 -DUseSSE" ws=64
+
+LIBTOOL=${CC%gcc*}libtool
 AC_SUBST(ws)
 AC_SUBST(LIBTOOL)
 AC_CONFIG_FILES([Makefile])

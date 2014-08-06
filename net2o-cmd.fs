@@ -518,6 +518,8 @@ $20 net2o: emit ( xc -- ) \ emit character on server log
     F cr ;
 +net2o: .time ( -- ) \ print timer to server log
     F .time .packets profile( .times ) ;
++net2o: !time ( -- ) \ start timer
+    F !time init-timer ;
 
 gen-table $freeze
 
@@ -758,10 +760,7 @@ net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at t
 gen-table $freeze
 ' context-table is gen-table
 
-$60 net2o: !time ( -- ) \ start timer
-    F !time init-timer ;
-
-+net2o: set-ip ( $:string -- ) \ set address information
+$60 net2o: set-ip ( $:string -- ) \ set address information
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
