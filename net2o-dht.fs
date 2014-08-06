@@ -294,7 +294,7 @@ Variable revtoken
 
 get-current also net2o-base definitions
 
-$70 net2o: dht-id ( $:string -- o:o ) $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
+$51 net2o: dht-id ( $:string -- o:o ) $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
 \g set dht id for further operations on it
 dht-table >table
 

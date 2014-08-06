@@ -116,12 +116,12 @@ previous
     net2o-code
       expect-reply
       log !time .time s" Download test " $, type 1 ulit, . pi float, f. cr endwith
-      get-ip 0 ulit,
+      get-ip
       $400 blocksize! $400 blockalign! stat( request-stats )
       "net2o.fs" "net2o.fs" >cache n2o:copy
       "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
-      n2o:done push' log words push' cr push' endwith
+      n2o:done push' log 0 ulit, words push' cr push' endwith
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download2 ( -- )
@@ -137,7 +137,7 @@ previous
       "data/2011-06-27_19-33-04-small.jpg" "photo006s.jpg" >cache n2o:copy
       "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
       "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
-      n2o:done
+      n2o:done push' log 55 ulit, words push' cr push' endwith
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
@@ -213,6 +213,39 @@ event: ->throw dup DoError throw ;
     dup to total-tests  1 over lshift 1- reqmask !
     0 ?DO  I c:test& req-ms# ms test# 1+ to test#  LOOP
     requests->0 ;
+
+\ lookup for other users
+
+: c:lookup ( addr u -- id u )
+  $2000 $10000 "test" ins-ip c:connect
+    2dup c:addme-fetch-host
+    nick-key >o ke-pk $@
+    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
+	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
+	    o o> >r 2dup c:fetch-id r> >o
+    REPEAT  o> 2drop do-disconnect ;
+: c:insert-host ( addr u -- )
+    ." check host: " 2dup .host cr
+    host>$ IF
+	[: check-addr1 0= IF  2drop  EXIT  THEN
+	  insert-address temp-addr ins-dest
+	  ." insert host: " temp-addr $10 xtype cr
+	  return-addr $10 0 skip nip 0= IF
+	      temp-addr return-addr $10 move
+\	      temp-addr return-address $10 move
+	  THEN ;] $>sock
+    ELSE  2drop  THEN ;
+
+: n2o:lookup ( addr u -- )
+    2dup c:lookup
+    0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
+    nick-key .ke-pk $@ >d#id >o dht-host ['] c:insert-host $[]map o> ;
+
+: nat:connect ( addr u -- )
+    init-cache' n2o:lookup
+    ." trying to connect to: " return-addr $10 xtype cr
+    $10000 $100000 n2o:connect +flow-control +resend
+    ." Connected!" cr ;
 
 \ some more helpers
 

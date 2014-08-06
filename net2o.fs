@@ -823,6 +823,7 @@ Variable reply-table
 Variable log-table
 Variable setup-table
 Variable ack-table
+Variable msg-table
 
 cmd-class class
     64field: dest-vaddr
@@ -872,12 +873,16 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
+end-class msg-class
+
+cmd-class class
     field: code-map
     field: code-rmap
     field: data-map
     field: data-rmap
     field: log-context
     field: ack-context
+    field: msg-context
     field: codebuf#
     field: context#
     field: wait-task
@@ -1091,6 +1096,8 @@ UValue connection
     cmd-class new >o  log-table @ token-table ! o o> ;
 : n2o:new-ack ( -- o )
     o ack-class new >o  parent !  ack-table @ token-table ! o o> ;
+: n2o:new-msg ( -- o )
+    o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -1107,6 +1114,7 @@ UValue connection
     filestate-lock 0 pthread_mutex_init drop
     n2o:new-log log-context !
     n2o:new-ack ack-context !
+    n2o:new-msg msg-context !
     o o> ;
 
 \ insert address for punching
@@ -2483,6 +2491,7 @@ con-cookie >osize @ buffer: cookie-adder
 
 require net2o-cmd.fs
 require net2o-dht.fs
+require net2o-msg.fs
 require net2o-keys.fs \ extra cmd space
 
 0 [IF]

@@ -18,38 +18,6 @@ init-client
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
-: c:lookup ( addr u -- id u )
-  $2000 $10000 "test" ins-ip c:connect
-    2dup c:addme-fetch-host
-    nick-key >o ke-pk $@
-    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
-	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
-	    o o> >r 2dup c:fetch-id r> >o
-    REPEAT  o> 2drop do-disconnect ;
-: c:insert-host ( addr u -- )
-    ." check host: " 2dup .host cr
-    host>$ IF
-	[: check-addr1 0= IF  2drop  EXIT  THEN
-	  insert-address temp-addr ins-dest
-	  ." insert host: " temp-addr $10 xtype cr
-	  return-addr $10 0 skip nip 0= IF
-	      temp-addr return-addr $10 move
-\	      temp-addr return-address $10 move
-	  THEN ;] $>sock
-    ELSE  2drop  THEN ;
-
-: n2o:lookup ( addr u -- )
-    2dup c:lookup
-    0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
-    nick-key .ke-pk $@ >d#id >o dht-host ['] c:insert-host $[]map o> ;
-
-: nat:connect ( addr u -- )
-    init-cache' n2o:lookup
-    ." trying to connect to: " return-addr $10 xtype cr
-    $10000 $100000 n2o:connect +flow-control +resend
-    ." Connected!" cr
-    c:test-rest ;
-
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
 
-script? [IF] "bob" nat:connect bye [THEN]
+script? [IF] "bob" nat:connect c:test-rest bye [THEN]

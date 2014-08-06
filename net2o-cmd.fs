@@ -483,6 +483,8 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
     $> cmdnest ;
 +net2o: req> ( -- ) \ end of request
     endwith ;
++net2o: request-done ( ureq -- ) 64>n \ signal request is completed
+    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
 
 \ inspection
 
@@ -543,8 +545,6 @@ log-table >table
 +net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: request-done ( ureq -- ) 64>n \ signal request is completed
-    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
 +net2o: set-rtdelay ( utimestamp -- ) \ set round trip delay
     o IF  rtdelay!  EXIT  THEN
     own-crypt? IF
@@ -556,6 +556,8 @@ log-table >table
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
 	THEN
     ELSE  64drop  THEN  un-cmd ;
++net2o: disconnect ( -- ) \ close connection
+    o 0= ?EXIT n2o:dispose-context un-cmd ;
 
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
@@ -631,6 +633,10 @@ net2o-base
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
++net2o: set-ip ( $:string -- ) \ set address information
+    $> setip-xt perform ;
++net2o: get-ip ( -- ) \ request address information
+    >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
 \ create commands to send back
 
@@ -712,8 +718,6 @@ gen-table $freeze
 +net2o: slurp ( -- ) \ slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
-+net2o: disconnect ( -- ) \ close connection
-    o 0= ?EXIT n2o:dispose-context un-cmd ;
 
 \ flow control functions
 
@@ -759,11 +763,6 @@ net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at t
 
 gen-table $freeze
 ' context-table is gen-table
-
-$60 net2o: set-ip ( $:string -- ) \ set address information
-    $> setip-xt perform ;
-+net2o: get-ip ( -- ) \ request address information
-    >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
@@ -1103,7 +1102,7 @@ forth-local-words:
     (
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+     ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
