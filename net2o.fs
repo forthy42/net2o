@@ -1778,7 +1778,7 @@ User outflag  outflag off
     o IF  code-map @  ELSE  0  THEN  outbuf-encrypt
     outbuf addr 64@ 64-0= IF
 	return-addr
-	.time ." cmd0 to: " dup $10 xtype cr
+	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
     ELSE
 	return-address
     THEN   packet-to ;
@@ -2244,7 +2244,7 @@ $10 Constant tmp-crypt-val
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
-    .time ." handle cmd0 " sockaddr alen @ .address cr
+    cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
     0 >o rdrop \ address 0 has no job context!
     0 inbuf-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
@@ -2494,6 +2494,64 @@ require net2o-cmd.fs
 require net2o-dht.fs
 require net2o-keys.fs \ extra cmd space
 require net2o-msg.fs
+
+\ connection setup helper
+
+: ins-ip ( -- net2oaddr )
+    net2o-host $@ net2o-port insert-ip ;
+: ins-ip4 ( -- net2oaddr )
+    net2o-host $@ net2o-port insert-ip4 ;
+: ins-ip6 ( -- net2oaddr )
+    net2o-host $@ net2o-port insert-ip6 ;
+
+: c:connect ( code data nick u ret -- )
+    [: .time ." Connect to: " dup hex. cr ;] $err
+    n2o:new-context >o rdrop o to connection
+    dest-key \ get our destination key
+    n2o:connect +flow-control +resend
+    [: .time ." Connected, o=" o hex. cr ;] $err ;
+
+: c:fetch-id ( pubkey u -- )
+    net2o-code
+      expect-reply  fetch-id,
+      cookie+request
+    end-code| ;
+
+: c:addme-fetch-host ( nick u -- ) +addme
+    net2o-code
+      expect-reply get-ip fetch-host, replace-me,
+      cookie+request
+    end-code| -setip n2o:send-replace ;
+
+: lookup ( addr u -- id u )
+    $2000 $10000 "" ins-ip c:connect
+    2dup c:addme-fetch-host
+    nick-key >o ke-pk $@
+    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
+	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
+	    o o> >r 2dup c:fetch-id r> >o
+    REPEAT  o> 2drop do-disconnect ;
+: insert-host ( addr u -- )
+    ." check host: " 2dup .host cr
+    host>$ IF
+	[: check-addr1 0= IF  2drop  EXIT  THEN
+	  insert-address temp-addr ins-dest
+	  ." insert host: " temp-addr $10 xtype cr
+	  return-addr $10 0 skip nip 0= IF
+	      temp-addr return-addr $10 move
+\	      temp-addr return-address $10 move
+	  THEN ;] $>sock
+    ELSE  2drop  THEN ;
+
+: n2o:lookup ( addr u -- )
+    2dup lookup
+    0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
+    nick-key .ke-pk $@ >d#id >o dht-host ['] insert-host $[]map o> ;
+
+: nick-connect ( cmdlen datalen addr u -- )
+    n2o:lookup
+    cmd0( ." trying to connect to: " return-addr $10 xtype cr )
+    n2o:connect +flow-control +resend ;
 
 0 [IF]
 Local Variables:

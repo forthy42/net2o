@@ -55,6 +55,11 @@ User <msg-buf
 
 previous
 
+: send-text ( addr u -- )
+    net2o-code  expect-reply
+    <msg ticks lit, msg-at $, msg-text msg>
+    cookie+request end-code| ;
+
 0 [IF]
 Local Variables:
 forth-local-words:

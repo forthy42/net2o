@@ -314,7 +314,7 @@ set-current previous previous
 
 : i'm ( "name" -- ) parse-name >key ;
 
-: dest-key ( addr u -- )
+: dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
     ke-pk $@ keysize umin o> dest-pubkey $! ;
 
@@ -331,6 +331,13 @@ set-current previous previous
 :noname ( revaddr u1 keyaddr u2 -- o )
     current-key >o replace-key o> >o skc keysize ke-sk sec!
     o o> ; is renew-key
+
+also net2o-base
+: fetch-id, ( id-addr u -- )
+    $, dht-id <req dht-host? req> endwith ;
+: fetch-host, ( nick u -- )
+    nick-key .ke-pk $@ fetch-id, ;
+previous
 
 0 [IF]
 Local Variables:

@@ -104,6 +104,7 @@ debug: resend(
 debug: track(
 debug: data(
 debug: cmd(
+debug: cmd0(
 debug: send(
 debug: firstack(
 debug: msg(

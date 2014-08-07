@@ -19,12 +19,8 @@ init-client
 
 : c:msg-test ( -- )
     [: .time ." Message test" cr ;] $err
-    net2o-code
-      expect-reply
-      <msg ticks lit, msg-at
-      "This is a test message" $, msg-text msg>
-      cookie+request
-    end-code| ['] .time $err
-    >timing do-disconnect [: .packets profile( .times ) ;] $err ;
+    "This is a test message" send-text
+    ['] .time $err
+    do-disconnect [: .packets profile( .times ) ;] $err ;
 
 script? [IF] "bob" nat:connect c:msg-test bye [THEN]

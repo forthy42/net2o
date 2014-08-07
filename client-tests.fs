@@ -42,20 +42,6 @@ UValue test#  0 to test#
     "eve" ke-nick $! $1367B086A26B4E42. d>64 ke-first 64! 1 ke-type ! o>
 ;
 
-: ins-ip ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip ;
-: ins-ip4 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip4 ;
-: ins-ip6 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip6 ;
-
-: c:connect ( code data nick u ret -- )
-    [: .time ." Connect to: " dup hex. cr ;] $err
-    n2o:new-context >o rdrop o to connection
-    dest-key \ get our destination key
-    n2o:connect +flow-control +resend
-    [: .time ." Connected, o=" o hex. cr ;] $err ;
-
 : c:add-me ( -- )  +addme
     net2o-code   expect-reply get-ip cookie+request  end-code| -setip ;
 
@@ -75,30 +61,11 @@ UValue test#  0 to test#
       endwith cookie+request
     end-code| ;
 
-also net2o-base
-: fetch-id, ( id-addr u -- )
-    $, dht-id <req dht-host? req> endwith ;
-: fetch-host, ( nick u -- )
-    nick-key .ke-pk $@ fetch-id, ;
-previous
-
 : c:fetch-host ( nick u -- )
     net2o-code
       expect-reply  fetch-host,
       cookie+request
     end-code| ;
-
-: c:fetch-id ( pubkey u -- )
-    net2o-code
-      expect-reply  fetch-id,
-      cookie+request
-    end-code| ;
-
-: c:addme-fetch-host ( nick u -- ) +addme
-    net2o-code
-      expect-reply get-ip fetch-host, replace-me,
-      cookie+request
-    end-code| -setip n2o:send-replace ;
 
 \ : c:fetch-tags ( -- )
 \     net2o-code
@@ -216,35 +183,7 @@ event: ->throw dup DoError throw ;
 
 \ lookup for other users
 
-: c:lookup ( addr u -- id u )
-  $2000 $10000 "test" ins-ip c:connect
-    2dup c:addme-fetch-host
-    nick-key >o ke-pk $@
-    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
-	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
-	    o o> >r 2dup c:fetch-id r> >o
-    REPEAT  o> 2drop do-disconnect ;
-: c:insert-host ( addr u -- )
-    ." check host: " 2dup .host cr
-    host>$ IF
-	[: check-addr1 0= IF  2drop  EXIT  THEN
-	  insert-address temp-addr ins-dest
-	  ." insert host: " temp-addr $10 xtype cr
-	  return-addr $10 0 skip nip 0= IF
-	      temp-addr return-addr $10 move
-\	      temp-addr return-address $10 move
-	  THEN ;] $>sock
-    ELSE  2drop  THEN ;
-
-: n2o:lookup ( addr u -- )
-    2dup c:lookup
-    0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
-    nick-key .ke-pk $@ >d#id >o dht-host ['] c:insert-host $[]map o> ;
-
-: nat:connect ( addr u -- )
-    init-cache' n2o:lookup
-    ." trying to connect to: " return-addr $10 xtype cr
-    $10000 $100000 n2o:connect +flow-control +resend
+: nat:connect ( addr u -- )  $10000 $100000  2swap nick-connect
     ." Connected!" cr ;
 
 \ some more helpers
