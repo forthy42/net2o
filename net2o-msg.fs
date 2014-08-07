@@ -15,22 +15,41 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+get-current also net2o-base definitions
+
 $52 net2o: msg ( -- ) \ push a message object
-    msg-context @ n:>o ;
+    msg-context @ n:>o buf-state 2@ msg-buf 2! ;
 
 msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-$20 net2o: msg-at ( timestamp -- ) \ specify sender time
-    ." msg at: " .ticks space ;
+net2o' emit net2o: msg-at ( timestamp -- ) \ specify sender time
+    parent @ .pubkey $@ key-table #@
+    IF cell+ .ke-nick $@ F type ELSE drop parent @ .pubkey $@ 85type THEN
+    ." [" .ticks ." ]: " ;
 +net2o: msg-text ( $:msg -- ) \ specify message string
-    $> F type F cr ;
+    $> F type ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    $> F ." wrapped object: " 85type F cr ;
+    $> ." wrapped object: " 85type F cr ;
++net2o: msg-sig ( $:signature -- ) \ detached signature
+    $>
+    msg-buf 2@ drop buf-state 2@ drop over - 3 - 2 pick - c:0key c:hash
+    keysize 2* <> !!keysize!!
+    parent @ .pubkey $@ keysize <> !!keysize!! ed-verify .check F cr ;
 
 gen-table $freeze
 ' context-table is gen-table
+
+set-current
+
+User <msg-buf
+
+: <msg ( -- ) msg cmdbuf$ + <msg-buf ! ;
+: msg> ( -- ) <msg-buf @ cmdbuf$ + over -
+    c:0key c:hash skc pkc ed-sign $, msg-sig endwith ;
+
+previous
 
 0 [IF]
 Local Variables:

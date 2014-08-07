@@ -873,6 +873,7 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
+    2field: msg-buf
 end-class msg-class
 
 cmd-class class
@@ -2491,8 +2492,8 @@ con-cookie >osize @ buffer: cookie-adder
 
 require net2o-cmd.fs
 require net2o-dht.fs
-require net2o-msg.fs
 require net2o-keys.fs \ extra cmd space
+require net2o-msg.fs
 
 0 [IF]
 Local Variables:
@@ -2500,7 +2501,7 @@ forth-local-words:
     (
      (("event:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))

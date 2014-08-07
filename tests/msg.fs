@@ -18,12 +18,11 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 : c:msg-test ( -- )
-    [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
+    [: .time ." Message test" cr ;] $err
     net2o-code
       expect-reply
-      log !time .time s" Message test" $, type cr endwith
-      msg ticks lit, msg-at
-      "This is a test message" $, msg-text endwith
+      <msg ticks lit, msg-at
+      "This is a test message" $, msg-text msg>
       cookie+request
     end-code| ['] .time $err
     >timing do-disconnect [: .packets profile( .times ) ;] $err ;
