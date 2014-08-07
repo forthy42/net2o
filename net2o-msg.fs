@@ -45,8 +45,12 @@ set-current
 
 User <msg-buf
 
-: <msg ( -- ) msg cmdbuf$ + <msg-buf ! ;
-: msg> ( -- ) <msg-buf @ cmdbuf$ + over -
+: <msg ( -- )
+    \G start a msg block
+    msg cmdbuf$ + <msg-buf ! ;
+: msg> ( -- )
+    \G end a msg block by adding a signature
+    <msg-buf @ cmdbuf$ + over -
     c:0key c:hash skc pkc ed-sign $, msg-sig endwith ;
 
 previous
