@@ -23,7 +23,7 @@ init-client
     revoke-me ;
 
 : c:bob ( -- ) 
-    $2000 $10000 "test" ins-ip dup add-beacon c:connect
+    $2000 $10000 "" ins-ip dup add-beacon c:connect
     ." Bob connected with: " pkc $20 85type cr
     c:revoke-bob
     ." Bob revoked: " pkc $20 85type  cr

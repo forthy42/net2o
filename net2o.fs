@@ -2523,7 +2523,7 @@ require net2o-msg.fs
       cookie+request
     end-code| -setip n2o:send-replace ;
 
-: lookup ( addr u -- id u )
+: nick-lookup ( addr u -- id u )
     $2000 $10000 "" ins-ip c:connect
     2dup c:addme-fetch-host
     nick-key >o ke-pk $@
@@ -2544,7 +2544,7 @@ require net2o-msg.fs
     ELSE  2drop  THEN ;
 
 : n2o:lookup ( addr u -- )
-    2dup lookup
+    2dup nick-lookup
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
     nick-key .ke-pk $@ >d#id >o dht-host ['] insert-host $[]map o> ;
 

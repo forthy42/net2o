@@ -275,6 +275,16 @@ set-current previous previous
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
+: .rvk ." Please write down revoke key: " cr
+    skrev $20 bounds DO  ." \ " I 4 85type space I 4 + 4 85type cr 8 +LOOP ;
+
+$40 buffer: nick-buf
+
+: make-key ( -- )
+    key#user ." nick: " nick-buf $40 accept nick-buf swap cr
+    ." passphrase: " +passphrase keys $[]# 1- keys sec[]@ key+len 2!
+    cr +gen-keys .rvk ;
+
 \ read key file
 
 : try-decrypt-key ( key u1 -- addr u2 true / false )
