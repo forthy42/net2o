@@ -17,9 +17,9 @@ init-client
 
 : c:msg-test ( -- )
     [: .time ." Message test" cr ;] $err
-    "This is a test message" send-text
-    "This is a second test message" send-text
-    pad 100 accept pad swap send-text
-    ['] .time $err ;
+    "Hi Bob!" send-text o-timeout
+    BEGIN  pad 100 accept cr dup WHILE  pad swap send-text  REPEAT
+    drop ['] .time $err ;
 
-script? [IF] "bob" nat:connect c:msg-test c:disconnect bye [THEN]
+script? [IF] c:announce-me ." connect bob?" key drop
+    "bob" nat:connect c:msg-test c:disconnect bye [THEN]

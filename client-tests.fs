@@ -150,6 +150,9 @@ UValue test#  0 to test#
       n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
+: c:disconnect ( -- )
+    do-disconnect [: .packets profile( .times ) ;] $err ;
+
 : c:test-rest ( -- )
     c:download1
     3e @time f> IF c:download2
@@ -161,7 +164,7 @@ UValue test#  0 to test#
 	    THEN
 	THEN
     THEN
-    >timing do-disconnect [: .packets profile( .times ) ;] $err ;
+    >timing c:disconnect ;
 
 : c:test ( -- )
     init-cache'

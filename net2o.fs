@@ -566,7 +566,8 @@ Defer init-reply
 alloc-io
 
 : net2o-pass ( params xt n task )  pass
-    b-out init-reply prep-socks alloc-io catch free-io
+    b-out op-vector @ debug-vector ! ." Created net2o task" cr
+    init-reply prep-socks alloc-io catch free-io
     ?dup-IF  DoError  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
@@ -2522,6 +2523,9 @@ require net2o-msg.fs
       expect-reply get-ip fetch-host, replace-me,
       cookie+request
     end-code| -setip n2o:send-replace ;
+
+: c:announce-me ( -- )
+    $2000 $10000 "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
 : nick-lookup ( addr u -- id u )
     $2000 $10000 "" ins-ip c:connect

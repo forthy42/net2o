@@ -39,7 +39,7 @@ require mkdir.fs
 
 $100 Constant keypack#
 
-0 Value pw-level# \ pw-level# 0 is lowest
+2 Value pw-level# \ pw-level# 0 is lowest
 \ !!TODO!! we need a way to tell how much we can trust keys
 \ passwords need a pw-level (because they are guessable)
 \ secrets don't, they aren't. We can quickly decrypt all

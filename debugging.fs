@@ -150,7 +150,9 @@ debug: regen( \ regenerate keys
 
 : toggle ( addr -- )  dup @ 0= swap ! ;
 
-: debug-task ( -- )  stacksize4 NewTask4 activate
+0 Value debug-task
+: new-debug-task ( -- ) debug-task ?EXIT
+    stacksize4 NewTask4 dup to debug-task activate
     BEGIN  case key
 	    'c' of  ['] cmd( >body toggle  endof
 	    'm' of  ['] msg( >body toggle  endof
