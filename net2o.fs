@@ -566,7 +566,7 @@ Defer init-reply
 alloc-io
 
 : net2o-pass ( params xt n task )  pass
-    b-out op-vector @ debug-vector ! ." Created net2o task" cr
+    b-out op-vector @ debug-vector !
     init-reply prep-socks alloc-io catch free-io
     ?dup-IF  DoError  THEN ;
 : net2o-task ( params xt n -- task )

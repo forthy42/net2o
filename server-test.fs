@@ -4,7 +4,7 @@ require client-tests.fs \ test framework
 
 +debug
 %droprate
-bg( )else( debug-task )
+\ bg( )else( debug-task )
 test-keys \ we want the test keys - never use this in production!
 
 ?nextarg [IF] s>number drop to net2o-port [THEN]
