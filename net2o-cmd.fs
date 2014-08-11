@@ -518,8 +518,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
 +net2o: new-code ( addr addr u -- ) \ crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: set-rtdelay ( utimestamp -- ) \ set round trip delay
-    o IF  rtdelay!  EXIT  THEN
++net2o: set-cookie ( utimestamp -- ) \ cookie and round trip delay
     own-crypt? IF
 	64dup cookie>context?
 	IF  >o rdrop  o to connection
@@ -547,7 +546,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
 +net2o: map-request ( addrs ucode udata -- ) \ request mapping
     2*64>n
     nest[
-    ?new-mykey ticker 64@ lit, set-rtdelay
+    ?new-mykey ticker 64@ lit, set-cookie
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize $, store-key  stskc KEYSIZE erase
@@ -591,7 +590,7 @@ net2o-base
 	return-addr return-address $10 move  resend0 $off
     THEN ;
 
-: cookie, ( -- )  add-cookie lit, set-rtdelay ;
+: cookie, ( -- )  add-cookie lit, set-cookie ;
 : request, ( -- )  next-request ulit, request-done ;
 
 : gen-punch ( -- )
@@ -647,6 +646,8 @@ $20 net2o: disconnect ( -- ) \ close connection
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
++net2o: set-rtdelay ( ticks -- ) \ set round trip delay only
+    rtdelay! ;
 
 +net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;
