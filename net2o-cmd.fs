@@ -769,7 +769,7 @@ $20 net2o: emit ( utf8 -- ) \ emit character on server log
     $> F type ;
 +net2o: . ( n -- ) \ print number on server log
     64. ;
-+net2o: f. ( -- ) \ print fp number on server log
++net2o: f. ( r -- ) \ print fp number on server log
     F f. ;
 +net2o: cr ( -- ) \ newline on server log
     F cr ;
