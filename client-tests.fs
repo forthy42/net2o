@@ -104,7 +104,7 @@ UValue test#  0 to test#
       "data/2011-06-27_19-33-04-small.jpg" "photo006s.jpg" >cache n2o:copy
       "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
       "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
-      n2o:done
+      n2o:done push' log log $20 ulit, words endwith push' cr push' endwith
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )
@@ -115,7 +115,7 @@ UValue test#  0 to test#
       $10000 blocksize! $400 blockalign! stat( request-stats )
       "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
-      n2o:done
+      n2o:done push' log 0 file-id $20 ulit, words endwith push' cr push' endwith
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download4 ( -- )
@@ -138,7 +138,7 @@ UValue test#  0 to test#
       $50000. 4 limit!
       $60000. 5 limit!
       $70000. 6 limit!
-      n2o:done
+      n2o:done push' log "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" $, dht-id $20 ulit, words endwith push' cr push' endwith
     end-code| ['] .time $err ;
 
 : c:download4a ( -- )

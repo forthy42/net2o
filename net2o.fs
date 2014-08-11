@@ -2311,6 +2311,8 @@ $10 Constant tmp-crypt-val
 	crypto-key sec-off
 	data-resend $off
 	dest-pubkey $off
+	pubkey $off
+	mpubkey $off
 	log-context @ .dispose
 	ack-context @ >o timing-stat $off track-timing $off dispose o>
 	dispose  0 to connection

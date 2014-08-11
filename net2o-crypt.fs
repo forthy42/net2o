@@ -300,7 +300,7 @@ Defer search-key \ search if that is one of our pubkeys
     ?keysize dup keysize [: check-key ;] $err
     dup keysize pubkey $! r> key-stage2 ;
 : net2o:receive-key ( addr u -- )
-    o 0= IF  2drop EXIT  THEN  skc key-rest ;
+    o 0= IF  2drop EXIT  THEN  pkc keysize mpubkey $! skc key-rest ;
 : net2o:keypair ( pkc uc pk u -- )
     o 0= IF  2drop EXIT  THEN
     2dup mpubkey $! ?keysize search-key key-rest ;

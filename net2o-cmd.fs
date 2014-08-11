@@ -161,11 +161,13 @@ Defer gen-table
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
--5 cells 0 +field net2o.name
+-6 dup 1+ 1 and cell 4 = and - cells 0 +field net2o.name
 drop
 
 : >net2o-name ( addr -- addr' u )
     net2o.name body> name>string ;
+: >net2o-sig ( addr -- addr' u )
+    net2o.name 3 cells + $@ ;
 
 : (net2o-see) ( addr -- )  @
     dup 0<> IF
@@ -244,10 +246,11 @@ User cmdbuf#
 : net2o: ( number "name" -- )
     ['] noop over >cmd \ allocate space in table
     Create  here to last-2o
-    dup >r , here >r 0 , 0 , net2o-does noname :
+    dup >r , here >r 0 , 0 , 0 , net2o-does noname :
     lastxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
 : >table ( table -- )  last-2o 2 cells + ! ;
+: cmdsig ( -- addr )  last-2o 3 cells + ;
 : net2o' ( "name" -- ) ' >body @ ;
 
 : F also forth parse-name parser1 execute previous ; immediate
@@ -261,9 +264,17 @@ Defer net2o:words
 
 Vocabulary net2o-base
 
-get-current also net2o-base definitions previous
+get-current also net2o-base definitions
 
 \ Command numbers preliminary and subject to change
+
+: ( ( "type"* "--" "type"* "rparen" -- ) ')' parse 2drop ;
+comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
+    s" (" cmdsig $!
+    BEGIN  parse-name dup  WHILE  over c@ cmdsig c$+!
+	s" )" str= UNTIL  ELSE  2drop  THEN
+    \ cmdsig $freeze
+;
 
 0 net2o: dummy ( -- ) ; \ alias
 0 net2o: end-cmd ( -- ) 0 buf-state ! ;
@@ -275,7 +286,7 @@ get-current also net2o-base definitions previous
     string@ ;
 +net2o: flit ( #dfloat -- r ) \ double float literal
     pf@ ;
-+net2o: endwith ( o:object -- ) \ last command in buffer
++net2o: endwith ( o:object -- ) \ end scope
     n:o> ;
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
@@ -286,6 +297,7 @@ get-current also net2o-base definitions previous
 +net2o: words ( ustart -- ) \ reflection
     64>n net2o:words ;
 
+previous
 dup set-current
 
 gen-table $freeze
@@ -493,9 +505,10 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
 :noname ( start -- )
     token-table $@ 2 pick cells safe/string bounds U+DO
 	I @ ?dup-IF
-	    >net2o-name dup $A0 + maxstring < IF
-		2 pick ulit, [: type ." (-)" ;] $tmp $, token
-	    ELSE  2drop  THEN
+	    dup >net2o-sig 2>r >net2o-name
+	    dup $A0 + maxstring < IF
+		2 pick ulit, 2r> 2swap [: type type ;] $tmp $, token
+	    ELSE  2drop rdrop rdrop  THEN
 	THEN  1+
     cell +LOOP  drop ; IS net2o:words
 
@@ -572,8 +585,8 @@ net2o-base
     pkc keysize $, receive-key ;
 +net2o: tmpkey-request ( -- ) \ request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
-+net2o: keypair ( $:yourkey $:mykey -- ) $> $> 2swap \ select a pubkey
-    tmp-crypt? IF  net2o:keypair  ELSE  2drop 2drop  THEN ;
++net2o: keypair ( $:yourkey $:mykey -- ) \ select a pubkey
+    $> $> tmp-crypt? IF  2swap net2o:keypair  ELSE  2drop 2drop  THEN ;
 +net2o: update-key ( -- ) \ update secrets
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \ generate IVs
@@ -700,7 +713,7 @@ gen-table $freeze
 
 \ flow control functions
 
-$31 net2o: ack ( -- )  ack-context @ n:>o ;
+$31 net2o: ack ( -- o:acko )  ack-context @ n:>o ;
 ack-table >table
 
 reply-table $@ inherit-table ack-table
@@ -750,11 +763,11 @@ reply-table $@ inherit-table log-table
 net2o' token net2o: log-token ( $:token n -- )
     64>n 0 .r ." :" $> F type space ;
 
-$20 net2o: emit ( xc -- ) \ emit character on server log
+$20 net2o: emit ( utf8 -- ) \ emit character on server log
     64>n xemit ;
 +net2o: type ( $:string -- ) \ type string on server log
     $> F type ;
-+net2o: . ( u -- ) \ print number on server log
++net2o: . ( n -- ) \ print number on server log
     64. ;
 +net2o: f. ( -- ) \ print fp number on server log
     F f. ;
@@ -781,8 +794,6 @@ log-table >table
 
 \ safe initialization
 
-net2o-base
-
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname ( throwcode -- )
@@ -791,9 +802,7 @@ net2o-base
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
     THEN  throw ; IS >throw
 
-set-current previous
-
-also net2o-base
+set-current
 
 : open-tracked-file ( addr u mode --)
     open-file <req get-size get-stat req> ;
