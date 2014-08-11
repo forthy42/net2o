@@ -501,38 +501,11 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
 
 gen-table $freeze
 
-\ log dump class
-
-gen-table $@ inherit-table log-table
-
-net2o' token net2o: log-token ( $:token n -- )
-    64>n 0 .r ." :" $> F type space ;
-
-$20 net2o: emit ( xc -- ) \ emit character on server log
-    64>n xemit ;
-+net2o: type ( $:string -- ) \ type string on server log
-    $> F type ;
-+net2o: . ( u -- ) \ print number on server log
-    64. ;
-+net2o: f. ( -- ) \ print fp number on server log
-    F f. ;
-+net2o: cr ( -- ) \ newline on server log
-    F cr ;
-+net2o: .time ( -- ) \ print timer to server log
-    F .time .packets profile( .times ) ;
-+net2o: !time ( -- ) \ start timer
-    F !time init-timer ;
-
-gen-table $freeze
-
 \ setup connection class
 
 reply-table $@ inherit-table setup-table
 
-$20 net2o: log ( -- o:log ) log-context @ n:>o ;
-log-table >table
-
-+net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
+$20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
 : ]nest$  ( -- )  end-cmd cmd>nest $, ;
@@ -556,8 +529,6 @@ log-table >table
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
 	THEN
     ELSE  64drop  THEN  un-cmd ;
-+net2o: disconnect ( -- ) \ close connection
-    o 0= ?EXIT n2o:dispose-context un-cmd ;
 
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
@@ -633,10 +604,6 @@ net2o-base
 
 +net2o: punch? ( -- ) \ Request punch addresses
     gen-punch ;
-+net2o: set-ip ( $:string -- ) \ set address information
-    $> setip-xt perform ;
-+net2o: get-ip ( -- ) \ request address information
-    >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
 \ create commands to send back
 
@@ -645,7 +612,10 @@ net2o-base
 
 +net2o: >time-offset ( n -- ) \ set time offset
     o IF  time-offset 64!  ELSE  64drop  THEN ;
-: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
++net2o: context ( -- ) \ make context active
+    o IF  context!  THEN ;
+
+: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! context ;
 : reply-key, ( -- )
     nest[ pkc keysize $, dest-pubkey @ IF
 	dest-pubkey $@ $, keypair
@@ -658,27 +628,50 @@ net2o-base
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, cookie+request time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
-
 +net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, gen-punchload gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
+gen-table $freeze
+
 \ everything that follows here can assume to have a connection context
 
-gen-table $freeze
-gen-table $@ inherit-table context-table
+reply-table $@ inherit-table context-table
 
-\ file functions
+\ generic functions
 
-$40 net2o: file-id ( uid -- o:file )
+$20 net2o: disconnect ( -- ) \ close connection
+    o 0= ?EXIT n2o:dispose-context un-cmd ;
++net2o: set-ip ( $:string -- ) \ set address information
+    $> setip-xt perform ;
++net2o: get-ip ( -- ) \ request address information
+    >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
+
++net2o: set-blocksize ( n -- ) \ set blocksize
+    64>n blocksize! ;
++net2o: set-blockalign ( n -- ) \ set block alignment
+    64>n pow2?  blockalign ! ;
++net2o: close-all ( -- ) \ close all files
+    n2o:close-all ;
+\ better slurping
+
++net2o: set-top ( utop flag -- ) \ set top, flag is true when all data is sent
+    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
++net2o: slurp ( -- ) \ slurp in tracked files
+    n2o:slurp swap ulit, flag, set-top
+    ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
+
+\ object handles
+
+$30 net2o: file-id ( uid -- o:file )
     64>n state-addr n:>o ;
 fs-table >table
 
 reply-table $@ inherit-table fs-table
 
 net2o' <req net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
-net2o' emit net2o: open-file ( $:string mode -- ) \ open file with mode
+$20 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
@@ -698,30 +691,15 @@ net2o' emit net2o: open-file ( $:string mode -- ) \ open file with mode
 gen-table $freeze
 ' context-table is gen-table
 
-+net2o: set-blocksize ( n -- ) \ set blocksize
-    64>n blocksize! ;
-+net2o: set-blockalign ( n -- ) \ set block alignment
-    64>n pow2?  blockalign ! ;
-+net2o: close-all ( -- ) \ close all files
-    n2o:close-all ;
-
 : blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
 : blockalign! ( n -- )  pow2? dup ulit, set-blockalign blockalign ! ;
-
-\ better slurping
 
 :noname ( uid useek -- ) 64>r ulit, file-id
     64r> lit, set-seek endwith ; is do-track-seek
 
-+net2o: set-top ( utop flag -- ) \ set top, flag is true when all data is sent
-    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
-+net2o: slurp ( -- ) \ slurp in tracked files
-    n2o:slurp swap ulit, flag, set-top
-    ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
-
 \ flow control functions
 
-$50 net2o: ack ( -- )  ack-context @ n:>o ;
+$31 net2o: ack ( -- )  ack-context @ n:>o ;
 ack-table >table
 
 reply-table $@ inherit-table ack-table
@@ -729,7 +707,7 @@ reply-table $@ inherit-table ack-table
 net2o' <req net2o: <req-ack ( -- )  ack ;
 net2o' req> net2o: ack-req> ( -- )
     cmdbuf# @ 1 = IF  cmdbuf# off  ELSE  endwith  THEN ;
-net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
+$20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     parent @ .net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  parent @ .net2o:ack-resend ;
@@ -763,6 +741,34 @@ net2o' emit net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at t
 
 gen-table $freeze
 ' context-table is gen-table
+
+\ log dump class
+
+reply-table $@ inherit-table log-table
+
+net2o' token net2o: log-token ( $:token n -- )
+    64>n 0 .r ." :" $> F type space ;
+
+$20 net2o: emit ( xc -- ) \ emit character on server log
+    64>n xemit ;
++net2o: type ( $:string -- ) \ type string on server log
+    $> F type ;
++net2o: . ( u -- ) \ print number on server log
+    64. ;
++net2o: f. ( -- ) \ print fp number on server log
+    F f. ;
++net2o: cr ( -- ) \ newline on server log
+    F cr ;
++net2o: .time ( -- ) \ print timer to server log
+    F .time .packets profile( .times ) ;
++net2o: !time ( -- ) \ start timer
+    F !time init-timer ;
+
+gen-table $freeze
+' context-table is gen-table
+
+$32 net2o: log ( -- o:log ) log-context @ n:>o ;
+log-table >table
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
@@ -977,7 +983,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-: gen-request ( -- )
+: gen-request ( -- ) o IF  setup!  THEN
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
@@ -1087,7 +1093,7 @@ previous
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend  client-loop
-    -timeout tskc KEYBYTES erase resend0 $off ;
+    -timeout tskc KEYBYTES erase resend0 $off  context! ;
 
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-request  tail-connect ;

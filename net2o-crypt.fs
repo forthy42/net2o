@@ -303,7 +303,7 @@ Defer search-key \ search if that is one of our pubkeys
     o 0= IF  2drop EXIT  THEN  skc key-rest ;
 : net2o:keypair ( pkc uc pk u -- )
     o 0= IF  2drop EXIT  THEN
-    ?keysize search-key key-rest ;
+    2dup mpubkey $! ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh

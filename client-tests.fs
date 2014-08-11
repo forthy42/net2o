@@ -104,7 +104,7 @@ UValue test#  0 to test#
       "data/2011-06-27_19-33-04-small.jpg" "photo006s.jpg" >cache n2o:copy
       "data/2011-06-27_19-55-48-small.jpg" "photo007s.jpg" >cache n2o:copy
       "data/2011-06-28_06-54-09-small.jpg" "photo008s.jpg" >cache n2o:copy
-      n2o:done push' log 55 ulit, words push' cr push' endwith
+      n2o:done
     end-code| n2o:close-all ['] .time $err ;
 
 : c:download3 ( -- )

@@ -17,7 +17,7 @@
 
 get-current also net2o-base definitions
 
-$52 net2o: msg ( -- ) \ push a message object
+$34 net2o: msg ( -- ) \ push a message object
     msg-context @ n:>o buf-state 2@ msg-buf 2! ;
 
 msg-table >table

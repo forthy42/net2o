@@ -903,7 +903,8 @@ cmd-class class
     field: blocksize
     field: blockalign
     field: crypto-key
-    field: pubkey
+    field: pubkey \ other side official pubkey
+    field: mpubkey \ our side official pubkey
     field: timeout-xt \ callback for timeout
     field: setip-xt   \ callback for set-ip
     field: ack-xt
@@ -1173,6 +1174,8 @@ Variable mapstart $1 mapstart !
 
 : server? ( -- flag )  is-server c@ negate ;
 : server! ( -- )  1 is-server c! ;
+: setup! ( -- )   setup-table @ token-table ! ;
+: context! ( -- )   context-table @ token-table ! ;
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
 : n2o:new-map ( u -- addr )
@@ -1181,7 +1184,7 @@ Variable mapstart $1 mapstart !
 : n2o:new-data pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  server!  THEN
+	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
@@ -1189,7 +1192,7 @@ Variable mapstart $1 mapstart !
 : n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  server!  THEN
+	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN
     msg( ." code map: " addrs $64. addrd $64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
@@ -2507,9 +2510,10 @@ require net2o-msg.fs
 
 : c:connect ( code data nick u ret -- )
     [: .time ." Connect to: " dup hex. cr ;] $err
-    n2o:new-context >o rdrop o to connection
+    n2o:new-context >o rdrop o to connection  setup!
     dest-key \ get our destination key
-    n2o:connect +flow-control +resend
+    n2o:connect
+    +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:fetch-id ( pubkey u -- )
