@@ -2537,7 +2537,8 @@ require net2o-msg.fs
     $2000 $10000 "" ins-ip c:connect
     2dup c:addme-fetch-host
     nick-key >o ke-pk $@
-    BEGIN  >d#id >o 0 dht-host $[]@ o> over c@ '!' =  WHILE
+    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!
+	over c@ '!' =  WHILE
 	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
 	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  o> 2drop do-disconnect ;
