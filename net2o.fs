@@ -325,13 +325,12 @@ User ip6:#
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
     [:  sockaddr_in6 %size alen !
 	sockaddr ipv4! query-sock sockaddr sock-rest connect
-	IF  errno 101 =  IF  drop "\0\0\0\0"  ELSE  true ?ior  THEN  THEN
-	query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
-	IF  drop s" " \ 0 is an invalid result
-	ELSE  ?ior
-	    sockaddr1 family w@ AF_INET6 =
-	    IF  ?fake-ip4  ELSE  sin_addr 4  THEN
-	THEN ;] 'sock ;
+	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	query-sock sockaddr1 alen getsockname
+	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	sockaddr1 family w@ AF_INET6 =
+	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+    ;] 'sock ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address
@@ -347,7 +346,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
     [:  sockaddr_in6 %size alen !
 	sockaddr sin6_addr $10 move
 	query-sock sockaddr sock-rest connect dup 0< errno 101 = and
-	IF  drop s" "
+	IF  drop ip6::0 $10
 	ELSE  ?ior
 	    query-sock sockaddr1 alen getsockname ?ior
 	    ?fake-ip4
