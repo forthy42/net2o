@@ -647,6 +647,7 @@ net2o-base
       reply-key, gen-punchload gen-punch time-offset! ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
+\ !!TODO!! knock should use special default key
 +net2o: knock ( $:challenge -- ) $> net2o:knock knock-val and validated or! ;
 
 gen-table $freeze

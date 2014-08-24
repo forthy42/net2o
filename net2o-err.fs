@@ -54,3 +54,4 @@ s" Wrong revocation secret"      throwcode !!not-my-revsk!!
 s" krypto mem request too big"   throwcode !!kr-size!!
 s" secret storage size wrong"    throwcode !!sec-size!!
 s" host not found"               throwcode !!host-notfound!!
+s" too many revokes chained"     throwcode !!maxlookup!!
