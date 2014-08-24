@@ -345,12 +345,12 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
     \G return IPv6 address - if length is 0, not reachable with IPv6
     [:  sockaddr_in6 %size alen !
 	sockaddr sin6_addr $10 move
-	query-sock sockaddr sock-rest connect dup 0< errno 101 = and
-	IF  drop ip6::0 $10
-	ELSE  ?ior
-	    query-sock sockaddr1 alen getsockname ?ior
-	    ?fake-ip4
-	THEN ;] 'sock ;
+	query-sock sockaddr sock-rest connect
+	dup 0< errno 101 = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
+	query-sock sockaddr1 alen getsockname
+	dup 0< errno 101 = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
+	?fake-ip4
+    ;] 'sock ;
 
 : check-ip64 ( dummy -- ipaddr u ) noipv4( check-ip6 EXIT )
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
