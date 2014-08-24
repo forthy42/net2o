@@ -44,16 +44,16 @@ object class
     \G Encrypt message in buffer addr u
     umethod c:decrypt ( addr u -- )
     \G Decrypt message in buffer addr u
-    umethod c:encrypt+auth ( addr u -- )
+    umethod c:encrypt+auth ( addr u tag -- )
     \G Encrypt message in buffer addr u
-    umethod c:decrypt+auth ( addr u -- flag )
+    umethod c:decrypt+auth ( addr u tag -- flag )
     \G Decrypt message in buffer addr u
     umethod c:hash ( addr u -- )
     \G Hash message in buffer addr u
     umethod c:prng ( addr u -- )
     \G Fill buffer addr u with PRNG sequence
-    umethod c:checksum ( -- xd )
+    umethod c:checksum ( tag -- xd )
     \G compute a 128 bit checksum
     umethod c:cookie ( -- x )
-    \G compute a different checksum
+    \G compute a different 64 bit checksum
 end-class crypto

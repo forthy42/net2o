@@ -48,7 +48,7 @@ UValue test#  0 to test#
 : c:add-tag ( -- ) +addme
     net2o-code
       expect-reply
-      s" DHT test" $, type cr get-ip
+      log s" DHT test" $, type cr endwith get-ip
       pkc keysize 2* $, dht-id
       forever "test:tag" pkc keysize 2* gen-tag-del $, dht-tags-
       forever "test:tag" pkc keysize 2* gen-tag $, dht-tags+

@@ -127,10 +127,10 @@ User last-ivskey
     2>r over >r  rng@ rng@ r> 128! 2r> crypt-key-init ;
 
 : encrypt$ ( addr u1 key u2 -- )
-    crypt-key-setup  2 64s - c:encrypt+auth ;
+    crypt-key-setup  2 64s - 0 c:encrypt+auth ;
 
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
-    crypt-key-init 2 64s - 2dup c:decrypt+auth ;
+    crypt-key-init 2 64s - 2dup 0 c:decrypt+auth ;
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
@@ -145,10 +145,10 @@ User last-ivskey
     drop c@ $F and 2* $100 swap lshift ;
 
 : encrypt-pw$ ( addr u1 key u2 n -- )
-    crypt-pw-setup  pw-diffuse  2 64s - c:encrypt+auth ;
+    crypt-pw-setup  pw-diffuse  2 64s - 0 c:encrypt+auth ;
 
 : decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
-    crypt-key-init   r> pw-diffuse  2 64s - 2dup c:decrypt+auth ;
+    crypt-key-init   r> pw-diffuse  2 64s - 2dup 0 c:decrypt+auth ;
 
 \ encrypt with own key
 
@@ -160,10 +160,12 @@ User last-ivskey
     $>align oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    crypt-buf-init outbuf packet-data +cryptsu c:encrypt+auth +enc ;
+    crypt-buf-init outbuf packet-data +cryptsu
+    outbuf 1+ c@ c:encrypt+auth +enc ;
 
 : inbuf-decrypt ( map -- flag2 ) +calc
-    crypt-buf-init inbuf packet-data +cryptsu c:decrypt+auth +enc ;
+    crypt-buf-init inbuf packet-data +cryptsu
+    inbuf 1+ c@ c:decrypt+auth +enc ;
 
 \ IVS
 
@@ -321,6 +323,14 @@ Defer search-key \ search if that is one of our pubkeys
 	EXIT
     THEN
     2drop ;
+
+\ port knocking
+
+Variable knocks
+
+: net2o:knock ( addr u -- flag )
+    0 -rot knocks [: 2over 2swap decrypt$ nip nip -rot 2>r or 2r>
+    ;] $[]map 2drop ;
 
 0 [IF]
 Local Variables:

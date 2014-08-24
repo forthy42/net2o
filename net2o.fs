@@ -324,7 +324,8 @@ User ip6:#
 
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
     [:  sockaddr_in6 %size alen !
-	sockaddr ipv4! query-sock sockaddr sock-rest connect ?ior
+	sockaddr ipv4! query-sock sockaddr sock-rest connect
+	IF  errno 101 =  IF  drop "\0\0\0\0"  ELSE  true ?ior  THEN  THEN
 	query-sock sockaddr1 alen getsockname dup 0< errno 101 = and
 	IF  drop s" " \ 0 is an invalid result
 	ELSE  ?ior
@@ -2240,19 +2241,21 @@ $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
 $10 Constant tmp-crypt-val
+$20 Constant knock-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
+: knocked?   ( -- flag )  validated @ knock-val     and ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
     0 >o rdrop \ address 0 has no job context!
     0 inbuf-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
-    validated off \ packets to address 0 are not really validated
+    knocks $@len 0= knock-val and validated ! \ packets to address 0 are not really validated
     inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  parent @ >o

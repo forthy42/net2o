@@ -54,7 +54,7 @@ end-c-library
 
 25 8 * Constant keccak#
 128 Constant keccak#max
-24 Constant keccak#cks
+128 Constant keccak#cks
 
 UValue @keccak
 
@@ -114,21 +114,23 @@ keccak-init
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
 \    /string dup 0= UNTIL  2drop
 ; to c:decrypt ( addr u -- )
-:noname ( addr u -- )
+:noname ( addr u tag -- )
     \G Encrypt message in buffer addr u with auth
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
 \    /string dup 0= UNTIL  drop
-    @keccak -rot KeccakEncryptLoop
+    { tag } @keccak -rot KeccakEncryptLoop
     @keccak KeccakF
-    >r keccak-checksums keccak#cks keccak> keccak-checksums 128@ r> 128!
+    >r keccak-checksums keccak#cks keccak>
+    keccak-checksums tag 7 and 4 lshift + 128@ r> 128!
 ; to c:encrypt+auth ( addr u -- )
-:noname ( addr u -- )
+:noname ( addr u tag -- )
     \G Decrypt message in buffer addr u, with auth check
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
 \    /string dup 0= UNTIL  drop
-    @keccak -rot KeccakDecryptLoop
+    { tag } @keccak -rot KeccakDecryptLoop
     @keccak KeccakF
-    128@ keccak-checksums keccak#cks keccak> keccak-checksums 128@ 128=
+    128@ keccak-checksums keccak#cks keccak>
+    keccak-checksums tag 7 and 4 lshift + 128@ 128=
 ; to c:decrypt+auth ( addr u -- flag )
 :noname ( addr u -- )
 \G Hash message in buffer addr u
@@ -145,10 +147,13 @@ keccak-init
 ; to c:prng
 \G Fill buffer addr u with PRNG sequence
 :noname @keccak KeccakF
-    keccak-checksums keccak#cks keccak> keccak-checksums 128@ ; to c:checksum ( -- xd )
+    keccak-checksums keccak#cks keccak>
+    7 and 4 lshift keccak-checksums + 128@ ; to c:checksum ( tag -- xd )
 \G compute a 128 bit checksum
-:noname keccak-checksums keccak#cks keccak> keccak-checksums $10 + 64@ ; to c:cookie ( -- x )
-\G obtain a different 64 bit checksum part
+:noname keccak-checksums keccak#cks keccak>
+    64#0 keccak-checksums keccak#cks bounds ?DO
+	I 64@ 64xor  8 +LOOP ; to c:cookie ( -- x )
+\G obtain a 64 bit checksum
 
 keccak ' new static-a with-allocater Constant keccak-o
 
