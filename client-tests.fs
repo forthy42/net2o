@@ -155,9 +155,9 @@ UValue test#  0 to test#
 
 : c:test-rest ( -- )
     c:download1
-    3e @time f> IF c:download2
-	waitkey( 8e )else( 6e ) @time f> IF  c:download3
-	    waitkey( 16e )else( 8e ) @time f> IF
+    7e @time f> IF c:download2
+	waitkey( 8e )else( 15e ) @time f> IF  c:download3
+	    waitkey( 16e )else( 20e ) @time f> IF
 		waitkey( ." Press key to continue" key drop cr )
 		c:download4
 		c:download4a
