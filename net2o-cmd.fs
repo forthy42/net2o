@@ -626,7 +626,7 @@ net2o-base
 +net2o: >time-offset ( n -- ) \ set time offset
     o IF  time-offset 64!  ELSE  64drop  THEN ;
 +net2o: context ( -- ) \ make context active
-    o IF  context!  THEN ;
+    o IF  context!  ELSE  ." Can't "  THEN  ." establish a context!" F cr ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! context ;
 : reply-key, ( -- )
