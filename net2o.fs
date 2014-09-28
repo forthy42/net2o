@@ -1066,7 +1066,7 @@ User >code-flag
 
 \ create context
 
-8 Value bursts# \ number of 
+4 Value bursts# \ number of 
 8 Value delta-damp# \ for clocks with a slight drift
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s

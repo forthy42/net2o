@@ -896,7 +896,7 @@ also net2o-base
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
-8 Value max-resend#
+2 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits )
     data-rmap @ >o
