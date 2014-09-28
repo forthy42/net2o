@@ -129,7 +129,7 @@ net2o app layer
 \end_layout
 
 \begin_layout Subtitle
-A universal structured data language
+A universal language for structured data and RPC
 \end_layout
 
 \begin_layout Author
@@ -137,7 +137,7 @@ Bernd Paysan
 \end_layout
 
 \begin_layout Date
-EuroForth 2014, Palma di Mallorca
+September 26, EuroForth 2014, Palma de Mallorca
 \end_layout
 
 \begin_layout Standard
@@ -318,7 +318,15 @@ Four stacks: integer, float, objects, strings
 
 \end_deeper
 \begin_layout Itemize
-endwith and endcmd for ending object message blocks and commands
+
+\family typewriter
+endwith
+\family default
+ and 
+\family typewriter
+endcmd
+\family default
+ for ending object message blocks and commands
 \end_layout
 
 \begin_deeper
@@ -328,8 +336,12 @@ endwith and endcmd for ending object message blocks and commands
 
 \end_deeper
 \begin_layout Itemize
-oswap to transfer the current object to the object stack, to be inserted
- in the outer object
+
+\family typewriter
+oswap
+\family default
+ to transfer the current object to the object stack, to be inserted in the
+ outer object
 \end_layout
 
 \begin_deeper
@@ -339,8 +351,12 @@ oswap to transfer the current object to the object stack, to be inserted
 
 \end_deeper
 \begin_layout Itemize
-words for reflection (words are listed with token number, identifier and
- stack effect to make automatic bindigs possible)
+
+\family typewriter
+words
+\family default
+ for reflection (words are listed with token number, identifier and stack
+ effect to make automatic bindigs possible)
 \end_layout
 
 \begin_layout EndFrame
@@ -683,12 +699,12 @@ msg 13977C927BF7F1AA lit, msg-at  "Hi Bob!" $, msg-text
 \end_layout
 
 \begin_layout LyX-Code
-85" Z(&3*>qxl*bWM*DUCA-Mf9N~u;<ddcW0C<XR)ezh?=jmn7zq4RFduAe=aOjKE*2y)I`t;Xi^buBc
-*@f2"
+    85" Z(&3*>qxl*bWM*DUCA-Mf9N~u;<ddcW0C<XR)ezh?=jmn7zq4RFduAe=aOjKE*2y)I`t;Xi^
+buBc*@f2"
 \end_layout
 
 \begin_layout LyX-Code
-$, msg-sig endwith 
+    $, msg-sig endwith 
 \end_layout
 
 \begin_layout LyX-Code
@@ -697,6 +713,84 @@ $, msg-sig endwith
 
 \begin_layout LyX-Code
 $, push-$ push' nest 0 lit, ok?
+\end_layout
+
+\end_deeper
+\begin_layout EndFrame
+
+\end_layout
+
+\begin_layout BeginFrame
+Structured Text a la HTML
+\end_layout
+
+\begin_layout ExampleBlock
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+
+HTML--like structured text
+\lang american
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+body
+\end_layout
+
+\begin_layout LyX-Code
+   p "Some text with " text
+\end_layout
+
+\begin_layout LyX-Code
+       bold "bold" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+       " markup" text
+\end_layout
+
+\begin_layout LyX-Code
+   oswap add
+\end_layout
+
+\begin_layout LyX-Code
+   li
+\end_layout
+
+\begin_layout LyX-Code
+       ul "a bullet point" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+       ul "another bullet point" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+   oswap add
+\end_layout
+
+\begin_layout LyX-Code
+oswap add
 \end_layout
 
 \end_deeper
