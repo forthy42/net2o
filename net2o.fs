@@ -2499,6 +2499,9 @@ con-cookie >osize @ buffer: cookie-adder
 \ load net2o plugins: first one with integraded command space
 
 require net2o-cmd.fs
+require net2o-connect.fs
+require net2o-connected.fs
+require net2o-log.fs
 require net2o-dht.fs
 require net2o-keys.fs \ extra cmd space
 require net2o-msg.fs
