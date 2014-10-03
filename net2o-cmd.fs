@@ -47,19 +47,15 @@ User buf-state cell uallot drop
 \ use a string stack to make sure that strings can only originate from
 \ a string inside the command we are just executing
 
-: @+ ( addr -- n addr' )  dup @ swap cell+ ;
-
-4 2* cells Constant string-max#
-User string-stack  string-max# uallot drop
+User string-stack
 
 : >$ ( addr u -- $:string )
-    string-stack @+ + 2!
-    2 cells string-stack +!
-    string-stack @ string-max# u>=  !!string-full!! ;
+    string-stack $[]# 1+ string-stack $[] cell- 2! ;
 : $> ( $:string -- addr u )
-    string-stack @ 0<= !!string-empty!!
-    -2 cells string-stack +!
-    string-stack @+ + 2@ ;
+    string-stack $[]# 2 -
+    dup 0< !!string-empty!! dup >r
+    string-stack $[] 2@
+    r> cells string-stack $!len ;
 
 : @>$ ( addr u -- $:string addr' u' )
     bounds p@+ [IFUNDEF] 64bit nip [THEN]
@@ -83,24 +79,26 @@ User string-stack  string-max# uallot drop
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
 
 : $.s ( $string1 .. $stringn -- )
-    string-stack @+ swap bounds U+DO
+    string-stack $@ bounds U+DO
 	cr i 2@ n2o:$.
     2 cells +LOOP ;
 
+\ generic stack using string array primitives
+
+: gen-pop ( stack -- x ) >r
+    \g generic single-stack pop
+    r@ $[]# dup 0<= !!object-empty!!
+    1- dup r@ $[] @ swap cells r> $!len ;
+: gen-push ( x stack -- )
+    \g generic single-stack push
+    dup $[]# swap $[] ! ;
+
 \ object stack
 
-8 cells Constant object-max#
+User object-stack
 
-User object-stack object-max# uallot drop
-
-: o-pop ( o:o1 o:x -- o1 o:x )
-    object-stack @ 0<= !!object-empty!!
-    -1 cells object-stack +!
-    object-stack @+ + @ ;
-: o-push ( o1 o:x -- o:o1 o:x )
-    object-stack @+ + !
-    cell object-stack +!
-    object-stack @ object-max# u>= !!object-full!! ;
+: o-pop ( o:o1 o:x -- o1 o:x ) object-stack gen-pop ;
+: o-push ( o1 o:x -- o:o1 o:x ) object-stack gen-push ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
     >o r> o-push ;
@@ -389,7 +387,7 @@ Variable throwcount
     r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
-    string-stack off  object-stack off  o to connection
+    string-stack $off  object-stack off  o to connection
     o IF
 	maxdata code+
 	cmd0source off
@@ -409,19 +407,16 @@ Variable throwcount
     \ maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup $20 = UNTIL  THEN  nip
     init0buf swap mykey-salt# + 2 64s + ;
 
-4 Constant maxnest#
 User neststart#
-User neststack maxnest# cells uallot drop \ nest up to 10 levels
+User nest-stack
 
-: nest[ ( -- ) neststart# @ neststack @+ swap cells + !
-    1 neststack +! neststack @ maxnest# u>= !!maxnest!!
+: nest[ ( -- ) neststart# @ nest-stack gen-push
     cmdbuf# @ neststart# ! ;
 
 : cmd> ( -- addr u )
     init0buf mykey-salt# + maxdata 2/ erase
     cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# !
-    -1 neststack +! neststack @ 0< !!minnest!!
-    neststack @+ swap cells + @ neststart# ! ;
+    nest-stack gen-pop neststart# ! ;
 
 : cmd>nest ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
@@ -564,7 +559,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize $, store-key  stskc KEYSIZE erase
-    ]nest  n2o:create-map  neststack @ IF  ]tmpnest  THEN
+    ]nest  n2o:create-map  nest-stack $[]# IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
 +net2o: set-tick ( uticks -- ) \ adjust time
