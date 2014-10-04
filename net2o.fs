@@ -541,30 +541,6 @@ Defer init-reply
 : free-statbuf ( -- )
     statbuf file-stat freez  0 to statbuf ;
 
-: alloc-io ( -- ) \ allocate IO and reset generic user variables
-    -other  ind-addr off  reqmask off
-    alloc-buf to inbuf  alloc-buf to outbuf
-    maxdata allocate throw to cmd0buf
-    maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
-    sockaddr_in %size alloz to sockaddr
-    sockaddr_in %size alloz to sockaddr1
-    $400 allocate throw to aligned$
-    init-statbuf
-    init-ed25519 c:init ;
-
-: free-io ( -- )
-    free-ed25519 c:free
-    free-statbuf
-    aligned$ $400 freez
-    sockaddr  sockaddr_in %size  freez
-    sockaddr1 sockaddr_in %size  freez
-    init0buf maxdata 2/ mykey-salt# + $10 +  freez
-    cmd0buf maxdata   freez
-    inbuf  free-buf
-    outbuf free-buf ;
-
-alloc-io
-
 User string-stack
 User object-stack
 User t-stack
@@ -576,9 +552,41 @@ User nest-stack
     t-stack off
     nest-stack off ;
 
+: stacks-$off ( -- )
+    string-stack $off
+    object-stack $off
+    t-stack $off
+    nest-stack $off ;
+
+: alloc-io ( -- ) \ allocate IO and reset generic user variables
+    -other  ind-addr off  reqmask off
+    alloc-buf to inbuf  alloc-buf to outbuf
+    maxdata allocate throw to cmd0buf
+    maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
+    sockaddr_in %size alloz to sockaddr
+    sockaddr_in %size alloz to sockaddr1
+    $400 allocate throw to aligned$
+    init-statbuf
+    init-ed25519 c:init
+    stacks-off ;
+
+: free-io ( -- )
+    free-ed25519 c:free
+    free-statbuf
+    aligned$ $400 freez
+    sockaddr  sockaddr_in %size  freez
+    sockaddr1 sockaddr_in %size  freez
+    init0buf maxdata 2/ mykey-salt# + $10 +  freez
+    cmd0buf maxdata   freez
+    inbuf  free-buf
+    outbuf free-buf
+    stacks-$off ;
+
+alloc-io
+
 : net2o-pass ( params xt n task )  pass
     b-out op-vector @ debug-vector !
-    init-reply prep-socks alloc-io stacks-off catch free-io
+    init-reply prep-socks alloc-io catch free-io
     ?dup-IF  DoError  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
