@@ -127,7 +127,7 @@ net2o-base
 +net2o: context ( -- ) \ make context active
     o IF  context!  ELSE  ." Can't "  THEN  ." establish a context!" F cr ;
 
-: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! context ;
+: time-offset! ( -- )  ticks 64dup lit, >time-offset time-offset 64! ;
 : reply-key, ( -- )
     nest[ pkc keysize $, dest-pubkey @ IF
 	dest-pubkey $@ $, keypair
@@ -138,12 +138,12 @@ net2o-base
 +net2o: gen-reply ( -- ) \ generate a key request reply reply
     own-crypt? knocked? or 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      reply-key, cookie+request time-offset! ]tmpnest
+      reply-key, cookie+request time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 +net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
     knocked? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      reply-key, gen-punchload gen-punch time-offset! ]tmpnest
+      reply-key, gen-punchload gen-punch time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 \ !!TODO!! knock should use special default key

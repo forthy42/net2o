@@ -565,9 +565,20 @@ Defer init-reply
 
 alloc-io
 
+User string-stack
+User object-stack
+User t-stack
+User nest-stack
+
+: stacks-off ( -- )
+    string-stack off
+    object-stack off
+    t-stack off
+    nest-stack off ;
+
 : net2o-pass ( params xt n task )  pass
     b-out op-vector @ debug-vector !
-    init-reply prep-socks alloc-io catch free-io
+    init-reply prep-socks alloc-io stacks-off catch free-io
     ?dup-IF  DoError  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;

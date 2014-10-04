@@ -47,8 +47,6 @@ User buf-state cell uallot drop
 \ use a string stack to make sure that strings can only originate from
 \ a string inside the command we are just executing
 
-User string-stack
-
 : >$ ( addr u -- $:string )
     string-stack $[]# 1+ string-stack $[] cell- 2! ;
 : $> ( $:string -- addr u )
@@ -95,8 +93,6 @@ User string-stack
 
 \ object stack
 
-User object-stack
-
 : o-pop ( o:o1 o:x -- o1 o:x ) object-stack gen-pop ;
 : o-push ( o1 o:x -- o:o1 o:x ) object-stack gen-push ;
 
@@ -109,13 +105,8 @@ User object-stack
 
 \ token stack - only for decompiling
 
-User t-stack
-
-: t-push ( addr -- )
-    t-stack $[]# t-stack $[] ! ;
-: t-pop ( -- addr )
-    t-stack $[]# 1- dup 0< !!object-empty!!
-    t-stack $[] @ t-stack $@len cell- t-stack $!len ;
+: t-push ( addr -- )  t-stack gen-push ;
+: t-pop ( -- addr )   t-stack gen-pop ;
 
 \ float are stored big endian.
 
@@ -408,7 +399,6 @@ Variable throwcount
     init0buf swap mykey-salt# + 2 64s + ;
 
 User neststart#
-User nest-stack
 
 : nest[ ( -- ) neststart# @ nest-stack gen-push
     cmdbuf# @ neststart# ! ;
@@ -464,7 +454,7 @@ dup set-current previous
     : 3*64>n ( 64a 64b 64c -- na nb nc ) 64>n >r 64>n >r 64>n r> r> ;
 [THEN]
 
-\ commands to read and write files
+\ commands to reply
 
 also net2o-base definitions
 $10 net2o: <req ( -- ) ; \ stub: push own id in reply
