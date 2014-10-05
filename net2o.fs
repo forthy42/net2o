@@ -547,12 +547,15 @@ User t-stack
 User nest-stack
 
 : stacks-off ( -- )
+    \g clear stack user variables which might have copied into
+    \g another task
     string-stack off
     object-stack off
     t-stack off
     nest-stack off ;
 
 : stacks-$off ( -- )
+    \g free stack user variables before freeing the task
     string-stack $off
     object-stack $off
     t-stack $off

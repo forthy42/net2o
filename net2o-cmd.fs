@@ -378,7 +378,7 @@ Variable throwcount
     r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
-    string-stack $off  object-stack off  o to connection
+    stacks-$off  o to connection
     o IF
 	maxdata code+
 	cmd0source off
