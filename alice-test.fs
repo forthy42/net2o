@@ -2,12 +2,12 @@
 
 require net2o.fs
 require client-tests.fs
+require test-keys.fs \ we want the test keys - never use this in production!
 
 +db stat(
 +debug
 %droprate
 script? [IF] debug-task [THEN]
-test-keys \ we want the test keys - never use this in production!
 
 i'm alice
 
