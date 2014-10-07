@@ -1,10 +1,10 @@
 \ net2o tests - msg
 
 require ../client-tests.fs
+require ../test-keys.fs \ we want the test keys - never use this in production!
 
 +db stat(
 script? [IF] +debug %droprate [THEN]
-test-keys \ we want the test keys - never use this in production!
 
 i'm bob
 

@@ -1,12 +1,12 @@
 \ net2o tests - client side
 
 require ../client-tests.fs
+require ../test-keys.fs \ we want the test keys - never use this in production!
 
 +db stat(
 +debug
 +db dht(
 
-test-keys \ we want the test keys - never use this in production!
 "anonymous" >key \ get our anonymous key
 
 init-client

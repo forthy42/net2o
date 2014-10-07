@@ -410,7 +410,7 @@ Variable $tmp2
 : &&' ( addr u addr' u' flag -- addr u false / addr u addr' u' )
     ]] 0= IF 2drop false EXIT THEN [[ ; immediate compile-only
 
-: str=?0 ( addr1 u1 addr2 u2 -- )
+: str=?0 ( addr1 u1 addr2 u2 -- flag )
     2dup ip6::0 over str= >r
     2over ip6::0 over str= >r str= r> r> or or ;
 
@@ -423,7 +423,8 @@ Variable $tmp2
 : str>merge ( addr1 u1 addr2 u2 -- )
     2dup ip6::0 over str= IF  rot umin move  ELSE  2drop 2drop  THEN ;
 
-: my-ip>merge  skip-symname 2swap skip-symname 2swap
+: my-ip>merge ( addr1 u1 addr2 u2 -- )
+    skip-symname 2swap skip-symname 2swap
     { addr1 u1 addr2 u2 -- }
     addr1 1+ $10 addr2 1+ over  str>merge
     addr1 $11 + 4 addr2 $11 + over str>merge ;
@@ -432,7 +433,7 @@ Variable $tmp2
     0 my-ip$ [: rot >r 2over my-ip= r> or ;] $[]map ;
 : my-ip-merge ( addr u -- addr u flag )
     0 my-ip$ [: rot >r 2over 2over my-ip= IF
-	    2over 2swap my-ip>merge rdrop true  ELSE  r>  THEN ;] $[]map ;
+	    2over 2swap my-ip>merge rdrop true  ELSE  2drop r>  THEN ;] $[]map ;
 
 \ Create udp socket
 
