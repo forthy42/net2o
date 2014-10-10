@@ -387,7 +387,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 \ acknowledge toplevel
 
 : net2o:ack-code ( ackflag -- ackflag' )
-    false { slurp? }
+    false dup { slurp? stats? }
     net2o-code  ack <req ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
@@ -396,11 +396,12 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	    true net2o:do-resend
 	THEN
 	0 data-rmap @ .do-slurp !@
-	?dup-IF  net2o:ackflush request-stats? IF  send-timing  THEN
-	    true to slurp?  THEN
+	?dup-IF  net2o:ackflush
+	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
     req> endwith  cmdbuf# @ 4 = IF  cmdbuf# off  THEN
     slurp? IF  slurp  THEN
+    stats? IF  ack <req send-timing req> endwith  THEN
     end-code r> dup ack-toggle# and IF  map-resend?  THEN ;
 
 : net2o:do-ack ( -- )

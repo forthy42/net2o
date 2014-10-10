@@ -222,10 +222,9 @@ User cmdbuf#
 : endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
 : maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
 : cmdbuf+ ( n -- )
-    dup maxstring u>= !!stringfit!! cmdbuf# +! ;
+    dup maxstring u>= !!cmdfit!! cmdbuf# +! ;
 
 : cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
-: flit, ( 64n -- )  cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -436,7 +435,7 @@ also net2o-base definitions
 : slit, ( n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
-: float, ( r -- )  flit flit, ;
+: float, ( r -- )  flit cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- ) (end-code) previous ;
