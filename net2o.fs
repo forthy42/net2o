@@ -553,14 +553,16 @@ User nest-stack
     string-stack off
     object-stack off
     t-stack off
-    nest-stack off ;
+    nest-stack off
+    b$ off ;
 
 : stacks-$off ( -- )
     \g free stack user variables before freeing the task
     string-stack $off
     object-stack $off
     t-stack $off
-    nest-stack $off ;
+    nest-stack $off
+    b$ $off ;
 
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
     -other  ind-addr off  reqmask off
