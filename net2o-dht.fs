@@ -430,12 +430,12 @@ previous
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
 : n2o:send-replace ( -- )
-    me>d#id >o dht-host $[]# IF
+    me>d#id >o ~~ dht-host $[]# ~~ IF
 	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id remove-me, endwith
-	  cookie+request
-	end-code|
-    THEN o> ;
+	  pkc keysize 2* $, dht-id ~~ remove-me, ~~ endwith
+	  cookie+request ~~
+	end-code| ~~
+    THEN o> ~~ ;
 
 : set-revocation ( addr u -- )
     dht-host $+[]! ;

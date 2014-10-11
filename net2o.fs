@@ -2068,7 +2068,8 @@ event: ->save ( o -- ) .net2o:save ;
 0 Value file-task
 
 : create-file-task ( -- )
-    [: BEGIN  ['] event-loop catch ?dup-IF  DoError  THEN  AGAIN ;]
+    [:  ." created file task " up@ hex. cr
+	BEGIN  ['] event-loop catch ?dup-IF  DoError  THEN  AGAIN ;]
     1 net2o-task to file-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
@@ -2185,7 +2186,8 @@ Variable recvflag  recvflag off
 	send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )
-    [: prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
+    [:  ." created sender task " up@ hex. cr
+	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Defer handle-beacon
 
@@ -2426,7 +2428,8 @@ Variable beacons \ destinations to send beacons to
 	    r@ .loop-err  REPEAT  drop rdrop ;
 
 : create-timeout-task ( -- )
-    [: BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
+    [:  ." created timeout task " up@ hex. cr
+	BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
     1 net2o-task to timeout-task ;
 
 \ event loop
@@ -2440,7 +2443,8 @@ Variable beacons \ destinations to send beacons to
     ELSE  elit, ->request  THEN ;
 
 : create-receiver-task ( -- )
-    [: BEGIN  ['] event-loop-nocatch catch-loop
+    [:  ." created receiver task " up@ hex. cr
+	BEGIN  ['] event-loop-nocatch catch-loop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
     1 net2o-task to receiver-task ;
 
@@ -2480,15 +2484,13 @@ end-class con-cookie
 
 con-cookie >osize @ Constant cookie-size#
 
-Variable cookies s" " cookies $!
-con-cookie >osize @ buffer: cookie-adder
+Variable cookies
 
 #5000000000. d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie )
-    [: o cookie-adder >o cc-context !
-      ntime d>64 64dup cc-timeout 64!
-      o o> cookie-size#  cookies $+! ;]
+    [: ticks 64dup o { 64^ cookie-adder w^ cookie-o }
+       cookie-adder cookie-size#  cookies $+! ;]
     resize-lock c-section ;
 
 : do-?cookie ( cookie -- context true / false )
