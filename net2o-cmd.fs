@@ -185,6 +185,7 @@ drop
 	4 of  pf@ f. ." float, " endof
 	5 of  ." endwith " cr  t-pop  token-table !  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
+	$15 of ." push' " p@ .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -377,7 +378,10 @@ Variable throwcount
     r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
-    stacks-$off  o to connection
+    string-stack $off
+    object-stack $off
+    nest-stack $off
+    o to connection
     o IF
 	maxdata code+
 	cmd0source off
