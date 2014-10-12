@@ -365,17 +365,15 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 \ insert into sorted string array
 
-Variable ins$0 \ just a null pointer
-
 : $ins[] ( addr u $array -- )
     \G insert O(log(n)) into pre-sorted array
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup $# $a $[]@ compare dup 0= IF
-		drop $# $a $[]! EXIT  THEN
+		drop $# $a $[]!  EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    ins$0 cell $a r@ cells $ins r> $a $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
 : $del[] ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array
     { $a } 0 $a $[]#

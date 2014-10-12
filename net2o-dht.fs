@@ -241,10 +241,11 @@ Variable revtoken
 		drop
 		2dup startdate@
 		$# $arr $[]@ startdate@ 64u>=
-		IF   $# $arr $[]!  ELSE  2drop  THEN EXIT  THEN
+		IF   $# $arr $[]!
+		ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
+    0 { w^ ins$0 } ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
 : $del[]sig ( addr u $arrrray -- )
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $arr } 0 $arr $[]#
@@ -341,7 +342,7 @@ end-class dht-file-class
     I c@ 2 + +LOOP  nip r> swap - ; dht-file-class to fs-read
 
 : new>dht ( -- )
-    [: dht-file-class new sp@ cell file-state $+! drop ;]
+    [: dht-file-class new { w^ fs-ins } fs-ins cell file-state $+! drop ;]
     filestate-lock c-section ;
 
 : d#open ( fid -- )  new>dht lastfile@ .fs-open ;
@@ -430,15 +431,15 @@ previous
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
 : n2o:send-replace ( -- )
-    me>d#id >o ~~ dht-host $[]# ~~ IF
+    me>d#id >o dht-host $[]# IF
 	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id ~~ remove-me, ~~ endwith
-	  cookie+request ~~
-	end-code| ~~
-    THEN o> ~~ ;
+	  pkc keysize 2* $, dht-id remove-me, endwith
+	  cookie+request
+	end-code|
+    THEN o> ;
 
 : set-revocation ( addr u -- )
-    dht-host $+[]! ;
+    dht-host $ins[]sig ;
 
 Defer renew-key
 
