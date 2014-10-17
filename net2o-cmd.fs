@@ -81,20 +81,10 @@ User buf-state cell uallot drop
 	cr i 2@ n2o:$.
     2 cells +LOOP ;
 
-\ generic stack using string array primitives
-
-: gen-pop ( stack -- x ) >r
-    \g generic single-stack pop
-    r@ $[]# dup 0<= !!object-empty!!
-    1- dup r@ $[] @ swap cells r> $!len ;
-: gen-push ( x stack -- )
-    \g generic single-stack push
-    dup $[]# swap $[] ! ;
-
 \ object stack
 
-: o-pop ( o:o1 o:x -- o1 o:x ) object-stack gen-pop ;
-: o-push ( o1 o:x -- o:o1 o:x ) object-stack gen-push ;
+: o-pop ( o:o1 o:x -- o1 o:x ) object-stack stack> ;
+: o-push ( o1 o:x -- o:o1 o:x ) object-stack >stack ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
     >o r> o-push ;
@@ -105,8 +95,8 @@ User buf-state cell uallot drop
 
 \ token stack - only for decompiling
 
-: t-push ( addr -- )  t-stack gen-push ;
-: t-pop ( -- addr )   t-stack gen-pop ;
+: t-push ( addr -- )  t-stack >stack ;
+: t-pop ( -- addr )   t-stack stack> ;
 
 \ float are stored big endian.
 
@@ -403,13 +393,13 @@ Variable throwcount
 
 User neststart#
 
-: nest[ ( -- ) neststart# @ nest-stack gen-push
+: nest[ ( -- ) neststart# @ nest-stack >stack
     cmdbuf# @ neststart# ! ;
 
 : cmd> ( -- addr u )
     init0buf mykey-salt# + maxdata 2/ erase
     cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# !
-    nest-stack gen-pop neststart# ! ;
+    nest-stack stack> neststart# ! ;
 
 : cmd>nest ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
