@@ -32,9 +32,27 @@
 
 : stack> ( stack -- x ) >r
     \g generic single-stack pop
-    r@ $[]# dup 0<= !!object-empty!!
+    r@ $[]# dup 0<= !!stack-empty!!
     1- dup r@ $[] @ swap cells r> $!len ;
 : >stack ( x stack -- )
     \g generic single-stack push
     dup $[]# swap $[] ! ;
 
+: stack@ ( stack -- x1 .. xn n )
+    \g fetch everything from the generic stack to the data stack
+    $@ dup cell/ >r bounds ?DO  I @  cell +LOOP  r> ;
+: stack! ( x1 .. xn n stack -- )
+    \g set the generic stack with values from the data stack
+    >r cells r@ $!len
+    r> $@ bounds cell- swap cell- -DO  I !  cell -LOOP ;
+
+: ustack ( "name" -- )
+    \g generate user stack, including initialization and free on thread
+    \g start and termination
+    User  latestxt >r
+    :noname  action-of thread-init compile,
+    r@ compile, postpone off postpone ;
+    is thread-init
+    :noname  action-of kill-task  compile,
+    r> compile, postpone $off postpone ;
+    is kill-task ;

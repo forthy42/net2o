@@ -18,7 +18,6 @@
 \ helper words
 
 require net2o-err.fs
-require net2o-tools.fs
 
 \ required tools
 
@@ -29,6 +28,7 @@ require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
+require net2o-tools.fs
 require 64bit.fs
 require debugging.fs
 require kregion.fs
@@ -514,27 +514,10 @@ Defer init-reply
 : free-statbuf ( -- )
     statbuf file-stat freez  0 to statbuf ;
 
-User string-stack
-User object-stack
-User t-stack
-User nest-stack
-
-: stacks-off ( -- )
-    \g clear stack user variables which might have copied into
-    \g another task
-    string-stack off
-    object-stack off
-    t-stack off
-    nest-stack off
-    b$ off ;
-
-: stacks-$off ( -- )
-    \g free stack user variables before freeing the task
-    string-stack $off
-    object-stack $off
-    t-stack $off
-    nest-stack $off
-    b$ $off ;
+ustack string-stack
+ustack object-stack
+ustack t-stack
+ustack nest-stack
 
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
     -other  ind-addr off  reqmask off
@@ -545,8 +528,7 @@ User nest-stack
     sockaddr_in %size alloz to sockaddr1
     $400 allocate throw to aligned$
     init-statbuf
-    init-ed25519 c:init
-    stacks-off ;
+    init-ed25519 c:init ;
 
 : free-io ( -- )
     free-ed25519 c:free
@@ -557,8 +539,7 @@ User nest-stack
     init0buf maxdata 2/ mykey-salt# + $10 +  freez
     cmd0buf maxdata   freez
     inbuf  free-buf
-    outbuf free-buf
-    stacks-$off ;
+    outbuf free-buf ;
 
 alloc-io
 
@@ -2400,7 +2381,7 @@ Variable beacons \ destinations to send beacons to
 	    r@ .loop-err  REPEAT  drop rdrop ;
 
 : create-timeout-task ( -- )
-    [:  ." created timeout task " up@ hex. cr
+    [:  \ ." created timeout task " up@ hex. cr
 	BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
     1 net2o-task to timeout-task ;
 
@@ -2415,7 +2396,7 @@ Variable beacons \ destinations to send beacons to
     ELSE  elit, ->request  THEN ;
 
 : create-receiver-task ( -- )
-    [:  ." created receiver task " up@ hex. cr
+    [:  \ ." created receiver task " up@ hex. cr
 	BEGIN  ['] event-loop-nocatch catch-loop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
     1 net2o-task to receiver-task ;

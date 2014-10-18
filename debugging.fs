@@ -210,7 +210,7 @@ timer: +ack
 
 \ buffered typing
 
-User b$
+Ustack b$
 
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;

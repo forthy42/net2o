@@ -46,6 +46,7 @@ s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 s" no temporary key"             throwcode !!no-tmpkey!!
+s" generic stack empty"          throwcode !!stack-empty!!
 s" String stack full"            throwcode !!string-full!!
 s" String stack empty"           throwcode !!string-empty!!
 s" Object stack full"            throwcode !!object-full!!
