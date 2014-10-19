@@ -111,7 +111,8 @@ User last-ivskey
 	ivs-assembly state# move
 	key( ." key: " ivs-assembly state# + 64@ $64. ivs-assembly state# 2* xtype cr )
 	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
-    dest-addr 64@ 64-0= IF  default-key  ELSE  true !!inv-dest!!  THEN ;
+    dest-flags 1+ c@ stateless# and
+    IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ .ivs>source?  ELSE  default-key  THEN

@@ -94,4 +94,3 @@ rngbuf# rng-pos !
     rng-pos @ 4 + rng-step?
     rng-pos @ rng-buffer @ + l@
     4 rng-pos +! ;
-

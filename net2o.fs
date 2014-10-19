@@ -764,6 +764,7 @@ $40 Constant multicasting#
 
 \ $30 Constant net2o-reserved# - should be 0
 
+$08 Constant stateless# \ stateless message
 $07 Constant acks#
 $01 Constant ack-toggle#
 $02 Constant b2b-toggle#
@@ -1740,7 +1741,7 @@ require net2o-crypt.fs
 User outflag  outflag off
 
 : set-flags ( -- )
-    outflag @ outbuf 1+ c! outflag off
+    0 outflag !@ outbuf 1+ c!
     outbuf w@ dest-flags w! ;
 
 #90 Constant EMSGSIZE
@@ -1758,7 +1759,7 @@ User outflag  outflag off
 : send-code-packet ( -- ) +sendX
 \    ." send " outbuf .header
     o IF  code-map @  ELSE  0  THEN  outbuf-encrypt
-    outbuf addr 64@ 64-0= IF
+    outbuf flags 1+ c@ stateless# and IF
 	return-addr
 	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
     ELSE
@@ -2265,7 +2266,8 @@ $20 Constant knock-val
 
 : handle-packet ( -- ) \ handle local packet
     >ret-addr >dest-addr +desta
-    dest-addr 64@ 64-0= IF  handle-cmd0
+    dest-flags 1+ c@ stateless# and  IF
+	handle-cmd0
     ELSE
 	check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )

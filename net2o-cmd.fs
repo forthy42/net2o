@@ -185,7 +185,9 @@ Variable show-offset  show-offset on
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see ( addr u -- ) ." net2o-code "  t-stack $off
+: n2o:see ( addr u -- )
+    ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
+    space  t-stack $off
     o IF  token-table @ >r  THEN
     [: BEGIN  cmd-see dup 0= UNTIL ;] catch
     o IF  r> token-table !  THEN  throw  2drop ;
@@ -284,32 +286,47 @@ gen-table $@ inherit-table reply-table
 
 \ net2o assembler
 
+: .dest-addr ( flag -- )
+    1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
+
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
-    ." see-me: " dest-addr 64@ $64.
+    ." see-me: "
+    inbuf flags .dest-addr
     \ tag-addr dup hex. 2@ swap hex. hex. F cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
-: cmdreset  cmdbuf# off ;
+: cmdreset ( -- )
+    cmdbuf# off ;
+: cmd0! ( -- )
+    \g initialize a stateless command
+    cmd0buf cmd0source !  stateless# outflag ! ;
+: cmd! ( -- )
+    \g initialize a statefull command
+    cmd0source off  outflag off ;
 
-: net2o-code    cmd0source off  cmdlock lock
+: net2o-code ( -- )
+    \g start a statefull command
+    cmd!  cmdlock lock
     cmdreset 1 code+ also net2o-base ;
 comp: :, also net2o-base ;
-: net2o-code0   cmd0buf cmd0source !   cmdlock lock
+: net2o-code0
+    \g start a stateless command
+    cmd0!  cmdlock lock
     cmdreset also net2o-base ;
 comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
-    cmd( ." send: " dest-addr 64@ $64. dup buf# n2o:see cr )
+    cmd( ." send: " dest-flags .dest-addr dup buf# n2o:see cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I send-cX  cmdreset  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: cmddest ( -- dest ) cmd0source @ IF  64#0  ELSE  code-vdest
+: cmddest ( -- dest ) cmd0source @ IF  rng@  ELSE  code-vdest
     64dup 64-0= !!no-dest!! THEN ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
@@ -357,7 +374,7 @@ previous
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( dest-addr 64@ $64. 2dup n2o:see )
+    cmd( dest-flags .dest-addr 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!
@@ -378,7 +395,7 @@ Variable throwcount
 	tag-addr? IF
 	    2drop  >flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
-	cmd0buf cmd0source !
+	cmd0!
     THEN
     [: cmdreset  do-cmd-loop  cmd-send? ;] cmdlock c-section ;
 

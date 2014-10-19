@@ -348,7 +348,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     end-code ;
 
 :noname ( addr u -- )
-    cmd0buf cmd0source ! cmdreset also net2o-base
+    cmd0! cmdreset also net2o-base
     [ also net2o-base ]
     ['] end-cmd IS expect-reply?
     $, nest end-code
@@ -357,7 +357,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 : 0-resend? ( -- )
     resend0 @ IF
 	\ ." Resend to 0" cr
-	cmd0buf cmd0source !
+	cmd0!
 	[: resend0 $@ >r cmdbuf r@ move
 	  r0-address return-addr $10 move
 	  cmdbuf r> 64#0 send-cmd 1 packets2 +! ;]
