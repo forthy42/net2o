@@ -295,13 +295,14 @@ Variable revtoken
 
 get-current also net2o-base definitions
 
-$33 net2o: dht-id ( $:string -- o:o ) $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
+$33 net2o: dht-id ( $:string -- o:o )
+    $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
 \g set dht id for further operations on it
 dht-table >table
 
 reply-table $@ inherit-table dht-table
 
-net2o' <req net2o: <req-dht ( -- ) dht-hash $@ $, dht-id ; \ redefine <req
+:noname dht-hash $@ $, dht-id ; dht-class to start-req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
@@ -419,7 +420,7 @@ previous
 
 also net2o-base
 : replace-me, ( -- )
-    pkc keysize 2* $, dht-id <req dht-host? req> endwith ;
+    pkc keysize 2* $, dht-id dht-host? endwith ;
 
 : remove-me, ( -- )
     dht-host dup >r

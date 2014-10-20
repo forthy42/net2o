@@ -52,7 +52,7 @@ fs-table >table
 
 reply-table $@ inherit-table fs-table
 
-net2o' <req net2o: <req-file ( -- ) fs-id @ ulit, file-id ;
+:noname fs-id @ ulit, file-id ; fs-class to start-req
 $20 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>n $> rot fs-open ;
 +net2o: close-file ( -- ) \ close file
@@ -86,9 +86,7 @@ ack-table >table
 
 reply-table $@ inherit-table ack-table
 
-net2o' <req net2o: <req-ack ( -- )  ack ;
-net2o' req> net2o: ack-req> ( -- )
-    cmdbuf# @ 1 = IF  cmdbuf# off  ELSE  endwith  THEN ;
+:noname ack ; ack-class to start-req
 $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     parent @ .net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
@@ -145,7 +143,7 @@ gen-table $freeze
 set-current
 
 : open-tracked-file ( addr u mode --)
-    open-file <req get-size get-stat req> ;
+    open-file get-size get-stat ;
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     file-reg# @ ulit, file-id
@@ -388,7 +386,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
-    net2o-code  ack <req ['] end-cmd IS expect-reply?
+    net2o-code  ack ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack
@@ -399,9 +397,9 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 	?dup-IF  net2o:ackflush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
-    req> endwith  cmdbuf# @ 4 = IF  cmdbuf# off  THEN
+    endwith  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
     slurp? IF  slurp  THEN
-    stats? IF  ack <req send-timing req> endwith  THEN
+    stats? IF  ack send-timing endwith  THEN
     end-code r> dup ack-toggle# and IF  map-resend?  THEN ;
 
 : net2o:do-ack ( -- )
@@ -426,10 +424,11 @@ also net2o-base
     timeout( .keepalive )
     rewind-transfer 0= IF  .keepalive  EXIT  THEN
     expected@ tuck u>= and IF  net2o-code
-	ack <req +expected req> endwith IF  slurp  THEN  end-code  EXIT  THEN
+	ack +expected endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply
-    update-rtdelay  ack <req net2o:genack
-    resend-all ticks lit, timeout rewind req> endwith slurp  end-code ;
+    ack net2o:genack
+      resend-all ticks lit, timeout rewind endwith slurp update-rtdelay
+    end-code ;
 previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )

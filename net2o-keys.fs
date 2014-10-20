@@ -344,7 +344,7 @@ $40 buffer: nick-buf
 
 also net2o-base
 : fetch-id, ( id-addr u -- )
-    $, dht-id <req dht-host? req> endwith ;
+    $, dht-id dht-host? endwith ;
 : fetch-host, ( nick u -- )
     nick-key .ke-pk $@ fetch-id, ;
 previous

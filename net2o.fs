@@ -796,7 +796,10 @@ current-o
 object class
     field: token-table
     field: parent
+    field: req?
+    method start-req
 end-class cmd-class \ command interpreter
+' noop cmd-class to start-req
 
 Variable cmd-table
 Variable reply-table
@@ -1151,8 +1154,10 @@ UValue connection
 
 Variable mapstart $1 mapstart !
 
-: server? ( -- flag )  is-server c@ negate ;
-: server! ( -- )  1 is-server c! ;
+: >is-server ( -- addr )
+    parent @ 0= IF  is-server  ELSE  parent @ .recurse  THEN ;
+: server? ( -- flag )  >is-server c@ negate ;
+: server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table ! ;
 : context! ( -- )   context-table @ token-table ! ;
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;

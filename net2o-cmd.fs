@@ -87,7 +87,7 @@ User buf-state cell uallot drop
 : o-push ( o1 o:x -- o:o1 o:x ) object-stack >stack ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
-    >o r> o-push ;
+    >o r> o-push  req? off ;
 : n:o> ( o:o2 o:o1 -- o:o2 )
     o-pop >r o> ;
 : n:oswap ( o:o1 o:o2 -- o:o2 o:o1 )
@@ -97,6 +97,7 @@ User buf-state cell uallot drop
 
 : t-push ( addr -- )  t-stack >stack ;
 : t-pop ( -- addr )   t-stack stack> ;
+: t# ( -- n ) t-stack $[]# ;
 
 \ float are stored big endian.
 
@@ -173,9 +174,9 @@ drop
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@  n2o.string  endof
 	4 of  pf@ f. ." float, " endof
-	5 of  ." endwith " cr  t-pop  token-table !  endof
+	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
-	$15 of ." push' " p@ .net2o-name  endof
+	$10 of ." push' " p@ .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
 
@@ -217,7 +218,8 @@ User cmdbuf#
 : cmdbuf+ ( n -- )
     dup maxstring u>= !!cmdfit!! cmdbuf# +! ;
 
-: cmd, ( 64n -- )  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
+: do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
+: cmd, ( 64n -- )  do-<req  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -245,6 +247,8 @@ Defer net2o:words
 
 Vocabulary net2o-base
 
+Defer do-req>
+
 get-current also net2o-base definitions
 
 \ Command numbers preliminary and subject to change
@@ -268,7 +272,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: flit ( #dfloat -- r ) \ double float literal
     pf@ ;
 +net2o: endwith ( o:object -- ) \ end scope
-    n:o> ;
+    do-req> n:o> ;
+:noname o IF  req? @  IF  endwith req? off  THEN  THEN ; is do-req>
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
 +net2o: tru ( -- f:true ) \ true flag literal
@@ -298,7 +303,7 @@ gen-table $@ inherit-table reply-table
     2r> buf-state 2! ;
 
 : cmdreset ( -- )
-    cmdbuf# off ;
+    cmdbuf# off  o IF  req? off  THEN ;
 : cmd0! ( -- )
     \g initialize a stateless command
     cmd0buf cmd0source !  stateless# outflag ! ;
@@ -467,7 +472,8 @@ dup set-current previous
 \ commands to reply
 
 also net2o-base definitions
-$10 net2o: <req ( -- ) ; \ stub: push own id in reply
+$10 net2o: push' ( #cmd -- ) \ push command into answer packet
+    p@ cmd, ;
 +net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
@@ -477,8 +483,6 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
     $> $, ;
 +net2o: push-float ( r -- ) \ push floating point number
     float, ;
-+net2o: push' ( #cmd -- ) \ push command into answer packet
-    p@ cmd, ;
 +net2o: ok ( utag -- ) \ tagged response
     64>n net2o:ok ;
 +net2o: ok? ( utag -- ) \ request tagged response
@@ -488,8 +492,6 @@ $10 net2o: <req ( -- ) ; \ stub: push own id in reply
     throw ;
 +net2o: nest ( $:string -- ) \ nested (self-encrypted) command
     $> cmdnest ;
-+net2o: req> ( -- ) \ end of request
-    endwith ;
 +net2o: request-done ( ureq -- ) 64>n \ signal request is completed
     o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
 
