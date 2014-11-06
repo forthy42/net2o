@@ -115,7 +115,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 +net2o: set-head ( addr -- ) \ set head
     64>n parent @ .data-rmap @ .dest-head umax! ;
 +net2o: timeout ( uticks -- ) \ timeout request
-    parent @ >o net2o:timeout  data-map @ .dest-tail @ ulit, set-head o> ;
+    parent @ >o net2o:timeout  data-map @ .dest-tail @ o> ulit, set-head ;
 
 \ profiling, nat traversal
 

@@ -148,24 +148,24 @@ drop
     net2o.name body> name>string ;
 : >net2o-sig ( addr -- addr' u )
     net2o.name 3 cells + $@ ;
+: .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
 
-: (net2o-see) ( addr -- )  @
+: (net2o-see) ( addr index -- )  dup >r + @
     dup 0<> IF
 	net2o.name
 	dup 2 cells + @ ?dup-IF  @ token-table @ t-push token-table !  THEN
-	body>
-    ELSE  drop ['] net2o-crash  THEN  .name ;
+	body> .name
+    ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
-: .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
 : .net2o-name ( n -- )  cells >r
     o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
-    IF  drop r> .net2o-num  EXIT  THEN  r> + (net2o-see) ;
+    IF  drop r> .net2o-num  EXIT  THEN  r> (net2o-see) ;
 : .net2o-name' ( n -- )  cells >r
     o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
-    IF  drop r> .net2o-num  EXIT  THEN  r> + @
+    IF  drop r> .net2o-num  EXIT  THEN  r@ + @
     dup 0<> IF
-	net2o.name body>
-    ELSE  drop ['] net2o-crash  THEN  .name ;
+	net2o.name body> .name
+    ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
 : net2o-see ( cmd -- ) hex[
     case
