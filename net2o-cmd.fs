@@ -182,16 +182,18 @@ drop
 
 Variable show-offset  show-offset on
 
+sema see-lock
+
 : cmd-see ( addr u -- addr' u' )
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
 : n2o:see ( addr u -- )
-    ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
-    space  t-stack $off
-    o IF  token-table @ >r  THEN
-    [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-    o IF  r> token-table !  THEN  throw  2drop ;
+    [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
+      space  t-stack $off
+      o IF  token-table @ >r  THEN
+      [: BEGIN  cmd-see dup 0= UNTIL ;] catch
+      o IF  r> token-table !  THEN  throw  2drop ;] see-lock c-section ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
