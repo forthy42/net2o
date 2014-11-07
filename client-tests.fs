@@ -127,9 +127,9 @@ UValue test#  0 to test#
       log .time s" Download test 4a" $, type cr endwith
       7 0 DO  -1. I limit!  LOOP
       n2o:done
-    end-code| n2o:close-all ['] .time $err ;
+    end-code| ['] .time $err n2o:close-all ;
 
-: c:disconnect ( -- )
+: c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
     do-disconnect [: .packets profile( .times ) ;] $err ;
 
 : c:test-rest ( -- )
