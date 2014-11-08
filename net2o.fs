@@ -543,12 +543,25 @@ ustack nest-stack
 
 alloc-io
 
-: net2o-pass ( params xt n task )  pass
+Variable net2o-tasks
+
+: net2o-pass ( params xt n task ) dup { w^ task }
+    task cell net2o-tasks $+!  pass
     b-out op-vector @ debug-vector !
     init-reply prep-socks alloc-io catch free-io
-    ?dup-IF  DoError  THEN ;
+    1+ ?dup-IF  1- ?dup-IF  DoError  THEN  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
+event: ->kill ( -- )  -1 throw ;
+: net2o-kills ( -- )
+    net2o-tasks $@ bounds ?DO
+	I @ <event ->kill event>
+    cell +LOOP  net2o-tasks $off
+    ." Killed everything" cr 10 ms ." done waiting" cr ;
+
+0 warnings !@
+: bye net2o-kills bye ;
+warnings !
 
 \ net2o header structure
 
@@ -2028,7 +2041,8 @@ event: ->save ( o -- ) .net2o:save ;
 
 : create-file-task ( -- )
     [:  ." created file task " up@ hex. cr
-	BEGIN  ['] event-loop catch ?dup-IF  DoError  THEN  AGAIN ;]
+	BEGIN  ['] event-loop catch dup -1 <> WHILE
+	    ?dup-IF  DoError  THEN  REPEAT  drop ;]
     1 net2o-task to file-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
@@ -2383,13 +2397,13 @@ Variable beacons \ destinations to send beacons to
 : timeout-loop-nocatch ( -- ) !ticks
     BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
 
-: catch-loop ( xt -- ) >r
-    BEGIN   nothrow r@ catch ?int dup  WHILE
-	    r@ .loop-err  REPEAT  drop rdrop ;
+: catch-loop { xt -- }
+    BEGIN   nothrow xt catch dup -1 = ?EXIT
+	?int dup  WHILE  xt .loop-err  REPEAT  drop false ;
 
 : create-timeout-task ( -- )
     [:  \ ." created timeout task " up@ hex. cr
-	BEGIN  ['] timeout-loop-nocatch catch-loop  AGAIN ;]
+	BEGIN  ['] timeout-loop-nocatch catch-loop  UNTIL ;]
     1 net2o-task to timeout-task ;
 
 \ event loop
@@ -2405,7 +2419,7 @@ Variable beacons \ destinations to send beacons to
 : create-receiver-task ( -- )
     [:  \ ." created receiver task " up@ hex. cr
 	BEGIN  ['] event-loop-nocatch catch-loop
-	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) AGAIN ;]
+	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) UNTIL ;]
     1 net2o-task to receiver-task ;
 
 : event-loop-task ( -- )
