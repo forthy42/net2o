@@ -18,4 +18,4 @@ init-client
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
 
-script? [IF] bye [THEN]
+script? [IF] net2o-bye [THEN]
