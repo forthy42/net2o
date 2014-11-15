@@ -16,6 +16,10 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS)
 
 lib_LTLIBRARIES = libkeccak.la
-libkeccak_la_SOURCES = KeccakF-1600-opt@ws@.c
+if ASM
+libkeccak_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
+else
+libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
+endif
 include_HEADERS = KeccakF-1600.h
 libkeccak_la_LIBADD = 

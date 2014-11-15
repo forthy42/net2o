@@ -8,7 +8,7 @@ require rng.fs
 
 \ random initializer for hash
 
-: hash-init-rng ( -- )  rng@ hashinit 64! rng@ hashinit 64'+ 64! ;
+: hash-init-rng ( -- )  rng@ rng@ hashinit 128! ;
 
 hash-init-rng
 

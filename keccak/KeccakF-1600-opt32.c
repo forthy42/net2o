@@ -76,12 +76,14 @@ void xor8bytesIntoInterleavedWords(UINT32 *even, UINT32 *odd, const UINT8* sourc
     xor2bytesIntoInterleavedWords(even, odd, source, 3)
 }
 
-#define xorLanesIntoState(laneCount, state, input) \
-    { \
-        int i; \
-        for(i=0; i<(laneCount); i++) \
-            xor8bytesIntoInterleavedWords(state+i*2, state+i*2+1, input+i*8); \
-    }
+#define xorLanesIntoState(byteCount, state, input) {			\
+  int i;								\
+  UINT64 tmp=0;								\
+  for(i=0; i<(byteCount-7); i+=8)					\
+    xor8bytesIntoInterleavedWords(state+(i>>2), state+(i>>2)+1, input+i); \
+  memcpy(&tmp, input+i, byteCount & 7);					\
+  xor8bytesIntoInterleavedWords(state+(i>>2), state+(i>>2)+1, &tmp);	\
+}
 
 void setInterleavedWordsInto8bytes(UINT8* dest, UINT32 even, UINT32 odd)
 {
@@ -93,43 +95,58 @@ void setInterleavedWordsInto8bytes(UINT8* dest, UINT32 even, UINT32 odd)
     setInterleavedWordsInto2bytes(dest, even, odd, 3)
 }
 
-#define extractLanes(laneCount, state, data) \
-    { \
-        int i; \
-        for(i=0; i<(laneCount); i++) \
-            setInterleavedWordsInto8bytes(data+i*8, ((UINT32*)state)[i*2], ((UINT32*)state)[i*2+1]); \
-    }
+#define extractLanes(byteCount, state, data) \
+  {					     \
+    int i;				     \
+    UINT64 tmp=0;			     \
+    for(i=0; i<(byteCount-7); i+=8)					\
+      setInterleavedWordsInto8bytes(data+i, ((UINT32*)state)[i>>2], ((UINT32*)state)[(i>>2)+1]); \
+    setInterleavedWordsInto8bytes(&tmp, ((UINT32*)state)[i>>2], ((UINT32*)state)[(i>>2)+1]); \
+    memcpy(data+i, &tmp, byteCount & 7);				\
+  }
 
 #else // No interleaving tables
 
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
 
 // Credit: Henry S. Warren, Hacker's Delight, Addison-Wesley, 2002
-#define xorInterleavedLE(rateInLanes, state, input) \
-	{ \
-		const UINT32 * pI = (const UINT32 *)input; \
-		UINT32 * pS = state; \
-		UINT32 t, x0, x1; \
-	    int i; \
-	    for (i = (rateInLanes)-1; i >= 0; --i) \
-		{ \
-			x0 = *(pI++); \
-			t = (x0 ^ (x0 >>  1)) & 0x22222222UL;  x0 = x0 ^ t ^ (t <<  1); \
-			t = (x0 ^ (x0 >>  2)) & 0x0C0C0C0CUL;  x0 = x0 ^ t ^ (t <<  2); \
-			t = (x0 ^ (x0 >>  4)) & 0x00F000F0UL;  x0 = x0 ^ t ^ (t <<  4); \
-			t = (x0 ^ (x0 >>  8)) & 0x0000FF00UL;  x0 = x0 ^ t ^ (t <<  8); \
- 			x1 = *(pI++); \
-			t = (x1 ^ (x1 >>  1)) & 0x22222222UL;  x1 = x1 ^ t ^ (t <<  1); \
-			t = (x1 ^ (x1 >>  2)) & 0x0C0C0C0CUL;  x1 = x1 ^ t ^ (t <<  2); \
-			t = (x1 ^ (x1 >>  4)) & 0x00F000F0UL;  x1 = x1 ^ t ^ (t <<  4); \
-			t = (x1 ^ (x1 >>  8)) & 0x0000FF00UL;  x1 = x1 ^ t ^ (t <<  8); \
-			*(pS++) ^= (UINT16)x0 | (x1 << 16); \
-			*(pS++) ^= (x0 >> 16) | (x1 & 0xFFFF0000); \
-		} \
-	}
+#define xorInterleavedLE(byteCount, state, input) \
+  {							   \
+    const UINT32 * pI = (const UINT32 *)input;		   \
+    UINT32 * pS = state;				   \
+    UINT32 t, x0, x1;					   \
+    int i;						   \
+    for (i = (byteCount)-8; i >= 0; i-=8)		   \
+      {							   \
+	x0 = *(pI++);							\
+	t = (x0 ^ (x0 >>  1)) & 0x22222222UL;  x0 = x0 ^ t ^ (t <<  1); \
+	t = (x0 ^ (x0 >>  2)) & 0x0C0C0C0CUL;  x0 = x0 ^ t ^ (t <<  2); \
+	t = (x0 ^ (x0 >>  4)) & 0x00F000F0UL;  x0 = x0 ^ t ^ (t <<  4); \
+	t = (x0 ^ (x0 >>  8)) & 0x0000FF00UL;  x0 = x0 ^ t ^ (t <<  8); \
+	x1 = *(pI++);							\
+	t = (x1 ^ (x1 >>  1)) & 0x22222222UL;  x1 = x1 ^ t ^ (t <<  1); \
+	t = (x1 ^ (x1 >>  2)) & 0x0C0C0C0CUL;  x1 = x1 ^ t ^ (t <<  2); \
+	t = (x1 ^ (x1 >>  4)) & 0x00F000F0UL;  x1 = x1 ^ t ^ (t <<  4); \
+	t = (x1 ^ (x1 >>  8)) & 0x0000FF00UL;  x1 = x1 ^ t ^ (t <<  8); \
+	*(pS++) ^= (UINT16)x0 | (x1 << 16);				\
+	*(pS++) ^= (x0 >> 16) | (x1 & 0xFFFF0000);			\
+      }									\
+    x0 = byteCount >= 4 ? *(pI++) : *(pI++) & 0xffffffffu >> (8*((4-byteCount) & 3)); \
+    t = (x0 ^ (x0 >>  1)) & 0x22222222UL;  x0 = x0 ^ t ^ (t <<  1);	\
+    t = (x0 ^ (x0 >>  2)) & 0x0C0C0C0CUL;  x0 = x0 ^ t ^ (t <<  2);	\
+    t = (x0 ^ (x0 >>  4)) & 0x00F000F0UL;  x0 = x0 ^ t ^ (t <<  4);	\
+    t = (x0 ^ (x0 >>  8)) & 0x0000FF00UL;  x0 = x0 ^ t ^ (t <<  8);	\
+    x1 = byteCount < 4 ? 0 : *(pI++) & 0xffffffffu >> (8*((4-byteCount) & 3)); \
+    t = (x1 ^ (x1 >>  1)) & 0x22222222UL;  x1 = x1 ^ t ^ (t <<  1);	\
+    t = (x1 ^ (x1 >>  2)) & 0x0C0C0C0CUL;  x1 = x1 ^ t ^ (t <<  2);	\
+    t = (x1 ^ (x1 >>  4)) & 0x00F000F0UL;  x1 = x1 ^ t ^ (t <<  4);	\
+    t = (x1 ^ (x1 >>  8)) & 0x0000FF00UL;  x1 = x1 ^ t ^ (t <<  8);	\
+    *(pS++) ^= (UINT16)x0 | (x1 << 16);					\
+    *(pS++) ^= (x0 >> 16) | (x1 & 0xFFFF0000);				\
+  }
 
-#define xorLanesIntoState(laneCount, state, input) \
-    xorInterleavedLE(laneCount, state, input)
+#define xorLanesIntoState(byteCount, state, input) \
+    xorInterleavedLE(byteCount, state, input)
 
 #else // (PLATFORM_BYTE_ORDER == IS_BIG_ENDIAN)
 
@@ -164,12 +181,14 @@ void xor8bytesIntoInterleavedWords(UINT32* evenAndOdd, const UINT8* source)
     evenAndOdd[1] ^= (UINT32)(evenAndOddWord >> 32);
 }
 
-#define xorLanesIntoState(laneCount, state, input) \
-    { \
-        int i; \
-        for(i=0; i<(laneCount); i++) \
-            xor8bytesIntoInterleavedWords(state+i*2, input+i*8); \
-    }
+#define xorLanesIntoState(byteCount, state, input)		 \
+  {								 \
+    int i; UINT64 tmp=0;					 \
+    for(i=0; i<(byteCount-7); i+=8)				 \
+      xor8bytesIntoInterleavedWords(((char*)state)+i, input+i);	\
+    memcpy(state+i, &tmp, byteCount & 7);			 \
+    xor8bytesIntoInterleavedWords(((char*)state)+i, &tmp);	 \
+  }
 
 #endif // Endianness
 
@@ -206,11 +225,13 @@ void setInterleavedWordsInto8bytes(UINT8* dest, UINT32* evenAndOdd)
 #endif // Endianness
 }
 
-#define extractLanes(laneCount, state, data) \
+#define extractLanes(byteCount, state, data) \
     { \
-        int i; \
-        for(i=0; i<(laneCount); i++) \
-            setInterleavedWordsInto8bytes(data+i*8, (UINT32*)state+i*2); \
+      int i; UINT64 tmp=0;						\
+      for(i=0; i<(byteCount-7); i+=8)					\
+	setInterleavedWordsInto8bytes(data+i, (UINT32*)state+i>>2);	\
+      setInterleavedWordsInto8bytes(&tmp, (UINT32*)state+i>>2;);	\
+      memcpy(data+i, &tmp, byteCount & 7);				\
     }
 
 #endif // With or without interleaving tables
@@ -261,30 +282,31 @@ void KeccakInitializeState(keccak_state state)
     memset(state, 0, 200);
 }
 
-void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
-    extractLanes(laneCount, state, (char*)data)
+    extractLanes(byteCount, state, (char*)data)
 }
 
-void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
-    xorLanesIntoState(laneCount, state, (char*)data)
+    xorLanesIntoState(byteCount, state, (char*)data)
 }
 
-void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
-  xorLanesIntoState(laneCount, state, (char*)data);
-  extractLanes(laneCount, state, (char*)data);
+  xorLanesIntoState(byteCount, state, (char*)data);
+  extractLanes(byteCount, state, (char*)data);
 }
 
-void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
-  UINT64 tmp[laneCount];
+  UINT64 tmp[(byteCount>>3)+1];
   int i;
+  tmp[(byteCount>>3)]=0;
 
-  extractLanes(laneCount, state, (char*)tmp);
-  for(i=0; i<laneCount; i++) {
+  extractLanes(byteCount, state, (char*)tmp);
+  for(i=0; i<byteCount-7; i+=8) {
     data[i] ^= tmp[i];
   }
-  xorLanesIntoState(laneCount, state, (char*)data);
+  xorLanesIntoState(byteCount, state, (char*)data);
 }

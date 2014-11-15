@@ -1,7 +1,8 @@
 \ keccak wrapper
 
-require 64bit.fs
 require unix/mmap.fs
+require unix/pthread.fs
+require 64bit.fs
 require crypto-api.fs
 require net2o-err.fs
 require kregion.fs
@@ -23,8 +24,8 @@ c-library keccak
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;
     \c     KeccakF(state);
-    \c     KeccakEncrypt(state, data, p>>3);
-    \c     data += p>>3; n-=p;
+    \c     KeccakEncrypt(state, data, p);
+    \c     data = (UINT64*)(((char*)data)+p); n-=p;
     \c   }
     \c   return data;
     \c }
@@ -33,8 +34,8 @@ c-library keccak
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;
     \c     KeccakF(state);
-    \c     KeccakDecrypt(state, data, p>>3);
-    \c     data += p>>3; n-=p;
+    \c     KeccakDecrypt(state, data, p);
+    \c     data = (UINT64*)(((char*)data)+p); n-=p;
     \c   }
     \c   return data;
     \c }
@@ -61,10 +62,10 @@ UValue @keccak
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
 : keccak* ( -- ) @keccak KeccakF ;
-: >keccak ( addr u -- )  3 rshift @keccak -rot KeccakAbsorb ;
-: +keccak ( addr u -- )  3 rshift @keccak -rot KeccakEncrypt ;
-: -keccak ( addr u -- )  3 rshift @keccak -rot KeccakDecrypt ;
-: keccak> ( addr u -- )  3 rshift @keccak -rot KeccakExtract ;
+: >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
+: +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
+: -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
+: keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
 
 \ crypto api integration
 

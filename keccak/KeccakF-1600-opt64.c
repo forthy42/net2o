@@ -220,116 +220,143 @@ void KeccakInitialize()
 {
 }
 
-void KeccakExtract(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
+  UINT64 m = 0xffffffffffffffffull;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-  memcpy(data, state, laneCount*8);
+  memcpy(data, state, byteCount);
 #else
   unsigned int i;
   
-  for(i=0; i<laneCount; i++)
-    fromWordToBytes(data+i, ((const UINT64*)state)[i]);
+  for(i=0; i<byteCount-7; i+=8)
+    fromWordToBytes(data+i>>3, ((const UINT64*)state)[i>>3]);
 #endif
 #ifdef UseBebigokimisa
-  switch(laneCount) {
-  case 25: case 24: case 23: case 22: case 21:
-    data[20] = ~data[20];
-  case 20: case 19: case 18:
-    data[17] = ~data[17];
-  case 17: case 16: case 15: case 14: case 13:
-    data[12] = ~data[12];
-  case 12: case 11: case 10: case 9:
-    data[ 8] = ~data[ 8];
-  case 8: case 7: case 6: case 5: case 4: case 3:
-    data[ 2] = ~data[ 2];
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+  m >>= ((8-byteCount) & 7)*8;
+#else
+  m <<= ((8-byteCount) & 7)*8;
+#endif
+  switch((byteCount+7)>>3) {
+  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 21:
+    data[20] ^= m; m = 0xffffffffffffffffull;
+  case 20: case 19: m = 0xffffffffffffffffull; case 18:
+    data[17] ^= m; m = 0xffffffffffffffffull;
+  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
+    data[12] ^= m; m = 0xffffffffffffffffull;
+  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
+    data[ 8] ^= m; m = 0xffffffffffffffffull;
+  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
+    data[ 2] ^= m; m = 0xffffffffffffffffull;
   case 2:
-    data[ 1] = ~data[ 1];
+    data[ 1] ^= m;
   }
 #endif
 }
 
-void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
   unsigned int i;
-  for(i=0; i<laneCount; i++) {
+  UINT64 m = 0xffffffffffffffffull;
+  for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    state[i] ^= data[i];
+    state[i>>3] ^= data[i>>3];
 #else
     UINT64 tmp;
-    fromWordToBytes(&tmp, data[i]);
-    state[i] ^= tmp;
+    fromWordToBytes(&tmp, data[i>>3]);
+    state[i>>3] ^= tmp;
 #endif
   }
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+  m >>= ((8-byteCount) & 7)*8;
+  if(byteCount & 7)
+    state[i>>3] ^= data[i>>3] & m;
+#else
+  m <<= ((8-byteCount) & 7)*8;
+  if(byteCount & 7) {
+    fromWordToBytes(&tmp, data[i>>3] & m);
+    state[i>>3] ^= data[i>>3] & m;
+  }
+#endif
 }
 
-void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
   unsigned int i;
-  for(i=0; i<laneCount; i++) {
+  UINT64 m = 0xffffffffffffffffull;
+  for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    data[i] = state[i] ^= data[i];
+    data[i>>3] = state[i>>3] ^= data[i>>3];
 #else
     UINT64 tmp;
-    fromWordToBytes(&tmp, data[i]);
-    tmp = state[i] ^= tmp;
-    fromWordToBytes(data+i, tmp);
+    fromWordToBytes(&tmp, data[i>>3]);
+    tmp = state[i>>3] ^= tmp;
+    fromWordToBytes(data+i>>3, tmp);
 #endif
   }
 #ifdef UseBebigokimisa
-  switch(laneCount) {
-  case 25: case 24: case 23: case 22: case 21:
-    data[20] = ~data[20];
-  case 20: case 19: case 18:
-    data[17] = ~data[17];
-  case 17: case 16: case 15: case 14: case 13:
-    data[12] = ~data[12];
-  case 12: case 11: case 10: case 9:
-    data[ 8] = ~data[ 8];
-  case 8: case 7: case 6: case 5: case 4: case 3:
-    data[ 2] = ~data[ 2];
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+  m >>= ((8-byteCount) & 7)*8;
+#else
+  m <<= ((8-byteCount) & 7)*8;
+#endif
+  switch((byteCount+7)>>3) {
+  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 21:
+    data[20] ^= m; m = 0xffffffffffffffffull;
+  case 20: case 19: m = 0xffffffffffffffffull; case 18:
+    data[17] ^= m; m = 0xffffffffffffffffull;
+  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
+    data[12] ^= m; m = 0xffffffffffffffffull;
+  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
+    data[ 8] ^= m; m = 0xffffffffffffffffull;
+  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
+    data[ 2] ^= m; m = 0xffffffffffffffffull;
   case 2:
-    data[ 1] = ~data[ 1];
+    data[ 1] ^= m;
   }
 #endif
 }
 
-void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int laneCount)
+void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
   unsigned int i;
-  for(i=0; i<laneCount; i++) {
+  UINT64 m = 0xffffffffffffffffull;
+  for(i=0; i<byteCount-7; i+=8) {
     UINT64 tmp;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-    tmp = data[i] ^ state[i];
-    state[i] = data[i];
-    data[i] = tmp;
+    tmp = data[i>>3] ^ state[i>>3];
+    state[i>>3] = data[i>>3];
+    data[i>>3] = tmp;
 #else
     UINT64 tmp1;
-    fromWordToBytes(&tmp, data[i]);
-    tmp1 = tmp ^ state[i];
-    state[i] = tmp;
-    fromWordToBytes(data+i, tmp1);
+    fromWordToBytes(&tmp, data[i>>3]);
+    tmp1 = tmp ^ state[i>>3];
+    state[i>>3] = tmp;
+    fromWordToBytes(data+i>>3, tmp1);
 #endif
   }
 #ifdef UseBebigokimisa
-  switch(laneCount) {
-  case 25: case 24: case 23: case 22: case 21:
-    data[20] = ~data[20];
-    state[20] = ~state[20];
-  case 20: case 19: case 18:
-    data[17] = ~data[17];
-    state[17] = ~state[17];
-  case 17: case 16: case 15: case 14: case 13:
-    data[12] = ~data[12];
-    state[12] = ~state[12];
-  case 12: case 11: case 10: case 9:
-    data[ 8] = ~data[ 8];
-    state[ 8] = ~state[ 8];
-  case 8: case 7: case 6: case 5: case 4: case 3:
-    data[ 2] = ~data[ 2];
-    state[ 2] = ~state[ 2];
+#if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
+  m >>= ((8-byteCount) & 7)*8;
+#else
+  m <<= ((8-byteCount) & 7)*8;
+#endif
+  switch((byteCount+7)>>3) {
+  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 21:
+    data[20] ^= m; state[20] ^= m; m = 0xffffffffffffffffull;
+  case 20: case 19: m = 0xffffffffffffffffull; case 18:
+    data[17] ^= m; state[17] ^= m; m = 0xffffffffffffffffull;
+  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
+    data[12] ^= m; state[12] ^= m; m = 0xffffffffffffffffull;
+  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
+    data[ 8] ^= m; state[ 8] ^= m; m = 0xffffffffffffffffull;
+  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
+    data[ 2] ^= m; state[ 2] ^= m; m = 0xffffffffffffffffull;
   case 2:
-    data[ 1] = ~data[ 1];
-    state[ 1] = ~state[ 1];
+    data[ 1] ^= m; state[ 1] ^= m;
   }
 #endif
 }
