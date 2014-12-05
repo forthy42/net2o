@@ -58,12 +58,11 @@ inline void tf_prep(struct tf_ctx *ctx)
   ctx->tweak[2] = ctx->tweak[0] ^ ctx->tweak[1];
 }
 
-#define PERMUTE(i)			    \
-  m = tf_permut[2*i];			    \
-  n = tf_permut[2*i+1];			    \
-  X[m] += X[n];				    \
-  X[n] = rot_l64(X[n], tf_rot_consts[i+s]); \
-  X[n] ^= X[m] 
+#define PERMUTE(i)					\
+  m = tf_permut[2*i];					\
+  n = tf_permut[2*i+1];					\
+  X[m] += X[n];						\
+  X[n] = X[m] ^ rot_l64(X[n], tf_rot_consts[i+s]);
 #define TWEAKE(r)		 \
   for (y=0;y<8;y++)		 \
     X[y] += ctx->key[(r+y) % 9]; \
