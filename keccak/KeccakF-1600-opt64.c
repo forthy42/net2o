@@ -229,7 +229,7 @@ void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
   unsigned int i;
   
   for(i=0; i<byteCount-7; i+=8)
-    fromWordToBytes(data+i>>3, ((const UINT64*)state)[i>>3]);
+    fromWordToBytes(data+(i>>3), ((const UINT64*)state)[i>>3]);
 #endif
 #ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -292,14 +292,25 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
     UINT64 tmp;
     fromWordToBytes(&tmp, data[i>>3]);
     tmp = state[i>>3] ^= tmp;
-    fromWordToBytes(data+i>>3, tmp);
+    fromWordToBytes(data+(i>>3), tmp);
 #endif
   }
 #ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   m >>= ((8-byteCount) & 7)*8;
+  if(byteCount & 7) {
+    state[i>>3] ^= data[i>>3] & m;
+    data[i>>3] = (data[i>>3] & ~m) | (state[i>>3] & m);
+  }
 #else
   m <<= ((8-byteCount) & 7)*8;
+  if(byteCount & 7) {
+    UINT64 tmp, tmp2;
+    fromWordToBytes(&tmp, data[i>>3] & m);
+    tmp = state[i>>3] ^= tmp;
+    fromWordToBytes(&tmp2, tmp);
+    data[i>>3] = (data[i>>3] & ~m) | (tmp2 & m);
+  }
 #endif
   switch((byteCount+7)>>3) {
   case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
@@ -334,14 +345,27 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
     fromWordToBytes(&tmp, data[i>>3]);
     tmp1 = tmp ^ state[i>>3];
     state[i>>3] = tmp;
-    fromWordToBytes(data+i>>3, tmp1);
+    fromWordToBytes(data+(i>>3), tmp1);
 #endif
   }
 #ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   m >>= ((8-byteCount) & 7)*8;
+  if(bytecount & 7) {
+    tmp = data[i>>3] ^ state[i>>3];
+    state[i>>3] = (data[i>>3] & m) | (state[i>>3] & ~m);
+    data[i>>3] = (tmp & m) | (data[i>>3] & ~m);
+  }
 #else
   m <<= ((8-byteCount) & 7)*8;
+  if(bytecount & 7) {
+    UINT64 tmp1;
+    fromWordToBytes(&tmp1, data[i>>3]);
+    tmp = tmp1 ^ state[i>>3];
+    state[i>>3] = (tmp & m) | (state[i>>3] & ~m);
+    tmp1 = (tmp & m) | (tmp1 & ~m);
+    fromWordToBytes(data+(i>>3), tmp1);
+  }
 #endif
   switch((byteCount+7)>>3) {
   case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;

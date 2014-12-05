@@ -229,8 +229,8 @@ void setInterleavedWordsInto8bytes(UINT8* dest, UINT32* evenAndOdd)
     { \
       int i; UINT64 tmp=0;						\
       for(i=0; i<(byteCount-7); i+=8)					\
-	setInterleavedWordsInto8bytes(data+i, (UINT32*)state+i>>2);	\
-      setInterleavedWordsInto8bytes(&tmp, (UINT32*)state+i>>2;);	\
+	setInterleavedWordsInto8bytes(data+i, (UINT32*)state+(i>>2));	\
+      setInterleavedWordsInto8bytes(&tmp, (UINT32*)state+(i>>2));	\
       memcpy(data+i, &tmp, byteCount & 7);				\
     }
 
@@ -306,7 +306,9 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 
   extractLanes(byteCount, state, (char*)tmp);
   for(i=0; i<byteCount-7; i+=8) {
-    data[i] ^= tmp[i];
+    data[i>>3] ^= tmp[i>>3];
   }
+  if(byteCount & 7)
+    data[i>>3] ^= tmp[i>>3];
   xorLanesIntoState(byteCount, state, (char*)data);
 }
