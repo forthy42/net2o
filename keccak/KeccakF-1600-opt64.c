@@ -334,8 +334,8 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 {
   unsigned int i;
   UINT64 m = 0xffffffffffffffffull;
+  UINT64 tmp;
   for(i=0; i<byteCount-7; i+=8) {
-    UINT64 tmp;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
     tmp = data[i>>3] ^ state[i>>3];
     state[i>>3] = data[i>>3];
@@ -351,7 +351,7 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 #ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   m >>= ((8-byteCount) & 7)*8;
-  if(bytecount & 7) {
+  if(byteCount & 7) {
     tmp = data[i>>3] ^ state[i>>3];
     state[i>>3] = (data[i>>3] & m) | (state[i>>3] & ~m);
     data[i>>3] = (tmp & m) | (data[i>>3] & ~m);
