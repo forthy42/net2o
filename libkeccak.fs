@@ -69,8 +69,6 @@ UValue @keccak
 
 \ crypto api integration
 
-require crypto-api.fs
-
 crypto class
     keccak# uvar keccak-state
     keccak#cks uvar keccak-checksums
@@ -155,7 +153,8 @@ keccak-init
     64#0 keccak-checksums keccak#cks bounds ?DO
 	I 64@ 64xor  8 +LOOP ; to c:cookie ( -- x )
 \G obtain a 64 bit checksum
-
-keccak ' new static-a with-allocater Constant keccak-o
-
-keccak-o crypto-o !
+:noname @keccak keccak#max + dup >r 128@ 128xor r> 128! ;
+to c:tweak! ( xd -- )
+\G set 128 bit tweek
+    
+crypto-o @ Constant keccak-o

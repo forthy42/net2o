@@ -33,8 +33,9 @@ require 64bit.fs
 require debugging.fs
 require kregion.fs
 require libkeccak.fs
+require threefish.fs
 \ require wurstkessel.fs
-\ wurstkessel-o crypto-o !
+keccak-o crypto-o !
 require rng.fs
 require ed25519-donna.fs
 require hash-table.fs

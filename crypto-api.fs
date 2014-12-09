@@ -56,4 +56,6 @@ object class
     \G compute a 128 bit checksum
     umethod c:cookie ( -- x )
     \G compute a different 64 bit checksum
+    umethod c:tweak! ( x128 -- )
+    \G set 128 bit tweek (if tweekable)
 end-class crypto

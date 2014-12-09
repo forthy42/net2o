@@ -1,8 +1,7 @@
 # Generic makefile, for crosscompiling use make -f Makefile.<target>
 
 INCLUDES   = -I$(NDK)/usr/include -I$(NDK)/usr/local/include/
-TOP        = $(HOME)/proj/swig-2.0.1-bernd2
-SWIG       = $(TOP)/preinst-swig
+SWIG       = /usr/bin/swig
 TARGETS    = keccak.fsx
 LIBRARY    = libkeccak.fs
 OPTIONS    = -forth -no-sectioncomments -stackcomments $(INCLUDES)

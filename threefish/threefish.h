@@ -21,14 +21,14 @@
 
 #include <stdint.h>
 
-struct tf_ctx {
+typedef struct tf_ctx {
 	uint64_t key[9];
 	uint64_t tweak[3];
-};
+} tf_ctx;
 
 
-void tf_init(struct tf_ctx *ctx);
 void tf_prep(struct tf_ctx *ctx);
+void tf_tweak(struct tf_ctx *ctx);
 void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p, uint64_t *out, int feed);
 void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out);
 

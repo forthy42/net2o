@@ -58,6 +58,11 @@ inline void tf_prep(struct tf_ctx *ctx)
   ctx->tweak[2] = ctx->tweak[0] ^ ctx->tweak[1];
 }
 
+inline void tf_tweak(struct tf_ctx *ctx)
+{
+  ctx->tweak[2] = ctx->tweak[0] ^ ctx->tweak[1];
+}
+
 #define PERMUTE(i)					\
   m = tf_permut[2*i];					\
   n = tf_permut[2*i+1];					\
