@@ -350,14 +350,6 @@ Defer search-key \ search if that is one of our pubkeys
     THEN
     2drop ;
 
-\ port knocking
-
-Variable knocks
-
-: net2o:knock ( addr u -- flag )
-    0 -rot knocks [: 2over 2swap decrypt$ nip nip -rot 2>r or 2r>
-    ;] $[]map 2drop ;
-
 0 [IF]
 Local Variables:
 forth-local-words:

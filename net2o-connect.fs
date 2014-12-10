@@ -56,7 +56,6 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
 +net2o: map-request ( addrs ucode udata -- ) \ request mapping
-    knocked? 0= IF   64drop 64drop 64drop un-cmd  EXIT  THEN
     2*64>n
     nest[
     ?new-mykey ticker 64@ lit, set-cookie
@@ -136,18 +135,16 @@ net2o-base
     update-key all-ivs ;
 
 +net2o: gen-reply ( -- ) \ generate a key request reply reply
-    own-crypt? knocked? or 0= ?EXIT
+    own-crypt? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, cookie+request time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 +net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
-    knocked? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, gen-punchload gen-punch time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
-\ !!TODO!! knock should use special default key
-+net2o: knock ( $:challenge -- ) $> net2o:knock knock-val and validated or! ;
++net2o: knock ( $:challenge -- ) $> tmp-0key sec! ;
 
 gen-table $freeze
 
