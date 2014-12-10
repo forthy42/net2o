@@ -1782,7 +1782,7 @@ User outflag  outflag off
 
 : send-code-packet ( -- ) +sendX
 \    ." send " outbuf .header
-    o IF  code-map @  ELSE  0  THEN  outbuf-encrypt
+    o IF  code-map @ outbuf-encrypt  ELSE  outbuf0-encrypt  THEN
     outbuf flags 1+ c@ stateless# and IF
 	return-addr
 	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
@@ -2256,7 +2256,7 @@ $10 Constant tmp-crypt-val
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
     0 >o rdrop \ address 0 has no job context!
-    0 inbuf-decrypt 0= IF
+    inbuf0-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
     inbuf packet-data queue-command ;
 
