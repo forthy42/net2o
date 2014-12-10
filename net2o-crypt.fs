@@ -45,7 +45,9 @@ object class
     keysize uvar oldskrev \ previous revocation secret after revocation
     \ shared secred
     keysize uvar keypad
-    64Variable last-mykey
+    1 64s uvar last-mykey
+    cell uvar my-0key
+    cell uvar tmp-0key 
 end-class keybuf-c
 
 : init-keybuf ( -- )
@@ -99,13 +101,16 @@ init-keybuf
     cmd( ." Default-key " cr )
     c:0key ;
 
+: addr>assembly ( addr flag -- )
+    [ acks# invert 8 lshift ]L and
+    ivs-assembly state# + 64'+ w!
+    ivs-assembly state# + 64! ; \ the address is part of the key
+
 User last-ivskey
 
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF  64dup ivs-assembly state# + 64! \ the address is part of the key
-	dest-flags w@ [ acks# invert 8 lshift ]L and
-	ivs-assembly state# + 64'+ w!
+    IF  64dup dest-flags w@ addr>assembly
 	\ the flags, too, except the ack toggle bits
 	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
 	ivs-assembly state# move
@@ -164,9 +169,29 @@ User last-ivskey
     crypt-buf-init outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 
-: inbuf-decrypt ( map -- flag2 ) +calc
+: inbuf-decrypt ( map -- flag ) +calc
     crypt-buf-init inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
+
+: set-0key ( 64addr flag keyaddr -- )
+    dup @ IF
+	$@ state# min ivs-assembly swap move
+	addr>assembly
+	ivs-assembly >c:key 
+    ELSE
+	2drop 64drop default-key
+    THEN ;
+
+: inbuf0-decrypt ( -- flag )  +calc
+    inbuf addr 64@ inbuf flags w@ my-0key set-0key
+    inbuf packet-data +cryptsu
+    inbuf 1+ c@ c:decrypt+auth +enc ;
+
+: outbuf0-encrypt ( -- ) +calc
+    outbuf addr 64@ outbuf flags w@
+    o IF  dest-0key  ELSE  tmp-0key  THEN  set-0key
+    outbuf packet-data +cryptsu
+    outbuf 1+ c@ c:encrypt+auth +enc ;
 
 \ IVS
 

@@ -964,6 +964,7 @@ cmd-class class
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
     field: dest-pubkey  \ if not 0, connect only to this key
+    field: dest-0key    \ key for stateless connections
 end-class context-class
 
 Variable context-table
