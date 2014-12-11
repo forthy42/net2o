@@ -395,6 +395,7 @@ Variable throwcount
     string-stack $off
     object-stack $off
     nest-stack $off
+    tmp-0key sec-off
     o to connection
     o IF
 	maxdata code+

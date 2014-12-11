@@ -47,7 +47,7 @@ $4000 Constant /kregion
     ELSE 0 THEN ;
 : sec+! ( addr1 u1 addr2 -- )
     dup @ 0= IF  sec!  ELSE  sec@ dup >r + swap $40 r> - umin move  THEN ;
-: sec-off ( addr -- ) >r r@ @ ?dup-IF  kfree64  THEN  r> off ;
+: sec-off ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
 
 : sec+[]! ( addr1 u1 addr2 -- ) >r
     0 { w^ sec } sec sec! sec cell r> $+! ;

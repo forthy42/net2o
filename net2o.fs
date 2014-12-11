@@ -811,6 +811,8 @@ current-o
 
 \ job context structure and subclasses
 
+Variable contexts \G contains all command objects
+
 object class
     field: token-table
     field: parent
@@ -885,6 +887,7 @@ cmd-class class
     field: log-context
     field: ack-context
     field: msg-context
+    field: next-context \ link field if needed
     field: codebuf#
     field: context#
     field: wait-task
@@ -1105,6 +1108,7 @@ UValue connection
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
+    o contexts !@ next-context !
     o to connection \ current connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
@@ -1782,11 +1786,12 @@ User outflag  outflag off
 
 : send-code-packet ( -- ) +sendX
 \    ." send " outbuf .header
-    o IF  code-map @ outbuf-encrypt  ELSE  outbuf0-encrypt  THEN
     outbuf flags 1+ c@ stateless# and IF
+	outbuf0-encrypt
 	return-addr
 	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
     ELSE
+	code-map @ outbuf-encrypt
 	return-address
     THEN   packet-to ;
 
@@ -2303,6 +2308,11 @@ $10 Constant tmp-crypt-val
 
 \ dispose context
 
+: unlink-ctx ( next hit ptr -- )
+    next-context @ o contexts
+    BEGIN  2dup @ <> WHILE  @ dup .next-context swap 0= UNTIL
+	2drop drop EXIT  THEN  nip ! ;
+
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " up@ hex. cr )
@@ -2315,12 +2325,14 @@ $10 Constant tmp-crypt-val
 	resend0 $off  fstate-off
 	\ erase crypto keys
 	crypto-key sec-off
+	dest-0key sec-off
 	data-resend $off
 	dest-pubkey $off
 	pubkey $off
 	mpubkey $off
 	log-context @ .dispose
 	ack-context @ >o timing-stat $off track-timing $off dispose o>
+	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 

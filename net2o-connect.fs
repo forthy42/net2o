@@ -144,7 +144,7 @@ net2o-base
       reply-key, gen-punchload gen-punch time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
-+net2o: knock ( $:challenge -- ) $> tmp-0key sec! ;
++net2o: knock ( $:key -- ) $> tmp-0key sec! ;
 
 gen-table $freeze
 

@@ -173,22 +173,30 @@ User last-ivskey
     crypt-buf-init inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
-: set-0key ( 64addr flag keyaddr -- )
+: set-0key ( keyaddr -- )
     dup @ IF
-	$@ state# min ivs-assembly swap move
-	addr>assembly
-	ivs-assembly >c:key 
+	sec@ state# min
+	ivs-assembly state# bounds ?DO
+	    2dup I swap move
+	dup +LOOP  2drop
     ELSE
-	2drop 64drop default-key
-    THEN ;
+	ivs-assembly state# erase
+    THEN
+    ivs-assembly >c:key ;
 
-: inbuf0-decrypt ( -- flag )  +calc
-    inbuf addr 64@ inbuf flags w@ my-0key set-0key
+: try-0decrypt ( key -- flag ) set-0key
     inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
+: inbuf0-decrypt ( -- flag )  +calc
+    inbuf addr 64@ inbuf flags w@ addr>assembly
+    my-0key try-0decrypt dup IF  EXIT  THEN
+    contexts  BEGIN  @ dup  WHILE  >o
+	    next-context dest-0key try-0decrypt o>
+	    dup IF  nip  EXIT  THEN  REPEAT ;
+
 : outbuf0-encrypt ( -- ) +calc
-    outbuf addr 64@ outbuf flags w@
+    outbuf addr 64@ outbuf flags w@ addr>assembly
     o IF  dest-0key  ELSE  tmp-0key  THEN  set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
