@@ -56,6 +56,7 @@ keypack-all# buffer: keypack-d
 cmd-class class
     field: ke-sk \ secret key
     field: ke-pk \ public key
+    field: ke-psk \ preshared key for stateless communication
     field: ke-nick
     field: ke-prof
     field: ke-sigs
@@ -320,13 +321,16 @@ $40 buffer: nick-buf
     key-table @ 0= IF  read-keys  THEN
     nick-key >o o 0= IF  EXIT  THEN
     ke-pk $@ pkc swap keysize 2* umin move
+    ke-psk sec@ my-0key sec!
     ke-sk @ skc keysize move o> ;
 
 : i'm ( "name" -- ) parse-name >key ;
 
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
-    ke-pk $@ keysize umin o> dest-pubkey $! ;
+    ke-psk sec@ state# umin
+    ke-pk $@ keysize umin o>
+    dest-pubkey $!  dest-0key sec! ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )

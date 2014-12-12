@@ -406,7 +406,7 @@ Variable $tmp2
     0 my-ip$ [: rot >r 2over my-ip= r> or ;] $[]map ;
 : my-ip-merge ( addr u -- addr u flag )
     0 my-ip$ [: rot >r 2over 2over my-ip= IF
-	    2over 2swap my-ip>merge rdrop true  ELSE  2drop r>  THEN ;] $[]map ;
+	  2over 2swap my-ip>merge rdrop true  ELSE  2drop r>  THEN ;] $[]map ;
 
 \ Create udp socket
 
@@ -967,7 +967,6 @@ cmd-class class
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
     field: dest-pubkey  \ if not 0, connect only to this key
-    field: src-0key    \ key for stateless connections
     field: dest-0key    \ key for stateless connections
 end-class context-class
 

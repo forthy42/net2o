@@ -17,6 +17,8 @@
 
 64 Constant state#
 
+Variable my-0key
+
 user-o keybuf
 
 state# 2* Constant state2#
@@ -46,7 +48,6 @@ object class
     \ shared secred
     keysize uvar keypad
     1 64s uvar last-mykey
-    cell uvar my-0key
 end-class keybuf-c
 
 : init-keybuf ( -- )
@@ -172,31 +173,32 @@ User last-ivskey
     crypt-buf-init inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
-: set-0key ( keyaddr -- )
-    sec@ dup IF
+: set-0key ( keyaddr u -- )
+    dup IF
 	state# min
 	ivs-assembly state# bounds ?DO
-	    2dup I swap move
+	    I' I - umin 2dup I swap move
 	dup +LOOP  2drop
     ELSE
 	2drop ivs-assembly state# erase
     THEN
+    ." 0key: " ivs-assembly state# 2* 85type cr
     ivs-assembly >c:key ;
 
-: try-0decrypt ( addr -- flag )  set-0key
+: try-0decrypt ( addr -- flag )  sec@ set-0key
     inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
 : inbuf0-decrypt ( -- flag )  +calc
     inbuf addr 64@ inbuf flags w@ addr>assembly
-    my-0key try-0decrypt dup IF  EXIT  THEN
+    my-0key try-0decrypt dup IF  EXIT  THEN  drop
     contexts  BEGIN  @ dup  WHILE  >o
 	    next-context dest-0key try-0decrypt o>
-	    dup IF  nip  EXIT  THEN  REPEAT ;
+	    dup IF  nip  EXIT  THEN  drop  REPEAT ;
 
 : outbuf0-encrypt ( -- ) +calc
     outbuf addr 64@ outbuf flags w@ addr>assembly
-    o IF  dest-0key  ELSE  my-0key  THEN  set-0key
+    o IF  dest-0key  ELSE  my-0key  THEN  sec@ set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 
