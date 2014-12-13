@@ -2354,6 +2354,7 @@ $10 Constant tmp-crypt-val
 	code-rmap @ ?dup-IF  .free-data  THEN
 	resend0 $off  fstate-off
 	\ erase crypto keys
+	dest-0key @ del-0key
 	crypto-key sec-off
 	dest-0key sec-off
 	data-resend $off
@@ -2362,7 +2363,7 @@ $10 Constant tmp-crypt-val
 	mpubkey $off
 	log-context @ .dispose
 	ack-context @ >o timing-stat $off track-timing $off dispose o>
-	unlink-ctx  dest-0key @ del-0key
+	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
