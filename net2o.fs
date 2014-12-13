@@ -43,6 +43,7 @@ require hash-table.fs
 \ user values
 
 UValue inbuf    ( -- addr )
+UValue tmpbuf   ( -- addr )
 UValue outbuf   ( -- addr )
 UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
@@ -522,7 +523,9 @@ ustack nest-stack
 
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
     -other  ind-addr off  reqmask off
-    alloc-buf to inbuf  alloc-buf to outbuf
+    alloc-buf to inbuf
+    alloc-buf to tmpbuf
+    alloc-buf to outbuf
     maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in %size alloz to sockaddr
@@ -540,6 +543,7 @@ ustack nest-stack
     init0buf maxdata 2/ mykey-salt# + $10 +  freez
     cmd0buf maxdata   freez
     inbuf  free-buf
+    tmpbuf free-buf
     outbuf free-buf ;
 
 alloc-io

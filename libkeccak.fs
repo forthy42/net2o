@@ -121,8 +121,8 @@ keccak-init
     @keccak KeccakF
     >r keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + 128@ r> 128!
-; to c:encrypt+auth ( addr u -- )
-:noname ( addr u tag -- )
+; to c:encrypt+auth ( addr u tag -- )
+:noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check
 \    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
 \    /string dup 0= UNTIL  drop
@@ -130,7 +130,7 @@ keccak-init
     @keccak KeccakF
     128@ keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + 128@ 128=
-; to c:decrypt+auth ( addr u -- flag )
+; to c:decrypt+auth ( addr u tag -- flag )
 :noname ( addr u -- )
 \G Hash message in buffer addr u
     BEGIN  2dup keccak#max umin tuck

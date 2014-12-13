@@ -67,20 +67,18 @@ init-keybuf
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
 
+: move-rep ( srcaddr u1 destaddr u2 -- )
+    bounds ?DO
+	I' I - umin 2dup I swap move
+    dup +LOOP  2drop ;
+
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
-    key-assembly state# + state# bounds DO
-	2dup I swap move
-    dup +LOOP  2drop
+    key-assembly state# + state# move-rep
     key-assembly key( ." >crypt-key " dup state2# xtype cr )
     >c:key ;
-: >crypt-source' ( addr -- )
-    crypt( ." ivs iv: "  dup state# .nnb cr )
-    key-assembly state# move ;
 : >crypt-source ( addr u -- )
-    key-assembly state# bounds DO
-	2dup I swap move
-    dup +LOOP  2drop ;
+    key-assembly state# move-rep ;
 
 \ regenerate ivs is a buffer swapping function:
 \ regenerate half of the ivs per time, when you reach the middle of the other half
@@ -175,24 +173,24 @@ User last-ivskey
 
 : set-0key ( keyaddr u -- )
     dup IF
-	state# min
-	ivs-assembly state# bounds ?DO
-	    I' I - umin 2dup I swap move
-	dup +LOOP  2drop
+	ivs-assembly state# move-rep
     ELSE
 	2drop ivs-assembly state# erase
     THEN
-    ." 0key: " ivs-assembly state# 2* 85type cr
+\    ." 0key: " ivs-assembly state# 2* 85type cr
     ivs-assembly >c:key ;
 
 : try-0decrypt ( addr -- flag )  sec@ set-0key
-    inbuf packet-data +cryptsu
-    inbuf 1+ c@ c:decrypt+auth +enc ;
+    inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
+    2r> +cryptsu
+    inbuf 1+ c@ c:decrypt+auth +enc
+    dup IF  tmpbuf inbuf packet-data move  THEN ;
 
-: inbuf0-decrypt ( -- flag )  +calc
+: inbuf0-decrypt ( -- flag ) +calc
     inbuf addr 64@ inbuf flags w@ addr>assembly
     my-0key try-0decrypt dup IF  EXIT  THEN  drop
     contexts  BEGIN  @ dup  WHILE  >o
+	    ." inbuf0 context " o hex.
 	    next-context dest-0key try-0decrypt o>
 	    dup IF  nip  EXIT  THEN  drop  REPEAT ;
 
@@ -296,7 +294,7 @@ $60 Constant rndkey#
     clear-keys ;
 
 : ivs-strings ( addr u -- )
-    state# <> !!ivs!! >crypt-source' >crypt-key-ivs ;
+    dup state# <> !!ivs!! >crypt-source >crypt-key-ivs ;
 
 \ public key encryption
 

@@ -40,14 +40,15 @@ $4000 Constant /kregion
 
 32 buffer: zero32
 
+: sec-off ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
 : sec! ( addr1 u1 addr2 -- )
+    over 0= IF  sec-off 2drop  EXIT  THEN
     >r r@ kalloc64? dup r> ! swap $40 umin move ;
 : sec@ ( addr -- addr1 u1 )
     @ dup IF  $40 over $20 + $20 zero32 over str= IF  2/  THEN
     ELSE 0 THEN ;
 : sec+! ( addr1 u1 addr2 -- )
     dup @ 0= IF  sec!  ELSE  sec@ dup >r + swap $40 r> - umin move  THEN ;
-: sec-off ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
 
 : sec+[]! ( addr1 u1 addr2 -- ) >r
     0 { w^ sec } sec sec! sec cell r> $+! ;
