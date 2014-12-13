@@ -1228,6 +1228,30 @@ Variable mapstart $1 mapstart !
 ' free-rcode rdata-class to free-data
 ' free-rcode rcode-class to free-data
 
+\ symmetric key management and searching in open connections
+
+: search-context ( .. xt -- .. ) { xt }
+    contexts  BEGIN  @ dup  WHILE  >o  xt execute
+	next-context o> swap  0= UNTIL  THEN  drop ;
+
+Variable 0keys
+
+sema 0key-sema
+
+: ins-0key [: { w^ addr -- }
+	addr cell 0keys $+! ;] 0key-sema c-section ;
+: del-0key ( addr -- )
+    [: 0keys $@ bounds ?DO
+	    dup I @ = IF
+		0keys I over @ - cell $del  LEAVE
+	    THEN
+	cell +LOOP drop ;] 0key-sema c-section ;
+: search-0key ( .. xt -- .. )
+    [: { xt } 0keys $@ bounds ?DO
+	    I xt execute 0= ?LEAVE
+	cell +LOOP
+    ;] 0key-sema c-section ;
+
 \ data sending around
 
 : >blockalign ( n -- block )
