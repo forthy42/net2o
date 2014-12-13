@@ -189,8 +189,7 @@ User last-ivskey
 : inbuf0-decrypt ( -- flag ) +calc
     inbuf addr 64@ inbuf flags w@ addr>assembly
     my-0key try-0decrypt dup IF  EXIT  THEN  drop
-    0 [: ." inbuf0 context " o hex.
-	dest-0key try-0decrypt or dup 0= ;] search-context ;
+    false [: try-0decrypt or dup 0= ;] search-0key ;
 
 : outbuf0-encrypt ( -- ) +calc
     outbuf addr 64@ outbuf flags w@ addr>assembly

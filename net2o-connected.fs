@@ -331,7 +331,7 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-: gen-request ( -- ) o IF  setup!  THEN
+: gen-request ( -- )  setup!
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
     ['] end-cmd IS expect-reply?

@@ -1177,6 +1177,26 @@ UValue connection
 	endof
 	!!no-addr!!  endcase ;
 
+\ insert keys
+
+Variable 0keys
+
+sema 0key-sema
+
+: ins-0key [: { w^ addr -- }
+	addr cell 0keys $+! ;] 0key-sema c-section ;
+: del-0key ( addr -- )
+    [: 0keys $@ bounds ?DO
+	    dup I @ = IF
+		0keys I over @ - cell $del  LEAVE
+	    THEN
+	cell +LOOP drop ;] 0key-sema c-section ;
+: search-0key ( .. xt -- .. )
+    [: { xt } 0keys $@ bounds ?DO
+	    I xt execute 0= ?LEAVE
+	cell +LOOP
+    ;] 0key-sema c-section ;
+
 \ create new maps
 
 Variable mapstart $1 mapstart !
@@ -1185,8 +1205,8 @@ Variable mapstart $1 mapstart !
     parent @ 0= IF  is-server  ELSE  parent @ .recurse  THEN ;
 : server? ( -- flag )  >is-server c@ negate ;
 : server! ( -- )  1 >is-server c! ;
-: setup! ( -- )   setup-table @ token-table ! ;
-: context! ( -- )   context-table @ token-table ! ;
+: setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
+: context! ( -- )   context-table @ token-table !  dest-0key @ del-0key ;
 : pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
 : n2o:new-map ( u -- addr )
@@ -1233,24 +1253,6 @@ Variable mapstart $1 mapstart !
 : search-context ( .. xt -- .. ) { xt }
     contexts  BEGIN  @ dup  WHILE  >o  xt execute
 	next-context o> swap  0= UNTIL  THEN  drop ;
-
-Variable 0keys
-
-sema 0key-sema
-
-: ins-0key [: { w^ addr -- }
-	addr cell 0keys $+! ;] 0key-sema c-section ;
-: del-0key ( addr -- )
-    [: 0keys $@ bounds ?DO
-	    dup I @ = IF
-		0keys I over @ - cell $del  LEAVE
-	    THEN
-	cell +LOOP drop ;] 0key-sema c-section ;
-: search-0key ( .. xt -- .. )
-    [: { xt } 0keys $@ bounds ?DO
-	    I xt execute 0= ?LEAVE
-	cell +LOOP
-    ;] 0key-sema c-section ;
 
 \ data sending around
 
@@ -2360,7 +2362,7 @@ $10 Constant tmp-crypt-val
 	mpubkey $off
 	log-context @ .dispose
 	ack-context @ >o timing-stat $off track-timing $off dispose o>
-	unlink-ctx
+	unlink-ctx  dest-0key @ del-0key
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
