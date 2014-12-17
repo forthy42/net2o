@@ -27,8 +27,6 @@ $20 net2o: disconnect ( -- ) \ close connection
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
-+net2o: set-rtdelay ( ticks -- ) \ set round trip delay only
-    ~~ ack@ ~~ .rtdelay! ~~ ;
 
 +net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;
@@ -116,6 +114,8 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     64>n parent @ .data-rmap @ .dest-head umax! ;
 +net2o: timeout ( uticks -- ) \ timeout request
     parent @ >o net2o:timeout  data-map @ .dest-tail @ o> ulit, set-head ;
++net2o: set-rtdelay ( ticks -- ) \ set round trip delay only
+    rtdelay! ;
 
 \ profiling, nat traversal
 
@@ -427,7 +427,8 @@ also net2o-base
 	ack +expected endwith IF  slurp  THEN  end-code  EXIT  THEN
     net2o-code  expect-reply
     ack net2o:genack
-      resend-all ticks lit, timeout rewind endwith slurp update-rtdelay
+       resend-all ticks lit, timeout rewind update-rtdelay
+    endwith slurp
     end-code ;
 previous
 
