@@ -889,6 +889,8 @@ cmd-class class
     64field: bandwidth-tick \ ns
     64field: next-tick \ ns
     64field: extra-ns
+    64field: slackgrow
+    64field: slackgrow'
 end-class ack-class
 
 cmd-class class
@@ -960,8 +962,6 @@ cmd-class class
     64field: resend-all-to \ ns
     64field: lastslack
     64field: lastdeltat
-    64field: slackgrow
-    64field: slackgrow'
     \ flow control, receiver part
     64field: burst-ticks
     64field: firstb-ticks
@@ -1412,7 +1412,7 @@ timestats buffer: stat-tuple
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- lastslack 64@ 64- slackgrow 64! ;
+    64- lastslack 64@ 64- ack@ .slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
     dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
@@ -1485,10 +1485,10 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     slack-max# 64-2/ 64>n slack-default# tuck min swap 64*/ ;
 
 : slackext ( rfactor -- slack )
-    slackgrow 64@
+    ack@ .slackgrow 64@
     window-size @ tick-init 1+ bursts# - 2* 64*/
     64>f f* f>64
-    slackgrow' 64@ 64+ 64dup ext-damp# 64*/ slackgrow' 64!
+    ack@ .slackgrow' 64@ 64+ 64dup ext-damp# 64*/ ack@ .slackgrow' 64!
     64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' )
@@ -1507,7 +1507,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : rate-stat2 ( rate -- rate )
     ack-stats( 64dup ack@ .extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
-           slackgrow 64@ 64>f stat-tuple ts-grow sf! 
+           ack@ .slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
