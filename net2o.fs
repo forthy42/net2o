@@ -1400,15 +1400,15 @@ timestats buffer: stat-tuple
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
-    ack@ .>rtdelay  64- 64dup ack@ .lastslack 64!
-    ack@ .lastdeltat 64@ delta-damp# 64rshift
-    64dup ack@ .min-slack 64+! 64negate ack@ .max-slack 64+!
-    64dup ack@ .min-slack 64min!
-    ack@ .max-slack 64max! ;
+    >rtdelay  64- 64dup lastslack 64!
+    lastdeltat 64@ delta-damp# 64rshift
+    64dup min-slack 64+! 64negate max-slack 64+!
+    64dup min-slack 64min!
+    max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
-    64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- ack@ .lastslack 64@ 64- ack@ .slackgrow 64! ;
+    64dup 64-0<= IF  64drop 64drop  EXIT  THEN
+    64- lastslack 64@ 64- slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
     dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
@@ -1448,11 +1448,11 @@ timestats buffer: stat-tuple
 	    64dup 64-0<= >r 64over 64-0<= r> or
 	    IF  64drop 64drop  ELSE  64- ack@ .lastdeltat 64!  THEN  r>
 	ELSE  +  THEN
-	ts-ticks 64@ timestat
+	ts-ticks 64@ ack@ .timestat
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )
-    >timestamp over  IF  + ts-ticks 64@ b2b-timestat
+    >timestamp over  IF  + ts-ticks 64@ ack@ .b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
 \ set rate calculation
