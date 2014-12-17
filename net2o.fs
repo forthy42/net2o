@@ -1355,8 +1355,6 @@ reply buffer: dummy-reply
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
-: .ack-stats( ]] ack@ .timing-stat @ IF [[ ['] )stats assert-canary ; immediate
-: ack-stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
@@ -1475,7 +1473,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 	msg( ." slack ignored: " 64dup 64. cr )
 	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    64>n ack-stats( dup s>f stat-tuple ts-slack sf! )
+    64>n stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f** ;
 
@@ -1499,12 +1497,12 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64dup extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
-    ack-stats( recv-tick 64@ time-offset 64@ 64-
+    stats( recv-tick 64@ time-offset 64@ 64-
            64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
-    ack-stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
+    stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
            slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
