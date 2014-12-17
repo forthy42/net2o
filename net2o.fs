@@ -1395,7 +1395,7 @@ timestats buffer: stat-tuple
     ticks ticker 64! ;
 
 : ticks-init ( ticks -- )
-    64dup ack@ .bandwidth-tick 64!  ack@ .next-tick 64! ;
+    64dup bandwidth-tick 64!  next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
     recv-tick 64@ 64dup lastack 64!
@@ -1429,14 +1429,14 @@ timestats buffer: stat-tuple
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
 : >flyburst ( -- )
-    ack@ .flyburst @ ack@ .flybursts max!@ \ reset bursts in flight
-    0= IF  ack@ .recv-tick 64@ ticks-init
-	bursts( .o ." restart bursts " ack@ .flybursts ? cr )
-	ack@ .net2o:set-flyburst ack@ .net2o:max-flyburst
+    flyburst @ flybursts max!@ \ reset bursts in flight
+    0= IF  recv-tick 64@ ticks-init
+	bursts( .o ." restart bursts " flybursts ? cr )
+	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
-    >flyburst
+    ack@ .>flyburst
     64>r time-offset 64@ 64+ 64r>
     data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
@@ -1950,7 +1950,7 @@ Create chunk-adder chunks-struct allot
 	0 chunk-adder chunk-count !
 	chunk-adder chunks-struct chunks $+! ;]
     resize-lock c-section
-    ticker 64@ ticks-init ;
+    ticker 64@ ack@ .ticks-init ;
 
 : o-chunks ( -- )
     [: chunks $@len 0 ?DO
@@ -2231,7 +2231,7 @@ Defer handle-beacon
 0 Value dump-fd
 
 : net2o:timeout ( ticks -- ) \ print why there is nothing to send
-    >flyburst net2o:send-chunks
+    ack@ .>flyburst net2o:send-chunks
     timeout( ." timeout? " .ticks space
     resend? . data-tail? . data-head? . fstates .
     chunks+ ? bandwidth? . next-chunk-tick .ticks cr )else( 64drop ) ;
