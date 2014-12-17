@@ -884,6 +884,8 @@ cmd-class class
     64field: last-time
     64field: lastack \ ns
     64field: recv-tick
+    64field: ns/burst
+    64field: last-ns/burst
 end-class ack-class
 
 cmd-class class
@@ -951,8 +953,6 @@ cmd-class class
 
     64field: min-slack
     64field: max-slack
-    64field: ns/burst
-    64field: last-ns/burst
     64field: extra-ns
     64field: bandwidth-tick \ ns
     64field: next-tick \ ns
@@ -1100,7 +1100,6 @@ Variable init-context#
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
     max-int64 64-2/ 64negate max-slack 64!
-    bandwidth-init n>64 ns/burst 64!
     never               next-tick 64!
     64#0                extra-ns 64! ;
 
@@ -1115,6 +1114,7 @@ UValue connection
     init-delay# rtdelay 64!
     flybursts# dup flybursts ! flyburst !
     ticks lastack 64! \ asking for context creation is as good as an ack
+    bandwidth-init n>64 ns/burst 64!
     o o> ;
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
@@ -1420,10 +1420,10 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    ack@ .rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
+    ack@ .rtdelay 64@ 64>f rt-bias# s>f f+ ack@ .ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
-    ack@ .rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
+    ack@ .rtdelay 64@ 64. ack@ .ns/burst 64@ 64. ." rtdelay" cr )
     dup flybursts-max# min ack@ .flyburst ! ;
 : net2o:max-flyburst ( bursts -- )  flybursts-max# min ack@ .flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
@@ -1493,7 +1493,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go faster!
-    64dup last-ns/burst 64!@ 64max ;
+    64dup ack@ .last-ns/burst 64!@ 64max ;
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
@@ -1513,7 +1513,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
-    bandwidth-max n>64 64max rate-limit rate-stat2 ns/burst 64!@
+    bandwidth-max n>64 64max rate-limit rate-stat2 ack@ .ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
@@ -1847,7 +1847,7 @@ User outflag  outflag off
     outbuf packet-body min-size r> lshift move ;
 
 : bandwidth+ ( -- )  o?
-    ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
+    ack@ .ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
@@ -1976,7 +1976,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 	    ack-state c!  ack@ .flybursts @ ack-resend# c!  THEN
 	-1 ack@ .flybursts +! bursts( ." bursts: " ack@ .flybursts ? ack@ .flyburst ? cr )
 	ack@ .flybursts @ 0<= IF
-	    bursts( .o ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
+	    bursts( .o ." no bursts in flight " ack@ .ns/burst ? data-tail@ swap hex. hex. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
@@ -1994,7 +1994,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     rdrop  1 chunks+ +! ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
-    .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
+    .o ." rate: " ack@ .ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
     .o ." slack: " min-slack ? cr
     .o ." rtdelay: " ack@ .rtdelay ? cr ;
 

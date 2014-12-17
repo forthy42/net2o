@@ -93,7 +93,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     64>n  parent @ .net2o:ack-resend ;
 +net2o: set-rate ( urate udelta-t -- ) \ set rate 
     parent @ >o cookie? IF  net2o:set-rate
-    ELSE  64drop 64drop ns/burst dup @ 2* 2* swap !  THEN o> ;
+    ELSE  64drop 64drop ack@ .ns/burst dup >r 64@ 64-2* 64-2* r> 64!  THEN o> ;
 +net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
     2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
 +net2o: track-timing ( -- ) \ track timing
