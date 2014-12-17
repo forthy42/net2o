@@ -1432,16 +1432,16 @@ timestats buffer: stat-tuple
     THEN ;
 
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
-    ack@ .>flyburst
-    64>r ack@ .time-offset 64@ 64+ 64r>
-    data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
+    >flyburst
+    64>r time-offset 64@ 64+ 64r>
+    parent @ .data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
-	dest-tail @ o> over - 0 max addr>bits ack@ .window-size !
+	dest-tail @ o> over - 0 max addr>bits window-size !
 	addr>ts r> .dest-timestamps @ swap
     ELSE  o> rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
-    >timestamp over  IF
+    ack@ .>timestamp over  IF
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  ts-ticks 64@
 	    r@ tick-init 1+ timestamp * - ts-ticks 64@
@@ -1452,7 +1452,7 @@ timestats buffer: stat-tuple
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )
-    >timestamp over  IF  + ts-ticks 64@ ack@ .b2b-timestat
+    ack@ .>timestamp over  IF  + ts-ticks 64@ ack@ .b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
 \ set rate calculation
