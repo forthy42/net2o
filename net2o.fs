@@ -1844,8 +1844,8 @@ User outflag  outflag off
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
     outbuf packet-body min-size r> lshift move ;
 
-: bandwidth+ ( -- )  o?
-    ack@ .ns/burst 64@ 1 tick-init 1+ 64*/ ack@ .bandwidth-tick 64+! ;
+: bandwidth+ ( -- )
+    ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
     ticker 64@ ack@ .bandwidth-tick 64@ 64max ack@ .next-tick 64! drop false ;
@@ -1854,7 +1854,7 @@ User outflag  outflag off
     >send  send-code-packet  net2o:update-key ;
 
 : send-dX ( addr n -- ) +sendX2
-    >send  bandwidth+ send-data-packet ;
+    >send  o IF  ack@ .bandwidth+  THEN send-data-packet ;
 
 Defer punch-reply
 
@@ -1921,8 +1921,8 @@ User <size-lb> 1 floats cell- uallot drop
     ?toggle-ack send-dX ;
 
 : bandwidth? ( -- flag )
-    ticker 64@ 64dup last-ticks 64! ack@ .next-tick 64@ 64- 64-0>=
-    ack@ .flybursts @ 0> and  ;
+    ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
+    flybursts @ 0> and  ;
 
 \ asynchronous sending
 
@@ -1981,7 +1981,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : send-a-chunk ( chunk -- flag )  >r
     data-b2b @ 0<= IF
-	bandwidth? dup  IF
+	ack@ .bandwidth? dup  IF
 	    b2b-toggle# ack-state xorc!
 	    bursts# 1- data-b2b !
 	THEN
@@ -2232,7 +2232,7 @@ Defer handle-beacon
     ack@ .>flyburst net2o:send-chunks
     timeout( ." timeout? " .ticks space
     resend? . data-tail? . data-head? . fstates .
-    chunks+ ? bandwidth? . next-chunk-tick .ticks cr )else( 64drop ) ;
+    chunks+ ? ack@ .bandwidth? . next-chunk-tick .ticks cr )else( 64drop ) ;
 
 \ timeout handling
 
