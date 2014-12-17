@@ -888,6 +888,7 @@ cmd-class class
     64field: last-ns/burst
     64field: bandwidth-tick \ ns
     64field: next-tick \ ns
+    64field: extra-ns
 end-class ack-class
 
 cmd-class class
@@ -955,7 +956,6 @@ cmd-class class
 
     64field: min-slack
     64field: max-slack
-    64field: extra-ns
     64field: next-timeout \ ns
     64field: resend-all-to \ ns
     64field: lastslack
@@ -1099,8 +1099,7 @@ Variable init-context#
 
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
-    max-int64 64-2/ 64negate max-slack 64!
-    64#0                extra-ns 64! ;
+    max-int64 64-2/ 64negate max-slack 64! ;
 
 resend-size# buffer: resend-init
 
@@ -1115,6 +1114,7 @@ UValue connection
     ticks lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init n>64 ns/burst 64!
     never               next-tick 64!
+    64#0                extra-ns 64!
     o o> ;
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
@@ -1498,7 +1498,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
     64over 64-2* 64-2* 64min \ limit to 4* rate
-    64dup extra-ns 64! 64+ ;
+    64dup ack@ .extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
     ack-stats( ack@ .recv-tick 64@ time-offset 64@ 64-
@@ -1506,7 +1506,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
-    ack-stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
+    ack-stats( 64dup ack@ .extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
            slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
