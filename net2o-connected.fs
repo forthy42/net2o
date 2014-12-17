@@ -86,7 +86,7 @@ reply-table $@ inherit-table ack-table
 
 :noname ack ; ack-class to start-req
 $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
-    parent @ .net2o:ack-addrtime ;
+    net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  parent @ .net2o:ack-resend ;
 +net2o: set-rate ( urate udelta-t -- ) \ set rate 

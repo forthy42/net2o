@@ -1441,14 +1441,14 @@ timestats buffer: stat-tuple
     ELSE  o> rdrop 0 0  THEN ;
 
 : net2o:ack-addrtime ( ticks addr -- )
-    ack@ .>timestamp over  IF
+    >timestamp over  IF
 	dup tick-init 1+ timestamp * u>
 	IF  + dup >r  ts-ticks 64@
 	    r@ tick-init 1+ timestamp * - ts-ticks 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
-	    IF  64drop 64drop  ELSE  64- ack@ .lastdeltat 64!  THEN  r>
+	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN  r>
 	ELSE  +  THEN
-	ts-ticks 64@ ack@ .timestat
+	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )
