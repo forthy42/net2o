@@ -891,6 +891,9 @@ cmd-class class
     64field: extra-ns
     64field: slackgrow
     64field: slackgrow'
+    64field: lastslack
+    64field: min-slack
+    64field: max-slack
 end-class ack-class
 
 cmd-class class
@@ -956,11 +959,8 @@ cmd-class class
     \ flow control, sender part
     field: window-size \ packets in flight
 
-    64field: min-slack
-    64field: max-slack
     64field: next-timeout \ ns
     64field: resend-all-to \ ns
-    64field: lastslack
     64field: lastdeltat
     \ flow control, receiver part
     64field: burst-ticks
@@ -1097,10 +1097,6 @@ $20 cells Value resend-size#
 
 Variable init-context#
 
-: init-flow-control ( -- )
-    max-int64 64-2/ min-slack 64!
-    max-int64 64-2/ 64negate max-slack 64! ;
-
 resend-size# buffer: resend-init
 
 UValue connection
@@ -1115,6 +1111,8 @@ UValue connection
     bandwidth-init n>64 ns/burst 64!
     never               next-tick 64!
     64#0                extra-ns 64!
+    max-int64 64-2/ min-slack 64!
+    max-int64 64-2/ 64negate max-slack 64!
     o o> ;
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
@@ -1134,7 +1132,6 @@ UValue connection
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
 \    resend-init resend-size# data-resend $!
-    init-flow-control
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     -1 blocksize !
     1 blockalign !
@@ -1405,15 +1402,15 @@ timestats buffer: stat-tuple
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
-    ack@ .>rtdelay  64- 64dup lastslack 64!
+    ack@ .>rtdelay  64- 64dup ack@ .lastslack 64!
     lastdeltat 64@ delta-damp# 64rshift
-    64dup min-slack 64+! 64negate max-slack 64+!
-    64dup min-slack 64min!
-    max-slack 64max! ;
+    64dup ack@ .min-slack 64+! 64negate ack@ .max-slack 64+!
+    64dup ack@ .min-slack 64min!
+    ack@ .max-slack 64max! ;
 
 : b2b-timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    64- lastslack 64@ 64- ack@ .slackgrow 64! ;
+    64- ack@ .lastslack 64@ 64- ack@ .slackgrow 64! ;
 
 : >offset ( addr -- addr' flag )
     dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
@@ -1469,14 +1466,14 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
 
-: slack-max# ( -- n ) max-slack 64@ min-slack 64@ 64- ;
+: slack-max# ( -- n ) ack@ .max-slack 64@ ack@ .min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : >slack-exp ( -- rfactor )
-    lastslack 64@ min-slack 64@ 64-
+    ack@ .lastslack 64@ ack@ .min-slack 64@ 64-
     64dup 64abs slack-ignore# 64u> IF
 	msg( ." slack ignored: " 64dup 64. cr )
-	64drop 64#0 lastslack 64@ min-slack 64!
+	64drop 64#0 ack@ .lastslack 64@ ack@ .min-slack 64!
     THEN
     64>n  .ack-stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
@@ -1998,7 +1995,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : .nosend ( -- ) ." done, "  4 set-precision
     .o ." rate: " ack@ .ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .o ." slack: " min-slack ? cr
+    .o ." slack: " ack@ .min-slack ? cr
     .o ." rtdelay: " ack@ .rtdelay ? cr ;
 
 : send-chunks-async ( -- flag )
