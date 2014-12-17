@@ -28,7 +28,7 @@ $20 net2o: disconnect ( -- ) \ close connection
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 +net2o: set-rtdelay ( ticks -- ) \ set round trip delay only
-    rtdelay! ;
+    ~~ ack@ ~~ .rtdelay! ~~ ;
 
 +net2o: set-blocksize ( n -- ) \ set blocksize
     64>n blocksize! ;

@@ -34,7 +34,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     own-crypt? IF
 	64dup cookie>context?
 	IF  >o rdrop  o to connection
-	    ticker 64@ ack@ .recv-tick 64! rtdelay! \ time stamp of arrival
+	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
@@ -66,7 +66,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     64drop 2drop 64drop ;
 
 +net2o: set-tick ( uticks -- ) \ adjust time
-    adjust-ticks ;
+    o IF  ack@ .adjust-ticks  ELSE  64drop  THEN ;
 +net2o: get-tick ( -- ) \ request time adjust
     ticks lit, set-tick ;
 

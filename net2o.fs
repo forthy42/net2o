@@ -1494,7 +1494,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go faster!
-    64dup ack@ .last-ns/burst 64!@ 64max ;
+    64dup last-ns/burst 64!@ 64max ;
 
 : >extra-ns ( rate -- rate' )
     >slack-exp fdup 64>f f* f>64 slackext
@@ -1514,9 +1514,9 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
-    bandwidth-max n>64 64max rate-limit
+    bandwidth-max n>64 64max
     ack@ >o
-    rate-stat2
+    rate-limit  rate-stat2
     ns/burst 64!@ bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
@@ -2561,9 +2561,9 @@ Variable cookies
 	nip return-addr be@ n2o:new-context swap
     THEN ;
 
-: rtdelay! ( time -- ) ack@ .recv-tick 64@ 64swap 64- ack@ .rtdelay 64! ;
+: rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
-    ack@ .recv-tick 64@ 64- ack@ .rtdelay 64@ 64-2/
+    recv-tick 64@ 64- rtdelay 64@ 64-2/
     64over 64abs 64over 64> IF  64+ tick-adjust 64!
     ELSE  64drop 64drop  THEN ;
 
