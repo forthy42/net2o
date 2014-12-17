@@ -895,6 +895,8 @@ cmd-class class
     64field: lastslack
     64field: min-slack
     64field: max-slack
+    64field: time-offset  \ make timestamps smaller
+    64field: lastdeltat
 end-class ack-class
 
 cmd-class class
@@ -961,7 +963,6 @@ cmd-class class
 
     64field: next-timeout \ ns
     64field: resend-all-to \ ns
-    64field: lastdeltat
     \ flow control, receiver part
     64field: burst-ticks
     64field: firstb-ticks
@@ -977,7 +978,6 @@ cmd-class class
     \ cookies
     field: last-ackaddr
     \ statistics
-    64field: time-offset  \ make timestamps smaller
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
     field: dest-pubkey  \ if not 0, connect only to this key
@@ -1403,7 +1403,7 @@ timestats buffer: stat-tuple
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
     ack@ .>rtdelay  64- 64dup ack@ .lastslack 64!
-    lastdeltat 64@ delta-damp# 64rshift
+    ack@ .lastdeltat 64@ delta-damp# 64rshift
     64dup ack@ .min-slack 64+! 64negate ack@ .max-slack 64+!
     64dup ack@ .min-slack 64min!
     ack@ .max-slack 64max! ;
@@ -1435,7 +1435,7 @@ timestats buffer: stat-tuple
 
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
     ack@ .>flyburst
-    64>r time-offset 64@ 64+ 64r>
+    64>r ack@ .time-offset 64@ 64+ 64r>
     data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
 	dest-tail @ o> over - 0 max addr>bits ack@ .window-size !
@@ -1448,7 +1448,7 @@ timestats buffer: stat-tuple
 	IF  + dup >r  ts-ticks 64@
 	    r@ tick-init 1+ timestamp * - ts-ticks 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
-	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN  r>
+	    IF  64drop 64drop  ELSE  64- ack@ .lastdeltat 64!  THEN  r>
 	ELSE  +  THEN
 	ts-ticks 64@ timestat
     ELSE  2drop 64drop  THEN ;
@@ -1483,24 +1483,24 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     slack-max# 64-2/ 64>n slack-default# tuck min swap 64*/ ;
 
 : slackext ( rfactor -- slack )
-    ack@ .slackgrow 64@
-    ack@ .window-size @ tick-init 1+ bursts# - 2* 64*/
+    slackgrow 64@
+    window-size @ tick-init 1+ bursts# - 2* 64*/
     64>f f* f>64
-    ack@ .slackgrow' 64@ 64+ 64dup ext-damp# 64*/ ack@ .slackgrow' 64!
-    64#0 64max ack@ .aggressivity-rate ;
+    slackgrow' 64@ 64+ 64dup ext-damp# 64*/ slackgrow' 64!
+    64#0 64max aggressivity-rate ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go faster!
     64dup last-ns/burst 64!@ 64max ;
 
 : >extra-ns ( rate -- rate' )
-    ack@ .>slack-exp fdup 64>f f* f>64 slackext
+    >slack-exp fdup 64>f f* f>64 slackext
     64over 64-2* 64-2* 64min \ limit to 4* rate
-    64dup ack@ .extra-ns 64! 64+ ;
+    64dup extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
-    .ack-stats( ack@ .recv-tick 64@ time-offset 64@ 64-
-           64dup ack@ .last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+    ack-stats( recv-tick 64@ time-offset 64@ 64-
+           64dup last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
@@ -1508,16 +1508,16 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
            slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
-: net2o:set-rate ( rate deltat -- )  rate-stat1
+: net2o:set-rate ( rate deltat -- )
+    rate-stat1
     64>r 64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
     bandwidth-max n>64 64max
-    ack@ >o
     rate-limit  rate-stat2
     ns/burst 64!@ bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
-    THEN o> ;
+    THEN ;
 
 \ acknowledge
 

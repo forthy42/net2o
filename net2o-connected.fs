@@ -90,7 +90,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 +net2o: ack-resend ( flag -- ) \ set resend toggle flag
     64>n  parent @ .net2o:ack-resend ;
 +net2o: set-rate ( urate udelta-t -- ) \ set rate 
-    parent @ >o cookie? IF  net2o:set-rate
+    parent @ >o cookie? IF  ack@ .net2o:set-rate
     ELSE  64drop 64drop ack@ .ns/burst dup >r 64@ 64-2* 64-2* r> 64!  THEN o> ;
 +net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
     2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
@@ -194,13 +194,13 @@ also net2o-base
     delta-ticks 64off  max-dticks 64off  acks off ;
 
 : net2o:acktime ( -- )
-    recv-addr 64@ ack@ .recv-tick 64@ time-offset 64@ 64-
+    recv-addr 64@ ack@ .recv-tick 64@ ack@ .time-offset 64@ 64-
     timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64-0=
     IF  64drop 64drop
-    ELSE  time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
+    ELSE  ack@ .time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
 
 \ ack bits, new code
 
