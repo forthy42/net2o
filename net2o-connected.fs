@@ -81,7 +81,10 @@ gen-table $freeze
 
 \ flow control functions
 
-$31 net2o: ack ( -- o:acko )  ack-context @ n:>o ;
+$31 net2o: ack ( -- o:acko )
+    ack-context @ dup 0= IF
+	drop n2o:new-ack dup ack-context !
+    THEN  n:>o ;
 ack-table >table
 
 reply-table $@ inherit-table ack-table

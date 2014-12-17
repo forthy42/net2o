@@ -1,6 +1,6 @@
-\ log dump class
+\ terminal                                           06aug2014py
 
-\ Copyright (C) 2011-2014   Bernd Paysan
+\ Copyright (C) 2014   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -15,36 +15,25 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-reply-table $@ inherit-table log-table
-
 get-current also net2o-base definitions
 
-net2o' token net2o: log-token ( $:token n -- )
-    64>n 0 .r ." :" $> F type space ;
+term-table >table
 
-$20 net2o: emit ( utf8 -- ) \ emit character on server log
-    64>n xemit ;
-+net2o: type ( $:string -- ) \ type string on server log
-    $> F type ;
-+net2o: cr ( -- ) \ newline on server log
-    F cr ;
-+net2o: . ( n -- ) \ print number on server log
-    64. ;
-+net2o: f. ( r -- ) \ print fp number on server log
-    F f. ;
-+net2o: .time ( -- ) \ print timer to server log
-    F .time .packets profile( .times ) ;
-+net2o: !time ( -- ) \ start timer
-    F !time init-timer ;
+log-table $@ inherit-table term-table
+
++net2o: at-xy ( x y -- ) F at-xy ;
++net2o: set-form ( w h -- ) term-h ! term-w ! ;
++net2o: form ( -- ) F form swap lit, lit, set-form ;
++net2o: set-keys ( $:string -- )  $> key-buf$ $+! ;
 
 gen-table $freeze
 ' context-table is gen-table
 
-$32 net2o: log ( -- o:log )
-    log-context @ dup 0= IF
-	drop  n2o:new-log dup log-context !
+$35 net2o: terminal ( -- o:terminal ) \ push a terminal object
+    term-context @ dup 0= IF
+	drop  n2o:new-term dup term-context !
     THEN  n:>o ;
-log-table >table
+term-table >table
 
 previous set-current
 

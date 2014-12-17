@@ -1,6 +1,6 @@
 \ messages                                           06aug2014py
 
-\ Copyright (C) 2013   Bernd Paysan
+\ Copyright (C) 2014   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -18,7 +18,10 @@
 get-current also net2o-base definitions
 
 $34 net2o: msg ( -- o:msg ) \ push a message object
-    msg-context @ n:>o buf-state 2@ msg-buf 2! ;
+    msg-context @ dup 0= IF
+	drop  n2o:new-msg dup msg-context !
+    THEN
+    n:>o buf-state 2@ msg-buf 2! ;
 
 msg-table >table
 

@@ -559,7 +559,7 @@ Variable net2o-tasks
     ELSE  ~~ 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
-event: ->kill ( -- )  -1 throw ;
+event: ->kill:n2o ( -- )  -1 throw ;
 : net2o-kills ( -- )
     net2o-tasks $@ bounds ?DO
 	I @ <event ->kill event>
@@ -831,6 +831,7 @@ Variable log-table
 Variable setup-table
 Variable ack-table
 Variable msg-table
+Variable term-table
 
 cmd-class class
     64field: dest-vaddr
@@ -884,14 +885,24 @@ cmd-class class
 end-class msg-class
 
 cmd-class class
+    field: term-w
+    field: term-h
+    field: key-buf$
+end-class term-class
+
+cmd-class class
+    \ maps for data and code transfer
     field: code-map
     field: code-rmap
     field: data-map
     field: data-rmap
+    \ contexts for subclasses
+    field: next-context \ link field to connect all contexts
     field: log-context
     field: ack-context
     field: msg-context
-    field: next-context \ link field if needed
+    field: term-context
+    \ rest of state
     field: codebuf#
     field: context#
     field: wait-task
@@ -1109,6 +1120,8 @@ UValue connection
     o ack-class new >o  parent !  ack-table @ token-table ! o o> ;
 : n2o:new-msg ( -- o )
     o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
+: n2o:new-term ( -- o )
+    o term-class new >o  parent !  term-table @ token-table ! o o> ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -1124,9 +1137,6 @@ UValue connection
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
     filestate-lock 0 pthread_mutex_init drop
-    n2o:new-log log-context !
-    n2o:new-ack ack-context !
-    n2o:new-msg msg-context !
     o o> ;
 
 \ insert address for punching
@@ -2361,8 +2371,14 @@ $10 Constant tmp-crypt-val
 	dest-pubkey $off
 	pubkey $off
 	mpubkey $off
-	log-context @ .dispose
-	ack-context @ >o timing-stat $off track-timing $off dispose o>
+	log-context @ ?dup-IF  .dispose  THEN
+	ack-context @ ?dup-IF
+	    >o timing-stat $off track-timing $off dispose o>
+	THEN
+	msg-context @ ?dup-IF  .dispose  THEN
+	term-context @ ?dup-IF
+	    >o key-buf$ $off dispose o>
+	THEN
 	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
@@ -2463,8 +2479,11 @@ Variable beacons \ destinations to send beacons to
     file-task ?dup-IF  <event swap wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 
+0 value core-wanted
+
 : create-receiver-task ( -- )
     [:  \ ." created receiver task " up@ hex. cr
+	[IFDEF] stick-to-core  core-wanted stick-to-core drop  [THEN]
 	['] event-loop-nocatch catch-loop drop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) ;]
     1 net2o-task to receiver-task ;
@@ -2480,7 +2499,8 @@ Variable beacons \ destinations to send beacons to
     o IF  up@ wait-task !  0timeout o+timeout  THEN
     event-loop-task requests->0 o> ;
 
-: server-loop ( -- )  0 >o rdrop  -1 reqmask !  client-loop ;
+: server-loop ( -- )
+    1 to core-wanted  0 >o rdrop  -1 reqmask !  client-loop ;
 
 \ client/server initializer
 
@@ -2553,6 +2573,7 @@ require net2o-log.fs
 require net2o-dht.fs
 require net2o-keys.fs \ extra cmd space
 require net2o-msg.fs
+require net2o-term.fs
 
 \ connection setup helper
 
