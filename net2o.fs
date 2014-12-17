@@ -880,6 +880,7 @@ cmd-class class
     field: flyburst
     field: flybursts
     field: timeouts
+    field: window-size \ packets in flight
     64field: rtdelay \ ns
     64field: last-time
     64field: lastack \ ns
@@ -957,7 +958,6 @@ cmd-class class
     field: req-codesize
     field: req-datasize
     \ flow control, sender part
-    field: window-size \ packets in flight
 
     64field: next-timeout \ ns
     64field: resend-all-to \ ns
@@ -1438,7 +1438,7 @@ timestats buffer: stat-tuple
     64>r time-offset 64@ 64+ 64r>
     data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
-	dest-tail @ o> over - 0 max addr>bits window-size !
+	dest-tail @ o> over - 0 max addr>bits ack@ .window-size !
 	addr>ts r> .dest-timestamps @ swap
     ELSE  o> rdrop 0 0  THEN ;
 
@@ -1466,16 +1466,16 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 3 4 2Constant ext-damp# \ 75% damping
 5 2 2Constant delta-t-grow# \ 4 times delta-t
 
-: slack-max# ( -- n ) ack@ .max-slack 64@ ack@ .min-slack 64@ 64- ;
+: slack-max# ( -- n ) max-slack 64@ min-slack 64@ 64- ;
 : slack# ( -- n )  slack-max# 64>n 2/ 2/ slack-default# max ;
 
 : >slack-exp ( -- rfactor )
-    ack@ .lastslack 64@ ack@ .min-slack 64@ 64-
+    lastslack 64@ min-slack 64@ 64-
     64dup 64abs slack-ignore# 64u> IF
 	msg( ." slack ignored: " 64dup 64. cr )
-	64drop 64#0 ack@ .lastslack 64@ ack@ .min-slack 64!
+	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    64>n  .ack-stats( dup s>f stat-tuple ts-slack sf! )
+    64>n ack-stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f** ;
 
@@ -1484,17 +1484,17 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : slackext ( rfactor -- slack )
     ack@ .slackgrow 64@
-    window-size @ tick-init 1+ bursts# - 2* 64*/
+    ack@ .window-size @ tick-init 1+ bursts# - 2* 64*/
     64>f f* f>64
     ack@ .slackgrow' 64@ 64+ 64dup ext-damp# 64*/ ack@ .slackgrow' 64!
-    64#0 64max aggressivity-rate ;
+    64#0 64max ack@ .aggressivity-rate ;
 
 : rate-limit ( rate -- rate' )
     \ not too quickly go faster!
     64dup last-ns/burst 64!@ 64max ;
 
 : >extra-ns ( rate -- rate' )
-    >slack-exp fdup 64>f f* f>64 slackext
+    ack@ .>slack-exp fdup 64>f f* f>64 slackext
     64over 64-2* 64-2* 64min \ limit to 4* rate
     64dup ack@ .extra-ns 64! 64+ ;
 
