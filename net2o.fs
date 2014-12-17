@@ -1420,19 +1420,19 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    ack@ .rtdelay 64@ 64>f rt-bias# s>f f+ ack@ .ns/burst 64@ 64>f f/ f>s
+    rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
-    ack@ .rtdelay 64@ 64. ack@ .ns/burst 64@ 64. ." rtdelay" cr )
-    dup flybursts-max# min ack@ .flyburst ! ;
-: net2o:max-flyburst ( bursts -- )  flybursts-max# min ack@ .flybursts max!@
+    rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
+    dup flybursts-max# min flyburst ! ;
+: net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
 : >flyburst ( -- )
     ack@ .flyburst @ ack@ .flybursts max!@ \ reset bursts in flight
     0= IF  ack@ .recv-tick 64@ ticks-init
 	bursts( .o ." restart bursts " ack@ .flybursts ? cr )
-	net2o:set-flyburst net2o:max-flyburst
+	ack@ .net2o:set-flyburst ack@ .net2o:max-flyburst
     THEN ;
 
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
@@ -1515,8 +1515,8 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
     bandwidth-max n>64 64max rate-limit rate-stat2 ack@ .ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
-	net2o:set-flyburst
-	net2o:max-flyburst
+	ack@ .net2o:set-flyburst
+	ack@ .net2o:max-flyburst
     THEN ;
 
 \ acknowledge
