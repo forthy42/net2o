@@ -1452,7 +1452,7 @@ timestats buffer: stat-tuple
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )
-    ack@ .>timestamp over  IF  + ts-ticks 64@ ack@ .b2b-timestat
+    >timestamp over  IF  + ts-ticks 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
 \ set rate calculation

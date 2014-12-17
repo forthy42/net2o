@@ -101,7 +101,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 +net2o: send-timing ( -- ) \ request recorded timing
     net2o:timing$ maxtiming umin tuck $, net2o:/timing rec-timing ;
 +net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
-    parent @ .net2o:ack-b2btime ;
+    net2o:ack-b2btime ;
 +net2o: ack-cookies ( ucookie addr umask -- ) \ acknowledge cookie
     [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
     parent @ >o data-map @ cookie+ 64over 64over 64= 0= IF
