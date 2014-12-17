@@ -1513,11 +1513,12 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
-    bandwidth-max n>64 64max rate-limit rate-stat2 ack@ .ns/burst 64!@
+    bandwidth-max n>64 64max rate-limit rate-stat2
+    ack@ >o ns/burst 64!@
     bandwidth-init n>64 64= IF \ first acknowledge
-	ack@ .net2o:set-flyburst
-	ack@ .net2o:max-flyburst
-    THEN ;
+	net2o:set-flyburst
+	net2o:max-flyburst
+    THEN o> ;
 
 \ acknowledge
 
