@@ -1358,7 +1358,8 @@ reply buffer: dummy-reply
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
-: ack-stats( ]] ack@ .timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+: .ack-stats( ]] ack@ .timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+: ack-stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
@@ -1385,7 +1386,7 @@ reply buffer: dummy-reply
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple timestats  ack@ .timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
 \ flow control
 
@@ -1477,7 +1478,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 	msg( ." slack ignored: " 64dup 64. cr )
 	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    64>n  ack-stats( dup s>f stat-tuple ts-slack sf! )
+    64>n  .ack-stats( dup s>f stat-tuple ts-slack sf! )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f** ;
 
@@ -1501,21 +1502,22 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64dup ack@ .extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
-    ack-stats( ack@ .recv-tick 64@ time-offset 64@ 64-
+    .ack-stats( ack@ .recv-tick 64@ time-offset 64@ 64-
            64dup ack@ .last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
-    ack-stats( 64dup ack@ .extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
-           ack@ .slackgrow 64@ 64>f stat-tuple ts-grow sf! 
+    ack-stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple ts-rate sf!
+           slackgrow 64@ 64>f stat-tuple ts-grow sf! 
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )  rate-stat1
     64>r 64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
-    bandwidth-max n>64 64max rate-limit rate-stat2
-    ack@ >o ns/burst 64!@
-    bandwidth-init n>64 64= IF \ first acknowledge
+    bandwidth-max n>64 64max rate-limit
+    ack@ >o
+    rate-stat2
+    ns/burst 64!@ bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
     THEN o> ;
