@@ -15,6 +15,9 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+: collect-keys ( -- )
+    BEGIN  key?  WHILE  key key-buf$ c$+!  REPEAT ;
+
 get-current also net2o-base definitions
 
 term-table >table
@@ -23,8 +26,10 @@ log-table $@ inherit-table term-table
 
 +net2o: at-xy ( x y -- ) F at-xy ;
 +net2o: set-form ( w h -- ) term-h ! term-w ! ;
-+net2o: form ( -- ) F form swap lit, lit, set-form ;
++net2o: get-form ( -- ) form swap lit, lit, set-form ;
 +net2o: set-keys ( $:string -- )  $> key-buf$ $+! ;
++net2o: get-keys ( -- )
+    collect-keys key-buf$ $@ $, set-keys key-buf$ $off ;
 
 gen-table $freeze
 ' context-table is gen-table

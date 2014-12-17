@@ -81,10 +81,7 @@ gen-table $freeze
 
 \ flow control functions
 
-$31 net2o: ack ( -- o:acko )
-    ack-context @ dup 0= IF
-	drop n2o:new-ack dup ack-context !
-    THEN  n:>o ;
+$31 net2o: ack ( -- o:acko )  ack@ n:>o ;
 ack-table >table
 
 reply-table $@ inherit-table ack-table
@@ -169,10 +166,10 @@ previous
 \ client side timing
 
 : ack-size ( -- )  1 acks +!
-    recv-tick 64@ 64dup lastb-ticks 64!@ 64- max-dticks 64max! ;
+    ack@ .recv-tick 64@ 64dup lastb-ticks 64!@ 64- max-dticks 64max! ;
 : ack-first ( -- )
     lastb-ticks 64@ firstb-ticks 64@ 64- delta-ticks 64+!
-    recv-tick 64@ 64dup firstb-ticks 64!  64dup lastb-ticks 64!
+    ack@ .recv-tick 64@ 64dup firstb-ticks 64!  64dup lastb-ticks 64!
     last-rtick 64!  recv-addr 64@ last-raddr 64! ;
 
 : ack-timing ( n -- )
@@ -187,7 +184,7 @@ also net2o-base
     64dup last-rate 64! ;
 
 : >rate ( -- )  delta-ticks 64@ 64-0= acks @ 0= or ?EXIT
-    recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0<> IF
+    ack@ .recv-tick 64@ 64dup burst-ticks 64!@ 64dup 64-0<> IF
 	64- max-dticks 64@ tick-init 1+ n>64 64* 64max 64>r
 	delta-ticks 64@ tick-init 1+ acks @ 64*/ setrate-limit
 	lit, 64r> lit, set-rate
@@ -197,7 +194,7 @@ also net2o-base
     delta-ticks 64off  max-dticks 64off  acks off ;
 
 : net2o:acktime ( -- )
-    recv-addr 64@ recv-tick 64@ time-offset 64@ 64-
+    recv-addr 64@ ack@ .recv-tick 64@ time-offset 64@ 64-
     timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" F cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
@@ -436,7 +433,7 @@ previous
 
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )
     \ timeout( .expected )
-    1 timeouts +! >next-timeout
+    1 ack@ .timeouts +! >next-timeout
     packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;

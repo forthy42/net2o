@@ -877,7 +877,13 @@ rcode-class class end-class rdata-class
 cmd-class class
     field: timing-stat
     field: track-timing
+    field: flyburst
+    field: flybursts
+    field: timeouts
+    64field: rtdelay \ ns
     64field: last-time
+    64field: lastack \ ns
+    64field: recv-tick
 end-class ack-class
 
 cmd-class class
@@ -901,7 +907,7 @@ cmd-class class
     field: log-context
     field: ack-context
     field: msg-context
-    field: term-context
+    field: file-state \ files
     \ rest of state
     field: codebuf#
     field: context#
@@ -910,10 +916,8 @@ cmd-class class
     field: punch-load
     $10 +field return-address \ used as return address
     $10 +field r0-address \ used for resending 0
-    64field: recv-tick
     64field: recv-addr
     field: recv-flag
-    field: file-state
     field: read-file#
     field: write-file#
     field: residualread
@@ -925,7 +929,7 @@ cmd-class class
     field: mpubkey \ our side official pubkey
     field: timeout-xt \ callback for timeout
     field: setip-xt   \ callback for set-ip
-    field: ack-xt
+    field: ack-xt     \ callback for acknowledge
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-lock
@@ -944,9 +948,6 @@ cmd-class class
     field: req-datasize
     \ flow control, sender part
     field: window-size \ packets in flight
-    field: timeouts
-    field: flyburst
-    field: flybursts
 
     64field: min-slack
     64field: max-slack
@@ -956,8 +957,6 @@ cmd-class class
     64field: bandwidth-tick \ ns
     64field: next-tick \ ns
     64field: next-timeout \ ns
-    64field: rtdelay \ ns
-    64field: lastack \ ns
     64field: resend-all-to \ ns
     64field: lastslack
     64field: lastdeltat
@@ -1101,27 +1100,31 @@ Variable init-context#
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
     max-int64 64-2/ 64negate max-slack 64!
-    init-delay# rtdelay 64!
-    flybursts# dup flybursts ! flyburst !
-    ticks lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init n>64 ns/burst 64!
     never               next-tick 64!
     64#0                extra-ns 64! ;
 
 resend-size# buffer: resend-init
 
-: no-timeout ( -- )  max-int64 next-timeout 64!  0 timeouts ! ;
-
 UValue connection
 
 : n2o:new-log ( -- o )
     cmd-class new >o  log-table @ token-table ! o o> ;
 : n2o:new-ack ( -- o )
-    o ack-class new >o  parent !  ack-table @ token-table ! o o> ;
+    o ack-class new >o  parent !  ack-table @ token-table !
+    init-delay# rtdelay 64!
+    flybursts# dup flybursts ! flyburst !
+    ticks lastack 64! \ asking for context creation is as good as an ack
+    o o> ;
+: ack@ ( -- o )
+    ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
 : n2o:new-msg ( -- o )
     o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
 : n2o:new-term ( -- o )
     o term-class new >o  parent !  term-table @ token-table ! o o> ;
+
+: no-timeout ( -- )  max-int64 next-timeout 64!
+    ack-context @ ?dup-IF  >o 0 timeouts ! o>  THEN ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -1355,7 +1358,7 @@ reply buffer: dummy-reply
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
-: ack-stats( ]] ack-context @ .timing-stat @ IF [[ ['] )stats assert-canary ; immediate
+: ack-stats( ]] ack@ .timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
 : net2o:timing$ ( -- addr u )
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
@@ -1363,7 +1366,7 @@ reply buffer: dummy-reply
     stats( timing-stat 0 rot $del ) ;
 
 : .rec-timing ( addr u -- )
-    ack-context @ >o track-timing $@ \ do some dumps
+    ack@ >o track-timing $@ \ do some dumps
     bounds ?DO
 	I ts-delta sf@ f>64 last-time 64+!
 	last-time 64@ 64>f 1n f* fdup f.
@@ -1382,7 +1385,7 @@ reply buffer: dummy-reply
 
 timestats buffer: stat-tuple
 
-: stat+ ( addr -- )  stat-tuple timestats  ack-context @ .timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats  ack@ .timing-stat $+! ;
 
 \ flow control
 
@@ -1395,8 +1398,8 @@ timestats buffer: stat-tuple
     64dup bandwidth-tick 64!  next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    recv-tick 64@ 64dup lastack 64!
-    64over 64- rtdelay 64min! ;
+    ack@ .recv-tick 64@ 64dup ack@ .lastack 64!
+    64over 64- ack@ .rtdelay 64min! ;
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
@@ -1417,18 +1420,18 @@ timestats buffer: stat-tuple
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
 : net2o:set-flyburst ( -- bursts )
-    rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
+    ack@ .rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
-    rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
-    dup flybursts-max# min flyburst ! ;
-: net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
+    ack@ .rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
+    dup flybursts-max# min ack@ .flyburst ! ;
+: net2o:max-flyburst ( bursts -- )  flybursts-max# min ack@ .flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
 : >flyburst ( -- )
-    flyburst @ flybursts max!@ \ reset bursts in flight
-    0= IF  recv-tick 64@ ticks-init
-	bursts( .o ." restart bursts " flybursts ? cr )
+    ack@ .flyburst @ ack@ .flybursts max!@ \ reset bursts in flight
+    0= IF  ack@ .recv-tick 64@ ticks-init
+	bursts( .o ." restart bursts " ack@ .flybursts ? cr )
 	net2o:set-flyburst net2o:max-flyburst
     THEN ;
 
@@ -1498,8 +1501,8 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64dup extra-ns 64! 64+ ;
 
 : rate-stat1 ( rate deltat -- )
-    ack-stats( recv-tick 64@ time-offset 64@ 64-
-           64dup ack-context @ .last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
+    ack-stats( ack@ .recv-tick 64@ time-offset 64@ 64-
+           64dup ack@ .last-time 64!@ 64- 64>f stat-tuple ts-delta sf!
            64over 64>f stat-tuple ts-reqrate sf! ) ;
 
 : rate-stat2 ( rate -- rate )
@@ -1921,7 +1924,7 @@ User <size-lb> 1 floats cell- uallot drop
 
 : bandwidth? ( -- flag )
     ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
-    flybursts @ 0> and  ;
+    ack@ .flybursts @ 0> and  ;
 
 \ asynchronous sending
 
@@ -1970,9 +1973,9 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 	ack-resend~ c@ ack-state c@ xor resend-toggle# and 0<> +
 	0 max dup ack-resend# c!
 	0= IF  ack-resend~ c@ ack-state c@ resend-toggle# invert and or
-	    ack-state c!  flybursts @ ack-resend# c!  THEN
-	-1 flybursts +! bursts( ." bursts: " flybursts ? flyburst ? cr )
-	flybursts @ 0<= IF
+	    ack-state c!  ack@ .flybursts @ ack-resend# c!  THEN
+	-1 ack@ .flybursts +! bursts( ." bursts: " ack@ .flybursts ? ack@ .flyburst ? cr )
+	ack@ .flybursts @ 0<= IF
 	    bursts( .o ." no bursts in flight " ns/burst ? data-tail@ swap hex. hex. cr )
 	THEN
     THEN
@@ -1993,7 +1996,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 : .nosend ( -- ) ." done, "  4 set-precision
     .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
     .o ." slack: " min-slack ? cr
-    .o ." rtdelay: " rtdelay ? cr ;
+    .o ." rtdelay: " ack@ .rtdelay ? cr ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string
@@ -2266,10 +2269,10 @@ Variable timeout-tasks s" " timeout-tasks $!
     rtdelay 64@ timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ ;
-: >next-timeout ( -- )  +timeouts next-timeout 64! ;
+: >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
 : 0timeout ( -- )
-    rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
-    0 timeouts !@ IF  timeout-task wake  THEN ;
+    ack@ .rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) [: 0 { ctx } max-int64
@@ -2325,7 +2328,7 @@ $10 Constant tmp-crypt-val
     ." size " min-size inbuf c@ datasize# and lshift hex. cr ) ;
 
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
-    ticker 64@  recv-tick 64! \ time stamp of arrival
+    ticker 64@  ack@ .recv-tick 64! \ time stamp of arrival
     dup >r inbuf-decrypt 0= IF  r> >o .inv-packet o>  drop  EXIT  THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr return-address $10 move
@@ -2376,9 +2379,6 @@ $10 Constant tmp-crypt-val
 	    >o timing-stat $off track-timing $off dispose o>
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
-	term-context @ ?dup-IF
-	    >o key-buf$ $off dispose o>
-	THEN
 	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
@@ -2403,7 +2403,7 @@ event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
-	timeouts @ timeouts# >= wait-task @ and  ?dup-IF  ->timeout event>  THEN
+	ack@ .timeouts @ timeouts# >= wait-task @ and  ?dup-IF  ->timeout event>  THEN
     THEN ;
 
 \ beacons
@@ -2558,9 +2558,9 @@ Variable cookies
 	nip return-addr be@ n2o:new-context swap
     THEN ;
 
-: rtdelay! ( time -- ) recv-tick 64@ 64swap 64- rtdelay 64! ;
+: rtdelay! ( time -- ) ack@ .recv-tick 64@ 64swap 64- ack@ .rtdelay 64! ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
-    recv-tick 64@ 64- rtdelay 64@ 64-2/
+    ack@ .recv-tick 64@ 64- ack@ .rtdelay 64@ 64-2/
     64over 64abs 64over 64> IF  64+ tick-adjust 64!
     ELSE  64drop 64drop  THEN ;
 
@@ -2573,7 +2573,7 @@ require net2o-log.fs
 require net2o-dht.fs
 require net2o-keys.fs \ extra cmd space
 require net2o-msg.fs
-require net2o-term.fs
+\ require net2o-term.fs
 
 \ connection setup helper
 

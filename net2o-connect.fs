@@ -34,7 +34,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     own-crypt? IF
 	64dup cookie>context?
 	IF  >o rdrop  o to connection
-	    ticker 64@ recv-tick 64! rtdelay! \ time stamp of arrival
+	    ticker 64@ ack@ .recv-tick 64! rtdelay! \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
