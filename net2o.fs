@@ -1398,13 +1398,13 @@ timestats buffer: stat-tuple
     64dup bandwidth-tick 64!  next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
-    ack@ .recv-tick 64@ 64dup ack@ .lastack 64!
-    64over 64- ack@ .rtdelay 64min! ;
+    recv-tick 64@ 64dup lastack 64!
+    64over 64- rtdelay 64min! ;
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
     timing( 64over 64. 64dup 64. ." acktime" cr )
-    >rtdelay  64- 64dup lastslack 64!
+    ack@ .>rtdelay  64- 64dup lastslack 64!
     lastdeltat 64@ delta-damp# 64rshift
     64dup min-slack 64+! 64negate max-slack 64+!
     64dup min-slack 64min!
