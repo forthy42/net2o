@@ -886,6 +886,8 @@ cmd-class class
     64field: recv-tick
     64field: ns/burst
     64field: last-ns/burst
+    64field: bandwidth-tick \ ns
+    64field: next-tick \ ns
 end-class ack-class
 
 cmd-class class
@@ -954,8 +956,6 @@ cmd-class class
     64field: min-slack
     64field: max-slack
     64field: extra-ns
-    64field: bandwidth-tick \ ns
-    64field: next-tick \ ns
     64field: next-timeout \ ns
     64field: resend-all-to \ ns
     64field: lastslack
@@ -1100,7 +1100,6 @@ Variable init-context#
 : init-flow-control ( -- )
     max-int64 64-2/ min-slack 64!
     max-int64 64-2/ 64negate max-slack 64!
-    never               next-tick 64!
     64#0                extra-ns 64! ;
 
 resend-size# buffer: resend-init
@@ -1115,6 +1114,7 @@ UValue connection
     flybursts# dup flybursts ! flyburst !
     ticks lastack 64! \ asking for context creation is as good as an ack
     bandwidth-init n>64 ns/burst 64!
+    never               next-tick 64!
     o o> ;
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
@@ -1395,7 +1395,7 @@ timestats buffer: stat-tuple
     ticks ticker 64! ;
 
 : ticks-init ( ticks -- )
-    64dup bandwidth-tick 64!  next-tick 64! ;
+    64dup ack@ .bandwidth-tick 64!  ack@ .next-tick 64! ;
 
 : >rtdelay ( client serv -- client serv )
     recv-tick 64@ 64dup lastack 64!
@@ -1847,10 +1847,10 @@ User outflag  outflag off
     outbuf packet-body min-size r> lshift move ;
 
 : bandwidth+ ( -- )  o?
-    ack@ .ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
+    ack@ .ns/burst 64@ 1 tick-init 1+ 64*/ ack@ .bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )  data-b2b @ ?EXIT
-    ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
+    ticker 64@ ack@ .bandwidth-tick 64@ 64max ack@ .next-tick 64! drop false ;
 
 : send-cX ( addr n -- ) +sendX2
     >send  send-code-packet  net2o:update-key ;
@@ -1912,7 +1912,7 @@ User <size-lb> 1 floats cell- uallot drop
 : ?toggle-ack ( -- )
     data-to-send 0= IF
 	resend-toggle# outflag xor!  ack-toggle# outflag xor!
-	never next-tick 64!
+	never ack@ .next-tick 64!
     THEN ;
 
 : net2o:send-chunk ( -- )  +chunk
@@ -1923,7 +1923,7 @@ User <size-lb> 1 floats cell- uallot drop
     ?toggle-ack send-dX ;
 
 : bandwidth? ( -- flag )
-    ticker 64@ 64dup last-ticks 64! next-tick 64@ 64- 64-0>=
+    ticker 64@ 64dup last-ticks 64! ack@ .next-tick 64@ 64- 64-0>=
     ack@ .flybursts @ 0> and  ;
 
 \ asynchronous sending
@@ -2014,7 +2014,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : next-chunk-tick ( -- tick )
     64#-1 chunks $@ bounds ?DO
-	I chunk-context @ .next-tick 64@ 64umin
+	I chunk-context @ .ack@ .next-tick 64@ 64umin
     chunks-struct +LOOP ;
 
 : send-another-chunk ( -- flag )  false  0 >r  !ticks
