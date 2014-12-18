@@ -52,7 +52,10 @@ reply-table $@ inherit-table fs-table
 
 :noname fs-id @ ulit, file-id ; fs-class to start-req
 $20 net2o: open-file ( $:string mode -- ) \ open file with mode
-    64>n $> rot fs-open ;
+    64>r $> 64r> fs-open ;
++net2o: file-type ( n -- ) \ choose file type
+    
+    ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
 +net2o: set-size ( size -- ) \ set size attribute of current file
