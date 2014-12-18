@@ -67,6 +67,10 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
     fs-size 64@ lit, set-size ;
 +net2o: get-stat ( -- ) \ request stat of current file
     n2o:get-stat >r lit, r> ulit, set-stat ;
++net2o: set-form ( w h -- ) \ if file is a terminal, set size
+    term-h ! term-w ! ;
++net2o: get-form ( -- ) \ if file is a terminal, request size
+    term-w @ lit, term-h @ lit, set-form ;
 
 gen-table $freeze
 ' context-table is gen-table

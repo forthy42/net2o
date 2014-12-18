@@ -904,12 +904,6 @@ cmd-class class
 end-class msg-class
 
 cmd-class class
-    field: term-w
-    field: term-h
-    field: key-buf$
-end-class term-class
-
-cmd-class class
     \ maps for data and code transfer
     field: code-map
     field: code-rmap
@@ -1118,8 +1112,6 @@ UValue connection
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
 : n2o:new-msg ( -- o )
     o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
-: n2o:new-term ( -- o )
-    o term-class new >o  parent !  term-table @ token-table ! o o> ;
 
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  >o 0 timeouts ! o>  THEN ;
@@ -1229,7 +1221,7 @@ Variable mapstart $1 mapstart !
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
-    addrs u map-source  data-map ! ;
+    addrs u map-source data-map ! ;
 : n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
@@ -1577,6 +1569,8 @@ cmd-class class
     field: fs-fid
     field: fs-path
     field: fs-id
+    field: term-w
+    field: term-h
     method fs-read
     method fs-write
     method fs-open
@@ -1847,14 +1841,14 @@ User outflag  outflag off
 : bandwidth+ ( -- )
     ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
 
-: burst-end ( flag -- flag )  data-b2b @ ?EXIT
-    ticker 64@ ack@ .bandwidth-tick 64@ 64max ack@ .next-tick 64! drop false ;
+: burst-end ( flag -- flag )
+    ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
 : send-cX ( addr n -- ) +sendX2
     >send  send-code-packet  net2o:update-key ;
 
 : send-dX ( addr n -- ) +sendX2
-    >send  o IF  ack@ .bandwidth+  THEN send-data-packet ;
+    >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer punch-reply
 
@@ -1988,13 +1982,14 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     ELSE
 	-1 data-b2b +!  true
     THEN
-    dup IF  r@ chunk-count+  net2o:send-chunk  burst-end  timeout( '.' emit )  THEN
+    dup IF  r@ chunk-count+  net2o:send-chunk
+	data-b2b @ 0<= IF  ack@ .burst-end  THEN  timeout( '.' emit )  THEN
     rdrop  1 chunks+ +! ;
 
-: .nosend ( -- ) ." done, "  4 set-precision
-    .o ." rate: " ack@ .ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .o ." slack: " ack@ .min-slack ? cr
-    .o ." rtdelay: " ack@ .rtdelay ? cr ;
+: .nosend ( -- ) ack@ >o ." done, "  4 set-precision
+    .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
+    .o ." slack: " min-slack ? cr
+    .o ." rtdelay: " rtdelay ? cr o> ;
 
 : send-chunks-async ( -- flag )
     chunks $@ chunks+ @ chunks-struct * safe/string

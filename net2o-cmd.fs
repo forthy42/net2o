@@ -400,7 +400,7 @@ Variable throwcount
 	maxdata code+
 	cmd0source off
 	tag-addr? IF
-	    2drop  >flyburst  1 packetr2 +!  EXIT  THEN
+	    2drop  ack@ .>flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
 	cmd0!
     THEN
