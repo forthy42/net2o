@@ -54,8 +54,7 @@ reply-table $@ inherit-table fs-table
 $20 net2o: open-file ( $:string mode -- ) \ open file with mode
     64>r $> 64r> fs-open ;
 +net2o: file-type ( n -- ) \ choose file type
-    
-    ;
+    fs-class! ;
 +net2o: close-file ( -- ) \ close file
     fs-close ;
 +net2o: set-size ( size -- ) \ set size attribute of current file
@@ -73,7 +72,9 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
 +net2o: set-form ( w h -- ) \ if file is a terminal, set size
     term-h ! term-w ! ;
 +net2o: get-form ( -- ) \ if file is a terminal, request size
-    term-w @ lit, term-h @ lit, set-form ;
+    term-w @ ulit, term-h @ ulit, set-form ;
++net2o: poll-request ( ulimit -- ) \ poll a file to check for size changes
+    poll! lit, set-size ;
 
 gen-table $freeze
 ' context-table is gen-table

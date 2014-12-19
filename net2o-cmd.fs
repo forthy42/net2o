@@ -449,8 +449,8 @@ also net2o-base definitions
 : $, ( addr u -- )  string dup >r n>64 cmd,
     r@ maxstring u>= !!stringfit!!
     cmdbuf$ + r@ move   r> cmdbuf# +! ;
-: lit, ( u -- )  ulit cmd, ;
-: slit, ( n -- )  slit n>zz cmd, ;
+: lit, ( 64u -- )  ulit cmd, ;
+: slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
 : float, ( r -- )  flit cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;

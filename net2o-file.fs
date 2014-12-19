@@ -122,6 +122,13 @@ Create file-classes
 
 here file-classes - cell/ Constant file-classes#
 
+$1 Value fs-class-permit \ by default permit only files
+
+: fs-class! ( n -- )
+    dup file-classes# u>= !!fileclass!!
+    1 over lshift fs-class-permit and 0= !!fileclass!!
+    cells file-classes + @ o cell- ! ;
+
 \ id handling
 
 : id>addr ( id -- addr remainder )
@@ -155,13 +162,16 @@ here file-classes - cell/ Constant file-classes#
     len +LOOP  dest-back ! ;
 
 : size! ( 64 -- )
-    64dup fs-size 64!  fs-limit 64umin!
+    64dup fs-size 64!  fs-limit 64umin! ;
+: seek-off ( -- )
     64#0 fs-seekto 64! 64#0 fs-seek 64! ;
 : seekto! ( 64 -- )
     fs-size 64@ 64umin fs-seekto 64umax! ;
 : limit-min! ( 64 id -- )
     fs-size 64@ 64umin fs-limit 64! ;
 : init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
+: poll! ( 64 -- 64 )
+    fs-limit 64! fs-poll 64dup size! ;
 
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
