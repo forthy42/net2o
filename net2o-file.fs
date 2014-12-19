@@ -16,7 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Variable net2o-path
-pad 200 get-dir net2o-path $!
+pad $400 get-dir net2o-path $!
 
 cmd-class class
     64field: fs-size
@@ -29,17 +29,14 @@ cmd-class class
     field: fs-id
     field: term-w
     field: term-h
+    field: fs-inbuf
+    field: fs-outbuf
     method fs-read
     method fs-write
     method fs-open
     method fs-close
+    method fs-poll
 end-class fs-class
-
-fs-class class
-end-class socket-class
-
-fs-class class
-end-class terminal-class
 
 Variable fs-table
 
@@ -52,6 +49,9 @@ Variable fs-table
 	64>d 2dup statbuf ntime!
 	statbuf 2 cells + ntime!
 	r> statbuf futimens ?ior [THEN] ;
+: fs-size! ( 64size -- )
+    64dup fs-size 64! fs-limit 64!
+    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! ;
 
 :noname ( addr u -- n )
     fs-limit 64@ fs-seekto 64@ >seek
@@ -73,15 +73,56 @@ Variable fs-table
     THEN
     fs-fid @ close-file throw  fs-fid off
 ; fs-class to fs-close
+:noname ( -- size )
+    fs-fid @ file-size throw d>64
+; fs-class to fs-poll
 :noname ( addr u mode -- ) fs-close 64>n
     msg( dup 2over ." open file: " type ."  with mode " . cr )
     >r 2dup absolut-path?  !!abs-path!!
     net2o-path open-path-file throw fs-path $! fs-fid !
     r@ r/o <> IF  0 fs-fid !@ close-file throw
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
-    fs-fid @ file-size throw d>64 64dup fs-size 64! fs-limit 64!
-    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64!
+    fs-poll fs-size!
 ; fs-class to fs-open
+
+\ subclassing for other sorts of files
+
+fs-class class
+end-class socket-class
+
+:noname ( addr u port -- ) fs-close 64>n
+    msg( dup 2over ." open socket: " type ."  with port " . cr )
+    open-socket fs-fid ! 64#0 fs-size! ; socket-class to fs-open
+:noname ( -- size )
+    fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
+    n>64 fs-size 64@ 64+ ; socket-class to fs-poll
+
+fs-class class
+end-class termclient-class
+
+:noname ( addr u -- u ) tuck type ; termclient-class to fs-write
+:noname ( addr u -- u ) 0 -rot bounds ?DO
+	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class to fs-read
+:noname ( addr u 64n -- ) 64drop 2drop ; termclient-class to fs-open
+:noname ( -- ) ; termclient-class to fs-close
+
+termclient-class class
+end-class termserver-class
+
+:noname ( addr u -- u ) tuck fs-inbuf $+! ; termserver-class to fs-write
+:noname ( addr u -- u ) fs-outbuf $@len umin >r
+    fs-outbuf $@ r@ umin rot swap move
+    fs-outbuf 0 r@ $del r> ; termserver-class to fs-read
+
+Create file-classes
+' fs-class ,
+' socket-class ,
+' termclient-class ,
+' termserver-class ,
+
+here file-classes - cell/ Constant file-classes#
+
+\ id handling
 
 : id>addr ( id -- addr remainder )
     >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
@@ -97,6 +138,8 @@ Variable fs-table
 : state-addr ( id -- addr )
     dup >r id>addr dup 0< !!gap!!
     0= IF  drop r@ new>file lastfile@  THEN  rdrop ;
+
+\ state handling
 
 : dest-top! ( addr -- )
     \ dest-tail @ dest-size @ + umin
