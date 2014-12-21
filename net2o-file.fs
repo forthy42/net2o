@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Sema file-sema
+
 Variable net2o-path
 pad $400 get-dir net2o-path $!
 
@@ -31,6 +33,7 @@ cmd-class class
     field: term-h
     field: fs-inbuf
     field: fs-outbuf
+    field: fs-termtask
     method fs-read
     method fs-write
     method fs-open
@@ -109,10 +112,55 @@ end-class termclient-class
 termclient-class class
 end-class termserver-class
 
+Variable termserver-tasks
+User termfile
+
+: ts-type ( addr u -- ) termfile @ .fs-outbuf $+! ;
+: ts-emit ( c -- ) termfile @ .fs-outbuf c$+! ;
+: ts-form ( -- w h ) termfile @ >o term-w @ term-h @ o> ;
+: ts-key? ( -- flag ) termfile @ .fs-inbuf $@len 0<> ;
+: ts-key ( -- key )
+    BEGIN  ts-key? 0=  WHILE  stop  REPEAT
+    termfile @ >o fs-inbuf $@ drop c@ fs-inbuf 0 1 $del o> ;
+
+' ts-type ' ts-emit what's cr ' ts-form output: termserver-out
+op-vector @
+what's at-xy what's at-deltaxy what's page what's attr!
+termserver-out
+IS attr! IS page IS at-deltaxy IS at-xy
+op-vector !
+' ts-key  ' ts-key? input: termserver-in
+
+1 Constant file-permit#
+2 Constant socket-permit#
+4 Constant ts-permit#
+8 Constant tc-permit#
+file-permit# Value fs-class-permit \ by default permit only files
+
+: >termserver-io ( -- )
+    [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section
+    ts-permit# fs-class-permit or to fs-class-permit ;
+
+event: ->termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
+    termserver-in termserver-out ;
+event: ->termclose ( -- ) termfile off  default-in default-out ;
+
 :noname ( addr u -- u ) tuck fs-inbuf $+! ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
     fs-outbuf 0 r@ $del r> ; termserver-class to fs-read
+:noname ( addr u 64n -- )  64drop 2drop
+    [: termserver-tasks $@ 0= !!no-termserver!!
+	@ termserver-tasks 0 cell $del dup fs-termtask !
+	<event o elit, ->termfile event>
+    ;] file-sema c-section
+; termserver-class to fs-open
+:noname ( -- )
+    [: fs-termtask @ ?dup-IF
+	    <event ->termclose event>
+	    fs-termtask cell termserver-tasks $+! fs-termtask off
+	THEN ;] file-sema c-section
+; termserver-class to fs-close
 
 Create file-classes
 ' fs-class ,
@@ -121,8 +169,6 @@ Create file-classes
 ' termserver-class ,
 
 here file-classes - cell/ Constant file-classes#
-
-$1 Value fs-class-permit \ by default permit only files
 
 : fs-class! ( n -- )
     dup file-classes# u>= !!fileclass!!
@@ -188,8 +234,6 @@ $1 Value fs-class-permit \ by default permit only files
 \    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
     )
     rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
-
-Sema file-sema
 
 \ careful: must follow exactpy the same loic as slurp (see below)
 : n2o:spit ( -- ) fstates 0= ?EXIT
