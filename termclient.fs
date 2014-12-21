@@ -1,0 +1,23 @@
+\ net2o tests - client side
+
+require client-tests.fs
+require test-keys.fs \ we want the test keys - never use this in production!
+
++db stat(
++debug
+%droprate
+debug-task
+
+i'm anonymous
+
+init-client
+
+!time
+
+?nextarg [IF] net2o-host $! [THEN]
+?nextarg [IF] s>number drop to net2o-port [THEN]
+?nextarg [IF] s>number drop [ELSE] 1 [THEN]
+
+c:terminal
+
+script? [IF] net2o-bye [THEN]
