@@ -153,11 +153,13 @@ set-current
 : open-tracked-file ( addr u mode --)
     open-file get-size get-stat ;
 
+: n2o>file ( xt -- )
+    file-reg# @ ulit, file-id  catch  endwith
+    throw  1 file-reg# +! ;
+
 : n2o:copy ( addrsrc us addrdest ud -- )
-    file-reg# @ ulit, file-id
-    2swap $, r/o ulit, open-tracked-file  endwith
-    file-reg# @ save-to
-    1 file-reg# +! ;
+    [: 2swap $, r/o ulit, open-tracked-file
+      file-reg# @ save-to ;] n2o>file ;
 
 : seek! ( pos id -- ) >r d>64
     64dup r@ state-addr .fs-seek 64!

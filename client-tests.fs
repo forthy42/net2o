@@ -184,3 +184,17 @@ event: ->throw dup DoError throw ;
 
 : sha-3-512s ( -- )
     [: 2dup sha-3-512 space type cr ;] arg-loop ;
+
+\ terminal connection
+
+: c:terminal ( -- )
+    $10000 $100000 "test" ins-ip c:connect
+    [: .time ." Terminal test: connect to server" cr ;] $err
+    tc-permit# fs-class-permit or to fs-class-permit
+    net2o-code
+    expect-reply
+      log .time "Terminal test" $, type cr endwith
+      $10000 blocksize! $400 blockalign! stat( request-stats )
+      [: 3 ulit, file-type  "" $, 0 ulit, open-file
+	state-addr >o 2 fs-class! o> ;] n2o>file
+    end-code| ['] .time $err ;
