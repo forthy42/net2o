@@ -2351,42 +2351,413 @@ Example: Download three files
 \end_layout
 
 \begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+reading three files
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
 \begin_layout LyX-Code
-net2o-code
+0 file-id "net2o.fs" 0
 \end_layout
 
 \begin_layout LyX-Code
-"Download test" $, type cr ( see-me )
+    open-file get-size get-stat endwith
 \end_layout
 
 \begin_layout LyX-Code
-get-ip $400 blocksize! $400 blockalign! stat( request-stats )
+1 file-id "data/2011-05-13_11-26-57-small.jpg" 0
 \end_layout
 
 \begin_layout LyX-Code
-"net2o.fs" 0 lit, 0 lit, open-tracked-file
+    open-file get-size get-stat endwith
 \end_layout
 
 \begin_layout LyX-Code
-"data/2011-05-13_11-26-57-small.jpg" 0 lit, 1 lit, open-tracked-file
+2 file-id "data/2011-05-20_17-01-12-small.jpg" 0
 \end_layout
 
 \begin_layout LyX-Code
-"data/2011-05-20_17-01-12-small.jpg" 0 lit, 2 lit, open-tracked-file
+    open-file get-size get-stat endwith
 \end_layout
 
 \begin_layout LyX-Code
-gen-total slurp-all-tracked-blocks send-chunks
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Reading Files: Reply
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+reading three files: replies
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+0 file-id 12B9A set-size
 \end_layout
 
 \begin_layout LyX-Code
-0 lit, tag-reply
+    138D607CB83D0F06 1A4 set-stat endwith
 \end_layout
 
 \begin_layout LyX-Code
-end-code 
+1 file-id 9C65C set-size
 \end_layout
 
+\begin_layout LyX-Code
+    13849CAE1F3B6EA8 1A4 set-stat endwith
+\end_layout
+
+\begin_layout LyX-Code
+2 file-id 9D240 set-size
+\end_layout
+
+\begin_layout LyX-Code
+    13849CAE2643FDCC 1A4 set-stat endwith
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Basics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Five data types: Integer (64 bits signed+unsigned), flag, string (generic
+ byte array), IEEE double float, objects
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Instructions and data encoding derived from Protobuf (7 bits per byte, MSB=1
+ means 
+\begin_inset Quotes eld
+\end_inset
+
+data continues
+\begin_inset Quotes erd
+\end_inset
+
+, most significant part first)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Four stacks: integer, float, objects, strings
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+endwith
+\family default
+ and 
+\family typewriter
+endcmd
+\family default
+ for ending object message blocks and commands
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+oswap
+\family default
+ to transfer the current object to the object stack, to be inserted in the
+ outer object
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+words
+\family default
+ for reflection (words are listed with token number, identifier and stack
+ effect to make automatic bindigs possible)
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Why binary encoding?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Faster and simpler to parse (simpler means smaller attack vector)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Ability to enter commands on the fly in text form through a frontend interpreter
+ still exists
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Debugging with a de--tokenizer is also very easy
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Object--oriented approach makes writing application--specific logic extremely
+ simple
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Why a programming language as data?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Lemma: every glue logic will become Turing complete
+\end_layout
+
+\begin_layout Itemize
+Implement only the things you need --- but you shouldn't have to implement
+ more than 
+\emph on
+one
+\emph default
+ generic interpreter
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Typical idea of sending remote procedure calls: serialize the entire object
+ (with subobjects), and call a function on that object
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Net2o idea (derived from ONF): Keep the entire object synchronized by sending
+ only the changes to it --- these changes are simple messages (setters)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This allows multi--message passing, and reduces latency
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Security
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Lemma: every sufficiently complex format can be exploited
+\end_layout
+
+\begin_layout Standard
+Therefore stick to a very simple format, i.e.: simplify and factor the code
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Interpreter (pseudocode)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+get_cmd:  p -> p cmd
+\end_layout
+
+\begin_layout LyX-Code
+    cmd = *p++;
+\end_layout
+
+\begin_layout LyX-Code
+n2cmd:  n -> call
+\end_layout
+
+\begin_layout LyX-Code
+    call = o ? token_table[n] : setup_table[n];
+\end_layout
+
+\begin_layout LyX-Code
+cmd_dispatch:  p -> p
+\end_layout
+
+\begin_layout LyX-Code
+    p, cmd = get_cmd(p);
+\end_layout
+
+\begin_layout LyX-Code
+    invoke(n2cmd(n));
+\end_layout
+
+\begin_layout LyX-Code
+cmd-loop: p -> void
+\end_layout
+
+\begin_layout LyX-Code
+  do { p = cmd-dispatch(p);
+\end_layout
+
+\begin_layout LyX-Code
+  } while(len(p) > 0)
+\end_layout
+
+\end_deeper
 \end_deeper
 \begin_layout Section
 Distributed Data
@@ -2505,10 +2876,6 @@ Avalanche distribution with quad--tree of depth 2
 
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 
@@ -2592,7 +2959,7 @@ The tree--like graph greatly reduces the number of nodes to know
 status open
 
 \begin_layout Plain Layout
-Distributed Prefix Hash Tree
+Distributed Hashes
 \end_layout
 
 \end_inset
@@ -2602,7 +2969,7 @@ Distributed Prefix Hash Tree
 
 \begin_deeper
 \begin_layout Itemize
-Most DHT approaches have poor performanc
+Most DHT approaches have poor performance
 \end_layout
 
 \begin_deeper
@@ -2612,7 +2979,7 @@ Most DHT approaches have poor performanc
 
 \end_deeper
 \begin_layout Itemize
-Prefix Hash Trees use a quite large base
+Still working out what is both simple and fast
 \end_layout
 
 \begin_deeper
@@ -2622,7 +2989,7 @@ Prefix Hash Trees use a quite large base
 
 \end_deeper
 \begin_layout Itemize
-Only a few queries necessary to query an extremely large data base
+Model: Directory servers know how stores which subset of the hashes
 \end_layout
 
 \begin_deeper
@@ -2632,8 +2999,8 @@ Only a few queries necessary to query an extremely large data base
 
 \end_deeper
 \begin_layout Itemize
-Suggestion: Active instantaneous replication of all changed data using the
- avalanche tree mentioned above
+Replicated servers send updates through a distribution tree (low latency
+ mirroring)
 \end_layout
 
 \end_deeper
