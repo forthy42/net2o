@@ -307,8 +307,6 @@ net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
 +net2o: dht-tags- ( $:string -- ) $> d#tags- ;
-$33 net2o: dhd-id-replace ( $:string -- )
-    $> >d#id n:o> n:>o ;
 
 set-current
 

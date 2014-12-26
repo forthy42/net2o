@@ -305,7 +305,7 @@ gen-table $@ inherit-table reply-table
     2r> buf-state 2! ;
 
 : cmdreset ( -- )
-    cmdbuf# off  o IF  req? off  THEN ;
+    cmdbuf# off  o IF  req? on  THEN ;
 : cmd0! ( -- )
     \g initialize a stateless command
     cmd0buf cmd0source !  stateless# outflag ! ;
