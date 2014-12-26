@@ -2311,6 +2311,27 @@ machine
  is a stack architecture.
 \end_layout
 
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The command VM is object oriented, i.e.
+ commands are messages to objects
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The command interpreter itself is extremely simple
+\end_layout
+
 \end_deeper
 \begin_layout Separator
 
