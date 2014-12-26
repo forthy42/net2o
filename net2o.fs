@@ -2096,7 +2096,7 @@ $10 Constant tmp-crypt-val
     0 >o rdrop \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
-    inbuf packet-data queue-command ;
+    stateless# outflag !  inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  parent @ >o
     msg( ." Handle data to addr: " dup hex. cr )
@@ -2107,6 +2107,7 @@ $10 Constant tmp-crypt-val
 
 : handle-cmd ( addr -- )  parent @ >o
     msg( ." Handle command to addr: " dup hex. cr )
+    outflag off
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN ;
 ' handle-cmd rcode-class to handle
