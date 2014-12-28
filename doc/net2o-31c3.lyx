@@ -688,6 +688,10 @@ works as overlay on current networks (UDP/IP), but can replace the entire
 \end_layout
 
 \end_deeper
+\begin_layout Separator
+
+\end_layout
+
 \begin_layout Section
 Topology
 \end_layout
@@ -789,6 +793,162 @@ The receiver bit--flips the path field, and gets the return address
 
 \begin_layout Itemize
 Easy handover possible
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Routing Algorithm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+A node publishes ISP switch+label in the DHT
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The ISP publishs peering switch+label in the DHT
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Assumption is a hierarchical network, so a recursive lookup will give a
+ good solution
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Splice the labels together, and you get a path
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Why Source Routing
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Three possible schemes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+switched circuit (POTS, virtual: ATM, MPLS)
+\end_layout
+
+\begin_layout Enumerate
+unique identifier (IP)
+\end_layout
+
+\begin_layout Enumerate
+source routing
+\end_layout
+
+\end_deeper
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Separation of network gear and computers: Fast, dumb, stateless equipment
+ for routing/switching
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The hierarchical topology is a derived 
+\begin_inset Quotes eld
+\end_inset
+
+law of nature
+\begin_inset Quotes erd
+\end_inset
+
+: people cluster together and connect clusters
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Attack vector is only bandwidth--based, and this can be mitigated (see 
+\begin_inset Quotes eld
+\end_inset
+
+fair routing
+\begin_inset Quotes erd
+\end_inset
+
+ below)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Routing slice is an implementation detail of each network segment (i.e.
+ is a unique identifier within each subnet)
 \end_layout
 
 \end_deeper
@@ -1162,6 +1322,233 @@ Ephemeral Key Exchange+Validation
 \end_layout
 
 \end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Key Replacement
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Problem with key revocation: you really want to 
+\emph on
+replace
+\emph default
+ your compromised key; signing the revocation with the secret key is a bad
+ idea, because the secret key is compromised (the attacker might be the
+ source of the key replacement)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Only the creator of the secret key can revoke it
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+A thief of the secret key can't (i.e.
+ further information is necessary)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Revocation must present a trustworthy replacement key
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Third parties must trust both the revocation and the replacement key without
+ another trustworthy instance, i.e.
+ trusting only their communication partner
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Solution: 
+\begin_inset Quotes eld
+\end_inset
+
+proof of creation
+\begin_inset Quotes erd
+\end_inset
+
+, i.e.
+ you prove you made the key with a separately stored secret
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Proof of Creation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Create two 256 bit random numbers 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Create pubkeys 
+\begin_inset Formula $p_{1}=base*[s_{1}]$
+\end_inset
+
+ and 
+\begin_inset Formula $p_{2}=base*[s_{2}]$
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Compute 
+\begin_inset Formula $[s]=[s_{1}*p_{2}]$
+\end_inset
+
+ as "work secret" and 
+\begin_inset Formula $p=base*[s]$
+\end_inset
+
+, the pubkey
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Publish 
+\begin_inset Formula $p$
+\end_inset
+
+ and 
+\begin_inset Formula $p_{1}$
+\end_inset
+
+, destroy 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ (no longer needed), keep 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+ as offline copy (e.g.
+ on paper)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+To revoke a key, publish 
+\begin_inset Formula $p_{2}$
+\end_inset
+
+, which the recipient can validate by 
+\begin_inset Formula $p_{1}*[p_{2}]\equiv p$
+\end_inset
+
+.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+To proof possession of all secrets, sign new key with 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+, 
+\begin_inset Formula $s$
+\end_inset
+
+, and 
+\begin_inset Formula $s_{new}$
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
 \begin_layout Subsection
 Symmetric Crypto
 \end_layout
@@ -1278,6 +1665,75 @@ All keys are one--time--use only!
 \end_layout
 
 \end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Symmetric Crypto: Threefish
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Keccak has one disadvantage: No ECB mode.
+ Application for ECB mode:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Encryption of hash values for the DHT --- to store key/value pairs in a
+ pubic DHT without revealing the content.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+For net2o--in--net2o tunnels (to be used for onion--routing), no authentication
+ and no IV is desirable, so use an ECB mode algorithm.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Strength >256 bits, tweaksable to make ECB mode more secure (counter as
+ tweak)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+SHA--3 finalist, so sufficiently good cryptanalysis
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
 \begin_layout Section
 Flow Control
 \end_layout
