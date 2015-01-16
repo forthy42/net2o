@@ -860,7 +860,9 @@ end-class code-class
 ' noop code-class to rewind-timestamps
 ' drop code-class to rewind-timestamps-partial
 
-code-class class end-class data-class
+code-class class
+    field: data-resend#
+end-class data-class
 
 code-class class
     field: data-ackbits
@@ -1220,7 +1222,8 @@ Variable mapstart $1 mapstart !
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
-    addrs u map-source data-map ! ;
+    addrs u map-source dup data-map !
+    >o u addr>bits alloz data-resend# ! o> ;
 : n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
@@ -1232,7 +1235,7 @@ Variable mapstart $1 mapstart !
 
 \ dispose connection
 
-: free-code ( o:data -- ) o 0= ?EXIT dest-size @ >r
+: free-code ( o:data -- ) dest-size @ >r
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
     dest-replies    r@ addr>replies ?free
@@ -1240,7 +1243,9 @@ Variable mapstart $1 mapstart !
     dest-cookies    r> addr>ts      ?free
     dispose ;
 ' free-code code-class to free-data
-' free-code data-class to free-data
+:noname ( -- )
+    data-resend# dest-size @ addr>bits ?free
+    free-code ; data-class to free-data
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size @ addr>bytes ?free
@@ -1822,7 +1827,14 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 dup data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 
-:noname ( new-back o:map -- )
+: rewind-resend#-partial ( new-back o:map -- )
+    cookie( ." Rewind cookie to: " dup hex. cr )
+    dest-back @ U+DO
+	I I' fix-size dup { len }
+	addr>bits swap addr>bits swap >r
+	data-resend# @ + r> erase
+    len +LOOP ;
+: rewind-rdata-timestamp ( new-back o:map -- )
     cookie( ." Rewind cookie to: " dup hex. cr )
     dest-back @ U+DO
 	I I' fix-size dup { len }
@@ -1831,8 +1843,9 @@ rdata-class to rewind-timestamps
 	dest-cookies @ + r>
 	cookies( ." cookies: " 2dup xtype cr ) erase
     len +LOOP ;
-dup data-class to rewind-timestamps-partial
-rdata-class to rewind-timestamps-partial
+:noname dup rewind-resend#-partial rewind-rdata-timestamp ;
+data-class to rewind-timestamps-partial
+' rewind-rdata-timestamp rdata-class to rewind-timestamps-partial
 
 : clearpages-partial ( new-back o:map -- )
     dest-back @ U+DO
@@ -1855,9 +1868,13 @@ rdata-class to rewind-timestamps-partial
     firstack( ." rewind firstacks" cr )
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
+: rewind-resend# ( o:map -- )
+    data-resend# @ dest-size @ addr>bits erase ;
+
 : net2o:rewind-sender ( n -- )
     data-map @ >o dest-round @
-    +DO  rewind-buffer  LOOP  o> ;
+    +DO  rewind-buffer  LOOP
+    rewind-resend# o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
     data-rmap @ >o dest-round @
