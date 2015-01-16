@@ -677,8 +677,6 @@ Variable lastn2oaddr
 User return-addr $10 cell- uallot drop
 User temp-addr   $10 cell- uallot drop
 
-\ these are all stubs for now
-
 [IFDEF] 64bit ' be-ux@ [ELSE] ' be-ul@ [THEN] alias be@
 [IFDEF] 64bit ' be-x! [ELSE] ' be-l! [THEN] alias be!
 
@@ -1011,22 +1009,23 @@ $100 Value dests#
     dests>> 64rshift 64>n 2* cells dest-map $@ drop + ;
 : dest-index ( -- addr ) dest-addr 64@ >dest-map ;
 
-: check-dest ( -- addr map o:job / f )
+: check-dest ( size -- addr map o:job / f )
     \G return false if invalid destination
     \G return 1 if code, -1 if data, plus destination address
+    negate \ generate mask
     dest-index 2 cells bounds ?DO
 	I @ IF
-	    dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n dup
+	    dup dest-addr 64@ I @ >o dest-vaddr 64@ 64- 64>n and dup
 	    dest-size @ u<
 	    IF
 		dup addr>bits ack-bit# !
 		dest-raddr @ swap dup >data-head ack-advance? ! +
 		o parent @ o> >o rdrop
-		UNLOOP  EXIT  THEN
+		UNLOOP  rot drop  EXIT  THEN
 	    drop o>
 	THEN
     cell +LOOP
-    false ;
+    drop false ;
 
 \ context debugging
 
@@ -1940,24 +1939,20 @@ queue-class >osize @ buffer: queue-adder
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
-: poll-sock ( -- flag )
-    eval-queue  clear-events  timeout!
-    pollfds pollfd#
+: >poll ( -- flag )
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
 [ELSE]
-    ptimeout cell+ @ #1000000 / poll 0>
+    ptimeout 2@ #1000 * swap #1000000 / + poll 0>
 [THEN] +wait
 ;
 
 : wait-send ( -- flag )
     clear-events  timeout!
-    pollfds pollfd#
-[IFDEF] ppoll
-    ptimeout 0 ppoll 0>
-[ELSE]
-    ptimeout cell+ @ #1000000 / poll 0>
-[THEN] ;
+    pollfds pollfd# >poll ;
+
+: poll-sock ( -- flag )
+    eval-queue  wait-send ;
 
 User try-reads
 4 Value try-read#
@@ -2130,7 +2125,7 @@ $10 Constant tmp-crypt-val
     dest-flags 1+ c@ stateless# and  IF
 	handle-cmd0
     ELSE
-	check-dest dup 0= IF
+	inbuf body-size check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )
 	    drop  EXIT  THEN +dest
 	handle-dest
