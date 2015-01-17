@@ -1601,6 +1601,8 @@ require net2o-crypt.fs
 : >dest ( addr -- ) outbuf destination $10 move ;
 : set-dest ( target -- )
     64dup dest-addr 64!  outbuf addr 64! ;
+: set-dest# ( resend# -- )
+    n>64 64dup dest-addr 64+!  outbuf addr 64+! ;
 
 User outflag  outflag off
 
@@ -1621,7 +1623,7 @@ User outflag  outflag off
     THEN ;
 
 : send-code-packet ( -- ) +sendX
-\    ." send " outbuf .header
+    header( ." send code " outbuf .header )
     outbuf flags 1+ c@ stateless# and IF
 	outbuf0-encrypt
 	return-addr
@@ -1632,6 +1634,7 @@ User outflag  outflag off
     THEN   packet-to ;
 
 : send-data-packet ( -- ) +sendX
+    header( ." send data " outbuf .header )
     data-map @  outbuf-encrypt
     send-cookie ret-addr packet-to ;
 
@@ -1649,6 +1652,8 @@ User outflag  outflag off
     >send  send-code-packet  net2o:update-key ;
 
 : send-dX ( addr n -- ) +sendX2
+    over data-map @ >o dest-raddr @ - addr>bits
+    data-resend# @ + >r r@ c@ dup 1+ r> c! o>  set-dest#
     >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer punch-reply
