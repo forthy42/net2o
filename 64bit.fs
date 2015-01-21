@@ -21,6 +21,7 @@ cell 8 = [IF]
     ' or Alias 64or
     ' and Alias 64and
     ' xor Alias 64xor
+    ' invert Alias 64invert
     ' l@ Alias 32@
     ' Variable Alias 64Variable
     ' User Alias 64User
@@ -30,9 +31,12 @@ cell 8 = [IF]
     ' 2* Alias 64-2*
     ' negate Alias 64negate
     0 Constant 64#0
+    1 Constant 64#1
     -1 Constant 64#-1
     ' rshift Alias 64rshift
     ' lshift Alias 64lshift
+    ' rol Alias 64rol
+    ' ror Alias 64ror
     ' s>f Alias 64>f
     ' f>s Alias f>64
     ' = Alias 64=
@@ -99,6 +103,7 @@ cell 8 = [IF]
     : 64or rot or >r or r> ;
     : 64and rot and >r and r> ;
     : 64xor rot xor >r xor r> ;
+    : 64invert  invert swap invert swap ;
     ' @ Alias 32@
     ' 2Variable Alias 64Variable
     : 64User  User cell uallot drop ;
@@ -108,21 +113,12 @@ cell 8 = [IF]
     ' d2* Alias 64-2*
     ' dnegate Alias 64negate
     0. 2Constant 64#0
+    1. 2Constant 64#1
     -1. 2Constant 64#-1
-    : 64lshift ( u64 u -- u64' )
-	dup $20 u>= IF
-	    nip $20 - lshift 0 swap
-	ELSE  >r
-	    r@ lshift over 8 cells r@ - rshift or
-	    swap r> lshift swap
-	THEN ;
-    : 64rshift ( u64 u -- u64' )
-	dup $20 u>= IF
-	    $20 - rshift nip 0
-	ELSE  >r swap
-	    r@ rshift over 8 cells r@ - lshift or
-	    swap r> rshift
-	THEN ;
+    ' dlshift Alias 64lshift
+    ' drshift Alias 64rshift
+    ' drol Alias 64rol
+    ' dror Alias 64ror
     ' d>f Alias 64>f
     ' f>d Alias f>64
     ' d= Alias 64=

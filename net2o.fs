@@ -445,15 +445,17 @@ end-structure
 m: addr>bits ( addr -- bits )
     chunk-p2 rshift ;
 m: addr>bytes ( addr -- bytes )
-    chunk-p2 3 + rshift ;
+    [ chunk-p2 3 + ]L rshift ;
 m: bytes>addr ( bytes addr -- )
-    chunk-p2 3 + lshift ;
+    [ chunk-p2 3 + ]L lshift ;
 m: bits>bytes ( bits -- bytes )
     1- 2/ 2/ 2/ 1+ ;
 m: bytes>bits ( bytes -- bits )
     3 lshift ;
 m: addr>ts ( addr -- ts-offset )
     addr>bits timestamp * ;
+m: addr>64 ( addr -- ts-offset )
+    [ chunk-p2 3 - ]L rshift -8 and ;
 m: addr>replies ( addr -- replies )
     addr>bits reply * ;
 m: addr>keys ( addr -- keys )
@@ -849,6 +851,7 @@ cmd-class class
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
     field: dest-end   \ -/-                    true if last chunk
+    field: data-resend# \ resend tokens; only for data
     field: do-slurp
     method free-data
     method regen-ivs
@@ -861,7 +864,6 @@ end-class code-class
 ' drop code-class to rewind-timestamps-partial
 
 code-class class
-    field: data-resend#
 end-class data-class
 
 code-class class
@@ -1041,7 +1043,7 @@ $100 Value dests#
 
 User >code-flag
 
-: alloc-data ( addr u -- u flag )
+: alloc-data ( addr u -- u )
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
     c:key# alloz dest-ivsgen !
@@ -1051,6 +1053,7 @@ User >code-flag
 	3 dest-ivslastgen !
     ELSE
 	dup addr>ts       alloz dest-timestamps !
+	dup addr>ts       alloz data-resend# !
     THEN ;
 
 : map-data ( addr u -- o )
@@ -1222,8 +1225,7 @@ Variable mapstart $1 mapstart !
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
-    addrs u map-source dup data-map !
-    >o u addr>bits alloz data-resend# ! o> ;
+    addrs u map-source data-map ! ;
 : n2o:new-code pow2? { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
@@ -1235,23 +1237,24 @@ Variable mapstart $1 mapstart !
 
 \ dispose connection
 
+: free-resend ( o:data ) dest-size @ addr>ts >r
+    data-resend#    r@ ?free
+    dest-timestamps r> ?free ;
 : free-code ( o:data -- ) dest-size @ >r
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
     dest-replies    r@ addr>replies ?free
-    dest-timestamps r@ addr>ts      ?free
     dest-cookies    r> addr>ts      ?free
     dispose ;
 ' free-code code-class to free-data
 :noname ( -- )
-    data-resend# dest-size @ addr>bits ?free
-    free-code ; data-class to free-data
+    free-resend free-code ; data-class to free-data
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size @ addr>bytes ?free
     data-ackbits-buf $off
     free-code ;
-' free-rcode rdata-class to free-data
+:noname free-resend free-rcode ; rdata-class to free-data
 ' free-rcode rcode-class to free-data
 
 \ symmetric key management and searching in open connections
@@ -1281,8 +1284,9 @@ Variable mapstart $1 mapstart !
 
 : fix-size ( offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and r> over + dest-size @ umin over - ;
-: fix-bitsize ( offset1 offset2 -- addr len )
-    over - >r dest-size @ addr>bits 1- and r> over + dest-size @ umin over - ;
+: fix-tssize ( offset1 offset2 -- addr len )
+    over - >r dest-size @ addr>ts 1- and r> over +
+    dest-size @ addr>ts umin over - ;
 : raddr+ ( addr len -- addr' len ) >r dest-raddr @ + r> ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
@@ -1651,9 +1655,22 @@ User outflag  outflag off
 : send-cX ( addr n -- ) +sendX2
     >send  send-code-packet  net2o:update-key ;
 
+: 64ffz< ( 64b -- u / -1 )
+    \G find first zero from the right, u is bit position
+    64 0 DO
+	64dup 64>n 1 and 0= IF  64drop I unloop  EXIT  THEN
+	64-2/
+    LOOP 64drop $40 ;
+
+: resend#+ ( addr -- n )
+    dest-raddr @ - addr>64 data-resend# @ + { addr }
+    rng8 $3F and { r }
+    addr 64@ r 64ror 64ffz< r + $3F and to r
+    64#1 r 64lshift addr 64@ or addr 64! 
+    r ;
+
 : send-dX ( addr n -- ) +sendX2
-    over data-map @ >o dest-raddr @ - addr>bits
-    data-resend# @ + >r r@ c@ dup 1+ r> c! o>  set-dest#
+    over data-map @ .resend#+ set-dest#
     >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer punch-reply
@@ -1834,18 +1851,16 @@ rdata-class to rewind-timestamps
 
 : rewind-resend#-partial ( new-back o:map -- )
     cookie( ." Rewind cookie to: " dup hex. cr )
-    dest-back @ U+DO
-	I I' fix-size dup { len }
-	addr>bits swap addr>bits swap >r
-	data-resend# @ + r> erase
+    addr>ts dest-back @ addr>ts U+DO
+	I I' fix-tssize { len }
+	data-resend# @ + len erase
     len +LOOP ;
 : rewind-rdata-timestamp ( new-back o:map -- )
     cookie( ." Rewind cookie to: " dup hex. cr )
-    dest-back @ U+DO
-	I I' fix-size dup { len }
-	addr>ts swap addr>ts swap >r
-	dup dest-timestamps @ + r@ erase
-	dest-cookies @ + r>
+    addr>ts dest-back @ addr>ts U+DO
+	I I' fix-tssize { len }
+	dup dest-timestamps @ + len erase
+	dest-cookies @ + len
 	cookies( ." cookies: " 2dup xtype cr ) erase
     len +LOOP ;
 :noname dup rewind-resend#-partial rewind-rdata-timestamp ;
@@ -1874,7 +1889,7 @@ data-class to rewind-timestamps-partial
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
 : rewind-resend# ( o:map -- )
-    data-resend# @ dest-size @ addr>bits erase ;
+    data-resend# @ dest-size @ addr>ts erase ;
 
 : net2o:rewind-sender ( n -- )
     data-map @ >o dest-round @
