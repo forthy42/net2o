@@ -1053,7 +1053,6 @@ User >code-flag
 	3 dest-ivslastgen !
     ELSE
 	dup addr>ts       alloz dest-timestamps !
-	dup addr>ts       alloz data-resend# !
     THEN ;
 
 : map-data ( addr u -- o )
@@ -1062,6 +1061,7 @@ User >code-flag
     >code-flag @ 0= IF
 	dup addr>ts alloz dest-cookies !
 	dup addr>bytes allocate-bits data-ackbits !
+	dup addr>bits allo1 data-resend# !
     THEN
     drop
     o o> ;
@@ -1070,6 +1070,7 @@ User >code-flag
     o >code-flag @ IF code-class ELSE data-class THEN new >o parent !
     alloc-data
     dup addr>ts alloz dest-cookies !
+    dup addr>ts alloz data-resend# !
     drop
     o o> ;
 
@@ -1240,6 +1241,9 @@ Variable mapstart $1 mapstart !
 : free-resend ( o:data ) dest-size @ addr>ts >r
     data-resend#    r@ ?free
     dest-timestamps r> ?free ;
+: free-resend' ( o:data ) dest-size @ addr>ts >r
+    data-resend#    r@ 2/ 2/ 2/ ?free
+    dest-timestamps r> ?free ;
 : free-code ( o:data -- ) dest-size @ >r
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
@@ -1247,14 +1251,15 @@ Variable mapstart $1 mapstart !
     dest-cookies    r> addr>ts      ?free
     dispose ;
 ' free-code code-class to free-data
-:noname ( -- )
+:noname ( o:data -- )
     free-resend free-code ; data-class to free-data
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size @ addr>bytes ?free
     data-ackbits-buf $off
     free-code ;
-:noname free-resend free-rcode ; rdata-class to free-data
+:noname ( o:data -- )
+    free-resend' free-rcode ; rdata-class to free-data
 ' free-rcode rcode-class to free-data
 
 \ symmetric key management and searching in open connections
@@ -1287,6 +1292,9 @@ Variable mapstart $1 mapstart !
 : fix-tssize ( offset1 offset2 -- addr len )
     over - >r dest-size @ addr>ts 1- and r> over +
     dest-size @ addr>ts umin over - ;
+: fix-bitsize ( offset1 offset2 -- addr len )
+    over - >r dest-size @ addr>bits 1- and r> over +
+    dest-size @ addr>bits umin over - ;
 : raddr+ ( addr len -- addr' len ) >r dest-raddr @ + r> ;
 : fix-size' ( base offset1 offset2 -- addr len )
     over - >r dest-size @ 1- and + r> ;
@@ -1844,28 +1852,33 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 :noname ( o:map -- )
     dest-timestamps @ dest-size @ addr>ts erase
-    dest-cookies @ dest-size @ addr>ts
-    cookies( ." cookies: " 2dup xtype cr ) erase ;
-dup data-class to rewind-timestamps
+    dest-cookies @ dest-size @ addr>ts erase
+    data-resend# @ dest-size @ addr>ts erase ;
+data-class to rewind-timestamps
+:noname ( o:map -- )
+    dest-timestamps @ dest-size @ addr>ts erase
+    dest-cookies @ dest-size @ addr>ts erase
+    data-resend# @ dest-size @ addr>bits $FF fill ;
 rdata-class to rewind-timestamps
 
-: rewind-resend#-partial ( new-back o:map -- )
-    cookie( ." Rewind cookie to: " dup hex. cr )
-    addr>ts dest-back @ addr>ts U+DO
-	I I' fix-tssize { len }
-	data-resend# @ + len erase
+: rewind-bits-partial ( new-back addr o:map -- )
+    { addr } addr>bits dest-back @ addr>bits U+DO
+	I I' fix-bitsize { len } addr + len $FF fill
     len +LOOP ;
-: rewind-rdata-timestamp ( new-back o:map -- )
-    cookie( ." Rewind cookie to: " dup hex. cr )
-    addr>ts dest-back @ addr>ts U+DO
-	I I' fix-tssize { len }
-	dup dest-timestamps @ + len erase
-	dest-cookies @ + len
-	cookies( ." cookies: " 2dup xtype cr ) erase
+: rewind-ts-partial ( new-back addr o:map -- )
+    { addr } addr>ts dest-back @ addr>ts U+DO
+	I I' fix-tssize { len } addr + len erase
     len +LOOP ;
-:noname dup rewind-resend#-partial rewind-rdata-timestamp ;
+:noname ( -- )
+    dup data-resend# @ rewind-ts-partial
+    dup dest-timestamps @ rewind-ts-partial
+    dest-cookies @ rewind-ts-partial ;
 data-class to rewind-timestamps-partial
-' rewind-rdata-timestamp rdata-class to rewind-timestamps-partial
+:noname ( -- )
+    dup data-resend# @ rewind-bits-partial
+    dup dest-timestamps @ rewind-ts-partial
+    dest-cookies @ rewind-ts-partial ;
+rdata-class to rewind-timestamps-partial
 
 : clearpages-partial ( new-back o:map -- )
     dest-back @ U+DO
