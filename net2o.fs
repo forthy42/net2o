@@ -857,11 +857,11 @@ cmd-class class
     method regen-ivs
     method handle
     method rewind-timestamps
-    method rewind-timestamps-partial
+    method rewind-partial
 end-class code-class
 ' drop code-class to regen-ivs
 ' noop code-class to rewind-timestamps
-' drop code-class to rewind-timestamps-partial
+' drop code-class to rewind-partial
 
 code-class class
 end-class data-class
@@ -1850,14 +1850,14 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 \ rewind buffer to send further packets
 
-:noname ( o:map -- )
-    dest-timestamps @ dest-size @ addr>ts erase
-    dest-cookies @ dest-size @ addr>ts erase
-    data-resend# @ dest-size @ addr>ts erase ;
+:noname ( o:map -- ) dest-size @ addr>ts 
+    dest-timestamps @ over erase
+    dest-cookies @ over erase
+    data-resend# @ swap erase ;
 data-class to rewind-timestamps
-:noname ( o:map -- )
-    dest-timestamps @ dest-size @ addr>ts erase
-    dest-cookies @ dest-size @ addr>ts erase
+:noname ( o:map -- ) dest-size @ addr>ts
+    dest-timestamps @ over erase
+    dest-cookies @ swap erase
     data-resend# @ dest-size @ addr>bits $FF fill ;
 rdata-class to rewind-timestamps
 
@@ -1869,27 +1869,23 @@ rdata-class to rewind-timestamps
     { addr } addr>ts dest-back @ addr>ts U+DO
 	I I' fix-tssize { len } addr + len erase
     len +LOOP ;
-:noname ( -- )
+:noname ( new-back o:map -- )
     dup data-resend# @ rewind-ts-partial
     dup dest-timestamps @ rewind-ts-partial
-    dest-cookies @ rewind-ts-partial ;
-data-class to rewind-timestamps-partial
-:noname ( -- )
+    dup dest-cookies @ rewind-ts-partial
+    regen-ivs-part ;
+data-class to rewind-partial
+:noname ( new-back o:map -- )
     dup data-resend# @ rewind-bits-partial
     dup dest-timestamps @ rewind-ts-partial
-    dest-cookies @ rewind-ts-partial ;
-rdata-class to rewind-timestamps-partial
+    dup dest-cookies @ rewind-ts-partial
+    regen-ivs-part ;
+rdata-class to rewind-partial
 
 : clearpages-partial ( new-back o:map -- )
     dest-back @ U+DO
 	I I' fix-size raddr+ tuck clearpages
     +LOOP ;
-
-: rewind-partial ( new-back o:map -- )
-    flush( ." rewind partial " dup hex. cr )
-    \ dup clearpages-partial
-    msg( ." Rewind to: " dup hex. cr )
-    dup rewind-timestamps-partial regen-ivs-part ;
 
 : rewind-buffer ( o:map -- )
     1 dest-round +!
