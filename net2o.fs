@@ -843,7 +843,6 @@ cmd-class class
     field: dest-ivsrest
     field: dest-timestamps
     field: dest-replies
-    field: dest-cookies
     field: dest-round \ going to be obsoleted
     \                   sender:                receiver:
     field: dest-top   \ -/-                    sender read up to here
@@ -1068,7 +1067,6 @@ User >code-flag
 : map-source ( addr u addrx -- o )
     o >code-flag @ IF code-class ELSE data-class THEN new >o parent !
     alloc-data
-    dup addr>ts alloz dest-cookies !
     >code-flag @ 0= IF
 	dup addr>ts alloz data-resend# !
     THEN
@@ -1248,7 +1246,6 @@ Variable mapstart $1 mapstart !
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
     dest-replies    r@ addr>replies ?free
-    dest-cookies @ IF  dest-cookies    r@ addr>ts      ?free  THEN
     rdrop dispose ;
 ' free-code code-class to free-data
 :noname ( o:data -- )
@@ -1587,25 +1584,6 @@ require net2o-file.fs
 
 require net2o-crypt.fs
 
-\ cookie stuff
-
-: send-cookie ( -- )  c:cookie  data-map  @ >o
-    dest-addr 64@ >offset 0= IF  drop 64drop o>  EXIT  THEN
-    cookie( ." cookie+ " dup hex. >r 64dup $64. r> cr )
-    addr>ts dest-cookies @ + 64! o> ;
-
-: cookie+ ( addr bitmap map -- sum ) >o
-    cookies( ." cookies: " 64>r dup hex. 64r> 64dup $64. space space )  64>r
-    addr>ts dest-size @ addr>ts umin
-    dest-cookies @ + { addr } 64#0 cookie( ." cookie: " )
-    BEGIN  64r@ 64>n 1 and IF
-	    addr 64@ 64dup 64-0= IF
-		." zero cookie @" addr dest-cookies @ - hex. cr
-	    THEN  cookie( 64dup $64. space ) 64+
-	THEN
-    addr 64'+ to addr 64r> 1 64rshift 64dup 64>r 64-0= UNTIL
-    64r> 64drop cookies( ." => " 64dup $64. space cr ) o> ;
-
 \ send blocks of memory
 
 : >dest ( addr -- ) outbuf destination $10 move ;
@@ -1646,7 +1624,7 @@ User outflag  outflag off
 : send-data-packet ( -- ) +sendX
     header( ." send data " outbuf .header )
     data-map @  outbuf-encrypt
-    send-cookie ret-addr packet-to ;
+    ret-addr packet-to ;
 
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
@@ -1860,7 +1838,6 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 :noname ( o:map -- ) dest-size @ addr>ts 
     dest-timestamps @ over erase
-    dest-cookies @ over erase
     data-resend# @ swap erase ;
 data-class to rewind-timestamps
 :noname ( o:map -- ) dest-size @ addr>ts
@@ -1878,7 +1855,6 @@ rdata-class to rewind-timestamps
 :noname ( new-back o:map -- )
     dup data-resend# @ rewind-ts-partial
     dup dest-timestamps @ rewind-ts-partial
-    dup dest-cookies @ rewind-ts-partial
     regen-ivs-part ;
 data-class to rewind-partial
 :noname ( new-back o:map -- )

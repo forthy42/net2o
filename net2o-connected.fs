@@ -215,15 +215,6 @@ also net2o-base
 
 \ ack bits, new code
 
-: net2o:ack-cookies ( -- )
-    data-rmap @ { map }
-    map .data-ackbits-buf $@
-    bounds ?DO
-	I 2 cells + 64@ lit,
-	I 2@ [ 8 cells ]L * maxdata * ulit, ulit, ack-cookies
-    [ 2 cells 64'+ ]L +LOOP
-    map .data-ackbits-buf $off ;
-
 : net2o:ack-resend# ( -- )  data-rmap @ { map }
     map .data-resend#-buf $@
     bounds ?DO
@@ -235,9 +226,7 @@ also net2o-base
 \ client side acknowledge
 
 : net2o:genack ( -- )
-    \ net2o:ack-cookies
-    net2o:ack-resend#
-    net2o:b2btime  net2o:acktime  >rate ;
+    net2o:ack-resend#  net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o
@@ -312,28 +301,11 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
-	\ net2o:ack-cookies
-	net2o:ack-resend#
-	rewind-transfer
+	net2o:ack-resend#  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
 
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
-
-: +ackbit ( bit -- ) 0. c:cookie { d^ new-ackbit 64^ new-cookie }
-    dup  [ 8 cells 1- ]L and swap cell>> rshift
-    data-ackbits-buf $@ bounds ?DO
-	dup I @ = IF drop
-	    cookie( ." cookie+ " I @ cell>> chunk-p2 + lshift hex. dup hex. new-cookie 64@ $64. )
-	    I cell+ swap +bit
-	    new-cookie 64@ I 2 cells + 64+!
-	    cookie( I 2 cells + 64@ $64. I cell+ @ hex. F cr )
-	    unloop EXIT  THEN
-    [ 2 cells 64'+ ]L +LOOP
-    cookie( ." cookie= " dup cell>> chunk-p2 + lshift hex. over hex. new-cookie 64@ $64. F cr )
-    new-ackbit !
-    new-ackbit cell+ swap +bit
-    new-ackbit [ 2 cells 64'+ ]L data-ackbits-buf $+! ;
 
 Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
@@ -353,7 +325,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 : +cookie ( -- )
     data-rmap @ >o  ack-bit# @ >r  r@ +resend#
-    data-ackbits @ r@ +bit@ ( dup 0= IF  r@ +ackbit  THEN ) rdrop
+    data-ackbits @ r> +bit@
     o> negate packetr2 +! ;
 
 : +expected ( -- flag )

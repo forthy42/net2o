@@ -149,10 +149,6 @@ keccak-init
     keccak-checksums keccak#cks keccak>
     7 and 4 lshift keccak-checksums + 128@ ; to c:checksum ( tag -- xd )
 \G compute a 128 bit checksum
-:noname keccak-checksums keccak#cks keccak>
-    64#0 keccak-checksums keccak#cks bounds ?DO
-	I 64@ 64xor  8 +LOOP ; to c:cookie ( -- x )
-\G obtain a 64 bit checksum
 :noname @keccak keccak#max + dup >r 128@ 128xor r> 128! ;
 to c:tweak! ( xd -- )
 \G set 128 bit tweek
