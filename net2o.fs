@@ -851,7 +851,6 @@ cmd-class class
     field: dest-tail  \ send from here         received all
     field: dest-back  \ flushed on destination flushed
     field: dest-end   \ -/-                    true if last chunk
-    field: data-resend# \ resend tokens; only for data
     field: do-slurp
     method free-data
     method regen-ivs
@@ -864,6 +863,7 @@ end-class code-class
 ' drop code-class to rewind-partial
 
 code-class class
+    field: data-resend# \ resend tokens; only for data
 end-class data-class
 
 code-class class
@@ -1060,7 +1060,6 @@ User >code-flag
     alloc-data
     >code-flag @ 0= IF
 	dup addr>bytes allocate-bits data-ackbits !
-	dup addr>bits allo1 data-resend# !
     THEN
     drop
     o o> ;
@@ -1069,7 +1068,9 @@ User >code-flag
     o >code-flag @ IF code-class ELSE data-class THEN new >o parent !
     alloc-data
     dup addr>ts alloz dest-cookies !
-    dup addr>ts alloz data-resend# !
+    >code-flag @ 0= IF
+	dup addr>ts alloz data-resend# !
+    THEN
     drop
     o o> ;
 
@@ -1241,7 +1242,6 @@ Variable mapstart $1 mapstart !
     data-resend#    r@ ?free
     dest-timestamps r> ?free ;
 : free-resend' ( o:data ) dest-size @ addr>ts >r
-    data-resend#    r@ 2/ 2/ 2/ ?free
     dest-timestamps r> ?free ;
 : free-code ( o:data -- ) dest-size @ >r
     dest-raddr r@   ?free+guard
@@ -1853,8 +1853,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     data-resend# @ swap erase ;
 data-class to rewind-timestamps
 :noname ( o:map -- ) dest-size @ addr>ts
-    dest-timestamps @ over erase
-    data-resend# @ dest-size @ addr>bits $FF fill ;
+    dest-timestamps @ over erase ;
 rdata-class to rewind-timestamps
 
 : rewind-bits-partial ( new-back addr o:map -- )
@@ -1872,7 +1871,6 @@ rdata-class to rewind-timestamps
     regen-ivs-part ;
 data-class to rewind-partial
 :noname ( new-back o:map -- )
-    dup data-resend# @ rewind-bits-partial
     dup dest-timestamps @ rewind-ts-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
@@ -1892,13 +1890,9 @@ rdata-class to rewind-partial
     firstack( ." rewind firstacks" cr )
     data-ackbits @ dest-size @ addr>bytes $FF fill ;
 
-: rewind-resend# ( o:map -- )
-    data-resend# @ dest-size @ addr>ts erase ;
-
 : net2o:rewind-sender ( n -- )
     data-map @ >o dest-round @
-    +DO  rewind-buffer  LOOP
-    rewind-resend# o> ;
+    +DO  rewind-buffer  LOOP o> ;
 
 : net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
     data-rmap @ >o dest-round @
