@@ -110,15 +110,10 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     net2o:timing$ maxtiming umin tuck $, net2o:/timing rec-timing ;
 +net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
     net2o:ack-b2btime ;
-+net2o: ack-cookies ( ucookie addr umask -- ) \ acknowledge cookie
-    [IFUNDEF] 64bit 64>r 64>n 64r> [THEN]
-    parent @ >o data-map @ cookie+ 64over 64over 64= 0= IF
-	." cookies don't match! " 64over $64. 64dup $64. F cr
-    THEN
-    64= cookie-val and validated or! o> ;
 +net2o: ack-resend# ( addr $:string -- )
     64>n $> parent @ .data-map @ .resend#? 0= IF
 	." resend# don't match!" F cr
+	cookie-val invert validated and!
     ELSE
 	cookie-val validated or!
     THEN ;
@@ -220,14 +215,10 @@ also net2o-base
 
 \ ack bits, new code
 
-: ack-cookie, ( map bits n -- ) [ 8 cells ]L * maxdata *
-    2dup 2>r rot >r swap u>64 r> cookie+
-    lit, 2r> ulit, ulit, ack-cookies ;
-
-: net2o:ack-cookies ( -- )  data-rmap @ { map }
+: net2o:ack-cookies ( -- )
+    data-rmap @ { map }
     map .data-ackbits-buf $@
     bounds ?DO
-	\ map I 2@ ack-cookie,
 	I 2 cells + 64@ lit,
 	I 2@ [ 8 cells ]L * maxdata * ulit, ulit, ack-cookies
     [ 2 cells 64'+ ]L +LOOP
@@ -244,7 +235,8 @@ also net2o-base
 \ client side acknowledge
 
 : net2o:genack ( -- )
-    net2o:ack-cookies net2o:ack-resend#
+    \ net2o:ack-cookies
+    net2o:ack-resend#
     net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
@@ -320,7 +312,9 @@ also net2o-base
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
-	net2o:ack-cookies  rewind-transfer
+	\ net2o:ack-cookies
+	net2o:ack-resend#
+	rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
 
@@ -359,7 +353,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 : +cookie ( -- )
     data-rmap @ >o  ack-bit# @ >r  r@ +resend#
-    data-ackbits @ r@ +bit@  dup 0= IF  r@ +ackbit  THEN  rdrop
+    data-ackbits @ r@ +bit@ ( dup 0= IF  r@ +ackbit  THEN ) rdrop
     o> negate packetr2 +! ;
 
 : +expected ( -- flag )
