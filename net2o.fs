@@ -1059,7 +1059,6 @@ User >code-flag
     o >code-flag @ IF rcode-class ELSE rdata-class THEN new >o parent !
     alloc-data
     >code-flag @ 0= IF
-	dup addr>ts alloz dest-cookies !
 	dup addr>bytes allocate-bits data-ackbits !
 	dup addr>bits allo1 data-resend# !
     THEN
@@ -1248,8 +1247,8 @@ Variable mapstart $1 mapstart !
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
     dest-replies    r@ addr>replies ?free
-    dest-cookies    r> addr>ts      ?free
-    dispose ;
+    dest-cookies @ IF  dest-cookies    r@ addr>ts      ?free  THEN
+    rdrop dispose ;
 ' free-code code-class to free-data
 :noname ( o:data -- )
     free-resend free-code ; data-class to free-data
@@ -1593,8 +1592,6 @@ require net2o-crypt.fs
     dest-addr 64@ >offset 0= IF  drop 64drop o>  EXIT  THEN
     cookie( ." cookie+ " dup hex. >r 64dup $64. r> cr )
     addr>ts dest-cookies @ + 64! o> ;
-: recv-cookie ( -- )  c:cookie  data-rmap @ >o
-    dest-cookies @ ack-bit# @ 64s + 64! o> ;
 
 : cookie+ ( addr bitmap map -- sum ) >o
     cookies( ." cookies: " 64>r dup hex. 64r> 64dup $64. space space )  64>r
@@ -1857,7 +1854,6 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 data-class to rewind-timestamps
 :noname ( o:map -- ) dest-size @ addr>ts
     dest-timestamps @ over erase
-    dest-cookies @ swap erase
     data-resend# @ dest-size @ addr>bits $FF fill ;
 rdata-class to rewind-timestamps
 
@@ -1878,7 +1874,6 @@ data-class to rewind-partial
 :noname ( new-back o:map -- )
     dup data-resend# @ rewind-bits-partial
     dup dest-timestamps @ rewind-ts-partial
-    dup dest-cookies @ rewind-ts-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
 
