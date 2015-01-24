@@ -116,6 +116,12 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 	." cookies don't match! " 64over $64. 64dup $64. F cr
     THEN
     64= cookie-val and validated or! o> ;
++net2o: ack-resend# ( addr $:string -- )
+    64>n $> parent @ .data-map @ .resend#? 0= IF
+	." resend# don't match!" F cr
+    ELSE
+	cookie-val validated or!
+    THEN ;
 +net2o: ack-flush ( addr -- ) \ flushed to addr
     64>n parent @ .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \ set head
@@ -227,10 +233,19 @@ also net2o-base
     [ 2 cells 64'+ ]L +LOOP
     map .data-ackbits-buf $off ;
 
+: net2o:ack-resend# ( -- )  data-rmap @ { map }
+    map .data-resend#-buf $@
+    bounds ?DO
+	I $@ over @ >r cell /string $FF -skip
+	dup >r $FF skip r> over - r> + ulit, $, ack-resend#
+    cell +LOOP
+    map .data-resend#-buf $[]off ;
+
 \ client side acknowledge
 
 : net2o:genack ( -- )
-    net2o:ack-cookies  net2o:b2btime  net2o:acktime  >rate ;
+    net2o:ack-cookies net2o:ack-resend#
+    net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
     data-rmap @ >o
@@ -326,8 +341,24 @@ cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
     new-ackbit cell+ swap +bit
     new-ackbit [ 2 cells 64'+ ]L data-ackbits-buf $+! ;
 
+Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
+
+: +resend# ( bit -- ) >r
+    dest-addr 64@ 64>n [ min-size 1- ]L and
+    r@ [ bursts# 4 * 1- ]L and
+    r> [ bursts# -4 * ]L and \ one block per burst
+    data-resend#-buf $[]# 0 ?DO
+	dup I data-resend#-buf $[]@ drop @ = IF
+	    drop I data-resend#-buf $[]@ drop cell+ + c!
+	    UNLOOP  EXIT  THEN
+    LOOP
+    data-resend#-buf $[]# { w^ burstblock n }
+    burstblock cell data-resend#-buf $+[]!
+    no-resend# [ bursts# 4 * ]L n data-resend#-buf $[]+!
+    n data-resend#-buf $[]@ drop cell+ + c! ;
+
 : +cookie ( -- )
-    data-rmap @ >o  ack-bit# @ >r
+    data-rmap @ >o  ack-bit# @ >r  r@ +resend#
     data-ackbits @ r@ +bit@  dup 0= IF  r@ +ackbit  THEN  rdrop
     o> negate packetr2 +! ;
 

@@ -872,6 +872,7 @@ code-class class
     field: data-ack#     \ fully acked bursts
     field: ack-bit#      \ actual ack bit
     field: ack-advance?  \ ack is advancing state
+    field: data-resend#-buf
 end-class rcode-class
 
 rcode-class class end-class rdata-class
@@ -1083,7 +1084,7 @@ User >code-flag
 
 \ create context
 
-4 Value bursts# \ number of 
+8 Value bursts# \ number of 
 8 Value delta-damp# \ for clocks with a slight drift
 bursts# 2* 2* 1- Value tick-init \ ticks without ack
 #1000000 max-size^2 lshift Value bandwidth-init \ 32µs/burst=2MB/s
@@ -1673,6 +1674,16 @@ User outflag  outflag off
     addr 64@ r 64ror 64ffz< r + $3F and to r
     64#1 r 64lshift addr 64@ or addr 64! 
     r ;
+
+: resend#? ( off addr u -- flag ) rot
+    64s  dest-size @ addr>ts 1- and data-resend# @ +
+    swap 64s bounds ?DO
+	dup c@ $FF <> IF
+	    dup c@ >r 64#1 r> 64lshift I 64@ 64and 64-0= IF
+		drop false UNLOOP  EXIT
+	    THEN
+	THEN  1+
+    8 +LOOP  drop true ;
 
 : send-dX ( addr n -- ) +sendX2
     over data-map @ .resend#+ set-dest#
