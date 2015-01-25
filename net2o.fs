@@ -804,6 +804,7 @@ $04 Constant resend-toggle#
 
 64User dest-addr
 User dest-flags
+User validated
 
 : >ret-addr ( -- )
     inbuf destination return-addr reverse$16 ;
@@ -1513,7 +1514,8 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 : net2o:set-rate ( rate deltat -- )
     rate-stat1
-    64>r 64dup >extra-ns noens( 64drop )else( 64nip )
+    64>r tick-init 1+ validated @ 8 rshift 1 max 64*/
+    64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
     bandwidth-max n>64 64max
     rate-limit  rate-stat2
@@ -1653,15 +1655,20 @@ User outflag  outflag off
     64#1 r 64lshift addr 64@ or addr 64! 
     r ;
 
-: resend#? ( off addr u -- flag ) rot
-    64s  dest-size @ addr>ts 1- and data-resend# @ +
-    swap 64s bounds ?DO
+: resend#? ( off addr u -- n )
+    0 rot 2swap \ count addr off u
+    bounds dest-size @ addr>bits tuck umin >r umin r> \ limits
+    64s data-resend# @ + swap
+    64s data-resend# @ + swap ?DO
 	dup c@ $FF <> IF
-	    dup c@ >r 64#1 r> 64lshift I 64@ 64and 64-0= IF
-		drop false UNLOOP  EXIT
-	    THEN
+	    dup c@ >r 64#1 r> 64lshift
+	    I 64@
+	    64over 64invert 64over 64and I 64! \ ack only once!
+	    64and 64-0= IF \ check if had been zero already
+		2drop 0 UNLOOP  EXIT
+	    THEN  swap 1+ swap
 	THEN  1+
-    8 +LOOP  drop true ;
+    8 +LOOP  drop ;
 
 : send-dX ( addr n -- ) +sendX2
     over data-map @ .resend#+ set-dest#
@@ -2094,8 +2101,6 @@ Variable timeout-tasks s" " timeout-tasks $!
 Defer queue-command ( addr u -- )
 ' dump IS queue-command
 
-User validated
-
 $01 Constant crypt-val
 $02 Constant own-crypt-val
 $04 Constant login-val
@@ -2113,6 +2118,7 @@ $10 Constant tmp-crypt-val
     0 >o rdrop \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
+    validated off \ we have no validated encryption
     stateless# outflag !  inbuf packet-data queue-command ;
 
 : handle-data ( addr -- )  parent @ >o

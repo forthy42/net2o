@@ -488,7 +488,7 @@ $10 net2o: push' ( #cmd -- ) \ push command into answer packet
 +net2o: ok ( utag -- ) \ tagged response
     64>n net2o:ok ;
 +net2o: ok? ( utag -- ) \ request tagged response
-    net2o:ok? lit, ok ;
+    lit, ok net2o:ok? ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
 +net2o: ko ( uerror -- ) \ receive error message
     throw ;

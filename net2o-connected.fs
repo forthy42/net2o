@@ -111,11 +111,13 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 +net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- )
-    64>n $> parent @ .data-map @ .resend#? 0= IF
-	." resend# don't match!" F cr
-	cookie-val invert validated and!
+    64>n $> parent @ .data-map @ .resend#? dup 0= IF
+	drop ." resend# don't match!" F cr
+	parent @ >o tag-addr dup 2@ ~~ 2drop drop
+	n2o:see-me o>
+	[ cookie-val $FF xor ]L validated and!
     ELSE
-	cookie-val validated or!
+	8 lshift validated +! cookie-val validated or!
     THEN ;
 +net2o: ack-flush ( addr -- ) \ flushed to addr
     64>n parent @ .net2o:rewind-sender-partial ;
