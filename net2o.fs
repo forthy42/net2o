@@ -1660,7 +1660,7 @@ User outflag  outflag off
     bounds dest-size @ addr>bits tuck umin >r umin r> \ limits
     64s data-resend# @ + swap
     64s data-resend# @ + swap ?DO
-	dup c@ $FF <> IF
+	dup c@ $40 u< IF
 	    dup c@ >r 64#1 r> 64lshift
 	    I 64@
 	    64over 64invert 64over 64and I 64! \ ack only once!
