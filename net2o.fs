@@ -420,11 +420,17 @@ Variable net2o-host "net2o.de" net2o-host $!
     r> ?dup-0=-IF  my-port  THEN to my-port#
     !my-ips ;
 
-$2A Constant overhead \ constant overhead
+\ values, configurable
+
 $4 Value max-size^2 \ 1k, don't fragment by default
+$12 Value max-data# \ 16MB data space
+$0C Value max-code# \ 256k code space
+$10 Value max-block# \ 64k maximum block size+alignment
+
+\ constants, and depending values
+
+$2A Constant overhead \ constant overhead
 $40 Constant min-size
-$400000 Value max-data#
-$10000 Value max-code#
 1 Value buffers#
 min-size max-size^2 lshift Value maxdata ( -- n )
 maxdata overhead + Value maxpacket
@@ -1214,12 +1220,13 @@ Variable mapstart $1 mapstart !
 : server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )   context-table @ token-table !  dest-0key @ del-0key ;
-: pow2? ( n -- n )  dup dup 1- and 0<> !!pow2!! ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
-: n2o:new-data pow2? { 64: addrs 64: addrd u -- }
+: n2o:new-data ( addrs addrd u -- )
+    dup max-data# u> !!mapsize!! min-size swap lshift
+    { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN
@@ -1227,7 +1234,9 @@ Variable mapstart $1 mapstart !
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source data-map ! ;
-: n2o:new-code pow2? { 64: addrs 64: addrd u -- }
+: n2o:new-code ( addrs addrd u -- )
+    dup max-code# u> !!mapsize!! min-size swap lshift
+    { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN

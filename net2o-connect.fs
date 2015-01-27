@@ -44,7 +44,8 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
     addrs lit, addrd lit, ucode ulit, new-code
-    addrs ucode n>64 64+ lit, addrd ucode n>64 64+ lit, udata ulit, new-data
+    addrs min-size ucode lshift n>64 64+ lit,
+    addrd min-size ucode lshift n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
 +net2o: store-key ( $:string -- ) $> \ store key

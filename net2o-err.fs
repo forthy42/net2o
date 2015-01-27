@@ -23,7 +23,7 @@ s" gap in file handles"          throwcode !!gap!!
 s" invalid file id"              throwcode !!fileid!!
 s" could not send"               throwcode !!send!!
 s" wrong packet size"            throwcode !!size!!
-s" no power of two"              throwcode !!pow2!!
+s" map size too big"             throwcode !!mapsize!!
 s" unimplemented net2o function" throwcode !!function!!
 s" too many commands"            throwcode !!commands!!
 s" float does not fit"           throwcode !!floatfit!!

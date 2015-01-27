@@ -28,10 +28,10 @@ $20 net2o: disconnect ( -- ) \ close connection
 +net2o: get-ip ( -- ) \ request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
-+net2o: set-blocksize ( n -- ) \ set blocksize
-    64>n blocksize! ;
-+net2o: set-blockalign ( n -- ) \ set block alignment
-    64>n pow2?  blockalign ! ;
++net2o: set-blocksize ( n -- ) \ set blocksize to 2^n
+    64>n 1 swap max-block# umin lshift blocksizes! ;
++net2o: set-blockalign ( n -- ) \ set block alignment to 2^n
+    64>n 1 swap max-block# umin lshift blockalign ! ;
 +net2o: close-all ( -- ) \ close all files
     n2o:close-all ;
 \ better slurping
@@ -78,9 +78,6 @@ $20 net2o: open-file ( $:string mode -- ) \ open file with mode
 
 gen-table $freeze
 ' context-table is gen-table
-
-: blocksize! ( n -- )  dup ulit, set-blocksize blocksize! ;
-: blockalign! ( n -- )  pow2? dup ulit, set-blockalign blockalign ! ;
 
 :noname ( uid useek -- ) 64>r ulit, file-id
     64r> lit, set-seek endwith ; is do-track-seek
@@ -152,6 +149,11 @@ gen-table $freeze
     THEN  throw ; IS >throw
 
 set-current
+
+: blocksize! ( n -- )  max-block# umin dup ulit, set-blocksize
+    1 swap lshift blocksizes! ;
+: blockalign! ( n -- ) max-block# umin dup ulit, set-blockalign
+    1 swap lshift blockalign ! ;
 
 : open-tracked-file ( addr u mode --)
     open-file get-size get-stat ;

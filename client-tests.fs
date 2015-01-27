@@ -51,9 +51,11 @@ UValue test#  0 to test#
 \       n2o:done
 \     end-code| ;
 
-: c:dht ( n -- )  $2000 $10000 "test" ins-ip c:connect 0 ?DO
+: c:dht ( n -- )  $8 $8 "test" ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
     LOOP do-disconnect ;
+
+: std-block ( -- ) $10 blocksize! $A blockalign! ;
 
 : c:download1 ( -- )
     [: .time ." Download test: 1 text file and 2 photos" cr ;] $err
@@ -61,7 +63,7 @@ UValue test#  0 to test#
       expect-reply
       log !time .time s" Download test " $, type 1 ulit, . pi float, f. cr endwith
       get-ip
-      $400 blocksize! $400 blockalign! stat( request-stats )
+      std-block stat( request-stats )
       "net2o.fs" "net2o.fs" >cache n2o:copy
       "data/2011-05-13_11-26-57-small.jpg" "photo000s.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12-small.jpg" "photo001s.jpg" >cache n2o:copy
@@ -73,7 +75,7 @@ UValue test#  0 to test#
     net2o-code
       expect-reply close-all \ rewind-total
       log .time s" Download test 2" $, type cr endwith
-      $10000 blocksize! $400 blockalign! stat( request-stats )
+      std-block stat( request-stats )
       "data/2011-06-02_15-02-38-small.jpg" "photo002s.jpg" >cache n2o:copy
       "data/2011-06-03_10-26-49-small.jpg" "photo003s.jpg" >cache n2o:copy
       "data/2011-06-15_12-27-03-small.jpg" "photo004s.jpg" >cache n2o:copy
@@ -89,7 +91,7 @@ UValue test#  0 to test#
     net2o-code
       expect-reply close-all \ rewind-total
       log .time s" Download test 3" $, type cr endwith
-      $10000 blocksize! $400 blockalign! stat( request-stats )
+      std-block stat( request-stats )
       "data/2011-05-13_11-26-57.jpg" "photo000.jpg" >cache n2o:copy
       "data/2011-05-20_17-01-12.jpg" "photo001.jpg" >cache n2o:copy
       n2o:done 0 ulit, file-id
@@ -101,7 +103,7 @@ UValue test#  0 to test#
     net2o-code
       expect-reply close-all \ rewind-total
       log .time s" Download test 4" $, type cr endwith
-      $10000 blocksize! $400 blockalign! stat( request-stats )
+      std-block stat( request-stats )
       "data/2011-06-02_15-02-38.jpg" "photo002.jpg" >cache n2o:copy
       "data/2011-06-03_10-26-49.jpg" "photo003.jpg" >cache n2o:copy
       "data/2011-06-15_12-27-03.jpg" "photo004.jpg" >cache n2o:copy
@@ -147,7 +149,7 @@ UValue test#  0 to test#
 
 : c:test ( -- )
     init-cache'
-    $10000 $100000 "test" ins-ip c:connect c:test-rest ;
+    $a $e "test" ins-ip c:connect c:test-rest ;
 
 event: ->throw dup DoError throw ;
 
@@ -165,7 +167,7 @@ event: ->throw dup DoError throw ;
 
 \ lookup for other users
 
-: nat:connect ( addr u -- )  $10000 $100000  2swap nick-connect
+: nat:connect ( addr u -- )  $A $E  2swap nick-connect
     ." Connected!" cr ;
 
 \ some more helpers
@@ -188,13 +190,13 @@ event: ->throw dup DoError throw ;
 \ terminal connection
 
 : c:terminal ( -- )
-    $10000 $100000 "test" ins-ip c:connect
+    $a $e "test" ins-ip c:connect
     [: .time ." Terminal test: connect to server" cr ;] $err
     tc-permit# fs-class-permit or to fs-class-permit
     net2o-code
     expect-reply
       log .time "Terminal test" $, type cr endwith
-      $10000 blocksize! $400 blockalign! stat( request-stats )
+      std-block stat( request-stats )
       [: 3 ulit, file-type  "" $, 0 ulit, open-file
 	state-addr >o 2 fs-class! o> ;] n2o>file
     end-code| ['] .time $err ;

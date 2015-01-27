@@ -270,7 +270,7 @@ User file-reg#
 : n2o:close-file ( id -- )
     id>addr? .fs-close ;
 
-: blocksize! ( n -- )
+: blocksizes! ( n -- )
     dup blocksize !
     file( ." file read: ======= " cr ." file write: ======= " cr )
     dup residualread !  residualwrite ! ;
@@ -279,7 +279,7 @@ User file-reg#
     [: fstates 0 ?DO
 	    I n2o:close-file
 	LOOP  file-reg# off  fstate-off
-	blocksize @ blocksize!
+	blocksize @ blocksizes!
 	read-file# off  write-file# off ;] file-sema c-section ;
 
 : n2o:open-file ( addr u mode id -- )
