@@ -108,8 +108,7 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 
 : gen>host ( addr u -- addr u )
     2dup c:0key "host" >keyed-hash
-    sigdate datesize# "date" >keyed-hash ;
-
+    sigdate +date ;
 : .check ( flag -- ) '✓' '⚡' rot select xemit ;
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
@@ -126,8 +125,10 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
+: +date ( addr -- )
+    datesize# "date" >keyed-hash ;
 : >date ( addr u -- addr u )
-    2dup + sigsize# - datesize# "date" >keyed-hash ;
+    2dup + sigsize# - +date ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     c:0key 2dup sigsize# - "host" >keyed-hash
     >date ; \ hash from address
@@ -161,7 +162,7 @@ Variable revtoken
 
 : revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
     sigonlysize# - 2dup 2r> >keyed-hash
-    sigdate datesize# "date" >keyed-hash
+    sigdate +date
     2dup + r> ed-verify ;
 
 : >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
@@ -170,7 +171,7 @@ Variable revtoken
 
 : sign-token, ( sk pk string u2 -- )
     c:0key revtoken $@ 2swap >keyed-hash
-    sigdate datesize# "date" >keyed-hash +revsign ;
+    sigdate +date +revsign ;
 
 : revoke-key ( -- addr u )
     skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
@@ -210,7 +211,7 @@ Variable revtoken
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
     c:0key dht-hash $@ "tag" >keyed-hash
-    2dup + sigsize# - datesize# "date" >keyed-hash
+    >date
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
     2dup + sigpksize# - verify-sig ;
@@ -378,7 +379,7 @@ gen-table $freeze
 
 : gen>tag ( addr u hash-addr uh -- addr u )
     c:0key "tag" >keyed-hash
-    sigdate datesize# "date" >keyed-hash
+    sigdate +date
     2dup ':' $split 2swap >keyed-hash ;
 : tag$ ( addr u -- tagaddr tag-u ) [: type .pk .sig ;] $tmp ;
 
