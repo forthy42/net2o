@@ -267,12 +267,14 @@ also net2o-base
     4 +LOOP  drop !rdata-tail ;
 
 : do-expect-reply ( -- )
-    reply-index ulit, ok?  end-cmd  net2o:expect-reply
-    msg( ." Expect reply" F cr )
-    ['] end-cmd IS expect-reply? ;
+    cmdbuf# @ 0> IF \ there's actuall something in the buffer
+	reply-index ulit, ok?  end-cmd
+	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
+	msg( ." Expect reply" F cr )
+    THEN  ['] end-cmd IS expect-reply? ;
 
-: expect-reply ( -- ) cmd( ." expect reply:" F cr )
-    ['] do-expect-reply IS expect-reply?  maxdata code+ ;
+: expect-reply ( -- ) \ cmd( ." expect reply:" F cr )
+    ['] do-expect-reply IS expect-reply? ;
 
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@ u>= IF
@@ -397,7 +399,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
-    net2o-code  ack ['] end-cmd IS expect-reply?
+    net2o-code  ack expect-reply \ ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack
@@ -411,11 +413,11 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     endwith  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
     slurp? IF  slurp  THEN
     stats? IF  ack send-timing endwith  THEN
-    end-code r> dup ack-toggle# and IF  map-resend?  THEN ;
+    end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64! \ last received packet
-    ( recv-cookie ) +cookie
+    +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
     IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing
@@ -431,7 +433,8 @@ also net2o-base
 : .keepalive ( -- )  ." transfer keepalive " expected@ hex. hex.
     data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
     F cr ;
-: transfer-keepalive? ( -- )  o to connection
+: transfer-keepalive? ( -- )
+    o to connection
     timeout( .keepalive )
     rewind-transfer 0= IF  .keepalive  EXIT  THEN
     expected@ tuck u>= and IF  net2o-code

@@ -47,6 +47,7 @@ object class
     keysize uvar oldskrev \ previous revocation secret after revocation
     \ shared secred
     keysize uvar keypad
+    state# uvar vaultkey
     1 64s uvar last-mykey
 end-class keybuf-c
 

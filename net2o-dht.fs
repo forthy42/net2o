@@ -126,9 +126,11 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
+: >date ( addr u -- addr u )
+    2dup + sigsize# - datesize# "date" >keyed-hash ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     c:0key 2dup sigsize# - "host" >keyed-hash
-    2dup + sigsize# - datesize# "date" >keyed-hash ; \ hash from address
+    >date ; \ hash from address
 
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize = &&
@@ -137,7 +139,7 @@ User sigdate datesize# cell- uallot drop \ date+expire date
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
 : check-ed25519 ( addr u -- addr u flag )  2dup + 1- c@ $20 = ;
-: verify-sig ( addr u pk -- )  >r
+: verify-sig ( addr u pk -- addr u flag )  >r
     check-date IF
 	check-ed25519 IF
 	    2dup + sigonlysize# - r> ed-verify

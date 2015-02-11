@@ -438,10 +438,6 @@ maxpacket $F + -$10 and Value maxpacket-aligned
 max-size^2 6 + Value chunk-p2
 $10 Constant mykey-salt#
 
-begin-structure timestamp
-64field: ts-ticks
-end-structure
-
 begin-structure reply
 field: reply-len
 field: reply-offset
@@ -459,7 +455,7 @@ m: bits>bytes ( bits -- bytes )
 m: bytes>bits ( bytes -- bits )
     3 lshift ;
 m: addr>ts ( addr -- ts-offset )
-    addr>bits timestamp * ;
+    addr>bits 64s ;
 m: addr>64 ( addr -- ts-offset )
     [ chunk-p2 3 - ]L rshift -8 and ;
 m: addr>replies ( addr -- replies )
@@ -913,6 +909,12 @@ cmd-class class
 end-class msg-class
 
 cmd-class class
+    KEYBYTES +field v-dhe \ diffie hellman exchange tmpkey
+    KEYBYTES +field v-key \ file vault key
+    keccak# +field v-kstate
+end-class vault-class
+
+cmd-class class
     \ maps for data and code transfer
     field: code-map
     field: code-rmap
@@ -923,6 +925,7 @@ cmd-class class
     field: log-context
     field: ack-context
     field: msg-context
+    field: vault-context
     field: file-state \ files
     \ rest of state
     field: codebuf#
@@ -1457,17 +1460,17 @@ timestats buffer: stat-tuple
 
 : net2o:ack-addrtime ( ticks addr -- )
     >timestamp over  IF
-	dup tick-init 1+ timestamp * u>
-	IF  + dup >r  ts-ticks 64@
-	    r@ tick-init 1+ timestamp * - ts-ticks 64@
+	dup tick-init 1+ 64s u>
+	IF  + dup >r  64@
+	    r@ tick-init 1+ 64s - 64@
 	    64dup 64-0<= >r 64over 64-0<= r> or
 	    IF  64drop 64drop  ELSE  64- lastdeltat 64!  THEN  r>
 	ELSE  +  THEN
-	ts-ticks 64@ timestat
+	64@ timestat
     ELSE  2drop 64drop  THEN ;
 
 : net2o:ack-b2btime ( ticks addr -- )
-    >timestamp over  IF  + ts-ticks 64@ b2b-timestat
+    >timestamp over  IF  + 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
 \ set rate calculation
@@ -1710,7 +1713,7 @@ User <size-lb> 1 floats cell- uallot drop
 64Variable last-ticks
 
 : ts-ticks! ( addr -- )
-    addr>ts dest-timestamps @ + >r last-ticks 64@ r> ts-ticks
+    addr>ts dest-timestamps @ + >r last-ticks 64@ r>
     dup 64@ 64-0= IF  64!  EXIT  THEN  64on 64drop 1 packets2 +! ;
 \ set double-used ticks to -1 to indicate unkown timing relationship
 
@@ -2202,6 +2205,7 @@ $10 Constant tmp-crypt-val
 	    >o timing-stat $off track-timing $off dispose o>
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
+	vault-context @ ?dup-IF  .dispose  THEN
 	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
