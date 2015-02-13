@@ -48,7 +48,23 @@ $100 Constant keypack#
 
 keypack# mykey-salt# + $10 + Constant keypack-all#
 
-keypack-all# buffer: keypack
+cmd-buf0 class
+    maxdata -
+    mykey-salt# uvar keypack
+    keypack# uvar keypack-buf
+    $10 uvar keypack-chksum
+end-class cmd-keybuf-c
+
+cmd-keybuf-c new cmdbuf: code-key
+
+code-key
+cmd0lock 0 pthread_mutex_init drop
+
+:noname ( -- addr u ) keypack-buf cmdbuf# @ ; to cmdbuf$
+:noname ( -- n )  keypack# cmdbuf# @ - ; to maxstring
+
+code0-buf
+
 keypack-all# buffer: keypack-d
 
 \ hashed key data base
@@ -216,8 +232,9 @@ key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>
 
 : key:code ( -- )
-    net2o-code0 keypack keypack-all# erase
-    keypack mykey-salt# + cmd0source ! ;
+    code-key  cmdlock lock
+    keypack keypack-all# erase
+    cmdreset also net2o-base ;
 comp: :, also net2o-base ;
 
 also net2o-base definitions

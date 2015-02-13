@@ -45,7 +45,6 @@ require hash-table.fs
 UValue inbuf    ( -- addr )
 UValue tmpbuf   ( -- addr )
 UValue outbuf   ( -- addr )
-UValue cmd0buf  ( -- addr )
 UValue init0buf ( -- addr )
 UValue sockaddr ( -- addr )
 UValue sockaddr1 ( -- addr ) \ temporary buffer
@@ -463,8 +462,6 @@ m: addr>replies ( addr -- replies )
 m: addr>keys ( addr -- keys )
     max-size^2 rshift [ min-size negate ]L and ;
 
-sema cmd0lock
-
 \ generic hooks and user variables
 
 User ind-addr
@@ -530,7 +527,6 @@ ustack nest-stack
     alloc-buf to inbuf
     alloc-buf to tmpbuf
     alloc-buf to outbuf
-    maxdata allocate throw to cmd0buf
     maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
     sockaddr_in %size alloz to sockaddr
     sockaddr_in %size alloz to sockaddr1
@@ -545,7 +541,6 @@ ustack nest-stack
     sockaddr  sockaddr_in %size  freez
     sockaddr1 sockaddr_in %size  freez
     init0buf maxdata 2/ mykey-salt# + $10 +  freez
-    cmd0buf maxdata   freez
     inbuf  free-buf
     tmpbuf free-buf
     outbuf free-buf ;
@@ -909,12 +904,6 @@ cmd-class class
 end-class msg-class
 
 cmd-class class
-    KEYBYTES +field v-dhe \ diffie hellman exchange tmpkey
-    KEYBYTES +field v-key \ file vault key
-    keccak# +field v-kstate
-end-class vault-class
-
-cmd-class class
     \ maps for data and code transfer
     field: code-map
     field: code-rmap
@@ -925,7 +914,6 @@ cmd-class class
     field: log-context
     field: ack-context
     field: msg-context
-    field: vault-context
     field: file-state \ files
     \ rest of state
     field: codebuf#
@@ -2205,7 +2193,6 @@ $10 Constant tmp-crypt-val
 	    >o timing-stat $off track-timing $off dispose o>
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
-	vault-context @ ?dup-IF  .dispose  THEN
 	unlink-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;

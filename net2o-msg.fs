@@ -27,11 +27,7 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-net2o' emit net2o: msg-at ( timestamp -- ) \ specify sender time
-    parent @ .pubkey $@ key-table #@
-    IF cell+ .ke-nick $@ F type ELSE drop parent @ .pubkey $@ 85type THEN
-    ." [" .ticks ." ]: " ;
-+net2o: msg-text ( $:msg -- ) \ specify message string
+net2o' emit net2o: msg-text ( $:msg -- ) \ specify message string
     $> F type ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
     $> ." wrapped object: " 85type F cr ;
@@ -39,7 +35,8 @@ net2o' emit net2o: msg-at ( timestamp -- ) \ specify sender time
     $>
     msg-buf 2@ drop buf-state 2@ drop over - 3 - 2 pick - c:0key c:hash
     keysize 2* <> !!keysize!!
-    parent @ .pubkey $@ keysize <> !!keysize!! ed-verify .check F cr ;
+    parent @ .pubkey $@ keysize <> !!keysize!!
+    date-sig? .check 2drop F cr ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -54,13 +51,13 @@ User <msg-buf
 : msg> ( -- )
     \G end a msg block by adding a signature
     <msg-buf @ cmdbuf$ + over -
-    c:0key c:hash skc pkc ed-sign $, msg-sig endwith ;
+    c:0key c:hash now>never [: .pk .sig ;] $tmp $, msg-sig endwith ;
 
 previous
 
 : send-text ( addr u -- )
     net2o-code  expect-reply
-    <msg ticks lit, msg-at $, msg-text msg>
+    <msg $, msg-text msg>
     cookie+request end-code| ;
 
 0 [IF]

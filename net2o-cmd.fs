@@ -207,21 +207,45 @@ Defer >throw
 
 \ commands
 
-User cmd0source
-User cmdbuf#
+user-o cmdbuf-o
 
-: cmdbuf     ( -- addr )  cmd0source @ dup 0= IF
-	drop connection .code-dest  THEN ;
-: cmdlock    ( -- addr )  cmd0source @ IF  cmd0lock  ELSE
-	connection .code-lock THEN ;
-: cmdbuf$ ( -- addr u )   cmdbuf cmdbuf# @ ;
-: endcmdbuf  ( -- addr' ) cmdbuf maxdata + ;
-: maxstring ( -- n )  endcmdbuf cmdbuf$ + - ;
-: cmdbuf+ ( n -- )
-    dup maxstring u>= !!cmdfit!! cmdbuf# +! ;
+object class
+    cell uvar cmdbuf#
+    umethod cmdlock
+    umethod cmdbuf$
+    umethod maxstring
+    umethod +cmdbuf
+    umethod cmdbuf+
+    umethod cmddest
+end-class cmd-buf-c
+
+: cmdbuf: ( addr -- )  Create , DOES> @ cmdbuf-o ! ;
+cmd-buf-c new cmdbuf: code-buf
+code-buf
+
+:noname ( -- addr ) connection .code-lock ; to cmdlock
+:noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
+:noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
+:noname ( u -- ) maxstring u>= !!stringfit!! ; to +cmdbuf
+:noname ( u -- ) dup +cmdbuf cmdbuf# +! ; to cmdbuf+
+:noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
+
+cmd-buf-c class
+    1 pthread-mutexes uvar cmd0lock
+    maxdata uvar cmd0buf
+end-class cmd-buf0
+
+cmd-buf0  new cmdbuf: code0-buf
+
+code0-buf cmd0lock 0 pthread_mutex_init drop
+
+:noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
+' cmd0lock to cmdlock
+' rng@ to cmddest
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
-: cmd, ( 64n -- )  do-<req  cmdbuf$ + dup >r p!+ r> - cmdbuf+ ;
+: cmd, ( 64n -- )  do-<req
+    64dup p-size dup >r +cmdbuf cmdbuf$ + p!+ drop r> cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -308,10 +332,10 @@ gen-table $@ inherit-table reply-table
     cmdbuf# off  o IF  req? on  THEN ;
 : cmd0! ( -- )
     \g initialize a stateless command
-    cmd0buf cmd0source !  stateless# outflag ! ;
+    code0-buf  stateless# outflag ! ;
 : cmd! ( -- )
     \g initialize a statefull command
-    cmd0source off  outflag off ;
+    code-buf  outflag off ;
 
 : net2o-code ( -- )
     \g start a statefull command
@@ -333,12 +357,9 @@ comp: :, also net2o-base ;
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: cmddest ( -- dest ) cmd0source @ IF  rng@  ELSE  code-vdest
-    64dup 64-0= !!no-dest!! THEN ;
-
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
-    connection >o cmdbuf cmdbuf# @ cmddest send-cmd
-    cmd0source @ 0= IF  code-update punch-load $off  THEN o> ;
+    connection >o outflag @ >r cmdbuf$ cmddest send-cmd
+    r> stateless# and 0= IF  code-update punch-load $off  THEN o> ;
 
 also net2o-base
 
@@ -398,7 +419,7 @@ Variable throwcount
     o to connection
     o IF
 	maxdata code+
-	cmd0source off
+	code-buf
 	tag-addr? IF
 	    2drop  ack@ .>flyburst  1 packetr2 +!  EXIT  THEN
     ELSE
@@ -447,8 +468,7 @@ also net2o-base definitions
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : $, ( addr u -- )  string dup >r n>64 cmd,
-    r@ maxstring u>= !!stringfit!!
-    cmdbuf$ + r@ move   r> cmdbuf# +! ;
+    r@ +cmdbuf  cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;

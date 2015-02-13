@@ -107,8 +107,7 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
 
 : gen>host ( addr u -- addr u )
-    2dup c:0key "host" >keyed-hash
-    sigdate +date ;
+    2dup c:0key "host" >keyed-hash ;
 : .check ( flag -- ) '✓' '⚡' rot select xemit ;
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
@@ -130,8 +129,7 @@ User sigdate datesize# cell- uallot drop \ date+expire date
 : >date ( addr u -- addr u )
     2dup + sigsize# - +date ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
-    c:0key 2dup sigsize# - "host" >keyed-hash
-    >date ; \ hash from address
+    c:0key 2dup sigsize# - "host" >keyed-hash ; \ hash from address
 
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize = &&
@@ -139,15 +137,15 @@ User sigdate datesize# cell- uallot drop \ date+expire date
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     64within ;
-: check-ed25519 ( addr u -- addr u flag )  2dup + 1- c@ $20 = ;
 : verify-sig ( addr u pk -- addr u flag )  >r
     check-date IF
-	check-ed25519 IF
-	    2dup + sigonlysize# - r> ed-verify
-	    EXIT  THEN
-    THEN  rdrop false ;
+	2dup + sigonlysize# - r> ed-verify
+	EXIT  THEN
+    rdrop false ;
+: date-sig? ( addr u pk -- addr u flag )
+    >r >date r> verify-sig ;
 : verify-host ( addr u -- addr u flag )
-    dht-hash $@ drop verify-sig ;
+    dht-hash $@ drop date-sig? ;
 
 \ revokation
 
@@ -184,7 +182,7 @@ Variable revtoken
     skc pkc "selfsign" sign-token,         \ self signed with new key
     "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
     revtoken $@ gen>host 2drop             \ sign host information with old key
-    sigdate datesize# revtoken $+!
+    sigdate +date sigdate datesize# revtoken $+!
     oldskc oldpkc +revsign
     0oldkey revtoken $@ ;
 
@@ -211,10 +209,9 @@ Variable revtoken
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
     c:0key dht-hash $@ "tag" >keyed-hash
-    >date
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )
-    2dup + sigpksize# - verify-sig ;
+    2dup + sigpksize# - date-sig? ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag 0= !!wrong-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
@@ -369,7 +366,9 @@ gen-table $freeze
 
 \ facility stuff
 
-: .sig ( -- )  sigdate datesize# type skc pkc ed-sign type space ;
+: .sig ( -- )
+    sigdate +date sigdate datesize# type
+    skc pkc ed-sign type space ;
 : .pk ( -- )  pkc keysize type ;
 : host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
@@ -379,7 +378,6 @@ gen-table $freeze
 
 : gen>tag ( addr u hash-addr uh -- addr u )
     c:0key "tag" >keyed-hash
-    sigdate +date
     2dup ':' $split 2swap >keyed-hash ;
 : tag$ ( addr u -- tagaddr tag-u ) [: type .pk .sig ;] $tmp ;
 
