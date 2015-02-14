@@ -40,16 +40,39 @@ require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
 
+\ values, configurable
+
+$4 Value max-size^2 \ 1k, don't fragment by default
+$12 Value max-data# \ 16MB data space
+$0C Value max-code# \ 256k code space
+$10 Value max-block# \ 64k maximum block size+alignment
+
+\ constants, and depending values
+
+$2A Constant overhead \ constant overhead
+$40 Constant min-size
+1 Value buffers#
+min-size max-size^2 lshift Value maxdata ( -- n )
+maxdata overhead + Value maxpacket
+maxpacket $F + -$10 and Value maxpacket-aligned
+max-size^2 6 + Value chunk-p2
+$10 Constant mykey-salt#
+
 \ user values
 
 UValue inbuf    ( -- addr )
 UValue tmpbuf   ( -- addr )
 UValue outbuf   ( -- addr )
-UValue init0buf ( -- addr )
-UValue sockaddr ( -- addr )
-UValue sockaddr1 ( -- addr ) \ temporary buffer
-UValue aligned$
-UValue statbuf
+
+user-o io-mem
+
+object class
+    sockaddr_in %size uvar sockaddr
+    sockaddr_in %size uvar sockaddr1
+    file-stat uvar statbuf
+    maxdata 2/ mykey-salt# + $10 + uvar init0buf
+    maxdata uvar aligned$
+end-class io-buffers
 
 [IFDEF] 64bit
     ' min! Alias 64min!
@@ -419,24 +442,6 @@ Variable net2o-host "net2o.de" net2o-host $!
     r> ?dup-0=-IF  my-port  THEN to my-port#
     !my-ips ;
 
-\ values, configurable
-
-$4 Value max-size^2 \ 1k, don't fragment by default
-$12 Value max-data# \ 16MB data space
-$0C Value max-code# \ 256k code space
-$10 Value max-block# \ 64k maximum block size+alignment
-
-\ constants, and depending values
-
-$2A Constant overhead \ constant overhead
-$40 Constant min-size
-1 Value buffers#
-min-size max-size^2 lshift Value maxdata ( -- n )
-maxdata overhead + Value maxpacket
-maxpacket $F + -$10 and Value maxpacket-aligned
-max-size^2 6 + Value chunk-p2
-$10 Constant mykey-salt#
-
 begin-structure reply
 field: reply-len
 field: reply-offset
@@ -512,11 +517,6 @@ Defer init-reply
     over @ IF  over @ swap 2dup erase  free+guard  off
     ELSE  2drop  THEN ;
 
-: init-statbuf ( -- )
-    file-stat alloz to statbuf ;
-: free-statbuf ( -- )
-    statbuf file-stat freez  0 to statbuf ;
-
 ustack string-stack
 ustack object-stack
 ustack t-stack
@@ -527,20 +527,12 @@ ustack nest-stack
     alloc-buf to inbuf
     alloc-buf to tmpbuf
     alloc-buf to outbuf
-    maxdata 2/ mykey-salt# + $10 + allocate throw to init0buf
-    sockaddr_in %size alloz to sockaddr
-    sockaddr_in %size alloz to sockaddr1
-    $400 alloz to aligned$
-    init-statbuf
+    io-buffers new io-mem !
     init-ed25519 c:init ;
 
 : free-io ( -- )
     free-ed25519 c:free
-    free-statbuf
-    aligned$ $400 freez
-    sockaddr  sockaddr_in %size  freez
-    sockaddr1 sockaddr_in %size  freez
-    init0buf maxdata 2/ mykey-salt# + $10 +  freez
+    io-mem @ .dispose io-mem off
     inbuf  free-buf
     tmpbuf free-buf
     outbuf free-buf ;
