@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require net2o.fs
+
 Variable vault-table
 
 cmd-class class
@@ -60,6 +62,63 @@ gen-table $freeze
 ' context-table is gen-table
 
 set-current
+
+cmd-buf-c class
+    cell uvar cmd$
+    1 pthread-mutexes uvar cmd$lock
+end-class cmd-buf$
+
+cmd-buf$ new cmdbuf: code-buf$
+
+code-buf$
+
+' cmd$lock to cmdlock
+:noname  cmd$ $@ cmdbuf# @ umin ; to cmdbuf$
+' true to maxstring \ really maxuint = -1 = true
+:noname ( u -- ) cmdbuf# @ + cmd$ $!len ; to ?cmdbuf
+:noname ( -- 64dest ) 64#0 ; to cmddest
+
+code0-buf \ reset default
+
+Variable enc-filename
+Variable enc-file
+
+KEYBYTES 4 64s + buffer: keygenbuf
+KEYBYTES buffer: keygendh
+KEYBYTES buffer: vkey
+
+: vdhe, ( -- )  gen-tmpkeys $, dhe ;
+: vkeys, ( key-list -- )
+    KEYBYTES rng$ vkey swap move
+    [: [: drop tskc swap keygendh ed-dh
+	vkey keygenbuf $10 + KEYBYTES move
+	keygenbuf $40 keygendh KEYBYTES encrypt$
+	keygenbuf $40 type ;] $[]map ;] $tmp
+    $, vault-keys ;
+: vfile, ( -- )
+    enc-filename $@ enc-file $slurp-file
+    "                " enc-file 0 $ins \ add space for iv
+    "                " enc-file $+!    \ add space for checksum
+    enc-file $@ vkey KEYBYTES encrypt$
+    enc-file $@ $, vault-file ;
+: vsig, ( -- ) [: pkc KEYBYTES type now>never .sig
+    ;] $tmp $, vault-sig ;
+
+: encryt-file ( filename u key-list -- )  code-buf$
+    >r enc-filename $!  pkc KEYBYTES r@ $+[]! \ encrypt for ourself
+    vdhe, r> vkeys, vfile, vsig,
+    s" .v2o" enc-filename $+!  code0-buf ;
+
+Defer write-decrypt
+: write-1file ( -- ) enc-file dup $@len 4 - 0 max 4 $del
+    enc-file $@ w/o create-file throw >r
+    v-data 2@ r@ write-file throw r> close-file throw ;
+' write-1file is write-decrypt
+
+: decrypt-file ( filename u -- )  enc-filename $!
+    enc-filename $@ enc-file $slurp-file
+    enc-file $@ do-cmd-loop
+    write-decrypt ;
 
 0 [IF]
 Local Variables:

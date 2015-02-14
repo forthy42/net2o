@@ -214,7 +214,7 @@ object class
     umethod cmdlock
     umethod cmdbuf$
     umethod maxstring
-    umethod +cmdbuf
+    umethod ?cmdbuf
     umethod cmdbuf+
     umethod cmddest
 end-class cmd-buf-c
@@ -226,8 +226,8 @@ code-buf
 :noname ( -- addr ) connection .code-lock ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( u -- ) maxstring u>= !!stringfit!! ; to +cmdbuf
-:noname ( u -- ) dup +cmdbuf cmdbuf# +! ; to cmdbuf+
+:noname ( u -- ) maxstring u>= !!stringfit!! ; to ?cmdbuf
+:noname ( u -- ) dup ?cmdbuf cmdbuf# +! ; to cmdbuf+
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 
 cmd-buf-c class
@@ -245,7 +245,7 @@ code0-buf cmd0lock 0 pthread_mutex_init drop
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
 : cmd, ( 64n -- )  do-<req
-    64dup p-size dup >r +cmdbuf cmdbuf$ + p!+ drop r> cmdbuf+ ;
+    64dup p-size dup >r ?cmdbuf cmdbuf$ + p!+ drop r> cmdbuf+ ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -468,12 +468,12 @@ also net2o-base definitions
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : $, ( addr u -- )  string dup >r n>64 cmd,
-    r@ +cmdbuf  cmdbuf$ + r@ move   r> cmdbuf# +! ;
+    r@ ?cmdbuf  cmdbuf$ + r@ move   r> cmdbuf# +! ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
-: float, ( r -- )  flit cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
+: float, ( r -- )  flit 10 ?cmdbuf cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- ) (end-code) previous ;
@@ -525,7 +525,7 @@ $10 net2o: push' ( #cmd -- ) \ push command into answer packet
     token-table $@ 2 pick cells safe/string bounds U+DO
 	I @ ?dup-IF
 	    dup >net2o-sig 2>r >net2o-name
-	    dup $A0 + maxstring < IF
+	    dup $A0 + maxstring u< IF
 		2 pick ulit, 2r> 2swap [: type type ;] $tmp $, token
 	    ELSE  2drop rdrop rdrop  THEN
 	THEN  1+
