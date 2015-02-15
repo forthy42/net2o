@@ -38,25 +38,23 @@ get-current also net2o-base definitions
 cmd-table $@ inherit-table vault-table
 
 net2o' emit net2o: dhe ( $:pubkey -- ) \ start diffie hellman exchange
-    $> keysize <> !!keysize!! skc v-dhe ed-dhv 2drop
+    $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
     v-key keysize erase ;
 +net2o: vault-keys ( $:keys -- ) $> bounds ?DO
-	I' I - state# u>= IF
-	    I state# vaultkey move
-	    vaultkey state# v-dhe keysize decrypt$ IF
-		dup keysize <> !!keysize!! v-key move
+	I' I - $40 u>= IF
+	    I vaultkey $40 move
+	    vaultkey $40 v-dhe keysize decrypt$ IF
+		dup keysize <> !!keysize!! v-key swap move
 	    ELSE  2drop  THEN
 	THEN
-    state# +LOOP ;
+    $40 +LOOP ;
 +net2o: vault-file ( $:content -- )
-    $> v-key keysize decrypt$ 0= !!no-decrypt!!
-    @keccak v-kstate keccak# move \ keep for signature
-    v-data 2! ;
+    v-key keysize >crypt-key $> 2dup c:decrypt v-data 2!
+    @keccak v-kstate keccak# move ; \ keep for signature
 +net2o: vault-sig ( $:sig -- )
     $> v-key keysize decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
-    over >r $20 /string dup sigsize# <> !!wrong-sig!!
-    >date r> verify-sig !!wrong-sig!! 2drop ;
+    verify-tag 0= !!wrong-sig!! 2drop ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -84,42 +82,49 @@ code0-buf \ reset default
 Variable enc-filename
 Variable enc-file
 
-KEYBYTES 4 64s + buffer: keygenbuf
-KEYBYTES buffer: keygendh
-KEYBYTES buffer: vkey
+keysize 4 64s + buffer: keygenbuf
+keysize buffer: keygendh
+keysize buffer: vkey
+keysize buffer: vpk
+keysize buffer: vsk
 
-: vdhe, ( -- )  gen-tmpkeys $, dhe ;
+: vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
-    KEYBYTES rng$ vkey swap move
-    [: [: drop tskc swap keygendh ed-dh
-	vkey keygenbuf $10 + KEYBYTES move
-	keygenbuf $40 keygendh KEYBYTES encrypt$
-	keygenbuf $40 type ;] $[]map ;] $tmp
+    keysize rng$ vkey swap move
+    [: [: drop vsk swap keygendh ed-dh 2>r
+	vkey keygenbuf $10 + keysize move
+	keygenbuf $40 2r> encrypt$
+	keygenbuf $40 F type ;] $[]map ;] $tmp
     $, vault-keys ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
-    "                " enc-file 0 $ins \ add space for iv
-    "                " enc-file $+!    \ add space for checksum
-    enc-file $@ vkey KEYBYTES encrypt$
+    vkey keysize >crypt-key enc-file $@ c:encrypt
     enc-file $@ $, vault-file ;
-: vsig, ( -- ) [: pkc KEYBYTES type now>never .sig
-    ;] $tmp $, vault-sig ;
+: vsig, ( -- )
+    [: $10 spaces now>never .pk .sig $10 spaces ;] $tmp
+    2dup vkey keysize encrypt$ $, vault-sig ;
 
-: encryt-file ( filename u key-list -- )  code-buf$
-    >r enc-filename $!  pkc KEYBYTES r@ $+[]! \ encrypt for ourself
+: encrypt-file ( filename u key-list -- )  code-buf$
+    >r enc-filename $!  pkc keysize r@ $+[]! \ encrypt for ourself
     vdhe, r> vkeys, vfile, vsig,
-    s" .v2o" enc-filename $+!  code0-buf ;
+    s" .v2o" enc-filename $+!
+    enc-filename $@ w/o create-file throw >r
+    cmd$ $@ r@ write-file throw r> F close-file throw
+    code0-buf ;
 
 Defer write-decrypt
-: write-1file ( -- ) enc-file dup $@len 4 - 0 max 4 $del
-    enc-file $@ w/o create-file throw >r
-    v-data 2@ r@ write-file throw r> close-file throw ;
+: write-1file ( -- ) enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
+    IF  enc-filename dup $@len 4 - 4 $del  THEN
+    s" .dec" enc-filename $+! \ for testing purposes add .dec
+    enc-filename $@ w/o create-file throw >r
+    v-data 2@ r@ write-file throw r> F close-file throw ;
 ' write-1file is write-decrypt
 
-: decrypt-file ( filename u -- )  enc-filename $!
+: decrypt-file ( filename u -- )
+    enc-filename $!
     enc-filename $@ enc-file $slurp-file
-    enc-file $@ do-cmd-loop
-    write-decrypt ;
+    enc-file $@ >vault do-cmd-loop
+    write-decrypt n:o> ;
 
 0 [IF]
 Local Variables:

@@ -342,6 +342,8 @@ $40 buffer: nick-buf
     ke-sk @ skc keysize move o> ;
 
 : i'm ( "name" -- ) parse-name >key ;
+: pk' ( "name" -- addr u )
+    parse-name nick-key >o ke-pk $@ o> ;
 
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
