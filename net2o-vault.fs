@@ -73,9 +73,10 @@ cmd-buf$ new cmdbuf: code-buf$
 code-buf$
 
 ' cmd$lock to cmdlock
-:noname  cmd$ $@ cmdbuf# @ umin ; to cmdbuf$
+:noname  cmd$ $@ ; to cmdbuf$
+:noname  cmd$ $off ; to cmdreset
 ' true to maxstring \ really maxuint = -1 = true
-:noname ( u -- ) cmdbuf# @ + cmd$ $!len ; to ?cmdbuf
+:noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
 code0-buf \ reset default

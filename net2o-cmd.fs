@@ -213,6 +213,7 @@ object class
     cell uvar cmdbuf#
     umethod cmdlock
     umethod cmdbuf$
+    umethod cmdreset
     umethod maxstring
     umethod +cmdbuf
     umethod cmddest
@@ -222,6 +223,7 @@ end-class cmd-buf-c
 cmd-buf-c new cmdbuf: code-buf
 code-buf
 
+:noname ( -- )  cmdbuf# off  o IF  req? on  THEN ; to cmdreset
 :noname ( -- addr ) connection .code-lock ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
@@ -326,8 +328,6 @@ gen-table $@ inherit-table reply-table
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
-: cmdreset ( -- )
-    cmdbuf# off  o IF  req? on  THEN ;
 : cmd0! ( -- )
     \g initialize a stateless command
     code0-buf  stateless# outflag ! ;
