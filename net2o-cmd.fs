@@ -214,8 +214,7 @@ object class
     umethod cmdlock
     umethod cmdbuf$
     umethod maxstring
-    umethod ?cmdbuf
-    umethod cmdbuf+
+    umethod +cmdbuf
     umethod cmddest
 end-class cmd-buf-c
 
@@ -226,8 +225,8 @@ code-buf
 :noname ( -- addr ) connection .code-lock ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( u -- ) maxstring u>= !!stringfit!! ; to ?cmdbuf
-:noname ( u -- ) dup ?cmdbuf cmdbuf# +! ; to cmdbuf+
+:noname ( addr u -- ) dup maxstring u> !!stringfit!!
+    tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 
 cmd-buf-c class
@@ -244,8 +243,7 @@ code0-buf cmd0lock 0 pthread_mutex_init drop
 ' rng@ to cmddest
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
-: cmd, ( 64n -- )  do-<req
-    64dup p-size dup >r ?cmdbuf cmdbuf$ + p!+ drop r> cmdbuf+ ;
+: cmd, ( 64n -- )  do-<req cmdtmp p!+ cmdtmp tuck - +cmdbuf ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -467,13 +465,12 @@ User neststart#
 also net2o-base definitions
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
-: $, ( addr u -- )  string dup >r n>64 cmd,
-    r@ ?cmdbuf  cmdbuf$ + r@ move   r> cmdbuf# +! ;
+: $, ( addr u -- )  string dup n>64 cmd, +cmdbuf ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
-: float, ( r -- )  flit 10 ?cmdbuf cmdbuf$ + dup >r pf!+ r> - cmdbuf+ ;
+: float, ( r -- )  flit cmdtmp pf!+ cmdtmp tuck - +cmdbuf ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- ) (end-code) previous ;
@@ -537,8 +534,10 @@ gen-table $freeze
 Local Variables:
 forth-local-words:
     (
-     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
+     (("net2o:" "+net2o:" "event:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "uvar" "uvalue") non-immediate (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
@@ -547,6 +546,7 @@ forth-local-indent-words:
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
      (("[:") (0 . 1) (0 . 1) immediate)
      ((";]") (-1 . 0) (0 . -1) immediate)
+     (("event:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]

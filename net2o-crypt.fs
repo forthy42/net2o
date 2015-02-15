@@ -359,10 +359,16 @@ Defer search-key \ search if that is one of our pubkeys
 Local Variables:
 forth-local-words:
     (
-     (("debug:" "field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+     (("event:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "uvar" "uvalue") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
-     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+     ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("event:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]

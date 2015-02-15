@@ -58,7 +58,17 @@ maxpacket $F + -$10 and Value maxpacket-aligned
 max-size^2 6 + Value chunk-p2
 $10 Constant mykey-salt#
 
-\ user values
+\ timestasts structure
+
+begin-structure timestats
+sffield: ts-delta
+sffield: ts-slack
+sffield: ts-reqrate
+sffield: ts-rate
+sffield: ts-grow
+end-structure
+
+\ per-thread memory space
 
 UValue inbuf    ( -- addr )
 UValue tmpbuf   ( -- addr )
@@ -67,11 +77,16 @@ UValue outbuf   ( -- addr )
 user-o io-mem
 
 object class
-    sockaddr_in %size uvar sockaddr
-    sockaddr_in %size uvar sockaddr1
-    file-stat uvar statbuf
+    pollfd %size 4 *               uvar pollfds \ up to four file descriptors
+    sockaddr_in %size              uvar sockaddr
+    sockaddr_in %size              uvar sockaddr1
+    file-stat                      uvar statbuf
+    cell                           uvar ind-addr
+    cell                           uvar reqmask
+    $10                            uvar cmdtmp
+    timestats                      uvar stat-tuple
     maxdata 2/ mykey-salt# + $10 + uvar init0buf
-    maxdata uvar aligned$
+    maxdata                        uvar aligned$
 end-class io-buffers
 
 [IFDEF] 64bit
@@ -469,12 +484,8 @@ m: addr>keys ( addr -- keys )
 
 \ generic hooks and user variables
 
-User ind-addr
-User reqmask
 UDefer other
 UValue pollfd#  2 to pollfd#
-User pollfds
-pollfds pollfd %size pollfd# * dup cell- uallot drop erase
 
 Defer init-reply
 
@@ -523,11 +534,11 @@ ustack t-stack
 ustack nest-stack
 
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
-    -other  ind-addr off  reqmask off
+    io-buffers new io-mem !
+    -other
     alloc-buf to inbuf
     alloc-buf to tmpbuf
     alloc-buf to outbuf
-    io-buffers new io-mem !
     init-ed25519 c:init ;
 
 : free-io ( -- )
@@ -972,14 +983,6 @@ end-class context-class
 
 Variable context-table
 
-begin-structure timestats
-sffield: ts-delta
-sffield: ts-slack
-sffield: ts-reqrate
-sffield: ts-rate
-sffield: ts-grow
-end-structure
-
 \ check for valid destination
 
 : >data-head ( addr o:map -- flag )  dest-size @ 1- >r
@@ -1085,8 +1088,6 @@ $20 cells Value resend-size#
 
 Variable init-context#
 
-resend-size# buffer: resend-init
-
 UValue connection
 
 : n2o:new-log ( -- o )
@@ -1117,7 +1118,6 @@ UValue connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
-\    resend-init resend-size# data-resend $!
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     -1 blocksize !
     1 blockalign !
@@ -1376,8 +1376,6 @@ reply buffer: dummy-reply
     track-timing $off o> ;
 
 : net2o:rec-timing ( addr u -- )  track-timing $+! ;
-
-timestats buffer: stat-tuple
 
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
@@ -2448,15 +2446,18 @@ require net2o-msg.fs
 Local Variables:
 forth-local-words:
     (
-     (("event:") definition-starter (font-lock-keyword-face . 1)
+     (("net2o:" "+net2o:" "event:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "uvar" "uvalue") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("[:") (0 . 1) (0 . 1) immediate)
+     ((";]") (-1 . 0) (0 . -1) immediate)
      (("event:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
