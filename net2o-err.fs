@@ -60,3 +60,5 @@ s" too many revokes chained"     throwcode !!maxlookup!!
 s" file class denied"            throwcode !!fileclass!!
 s" no free termservers"          throwcode !!no-termserver!!
 s" decryption failed"            throwcode !!no-decrypt!!
+s" no data"                      throwcode !!no-data!!
+s" invalid command order"        throwcode !!inv-order!!

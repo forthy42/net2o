@@ -24,10 +24,11 @@ cmd-class class
     KEYBYTES +field v-key \ file vault key
     keccak# +field v-kstate
     2field: v-data
+    field: v-state
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table ! ;
+    vault-class new n:>o vault-table @ token-table ! v-state off ;
 
 Defer do-decrypted ( addr u -- ) \ what to do with a decrypted file
 
@@ -37,24 +38,26 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table vault-table
 
-net2o' emit net2o: dhe ( $:pubkey -- ) \ start diffie hellman exchange
+net2o' emit net2o: dhe ( $:pubkey -- ) v-state @ !!inv-order!!
+    \ start diffie hellman exchange
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
-    v-key keysize erase ;
-+net2o: vault-keys ( $:keys -- ) $> bounds ?DO
+    v-key keysize erase 1 v-state or! ;
++net2o: vault-keys ( $:keys -- ) v-state @ 1 <> !!no-tmpkey!!
+    $> bounds ?DO
 	I' I - $40 u>= IF
 	    I vaultkey $40 move
 	    vaultkey $40 v-dhe keysize decrypt$ IF
 		dup keysize <> !!keysize!! v-key swap move
 	    ELSE  2drop  THEN
 	THEN
-    $40 +LOOP ;
-+net2o: vault-file ( $:content -- )
+    $40 +LOOP 2 v-state or! ;
++net2o: vault-file ( $:content -- ) v-state @ 3 <> !!no-tmpkey!!
     v-key keysize >crypt-key $> 2dup c:decrypt v-data 2!
-    @keccak v-kstate keccak# move ; \ keep for signature
-+net2o: vault-sig ( $:sig -- )
+    @keccak v-kstate keccak# move 4 v-state or! ; \ keep for signature
++net2o: vault-sig ( $:sig -- ) v-state @ 7 <> !!no-data!!
     $> v-key keysize decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
-    verify-tag 0= !!wrong-sig!! 2drop ;
+    verify-tag 0= !!wrong-sig!! 2drop 8 v-state or! ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -69,6 +72,7 @@ end-class cmd-buf$
 cmd-buf$ new cmdbuf: code-buf$
 
 code-buf$
+cmd$lock 0 pthread_mutex_init drop
 
 ' cmd$lock to cmdlock
 :noname  cmd$ $@ ; to cmdbuf$
@@ -115,7 +119,6 @@ keysize buffer: vsk
 Defer write-decrypt
 : write-1file ( -- ) enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
     IF  enc-filename dup $@len 4 - 4 $del  THEN
-    s" .dec" enc-filename $+! \ for testing purposes add .dec
     enc-filename $@ w/o create-file throw >r
     v-data 2@ r@ write-file throw r> F close-file throw ;
 ' write-1file is write-decrypt
@@ -124,7 +127,14 @@ Defer write-decrypt
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
     enc-file $@ >vault do-cmd-loop
-    write-decrypt n:o> ;
+    v-state @ $F = IF write-decrypt THEN n:o> ;
+
+\ define key lists
+
+Variable vkey-list
+
+: vpks-off ( -- ) vkey-list $[]off ;
+: +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
 
 0 [IF]
 Local Variables:
