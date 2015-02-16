@@ -57,7 +57,7 @@ User buf-state cell uallot drop
 
 : @>$ ( addr u -- $:string addr' u' )
     bounds p@+ [IFUNDEF] 64bit nip [THEN]
-    swap $200000 umin bounds ( endbuf endstring startstring )
+    swap bounds ( endbuf endstring startstring )
     >r over umin dup r> over umin tuck - >$ tuck - ;
 
 : string@ ( -- $:string )

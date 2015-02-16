@@ -136,6 +136,17 @@ Variable vkey-list
 : vpks-off ( -- ) vkey-list $[]off ;
 : +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
 
+: get-me ( -- )
+    ." Enter your net2o passphrase: " +passphrase
+    next-arg >key ;
+: enc-vault ( -- ) \ filename myname user1 .. usern
+    next-arg get-me
+    BEGIN argc @ 1 >  WHILE
+	    next-arg nick-key >o ke-pk $@ o> keysize umin vkey-list $+[]!
+    REPEAT  vkey-list encrypt-file ;
+: dec-vault ( -- )
+    next-arg get-me decrypt-file ;
+
 0 [IF]
 Local Variables:
 forth-local-words:
