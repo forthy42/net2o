@@ -129,6 +129,8 @@ Defer write-decrypt
     enc-file $@ >vault do-cmd-loop
     v-state @ $F = IF write-decrypt THEN n:o> ;
 
+previous
+
 \ define key lists
 
 Variable vkey-list
@@ -137,7 +139,7 @@ Variable vkey-list
 : +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
 
 : get-me ( -- )
-    ." Enter your net2o passphrase: " +passphrase
+    ." Enter your net2o passphrase: " +passphrase cr
     next-arg >key ;
 : enc-vault ( -- ) \ filename myname user1 .. usern
     next-arg get-me

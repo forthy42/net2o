@@ -58,7 +58,8 @@ User buf-state cell uallot drop
 : @>$ ( addr u -- $:string addr' u' )
     bounds p@+ [IFUNDEF] 64bit nip [THEN]
     swap bounds ( endbuf endstring startstring )
-    >r over umin dup r> over umin tuck - >$ tuck - ;
+    >r 2dup u< !!stringfit!!
+    dup r> over umin tuck - >$ tuck - ;
 
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
