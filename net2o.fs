@@ -822,6 +822,7 @@ object class
     field: token-table
     field: parent
     field: req?
+    field: c-state \ state for checks whether everything is there
     method start-req
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req

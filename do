@@ -41,3 +41,4 @@ git clone https://github.com/forthy42/ed25519-donna.git -b bernd
 # build and install keccak
 
 (cd keccak; ./autogen.sh && make && sudo make install)
+(cd threefish; ./autogen.sh && make && sudo make install)

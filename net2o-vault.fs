@@ -24,11 +24,10 @@ cmd-class class
     KEYBYTES +field v-key \ file vault key
     keccak# +field v-kstate
     2field: v-data
-    field: v-state
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table ! v-state off ;
+    vault-class new n:>o vault-table @ token-table ! c-state off ;
 
 Defer do-decrypted ( addr u -- ) \ what to do with a decrypted file
 
@@ -38,11 +37,11 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table vault-table
 
-net2o' emit net2o: dhe ( $:pubkey -- ) v-state @ !!inv-order!!
+net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \ start diffie hellman exchange
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
-    v-key keysize erase 1 v-state or! ;
-+net2o: vault-keys ( $:keys -- ) v-state @ 1 <> !!no-tmpkey!!
+    v-key keysize erase 1 c-state or! ;
++net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
     $> bounds ?DO
 	I' I - $40 u>= IF
 	    I vaultkey $40 move
@@ -50,14 +49,14 @@ net2o' emit net2o: dhe ( $:pubkey -- ) v-state @ !!inv-order!!
 		dup keysize <> !!keysize!! v-key swap move
 	    ELSE  2drop  THEN
 	THEN
-    $40 +LOOP 2 v-state or! ;
-+net2o: vault-file ( $:content -- ) v-state @ 3 <> !!no-tmpkey!!
+    $40 +LOOP 2 c-state or! ;
++net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
     v-key keysize >crypt-key $> 2dup c:decrypt v-data 2!
-    @keccak v-kstate keccak# move 4 v-state or! ; \ keep for signature
-+net2o: vault-sig ( $:sig -- ) v-state @ 7 <> !!no-data!!
+    @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
++net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     $> v-key keysize decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
-    verify-tag 0= !!wrong-sig!! 2drop 8 v-state or! ;
+    verify-tag 0= !!wrong-sig!! 2drop 8 c-state or! ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -127,7 +126,7 @@ Defer write-decrypt
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
     enc-file $@ >vault do-cmd-loop
-    v-state @ $F = IF write-decrypt THEN n:o> ;
+    c-state @ $F = IF write-decrypt THEN n:o> ;
 
 previous
 
