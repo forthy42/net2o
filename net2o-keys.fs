@@ -187,6 +187,7 @@ max-passphrase# buffer: passphrase
 Variable keys
 2Variable key+len \ current key + len
 
+: key>default ( -- ) keys $[]# 1- keys sec[]@ key+len 2! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
@@ -248,7 +249,7 @@ set-current previous previous
 
 : key-crypt ( -- )
     keypack keypack-all#
-    key+len 2@ dup $20 = \ is a secret, no need to be slow
+    key+len 2@ dup $20 u<= \ is a secret, no need to be slow
     IF  encrypt$  ELSE  pw-level# encrypt-pw$  THEN ;
 
 0 Value key-fd
@@ -300,7 +301,7 @@ $40 buffer: nick-buf
 
 : make-key ( -- )
     key#user ." nick: " nick-buf $40 accept nick-buf swap cr
-    ." passphrase: " +passphrase keys $[]# 1- keys sec[]@ key+len 2!
+    ." passphrase: " +passphrase key>default
     cr +gen-keys .rvk ;
 
 \ read key file

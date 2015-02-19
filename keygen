@@ -1,0 +1,13 @@
+#! /usr/local/bin/gforth-fast
+
+require net2o.fs
+
+: .rsk ." \ revoke: " skrev $20 85type cr ;
+
+." Passphrase: " +passphrase cr key>default
+." nick: " pad 100 accept cr pad swap
+key#user -rot +gen-keys .rsk
+
+\ ." Passphrase again: " +passphrase key>default cr
+read-keys .keys
+bye
