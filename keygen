@@ -2,8 +2,6 @@
 
 require net2o.fs
 
-: .rsk ." \ revoke: " skrev $20 85type cr ;
-
 ." Passphrase: " +passphrase cr key>default
 ." nick: " pad 100 accept cr pad swap
 key#user -rot +gen-keys .rsk

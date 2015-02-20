@@ -54,6 +54,9 @@ rngbuf# rng-pos !
        rng-buffer @ rngbuf# c:encrypt
        rng-pos off ;] rng-exec ;
 
+ : >rng$ ( addr u -- )
+     ['] c:encrypt rng-exec ;
+ 
 \ init rng to be actually useful
 
 : random-init ( -- )

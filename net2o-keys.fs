@@ -37,7 +37,7 @@ require mkdir.fs
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
-$100 Constant keypack#
+$1E0 Constant keypack#
 
 2 Value pw-level# \ pw-level# 0 is lowest
 \ !!TODO!! we need a way to tell how much we can trust keys
@@ -125,10 +125,17 @@ Variable key-table
 
 Variable strict-keys  strict-keys on
 
+require ansi.fs
+
+: .black ( addr u -- )
+    [ black >bg black >fg or ]L attr!   85type
+	[ default-color >bg default-color >fg or ]L attr! ;
+: .rsk ." \ revoke: " skrev $20 .black cr ;
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
     ." ke-pk: " ke-pk $@ 85type cr
-    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize 85type cr  THEN
+    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize
+	.black cr  THEN
     ." first: " ke-first 64@ .sigdate cr
     ." last: " ke-last 64@ .sigdate cr
     o> ;
@@ -252,29 +259,35 @@ set-current previous previous
     key+len 2@ dup $20 u<= \ is a secret, no need to be slow
     IF  encrypt$  ELSE  pw-level# encrypt-pw$  THEN ;
 
-0 Value key-fd
+0 Value key-sfd \ secret keys
+0 Value key-pfd \ pubkeys
 
 : ?.net2o ( -- )
     s" ~/.net2o" r/o open-file nip IF
 	s" ~/.net2o" $1C0 mkdir-parents throw
     THEN ;
 
-: ?key-fd ( -- fd ) key-fd dup ?EXIT drop
+: ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
-    "~/.net2o/keyfile.n2o" r/w open-file dup -514 = IF
-	2drop "~/.net2o/keyfile.n2o" r/w create-file
-    THEN  throw
-    dup to key-fd ;
+    addr u r/w open-file dup -514 = IF
+	2drop addr u r/w create-file
+    THEN  throw ;
+: ?key-sfd ( -- fd ) key-sfd "~/.net2o/seckeys.k2o" ?fd dup to key-sfd ;
+: ?key-pfd ( -- fd ) key-pfd "~/.net2o/pubkeys.k2o" ?fd dup to key-pfd ;
 
 : append-file ( addr u fd -- ) >r
     r@ file-size throw  r@ reposition-file throw
     r@ write-file throw  r> flush-file throw ;
 
-: key>file ( -- )
-    keypack keypack-all# ?key-fd append-file ;
+: key>sfile ( -- )
+    keypack keypack-all# ?key-sfd append-file ;
+: key>pfile ( -- )
+    keypack keypack-all# ?key-pfd append-file ;
 
-: rnd>file ( -- )
-    ( keypack keypack-all# >rng$ ) key>file ;
+: rnd>sfile ( -- )
+    keypack keypack-all# >rng$ key>sfile ;
+: rnd>pfile ( -- )
+    keypack keypack-all# >rng$ key>pfile ;
 
 : >keys ( -- )
     \G add shared secret to list of possible keys
@@ -290,7 +303,7 @@ set-current previous previous
     end:key ;
 
 : +gen-keys ( type nick u -- )
-    gen-keys >keys pack-key key-crypt key>file ;
+    gen-keys >keys pack-key key-crypt key>sfile ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
@@ -306,32 +319,36 @@ $40 buffer: nick-buf
 
 \ read key file
 
-: try-decrypt-key ( key u1 -- addr u2 true / false )
-    keypack c@ $F and pw-level# u<= IF
-	keypack keypack-d keypack-all# move
-	keypack-d keypack-all# 2swap
-	dup $20 = IF  decrypt$  ELSE  decrypt-pw$  THEN
-	?dup-if  EXIT  THEN
-    THEN  2drop false ;
+: try-decrypt-key ( key u1 -- addr u2 flag )
+    keypack keypack-d keypack-all# move
+    keypack-d keypack-all# 2swap
+    dup $20 = IF  decrypt$  ELSE
+	keypack c@ $F and pw-level# <= IF  decrypt-pw$
+	ELSE  2drop false  THEN
+    THEN ;
 
 : try-decrypt ( -- addr u / 0 0 )
     keys $[]# 0 ?DO
 	I keys sec[]@ try-decrypt-key IF  unloop  EXIT  THEN
+	2drop
     LOOP  0 0 ;
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
     sample-key .do-cmd-loop ;
 
-: read-key-loop ( -- )
+: read-keys-loop ( fd -- )  >r 0. r@ reposition-file throw
     BEGIN
-	?key-fd file-position throw d>64 key-read-offset 64!
-	keypack keypack-all# key-fd read-file throw
+	r@ file-position throw d>64 key-read-offset 64!
+	keypack keypack-all# r@ read-file throw
 	keypack-all# = WHILE  try-decrypt do-key
-    REPEAT ;
+    REPEAT  rdrop ;
+: read-key-loop ( -- ) ?key-sfd read-keys-loop ;
+: read-pkey-loop ( -- ) pw-level# >r -1 to pw-level#
+    ?key-pfd read-keys-loop r> to pw-level# ;
 
 : read-keys ( -- )
-    [: 0. ?key-fd reposition-file throw  read-key-loop ;] catch drop nothrow ;
+    read-key-loop read-pkey-loop ;
 
 \ select key by nick
 
