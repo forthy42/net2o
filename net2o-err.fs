@@ -62,3 +62,4 @@ s" no free termservers"          throwcode !!no-termserver!!
 s" decryption failed"            throwcode !!no-decrypt!!
 s" no data"                      throwcode !!no-data!!
 s" invalid command order"        throwcode !!inv-order!!
+s" nick not found"               throwcode !!no-nick!!

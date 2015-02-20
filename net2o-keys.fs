@@ -354,7 +354,7 @@ $40 buffer: nick-buf
 
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
-    nick-key >o o 0= IF  EXIT  THEN
+    nick-key >o o 0= IF  o> true !!no-nick!!  THEN
     ke-pk $@ pkc swap keysize 2* umin move
     ke-psk sec@ my-0key sec!
     ke-sk @ skc keysize move o> ;
