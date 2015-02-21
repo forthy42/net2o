@@ -297,10 +297,38 @@ set-current previous previous
 
 : pack-key ( type nick u -- )
     key:code
-        pkc keysize 2* $, newkey
-	skc keysize $, privkey
-        $, keynick lit, keytype ticks lit, keyfirst
+      pkc keysize 2* $, newkey
+      skc keysize $, privkey
+      $, keynick lit, keytype ticks lit, keyfirst
     end:key ;
+
+: pack-pubkey ( o:key -- )
+    key:code
+      ke-pk $@ $, newkey
+      ke-type @ ulit, keytype
+      ke-nick $@ $, keynick
+      ke-first 64@ lit, keyfirst
+      ke-last 64@ lit, keylast
+    end:key ;
+: pack-seckey ( o:key -- )
+    key:code
+      ke-pk $@ $, newkey
+      ke-sk sec@ $, privkey
+      ke-type @ ulit, keytype
+      ke-nick $@ $, keynick
+      ke-first 64@ lit, keyfirst
+      ke-last 64@ lit, keylast
+    end:key ;
+
+: save-pubkeys ( -- )
+    key-pfd ?dup-IF  close-file throw  THEN
+    0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
+    key-table [: cell+ $@ drop cell+ >o
+      ke-sk sec@ d0= IF  pack-pubkey  THEN
+      key-crypt key>pfile o> ;] #map
+    "~/.net2o/pubkeys.k2o" "~/.net2o/pubkeys.k2o~" rename-file throw
+    "~/.net2o/pubkeys.k2o+" "~/.net2o/pubkeys.k2o" rename-file throw
+    key-pfd close-file throw 0 to key-pfd ;
 
 : +gen-keys ( type nick u -- )
     gen-keys >keys pack-key key-crypt key>sfile ;
@@ -402,8 +430,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:") (0 . 1) (0 . 1) immediate)
-     ((";]") (-1 . 0) (0 . -1) immediate)
+     (("[:" "key:code") (0 . 1) (0 . 1) immediate)
+     ((";]" "end:key") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]

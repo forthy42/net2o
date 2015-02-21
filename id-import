@@ -1,0 +1,11 @@
+#! /usr/local/bin/gforth-fast
+
+require net2o.fs
+
+." Passphrase: " +passphrase cr key>default
+read-keys key>default
+Variable key-readin
+next-arg key-readin $slurp-file
+key-readin $@ do-key
+save-pubkeys
+bye
