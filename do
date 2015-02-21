@@ -41,13 +41,13 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
 # if the snapshot doesn't, try the git version
 
 gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
-    git-get git://git.savannah.gnu.org/ gforth
+    git-get git://git.savannah.gnu.org gforth
     build gforth
 )
 
 # get, build, and install ed25519-donna
 
-git-get https://github.com/forthy42/ ed25519-donna
+git-get https://github.com/forthy42 ed25519-donna
 
 # build and install libraries
 
