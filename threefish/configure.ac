@@ -11,7 +11,9 @@ AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
-LIBTOOL=${CC%gcc*}libtool
+PRECC=${CC%gcc*}
+PRECLANG=${RRECC%clang*}
+LIBTOOL=${PRECLANG}libtool
 AC_SUBST(LIBTOOL)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

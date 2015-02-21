@@ -45,7 +45,9 @@ AM_CONDITIONAL([ASM], [test x$asm = xtrue])
 #ARM with NEON
 #./configure --enable-asm as="inplace-armgcc-ARMv7A-NEON" plattform=neon CC="arm-linux-androideabi-gcc -mfpu=neon-vfpv4" --host=arm-linux-androideabi
 
-LIBTOOL=${CC%gcc*}libtool
+PRECC=${CC%gcc*}
+PRECLANG=${RRECC%clang*}
+LIBTOOL=${PRECLANG}libtool
 AC_SUBST(ws)
 AC_SUBST(as)
 AC_SUBST(plattform)
