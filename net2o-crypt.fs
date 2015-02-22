@@ -23,6 +23,19 @@ user-o keybuf
 
 state# 2* Constant state2#
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
+\ specify strength (in bytes), not length! length is 2*strength
+32 Constant hash#128 \ 128 bit hash strength is enough!
+64 Constant hash#256 \ 256 bit hash strength is more than enough!
+\ Hash state variables
+
+$41 Constant sigonlysize#
+$51 Constant sigsize#
+$71 Constant sigpksize#
+$10 Constant datesize#
+
+\ key storage stuff
+$1E0 Constant keypack#
+keypack# mykey-salt# + $10 + Constant keypack-all#
 
 object class
     state2# uvar key-assembly
@@ -48,6 +61,9 @@ object class
     \ shared secred
     keysize uvar keypad
     state# uvar vaultkey
+    hash#256 uvar keyed-hash-out
+    datesize# uvar sigdate
+    keypack-all# uvar keypack-d
     1 64s uvar last-mykey
 end-class keybuf-c
 
@@ -354,6 +370,69 @@ Defer search-key \ search if that is one of our pubkeys
 	EXIT
     THEN
     2drop ;
+
+\ signature stuff
+
+\ Idea: set "r" first half to the value, "r" second half to the key, diffuse
+\ we use explicitely Keccak here, this needs to be globally the same!
+\ Keyed hashs are there for unique handles
+
+: >keyed-hash ( valaddr uval keyaddr ukey -- )
+    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
+    hash( ." hashing: " 2over 85type ':' emit 2dup 85type cr )
+    c:hash c:hash
+    hash( @keccak 200 85type cr cr ) ;
+
+: keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
+    c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
+: keyed-hash#256 ( valaddr uval keyaddr ukey -- hashaddr uhash )
+    c:0key >keyed-hash  keyed-hash-out hash#256 2dup keccak> ;
+
+\ signature printing
+
+: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
+: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
+
+: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
+: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+
+: .check ( flag -- ) '✓' '⚡' rot select xemit ;
+: .sigdate ( tick -- )
+    64dup 64#0  64= IF  64drop ." forever"  EXIT  THEN
+    64dup 64#-1 64= IF  64drop ." never"    EXIT  THEN
+    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
+	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
+    ELSE  64drop .ticks  THEN ;
+: .sigdates ( addr u -- )
+    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
+
+\ signature verification
+
+: +date ( addr -- )
+    datesize# "date" >keyed-hash ;
+: >date ( addr u -- addr u )
+    2dup + sigsize# - +date ;
+
+#10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
+
+: check-date ( addr u -- addr u flag )
+    2dup + 1- c@ keysize = &&
+    2dup + sigsize# - >r
+    ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
+    64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
+    64within ;
+: verify-sig ( addr u pk -- addr u flag )  >r
+    check-date IF
+	2dup + sigonlysize# - r> ed-verify
+	EXIT  THEN
+    rdrop false ;
+: date-sig? ( addr u pk -- addr u flag )
+    >r >date r> verify-sig ;
+: .sig ( -- )
+    sigdate +date sigdate datesize# type
+    skc pkc ed-sign type keysize emit ;
+: .pk ( -- )  pkc keysize type ;
 
 0 [IF]
 Local Variables:

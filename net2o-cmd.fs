@@ -83,6 +83,7 @@ User buf-state cell uallot drop
 	.\" 85\" " 85type
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
+: n2o.sig ( $:string -- )  cr ." sig " $> n2o:$. ."  string, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
@@ -184,6 +185,7 @@ drop
 	4 of  pf@ f. ." float, " endof
 	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
+	10 of  string@  n2o.sig  endof
 	$10 of ." push' " p@ .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -316,6 +318,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     false ;
 +net2o: words ( ustart -- ) \ reflection
     64>n net2o:words ;
++net2o: sig ( #sig -- ) \ sig literal
+    c-buf@ 1- string@ $> check-sig ;
 
 previous
 dup set-current
@@ -473,7 +477,9 @@ User neststart#
 also net2o-base definitions
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
-: $, ( addr u -- )  string dup n>64 cmd, +cmdbuf ;
+: string, ( addr u -- )  dup n>64 cmd, +cmdbuf ;
+: $, ( addr u -- )  string string, ;
+: sig, ( addr u -- )  sig string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;

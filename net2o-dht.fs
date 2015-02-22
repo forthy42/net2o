@@ -15,27 +15,6 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ specify strength (in bytes), not length! length is 2*strength
-32 Constant hash#128 \ 128 bit hash strength is enough!
-64 Constant hash#256 \ 256 bit hash strength is more than enough!
-keccak#max buffer: keyed-hash-buf
-hash#256   buffer: keyed-hash-out
-
-\ Idea: set "r" first half to the value, "r" second half to the key, diffuse
-\ we use explicitely Keccak here, this needs to be globally the same!
-\ Keyed hashs are there for unique handles
-
-: >keyed-hash ( valaddr uval keyaddr ukey -- )
-    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
-    hash( ." hashing: " 2over 85type ':' emit 2dup 85type F cr )
-    c:hash c:hash
-    hash( @keccak 200 85type F cr F cr ) ;
-
-: keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
-    c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
-: keyed-hash#256 ( valaddr uval keyaddr ukey -- hashaddr uhash )
-    c:0key >keyed-hash  keyed-hash-out hash#256 2dup keccak> ;
-
 \ For speed reasons, the DHT is in-memory
 \ we may keep a log of changes on disk if we want persistence
 \ might not be saved too frequently... robustness comes from distribution
@@ -88,62 +67,16 @@ s" DHT permission denied"        throwcode !!dht-permission!!
 s" no signature"                 throwcode !!no-sig!!
 s" invalid signature"            throwcode !!wrong-sig!!
 
-\ Hash state variables
-
-$41 Constant sigonlysize#
-$51 Constant sigsize#
-$71 Constant sigpksize#
-$10 Constant datesize#
-
-\ signature printing
-
-User sigdate datesize# cell- uallot drop \ date+expire date
-
-: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
-
-: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
-: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+\ checks for signatures
 
 : gen>host ( addr u -- addr u )
     2dup c:0key "host" >keyed-hash ;
-: .check ( flag -- ) '✓' '⚡' rot select xemit ;
-: .sigdate ( tick -- )
-    64dup 64#0  64= IF  ." forever"  64drop  EXIT  THEN
-    64dup 64#-1 64= IF  ." never"  64drop  EXIT  THEN
-    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
-	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
-    ELSE  64drop .ticks  THEN ;
-: .sigdates ( addr u -- )
-    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
-
-\ checks for signatures
-
-#10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
-: +date ( addr -- )
-    datesize# "date" >keyed-hash ;
-: >date ( addr u -- addr u )
-    2dup + sigsize# - +date ;
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     c:0key 2dup sigsize# - "host" >keyed-hash ; \ hash from address
 
-: check-date ( addr u -- addr u flag )
-    2dup + 1- c@ keysize = &&
-    2dup + sigsize# - >r
-    ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
-    64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
-    64within ;
-: verify-sig ( addr u pk -- addr u flag )  >r
-    check-date IF
-	2dup + sigonlysize# - r> ed-verify
-	EXIT  THEN
-    rdrop false ;
-: date-sig? ( addr u pk -- addr u flag )
-    >r >date r> verify-sig ;
 : verify-host ( addr u -- addr u flag )
     dht-hash $@ drop date-sig? ;
 
@@ -366,10 +299,6 @@ gen-table $freeze
 
 \ facility stuff
 
-: .sig ( -- )
-    sigdate +date sigdate datesize# type
-    skc pkc ed-sign type space ;
-: .pk ( -- )  pkc keysize type ;
 : host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
 : gen-host ( addr u -- addr' u' )
     gen>host host$ ;

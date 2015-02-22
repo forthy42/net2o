@@ -825,8 +825,10 @@ object class
     field: c-state \ state for checks whether everything is there
     field: c-buf \ buffer pointer e.g. for signing parts of a buffer
     method start-req
+    method check-sig \ generic signature checker
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
+:noname true !!inv-sig!! ; cmd-class to check-sig
 
 Variable cmd-table
 Variable reply-table

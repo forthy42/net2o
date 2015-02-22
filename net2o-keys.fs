@@ -20,7 +20,8 @@ require mkdir.fs
 \ accept for password entry
 
 : accept* ( addr u -- u' )
-    \ accept-like input, but types * instead of the character
+    \g accept-like input, but types * instead of the character
+    \g don't save into history
     dup >r
     BEGIN  xkey dup #cr <> WHILE
 	    dup #bs = over #del = or IF
@@ -37,7 +38,6 @@ require mkdir.fs
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
-$1E0 Constant keypack#
 
 2 Value pw-level# \ pw-level# 0 is lowest
 \ !!TODO!! we need a way to tell how much we can trust keys
@@ -45,8 +45,6 @@ $1E0 Constant keypack#
 \ secrets don't, they aren't. We can quickly decrypt all
 \ secret-based stuff, without bothering with slowdowns.
 \ So secrets should use normal string decrypt
-
-keypack# mykey-salt# + $10 + Constant keypack-all#
 
 cmd-buf0 class
     maxdata -
@@ -65,9 +63,9 @@ cmd0lock 0 pthread_mutex_init drop
 
 code0-buf
 
-keypack-all# buffer: keypack-d
-
 \ hashed key data base
+
+User >storekey
 
 cmd-class class
     field: ke-sk   \ secret key
@@ -78,6 +76,7 @@ cmd-class class
     field: ke-prof \ profile object
     field: ke-selfsig
     field: ke-sigs
+    field: ke-storekey \ used to encrypt on storage
     64field: ke-offset \ offset in key file
     0 +field ke-end
 end-class key-entry
@@ -103,7 +102,7 @@ Variable key-table
     \ addr u is the public key
     sample-key >o
     key-entry-table @ token-table !
-    ke-sk ke-end over - erase
+    ke-sk ke-end over - erase  >storekey @ ke-storekey !
     key-read-offset 64@ ke-offset 64!
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over keysize umin key-table #! o>
@@ -189,9 +188,8 @@ max-passphrase# buffer: passphrase
     passphrase-in >passphrase ;
 
 Variable keys
-2Variable key+len \ current key + len
 
-: key>default ( -- ) keys $[]# 1- keys sec[]@ key+len 2! ;
+: key>default ( -- ) keys $[]# 1- keys $[] @ >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : ">passphrase ( addr u -- ) >passphrase +key ;
@@ -229,7 +227,8 @@ $10 net2o: newkey ( $:string -- o:key )
     $> 2dup p-size - 1- { addr } key:new n:>o addr c-buf ! 1 c-state ! ;
 key-entry-table >table
 +net2o: privkey ( $:string -- ) \ c-state @ 8 <> !!inv-order!!
-    $> ke-sk sec! +seckey ;
+    $> ke-sk sec! ke-sk sec@ drop keypad sk>pk
+    keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!! +seckey ;
 +net2o: keytype ( n -- ) c-state @ 8 = !!inv-order!!
     64>n ke-type ! 2 c-state or! ; \ default: anonymous
 +net2o: keynick ( $:string -- ) c-state @ 8 = !!inv-order!!
@@ -249,6 +248,12 @@ dup set-current previous
 
 gen-table $freeze
 ' context-table is gen-table
+
+:noname ( addrm um addrsig usig -- )
+    c-state @ 7 <> !!inv-order!!
+    ke-selfsig $! c:0key c:hash
+    ke-selfsig $@ ke-pk $@ drop date-sig?
+    0= !!inv-sig!! 2drop 8 c-state ! ; key-entry to check-sig
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>
@@ -270,7 +275,7 @@ set-current previous previous
 
 : key-crypt ( -- )
     keypack keypack-all#
-    key+len 2@ dup $20 u<= \ is a secret, no need to be slow
+    >storekey sec@ dup $20 u<= \ is a secret, no need to be slow
     IF  encrypt$  ELSE  pw-level# encrypt-pw$  THEN ;
 
 0 Value key-sfd \ secret keys
@@ -316,7 +321,7 @@ set-current previous previous
       pkc keysize 2* $, newkey
       rot lit, keytype
       $, keynick
-      now>never cmdbuf$ c:0key c:hash ['] .sig $tmp $, keyselfsig
+      now>never cmdbuf$ c:0key c:hash ['] .sig $tmp sig,
       skc keysize $, privkey
     end:key ;
 
@@ -327,7 +332,8 @@ also net2o-base
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-    ke-selfsig $@ $, keyselfsig ;
+    ke-selfsig $@ sig,
+    ke-storekey @ >storekey ! ;
 previous
 
 : pack-pubkey ( o:key -- )
@@ -340,15 +346,31 @@ previous
       ke-sk sec@ $, privkey
     end:key ;
 
+: >backup ( addr u -- )
+    2dup 2dup [: type '~' emit ;] $tmp rename-file throw
+    2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
+
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
     0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
     key-table [: cell+ $@ drop cell+ >o
       ke-sk sec@ d0= IF  pack-pubkey  THEN
       key-crypt key>pfile o> ;] #map
-    "~/.net2o/pubkeys.k2o" "~/.net2o/pubkeys.k2o~" rename-file throw
-    "~/.net2o/pubkeys.k2o+" "~/.net2o/pubkeys.k2o" rename-file throw
-    key-pfd close-file throw 0 to key-pfd ;
+    key-pfd close-file throw
+    "~/.net2o/pubkeys.k2o" >backup
+    0 to key-pfd ;
+
+: save-seckeys ( -- )
+    key-sfd ?dup-IF  close-file throw  THEN
+    0 "~/.net2o/seckeys.k2o+" ?fd to key-sfd
+    key-table [: cell+ $@ drop cell+ >o
+      ke-sk sec@ d0<> IF  pack-seckey  THEN
+      key-crypt key>sfile o> ;] #map
+    "~/.net2o/seckeys.k2o" >backup
+    key-sfd close-file throw 0 to key-sfd ;
+
+: save-keys ( -- )
+    save-pubkeys save-seckeys ;
 
 : +gen-keys ( type nick u -- )
     gen-keys >keys pack-key key-crypt key>sfile ;
@@ -377,7 +399,8 @@ $40 buffer: nick-buf
 
 : try-decrypt ( -- addr u / 0 0 )
     keys $[]# 0 ?DO
-	I keys sec[]@ try-decrypt-key IF  unloop  EXIT  THEN
+	I keys sec[]@ try-decrypt-key IF
+	    I keys $[] @ >storekey ! unloop  EXIT  THEN
 	2drop
     LOOP  0 0 ;
 
