@@ -63,6 +63,13 @@ User buf-state cell uallot drop
 
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
+: c-buf@ ( -- addr u )
+    c-buf @ buf-state 2@ drop over - ;
+: $>- ( $:string -- addr1 u1 addr2 u2 )
+    \g addr1 u1 is the string, addr2 u2 is the buffer from c-buf
+    \g up to the start of the string (string command and length excluded).
+    $> 2dup >r >r c-buf @ r> over - r> p-size - 1-
+    2dup + c@ 3 <> !!inv-order!! ;
 
 \ string debugging
 

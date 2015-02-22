@@ -21,7 +21,7 @@ $34 net2o: msg ( -- o:msg ) \ push a message object
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
     THEN
-    n:>o buf-state 2@ msg-buf 2! ;
+    n:>o buf-state 2@ drop c-buf ! ;
 
 msg-table >table
 
@@ -32,8 +32,7 @@ net2o' emit net2o: msg-text ( $:msg -- ) \ specify message string
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
     $> ." wrapped object: " 85type F cr ;
 +net2o: msg-sig ( $:signature -- ) \ detached signature
-    $>
-    msg-buf 2@ drop buf-state 2@ drop over - 3 - 2 pick - c:0key c:hash
+    $>- c:0key c:hash
     keysize 2* <> !!keysize!!
     parent @ .pubkey $@ keysize <> !!keysize!!
     date-sig? .check 2drop F cr ;
@@ -43,15 +42,13 @@ gen-table $freeze
 
 set-current
 
-User <msg-buf
-
 : <msg ( -- )
     \G start a msg block
-    msg cmdbuf$ + <msg-buf ! ;
+    msg cmdbuf$ + c-buf ! ;
 : msg> ( -- )
     \G end a msg block by adding a signature
-    <msg-buf @ cmdbuf$ + over -
-    c:0key c:hash now>never [: .pk .sig ;] $tmp $, msg-sig endwith ;
+    c-buf @ cmdbuf$ + over - now>never
+    hash-sig $, msg-sig endwith ;
 
 previous
 

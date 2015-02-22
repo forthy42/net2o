@@ -70,16 +70,14 @@ keypack-all# buffer: keypack-d
 \ hashed key data base
 
 cmd-class class
-    field: ke-sk \ secret key
-    field: ke-pk \ public key
-    field: ke-psk \ preshared key for stateless communication
-    field: ke-nick
-    field: ke-prof
+    field: ke-sk   \ secret key
+    field: ke-pk   \ public key
+    field: ke-type \ key type
+    field: ke-nick \ key nick
+    field: ke-psk  \ preshared key for stateless communication
+    field: ke-prof \ profile object
+    field: ke-selfsig
     field: ke-sigs
-    field: ke-type
-    field: ke-key
-    64field: ke-first
-    64field: ke-last
     64field: ke-offset \ offset in key file
     0 +field ke-end
 end-class key-entry
@@ -106,7 +104,6 @@ Variable key-table
     sample-key >o
     key-entry-table @ token-table !
     ke-sk ke-end over - erase
-    64#-1 ke-last 64!
     key-read-offset 64@ ke-offset 64!
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over keysize umin key-table #! o>
@@ -136,16 +133,16 @@ require ansi.fs
     ." ke-pk: " ke-pk $@ 85type cr
     ke-sk @ IF  ." ke-sk: " ke-sk @ keysize
 	.black cr  THEN
-    ." first: " ke-first 64@ .sigdate cr
-    ." last: " ke-last 64@ .sigdate cr
+    ." first: " ke-selfsig $@ drop 64@ .sigdate cr
+    ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key:new" cr
     ke-sk @ IF  .\" x\" " ke-sk @ keysize 85type .\" \" ke-sk sec! +seckey" cr  THEN
     '"' emit ke-nick $@ type .\" \" ke-nick $! "
-    ke-first 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
-    ." . d>64 ke-first 64! " ke-type @ . ." ke-type !"  cr o> ;
+    ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
+    ." . d>64 ke-first! " ke-type @ . ." ke-type !"  cr o> ;
 
 : .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
@@ -217,20 +214,37 @@ Variable keys
 \ we store each item in a 256 bytes encrypted string, i.e. with a 16
 \ byte salt and a 16 byte checksum.
 
+: ke-first! ( 64date -- )
+    ke-selfsig $@len $10 umax ke-selfsig $!len
+    ke-selfsig $@ drop 64! ;
+: ke-last! ( 64date -- )
+    ke-selfsig $@len $10 umax ke-selfsig $!len
+    ke-selfsig $@ drop 64'+ 64! ;
+
 get-current also net2o-base definitions
 
 cmd-table $@ inherit-table key-entry-table
 
-$10 net2o: newkey ( $:string -- o:key ) $> key:new n:>o ;
+$10 net2o: newkey ( $:string -- o:key )
+    $> 2dup p-size - 1- { addr } key:new n:>o addr c-buf ! 1 c-state ! ;
 key-entry-table >table
-+net2o: privkey ( $:string -- ) $> ke-sk sec! +seckey ;
-+net2o: keytype ( n -- )  64>n ke-type ! ; \ default: anonymous
-+net2o: keynick ( $:string -- )    $> ke-nick $! ;
-+net2o: keyprofile ( $:string -- ) $> ke-prof $! ;
++net2o: privkey ( $:string -- ) \ c-state @ 8 <> !!inv-order!!
+    $> ke-sk sec! +seckey ;
++net2o: keytype ( n -- ) c-state @ 8 = !!inv-order!!
+    64>n ke-type ! 2 c-state or! ; \ default: anonymous
++net2o: keynick ( $:string -- ) c-state @ 8 = !!inv-order!!
+    $> ke-nick $! 4 c-state or! ;
++net2o: keyprofile ( $:string -- ) c-state @ 8 = !!inv-order!!
+    $> ke-prof $! ;
 +net2o: newkeysig ( $:string -- )  $> ke-sigs $+[]! ;
 +net2o: keymask ( x -- )  64drop ;
-+net2o: keyfirst ( date-ns -- )  ke-first 64! ;
-+net2o: keylast  ( date-ns -- )  ke-last 64! ;
++net2o: keyselfsig ( $:string -- ) c-state @ 7 <> !!inv-order!!
+    $>- 2swap ke-selfsig $!
+    c:0key c:hash
+    ke-selfsig $@ ke-pk $@ drop date-sig?
+    0= !!inv-sig!! 8 c-state ! ;
++net2o: keypsk ( $:string -- ) c-state @ 8 = !!inv-order!!
+    $> ke-psk sec! ;
 dup set-current previous
 
 gen-table $freeze
@@ -294,30 +308,36 @@ set-current previous previous
     skc pkc keypad ed-dh +key ;
 
 \ key generation
+\ for reproducibility of the selfsig, always use the same order:
+\ "pubkey" newkey <n> keytype "nick" keynick "sig" keyselfsig
 
 : pack-key ( type nick u -- )
     key:code
       pkc keysize 2* $, newkey
+      rot lit, keytype
+      $, keynick
+      now>never cmdbuf$ c:0key c:hash ['] .sig $tmp $, keyselfsig
       skc keysize $, privkey
-      $, keynick lit, keytype ticks lit, keyfirst
     end:key ;
+
+also net2o-base
+: pack-corekey ( o:key -- )
+    ke-pk $@ $, newkey
+    ke-type @ ulit, keytype
+    ke-nick $@ $, keynick
+    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
+    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
+    ke-selfsig $@ $, keyselfsig ;
+previous
 
 : pack-pubkey ( o:key -- )
     key:code
-      ke-pk $@ $, newkey
-      ke-type @ ulit, keytype
-      ke-nick $@ $, keynick
-      ke-first 64@ lit, keyfirst
-      ke-last 64@ lit, keylast
+      pack-corekey
     end:key ;
 : pack-seckey ( o:key -- )
     key:code
-      ke-pk $@ $, newkey
+      pack-corekey
       ke-sk sec@ $, privkey
-      ke-type @ ulit, keytype
-      ke-nick $@ $, keynick
-      ke-first 64@ lit, keyfirst
-      ke-last 64@ lit, keylast
     end:key ;
 
 : save-pubkeys ( -- )
@@ -400,11 +420,11 @@ $40 buffer: nick-buf
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
     s" #revoked" dup >r ke-nick $+!
-    ke-nick $@ r> - ke-prof $@ ke-sigs ke-type @ ke-key @ 
+    ke-nick $@ r> - ke-prof $@ ke-psk sec@ ke-sigs ke-type @
     rev-addr keysize 2* key:new >o
-    ke-key ! ke-type ! [: ke-sigs $+[]! ;] $[]map ke-prof $! ke-nick $!
+    ke-type ! [: ke-sigs $+[]! ;] $[]map ke-psk sec! ke-prof $! ke-nick $!
     rev-addr keysize 2* ke-pk $!
-    rev-addr u + 1- dup c@ 2* - $10 - dup 64@ ke-first 64! 64'+ 64@ ke-last 64!
+    rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o> ;
 
 :noname ( revaddr u1 keyaddr u2 -- o )

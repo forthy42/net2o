@@ -823,6 +823,7 @@ object class
     field: parent
     field: req?
     field: c-state \ state for checks whether everything is there
+    field: c-buf \ buffer pointer e.g. for signing parts of a buffer
     method start-req
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
@@ -904,7 +905,6 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
-    2field: msg-buf
 end-class msg-class
 
 cmd-class class

@@ -1,7 +1,7 @@
 #! /usr/local/bin/gforth-fast
 
 require net2o.fs
-
++db trace(
 ." Passphrase: " +passphrase cr key>default
 read-keys key>default
 Variable key-readin
