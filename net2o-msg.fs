@@ -21,21 +21,21 @@ $34 net2o: msg ( -- o:msg ) \ push a message object
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
     THEN
-    n:>o buf-state 2@ drop c-buf ! ;
+    n:>o buf-state 2@ drop c-buf ! c-state off ;
 
 msg-table >table
 
 reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-text ( $:msg -- ) \ specify message string
-    $> F type ;
+    c-state @ !!inv-order!! $> F type ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    $> ." wrapped object: " 85type F cr ;
-+net2o: msg-sig ( $:signature -- ) \ detached signature
-    $>- c:0key c:hash
-    keysize 2* <> !!keysize!!
+    c-state @ !!inv-order!! $> ." wrapped object: " 85type F cr ;
+:noname ( addrm um addrsig usig -- ) \ detached signature
+    c-state @ !!inv-order!!
+    2swap c:0key c:hash
     parent @ .pubkey $@ keysize <> !!keysize!!
-    date-sig? .check 2drop F cr ;
+    date-sig? .check 2drop -1 c-state ! F cr ; msg-class to check-sig
 
 gen-table $freeze
 ' context-table is gen-table
@@ -48,7 +48,7 @@ set-current
 : msg> ( -- )
     \G end a msg block by adding a signature
     c-buf @ cmdbuf$ + over - now>never
-    hash-sig $, msg-sig endwith ;
+    hash-sig sig, endwith ;
 
 previous
 

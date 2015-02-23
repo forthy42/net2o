@@ -282,8 +282,10 @@ set-current previous previous
 0 Value key-pfd \ pubkeys
 
 : ?.net2o ( -- )
-    s" ~/.net2o" r/o open-file nip IF
-	s" ~/.net2o" $1C0 mkdir-parents throw
+    s" ~/.net2o" r/o open-file IF
+	drop s" ~/.net2o" $1C0 mkdir-parents throw
+    ELSE
+	close-file throw
     THEN ;
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
