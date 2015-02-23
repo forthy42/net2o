@@ -4,6 +4,10 @@ echo "This script builds net2o from scratch"
 
 GFORTH=gforth-0.7.9_20150221
 
+# helper functions
+
+which sudo >/dev/null || alias sudo='su -c'
+
 function git-get {
     purl=$1
     pname=$2
@@ -37,15 +41,7 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
     build $GFORTH
 )
 
-# we test for an existing Gforth that can load net2o.fs
-# if the snapshot doesn't, try the git version
-
-gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
-    git-get git://git.savannah.gnu.org gforth
-    build gforth
-)
-
-# get, build, and install ed25519-donna
+# get, build, and install ed25519-donna, keccak and threefish
 
 git-get https://github.com/forthy42 ed25519-donna
 
@@ -55,3 +51,11 @@ for i in ed25519-donna keccak threefish
 do
     build $i
 done
+
+# we test for an existing Gforth that can load net2o.fs
+# if the snapshot doesn't, try the git version
+
+gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
+    git-get git://git.savannah.gnu.org gforth
+    build gforth
+)
