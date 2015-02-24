@@ -20,8 +20,6 @@ reply-table $@ inherit-table setup-table
 $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
-: ]nest$  ( -- )  end-cmd cmd>nest $, ;
-: ]nest  ( -- )  ]nest$ push-$ push' nest ;
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
 
 +net2o: new-data ( addr addr u -- ) \ create new data mapping

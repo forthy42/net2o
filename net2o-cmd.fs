@@ -236,6 +236,9 @@ Variable throwcount
 	buf-state @ show-offset !  n2o:see-me  show-offset on
 	un-cmd  throwcount @ 4 < IF  >throw  THEN  THEN
     r> sp! 2drop +cmd ;
+: nest-cmd-loop ( addr u -- )
+    buf-state 2@ 2>r do-cmd-loop
+    2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN ;
 
 \ commands
 
@@ -340,10 +343,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     64>n net2o:words ;
 +net2o: sig ( #sig -- ) \ sig literal
     c-buf@ 1- string@ $> check-sig ;
-+net2o: signest ( #sig -- ) \ nest+sig
-    string@ $> buf-state 2@ 2>r
-    check-sig2 do-cmd-loop
-    2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN ;
++net2o: nestsig ( #sig -- ) \ check sig+nest
+    string@ $> nest-sig IF
+	nest-cmd-loop
+    ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
 
 previous
 dup set-current
@@ -444,7 +447,8 @@ previous
 
 \ nested commands
 
-: >initbuf ( addr u -- addr' u' ) tuck
+: >initbuf ( addr u -- addr' u' )
+    dup maxdata 2/ u> !!cmdfit!! tuck
     init0buf mykey-salt# + swap move dfaligned
     \ maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup $20 = UNTIL  THEN  nip
     init0buf swap mykey-salt# + 2 64s + ;
@@ -464,9 +468,8 @@ User neststart#
     cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
 
 : do-nest ( addr u flag -- )
-    buf-state 2@ 2>r validated @ >r  validated or!  do-cmd-loop
-    r> validated !
-    2r> buf-state cell+ @ IF  buf-state 2!  ELSE  2drop  THEN ;
+    validated @ >r  validated or!  
+    nest-cmd-loop  r> validated ! ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
@@ -494,6 +497,9 @@ also net2o-base definitions
 comp: :, previous ;
 : push-cmd ( -- )
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
+
+: ]nest$  ( -- )  cmd>nest $, ;
+: ]sig$ ( -- ) ;
 
 dup set-current previous
 
@@ -546,6 +552,8 @@ $10 net2o: push' ( #cmd -- ) \ push command into answer packet
     cell +LOOP  drop ; IS net2o:words
 
 gen-table $freeze
+
+: ]nest  ( -- )  ]nest$ push-$ push' nest ;
 
 0 [IF]
 Local Variables:

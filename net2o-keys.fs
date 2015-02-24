@@ -125,13 +125,17 @@ require ansi.fs
 
 : .black ( addr u -- )
     [ black >bg black >fg or ]L attr!   85type
-	[ default-color >bg default-color >fg or ]L attr! ;
-: .rsk ." \ revoke: " skrev $20 .black cr ;
+    [ default-color >bg default-color >fg or ]L attr! ;
+: .red ( addr u -- )
+    [ red >bg white >fg or bold or ]L attr!   85type
+    [ default-color >bg default-color >fg or ]L attr! ;
+: .rsk ( nick u )
+    ." \ revoke: " skrev $20 .red space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
-    ." ke-pk: " ke-pk $@ 85type cr
-    ke-sk @ IF  ." ke-sk: " ke-sk @ keysize
-	.black cr  THEN
+    ." pubkey: " ke-pk $@ 85type cr
+    ke-sk @ IF  ." seckey: " ke-sk @ keysize
+	.black ."  (keep secret!)" cr  THEN
     ." first: " ke-selfsig $@ drop 64@ .sigdate cr
     ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
@@ -374,7 +378,7 @@ previous
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
 
-: +gen-keys ( type nick u -- )
+: +gen-keys ( nick u type -- ) -rot
     gen-keys >keys pack-key key-crypt key>sfile ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;

@@ -52,6 +52,9 @@ do
     build $i
 done
 
+# make sure libraries are found
+sudo /sbin/ldconfig
+
 # we test for an existing Gforth that can load net2o.fs
 # if the snapshot doesn't, try the git version
 
