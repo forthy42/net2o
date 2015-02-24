@@ -2,7 +2,7 @@
 
 require net2o.fs
 
-." Passphrase: " +passphrase cr key>default
++newphrase key>default
 ." nick: " pad 100 accept cr pad swap
 2dup key#user +gen-keys .rsk
 

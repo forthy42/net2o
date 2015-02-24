@@ -196,6 +196,14 @@ Variable keys
 : key>default ( -- ) keys $[]# 1- keys $[] @ >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
+: +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;
+: +newphrase ( -- )
+    BEGIN
+	." Passphrase: " +passphrase cr
+	." Retype pls: " +checkphrase 0= WHILE
+	    ."  didn't match, retype please" cr
+    REPEAT cr ;
+
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : +seckey ( -- )
     ke-sk @ ke-pk $@ drop keypad ed-dh +key ;
