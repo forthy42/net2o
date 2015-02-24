@@ -205,6 +205,14 @@ sema see-lock
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
       o IF  r> token-table !  THEN  throw  2drop ;] see-lock c-section ;
 
+: n2o:see-me ( -- )
+    buf-state 2@ 2>r
+    ." see-me: "
+    inbuf flags .dest-addr
+    \ tag-addr dup hex. 2@ swap hex. hex. F cr
+    inbuf packet-data n2o:see
+    2r> buf-state 2! ;
+
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
     cmd@ trace( dup IF dup .net2o-name' THEN >r .s r> $.s cr ) n>cmd
@@ -213,7 +221,21 @@ sema see-lock
 
 : >cmd ( xt u -- ) gen-table $[] ! ;
 
+: un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
+
 Defer >throw
+Variable throwcount
+
+: do-cmd-loop ( addr u -- )
+    cmd( dest-flags .dest-addr 2dup n2o:see )
+    sp@ >r throwcount off
+    [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
+    dup IF   1 throwcount +!
+	[: ." do-cmd-loop: " dup . .exe cr ;] $err
+	dup DoError  nothrow
+	buf-state @ show-offset !  n2o:see-me  show-offset on
+	un-cmd  throwcount @ 4 < IF  >throw  THEN  THEN
+    r> sp! 2drop +cmd ;
 
 \ commands
 
@@ -274,8 +296,6 @@ code0-buf cmd0lock 0 pthread_mutex_init drop
 
 : F also forth parse-name parser1 execute previous ; immediate
 
-: un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
-
 Defer net2o:words
 
 : inherit-table ( addr u "name" -- )
@@ -320,6 +340,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     64>n net2o:words ;
 +net2o: sig ( #sig -- ) \ sig literal
     c-buf@ 1- string@ $> check-sig ;
++net2o: signest ( #sig -- ) \ nest+sig
+    string@ $> buf-state 2@ 2>r
+    check-sig2 do-cmd-loop
+    2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN ;
 
 previous
 dup set-current
@@ -331,14 +355,6 @@ gen-table $@ inherit-table reply-table
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
-
-: n2o:see-me ( -- )
-    buf-state 2@ 2>r
-    ." see-me: "
-    inbuf flags .dest-addr
-    \ tag-addr dup hex. 2@ swap hex. hex. F cr
-    inbuf packet-data n2o:see
-    2r> buf-state 2! ;
 
 : cmd0! ( -- )
     \g initialize a stateless command
@@ -408,19 +424,6 @@ previous
 	r> reply-dest 64@ send-cmd true
 	1 packets2 +!
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
-
-Variable throwcount
-
-: do-cmd-loop ( addr u -- )
-    cmd( dest-flags .dest-addr 2dup n2o:see )
-    sp@ >r throwcount off
-    [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
-    dup IF   1 throwcount +!
-	[: ." do-cmd-loop: " dup . .exe cr ;] $err
-	dup DoError  nothrow
-	buf-state @ show-offset !  n2o:see-me  show-offset on
-	un-cmd  throwcount @ 4 < IF  >throw  THEN  THEN
-    r> sp! 2drop +cmd ;
 
 : cmd-loop ( addr u -- )
     string-stack $off

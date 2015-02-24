@@ -826,9 +826,11 @@ object class
     field: c-buf \ buffer pointer e.g. for signing parts of a buffer
     method start-req
     method check-sig \ generic signature checker
+    method check-sig2 \ generic signature checker version 2
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
 :noname true !!inv-sig!! ; cmd-class to check-sig
+:noname true !!inv-sig!! ; cmd-class to check-sig2
 
 Variable cmd-table
 Variable reply-table
