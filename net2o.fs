@@ -2101,12 +2101,16 @@ $02 Constant own-crypt-val
 $04 Constant login-val
 $08 Constant cookie-val
 $10 Constant tmp-crypt-val
+$20 Constant signed-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
 : login?     ( -- flag )  validated @ login-val     and ;
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
+: signed?    ( -- flag )  validated @ signed-val    and ;
+
+: !!signed?  ( -- ) signed? 0= !!unsigned!! ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )

@@ -346,7 +346,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     c-buf@ 1- string@ $> check-sig ;
 +net2o: nestsig ( #sig -- ) \ check sig+nest
     string@ $> nest-sig IF
-	nest-cmd-loop
+	signed-val validated or!  nest-cmd-loop
+	signed-val invert validated and!
     ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
 
 previous

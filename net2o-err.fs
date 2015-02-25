@@ -65,3 +65,4 @@ s" no data"                      throwcode !!no-data!!
 s" invalid command order"        throwcode !!inv-order!!
 s" nick not found"               throwcode !!no-nick!!
 s" passphrases don't match"      throwcode !!passphrase-unmatch!!
+s" data needs to be signed"      throwcode !!unsigned!!

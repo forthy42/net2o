@@ -234,23 +234,21 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table key-entry-table
 
-$10 net2o: newkey ( $:string -- o:key )
+$10 net2o: newkey ( $:string -- o:key ) !!signed?
     $> 2dup p-size - 1- { addr } key:new n:>o addr c-buf ! 1 c-state ! ;
 key-entry-table >table
-+net2o: privkey ( $:string -- ) \ c-state @ 8 <> !!inv-order!!
-    $> ke-sk sec! ke-sk sec@ drop keypad sk>pk
-    keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!! +seckey ;
-+net2o: keytype ( n -- ) c-state @ 8 = !!inv-order!!
-    64>n ke-type ! 2 c-state or! ; \ default: anonymous
-+net2o: keynick ( $:string -- ) c-state @ 8 = !!inv-order!!
-    $> ke-nick $! 4 c-state or! ;
-+net2o: keyprofile ( $:string -- ) c-state @ 8 = !!inv-order!!
-    $> ke-prof $! ;
++net2o: privkey ( $:string -- )
+    \ does not need to be signed, the secret key verifies itself
+    $> over keypad sk>pk \ generate pubkey
+    keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
+    ke-sk sec! +seckey ;
++net2o: keytype ( n -- ) !!signed? 64>n ke-type ! 2 c-state or! ;
++net2o: keynick ( $:string -- )  !!signed? $> ke-nick $! 4 c-state or! ;
++net2o: keyprofile ( $:string -- ) !!signed? $> ke-prof $! ;
 +net2o: +keysig ( $:string -- )  $> ke-sigs $+[]! ;
 +net2o: keymask ( x -- )  64drop ;
-+net2o: keypsk ( $:string -- ) c-state @ 8 = !!inv-order!!
-    $> ke-psk sec! ;
-+net2o: keysig ( $:string -- ) $> ke-selfsig $! ;
++net2o: keypsk ( $:string -- ) !!signed? $> ke-psk sec! ;
++net2o: keysig ( $:string -- ) !!signed? $> ke-selfsig $! ;
 dup set-current previous
 
 gen-table $freeze
@@ -365,8 +363,8 @@ also net2o-base
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-    ke-pk $@ $, ]pk+sig$
-    ke-selfsig $@ +cmdins
+    ke-pk $@ ]pk+sig$ drop
+    ke-selfsig $@ +cmdbuf
     ke-storekey @ >storekey ! ;
 previous
 
