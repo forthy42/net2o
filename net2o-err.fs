@@ -40,7 +40,7 @@ s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
 s" absolute path not allowed!"   throwcode !!abs-path!!
 s" invalid packet destination"   throwcode !!inv-dest!!
-s" key+pubkey must be 32 bytes"  throwcode !!keysize!!
+s" wrong key size"               throwcode !!keysize!!
 s" unknown key"                  throwcode !!unknown-key!!
 s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!

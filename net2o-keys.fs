@@ -201,7 +201,7 @@ Variable keys
     BEGIN
 	." Passphrase: " +passphrase cr
 	." Retype pls: " +checkphrase 0= WHILE
-	    ."  didn't match, retype please" cr
+	    ."  didn't match, try again please" cr
     REPEAT cr ;
 
 : ">passphrase ( addr u -- ) >passphrase +key ;
@@ -209,7 +209,7 @@ Variable keys
     ke-sk @ ke-pk $@ drop keypad ed-dh +key ;
 
 "" ">passphrase \ following the encrypt-everything paradigm,
-\ no password is the empty string!  It's still encrypted!
+\ no password is the empty string!  It's still encrypted ;-)!
 
 \ a secret key just needs a nick and a type.
 \ Secret keys can be persons and groups.
@@ -224,12 +224,11 @@ Variable keys
 \ we store each item in a 256 bytes encrypted string, i.e. with a 16
 \ byte salt and a 16 byte checksum.
 
-: ke-first! ( 64date -- )
-    ke-selfsig $@len $10 umax ke-selfsig $!len
-    ke-selfsig $@ drop 64! ;
 : ke-last! ( 64date -- )
     ke-selfsig $@len $10 umax ke-selfsig $!len
     ke-selfsig $@ drop 64'+ 64! ;
+: ke-first! ( 64date -- ) 64#-1 ke-last!
+    ke-selfsig $@ drop 64! ;
 
 get-current also net2o-base definitions
 
@@ -247,15 +246,11 @@ key-entry-table >table
     $> ke-nick $! 4 c-state or! ;
 +net2o: keyprofile ( $:string -- ) c-state @ 8 = !!inv-order!!
     $> ke-prof $! ;
-+net2o: newkeysig ( $:string -- )  $> ke-sigs $+[]! ;
++net2o: +keysig ( $:string -- )  $> ke-sigs $+[]! ;
 +net2o: keymask ( x -- )  64drop ;
-+net2o: keyselfsig ( $:string -- ) c-state @ 7 <> !!inv-order!!
-    $>- 2swap ke-selfsig $!
-    c:0key c:hash
-    ke-selfsig $@ ke-pk $@ drop date-sig?
-    0= !!inv-sig!! 8 c-state ! ;
 +net2o: keypsk ( $:string -- ) c-state @ 8 = !!inv-order!!
     $> ke-psk sec! ;
++net2o: keysig ( $:string -- ) $> ke-selfsig $! ;
 dup set-current previous
 
 gen-table $freeze
@@ -266,6 +261,13 @@ gen-table $freeze
     ke-selfsig $! c:0key c:hash
     ke-selfsig $@ ke-pk $@ drop date-sig?
     0= !!inv-sig!! 2drop 8 c-state ! ; key-entry to check-sig
+:noname ( addr u -- flag )
+    2dup over + 1- c@ 2* { pk pk# }
+    c:0key 2dup sigsize# - c:hash
+    pk date-sig? dup 0= IF  nip nip  EXIT  THEN  drop
+    pk# safe/string sigsize# - 2dup + sigsize# >$
+    pk pk# >$
+    0 c-state ! true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>
@@ -330,23 +332,41 @@ set-current previous previous
 \ for reproducibility of the selfsig, always use the same order:
 \ "pubkey" newkey <n> keytype "nick" keynick "sig" keyselfsig
 
+User pk+sig$
+
+keysize 2* Constant pkrk#
+
+: +cmdins ( addr u -- ) >r
+    pad r@ +cmdbuf \ just add n dummy bytes
+    cmdbuf$ over swap r@ /string move
+    cmdbuf$ drop r> move ;
+
+: ]pk+sig$ ( pk u -- n ) +cmdins
+    cmdbuf$ nip sigsize# + n>64 cmdtmp$ dup >r +cmdins
+    [ also net2o-base net2o' nestsig previous ]L n>64 cmdtmp$
+    dup >r +cmdins r> r> + ;
+
+: ]pk+sign ( -- ) pkc pkrk# ]pk+sig$ >r
+    c:0key cmdbuf$ r> safe/string c:hash ['] .sig $tmp +cmdbuf ;
+
 : pack-key ( type nick u -- )
+    now>never
     key:code
-      pkc keysize 2* $, newkey
-      rot lit, keytype
-      $, keynick
-      now>never cmdbuf$ c:0key c:hash ['] .sig $tmp sig,
+      newkey keysig
+      rot lit, keytype $, keynick
+      pkc pkrk# ]pk+sign
       skc keysize $, privkey
     end:key ;
 
 also net2o-base
 : pack-corekey ( o:key -- )
-    ke-pk $@ $, newkey
+    newkey keysig
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-    ke-selfsig $@ sig,
+    ke-pk $@ $, ]pk+sig$
+    ke-selfsig $@ +cmdins
     ke-storekey @ >storekey ! ;
 previous
 
@@ -440,7 +460,7 @@ $40 buffer: nick-buf
 : >key ( addr u -- )
     key-table @ 0= IF  read-keys  THEN
     nick-key >o o 0= IF  o> true !!no-nick!!  THEN
-    ke-pk $@ pkc swap keysize 2* umin move
+    ke-pk $@ pkc swap pkrk# umin move
     ke-psk sec@ my-0key sec!
     ke-sk @ skc keysize move o> ;
 
@@ -458,9 +478,9 @@ $40 buffer: nick-buf
     key( ." Replace:" cr o cell- 0 .key )
     s" #revoked" dup >r ke-nick $+!
     ke-nick $@ r> - ke-prof $@ ke-psk sec@ ke-sigs ke-type @
-    rev-addr keysize 2* key:new >o
+    rev-addr pkrk# key:new >o
     ke-type ! [: ke-sigs $+[]! ;] $[]map ke-psk sec! ke-prof $! ke-nick $!
-    rev-addr keysize 2* ke-pk $!
+    rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o> ;
 

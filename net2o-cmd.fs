@@ -280,7 +280,8 @@ code0-buf cmd0lock 0 pthread_mutex_init drop
 ' rng@ to cmddest
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
-: cmd, ( 64n -- )  do-<req cmdtmp p!+ cmdtmp tuck - +cmdbuf ;
+: cmdtmp$ ( 64n -- addr u )  cmdtmp p!+ cmdtmp tuck - ;
+: cmd, ( 64n -- )  do-<req cmdtmp$ +cmdbuf ;
 
 : net2o, @ n>64 cmd, ;
 
@@ -450,7 +451,6 @@ previous
 : >initbuf ( addr u -- addr' u' )
     dup maxdata 2/ u> !!cmdfit!! tuck
     init0buf mykey-salt# + swap move dfaligned
-    \ maxdata  BEGIN  2dup 2/ u<  WHILE  2/ dup $20 = UNTIL  THEN  nip
     init0buf swap mykey-salt# + 2 64s + ;
 
 User neststart#
@@ -499,7 +499,6 @@ comp: :, previous ;
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
 
 : ]nest$  ( -- )  cmd>nest $, ;
-: ]sig$ ( -- ) ;
 
 dup set-current previous
 
