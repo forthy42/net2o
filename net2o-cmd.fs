@@ -63,13 +63,6 @@ User buf-state cell uallot drop
 
 : string@ ( -- $:string )
     buf-state 2@ @>$ buf-state 2! ;
-: c-buf@ ( -- addr u )
-    c-buf @ buf-state 2@ drop over - ;
-: $>- ( $:string -- addr1 u1 addr2 u2 )
-    \g addr1 u1 is the string, addr2 u2 is the buffer from c-buf
-    \g up to the start of the string (string command and length excluded).
-    $> 2dup >r >r c-buf @ r> over - r> p-size - 1-
-    2dup + c@ 3 <> !!inv-order!! ;
 
 \ string debugging
 
@@ -450,20 +443,24 @@ previous
 User neststart#
 2 Constant fwd# \ maximum 14 bits = 16kB
 
+: nest$ ( -- addr u )  cmdbuf$ neststart# @ safe/string ;
+
+: cmd-resolve> ( -- addr u )
+    nest$ over >r dup n>64 cmdtmp$ dup fwd# u> !!cmdfit!!
+    r> over - swap move
+    nest-stack stack> neststart# ! ;
+
 also net2o-base
 
 : sign[ ( -- ) neststart# @ nest-stack >stack
     string "\x80\x80" +cmdbuf cmdbuf# @ neststart# ! ;
 : nest[ ( -- ) sign[
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
+: ]sign ( -- )
+    c:0key nest$ c:hash ['] .sig $tmp +cmdbuf
+    cmd-resolve> 2drop  nestsig ;
 
 previous
-
-: cmd-resolve> ( -- addr u )
-    cmdbuf$ neststart# @ safe/string
-    over >r dup n>64 cmdtmp$ dup fwd# u> !!cmdfit!!
-    r> over - swap move
-    nest-stack stack> neststart# ! ;
 
 : cmd> ( -- addr u )
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf \ add space for checksum

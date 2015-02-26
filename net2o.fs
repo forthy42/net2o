@@ -823,7 +823,6 @@ object class
     field: parent
     field: req?
     field: c-state \ state for checks whether everything is there
-    field: c-buf \ buffer pointer e.g. for signing parts of a buffer
     method start-req
     method nest-sig \ check sig first and then nest
 end-class cmd-class \ command interpreter

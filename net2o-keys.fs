@@ -273,8 +273,7 @@ comp: :, also net2o-base ;
 also net2o-base definitions
 
 : end:key ( -- )
-    endwith end-cmd previous
-    cmdlock unlock ;
+    endwith previous cmdlock unlock ;
 comp: :, previous ;
 
 set-current previous previous
@@ -328,16 +327,14 @@ User pk+sig$
 
 keysize 2* Constant pkrk#
 
-: ]pk+sign ( addr u -- ) +cmdbuf
-    c:0key cmdbuf$ neststart# @ /string c:hash ['] .sig $tmp +cmdbuf
-    cmd-resolve> ;
+: ]pk+sign ( addr u -- ) +cmdbuf ]sign ;
 
 : pack-key ( type nick u -- )
     now>never
     key:code
       sign[
       rot lit, keytype $, keynick
-      pkc pkrk# ]pk+sign nestsig
+      pkc pkrk# ]pk+sign
       skc keysize $, privkey
     end:key ;
 
