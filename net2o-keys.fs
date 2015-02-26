@@ -1,6 +1,6 @@
 \ net2o key storage
 
-\ Copyright (C) 2010-2013   Bernd Paysan
+\ Copyright (C) 2010-2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -234,37 +234,31 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table key-entry-table
 
-$10 net2o: newkey ( $:string -- o:key ) !!signed?
-    $> 2dup p-size - 1- { addr } key:new n:>o addr c-buf ! 1 c-state ! ;
-key-entry-table >table
-+net2o: privkey ( $:string -- )
+\ $10 net2o: newkey ( $:string -- o:key ) !!signed?
+\     $> key:new n:>o  1 !!>order? ;
+\ key-entry-table >table
+$11 net2o: privkey ( $:string -- )
     \ does not need to be signed, the secret key verifies itself
     $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
-+net2o: keytype ( n -- ) !!signed? 64>n ke-type ! 2 c-state or! ;
-+net2o: keynick ( $:string -- )  !!signed? $> ke-nick $! 4 c-state or! ;
-+net2o: keyprofile ( $:string -- ) !!signed? $> ke-prof $! ;
-+net2o: +keysig ( $:string -- )  $> ke-sigs $+[]! ;
-+net2o: keymask ( x -- )  64drop ;
-+net2o: keypsk ( $:string -- ) !!signed? $> ke-psk sec! ;
-+net2o: keysig ( $:string -- ) !!signed? $> ke-selfsig $! ;
++net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
++net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $! ;
++net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
++net2o: keymask ( x -- )                       8 !!>order? 64drop ;
++net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
++net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
 dup set-current previous
 
 gen-table $freeze
 ' context-table is gen-table
 
-:noname ( addrm um addrsig usig -- )
-    c-state @ 7 <> !!inv-order!!
-    ke-selfsig $! c:0key c:hash
-    ke-selfsig $@ ke-pk $@ drop date-sig?
-    0= !!inv-sig!! 2drop 8 c-state ! ; key-entry to check-sig
-:noname ( addr u -- flag )
-    2dup over + 1- c@ 2* { pk pk# }
+:noname ( addr u -- addr u' flag )
+    2dup + 1- c@ 2* { pk# }
     c:0key 2dup sigsize# - c:hash
-    pk date-sig? dup 0= IF  nip nip  EXIT  THEN  drop
-    pk# safe/string sigsize# - 2dup + sigsize# >$
-    pk pk# >$
+    2dup + pk# sigsize# + - date-sig? dup 0= ?EXIT  drop
+    sigsize# - 2dup + sigsize# >$
+    pk# - 2dup + pk# key:new n:>o $> ke-selfsig $!
     0 c-state ! true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
@@ -334,37 +328,28 @@ User pk+sig$
 
 keysize 2* Constant pkrk#
 
-: +cmdins ( addr u -- ) >r
-    pad r@ +cmdbuf \ just add n dummy bytes
-    cmdbuf$ over swap r@ /string move
-    cmdbuf$ drop r> move ;
-
-: ]pk+sig$ ( pk u -- n ) +cmdins
-    cmdbuf$ nip sigsize# + n>64 cmdtmp$ dup >r +cmdins
-    [ also net2o-base net2o' nestsig previous ]L n>64 cmdtmp$
-    dup >r +cmdins r> r> + ;
-
-: ]pk+sign ( -- ) pkc pkrk# ]pk+sig$ >r
-    c:0key cmdbuf$ r> safe/string c:hash ['] .sig $tmp +cmdbuf ;
+: ]pk+sign ( addr u -- ) +cmdbuf
+    c:0key cmdbuf$ neststart# @ /string c:hash ['] .sig $tmp +cmdbuf
+    cmd-resolve> ;
 
 : pack-key ( type nick u -- )
     now>never
     key:code
-      newkey keysig
+      sign[
       rot lit, keytype $, keynick
-      pkc pkrk# ]pk+sign
+      pkc pkrk# ]pk+sign nestsig
       skc keysize $, privkey
     end:key ;
 
 also net2o-base
 : pack-corekey ( o:key -- )
-    newkey keysig
+    sign[
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-    ke-pk $@ ]pk+sig$ drop
-    ke-selfsig $@ +cmdbuf
+    ke-pk $@ +cmdbuf
+    ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-storekey @ >storekey ! ;
 previous
 

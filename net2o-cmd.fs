@@ -342,11 +342,9 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     false ;
 +net2o: words ( ustart -- ) \ reflection
     64>n net2o:words ;
-+net2o: sig ( #sig -- ) \ sig literal
-    c-buf@ 1- string@ $> check-sig ;
-+net2o: nestsig ( #sig -- ) \ check sig+nest
-    string@ $> nest-sig IF
-	signed-val validated or!  nest-cmd-loop
++net2o: nestsig ( $:cmd+sig -- ) \ check sig+nest
+    $> nest-sig IF
+	signed-val validated or! nest-cmd-loop
 	signed-val invert validated and!
     ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
 
@@ -449,24 +447,31 @@ previous
 
 \ nested commands
 
-: >initbuf ( addr u -- addr' u' )
-    dup maxdata 2/ u> !!cmdfit!! tuck
-    init0buf mykey-salt# + swap move dfaligned
-    init0buf swap mykey-salt# + 2 64s + ;
-
 User neststart#
+2 Constant fwd# \ maximum 14 bits = 16kB
 
-: nest[ ( -- ) neststart# @ nest-stack >stack
-    cmdbuf# @ neststart# ! ;
+also net2o-base
 
-: cmd> ( -- addr u )
-    init0buf mykey-salt# + maxdata 2/ erase
-    cmdbuf$ neststart# @ safe/string neststart# @ cmdbuf# !
+: sign[ ( -- ) neststart# @ nest-stack >stack
+    string "\x80\x80" +cmdbuf cmdbuf# @ neststart# ! ;
+: nest[ ( -- ) sign[
+    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
+
+previous
+
+: cmd-resolve> ( -- addr u )
+    cmdbuf$ neststart# @ safe/string
+    over >r dup n>64 cmdtmp$ dup fwd# u> !!cmdfit!!
+    r> over - swap move
     nest-stack stack> neststart# ! ;
 
-: cmd>nest ( -- addr u ) cmd> >initbuf 2dup mykey-encrypt$ ;
+: cmd> ( -- addr u )
+    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf \ add space for checksum
+    cmd-resolve> ;
+
+: cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
-    cmd> >initbuf 2dup tmpkey@ keysize umin encrypt$ ;
+    cmd> 2dup tmpkey@ keysize umin encrypt$ ;
 
 : do-nest ( addr u flag -- )
     validated @ >r  validated or!  
@@ -486,7 +491,6 @@ also net2o-base definitions
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : string, ( addr u -- )  dup n>64 cmd, +cmdbuf ;
 : $, ( addr u -- )  string string, ;
-: sig, ( addr u -- )  sig string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;

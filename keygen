@@ -1,4 +1,5 @@
 #! /usr/local/bin/gforth-fast
+\ -*-Forth-*-
 
 require net2o.fs
 

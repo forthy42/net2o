@@ -825,11 +825,9 @@ object class
     field: c-state \ state for checks whether everything is there
     field: c-buf \ buffer pointer e.g. for signing parts of a buffer
     method start-req
-    method check-sig \ generic signature checker
     method nest-sig \ check sig first and then nest
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
-:noname true !!inv-sig!! ; cmd-class to check-sig
 :noname ( addr u -- flag ) 2drop false ; cmd-class to nest-sig
 
 Variable cmd-table
@@ -2111,6 +2109,8 @@ $20 Constant signed-val
 : signed?    ( -- flag )  validated @ signed-val    and ;
 
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
+: !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
+: !!>=order?   ( n -- )  dup c-state @ u< !!inv-order!! c-state or! ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )

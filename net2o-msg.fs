@@ -28,19 +28,20 @@ msg-table >table
 reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-text ( $:msg -- ) \ specify message string
-    c-state @ !!inv-order!! $> F type ;
+    c-state @ 0= !!inv-order!! $> F type ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    c-state @ !!inv-order!! $> ." wrapped object: " 85type F cr ;
-:noname ( addrm um addrsig usig -- ) \ detached signature
-    c-state @ !!inv-order!!
-    2swap c:0key c:hash
+    c-state @ 0= !!inv-order!! $> ." wrapped object: " 85type F cr ;
+:noname ( addr u -- ) \ detached signature
+    2dup sigsize# - c:0key c:hash
     parent @ .pubkey $@ keysize <> !!keysize!!
-    date-sig? .check 2drop -1 c-state ! F cr ; msg-class to check-sig
+    date-sig? dup c-state ! ; msg-class to nest-sig
 
 gen-table $freeze
 ' context-table is gen-table
 
 set-current
+
+: ]msg+sign ( addr u -- ) !!fixme!! ;
 
 : <msg ( -- )
     \G start a msg block
@@ -48,7 +49,7 @@ set-current
 : msg> ( -- )
     \G end a msg block by adding a signature
     c-buf @ cmdbuf$ + over - now>never
-    hash-sig sig, endwith ;
+    ]msg+sign endwith ;
 
 previous
 
