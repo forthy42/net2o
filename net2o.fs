@@ -56,7 +56,8 @@ min-size max-size^2 lshift Value maxdata ( -- n )
 maxdata overhead + Value maxpacket
 maxpacket $F + -$10 and Value maxpacket-aligned
 max-size^2 6 + Value chunk-p2
-$10 Constant mykey-salt#
+$10 Constant key-salt#
+$10 Constant key-cksum#
 
 \ timestasts structure
 
@@ -85,7 +86,7 @@ object class
     cell                           uvar reqmask
     $10                            uvar cmdtmp
     timestats                      uvar stat-tuple
-    maxdata 2/ mykey-salt# + $10 + uvar init0buf
+    maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     maxdata                        uvar aligned$
 end-class io-buffers
 

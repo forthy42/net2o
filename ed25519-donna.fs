@@ -97,10 +97,10 @@ init-ed25519
     \G and output 64 bytes to hashtmp
     >keccak keccak* hashtmp $40 keccak> ;
 
-: ed-sign { sk pk -- sig u }
+: ed-sign { skh sk pk -- sig u }
     \G sign a message: the keccak state contains the hash of the message.
     @keccak keccaktmp keccak# move \ we need this twice - move away
-    sk $20 >hash \ gen "random number" from secret to hashtmp
+    skh $20 >hash \ gen "random number" from secret to hashtmp
     keccaktmp @keccak keccak# move \ restore state
     sct3 hashtmp 64b>sc25519
     get0 sct3 ge25519*base   \ sct3 is k

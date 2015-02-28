@@ -15,12 +15,9 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ key related  constants
+
 64 Constant state#
-
-Variable my-0key
-
-user-o keybuf
-
 state# 2* Constant state2#
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 \ specify strength (in bytes), not length! length is 2*strength
@@ -35,41 +32,56 @@ $10 Constant datesize#
 
 \ key storage stuff
 $1E0 Constant keypack#
-keypack# mykey-salt# + $10 + Constant keypack-all#
+keypack# key-salt# + key-cksum# + Constant keypack-all#
+
+Variable my-0key
+
+user-o keytmp \ storage for secure temporary keys
 
 object class
-    state2# uvar key-assembly
-    state2# uvar ivs-assembly
-    state2# uvar no-key \ just zeros for no key
-    state# uvar mykey \ instance's private key
-    state# uvar oldmykey \ previous private key
-    
+    state2#   uvar key-assembly
+    state2#   uvar ivs-assembly
+    state2#   uvar no-key \ just zeros for no key
+    state#    uvar mykey    \ instance's rotating private key
+    state#    uvar oldmykey \ previous rotating private key
+    keysize   uvar oldpkc   \ previous pubkey after revocation
+    keysize   uvar oldskc   \ previous secret key after revocation
+    keysize   uvar oldpkrev \ previous revocation pubkey after revocation
+    keysize   uvar oldskrev \ previous revocation secret after revocation
+    keysize   uvar keypad
+    state#    uvar vaultkey
+    hash#256  uvar keyed-hash-out
+    datesize# uvar sigdate
+    1 64s     uvar last-mykey
+    keysize   uvar stpkc \ server temporary keypair - once per connection setup
+    keysize   uvar stskc
+    keypack-all# uvar keypack-d
+    cell      uvar keytmp-up
+end-class keytmp-c
+
+user-o keybuf \ storage for secure permanent keys
+
+object class
     \ key storage
     \ client keys
     keysize uvar pkc   \ pubkey
     keysize uvar pk1   \ pubkey 1 for revokation
     keysize uvar skc   \ secret key
+    keysize uvar sksig \ secret key for signature
     keysize uvar sk1   \ secret key 1 for revokation (will not last)
     keysize uvar pkrev \ pubkey for revoking keys
     keysize uvar skrev \ secret for revoking keys
-    keysize uvar stpkc \ server temporary keypair - once per connection setup
-    keysize uvar stskc
-    keysize uvar oldpkc   \ previous pubkey after revocation
-    keysize uvar oldskc   \ previous secret key after revocation
-    keysize uvar oldpkrev \ previous revocation pubkey after revocation
-    keysize uvar oldskrev \ previous revocation secret after revocation
-    \ shared secred
-    keysize uvar keypad
-    state# uvar vaultkey
-    hash#256 uvar keyed-hash-out
-    datesize# uvar sigdate
-    keypack-all# uvar keypack-d
-    1 64s uvar last-mykey
 end-class keybuf-c
 
-: init-keybuf ( -- )
-    keybuf @ ?EXIT \ we have only one global keybuf
+: new-keybuf ( -- )
     keybuf-c >osize @ kalloc keybuf ! ;
+
+: init-keybuf ( -- )
+    keytmp @ IF
+	up@ keytmp-up @ <> IF  BUT  THEN
+	keytmp-c >osize @ kalloc keytmp !
+    THEN
+    keybuf @ ?EXIT  new-keybuf ; \ we have only one global keybuf
 
 init-keybuf
 
@@ -139,9 +151,9 @@ User last-ivskey
     ( cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
-    over mykey-salt# >crypt-source
+    over key-salt# >crypt-source
     2r> >crypt-key 
-    mykey-salt# safe/string
+    key-salt# safe/string
     key( ." key init: " c:key@ c:key# .nnb cr ) c:diffuse ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
@@ -316,12 +328,15 @@ $60 Constant rndkey#
 \ because pk=base*sk, so base*skc*sks = base*sks*skc
 \ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
+: >sksig ( -- )
+    c:0key pkc $60 c:hash sksig $20 keccak> ;
 : gen-keys ( -- )
     \g generate revocable keypair
     sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
     sk1 pkrev skc pkc ed-keypairx \ generate real keypair
-    genkey( ." gen key: " skc keysize xtype cr ) ;
+    genkey( ." gen key: " skc keysize xtype cr )
+    >sksig ;
 : check-rev? ( -- flag )
     \g check generated key if revocation is possible
     skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
@@ -431,7 +446,7 @@ Defer search-key \ search if that is one of our pubkeys
     >r >date r> verify-sig ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
-    skc pkc ed-sign type keysize emit ;
+    sksig skc pkc ed-sign type keysize emit ;
 : .pk ( -- )  pkc keysize type ;
 
 0 [IF]

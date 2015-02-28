@@ -98,7 +98,7 @@ Variable revtoken
 
 : >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
 
-: +revsign ( sk pk -- )  ed-sign revtoken $+! bl revtoken c$+! ;
+: +revsign ( sk pk -- )  sksig -rot ed-sign revtoken $+! bl revtoken c$+! ;
 
 : sign-token, ( sk pk string u2 -- )
     c:0key revtoken $@ 2swap >keyed-hash

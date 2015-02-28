@@ -48,9 +48,9 @@ require mkdir.fs
 
 cmd-buf0 class
     maxdata -
-    mykey-salt# uvar keypack
-    keypack# uvar keypack-buf
-    $10 uvar keypack-chksum
+    key-salt# uvar keypack
+    keypack#  uvar keypack-buf
+    key-cksum# uvar keypack-chksum
 end-class cmd-keybuf-c
 
 cmd-keybuf-c new cmdbuf: code-key
@@ -442,7 +442,8 @@ $40 buffer: nick-buf
     nick-key >o o 0= IF  o> true !!no-nick!!  THEN
     ke-pk $@ pkc swap pkrk# umin move
     ke-psk sec@ my-0key sec!
-    ke-sk @ skc keysize move o> ;
+    ke-sk sec@ skc swap keysize umin move
+    >sksig o> ;
 
 : i'm ( "name" -- ) parse-name >key ;
 : pk' ( "name" -- addr u )
@@ -481,6 +482,8 @@ forth-local-words:
     (
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "uvar" "uvalue") non-immediate (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
