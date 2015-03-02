@@ -18,6 +18,30 @@ c-library threefish
 	s" ./threefish" add-libpath
     [THEN]
     \c #include <threefish.h>
+    \c void tf_encrypt_loop(struct tf_ctx *ctx, uint64_t *p, size_t n,
+    \c 			    int flags1, int flags2) {
+    \c   int flags=flags1;
+    \c   while(n>=64) {
+    \c     tf_encrypt(ctx, p, p, flags);
+    \c     flags=flags2;
+    \c     p+=8;
+    \c     n-=64;
+    \c     if(!++(ctx->tweak[0]))
+    \c       (ctx->tweak[1])++;
+    \c   }
+    \c }
+    \c void tf_decrypt_loop(struct tf_ctx *ctx, uint64_t *c, size_t n,
+    \c 			    int flags1, int flags2) {
+    \c   int flags=flags1;
+    \c   while(n>=64) {
+    \c     tf_decrypt(ctx, c, c, flags);
+    \c     flags=flags2;
+    \c     c+=8;
+    \c     n-=64;
+    \c     if(!++(ctx->tweak[0]))
+    \c       (ctx->tweak[1])++;
+    \c   }
+    \c }
 \ -------===< structs >===--------
 \ tf_ctx
 begin-structure tf_ctx
@@ -28,6 +52,8 @@ drop 96 end-structure
 \ ------===< functions >===-------
 c-function tf_encrypt tf_encrypt a a a n -- void
 c-function tf_decrypt tf_decrypt a a a n -- void
+c-function tf_encrypt_loop tf_encrypt_loop a a n n n -- void
+c-function tf_decrypt_loop tf_decrypt_loop a a n n n -- void
 
 end-c-library
 
@@ -91,14 +117,11 @@ to c:prng
     \G Encrypt message in buffer addr u, must be by *64
     \G authentication is stored in the 16 bytes following that buffer
     { tag }
-    BEGIN  dup threefish#max u>=  WHILE
-	    over >r threefish-state r> dup $E tf_encrypt
-	    threefish#max /string +threefish
-    REPEAT  +
+    2>r threefish-state 2r@ $E dup tf_encrypt_loop
     threefish-padded threefish#max erase
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
     threefish-state threefish-padded dup $E tf_encrypt
-    >r threefish-padded 128@ r> 128!
+    threefish-padded 128@ 2r> + 128!
 ; to c:encrypt+auth
 \G Fill buffer addr u with PRNG sequence
 :noname ( addr u -- )
@@ -112,14 +135,11 @@ to c:prng
 :noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, must be by *64
     { tag }
-    BEGIN  dup threefish#max u>=  WHILE
-	    over >r threefish-state r> dup $E tf_decrypt
-	    threefish#max /string +threefish
-    REPEAT +
+    2>r threefish-state 2r@ $E dup tf_decrypt_loop
     threefish-padded threefish#max erase
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
     threefish-state threefish-padded dup $E tf_encrypt
-    128@ threefish-padded 128@ 128=
+    2r> + 128@ threefish-padded 128@ 128=
 ; to c:decrypt+auth
 :noname ( addr u -- )
     \G Hash message in buffer addr u

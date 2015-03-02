@@ -14,9 +14,12 @@ require ../net2o.fs
 : test-all ( addr u -- )
     2dup test-keccak test-threefish ;
 
+25000000 Constant test-size#
+test-size# $10 + allocate throw Constant test-pad
+
 script? [IF]
-    pad $100000 test-all
-    pad $100000 test-all
-    pad $100000 test-all
+    test-pad test-size# test-all
+    test-pad test-size# test-all
+    test-pad test-size# test-all
     bye
 [THEN]
