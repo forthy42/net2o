@@ -145,10 +145,6 @@ keccak-init
     /string dup 0= UNTIL  2drop
 ; to c:prng
 \G Fill buffer addr u with PRNG sequence
-:noname @keccak KeccakF
-    keccak-checksums keccak#cks keccak>
-    7 and 4 lshift keccak-checksums + 128@ ; to c:checksum ( tag -- xd )
-\G compute a 128 bit checksum
 :noname @keccak keccak#max + dup >r 128@ 128xor r> 128! ;
 to c:tweak! ( xd -- )
 \G set 128 bit tweek

@@ -465,16 +465,48 @@ $40 buffer: nick-buf
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o> ;
 
-:noname ( revaddr u1 keyaddr u2 -- o )
-    current-key >o replace-key o> >o skc keysize ke-sk sec!
-    o o> ; is renew-key
+: renew-key ( revaddr u1 keyaddr u2 -- o )
+    current-key >o replace-key o>
+    >o skc keysize ke-sk sec! o o> ;
 
-also net2o-base
-: fetch-id, ( id-addr u -- )
-    $, dht-id dht-host? endwith ;
-: fetch-host, ( nick u -- )
-    nick-key .ke-pk $@ fetch-id, ;
-previous
+\ revokation
+
+4 datesize# + keysize 9 * + Constant revsize#
+
+Variable revtoken
+
+: 0oldkey ( -- ) \ pubkeys can stay
+    oldskc keysize erase  oldskrev keysize erase ;
+
+: keymove ( addr1 addr2 -- )  keysize move ;
+
+: revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
+    sigonlysize# - 2dup 2r> >keyed-hash
+    sigdate +date
+    2dup + r> ed-verify ;
+
+: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
+
+: +revsign ( sk pk -- )  sksig -rot ed-sign revtoken $+! bl revtoken c$+! ;
+
+: sign-token, ( sk pk string u2 -- )
+    c:0key revtoken $@ 2swap >keyed-hash
+    sigdate +date +revsign ;
+
+: revoke-key ( -- addr u )
+    skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
+                                           \ backup keys
+    oldskrev oldpkrev sk>pk                \ generate revokation pubkey
+    gen-keys                               \ generate new keys
+    pkc keysize 2* revtoken $!             \ my new key
+    oldpkrev keysize revtoken $+!          \ revoke token
+    oldskrev oldpkrev "revoke" sign-token, \ revoke signature
+    skc pkc "selfsign" sign-token,         \ self signed with new key
+    "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
+    revtoken $@ gen>host 2drop             \ sign host information with old key
+    sigdate +date sigdate datesize# revtoken $+!
+    oldskc oldpkc +revsign
+    0oldkey revtoken $@ ;
 
 0 [IF]
 Local Variables:

@@ -60,64 +60,16 @@ Variable dht-table
 
 \ !!TBD!!
 
-\ hash errors
-
-s" invalid DHT key"              throwcode !!no-dht-key!!
-s" DHT permission denied"        throwcode !!dht-permission!!
-s" no signature"                 throwcode !!no-sig!!
-s" invalid signature"            throwcode !!wrong-sig!!
-
 \ checks for signatures
-
-: gen>host ( addr u -- addr u )
-    2dup c:0key "host" >keyed-hash ;
 
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
+
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
     c:0key 2dup sigsize# - "host" >keyed-hash ; \ hash from address
 
 : verify-host ( addr u -- addr u flag )
     dht-hash $@ drop date-sig? ;
-
-\ revokation
-
-4 datesize# + keysize 9 * + Constant revsize#
-
-Variable revtoken
-
-: 0oldkey ( -- ) \ pubkeys can stay
-    oldskc keysize erase  oldskrev keysize erase ;
-
-: keymove ( addr1 addr2 -- )  keysize move ;
-
-: revoke-verify ( addr u1 pk string u2 -- addr u flag ) rot >r 2>r c:0key
-    sigonlysize# - 2dup 2r> >keyed-hash
-    sigdate +date
-    2dup + r> ed-verify ;
-
-: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
-
-: +revsign ( sk pk -- )  sksig -rot ed-sign revtoken $+! bl revtoken c$+! ;
-
-: sign-token, ( sk pk string u2 -- )
-    c:0key revtoken $@ 2swap >keyed-hash
-    sigdate +date +revsign ;
-
-: revoke-key ( -- addr u )
-    skc oldskc keymove  pkc oldpkc keymove  skrev oldskrev keymove
-                                           \ backup keys
-    oldskrev oldpkrev sk>pk                \ generate revokation pubkey
-    gen-keys                               \ generate new keys
-    pkc keysize 2* revtoken $!             \ my new key
-    oldpkrev keysize revtoken $+!          \ revoke token
-    oldskrev oldpkrev "revoke" sign-token, \ revoke signature
-    skc pkc "selfsign" sign-token,         \ self signed with new key
-    "!" revtoken 0 $ins                    \ "!" + oldkeylen+newkeylen to flag revokation
-    revtoken $@ gen>host 2drop             \ sign host information with old key
-    sigdate +date sigdate datesize# revtoken $+!
-    oldskc oldpkc +revsign
-    0oldkey revtoken $@ ;
 
 : revoke? ( addr u -- addr u flag )
     2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
@@ -138,7 +90,7 @@ Variable revtoken
 
 : check-host ( addr u -- addr u )
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
-    0= !!wrong-sig!! ;
+    0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!no-sig!!
     c:0key dht-hash $@ "tag" >keyed-hash
@@ -146,7 +98,7 @@ Variable revtoken
 : verify-tag ( addr u -- addr u flag )
     2dup + sigpksize# - date-sig? ;
 : check-tag ( addr u -- addr u )
-    >tag verify-tag 0= !!wrong-sig!! ;
+    >tag verify-tag 0= !!inv-sig!! ;
 : delete-tag? ( addr u -- addr u flag )
     >tag "tag" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
@@ -359,6 +311,11 @@ also net2o-base
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
     r> $[]off ;
+
+: fetch-id, ( id-addr u -- )
+    $, dht-id dht-host? endwith ;
+: fetch-host, ( nick u -- )
+    nick-key .ke-pk $@ fetch-id, ;
 previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
@@ -373,8 +330,6 @@ previous
 
 : set-revocation ( addr u -- )
     dht-host $ins[]sig ;
-
-Defer renew-key
 
 : n2o:send-revoke ( addr u -- )
     keysize <> !!keysize!! >revoke

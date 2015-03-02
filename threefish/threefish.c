@@ -40,25 +40,24 @@ static const uint8_t tf_permut[] = {
 };
 
 /* 64-bit rotate left */
-inline uint64_t rot_l64(uint64_t x, uint16_t N)
+static inline uint64_t rot_l64(uint64_t x, uint16_t N)
 {
   return (x << N) ^ (x >> (64-N));
 }
 
 /* 64-bit rotate right */
-inline uint64_t rot_r64(uint64_t x, uint16_t N) {
+static inline uint64_t rot_r64(uint64_t x, uint16_t N) {
   return (x >> N) ^ (x << (64-N));
 }
 
-inline void tf_prep(struct tf_ctx *ctx)
+static inline void tf_prep(struct tf_ctx *ctx)
 {
   ctx->key[8] = ctx->key[0] ^ ctx->key[1] ^ ctx->key[2] ^
     ctx->key[3] ^ ctx->key[4] ^ ctx->key[5] ^
     ctx->key[6] ^ ctx->key[7] ^ SKEIN_KS_PARITY;
-  ctx->tweak[2] = ctx->tweak[0] ^ ctx->tweak[1];
 }
 
-inline void tf_tweak(struct tf_ctx *ctx)
+static inline void tf_tweak(struct tf_ctx *ctx)
 {
   ctx->tweak[2] = ctx->tweak[0] ^ ctx->tweak[1];
 }
@@ -82,11 +81,18 @@ inline void tf_tweak(struct tf_ctx *ctx)
   TWEAKE(r); s ^= 16
 
 void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p,
-		uint64_t *out, int feed)
+		uint64_t *out, int flags)
 {
   uint64_t X[8];
   int8_t i,m,n,s=0,y;
   
+  if(flags & 8) {
+    tf_prep(ctx);
+  }
+  if(flags & 4) {
+    tf_tweak(ctx);
+  }
+
   for(i=0;i<8;i++) {
     X[i] = p[i] + ctx->key[i];
   }
@@ -98,12 +104,19 @@ void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p,
   ROUNDE(7); ROUNDE(8); ROUNDE(9); ROUNDE(10); ROUNDE(11); ROUNDE(12);
   ROUNDE(13); ROUNDE(14); ROUNDE(15); ROUNDE(16); ROUNDE(17); ROUNDE(18);
   
-  if (feed) {
+  switch(flags & 3) {
+  case 2: // Bernd mode
+    for (i=0; i<8; i++) {
+      ctx->key[i] ^= X[i] ^ p[i];
+    }
+  case 0: // ECB mode
+    memcpy(out, X, 64);
+    break;
+  case 1: // SKEIN mode
     for (i=0; i<8; i++) {
       out[i] = X[i] ^ p[i];
-    }
-  } else {
-    memcpy(out, X, 64);
+    } break;
+  default: break;
   }
 }
 
@@ -127,10 +140,17 @@ void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p,
   PERMUTD(3); PERMUTD(2); PERMUTD(1); PERMUTD(0);     \
   s ^= 16;
 
-void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out)
+void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out, int flags)
 {
   uint64_t X[8];
   int8_t i,m,n,s=16,y;
+
+  if(flags & 8) {
+    tf_prep(ctx);
+  }
+  if(flags & 4) {
+    tf_tweak(ctx);
+  }
   
   memcpy(X, c, 64);
   
@@ -140,8 +160,19 @@ void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out)
   ROUNDD(6); ROUNDD(5); ROUNDD(4); ROUNDD(3); ROUNDD(2); ROUNDD(1);
   
   for (i=0; i<8; i++) {
-    out[i] = X[i] - ctx->key[i];
+    X[i] -= ctx->key[i];
   }
-  out[5] -= ctx->tweak[0];
-  out[6] -= ctx->tweak[1];
+  X[5] -= ctx->tweak[0];
+  X[6] -= ctx->tweak[1];
+  
+  switch(flags & 3) {
+  case 2: // Bernd mode
+    for (i=0; i<8; i++) {
+      ctx->key[i] ^= X[i] ^ c[i];
+    }
+  case 0: // ECB mode
+    memcpy(out, X, 64);
+    break;
+  default: break;
+  }
 }

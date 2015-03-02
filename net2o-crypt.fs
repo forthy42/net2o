@@ -428,6 +428,8 @@ Defer search-key \ search if that is one of our pubkeys
     datesize# "date" >keyed-hash ;
 : >date ( addr u -- addr u )
     2dup + sigsize# - +date ;
+: gen>host ( addr u -- addr u )
+    2dup c:0key "host" >keyed-hash ;
 
 #10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 

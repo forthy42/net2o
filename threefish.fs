@@ -26,10 +26,8 @@ begin-structure tf_ctx
 drop 96 end-structure
 
 \ ------===< functions >===-------
-c-function tf_prep tf_prep a -- void
-c-function tf_tweak tf_tweak a -- void
 c-function tf_encrypt tf_encrypt a a a n -- void
-c-function tf_decrypt tf_decrypt a a a -- void
+c-function tf_decrypt tf_decrypt a a a n -- void
 
 end-c-library
 
@@ -42,7 +40,6 @@ $40 Constant threefish#max
 crypto class
     tf_ctx uvar threefish-state
     threefish#max uvar threefish-padded
-    threefish#max uvar threefish-hash
     cell uvar threefish-up
 end-class threefish
 
@@ -53,20 +50,17 @@ end-class threefish
 : threefish-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @threefish crypto-o off ;
 
-: threefish0 ( -- )  threefish-state tf_ctx erase
-    threefish-state tf_prep ;
+: threefish0 ( -- )  threefish-state tf_ctx erase ;
 : >threefish ( addr u -- )  threefish-state swap move
-    threefish-state tf_ctx-tweak sizeof tf_ctx-tweak erase
-    threefish-state tf_prep ;
+    threefish-state tf_ctx-tweak sizeof tf_ctx-tweak erase ;
 : threefish> ( addr u -- )  threefish-state -rot move ;
 : +threefish ( -- )
     threefish-state tf_ctx-tweak $10 bounds DO
 	1 I +! I @ ?LEAVE \ continue when wraparound
-    cell +LOOP  threefish-state tf_tweak ;
+    cell +LOOP  ;
 : tf-tweak! ( 128b -- )
     threefish-state tf_ctx-tweak $10 erase
-    threefish-state tf_ctx-tweak 128!
-    threefish-state tf_tweak ;
+    threefish-state tf_ctx-tweak 128! ;
 
 threefish-init
 
@@ -86,28 +80,54 @@ threefish-init
 ' noop to c:diffuse ( -- ) \ no diffusing
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u, must be by *64
+    $C >r
     BEGIN  dup threefish#max u>=  WHILE
-	    over >r threefish-state r> dup 0 tf_encrypt
-	    threefish#max /string +threefish
-    REPEAT  2drop
+	    over >r threefish-state r> dup r> tf_encrypt
+	    threefish#max /string +threefish 4 >r
+    REPEAT  2drop rdrop
 ; dup to c:encrypt
 to c:prng
+:noname ( addr u tag -- )
+    \G Encrypt message in buffer addr u, must be by *64
+    \G authentication is stored in the 16 bytes following that buffer
+    { tag }
+    BEGIN  dup threefish#max u>=  WHILE
+	    over >r threefish-state r> dup $E tf_encrypt
+	    threefish#max /string +threefish
+    REPEAT  +
+    threefish-padded threefish#max erase
+    $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
+    threefish-state threefish-padded dup $E tf_encrypt
+    >r threefish-padded 128@ r> 128!
+; to c:encrypt+auth
 \G Fill buffer addr u with PRNG sequence
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u, must be by *64
-   BEGIN  dup threefish#max u>=  WHILE
-	   over >r threefish-state r> dup tf_decrypt
-	   threefish#max /string +threefish
-    REPEAT  2drop
+    $C >r
+    BEGIN  dup threefish#max u>=  WHILE
+	    over >r threefish-state r> dup r> tf_decrypt
+	    threefish#max /string +threefish 4 >r
+    REPEAT  2drop rdrop
 ; to c:decrypt
+:noname ( addr u tag -- flag )
+    \G Decrypt message in buffer addr u, must be by *64
+    { tag }
+    BEGIN  dup threefish#max u>=  WHILE
+	    over >r threefish-state r> dup $E tf_decrypt
+	    threefish#max /string +threefish
+    REPEAT +
+    threefish-padded threefish#max erase
+    $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
+    threefish-state threefish-padded dup $E tf_encrypt
+    128@ threefish-padded 128@ 128=
+; to c:decrypt+auth
 :noname ( addr u -- )
     \G Hash message in buffer addr u
-    threefish-hash threefish#max erase
     BEGIN  2dup threefish#max umin tuck
 	dup threefish#max u< IF
 	    threefish-padded threefish#max >padded
 	    threefish-padded threefish#max
-	THEN  drop threefish-state swap threefish-hash 1 tf_encrypt
+	THEN  drop threefish-state swap threefish-state $D tf_encrypt
     +threefish /string dup 0= UNTIL  2drop
 ; to c:hash
 ' tf-tweak! to c:tweak! ( 128b -- )

@@ -52,8 +52,6 @@ object class
     \G Hash message in buffer addr u
     umethod c:prng ( addr u -- )
     \G Fill buffer addr u with PRNG sequence
-    umethod c:checksum ( tag -- xd )
-    \G compute a 128 bit checksum
     umethod c:tweak! ( x128 -- )
     \G set 128 bit tweek (if tweekable)
 end-class crypto

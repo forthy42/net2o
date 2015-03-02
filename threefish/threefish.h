@@ -27,12 +27,12 @@ typedef struct tf_ctx {
 } tf_ctx;
 
 
-void tf_prep(struct tf_ctx *ctx);
-void tf_tweak(struct tf_ctx *ctx);
-void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p, uint64_t *out, int feed);
-void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out);
+static void tf_prep(struct tf_ctx *ctx);
+static void tf_tweak(struct tf_ctx *ctx);
+void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p, uint64_t *out, int flags);
+void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out, int flags);
 
-uint64_t rot_l64(uint64_t x, uint16_t N);
-uint64_t rot_r64(uint64_t x, uint16_t N);
+static uint64_t rot_l64(uint64_t x, uint16_t N);
+static uint64_t rot_r64(uint64_t x, uint16_t N);
 
 #endif  /* ifndef _THREEFISH_H_ */
