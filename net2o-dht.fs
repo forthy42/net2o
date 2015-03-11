@@ -261,8 +261,6 @@ gen-table $freeze
     c:0key "tag" >keyed-hash
     2dup ':' $split 2swap >keyed-hash ;
 : tag$ ( addr u -- tagaddr tag-u ) [: type .pk .sig ;] $tmp ;
-: hash-sig ( addr u -- sig u )
-    c:0key c:hash [: .pk .sig ;] $tmp ;
 
 : gen-tag ( addr u hash-addr uh -- addr' u' )
     gen>tag tag$ ;

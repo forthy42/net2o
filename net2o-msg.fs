@@ -27,14 +27,15 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-net2o' emit net2o: msg-text ( $:msg -- ) \ specify message string
-    !!signed? $> F type ;
+net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
+    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
++net2o: msg-text ( $:msg -- ) \ specify message string
+    !!signed? 1 2 !!<>=order? $> F type F cr ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    !!signed? $> ." wrapped object: " 85type F cr ;
-:noname ( addr u -- ) \ detached signature
-    2dup sigsize# - c:0key c:hash
-    parent @ .pubkey $@ keysize <> !!keysize!!
-    date-sig? ; msg-class to nest-sig
+    !!signed? 1 2 !!<>=order? $> ." wrapped object: " 85type F cr ;
+:noname ( addr u -- addr u flag )
+    pk-sig? dup >r IF  sigpksize# - 2dup + sigpksize# >$  c-state off  THEN r>
+; msg-class to nest-sig
 
 gen-table $freeze
 ' context-table is gen-table
@@ -42,9 +43,9 @@ gen-table $freeze
 set-current
 
 : <msg ( -- ) \G start a msg block
-    msg sign[ ;
+    msg sign[ msg-start ;
 : msg> ( -- ) \G end a msg block by adding a signature
-    now>never ]sign endwith ;
+    now>never ]pksign endwith ;
 
 previous
 

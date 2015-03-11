@@ -446,10 +446,15 @@ Defer search-key \ search if that is one of our pubkeys
     rdrop false ;
 : date-sig? ( addr u pk -- addr u flag )
     >r >date r> verify-sig ;
+: pk-sig? ( addr u -- addr u' flag )
+    dup sigpksize# u< !!no-sig!!
+    2dup sigpksize# - c:0key 2dup c:hash + date-sig? ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sksig skc pkc ed-sign type keysize emit ;
 : .pk ( -- )  pkc keysize type ;
+: pk-sig ( addr u -- sig u )
+    c:0key c:hash [: .pk .sig ;] $tmp ;
 
 0 [IF]
 Local Variables:

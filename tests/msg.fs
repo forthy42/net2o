@@ -22,4 +22,4 @@ init-client
     pad 100 accept pad swap send-text
     ['] .time $err ;
 
-script? [IF] "bob" nat:connect c:msg-test c:disconnect bye [THEN]
+script? [IF] $a $e "test" ins-ip c:connect c:msg-test c:disconnect bye [THEN]

@@ -153,6 +153,9 @@ require ansi.fs
 : .key# ( addr u -- ) keysize umin
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ .ke-nick $@ type ." ' ok" cr ;
+: .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
+    IF  2drop 8 85type
+    ELSE  cell+ .ke-nick $@ type  THEN ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF
@@ -254,12 +257,10 @@ gen-table $freeze
 ' context-table is gen-table
 
 :noname ( addr u -- addr u' flag )
-    2dup + 1- c@ 2* { pk# }
-    c:0key 2dup sigsize# - c:hash
-    2dup + pk# sigsize# + - date-sig? dup 0= ?EXIT  drop
+    pk-sig? dup 0= ?EXIT  drop
     sigsize# - 2dup + sigsize# >$
-    pk# - 2dup + pk# key:new n:>o $> ke-selfsig $!
-    0 c-state ! true ; key-entry to nest-sig
+    keysize - 2dup + keysize key:new n:>o $> ke-selfsig $!
+    c-state off  true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>

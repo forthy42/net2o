@@ -235,7 +235,7 @@ here file-classes - cell/ Constant file-classes#
     )
     rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
 
-\ careful: must follow exactpy the same loic as slurp (see below)
+\ careful: must follow exactpy the same logic as slurp (see below)
 : n2o:spit ( -- ) fstates 0= ?EXIT
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE

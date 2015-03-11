@@ -2109,8 +2109,13 @@ $20 Constant signed-val
 : signed?    ( -- flag )  validated @ signed-val    and ;
 
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
+: !!<order?   ( n -- )  dup c-state @ u>  !!inv-order!! c-state or! ;
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
 : !!>=order?   ( n -- )  dup c-state @ u< !!inv-order!! c-state or! ;
+: !!<>order?   ( n1 n2 -- )  dup >r
+    c-state @ -rot swap within !!inv-order!! r> c-state or! ;
+: !!<>=order?   ( n1 n2 -- )  dup >r 1+
+    c-state @ -rot swap within !!inv-order!! r> c-state or! ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )

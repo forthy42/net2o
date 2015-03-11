@@ -456,9 +456,11 @@ also net2o-base
     string "\x80\x80" +cmdbuf cmdbuf# @ neststart# ! ;
 : nest[ ( -- ) sign[
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
-: ]sign ( -- )
-    c:0key nest$ c:hash ['] .sig $tmp +cmdbuf
+: ']sign ( xt -- )
+    c:0key nest$ c:hash $tmp +cmdbuf
     cmd-resolve> 2drop  nestsig ;
+: ]sign ( -- ) ['] .sig ']sign ;
+: ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 
 previous
 
