@@ -66,7 +66,7 @@ Variable dht-table
     "delete" >keyed-hash ;
 
 : >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
-    c:0key 2dup sigsize# - "host" >keyed-hash ; \ hash from address
+    2dup sigsize# - gen>host 2drop ; \ hash from address
 
 : verify-host ( addr u -- addr u flag )
     dht-hash $@ drop date-sig? ;
@@ -150,12 +150,10 @@ Variable dht-table
     ELSE  @ nip nip  THEN ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
-: .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN  2dup 2>r
-    >host 2dup + sigonlysize# - dht-hash $@ drop ed-verify >r sigsize# - .ipaddr
-    r> 2r> .sigdates .check ;
+: .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
+    2dup sigsize# - .ipaddr 2dup .sigdates >host verify-host .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
-    >host 2dup + sigonlysize# - dht-hash $@ drop ed-verify >r sigsize# -
-    r> ;
+    >host verify-host >r sigsize# - r> ;
 : d#. ( -- )
     dht-hash $@ 85type ." :" cr
     k#size cell DO
