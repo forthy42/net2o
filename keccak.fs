@@ -13,7 +13,6 @@ require kregion.fs
 [THEN]
 
 c-library keccak
-    \    s" keccak/.libs" add-libpath
     s" keccak" add-lib
     [IFDEF] android
 	s" ./keccak" add-libpath
