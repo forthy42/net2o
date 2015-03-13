@@ -123,19 +123,19 @@ Variable strict-keys  strict-keys on
 
 require ansi.fs
 
-: .black ( addr u -- )
-    [ black >bg black >fg or ]L attr!   85type
+: reset-color ( -- )
     [ default-color >bg default-color >fg or ]L attr! ;
-: .red ( addr u -- )
-    [ red >bg white >fg or bold or ]L attr!   85type
-    [ default-color >bg default-color >fg or ]L attr! ;
+: .black85 ( addr u -- )
+    [ black >bg black >fg or ]L attr!   85type reset-color ;
+: .red85 ( addr u -- )
+    [ red >bg white >fg or bold or ]L attr!   85type reset-color ;
 : .rsk ( nick u )
-    ." \ revoke: " skrev $20 .red space type ."  (keep offline copy!)" cr ;
+    ." \ revoke: " skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF  ." seckey: " ke-sk @ keysize
-	.black ."  (keep secret!)" cr  THEN
+	.black85 ."  (keep secret!)" cr  THEN
     ." first: " ke-selfsig $@ drop 64@ .sigdate cr
     ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
@@ -155,7 +155,7 @@ require ansi.fs
     cell+ .ke-nick $@ type ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
     IF  2drop 8 85type
-    ELSE  cell+ .ke-nick $@ type  THEN ;
+    ELSE  cell+ .ke-nick $@ type 2drop  THEN ;
 
 :noname ( addr u -- )
     o IF  dest-pubkey @ IF

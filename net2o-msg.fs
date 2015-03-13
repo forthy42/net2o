@@ -29,10 +29,14 @@ reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
++net2o: msg-signal ( $:pubkey -- ) \ signal message to one person
+    !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
+    IF  [ red >bg white >fg or bold or ]L attr!  THEN  ." @" .key-id space
+    reset-color ;
 +net2o: msg-text ( $:msg -- ) \ specify message string
-    !!signed? 1 2 !!<>=order? $> F type F cr ;
+    !!signed? 1 4 !!<>=order? $> F type F cr ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    !!signed? 1 2 !!<>=order? $> ." wrapped object: " 85type F cr ;
+    !!signed? 1 4 !!<>=order? $> ." wrapped object: " 85type F cr ;
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF  sigpksize# - 2dup + sigpksize# >$  c-state off  THEN r>
 ; msg-class to nest-sig
