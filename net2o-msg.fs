@@ -18,7 +18,7 @@
 Variable msg-groups
 
 : avalanche-to ( dest u -- )
-    !!fixme!! \ still a stub ;
+    !!fixme!! ; \ still a stub
 : avalanche-msg ( group-addr u -- )
     \g forward message to all next nodes of that message group
     msg-groups #@ IF
