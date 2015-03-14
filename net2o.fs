@@ -929,6 +929,7 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
+    2field: last-msg
 end-class msg-class
 
 cmd-class class
