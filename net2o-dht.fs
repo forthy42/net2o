@@ -65,7 +65,7 @@ Variable dht-table
 : >delete ( addr u type u2 -- addr u )
     "delete" >keyed-hash ;
 
-: >host ( addr u -- addr u )  dup sigsize# u< !!no-sig!!
+: >host ( addr u -- addr u )  dup sigsize# u< !!unsigned!!
     2dup sigsize# - gen>host 2drop ; \ hash from address
 
 : verify-host ( addr u -- addr u flag )
@@ -92,7 +92,7 @@ Variable dht-table
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
     0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
-    dup sigpksize# u< !!no-sig!!
+    dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
     2dup sigpksize# - ':' $split 2swap >keyed-hash ;
 : verify-tag ( addr u -- addr u flag )

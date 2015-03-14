@@ -17,7 +17,7 @@ init-client
 
 : c:msg-test ( -- )
     [: .time ." Message test" cr ;] $err
-    "Hi Alice!" send-text o-timeout
+    "Hi Alice!" "alice" send-text-to o-timeout
     BEGIN  pad 100 accept cr dup WHILE  pad swap send-text  REPEAT
     drop ['] .time $err ;
 

@@ -116,12 +116,13 @@ Variable key-table
 	rot drop o -rot
     THEN  o> ;] #map 2drop ;
 
+: nick>pk ( nick u -- pk u )
+    nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
+
 : key-exist? ( addr u -- flag )
     key-table #@ d0<> ; 
 
 Variable strict-keys  strict-keys on
-
-require ansi.fs
 
 : reset-color ( -- )
     [ default-color >bg default-color >fg or ]L attr! ;
@@ -448,7 +449,7 @@ $40 buffer: nick-buf
 
 : i'm ( "name" -- ) parse-name >key ;
 : pk' ( "name" -- addr u )
-    parse-name nick-key >o ke-pk $@ o> ;
+    parse-name nick>pk ;
 
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!

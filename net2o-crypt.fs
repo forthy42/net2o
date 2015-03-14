@@ -447,7 +447,7 @@ Defer search-key \ search if that is one of our pubkeys
 : date-sig? ( addr u pk -- addr u flag )
     >r >date r> verify-sig ;
 : pk-sig? ( addr u -- addr u' flag )
-    dup sigpksize# u< !!no-sig!!
+    dup sigpksize# u< !!unsigned!!
     2dup sigpksize# - c:0key 2dup c:hash + date-sig? ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type

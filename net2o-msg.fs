@@ -15,6 +15,17 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Variable msg-groups
+
+: avalanche-to ( dest u -- )
+    !!fixme!! \ still a stub ;
+: avalanche-msg ( group-addr u -- )
+    \g forward message to all next nodes of that message group
+    msg-groups #@ IF
+	bounds ?DO  I $@ avalanche-to  cell +LOOP
+    ELSE  2drop  THEN ;
+
+
 get-current also net2o-base definitions
 
 $34 net2o: msg ( -- o:msg ) \ push a message object
@@ -31,14 +42,20 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-signal ( $:pubkey -- ) \ signal message to one person
     !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
-    IF  [ red >bg white >fg or bold or ]L attr!  THEN  ." @" .key-id space
+    IF   info-color attr!  THEN  ." @" .key-id space
     reset-color ;
 +net2o: msg-text ( $:msg -- ) \ specify message string
     !!signed? 1 4 !!<>=order? $> F type F cr ;
 +net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
     !!signed? 1 4 !!<>=order? $> ." wrapped object: " 85type F cr ;
++net2o: msg-group ( $:group -- ) \ specify a chat group
+    signed? !!signed!! 4 8 !!<>=order? \ already a message there
+    $> avalanche-msg ;
 :noname ( addr u -- addr u flag )
-    pk-sig? dup >r IF  sigpksize# - 2dup + sigpksize# >$  c-state off  THEN r>
+    pk-sig? dup >r IF
+	2dup last-msg 2!
+	sigpksize# - 2dup + sigpksize# >$  c-state off
+    THEN r>
 ; msg-class to nest-sig
 
 gen-table $freeze
@@ -56,6 +73,12 @@ previous
 : send-text ( addr u -- )
     net2o-code  expect-reply
     <msg $, msg-text msg>
+    cookie+request end-code| ;
+
+: send-text-to ( msg u nick u -- )
+    net2o-code expect-reply
+    <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
+    $, msg-text msg>
     cookie+request end-code| ;
 
 0 [IF]

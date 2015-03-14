@@ -21,7 +21,8 @@ require net2o-err.fs
 
 \ required tools
 
-\ require smartdots.fs
+require ansi.fs
+require date.fs
 require mini-oof2.fs
 require user-object.fs
 require unix/socket.fs
@@ -203,6 +204,27 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     count reverse8 r@ $A + c@ reverse8 dst 5 + c! dst $A + c!
     count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
     c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
+
+\ print time
+
+1970 1 1 ymd2day Constant unix-day0
+
+: fsplit ( r -- r n )  fdup floor fdup f>s f- ;
+
+: today? ( day -- flag ) ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
+
+: .day ( seconds -- fraction/day ) 86400e f/ fsplit
+    dup today? IF  drop  EXIT  THEN
+    unix-day0 + day2ymd
+    rot 0 .r '-' emit swap 0 .r '-' emit 0 .r 'T' emit ;
+: .timeofday ( fraction/day -- )
+    24e f* fsplit 0 .r ':' emit 60e f* fsplit 0 .r ':' emit
+    60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
+
+: .ticks ( ticks -- )
+    64dup 64-0= IF  ." never" 64drop EXIT  THEN
+    64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
+    64>f 1e-9 f* .day .timeofday ;
 
 \ IP address stuff
 
