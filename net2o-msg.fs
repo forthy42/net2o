@@ -15,16 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Variable msg-groups
-
-: avalanche-to ( dest u -- )
-    !!fixme!! ; \ still a stub
+defer avalanche-to ( addr u o:context -- )
 : avalanche-msg ( group-addr u -- )
     \g forward message to all next nodes of that message group
     msg-groups #@ IF
-	bounds ?DO  I $@ avalanche-to  cell +LOOP
+	bounds ?DO  last-msg 2@ I @ .avalanche-to  cell +LOOP
     ELSE  2drop  THEN ;
-
 
 get-current also net2o-base definitions
 
@@ -51,6 +47,11 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
 +net2o: msg-group ( $:group -- ) \ specify a chat group
     signed? !!signed!! 4 8 !!<>=order? \ already a message there
     $> avalanche-msg ;
++net2o: msg-join ( $:group -- ) \ join a chat group
+    $> msg-groups #@ d0<> IF \ we only join existing groups
+	parent cell last# cell+ $+!  THEN ;
++net2o: msg-leave ( $:group -- ) \ leave a chat group, stub
+    $> msg-groups #@ d0<> IF  !!fixme!!  THEN ;
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
 	2dup last-msg 2!
@@ -80,6 +81,11 @@ previous
     <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
     $, msg-text msg>
     cookie+request end-code| ;
+
+:noname ( addr u o:context -- )
+    net2o-code  expect-reply
+    msg $, nest-sig endwith
+    cookie+request end-code ; is avalanche-to
 
 0 [IF]
 Local Variables:

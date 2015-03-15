@@ -52,7 +52,7 @@ hash-init-rng
 \ Each hierarchy uses one byte of state as index (only lower 7 bits)
 \ if there is a collission, add another indirection
 
-0 value last#
+uvalue last#
 
 : #!? ( addrval u addrkey u bucket -- true / addrval u addrkey u false )
     >r r@ @ 0= IF  r@ $! r@ cell+ $!  r> to last#
@@ -62,7 +62,7 @@ hash-init-rng
 
 : #@? ( addrkey u bucket -- addrval u true / addrkey u false )
     >r r@ @ 0= IF  rdrop false  EXIT  THEN
-    2dup r@ $@ str=  IF  2drop r> cell+ $@ true  EXIT  THEN
+    2dup r@ $@ str=  IF  2drop r> dup to last# cell+ $@ true  EXIT  THEN
     rdrop false ;    
 
 : #off? ( addrkey u bucket -- true / addrkey u false )

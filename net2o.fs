@@ -1113,6 +1113,7 @@ $20 cells Value resend-size#
 #50.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
 
 Variable init-context#
+Variable msg-groups
 
 UValue connection
 
@@ -1206,13 +1207,16 @@ Variable 0keys
 sema 0key-sema
 
 : ins-0key [: { w^ addr -- }
-	addr cell 0keys $+! ;] 0key-sema c-section ;
+      addr cell 0keys $+! ;] 0key-sema c-section ;
+: del$cell ( addr stringaddr -- ) { string }
+    string $@ bounds ?DO
+	dup I @ = IF
+	    string I over @ cell+ - tuck cell $del
+	    2rdrop string $@ rot /string tuck bounds 2>r 0= ?LEAVE  0
+	ELSE  cell  THEN
+    +LOOP drop ;
 : del-0key ( addr -- )
-    [: 0keys $@ bounds ?DO
-	    dup I @ = IF
-		0keys I over @ - cell $del  LEAVE
-	    THEN
-	cell +LOOP drop ;] 0key-sema c-section ;
+    [: 0keys del$cell ;] 0key-sema c-section ;
 : search-0key ( .. xt -- .. )
     [: { xt } 0keys $@ bounds ?DO
 	    I xt execute 0= ?LEAVE
@@ -2084,13 +2088,7 @@ Variable timeout-tasks s" " timeout-tasks $!
       o { w^ timeout-o }  timeout-o cell timeout-tasks $+! ;]
   timeout-sema c-section  timeout-task wake ;
 : o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
-    [: timeout-tasks $@len 0 ?DO
-	  timeout-tasks $@ I /string drop @ o =  IF
-	      timeout-tasks I cell $del
-	      timeout-tasks $@len drop
-	      r> r> cell- 2dup >r >r = ?LEAVE
-	      0  ELSE  cell  THEN
-      +LOOP ;] timeout-sema c-section ;
+    [: o timeout-tasks del$cell ;] timeout-sema c-section ;
 : -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
 
 : sq2** ( 64n n -- 64n' )
@@ -2196,6 +2194,8 @@ $20 Constant signed-val
     next-context @ o contexts
     BEGIN  2dup @ <> WHILE  @ dup .next-context swap 0= UNTIL
 	2drop drop EXIT  THEN  nip ! ;
+: ungroup-ctx ( -- )
+    msg-groups [: >r o r> cell+ del$cell ;] #map ;
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
@@ -2220,7 +2220,7 @@ $20 Constant signed-val
 	    >o timing-stat $off track-timing $off dispose o>
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
-	unlink-ctx
+	unlink-ctx  ungroup-ctx
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
