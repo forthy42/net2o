@@ -1212,7 +1212,8 @@ sema 0key-sema
     string $@ bounds ?DO
 	dup I @ = IF
 	    string I over @ cell+ - tuck cell $del
-	    2rdrop string $@ rot /string tuck bounds 2>r 0= ?LEAVE  0
+	    unloop string $@ rot /string bounds
+	    ?DO NOPE 0
 	ELSE  cell  THEN
     +LOOP drop ;
 : del-0key ( addr -- )
@@ -1789,11 +1790,12 @@ Create chunk-adder chunks-struct allot
     ticker 64@ ack@ .ticks-init ;
 
 : o-chunks ( -- )
-    [: chunks $@len 0 ?DO
-	    chunks $@ I /string drop chunk-context @ o = IF
-		chunks I chunks-struct $del
-		r> r> chunks-struct - 2dup >r >r = ?LEAVE
-	    0  ELSE  chunks-struct  THEN  +LOOP ;]
+    [: chunks $@ bounds ?DO
+	    I chunk-context @ o = IF
+		chunks I over @ cell+ - tuck chunks-struct $del
+		unloop chunks $@ rot /string bounds
+		?DO NOPE 0
+	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-lock c-section ;
 
 event: ->send-chunks ( o -- ) .do-send-chunks ;
@@ -1942,7 +1944,7 @@ event: ->save ( o -- ) .net2o:save ;
 \ schedule delayed events
 
 object class
-field: queue-timestamp
+64field: queue-timestamp
 field: queue-job
 field: queue-xt
 end-class queue-class
@@ -1952,24 +1954,20 @@ Variable queue s" " queue $!
 queue-class >osize @ buffer: queue-adder  
 
 : add-queue ( xt us -- )
-    ticker 64@ +  o queue-adder >o queue-job !  queue-timestamp !
+    ticker 64@ +  o queue-adder >o queue-job !  queue-timestamp 64!
     queue-xt !  o queue-struct queue $+! o> ;
 
 : eval-queue ( -- )
     queue $@len 0= ?EXIT  ticker 64@
     queue $@ bounds ?DO  I >o
-	dup queue-timestamp @ u> IF
+	64dup queue-timestamp 64@ 64u> IF
 	    queue-xt @ queue-job @ .execute
-	    0 queue-timestamp !
-	THEN o>
-    queue-struct +LOOP  drop
-    0 >r BEGIN  r@ queue $@len u<  WHILE
-	    queue $@ r@ safe/string drop queue-timestamp @ 0= IF
-		queue r@ queue-struct $del
-	    ELSE
-		r> queue-struct + >r
-	    THEN
-    REPEAT  rdrop ;
+	    64#0 queue-timestamp 64! o>
+	    queue I over @ cell+ - tuck queue-struct $del
+	    unloop queue $@ rot /string bounds
+	    ?DO  NOPE 0
+	ELSE  o>  queue-struct  THEN
+    +LOOP  64drop ;
 
 \ poll loop
 
@@ -2461,12 +2459,11 @@ require net2o-msg.fs
     ." check host: " 2dup .host cr
     host>$ IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
-	  insert-address temp-addr ins-dest
-	  ." insert host: " temp-addr $10 xtype cr
-	  return-addr $10 0 skip nip 0= IF
-	      temp-addr return-addr $10 move
-\	      temp-addr return-address $10 move
-	  THEN ;] $>sock
+	    insert-address temp-addr ins-dest
+	    ." insert host: " temp-addr $10 xtype cr
+	    return-addr $10 0 skip nip 0= IF
+		temp-addr return-addr $10 move
+	    THEN ;] $>sock
     ELSE  2drop  THEN ;
 
 : n2o:lookup ( addr u -- )
@@ -2483,19 +2480,14 @@ require net2o-msg.fs
 Local Variables:
 forth-local-words:
     (
-     (("net2o:" "+net2o:" "event:") definition-starter (font-lock-keyword-face . 1)
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "uvar" "uvalue") non-immediate (font-lock-type-face . 2)
+     (("64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
-     ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
-      ")" nil comment (font-lock-comment-face . 1))
     )
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:") (0 . 1) (0 . 1) immediate)
-     ((";]") (-1 . 0) (0 . -1) immediate)
-     (("event:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]
