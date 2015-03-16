@@ -28,6 +28,7 @@ KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
 $41 Constant sigonlysize#
 $51 Constant sigsize#
 $71 Constant sigpksize#
+$91 Constant sigpk2size#
 $10 Constant datesize#
 
 \ key storage stuff
@@ -449,6 +450,9 @@ Defer search-key \ search if that is one of our pubkeys
 : pk-sig? ( addr u -- addr u' flag )
     dup sigpksize# u< !!unsigned!!
     2dup sigpksize# - c:0key 2dup c:hash + date-sig? ;
+: pk2-sig? ( addr u -- addr u' flag )
+    dup sigpk2size# u< !!unsigned!!
+    2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sksig skc pkc ed-sign type keysize emit ;

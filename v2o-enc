@@ -2,4 +2,4 @@
 #usage: v2o-enc file me user1 .. usern
 #will ask for your password
 
-gforth-fast net2o-vault.fs -e "enc-vault bye" "$@"
+gforth net2o-vault.fs -e "enc-vault bye" "$@"

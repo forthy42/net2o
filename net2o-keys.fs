@@ -258,9 +258,9 @@ gen-table $freeze
 ' context-table is gen-table
 
 :noname ( addr u -- addr u' flag )
-    pk-sig? dup 0= ?EXIT  drop
-    sigsize# - 2dup + sigsize# >$
-    keysize - 2dup + keysize key:new n:>o $> ke-selfsig $!
+    pk2-sig? dup 0= ?EXIT drop
+    2dup + sigsize# - sigsize# >$
+    sigpk2size# - 2dup + keysize 2* key:new n:>o $> ke-selfsig $!
     c-state off  true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key

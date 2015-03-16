@@ -56,7 +56,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     $> v-key keysize decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
-    verify-tag 0= !!wrong-sig!! 2drop 8 c-state or! ;
+    verify-tag 0= !!unsigned!! 2drop 8 c-state or! ;
 
 gen-table $freeze
 ' context-table is gen-table
