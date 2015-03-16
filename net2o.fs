@@ -1207,13 +1207,16 @@ Variable 0keys
 sema 0key-sema
 
 : ins-0key [: { w^ addr -- }
-      addr cell 0keys $+! ;] 0key-sema c-section ;
+	addr cell 0keys $+! ;] 0key-sema c-section ;
+: del$one ( addr1 addr2 size -- pos )
+    >r over @ cell+ - tuck r> $del ;
+: next$ ( pos string -- addre addrs )
+    $@ rot /string bounds ;
 : del$cell ( addr stringaddr -- ) { string }
     string $@ bounds ?DO
 	dup I @ = IF
-	    string I over @ cell+ - tuck cell $del
-	    unloop string $@ rot /string bounds
-	    ?DO NOPE 0
+	    string I cell del$one
+	    unloop string next$ ?DO NOPE 0
 	ELSE  cell  THEN
     +LOOP drop ;
 : del-0key ( addr -- )
@@ -1792,9 +1795,8 @@ Create chunk-adder chunks-struct allot
 : o-chunks ( -- )
     [: chunks $@ bounds ?DO
 	    I chunk-context @ o = IF
-		chunks I over @ cell+ - tuck chunks-struct $del
-		unloop chunks $@ rot /string bounds
-		?DO NOPE 0
+		chunks I chunks-struct del$one
+		unloop chunks next$ ?DO NOPE 0
 	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-lock c-section ;
 
@@ -1961,11 +1963,9 @@ queue-class >osize @ buffer: queue-adder
     queue $@len 0= ?EXIT  ticker 64@
     queue $@ bounds ?DO  I >o
 	64dup queue-timestamp 64@ 64u> IF
-	    queue-xt @ queue-job @ .execute
-	    64#0 queue-timestamp 64! o>
-	    queue I over @ cell+ - tuck queue-struct $del
-	    unloop queue $@ rot /string bounds
-	    ?DO  NOPE 0
+	    queue-xt @ queue-job @ .execute o>
+	    queue I queue-struct del$one
+	    unloop queue next$ ?DO  NOPE 0
 	ELSE  o>  queue-struct  THEN
     +LOOP  64drop ;
 
@@ -2375,19 +2375,18 @@ Variable cookies
 
 : do-?cookie ( cookie -- context true / false )
     ticker 64@ connect-timeout# 64- { 64: timeout }
-      0 >r BEGIN  r@ cookies $@len u<  WHILE
-	      cookies $@ r@ /string drop >o
-	      cc-timeout 64@ timeout 64u< IF
-		  o> cookies r@ cookie-size# $del
-	      ELSE
-		  64dup cc-timeout 64@ 64= IF
-		      64drop cc-context @ o>
-		      cookies r> cookie-size# $del
-		      true EXIT
-		  THEN
-		  o> r> cookie-size# + >r
-	      THEN
-      REPEAT  64drop rdrop false ;
+    cookies $@ bounds ?DO
+	I .cc-timeout 64@ timeout 64u< IF
+	    cookies I cookie-size# del$one
+	    unloop cookies next$ ?DO  NOPE  0
+	ELSE
+	    64dup I .cc-timeout 64@ 64= IF
+		64drop I .cc-context @
+		cookies I cookie-size# del$one drop
+		unloop  true  EXIT
+	    THEN
+	    cookie-size#  THEN
+    +LOOP  64drop 0 ;
   
 : ?cookie ( cookie -- context true / false )
     ['] do-?cookie resize-lock c-section ;
