@@ -197,7 +197,7 @@ max-passphrase# buffer: passphrase
 
 Variable keys
 
-: key>default ( -- ) keys $[]# 1- keys $[] @ >storekey ! ;
+: key>default ( -- ) keys $[]# 1- keys sec[]@ 2dup 85type F cr drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;
@@ -261,7 +261,7 @@ gen-table $freeze
     pk2-sig? dup 0= ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize 2* key:new n:>o $> ke-selfsig $!
-    c-state off  true ; key-entry to nest-sig
+    c-state off true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>
@@ -370,8 +370,10 @@ previous
     key-pfd ?dup-IF  close-file throw  THEN
     0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
     key-table [: cell+ $@ drop cell+ >o
-      ke-sk sec@ d0= IF  pack-pubkey  THEN
-      key-crypt key>pfile o> ;] #map
+      ke-sk sec@ d0= IF  pack-pubkey
+	  ." saving " ke-nick $@ type F cr
+	  key-crypt key>pfile
+      THEN o> ;] #map
     key-pfd close-file throw
     "~/.net2o/pubkeys.k2o" >backup
     0 to key-pfd ;

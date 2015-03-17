@@ -1,0 +1,36 @@
+#!/bin/bash
+#usage: v2o-enc file me
+#will ask for your password
+
+cmd="$1"
+shift
+
+case "$cmd" in
+    --help)
+        grep "#u[s]age: n2o $1" $0 | sed -e 's/\t#usage: //g'
+	;;
+    cat)
+	#usage: n2o cat file me
+        gforth-fast net2o-vault.fs -e "vault>out dec-vault bye" "$@"
+	;;
+    dec)
+	#usage: n2o dec file me
+	gforth-fast net2o-vault.fs -e "dec-vault bye" "$@"
+	;;
+    enc)
+	#usage: n2o enc file me user1 .. usern
+	gforth-fast net2o-vault.fs -e "enc-vault bye" "$@"
+	;;
+    keygen)
+	#usage: n2o keygen nick
+	gforth-fast net2o-vault.fs -e "key-gen bye" "$@"
+	;;
+    keyin)
+	#usage: n2o keyin me file
+	gforth-fast net2o-vault.fs -e "key-in bye" "$@"
+	;;
+    keyout)
+	#usage: n2o keyout nick
+	gforth-fast net2o-vault.fs -e "key-out bye" "$@"
+	;;
+esac

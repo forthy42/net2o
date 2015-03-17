@@ -1,5 +1,0 @@
-#!/bin/bash
-#usage: v2o-enc file me
-#will ask for your password
-
-gforth-fast net2o-vault.fs -e "dec-vault bye" "$@"
