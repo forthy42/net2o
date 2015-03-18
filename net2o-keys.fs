@@ -371,7 +371,7 @@ previous
     0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
     key-table [: cell+ $@ drop cell+ >o
       ke-sk sec@ d0= IF  pack-pubkey
-	  ." saving " ke-nick $@ type F cr
+	  flush( ." saving " ke-nick $@ type F cr )
 	  key-crypt key>pfile
       THEN o> ;] #map
     key-pfd close-file throw

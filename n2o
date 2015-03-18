@@ -1,36 +1,72 @@
-#!/bin/bash
-#usage: v2o-enc file me
-#will ask for your password
+#! /usr/local/bin/gforth
+\ will ask for your password
 
-cmd="$1"
-shift
+require net2o.fs
+require net2o-vault.fs
 
-case "$cmd" in
-    --help)
-        grep "#u[s]age: n2o $1" $0 | sed -e 's/\t#usage: //g'
-	;;
-    cat)
-	#usage: n2o cat file me
-        gforth-fast net2o-vault.fs -e "vault>out dec-vault bye" "$@"
-	;;
-    dec)
-	#usage: n2o dec file me
-	gforth-fast net2o-vault.fs -e "dec-vault bye" "$@"
-	;;
-    enc)
-	#usage: n2o enc file me user1 .. usern
-	gforth-fast net2o-vault.fs -e "enc-vault bye" "$@"
-	;;
-    keygen)
-	#usage: n2o keygen nick
-	gforth-fast net2o-vault.fs -e "key-gen bye" "$@"
-	;;
-    keyin)
-	#usage: n2o keyin me file
-	gforth-fast net2o-vault.fs -e "key-in bye" "$@"
-	;;
-    keyout)
-	#usage: n2o keyout nick
-	gforth-fast net2o-vault.fs -e "key-out bye" "$@"
-	;;
-esac
+: get-me ( -- )
+    ." Enter your net2o passphrase: " +passphrase cr
+    next-arg >key ;
+
+Variable key-readin
+
+: out-me ( -- )
+    pkc keysize key-table #@ 0= !!unknown-key!!
+    cell+ >o pack-pubkey ke-nick $@ o>
+    [: type ." .n2o" ;] $tmp w/o create-file throw
+    >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
+
+Variable vkey-list
+
+: vpks-off ( -- ) vkey-list $[]off ;
+: +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
+
+Vocabulary net2o-cmds
+
+get-current also net2o-cmds definitions
+
+: keyin ( -- )
+    \G usage: n2o keyin me file
+    get-me keys key>default
+    next-arg key-readin $slurp-file
+    key-readin $@ do-key
+    save-pubkeys ;
+: keyout ( -- )
+    \G usage: n2o keyout nick
+    get-me out-me ;
+: keygen ( -- )
+    \G usage: n2o keygen nick
+    +newphrase key>default
+    next-arg 2dup key#user +gen-keys .rsk
+    read-keys .keys out-me ;
+
+\ define key lists
+
+: enc ( -- ) \ filename myname user1 .. usern
+    \G usage: n2o enc file me user1 .. usern
+    next-arg get-me
+    BEGIN argc @ 1 >  WHILE
+	    next-arg nick-key >o ke-pk $@ o> keysize umin vkey-list $+[]!
+    REPEAT  vkey-list encrypt-file ;
+: dec ( -- )
+    \G usage: n2o dec file me
+    next-arg get-me decrypt-file ;
+: cat ( -- )
+    \G usage: n2o cat file me
+    vault>out dec ;
+
+: help ( -- )
+    next-arg "cmd" replaces
+    [ loadfilename 2@ ] 2Literal "0" replaces
+    "grep \"\\G u[s]age: n2o %cmd%\" %0% | sed -e 's/ *\\\\G u[s]age: //g'"
+    $substitute drop system ;
+
+set-current
+
+: do-net2o-cmd ( -- )
+    next-arg ['] net2o-cmds >body search-wordlist
+    IF  execute  ELSE  help  THEN ;
+
+previous
+
+script? [IF]  do-net2o-cmd bye  [THEN]

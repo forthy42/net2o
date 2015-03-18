@@ -131,43 +131,6 @@ vault>file
     c-state @ $F = IF write-decrypt THEN n:o> ;
 previous
 
-: get-me ( -- )
-    ." Enter your net2o passphrase: " +passphrase cr
-    next-arg >key ;
-: key-gen ( -- )
-    +newphrase key>default
-    next-arg 2dup key#user +gen-keys .rsk
-    read-keys .keys ;
-
-Variable key-readin
-
-: key-in ( -- )
-    get-me keys key>default
-    next-arg key-readin $slurp-file
-    key-readin $@ do-key
-    save-pubkeys ;
-: key-out ( -- )
-    get-me
-    pkc keysize key-table #@ 0= !!unknown-key!!
-    cell+ >o pack-pubkey ke-nick $@ o>
-    [: type ." .n2o" ;] $tmp w/o create-file throw
-    >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
-
-\ define key lists
-
-Variable vkey-list
-
-: vpks-off ( -- ) vkey-list $[]off ;
-: +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
-
-: enc-vault ( -- ) \ filename myname user1 .. usern
-    next-arg get-me
-    BEGIN argc @ 1 >  WHILE
-	    next-arg nick-key >o ke-pk $@ o> keysize umin vkey-list $+[]!
-    REPEAT  vkey-list encrypt-file ;
-: dec-vault ( -- )
-    next-arg get-me decrypt-file ;
-
 0 [IF]
 Local Variables:
 forth-local-words:
