@@ -62,6 +62,10 @@ get-current also net2o-cmds definitions
     +newphrase key>default
     next-arg 2dup key#user +gen-keys .rsk
     read-keys .keys out-me ;
+: keylist ( -- )
+    \G usage: n2o keylist
+    get-me
+    key-table [: cell+ $@ drop cell+ >o ke-nick $@ type cr o> ;] #map ;
 
 \ define key lists
 
