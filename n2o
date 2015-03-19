@@ -66,8 +66,8 @@ get-current also net2o-cmds definitions
     \G usage: n2o keylist
     get-me
     key-table [: cell+ $@ drop cell+ >o
-	ke-nick $@ type #tab emit
-	ke-pk $@ keysize umin 85type cr o> ;] #map ;
+	ke-pk $@ keysize umin 85type space
+	ke-nick $@ type cr o> ;] #map ;
 
 \ define key lists
 
