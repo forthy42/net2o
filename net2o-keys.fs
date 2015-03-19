@@ -116,6 +116,17 @@ Variable key-table
 	rot drop o -rot
     THEN  o> ;] #map 2drop ;
 
+: secret-keys# ( -- n )
+    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ 0<> - o> ;] #map ;
+: secret-key ( n -- o/0 )
+    0 tuck key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+	  2dup = IF  rot drop o -rot  THEN  1+
+      THEN  o> ;] #map 2drop ;
+: .secret-nicks ( -- )
+    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+	  dup . ke-nick $@ type cr 1+
+      THEN o> ;] #map drop ;
+
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
 
@@ -441,13 +452,16 @@ $40 buffer: nick-buf
 
 \ select key by nick
 
-: >key ( addr u -- )
-    key-table @ 0= IF  read-keys  THEN
-    nick-key >o o 0= IF  o> true !!no-nick!!  THEN
+: >raw-key ( o -- )
+    dup 0= !!no-nick!! >o
     ke-pk $@ pkc swap pkrk# umin move
     ke-psk sec@ my-0key sec!
     ke-sk sec@ skc swap keysize umin move
     >sksig o> ;
+
+: >key ( addr u -- )
+    key-table @ 0= IF  read-keys  THEN
+    nick-key >raw-key ;
 
 : i'm ( "name" -- ) parse-name >key ;
 : pk' ( "name" -- addr u )

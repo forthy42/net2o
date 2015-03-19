@@ -1,12 +1,28 @@
 #! /usr/local/bin/gforth
-\ will ask for your password
 
 require net2o.fs
 require net2o-vault.fs
 
-: get-me ( -- )
-    ." Enter your net2o passphrase: " +passphrase cr
-    next-arg >key ;
+: del-last-key ( -- )
+    keys $[]# 1- keys $[] sec-off
+    keys $@len cell- keys $!len ;
+
+: choose-key ( -- o )
+    0 BEGIN  drop
+	." Choose nick:" cr .secret-nicks
+	key '0' - 0 max secret-key dup
+    UNTIL ;
+
+\ will ask for your password and if possible auto-select your id
+
+: get-me ( -- )  read-keys secret-keys#
+    BEGIN  dup 0= WHILE drop
+	    ." Enter your net2o passphrase: " +passphrase
+	    read-keys secret-keys# dup 0= IF
+		."  wrong passphrase, no key found" del-last-key
+	    THEN  cr
+    REPEAT
+    1 = IF  0 secret-key  ELSE  choose-key  THEN   >raw-key ;
 
 Variable key-readin
 
@@ -16,23 +32,30 @@ Variable key-readin
     [: type ." .n2o" ;] $tmp w/o create-file throw
     >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
 
-Variable vkey-list
+Variable keylist
 
-: vpks-off ( -- ) vkey-list $[]off ;
-: +pk ( "name" -- )  pk' keysize umin vkey-list $+[]! ;
+: vpks-off ( -- ) keylist $[]off ;
+: +pk ( "name" -- )  pk' keysize umin keylist $+[]! ;
+: args>keylist ( -- )
+    BEGIN argc @ 1 >  WHILE
+	    next-arg nick-key
+	    ?dup-IF  >o ke-pk $@ o> keysize umin keylist $+[]!  THEN
+    REPEAT ;
+
+\ commands for the command line user interface
 
 Vocabulary net2o-cmds
 
 get-current also net2o-cmds definitions
 
 : keyin ( -- )
-    \G usage: n2o keyin me file
+    \G usage: n2o keyin file
     get-me keys key>default
     next-arg key-readin $slurp-file
     key-readin $@ do-key
     save-pubkeys ;
 : keyout ( -- )
-    \G usage: n2o keyout nick
+    \G usage: n2o keyout
     get-me out-me ;
 : keygen ( -- )
     \G usage: n2o keygen nick
@@ -43,16 +66,14 @@ get-current also net2o-cmds definitions
 \ define key lists
 
 : enc ( -- ) \ filename myname user1 .. usern
-    \G usage: n2o enc file me user1 .. usern
-    next-arg get-me
-    BEGIN argc @ 1 >  WHILE
-	    next-arg nick-key >o ke-pk $@ o> keysize umin vkey-list $+[]!
-    REPEAT  vkey-list encrypt-file ;
+    \G usage: n2o enc file user1 .. usern
+    next-arg get-me args>keylist
+    keylist encrypt-file ;
 : dec ( -- )
-    \G usage: n2o dec file me
+    \G usage: n2o dec file
     next-arg get-me decrypt-file ;
 : cat ( -- )
-    \G usage: n2o cat file me
+    \G usage: n2o cat file
     vault>out dec ;
 
 : help ( -- )
