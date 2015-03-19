@@ -56,3 +56,7 @@
     :noname  action-of kill-task  compile,
     r> compile, postpone $off postpone ;
     is kill-task ;
+
+[IFUNDEF] NOPE
+    : NOPE  drop 2drop ; immediate restrict
+[THEN]

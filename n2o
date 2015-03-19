@@ -22,7 +22,7 @@ require net2o-vault.fs
 		."  wrong passphrase, no key found" del-last-key
 	    THEN  cr
     REPEAT
-    1 = IF  0 secret-key  ELSE  choose-key  THEN   >raw-key ;
+    1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ;
 
 Variable key-readin
 
@@ -34,7 +34,7 @@ Variable key-readin
 
 Variable keylist
 
-: vpks-off ( -- ) keylist $[]off ;
+: pk-off ( -- ) keylist $[]off ;
 : +pk ( "name" -- )  pk' keysize umin keylist $+[]! ;
 : args>keylist ( -- )
     BEGIN argc @ 1 >  WHILE
