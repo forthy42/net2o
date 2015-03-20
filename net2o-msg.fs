@@ -37,14 +37,6 @@ reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
-+net2o: msg-signal ( $:pubkey -- ) \ signal message to one person
-    !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
-    IF   info-color attr!  THEN  ." @" .key-id space
-    reset-color ;
-+net2o: msg-text ( $:msg -- ) \ specify message string
-    !!signed? 1 4 !!<>=order? $> F type F cr ;
-+net2o: msg-object ( $:hash -- ) \ specify an object, e.g. an image
-    !!signed? 1 4 !!<>=order? $> ." wrapped object: " 85type F cr ;
 +net2o: msg-group ( $:group -- ) \ specify a chat group
     signed? !!signed!! 4 8 !!<>=order? \ already a message there
     $> avalanche-msg ;
@@ -54,6 +46,18 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
 +net2o: msg-leave ( $:group -- ) \ leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
+
++net2o: msg-signal ( $:pubkey -- ) \ signal message to one person
+    !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
+    IF   info-color attr!  THEN  ." @" .key-id space
+    reset-color ;
++net2o: msg-re ( $:hash ) \ relate to some object
+    !!signed? 1 4 !!<>=order? $> ." re: " 85type F cr ;
++net2o: msg-text ( $:msg -- ) \ specify message string
+    !!signed? 1 8 !!<>=order? $> F type F cr ;
++net2o: msg-object ( $:object -- ) \ specify an object, e.g. an image
+    !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type F cr ;
+
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
 	2dup last-msg 2!

@@ -21,13 +21,15 @@ Variable vault-table
 
 cmd-class class
     KEYBYTES +field v-dhe \ diffie hellman exchange tmpkey
-    KEYBYTES +field v-key \ file vault key
+    state# +field v-key \ file vault key, maximum 64 bytes
     keccak# +field v-kstate
     2field: v-data
+    field: v-mode \ crypto mode and key size
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table ! c-state off ;
+    vault-class new n:>o vault-table @ token-table ! c-state off
+    state# v-mode ! ;
 
 Defer do-decrypted ( addr u -- ) \ what to do with a decrypted file
 
@@ -42,21 +44,27 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
     v-key keysize erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
+    v-mode @ dup $FF and { vk# } 8 rshift $FF and >crypto
     $> bounds ?DO
-	I' I - $40 u>= IF
-	    I vaultkey $40 move
-	    vaultkey $40 v-dhe keysize decrypt$ IF
-		dup keysize <> !!keysize!! v-key swap move
+	I' I - vk# u>= IF
+	    I vaultkey vk# move
+	    vaultkey vk# v-dhe keysize decrypt$ IF
+		dup state# 1+ keysize within !!keysize!!
+		v-key state# move-rep
+		2 c-state or!  LEAVE
 	    ELSE  2drop  THEN
 	THEN
-    $40 +LOOP 2 c-state or! ;
+    vk# +LOOP ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
-    v-key keysize >crypt-key $> 2dup c:decrypt v-data 2!
+    v-mode @ $10 rshift $FF and >crypto
+    v-key state# >crypt-key $> 2dup c:decrypt v-data 2!
     @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     $> v-key keysize decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
     verify-tag 0= !!unsigned!! 2drop 8 c-state or! ;
++net2o: vault-crypt ( n -- ) \ set encryption mode and key wrap size
+    64>n v-mode ! ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -85,19 +93,15 @@ code0-buf \ reset default
 Variable enc-filename
 Variable enc-file
 
-keysize 4 64s + buffer: keygenbuf
-keysize buffer: keygendh
-keysize buffer: vkey
-keysize buffer: vpk
-keysize buffer: vsk
 
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
-    keysize rng$ vkey swap move
+    state2# rng$ vkey swap move
+    $40 lit, vault-crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
-	vkey keygenbuf $10 + keysize move
-	keygenbuf $40 2r> encrypt$
-	keygenbuf $40 F type ;] $[]map ;] $tmp
+	vkey vaultkey $10 + keysize move
+	vaultkey $40 2r> encrypt$
+	vaultkey $40 F type ;] $[]map ;] $tmp
     $, vault-keys ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
@@ -127,7 +131,7 @@ vault>file
 : decrypt-file ( filename u -- )
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
-    enc-file $@ >vault do-cmd-loop
+    enc-file $@ >vault ['] do-cmd-loop catch 0 >crypto throw
     c-state @ $F = IF write-decrypt THEN n:o> ;
 previous
 

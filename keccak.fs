@@ -72,12 +72,14 @@ crypto class
     keccak# uvar keccak-state
     keccak#cks uvar keccak-checksums
     keccak#max uvar keccak-padded
-    cell uvar keccak-up
 end-class keccak
 
-: keccak-init crypto-o @ IF  keccak-up @ next-task = ?EXIT  THEN
-    [: keccak new crypto-o ! ;] crypto-a with-allocater
-    next-task keccak-up ! keccak-state to @keccak ;
+User keccak-t
+
+: keccak-init ( -- )
+    keccak-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
+    [: keccak new dup crypto-o ! keccak-t ! ;] crypto-a with-allocater
+    up@ crypto-up ! keccak-state to @keccak ;
 
 : keccak-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @keccak crypto-o off ;

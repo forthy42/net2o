@@ -41,6 +41,15 @@ require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
 
+\ crypto selection
+
+Create crypt-modes ' keccak-t , ' threefish-t ,
+here crypt-modes - cell/ Constant crypts#
+
+: >crypt ( n -- )
+    crypts# 1- umax cells crypt-modes + perform @ crypto-o ! c:init ;
+0 >crypt
+
 \ values, configurable
 
 $4 Value max-size^2 \ 1k, don't fragment by default

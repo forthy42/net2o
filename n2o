@@ -1,4 +1,4 @@
-#! /usr/local/bin/gforth
+#! /usr/bin/env gforth
 
 require net2o.fs
 require net2o-vault.fs

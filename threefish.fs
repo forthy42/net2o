@@ -66,12 +66,14 @@ $40 Constant threefish#max
 crypto class
     tf_ctx uvar threefish-state
     threefish#max uvar threefish-padded
-    cell uvar threefish-up
 end-class threefish
 
-: threefish-init crypto-o @ IF  threefish-up @ next-task = ?EXIT  THEN
-    [: threefish new crypto-o ! ;] crypto-a with-allocater
-    next-task threefish-up ! threefish-state to @threefish ;
+User threefish-t
+
+: threefish-init ( -- )
+    threefish-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
+    [: threefish new dup crypto-o ! threefish-t ! ;] crypto-a with-allocater
+    up@ crypto-up ! threefish-state to @threefish ;
 
 : threefish-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @threefish crypto-o off ;
@@ -111,8 +113,11 @@ threefish-init
 	    over >r threefish-state r> dup r> tf_encrypt
 	    threefish#max /string +threefish 4 >r
     REPEAT  2drop rdrop
-; dup to c:encrypt
-to c:prng
+; to c:encrypt
+:noname ( addr u -- )
+\G Fill buffer addr u with PRNG sequence
+    2>r threefish-state 2r> $E dup tf_encrypt_loop
+; to c:prng
 :noname ( addr u tag -- )
     \G Encrypt message in buffer addr u, must be by *64
     \G authentication is stored in the 16 bytes following that buffer
@@ -123,7 +128,6 @@ to c:prng
     threefish-state threefish-padded dup $E tf_encrypt
     threefish-padded 128@ 2r> + 128!
 ; to c:encrypt+auth
-\G Fill buffer addr u with PRNG sequence
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u, must be by *64
     $C >r
@@ -152,7 +156,5 @@ to c:prng
 ; to c:hash
 ' tf-tweak! to c:tweak! ( 128b -- )
 \G set tweek
-
-\G Fill buffer addr u with PRNG sequence
 
 crypto-o @ Constant threefish-o

@@ -50,13 +50,17 @@ object class
     keysize   uvar oldpkrev \ previous revocation pubkey after revocation
     keysize   uvar oldskrev \ previous revocation secret after revocation
     keysize   uvar keypad
-    state#    uvar vaultkey
     hash#256  uvar keyed-hash-out
     datesize# uvar sigdate
     1 64s     uvar last-mykey
     keysize   uvar stpkc \ server temporary keypair - once per connection setup
     keysize   uvar stskc
     keypack-all# uvar keypack-d
+    $100      uvar vaultkey \ buffers for vault
+    state2#   uvar vkey \ maximum size for session key
+    keysize   uvar keygendh
+    keysize   uvar vpk
+    keysize   uvar vsk
     cell      uvar keytmp-up
 end-class keytmp-c
 
