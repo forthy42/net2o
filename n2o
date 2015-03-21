@@ -1,4 +1,5 @@
 #! /usr/bin/env gforth
+\ -*- mode: Forth -*-
 
 require net2o.fs
 require net2o-vault.fs
@@ -74,7 +75,7 @@ get-current also net2o-cmds definitions
 : enc ( -- ) \ filename myname user1 .. usern
     \G usage: n2o enc file user1 .. usern
     next-arg get-me args>keylist
-    keylist encrypt-file ;
+    keylist enc-threefish encrypt-file ;
 : dec ( -- )
     \G usage: n2o dec file
     next-arg get-me decrypt-file ;

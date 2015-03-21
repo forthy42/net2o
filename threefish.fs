@@ -101,8 +101,10 @@ threefish-init
 \G obtain key storage size
 ' threefish0 to c:0key ( -- )
 \G set zero key
-:noname threefish0 threefish#max >threefish ; to >c:key ( addr -- )
-\G move 64 bytes from addr to the key
+:noname threefish0 dup threefish#max >threefish
+    threefish-state swap threefish#max + threefish#max $E dup tf_encrypt_loop
+    64#0 64dup tf-tweak! ; to >c:key ( addr -- )
+\G move 128 bytes from addr to the key
 :noname threefish#max threefish> ; to c:key> ( addr -- )
 \G get 64 bytes from the key to addr
 ' noop to c:diffuse ( -- ) \ no diffusing

@@ -42,9 +42,9 @@ cmd-table $@ inherit-table vault-table
 net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \ start diffie hellman exchange
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
-    v-key keysize erase 1 c-state or! ;
+    v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
-    v-mode @ dup $FF and { vk# } 8 rshift $FF and >crypto
+    v-mode @ dup $FF and { vk# } 8 rshift $FF and >crypt
     $> bounds ?DO
 	I' I - vk# u>= IF
 	    I vaultkey vk# move
@@ -56,7 +56,6 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	THEN
     vk# +LOOP ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
-    v-mode @ $10 rshift $FF and >crypto
     v-key state# >crypt-key $> 2dup c:decrypt v-data 2!
     @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
@@ -92,21 +91,27 @@ code0-buf \ reset default
 
 Variable enc-filename
 Variable enc-file
+Variable enc-mode
 
+: enc-keccak ( -- )      $60 enc-mode ! ; \ wrap with keccak
+: enc-threefish ( -- ) $0160 enc-mode ! ; \ wrap with threefish
+
+enc-keccak
 
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
+    vaultkey $100 erase
     state2# rng$ vkey swap move
-    $40 lit, vault-crypt
+    enc-mode @ dup lit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
 	vkey vaultkey $10 + keysize move
-	vaultkey $40 2r> encrypt$
-	vaultkey $40 F type ;] $[]map ;] $tmp
-    $, vault-keys ;
+	vaultkey enc-mode @ $FF and 2r> encrypt$
+	vaultkey enc-mode @ $FF and F type ;] $[]map ;] $tmp
+    $, vault-keys 0 >crypt ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
     vkey keysize >crypt-key enc-file $@ c:encrypt
-    enc-file $@ $, vault-file ;
+    enc-file $@ $, vault-file 0 >crypt ;
 : vsig, ( -- )
     [: $10 spaces now>never .pk .sig $10 spaces ;] $tmp
     2dup vkey keysize encrypt$ $, vault-sig ;
@@ -131,7 +136,7 @@ vault>file
 : decrypt-file ( filename u -- )
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
-    enc-file $@ >vault ['] do-cmd-loop catch 0 >crypto throw
+    enc-file $@ >vault ['] do-cmd-loop catch 0 >crypt throw
     c-state @ $F = IF write-decrypt THEN n:o> ;
 previous
 
