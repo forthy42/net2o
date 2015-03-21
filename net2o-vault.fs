@@ -28,8 +28,7 @@ cmd-class class
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table ! c-state off
-    state# v-mode ! ;
+    vault-class new n:>o vault-table @ token-table ! ;
 
 Defer do-decrypted ( addr u -- ) \ what to do with a decrypted file
 
@@ -44,7 +43,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
     v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
-    v-mode @ dup $FF and { vk# } 8 rshift $FF and >crypt
+    v-mode @ dup $FF and state# umax { vk# } 8 rshift $FF and >crypt
     $> bounds ?DO
 	I' I - vk# u>= IF
 	    I vaultkey vk# move
@@ -56,7 +55,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	THEN
     vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
-    no-key state# >crypt-source
+    v-mode @ IF  no-key state# >crypt-source  THEN
     v-key state# >crypt-key $> 2dup c:decrypt v-data 2!
     @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
@@ -94,7 +93,7 @@ code0-buf \ reset default
 
 Variable enc-filename
 Variable enc-file
-Variable enc-mode $40 enc-mode !
+Variable enc-mode
 Variable enc-padding
 
 $80 Constant min-align#
@@ -108,6 +107,8 @@ $400 Constant pow-align#
 
 : enc-keccak ( -- )      $60 enc-mode ! ; \ wrap with keccak
 : enc-threefish ( -- ) $0160 enc-mode ! ; \ wrap with threefish
+
+enc-keccak
 
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
