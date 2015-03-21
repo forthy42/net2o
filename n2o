@@ -72,8 +72,12 @@ get-current also net2o-cmds definitions
 
 \ define key lists
 
-: enc ( -- ) \ filename myname user1 .. usern
+: enc ( -- )
     \G usage: n2o enc file user1 .. usern
+    next-arg get-me args>keylist
+    key-list encrypt-file ;
+: enc3 ( -- )
+    \G usage: n2o enc3 file user1 .. usern; threefish keywrapping
     next-arg get-me args>keylist
     key-list enc-threefish encrypt-file ;
 : dec ( -- )
