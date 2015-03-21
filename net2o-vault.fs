@@ -54,12 +54,13 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 		2 c-state or!  LEAVE
 	    ELSE  2drop  THEN
 	THEN
-    vk# +LOOP ;
+    vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
+    no-key state# >crypt-source
     v-key state# >crypt-key $> 2dup c:decrypt v-data 2!
     @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
-    $> v-key keysize decrypt$ 0= !!no-decrypt!!
+    $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
     verify-tag 0= !!unsigned!! 2drop 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \ set encryption mode and key wrap size
@@ -101,20 +102,21 @@ enc-keccak
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
     vaultkey $100 erase
-    state2# rng$ vkey swap move
+    enc-mode @ $FF and $20 - rng$ vkey state# move-rep
     enc-mode @ dup lit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
-	vkey vaultkey $10 + keysize move
+	vkey vaultkey $10 + enc-mode @ $FF and $20 - move
 	vaultkey enc-mode @ $FF and 2r> encrypt$
 	vaultkey enc-mode @ $FF and F type ;] $[]map ;] $tmp
     $, vault-keys 0 >crypt ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
-    vkey keysize >crypt-key enc-file $@ c:encrypt
-    enc-file $@ $, vault-file 0 >crypt ;
+    no-key state# >crypt-source
+    vkey state# >crypt-key enc-file $@ c:encrypt
+    enc-file $@ $, vault-file ;
 : vsig, ( -- )
     [: $10 spaces now>never .pk .sig $10 spaces ;] $tmp
-    2dup vkey keysize encrypt$ $, vault-sig ;
+    2dup vkey state# encrypt$ $, vault-sig ;
 
 : encrypt-file ( filename u key-list -- )  code-buf$
     >r enc-filename $!  pkc keysize r@ $+[]! \ encrypt for ourself

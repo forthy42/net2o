@@ -33,14 +33,14 @@ Variable key-readin
     [: type ." .n2o" ;] $tmp w/o create-file throw
     >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
 
-Variable keylist
+Variable key-list
 
-: pk-off ( -- ) keylist $[]off ;
-: +pk ( "name" -- )  pk' keysize umin keylist $+[]! ;
+: pk-off ( -- ) key-list $[]off ;
+: +pk ( "name" -- )  pk' keysize umin key-list $+[]! ;
 : args>keylist ( -- )
     BEGIN argc @ 1 >  WHILE
 	    next-arg nick-key
-	    ?dup-IF  >o ke-pk $@ o> keysize umin keylist $+[]!  THEN
+	    ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN
     REPEAT ;
 
 \ commands for the command line user interface
@@ -75,7 +75,7 @@ get-current also net2o-cmds definitions
 : enc ( -- ) \ filename myname user1 .. usern
     \G usage: n2o enc file user1 .. usern
     next-arg get-me args>keylist
-    keylist enc-threefish encrypt-file ;
+    key-list enc-threefish encrypt-file ;
 : dec ( -- )
     \G usage: n2o dec file
     next-arg get-me decrypt-file ;

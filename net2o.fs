@@ -47,7 +47,7 @@ Create crypt-modes ' keccak-t , ' threefish-t ,
 here crypt-modes - cell/ Constant crypts#
 
 : >crypt ( n -- )
-    crypts# 1- umax cells crypt-modes + perform @ crypto-o ! c:init ;
+    crypts# 1- umin cells crypt-modes + perform @ crypto-o ! c:init ;
 0 >crypt
 
 \ values, configurable
