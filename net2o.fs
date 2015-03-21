@@ -151,10 +151,11 @@ end-class io-buffers
 
 \ variable length integers
 
+: p@+ ( addr -- u64 addr' )  >r 64#0 r@ 10 bounds
+    DO  7 64lshift I c@ $7F and n>64 64or
+	I c@ $80 and 0= IF  I 1+ UNLOOP rdrop  EXIT  THEN
+    LOOP  r> 10 + ;
 [IFDEF] 64bit
-    : p@+ ( addr -- u64 addr' )  >r 0
-	BEGIN  7 lshift r@ c@ $7F and or r@ c@ $80 and  WHILE
-		r> 1+ >r  REPEAT  r> 1+ ;
     : p-size ( u64 -- n ) \ to speed up: binary tree comparison
 	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
 	dup    $FFFFFFFFFFFFFF u<= IF
@@ -171,9 +172,6 @@ end-class io-buffers
 	BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
 	drop rdrop r> ;
 [ELSE]
-    : p@+ ( addr -- u64 addr' )  >r 0.
-	BEGIN  7 64lshift r@ c@ $7F and 0 64or r@ c@ $80 and  WHILE
-		r> 1+ >r  REPEAT  r> 1+ ;
     : p-size ( x64 -- n ) \ to speed up: binary tree comparison
 	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
 	2dup   $FFFFFFFFFFFFFF. du<= IF

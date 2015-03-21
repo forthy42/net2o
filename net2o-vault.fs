@@ -62,7 +62,9 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-kstate @keccak keccak# move
-    verify-tag 0= !!unsigned!! 2drop 8 c-state or! ;
+    verify-tag 0= !!inv-sig!!
+    sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
+    8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \ set encryption mode and key wrap size
     64>n v-mode ! ;
 
@@ -92,12 +94,20 @@ code0-buf \ reset default
 
 Variable enc-filename
 Variable enc-file
-Variable enc-mode
+Variable enc-mode $40 enc-mode !
+Variable enc-padding
+
+$80 Constant min-align#
+$400 Constant pow-align#
+
+: vault-aligned ( len -- len' )
+    \G Align vault to minimum granularity plus relative alignment
+    \G to hide the actual file-size
+    1- 0 >r  BEGIN  dup pow-align# u>  WHILE  2/ r> 1+ >r  REPEAT
+    1+ r> lshift  min-align# 1- + min-align# negate and ;
 
 : enc-keccak ( -- )      $60 enc-mode ! ; \ wrap with keccak
 : enc-threefish ( -- ) $0160 enc-mode ! ; \ wrap with threefish
-
-enc-keccak
 
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
@@ -111,11 +121,14 @@ enc-keccak
     $, vault-keys 0 >crypt ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
+    enc-file $@len dup >r vault-aligned enc-file $!len
+    enc-file $@ r> /string dup enc-padding ! erase
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt
     enc-file $@ $, vault-file ;
 : vsig, ( -- )
-    [: $10 spaces now>never .pk .sig $10 spaces ;] $tmp
+    [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ F type
+      .pk .sig $10 spaces ;] $tmp
     2dup vkey state# encrypt$ $, vault-sig ;
 
 : encrypt-file ( filename u key-list -- )  code-buf$
@@ -154,8 +167,6 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:") (0 . 1) (0 . 1) immediate)
-     ((";]") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]

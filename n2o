@@ -74,15 +74,15 @@ get-current also net2o-cmds definitions
 
 : enc ( -- )
     \G usage: n2o enc file user1 .. usern
-    next-arg get-me args>keylist
-    key-list encrypt-file ;
+    next-arg 2>r get-me args>keylist
+    2r> key-list encrypt-file ;
 : enc3 ( -- )
     \G usage: n2o enc3 file user1 .. usern; threefish keywrapping
-    next-arg get-me args>keylist
-    key-list enc-threefish encrypt-file ;
+    next-arg 2>r get-me args>keylist
+    2r> key-list enc-threefish encrypt-file ;
 : dec ( -- )
     \G usage: n2o dec file
-    next-arg get-me decrypt-file ;
+    next-arg 2>r get-me 2r> decrypt-file ;
 : cat ( -- )
     \G usage: n2o cat file
     vault>out dec ;
