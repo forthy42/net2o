@@ -134,12 +134,18 @@ keccak-init
     /string dup 0= UNTIL  2drop
 ; to c:hash
 :noname ( addr u -- )
+\G Fill buffer addr u with PRNG sequence
     BEGIN  keccak*  2dup keccak#max umin tuck keccak>
     /string dup 0= UNTIL  2drop
 ; to c:prng
-\G Fill buffer addr u with PRNG sequence
 :noname @keccak keccak#max + dup >r 128@ 128xor r> 128! ;
 to c:tweak! ( xd -- )
 \G set 128 bit tweek
+:noname ( addr u -- ) >keccak keccak* ;
+\G absorb + hash for a message <= 64 bytes
+to c:shorthash
+' keccak> ( addr u -- )
+    \G extract short hash (up to 64 bytes)
+to c:hash@
     
 crypto-o @ Constant keccak-o

@@ -55,4 +55,8 @@ object class
     \G Fill buffer addr u with PRNG sequence
     umethod c:tweak! ( x128 -- )
     \G set 128 bit tweek (if tweekable)
+    umethod c:shorthash ( addr u -- )
+    \G absorb + hash for a message <= 64 bytes
+    umethod c:hash@ ( addr u -- )
+    \G extract short hash (up to 64 bytes)
 end-class crypto

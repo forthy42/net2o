@@ -49,7 +49,7 @@ object class
     $C0 uvar get0
     $C0 uvar get1
     $40 uvar hashtmp
-    #200 uvar keccaktmp
+    #200 uvar hstatetmp
     cell uvar task-id
 end-class edbuf-c
 
@@ -95,13 +95,13 @@ init-ed25519
 : >hash ( addr u -- )
     \G absorb a short string, perform a hash round
     \G and output 64 bytes to hashtmp
-    >keccak keccak* hashtmp $40 keccak> ;
+    c:shorthash hashtmp $40 c:hash@ ;
 
 : ed-sign { skh sk pk -- sig u }
     \G sign a message: the keccak state contains the hash of the message.
-    @keccak keccaktmp keccak# move \ we need this twice - move away
+    c:key@ hstatetmp c:key# move \ we need this twice - move away
     skh $20 >hash \ gen "random number" from secret to hashtmp
-    keccaktmp @keccak keccak# move \ restore state
+    hstatetmp c:key@ c:key# move \ restore state
     sct3 hashtmp 64b>sc25519
     get0 sct3 ge25519*base   \ sct3 is k
     sigbuf get0 ge25519-pack   \ sct0 is r=k*base
@@ -118,7 +118,7 @@ init-ed25519
     \G check a message: the keccak state contains the hash of the message.
     \G The unpacked pk is in get0, so this word can be used for batch checking.
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
-    hashtmp $40 >keccak keccak* hashtmp $40 keccak> \ z=hash(r+pk+message)
+    hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
     sct3 sig $20 + raw>sc25519     \ sct3 is s
     get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
