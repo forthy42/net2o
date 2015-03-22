@@ -105,30 +105,22 @@ keccak-init
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
     @keccak -rot KeccakEncryptLoop  drop
-\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
-\    /string dup 0= UNTIL  2drop
 ; to c:encrypt
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u
     @keccak -rot KeccakDecryptLoop  drop
-\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
-\    /string dup 0= UNTIL  2drop
 ; to c:decrypt ( addr u -- )
 :noname ( addr u tag -- )
     \G Encrypt message in buffer addr u with auth
-\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck +keccak
-\    /string dup 0= UNTIL  drop
     { tag } @keccak -rot KeccakEncryptLoop
-    @keccak KeccakF
+    keccak*
     >r keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + 128@ r> 128!
 ; to c:encrypt+auth ( addr u tag -- )
 :noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check
-\    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck -keccak
-\    /string dup 0= UNTIL  drop
     { tag } @keccak -rot KeccakDecryptLoop
-    @keccak KeccakF
+    keccak*
     128@ keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + 128@ 128=
 ; to c:decrypt+auth ( addr u tag -- flag )
@@ -138,11 +130,11 @@ keccak-init
 	dup keccak#max u< IF
 	    keccak-padded keccak#max >padded
 	    keccak-padded keccak#max
-	THEN  >keccak  @keccak KeccakF
+	THEN  >keccak  keccak*
     /string dup 0= UNTIL  2drop
 ; to c:hash
 :noname ( addr u -- )
-    BEGIN  @keccak KeccakF  2dup keccak#max umin tuck keccak>
+    BEGIN  keccak*  2dup keccak#max umin tuck keccak>
     /string dup 0= UNTIL  2drop
 ; to c:prng
 \G Fill buffer addr u with PRNG sequence

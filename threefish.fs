@@ -107,7 +107,10 @@ threefish-init
 \G move 128 bytes from addr to the key
 :noname threefish#max threefish> ; to c:key> ( addr -- )
 \G get 64 bytes from the key to addr
-' noop to c:diffuse ( -- ) \ no diffusing
+:noname ( -- )
+    threefish-padded threefish#max erase
+    threefish-state threefish-padded threefish#max $E dup tf_encrypt_loop
+; to c:diffuse ( -- ) \ no diffusing
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u, must be by *64
     $C >r
@@ -125,9 +128,8 @@ threefish-init
     \G authentication is stored in the 16 bytes following that buffer
     { tag }
     2>r threefish-state 2r@ $E dup tf_encrypt_loop
-    threefish-padded threefish#max erase
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
-    threefish-state threefish-padded dup $E tf_encrypt
+    c:diffuse
     threefish-padded 128@ 2r> + 128!
 ; to c:encrypt+auth
 :noname ( addr u -- )

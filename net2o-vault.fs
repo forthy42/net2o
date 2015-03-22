@@ -55,8 +55,8 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	THEN
     vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
-    v-mode @ IF  no-key state# >crypt-source  THEN
-    v-key state# >crypt-key $> 2dup c:decrypt v-data 2!
+    no-key state# >crypt-source  v-key state# >crypt-key
+    $> 2dup c:decrypt v-data 2!  c:diffuse
     @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     $> v-key state# decrypt$ 0= !!no-decrypt!!
@@ -125,7 +125,7 @@ enc-keccak
     enc-file $@len dup >r vault-aligned enc-file $!len
     enc-file $@ r> /string dup enc-padding ! erase
     no-key state# >crypt-source
-    vkey state# >crypt-key enc-file $@ c:encrypt
+    vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
     enc-file $@ $, vault-file ;
 : vsig, ( -- )
     [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ F type
@@ -147,7 +147,7 @@ Defer write-decrypt
     v-data 2@ r@ write-file throw r> F close-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
 vault>file
-: vault>out [: v-data 2@ F type F cr ;] is write-decrypt ;
+: vault>out [: v-data 2@ F type ;] is write-decrypt ;
 
 : decrypt-file ( filename u -- )
     enc-filename $!
