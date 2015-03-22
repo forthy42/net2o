@@ -1,6 +1,6 @@
 \ symmetric encryption and decryption
 
-\ Copyright (C) 2011-2013   Bernd Paysan
+\ Copyright (C) 2011-2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -157,13 +157,12 @@ User last-ivskey
     ( cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
-    over key-salt# >crypt-source
-    2r> >crypt-key 
+    over 128@ 2r> c:tweakkey!
     key-salt# safe/string
     key( ." key init: " c:key@ c:key# .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
-    2>r over >r  rng128 r> 128! 2r> crypt-key-init ;
+    2>r over >r  rng128 64over 64over r> 128! 2r> c:tweakkey! ;
 
 : encrypt$ ( addr u1 key u2 -- )
     crypt-key-setup  key-cksum# - 0 c:encrypt+auth ;
@@ -173,9 +172,15 @@ User last-ivskey
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
+: crypt-pw-init ( addr u key u -- addr' u' ) 2>r
+    over key-salt# >crypt-source
+    2r> >crypt-key 
+    key-salt# safe/string
+    key( ." key init: " c:key@ c:key# .nnb cr ) ;
+
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
     2>r over >r  rng128 r@ 128!
-    r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
+    r@ c@ n $F0 mux r> c! 2r> crypt-pw-init $100 n 2* lshift ;
 
 : pw-diffuse ( diffuse# -- )
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
@@ -187,7 +192,7 @@ User last-ivskey
     crypt-pw-setup  pw-diffuse  key-cksum# - 0 c:encrypt+auth ;
 
 : decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
-    crypt-key-init   r> pw-diffuse  key-cksum# - 2dup 0 c:decrypt+auth ;
+    crypt-pw-init   r> pw-diffuse  key-cksum# - 2dup 0 c:decrypt+auth ;
 
 \ encrypt with own key
 

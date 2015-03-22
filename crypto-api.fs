@@ -59,4 +59,6 @@ object class
     \G absorb + hash for a message <= 64 bytes
     umethod c:hash@ ( addr u -- )
     \G extract short hash (up to 64 bytes)
+    umethod c:tweakkey! ( x128 addr u -- )
+    \G set key plus tweak
 end-class crypto

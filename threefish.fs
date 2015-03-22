@@ -23,11 +23,8 @@ c-library threefish
     \c   int flags=flags1;
     \c   while(n>=64) {
     \c     tf_encrypt(ctx, p, p, flags);
-    \c     flags=flags2;
-    \c     p+=8;
-    \c     n-=64;
-    \c     if(!++(ctx->tweak[0]))
-    \c       (ctx->tweak[1])++;
+    \c     flags=flags2; p+=8; n-=64;
+    \c     ctx->tweak[1] += !++(ctx->tweak[0]);
     \c   }
     \c }
     \c void tf_decrypt_loop(struct tf_ctx *ctx, uint64_t *c, size_t n,
@@ -35,11 +32,8 @@ c-library threefish
     \c   int flags=flags1;
     \c   while(n>=64) {
     \c     tf_decrypt(ctx, c, c, flags);
-    \c     flags=flags2;
-    \c     c+=8;
-    \c     n-=64;
-    \c     if(!++(ctx->tweak[0]))
-    \c       (ctx->tweak[1])++;
+    \c     flags=flags2; c+=8; n-=64;
+    \c     ctx->tweak[1] += !++(ctx->tweak[0]);
     \c   }
     \c }
 \ -------===< structs >===--------
@@ -167,5 +161,10 @@ threefish-init
 ; to c:shorthash
 ' threefish> to c:hash@
 \G extract short hash (up to 64 bytes)
+:noname ( x128 addr u -- )
+    \G set key plus tweak
+    threefish#max umin threefish-state swap move
+    tf-tweak! ;
+to c:tweakkey!
 
 crypto-o @ Constant threefish-o

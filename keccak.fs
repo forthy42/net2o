@@ -147,5 +147,9 @@ to c:shorthash
 ' keccak> ( addr u -- )
     \G extract short hash (up to 64 bytes)
 to c:hash@
+:noname ( x128 addr u -- )
+    \G set key plus tweak
+    keccak0 keccak#max umin >keccak c:tweak! ;
+to c:tweakkey!
     
 crypto-o @ Constant keccak-o
