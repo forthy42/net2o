@@ -135,14 +135,24 @@ Variable key-table
 
 Variable strict-keys  strict-keys on
 
+[IFUNDEF] magenta  brown constant magenta [THEN]
+
+Create 85colors
+red     >bg white >fg or bold or ,
+yellow  >bg white >fg or bold or ,
+blue    >bg white >fg or bold or ,
+magenta >bg white >fg or bold or ,
+
 : reset-color ( -- )
     [ default-color >bg default-color >fg or ]L attr! ;
 : .black85 ( addr u -- )
     [ black >bg black >fg or ]L attr!   85type reset-color ;
-: .red85 ( addr u -- )
-    [ red >bg white >fg or bold or ]L attr!   85type reset-color ;
-: .rsk ( nick u )
-    ." \ revoke: " skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
+: .red85 ( addr u -- )  0 -rot bounds ?DO
+	cr ." \ revoke: " dup cells 85colors + @ attr! 1+ 3 and
+	I 4 85type  dup cells 85colors + @ attr! 1+ 3 and
+	I 4 + 4 85type reset-color 8 +LOOP  drop ;
+: .rsk ( nick u -- )
+    skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " ke-nick $@ type cr
     ." pubkey: " ke-pk $@ 85type cr
