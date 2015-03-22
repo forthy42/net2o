@@ -29,8 +29,8 @@ end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
     vault-class new n:>o vault-table @ token-table ! ;
-
-Defer do-decrypted ( addr u -- ) \ what to do with a decrypted file
+: v-mode>crypt2 ( -- )
+    v-mode @ $10 rshift $FF and >crypt ;
 
 vault-table >table
 
@@ -56,17 +56,20 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	THEN
     vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
+    v-mode>crypt2
     no-key state# >crypt-source  v-key state# >crypt-key
     key( ." vkey: " v-key state# 85type F cr )
     $> 2dup c:decrypt v-data 2!  c:diffuse
-    @keccak v-kstate keccak# move 4 c-state or! ; \ keep for signature
+    c:key@ v-kstate c:key# move
+    0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     key( ." vkey: " v-key state# 85type F cr )
     $> v-key state# decrypt$ 0= !!no-decrypt!!
-    v-kstate @keccak keccak# move
+    v-mode>crypt2
+    v-kstate c:key@ c:key# move
     verify-tag 0= !!inv-sig!!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
-    8 c-state or! ;
+    0 >crypt 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \ set encryption mode and key wrap size
     64>n v-mode ! ;
 
@@ -109,7 +112,9 @@ $400 Constant pow-align#
     1+ r> lshift  min-align# 1- + min-align# negate and ;
 
 : enc-keccak ( -- )      $60 enc-mode ! ; \ wrap with keccak
-: enc-threefish ( -- ) $0160 enc-mode ! ; \ wrap with threefish
+: enc-threefish ( -- ) $010160 enc-mode ! ; \ wrap with threefish
+: enc>crypt2 ( -- )
+    enc-mode @ $10 rshift $FF and >crypt ;
 
 enc-keccak
 
@@ -129,12 +134,15 @@ enc-keccak
     enc-file $@len dup >r vault-aligned enc-file $!len
     enc-file $@ r> /string dup enc-padding ! erase
     key( ." vkey: " vkey state# 85type F cr )
+    enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
-    enc-file $@ $, vault-file ;
+    enc-file $@ $, vault-file 0 >crypt ;
 : vsig, ( -- )
+    enc>crypt2
     [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ F type
       .pk .sig $10 spaces ;] $tmp
+    0 >crypt
     key( ." vkey: " vkey state# 85type F cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 

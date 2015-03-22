@@ -81,7 +81,7 @@ User threefish-t
 : threefish0 ( -- )  threefish-state tf_ctx erase ;
 : >threefish ( addr u -- )  threefish-state swap move
     threefish-state tf_ctx-tweak sizeof tf_ctx-tweak erase ;
-: threefish> ( addr u -- )  threefish-state -rot move ;
+: threefish> ( addr u -- )  threefish-state -rot threefish#max umin move ;
 : +threefish ( -- )
     threefish-state tf_ctx-tweak $10 bounds DO
 	1 I +! I @ ?LEAVE \ continue when wraparound
@@ -155,10 +155,17 @@ threefish-init
 	dup threefish#max u< IF
 	    threefish-padded threefish#max >padded
 	    threefish-padded threefish#max
-	THEN  drop threefish-state swap threefish-state $D tf_encrypt
+	THEN  drop threefish-state swap over $D tf_encrypt
     +threefish /string dup 0= UNTIL  2drop
 ; to c:hash
 ' tf-tweak! to c:tweak! ( 128b -- )
 \G set tweek
+:noname ( addr u -- )
+\G absorb + hash for a message <= 64 bytes
+    threefish-padded threefish#max >padded
+    threefish-state threefish-padded over $D tf_encrypt
+; to c:shorthash
+' threefish> to c:hash@
+\G extract short hash (up to 64 bytes)
 
 crypto-o @ Constant threefish-o

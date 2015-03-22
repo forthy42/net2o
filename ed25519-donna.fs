@@ -49,7 +49,7 @@ object class
     $C0 uvar get0
     $C0 uvar get1
     $40 uvar hashtmp
-    #200 uvar hstatetmp
+    keccak# uvar hstatetmp
     cell uvar task-id
 end-class edbuf-c
 

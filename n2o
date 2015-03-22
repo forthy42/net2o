@@ -1,4 +1,4 @@
-#! /usr/bin/env gforth
+#! /usr/bin/env gforth-fast
 \ -*- mode: Forth -*-
 
 require net2o.fs
@@ -49,6 +49,21 @@ Vocabulary net2o-cmds
 
 get-current also net2o-cmds definitions
 
+: help ( -- )
+    \G usage: n2o help
+    next-arg "cmd" replaces
+    [ loadfilename 2@ ] sliteral "0" replaces
+    "grep \"\\G u[s]age: n2o %cmd%\" %0% | sed -e 's/ *\\\\G u[s]age: //g'"
+    $substitute drop system ;
+
+set-current
+
+: next-cmd ( -- )
+    next-arg ['] net2o-cmds >body search-wordlist
+    IF  execute  ELSE  help  THEN ;
+
+get-current net2o-cmds definitions
+
 : keyin ( -- )
     \G usage: n2o keyin file
     get-me keys key>default
@@ -76,10 +91,12 @@ get-current also net2o-cmds definitions
     \G usage: n2o enc file user1 .. usern
     next-arg 2>r get-me args>keylist
     2r> key-list encrypt-file ;
-: enc3 ( -- )
-    \G usage: n2o enc3 file user1 .. usern; threefish keywrapping
-    next-arg 2>r get-me args>keylist
-    2r> key-list enc-threefish encrypt-file ;
+: +threefish ( -- )
+    \G usage: n2o +threefish <next-cmd>
+    enc-threefish next-cmd ;
+: +keccak ( -- )
+    \G usage: n2o +keccak <next-cmd>
+    enc-keccak next-cmd ;
 : dec ( -- )
     \G usage: n2o dec file
     next-arg 2>r get-me 2r> decrypt-file ;
@@ -87,18 +104,6 @@ get-current also net2o-cmds definitions
     \G usage: n2o cat file
     vault>out dec ;
 
-: help ( -- )
-    next-arg "cmd" replaces
-    [ loadfilename 2@ ] 2Literal "0" replaces
-    "grep \"\\G u[s]age: n2o %cmd%\" %0% | sed -e 's/ *\\\\G u[s]age: //g'"
-    $substitute drop system ;
+set-current previous
 
-set-current
-
-: do-net2o-cmd ( -- )
-    next-arg ['] net2o-cmds >body search-wordlist
-    IF  execute  ELSE  help  THEN ;
-
-previous
-
-script? [IF]  do-net2o-cmd bye  [THEN]
+script? [IF]  next-cmd bye  [THEN]
