@@ -162,7 +162,8 @@ User last-ivskey
     key( ." key init: " c:key@ c:key# .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
-    2>r over >r  rng128 64over 64over r> 128! 2r> c:tweakkey! ;
+    2>r over >r  rng128 64over 64over r> 128! 2r> c:tweakkey!
+    key-salt# safe/string ;
 
 : encrypt$ ( addr u1 key u2 -- )
     crypt-key-setup  key-cksum# - 0 c:encrypt+auth ;
