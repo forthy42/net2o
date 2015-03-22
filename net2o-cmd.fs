@@ -270,7 +270,7 @@ code0-buf cmd0lock 0 pthread_mutex_init drop
 
 :noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
 ' cmd0lock to cmdlock
-' rng@ to cmddest
+' rng64 to cmddest
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
 : cmdtmp$ ( 64n -- addr u )  cmdtmp p!+ cmdtmp tuck - ;

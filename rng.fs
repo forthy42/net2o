@@ -84,10 +84,12 @@ rngbuf# rng-pos !
     IF  rng-allot salt-init  THEN
     rngbuf# u> IF  rng-step  THEN ;
 
-: rng@ ( -- x )
+: rng64 ( -- x64 )
     rng-pos @ 64aligned 64'+ rng-step?
     rng-pos @ 64aligned dup 64'+ rng-pos !
     rng-buffer @ + 64@ ;
+
+: rng128 ( -- x128 ) rng64 rng64 ;
 
 : rng$ ( u -- addr u ) >r
     rng-pos @ r@ + rng-step?
