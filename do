@@ -6,7 +6,15 @@ GFORTH=gforth-0.7.9_20150221
 
 # helper functions
 
-which sudo >/dev/null || alias sudo='su -c'
+if which sudo >/dev/null
+then
+    echo "sudo available"
+else
+    function sudo {
+        su --command="$*"
+    }
+    export sudo
+fi
 
 function git-get {
     purl=$1
