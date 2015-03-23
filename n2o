@@ -34,18 +34,34 @@ Variable key-readin
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
     cell+ out-key ;
+: arg-loop { xt -- }
+    begin  ?nextarg  while  xt execute  repeat ;
+: ?@nextarg ( -- addr u noarg-flag )
+    argc @ 1 > IF
+	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
+    THEN  false ;
+: @arg-loop { xt -- }
+    begin  ?@nextarg  while  xt execute  repeat ;
+
 : out-nicks ( -- )
-    BEGIN  ?nextarg  WHILE  nick-key out-key  REPEAT ;
+    [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
 Variable key-list
 
 : pk-off ( -- ) key-list $[]off ;
 : +pk ( "name" -- )  pk' keysize umin key-list $+[]! ;
+
 : args>keylist ( -- )
-    BEGIN argc @ 1 >  WHILE
-	    next-arg nick-key
-	    ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN
-    REPEAT ;
+    [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
+    @arg-loop ;
+: .85info ( addr u -- )
+    info-color attr! 85type default-color attr! ;
+
+$20 value hash-size#
+
+: hash-file ( addr u -- hash u' )
+    c:0key slurp-file 2dup c:hash drop free throw pad c:key>
+    pad hash-size# ;
 
 \ commands for the command line user interface
 
@@ -79,7 +95,7 @@ get-current net2o-cmds definitions
     key-readin $@ do-key
     save-pubkeys ;
 : keyout ( -- )
-    \G usage: n2o keyout [user1 .. usern]
+    \G usage: n2o keyout [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     get-me argc @ 1 > IF  out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
@@ -91,8 +107,7 @@ get-current net2o-cmds definitions
     \G usage: n2o keylist
     get-me
     key-table [: cell+ $@ drop cell+ >o
-	info-color attr! ke-pk $@ keysize umin 85type space
-	default-color attr! ke-nick $@ type cr o> ;] #map ;
+      ke-pk $@ keysize umin .85info space ke-nick $@ type cr o> ;] #map ;
 
 \ encryption subcommands
   
@@ -104,15 +119,51 @@ get-current net2o-cmds definitions
     enc-keccak next-cmd ;
 
 : enc ( -- )
-    \G usage: n2o enc file user1 .. usern
-    next-arg 2>r get-me args>keylist
-    2r> key-list encrypt-file ;
+    \G usage: n2o enc @user1 .. @usern files
+    get-me args>keylist
+    [: key-list encrypt-file ;] arg-loop ;
 : dec ( -- )
     \G usage: n2o dec file
-    next-arg 2>r get-me 2r> decrypt-file ;
+    get-me [: decrypt-file ;] arg-loop ;
 : cat ( -- )
     \G usage: n2o cat file
     vault>out dec ;
+
+\ hash+signature
+
+: +256 ( -- )
+    \G usage: n2o +256 <next-cmd>
+    \G +256: set hash output to 256 bits (default)
+    $20 to hash-size# next-cmd ;
+
+: +512 ( -- )
+    \G usage: n2o +512 <next-cmd>
+    \G +512: set hash output to 256 bits (default)
+    $40 to hash-size# next-cmd ;
+
+: hash ( -- )
+    \G usage: n2o hash files
+    enc-mode @ 8 rshift $FF and >crypt
+    [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
+
+: sign ( -- )
+    \G usage: n2o sign files
+    get-me now>never
+    [: 2dup hash-file 2drop
+      [: type ." .s2o" ;] $tmp w/o create-file throw >r
+      [: .pk .sig ;] $tmp r@ write-file r> close-file throw throw ;]
+    arg-loop ;
+
+: verify ( -- )
+    \G usage: n2o verify files
+    \G verify: check integrity of files vs. detached signature
+    get-me
+    [: 2dup hash-file 2drop 2dup type
+      [: type ." .s2o" ;] $tmp slurp-file
+      over date-sig? dup IF  info-color  ELSE  err-color  THEN  attr! .check
+      space over keysize .key-id default-color attr!
+      drop free throw cr ;]
+    arg-loop ;
 
 \ server mode
 
