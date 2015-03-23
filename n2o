@@ -27,11 +27,15 @@ require net2o-vault.fs
 
 Variable key-readin
 
-: out-me ( -- )
-    pkc keysize key-table #@ 0= !!unknown-key!!
-    cell+ >o pack-pubkey ke-nick $@ o>
+: out-key ( o -- )
+    >o pack-pubkey ke-nick $@ o>
     [: type ." .n2o" ;] $tmp w/o create-file throw
     >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
+: out-me ( -- )
+    pkc keysize key-table #@ 0= !!unknown-key!!
+    cell+ out-key ;
+: out-nicks ( -- )
+    BEGIN  ?nextarg  WHILE  nick-key out-key  REPEAT ;
 
 Variable key-list
 
@@ -51,9 +55,12 @@ get-current also net2o-cmds definitions
 
 : help ( -- )
     \G usage: n2o help
-    next-arg "cmd" replaces
     [ loadfilename 2@ ] sliteral "0" replaces
-    "grep \"\\G u[s]age: n2o %cmd%\" %0% | sed -e 's/ *\\\\G u[s]age: //g'"
+    ?nextarg IF  "cmd" replaces
+	"grep -E '\\G u[s]age: n2o %cmd%|\\G %cmd%: ' %0% | sed -e 's/ *\\\\G u[s]age: //g' -e 's/ *\\\\G %cmd%: //g'"
+    ELSE
+	"grep '\\G u[s]age: n2o ' %0% | sed -e 's/ *\\\\G u[s]age: //g'"
+    THEN
     $substitute drop system ;
 
 set-current
@@ -66,13 +73,15 @@ get-current net2o-cmds definitions
 
 : keyin ( -- )
     \G usage: n2o keyin file
+    \G keyin: read a .n2o key file in
     get-me keys key>default
     next-arg key-readin $slurp-file
     key-readin $@ do-key
     save-pubkeys ;
 : keyout ( -- )
-    \G usage: n2o keyout
-    get-me out-me ;
+    \G usage: n2o keyout [user1 .. usern]
+    \G keyout: output pubkey of your identity
+    get-me argc @ 1 > IF  out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
     \G usage: n2o keygen nick
     +newphrase key>default
@@ -85,24 +94,31 @@ get-current net2o-cmds definitions
 	info-color attr! ke-pk $@ keysize umin 85type space
 	default-color attr! ke-nick $@ type cr o> ;] #map ;
 
-\ define key lists
-
-: enc ( -- )
-    \G usage: n2o enc file user1 .. usern
-    next-arg 2>r get-me args>keylist
-    2r> key-list encrypt-file ;
+\ encryption subcommands
+  
 : +threefish ( -- )
     \G usage: n2o +threefish <next-cmd>
     enc-threefish next-cmd ;
 : +keccak ( -- )
     \G usage: n2o +keccak <next-cmd>
     enc-keccak next-cmd ;
+
+: enc ( -- )
+    \G usage: n2o enc file user1 .. usern
+    next-arg 2>r get-me args>keylist
+    2r> key-list encrypt-file ;
 : dec ( -- )
     \G usage: n2o dec file
     next-arg 2>r get-me 2r> decrypt-file ;
 : cat ( -- )
     \G usage: n2o cat file
     vault>out dec ;
+
+\ server mode
+
+: server ( -- )
+    \G usage: n2o server
+    get-me init-server server-loop ;
 
 set-current previous
 
