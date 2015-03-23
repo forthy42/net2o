@@ -66,6 +66,11 @@ UValue @keccak
 : -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
 : keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
 
+: move-rep ( srcaddr u1 destaddr u2 -- )
+    bounds ?DO
+	I' I - umin 2dup I swap move
+    dup +LOOP  2drop ;
+
 \ crypto api integration
 
 crypto class
@@ -138,9 +143,6 @@ keccak-init
     BEGIN  keccak*  2dup keccak#max umin tuck keccak>
     /string dup 0= UNTIL  2drop
 ; to c:prng
-:noname @keccak keccak#max + dup >r 128@ 128xor r> 128! ;
-to c:tweak! ( xd -- )
-\G set 128 bit tweek
 :noname ( addr u -- ) >keccak keccak* ;
 \G absorb + hash for a message <= 64 bytes
 to c:shorthash
@@ -149,7 +151,10 @@ to c:shorthash
 to c:hash@
 :noname ( x128 addr u -- )
     \G set key plus tweak
-    keccak0 keccak#max umin >keccak c:tweak! ;
+    keccak-padded keccak#max dup 2/ /string move-rep
+    keccak-padded keccak#max 2/ bounds DO
+	64over 64over I 128!  $10 +LOOP  64drop 64drop
+    keccak0 keccak-padded keccak#max >keccak ;
 to c:tweakkey!
     
 crypto-o @ Constant keccak-o

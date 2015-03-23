@@ -152,8 +152,6 @@ threefish-init
 	THEN  drop threefish-state swap over $D tf_encrypt
     +threefish /string dup 0= UNTIL  2drop
 ; to c:hash
-' tf-tweak! to c:tweak! ( 128b -- )
-\G set tweek
 :noname ( addr u -- )
 \G absorb + hash for a message <= 64 bytes
     threefish-padded threefish#max >padded

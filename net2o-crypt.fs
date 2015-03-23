@@ -102,11 +102,6 @@ init-keybuf
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
 
-: move-rep ( srcaddr u1 destaddr u2 -- )
-    bounds ?DO
-	I' I - umin 2dup I swap move
-    dup +LOOP  2drop ;
-
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
     key-assembly state# + state# move-rep
@@ -134,21 +129,17 @@ init-keybuf
     cmd( ." Default-key " cr )
     c:0key ;
 
-: addr>assembly ( addr flag -- )
-    [ acks# invert 8 lshift ]L and
-    ivs-assembly state# + 64'+ w!
-    ivs-assembly state# + 64! ; \ the address is part of the key
+: addr>assembly ( addr64 flag -- x128 )
+    [ acks# invert 8 lshift ]L and n>64 ;
 
 User last-ivskey
 
 : ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF  64dup dest-flags w@ addr>assembly
-	\ the flags, too, except the ack toggle bits
-	64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
-	ivs-assembly state# move
-	key( ." key: " ivs-assembly state# + 64@ $64. ivs-assembly state# 2* xtype cr )
-	ivs-assembly >c:key regen-ivs  EXIT  THEN  64drop
+    IF	\ the flags, too, except the ack toggle bits
+	64dup 64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
+	>r dest-flags w@ addr>assembly r> state# c:tweakkey!
+	regen-ivs  EXIT  THEN  64drop
     dest-flags 1+ c@ stateless# and
     IF  default-key  ELSE  true !!inv-dest!!  THEN ;
 
@@ -173,15 +164,9 @@ User last-ivskey
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
-: crypt-pw-init ( addr u key u -- addr' u' ) 2>r
-    over key-salt# >crypt-source
-    2r> >crypt-key 
-    key-salt# safe/string
-    key( ." key init: " c:key@ c:key# .nnb cr ) ;
-
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
     2>r over >r  rng128 r@ 128!
-    r@ c@ n $F0 mux r> c! 2r> crypt-pw-init $100 n 2* lshift ;
+    r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
 
 : pw-diffuse ( diffuse# -- )
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
@@ -193,7 +178,7 @@ User last-ivskey
     crypt-pw-setup  pw-diffuse  key-cksum# - 0 c:encrypt+auth ;
 
 : decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
-    crypt-pw-init   r> pw-diffuse  key-cksum# - 2dup 0 c:decrypt+auth ;
+    crypt-key-init   r> pw-diffuse  key-cksum# - 2dup 0 c:decrypt+auth ;
 
 \ encrypt with own key
 
