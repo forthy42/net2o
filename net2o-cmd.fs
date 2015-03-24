@@ -220,7 +220,7 @@ Defer >throw
 Variable throwcount
 
 : do-cmd-loop ( addr u -- )
-    cmd( dest-flags .dest-addr 2dup n2o:see )
+    cmd( dest-flags .dest-addr 64@ $64. 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     dup IF   1 throwcount +!

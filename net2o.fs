@@ -2449,7 +2449,7 @@ require net2o-msg.fs
       cookie+request
     end-code| -setip n2o:send-replace ;
 
-: c:announce-me ( -- )
+: announce-me ( -- )
     $2000 $10000 "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
 : nick-lookup ( addr u -- id u )

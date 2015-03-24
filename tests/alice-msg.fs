@@ -21,5 +21,5 @@ init-client
     BEGIN  pad 100 accept cr dup WHILE  pad swap send-text  REPEAT
     drop ['] .time $err ;
 
-script? [IF] c:announce-me ." connect bob?" key drop
+script? [IF] announce-me ." connect bob?" key drop
     "bob" nat:connect c:msg-test c:disconnect bye [THEN]
