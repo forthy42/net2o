@@ -222,7 +222,7 @@ void KeccakInitialize()
 
 void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 {
-  UINT64 m = 0xffffffffffffffffull;
+  UINT64 m = ~(UINT64)0;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   memcpy(data, state, byteCount);
 #else
@@ -238,17 +238,17 @@ void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
   m <<= ((8-byteCount) & 7)*8;
 #endif
   switch((byteCount+7)>>3) {
-  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 25: case 24: case 23: case 22: m = ~(UINT64)0;
   case 21:
-    data[20] ^= m; m = 0xffffffffffffffffull;
-  case 20: case 19: m = 0xffffffffffffffffull; case 18:
-    data[17] ^= m; m = 0xffffffffffffffffull;
-  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
-    data[12] ^= m; m = 0xffffffffffffffffull;
-  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
-    data[ 8] ^= m; m = 0xffffffffffffffffull;
-  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
-    data[ 2] ^= m; m = 0xffffffffffffffffull;
+    data[20] ^= m; m = ~(UINT64)0;
+  case 20: case 19: m = ~(UINT64)0; case 18:
+    data[17] ^= m; m = ~(UINT64)0;
+  case 17: case 16: case 15: case 14: m = ~(UINT64)0; case 13:
+    data[12] ^= m; m = ~(UINT64)0;
+  case 12: case 11: case 10: m = ~(UINT64)0; case 9:
+    data[ 8] ^= m; m = ~(UINT64)0;
+  case 8: case 7: case 6: case 5: case 4: m = ~(UINT64)0; case 3:
+    data[ 2] ^= m; m = ~(UINT64)0;
   case 2:
     data[ 1] ^= m;
   }
@@ -258,7 +258,7 @@ void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 {
   int i;
-  UINT64 m = 0xffffffffffffffffull;
+  UINT64 m = ~(UINT64)0;
   for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
     state[i>>3] ^= data[i>>3];
@@ -284,7 +284,7 @@ void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 {
   int i;
-  UINT64 m = 0xffffffffffffffffull;
+  UINT64 m = ~(UINT64)0;
   for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
     data[i>>3] = state[i>>3] ^= data[i>>3];
@@ -313,17 +313,17 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
   }
 #endif
   switch((byteCount+7)>>3) {
-  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 25: case 24: case 23: case 22: m = ~(UINT64)0;
   case 21:
-    data[20] ^= m; m = 0xffffffffffffffffull;
-  case 20: case 19: m = 0xffffffffffffffffull; case 18:
-    data[17] ^= m; m = 0xffffffffffffffffull;
-  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
-    data[12] ^= m; m = 0xffffffffffffffffull;
-  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
-    data[ 8] ^= m; m = 0xffffffffffffffffull;
-  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
-    data[ 2] ^= m; m = 0xffffffffffffffffull;
+    data[20] ^= m; m = ~(UINT64)0;
+  case 20: case 19: m = ~(UINT64)0; case 18:
+    data[17] ^= m; m = ~(UINT64)0;
+  case 17: case 16: case 15: case 14: m = ~(UINT64)0; case 13:
+    data[12] ^= m; m = ~(UINT64)0;
+  case 12: case 11: case 10: m = ~(UINT64)0; case 9:
+    data[ 8] ^= m; m = ~(UINT64)0;
+  case 8: case 7: case 6: case 5: case 4: m = ~(UINT64)0; case 3:
+    data[ 2] ^= m; m = ~(UINT64)0;
   case 2:
     data[ 1] ^= m;
   }
@@ -333,7 +333,7 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
 {
   int i;
-  UINT64 m = 0xffffffffffffffffull;
+  UINT64 m = ~(UINT64)0;
   UINT64 tmp;
   for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -368,17 +368,17 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
   }
 #endif
   switch((byteCount+7)>>3) {
-  case 25: case 24: case 23: case 22: m = 0xffffffffffffffffull;
+  case 25: case 24: case 23: case 22: m = ~(UINT64)0;
   case 21:
-    data[20] ^= m; state[20] ^= m; m = 0xffffffffffffffffull;
-  case 20: case 19: m = 0xffffffffffffffffull; case 18:
-    data[17] ^= m; state[17] ^= m; m = 0xffffffffffffffffull;
-  case 17: case 16: case 15: case 14: m = 0xffffffffffffffffull; case 13:
-    data[12] ^= m; state[12] ^= m; m = 0xffffffffffffffffull;
-  case 12: case 11: case 10: m = 0xffffffffffffffffull; case 9:
-    data[ 8] ^= m; state[ 8] ^= m; m = 0xffffffffffffffffull;
-  case 8: case 7: case 6: case 5: case 4: m = 0xffffffffffffffffull; case 3:
-    data[ 2] ^= m; state[ 2] ^= m; m = 0xffffffffffffffffull;
+    data[20] ^= m; state[20] ^= m; m = ~(UINT64)0;
+  case 20: case 19: m = ~(UINT64)0; case 18:
+    data[17] ^= m; state[17] ^= m; m = ~(UINT64)0;
+  case 17: case 16: case 15: case 14: m = ~(UINT64)0; case 13:
+    data[12] ^= m; state[12] ^= m; m = ~(UINT64)0;
+  case 12: case 11: case 10: m = ~(UINT64)0; case 9:
+    data[ 8] ^= m; state[ 8] ^= m; m = ~(UINT64)0;
+  case 8: case 7: case 6: case 5: case 4: m = ~(UINT64)0; case 3:
+    data[ 2] ^= m; state[ 2] ^= m; m = ~(UINT64)0;
   case 2:
     data[ 1] ^= m; state[ 1] ^= m;
   }
