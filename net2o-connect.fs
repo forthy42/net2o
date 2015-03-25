@@ -20,7 +20,7 @@ reply-table $@ inherit-table setup-table
 $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 
-: ]tmpnest ( -- )  end-cmd cmd>tmpnest $, tmpnest ;
+: ]tmpnest ( -- )  end-cmd cmd>tmpnest 2drop tmpnest ;
 
 +net2o: new-data ( addr addr u -- ) \ create new data mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN

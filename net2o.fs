@@ -587,7 +587,7 @@ Variable net2o-tasks
     task cell net2o-tasks $+!  pass
     b-out op-vector @ debug-vector !
     init-reply prep-socks alloc-io catch
-    1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
+    1+ ?dup-IF  free-io 1- ?dup-IF  DoError default-color attr!  THEN
     ELSE  ~~ 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
@@ -601,7 +601,8 @@ event: ->kill:n2o ( -- )  -1 throw ;
 true value net2o-running
 
 0 warnings !@
-: net2o-bye false to net2o-running ['] noop is kill-task  bye ;
+: net2o-bye false to net2o-running ['] noop is kill-task
+    default-color attr! bye ;
 warnings !
 
 \ net2o header structure
@@ -1646,12 +1647,10 @@ User outflag  outflag off
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
     outbuf flags 1+ c@ stateless# and IF
-	outbuf0-encrypt
-	return-addr
+	outbuf0-encrypt  return-addr
 	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
     ELSE
-	code-map @ outbuf-encrypt
-	return-address
+	code-map @ outbuf-encrypt  return-address
     THEN   packet-to ;
 
 : send-data-packet ( -- ) +sendX
@@ -2450,10 +2449,10 @@ require net2o-msg.fs
     end-code| -setip n2o:send-replace ;
 
 : announce-me ( -- )
-    $2000 $10000 "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
+    $A $E "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
 : nick-lookup ( addr u -- id u )
-    $2000 $10000 "" ins-ip c:connect
+    $A $E "" ins-ip c:connect
     2dup c:addme-fetch-host
     nick-key >o ke-pk $@
     BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!

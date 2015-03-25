@@ -197,23 +197,20 @@ User last-ivskey
     crypt-buf-init inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
-: set-0key ( keyaddr u -- )
-    dup IF
-	ivs-assembly state# move-rep
-    ELSE
-	2drop ivs-assembly state# erase
-    THEN
+: set-0key ( tweak128 keyaddr u -- )
+    dup 0= IF  2drop no-key state#  THEN
 \    ." 0key: " ivs-assembly state# 2* 85type cr
-    ivs-assembly >c:key ;
+    c:tweakkey! ;
 
-: try-0decrypt ( addr -- flag )  sec@ set-0key
+: try-0decrypt ( addr -- flag ) >r
+    inbuf addr 64@ inbuf flags w@ addr>assembly
+    r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc
     dup IF  tmpbuf inbuf packet-data move  THEN ;
 
 : inbuf0-decrypt ( -- flag ) +calc
-    inbuf addr 64@ inbuf flags w@ addr>assembly
     my-0key try-0decrypt dup IF  EXIT  THEN  drop
     false [: try-0decrypt or dup 0= ;] search-0key ;
 

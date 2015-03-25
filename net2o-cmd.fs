@@ -502,7 +502,7 @@ comp: :, previous ;
 : push-cmd ( -- )
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
 
-: ]nest$  ( -- )  cmd>nest $, ;
+: ]nest$  ( -- )  cmd>nest 2drop ;
 
 dup set-current previous
 

@@ -110,8 +110,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
 +net2o: ack-resend# ( addr $:string -- )
     64>n $> parent @ .data-map @ .resend#? dup 0= IF
 	drop ." resend# don't match!" F cr
-	parent @ >o tag-addr dup 2@ ~~ 2drop drop
-	n2o:see-me o>
+	parent @ .n2o:see-me
 	[ cookie-val $FF xor ]L validated and!
     ELSE
 	8 lshift validated +! cookie-val validated or!
@@ -344,7 +343,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-: gen-request ( -- )  setup!
+: gen-request ( -- ) setup!
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
