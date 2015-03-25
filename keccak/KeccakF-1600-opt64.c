@@ -220,13 +220,13 @@ void KeccakInitialize()
 {
 }
 
-void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 {
   UINT64 m = 0xffffffffffffffffull;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   memcpy(data, state, byteCount);
 #else
-  unsigned int i;
+  int i;
   
   for(i=0; i<byteCount-7; i+=8)
     fromWordToBytes(data+(i>>3), ((const UINT64*)state)[i>>3]);
@@ -255,9 +255,9 @@ void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
 #endif
 }
 
-void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   UINT64 m = 0xffffffffffffffffull;
   for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -281,9 +281,9 @@ void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
 #endif
 }
 
-void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   UINT64 m = 0xffffffffffffffffull;
   for(i=0; i<byteCount-7; i+=8) {
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
@@ -330,9 +330,9 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
 #endif
 }
 
-void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   UINT64 m = 0xffffffffffffffffull;
   UINT64 tmp;
   for(i=0; i<byteCount-7; i+=8) {
