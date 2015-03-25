@@ -2309,7 +2309,7 @@ Variable beacons \ destinations to send beacons to
 	?int dup  WHILE  xt .loop-err  net2o-running 0=  UNTIL  THEN
     drop false ;
 
-: create-timeout-task ( -- )
+: create-timeout-task ( -- )  timeout-task ?EXIT
     [:  \ ." created timeout task " up@ hex. cr
 	['] timeout-loop-nocatch catch-loop drop ;]
     1 net2o-task to timeout-task ;

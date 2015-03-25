@@ -98,8 +98,8 @@ Variable key-table
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
 
-: key:new ( addr u -- )
-    \ addr u is the public key
+: key:new ( addr u -- o )
+    \G create new key, addr u is the public key
     sample-key >o
     key-entry-table @ token-table !
     ke-sk ke-end over - erase  >storekey @ ke-storekey !
@@ -107,6 +107,11 @@ Variable key-table
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over keysize umin key-table #! o>
     current-key ;
+
+: key?new ( addr u -- o )
+    \G Create or lookup new key
+    2dup keysize umin key-table #@ drop
+    dup 0= IF  drop key:new  ELSE  nip nip cell+  THEN ;
 
 \ search for keys - not optimized
 
@@ -163,7 +168,7 @@ magenta >bg white >fg or bold or ,
     o> ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
-    .\" x\" " ke-pk $@ 85type .\" \" key:new" cr
+    .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
     ke-sk @ IF  .\" x\" " ke-sk @ keysize 85type .\" \" ke-sk sec! +seckey" cr  THEN
     '"' emit ke-nick $@ type .\" \" ke-nick $! "
     ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
@@ -281,7 +286,7 @@ gen-table $freeze
 :noname ( addr u -- addr u' flag )
     pk2-sig? dup 0= ?EXIT drop
     2dup + sigsize# - sigsize# >$
-    sigpk2size# - 2dup + keysize 2* key:new n:>o $> ke-selfsig $!
+    sigpk2size# - 2dup + keysize 2* key?new n:>o $> ke-selfsig $!
     c-state off true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
@@ -487,7 +492,7 @@ $40 buffer: nick-buf
     key( ." Replace:" cr o cell- 0 .key )
     s" #revoked" dup >r ke-nick $+!
     ke-nick $@ r> - ke-prof $@ ke-psk sec@ ke-sigs ke-type @
-    rev-addr pkrk# key:new >o
+    rev-addr pkrk# key?new >o
     ke-type ! [: ke-sigs $+[]! ;] $[]map ke-psk sec! ke-prof $! ke-nick $!
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!

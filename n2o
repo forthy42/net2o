@@ -16,7 +16,7 @@ require net2o-vault.fs
 
 \ will ask for your password and if possible auto-select your id
 
-: get-me ( -- )  read-keys secret-keys#
+: get-me ( -- ) read-keys secret-keys#
     BEGIN  dup 0= WHILE drop
 	    ." Enter your net2o passphrase: " +passphrase
 	    read-keys secret-keys# dup 0= IF
@@ -24,6 +24,9 @@ require net2o-vault.fs
 	    THEN  cr
     REPEAT
     1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ;
+
+: get-me-again ( -- )
+    secret-keys# ?EXIT  get-me ;
 
 Variable key-readin
 
@@ -167,9 +170,14 @@ get-current net2o-cmds definitions
 
 \ server mode
 
+: -strict ( -- )
+    \G usage: n2o -strict <next-cmd>
+    \G -strict: open for all keys
+    strict-keys off next-cmd ;
+
 : server ( -- )
     \G usage: n2o server
-    get-me init-server server-loop ;
+    get-me-again init-server server-loop ;
 
 set-current previous
 

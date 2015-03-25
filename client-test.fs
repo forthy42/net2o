@@ -3,7 +3,7 @@
 require client-tests.fs
 require test-keys.fs \ we want the test keys - never use this in production!
 
-+db stat(
++db stat( \ )
 +debug
 %droprate
 debug-task

@@ -2,7 +2,7 @@
 
 require ../client-tests.fs
 
-+db stat(
++db stat( \ )
 script? [IF] +debug %droprate [THEN]
 require ../test-keys.fs \ we want the test keys - never use this in production!
 
