@@ -183,7 +183,7 @@ get-current net2o-cmds definitions
 
 : chat ( -- )
     \G usage: chat @user
-    get-me announce-me
+    get-me init-client announce-me
     ?@nextarg IF
 	." press key to connect to " 2dup type key drop
 	$A $A 2swap nick-connect do-chat c:disconnect  THEN ;
