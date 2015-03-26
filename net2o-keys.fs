@@ -329,14 +329,22 @@ set-current previous previous
 : ?key-sfd ( -- fd ) key-sfd "~/.net2o/seckeys.k2o" ?fd dup to key-sfd ;
 : ?key-pfd ( -- fd ) key-pfd "~/.net2o/pubkeys.k2o" ?fd dup to key-pfd ;
 
-: append-file ( addr u fd -- ) >r
-    r@ file-size throw  r@ reposition-file throw
+: write@pos-file ( addr u 64pos fd -- ) >r
+    64>d r@ reposition-file throw
     r@ write-file throw  r> flush-file throw ;
+
+: append-file ( addr u fd -- ) >r
+    r@ file-size throw r> write@pos-file ;
 
 : key>sfile ( -- )
     keypack keypack-all# ?key-sfd append-file ;
 : key>pfile ( -- )
     keypack keypack-all# ?key-pfd append-file ;
+
+: key>sfile@pos ( 64pos -- ) 64>r
+    keypack keypack-all# 64r> ?key-sfd write@pos-file ;
+: key>pfile@pos ( 64pos -- ) 64>r
+    keypack keypack-all# 64r> ?key-pfd write@pos-file ;
 
 : rnd>sfile ( -- )
     keypack keypack-all# >rng$ key>sfile ;
@@ -392,24 +400,33 @@ previous
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw
     2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
 
+Variable cp-tmp
+
 : save-pubkeys ( -- )
-    key-pfd ?dup-IF  close-file throw  THEN
+    key-pfd ?dup-IF
+	dup 0. rot reposition-file throw
+	dup cp-tmp $slurp close-file throw  THEN
     0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
+    cp-tmp $@ key-pfd write-file throw cp-tmp $off
     key-table [: cell+ $@ drop cell+ >o
       ke-sk sec@ d0= IF  pack-pubkey
 	  flush( ." saving " ke-nick $@ type F cr )
-	  key-crypt key>pfile
+	  key-crypt ke-offset 64@ key>pfile@pos
       THEN o> ;] #map
     key-pfd close-file throw
     "~/.net2o/pubkeys.k2o" >backup
     0 to key-pfd ;
 
 : save-seckeys ( -- )
-    key-sfd ?dup-IF  close-file throw  THEN
+    key-sfd ?dup-IF
+	dup 0. rot reposition-file throw
+	dup cp-tmp $slurp close-file throw  THEN
     0 "~/.net2o/seckeys.k2o+" ?fd to key-sfd
+    cp-tmp $@ key-sfd write-file throw cp-tmp $off
     key-table [: cell+ $@ drop cell+ >o
-      ke-sk sec@ d0<> IF  pack-seckey  THEN
-      key-crypt key>sfile o> ;] #map
+      ke-sk sec@ d0<> IF  pack-seckey
+	  key-crypt ke-offset 64@ key>sfile@pos
+      THEN o> ;] #map
     "~/.net2o/seckeys.k2o" >backup
     key-sfd close-file throw 0 to key-sfd ;
 

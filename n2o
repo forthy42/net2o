@@ -163,7 +163,7 @@ get-current net2o-cmds definitions
     get-me
     [: 2dup hash-file 2drop 2dup type
       [: type ." .s2o" ;] $tmp slurp-file
-      over date-sig? dup IF  info-color  ELSE  err-color  THEN  attr! .check
+      over date-sig? dup >r  info-color err-color r> select  attr! .check
       space over keysize .key-id default-color attr!
       drop free throw cr ;]
     arg-loop ;
@@ -179,6 +179,17 @@ get-current net2o-cmds definitions
     \G usage: n2o server
     get-me-again init-server server-loop ;
 
-set-current previous
+\ chat mode
 
-script? [IF]  next-cmd bye  [THEN]
+: chat ( -- )
+    \G usage: chat @user
+    get-me announce-me
+    ?@nextarg IF
+	." press key to connect to " 2dup type key drop
+	$A $A 2swap nick-connect do-chat c:disconnect  THEN ;
+
+set-current
+
+script? [IF]  argc @ 1 > [IF] next-cmd [ELSE] help [THEN] bye  [THEN]
+
+previous

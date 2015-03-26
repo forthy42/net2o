@@ -2436,6 +2436,9 @@ require net2o-msg.fs
     +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
+: c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
+    do-disconnect [: .packets profile( .times ) ;] $err ;
+
 : c:fetch-id ( pubkey u -- )
     net2o-code
       expect-reply  fetch-id,

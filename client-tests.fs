@@ -131,9 +131,6 @@ UValue test#  0 to test#
       n2o:done
     end-code| ['] .time $err n2o:close-all ;
 
-: c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
-    do-disconnect [: .packets profile( .times ) ;] $err ;
-
 : c:test-rest ( -- )
     c:download1
     7e @time f> IF c:download2

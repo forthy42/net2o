@@ -88,6 +88,17 @@ previous
     $, msg-text msg>
     cookie+request end-code| ;
 
+: .chat ( addr u -- )
+    sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
+
+: do-chat ( -- )
+    o-timeout
+    BEGIN  pad $100 accept cr dup WHILE
+	    dup 1+ xback-restore
+	    pad swap 2dup o+timeout send-text o-timeout .chat
+    REPEAT
+    drop ;
+
 :noname ( addr u o:context -- )
     net2o-code  expect-reply
     msg $, nest-sig endwith
