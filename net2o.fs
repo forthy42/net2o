@@ -587,8 +587,8 @@ Variable net2o-tasks
     task cell net2o-tasks $+!  pass
     b-out op-vector @ debug-vector !
     init-reply prep-socks alloc-io catch
-    1+ ?dup-IF  free-io 1- ?dup-IF  DoError default-color attr!  THEN
-    ELSE  ~~ 0 (bye) ~~  THEN ;
+    1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
+    ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
 event: ->kill:n2o ( -- )  -1 throw ;
@@ -602,7 +602,7 @@ true value net2o-running
 
 0 warnings !@
 : net2o-bye false to net2o-running ['] noop is kill-task
-    default-color attr! bye ;
+    bye ;
 warnings !
 
 \ net2o header structure
@@ -2454,7 +2454,7 @@ require net2o-msg.fs
 : announce-me ( -- )
     $A $E "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
-: nick-lookup ( addr u -- id u )
+: nick-lookup ( addr u -- )
     $A $E "" ins-ip c:connect
     2dup c:addme-fetch-host
     nick-key >o ke-pk $@
@@ -2463,9 +2463,9 @@ require net2o-msg.fs
 	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
 	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  o> 2drop do-disconnect ;
-: insert-host ( addr u -- )
-    ." check host: " 2dup .host cr
-    host>$ IF
+: insert-host ( o addr u -- o )
+    2 pick >o ." check host: " 2dup .host cr
+    host>$ o> IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	    insert-address temp-addr ins-dest
 	    ." insert host: " temp-addr $10 xtype cr
@@ -2474,10 +2474,14 @@ require net2o-msg.fs
 	    THEN ;] $>sock
     ELSE  2drop  THEN ;
 
+: nick-id ( addr-nick u -- id )
+    nick-key .ke-pk $@ >d#id ;
+
 : n2o:lookup ( addr u -- )
-    2dup nick-lookup
+    2dup nick-id { id }
+    id .dht-host $[]# 0= IF  2dup nick-lookup  THEN
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
-    nick-key .ke-pk $@ >d#id >o dht-host ['] insert-host $[]map o> ;
+    id dup .dht-host ['] insert-host $[]map drop ;
 
 : nick-connect ( cmdlen datalen addr u -- )
     n2o:lookup

@@ -134,13 +134,13 @@ get-current net2o-cmds definitions
 
 \ hash+signature
 
-: +256 ( -- )
-    \G usage: n2o +256 <next-cmd>
+: -256 ( -- )
+    \G usage: n2o -256 <next-cmd>
     \G +256: set hash output to 256 bits (default)
     $20 to hash-size# next-cmd ;
 
-: +512 ( -- )
-    \G usage: n2o +512 <next-cmd>
+: -512 ( -- )
+    \G usage: n2o -512 <next-cmd>
     \G +512: set hash output to 256 bits (default)
     $40 to hash-size# next-cmd ;
 
@@ -170,9 +170,9 @@ get-current net2o-cmds definitions
 
 \ server mode
 
-: -strict ( -- )
-    \G usage: n2o -strict <next-cmd>
-    \G -strict: open for all keys
+: -lax ( -- )
+    \G usage: n2o -lax <next-cmd>
+    \G -lax: open for all keys
     strict-keys off next-cmd ;
 
 : server ( -- )
@@ -180,6 +180,12 @@ get-current net2o-cmds definitions
     get-me-again init-server server-loop ;
 
 \ chat mode
+
+: -root ( -- )
+    \G usage: n2o -root <address[:port]> <next-cmd> ;
+    next-arg ':' $split dup IF  s>number drop to net2o-port
+    ELSE  2drop  THEN  net2o-host $!
+    next-cmd ;
 
 : chat ( -- )
     \G usage: chat @user
@@ -190,6 +196,18 @@ get-current net2o-cmds definitions
 
 set-current
 
-script? [IF]  argc @ 1 > [IF] next-cmd [ELSE] help [THEN] bye  [THEN]
+: +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN  c@ '+' = ;
+
+: ++debug ( -- )
+    BEGIN  argc @ 1 > WHILE  1 arg +?  WHILE
+		1 arg debug-eval $!
+		s" db " debug-eval 1 $ins
+		s" (" debug-eval $+!
+		debug-eval $@ evaluate
+		shift-args
+	REPEAT  THEN ;
+
+script? [IF] ++debug \ read in all debugging stuff
+    argc @ 1 > [IF] next-cmd [ELSE] help [THEN] bye  [THEN]
 
 previous

@@ -201,13 +201,17 @@ Ustack b$
 
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
-: bcr    #lf bemit b$ $@ (type) b$ $off ;
+: bflush b$ $@ (type) b$ $off ;
+: bcr    #lf bemit bflush ;
 
 ' btype ' bemit ' bcr ' form output: b-out
 op-vector @
 b-out ' (attr!) is attr!
 op-vector !
 \ ' noop alias b-out
+
+:noname defers DoError bflush ; is DoError
+:noname defers .debugline bflush ; is .debugline
 
 \ misc
 
@@ -231,7 +235,7 @@ false [IF]
 
 \ more phony throw stuff, only for debugging engine
 
-debugging-method [IF]
+debugging-method 0 and [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
 
