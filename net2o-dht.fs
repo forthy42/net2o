@@ -22,6 +22,8 @@
 
 $200 cells Constant dht-size# \ $100 entris + $100 chains
 
+Sema dht-sema
+
 Variable d#public
 
 : dht@ ( bucket -- addr )  >r
@@ -144,10 +146,10 @@ Variable dht-table
     REPEAT 2drop 2drop ; \ not found
 
 : >d#id ( addr u -- o )
-    2dup d#public d#
-    dup @ 0= IF  dht-class new >o
-	o swap !  dht-hash $!  dht-table @ token-table !  o o>
-    ELSE  @ nip nip  THEN ;
+    [: 2dup d#public d#
+      dup @ 0= IF  dht-class new >o
+	  o swap !  dht-hash $!  dht-table @ token-table !  o o>
+      ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
@@ -317,12 +319,13 @@ previous
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
 : n2o:send-replace ( -- )
-    me>d#id >o dht-host $[]# IF
-	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id remove-me, endwith
-	  cookie+request
-	end-code|
-    THEN o> ;
+    [: me>d#id >o dht-host $[]# IF
+	  net2o-code   expect-reply
+	    pkc keysize 2* $, dht-id remove-me, endwith
+	    cookie+request
+	  end-code|
+      THEN  dht-host $[]off
+      o> ;] dht-sema c-section ;
 
 : set-revocation ( addr u -- )
     dht-host $ins[]sig ;
@@ -357,7 +360,7 @@ previous
 : beacon-replace ( -- )  \ sign on, and do a replace-me
     sockaddr alen @ save-mem
     [: over >r insert-address r> free throw
-      n2o:new-context $1000 $1000 n2o:connect msg( ." beacon: connected" F cr )
+      n2o:new-context $6 $6 n2o:connect msg( ." beacon: connected" F cr )
       replace-me msg( ." beacon: replaced" F cr )
       do-disconnect ;] 3 net2o-task drop ;
 

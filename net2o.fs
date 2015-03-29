@@ -2452,7 +2452,7 @@ require net2o-msg.fs
     end-code| -setip n2o:send-replace ;
 
 : announce-me ( -- )
-    $A $E "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
+    $8 $8 "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
 : nick-lookup ( addr u -- )
     $A $E "" ins-ip c:connect
