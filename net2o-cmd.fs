@@ -395,11 +395,6 @@ UDefer expect-reply?
 
 previous
 
-state# buffer: acked-buf
-state# rng$ acked-buf swap move \ must be un-guessable
-
-: acked ( -- ) \ replace key with random stuff
-    acked-buf last-ivskey @ state# move ;
 : net2o:ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
@@ -410,7 +405,7 @@ state# rng$ acked-buf swap move \ must be un-guessable
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
-    ( acked )  0. rot reply[] 2! ; \ clear request
+    0. rot reply[] 2! ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     cmdbuf$

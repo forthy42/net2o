@@ -133,10 +133,8 @@ init-keybuf
 : addr>assembly ( addr64 flag -- x128 )
     [ acks# invert 8 lshift ]L and n>64 ;
 
-User last-ivskey
-
 : >ivskey ( 64addr -- keyaddr )
-    64>n addr>keys dest-ivs $@ rot umin + dup last-ivskey ! ;
+    64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
     >r dest-flags w@ addr>assembly r> state# c:tweakkey! ;
 

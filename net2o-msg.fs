@@ -91,17 +91,19 @@ previous
 : .chat ( addr u -- )
     sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
 
+: get-input ( -- u )
+    pad $100 accept dup 1+ xback-restore ;
+
 : do-chat ( -- )
-    o-timeout
-    BEGIN  pad $100 accept cr dup WHILE
-	    dup 1+ xback-restore
-	    pad swap 2dup o+timeout send-text o-timeout .chat
+    -timeout
+    BEGIN  get-input dup WHILE
+	    pad swap 2dup +resend-cmd send-text -timeout .chat
     REPEAT
     drop ;
 
 :noname ( addr u o:context -- )
     net2o-code  expect-reply
-    msg $, nest-sig endwith
+    msg $, nestsig endwith
     cookie+request end-code ; is avalanche-to
 
 0 [IF]

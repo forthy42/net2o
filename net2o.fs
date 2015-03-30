@@ -1390,8 +1390,10 @@ reply buffer: dummy-reply
     
 \ timing records
 
+sema timing-lock
+
 : net2o:track-timing ( -- ) \ initialize timing records
-    s" " timing-stat $! ;
+    timing-stat $off ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
@@ -1402,22 +1404,23 @@ reply buffer: dummy-reply
     stats( timing-stat 0 rot $del ) ;
 
 : .rec-timing ( addr u -- )
-    ack@ >o track-timing $@ \ do some dumps
-    bounds ?DO
-	I ts-delta sf@ f>64 last-time 64+!
-	last-time 64@ 64>f 1n f* fdup f.
-	time-offset 64@ 64>f 1n f* 10e fmod f+ f.
-	\ I ts-delta sf@ f.
-	I ts-slack sf@ 1u f* f.
-	tick-init 1+ maxdata * 1k fm* fdup
-	I ts-reqrate sf@ f/ f.
-	I ts-rate sf@ f/ f.
-	I ts-grow sf@ 1u f* f.
-	." timing" cr
-    timestats +LOOP
-    track-timing $off o> ;
+    [: ack@ >o track-timing $@ \ do some dumps
+      bounds ?DO
+	  I ts-delta sf@ f>64 last-time 64+!
+	  last-time 64@ 64>f 1n f* fdup f.
+	  time-offset 64@ 64>f 1n f* 10e fmod f+ f.
+	  \ I ts-delta sf@ f.
+	  I ts-slack sf@ 1u f* f.
+	  tick-init 1+ maxdata * 1k fm* fdup
+	  I ts-reqrate sf@ f/ f.
+	  I ts-rate sf@ f/ f.
+	  I ts-grow sf@ 1u f* f.
+	  ." timing" cr
+      timestats +LOOP
+      track-timing $off o> ;] timing-lock c-section ;
 
-: net2o:rec-timing ( addr u -- )  track-timing $+! ;
+: net2o:rec-timing ( addr u -- )
+    [: track-timing $+! ;] timing-lock c-section ;
 
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
@@ -1786,15 +1789,15 @@ Create chunk-adder chunks-struct allot
 0 Value receiver-task
 0 Value timeout-task
 
-: do-send-chunks ( -- )
-    chunks $@ bounds ?DO
-	I chunk-context @ o = IF
-	    UNLOOP  EXIT
-	THEN
-    chunks-struct +LOOP
-    [: o chunk-adder chunk-context !
-	0 chunk-adder chunk-count !
-	chunk-adder chunks-struct chunks $+! ;]
+: do-send-chunks ( -- ) data-to-send 0= ?EXIT
+    [: chunks $@ bounds ?DO
+	  I chunk-context @ o = IF
+	      UNLOOP  EXIT
+	  THEN
+      chunks-struct +LOOP
+      o chunk-adder chunk-context !
+      0 chunk-adder chunk-count !
+      chunk-adder chunks-struct chunks $+! ;]
     resize-lock c-section
     ticker 64@ ack@ .ticks-init ;
 
@@ -1846,7 +1849,8 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     .o ." rtdelay: " rtdelay ? cr o> ;
 
 : send-chunks-async ( -- flag )
-    chunks $@ chunks+ @ chunks-struct * safe/string
+    chunks $@ dup 0= IF  nip  EXIT  THEN
+    chunks+ @ chunks-struct * safe/string
     IF
 	dup chunk-context @ >o rdrop
 	chunk-count
@@ -1854,7 +1858,8 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 	    send-a-chunk
 	ELSE
 	    drop msg( .nosend )
-	    chunks chunks+ @ chunks-struct * chunks-struct $del
+	    [: chunks chunks+ @ chunks-struct * chunks-struct $del ;]
+	    resize-lock c-section
 	    false
 	THEN
     ELSE  drop chunks+ off false  THEN ;

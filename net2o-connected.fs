@@ -445,13 +445,14 @@ also net2o-base
     end-code ;
 previous
 
+: cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend? ;
 : connected-timeout ( -- ) timeout( ." connected timeout" F cr )
     \ timeout( .expected )
-    1 ack@ .timeouts +! >next-timeout
-    packets2 @ cmd-resend? packets2 @ = IF  transfer-keepalive?  THEN ;
+    packets2 @ cmd-timeout packets2 @ = IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
+: +resend-cmd   ['] cmd-timeout  timeout-xt ! o+timeout ;
 
 : +get-time     ['] get-tick is other ;
 
