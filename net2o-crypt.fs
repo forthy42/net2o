@@ -43,7 +43,6 @@ user-o keytmp \ storage for secure temporary keys
 object class
     state2#   uvar key-assembly
     state2#   uvar ivs-assembly
-    state2#   uvar no-key \ just zeros for no key
     state#    uvar mykey    \ instance's rotating private key
     state#    uvar oldmykey \ previous rotating private key
     keysize   uvar oldpkc   \ previous pubkey after revocation
@@ -78,6 +77,8 @@ object class
     keysize uvar pkrev \ pubkey for revoking keys
     keysize uvar skrev \ secret for revoking keys
 end-class keybuf-c
+
+state2# buffer: no-key \ just zeros for no key
 
 : new-keybuf ( -- )
     keybuf-c >osize @ kalloc keybuf ! ;
@@ -134,14 +135,16 @@ init-keybuf
 
 User last-ivskey
 
-: ivs>source? ( o:map -- )  o 0= IF  default-key  EXIT  THEN
-    dest-addr 64@ dest-vaddr 64@ 64- 64dup dest-size @ n>64 64u<
-    IF	\ the flags, too, except the ack toggle bits
-	64dup 64>n addr>keys dest-ivs $@ drop over + dup last-ivskey !
-	>r dest-flags w@ addr>assembly r> state# c:tweakkey!
-	regen-ivs  EXIT  THEN  64drop
-    dest-flags 1+ c@ stateless# and
-    IF  default-key  ELSE  true !!inv-dest!!  THEN ;
+: >ivskey ( 64addr -- keyaddr )
+    64>n addr>keys dest-ivs $@ rot umin + dup last-ivskey ! ;
+: ivs-tweak ( 64addr keyaddr -- )
+    >r dest-flags w@ addr>assembly r> state# c:tweakkey! ;
+
+: ivs>source? ( o:map -- )
+    o 0=  dest-flags 1+ c@ stateless# and  or IF  default-key  EXIT  THEN
+    dest-addr 64@ dest-vaddr 64@ 64-
+    64dup dest-size @ n>64 64u>= !!inv-dest!!
+    64dup 64dup >ivskey ivs-tweak regen-ivs ;
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ .ivs>source?  ELSE  default-key  THEN

@@ -96,7 +96,8 @@ threefish-init
 ' threefish0 to c:0key ( -- )
 \G set zero key
 :noname threefish0 dup threefish#max >threefish
-    threefish-state swap threefish#max + threefish#max $E dup tf_encrypt_loop
+    threefish#max + threefish-padded threefish#max move
+    threefish-state threefish-padded threefish#max $E dup tf_encrypt_loop
     64#0 64dup tf-tweak! ; to >c:key ( addr -- )
 \G move 128 bytes from addr to the key
 :noname threefish#max threefish> ; to c:key> ( addr -- )

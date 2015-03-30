@@ -215,7 +215,7 @@ max-passphrase# buffer: passphrase
 
 : >passphrase ( addr u -- addr u )
     \G create a 512 bit hash of the passphrase
-    no-key dup state2# erase >c:key c:hash
+    no-key >c:key c:hash
     keccak-padded c:key> keccak-padded keccak#max 2/ ;
 
 : get-passphrase ( -- addr u )
