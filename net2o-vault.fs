@@ -78,15 +78,15 @@ gen-table $freeze
 
 set-current
 
+Sema cmd$lock
+
 cmd-buf-c class
     cell uvar cmd$
-    1 pthread-mutexes uvar cmd$lock
 end-class cmd-buf$
 
 cmd-buf$ new cmdbuf: code-buf$
 
 code-buf$
-cmd$lock 0 pthread_mutex_init drop
 
 ' cmd$lock to cmdlock
 :noname  cmd$ $@ ; to cmdbuf$

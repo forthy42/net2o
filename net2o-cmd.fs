@@ -259,14 +259,15 @@ code-buf
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 
+sema cmd0lock
+
 cmd-buf-c class
-    1 pthread-mutexes uvar cmd0lock
     maxdata uvar cmd0buf
 end-class cmd-buf0
 
 cmd-buf0  new cmdbuf: code0-buf
 
-code0-buf cmd0lock 0 pthread_mutex_init drop
+code0-buf
 
 :noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
 ' cmd0lock to cmdlock
