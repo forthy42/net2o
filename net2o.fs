@@ -1393,7 +1393,7 @@ reply buffer: dummy-reply
 sema timing-lock
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    timing-stat $off ;
+    s" " timing-stat $! ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate

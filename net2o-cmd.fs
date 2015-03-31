@@ -255,7 +255,7 @@ code-buf
 :noname ( -- addr ) connection .code-lock ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( addr u -- ) dup maxstring u> !!stringfit!!
+:noname ( addr u -- ) dup maxstring u> IF  ~~ true  !!stringfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 

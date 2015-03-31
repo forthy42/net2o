@@ -437,12 +437,13 @@ also net2o-base
     timeout( .keepalive )
     rewind-transfer 0= IF  .keepalive  EXIT  THEN
     expected@ tuck u>= and IF  net2o-code
-	ack +expected endwith IF  slurp  THEN  end-code  EXIT  THEN
-    net2o-code  expect-reply
-    ack net2o:genack
-       resend-all ticks lit, timeout rewind update-rtdelay
-    endwith slurp
-    end-code ;
+	  ack +expected endwith IF  slurp  THEN  end-code  EXIT  THEN
+\    net2o-code  expect-reply
+\      ack net2o:genack
+\      resend-all ticks lit, timeout rewind update-rtdelay
+\      endwith slurp
+\    end-code
+;
 previous
 
 : cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend? ;
@@ -452,7 +453,7 @@ previous
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
-: +resend-cmd   ['] cmd-timeout  timeout-xt ! o+timeout ;
+: +resend-cmd   ['] cmd-timeout        timeout-xt ! o+timeout ;
 
 : +get-time     ['] get-tick is other ;
 
