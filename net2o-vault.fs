@@ -137,7 +137,7 @@ enc-keccak
     enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
-    enc-file $@ $, vault-file 0 >crypt ;
+    enc-file $@ $, vault-file 0 >crypt enc-file $off ;
 : vsig, ( -- )
     enc>crypt2
     [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ F type
@@ -146,7 +146,7 @@ enc-keccak
     key( ." vkey: " vkey state# 85type F cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 
-: encrypt-file ( filename u key-list -- )  code-buf$
+: encrypt-file ( filename u key-list -- )  code-buf$ cmdreset
     >r enc-filename $!  pkc keysize r@ $+[]! \ encrypt for ourself
     vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!

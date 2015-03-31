@@ -143,8 +143,24 @@ debug: replace-beacon( \ reply to every beacon
 debug: kalloc( \ secure allocate
 debug: invalid( \ print invalid packets
 debug: regen( \ regenerate keys
+debug: sema(
 
 -db profile( \ )
+
+false warnings !@
+
+: c-section ( xt addr -- ) 
+    \G implement a critical section that will unlock the semaphore
+    \G even in case there's an exception within.
+    { sema }
+    sema lock
+    sema( ." sema: " sema dup hex. body> >name .name ." lock" cr )
+    catch
+    sema( ." sema: " sema dup hex. body> >name .name ." unlock" cr )
+    sema unlock
+    throw ;
+
+warnings !
 
 \ key debugging task
 

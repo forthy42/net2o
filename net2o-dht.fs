@@ -332,11 +332,11 @@ previous
 : n2o:send-revoke ( addr u -- )
     keysize <> !!keysize!! >revoke
     me>d#id >o
-    net2o-code  expect-reply
-      dht-hash $@ $, dht-id remove-me,
-      revoke-key 2dup set-revocation
-      2dup $, dht-host+ endwith
-      cookie+request
+    [: net2o-code  expect-reply
+	dht-hash $@ $, dht-id remove-me,
+	revoke-key 2dup set-revocation
+	2dup $, dht-host+ endwith
+	cookie+request ;] dht-sema c-section
     end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
 

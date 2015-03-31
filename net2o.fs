@@ -2230,6 +2230,8 @@ $20 Constant signed-val
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
 	unlink-ctx  ungroup-ctx
+	code-lock pthread_mutex_destroy drop
+	filestate-lock pthread_mutex_destroy drop
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
