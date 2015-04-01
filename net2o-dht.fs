@@ -304,8 +304,10 @@ also net2o-base
 : replace-me, ( -- )
     pkc keysize 2* $, dht-id dht-host? endwith ;
 
-: remove-me, ( -- )
-    dht-host dup >r
+User replace-host
+
+: remove-me, ( addr -- )
+    replace-host dup >r
     [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
     r> $[]off ;
@@ -318,25 +320,29 @@ previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
-: n2o:send-replace ( -- )
-    me>d#id >o [: dht-host $[]# dup  IF
-	  net2o-code   expect-reply
-	    pkc keysize 2* $, dht-id remove-me, endwith
-	    cookie+request
-	    dht-host $[]off  THEN
-    ;] dht-sema c-section o> IF  end-code|  THEN ;
+: >replace-host ( -- o )
+    me>d#id >o [: 0 dht-host !@ ;] dht-sema c-section
+    replace-host ! o o> ;
+
+: n2o:send-replace ( -- ) >replace-host drop
+    replace-host $[]# IF
+	net2o-code   expect-reply
+	  pkc keysize 2* $, dht-id
+	  remove-me, endwith
+	  cookie+request
+	end-code|
+    THEN ;
 
 : set-revocation ( addr u -- )
     dht-host $ins[]sig ;
 
 : n2o:send-revoke ( addr u -- )
-    keysize <> !!keysize!! >revoke
-    me>d#id >o
-    [: net2o-code  expect-reply
+    keysize <> !!keysize!! >replace-host >o
+    net2o-code  expect-reply
 	dht-hash $@ $, dht-id remove-me,
 	revoke-key 2dup set-revocation
 	2dup $, dht-host+ endwith
-	cookie+request ;] dht-sema c-section
+	cookie+request
     end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
 

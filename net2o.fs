@@ -573,7 +573,7 @@ ustack nest-stack
 
 : free-io ( -- )
     free-ed25519 c:free
-    io-mem @ .dispose io-mem off
+    0 io-mem !@ .dispose
     inbuf  free-buf
     tmpbuf free-buf
     outbuf free-buf ;
@@ -1724,12 +1724,10 @@ Defer punch-reply
 
 \ branchless version using floating point
 
-User <size-lb> 1 floats cell- uallot drop
-
 : send-size ( u -- n )
     min-size umax maxdata umin 1-
     [ min-size 2/ 2/ s>f 1/f ] FLiteral fm*
-    <size-lb> df!  <size-lb> 6 + c@ 4 rshift ;
+    { f^ <size-lb> }  <size-lb> 6 + c@ 4 rshift ;
 
 64Variable last-ticks
 
@@ -1991,9 +1989,9 @@ queue-class >osize @ buffer: queue-adder
 : timeout! ( -- )
     sender-task dup IF  up@ =  ELSE  0=  THEN  IF
 	next-chunk-tick 64dup 64#-1 64= 0= >r ticker 64@ 64- 64dup 64-0>= r> or
-	IF    64>n 0 max poll-timeout# min 0 ptimeout 2!
-	ELSE  64drop poll-timeout# 0 ptimeout 2!  THEN
-    ELSE  poll-timeout# 0 ptimeout 2!  THEN ;
+	IF    64#0 64max poll-timeout# n>64 64min 64>d
+	ELSE  64drop poll-timeout# 0  THEN
+    ELSE  poll-timeout# 0  THEN  ptimeout 2! ;
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
@@ -2006,8 +2004,7 @@ queue-class >osize @ buffer: queue-adder
 ;
 
 : wait-send ( -- flag )
-    clear-events  timeout!
-    pollfds pollfd# >poll ;
+    clear-events  timeout!  pollfds pollfd# >poll ;
 
 : poll-sock ( -- flag )
     eval-queue  wait-send ;
