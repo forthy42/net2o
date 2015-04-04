@@ -23,3 +23,4 @@ libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
 endif
 include_HEADERS = KeccakF-1600.h
 libkeccak_la_LIBADD = 
+libkeccak_la_LDFLAGS = -version-info ${VERSION} -no-undefined
