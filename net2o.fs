@@ -667,7 +667,7 @@ Variable routes
 
 : info>string ( addr -- addr u )
     dup ai_addr @ swap ai_addrlen l@
-    over w@ AF_INET = IF
+    over ai_family w@ AF_INET = IF
 	drop >r
 	r@ port be-uw@ sockaddr port be-w!
 	r> sin_addr be-ul@ sockaddr ipv4!
