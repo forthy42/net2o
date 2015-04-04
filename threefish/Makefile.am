@@ -19,3 +19,4 @@ lib_LTLIBRARIES = libthreefish.la
 libthreefish_la_SOURCES = threefish.c
 include_HEADERS = threefish.h
 libthreefish_la_LIBADD = 
+libthreefish_la_LDFLAGS = -version-info ${VERSION} -no-undefined
