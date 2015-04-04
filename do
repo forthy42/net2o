@@ -4,6 +4,11 @@ echo "This script builds net2o from scratch"
 
 GFORTH=gforth-0.7.9_20150221
 
+if [ $(uname -o) = Cygwin ]
+then
+    CONFOPT="--prefix=/usr"
+fi
+
 # helper functions
 
 if which sudo >/dev/null
@@ -29,7 +34,7 @@ function git-get {
 }
 function build {
     pname=$1
-    (cd $pname; ./autogen.sh && ./configure && make && sudo make install)
+    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
 }
 
 # get net2o itself

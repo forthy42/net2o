@@ -37,7 +37,6 @@ require keccak.fs
 require threefish.fs
 \ require wurstkessel.fs \ self-developped crypto for early development
 keccak-o crypto-o !
-require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
 
