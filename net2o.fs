@@ -1376,9 +1376,8 @@ reply buffer: dummy-reply
     code-map @ .dest-tail @ addr>bits ;
 
 : code+ ( n -- )
-    connection .code-map @ >o dup negate dest-tail @ and + dest-back !
-    dest-back @ dest-size @ u>= IF  dest-back off  THEN
-    o> ;
+    connection .code-map @ >o dup negate dest-tail @ and +
+    dest-size @ 1- and dest-back ! o> ;
 
 : code-update ( -- )
     connection .code-map @ >o dest-back @ dest-tail ! o> ;

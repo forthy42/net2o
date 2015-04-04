@@ -1,6 +1,6 @@
 \ distributed hash table                             16oct2013py
 
-\ Copyright (C) 2013   Bernd Paysan
+\ Copyright (C) 2013-2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -398,8 +398,6 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:" "net2o-code") (0 . 1) (0 . 1) immediate)
-     ((";]" "end-code" "end-code|") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]
