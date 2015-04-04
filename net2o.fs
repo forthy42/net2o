@@ -665,14 +665,17 @@ Variable routes
 
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
-: info>string ( addr -- addr u )
-    dup ai_addr @ swap ai_addrlen l@
-    over family w@ AF_INET = IF
-	drop >r
-	r@ port be-uw@ sockaddr port be-w!
-	r> sin_addr be-ul@ sockaddr ipv4!
-	sockaddr sock-rest
-    THEN ;
+: ipv4>ipv6 ( addr u -- addr' u' )
+    drop >r
+    r@ port be-uw@ sockaddr port be-w!
+    r> sin_addr be-ul@ sockaddr ipv4!
+    sockaddr sock-rest ;
+: ?>ipv6 ( addr u -- addr' u' )
+    over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
+: info@ ( info -- addr u )
+    dup ai_addr @ swap ai_addrlen l@ ;
+: info>string ( info -- addr u )
+    info@ ?>ipv6 ;
 
 0 Value lastaddr
 Variable lastn2oaddr
@@ -1638,11 +1641,8 @@ User outflag  outflag off
 : packet-to ( addr -- )  >dest
     out-route  outbuf dup packet-size
     send-a-packet 0< IF
-	errno EMSGSIZE = IF
-	    max-size^2 1- to max-size^2  ." pmtu/2" cr
-	ELSE
-	    -512 errno - throw
-	THEN
+	errno EMSGSIZE <> ?ior
+	max-size^2 1- to max-size^2  ." pmtu/2" cr
     THEN ;
 
 : send-code-packet ( -- ) +sendX
@@ -2190,7 +2190,7 @@ $20 Constant signed-val
 
 : route-packet ( -- ) route( ." route to: " inbuf destination $10 xtype cr )
     inbuf >r r@ get-dest route>address
-    r> dup packet-size send-a-packet drop ;
+    r> dup packet-size send-a-packet 0< ?ior ;
 
 \ dispose context
 
