@@ -21,17 +21,10 @@
 
 User buf-state cell uallot drop
 
-[IFDEF] 64bit
-    : zz>n ( zigzag -- n )
-	dup 1 rshift swap 1 and negate xor ;
-    : n>zz ( n -- zigzag )
-	dup 0< swap 2* xor ;
-[ELSE]
-    : zz>n ( 64u -- 64n )
-	64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
-    : n>zz ( 64n -- 64u )
-	64dup 64-0< >r 64dup 64+ r> n>64 64xor ;
-[THEN]
+: zz>n ( 64u -- 64n )
+    64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
+: n>zz ( 64n -- 64u )
+    64dup 64-0< n>64 64swap 64-2* 64xor ;
     
 : ps!+ ( 64n addr -- addr' )
     >r n>zz r> p!+ ;
@@ -56,9 +49,8 @@ User buf-state cell uallot drop
     r> cells string-stack $!len ;
 
 : @>$ ( addr u -- $:string addr' u' )
-    bounds p@+ [IFUNDEF] 64bit nip [THEN]
-    swap bounds ( endbuf endstring startstring )
-    >r 2dup u< !!stringfit!!
+    bounds p@+ 64>n swap bounds ( endbuf endstring startstring )
+    >r 2dup u< IF  true !!stringfit!!  THEN
     dup r> over umin tuck - >$ tuck - ;
 
 : string@ ( -- $:string )

@@ -12,6 +12,8 @@ i'm anonymous
 
 init-client
 
+"" connect-nick $!  strict-keys off
+
 !time
 
 ?nextarg [IF] net2o-host $! [THEN]

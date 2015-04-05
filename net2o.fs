@@ -514,7 +514,7 @@ m: addr>keys ( addr -- keys )
 \ generic hooks and user variables
 
 UDefer other
-UValue pollfd#  2 to pollfd#
+UValue pollfd#  0 to pollfd#
 
 Defer init-reply
 
@@ -525,8 +525,8 @@ Defer init-reply
     >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
 
 : prep-socks ( -- )  pollfds >r
-    net2o-sock         POLLIN  r> fds!+ >r
-    epiper @    fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
+    net2o-sock      POLLIN  r> fds!+ >r
+    epiper @ fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
 
 \ the policy on allocation and freeing is that both freshly allocated
 \ and to-be-freed memory is erased.  This makes sure that no unwanted
@@ -584,8 +584,8 @@ Variable net2o-tasks
 : net2o-pass ( params xt n task -- )
     dup { w^ task }
     task cell net2o-tasks $+!  pass
-    b-out op-vector @ debug-vector !
-    init-reply prep-socks alloc-io catch
+    alloc-io b-out op-vector @ debug-vector !
+    init-reply prep-socks catch
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
@@ -1993,7 +1993,7 @@ queue-class >osize @ buffer: queue-adder
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
-: >poll ( -- flag )
+: >poll ( -- flag ) \ prep-socks
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
 [ELSE]

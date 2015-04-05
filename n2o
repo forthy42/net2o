@@ -177,7 +177,7 @@ get-current net2o-cmds definitions
 
 : server ( -- )
     \G usage: n2o server
-    get-me-again init-server server-loop ;
+    get-me init-server server-loop ;
 
 \ chat mode
 
