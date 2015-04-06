@@ -8,7 +8,7 @@ require rng.fs
 
 \ dummy load for Android
 [IFDEF] android
-    s" /data/data/gnu.gforth/lib/libed25519-prims.so" open-lib drop
+    s" /data/data/gnu.gforth/lib/libed25519prims.so" open-lib drop
 [THEN]
 
 c-library ed25519_donna
