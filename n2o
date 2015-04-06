@@ -188,12 +188,22 @@ get-current net2o-cmds definitions
 
 \ script mode
 
-: script ( -- )
-    \G usage: script
-    \G script: Offer a net2o command line for client stuff
+: cmd ( -- )
+    \G usage: cmd
+    \G cmd: Offer a net2o command line for client stuff
     get-me init-client word-args
     ['] net2o-cmds >body 1 set-order
     ['] rec:word 1 set-recognizers quit ;
+
+: script ( -- )
+    \G usage: script file
+    \G script: read a file in script mode
+    ?nextarg 0= IF  help  EXIT  THEN
+    get-me init-client word-args
+    get-order n>r get-recognizers n>r
+    ['] net2o-cmds >body 1 set-order
+    ['] rec:word 1 set-recognizers included
+    nr> set-recognizers nr> set-order ;
 
 synonym bye bye
 
