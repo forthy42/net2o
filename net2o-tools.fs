@@ -1,7 +1,40 @@
 \ net2o tools
 
-: ?nextarg ( -- addr u noarg-flag )
+Defer ?nextarg
+Defer ?@nextarg
+
+: ?cmd-nextarg ( -- addr u t / f )
     argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
+: ?cmd-@nextarg ( -- addr u t / f )
+    argc @ 1 > IF
+	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
+    THEN  false ;
+
+: cmd-args ( -- )
+    ['] ?cmd-nextarg IS ?nextarg
+    ['] ?cmd-@nextarg IS ?@nextarg ;
+cmd-args
+
+: parse-name" ( -- addr u )
+    >in @ >r parse-name
+    over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
+: ?word-nextarg ( -- addr u t / f )
+    parse-name" dup 0= IF  nip nip  false  ELSE  true  THEN ;
+: ?word-@nextarg ( -- addr u t / f )
+    >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
+    over c@ '@' = IF  rdrop true  EXIT  THEN
+    r> >in ! 2drop false ;
+
+: word-args ( -- )
+    ['] ?word-nextarg IS ?nextarg
+    ['] ?word-@nextarg IS ?@nextarg ;
+
+: arg-loop { xt -- }
+    begin  ?nextarg  while  xt execute  repeat ;
+: @arg-loop { xt -- }
+    begin  ?@nextarg  while  xt execute  repeat ;
+
+\ string
 
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
@@ -12,6 +45,8 @@
         /string dup r> u< IF  + 1+ -1  THEN
     THEN ;
 [THEN]
+
+\ logic memory modifiers
 
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;
 : xor!  ( x addr -- )   >r r@ @ xor  r> ! ;

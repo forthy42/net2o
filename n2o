@@ -37,14 +37,6 @@ Variable key-readin
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
     cell+ out-key ;
-: arg-loop { xt -- }
-    begin  ?nextarg  while  xt execute  repeat ;
-: ?@nextarg ( -- addr u noarg-flag )
-    argc @ 1 > IF
-	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
-    THEN  false ;
-: @arg-loop { xt -- }
-    begin  ?@nextarg  while  xt execute  repeat ;
 
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
@@ -85,7 +77,7 @@ get-current also net2o-cmds definitions
 set-current
 
 : next-cmd ( -- )
-    next-arg ['] net2o-cmds >body search-wordlist
+    ?nextarg 0= IF  help  EXIT  THEN  ['] net2o-cmds >body search-wordlist
     IF  execute  ELSE  help  THEN ;
 
 get-current net2o-cmds definitions
@@ -94,7 +86,7 @@ get-current net2o-cmds definitions
     \G usage: n2o keyin file
     \G keyin: read a .n2o key file in
     get-me keys key>default
-    next-arg key-readin $slurp-file
+    ?nextarg 0= ?EXIT key-readin $slurp-file
     key-readin $@ do-key
     save-pubkeys ;
 : keyout ( -- )
@@ -104,7 +96,7 @@ get-current net2o-cmds definitions
 : keygen ( -- )
     \G usage: n2o keygen nick
     +newphrase key>default
-    next-arg 2dup key#user +gen-keys .rsk
+    ?nextarg 0= ?EXIT  2dup key#user +gen-keys .rsk
     read-keys .keys out-me ;
 : keylist ( -- )
     \G usage: n2o keylist
@@ -182,8 +174,8 @@ get-current net2o-cmds definitions
 \ chat mode
 
 : -root ( -- )
-    \G usage: n2o -root <address[:port]> <next-cmd> ;
-    next-arg ':' $split dup IF  s>number drop to net2o-port
+    \G usage: n2o -root <address[:port]> <next-cmd>
+    ?nextarg 0= ?EXIT ':' $split dup IF  s>number drop to net2o-port
     ELSE  2drop  THEN  net2o-host $!
     next-cmd ;
 
@@ -193,6 +185,17 @@ get-current net2o-cmds definitions
     ?@nextarg IF
 	." press key to connect to " 2dup type key drop
 	$A $A 2swap nick-connect do-chat c:disconnect  THEN ;
+
+\ script mode
+
+: script ( -- )
+    \G usage: script
+    \G script: Offer a net2o command line for client stuff
+    get-me init-client word-args
+    ['] net2o-cmds >body 1 set-order
+    ['] rec:word 1 set-recognizers quit ;
+
+synonym bye bye
 
 set-current
 

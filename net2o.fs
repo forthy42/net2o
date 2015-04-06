@@ -2353,8 +2353,10 @@ Variable beacons \ destinations to send beacons to
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ;
 
-: init-client ( -- )  init-cache 0 init-rest ;
-: init-server ( -- )  net2o-port init-rest ;
+Variable initialized
+
+: init-client ( -- )  true initialized !@ 0= IF  init-cache 0 init-rest  THEN ;
+: init-server ( -- )  true initialized !@ 0= IF  net2o-port init-rest  THEN ;
 
 \ connection cookies
 
