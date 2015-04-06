@@ -590,18 +590,11 @@ Variable net2o-tasks
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
-event: ->kill:n2o ( -- )  -1 throw ;
 : net2o-kills ( -- )
-    net2o-tasks $@ bounds ?DO
-	I @ <event ->kill event>
-    cell +LOOP  net2o-tasks $off
-    ." Killed everything" cr 10 ms ." done waiting" cr ;
-
-true value net2o-running
+    net2o-tasks $@ bounds ?DO  I @ kill  cell +LOOP  net2o-tasks $off ;
 
 0 warnings !@
-: net2o-bye false to net2o-running ['] noop is kill-task
-    bye ;
+: bye  net2o-kills  1 ms bye ;
 warnings !
 
 \ net2o header structure
@@ -2308,7 +2301,7 @@ Variable beacons \ destinations to send beacons to
 
 : catch-loop { xt -- flag }
     BEGIN   nothrow xt catch dup -1 = ?EXIT
-	?int dup  WHILE  xt .loop-err  net2o-running 0=  UNTIL  THEN
+	?int dup  WHILE  xt .loop-err  REPEAT
     drop false ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT

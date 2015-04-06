@@ -3,9 +3,9 @@
 require ../client-tests.fs
 require ../test-keys.fs \ we want the test keys - never use this in production!
 
-+db stat(
++db stat( \ )
 +debug
-+db dht(
++db dht( \ )
 
 "anonymous" >key \ get our anonymous key
 
