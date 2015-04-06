@@ -368,9 +368,9 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     resend0 @ IF
 	\ ." Resend to 0" cr
 	cmd0!
-	[: resend0 $@ >r cmdbuf$ r@ umin move
+	[: cmdreset resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
-	  cmdbuf$ r> umin 64#0 send-cmd 1 packets2 +! ;]
+	  cmdbuf$ rng64 send-cmd 1 packets2 +! ;]
 	cmdlock c-section
     THEN ;
 
