@@ -46,6 +46,9 @@ cmd-args
     THEN ;
 [THEN]
 
+: -scan ( addr u char -- addr u' ) >r
+    BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
+
 \ logic memory modifiers
 
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;

@@ -169,7 +169,7 @@ get-current net2o-cmds definitions
 
 : server ( -- )
     \G usage: n2o server
-    get-me init-server server-loop ;
+    get-me init-server announce-me server-loop ;
 
 \ chat mode
 
@@ -204,6 +204,19 @@ get-current net2o-cmds definitions
     ['] net2o-cmds >body 1 set-order
     ['] rec:word 1 set-recognizers included
     nr> set-recognizers nr> set-order ;
+
+\ file copy
+
+: get ( -- )
+    \G usage: get @user <file1> .. <filen>
+    \G get: get files into current directory
+    get-me init-client
+    ?@nextarg IF
+	$A $E 2swap nick-connect ." connected" cr
+	net2o-code expect-reply
+	[: 2dup 2dup '/' -scan nip /string n2o:copy ;] arg-loop
+	end-code|
+	c:disconnect  THEN ;
 
 synonym bye bye
 
