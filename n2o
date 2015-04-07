@@ -179,6 +179,10 @@ get-current net2o-cmds definitions
     \G usage: n2o server
     get-me init-server announce-me server-loop ;
 
+: rootserver ( -- )
+    \G usage: n2o rootserver
+    strict-keys off get-me init-server server-loop ;
+
 \ chat mode
 
 : -root ( -- )
