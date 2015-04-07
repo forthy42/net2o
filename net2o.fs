@@ -2143,7 +2143,7 @@ $20 Constant signed-val
     validated off \ we have no validated encryption
     stateless# outflag !  inbuf packet-data queue-command ;
 
-: handle-data ( addr -- )  parent @ >o
+: handle-data ( addr -- )  parent @ >o  o to connection
     msg( ." Handle data to addr: " dup hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
