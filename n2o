@@ -111,16 +111,16 @@ get-current net2o-cmds definitions
       ke-pk $@ keysize umin .85info space ke-nick $@ type cr o> ;] #map ;
 
 \ encryption subcommands
-  
-: +threefish ( -- )
-    \G usage: n2o +threefish <next-cmd>
+
+: -threefish ( -- )
+    \G usage: n2o -threefish <next-cmd>
     enc-threefish next-cmd ;
-: +keccak ( -- )
-    \G usage: n2o +keccak <next-cmd>
+: -keccak ( -- )
+    \G usage: n2o -keccak <next-cmd>
     enc-keccak next-cmd ;
 
 : enc ( -- )
-    \G usage: n2o enc @user1 .. @usern files
+    \G usage: n2o enc @user1 .. @usern file1 .. filen
     get-me args>keylist
     [: key-list encrypt-file ;] arg-loop ;
 : dec ( -- )
@@ -213,7 +213,7 @@ get-current net2o-cmds definitions
 \ file copy
 
 : get ( -- )
-    \G usage: get @user <file1> .. <filen>
+    \G usage: get @user file1 .. filen
     \G get: get files into current directory
     get-me init-client
     ?@nextarg IF
