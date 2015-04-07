@@ -62,6 +62,12 @@ $20 value hash-size#
 
 Vocabulary net2o-cmds
 
+: do-net2o-cmds ( xt -- )
+    get-order n>r get-recognizers n>r
+    ['] net2o-cmds >body 1 set-order
+    ['] rec:word 1 set-recognizers catch
+    nr> set-recognizers nr> set-order throw ;
+
 get-current also net2o-cmds definitions
 
 : help ( -- )
@@ -133,7 +139,7 @@ get-current net2o-cmds definitions
 
 : -512 ( -- )
     \G usage: n2o -512 <next-cmd>
-    \G +512: set hash output to 256 bits (default)
+    \G +512: set hash output to 512 bits
     $40 to hash-size# next-cmd ;
 
 : hash ( -- )
@@ -195,19 +201,14 @@ get-current net2o-cmds definitions
 : cmd ( -- )
     \G usage: cmd
     \G cmd: Offer a net2o command line for client stuff
-    get-me init-client word-args
-    ['] net2o-cmds >body 1 set-order
-    ['] rec:word 1 set-recognizers quit ;
+    get-me ." net2o interactive shell, type 'bye' to quit"
+    init-client word-args ['] quit do-net2o-cmds ;
 
 : script ( -- )
     \G usage: script file
     \G script: read a file in script mode
     ?nextarg 0= IF  help  EXIT  THEN
-    get-me init-client word-args
-    get-order n>r get-recognizers n>r
-    ['] net2o-cmds >body 1 set-order
-    ['] rec:word 1 set-recognizers included
-    nr> set-recognizers nr> set-order ;
+    get-me init-client word-args ['] included do-net2o-cmds ;
 
 \ file copy
 
