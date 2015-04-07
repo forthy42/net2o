@@ -2448,11 +2448,13 @@ require net2o-msg.fs
       cookie+request
     end-code| -setip n2o:send-replace ;
 
+Variable dhtnick "net2o-dhtroot" dhtnick $!
+
 : announce-me ( -- )
-    $8 $8 "" ins-ip dup add-beacon c:connect replace-me do-disconnect ;
+    $8 $8 dhtnick $@ ins-ip dup add-beacon c:connect replace-me do-disconnect ;
 
 : nick-lookup ( addr u -- )
-    $A $E "" ins-ip c:connect
+    $A $E dhtnick $@ ins-ip c:connect
     2dup c:addme-fetch-host
     nick-key >o ke-pk $@
     BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!

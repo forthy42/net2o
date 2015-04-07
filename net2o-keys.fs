@@ -195,7 +195,7 @@ magenta >bg white >fg or bold or ,
 	THEN  THEN
     2dup key-exist? 0= IF
 	strict-keys @ !!unknown-key!!
-	." Unknown key "  .nnb cr
+	." Unknown key " 85type cr
     ELSE
 	.key#
     THEN ; IS check-key

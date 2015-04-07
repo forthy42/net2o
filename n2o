@@ -187,6 +187,10 @@ get-current net2o-cmds definitions
     ELSE  2drop  THEN  net2o-host $!
     next-cmd ;
 
+: -rootnick ( -- )
+    \G usage: n2o -rootnick <nick> <next-cmd>
+    ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
+
 : chat ( -- )
     \G usage: chat @user
     get-me init-client announce-me
