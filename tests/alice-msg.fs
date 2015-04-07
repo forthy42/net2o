@@ -6,6 +6,8 @@ require ../client-tests.fs
 script? [IF] +debug %droprate [THEN]
 require ../test-keys.fs \ we want the test keys - never use this in production!
 
+"test" dhtnick $!
+
 i'm alice
 
 init-client

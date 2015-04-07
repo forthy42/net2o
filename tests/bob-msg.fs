@@ -6,6 +6,8 @@ require ../test-keys.fs \ we want the test keys - never use this in production!
 +db stat( \ )
 script? [IF] +debug %droprate [THEN]
 
+"test" dhtnick $!
+
 i'm bob
 
 init-client
