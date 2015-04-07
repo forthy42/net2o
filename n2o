@@ -177,10 +177,6 @@ get-current net2o-cmds definitions
     \G usage: n2o server
     get-me init-server announce-me server-loop ;
 
-: peer ( -- )
-    \G usage: n2o server
-    get-me init-client announce-me server-loop ;
-
 \ chat mode
 
 : -root ( -- )
