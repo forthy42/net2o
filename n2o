@@ -103,7 +103,9 @@ get-current net2o-cmds definitions
     \G usage: n2o keygen nick
     +newphrase key>default
     ?nextarg 0= ?EXIT  2dup key#user +gen-keys .rsk
-    read-keys .keys out-me ;
+    read-keys .keys
+    secret-keys# 1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key
+    out-me ;
 : keylist ( -- )
     \G usage: n2o keylist
     get-me
