@@ -166,7 +166,7 @@ event: ->throw dup DoError throw ;
 
 \ lookup for other users
 
-: nat:connect ( addr u -- )  $A $E  2swap nick-connect
+: nat:connect ( addr u -- )  $A $E nick-connect
     ." Connected!" cr ;
 
 \ some more helpers

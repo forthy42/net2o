@@ -2476,12 +2476,12 @@ require net2o-msg.fs
 
 : n2o:lookup ( addr u -- )
     2dup nick-id { id }
-    id .dht-host $[]# 0= IF  2dup nick-lookup  THEN
+    id .dht-host $[]# 0= IF  2dup nick-lookup  2dup nick-id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
     id dup .dht-host ['] insert-host $[]map drop ;
 
-: nick-connect ( cmdlen datalen addr u -- )
-    n2o:lookup
+: nick-connect ( addr u cmdlen datalen -- )
+    2>r n2o:lookup 2r>
     cmd0( ." trying to connect to: " return-addr $10 xtype cr )
     n2o:connect +flow-control +resend ;
 

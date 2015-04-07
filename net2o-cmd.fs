@@ -223,6 +223,7 @@ Variable throwcount
     cmd( dest-flags .dest-addr 64@ $64. 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
+    trace( ." cmd loop done" cr )
     dup IF   1 throwcount +!
 	[: ." do-cmd-loop: " dup . .exe cr ;] $err
 	dup DoError  nothrow

@@ -171,6 +171,10 @@ get-current net2o-cmds definitions
     \G usage: n2o server
     get-me init-server announce-me server-loop ;
 
+: peer ( -- )
+    \G usage: n2o server
+    get-me init-client announce-me server-loop ;
+
 \ chat mode
 
 : -root ( -- )
@@ -184,7 +188,7 @@ get-current net2o-cmds definitions
     get-me init-client announce-me
     ?@nextarg IF
 	." press key to connect to " 2dup type key drop
-	$A $A 2swap nick-connect do-chat c:disconnect  THEN ;
+	$A $A nick-connect do-chat c:disconnect  THEN ;
 
 \ script mode
 
@@ -212,10 +216,10 @@ get-current net2o-cmds definitions
     \G get: get files into current directory
     get-me init-client
     ?@nextarg IF
-	$A $E 2swap nick-connect ." connected" cr
+	$A $E nick-connect ." connected" cr
 	net2o-code expect-reply
 	[: 2dup 2dup '/' -scan nip /string n2o:copy ;] arg-loop
-	end-code|
+	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
 synonym bye bye

@@ -93,7 +93,7 @@ net2o-base
 \ nat traversal functions
 
 +net2o: punch ( $:string -- ) \ punch NAT traversal hole
-    $> net2o:punch ;
+    $> buf-state 2@ 2>r net2o:punch 2r> buf-state 2! ;
 +net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
     $> punch-load $! ;
 +net2o: punch-done ( -- ) \ punch received
@@ -140,7 +140,7 @@ net2o-base
       push-cmd ;]  IS expect-reply? ;
 +net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
-      reply-key, gen-punchload gen-punch time-offset! context ]tmpnest
+      reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 
 gen-table $freeze
