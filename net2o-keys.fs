@@ -331,10 +331,10 @@ set-current previous previous
 
 : write@pos-file ( addr u 64pos fd -- ) >r
     64>d r@ reposition-file throw
-    r@ write-file throw  r> flush-file throw ;
+    r@ write-file throw r> flush-file throw ;
 
 : append-file ( addr u fd -- ) >r
-    r@ file-size throw r> write@pos-file ;
+    r@ file-size throw d>64 r> write@pos-file ;
 
 : key>sfile ( -- )
     keypack keypack-all# ?key-sfd append-file ;
