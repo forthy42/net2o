@@ -1,0 +1,1011 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+%\usetheme{Warsaw}
+% or ...
+\usetheme{Singapore}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=169
+\use_default_options false
+\maintain_unincluded_children false
+\language ngerman
+\language_package auto
+\inputencoding utf8x
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Stichwortverzeichnis
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-1.3ex
+\backslash
+lower2.6ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.8ex
+\end_layout
+
+\end_inset
+
+: Command Language
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+net2o cmd
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subtitle
+Eine universelle Sprache für strukturierte Daten und RPC
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+11.
+ April, Forth--Tagung 2015, Hannover
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Übersicht
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Kommunikation im Forth--Stil
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Anforderungen für sichere Kommunikation (sicher wie in 
+\begin_inset Quotes gld
+\end_inset
+
+keine Exploits durch Fehlinterpretation
+\begin_inset Quotes grd
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+Extrem einfacher Interpreter
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Erweiterbar, aber der Empfänger muss die Erweiterungen erlauben
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Universell, also nur ein Interpreter, den man auditen und verifizieren muss
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die triviale Einfachheit macht es schwierig, das zu erklären
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+Object Oriented Forth Code als Data
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Grundlagen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Fünf Datentypen: Integer (64 Bit mit und ohne Vorzeichen), Flag, String
+ (generisches Byte--Array), IEEE float, Objekte.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Instruktionen und Daten werden wie Protobuf
+\begin_inset CommandInset citation
+LatexCommand cite
+key "protobuf"
+
+\end_inset
+
+ codiert (7 bits pro Byte, MSB=1 bedeutet 
+\begin_inset Quotes gld
+\end_inset
+
+Daten gehen weiter
+\begin_inset Quotes grd
+\end_inset
+
+, höchstwertiger Teil zuerst)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Vier Stacks: integer, float, objects, strings
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+endwith
+\family default
+ und 
+\family typewriter
+endcmd
+\family default
+ um Objekt--Message--Blöcke und Kommandos zu beenden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+oswap
+\family default
+ um das aktuelle Objekt für's Einfügen in das Vater--Objekt auf den Objekt--Stac
+k zu legen
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\family typewriter
+words
+\family default
+ für Reflections (die Wörter werden mit Token--Nummer, Identifier und Stack--Eff
+ekt gelistet, damit automatische Bindings erzeugbar sind)
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Warum binär codieren?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Schneller und einfacher zu parsen (einfacher bedeutet kleinere Angriffsfläche)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Es gibt immer noch die Möglichkeit, Kommandos über ein Frontend als Klartext
+ einzugeben
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der Detokenizer für's Debuggen ist auch sehr einfach
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Der objekt--orientierte Ansatz macht das Schreiben von Anwendungsspezifischer
+ Logik sehr einfach
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Warum eine Programmiersprache als Daten?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Lemma: jede glue logic wird irgendwann Turing--complete
+\end_layout
+
+\begin_layout Itemize
+Implementiere nur das, was du brauchst --- aber du solltest nicht mehr als
+ einen generischen Interpreter implementieren
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die typische Vorgehensweise für RPC: Das ganze Objekt serialisieren (mit
+ Unterobjekten), über's Netz senden, und eine Funktion auf das Objekt anwenden
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Das Konzept von Net2o (basiert auf ONF): Halte das Objekt synchron und sende
+ nur die Änderungen --- mit einfachen Settern und Gettern, und was man sonst
+ für Funktionen braucht
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Damit kann man viele Aufrufe auf einmal übertragen, und reduziert die Latenz
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Sicherheit
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Lemma: jedes hinreichend komplexe Format kann missbraucht werden
+\end_layout
+
+\begin_layout Standard
+Also beschränkt man sich auf ein ganz einfaches Format
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status open
+
+\begin_layout Plain Layout
+Interpreter
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+: cmd@ ( -- u )
+\end_layout
+
+\begin_layout LyX-Code
+  buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
+\end_layout
+
+\begin_layout LyX-Code
+: n>cmd ( n -- addr )  cells >r
+\end_layout
+
+\begin_layout LyX-Code
+  o IF   token-table  ELSE  setup-table  THEN
+\end_layout
+
+\begin_layout LyX-Code
+  $@ r@ u<= IF  net2o-crash  THEN  r> + ;
+\end_layout
+
+\begin_layout LyX-Code
+: cmd-dispatch ( addr u -- addr' u' )  buf-state 2!
+\end_layout
+
+\begin_layout LyX-Code
+  cmd@ n>cmd @ ?dup IF  execute  ELSE  net2o-crash  THEN
+\end_layout
+
+\begin_layout LyX-Code
+  buf-state 2@ ;
+\end_layout
+
+\begin_layout LyX-Code
+: cmd-loop ( addr u -- )
+\end_layout
+
+\begin_layout LyX-Code
+  BEGIN  cmd-dispatch dup 0<= UNTIL  2drop ;
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+Ein paar Beispiele
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Dateien lesen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+lese drei Dateien
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+0 lit, file-id "net2o.fs" $, 0 lit,
+\end_layout
+
+\begin_layout LyX-Code
+open-file get-size get-stat endwith
+\end_layout
+
+\begin_layout LyX-Code
+1 lit, file-id "data/2011-05-13_11-26-57-small.jpg" $, 0 lit,
+\end_layout
+
+\begin_layout LyX-Code
+open-file get-size get-stat endwith
+\end_layout
+
+\begin_layout LyX-Code
+2 lit, file-id "data/2011-05-20_17-01-12-small.jpg" $, 0 lit,
+\end_layout
+
+\begin_layout LyX-Code
+open-file get-size get-stat endwith
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Dateien lesen: Antwort
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+lese drei Dateien: Antwort
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+0 lit, file-id 12B9A lit, set-size
+\end_layout
+
+\begin_layout LyX-Code
+    2014-8-24T13:52:27.220Z lit, 1A4 lit, set-stat endwith
+\end_layout
+
+\begin_layout LyX-Code
+1 lit, file-id 9C65C lit, set-size
+\end_layout
+
+\begin_layout LyX-Code
+    2014-7-27T00:34:15.309Z lit, 1A4 lit, set-stat endwith
+\end_layout
+
+\begin_layout LyX-Code
+2 lit, file-id 9D240 lit, set-size
+\end_layout
+
+\begin_layout LyX-Code
+    2014-7-27T00:34:15.427Z lit, 1A4 lit, set-stat endwith
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Messages
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+messages
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+msg [: msg-start "Hi Bernd" $, msg-text ;]+
+\end_layout
+
+\begin_layout LyX-Code
+    "<pubkey>"+"<date-span>"+"<signature>" $,
+\end_layout
+
+\begin_layout LyX-Code
+    nestsig endwith
+\end_layout
+
+\begin_layout LyX-Code
+"<reply-token>" push-$ push' nest 0 ok?
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Structured Text a la HTML
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout ExampleBlock
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+HTML--like structured text
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout LyX-Code
+body
+\end_layout
+
+\begin_layout LyX-Code
+   p "Some text with " text
+\end_layout
+
+\begin_layout LyX-Code
+       bold "bold" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+       " markup" text
+\end_layout
+
+\begin_layout LyX-Code
+   oswap add
+\end_layout
+
+\begin_layout LyX-Code
+   li
+\end_layout
+
+\begin_layout LyX-Code
+       ul "a bullet point" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+       ul "another bullet point" text oswap add
+\end_layout
+
+\begin_layout LyX-Code
+   oswap add
+\end_layout
+
+\begin_layout LyX-Code
+oswap add
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+Literatur&Links
+\end_layout
+
+\begin_layout Frame
+
+\lang english
+\begin_inset Argument 3
+status open
+
+\begin_layout Plain Layout
+
+\lang english
+allowframebreaks
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+
+\lang english
+Literatur&Links
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Bibliography
+
+\lang english
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o source repository und Wiki 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+
+\lang english
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "hse238"
+
+\end_inset
+
+Google Developers
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\emph on
+Protocol Buffers
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://developers.google.com/protocol-buffers/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\end_body
+\end_document
