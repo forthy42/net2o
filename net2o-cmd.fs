@@ -21,9 +21,9 @@
 
 User buf-state cell uallot drop
 
-: zz>n ( 64u -- 64n )
+: zz>n ( 64zz -- 64n )
     64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
-: n>zz ( 64n -- 64u )
+: n>zz ( 64n -- 64zz )
     64dup 64-0< n>64 64swap 64-2* 64xor ;
     
 : ps!+ ( 64n addr -- addr' )

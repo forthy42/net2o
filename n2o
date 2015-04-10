@@ -196,7 +196,7 @@ get-current net2o-cmds definitions
     ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
 
 : chat ( -- )
-    \G usage: chat @user
+    \G usage: n2o chat @user
     get-me init-client announce-me
     ?@nextarg IF
 	." press key to connect to " 2dup type key drop
@@ -205,13 +205,13 @@ get-current net2o-cmds definitions
 \ script mode
 
 : cmd ( -- )
-    \G usage: cmd
+    \G usage: n2o cmd
     \G cmd: Offer a net2o command line for client stuff
     get-me ." net2o interactive shell, type 'bye' to quit"
     init-client word-args ['] quit do-net2o-cmds ;
 
 : script ( -- )
-    \G usage: script file
+    \G usage: n2o script file
     \G script: read a file in script mode
     ?nextarg 0= IF  help  EXIT  THEN
     get-me init-client word-args ['] included do-net2o-cmds ;
@@ -219,7 +219,7 @@ get-current net2o-cmds definitions
 \ file copy
 
 : get ( -- )
-    \G usage: get @user file1 .. filen
+    \G usage: n2o get @user file1 .. filen
     \G get: get files into current directory
     get-me init-client
     ?@nextarg IF
