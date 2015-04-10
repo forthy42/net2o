@@ -369,7 +369,7 @@ keysize 2* Constant pkrk#
     now>never
     key:code
       sign[
-      rot lit, keytype $, keynick
+      rot ulit, keytype $, keynick
       pkc pkrk# ]pk+sign
       skc keysize $, privkey
     end:key ;

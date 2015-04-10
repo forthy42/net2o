@@ -179,7 +179,7 @@ init-keybuf
     crypt-pw-setup  pw-diffuse  key-cksum# - 0 c:encrypt+auth ;
 
 : decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
-    crypt-key-init   r> pw-diffuse  key-cksum# - 2dup 0 c:decrypt+auth ;
+    crypt-key-init   r> pw-diffuse key-cksum# - 2dup 0 c:decrypt+auth ;
 
 \ encrypt with own key
 
