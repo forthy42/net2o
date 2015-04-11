@@ -219,12 +219,13 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : today? ( day -- flag ) ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
+: .2 ( n -- ) s>d <# # # #> type ;
 : .day ( seconds -- fraction/day ) 86400e f/ fsplit
     dup today? IF  drop  EXIT  THEN
     unix-day0 + day2ymd
-    rot 0 .r '-' emit swap 0 .r '-' emit 0 .r 'T' emit ;
+    rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit 0 .r ':' emit 60e f* fsplit 0 .r ':' emit
+    24e f* fsplit .2 ':' emit 60e f* fsplit .2 ':' emit
     60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
 
 : .ticks ( ticks -- )

@@ -120,7 +120,7 @@ keccak-init
     { tag } @keccak -rot KeccakEncryptLoop
     keccak*
     >r keccak-checksums keccak#cks keccak>
-    keccak-checksums tag 7 and 4 lshift + 128@ r> 128!
+    keccak-checksums tag 7 and 4 lshift + r> $10 move
 ; to c:encrypt+auth ( addr u tag -- )
 :noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check

@@ -34,7 +34,7 @@ function git-get {
 }
 function build {
     pname=$1
-    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
+    (cd $pname; mkdir -p m4; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
 }
 
 # get net2o itself

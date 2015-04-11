@@ -49,7 +49,7 @@ User buf-state cell uallot drop
     r> cells string-stack $!len ;
 
 : @>$ ( addr u -- $:string addr' u' )
-    bounds p@+ 64>n swap bounds ( endbuf endstring startstring )
+    bounds p@+ 64n-swap 64>n bounds ( endbuf endstring startstring )
     >r 2dup u< IF  true !!stringfit!!  THEN
     dup r> over umin tuck - >$ tuck - ;
 
