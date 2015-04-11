@@ -18,7 +18,7 @@ c-library keccak
 	s" ./keccak" add-libpath
     [THEN]
     \c #include <KeccakF-1600.h>
-    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, unsigned int n)
+    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n)
     \c {
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;
@@ -28,7 +28,7 @@ c-library keccak
     \c   }
     \c   return data;
     \c }
-    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, unsigned int n)
+    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, int n)
     \c {
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;

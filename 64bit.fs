@@ -162,17 +162,17 @@ cell 8 = [IF]
 	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
     : 128@ ( addr -- x1..x4 )
 	>r
-	r@ 3 cells + @
-	r@ 2 cells + @
+	r@ @
 	r@ cell+ @
-	r> @ ;
+	r@ 2 cells + @
+	r> 3 cells + @ ;
     : 128= ( x1..y4 y1..y4 -- flag )  128xor  or or or 0= ;
     : 128! ( x1..x4 addr -- )
 	>r
-	r@ !
-	r@ cell+ !
+	r@ 3 cells + !
 	r@ 2 cells + !
-	r> 3 cells + ! ;
+	r@ cell+ !
+	r> ! ;
     ' stop-dns alias stop-64ns
     : compile-pushlocal-64 ( a-addr -- ) ( run-time: w1 w2 -- )
 	locals-size @ alignlp-w cell+ cell+ dup locals-size !
