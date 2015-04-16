@@ -51,12 +51,22 @@ Variable key-list
     @arg-loop ;
 : .85info ( addr u -- )
     info-color attr! 85type default-color attr! ;
+: .85warn ( addr u -- )
+    warn-color attr! 85type default-color attr! ;
 
 $20 value hash-size#
 
 : hash-file ( addr u -- hash u' )
     c:0key slurp-file 2dup c:hash drop free throw pad c:key>
     pad hash-size# ;
+
+: do-keyin ( addr u -- )  key>default
+    key-readin $slurp-file key-readin $@ do-key save-pubkeys ;
+
+: ?dhtroot ( -- )
+    "net2o-dhtroot" nick-key 0= IF
+	"net2o-dhtroot.n2o" do-keyin
+    THEN ;
 
 \ commands for the command line user interface
 
@@ -91,10 +101,7 @@ get-current net2o-cmds definitions
 : keyin ( -- )
     \G usage: n2o keyin file
     \G keyin: read a .n2o key file in
-    get-me keys key>default
-    ?nextarg 0= ?EXIT key-readin $slurp-file
-    key-readin $@ do-key
-    save-pubkeys ;
+    get-me ?nextarg IF  do-keyin  THEN ;
 : keyout ( -- )
     \G usage: n2o keyout [@user1 .. @usern]
     \G keyout: output pubkey of your identity
@@ -105,12 +112,14 @@ get-current net2o-cmds definitions
     ?nextarg 0= ?EXIT  2dup key#user +gen-keys .rsk
     read-keys .keys
     secret-keys# 1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key
-    out-me ;
+    out-me ?dhtroot ;
 : keylist ( -- )
     \G usage: n2o keylist
     get-me
     key-table [: cell+ $@ drop cell+ >o
-      ke-pk $@ keysize umin .85info space ke-nick $@ type cr o> ;] #map ;
+      ke-pk $@ keysize umin
+      ke-sk sec@ nip IF  .85warn  ELSE  .85info  THEN
+      space ke-nick $@ type cr o> ;] #map ;
 
 \ encryption subcommands
 
