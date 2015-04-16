@@ -96,6 +96,11 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
     '"' parse base85>$ ;
 comp: execute postpone SLiteral ;
 
+: .85info ( addr u -- )
+    info-color attr! 85type default-color attr! ;
+: .85warn ( addr u -- )
+    warn-color attr! 85type default-color attr! ;
+
 \ debugging switches
 
 debug: timing(

@@ -49,10 +49,6 @@ Variable key-list
 : args>keylist ( -- )
     [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
     @arg-loop ;
-: .85info ( addr u -- )
-    info-color attr! 85type default-color attr! ;
-: .85warn ( addr u -- )
-    warn-color attr! 85type default-color attr! ;
 
 $20 value hash-size#
 

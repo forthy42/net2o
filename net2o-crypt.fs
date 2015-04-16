@@ -330,15 +330,15 @@ $60 Constant rndkey#
     sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
     sk1 pkrev skc pkc ed-keypairx \ generate real keypair
-    genkey( ." gen key: " skc keysize xtype cr )
+    genkey( ." gen key: " skc keysize .85warn pkc keysize .85info cr )
     >sksig ;
 : check-rev? ( -- flag )
     \g check generated key if revocation is possible
     skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
 : gen-tmpkeys ( -- pk u ) tskc tpkc ed-keypair tpkc keysize
-    genkey( ." tmp key: " tskc keysize 85type space tpkc keysize 85type cr ) ;
+    genkey( ." tmp key: " tskc keysize .85warn tpkc keysize .85info cr ) ;
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
-    genkey( ." tmpskey: " stskc keysize 85type space stpkc keysize 85type cr ) ;
+    genkey( ." tmpskey: " stskc keysize .85warn stpkc keysize .85info cr ) ;
 
 \ setting of keys
 
