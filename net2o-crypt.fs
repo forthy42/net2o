@@ -365,7 +365,8 @@ Defer search-key \ search if that is one of our pubkeys
     2dup mpubkey $! ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
-    swap keypad ed-dh
+    trace( ." gen tmpkey: " over keysize 85type space dup keysize 85type space )
+    swap keypad ed-dh trace( 2dup 85type cr )
     o IF  do-keypad sec!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
 
