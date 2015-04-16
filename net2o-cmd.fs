@@ -468,7 +468,8 @@ previous
 
 : cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
-    cmd> 2dup tmpkey@ keysize umin encrypt$ ;
+    cmd> 2dup tmpkey@ keysize umin
+    trace( ." tmpnest encrypt with: " 2dup 85type F cr ) encrypt$ ;
 
 : do-nest ( addr u flag -- )
     validated @ >r  validated or!  
@@ -478,7 +479,7 @@ previous
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
 
 : cmdtmpnest ( addr u -- )
-    $>align tmpkey@ drop keysize decrypt$
+    $>align tmpkey@ drop keysize trace( ~~ ." try tmpnest with key: " 2dup 85type F cr ) decrypt$
     IF  tmp-crypt-val do-nest  ELSE
 	trace( ." tmpnest failed" F cr ) un-cmd  THEN ;
 
