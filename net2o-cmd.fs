@@ -57,7 +57,7 @@ User buf-state cell uallot drop
     buf-state 2@ @>$ buf-state 2! ;
 
 : @>$noerr ( addr u -- $:string addr' u' )
-    bounds p@+ 64>n swap bounds ( endbuf endstring startstring )
+    bounds p@+ 64n-swap 64>n bounds ( endbuf endstring startstring )
     >r over umin dup r> over umin tuck - >$ tuck - ;
 
 : string@noerr ( -- $:string )
@@ -75,7 +75,6 @@ User buf-state cell uallot drop
 	.\" 85\" " 85type
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
-: n2o.sig ( $:string -- )  cr ." sig " $> n2o:$. ."  string, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
@@ -177,8 +176,7 @@ drop
 	4 of  pf@ f. ." float, " endof
 	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
-	10 of  string@noerr  n2o.sig  endof
-	$10 of ." push' " p@ .net2o-name  endof
+	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
 
