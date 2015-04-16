@@ -43,6 +43,8 @@ if [ ! -f net2o.fossil ]
 then
     fossil clone http://fossil.net2o.de/net2o net2o.fossil
     fossil open net2o.fossil
+else
+    fossil up
 fi
 
 # get, build, and install Gforth
