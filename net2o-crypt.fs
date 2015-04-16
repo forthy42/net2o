@@ -336,9 +336,9 @@ $60 Constant rndkey#
     \g check generated key if revocation is possible
     skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
 : gen-tmpkeys ( -- pk u ) tskc tpkc ed-keypair tpkc keysize
-    genkey( ." tmp key: " tskc keysize xtype cr ) ;
+    genkey( ." tmp key: " tskc keysize 85type space tpkc keysize 85type cr ) ;
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
-    genkey( ." tmpskey: " stskc keysize xtype cr ) ;
+    genkey( ." tmpskey: " stskc keysize 85type space stpkc keysize 85type cr ) ;
 
 \ setting of keys
 
@@ -365,8 +365,7 @@ Defer search-key \ search if that is one of our pubkeys
     2dup mpubkey $! ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
-    trace( ." gen tmpkey: " over keysize 85type space dup keysize 85type space )
-    swap keypad ed-dh trace( 2dup 85type cr )
+    swap keypad ed-dh
     o IF  do-keypad sec!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
 
