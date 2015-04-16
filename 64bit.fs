@@ -180,11 +180,7 @@ cell 8 = [IF]
 	postpone >l postpone >l ;
     also locals-types definitions
     ' d: alias 64:
-    : 64^ ( "name" -- a-addr xt ) \ gforth d-caret
-	create-local
-	['] compile-pushlocal-64
-      does> ( Compilation: -- ) ( Run-time: -- w )
-	postpone laddr# @ lp-offset, ;
+    ' d^ alias 64^
     previous definitions
 [THEN]
 \ independent of cell size, using dfloats:
