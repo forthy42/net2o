@@ -36,6 +36,8 @@ c-library ed25519_donna
     \ c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
     c-function ge25519* ge25519_scalarmult a a a -- void ( r p s -- )
     c-function 32b= str32eq a a -- n ( addr1 addr2 -- flag )
+    c-variable ge25519-basepoint ge25519_basepoint ( --  addr )
+    c-variable ge25519-niels*[] ge25519_niels_sliding_multiples ( -- addr )
 end-c-library
 
 : 32b>sc25519 32 nb>sc25519 ;

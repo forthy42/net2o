@@ -31,75 +31,8 @@ false [IF]
     '"' parse hex>$ ;
 comp: execute postpone SLiteral ;
 
-\ base64 output (not the usual base64, suitable as filenames)
-
-: .b64 ( n -- n' ) dup >r 6 rshift r> $3F and
-    dup #10 u< IF  '0' + emit  EXIT  THEN  #10 -
-    dup #26 u< IF  'A' + emit  EXIT  THEN  #26 -
-    dup #26 u< IF  'a' + emit  EXIT  THEN  #26 -
-    IF  '_'  ELSE  '-'  THEN  emit ;
-: .1base64 ( addr -- )
-    c@ .b64 .b64 drop ;
-: .2base64 ( addr -- )
-    le-uw@ .b64 .b64 .b64 drop ;
-: .3base64 ( addr -- )
-    le-ul@ $FFFFFF and .b64 .b64 .b64 .b64 drop ;
-Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
-: 64type ( addr u -- )
-    bounds ?DO  I I' over - 3 umin cells .base64s + perform  3 +LOOP ;
-
-: b64digit ( char -- n )
-    '0' - dup #09 u<= ?EXIT
-    [ 'A' '9' - 1- ]L - dup #36 u<= ?EXIT
-    dup #40 = IF  drop #63  EXIT  THEN
-    [ 'a' 'Z' - 1- ]L - dup #62 u<= ?EXIT
-    drop #62 ;
-    
-: base64>n ( addr u -- n )  0. 2swap bounds +DO
-	I c@ b64digit over lshift rot or swap 6 +
-    LOOP  drop ;
-: base64>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO
-	I I' over - 4 umin base64>n over le-l! 3 +
-    4 +LOOP  drop r> 3 4 */ ;
-
-: 64" ( "base64string" -- addr u )
-    '"' parse base64>$ ;
-comp: execute postpone SLiteral ;
-
-\ base85 output (derived from RFC 1924, suitable as file name)
-
-85 buffer: 85>chars
-s" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~"
-85>chars swap move
-$80 buffer: chars>85
-85 0 [DO] [I] dup 85>chars + c@ chars>85 + c! [LOOP]
-
-: .b85 ( n -- n' ) 85 /mod swap 85>chars + c@ emit ;
-: .1base85 ( addr -- ) c@ .b85 .b85 drop ;
-: .2base85 ( addr -- ) le-uw@ .b85 .b85 .b85 drop ;
-: .3base85 ( addr -- ) le-ul@ $FFFFFF and .b85 .b85 .b85 .b85 drop ;
-: .4base85 ( addr -- ) le-ul@ .b85 .b85 .b85 .b85 .b85 drop ;
-Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
-: 85type ( addr u -- )
-    bounds ?DO  I I' over - 4 umin cells .base85s + perform  4 +LOOP ;
-
-: b85digit ( char -- n ) $7F umin chars>85 + c@ ;
-    
-: base85>n ( addr u -- n )  0 1 2swap bounds +DO
-	I c@ b85digit over * rot + swap 85 *
-    LOOP  drop ;
-: base85>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO
-	I I' over - 5 umin base85>n over le-l! 4 +
-    5 +LOOP  drop r> 4 5 */ ;
-
-: 85" ( "base85string" -- addr u )
-    '"' parse base85>$ ;
-comp: execute postpone SLiteral ;
-
-: .85info ( addr u -- )
-    info-color attr! 85type default-color attr! ;
-: .85warn ( addr u -- )
-    warn-color attr! 85type default-color attr! ;
+require base64.fs
+require base85.fs
 
 \ debugging switches
 
@@ -152,6 +85,7 @@ debug: sema(
 
 -db profile( \ )
 
+0 [IF]
 false warnings !@
 
 : c-section ( xt addr -- ) 
@@ -166,6 +100,7 @@ false warnings !@
     throw ;
 
 warnings !
+[THEN]
 
 \ key debugging task
 
