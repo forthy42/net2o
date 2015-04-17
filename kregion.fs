@@ -57,7 +57,12 @@ $4000 Constant /kregion
 
 storage class end-class crypto-alloc
 
-:noname  ( len -- addr )  kalloc ; crypto-alloc to :allocate
+$10 Constant crypt-align
+
+:noname  ( len -- addr )
+    [ crypt-align cell- crypt-align 1- + ]L +
+    crypt-align negate and kalloc [ crypt-align cell- ]L +
+; crypto-alloc to :allocate
 \ we never free these classes, they are per-task temporary storages
 
 crypto-alloc ' new static-a with-allocater Constant crypto-a
