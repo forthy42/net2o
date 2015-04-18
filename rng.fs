@@ -65,7 +65,7 @@ rngbuf# rng-pos !
 : read-initrng ( fd -- flag )  { fd }
     0. fd reposition-file throw
     rng-key @ c:key# fd read-file throw c:key# =
-    c:diffuse  fd close-file throw ;
+    ['] c:diffuse rng-exec  fd close-file throw ;
 
 : write-initrng ( -- )
     s" ~/.initrng" r/w create-file throw >r
