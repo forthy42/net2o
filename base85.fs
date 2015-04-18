@@ -6,7 +6,7 @@ s" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?
 $80 buffer: chars>85
 85 0 [DO] [I] dup 85>chars + c@ chars>85 + c! [LOOP]
 
-: .b85 ( n -- n' ) 85 /mod swap 85>chars + c@ emit ;
+: .b85 ( n -- n' ) 0 85 um/mod swap 85>chars + c@ emit ;
 : .1base85 ( addr -- ) c@ .b85 .b85 drop ;
 : .2base85 ( addr -- ) le-uw@ .b85 .b85 .b85 drop ;
 : .3base85 ( addr -- ) le-ul@ $FFFFFF and .b85 .b85 .b85 .b85 drop ;

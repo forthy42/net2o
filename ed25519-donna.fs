@@ -33,7 +33,7 @@ c-library ed25519_donna
     c-function ge25519-pack ge25519_pack a a -- void ( r ger -- )
     c-function ge25519-unpack- ge25519_unpack_negative_vartime a a -- n ( r p -- flag )
     c-function ge25519*+ ge25519_double_scalarmult_vartime a a a a -- void ( r p s1 s2 -- )
-    \ c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
+    c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
     c-function ge25519* ge25519_scalarmult a a a -- void ( r p s -- )
     c-function 32b= str32eq a a -- n ( addr1 addr2 -- flag )
     c-variable ge25519-basepoint ge25519_basepoint ( --  addr )
@@ -152,9 +152,9 @@ init-ed25519
     dest get1 ge25519-pack
     clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
-\ : ed-dhv { sk pk dest -- secret len }
-\     get0 pk ge25519-unpack- 0= !!no-ed-key!!
-\     sct2 sk raw>sc25519
-\     get1 get0 sct2 ge25519*v
-\     dest get1 ge25519-pack
-\     clean-ed25519 dest $20  $80 dest $1F + xorc! ;
+: ed-dhv { sk pk dest -- secret len }
+    get0 pk ge25519-unpack- 0= !!no-ed-key!!
+    sct2 sk raw>sc25519
+    get1 get0 sct2 ge25519*v
+    dest get1 ge25519-pack
+    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
