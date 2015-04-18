@@ -124,11 +124,14 @@ User termfile
     termfile @ >o fs-inbuf $@ drop c@ fs-inbuf 0 1 $del o> ;
 
 ' ts-type ' ts-emit what's cr ' ts-form output: termserver-out
+what's name
 op-vector @
 what's at-xy what's at-deltaxy what's page what's attr!
+[IFDEF] notrace notrace [THEN]
 termserver-out
 IS attr! IS page IS at-deltaxy IS at-xy
 op-vector !
+is name
 ' ts-key  ' ts-key? input: termserver-in
 
 1 Constant file-permit#

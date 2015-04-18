@@ -91,8 +91,8 @@ cmd-args
     :noname  action-of thread-init compile,
     r@ compile, postpone off postpone ;
     is thread-init
-    :noname  action-of kill-task  compile,
-    r> compile, postpone $off postpone ;
+    :noname  r> compile, postpone $off  action-of kill-task  compile,
+    postpone ;
     is kill-task ;
 
 [IFUNDEF] NOPE

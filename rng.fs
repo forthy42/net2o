@@ -38,8 +38,8 @@ User rng-key
 rngbuf# rng-pos !
 
 : rng-allot ( -- )
-    rngbuf# allocate throw rng-buffer !
-    c:key# allocate throw rng-key !
+    rngbuf# kalloc rng-buffer !
+    c:key# kalloc rng-key !
     rngbuf# rng-pos !
     getpid rng-pid ! up@ rng-task ! ;
 

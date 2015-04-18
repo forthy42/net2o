@@ -2351,6 +2351,7 @@ Variable beacons \ destinations to send beacons to
     THEN ;
 
 : init-rest ( port -- )  init-mykey init-mykey \ two keys
+    \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ;
 
