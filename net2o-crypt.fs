@@ -335,7 +335,7 @@ $60 Constant rndkey#
 : check-rev? ( -- flag )
     \g check generated key if revocation is possible
     skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
-: gen-tmpkeys ( -- pk u ) tskc tpkc ed-keypair tpkc keysize
+: gen-tmpkeys ( -- ) tskc tpkc ed-keypair
     genkey( ." tmp key: " tskc keysize .85warn tpkc keysize .85info cr ) ;
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
     genkey( ." tmpskey: " stskc keysize .85warn stpkc keysize .85info cr ) ;
