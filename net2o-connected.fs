@@ -347,7 +347,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
-    gen-tmpkeys $, receive-tmpkey
+    tpkc keysize $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
     ELSE  gen-reply request,  THEN ]nest
     tmpkey-request
@@ -458,11 +458,11 @@ previous
 : +get-time     ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend  client-loop
+: tail-connect ( -- )   +resend-cmd  client-loop
     -timeout tskc KEYBYTES erase resend0 $off  context! ;
 
 : n2o:connect ( ucode udata -- )
-    reqsize!  gen-request  tail-connect ;
+    reqsize!  gen-tmpkeys  gen-request  tail-connect ;
 
 : end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
 

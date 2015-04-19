@@ -2374,8 +2374,9 @@ Variable cookies
 #5000000000. d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie )
-    [: ticks 64dup o { 64^ cookie-adder w^ cookie-o }
-       cookie-adder cookie-size#  cookies $+! ;]
+    [: ticks 64dup [IFUNDEF] 64bit swap [THEN] o
+	{ 64^ cookie-adder w^ cookie-o }
+	cookie-adder cookie-size#  cookies $+! ;]
     resize-lock c-section ;
 
 : do-?cookie ( cookie -- context true / false )

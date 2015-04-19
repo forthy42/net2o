@@ -29,12 +29,13 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
 +net2o: set-cookie ( utimestamp -- ) \ cookie and round trip delay
-    own-crypt? IF
+    own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
-	IF  >o rdrop  o to connection
+	IF  trace( ." context " F cr ) >o rdrop  o to connection
 	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
+	    trace( ." ticker " F cr )
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
 	THEN
     ELSE  64drop  THEN  un-cmd ;

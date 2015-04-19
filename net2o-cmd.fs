@@ -480,7 +480,7 @@ previous
 
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ drop keysize decrypt$
-    IF  tmp-crypt-val do-nest  ELSE  un-cmd  THEN ;
+    IF  tmp-crypt-val do-nest  ELSE  trace( ." tmpnest failed!" F cr )  un-cmd  THEN ;
 
 \ net2o assembler stuff
 
