@@ -1677,7 +1677,7 @@ User outflag  outflag off
     dest-raddr @ - addr>64 data-resend# @ + { addr }
     rng8 $3F and { r }
     addr 64@ r 64ror 64ffz< r + $3F and to r
-    64#1 r 64lshift addr 64@ or addr 64! 
+    64#1 r 64lshift addr 64@ 64or addr 64! 
     r ;
 
 : resend#? ( off addr u -- n )
