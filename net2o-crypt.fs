@@ -142,7 +142,7 @@ init-keybuf
     o 0=  dest-flags 1+ c@ stateless# and  or IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64-
     64dup dest-size @ n>64 64u>= !!inv-dest!!
-    64dup 64dup >ivskey ivs-tweak regen-ivs ;
+    64dup 64dup >ivskey ivs-tweak 64>n regen-ivs ;
 
 : crypt-buf-init ( map -- ) >r
     o IF  r@ .ivs>source?  ELSE  default-key  THEN

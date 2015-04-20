@@ -2160,13 +2160,15 @@ $20 Constant signed-val
 ' drop code-class to handle
 
 : .inv-packet ( -- )
-    invalid( ." invalid packet to "
+    ." invalid packet to "
     dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  $64.
-    ." size " min-size inbuf c@ datasize# and lshift hex. cr ) ;
+    ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
 
 : handle-dest ( addr map -- ) \ handle packet to valid destinations
     ticker 64@  ack@ .recv-tick 64! \ time stamp of arrival
-    dup >r inbuf-decrypt 0= IF  r> >o .inv-packet o>  drop  EXIT  THEN
+    dup >r inbuf-decrypt 0= IF
+	invalid( r> >o .inv-packet o>  drop )else( rdrop drop ) EXIT
+    THEN
     crypt-val validated ! \ ok, we have a validated connection
     return-addr return-address $10 move
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
