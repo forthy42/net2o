@@ -276,7 +276,7 @@ also net2o-base
     ['] do-expect-reply IS expect-reply? ;
 
 : resend-all ( -- )
-    ticker 64@ resend-all-to 64@ u>= IF
+    ticker 64@ resend-all-to 64@ 64u>= IF
 	false net2o:do-resend
 	+timeouts resend-all-to 64!
     THEN ;
@@ -419,7 +419,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
-    IF  net2o:ack-code   ELSE  ack-receive @ xor  THEN  ack-timing
+    IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
     ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. F cr )
 ;
 
