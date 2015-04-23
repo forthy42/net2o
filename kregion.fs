@@ -20,8 +20,11 @@ Variable kfree64' \ free list for 64 bytes keys
 
 $4000 Constant /kregion
 
-: kalloc ( len -- addr ) >r
+$10 Constant crypt-align
+
+: kalloc ( len -- addr )
     \G allocate a len byte block of non-swappable stuff
+    [ crypt-align 1- ]L + [ crypt-align negate ]L and >r
     r@ /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
 	2drop /kregion alloc+lock /kregion 2dup kregion 2!  THEN
@@ -56,8 +59,6 @@ $4000 Constant /kregion
 : sec[]@ ( i addr -- addr u )  $[] sec@ ;
 
 storage class end-class crypto-alloc
-
-$10 Constant crypt-align
 
 :noname  ( len -- addr )
     [ crypt-align cell- crypt-align 1- + ]L +

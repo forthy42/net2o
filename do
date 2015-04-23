@@ -6,7 +6,9 @@ GFORTH=gforth-0.7.9_20150407
 
 if [ $(uname -o) = Cygwin ]
 then
-    CONFOPT="--prefix=/usr"
+    CONFOPT="--prefix=/usr $*"
+else
+    CONFOPT="$*"
 fi
 
 # helper functions
@@ -34,7 +36,7 @@ function git-get {
 }
 function build {
     pname=$1
-    (cd $pname; mkdir -p m4; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
+    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make clean && make && sudo make install)
 }
 
 # get net2o itself

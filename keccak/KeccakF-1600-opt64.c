@@ -11,7 +11,7 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-typedef unsigned long long int STATEI;
+#define STATEI unsigned long long int
 #include <string.h>
 #include "brg_endian.h"
 #include "KeccakF-1600-opt64-settings.h"

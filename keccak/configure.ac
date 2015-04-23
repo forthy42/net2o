@@ -32,6 +32,11 @@ case "$host_alias" in
 	enable_asm=yes
 	plattform=neon
 	;;
+    i686-*)
+	# if you don't want sse, specify i586-linux-gnu
+	CFLAGS="-O3 -m32 -mssse3 -DUseSSE"
+	ws=opt64
+	;;
 esac
 
 AC_ARG_ENABLE([asm],
@@ -44,7 +49,7 @@ esac],[asm=false])
 AM_CONDITIONAL([ASM], [test x$asm = xtrue])
 
 #x86 on x86_64 plattforms:
-#./configure CC="gcc -m32 -mssse3 -DUseSSE" ws=64
+#./configure --host=i686-linux-gnu CFLAGS="-O3 -m32 -mssse3 -DUseSSE" ws=opt64
 #ARM with NEON
 #./configure --enable-asm as="inplace-armgcc-ARMv7A-NEON" plattform=neon CC="arm-linux-androideabi-gcc -mfpu=neon-vfpv4" --host=arm-linux-androideabi
 

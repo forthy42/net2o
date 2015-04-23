@@ -9,6 +9,14 @@ AC_CONFIG_HEADERS([config.h])
 
 CFLAGS=${CFLAGS--O3}
 
+# special optimizations for some plattforms
+case "$host_alias" in
+    i686-*)
+	# if you don't want sse, specify i586-linux-gnu
+	CFLAGS="-O3 -m32 -mssse3 -DUseSSE"
+	;;
+esac
+
 AC_PROG_CC
 AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])

@@ -22,7 +22,7 @@ require user-object.fs
 User-o crypto-o
 
 object class
-    $10 cell- uvar crypto-up \ make sure rest is by $10 aligned
+    $10 uvar crypto-up \ make sure rest is still by $10 aligned
     umethod c:init ( -- )
     \G initialize crypto function for a task
     umethod c:free ( -- )
