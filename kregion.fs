@@ -22,9 +22,12 @@ $4000 Constant /kregion
 
 $10 Constant crypt-align
 
+: kalign ( addr -- addr' )
+    [ crypt-align 1- ]L + [ crypt-align negate ]L and ;
+
 : kalloc ( len -- addr )
     \G allocate a len byte block of non-swappable stuff
-    [ crypt-align 1- ]L + [ crypt-align negate ]L and >r
+    kalign >r
     r@ /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
 	2drop /kregion alloc+lock /kregion 2dup kregion 2!  THEN
@@ -62,7 +65,7 @@ storage class end-class crypto-alloc
 
 :noname  ( len -- addr )
     [ crypt-align cell- crypt-align 1- + ]L +
-    crypt-align negate and kalloc [ crypt-align cell- ]L +
+    [ crypt-align negate ]L and kalloc [ crypt-align cell- ]L +
 ; crypto-alloc to :allocate
 \ we never free these classes, they are per-task temporary storages
 

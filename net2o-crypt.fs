@@ -236,13 +236,13 @@ Sema regen-sema
 
 : regen-ivs/2 ( -- )
     c:key@ >r
-    dest-ivsgen @ key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
+    dest-ivsgen @ kalign key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
     clear-replies
     dest-ivs $@ dest-a/b c:prng
     2 dest-ivslastgen xor! r> c:key! ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
-      dest-ivsgen @ key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
+      dest-ivsgen @ kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
       dest-ivs $@ c:prng r> c:key! ;]
     regen-sema c-section ;
 
@@ -264,7 +264,7 @@ Sema regen-sema
 
 : regen-ivs-part ( new-back -- )
     [: c:key@ >r
-      dest-ivsgen @
+      dest-ivsgen @ kalign
       key( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
       regen( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
       c:key!
@@ -273,8 +273,8 @@ Sema regen-sema
 	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
 	  rest-prng
       len +LOOP
-      key( ." regen-ivs-part' " dest-ivsgen @ c:key# .nnb cr )
-      regen( ." regen-ivs-part' " dest-ivsgen @ c:key# .nnb cr )
+      key( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
+      regen( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
@@ -286,7 +286,7 @@ Sema regen-sema
 : one-ivs ( addr -- )
     @ >o c:key@ >r
     key-assembly state2# c:prng
-    dest-ivsgen @ c:key!  key-assembly >c:key
+    dest-ivsgen @ kalign c:key!  key-assembly >c:key
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng
     r> c:key! o> ;
