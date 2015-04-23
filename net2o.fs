@@ -1069,7 +1069,7 @@ User >code-flag
 : alloc-data ( addr u -- u )
     dup >r dest-size ! dest-vaddr 64! r>
     dup alloc+guard dest-raddr !
-    c:key# crypt-align + alloz dest-ivsgen !
+    c:key# crypt-align + alloz dest-ivsgen ! \ !!FIXME!! should be a kalloc
     >code-flag @
     IF
 	dup addr>replies  alloz dest-replies !
