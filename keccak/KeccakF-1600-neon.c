@@ -31,12 +31,12 @@ void KeccakInitialize()
 {
 }
 
-void KeccakExtract(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 {
   memcpy(data, state, byteCount);
 }
 
-void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 {
   unsigned int i;
   UINT64 m = 0xffffffffffffffffull;
@@ -48,7 +48,7 @@ void KeccakAbsorb(keccak_state state, UINT64 *data, unsigned int byteCount)
     state[i>>3] ^= data[i>>3] & m;
 }
 
-void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 {
   unsigned int i;
   for(i=0; i<byteCount-7; i+=8) {
@@ -60,7 +60,7 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
   }
 }
 
-void KeccakDecrypt(keccak_state state, UINT64 *data, unsigned int byteCount)
+void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
 {
   unsigned int i;
   UINT64 tmp;
