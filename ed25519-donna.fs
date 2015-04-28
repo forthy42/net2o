@@ -1,11 +1,6 @@
 \ Interface to the ed25519 primitives from donna     23oct2013py
 \ The high level stuff is all in Forth
 
-require mini-oof2.fs
-require user-object.fs
-require keccak.fs
-require rng.fs
-
 \ dummy load for Android
 [IFDEF] android
     s" /data/data/gnu.gforth/lib/libed25519prims.so" open-lib drop

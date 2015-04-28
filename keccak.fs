@@ -1,12 +1,5 @@
 \ keccak wrapper
 
-require unix/mmap.fs
-require unix/pthread.fs
-require 64bit.fs
-require crypto-api.fs
-require net2o-err.fs
-require kregion.fs
-
 \ dummy load for Android
 [IFDEF] android
     s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop

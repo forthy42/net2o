@@ -23,8 +23,10 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
 PRECC=${CC%gcc*}
-PRECLANG=${RRECC%clang*}
+PRECLANG=${PRECC%clang*}
 LIBTOOL=${PRECLANG}libtool
+echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
+
 AC_SUBST(LIBTOOL)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
