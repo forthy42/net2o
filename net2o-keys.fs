@@ -150,7 +150,7 @@ blue    >bg white >fg or bold or ,
 magenta >bg white >fg or bold or ,
 
 : reset-color ( -- )
-    [ default-color >bg default-color >fg or ]L attr! ;
+    default-color attr! ;
 : .black85 ( addr u -- )
     [ black >bg black >fg or ]L attr!   85type reset-color ;
 : .red85 ( addr u -- )  0 -rot bounds ?DO

@@ -13,9 +13,15 @@ c-library ed25519_donna
     [THEN]
     \c #include <stdint.h>
     \c #include <ed25519-prims.h>
-    \c int str32eq(uint64_t* a, uint64_t* b) {
-    \c    uint64_t diff=((a[0]^b[0])|(a[1]^b[1])|(a[2]^b[2])|(a[3]^b[3]));
-    \c    return -(diff==0);
+    \c int str32eq(long* a, long* b) {
+    \c   long diff=0;
+    \c   switch(sizeof(long)) {
+    \c     case 4:
+    \c       diff|=((a[4]^b[4])|(a[5]^b[5])|(a[6]^b[6])|(a[7]^b[7]));
+    \c     case 8:
+    \c       diff|=((a[0]^b[0])|(a[1]^b[1])|(a[2]^b[2])|(a[3]^b[3]));
+    \c   }
+    \c   return -(diff==0);
     \c }
 
     c-function raw>sc25519 expand_raw256_modm a a -- void ( sc char[32] -- )
