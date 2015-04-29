@@ -23,7 +23,7 @@ require mkdir.fs
     \g accept-like input, but types * instead of the character
     \g don't save into history
     dup >r
-    BEGIN  xkey dup #cr <> WHILE
+    BEGIN  xkey dup #cr <> over #lf <> and WHILE
 	    dup #bs = over #del = or IF
 		drop dup r@ u< IF
 		    over + >r xchar- r> over -
@@ -32,7 +32,8 @@ require mkdir.fs
 		    bell
 		THEN
 	    ELSE
-		-rot xc!+? 0= IF  bell  ELSE  '⬤' xemit  THEN
+		-rot xc!+? 0= IF  bell  ELSE
+		    [IFDEF] android '*' [ELSE] '⬤' [THEN] xemit  THEN
 	    THEN
     REPEAT  drop  nip r> swap - ;
 

@@ -19,7 +19,7 @@ cmd-args
     >in @ >r parse-name
     over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
 : ?word-nextarg ( -- addr u t / f )
-    parse-name" dup 0= IF  nip nip  false  ELSE  true  THEN ;
+    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN ;
 : ?word-@nextarg ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
     over c@ '@' = IF  rdrop true  EXIT  THEN
