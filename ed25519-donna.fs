@@ -25,7 +25,7 @@ c-library ed25519_donna
     \c }
 
     c-function raw>sc25519 expand_raw256_modm a a -- void ( sc char[32] -- )
-    c-function nb>sc25519 expand256_modm a a n -- void ( sc char[64] -- )
+    c-function nb>sc25519 expand256_modm a a n -- void ( sc char[64] n -- )
     c-function sc25519>32b contract256_modm a a -- void ( char[32] sc -- )
     c-function sc25519* mul256_modm a a a -- void ( r x y -- )
     c-function sc25519+ add256_modm a a a -- void ( r x y -- )
@@ -153,9 +153,9 @@ init-ed25519
     dest get1 ge25519-pack
     clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
-: ed-dhv { sk pk dest -- secret len }
-    get0 pk ge25519-unpack- 0= !!no-ed-key!!
-    sct2 sk raw>sc25519
-    get1 get0 sct2 ge25519*v
-    dest get1 ge25519-pack
-    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
+\ : ed-dhv { sk pk dest -- secret len }
+\     get0 pk ge25519-unpack- 0= !!no-ed-key!!
+\     sct2 sk raw>sc25519
+\     get1 get0 sct2 ge25519*v
+\     dest get1 ge25519-pack
+\     clean-ed25519 dest $20  $80 dest $1F + xorc! ;

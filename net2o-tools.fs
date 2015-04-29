@@ -22,7 +22,7 @@ cmd-args
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN ;
 : ?word-@nextarg ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
-    over c@ '@' = IF  rdrop true  EXIT  THEN
+    over c@ '@' = IF  rdrop 1 /string true  EXIT  THEN
     r> >in ! 2drop false ;
 
 : word-args ( -- )
@@ -96,5 +96,7 @@ cmd-args
     is kill-task ;
 
 [IFUNDEF] NOPE
-    : NOPE  drop 2drop ; immediate restrict
+    : NOPE ( c:sys -- )
+	\G removes a control structure sys from the stack
+	drop 2drop ; immediate restrict
 [THEN]
