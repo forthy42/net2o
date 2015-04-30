@@ -435,14 +435,15 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 Variable myname
 
 : +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [:  .myname '2' emit
-	dup 4 = IF ip6::0 $10 type ELSE dup $10 = IF type ip6::0 4 THEN THEN type
-	my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
+    [: .myname '2' emit
+      dup 4 = IF ip6::0 $10 type ELSE dup $10 = IF type ip6::0 4 THEN THEN type
+      my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
+    nat( ." myip: " 2dup .ipaddr cr )
     my-ip$ $ins[] ;
 
 Variable $tmp2
 
-: !my-ips ( -- )  $tmp2 $off
+: !my-ips ( -- )  $tmp2 $off nat( ." start storing myips" cr )
     global-ip6 tuck [: type global-ip4 type ;] $tmp2 $exec
     $tmp2 $@ +my-ip
     0= IF  local-ip6  +my-ip THEN ;
@@ -1706,7 +1707,9 @@ Defer punch-reply
 : send-punch ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
     insert-address temp-addr ins-dest
-    temp-addr return-addr $10 move  punch-load $@ punch-reply ;
+    temp-addr return-addr $10 move
+    nat( ." send punch to: " return-addr $10 xtype cr )
+    punch-load $@ punch-reply ;
 
 : net2o:punch ( addr u -- )
     o IF
