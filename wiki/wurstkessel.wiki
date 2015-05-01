@@ -1,0 +1,86 @@
+<h1>Wurstkessel</h1>
+
+<p>In the earlier prototype of net2o, I used my own symmetric cryptography
+system, which I called "Wurstkessel". I designed Wurstkessel, because I'm not
+convinced with the standard symmetric cryptography tools, especially not with
+AES and SHA-1. I was also not happy with the SHA-3 contest, as most entries
+used a slightly modified Merkle–Damgård construction, though MD has known
+problems.</p>
+
+<p>The tools in question should be able to perform the following tasks:</p>
+<ul>
+<li>provide a secure random number generator</li>
+<li>en- and decrypt messages</li>
+<li>create a secure hash of the message</li>
+</ul>
+
+<p>Wurstkessel uses one algorithm to provide all these functions, especially it
+allows to collapse the en/decrypt function and the hash computation into one
+step.</p>
+
+<p>The base of all this is a secure random number generator that allows to add
+entropy. This defines how the encryption and decryption must work: as stream
+cipher. Stream ciphers xor random numbers with the plain text, the random
+number generator starts with the shared secret (the key) and a good deal of
+salt (a random number at the start of the encrypted data) as internal state.</p>
+
+<p>This salt is very crucial for the secure operation of a traditional stream
+cipher, as its random number generator is purely deterministic, and therefore,
+a key could only be used once. The combination of key and salt must be unique,
+i.e. the salt must have the form of a nonce.</p>
+
+<p>Wurstkessel is more relaxed here. Its rounds operation is</p>
+
+<p><i>ϕ(a,s,e) ⇒ a',s',e'</i></p>
+
+<p>where ϕ is the transformation function, and</p>
+<ul>
+<li><i>a</i> is the accumulator, which accumulates entropy and internal states</li>
+<li><i>s</i> is the internal state, which is used to encrypt and as hash result</li>
+<li><i>e</i> is an entropy source, i.e. the message</li>
+</ul>
+
+<p>By using the message as entropy source, the random number generator is no
+longer determined by its initial state, thus different messages also influence
+the cipher. The block size of one primitive operation however is 64 bytes, and
+within these 64 bytes, the property of a normal stream cipher still holds, so
+please use each key+salt pair only once.</p>
+
+<p>The individual rounds mix state and accumulator byte-wise with different
+strides to walk through state and accumulator, and by xoring these values
+creating the index into a 256 entry table of 64 bit numbers obtained once from
+a random number source. 8 differently rotated numbers are combined together to
+form one 64 bit portion of the next state. The table index does not actually
+reveal internal state, as it is the xor of two bytes, and each combination of
+state and accumulator byte is used only once - thus any knowledge of the index
+is useless for the next round. There should be at least two rounds for
+encryption to spread all information over the entire 512 bits, and to make sure
+that no two consecutive states are exposed to a known plaintext attack (the
+accumulator is never exposed).</p>
+
+<p>The final state is the hash of the message. The hash is unique (with a
+collision probability of 2<sup>-256</sup>) not only for the message itself, but
+also for key and salt, thus appending this hash to the message gives us
+integrity.</p>
+
+<p>Wurstkessel has to be taken with a grain of salt, as it still lacks peer
+review and analysis. Its random number quality has been verified with the
+dieharder test suite.</p>
+
+<p>Note: The SHA-3 winner, Keccak, uses a similar combination of external and
+internal state, and mixing in the message; they call this "sponge"; other
+people call similar approaches "wide-pipe". Thanks to their lengthy
+cryptanalysis, it can now be said that the sponge/wide-pipe part of Wurstkessel
+has received sufficient peer review and analysis, and is a sound concept.</p>
+
+<p>The remaining unreviewed part is the S-box, the ϕ function in Wurstkessel.
+Fortunately, this is a very traditional S-box, which is only modified in so far
+that using xor of two byte of the state as index into the random number table
+doesn't reveal the actual internal state in a side-channel attack.</p>
+
+<p>I would rather criticize Keccak's permutation function f, because it is
+reversible. Wurstkessel deliberately chose a not fully reversible one-way
+function. The reversibility of Keccak's f should not be a problem to an
+attacker for encryption and decryption, because it is secret, but I can imagine
+it becoming a potential attack vector with hashes. And that's what the
+competition was about: hashes.</p>

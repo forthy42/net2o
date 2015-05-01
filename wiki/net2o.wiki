@@ -41,12 +41,12 @@ for serious applications now.</li>
 
 <h2>What third party technology do we use</h2>
 <ul>
-<li><a href="/net2o/wiki?name=ed25519">ed25519</a> from Dan Bernstein (in the
+<li><a href="ed25519.wiki">ed25519</a> from Dan Bernstein (in the
 donna version from floodberry)</li>
 <li><a href="http://keccak.noekeon.org/">Keccak</a>&nbsp;(original reference
 implementation)<br>
 </li>
-<li>(<a href="/net2o/wiki?name=wurstkessel">wurstkessel</a> from myself - now
+<li>(<a href="wurstkessel.wiki">wurstkessel</a> from myself - now
 replaced by Keccak)</li>
 </ul>
 
@@ -58,7 +58,7 @@ well.</p>
 <p>You want to have the following packets installed: git automake autoconf make
 gcc libtool libltdl7 (libtool-ltdl on RedHat/Centos)</p>
 
-<p>Get the&nbsp;<a href="https://fossil.net2o.de/net2o/finfo?name=do">do</a>&nbsp;file
+<p>Get the&nbsp;<a href="https://fossil.net2o.de/net2o/doc/trunk/do">do</a>&nbsp;file
 (latest revision), put it into your net2o folder, and let it run. &nbsp;You
 need <a href="http://www.fossil-scm.org/index.html/doc/tip/www/index.wiki">fossil</a>&nbsp;(and
 git) as SCM, get the latest from the fossil homepage. &nbsp;You don't need to
