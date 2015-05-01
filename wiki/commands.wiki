@@ -1,0 +1,85 @@
+<h1>Commands</h1>
+
+<p>net2o separates data and commands. &nbsp;Data is pass through to higher
+layers, commands are interpreted when they arrive. &nbsp;For connection
+requests, the address 0 is always mapped as connectionless code address.</p>
+
+<p>The command interpreter is a stack machine with two data types: 64 bit
+integers and strings. &nbsp;Encoding of commands, integers and string length
+follows protobuf, strings are just sequences of bytes (interpretation can
+vary). &nbsp;Command blocks contain a sequence of commands; there are no
+conditionals and looping instructions.</p>
+
+<p>Strings can contain encrypted nested commands, used during communication
+setup.</p>
+
+<h2>List of Commands</h2>
+<pre>0: end-cmd ( -- ) \ last command in buffer
+1: ulit ( "u" -- u ) \ unsigned literal
+2: slit ( "n" -- n ) \ signed literal, zig-zag encoded
+3: string ( "string" -- addr u ) \ string literal
+4: emit ( xc -- ) \ emit character on server log
+5: type ( addr u -- ) \ type string on server log
+6: . ( -- ) \ print number on server log
+7: cr ( -- ) \ newline on server log
+8: see-me ( -- ) \ see received commands on server log
+10: push-$ ( addr u -- ) \ push string into answer packet
+11: push-slit ( n -- ) \ push singed literal into answer packet
+12: push-lit ( u -- ) \ push unsigned literal into answer packet
+13: push' ( "cmd" -- ) \ push command into answer packet
+14: nest ( addr u -- ) \ nested (self-encrypted) command
+15: tmpnest ( addr u -- ) \ nested (temporary encrypted) command
+16: new-data ( addr addr u -- ) \ create new data mapping
+17: new-code ( addr addr u -- ) \ crate new code mapping
+18: request-done ( -- ) \ signal request is completed
+19: set-rtdelay ( timestamp -- ) \ set round trip delay
+20: store-key ( addr u -- ) \ store key
+21: map-request ( addrs ucode udata -- ) \ request mapping
+22: disconnect ( -- ) \ close connection
+23: set-tick ( ticks -- ) \ adjust time
+24: get-tick ( -- ) \ request time adjust
+30: open-file ( addr u mode id -- ) \ open file id at path "addr u" with mode
+31: close-file ( id -- ) \ close file
+32: file-size ( id -- size ) \ obtain file size
+33: send-chunks ( -- ) \ start sending chunks
+34: set-blocksize ( n -- ) \ set blocksize
+35: set-blockalign ( n -- ) \ set block alignment
+36: close-all ( -- ) \ close all files
+40: ack-addrtime ( time addr -- ) \ packet at addr received at time
+41: ack-resend ( flag -- ) \ set resend toggle flag
+42: set-rate ( rate delta-t -- ) \ set rate 
+43: resend-mask ( addr mask -- ) \ resend mask blocks starting at addr
+44: track-timing ( -- ) \ track timing
+45: rec-timing ( addr u -- ) \ recorded timing
+46: send-timing ( -- ) \ request recorded timing
+47: &gt;time-offset ( n -- ) \ set time offset
+48: ack-b2btime ( time addr -- ) \ burst-to-burst time at packet addr
+49: ack-cookies ( cookie addr mask -- ) \ acknowledge cookie
+50: ack-flush ( addr -- ) \ flushed to addr
+51: set-head ( addr -- ) \ set head
+52: timeout ( ticks -- ) \ timeout request
+53: set-top ( top flag -- ) \ set top, flag is true when all data is sent
+54: ok ( tag -- ) \ tagged response
+55: ok? ( tag -- ) \ request tagged response
+56: ko ( error -- ) \ receive error message
+60: receive-key ( addr u -- ) \ receive a key
+61: key-request ( -- addr u ) \ request a key
+62: receive-tmpkey ( addr u -- ) \ receive emphemeral key
+63: tmpkey-request ( -- ) \ request ephemeral key
+64: update-key ( -- ) \ update secrets
+65: gen-ivs ( addr u -- ) \ generate IVs
+66: gen-reply ( -- ) \ generate a key request reply reply
+70: track-size ( size id -- ) \ set size attribute of file id
+71: track-seek ( seek id -- ) \ set seek attribute of file id
+72: track-limit ( limit id -- ) \ set limit attribute of file id
+73: set-stat ( mtime mod id -- ) \ set time and mode of file id
+74: get-stat ( id -- ) \ request stat of file id
+75: open-tracked-file ( addr u mode id -- ) \ open file in tracked mode
+76: slurp ( -- ) \ slurp in tracked files
+77: rewind-sender ( n -- ) \ rewind buffer
+120: !time ( -- ) \ start timer
+121: .time ( -- ) \ print timer to server log
+122: set-ip ( addr u -- ) \ set address information
+123: get-ip ( -- ) \ request address information
+124: punch ( addr u -- ) \ punch NAT traversal hole
+</pre>

@@ -1,0 +1,71 @@
+<h1>Applications</h1>
+
+<div><i>This is also yet very incomplete</i></div>
+
+<div>The main idea here is that the browser is the OS for applications. &nbsp;In
+a P2P network, you don't have servers which perform the applications, and
+"lightweight" terminals which just display the result. &nbsp;You need to
+distribute the programs just like any other object. &nbsp;The main purpose for
+applications is to display content.</div>
+
+<div>Content is (structured) text, images, videos, music, etc.</div>
+
+<h2>Turing creep</h2>
+
+<div>There's a phenomenon I call "Turing creep": Any environment strives to
+become Turing complete, i.e. it will in the long run contain a Turing complete
+language, accessible by the user. &nbsp;Even if you try to remove the Turing
+completeness (like in PDF, the predecessor PostScript was TC), it will creep in
+through the backdoor (PDF has now JavaScript macros).</div>
+
+<div>Therefore, you better start with a Turing complete language. To be more
+precise: An efficient TC language. &nbsp;People will otherwise spend an
+enormous amount to make the inefficient language efficient, or add an efficient
+subset (see for example JavaScript and asm.js).</div>
+
+<div>This of course begs the question of security: How can you securely execute
+code that comes from the Internet?</div>
+
+<h2>Secure execution</h2>
+
+<div>The following options have been tried, and some of them failed more
+spectacularly than others:</div>
+
+<div>
+<ol>
+<li>Execute code in a controlled VM (e.g. Java). &nbsp;This is broken by
+design, you can't secure something from the inside.</li>
+<li>Execute code in a sandbox. &nbsp;This has been shown to be way more robust;
+it is much harder to break out of a sandbox.</li>
+<li>Public inspection of code: This is the free software approach. &nbsp;The
+underhanded C context shows that public inspection is tricky. &nbsp;Especially
+large code bases are problematic.</li>
+<li>Scan for known evil. &nbsp;This is the security industry's approach, and it
+is broken.</li>
+<li>Code signing is also a scam - it can work together with public inspection,
+but using it for accountability doesn't work.</li>
+</ol>
+
+<div>Therefore the method of choice is to execute public inspected and signed
+code in a sandbox (signed by the inspectors is the important part).</div></div>
+
+<h2>Output Abstraction</h2>
+
+<div>The low-level output abstraction (least common denominator) available on
+today's platforms is OpenGL ES 2.0. &nbsp;Yes, there is Windows Phone, which
+has essentially the same capabilities, but not the same framework. &nbsp;All
+relevant data can be rendered using OpenGL: Fonts, images, videos are OpenGL
+textures, the glue for displaying these textures are triangles and GL shader
+language code. &nbsp;This can provable display everything we want to display
+today.</div>
+
+<h2>Frameworks used</h2>
+
+<div>
+<ul>
+<li>libsoil for images (PNG+JPEG)</li>
+<li>freetype-gl for fonts (TrueType/OpenType)</li>
+<li>OpenMAX on Android, gstreamer on Linux for rendering videos</li>
+<li><a href="https://fossil.net2o.de/minos2/index">MINOΣ</a><u>2</u>:
+Lightweight OpenGL-based widget library in Forth</li>
+</ul></div>

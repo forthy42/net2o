@@ -1,0 +1,70 @@
+<h1>Topology</h1>
+
+<p>net2o assumes a hierarchical topology, i.e. a tree topology. &nbsp;There may
+be multiple paths reaching the same destination, so this doesn't exclude that
+parts of the tree are actually mesh networks. &nbsp;This reflects reality in
+the current Internet, and the expensive layer 1 infrastructure isn't likely to
+be replaced soon.</p>
+
+<p>Most connections send a larger number of packets, so routing each packet is
+wasteful, drives up costs and lowers speed. &nbsp;Therefore the decision is to
+switch packets, and route connections - at the source. &nbsp;I call this
+combination</p>
+
+<h2>Path Switching</h2>
+
+<p>The path is a 128 bit field in the packet, the switching algorithm is as
+follows:</p>
+<ul>
+<li>Take the first <i>n</i>&nbsp;bits of the path field and use those to select
+the destination</li>
+<li>Shift the path field by <i>n</i>&nbsp;bits to the left</li>
+<li>Insert the bit-reversed <i>n</i>&nbsp;bit source into the rear end of the
+path field to mark the way back</li>
+</ul>
+
+<p>The receiver bit-reverses the entire path, and thereby gets a way back to
+the sender. &nbsp;This makes spoofing impossible, and eases
+<a href="/net2o/wiki?name=handover">handover</a>, as only the device that
+switches networks needs to calculate a new path; the receiver will accept any
+properly authenticated packet and use the new path to send data back.</p>
+
+<h2>Packet Format</h2>
+
+<p>Packets have a power-of-two size from 64 bytes to 2MB data. Assuming network
+speed to grow by a factor 1000 in 20 years, going from a million 1k packets on
+a 10Gb Ethernet now to a billion 1M packets in 40 years means this has enough
+headroom for the next 40 years.</p>
+
+<p>The packet contains these elements:</p>
+<ol>
+<li>2 bytes flags: 2 bits QoS (00 highest to 11 lowest), 2 bits protocol
+version (default is now 01), 4 bits packet size (64*2^<i>n</i>), 2 bit switch
+flags (broadcast, multicast), 3 bits reserved, 3 bits for flow control
+(resend-toggle, burst-toggle, ack-toggle).</li>
+<li>16 bytes path (rough Internet 1.0 equivalent: "address")</li>
+<li>8 bytes address: this is the address in the destination buffer where the
+packet will be stored (roughly equivalent to port+sequence number)</li>
+<li>64*2^size bytes data</li>
+<li>16 bytes authentication data (keyed cryptographic checksum)</li>
+</ol>
+
+<div>The "abstraction" at packet level is shared memory; the model is read
+locally and write remotely (you can't read remotely, you can ask for the other
+side to send you packets). &nbsp;Of course, the addresses are virtual, so you
+can't write into arbitrary memory - only into the buffers provided by the other
+side.</div>
+
+<h2>Why Source Routing?</h2>
+
+<p>There are three possible schemes:</p>
+<ol>
+<li>switched circuit (POTS, virtual: ATM, MPLS)</li>
+<li>unique identifier (IP)</li>
+<li>source routing</li>
+</ol>
+
+<p>I want to separate computers and network devices; source routing allows to
+use simple, fast, stateless equipment for switching (or at least equipment with
+a small amount of state: A small mapping table is helpful to give a bit
+anonymity, by regularly changing the mapping).</p>

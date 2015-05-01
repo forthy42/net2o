@@ -76,17 +76,17 @@ equal to the ISO-OSI layers, but this layering provides a familiar starting
 point:</p>
 <ol>
 <li>Physical layer - this is not part of net2o itself.</li>
-<li><a href="/net2o/wiki?name=topology">Topology</a><br>
+<li><a href="topology.wiki">Topology</a><br>
 </li>
-<li><a href="/net2o/wiki?name=encryption">Encryption</a><br>
+<li><a href="encryption.wiki">Encryption</a><br>
 </li>
-<li><a href="/net2o/wiki?name=flow-control">Flow Control</a><br>
+<li><a href="flow-control.wiki">Flow Control</a><br>
 </li>
-<li><a href="/net2o/wiki?name=commands">Commands</a><br>
+<li><a href="commands.wiki">Commands</a><br>
 </li>
-<li><a href="/net2o/wiki?name=distributed-data">Distributed Data</a><br>
+<li><a href="distributed-data.wiki">Distributed Data</a><br>
 </li>
-<li><a href="/net2o/wiki?name=applications">Applications</a><br>
+<li><a href="applications.wiki">Applications</a><br>
 </li>
 </ol>
 

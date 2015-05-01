@@ -1,0 +1,30 @@
+<h1>Distributed Data</h1>
+
+<div><i>This is still quite incomplete</i></div>
+
+<div>Following the "everything is a file" philosophy of Unix, every data object
+is a file. &nbsp;It's uniquely referenced by its hash. &nbsp;Further metadata
+are called "tags", and organized in a distributed prefix hash tree. &nbsp;There
+are also "subjects" (persons, computers), which are referenced by their public
+keys; necessary metadata for those subjects is also found in the DPHT.</div>
+
+<div>As the DPHT contains all the metadata, objects which are not shared public
+should also not be visible in a public hash tree; therefore, there are private
+or group-related hash trees, as well.</div>
+
+<h2>Efficient distribution of data to large numbers of peers</h2>
+
+<div>For distributing data to many peers, these peers are arranged in a colored
+tree. &nbsp;Data (e.g. video streams) are divided into different chunks, and
+sent down different colored branches of the tree. &nbsp;The leaf nodes of each
+colored branch then distribute the data to the other branches. &nbsp;It can be
+shown that each node receives as much data as it sends (when the tree is
+balanced). &nbsp;The latency of the tree is O(log n); the actual base is a
+tradeoff of bandwidth and sending latency. &nbsp;The rule of thumb is to use
+the hop-to-hop latency time to send out packets, so higher latency means higher
+fanout of the tree.</div>
+
+<div>Trees are formed ad hoc, and since nodes can come and go as they like,
+there needs to be self-healing capabilities. &nbsp;Nodes know 2n neighbors for
+a tree base n. &nbsp;These trees are used for file-sharing, for group message
+delivery, and to keep the DPHT in sync.</div>

@@ -1,0 +1,81 @@
+<h1>Encryption</h1>
+
+<p>To protect privacy, everything is encrypted with the strongest encryption
+available. The reasons for selecting the algorithms were:</p>
+
+<h2>Key Exchange and Signatures</h2>
+<ul>
+<li>RSA: Reasonable (128bit) strength requires at least 3kbit key size;
+factoring is not as hard as originally assumed; the algorithm are still above
+polynomial, but way below brute force, and any further breakthrough will
+require to increase the key size to unreasonable limits. With a 4kbit key (512
+bytes per key), the connection setup information won't fit into the 1kB
+packets.</li>
+<li>Diffie-Hellman discrete logarithm has essentially the same strength as RSA.</li>
+<li>Elliptic Curve Cryptography is still considered "strong", i.e. there is
+only the very generic big/little step attack, which means a 256 bit key equals
+128 bit strength.</li>
+</ul>
+
+<p>The selection therefore was Ed25519, a Edwards form variant of Dan
+Bernstein's curve25519. &nbsp;Edwards form is notationally simpler and regular
+than other curves, allowing more optimizations. &nbsp;The parameters of this
+curve are known-good, following the "nothing up my sleeve" principle.</p>
+
+<h3>Key Exchange Procedure</h3>
+
+<p>The first phase of a key exchange uses ephemeral (one-time) keys. Let's call
+the initiator Alice, and the connected device Bob:</p>
+<ol>
+<li>Alice generates a key pair, and sends Bob the public key, together with a
+connection request.</li>
+<li>Bob creates a key pair and sends Alice the public key. Using this public
+and secret key, he generates a shared secret1, and uses that to encrypt his
+permanent public key (used for authentication). An attacker can see the
+ephemeral key, but not the permanent pubkey. &nbsp;Bob puts his state in an
+encrypted string where only Bob knows the key, and sends this "ticket" back to
+Alice. &nbsp;Receiving the ticket will actually open up the connection.</li>
+<li>Alice receives both keys and can now create two shared secrets: secret1 is
+the ephemeral secret, secret2 is the authentication secret. &nbsp;She sends her
+authentication pubkey back to Bob encrypted with secret1. &nbsp;This allows Bob
+to compute secret2. &nbsp;Furthermore, Alice sends back Bob's ticket and a
+random per-connection seed for the symmetric keys; the ticket can be (in
+theory) used to open several connections to Bob with a single packet (no reply
+required).</li>
+</ol>
+
+<p>The general formula for ECC Diffie-Hellman key exchange is secret =
+pk1*(sk2)&nbsp;= pk2*(sk1). For secret2, I modify this to avoid side-channel
+attacks in the lengthy curve point computation, and use secret2 =
+pka*(skb*secret1)&nbsp;= pkb*(ska*secret1). &nbsp;The scalar multiplication in
+mod <i>l</i>&nbsp;(the number of curve points) is much faster than the curve
+point computation, and is much less likely to leak information.</p>
+
+<h2>Symmetric Crypto</h2>
+
+<p>The requirement is AEAD: Authenticate and encrypt/decrypt together. &nbsp;Candidates
+&nbsp;were:</p>
+<ul>
+<li>AES in CGM - this has two problems.</li>
+<ol>
+<li>CGM is not a secure hash, and the GF(2^n) field used gives &nbsp;security
+level of only about 64 bits for 128 bits checksum.</li>
+<li>AES uses a constant key, and therefore, side-channel attacks are more
+likely to succeed.</li>
+</ol>
+<li>xsalsa/salsa20+poly1305: This uses a stream cipher and a GF(p) polynom,
+which provides full 128 bit security for the 128 bit checksum, but the security
+of the checksum depends on the encryption. &nbsp;There's a low risk that the
+proof here is basing on wrong assumptions. &nbsp;As a stream cipher, there is
+no constant key, so side-channel attacks are more difficult. &nbsp;This
+combination wins over AES/CGM.</li>
+<li>Keccak in duplex mode provides both encryption and strong authentication,
+which does not depend on the encryption. &nbsp;The checksum is a keyed
+plaintext checksum, so it actually protects the plain text, and proves
+knowledge of the key at the same time. &nbsp;Verification of the packet is
+possible without actually decrypting it (i.e. it <i>also</i>&nbsp;is a
+ciphertext checksum). &nbsp;Strength is &gt;256 bits, providing a very high
+margin. &nbsp;Furthermore, Keccak/SHA-3 is a universal crypto primitive, so
+everything needed for symmetric crypto is done with just one primitive. &nbsp;Keccak
+wins over xsalsa/salsa20+poly1305.</li>
+</ul>
