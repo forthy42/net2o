@@ -282,7 +282,7 @@ false Value add-myip
     THEN
     endwith request,  end-cmd
     ['] end-cmd IS expect-reply? ;
-: addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr cr ) 2dup .iperr
+: addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr F cr )
     pub? IF
 	my-ip-merge IF  2drop  EXIT  THEN
 	my-ip$ $ins[]  EXIT  THEN

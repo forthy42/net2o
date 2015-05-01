@@ -222,7 +222,7 @@ get-current net2o-cmds definitions
     get-me init-client announce-me
     ?@nextarg IF
 	." press key to connect to " 2dup type key drop
-	$A $A nick-connect do-chat c:disconnect  THEN ;
+	$A $A nick-connect ret+beacon do-chat ret-beacon c:disconnect  THEN ;
 
 \ script mode
 

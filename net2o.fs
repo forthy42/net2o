@@ -2284,8 +2284,14 @@ Variable beacons \ destinations to send beacons to
 
 : +beacon ( sockaddr len -- )
     beacon( ." add beacon: " 2dup .address cr )
-    beacons $+[]! ;
+    beacons $ins[] ;
+: -beacon ( sockaddr len -- )
+    beacon( ." remove beacon: " 2dup .address cr )
+    beacons $del[] ;
 : add-beacon ( net2oaddr -- ) route>address sockaddr alen @ +beacon ;
+: sub-beacon ( net2oaddr -- ) route>address sockaddr alen @ -beacon ;
+: ret+beacon ( -- )  ret-addr be@ add-beacon ;
+: ret-beacon ( -- )  ret-addr be@ sub-beacon ;
 
 \ timeout loop
 
