@@ -46,7 +46,7 @@ What third party technology do we use
 -------------------------------------
 
 * [ed25519](ed25519.wiki) from Dan Bernstein (in the donna version from
-  floodberry)
+  floodyberry)
 * [Keccak](http://keccak.noekeon.org/) (original reference implementation)
 * ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
 
