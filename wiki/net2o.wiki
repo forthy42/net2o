@@ -92,24 +92,24 @@ point:</p>
 
 <h2>Videos</h2>
 
-<p><a href="?name=31c3">31c3</a>&nbsp;presentation<br>
+<p><a href="31c3.wiki">31c3</a>&nbsp;presentation<br>
 </p>
 
 <h2>Discussions</h2>
 <ul>
-<li>The <a href="/net2o/wiki?name=pki">pki</a> problem</li>
-<li><a href="/net2o/wiki?name=client-auth">Client authentication</a></li>
-<li><a href="/net2o/wiki?name=handover">Handover</a></li>
-<li><a href="/net2o/wiki?name=ack+cookies">Ack cookies</a></li>
-<li><a href="/net2o/wiki?name=key-format">Key format</a><br>
+<li>The <a href="pki.wiki">pki</a> problem</li>
+<li><a href="client-auth.wiki">Client authentication</a></li>
+<li><a href="handover.wiki">Handover</a></li>
+<li><a href="ack+cookies.wiki">Ack cookies</a></li>
+<li><a href="key-format.wiki">Key format</a><br>
 </li>
-<li><a href="/net2o/wiki?name=keyrevokation">Key revocation</a><br>
+<li><a href="key-revocation.wiki">Key revocation</a><br>
 </li>
-<li><a href="/net2o/wiki?name=nsa-backdoor">NSA backdoor</a><br>
+<li><a href="nsa-backdoor.wiki">NSA backdoor</a><br>
 </li>
-<li><a href="/net2o/wiki?name=onion-routing">Onion Routing</a><br>
+<li><a href="onion-routing.wiki">Onion Routing</a><br>
 </li>
-<li><a href="?name=whatnotfor">What it's not for</a><br>
+<li><a href="whatnotfor.wiki">What it's not for</a><br>
 </li>
 </ul>
 

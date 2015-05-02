@@ -1,0 +1,30 @@
+<h1>Key Format</h1>
+
+<div>The public key is the primary key (the ID) of a key. &nbsp;Other fields
+are:</div>
+
+<div>
+<ul>
+<li>Private key (for secret key ring) - the private key may be protected by a
+pass phrase and a pass file</li>
+<li>Nickname (for humans)</li>
+<li>Full name (for humans)</li>
+<li>Creation and expiration dates</li>
+</ul>
+
+<h2>Signatures</h2>
+
+<div>Keys may be signed, we treat key signatures as separate entities. &nbsp;A
+signature consists of</div>
+
+<div>
+<ul>
+<li>The pubkey of the signed key</li>
+<li>The pubkey of the signer</li>
+<li>The "digest", the cryptographic checksum that proves that the signer has
+signed the key</li>
+</ul></div>
+
+<div>This feature will be implemented when Dan Bernstein integrates signatures
+into NaCl; maybe a bit earlier, since the code for these signatures is already
+tested.</div></div>
