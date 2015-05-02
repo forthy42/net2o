@@ -89,7 +89,7 @@ point:
 Videos
 ------
 
-[31c3](31c3.wiki) presentation
+[31c3](31c3.md) presentation
 
 Discussions
 -----------
