@@ -68,7 +68,7 @@ own do script.  This script will ask for your root password to
 install Gforth and the two libraries mentioned above.  After completion,
 you can run a test:
 
-    gforth-fast server-test.fs &amp; gforth-fast client-test.fs localhost &gt;timing
+    gforth-fast server-test.fs & gforth-fast client-test.fs localhost >timing
     gnuplot -p -e 'load "doc/timing.plt";'
 
 Documentation
