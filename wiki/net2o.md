@@ -105,4 +105,4 @@ Discussions
 * [What it's not for](whatnotfor.wiki)
 
 [de](/net2o/wiki?name=net2o.de)
-[中文](/net2o/wiki?name=net2o.zh)
+[中文](net2o.zh.md)
