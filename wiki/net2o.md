@@ -97,7 +97,7 @@ Discussions
 * The [pki](pki.md) problem
 * [Client authentication](client-auth.wiki)
 * [Handover](handover.wiki)
-* [Ack cookies](ack+cookies.wiki)
+* [Ack cookies](ackcookies.wiki)
 * [Key format](key-format.wiki)
 * [Key revocation](key-revocation.wiki)
 * [NSA backdoor](nsa-backdoor.wiki)
