@@ -104,5 +104,5 @@ Discussions
 * [Onion Routing](onion-routing.wiki)
 * [What it's not for](whatnotfor.wiki)
 
-[de](wiki?name=net2o.de)
-[中文](name=net2o.zh)
+[de](/net2o/wiki?name=net2o.de)
+[中文](/net2o/wiki?name=net2o.zh)
