@@ -97,7 +97,7 @@ point:</p>
 
 <h2>Discussions</h2>
 <ul>
-<li>The <a href="pki.wiki">pki</a> problem</li>
+<li>The <a href="pki.md">pki</a> problem</li>
 <li><a href="client-auth.wiki">Client authentication</a></li>
 <li><a href="handover.wiki">Handover</a></li>
 <li><a href="ack+cookies.wiki">Ack cookies</a></li>

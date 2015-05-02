@@ -1,32 +1,42 @@
-<h1>The Trust Problem</h1>Cryptography gives the promise of privacy. A
-communication is secret for everybody except those who have the key to decrypt
-the message. So Alice and Bob, the two communication partners used in
-cryptography examples, have a shared secret, which they use to exchange
-messages. Eve, the eavesdropper, does not know this secret, and therefore can
-not read the messages, nor manipulate the communication without being noticed
-(she can always stop the communication by cutting the line, and she still may
-be able to know that it's Alice and Bob, who are communicating, by looking at
-the routing information of the packets she sees).
+The Trust Problem
+=================
 
-<h2>Key Exchange</h2>Now, how do Alice and Bob establish a shared secret? This
-is a crucial problem to cryptography, the
+Cryptography gives the promise of privacy. A communication is
+secret for everybody except those who have the key to decrypt the
+message. So Alice and Bob, the two communication partners used in
+cryptography examples, have a shared secret, which they use to
+exchange messages. Eve, the eavesdropper, does not know this secret,
+and therefore can not read the messages, nor manipulate the
+communication without being noticed (she can always stop the
+communication by cutting the line, and she still may be able to know
+that it's Alice and Bob, who are communicating, by looking at the
+routing information of the packets she sees).
 
-<p><a href="http://en.wikipedia.org/wiki/Key_exchange">key exchange</a>. The
-English Wikipedia article tells you how they could do that: If Alice and Bob
-wish to exchange encrypted messages, each must be equipped to encrypt messages
-to be sent and decrypt messages received. The nature of the equipping they
-require depends on the encryption technique they might use. If they use a code,
-both will require a copy of the same codebook. If they use a cipher, they will
-need appropriate keys. If the cipher is a symmetric key cipher, both will need
-a copy of the same key. If an asymmetric key cipher with the public/private key
-property, both will need the other's public key. For the cases, where both
-parties need the same thing, they need a secure channel to exchange this. Now,
-if they already have a secure channel, they might as well exchange the message
-using this secure channel - the only advantage cryptography has then, is that
-the secure channel might be costly, or rarely available (e.g. a personal
-meeting is required to set up the system).
+Key Exchange
+-------------
 
-</p><h2>Diffie-Hellman</h2>Now, with public key cryptography, the Diffie-Hellman
+Now, how do Alice and Bob establish a shared secret? This is a
+crucial problem to cryptography, the [key exchange](http://en.wikipedia.org/wiki/Key_exchange). The
+English Wikipedia article tells you how they could do that: If Alice
+and Bob wish to exchange encrypted messages, each must be equipped to
+encrypt messages to be sent and decrypt messages received. The nature
+of the equipping they require depends on the encryption technique they
+might use. If they use a code, both will require a copy of the same
+codebook. If they use a cipher, they will need appropriate keys. If
+the cipher is a symmetric key cipher, both will need a copy of the
+same key. If an asymmetric key cipher with the public/private key
+property, both will need the other's public key. For the cases, where
+both parties need the same thing, they need a secure channel to
+exchange this. Now, if they already have a secure channel, they might
+as well exchange the message using this secure channel - the only
+advantage cryptography has then, is that the secure channel might be
+costly, or rarely available (e.g. a personal meeting is required to
+set up the system).
+
+Diffie-Hellman
+--------------
+
+Now, with public key cryptography, the Diffie-Hellman
 key exchange promises to solve this problem. The key is split into two parts,
 one of which can be made public, but only when both are used together, a shared
 secret can be established. There is only one drawback of the Diffie-Hellman
@@ -38,7 +48,10 @@ solve this, various attempts at creating a PKI have been started. The most
 widely used PKI attempt is that of SSL, and it is a failure. I need to explain
 what SSL does to ensure that identities are correct:
 
-<h2>SSL's PKI attempt</h2>SSL uses Certificate Authorities (CAs) to sign public
+SSL's PKI attempt
+-----------------
+
+SSL uses Certificate Authorities (CAs) to sign public
 keys. The message of this signature is "someone gave us some money, told us he
 has this domain, and he gave us this public key." The "premium" signatures
 usually mean "he gave us more money". This is big business, so you can expect
@@ -59,7 +72,10 @@ know which of the 600 CAs are trustworthy and which are not. And it is
 sufficient if <b>one</b> of them is not, even when the vast majority would be
 ok. Oh shit!
 
-<h2>The Broken Promise</h2>It turns out that the promise of Diffie-Hellman does
+The Broken Promise
+------------------
+
+It turns out that the promise of Diffie-Hellman does
 not hold. To verify the identity of your communication partner, you still need
 a secure channel - this time it's a channel Alice ⇔ CA ⇔ Bob, which allows
 Alice and Bob to verify their identities. If this channel was really secure,
@@ -68,11 +84,14 @@ exchange. The advantage of the SSL approach is that the CAs aren't involved in
 the actual key exchange, only in signing the public keys. But this has to be a
 secure channel.
 
-<h2>Looking for a Solution</h2>Now, how to solve that problem? Society always
+Looking for a Solution
+----------------------
+
+Now, how to solve that problem? Society always
 had problems with people not being trustworthy, and the Chinese approach to
 this problem is called "关系" (pinyin: guānxì, Relationship). You don't
 talk to strangers, you only talk to people you already know. To create new
-relationships, you need to use connections, i.e. people who know both you <b>and</b>
+relationships, you need to use connections, i.e. people who know both you **and**
 the other side. Now how do we transfer this model to a PKI? Fairly simple: Each
 client stores the relation "domain, public key" it sees. This is something that
 needs a costly secure channel, so we need to cache as much as we can, and not
@@ -101,7 +120,10 @@ others, and those have to match. Once we have assembled enough key parts to
 recover the remaining errors, we are done, we can establish a direct, secure
 connection.
 
-<h2>Why Still Use a PKI?</h2>What advantages does a public key system still
+Why Still Use a PKI?
+--------------------
+
+What advantages does a public key system still
 offer? * In the client-server communication case, it is sufficient that the
 client verifies the server, the other way round doesn't matter. Thus, while
 every client should verify the identity of the server, it is not necessary that
@@ -117,7 +139,10 @@ before he's discovered. * We can easily replicate public keys and store them
 before we even need them (e.g. based on popularity), reducing the costs when we
 actually need to create a connection.
 
-<h2>Summary</h2>In summary: Diffie-Hellman does not solve the key exchange
+Summary
+-------
+
+In summary: Diffie-Hellman does not solve the key exchange
 problem. You still need a secure channel, now to validate identity, not to
 exchange keys. The problem however remains the same. The evaluation, whether a
 PKI is secure now is identical to evaluate whether you can use it to exchange
