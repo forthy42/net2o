@@ -131,7 +131,7 @@ Defer gen-table
 ' cmd-table IS gen-table
 
 : $freeze ( addr -- )
-    \G copy string to dictionary
+    \ copy string to dictionary
     >r r@ $@  align here r> !
     dup , here swap dup allot move align ;
 
@@ -278,10 +278,31 @@ code0-buf
 
 : net2o, @ n>64 cmd, ;
 
+\ net2o doc production
+
+[IFDEF] docgen
+    false value ?.stack
+    : .n-name ( n "name" -- )
+	." + " dup hex. >in @ >r parse-name type r> >in !
+	true to ?.stack ;
+    false warnings !@
+    : \g ( rest-of-line -- )
+	source >in @ /string over 2 - c@ 'g' = >r
+	>in @ 3 > r@ and 2 and spaces
+	dup >in +!
+	r> IF  type cr  ELSE  2drop  THEN ; immediate
+    warnings !
+[ELSE]
+    ' noop alias .n-name
+[THEN]
+
+\ net2o command definition
+
 0 Value last-2o
 
 : net2o-does  DOES> net2o, ;
 : net2o: ( number "name" -- )
+    .n-name
     ['] noop over >cmd \ allocate space in table
     Create  here to last-2o
     dup >r , here >r 0 , 0 , 0 , net2o-does noname :
@@ -308,34 +329,59 @@ get-current also net2o-base definitions
 
 : ( ( "type"* "--" "type"* "rparen" -- ) ')' parse 2drop ;
 comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
+    [IFDEF] docgen  >in @ >r ')' parse ."  ( " type ." )" cr r> >in !  [THEN]
     s" (" cmdsig $!
     BEGIN  parse-name dup  WHILE  over c@ cmdsig c$+!
 	s" )" str= UNTIL  ELSE  2drop  THEN
     \ cmdsig $freeze
 ;
 
-0 net2o: dummy ( -- ) ; \ alias
-0 net2o: end-cmd ( -- ) 0 buf-state ! ;
-+net2o: ulit ( #u -- u ) \ unsigned literal
+0 net2o: dummy ( -- ) ;
+
+\g Commands
+\g ========
+\g
+\g net2o separates data and commands.  Data is pass through to higher
+\g layers, commands are interpreted when they arrive.  For connection
+\g requests, the address 0 is always mapped as connectionless code
+\g address.
+\g
+\g The command interpreter is a stack machine with two data types: 64
+\g bit integers and strings.  Encoding of commands, integers and string
+\g length follows protobuf, strings are just sequences of bytes
+\g (interpretation can vary).  Command blocks contain a sequence of
+\g commands; there are no conditionals and looping instructions.
+\g
+\g Strings can contain encrypted nested commands, used during
+\g communication setup.
+\g
+\g List of Commands
+\g ----------------
+\g
+
+\g ### base commands ###
+0 net2o: end-cmd ( -- ) \g end command buffer
+    0 buf-state ! ;
++net2o: ulit ( #u -- u ) \g unsigned literal
     p@ ;
-+net2o: slit ( #n -- n ) \ signed literal, zig-zag encoded
++net2o: slit ( #n -- n ) \g signed literal, zig-zag encoded
     ps@ ;
-+net2o: string ( #string -- $:string ) \ string literal
++net2o: string ( #string -- $:string ) \g string literal
     string@ ;
-+net2o: flit ( #dfloat -- r ) \ double float literal
++net2o: flit ( #dfloat -- r ) \g double float literal
     pf@ ;
-+net2o: endwith ( o:object -- ) \ end scope
++net2o: endwith ( o:object -- ) \g end scope
     do-req> n:o> ;
 :noname o IF  req? @  IF  endwith req? off  THEN  THEN ; is do-req>
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     n:oswap ;
-+net2o: tru ( -- f:true ) \ true flag literal
++net2o: tru ( -- f:true ) \g true flag literal
     true ;
-+net2o: fals ( -- f:false ) \ false flag literal
++net2o: fals ( -- f:false ) \g false flag literal
     false ;
-+net2o: words ( ustart -- ) \ reflection
++net2o: words ( ustart -- ) \g reflection
     64>n net2o:words ;
-+net2o: nestsig ( $:cmd+sig -- ) \ check sig+nest
++net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig IF
 	signed-val validated or! nest-cmd-loop
 	signed-val invert validated and!
@@ -353,19 +399,19 @@ gen-table $@ inherit-table reply-table
     1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
 
 : cmd0! ( -- )
-    \g initialize a stateless command
+    \G initialize a stateless command
     code0-buf  stateless# outflag ! ;
 : cmd! ( -- )
-    \g initialize a statefull command
+    \G initialize a statefull command
     code-buf  outflag off ;
 
 : net2o-code ( -- )
-    \g start a statefull command
+    \G start a statefull command
     cmd!  cmdlock lock
     cmdreset 1 code+ also net2o-base ;
 comp: :, also net2o-base ;
 : net2o-code0
-    \g start a stateless command
+    \G start a stateless command
     cmd0!  cmdlock lock
     cmdreset also net2o-base ;
 comp: :, also net2o-base ;
@@ -516,27 +562,28 @@ dup set-current previous
 \ commands to reply
 
 also net2o-base definitions
-$10 net2o: push' ( #cmd -- ) \ push command into answer packet
+\g ### reply commands ###
+$10 net2o: push' ( #cmd -- ) \g push command into answer packet
     p@ cmd, ;
-+net2o: push-lit ( u -- ) \ push unsigned literal into answer packet
++net2o: push-lit ( u -- ) \g push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
-+net2o: push-slit ( n -- ) \ push singed literal into answer packet
++net2o: push-slit ( n -- ) \g push singed literal into answer packet
     slit, ;
-+net2o: push-$ ( $:string -- ) \ push string into answer packet
++net2o: push-$ ( $:string -- ) \g push string into answer packet
     $> $, ;
-+net2o: push-float ( r -- ) \ push floating point number
++net2o: push-float ( r -- ) \g push floating point number
     float, ;
-+net2o: ok ( utag -- ) \ tagged response
++net2o: ok ( utag -- ) \g tagged response
     64>n net2o:ok ;
-+net2o: ok? ( utag -- ) \ request tagged response
++net2o: ok? ( utag -- ) \g request tagged response
     lit, ok net2o:ok? ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
-+net2o: ko ( uerror -- ) \ receive error message
++net2o: ko ( uerror -- ) \g receive error message
     throw ;
-+net2o: nest ( $:string -- ) \ nested (self-encrypted) command
++net2o: nest ( $:string -- ) \g nested (self-encrypted) command
     $> cmdnest ;
-+net2o: request-done ( ureq -- ) 64>n \ signal request is completed
++net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
 
 \ inspection

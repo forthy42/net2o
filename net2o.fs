@@ -539,7 +539,7 @@ Defer init-reply
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
 : freez ( addr size -- )
-    \g erase and then free - for secret stuff
+    \G erase and then free - for secret stuff
     over swap erase free throw ;
 : ?free ( addr size -- ) >r
     dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
@@ -1331,17 +1331,17 @@ Variable mapstart $1 mapstart !
     over - >r dest-size @ 1- and + r> ;
 : head@ ( -- head )  data-map @ .dest-head @ ;
 : data-head@ ( -- addr u )
-    \g you can read into this, it's a block at a time (wraparound!)
+    \G you can read into this, it's a block at a time (wraparound!)
     data-map @ >o
     dest-head @ dest-back @ dest-size @ + fix-size raddr+ o>
     residualread @ umin ;
 : rdata-back@ ( -- addr u )
-    \g you can write from this, also a block at a time
+    \G you can write from this, also a block at a time
     data-rmap @ >o
     dest-back @ dest-tail @ fix-size raddr+ o>
     residualwrite @ umin ;
 : data-tail@ ( -- addr u )
-    \g you can send from this - as long as you stay block aligned
+    \G you can send from this - as long as you stay block aligned
     data-map @ >o dest-raddr @ dest-tail @ dest-head @ fix-size' o> ;
 
 : data-head? ( -- flag )

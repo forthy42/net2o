@@ -35,6 +35,7 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
+\g ### message commands ###
 net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \ specify a chat group

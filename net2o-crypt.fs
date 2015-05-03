@@ -326,14 +326,14 @@ $60 Constant rndkey#
 : >sksig ( -- )
     c:0key pkc $60 c:hash sksig $20 keccak> ;
 : gen-keys ( -- )
-    \g generate revocable keypair
+    \G generate revocable keypair
     sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
     sk1 pkrev skc pkc ed-keypairx \ generate real keypair
     genkey( ." gen key: " skc keysize .85warn pkc keysize .85info cr )
     >sksig ;
 : check-rev? ( -- flag )
-    \g check generated key if revocation is possible
+    \G check generated key if revocation is possible
     skrev pkrev sk>pk pkrev dup sk-mask pk1 keypad ed-dh pkc keysize str= ;
 : gen-tmpkeys ( -- ) tskc tpkc ed-keypair
     genkey( ." tmp key: " tskc keysize .85warn tpkc keysize .85info cr ) ;

@@ -187,6 +187,7 @@ dht-table >table
 
 reply-table $@ inherit-table dht-table
 
+\g ### dht commands ###
 :noname dht-hash $@ $, dht-id ; dht-class to start-req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;

@@ -21,59 +21,61 @@ reply-table $@ inherit-table context-table
 
 \ generic functions
 
-$20 net2o: disconnect ( -- ) \ close connection
+\g ### connection commands ###
+$20 net2o: disconnect ( -- ) \g close connection
     o 0= ?EXIT n2o:dispose-context un-cmd ;
-+net2o: set-ip ( $:string -- ) \ set address information
++net2o: set-ip ( $:string -- ) \g set address information
     $> setip-xt perform ;
-+net2o: get-ip ( -- ) \ request address information
++net2o: get-ip ( -- ) \g request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
-+net2o: set-blocksize ( n -- ) \ set blocksize to 2^n
++net2o: set-blocksize ( n -- ) \g set blocksize to 2^n
     64>n 1 swap max-block# umin lshift blocksizes! ;
-+net2o: set-blockalign ( n -- ) \ set block alignment to 2^n
++net2o: set-blockalign ( n -- ) \g set block alignment to 2^n
     64>n 1 swap max-block# umin lshift blockalign ! ;
-+net2o: close-all ( -- ) \ close all files
++net2o: close-all ( -- ) \g close all files
     n2o:close-all ;
 \ better slurping
 
-+net2o: set-top ( utop flag -- ) \ set top, flag is true when all data is sent
++net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
-+net2o: slurp ( -- ) \ slurp in tracked files
++net2o: slurp ( -- ) \g slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
 
 \ object handles
 
-$30 net2o: file-id ( uid -- o:file )
+$30 net2o: file-id ( uid -- o:file ) \g choose a file object
     64>n state-addr n:>o ;
 fs-table >table
 
 reply-table $@ inherit-table fs-table
 
+\g ### file commands ###
 :noname fs-id @ ulit, file-id ; fs-class to start-req
-$20 net2o: open-file ( $:string mode -- ) \ open file with mode
+$20 net2o: open-file ( $:string mode -- ) \g open file with mode
     64>r $> 64r> fs-open ;
-+net2o: file-type ( n -- ) \ choose file type
++net2o: file-type ( n -- ) \g choose file type
     fs-class! ;
-+net2o: close-file ( -- ) \ close file
++net2o: close-file ( -- ) \g close file
     fs-close ;
-+net2o: set-size ( size -- ) \ set size attribute of current file
++net2o: set-size ( size -- ) \g set size attribute of current file
     track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. F cr ) size! ;
-+net2o: set-seek ( useek -- ) \ set seek attribute of current file
++net2o: set-seek ( useek -- ) \g set seek attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. F cr ) seekto! ;
-+net2o: set-limit ( ulimit -- ) \ set limit attribute of current file
++net2o: set-limit ( ulimit -- ) \g set limit attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
-+net2o: set-stat ( umtime umod -- ) \ set time and mode of current file
++net2o: set-stat ( umtime umod -- ) \g set time and mode of current file
     64>n n2o:set-stat ;
-+net2o: get-size ( -- )
++net2o: get-size ( -- ) \g requuest file size
     fs-size 64@ lit, set-size ;
-+net2o: get-stat ( -- ) \ request stat of current file
++net2o: get-stat ( -- ) \g request stat of current file
     n2o:get-stat >r lit, r> ulit, set-stat ;
-+net2o: set-form ( w h -- ) \ if file is a terminal, set size
++net2o: set-form ( w h -- ) \g if file is a terminal, set size
     term-h ! term-w ! ;
-+net2o: get-form ( -- ) \ if file is a terminal, request size
++net2o: get-form ( -- ) \g if file is a terminal, request size
     term-w @ ulit, term-h @ ulit, set-form ;
-+net2o: poll-request ( ulimit -- ) \ poll a file to check for size changes
++net2o: poll-request ( ulimit -- ) \g poll a file to check for size changes
     poll! lit, set-size ;
 
 gen-table $freeze
@@ -84,30 +86,32 @@ gen-table $freeze
 
 \ flow control functions
 
-$31 net2o: ack ( -- o:acko )  ack@ n:>o ;
+$31 net2o: ack ( -- o:acko ) \g ack object
+    ack@ n:>o ;
 ack-table >table
 
+\g ### ack commands ###
 reply-table $@ inherit-table ack-table
 
 :noname ack ; ack-class to start-req
-$20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
+$20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-addrtime ;
-+net2o: ack-resend ( flag -- ) \ set resend toggle flag
++net2o: ack-resend ( flag -- ) \g set resend toggle flag
     64>n  parent @ .net2o:ack-resend ;
-+net2o: set-rate ( urate udelta-t -- ) \ set rate 
++net2o: set-rate ( urate udelta-t -- ) \g set rate 
     parent @ >o cookie? IF  ack@ .net2o:set-rate
     ELSE  64drop 64drop ack@ .ns/burst dup >r 64@ 64-2* 64-2* r> 64!  THEN o> ;
-+net2o: resend-mask ( addr umask -- ) \ resend mask blocks starting at addr
++net2o: resend-mask ( addr umask -- ) \g resend mask blocks starting at addr
     2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
-+net2o: track-timing ( -- ) \ track timing
++net2o: track-timing ( -- ) \g track timing
     net2o:track-timing ;
-+net2o: rec-timing ( $:string -- ) \ recorded timing
++net2o: rec-timing ( $:string -- ) \g recorded timing
     $> net2o:rec-timing ;
-+net2o: send-timing ( -- ) \ request recorded timing
++net2o: send-timing ( -- ) \g request recorded timing
     net2o:timing$ maxtiming umin tuck $, net2o:/timing rec-timing ;
-+net2o: ack-b2btime ( utime addr -- ) \ burst-to-burst time at packet addr
++net2o: ack-b2btime ( utime addr -- ) \g burst-to-burst time at packet addr
     net2o:ack-b2btime ;
-+net2o: ack-resend# ( addr $:string -- )
++net2o: ack-resend# ( addr $:string -- ) \g resend numbers
     64>n $> parent @ .data-map @ .resend#? dup 0= IF
 	drop ." resend# don't match!" F cr
 	parent @ .n2o:see-me
@@ -115,13 +119,13 @@ $20 net2o: ack-addrtime ( utime addr -- ) \ packet at addr received at time
     ELSE
 	8 lshift validated +! cookie-val validated or!
     THEN ;
-+net2o: ack-flush ( addr -- ) \ flushed to addr
++net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent @ .net2o:rewind-sender-partial ;
-+net2o: set-head ( addr -- ) \ set head
++net2o: set-head ( addr -- ) \g set head
     64>n parent @ .data-rmap @ .dest-head umax! ;
-+net2o: timeout ( uticks -- ) \ timeout request
++net2o: timeout ( uticks -- ) \g timeout request
     parent @ >o net2o:timeout  data-map @ .dest-tail @ o> ulit, set-head ;
-+net2o: set-rtdelay ( ticks -- ) \ set round trip delay only
++net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 
 \ profiling, nat traversal

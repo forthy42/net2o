@@ -68,25 +68,40 @@ cmd-args
 
 \ generic stack using string array primitives
 
+\ Copyright (C) 2015   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 : stack> ( stack -- x ) >r
-    \g generic single-stack pop
+    \G generic single-stack pop
     r@ $[]# dup 0<= !!stack-empty!!
     1- dup r@ $[] @ swap cells r> $!len ;
 : >stack ( x stack -- )
-    \g generic single-stack push
+    \G generic single-stack push
     dup $[]# swap $[] ! ;
 
 : stack@ ( stack -- x1 .. xn n )
-    \g fetch everything from the generic stack to the data stack
+    \G fetch everything from the generic stack to the data stack
     $@ dup cell/ >r bounds ?DO  I @  cell +LOOP  r> ;
 : stack! ( x1 .. xn n stack -- )
-    \g set the generic stack with values from the data stack
+    \G set the generic stack with values from the data stack
     >r cells r@ $!len
     r> $@ bounds cell- swap cell- -DO  I !  cell -LOOP ;
 
 : ustack ( "name" -- )
-    \g generate user stack, including initialization and free on thread
-    \g start and termination
+    \G generate user stack, including initialization and free on thread
+    \G start and termination
     User  latestxt >r
     :noname  action-of thread-init compile,
     r@ compile, postpone off postpone ;

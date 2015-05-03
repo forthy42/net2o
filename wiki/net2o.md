@@ -6,7 +6,6 @@ net2o is the attempt to reinvent the Internet.
 What's broken?
 --------------
 
-
 * The internet bases on assumptions 20-30 years old
 * These assumptions are wrong today
 * Much of it followed the "good enough" principle
@@ -82,7 +81,7 @@ point:
 2. [Topology](topology.wiki)
 3. [Encryption](encryption.wiki)
 4. [Flow Control](flow-control.wiki)
-5. [Commands](commands.wiki)
+5. [Commands](commands.md)
 6. [Distributed Data](distributed-data.wiki)
 7. [Applications](applications.wiki)
 

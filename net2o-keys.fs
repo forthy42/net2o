@@ -20,8 +20,8 @@ require mkdir.fs
 \ accept for password entry
 
 : accept* ( addr u -- u' )
-    \g accept-like input, but types * instead of the character
-    \g don't save into history
+    \G accept-like input, but types * instead of the character
+    \G don't save into history
     dup >r
     BEGIN  xkey dup #cr <> over #lf <> and WHILE
 	    dup #bs = over #del = or IF
@@ -265,20 +265,25 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table key-entry-table
 
-\ $10 net2o: newkey ( $:string -- o:key ) !!signed?
-\     $> key:new n:>o  1 !!>order? ;
-\ key-entry-table >table
+\g ### key storage commands ###
 $11 net2o: privkey ( $:string -- )
+    \g private key
     \ does not need to be signed, the secret key verifies itself
     $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
+\g key type (0: anon, 1: user, 2: group)
 +net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $! ;
+\g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
+\g key profile (hash of a resource)
 +net2o: keymask ( x -- )                       8 !!>order? 64drop ;
+\g key mask
 +net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
+\g preshared key (unclear if that's going to stay
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
+\g add a key signature
 dup set-current previous
 
 gen-table $freeze

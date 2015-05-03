@@ -38,8 +38,9 @@ get-current also net2o-base definitions
 
 cmd-table $@ inherit-table vault-table
 
+\g ### vault commands ###
 net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
-    \ start diffie hellman exchange
+    \g start diffie hellman exchange
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
     v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
@@ -70,7 +71,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     verify-tag 0= !!inv-sig!!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
     0 >crypt 8 c-state or! ;
-+net2o: vault-crypt ( n -- ) \ set encryption mode and key wrap size
++net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
     64>n v-mode ! ;
 
 gen-table $freeze
