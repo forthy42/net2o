@@ -17,7 +17,10 @@
 
 reply-table $@ inherit-table setup-table
 
+\g 
 \g ### connection setup commands ###
+\g 
+
 $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     $> cmdtmpnest ;
 

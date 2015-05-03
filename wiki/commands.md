@@ -1,19 +1,25 @@
 Commands
 ========
+
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
 requests, the address 0 is always mapped as connectionless code
 address.
+
 The command interpreter is a stack machine with two data types: 64
 bit integers and strings.  Encoding of commands, integers and string
 length follows protobuf, strings are just sequences of bytes
 (interpretation can vary).  Command blocks contain a sequence of
 commands; there are no conditionals and looping instructions.
+
 Strings can contain encrypted nested commands, used during
 communication setup.
+
 List of Commands
 ----------------
+
 ### base commands ###
+
 + $0 end-cmd ( -- )
   end command buffer
 + $1 ulit ( #u -- u )
@@ -35,7 +41,9 @@ List of Commands
   reflection
 + $A nestsig ( $:cmd+sig -- )
   check sig+nest
+
 ### reply commands ###
+
 + $10 push' ( #cmd -- )
   push command into answer packet
 + $11 push-lit ( u -- )
@@ -57,7 +65,9 @@ List of Commands
 + $19 request-done ( ureq -- )
   signal request is completed
 + $1A token ( $:token n -- )
+
 ### connection setup commands ###
+
 + $20 tmpnest ( $:string -- )
 + $21 new-data ( addr addr u -- )
 + $22 new-code ( addr addr u -- )
@@ -81,7 +91,9 @@ List of Commands
 + $34 context ( -- )
 + $35 gen-reply ( -- )
 + $36 gen-punch-reply ( -- )
+
 ### connection commands ###
+
 + $20 disconnect ( -- )
   close connection
 + $21 set-ip ( $:string -- )
@@ -100,7 +112,9 @@ List of Commands
   slurp in tracked files
 + $30 file-id ( uid -- o:file )
   choose a file object
+
 ### file commands ###
+
 + $20 open-file ( $:string mode -- )
   open file with mode
 + $21 file-type ( n -- )
@@ -127,7 +141,9 @@ List of Commands
   poll a file to check for size changes
 + $31 ack ( -- o:acko )
   ack object
+
 ### ack commands ###
+
 + $20 ack-addrtime ( utime addr -- )
   packet at addr received at time
 + $21 ack-resend ( flag -- )
@@ -154,6 +170,9 @@ List of Commands
   timeout request
 + $2C set-rtdelay ( ticks -- )
   set round trip delay only
+
+### log commands ###
+
 + $1A log-token ( $:token n -- )
 + $20 emit ( utf8 -- )
 + $21 type ( $:string -- )
@@ -163,7 +182,9 @@ List of Commands
 + $25 .time ( -- )
 + $26 !time ( -- )
 + $32 log ( -- o:log )
+
 ### key storage commands ###
+
 + $11 privkey ( $:string -- )
   private key
 + $12 keytype ( n -- )
@@ -178,9 +199,11 @@ key mask
 preshared key (unclear if that's going to stay
 + $17 +keysig ( $:string -- )
 add a key signature
+
+### dht commands ###
+
 + $33 dht-id ( $:string -- o:o )
 set dht id for further operations on it
-### dht commands ###
 + $20 dht-host+ ( $:string -- )
 + $21 dht-host- ( $:string -- )
 + $22 dht-tags+ ( $:string -- )
@@ -188,8 +211,10 @@ set dht id for further operations on it
 + $24 dht-host? ( -- )
 + $25 dht-tags? ( -- )
   forward message to all next nodes of that message group
-+ $34 msg ( -- o:msg )
+
 ### message commands ###
+
++ $34 msg ( -- o:msg )
 + $20 msg-start ( $:pksig -- )
 + $21 msg-group ( $:group -- )
 + $22 msg-join ( $:group -- )
@@ -198,3 +223,13 @@ set dht id for further operations on it
 + $25 msg-re ( $:hash )
 + $26 msg-text ( $:msg -- )
 + $27 msg-object ( $:object -- )
+
+### vault commands ###
+
++ $20 dhe ( $:pubkey -- )
+  start diffie hellman exchange
++ $21 vault-keys ( $:keys -- )
++ $22 vault-file ( $:content -- )
++ $23 vault-sig ( $:sig -- )
++ $24 vault-crypt ( n -- )
+  set encryption mode and key wrap size

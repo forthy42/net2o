@@ -25,6 +25,9 @@ defer avalanche-to ( addr u o:context -- )
 
 get-current also net2o-base definitions
 
+\g 
+\g ### message commands ###
+\g 
 $34 net2o: msg ( -- o:msg ) \ push a message object
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
@@ -35,7 +38,6 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-\g ### message commands ###
 net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \ specify a chat group

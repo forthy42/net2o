@@ -180,6 +180,10 @@ Variable dht-table
 
 get-current also net2o-base definitions
 
+\g 
+\g ### dht commands ###
+\g 
+
 $33 net2o: dht-id ( $:string -- o:o )
     $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
 \g set dht id for further operations on it
@@ -187,7 +191,6 @@ dht-table >table
 
 reply-table $@ inherit-table dht-table
 
-\g ### dht commands ###
 :noname dht-hash $@ $, dht-id ; dht-class to start-req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;

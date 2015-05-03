@@ -264,8 +264,9 @@ Variable keys
 get-current also net2o-base definitions
 
 cmd-table $@ inherit-table key-entry-table
-
+\g 
 \g ### key storage commands ###
+\g 
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself

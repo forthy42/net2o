@@ -37,8 +37,9 @@ vault-table >table
 get-current also net2o-base definitions
 
 cmd-table $@ inherit-table vault-table
-
+\g 
 \g ### vault commands ###
+\g 
 net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \g start diffie hellman exchange
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop

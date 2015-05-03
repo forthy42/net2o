@@ -20,8 +20,9 @@
 reply-table $@ inherit-table context-table
 
 \ generic functions
-
+\g 
 \g ### connection commands ###
+\g 
 $20 net2o: disconnect ( -- ) \g close connection
     o 0= ?EXIT n2o:dispose-context un-cmd ;
 +net2o: set-ip ( $:string -- ) \g set address information
@@ -50,8 +51,9 @@ $30 net2o: file-id ( uid -- o:file ) \g choose a file object
 fs-table >table
 
 reply-table $@ inherit-table fs-table
-
+\g 
 \g ### file commands ###
+\g 
 :noname fs-id @ ulit, file-id ; fs-class to start-req
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
     64>r $> 64r> fs-open ;
@@ -89,8 +91,9 @@ gen-table $freeze
 $31 net2o: ack ( -- o:acko ) \g ack object
     ack@ n:>o ;
 ack-table >table
-
+\g 
 \g ### ack commands ###
+\g 
 reply-table $@ inherit-table ack-table
 
 :noname ack ; ack-class to start-req

@@ -340,26 +340,27 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 
 \g Commands
 \g ========
-\g
+\g 
 \g net2o separates data and commands.  Data is pass through to higher
 \g layers, commands are interpreted when they arrive.  For connection
 \g requests, the address 0 is always mapped as connectionless code
 \g address.
-\g
+\g 
 \g The command interpreter is a stack machine with two data types: 64
 \g bit integers and strings.  Encoding of commands, integers and string
 \g length follows protobuf, strings are just sequences of bytes
 \g (interpretation can vary).  Command blocks contain a sequence of
 \g commands; there are no conditionals and looping instructions.
-\g
+\g 
 \g Strings can contain encrypted nested commands, used during
 \g communication setup.
-\g
+\g 
 \g List of Commands
 \g ----------------
-\g
-
+\g 
 \g ### base commands ###
+\g 
+
 0 net2o: end-cmd ( -- ) \g end command buffer
     0 buf-state ! ;
 +net2o: ulit ( #u -- u ) \g unsigned literal
@@ -562,7 +563,9 @@ dup set-current previous
 \ commands to reply
 
 also net2o-base definitions
+\g 
 \g ### reply commands ###
+\g 
 $10 net2o: push' ( #cmd -- ) \g push command into answer packet
     p@ cmd, ;
 +net2o: push-lit ( u -- ) \g push unsigned literal into answer packet

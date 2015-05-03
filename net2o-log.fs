@@ -18,7 +18,9 @@
 reply-table $@ inherit-table log-table
 
 get-current also net2o-base definitions
-
+\g 
+\g ### log commands ###
+\g 
 net2o' token net2o: log-token ( $:token n -- )
     64>n 0 .r ." :" $> F type space ;
 
