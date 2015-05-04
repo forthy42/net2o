@@ -694,7 +694,7 @@ Variable lastn2oaddr
     >r SOCK_DGRAM >hints r> hints ai_family l!
     get-info info>string insert-address ;
 
-: insert-ip ( addr u port -- net2o-addr )  PF_UNSPEC insert-ip* ;
+: insert-ip ( addr u port -- net2o-addr )  AF_INET   insert-ip* ;
 : insert-ip4 ( addr u port -- net2o-addr ) AF_INET   insert-ip* ;
 : insert-ip6 ( addr u port -- net2o-addr ) AF_INET6  insert-ip* ;
 
@@ -1187,7 +1187,9 @@ UValue connection
     $16 /string !temp-addr ;
 
 : check-addr1 ( -- addr u flag )
-    sockaddr1 sock-rest 2dup try-ip ;
+    sockaddr1 sock-rest 2dup try-ip
+    nat( ." check: " >r 2dup .address
+    r> dup IF ."  ok"  ELSE  ."  ko"  THEN  cr ) ;
 
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
