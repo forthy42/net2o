@@ -769,7 +769,9 @@ User temp-addr   $10 cell- uallot drop
 
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF
-	>r r@ get-dest  route>address  r> ins-source  false  EXIT  THEN
+	>r r@ get-dest  route>address
+	route( sockaddr alen @ .address cr )
+	r> ins-source  false  EXIT  THEN
     2drop true ; \ local packet
 
 : in-check ( -- flag )  address>route -1 <> ;
