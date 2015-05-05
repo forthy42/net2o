@@ -770,7 +770,6 @@ User temp-addr   $10 cell- uallot drop
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF
 	>r r@ get-dest  route>address
-	route( sockaddr alen @ .address cr )
 	r> ins-source  false  EXIT  THEN
     2drop true ; \ local packet
 
@@ -2193,8 +2192,10 @@ $20 Constant signed-val
 	handle-dest
     THEN ;
 
-: route-packet ( -- ) route( ." route to: " inbuf destination $10 xtype cr )
+: route-packet ( -- )
     inbuf >r r@ get-dest route>address
+    route( ." route to: " sockaddr alen @ .address space
+           inbuf destination $10 xtype cr )
     r> dup packet-size send-a-packet 0< ?ior ;
 
 \ dispose context
