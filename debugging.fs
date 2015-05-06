@@ -135,9 +135,13 @@ timer: +ack
 
 Ustack b$
 
+event: ->b$off b$ $off ;
+event: ->type defers type <event ->b$off event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
-: bflush b$ $@ (type) b$ $off ;
+: bflush ( -- )
+    b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
+    BEGIN  b$ @  WHILE  stop  REPEAT ;
 : bcr    #lf bemit bflush ;
 
 ' btype ' bemit ' bcr ' form output: b-out
