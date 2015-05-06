@@ -89,9 +89,9 @@ UValue outbuf   ( -- addr )
 user-o io-mem
 
 object class
-    pollfd %size 4 *               uvar pollfds \ up to four file descriptors
-    sockaddr_in %size              uvar sockaddr
-    sockaddr_in %size              uvar sockaddr1
+    pollfd 4 *                     uvar pollfds \ up to four file descriptors
+    sockaddr_in                    uvar sockaddr
+    sockaddr_in                    uvar sockaddr1
     file-stat                      uvar statbuf
     cell                           uvar ind-addr
     cell                           uvar reqmask
@@ -349,10 +349,10 @@ User ip6:#
     AF_INET6 r@ family w!
     0        r@ sin6_flowinfo l!
     0        r@ sin6_scope_id l!
-    r> sockaddr_in6 %size ;
+    r> sockaddr_in6 ;
 
 : my-port ( -- port )
-    sockaddr_in6 %size alen !
+    sockaddr_in6 alen !
     net2o-sock sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
@@ -368,7 +368,7 @@ User ip6:#
     str= IF  12 + 4  ELSE  $10   THEN ;
 
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-    [:  sockaddr_in6 %size alen !
+    [:  sockaddr_in6 alen !
 	sockaddr ipv4! query-sock sockaddr sock-rest connect
 	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
@@ -388,7 +388,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    [:  sockaddr_in6 %size alen !
+    [:  sockaddr_in6 alen !
 	sockaddr sin6_addr $10 move
 	query-sock sockaddr sock-rest connect
 	dup 0< errno 101 = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
@@ -525,9 +525,6 @@ Defer init-reply
 : -other        ['] noop is other ;
 -other
 
-: fds!+ ( fileno flag addr -- addr' )
-    >r r@ events w!  r@ fd l!  r> pollfd %size + ; 
-
 : prep-socks ( -- )  pollfds >r
     net2o-sock      POLLIN  r> fds!+ >r
     epiper @ fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
@@ -635,7 +632,7 @@ MSG_WAITALL   Constant do-block
 MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
-    >r [ sockaddr_in %size ]L alen !
+    >r sockaddr_in alen !
     net2o-sock inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
@@ -1984,7 +1981,7 @@ queue-class >osize @ buffer: queue-adder
     epiper @    fileno POLLIN  r> fds!+ drop 1 to pollfd# ;
 
 : clear-events ( -- )  pollfds
-    pollfd# 0 DO  0 over revents w!  pollfd %size +  LOOP  drop ;
+    pollfd# 0 DO  0 over revents w!  pollfd +  LOOP  drop ;
 
 : timeout! ( -- )
     sender-task dup IF  up@ =  ELSE  0=  THEN  IF
@@ -2018,8 +2015,8 @@ User try-reads
     try-read# try-reads !  0 0 ;
 
 : read-event ( -- )
-    pollfds [ pollfd %size revents ]L + w@ POLLIN = IF
-	?events  0 pollfds pollfd %size + revents w!
+    pollfds [ pollfd revents ]L + w@ POLLIN = IF
+	?events  0 pollfds pollfd + revents w!
     THEN ;
 
 : try-read-packet-wait ( -- addr u / 0 0 )
