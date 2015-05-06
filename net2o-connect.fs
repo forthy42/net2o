@@ -132,9 +132,9 @@ net2o-base
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
 : reply-key, ( -- )
-    nest[ pkc keysize $, dest-pubkey @ IF
-	dest-pubkey $@ $, keypair
-	dest-pubkey $@ drop skc key-stage2
+    nest[ pkc keysize $, pubkey @ IF
+	pubkey $@ $, keypair
+	pubkey $@ drop skc key-stage2
     ELSE  receive-key  THEN
     update-key all-ivs ;
 

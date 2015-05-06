@@ -186,9 +186,9 @@ magenta >bg white >fg or bold or ,
     ELSE  cell+ .ke-nick $@ type 2drop  THEN ;
 
 :noname ( addr u -- )
-    o IF  dest-pubkey @ IF
-	    2dup dest-pubkey $@ keysize umin str= 0= IF
-		[: ." want: " dest-pubkey $@ keysize umin 85type cr
+    o IF  pubkey @ IF
+	    2dup pubkey $@ keysize umin str= 0= IF
+		[: ." want: " pubkey $@ keysize umin 85type cr
 		  ." got : " 2dup 85type cr ;] $err
 		true !!wrong-key!!
 	    THEN
@@ -510,7 +510,7 @@ $40 buffer: nick-buf
     nick-key >o o 0= !!unknown-key!!
     ke-psk sec@ state# umin
     ke-pk $@ keysize umin o>
-    dest-pubkey $!  dest-0key sec! ;
+    pubkey $!  dest-0key sec! ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )

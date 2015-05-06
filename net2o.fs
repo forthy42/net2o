@@ -938,6 +938,10 @@ cmd-class class
 end-class msg-class
 
 cmd-class class
+    \ callbacks
+    field: timeout-xt \ callback for timeout
+    field: setip-xt   \ callback for set-ip
+    field: ack-xt     \ callback for acknowledge
     \ maps for data and code transfer
     field: code-map
     field: code-rmap
@@ -968,9 +972,6 @@ cmd-class class
     field: crypto-key
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
-    field: timeout-xt \ callback for timeout
-    field: setip-xt   \ callback for set-ip
-    field: ack-xt     \ callback for acknowledge
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-lock
@@ -1008,11 +1009,19 @@ cmd-class class
     \ statistics
     KEYBYTES +field tpkc
     KEYBYTES +field tskc
-    field: dest-pubkey  \ if not 0, connect only to this key
     field: dest-0key    \ key for stateless connections
 end-class context-class
 
 Variable context-table
+
+\ events for context-oriented behavior
+
+: dbg-connect ( -- )
+    ." connected from: " pubkey $@ 85type cr ;
+
+Defer do-connect  ' dbg-connect IS do-connect
+
+event: ->connect ( connection -- ) .do-connect ;
 
 \ check for valid destination
 
@@ -1143,6 +1152,8 @@ UValue connection
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  >o 0 timeouts ! o>  THEN ;
 
+: -flow-control ['] noop         ack-xt ! ;
+
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     o contexts !@ next-context !
@@ -1151,6 +1162,7 @@ UValue connection
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
+    -flow-control
     -1 blocksize !
     1 blockalign !
     code-lock 0 pthread_mutex_init drop
@@ -1243,7 +1255,9 @@ Variable mapstart $1 mapstart !
 : server? ( -- flag )  >is-server c@ negate ;
 : server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
-: context! ( -- )   context-table @ token-table !  dest-0key @ del-0key ;
+: context! ( -- )
+    context-table @ token-table !  dest-0key @ del-0key
+    <event wait-task @ ?dup-0=-IF [ up@ ]L THEN o elit, ->connect event> ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
@@ -1296,6 +1310,7 @@ Variable mapstart $1 mapstart !
 \ symmetric key management and searching in open connections
 
 : search-context ( .. xt -- .. ) { xt }
+    \G xt has ( .. -- .. flag ) with true to continue
     contexts  BEGIN  @ dup  WHILE  >o  xt execute
 	next-context o> swap  0= UNTIL  THEN  drop ;
 
@@ -2219,7 +2234,6 @@ $20 Constant signed-val
 	crypto-key sec-off
 	dest-0key sec-off
 	data-resend $off
-	dest-pubkey $off
 	pubkey $off
 	mpubkey $off
 	log-context @ ?dup-IF  .dispose  THEN
@@ -2331,7 +2345,6 @@ Variable beacons \ destinations to send beacons to
     BEGIN  packet-event  event-send  AGAIN ;
 
 : n2o:request-done ( n -- )
-    request( ." Request " dup . ." done, to task: " wait-task @ hex. cr )
     file-task ?dup-IF  <event swap wait-task @ elit, elit, ->reqsave event>
     ELSE  elit, ->request  THEN ;
 
@@ -2499,6 +2512,10 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     id .dht-host $[]# 0= IF  2dup nick-lookup  2dup nick-id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
     id dup .dht-host ['] insert-host $[]map drop ;
+
+: search-connect ( nick u -- o/0 ) nick>pk keysize umin
+    0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context
+    nip nip  dup to connection ;
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r n2o:lookup 2r>

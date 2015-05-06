@@ -358,7 +358,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     nest[ cookie, ind-addr @ IF  gen-punch-reply
     ELSE  gen-reply request,  THEN ]nest
     tmpkey-request
-    dest-pubkey @ 0= IF  key-request  THEN
+    pubkey @ 0= IF  key-request  THEN
     ind-addr @  IF  punch?  THEN  other
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
@@ -431,7 +431,6 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
-: -flow-control ['] noop         ack-xt ! ;
 
 \ keepalive
 

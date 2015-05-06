@@ -78,6 +78,14 @@ $20 value hash-size#
 	"net2o-dhtroot.n2o" do-keyin
     THEN ;
 
+Variable chat-key
+
+: wait-chat ( addr u -- )
+    ." press key to connect to " 2dup type nick>pk keysize umin chat-key $!
+    [: chat-key $@ pubkey $@ str= IF  bl unkey  THEN ;] is do-connect
+    key drop  ['] noop IS do-connect ;
+
+
 \ commands for the command line user interface
 
 Vocabulary net2o-cmds
@@ -221,8 +229,10 @@ get-current net2o-cmds definitions
     \G usage: n2o chat @user
     get-me init-client announce-me
     ?@nextarg IF
-	." press key to connect to " 2dup type key drop
-	$A $A nick-connect ret+beacon do-chat ret-beacon c:disconnect  THEN ;
+	2dup wait-chat
+	2dup search-connect ?dup-IF  >o 2drop rdrop
+	ELSE  $A $A nick-connect  THEN
+	ret+beacon do-chat ret-beacon c:disconnect  THEN ;
 
 \ script mode
 

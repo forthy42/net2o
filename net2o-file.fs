@@ -34,6 +34,7 @@ cmd-class class
     field: fs-inbuf
     field: fs-outbuf
     field: fs-termtask
+    field: file-xt \ callback for operation completed
     method fs-read
     method fs-write
     method fs-open
@@ -43,8 +44,38 @@ end-class fs-class
 
 Variable fs-table
 
+\ file events
+
+: file:done ( -- )
+    ." download done: " fs-id ? fs-path $@ type cr ;
+event: ->file-done ( file-o -- )
+    >o file-xt perform o> ;
+
+\ id handling
+
+: id>addr ( id -- addr remainder )
+    >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
+: id>addr? ( id -- addr )
+    id>addr cell < !!fileid!! ;
+: new>file ( id -- )
+    [: fs-class new { w^ fsp } fsp cell file-state $+!
+      o fsp @ >o parent ! fs-id ! ['] file:done file-xt !
+      fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
+    filestate-lock c-section ;
+
+: lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
+: state-addr ( id -- addr )
+    dup >r id>addr dup 0< !!gap!!
+    0= IF  drop r@ new>file lastfile@  THEN  rdrop ;
+
+cell 8 = [IF]
+    ' noop alias 64>usat
+[ELSE]
+    : 64>usat ( 64 -- u ) 0<> or ;
+[THEN]
+
 : >seek ( size 64to 64seek -- size' )
-    64dup 64>d fs-fid @ reposition-file throw 64- 64>n umin ;
+    64dup 64>d fs-fid @ reposition-file throw 64- 64>usat umin ;
 
 : fs-timestamp! ( mtime fileno -- ) >r
     [IFDEF] android  rdrop 64drop
@@ -63,9 +94,13 @@ Variable fs-table
 ; fs-class to fs-read
 :noname ( addr u -- n )
     fs-limit 64@ fs-size 64@ 64umin
+    fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
     fs-seek 64@ >seek
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
+    fs-size 64@ fs-seek 64@ 64= IF
+	<event o elit, ->file-done parent @ .wait-task @ event>
+    THEN
 ; fs-class to fs-write
 :noname ( -- )
     fs-fid @ 0= ?EXIT
@@ -74,7 +109,7 @@ Variable fs-table
 	fs-fid @ flush-file throw
 	fs-fid @ fileno fs-timestamp!
     THEN
-    fs-fid @ close-file throw  fs-fid off
+    fs-fid @ close-file throw  fs-fid off  fs-path $off
 ; fs-class to fs-close
 :noname ( -- size )
     fs-fid @ file-size throw d>64
@@ -178,23 +213,6 @@ here file-classes - cell/ Constant file-classes#
     1 over lshift fs-class-permit and 0= !!fileclass!!
     cells file-classes + @ o cell- ! ;
 
-\ id handling
-
-: id>addr ( id -- addr remainder )
-    >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
-: id>addr? ( id -- addr )
-    id>addr cell < !!fileid!! ;
-: new>file ( id -- )
-    [: fs-class new { w^ fsp } fsp cell file-state $+!
-      fsp @ >o fs-id !
-      fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
-    filestate-lock c-section ;
-
-: lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
-: state-addr ( id -- addr )
-    dup >r id>addr dup 0< !!gap!!
-    0= IF  drop r@ new>file lastfile@  THEN  rdrop ;
-
 \ state handling
 
 : dest-top! ( addr -- )
@@ -250,7 +268,7 @@ here file-classes - cell/ Constant file-classes#
     file-sema c-section ;
 
 : save-to ( addr u n -- )  state-addr >o
-    r/w create-file throw fs-fid ! o> ;
+    2dup fs-path $! r/w create-file throw fs-fid ! o> ;
 
 \ file status stuff
 

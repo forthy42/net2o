@@ -98,7 +98,7 @@ previous
     pad $100 accept dup 1+ xback-restore ;
 
 : do-chat ( -- )
-    -timeout
+    -timeout  BEGIN  key?  WHILE  key drop  REPEAT
     BEGIN  get-input dup WHILE
 	    pad swap 2dup +resend-cmd send-text -timeout .chat
     REPEAT
