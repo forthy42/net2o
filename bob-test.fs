@@ -29,7 +29,7 @@ init-client
     ." Bob revoked: " pkc $20 85type  cr
     replace-me
     ." Bob replaced: " pkc $20 85type  cr
-    do-disconnect ;
+    disconnect-me ;
 
 strict-keys off
 c:bob server-loop

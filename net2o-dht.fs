@@ -358,7 +358,7 @@ previous
     net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip n2o:send-revoke ;
 
-: do-disconnect ( -- )
+: disconnect-me ( -- )
     net2o-code log .time s" Disconnect" $, type cr endwith
       close-all disconnect  end-code msg( ." disconnected" F cr )
     n2o:dispose-context msg( ." Disposed context" F cr ) ;
@@ -368,7 +368,7 @@ previous
     [: over >r insert-address r> free throw
       n2o:new-context $6 $6 n2o:connect msg( ." beacon: connected" F cr )
       replace-me msg( ." beacon: replaced" F cr )
-      do-disconnect ;] 3 net2o-task drop ;
+      disconnect-me ;] 3 net2o-task drop ;
 
 \ beacon handling
 

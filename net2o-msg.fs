@@ -99,7 +99,7 @@ previous
 
 : do-chat ( -- )
     -timeout  BEGIN  key?  WHILE  key drop  REPEAT
-    BEGIN  get-input dup WHILE
+    BEGIN  get-input dup connection 0<> and  WHILE
 	    pad swap 2dup +resend-cmd send-text -timeout .chat
     REPEAT
     drop ;

@@ -55,7 +55,7 @@ Variable connect-nick  "test" connect-nick $!
 
 : c:dht ( n -- )  $8 $8 connect-nick $@ ins-ip c:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
-    LOOP do-disconnect ;
+    LOOP  disconnect-me ;
 
 : std-block ( -- ) $10 blocksize! $A blockalign! ;
 

@@ -1018,10 +1018,13 @@ Variable context-table
 
 : dbg-connect ( -- )
     ." connected from: " pubkey $@ 85type cr ;
+: dbg-disconnect ( -- )
+    ." disconnecting: " pubkey $@ 85type cr ;
 
-Defer do-connect  ' dbg-connect IS do-connect
+Defer do-connect     ' dbg-connect IS do-connect
+Defer do-disconnect  ' dbg-disconnect IS do-disconnect
 
-event: ->connect ( connection -- ) .do-connect ;
+event: ->connect    ( connection -- ) .do-connect ;
 
 \ check for valid destination
 
@@ -2247,6 +2250,8 @@ $20 Constant signed-val
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
+event: ->disconnect ( connection -- ) .do-disconnect n2o:dispose-context ;
+
 \ loops for server and client
 
 8 cells 1- Constant maxrequest#
@@ -2465,7 +2470,7 @@ require net2o-msg.fs
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
-    do-disconnect [: .packets profile( .times ) ;] $err ;
+    disconnect-me [: .packets profile( .times ) ;] $err ;
 
 : c:fetch-id ( pubkey u -- )
     net2o-code
@@ -2482,7 +2487,7 @@ require net2o-msg.fs
 Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 : announce-me ( -- )
-    $8 $8 dhtnick $@ ins-ip dup add-beacon c:connect replace-me do-disconnect ;
+    $8 $8 dhtnick $@ ins-ip dup add-beacon c:connect replace-me disconnect-me ;
 
 : nick-lookup ( addr u -- )
     $A $E dhtnick $@ ins-ip c:connect
@@ -2492,7 +2497,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 	over c@ '!' =  WHILE
 	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
 	    o o> >r 2dup c:fetch-id r> >o
-    REPEAT  o> 2drop do-disconnect ;
+    REPEAT  o> 2drop disconnect-me ;
 : insert-host ( o addr u -- o )
     2 pick >o ." check host: " 2dup .host cr
     host>$ o> IF
