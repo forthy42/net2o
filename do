@@ -22,12 +22,12 @@ else
 	function sudo {
             su --command="$*"
 	}
-	export sudo
     else
 	function sudo {
 	    eval "$@"
 	}
     fi
+    export sudo
 fi
 
 function git-get {
