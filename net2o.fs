@@ -637,7 +637,9 @@ MSG_DONTWAIT  Constant don't-block
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
 	512 + negate throw  THEN
-    inbuf swap  1 packetr +! ;
+    inbuf swap  1 packetr +!
+    recvfrom( ." received from: " sockaddr alen @ .address dup . cr )
+    ;
 
 $00000000 Value droprate#
 

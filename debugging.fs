@@ -61,7 +61,8 @@ debug: replace-beacon( \ reply to every beacon
 debug: kalloc( \ secure allocate
 debug: invalid( \ print invalid packets
 debug: regen( \ regenerate keys
-debug: sema(
+debug: sema( \ semaphores
+debug: recvfrom(
 
 -db profile( \ )
 
