@@ -17,10 +17,17 @@ if which sudo >/dev/null
 then
     echo "sudo available"
 else
-    function sudo {
-        su --command="$*"
-    }
-    export sudo
+    if which su >/dev/null
+    then
+	function sudo {
+            su --command="$*"
+	}
+	export sudo
+    else
+	function sudo {
+	    eval "$@"
+	}
+    fi
 fi
 
 function git-get {
