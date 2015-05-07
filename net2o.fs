@@ -653,6 +653,7 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
+    sendto( ." send to: " sockaddr alen @ .address space dup . cr )
     net2o-sock -rot 0 sockaddr alen @ sendto +send 1 packets +! ;
 
 \ clients routing table

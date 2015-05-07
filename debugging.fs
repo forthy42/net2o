@@ -63,6 +63,7 @@ debug: invalid( \ print invalid packets
 debug: regen( \ regenerate keys
 debug: sema( \ semaphores
 debug: recvfrom(
+debug: sendto(
 
 -db profile( \ )
 
