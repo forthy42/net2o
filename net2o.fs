@@ -654,7 +654,7 @@ $00000000 Value droprate#
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
     net2o-sock -rot 0 sockaddr alen @ sendto +send 1 packets +!
-    sendto( ." send to: " sockaddr alen @ .address dup . cr ) ;
+    sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
 
 \ clients routing table
 
