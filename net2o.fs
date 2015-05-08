@@ -425,12 +425,15 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
     0 warnings !@
     : sendto { sock1 sock2 pack u1 flag addr u2 -- size }
 	addr family w@ AF_INET6 =
-	IF  addr sin6_addr $C fake-ip4 over str= ELSE  false  THEN
-	IF
-	    AF_INET sockaddr2 family w!
-	    addr port w@ sockaddr2 port w!
-	    addr sin6_addr $C + l@ sockaddr2 sin_addr l!
-	    sock2 pack u1 flag sockaddr2 sockaddr_in4 sendto
+	IF  addr sin6_addr $C fake-ip4 over str=
+	    IF
+		AF_INET sockaddr2 family w!
+		addr port w@ sockaddr2 port w!
+		addr sin6_addr $C + l@ sockaddr2 sin_addr l!
+		sock2 pack u1 flag sockaddr2 sockaddr_in4 sendto
+	    ELSE
+		sock1 pack u1 flag addr u2 sendto
+	    THEN
 	ELSE
 	    sock1 pack u1 flag addr u2 sendto
 	THEN ;
@@ -678,7 +681,7 @@ MSG_DONTWAIT  Constant don't-block
 
 [IFDEF] no-hybrid
     : read-a-packet4 ( blockage -- addr u / 0 0 )
-	>r sockaddr_in4 alen !
+	>r sockaddr_in alen !
 	net2o-sock nip
 	inbuf maxpacket r> sockaddr alen recvfrom
 	dup 0< IF
