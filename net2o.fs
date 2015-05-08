@@ -662,7 +662,7 @@ User socktimeout cell uallot drop
 	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt THEN
     drop ;
 
-MSG_WAITALL   Constant do-block
+0             Constant do-block
 MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
@@ -678,7 +678,7 @@ MSG_DONTWAIT  Constant don't-block
 
 [IFDEF] no-hybrid
     : read-a-packet4 ( blockage -- addr u / 0 0 )
-	>r sockaddr_in alen !
+	>r sockaddr_in4 alen !
 	net2o-sock nip
 	inbuf maxpacket r> sockaddr alen recvfrom
 	dup 0< IF
@@ -2061,7 +2061,7 @@ queue-class >osize @ buffer: queue-adder
 
 : max-timeout! ( -- ) poll-timeout# 0 ptimeout 2! ;
 
-: >poll ( -- flag ) \ prep-socks
+: >poll ( addr u -- flag ) \ prep-socks
 [IFDEF] ppoll
     ptimeout 0 ppoll 0>
 [ELSE]
@@ -2108,8 +2108,12 @@ User try-reads
 16 Value recvs# \ balance receive and send
 Variable recvflag  recvflag off
 
-: read-a-packet? ( -- addr u )
-    don't-block read-a-packet dup IF  1 recvflag +!  THEN ;
+[IFDEF] no-hybrid
+    ' try-read-packet-wait alias read-a-packet? ( -- addr u )
+[ELSE]
+    : read-a-packet? ( -- addr u )
+	don't-block read-a-packet dup IF  1 recvflag +!  THEN ;
+[THEN]
 
 : send-read-packet ( -- addr u )
     recvs# recvflag @ > IF  read-a-packet? dup ?EXIT  2drop  THEN
