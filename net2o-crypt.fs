@@ -370,7 +370,7 @@ Defer search-key \ search if that is one of our pubkeys
     ( keypad keysize .nnb cr ) ;
 
 : tmpkey@ ( -- addr u )
-    do-keypad sec@  dup ?EXIT  2drop
+    do-keypad sec@ dup ?EXIT  2drop
     keypad keysize ;
 
 : net2o:update-key ( -- )

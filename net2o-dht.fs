@@ -376,7 +376,7 @@ previous
     case '?' of \ if we don't know that address, send a reply
 	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
 		beacon( ." Send reply to: " sockaddr alen @ .address F cr )
-		net2o-sock fileno s" !" 0 sockaddr alen @ sendto +send
+		net2o-sock s" !" 0 sockaddr alen @ sendto +send
 	    THEN
 	endof
 	'!' of \ I got a reply, my address is unknown

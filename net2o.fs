@@ -70,6 +70,10 @@ max-size^2 6 + Value chunk-p2
 $10 Constant key-salt#
 $10 Constant key-cksum#
 
+[IFDEF] cygwin
+    : no-hybrid ; \ cygwin can't deal with hybrid stacks
+[THEN]
+
 \ timestasts structure
 
 begin-structure timestats
@@ -92,6 +96,9 @@ object class
     pollfd 4 *                     uvar pollfds \ up to four file descriptors
     sockaddr_in                    uvar sockaddr
     sockaddr_in                    uvar sockaddr1
+    [IFDEF] no-hybrid
+	sockaddr_in                uvar sockaddr2
+    [THEN]
     file-stat                      uvar statbuf
     cell                           uvar ind-addr
     cell                           uvar reqmask
@@ -237,7 +244,11 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ IP address stuff
 
-0 Value net2o-sock
+[IFDEF] no-hybrid
+    0 0 2Value net2o-sock
+[ELSE]
+    0 Value net2o-sock
+[THEN]
 0 Value query-sock
 Variable my-ip$
 
@@ -276,7 +287,7 @@ Create sockaddr" 2 c, $16 allot
     [: { addr alen -- sockaddr u } '2' emit
     case addr family w@
 	AF_INET of
-	    .ip6::0 addr sin_addr 4 move type
+	    .ip6::0 addr sin_addr 4 type
 	endof
 	AF_INET6 of
 	    addr sin6_addr 12 fake-ip4 over str= IF
@@ -353,7 +364,7 @@ User ip6:#
 
 : my-port ( -- port )
     sockaddr_in6 alen !
-    net2o-sock sockaddr1 alen getsockname ?ior
+    net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
 : sock[ ( -- )  query-sock ?EXIT
@@ -407,6 +418,24 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;
+
+\ no-hybrid stuff
+
+[IFDEF] no-hybrid
+    0 warnings !@
+    : sendto { sock1 sock2 pack u1 flag addr u2 -- size }
+	addr family w@ AF_INET6 =
+	IF  addr sin6_addr $C fake-ip4 over str= ELSE  false  THEN
+	IF
+	    AF_INET sockaddr2 family w!
+	    addr port w@ sockaddr2 port w!
+	    addr sin6_addr $C + l@ sockaddr2 sin_addr l!
+	    sock2 pack u1 flag sockaddr2 sockaddr_in4 sendto
+	ELSE
+	    sock1 pack u1 flag addr u2 sendto
+	THEN ;
+    warnings !
+[THEN]
 
 \ insert into sorted string array
 
@@ -486,9 +515,12 @@ Variable $tmp2
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- ) dup >r
-    create-udp-server46 to net2o-sock
+    create-udp-server46
+    [IFDEF] no-hybrid 0 [THEN] to net2o-sock
     r> ?dup-0=-IF  my-port  THEN to my-port#
-    !my-ips ;
+    [IFDEF] no-hybrid
+	net2o-sock drop my-port# create-udp-server to net2o-sock
+    [THEN] !my-ips ;
 
 begin-structure reply
 field: reply-len
@@ -525,9 +557,11 @@ Defer init-reply
 : -other        ['] noop is other ;
 -other
 
-: prep-socks ( -- )  pollfds >r
-    net2o-sock      POLLIN  r> fds!+ >r
-    epiper @ fileno POLLIN  r> fds!+ drop 2 to pollfd# ;
+: prep-socks ( -- )
+    epiper @ fileno POLLIN  pollfds fds!+ >r
+    net2o-sock [IFDEF] no-hybrid swap [THEN] POLLIN  r> fds!+
+    [IFDEF] no-hybrid POLLIN swap fds!+ [THEN]
+    pollfds - pollfd / to pollfd# ;
 
 \ the policy on allocation and freeing is that both freshly allocated
 \ and to-be-freed memory is erased.  This makes sure that no unwanted
@@ -633,13 +667,27 @@ MSG_DONTWAIT  Constant don't-block
 
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in alen !
-    net2o-sock inbuf maxpacket r> sockaddr alen recvfrom
+    net2o-sock [IFDEF] no-hybrid drop [THEN]
+    inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
 	512 + negate throw  THEN
     inbuf swap  1 packetr +!
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
+;
+
+[IFDEF] no-hybrid
+    : read-a-packet4 ( blockage -- addr u / 0 0 )
+	>r sockaddr_in alen !
+	net2o-sock nip
+	inbuf maxpacket r> sockaddr alen recvfrom
+	dup 0< IF
+	    errno dup 11 = IF  2drop 0. EXIT  THEN
+	    512 + negate throw  THEN
+	inbuf swap  1 packetr +!
+	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
     ;
+[THEN]
 
 $00000000 Value droprate#
 
@@ -653,7 +701,7 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    \ ." dropping packet" cr
 	    2drop 0  EXIT  THEN  THEN
-    net2o-sock -rot 0 sockaddr alen @ sendto +send 1 packets +!
+    2>r net2o-sock 2r> 0 sockaddr alen @ sendto +send 1 packets +!
     sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
 
 \ clients routing table
@@ -1998,8 +2046,8 @@ queue-class >osize @ buffer: queue-adder
 
 \ poll loop
 
-: prep-evsocks ( -- )  pollfds >r
-    epiper @    fileno POLLIN  r> fds!+ drop 1 to pollfd# ;
+: prep-evsocks ( -- )
+    epiper @    fileno POLLIN pollfds fds!+ drop 1 to pollfd# ;
 
 : clear-events ( -- )  pollfds
     pollfd# 0 DO  0 over revents w!  pollfd +  LOOP  drop ;
@@ -2022,7 +2070,7 @@ queue-class >osize @ buffer: queue-adder
 ;
 
 : wait-send ( -- flag )
-    clear-events  timeout!  pollfds pollfd# >poll ;
+    ( clear-events )  timeout!  pollfds pollfd# >poll ;
 
 : poll-sock ( -- flag )
     eval-queue  wait-send ;
@@ -2031,19 +2079,28 @@ User try-reads
 4 Value try-read#
 
 : read-a-packet4/6 ( -- addr u )
-    pollfds revents w@ POLLIN = IF  try-reads off
-	do-block read-a-packet 0 pollfds revents w! +rec EXIT  THEN
+    pollfds [ pollfd revents ]L + w@ POLLIN and IF  try-reads off
+	do-block read-a-packet
+	( 0 pollfds [ pollfd revents ]L + w! ) +rec EXIT  THEN
+    [IFDEF] no-hybrid
+	pollfds [ pollfd 2* revents ]L + w@ POLLIN and IF  try-reads off
+	    do-block read-a-packet4
+	    ( 0 pollfds [ pollfd 2* revents ]L + w! ) +rec EXIT  THEN
+    [THEN]
     try-read# try-reads !  0 0 ;
 
 : read-event ( -- )
-    pollfds [ pollfd revents ]L + w@ POLLIN = IF
-	?events  0 pollfds pollfd + revents w!
+    pollfds revents w@ POLLIN and IF
+	?events  \ 0 pollfds revents w!
     THEN ;
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    try-read# try-reads @ ?DO
-	don't-block read-a-packet
-	dup IF  unloop  +rec  EXIT  THEN  2drop  LOOP
+    [IFUNDEF] no-hybrid
+	try-read# try-reads @ ?DO
+	    don't-block read-a-packet
+	    dup IF  unloop  +rec  EXIT  THEN  2drop
+	LOOP
+    [THEN]
     poll-sock IF read-a-packet4/6 read-event ELSE 0 0 THEN ;
 
 4 Value sends#
