@@ -435,7 +435,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 		sock1 pack u1 flag addr u2 sendto
 	    THEN
 	ELSE
-	    sock1 pack u1 flag addr u2 sendto
+	    sock2 pack u1 flag addr u2 sendto
 	THEN ;
     warnings !
 [THEN]
