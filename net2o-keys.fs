@@ -23,6 +23,10 @@ require mkdir.fs
 
 User esc-state
 Defer old-emit  what's emit is old-emit
+
+: *-width ( addr u -- n )
+    0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
+
 : emit-pw* ( n -- )
     dup #esc = IF  esc-state on  THEN
     dup bl < IF  old-emit  EXIT  THEN
@@ -41,9 +45,11 @@ Defer old-emit  what's emit is old-emit
 : accept* ( addr u -- u' )
     \G accept-like input, but types * instead of the character
     \G don't save into history
-    history >r  what's type >r  what's emit is old-emit
-    ['] type-pw* is type  ['] emit-pw* is emit  0 to history
-    accept  what's old-emit is emit  r> is type  r> to history
+    history >r  what's type >r  what's emit is old-emit  what's x-width >r
+    ['] type-pw* is type  ['] emit-pw* is emit  ['] *-width is x-width
+    0 to history
+    accept
+    r> is x-width  what's old-emit is emit  r> is type  r> to history
     "\b " type ;
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
