@@ -21,11 +21,20 @@ require mkdir.fs
 
 [IFDEF] android '*' [ELSE] '⬤' [THEN] Constant pw*
 
-User esc-state
+xc-vector up@ - class-o !
+
+0 cell uvar esc-state drop
+
 Defer old-emit  what's emit is old-emit
+
+here
+xc-vector @ cell- dup @ tuck - here swap dup allot move
+, here 0 , Constant utf-8*
 
 : *-width ( addr u -- n )
     0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
+
+xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 
 : emit-pw* ( n -- )
     dup #esc = IF  esc-state on  THEN
@@ -39,18 +48,18 @@ Defer old-emit  what's emit is old-emit
     toupper 'A' '[' within IF  esc-state off  THEN ;
 
 : type-pw* ( addr u -- )  2dup bl skip nip 0=
-    IF    bounds U+DO  bl old-emit  LOOP
+    IF    bounds U+DO  bl old-emit    LOOP
     ELSE  bounds U+DO  I c@ emit-pw*  LOOP  THEN ;
 
 : accept* ( addr u -- u' )
     \G accept-like input, but types * instead of the character
     \G don't save into history
-    history >r  what's type >r  what's emit is old-emit  what's x-width >r
-    ['] type-pw* is type  ['] emit-pw* is emit  ['] *-width is x-width
+    history >r  what's type >r  what's emit is old-emit
+    ['] type-pw* is type  ['] emit-pw* is emit  utf-8* xc-vector !@ >r
     0 to history
-    accept
-    r> is x-width  what's old-emit is emit  r> is type  r> to history
-    "\b " type ;
+    ['] accept catch
+    r> xc-vector !  what's old-emit is emit  r> is type  r> to history
+    throw "\b " type ;
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
