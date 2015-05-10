@@ -94,8 +94,8 @@ previous
 : .chat ( addr u -- )
     sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
 
-: get-input ( -- u )
-    pad $100 accept dup 1+ xback-restore ;
+: get-input ( -- u )  history >r  0 to history
+    pad $100 accept dup 1+ xback-restore  r> to history ;
 
 : do-chat ( -- )
     -timeout  BEGIN  key?  WHILE  key drop  REPEAT

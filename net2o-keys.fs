@@ -19,23 +19,32 @@ require mkdir.fs
 
 \ accept for password entry
 
+[IFDEF] android '*' [ELSE] '⬤' [THEN] Constant pw*
+
+User esc-state
+Defer old-emit  what's emit is old-emit
+: emit-pw* ( n -- )
+    dup #esc = IF  esc-state on  THEN
+    dup bl < IF  old-emit  EXIT  THEN
+    dup esc-state @ IF  old-emit
+    ELSE  $C0 $80 within IF
+	    [ pw* ' xemit $tmp
+	    bounds [?DO] [I] c@ ]L old-emit [ [LOOP] ]
+	THEN
+    THEN
+    toupper 'A' '[' within IF  esc-state off  THEN ;
+
+: type-pw* ( addr u -- )  2dup bl skip nip 0=
+    IF    bounds U+DO  bl old-emit  LOOP
+    ELSE  bounds U+DO  I c@ emit-pw*  LOOP  THEN ;
+
 : accept* ( addr u -- u' )
     \G accept-like input, but types * instead of the character
     \G don't save into history
-    dup >r
-    BEGIN  xkey dup #cr <> over #lf <> and WHILE
-	    dup #bs = over #del = or IF
-		drop dup r@ u< IF
-		    over + >r xchar- r> over -
-		    1 backspaces space 1 backspaces
-		ELSE
-		    bell
-		THEN
-	    ELSE
-		-rot xc!+? 0= IF  bell  ELSE
-		    [IFDEF] android '*' [ELSE] '⬤' [THEN] xemit  THEN
-	    THEN
-    REPEAT  drop  nip r> swap - ;
+    history >r  what's type >r  what's emit is old-emit
+    ['] type-pw* is type  ['] emit-pw* is emit  0 to history
+    accept  what's old-emit is emit  r> is type  r> to history
+    "\b " type ;
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
