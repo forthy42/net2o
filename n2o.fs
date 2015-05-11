@@ -232,7 +232,9 @@ get-current net2o-cmds definitions
     ?@nextarg IF
 	2dup wait-chat
 	2dup search-connect ?dup-IF  >o 2drop rdrop
-	ELSE  $A $A nick-connect  THEN
+	ELSE  $A $A nick-connect
+	    net2o-code expect-reply log !time endwith get-ip end-code
+	THEN
 	ret+beacon do-chat
 	connection  IF  ret-beacon c:disconnect  THEN  THEN ;
 
