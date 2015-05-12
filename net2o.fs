@@ -379,7 +379,7 @@ User ip6:#
     str= IF  12 + 4  ELSE  $10   THEN ;
 
 : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-    [:  sockaddr_in6 alen !
+    [:  sockaddr_in6 alen !  53 sockaddr port be-w!
 	sockaddr ipv4! query-sock sockaddr sock-rest connect
 	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
@@ -399,7 +399,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 : check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    [:  sockaddr_in6 alen !
+    [:  sockaddr_in6 alen !  53 sockaddr port be-w!
 	sockaddr sin6_addr $10 move
 	query-sock sockaddr sock-rest connect
 	dup 0< errno 101 = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
