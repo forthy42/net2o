@@ -674,6 +674,7 @@ MSG_DONTWAIT  Constant don't-block
     inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
 	errno dup 11 = IF  2drop 0. EXIT  THEN
+	dup 35 = IF  2drop 0.  EXIT  THEN
 	512 + negate throw  THEN
     inbuf swap  1 packetr +!
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
@@ -2098,7 +2099,7 @@ User try-reads
     THEN ;
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    [defined] no-hybrid [defined] darwin [ or 0= ] [IF]
+    [defined] no-hybrid ( [defined] darwin ) [ ( or ) 0= ] [IF]
 	try-read# try-reads @ ?DO
 	    don't-block read-a-packet
 	    dup IF  unloop  +rec  EXIT  THEN  2drop
@@ -2111,7 +2112,7 @@ User try-reads
 16 Value recvs# \ balance receive and send
 Variable recvflag  recvflag off
 
-[defined] no-hybrid [defined] darwin or [IF]
+[defined] no-hybrid ( [defined] darwin or ) [IF]
     ' try-read-packet-wait alias read-a-packet? ( -- addr u )
 [ELSE]
     : read-a-packet? ( -- addr u )
