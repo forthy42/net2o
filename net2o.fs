@@ -2098,7 +2098,7 @@ User try-reads
     THEN ;
 
 : try-read-packet-wait ( -- addr u / 0 0 )
-    [IFUNDEF] no-hybrid
+    [defined] no-hybrid [defined] darwin [ or 0= ] [IF]
 	try-read# try-reads @ ?DO
 	    don't-block read-a-packet
 	    dup IF  unloop  +rec  EXIT  THEN  2drop
@@ -2111,7 +2111,7 @@ User try-reads
 16 Value recvs# \ balance receive and send
 Variable recvflag  recvflag off
 
-[IFDEF] no-hybrid
+[defined] no-hybrid [defined] darwin or [IF]
     ' try-read-packet-wait alias read-a-packet? ( -- addr u )
 [ELSE]
     : read-a-packet? ( -- addr u )
