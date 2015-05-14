@@ -175,12 +175,19 @@ List of Commands
 
 + $1A log-token ( $:token n -- )
 + $20 emit ( utf8 -- )
+  emit character on server log
 + $21 type ( $:string -- )
+  type string on server log
 + $22 cr ( -- )
+  newline on server log
 + $23 . ( n -- )
+  print number on server log
 + $24 f. ( r -- )
+  print fp number on server log
 + $25 .time ( -- )
+  print timer to server log
 + $26 !time ( -- )
+  start timer
 + $32 log ( -- o:log )
 
 ### key storage commands ###
