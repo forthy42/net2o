@@ -98,9 +98,11 @@ previous
     pad $100 accept dup 1+ xback-restore  r> to history ;
 
 : do-chat ( -- )
+    ." Type '/bye' as single item to quit" cr
     -timeout  BEGIN  key?  WHILE  key drop  REPEAT
-    BEGIN  get-input dup connection 0<> and  WHILE
-	    pad swap 2dup +resend-cmd send-text -timeout .chat
+    BEGIN  get-input pad swap
+	2dup "/bye" str= 0= connection 0<> and  WHILE
+	    2dup +resend-cmd send-text -timeout .chat
     REPEAT
     drop ;
 

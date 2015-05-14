@@ -275,7 +275,7 @@ here file-classes - cell/ Constant file-classes#
 : n2o:get-stat ( -- mtime mod )
     fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
-    statbuf st_mode l@ $FFF and ;
+    statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] $FFF and ;
 
 : n2o:track-mod ( mod fileno -- )
     [IFDEF] android 2drop
