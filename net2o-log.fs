@@ -24,19 +24,19 @@ get-current also net2o-base definitions
 net2o' token net2o: log-token ( $:token n -- )
     64>n 0 .r ." :" $> F type space ;
 
-$20 net2o: emit ( utf8 -- ) \ emit character on server log
+$20 net2o: emit ( utf8 -- ) \g emit character on server log
     64>n xemit ;
-+net2o: type ( $:string -- ) \ type string on server log
++net2o: type ( $:string -- ) \g type string on server log
     $> F type ;
-+net2o: cr ( -- ) \ newline on server log
++net2o: cr ( -- ) \g newline on server log
     F cr ;
-+net2o: . ( n -- ) \ print number on server log
++net2o: . ( n -- ) \g print number on server log
     64. ;
-+net2o: f. ( r -- ) \ print fp number on server log
++net2o: f. ( r -- ) \g print fp number on server log
     F f. ;
-+net2o: .time ( -- ) \ print timer to server log
++net2o: .time ( -- ) \g print timer to server log
     F .time .packets profile( .times ) ;
-+net2o: !time ( -- ) \ start timer
++net2o: !time ( -- ) \g start timer
     F !time init-timer ;
 
 gen-table $freeze
