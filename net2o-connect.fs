@@ -21,18 +21,18 @@ reply-table $@ inherit-table setup-table
 \g ### connection setup commands ###
 \g 
 
-$20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
+$20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     $> cmdtmpnest ;
 
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest 2drop tmpnest ;
 
-+net2o: new-data ( addr addr u -- ) \ create new data mapping
++net2o: new-data ( addr addr u -- ) \g create new data mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: new-code ( addr addr u -- ) \ crate new code mapping
++net2o: new-code ( addr addr u -- ) \g crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: set-cookie ( utimestamp -- ) \ cookie and round trip delay
++net2o: set-cookie ( utimestamp -- ) \g cookie and round trip delay
     own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
 	IF  trace( ." context " F cr ) >o rdrop  o to connection
@@ -51,7 +51,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     addrd min-size ucode lshift n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
-+net2o: store-key ( $:string -- ) $> \ store key
++net2o: store-key ( $:string -- ) $> \g store key
     o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb F cr )
@@ -59,7 +59,7 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
 	crypto-key sec!
     ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
 
-+net2o: map-request ( addrs ucode udata -- ) \ request mapping
++net2o: map-request ( addrs ucode udata -- ) \g request mapping
     2*64>n
     nest[
     ?new-mykey ticker 64@ lit, set-cookie
@@ -69,39 +69,39 @@ $20 net2o: tmpnest ( $:string -- ) \ nested (temporary encrypted) command
     ]nest  n2o:create-map  nest-stack $[]# IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
-+net2o: set-tick ( uticks -- ) \ adjust time
++net2o: set-tick ( uticks -- ) \g adjust time
     o IF  ack@ .adjust-ticks  ELSE  64drop  THEN ;
-+net2o: get-tick ( -- ) \ request time adjust
++net2o: get-tick ( -- ) \g request time adjust
     ticks lit, set-tick ;
 
 net2o-base
 
 \ crypto functions
 
-+net2o: receive-key ( $:key -- ) $> \ receive a key
++net2o: receive-key ( $:key -- ) $> \g receive a key
     crypt( ." Received key: " tmpkey@ .nnb F cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
-+net2o: receive-tmpkey ( $:key -- ) $> \ receive emphemeral key
++net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
-+net2o: key-request ( -- ) \ request a key
++net2o: key-request ( -- ) \g request a key
     crypt( ." Nested key: " tmpkey@ .nnb F cr )
     pkc keysize $, receive-key ;
-+net2o: tmpkey-request ( -- ) \ request ephemeral key
++net2o: tmpkey-request ( -- ) \g request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
-+net2o: keypair ( $:yourkey $:mykey -- ) \ select a pubkey
++net2o: keypair ( $:yourkey $:mykey -- ) \g select a pubkey
     $> $> tmp-crypt? IF  2swap net2o:keypair  ELSE  2drop 2drop  THEN ;
-+net2o: update-key ( -- ) \ update secrets
++net2o: update-key ( -- ) \g update secrets
     net2o:update-key ;
-+net2o: gen-ivs ( $:string -- ) \ generate IVs
++net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> ivs-strings receive-ivs ;
 
 \ nat traversal functions
 
-+net2o: punch ( $:string -- ) \ punch NAT traversal hole
++net2o: punch ( $:string -- ) \g punch NAT traversal hole
     $> buf-state 2@ 2>r net2o:punch 2r> buf-state 2! ;
-+net2o: punch-load, ( $:string -- ) \ use for punch payload: nest it
++net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
     $> punch-load $! ;
-+net2o: punch-done ( -- ) \ punch received
++net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
 	return-addr return-address $10 move  resend0 $off
     THEN ;
@@ -117,17 +117,17 @@ net2o-base
 : gen-punchload ( -- )
     nest[ cookie, punch-done request, ]nest$ punch-load, ;
 
-+net2o: punch? ( -- ) \ Request punch addresses
++net2o: punch? ( -- ) \g Request punch addresses
     gen-punch ;
 
 \ create commands to send back
 
-: all-ivs ( -- ) \ Seed and gen all IVS
+: all-ivs ( -- ) \g Seed and gen all IVS
     state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
 
-+net2o: >time-offset ( n -- ) \ set time offset
++net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
-+net2o: context ( -- ) \ make context active
++net2o: context ( -- ) \g make context active
     o IF  context!  ELSE  ." Can't "  THEN  ." establish a context!" F cr ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
@@ -138,12 +138,12 @@ net2o-base
     ELSE  receive-key  THEN
     update-key all-ivs ;
 
-+net2o: gen-reply ( -- ) \ generate a key request reply reply
++net2o: gen-reply ( -- ) \g generate a key request reply reply
     own-crypt? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, cookie+request time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
-+net2o: gen-punch-reply ( -- )  o? \ generate a key request reply reply
++net2o: gen-punch-reply ( -- )  o? \g generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
       reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
       push-cmd ;]  IS expect-reply? ;

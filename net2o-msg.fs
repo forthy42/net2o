@@ -28,7 +28,7 @@ get-current also net2o-base definitions
 \g 
 \g ### message commands ###
 \g 
-$34 net2o: msg ( -- o:msg ) \ push a message object
+$34 net2o: msg ( -- o:msg ) \g push a message object
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
     THEN
@@ -38,27 +38,27 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-net2o' emit net2o: msg-start ( $:pksig -- ) \ start message
+net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
-+net2o: msg-group ( $:group -- ) \ specify a chat group
-    signed? !!signed!! 4 8 !!<>=order? \ already a message there
++net2o: msg-group ( $:group -- ) \g specify a chat group
+    signed? !!signed!! 4 8 !!<>=order? \g already a message there
     $> avalanche-msg ;
-+net2o: msg-join ( $:group -- ) \ join a chat group
++net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
 	parent cell last# cell+ $+!  THEN ;
-+net2o: msg-leave ( $:group -- ) \ leave a chat group
++net2o: msg-leave ( $:group -- ) \g leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
 
-+net2o: msg-signal ( $:pubkey -- ) \ signal message to one person
++net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
     IF   info-color attr!  THEN  ." @" .key-id space
     reset-color ;
-+net2o: msg-re ( $:hash ) \ relate to some object
++net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ." re: " 85type F cr ;
-+net2o: msg-text ( $:msg -- ) \ specify message string
++net2o: msg-text ( $:msg -- ) \g specify message string
     !!signed? 1 8 !!<>=order? $> F type F cr ;
-+net2o: msg-object ( $:object -- ) \ specify an object, e.g. an image
++net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type F cr ;
 
 :noname ( addr u -- addr u flag )

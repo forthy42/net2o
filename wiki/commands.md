@@ -69,28 +69,52 @@ List of Commands
 ### connection setup commands ###
 
 + $20 tmpnest ( $:string -- )
+  nested (temporary encrypted) command
 + $21 new-data ( addr addr u -- )
+  create new data mapping
 + $22 new-code ( addr addr u -- )
+  crate new code mapping
 + $23 set-cookie ( utimestamp -- )
+  cookie and round trip delay
 + $24 store-key ( $:string -- )
+  store key
 + $25 map-request ( addrs ucode udata -- )
+  request mapping
 + $26 set-tick ( uticks -- )
+  adjust time
 + $27 get-tick ( -- )
+  request time adjust
 + $28 receive-key ( $:key -- )
+  receive a key
 + $29 receive-tmpkey ( $:key -- )
+  receive emphemeral key
 + $2A key-request ( -- )
+  request a key
 + $2B tmpkey-request ( -- )
+  request ephemeral key
 + $2C keypair ( $:yourkey $:mykey -- )
+  select a pubkey
 + $2D update-key ( -- )
+  update secrets
 + $2E gen-ivs ( $:string -- )
+  generate IVs
 + $2F punch ( $:string -- )
+  punch NAT traversal hole
 + $30 punch-load, ( $:string -- )
+  use for punch payload: nest it
 + $31 punch-done ( -- )
+  punch received
 + $32 punch? ( -- )
+  Request punch addresses
+  Seed and gen all IVS
 + $33 >time-offset ( n -- )
+  set time offset
 + $34 context ( -- )
+  make context active
 + $35 gen-reply ( -- )
+  generate a key request reply reply
 + $36 gen-punch-reply ( -- )
+  generate a key request reply reply
 
 ### connection commands ###
 
@@ -222,14 +246,24 @@ set dht id for further operations on it
 ### message commands ###
 
 + $34 msg ( -- o:msg )
+  push a message object
 + $20 msg-start ( $:pksig -- )
+  start message
 + $21 msg-group ( $:group -- )
+  specify a chat group
+  already a message there
 + $22 msg-join ( $:group -- )
+  join a chat group
 + $23 msg-leave ( $:group -- )
+  leave a chat group
 + $24 msg-signal ( $:pubkey -- )
+  signal message to one person
 + $25 msg-re ( $:hash )
+  relate to some object
 + $26 msg-text ( $:msg -- )
+  specify message string
 + $27 msg-object ( $:object -- )
+  specify an object, e.g. an image
 
 ### vault commands ###
 
