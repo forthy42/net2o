@@ -45,7 +45,7 @@ The packet contains these elements:
 2. 16 bytes path (rough Internet 1.0 equivalent: "address")
 3. 8 bytes address: this is the address in the destination buffer where the
    packet will be stored (roughly equivalent to port+sequence number)
-4. 64*2^size bytes data
+4. 64*2^_size_ bytes data
 5. 16 bytes authentication data (keyed cryptographic checksum)
 
 The "abstraction" at packet level is shared memory; the model is read

@@ -138,10 +138,12 @@ timer: +ack
 Ustack b$
 
 event: ->b$off b$ $off ;
-event: ->type defers type <event ->b$off event> ;
+event: ->type defers type <event ->b$off event> ctrl L unkey ;
+event: ->hide ctrl Z unkey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )
+    <event up@ elit, ->hide [ up@ ]l event>  stop
     b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
     BEGIN  b$ @  WHILE  stop  REPEAT ;
 : bcr    #lf bemit bflush ;
