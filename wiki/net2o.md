@@ -78,7 +78,7 @@ equal to the ISO-OSI layers, but this layering provides a familiar starting
 point:
 
 1. Physical layer - this is not part of net2o itself.
-2. [Topology](topology.wiki)
+2. [Topology](topology.md)
 3. [Encryption](encryption.wiki)
 4. [Flow Control](flow-control.wiki)
 5. [Commands](commands.md)

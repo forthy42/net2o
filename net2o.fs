@@ -673,7 +673,7 @@ MSG_DONTWAIT  Constant don't-block
     net2o-sock [IFDEF] no-hybrid drop [THEN]
     inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
-	errno dup 11 = over 35 = or IF  2drop 0. EXIT  THEN
+	errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
 	512 + negate throw  THEN
     inbuf swap  1 packetr +!
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
@@ -685,7 +685,7 @@ MSG_DONTWAIT  Constant don't-block
 	net2o-sock nip
 	inbuf maxpacket r> sockaddr alen recvfrom
 	dup 0< IF
-	    errno dup 11 = over 35 = or IF  2drop 0. EXIT  THEN
+	    errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
 	inbuf swap  1 packetr +!
 	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
     ;
