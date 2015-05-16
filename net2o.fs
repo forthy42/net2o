@@ -348,7 +348,8 @@ User ip6:#
 	'2' of  .ip64 endof
 	dup emit -rot dump endcase ;
 
-: .iperr ( addr len -- ) [: .time ." connected from: " .ipaddr cr ;] $err ;
+: .iperr ( addr len -- ) [: info-color attr!
+      .time ." connected from: " .ipaddr default-color attr! cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- ) >r
     r@ sin6_addr 12 + be-l!
@@ -1070,10 +1071,10 @@ Variable context-table
 
 \ events for context-oriented behavior
 
-: dbg-connect ( -- )
-    ." connected from: " pubkey $@ 85type cr ;
-: dbg-disconnect ( -- )
-    ." disconnecting: " pubkey $@ 85type cr ;
+: dbg-connect ( -- )  info-color attr!
+    ." connected from: " pubkey $@ 85type default-color attr! cr ;
+: dbg-disconnect ( -- )  info-color attr!
+    ." disconnecting: " pubkey $@ 85type default-color attr! cr ;
 
 Defer do-connect     ' dbg-connect IS do-connect
 Defer do-disconnect  ' dbg-disconnect IS do-disconnect

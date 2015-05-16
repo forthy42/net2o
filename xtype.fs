@@ -6,8 +6,6 @@
 
 : xtype ( addr u -- )  hex[
     bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
-: .nnb ( addr n -- )  xtype ;
-: .64b ( addr -- ) 64 .nnb ;
 
 : (digits>$) ( addr u -- addr' u' ) save-mem
     >r dup dup r> bounds ?DO

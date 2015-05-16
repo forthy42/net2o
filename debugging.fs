@@ -14,6 +14,9 @@ require xtype.fs
 require base64.fs
 require base85.fs
 
+: .nnb ( addr n -- )  85type ;
+: .64b ( addr -- ) 64 .nnb ;
+
 \ debugging switches
 
 debug: timing(
@@ -162,6 +165,9 @@ op-vector !
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
 \ : $err ( xt -- ) execute ;
+op-vector @
+$-out ' (attr!) is attr!
+op-vector !
 
 \ extra hints for last word executed
 

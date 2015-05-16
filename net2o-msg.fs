@@ -100,7 +100,9 @@ previous
     ELSE  dup 1+ xback-restore  pad swap  THEN  r> to history ;
 
 : do-chat ( -- )
-    ." Type '/bye' as single item to quit" cr
+    warn-color attr!
+    ." Type ctrl-D or '/bye' as single item to quit" cr
+    default-color attr!
     -timeout  BEGIN  key?  WHILE  key drop  REPEAT
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
