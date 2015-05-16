@@ -686,6 +686,7 @@ MSG_DONTWAIT  Constant don't-block
 	inbuf maxpacket r> sockaddr alen recvfrom
 	dup 0< IF
 	    errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
+	THEN
 	inbuf swap  1 packetr +!
 	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
     ;
