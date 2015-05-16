@@ -82,11 +82,9 @@ Variable chat-key
 
 : wait-chat ( addr u -- )
     ." press key to connect to " 2dup type nick>pk keysize umin chat-key $!
+    [: 0 to connection -56 throw ;] is do-disconnect
     [: chat-key $@ pubkey $@ str= IF  bl unkey  THEN ;] is do-connect
-    key drop  ['] noop IS do-connect
-    [: ." do-disconnect" cr
-      0 to connection <event -56 elit, ->throw [ up@ ]l event> ;]
-    is do-disconnect ;
+    key drop  ['] noop IS do-connect ;
 
 \ commands for the command line user interface
 
@@ -237,7 +235,8 @@ get-current net2o-cmds definitions
 	    net2o-code expect-reply log !time endwith get-ip end-code
 	THEN
 	ret+beacon do-chat
-	connection  IF  ret-beacon c:disconnect  THEN  THEN ;
+	connection  IF  ret-beacon c:disconnect  THEN
+    THEN ;
 
 \ script mode
 

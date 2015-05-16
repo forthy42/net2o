@@ -96,14 +96,14 @@ previous
 
 : get-input-line ( -- addr u )  history >r  0 to history
     pad $100 ['] accept catch -56 =
-    IF  2drop "/bye"
+    IF    2drop "/bye"
     ELSE  dup 1+ xback-restore  pad swap  THEN  r> to history ;
 
 : do-chat ( -- )
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
     default-color attr!
-    -timeout  BEGIN  key?  WHILE  key drop  REPEAT
+    -timeout \ BEGIN  key?  WHILE  key drop  REPEAT
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
