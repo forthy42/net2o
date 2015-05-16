@@ -375,6 +375,17 @@ User ip6:#
 
 : 'sock ( xt -- )  sock[ catch ]sock throw ;
 
+[IFDEF] ho-hybrid
+    : sock4[ ( -- )  query-sock ?EXIT
+	new-udp-socket to query-sock ;
+    : ]4sock ( -- )  query-sock 0= ?EXIT
+	query-sock closesocket 0 to query-sock ?ior ;
+
+    : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
+[ELSE]
+    ' 'sock alias 'sock4
+[THEN]
+
 : ?fake-ip4 ( -- addr u )
     sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
@@ -387,7 +398,7 @@ User ip6:#
 	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	sockaddr1 family w@ AF_INET6 =
 	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
-    ;] 'sock ;
+    ;] 'sock4 ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address

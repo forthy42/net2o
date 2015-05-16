@@ -103,7 +103,7 @@ previous
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
     default-color attr!
-    -timeout \ BEGIN  key?  WHILE  key drop  REPEAT
+    -timeout
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
