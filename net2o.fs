@@ -409,7 +409,7 @@ User ip6:#
 	  query-sock sockaddr1 alen getsockname
 	  dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  sockaddr1 family w@ AF_INET6 =
-	  IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+	  IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
 	;] 'sock ;
 [THEN]
 
