@@ -375,6 +375,10 @@ User ip6:#
 
 : 'sock ( xt -- )  sock[ catch ]sock throw ;
 
+: ?fake-ip4 ( -- addr u )
+    sockaddr1 sin6_addr dup $C fake-ip4 over
+    str= IF  12 + 4  ELSE  $10   THEN ;
+
 [IFDEF] ho-hybrid
     : sock4[ ( -- )  query-sock ?EXIT
 	new-udp-socket to query-sock ;
@@ -382,23 +386,31 @@ User ip6:#
 	query-sock closesocket 0 to query-sock ?ior ;
 
     : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
+
+    : sock-rest4 ( sockaddr -- addr u ) >r
+	AF_INET r@ family w!
+	r> sockaddr_in4 ;
+
+    : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
+	[: sockaddr_in4 alen !  53 sockaddr port be-w!
+	  sockaddr sin_addr be-l! query-sock sockaddr sock-rest4 connect
+	  dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  query-sock sockaddr1 alen getsockname
+	  dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  sockaddr1 family w@ AF_INET6 =
+	  IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+	;] 'sock4 ;
 [ELSE]
-    ' 'sock alias 'sock4
+    : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
+	[: sockaddr_in6 alen !  53 sockaddr port be-w!
+	  sockaddr ipv4! query-sock sockaddr sock-rest connect
+	  dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  query-sock sockaddr1 alen getsockname
+	  dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  sockaddr1 family w@ AF_INET6 =
+	  IF  ?fake-ip4  ELSE  sin_addr 4  THEN
+	;] 'sock ;
 [THEN]
-
-: ?fake-ip4 ( -- addr u )
-    sockaddr1 sin6_addr dup $C fake-ip4 over
-    str= IF  12 + 4  ELSE  $10   THEN ;
-
-: check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-    [:  sockaddr_in6 alen !  53 sockaddr port be-w!
-	sockaddr ipv4! query-sock sockaddr sock-rest connect
-	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
-	query-sock sockaddr1 alen getsockname
-	dup 0< errno 101 = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
-	sockaddr1 family w@ AF_INET6 =
-	IF  ?fake-ip4  ELSE  sin_addr 4  THEN
-    ;] 'sock4 ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address
