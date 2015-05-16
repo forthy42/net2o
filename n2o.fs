@@ -230,7 +230,7 @@ get-current net2o-cmds definitions
     get-me init-client announce-me
     ?@nextarg IF
 	2dup wait-chat
-	2dup search-connect ?dup-IF  >o 2drop rdrop
+	2dup search-connect ?dup-IF  >o 2drop rdrop  key? IF  key drop  THEN
 	ELSE  $A $A nick-connect !time
 	    net2o-code expect-reply log !time endwith get-ip end-code
 	THEN
