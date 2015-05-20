@@ -25,6 +25,7 @@ require ansi.fs
 require date.fs
 require mini-oof2.fs
 require user-object.fs
+require rec-scope.fs
 require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
@@ -252,8 +253,10 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 0 Value query-sock
 Variable my-ip$
 
-Create fake-ip4 $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
+Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
+Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
+\ prefix for IPv4 addresses via NAT64
 
 \ convention:
 \ '!' is a key revocation, it contains the new key
@@ -351,11 +354,18 @@ User ip6:#
 : .iperr ( addr len -- ) [: info-color attr!
       .time ." connected from: " .ipaddr default-color attr! cr ;] $err ;
 
-: ipv4! ( ipv4 sockaddr -- ) >r
-    r@ sin6_addr 12 + be-l!
+: ipv4! ( ipv4 sockaddr -- )
+    >r    r@ sin6_addr 12 + be-l!
     $FFFF r@ sin6_addr 8 + be-l!
     0     r@ sin6_addr 4 + l!
     0     r> sin6_addr l! ;
+
+: ipv4!nat ( ipv4 sockaddr -- )
+    \ nat64 version...
+    >r        r@ sin6_addr 12 + be-l!
+    0         r@ sin6_addr 8 + l!
+    0         r@ sin6_addr 4 + l!
+    $0064ff9b r> sin6_addr be-l! ;
 
 : sock-rest ( sockaddr -- addr u ) >r
     AF_INET6 r@ family w!

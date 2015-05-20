@@ -35,11 +35,11 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
 +net2o: set-cookie ( utimestamp -- ) \g cookie and round trip delay
     own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
-	IF  trace( ." context " F cr ) >o rdrop  o to connection
+	IF  trace( ." context " forth:cr ) >o rdrop  o to connection
 	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
-	    trace( ." ticker " F cr )
+	    trace( ." ticker " forth:cr )
 	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
 	THEN
     ELSE  64drop  THEN  un-cmd ;
@@ -52,12 +52,12 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     addrd ucode udata addrs ;
 
 +net2o: store-key ( $:string -- ) $> \g store key
-    o 0= IF  ." don't store key, o=0: " .nnb F cr un-cmd  EXIT  THEN
+    o 0= IF  ." don't store key, o=0: " .nnb forth:cr un-cmd  EXIT  THEN
     own-crypt? IF
-	key( ." store key: o=" o hex. 2dup .nnb F cr )
+	key( ." store key: o=" o hex. 2dup .nnb forth:cr )
 	2dup do-keypad sec!
 	crypto-key sec!
-    ELSE  ." don't store key: o=" o hex. .nnb F cr  THEN ;
+    ELSE  ." don't store key: o=" o hex. .nnb forth:cr  THEN ;
 
 +net2o: map-request ( addrs ucode udata -- ) \g request mapping
     2*64>n
@@ -79,12 +79,12 @@ net2o-base
 \ crypto functions
 
 +net2o: receive-key ( $:key -- ) $> \g receive a key
-    crypt( ." Received key: " tmpkey@ .nnb F cr )
+    crypt( ." Received key: " tmpkey@ .nnb forth:cr )
     tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
 +net2o: key-request ( -- ) \g request a key
-    crypt( ." Nested key: " tmpkey@ .nnb F cr )
+    crypt( ." Nested key: " tmpkey@ .nnb forth:cr )
     pkc keysize $, receive-key ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
@@ -128,7 +128,7 @@ net2o-base
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
 +net2o: context ( -- ) \g make context active
-    o IF  context!  ELSE  ." Can't "  THEN  ." establish a context!" F cr ;
+    o IF  context!  ELSE  ." Can't "  THEN  ." establish a context!" forth:cr ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
 : reply-key, ( -- )
@@ -140,11 +140,11 @@ net2o-base
 
 +net2o: gen-reply ( -- ) \g generate a key request reply reply
     own-crypt? 0= ?EXIT
-    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+    [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, cookie+request time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 +net2o: gen-punch-reply ( -- )  o? \g generate a key request reply reply
-    [: crypt( ." Reply key: " tmpkey@ .nnb F cr )
+    [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 

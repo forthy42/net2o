@@ -64,11 +64,11 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
 +net2o: close-file ( -- ) \g close file
     fs-close ;
 +net2o: set-size ( size -- ) \g set size attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. F cr ) size! ;
+    track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. forth:cr ) size! ;
 +net2o: set-seek ( useek -- ) \g set seek attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. F cr ) seekto! ;
+    track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. forth:cr ) seekto! ;
 +net2o: set-limit ( ulimit -- ) \g set limit attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. F cr ) limit-min! ;
+    track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. forth:cr ) limit-min! ;
 +net2o: set-stat ( umtime umod -- ) \g set time and mode of current file
     64>n n2o:set-stat ;
 +net2o: get-size ( -- ) \g requuest file size
@@ -118,7 +118,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
     64>n $> parent @ .data-map @ .resend#? dup 0= IF
-	drop ." resend# don't match!" F cr
+	drop ." resend# don't match!" forth:cr
 	parent @ .n2o:see-me
 	[ cookie-val $FF xor ]L validated and!
     ELSE
@@ -218,7 +218,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     recv-addr 64@ ack@ .recv-tick 64@ ack@ .time-offset 64@ 64-
-    timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" F cr )
+    timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" forth:cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64-0=
@@ -266,7 +266,7 @@ also net2o-base
 	    -1 tailbits I bytes>bits - lshift invert or
 	THEN
 	dup $FFFFFFFF <> IF
-	    resend( ." resend: " dup hex. over hex. F cr )
+	    resend( ." resend: " dup hex. over hex. forth:cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF  I 4 + data-rmap @ .data-ack# !  THEN
@@ -278,10 +278,10 @@ also net2o-base
     cmdbuf# @ 0> IF \ there's actuall something in the buffer
 	reply-index ulit, ok?  end-cmd
 	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
-	msg( ." Expect reply" F cr )
+	msg( ." Expect reply" forth:cr )
     THEN  ['] end-cmd IS expect-reply? ;
 
-: expect-reply ( -- ) \ cmd( ." expect reply:" F cr )
+: expect-reply ( -- ) \ cmd( ." expect reply:" forth:cr )
     ['] do-expect-reply IS expect-reply? ;
 
 : resend-all ( -- )
@@ -302,7 +302,7 @@ also net2o-base
     rewind data-end? IF  filereq# @ n2o:request-done  false
     ELSE  true  THEN ;
 
-: request-stats   F true to request-stats?  ack track-timing endwith ;
+: request-stats   forth:true to request-stats?  ack track-timing endwith ;
 
 : expected@ ( -- head top )
     o IF  data-rmap @ >o
@@ -314,7 +314,7 @@ also net2o-base
 	expect-reply
 	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
-	o> F cr ." Block transfer done: " expected@ hex. hex. F cr )
+	o> forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
 	net2o:ack-resend#  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
@@ -353,7 +353,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     map-request ;
 
 : gen-request ( -- ) setup!
-    cmd( ind-addr @ IF  ." in" THEN ." direct connect" F cr )
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
@@ -388,7 +388,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
 	    I @ 0<> IF
-		timeout( ." resend: " I 2@ n2o:see F cr )
+		timeout( ." resend: " I 2@ n2o:see forth:cr )
 		I 2@ I reply-dest 64@ send-cmd
 		1 packets2 +!
 	    THEN
@@ -399,9 +399,9 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     0-resend? map-resend? ;
 
 : .expected ( -- )
-    F .time ." expected/received: " recv-addr @ hex.
+    forth:.time ." expected/received: " recv-addr @ hex.
     data-rmap @ .data-ack# @ hex.
-    expected@ hex. hex. F cr ;
+    expected@ hex. hex. forth:cr ;
 
 \ acknowledge toplevel
 
@@ -429,7 +429,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .ack-advance? @
     IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
-    ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. F cr )
+    ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. forth:cr )
 ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
@@ -439,7 +439,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 also net2o-base
 : .keepalive ( -- )  ." transfer keepalive " expected@ hex. hex.
     data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
-    F cr ;
+    forth:cr ;
 : transfer-keepalive? ( -- )
     o to connection
     timeout( .keepalive )
@@ -455,7 +455,7 @@ also net2o-base
 previous
 
 : cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend? ;
-: connected-timeout ( -- ) timeout( ." connected timeout" F cr )
+: connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
     \ timeout( .expected )
     packets2 @ cmd-timeout packets2 @ = IF  transfer-keepalive?  THEN ;
 

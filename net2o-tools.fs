@@ -2,9 +2,12 @@
 
 Defer ?nextarg
 Defer ?@nextarg
+Defer ?peekarg
 
 : ?cmd-nextarg ( -- addr u t / f )
     argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
+: ?cmd-peekarg ( -- addr u t / f )
+    argc @ 1 > IF  1 arg true  ELSE  false  THEN ;
 : ?cmd-@nextarg ( -- addr u t / f )
     argc @ 1 > IF
 	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
@@ -12,6 +15,7 @@ Defer ?@nextarg
 
 : cmd-args ( -- )
     ['] ?cmd-nextarg IS ?nextarg
+    ['] ?cmd-peekarg IS ?peekarg
     ['] ?cmd-@nextarg IS ?@nextarg ;
 cmd-args
 
@@ -20,6 +24,8 @@ cmd-args
     over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
 : ?word-nextarg ( -- addr u t / f )
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN ;
+: ?word-peekarg ( -- addr u t / f )  >in @ >r
+    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in ! ;
 : ?word-@nextarg ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
     over c@ '@' = IF  rdrop 1 /string true  EXIT  THEN
@@ -27,6 +33,7 @@ cmd-args
 
 : word-args ( -- )
     ['] ?word-nextarg IS ?nextarg
+    ['] ?word-peekarg IS ?peekarg
     ['] ?word-@nextarg IS ?@nextarg ;
 
 : arg-loop { xt -- }

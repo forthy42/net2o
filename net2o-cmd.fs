@@ -200,7 +200,7 @@ sema see-lock
     buf-state 2@ 2>r
     ." see-me: "
     inbuf flags .dest-addr
-    \ tag-addr dup hex. 2@ swap hex. hex. F cr
+    \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
     inbuf packet-data n2o:see
     2r> buf-state 2! ;
 
@@ -311,8 +311,6 @@ code0-buf
 : >table ( table -- )  last-2o 2 cells + ! ;
 : cmdsig ( -- addr )  last-2o 3 cells + ;
 : net2o' ( "name" -- ) ' >body @ ;
-
-: F also forth parse-name parser1 execute previous ; immediate
 
 Defer net2o:words
 
@@ -444,10 +442,10 @@ previous
 
 : net2o:ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
-    tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. F cr )
+    tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r> reply-dest 64! ;
 : net2o:ok ( tag -- )
-    timeout( cmd( ." ack: " dup hex. F cr ) )
+    timeout( cmd( ." ack: " dup hex. forth:cr ) )
     o 0= IF  drop EXIT  THEN
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
@@ -516,7 +514,7 @@ previous
 : cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
     cmd> 2dup tmpkey@ keysize umin
-    trace( ." tmpnest encrypt with: " 2dup 85type F cr ) encrypt$ ;
+    trace( ." tmpnest encrypt with: " 2dup 85type forth:cr ) encrypt$ ;
 
 : do-nest ( addr u flag -- )
     validated @ >r  validated or!  
@@ -527,7 +525,7 @@ previous
 
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ drop keysize decrypt$
-    IF  tmp-crypt-val do-nest  ELSE  trace( ." tmpnest failed!" F cr )  un-cmd  THEN ;
+    IF  tmp-crypt-val do-nest  ELSE  trace( ." tmpnest failed!" forth:cr )  un-cmd  THEN ;
 
 \ net2o assembler stuff
 

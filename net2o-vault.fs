@@ -52,7 +52,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	    vaultkey vk# v-dhe keysize decrypt$ IF
 		dup state# 1+ keysize within !!keysize!!
 		v-key state# move-rep
-		key( ." vkey: " v-key state# 85type F cr )
+		key( ." vkey: " v-key state# 85type forth:cr )
 		2 c-state or!  LEAVE
 	    ELSE  2drop  THEN
 	THEN
@@ -60,12 +60,12 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
     v-mode>crypt2
     no-key state# >crypt-source  v-key state# >crypt-key
-    key( ." vkey: " v-key state# 85type F cr )
+    key( ." vkey: " v-key state# 85type forth:cr )
     $> 2dup c:decrypt v-data 2!  c:diffuse
     c:key@ v-kstate c:key# move
     0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
-    key( ." vkey: " v-key state# 85type F cr )
+    key( ." vkey: " v-key state# 85type forth:cr )
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
@@ -124,28 +124,28 @@ enc-keccak
 : vkeys, ( key-list -- )
     vaultkey $100 erase
     enc-mode @ $FF and $20 - rng$ vkey state# move-rep
-    key( ." vkey: " vkey state# 85type F cr )
+    key( ." vkey: " vkey state# 85type forth:cr )
     enc-mode @ dup lit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
 	vkey vaultkey $10 + enc-mode @ $FF and $20 - move
 	vaultkey enc-mode @ $FF and 2r> encrypt$
-	vaultkey enc-mode @ $FF and F type ;] $[]map ;] $tmp
+	vaultkey enc-mode @ $FF and forth:type ;] $[]map ;] $tmp
     $, vault-keys 0 >crypt ;
 : vfile, ( -- )
     enc-filename $@ enc-file $slurp-file
     enc-file $@len dup >r vault-aligned enc-file $!len
     enc-file $@ r> /string dup enc-padding ! erase
-    key( ." vkey: " vkey state# 85type F cr )
+    key( ." vkey: " vkey state# 85type forth:cr )
     enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
     enc-file $@ $, vault-file 0 >crypt enc-file $off ;
 : vsig, ( -- )
     enc>crypt2
-    [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ F type
+    [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ forth:type
       .pk .sig $10 spaces ;] $tmp
     0 >crypt
-    key( ." vkey: " vkey state# 85type F cr )
+    key( ." vkey: " vkey state# 85type forth:cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 
 : encrypt-file ( filename u key-list -- )  code-buf$ cmdreset
@@ -153,17 +153,17 @@ enc-keccak
     vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ w/o create-file throw >r
-    cmd$ $@ r@ write-file throw r> F close-file throw
+    cmd$ $@ r@ write-file throw r> forth:close-file throw
     code0-buf ;
 
 Defer write-decrypt
 : write-1file ( -- ) enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
     IF  enc-filename dup $@len 4 - 4 $del  THEN
     enc-filename $@ w/o create-file throw >r
-    v-data 2@ r@ write-file throw r> F close-file throw ;
+    v-data 2@ r@ write-file throw r> forth:close-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
 vault>file
-: vault>out [: v-data 2@ F type ;] is write-decrypt ;
+: vault>out [: v-data 2@ forth:type ;] is write-decrypt ;
 
 : decrypt-file ( filename u -- )
     enc-filename $!

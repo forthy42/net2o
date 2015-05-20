@@ -55,11 +55,11 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     IF   info-color attr!  THEN  ." @" .key-id space
     reset-color ;
 +net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 1 4 !!<>=order? $> ." re: " 85type F cr ;
+    !!signed? 1 4 !!<>=order? $> ." re: " 85type forth:cr ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> F type F cr ;
+    !!signed? 1 8 !!<>=order? $> forth:type forth:cr ;
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type F cr ;
+    !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF

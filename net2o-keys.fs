@@ -202,6 +202,10 @@ magenta >bg white >fg or bold or ,
 : .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
+: key>nick ( addrkey u1 -- nick u2 )
+    key-table #@ 0= IF  drop ""  EXIT  THEN
+    cell+ .ke-nick $@ ;
+
 : .key# ( addr u -- ) keysize umin
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ .ke-nick $@ type ." ' ok" cr ;
@@ -248,7 +252,7 @@ max-passphrase# buffer: passphrase
 
 Variable keys
 
-: key>default ( -- ) keys $[]# 1- keys sec[]@ 2dup 85type F cr drop >storekey ! ;
+: key>default ( -- ) keys $[]# 1- keys sec[]@ 2dup 85type forth:cr drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;
@@ -441,7 +445,7 @@ Variable cp-tmp
     cp-tmp $@ key-pfd write-file throw cp-tmp $off
     key-table [: cell+ $@ drop cell+ >o
       ke-sk sec@ d0= IF  pack-pubkey
-	  flush( ." saving " ke-nick $@ type F cr )
+	  flush( ." saving " ke-nick $@ type forth:cr )
 	  key-crypt ke-offset 64@ key>pfile@pos
       THEN o> ;] #map
     key-pfd close-file throw

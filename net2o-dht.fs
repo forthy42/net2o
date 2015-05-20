@@ -185,7 +185,7 @@ get-current also net2o-base definitions
 \g 
 
 $33 net2o: dht-id ( $:string -- o:o )
-    $> >d#id dht( ." set dht to: " dup hex. F cr ) n:>o ;
+    $> >d#id dht( ." set dht to: " dup hex. forth:cr ) n:>o ;
 \g set dht id for further operations on it
 dht-table >table
 
@@ -219,7 +219,7 @@ end-class dht-file-class
 : d#values, ( addr u mask -- addr' u' ) { mask }
     k#size cell/ 1 DO
 	mask 1 and IF
-	    I dup cells dht-hash dht( ." access dht: " dup hex. over . F cr ) +
+	    I dup cells dht-hash dht( ." access dht: " dup hex. over . forth:cr ) +
 	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
@@ -286,7 +286,7 @@ false Value add-myip
     THEN
     endwith request,  end-cmd
     ['] end-cmd IS expect-reply? ;
-: addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr F cr )
+: addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr forth:cr )
     pub? IF
 	my-ip-merge IF  2drop  EXIT  THEN
 	my-ip$ $ins[]  EXIT  THEN
@@ -360,14 +360,14 @@ previous
 
 : disconnect-me ( -- )
     net2o-code log .time s" Disconnect" $, type cr endwith
-      close-all disconnect  end-code msg( ." disconnected" F cr )
-    n2o:dispose-context msg( ." Disposed context" F cr ) ;
+      close-all disconnect  end-code msg( ." disconnected" forth:cr )
+    n2o:dispose-context msg( ." Disposed context" forth:cr ) ;
 
 : beacon-replace ( -- )  \ sign on, and do a replace-me
     sockaddr alen @ save-mem
     [: over >r insert-address r> free throw
-      n2o:new-context $6 $6 n2o:connect msg( ." beacon: connected" F cr )
-      replace-me msg( ." beacon: replaced" F cr )
+      n2o:new-context $6 $6 n2o:connect msg( ." beacon: connected" forth:cr )
+      replace-me msg( ." beacon: replaced" forth:cr )
       disconnect-me ;] 3 net2o-task drop ;
 
 \ beacon handling
@@ -375,12 +375,12 @@ previous
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply
 	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
-		beacon( ." Send reply to: " sockaddr alen @ .address F cr )
+		beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
 		net2o-sock s" !" 0 sockaddr alen @ sendto +send
 	    THEN
 	endof
 	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got reply: " sockaddr alen @ .address F cr )
+	    beacon( ." Got reply: " sockaddr alen @ .address forth:cr )
 	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
 	    IF
 		beacon( ." Try replace" cr )

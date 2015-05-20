@@ -1,6 +1,6 @@
 \ net2o command line interface
 
-\ Copyright (C) 2010-2015   Bernd Paysan
+\ Copyright (C) 2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -78,13 +78,38 @@ $20 value hash-size#
 	"net2o-dhtroot.n2o" do-keyin
     THEN ;
 
-Variable chat-key
+Variable chat-keys
+Variable msg-group
 
-: wait-chat ( addr u -- )
-    ." press key to connect to " 2dup type nick>pk keysize umin chat-key $!
+: nicks>chat ( -- )
+    [: nick>pk keysize umin chat-keys $+[]! ;] @arg-loop ;
+
+: wait-chat ( -- )
+    ." press key to connect to "
+    chat-keys [: key>nick type space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
-    [: chat-key $@ pubkey $@ str= IF  bl unkey  THEN ;] is do-connect
+    [: false chat-keys [: pubkey $@ str= or ;] $[]map
+      IF  bl unkey  THEN ;] is do-connect
     key drop  ['] noop IS do-connect ;
+
+: chat-user ( -- )
+    wait-chat
+    0 chat-keys $[]@ key>nick search-connect
+    ?dup-IF  >o rdrop  key? IF  key drop  THEN
+    ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
+	net2o-code expect-reply log !time endwith get-ip end-code
+    THEN
+    ret+beacon do-chat
+    connection  IF  ret-beacon c:disconnect  THEN ;
+
+: handle-chat ( char -- )
+    case
+	'#' of \ group chat
+	    ?nextarg drop 1 /string msg-group $!
+	    "" msg-group $@ msg-groups #!  nicks>chat  endof
+	'@' of  nicks>chat  endof
+	drop  EXIT   endcase
+    chat-user ;
 
 \ commands for the command line user interface
 
@@ -226,17 +251,11 @@ get-current net2o-cmds definitions
     ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
 
 : chat ( -- )
-    \G usage: n2o chat @user
+    \G usage: n2o chat @user   to chat privately with a user
+    \G usage: n2o chat @user#group   to chat with the chatgroup managed by user
+    \G usage: n2o chat #group  to start a group chat (peers may connect)
     get-me init-client announce-me
-    ?@nextarg IF
-	2dup wait-chat
-	2dup search-connect ?dup-IF  >o 2drop rdrop  key? IF  key drop  THEN
-	ELSE  $A $A nick-connect !time
-	    net2o-code expect-reply log !time endwith get-ip end-code
-	THEN
-	ret+beacon do-chat
-	connection  IF  ret-beacon c:disconnect  THEN
-    THEN ;
+    ?peekarg IF  drop c@ handle-chat  THEN ;
 
 \ script mode
 
