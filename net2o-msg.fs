@@ -73,8 +73,11 @@ gen-table $freeze
 
 set-current
 
+Variable msg-group$
+
 : <msg ( -- ) \G start a msg block
-    msg sign[ msg-start ;
+    msg sign[ msg-group$ $@ dup IF  $, msg-group  ELSE  2drop  THEN
+    msg-start ;
 : msg> ( -- ) \G end a msg block by adding a signature
     now>never ]pksign endwith ;
 

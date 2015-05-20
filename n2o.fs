@@ -79,7 +79,6 @@ $20 value hash-size#
     THEN ;
 
 Variable chat-keys
-Variable msg-group
 
 : nicks>chat ( -- )
     [: nick>pk keysize umin chat-keys $+[]! ;] @arg-loop ;
@@ -103,13 +102,10 @@ Variable msg-group
     connection  IF  ret-beacon c:disconnect  THEN ;
 
 : handle-chat ( char -- )
-    case
-	'#' of \ group chat
-	    ?nextarg drop 1 /string msg-group $!
-	    "" msg-group $@ msg-groups #!  nicks>chat  endof
-	'@' of  nicks>chat  endof
-	drop  EXIT   endcase
-    chat-user ;
+    '#' = IF \ group chat
+	?nextarg drop 1 /string msg-group$ $!
+	"" msg-group$ $@ msg-groups #!  THEN
+    nicks>chat chat-user ;
 
 \ commands for the command line user interface
 
