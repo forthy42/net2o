@@ -159,9 +159,10 @@ get-current net2o-cmds definitions
     \G usage: n2o keylist
     get-me
     key-table [: cell+ $@ drop cell+ >o
-      ke-pk $@ keysize umin
-      ke-sk sec@ nip IF  .85warn  ELSE  .85info  THEN
-      space ke-nick $@ type cr o> ;] #map ;
+	ke-pk $@ keysize umin
+	ke-sk sec@ nip IF  .85warn  ELSE  .85info  THEN
+	ke-selfsig $@ .sigdates
+	space ke-nick $@ type cr o> ;] #map ;
 
 \ encryption subcommands
 
