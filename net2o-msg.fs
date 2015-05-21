@@ -110,19 +110,22 @@ previous
     IF    2drop "/bye"
     ELSE  dup 1+ xback-restore  pad swap  THEN  r> to history ;
 
+: g?join ( -- )
+    msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
+
+: g?leave ( -- )
+    msg-group$ $@len connection 0<> and IF
+	+resend-cmd send-leave -timeout
+    THEN ;
+
 : do-chat ( -- )
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
-    default-color attr!
-    msg-group$ $@len IF  +resend-cmd send-join  ELSE  2drop  THEN
-    -timeout
+    default-color attr!  -timeout  g?join
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
-    REPEAT
-    msg-group$ $@len connection 0<> and IF
-	+resend-cmd send-leave -timeout
-    THEN  drop ;
+    REPEAT  2drop g?leave ;
 
 :noname ( addr u o:context -- )
     2dup + sigpksize# - keysize pubkey $@ str=

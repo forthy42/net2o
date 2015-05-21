@@ -93,7 +93,7 @@ Variable chat-keys
 
 : chat-user ( -- )
     wait-chat
-    0 chat-keys $[]@ key>nick search-connect
+    0 chat-keys $[]@ search-connect
     ?dup-IF  >o rdrop  key? IF  key drop  THEN
     ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
 	net2o-code expect-reply log !time endwith get-ip end-code

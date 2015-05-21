@@ -2618,9 +2618,9 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     2dup nick-id { id }
     id .dht-host $[]# 0= IF  2dup nick-lookup  2dup nick-id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
-    id dup .dht-host ['] insert-host $[]map drop ;
+    id dup .dht-host ['] insert-host $[]map drop 2drop ;
 
-: search-connect ( nick u -- o/0 ) nick>pk keysize umin
+: search-connect ( key u -- o/0 )
     0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
 
