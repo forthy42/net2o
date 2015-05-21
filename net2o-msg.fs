@@ -94,6 +94,14 @@ previous
     $, msg-text msg>
     cookie+request end-code| ;
 
+: send-join ( -- )
+    net2o-code expect-reply <msg msg-group$ $@ $, msg-join msg>
+    cookie+request end-code| ;
+
+: send-leave ( -- )
+    net2o-code expect-reply <msg msg-group$ $@ $, msg-leave msg>
+    cookie+request end-code| ;
+
 : .chat ( addr u -- )
     sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
 
@@ -106,14 +114,19 @@ previous
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
     default-color attr!
+    msg-group$ $@len IF  +resend-cmd send-join  ELSE  2drop  THEN
     -timeout
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
     REPEAT
-    drop ;
+    msg-group$ $@len connection 0<> and IF
+	+resend-cmd send-leave -timeout
+    THEN  drop ;
 
 :noname ( addr u o:context -- )
+    2dup + sigpksize# - keysize pubkey $@ str=
+    IF  2drop  EXIT  THEN \ don't send to originator
     net2o-code  expect-reply
     msg $, nestsig endwith
     cookie+request end-code ; is avalanche-to
