@@ -27,7 +27,8 @@ esac
 # special optimizations for some plattforms
 case "$host_alias" in
      arm-linux-androideabi)
-	CCASFLAGS="$CCASFLAGS -mfpu=neon-vfpv4"
+	CCASFLAGS="-O3 -mfpu=neon-vfpv4"
+	CFLAGS="-O3 -mfpu=neon-vfpv4"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	plattform=neon

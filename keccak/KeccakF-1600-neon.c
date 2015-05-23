@@ -17,9 +17,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "KeccakF-1600-opt64-settings.h"
 #include "KeccakF-1600.h"
 
-void KeccakF(keccak_state state)
+void KeccakF(keccak_state state, int round)
 {
-  KeccakF_armv7a_neon(state);
+  KeccakF_armv7a_neon(state, round);
 }
 
 void KeccakInitializeState(keccak_state state)
