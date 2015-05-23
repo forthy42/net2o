@@ -41,7 +41,7 @@ static const UINT32 KeccakF1600RoundConstants_int2[2*24] =
 
 #undef rounds
 
-#define rounds \
+#define rounds(round) \
 { \
     UINT32 Da0, De0, Di0, Do0, Du0; \
     UINT32 Da1, De1, Di1, Do1, Du1; \
@@ -72,7 +72,7 @@ static const UINT32 KeccakF1600RoundConstants_int2[2*24] =
 \
     copyFromState(A, state) \
 \
-    for( i = 12; i != 0; --i ) { \
+    for( i = round/2; i != 0; --i ) { \
 	    Cx = Abu0^Agu0^Aku0^Amu0^Asu0; \
 	    Du1 = Abe1^Age1^Ake1^Ame1^Ase1; \
 	    Da0 = Cx^ROL32(Du1, 1); \

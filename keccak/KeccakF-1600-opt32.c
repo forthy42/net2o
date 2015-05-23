@@ -271,7 +271,7 @@ void extractLanes(int byteCount, UINT32* state, UINT8 *data)
 
 #endif
 
-void KeccakF(keccak_state state)
+void KeccakF(keccak_state state, int round)
 {
     declareABCDE
 #if (Unrolling != 24)
@@ -279,7 +279,7 @@ void KeccakF(keccak_state state)
 #endif
 
     copyFromState(A, state)
-    rounds
+    rounds(round)
 }
 
 void KeccakInitialize()

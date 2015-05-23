@@ -11,38 +11,10 @@ and related or neighboring rights to the source code in this file.
 http://creativecommons.org/publicdomain/zero/1.0/
 */
 
-#if (Unrolling == 24)
-#define rounds \
+#if (Unrolling == 12)
+#define rounds(round) \
     prepareTheta \
-    thetaRhoPiChiIotaPrepareTheta( 0, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 1, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 2, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 3, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 4, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 5, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 6, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 7, E, A) \
-    thetaRhoPiChiIotaPrepareTheta( 8, A, E) \
-    thetaRhoPiChiIotaPrepareTheta( 9, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(10, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(11, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(12, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(13, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(14, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(15, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(16, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(17, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(18, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(19, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(20, A, E) \
-    thetaRhoPiChiIotaPrepareTheta(21, E, A) \
-    thetaRhoPiChiIotaPrepareTheta(22, A, E) \
-    thetaRhoPiChiIota(23, E, A) \
-    copyToState(state, A)
-#elif (Unrolling == 12)
-#define rounds \
-    prepareTheta \
-    for(i=0; i<24; i+=12) { \
+    for(i=0; i<round; i+=12) { \
         thetaRhoPiChiIotaPrepareTheta(i   , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+ 1, E, A) \
         thetaRhoPiChiIotaPrepareTheta(i+ 2, A, E) \
@@ -57,24 +29,10 @@ http://creativecommons.org/publicdomain/zero/1.0/
         thetaRhoPiChiIotaPrepareTheta(i+11, E, A) \
     } \
     copyToState(state, A)
-#elif (Unrolling == 8)
-#define rounds \
-    prepareTheta \
-    for(i=0; i<24; i+=8) { \
-        thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
-        thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
-        thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
-        thetaRhoPiChiIotaPrepareTheta(i+3, E, A) \
-        thetaRhoPiChiIotaPrepareTheta(i+4, A, E) \
-        thetaRhoPiChiIotaPrepareTheta(i+5, E, A) \
-        thetaRhoPiChiIotaPrepareTheta(i+6, A, E) \
-        thetaRhoPiChiIotaPrepareTheta(i+7, E, A) \
-    } \
-    copyToState(state, A)
 #elif (Unrolling == 6)
-#define rounds \
+#define rounds(round) \
     prepareTheta \
-    for(i=0; i<24; i+=6) { \
+    for(i=0; i<round; i+=6) { \
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
         thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
@@ -84,9 +42,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
     } \
     copyToState(state, A)
 #elif (Unrolling == 4)
-#define rounds \
+#define rounds(round) \
     prepareTheta \
-    for(i=0; i<24; i+=4) { \
+    for(i=0; i<round; i+=4) { \
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
         thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
@@ -94,9 +52,9 @@ http://creativecommons.org/publicdomain/zero/1.0/
     } \
     copyToState(state, A)
 #elif (Unrolling == 3)
-#define rounds \
+#define rounds(round) \
     prepareTheta \
-    for(i=0; i<24; i+=3) { \
+    for(i=0; i<round; i+=3) { \
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
         thetaRhoPiChiIotaPrepareTheta(i+2, A, E) \
@@ -104,17 +62,17 @@ http://creativecommons.org/publicdomain/zero/1.0/
     } \
     copyToState(state, A)
 #elif (Unrolling == 2)
-#define rounds \
+#define rounds(round) \
     prepareTheta \
-    for(i=0; i<24; i+=2) { \
+    for(i=0; i<round; i+=2) { \
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         thetaRhoPiChiIotaPrepareTheta(i+1, E, A) \
     } \
     copyToState(state, A)
 #elif (Unrolling == 1)
-#define rounds \
+#define rounds(round) \
     prepareTheta \
-    for(i=0; i<24; i++) { \
+    for(i=0; i<round; i++) { \
         thetaRhoPiChiIotaPrepareTheta(i  , A, E) \
         copyStateVariables(A, E) \
     } \

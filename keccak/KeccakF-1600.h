@@ -13,7 +13,7 @@ typedef unsigned long long int UINT64;
 typedef STATEI keccak_state[25*sizeof(UINT64)/sizeof(STATEI)];
 
 void KeccakInitialize();
-void KeccakF(keccak_state state);
+void KeccakF(keccak_state state, int round);
 void KeccakInitializeState(keccak_state state);
 void KeccakExtract(keccak_state state, UINT64 *data, int laneCount);
 void KeccakAbsorb (keccak_state state, UINT64 *data, int laneCount);

@@ -11,21 +11,21 @@ c-library keccak
 	s" ./keccak" add-libpath
     [THEN]
     \c #include <KeccakF-1600.h>
-    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n)
+    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
     \c {
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;
-    \c     KeccakF(state);
+    \c     KeccakF(state, rounds);
     \c     KeccakEncrypt(state, data, p);
     \c     data = (UINT64*)(((char*)data)+p); n-=p;
     \c   }
     \c   return data;
     \c }
-    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, int n)
+    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
     \c {
     \c   while(n>0) {
     \c     unsigned int p = n >= 128 ? 128 : n;
-    \c     KeccakF(state);
+    \c     KeccakF(state, rounds);
     \c     KeccakDecrypt(state, data, p);
     \c     data = (UINT64*)(((char*)data)+p); n-=p;
     \c   }
@@ -34,14 +34,14 @@ c-library keccak
 
 \ ------===< functions >===-------
 c-function KeccakInitialize KeccakInitialize  -- void
-c-function KeccakF KeccakF a -- void
+c-function KeccakF KeccakF a n -- void
 c-function KeccakInitializeState KeccakInitializeState a -- void
 c-function KeccakExtract KeccakExtract a a n -- void
 c-function KeccakAbsorb KeccakAbsorb a a n -- void
 c-function KeccakEncrypt KeccakEncrypt a a n -- void
 c-function KeccakDecrypt KeccakDecrypt a a n -- void
-c-function KeccakEncryptLoop KeccakEncryptLoop a a n -- a
-c-function KeccakDecryptLoop KeccakDecryptLoop a a n -- a
+c-function KeccakEncryptLoop KeccakEncryptLoop a a n n -- a
+c-function KeccakDecryptLoop KeccakDecryptLoop a a n n -- a
 
 end-c-library
 
@@ -50,10 +50,11 @@ end-c-library
 128 Constant keccak#cks
 
 UValue @keccak
+24 Value rounds
 
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
-: keccak* ( -- ) @keccak KeccakF ;
+: keccak* ( -- ) @keccak rounds KeccakF ;
 : >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
 : +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
 : -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
@@ -102,22 +103,22 @@ keccak-init
 \G perform a diffuse round
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
-    @keccak -rot KeccakEncryptLoop  drop
+    @keccak -rot rounds KeccakEncryptLoop  drop
 ; to c:encrypt
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u
-    @keccak -rot KeccakDecryptLoop  drop
+    @keccak -rot rounds KeccakDecryptLoop  drop
 ; to c:decrypt ( addr u -- )
 :noname ( addr u tag -- )
     \G Encrypt message in buffer addr u with auth
-    { tag } @keccak -rot KeccakEncryptLoop
+    { tag } @keccak -rot rounds KeccakEncryptLoop
     keccak*
     >r keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + r> $10 move
 ; to c:encrypt+auth ( addr u tag -- )
 :noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check
-    { tag } @keccak -rot KeccakDecryptLoop
+    { tag } @keccak -rot rounds KeccakDecryptLoop
     keccak*
     128@ keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + 128@ 128=

@@ -172,7 +172,7 @@ ALIGN const UINT64 rot_39_41[2] = {39, 41};
 
 #include "KeccakF-1600-unrolling.macros"
 
-void KeccakF(keccak_state state)
+void KeccakF(keccak_state state, int round)
 {
     declareABCDE
 #if (Unrolling != 24)
@@ -180,7 +180,7 @@ void KeccakF(keccak_state state)
 #endif
 
     copyFromState(A, state)
-    rounds
+    rounds(round)
 #if defined(UseMMX)
     _mm_empty();
 #endif
