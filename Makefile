@@ -27,7 +27,7 @@ VERSION  = $(shell $(ENGINE) --version | tr ' ' /)
 LIBCCNAMED =
 LIBCCDEST =
 KERNEL    = 
-PREFIX    = $(shell which $(GCC) | sed -e s,/bin/$(GCC),sysroot/usr,g)
+PREFIX    = /usr/local
 INCDIR    = $(PREFIX)/include/$(VERSION)
 
 all: libs libcc
@@ -38,5 +38,5 @@ libs:
 libcc:	$(FORTHLIB)
 	mkdir -p $(INCDIR)
 	cp $(SRC)/engine/libcc.h $(SRC)/engine/config.h $(INCDIR)
-	for i in $(FORTHLIB); do (echo "generating library $$i"; \
+	-for i in $(FORTHLIB); do (echo "generating library $$i"; \
 		$(ENGINE) -p ".:~+:$(SRC)"  -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye); done
