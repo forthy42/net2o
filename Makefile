@@ -33,7 +33,7 @@ INCDIR    = $(PREFIX)/include/$(VERSION)
 all: libs libcc
 
 libs:
-	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) && make clean && make && make prefix=$(PREFIX) install); done
+	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && make clean && make && make install); done
 
 libcc:	$(FORTHLIB)
 	mkdir -p $(INCDIR)
