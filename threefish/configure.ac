@@ -11,6 +11,9 @@ CFLAGS=${CFLAGS--O3}
 
 # special optimizations for some plattforms
 case "$host_alias" in
+    arm-*)
+	CFLAGS="-O3 -mfpu=neon-vfpv4"
+	;;
     i686-*)
 	# if you don't want sse, specify i586-linux-gnu
 	CFLAGS="-O3 -m32 -mssse3 -DUseSSE"
