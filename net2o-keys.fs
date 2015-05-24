@@ -55,7 +55,7 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
     \G accept-like input, but types * instead of the character
     \G don't save into history
     history >r  what's type >r  what's emit is old-emit
-    ['] type-pw* is type  ['] emit-pw* is emit  utf-8* xc-vector !@ >r
+    utf-8* xc-vector !@ >r  ['] type-pw* is type  ['] emit-pw* is emit
     0 to history
     ['] accept catch
     r> xc-vector !  what's old-emit is emit  r> is type  r> to history
@@ -70,6 +70,8 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 \ secrets don't, they aren't. We can quickly decrypt all
 \ secret-based stuff, without bothering with slowdowns.
 \ So secrets should use normal string decrypt
+
+cmdbuf-o up@ - class-o !
 
 cmd-buf0 class
     maxdata -
@@ -504,12 +506,13 @@ $40 buffer: nick-buf
     dup 0= IF  2drop  EXIT  THEN
     sample-key .do-cmd-loop ;
 
-: read-keys-loop ( fd -- )  >r 0. r@ reposition-file throw
+: read-keys-loop ( fd -- )  code-key
+    >r 0. r@ reposition-file throw
     BEGIN
 	r@ file-position throw d>64 key-read-offset 64!
 	keypack keypack-all# r@ read-file throw
 	keypack-all# = WHILE  try-decrypt do-key
-    REPEAT  rdrop ;
+    REPEAT  rdrop  code0-buf ;
 : read-key-loop ( -- ) ?key-sfd read-keys-loop ;
 : read-pkey-loop ( -- ) pw-level# >r -1 to pw-level#
     ?key-pfd read-keys-loop r> to pw-level# ;
