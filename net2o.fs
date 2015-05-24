@@ -780,9 +780,9 @@ Variable lastn2oaddr
     >r SOCK_DGRAM >hints r> hints ai_family l!
     get-info info>string insert-address ;
 
-: insert-ip ( addr u port -- net2o-addr )  AF_INET   insert-ip* ;
-: insert-ip4 ( addr u port -- net2o-addr ) AF_INET   insert-ip* ;
-: insert-ip6 ( addr u port -- net2o-addr ) AF_INET6  insert-ip* ;
+: insert-ip ( addr u port -- net2o-addr )  PF_INET   insert-ip* ;
+: insert-ip4 ( addr u port -- net2o-addr ) PF_INET   insert-ip* ;
+: insert-ip6 ( addr u port -- net2o-addr ) PF_INET6  insert-ip* ;
 
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
