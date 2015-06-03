@@ -20,6 +20,7 @@
 \ command helper
 
 User buf-state cell uallot drop
+User buf-dump  cell uallot drop
 
 : zz>n ( 64zz -- 64n )
     64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
@@ -200,7 +201,7 @@ sema see-lock
     ." see-me: "
     inbuf flags .dest-addr
     \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
-    inbuf packet-data n2o:see
+    buf-dump 2@ n2o:see
     2r> buf-state 2! ;
 
 : cmd-dispatch ( addr u -- addr' u' )
@@ -216,20 +217,23 @@ sema see-lock
 Defer >throw
 Variable throwcount
 
-: do-cmd-loop ( addr u -- )
+: cmd-throw ( error -- )
+    1 throwcount +!
+    [: ." do-cmd-loop: " dup . .exe cr ;] $err
+    dup DoError  nothrow
+    buf-state @ show-offset !  n2o:see-me  show-offset on
+    un-cmd  throwcount @ 4 < IF  >throw  THEN ;
+: do-cmd-loop ( addr u -- )  2dup buf-dump 2!
     cmd( dest-flags .dest-addr 64@ $64. 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     trace( ." cmd loop done" cr )
-    dup IF   1 throwcount +!
-	[: ." do-cmd-loop: " dup . .exe cr ;] $err
-	dup DoError  nothrow
-	buf-state @ show-offset !  n2o:see-me  show-offset on
-	un-cmd  throwcount @ 4 < IF  >throw  THEN  THEN
+    dup IF   cmd-throw  THEN
     r> sp! 2drop +cmd ;
 : nest-cmd-loop ( addr u -- )
-    buf-state 2@ 2>r do-cmd-loop
-    2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN ;
+    buf-dump 2@ 2>r buf-state 2@ 2>r ['] do-cmd-loop catch
+    2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN
+    2r> buf-dump 2! ?dup-IF  cmd-throw  THEN ;
 
 \ commands
 

@@ -102,14 +102,15 @@ Variable chat-keys
     0 chat-keys $[]@ search-connect
     ?dup-IF  >o rdrop  key? IF  key drop  THEN
     ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
-	net2o-code expect-reply log !time endwith get-ip end-code
+	net2o-code expect-reply log !time endwith
+	join, get-ip end-code
     THEN
     ret+beacon do-chat
     connection  IF  ret-beacon c:disconnect  THEN ;
 
 : handle-chat ( char -- )
-    '#' = IF \ group chat
-	?nextarg drop 1 /string
+    '@' <> IF \ group chat
+	?nextarg drop
 	'@' $split over >r 2over + r> <> /string \ get the @ back
 	2swap msg-group$ $!
 	"" msg-group$ $@ msg-groups #!
@@ -259,8 +260,8 @@ get-current net2o-cmds definitions
 
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user
-    \G usage: n2o chat #group@user   to chat with the chatgroup managed by user
-    \G usage: n2o chat #group  to start a group chat (peers may connect)
+    \G usage: n2o chat group@user   to chat with the chatgroup managed by user
+    \G usage: n2o chat group   to start a group chat (peers may connect)
     get-me init-client announce-me
     ?peekarg IF  drop c@ handle-chat  THEN ;
 

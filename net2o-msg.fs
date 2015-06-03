@@ -95,12 +95,20 @@ previous
     $, msg-text msg>
     cookie+request end-code| ;
 
+also net2o-base
+: join, ( -- )
+    msg-group$ $@ dup IF  msg $, msg-join endwith  ELSE  2drop  THEN ;
+
+: leave, ( -- )
+    msg-group$ $@ dup IF  msg $, msg-leave endwith  ELSE  2drop  THEN ;
+previous
+
 : send-join ( -- )
-    net2o-code expect-reply <msg msg-group$ $@ $, msg-join msg>
+    net2o-code expect-reply join,
     cookie+request end-code| ;
 
 : send-leave ( -- )
-    net2o-code expect-reply <msg msg-group$ $@ $, msg-leave msg>
+    net2o-code expect-reply leave,
     cookie+request end-code| ;
 
 : .chat ( addr u -- )
@@ -122,7 +130,7 @@ previous
 : do-chat ( -- )
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
-    default-color attr!  -timeout  g?join
+    default-color attr!  -timeout
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
