@@ -18,9 +18,8 @@
 defer avalanche-to ( addr u o:context -- )
 : avalanche-msg ( group-addr u -- )
     \g forward message to all next nodes of that message group
-    last-msg 2@ d0= !!inv-order!!
-    msg-groups #@ IF
-	bounds ?DO  last-msg 2@ I @ .avalanche-to  cell +LOOP
+    msg-groups #@ dup IF
+	bounds ?DO  last-msg 2@ I @ .avalanche-to cell +LOOP
     ELSE  2drop  THEN  0. last-msg 2! ;
 
 get-current also net2o-base definitions
@@ -41,7 +40,7 @@ reply-table $@ inherit-table msg-table
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
-    !!signed?  4 8 !!<>=order? \g already a message there
+    !!signed?  8 $10 !!<>=order? \g already a message there
     $> avalanche-msg ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
