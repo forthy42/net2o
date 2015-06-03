@@ -80,16 +80,22 @@ $20 value hash-size#
 
 Variable chat-keys
 
+: nick>chat ( addr u -- )
+    nick>pk keysize umin chat-keys $+[]! ;
+
 : nicks>chat ( -- )
-    [: nick>pk keysize umin chat-keys $+[]! ;] @arg-loop ;
+    ['] nick>chat @arg-loop ;
+
+: wait-key ( -- )
+    BEGIN  key ctrl L <>  UNTIL ;
 
 : wait-chat ( -- )
     ." press key to connect to "
     chat-keys [: key>nick type space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: pubkey $@ str= or ;] $[]map
-      IF  bl unkey  THEN ;] is do-connect
-    key drop  ['] noop IS do-connect ;
+	IF  bl unkey  THEN ;] is do-connect
+    wait-key  ['] noop IS do-connect ;
 
 : chat-user ( -- )
     wait-chat
@@ -103,8 +109,12 @@ Variable chat-keys
 
 : handle-chat ( char -- )
     '#' = IF \ group chat
-	?nextarg drop 1 /string msg-group$ $!
-	"" msg-group$ $@ msg-groups #!  THEN
+	?nextarg drop 1 /string
+	'@' $split over >r 2over + r> <> /string \ get the @ back
+	2swap msg-group$ $!
+	"" msg-group$ $@ msg-groups #!
+	dup 0<> IF  nick>chat ELSE  2drop  THEN
+    THEN
     nicks>chat chat-user ;
 
 \ commands for the command line user interface
@@ -249,7 +259,7 @@ get-current net2o-cmds definitions
 
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user
-    \G usage: n2o chat @user#group   to chat with the chatgroup managed by user
+    \G usage: n2o chat #group@user   to chat with the chatgroup managed by user
     \G usage: n2o chat #group  to start a group chat (peers may connect)
     get-me init-client announce-me
     ?peekarg IF  drop c@ handle-chat  THEN ;

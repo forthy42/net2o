@@ -30,10 +30,15 @@ KERNEL    =
 PREFIX    = /usr/local
 INCDIR    = $(PREFIX)/include/$(VERSION)
 
-all: libs install libcc
+all: configs no-config
+
+no-config: libs install libcc
+
+configs:
+	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && make clean); done
 
 libs:
-	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && make clean && make); done
+	for i in $(LIBS); do (cd $$i; make); done
 
 install:
 	for i in $(LIBS); do (cd $$i; make install); done

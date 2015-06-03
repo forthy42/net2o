@@ -71,9 +71,7 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 \ secret-based stuff, without bothering with slowdowns.
 \ So secrets should use normal string decrypt
 
-cmdbuf-o up@ - class-o !
-
-cmd-buf0 class
+cmd-buf0 uclass cmdbuf-o
     maxdata -
     key-salt# uvar keypack
     keypack#  uvar keypack-buf

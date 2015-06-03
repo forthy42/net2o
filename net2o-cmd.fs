@@ -190,8 +190,7 @@ sema see-lock
 
 : n2o:see ( addr u -- )
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
-      '<' emit dup 0 .r '>' emit
-      space  t-stack $off
+      dup hex. t-stack $off
       o IF  token-table @ >r  THEN
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
       o IF  r> token-table !  THEN  throw  2drop ;] see-lock c-section ;

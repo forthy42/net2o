@@ -41,7 +41,7 @@ reply-table $@ inherit-table msg-table
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
-    signed? !!signed!! 4 8 !!<>=order? \g already a message there
+    !!signed?  4 8 !!<>=order? \g already a message there
     $> avalanche-msg ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
@@ -76,9 +76,10 @@ set-current
 Variable msg-group$
 
 : <msg ( -- ) \G start a msg block
-    msg sign[ msg-group$ $@ dup IF  $, msg-group  ELSE  2drop  THEN
+    msg sign[
     msg-start ;
 : msg> ( -- ) \G end a msg block by adding a signature
+    msg-group$ $@ dup IF  $, msg-group  ELSE  2drop  THEN
     now>never ]pksign endwith ;
 
 previous
