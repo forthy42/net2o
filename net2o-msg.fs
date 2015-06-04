@@ -16,11 +16,14 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defer avalanche-to ( addr u o:context -- )
-: avalanche-msg ( group-addr u -- )
+: avalanche-msg ( -- )
     \g forward message to all next nodes of that message group
-    msg-groups #@ dup IF
+    last-group 2@ msg-groups #@ dup IF
 	bounds ?DO  last-msg 2@ I @ .avalanche-to cell +LOOP
     ELSE  2drop  THEN  0. last-msg 2! ;
+event: ->avalanche ( o -- )
+    avalanche( ." Avalanche to: " dup hex. cr )
+    .avalanche-msg ;
 
 get-current also net2o-base definitions
 
@@ -41,7 +44,9 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
-    $> avalanche-msg ;
+    $> last-group 2!
+    parent @ .wait-task @ ?dup-IF
+	<event o elit, ->avalanche event>  THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
 	parent cell last# cell+ $+!  THEN ;
@@ -73,6 +78,7 @@ gen-table $freeze
 set-current
 
 Variable msg-group$
+Variable group-master
 
 : <msg ( -- ) \G start a msg block
     msg sign[
@@ -95,18 +101,18 @@ previous
     cookie+request end-code| ;
 
 also net2o-base
-: join, ( -- )
+: join, ( -- )  group-master @ ?EXIT
     msg-group$ $@ dup IF  msg $, msg-join endwith  ELSE  2drop  THEN ;
 
-: leave, ( -- )
+: leave, ( -- )  group-master @ ?EXIT
     msg-group$ $@ dup IF  msg $, msg-leave endwith  ELSE  2drop  THEN ;
 previous
 
-: send-join ( -- )
+: send-join ( -- )  group-master @ ?EXIT
     net2o-code expect-reply join,
     cookie+request end-code| ;
 
-: send-leave ( -- )
+: send-leave ( -- )  group-master @ ?EXIT
     net2o-code expect-reply leave,
     cookie+request end-code| ;
 
@@ -118,10 +124,10 @@ previous
     IF    2drop "/bye"
     ELSE  dup 1+ xback-restore  pad swap  THEN  r> to history ;
 
-: g?join ( -- )
+: g?join ( -- )  group-master @ ?EXIT
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
-: g?leave ( -- )
+: g?leave ( -- )  group-master @ ?EXIT
     msg-group$ $@len connection 0<> and IF
 	+resend-cmd send-leave -timeout
     THEN ;
@@ -137,10 +143,13 @@ previous
 
 :noname ( addr u o:context -- )
     2dup + sigpksize# - keysize pubkey $@ str=
-    IF  2drop  EXIT  THEN \ don't send to originator
+    IF  2drop
+	avalanche( ." unsend avalance to: " pubkey $@ key>nick type cr )
+	EXIT  THEN \ don't send to originator
+    avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     net2o-code  expect-reply
     msg $, nestsig endwith
-    cookie+request end-code ; is avalanche-to
+    cookie+request end-code| ; is avalanche-to
 
 0 [IF]
 Local Variables:

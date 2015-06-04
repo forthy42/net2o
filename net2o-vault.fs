@@ -80,25 +80,6 @@ gen-table $freeze
 
 set-current
 
-Sema cmd$lock
-
-cmd-buf-c class
-    cell uvar cmd$
-end-class cmd-buf$
-
-cmd-buf$ new cmdbuf: code-buf$
-
-code-buf$
-
-' cmd$lock to cmdlock
-:noname  cmd$ $@ ; to cmdbuf$
-:noname  cmd$ $off ; to cmdreset
-' true to maxstring \ really maxuint = -1 = true
-:noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
-:noname ( -- 64dest ) 64#0 ; to cmddest
-
-code0-buf \ reset default
-
 Variable enc-filename
 Variable enc-file
 Variable enc-mode

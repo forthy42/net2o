@@ -67,6 +67,7 @@ debug: regen( \ regenerate keys
 debug: sema( \ semaphores
 debug: recvfrom(
 debug: sendto(
+debug: avalanche( \ distribution tree
 
 -db profile( \ )
 

@@ -1024,6 +1024,7 @@ end-class ack-class
 
 cmd-class class
     2field: last-msg
+    2field: last-group
 end-class msg-class
 
 cmd-class class

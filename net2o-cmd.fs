@@ -235,7 +235,7 @@ Variable throwcount
     2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN
     2r> buf-dump 2! ?dup-IF  cmd-throw  THEN ;
 
-\ commands
+\ command buffers
 
 user-o cmdbuf-o
 
@@ -269,7 +269,26 @@ end-class cmd-buf0
 
 cmd-buf0  new cmdbuf: code0-buf
 
-code0-buf
+\ command buffer in a string
+
+Sema cmd$lock
+
+cmd-buf-c class
+    cell uvar cmd$
+end-class cmd-buf$
+
+cmd-buf$ new cmdbuf: code-buf$
+
+code-buf$
+
+' cmd$lock to cmdlock
+:noname  cmd$ $@ ; to cmdbuf$
+:noname  cmd$ $off ; to cmdreset
+' true to maxstring \ really maxuint = -1 = true
+:noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
+:noname ( -- 64dest ) 64#0 ; to cmddest
+
+code0-buf \ reset default
 
 :noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
 ' cmd0lock to cmdlock
