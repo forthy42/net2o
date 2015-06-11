@@ -389,7 +389,7 @@ User ip6:#
     sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
 
-101 Constant ENETUNREACH
+128 101 machine "mips" str= select Constant ENETUNREACH
 29  Constant ESPIPE
 
 [IFDEF] no-hybrid
@@ -440,8 +440,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
     [:  sockaddr_in6 alen !  53 sockaddr port be-w!
 	sockaddr sin6_addr $10 move
 	query-sock sockaddr sock-rest connect
-	dup 0< errno dup ENETUNREACH = swap ESPIPE = or and
-	IF  drop ip6::0 $10  EXIT  THEN  ?ior
+	dup 0< errno ENETUNREACH = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
 	dup 0< errno ENETUNREACH = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	?fake-ip4
