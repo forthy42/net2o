@@ -183,7 +183,7 @@ drop
 
 Variable show-offset  show-offset on
 
-sema see-lock
+sema see-sema
 
 : cmd-see ( addr u -- addr' u' )
     dup show-offset @ = IF  ." <<< "  THEN
@@ -194,7 +194,7 @@ sema see-lock
       dup hex. t-stack $off
       o IF  token-table @ >r  THEN
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-      o IF  r> token-table !  THEN  throw  2drop ;] see-lock c-section ;
+      o IF  r> token-table !  THEN  throw  2drop ;] see-sema c-section ;
 
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
@@ -254,7 +254,7 @@ cmd-buf-c new cmdbuf: code-buf
 code-buf
 
 :noname ( -- )  cmdbuf# off  o IF  req? on  THEN ; to cmdreset
-:noname ( -- addr ) connection .code-lock ; to cmdlock
+:noname ( -- addr ) connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
 :noname ( addr u -- ) dup maxstring u> IF  ~~ true  !!stringfit!!  THEN

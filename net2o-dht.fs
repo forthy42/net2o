@@ -233,7 +233,7 @@ end-class dht-file-class
 
 : new>dht ( -- )
     [: dht-file-class new { w^ fs-ins } fs-ins cell file-state $+! drop ;]
-    filestate-lock c-section ;
+    filestate-sema c-section ;
 
 : d#open ( fid -- )  new>dht lastfile@ .fs-open ;
 : d#query ( addr u mask fid -- )  state-addr >o

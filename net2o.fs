@@ -1067,8 +1067,8 @@ cmd-class class
     field: mpubkey \ our side official pubkey
     field: request#
     field: filereq#
-    1 pthread-mutexes +field filestate-lock
-    1 pthread-mutexes +field code-lock
+    1 pthread-mutexes +field filestate-sema
+    1 pthread-mutexes +field code-sema
 
     field: data-resend
     field: data-b2b
@@ -1261,8 +1261,8 @@ UValue connection
     -flow-control
     -1 blocksize !
     1 blockalign !
-    code-lock 0 pthread_mutex_init drop
-    filestate-lock 0 pthread_mutex_init drop
+    code-sema 0 pthread_mutex_init drop
+    filestate-sema 0 pthread_mutex_init drop
     o o> ;
 
 \ insert address for punching
@@ -1499,7 +1499,7 @@ reply buffer: dummy-reply
     
 \ timing records
 
-sema timing-lock
+sema timing-sema
 
 : net2o:track-timing ( -- ) \ initialize timing records
     s" " timing-stat $! ;
@@ -1526,10 +1526,10 @@ sema timing-lock
 	  I ts-grow sf@ 1u f* f.
 	  ." timing" cr
       timestats +LOOP
-      track-timing $off o> ;] timing-lock c-section ;
+      track-timing $off o> ;] timing-sema c-section ;
 
 : net2o:rec-timing ( addr u -- )
-    [: track-timing $+! ;] timing-lock c-section ;
+    [: track-timing $+! ;] timing-sema c-section ;
 
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
@@ -1670,7 +1670,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 
 \ acknowledge
 
-sema resize-lock
+sema resize-sema
 
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
@@ -1904,7 +1904,7 @@ Create chunk-adder chunks-struct allot
       o chunk-adder chunk-context !
       0 chunk-adder chunk-count !
       chunk-adder chunks-struct chunks $+! ;]
-    resize-lock c-section
+    resize-sema c-section
     ticker 64@ ack@ .ticks-init ;
 
 : o-chunks ( -- )
@@ -1913,7 +1913,7 @@ Create chunk-adder chunks-struct allot
 		chunks I chunks-struct del$one
 		unloop chunks next$ ?DO NOPE 0
 	    ELSE  chunks-struct  THEN  +LOOP ;]
-    resize-lock c-section ;
+    resize-sema c-section ;
 
 event: ->send-chunks ( o -- ) .do-send-chunks ;
 
@@ -1965,7 +1965,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 	ELSE
 	    drop msg( .nosend )
 	    [: chunks chunks+ @ chunks-struct * chunks-struct $del ;]
-	    resize-lock c-section
+	    resize-sema c-section
 	    false
 	THEN
     ELSE  drop chunks+ off false  THEN ;
@@ -2351,8 +2351,8 @@ $20 Constant signed-val
 	THEN
 	msg-context @ ?dup-IF  .dispose  THEN
 	unlink-ctx  ungroup-ctx
-	code-lock pthread_mutex_destroy drop
-	filestate-lock pthread_mutex_destroy drop
+	code-sema pthread_mutex_destroy drop
+	filestate-sema pthread_mutex_destroy drop
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
@@ -2516,7 +2516,7 @@ Variable cookies
     [: ticks 64dup [IFUNDEF] 64bit swap [THEN] o
 	{ 64^ cookie-adder w^ cookie-o }
 	cookie-adder cookie-size#  cookies $+! ;]
-    resize-lock c-section ;
+    resize-sema c-section ;
 
 : do-?cookie ( cookie -- context true / false )
     ticker 64@ connect-timeout# 64- { 64: timeout }
@@ -2534,7 +2534,7 @@ Variable cookies
     +LOOP  64drop 0 ;
   
 : ?cookie ( cookie -- context true / false )
-    ['] do-?cookie resize-lock c-section ;
+    ['] do-?cookie resize-sema c-section ;
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
