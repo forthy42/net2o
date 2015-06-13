@@ -87,21 +87,24 @@ Variable chat-keys
     ['] nick>chat @arg-loop ;
 
 : wait-key ( -- )
-    BEGIN  key ctrl L <>  UNTIL ;
+    BEGIN  key ctrl L <>  UNTIL  ctrl L unkey ;
 
 : wait-chat ( -- )
     ." press key to connect to "
     chat-keys [: key>nick type space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: pubkey $@ str= or ;] $[]map
-	IF  bl unkey  THEN  up@ wait-task ! ;] is do-connect
+	IF  ctrl Z unkey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
+: search-chat ( -- )
+    false chat-keys
+    [: rot dup 0= IF drop search-connect
+      ELSE  nip nip  THEN ;] $[]map ;
+
 : chat-user ( -- )
-    wait-chat
-    false chat-keys [: rot dup 0= IF drop search-connect
-	ELSE  nip nip  THEN ;] $[]map
-    ?dup-IF  >o rdrop  key? IF  key drop  THEN
+    wait-chat  search-chat
+    ?dup-IF  >o rdrop
     ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
 	net2o-code expect-reply log !time endwith
 	join, get-ip end-code
@@ -262,7 +265,7 @@ get-current net2o-cmds definitions
 : -master ( -- )
     \G usage: n2o -master <next-cmd>
     \G cmd: set mode to chat master
-    group-master on ;
+    group-master on next-cmd ;
 
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user
