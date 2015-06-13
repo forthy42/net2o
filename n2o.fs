@@ -97,7 +97,10 @@ Variable chat-keys
 	IF  ctrl Z unkey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
-: search-chat ( -- )
+: search-chat ( -- chat )
+    group-master @ IF  msg-group$ $@ msg-groups #@ dup cell- 0 max /string
+	IF  @  ELSE  drop 0  THEN  EXIT
+    THEN
     false chat-keys
     [: rot dup 0= IF drop search-connect
       ELSE  nip nip  THEN ;] $[]map ;
@@ -117,7 +120,7 @@ Variable chat-keys
 	?nextarg drop
 	'@' $split over >r 2over + r> <> /string \ get the @ back
 	2swap msg-group$ $!
-	"" msg-group$ $@ msg-groups #!
+	group-master @ IF   "" msg-group$ $@ msg-groups #!  THEN
 	dup 0<> IF  nick>chat ELSE  2drop  THEN
     THEN
     nicks>chat chat-user ;
