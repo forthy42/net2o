@@ -24,6 +24,8 @@ defer avalanche-to ( addr u o:context -- )
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     .avalanche-msg ;
+event: ->chat-connect ( o -- )
+    drop ctrl Z unkey ;
 
 get-current also net2o-base definitions
 
@@ -49,7 +51,9 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 	<event o elit, ->avalanche event>  THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
-	parent cell last# cell+ $+!  THEN ;
+	parent cell last# cell+ $+!
+	parent @ .wait-task @ ?dup-IF
+	    <event parent @ elit, ->chat-connect event>  THEN THEN ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
@@ -132,14 +136,31 @@ previous
 	+resend-cmd send-leave -timeout
     THEN ;
 
-: do-chat ( -- )
+: chat-entry ( -- )
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
-    default-color attr!  -timeout
+    default-color attr! ;
+
+: do-chat ( -- ) chat-entry  -timeout
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
     REPEAT  2drop g?leave ;
+
+also net2o-base
+: avalanche-text ( addr u -- )
+    code-buf$ cmdreset <msg $, msg-text msg>
+    cmd$ $@ last-msg 2!
+    code-buf avalanche-msg ;
+previous
+
+: group-chat ( -- ) chat-entry
+    [: up@ wait-task ! ;] IS do-connect
+    BEGIN  get-input-line
+	2dup "/bye" str= 0=
+	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
+	    2dup avalanche-text .chat
+    REPEAT  2drop ;
 
 :noname ( addr u o:context -- )
     2dup + sigpksize# - keysize pubkey $@ str=
@@ -147,9 +168,9 @@ previous
 	avalanche( ." unsend avalance to: " pubkey $@ key>nick type cr )
 	EXIT  THEN \ don't send to originator
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
-    net2o-code  expect-reply
+    o to connection +resend-cmd net2o-code expect-reply
     msg $, nestsig endwith
-    cookie+request end-code| ; is avalanche-to
+    cookie+request end-code| -timeout ; is avalanche-to
 
 0 [IF]
 Local Variables:

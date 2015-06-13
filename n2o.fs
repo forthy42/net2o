@@ -87,7 +87,7 @@ Variable chat-keys
     ['] nick>chat @arg-loop ;
 
 : wait-key ( -- )
-    BEGIN  key ctrl L <>  UNTIL  ctrl L unkey ;
+    BEGIN  key ctrl L <>  UNTIL ;
 
 : wait-chat ( -- )
     ." press key to connect to "
@@ -97,13 +97,18 @@ Variable chat-keys
 	IF  ctrl Z unkey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
-: search-chat ( -- chat )
-    group-master @ IF  msg-group$ $@ msg-groups #@ dup cell- 0 max /string
-	IF  @  ELSE  drop 0  THEN  EXIT
-    THEN
+: last-chat-peer ( -- chat )
+    msg-group$ $@ msg-groups #@ dup cell- 0 max /string
+    IF  @  ELSE  drop 0  THEN ;
+
+: search-peer ( -- chat )
     false chat-keys
     [: rot dup 0= IF drop search-connect
       ELSE  nip nip  THEN ;] $[]map ;
+
+: search-chat ( -- chat )
+    group-master @ IF  last-chat-peer  EXIT  THEN
+    search-peer ;
 
 : chat-user ( -- )
     wait-chat  search-chat
@@ -123,7 +128,7 @@ Variable chat-keys
 	group-master @ IF   "" msg-group$ $@ msg-groups #!  THEN
 	dup 0<> IF  nick>chat ELSE  2drop  THEN
     THEN
-    nicks>chat chat-user ;
+    nicks>chat group-master @ IF  group-chat  ELSE  chat-user  THEN ;
 
 \ commands for the command line user interface
 
