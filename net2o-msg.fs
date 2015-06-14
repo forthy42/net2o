@@ -16,14 +16,15 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defer avalanche-to ( addr u o:context -- )
-: avalanche-msg ( -- )
+: avalanche-msg ( msgaddr u groupaddr u -- )
     \g forward message to all next nodes of that message group
-    last-group 2@ msg-groups #@ dup IF
-	bounds ?DO  last-msg 2@ I @ .avalanche-to cell +LOOP
-    ELSE  2drop  THEN  0. last-msg 2! ;
+    msg-groups #@ dup IF
+	bounds ?DO  I @ o <> IF  2dup I @ .avalanche-to  THEN
+	cell +LOOP
+    ELSE  2drop  THEN  2drop ;
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    .avalanche-msg ;
+    >o last-msg 2@ last-group 2@ parent @ .avalanche-msg 0. last-msg 2! o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z unkey ;
 
@@ -149,9 +150,8 @@ previous
 
 also net2o-base
 : avalanche-text ( addr u -- )
-    code-buf$ <msg $, msg-text msg>
-    cmdbuf$ last-msg 2!
-    code-buf avalanche-msg ;
+    code-buf$ cmdreset <msg $, msg-text msg>
+    cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
 
 : group-chat ( -- ) chat-entry
@@ -164,10 +164,6 @@ previous
     REPEAT  2drop ;
 
 :noname ( addr u o:context -- )
-    2dup + sigpksize# - keysize pubkey $@ str=
-    IF  2drop
-	avalanche( ." unsend avalance to: " pubkey $@ key>nick type cr )
-	EXIT  THEN \ don't send to originator
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-cmd net2o-code expect-reply
     msg $, nestsig endwith
