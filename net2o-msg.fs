@@ -149,8 +149,8 @@ previous
 
 also net2o-base
 : avalanche-text ( addr u -- )
-    code-buf$ cmdreset <msg $, msg-text msg>
-    cmd$ $@ last-msg 2!
+    code-buf$ <msg $, msg-text msg>
+    cmdbuf$ last-msg 2!
     code-buf avalanche-msg ;
 previous
 
@@ -159,7 +159,8 @@ previous
     BEGIN  get-input-line
 	2dup "/bye" str= 0=
 	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
-	    2dup avalanche-text .chat
+	    msg-group$ $@ msg-groups #@ drop @ >o
+	    2dup msg-context @ .avalanche-text .chat o>
     REPEAT  2drop ;
 
 :noname ( addr u o:context -- )

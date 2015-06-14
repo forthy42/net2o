@@ -518,12 +518,12 @@ User neststart#
 also net2o-base
 
 : sign[ ( -- ) neststart# @ nest-stack >stack
-    string "\x80\x80" +cmdbuf cmdbuf# @ neststart# ! ;
+    string "\x80\0" +cmdbuf cmdbuf$ nip neststart# ! ;
 : nest[ ( -- ) sign[
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
 : ']sign ( xt -- )
     c:0key nest$ c:hash $tmp +cmdbuf
-    cmd-resolve> 2drop  nestsig ;
+    cmd-resolve> 2drop nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 
