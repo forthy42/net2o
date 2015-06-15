@@ -166,9 +166,11 @@ op-vector !
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
 \ : $err ( xt -- ) execute ;
+[IFDEF] traceall  what's name notrace [THEN]
 op-vector @
 $-out ' (attr!) is attr!
 op-vector !
+[IFDEF] traceall  is name [THEN]
 
 \ extra hints for last word executed
 

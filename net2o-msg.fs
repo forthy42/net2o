@@ -20,11 +20,11 @@ defer avalanche-to ( addr u o:context -- )
     \g forward message to all next nodes of that message group
     msg-groups #@ dup IF
 	bounds ?DO  I @ o <> IF  2dup I @ .avalanche-to  THEN
-	cell +LOOP
+	cell +LOOP  client-loop
     ELSE  2drop  THEN  2drop ;
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    >o last-msg 2@ last-group 2@ parent @ .avalanche-msg 0. last-msg 2! o> ;
+    >o last-msg 2@ last-group 2@ parent @ .avalanche-msg o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z unkey ;
 
@@ -124,11 +124,18 @@ previous
 : .chat ( addr u -- )
     sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
 
-: get-input-line ( -- addr u )  history >r  0 to history
-    pad $100 ['] accept catch -56 =
-    IF    2drop "/bye"
-    ELSE  dup 1+ xback-restore  pad swap  THEN  r> to history ;
+$200 Constant maxmsg#
 
+: get-input-line ( -- addr u )  history >r  0 to history
+    BEGIN  pad maxmsg# ['] accept catch
+	dup dup -56 = swap -28 = or \ quit or ^c to leave
+	IF    drop 2drop "/bye"
+	ELSE
+	    drop \ fixme: do DoError instead
+	    dup 1+ xback-restore  pad swap  THEN
+	dup 0= WHILE  2drop  REPEAT
+    r> to history ;
+    
 : g?join ( -- )  group-master @ ?EXIT
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
@@ -143,6 +150,7 @@ previous
     default-color attr! ;
 
 : do-chat ( -- ) chat-entry  -timeout
+    \ ['] cmd( >body on
     BEGIN  get-input-line
 	2dup "/bye" str= 0= connection 0<> and  WHILE
 	    2dup +resend-cmd send-text -timeout .chat
@@ -155,19 +163,21 @@ also net2o-base
 previous
 
 : group-chat ( -- ) chat-entry
-    [: up@ wait-task ! ;] IS do-connect
+    [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= 0=
 	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
 	    msg-group$ $@ msg-groups #@ drop @ >o
 	    2dup msg-context @ .avalanche-text .chat o>
-    REPEAT  2drop ;
+    REPEAT  2drop
+    msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
+    r> 0 ?DO  >o o to connection ret-beacon disconnect-me o>  cell +LOOP ;
 
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-cmd net2o-code expect-reply
     msg $, nestsig endwith
-    cookie+request end-code| -timeout ; is avalanche-to
+    cookie+request end-code ; is avalanche-to
 
 0 [IF]
 Local Variables:

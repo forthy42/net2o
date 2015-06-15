@@ -254,7 +254,7 @@ cmd-buf-c new cmdbuf: code-buf
 code-buf
 
 :noname ( -- )  cmdbuf# off  o IF  req? on  THEN ; to cmdreset
-:noname ( -- addr ) connection .code-sema ; to cmdlock
+:noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
 :noname ( addr u -- ) dup maxstring u> IF  ~~ true  !!stringfit!!  THEN
