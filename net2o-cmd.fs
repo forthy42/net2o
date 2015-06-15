@@ -437,18 +437,19 @@ comp: :, also net2o-base ;
     cmdreset also net2o-base ;
 comp: :, also net2o-base ;
 
-: send-cmd ( addr u dest -- )  n64-swap { buf# }
+: send-cmd ( addr u dest -- size )  n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
     cmd( ." send: " dest-flags .dest-addr dup buf# n2o:see cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I send-cX  cmdreset  UNLOOP
+	    I send-cX  cmdreset  min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest send-cmd
-    r> stateless# and 0= IF  code-update punch-load $off  THEN o> ;
+    r> stateless# and 0= IF  code-update punch-load $off
+    ELSE  drop  THEN o> ;
 
 also net2o-base
 
@@ -458,7 +459,7 @@ UDefer expect-reply?
 :noname  ['] end-cmd IS expect-reply? ; is init-reply
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd connection IF  code-update THEN  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd ( connection IF  code-update THEN )  THEN ;
 
 previous
 

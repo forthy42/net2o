@@ -1489,7 +1489,7 @@ reply buffer: dummy-reply
     connection .code-map @ >o dup negate dest-tail @ and +
     dest-size @ 1- and dest-back ! o> ;
 
-: code-update ( -- )
+: code-update ( n -- ) drop \ to be used later
     connection .code-map @ >o dest-back @ dest-tail ! o> ;
 
 \ aligned buffer to make encryption/decryption fast

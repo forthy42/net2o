@@ -379,7 +379,8 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	cmd0!
 	[: cmdreset resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
-	  cmdbuf$ rng64 send-cmd 1 packets2 +! ;]
+	  cmdbuf$ rng64 send-cmd drop
+	  1 packets2 +! ;]
 	cmdlock c-section
     THEN ;
 
@@ -389,7 +390,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	dest-size @ addr>replies bounds o> U+DO
 	    I @ 0<> IF
 		timeout( ." resend: " I 2@ n2o:see forth:cr )
-		I 2@ I reply-dest 64@ send-cmd
+		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +!
 	    THEN
 	reply +LOOP
