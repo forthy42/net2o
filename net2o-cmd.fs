@@ -459,7 +459,7 @@ UDefer expect-reply?
 :noname  ['] end-cmd IS expect-reply? ; is init-reply
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd ( connection IF  code-update THEN )  THEN ;
+    cmdbuf# @ IF  expect-reply? cmd  THEN ;
 
 previous
 

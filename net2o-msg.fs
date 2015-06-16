@@ -18,10 +18,11 @@
 defer avalanche-to ( addr u o:context -- )
 : avalanche-msg ( msgaddr u groupaddr u -- )
     \g forward message to all next nodes of that message group
+    2swap { d: msg }
     msg-groups #@ dup IF
-	bounds ?DO  I @ o <> IF  2dup I @ .avalanche-to  THEN
-	cell +LOOP  client-loop
-    ELSE  2drop  THEN  2drop ;
+	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
+	cell +LOOP
+    ELSE  2drop  THEN ;
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     >o last-msg 2@ last-group 2@ parent @ .avalanche-msg o> ;
