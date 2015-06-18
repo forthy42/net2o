@@ -123,10 +123,9 @@ Variable chat-keys
 : handle-chat ( char -- )
     '@' <> IF \ group chat
 	?nextarg drop
-	'@' $split over >r 2over + r> <> /string \ get the @ back
-	2swap msg-group$ $!
-	group-master @ IF   "" msg-group$ $@ msg-groups #!  THEN
-	dup 0<> IF  nick>chat ELSE  2drop  THEN
+	'@' $split 2swap msg-group$ $!
+	"" msg-group$ $@ msg-groups #!
+	dup 0<> IF  nick>chat  ELSE  2drop  THEN
     THEN
     nicks>chat group-master @ IF  group-chat  ELSE  chat-user  THEN ;
 
