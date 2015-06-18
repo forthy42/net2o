@@ -16,7 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defer avalanche-to ( addr u o:context -- )
-: avalanche-msg ( msgaddr u groupaddr u -- )
+: avalanche-msg ( msg groupaddr u -- )
     \g forward message to all next nodes of that message group
     2swap { d: msg }
     msg-groups #@ dup IF
@@ -25,7 +25,7 @@ defer avalanche-to ( addr u o:context -- )
     ELSE  2drop  THEN ;
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    >o last-msg 2@ last-group 2@ parent @ .avalanche-msg o> ;
+    >o last-msg $@ last-group $@ parent @ .avalanche-msg o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z unkey ;
 
@@ -48,7 +48,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
-    $> last-group 2!
+    $> last-group $!
     parent @ .wait-task @ ?dup-IF
 	<event o elit, ->avalanche event>  THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
@@ -73,7 +73,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
-	2dup last-msg 2!
+	2dup last-msg $!
 	sigpksize# - 2dup + sigpksize# >$  c-state off
     THEN r>
 ; msg-class to nest-sig
@@ -132,11 +132,14 @@ $200 Constant maxmsg#
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
 	IF    drop 2drop "/bye"
 	ELSE
-	    drop \ fixme: do DoError instead
-	    dup 1+ xback-restore  pad swap  THEN
+	    0= IF
+		dup 1+ xback-restore  pad swap
+	    ELSE \ fixme: do DoError instead
+		drop 0  THEN
+	THEN
 	dup 0= WHILE  2drop  REPEAT
     r> to history ;
-    
+
 : g?join ( -- )  group-master @ ?EXIT
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
@@ -163,7 +166,7 @@ also net2o-base
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
 
-: group-chat ( -- ) chat-entry
+: group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= 0=
@@ -176,8 +179,8 @@ previous
 
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
-    o to connection +resend-cmd net2o-code expect-reply
-    msg $, nestsig endwith
+    o to connection +resend-cmd
+    net2o-code expect-reply msg $, nestsig endwith
     cookie+request end-code ; is avalanche-to
 
 0 [IF]

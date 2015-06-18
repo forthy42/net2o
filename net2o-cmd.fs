@@ -249,8 +249,11 @@ object class
     umethod cmddest
 end-class cmd-buf-c
 
-: cmdbuf: ( addr -- )  Create , DOES> @ cmdbuf-o ! ;
-cmd-buf-c new cmdbuf: code-buf
+: cmdbuf: ( addr -- )  Create , DOES> perform @ cmdbuf-o ! ;
+
+cmd-buf-c new code-buf^ !
+' code-buf^ cmdbuf: code-buf
+
 code-buf
 
 :noname ( -- )  cmdbuf# off  o IF  req? on  THEN ; to cmdreset
@@ -267,7 +270,8 @@ cmd-buf-c class
     maxdata uvar cmd0buf
 end-class cmd-buf0
 
-cmd-buf0  new cmdbuf: code0-buf
+cmd-buf0 new code0-buf^ !
+' code0-buf^ cmdbuf: code0-buf
 
 \ command buffer in a string
 
@@ -277,7 +281,8 @@ cmd-buf-c class
     cell uvar cmd$
 end-class cmd-buf$
 
-cmd-buf$ new cmdbuf: code-buf$
+cmd-buf$ new code-buf$^ !
+' code-buf$^ cmdbuf: code-buf$
 
 code-buf$
 
@@ -293,6 +298,17 @@ code0-buf \ reset default
 :noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
 ' cmd0lock to cmdlock
 ' rng64 to cmddest
+
+:noname ( -- )
+    cmd-buf0 new code0-buf^ !
+    cmd-buf-c new code-buf^ !
+    cmd-buf$ new code-buf$^ ! ; is alloc-code-bufs
+:noname
+    code0-buf^ @ .dispose
+    code-buf^ @ .dispose
+    code-buf$^ @ >o cmd$ $off dispose o> ; is free-code-bufs
+
+\ stuff into code buffers
 
 : do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
 : cmdtmp$ ( 64n -- addr u )  cmdtmp p!+ cmdtmp tuck - ;
@@ -483,7 +499,7 @@ previous
     tag-addr dup >r 2@
     ?dup-IF
 	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
-	r> reply-dest 64@ send-cmd true
+	r> reply-dest 64@ send-cmd drop true
 	1 packets2 +!
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
 

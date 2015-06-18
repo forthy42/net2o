@@ -78,7 +78,8 @@ cmd-buf0 uclass cmdbuf-o
     key-cksum# uvar keypack-chksum
 end-class cmd-keybuf-c
 
-cmd-keybuf-c new cmdbuf: code-key
+cmd-keybuf-c new code-key^ !
+' code-key^ cmdbuf: code-key
 
 code-key
 cmd0lock 0 pthread_mutex_init drop
@@ -87,6 +88,11 @@ cmd0lock 0 pthread_mutex_init drop
 :noname ( -- n )  keypack# cmdbuf# @ - ; to maxstring
 
 code0-buf
+
+:noname defers alloc-code-bufs
+    cmd-keybuf-c new code-key^ ! ; is alloc-code-bufs
+:noname defers free-code-bufs
+    code-key^ @ .dispose ; is free-code-bufs
 
 \ hashed key data base
 

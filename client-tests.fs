@@ -155,7 +155,8 @@ event: ->throw dup DoError throw ;
 : c:test& ( n -- ) \ in background
     up@ 2 stacksize4 NewTask4 pass >r
     alloc-io ['] c:test catch ?dup-IF
-	elit, ->throw drop  ELSE  elit, ->request  THEN  r> event> ;
+	elit, ->throw drop
+    ELSE  elit, connection elit, ->request  THEN  r> event> ;
 
 #100 Value req-ms#
 

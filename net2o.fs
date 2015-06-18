@@ -107,6 +107,10 @@ object class
     timestats                      uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     maxdata                        uvar aligned$
+    cell                           uvar code0-buf^
+    cell                           uvar code-buf^
+    cell                           uvar code-buf$^
+    cell                           uvar code-key^
 end-class io-buffers
 
 [IFDEF] 64bit
@@ -638,16 +642,21 @@ ustack object-stack
 ustack t-stack
 ustack nest-stack
 
+Defer alloc-code-bufs ' noop is alloc-code-bufs
+Defer free-code-bufs  ' noop is free-code-bufs
+
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
     io-buffers new io-mem !
     -other
     alloc-buf to inbuf
     alloc-buf to tmpbuf
     alloc-buf to outbuf
+    alloc-code-bufs
     init-ed25519 c:init ;
 
 : free-io ( -- )
     free-ed25519 c:free
+    free-code-bufs
     0 io-mem !@ .dispose
     inbuf  free-buf
     tmpbuf free-buf
@@ -1026,8 +1035,8 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
-    2field: last-msg
-    2field: last-group
+    field: last-msg
+    field: last-group
 end-class msg-class
 
 cmd-class class
@@ -2369,16 +2378,19 @@ event: ->disconnect ( connection -- ) .do-disconnect n2o:dispose-context ;
     next-packet !ticks nip 0= ?EXIT  inbuf route?
     IF  route-packet  ELSE  handle-packet  THEN ;
 
-event: ->request ( n -- ) 1 over lshift invert reqmask and!
+event: ->request ( n o -- ) >o 1 over lshift invert reqmask and!
+    reqmask @ 0= IF  -timeout  THEN o>
     request( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
-event: ->reqsave ( task n -- )  <event elit, ->request event> ;
-event: ->timeout ( -- ) reqmask off msg( ." Request timed out" cr )
-    true !!timeout!! ;
+event: ->reqsave ( task n o -- )  <event swap elit, elit, ->request event> ;
+event: ->timeout ( o -- )
+    0 reqmask !@ >r .-timeout msg( ." Request timed out" cr )
+    r> 0<> !!timeout!! ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
-	ack@ .timeouts @ timeouts# >= wait-task @ and  ?dup-IF  ->timeout event>  THEN
+	ack@ .timeouts @ timeouts# >= wait-task @ and  ?dup-IF
+	    o elit, ->timeout event>  THEN
     THEN ;
 
 \ beacons
@@ -2456,8 +2468,8 @@ Variable beacons \ destinations to send beacons to
     BEGIN  packet-event  event-send  AGAIN ;
 
 : n2o:request-done ( n -- )
-    file-task ?dup-IF  <event swap wait-task @ elit, elit, ->reqsave event>
-    ELSE  elit, ->request  THEN ;
+    file-task ?dup-IF  <event swap wait-task @ elit, elit, o elit, ->reqsave event>
+    ELSE  elit, o elit, ->request  THEN ;
 
 0 value core-wanted
 
