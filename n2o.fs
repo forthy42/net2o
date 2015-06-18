@@ -125,7 +125,7 @@ Variable chat-keys
 	?nextarg drop
 	'@' $split 2swap msg-group$ $!
 	"" msg-group$ $@ msg-groups #!
-	dup 0<> IF  nick>chat  ELSE  2drop  THEN
+	dup 0<> IF  nick>chat  ELSE  2drop group-master on  THEN
     THEN
     nicks>chat group-master @ IF  group-chat  ELSE  chat-user  THEN ;
 
@@ -268,11 +268,6 @@ get-current net2o-cmds definitions
 : -rootnick ( -- )
     \G usage: n2o -rootnick <nick> <next-cmd>
     ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
-
-: -master ( -- )
-    \G usage: n2o -master <next-cmd>
-    \G cmd: set mode to chat master
-    group-master on next-cmd ;
 
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user

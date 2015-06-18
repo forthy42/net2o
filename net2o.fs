@@ -2208,8 +2208,6 @@ Defer handle-beacon
 
 \ timeout handling
 
-: do-timeout ( -- )  timeout-xt perform ;
-
 #2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
 #10.000.000 d>64 64Value timeout-min# \ 10ms minimum timeout
 #14 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
@@ -2217,15 +2215,21 @@ Defer handle-beacon
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 
-: o+timeout ( -- ) timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
+: 0timeout ( -- )
+    ack@ .rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
+: do-timeout ( -- )  timeout-xt perform ;
+
+: o+timeout ( -- )
+    0timeout  timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
       o { w^ timeout-o }  timeout-o cell timeout-tasks $+! ;]
   timeout-sema c-section  timeout-task wake ;
-: o-timeout ( -- ) timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
+: o-timeout ( -- )
+    0timeout  timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
     [: o timeout-tasks del$cell ;] timeout-sema c-section ;
-: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
 
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
@@ -2234,9 +2238,6 @@ Variable timeout-tasks s" " timeout-tasks $!
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ ;
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
-: 0timeout ( -- )
-    ack@ .rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
-    0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
 : next-timeout? ( -- time context ) [: 0 { ctx } max-int64
@@ -2245,6 +2246,8 @@ Variable timeout-tasks s" " timeout-tasks $!
     cell +LOOP  ctx ;] timeout-sema c-section ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
+
+: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
 
 \ handling packets
 
@@ -2488,7 +2491,7 @@ Variable beacons \ destinations to send beacons to
 : client-loop ( -- )
     !ticks
     connection >o
-    o IF  up@ wait-task !  0timeout o+timeout  THEN
+    o IF  up@ wait-task !  o+timeout  THEN
     event-loop-task requests->0 o> ;
 
 : server-loop ( -- )

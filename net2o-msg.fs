@@ -132,9 +132,10 @@ $200 Constant maxmsg#
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
 	IF    drop 2drop "/bye"
 	ELSE
-	    0= IF
-		dup 1+ xback-restore  pad swap
+	    dup 0= IF
+		drop dup 1+ xback-restore  pad swap
 	    ELSE \ fixme: do DoError instead
+		." Error: " . cr
 		drop 0  THEN
 	THEN
 	dup 0= WHILE  2drop  REPEAT
