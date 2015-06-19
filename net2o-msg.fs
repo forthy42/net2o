@@ -129,7 +129,9 @@ previous
     cookie+request end-code| ;
 
 : .chat ( addr u -- )
-    sigdate 64@ .ticks space pkc keysize .key-id ." : " type cr ;
+    sigdate 64@ .ticks space pkc keysize .key-id
+    2dup s" /me " string-prefix? IF  4 /string space
+    ELSE  ." : "  THEN type cr ;
 
 $200 Constant maxmsg#
 
@@ -168,7 +170,11 @@ $200 Constant maxmsg#
 
 also net2o-base
 : avalanche-text ( addr u -- )
-    code-buf$ cmdreset <msg $, msg-text msg> endwith
+    code-buf$ cmdreset
+    <msg
+    2dup s" /me " string-prefix? IF  4 /string $, msg-action
+    ELSE  $, msg-text  THEN
+    msg> endwith
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
 
