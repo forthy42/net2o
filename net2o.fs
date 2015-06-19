@@ -2221,7 +2221,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : do-timeout ( -- )  timeout-xt perform ;
 
 : o+timeout ( -- )
-    0timeout  timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
+    timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
@@ -2368,7 +2368,7 @@ $20 Constant signed-val
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
-event: ->disconnect ( connection -- ) .do-disconnect n2o:dispose-context ;
+event: ->disconnect ( connection -- ) >o do-disconnect n2o:dispose-context o> ;
 
 \ loops for server and client
 

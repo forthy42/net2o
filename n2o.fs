@@ -116,9 +116,13 @@ Variable chat-keys
     ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
 	net2o-code expect-reply log !time endwith
 	join, get-ip end-code
+	msg-group$ $@ dup IF
+	    o { w^ group } 2dup msg-groups #@ d0<> IF
+		group cell last# cell+ $+!
+	    ELSE  group cell 2swap msg-groups #!  THEN
+	ELSE  2drop  THEN
     THEN
-    ret+beacon do-chat
-    connection  IF  ret-beacon c:disconnect  THEN ;
+    ret+beacon group-chat ;
 
 : handle-chat ( char -- )
     '@' <> IF \ group chat

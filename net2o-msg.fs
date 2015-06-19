@@ -70,6 +70,8 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 8 !!<>=order? $> forth:type forth:cr ;
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
++net2o: msg-action ( $:msg -- ) \g specify message string
+    !!signed? 1 8 !!<>=order? $> .\" \b\b " forth:type forth:cr ;
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
@@ -91,34 +93,38 @@ Variable group-master
     msg-start ;
 : msg> ( -- ) \G end a msg block by adding a signature
     msg-group$ $@ dup IF  $, msg-group  ELSE  2drop  THEN
-    now>never ]pksign endwith ;
+    now>never ]pksign ;
 
 previous
 
 : send-text ( addr u -- )
     net2o-code  expect-reply
-    <msg $, msg-text msg>
+    <msg $, msg-text msg> endwith
     cookie+request end-code| ;
 
 : send-text-to ( msg u nick u -- )
     net2o-code expect-reply
     <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
-    $, msg-text msg>
+    $, msg-text msg> endwith
     cookie+request end-code| ;
 
 also net2o-base
-: join, ( -- )  group-master @ ?EXIT
-    msg-group$ $@ dup IF  msg $, msg-join endwith  ELSE  2drop  THEN ;
+: join, ( -- )
+    msg-group$ $@ dup IF  msg $, msg-join
+	sign[ msg-start "joined" $, msg-action msg> endwith
+    ELSE  2drop  THEN ;
 
-: leave, ( -- )  group-master @ ?EXIT
-    msg-group$ $@ dup IF  msg $, msg-leave endwith  ELSE  2drop  THEN ;
+: leave, ( -- )
+    msg-group$ $@ dup IF  msg $, msg-leave
+	sign[ msg-start "left" $, msg-action msg> endwith
+    ELSE  2drop  THEN ;
 previous
 
-: send-join ( -- )  group-master @ ?EXIT
+: send-join ( -- )
     net2o-code expect-reply join,
     cookie+request end-code| ;
 
-: send-leave ( -- )  group-master @ ?EXIT
+: send-leave ( -- )
     net2o-code expect-reply leave,
     cookie+request end-code| ;
 
@@ -135,16 +141,15 @@ $200 Constant maxmsg#
 	    dup 0= IF
 		drop dup 1+ xback-restore  pad swap
 	    ELSE \ fixme: do DoError instead
-		." Error: " . cr
-		drop 0  THEN
+		DoError drop 0  THEN
 	THEN
 	dup 0= WHILE  2drop  REPEAT
     r> to history ;
 
-: g?join ( -- )  group-master @ ?EXIT
+: g?join ( -- )
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
-: g?leave ( -- )  group-master @ ?EXIT
+: g?leave ( -- )
     msg-group$ $@len connection 0<> and IF
 	+resend-cmd send-leave -timeout
     THEN ;
@@ -163,7 +168,7 @@ $200 Constant maxmsg#
 
 also net2o-base
 : avalanche-text ( addr u -- )
-    code-buf$ cmdreset <msg $, msg-text msg>
+    code-buf$ cmdreset <msg $, msg-text msg> endwith
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
 
@@ -174,7 +179,7 @@ previous
 	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
 	    msg-group$ $@ msg-groups #@ drop @ >o
 	    2dup msg-context @ .avalanche-text .chat o>
-    REPEAT  2drop
+    REPEAT  2drop g?leave
     msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
     r> 0 ?DO  >o o to connection ret-beacon disconnect-me o>  cell +LOOP ;
 
