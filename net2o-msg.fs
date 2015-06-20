@@ -61,8 +61,8 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 	parent @ last# cell+ del$cell  THEN ;
 
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    !!signed? 1 2 !!<>order? $> keysize umin 2dup pkc over str=
-    IF   info-color attr!  THEN  ." @" .key-id space
+    !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
+    IF   err-color attr!  THEN  ." @" .key-id space
     reset-color ;
 +net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ." re: " 85type forth:cr ;
@@ -71,7 +71,8 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> .\" \b\b " forth:type forth:cr ;
+    !!signed? 1 8 !!<>=order? $> .\" \b\b "
+    warn-color attr! forth:type reset-color forth:cr ;
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
@@ -130,8 +131,9 @@ previous
 
 : .chat ( addr u -- )
     sigdate 64@ .ticks space pkc keysize .key-id
-    2dup s" /me " string-prefix? IF  4 /string space
-    ELSE  ." : "  THEN type cr ;
+    2dup s" /me " string-prefix? IF
+	4 /string space warn-color attr! type reset-color
+    ELSE  ." : " type  THEN  cr ;
 
 $200 Constant maxmsg#
 
@@ -173,7 +175,10 @@ also net2o-base
     code-buf$ cmdreset
     <msg
     2dup s" /me " string-prefix? IF  4 /string $, msg-action
-    ELSE  $, msg-text  THEN
+    ELSE
+	BEGIN  dup  WHILE  over c@ '@' = WHILE
+		bl $split 2swap 1 /string nick>pk $, msg-signal  REPEAT  THEN
+	$, msg-text  THEN
     msg> endwith
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
