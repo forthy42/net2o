@@ -154,7 +154,7 @@ $200 Constant maxmsg#
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
 : g?leave ( -- )
-    msg-group$ $@len connection 0<> and IF
+    msg-group$ $@len IF
 	+resend-cmd send-leave -timeout
     THEN ;
 
@@ -190,9 +190,10 @@ previous
 	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
 	    msg-group$ $@ msg-groups #@ drop @ >o
 	    2dup msg-context @ .avalanche-text .chat o>
-    REPEAT  2drop g?leave
+    REPEAT  2drop
     msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
-    r> 0 ?DO  >o o to connection ret-beacon disconnect-me o>  cell +LOOP ;
+    r> 0 ?DO  >o o to connection +resend-cmd send-leave
+    ret-beacon disconnect-me o>  cell +LOOP ;
 
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
