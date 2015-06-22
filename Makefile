@@ -32,7 +32,7 @@ INCDIR    = $(PREFIX)/include/$(VERSION)
 INSTALL	= /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 ARCH	  =
-package   =
+datadir   =
 
 SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  client-test.fs client-tests.fs crypto-api.fs curve25519.fs	\
@@ -54,7 +54,7 @@ SRCDIRS = tests
 
 all: configs no-config
 
-no-config: libs install libcc
+no-config: libs install-libs libcc
 
 configs:
 	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && make clean); done
@@ -62,14 +62,15 @@ configs:
 libs:
 	for i in $(LIBS); do (cd $$i; make); done
 
-install:
-	echo "Install into '$(package)'"
+install-libs:
 	for i in $(LIBS); do (cd $$i; make install); done
+
+install:
 	for i in $(SRCDIRS); do \
-		mkdir -p $(package)$(DESTDIR)$(datadir)/gforth$(ARCH)/site-forth/net2o/$$i; \
+		mkdir -p $(DESTDIR)$(datadir)/gforth$(ARCH)/site-forth/net2o/$$i; \
 	done
 	for i in $(SOURCES); do \
-		$(INSTALL_DATA) ./$$i $(package)$(DESTDIR)$(datadir)/gforth$(ARCH)/site-forth/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth$(ARCH)/site-forth/net2o/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
