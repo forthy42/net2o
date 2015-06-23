@@ -2,14 +2,12 @@
 \ The high level stuff is all in Forth
 
 \ dummy load for Android
-[IFDEF] android
-    s" /data/data/gnu.gforth/lib/libed25519prims.so" open-lib drop
-[THEN]
 
 c-library ed25519_donna
     "ed25519prims" add-lib
     [IFDEF] android
 	s" ./shlibs/ed25519-donna/.libs" add-libpath
+	s" libed25519prims.so" open-path-lib drop
     [THEN]
     \c #include <stdint.h>
     \c #include <ed25519-prims.h>

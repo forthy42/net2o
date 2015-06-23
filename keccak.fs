@@ -1,14 +1,12 @@
 \ keccak wrapper
 
 \ dummy load for Android
-[IFDEF] android
-    s" /data/data/gnu.gforth/lib/libkeccak.so" open-lib drop
-[THEN]
 
 c-library keccak
     s" keccak" add-lib
     [IFDEF] android
 	s" ./keccak" add-libpath
+	s" libkeccak.so" open-path-lib drop
     [THEN]
     \c #include <KeccakF-1600.h>
     \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
