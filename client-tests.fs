@@ -53,7 +53,7 @@ UValue test#  0 to test#
 
 Variable connect-nick  "test" connect-nick $!
 
-: c:dht ( n -- )  $8 $8 connect-nick $@ ins-ip c:connect 0 ?DO
+: c:dht ( n -- )  $8 $8 connect-nick $@ nick>pk ins-ip pk:connect 0 ?DO
 	c:add-tag "anonymous" c:fetch-tag \ c:fetch-tags
     LOOP  disconnect-me ;
 
@@ -148,7 +148,7 @@ Variable connect-nick  "test" connect-nick $!
 
 : c:test ( -- )
     init-cache'
-    $a $e connect-nick $@ ins-ip c:connect c:test-rest ;
+    $a $e connect-nick $@ nick>pk ins-ip pk:connect c:test-rest ;
 
 event: ->throw dup DoError throw ;
 
@@ -187,7 +187,7 @@ event: ->throw dup DoError throw ;
 \ terminal connection
 
 : c:terminal ( -- )
-    $a $e connect-nick $@ ins-ip c:connect
+    $a $e connect-nick $@ nick>pk ins-ip pk:connect
     [: .time ." Terminal test: connect to server" cr ;] $err
     tc-permit# fs-class-permit or to fs-class-permit
     net2o-code

@@ -132,7 +132,7 @@ net2o-base
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
 : reply-key, ( -- )
-    nest[ pkc keysize $, pubkey @ keypad$ nip keysize u<= and IF
+    nest[ pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	pubkey $@ $, keypair
 	pubkey $@ drop skc key-stage2
     ELSE  receive-key  THEN
