@@ -547,6 +547,13 @@ $40 buffer: nick-buf
     ke-pk $@ keysize umin o>
     pubkey $!  dest-0key sec! ;
 
+: dest-pk ( addr u -- ) 2dup key-table #@ 0= IF
+	drop keysize umin pubkey $!
+    ELSE  cell+ >o
+	ke-psk sec@ state# umin
+	ke-pk $@ keysize umin o>
+	pubkey $!  dest-0key sec!  THEN ;
+
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
     s" #revoked" dup >r ke-nick $+!

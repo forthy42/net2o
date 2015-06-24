@@ -2590,6 +2590,14 @@ require net2o-msg.fs
     +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
+: pk:connect ( code data key u ret -- )
+    [: .time ." Connect to: " dup hex. cr ;] $err
+    n2o:new-context >o rdrop o to connection  setup!
+    dest-pk \ set our destination key
+    n2o:connect
+    +flow-control +resend
+    [: .time ." Connected, o=" o hex. cr ;] $err ;
+
 : c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
     disconnect-me [: .packets profile( .times ) ;] $err ;
 
@@ -2602,6 +2610,12 @@ require net2o-msg.fs
 : c:addme-fetch-host ( nick u -- ) +addme
     net2o-code
       expect-reply get-ip fetch-host, replace-me,
+      cookie+request
+    end-code| -setip n2o:send-replace ;
+
+: pk:addme-fetch-host ( key u -- ) +addme
+    net2o-code
+      expect-reply get-ip fetch-id, replace-me,
       cookie+request
     end-code| -setip n2o:send-replace ;
 
@@ -2619,6 +2633,14 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
 	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  o> 2drop disconnect-me ;
+: pk-lookup ( addr u -- )
+    $A $E dhtnick $@ nick>pk ins-ip pk:connect
+    2dup pk:addme-fetch-host
+    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!
+	over c@ '!' =  WHILE
+	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
+	    o o> >r 2dup c:fetch-id r> >o
+    REPEAT  2drop disconnect-me ;
 : insert-host ( o addr u -- o )
     2 pick >o ." check host: " 2dup .host cr
     host>$ o> IF
@@ -2631,7 +2653,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     ELSE  2drop  THEN ;
 
 : nick-id ( addr-nick u -- id )
-    nick-key .ke-pk $@ >d#id ;
+    nick>pk >d#id ;
 
 : n2o:lookup ( addr u -- )
     2dup nick-id { id }
@@ -2639,14 +2661,28 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     0 n2o:new-context >o rdrop 2dup dest-key  return-addr $10 erase
     id dup .dht-host ['] insert-host $[]map drop 2drop ;
 
+: n2o:pklookup ( addr u -- )
+    2dup >d#id { id }
+    id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
+    0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
+    id dup .dht-host ['] insert-host $[]map drop 2drop ;
+
 : search-connect ( key u -- o/0 )
     0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
 
-: nick-connect ( addr u cmdlen datalen -- )
+: nickx-connect ( addr u cmdlen datalen -- )
     2>r n2o:lookup 2r>
     cmd0( ." trying to connect to: " return-addr $10 xtype cr )
     n2o:connect +flow-control +resend ;
+
+:noname ( addr u cmdlen datalen -- )
+    2>r n2o:pklookup 2r>
+    cmd0( ." trying to connect to: " return-addr $10 xtype cr )
+    n2o:connect +flow-control +resend ; is pk-connect
+
+: nick-connect ( addr u cmdlen datalen -- )
+    2>r nick>pk 2r> pk-connect ;
 
 0 [IF]
 Local Variables:

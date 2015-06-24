@@ -87,7 +87,8 @@ Variable chat-keys
     ['] nick>chat @arg-loop ;
 
 : wait-key ( -- )
-    BEGIN  key ctrl L <>  UNTIL ;
+    BEGIN  1 key lshift [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
+    and 0=  UNTIL ;
 
 : wait-chat ( -- )
     ." press key to connect to "

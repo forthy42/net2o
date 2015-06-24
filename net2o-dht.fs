@@ -317,7 +317,7 @@ also net2o-base
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;
 : fetch-host, ( nick u -- )
-    nick-key .ke-pk $@ fetch-id, ;
+    nick>pk fetch-id, ;
 previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;

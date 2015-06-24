@@ -16,6 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 defer avalanche-to ( addr u o:context -- )
+defer pk-connect ( key u cmdlen datalen -- )
 : avalanche-msg ( msg groupaddr u -- )
     \g forward message to all next nodes of that message group
     2swap { d: msg }
@@ -28,6 +29,11 @@ event: ->avalanche ( o -- )
     >o last-msg $@ last-group $@ parent @ .avalanche-msg o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z unkey ;
+event: ->reconnect ( o -- )
+    >o last-group $@ msg-groups #@ d0=
+    IF  "" last-group $@ msg-groups #!  THEN  last# >r
+    last-msg $@ $A $A pk-connect o { w^ connection }
+    connection cell r> cell+ $+! o> ;
 
 get-current also net2o-base definitions
 
@@ -73,6 +79,10 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 1 8 !!<>=order? $> .\" \b\b "
     warn-color attr! forth:type reset-color forth:cr ;
+
++net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
+    signed? !!signed!! $> last-msg $!
+    <event o elit, ->reconnect parent @ .wait-task @ event> ;
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
