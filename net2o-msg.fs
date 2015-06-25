@@ -87,7 +87,8 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
 	2dup last-msg $!
-	sigpksize# - 2dup + sigpksize# >$  c-state off
+	sigpksize# - 2dup + dup keysize last-group $!
+	sigpksize# >$  c-state off
     THEN r>
 ; msg-class to nest-sig
 

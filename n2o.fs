@@ -95,7 +95,7 @@ Variable chat-keys
     chat-keys [: key>nick type space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: pubkey $@ str= or ;] $[]map
-	IF  ctrl Z unkey  THEN  up@ wait-task ! ;] is do-connect
+	IF  bl unkey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
 : last-chat-peer ( -- chat )
@@ -123,6 +123,9 @@ Variable chat-keys
 	    ELSE  group cell 2swap msg-groups #!  THEN
 	ELSE  2drop  THEN
     THEN
+    pubkey $@ msg-group$ $!
+    o { w^ connect }
+    connect cell pubkey $@ keysize umin msg-groups #!
     ret+beacon group-chat ;
 
 : handle-chat ( char -- )
