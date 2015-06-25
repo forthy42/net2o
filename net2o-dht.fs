@@ -310,12 +310,12 @@ also net2o-base
 
 : remove-me, ( addr -- )
     dup >r
-    [:  over c@ '0' < IF  true  ELSE  2dup ['] .myname $tmp string-prefix?  THEN
+    [:  over c@ '0' <> IF  true  ELSE  2dup ['] .myname $tmp string-prefix?  THEN
 	IF  sigsize# - 2dup + sigdate datesize# move
 	    gen-host-del $, dht-host-
 	ELSE  2drop  THEN ;] $[]map
     0 BEGIN
-	dup r@ $[]@ over c@ '0' < IF  2drop true
+	dup r@ $[]@ over c@ '0' <> IF  2drop true
 	ELSE  ['] .myname $tmp string-prefix?  THEN   IF
 	    dup r@ $[] $off
 	    r@ over cells cell $del  ELSE  1+  THEN
