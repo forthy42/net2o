@@ -279,6 +279,13 @@ also net2o-base
     over c@ '2' = IF  dup $17 u<=  ELSE  false  THEN ;
 
 false Value add-myip
+Variable $addme
+
+: +name ( addr u -- addr' u' )
+    \ add my name to host
+    $addme $off
+    [: .myname type ;] $addme $exec
+    $addme $@ ;
 
 : addme-end ( -- )
     add-myip IF
