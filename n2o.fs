@@ -123,7 +123,7 @@ Variable chat-keys
 	    ELSE  group cell 2swap msg-groups #!  THEN
 	ELSE  2drop  THEN
     THEN
-    pubkey $@ msg-group$ $!
+    msg-group$ $@len 0= IF  pubkey $@ msg-group$ $!  THEN
     o { w^ connect }
     connect cell pubkey $@ keysize umin msg-groups #!
     ret+beacon group-chat ;

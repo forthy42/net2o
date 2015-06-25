@@ -43,6 +43,7 @@ get-current also net2o-base definitions
 $34 net2o: msg ( -- o:msg ) \g push a message object
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
+	pubkey $@ msg-context @ .last-group $!
     THEN
     n:>o c-state off ;
 
@@ -87,7 +88,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
 	2dup last-msg $!
-	sigpksize# - 2dup + dup keysize last-group $!
+	sigpksize# - 2dup +
 	sigpksize# >$  c-state off
     THEN r>
 ; msg-class to nest-sig
@@ -173,13 +174,6 @@ $200 Constant maxmsg#
     warn-color attr!
     ." Type ctrl-D or '/bye' as single item to quit" cr
     default-color attr! ;
-
-: do-chat ( -- ) chat-entry  -timeout
-    \ ['] cmd( >body on
-    BEGIN  get-input-line
-	2dup "/bye" str= 0= connection 0<> and  WHILE
-	    2dup +resend-cmd send-text -timeout .chat
-    REPEAT  2drop g?leave ;
 
 also net2o-base
 : avalanche-text ( addr u -- )
