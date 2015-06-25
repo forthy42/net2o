@@ -310,8 +310,10 @@ also net2o-base
 
 : remove-me, ( addr -- )
     dup >r
-    [: sigsize# - 2dup + sigdate datesize# move
-      gen-host-del $, dht-host- ;] $[]map
+    [:  2dup ['] .myname $tmp string-prefix?
+	IF  sigsize# - 2dup + sigdate datesize# move
+	    gen-host-del $, dht-host-
+	ELSE  2drop  THEN ;] $[]map
     r> $[]off ;
 
 : fetch-id, ( id-addr u -- )

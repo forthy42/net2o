@@ -275,7 +275,8 @@ Variable myprio \ lower is more important, 0 is "no priority"
 
 : default-host ( -- )
     pad $100 gethostname drop pad cstring>sstring myhost $!
-    10 myprio ! ;
+    [IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
+    myprio ! ;
 
 default-host
 
