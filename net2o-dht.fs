@@ -314,7 +314,10 @@ also net2o-base
 	IF  sigsize# - 2dup + sigdate datesize# move
 	    gen-host-del $, dht-host-
 	ELSE  2drop  THEN ;] $[]map
-    r> $[]off ;
+    0 BEGIN  dup r@ $[]@ ['] .myname $tmp string-prefix? IF
+	    dup r@ $[] $off
+	    r@ over cells cell $del  ELSE  1+  THEN
+	dup r@ $[]# u>=  UNTIL  rdrop ;
 
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;
