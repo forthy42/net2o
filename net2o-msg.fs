@@ -78,7 +78,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> .\" \b\b "
+    !!signed? 1 8 !!<>=order? $> -2 0 at-deltaxy space
     warn-color attr! forth:type reset-color forth:cr ;
 
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree

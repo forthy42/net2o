@@ -151,10 +151,15 @@ event: ->hide ctrl Z unkey <event ->wake event> ;
     b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
     BEGIN  b$ @  WHILE  stop  REPEAT ;
 : bcr    #lf bemit bflush ;
+: bat-deltaxy ( dx dy -- ) drop
+    dup 0> IF  0 ?DO  bl bemit  LOOP
+    ELSE  >r  b$ dup $@len r@ + r> negate $del  THEN ;
 
 ' btype ' bemit ' bcr ' form output: b-out
 op-vector @
-b-out ' (attr!) is attr!
+b-out
+[IFUNDEF] android ' (attr!) is attr! [THEN] \ no color on android
+' bat-deltaxy is at-deltaxy
 op-vector !
 \ ' noop alias b-out
 
