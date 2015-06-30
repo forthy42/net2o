@@ -68,6 +68,7 @@ debug: sema( \ semaphores
 debug: recvfrom(
 debug: sendto(
 debug: avalanche( \ distribution tree
+debug: adjust-timer( \ adjust timer
 
 -db profile( \ )
 

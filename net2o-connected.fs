@@ -464,7 +464,8 @@ previous
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
 : +resend-cmd   ['] cmd-timeout        timeout-xt ! o+timeout ;
 
-: +get-time     ['] get-tick is other ;
+: +get-time     adjust-timer( ." request get-tick" forth:cr )
+    ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend-cmd  client-loop
