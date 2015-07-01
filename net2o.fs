@@ -1075,6 +1075,7 @@ cmd-class class
     field: crypto-key
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
+\    field: reqmask
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-sema
@@ -2221,7 +2222,7 @@ Variable timeout-tasks s" " timeout-tasks $!
     0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : do-timeout ( -- )  timeout-xt perform ;
 
-: o+timeout ( -- )
+: o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
@@ -2376,18 +2377,20 @@ event: ->disconnect ( connection -- ) >o do-disconnect n2o:dispose-context o> ;
 8 cells 1- Constant maxrequest#
 
 : next-request ( -- n )
-    1 dup request# +!@ maxrequest# and tuck lshift reqmask or! ;
+    1 dup request# +!@ maxrequest# and tuck lshift reqmask or!
+    request( ." Request added: " dup . ." o " o hex. ." task: " up@ hex. cr ) ;
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
     IF  route-packet  ELSE  handle-packet  THEN ;
 
 event: ->request ( n o -- ) >o 1 over lshift invert reqmask and!
-    reqmask @ 0= IF  -timeout  THEN o>
-    request( ." Request completed: " . ." task: " up@ hex. cr )else( drop ) ;
+    reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
+    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN o>
+    request( ." Request completed: " . ." o " o hex. ." task: " up@ hex. cr )else( drop ) ;
 event: ->reqsave ( task n o -- )  <event swap elit, elit, ->request event> ;
 event: ->timeout ( o -- )
-    0 reqmask !@ >r .-timeout msg( ." Request timed out" cr )
+    >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
 
 : timeout-expired? ( -- flag )
@@ -2492,7 +2495,9 @@ Variable beacons \ destinations to send beacons to
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) BEGIN  stop reqmask @ 0= UNTIL  o IF  o-timeout  THEN ;
+: requests->0 ( -- ) BEGIN  stop
+    o IF  reqmask @ 0=  ELSE  false  THEN  UNTIL
+    o IF  o-timeout  THEN ;
 
 : client-loop ( -- )
     !ticks
@@ -2501,7 +2506,7 @@ Variable beacons \ destinations to send beacons to
     event-loop-task requests->0 o> ;
 
 : server-loop ( -- )
-    1 to core-wanted  0 >o rdrop  -1 reqmask !  client-loop ;
+    1 to core-wanted  0 >o rdrop  BEGIN  client-loop  AGAIN ;
 
 \ client/server initializer
 
