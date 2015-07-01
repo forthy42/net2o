@@ -102,7 +102,8 @@ object class
     [THEN]
     file-stat                      uvar statbuf
     cell                           uvar ind-addr
-    cell                           uvar reqmask
+    cell                           uvar task#
+    \ cell                           uvar reqmask
     $10                            uvar cmdtmp
     timestats                      uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
@@ -569,9 +570,11 @@ Variable net2o-host "net2o.de" net2o-host $!
     [THEN] !my-ips ;
 
 begin-structure reply
-field: reply-len
-field: reply-offset
-64field: reply-dest
+    field: reply-len
+    field: reply-offset
+    64field: reply-dest
+    field: reply-timeout# \ per-reply timeout counter
+    field: reply-timeout-xt \ per-reply timeout xt
 end-structure
 
 m: addr>bits ( addr -- bits )
@@ -646,8 +649,11 @@ ustack nest-stack
 Defer alloc-code-bufs ' noop is alloc-code-bufs
 Defer free-code-bufs  ' noop is free-code-bufs
 
+Variable task-id#
+
 : alloc-io ( -- ) \ allocate IO and reset generic user variables
     io-buffers new io-mem !
+    1 task-id# +!@ task# !
     -other
     alloc-buf to inbuf
     alloc-buf to tmpbuf
@@ -1075,7 +1081,7 @@ cmd-class class
     field: crypto-key
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
-\    field: reqmask
+    field: reqmask \ per connection request mask
     field: request#
     field: filereq#
     1 pthread-mutexes +field filestate-sema
@@ -1117,6 +1123,9 @@ cmd-class class
 end-class context-class
 
 Variable context-table
+
+\ : reqmask ( -- addr )
+\     task# @ reqmask[] $[] ;
 
 \ events for context-oriented behavior
 
@@ -1487,6 +1496,7 @@ Variable mapstart $1 mapstart !
     maxdata negate and addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
+' noop dummy-reply reply-timeout-xt !
 
 : reply[] ( index -- addr )
     code-map @ >o
@@ -2223,14 +2233,14 @@ Variable timeout-tasks s" " timeout-tasks $!
 : do-timeout ( -- )  timeout-xt perform ;
 
 : o+timeout ( -- )  0timeout
-    timeout( ." +timeout: " o hex. ." task: " up@ hex. cr )
+    timeout( ." +timeout: " o hex. ." task: " task# ? cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
       o { w^ timeout-o }  timeout-o cell timeout-tasks $+! ;]
   timeout-sema c-section  timeout-task wake ;
 : o-timeout ( -- )
-    0timeout  timeout( ." -timeout: " o hex. ." task: " up@ hex. cr )
+    0timeout  timeout( ." -timeout: " o hex. ." task: " task# ? cr )
     [: o timeout-tasks del$cell ;] timeout-sema c-section ;
 
 : sq2** ( 64n n -- 64n' )
@@ -2344,7 +2354,7 @@ $20 Constant signed-val
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
-	timeout( ." Disposing context... " o hex. ." task: " up@ hex. cr )
+	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks
 	0. data-rmap @ .dest-vaddr 64@ >dest-map 2!
 	data-map  @ ?dup-IF  .free-data  THEN
@@ -2378,16 +2388,16 @@ event: ->disconnect ( connection -- ) >o do-disconnect n2o:dispose-context o> ;
 
 : next-request ( -- n )
     1 dup request# +!@ maxrequest# and tuck lshift reqmask or!
-    request( ." Request added: " dup . ." o " o hex. ." task: " up@ hex. cr ) ;
+    request( ." Request added: " dup . ." o " o hex. ." task: " task# ? cr ) ;
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
     IF  route-packet  ELSE  handle-packet  THEN ;
 
 event: ->request ( n o -- ) >o 1 over lshift invert reqmask and!
+    request( ." Request completed: " . ." o " o hex. ." task: " task# ? cr )else( drop )
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
-    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN o>
-    request( ." Request completed: " . ." o " o hex. ." task: " up@ hex. cr )else( drop ) ;
+    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN o> ;
 event: ->reqsave ( task n o -- )  <event swap elit, elit, ->request event> ;
 event: ->timeout ( o -- )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
@@ -2470,7 +2480,7 @@ Variable beacons \ destinations to send beacons to
     drop false ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
-    [:  \ ." created timeout task " up@ hex. cr
+    [:  \ ." created timeout task " task# ? cr
 	['] timeout-loop-nocatch catch-loop drop ;]
     1 net2o-task to timeout-task ;
 
@@ -2486,7 +2496,7 @@ Variable beacons \ destinations to send beacons to
 0 value core-wanted
 
 : create-receiver-task ( -- )
-    [:  \ ." created receiver task " up@ hex. cr
+    [:  \ ." created receiver task " task# ? cr
 	[IFDEF] stick-to-core  core-wanted stick-to-core drop  [THEN]
 	['] event-loop-nocatch catch-loop drop
 	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) ;]
@@ -2495,9 +2505,10 @@ Variable beacons \ destinations to send beacons to
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) BEGIN  stop
+: requests->0 ( -- ) reqmask @ >r request( ." wait reqmask=" r@ hex. cr )
+    BEGIN  stop
     o IF  reqmask @ 0=  ELSE  false  THEN  UNTIL
-    o IF  o-timeout  THEN ;
+    o IF  o-timeout  THEN  rdrop request( ." wait done" cr ) ;
 
 : client-loop ( -- )
     !ticks

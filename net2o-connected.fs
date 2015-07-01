@@ -141,7 +141,8 @@ gen-table $freeze
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
 : net2o:ackflush ( n -- ) ulit, ack-flush ;
-: n2o:done ( -- )  slurp next-request filereq# ! ;
+: n2o:done ( -- ) request( ." n2o:done request" forth:cr )
+    slurp next-request filereq# ! ;
 
 : rewind ( -- )
     data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
@@ -358,7 +359,9 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
-    ELSE  gen-reply request,  THEN  ]nest  other
+    ELSE  request( ." gen reply" forth:cr )
+	gen-reply request,
+    THEN  ]nest  other
     tmpkey-request
     pubkey @ 0= IF  key-request  THEN
     ind-addr @  IF  punch?  THEN

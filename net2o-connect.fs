@@ -118,9 +118,10 @@ net2o-base
 : gen-punch ( -- )
     my-ip$ [: $, punch ;] $[]map ;
 
-: cookie+request ( -- )  nest[ cookie, request, ]nest ;
+: cookie+request ( -- ) request( ." gen cookie" forth:cr )
+    nest[ cookie, request, ]nest ;
 
-: gen-punchload ( -- )
+: gen-punchload ( -- ) request( ." gen punchload" forth:cr )
     nest[ cookie, punch-done request, ]nest$ punch-load, ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
@@ -147,7 +148,7 @@ net2o-base
 +net2o: gen-reply ( -- ) \g generate a key request reply reply
     own-crypt? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
-      reply-key, cookie+request time-offset! context ]tmpnest
+      reply-key, ( cookie+request ) time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
 +net2o: gen-punch-reply ( -- )  o? \g generate a key request reply reply
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )

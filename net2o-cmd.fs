@@ -486,6 +486,7 @@ previous
 : net2o:ok ( tag -- )
     timeout( cmd( ." ack: " dup hex. forth:cr ) )
     o 0= IF  drop EXIT  THEN
+    request( ." request acked: " dup . cr )
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )

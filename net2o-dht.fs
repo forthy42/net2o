@@ -287,12 +287,11 @@ Variable $addme
     [: .myname type ;] $addme $exec
     $addme $@ ;
 
-: addme-end ( -- )
+: addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
 	my-ip$ [: gen-host $, dht-host+ ;] $[]map
     THEN
-    endwith request,  end-cmd
-    ['] end-cmd IS expect-reply? ;
+    endwith  do-expect-reply ( request, end-cmd ) ;
 : addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr forth:cr )
     pub? IF
 	my-ip-merge IF  2drop  EXIT  THEN
