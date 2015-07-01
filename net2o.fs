@@ -2505,10 +2505,10 @@ Variable beacons \ destinations to send beacons to
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) reqmask @ >r request( ." wait reqmask=" r@ hex. cr )
+: requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ hex. THEN cr )
     BEGIN  stop
     o IF  reqmask @ 0=  ELSE  false  THEN  UNTIL
-    o IF  o-timeout  THEN  rdrop request( ." wait done" cr ) ;
+    o IF  o-timeout  THEN  request( ." wait done" cr ) ;
 
 : client-loop ( -- )
     !ticks
