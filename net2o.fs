@@ -2561,10 +2561,11 @@ Variable cookies
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/
     64over 64abs 64over 64> r> and IF
-	64+ adjust-timer( ." adjust timer: " 64dup 64. )
+	64+ adjust-timer( ." adjust timer: " 64dup 64. forth:cr )
 	tick-adjust 64!
-    ELSE  64+
-	adjust-timer( ." don't adjust timer: " 64dup 64. ) 64drop  THEN ;
+    ELSE
+	64+ adjust-timer( ." don't adjust timer: " 64dup 64. forth:cr )
+	64drop  THEN ;
 
 \ load net2o plugins: first one with integraded command space
 
@@ -2615,7 +2616,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk ins-ip
     dup add-beacon pk:connect replace-me disconnect-me
-    adjust-timer( ." unrequest get-time" forth:cr ) -other ;
+    -other ;
 
 : pk-lookup ( addr u -- )
     $A $E dhtnick $@ nick>pk ins-ip pk:connect

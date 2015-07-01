@@ -358,10 +358,10 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
-    ELSE  gen-reply request,  THEN ]nest
+    ELSE  gen-reply request,  THEN  ]nest  other
     tmpkey-request
     pubkey @ 0= IF  key-request  THEN
-    ind-addr @  IF  punch?  THEN  other
+    ind-addr @  IF  punch?  THEN
     req-codesize @  req-datasize @  map-request,
     ['] push-cmd IS expect-reply?
     end-code ;
@@ -464,8 +464,7 @@ previous
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
 : +resend-cmd   ['] cmd-timeout        timeout-xt ! o+timeout ;
 
-: +get-time     adjust-timer( ." request get-tick" forth:cr )
-    ['] get-tick is other ;
+: +get-time     ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend-cmd  client-loop

@@ -70,7 +70,13 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     64drop 2drop 64drop ;
 
 +net2o: set-tick ( uticks -- ) \g adjust time
-    o IF  ack@ .adjust-ticks  ELSE  64drop  THEN ;
+    o IF
+	adjust-timer( ." adjust timer" forth:cr )
+	ack@ .adjust-ticks
+    ELSE
+	adjust-timer( ." no object: don't adjust timer " o hex. forth:cr )
+	64drop
+    THEN ;
 +net2o: get-tick ( -- ) \g request time adjust
     ticks lit, set-tick ;
 
