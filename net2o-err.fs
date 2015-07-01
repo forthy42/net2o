@@ -46,6 +46,8 @@ s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
 s" invalid signature"            throwcode !!inv-sig!!
+s" expired signature"            throwcode !!old-sig!!
+s" future signature"             throwcode !!new-sig!!
 s" no temporary key"             throwcode !!no-tmpkey!!
 s" generic stack empty"          throwcode !!stack-empty!!
 s" String stack full"            throwcode !!string-full!!

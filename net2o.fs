@@ -2390,11 +2390,16 @@ event: ->timeout ( o -- )
     0 reqmask !@ >r .-timeout msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
 
+: timeout-expired? ( -- flag )
+    ack@ .timeouts @ timeouts# >= ;
+: push-timeout ( o:connection -- )
+    timeout-expired? wait-task @ and  ?dup-IF
+	o elit, ->timeout event>  THEN ;
+	
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	timeout( ." do timeout: " o hex. timeout-xt @ .name cr ) do-timeout
-	ack@ .timeouts @ timeouts# >= wait-task @ and  ?dup-IF
-	    o elit, ->timeout event>  THEN
+	timeout( ." do timeout: " o hex. timeout-xt @ .name cr )
+	do-timeout
     THEN ;
 
 \ beacons

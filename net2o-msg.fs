@@ -200,9 +200,15 @@ previous
     r> 0 ?DO  >o o to connection +resend-cmd send-leave
     ret-beacon disconnect-me o>  cell +LOOP ;
 
+: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend?
+    timeout-expired? IF  pubkey $@ key>nick type ."  left (timeout)" cr
+	n2o:dispose-context  THEN ;
+
+: +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
+
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
-    o to connection +resend-cmd
+    o to connection +resend-msg
     net2o-code expect-reply msg $, nestsig endwith
     cookie+request end-code ; is avalanche-to
 

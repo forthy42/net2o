@@ -455,10 +455,12 @@ also net2o-base
 ;
 previous
 
-: cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend? ;
+: cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend?
+    push-timeout ;
 : connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
     \ timeout( .expected )
-    packets2 @ cmd-timeout packets2 @ = IF  transfer-keepalive?  THEN ;
+    packets2 @ cmd-timeout packets2 @ = IF  transfer-keepalive?  THEN
+    push-timeout ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
