@@ -141,11 +141,10 @@ previous
     net2o-code expect-reply leave,
     cookie+request end-code| ;
 
-: .chat ( addr u -- )
-    sigdate 64@ .ticks space pkc keysize .key-id
-    2dup s" /me " string-prefix? IF
-	4 /string space warn-color attr! type reset-color
-    ELSE  ." : " type  THEN  cr ;
+: .chathead ( -- )
+    sigdate 64@ .ticks space pkc keysize .key-id ;
+
+: .chat ( addr u -- )  .chathead ." : " type cr ;
 
 $200 Constant maxmsg#
 
@@ -176,16 +175,39 @@ $200 Constant maxmsg#
     default-color attr! ;
 
 also net2o-base
-: avalanche-text ( addr u -- )
+: send-avalanche ( xt -- )
     code-buf$ cmdreset
-    <msg
-    2dup s" /me " string-prefix? IF  4 /string $, msg-action
-    ELSE
-	BEGIN  dup  WHILE  over c@ '@' = WHILE
-		bl $split 2swap 1 /string nick>pk $, msg-signal  REPEAT  THEN
-	$, msg-text  THEN
-    msg> endwith
+    <msg execute msg> endwith 
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
+
+Vocabulary chat-/cmds
+
+get-current also chat-/cmds definitions
+
+: me ( addr u -- )
+    2dup [: $, msg-action ;] send-avalanche
+    .chathead space warn-color attr! forth:type reset-color forth:cr ;
+
+: peers ( addr u -- ) 2drop ." peers:"
+    msg-group$ $@ msg-groups #@ bounds ?DO
+	space I @ .pubkey $@ .key-id
+    cell +LOOP  forth:cr ;
+
+: help ( addr u -- ) 2drop ." all commands start with / as first character: "
+    ['] chat-/cmds >body wordlist-words ." bye" forth:cr ;
+
+set-current previous
+
+: avalanche-text ( addr u -- )
+    over c@ '/' = IF
+	1 /string bl $split 2swap ['] chat-/cmds >body (search-wordlist)
+	?dup-IF  name>int execute  EXIT  THEN
+    THEN
+    2dup
+    [: BEGIN  dup  WHILE  over c@ '@' = WHILE
+		  bl $split 2swap 1 /string nick>pk $, msg-signal
+	  REPEAT  THEN
+      $, msg-text ;] send-avalanche .chat ;
 previous
 
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
@@ -194,7 +216,7 @@ previous
 	2dup "/bye" str= 0=
 	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
 	    msg-group$ $@ msg-groups #@ drop @ >o
-	    2dup msg-context @ .avalanche-text .chat o>
+	    msg-context @ .avalanche-text o>
     REPEAT  2drop
     msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
     r> 0 ?DO  >o o to connection +resend-cmd send-leave
