@@ -216,8 +216,8 @@ magenta >bg white >fg or bold or ,
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ .ke-nick $@ type ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
-    IF  2drop 8 85type
-    ELSE  cell+ .ke-nick $@ type 2drop  THEN ;
+    IF  2drop ." unknown (" 8 85type ." ...)"
+    ELSE  cell+ .ke-nick $@ info-color attr! type reset-color 2drop  THEN ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF

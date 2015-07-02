@@ -171,12 +171,13 @@ set-current
 get-current net2o-cmds definitions
 
 : keyin ( -- )
-    \G usage: n2o keyin file
+    \G usage: n2o keyin file1 .. filen
     \G keyin: read a .n2o key file in
-    get-me ?nextarg IF  do-keyin  THEN ;
+    get-me BEGIN  ?nextarg WHILE  do-keyin  REPEAT ;
 : keyout ( -- )
     \G usage: n2o keyout [@user1 .. @usern]
     \G keyout: output pubkey of your identity
+    \G keyout: optional: output pubkeys of other users
     get-me argc @ 1 > IF  out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
     \G usage: n2o keygen nick
