@@ -216,7 +216,7 @@ magenta >bg white >fg or bold or ,
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ .ke-nick $@ type ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
-    IF  2drop ." unknown (" 8 85type ." ...)"
+    IF  2drop err-color attr! 8 85type ." (unknown)" reset-color
     ELSE  cell+ .ke-nick $@ info-color attr! type reset-color 2drop  THEN ;
 
 :noname ( addr u -- )
@@ -258,7 +258,7 @@ max-passphrase# buffer: passphrase
 
 Variable keys
 
-: key>default ( -- ) keys $[]# 1- keys sec[]@ 2dup 85type forth:cr drop >storekey ! ;
+: key>default ( -- ) keys $[]# 1- keys sec[]@ drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;

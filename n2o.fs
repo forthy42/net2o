@@ -70,11 +70,13 @@ $20 value hash-size#
     c:0key slurp-file 2dup c:hash drop free throw pad c:key>
     pad hash-size# ;
 
-: do-keyin ( addr u -- )  key>default
-    key-readin $slurp-file key-readin $@ do-key save-pubkeys ;
+: do-keyin ( addr u -- )
+    key-readin $slurp-file
+    key-readin $@ do-key save-pubkeys ;
 
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
+	key>default
 	"net2o-dhtroot.n2o" do-keyin
     THEN ;
 
@@ -115,8 +117,9 @@ Variable chat-keys
     wait-chat  search-chat
     ?dup-IF  >o rdrop
     ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
+	+resend-msg
 	net2o-code expect-reply log !time endwith
-	join, get-ip end-code
+	join, get-ip cookie+request end-code
 	msg-group$ $@ dup IF
 	    o { w^ group } 2dup msg-groups #@ d0<> IF
 		group cell last# cell+ $+!
@@ -173,7 +176,8 @@ get-current net2o-cmds definitions
 : keyin ( -- )
     \G usage: n2o keyin file1 .. filen
     \G keyin: read a .n2o key file in
-    get-me BEGIN  ?nextarg WHILE  do-keyin  REPEAT ;
+    get-me key>default
+    BEGIN  ?nextarg WHILE  do-keyin  REPEAT ;
 : keyout ( -- )
     \G usage: n2o keyout [@user1 .. @usern]
     \G keyout: output pubkey of your identity

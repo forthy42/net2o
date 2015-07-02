@@ -200,8 +200,11 @@ set-current previous
 
 : avalanche-text ( addr u -- )
     over c@ '/' = IF
-	1 /string bl $split 2swap ['] chat-/cmds >body (search-wordlist)
-	?dup-IF  name>int execute  EXIT  THEN
+	1 /string bl $split 2swap
+	2dup ['] chat-/cmds >body (search-wordlist)
+	?dup-IF  nip nip name>int execute
+	ELSE  ." unknown command: " forth:type forth:cr  THEN
+	EXIT
     THEN
     2dup
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE
