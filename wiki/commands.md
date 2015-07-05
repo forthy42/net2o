@@ -1,3 +1,4 @@
++ $0 dummy ( -- )
 Commands
 ========
 
@@ -239,8 +240,22 @@ set dht id for further operations on it
 + $21 dht-host- ( $:string -- )
 + $22 dht-tags+ ( $:string -- )
 + $23 dht-tags- ( $:string -- )
-+ $24 dht-host? ( -- )
-+ $25 dht-tags? ( -- )
++ $24 dht-owner+ ( $:string -- )
++ $25 dht-owner- ( $:string -- )
++ $26 dht-host? ( -- )
++ $27 dht-tags? ( -- )
++ $28 dht-owner? ( -- )
+
+### address commands ###
+
++ $10 addr-pri# ( n -- )
+  priority
++ $11 addr-id ( $:id -- )
+  unique host id string
++ $12 addr-addr ( $:addr -- )
+  ip address + port
++ $13 addr-key ( $:addr -- )
+  key for connection setup
   forward message to all next nodes of that message group
 
 ### message commands ###
@@ -264,6 +279,10 @@ set dht id for further operations on it
   specify message string
 + $27 msg-object ( $:object -- )
   specify an object, e.g. an image
++ $28 msg-action ( $:msg -- )
+  specify message string
++ $29 msg-reconnect ( $:pubkey -- )
+  rewire distribution tree
 
 ### vault commands ###
 

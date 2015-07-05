@@ -972,6 +972,7 @@ Variable setup-table
 Variable ack-table
 Variable msg-table
 Variable term-table
+Variable address-table
 
 cmd-class class
     64field: dest-vaddr
@@ -1121,6 +1122,13 @@ cmd-class class
     KEYBYTES +field tskc
     field: dest-0key    \ key for stateless connections
 end-class context-class
+
+cmd-class class
+    field: host-pri#
+    field: host-id
+    field: host-addr
+    field: host-key
+end-class address-class
 
 Variable context-table
 

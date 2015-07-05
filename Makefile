@@ -52,6 +52,8 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 
 SRCDIRS = tests
 
+DOC = wiki/commands.md
+
 all: configs no-config
 
 no-config: libs install-libs libcc
@@ -80,3 +82,8 @@ libcc:	$(FORTHLIB)
 		echo "generating library $$i"; \
 		$(ENGINE) -p ".:~+:$(SRC)"  -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
 	done
+
+doc:	$(DOC)
+
+wiki/commands.md:	$(SOURCES)
+	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md

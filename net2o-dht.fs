@@ -105,6 +105,8 @@ Variable dht-table
     >tag "tag" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
     >host "host" >delete verify-host ;
+: delete-owner? ( addr u -- addr u flag )
+    >host "owner" >delete verify-host ;
 
 \ some hash storage primitives
 
@@ -167,10 +169,14 @@ Variable dht-table
 	THEN $[]map cr
     cell +LOOP ;
 
+: d#owner+ ( addr u -- ) \ with sanity checks
+    check-host dht-owner $ins[]sig dht( d#. ) ;
 : d#host+ ( addr u -- ) \ with sanity checks
     check-host dht-host $ins[]sig dht( d#. ) ;
 : d#tags+ ( addr u -- ) \ with sanity checks
     check-tag dht-tags $ins[]sig dht( d#. ) ;
+: d#owner- ( addr u -- ) \ with sanity checks
+    delete-owner? IF  dht-owner $del[]sig dht( d#. )  ELSE  2drop  THEN ;
 : d#host- ( addr u -- ) \ with sanity checks
     delete-host? IF  dht-host $del[]sig dht( d#. )  ELSE  2drop  THEN ;
 : d#tags- ( addr u -- ) \ with sanity checks
@@ -196,6 +202,8 @@ net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
 +net2o: dht-tags- ( $:string -- ) $> d#tags- ;
++net2o: dht-owner+ ( $:string -- ) $> d#owner+ ;
++net2o: dht-owner- ( $:string -- ) $> d#owner- ;
 
 set-current
 
@@ -205,6 +213,8 @@ set-current
     [: dup $A0 + maxstring < IF  $, dht-host+  ELSE  2drop  THEN ;] $[]map ;
 : d#tags? ( -- )  dht-tags
     [: dup $A0 + maxstring < IF  $, dht-tags+  ELSE  2drop  THEN ;] $[]map ;
+: d#owner? ( -- )  dht-owner
+    [: dup $A0 + maxstring < IF  $, dht-owner+  ELSE  2drop  THEN ;] $[]map ;
 
 fs-class class
     field: dht-queries
@@ -243,6 +253,7 @@ get-current definitions
 
 +net2o: dht-host? ( -- ) d#host? ;
 +net2o: dht-tags? ( -- ) d#tags? ;
++net2o: dht-owner? ( -- ) d#owner? ;
 \ +net2o: dht-open ( fid -- ) 64>n d#open ;
 \ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
@@ -260,6 +271,8 @@ gen-table $freeze
     gen>host host$ ;
 : gen-host-del ( addr u -- addr' u' )
     gen>host "host" >delete host$ ;
+: gen-owner-del ( addr u -- addr' u' )
+    gen>host "owner" >delete host$ ;
 
 : gen>tag ( addr u hash-addr uh -- addr u )
     c:0key "tag" >keyed-hash
@@ -271,6 +284,44 @@ gen-table $freeze
 : gen-tag-del ( addr u hash-addr uh -- addr' u' )
     gen>tag "tag" >delete tag$ ;
 
+\ address interpreter
+
+get-current also net2o-base definitions
+
+cmd-table $@ inherit-table address-table
+\g 
+\g ### address commands ###
+\g 
+
+$10 net2o: addr-pri# ( n -- ) \g priority
+    64>n host-pri# ! ;
++net2o: addr-id ( $:id -- ) \g unique host id string
+    $> host-id $! ;
++net2o: addr-addr ( $:addr -- ) \g ip address + port
+    $> host-addr $! ;
++net2o: addr-key ( $:addr -- ) \g key for connection setup
+    $> host-key sec! ;
+set-current previous
+
+gen-table $freeze
+' context-table is gen-table
+
+: n2o:new-addr ( -- o )
+    address-class new >o  address-table @ token-table ! o o> ;
+
+: new-addr ( addr u -- o ) \G create a new address object from string
+    n2o:new-addr n:>o do-cmd-loop o n:o> ;
+
+also net2o-base
+: o>addr ( o -- addr u ) \G create new address string from object
+    >o code-buf$ cmdreset
+    host-pri# @ ulit, addr-pri#
+    host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
+    host-addr $@ dup IF $, addr-addr  ELSE  2drop  THEN
+    host-key sec@ dup IF $, addr-key  ELSE  2drop  THEN
+    o> ; 
+previous
+    
 \ addme stuff
 
 also net2o-base
