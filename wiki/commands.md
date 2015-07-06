@@ -252,9 +252,21 @@ set dht id for further operations on it
   priority
 + $11 addr-id ( $:id -- )
   unique host id string
-+ $12 addr-addr ( $:addr -- )
-  ip address + port
-+ $13 addr-key ( $:addr -- )
++ $12 addr-anchor ( $:pubkey -- )
+  anchor for routing further
++ $13 addr-ipv4 ( n -- )
+  ip address
++ $14 addr-ipv6 ( $:ipv6 -- )
+  ipv6 address
++ $15 addr-portv4 ( n -- )
+  ipv4 port
++ $16 addr-portv6 ( n -- )
+  ipv6 port
++ $17 addr-port ( n -- )
+  ip port
++ $18 addr-route ( $:net2o -- )
+  net2o routing part
++ $19 addr-key ( $:addr -- )
   key for connection setup
   forward message to all next nodes of that message group
 

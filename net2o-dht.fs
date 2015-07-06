@@ -297,8 +297,20 @@ $10 net2o: addr-pri# ( n -- ) \g priority
     64>n host-pri# ! ;
 +net2o: addr-id ( $:id -- ) \g unique host id string
     $> host-id $! ;
-+net2o: addr-addr ( $:addr -- ) \g ip address + port
-    $> host-addr $! ;
++net2o: addr-anchor ( $:pubkey -- ) \g anchor for routing further
+    $> host-anchor $! ;
++net2o: addr-ipv4 ( n -- ) \g ip address
+    64>n host-ipv4 l! ;
++net2o: addr-ipv6 ( $:ipv6 -- ) \g ipv6 address
+    $> host-ipv6 swap $10 umin move ;
++net2o: addr-portv4 ( n -- ) \g ipv4 port
+    64>n host-portv4 w! ;
++net2o: addr-portv6 ( n -- ) \g ipv6 port
+    64>n host-portv4 w! ;
++net2o: addr-port ( n -- ) \g ip port
+    64>n host-portv4 w! ;
++net2o: addr-route ( $:net2o -- ) \g net2o routing part
+    $> host-route $! ;
 +net2o: addr-key ( $:addr -- ) \g key for connection setup
     $> host-key sec! ;
 set-current previous
@@ -317,10 +329,35 @@ also net2o-base
     >o code-buf$ cmdreset
     host-pri# @ ulit, addr-pri#
     host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
-    host-addr $@ dup IF $, addr-addr  ELSE  2drop  THEN
-    host-key sec@ dup IF $, addr-key  ELSE  2drop  THEN
+    host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
+    host-ipv4 l@ ?dup-IF ulit, addr-ipv4  THEN
+    host-ipv6 $10 ip6::0 over str= 0= IF  host-ipv6 $10 $, addr-ipv6  THEN
+    host-portv4 w@ host-portv6 w@ = IF
+	host-portv4 w@ ulit, addr-port
+    ELSE
+	host-portv4 w@ ?dup-IF  ulit, addr-portv4  THEN
+	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
+    THEN
+    host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
+    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
     o> ; 
 previous
+
+: addr>6sock ( o -- ) >o
+    host-portv6 w@ sockaddr1 port be-w!
+    host-ipv6 sockaddr1 sin6_addr $10 move
+    host-route $@ !temp-addr
+    o> ;
+    
+: addr>4sock ( o -- ) >o
+    host-portv4 w@ sockaddr1 port be-w!
+    host-ipv4 l@ sockaddr1 ipv4!
+    host-route $@ !temp-addr
+    o> ;
+
+: addr>sock ( o xt -- ) { xt } >o
+    host-ipv4 l@ IF  addr>4sock xt execute  THEN
+    host-ipv6 $10 ip6::0 over str= 0= IF  addr>6sock xt execute  THEN ;
     
 \ addme stuff
 

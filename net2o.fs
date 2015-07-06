@@ -1126,7 +1126,12 @@ end-class context-class
 cmd-class class
     field: host-pri#
     field: host-id
-    field: host-addr
+    lfield: host-ipv4
+    $10 +field host-ipv6
+    wfield: host-portv4
+    wfield: host-portv6
+    field: host-anchor \ net2o anchor (is a pubkey)
+    field: host-route \ net2o route
     field: host-key
 end-class address-class
 
