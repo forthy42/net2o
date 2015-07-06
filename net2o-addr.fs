@@ -24,7 +24,7 @@ cmd-table $@ inherit-table address-table
 \g ### address commands ###
 \g 
 
-$10 net2o: addr-pri# ( n -- ) \g priority
+$11 net2o: addr-pri# ( n -- ) \g priority
     64>n host-pri# ! ;
 +net2o: addr-id ( $:id -- ) \g unique host id string
     $> host-id $! ;
@@ -38,8 +38,8 @@ $10 net2o: addr-pri# ( n -- ) \g priority
     64>n host-portv4 w! ;
 +net2o: addr-portv6 ( n -- ) \g ipv6 port
     64>n host-portv4 w! ;
-+net2o: addr-port ( n -- ) \g ip port
-    64>n host-portv4 w! ;
++net2o: addr-port ( n -- ) \g ip port, both protocols
+    64>n dup host-portv4 w! host-portv6 w! ;
 +net2o: addr-route ( $:net2o -- ) \g net2o routing part
     $> host-route $! ;
 +net2o: addr-key ( $:addr -- ) \g key for connection setup
@@ -73,7 +73,7 @@ also net2o-base
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
     host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
-    o> ; 
+    cmdbuf$ o> ; 
 previous
 
 : .addr ( o -- ) \G print addr
