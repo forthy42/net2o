@@ -2613,6 +2613,7 @@ require net2o-connected.fs
 require net2o-log.fs
 require net2o-keys.fs
 require net2o-dht.fs
+require net2o-addr.fs
 require net2o-msg.fs
 \ require net2o-term.fs
 

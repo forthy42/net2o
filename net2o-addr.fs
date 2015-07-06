@@ -1,0 +1,142 @@
+\ net2o template for new files
+
+\ Copyright (C) 2015   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+\ address interpreter
+
+get-current also net2o-base definitions
+
+cmd-table $@ inherit-table address-table
+\g 
+\g ### address commands ###
+\g 
+
+$10 net2o: addr-pri# ( n -- ) \g priority
+    64>n host-pri# ! ;
++net2o: addr-id ( $:id -- ) \g unique host id string
+    $> host-id $! ;
++net2o: addr-anchor ( $:pubkey -- ) \g anchor for routing further
+    $> host-anchor $! ;
++net2o: addr-ipv4 ( n -- ) \g ip address
+    64>n host-ipv4 be-l! ;
++net2o: addr-ipv6 ( $:ipv6 -- ) \g ipv6 address
+    $> host-ipv6 swap $10 umin move ;
++net2o: addr-portv4 ( n -- ) \g ipv4 port
+    64>n host-portv4 w! ;
++net2o: addr-portv6 ( n -- ) \g ipv6 port
+    64>n host-portv4 w! ;
++net2o: addr-port ( n -- ) \g ip port
+    64>n host-portv4 w! ;
++net2o: addr-route ( $:net2o -- ) \g net2o routing part
+    $> host-route $! ;
++net2o: addr-key ( $:addr -- ) \g key for connection setup
+    $> host-key sec! ;
+set-current previous
+
+gen-table $freeze
+' context-table is gen-table
+
+: n2o:new-addr ( -- o )
+    address-class new >o  address-table @ token-table ! o o> ;
+: n2o:dispose-addr ( o:addr -- o:addr )
+    host-id $off host-anchor $off host-route $off host-key sec-off ;
+
+: new-addr ( addr u -- o ) \G create a new address object from string
+    n2o:new-addr n:>o do-cmd-loop o n:o> ;
+
+also net2o-base
+: o>addr ( o -- addr u ) \G create new address string from object
+    >o code-buf$ cmdreset
+    host-pri# @ ulit, addr-pri#
+    host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
+    host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
+    host-ipv4 l@ ?dup-IF ulit, addr-ipv4  THEN
+    host-ipv6 ip6? IF  host-ipv6 $10 $, addr-ipv6  THEN
+    host-portv4 w@ host-portv6 w@ = IF
+	host-portv4 w@ ulit, addr-port
+    ELSE
+	host-portv4 w@ ?dup-IF  ulit, addr-portv4  THEN
+	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
+    THEN
+    host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
+    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
+    o> ; 
+previous
+
+: .addr ( o -- ) \G print addr
+    >o
+    ." #" host-pri# @ 0 .r
+    host-id $@ dup IF ." '" type ." '"  ELSE  2drop  THEN
+    host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
+    host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
+    host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop THEN
+    host-portv4 w@ host-portv6 w@ = IF
+	." :" host-portv4 w@ 0 .r
+    ELSE
+	host-portv4 w@ ?dup-IF  ." :4," 0 .r  THEN
+	host-portv6 w@ ?dup-IF  ." :6," 0 .r  THEN
+    THEN
+    host-route $@ dup IF  ." |" xtype  ELSE  2drop  THEN  cr
+    host-key sec@ dup IF  ." key: " 85type cr  ELSE  2drop  THEN
+    o> ; 
+
+: addr>6sock ( o -- ) >o
+    host-portv6 w@ sockaddr1 port be-w!
+    host-ipv6 sockaddr1 sin6_addr ip6!
+    host-route $@ !temp-addr
+    o> ;
+    
+: addr>4sock ( o -- ) >o
+    host-portv4 w@ sockaddr1 port be-w!
+    host-ipv4 be-ul@ sockaddr1 ipv4!
+    host-route $@ !temp-addr
+    o> ;
+
+: addr>sock ( o xt -- ) { xt } >o
+    host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
+    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ;
+
+: +my-addrs ( port o:addr -- )
+    myprio @ host-pri# !
+    myhost $@ host-id $!
+    host-ipv4 be-ul@ IF  dup host-portv4 w!  THEN
+    host-ipv6 ip6? IF  dup host-portv6 w!  THEN  drop
+    o my-addr[] $[]# my-addr[] $[] ! ;
+
+: !my-addrs ( -- ) n2o:new-addr >o
+    global-ip6 tuck host-ipv6 swap $10 umin move
+    global-ip4 IF  be-ul@ host-ipv4 be-l!  ELSE  drop  THEN
+    my-port# +my-addrs o>
+    0= IF  local-ipv6  IF
+	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
+	ELSE  drop  THEN
+    THEN ;
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+    )
+End:
+[THEN]
