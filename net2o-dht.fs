@@ -300,7 +300,7 @@ $10 net2o: addr-pri# ( n -- ) \g priority
 +net2o: addr-anchor ( $:pubkey -- ) \g anchor for routing further
     $> host-anchor $! ;
 +net2o: addr-ipv4 ( n -- ) \g ip address
-    64>n host-ipv4 l! ;
+    64>n host-ipv4 be-l! ;
 +net2o: addr-ipv6 ( $:ipv6 -- ) \g ipv6 address
     $> host-ipv6 swap $10 umin move ;
 +net2o: addr-portv4 ( n -- ) \g ipv4 port
@@ -320,6 +320,8 @@ gen-table $freeze
 
 : n2o:new-addr ( -- o )
     address-class new >o  address-table @ token-table ! o o> ;
+: n2o:dispose-addr ( o:addr -- o:addr )
+    host-id $off host-anchor $off host-route $off host-key sec-off ;
 
 : new-addr ( addr u -- o ) \G create a new address object from string
     n2o:new-addr n:>o do-cmd-loop o n:o> ;
@@ -331,7 +333,7 @@ also net2o-base
     host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
     host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
     host-ipv4 l@ ?dup-IF ulit, addr-ipv4  THEN
-    host-ipv6 $10 ip6::0 over str= 0= IF  host-ipv6 $10 $, addr-ipv6  THEN
+    host-ipv6 ip6? IF  host-ipv6 $10 $, addr-ipv6  THEN
     host-portv4 w@ host-portv6 w@ = IF
 	host-portv4 w@ ulit, addr-port
     ELSE
@@ -343,22 +345,55 @@ also net2o-base
     o> ; 
 previous
 
+: .addr ( o -- ) \G print addr
+    >o
+    ." #" host-pri# @ 0 .r
+    host-id $@ dup IF ." '" type ." '"  ELSE  2drop  THEN
+    host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
+    host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
+    host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop THEN
+    host-portv4 w@ host-portv6 w@ = IF
+	." :" host-portv4 w@ 0 .r
+    ELSE
+	host-portv4 w@ ?dup-IF  ." :4," 0 .r  THEN
+	host-portv6 w@ ?dup-IF  ." :6," 0 .r  THEN
+    THEN
+    host-route $@ dup IF  ." |" xtype  ELSE  2drop  THEN  cr
+    host-key sec@ dup IF  ." key: " 85type cr  ELSE  2drop  THEN
+    o> ; 
+
 : addr>6sock ( o -- ) >o
     host-portv6 w@ sockaddr1 port be-w!
-    host-ipv6 sockaddr1 sin6_addr $10 move
+    host-ipv6 sockaddr1 sin6_addr ip6!
     host-route $@ !temp-addr
     o> ;
     
 : addr>4sock ( o -- ) >o
     host-portv4 w@ sockaddr1 port be-w!
-    host-ipv4 l@ sockaddr1 ipv4!
+    host-ipv4 be-ul@ sockaddr1 ipv4!
     host-route $@ !temp-addr
     o> ;
 
 : addr>sock ( o xt -- ) { xt } >o
-    host-ipv4 l@ IF  addr>4sock xt execute  THEN
-    host-ipv6 $10 ip6::0 over str= 0= IF  addr>6sock xt execute  THEN ;
-    
+    host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
+    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ;
+
+: +my-addrs ( port o:addr -- )
+    myprio @ host-pri# !
+    myhost $@ host-id $!
+    host-ipv4 be-ul@ IF  dup host-portv4 w!  THEN
+    host-ipv6 ip6? IF  dup host-portv6 w!  THEN  drop
+    o my-addr[] $[]# my-addr[] $[] ! ;
+
+: !my-addrs ( -- ) n2o:new-addr >o
+    global-ip6 tuck host-ipv6 swap $10 umin move
+    global-ip4 IF  be-ul@ host-ipv4 be-l!  ELSE  drop  THEN
+    my-port# +my-addrs o>
+    0= IF  local-ipv6  IF
+	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
+	ELSE  drop  THEN
+    THEN ;
+
 \ addme stuff
 
 also net2o-base

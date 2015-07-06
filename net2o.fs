@@ -257,6 +257,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 [THEN]
 0 Value query-sock
 Variable my-ip$
+Variable my-addr[]
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
@@ -441,10 +442,13 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 0 Value my-port#
 
+: ip6! ( addr1 addr2 -- ) $10 move ;
+: ip6? ( addr -- flag )  $10 ip6::0 over str= 0= ;
+
 : check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
     \G return IPv6 address - if length is 0, not reachable with IPv6
     [:  sockaddr_in6 alen !  53 sockaddr port be-w!
-	sockaddr sin6_addr $10 move
+	sockaddr sin6_addr ip6!
 	query-sock sockaddr sock-rest connect
 	dup 0< errno ENETUNREACH = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
