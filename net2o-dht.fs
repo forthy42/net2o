@@ -319,13 +319,15 @@ Variable $addme
 : new-addme ( addr u -- )  new-addr { addr } now>never
     nat( ." addme: " addr .addr forth:cr )
     addr .host-route $@len 0= IF
-	addr my-addr-merge ?EXIT
-	addr o>addr gen-host my-addr$ $ins[]  EXIT  THEN
+	addr my-addr-merge IF  addr >o n2o:dispose-addr o> EXIT  THEN
+	addr o>addr gen-host my-addr$ $ins[]
+	addr >o n2o:dispose-addr o> EXIT  THEN
     addr my-addr? 0= IF  2dup my-addr$ $ins[]  THEN
     what's expect-reply? ['] new-addme-end <> IF
 	expect-reply pkc keysize 2* $, dht-id
     THEN
     addr o>addr gen-host $, dht-host+
+    addr >o n2o:dispose-addr o>
     ['] new-addme-end IS expect-reply? ;
 previous
 
