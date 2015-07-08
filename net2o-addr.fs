@@ -169,17 +169,17 @@ also net2o-base
     [: { addr alen }
     case addr family w@
 	AF_INET of
-	    addr sin_addr be-l@ ulit, addr-ipv4
+	    addr sin_addr be-ul@ ulit, addr-ipv4
 	endof
 	AF_INET6 of
 	    addr sin6_addr 12 fake-ip4 over str= IF
-		.ip6::0 addr sin6_addr 12 + be-l@ ulit, addr-ipv4
+		.ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
 	    ELSE
 		addr sin6_addr $10 $, addr-ipv6
 	    THEN
 	endof
     endcase
-    addr port be-w@ ulit, addr-port ;] gen-cmd$ ;
+    addr port be-uw@ ulit, addr-port ;] gen-cmd$ ;
 previous
 
 0 [IF]
