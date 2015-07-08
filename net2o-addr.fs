@@ -163,8 +163,10 @@ is .iperr
     o1 .host-ipv4   4 host-ipv4 over str>merge
     o1 .host-ipv6 $10 host-ipv6 over str>merge ;
 
-: my-addr-merge ( o -- )
-    my-addr[] [: >o dup my-addr= IF dup my-addr-merge1 THEN o> ;] $[]o-map
+: my-addr-merge ( o -- flag )
+    false swap
+    my-addr[] [: >o dup my-addr= IF dup my-addr-merge1
+	nip 0 swap THEN o> ;] $[]o-map
     drop ;
 
 \ sockaddr conversion
