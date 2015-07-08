@@ -78,7 +78,7 @@ previous
 
 : .addr ( o -- ) \G print addr
     >o
-    ." #" host-pri# @ 0 .r
+    host-pri# @ ?dup-IF  0 .r '#' emit  THEN
     host-id $@ dup IF '"' emit type '"' emit  ELSE  2drop  THEN
     host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
     host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
@@ -94,7 +94,9 @@ previous
     o> ; 
 
 :noname ( addr len -- ) [: info-color attr!
-	.time ." connected from: " .addr default-color attr! cr ;] $err ;
+	.time ." connected from: "
+	new-addr >o o .addr n2o:dispose-addr o>
+	default-color attr! cr ;] $err ;
 is .iperr
 
 : addr>6sock ( o -- ) >o

@@ -316,17 +316,17 @@ Variable $addme
 	my-addr$ [: $, dht-host+ ;] $[]map
     THEN
     endwith  do-expect-reply ;
-: new-addme ( addr u -- ) new-addr { addr } now>never
+: new-addme ( addr u -- )  new-addr { addr } now>never
     nat( ." addme: " addr .addr forth:cr )
     addr .addr-route $@len 0= IF
 	addr my-addr-merge IF  2drop  EXIT  THEN
 	o>addr gen-host my-addr$ $ins[]  EXIT  THEN
     2dup my-addr? 0= IF  2dup my-addr$ $ins[]  THEN
-    what's expect-reply? ['] addme-end <> IF
+    what's expect-reply? ['] new-addme-end <> IF
 	expect-reply pkc keysize 2* $, dht-id
     THEN
     o>addr gen-host $, dht-host+
-    ['] addme-end IS expect-reply? ;
+    ['] new-addme-end IS expect-reply? ;
 previous
 
 : +addme ['] new-addme setip-xt ! ;
