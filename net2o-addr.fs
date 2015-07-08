@@ -74,7 +74,7 @@ also net2o-base
     host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN  o> ; 
 previous
 : o>addr ( o -- addr u )
-    code-buf$ cmdreset o-genaddr cmdbuf$ ;
+    cmdbuf-o @ >r code-buf$ cmdreset o-genaddr cmdbuf$ r> cmdbuf-o ! ;
 
 : .addr ( o -- ) \G print addr
     >o
@@ -160,6 +160,27 @@ previous
 : my-addr-merge ( o -- )
     my-addr[] [: >o dup my-addr= IF dup my-addr-merge1 THEN o> ;] $[]o-map
     drop ;
+
+\ sockaddr conversion
+
+also net2o-base
+: new.sockaddr ( addr alen -- sockaddr u )
+    \ convert socket into net2o address token
+    [: { addr alen }
+    case addr family w@
+	AF_INET of
+	    addr sin_addr be-l@ ulit, addr-ipv4
+	endof
+	AF_INET6 of
+	    addr sin6_addr 12 fake-ip4 over str= IF
+		.ip6::0 addr sin6_addr 12 + be-l@ ulit, addr-ipv4
+	    ELSE
+		addr sin6_addr $10 $, addr-ipv6
+	    THEN
+	endof
+    endcase
+    addr port be-w@ ulit, addr-port ;] gen-cmd$ ;
+previous
 
 0 [IF]
 Local Variables:
