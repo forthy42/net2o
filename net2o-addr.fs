@@ -175,19 +175,21 @@ also net2o-base
 : new.sockaddr ( addr alen -- sockaddr u )
     \ convert socket into net2o address token
     [: { addr alen }
-    case addr family w@
-	AF_INET of
-	    addr sin_addr be-ul@ ulit, addr-ipv4
-	endof
-	AF_INET6 of
-	    addr sin6_addr 12 fake-ip4 over str= IF
-		.ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
-	    ELSE
-		addr sin6_addr $10 $, addr-ipv6
-	    THEN
-	endof
-    endcase
-    addr port be-uw@ ulit, addr-port ;] gen-cmd$ ;
+	case addr family w@
+	    AF_INET of
+		addr sin_addr be-ul@ ulit, addr-ipv4
+	    endof
+	    AF_INET6 of
+		addr sin6_addr 12 fake-ip4 over str= IF
+		    .ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
+		ELSE
+		    addr sin6_addr $10 $, addr-ipv6
+		THEN
+	    endof
+	endcase
+	addr port be-uw@ ulit, addr-port
+	return-address $10 0 -skip ?dup-IF  $, addr-route  ELSE  2drop  THEN
+    ;] gen-cmd$ ;
 previous
 :noname ( -- addr len )
     return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
