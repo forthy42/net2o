@@ -454,6 +454,14 @@ Defer search-key \ search if that is one of our pubkeys
 : pk-sig ( addr u -- sig u )
     c:0key c:hash [: .pk .sig ;] $tmp ;
 
+: +sig$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
+: gen-host ( addr u -- addr' u' )
+    gen>host +sig$ ;
+: >delete ( addr u type u2 -- addr u )
+    "delete" >keyed-hash ;
+: gen-host-del ( addr u -- addr' u' )
+    gen>host "host" >delete +sig$ ;
+
 0 [IF]
 Local Variables:
 forth-local-words:

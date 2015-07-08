@@ -58,8 +58,7 @@ gen-table $freeze
     n2o:new-addr n:>o do-cmd-loop o n:o> ;
 
 also net2o-base
-: o>addr ( o -- addr u ) \G create new address string from object
-    >o code-buf$ cmdreset
+: o-genaddr ( o -- ) >o \G create new address string from object
     host-pri# @ ulit, addr-pri#
     host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
     host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
@@ -72,14 +71,15 @@ also net2o-base
 	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
-    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
-    cmdbuf$ o> ; 
+    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN  o> ; 
 previous
+: o>addr ( o -- addr u )
+    code-buf$ cmdreset o-genaddr cmdbuf$ ;
 
 : .addr ( o -- ) \G print addr
     >o
     ." #" host-pri# @ 0 .r
-    host-id $@ dup IF ." '" type ." '"  ELSE  2drop  THEN
+    host-id $@ dup IF '"' emit type '"' emit  ELSE  2drop  THEN
     host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
     host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
     host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop THEN
@@ -124,6 +124,42 @@ previous
 	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
 	ELSE  drop  THEN
     THEN ;
+
+: $[]o-map { addr xt -- }
+    \G execute @var{xt} for all elements of the object array @var{addr}.
+    \G xt is @var{( o -- )}, getting one string at a time
+    addr $[]# 0 ?DO  I addr $[] @ xt execute  LOOP ;
+
+: addrs-off ( -- )
+    \G dispose all addresses
+    my-addr[] [: >o n2o:dispose-addr o> ;] $[]o-map
+    my-addr[] $off
+    my-addr$ $[]off ;
+
+: !my-addr$ ( -- )
+    my-addr[] [: o>addr gen-host my-addr$ $ins[] ;] $[]o-map ;
+
+:noname addrs-off !my-addrs !my-addr$ ; is !my-addr
+
+\ merge addresses
+
+: my-addr= ( o1 o:o2 -- ) { o1 }
+    o1 .host-portv4 2 host-portv4 over str=?0 &&
+    o1 .host-portv6 2 host-portv6 over str=?0 &&
+    o1 .host-route $@ host-route $@  str=?0 &&
+    o1 .host-ipv4   4 host-ipv4 over str=?0 &&
+    o1 .host-ipv6 $10 host-ipv6 over str=?0 ;
+
+: my-addr? ( o -- o flag )
+    o my-addr[] [: >o over my-addr= o> or ;] $[]o-map ;
+
+: my-addr-merge1 ( o1 o:o2 -- ) { o1 }
+    o1 .host-ipv4   4 host-ipv4 over str>merge
+    o1 .host-ipv6 $10 host-ipv6 over str>merge ;
+
+: my-addr-merge ( o -- )
+    my-addr[] [: >o dup my-addr= IF dup my-addr-merge1 THEN o> ;] $[]o-map
+    drop ;
 
 0 [IF]
 Local Variables:

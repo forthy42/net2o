@@ -257,7 +257,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 [THEN]
 0 Value query-sock
 Variable my-ip$
-Variable my-addr[]
+Variable my-addr[] \ object based hosts
+Variable my-addr$ \ string based hosts (with sigs)
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
@@ -528,6 +529,10 @@ Variable $tmp2
     $tmp2 $@ +my-ip
     0= IF  local-ip6  +my-ip THEN ;
 
+\ new address handling is in net2o-addr.fs, loaded later
+
+Defer !my-addr
+
 \ this looks ok
 
 : && ( flag -- ) ]] dup 0= ?EXIT drop [[ ; immediate compile-only
@@ -571,7 +576,8 @@ Variable net2o-host "net2o.de" net2o-host $!
     r> ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
 	net2o-sock drop my-port# create-udp-server to net2o-sock
-    [THEN] !my-ips ;
+    [THEN]
+    !my-ips !my-addr ;
 
 begin-structure reply
     field: reply-len
@@ -2612,8 +2618,8 @@ require net2o-connect.fs
 require net2o-connected.fs
 require net2o-log.fs
 require net2o-keys.fs
-require net2o-dht.fs
 require net2o-addr.fs
+require net2o-dht.fs
 require net2o-msg.fs
 \ require net2o-term.fs
 
