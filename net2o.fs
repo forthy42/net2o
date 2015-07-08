@@ -359,8 +359,7 @@ User ip6:#
 	'2' of  .ip64 endof
 	dup emit -rot dump endcase ;
 
-: .iperr ( addr len -- ) [: info-color attr!
-      .time ." connected from: " .ipaddr default-color attr! cr ;] $err ;
+Defer .iperr
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!
@@ -1769,6 +1768,9 @@ require net2o-file.fs
 : n2oaddrs ( xt -- )
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
+: new-n2oaddrs ( xt -- )
+    my-addr$ [: rot dup >r execute r> ;] $[]map drop ;
+Defer new>sockaddr
 
 \ load crypto here
 

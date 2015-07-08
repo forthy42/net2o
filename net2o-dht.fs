@@ -329,7 +329,7 @@ Variable $addme
     ['] addme-end IS expect-reply? ;
 previous
 
-: +addme ['] addme setip-xt ! ;
+: +addme ['] new-addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
 
 \ replace me stuff

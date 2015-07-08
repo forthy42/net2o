@@ -93,6 +93,10 @@ previous
     host-key sec@ dup IF  ." key: " 85type cr  ELSE  2drop  THEN
     o> ; 
 
+:noname ( addr len -- ) [: info-color attr!
+	.time ." connected from: " .addr default-color attr! cr ;] $err ;
+is .iperr
+
 : addr>6sock ( o -- ) >o
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
@@ -181,6 +185,8 @@ also net2o-base
     endcase
     addr port be-uw@ ulit, addr-port ;] gen-cmd$ ;
 previous
+:noname ( -- addr len )
+    return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
 
 0 [IF]
 Local Variables:
