@@ -2688,7 +2688,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup 2r>
-    cmd0( ." trying to connect to: " return-addr $10 xtype cr )
+    cmd0( ." attempt to connect to: " return-addr $10 xtype cr )
     n2o:connect +flow-control +resend ; is pk-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
