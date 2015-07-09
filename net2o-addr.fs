@@ -113,9 +113,9 @@ is .iperr
     host-route $@ !temp-addr
     o> ;
 
-: addr>sock ( o xt -- ) { xt } >o
+:noname ( o xt -- ) { xt } >o
     host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
-    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ;
+    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ; is addr>sock
 
 : +my-addrs ( port o:addr -- )
     myprio @ host-pri# !

@@ -1871,6 +1871,8 @@ Defer punch-reply
     nat( ." send punch to: " return-addr $10 xtype cr )
     punch-load $@ punch-reply ;
 
+Defer addr>sock
+
 : net2o:punch ( addr u -- )
     o IF
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
