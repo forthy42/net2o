@@ -62,7 +62,7 @@ also net2o-base
     host-pri# @ ulit, addr-pri#
     host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
     host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
-    host-ipv4 l@ ?dup-IF ulit, addr-ipv4  THEN
+    host-ipv4 be-ul@ ?dup-IF ulit, addr-ipv4  THEN
     host-ipv6 ip6? IF  host-ipv6 $10 $, addr-ipv6  THEN
     host-portv4 w@ host-portv6 w@ = IF
 	host-portv4 w@ ulit, addr-port
@@ -93,13 +93,8 @@ previous
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
-: .addr$ ( addr u -- )
-    new-addr >o o .addr n2o:dispose-addr o> ;
-
-:noname ( addr len -- ) [: info-color attr!
-	.time ." connected from: "
-	.addr$ default-color attr! cr ;] $err ;
-is .iperr
+:noname ( addr u -- )
+    new-addr >o o .addr n2o:dispose-addr o> ; is .addr$
 
 : addr>6sock ( -- )
     host-portv6 w@ sockaddr1 port be-w!

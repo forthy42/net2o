@@ -116,7 +116,7 @@ net2o-base
 : request, ( -- )  next-request ulit, request-done ;
 
 : gen-punch ( -- )
-    my-ip$ [: $, punch ;] $[]map ;
+    my-addr$ [: -sig nat( 2dup ." punch: " .addr$ forth:cr ) $, punch ;] $[]map ;
 
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
     nest[ cookie, request, ]nest ;

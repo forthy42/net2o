@@ -359,7 +359,11 @@ User ip6:#
 	'2' of  .ip64 endof
 	dup emit -rot dump endcase ;
 
-Defer .iperr
+Defer .addr$
+
+: .iperr ( addr len -- ) [: info-color attr!
+	.time ." connected from: "
+	.addr$ default-color attr! cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!
