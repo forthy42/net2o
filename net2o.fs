@@ -1874,7 +1874,7 @@ Defer punch-reply
 : net2o:punch ( addr u -- )
     o IF
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
-	$>sock
+	addr>sock \ $>sock
     ELSE  2drop  THEN ;
 
 \ send chunk
@@ -2686,12 +2686,22 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 		temp-addr return-addr $10 move
 	    THEN ;] $>sock
     ELSE  2drop  THEN ;
+: new-insert-host ( o addr u -- o )
+    2 pick >o ." check host: " 2dup .addr$ cr
+    host>$ o> IF
+	[: check-addr1 0= IF  2drop  EXIT  THEN
+	    insert-address temp-addr ins-dest
+	    ." insert host: " temp-addr $10 xtype cr
+	    return-addr $10 0 skip nip 0= IF
+		temp-addr return-addr $10 move
+	    THEN ;] addr>sock
+    ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
-    id dup .dht-host ['] insert-host $[]map drop 2drop ;
+    id dup .dht-host ['] new-insert-host $[]map drop 2drop ;
 
 : search-connect ( key u -- o/0 )
     0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context

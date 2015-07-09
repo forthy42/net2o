@@ -93,10 +93,12 @@ previous
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
+: addr$ ( addr u -- )
+    new-addr >o o .addr n2o:dispose-addr o> ;
+
 :noname ( addr len -- ) [: info-color attr!
 	.time ." connected from: "
-	new-addr >o o .addr n2o:dispose-addr o>
-	default-color attr! cr ;] $err ;
+	.addr$ default-color attr! cr ;] $err ;
 is .iperr
 
 : addr>6sock ( o -- ) >o
