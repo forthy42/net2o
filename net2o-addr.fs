@@ -89,8 +89,8 @@ previous
 	host-portv4 w@ ?dup-IF  ." :4," 0 .r  THEN
 	host-portv6 w@ ?dup-IF  ." :6," 0 .r  THEN
     THEN
-    host-route $@ dup IF  ." |" xtype  ELSE  2drop  THEN  cr
-    host-key sec@ dup IF  ." key: " 85type cr  ELSE  2drop  THEN
+    host-route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
+    host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
 :noname ( addr len -- ) [: info-color attr!
@@ -188,11 +188,11 @@ also net2o-base
 	    endof
 	endcase
 	addr port be-uw@ ulit, addr-port
-	return-address $10 0 -skip ?dup-IF  $, addr-route  ELSE  2drop  THEN
+	return-address ~~ $10 0 -skip ~~ ?dup-IF  $, addr-route  ELSE  2drop  THEN
     ;] gen-cmd$ ;
 previous
 :noname ( -- addr len )
-    return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
+    return-address ~~ be@ routes #.key $@ new.sockaddr ; is new>sockaddr
 
 0 [IF]
 Local Variables:
