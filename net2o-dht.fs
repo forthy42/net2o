@@ -152,7 +152,7 @@ Variable dht-table
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
-    2dup sigsize# - ~~ .addr$ ~~ 2dup .sigdates >host verify-host .check 2drop ;
+    2dup sigsize# - .addr$ 2dup .sigdates >host verify-host .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
 : d#. ( -- )

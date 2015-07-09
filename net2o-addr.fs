@@ -101,17 +101,15 @@ previous
 	.addr$ default-color attr! cr ;] $err ;
 is .iperr
 
-: addr>6sock ( o -- ) >o
+: addr>6sock ( -- )
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
-    host-route $@ !temp-addr
-    o> ;
+    host-route $@ !temp-addr ;
     
-: addr>4sock ( o -- ) >o
+: addr>4sock ( -- )
     host-portv4 w@ sockaddr1 port be-w!
     host-ipv4 be-ul@ sockaddr1 ipv4!
-    host-route $@ !temp-addr
-    o> ;
+    host-route $@ !temp-addr ;
 
 :noname ( o xt -- ) { xt } >o
     host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN

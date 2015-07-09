@@ -1766,14 +1766,14 @@ Defer sockaddr+return
 
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
+: -sig ( addr u -- addr u' ) 2dup + 1- c@ 2* $11 + - ;
 : >sockaddr ( -- addr len )
     return-address be@ routes #.key $@ .sockaddr ;
 : n2oaddrs ( xt -- )
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
 : new-n2oaddrs ( xt -- )
-    my-addr$ [: 2dup + 1- c@ 2* $11 + -
-      sockaddr+return rot dup >r execute r> ;] $[]map drop ;
+    my-addr$ [: -sig sockaddr+return rot dup >r execute r> ;] $[]map drop ;
 
 \ load crypto here
 
@@ -2689,14 +2689,15 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 	    THEN ;] $>sock
     ELSE  2drop  THEN ;
 : new-insert-host ( o addr u -- o )
-    2 pick >o ." check host: " 2dup .addr$ cr
-    host>$ o> IF
+    2 pick >o host>$ o> IF
+	new-addr ." check host: " dup .addr cr dup >r
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	    insert-address temp-addr ins-dest
 	    ." insert host: " temp-addr $10 xtype cr
 	    return-addr $10 0 skip nip 0= IF
 		temp-addr return-addr $10 move
 	    THEN ;] addr>sock
+	  r> >o n2o:dispose-addr o>
     ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
