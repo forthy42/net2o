@@ -30,7 +30,8 @@ $20 net2o: disconnect ( -- ) \g close connection
 +net2o: set-ip ( $:string -- ) \g set address information
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \g request address information
-    new>sockaddr $, set-ip [: $, set-ip ;] new-n2oaddrs ;
+    new-addr( new>sockaddr )else( >sockaddr ) $, set-ip
+    [: $, set-ip ;] new-addr( new-n2oaddrs )else( n2oaddrs ) ;
 
 +net2o: set-blocksize ( n -- ) \g set blocksize to 2^n
     64>n 1 swap max-block# umin lshift blocksizes! ;
