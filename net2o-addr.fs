@@ -190,8 +190,7 @@ also net2o-base
 	addr port be-uw@ ulit, addr-port
     ;] gen-cmd$ ;
 :noname ( addr len -- addr' len' )
-    [: cmd$ $! return-address $10 0 -skip ~~ $, addr-route ;] gen-cmd$
-    2dup dump ;
+    [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
 is sockaddr+return
 previous
 :noname ( -- addr len )
