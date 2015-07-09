@@ -93,7 +93,7 @@ previous
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
-: addr$ ( addr u -- )
+: .addr$ ( addr u -- )
     new-addr >o o .addr n2o:dispose-addr o> ;
 
 :noname ( addr len -- ) [: info-color attr!
