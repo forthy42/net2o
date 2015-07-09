@@ -1761,6 +1761,9 @@ require net2o-file.fs
 
 \ helpers for addresses
 
+Defer new>sockaddr
+Defer sockaddr+return
+
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : >sockaddr ( -- addr len )
@@ -1769,8 +1772,7 @@ require net2o-file.fs
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
 : new-n2oaddrs ( xt -- )
-    my-addr$ [: rot dup >r execute r> ;] $[]map drop ;
-Defer new>sockaddr
+    my-addr$ [: sockaddr+return rot dup >r execute r> ;] $[]map drop ;
 
 \ load crypto here
 

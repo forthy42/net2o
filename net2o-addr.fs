@@ -188,11 +188,13 @@ also net2o-base
 	    endof
 	endcase
 	addr port be-uw@ ulit, addr-port
-	return-address ~~ $10 0 -skip ~~ ?dup-IF  $, addr-route  ELSE  2drop  THEN
     ;] gen-cmd$ ;
+:noname ( addr len -- addr' len' )
+    [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
+is sockaddr+return
 previous
 :noname ( -- addr len )
-    return-address ~~ be@ routes #.key $@ new.sockaddr ; is new>sockaddr
+    return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
 
 0 [IF]
 Local Variables:
