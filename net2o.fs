@@ -1867,6 +1867,8 @@ User outflag  outflag off
     >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer punch-reply
+Defer addr>sock
+Defer new-addr
 
 : send-punch ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
@@ -1875,10 +1877,9 @@ Defer punch-reply
     nat( ." send punch to: " return-addr $10 xtype cr )
     punch-load $@ punch-reply ;
 
-Defer addr>sock
-
 : net2o:punch ( addr u -- )
     o IF
+	new-addr
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
 	addr>sock \ $>sock
     ELSE  2drop  THEN ;

@@ -54,8 +54,8 @@ gen-table $freeze
 : n2o:dispose-addr ( o:addr -- o:addr )
     host-id $off host-anchor $off host-route $off host-key sec-off ;
 
-: new-addr ( addr u -- o ) \G create a new address object from string
-    n2o:new-addr n:>o nest-cmd-loop o n:o> ;
+:noname ( addr u -- o ) \G create a new address object from string
+    n2o:new-addr n:>o nest-cmd-loop o n:o> ; is new-addr
 
 also net2o-base
 : o-genaddr ( o -- ) >o \G create new address string from object
