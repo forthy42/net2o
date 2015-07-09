@@ -472,7 +472,7 @@ previous
 : +get-time     ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend-cmd  client-loop
+: tail-connect ( -- )   +resend-cmd client-loop
     -timeout tskc KEYBYTES erase resend0 $off  context! ;
 
 : n2o:connect ( ucode udata -- )

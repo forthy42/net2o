@@ -1398,7 +1398,7 @@ Variable mapstart $1 mapstart !
 : server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
-    context-table @ token-table !  dest-0key @ del-0key
+    context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
     <event wait-task @ ?dup-0=-IF [ up@ ]L THEN o elit, ->connect event> ;
 
 : n2o:new-map ( u -- addr )
