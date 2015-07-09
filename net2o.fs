@@ -1772,7 +1772,8 @@ Defer sockaddr+return
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
 : new-n2oaddrs ( xt -- )
-    my-addr$ [: sockaddr+return rot dup >r execute r> ;] $[]map drop ;
+    my-addr$ [: 2dup + 1- c@ 2* $11 + -
+      sockaddr+return rot dup >r execute r> ;] $[]map drop ;
 
 \ load crypto here
 
