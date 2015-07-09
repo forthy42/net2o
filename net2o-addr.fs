@@ -115,9 +115,12 @@ is .iperr
     host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
     host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ; is addr>sock
 
-: +my-addrs ( port o:addr -- )
+: +my-id ( -- )
     myprio @ host-pri# !
-    myhost $@ host-id $!
+    myhost $@ host-id $! ;
+
+: +my-addrs ( port o:addr -- )
+    +my-id
     host-ipv4 be-ul@ IF  dup host-portv4 w!  THEN
     host-ipv6 ip6? IF  dup host-portv6 w!  THEN  drop
     o my-addr[] $[]# my-addr[] $[] ! ;

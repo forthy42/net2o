@@ -322,7 +322,9 @@ Variable $addme
 	addr my-addr-merge IF  addr >o n2o:dispose-addr o> EXIT  THEN
 	addr o>addr gen-host my-addr$ $ins[]
 	addr >o n2o:dispose-addr o> EXIT  THEN
-    addr my-addr? 0= IF  2dup my-addr$ $ins[]  THEN
+    addr my-addr? 0= IF
+	addr >o +my-id o>
+	addr o>addr my-addr$ $ins[]  THEN
     what's expect-reply? ['] new-addme-end <> IF
 	expect-reply pkc keysize 2* $, dht-id
     THEN

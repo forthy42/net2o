@@ -2690,7 +2690,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     ELSE  2drop  THEN ;
 : new-insert-host ( o addr u -- o )
     2 pick >o host>$ o> IF
-	new-addr ." check host: " dup .addr cr dup >r
+	new-addr ." check addr: " dup .addr cr dup >r
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	    insert-address temp-addr ins-dest
 	    ." insert host: " temp-addr $10 xtype cr
