@@ -52,12 +52,12 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     addrd ucode udata addrs ;
 
 +net2o: store-key ( $:string -- ) $> \g store key
-    o 0= IF  ." don't store key, o=0: " .nnb forth:cr un-cmd  EXIT  THEN
+    o 0= IF  2drop un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb forth:cr )
 	2dup do-keypad sec!
 	crypto-key sec!
-    ELSE  ." don't store key: o=" o hex. .nnb forth:cr  THEN ;
+    ELSE  2drop un-cmd  THEN ;
 
 +net2o: map-request ( addrs ucode udata -- ) \g request mapping
     2*64>n
