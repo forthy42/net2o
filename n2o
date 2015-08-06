@@ -3,5 +3,5 @@
 
 require n2o.fs
 
-script? [IF] ++debug \ read in all debugging stuff
+script? [IF] ++debug %droprate \ read in all debugging stuff
     argc @ 1 > [IF] next-cmd [ELSE] help [THEN] bye  [THEN]

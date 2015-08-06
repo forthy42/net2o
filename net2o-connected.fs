@@ -376,7 +376,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     $, nest end-code
 ; is punch-reply
 
-: 0-resend? ( -- )
+: 0-resend? ( -- n )
     resend0 @ IF
 	\ ." Resend to 0" cr
 	cmd0!
@@ -384,23 +384,23 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
 	  1 packets2 +! ;]
-	cmdlock c-section
-    THEN ;
+	cmdlock c-section  1
+    ELSE  0  THEN ;
 
-: map-resend? ( -- )
-    code-map @ ?dup-IF  >o
+: map-resend? ( -- n )
+    code-map @ ?dup-IF  >o 0
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
 	    I @ 0<> IF
 		timeout( ." resend: " I 2@ n2o:see forth:cr )
 		I 2@ I reply-dest 64@ send-cmd drop
-		1 packets2 +!
+		1 packets2 +! 1+
 	    THEN
 	reply +LOOP
-    THEN ;
+    ELSE  0  THEN ;
 
-: cmd-resend? ( -- )
-    0-resend? map-resend? ;
+: cmd-resend? ( -- n )
+    0-resend? map-resend? + ;
 
 : .expected ( -- )
     forth:.time ." expected/received: " recv-addr @ hex.
@@ -459,11 +459,11 @@ also net2o-base
 previous
 
 : cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend?
-    push-timeout ;
+    IF  push-timeout  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
     \ timeout( .expected )
-    packets2 @ cmd-timeout packets2 @ = IF  transfer-keepalive?  THEN
-    push-timeout ;
+    packets2 @ cmd-timeout packets2 @ =
+    IF  transfer-keepalive?  ELSE  push-timeout  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;

@@ -207,9 +207,11 @@ set-current previous
 	EXIT
     THEN
     2dup
-    [: BEGIN  dup  WHILE  over c@ '@' = WHILE
-		  bl $split 2swap 1 /string nick>pk $, msg-signal
-	  REPEAT  THEN
+    [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
+		  bl $split 2swap 1 /string nick>pk \ 0. if no nick
+		  2dup d0= IF  2drop 2drop oaddr ou true
+		  ELSE  $, msg-signal false  THEN
+	  UNTIL  THEN  THEN
       $, msg-text ;] send-avalanche .chat ;
 previous
 
@@ -225,7 +227,8 @@ previous
     r> 0 ?DO  >o o to connection +resend-cmd send-leave
     ret-beacon disconnect-me o>  cell +LOOP ;
 
-: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend?
+: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
+    cmd-resend? 0= ?EXIT
     timeout-expired? IF  pubkey $@ key>nick type ."  left (timeout)" cr
 	n2o:dispose-context  THEN ;
 
