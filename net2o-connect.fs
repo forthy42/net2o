@@ -121,8 +121,11 @@ net2o-base
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
     nest[ cookie, request, ]nest ;
 
+: new-punchload ( -- )
+    punch-gen nest[ cookie, punch-done request, ]nest$! ;
+
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
-    nest[ cookie, punch-done request, ]nest$ punch-load, ;
+    punch-gen $@ $, punch-load, ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
     gen-punch ;

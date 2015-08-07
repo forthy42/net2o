@@ -228,7 +228,7 @@ previous
     ret-beacon disconnect-me o>  cell +LOOP ;
 
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
-    cmd-resend? 0= ?EXIT
+    cmd-resend? IF  ." Resend to " pubkey $@ key>nick type cr  ELSE  EXIT  THEN
     timeout-expired? IF  pubkey $@ key>nick type ."  left (timeout)" cr
 	n2o:dispose-context  THEN ;
 

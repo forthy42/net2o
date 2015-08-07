@@ -356,6 +356,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 : gen-request ( -- ) setup!
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     net2o-code0
+    ind-addr @ IF  new-punchload  THEN
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
     nest[ cookie, ind-addr @ IF  gen-punch-reply
@@ -380,7 +381,9 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     resend0 @ IF
 	\ ." Resend to 0" cr
 	cmd0!
-	[: cmdreset resend0 $@ +cmdbuf
+	[:
+	  resend( ." resend0: " resend0 $@ n2o:see forth:cr )
+	  cmdreset resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
 	  1 packets2 +! ;]
@@ -392,7 +395,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
 	    I @ 0<> IF
-		timeout( ." resend: " I 2@ n2o:see forth:cr )
+		resend( ." resend: " I 2@ n2o:see forth:cr )
 		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +! 1+
 	    THEN

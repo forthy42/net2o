@@ -246,6 +246,7 @@ object class
     umethod cmdreset
     umethod maxstring
     umethod +cmdbuf
+    umethod -cmdbuf
     umethod cmddest
 end-class cmd-buf-c
 
@@ -262,6 +263,7 @@ code-buf
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
 :noname ( addr u -- ) dup maxstring u> IF  ~~ true  !!stringfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
+:noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 
 sema cmd0lock
@@ -291,6 +293,7 @@ code-buf$
 :noname  cmd$ $off ; to cmdreset
 ' true to maxstring \ really maxuint = -1 = true
 :noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
+:noname ( n -- )  cmd$ $@len + cmd$ $!len ; to -cmdbuf
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
 code0-buf \ reset default
@@ -455,7 +458,7 @@ comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- size )  n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
-    cmd( ." send: " dest-flags .dest-addr dup buf# n2o:see cr )
+    cmd( ." send: " outflag .dest-addr dup buf# n2o:see cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I send-cX  cmdreset  min-size I lshift  UNLOOP
@@ -499,7 +502,8 @@ previous
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
     ?dup-IF
-	cmd( dest-addr 64@ $64. ." resend canned code reply " tag-addr hex. cr )
+	cmd( dest-addr 64@ $64. ." resend canned code reply " r@ hex. forth:cr )
+	resend( ." resend canned code reply " r@ hex. forth:cr )
 	r> reply-dest 64@ send-cmd drop true
 	1 packets2 +!
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
@@ -517,7 +521,8 @@ previous
     ELSE
 	cmd0!
     THEN
-    [: cmdreset  do-cmd-loop  cmd-send? ;] cmdlock c-section ;
+    [: outflag @ >r cmdreset  do-cmd-loop
+      r> outflag ! cmd-send? ;] cmdlock c-section ;
 
 ' cmd-loop is queue-command
 
@@ -587,6 +592,9 @@ comp: :, previous ;
     end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
 
 : ]nest$  ( -- )  cmd>nest 2drop ;
+: ]nest$!  ( addr -- )
+    neststart# @ >r cmd>nest rot $!
+    r> fwd# - 1- cmdbuf$ nip - -cmdbuf ;
 
 dup set-current previous
 
