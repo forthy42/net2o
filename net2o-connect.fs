@@ -148,12 +148,12 @@ net2o-base
     ELSE  receive-key  THEN
     update-key all-ivs ;
 
-+net2o: gen-reply ( -- ) \g generate a key request reply reply
++net2o: gen-reply ( -- ) \g generate a key request reply
     own-crypt? 0= ?EXIT
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, ( cookie+request ) time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
-+net2o: gen-punch-reply ( -- )  o? \g generate a key request reply reply
++net2o: gen-punch-reply ( -- )  o? \g generate a punch request reply
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
       push-cmd ;]  IS expect-reply? ;

@@ -577,8 +577,9 @@ begin-structure reply
     field: reply-len
     field: reply-offset
     64field: reply-dest
-    field: reply-timeout# \ per-reply timeout counter
-    field: reply-timeout-xt \ per-reply timeout xt
+    field: reply-xt \ execute when receiving an ok
+\    field: reply-timeout# \ per-reply timeout counter
+\    field: reply-timeout-xt \ per-reply timeout xt
 end-structure
 
 m: addr>bits ( addr -- bits )
@@ -604,8 +605,6 @@ m: addr>keys ( addr -- keys )
 
 UDefer other
 UValue pollfd#  0 to pollfd#
-
-Defer init-reply
 
 : -other        ['] noop is other ;
 -other
@@ -681,7 +680,7 @@ Variable net2o-tasks
     dup { w^ task }
     task cell net2o-tasks $+!  pass
     alloc-io b-out op-vector @ debug-vector !
-    init-reply prep-socks catch
+    prep-socks catch
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
@@ -1326,7 +1325,8 @@ Variable mapstart $1 mapstart !
     maxdata negate and addr>replies dest-replies @ + o> ;
 
 reply buffer: dummy-reply
-' noop dummy-reply reply-timeout-xt !
+\ ' noop dummy-reply reply-timeout-xt !
+' noop dummy-reply reply-xt !
 
 : reply[] ( index -- addr )
     code-map @ >o

@@ -241,6 +241,7 @@ user-o cmdbuf-o
 
 object class
     cell uvar cmdbuf#
+    cell uvar cmd-reply-xt
     umethod cmdlock
     umethod cmdbuf$
     umethod cmdreset
@@ -445,15 +446,24 @@ gen-table $@ inherit-table reply-table
     \G initialize a statefull command
     code-buf  outflag off ;
 
+also net2o-base
+
+UDefer expect-reply?
+' end-cmd IS expect-reply?
+
+: init-reply  ['] end-cmd IS expect-reply?  ['] noop cmd-reply-xt ! ;
+
+previous
+
 : net2o-code ( -- )
     \G start a statefull command
     cmd!  cmdlock lock
-    cmdreset 1 code+ also net2o-base ;
+    cmdreset init-reply 1 code+ also net2o-base ;
 comp: :, also net2o-base ;
 : net2o-code0
     \G start a stateless command
     cmd0!  cmdlock lock
-    cmdreset also net2o-base ;
+    cmdreset init-reply also net2o-base ;
 comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- size )  n64-swap { buf# }
@@ -472,11 +482,6 @@ comp: :, also net2o-base ;
 
 also net2o-base
 
-UDefer expect-reply?
-' end-cmd IS expect-reply?
-
-:noname  ['] end-cmd IS expect-reply? ; is init-reply
-
 : cmd-send? ( -- )
     cmdbuf# @ IF  expect-reply? cmd  THEN ;
 
@@ -486,18 +491,20 @@ previous
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r> reply-dest 64! ;
-: net2o:ok ( tag -- )
+: net2o:ok ( tag -- ) ." ok: " dup hex. forth:cr
     timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
     resend0 $off
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
-    0. rot reply[] 2! ; \ clear request
+    0. rot reply[] dup >r 2!
+    ['] noop r> reply-xt !@ execute ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     cmdbuf$
-    connection >o code-reply dup >r 2! code-vdest r> reply-dest 64! o> ;
+    connection >o code-reply dup >r 2! code-vdest r@ reply-dest 64!
+    cmd-reply-xt @ r> reply-xt ! o> ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
