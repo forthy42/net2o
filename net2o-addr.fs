@@ -54,16 +54,15 @@ gen-table $freeze
 : n2o:dispose-addr ( o:addr -- o:addr )
     host-id $off host-anchor $off host-route $off host-key sec-off ;
 
-: new-addr ( addr u -- o ) \G create a new address object from string
-    n2o:new-addr n:>o do-cmd-loop o n:o> ;
+:noname ( addr u -- o ) \G create a new address object from string
+    n2o:new-addr n:>o nest-cmd-loop o n:o> ; is new-addr
 
 also net2o-base
-: o>addr ( o -- addr u ) \G create new address string from object
-    >o code-buf$ cmdreset
+: o-genaddr ( o -- ) >o \G create new address string from object
     host-pri# @ ulit, addr-pri#
     host-id $@ dup IF $, addr-id  ELSE  2drop  THEN
     host-anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
-    host-ipv4 l@ ?dup-IF ulit, addr-ipv4  THEN
+    host-ipv4 be-ul@ ?dup-IF ulit, addr-ipv4  THEN
     host-ipv6 ip6? IF  host-ipv6 $10 $, addr-ipv6  THEN
     host-portv4 w@ host-portv6 w@ = IF
 	host-portv4 w@ ulit, addr-port
@@ -72,14 +71,15 @@ also net2o-base
 	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
-    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
-    cmdbuf$ o> ; 
+    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN  o> ; 
 previous
+: o>addr ( o -- addr u )
+    cmdbuf-o @ >r code-buf$ cmdreset o-genaddr cmdbuf$ r> cmdbuf-o ! ;
 
 : .addr ( o -- ) \G print addr
     >o
-    ." #" host-pri# @ 0 .r
-    host-id $@ dup IF ." '" type ." '"  ELSE  2drop  THEN
+    host-pri# @ ?dup-IF  0 .r '#' emit  THEN
+    host-id $@ dup IF '"' emit type '"' emit  ELSE  2drop  THEN
     host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
     host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
     host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop THEN
@@ -89,29 +89,33 @@ previous
 	host-portv4 w@ ?dup-IF  ." :4," 0 .r  THEN
 	host-portv6 w@ ?dup-IF  ." :6," 0 .r  THEN
     THEN
-    host-route $@ dup IF  ." |" xtype  ELSE  2drop  THEN  cr
-    host-key sec@ dup IF  ." key: " 85type cr  ELSE  2drop  THEN
+    host-route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
+    host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
-: addr>6sock ( o -- ) >o
+:noname ( addr u -- )
+    new-addr >o o .addr n2o:dispose-addr o> ; is .addr$
+
+: addr>6sock ( -- )
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
-    host-route $@ !temp-addr
-    o> ;
+    host-route $@ !temp-addr ;
     
-: addr>4sock ( o -- ) >o
+: addr>4sock ( -- )
     host-portv4 w@ sockaddr1 port be-w!
     host-ipv4 be-ul@ sockaddr1 ipv4!
-    host-route $@ !temp-addr
-    o> ;
+    host-route $@ !temp-addr ;
 
-: addr>sock ( o xt -- ) { xt } >o
+:noname ( o xt -- ) { xt } >o
     host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
-    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ;
+    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ; is addr>sock
+
+: +my-id ( -- )
+    myprio @ host-pri# !
+    myhost $@ host-id $! ;
 
 : +my-addrs ( port o:addr -- )
-    myprio @ host-pri# !
-    myhost $@ host-id $!
+    +my-id
     host-ipv4 be-ul@ IF  dup host-portv4 w!  THEN
     host-ipv6 ip6? IF  dup host-portv6 w!  THEN  drop
     o my-addr[] $[]# my-addr[] $[] ! ;
@@ -124,6 +128,71 @@ previous
 	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
 	ELSE  drop  THEN
     THEN ;
+
+: $[]o-map { addr xt -- }
+    \G execute @var{xt} for all elements of the object array @var{addr}.
+    \G xt is @var{( o -- )}, getting one string at a time
+    addr $[]# 0 ?DO  I addr $[] @ xt execute  LOOP ;
+
+: addrs-off ( -- )
+    \G dispose all addresses
+    my-addr[] [: >o n2o:dispose-addr o> ;] $[]o-map
+    my-addr[] $off
+    my-addr$ $[]off ;
+
+: !my-addr$ ( -- )
+    my-addr[] [: o>addr gen-host my-addr$ $ins[] ;] $[]o-map ;
+
+:noname addrs-off !my-addrs !my-addr$ ; is !my-addr
+
+\ merge addresses
+
+: my-addr= ( o1 o:o2 -- ) { o1 }
+    o1 .host-portv4 2 host-portv4 over str=?0 &&
+    o1 .host-portv6 2 host-portv6 over str=?0 &&
+    o1 .host-route $@ host-route $@  str=?0 &&
+    o1 .host-ipv4   4 host-ipv4 over str=?0 &&
+    o1 .host-ipv6 $10 host-ipv6 over str=?0 ;
+
+: my-addr? ( o -- o flag )
+    o my-addr[] [: >o over my-addr= o> or ;] $[]o-map ;
+
+: my-addr-merge1 ( o1 o:o2 -- ) { o1 }
+    o1 .host-ipv4   4 host-ipv4 over str>merge
+    o1 .host-ipv6 $10 host-ipv6 over str>merge ;
+
+: my-addr-merge ( o -- flag )
+    false swap
+    my-addr[] [: >o dup my-addr= IF dup my-addr-merge1
+	nip 0 swap THEN o> ;] $[]o-map
+    drop ;
+
+\ sockaddr conversion
+
+also net2o-base
+: new.sockaddr ( addr alen -- sockaddr u )
+    \ convert socket into net2o address token
+    [: { addr alen }
+	case addr family w@
+	    AF_INET of
+		addr sin_addr be-ul@ ulit, addr-ipv4
+	    endof
+	    AF_INET6 of
+		addr sin6_addr 12 fake-ip4 over str= IF
+		    .ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
+		ELSE
+		    addr sin6_addr $10 $, addr-ipv6
+		THEN
+	    endof
+	endcase
+	addr port be-uw@ ulit, addr-port
+    ;] gen-cmd$ ;
+:noname ( addr len -- addr' len' )
+    [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
+is sockaddr+return
+previous
+:noname ( -- addr len )
+    return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
 
 0 [IF]
 Local Variables:

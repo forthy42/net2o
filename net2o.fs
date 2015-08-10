@@ -241,7 +241,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 [THEN]
 0 Value query-sock
 Variable my-ip$
-Variable my-addr[]
+Variable my-addr[] \ object based hosts
+Variable my-addr$ \ string based hosts (with sigs)
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
@@ -342,8 +343,11 @@ User ip6:#
 	'2' of  .ip64 endof
 	dup emit -rot dump endcase ;
 
+Defer .addr$
+
 : .iperr ( addr len -- ) [: info-color attr!
-      .time ." connected from: " .ipaddr default-color attr! cr ;] $err ;
+	.time ." connected from: "
+	new-addr( .addr$ )else( .ipaddr ) default-color attr! cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!
@@ -512,6 +516,10 @@ Variable $tmp2
     $tmp2 $@ +my-ip
     0= IF  local-ip6  +my-ip THEN ;
 
+\ new address handling is in net2o-addr.fs, loaded later
+
+Defer !my-addr
+
 \ this looks ok
 
 : && ( flag -- ) ]] dup 0= ?EXIT drop [[ ; immediate compile-only
@@ -555,7 +563,8 @@ Variable net2o-host "net2o.de" net2o-host $!
     r> ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
 	net2o-sock drop my-port# create-udp-server to net2o-sock
-    [THEN] !my-ips ;
+    [THEN]
+    !my-ips !my-addr ;
 
 begin-structure reply
     field: reply-len
@@ -1185,7 +1194,7 @@ Variable mapstart $1 mapstart !
 : server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
-    context-table @ token-table !  dest-0key @ del-0key
+    context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
     <event wait-task @ ?dup-0=-IF [ up@ ]L THEN o elit, ->connect event> ;
 
 : n2o:new-map ( u -- addr )
@@ -1553,13 +1562,19 @@ require net2o-file.fs
 
 \ helpers for addresses
 
+Defer new>sockaddr
+Defer sockaddr+return
+
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
+: -sig ( addr u -- addr u' ) 2dup + 1- c@ 2* $11 + - ;
 : >sockaddr ( -- addr len )
     return-address be@ routes #.key $@ .sockaddr ;
 : n2oaddrs ( xt -- )
     my-ip$ [: [: type return-address $10 0 -skip type ;] $tmp
       rot dup >r execute r> ;] $[]map drop ;
+: new-n2oaddrs ( xt -- )
+    my-addr$ [: -sig sockaddr+return rot dup >r execute r> ;] $[]map drop ;
 
 \ load crypto here
 
@@ -1649,6 +1664,8 @@ User outflag  outflag off
     >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer punch-reply
+Defer addr>sock
+Defer new-addr
 
 : send-punch ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
@@ -1659,8 +1676,9 @@ Defer punch-reply
 
 : net2o:punch ( addr u -- )
     o IF
+	new-addr( new-addr )
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
-	$>sock
+	new-addr( addr>sock )else( $>sock )
     ELSE  2drop  THEN ;
 
 \ send chunk
@@ -2403,8 +2421,8 @@ require net2o-connect.fs
 require net2o-connected.fs
 require net2o-log.fs
 require net2o-keys.fs
-require net2o-dht.fs
 require net2o-addr.fs
+require net2o-dht.fs
 require net2o-msg.fs
 \ require net2o-term.fs
 
@@ -2457,7 +2475,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  2drop disconnect-me ;
 : insert-host ( o addr u -- o )
-    2 pick >o ." check host: " 2dup .host cr
+    2 pick >o ~~ \ ." check host: " 2dup .host cr
     host>$ o> IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	    insert-address temp-addr ins-dest
@@ -2466,12 +2484,24 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 		temp-addr return-addr $10 move
 	    THEN ;] $>sock
     ELSE  2drop  THEN ;
+: new-insert-host ( o addr u -- o )
+    2 pick >o host>$ o> IF
+	new-addr ." check addr: " dup .addr cr dup >r
+	[: check-addr1 0= IF  2drop  EXIT  THEN
+	    insert-address temp-addr ins-dest
+	    ." insert host: " temp-addr $10 xtype cr
+	    return-addr $10 0 skip nip 0= IF
+		temp-addr return-addr $10 move
+	    THEN ;] addr>sock
+	  r> >o n2o:dispose-addr o>
+    ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
-    id dup .dht-host ['] insert-host $[]map drop 2drop ;
+    id dup .dht-host
+    new-addr( ['] new-insert-host )else( ['] insert-host ) $[]map drop 2drop ;
 
 : search-connect ( key u -- o/0 )
     0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context

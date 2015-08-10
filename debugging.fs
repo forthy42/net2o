@@ -69,6 +69,7 @@ debug: recvfrom(
 debug: sendto(
 debug: avalanche( \ distribution tree
 debug: adjust-timer( \ adjust timer
+debug: new-addr( \ new address to try out
 
 -db profile( \ )
 

@@ -64,9 +64,6 @@ Variable dht-table
 
 \ checks for signatures
 
-: >delete ( addr u type u2 -- addr u )
-    "delete" >keyed-hash ;
-
 : >host ( addr u -- addr u )  dup sigsize# u< !!unsigned!!
     2dup sigsize# - gen>host 2drop ; \ hash from address
 
@@ -155,7 +152,8 @@ Variable dht-table
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
-    2dup sigsize# - .ipaddr 2dup .sigdates >host verify-host .check 2drop ;
+    2dup sigsize# - new-addr( .addr$ )else( .ipaddr )
+    2dup .sigdates >host verify-host .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
 : d#. ( -- )
@@ -266,13 +264,8 @@ gen-table $freeze
 
 \ facility stuff
 
-: host$ ( addr u -- hostaddr host-u ) [: type .sig ;] $tmp ;
-: gen-host ( addr u -- addr' u' )
-    gen>host host$ ;
-: gen-host-del ( addr u -- addr' u' )
-    gen>host "host" >delete host$ ;
 : gen-owner-del ( addr u -- addr' u' )
-    gen>host "owner" >delete host$ ;
+    gen>host "owner" >delete +sig$ ;
 
 : gen>tag ( addr u hash-addr uh -- addr u )
     c:0key "tag" >keyed-hash
@@ -316,9 +309,32 @@ Variable $addme
     THEN
     gen-host $, dht-host+
     ['] addme-end IS expect-reply? ;
+
+\ new address formats
+
+: new-addme-end ( -- ) request( ." addme" forth:cr )
+    add-myip IF
+	my-addr$ [: $, dht-host+ ;] $[]map
+    THEN
+    endwith  do-expect-reply ;
+: new-addme ( addr u -- )  new-addr { addr } now>never
+    addr >o +my-id o>
+    nat( ." addme: " addr .addr forth:cr )
+    addr .host-route $@len 0= IF
+	addr my-addr-merge IF  addr >o n2o:dispose-addr o> EXIT  THEN
+	addr o>addr gen-host my-addr$ $ins[]
+	addr >o n2o:dispose-addr o> EXIT  THEN
+    addr my-addr? 0= IF
+	addr o>addr my-addr$ $ins[]  THEN
+    what's expect-reply? ['] new-addme-end <> IF
+	expect-reply pkc keysize 2* $, dht-id
+    THEN
+    addr o>addr gen-host $, dht-host+
+    addr >o n2o:dispose-addr o>
+    ['] new-addme-end IS expect-reply? ;
 previous
 
-: +addme ['] addme setip-xt ! ;
+: +addme new-addr( ['] new-addme )else( ['] addme ) setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
 
 \ replace me stuff
