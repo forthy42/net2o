@@ -83,6 +83,11 @@ cell 8 = [IF]
     ' w: alias 64:
     ' w^ alias 64^
     previous definitions
+    ' min! Alias 64min!
+    ' max! Alias 64max!
+    ' umin! Alias 64umin!
+    ' umax! Alias 64umax!
+    ' !@ Alias 64!@
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -182,6 +187,13 @@ cell 8 = [IF]
     ' d: alias 64:
     ' d^ alias 64^
     previous definitions
+    : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
+    : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;
+    : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
+    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
+    : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
+    : 64umin! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
+    : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
 [THEN]
 \ independent of cell size, using dfloats:
 ' dfloats Alias 64s

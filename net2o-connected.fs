@@ -286,7 +286,8 @@ also net2o-base
     ['] do-expect-reply IS expect-reply?
     cmd-reply-xt ! ;
 
-: expect-reply ( -- )  [: ." got reply" forth:cr ;] expect-reply-xt ;
+: expect-reply ( -- )
+    ['] drop expect-reply-xt ;
 
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@ 64u>= IF

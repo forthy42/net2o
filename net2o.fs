@@ -114,22 +114,6 @@ object class
     cell                           uvar code-key^
 end-class io-buffers
 
-[IFDEF] 64bit
-    ' min! Alias 64min!
-    ' max! Alias 64max!
-    ' umin! Alias 64umin!
-    ' umax! Alias 64umax!
-    ' !@ Alias 64!@
-[ELSE]
-    : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
-    : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;
-    : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
-    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
-    : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
-    : 64umin! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
-    : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
-[THEN]
-
 \ bit vectors, lsb first
 
 : bits ( n -- n ) 1 swap lshift ;
@@ -1027,7 +1011,7 @@ User >code-flag
     c:key# crypt-align + alloz dest-ivsgen ! \ !!FIXME!! should be a kalloc
     >code-flag @
     IF
-	dup addr>replies  alloz dest-replies !
+	dup addr>replies  alloc+guard dest-replies !
 	3 dest-ivslastgen !
     ELSE
 	dup addr>ts       alloz dest-timestamps !
@@ -1238,7 +1222,7 @@ Variable mapstart $1 mapstart !
 : free-code ( o:data -- ) dest-size @ >r
     dest-raddr r@   ?free+guard
     dest-ivsgen     c:key# ?free
-    dest-replies    r@ addr>replies ?free
+    dest-replies    r@ addr>replies ?free+guard
     rdrop dispose ;
 ' free-code code-class to free-data
 :noname ( o:data -- )
