@@ -1062,7 +1062,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 2 Value flybursts#
 $100 Value flybursts-max#
 $20 cells Value resend-size#
-#50.000.000 d>64 64Constant init-delay# \ 30ms initial timeout step
+#50.000.000 d>64 64Constant init-delay# \ 50ms initial timeout step
 
 Variable init-context#
 Variable msg-groups
@@ -2060,7 +2060,7 @@ Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 
 : 0timeout ( -- )
-    ack@ .rtdelay 64@ timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    ack@ .rtdelay 64@ 64-2* timeout-min# 64max ticker 64@ 64+ next-timeout 64!
     0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : do-timeout ( -- )  timeout-xt perform ;
 
@@ -2078,7 +2078,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : +timeouts ( -- timeout ) 
-    rtdelay 64@ timeout-min# 64max timeouts @ sq2**
+    rtdelay 64@ 64-2* timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
     ticker 64@ 64+ ;
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
