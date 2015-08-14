@@ -120,7 +120,7 @@ init-keybuf
 
 : clear-replies ( -- )
     dest-replies @ dest-size @ addr>replies dest-a/b
-    ." Clear replies " over hex. dup hex. cr
+    reply( ." Clear replies " over hex. dup hex. cr )
     erase ;
 
 : crypt-key$ ( -- addr u )
@@ -235,11 +235,12 @@ Sema regen-sema
     >crypt-key ;
 
 : regen-ivs/2 ( -- )
-    c:key@ >r
-    dest-ivsgen @ kalign key( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
-    clear-replies
-    dest-ivs $@ dest-a/b c:prng
-    2 dest-ivslastgen xor! r> c:key! ;
+    [: c:key@ >r
+	dest-ivsgen @ kalign reply( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
+	clear-replies
+	dest-ivs $@ dest-a/b c:prng
+	2 dest-ivslastgen xor! r> c:key! ;]
+    regen-sema c-section  ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
       dest-ivsgen @ kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
