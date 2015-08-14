@@ -120,7 +120,7 @@ init-keybuf
 
 : clear-replies ( -- )
     dest-replies @ dest-size @ addr>replies dest-a/b
-    cmd( ." Clear replies " over hex. dup hex. cr )
+    ." Clear replies " over hex. dup hex. cr
     erase ;
 
 : crypt-key$ ( -- addr u )

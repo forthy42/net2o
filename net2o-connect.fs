@@ -113,7 +113,8 @@ net2o-base
     THEN ;
 
 : cookie, ( -- )  add-cookie lit, set-cookie ;
-: request, ( -- )  next-request ulit, request-done ;
+: #request, ( -- )  ulit, request-done ;
+: request, ( -- )  next-request #request, ;
 
 : gen-punch ( -- )
     new-addr( my-addr$ [: -sig $, punch ;]
@@ -123,10 +124,10 @@ net2o-base
     nest[ cookie, request, ]nest ;
 
 : new-punchload ( -- )
-    punch-gen nest[ cookie, punch-done request, ]nest$! ;
+    next-request punch-gen ! ;
 
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
-    punch-gen $@ $, punch-load, ;
+    nest[ cookie, punch-done punch-gen @ #request, ]nest$ $, punch-load, ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
     gen-punch ;

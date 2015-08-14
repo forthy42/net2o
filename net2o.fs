@@ -2477,7 +2477,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 	    o o> >r 2dup c:fetch-id r> >o
     REPEAT  2drop disconnect-me ;
 : insert-host ( o addr u -- o )
-    2 pick >o ~~ \ ." check host: " 2dup .host cr
+    2 pick >o \ ." check host: " 2dup .host cr
     host>$ o> IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
 	    insert-address temp-addr ins-dest

@@ -133,7 +133,7 @@ cmd-class class
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
     field: punch-load
-    field: punch-gen
+    field: punch-gen \ punch request number
     0 +field end-strings
     \ secrets
     0 +field start-secrets
