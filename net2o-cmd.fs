@@ -504,8 +504,7 @@ previous
     nat( ." ok from: " ret-addr $10 xtype space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
-    ['] drop r> reply-xt !@ ?dup-IF  execute
-    ELSE  ." got reply, xt erased: " . cr  THEN ; \ clear request
+    ['] drop r> reply-xt execute ; \ clear request
 : net2o:expect-reply ( -- )  o?
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     cmdbuf$

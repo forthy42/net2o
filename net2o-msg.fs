@@ -111,7 +111,7 @@ Variable group-master
 previous
 
 : msg-reply ( tag -- )
-    ." got reply " hex. pubkey $@ key>nick type cr ;
+    reply( ." got reply " hex. pubkey $@ key>nick type cr )else( drop ) ;
 
 : send-text ( addr u -- )
     net2o-code  ['] msg-reply expect-reply-xt
@@ -231,7 +231,8 @@ previous
     ret-beacon disconnect-me o>  cell +LOOP ;
 
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
-    cmd-resend? IF  ." Resend to " pubkey $@ key>nick type cr  ELSE  EXIT  THEN
+    cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
+    ELSE  EXIT  THEN
     timeout-expired? IF  pubkey $@ key>nick type ."  left (timeout)" cr
 	n2o:dispose-context  THEN ;
 
