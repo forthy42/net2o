@@ -65,11 +65,6 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 
 
 2 Value pw-level# \ pw-level# 0 is lowest
-\ !!TODO!! we need a way to tell how much we can trust keys
-\ passwords need a pw-level (because they are guessable)
-\ secrets don't, they aren't. We can quickly decrypt all
-\ secret-based stuff, without bothering with slowdowns.
-\ So secrets should use normal string decrypt
 
 cmd-buf0 uclass cmdbuf-o
     maxdata -
@@ -99,12 +94,13 @@ code0-buf
 User >storekey
 
 cmd-class class
-    field: ke-sk   \ secret key
-    field: ke-pk   \ public key
-    field: ke-type \ key type
-    field: ke-nick \ key nick
-    field: ke-psk  \ preshared key for stateless communication
-    field: ke-prof \ profile object
+    field: ke-sk       \ secret key
+    field: ke-pk       \ public key
+    field: ke-type     \ key type
+    field: ke-nick     \ key nick
+    field: ke-nick#    \ to avoid colissions, add a number here
+    field: ke-psk      \ preshared key for stateless communication
+    field: ke-prof     \ profile object
     field: ke-selfsig
     field: ke-sigs
     field: ke-storekey \ used to encrypt on storage
@@ -120,7 +116,8 @@ Variable key-entry-table
 
 0 Value sample-key
 
-Variable key-table
+Variable key-table \ key hash table
+Variable nick-table \ nick hash table
 
 64Variable key-read-offset
 
@@ -128,6 +125,11 @@ Variable key-table
     2dup keysize umin key-table #@ drop
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
+
+: nick! ( -- ) o { w: optr }
+    0 BEGIN  ke-nick $@ [: type '#' emit dup 0 .r ;] $tmp
+	2dup nick-table #@ 0. d<> WHILE  2drop 1+  REPEAT
+    optr cell 2swap nick-table #!  ke-nick# ! ;
 
 : key:new ( addr u -- o )
     \G create new key, addr u is the public key
@@ -158,9 +160,11 @@ Variable key-table
     0 tuck key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  2dup = IF  rot drop o -rot  THEN  1+
       THEN  o> ;] #map 2drop ;
+: .nick ( o:key -- )  ke-nick $.
+    ke-nick# @ ?dup-IF  '#' emit 0 .r  THEN ;
 : .secret-nicks ( -- )
     0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  dup . ke-nick $@ type cr 1+
+	  dup . .nick cr 1+
       THEN o> ;] #map drop ;
 
 : nick>pk ( nick u -- pk u )
@@ -190,7 +194,7 @@ magenta >bg white >fg or bold or ,
 : .rsk ( nick u -- )
     skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
-    ." nick: " ke-nick $@ type cr
+    ." nick: " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF  ." seckey: " ke-sk @ keysize
 	.black85 ."  (keep secret!)" cr  THEN
@@ -201,7 +205,7 @@ magenta >bg white >fg or bold or ,
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
     ke-sk @ IF  .\" x\" " ke-sk @ keysize 85type .\" \" ke-sk sec! +seckey" cr  THEN
-    '"' emit ke-nick $@ type .\" \" ke-nick $! "
+    '"' emit .nick .\" \" ke-nick $! "
     ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first! " ke-type @ . ." ke-type !"  cr o> ;
 
@@ -214,7 +218,7 @@ magenta >bg white >fg or bold or ,
 
 : .key# ( addr u -- ) keysize umin
     ." Key '" key-table #@ 0= IF drop EXIT THEN
-    cell+ .ke-nick $@ type ." ' ok" cr ;
+    cell+ ..nick ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
     IF  2drop err-color attr! 8 85type ." (unknown)" reset-color
     ELSE  cell+ .ke-nick $@ info-color attr! type reset-color 2drop  THEN ;
@@ -309,7 +313,8 @@ $11 net2o: privkey ( $:string -- )
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
 \g key type (0: anon, 1: user, 2: group)
-+net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $! ;
++net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $!
+    nick! ;
 \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
 \g key profile (hash of a resource)
@@ -451,7 +456,7 @@ Variable cp-tmp
     cp-tmp $@ key-pfd write-file throw cp-tmp $off
     key-table [: cell+ $@ drop cell+ >o
       ke-sk sec@ d0= IF  pack-pubkey
-	  flush( ." saving " ke-nick $@ type forth:cr )
+	  flush( ." saving " .nick forth:cr )
 	  key-crypt ke-offset 64@ key>pfile@pos
       THEN o> ;] #map
     key-pfd close-file throw

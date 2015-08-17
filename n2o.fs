@@ -197,7 +197,7 @@ get-current net2o-cmds definitions
 	ke-pk $@ keysize umin
 	ke-sk sec@ nip IF  .85warn  ELSE  .85info  THEN
 	ke-selfsig $@ .sigdates
-	space ke-nick $@ type cr o> ;] #map ;
+	space .nick  cr o> ;] #map ;
 
 \ encryption subcommands
 
