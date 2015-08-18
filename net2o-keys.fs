@@ -126,10 +126,16 @@ Variable nick-table \ nick hash table
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
 
-: nick! ( -- ) o { w: optr }
-    0 BEGIN  ke-nick $@ [: type '#' emit dup 0 .r ;] $tmp
-	2dup nick-table #@ 0. d<> WHILE  2drop 1+  REPEAT
-    optr cell 2swap nick-table #!  ke-nick# ! ;
+: nick! ( -- ) o { w^ optr }
+    ke-nick $@ nick-table #@ 2dup d0= IF
+	2drop  optr cell ke-nick $@ nick-table #! 0
+    ELSE
+	last# cell+ $@len cell/
+	optr cell last# cell+ $+!
+    THEN  ke-nick# ! ;
+
+: #.nick ( hash -- )
+    dup $@ type '#' emit cell+ $@len cell/ . ;
 
 : key:new ( addr u -- o )
     \G create new key, addr u is the public key
@@ -148,11 +154,16 @@ Variable nick-table \ nick hash table
 
 \ search for keys - not optimized
 
-: nick-key ( addr u -- o ) \ search for key nickname
-    0 -rot key-table 
-    [: cell+ $@ drop cell+ >o ke-nick $@ 2over str= IF
-	rot drop o -rot
-    THEN  o> ;] #map 2drop ;
+: #split ( addr u -- addr u n )
+    [: 2dup '#' -scan nip >r
+      r@ 0= IF  rdrop 0  EXIT  THEN
+      0. 2over r@ /string >number
+      0= IF  nip drop nip r> 1- swap  ELSE
+	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
+
+: nick-key ( addr u -- o / 0 ) \ search for key nickname
+    #split >r nick-table #@ 2dup d0= IF  rdrop drop  EXIT  THEN
+    r> cells safe/string 0= IF  drop 0  EXIT  THEN  @ ;
 
 : secret-keys# ( -- n )
     0 key-table [: cell+ $@ drop cell+ >o ke-sk @ 0<> - o> ;] #map ;
@@ -221,7 +232,7 @@ magenta >bg white >fg or bold or ,
     cell+ ..nick ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
     IF  2drop err-color attr! 8 85type ." (unknown)" reset-color
-    ELSE  cell+ .ke-nick $@ info-color attr! type reset-color 2drop  THEN ;
+    ELSE  cell+ info-color attr! ..nick reset-color 2drop  THEN ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF

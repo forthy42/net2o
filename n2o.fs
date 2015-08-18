@@ -30,7 +30,7 @@ require net2o-vault.fs
 
 \ will ask for your password and if possible auto-select your id
 
-: get-me ( -- ) read-keys secret-keys#
+: get-me ( -- )  secret-keys#
     BEGIN  dup 0= WHILE drop
 	    ." Enter your net2o passphrase: " +passphrase
 	    read-keys secret-keys# dup 0= IF
@@ -45,8 +45,8 @@ require net2o-vault.fs
 Variable key-readin
 
 : out-key ( o -- )
-    >o pack-pubkey ke-nick $@ o>
-    [: type ." .n2o" ;] $tmp w/o create-file throw
+    >o pack-pubkey o o>
+    [: ..nick ." .n2o" ;] $tmp w/o create-file throw
     >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
@@ -83,7 +83,7 @@ $20 value hash-size#
 Variable chat-keys
 
 : nick>chat ( addr u -- )
-    nick>pk keysize umin chat-keys $+[]! ;
+    nick>pk chat-keys $+[]! ;
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;
@@ -94,9 +94,9 @@ Variable chat-keys
 
 : wait-chat ( -- )
     ." press key to connect to "
-    chat-keys [: key>nick type space ;] $[]map
+    chat-keys [: keysize umin .key-id space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
-    [: false chat-keys [: pubkey $@ str= or ;] $[]map
+    [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
 	IF  bl unkey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
@@ -106,7 +106,7 @@ Variable chat-keys
 
 : search-peer ( -- chat )
     false chat-keys
-    [: rot dup 0= IF drop search-connect
+    [: keysize umin rot dup 0= IF drop search-connect
       ELSE  nip nip  THEN ;] $[]map ;
 
 : search-chat ( -- chat )
@@ -116,7 +116,7 @@ Variable chat-keys
 : chat-user ( -- )
     wait-chat  search-chat
     ?dup-IF  >o rdrop
-    ELSE  0 chat-keys $[]@ key>nick  $A $A nick-connect !time
+    ELSE  0 chat-keys $[]@ $A $A pk-connect !time
 	+resend-msg
 	net2o-code expect-reply log !time endwith
 	join, get-ip cookie+request end-code
