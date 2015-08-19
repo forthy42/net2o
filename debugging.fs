@@ -73,6 +73,7 @@ debug: new-addr( \ new address to try out
 debug: reply( \ test replies
 
 +db new-addr( \ )
+-db profile( \ )
 
 0 [IF]
 false warnings !@
