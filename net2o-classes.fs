@@ -212,6 +212,7 @@ cmd-class class
     field: host-anchor \ net2o anchor (is a pubkey)
     field: host-route \ net2o route
     field: host-key
+    field: host-revoke
 end-class address-class
 
 Variable context-table

@@ -44,6 +44,8 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     $> host-route $! ;
 +net2o: addr-key ( $:addr -- ) \g key for connection setup
     $> host-key sec! ;
++net2o: addr-revoke ( $:revoke -- ) \g revocation info
+    $> host-revoke $! ;
 set-current previous
 
 gen-table $freeze
@@ -52,7 +54,8 @@ gen-table $freeze
 : n2o:new-addr ( -- o )
     address-class new >o  address-table @ token-table ! o o> ;
 : n2o:dispose-addr ( o:addr -- o:addr )
-    host-id $off host-anchor $off host-route $off host-key sec-off ;
+    host-id $off host-anchor $off host-route $off host-key sec-off
+    host-revoke $off ;
 
 :noname ( addr u -- o ) \G create a new address object from string
     n2o:new-addr n:>o nest-cmd-loop o n:o> ; is new-addr
@@ -71,7 +74,8 @@ also net2o-base
 	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
-    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN  o> ; 
+    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
+    host-revoke $@ dup IF  $, addr-revoke  ELSE  2drop  THEN o> ; 
 previous
 : o>addr ( o -- addr u )
     cmdbuf-o @ >r code-buf$ cmdreset o-genaddr cmdbuf$ r> cmdbuf-o ! ;

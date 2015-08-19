@@ -72,7 +72,7 @@ debug: adjust-timer( \ adjust timer
 debug: new-addr( \ new address to try out
 debug: reply( \ test replies
 
--db profile( \ )
++db new-addr( \ )
 
 0 [IF]
 false warnings !@
