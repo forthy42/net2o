@@ -109,11 +109,6 @@ warnings !
 
 \ timing ticks
 
-64Variable tick-adjust
-: ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
-
-: ticks-u ( -- u )  ticks 64>n ;
-
 false [IF]
     ' noop alias init-timer
     ' noop alias .times

@@ -30,8 +30,8 @@ require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
-require net2o-tools.fs
 require 64bit.fs
+require net2o-tools.fs
 require debugging.fs
 require kregion.fs
 require crypto-api.fs
@@ -105,6 +105,8 @@ object class
     cell                           uvar task#
     \ cell                           uvar reqmask
     $10                            uvar cmdtmp
+    $10                            uvar return-addr
+    $10                            uvar temp-addr
     timestats                      uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     maxdata                        uvar aligned$
@@ -113,146 +115,6 @@ object class
     cell                           uvar code-buf$^
     cell                           uvar code-key^
 end-class io-buffers
-
-\ bit vectors, lsb first
-
-: bits ( n -- n ) 1 swap lshift ;
-
-: >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
-: +bit ( addr n -- )  >bit over c@ or swap c! ;
-: +bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
-    or swap c! r> 0<> ;
-: -bit ( addr n -- )  >bit invert over c@ and swap c! ;
-: -bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
-    invert or invert swap c! r> 0<> ;
-: bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
-: bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
-
-: bittype ( addr base n -- )  bounds +DO
-	dup I bit@ '+' '-' rot select emit  LOOP  drop ;
-
-: bit-erase ( addr off len -- )
-    dup 8 u>= IF
-	>r dup 7 and >r 3 rshift + r@ bits 1- over andc!
-	1+ 8 r> - r> swap -
-	dup 7 and >r 3 rshift 2dup erase +
-	0 r> THEN
-    bounds ?DO  dup I -bit  LOOP  drop ;
-
-: bit-fill ( addr off len -- )
-    dup 8 u>= IF
-	>r dup 7 and >r 3 rshift + r@ bits 1- invert over orc!
-	1+ 8 r> - r> swap -
-	dup 7 and >r 3 rshift 2dup $FF fill +
-	0 r> THEN
-    bounds ?DO  dup I +bit  LOOP  drop ;
-
-\ variable length integers
-
-: p@+ ( addr -- u64 addr' )  >r 64#0 r@ 10 bounds
-    DO  7 64lshift I c@ $7F and n>64 64or
-	I c@ $80 and 0= IF  I 1+ UNLOOP rdrop  EXIT  THEN
-    LOOP  r> 10 + ;
-[IFDEF] 64bit
-    : p-size ( u64 -- n ) \ to speed up: binary tree comparison
-	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
-	dup    $FFFFFFFFFFFFFF u<= IF
-	    dup       $FFFFFFF u<= IF
-		dup      $3FFF u<= IF
-		    $00000007F u<= 2 +  EXIT  THEN
-		$00000001FFFFF u<= 4 +  EXIT  THEN
-	    dup   $3FFFFFFFFFF u<= IF
-		$00007FFFFFFFF u<= 6 +  EXIT  THEN
-	    $00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
-	$000007FFFFFFFFFFFFFFF u<= 10 + ;
-    : p!+ ( u64 addr -- addr' )  over p-size + dup >r >r
-	dup $7F and r> 1- dup >r c!  7 rshift
-	BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
-	drop rdrop r> ;
-[ELSE]
-    : p-size ( x64 -- n ) \ to speed up: binary tree comparison
-	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
-	2dup   $FFFFFFFFFFFFFF. du<= IF
-	    2dup      $FFFFFFF. du<= IF
-		2dup     $3FFF. du<= IF
-		    $00000007F. du<= 2 +  EXIT  THEN
-		$00000001FFFFF. du<= 4 +  EXIT  THEN
-	    2dup  $3FFFFFFFFFF. du<= IF
-		$00007FFFFFFFF. du<= 6 +  EXIT  THEN
-	    $00001FFFFFFFFFFFF. du<= 8 +  EXIT  THEN
-	$000007FFFFFFFFFFFFFFF. du<= 10 + ;
-    : p!+ ( u64 addr -- addr' )  >r 2dup p-size r> + dup >r >r
-	over $7F and r> 1- dup >r c!  7 64rshift
-	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 64rshift  REPEAT
-	2drop rdrop r> ;
-[THEN]
-
-[IFUNDEF] w, : w, ( w -- )  here w! 2 allot ; [THEN]
-
-\ bit reversing
-
-: bitreverse8 ( u1 -- u2 )
-    0 8 0 DO  2* over 1 and + swap 2/ swap  LOOP  nip ;
-
-Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
-
-: reverse8 ( c1 -- c2 ) reverse-table + c@ ;
-: reverse ( x1 -- x2 )
-    0 cell 0 DO  8 lshift over $FF and reverse8 or
-       swap 8 rshift swap  LOOP  nip ;
-: reverse$16 ( addrsrc addrdst -- ) { dst } dup >r
-    count reverse8 r@ $F + c@ reverse8 dst     c! dst $F + c!
-    count reverse8 r@ $E + c@ reverse8 dst 1+  c! dst $E + c!
-    count reverse8 r@ $D + c@ reverse8 dst 2 + c! dst $D + c!
-    count reverse8 r@ $C + c@ reverse8 dst 3 + c! dst $C + c!
-    count reverse8 r@ $B + c@ reverse8 dst 4 + c! dst $B + c!
-    count reverse8 r@ $A + c@ reverse8 dst 5 + c! dst $A + c!
-    count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
-    c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
-
-\ print time
-
-1970 1 1 ymd2day Constant unix-day0
-
-: fsplit ( r -- r n )  fdup floor fdup f>s f- ;
-
-: today? ( day -- flag ) ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
-
-: .2 ( n -- ) s>d <# # # #> type ;
-: .day ( seconds -- fraction/day ) 86400e f/ fsplit
-    dup today? IF  drop  EXIT  THEN
-    unix-day0 + day2ymd
-    rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
-: .timeofday ( fraction/day -- )
-    24e f* fsplit .2 ':' emit 60e f* fsplit .2 ':' emit
-    60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
-
-: .ticks ( ticks -- )
-    64dup 64-0= IF  ." never" 64drop EXIT  THEN
-    64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
-    64>f 1e-9 f* .day .timeofday ;
-
-\ insert into sorted string array
-
-: $ins[] ( addr u $array -- )
-    \G insert O(log(n)) into pre-sorted array
-    { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
-		drop $# $a $[]!  EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
-: $del[] ( addr u $array -- )
-    \G delete O(log(n)) from pre-sorted array
-    { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
-		drop $# $a $[] $off
-		$a $# cells cell $del
-		2drop EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT 2drop 2drop ; \ not found
 
 \ add IP addresses
 
@@ -282,23 +144,23 @@ begin-structure reply
 \    field: reply-timeout-xt \ per-reply timeout xt
 end-structure
 
-m: addr>bits ( addr -- bits )
+: addr>bits ( addr -- bits )
     chunk-p2 rshift ;
-m: addr>bytes ( addr -- bytes )
+: addr>bytes ( addr -- bytes )
     [ chunk-p2 3 + ]L rshift ;
-m: bytes>addr ( bytes addr -- )
+: bytes>addr ( bytes addr -- )
     [ chunk-p2 3 + ]L lshift ;
-m: bits>bytes ( bits -- bytes )
+: bits>bytes ( bits -- bytes )
     1- 2/ 2/ 2/ 1+ ;
-m: bytes>bits ( bytes -- bits )
+: bytes>bits ( bytes -- bits )
     3 lshift ;
-m: addr>ts ( addr -- ts-offset )
+: addr>ts ( addr -- ts-offset )
     addr>bits 64s ;
-m: addr>64 ( addr -- ts-offset )
+: addr>64 ( addr -- ts-offset )
     [ chunk-p2 3 - ]L rshift -8 and ;
-m: addr>replies ( addr -- replies )
+: addr>replies ( addr -- replies )
     addr>bits reply * ;
-m: addr>keys ( addr -- keys )
+: addr>keys ( addr -- keys )
     max-size^2 rshift [ min-size negate ]L and ;
 
 \ generic hooks and user variables
@@ -513,9 +375,6 @@ Variable lastn2oaddr
     $@ sockaddr swap dup alen ! move  rdrop ;
 
 \ route an incoming packet
-
-User return-addr $10 cell- uallot drop
-User temp-addr   $10 cell- uallot drop
 
 [IFDEF] 64bit ' be-ux@ [ELSE] ' be-ul@ [THEN] alias be@
 [IFDEF] 64bit ' be-x! [ELSE] ' be-l! [THEN] alias be!
@@ -814,55 +673,7 @@ UValue connection
     1 pthread-mutexes +LOOP
     o o> ;
 
-\ insert address for punching
-
 : ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
-
-: !temp-addr ( addr u -- ) dup 0<> ind-addr !
-    temp-addr dup $10 erase  swap $10 umin move ;
-
-: 6>sock ( addr u -- )
-    over $10 + w@ sockaddr1 port w!
-    over $10 sockaddr1 sin6_addr swap move
-    $12 /string !temp-addr ;
-
-: 4>sock ( addr u -- )
-    over $4 + w@ sockaddr1 port w!
-    over be-ul@ sockaddr1 ipv4!
-    6 /string !temp-addr ;
-
-: 64>6sock ( addr u -- )
-    over $14 + w@ sockaddr1 port w!
-    over $10 sockaddr1 sin6_addr swap move
-    $16 /string !temp-addr ;
-
-: 64>4sock ( addr u -- )
-    over $14 + w@ sockaddr1 port w!
-    over $10 + be-ul@ sockaddr1 ipv4!
-    $16 /string !temp-addr ;
-
-: check-addr1 ( -- addr u flag )
-    sockaddr1 sock-rest 2dup try-ip
-    nat( ." check: " >r 2dup .address
-    r> dup IF ."  ok"  ELSE  ."  ko"  THEN  cr ) ;
-
-: ping-addr1 ( -- )
-    check-addr1 0= IF  2drop  EXIT  THEN
-    nat( ." ping: " 2dup .address cr )
-    2>r net2o-sock "" 0 2r> sendto drop ;
-
-: 64-6? ( addr u -- )  $10 umin    ip6::0 over str= 0= ;
-: 64-4? ( addr u -- )  $10 /string 4 umin 64-6? ;
-
-: $>sock ( addr u xt -- ) { xt }
-    skip-symname
-    case  over c@ >r 1 /string r>
-	'2' of
-	    2dup 64-4? IF  2dup 64>4sock xt execute THEN
-	    2dup 64-6? IF  2dup 64>6sock xt execute THEN
-	    2drop
-	endof
-	!!no-addr!!  endcase ;
 
 \ insert keys
 

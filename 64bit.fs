@@ -1,5 +1,10 @@
 \ portable functions for 64 bit numbers
 
+: min!  ( n addr -- )   >r r@ @ min  r> ! ;
+: max!  ( n addr -- )   >r r@ @ max  r> ! ;
+: umin! ( n addr -- )   >r r@ @ umin r> ! ;
+: umax! ( n addr -- )   >r r@ @ umax r> ! ;
+
 cell 8 = [IF]
     : 64bit ;
     : 64, drop , ;

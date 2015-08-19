@@ -1,5 +1,20 @@
 \ net2o tools
 
+\ Copyright (C) 2015   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 Defer ?nextarg
 Defer ?@nextarg
 Defer ?peekarg
@@ -61,10 +76,6 @@ cmd-args
 : or!   ( x addr -- )   >r r@ @ or   r> ! ;
 : xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
 : and!  ( x addr -- )   >r r@ @ and  r> ! ;
-: min!  ( n addr -- )   >r r@ @ min  r> ! ;
-: max!  ( n addr -- )   >r r@ @ max  r> ! ;
-: umin! ( n addr -- )   >r r@ @ umin r> ! ;
-: umax! ( n addr -- )   >r r@ @ umax r> ! ;
 
 : xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
 : andc! ( x c-addr -- )   >r r@ c@ and  r> c! ;
@@ -74,21 +85,6 @@ cmd-args
 : umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
 
 \ generic stack using string array primitives
-
-\ Copyright (C) 2015   Bernd Paysan
-
-\ This program is free software: you can redistribute it and/or modify
-\ it under the terms of the GNU Affero General Public License as published by
-\ the Free Software Foundation, either version 3 of the License, or
-\ (at your option) any later version.
-
-\ This program is distributed in the hope that it will be useful,
-\ but WITHOUT ANY WARRANTY; without even the implied warranty of
-\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-\ GNU Affero General Public License for more details.
-
-\ You should have received a copy of the GNU Affero General Public License
-\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 : stack> ( stack -- x ) >r
     \G generic single-stack pop
@@ -122,3 +118,148 @@ cmd-args
 	\G removes a control structure sys from the stack
 	drop 2drop ; immediate restrict
 [THEN]
+
+\ bit vectors, lsb first
+
+: bits ( n -- n ) 1 swap lshift ;
+
+: >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
+: +bit ( addr n -- )  >bit over c@ or swap c! ;
+: +bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
+    or swap c! r> 0<> ;
+: -bit ( addr n -- )  >bit invert over c@ and swap c! ;
+: -bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
+    invert or invert swap c! r> 0<> ;
+: bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
+: bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
+
+: bittype ( addr base n -- )  bounds +DO
+	dup I bit@ '+' '-' rot select emit  LOOP  drop ;
+
+: bit-erase ( addr off len -- )
+    dup 8 u>= IF
+	>r dup 7 and >r 3 rshift + r@ bits 1- over andc!
+	1+ 8 r> - r> swap -
+	dup 7 and >r 3 rshift 2dup erase +
+	0 r> THEN
+    bounds ?DO  dup I -bit  LOOP  drop ;
+
+: bit-fill ( addr off len -- )
+    dup 8 u>= IF
+	>r dup 7 and >r 3 rshift + r@ bits 1- invert over orc!
+	1+ 8 r> - r> swap -
+	dup 7 and >r 3 rshift 2dup $FF fill +
+	0 r> THEN
+    bounds ?DO  dup I +bit  LOOP  drop ;
+
+\ variable length integers
+
+: p@+ ( addr -- u64 addr' )  >r 64#0 r@ 10 bounds
+    DO  7 64lshift I c@ $7F and n>64 64or
+	I c@ $80 and 0= IF  I 1+ UNLOOP rdrop  EXIT  THEN
+    LOOP  r> 10 + ;
+[IFDEF] 64bit
+    : p-size ( u64 -- n ) \ to speed up: binary tree comparison
+	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
+	dup    $FFFFFFFFFFFFFF u<= IF
+	    dup       $FFFFFFF u<= IF
+		dup      $3FFF u<= IF
+		    $00000007F u<= 2 +  EXIT  THEN
+		$00000001FFFFF u<= 4 +  EXIT  THEN
+	    dup   $3FFFFFFFFFF u<= IF
+		$00007FFFFFFFF u<= 6 +  EXIT  THEN
+	    $00001FFFFFFFFFFFF u<= 8 +  EXIT  THEN
+	$000007FFFFFFFFFFFFFFF u<= 10 + ;
+    : p!+ ( u64 addr -- addr' )  over p-size + dup >r >r
+	dup $7F and r> 1- dup >r c!  7 rshift
+	BEGIN  dup  WHILE  dup $7F and $80 or r> 1- dup >r c! 7 rshift  REPEAT
+	drop rdrop r> ;
+[ELSE]
+    : p-size ( x64 -- n ) \ to speed up: binary tree comparison
+	\ flag IF  1  ELSE  2  THEN  equals  flag 2 +
+	2dup   $FFFFFFFFFFFFFF. du<= IF
+	    2dup      $FFFFFFF. du<= IF
+		2dup     $3FFF. du<= IF
+		    $00000007F. du<= 2 +  EXIT  THEN
+		$00000001FFFFF. du<= 4 +  EXIT  THEN
+	    2dup  $3FFFFFFFFFF. du<= IF
+		$00007FFFFFFFF. du<= 6 +  EXIT  THEN
+	    $00001FFFFFFFFFFFF. du<= 8 +  EXIT  THEN
+	$000007FFFFFFFFFFFFFFF. du<= 10 + ;
+    : p!+ ( u64 addr -- addr' )  >r 2dup p-size r> + dup >r >r
+	over $7F and r> 1- dup >r c!  7 64rshift
+	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 64rshift  REPEAT
+	2drop rdrop r> ;
+[THEN]
+
+[IFUNDEF] w, : w, ( w -- )  here w! 2 allot ; [THEN]
+
+\ bit reversing
+
+: bitreverse8 ( u1 -- u2 )
+    0 8 0 DO  2* over 1 and + swap 2/ swap  LOOP  nip ;
+
+Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
+
+: reverse8 ( c1 -- c2 ) reverse-table + c@ ;
+: reverse ( x1 -- x2 )
+    0 cell 0 DO  8 lshift over $FF and reverse8 or
+       swap 8 rshift swap  LOOP  nip ;
+: reverse$16 ( addrsrc addrdst -- ) { dst } dup >r
+    count reverse8 r@ $F + c@ reverse8 dst     c! dst $F + c!
+    count reverse8 r@ $E + c@ reverse8 dst 1+  c! dst $E + c!
+    count reverse8 r@ $D + c@ reverse8 dst 2 + c! dst $D + c!
+    count reverse8 r@ $C + c@ reverse8 dst 3 + c! dst $C + c!
+    count reverse8 r@ $B + c@ reverse8 dst 4 + c! dst $B + c!
+    count reverse8 r@ $A + c@ reverse8 dst 5 + c! dst $A + c!
+    count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
+    c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
+
+\ print time
+
+64Variable tick-adjust
+: ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
+
+: ticks-u ( -- u )  ticks 64>n ;
+
+1970 1 1 ymd2day Constant unix-day0
+
+: fsplit ( r -- r n )  fdup floor fdup f>s f- ;
+
+: today? ( day -- flag ) ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
+
+: .2 ( n -- ) s>d <# # # #> type ;
+: .day ( seconds -- fraction/day ) 86400e f/ fsplit
+    dup today? IF  drop  EXIT  THEN
+    unix-day0 + day2ymd
+    rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
+: .timeofday ( fraction/day -- )
+    24e f* fsplit .2 ':' emit 60e f* fsplit .2 ':' emit
+    60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
+
+: .ticks ( ticks -- )
+    64dup 64-0= IF  ." never" 64drop EXIT  THEN
+    64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
+    64>f 1e-9 f* .day .timeofday ;
+
+\ insert into sorted string array
+
+: $ins[] ( addr u $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[]!  EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+: $del[] ( addr u $array -- )
+    \G delete O(log(n)) from pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup $# $a $[]@ compare dup 0= IF
+		drop $# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found

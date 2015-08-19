@@ -107,8 +107,8 @@ previous
     host-route $@ !temp-addr ;
 
 :noname ( o xt -- ) { xt } >o
-    host-ipv4 be-ul@ IF  addr>4sock xt execute  THEN
-    host-ipv6 ip6? IF  addr>6sock xt execute  THEN o> ; is addr>sock
+    host-ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN
+    host-ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN o> ; is addr>sock
 
 : +my-id ( -- )
     myprio @ host-pri# !
