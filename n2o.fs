@@ -156,7 +156,8 @@ Vocabulary net2o-cmds
 get-current also net2o-cmds definitions
 
 : help ( -- )
-    \G usage: n2o help
+    \G usage: n2o help [cmd]
+    \G help: print commands or details about specified command
     [ loadfilename 2@ ] sliteral "0" replaces
     ?nextarg IF  "cmd" replaces
 	"grep -E '\\G u[s]age: n2o %cmd%|\\G %cmd%: ' %0% | sed -e 's/ *\\\\G u[s]age: //g' -e 's/ *\\\\G %cmd%: //g'"
@@ -320,6 +321,14 @@ get-current net2o-cmds definitions
 synonym bye bye
 
 set-current
+
+\ allow issuing commands during chat
+
+get-current also chat-/cmds definitions
+
+: n2o word-args ['] evaluate do-net2o-cmds ;
+
+set-current previous
 
 : +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN  c@ '+' = ;
 

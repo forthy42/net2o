@@ -80,10 +80,11 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 1 8 !!<>=order? $> -2 0 at-deltaxy space
     warn-color attr! forth:type reset-color forth:cr ;
-
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
     signed? !!signed!! $> last-msg $!
     <event o elit, ->reconnect parent @ .wait-task @ event> ;
++net2o: msg-joined ( $:nick -- ) \g join a group, send your key with nick
+    signed? !!signed!! 1 2 !!<>order? $> type ;
 
 :noname ( addr u -- addr u flag )
     pk-sig? dup >r IF
