@@ -38,18 +38,18 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  client-test.fs client-tests.fs crypto-api.fs curve25519.fs	\
 	  debugging.fs ed25519-donna.fs ed25519-table-test.fs		\
 	  eve-test.fs hash-table.fs keccak.fs keccak-small.fs		\
-	  kregion.fs n2o.fs net2o-addr.fs net2o-cmd.fs			\
-	  net2o-connected.fs net2o-connect.fs net2o-crypt.fs		\
-	  net2o-dht.fs net2o-err.fs net2o-file.fs net2o.fs		\
-	  net2o-keys.fs net2o-log.fs net2o-msg.fs net2o-template.fs	\
-	  net2o-tools.fs net2o-vault.fs rng.fs server-test.fs		\
-	  termclient.fs terminal-test.fs test-keys.fs threefish.fs	\
-	  xtype.fs tests/alice2-msg.fs tests/alice-msg.fs		\
-	  tests/bernd-msg.fs tests/bob-msg.fs tests/copy.fs		\
-	  tests/cryptspeed.fs tests/dht.fs tests/dht-pop.fs		\
-	  tests/ed25519.fs tests/insdeltest.fs tests/keys.fs		\
-	  tests/msg.fs tests/teststat.fs tests/vault.fs			\
-	  net2o-dhtroot.n2o
+	  kregion.fs n2o.fs net2o-addr.fs net2o-classes.fs		\
+	  net2o-cmd.fs net2o-connected.fs net2o-connect.fs		\
+	  net2o-crypt.fs net2o-dht.fs net2o-err.fs net2o-file.fs	\
+	  net2o.fs net2o-ip.fs net2o-keys.fs net2o-log.fs		\
+	  net2o-msg.fs net2o-template.fs net2o-tools.fs			\
+	  net2o-vault.fs rng.fs server-test.fs termclient.fs		\
+	  terminal-test.fs test-keys.fs threefish.fs xtype.fs		\
+	  tests/alice2-msg.fs tests/alice-msg.fs tests/bernd-msg.fs	\
+	  tests/bob-msg.fs tests/copy.fs tests/cryptspeed.fs		\
+	  tests/dht.fs tests/dht-pop.fs tests/ed25519.fs		\
+	  tests/insdeltest.fs tests/keys.fs tests/msg.fs		\
+	  tests/teststat.fs tests/vault.fs net2o-dhtroot.n2o
 
 SRCDIRS = tests
 
