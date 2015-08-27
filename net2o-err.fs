@@ -17,7 +17,7 @@
 
 : throwcode ( addr u -- )  exception Create ,
     [: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-compiler
-  DOES> ( flag -- ) @ and throw ;
+    [: ( flag -- ) @ and throw ;] set-does> ;
 
 s" gap in file handles"          throwcode !!gap!!
 s" invalid file id"              throwcode !!fileid!!
