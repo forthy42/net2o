@@ -158,8 +158,8 @@ previous
     o1 .host-ipv4   4 host-ipv4 over str=?0 &&
     o1 .host-ipv6 $10 host-ipv6 over str=?0 ;
 
-: my-addr? ( o -- o flag )
-    o my-addr[] [: >o over my-addr= o> or ;] $[]o-map ;
+: my-addr? ( o -- flag )
+    false my-addr[] [: >o over my-addr= o> or ;] $[]o-map nip ;
 
 : my-addr-merge1 ( o1 o:o2 -- ) { o1 }
     o1 .host-ipv4   4 host-ipv4 over str>merge

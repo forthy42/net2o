@@ -319,13 +319,17 @@ Variable $addme
     endwith  do-expect-reply ;
 : new-addme ( addr u -- )  new-addr { addr } now>never
     addr >o +my-id o>
-    nat( ." addme: " addr .addr forth:cr )
+    nat( ." addme: " addr .addr )
     addr .host-route $@len 0= IF
-	addr my-addr-merge IF  addr >o n2o:dispose-addr o> EXIT  THEN
+	addr my-addr-merge IF  addr >o n2o:dispose-addr o>
+	    nat( ."  merged" forth:cr ) EXIT  THEN
 	addr o>addr gen-host my-addr$ $ins[]
-	addr >o n2o:dispose-addr o> EXIT  THEN
+	addr >o n2o:dispose-addr o>
+	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
-	addr o>addr my-addr$ $ins[]  THEN
+	addr o>addr gen-host my-addr$ $ins[]
+	nat( ."  routed" ) THEN
+    nat( forth:cr )
     what's expect-reply? ['] new-addme-end <> IF
 	expect-reply pkc keysize 2* $, dht-id
     THEN

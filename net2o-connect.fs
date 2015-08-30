@@ -117,8 +117,9 @@ net2o-base
 : request, ( -- )  next-request #request, ;
 
 : gen-punch ( -- )
-    new-addr( my-addr$ [: -sig $, punch ;]
-    )else( my-ip$ [: $, punch ;] ) $[]map ;
+    new-addr( my-addr$ [: -sig nat( ." punch: " 2dup .addr$ forth:cr ) $, punch ;]
+    )else( my-ip$ [: nat( ." punch: " 2dup .ipaddr forth:cr )
+      $, punch ;] ) $[]map ;
 
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
     nest[ cookie, request, ]nest ;

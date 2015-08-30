@@ -1922,8 +1922,13 @@ Variable cookies
 	nip return-addr be@ n2o:new-context swap
     THEN ;
 
+: .ns ( r -- )  1e-9 f*
+    fdup 1e-6 f< IF  1e9 f* 10 0 0 f.rdp ." ns"  EXIT  THEN
+    fdup 1e-3 f< IF  1e6 f* 10 3 0 f.rdp ." µs"  EXIT  THEN
+    fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
+    10 6 0 f.rdp 's' emit ;
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
-    64dup ." rtdelay: " 64>f 1e-9 f* 10 6 0 f.rdp 's' emit cr
+    64dup ." rtdelay: " 64>f .ns cr
     rtdelay 64! ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/
