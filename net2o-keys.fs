@@ -19,6 +19,8 @@ require mkdir.fs
 
 \ accept for password entry
 
+2 Value pw-level# \ pw-level# 0 is lowest
+
 [IFDEF] android '*' [ELSE] '⬤' [THEN] Constant pw*
 
 xc-vector up@ - class-o !
@@ -63,9 +65,6 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
-
-2 Value pw-level# \ pw-level# 0 is lowest
-
 cmd-buf0 uclass cmdbuf-o
     maxdata -
     key-salt# uvar keypack
@@ -103,6 +102,7 @@ cmd-class class
     field: ke-prof     \ profile object
     field: ke-selfsig
     field: ke-sigs
+    field: ke-import   \ type of key import
     field: ke-storekey \ used to encrypt on storage
     64field: ke-offset \ offset in key file
     0 +field ke-end
@@ -110,9 +110,25 @@ end-class key-entry
 
 Variable key-entry-table
 
-0 Constant key#anon
-1 Constant key#user
-2 Constant key#group
+0
+enum key#anon
+enum key#user
+enum key#group
+drop
+
+0
+enum import#self      \ private key
+enum import#manual    \ manual import
+enum import#scan      \ scan import
+enum import#chat      \ mid trust level
+enum import#dht       \ lowest trust level
+enum import#untrusted \ must be last
+drop
+
+Variable import-type  import#untrusted import-type !
+
+Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $E60 ,
+[: swap cells + @ attr! ;] set-does>
 
 0 Value sample-key
 
@@ -143,6 +159,7 @@ Variable nick-table \ nick hash table
     key-entry-table @ token-table !
     ke-sk ke-end over - erase  >storekey @ ke-storekey !
     key-read-offset 64@ ke-offset 64!
+    import-type @ ke-import !
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over keysize umin key-table #! o>
     current-key ;
@@ -335,6 +352,8 @@ $11 net2o: privkey ( $:string -- )
 \g preshared key (unclear if that's going to stay
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
 \g add a key signature
++net2o: keyimport ( n -- ) pw-level# 0>= !!invalid!!
+    64>n import#untrusted umin ke-import ! ;
 dup set-current previous
 
 gen-table $freeze
@@ -440,6 +459,7 @@ also net2o-base
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
+    ke-import @ ulit, keyimport
     ke-storekey @ >storekey ! ;
 previous
 
@@ -490,8 +510,9 @@ Variable cp-tmp
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
 
-: +gen-keys ( nick u type -- ) -rot
-    gen-keys >keys pack-key key-crypt key>sfile ;
+: +gen-keys ( nick u type -- ) -rot  import#self import-type !
+    gen-keys >keys pack-key key-crypt key>sfile
+    import#untrusted import-type ! ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
@@ -533,12 +554,16 @@ $40 buffer: nick-buf
 	keypack keypack-all# r@ read-file throw
 	keypack-all# = WHILE  try-decrypt do-key
     REPEAT  rdrop  code0-buf ;
-: read-key-loop ( -- ) ?key-sfd read-keys-loop ;
-: read-pkey-loop ( -- ) pw-level# >r -1 to pw-level#
-    ?key-pfd read-keys-loop r> to pw-level# ;
+: read-key-loop ( -- )
+    import#self import-type !
+    ?key-sfd read-keys-loop ;
+: read-pkey-loop ( -- )
+    pw-level# >r -1 to pw-level#  import#manual import-type !
+    ?key-pfd read-keys-loop
+    r> to pw-level#  ;
 
 : read-keys ( -- )
-    read-key-loop read-pkey-loop ;
+    read-key-loop read-pkey-loop import#untrusted import-type ! ;
 
 \ select key by nick
 
@@ -572,13 +597,15 @@ $40 buffer: nick-buf
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
+    import#self import-type !
     s" #revoked" dup >r ke-nick $+!
     ke-nick $@ r> - ke-prof $@ ke-psk sec@ ke-sigs ke-type @
     rev-addr pkrk# key?new >o
     ke-type ! [: ke-sigs $+[]! ;] $[]map ke-psk sec! ke-prof $! ke-nick $!
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
-    key( ." with:" cr o cell- 0 .key ) o o> ;
+    key( ." with:" cr o cell- 0 .key ) o o>
+    import#untrusted import-type ! ;
 
 : renew-key ( revaddr u1 keyaddr u2 -- o )
     current-key >o replace-key o>

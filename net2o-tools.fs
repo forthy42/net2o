@@ -15,6 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ enum
+
+: enum ( n "name" -- n+1 )  dup Constant 1+ ;
+
+\ argument handling that works transparent from OS and Forth command line
+
 Defer ?nextarg
 Defer ?@nextarg
 Defer ?peekarg

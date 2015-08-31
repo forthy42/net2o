@@ -25,6 +25,7 @@ s" could not send"               throwcode !!send!!
 s" wrong packet size"            throwcode !!size!!
 s" map size too big"             throwcode !!mapsize!!
 s" unimplemented net2o function" throwcode !!function!!
+s" invalid net2o function"       throwcode !!invalid!!
 s" too many commands"            throwcode !!commands!!
 s" float does not fit"           throwcode !!floatfit!!
 s" string does not fit"          throwcode !!stringfit!!

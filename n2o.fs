@@ -72,7 +72,7 @@ $20 value hash-size#
 
 : do-keyin ( addr u -- )
     key-readin $slurp-file
-    key-readin $@ do-key save-pubkeys ;
+    key-readin $@ do-key ;
 
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
@@ -175,30 +175,39 @@ set-current
 get-current net2o-cmds definitions
 
 : keyin ( -- )
-    \G usage: n2o keyin file1 .. filen
+    \G usage: n2o keyin/inkey file1 .. filen
     \G keyin: read a .n2o key file in
-    get-me key>default
-    BEGIN  ?nextarg WHILE  do-keyin  REPEAT ;
+    import#manual import-type !  get-me key>default
+    BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys
+    import#untrusted import-type ! ;
 : keyout ( -- )
-    \G usage: n2o keyout [@user1 .. @usern]
+    \G usage: n2o keyout/outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     \G keyout: optional: output pubkeys of other users
     get-me argc @ 1 > IF  out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
-    \G usage: n2o keygen nick
+    \G usage: n2o keygen/genkey nick
+    \G keygen: generate a new keypair
+    ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
-    ?nextarg 0= ?EXIT  2dup key#user +gen-keys .rsk
+    2dup key#user +gen-keys .rsk
     read-keys .keys
     secret-keys# 1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key
     out-me ?dhtroot ;
 : keylist ( -- )
-    \G usage: n2o keylist
+    \G usage: n2o keylist/listkey
+    \G keylist: list all known keys
     get-me
     key-table [: cell+ $@ drop cell+ >o
-	ke-pk $@ keysize umin
-	ke-sk sec@ nip IF  .85warn  ELSE  .85info  THEN
-	ke-selfsig $@ .sigdates
-	space .nick  cr o> ;] #map ;
+      ke-pk $@ keysize umin
+      ke-import @ >im-color 85type default-color attr!
+      ke-selfsig $@ .sigdates
+      space .nick  cr o> ;] #map ;
+
+synonym inkey keyin
+synonym outkey keyout
+synonym genkey keygen
+synonym listkey keylist
 
 \ encryption subcommands
 

@@ -32,8 +32,6 @@ Variable d#public
 
 \ keys are enumerated small integers
 
-: enum ( n -- n+1 )  dup Constant 1+ ;
-
 0
 enum k#hash     \ hash itself is item 0
 enum k#peers    \ distribution list - includes "where did I get this from"
