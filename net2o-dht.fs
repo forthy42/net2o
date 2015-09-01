@@ -353,7 +353,7 @@ also net2o-base
 	  2dup + sigdate datesize# move
 	  gen-host-del $, dht-host-
 	  false  ELSE  2drop true  THEN ;] $[]filter
-    ." hosts remain:" cr r> [: .host cr ;] $[]map ;
+    ( ." hosts remain:" cr r> [: .host cr ;] $[]map ) rdrop ;
 
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;
