@@ -349,10 +349,11 @@ also net2o-base
     new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
 
 : remove-me, ( addr -- )
-    [: sigsize# - 2dup my-host? IF
+    dup >r [: sigsize# - 2dup my-host? IF
 	  2dup + sigdate datesize# move
 	  gen-host-del $, dht-host-
-      false  ELSE  2drop true  THEN ;] $[]filter ;
+	  false  ELSE  2drop true  THEN ;] $[]filter
+    ." hosts remain:" cr r> [: .host cr ;] $[]map ;
 
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;
