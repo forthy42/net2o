@@ -349,6 +349,7 @@ also net2o-base
     new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
 
 : remove-me, ( addr -- )
+    pkc keysize 2* dht-hash $!
     dup >r [: sigsize# - 2dup my-host? IF
 	  2dup + sigdate datesize# move
 	  gen-host-del $, dht-host-
