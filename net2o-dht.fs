@@ -166,17 +166,20 @@ Variable dht-table
     cell +LOOP ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
-    check-host dht-owner $ins[]sig dht( d#. ) ;
+    [: check-host dht-owner $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#host+ ( addr u -- ) \ with sanity checks
-    check-host dht-host $ins[]sig dht( d#. ) ;
+    [: check-host dht-host $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
-    check-tag dht-tags $ins[]sig dht( d#. ) ;
+    [: check-tag dht-tags $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#owner- ( addr u -- ) \ with sanity checks
-    delete-owner? IF  dht-owner $del[]sig dht( d#. )  ELSE  2drop  THEN ;
+    [: delete-owner? IF  dht-owner $del[]sig dht( d#. )
+      ELSE  2drop  THEN ;] dht-sema c-section ;
 : d#host- ( addr u -- ) \ with sanity checks
-    delete-host? IF  dht-host $del[]sig dht( d#. )  ELSE  2drop  THEN ;
+    [: delete-host? IF  dht-host $del[]sig dht( d#. )
+      ELSE  2drop  THEN ;] dht-sema c-section ;
 : d#tags- ( addr u -- ) \ with sanity checks
-    delete-tag?  IF  dht-tags $del[]sig dht( d#. )  ELSE  2drop  THEN ;
+    [: delete-tag?  IF  dht-tags $del[]sig dht( d#. )
+      ELSE  2drop  THEN ;] dht-sema c-section ;
 
 \ commands for DHT
 
@@ -349,12 +352,13 @@ also net2o-base
     new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
 
 : remove-me, ( addr -- )
-    dup >r [: sigsize# - 2dup my-host? IF
-	  2dup + sigdate datesize# move
-	  gen-host-del $, dht-host-
-	  false  ELSE  2drop true  THEN ;] $[]filter
-    ." hosts remain:" forth:cr
-    r> dup 0 .dht-host - >o [: .host forth:cr ;] $[]map o> ( rdrop ) ;
+    \ 0 swap !@ { w^ host } host
+    [: [: sigsize# - 2dup my-host? IF
+	    2dup + sigdate datesize# move
+	    gen-host-del $, dht-host-
+	    false  ELSE  2drop true  THEN ;] $[]filter
+    ;] dht-sema c-section
+    ( host $off ) ;
 
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;
@@ -364,25 +368,22 @@ previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
-: >replace-host ( -- o )
-    me>d#id >o [: 0 dht-host !@ ;] dht-sema c-section o o> ;
-
-: n2o:send-replace ( -- ) >replace-host drop { w^ host }
-    host $[]# IF
+: n2o:send-replace ( -- ) me>d#id .dht-host >r
+    r@ $[]# IF
 	net2o-code   expect-reply
-	  pkc keysize 2* $, dht-id
-	  host remove-me, endwith
-	  cookie+request
+	pkc keysize 2* $, dht-id
+	0 r@ remove-me, endwith
+	cookie+request
 	end-code|
-    THEN ;
+    THEN  rdrop ;
 
 : set-revocation ( addr u -- )
     dht-host $ins[]sig ;
 
 : n2o:send-revoke ( addr u -- )
-    keysize <> !!keysize!! >replace-host >o { w^ host }
+    keysize <> !!keysize!! me>d#id >o
     net2o-code  expect-reply
-	dht-hash $@ $, dht-id host remove-me,
+	dht-hash $@ $, dht-id dht-host remove-me,
 	revoke-key 2dup set-revocation
 	2dup $, dht-host+ endwith
 	cookie+request

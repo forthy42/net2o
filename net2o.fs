@@ -1707,7 +1707,7 @@ $20 Constant signed-val
 	o-timeout o-chunks
 	0. data-rmap @ .dest-vaddr 64@ >dest-map 2!
 	dest-0key @ del-0key
-	end-maps start-maps DO  I @ ?dup-IF  .free-data  THEN  cell +LOOP
+	end-maps start-maps DO  I @ ?dup-IF .free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP
 	end-secrets start-secrets DO  I sec-off  cell +LOOP
 	fstate-off
