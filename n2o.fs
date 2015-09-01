@@ -97,7 +97,7 @@ Variable chat-keys
     chat-keys [: keysize umin .key-id space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
-	IF  bl unkey  THEN  up@ wait-task ! ;] is do-connect
+	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
     wait-key  [: up@ wait-task ! ;] IS do-connect ;
 
 : last-chat-peer ( -- chat )
@@ -192,7 +192,7 @@ get-current net2o-cmds definitions
     +newphrase key>default
     2dup key#user +gen-keys .rsk
     read-keys .keys
-    secret-keys# 1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key
+    secret-keys# 1- secret-key >raw-key
     out-me ?dhtroot ;
 : keylist ( -- )
     \G usage: n2o keylist/listkey

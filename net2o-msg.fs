@@ -28,7 +28,7 @@ event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     >o last-msg $@ last-group $@ parent @ .avalanche-msg o> ;
 event: ->chat-connect ( o -- )
-    drop ctrl Z unkey ;
+    drop ctrl Z inskey ;
 event: ->reconnect ( o -- )
     >o last-group $@ msg-groups #@ d0=
     IF  "" last-group $@ msg-groups #!  THEN  last# >r

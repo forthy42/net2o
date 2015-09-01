@@ -140,9 +140,13 @@ timer: +ack
 
 Ustack b$
 
+[IFUNDEF] inskey
+    : inskey ( key -- )  key-buffer c$+! ;
+[THEN]
+
 event: ->b$off b$ $off ;
-event: ->type defers type <event ->b$off event> ctrl L unkey ;
-event: ->hide ctrl Z unkey <event ->wake event> ;
+event: ->type defers type <event ->b$off event> ctrl L inskey ;
+event: ->hide ctrl Z inskey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )

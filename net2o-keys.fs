@@ -521,8 +521,10 @@ Variable cp-tmp
 
 $40 buffer: nick-buf
 
+: get-nick ( -- addr u )
+    ." nick: " nick-buf $40 accept nick-buf swap cr ;
 : make-key ( -- )
-    key#user ." nick: " nick-buf $40 accept nick-buf swap cr
+    key#user get-nick
     ." passphrase: " +passphrase key>default
     cr +gen-keys .rvk ;
 
