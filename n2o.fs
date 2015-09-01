@@ -292,6 +292,13 @@ synonym listkey keylist
     \G usage: n2o -rootnick <nick> <next-cmd>
     ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
 
+: -port ( -- )
+    \G usage: n2o -port <port#> <next-cmd>
+    \G -port: sets port to a fixed number for reachability from outside,
+    \G -port: allows to define port forwarding rules in the firewall
+    ?nextarg 0= ?Exit  s>number drop dup to net2o-port to net2o-client-port
+    next-cmd ;
+
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user
     \G usage: n2o chat group@user   to chat with the chatgroup managed by user

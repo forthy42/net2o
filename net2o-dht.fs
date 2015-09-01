@@ -345,11 +345,14 @@ also net2o-base
 : replace-me, ( -- )
     pkc keysize 2* $, dht-id dht-host? endwith ;
 
+: my-host? ( addr u -- flag )
+    new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
+
 : remove-me, ( addr -- )
-    dup >r
-    [: sigsize# - 2dup + sigdate datesize# move
-      gen-host-del $, dht-host- ;] $[]map
-    r> $[]off ;
+    [: sigsize# - 2dup my-host? IF
+	  2dup + sigdate datesize# move
+	  gen-host-del $, dht-host-
+      false  ELSE  2drop true  THEN ;] $[]filter ;
 
 : fetch-id, ( id-addr u -- )
     $, dht-id dht-host? endwith ;

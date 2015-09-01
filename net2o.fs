@@ -22,7 +22,6 @@ require net2o-err.fs
 \ required tools
 
 require ansi.fs
-require date.fs
 require mini-oof2.fs
 require user-object.fs
 require rec-scope.fs
@@ -30,7 +29,6 @@ require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
-require 64bit.fs
 require net2o-tools.fs
 require debugging.fs
 require kregion.fs
@@ -123,6 +121,7 @@ require net2o-ip.fs
 \ Create udp socket
 
 4242 Value net2o-port
+0    Value net2o-client-port \ client port by default unassigned
 
 Variable net2o-host "net2o.de" net2o-host $!
 
@@ -1877,7 +1876,8 @@ Variable beacons \ destinations to send beacons to
 
 Variable initialized
 
-: init-client ( -- )  true initialized !@ 0= IF  init-cache 0 init-rest  THEN ;
+: init-client ( -- )  true initialized !@ 0= IF
+	init-cache net2o-client-port init-rest  THEN ;
 : init-server ( -- )  true initialized !@ 0= IF  net2o-port init-rest  THEN ;
 
 \ connection cookies

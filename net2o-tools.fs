@@ -15,6 +15,11 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require net2o-err.fs
+require unix/pthread.fs
+require 64bit.fs
+require date.fs
+
 \ enum
 
 : enum ( n "name" -- n+1 )  dup Constant 1+ ;
@@ -269,3 +274,18 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
+
+\ filter entries out of a string array
+
+: $[]filter { addr xt -- }
+    \G execute @var{xt} for all elements of the string array @var{addr}.
+    \G xt is @var{( addr u -- flag )}, getting one string at a time,
+    \G if flag is false, delete the corresponding string.
+    0 { idx }  BEGIN  idx addr $[]# <  WHILE
+	    idx addr $[]@ xt execute IF
+		idx 1+ to idx
+	    ELSE
+		idx addr $[] $off
+		addr idx cells cell $del
+	    THEN
+    REPEAT ;
