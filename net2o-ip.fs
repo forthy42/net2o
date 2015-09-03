@@ -45,6 +45,9 @@ Variable myprio \ lower is more important, 0 is "no priority"
 
 : default-host ( -- )
     pad $100 gethostname drop pad cstring>sstring myhost $!
+    myhost $@ s" .site" string-suffix? IF
+	myhost dup $@len 5 - 5 $del
+    THEN
     [IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
     myprio ! ;
 

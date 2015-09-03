@@ -79,6 +79,12 @@ cmd-args
     THEN ;
 [THEN]
 
+[IFUNDEF] string-suffix?
+    : string-suffix? ( addr1 u1 addr2 u2 -- flag )
+	\G return true if addr2 u2 is a suffix of addr1 u1
+	tuck 2>r over swap - 0 max /string 2r> str= ;
+[THEN]
+
 : -scan ( addr u char -- addr u' ) >r
     BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
 
