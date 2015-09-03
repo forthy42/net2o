@@ -143,7 +143,7 @@ previous
 
 : send-leave ( -- )
     net2o-code ['] msg-reply expect-reply-xt leave,
-    ( cookie+request ) end-code| ;
+    cookie+request end-code| ;
 
 : .chathead ( -- )
     sigdate 64@ .ticks space pkc keysize .key-id ;

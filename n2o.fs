@@ -296,7 +296,8 @@ synonym listkey keylist
     \G usage: n2o -port <port#> <next-cmd>
     \G -port: sets port to a fixed number for reachability from outside,
     \G -port: allows to define port forwarding rules in the firewall
-    ?nextarg 0= ?Exit  s>number drop dup to net2o-port to net2o-client-port
+    \G -port: only for client; server-side port is different
+    ?nextarg 0= ?Exit  s>number drop to net2o-client-port
     next-cmd ;
 
 : chat ( -- )

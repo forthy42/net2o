@@ -115,7 +115,7 @@ Variable dht-table
 	I c@ cells hash dht@ + d#? ?dup-IF
 	    nip nip UNLOOP  EXIT  THEN
 	I c@ $100 + cells hash dht@ + to hash
-    LOOP  true abort" dht exhausted - this should not happen" ;
+    LOOP  true !!dht-full!! ;
 
 : $ins[]sig ( addr u $array -- )
     \G insert O(log(n)) into pre-sorted array
@@ -368,11 +368,12 @@ previous
 
 : me>d#id ( -- ) pkc keysize 2* >d#id ;
 
-: n2o:send-replace ( -- ) me>d#id .dht-host >r
+: n2o:send-replace ( -- )
+    me>d#id .dht-host >r
     r@ $[]# IF
 	net2o-code   expect-reply
 	pkc keysize 2* $, dht-id
-	0 r@ remove-me, endwith
+	r@ remove-me, endwith
 	cookie+request
 	end-code|
     THEN  rdrop ;

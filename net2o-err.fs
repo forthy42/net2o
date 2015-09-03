@@ -72,3 +72,4 @@ s" data needs to be signed"      throwcode !!unsigned!!
 s" data needs to be unsigned"    throwcode !!signed!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
 s" DHT permission denied"        throwcode !!dht-permission!!
+s" dht exhausted - this should not happen" throwcode !!dht-full!!
