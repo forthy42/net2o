@@ -135,6 +135,9 @@ also net2o-base
     msg-group$ $@ dup IF  msg $, msg-leave
 	sign[ msg-start "left" $, msg-action msg> endwith
     ELSE  2drop  THEN ;
+
+: left, ( addr u -- )
+    keysize umin $, msg-signal " left (timeout)" $, msg-action ;
 previous
 
 : send-join ( -- )
@@ -234,8 +237,13 @@ previous
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
     ELSE  EXIT  THEN
-    timeout-expired? IF  pubkey $@ key>nick type ."  left (timeout)" cr
-	n2o:dispose-context  THEN ;
+    timeout-expired? IF  pubkey $@ ['] type $tmp n2o:dispose-context
+	msg-group$ $@len IF
+	    .chathead ." : @" info-color attr! 2dup key>nick type
+	    warn-color attr! ."  left (timeout)" default-color attr! cr
+	    ['] left, send-avalanche
+	ELSE  key>nick type ."  left (timeout)" cr  THEN
+    THEN ;
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
