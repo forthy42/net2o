@@ -295,3 +295,10 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 		addr idx cells cell $del
 	    THEN
     REPEAT ;
+
+\ colors
+
+: <default> default-color attr! ;
+: <warn>    warn-color attr! ;
+: <info>    info-color attr! ;
+: <err>     err-color attr! ;

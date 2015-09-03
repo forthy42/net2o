@@ -234,15 +234,18 @@ previous
     r> 0 ?DO  >o o to connection +resend-cmd send-leave
     ret-beacon disconnect-me o>  cell +LOOP ;
 
+: .msg-timeout ( key-addr u -- )
+    .chathead ." : @" info-color attr! key>nick type
+    warn-color attr! ."  left (timeout)" default-color attr! cr ;
+
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
     ELSE  EXIT  THEN
     timeout-expired? IF  pubkey $@ ['] type $tmp n2o:dispose-context
+	2dup .msg-timeout
 	msg-group$ $@len IF
-	    .chathead ." : @" info-color attr! 2dup key>nick type
-	    warn-color attr! ."  left (timeout)" default-color attr! cr
 	    ['] left, send-avalanche
-	ELSE  key>nick type ."  left (timeout)" cr  THEN
+	ELSE  2drop  THEN
     THEN ;
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
