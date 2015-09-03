@@ -200,7 +200,7 @@ get-current net2o-cmds definitions
     get-me
     key-table [: cell+ $@ drop cell+ >o
       ke-pk $@ keysize umin
-      ke-import @ >im-color 85type default-color attr!
+      ke-import @ >im-color 85type <default>
       ke-selfsig $@ .sigdates
       space .nick  cr o> ;] #map ;
 
@@ -261,7 +261,7 @@ synonym listkey keylist
     [: 2dup hash-file 2drop 2dup type
       [: type ." .s2o" ;] $tmp slurp-file
       over date-sig? dup >r  info-color err-color r> select  attr! .check
-      space over keysize .key-id default-color attr!
+      space over keysize .key-id <default>
       drop free throw cr ;]
     arg-loop ;
 

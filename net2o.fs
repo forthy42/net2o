@@ -516,10 +516,10 @@ require net2o-classes.fs
 
 \ events for context-oriented behavior
 
-: dbg-connect ( -- )  info-color attr!
-    ." connected from: " pubkey $@ 85type default-color attr! cr ;
-: dbg-disconnect ( -- )  info-color attr!
-    ." disconnecting: " pubkey $@ 85type default-color attr! cr ;
+: dbg-connect ( -- )  <info>
+    ." connected from: " pubkey $@ 85type <default> cr ;
+: dbg-disconnect ( -- )  <info>
+    ." disconnecting: " pubkey $@ 85type <default> cr ;
 
 Defer do-connect     ' dbg-connect IS do-connect
 Defer do-disconnect  ' dbg-disconnect IS do-disconnect

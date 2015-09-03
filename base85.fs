@@ -29,6 +29,6 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 comp: execute postpone SLiteral ;
 
 : .85info ( addr u -- )
-    info-color attr! 85type default-color attr! ;
+    <info> 85type <default> ;
 : .85warn ( addr u -- )
-    warn-color attr! 85type default-color attr! ;
+    <warn> 85type <default> ;

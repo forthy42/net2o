@@ -131,9 +131,9 @@ User ip6:#
 
 Defer .addr$
 
-: .iperr ( addr len -- ) [: info-color attr!
+: .iperr ( addr len -- ) [: <info>
 	.time ." connected from: "
-	new-addr( .addr$ )else( .ipaddr ) default-color attr! cr ;] $err ;
+	new-addr( .addr$ )else( .ipaddr ) <default> cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!
