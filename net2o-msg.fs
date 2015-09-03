@@ -70,7 +70,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
     IF   <err>  THEN  ." @" .key-id space
-    reset-color ;
+    <default> ;
 +net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ." re: " 85type forth:cr ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
@@ -79,7 +79,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 1 8 !!<>=order? $> -2 0 at-deltaxy space
-    <warn> forth:type reset-color forth:cr ;
+    <warn> forth:type <default> forth:cr ;
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
     signed? !!signed!! $> last-msg $!
     <event o elit, ->reconnect parent @ .wait-task @ event> ;
@@ -162,7 +162,7 @@ $200 Constant maxmsg#
 	ELSE
 	    dup 0= IF
 		drop dup 1+ xback-restore  pad swap
-	    ELSE \ fixme: do DoError instead
+	    ELSE
 		DoError drop 0  THEN
 	THEN
 	dup 0= WHILE  2drop  REPEAT
@@ -177,9 +177,7 @@ $200 Constant maxmsg#
     THEN ;
 
 : chat-entry ( -- )
-    <warn>
-    ." Type ctrl-D or '/bye' as single item to quit" cr
-    <default> ;
+    <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
 also net2o-base
 : send-avalanche ( xt -- )
@@ -193,7 +191,7 @@ get-current also chat-/cmds definitions
 
 : me ( addr u -- )
     2dup [: $, msg-action ;] send-avalanche
-    .chathead space <warn> forth:type reset-color forth:cr ;
+    .chathead space <warn> forth:type <default> forth:cr ;
 
 : peers ( addr u -- ) 2drop ." peers:"
     msg-group$ $@ msg-groups #@ bounds ?DO
@@ -210,7 +208,7 @@ set-current previous
 	1 /string bl $split 2swap
 	2dup ['] chat-/cmds >body (search-wordlist)
 	?dup-IF  nip nip name>int execute
-	ELSE  ." unknown command: " forth:type forth:cr  THEN
+	ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN
 	EXIT
     THEN
     2dup

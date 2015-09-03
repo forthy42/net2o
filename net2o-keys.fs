@@ -211,14 +211,12 @@ yellow  >bg white >fg or bold or ,
 blue    >bg white >fg or bold or ,
 magenta >bg white >fg or bold or ,
 
-: reset-color ( -- )
-    <default> ;
 : .black85 ( addr u -- )
-    [ black >bg black >fg or ]L attr!   85type reset-color ;
+    [ black >bg black >fg or ]L attr!   85type <default> ;
 : .red85 ( addr u -- )  0 -rot bounds ?DO
 	cr ." \ revoke: " dup cells 85colors + @ attr! 1+ 3 and
 	I 4 85type  dup cells 85colors + @ attr! 1+ 3 and
-	I 4 + 4 85type reset-color 8 +LOOP  drop ;
+	I 4 + 4 85type <default> 8 +LOOP  drop ;
 : .rsk ( nick u -- )
     skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
@@ -248,8 +246,8 @@ magenta >bg white >fg or bold or ,
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
 : .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
-    IF  2drop <err> 8 85type ." (unknown)" reset-color
-    ELSE  cell+ <info> ..nick reset-color 2drop  THEN ;
+    IF  2drop <err> 8 85type ." (unknown)" <default>
+    ELSE  cell+ <info> ..nick <default> 2drop  THEN ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF
