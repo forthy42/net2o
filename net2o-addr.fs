@@ -174,7 +174,7 @@ previous
 \ sockaddr conversion
 
 also net2o-base
-: new.sockaddr ( addr alen -- sockaddr u )
+: .sockaddr ( addr alen -- sockaddr u )
     \ convert socket into net2o address token
     [: { addr alen }
 	case addr family w@
@@ -196,7 +196,7 @@ also net2o-base
 is sockaddr+return
 previous
 :noname ( -- addr len )
-    return-address be@ routes #.key $@ new.sockaddr ; is new>sockaddr
+    return-address be@ routes #.key $@ .sockaddr ; is >sockaddr
 
 0 [IF]
 Local Variables:

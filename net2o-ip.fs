@@ -63,23 +63,6 @@ Create ip6::0 here 16 dup allot erase
 
 Create sockaddr" 2 c, $16 allot
 
-: .sockaddr
-    \ convert socket into net2o address token
-    [: { addr alen -- sockaddr u } '2' emit
-    case addr family w@
-	AF_INET of
-	    .ip6::0 addr sin_addr 4 type
-	endof
-	AF_INET6 of
-	    addr sin6_addr 12 fake-ip4 over str= IF
-		.ip6::0 addr sin6_addr 12 + 4 type
-	    ELSE
-		addr sin6_addr $10 type .ip4::0
-	    THEN
-	endof
-    endcase
-    addr port 2 type ;] $tmp ;
-
 : .port ( addr len -- addr' len' )
     ." :" over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
 : .net2o ( addr u -- ) dup IF  ." |" xtype  ELSE  2drop  THEN ;
@@ -118,22 +101,11 @@ User ip6:#
 : skip-symname ( addr u -- addr' u' )
     over c@ '0' = IF  2 safe/string  THEN
     over c@ '?' - 0 max safe/string ;
-: .symname ( addr u -- addr' u' )
-    over c@ '0' = IF  over 1+ c@ 0 .r '#' emit  2 safe/string  THEN
-    over c@ '?' - 0 max >r r@ IF   '"' emit over r@ 1 /string type '"' emit  THEN
-    r> safe/string ;
-
-: .ipaddr ( addr len -- )  .symname
-    case  over c@ >r 1 /string r>
-	'1' of  ." |" xtype  endof
-	'2' of  .ip64 endof
-	dup emit -rot dump endcase ;
 
 Defer .addr$
 
-: .iperr ( addr len -- ) [: <info>
-	.time ." connected from: "
-	new-addr( .addr$ )else( .ipaddr ) <default> cr ;] $err ;
+: .iperr ( addr len -- )
+    [: <info> .time ." connected from: " .addr$ <default> cr ;] $err ;
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!
@@ -264,20 +236,6 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
 
 Variable myname
 
-: +my-ip ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
-    [: .myname '2' emit
-      dup 4 = IF ip6::0 $10 type ELSE dup $10 = IF type ip6::0 4 THEN THEN type
-      my-port# 8 rshift emit my-port# $FF and emit ;] $tmp
-    nat( ." myip: " 2dup .ipaddr cr )
-    my-ip$ $ins[] ;
-
-Variable $tmp2
-
-: !my-ips ( -- )  $tmp2 $off nat( ." start storing myips" cr )
-    global-ip6 tuck [: type global-ip4 type ;] $tmp2 $exec
-    $tmp2 $@ +my-ip
-    0= IF  local-ip6  +my-ip THEN ;
-
 \ new address handling is in net2o-addr.fs, loaded later
 
 Defer !my-addr
@@ -292,51 +250,13 @@ Defer !my-addr
     2dup ip6::0 over str= >r
     2over ip6::0 over str= >r str= r> r> or or ;
 
-: my-ip= skip-symname 2swap skip-symname { addr1 u1 addr2 u2 -- flag }
-    addr1 c@ '2' = addr2 c@ '2' = and &&
-    addr1 u1 $15 safe/string addr2 u2 $15 safe/string str= &&
-    addr1 1+ $10 addr2 1+ over str=?0 &&
-    addr1 $11 + 4 addr2 $11 + over str=?0 ;
-
 : str>merge ( addr1 u1 addr2 u2 -- )
     2dup ip6::0 over str= IF  rot umin move  ELSE  2drop 2drop  THEN ;
-
-: my-ip>merge ( addr1 u1 addr2 u2 -- )
-    skip-symname 2swap skip-symname 2swap
-    { addr1 u1 addr2 u2 -- }
-    addr1 1+ $10 addr2 1+ over  str>merge
-    addr1 $11 + 4 addr2 $11 + over str>merge ;
-
-: my-ip? ( addr u -- addr u flag )
-    0 my-ip$ [: rot >r 2over my-ip= r> or ;] $[]map ;
-: my-ip-merge ( addr u -- addr u flag )
-    0 my-ip$ [: rot >r 2over 2over my-ip= IF
-	  2over 2swap my-ip>merge rdrop true  ELSE  2drop r>  THEN ;] $[]map ;
 
 \ insert address for punching
 
 : !temp-addr ( addr u -- ) dup 0<> ind-addr !
     temp-addr dup $10 erase  swap $10 umin move ;
-
-: 6>sock ( addr u -- )
-    over $10 + w@ sockaddr1 port w!
-    over $10 sockaddr1 sin6_addr swap move
-    $12 /string !temp-addr ;
-
-: 4>sock ( addr u -- )
-    over $4 + w@ sockaddr1 port w!
-    over be-ul@ sockaddr1 ipv4!
-    6 /string !temp-addr ;
-
-: 64>6sock ( addr u -- )
-    over $14 + w@ sockaddr1 port w!
-    over $10 sockaddr1 sin6_addr swap move
-    $16 /string !temp-addr ;
-
-: 64>4sock ( addr u -- )
-    over $14 + w@ sockaddr1 port w!
-    over $10 + be-ul@ sockaddr1 ipv4!
-    $16 /string !temp-addr ;
 
 : check-addr1 ( -- addr u flag )
     sockaddr1 sock-rest 2dup try-ip
@@ -347,19 +267,6 @@ Defer !my-addr
     check-addr1 0= IF  2drop  EXIT  THEN
     nat( ." ping: " 2dup .address cr )
     2>r net2o-sock "" 0 2r> sendto drop ;
-
-: 64-6? ( addr u -- )  $10 umin    ip6::0 over str= 0= ;
-: 64-4? ( addr u -- )  $10 /string 4 umin 64-6? ;
-
-: $>sock ( addr u xt -- ) { xt }
-    skip-symname
-    case  over c@ >r 1 /string r>
-	'2' of
-	    2dup 64-4? IF  2dup 64>4sock xt execute THEN
-	    2dup 64-6? IF  2dup 64>6sock xt execute THEN
-	    2drop
-	endof
-	!!no-addr!!  endcase ;
 
 0 [IF]
 Local Variables:

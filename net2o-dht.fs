@@ -150,7 +150,7 @@ Variable dht-table
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
-    2dup sigsize# - new-addr( .addr$ )else( .ipaddr )
+    2dup sigsize# - .addr$
     2dup .sigdates >host verify-host .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
@@ -282,43 +282,16 @@ gen-table $freeze
 
 also net2o-base
 
-: pub? ( addr u -- addr u flag )  skip-symname
-    over c@ '2' = IF  dup $17 u<=  ELSE  false  THEN ;
-
 false Value add-myip
-Variable $addme
-
-: +name ( addr u -- addr' u' )
-    \ add my name to host
-    $addme $off
-    [: .myname type ;] $addme $exec
-    $addme $@ ;
-
-: addme-end ( -- ) request( ." addme" forth:cr )
-    add-myip IF
-	my-ip$ [: gen-host $, dht-host+ ;] $[]map
-    THEN
-    endwith  do-expect-reply ( request, end-cmd ) ;
-: addme ( addr u -- ) nat( ." addme: " 2dup .ipaddr forth:cr )
-    pub? IF
-	my-ip-merge IF  2drop  EXIT  THEN
-	my-ip$ $ins[]  EXIT  THEN
-    2dup my-ip? 0= IF  2dup my-ip$ $ins[]  THEN
-    now>never
-    what's expect-reply? ['] addme-end <> IF
-	expect-reply pkc keysize2 $, dht-id
-    THEN
-    gen-host $, dht-host+
-    ['] addme-end IS expect-reply? ;
 
 \ new address formats
 
-: new-addme-end ( -- ) request( ." addme" forth:cr )
+: addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
 	my-addr$ [: $, dht-host+ ;] $[]map
     THEN
     endwith  do-expect-reply ;
-: new-addme ( addr u -- )  new-addr { addr } now>never
+: addme ( addr u -- )  new-addr { addr } now>never
     addr >o +my-id o>
     nat( ." addme: " addr .addr )
     addr .host-route $@len 0= IF
@@ -331,15 +304,15 @@ Variable $addme
 	addr o>addr gen-host my-addr$ $ins[]
 	nat( ."  routed" ) THEN
     nat( forth:cr )
-    what's expect-reply? ['] new-addme-end <> IF
+    what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize2 $, dht-id
     THEN
     addr o>addr gen-host $, dht-host+
     addr >o n2o:dispose-addr o>
-    ['] new-addme-end IS expect-reply? ;
+    ['] addme-end IS expect-reply? ;
 previous
 
-: +addme new-addr( ['] new-addme )else( ['] addme ) setip-xt ! ;
+: +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
 
 \ replace me stuff
