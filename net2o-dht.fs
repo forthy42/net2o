@@ -69,15 +69,15 @@ Variable dht-table
     dht-hash $@ drop date-sig? ;
 
 : revoke? ( addr u -- addr u flag )
-    2dup 1 umin "!" str= over revsize# = and &&    \ verify size and prefix
+    over c@ '!' = and over revsize# = and &&       \ verify size and prefix
     >host verify-host &&                           \ verify it's a proper host
     2dup + sigsize# - sigdate datesize# move       \ copy signing date
     2dup 1 /string sigsize# -                      \ extract actual revoke part
     over "selfsign" revoke-verify &&'              \ verify self signature
-    over keysize 2* + "revoke" revoke-verify &&'   \ verify revoke signature
-    over keysize 2* + pkrev keymove
+    over keysize2 + "revoke" revoke-verify &&'     \ verify revoke signature
+    over keysize2 + pkrev keymove
     pkrev dup sk-mask  dht-hash $@ drop keysize +  keypad ed-dh
-    dht-hash $@ drop keysize str= nip nip ;       \ verify revoke token
+    dht-hash $@ drop keysize str= nip nip ;        \ verify revoke token
 
 : .revoke ( addr u -- )
     ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 85type space
@@ -306,7 +306,7 @@ Variable $addme
     2dup my-ip? 0= IF  2dup my-ip$ $ins[]  THEN
     now>never
     what's expect-reply? ['] addme-end <> IF
-	expect-reply pkc keysize 2* $, dht-id
+	expect-reply pkc keysize2 $, dht-id
     THEN
     gen-host $, dht-host+
     ['] addme-end IS expect-reply? ;
@@ -332,7 +332,7 @@ Variable $addme
 	nat( ."  routed" ) THEN
     nat( forth:cr )
     what's expect-reply? ['] new-addme-end <> IF
-	expect-reply pkc keysize 2* $, dht-id
+	expect-reply pkc keysize2 $, dht-id
     THEN
     addr o>addr gen-host $, dht-host+
     addr >o n2o:dispose-addr o>
@@ -346,7 +346,7 @@ previous
 
 also net2o-base
 : replace-me, ( -- )
-    pkc keysize 2* $, dht-id dht-host? endwith ;
+    pkc keysize2 $, dht-id dht-host? endwith ;
 
 : my-host? ( addr u -- flag )
     new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
@@ -366,13 +366,13 @@ also net2o-base
     nick>pk fetch-id, ;
 previous
 
-: me>d#id ( -- ) pkc keysize 2* >d#id ;
+: me>d#id ( -- ) pkc keysize2 >d#id ;
 
 : n2o:send-replace ( -- )
     me>d#id .dht-host >r
     r@ $[]# IF
 	net2o-code   expect-reply
-	pkc keysize 2* $, dht-id
+	pkc keysize2 $, dht-id
 	r@ remove-me, endwith
 	cookie+request
 	end-code|

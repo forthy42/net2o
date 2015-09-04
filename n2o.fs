@@ -83,7 +83,9 @@ $20 value hash-size#
 Variable chat-keys
 
 : nick>chat ( addr u -- )
-    nick>pk chat-keys $+[]! ;
+    '.' $split dup 0= IF  2swap  THEN
+    nick>pk chat-keys $+[]!
+    chat-keys $[]# 1- chat-keys $[]+! ;
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;
@@ -94,7 +96,8 @@ Variable chat-keys
 
 : wait-chat ( -- )
     ." press key to connect to "
-    chat-keys [: keysize umin .key-id space ;] $[]map
+    chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
+      keysize umin .key-id space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect

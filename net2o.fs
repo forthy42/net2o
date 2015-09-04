@@ -2003,25 +2003,32 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     2 pick >o \ ." check host: " 2dup .host cr
     host>$ o> IF
 	[: check-addr1 0= IF  2drop  EXIT  THEN
-	    insert-address temp-addr ins-dest
-	    ." insert host: " temp-addr $10 xtype cr
-	    return-addr $10 0 skip nip 0= IF
-		temp-addr return-addr $10 move
-	    THEN ;] $>sock
+	  insert-address temp-addr ins-dest
+	  ." insert host: " temp-addr $10 xtype cr
+	  return-addr $10 0 skip nip 0= IF
+	      temp-addr return-addr $10 move
+	  THEN ;] $>sock
     ELSE  2drop  THEN ;
+
+User host$ \ check for this hostname
+
 : new-insert-host ( o addr u -- o )
     2 pick >o host>$ o> IF
-	new-addr ." check addr: " dup .addr cr dup >r
-	[: check-addr1 0= IF  2drop  EXIT  THEN
-	    insert-address temp-addr ins-dest
-	    ." insert host: " temp-addr $10 xtype cr
-	    return-addr $10 0 skip nip 0= IF
-		temp-addr return-addr $10 move
-	    THEN ;] addr>sock
-	  r> >o n2o:dispose-addr o>
+	new-addr  dup .host-id $@
+	host$ $@ str= host$ $@len 0= or IF
+	    ." check addr: " dup .addr cr dup >r
+	    [: check-addr1 0= IF  2drop  EXIT  THEN
+	      insert-address temp-addr ins-dest
+	      ." insert host: " temp-addr $10 xtype cr
+	      return-addr $10 0 skip nip 0= IF
+		  temp-addr return-addr $10 move
+	      THEN ;] addr>sock r>
+	THEN
+	>o n2o:dispose-addr o>
     ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
+    2dup keysize2 /string host$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase

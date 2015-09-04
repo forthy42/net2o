@@ -138,7 +138,7 @@ Variable nick-table \ nick hash table
 64Variable key-read-offset
 
 : current-key ( addr u -- o )
-    2dup keysize umin key-table #@ drop
+    2dup key| key-table #@ drop
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
 
@@ -161,12 +161,12 @@ Variable nick-table \ nick hash table
     key-read-offset 64@ ke-offset 64!
     import-type @ ke-import !
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
-    2over keysize umin key-table #! o>
+    2over key| key-table #! o>
     current-key ;
 
 : key?new ( addr u -- o )
     \G Create or lookup new key
-    2dup keysize umin key-table #@ drop
+    2dup key| key-table #@ drop
     dup 0= IF  drop key:new  ELSE  nip nip cell+  THEN ;
 
 \ search for keys - not optimized
@@ -242,17 +242,17 @@ magenta >bg white >fg or bold or ,
     key-table #@ 0= IF  drop ""  EXIT  THEN
     cell+ .ke-nick $@ ;
 
-: .key# ( addr u -- ) keysize umin
+: .key# ( addr u -- ) key|
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
-: .key-id ( addr u -- ) keysize umin 2dup key-table #@ 0=
+: .key-id ( addr u -- ) key| 2dup key-table #@ 0=
     IF  2drop <err> 8 85type ." (unknown)" <default>
     ELSE  cell+ <info> ..nick <default> 2drop  THEN ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF
-	    2dup pubkey $@ keysize umin str= 0= IF
-		[: ." want: " pubkey $@ keysize umin 85type cr
+	    2dup pubkey $@ key| str= 0= IF
+		[: ." want: " pubkey $@ key| 85type cr
 		  ." got : " 2dup 85type cr ;] $err
 		true !!wrong-key!!
 	    THEN
@@ -360,7 +360,7 @@ gen-table $freeze
 :noname ( addr u -- addr u' flag )
     pk2-sig? dup 0= ?EXIT drop
     2dup + sigsize# - sigsize# >$
-    sigpk2size# - 2dup + keysize 2* key?new n:>o $> ke-selfsig $!
+    sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
     c-state off true ; key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
@@ -435,7 +435,7 @@ set-current previous previous
 
 User pk+sig$
 
-keysize 2* Constant pkrk#
+keysize2 Constant pkrk#
 
 : ]pk+sign ( addr u -- ) +cmdbuf ]sign ;
 
@@ -571,7 +571,7 @@ $40 buffer: nick-buf
     dup 0= !!no-nick!! >o
     ke-pk $@ pkc swap pkrk# umin move
     ke-psk sec@ my-0key sec!
-    ke-sk sec@ skc swap keysize umin move
+    ke-sk sec@ skc swap key| move
     >sksig o> ;
 
 : >key ( addr u -- )
@@ -585,14 +585,14 @@ $40 buffer: nick-buf
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
     ke-psk sec@ state# umin
-    ke-pk $@ keysize umin o>
+    ke-pk $@ key| o>
     pubkey $!  dest-0key sec! ;
 
-: dest-pk ( addr u -- ) 2dup key-table #@ 0= IF
-	drop keysize umin pubkey $!
+: dest-pk ( addr u -- ) key2| 2dup key-table #@ 0= IF
+	drop key| pubkey $!
     ELSE  cell+ >o
 	ke-psk sec@ state# umin
-	ke-pk $@ keysize umin o>
+	ke-pk $@ key| o>
 	pubkey $!  dest-0key sec!  THEN ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
@@ -640,7 +640,7 @@ Variable revtoken
                                            \ backup keys
     oldskrev oldpkrev sk>pk                \ generate revokation pubkey
     gen-keys                               \ generate new keys
-    pkc keysize 2* revtoken $!             \ my new key
+    pkc keysize2 revtoken $!               \ my new key
     oldpkrev keysize revtoken $+!          \ revoke token
     oldskrev oldpkrev "revoke" sign-token, \ revoke signature
     skc pkc "selfsign" sign-token,         \ self signed with new key

@@ -20,6 +20,11 @@
 64 Constant state#
 state# 2* Constant state2#
 KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
+KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
+
+: key| ( size -- size' ) keysize umin ;
+: key2| ( size -- size' ) keysize2 umin ;
+
 \ specify strength (in bytes), not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
