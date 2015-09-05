@@ -114,6 +114,8 @@ object class
     cell                           uvar code-key^
 end-class io-buffers
 
+Variable routes
+
 \ add IP addresses
 
 require net2o-ip.fs
@@ -327,8 +329,6 @@ $00000000 Value droprate#
 
 \ clients routing table
 
-Variable routes
-
 : init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
 
 : ipv4>ipv6 ( addr u -- addr' u' )
@@ -374,9 +374,6 @@ Variable lastn2oaddr
     $@ sockaddr swap dup alen ! move  rdrop ;
 
 \ route an incoming packet
-
-[IFDEF] 64bit ' be-ux@ [ELSE] ' be-ul@ [THEN] alias be@
-[IFDEF] 64bit ' be-x! [ELSE] ' be-l! [THEN] alias be!
 
 : >rpath-len ( rpath -- rpath len )
     dup $100 u< IF  1  EXIT  THEN
@@ -1082,8 +1079,6 @@ require net2o-file.fs
 Defer >sockaddr
 Defer sockaddr+return
 
-: -skip ( addr u char -- ) >r
-    BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : -sig ( addr u -- addr u' ) 2dup + 1- c@ 2* $11 + - ;
 : n2oaddrs ( xt -- )
     my-addr$ [: -sig sockaddr+return rot dup >r execute r> ;] $[]map drop ;
@@ -1119,7 +1114,7 @@ User outflag  outflag off
     header( ." send code " outbuf .header )
     outbuf flags 1+ c@ stateless# and IF
 	outbuf0-encrypt  return-addr
-	cmd0( .time ." cmd0 to: " dup $10 xtype cr )
+	cmd0( .time ." cmd0 to: " dup .addr-path cr )
     ELSE
 	code-map @ outbuf-encrypt  return-address
     THEN   packet-to ;
@@ -1183,7 +1178,7 @@ Defer new-addr
     check-addr1 0= IF  2drop  EXIT  THEN
     insert-address temp-addr ins-dest
     temp-addr return-addr $10 move
-    nat( ." send punch to: " return-addr $10 xtype cr )
+    nat( ." send punch to: " return-addr .addr-path cr )
     punch-load $@ punch-reply ;
 
 : net2o:punch ( addr u -- )
@@ -1684,7 +1679,7 @@ $20 Constant signed-val
 : route-packet ( -- )
     inbuf >r r@ get-dest route>address
     route( ." route to: " sockaddr alen @ .address space
-           inbuf destination $10 xtype cr )
+           inbuf destination .addr-path cr )
     r> dup packet-size send-a-packet 0< ?ior ;
 
 \ dispose context
@@ -2004,7 +1999,7 @@ User host$ \ check for this hostname
 	    ." check addr: " dup .addr cr dup >r
 	    [: check-addr1 0= IF  2drop  EXIT  THEN
 	      insert-address temp-addr ins-dest
-	      ." insert host: " temp-addr $10 xtype cr
+	      ." insert host: " temp-addr .addr-path cr
 	      return-addr $10 0 skip nip 0= IF
 		  temp-addr return-addr $10 move
 	      THEN ;] addr>sock r>
@@ -2025,7 +2020,7 @@ User host$ \ check for this hostname
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup 2r>
-    cmd0( ." attempt to connect to: " return-addr $10 xtype cr )
+    cmd0( ." attempt to connect to: " return-addr .addr-path cr )
     n2o:connect +flow-control +resend ; is pk-connect
 
 : nick-connect ( addr u cmdlen datalen -- )

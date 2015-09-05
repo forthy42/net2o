@@ -117,31 +117,6 @@ Variable dht-table
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true !!dht-full!! ;
 
-: $ins[]sig ( addr u $array -- )
-    \G insert O(log(n)) into pre-sorted array
-    { $arr } 0 $arr $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigsize# - $# $arr $[]@ sigsize# - compare dup 0= IF
-		drop
-		2dup startdate@
-		$# $arr $[]@ startdate@ 64u>=
-		IF   $# $arr $[]!
-		ELSE  2drop  THEN EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
-: $del[]sig ( addr u $arrrray -- )
-    \G delete O(log(n)) from pre-sorted array, check sigs
-    { $arr } 0 $arr $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# -
-	    compare dup 0= IF
-		$# $arr $[] $off
-		$arr $# cells cell $del
-		2drop EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT 2drop 2drop ; \ not found
-
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
       dup @ 0= IF  dht-class new >o
@@ -297,11 +272,11 @@ false Value add-myip
     addr .host-route $@len 0= IF
 	addr my-addr-merge IF  addr >o n2o:dispose-addr o>
 	    nat( ."  merged" forth:cr ) EXIT  THEN
-	addr o>addr gen-host my-addr$ $ins[]
+	addr o>addr gen-host my-addr$ $ins[]sig
 	addr >o n2o:dispose-addr o>
 	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
-	addr o>addr gen-host my-addr$ $ins[]
+	addr o>addr gen-host my-addr$ $ins[]sig
 	nat( ."  routed" ) THEN
     nat( forth:cr )
     what's expect-reply? ['] addme-end <> IF

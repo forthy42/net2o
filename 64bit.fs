@@ -93,6 +93,8 @@ cell 8 = [IF]
     ' umin! Alias 64umin!
     ' umax! Alias 64umax!
     ' !@ Alias 64!@
+    ' be-ux@ Alias be@
+    ' be-x! Alias be!
 [ELSE]
     ' 2swap alias 64rot
     ' 2swap alias -64rot
@@ -199,6 +201,8 @@ cell 8 = [IF]
     : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
     : 64umin! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
     : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
+    ' be-ul@ alias be@
+    ' be-l! alias be!
 [THEN]
 \ independent of cell size, using dfloats:
 ' dfloats Alias 64s

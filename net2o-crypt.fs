@@ -28,13 +28,6 @@ KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
 \ specify strength (in bytes), not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
-\ Hash state variables
-
-$41 Constant sigonlysize#
-$51 Constant sigsize#
-$71 Constant sigpksize#
-$91 Constant sigpk2size#
-$10 Constant datesize#
 
 \ key storage stuff
 $1E0 Constant keypack#
@@ -409,9 +402,6 @@ Defer search-key \ search if that is one of our pubkeys
 : now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
-
-: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
-: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
 
 : .check ( flag -- ) '✔' '✘' rot select xemit ;
 : .sigdate ( tick -- )

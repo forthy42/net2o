@@ -85,6 +85,8 @@ cmd-args
 	tuck 2>r over swap - 0 max /string 2r> str= ;
 [THEN]
 
+: -skip ( addr u char -- ) >r
+    BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
 : -scan ( addr u char -- addr u' ) >r
     BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
 
@@ -277,6 +279,42 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 	    2dup $# $a $[]@ compare dup 0= IF
 		drop $# $a $[] $off
 		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
+
+\ same with signatures; newest signature replaces older
+
+$41 Constant sigonlysize#
+$51 Constant sigsize#
+$71 Constant sigpksize#
+$91 Constant sigpk2size#
+$10 Constant datesize#
+
+: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
+: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+
+: $ins[]sig ( addr u $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $arr } 0 $arr $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup sigsize# - $# $arr $[]@ sigsize# - compare dup 0= IF
+		drop
+		2dup startdate@
+		$# $arr $[]@ startdate@ 64u>=
+		IF   $# $arr $[]!
+		ELSE  2drop  THEN EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    0 { w^ ins$0 } ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
+: $del[]sig ( addr u $arrrray -- )
+    \G delete O(log(n)) from pre-sorted array, check sigs
+    { $arr } 0 $arr $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# -
+	    compare dup 0= IF
+		$# $arr $[] $off
+		$arr $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found

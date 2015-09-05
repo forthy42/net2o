@@ -501,7 +501,7 @@ previous
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
     resend0 $off
-    nat( ." ok from: " ret-addr $10 xtype space dup .
+    nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
     ['] drop r> reply-xt !@ execute ; \ clear request
