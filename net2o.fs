@@ -423,7 +423,7 @@ Variable lastn2oaddr
     $10 2dup 0 scan nip -
     2dup p+ { addr1 u1 addr2 u2 } \ better use locals here
     addr2 addr1 u2 move
-    addr1 u2 + u1 u2 - erase ;
+    addr1 u1 u2 /string erase ;
 
 : get-dest ( packet -- addr )  destination dup be@ swap skip-dest ;
 : route? ( packet -- flag )  destination c@  ;
@@ -1544,8 +1544,7 @@ Defer handle-beacon
 	over packet-size over <> !!size!! +next
 	EXIT
     THEN
-    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
-;
+    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN ;
 
 0 Value dump-fd
 

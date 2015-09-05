@@ -380,6 +380,9 @@ previous
 	    THEN
 	    2drop
 	endof
+	'>' of \ I got a punch
+	    nat( ." Got punch: " sockaddr alen @ .address forth:cr )
+	endof
     endcase ; is handle-beacon
 
 0 [IF]

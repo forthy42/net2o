@@ -266,7 +266,7 @@ Defer !my-addr
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
     nat( ." ping: " 2dup .address cr )
-    2>r net2o-sock "" 0 2r> sendto drop ;
+    2>r net2o-sock ">" 0 2r> sendto drop ;
 
 : p+ ( addr u -- addr' u' )
     BEGIN  dup  WHILE  over c@ $80 < >r 1 /string r>  UNTIL  THEN ;
