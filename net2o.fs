@@ -421,11 +421,9 @@ Variable lastn2oaddr
     path r> plen move ;
 : skip-dest ( addr -- )
     $10 2dup 0 scan nip -
-    2dup bounds ?DO
-	I c@ $80 u< IF
-	    2dup I 1+ -rot >r 2dup - r> swap - dup >r move
-	    r> /string  LEAVE  THEN
-    LOOP  erase ;
+    2dup p+ { addr1 u1 addr2 u2 } \ better use locals here
+    addr2 addr1 u2 move
+    addr1 u2 + u1 u2 - erase ;
 
 : get-dest ( packet -- addr )  destination dup be@ swap skip-dest ;
 : route? ( packet -- flag )  destination c@  ;
