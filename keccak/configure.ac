@@ -24,18 +24,24 @@ case "$ac_cv_sizeof_void_p" in
     ;;
 esac
 
+flags="$CFLAGS"
+nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
+
 # special optimizations for some plattforms
 case "$host_alias" in
      arm-linux-androideabi)
-	CCASFLAGS="-O3 -mfpu=neon-vfpv4"
-	CFLAGS="-O3 -mfpu=neon-vfpv4"
+	fastasmflags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	fastflags="-O3 -mfpu=neon-vfpv4 $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	plattform=neon
+	extralibs=libkeccakfast.la
+	CFLAGS=""
+	CCASFLAGS=""
 	;;
     i686-*)
 	# if you don't want sse, specify i586-linux-gnu
-	CFLAGS="-O3 -m32 -mssse3 -DUseSSE"
+	flags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
 	ws=opt64
 	;;
 esac
@@ -59,6 +65,12 @@ PRECLANG=${PRECC%clang*}
 LIBTOOL=${PRECLANG}libtool
 echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
 
+AC_SUBST(extralibs)
+AC_SUBST(nomflags)
+AC_SUBST(fastflags)
+AC_SUBST(fastasmflags)
+AC_SUBST(flags)
+AC_SUBST(asmflags)
 AC_SUBST(ws)
 AC_SUBST(as)
 AC_SUBST(plattform)
