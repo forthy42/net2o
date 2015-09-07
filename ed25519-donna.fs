@@ -7,7 +7,23 @@ c-library ed25519_donna
     "ed25519prims" add-lib
     [IFDEF] android
 	s" ./shlibs/ed25519-donna/.libs" add-libpath
-	s" libed25519prims.so" open-path-lib drop
+	android_getCpuFeatures drop
+	android_getCpuFamily ANDROID_CPU_FAMILY_ARM = [IF]
+	    ANDROID_CPU_ARM_FEATURE_NEON and
+	[ELSE]
+	    android_getCpuFamily ANDROID_CPU_FAMILY_X86 = [IF]
+		ANDROID_CPU_X86_FEATURE_SSSE3 and
+	    [ELSE]
+		drop false
+	    [THEN]
+	[THEN]
+	previous
+	[IF]
+	    ." fast ed25519" cr
+	    s" libed25519primsfast.so" open-path-lib drop
+	[ELSE]
+	    s" libed25519prims.so" open-path-lib drop
+	[THEN]
     [THEN]
     \c #include <stdint.h>
     \c #include <ed25519-prims.h>

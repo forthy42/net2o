@@ -16,14 +16,20 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS)
 
 lib_LTLIBRARIES = libkeccak.la
-libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
 if FAST
 lib_LTLIBRARIES += libkeccakfast.la
-endif
 if ASM
 libkeccakfast_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
 else
 libkeccakfast_la_SOURCES = KeccakF-1600-@ws@.c
+endif
+libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
+else
+if ASM
+libkeccak_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
+else
+libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
+endif
 endif
 include_HEADERS = KeccakF-1600.h
 libkeccak_la_LIBADD = 

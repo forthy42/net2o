@@ -38,7 +38,15 @@ case "$host_alias" in
 	enable_asm=yes
 	enable_fast=yes
 	plattform=neon
-	extralibs=libkeccakfast.la
+	CFLAGS=""
+	CCASFLAGS=""
+	;;
+     arm-*)
+	asmflags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	flags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	as="inplace-armgcc-ARMv7A-NEON"
+	enable_asm=yes
+	plattform=neon
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
@@ -66,6 +74,14 @@ AC_ARG_ENABLE([asm],
   *) AC_MSG_ERROR([bad value ${enableval} for --enable-asm]) ;;
 esac],[asm=false])
 AM_CONDITIONAL([ASM], [test x$asm = xtrue])
+AC_ARG_ENABLE([fast],
+[  --enable-fast    Turn on optional fast library with non-standard CPU features],
+[case "${enableval}" in
+  yes) fast=true ;;
+  no)  fast=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-fast]) ;;
+esac],[fast=false])
+AM_CONDITIONAL([FAST], [test x$fast = xtrue])
 
 #x86 on x86_64 plattforms:
 #./configure --host=i686-linux-gnu CFLAGS="-O3 -m32 -mssse3 -DUseSSE" ws=opt64
@@ -77,7 +93,6 @@ PRECLANG=${PRECC%clang*}
 LIBTOOL=${PRECLANG}libtool
 echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
 
-AC_SUBST(extralibs)
 AC_SUBST(nomflags)
 AC_SUBST(fastflags)
 AC_SUBST(fastasmflags)
