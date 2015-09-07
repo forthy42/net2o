@@ -30,9 +30,10 @@ $40 Constant keymax#
 keyqr#² buffer: keyqr
 
 : .prelines ( -- )
-    keyqr# 2/ 2/ 0 ?DO  <black> keyqr# 2* spaces <default> cr  LOOP ;
+    rows keyqr# 2/ - 2/ 0 ?DO
+	<black> cols spaces <default> cr  LOOP ;
 : .preline ( -- )
-    <black> keyqr# 2/ spaces ;
+    <black> cols keyqr# - 2/ spaces ;
 : qr.2lines ( addr u -- ) .preline
     tuck bounds ?DO
 	I c@ over I + c@ $F xor >bg swap $F xor >fg or attr!
@@ -62,11 +63,15 @@ keyqr#² buffer: keyqr
 	[ keyqr# 2* ]L +
     keyline# +LOOP  drop ;
 
+\ generate ECC
+
+\ swap bit 0 and bit 1
 Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 
 : >ecc1 ( -- )
     keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
-	0 I 2 + keyqr# 4 - bounds ?DO  i c@ xor  i 1+ c@ 0.1-swap xor  2 +LOOP  I 1 + c!
+	0 I 2 + keyqr# 4 - bounds ?DO
+	i c@ xor  i 1+ c@ 0.1-swap xor  2 +LOOP  I 1 + c!
     keyqr# +LOOP ;
 : >ecc2 ( -- )
     keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
@@ -79,11 +84,11 @@ Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
     LOOP ;
 : >ecc4 ( -- )
     keyqr keyqr# + 1+ keyqr# 2 - bounds ?DO
-	0 I keyqr# + keyqr#² keyqr# 3 * - bounds ?DO  i c@ xor  keyqr# +LOOP
-	I keyqr#² keyqr# 3 * - + c!
+	0 I keyqr# + keyqr#² keyqr# 3 * - bounds ?DO
+	i c@ xor  keyqr# +LOOP	I keyqr#² keyqr# 3 * - + c!
     LOOP ;
 
-: >ecc ( addr u -- ) >ecc1 >ecc2 >ecc3 >ecc4 ; \ dummy
+: >ecc ( addr u -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;
 
 : >keyqr ( addr u -- ) \ 64 bytes
     >keyframe >keylines >ecc keyqr keyqr# qr.block ;
