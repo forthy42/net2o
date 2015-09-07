@@ -11,10 +11,15 @@ c-library keccak
 	android_getCpuFamily ANDROID_CPU_FAMILY_ARM = [IF]
 	    ANDROID_CPU_ARM_FEATURE_NEON and
 	[ELSE]
-	    drop false
+	    android_getCpuFamily ANDROID_CPU_FAMILY_X86 = [IF]
+		ANDROID_CPU_X86_FEATURE_SSSE3 and
+	    [ELSE]
+		drop false
+	    [THEN]
 	[THEN]
 	previous
 	[IF]
+	    ." fast keccak" cr
 	    s" libkeccakfast.so" open-path-lib drop
 	[ELSE]
 	    s" libkeccak.so" open-path-lib drop

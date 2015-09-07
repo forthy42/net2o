@@ -30,19 +30,31 @@ nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 # special optimizations for some plattforms
 case "$host_alias" in
      arm-linux-androideabi)
+	flags="$CFLAGS"
+	asmflags="$CFLAGS"
 	fastasmflags="-O3 -mfpu=neon-vfpv4 $nomflags"
 	fastflags="-O3 -mfpu=neon-vfpv4 $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
+	enable_fast=yes
 	plattform=neon
 	extralibs=libkeccakfast.la
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
+    i686-linux-android)
+	# if you don't want sse, specify i586-linux-gnu
+	enable_fast=yes
+        flags="$CFLAGS"
+	fastflags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
+	ws=opt64
+	CFLAGS=""
+	;;
     i686-*)
 	# if you don't want sse, specify i586-linux-gnu
-	flags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
+        flags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
 	ws=opt64
+	CFLAGS=""
 	;;
 esac
 

@@ -17,8 +17,10 @@ AM_CPPFLAGS = $(EXAMPLE_CFLAGS)
 
 lib_LTLIBRARIES = libkeccak.la
 libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
-if ASM
+if FAST
 lib_LTLIBRARIES += libkeccakfast.la
+endif
+if ASM
 libkeccakfast_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
 else
 libkeccakfast_la_SOURCES = KeccakF-1600-@ws@.c
