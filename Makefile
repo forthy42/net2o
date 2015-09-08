@@ -18,7 +18,7 @@
 LIBS 	 = keccak threefish ed25519-donna
 GCC	 = gcc
 LIBTOOL	 = libtool
-CFLAGS	 = -O3
+CFLAGS	 = -O3 -fomit-frame-pointer
 HOST     = 
 FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs
 SRC      = .
@@ -48,8 +48,9 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/alice2-msg.fs tests/alice-msg.fs tests/bernd-msg.fs	\
 	  tests/bob-msg.fs tests/copy.fs tests/cryptspeed.fs		\
 	  tests/dht.fs tests/dht-pop.fs tests/ed25519.fs		\
-	  tests/insdeltest.fs tests/keys.fs tests/msg.fs		\
-	  tests/teststat.fs tests/vault.fs net2o-dhtroot.n2o
+	  tests/insdeltest.fs tests/keccak.fs tests/keys.fs		\
+	  tests/msg.fs tests/teststat.fs tests/vault.fs			\
+	  net2o-dhtroot.n2o
 
 SRCDIRS = tests
 
