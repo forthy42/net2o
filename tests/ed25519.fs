@@ -1,6 +1,6 @@
 \ test for ed25519 - first fuzzed, then deterministic test
 
-init-ed25519
+require ../net2o.fs
 
 : gen-pairs ( -- )
     skc pkc ed-keypair
@@ -18,8 +18,8 @@ init-ed25519
     gen-sig dup check-sig swap check-sig0 0= and check-dh and
     IF ." +" ELSE ." -" THEN ;
 : fuzzes ( n -- ) 0 ?DO  do-fuzz  LOOP ;
-: fuzzl ( n -- )  0 ?DO  64 fuzzes cr  LOOP ;
-!time 16 fuzzl .time cr
+: fuzzl ( n -- )  0 ?DO  cols I' I - umin fuzzes cols +LOOP ;
+!time 1024 fuzzl cr .time ."  for 1024 checks" cr
 
 \ deterministic tests
 
