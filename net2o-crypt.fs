@@ -156,10 +156,13 @@ init-keybuf
     key-salt# safe/string ;
 
 : encrypt$ ( addr u1 key u2 -- )
-    crypt-key-setup  key-cksum# - 0 c:encrypt+auth ;
+    crypt-key-setup
+    over >r $>align 2dup key-cksum# - 0 c:encrypt+auth
+    r> swap move ;
 
 : decrypt$ ( addr u1 key u2 -- addr' u' flag )
-    crypt-key-init key-cksum# - 2dup 0 c:decrypt+auth ;
+    crypt-key-init
+    $>align key-cksum# - 2dup 0 c:decrypt+auth ;
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
@@ -182,12 +185,12 @@ init-keybuf
 \ encrypt with own key
 
 : mykey-encrypt$ ( addr u -- ) +calc
-    over >r $>align 2dup mykey state# encrypt$ r> swap move +enc ;
+    mykey state# encrypt$ +enc ;
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
-    +calc 2dup $>align mykey state# decrypt$
+    +calc 2dup mykey state# decrypt$
     IF  +enc 2nip true  EXIT  THEN  2drop
-    $>align oldmykey state# decrypt$ +enc ;
+    oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
     crypt-buf-init outbuf packet-data +cryptsu

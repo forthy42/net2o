@@ -21,7 +21,7 @@ require mkdir.fs
 
 2 Value pw-level# \ pw-level# 0 is lowest
 
-[IFDEF] android '*' [ELSE] '⬤' [THEN] Constant pw*
+[IFDEF] androidxxx '*' [ELSE] '⬤' [THEN] Constant pw*
 
 xc-vector up@ - class-o !
 
