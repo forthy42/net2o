@@ -49,8 +49,8 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/bob-msg.fs tests/copy.fs tests/cryptspeed.fs		\
 	  tests/dht.fs tests/dht-pop.fs tests/ed25519.fs		\
 	  tests/insdeltest.fs tests/keccak.fs tests/keys.fs		\
-	  tests/msg.fs tests/teststat.fs tests/vault.fs			\
-	  net2o-dhtroot.n2o
+	  tests/msg.fs tests/teststat.fs tests/threefish.fs		\
+	  tests/vault.fs net2o-dhtroot.n2o
 
 SRCDIRS = tests
 
