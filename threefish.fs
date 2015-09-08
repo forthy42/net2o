@@ -6,7 +6,9 @@ c-library threefish
     s" threefish" add-lib
     [IFDEF] android
 	s" ./threefish" add-libpath
-	s" libthreefish.so" open-path-lib drop
+	also android fast-lib previous
+	[IF] s" libthreefishfast.so" [ELSE] s" libthreefish.so" [THEN]
+	open-path-lib drop
     [THEN]
     \c #include <threefish.h>
     \c void tf_encrypt_loop(struct tf_ctx *ctx, uint64_t *p, size_t n,

@@ -181,7 +181,8 @@ init-keybuf
 
 \ encrypt with own key
 
-: mykey-encrypt$ ( addr u -- ) +calc mykey state# encrypt$ +enc ;
+: mykey-encrypt$ ( addr u -- ) +calc
+    over >r $>align 2dup mykey state# encrypt$ r> swap move +enc ;
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc 2dup $>align mykey state# decrypt$

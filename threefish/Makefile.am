@@ -16,7 +16,15 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS)
 
 lib_LTLIBRARIES = libthreefish.la
-libthreefish_la_SOURCES = threefish.c
+if FAST
+lib_LTLIBRARIES += libthreefishfast.la
+endif
 include_HEADERS = threefish.h
+libthreefish_la_SOURCES = threefish.c
 libthreefish_la_LIBADD = 
 libthreefish_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libthreefish_la_CFLAGS = @flags@
+libthreefishfast_la_SOURCES = threefish.c
+libthreefishfast_la_LIBADD = 
+libthreefishfast_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libthreefishfast_la_CFLAGS = @fastflags@

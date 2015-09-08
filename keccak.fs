@@ -19,24 +19,9 @@ c-library keccak
     s" keccak" add-lib
     [IFDEF] android
 	s" ./keccak" add-libpath
-	also android
-	android_getCpuFeatures drop
-	android_getCpuFamily ANDROID_CPU_FAMILY_ARM = [IF]
-	    ANDROID_CPU_ARM_FEATURE_NEON and
-	[ELSE]
-	    android_getCpuFamily ANDROID_CPU_FAMILY_X86 = [IF]
-		ANDROID_CPU_X86_FEATURE_SSSE3 and
-	    [ELSE]
-		drop false
-	    [THEN]
-	[THEN]
-	previous
-	[IF]
-	    ." fast keccak" cr
-	    s" libkeccakfast.so" open-path-lib drop
-	[ELSE]
-	    s" libkeccak.so" open-path-lib drop
-	[THEN]
+	also android fast-lib previous
+	[IF]  s" libkeccakfast.so"  [ELSE]  s" libkeccak.so"  [THEN]
+	open-path-lib drop
     [THEN]
     \c #include <KeccakF-1600.h>
     \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
