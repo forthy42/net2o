@@ -199,9 +199,12 @@ UValue pollfd#  0 to pollfd#
 \ guard page after the end.
 
 : alloc-buf ( -- addr )
-    maxpacket-aligned buffers# * alloc+guard 6 + ;
+    maxpacket-aligned buffers# * alloc+guard ;
+: alloc-buf+6 ( -- addr )  alloc-buf 6 + ;
 : free-buf ( addr -- )
-    6 - maxpacket-aligned buffers# * 2dup erase free+guard ;
+    maxpacket-aligned buffers# * 2dup erase free+guard ;
+: free-buf+6 ( addr -- )
+    6 - free-buf ;
 
 : ?free+guard ( addr u -- )
     over @ IF  over @ swap 2dup erase  free+guard  off
@@ -221,9 +224,9 @@ Variable task-id#
     io-buffers new io-mem !
     1 task-id# +!@ task# !
     -other
-    alloc-buf to inbuf
+    alloc-buf+6 to inbuf
     alloc-buf to tmpbuf
-    alloc-buf to outbuf
+    alloc-buf+6 to outbuf
     alloc-code-bufs
     init-ed25519 c:init ;
 
@@ -231,9 +234,9 @@ Variable task-id#
     free-ed25519 c:free
     free-code-bufs
     0 io-mem !@ .dispose
-    inbuf  free-buf
+    inbuf  free-buf+6
     tmpbuf free-buf
-    outbuf free-buf ;
+    outbuf free-buf+6 ;
 
 alloc-io
 
