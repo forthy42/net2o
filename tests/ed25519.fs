@@ -4,15 +4,15 @@ init-ed25519
 
 : gen-pairs ( -- )
     skc pkc ed-keypair
-    stskc stpkc ed-keypair ;
+    stskc stpkc ed-keypair  >sksig ;
 : gen-sig ( -- addr )
-    keccak0 "Test 123" >keccak keccak* skc pkc ed-sign drop ;
+    keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign drop ;
 : check-sig ( addr -- flag )
     keccak0 "Test 123" >keccak keccak* pkc ed-verify ;
 : check-sig0 ( addr -- flag )
     keccak0 "Test 124" >keccak keccak* pkc ed-verify ;
 : check-dh ( -- flag )
-    skc stpkc ed-dh stskc pkc ed-dh str= ;
+    skc stpkc pad ed-dh stskc pkc pad $20 + ed-dh str= ;
 
 : do-fuzz ( -- )  gen-pairs
     gen-sig dup check-sig swap check-sig0 0= and check-dh and
@@ -28,15 +28,15 @@ x" C8B0514857E50524DEC94FB1157EF0BB0B89FFADA3A281FF2AE06F4BBD7EE671" stskc swap 
 skc pkc sk>pk pkc $20 x" 148777AA913CA970AD23E1C71B6B5C650B0448BA6DACEA5587ADFE13BA9262BB" str= 0= [IF] ." incorrect pubkey " pkc $20 xtype cr [THEN]
 stskc stpkc sk>pk stpkc $20 x" 301C3345E9756348DD442B03AAE186A73272ECF145D63C3A01DD7BBF7A3F24D7" str= 0= [IF] ." incorrect pubkey " stpkc $20 xtype cr [THEN]
 
-100 0 [do] skc stpkc ed-dh 2drop [loop] \ warmup for the CPU
+100 0 [do] skc stpkc pad ed-dh 2drop [loop] \ warmup for the CPU
 
 ." Test keypair "
 skc pkc 2dup sk>pk !time sk>pk .time cr
 ." Test signing "
-keccak0 "Test 123" >keccak keccak* skc pkc ed-sign
+keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign
 x" 91749F6069108909E6663724379AF9ACF571C13EB273AD88BB071B503491041EAA7A87FE853B969CF87EC4C53851CD5DD0A3A7008C7AB094255B56E97D697301" str= 0= [IF] ." in" [THEN] ." correct sig "
 keccak0 "Test 123" >keccak keccak*
-skc pkc !time ed-sign drop .time cr
+sksig skc pkc !time ed-sign drop .time cr
 keccak0 "Test 123" >keccak keccak* dup pkc ed-verify drop
 keccak0 "Test 123" >keccak keccak*
 ." Test verify "
@@ -52,21 +52,23 @@ $40 xtype cr
 
 ." Test EdDH "
 stskc stpkc sk>pk
-skc stpkc 2dup ed-dh 2drop ed-dh pad swap move
-skc stpkc 2dup ed-dh 2drop ed-dh 2drop
-stskc pkc 2dup ed-dh 2drop ed-dh
-stskc pkc 2dup ed-dh 2drop !time ed-dh .time 2drop
-2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42B52" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
-2dup pad over str= [IF] ."  passed"
+skc stpkc 2dup pad ed-dh 2drop pad ed-dh pad $20 + swap move
+skc stpkc 2dup pad ed-dh 2drop pad ed-dh 2drop
+stskc pkc 2dup pad ed-dh 2drop pad ed-dh
+stskc pkc 2dup pad ed-dh 2drop !time pad ed-dh .time 2drop
+2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
+2dup pad $20 + over str= [IF] ."  passed"
 [ELSE] ."  failed" pad over cr xtype [THEN] cr
 xtype cr
 
+[IFDEF] ed-dhv]
 ." Test EdDH variable speed "
-skc stpkc 2dup ed-dhv 2drop ed-dhv pad swap move
-skc stpkc 2dup ed-dhv 2drop ed-dhv 2drop
-stskc pkc 2dup ed-dhv 2drop ed-dhv
-stskc pkc 2dup ed-dhv 2drop !time ed-dhv .time 2drop
-2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42B52" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
-2dup pad over str= [IF] ."  passed"
+skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv pad $20 + swap move
+skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv 2drop
+stskc pkc 2dup pad ed-dhv 2drop pad ed-dhv
+stskc pkc 2dup pad ed-dhv 2drop !time pad ed-dhv .time 2drop
+2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
+2dup pad $20 + over str= [IF] ."  passed"
 [ELSE] ."  failed" pad over cr xtype [THEN] cr
 xtype cr
+[THEN]
