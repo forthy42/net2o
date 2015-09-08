@@ -33,7 +33,7 @@ stskc stpkc sk>pk stpkc $20 x" 301C3345E9756348DD442B03AAE186A73272ECF145D63C3A0
 ." Test keypair "
 skc pkc 2dup sk>pk !time sk>pk .time cr
 ." Test signing "
-keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign
+keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign 2dup xtype
 x" 91749F6069108909E6663724379AF9ACF571C13EB273AD88BB071B503491041EAA7A87FE853B969CF87EC4C53851CD5DD0A3A7008C7AB094255B56E97D697301" str= 0= [IF] ." in" [THEN] ." correct sig "
 keccak0 "Test 123" >keccak keccak*
 sksig skc pkc !time ed-sign drop .time cr
