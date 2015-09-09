@@ -32,8 +32,8 @@ case "$host_alias" in
      arm-linux-androideabi)
 	flags="$CFLAGS"
 	asmflags="$CFLAGS"
-	fastasmflags="-O3 -mfpu=neon-vfpv4 $nomflags"
-	fastflags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	fastasmflags="-O3 -mfpu=neon $nomflags"
+	fastflags="-O3 -mfpu=neon $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	enable_fast=yes
@@ -42,8 +42,8 @@ case "$host_alias" in
 	CCASFLAGS=""
 	;;
      arm-*)
-	asmflags="-O3 -mfpu=neon-vfpv4 $nomflags"
-	flags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	asmflags="-O3 -mfpu=neon $nomflags"
+	flags="-O3 -mfpu=neon $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	plattform=neon

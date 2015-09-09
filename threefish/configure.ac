@@ -17,12 +17,12 @@ case "$host_alias" in
     arm-linux-androideabi)
 	flags="$CFLAGS"
 	#may try with -mneon-for-64bits
-	fastflags="-O3 -mfpu=neon-vfpv4 $nomflags"
+	fastflags="-O3 -mfpu=neon $nomflags"
 	enable_fast=yes
 	CFLAGS=""
 	;;
     arm-*)
-	CFLAGS="-O3 -mfpu=neon-vfpv4 $nomflags"
+	CFLAGS="-O3 -mfpu=neon $nomflags"
 	;;
     i686-linux-android)
 	flags="$CFLAGS"
