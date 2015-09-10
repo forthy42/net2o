@@ -341,3 +341,27 @@ $10 Constant datesize#
 : <info>    info-color attr! ;
 : <err>     err-color attr! ;
 : <black>   black >fg black >bg or attr! ;
+
+\ Memory words
+
+\ the policy on allocation and freeing is that both freshly allocated
+\ and to-be-freed memory is erased.  This makes sure that no unwanted
+\ data will be lurking in that memory, waiting to be leaked out
+
+: alloz ( size -- addr )
+    dup >r allocate throw dup r> erase ;
+: freez ( addr size -- )
+    \G erase and then free - for secret stuff
+    over swap erase free throw ;
+: ?free ( addr size -- ) >r
+    dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
+
+: allo1 ( size -- addr )
+    dup >r allocate throw dup r> $FF fill ;
+: allocate-bits ( size -- addr )
+    dup >r cell+ allo1 dup r> + off ; \ last cell is off
+
+: ?free+guard ( addr u -- )
+    over @ IF  over @ swap 2dup erase  free+guard  off
+    ELSE  2drop  THEN ;
+

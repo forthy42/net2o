@@ -276,6 +276,22 @@ Defer !my-addr
 	$@ .address
 	$10 p+ 0 -skip dup IF  '|' emit  THEN xtype  THEN ;
 
+\ Create udp socket
+
+4242 Value net2o-port
+0    Value net2o-client-port \ client port by default unassigned
+
+Variable net2o-host "net2o.de" net2o-host $!
+
+: net2o-socket ( port -- ) dup >r
+    create-udp-server46
+    [IFDEF] no-hybrid 0 [THEN] to net2o-sock
+    r> ?dup-0=-IF  my-port  THEN to my-port#
+    [IFDEF] no-hybrid
+	net2o-sock drop my-port# create-udp-server to net2o-sock
+    [THEN]
+    !my-addr ;
+
 0 [IF]
 Local Variables:
 forth-local-words:

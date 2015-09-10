@@ -19,43 +19,23 @@
 
 \ dummy load for Android
 
+require rec-scope.fs
+
 [IFDEF] android
-    also android fast-lib previous SDK_INT 10 > and
-    [IF]  s" libed25519primsfast.so"  [ELSE]  s" libed25519prims.so"  [THEN]
-    also c-lib open-path-lib drop previous
+    android:fast-lib [IF]
+	require ed25519-donnafast.fs false
+    [ELSE]
+	s" libed25519_donna.so" c-lib:open-path-lib drop true
+    [THEN]
+[ELSE]
+    true
 [THEN]
-
-c-library ed25519_donna
-    "ed25519prims" add-lib
-    \c #include <stdint.h>
-    \c #include <ed25519-prims.h>
-    \c int str32eq(long* a, long* b) {
-    \c   long diff=0;
-    \c   switch(sizeof(long)) {
-    \c     case 4:
-    \c       diff|=((a[4]^b[4])|(a[5]^b[5])|(a[6]^b[6])|(a[7]^b[7]));
-    \c     case 8:
-    \c       diff|=((a[0]^b[0])|(a[1]^b[1])|(a[2]^b[2])|(a[3]^b[3]));
-    \c   }
-    \c   return -(diff==0);
-    \c }
-
-    c-function raw>sc25519 expand_raw256_modm a a -- void ( sc char[32] -- )
-    c-function nb>sc25519 expand256_modm a a n -- void ( sc char[64] n -- )
-    c-function sc25519>32b contract256_modm a a -- void ( char[32] sc -- )
-    c-function sc25519* mul256_modm a a a -- void ( r x y -- )
-    c-function sc25519+ add256_modm a a a -- void ( r x y -- )
-
-    c-function ge25519*base ge25519_scalarmult_base a a -- void ( ger x -- )
-    c-function ge25519-pack ge25519_pack a a -- void ( r ger -- )
-    c-function ge25519-unpack- ge25519_unpack_negative_vartime a a -- n ( r p -- flag )
-    c-function ge25519*+ ge25519_double_scalarmult_vartime a a a a -- void ( r p s1 s2 -- )
-    c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
-    c-function ge25519* ge25519_scalarmult a a a -- void ( r p s -- )
-    c-function 32b= str32eq a a -- n ( addr1 addr2 -- flag )
-    c-variable ge25519-basepoint ge25519_basepoint ( --  addr )
-    c-variable ge25519-niels*[] ge25519_niels_sliding_multiples ( -- addr )
-end-c-library
+[IF]
+    c-library ed25519_donna
+	"ed25519prims" add-lib
+	include ed25519-donnalib.fs
+    end-c-library
+[THEN]
 
 : 32b>sc25519 32 nb>sc25519 ;
 : 64b>sc25519 64 nb>sc25519 ;

@@ -15,48 +15,23 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require rec-scope.fs
+
 [IFDEF] android
-    also android fast-lib previous SDK_INT 10 > and
-    [IF]  s" libkeccakfast.so"  [ELSE]  s" libkeccak.so"  [THEN]
-    also c-lib open-path-lib drop previous
+    android:fast-lib [IF]
+	require keccakfast.fs false
+    [ELSE]
+	s" libkeccak.so" c-lib:open-path-lib drop true
+    [THEN]
+[ELSE]
+    true
 [THEN]
-
-c-library keccak
-    s" keccak" add-lib
-    \c #include <KeccakF-1600.h>
-    \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
-    \c {
-    \c   while(n>0) {
-    \c     unsigned int p = n >= 128 ? 128 : n;
-    \c     KeccakF(state, rounds);
-    \c     KeccakEncrypt(state, data, p);
-    \c     data = (UINT64*)(((char*)data)+p); n-=p;
-    \c   }
-    \c   return data;
-    \c }
-    \c UINT64* KeccakDecryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
-    \c {
-    \c   while(n>0) {
-    \c     unsigned int p = n >= 128 ? 128 : n;
-    \c     KeccakF(state, rounds);
-    \c     KeccakDecrypt(state, data, p);
-    \c     data = (UINT64*)(((char*)data)+p); n-=p;
-    \c   }
-    \c   return data;
-    \c }
-
-\ ------===< functions >===-------
-c-function KeccakInitialize KeccakInitialize  -- void
-c-function KeccakF KeccakF a n -- void
-c-function KeccakInitializeState KeccakInitializeState a -- void
-c-function KeccakExtract KeccakExtract a a n -- void
-c-function KeccakAbsorb KeccakAbsorb a a n -- void
-c-function KeccakEncrypt KeccakEncrypt a a n -- void
-c-function KeccakDecrypt KeccakDecrypt a a n -- void
-c-function KeccakEncryptLoop KeccakEncryptLoop a a n n -- a
-c-function KeccakDecryptLoop KeccakDecryptLoop a a n n -- a
-
-end-c-library
+[IF]
+    c-library keccak
+	s" keccak" add-lib
+	include keccaklib.fs
+    end-c-library
+[THEN]
 
 25 8 * Constant keccak#
 128 Constant keccak#max

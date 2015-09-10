@@ -69,6 +69,17 @@ max-size^2 6 + Value chunk-p2
 $10 Constant key-salt#
 $10 Constant key-cksum#
 
+\ for bigger blocks, we use use alloc+guard, i.e. mmap with a
+\ guard page after the end.
+
+: alloc-buf ( -- addr )
+    maxpacket-aligned buffers# * alloc+guard ;
+: alloc-buf+6 ( -- addr )  alloc-buf 6 + ;
+: free-buf ( addr -- )
+    maxpacket-aligned buffers# * 2dup erase free+guard ;
+: free-buf+6 ( addr -- )
+    6 - free-buf ;
+
 [IFDEF] cygwin
     : no-hybrid ; \ cygwin can't deal with hybrid stacks
 [THEN]
@@ -120,22 +131,6 @@ Variable routes
 
 require net2o-ip.fs
 
-\ Create udp socket
-
-4242 Value net2o-port
-0    Value net2o-client-port \ client port by default unassigned
-
-Variable net2o-host "net2o.de" net2o-host $!
-
-: net2o-socket ( port -- ) dup >r
-    create-udp-server46
-    [IFDEF] no-hybrid 0 [THEN] to net2o-sock
-    r> ?dup-0=-IF  my-port  THEN to my-port#
-    [IFDEF] no-hybrid
-	net2o-sock drop my-port# create-udp-server to net2o-sock
-    [THEN]
-    !my-addr ;
-
 begin-structure reply
     field: reply-len
     field: reply-offset
@@ -177,38 +172,6 @@ UValue pollfd#  0 to pollfd#
     net2o-sock [IFDEF] no-hybrid swap [THEN] POLLIN  r> fds!+
     [IFDEF] no-hybrid POLLIN swap fds!+ [THEN]
     pollfds - pollfd / to pollfd# ;
-
-\ the policy on allocation and freeing is that both freshly allocated
-\ and to-be-freed memory is erased.  This makes sure that no unwanted
-\ data will be lurking in that memory, waiting to be leaked out
-
-: alloz ( size -- addr )
-    dup >r allocate throw dup r> erase ;
-: freez ( addr size -- )
-    \G erase and then free - for secret stuff
-    over swap erase free throw ;
-: ?free ( addr size -- ) >r
-    dup @ IF  dup @ r@ freez off  ELSE  drop  THEN  rdrop ;
-
-: allo1 ( size -- addr )
-    dup >r allocate throw dup r> $FF fill ;
-: allocate-bits ( size -- addr )
-    dup >r cell+ allo1 dup r> + off ; \ last cell is off
-
-\ for bigger blocks, we use use alloc+guard, i.e. mmap with a
-\ guard page after the end.
-
-: alloc-buf ( -- addr )
-    maxpacket-aligned buffers# * alloc+guard ;
-: alloc-buf+6 ( -- addr )  alloc-buf 6 + ;
-: free-buf ( addr -- )
-    maxpacket-aligned buffers# * 2dup erase free+guard ;
-: free-buf+6 ( addr -- )
-    6 - free-buf ;
-
-: ?free+guard ( addr u -- )
-    over @ IF  over @ swap 2dup erase  free+guard  off
-    ELSE  2drop  THEN ;
 
 ustack string-stack
 ustack object-stack
