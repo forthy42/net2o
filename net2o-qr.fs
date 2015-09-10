@@ -90,7 +90,7 @@ Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 
 : >ecc ( addr u -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;
 
-: >keyqr ( addr u -- ) \ 64 bytes
+: .keyqr ( addr u -- ) \ 64 bytes
     >keyframe >keylines >ecc keyqr keyqr# qr.block ;
 
 0 [IF]

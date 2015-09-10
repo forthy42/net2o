@@ -1939,92 +1939,9 @@ require net2o-keys.fs
 require net2o-addr.fs
 require net2o-dht.fs
 require net2o-msg.fs
+require net2o-helper.fs
+require net2o-qr.fs
 \ require net2o-term.fs
-
-\ connection setup helper
-
-: ins-ip ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip ;
-: ins-ip4 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip4 ;
-: ins-ip6 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip6 ;
-
-: pk:connect ( code data key u ret -- )
-    [: .time ." Connect to: " dup hex. cr ;] $err
-    n2o:new-context >o rdrop o to connection  setup!
-    dest-pk \ set our destination key
-    n2o:connect
-    +flow-control +resend
-    [: .time ." Connected, o=" o hex. cr ;] $err ;
-
-: c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
-    disconnect-me [: .packets profile( .times ) ;] $err ;
-
-: c:fetch-id ( pubkey u -- )
-    net2o-code
-      expect-reply  fetch-id,
-      cookie+request
-    end-code| ;
-
-: pk:addme-fetch-host ( key u -- ) +addme
-    net2o-code
-      expect-reply get-ip fetch-id, replace-me,
-      cookie+request
-    end-code| -setip n2o:send-replace ;
-
-Variable dhtnick "net2o-dhtroot" dhtnick $!
-
-: announce-me ( -- )
-    tick-adjust 64@ 64-0= IF  +get-time  THEN
-    $8 $8 dhtnick $@ nick>pk ins-ip
-    dup add-beacon pk:connect replace-me disconnect-me
-    -other ;
-
-: pk-lookup ( addr u -- )
-    $A $E dhtnick $@ nick>pk ins-ip pk:connect
-    2dup pk:addme-fetch-host
-    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!
-	over c@ '!' =  WHILE
-	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
-	    o o> >r 2dup c:fetch-id r> >o
-    REPEAT  2drop disconnect-me ;
-
-User host$ \ check for this hostname
-
-: insert-host ( o addr u -- o )
-    2 pick >o host>$ o> IF
-	new-addr  dup .host-id $@
-	host$ $@ str= host$ $@len 0= or IF
-	    ." check addr: " dup .addr cr dup >r
-	    [: check-addr1 0= IF  2drop  EXIT  THEN
-	      insert-address temp-addr ins-dest
-	      ." insert host: " temp-addr .addr-path cr
-	      return-addr $10 0 skip nip 0= IF
-		  temp-addr return-addr $10 move
-	      THEN ;] addr>sock r>
-	THEN
-	>o n2o:dispose-addr o>
-    ELSE  2drop  THEN ;
-
-: n2o:pklookup ( addr u -- )
-    2dup keysize2 /string host$ $! key2|
-    2dup >d#id { id }
-    id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
-    0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
-    id dup .dht-host ['] insert-host $[]map drop 2drop ;
-
-: search-connect ( key u -- o/0 )
-    0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context
-    nip nip  dup to connection ;
-
-:noname ( addr u cmdlen datalen -- )
-    2>r n2o:pklookup 2r>
-    cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    n2o:connect +flow-control +resend ; is pk-connect
-
-: nick-connect ( addr u cmdlen datalen -- )
-    2>r nick>pk 2r> pk-connect ;
 
 0 [IF]
 Local Variables:

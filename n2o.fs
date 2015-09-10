@@ -55,6 +55,10 @@ Variable key-readin
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
+: qr-me ( -- ) pkc keysize2 .keyqr ;
+: qr-nicks ( -- )
+    [: nick-key ?dup-IF  .ke-pk $@ .keyqr  THEN ;] @arg-loop ;
+
 Variable key-list
 
 : pk-off ( -- ) key-list $[]off ;
@@ -206,6 +210,11 @@ get-current net2o-cmds definitions
       ke-import @ >im-color 85type <default>
       ke-selfsig $@ .sigdates
       space .nick  cr o> ;] #map ;
+
+: keyqr ( -- )
+    \G usage: n2o keyqr [@user1 .. @usern]
+    \G keyqr: print qr of own key (default) or selected user's qr
+    get-me argc @ 1 > IF  qr-nicks  ELSE  qr-me  THEN ;
 
 synonym inkey keyin
 synonym outkey keyout
