@@ -2,14 +2,14 @@
 
 \ dummy load for Android
 
+[IFDEF] android
+    also android fast-lib previous SDK_INT 10 > and
+    [IF] s" libthreefishfast.so" [ELSE] s" libthreefish.so" [THEN]
+    also c-lib open-path-lib drop previous
+[THEN]
+
 c-library threefish
     s" threefish" add-lib
-    [IFDEF] android
-	s" ./threefish" add-libpath
-	also android fast-lib previous
-	[IF] s" libthreefishfast.so" [ELSE] s" libthreefish.so" [THEN]
-	open-path-lib drop
-    [THEN]
     \c #include <threefish.h>
     \c void tf_encrypt_loop(struct tf_ctx *ctx, uint64_t *p, size_t n,
     \c 			    int flags1, int flags2) {

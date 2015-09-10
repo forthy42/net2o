@@ -15,14 +15,14 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+[IFDEF] android
+    also android fast-lib previous SDK_INT 10 > and
+    [IF]  s" libkeccakfast.so"  [ELSE]  s" libkeccak.so"  [THEN]
+    also c-lib open-path-lib drop previous
+[THEN]
+
 c-library keccak
     s" keccak" add-lib
-    [IFDEF] android
-	s" ./keccak" add-libpath
-	also android fast-lib previous
-	[IF]  s" libkeccakfast.so"  [ELSE]  s" libkeccak.so"  [THEN]
-	open-path-lib drop
-    [THEN]
     \c #include <KeccakF-1600.h>
     \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
     \c {

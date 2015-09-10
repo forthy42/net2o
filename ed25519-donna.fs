@@ -19,14 +19,14 @@
 
 \ dummy load for Android
 
+[IFDEF] android
+    also android fast-lib previous SDK_INT 10 > and
+    [IF]  s" libed25519primsfast.so"  [ELSE]  s" libed25519prims.so"  [THEN]
+    also c-lib open-path-lib drop previous
+[THEN]
+
 c-library ed25519_donna
     "ed25519prims" add-lib
-    [IFDEF] android
-	s" ./shlibs/ed25519-donna/.libs" add-libpath
-	also android fast-lib previous
-	[IF]  s" libed25519primsfast.so"  [ELSE]  s" libed25519prims.so"  [THEN]
-	open-path-lib drop
-    [THEN]
     \c #include <stdint.h>
     \c #include <ed25519-prims.h>
     \c int str32eq(long* a, long* b) {
