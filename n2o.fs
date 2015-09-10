@@ -220,6 +220,7 @@ synonym inkey keyin
 synonym outkey keyout
 synonym genkey keygen
 synonym listkey keylist
+synonym qrkey keyqr
 
 \ encryption subcommands
 
