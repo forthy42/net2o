@@ -45,10 +45,10 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  net2o-addr.fs net2o-classes.fs net2o-cmd.fs			\
 	  net2o-connected.fs net2o-connect.fs net2o-crypt.fs		\
 	  net2o-dht.fs net2o-err.fs net2o-file.fs net2o.fs		\
-	  net2o-ip.fs net2o-keys.fs net2o-log.fs net2o-msg.fs		\
-	  net2o-qr.fs net2o-template.fs net2o-tools.fs net2o-vault.fs	\
-	  rng.fs server-test.fs termclient.fs terminal-test.fs		\
-	  test-keys.fs xtype.fs tests/alice2-msg.fs			\
+	  net2o-ip.fs net2o-helper net2o-keys.fs net2o-log.fs		\
+	  net2o-msg.fs net2o-qr.fs net2o-template.fs net2o-tools.fs	\
+	  net2o-vault.fs rng.fs server-test.fs termclient.fs		\
+	  terminal-test.fs test-keys.fs xtype.fs tests/alice2-msg.fs	\
 	  tests/alice-msg.fs tests/bernd-msg.fs tests/bob-msg.fs	\
 	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
 	  tests/dht-pop.fs tests/ed25519.fs tests/insdeltest.fs		\
