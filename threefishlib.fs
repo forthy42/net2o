@@ -1,0 +1,48 @@
+\ threefish wrapper
+
+\ Copyright (C) 2012-2015   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+\c #include <threefish.h>
+\c void tf_encrypt_loop(struct tf_ctx *ctx, uint64_t *p, size_t n,
+\c 			    int flags1, int flags2) {
+\c   int flags=flags1;
+\c   while(n>=64) {
+\c     tf_encrypt(ctx, p, p, flags);
+\c     flags=flags2; p+=8; n-=64;
+\c     ctx->tweak[1] += !++(ctx->tweak[0]);
+\c   }
+\c }
+\c void tf_decrypt_loop(struct tf_ctx *ctx, uint64_t *c, size_t n,
+\c 			    int flags1, int flags2) {
+\c   int flags=flags1;
+\c   while(n>=64) {
+\c     tf_decrypt(ctx, c, c, flags);
+\c     flags=flags2; c+=8; n-=64;
+\c     ctx->tweak[1] += !++(ctx->tweak[0]);
+\c   }
+\c }
+\ -------===< structs >===--------
+\ tf_ctx
+begin-structure tf_ctx
+    drop 0 72 +field tf_ctx-key
+    drop 72 24 +field tf_ctx-tweak
+    drop 96 end-structure
+
+\ ------===< functions >===-------
+c-function tf_encrypt tf_encrypt a a a n -- void
+c-function tf_decrypt tf_decrypt a a a n -- void
+c-function tf_encrypt_loop tf_encrypt_loop a a n n n -- void
+c-function tf_decrypt_loop tf_decrypt_loop a a n n n -- void
