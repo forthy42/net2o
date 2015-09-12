@@ -124,7 +124,6 @@ Variable dht-table
     LOOP  true !!dht-full!! ;
 
 dht-class new constant dummy-dht
-dummy-dht >o dht-table @ token-table ! o>
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
@@ -246,6 +245,8 @@ get-current definitions
 \ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 
 previous set-current
+
+dummy-dht >o dht-table @ token-table ! o>
 
 \ value reading requires constructing answer packet
 
