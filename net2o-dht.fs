@@ -113,7 +113,7 @@ Variable dht-table
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r r@ @ .dht-hash $@ 2over ~~ string-prefix? ~~ IF  r> EXIT  THEN
+    >r r@ @ .dht-hash $@ 2over str= IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
