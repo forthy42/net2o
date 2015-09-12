@@ -108,6 +108,15 @@ cmd-class class
     0 +field ke-end
 end-class key-entry
 
+: free-key ( o:key -- o:key )
+    \g free all parts of the subkey
+    ke-sk sec-off
+    ke-pk $off
+    ke-nick $off
+    ke-psk sec-off
+    ke-selfsig $off
+    ke-sigs $[]off ;
+
 Variable key-entry-table
 
 0
@@ -128,7 +137,7 @@ drop
 Variable import-type  import#untrusted import-type !
 
 Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $E60 ,
-[: swap cells + @ attr! ;] set-does>
+DOES> swap cells + @ attr! ;
 
 0 Value sample-key
 
@@ -227,6 +236,9 @@ magenta >bg white >fg or bold or ,
     ." first: " ke-selfsig $@ drop 64@ .sigdate cr
     ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
+
+: .key-short ( o:key -- o:key )
+    .nick ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
@@ -347,7 +359,7 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keymask ( x -- )                       8 !!>order? 64drop ;
 \g key mask
 +net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
-\g preshared key (unclear if that's going to stay).. no, won't stay.
+\g preshared key, used for DHT encryption
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
 \g add a key signature
 +net2o: keyimport ( n -- ) pw-level# 0>= !!invalid!!
@@ -556,6 +568,12 @@ $40 buffer: nick-buf
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
     sample-key .do-cmd-loop ;
+
+: .key$ ( addr u -- )
+    sample-key >o
+    signed-val validated or! nest-cmd-loop
+    signed-val invert validated and!
+    .key-short free-key o> ;
 
 : read-keys-loop ( fd -- )  code-key
     >r 0. r@ reposition-file throw

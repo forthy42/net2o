@@ -133,7 +133,7 @@ Variable dht-table
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
     2dup sigsize# - .addr$
     2dup .sigdates >host verify-host .check 2drop ;
-: .owner ( addr u -- )  2dup sigsize# - xtype
+: .owner ( addr u -- )  2dup sigsize# - .key$
     2dup .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
