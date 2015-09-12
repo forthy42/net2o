@@ -4,4 +4,4 @@
 require n2o.fs
 
 script? [IF] ++debug %droprate \ read in all debugging stuff
-    argc @ 1 > [IF] next-cmd [ELSE] help [THEN] bye  [THEN]
+    argc @ 1 > [IF] next-cmd [ELSE] help [THEN] n2o:bye  [THEN]

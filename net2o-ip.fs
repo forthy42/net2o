@@ -23,9 +23,9 @@
     0 Value net2o-sock
 [THEN]
 0 Value query-sock
-Variable my-ip$
 Variable my-addr[] \ object based hosts
 Variable my-addr$ \ string based hosts (with sigs)
+Variable pub-addr$ \ publicated addresses (with sigs)
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6

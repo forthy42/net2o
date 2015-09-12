@@ -307,7 +307,14 @@ $10 Constant datesize#
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
-: $del[]sig ( addr u $arrrray -- )
+: $rep[]sig ( addr u $array -- ) >r
+    \G replace if newer in one-element array
+    r@ $[]# IF
+	2dup startdate@ 0 r@ $[]@ startdate@ 64u<
+	IF  2drop rdrop  EXIT  THEN
+    THEN
+    0 r> $[]! ;
+: $del[]sig ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array, check sigs
     { $arr } 0 $arr $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }

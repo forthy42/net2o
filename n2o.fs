@@ -149,18 +149,18 @@ Variable chat-keys
 
 \ commands for the command line user interface
 
-Vocabulary net2o-cmds
+Vocabulary n2o
 
 : do-net2o-cmds ( xt -- )
     get-order n>r get-recognizers n>r
-    ['] net2o-cmds >body 1 set-order
+    ['] n2o >body 1 set-order
     ['] rec:word 1 set-recognizers catch
     nr> set-recognizers nr> set-order throw ;
 
 : n2o-cmds ( -- )
     init-client word-args ['] quit do-net2o-cmds ;
 
-get-current also net2o-cmds definitions
+get-current also n2o definitions
 
 : help ( -- )
     \G usage: n2o help [cmd]
@@ -176,10 +176,10 @@ get-current also net2o-cmds definitions
 set-current
 
 : next-cmd ( -- )
-    ?nextarg 0= IF  help  EXIT  THEN  ['] net2o-cmds >body search-wordlist
+    ?nextarg 0= IF  help  EXIT  THEN  ['] n2o >body search-wordlist
     IF  execute  ELSE  help  THEN ;
 
-get-current net2o-cmds definitions
+get-current n2o definitions
 
 : keyin ( -- )
     \G usage: n2o keyin/inkey file1 .. filen
@@ -348,7 +348,8 @@ synonym qrkey keyqr
 	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
-synonym bye bye
+: bye ( -- )
+    subme bye ;
 
 set-current
 

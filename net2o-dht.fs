@@ -23,6 +23,7 @@
 $200 cells Constant dht-size# \ $100 entris + $100 chains
 
 Sema dht-sema
+Sema d#-sema
 
 Variable d#public
 
@@ -138,19 +139,19 @@ Variable dht-table
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
 : d#. ( -- )
-    dht-hash $@ 85type ." :" cr
-    k#size cell DO
-	I cell/ 0 .r ." : "
-	dht-hash I +
-	I cell/ case
-	    k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
-	    k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
-	    k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
-	nip endcase
-    cell +LOOP ;
+    [: dht-hash $@ 85type ." :" cr
+	k#size cell DO
+	    I cell/ 0 .r ." : "
+	    dht-hash I +
+	    I cell/ case
+		k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
+		k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
+		k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
+		nip endcase
+	cell +LOOP ;] d#-sema c-section ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
-    [: check-owner dht-owner $ins[]sig dht( d#. ) ;] dht-sema c-section ;
+    [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#host+ ( addr u -- ) \ with sanity checks
     [: check-host dht-host $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
@@ -270,9 +271,11 @@ false Value add-myip
 
 \ new address formats
 
+: pub-addr, ( addr u -- )
+     2dup pub-addr$ $ins[]sig $, dht-host+ ;
 : addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
-	my-addr$ [: $, dht-host+ ;] $[]map
+	my-addr$ ['] pub-addr, $[]map
     THEN
     endwith  do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
@@ -292,13 +295,24 @@ false Value add-myip
 	expect-reply pkc keysize2 $, dht-id
 	mynick$ $, dht-owner+
     THEN
-    addr o>addr gen-host $, dht-host+
+    addr o>addr gen-host pub-addr,
     addr .n2o:dispose-addr
     ['] addme-end IS expect-reply? ;
 previous
 
 : +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
+
+: subme ( -- )
+    pub-addr$ $[]# 0= ?EXIT
+    $A $E dhtnick $@ nick>pk ins-ip pk:connect
+    net2o-code
+    pkc keysize2 $, dht-id
+    pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
+	gen-host-del $, dht-host- ;] $[]map
+    endwith
+    end-code|
+    disconnect-me ;
 
 \ replace me stuff
 
