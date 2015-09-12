@@ -124,7 +124,7 @@ Variable dht-table
     LOOP  true !!dht-full!! ;
 
 dht-class new constant dummy-dht
-dummy-dth >o dht-table @ token-table ! o>
+dummy-dht >o dht-table @ token-table ! o>
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
