@@ -32,16 +32,11 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
+: dht-connect ( -- )
+    $8 $8 dhtnick $@ nick>pk ins-ip pk:connect ;
+
 : subme ( -- )
-    pub-addr$ $[]# 0= ?EXIT
-    $A $E dhtnick $@ nick>pk ins-ip pk:connect
-    net2o-code
-    pkc keysize2 $, dht-id
-    pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
-	gen-host-del $, dht-host- ;] $[]map
-    endwith
-    end-code|
-    disconnect-me ;
+    pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
 
 : c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
     disconnect-me [: .packets profile( .times ) ;] $err ;
@@ -65,7 +60,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     -other ;
 
 : pk-lookup ( addr u -- )
-    $A $E dhtnick $@ nick>pk ins-ip pk:connect
+    dht-connect
     2dup pk:addme-fetch-host
     BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!
 	over c@ '!' =  WHILE

@@ -78,6 +78,14 @@ $20 value hash-size#
     key-readin $slurp-file
     key-readin $@ do-key ;
 
+Variable search-key$
+
+: search-keys ( -- )
+    dht-connect
+    net2o-code  expect-reply
+    search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
+    cookie+request end-code| disconnect-me ;
+
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
 	key>default
@@ -216,11 +224,22 @@ get-current n2o definitions
     \G keyqr: print qr of own key (default) or selected user's qr
     get-me argc @ 1 > IF  qr-nicks  ELSE  qr-me  THEN ;
 
+: keysearch ( -- )
+    \G usage: n2o keysearch 85string1 .. 85stringn
+    \G keysearch: search for keys prefixed with base85 strings,
+    \G keysearch: and import them into the key chain
+    get-me  init-client
+    search-key$ $[]off  import#dht import-type !
+    BEGIN  ?nextarg  WHILE  base85>$ search-key$ $+[]!  REPEAT
+    search-keys  save-pubkeys
+    import#untrusted import-type ! ;
+
 synonym inkey keyin
 synonym outkey keyout
 synonym genkey keygen
 synonym listkey keylist
 synonym qrkey keyqr
+synonym searchkey keysearch
 
 \ encryption subcommands
 

@@ -113,7 +113,7 @@ Variable dht-table
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r 2dup r@ @ .dht-hash $@ str= IF  r> EXIT  THEN
+    >r 2dup r@ @ .dht-hash $@ 2swap string-prefix? IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
@@ -301,6 +301,14 @@ previous
 
 : +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
+
+: sub-me ( -- )
+    net2o-code
+    pkc keysize2 $, dht-id
+    pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
+	gen-host-del $, dht-host- ;] $[]map
+    endwith
+    end-code| ;
 
 \ replace me stuff
 
