@@ -52,6 +52,8 @@ cmd-class class
     field: dht-tags   \ tags added
 end-class dht-class
 
+dht-class new constant dummy-dht
+
 Variable dht-table
 
 \ map primitives
@@ -125,8 +127,10 @@ Variable dht-table
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
-      dup @ 0= IF  dht-class new >o
-	  o swap !  dht-hash $!  dht-table @ token-table !  o o>
+	dup @ 0= IF
+	    dup $40 = IF  dht-class new >o
+		o swap !  dht-hash $!  dht-table @ token-table !  o o>
+	    ELSE  2drop dummy-dht  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
