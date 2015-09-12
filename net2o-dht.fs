@@ -144,7 +144,7 @@ Variable dht-table
 	dht-hash I +
 	I cell/ case
 	    k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
-	    k#tag   of  [: cr .tag   ." , " ;] $[]map cr  endof
+	    k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
 	    k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
 	nip endcase
     cell +LOOP ;
