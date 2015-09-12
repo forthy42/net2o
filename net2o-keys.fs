@@ -347,7 +347,7 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keymask ( x -- )                       8 !!>order? 64drop ;
 \g key mask
 +net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
-\g preshared key (unclear if that's going to stay
+\g preshared key (unclear if that's going to stay).. no, won't stay.
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
 \g add a key signature
 +net2o: keyimport ( n -- ) pw-level# 0>= !!invalid!!
@@ -449,12 +449,15 @@ keysize2 Constant pkrk#
     end:key ;
 
 also net2o-base
-: pack-corekey ( o:key -- )
-    sign[
+: pack-core ( o:key -- ) \ core without key
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
-    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
-    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
+\    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
+    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
+
+: pack-corekey ( o:key -- )
+    sign[
+    pack-core
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
@@ -470,6 +473,13 @@ previous
       pack-corekey
       ke-sk sec@ $, privkey
     end:key ;
+: keynick$ ( o:key -- addr u )
+    \g get the annotations with signature
+    ['] pack-core gen-cmd$ 2drop
+    ke-selfsig $@ tmp$ $+! tmp$ $@ ;
+: mynick$ ( o:key -- addr u )
+    \g get my nick with signature
+    pkc keysize key-table #@ drop cell+ .keynick$ ;
 
 : >backup ( addr u -- )
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw

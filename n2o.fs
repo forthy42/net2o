@@ -47,7 +47,7 @@ Variable key-readin
 : out-key ( o -- )
     >o pack-pubkey o o>
     [: ..nick ." .n2o" ;] $tmp w/o create-file throw
-    >r keypack-buf cmdbuf# @ r@ write-file throw r> close-file throw ;
+    >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
     cell+ out-key ;

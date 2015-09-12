@@ -33,23 +33,23 @@ Variable d#public
 \ keys are enumerated small integers
 
 0
-enum k#hash     \ hash itself is item 0
-enum k#peers    \ distribution list - includes "where did I get this from"
-                \ managed by the hash owner himself
-enum k#owner    \ owner(s) of the object (pubkey+signature)
-enum k#host     \ network id+routing from there (+signature)
-enum k#map      \ peers have those parts of the object
-enum k#tags     \ tags added
+enum k#hash  
+enum k#peers  
+enum k#owner  
+enum k#host  
+enum k#map   
+enum k#tags  
 \ most stuff is added as tag or tag:value pair
 cells Constant k#size
 
 cmd-class class
-    field: dht-hash
-    field: dht-peers
-    field: dht-owner
-    field: dht-host
-    field: dht-map
-    field: dht-tags
+    field: dht-hash   \ hash itself is item 0
+    field: dht-peers  \ distribution list - includes "where did I get this from"
+                      \ managed by the hash owner himself
+    field: dht-owner  \ owner(s) of the object (pubkey+signature)
+    field: dht-host   \ network id+routing from there (+signature)
+    field: dht-map    \ peers have those parts of the object
+    field: dht-tags   \ tags added
 end-class dht-class
 
 Variable dht-table
@@ -88,6 +88,10 @@ Variable dht-table
 : check-host ( addr u -- addr u )
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
     0= !!inv-sig!! ;
+: check-owner ( addr u -- addr u )
+    2dup sigsize# - 2dup + >r
+    [: type dht-hash $@ type ;] c:0key c:hash
+    r> sigsize# dht-hash $@ drop date-sig? 0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
@@ -141,7 +145,7 @@ Variable dht-table
     cell +LOOP ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
-    [: check-host dht-owner $ins[]sig dht( d#. ) ;] dht-sema c-section ;
+    [: check-owner dht-owner $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#host+ ( addr u -- ) \ with sanity checks
     [: check-host dht-host $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
@@ -267,13 +271,13 @@ false Value add-myip
     THEN
     endwith  do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
-    addr >o +my-id o>
+    addr .+my-id
     nat( ." addme: " addr .addr )
     addr .host-route $@len 0= IF
-	addr my-addr-merge IF  addr >o n2o:dispose-addr o>
+	addr my-addr-merge IF  addr .n2o:dispose-addr
 	    nat( ."  merged" forth:cr ) EXIT  THEN
 	addr o>addr gen-host my-addr$ $ins[]sig
-	addr >o n2o:dispose-addr o>
+	addr .n2o:dispose-addr
 	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
 	addr o>addr gen-host my-addr$ $ins[]sig
@@ -281,9 +285,10 @@ false Value add-myip
     nat( forth:cr )
     what's expect-reply? ['] addme-end <> IF
 	expect-reply pkc keysize2 $, dht-id
+	mynick$ $, dht-owner+
     THEN
     addr o>addr gen-host $, dht-host+
-    addr >o n2o:dispose-addr o>
+    addr .n2o:dispose-addr
     ['] addme-end IS expect-reply? ;
 previous
 
