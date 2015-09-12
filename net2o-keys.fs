@@ -238,7 +238,7 @@ magenta >bg white >fg or bold or ,
     o> ;
 
 : .key-short ( o:key -- o:key )
-    .nick ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
+    ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
