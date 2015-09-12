@@ -143,10 +143,10 @@ Variable dht-table
 	I cell/ 0 .r ." : "
 	dht-hash I +
 	I cell/ case
-	    k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
-	    k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
-	    k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
-	    nip cr endcase
+	    k#host  of  [: cr .host  ." ,"  ;] $[]map  endof
+	    k#tags  of  [: cr .tag   ." , " ;] $[]map  endof
+	    k#owner of  [: cr .owner ." , " ;] $[]map  endof
+	    nip endcase  cr
     cell +LOOP ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
