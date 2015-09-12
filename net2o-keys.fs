@@ -570,10 +570,10 @@ $40 buffer: nick-buf
     sample-key .do-cmd-loop ;
 
 : .key$ ( addr u -- )
-    sample-key >o
-    signed-val validated or! nest-cmd-loop
-    signed-val invert validated and!
-    .key-short free-key o> ;
+~~    sample-key >o  ke-sk ke-end over - erase
+~~    signed-val validated or! nest-cmd-loop
+~~    signed-val invert validated and!
+~~    .key-short free-key o> ;
 
 : read-keys-loop ( fd -- )  code-key
     >r 0. r@ reposition-file throw
