@@ -113,7 +113,7 @@ Variable dht-table
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r r@ @ .dht-hash $@ 2over str= IF  r> EXIT  THEN
+    >r r@ @ .dht-hash $@ 2over ~~ string-prefix? ~~ IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
@@ -128,7 +128,7 @@ dht-class new constant dummy-dht
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
 	dup @ 0= IF
-	    dup $40 = IF  dht-class new >o
+	    over $40 = IF  dht-class new >o
 		o swap !  dht-hash $!  dht-table @ token-table !  o o>
 	    ELSE  2drop dummy-dht  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
