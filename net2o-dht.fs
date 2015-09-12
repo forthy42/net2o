@@ -89,9 +89,9 @@ Variable dht-table
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
     0= !!inv-sig!! ;
 : check-owner ( addr u -- addr u )
-    2dup sigsize# -
-    c:0key [: type dht-hash $@ type ;] $tmp c:hash
-    dht-hash $@ drop date-sig? 0= !!inv-sig!! ;
+    ~~ 2dup sigsize# -
+    ~~ c:0key [: type dht-hash $@ type ;] $tmp c:hash
+    ~~ dht-hash $@ drop ~~ date-sig? ~~ 0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
