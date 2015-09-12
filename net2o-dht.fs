@@ -88,10 +88,12 @@ Variable dht-table
 : check-host ( addr u -- addr u )
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
     0= !!inv-sig!! ;
+: verify-owner ( addr u -- flag )
+    2dup sigsize# -
+    c:0key [: type dht-hash $@ type ;] $tmp c:hash
+    dht-hash $@ drop date-sig? ;
 : check-owner ( addr u -- addr u )
-    ~~ 2dup sigsize# -
-    ~~ c:0key [: type dht-hash $@ type ;] $tmp c:hash
-    ~~ dht-hash $@ drop ~~ date-sig? ~~ 0= !!inv-sig!! ;
+    verify-owner 0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
@@ -131,17 +133,20 @@ Variable dht-table
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
     2dup sigsize# - .addr$
     2dup .sigdates >host verify-host .check 2drop ;
+: .owner ( addr u -- )  2dup sigsize# - xtype
+    2dup .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
 : d#. ( -- )
     dht-hash $@ 85type ." :" cr
     k#size cell DO
 	I cell/ 0 .r ." : "
-	dht-hash I +  I k#host cells = IF
-	    [: cr .host ." ," ;]
-	ELSE
-	    [: cr .tag ." , " ;]
-	THEN $[]map cr
+	dht-hash I +
+	I cell/ case
+	    k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
+	    k#tag   of  [: cr .tag   ." , " ;] $[]map cr  endof
+	    k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
+	nip endcase
     cell +LOOP ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
