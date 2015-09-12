@@ -52,8 +52,6 @@ cmd-class class
     field: dht-tags   \ tags added
 end-class dht-class
 
-dht-class new constant dummy-dht
-
 Variable dht-table
 
 \ map primitives
@@ -124,6 +122,9 @@ Variable dht-table
 	    nip nip UNLOOP  EXIT  THEN
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true !!dht-full!! ;
+
+dht-class new constant dummy-dht
+dummy-dth >o dht-table @ token-table ! o>
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
