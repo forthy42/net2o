@@ -90,7 +90,7 @@ Variable dht-table
     0= !!inv-sig!! ;
 : check-owner ( addr u -- addr u )
     2dup sigsize# - 2dup + >r
-    [: type dht-hash $@ type ;] c:0key c:hash
+    c:0key [: type dht-hash $@ type ;] $tmp c:hash
     r> sigsize# dht-hash $@ drop date-sig? 0= !!inv-sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
