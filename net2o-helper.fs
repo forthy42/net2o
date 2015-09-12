@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Variable dhtnick "net2o-dhtroot" dhtnick $!
+
 : ins-ip ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip ;
 : ins-ip4 ( -- net2oaddr )
@@ -30,6 +32,17 @@
     +flow-control +resend
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
+: subme ( -- )
+    pub-addr$ $[]# 0= ?EXIT
+    $A $E dhtnick $@ nick>pk ins-ip pk:connect
+    net2o-code
+    pkc keysize2 $, dht-id
+    pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
+	gen-host-del $, dht-host- ;] $[]map
+    endwith
+    end-code|
+    disconnect-me ;
+
 : c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
     disconnect-me [: .packets profile( .times ) ;] $err ;
 
@@ -44,8 +57,6 @@
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
     end-code| -setip n2o:send-replace ;
-
-Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN

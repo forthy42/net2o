@@ -303,17 +303,6 @@ previous
 : +addme ['] addme setip-xt ! ;
 : -setip ['] .iperr setip-xt ! ;
 
-: subme ( -- )
-    pub-addr$ $[]# 0= ?EXIT
-    $A $E dhtnick $@ nick>pk ins-ip pk:connect
-    net2o-code
-    pkc keysize2 $, dht-id
-    pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
-	gen-host-del $, dht-host- ;] $[]map
-    endwith
-    end-code|
-    disconnect-me ;
-
 \ replace me stuff
 
 also net2o-base
