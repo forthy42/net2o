@@ -23,7 +23,6 @@
 $200 cells Constant dht-size# \ $100 entris + $100 chains
 
 Sema dht-sema
-Sema d#-sema
 
 Variable d#public
 
@@ -139,16 +138,16 @@ Variable dht-table
 : host>$ ( addr u -- addr u' flag )
     >host verify-host >r sigsize# - r> ;
 : d#. ( -- )
-    [: dht-hash $@ 85type ." :" cr
-	k#size cell DO
-	    I cell/ 0 .r ." : "
-	    dht-hash I +
-	    I cell/ case
-		k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
-		k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
-		k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
-		nip endcase
-	cell +LOOP ;] d#-sema c-section ;
+    dht-hash $@ 85type ." :" cr
+    k#size cell DO
+	I cell/ 0 .r ." : "
+	dht-hash I +
+	I cell/ case
+	    k#host  of  [: cr .host  ." ,"  ;] $[]map cr  endof
+	    k#tags  of  [: cr .tag   ." , " ;] $[]map cr  endof
+	    k#owner of  [: cr .owner ." , " ;] $[]map cr  endof
+	    nip cr endcase
+    cell +LOOP ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
     [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-sema c-section ;
