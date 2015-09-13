@@ -86,6 +86,15 @@ Variable search-key$
     search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
 
+: insert-keys ( -- )
+    search-key$ [: >d#id >o
+      dht-owner $@len IF
+	  [: dht-owner $@ 2dup sigsize# - tuck type /string
+	    dht-hash $. dht-owner $. type ;] $tmp
+	  key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
+      THEN
+      o> ;] $[]map ;
+
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
 	key>default

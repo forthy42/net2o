@@ -368,6 +368,10 @@ Vocabulary net2o-base
 
 Defer do-req>
 
+: do-nestsig ( addr u -- )
+    signed-val validated or! nest-cmd-loop
+    signed-val invert validated and! ;
+
 get-current also net2o-base definitions
 
 \ Command numbers preliminary and subject to change
@@ -428,9 +432,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: words ( ustart -- ) \g reflection
     64>n net2o:words ;
 +net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig IF
-	signed-val validated or! nest-cmd-loop
-	signed-val invert validated and!
+    $> nest-sig IF  do-nestsig
     ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
 
 previous

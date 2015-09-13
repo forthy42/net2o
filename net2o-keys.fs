@@ -369,11 +369,12 @@ dup set-current previous
 gen-table $freeze
 ' context-table is gen-table
 
-:noname ( addr u -- addr u' flag )
+: key:nest-sig ( addr u -- addr u' flag )
     pk2-sig? dup 0= ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
-    c-state off true ; key-entry to nest-sig
+    c-state off true ;
+' key:nest-sig key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>

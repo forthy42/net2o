@@ -52,6 +52,14 @@ cmd-class class
     field: dht-tags   \ tags added
 end-class dht-class
 
+: dht-off ( o:dht -- o:dht )
+    dht-hash $off
+    dht-peers $[]off
+    dht-owner $[]off
+    dht-host $[]off
+    dht-map $[]off
+    dht-tags $[]off ;
+
 Variable dht-table
 
 \ map primitives
@@ -113,7 +121,7 @@ Variable dht-table
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r r@ @ .dht-hash $@ 2over ~~ string-prefix? ~~ IF  r> EXIT  THEN
+    >r r@ @ .dht-hash $@ 2over string-prefix? IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
@@ -130,7 +138,7 @@ dht-class new constant dummy-dht
 	dup @ 0= IF
 	    over $40 = IF  dht-class new >o
 		o swap !  dht-hash $!  dht-table @ token-table !  o o>
-	    ELSE  2drop dummy-dht  THEN
+	    ELSE  2drop dummy-dht dup .dht-off  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
