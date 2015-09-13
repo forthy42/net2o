@@ -88,12 +88,12 @@ Variable search-key$
 
 : insert-keys ( -- )
     search-key$ [: >d#id >o
-      dht-owner $@len IF
-	  [: dht-owner $@ 2dup sigsize# - tuck type /string
-	    dht-hash $. dht-owner $. type ;] $tmp
-	  key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
-      THEN
-      o> ;] $[]map ;
+	0 dht-owner $[]@ nip sigsize# u> IF
+	    [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
+		dht-hash $. type ;] $tmp
+	    key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
+	THEN
+	o> ;] $[]map ;
 
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
@@ -137,18 +137,22 @@ Variable chat-keys
     group-master @ IF  last-chat-peer  EXIT  THEN
     search-peer ;
 
+: greet ( -- )
+    net2o-code expect-reply log !time endwith
+    join, get-ip cookie+request end-code ;
+
+: +group ( -- )
+    msg-group$ $@ dup IF
+	o { w^ group } 2dup msg-groups #@ d0<> IF
+	    group cell last# cell+ $+!
+	ELSE  group cell 2swap msg-groups #!  THEN
+    ELSE  2drop  THEN ;
+
 : chat-user ( -- )
     wait-chat  search-chat
     ?dup-IF  >o rdrop
     ELSE  0 chat-keys $[]@ $A $A pk-connect !time
-	+resend-msg
-	net2o-code expect-reply log !time endwith
-	join, get-ip cookie+request end-code
-	msg-group$ $@ dup IF
-	    o { w^ group } 2dup msg-groups #@ d0<> IF
-		group cell last# cell+ $+!
-	    ELSE  group cell 2swap msg-groups #!  THEN
-	ELSE  2drop  THEN
+	+resend-msg  greet +group
     THEN
     msg-group$ $@len 0= IF  pubkey $@ msg-group$ $!  THEN
     o { w^ connect }
@@ -240,7 +244,7 @@ get-current n2o definitions
     get-me  init-client
     search-key$ $[]off  import#dht import-type !
     BEGIN  ?nextarg  WHILE  base85>$ search-key$ $+[]!  REPEAT
-    search-keys  save-pubkeys
+    search-keys  insert-keys  save-pubkeys
     import#untrusted import-type ! ;
 
 synonym inkey keyin
