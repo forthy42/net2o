@@ -229,12 +229,12 @@ get-current n2o definitions
       space .nick  cr o> ;] #map ;
 
 : keyqr ( -- )
-    \G usage: n2o keyqr [@user1 .. @usern]
+    \G usage: n2o keyqr/qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
     get-me argc @ 1 > IF  qr-nicks  ELSE  qr-me  THEN ;
 
 : keysearch ( -- )
-    \G usage: n2o keysearch 85string1 .. 85stringn
+    \G usage: n2o keysearch/searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
     get-me  init-client
