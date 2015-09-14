@@ -260,9 +260,9 @@ magenta >bg white >fg or bold or ,
 
 Defer dht-nick? \ query DHT for nick
 
-: .key-id ( addr u -- ) 2dup key| key-table #@ 0=
-    IF  drop 2dup dht-nick? 2dup key| key-table #@ 0=
-	IF  2drop <err> 8 85type ." (unknown)" <default>  EXIT  THEN  THEN
+: .key-id ( addr u -- ) ~~ 2dup key| key-table #@ 0=
+    IF  ~~ drop 2dup dht-nick? 2dup key| key-table #@ 0=
+	IF  ~~ 2drop <err> 8 85type ." (unknown)" <default>  EXIT  THEN  THEN
     cell+ <info> ..nick <default> 2drop ;
 
 :noname ( addr u -- )
