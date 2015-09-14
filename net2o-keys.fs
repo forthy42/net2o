@@ -259,11 +259,16 @@ magenta >bg white >fg or bold or ,
     cell+ ..nick ." ' ok" cr ;
 
 Defer dht-nick?
-event: ->search-key  key| dht-nick? ;
+event: ->search-key  key| over >r dht-nick? r> free throw ;
 
-: .key-id ( addr u -- ) 2dup key| key-table #@ 0=
-    IF  drop <event 2dup save-mem e$, ->search-key [ up@ ]l event>
-	<err> 8 umin 85type ." (unknown)" <default>  EXIT  THEN
+: .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
+
+: .key-id ( addr u -- ) key| 2dup key-table #@ 0=
+    IF  drop up@ receiver-task = IF
+	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
+	    .unkey-id EXIT  THEN
+	2dup dht-nick? 2dup key-table #@ 0= IF
+	    drop .unkey-id EXIT  THEN  THEN
     cell+ <info> ..nick <default> 2drop ;
 
 :noname ( addr u -- )
