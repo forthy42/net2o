@@ -106,6 +106,8 @@ User host$ \ check for this hostname
 
 \ search keys
 
+User search-key$
+
 : search-keys ( -- )
     dht-connect
     net2o-code  expect-reply
@@ -126,10 +128,6 @@ User host$ \ check for this hostname
     dup 4 < IF  2drop  EXIT  THEN
     search-key$ $off search-key$ $+[]!
     search-keys insert-keys save-pubkeys ;
-
-:noname  search-keys $[]# IF
-	search-keys  insert-keys  save-pubkeys
-	search-keys $[]off  THEN ; is do-hide
 
 0 [IF]
 Local Variables:
