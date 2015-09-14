@@ -372,3 +372,41 @@ $10 Constant datesize#
     over @ IF  over @ swap 2dup erase  free+guard  off
     ELSE  2drop  THEN ;
 
+\ file stuff
+
+: ?.net2o ( -- )
+    s" ~/.net2o" r/o open-file IF
+	drop s" ~/.net2o" $1C0 mkdir-parents throw
+    ELSE
+	close-file throw
+    THEN ;
+
+: ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
+    ?.net2o
+    addr u r/w open-file dup -514 = IF
+	2drop addr u r/w create-file
+    THEN  throw ;
+
+: write@pos-file ( addr u 64pos fd -- ) >r
+    64>d r@ reposition-file throw
+    r@ write-file throw r> flush-file throw ;
+
+: append-file ( addr u fd -- 64pos ) >r
+    r@ file-size throw d>64 64dup { 64: pos } r> write@pos-file pos ;
+
+\ copy files
+
+: >backup ( addr u -- )
+    2dup 2dup [: type '~' emit ;] $tmp rename-file throw
+    2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
+
+: >copy ( addr u -- fd )
+    2dup [: type '+' emit ;] $tmp r/w create-file throw { fd1 }
+    r/o open-file throw 0 { fd0 w^ cpy }
+    0. fd0 reposition-file throw
+    fd0 cpy $slurp fd0 close-file throw
+    cpy $@ fd1 write-file throw cpy $off
+    fd1 flush-file throw  fd1 ;
+
+: save-file ( addr u xt -- ) >r
+    2dup >copy r> execute >backup ;

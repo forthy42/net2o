@@ -75,7 +75,7 @@ $20 value hash-size#
     pad hash-size# ;
 
 : do-keyin ( addr u -- )
-    key-readin $slurp-file
+    key-readin $slurp-file  64#-1 key-read-offset 64!
     key-readin $@ do-key ;
 
 : ?dhtroot ( -- )

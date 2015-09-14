@@ -407,37 +407,18 @@ set-current previous previous
 0 Value key-sfd \ secret keys
 0 Value key-pfd \ pubkeys
 
-: ?.net2o ( -- )
-    s" ~/.net2o" r/o open-file IF
-	drop s" ~/.net2o" $1C0 mkdir-parents throw
-    ELSE
-	close-file throw
-    THEN ;
-
-: ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
-    ?.net2o
-    addr u r/w open-file dup -514 = IF
-	2drop addr u r/w create-file
-    THEN  throw ;
 : ?key-sfd ( -- fd ) key-sfd "~/.net2o/seckeys.k2o" ?fd dup to key-sfd ;
 : ?key-pfd ( -- fd ) key-pfd "~/.net2o/pubkeys.k2o" ?fd dup to key-pfd ;
 
-: write@pos-file ( addr u 64pos fd -- ) >r
-    64>d r@ reposition-file throw
-    r@ write-file throw r> flush-file throw ;
-
-: append-file ( addr u fd -- ) >r
-    r@ file-size throw d>64 r> write@pos-file ;
-
 : key>sfile ( -- )
-    keypack keypack-all# ?key-sfd append-file ;
+    keypack keypack-all# ?key-sfd append-file ke-offset 64! ;
 : key>pfile ( -- )
-    keypack keypack-all# ?key-pfd append-file ;
+    keypack keypack-all# ?key-pfd append-file ke-offset 64! ;
 
-: key>sfile@pos ( 64pos -- ) 64>r
-    keypack keypack-all# 64r> ?key-sfd write@pos-file ;
-: key>pfile@pos ( 64pos -- ) 64>r
-    keypack keypack-all# 64r> ?key-pfd write@pos-file ;
+: key>sfile@pos ( 64pos -- ) 64dup 64#-1 64= IF  64drop key>sfile
+    ELSE  64>r keypack keypack-all# 64r> ?key-sfd write@pos-file  THEN ;
+: key>pfile@pos ( 64pos -- ) 64dup 64#-1 64= IF  64drop key>pfile
+    ELSE  64>r keypack keypack-all# 64r> ?key-pfd write@pos-file  THEN ;
 
 : rnd>sfile ( -- )
     keypack keypack-all# >rng$ key>sfile ;
@@ -500,27 +481,17 @@ previous
     \g get my nick with signature
     pkc keysize key-table #@ drop cell+ .keynick$ ;
 
-: >backup ( addr u -- )
-    2dup 2dup [: type '~' emit ;] $tmp rename-file throw
-    2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
-
 Variable cp-tmp
 
 : save-pubkeys ( -- )
-    key-pfd ?dup-IF
-	dup 0. rot reposition-file throw
-	dup cp-tmp $slurp close-file throw  THEN
-    0 "~/.net2o/pubkeys.k2o+" ?fd to key-pfd
-    cp-tmp $@ key-pfd write-file throw cp-tmp $off
-    key-table [: cell+ $@ drop cell+ >o
-      ke-sk sec@ d0= IF  pack-pubkey
-	  flush( ." saving " .nick forth:cr )
-	  key-crypt ke-offset 64@ key>pfile@pos
-      THEN o> ;] #map
-    key-pfd close-file throw
-    "~/.net2o/pubkeys.k2o" >backup
-    0 to key-pfd
-    import#untrusted import-type ! ;
+    key-pfd ?dup-IF  close-file throw  THEN
+    "~/.net2o/pubkeys.k2o" [: to key-pfd
+      key-table [: cell+ $@ drop cell+ >o
+	ke-sk sec@ d0= IF  pack-pubkey
+	    flush( ." saving " .nick forth:cr )
+	    key-crypt ke-offset 64@ key>pfile@pos
+	THEN o> ;] #map
+    ;] save-file ;
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF

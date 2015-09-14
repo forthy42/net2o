@@ -118,6 +118,7 @@ User search-key$
     import#dht import-type !
     search-key$ [: >d#id >o
       0 dht-owner $[]@ nip sigsize# u> IF
+	  64#-1 key-read-offset 64!
 	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
 	    dht-hash $. type ;] $tmp
 	  key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
