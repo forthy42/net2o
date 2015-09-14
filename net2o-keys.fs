@@ -494,17 +494,13 @@ Variable cp-tmp
     ;] save-file ;
 
 : save-seckeys ( -- )
-    key-sfd ?dup-IF
-	dup 0. rot reposition-file throw
-	dup cp-tmp $slurp close-file throw  THEN
-    0 "~/.net2o/seckeys.k2o+" ?fd to key-sfd
-    cp-tmp $@ key-sfd write-file throw cp-tmp $off
-    key-table [: cell+ $@ drop cell+ >o
-      ke-sk sec@ d0<> IF  pack-seckey
-	  key-crypt ke-offset 64@ key>sfile@pos
-      THEN o> ;] #map
-    "~/.net2o/seckeys.k2o" >backup
-    key-sfd close-file throw 0 to key-sfd ;
+    key-sfd ?dup-IF  close-file throw  THEN
+    "~/.net2o/seckeys.k2o" [: to key-sfd
+      key-table [: cell+ $@ drop cell+ >o
+	ke-sk sec@ d0<> IF  pack-seckey
+	    key-crypt ke-offset 64@ key>sfile@pos
+	THEN o> ;] #map
+    ;] save-file ;
 
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
