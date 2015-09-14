@@ -104,6 +104,30 @@ User host$ \ check for this hostname
 : nick-connect ( addr u cmdlen datalen -- )
     2>r nick>pk 2r> pk-connect ;
 
+\ search keys
+
+User search-key$
+
+: search-keys ( -- )
+    dht-connect
+    net2o-code  expect-reply
+    search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
+    cookie+request end-code| disconnect-me ;
+
+: insert-keys ( -- )
+    import#dht import-type !
+    search-key$ [: >d#id >o
+      0 dht-owner $[]@ nip sigsize# u> IF
+	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
+	    dht-hash $. type ;] $tmp
+	  key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
+      THEN
+      o> ;] $[]map ;
+
+:noname ( pk u -- )
+    search-key$ $off search-key$ $+[]!
+    search-keys  insert-keys  save-pubkeys ; is dht-nick?
+
 0 [IF]
 Local Variables:
 forth-local-words:

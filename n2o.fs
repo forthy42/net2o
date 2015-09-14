@@ -78,23 +78,6 @@ $20 value hash-size#
     key-readin $slurp-file
     key-readin $@ do-key ;
 
-Variable search-key$
-
-: search-keys ( -- )
-    dht-connect
-    net2o-code  expect-reply
-    search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
-    cookie+request end-code| disconnect-me ;
-
-: insert-keys ( -- )
-    search-key$ [: >d#id >o
-	0 dht-owner $[]@ nip sigsize# u> IF
-	    [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
-		dht-hash $. type ;] $tmp
-	    key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
-	THEN
-	o> ;] $[]map ;
-
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
 	key>default
@@ -110,6 +93,10 @@ Variable chat-keys
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;
+
+: keys>search ( -- )
+    search-key$ $[]off
+    BEGIN  ?nextarg  WHILE  base85>$ search-key$ $+[]!  REPEAT ;
 
 : wait-key ( -- )
     BEGIN  1 key lshift [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
@@ -206,8 +193,7 @@ get-current n2o definitions
     \G usage: n2o keyin/inkey file1 .. filen
     \G keyin: read a .n2o key file in
     import#manual import-type !  get-me key>default
-    BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys
-    import#untrusted import-type ! ;
+    BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
     \G usage: n2o keyout/outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
@@ -242,10 +228,7 @@ get-current n2o definitions
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
     get-me  init-client
-    search-key$ $[]off  import#dht import-type !
-    BEGIN  ?nextarg  WHILE  base85>$ search-key$ $+[]!  REPEAT
-    search-keys  insert-keys  save-pubkeys
-    import#untrusted import-type ! ;
+    keys>search search-keys insert-keys save-pubkeys ;
 
 synonym inkey keyin
 synonym outkey keyout

@@ -257,9 +257,13 @@ magenta >bg white >fg or bold or ,
 : .key# ( addr u -- ) key|
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
-: .key-id ( addr u -- ) key| 2dup key-table #@ 0=
-    IF  2drop <err> 8 85type ." (unknown)" <default>
-    ELSE  cell+ <info> ..nick <default> 2drop  THEN ;
+
+Defer dht-nick? \ query DHT for nick
+
+: .key-id ( addr u -- ) 2dup key| key-table #@ 0=
+    IF  drop 2dup dht-nick? 2dup key| key-table #@ 0=
+	IF  2drop <err> 8 85type ." (unknown)" <default>  EXIT  THEN  THEN
+    cell+ <info> ..nick <default> 2drop ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF
@@ -362,8 +366,9 @@ $11 net2o: privkey ( $:string -- )
 \g preshared key, used for DHT encryption
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
 \g add a key signature
-+net2o: keyimport ( n -- ) pw-level# 0>= !!invalid!!
-    64>n import#untrusted umin ke-import ! ;
++net2o: keyimport ( n -- )
+    pw-level# 0< IF  64>n import#untrusted umin ke-import !
+    ELSE  64drop  THEN ;
 dup set-current previous
 
 gen-table $freeze
@@ -513,7 +518,8 @@ Variable cp-tmp
       THEN o> ;] #map
     key-pfd close-file throw
     "~/.net2o/pubkeys.k2o" >backup
-    0 to key-pfd ;
+    0 to key-pfd
+    import#untrusted import-type ! ;
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF
