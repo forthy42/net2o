@@ -258,8 +258,11 @@ magenta >bg white >fg or bold or ,
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
 
+Defer dht-nick?
+event: ->search-key  key| dht-nick? ;
+
 : .key-id ( addr u -- ) 2dup key| key-table #@ 0=
-    IF  drop
+    IF  drop <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	<err> 8 umin 85type ." (unknown)" <default>  EXIT  THEN
     cell+ <info> ..nick <default> 2drop ;
 

@@ -124,10 +124,10 @@ User search-key$
       THEN
       o> ;] $[]map ;
 
-: dht-nick? ( pk u -- )
+:noname ( pk u -- )
     dup 4 < IF  2drop  EXIT  THEN
     search-key$ $off search-key$ $+[]!
-    search-keys insert-keys save-pubkeys ;
+    search-keys insert-keys save-pubkeys ; is dht-nick?
 
 0 [IF]
 Local Variables:
