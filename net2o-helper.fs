@@ -125,7 +125,7 @@ User search-key$
       o> ;] $[]map ;
 
 :noname ( pk u -- )
-    search-key$ $off search-key$ $+[]!
+    ~~ search-key$ $off search-key$ $+[]!
     search-keys  insert-keys  save-pubkeys ; is dht-nick?
 
 0 [IF]
