@@ -109,7 +109,7 @@ User host$ \ check for this hostname
 User search-key$
 
 : search-keys ( -- )
-    dht-connect
+    ~~ dht-connect
     net2o-code  expect-reply
     search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
