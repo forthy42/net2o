@@ -408,5 +408,9 @@ $10 Constant datesize#
     cpy $@ fd1 write-file throw cpy $off
     fd1 flush-file throw  fd1 ;
 
-: save-file ( addr u xt -- ) >r
-    2dup >copy r> execute >backup ;
+: save-file ( addr u xt -- )
+    \G save file @var{addr u} by making a copy first,
+    \G applying xt ( fd -- ) on that copy, and then
+    \G moving the existing file to backup ("~" appended to filename)
+    \G and the copy ("+" appended to filename) to the original name.
+    >r 2dup >copy r> execute >backup ;

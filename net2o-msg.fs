@@ -17,16 +17,22 @@
 
 defer avalanche-to ( addr u o:context -- )
 defer pk-connect ( key u cmdlen datalen -- )
-: avalanche-msg ( msg groupaddr u -- )
+: avalanche-msg ( msg u1 groupaddr u2 -- )
     \g forward message to all next nodes of that message group
     2swap { d: msg }
     msg-groups #@ dup IF
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
 	cell +LOOP
     ELSE  2drop  THEN ;
+: do-msg-nestsig ( -- )
+    last-msg $@
+    sigpksize# - 2dup + sigpksize# >$  c-state off
+    do-nestsig ;
+: do-avalanche ( -- )
+    last-msg $@ last-group $@ parent @ .avalanche-msg ;
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    >o last-msg $@ last-group $@ parent @ .avalanche-msg o> ;
+    >o do-avalanche o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
 event: ->reconnect ( o -- )
@@ -34,6 +40,8 @@ event: ->reconnect ( o -- )
     IF  "" last-group $@ msg-groups #!  THEN  last# >r
     last-msg $@ $A $A pk-connect o { w^ connection }
     connection cell r> cell+ $+! o> ;
+event: ->msg-nestsig ( o -- )
+    >o do-msg-nestsig o> ctrl L inskey ;
 
 get-current also net2o-base definitions
 
@@ -55,9 +63,11 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
-    $> last-group $!
-    parent @ .wait-task @ ?dup-IF
-	<event o elit, ->avalanche event>  THEN ;
+    $> last-group $! up@ receiver-task <> IF
+	do-avalanche
+    ELSE parent @ .wait-task @ ?dup-IF
+	    <event o elit, ->avalanche event>  THEN
+    THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
 	parent cell last# cell+ $+!
@@ -85,13 +95,15 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     <event o elit, ->reconnect parent @ .wait-task @ event> ;
 +net2o: msg-joined ( $:nick -- ) \g join a group, send your key with nick
     signed? !!signed!! 1 2 !!<>order? $> type ;
+net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
+    $> nest-sig -rot last-msg $! IF
+	parent @ .wait-task @ ?dup-IF
+	    >r r@ <hide> <event o elit, ->msg-nestsig r> event>
+	ELSE  do-msg-nestsig  THEN
+    ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
 
 :noname ( addr u -- addr u flag )
-    pk-sig? dup >r IF
-	2dup last-msg $!
-	sigpksize# - 2dup +
-	sigpksize# >$  c-state off
-    THEN r>
+    pk-sig?
 ; msg-class to nest-sig
 
 gen-table $freeze

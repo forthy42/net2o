@@ -147,8 +147,10 @@ event: ->type defers type <event ->b$off event> ctrl L inskey ;
 event: ->hide ctrl Z inskey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
+: <hide> ( task -- )
+    <event up@ elit, ->hide event>  stop ;
 : bflush ( -- )
-    <event up@ elit, ->hide [ up@ ]l event>  stop
+    [ up@ ]l <hide>
     b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
     BEGIN  b$ @  WHILE  stop  REPEAT ;
 : bcr    #lf bemit bflush ;
