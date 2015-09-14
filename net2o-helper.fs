@@ -109,7 +109,7 @@ User host$ \ check for this hostname
 User search-key$
 
 : search-keys ( -- )
-    ~~ dht-connect
+    dht-connect
     net2o-code  expect-reply
     search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
@@ -125,7 +125,8 @@ User search-key$
       o> ;] $[]map ;
 
 :noname ( pk u -- )
-    ~~ search-key$ $off search-key$ $+[]!
+    dup 4 < IF  2drop  EXIT  THEN
+    search-key$ $off search-key$ $+[]!
     search-keys  insert-keys  save-pubkeys ; is dht-nick?
 
 0 [IF]
