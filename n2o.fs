@@ -204,10 +204,9 @@ get-current n2o definitions
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
-    2dup key#user +gen-keys .rsk
-    read-keys .keys
+    2dup key#user +gen-keys .rsk .keys
     secret-keys# 1- secret-key >raw-key
-    out-me ?dhtroot ;
+    out-me ?dhtroot  save-keys ;
 : keylist ( -- )
     \G usage: n2o keylist/listkey
     \G keylist: list all known keys

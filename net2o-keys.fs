@@ -267,7 +267,10 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	    .unkey-id EXIT  THEN
-	2dup dht-nick? 2dup key-table #@ 0= IF
+	buf-dump 2@ 2>r buf-state 2@ 2>r cmdbuf-o @ >r
+	2dup dht-nick?
+	r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2!
+	2dup key-table #@ 0= IF
 	    drop .unkey-id EXIT  THEN  THEN
     cell+ <info> ..nick <default> 2drop ;
 
@@ -510,9 +513,15 @@ Variable cp-tmp
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
 
-: +gen-keys ( nick u type -- ) -rot  import#self import-type !
-    gen-keys >keys pack-key key-crypt key>sfile
-    import#untrusted import-type ! ;
+: +gen-keys ( nick u type -- )
+    gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
+    import#self ke-import !  ke-type !  ke-nick $!  nick!
+    skc keysize ke-sk sec!  +seckey
+    [ also net2o-base ]
+    [: ke-type @ ulit, keytype ke-nick $@ $, keynick ;] gen-cmd$
+    [ previous ] [: type pkc keysize2 type ;] $tmp
+    now>never c:0key c:hash ['] .sig $tmp ke-selfsig $!
+    o> ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
