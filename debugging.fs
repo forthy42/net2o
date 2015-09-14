@@ -142,9 +142,11 @@ Ustack b$
     : inskey ( key -- )  key-buffer c$+! ;
 [THEN]
 
+Defer do-hide
+
 event: ->b$off b$ $off ;
 event: ->type defers type <event ->b$off event> ctrl L inskey ;
-event: ->hide ctrl Z inskey <event ->wake event> ;
+event: ->hide do-hide ctrl Z inskey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )

@@ -258,11 +258,11 @@ magenta >bg white >fg or bold or ,
     ." Key '" key-table #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
 
-Defer dht-nick? \ query DHT for nick
+Variable search-key$
 
-: .key-id ( addr u -- ) ~~ 2dup key| key-table #@ 0=
-    IF  ~~ drop 2dup dht-nick? 2dup key| key-table #@ 0=
-	IF  ~~ 2drop <err> 8 85type ." (unknown)" <default>  EXIT  THEN  THEN
+: .key-id ( addr u -- ) 2dup key| key-table #@ 0=
+    IF  drop 2dup search-key$ $+[]!
+	<err> 8 umin 85type ." (unknown)" <default>  EXIT  THEN
     cell+ <info> ..nick <default> 2drop ;
 
 :noname ( addr u -- )

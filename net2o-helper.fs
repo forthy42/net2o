@@ -33,7 +33,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     [: .time ." Connected, o=" o hex. cr ;] $err ;
 
 : dht-connect ( -- )
-    $8 $8 dhtnick $@ nick>pk ins-ip pk:connect ;
+    $8 $8 dhtnick $@ nick>pk ins-ip  pk:connect ;
 
 : subme ( -- )
     pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
@@ -106,8 +106,6 @@ User host$ \ check for this hostname
 
 \ search keys
 
-User search-key$
-
 : search-keys ( -- )
     dht-connect
     net2o-code  expect-reply
@@ -124,10 +122,14 @@ User search-key$
       THEN
       o> ;] $[]map ;
 
-:noname ( pk u -- )
+: dht-nick? ( pk u -- )
     dup 4 < IF  2drop  EXIT  THEN
     search-key$ $off search-key$ $+[]!
-    search-keys  insert-keys  save-pubkeys ; is dht-nick?
+    search-keys insert-keys save-pubkeys ;
+
+:noname  search-keys $[]# IF
+	search-keys  insert-keys  save-pubkeys
+	search-keys $[]off  THEN ; is do-hide
 
 0 [IF]
 Local Variables:
