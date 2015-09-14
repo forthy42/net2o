@@ -192,7 +192,7 @@ get-current n2o definitions
 : keyin ( -- )
     \G usage: n2o keyin/inkey file1 .. filen
     \G keyin: read a .n2o key file in
-    import#manual import-type !  get-me key>default
+    get-me  import#manual import-type !  key>default
     BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
     \G usage: n2o keyout/outkey [@user1 .. @usern]
