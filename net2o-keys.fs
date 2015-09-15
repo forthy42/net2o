@@ -273,10 +273,11 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	    .unkey-id EXIT  THEN
 	buf-dump 2@ 2>r buf-state 2@ 2>r cmdbuf-o @ >r
+	connection >o validated @ >r
 	2dup dht-nick?
+	r> validated ! o>
 	r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2!
-	2dup key-table #@ 0= IF
-	    drop .unkey-id EXIT  THEN  THEN
+	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ <info> ..nick <default> 2drop ;
 
 :noname ( addr u -- )

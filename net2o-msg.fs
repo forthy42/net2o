@@ -40,8 +40,8 @@ event: ->reconnect ( o -- )
     IF  "" last-group $@ msg-groups #!  THEN  last# >r
     last-msg $@ $A $A pk-connect o { w^ connection }
     connection cell r> cell+ $+! o> ;
-event: ->msg-nestsig ( o -- )
-    >o do-msg-nestsig o> ctrl L inskey ;
+event: ->msg-nestsig ( editor stack o -- editor stack )
+    >o 2>r 2>r do-msg-nestsig 2r> 2r> o> ctrl L inskey ;
 
 get-current also net2o-base definitions
 
