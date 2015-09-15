@@ -211,11 +211,7 @@ get-current n2o definitions
     \G usage: n2o keylist/listkey
     \G keylist: list all known keys
     get-me
-    key-table [: cell+ $@ drop cell+ >o
-      ke-pk $@ keysize umin
-      ke-import @ >im-color 85type <default>
-      ke-selfsig $@ .sigdates
-      space .nick  cr o> ;] #map ;
+    key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
 
 : keyqr ( -- )
     \G usage: n2o keyqr/qrkey [@user1 .. @usern]

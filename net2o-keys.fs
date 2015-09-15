@@ -236,7 +236,12 @@ magenta >bg white >fg or bold or ,
     ." first: " ke-selfsig $@ drop 64@ .sigdate cr
     ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
-
+: .key-list ( o:key -- o:key )
+    ke-offset 64@ 64>d keypack-all# um/mod nip 2 .r space
+    ke-pk $@ keysize umin
+    ke-import @ >im-color 85type <default>
+    ke-selfsig $@ .sigdates
+    space .nick  cr ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 

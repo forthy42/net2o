@@ -17,10 +17,27 @@
 
 \ net2o commands are protobuf coded, not byte coded.
 
-\ command helper
+\ command buffers
 
-User buf-state cell uallot drop
-User buf-dump  cell uallot drop
+user-o cmdbuf-o
+
+object class
+    cell uvar cmdbuf#
+    cell uvar cmd-reply-xt
+    2 cells uvar buf-state
+    2 cells uvar buf-dump
+    umethod cmdlock
+    umethod cmdbuf$
+    umethod cmdreset
+    umethod maxstring
+    umethod +cmdbuf
+    umethod -cmdbuf
+    umethod cmddest
+end-class cmd-buf-c
+
+: cmdbuf: ( addr -- )  Create , DOES> perform @ cmdbuf-o ! ;
+
+\ command helper
 
 : zz>n ( 64zz -- 64n )
     64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
@@ -234,24 +251,6 @@ Variable throwcount
     buf-dump 2@ 2>r buf-state 2@ 2>r ['] do-cmd-loop catch
     2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN
     2r> buf-dump 2! ?dup-IF  cmd-throw  THEN ;
-
-\ command buffers
-
-user-o cmdbuf-o
-
-object class
-    cell uvar cmdbuf#
-    cell uvar cmd-reply-xt
-    umethod cmdlock
-    umethod cmdbuf$
-    umethod cmdreset
-    umethod maxstring
-    umethod +cmdbuf
-    umethod -cmdbuf
-    umethod cmddest
-end-class cmd-buf-c
-
-: cmdbuf: ( addr -- )  Create , DOES> perform @ cmdbuf-o ! ;
 
 cmd-buf-c new code-buf^ !
 ' code-buf^ cmdbuf: code-buf
