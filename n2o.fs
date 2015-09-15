@@ -105,7 +105,7 @@ Variable chat-keys
 : wait-chat ( -- )
     ." press key to connect to "
     chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
-	.key-id space ;] $[]map
+	.key-id space ;] $[]map cr
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect

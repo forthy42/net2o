@@ -25,12 +25,12 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     net2o-host $@ net2o-port insert-ip6 ;
 
 : pk:connect ( code data key u ret -- )
-    [: .time ." Connect to: " dup hex. cr ;] $err
+    connect( [: .time ." Connect to: " dup hex. cr ;] $err )
     n2o:new-context >o rdrop o to connection  setup!
     dest-pk \ set our destination key
     n2o:connect
     +flow-control +resend
-    [: .time ." Connected, o=" o hex. cr ;] $err ;
+    connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
 : dht-connect ( -- )
     $8 $8 dhtnick $@ nick>pk ins-ip  pk:connect ;
@@ -38,8 +38,8 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 : subme ( -- )
     pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
 
-: c:disconnect ( -- ) [: ." Disconnecting..." cr ;] $err
-    disconnect-me [: .packets profile( .times ) ;] $err ;
+: c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
+    disconnect-me connect( [: .packets profile( .times ) ;] $err ) ;
 
 : c:fetch-id ( pubkey u -- )
     net2o-code
@@ -74,10 +74,10 @@ User host$ \ check for this hostname
     2 pick >o host>$ o> IF
 	new-addr  dup .host-id $@
 	host$ $@ str= host$ $@len 0= or IF
-	    ." check addr: " dup .addr cr dup >r
+	    connect( ." check addr: " dup .addr cr ) dup >r
 	    [: check-addr1 0= IF  2drop  EXIT  THEN
 	      insert-address temp-addr ins-dest
-	      ." insert host: " temp-addr .addr-path cr
+	      connect( ." insert host: " temp-addr .addr-path cr )
 	      return-addr $10 0 skip nip 0= IF
 		  temp-addr return-addr $10 move
 	      THEN ;] addr>sock r>
@@ -129,6 +129,16 @@ User search-key$
     dup 4 < IF  2drop  EXIT  THEN
     search-key$ $off search-key$ $+[]!
     search-keys insert-keys save-pubkeys ; is dht-nick?
+
+\ connect, disconnect debug
+
+: dbg-connect ( -- )  connect( <info>
+    ." connected from: " pubkey $@ .key-id <default> cr ) ;
+: dbg-disconnect ( -- ) connect( <info>
+    ." disconnecting: " pubkey $@ .key-id <default> cr ) ;
+' dbg-connect IS do-connect
+' dbg-disconnect IS do-disconnect
+
 
 0 [IF]
 Local Variables:

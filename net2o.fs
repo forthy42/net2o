@@ -477,13 +477,8 @@ require net2o-classes.fs
 
 \ events for context-oriented behavior
 
-: dbg-connect ( -- )  <info>
-    ." connected from: " pubkey $@ 85type <default> cr ;
-: dbg-disconnect ( -- )  <info>
-    ." disconnecting: " pubkey $@ 85type <default> cr ;
-
-Defer do-connect     ' dbg-connect IS do-connect
-Defer do-disconnect  ' dbg-disconnect IS do-disconnect
+Defer do-connect
+Defer do-disconnect
 
 event: ->connect    ( connection -- ) .do-connect ;
 
@@ -1881,7 +1876,7 @@ Variable cookies
     fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
     10 6 0 f.rdp 's' emit ;
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
-    64dup ." rtdelay: " 64>f .ns cr
+    connect( 64dup ." rtdelay: " 64>f .ns cr )
     rtdelay 64! ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/

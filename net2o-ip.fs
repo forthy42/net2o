@@ -105,7 +105,8 @@ User ip6:#
 Defer .addr$
 
 : .iperr ( addr len -- )
-    [: <info> .time ." connected from: " .addr$ <default> cr ;] $err ;
+    connect( [: <info> .time ." connected from: " .addr$ <default> cr ;] $err
+    )else( 2drop ) ;
 
 : ipv4! ( ipv4 sockaddr -- )
     >r    r@ sin6_addr 12 + be-l!

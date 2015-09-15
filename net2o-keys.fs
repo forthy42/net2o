@@ -281,13 +281,13 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 		  ." got : " 2dup 85type cr ;] $err
 		true !!wrong-key!!
 	    THEN
-	    .key#  EXIT
+	    connect( .key# )else( 2drop )  EXIT
 	THEN  THEN
     2dup key-exist? 0= IF
 	strict-keys @ !!unknown-key!!
 	." Unknown key " 85type cr
     ELSE
-	.key#
+	connect( .key# )else( 2drop )
     THEN ; IS check-key
 
 :noname ( pkc -- skc )
