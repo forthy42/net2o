@@ -272,11 +272,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	    .unkey-id EXIT  THEN
-	buf-dump 2@ 2>r buf-state 2@ 2>r cmdbuf-o @ >r
-	connection >o validated @ >r
-	2dup dht-nick?
-	r> validated ! o>
-	r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2!
+	2dup ['] dht-nick? cmd-nest
 	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ <info> ..nick <default> 2drop ;
 
@@ -466,7 +462,7 @@ also net2o-base
 : pack-core ( o:key -- ) \ core without key
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
-\    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
+    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
 
 : pack-corekey ( o:key -- )

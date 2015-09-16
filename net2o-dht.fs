@@ -385,7 +385,7 @@ previous
     -setip n2o:send-revoke ;
 
 : disconnect-me ( -- )
-    net2o-code log .time s" Disconnect" $, type cr endwith
+    net2o-code connect( log .time s" Disconnect" $, type cr endwith )
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
     n2o:dispose-context msg( ." Disposed context" forth:cr ) ;
 

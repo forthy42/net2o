@@ -37,6 +37,13 @@ end-class cmd-buf-c
 
 : cmdbuf: ( addr -- )  Create , DOES> perform @ cmdbuf-o ! ;
 
+: cmd-nest { xt -- }
+    buf-dump 2@ 2>r buf-state 2@ 2>r cmdbuf-o @ >r
+    connection >o validated @ >r
+    xt execute
+    r> validated ! o>
+    r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2! ;
+
 \ command helper
 
 : zz>n ( 64zz -- 64n )
