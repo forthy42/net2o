@@ -99,7 +99,7 @@ Discussions
 * [Ack cookies](ackcookies.wiki)
 * [Key format](key-format.wiki)
 * [Key revocation](key-revocation.wiki)
-* [NSA backdoor](nsa-backdoor.wiki)
+* [NSA backdoor](nsa-backdoor.md)
 * [Onion Routing](onion-routing.wiki)
 * [What it's not for](whatnotfor.wiki)
 
