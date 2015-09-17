@@ -198,7 +198,7 @@ get-current n2o definitions
     \G usage: n2o keyout/outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     \G keyout: optional: output pubkeys of other users
-    get-me argc @ 1 > IF  out-nicks  ELSE  out-me  THEN ;
+    get-me ?peekarg IF  2drop out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
     \G usage: n2o keygen/genkey nick
     \G keygen: generate a new keypair
@@ -216,7 +216,7 @@ get-current n2o definitions
 : keyqr ( -- )
     \G usage: n2o keyqr/qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
-    get-me argc @ 1 > IF  qr-nicks  ELSE  qr-me  THEN ;
+    get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keysearch ( -- )
     \G usage: n2o keysearch/searchkey 85string1 .. 85stringn
@@ -367,7 +367,8 @@ set-current
 
 get-current also chat-/cmds definitions
 
-: n2o word-args ['] evaluate do-net2o-cmds ;
+: n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
+    ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
 
 set-current previous
 

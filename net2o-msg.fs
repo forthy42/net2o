@@ -215,14 +215,14 @@ get-current also chat-/cmds definitions
 
 set-current previous
 
+: do-chat-cmds ( addr u -- )
+    1 /string bl $split 2swap
+    2dup ['] chat-/cmds >body (search-wordlist)
+    ?dup-IF  nip nip name>int execute
+    ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
+
 : avalanche-text ( addr u -- )
-    over c@ '/' = IF
-	1 /string bl $split 2swap
-	2dup ['] chat-/cmds >body (search-wordlist)
-	?dup-IF  nip nip name>int execute
-	ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN
-	EXIT
-    THEN
+    over c@ '/' = IF  do-chat-cmds  EXIT  THEN
     2dup
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
 		  bl $split 2swap 1 /string nick>pk \ 0. if no nick
