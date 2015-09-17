@@ -141,9 +141,9 @@ Variable chat-keys
     ELSE  0 chat-keys $[]@ $A $A pk-connect !time
 	+resend-msg  greet +group
     THEN
-    msg-group$ $@len 0= IF  pubkey $@ msg-group$ $!  THEN
+    msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
     o { w^ connect }
-    connect cell pubkey $@ keysize umin msg-groups #!
+    connect cell pubkey $@ key| msg-groups #!
     ret+beacon group-chat ;
 
 : handle-chat ( char -- )

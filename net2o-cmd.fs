@@ -549,6 +549,7 @@ previous
 \ nested commands
 
 User neststart#
+User nest-string cell uallot drop
 2 Constant fwd# \ maximum 14 bits = 16kB
 
 : nest$ ( -- addr u )  cmdbuf$ neststart# @ safe/string ;
@@ -566,7 +567,7 @@ also net2o-base
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
 : ']sign ( xt -- )
     c:0key nest$ c:hash $tmp +cmdbuf
-    cmd-resolve> 2drop nestsig ;
+    cmd-resolve> nest-string 2! nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 

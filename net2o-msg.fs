@@ -41,7 +41,13 @@ event: ->reconnect ( o -- )
     last-msg $@ $A $A pk-connect o { w^ connection }
     connection cell r> cell+ $+! o> ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
-    >o 2>r 2>r do-msg-nestsig 2r> 2r> o> ctrl L inskey ;
+    >o do-msg-nestsig o> ctrl L inskey ;
+
+: ?msg-context ( -- o )
+    msg-context @ dup 0= IF
+	drop  n2o:new-msg dup msg-context !
+	pubkey $@ msg-context @ .last-group $!
+    THEN ;
 
 get-current also net2o-base definitions
 
@@ -49,11 +55,7 @@ get-current also net2o-base definitions
 \g ### message commands ###
 \g 
 $34 net2o: msg ( -- o:msg ) \g push a message object
-    msg-context @ dup 0= IF
-	drop  n2o:new-msg dup msg-context !
-	pubkey $@ msg-context @ .last-group $!
-    THEN
-    n:>o c-state off ;
+    ?msg-context n:>o c-state off ;
 
 msg-table >table
 
@@ -161,10 +163,9 @@ previous
     net2o-code ['] msg-reply expect-reply-xt leave,
     cookie+request end-code| ;
 
-: .chathead ( -- )
-    sigdate 64@ .ticks space pkc keysize .key-id ;
-
-: .chat ( addr u -- )  .chathead ." : " type cr ;
+: .chat ( -- )
+    msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
+    nest-string 2@ last-msg $! do-msg-nestsig o> o> ;
 
 $200 Constant maxmsg#
 
@@ -203,8 +204,7 @@ Vocabulary chat-/cmds
 get-current also chat-/cmds definitions
 
 : me ( addr u -- )
-    2dup [: $, msg-action ;] send-avalanche
-    .chathead space <warn> forth:type <default> forth:cr ;
+    [: $, msg-action ;] send-avalanche .chat ;
 
 : peers ( addr u -- ) 2drop ." peers:"
     msg-group$ $@ msg-groups #@ bounds ?DO
@@ -224,7 +224,6 @@ set-current previous
 
 : avalanche-text ( addr u -- )
     over c@ '/' = IF  do-chat-cmds  EXIT  THEN
-    2dup
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
 		  bl $split 2swap 1 /string ':' -skip nick>pk \ 0. if no nick
 		  2dup d0= IF  2drop 2drop oaddr ou true
@@ -236,26 +235,20 @@ previous
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
-	2dup "/bye" str= 0=
-	msg-group$ $@ msg-groups #@ nip 0> and  WHILE
-	    msg-group$ $@ msg-groups #@ drop @ >o
-	    msg-context @ .avalanche-text o>
-    REPEAT  2drop
+	2dup "/bye" str= 0= >r
+	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
+	    @ >o msg-context @ .avalanche-text o>
+    REPEAT  drop 2drop
     msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
     r> 0 ?DO  >o o to connection +resend-cmd send-leave
     ret-beacon disconnect-me o>  cell +LOOP ;
-
-: .msg-timeout ( key-addr u -- )
-    .chathead ." : @" <info> key>nick type
-    <warn> ."  left (timeout)" <default> cr ;
 
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
     ELSE  EXIT  THEN
     timeout-expired? IF  pubkey $@ ['] type $tmp n2o:dispose-context
-	2dup .msg-timeout
 	msg-group$ $@len IF
-	    ['] left, send-avalanche
+	    ['] left, send-avalanche .chat
 	ELSE  2drop  THEN
     THEN ;
 
