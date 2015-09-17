@@ -95,3 +95,8 @@ doc:	$(DOC)
 
 wiki/commands.md:	$(SOURCES)
 	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md
+
+TAGS:	$(SOURCES)
+	gforth etags.fs -e '0 to script?' n2o.fs -e "bye"
+	mv TAGS net2o.TAGS
+	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS

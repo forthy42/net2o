@@ -326,6 +326,28 @@ $10 Constant datesize#
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 
+\ list sorted by sig date
+
+: $ins[]date ( addr u $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
+		64drop $# $a $[]!  EXIT  THEN
+	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+: $del[]date ( addr u $array -- )
+    \G delete O(log(n)) from pre-sorted array
+    { $a } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
+		64drop $# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
+
 \ filter entries out of a string array
 
 : $[]filter { addr xt -- }
