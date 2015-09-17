@@ -226,7 +226,7 @@ set-current previous
     over c@ '/' = IF  do-chat-cmds  EXIT  THEN
     2dup
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
-		  bl $split 2swap 1 /string nick>pk \ 0. if no nick
+		  bl $split 2swap 1 /string ':' -skip nick>pk \ 0. if no nick
 		  2dup d0= IF  2drop 2drop oaddr ou true
 		  ELSE  $, msg-signal false  THEN
 	  UNTIL  THEN  THEN
