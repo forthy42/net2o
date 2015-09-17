@@ -315,7 +315,8 @@ max-passphrase# buffer: passphrase
 
 Variable keys
 
-: key>default ( -- ) keys $[]# 1- keys sec[]@ drop >storekey ! ;
+: lastkey@ ( -- addr u ) keys $[]# 1- keys sec[]@ ;
+: key>default ( -- ) lastkey@ drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
 : +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;

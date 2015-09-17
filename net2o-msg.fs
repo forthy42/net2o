@@ -24,12 +24,37 @@ defer pk-connect ( key u cmdlen datalen -- )
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
 	cell +LOOP
     ELSE  2drop  THEN ;
+
+Variable msg-group$
+Variable group-master
+Variable msg-logs
+
+: init-chatlog ( -- ) ?.net2o s" ~/.net2o/chats" $1FF init-dir ;
+
+: >chatid ( group u -- id u )  lastkey@ keyed-hash#128 ;
+
+: save-msgs ( group u -- )  init-chatlog
+    enc-file $off
+    2dup msg-logs #@ bounds ?DO
+	I $@ [: net2o-base:$, net2o-base:nestsig ;] gen-cmd$ enc-file $+!
+    cell +LOOP
+    >chatid
+    [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
+    pk-off  key-list encfile-rest ;
+
+: +msg-log ( addr u -- )
+    msg-group$ $@ msg-logs #@ d0= IF
+	s" " msg-group$ $@ msg-logs #!  THEN
+    last# cell+ $ins[]date msg-group$ $@ save-msgs ;
+
 : do-msg-nestsig ( -- )
-    last-msg $@
+    last-msg $@ 2dup +msg-log
     sigpksize# - 2dup + sigpksize# >$  c-state off
     do-nestsig ;
+
 : do-avalanche ( -- )
     last-msg $@ last-group $@ parent @ .avalanche-msg ;
+
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     >o do-avalanche o> ;
@@ -112,10 +137,6 @@ gen-table $freeze
 ' context-table is gen-table
 
 set-current
-
-Variable msg-group$
-Variable group-master
-Variable msg-logs
 
 : <msg ( -- ) \G start a msg block
     msg sign[

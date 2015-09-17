@@ -396,12 +396,14 @@ $10 Constant datesize#
 
 \ file stuff
 
-: ?.net2o ( -- )
-    s" ~/.net2o" r/o open-file IF
-	drop s" ~/.net2o" $1C0 mkdir-parents throw
-    ELSE
-	close-file throw
-    THEN ;
+: init-dir ( addr u flags -- ) >r
+    2dup file-status nip #-514 = IF
+	r> =mkdir throw
+    ELSE  2drop rdrop  THEN ;
+
+: ?.net2o ( -- )  s" ~/.net2o" $1C0 init-dir ;
+
+: init-cache ( -- ) ?.net2o s" ~/.net2o/.cache" $1FF init-dir ;
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
@@ -422,8 +424,11 @@ $10 Constant datesize#
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw
     2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
 
+: >new ( addr u -- fd )
+    [: type '+' emit ;] $tmp r/w create-file throw ;
+
 : >copy ( addr u -- fd )
-    2dup [: type '+' emit ;] $tmp r/w create-file throw { fd1 }
+    2dup >new { fd1 }
     r/o open-file throw 0 { fd0 w^ cpy }
     0. fd0 reposition-file throw
     fd0 cpy $slurp fd0 close-file throw
@@ -435,4 +440,11 @@ $10 Constant datesize#
     \G applying xt ( fd -- ) on that copy, and then
     \G moving the existing file to backup ("~" appended to filename)
     \G and the copy ("+" appended to filename) to the original name.
-    >r 2dup >copy r> execute >backup ;
+    >r 2dup >copy r> over >r execute r> close-file throw >backup ;
+
+: new-file ( addr u xt -- )
+    \G save file @var{addr u} by making an empty first,
+    \G applying xt ( fd -- ) on that file, and then
+    \G moving the existing file to backup ("~" appended to filename)
+    \G and the new ("+" appended to filename) to the original name.
+    >r 2dup >new r> over >r execute r> close-file throw >backup ;

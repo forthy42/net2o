@@ -16,7 +16,6 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require net2o.fs
-require net2o-vault.fs
 
 : del-last-key ( -- )
     keys $[]# 1- keys $[] sec-off
@@ -59,9 +58,6 @@ Variable key-readin
 : qr-nicks ( -- )
     [: nick-key ?dup-IF  .ke-pk $@ .keyqr  THEN ;] @arg-loop ;
 
-Variable key-list
-
-: pk-off ( -- ) key-list $[]off ;
 : +pk ( "name" -- )  pk' keysize umin key-list $+[]! ;
 
 : args>keylist ( -- )

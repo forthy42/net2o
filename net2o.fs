@@ -1812,11 +1812,6 @@ Variable beacons \ destinations to send beacons to
 
 \ client/server initializer
 
-: init-cache ( -- )
-    s" .cache" file-status nip #-514 = IF
-	s" .cache" $1FF =mkdir throw
-    THEN ;
-
 : init-rest ( port -- )  init-mykey init-mykey \ two keys
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
@@ -1896,6 +1891,7 @@ require net2o-log.fs
 require net2o-keys.fs
 require net2o-addr.fs
 require net2o-dht.fs
+require net2o-vault.fs
 require net2o-msg.fs
 require net2o-helper.fs
 require net2o-qr.fs

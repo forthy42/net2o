@@ -101,6 +101,10 @@ $400 Constant pow-align#
 
 enc-keccak
 
+Variable key-list
+
+: pk-off ( -- ) key-list $[]off ;
+
 : vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
 : vkeys, ( key-list -- )
     vaultkey $100 erase
@@ -112,15 +116,19 @@ enc-keccak
 	vaultkey enc-mode @ $FF and 2r> encrypt$
 	vaultkey enc-mode @ $FF and forth:type ;] $[]map ;] $tmp
     $, vault-keys 0 >crypt ;
-: vfile, ( -- )
-    enc-filename $@ enc-file $slurp-file
+: vfile-in ( -- )
+    enc-filename $@ enc-file $slurp-file ;
+: vfile-pad ( -- )
     enc-file $@len dup >r vault-aligned enc-file $!len
-    enc-file $@ r> /string dup enc-padding ! erase
+    enc-file $@ r> /string dup enc-padding ! erase ;
+: vfile-enc ( -- )
     key( ." vkey: " vkey state# 85type forth:cr )
     enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
     enc-file $@ $, vault-file 0 >crypt enc-file $off ;
+: vfile, ( -- )
+    vfile-pad vfile-enc ;
 : vsig, ( -- )
     enc>crypt2
     [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ forth:type
@@ -129,13 +137,15 @@ enc-keccak
     key( ." vkey: " vkey state# 85type forth:cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 
-: encrypt-file ( filename u key-list -- )  code-buf$ cmdreset
-    >r enc-filename $!  pkc keysize r@ $+[]! \ encrypt for ourself
+: encfile-rest ( key-list -- ) >r
+    code-buf$ cmdreset pkc keysize r@ $+[]! \ encrypt for ourself
     vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
-    enc-filename $@ w/o create-file throw >r
-    cmd$ $@ r@ write-file throw r> forth:close-file throw
+    enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file
     code0-buf ;
+
+: encrypt-file ( filename u key-list -- )
+    >r enc-filename $! vfile-in r> encfile-rest ;
 
 Defer write-decrypt
 : write-1file ( -- ) enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
