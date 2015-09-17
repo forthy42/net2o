@@ -60,7 +60,7 @@ msg-table >table
 reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
-    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ." : " ;
+    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
     $> last-group $! up@ receiver-task <> IF
@@ -79,16 +79,16 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
-    IF   <err>  THEN  ." @" .key-id space
+    IF   <err>  THEN  ."  @" .key-id
     <default> ;
 +net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 1 4 !!<>=order? $> ." re: " 85type forth:cr ;
+    !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> forth:type forth:cr ;
+    !!signed? 1 8 !!<>=order? ." : " $> forth:type forth:cr ;
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 1 8 !!<>=order? $> ." wrapped object: " 85type forth:cr ;
+    !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> -2 0 at-deltaxy space
+    !!signed? 1 8 !!<>=order? $> space
     <warn> forth:type <default> forth:cr ;
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
     signed? !!signed!! $> last-msg $!
@@ -113,6 +113,7 @@ set-current
 
 Variable msg-group$
 Variable group-master
+Variable msg-logs
 
 : <msg ( -- ) \G start a msg block
     msg sign[
