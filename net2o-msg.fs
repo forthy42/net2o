@@ -269,7 +269,6 @@ previous
 
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
-    BEGIN  10 ms connection group-master @ or  UNTIL
     msg-group$ $@ load-msg
     BEGIN  get-input-line
 	2dup "/bye" str= 0= >r

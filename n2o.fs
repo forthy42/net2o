@@ -121,8 +121,8 @@ Variable chat-keys
     search-peer ;
 
 : greet ( -- )
-    net2o-code expect-reply log !time endwith
-    join, get-ip cookie+request end-code ;
+    net2o-code expect-reply  log !time endwith
+    join, get-ip end-code ;
 
 : +group ( -- )
     msg-group$ $@ dup IF
