@@ -148,19 +148,20 @@ Variable key-list
     >r enc-filename $! vfile-in r> encfile-rest ;
 
 Defer write-decrypt
-: write-1file ( -- ) enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
+: write-1file ( addr u -- )
+    enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
     IF  enc-filename dup $@len 4 - 4 $del  THEN
     enc-filename $@ w/o create-file throw >r
-    v-data 2@ r@ write-file throw r> forth:close-file throw ;
+    r@ write-file throw r> forth:close-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
 vault>file
-: vault>out [: v-data 2@ forth:type ;] is write-decrypt ;
+: vault>out [: forth:type ;] is write-decrypt ;
 
 : decrypt-file ( filename u -- )
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
     enc-file $@ >vault ['] do-cmd-loop catch 0 >crypt throw
-    c-state @ $F = IF write-decrypt THEN n:o> ;
+    v-data 2@ c-state @ n:o> $F = IF write-decrypt THEN ;
 previous
 
 0 [IF]

@@ -101,11 +101,11 @@ Variable chat-keys
 : wait-chat ( -- )
     ." press key to connect to "
     chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
-	.key-id space ;] $[]map cr
+	.key-id space ;] $[]map
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
-    wait-key  [: up@ wait-task ! ;] IS do-connect ;
+    wait-key cr [: up@ wait-task ! ;] IS do-connect ;
 
 : last-chat-peer ( -- chat )
     msg-group$ $@ msg-groups #@ dup cell- 0 max /string

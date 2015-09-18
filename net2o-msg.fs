@@ -28,12 +28,21 @@ defer pk-connect ( key u cmdlen datalen -- )
 Variable msg-group$
 Variable group-master
 Variable msg-logs
+Variable otr-mode
+Variable replay-mode
+
+: ?msg-context ( -- o )
+    msg-context @ dup 0= IF
+	drop  n2o:new-msg dup msg-context !
+	pubkey $@ msg-context @ .last-group $!
+    THEN ;
 
 : init-chatlog ( -- ) ?.net2o s" ~/.net2o/chats" $1FF init-dir ;
 
 : >chatid ( group u -- id u )  lastkey@ keyed-hash#128 ;
 
-: save-msgs ( group u -- )  init-chatlog
+: save-msgs ( group u -- )
+    otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN  init-chatlog
     enc-file $off
     2dup msg-logs #@ bounds ?DO
 	I $@ [: net2o-base:$, net2o-base:nestsig ;] gen-cmd$ enc-file $+!
@@ -41,6 +50,15 @@ Variable msg-logs
     >chatid
     [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
+
+: vault>msg ( -- )  replay-mode on
+    [: n2o:new-msg >o parent off do-cmd-loop dispose o> ;]
+    is write-decrypt ;
+
+: load-msg ( group u -- )
+    vault>msg
+    >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp decrypt-file
+    replay-mode off ;
 
 : +msg-log ( addr u -- )
     msg-group$ $@ msg-logs #@ d0= IF
@@ -68,12 +86,6 @@ event: ->reconnect ( o -- )
 event: ->msg-nestsig ( editor stack o -- editor stack )
     >o do-msg-nestsig o> ctrl L inskey ;
 
-: ?msg-context ( -- o )
-    msg-context @ dup 0= IF
-	drop  n2o:new-msg dup msg-context !
-	pubkey $@ msg-context @ .last-group $!
-    THEN ;
-
 get-current also net2o-base definitions
 
 \g 
@@ -89,6 +101,7 @@ reply-table $@ inherit-table msg-table
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
+    replay-mode @ IF  $> 2drop  EXIT  THEN
     !!signed?  8 $10 !!<>=order? \g already a message there
     $> last-group $! up@ receiver-task <> IF
 	do-avalanche
@@ -96,6 +109,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 	    <event o elit, ->avalanche event>  THEN
     THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
+    replay-mode @ IF  $> 2drop  EXIT  THEN
     signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
 	parent cell last# cell+ $+!
 	parent @ .wait-task @ ?dup-IF
@@ -124,7 +138,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     signed? !!signed!! 1 2 !!<>order? $> type ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig -rot last-msg $! IF
-	parent @ .wait-task @ ?dup-IF
+	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
 	    >r r@ <hide> <event o elit, ->msg-nestsig r> event>
 	ELSE  do-msg-nestsig  THEN
     ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
@@ -255,6 +269,8 @@ previous
 
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
+    BEGIN  10 ms connection group-master @ or  UNTIL
+    msg-group$ $@ load-msg
     BEGIN  get-input-line
 	2dup "/bye" str= 0= >r
 	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
