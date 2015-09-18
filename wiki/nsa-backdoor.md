@@ -11,10 +11,8 @@ topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
 backdoors: I have an official front door in net2o for the NSA.
-**Update:** The German justice minister was here, and said that
-anonymous and encrypted services are [danger inclined
-services](http://www.heise.de/newsticker/meldung/Gutachter-WLAN-Gesetzentwurf-hebelt-anonyme-Internetnutzung-aus-2814527.html)
-and responsible for their user's actions.
+**Update:** Obama was here and leaked the [NSA backdoor
+whitepaper](https://cryptome.org/2015/09/nsc-crypto-wapo-15-0916.pdf)
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page.
