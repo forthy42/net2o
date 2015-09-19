@@ -120,10 +120,6 @@ Variable chat-keys
     group-master @ IF  last-chat-peer  EXIT  THEN
     search-peer ;
 
-: greet ( -- )
-    net2o-code expect-reply  log !time endwith
-    join, get-ip end-code ;
-
 : +group ( -- )
     msg-group$ $@ dup IF
 	o { w^ group } 2dup msg-groups #@ d0<> IF
@@ -131,12 +127,17 @@ Variable chat-keys
 	ELSE  group cell 2swap msg-groups #!  THEN
     ELSE  2drop  THEN ;
 
-: chat-user ( -- )
+: chat-connect ( -- )
+    0 chat-keys $[]@ $A $A pk-connect !time
+    +resend-msg  greet +group ;
+
+: ?chat-connect ( -- )
+    0 chat-keys $[]@ pk-peek? IF  10 ms chat-connect  EXIT  THEN
     wait-chat  search-chat
-    ?dup-IF  >o rdrop
-    ELSE  0 chat-keys $[]@ $A $A pk-connect !time
-	+resend-msg  greet +group
-    THEN
+    ?dup-IF  >o rdrop  ELSE  chat-connect  THEN ;
+
+: chat-user ( -- )
+    ?chat-connect
     msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
     o { w^ connect }
     connect cell pubkey $@ key| msg-groups #!

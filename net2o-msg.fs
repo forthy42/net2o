@@ -142,6 +142,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	    >r r@ <hide> <event o elit, ->msg-nestsig r> event>
 	ELSE  do-msg-nestsig  THEN
     ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
+net2o' endwith net2o: msg-endwith ( o:object -- ) n:o> ;
 
 :noname ( addr u -- addr u flag )
     pk-sig?
@@ -224,6 +225,10 @@ $200 Constant maxmsg#
     msg-group$ $@len IF
 	+resend-cmd send-leave -timeout
     THEN ;
+
+: greet ( -- )
+    net2o-code expect-reply  log !time endwith
+    join, get-ip end-code ;
 
 : chat-entry ( -- )
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;

@@ -32,8 +32,9 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
-: dht-connect ( -- )
-    $8 $8 dhtnick $@ nick>pk ins-ip  pk:connect ;
+: dht-connect' ( xt -- ) >r
+    $8 $8 dhtnick $@ nick>pk ins-ip r> execute pk:connect ;
+: dht-connect ( -- )  ['] noop dht-connect' ;
 
 : subme ( -- )
     pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
@@ -55,18 +56,22 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    $8 $8 dhtnick $@ nick>pk ins-ip
-    dup add-beacon pk:connect replace-me disconnect-me
-    -other ;
+    [: dup add-beacon ;] dht-connect' replace-me disconnect-me -other ;
+
+: replace-loop ( addr u -- flag )
+    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0<> WHILE
+	    over c@ '!' = WHILE
+		replace-key o>
+		connect( >o ke-pk $@ ." replace key: " 2dup 85type cr o o> )
+		>r 2dup c:fetch-id r> >o  REPEAT  THEN  d0<> ;
+
+: pk-query ( addr u xt -- ) >r
+    dht-connect  2dup r> execute  replace-loop  disconnect-me ;
 
 : pk-lookup ( addr u -- )
-    dht-connect
-    2dup pk:addme-fetch-host
-    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0= !!host-notfound!!
-	over c@ '!' =  WHILE
-	    replace-key o> >o ke-pk $@ ." replace key: " 2dup 85type cr
-	    o o> >r 2dup c:fetch-id r> >o
-    REPEAT  2drop disconnect-me ;
+    ['] pk:addme-fetch-host pk-query 0= !!host-notfound!! ;
+
+: pk-peek? ( addr u0 -- flag )  ['] c:fetch-id pk-query ;
 
 User host$ \ check for this hostname
 
