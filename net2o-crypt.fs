@@ -428,7 +428,8 @@ Defer search-key \ search if that is one of our pubkeys
 
 #10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 
--4
+-5
+enum sig-keysize
 enum sig-unsigned
 enum sig-early
 enum sig-late
@@ -440,7 +441,7 @@ drop
     64>r 64over 64r> 64u>= sig-late and >r 64u< sig-early and r> min ;
 
 : check-date ( addr u -- addr u flag )
-    2dup + 1- c@ keysize = &&
+    2dup + 1- c@ keysize <> sig-keysize and ?dup-IF  EXIT  THEN
     2dup + sigsize# - >r
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN

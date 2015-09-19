@@ -148,7 +148,7 @@ dht-class new constant dummy-dht
 : .owner ( addr u -- )  2dup sigsize# - .key$
     2dup .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
-    >host verify-host >r sigsize# - r> ;
+    >host verify-host 0= >r sigsize# - r> ;
 : d#. ( -- )
     dht-hash $@ 85type ." :" cr
     k#size cell DO

@@ -41,11 +41,11 @@ s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
 s" absolute path not allowed!"   throwcode !!abs-path!!
 s" invalid packet destination"   throwcode !!inv-dest!!
-s" wrong key size"               throwcode !!keysize!!
 s" unknown key"                  throwcode !!unknown-key!!
 s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
+s" wrong key size"               throwcode !!keysize!!
 s" no signature appended"        throwcode !!no-sig!!
 s" future signature"             throwcode !!new-sig!!
 s" expired signature"            throwcode !!old-sig!!

@@ -77,7 +77,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 User host$ \ check for this hostname
 
 : insert-host ( o addr u -- o )
-    2 pick >o host>$ o> IF
+    2 pick >o host>$ ~~ o> IF
 	new-addr  dup .host-id $@
 	host$ $@ str= host$ $@len 0= or IF
 	    connect( ." check addr: " dup .addr cr ) dup >r
@@ -127,7 +127,7 @@ User search-key$
 	  64#-1 key-read-offset 64!
 	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
 	    dht-hash $. type ;] $tmp
-	  key:nest-sig IF  do-nestsig  ELSE  2drop  THEN
+	  key:nest-sig 0= IF  do-nestsig  ELSE  2drop  THEN
       THEN
       o> ;] $[]map ;
 
