@@ -59,7 +59,8 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     [: dup add-beacon ;] dht-connect' replace-me disconnect-me -other ;
 
 : replace-loop ( addr u -- flag )
-    BEGIN  >d#id >o 0 dht-host $[]@ o> 2dup d0<> WHILE
+    BEGIN  >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  0.  THEN o>
+	2dup d0<> WHILE
 	    over c@ '!' = WHILE
 		replace-key o>
 		connect( >o ke-pk $@ ." replace key: " 2dup 85type cr o o> )
