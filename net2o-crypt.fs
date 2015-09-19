@@ -428,24 +428,35 @@ Defer search-key \ search if that is one of our pubkeys
 
 #10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 
+-4
+enum sig-unsigned
+enum sig-early
+enum sig-late
+enum sig-wrong
+enum sig-ok
+drop
+
+: early/late? ( n64 min64 max64 -- sig-error )
+    64>r 64over 64r> 64u>= sig-late and >r 64u< sig-early and r> min ;
+
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize = &&
     2dup + sigsize# - >r
     ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
-    64within ;
+    early/late? ;
 : verify-sig ( addr u pk -- addr u flag )  >r
-    check-date IF
-	2dup + sigonlysize# - r> ed-verify
+    check-date dup 0= IF  drop
+	2dup + sigonlysize# - r> ed-verify 0= sig-wrong and
 	EXIT  THEN
-    rdrop false ;
+    rdrop ;
 : date-sig? ( addr u pk -- addr u flag )
     >r >date r> verify-sig ;
 : pk-sig? ( addr u -- addr u' flag )
-    dup sigpksize# u< !!unsigned!!
+    dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpksize# - c:0key 2dup c:hash + date-sig? ;
 : pk2-sig? ( addr u -- addr u' flag )
-    dup sigpk2size# u< !!unsigned!!
+    dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type

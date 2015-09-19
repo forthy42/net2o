@@ -387,10 +387,10 @@ gen-table $freeze
 ' context-table is gen-table
 
 : key:nest-sig ( addr u -- addr u' flag )
-    pk2-sig? dup 0= ?EXIT drop
+    pk2-sig? dup ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
-    c-state off true ;
+    c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key

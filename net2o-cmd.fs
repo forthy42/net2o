@@ -439,8 +439,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: words ( ustart -- ) \g reflection
     64>n net2o:words ;
 +net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig IF  do-nestsig
-    ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
+    $> nest-sig dup 0= IF  drop do-nestsig
+    ELSE  !!sig!!  THEN ; \ balk on all wrong signatures
 
 previous
 dup set-current

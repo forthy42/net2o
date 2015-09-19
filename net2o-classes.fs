@@ -30,7 +30,7 @@ object class
     method nest-sig \ check sig first and then nest
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
-:noname ( addr u -- flag ) 2drop false ; cmd-class to nest-sig
+:noname ( addr u -- flag ) 2drop -1 ; cmd-class to nest-sig
 
 Variable cmd-table
 Variable reply-table

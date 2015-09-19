@@ -43,7 +43,7 @@ Variable replay-mode
 
 : save-msgs ( group u -- )
     otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN  init-chatlog
-    enc-file $off
+    enc-file $off  req? off
     2dup msg-logs #@ bounds ?DO
 	I $@ [: net2o-base:$, net2o-base:nestsig ;] gen-cmd$ enc-file $+!
     cell +LOOP
@@ -137,16 +137,14 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-joined ( $:nick -- ) \g join a group, send your key with nick
     signed? !!signed!! 1 2 !!<>order? $> type ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig -rot last-msg $! IF
+    $> nest-sig -rot last-msg $! dup 0= IF drop
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
 	    >r r@ <hide> <event o elit, ->msg-nestsig r> event>
 	ELSE  do-msg-nestsig  THEN
-    ELSE  true !!inv-sig!!  THEN ; \ balk on all wrong signatures
-net2o' endwith net2o: msg-endwith ( o:object -- ) n:o> ;
+    ELSE  !!sig!!  THEN ; \ balk on all wrong signatures
 
-:noname ( addr u -- addr u flag )
-    pk-sig?
-; msg-class to nest-sig
+' msg msg-class to start-req
+' pk-sig? msg-class to nest-sig
 
 gen-table $freeze
 ' context-table is gen-table

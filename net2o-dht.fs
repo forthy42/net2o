@@ -78,7 +78,7 @@ Variable dht-table
 
 : revoke? ( addr u -- addr u flag )
     over c@ '!' = and over revsize# = and &&       \ verify size and prefix
-    >host verify-host &&                           \ verify it's a proper host
+    >host verify-host 0= &&                        \ verify it's a proper host
     2dup + sigsize# - sigdate datesize# move       \ copy signing date
     2dup 1 /string sigsize# -                      \ extract actual revoke part
     over "selfsign" revoke-verify &&'              \ verify self signature
@@ -95,13 +95,13 @@ Variable dht-table
 
 : check-host ( addr u -- addr u )
     over c@ '!' = IF  revoke?  ELSE  >host verify-host  THEN
-    0= !!inv-sig!! ;
+    !!sig!! ;
 : verify-owner ( addr u -- flag )
     2dup sigsize# -
     c:0key [: type dht-hash $@ type ;] $tmp c:hash
     dht-hash $@ drop date-sig? ;
 : check-owner ( addr u -- addr u )
-    verify-owner 0= !!inv-sig!! ;
+    verify-owner !!sig!! ;
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
@@ -109,7 +109,7 @@ Variable dht-table
 : verify-tag ( addr u -- addr u flag )
     2dup + sigpksize# - date-sig? ;
 : check-tag ( addr u -- addr u )
-    >tag verify-tag 0= !!inv-sig!! ;
+    >tag verify-tag !!sig!! ;
 : delete-tag? ( addr u -- addr u flag )
     >tag "tag" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
@@ -168,13 +168,13 @@ dht-class new constant dummy-dht
 : d#tags+ ( addr u -- ) \ with sanity checks
     [: check-tag dht-tags $ins[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#owner- ( addr u -- ) \ with sanity checks
-    [: delete-owner? IF  dht-owner $del[]sig dht( d#. )
+    [: delete-owner? 0= IF  dht-owner $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
 : d#host- ( addr u -- ) \ with sanity checks
-    [: delete-host? IF  dht-host $del[]sig dht( d#. )
+    [: delete-host? 0= IF  dht-host $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
 : d#tags- ( addr u -- ) \ with sanity checks
-    [: delete-tag?  IF  dht-tags $del[]sig dht( d#. )
+    [: delete-tag? 0= IF  dht-tags $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
 
 \ commands for DHT

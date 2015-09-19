@@ -46,9 +46,10 @@ s" unknown key"                  throwcode !!unknown-key!!
 s" wrong key"                    throwcode !!wrong-key!!
 s" no key file"                  throwcode !!nokey!!
 s" invalid Ed25519 key"          throwcode !!no-ed-key!!
-s" invalid signature"            throwcode !!inv-sig!!
-s" expired signature"            throwcode !!old-sig!!
+s" no signature appended"        throwcode !!no-sig!!
 s" future signature"             throwcode !!new-sig!!
+s" expired signature"            throwcode !!old-sig!!
+s" invalid signature"            throwcode !!inv-sig!!
 s" no temporary key"             throwcode !!no-tmpkey!!
 s" generic stack empty"          throwcode !!stack-empty!!
 s" String stack full"            throwcode !!string-full!!
@@ -73,3 +74,6 @@ s" data needs to be unsigned"    throwcode !!signed!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
 s" DHT permission denied"        throwcode !!dht-permission!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
+
+: !!sig!! ( n -- )
+    ?dup-IF  [ ' !!inv-sig!! >body @ 1+ ]L + throw  THEN ;

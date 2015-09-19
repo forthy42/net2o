@@ -69,7 +69,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
-    verify-tag 0= !!inv-sig!!
+    verify-tag !!sig!!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
     0 >crypt 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
