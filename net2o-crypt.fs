@@ -407,7 +407,7 @@ Defer search-key \ search if that is one of our pubkeys
 : forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
 : now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
 
-: .check ( flag -- ) '✔' '✘' rot select xemit ;
+: .check ( flag -- ) '✘' '✔' rot select xemit ;
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  64drop ." forever"  EXIT  THEN
     64dup 64#-1 64= IF  64drop ." never"    EXIT  THEN
