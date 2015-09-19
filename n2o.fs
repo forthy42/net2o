@@ -99,9 +99,9 @@ Variable chat-keys
     and 0=  UNTIL ;
 
 : wait-chat ( -- )
-    ." press key to connect to "
     chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
 	.key-id space ;] $[]map
+    ." is not online. press key to recheck."
     [: 0 to connection -56 throw ;] is do-disconnect
     [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
@@ -132,9 +132,9 @@ Variable chat-keys
     +resend-msg  greet +group ;
 
 : ?chat-connect ( -- )
-    0 chat-keys $[]@ pk-peek? IF  10 ms chat-connect  EXIT  THEN
-    wait-chat  search-chat
-    ?dup-IF  >o rdrop  ELSE  chat-connect  THEN ;
+    BEGIN  0 chat-keys $[]@ pk-peek? 0= WHILE
+	    wait-chat  search-chat ?dup UNTIL  ELSE  0  THEN
+    ?dup-IF  >o rdrop  ELSE  10 ms chat-connect  THEN ;
 
 : chat-user ( -- )
     ?chat-connect
