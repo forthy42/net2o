@@ -651,7 +651,7 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
     lit, ok net2o:ok? ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
 +net2o: ko ( uerror -- ) \g receive error message
-    throw ;
+    remote? off throw ;
 +net2o: nest ( $:string -- ) \g nested (self-encrypted) command
     $> cmdnest ;
 +net2o: request-done ( ureq -- ) 64>n \g signal request is completed

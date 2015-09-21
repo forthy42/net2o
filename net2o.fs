@@ -661,10 +661,6 @@ sema 0key-sema
 
 Variable mapstart $1 mapstart !
 
-: >is-server ( -- addr )
-    parent @ 0= IF  is-server  ELSE  parent @ .recurse  THEN ;
-: server? ( -- flag )  >is-server c@ negate ;
-: server! ( -- )  1 >is-server c! ;
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
@@ -678,7 +674,7 @@ Variable mapstart $1 mapstart !
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN
+	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
     msg( ." data map: " addrs $64. addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
@@ -688,7 +684,7 @@ Variable mapstart $1 mapstart !
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  server! setup!  THEN
+	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
     msg( ." code map: " addrs $64. addrd $64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
@@ -1586,13 +1582,16 @@ $20 Constant signed-val
 : !!<>=order?   ( n1 n2 -- )  dup >r 1+
     c-state @ -rot swap within !!inv-order!! r> c-state or! ;
 
+User remote?
+
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
-    0 >o rdrop \ address 0 has no job context!
+    0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
     validated off \ we have no validated encryption
-    stateless# outflag !  inbuf packet-data queue-command ;
+    stateless# outflag !  inbuf packet-data queue-command
+    remote? off ;
 
 : handle-data ( addr -- )  parent @ >o  o to connection
     msg( ." Handle data to addr: " dup hex. cr )
@@ -1603,9 +1602,10 @@ $20 Constant signed-val
 
 : handle-cmd ( addr -- )  parent @ >o
     msg( ." Handle command to addr: " dup hex. cr )
-    outflag off
+    outflag off remote? on
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
-    r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN ;
+    r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
+    remote? off ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
 

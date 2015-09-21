@@ -152,7 +152,7 @@ gen-table $freeze
 : lit<   lit, push-lit ;
 : slit<  slit, push-slit ;
 :noname ( throwcode -- )
-    connection @ .server? IF
+    remote? @ IF
 	dup  IF  dup nlit, ko end-cmd
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
     THEN  throw ; IS >throw

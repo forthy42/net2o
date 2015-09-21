@@ -36,7 +36,11 @@ This should be your key and the net2o-dhtroot key.  Import my key
 
     ./n2o keysearch kQusJ
 
-At the moment, a 32 bit ID should do it...
+At the moment, a 32 bit ID should do it...  Your own pubkeys have been
+exported with the keygen command into a <nick>.n2o file.  You can
+import that in your other id(s) with
+
+    ./n2o keyin <nick>.n2o
 
 Try encrypt and decrypt a test file for yourself:
 
