@@ -113,11 +113,11 @@ end-class cmd-buf-c
 : o-push ( o1 o:x -- o:o1 o:x ) object-stack >stack ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
-    >o r> o-push  req? off ;
+    >o r> o-push  o IF  1 req? !  THEN ;
 : n:o> ( o:o2 o:o1 -- o:o2 )
-    o-pop >r o> ;
+    o-pop >r o>  o IF  req? off  THEN ;
 : n:oswap ( o:o1 o:o2 -- o:o2 o:o1 )
-    o-pop >o r> o-push ;
+    o-pop >o r> o-push  o IF  req? off  THEN ;
 
 \ token stack - only for decompiling
 
@@ -265,7 +265,7 @@ cmd-buf-c new code-buf^ !
 
 code-buf
 
-:noname ( -- )  cmdbuf# off  o IF  req? on  THEN ; to cmdreset
+:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; to cmdreset
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
@@ -326,7 +326,7 @@ code0-buf \ reset default
 
 \ stuff into code buffers
 
-: do-<req ( -- )  o IF  -1 req? !@ 0= IF  start-req  THEN  THEN ;
+: do-<req ( -- )  o IF  req? @ 0> IF  start-req req? on  THEN  THEN ;
 : cmdtmp$ ( 64n -- addr u )  cmdtmp p!+ cmdtmp tuck - ;
 : cmd, ( 64n -- )  do-<req cmdtmp$ +cmdbuf ;
 
@@ -429,9 +429,9 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     pf@ ;
 +net2o: endwith ( o:object -- ) \g end scope
     do-req> n:o> ;
-:noname o IF  req? @  IF  endwith req? off  THEN  THEN ; is do-req>
+:noname o IF  req? @ 0<  IF  endwith req? off  THEN  THEN ; is do-req>
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
-    n:oswap ;
+    do-req> n:oswap ;
 +net2o: tru ( -- f:true ) \g true flag literal
     true ;
 +net2o: fals ( -- f:false ) \g false flag literal

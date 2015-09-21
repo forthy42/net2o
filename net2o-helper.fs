@@ -77,7 +77,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 User host$ \ check for this hostname
 
 : insert-host ( o addr u -- o )
-    2 pick >o host>$ ~~ o> IF
+    2 pick >o host>$ o> IF
 	new-addr  dup .host-id $@
 	host$ $@ str= host$ $@len 0= or IF
 	    connect( ." check addr: " dup .addr cr ) dup >r

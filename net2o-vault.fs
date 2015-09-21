@@ -137,12 +137,12 @@ Variable key-list
     key( ." vkey: " vkey state# 85type forth:cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 
-: encfile-rest ( key-list -- ) >r
+: encfile-rest ( key-list -- ) >vault >r
     code-buf$ cmdreset pkc keysize r@ $+[]! \ encrypt for ourself
     vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file
-    code0-buf ;
+    code0-buf dispose n:o> ;
 
 : encrypt-file ( filename u key-list -- )
     >r enc-filename $! vfile-in r> encfile-rest ;

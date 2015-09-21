@@ -43,10 +43,11 @@ Variable replay-mode
 
 : save-msgs ( group u -- )
     otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN  init-chatlog
-    enc-file $off  req? off
+    enc-file $off  n2o:new-msg >o
     2dup msg-logs #@ bounds ?DO
-	I $@ [: net2o-base:$, net2o-base:nestsig ;] gen-cmd$ enc-file $+!
-    cell +LOOP
+	I $@ [: req? on net2o-base:$, net2o-base:nestsig req? off ;]
+	gen-cmd$ enc-file $+!
+    cell +LOOP dispose o>
     >chatid
     [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
