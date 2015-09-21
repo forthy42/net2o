@@ -420,8 +420,10 @@ $10 Constant datesize#
 
 \ copy files
 
+: throw?exists ( throwcode -- )  dup #-514 <> and throw ;
+
 : >backup ( addr u -- )
-    2dup 2dup [: type '~' emit ;] $tmp rename-file throw
+    2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
     2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
 
 : >new ( addr u -- fd )
