@@ -221,6 +221,9 @@ sema see-sema
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
       o IF  r> token-table !  THEN  throw  2drop ;] see-sema c-section ;
 
+: .dest-addr ( flag -- )
+    1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
+
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
     ." see-me: "
@@ -249,7 +252,7 @@ Variable throwcount
     buf-state @ show-offset !  n2o:see-me  show-offset on
     un-cmd  throwcount @ 4 < IF  >throw  THEN ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!
-    cmd( dest-flags .dest-addr 64@ $64. 2dup n2o:see )
+    cmd( dest-flags .dest-addr 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     trace( ." cmd loop done" cr )
@@ -450,9 +453,6 @@ gen-table $@ inherit-table reply-table
 
 \ net2o assembler
 
-: .dest-addr ( flag -- )
-    1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
-
 : cmd0! ( -- )
     \G initialize a stateless command
     code0-buf  stateless# outflag ! ;
@@ -567,7 +567,9 @@ also net2o-base
 : nest[ ( -- ) sign[
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
 : ']sign ( xt -- )
-    c:0key nest$ c:hash $tmp +cmdbuf
+    c:0key nest$
+\    ." sign: " 2dup xtype forth:cr
+    c:hash $tmp +cmdbuf
     cmd-resolve> nest-string 2! nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;

@@ -432,7 +432,7 @@ $10 Constant datesize#
 : >copy ( addr u -- fd )
     2dup >new { fd1 }
     r/o open-file dup #-514 = IF
-	drop
+	2drop
     ELSE
 	throw 0 { fd0 w^ cpy }
 	0. fd0 reposition-file throw

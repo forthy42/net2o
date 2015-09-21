@@ -172,6 +172,11 @@ op-vector !
 
 \ misc
 
+: do-debug ( xt -- )
+    op-vector @ { oldout }
+    debug-vector @ op-vector !
+    catch oldout op-vector ! throw ;
+
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
 \ : $err ( xt -- ) execute ;

@@ -45,7 +45,7 @@ Variable replay-mode
     otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN  init-chatlog
     enc-file $off  n2o:new-msg >o
     2dup msg-logs #@ bounds ?DO
-	I $@ [: req? on net2o-base:$, net2o-base:nestsig req? off ;]
+	I $@ [: net2o-base:$, net2o-base:nestsig ;]
 	gen-cmd$ enc-file $+!
     cell +LOOP dispose o>
     >chatid
@@ -235,8 +235,8 @@ $200 Constant maxmsg#
 
 also net2o-base
 : send-avalanche ( xt -- )
-    code-buf$ cmdreset
-    <msg execute msg> endwith 
+    0 >o code-buf$ cmdreset
+    <msg execute msg> endwith  o>
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 
 Vocabulary chat-/cmds

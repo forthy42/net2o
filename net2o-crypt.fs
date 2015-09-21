@@ -455,7 +455,9 @@ drop
     >r >date r> verify-sig ;
 : pk-sig? ( addr u -- addr u' flag )
     dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
-    2dup sigpksize# - c:0key 2dup c:hash + date-sig? ;
+    2dup sigpksize# - c:0key
+\    ." verify: " 2dup xtype forth:cr
+    2dup c:hash + date-sig? ;
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
