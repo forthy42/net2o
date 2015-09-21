@@ -33,6 +33,17 @@ This should be your key and the net2o-dhtroot key.  Import my key
 
     ./n2o keysearch kQusJ
 
+At the moment, a 32 bit ID should do it...
+
+Try encrypt and decrypt a test file for yourself:
+
+    <create a file>
+    ./n2o enc <file>
+    ./n2o cat <file>.v2o
+    ./n2o dec <file>.v2o
+
 If you have installed it on two computers, you can chat with yourself:
 
-   ./n2o chat @<yourself>
+    ./n2o chat @<yourself>
+
+on both computers.

@@ -57,8 +57,9 @@ Variable replay-mode
     is write-decrypt ;
 
 : load-msg ( group u -- )
-    vault>msg
-    >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp decrypt-file
+    >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
+    2dup file-status nip #-514 = ?EXIT
+    vault>msg decrypt-file
     replay-mode off ;
 
 : +msg-log ( addr u -- )
