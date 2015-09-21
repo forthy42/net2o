@@ -49,26 +49,8 @@ What third party technology do we use
 * [Keccak](http://keccak.noekeon.org/) (original reference implementation)
 * ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
 
-How to build it
----------------
-
-You need: A Linux machine; with some luck, you get it to run on Mac OS X, as
-well.
-
-You want to have the following packets installed: git automake autoconf make
-gcc libtool libltdl7 (libtool-ltdl on RedHat/Centos)
-
-Get the [do](https://fossil.net2o.de/net2o/doc/trunk/do) file
-(latest revision), put it into your net2o folder, and let it run. You
-need [fossil](http://www.fossil-scm.org/index.html/doc/tip/www/index.wiki); (and
-git) as SCM, get the latest from the fossil homepage.  You don't need to
-cut'n'paste the whole script, just do the fossil clone+open, then you get your
-own do script.  This script will ask for your root password to
-install Gforth and the two libraries mentioned above.  After completion,
-you can run a test:
-
-    gforth-fast server-test.fs & gforth-fast client-test.fs localhost >timing
-    gnuplot -p -e 'load "doc/timing.plt";'
+[Get it](get-it.md)
+-------------------
 
 Documentation
 -------------
@@ -101,6 +83,7 @@ Discussions
 * [Key revocation](key-revocation.wiki)
 * [NSA backdoor](nsa-backdoor.md)
 * [Onion Routing](onion-routing.wiki)
+* [Threat Model](threat-model.md)
 * [What it's not for](whatnotfor.wiki)
 
 [de](/net2o/wiki?name=net2o.de)

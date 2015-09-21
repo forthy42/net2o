@@ -115,9 +115,9 @@ end-class cmd-buf-c
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
     >o r> o-push  o IF  1 req? !  THEN ;
 : n:o> ( o:o2 o:o1 -- o:o2 )
-    o-pop >r o>  o IF  req? off  THEN ;
+    o-pop >r o> ;
 : n:oswap ( o:o1 o:o2 -- o:o2 o:o1 )
-    o-pop >o r> o-push  o IF  req? off  THEN ;
+    o-pop >o r> o-push ;
 
 \ token stack - only for decompiling
 

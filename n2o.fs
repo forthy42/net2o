@@ -220,7 +220,8 @@ get-current n2o definitions
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
     get-me  init-client
-    keys>search search-keys insert-keys save-pubkeys ;
+    keys>search search-keys insert-keys save-pubkeys
+    keylist ;
 
 synonym inkey keyin
 synonym outkey keyout
