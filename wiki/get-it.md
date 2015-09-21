@@ -45,8 +45,14 @@ Try encrypt and decrypt a test file for yourself:
     ./n2o cat <file>.v2o
     ./n2o dec <file>.v2o
 
-You can chat with your two ids:
+You can try a group chat with several ids, start the group "test" with <id1>
 
-    ./n2o chat @<id>
+    ./n2o chat test
 
-on two computers or terminals.
+And connect from the other ids with
+
+    ./n2o chat test@<id1>
+
+on several computers/terminals.  The chat mode works a bit like IRC,
+you can use /help to list the commands, /peers to see the direct
+neighbors, and /me <action> if you aren't actually talking.

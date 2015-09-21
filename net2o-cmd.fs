@@ -326,7 +326,7 @@ code0-buf \ reset default
 
 \ stuff into code buffers
 
-: do-<req ( -- )  o IF  req? @ 0> IF  start-req req? on  THEN  THEN ;
+: do-<req ( -- )  o IF  req? @ 0> IF  req? on start-req  THEN  THEN ;
 : cmdtmp$ ( 64n -- addr u )  cmdtmp p!+ cmdtmp tuck - ;
 : cmd, ( 64n -- )  do-<req cmdtmp$ +cmdbuf ;
 
