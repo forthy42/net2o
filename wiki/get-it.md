@@ -23,7 +23,10 @@ run some tests:
 
 This will ask for your password and generate a key.  Write down the
 base85 code it gives for revoking that key; this revocation key is not
-stored anywhere else.
+stored anywhere else.  For some tests, you want to create a second key
+(e.g. to test chat).  Give it a different pass phrase; you can create
+as many IDs as you like; if they have different passphrases, only one
+of them opens at a time.
 
 Check what keys you have already importet:
 
@@ -42,8 +45,8 @@ Try encrypt and decrypt a test file for yourself:
     ./n2o cat <file>.v2o
     ./n2o dec <file>.v2o
 
-If you have installed it on two computers, you can chat with yourself:
+You can chat with your two ids:
 
-    ./n2o chat @<yourself>
+    ./n2o chat @<id>
 
-on both computers.
+on two computers or terminals.

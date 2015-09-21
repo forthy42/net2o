@@ -429,11 +429,15 @@ $10 Constant datesize#
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }
-    r/o open-file throw 0 { fd0 w^ cpy }
-    0. fd0 reposition-file throw
-    fd0 cpy $slurp fd0 close-file throw
-    cpy $@ fd1 write-file throw cpy $off
-    fd1 flush-file throw  fd1 ;
+    r/o open-file dup #-514 = IF
+	drop
+    ELSE
+	throw 0 { fd0 w^ cpy }
+	0. fd0 reposition-file throw
+	fd0 cpy $slurp fd0 close-file throw
+	cpy $@ fd1 write-file throw cpy $off
+	fd1 flush-file throw
+    THEN  fd1 ;
 
 : save-file ( addr u xt -- )
     \G save file @var{addr u} by making a copy first,
