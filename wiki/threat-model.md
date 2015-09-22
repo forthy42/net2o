@@ -19,11 +19,12 @@ close to metadata, like which page did you visit when.  That data can
 be abused in different ways, too.
 
 It turned out that the NSA is a combination of all three threats, plus
-a somewhat new threat, the wide collection of metadata, and
-corresponding actions taken when people are in contact with "targets".
+a new threat, the wide collection of metadata, and corresponding
+actions taken when people are in contact with "targets", including
+indirect contacts.
 
-Threats in detail with solutions
---------------------------------
+Threats in detail with solution sketch
+--------------------------------------
 
 1. Remote execution: Many security holes allow remote code execution.
 This paves the way for malware.  Since defect density of well-designed
@@ -35,7 +36,7 @@ bugs simply have to be found and fixed.
 communication, and collect data and metadata.  Data can be protected
 by encryption.  However, metadata is available at several places:
 Direct connections (without onion routing) are revealing.  Queries in
-DHT nodes, which can be operated by enemies, can revealing, too.  When
+DHT nodes, which can be operated by enemies, can be revealing, too.  When
 the adversary taps big interchange nodes, direct connections may be
 hidden by taking a shorter route.  Onion routing can be ineffective,
 if the adversary controls enough relays.  So good anonymization is way
@@ -58,15 +59,19 @@ from the rest of the world, by dropping all packets at his borders.
 
 5. Censorship by harassing the origin: Anonymity can shield you from
 being detected as the origin; easy use of multiple, seemingly
-unrelated ids can help to hide the identity, plus all means to hide
-metadata.  However, persons with high influence can often be detected
-by other means, which means anybody who angers the authority must make
-no mistakes, and eventually has to move to a secure place, before he's
-identifed.  This is difficult, as it is not clear who is your
-adversary, and who is your friend.  Hiding the identity is
-particularly difficult for celebrities whos fanbase want to have a
-verified contact, and who speak to the public.  These are usually also
-the most influential people.
+unrelated ids can help to hide the identity of particular activities,
+plus all means to hide metadata.  However, persons with high influence
+can often be detected by other means, which means anybody who angers
+the authority must make no mistakes, and eventually has to move to a
+secure place, before he's identifed.  This is difficult, as it is not
+clear who is your adversary, and who is your friend.  Hiding the
+identity is particularly difficult for celebrities whos fanbase want
+to have a verified contact, and who speak to the public.  These are
+usually also the most influential people.  Technical solutions can
+only rise the price for being detected, so ideally the price to get
+you corresponds to the evil you did.  The primary effort of net2o is
+to make mass surveillance prohibitively expensive, but targeted
+individuals very likely still face danger.
 
 6. Confiscating and searching devices: Adversaries may be able to get
 physical access to your devices or the devices with your backups.
@@ -74,4 +79,5 @@ Full disk encryption can help in off mode, file encryption can help
 you on multi-user systems where other users may legitimely access some
 files, but not others.  File encryption is also necessary when you
 store files on devices owned by other people (e.g. online off-site
-backups).
+backups).  Tamper detection is necessary to avoid using bugged device.
+Several solutions here are outside the scope of net2o.
