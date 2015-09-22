@@ -337,7 +337,7 @@ synonym searchkey keysearch
     \G usage: n2o chatlog @user1/group1 .. @usern/groupn 
     \G chatlog: dump chat log
     get-me
-    BEGIN  ?nextarg  WHILE  ." Chat log for " 2dup type cr
+    BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type ."  ===" cr
     over c@ '@' = IF  1 /string nick>pk key|  THEN  load-msg  REPEAT ;
 
 \ script mode
