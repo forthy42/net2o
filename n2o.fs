@@ -140,7 +140,7 @@ Variable chat-keys
     ?chat-connect
     msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
     o { w^ connect }
-    connect cell pubkey $@ key| msg-groups #!
+    connect cell msg-group$ $@ msg-groups #!
     ret+beacon group-chat ;
 
 : handle-chat ( char -- )
@@ -263,12 +263,12 @@ synonym searchkey keysearch
     $40 to hash-size# next-cmd ;
 
 : hash ( -- )
-    \G usage: n2o hash files
+    \G usage: n2o hash file1 .. filen
     enc-mode @ 8 rshift $FF and >crypt
     [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
 
 : sign ( -- )
-    \G usage: n2o sign files
+    \G usage: n2o sign file1 .. filen
     get-me now>never
     [: 2dup hash-file 2drop
       [: type ." .s2o" ;] $tmp w/o create-file throw >r
@@ -276,7 +276,7 @@ synonym searchkey keysearch
     arg-loop ;
 
 : verify ( -- )
-    \G usage: n2o verify files
+    \G usage: n2o verify file1 .. filen
     \G verify: check integrity of files vs. detached signature
     get-me
     [: 2dup hash-file 2drop 2dup type
@@ -318,8 +318,13 @@ synonym searchkey keysearch
     \G -port: sets port to a fixed number for reachability from outside,
     \G -port: allows to define port forwarding rules in the firewall
     \G -port: only for client; server-side port is different
-    ?nextarg 0= ?Exit  s>number drop to net2o-client-port
+    ?nextarg 0= ?EXIT  s>number drop to net2o-client-port
     next-cmd ;
+
+: -otr ( --- )
+    \G usage: n2o -otr <next-cmd>
+    \G -otr: Turn off-the-records mode on, so chats are not logged
+    otr-mode on next-cmd ;
 
 : chat ( -- )
     \G usage: n2o chat @user   to chat privately with a user
@@ -327,6 +332,13 @@ synonym searchkey keysearch
     \G usage: n2o chat group   to start a group chat (peers may connect)
     get-me init-client announce-me
     ?peekarg IF  drop c@ handle-chat  THEN ;
+
+: chatlog ( -- )
+    \G usage: n2o chatlog @user1/group1 .. @usern/groupn 
+    \G chatlog: dump chat log
+    get-me
+    BEGIN  ?nextarg  WHILE  ." Chat log for " 2dup type cr
+    over c@ '@' = IF  1 /string nick>pk key|  THEN  load-msg  REPEAT ;
 
 \ script mode
 
