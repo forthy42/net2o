@@ -64,11 +64,11 @@ And connect from the other ids with
 
 Or do a 1:1 chat with
 
-   ./n2o chat @<id2>
+    ./n2o chat @<id2>
 
 from <id1> and
 
-   ./n2o chat @<id1>
+    ./n2o chat @<id1>
 
 from <id2> on several computers/terminals.  The chat mode works a bit like IRC,
 you can use /help to list the commands, /peers to see the direct
@@ -76,11 +76,11 @@ neighbors, and /me <action> if you aren't actually talking.
 
 You can copy small or large files:
 
-   ./n2o server
+    ./n2o server
 
-to supply things on <id1>, and
+to supply things on <id1>, and e.g.
 
-   ./n2o get @<id1> data/2011-05-20_17-01-12.jpg
+    ./n2o get @<id1> data/2011-05-20_17-01-12.jpg
 
 to copy one of the test images.  A fine-grained access right system
 with default deny will follow, so this section will change.
