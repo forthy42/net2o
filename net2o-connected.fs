@@ -17,6 +17,8 @@
 
 \ everything that follows here can assume to have a connection context
 
+get-current also net2o-base definitions
+
 reply-table $@ inherit-table context-table
 
 \ generic functions

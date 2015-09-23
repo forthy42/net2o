@@ -632,7 +632,7 @@ dup set-current previous
 
 \ commands to reply
 
-also net2o-base definitions
+get-current also net2o-base definitions
 \g 
 \g ### reply commands ###
 \g 
@@ -676,6 +676,8 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 gen-table $freeze
 
 : ]nest  ( -- )  ]nest$ push-$ push' nest ;
+
+set-current previous
 
 0 [IF]
 Local Variables:

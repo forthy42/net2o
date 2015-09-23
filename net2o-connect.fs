@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+get-current also net2o-base definitions
+
 reply-table $@ inherit-table setup-table
 
 \g 
@@ -162,6 +164,8 @@ net2o-base
       push-cmd ;]  IS expect-reply? ;
 
 gen-table $freeze
+
+set-current previous
 
 0 [IF]
 Local Variables:

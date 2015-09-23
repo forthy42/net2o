@@ -408,7 +408,7 @@ also net2o-base definitions
     endwith previous cmdlock unlock ;
 comp: :, previous ;
 
-set-current previous previous
+set-current previous
 
 : key-crypt ( -- )
     keypack keypack-all#

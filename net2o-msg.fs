@@ -99,12 +99,12 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
     require unix/jni-location.fs
     also android
     : coord! ( -- ) location ?dup-IF  >o
-	    getLatitude  coord 0 sf[]!
-	    getLongitude coord 1 sf[]!
-	    getAltitude  coord 2 sf[]!
-	    getSpeed     coord 3 sf[]!
-	    getBearing   coord 4 sf[]!
-	    getAccuracy  coord 5 sf[]!
+	    getLatitude  coord" 0 sf[]!
+	    getLongitude coord" 1 sf[]!
+	    getAltitude  coord" 2 sf[]!
+	    getSpeed     coord" 3 sf[]!
+	    getBearing   coord" 4 sf[]!
+	    getAccuracy  coord" 5 sf[]!
 	    o>
 	ELSE
 	    start-gps
