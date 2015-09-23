@@ -88,6 +88,43 @@ event: ->reconnect ( o -- )
 event: ->msg-nestsig ( editor stack o -- editor stack )
     >o do-msg-nestsig o> ctrl L inskey ;
 
+\ coordinates
+
+6 sfloats buffer: coord"
+: coord@ ( -- addr u ) coord" 6 sfloats ;
+: sf[]@ ( addr i -- sf )  sfloats + sf@ ;
+: sf[]! ( addr i -- sf )  sfloats + sf! ;
+
+[IFDEF] android
+    require unix/jni-location.fs
+    also android
+    : coord! ( -- ) location ?dup-IF  >o
+	    getLatitude  coord 0 sf[]!
+	    getLongitude coord 1 sf[]!
+	    getAltitude  coord 2 sf[]!
+	    getSpeed     coord 3 sf[]!
+	    getBearing   coord 4 sf[]!
+	    getAccuracy  coord 5 sf[]!
+	    o>
+	ELSE
+	    start-gps
+	THEN ;
+    previous
+[ELSE]
+    : coord! ;
+[THEN]
+
+: .coords ( addr u -- ) drop
+    ." Lat: " dup 0 sf[]@ .deg cr
+    ." Lon: " dup 1 sf[]@ .deg cr
+    ." Alt: " dup 2 sf[]@ 7 1 0 f.rdp cr
+    ." Spd: " dup 3 sf[]@ 8 2 0 f.rdp cr
+    ." Dir: " dup 4 sf[]@ 8 2 0 f.rdp cr
+    ." Acc: " dup 5 sf[]@ 8 2 0 f.rdp cr
+    drop ;
+
+Defer msg:last
+
 get-current also net2o-base definitions
 
 \g 
@@ -136,8 +173,9 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
     signed? !!signed!! $> last-msg $!
     <event o elit, ->reconnect parent @ .wait-task @ event> ;
-+net2o: msg-joined ( $:nick -- ) \g join a group, send your key with nick
-    signed? !!signed!! 1 2 !!<>order? $> type ;
++net2o: msg-last? ( tick -- ) msg:last ;
++net2o: msg-coord ( $:gps -- )
+    ." GPS: " $> .coords ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig -rot last-msg $! dup 0= IF drop
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
@@ -152,6 +190,12 @@ gen-table $freeze
 ' context-table is gen-table
 
 set-current
+
+:noname ( tick -- )
+    last-group $@ msg-logs #@ d0= IF  64drop  EXIT  THEN
+    last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
+	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
+	ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
 
 : <msg ( -- ) \G start a msg block
     msg sign[
@@ -250,6 +294,10 @@ get-current also chat-/cmds definitions
     msg-group$ $@ msg-groups #@ bounds ?DO
 	space I @ .pubkey $@ .key-id
     cell +LOOP  forth:cr ;
+
+: here ( addr u -- ) 2drop
+    coord! coord@ 2dup 0 -skip nip 0= IF  2drop
+    ELSE  [: $, msg-coord ;] send-avalanche .chat  THEN ;
 
 : help ( addr u -- ) 2drop ." all commands start with / as first character: "
     ['] chat-/cmds >body wordlist-words ." bye" forth:cr ;

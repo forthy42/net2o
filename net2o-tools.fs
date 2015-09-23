@@ -255,6 +255,12 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : .timeofday ( fraction/day -- )
     24e f* fsplit .2 ':' emit 60e f* fsplit .2 ':' emit
     60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
+: .deg ( degree -- )
+    fdup f0< IF ." -" fnegate THEN
+    fsplit 0 .r '°' xemit  60e f*
+    fsplit .2   ''' xemit  60e f*
+    fsplit .2   '"' xemit 100e f*
+    f>s .2 ;
 
 : .ticks ( ticks -- )
     64dup 64-0= IF  ." never" 64drop EXIT  THEN
