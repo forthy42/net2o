@@ -42,12 +42,12 @@ Variable replay-mode
 : >chatid ( group u -- id u )  lastkey@ keyed-hash#128 ;
 
 : save-msgs ( group u -- )
-    otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN  init-chatlog
-    enc-file $off  n2o:new-msg >o
+    otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN
+    init-chatlog  enc-file $off  n2o:new-msg >o
     2dup msg-logs #@ bounds ?DO
 	I $@ [: net2o-base:$, net2o-base:nestsig ;]
 	gen-cmd$ enc-file $+!
-    cell +LOOP dispose o>
+    cell +LOOP  dispose o>
     >chatid
     [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
@@ -58,7 +58,7 @@ Variable replay-mode
 
 : load-msg ( group u -- )
     >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
-    2dup file-status nip #-514 = ?EXIT
+    2dup file-status nip no-file# = ?EXIT
     vault>msg decrypt-file
     replay-mode off ;
 
@@ -316,7 +316,7 @@ set-current previous
 		  bl $split 2swap 1 /string ':' -skip nick>pk \ 0. if no nick
 		  2dup d0= IF  2drop 2drop oaddr ou true
 		  ELSE  $, msg-signal false  THEN
-	  UNTIL  THEN  THEN
+	      UNTIL  THEN  THEN
       $, msg-text ;] send-avalanche .chat ;
 previous
 

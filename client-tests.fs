@@ -15,7 +15,7 @@ UValue test#  0 to test#
 : >cache ( addr u -- addr' u' ) [: ." .cache" .test# ." /" type ;] $tmp ;
 
 : init-cache' ( -- )
-    "" >cache 1- file-status nip #-514 = IF
+    "" >cache 1- file-status nip no-file# = IF
 	"" >cache 1- $1FF =mkdir throw
     THEN ;
 

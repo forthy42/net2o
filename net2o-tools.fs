@@ -426,7 +426,9 @@ $10 Constant datesize#
 
 \ copy files
 
-: throw?exists ( throwcode -- )  dup #-514 <> and throw ;
+#-514 Constant no-file#
+
+: throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
 : >backup ( addr u -- )
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
@@ -437,7 +439,7 @@ $10 Constant datesize#
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }
-    r/o open-file dup #-514 = IF
+    r/o open-file dup no-file# = IF
 	2drop
     ELSE
 	throw 0 { fd0 w^ cpy }

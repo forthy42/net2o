@@ -110,7 +110,7 @@ Variable key-list
     vaultkey $100 erase
     enc-mode @ $FF and $20 - rng$ vkey state# move-rep
     key( ." vkey: " vkey state# 85type forth:cr )
-    enc-mode @ dup lit, vault-crypt 8 rshift $FF and >crypt
+    enc-mode @ dup ulit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
 	vkey vaultkey $10 + enc-mode @ $FF and $20 - move
 	vaultkey enc-mode @ $FF and 2r> encrypt$
