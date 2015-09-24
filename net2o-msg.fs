@@ -29,7 +29,7 @@ Variable msg-group$
 Variable group-master
 Variable msg-logs
 Variable otr-mode
-Variable replay-mode
+User replay-mode
 
 : ?msg-context ( -- o )
     msg-context @ dup 0= IF
@@ -62,15 +62,18 @@ Variable replay-mode
     vault>msg decrypt-file
     replay-mode off ;
 
-: +msg-log ( addr u -- )
+: +msg-log ( addr u -- flag )
     msg-group$ $@ msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN
-    last# cell+ $ins[]date msg-group$ $@ save-msgs ;
+    last# cell+ $[]# >r
+    last# cell+ $ins[]date msg-group$ $@ save-msgs
+    r> last# cell+ $[]# <> ;
 
 : do-msg-nestsig ( -- )
-    last-msg $@ 2dup +msg-log
-    sigpksize# - 2dup + sigpksize# >$  c-state off
-    do-nestsig ;
+    last-msg $@ 2dup +msg-log IF
+	sigpksize# - 2dup + sigpksize# >$  c-state off
+	do-nestsig
+    ELSE  2drop  THEN ;
 
 : do-avalanche ( -- )
     last-msg $@ last-group $@ parent @ .avalanche-msg ;
@@ -140,9 +143,9 @@ reply-table $@ inherit-table msg-table
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
-    replay-mode @ IF  $> 2drop  EXIT  THEN
     !!signed?  8 $10 !!<>=order? \g already a message there
-    $> last-group $! up@ receiver-task <> IF
+    $> last-group $!  replay-mode @ ?EXIT
+    up@ receiver-task <> IF
 	do-avalanche
     ELSE parent @ .wait-task @ ?dup-IF
 	    <event o elit, ->avalanche event>  THEN
@@ -243,9 +246,10 @@ previous
     net2o-code ['] msg-reply expect-reply-xt leave,
     cookie+request end-code| ;
 
-: .chat ( -- )
+: .chat ( -- ) replay-mode on
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
-    nest-string 2@ last-msg $! do-msg-nestsig o> o> ;
+    nest-string 2@ last-msg $! do-msg-nestsig o> o>
+    replay-mode off ;
 
 $200 Constant maxmsg#
 

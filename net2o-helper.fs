@@ -92,7 +92,7 @@ User host$ \ check for this hostname
     ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
-    2dup keysize2 /string host$ $! key2|
+    2dup keysize2 safe/string host$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase

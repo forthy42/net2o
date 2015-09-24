@@ -197,8 +197,9 @@ Variable nick-table \ nick hash table
     0 tuck key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  2dup = IF  rot drop o -rot  THEN  1+
       THEN  o> ;] #map 2drop ;
-: .nick ( o:key -- )   ke-import @ >im-color ke-nick $.
-    ke-nick# @ ?dup-IF  '#' emit 0 .r  THEN <default> ;
+: .nick-base ( o:key -- )
+    ke-nick $.  ke-nick# @ ?dup-IF  '#' emit 0 .r  THEN ;
+: .nick ( o:key -- )   ke-import @ >im-color .nick-base <default> ;
 : .secret-nicks ( -- )
     0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  dup . .nick cr 1+

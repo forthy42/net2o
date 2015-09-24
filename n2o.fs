@@ -45,7 +45,7 @@ Variable key-readin
 
 : out-key ( o -- )
     >o pack-pubkey o o>
-    [: ..nick ." .n2o" ;] $tmp w/o create-file throw
+    [: ..nick-base ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
@@ -84,8 +84,7 @@ Variable chat-keys
 
 : nick>chat ( addr u -- )
     '.' $split dup 0= IF  2swap  THEN
-    nick>pk chat-keys $+[]!
-    chat-keys $[]# 1- chat-keys $[]+! ;
+    [: nick>pk type type ;] $tmp chat-keys $+[]! ;
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;
