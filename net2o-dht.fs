@@ -343,7 +343,7 @@ also net2o-base
     ( host $off ) ;
 
 : fetch-id, ( id-addr u -- )
-    $, dht-id dht-host? endwith ;
+    key2| $, dht-id dht-host? endwith ;
 : fetch-host, ( nick u -- )
     nick>pk fetch-id, ;
 previous

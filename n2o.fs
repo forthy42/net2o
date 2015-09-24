@@ -31,7 +31,7 @@ require net2o.fs
 
 : get-me ( -- )  secret-keys#
     BEGIN  dup 0= WHILE drop
-	    ." Enter your net2o passphrase: " +passphrase
+	    ." Passphrase: " +passphrase
 	    read-keys secret-keys# dup 0= IF
 		."  wrong passphrase, no key found" del-last-key
 	    THEN  cr
@@ -82,9 +82,7 @@ $20 value hash-size#
 
 Variable chat-keys
 
-: nick>chat ( addr u -- )
-    '.' $split dup 0= IF  2swap  THEN
-    [: nick>pk type type ;] $tmp chat-keys $+[]! ;
+: nick>chat ( addr u -- ) host.nick>pk  chat-keys $+[]! ;
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;

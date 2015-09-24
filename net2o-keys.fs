@@ -207,6 +207,8 @@ Variable nick-table \ nick hash table
 
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
+: host.nick>pk ( addr u -- pk u' )
+    '.' $split dup 0= IF  2swap  THEN [: nick>pk type type ;] $tmp ;
 
 : key-exist? ( addr u -- flag )
     key-table #@ d0<> ; 

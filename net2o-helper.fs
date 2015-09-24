@@ -59,7 +59,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     [: dup add-beacon ;] dht-connect' replace-me disconnect-me -other ;
 
 : replace-loop ( addr u -- flag )
-    BEGIN  >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  0.  THEN o>
+    BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  0.  THEN o>
 	2dup d0<> WHILE
 	    over c@ '!' = WHILE
 		replace-key o>
@@ -108,7 +108,7 @@ User host$ \ check for this hostname
     n2o:connect +flow-control +resend ; is pk-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
-    2>r nick>pk 2r> pk-connect ;
+    2>r host.nick>pk 2r> pk-connect ;
 
 \ search keys
 
