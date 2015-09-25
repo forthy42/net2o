@@ -117,7 +117,7 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
     : coord! ;
 [THEN]
 
-: .coords ( addr u -- ) drop
+: .coords ( addr u -- ) $>align drop
     ." Lat: " dup 0 sf[]@ .deg cr
     ." Lon: " dup 1 sf[]@ .deg cr
     ." Alt: " dup 2 sf[]@ 7 1 0 f.rdp cr

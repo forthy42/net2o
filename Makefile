@@ -54,9 +54,10 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/dht-pop.fs tests/ed25519.fs tests/insdeltest.fs		\
 	  tests/keccak.fs tests/keys.fs tests/msg.fs			\
 	  tests/teststat.fs tests/threefish.fs tests/vault.fs		\
-	  net2o-dhtroot.n2o $(FORTHLIB) ed25519-donnalib.fs		\
-	  keccaklib.fs threefishlib.fs
+	  $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs			\
+	  threefishlib.fs
 
+EXTRAS = net2o-dhtroot.n2o 
 
 SRCDIRS = tests
 
@@ -81,6 +82,9 @@ install:
 	done
 	for i in $(SOURCES); do \
 		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth$(ARCH)/site-forth/net2o/$$i; \
+	done
+	for i in $(EXTRAS); do \
+		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth$(ARCH)/home/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
