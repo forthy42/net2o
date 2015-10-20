@@ -156,7 +156,7 @@ Vocabulary n2o
 : do-net2o-cmds ( xt -- )
     get-order n>r get-recognizers n>r
     ['] n2o >body 1 set-order
-    ['] rec:word 1 set-recognizers catch
+    ['] rec:name 1 set-recognizers catch
     nr> set-recognizers nr> set-order throw ;
 
 : n2o-cmds ( -- )
