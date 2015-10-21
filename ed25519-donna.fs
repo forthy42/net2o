@@ -65,7 +65,8 @@ end-class edbuf-c
 init-ed25519
 
 : free-ed25519 ( -- )
-    edbuf @ ?dup-IF  .dispose  THEN  edbuf off ;
+    edbuf @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
+    edbuf off ;
 
 : clean-ed25519 ( -- )
     \g do this every time you computed using something secret

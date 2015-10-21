@@ -1726,7 +1726,7 @@ event: ->timeout ( o -- )
 Variable beacons \ destinations to send beacons to
 
 : send-beacons ( -- )
-    beacons [: beacon( ." send beacon to: " 2dup .address cr )
+    beacons [: cell /string beacon( ." send beacon to: " 2dup .address cr )
 	2>r net2o-sock s" ?" 0 2r> sendto +send ;] $[]map ;
 
 : beacon? ( -- )
@@ -1734,16 +1734,18 @@ Variable beacons \ destinations to send beacons to
 	send-beacons +beacons
     THEN ;
 
-: +beacon ( sockaddr len -- )
-    beacon( ." add beacon: " 2dup .address cr )
-    beacons $ins[] ;
-: -beacon ( sockaddr len -- )
-    beacon( ." remove beacon: " 2dup .address cr )
-    beacons $del[] ;
-: add-beacon ( net2oaddr -- ) route>address sockaddr alen @ +beacon ;
-: sub-beacon ( net2oaddr -- ) route>address sockaddr alen @ -beacon ;
-: ret+beacon ( -- )  ret-addr be@ add-beacon ;
-: ret-beacon ( -- )  ret-addr be@ sub-beacon ;
+: >beacon ( sockaddr len xt -- addr len )
+    [: { w^ xt } xt cell type type ;] $tmp ;
+: +beacon ( sockaddr len xt -- )
+    beacon( ." add beacon: " >r 2dup .address r> ."  ' " dup .name cr )
+    >beacon beacons $ins[] ;
+: -beacon ( sockaddr len xt -- )
+    beacon( ." remove beacon: " >r 2dup .address r> ."  ' " dup .name cr )
+    >beacon beacons $del[] ;
+: add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
+: sub-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> -beacon ;
+: ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
+: ret-beacon ( -- )  ret-addr be@ ['] 2drop sub-beacon ;
 
 \ timeout loop
 

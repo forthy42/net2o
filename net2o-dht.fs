@@ -389,36 +389,6 @@ previous
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
     n2o:dispose-context msg( ." Disposed context" forth:cr ) ;
 
-: beacon-replace ( -- )  \ sign on, and do a replace-me
-    sockaddr alen @ save-mem
-    [: over >r insert-address r> free throw
-      n2o:new-context $6 $6 n2o:connect msg( ." beacon: connected" forth:cr )
-      replace-me msg( ." beacon: replaced" forth:cr )
-      disconnect-me ;] 3 net2o-task drop ;
-
-\ beacon handling
-
-:noname ( char -- )
-    case '?' of \ if we don't know that address, send a reply
-	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
-		beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
-		net2o-sock s" !" 0 sockaddr alen @ sendto +send
-	    THEN
-	endof
-	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got reply: " sockaddr alen @ .address forth:cr )
-	    sockaddr alen @ false beacons [: rot >r 2over str= r> or ;] $[]map
-	    IF
-		beacon( ." Try replace" cr )
-		beacon-replace
-	    THEN
-	    2drop
-	endof
-	'>' of \ I got a punch
-	    nat( ." Got punch: " sockaddr alen @ .address forth:cr )
-	endof
-    endcase ; is handle-beacon
-
 0 [IF]
 Local Variables:
 forth-local-words:

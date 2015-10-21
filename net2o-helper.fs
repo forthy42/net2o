@@ -54,9 +54,49 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
       cookie+request
     end-code| -setip n2o:send-replace ;
 
+: dht-beacon ( addr u -- )  2drop
+    dht-connect
+    beacon( ." beacon: connected" forth:cr )
+    replace-me beacon( ." beacon: replaced" forth:cr )
+    ret-beacon disconnect-me ;
+
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    [: dup add-beacon ;] dht-connect' replace-me disconnect-me -other ;
+    [: dup ['] dht-beacon add-beacon ;] dht-connect'
+    replace-me disconnect-me -other ;
+
+\ beacon handling
+
+0 Value beacon-task
+
+: create-beacon-task [: BEGIN stop AGAIN ;] 1 net2o-task to beacon-task ;
+
+event: ->do-beacon ( addr u -- )
+    beacon( ." ->do-beacon" forth:cr )
+    over >r cell /string r> perform ;
+
+: do-beacon ( addr u -- )  \ sign on, and do a replace-me
+    beacon-task 0= IF  create-beacon-task  THEN
+    <event e$, ->do-beacon beacon-task event> ;
+
+:noname ( char -- )
+    case '?' of \ if we don't know that address, send a reply
+	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
+		beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
+		net2o-sock s" !" 0 sockaddr alen @ sendto +send
+	    THEN
+	endof
+	'!' of \ I got a reply, my address is unknown
+	    beacon( ." Got reply: " sockaddr alen @ .address forth:cr )
+	    sockaddr alen @ save-mem beacons
+	    [: 2over 2over cell /string str=
+	      IF  do-beacon  ELSE  2drop  THEN ;] $[]map
+	    drop free throw
+	endof
+	'>' of \ I got a punch
+	    nat( ." Got punch: " sockaddr alen @ .address forth:cr )
+	endof
+    endcase ; is handle-beacon
 
 : replace-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  0.  THEN o>
