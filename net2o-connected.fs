@@ -483,7 +483,7 @@ previous
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : tail-connect ( -- )   +resend-cmd client-loop
-    -timeout tskc KEYBYTES erase resend0 $off  context! ;
+    -timeout tskc KEYBYTES erase ( resend0 $off ) context! ;
 
 : n2o:connect ( ucode udata -- )
     reqsize!  gen-tmpkeys  gen-request  tail-connect ;
