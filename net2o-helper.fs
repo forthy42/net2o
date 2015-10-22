@@ -67,17 +67,12 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 \ beacon handling
 
-0 Value beacon-task
-
-: create-beacon-task [: BEGIN stop AGAIN ;] 1 net2o-task to beacon-task ;
-
 event: ->do-beacon ( addr u -- )
     beacon( ." ->do-beacon" forth:cr )
     over >r cell /string r> perform ;
 
 : do-beacon ( addr u -- )  \ sign on, and do a replace-me
-    beacon-task 0= IF  create-beacon-task  THEN
-    <event e$, ->do-beacon beacon-task event> ;
+    <event e$, ->do-beacon ?query-task event> ;
 
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply

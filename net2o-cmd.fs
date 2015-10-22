@@ -513,11 +513,13 @@ previous
     nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
-    ['] drop r> reply-xt !@ ?dup-IF  execute  THEN ; \ clear request
-: net2o:expect-reply ( -- )  o?
+    0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
+: net2o:expect-reply ( -- )
+    o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
-    cmdbuf$
-    connection >o code-reply dup >r 2! code-vdest r@ reply-dest 64!
+    msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
+    connection >o
+    cmdbuf$ code-reply dup >r 2! code-vdest r@ reply-dest 64!
     cmd-reply-xt @ r> reply-xt ! o> ;
 
 : tag-addr? ( -- flag )

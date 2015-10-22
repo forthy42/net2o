@@ -288,7 +288,7 @@ $00000000 Value droprate#
 
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
-	    \ ." dropping packet" cr
+	    resend( ." dropping packet" cr )
 	    2drop 0  EXIT  THEN  THEN
     2>r net2o-sock 2r> 0 sockaddr alen @ sendto +send 1 packets +!
     sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
@@ -1209,6 +1209,11 @@ Create chunk-adder chunks-struct allot
 0 Value sender-task
 0 Value receiver-task
 0 Value timeout-task
+0 Value query-task    \ for background queries initiated in other tasks
+
+: create-query-task [: BEGIN stop AGAIN ;] 1 net2o-task to query-task ;
+: ?query-task ( -- task )
+    query-task 0= IF  create-query-task  THEN  query-task ;
 
 : do-send-chunks ( -- ) data-to-send 0= ?EXIT
     [: chunks $@ bounds ?DO

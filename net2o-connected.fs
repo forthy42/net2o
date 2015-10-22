@@ -281,7 +281,6 @@ also net2o-base
     cmdbuf# @ 0> IF \ there's actuall something in the buffer
 	reply-index ulit, ok?  end-cmd
 	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
-	msg( ." Expect reply" forth:cr )
     THEN  ['] end-cmd IS expect-reply? ;
 
 : expect-reply-xt ( xt -- ) \ cmd( ." expect reply:" forth:cr )
@@ -389,6 +388,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	cmd0!
 	[:
 	  resend( ." resend0: " resend0 $@ n2o:see forth:cr )
+	  msg( ." resend0: " resend0 $@ swap hex. hex forth:cr )
 	  cmdreset resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
@@ -400,8 +400,9 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     code-map @ ?dup-IF  >o 0
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
-	    I @ 0<> IF
+	    I 2@ d0<> IF
 		resend( ." resend: " I 2@ n2o:see forth:cr )
+		msg( ." resend: " I 2@ swap hex. hex. forth:cr )
 		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +! 1+
 	    THEN
