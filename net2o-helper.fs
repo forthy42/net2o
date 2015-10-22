@@ -28,7 +28,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
     n2o:new-context >o rdrop o to connection  setup!
     dest-pk \ set our destination key
-    n2o:connect
+    +resend-cmd n2o:connect
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
