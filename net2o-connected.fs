@@ -468,7 +468,7 @@ also net2o-base
 previous
 
 : cmd-timeout ( -- )  1 ack@ .timeouts +! >next-timeout cmd-resend?
-    IF  push-timeout  THEN ;
+    IF  timeout( ." resend commands" forth:cr ) push-timeout  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
     \ timeout( .expected )
     packets2 @ cmd-timeout packets2 @ =

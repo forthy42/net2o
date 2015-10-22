@@ -1525,7 +1525,7 @@ Variable timeout-tasks s" " timeout-tasks $!
     0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : do-timeout ( -- )  timeout-xt perform ;
 
-: o+timeout ( -- )  0timeout
+: o+timeout ( -- )  !ticks  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
