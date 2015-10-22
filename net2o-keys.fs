@@ -41,8 +41,8 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 : emit-pw* ( n -- )
     dup #esc = IF  esc-state on  THEN
     dup bl < IF  old-emit  EXIT  THEN
-    dup esc-state @ IF  old-emit
-    ELSE  $C0 $80 within IF
+    esc-state @ IF  dup old-emit
+    ELSE  dup $C0 $80 within IF
 	    [ pw* ' xemit $tmp
 	    bounds [?DO] [I] c@ ]L old-emit [ [LOOP] ]
 	THEN
@@ -61,7 +61,7 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
     0 to history
     ['] accept catch
     r> xc-vector !  what's old-emit is emit  r> is type  r> to history
-    throw "\b " type ;
+    throw -1 0 at-deltaxy space ;
 
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
