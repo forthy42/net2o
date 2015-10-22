@@ -490,7 +490,8 @@ comp: :, also net2o-base ;
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
 : cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
-    connection >o outflag @ >r cmdbuf$ cmddest send-cmd
+    connection >o outflag @ >r cmdbuf$ cmddest
+    msg( ." send cmd to: " 64dup $64. forth:cr ) send-cmd
     r> stateless# and 0= IF  code-update punch-load $off
     ELSE  drop  THEN o> ;
 

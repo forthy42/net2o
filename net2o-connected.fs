@@ -402,7 +402,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 	dest-size @ addr>replies bounds o> U+DO
 	    I 2@ d0<> IF
 		resend( ." resend: " I 2@ n2o:see forth:cr )
-		msg( ." resend: " I 2@ swap hex. hex. forth:cr )
+		msg( ." resend: " I reply-dest 64@ $64. I 2@ swap hex. hex. forth:cr )
 		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +! 1+
 	    THEN

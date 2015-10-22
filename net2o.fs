@@ -675,7 +675,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
-    msg( ." data map: " addrs $64. addrd $64. u hex. cr )
+    msg( ." data map: " addrs $64. ." own: " addrd $64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source data-map ! ;
@@ -685,7 +685,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
-    msg( ." code map: " addrs $64. addrd $64. u hex. cr )
+    msg( ." code map: " addrs $64. ." own: " addrd $64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
