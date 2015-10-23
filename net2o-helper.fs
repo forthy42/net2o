@@ -83,12 +83,14 @@ event: ->do-beacon ( addr u -- )
 	endof
 	'!' of \ I got a reply, my address is unknown
 	    beacon( ." Got unknown reply: " sockaddr alen @ .address forth:cr )
+	    sockaddr alen @ beacons
 	    [: 2over 2over beacon-struct - str=
 		IF  do-beacon  ELSE  2drop  THEN ;] $[]map
 	    2drop
 	endof
 	'.' of \ I got a reply, my address is known
 	    beacon( ." Got known reply: " sockaddr alen @ .address forth:cr )
+	    sockaddr alen @ beacons
 	    [: beacon-struct - 2over 2over str=
 		IF  + >r beacon-ticks# r> beacon-time 64+!
 		ELSE  2drop  THEN ;] $[]map
