@@ -76,9 +76,9 @@ event: ->do-beacon ( addr u -- )
 
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply
-	    beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
 	    net2o-sock
 	    sockaddr alen @ 2dup routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
+	    beacon( ." Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
 	    0 sockaddr alen @ sendto +send
 	endof
 	'!' of \ I got a reply, my address is unknown
