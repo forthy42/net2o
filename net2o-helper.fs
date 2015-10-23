@@ -74,31 +74,37 @@ event: ->do-beacon ( addr u -- )
 : do-beacon ( addr u -- )  \ sign on, and do a replace-me
     <event e$, ->do-beacon ?query-task event> ;
 
+: ?-beacon ( -- )
+    \g if we don't know that address, send a reply
+    net2o-sock
+    sockaddr alen @ routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
+    beacon( ." Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
+    0 sockaddr alen @ sendto +send ;
+: !-beacon ( -- )
+    \g I got a reply, my address is unknown
+    beacon( ." Got unknown reply: " sockaddr alen @ .address forth:cr )
+    sockaddr alen @ beacons
+    [: 2over 2over beacon-struct - str=
+	IF  do-beacon  ELSE  2drop  THEN ;] $[]map
+    2drop ;
+: .-beacon ( -- )
+    \g I got a reply, my address is known
+    beacon( ." Got known reply: " sockaddr alen @ .address forth:cr )
+    sockaddr alen @ beacons
+    [: beacon-struct - 2over 2over str=
+	IF  + >r beacon-ticks# r> beacon-time 64+!
+	ELSE  2drop  THEN ;] $[]map
+    2drop ;
+: >-beacon ( -- )
+    \g I got a punch
+    nat( ." Got punch: " sockaddr alen @ .address forth:cr ) ;
+
 :noname ( char -- )
-    case '?' of \ if we don't know that address, send a reply
-	    net2o-sock
-	    sockaddr alen @ routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
-	    beacon( ." Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
-	    0 sockaddr alen @ sendto +send
-	endof
-	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got unknown reply: " sockaddr alen @ .address forth:cr )
-	    sockaddr alen @ beacons
-	    [: 2over 2over beacon-struct - str=
-		IF  do-beacon  ELSE  2drop  THEN ;] $[]map
-	    2drop
-	endof
-	'.' of \ I got a reply, my address is known
-	    beacon( ." Got known reply: " sockaddr alen @ .address forth:cr )
-	    sockaddr alen @ beacons
-	    [: beacon-struct - 2over 2over str=
-		IF  + >r beacon-ticks# r> beacon-time 64+!
-		ELSE  2drop  THEN ;] $[]map
-	    2drop
-	endof
-	'>' of \ I got a punch
-	    nat( ." Got punch: " sockaddr alen @ .address forth:cr )
-	endof
+    case
+	'?' of  ?-beacon  endof
+	'!' of  !-beacon  endof
+	'.' of  .-beacon  endof
+	'>' of  >-beacon  endof
     endcase ; is handle-beacon
 
 : replace-loop ( addr u -- flag )
