@@ -1718,35 +1718,41 @@ event: ->timeout ( o -- )
 \ the connection would expire to refresh the NAT window.
 \ beacons are send regularly regardless if you have any other traffic,
 \ because that's easier to do.
-\ beacons are one-byte packets, either space (no-reply) or '?' (reply if new)
+\ beacons are one-byte packets, with ASCII characters to say what they mean
 
-#55.000.000.000 d>64 64Value beacon-ticks# \ 55s beacon tick rate
-64Variable beacon-time ticks beacon-time 64!
+begin-structure beacon-struct
+    64field: beacon-time
+    field: beacon-xt
+end-structure
 
-: +beacons ( -- )
-    beacon-time 64@ beacon-ticks# 64+ beacon-time 64! ;
-
-+beacons
+#50.000.000.000 d>64 64Value beacon-ticks# \ 50s beacon tick rate
+#1.000.000.000 d>64 64Value beacon-short-ticks# \ 1s short beacon tick rate
 
 Variable beacons \ destinations to send beacons to
 
-: send-beacons ( -- )
-    beacons [: cell /string beacon( ." send beacon to: " 2dup .address cr )
-	2>r net2o-sock s" ?" 0 2r> sendto +send ;] $[]map ;
+: next-beacon ( -- 64tick )
+    64#-1 beacons [: beacon-struct - + beacon-time 64@ 64umin ;] $[]map ;
+
+: send-beacons ( -- ) !ticks
+    beacons [: beacon-struct -
+	2dup + beacon-time 64@ ticker 64@ 64u<= IF
+	    beacon( ." send beacon to: " 2dup .address cr )
+	    2>r ticker 64@ beacon-short-ticks# 64+ 2r@ + 64!
+	    net2o-sock s" ?" 0 2r> sendto +send
+	ELSE  2drop  THEN
+	;] $[]map ;
 
 : beacon? ( -- )
-    beacon-time 64@ ticker 64@ 64- 64-0< IF
-	send-beacons +beacons
-    THEN ;
+    next-beacon ticker 64@ 64u<= IF  send-beacons  THEN ;
 
 : >beacon ( sockaddr len xt -- addr len )
-    [: { w^ xt } xt cell type type ;] $tmp ;
+    [: { w^ xt } type ticker 8 type xt cell type ;] $tmp ;
 : +beacon ( sockaddr len xt -- )
     beacon( ." add beacon: " >r 2dup .address r> ."  ' " dup .name cr )
-    >beacon beacons $ins[] ;
+    >beacon beacons beacon-struct $ins[]# ;
 : -beacon ( sockaddr len xt -- )
     beacon( ." remove beacon: " >r 2dup .address r> ."  ' " dup .name cr )
-    >beacon beacons $del[] ;
+    >beacon beacons beacon-struct $del[]# ;
 : add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
 : sub-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> -beacon ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
@@ -1763,7 +1769,7 @@ Variable beacons \ destinations to send beacons to
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 
 : >next-ticks ( -- )
-    next-timeout? drop beacon-time 64@ 64umin ticker 64@ 64-
+    next-timeout? drop next-beacon 64umin ticker 64@ 64-
     64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
     stop-64ns
     timeout( ticker 64@ ) !ticks

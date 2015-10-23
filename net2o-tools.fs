@@ -267,27 +267,34 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
     64>f 1e-9 f* .day .timeofday ;
 
-\ insert into sorted string array
+\ insert into sorted string array, discarding n bytes at the end
 
-: $ins[] ( addr u $array -- )
+: $ins[]# ( addr u $array n -- )
     \G insert O(log(n)) into pre-sorted array
-    { $a } 0 $a $[]#
+    { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
+	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
 		drop $# $a $[]!  EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
-: $del[] ( addr u $array -- )
+: $del[]# ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
-    { $a } 0 $a $[]#
+    { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup $# $a $[]@ compare dup 0= IF
+	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
 		drop $# $a $[] $off
 		$a $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
+
+\ insert into sorted string array
+
+: $ins[] ( addr u $array -- ) 0 $ins[]# ;
+    \G insert O(log(n)) into pre-sorted array
+: $del[] ( addr u $array -- ) 0 $del[]# ;
+    \G delete O(log(n)) from pre-sorted array
 
 \ same with signatures; newest signature replaces older
 
@@ -300,19 +307,22 @@ $10 Constant datesize#
 : startdate@ ( addr u -- date ) + sigsize# - 64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
 
-: $ins[]sig ( addr u $array -- )
-    \G insert O(log(n)) into pre-sorted array
-    { $arr } 0 $arr $[]#
+: $ins[]sig# ( addr u $array n -- )
+    \G insert O(log(n)) into pre-sorted array if sigdate is newer
+    { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigsize# - $# $arr $[]@ sigsize# - compare dup 0= IF
+	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
 		drop
-		2dup startdate@
-		$# $arr $[]@ startdate@ 64u>=
-		IF   $# $arr $[]!
+		2dup rest - + 64@
+		$# $a $[]@ rest - + 64@ 64u>=
+		IF   $# $a $[]!
 		ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $arr r@ cells $ins r> $arr $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+
+: $ins[]sig ( addr u $array -- ) sigsize# $ins[]sig# ;
+: $del[]sig ( addr u $array -- ) sigsize# $del[]# ;
 : $rep[]sig ( addr u $array -- ) >r
     \G replace if newer in one-element array
     r@ $[]# IF
@@ -320,17 +330,6 @@ $10 Constant datesize#
 	IF  2drop rdrop  EXIT  THEN
     THEN
     0 r> $[]! ;
-: $del[]sig ( addr u $array -- )
-    \G delete O(log(n)) from pre-sorted array, check sigs
-    { $arr } 0 $arr $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup sigonlysize# - $# $arr $[]@ sigonlysize# -
-	    compare dup 0= IF
-		$# $arr $[] $off
-		$arr $# cells cell $del
-		2drop EXIT  THEN
-	    0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT 2drop 2drop ; \ not found
 
 \ list sorted by sig date
 

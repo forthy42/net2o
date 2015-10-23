@@ -69,24 +69,30 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 event: ->do-beacon ( addr u -- )
     beacon( ." ->do-beacon" forth:cr )
-    over >r cell /string r> perform ;
+    beacon-struct - 2dup + beacon-xt perform ;
 
 : do-beacon ( addr u -- )  \ sign on, and do a replace-me
     <event e$, ->do-beacon ?query-task event> ;
 
 :noname ( char -- )
     case '?' of \ if we don't know that address, send a reply
-	    replace-beacon( true )else( sockaddr alen @ 2dup routes #key -1 = ) IF
-		beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
-		net2o-sock s" !" 0 sockaddr alen @ sendto +send
-	    THEN
+	    beacon( ." Send reply to: " sockaddr alen @ .address forth:cr )
+	    net2o-sock
+	    sockaddr alen @ 2dup routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
+	    0 sockaddr alen @ sendto +send
 	endof
 	'!' of \ I got a reply, my address is unknown
-	    beacon( ." Got reply: " sockaddr alen @ .address forth:cr )
-	    sockaddr alen @ save-mem beacons
-	    [: 2over 2over cell /string str=
-	      IF  do-beacon  ELSE  2drop  THEN ;] $[]map
-	    drop free throw
+	    beacon( ." Got unknown reply: " sockaddr alen @ .address forth:cr )
+	    [: 2over 2over beacon-struct - str=
+		IF  do-beacon  ELSE  2drop  THEN ;] $[]map
+	    2drop
+	endof
+	'.' of \ I got a reply, my address is known
+	    beacon( ." Got known reply: " sockaddr alen @ .address forth:cr )
+	    [: beacon-struct - 2over 2over str=
+		IF  + >r beacon-ticks# r> beacon-time 64+!
+		ELSE  2drop  THEN ;] $[]map
+	    2drop
 	endof
 	'>' of \ I got a punch
 	    nat( ." Got punch: " sockaddr alen @ .address forth:cr )
