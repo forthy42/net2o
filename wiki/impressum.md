@@ -4,9 +4,9 @@ Impressum
 Angaben gemäß § 5 TMG:
 ----------------------
 
-Bernd Paysan
-net2o secure communication
-Wilbrechtstr. 85
+Bernd Paysan<br/>
+net2o secure communication<br/>
+Wilbrechtstr. 85<br/>
 81477 München
 
 Kontakt:
@@ -24,12 +24,12 @@ Kontakt:
 Umsatzsteuer-ID:
 ----------------
 
-Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:
+Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:<br/>
 DE 223 195 380
 
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 ----------------------------------------------------
 
-Bernd Paysan
-Wilbrechtstr. 85
+Bernd Paysan<br/>
+Wilbrechtstr. 85<br/>
 81477 München
