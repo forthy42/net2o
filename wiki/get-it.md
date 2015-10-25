@@ -1,5 +1,8 @@
+Get it
+======
+
 Get it for PC
-=============
+-------------
 
 You need: A Linux machine, Windows with Cygwin or better Cygwin64, Mac
 OS X with fink development tools (please use GCC, don't use XCode's
@@ -15,11 +18,40 @@ Get the [do](https://fossil.net2o.de/net2o/doc/trunk/do) file
 (latest revision), put it into your net2o folder, and let it run.
 
 This script will ask for your root password to install Gforth and the
-a few libraries.  After completion, you can generate your own key and
-run some tests:
+a few libraries.
 
-    ./n2o help
-    ./n2o keygen <nick>
+You can try net2o (see below) either by starting net2o with
+
+    ./n2o cmd
+
+and enter net2o command mode, or by running each command with
+
+    ./n2o <command>
+
+in the second case, you'll be asked again and again for your password
+when needed.
+
+Get it for Android
+------------------
+
+You need: An Android phone with at least Android 2.3, and Gforth,
+either from the app store, or from [here](https://net2o.de/Gforth.apk).
+
+To load net2o into Gforth, start Gforth and enter
+
+    include net2o/n2o.fs
+
+Then turn on the net2o command mode for net2o with
+
+    n2o-cmds
+
+Try it
+------
+
+You can execute the following net2o script commands either by entering
+
+    help
+    keygen <nick>
 
 This will ask for your password and generate a key.  Write down the
 base85 code it gives for revoking that key; this revocation key is not
@@ -30,45 +62,45 @@ of them opens at a time.
 
 Check what keys you have already importet:
 
-    ./n2o keylist
+    keylist
 
 This should be your key and the net2o-dhtroot key.  Import my key
 
-    ./n2o keysearch kQusJ
+    keysearch kQusJ
 
 At the moment, a 32 bit ID should do it...  Your own pubkeys have been
 exported with the keygen command into a <nick>.n2o file.  You can
 import that in your other id(s) with
 
-    ./n2o keyin <nick>.n2o
+    keyin <nick>.n2o
 
 Try encrypt and decrypt a test file for yourself:
 
     <create a file>
-    ./n2o enc <file>
-    ./n2o cat <file>.v2o
-    ./n2o dec <file>.v2o
+    enc <file>
+    cat <file>.v2o
+    dec <file>.v2o
 
 You can also create detached signatures (<file>.s2o):
 
-    ./n2o sign <file>
-    ./n2o verify <file>
+    sign <file>
+    verify <file>
 
 You can try a group chat with several ids, start the group "test" with <id1>
 
-    ./n2o chat test
+    chat test
 
 And connect from the other ids with
 
-    ./n2o chat test@<id1>
+    chat test@<id1>
 
 Or do a 1:1 chat with
 
-    ./n2o chat @<id2>
+    chat @<id2>
 
 from <id1> and
 
-    ./n2o chat @<id1>
+    chat @<id1>
 
 from <id2> on several computers/terminals.  The chat mode works a bit like IRC,
 you can use /help to list the commands, /peers to see the direct
@@ -76,11 +108,11 @@ neighbors, and /me <action> if you aren't actually talking.
 
 You can copy small or large files:
 
-    ./n2o server
+    server
 
 to supply things on <id1>, and e.g.
 
-    ./n2o get @<id1> data/2011-05-20_17-01-12.jpg
+    get @<id1> data/2011-05-20_17-01-12.jpg
 
 to copy one of the test images.  A fine-grained access right system
 with default deny will follow, so this section will change.
