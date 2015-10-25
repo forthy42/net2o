@@ -49,8 +49,11 @@ What third party technology do we use
 * [Keccak](http://keccak.noekeon.org/) (original reference implementation)
 * ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
 
-[Get it](get-it.md)
--------------------
+Get it
+------
+
+* [For PCs](get-it-pc.md)
+* [For Android](get-it-android.md)
 
 Documentation
 -------------

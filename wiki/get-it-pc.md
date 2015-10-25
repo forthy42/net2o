@@ -1,5 +1,5 @@
-Get it
-======
+Get it for PC
+=============
 
 You need: A Linux machine, Windows with Cygwin or better Cygwin64, Mac
 OS X with fink development tools (please use GCC, don't use XCode's
