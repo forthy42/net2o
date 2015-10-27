@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Defer >invitations
+
 get-current also net2o-base definitions
 
 reply-table $@ inherit-table setup-table
@@ -162,6 +164,15 @@ net2o-base
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
+
+\ one-shot packets
+
++net2o: oneshot-tmpkey ( $:tmpkey -- ) \g oneshot tmpkey
+    $> keysize <> !!keysize!! skc swap keypad ed-dh do-keypad sec! ;
++net2o: invite ( $:nick+sig -- ) \g invite someone
+    $> tmp-crypt? IF
+	pk2-sig? !!sig!! >invitations do-keypad sec-off
+    ELSE  2drop  THEN ;
 
 gen-table $freeze
 

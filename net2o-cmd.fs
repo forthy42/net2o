@@ -586,7 +586,7 @@ previous
 : cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
     cmd> 2dup tmpkey@ keysize umin
-    trace( ." tmpnest encrypt with: " 2dup 85type forth:cr ) encrypt$ ;
+    key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
 
 : do-nest ( addr u flag -- )
     validated @ >r  validated or!  
@@ -596,7 +596,8 @@ previous
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
 
 : cmdtmpnest ( addr u -- )
-    $>align tmpkey@ drop keysize decrypt$
+    $>align tmpkey@ drop keysize
+    key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
     IF  tmp-crypt-val do-nest  ELSE  trace( ." tmpnest failed!" forth:cr )  un-cmd  THEN ;
 
 \ net2o assembler stuff
@@ -635,7 +636,7 @@ dup set-current previous
 
 \ commands to reply
 
-get-current also net2o-base definitions
+also net2o-base definitions
 \g 
 \g ### reply commands ###
 \g 

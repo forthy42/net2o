@@ -1658,7 +1658,7 @@ User remote?
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks
-	0. data-rmap @ .dest-vaddr 64@ >dest-map 2!
+	data-rmap @ IF  0. data-rmap @ .dest-vaddr 64@ >dest-map 2!  THEN
 	dest-0key @ del-0key
 	end-maps start-maps DO  I @ ?dup-IF .free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP

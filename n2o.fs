@@ -85,11 +85,10 @@ Variable chat-keys
 : nick>chat ( addr u -- ) host.nick>pk  chat-keys $+[]! ;
 
 : nicks>chat ( -- )
-    ['] nick>chat @arg-loop ;
+    chat-keys $[]off ['] nick>chat @arg-loop ;
 
 : keys>search ( -- )
-    search-key$ $[]off
-    BEGIN  ?nextarg  WHILE  base85>$ search-key$ $+[]!  REPEAT ;
+    search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
 : wait-key ( -- )
     BEGIN  1 key lshift [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
@@ -298,6 +297,11 @@ synonym searchkey keysearch
     \G usage: n2o rootserver
     strict-keys off get-me init-server server-loop ;
 
+: announce ( -- )
+    \G usage: n2o announce
+    \G announce: Only announce ID
+    get-me announce-me ;
+
 \ chat mode
 
 : -root ( -- )
@@ -336,6 +340,13 @@ synonym searchkey keysearch
     get-me
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type ."  ===" cr
     over c@ '@' = IF  1 /string nick>pk key|  THEN  load-msg  REPEAT ;
+
+: invite ( -- )
+    \G usage: n2o invite @user
+    \G invite: send or accept an invitation to another user
+    get-me init-client announce-me nicks>chat 
+    chat-keys [: 2dup n2o:pklookup send-invitation
+	n2o:dispose-context ;] $[]map ; 
 
 \ script mode
 

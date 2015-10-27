@@ -129,14 +129,15 @@ drop
 enum import#self      \ private key
 enum import#manual    \ manual import
 enum import#scan      \ scan import
-enum import#chat      \ mid trust level
-enum import#dht       \ lowest trust level
+enum import#chat      \ chat import
+enum import#dht       \ dht import
+enum import#invited   \ invitation import
 enum import#untrusted \ must be last
 drop
 
 Variable import-type  import#untrusted import-type !
 
-Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $E60 ,
+Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
 DOES> swap cells + @ attr! ;
 
 0 Value sample-key
@@ -491,9 +492,18 @@ previous
     \g get the annotations with signature
     ['] pack-core gen-cmd$ 2drop
     ke-selfsig $@ tmp$ $+! tmp$ $@ ;
-: mynick$ ( o:key -- addr u )
+: keypk2nick$ ( o:key -- addr u )
+    \g get the annotations with signature
+    ['] pack-core gen-cmd$ 2drop
+    ke-pk $@ tmp$ $+! ke-selfsig $@ tmp$ $+! tmp$ $@ ;
+: mynick-key ( -- o )
+    pkc keysize key-table #@ drop cell+ ;
+: mynick$ ( -- addr u )
     \g get my nick with signature
-    pkc keysize key-table #@ drop cell+ .keynick$ ;
+    mynick-key .keynick$ ;
+: mypk2nick$ ( o:key -- addr u )
+    \g get my nick with signature
+    mynick-key .keypk2nick$ ;
 
 Variable cp-tmp
 
@@ -672,6 +682,21 @@ Variable revtoken
     sigdate +date sigdate datesize# revtoken $+!
     oldskc oldpkc +revsign
     0oldkey revtoken $@ ;
+
+\ invitation
+
+Variable invitations
+
+:noname ( addr u -- )
+    invitations $ins[]sig ; is >invitations
+: send-invitation ( pk u -- )
+    setup! mypk2nick$ 2>r
+    gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!
+    net2o-code0
+    tpkc keysize $, oneshot-tmpkey
+    nest[ 2r> $, invite ]tmpnest
+    cookie+request
+    end-code| ;
 
 0 [IF]
 Local Variables:

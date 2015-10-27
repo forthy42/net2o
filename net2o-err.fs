@@ -76,4 +76,4 @@ s" DHT permission denied"        throwcode !!dht-permission!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
 
 : !!sig!! ( n -- )
-    ?dup-IF  [ ' !!inv-sig!! >body @ 1+ ]L + throw  THEN ;
+    ?dup-IF  [ ' !!inv-sig!! >body @ 1+ ]L swap - throw  THEN ;
