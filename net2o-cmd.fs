@@ -382,6 +382,9 @@ Defer do-req>
     signed-val validated or! nest-cmd-loop
     signed-val invert validated and! ;
 
+: cmd:nestsig ( addr u -- )
+    nest-sig dup 0= IF  drop do-nestsig  ELSE  !!sig!!  THEN ;
+
 get-current also net2o-base definitions
 
 \ Command numbers preliminary and subject to change
@@ -442,8 +445,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: words ( ustart -- ) \g reflection
     64>n net2o:words ;
 +net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig dup 0= IF  drop do-nestsig
-    ELSE  !!sig!!  THEN ; \ balk on all wrong signatures
+    $> cmd:nestsig ; \ balk on all wrong signatures
 
 previous
 dup set-current

@@ -152,7 +152,9 @@ Variable nick-table \ nick hash table
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
 
-: nick! ( -- ) o { w^ optr }
+Variable sim-nick!
+
+: nick! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
     ke-nick $@ nick-table #@ 2dup d0= IF
 	2drop  optr cell ke-nick $@ nick-table #! 0
     ELSE
@@ -394,7 +396,7 @@ gen-table $freeze
     pk2-sig? dup ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
-    c-state off sig-ok ;
+    sim-nick! off c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
 key-entry ' new static-a with-allocater to sample-key
@@ -598,6 +600,17 @@ $40 buffer: nick-buf
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#untrusted import-type ! ;
 
+: read-pk2key$ ( addr u -- )
+    \g read a nested key into sample-key
+    sample-key >o c-state off  sim-nick! on
+    pk2-sig? !!sig!! sigpk2size# - 2dup + >r do-nestsig
+    r@ keysize2 ke-pk $!
+    r> keysize2 + sigsize# ke-selfsig $!
+    o>  sim-nick! off ;
+
+: .pk2key$ ( addr u -- )
+    read-pk2key$ sample-key >o .key-list free-key o> ;
+
 \ select key by nick
 
 : >raw-key ( o -- )
@@ -687,8 +700,14 @@ Variable revtoken
 
 Variable invitations
 
+event: ->invite ( addr u -- )
+    ." invited: " over >r .pk2key$ r> free throw ctrl L inskey ;
+event: ->wakeme ( o -- ) <event ->wake event> ;
+
 :noname ( addr u -- )
-    invitations $ins[]sig ; is >invitations
+    2dup invitations $ins[]sig save-mem up@ <hide>
+    <event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
+; is >invitations
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
     gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!
