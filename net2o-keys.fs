@@ -703,15 +703,40 @@ Variable revtoken
 \ invitation
 
 Variable invitations
+Variable block-table
 
 event: ->invite ( addr u -- )
     ." invite me: " over >r .pk2key$ r> free throw ctrl L inskey ;
 event: ->wakeme ( o -- ) <event ->wake event> ;
 
+: pk2key$-add ( addr u -- )
+    sample-key >o import#invited import-type ! cmd:nestsig o>
+    import#untrusted import-type !  save-pubkeys ;
+
+: block-add ( addr u -- )
+    sigpk2size# - + keysize 2dup block-table #!
+    ( tbd: save-blocklist ) ;
+
+: process-invitation ( addr u -- )
+    key case
+	'y' of  pk2key$-add ." added"    endof
+	'n' of  2drop       ." ignored"  endof
+	'b' of  block-add   ." blocked"  endof
+	2drop
+    endcase ;
+
+: filter-invitation? ( addr u -- flag )
+    sigpk2size# - +
+    dup keysize block-table #@ nip keysize =
+    IF drop true  EXIT  THEN
+    keysize key-table #@ d0<> ; \ already there
+
 : .invitations ( -- )
-    invitations [: ." invite me: " .pk2key$ ;] $[]map ;
+    invitations [: ." invite (y/n/b)? " 2dup .pk2key$ process-invitation
+    ;] $[]map  invitations $[]off ;
 
 :noname ( addr u -- )
+    2dup filter-invitation? IF  2drop EXIT  THEN
     2dup invitations $ins[]sig save-mem [ up@ ]l <hide>
     <event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
 ; is >invitations
