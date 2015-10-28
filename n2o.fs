@@ -82,10 +82,10 @@ $20 value hash-size#
 
 Variable chat-keys
 
-: nick>chat ( addr u -- ) host.nick>pk  chat-keys $+[]! ;
+: nick>chat ( addr u -- ) host.nick>pk chat-keys $+[]! ;
 
 : nicks>chat ( -- )
-    chat-keys $[]off ['] nick>chat @arg-loop ;
+    ['] nick>chat @arg-loop ;
 
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
@@ -346,7 +346,8 @@ synonym searchkey keysearch
     \G invite: send or accept an invitation to another user
     get-me init-client announce-me nicks>chat 
     chat-keys [: 2dup n2o:pklookup send-invitation
-	n2o:dispose-context ;] $[]map ; 
+      n2o:dispose-context ;] $[]map
+    ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 
 
 \ script mode
 

@@ -182,7 +182,9 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig -rot last-msg $! dup 0= IF drop
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
-	    >r r@ <hide> <event o elit, ->msg-nestsig r> event>
+	    >r r@ <hide> <event o elit, ->msg-nestsig
+	    up@ elit, ->wakeme r> event>
+	    stop
 	ELSE  do-msg-nestsig  THEN
     ELSE  !!sig!!  THEN ; \ balk on all wrong signatures
 
@@ -305,6 +307,8 @@ get-current also chat-/cmds definitions
 
 : help ( addr u -- ) 2drop ." all commands start with / as first character: "
     ['] chat-/cmds >body wordlist-words ." bye" forth:cr ;
+
+: invitations ( addr u -- ) 2drop .invitations ;
 
 set-current previous
 

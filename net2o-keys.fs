@@ -248,6 +248,10 @@ magenta >bg white  >fg or bold or ,
     ke-import @ >im-color 85type <default>
     ke-selfsig $@ .sigdates
     space .nick  cr ;
+: .key-invite ( o:key -- o:key )
+    ke-pk $@ keysize umin
+    ke-import @ >im-color 85type <default>
+    space .nick  cr ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 
@@ -609,7 +613,7 @@ $40 buffer: nick-buf
     o>  sim-nick! off ;
 
 : .pk2key$ ( addr u -- )
-    read-pk2key$ sample-key >o .key-list free-key o> ;
+    read-pk2key$ sample-key >o .key-invite free-key o> ;
 
 \ select key by nick
 
@@ -701,11 +705,14 @@ Variable revtoken
 Variable invitations
 
 event: ->invite ( addr u -- )
-    ." invited: " over >r .pk2key$ r> free throw ctrl L inskey ;
+    ." invite me: " over >r .pk2key$ r> free throw ctrl L inskey ;
 event: ->wakeme ( o -- ) <event ->wake event> ;
 
+: .invitations ( -- )
+    invitations [: ." invite me: " .pk2key$ ;] $[]map ;
+
 :noname ( addr u -- )
-    2dup invitations $ins[]sig save-mem up@ <hide>
+    2dup invitations $ins[]sig save-mem [ up@ ]l <hide>
     <event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
 ; is >invitations
 : send-invitation ( pk u -- )
