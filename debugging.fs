@@ -71,6 +71,7 @@ debug: avalanche( \ distribution tree
 debug: adjust-timer( \ adjust timer
 debug: reply( \ test replies
 debug: connect( \ connect debugging messages
+debug: dumpaddr( \ also dump raw address
 
 -db profile( \ )
 
