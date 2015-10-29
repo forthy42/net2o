@@ -1736,7 +1736,7 @@ Variable beacons \ destinations to send beacons to
 : send-beacons ( -- ) !ticks
     beacons [: beacon-struct -
 	2dup + beacon-time 64@ ticker 64@ 64u<= IF
-	    beacon( ticks .ticks ." send beacon to: " 2dup .address cr )
+	    beacon( ticks .ticks ."  send beacon to: " 2dup .address cr )
 	    2>r ticker 64@ beacon-short-ticks# 64+ 2r@ + 64!
 	    net2o-sock s" ?" 0 2r> sendto +send
 	ELSE  2drop  THEN
