@@ -1771,6 +1771,7 @@ Variable beacons \ destinations to send beacons to
 : >next-ticks ( -- )
     next-timeout? drop next-beacon 64umin ticker 64@ 64-
     64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
+    10000.000000000 d>64 64min \ limit sleep time to 10k seconds
     stop-64ns
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
