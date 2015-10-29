@@ -91,7 +91,6 @@ User ip6:#
     .port .net2o ;
 
 : .address ( addr u -- )
-    dumpaddr( 2dup xtype space )
     over w@ AF_INET6 =
     IF  drop dup sin6_addr $10 .ip6a 2drop
     ELSE  drop dup sin_addr 4 .ip4a 2drop  THEN
