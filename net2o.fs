@@ -1726,7 +1726,7 @@ begin-structure beacon-struct
 end-structure
 
 #50.000.000.000 d>64 64Value beacon-ticks# \ 50s beacon tick rate
-#1.000.000.000 d>64 64Value beacon-short-ticks# \ 1s short beacon tick rate
+#2.000.000.000 d>64 64Value beacon-short-ticks# \ 2s short beacon tick rate
 
 Variable beacons \ destinations to send beacons to
 
@@ -1738,7 +1738,7 @@ Variable beacons \ destinations to send beacons to
 	2dup + beacon-time 64@ ticker 64@ 64u<= IF
 	    beacon( ticks .ticks ."  send beacon to: " 2dup .address cr )
 	    2>r ticker 64@ beacon-short-ticks# 64+ 2r@ + 64!
-	    net2o-sock s" ?" 0 2r> sendto +send
+	    net2o-sock s" ?" 0 2r> sendto drop +send
 	ELSE  2drop  THEN
 	;] $[]map ;
 
@@ -1777,8 +1777,7 @@ Variable beacons \ destinations to send beacons to
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
 : timeout-loop-nocatch ( -- )
-    BEGIN   !ticks ~~ >next-ticks ~~ beacon? ~~ request-timeout ~~ event-send ~~
-    AGAIN ;
+    BEGIN   !ticks >next-ticks beacon? request-timeout event-send  AGAIN ;
 
 : catch-loop { xt -- flag }
     BEGIN   nothrow xt catch dup -1 = ?EXIT
