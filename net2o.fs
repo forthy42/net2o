@@ -1776,8 +1776,9 @@ Variable beacons \ destinations to send beacons to
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
-: timeout-loop-nocatch ( -- ) !ticks
-    BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
+: timeout-loop-nocatch ( -- )
+    BEGIN   !ticks ~~ >next-ticks ~~ beacon? ~~ request-timeout ~~ event-send ~~
+    AGAIN ;
 
 : catch-loop { xt -- flag }
     BEGIN   nothrow xt catch dup -1 = ?EXIT

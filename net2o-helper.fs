@@ -82,22 +82,22 @@ event: ->do-beacon ( addr u -- )
     0 sockaddr alen @ sendto +send ;
 : !-beacon ( -- )
     \g I got a reply, my address is unknown
-    beacon( ." Got unknown reply: " sockaddr alen @ .address forth:cr )
+    beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons
     [: 2over 2over beacon-struct - str=
 	IF  do-beacon  ELSE  2drop  THEN ;] $[]map
     2drop ;
 : .-beacon ( -- )
     \g I got a reply, my address is known
-    beacon( ." Got known reply: " sockaddr alen @ .address forth:cr )
+    beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons
     [: beacon-struct - 2over 2over str=
-	IF  + >r beacon-ticks# r> beacon-time 64+!
+	IF  + beacon-time >r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
 	ELSE  2drop  THEN ;] $[]map
     2drop ;
 : >-beacon ( -- )
     \g I got a punch
-    nat( ." Got punch: " sockaddr alen @ .address forth:cr ) ;
+    nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr ) ;
 
 :noname ( char -- )
     case
