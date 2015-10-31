@@ -1774,12 +1774,12 @@ Variable beacons \ destinations to send beacons to
     o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
 
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
+#10000.000000000 d>64 64Constant max-timeout#
 
 : >next-ticks ( -- )
     next-timeout? drop next-beacon 64umin ticks 64-
-    64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
-    10000.000000000 d>64 64min \ limit sleep time to 10k seconds
-    stop-64ns
+    64#0 64max max-timeout# 64min \ limit sleep time to 10k seconds
+    timeout( ." wait for " 64dup 64. ." ns" cr ) stop-64ns
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 

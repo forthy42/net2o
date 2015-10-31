@@ -343,10 +343,11 @@ previous
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
     ELSE  EXIT  THEN
-    timeout-expired? IF  pubkey $@ ['] type $tmp n2o:dispose-context
+    timeout-expired? IF
 	msg-group$ $@len IF
-	    ['] left, send-avalanche .chat
-	ELSE  2drop  THEN
+	    pubkey $@ ['] left, send-avalanche .chat
+	THEN
+	n2o:dispose-context
     THEN ;
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
