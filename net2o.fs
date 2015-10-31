@@ -1720,39 +1720,46 @@ event: ->timeout ( o -- )
 \ because that's easier to do.
 \ beacons are one-byte packets, with ASCII characters to say what they mean
 
-begin-structure beacon-struct
-    64field: beacon-time
-    field: beacon-xt
-end-structure
-
 #50.000.000.000 d>64 64Value beacon-ticks# \ 50s beacon tick rate
 #2.000.000.000 d>64 64Value beacon-short-ticks# \ 2s short beacon tick rate
 
 Variable beacons \ destinations to send beacons to
 
 : next-beacon ( -- 64tick )
-    64#-1 beacons [: beacon-struct - + beacon-time 64@ 64umin ;] $[]map ;
+    64#-1 beacons [: cell+ $@ drop 64@ 64umin ;] #map ;
 
 : send-beacons ( -- ) !ticks
-    beacons [: beacon-struct -
-	2dup + beacon-time 64@ ticker 64@ 64u<= IF
+    beacons [: { beacon } beacon $@ beacon cell+ $@ drop 64@
+	ticker 64@ 64u<= IF
 	    beacon( ticks .ticks ."  send beacon to: " 2dup .address cr )
-	    2>r ticker 64@ beacon-short-ticks# 64+ 2r@ + 64!
+	    2>r ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
 	    net2o-sock s" ?" 0 2r> sendto drop +send
 	ELSE  2drop  THEN
-	;] $[]map ;
+	;] #map ;
 
 : beacon? ( -- )
     next-beacon ticker 64@ 64u<= IF  send-beacons  THEN ;
 
 : >beacon ( sockaddr len xt -- addr len )
     [: { w^ xt } type ticker 8 type xt cell type ;] $tmp ;
-: +beacon ( sockaddr len xt -- )
-    beacon( ." add beacon: " >r 2dup .address r> ."  ' " dup .name cr )
-    >beacon beacons beacon-struct $ins[]# ;
-: -beacon ( sockaddr len xt -- )
-    beacon( ." remove beacon: " >r 2dup .address r> ."  ' " dup .name cr )
-    >beacon beacons beacon-struct $del[]# ;
+: +beacon ( sockaddr len xt -- ) { w^ xt }
+    beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
+    2dup beacons #@ d0= IF
+	xt [: ticker 8 type cell type ;] $tmp 2swap beacons #!
+    ELSE
+	xt cell last# cell+ $+! 2drop
+    THEN ;
+: -beacon ( sockaddr len xt -- ) { w^ xt }
+    beacon( ." remove beacon: " 2dup .address ."  ' " xt @ .name cr )
+    beacons #@ d0<> IF
+	last# cell+ $@ 8 /string bounds ?DO
+	    I @ xt @ = IF  last# cell+ I over $@ drop - cell $del  LEAVE  THEN
+	cell +LOOP
+	last# cell+ $@len 8 = IF
+	    last# $off last# cell+ $off
+	THEN
+    THEN ;
+    
 : add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
 : sub-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> -beacon ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
@@ -1769,7 +1776,7 @@ Variable beacons \ destinations to send beacons to
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 
 : >next-ticks ( -- )
-    next-timeout? drop next-beacon 64umin ticker 64@ 64-
+    next-timeout? drop next-beacon 64umin ticks 64-
     64#0 64max timeout( ." wait for " 64dup 64. ." ns" cr )
     10000.000000000 d>64 64min \ limit sleep time to 10k seconds
     stop-64ns
