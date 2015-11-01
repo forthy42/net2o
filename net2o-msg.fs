@@ -307,6 +307,14 @@ also net2o-base get-current also chat-/cmds definitions
 : me ( addr u -- )
     [: $, msg-action ;] send-avalanche .chat ;
 
+[IFUNDEF] (.time)
+    : (.time) ( delta-f -- )
+	fdup 1e f>= IF  13 9 0 f.rdp ." s "   EXIT  THEN  1000 fm*
+	fdup 1e f>= IF  10 6 0 f.rdp ." ms "  EXIT  THEN  1000 fm*
+	fdup 1e f>= IF   7 3 0 f.rdp ." µs "  EXIT  THEN  1000 fm*
+	f>s 3 .r ." ns " ;
+[THEN]
+
 : peers ( addr u -- ) 2drop ." peers:"
     msg-group$ $@ msg-groups #@ bounds ?DO
 	space I @ >o pubkey $@ .key-id ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
