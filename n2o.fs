@@ -82,7 +82,8 @@ $20 value hash-size#
 
 Variable chat-keys
 
-: nick>chat ( addr u -- ) host.nick>pk chat-keys $+[]! ;
+: nick>chat ( addr u -- )
+    host.nick>pk dup 0= !!no-nick!! chat-keys $+[]! ;
 
 : nicks>chat ( -- )
     ['] nick>chat @arg-loop ;

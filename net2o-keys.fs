@@ -221,10 +221,7 @@ Variable strict-keys  strict-keys on
 [IFUNDEF] magenta  brown constant magenta [THEN]
 
 Create 85colors
-defaultcolor >bg defaultcolor >fg ,
-defaultcolor >bg defaultcolor >fg invers or ,
-defaultcolor >bg defaultcolor >fg invers or ,
-defaultcolor >bg defaultcolor >fg ,
+0 , invers , invers , 0 ,
 
 : .black85 ( addr u -- )
     [ black >bg black >fg or ]L attr!   85type <default> ;
