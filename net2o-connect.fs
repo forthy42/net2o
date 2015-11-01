@@ -44,7 +44,8 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
 	    EXIT
 	ELSE \ just check if timeout didn't expire
 	    trace( ." ticker " forth:cr )
-	    ticker 64@ connect-timeout# 64- 64u< 0= ?EXIT
+	    64dup context-ticker 64!
+	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
 	THEN
     ELSE  64drop  THEN  un-cmd ;
 
@@ -66,7 +67,7 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
 +net2o: map-request ( addrs ucode udata -- ) \g request mapping
     2*64>n
     nest[
-    ?new-mykey ticker 64@ lit, set-cookie
+    ?new-mykey  ticker 64@ lit, set-cookie
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize $, store-key  stskc KEYSIZE erase

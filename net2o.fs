@@ -112,7 +112,6 @@ object class
     file-stat                      uvar statbuf
     cell                           uvar ind-addr
     cell                           uvar task#
-    \ cell                           uvar reqmask
     $10                            uvar cmdtmp
     $10                            uvar return-addr
     $10                            uvar temp-addr
@@ -135,6 +134,7 @@ begin-structure reply
     field: reply-len
     field: reply-offset
     64field: reply-dest
+    64field: reply-time
     field: reply-xt \ execute when receiving an ok
 \    field: reply-timeout# \ per-reply timeout counter
 \    field: reply-timeout-xt \ per-reply timeout xt
@@ -613,6 +613,13 @@ UValue connection
 
 : -flow-control ['] noop         ack-xt ! ;
 
+64User ticker
+64User context-ticker  64#0 context-ticker 64!
+
+: rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
+    connect( 64dup ." rtdelay: " 64>f .ns cr )
+    rtdelay 64! ;
+
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     o contexts !@ next-context !
@@ -626,6 +633,8 @@ UValue connection
     1 blockalign !
     end-semas start-semas DO  I 0 pthread_mutex_init drop
     1 pthread-mutexes +LOOP
+    64#0 context-ticker 64!@ 64dup 64#0 64<> IF
+	ack@ >o ticker 64@ recv-tick 64! rtdelay! o>  ELSE  64drop  THEN
     o o> ;
 
 : ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
@@ -847,8 +856,6 @@ sema timing-sema
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
 \ flow control
-
-64User ticker
 
 : !ticks ( -- )
     ticks ticker 64! ;
@@ -1891,9 +1898,6 @@ Variable cookies
     fdup 1e-3 f< IF  1e6 f* 10 3 0 f.rdp ." µs"  EXIT  THEN
     fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
     10 6 0 f.rdp 's' emit ;
-: rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
-    connect( 64dup ." rtdelay: " 64>f .ns cr )
-    rtdelay 64! ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/
     64over 64abs 64over 64> r> and IF

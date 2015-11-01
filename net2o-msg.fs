@@ -23,7 +23,7 @@ defer pk-connect ( key u cmdlen datalen -- )
     msg-groups #@ dup IF
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
 	cell +LOOP
-    ELSE  2drop  THEN ;
+    ELSE  drop 2drop  THEN ;
 
 Variable msg-group$
 Variable group-master
@@ -215,7 +215,7 @@ previous
     reply( ." got reply " hex. pubkey $@ key>nick type cr )else( drop ) ;
 
 : send-text ( addr u -- )
-    net2o-code  ['] msg-reply expect-reply-xt
+    net2o-code ['] msg-reply expect-reply-xt
     <msg $, msg-text msg> endwith
     ( cookie+request ) end-code| ;
 
@@ -288,17 +288,28 @@ also net2o-base
     0 >o code-buf$ cmdreset
     <msg execute msg> endwith  o>
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
+previous
+
+\ debugging aids for classes
+
+: .ack ( o:ack -- o:ack )
+    ." ack context:" cr
+    ." rtdelay: " rtdelay 64@ 64. cr ;
+
+: .context ( o:context -- o:context )
+    ." Connected with: " pubkey $@ .key-id cr
+    ack-context @ ?dup-IF  ..ack  THEN ;
 
 Vocabulary chat-/cmds
 
-get-current also chat-/cmds definitions
+also net2o-base get-current also chat-/cmds definitions
 
 : me ( addr u -- )
     [: $, msg-action ;] send-avalanche .chat ;
 
 : peers ( addr u -- ) 2drop ." peers:"
     msg-group$ $@ msg-groups #@ bounds ?DO
-	space I @ .pubkey $@ .key-id
+	space I @ >o pubkey $@ .key-id ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
     cell +LOOP  forth:cr ;
 
 : here ( addr u -- ) 2drop
@@ -309,6 +320,9 @@ get-current also chat-/cmds definitions
     ['] chat-/cmds >body wordlist-words ." bye" forth:cr ;
 
 : invitations ( addr u -- ) 2drop .invitations ;
+
+: connections ( addr u -- ) 2drop
+    msg-group$ $@ msg-groups #@ bounds ?DO  I @ ..context  cell +LOOP ;
 
 set-current previous
 
@@ -356,7 +370,7 @@ previous
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
     net2o-code ['] msg-reply expect-reply-xt msg $, nestsig endwith
-    ( cookie+request ) end-code ; is avalanche-to
+    end-code ; is avalanche-to
 
 0 [IF]
 Local Variables:

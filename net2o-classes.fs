@@ -166,6 +166,7 @@ cmd-class class
     field: blocksize
     field: blockalign
     field: reqmask \ per connection request mask
+    field: reqcount \ per connection request count (for non cookie-requests)
     field: request#
     field: filereq#
 
