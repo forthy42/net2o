@@ -23,7 +23,7 @@ defer pk-connect ( key u cmdlen datalen -- )
     msg-groups #@ dup IF
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
 	cell +LOOP
-    ELSE  drop 2drop  THEN ;
+    ELSE  2drop  THEN ;
 
 Variable msg-group$
 Variable group-master

@@ -255,7 +255,7 @@ Variable throwcount
     cmd( dest-flags .dest-addr 2dup n2o:see )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
-    trace( ." cmd loop done" cr )
+    trace( ." cmd loop done" .s cr )
     dup IF   cmd-throw  THEN
     r> sp! 2drop +cmd ;
 : nest-cmd-loop ( addr u -- )

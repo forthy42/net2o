@@ -206,7 +206,7 @@ debugging-method drop 0 [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
 
-:noname  ?dup-IF  ." Throw directly" cr dobacktrace
+:noname  ?dup-IF  ." Throw directly " dup . cr dobacktrace
 	defers throw  THEN ; is throw
 [THEN]
 
