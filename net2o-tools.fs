@@ -43,7 +43,6 @@ Defer ?peekarg
     ['] ?cmd-nextarg IS ?nextarg
     ['] ?cmd-peekarg IS ?peekarg
     ['] ?cmd-@nextarg IS ?@nextarg ;
-cmd-args
 
 : parse-name" ( -- addr u )
     >in @ >r parse-name
@@ -61,6 +60,7 @@ cmd-args
     ['] ?word-nextarg IS ?nextarg
     ['] ?word-peekarg IS ?peekarg
     ['] ?word-@nextarg IS ?@nextarg ;
+word-args
 
 : arg-loop { xt -- }
     begin  ?nextarg  while  xt execute  repeat ;

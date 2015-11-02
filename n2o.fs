@@ -76,8 +76,8 @@ $20 value hash-size#
 
 : ?dhtroot ( -- )
     "net2o-dhtroot" nick-key 0= IF
-	key>default
-	"net2o-dhtroot.n2o" do-keyin
+	key>default  import#manual import-type !  64#-1 key-read-offset 64!
+	85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key
     THEN ;
 
 Variable chat-keys
@@ -162,18 +162,30 @@ Vocabulary n2o
 : n2o-cmds ( -- )
     init-client word-args ['] quit do-net2o-cmds ;
 
+synonym \U \G
+
+: search-help ( pattern xt -- )
+    [ loadfilename 2@ ] sliteral open-fpath-file throw
+    [: >r BEGIN  refill  WHILE
+		source 2over string-prefix? IF  r@ execute  THEN
+	REPEAT rdrop 2drop ;] execute-parsing-named-file ;
+
+: .usage ( addr u -- addr u )
+    ." n2o " source 7 /string type cr ;
+: .cmd ( addr u -- addr u )
+    source 2over nip /string type cr ;
+
 get-current also n2o definitions
 
 : help ( -- )
-    \G usage: n2o help [cmd]
+    \U help [cmd]
     \G help: print commands or details about specified command
-    [ loadfilename 2@ ] sliteral "0" replaces
-    ?nextarg IF  "cmd" replaces
-	"grep -E '\\G u[s]age: n2o %cmd%|\\G %cmd%: ' %0% | sed -e 's/ *\\\\G u[s]age: //g' -e 's/ *\\\\G %cmd%: //g'"
-    ELSE
-	"grep '\\G u[s]age: n2o ' %0% | sed -e 's/ *\\\\G u[s]age: //g'"
-    THEN
-    $substitute drop system ;
+    BEGIN  ?nextarg  WHILE
+	2dup [: ."     \U " type ;] $tmp ['] .usage search-help
+	[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
+    AGAIN
+	s"     \U " ['] .usage search-help
+    THEN ;
 
 set-current
 
@@ -184,17 +196,17 @@ set-current
 get-current n2o definitions
 
 : keyin ( -- )
-    \G usage: n2o keyin/inkey file1 .. filen
+    \U keyin/inkey file1 .. filen
     \G keyin: read a .n2o key file in
     get-me  import#manual import-type !  key>default
     BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
-    \G usage: n2o keyout/outkey [@user1 .. @usern]
+    \U keyout/outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     \G keyout: optional: output pubkeys of other users
     get-me ?peekarg IF  2drop out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
-    \G usage: n2o keygen/genkey nick
+    \U keygen/genkey nick
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
@@ -202,18 +214,18 @@ get-current n2o definitions
     secret-keys# 1- secret-key >raw-key
     out-me ?dhtroot  save-keys ;
 : keylist ( -- )
-    \G usage: n2o keylist/listkey
+    \U keylist/listkey
     \G keylist: list all known keys
     get-me
     key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
 
 : keyqr ( -- )
-    \G usage: n2o keyqr/qrkey [@user1 .. @usern]
+    \U keyqr/qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
     get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keysearch ( -- )
-    \G usage: n2o keysearch/searchkey 85string1 .. 85stringn
+    \U keysearch/searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
     get-me  init-client
@@ -230,42 +242,42 @@ synonym searchkey keysearch
 \ encryption subcommands
 
 : -threefish ( -- )
-    \G usage: n2o -threefish <next-cmd>
+    \U -threefish <next-cmd>
     enc-threefish next-cmd ;
 : -keccak ( -- )
-    \G usage: n2o -keccak <next-cmd>
+    \U -keccak <next-cmd>
     enc-keccak next-cmd ;
 
 : enc ( -- )
-    \G usage: n2o enc @user1 .. @usern file1 .. filen
+    \U enc @user1 .. @usern file1 .. filen
     get-me args>keylist
     [: key-list encrypt-file ;] arg-loop ;
 : dec ( -- )
-    \G usage: n2o dec file
+    \U dec file
     get-me [: decrypt-file ;] arg-loop ;
 : cat ( -- )
-    \G usage: n2o cat file
+    \U cat file
     vault>out dec ;
 
 \ hash+signature
 
 : -256 ( -- )
-    \G usage: n2o -256 <next-cmd>
+    \U -256 <next-cmd>
     \G +256: set hash output to 256 bits (default)
     $20 to hash-size# next-cmd ;
 
 : -512 ( -- )
-    \G usage: n2o -512 <next-cmd>
+    \U -512 <next-cmd>
     \G +512: set hash output to 512 bits
     $40 to hash-size# next-cmd ;
 
 : hash ( -- )
-    \G usage: n2o hash file1 .. filen
+    \U hash file1 .. filen
     enc-mode @ 8 rshift $FF and >crypt
     [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
 
 : sign ( -- )
-    \G usage: n2o sign file1 .. filen
+    \U sign file1 .. filen
     get-me now>never
     [: 2dup hash-file 2drop
       [: type ." .s2o" ;] $tmp w/o create-file throw >r
@@ -273,7 +285,7 @@ synonym searchkey keysearch
     arg-loop ;
 
 : verify ( -- )
-    \G usage: n2o verify file1 .. filen
+    \U verify file1 .. filen
     \G verify: check integrity of files vs. detached signature
     get-me
     [: 2dup hash-file 2drop 2dup type
@@ -286,37 +298,37 @@ synonym searchkey keysearch
 \ server mode
 
 : -lax ( -- )
-    \G usage: n2o -lax <next-cmd>
+    \U -lax <next-cmd>
     \G -lax: open for all keys
     strict-keys off next-cmd ;
 
 : server ( -- )
-    \G usage: n2o server
+    \U server
     get-me init-server announce-me server-loop ;
 
 : rootserver ( -- )
-    \G usage: n2o rootserver
+    \U rootserver
     strict-keys off get-me init-server server-loop ;
 
 : announce ( -- )
-    \G usage: n2o announce
+    \U announce
     \G announce: Only announce ID
     get-me announce-me ;
 
 \ chat mode
 
 : -root ( -- )
-    \G usage: n2o -root <address[:port]> <next-cmd>
+    \U -root <address[:port]> <next-cmd>
     ?nextarg 0= ?EXIT ':' $split dup IF  s>number drop to net2o-port
     ELSE  2drop  THEN  net2o-host $!
     next-cmd ;
 
 : -rootnick ( -- )
-    \G usage: n2o -rootnick <nick> <next-cmd>
+    \U -rootnick <nick> <next-cmd>
     ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
 
 : -port ( -- )
-    \G usage: n2o -port <port#> <next-cmd>
+    \U -port <port#> <next-cmd>
     \G -port: sets port to a fixed number for reachability from outside,
     \G -port: allows to define port forwarding rules in the firewall
     \G -port: only for client; server-side port is different
@@ -324,26 +336,26 @@ synonym searchkey keysearch
     next-cmd ;
 
 : -otr ( --- )
-    \G usage: n2o -otr <next-cmd>
+    \U -otr <next-cmd>
     \G -otr: Turn off-the-records mode on, so chats are not logged
     otr-mode on next-cmd ;
 
 : chat ( -- )
-    \G usage: n2o chat @user   to chat privately with a user
-    \G usage: n2o chat group@user   to chat with the chatgroup managed by user
-    \G usage: n2o chat group   to start a group chat (peers may connect)
+    \U chat @user   to chat privately with a user
+    \U chat group@user   to chat with the chatgroup managed by user
+    \U chat group   to start a group chat (peers may connect)
     get-me init-client announce-me
     ?peekarg IF  drop c@ handle-chat  THEN ;
 
 : chatlog ( -- )
-    \G usage: n2o chatlog @user1/group1 .. @usern/groupn 
+    \U chatlog @user1/group1 .. @usern/groupn 
     \G chatlog: dump chat log
     get-me
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type ."  ===" cr
     over c@ '@' = IF  1 /string nick>pk key|  THEN  load-msg  REPEAT ;
 
 : invite ( -- )
-    \G usage: n2o invite @user
+    \U invite @user
     \G invite: send or accept an invitation to another user
     get-me init-client announce-me nicks>chat 
     chat-keys [: 2dup n2o:pklookup send-invitation
@@ -353,13 +365,13 @@ synonym searchkey keysearch
 \ script mode
 
 : cmd ( -- )
-    \G usage: n2o cmd
+    \U cmd
     \G cmd: Offer a net2o command line for client stuff
     get-me ." net2o interactive shell, type 'bye' to quit"
     n2o-cmds ;
 
 : script ( -- )
-    \G usage: n2o script file
+    \U script file
     \G script: read a file in script mode
     ?nextarg 0= IF  help  EXIT  THEN
     get-me init-client word-args ['] included do-net2o-cmds ;
@@ -367,7 +379,7 @@ synonym searchkey keysearch
 \ file copy
 
 : get ( -- )
-    \G usage: n2o get @user file1 .. filen
+    \U get @user file1 .. filen
     \G get: get files into current directory
     get-me init-client
     ?@nextarg IF
