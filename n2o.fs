@@ -183,7 +183,7 @@ get-current also n2o definitions
     BEGIN  ?nextarg  WHILE
 	2dup [: ."     \U " type ;] $tmp ['] .usage search-help
 	[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
-    AGAIN
+    AGAIN  ELSE
 	s"     \U " ['] .usage search-help
     THEN ;
 
