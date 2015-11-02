@@ -243,20 +243,25 @@ synonym searchkey keysearch
 
 : -threefish ( -- )
     \U -threefish <next-cmd>
+    \G -threefish: use threefish encryption for vaults
     enc-threefish next-cmd ;
 : -keccak ( -- )
     \U -keccak <next-cmd>
+    \G -keccak: use keccak encryption for vaults
     enc-keccak next-cmd ;
 
 : enc ( -- )
     \U enc @user1 .. @usern file1 .. filen
+    \G enc: encrypt files for the listed users
     get-me args>keylist
     [: key-list encrypt-file ;] arg-loop ;
 : dec ( -- )
-    \U dec file
+    \U dec file1 .. filen
+    \G dec: decrypt files
     get-me [: decrypt-file ;] arg-loop ;
 : cat ( -- )
-    \U cat file
+    \U cat file1 .. filen
+    \G cat: cat encrypted files to stdout
     vault>out dec ;
 
 \ hash+signature
