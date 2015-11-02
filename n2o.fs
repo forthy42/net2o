@@ -180,10 +180,10 @@ get-current also n2o definitions
 : help ( -- )
     \U help [cmd]
     \G help: print commands or details about specified command
-    BEGIN  ?nextarg  WHILE
+    ?nextarg IF  BEGIN
 	2dup [: ."     \U " type ;] $tmp ['] .usage search-help
 	[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
-    AGAIN  ELSE
+    ?nextarg 0= UNTIL  ELSE
 	s"     \U " ['] .usage search-help
     THEN ;
 
