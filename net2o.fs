@@ -224,7 +224,7 @@ warnings !
 \ net2o header structure
 
 begin-structure net2o-header
-    2 +field flags
+    2 +field hdrflags
    16 +field destination
     8 +field addr
 end-structure
@@ -468,7 +468,7 @@ User validated
     inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
     inbuf addr 64@ dest-addr 64!
-    inbuf flags w@ dest-flags w! ;
+    inbuf hdrflags w@ dest-flags w! ;
 
 require net2o-classes.fs
 
@@ -1074,7 +1074,7 @@ User outflag  outflag off
 
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
-    outbuf flags 1+ c@ stateless# and IF
+    outbuf hdrflags 1+ c@ stateless# and IF
 	outbuf0-encrypt  return-addr
 	cmd0( .time ." cmd0 to: " dup .addr-path cr )
     ELSE

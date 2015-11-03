@@ -206,7 +206,7 @@ init-keybuf
     c:tweakkey! ;
 
 : try-0decrypt ( addr -- flag ) >r
-    inbuf addr 64@ inbuf flags w@ addr>assembly
+    inbuf addr 64@ inbuf hdrflags w@ addr>assembly
     r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
@@ -218,7 +218,7 @@ init-keybuf
     false [: try-0decrypt or dup 0= ;] search-0key ;
 
 : outbuf0-encrypt ( -- ) +calc
-    outbuf addr 64@ outbuf flags w@ addr>assembly
+    outbuf addr 64@ outbuf hdrflags w@ addr>assembly
     o IF  dest-0key  ELSE  my-0key  THEN  sec@ set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;

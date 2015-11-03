@@ -219,25 +219,36 @@ Variable sim-nick!
 Variable strict-keys  strict-keys on
 
 [IFUNDEF] magenta  brown constant magenta [THEN]
+[IFDEF] gl-type : bg| >bg or ; [ELSE] : bg| drop ; [THEN]
 
-Create 85colors
-0 , invers , invers , 0 ,
+Create 85colors-bw
+0 , invers ,
+invers , 0 ,
+0 , invers ,
+invers , 0 ,
+Create 85colors-cl
+yellow >fg blue >bg or bold or , red >fg white bg| ,
+black >fg cyan bg| , green >fg black >bg or bold or ,
+white >fg black >bg or bold or , magenta >fg yellow bg| ,
+blue >fg yellow bg| , cyan >fg red >bg or bold or ,
+
+[IFDEF] gl-type 85colors-cl [ELSE] 85colors-bw [THEN] Value 85colors
 
 : .black85 ( addr u -- )
     [ black >bg black >fg or ]L attr!   85type <default> ;
-: .red85 ( addr u -- )  0 -rot bounds ?DO
-	cr ." \ revoke: " dup cells 85colors + @ attr! 1+ 3 and
-	I 4 85type  dup cells 85colors + @ attr! 1+ 3 and
+: .stripe85 ( addr u -- )  0 -rot bounds ?DO
+	cr dup cells 85colors + @ attr! 1+
+	I 4 85type  dup cells 85colors + @ attr! 1+
 	I 4 + 4 85type <default> 8 +LOOP  drop ;
 : .rsk ( nick u -- )
-    skrev $20 .red85 space type ."  (keep offline copy!)" cr ;
+    skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF  ." seckey: " ke-sk @ keysize
 	.black85 ."  (keep secret!)" cr  THEN
-    ." first: " ke-selfsig $@ drop 64@ .sigdate cr
-    ." last: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
+    ." created: " ke-selfsig $@ drop 64@ .sigdate cr
+    ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
@@ -512,6 +523,7 @@ Variable cp-tmp
 
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
+    ?.net2o
     "~/.net2o/pubkeys.k2o" [: to key-pfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0= IF  pack-pubkey
@@ -522,6 +534,7 @@ Variable cp-tmp
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
+    ?.net2o
     "~/.net2o/seckeys.k2o" [: to key-sfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey

@@ -227,7 +227,7 @@ sema see-sema
 : n2o:see-me ( -- )
     buf-state 2@ 2>r
     ." see-me: "
-    inbuf flags .dest-addr
+    inbuf hdrflags .dest-addr
     \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
     buf-dump 2@ n2o:see
     2r> buf-state 2! ;
