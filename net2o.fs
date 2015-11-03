@@ -1783,14 +1783,26 @@ Variable beacons \ destinations to send beacons to
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 #10.000000000 d>64 64Constant max-timeout# \ 10s sleep, no more
 
+[IFDEF] android
+    64Variable old-beacon 64#-1 old-beacon 64!
+    : set-beacon-alarm ( beacon-tick -- )
+	64dup old-beacon 64@ 64= IF  64drop  EXIT  THEN
+	64dup old-beacon 64!
+	64>d 1000000 ud/mod clazz .set_alarm drop ;
+    : android-wakeup ( 0 -- ) drop
+	timeout-task wake ; ' android-wakeup is android-alarm
+[THEN]
+
 : >next-ticks ( -- )
-    next-timeout? drop next-beacon 64umin ticks 64-
-    64#0 64max max-timeout# 64min \ limit sleep time to 10k seconds
+    next-timeout? drop next-beacon
+    [IFDEF] android 64dup set-beacon-alarm [THEN]
+    64umin ticks 64-
+    64#0 64max max-timeout# 64min \ limit sleep time to 1 seconds
     timeout( ." wait for " 64dup 64. ." ns" cr ) stop-64ns
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
-: timeout-loop-nocatch ( -- )
+: timeout-loop-nocatch ( -- ) [IFDEF] android jni:attach [THEN]
     BEGIN   !ticks >next-ticks beacon? request-timeout event-send  AGAIN ;
 
 : catch-loop { xt -- flag }
