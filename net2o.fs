@@ -1790,7 +1790,10 @@ Variable beacons \ destinations to send beacons to
 	64dup old-beacon 64!
 	64>d 1000000 ud/mod clazz .set_alarm drop ;
     : android-wakeup ( 0 -- ) drop
-	timeout-task wake ; ' android-wakeup is android-alarm
+	timeout-task wake ;
+    also android
+    ' android-wakeup is android-alarm
+    previous
 [THEN]
 
 : >next-ticks ( -- )
