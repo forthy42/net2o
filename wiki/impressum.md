@@ -13,12 +13,14 @@ Kontakt:
 --------
 
 <table><tr>
-<td>Telefon:</td>
+<th>Telefon:</th>
 <td>+498941154655</td></tr>
-<tr><td>Telefax:</td>
+<tr><th>Telefax:</th>
 <td>+498941154656</td></tr>
-<tr><td>E-Mail:</td>
+<tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
+<tr><th>net2o id:</th>
+<td><tt>kQusJzA;7*?t=uy@X}1GWr!+0qqp_Cn176t4(dQ*</tt></td>
 </tr></table>
 
 Umsatzsteuer-ID:
