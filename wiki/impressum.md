@@ -20,7 +20,7 @@ Kontakt:
 <tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
 <tr><th>net2o id:</th>
-<td><tt><span style="background-color: #fc9">kQusJ</span><span style="background-color: #9cf">zA;7*</span><span style="background-color: #fc9">?t=uy</span><span style="background-color: #9cf">@X}1G</span><span style="background-color: #fc9">Wr!+0</span><span style="background-color: #9cf">qqp_C</span><span style="background-color: #fc9">n176t</span><span style="background-color: #9cf">4(dQ*</span></tt></td>
+<td><tt><span style="background-color: #fec">kQusJ</span><span style="background-color: #cef">zA;7*</span><span style="background-color: #fec">?t=uy</span><span style="background-color: #cef">@X}1G</span><span style="background-color: #fec">Wr!+0</span><span style="background-color: #cef">qqp_C</span><span style="background-color: #fec">n176t</span><span style="background-color: #cef">4(dQ*</span></tt></td>
 </tr></table>
 
 Umsatzsteuer-ID:
