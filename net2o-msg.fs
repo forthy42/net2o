@@ -350,9 +350,12 @@ set-current previous
       $, msg-text ;] send-avalanche .chat ;
 previous
 
+: ?chat-group ( -- )
+    msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
+    msg-group$ $@ load-msg ;
+
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
-    msg-group$ $@ load-msg
     BEGIN  get-input-line
 	2dup "/bye" str= 0= >r
 	msg-group$ $@ msg-groups #@ 0> r> and  WHILE

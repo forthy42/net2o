@@ -431,10 +431,10 @@ $10 Constant datesize#
 
 : >backup ( addr u -- )
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
-    2dup [: type '+' emit ;] $tmp 2swap rename-file throw ;
+    2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
 
 : >new ( addr u -- fd )
-    [: type '+' emit ;] $tmp r/w create-file throw ;
+    [: type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }

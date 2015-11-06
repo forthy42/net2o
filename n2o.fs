@@ -134,8 +134,7 @@ Variable chat-keys
     ?dup-IF  >o rdrop  ELSE  10 ms chat-connect  THEN ;
 
 : chat-user ( -- )
-    ?chat-connect
-    msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
+    ?chat-group ?chat-connect
     o { w^ connect }
     connect cell msg-group$ $@ msg-groups #!
     ret+beacon group-chat ;

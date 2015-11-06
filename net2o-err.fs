@@ -75,5 +75,7 @@ s" invalid DHT key"              throwcode !!no-dht-key!!
 s" DHT permission denied"        throwcode !!dht-permission!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
 
+: sig-enum>throw ( enum -- throwcode )
+    [ ' !!inv-sig!! >body @ 1- ]L swap - ;
 : !!sig!! ( n -- )
-    ?dup-IF  [ ' !!inv-sig!! >body @ 1+ ]L swap - throw  THEN ;
+    ?dup-IF  sig-enum>throw throw  THEN ;
