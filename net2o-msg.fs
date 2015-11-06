@@ -180,7 +180,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-coord ( $:gps -- )
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig -rot last-msg $! dup 0= IF drop
+    $> nest-sig dup 0= IF drop last-msg $!
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
 	    >r r@ <hide> <event o elit, ->msg-nestsig
 	    up@ elit, ->wakeme r> event>

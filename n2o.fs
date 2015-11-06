@@ -146,7 +146,7 @@ Variable chat-keys
 	"" msg-group$ $@ msg-groups #!
 	dup 0<> IF  nick>chat  ELSE  2drop group-master on  THEN
     THEN
-    nicks>chat group-master @ IF  group-chat  ELSE  chat-user  THEN ;
+    nicks>chat group-master @ IF  ?chat-group group-chat  ELSE  chat-user  THEN ;
 
 \ commands for the command line user interface
 
