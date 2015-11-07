@@ -151,6 +151,7 @@ event: ->hide ctrl Z inskey <event ->wake event> ;
 : <hide> ( task -- )
     <event up@ elit, ->hide event>  stop ;
 : bflush ( -- )
+    up@ [ up@ ]l = IF  b$ $.  b$ $off  EXIT  THEN
     [ up@ ]l <hide>
     b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
     BEGIN  b$ @  WHILE  stop  REPEAT ;

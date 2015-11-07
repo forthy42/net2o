@@ -28,7 +28,7 @@
     jvalue notification-manager
     : notify+ ( addr u -- )  notify$ $+! ;
     : ?nb ( -- )
-	nb 0= IF  clazz newNotification.Builder to nb  THEN ;
+	nb 0= IF  clazz 0 .newNotification.Builder to nb  THEN ;
     : ?nm ( -- )
 	notification-manager 0= IF
 	    NOTIFICATION_SERVICE clazz .getSystemService
@@ -37,22 +37,24 @@
     : ?ni ( -- )
 	ni 0= IF  clazz .gforthintent to ni  THEN ;
     : ?notify ( -- )
-	?attach ?nm ?nb ?ni ;
+	attach ?nm ?nb ?ni ;
+    : msg-builder ( -- ) ?notify
+	0x01080077 nb .setSmallIcon >o
+	$FFFF00 1000 2000 setLights xref> >o
+\	ni setContentIntent xref> >o
+	3 setDefaults xref> >o
+	1 setAutoCancel xref> to nb ;
+    msg-builder
     : msg-notify ( -- )
 	rendering @ notify? @ <= IF
 	    pending-notifications off  notify$ $off  EXIT
 	THEN
-	1 pending-notifications +! ?notify
-	0x01080077 nb .setSmallIcon to nb
+	1 pending-notifications +!
 	[: ." net2o: " pending-notifications @ dup .
 	  ." Message" 1 > IF ." s"  THEN ;] $tmp
-	make-jstring nb .setContentTitle to nb
-	notify$ $@ make-jstring dup nb .setContentText to nb
-	nb .setTicker to nb
-	$FFFF00 1000 2000 nb .setLights to nb
-	3 nb .setDefaults to nb
-\	ni nb .setContentIntent to nb
-	1 nb .setAutoCancel to nb
+	make-jstring nb >o setContentTitle xref> >o
+	notify$ $@ make-jstring dup setContentText xref> >o
+	setTicker xref> to nb
 	nb .build to nf
 	1 nf notification-manager .notify
 	notify$ $off ;

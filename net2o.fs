@@ -1805,7 +1805,7 @@ Variable beacons \ destinations to send beacons to
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
-: timeout-loop-nocatch ( -- ) [IFDEF] android jni:?attach [THEN]
+: timeout-loop-nocatch ( -- ) [IFDEF] android jni:attach [THEN]
     BEGIN   !ticks >next-ticks beacon? request-timeout event-send  AGAIN ;
 
 : catch-loop { xt -- flag }
