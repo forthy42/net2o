@@ -15,6 +15,53 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+\ notifications (on android only now)
+
+[IFDEF] android
+    also android also jni
+    Variable pending-notifications
+    Variable notify$
+    Variable notify? 0 notify? ! \ default for now: no notification
+    jvalue nb
+    jvalue nf
+    jvalue ni
+    jvalue notification-manager
+    : notify+ ( addr u -- )  notify$ $+! ;
+    : ?nb ( -- )
+	nb 0= IF  clazz newNotification.Builder to nb  THEN ;
+    : ?nm ( -- )
+	notification-manager 0= IF
+	    NOTIFICATION_SERVICE clazz .getSystemService
+	    to notification-manager
+	THEN ;
+    : ?ni ( -- )
+	ni 0= IF  clazz .gforthintent to ni  THEN ;
+    : ?notify ( -- )
+	?attach ?nm ?nb ?ni ;
+    : msg-notify ( -- )
+	rendering @ notify? @ <= IF
+	    pending-notifications off  notify$ $off  EXIT
+	THEN
+	1 pending-notifications +! ?notify
+	0x01080077 nb .setSmallIcon to nb
+	[: ." net2o: " pending-notifications @ dup .
+	  ." Message" 1 > IF ." s"  THEN ;] $tmp
+	make-jstring nb .setContentTitle to nb
+	notify$ $@ make-jstring dup nb .setContentText to nb
+	nb .setTicker to nb
+	$FFFF00 1000 2000 nb .setLights to nb
+	3 nb .setDefaults to nb
+\	ni nb .setContentIntent to nb
+	1 nb .setAutoCancel to nb
+	nb .build to nf
+	1 nf notification-manager .notify
+	notify$ $off ;
+    previous previous
+[ELSE]
+    : notify+ 2drop ;
+    : msg-notify ;
+[THEN]
+
 defer avalanche-to ( addr u o:context -- )
 defer pk-connect ( key u cmdlen datalen -- )
 : avalanche-msg ( msg u1 groupaddr u2 -- )
@@ -73,6 +120,7 @@ User replay-mode
     last-msg $@ 2dup +msg-log IF
 	sigpksize# - 2dup + sigpksize# >$  c-state off
 	do-nestsig
+	replay-mode @ 0= up@ [ up@ ]L = and IF  msg-notify  THEN
     ELSE  2drop  THEN ;
 
 : do-avalanche ( -- )
@@ -141,7 +189,8 @@ msg-table >table
 reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
-    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space .key-id ;
+    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
+    [: .key-id ." : " ;] $tmp notify+ ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
     $> last-group $!  replay-mode @ ?EXIT
@@ -162,12 +211,12 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
-    IF   <err>  THEN  ."  @" .key-id
-    <default> ;
+    IF   <err>  THEN  2dup [: ."  @" .key-id ;] $tmp notify+
+    ."  @" .key-id <default> ;
 +net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? ." : " $> forth:type forth:cr ;
+    !!signed? 1 8 !!<>=order? ." : " $> 2dup notify+ forth:type forth:cr ;
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
