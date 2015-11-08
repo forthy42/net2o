@@ -428,16 +428,20 @@ previous
     msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
     msg-group$ $@ load-msg ;
 
+: leave-chat ( addr u -- )
+    dup >r bounds ?DO  I @  cell +LOOP
+    r> 0 ?DO  >o o to connection +resend-cmd send-leave
+    ret-beacon disconnect-me o>  cell +LOOP ;
+
+: leave-chats ( -- )
+    msg-groups [: cell+ $@ leave-chat ;] #map ;
+
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
-	2dup "/bye" str= 0= >r
-	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
+	2dup "/bye" str= 0=  WHILE
 	    @ >o msg-context @ .avalanche-text o>
-    REPEAT  drop 2drop
-    msg-group$ $@ msg-groups #@ dup >r bounds ?DO  I @  cell +LOOP
-    r> 0 ?DO  >o o to connection +resend-cmd send-leave
-    ret-beacon disconnect-me o>  cell +LOOP ;
+    REPEAT  drop 2drop leave-chats ;
 
 : msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
