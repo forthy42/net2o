@@ -205,10 +205,11 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    signed? !!signed!! $> msg-groups #@ d0<> IF \ we only join existing groups
-	parent cell last# cell+ $+!
-	parent @ .wait-task @ ?dup-IF
-	    <event parent @ elit, ->chat-connect event>  THEN THEN ;
+    signed? !!signed!! $> 2dup msg-groups #@ d0<> IF  2drop \ existing groups
+    ELSE  s" " 2swap msg-groups #!  THEN
+    parent cell last# cell+ $+!
+    parent @ .wait-task @ ?dup-IF
+	<event parent @ elit, ->chat-connect event>  THEN ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
@@ -254,13 +255,15 @@ set-current
     last-group $@ msg-logs #@ d0= IF  64drop  EXIT  THEN
     last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
 	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
-	ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
+      ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
 
-: <msg ( -- ) \G start a msg block
-    msg sign[
-    msg-start ;
-: msg> ( -- ) \G end a msg block by adding a signature
-    msg-group$ $@ dup IF  $, msg-group  ELSE  2drop  THEN
+: <msg ( -- )
+    \G start a msg block
+    msg sign[ msg-start ;
+: msg> ( -- )
+    \G end a msg block by adding a signature and the group (if any)
+    msg-group$ $@ dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
+    IF  $, msg-group  ELSE  2drop  THEN
     now>never ]pksign ;
 
 previous
@@ -279,14 +282,17 @@ previous
     $, msg-text msg> endwith
     ( cookie+request ) end-code| ;
 
+: ?destpk ( addr u -- addr' u' )
+    2dup pubkey $@ str= IF  2drop pkc keysize  THEN ;
+
 also net2o-base
 : join, ( -- )
-    msg-group$ $@ dup IF  msg $, msg-join
+    msg-group$ $@ dup IF  msg ?destpk $, msg-join
 	sign[ msg-start "joined" $, msg-action msg> endwith
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
-    msg-group$ $@ dup IF  msg $, msg-leave
+    msg-group$ $@ dup IF  msg ?destpk $, msg-leave
 	sign[ msg-start "left" $, msg-action msg> endwith
     ELSE  2drop  THEN ;
 
@@ -394,8 +400,10 @@ also net2o-base get-current also chat-/cmds definitions
 : invitations ( addr u -- ) 2drop .invitations ;
 
 : chats ( addr u -- ) 2drop ." Chats: "
-    msg-groups [:
-      $@ 2dup printable? IF  forth:type  ELSE  .key-id  THEN space ;] #map
+    msg-groups [: >r
+      r@ $@ msg-group$ $@ str= IF ." *" THEN
+      r@ $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN
+      ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
     forth:cr ;
 
 set-current previous
