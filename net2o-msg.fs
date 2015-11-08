@@ -439,7 +439,8 @@ previous
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
-	2dup "/bye" str= 0=  WHILE
+	2dup "/bye" str= 0= >r
+	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
 	    @ >o msg-context @ .avalanche-text o>
     REPEAT  drop 2drop leave-chats ;
 
