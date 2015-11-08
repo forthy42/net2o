@@ -294,6 +294,8 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ ..nick 2drop ;
 
+: .simple-id ( addr u -- ) key| key>nick type ;
+
 :noname ( addr u -- )
     o IF  pubkey @ IF
 	    2dup pubkey $@ key| str= 0= IF

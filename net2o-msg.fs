@@ -21,14 +21,13 @@
     also android also jni
     Variable pending-notifications
     Variable notify$
-    Variable notify? 0 notify? ! \ default for now: no notification
+    Variable notify? -2 notify? ! \ default: no notification when active
     jvalue nb
-    jvalue nf
     jvalue ni
+    jvalue nf
     jvalue notification-manager
     : notify+ ( addr u -- )  notify$ $+! ;
-    : ?nb ( -- )
-	nb 0= IF  clazz 0 .newNotification.Builder to nb  THEN ;
+    : notify! ( addr u -- )  notify$ $! ;
     : ?nm ( -- )
 	notification-manager 0= IF
 	    NOTIFICATION_SERVICE clazz .getSystemService
@@ -36,32 +35,35 @@
 	THEN ;
     : ?ni ( -- )
 	ni 0= IF  clazz .gforthintent to ni  THEN ;
-    : ?notify ( -- )
-	attach ?nm ?nb ?ni ;
-    : msg-builder ( -- ) ?notify
-	0x01080077 nb .setSmallIcon >o
-	$FFFF00 1000 2000 setLights xref> >o
-\	ni setContentIntent xref> >o
-	3 setDefaults xref> >o
-	1 setAutoCancel xref> to nb ;
+    : msg-builder ( -- ) ?nm ?ni
+	clazz newNotification.Builder to nb
+	0x01080077 nb .setSmallIcon to nb
+	$FFFF00 1000 2000 nb .setLights to nb
+	ni nb .setContentIntent to nb
+	3 nb .setDefaults to nb
+	1 nb .setAutoCancel to nb ;
     msg-builder
-    : msg-notify ( -- )
-	rendering @ notify? @ <= IF
-	    pending-notifications off  notify$ $off  EXIT
-	THEN
+    : build-notification ( -- )
 	1 pending-notifications +!
 	[: ." net2o: " pending-notifications @ dup .
 	  ." Message" 1 > IF ." s"  THEN ;] $tmp
-	make-jstring nb >o setContentTitle xref> >o
-	notify$ $@ make-jstring dup setContentText xref> >o
-	setTicker xref> to nb
-	nb .build to nf
+	make-jstring nb .setContentTitle to nb
+	notify$ $@ make-jstring nb .setContentText to nb
+	notify$ $@ make-jstring nb .setTicker to nb
+	nb .build to nf ;
+    : msg-notify ( -- )
+	rendering @ notify? @ <= up@ [ up@ ]l <> or IF
+	    pending-notifications off  notify$ $off  EXIT
+	THEN
+	build-notification
 	1 nf notification-manager .notify
 	notify$ $off ;
     previous previous
 [ELSE]
-    : notify+ 2drop ;
-    : msg-notify ;
+    Variable notify$
+    : notify+ notify$ $+! ;
+    : notify! notify$ $! ;
+    : msg-notify ( ." notificaton: " notify$ $. cr ) notify$ $off ;
 [THEN]
 
 defer avalanche-to ( addr u o:context -- )
@@ -192,7 +194,7 @@ reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
-    [: .key-id ." : " ;] $tmp notify+ ;
+    [: .simple-id ." : " ;] $tmp notify! ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
     $> last-group $!  replay-mode @ ?EXIT
@@ -213,7 +215,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
-    IF   <err>  THEN  2dup [: ."  @" .key-id ;] $tmp notify+
+    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ;
 +net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
@@ -232,12 +234,13 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop last-msg $!
-	parent @ dup IF  .wait-task @ dup up@ <> and  THEN  ?dup-IF
+	parent @ dup IF  .wait-task @ dup up@ <> and  THEN
+	?dup-IF
 	    >r r@ <hide> <event o elit, ->msg-nestsig
 	    up@ elit, ->wakeme r> event>
 	    stop
 	ELSE  do-msg-nestsig  THEN
-    ELSE  !!sig!!  THEN ; \ balk on all wrong signatures
+    ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
 ' msg msg-class to start-req
 ' pk-sig? msg-class to nest-sig
@@ -380,8 +383,10 @@ also net2o-base get-current also chat-/cmds definitions
 
 : invitations ( addr u -- ) 2drop .invitations ;
 
-: connections ( addr u -- ) 2drop
-    msg-group$ $@ msg-groups #@ bounds ?DO  I @ ..context  cell +LOOP ;
+: chats ( addr u -- ) 2drop
+    msg-groups [: ;] #map ;
+
+synonym notify msg-notify
 
 set-current previous
 
