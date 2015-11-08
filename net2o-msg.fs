@@ -344,6 +344,16 @@ also net2o-base
     cmdbuf$ 4 /string 2 - msg-group$ $@ code-buf avalanche-msg ;
 previous
 
+\ chat helper words
+
+Variable chat-keys
+
+: nick>chat ( addr u -- )
+    host.nick>pk dup 0= !!no-nick!! chat-keys $+[]! ;
+
+: nicks>chat ( -- )
+    ['] nick>chat @arg-loop ;
+
 \ debugging aids for classes
 
 : .ack ( o:ack -- o:ack )
@@ -383,10 +393,10 @@ also net2o-base get-current also chat-/cmds definitions
 
 : invitations ( addr u -- ) 2drop .invitations ;
 
-: chats ( addr u -- ) 2drop
-    msg-groups [: ;] #map ;
-
-synonym notify msg-notify
+: chats ( addr u -- ) 2drop ." Chats: "
+    msg-groups [:
+      $@ 2dup printable? IF  forth:type  ELSE  .key-id  THEN space ;] #map
+    forth:cr ;
 
 set-current previous
 
@@ -407,7 +417,7 @@ set-current previous
 previous
 
 : ?chat-group ( -- )
-    msg-group$ $@len 0= IF  pubkey $@ key| msg-group$ $!  THEN
+    msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
     msg-group$ $@ load-msg ;
 
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
