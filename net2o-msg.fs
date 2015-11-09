@@ -370,6 +370,9 @@ Variable chat-keys
     ." Connected with: " pubkey $@ .key-id cr
     ack-context @ ?dup-IF  ..ack  THEN ;
 
+: .group ( addr -- )
+    $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
+
 Vocabulary chat-/cmds
 
 also net2o-base get-current also chat-/cmds definitions
@@ -385,10 +388,12 @@ also net2o-base get-current also chat-/cmds definitions
 	f>s 3 .r ." ns " ;
 [THEN]
 
-: peers ( addr u -- ) 2drop ." peers:"
-    msg-group$ $@ msg-groups #@ bounds ?DO
-	space I @ >o pubkey $@ .key-id ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
-    cell +LOOP  forth:cr ;
+: peers ( addr u -- ) 2drop
+    msg-groups [: dup .group ." : "
+      cell+ $@ bounds ?DO
+	  space I @ >o pubkey $@ .key-id space
+	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
+      cell +LOOP  forth:cr ;] #map ;
 
 : here ( addr u -- ) 2drop
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
@@ -399,11 +404,10 @@ also net2o-base get-current also chat-/cmds definitions
 
 : invitations ( addr u -- ) 2drop .invitations ;
 
-: chats ( addr u -- ) 2drop ." Chats: "
+: chats ( addr u -- ) 2drop ." chats: "
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
-      r@ $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN
-      ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
+      r@ .group ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
     forth:cr ;
 
 : chat ( addr u -- )
