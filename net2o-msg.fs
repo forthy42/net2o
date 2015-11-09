@@ -406,6 +406,10 @@ also net2o-base get-current also chat-/cmds definitions
       ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
     forth:cr ;
 
+: chat ( addr u -- )
+    over c@ '@' = IF  1 /string nick>pk key|  THEN  msg-group$ $!
+    0. chats ;
+
 set-current previous
 
 : do-chat-cmds ( addr u -- )
