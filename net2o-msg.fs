@@ -407,8 +407,12 @@ also net2o-base get-current also chat-/cmds definitions
     forth:cr ;
 
 : chat ( addr u -- )
-    over c@ '@' = IF  1 /string nick>pk key|  THEN  msg-group$ $!
-    0. chats ;
+    over c@ '@' = IF  1 /string nick>pk key|  THEN
+    2dup msg-groups #@ nip 0= IF
+	." That chat isn't active" forth:cr 2drop \ !!FIXME!!
+    ELSE
+	msg-group$ $!
+    THEN  0. chats ;
 
 set-current previous
 
