@@ -1662,6 +1662,8 @@ User remote?
 : ungroup-ctx ( -- )
     msg-groups [: >r o r> cell+ del$cell ;] #map ;
 
+Defer punch-dispose
+
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
@@ -1681,7 +1683,7 @@ User remote?
 	unlink-ctx  ungroup-ctx
 	end-semas start-semas DO  I pthread_mutex_destroy drop
 	1 pthread-mutexes +LOOP
-\	punch-addrs $[]off
+	punch-dispose
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
