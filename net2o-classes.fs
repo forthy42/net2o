@@ -132,6 +132,7 @@ cmd-class class
     field: data-resend
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
+    field: punch-addrs
     field: punch-load
     field: punch-gen \ punch request number
     0 +field end-strings

@@ -97,6 +97,9 @@ previous
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
 
+: .nat-addrs ( -- )
+    punch-addrs $@ bounds ?DO  I @ .addr cr  cell +LOOP ;
+
 :noname ( addr u -- )
     new-addr >o o .addr n2o:dispose-addr o> ; is .addr$
 

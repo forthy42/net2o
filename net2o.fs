@@ -1145,9 +1145,10 @@ Defer new-addr
 
 : net2o:punch ( addr u -- )
     o IF
-	new-addr
+	new-addr dup >r
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
 	addr>sock
+	r>  dup { w^ punch-addr } punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
 
 \ send chunk
@@ -1680,6 +1681,7 @@ User remote?
 	unlink-ctx  ungroup-ctx
 	end-semas start-semas DO  I pthread_mutex_destroy drop
 	1 pthread-mutexes +LOOP
+\	punch-addrs $[]off
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 

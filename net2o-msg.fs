@@ -418,6 +418,12 @@ also net2o-base get-current also chat-/cmds definitions
 	msg-group$ $!
     THEN  0. chats ;
 
+: nat ( addr u -- )  2drop
+    msg-groups [: dup .group ." : "
+      cell+ $@ bounds ?DO
+	  space I @ >o pubkey $@ .key-id ." :" forth:cr .nat-addrs o>
+      cell +LOOP ;] #map ;
+
 set-current previous
 
 : do-chat-cmds ( addr u -- )
