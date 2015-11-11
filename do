@@ -43,6 +43,10 @@ function git-get {
 }
 function build {
     pname=$1
+    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
+}
+function build-clean {
+    pname=$1
     (cd $pname; ./autogen.sh && ./configure $CONFOPT && make clean && make && sudo make install)
 }
 
@@ -73,7 +77,7 @@ git-get https://github.com/forthy42 ed25519-donna
 
 for i in ed25519-donna keccak threefish
 do
-    build $i
+    build-clean $i
 done
 
 # make sure libraries are found
@@ -84,5 +88,5 @@ sudo /sbin/ldconfig
 
 gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
     git-get git://git.savannah.gnu.org gforth
-    build gforth
+    build-clean gforth
 )
