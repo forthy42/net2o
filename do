@@ -31,12 +31,13 @@ else
 fi
 
 function git-get {
+    echo "=== git clone $purl/$pname.git $* ==="
     purl=$1
     pname=$2
     shift; shift
     if [ -d $pname ]
     then
-	(cd $pname; git pull)
+	(cd $pname; git pull -f)
     else
 	git clone $purl/$pname.git $*
     fi
