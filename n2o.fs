@@ -388,6 +388,11 @@ synonym searchkey keysearch
 : bye ( -- )
     subme bye ;
 
+: -bw ( -- )
+    \U -bw <cmd>
+    \G -bw: disable color codes
+    ['] drop is attr!  next-cmd ;
+
 set-current
 
 \ allow issuing commands during chat
