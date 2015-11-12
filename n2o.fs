@@ -30,13 +30,15 @@ require net2o.fs
 
 \ will ask for your password and if possible auto-select your id
 
-: get-me ( -- )  secret-keys#
+: get-me ( -- )
+    debug-out op-vector !@ >r
+    secret-keys#
     BEGIN  dup 0= WHILE drop
 	    ." Passphrase: " +passphrase
 	    read-keys secret-keys# dup 0= IF
 		."  wrong passphrase, no key found" del-last-key
 	    THEN  cr
-    REPEAT
+    REPEAT  r> op-vector !
     1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ;
 
 : get-me-again ( -- )
@@ -186,17 +188,17 @@ set-current
 get-current n2o definitions
 
 : keyin ( -- )
-    \U keyin/inkey file1 .. filen
+    \U keyin|inkey file1 .. filen
     \G keyin: read a .n2o key file in
     get-me  import#manual import-type !  key>default
     BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
-    \U keyout/outkey [@user1 .. @usern]
+    \U keyout|outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     \G keyout: optional: output pubkeys of other users
     get-me ?peekarg IF  2drop out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
-    \U keygen/genkey nick
+    \U keygen|genkey nick
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
@@ -204,18 +206,18 @@ get-current n2o definitions
     secret-keys# 1- secret-key >raw-key
     out-me +dhtroot save-keys ;
 : keylist ( -- )
-    \U keylist/listkey
+    \U keylist|listkey
     \G keylist: list all known keys
     get-me
     key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
 
 : keyqr ( -- )
-    \U keyqr/qrkey [@user1 .. @usern]
+    \U keyqr|qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
     get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keysearch ( -- )
-    \U keysearch/searchkey 85string1 .. 85stringn
+    \U keysearch|searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
     get-me  init-client
@@ -343,7 +345,7 @@ synonym searchkey keysearch
     ?peekarg IF  drop c@ handle-chat  THEN ;
 
 : chatlog ( -- )
-    \U chatlog @user1/group1 .. @usern/groupn 
+    \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
     get-me
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type ."  ===" cr
