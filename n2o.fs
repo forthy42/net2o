@@ -23,9 +23,10 @@ require net2o.fs
 
 : choose-key ( -- o )
     0 BEGIN  drop
-	." Choose nick:" cr .secret-nicks
-	key '0' - 0 max secret-key dup
-    UNTIL ;
+	." Choose nick by number:" cr .secret-nicks
+	key '0' - 0 max secret-key dup 0= WHILE
+	    ." Please enter a number between 0 and " secret-keys# 1- . cr
+    REPEAT ;
 
 \ will ask for your password and if possible auto-select your id
 

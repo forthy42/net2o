@@ -203,10 +203,6 @@ Variable sim-nick!
 : .nick-base ( o:key -- )
     ke-nick $.  ke-nick# @ ?dup-IF  '#' emit 0 .r  THEN ;
 : .nick ( o:key -- )   ke-import @ >im-color .nick-base <default> ;
-: .secret-nicks ( -- )
-    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  dup . .nick cr 1+
-      THEN o> ;] #map drop ;
 
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
@@ -250,12 +246,18 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ." created: " ke-selfsig $@ drop 64@ .sigdate cr
     ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     o> ;
-: .key-list ( o:key -- o:key )
-    ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
+: .key-rest ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
     ke-selfsig $@ .sigdates
-    space .nick  cr ;
+    space .nick ;
+: .key-list ( o:key -- o:key )
+    ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
+    .key-rest cr ;
+: .secret-nicks ( -- )
+    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+	  dup 2 .r space .key-rest cr 1+
+      THEN o> ;] #map drop ;
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
