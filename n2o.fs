@@ -23,7 +23,7 @@ require net2o.fs
 
 : choose-key ( -- o )
     0 BEGIN  drop
-	." Choose nick by number:" cr .secret-nicks
+	." Choose key by number:" cr .secret-nicks
 	key '0' - 0 max secret-key dup 0= WHILE
 	    ." Please enter a number between 0 and " secret-keys# 1- . cr
     REPEAT ;
