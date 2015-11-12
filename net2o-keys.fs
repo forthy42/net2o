@@ -534,7 +534,7 @@ Variable cp-tmp
 	    flush( ." saving " .nick forth:cr )
 	    key-crypt ke-offset 64@ key>pfile@pos
 	THEN o> ;] #map
-    ;] save-file  ?key-pfd drop ;
+    0 to key-pfd ;] save-file  ?key-pfd drop ;
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
@@ -544,7 +544,7 @@ Variable cp-tmp
 	ke-sk sec@ d0<> IF  pack-seckey
 	    key-crypt ke-offset 64@ key>sfile@pos
 	THEN o> ;] #map
-    ;] save-file  ?key-sfd drop ;
+    0 to key-sfd ;] save-file  ?key-sfd drop ;
 
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
