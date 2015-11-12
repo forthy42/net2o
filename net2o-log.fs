@@ -17,7 +17,7 @@
 
 reply-table $@ inherit-table log-table
 
-get-current also net2o-base definitions
+scope{ net2o-base
 \g 
 \g ### log commands ###
 \g 
@@ -48,7 +48,7 @@ $32 net2o: log ( -- o:log )
     THEN  n:>o ;
 log-table >table
 
-previous set-current
+}scope
 
 0 [IF]
 Local Variables:

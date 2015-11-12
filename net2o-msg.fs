@@ -196,7 +196,7 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
 
 Defer msg:last
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 \g 
 \g ### message commands ###
@@ -416,11 +416,9 @@ scope: notify-cmds
 	endcase
     ELSE  2drop  THEN  1000000 um* d>64 to delta-notify .notify ;
 
-previous set-current
+}scope
 
-Vocabulary chat-/cmds
-
-also net2o-base get-current also chat-/cmds definitions
+also net2o-base scope: chat-/cmds
 
 : me ( addr u -- )
     [: $, msg-action ;] send-avalanche .chat ;
@@ -476,7 +474,7 @@ also net2o-base get-current also chat-/cmds definitions
 	name>int execute
     ELSE  ." Unknown notify command" 2drop forth:cr  THEN ;
 
-set-current previous
+}scope
 
 : do-chat-cmds ( addr u -- )
     1 /string bl $split 2swap
@@ -492,6 +490,7 @@ set-current previous
 		  ELSE  $, msg-signal false  THEN
 	      UNTIL  THEN  THEN
       $, msg-text ;] send-avalanche .chat ;
+
 previous
 
 : ?chat-group ( -- )

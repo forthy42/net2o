@@ -17,7 +17,7 @@
 
 \ address interpreter
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 cmd-table $@ inherit-table address-table
 \g 
@@ -46,7 +46,7 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     $> host-key sec! ;
 +net2o: addr-revoke ( $:revoke -- ) \g revocation info
     $> host-revoke $! ;
-set-current previous
+}scope
 
 gen-table $freeze
 ' context-table is gen-table

@@ -34,7 +34,7 @@ end-class vault-class
 
 vault-table >table
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 cmd-table $@ inherit-table vault-table
 \g 

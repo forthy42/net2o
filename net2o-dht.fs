@@ -179,7 +179,7 @@ dht-class new constant dummy-dht
 
 \ commands for DHT
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 \g 
 \g ### dht commands ###

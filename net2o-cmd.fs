@@ -385,7 +385,7 @@ Defer do-req>
 : cmd:nestsig ( addr u -- )
     nest-sig dup 0= IF  drop do-nestsig  ELSE  !!sig!!  THEN ;
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 \ Command numbers preliminary and subject to change
 
@@ -447,8 +447,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> cmd:nestsig ; \ balk on all wrong signatures
 
-previous
-dup set-current
+}scope
 
 gen-table $freeze
 gen-table $@ inherit-table reply-table
@@ -606,7 +605,7 @@ previous
 
 \ net2o assembler stuff
 
-also net2o-base definitions
+scope{ net2o-base
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : string, ( addr u -- )  dup n>64 cmd, +cmdbuf ;
@@ -628,7 +627,7 @@ comp: :, previous ;
     neststart# @ >r cmd>nest rot $!
     r> fwd# - 1- cmdbuf$ nip - -cmdbuf ;
 
-dup set-current previous
+}scope
 
 [IFDEF] 64bit
     ' noop Alias 2*64>n immediate
@@ -640,7 +639,7 @@ dup set-current previous
 
 \ commands to reply
 
-also net2o-base definitions
+scope{ net2o-base
 \g 
 \g ### reply commands ###
 \g 
@@ -685,7 +684,7 @@ gen-table $freeze
 
 : ]nest  ( -- )  ]nest$ push-$ push' nest ;
 
-set-current previous
+}scope
 
 0 [IF]
 Local Variables:

@@ -17,7 +17,7 @@
 
 Defer >invitations
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 reply-table $@ inherit-table setup-table
 
@@ -177,7 +177,7 @@ net2o-base
 
 gen-table $freeze
 
-set-current previous
+}scope
 
 0 [IF]
 Local Variables:

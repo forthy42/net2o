@@ -17,7 +17,7 @@
 
 \ everything that follows here can assume to have a connection context
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 reply-table $@ inherit-table context-table
 

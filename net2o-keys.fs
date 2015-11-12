@@ -375,7 +375,7 @@ Variable keys
 : ke-first! ( 64date -- ) 64#-1 ke-last!
     ke-selfsig $@ drop 64! ;
 
-get-current also net2o-base definitions
+scope{ net2o-base
 
 cmd-table $@ inherit-table key-entry-table
 \g 
@@ -403,7 +403,7 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keyimport ( n -- )
     pw-level# 0< IF  64>n import#untrusted umin ke-import !
     ELSE  64drop  THEN ;
-dup set-current previous
+}scope
 
 gen-table $freeze
 ' context-table is gen-table
@@ -424,13 +424,13 @@ sample-key >o key-entry-table @ token-table ! o>
     cmdreset also net2o-base ;
 comp: :, also net2o-base ;
 
-also net2o-base definitions
+scope{ net2o-base
 
 : end:key ( -- )
     endwith previous cmdlock unlock ;
 comp: :, previous ;
 
-set-current previous
+}scope
 
 : key-crypt ( -- )
     keypack keypack-all#

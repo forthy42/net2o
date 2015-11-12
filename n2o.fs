@@ -165,7 +165,7 @@ Vocabulary n2o
 : .cmd ( addr u -- addr u )
     source 2over nip /string type cr ;
 
-get-current also n2o definitions
+scope{ n2o
 
 : help ( -- )
     \U help [cmd]
@@ -402,12 +402,12 @@ set-current
 
 \ allow issuing commands during chat
 
-get-current also chat-/cmds definitions
+scope{ chat-/cmds
 
 : n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
 
-set-current previous
+}scope
 
 : +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN  c@ '+' = ;
 

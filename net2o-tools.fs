@@ -471,4 +471,4 @@ $10 Constant datesize#
 : }scope ( addr -- )
     previous set-current ;
 : scope: ( "vocabulary" -- addr )
-    vocabular get-current also last-xt execute definitions ;
+    vocabulary get-current also lastxt execute definitions ;
