@@ -88,14 +88,10 @@ previous
     host-pri# @ ?dup-IF  0 .r '#' emit  THEN
     host-id $@ dup IF '"' emit type '"' emit  ELSE  2drop  THEN
     host-anchor $@ dup IF ." anchor: " 85type cr  ELSE  2drop  THEN
-    host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop  THEN
-    host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop THEN
-    host-portv4 w@ host-portv6 w@ = IF
-	." :" host-portv4 w@ 0 .r
-    ELSE
-	host-portv4 w@ ?dup-IF  ." :4," 0 .r  THEN
-	host-portv6 w@ ?dup-IF  ." :6," 0 .r  THEN
+    host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop
+	host-portv4 w@ host-portv6 w@ <> IF  host-portv6 w@ ." :" 0 .r space THEN
     THEN
+    host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop host-portv4 w@ ." :" 0 .r  THEN
     host-route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 

@@ -154,8 +154,6 @@ Vocabulary n2o
 : n2o-cmds ( -- )
     init-client word-args ['] quit do-net2o-cmds ;
 
-synonym \U \G
-
 : search-help ( pattern xt -- )
     [ loadfilename 2@ ] sliteral open-fpath-file throw
     [: >r BEGIN  refill  WHILE

@@ -17,6 +17,8 @@ require base85.fs
 : .nnb ( addr n -- )  85type ;
 : .64b ( addr -- ) 64 .nnb ;
 
+synonym \U \G \ comment for help
+
 \ debugging switches
 
 debug: timing(

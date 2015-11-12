@@ -17,11 +17,22 @@
 
 \ notifications (on android only now)
 
+64#0 64Value last-notify
+64#0 64Value latest-notify
+60.000000000 d>64 64Value delta-notify \ one notification per minute is enough
+3 Value notify-mode
+$FFFF00 Value notify-rgb
+500 Value notify-on
+4500 Value notify-off
+
+: tick-notify? ( -- flag )
+    ticks last-notify 64- delta-notify 64< ;
+Variable notify? -2 notify? ! \ default: no notification when active
+Variable notify$
+
 [IFDEF] android
     also android also jni
     Variable pending-notifications
-    Variable notify$
-    Variable notify? -2 notify? ! \ default: no notification when active
     jvalue nb
     jvalue ni
     jvalue nf
@@ -35,16 +46,19 @@
 	THEN ;
     : ?ni ( -- )
 	ni 0= IF  clazz .gforthintent to ni  THEN ;
+    : notify-lights ( -- )
+	notify-rgb notify-on notify-off nb .setLights to nb
+	notify-mode nb .setDefaults to nb ;
     : msg-builder ( -- ) ?nm ?ni
 	clazz newNotification.Builder to nb
 	0x01080077 nb .setSmallIcon to nb
-	$FFFF00 1000 2000 nb .setLights to nb
+	notify-lights
 	ni nb .setContentIntent to nb
-	3 nb .setDefaults to nb
 	1 nb .setAutoCancel to nb ;
     msg-builder
     : build-notification ( -- )
 	1 pending-notifications +!
+	tick-notify? ?EXIT
 	[: ." net2o: " pending-notifications @ dup .
 	  ." Message" 1 > IF ." s"  THEN ;] $tmp
 	make-jstring nb .setContentTitle to nb
@@ -52,18 +66,20 @@
 	notify$ $@ make-jstring nb .setTicker to nb
 	nb .build to nf ;
     : msg-notify ( -- )
+	ticks to latest-notify
 	rendering @ notify? @ <= up@ [ up@ ]l <> or IF
 	    pending-notifications off  notify$ $off  EXIT
 	THEN
 	build-notification
 	1 nf notification-manager .notify
-	notify$ $off ;
+	notify$ $off  ticks to last-notify ;
     previous previous
 [ELSE]
-    Variable notify$
     : notify+ notify$ $+! ;
     : notify! notify$ $! ;
-    : msg-notify ( ." notificaton: " notify$ $. cr ) notify$ $off ;
+    : msg-notify ( ." notificaton: " notify$ $. cr )
+	notify$ $off  ticks to last-notify ;
+    : notify-lights ;
 [THEN]
 
 defer avalanche-to ( addr u o:context -- )
@@ -373,6 +389,37 @@ Variable chat-keys
 : .group ( addr -- )
     $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
+Vocabulary notify-cmds
+
+: .notify ( -- )
+    ." notify " notify? ? ." led " notify-rgb hex. notify-on . notify-off .
+    ." interval " delta-notify 64>d 1000000 um/mod . drop forth:cr ;
+
+: get-hex ( addr u -- addr' u' n )
+    bl skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
+: get-dec ( addr u -- addr' u' n )
+    bl skip 0. 2swap ['] >number #10 base-execute 2swap drop ;
+
+get-current also notify-cmds definitions
+
+: on ( addr u -- ) 2drop -2 notify? ! .notify ;
+: always ( addr u -- ) 2drop -3 notify? ! .notify ;
+: off ( addr u -- ) 2drop 0 notify? ! .notify ;
+: led ( addr u -- ) \ "<rrggbb> <on-ms> <off-ms>"
+    get-hex to notify-rgb
+    get-dec #500 max to notify-on
+    get-dec #500 max to notify-off
+    2drop .notify ;
+: interval ( addr u -- )
+    0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
+	    's' of 1000 * endof
+	    'm' of 60000 * endof
+	    'h' of 36000000 * endof
+	endcase
+    ELSE  2drop  THEN  1000000 um* d>64 to delta-notify .notify ;
+
+previous set-current
+
 Vocabulary chat-/cmds
 
 also net2o-base get-current also chat-/cmds definitions
@@ -423,6 +470,13 @@ also net2o-base get-current also chat-/cmds definitions
       cell+ $@ bounds ?DO
 	  space I @ >o pubkey $@ .key-id ." :" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
+
+: notify ( addr u -- )
+    \U notify on|away|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]
+    \G Change notificaton settings
+    bl skip bl $split 2swap ['] notify-cmds >body (search-wordlist) dup IF
+	name>int execute
+    ELSE  ." Unknown notify command" 2drop forth:cr  THEN ;
 
 set-current previous
 
