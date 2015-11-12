@@ -389,8 +389,6 @@ Variable chat-keys
 : .group ( addr -- )
     $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
-Vocabulary notify-cmds
-
 : .notify ( -- )
     ." notify " notify? ? ." led " notify-rgb hex. notify-on . notify-off .
     ." interval " delta-notify 64>d 1000000 um/mod . drop forth:cr ;
@@ -400,7 +398,7 @@ Vocabulary notify-cmds
 : get-dec ( addr u -- addr' u' n )
     bl skip 0. 2swap ['] >number #10 base-execute 2swap drop ;
 
-get-current also notify-cmds definitions
+scope: notify-cmds
 
 : on ( addr u -- ) 2drop -2 notify? ! .notify ;
 : always ( addr u -- ) 2drop -3 notify? ! .notify ;

@@ -463,3 +463,12 @@ $10 Constant datesize#
     \G moving the existing file to backup ("~" appended to filename)
     \G and the new ("+" appended to filename) to the original name.
     >r 2dup >new r> over >r execute r> close-file throw >backup ;
+
+\ scoping
+
+: scope{ ( "vocabulary" -- addr )
+    get-current also ' execute definitions ;
+: }scope ( addr -- )
+    previous set-current ;
+: scope: ( "vocabulary" -- addr )
+    vocabular get-current also last-xt execute definitions ;
