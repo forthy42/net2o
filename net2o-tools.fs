@@ -245,7 +245,9 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
-: today? ( day -- flag ) ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
+false Value everyday?
+: today? ( day -- flag )
+    ticks 64>f 1e-9 f* 86400e f/ floor f>s = everyday? 0= and ;
 
 : .2 ( n -- ) s>d <# # # #> type ;
 : .day ( seconds -- fraction/day ) 86400e f/ fsplit

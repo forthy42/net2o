@@ -395,6 +395,11 @@ synonym searchkey keysearch
     \G -bw: disable color codes
     ['] drop is attr!  next-cmd ;
 
+: -fulldate ( -- )
+    \U -fulldate <cmd>
+    \G -fulldate: always display full date
+    true to everyday?  next-cmd ;
+
 set-current
 
 \ allow issuing commands during chat
