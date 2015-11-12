@@ -75,11 +75,9 @@ $20 value hash-size#
     key-readin $slurp-file  64#-1 key-read-offset 64!
     key-readin $@ do-key ;
 
-: ?dhtroot ( -- )
-    "net2o-dhtroot" nick-key 0= IF
-	key>default  import#manual import-type !  64#-1 key-read-offset 64!
-	85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key
-    THEN ;
+: +dhtroot ( -- )
+    key>default  import#manual import-type !  64#-1 key-read-offset 64!
+    85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key ;
 
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
@@ -204,7 +202,7 @@ get-current n2o definitions
     +newphrase key>default
     2dup key#user +gen-keys .rsk .keys
     secret-keys# 1- secret-key >raw-key
-    out-me ?dhtroot  save-keys ;
+    out-me +dhtroot save-keys ;
 : keylist ( -- )
     \U keylist/listkey
     \G keylist: list all known keys

@@ -155,8 +155,8 @@ Variable nick-table \ nick hash table
 Variable sim-nick!
 
 : nick! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
-    ke-nick $@ nick-table #@ 2dup d0= IF
-	2drop  optr cell ke-nick $@ nick-table #! 0
+    ke-nick $@ nick-table #@ d0= IF
+	optr cell ke-nick $@ nick-table #! 0
     ELSE
 	last# cell+ $@len cell/
 	optr cell last# cell+ $+!
@@ -534,7 +534,7 @@ Variable cp-tmp
 	    flush( ." saving " .nick forth:cr )
 	    key-crypt ke-offset 64@ key>pfile@pos
 	THEN o> ;] #map
-    ;] save-file ;
+    ;] save-file  ?key-pfd drop ;
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
@@ -544,7 +544,7 @@ Variable cp-tmp
 	ke-sk sec@ d0<> IF  pack-seckey
 	    key-crypt ke-offset 64@ key>sfile@pos
 	THEN o> ;] #map
-    ;] save-file ;
+    ;] save-file  ?key-sfd drop ;
 
 : save-keys ( -- )
     save-pubkeys save-seckeys ;
