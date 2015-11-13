@@ -58,7 +58,6 @@ Variable notify$
     msg-builder
     : build-notification ( -- )
 	1 pending-notifications +!
-	tick-notify? ?EXIT
 	[: ." net2o: " pending-notifications @ dup .
 	  ." Message" 1 > IF ." s"  THEN ;] $tmp
 	make-jstring nb .setContentTitle to nb
@@ -67,12 +66,12 @@ Variable notify$
 	nb .build to nf ;
     : msg-notify ( -- )
 	ticks to latest-notify
-	rendering @ notify? @ <= up@ [ up@ ]l <> or IF
-	    pending-notifications off  notify$ $off  EXIT
-	THEN
-	build-notification
-	1 nf notification-manager .notify
-	notify$ $off  ticks to last-notify ;
+	rendering @ notify? @ <= dup IF  pending-notifications off  THEN
+	tick-notify? or 0= IF
+	    build-notification
+	    1 nf notification-manager .notify
+	    ticks to last-notify
+	THEN  notify$ $off ;
     previous previous
 [ELSE]
     : notify+ notify$ $+! ;
