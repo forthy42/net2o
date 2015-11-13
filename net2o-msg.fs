@@ -46,13 +46,11 @@ Variable notify$
 	THEN ;
     : ?ni ( -- )
 	ni 0= IF  clazz .gforthintent to ni  THEN ;
-    : notify-lights ( -- )
-	notify-rgb notify-on notify-off nb .setLights to nb
-	notify-mode nb .setDefaults to nb ;
     : msg-builder ( -- ) ?nm ?ni
 	clazz newNotification.Builder to nb
+	notify-rgb notify-on notify-off nb .setLights to nb
+	notify-mode nb .setDefaults to nb
 	0x01080077 nb .setSmallIcon to nb
-	notify-lights
 	ni nb .setContentIntent to nb
 	1 nb .setAutoCancel to nb ;
     msg-builder
@@ -66,7 +64,10 @@ Variable notify$
 	nb .build to nf ;
     : msg-notify ( -- )
 	ticks to latest-notify
-	rendering @ notify? @ <= dup IF  pending-notifications off  THEN
+	rendering @ notify? @ <= dup IF
+	    pending-notifications off
+	    64#0 to last-notify
+	THEN
 	tick-notify? or 0= IF
 	    build-notification
 	    1 nf notification-manager .notify
@@ -78,7 +79,7 @@ Variable notify$
     : notify! notify$ $! ;
     : msg-notify ( ." notificaton: " notify$ $. cr )
 	notify$ $off  ticks to last-notify ;
-    : notify-lights ;
+    : msg-builder ;
 [THEN]
 
 defer avalanche-to ( addr u o:context -- )
@@ -406,7 +407,7 @@ scope: notify-cmds
     get-hex to notify-rgb
     get-dec #500 max to notify-on
     get-dec #500 max to notify-off
-    2drop .notify ;
+    2drop .notify msg-builder ;
 : interval ( addr u -- )
     0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
 	    's' of 1000 * endof
@@ -414,6 +415,8 @@ scope: notify-cmds
 	    'h' of 36000000 * endof
 	endcase
     ELSE  2drop  THEN  1000000 um* d>64 to delta-notify .notify ;
+: mode ( addr u -- )
+    get-dec 3 and to notify-mode 2drop .notify msg-builder ;
 
 }scope
 

@@ -31,7 +31,7 @@ require net2o.fs
 \ will ask for your password and if possible auto-select your id
 
 : get-me ( -- )
-    debug-vector @ op-vector !@ >r
+    debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= WHILE drop
 	    ." Passphrase: " +passphrase
