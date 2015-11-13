@@ -140,7 +140,8 @@ User replay-mode
     last-msg $@ 2dup +msg-log IF
 	sigpksize# - 2dup + sigpksize# >$  c-state off
 	do-nestsig
-	replay-mode @ 0= up@ [ up@ ]L = and IF  msg-notify  THEN
+	replay-mode @ 0=
+	IF  msg-notify  ELSE  64#0 to last-notify  THEN
     ELSE  2drop  THEN ;
 
 : do-avalanche ( -- )
@@ -391,7 +392,8 @@ Variable chat-keys
 
 : .notify ( -- )
     ." notify " notify? ? ." led " notify-rgb hex. notify-on . notify-off .
-    ." interval " delta-notify 64>d 1000000 um/mod . drop forth:cr ;
+    ." interval " delta-notify 64>d 1000000 um/mod . drop
+    ." mode " notify-mode . forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
     bl skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
