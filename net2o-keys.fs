@@ -144,6 +144,8 @@ bit perm%filerd  \ can read files
 bit perm%filewr  \ can write files
 drop
 
+perm%msg perm%filerd or Constant perm%default
+
 Variable import-type  import#untrusted import-type !
 
 Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,

@@ -337,11 +337,8 @@ code0-buf \ reset default
 
 \ net2o doc production
 
+Defer .n-name  ' noop is .n-name
 [IFDEF] docgen
-    false value ?.stack
-    : .n-name ( n "name" -- )
-	." + " dup hex. >in @ >r parse-name type r> >in !
-	true to ?.stack ;
     false warnings !@
     : \g ( rest-of-line -- )
 	source >in @ /string over 2 - c@ 'g' = >r
@@ -349,8 +346,6 @@ code0-buf \ reset default
 	dup >in +!
 	r> IF  type cr  ELSE  2drop  THEN ; immediate
     warnings !
-[ELSE]
-    ' noop alias .n-name
 [THEN]
 
 \ net2o command definition
@@ -389,16 +384,24 @@ scope{ net2o-base
 
 \ Command numbers preliminary and subject to change
 
+Defer doc(gen  ' noop is doc(gen
+
 : ( ( "type"* "--" "type"* "rparen" -- ) ')' parse 2drop ;
 comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
-    [IFDEF] docgen  >in @ >r ')' parse ."  ( " type ." )" cr r> >in !  [THEN]
-    s" (" cmdsig $!
+    doc(gen s" (" cmdsig $!
     BEGIN  parse-name dup  WHILE  over c@ cmdsig c$+!
 	s" )" str= UNTIL  ELSE  2drop  THEN
     \ cmdsig $freeze
 ;
 
 0 net2o: dummy ( -- ) ;
+
+[IFDEF] docgen
+    :noname ( -- )
+	>in @ >r ')' parse ."  ( " type ." )" cr r> >in ! ; is doc(gen
+    :noname ( n "name" -- )
+	." + " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
+[THEN]
 
 \g Commands
 \g ========
