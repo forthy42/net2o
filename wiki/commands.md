@@ -113,9 +113,13 @@ List of Commands
 + $34 context ( -- )
   make context active
 + $35 gen-reply ( -- )
-  generate a key request reply reply
+  generate a key request reply
 + $36 gen-punch-reply ( -- )
-  generate a key request reply reply
+  generate a punch request reply
++ $37 oneshot-tmpkey ( $:tmpkey -- )
+  oneshot tmpkey
++ $38 invite ( $:nick+sig -- )
+  invite someone
 
 ### connection commands ###
 
@@ -214,6 +218,7 @@ List of Commands
 + $26 !time ( -- )
   start timer
 + $32 log ( -- o:log )
+  free all parts of the subkey
 
 ### key storage commands ###
 
@@ -226,11 +231,42 @@ key nick
 + $14 keyprofile ( $:string -- )
 key profile (hash of a resource)
 + $15 keymask ( x -- )
-key mask
+key access right mask
 + $16 keypsk ( $:string -- )
-preshared key (unclear if that's going to stay
+preshared key, used for DHT encryption
 + $17 +keysig ( $:string -- )
 add a key signature
++ $18 keyimport ( n -- )
+  get the annotations with signature
+  get the annotations with signature
+  get my nick with signature
+  get my nick with signature
+  read a nested key into sample-key
+
+### address commands ###
+
++ $11 addr-pri# ( n -- )
+  priority
++ $12 addr-id ( $:id -- )
+  unique host id string
++ $13 addr-anchor ( $:pubkey -- )
+  anchor for routing further
++ $14 addr-ipv4 ( n -- )
+  ip address
++ $15 addr-ipv6 ( $:ipv6 -- )
+  ipv6 address
++ $16 addr-portv4 ( n -- )
+  ipv4 port
++ $17 addr-portv6 ( n -- )
+  ipv6 port
++ $18 addr-port ( n -- )
+  ip port, both protocols
++ $19 addr-route ( $:net2o -- )
+  net2o routing part
++ $1A addr-key ( $:addr -- )
+  key for connection setup
++ $1B addr-revoke ( $:revoke -- )
+  revocation info
 
 ### dht commands ###
 
@@ -246,28 +282,15 @@ set dht id for further operations on it
 + $27 dht-tags? ( -- )
 + $28 dht-owner? ( -- )
 
-### address commands ###
+### vault commands ###
 
-+ $10 addr-pri# ( n -- )
-  priority
-+ $11 addr-id ( $:id -- )
-  unique host id string
-+ $12 addr-anchor ( $:pubkey -- )
-  anchor for routing further
-+ $13 addr-ipv4 ( n -- )
-  ip address
-+ $14 addr-ipv6 ( $:ipv6 -- )
-  ipv6 address
-+ $15 addr-portv4 ( n -- )
-  ipv4 port
-+ $16 addr-portv6 ( n -- )
-  ipv6 port
-+ $17 addr-port ( n -- )
-  ip port
-+ $18 addr-route ( $:net2o -- )
-  net2o routing part
-+ $19 addr-key ( $:addr -- )
-  key for connection setup
++ $20 dhe ( $:pubkey -- )
+  start diffie hellman exchange
++ $21 vault-keys ( $:keys -- )
++ $22 vault-file ( $:content -- )
++ $23 vault-sig ( $:sig -- )
++ $24 vault-crypt ( n -- )
+  set encryption mode and key wrap size
   forward message to all next nodes of that message group
 
 ### message commands ###
@@ -295,13 +318,7 @@ set dht id for further operations on it
   specify message string
 + $29 msg-reconnect ( $:pubkey -- )
   rewire distribution tree
-
-### vault commands ###
-
-+ $20 dhe ( $:pubkey -- )
-  start diffie hellman exchange
-+ $21 vault-keys ( $:keys -- )
-+ $22 vault-file ( $:content -- )
-+ $23 vault-sig ( $:sig -- )
-+ $24 vault-crypt ( n -- )
-  set encryption mode and key wrap size
++ $2A msg-last? ( tick -- )
++ $2B msg-coord ( $:gps -- )
++ $A msg-nestsig ( $:cmd+sig -- )
+  check sig+nest

@@ -77,23 +77,23 @@ event: ->do-beacon ( addr -- )
     <event elit, ->do-beacon ?query-task event> ;
 
 : ?-beacon ( -- )
-    \g if we don't know that address, send a reply
+    \G if we don't know that address, send a reply
     net2o-sock
     sockaddr alen @ routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
     beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
     0 sockaddr alen @ sendto +send ;
 : !-beacon ( -- )
-    \g I got a reply, my address is unknown
+    \G I got a reply, my address is unknown
     beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
 : .-beacon ( -- )
-    \g I got a reply, my address is known
+    \G I got a reply, my address is known
     beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons #@ IF
 	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
     THEN ;
 : >-beacon ( -- )
-    \g I got a punch
+    \G I got a punch
     nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr ) ;
 
 :noname ( char -- )

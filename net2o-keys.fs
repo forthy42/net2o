@@ -105,6 +105,7 @@ cmd-class class
     field: ke-import   \ type of key import
     field: ke-storekey \ used to encrypt on storage
     64field: ke-offset \ offset in key file
+    64field: ke-mask   \ permission mask
     0 +field ke-end
 end-class key-entry
 
@@ -133,6 +134,14 @@ enum import#chat      \ chat import
 enum import#dht       \ dht import
 enum import#invited   \ invitation import
 enum import#untrusted \ must be last
+drop
+
+1
+bit perm%connect \ not set for banned people
+bit perm%dht     \ can write into the DHT
+bit perm%msg     \ can send messages
+bit perm%filerd  \ can read files
+bit perm%filewr  \ can write files
 drop
 
 Variable import-type  import#untrusted import-type !
@@ -394,8 +403,8 @@ $11 net2o: privkey ( $:string -- )
 \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
 \g key profile (hash of a resource)
-+net2o: keymask ( x -- )                       8 !!>order? 64drop ;
-\g key mask
++net2o: keymask ( x -- )                       8 !!>order? ke-mask 64! ;
+\g key access right mask
 +net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
 \g preshared key, used for DHT encryption
 +net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
