@@ -36,11 +36,14 @@ bugs simply have to be found and fixed.
 communication, and collect data and metadata.  Data can be protected
 by encryption.  However, metadata is available at several places:
 Direct connections (without onion routing) are revealing.  Queries in
-DHT nodes, which can be operated by enemies, can be revealing, too.  When
-the adversary taps big interchange nodes, direct connections may be
-hidden by taking a shorter route.  Onion routing can be ineffective,
-if the adversary controls enough relays.  So good anonymization is way
-more difficult to reach than good data protection.
+DHT nodes, which can be operated by enemies, can be revealing, too.
+When the adversary taps big interchange nodes, direct connections may
+be hidden by taking a shorter route.  Onion routing can be
+ineffective, if the adversary controls enough relays, especially the
+most vulnerable entry nodes.  So good anonymization is way more
+difficult to reach than good data protection.  For a start, all nodes
+in an onion router mesh must be equal, and none of them may know if
+they are entry or rendesvouz nodes.
 
 3. Eavesdropping, active: The adversary can perform a man in the
 middle attack (MITM).  Public key exchange only protects against
@@ -81,3 +84,39 @@ files, but not others.  File encryption is also necessary when you
 store files on devices owned by other people (e.g. online off-site
 backups).  Tamper detection is necessary to avoid using bugged device.
 Several solutions here are outside the scope of net2o.
+
+Trust model
+-----------
+
+Actually, a threat model is the wrong way to design secure software.
+A threat model makes the assumption of "default permit", and deny
+access to the threat.  "Default deny" is more important.  Who can you
+trust?
+
+1. Nobody.  You can't even trust yourself, because you will make
+mistakes.
+
+Of course, that's an extreme position, but we are dealing with that
+sort of trust model all the time. So what's a realistic trust model?
+A realistic trust model follows a "need to know" principle - you can't
+distrust those who need to know.  But you verify that they deserve
+your trust.
+
+1. You trust yourself.  You educate youself to reduce the risk of
+making stupid mistakes.
+
+2. You trust those you communicate with to the extent that they also
+have access to the communication you have with them.  You use your
+communication to verify that they deserve that trust.
+
+3. You trust the authors of the software you use, and the auditors of
+this software, but to make sure that trust is deserved, they make
+their sources available.
+
+4. You keep as much data on your own systems, and encrypt it when it
+is stored or transmitted elsewhere, but to enable public contacts, you
+need information in the public.
+
+5. Anonymous communication relies on a combination of trust,
+unrelatedness, and cover traffic (which requires being central enough
+to deserve trust from many users).  This is why it's hard.

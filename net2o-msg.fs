@@ -472,7 +472,7 @@ also net2o-base scope: chat-/cmds
       cell +LOOP ;] #map ;
 
 : notify ( addr u -- )
-    \U notify on|away|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]
+    \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G Change notificaton settings
     bl skip bl $split 2swap ['] notify-cmds >body (search-wordlist) dup IF
 	name>int execute
