@@ -120,11 +120,15 @@ end-class key-entry
 
 Variable key-entry-table
 
+\ key class
+
 0
 enum key#anon
 enum key#user
 enum key#group
 drop
+
+\ key import type
 
 0
 enum import#self      \ private key
@@ -136,20 +140,29 @@ enum import#invited   \ invitation import
 enum import#untrusted \ must be last
 drop
 
+Variable import-type  import#untrusted import-type !
+
+Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
+DOES> swap cells + @ attr! ;
+
+\ permissions
+
 1
 bit perm%connect \ not set for banned people
+bit perm%blocked \ set for banned people - makes sure one bit is set
 bit perm%dht     \ can write into the DHT
 bit perm%msg     \ can send messages
 bit perm%filerd  \ can read files
 bit perm%filewr  \ can write files
 drop
 
-perm%msg perm%filerd or Constant perm%default
+perm%connect perm%dht perm%msg perm%filerd or or or Value perm%default
 
-Variable import-type  import#untrusted import-type !
+: .perm ( permission -- )  64#1 "cbdmrw" bounds DO
+	64over 64over 64and 64-0<> I c@ '-' rot select emit 64-2*
+    LOOP  64drop 64drop ;
 
-Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
-DOES> swap cells + @ attr! ;
+\ sample key
 
 0 Value sample-key
 
@@ -220,8 +233,8 @@ Variable sim-nick!
 : host.nick>pk ( addr u -- pk u' )
     '.' $split dup 0= IF  2swap  THEN [: nick>pk type type ;] $tmp ;
 
-: key-exist? ( addr u -- flag )
-    key-table #@ d0<> ; 
+: key-exist? ( addr u -- o )
+    key-table #@ IF  cell+  THEN ; 
 
 Variable strict-keys  strict-keys on
 
@@ -256,12 +269,13 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	.black85 ."  (keep secret!)" cr  THEN
     ." created: " ke-selfsig $@ drop 64@ .sigdate cr
     ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
+    ." perm: " ke-mask 64@ .perm
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
     ke-selfsig $@ .sigdates
-    space .nick ;
+    space .nick space ke-mask 64@ .perm ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
@@ -423,6 +437,7 @@ gen-table $freeze
     pk2-sig? dup ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
+    perm%default ke-mask 64! \ set permission to default
     sim-nick! off c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
@@ -497,7 +512,8 @@ also net2o-base
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
-    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
+    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
+    ke-mask 64@ lit, ;
 
 : pack-corekey ( o:key -- )
     sign[

@@ -386,13 +386,14 @@ scope{ net2o-base
 
 Defer doc(gen  ' noop is doc(gen
 
+: (>sig ( "comments"* ']' -- )
+    s" (" cmdsig $!
+    BEGIN  parse-name dup  WHILE  over c@ cmdsig c$+!
+	s" )" str= UNTIL  ELSE  2drop  THEN ;
+
 : ( ( "type"* "--" "type"* "rparen" -- ) ')' parse 2drop ;
 comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
-    doc(gen s" (" cmdsig $!
-    BEGIN  parse-name dup  WHILE  over c@ cmdsig c$+!
-	s" )" str= UNTIL  ELSE  2drop  THEN
-    \ cmdsig $freeze
-;
+    doc(gen (>sig ;
 
 0 net2o: dummy ( -- ) ;
 
