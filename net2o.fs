@@ -1587,6 +1587,7 @@ $20 Constant signed-val
 : signed?    ( -- flag )  validated @ signed-val    and ;
 
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
+: !!unsigned?  ( -- ) signed?  !!signed!! ;
 : !!<order?   ( n -- )  dup c-state @ u>  !!inv-order!! c-state or! ;
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
 : !!>=order?   ( n -- )  dup c-state @ u< !!inv-order!! c-state or! ;

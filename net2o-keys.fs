@@ -403,13 +403,13 @@ $11 net2o: privkey ( $:string -- )
 \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
 \g key profile (hash of a resource)
-+net2o: keymask ( x -- )                       8 !!>order? ke-mask 64! ;
++net2o: keymask ( x -- )         !!unsigned? $10 !!>=order? ke-mask 64! ;
 \g key access right mask
-+net2o: keypsk ( $:string -- )     !!signed? $10 !!>order? $> ke-psk sec! ;
++net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> ke-psk sec! ;
 \g preshared key, used for DHT encryption
-+net2o: +keysig ( $:string -- )  $20 !!>=order? $> ke-sigs $+[]! ;
++net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
 \g add a key signature
-+net2o: keyimport ( n -- )
++net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
     pw-level# 0< IF  64>n import#untrusted umin ke-import !
     ELSE  64drop  THEN ;
 }scope
@@ -496,9 +496,7 @@ also net2o-base
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
-    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-\    ke-mask 64@ lit, keymask
-;
+    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
 
 : pack-corekey ( o:key -- )
     sign[
@@ -506,6 +504,7 @@ also net2o-base
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
+    ke-mask 64@ lit, keymask
     ke-storekey @ >storekey ! ;
 previous
 

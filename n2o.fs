@@ -295,7 +295,7 @@ synonym searchkey keysearch
 : -lax ( -- )
     \U -lax <next-cmd>
     \G -lax: open for all keys
-    strict-keys off next-cmd ;
+    strict-keys off  perm%default to perm%unknown  next-cmd ;
 
 : server ( -- )
     \U server
