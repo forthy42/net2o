@@ -497,7 +497,8 @@ also net2o-base
     ke-nick $@ $, keynick
     ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
-    ke-mask 64@ lit, ;
+\    ke-mask 64@ lit, keymask
+;
 
 : pack-corekey ( o:key -- )
     sign[

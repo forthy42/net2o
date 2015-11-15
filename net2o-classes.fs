@@ -132,11 +132,11 @@ cmd-class class
     field: data-resend
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
-    64field: perm-mask
     field: punch-addrs
     field: punch-load
     field: punch-gen \ punch request number
     0 +field end-strings
+    64field: perm-mask
     \ secrets
     0 +field start-secrets
     field: crypto-key
