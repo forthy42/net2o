@@ -132,6 +132,7 @@ cmd-class class
     field: data-resend
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
+    64field: perm-mask
     field: punch-addrs
     field: punch-load
     field: punch-gen \ punch request number
@@ -218,6 +219,24 @@ cmd-class class
 end-class address-class
 
 Variable context-table
+
+\ permissions
+
+1
+bit perm%connect \ not set for banned people
+bit perm%blocked \ set for banned people - makes sure one bit is set
+bit perm%dht     \ can write into the DHT
+bit perm%msg     \ can send messages
+bit perm%filerd  \ can read files
+bit perm%filewr  \ can write files
+drop
+
+perm%connect perm%dht perm%msg perm%filerd or or or Value perm%default
+perm%blocked Value perm%unknown
+
+: .perm ( permission -- )  64#1 "cbdmrw" bounds DO
+	64over 64over 64and 64-0<> I c@ '-' rot select emit 64-2*
+    LOOP  64drop 64drop ;
 
 0 [IF]
 Local Variables:

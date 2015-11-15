@@ -145,23 +145,6 @@ Variable import-type  import#untrusted import-type !
 Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
 DOES> swap cells + @ attr! ;
 
-\ permissions
-
-1
-bit perm%connect \ not set for banned people
-bit perm%blocked \ set for banned people - makes sure one bit is set
-bit perm%dht     \ can write into the DHT
-bit perm%msg     \ can send messages
-bit perm%filerd  \ can read files
-bit perm%filewr  \ can write files
-drop
-
-perm%connect perm%dht perm%msg perm%filerd or or or Value perm%default
-
-: .perm ( permission -- )  64#1 "cbdmrw" bounds DO
-	64over 64over 64and 64-0<> I c@ '-' rot select emit 64-2*
-    LOOP  64drop 64drop ;
-
 \ sample key
 
 0 Value sample-key
@@ -233,7 +216,7 @@ Variable sim-nick!
 : host.nick>pk ( addr u -- pk u' )
     '.' $split dup 0= IF  2swap  THEN [: nick>pk type type ;] $tmp ;
 
-: key-exist? ( addr u -- o )
+: key-exist? ( addr u -- o/0 )
     key-table #@ IF  cell+  THEN ; 
 
 Variable strict-keys  strict-keys on
@@ -332,10 +315,11 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	    THEN
 	    connect( .key# )else( 2drop )  EXIT
 	THEN  THEN
-    2dup key-exist? 0= IF
-	strict-keys @ !!unknown-key!!
+    2dup key-exist? dup 0= IF
+	drop strict-keys @ !!unknown-key!!
 	." Unknown key " 85type cr
     ELSE
+	.ke-mask 64@ perm-mask 64!
 	connect( .key# )else( 2drop )
     THEN ; IS check-key
 
@@ -680,11 +664,12 @@ $40 buffer: nick-buf
     pubkey $!  dest-0key sec! ;
 
 : dest-pk ( addr u -- ) key2| 2dup key-table #@ 0= IF
-	drop key| pubkey $!
+	drop key| pubkey $!  perm%unknown perm-mask 64!
     ELSE  cell+ >o
+	ke-mask 64@
 	ke-psk sec@ state# umin
 	ke-pk $@ key| o>
-	pubkey $!  dest-0key sec!  THEN ;
+	pubkey $!  dest-0key sec!  perm-mask 64!  THEN ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
