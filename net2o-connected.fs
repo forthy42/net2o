@@ -49,15 +49,15 @@ $20 net2o: disconnect ( -- ) \g close connection
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
 
 \ object handles
+\g 
+\g ### file commands ###
+\g 
 
 $30 net2o: file-id ( uid -- o:file ) \g choose a file object
     64>n state-addr n:>o ;
 fs-table >table
 
 reply-table $@ inherit-table fs-table
-\g 
-\g ### file commands ###
-\g 
 :noname fs-id @ ulit, file-id ; fs-class to start-req
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
     64>r $> 64r> fs-open ;
@@ -91,13 +91,13 @@ gen-table $freeze
     64r> lit, set-seek endwith ; is do-track-seek
 
 \ flow control functions
+\g 
+\g ### ack commands ###
+\g 
 
 $31 net2o: ack ( -- o:acko ) \g ack object
     ack@ n:>o ;
 ack-table >table
-\g 
-\g ### ack commands ###
-\g 
 reply-table $@ inherit-table ack-table
 
 :noname ack ; ack-class to start-req

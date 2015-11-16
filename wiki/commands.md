@@ -138,11 +138,11 @@ List of Commands
   set top, flag is true when all data is sent
 + $27 slurp ( -- )
   slurp in tracked files
-+ $30 file-id ( uid -- o:file )
-  choose a file object
 
 ### file commands ###
 
++ $30 file-id ( uid -- o:file )
+  choose a file object
 + $20 open-file ( $:string mode -- )
   open file with mode
 + $21 file-type ( n -- )
@@ -167,11 +167,11 @@ List of Commands
   if file is a terminal, request size
 + $2B poll-request ( ulimit -- )
   poll a file to check for size changes
-+ $31 ack ( -- o:acko )
-  ack object
 
 ### ack commands ###
 
++ $31 ack ( -- o:acko )
+  ack object
 + $20 ack-addrtime ( utime addr -- )
   packet at addr received at time
 + $21 ack-resend ( flag -- )
