@@ -186,6 +186,7 @@ scope{ net2o-base
 \g 
 
 $33 net2o: dht-id ( $:string -- o:o )
+    perm-mask @ perm%dht and 0= !!dht-perm!!
     $> >d#id dht( ." set dht to: " dup hex. forth:cr ) n:>o ;
 \g set dht id for further operations on it
 dht-table >table

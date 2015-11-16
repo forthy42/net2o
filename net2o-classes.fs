@@ -136,7 +136,7 @@ cmd-class class
     field: punch-load
     field: punch-gen \ punch request number
     0 +field end-strings
-    64field: perm-mask
+    field: perm-mask
     \ secrets
     0 +field start-secrets
     field: crypto-key
@@ -229,12 +229,14 @@ bit perm%dht     \ can write into the DHT
 bit perm%msg     \ can send messages
 bit perm%filerd  \ can read files
 bit perm%filewr  \ can write files
+bit perm%filename \ can access named files
+bit perm%filehash \ can access files by hash
 drop
 
-perm%connect perm%dht perm%msg perm%filerd or or or Value perm%default
+perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
 perm%blocked Value perm%unknown
 
-: .perm ( permission -- )  64#1 "cbdmrw" bounds DO
+: .perm ( permission -- )  64#1 "cbdmrwnh" bounds DO
 	64over 64over 64and 64-0<> I c@ '-' rot select emit 64-2*
     LOOP  64drop 64drop ;
 

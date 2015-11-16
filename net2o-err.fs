@@ -72,8 +72,12 @@ s" passphrases don't match"      throwcode !!passphrase-unmatch!!
 s" data needs to be signed"      throwcode !!unsigned!!
 s" data needs to be unsigned"    throwcode !!signed!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
-s" DHT permission denied"        throwcode !!dht-permission!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
+s" Connect denied"               throwcode !!connect-perm!!
+s" DHT permission denied"        throwcode !!dht-perm!!
+s" MSG permission denied"        throwcode !!msg-perm!!
+s" file read permission denied"  throwcode !!filerd-perm!!
+s" file write permission denied" throwcode !!filewr-perm!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

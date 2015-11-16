@@ -252,7 +252,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	.black85 ."  (keep secret!)" cr  THEN
     ." created: " ke-selfsig $@ drop 64@ .sigdate cr
     ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
-    ." perm: " ke-mask 64@ .perm
+    ." perm: " ke-mask 64@ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ keysize umin
@@ -280,7 +280,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first! " ke-type @ . ." ke-type !"  cr o> ;
 
-: .keys ( -- ) key-table [: cell+ $@ .key ;] #map ;
+: .keys ( -- ) key-table [: ." index: " dup $@ 85type cr cell+ $@ .key ;] #map ;
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
 : key>nick ( addrkey u1 -- nick u2 )
@@ -319,7 +319,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	drop strict-keys @ !!unknown-key!!
 	." Unknown key " 85type cr
     ELSE
-	.ke-mask 64@ perm-mask 64!
+	o IF  .ke-mask 64@ 64>n perm-mask !  ELSE  drop  THEN
 	connect( .key# )else( 2drop )
     THEN ; IS check-key
 
@@ -663,13 +663,13 @@ $40 buffer: nick-buf
     ke-pk $@ key| o>
     pubkey $!  dest-0key sec! ;
 
-: dest-pk ( addr u -- ) key2| 2dup key-table #@ 0= IF
-	drop key| pubkey $!  perm%unknown perm-mask 64!
+: dest-pk ( addr u -- ) key2| 2dup key| key-table #@ 0= IF
+	drop key| pubkey $!  perm%unknown perm-mask !
     ELSE  cell+ >o
-	ke-mask 64@
+	ke-mask 64@ 64>n
 	ke-psk sec@ state# umin
 	ke-pk $@ key| o>
-	pubkey $!  dest-0key sec!  perm-mask 64!  THEN ;
+	pubkey $!  dest-0key sec!  perm-mask !  2drop  THEN ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
