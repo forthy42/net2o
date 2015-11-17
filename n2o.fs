@@ -393,10 +393,12 @@ synonym searchkey keysearch
     \G -bw: disable color codes
     ['] drop is attr!  next-cmd ;
 
-: -fulldate ( -- )
-    \U -fulldate <cmd>
-    \G -fulldate: always display full date
-    true to everyday?  next-cmd ;
+: -date ( -- )
+    \U -date n <cmd>
+    \G -date: set date precision to n
+    ?nextarg 0= IF help ELSE
+	s>number drop to date?
+	next-cmd THEN ;
 
 set-current
 

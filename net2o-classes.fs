@@ -223,22 +223,24 @@ Variable context-table
 \ permissions
 
 1
-bit perm%connect \ not set for banned people
-bit perm%blocked \ set for banned people - makes sure one bit is set
-bit perm%dht     \ can write into the DHT
-bit perm%msg     \ can send messages
-bit perm%filerd  \ can read files
-bit perm%filewr  \ can write files
+bit perm%connect  \ not set for banned people
+bit perm%blocked  \ set for banned people - makes sure one bit is set
+bit perm%dht      \ can write into the DHT
+bit perm%msg      \ can send messages
+bit perm%filerd   \ can read files
+bit perm%filewr   \ can write files
 bit perm%filename \ can access named files
 bit perm%filehash \ can access files by hash
+bit perm%sync     \ is allowed to sync
 drop
 
 perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
 perm%blocked Value perm%unknown
+perm%blocked invert Value perm%myself
 
-: .perm ( permission -- )  64#1 "cbdmrwnh" bounds DO
-	64over 64over 64and 64-0<> I c@ '-' rot select emit 64-2*
-    LOOP  64drop 64drop ;
+: .perm ( permission -- )  1 "cbdmrwnhs" bounds DO
+	2dup and 0<> I c@ '-' rot select emit 2*
+    LOOP  2drop ;
 
 0 [IF]
 Local Variables:

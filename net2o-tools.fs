@@ -246,18 +246,21 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
-false Value everyday?
+1 Value date?
 : today? ( day -- flag )
-    ticks 64>f 1e-9 f* 86400e f/ floor f>s = everyday? 0= and ;
+    ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
 : .2 ( n -- ) s>d <# # # #> type ;
-: .day ( seconds -- fraction/day ) 86400e f/ fsplit
-    dup today? IF  drop  EXIT  THEN
+: >day ( seconds -- fraction day )
+    86400e f/ fsplit ;
+: .day ( seconds -- fraction/day )
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit .2 ':' emit 60e f* fsplit .2 ':' emit
-    60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp 'Z' emit ;
+    24e f* fsplit .2 ':' emit 60e f* fsplit .2
+    date? 2 < IF  fdrop  ELSE  ':' emit
+	60e f* fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp
+    THEN  'Z' emit ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r '°' xemit  60e f*
@@ -268,7 +271,10 @@ false Value everyday?
 : .ticks ( ticks -- )
     64dup 64-0= IF  ." never" 64drop EXIT  THEN
     64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
-    64>f 1e-9 f* .day .timeofday ;
+    64>f 1e-9 f* >day
+    dup today? date? 3 < and IF drop .timeofday ELSE
+	.day date? 0> IF .timeofday ELSE fdrop THEN
+    THEN ;
 
 \ insert into sorted string array, discarding n bytes at the end
 

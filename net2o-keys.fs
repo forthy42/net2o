@@ -104,8 +104,8 @@ cmd-class class
     field: ke-sigs
     field: ke-import   \ type of key import
     field: ke-storekey \ used to encrypt on storage
+    field: ke-mask   \ permission mask
     64field: ke-offset \ offset in key file
-    64field: ke-mask   \ permission mask
     0 +field ke-end
 end-class key-entry
 
@@ -183,10 +183,13 @@ Variable sim-nick!
     2over key| key-table #! o>
     current-key ;
 
+0 Value last-key
+
 : key?new ( addr u -- o )
     \G Create or lookup new key
     2dup key| key-table #@ drop
-    dup 0= IF  drop key:new  ELSE  nip nip cell+  THEN ;
+    dup 0= IF  drop key:new  ELSE  nip nip cell+  THEN
+    dup to last-key ;
 
 \ search for keys - not optimized
 
@@ -242,7 +245,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .stripe85 ( addr u -- )  0 -rot bounds ?DO
 	cr dup cells 85colors + @ attr! 1+
 	I 4 85type  dup cells 85colors + @ attr! 1+
-	I 4 + 4 85type <default> 8 +LOOP  drop ;
+    I 4 + 4 85type <default> 8 +LOOP  drop ;
+: .import85 ( addr u -- )
+    ke-import @ >im-color 85type <default> ;
 : .rsk ( nick u -- )
     skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
@@ -252,13 +257,12 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	.black85 ."  (keep secret!)" cr  THEN
     ." created: " ke-selfsig $@ drop 64@ .sigdate cr
     ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
-    ." perm: " ke-mask 64@ .perm cr
+    ." perm: " ke-mask @ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
-    ke-pk $@ keysize umin
-    ke-import @ >im-color 85type <default>
+    ke-pk $@ key| .import85
     ke-selfsig $@ .sigdates
-    space .nick space ke-mask 64@ .perm ;
+    space ke-mask @ .perm space .nick ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
@@ -319,7 +323,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	drop strict-keys @ !!unknown-key!!
 	." Unknown key " 85type cr
     ELSE
-	o IF  .ke-mask 64@ 64>n perm-mask !  ELSE  drop  THEN
+	o IF  .ke-mask @ perm-mask !  ELSE  drop  THEN
 	connect( .key# )else( 2drop )
     THEN ; IS check-key
 
@@ -393,7 +397,7 @@ cmd-table $@ inherit-table key-entry-table
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
-    $> over keypad sk>pk \ generate pubkey
+    !!unsigned? $20 !!>=order? $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
@@ -403,7 +407,7 @@ $11 net2o: privkey ( $:string -- )
 \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
 \g key profile (hash of a resource)
-+net2o: keymask ( x -- )         !!unsigned? $10 !!>=order? ke-mask 64! ;
++net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n ke-mask ! ;
 \g key access right mask
 +net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> ke-psk sec! ;
 \g preshared key, used for DHT encryption
@@ -421,7 +425,6 @@ gen-table $freeze
     pk2-sig? dup ?EXIT drop
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
-    perm%default ke-mask 64! \ set permission to default
     sim-nick! off c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
@@ -504,7 +507,7 @@ also net2o-base
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
-    ke-mask 64@ lit, keymask
+    ke-mask @ ulit, keymask
     ke-storekey @ >storekey ! ;
 previous
 
@@ -601,9 +604,14 @@ $40 buffer: nick-buf
 	2drop
     LOOP  0 0 ;
 
+: ?perm ( -- )
+    last-key >o ke-mask @ 0= IF
+	ke-sk sec@ nip IF  perm%myself  ELSE  perm%default  THEN  ke-mask !
+    THEN o> ;
+
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key .do-cmd-loop ;
+    sample-key .do-cmd-loop ?perm ;
 
 : .key$ ( addr u -- )
     sample-key >o  ke-sk ke-end over - erase
@@ -666,7 +674,7 @@ $40 buffer: nick-buf
 : dest-pk ( addr u -- ) key2| 2dup key| key-table #@ 0= IF
 	drop key| pubkey $!  perm%unknown perm-mask !
     ELSE  cell+ >o
-	ke-mask 64@ 64>n
+	ke-mask @
 	ke-psk sec@ state# umin
 	ke-pk $@ key| o>
 	pubkey $!  dest-0key sec!  perm-mask !  2drop  THEN ;
