@@ -396,6 +396,7 @@ synonym searchkey keysearch
 : -date ( -- )
     \U -date n <cmd>
     \G -date: set date precision to n
+    \G -date: 0 is least, 5 is highest
     ?nextarg 0= IF help ELSE
 	s>number drop to date?
 	next-cmd THEN ;
