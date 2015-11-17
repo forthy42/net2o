@@ -273,7 +273,10 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     64dup 64-0= IF  ." never" 64drop EXIT  THEN
     64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
     64>f 1e-9 f* >day
-    dup today? date? 4 < and IF drop .timeofday ELSE
+    dup today? date? 4 < and IF
+	drop date? dup >r
+	date? 2 < - to date? .timeofday r> to date?
+    ELSE
 	.day date? 0> IF .timeofday ELSE fdrop THEN
     THEN ;
 
