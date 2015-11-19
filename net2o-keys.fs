@@ -331,6 +331,11 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     keysize key-table #@ 0= !!unknown-key!!
     cell+ .ke-sk sec@ 0= !!unknown-key!! ; is search-key
 
+\ permission parsing
+
+: gen-permission ( addr u -- )  2drop ;
+: apply-permission ( -- ) ;
+
 \ get passphrase
 
 3 Value passphrase-retry#

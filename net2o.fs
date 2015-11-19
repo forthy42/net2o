@@ -1929,6 +1929,7 @@ Variable cookies
 
 \ load net2o plugins: first one with integraded command space
 
+require net2o-notify.fs
 require net2o-cmd.fs
 require net2o-connect.fs
 require net2o-connected.fs

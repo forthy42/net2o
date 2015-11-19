@@ -222,6 +222,15 @@ get-current n2o definitions
     keys>search search-keys insert-keys save-pubkeys
     keylist ;
 
+: perm ( -- )
+    \U perm [@user1 .. @usern] permissions
+    \G perm: Change or set permissions. permission starts with
+    \G perm: + for adding permissions
+    \G perm: - for taking away permissions
+    \G perm: no prefix for setting permissions exactly
+    nicks>chat ?nextarg IF  gen-permission  THEN
+    apply-permission save-keys ;
+
 synonym inkey keyin
 synonym outkey keyout
 synonym genkey keygen
