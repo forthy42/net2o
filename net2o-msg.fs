@@ -145,7 +145,7 @@ reply-table $@ inherit-table msg-table
 
 net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
-    [: .simple-id ." : " ;] $tmp notify! ;
+    [: .simple-id ;] $tmp notify! ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
     !!signed?  8 $10 !!<>=order? \g already a message there
     $> last-group $!  replay-mode @ ?EXIT
@@ -172,11 +172,12 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-re ( $:hash ) \g relate to some object
     !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? ." : " $> 2dup notify+ forth:type forth:cr ;
+    !!signed? 1 8 !!<>=order? ." : " $>
+    2dup [: ." : " forth:type ;] $tmp notify+ forth:type forth:cr ;
 +net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
     !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
 +net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> space
+    !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
     signed? !!signed!! $> last-msg $!

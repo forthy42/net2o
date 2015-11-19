@@ -29,13 +29,18 @@ $FFFF00 Value notify-rgb
     ticks last-notify 64- delta-notify 64< ;
 Variable notify? -2 notify? ! \ default: no notification when active
 Variable notify$
+Variable pending-notifications
+
 Sema notify-sema
 : notify; nip (;]) ]] notify-sema c-section ; [[ ;
 : notify> comp-[: ['] notify; colon-sys-xt-offset stick ; immediate
 
+: notify-title ( -- )
+    ." net2o: " pending-notifications @ dup .
+    ." Message" 1 > IF ." s"  THEN ;
+    
 [IFDEF] android
     also android also jni
-    Variable pending-notifications
     jvalue nb
     jvalue ni
     jvalue nf
@@ -59,31 +64,37 @@ Sema notify-sema
     msg-builder
     : build-notification ( -- )
 	1 pending-notifications +!
-	[: ." net2o: " pending-notifications @ dup .
-	  ." Message" 1 > IF ." s"  THEN ;] $tmp
-	make-jstring nb .setContentTitle to nb
+	['] notify-title $tmp make-jstring nb .setContentTitle to nb
 	notify$ $@ make-jstring nb .setContentText to nb
 	notify$ $@ make-jstring nb .setTicker to nb
 	nb .build to nf ;
-    : msg-notify ( -- ) notify>
-	ticks to latest-notify
-	rendering @ notify? @ <= dup IF
-	    pending-notifications off
-	    64#0 to last-notify
-	THEN
-	tick-notify? or 0= IF
-	    build-notification
-	    1 nf notification-manager .notify
-	    ticks to last-notify
-	THEN  notify$ $off ;
+    : show-notification ( -- )
+	1 nf notification-manager .notify ;
     previous previous
 [ELSE]
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
-    : msg-notify ( ." notificaton: " notify$ $. cr )
-	notify> notify$ $off  ticks to last-notify ;
+    : build-notification ( -- ) ;
+    : show-notification ( -- )
+	1 pending-notifications +!
+	[: .\" notify-send -a net2o -c im.received \"" notify-title
+	  .\" \" \"" notify$ $. '"' emit ;] $tmp system ;
     : msg-builder ;
+    [IFUNDEF] rendering
+	Variable rendering  -1 rendering !
+    [THEN]
 [THEN]
+
+: msg-notify ( -- ) notify>
+    ticks to latest-notify
+    rendering @ notify? @ <= dup IF
+	pending-notifications off
+	64#0 to last-notify
+    THEN
+    tick-notify? or 0= IF
+	build-notification show-notification
+	ticks to last-notify
+    THEN  notify$ $off ;
 
 0 [IF]
 Local Variables:
