@@ -69,16 +69,27 @@ User replay-mode
     last# cell+ $ins[]date msg-group$ $@ save-msgs
     r> last# cell+ $[]# <> ;
 
+Sema msg-sema
+
+: msg@ ( -- addr u )
+    [: 0 last-msg $[]@ ;] msg-sema c-section ;
+: msg+ ( addr u -- )
+    [: last-msg $+[]! ;] msg-sema c-section ;
+: msg- ( -- )
+    [: 0 last-msg $[] $off
+      last-msg 0 cell $del ;] msg-sema c-section ;
+
 : do-msg-nestsig ( -- )
-    last-msg $@ 2dup +msg-log IF
+    msg@ 2dup +msg-log IF
 	sigpksize# - 2dup + sigpksize# >$  c-state off
 	do-nestsig
 	replay-mode @ 0=
-	IF  msg-notify  ELSE  64#0 to last-notify  THEN
-    ELSE  2drop  THEN ;
+	IF  msg-notify  ELSE  notify-  THEN
+    ELSE  2drop  THEN
+    msg- ;
 
 : do-avalanche ( -- )
-    last-msg $@ last-group $@ parent @ .avalanche-msg ;
+    msg@ last-group $@ parent @ .avalanche-msg msg- ;
 
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
@@ -88,8 +99,8 @@ event: ->chat-connect ( o -- )
 event: ->reconnect ( o -- )
     >o last-group $@ msg-groups #@ d0=
     IF  "" last-group $@ msg-groups #!  THEN  last# >r
-    last-msg $@ $A $A pk-connect o { w^ connection }
-    connection cell r> cell+ $+! o> ;
+    msg@ $A $A pk-connect o { w^ connection }
+    connection cell r> cell+ $+! o> msg- ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
     >o do-msg-nestsig o> ctrl L inskey ;
 
@@ -180,13 +191,13 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
-    signed? !!signed!! $> last-msg $!
+    signed? !!signed!! $> msg+
     <event o elit, ->reconnect parent @ .wait-task @ event> ;
 +net2o: msg-last? ( tick -- ) msg:last ;
 +net2o: msg-coord ( $:gps -- )
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig dup 0= IF drop last-msg $!
+    $> nest-sig dup 0= IF drop msg+
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN
 	?dup-IF
 	    >r r@ <hide> <event o elit, ->msg-nestsig
@@ -262,7 +273,7 @@ previous
 
 : .chat ( -- ) replay-mode on
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
-    nest-string 2@ last-msg $! do-msg-nestsig o> o>
+    nest-string 2@ msg+ do-msg-nestsig o> o>
     replay-mode off ;
 
 $200 Constant maxmsg#

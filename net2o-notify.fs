@@ -77,19 +77,24 @@ Sema notify-sema
     : build-notification ( -- ) ;
     : show-notification ( -- )
 	1 pending-notifications +!
-	[: .\" notify-send -a net2o -c im.received \"" notify-title
-	  .\" \" \"" notify$ $. '"' emit ;] $tmp system ;
+	[IFDEF] linux
+	    [: .\" notify-send -a net2o -c im.received \"" notify-title
+	      .\" \" \"" notify$ $. '"' emit ;] $tmp system
+	[THEN] ;
     : msg-builder ;
     [IFUNDEF] rendering
 	Variable rendering  -1 rendering !
     [THEN]
 [THEN]
 
+: notify- ( -- )
+    pending-notifications off
+    64#0 to last-notify ;
+
 : msg-notify ( -- ) notify>
     ticks to latest-notify
     rendering @ notify? @ <= dup IF
-	pending-notifications off
-	64#0 to last-notify
+	notify-
     THEN
     tick-notify? or 0= IF
 	build-notification show-notification
