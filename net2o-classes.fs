@@ -237,10 +237,7 @@ drop
 perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
 perm%blocked Value perm%unknown
 perm%blocked invert Value perm%myself
-
-: .perm ( permission -- )  1 "cbdmrwnhs" bounds DO
-	2dup and 0<> I c@ '-' rot select emit 2*
-    LOOP  2drop ;
+Create perm$ ," cbdmrwnhs"
 
 0 [IF]
 Local Variables:

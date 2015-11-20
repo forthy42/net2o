@@ -206,8 +206,7 @@ get-current n2o definitions
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys
-    get-me
-    key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
+    get-me list-keys ;
 
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]
@@ -227,9 +226,13 @@ get-current n2o definitions
     \G perm: Change or set permissions. permission starts with
     \G perm: + for adding permissions
     \G perm: - for taking away permissions
+    \G perm: = sets defaults, add or subtract permissions afterwards
     \G perm: no prefix for setting permissions exactly
-    nicks>chat ?nextarg IF  gen-permission  THEN
-    apply-permission save-keys ;
+    get-me
+    BEGIN  chat-keys $[]off  nicks>chat ?nextarg WHILE  >perm
+	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
+	    $[]map 2drop  REPEAT
+    save-keys ;
 
 synonym inkey keyin
 synonym outkey keyout

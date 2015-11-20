@@ -222,6 +222,34 @@ Variable sim-nick!
 : key-exist? ( addr u -- o/0 )
     key-table #@ IF  cell+  THEN ; 
 
+\ permission modification
+
+26 buffer: perm-chars
+0 perm$ count bounds [DO] dup [I] c@ 'a' - perm-chars + c! 1+ [LOOP] drop
+
+: .perm ( permission -- )  1 perm$ count bounds DO
+	2dup and 0<> I c@ '-' rot select emit 2*
+    LOOP  2drop ;
+: permand ( permand permor new -- permand' permor )
+    invert tuck and >r and r> ;
+: >perm-mod ( permand permor -- permand' permor )
+    swap dup 0= IF  drop dup invert  THEN swap ;
+: >perm ( addr u -- permand permor )
+    \g parse permissions: + adds, - removes permissions,
+    \g no modifier sets permissons.
+    0 0 ['] or { xt }
+    2swap bounds ?DO
+	I c@ case
+	    '+' of  >perm-mod ['] or to xt endof
+	    '-' of  >perm-mod ['] permand to xt  endof
+	    '=' of  2drop perm%default dup ['] or to xt  endof
+	    'a' - dup 'z' u<=  IF
+		perm-chars + c@ 1 swap lshift xt execute 0
+	    THEN  endcase
+    LOOP ;
+
+\ key display
+
 Variable strict-keys  strict-keys on
 
 [IFUNDEF] magenta  brown constant magenta [THEN]
@@ -276,6 +304,8 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     space .nick  cr ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
+: list-keys ( -- )
+    key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
@@ -331,10 +361,10 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     keysize key-table #@ 0= !!unknown-key!!
     cell+ .ke-sk sec@ 0= !!unknown-key!! ; is search-key
 
-\ permission parsing
+\ apply permissions
 
-: gen-permission ( addr u -- )  2drop ;
-: apply-permission ( -- ) ;
+: apply-permission ( permand permor o:key -- permand permor o:key )
+    over ke-mask @ and over or ke-mask ! .key-list ;
 
 \ get passphrase
 
@@ -402,7 +432,7 @@ cmd-table $@ inherit-table key-entry-table
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
-    !!unsigned? $20 !!>=order? $> over keypad sk>pk \ generate pubkey
+    !!unsigned? $40 !!>=order? $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
