@@ -75,12 +75,11 @@ Sema notify-sema
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
     : build-notification ( -- ) ;
-    s" which notify-send >/dev/null 2>/dev/null" system
-    $? 0= value has-notify-send
     : show-notification ( -- )
 	1 pending-notifications +!
 	[IFDEF] linux
-	    [ has-notify-send ] [IF]
+	    [ s" which notify-send >/dev/null 2>/dev/null" system
+	    $? 0= ] [IF]
 		[: .\" notify-send -a net2o -c im.received "
 		  [ s" doc/net2o-logo.png" open-fpath-file 0= ] [IF]
 		      ." -i " [ over c@ '/' <> [IF]
