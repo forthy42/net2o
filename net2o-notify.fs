@@ -75,11 +75,15 @@ Sema notify-sema
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
     : build-notification ( -- ) ;
+    s" which notify-send >/dev/null 2>/dev/null" system
+    $? 0= value has-notify-send
     : show-notification ( -- )
 	1 pending-notifications +!
 	[IFDEF] linux
-	    [: .\" notify-send -a net2o -c im.received \"" notify-title
-	      .\" \" \"" notify$ $. '"' emit ;] $tmp system
+	    [ has-notify-send ] [IF]
+		[: .\" notify-send -a net2o -c im.received \"" notify-title
+		  .\" \" \"" notify$ $. '"' emit ;] $tmp system
+	    [THEN]
 	[THEN] ;
     : msg-builder ;
     [IFUNDEF] rendering

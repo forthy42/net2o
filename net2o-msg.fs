@@ -412,9 +412,10 @@ also net2o-base scope: chat-/cmds
     THEN  0. chats ;
 
 : nat ( addr u -- )  2drop
-    msg-groups [: dup .group ." : "
+    msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
-	  space I @ >o pubkey $@ .key-id ." :" forth:cr .nat-addrs o>
+	  space I @ >o pubkey $@ .key-id ." : " return-address .addr-path
+	  forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
 : notify ( addr u -- )
