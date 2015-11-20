@@ -81,7 +81,14 @@ Sema notify-sema
 	1 pending-notifications +!
 	[IFDEF] linux
 	    [ has-notify-send ] [IF]
-		[: .\" notify-send -a net2o -c im.received \"" notify-title
+		[: .\" notify-send -a net2o -c im.received "
+		  [ s" doc/net2o-logo.png" open-fpath-file 0= ] [IF]
+		      ." -i " [ over c@ '/' <> [IF]
+			  pad $200 get-dir ] sliteral type ." /" [
+		      [THEN]
+		      ] sliteral type [ close-file throw ]
+		  [THEN]
+		  .\"  \"" notify-title
 		  .\" \" \"" notify$ $. '"' emit ;] $tmp system
 	    [THEN]
 	[THEN] ;
