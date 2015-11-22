@@ -26,7 +26,8 @@ require net2o.fs
 	." Choose key by number:" cr .secret-nicks
 	key '0' - 0 max secret-key dup 0= WHILE
 	    ." Please enter a number between 0 and " secret-keys# 1- . cr
-    REPEAT ;
+    REPEAT
+    ." ==== key " dup ..nick ."  chosen ====" cr ;
 
 \ will ask for your password and if possible auto-select your id
 
@@ -220,7 +221,7 @@ get-current n2o definitions
     keylist ;
 
 : perm ( -- )
-    \U perm [@user1 .. @usern] permissions
+    \U perm @user1 .. @usern permissions
     \G perm: Change or set permissions. permission starts with
     \G perm: + for adding permissions
     \G perm: - for taking away permissions
@@ -231,6 +232,15 @@ get-current n2o definitions
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
 	    $[]map 2drop  REPEAT
     save-keys ;
+
+: passwd ( -- )
+    \U passwd [pw-level]
+    \G passwd: Change the password for the selected secret key
+    get-me +newphrase key>default
+    pkc keysize key-exist? ?dup-IF  >o >storekey @ ke-storekey !
+	?nextarg IF  >number drop 0 max pw-maxlevel# min  ke-pwlevel !  THEN  o>
+	save-keys
+    THEN ;
 
 synonym inkey keyin
 synonym outkey keyout

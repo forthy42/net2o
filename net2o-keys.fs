@@ -393,7 +393,7 @@ Variable keys
 : key>default ( -- ) lastkey@ drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
 : +passphrase ( -- )  get-passphrase +key ;
-: +checkphrase ( -- flag ) get-passphrase keys $[]# 1- keys sec[]@ str= ;
+: +checkphrase ( -- flag ) get-passphrase lastkey@ str= ;
 : +newphrase ( -- )
     BEGIN
 	." Passphrase: " +passphrase cr
@@ -632,16 +632,19 @@ $40 buffer: nick-buf
 : get-nick ( -- addr u )
     ." nick: " nick-buf $40 accept nick-buf swap cr ;
 
+: yes? ( -- flag )  key cr 'y' = ;
+
 : ?rsk ( -- )
     pkc keysize key-exist? dup 0= IF  drop  EXIT  THEN
     >o ke-rsk sec@ dup 0= IF  2drop o>  EXIT  THEN
     ." You still haven't stored your revoke key securely off-line." cr
-    ." Write this down now:"
-    .stripe85 cr
-    ." Written down?" key cr 'y' = IF
-	." You won't see this again! Delete?" key cr 'y' =
-	IF ke-rsk sec-off  save-keys
-	    ." revoke key deleted." cr o>  EXIT  THEN  THEN
+    ." Paper and pencil ready?" yes? IF
+	.stripe85 cr
+	." Written down?" yes? IF
+	    ." You won't see this again! Delete?" yes?
+	    IF ke-rsk sec-off  save-keys
+		." revoke key deleted." cr o>  EXIT  THEN  THEN
+    ELSE  2drop  THEN
     ." I'm keeping your revoke key.  This will show up again." cr o> ;
 
 \ read key file
@@ -654,10 +657,11 @@ $40 buffer: nick-buf
 	ELSE  2drop false  THEN
     THEN ;
 
-: try-decrypt ( -- addr u / 0 0 )
+: try-decrypt ( flag -- addr u / 0 0 ) { flag }
     keys $[]# 0 ?DO
-	I keys sec[]@ try-decrypt-key IF
-	    I keys $[] @ >storekey ! unloop  EXIT  THEN
+	I keys sec[]@ dup keysize = flag xor IF
+	    try-decrypt-key IF
+		I keys $[] @ >storekey ! unloop  EXIT  THEN  THEN
 	2drop
     LOOP  0 0 ;
 
@@ -681,7 +685,8 @@ $40 buffer: nick-buf
     BEGIN
 	r@ file-position throw d>64 key-read-offset 64!
 	keypack keypack-all# r@ read-file throw
-	keypack-all# = WHILE  try-decrypt do-key
+	keypack-all# = WHILE
+	    import-type @ import#self = try-decrypt do-key
     REPEAT  rdrop  code0-buf ;
 : read-key-loop ( -- )
     import#self import-type !
