@@ -20,6 +20,7 @@ require mkdir.fs
 \ accept for password entry
 
 2 Value pw-level# \ pw-level# 0 is lowest
+4 Value pw-maxlevel# \ pw-maxlevel# is the maximum checked
 
 [IFDEF] androidxxx '*' [ELSE] '⬤' [THEN] Constant pw*
 
@@ -105,8 +106,9 @@ cmd-class class
     field: ke-sigs
     field: ke-import   \ type of key import
     field: ke-storekey \ used to encrypt on storage
-    field: ke-mask   \ permission mask
+    field: ke-mask     \ permission mask
     64field: ke-offset \ offset in key file
+    field: ke-pwlevel  \ password strength level
     0 +field ke-end
 end-class key-entry
 
@@ -435,6 +437,7 @@ $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
     !!unsigned? $40 !!>=order?
+    keypack c@ $F and ke-pwlevel !
     $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
@@ -601,7 +604,9 @@ Variable cp-tmp
     "~/.net2o/seckeys.k2o" [: to key-sfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey
+	    pw-level# >r  ke-pwlevel @ to pw-level#
 	    key-crypt ke-offset 64@ key>sfile@pos
+	    r> to pw-level#
 	THEN o> ;] #map
     0 to key-sfd ;] save-file  ?key-sfd drop ;
 
@@ -611,6 +616,7 @@ Variable cp-tmp
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     import#self ke-import !  ke-type !  ke-nick $!  nick!
+    pw-level# ke-pwlevel !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
     [ also net2o-base ]
@@ -644,7 +650,7 @@ $40 buffer: nick-buf
     keypack keypack-d keypack-all# move
     keypack-d keypack-all# 2swap
     dup $20 = IF  decrypt$  ELSE
-	keypack c@ $F and pw-level# <= IF  decrypt-pw$
+	keypack c@ $F and pw-maxlevel# <= IF  decrypt-pw$
 	ELSE  2drop false  THEN
     THEN ;
 
