@@ -584,6 +584,10 @@ previous
 : mypk2nick$ ( o:key -- addr u )
     \g get my nick with signature
     mynick-key .keypk2nick$ ;
+: key-sign ( o:key -- o:key )
+    ['] pack-core gen-cmd$
+    [: type ke-pk $@ type ;] $tmp
+    now>never c:0key c:hash ['] .sig $tmp ke-selfsig $! ;
 
 Variable cp-tmp
 
@@ -619,11 +623,7 @@ Variable cp-tmp
     pw-level# ke-pwlevel !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
-    [ also net2o-base ]
-    [: ke-type @ ulit, keytype ke-nick $@ $, keynick ;] gen-cmd$
-    [ previous ] [: type pkc keysize2 type ;] $tmp
-    now>never c:0key c:hash ['] .sig $tmp ke-selfsig $!
-    o> ;
+    key-sign o> ;
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 

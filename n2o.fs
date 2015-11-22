@@ -242,6 +242,13 @@ get-current n2o definitions
 	save-keys
     THEN ;
 
+: nick ( -- )
+    \U nick newnick
+    \G nick: Change your nick to <newnick>
+    get-me ?nextarg IF  pkc keysize key-exist? ?dup-IF
+	    >o ke-nick $! key-sign o> save-keys
+	ELSE  2drop  THEN  THEN ;
+
 synonym inkey keyin
 synonym outkey keyout
 synonym genkey keygen
