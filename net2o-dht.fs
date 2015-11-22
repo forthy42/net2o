@@ -85,7 +85,7 @@ Variable dht-table
     over keysize2 + "revoke" revoke-verify &&'     \ verify revoke signature
     over keysize2 + pkrev keymove
     pkrev dup sk-mask  dht-hash $@ drop keysize +  keypad ed-dh
-    dht-hash $@ drop keysize str= nip nip ;        \ verify revoke token
+    dht-hash $@ key| str= nip nip ;        \ verify revoke token
 
 : .revoke ( addr u -- )
     ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 85type space

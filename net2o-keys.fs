@@ -458,8 +458,8 @@ $11 net2o: privkey ( $:string -- )
     \g revoke key, temporarily stored
     \ does not need to be signed, the revoke key verifies itself
     !!unsigned? $80 !!>=order?
-    $> \ check-rsk? 0= !!wrong-key!!
-    ke-rsk sec! ;
+    $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
+    pkrev keysize2 erase  ke-rsk sec! ;
 }scope
 
 gen-table $freeze
@@ -762,7 +762,7 @@ Variable revtoken
     sigdate +date
     2dup + r> ed-verify ;
 
-: >revoke ( skrev -- )  skrev keymove  check-rev? 0= !!not-my-revsk!! ;
+: >revoke ( skrev -- )  skrev keymove  pkc check-rev? 0= !!not-my-revsk!! ;
 
 : +revsign ( sk pk -- )  sksig -rot ed-sign revtoken $+! bl revtoken c$+! ;
 
