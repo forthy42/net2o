@@ -31,6 +31,7 @@ require net2o.fs
 \ will ask for your password and if possible auto-select your id
 
 : get-me ( -- )
+    secret-keys# ?EXIT
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= WHILE drop
@@ -39,10 +40,7 @@ require net2o.fs
 		."  wrong passphrase, no key found" del-last-key
 	    THEN  cr
     REPEAT  r> op-vector !
-    1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ;
-
-: get-me-again ( -- )
-    secret-keys# ?EXIT  get-me ;
+    1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ?rsk ;
 
 Variable key-readin
 
@@ -200,9 +198,9 @@ get-current n2o definitions
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
-    2dup key#user +gen-keys .rsk .keys
+    key#user +gen-keys
     secret-keys# 1- secret-key >raw-key
-    out-me +dhtroot save-keys ;
+    out-me +dhtroot save-keys .keys ?rsk ;
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys

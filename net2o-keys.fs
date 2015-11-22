@@ -95,6 +95,7 @@ User >storekey
 cmd-class class
     field: ke-sk       \ secret key
     field: ke-pk       \ public key
+    field: ke-rsk      \ revoke secret (temporarily stored)
     field: ke-type     \ key type
     field: ke-nick     \ key nick
     field: ke-nick#    \ to avoid colissions, add a number here
@@ -244,7 +245,8 @@ Variable sim-nick!
 	    '-' of  >perm-mod ['] permand to xt  endof
 	    '=' of  2drop perm%default dup ['] or to xt  endof
 	    'a' - dup 'z' u<=  IF
-		perm-chars + c@ 1 swap lshift xt execute 0
+		perm-chars + c@ 1 swap lshift xt execute
+		0 ( dummy for endcase )
 	    THEN  endcase
     LOOP ;
 
@@ -432,7 +434,8 @@ cmd-table $@ inherit-table key-entry-table
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
-    !!unsigned? $40 !!>=order? $> over keypad sk>pk \ generate pubkey
+    !!unsigned? $40 !!>=order?
+    $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
@@ -451,6 +454,12 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
     pw-level# 0< IF  64>n import#untrusted umin ke-import !
     ELSE  64drop  THEN ;
++net2o: rskkey ( $:string --- )
+    \g revoke key, temporarily stored
+    \ does not need to be signed, the revoke key verifies itself
+    !!unsigned? $80 !!>=order?
+    $> \ check-rsk? 0= !!wrong-key!!
+    ke-rsk sec! ;
 }scope
 
 gen-table $freeze
@@ -554,6 +563,7 @@ previous
     key:code
       pack-corekey
       ke-sk sec@ $, privkey
+      ke-rsk sec@ dup IF  $, rskkey  ELSE  2drop  THEN
     end:key ;
 : keynick$ ( o:key -- addr u )
     \g get the annotations with signature
@@ -602,6 +612,7 @@ Variable cp-tmp
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     import#self ke-import !  ke-type !  ke-nick $!  nick!
     skc keysize ke-sk sec!  +seckey
+    skrev keysize ke-rsk sec!
     [ also net2o-base ]
     [: ke-type @ ulit, keytype ke-nick $@ $, keynick ;] gen-cmd$
     [ previous ] [: type pkc keysize2 type ;] $tmp
@@ -610,17 +621,22 @@ Variable cp-tmp
 
 : +keypair ( type nick u -- ) +passphrase +gen-keys ;
 
-: .rvk ." Please write down revoke key: " cr
-    skrev $20 bounds DO  ." \ " I 4 85type space I 4 + 4 85type cr 8 +LOOP ;
-
 $40 buffer: nick-buf
 
 : get-nick ( -- addr u )
     ." nick: " nick-buf $40 accept nick-buf swap cr ;
-: make-key ( -- )
-    key#user get-nick
-    ." passphrase: " +passphrase key>default
-    cr +gen-keys .rvk ;
+
+: ?rsk ( -- )
+    pkc keysize key-exist? dup 0= IF  drop  EXIT  THEN
+    >o ke-rsk sec@ dup 0= IF  2drop o>  EXIT  THEN
+    ." You still haven't stored your revoke key securely off-line." cr
+    ." Write this down now:"
+    .stripe85 cr
+    ." Written down?" key cr 'y' = IF
+	." You won't see this again! Delete?" key cr 'y' =
+	IF ke-rsk sec-off  save-keys
+	    ." revoke key deleted." cr o>  EXIT  THEN  THEN
+    ." I'm keeping your revoke key.  This will show up again." cr o> ;
 
 \ read key file
 
