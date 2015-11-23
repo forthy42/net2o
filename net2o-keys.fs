@@ -538,14 +538,14 @@ keysize2 Constant pkrk#
       sign[
       rot ulit, keytype $, keynick
       pkc pkrk# ]pk+sign
-      skc keysize $, privkey
+      skc keysize sec$, privkey
     end:key ;
 
 also net2o-base
 : pack-core ( o:key -- ) \ core without key
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
-    ke-psk sec@ dup IF  $, keypsk  ELSE  2drop  THEN
+    ke-psk sec@ dup IF  sec$, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
 
 : pack-corekey ( o:key -- )
@@ -554,7 +554,7 @@ also net2o-base
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
-    ke-mask @ ulit, keymask
+    ke-mask @ slit, keymask
     ke-storekey @ >storekey ! ;
 previous
 
@@ -565,8 +565,8 @@ previous
 : pack-seckey ( o:key -- )
     key:code
       pack-corekey
-      ke-sk sec@ $, privkey
-      ke-rsk sec@ dup IF  $, rskkey  ELSE  2drop  THEN
+      ke-sk sec@ sec$, privkey
+      ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
     end:key ;
 : keynick$ ( o:key -- addr u )
     \g get the annotations with signature
@@ -620,7 +620,7 @@ Variable cp-tmp
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     import#self ke-import !  ke-type !  ke-nick $!  nick!
-    pw-level# ke-pwlevel !
+    pw-level# ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
     key-sign o> ;

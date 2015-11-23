@@ -101,6 +101,8 @@ end-class cmd-buf-c
 	.\" 85\" " 85type
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
+: n2o.secstring ( $:string -- )
+    cr $> nip .\" 85\" " <black> 5 4 */ spaces <default> .\" \" sec$, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
@@ -202,6 +204,7 @@ drop
 	4 of  pf@ f. ." float, " endof
 	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
+	11 of  string@noerr  n2o.secstring  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -450,7 +453,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     64>n net2o:words ;
 +net2o: nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> cmd:nestsig ; \ balk on all wrong signatures
-
++net2o: secstring ( #string -- $:string ) \g secret string literal
+    string@ ;
 }scope
 
 gen-table $freeze
@@ -614,6 +618,7 @@ scope{ net2o-base
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : string, ( addr u -- )  dup n>64 cmd, +cmdbuf ;
 : $, ( addr u -- )  string string, ;
+: sec$, ( addr u -- )  secstring string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;

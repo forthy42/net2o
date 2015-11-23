@@ -70,7 +70,7 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     ?new-mykey  ticker 64@ lit, set-cookie
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
-    keypad keysize $, store-key  stskc KEYSIZE erase
+    keypad keysize sec$, store-key  stskc KEYSIZE erase
     ]nest  n2o:create-map  nest-stack $[]# IF  ]tmpnest  THEN
     64drop 2drop 64drop ;
 
@@ -140,7 +140,7 @@ net2o-base
 \ create commands to send back
 
 : all-ivs ( -- ) \g Seed and gen all IVS
-    state# rng$ 2dup $, gen-ivs ivs-strings send-ivs ;
+    state# rng$ 2dup sec$, gen-ivs ivs-strings send-ivs ;
 
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
