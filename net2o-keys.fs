@@ -272,8 +272,6 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 
 [IFDEF] gl-type 85colors-cl [ELSE] 85colors-bw [THEN] Value 85colors
 
-: .black85 ( addr u -- )
-    [ black >bg black >fg or ]L attr!   85type <default> ;
 : .stripe85 ( addr u -- )  0 -rot bounds ?DO
 	cr dup cells 85colors + @ attr! 1+
 	I 4 85type  dup cells 85colors + @ attr! 1+
@@ -285,8 +283,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key ( addr u -- ) drop cell+ >o
     ." nick: " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
-    ke-sk @ IF  ." seckey: " ke-sk @ keysize
-	.black85 ."  (keep secret!)" cr  THEN
+    ke-sk @ IF  ." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
     ." created: " ke-selfsig $@ drop 64@ .sigdate cr
     ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
     ." perm: " ke-mask @ .perm cr

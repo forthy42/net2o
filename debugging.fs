@@ -73,6 +73,7 @@ debug: avalanche( \ distribution tree
 debug: adjust-timer( \ adjust timer
 debug: reply( \ test replies
 debug: connect( \ connect debugging messages
+debug: reveal( \ reveal secrets
 
 -db profile( \ )
 

@@ -91,6 +91,9 @@ end-class cmd-buf-c
 
 \ string debugging
 
+: .black85 ( addr u -- )
+    <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
+
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
 
@@ -102,7 +105,7 @@ end-class cmd-buf-c
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
 : n2o.secstring ( $:string -- )
-    cr $> nip .\" 85\" " <black> 5 4 */ spaces <default> .\" \" sec$, " ;
+    cr $> .\" 85\" " .black85 .\" \" sec$, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
