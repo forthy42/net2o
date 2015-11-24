@@ -173,7 +173,8 @@ User search-key$
 	  64#-1 key-read-offset 64!
 	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
 	    dht-hash $. type ;] $tmp
-	  key:nest-sig 0= IF  do-nestsig  ELSE  2drop  THEN
+	  key:nest-sig 0= IF  do-nestsig
+	      perm%default ke-mask ! n:o>  ELSE  2drop  THEN
       THEN
       o> ;] $[]map ;
 
