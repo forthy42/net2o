@@ -78,6 +78,7 @@ s" DHT permission denied"        throwcode !!dht-perm!!
 s" MSG permission denied"        throwcode !!msg-perm!!
 s" file read permission denied"  throwcode !!filerd-perm!!
 s" file write permission denied" throwcode !!filewr-perm!!
+s" file access by name denied"   throwcode !!filename-perm!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;
