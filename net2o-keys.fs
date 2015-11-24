@@ -353,6 +353,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     2dup key-exist? dup 0= IF
 	drop strict-keys @ !!unknown-key!!
 	." Unknown key " 85type cr
+	perm%unknown perm-mask !
     ELSE
 	o IF  .ke-mask @ perm-mask !  ELSE  drop  THEN
 	connect( .key# )else( 2drop )
