@@ -330,7 +330,8 @@ synonym searchkey keysearch
 
 : rootserver ( -- )
     \U rootserver
-    strict-keys off get-me init-server server-loop ;
+    strict-keys off perm%default to perm%unknown
+    get-me init-server server-loop ;
 
 : announce ( -- )
     \U announce
