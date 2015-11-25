@@ -114,7 +114,7 @@ cell 8 = [IF]
 :noname ( -- size )
     fs-fid @ file-size throw d>64
 ; fs-class to fs-poll
-:noname ( addr u mode -- ) fs-close 64>n
+:noname ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " type ."  with mode " . cr )
     >r 2dup absolut-path?  !!abs-path!!
     net2o-path open-path-file throw fs-path $! fs-fid !
@@ -341,6 +341,16 @@ User file-reg#
 	    fs-seekto 64@ 64dup fs-seek 64! o>
 	    xt execute  ELSE  drop o>  THEN
     LOOP ;
+
+\ permission checks
+
+Create >file-perm
+perm%filerd w, perm%filerd perm%filewr or w, perm%filewr w,
+DOES>  + w@ ;
+: ?rd-perm ( n -- ) perm%filerd and 0<> !!filerd-perm!! ;
+: ?wr-perm ( n -- ) perm%filewr and 0<> !!filewr-perm!! ;
+: ?rw-perm ( n perm -- )
+    >r >file-perm r> invert and dup ?rd-perm ?wr-perm ;
 
 0 [IF]
 Local Variables:
