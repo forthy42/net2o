@@ -82,7 +82,7 @@ Discussions
 * [Key format](key-format.wiki)
 * [Key revocation](key-revocation.wiki)
 * [NSA backdoor](nsa-backdoor.md)
-* [Onion Routing](onion-routing.wiki)
+* [Onion Routing](onion-routing.md)
 * [Threat Model](threat-model.md)
 * [What it's not for](whatnotfor.wiki)
 
