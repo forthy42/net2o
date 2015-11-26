@@ -70,7 +70,6 @@ Sema notify-sema
 	nb .build to nf ;
     : show-notification ( -- )
 	1 nf notification-manager .notify ;
-    previous previous
 [ELSE]
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
@@ -95,6 +94,7 @@ Sema notify-sema
     [IFUNDEF] rendering
 	Variable rendering  -1 rendering !
     [THEN]
+    also also
 [THEN]
 
 : notify- ( -- )
@@ -110,6 +110,8 @@ Sema notify-sema
 	build-notification show-notification
 	ticks to last-notify
     THEN  notify$ $off ;
+
+previous previous
 
 0 [IF]
 Local Variables:
