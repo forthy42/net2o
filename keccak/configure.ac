@@ -83,6 +83,9 @@ AC_ARG_ENABLE([fast],
 esac],[fast=false])
 AM_CONDITIONAL([FAST], [test x$fast = xtrue])
 
+dnl MacOS X has a libtool that does something else
+AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
+
 #x86 on x86_64 plattforms:
 #./configure --host=i686-linux-gnu CFLAGS="-O3 -m32 -mssse3 -DUseSSE" ws=opt64
 #ARM with NEON

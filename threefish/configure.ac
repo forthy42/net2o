@@ -45,6 +45,9 @@ AC_ARG_ENABLE([fast],
 esac],[fast=false])
 AM_CONDITIONAL([FAST], [test x$fast = xtrue])
 
+dnl MacOS X has a libtool that does something else
+AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
+
 AC_PROG_CC
 AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
