@@ -36,12 +36,15 @@ require net2o.fs
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= WHILE drop
-	    ." Passphrase: " +passphrase
+	    ." Passphrase: " +passphrase   !time
 	    read-keys secret-keys# dup 0= IF
 		."  wrong passphrase, no key found" del-last-key
 	    THEN  cr
-    REPEAT  r> op-vector !
-    1 = IF  0 secret-key  ELSE  choose-key  THEN  >raw-key ?rsk ;
+    REPEAT
+    1 = IF  0 secret-key
+	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
+    ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
+    >raw-key ?rsk   r> op-vector ! ;
 
 Variable key-readin
 
