@@ -246,7 +246,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
-1 Value date?
+2 Value date?
 : today? ( day -- flag )
     ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
@@ -258,8 +258,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
 : .timeofday ( fraction/day -- )
     24e f* fsplit .2 ':' emit 60e f* fsplit .2
-    date? 2 < IF  fdrop  ELSE  ':' emit
-	60e f* date? 1 and 0= IF  f>s .2
+    date? 3 < IF  fdrop  ELSE  ':' emit
+	60e f* date? 1 and IF  f>s .2
 	ELSE  fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp  THEN
     THEN  'Z' emit ;
 : .deg ( degree -- )
@@ -269,15 +269,15 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     fsplit .2   '"' xemit 100e f*
     f>s .2 ;
 
-: .ticks ( ticks -- )
+: .ticks ( ticks -- )  date? 0= IF  64drop  EXIT  THEN
     64dup 64-0= IF  ." never" 64drop EXIT  THEN
     64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
     64>f 1e-9 f* >day
-    dup today? date? 4 < and IF
+    dup today? date? 5 < and IF
 	drop date? dup >r
-	date? 2 < - to date? .timeofday r> to date?
+	date? 3 < - to date? .timeofday r> to date?
     ELSE
-	.day date? 0> IF .timeofday ELSE fdrop THEN
+	.day date? 1 > IF .timeofday ELSE fdrop THEN
     THEN ;
 
 \ insert into sorted string array, discarding n bytes at the end

@@ -4,7 +4,7 @@ echo "This script builds net2o from scratch"
 
 GFORTH=gforth-0.7.9_20151126
 
-if [ $(uname -o) -eq Cygwin ]
+if [ $(uname -o) = Cygwin ]
 then
     CONFOPT="--prefix=/usr $*"
 else
