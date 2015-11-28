@@ -403,7 +403,7 @@ Variable keys
 : +seckey ( -- )
     ke-sk @ ke-pk $@ drop keypad ed-dh +key ;
 
-"" ">passphrase \ following the encrypt-everything paradigm,
+\ "" ">passphrase \ following the encrypt-everything paradigm,
 \ no password is the empty string!  It's still encrypted ;-)!
 
 \ a secret key just needs a nick and a type.
