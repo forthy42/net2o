@@ -22,7 +22,7 @@ require mkdir.fs
 2 Value pw-level# \ pw-level# 0 is lowest
 4 Value pw-maxlevel# \ pw-maxlevel# is the maximum checked
 
-[IFDEF] androidxxx '*' [ELSE] '⬤' [THEN] Constant pw*
+[IFDEF] androidxxx '*' [ELSE] '•' [THEN] Constant pw*
 
 xc-vector up@ - class-o !
 
