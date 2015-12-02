@@ -93,26 +93,31 @@ word-args
 
 \ logic memory modifiers
 
-: or!   ( x addr -- )   >r r@ @ or   r> ! ;
-: xor!  ( x addr -- )   >r r@ @ xor  r> ! ;
-: and!  ( x addr -- )   >r r@ @ and  r> ! ;
+: or!   ( x addr -- )    >r r@ @ or   r> ! ;
+: xor!  ( x addr -- )    >r r@ @ xor  r> ! ;
+: and!  ( x addr -- )    >r r@ @ and  r> ! ;
 
-: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
-: andc! ( x c-addr -- )   >r r@ c@ and  r> c! ;
-: orc!  ( x c-addr -- )   >r r@ c@ or   r> c! ;
+: xorc! ( x c-addr -- )  >r r@ c@ xor r> c! ;
+: andc! ( x c-addr -- )  >r r@ c@ and r> c! ;
+: orc!  ( x c-addr -- )  >r r@ c@ or  r> c! ;
 
-: max!@ ( n addr -- )   >r r@ @ max r> !@ ;
+: max!@ ( n addr -- )    >r r@ @ max  r> !@ ;
 : umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
 
 \ generic stack using string array primitives
 
 : stack> ( stack -- x ) >r
     \G generic single-stack pop
-    r@ $[]# dup 0<= !!stack-empty!!
+    r@ $[]# dup 0= !!stack-empty!!
     1- dup r@ $[] @ swap cells r> $!len ;
 : >stack ( x stack -- )
     \G generic single-stack push
     dup $[]# swap $[] ! ;
+: bottom> ( stack -- x )
+    r@ $[]# dup 0= !!stack-empty!!
+    >r 0 r@ $[] @ r> 0 cell $del ;
+: >bottom ( x stack -- )
+    >r { w^ x } x cell r> 0 $ins ;
 
 : stack@ ( stack -- x1 .. xn n )
     \G fetch everything from the generic stack to the data stack
