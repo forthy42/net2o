@@ -370,6 +370,10 @@ scope: notify-cmds
 
 }scope
 
+[IFUNDEF] find-name-in
+    synonym find-name-in (search-wordlist)
+[THEN]
+
 also net2o-base scope: chat-/cmds
 
 : me ( addr u -- )
@@ -419,10 +423,6 @@ also net2o-base scope: chat-/cmds
 	  ." --- " I @ >o pubkey $@ .key-id ." : " return-address .addr-path
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
-
-[IFUNDEF] find-name-in
-    synonym find-name-in (search-wordlist)
-[THEN]
 
 : notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
