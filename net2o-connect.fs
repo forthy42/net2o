@@ -36,18 +36,6 @@ $20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
 +net2o: new-code ( addr addr u -- ) \g crate new code mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
-+net2o: set-cookie ( utimestamp -- ) \g cookie and round trip delay
-    own-crypt? IF  trace( ." owncrypt " )
-	64dup cookie>context?
-	IF  trace( ." context " forth:cr ) >o rdrop  o to connection
-	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
-	    EXIT
-	ELSE \ just check if timeout didn't expire
-	    trace( ." ticker " forth:cr )
-	    64dup context-ticker 64!
-	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
-	THEN
-    ELSE  64drop  THEN  un-cmd ;
 
 : n2o:create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }

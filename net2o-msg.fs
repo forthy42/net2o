@@ -91,14 +91,17 @@ Sema msg-sema
 : do-avalanche ( -- )
     msg@ last-group $@ parent @ .avalanche-msg msg- ;
 
+: >group ( addr u -- group )
+    2dup msg-groups #@ d0=
+    IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
+
 event: ->avalanche ( o -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     >o do-avalanche o> ;
 event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
 event: ->reconnect ( o -- )
-    >o last-group $@ msg-groups #@ d0=
-    IF  "" last-group $@ msg-groups #!  THEN  last# >r
+    >o last-group $@ >group  last# >r
     msg@ $A $A pk-connect o { w^ connection }
     connection cell r> cell+ $+! o> msg- ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
@@ -167,8 +170,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    signed? !!signed!! $> 2dup msg-groups #@ d0<> IF  2drop \ existing groups
-    ELSE  s" " 2swap msg-groups #!  THEN
+    signed? !!signed!! $> >group
     parent cell last# cell+ $+!
     parent @ .wait-task @ ?dup-IF
 	<event parent @ elit, ->chat-connect event>  THEN ;
@@ -418,10 +420,14 @@ also net2o-base scope: chat-/cmds
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
+[IFUNDEF] find-name-in
+    synonym find-name-in (search-wordlist)
+[THEN]
+
 : notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G Change notificaton settings
-    bl skip bl $split 2swap ['] notify-cmds >body (search-wordlist) dup IF
+    bl skip bl $split 2swap ['] notify-cmds >body find-name-in dup IF
 	name>int execute
     ELSE  ." Unknown notify command" 2drop forth:cr  THEN ;
 
@@ -429,7 +435,7 @@ also net2o-base scope: chat-/cmds
 
 : do-chat-cmds ( addr u -- )
     1 /string bl $split 2swap
-    2dup ['] chat-/cmds >body (search-wordlist)
+    2dup ['] chat-/cmds >body find-name-in
     ?dup-IF  nip nip name>int execute
     ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
 
@@ -448,13 +454,23 @@ previous
     msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
     msg-group$ $@ load-msg ;
 
-: leave-chat ( addr u -- )
-    dup >r bounds ?DO  I @  cell +LOOP
-    r> 0 ?DO  >o o to connection +resend-cmd send-leave
+also net2o-base
+: send-reconnects ( addr u o:connection -- )  o to connection
+    ['] cmd( >body on
+    net2o-code expect-reply msg
+    bounds ?DO  I @ .pubkey $@ $, msg-reconnect  cell +LOOP
+    endwith cookie+request end-code| ;
+previous
+
+: leave-chat ( group -- ) cell+ >r
+\    r@ $@len cell > IF
+\	r@ $@ over @ >o cell /string send-reconnects o>  THEN
+    r@ $@ bounds ?DO  I @  cell +LOOP
+    r> $@len 0 ?DO  >o o to connection +resend-cmd send-leave
     ret-beacon disconnect-me o>  cell +LOOP ;
 
 : leave-chats ( -- )
-    msg-groups [: cell+ $@ leave-chat ;] #map ;
+    msg-groups ['] leave-chat #map ;
 
 : group-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
