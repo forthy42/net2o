@@ -498,9 +498,15 @@ previous
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection +resend-cmd
     ret-beacon disconnect-me o>  cell +LOOP ;
+: disconnect-all ( group -- ) >r
+    r@ cell+ $@ bounds ?DO  I @  cell +LOOP
+    r> cell+ $@len 0 +DO  >o o to connection +resend-cmd send-leave
+    ret-beacon disconnect-me o>  cell +LOOP ;
 
 : leave-chat ( group -- )
-    dup send-reconnect disconnect-group ;
+\    dup send-reconnect disconnect-group
+    disconnect-all
+;
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;
 
