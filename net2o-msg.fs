@@ -321,9 +321,7 @@ $200 Constant maxmsg#
     msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
 
 : g?leave ( -- )
-    msg-group$ $@len IF
-	+resend-cmd send-leave -timeout
-    THEN ;
+    msg-group$ $@len IF  +resend-cmd send-leave -timeout  THEN ;
 
 : greet ( -- )
     net2o-code expect-reply  log !time endwith
