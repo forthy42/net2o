@@ -156,16 +156,8 @@ Vocabulary n2o
 : n2o-cmds ( -- )
     init-client word-args ['] quit do-net2o-cmds ;
 
-: search-help ( pattern xt -- )
-    [ loadfilename 2@ ] sliteral open-fpath-file throw
-    [: >r BEGIN  refill  WHILE
-		source 2over string-prefix? IF  r@ execute  THEN
-	REPEAT rdrop 2drop ;] execute-parsing-named-file ;
-
 : .usage ( addr u -- addr u )
     ." n2o " source 7 /string type cr ;
-: .cmd ( addr u -- addr u )
-    source 2over nip /string type cr ;
 
 scope{ n2o
 
@@ -370,6 +362,8 @@ synonym searchkey keysearch
     \U chat @user   to chat privately with a user
     \U chat group@user   to chat with the chatgroup managed by user
     \U chat group   to start a group chat (peers may connect)
+    \G chat: chat with an user, a group managed by an user, or start
+    \G your own group
     get-me init-client announce-me
     ?peekarg IF  drop c@ handle-chat  THEN ;
 

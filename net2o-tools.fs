@@ -488,3 +488,15 @@ $10 Constant datesize#
     previous set-current ;
 : scope: ( "vocabulary" -- addr )
     vocabulary get-current also lastxt execute definitions ;
+
+\ help display
+
+: search-help ( pattern xt file-addr u -- )
+    open-fpath-file throw
+    [: >r BEGIN  refill  WHILE
+	      source 2over string-prefix? IF  r@ execute  THEN
+      REPEAT rdrop 2drop ;] execute-parsing-named-file ;
+comp: loadfilename 2@ postpone sliteral :, ;
+
+: .cmd ( addr u -- addr u )
+    source 2over nip /string type cr ;

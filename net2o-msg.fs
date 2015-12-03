@@ -246,10 +246,10 @@ set-current
       ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
 
 : <msg ( -- )
-    \G start a msg block
+    \g start a msg block
     msg sign[ msg-start ;
 : msg> ( -- )
-    \G end a msg block by adding a signature and the group (if any)
+    \g end a msg block by adding a signature and the group (if any)
     msg-group$ $@ dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
     IF  $, msg-group  ELSE  2drop  THEN
     now>never ]pksign ;
@@ -309,7 +309,8 @@ $200 Constant maxmsg#
 	IF    drop 2drop "/bye"
 	ELSE
 	    dup 0= IF
-		drop dup 1+ xback-restore  pad swap
+		drop dup 1+ xback-restore dup 1+ spaces dup 1+ xback-restore
+		pad swap
 	    ELSE
 		DoError drop 0  THEN
 	THEN
@@ -396,12 +397,6 @@ scope: notify-cmds
 [IFUNDEF] find-name-in
     synonym find-name-in (search-wordlist)
 [THEN]
-
-also net2o-base scope: chat-/cmds
-
-: me ( addr u -- )
-    [: $, msg-action ;] send-avalanche .chat ;
-
 [IFUNDEF] (.time)
     : (.time) ( delta-f -- )
 	fdup 1e f>= IF  13 9 0 f.rdp ." s "   EXIT  THEN  1000 fm*
@@ -410,7 +405,19 @@ also net2o-base scope: chat-/cmds
 	f>s 3 .r ." ns " ;
 [THEN]
 
+: .chathelp ( addr u -- addr u )
+    ." /" source 7 /string type cr ;
+
+also net2o-base scope: chat-/cmds
+
+: me ( addr u -- )
+    \U me <action>
+    \G me: send remaining string as action
+    [: $, msg-action ;] send-avalanche .chat ;
+
 : peers ( addr u -- ) 2drop
+    \U peers
+    \G peers: list peers in all groups
     msg-groups [: dup .group ." : "
       cell+ $@ bounds ?DO
 	  space I @ >o pubkey $@ .key-id space
@@ -418,21 +425,34 @@ also net2o-base scope: chat-/cmds
       cell +LOOP  forth:cr ;] #map ;
 
 : here ( addr u -- ) 2drop
+    \U here
+    \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE  [: $, msg-coord ;] send-avalanche .chat  THEN ;
 
-: help ( addr u -- ) 2drop ." all commands start with / as first character: "
-    ['] chat-/cmds >body wordlist-words ." bye" forth:cr ;
+: help ( addr u -- )
+    \U help
+    \G help: list help
+    bl skip '/' skip
+    2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
+    [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
 
-: invitations ( addr u -- ) 2drop .invitations ;
+: invitations ( addr u -- )
+    \U invitations
+    \G invitations: handle invitations: accept, ignore or block invitations
+    2drop .invitations ;
 
 : chats ( addr u -- ) 2drop ." chats: "
+    \U chats
+    \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
       r@ .group ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
     forth:cr ;
 
 : chat ( addr u -- )
+    \U chat @user|group
+    \G chat: switch to chat with user or group
     over c@ '@' = IF  1 /string nick>pk key|  THEN
     2dup msg-groups #@ nip 0= IF
 	." That chat isn't active" forth:cr 2drop \ !!FIXME!!
@@ -441,6 +461,8 @@ also net2o-base scope: chat-/cmds
     THEN  0. chats ;
 
 : nat ( addr u -- )  2drop
+    \U nat
+    \G nat: list nat traversal information of all peers in all groups
     msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
 	  ." --- " I @ >o pubkey $@ .key-id ." : " return-address .addr-path
@@ -449,7 +471,7 @@ also net2o-base scope: chat-/cmds
 
 : notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
-    \G Change notificaton settings
+    \G notify: Change notificaton settings
     bl skip bl $split 2swap ['] notify-cmds >body find-name-in dup IF
 	name>int execute
     ELSE  ." Unknown notify command" 2drop forth:cr  THEN ;
