@@ -112,7 +112,6 @@ end-class ack-class
 cmd-class class
     field: msgs[]
     field: peers[]
-    field: last-group
 end-class msg-class
 
 cmd-class class

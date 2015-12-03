@@ -319,8 +319,13 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
 : key>nick ( addrkey u1 -- nick u2 )
-    key-table #@ 0= IF  drop ""  EXIT  THEN
+    \g convert key to nick
+    key| key-table #@ 0= IF  drop 0.  EXIT  THEN
     cell+ .ke-nick $@ ;
+: key>key ( addrkey u1 -- key u2 )
+    \g expand key to full size and check if we know it
+    key| key-table #@ 0= IF  drop 0.  EXIT  THEN
+    cell+ .ke-pk $@ ;
 
 : .key# ( addr u -- ) key|
     ." Key '" key-table #@ 0= IF drop EXIT THEN
@@ -339,7 +344,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ ..nick 2drop ;
 
-: .simple-id ( addr u -- ) key| key>nick type ;
+: .simple-id ( addr u -- ) key>nick type ;
 
 :noname ( addr u -- )
     o IF  pubkey @ IF
@@ -728,15 +733,15 @@ $40 buffer: nick-buf
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
     ke-psk sec@ state# umin
-    ke-pk $@ key| o>
+    ke-pk $@ o>
     pubkey $!  dest-0key sec! ;
 
 : dest-pk ( addr u -- ) key2| 2dup key| key-table #@ 0= IF
-	drop key| pubkey $!  perm%unknown perm-mask !
+	drop pubkey $!  perm%unknown perm-mask !
     ELSE  cell+ >o
 	ke-mask @
 	ke-psk sec@ state# umin
-	ke-pk $@ key| o>
+	ke-pk $@ o>
 	pubkey $!  dest-0key sec!  perm-mask !  2drop  THEN ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket

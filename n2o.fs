@@ -95,7 +95,7 @@ $20 value hash-size#
 	.key-id space ;] $[]map
     ." is not online. press key to recheck."
     [: 0 to connection -56 throw ;] is do-disconnect
-    [: false chat-keys [: keysize umin pubkey $@ str= or ;] $[]map
+    [: false chat-keys [: keysize umin pubkey $@ key| str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
     wait-key cr [: up@ wait-task ! ;] IS do-connect ;
 

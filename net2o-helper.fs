@@ -145,7 +145,7 @@ User host$ \ check for this hostname
     id dup .dht-host ['] insert-host $[]map drop 2drop ;
 
 : search-connect ( key u -- o/0 )
-    0 [: drop 2dup pubkey $@ str= o and  dup 0= ;] search-context
+    0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
 
 :noname ( addr u cmdlen datalen -- )

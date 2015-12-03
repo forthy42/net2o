@@ -34,7 +34,6 @@ User replay-mode
 : ?msg-context ( -- o )
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
-	pubkey $@ msg-context @ .last-group $!
     THEN ;
 
 : init-chatlog ( -- ) ?.net2o s" ~/.net2o/chats" $1FF init-dir ;
@@ -72,6 +71,7 @@ User replay-mode
 Sema queue-sema
 
 \ msg queue
+
 : msg@ ( -- addr u )
     [: 0 msgs[] $[]@ ;] queue-sema c-section ;
 : msg+ ( addr u -- )
@@ -81,6 +81,7 @@ Sema queue-sema
       msgs[] 0 cell $del ;] queue-sema c-section ;
 
 \ peer queue
+
 : peer@ ( -- addr u )
     [: 0 peers[] $[]@ ;] queue-sema c-section ;
 : peer+ ( addr u -- )
@@ -88,6 +89,8 @@ Sema queue-sema
 : peer- ( -- )
     [: 0 peers[] $[] $off
       peers[] 0 cell $del ;] queue-sema c-section ;
+
+\ events
 
 : do-msg-nestsig ( -- )
     msg@ 2dup +msg-log IF
@@ -102,21 +105,23 @@ Sema queue-sema
     2dup msg-groups #@ d0=
     IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
 
-: reconnect-chat ( -- )
-    peer@ $A $A pk-connect o { w^ connection }
-    connection cell last# cell+ $+! peer- ;
-
-: reconnect-chats ( -- )
-    BEGIN  peer@ nip 0>  WHILE  reconnect-chat  REPEAT ;
+: reconnect-chat ( -- )  EXIT
+    last# >r  peer@ key>key
+    2dup d0<> IF
+	0 >o $A $A pk-connect o { w^ con }
+	con cell r@ cell+ $+! o>
+    ELSE  2drop  THEN  peer- rdrop ;
 
 : do-avalanche ( -- )
     msg@ parent @ .avalanche-msg msg- ;
 
-event: ->avalanche ( group o -- )
+event: ->avalanche ( o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    >o to last# reconnect-chats do-avalanche o> ;
+    to last# .do-avalanche ;
 event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
+event: ->chat-reconnect ( group o -- )
+    to last# .reconnect-chat ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
     >o do-msg-nestsig o> ctrl L inskey ;
 
@@ -174,12 +179,13 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ;
 +net2o: msg-group ( $:group -- ) \g specify a chat group
-    !!signed?  8 $10 !!<>=order? \g already a message there
-    $> msg-groups #@ d0= replay-mode @ or ?EXIT
-    up@ receiver-task <> IF
-	do-avalanche
-    ELSE parent @ .wait-task @ ?dup-IF
-	    <event last# elit, o elit, ->avalanche event>  THEN
+    $> msg-groups #@ d0= replay-mode @ or ?EXIT \ produce flag and set last#
+    signed? IF  8 $10 !!<>=order? \ already a message there
+	up@ receiver-task <> IF
+	    do-avalanche
+	ELSE parent @ .wait-task @ ?dup-IF
+		<event o elit, last# elit, ->avalanche event>  THEN
+	THEN
     THEN ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
@@ -206,7 +212,12 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
 +net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
-    signed? !!signed!! $> peer+ ;
+    signed? !!signed!! $> peer+
+    parent @ .wait-task @ ?dup-IF
+	<event o elit, last# elit, ->chat-reconnect event>
+    ELSE
+	reconnect-chat
+    THEN ;
 +net2o: msg-last? ( tick -- ) msg:last ;
 +net2o: msg-coord ( $:gps -- )
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
@@ -229,7 +240,7 @@ gen-table $freeze
 set-current
 
 :noname ( tick -- )
-    last-group $@ msg-logs #@ d0= IF  64drop  EXIT  THEN
+    last# 0= ?EXIT
     last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
 	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
       ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
@@ -260,7 +271,7 @@ previous
     ( cookie+request ) end-code| ;
 
 : ?destpk ( addr u -- addr' u' )
-    2dup pubkey $@ str= IF  2drop pkc keysize  THEN ;
+    2dup pubkey $@ key| str= IF  2drop pkc keysize  THEN ;
 
 also net2o-base
 : join, ( -- )
@@ -274,7 +285,7 @@ also net2o-base
     ELSE  2drop  THEN ;
 
 : left, ( addr u -- )
-    keysize umin $, msg-signal " left (timeout)" $, msg-action ;
+    key| $, msg-signal " left (timeout)" $, msg-action ;
 previous
 
 : send-join ( -- )
@@ -469,13 +480,12 @@ previous
 also net2o-base
 : reconnect, ( group -- )
     cell+ $@ cell safe/string bounds ?DO
-	I @ .pubkey $@ $, msg-reconnect
+	I @ .pubkey $@ key| $, msg-reconnect
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
-    ['] cmd( >body on
     net2o-code expect-reply msg
-    dup $@ ?destpk $, msg-leave  reconnect,
+    dup  $@ ?destpk $, msg-leave  reconnect,
     sign[ msg-start "left" $, msg-action msg>
     endwith cookie+request end-code| ;
 previous
