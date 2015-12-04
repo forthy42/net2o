@@ -4,15 +4,15 @@ require ansi.fs
 require mini-oof2.fs
 require user-object.fs
 require unix/mmap.fs
-require net2o-tools.fs
-require xtype.fs
-require base64.fs
-require base85.fs
-require kregion.fs
-require crypto-api.fs
-require keccak.fs
-require rng.fs
-require ed25519-donna.fs
+require ../net2o-tools.fs
+require ../xtype.fs
+require ../base64.fs
+require ../base85.fs
+require ../kregion.fs
+require ../crypto-api.fs
+require ../keccak.fs
+require ../rng.fs
+require ../ed25519-donna.fs
 
 here negate $1F and allot
 here $20 allot
