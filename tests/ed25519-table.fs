@@ -1,10 +1,17 @@
 \ test ed25519-donna basepoint multiplication
 
-: xorc! ( x c-addr -- )   >r r@ c@ xor  r> c! ;
-
+require ansi.fs
+require mini-oof2.fs
+require user-object.fs
+require unix/mmap.fs
+require net2o-tools.fs
 require xtype.fs
 require base64.fs
 require base85.fs
+require kregion.fs
+require crypto-api.fs
+require keccak.fs
+require rng.fs
 require ed25519-donna.fs
 
 here negate $1F and allot
@@ -26,6 +33,13 @@ constant stpkc constant stskc constant keypad constant keypad2
     cell +LOOP  drop ;
 
 : ?ok  keypad $20 keypad2 over str= IF ." ok"  THEN ;
+
+: ed-dhv { sk pk dest -- secret len }
+    get0 pk ge25519-unpack- 0= !!no-ed-key!!
+    sct2 sk raw>sc25519
+    get1 get0 sct2 ge25519*v
+    dest get1 ge25519-pack
+    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
 : 25519.all ( -- )
     init-skc init-pkc
