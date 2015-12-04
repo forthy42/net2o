@@ -38,10 +38,6 @@ Sema notify-sema
 : notify-title ( -- )
     ." net2o: " pending-notifications @ dup .
     ." Message" 1 > IF ." s"  THEN ;
-: 'type' ( addr u -- ) ''' emit
-    BEGIN  ''' $split dup WHILE
-	    2swap type dup IF  .\" '\"'\"'"  THEN
-    REPEAT  2drop type ''' emit ;
     
 [IFDEF] android
     also android also jni

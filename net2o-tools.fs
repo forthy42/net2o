@@ -500,3 +500,10 @@ comp: loadfilename 2@ postpone sliteral :, ;
 
 : .cmd ( addr u -- addr u )
     source 2over nip /string type cr ;
+
+\ single quoted string with escapes of single quote for shell invocation
+
+: 'type' ( addr u -- ) ''' emit
+    BEGIN  ''' $split dup WHILE
+	    2swap type dup IF  .\" '\"'\"'"  THEN
+    REPEAT  2drop type ''' emit ;
