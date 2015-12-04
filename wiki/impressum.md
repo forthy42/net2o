@@ -19,6 +19,8 @@ Kontakt:
 <td>+498941154656</td></tr>
 <tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
+<tr><th>PGP key:</th>
+<td><a href="//net2o.de/bernd@net2o.de.gpg.asc">67007C30</a></td
 <tr><th>net2o id:</th>
 <td><tt><span style="background-color: #fec">kQusJ</span><span style="background-color: #cef">zA;7*</span><span style="background-color: #fec">?t=uy</span><span style="background-color: #cef">@X}1G</span><span style="background-color: #fec">Wr!+0</span><span style="background-color: #cef">qqp_C</span><span style="background-color: #fec">n176t</span><span style="background-color: #cef">4(dQ*</span></tt></td>
 </tr></table>
