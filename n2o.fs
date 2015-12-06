@@ -244,6 +244,14 @@ get-current n2o definitions
 	    >o ke-nick $! key-sign o> save-keys
 	ELSE  2drop  THEN  THEN ;
 
+: pet ( -- )
+    \U pet nick pet
+    \G pet: Add a new petname to <nick>
+    get-me
+    BEGIN  ?nextarg WHILE  nick-key dup 0= IF  drop EXIT  THEN
+	    >o ?nextarg IF  ke-pets $+[]! pet!  THEN  o>
+    REPEAT  save-keys keylist ;
+
 synonym inkey keyin
 synonym outkey keyout
 synonym genkey keygen
@@ -371,8 +379,9 @@ synonym searchkey keysearch
     \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
     get-me
-    BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type ."  ===" cr
-    over c@ '@' = IF  1 /string nick>pk key|  THEN  load-msg  REPEAT ;
+    BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type
+	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
+	    ."  ===" cr load-msg  REPEAT ;
 
 : invite ( -- )
     \U invite @user

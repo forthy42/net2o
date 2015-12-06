@@ -100,6 +100,8 @@ cmd-class class
     field: ke-type     \ key type
     field: ke-nick     \ key nick
     field: ke-nick#    \ to avoid colissions, add a number here
+    field: ke-pets     \ key petnames
+    field: ke-pets#    \ to avoid colissions, add a number here
     field: ke-psk      \ preshared key for stateless communication
     field: ke-prof     \ profile object
     field: ke-selfsig
@@ -119,7 +121,9 @@ end-class key-entry
     ke-nick $off
     ke-psk sec-off
     ke-selfsig $off
-    ke-sigs $[]off ;
+    ke-sigs $[]off
+    ke-pets $[]off
+    ke-pets# $off ;
 
 Variable key-entry-table
 
@@ -175,6 +179,17 @@ Variable sim-nick!
 : #.nick ( hash -- )
     dup $@ type '#' emit cell+ $@len cell/ . ;
 
+: last-pet@ ( -- addr u )
+    ke-pets $[]# ?dup-IF  1- ke-pets $[]@  ELSE  0.  THEN ;
+
+: pet! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
+    last-pet@ nick-table #@ d0= IF
+	optr cell last-pet@ nick-table #! 0
+    ELSE
+	last# cell+ $@len cell/
+	optr cell last# cell+ $+!
+    THEN  ke-pets $[]# 1- ke-pets# $[] ! ;
+
 : key:new ( addr u -- o )
     \G create new key, addr u is the public key
     sample-key >o
@@ -213,9 +228,19 @@ Variable sim-nick!
     0 tuck key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  2dup = IF  rot drop o -rot  THEN  1+
       THEN  o> ;] #map 2drop ;
+: .# ( n -- ) ?dup-IF  '#' emit 0 .r  THEN ;
 : .nick-base ( o:key -- )
-    ke-nick $.  ke-nick# @ ?dup-IF  '#' emit 0 .r  THEN ;
-: .nick ( o:key -- )   ke-import @ >im-color .nick-base <default> ;
+    ke-nick $.  ke-nick# @ .# ;
+: .pet-base ( o:key -- )
+    0 ke-pets [: space type
+      dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
+: .pet0-base ( o:key -- )
+    ke-pets $[]# IF  0 ke-pets $[]@ type 0 ke-pets# $[] @ .#
+    ELSE  .nick-base  THEN ;
+: .real-nick ( o:key -- )   ke-import @ >im-color .nick-base <default> ;
+: .nick ( o:key -- )   ke-import @ >im-color .pet0-base <default> ;
+: .nick+pet ( o:key -- )
+    ke-import @ >im-color .nick-base .pet-base <default> ;
 
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
@@ -291,7 +316,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
     ke-selfsig $@ .sigdates
-    space ke-mask @ .perm space .nick ;
+    space ke-mask @ .perm space .nick+pet ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
@@ -307,6 +332,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
     key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
+: list-nicks ( -- )
+    nick-table [: dup $. ." :" cr cell+ $@ bounds ?DO
+	  I @ ..key-list  cell +LOOP ;] #map ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
@@ -466,6 +494,8 @@ $11 net2o: privkey ( $:string -- )
     !!unsigned? $80 !!>=order?
     $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
     pkrev keysize2 erase  ke-rsk sec! ;
++net2o: keypet ( $:string -- )  !!unsigned?  $>
+    pw-level# 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
 }scope
 
 gen-table $freeze
@@ -558,6 +588,7 @@ also net2o-base
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
     ke-mask @ slit, keymask
+    ke-pets [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
 previous
 
