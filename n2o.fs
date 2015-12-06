@@ -86,8 +86,13 @@ $20 value hash-size#
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
+: key-ctrlbit ( -- n )
+    \g return a bit mask for the control key pressed
+    1 key dup $20 < IF  lshift  ELSE  2drop 0  THEN ;
+
 : wait-key ( -- )
-    BEGIN  1 key lshift [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
+    BEGIN  key-ctrlbit
+	[ 1 ctrl L lshift 1 ctrl Z lshift or ]L
     and 0=  UNTIL ;
 
 : wait-chat ( -- )
