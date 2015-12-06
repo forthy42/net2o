@@ -249,12 +249,22 @@ get-current n2o definitions
 	ELSE  2drop  THEN  THEN ;
 
 : pet ( -- )
-    \U pet nick pet
-    \G pet: Add a new petname to <nick>
+    \U pet nick1/pet1 petnew1 .. nickn/petn petnewn
+    \G pet: Add a new petname to existing <nick> or <pet>
     get-me
-    BEGIN  ?nextarg WHILE  nick-key dup 0= IF  drop EXIT  THEN
-	    >o ?nextarg IF  ke-pets $+[]! pet!  THEN  o>
-    REPEAT  save-keys keylist ;
+    [: nick-key dup 0= IF  drop EXIT  THEN
+      >o ?nextarg IF  ke-pets $+[]! pet!  THEN  o> ;] arg-loop
+    save-keys keylist ;
+
+: pet- ( -- )
+    \U pet- pet1 .. petn
+    \G pet-: remove pet name
+    get-me
+    [: 2dup nick-key dup 0= IF  drop 2drop  EXIT  THEN
+      >o ke-pets [: 2over str= 0= ;] $[]filter 2drop o o>
+      last# cell+ del$cell
+      last# cell+ $@len 0= IF  last# $off last# cell+ $off  THEN ;] arg-loop
+    save-keys keylist ;
 
 synonym inkey keyin
 synonym outkey keyout
