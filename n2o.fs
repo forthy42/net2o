@@ -88,11 +88,10 @@ $20 value hash-size#
 
 : key-ctrlbit ( -- n )
     \g return a bit mask for the control key pressed
-    1 key dup $20 < IF  lshift  ELSE  2drop 0  THEN ;
+    1 key dup $20 < >r lshift r> and ;
 
 : wait-key ( -- )
-    BEGIN  key-ctrlbit
-	[ 1 ctrl L lshift 1 ctrl Z lshift or ]L
+    BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
     and 0=  UNTIL ;
 
 : wait-chat ( -- )
