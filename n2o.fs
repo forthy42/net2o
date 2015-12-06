@@ -263,7 +263,7 @@ get-current n2o definitions
     [: 2dup nick-key dup 0= IF  drop 2drop  EXIT  THEN
       >o ke-pets [: 2over str= 0= ;] $[]filter 2drop o o>
       last# cell+ del$cell
-      last# cell+ $@len 0= IF  last# $off last# cell+ $off  THEN ;] arg-loop
+      last# cell+ $@len 0= IF  last# bucket-off  THEN ;] arg-loop
     save-keys keylist ;
 
 synonym inkey keyin

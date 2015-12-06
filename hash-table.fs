@@ -65,9 +65,11 @@ uvalue last#
     2dup r@ $@ str=  IF  2drop r> dup to last# cell+ $@ true  EXIT  THEN
     rdrop false ;    
 
+: bucket-off ( bucket -- ) dup $off cell+ $off ;
+
 : #off? ( addrkey u bucket -- true / addrkey u false )
     >r r@ @ 0= IF  rdrop false  EXIT  THEN
-    2dup r@ $@ str=  IF  2drop r@ $off r> cell+ $off true  EXIT  THEN
+    2dup r@ $@ str=  IF  2drop r> bucket-off true  EXIT  THEN
     rdrop false ;    
 
 $180 cells Constant table-size#
