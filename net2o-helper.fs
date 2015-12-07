@@ -138,8 +138,7 @@ User host$ \ check for this hostname
 	THEN ;] addr>sock ;
 
 : insert-host ( addr u -- )
-    new-addr  dup host=  IF  insert-addr  THEN
-    >o n2o:dispose-addr o> ;
+    new-addr  dup host=  IF  insert-addr  THEN  .n2o:dispose-addr ;
 
 : insert-host? ( o addr u -- o )
     check-host? IF  insert-host  ELSE  2drop  THEN ;

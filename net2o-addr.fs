@@ -142,7 +142,7 @@ previous
 
 : addrs-off ( -- )
     \G dispose all addresses
-    my-addr[] [: >o n2o:dispose-addr o> ;] $[]o-map
+    my-addr[] [: .n2o:dispose-addr ;] $[]o-map
     my-addr[] $off
     my-addr$ $[]off ;
 
