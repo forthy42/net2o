@@ -40,22 +40,21 @@ datadir   =
 
 SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  client-test.fs client-tests.fs crypto-api.fs debugging.fs	\
-	  ed25519-table-test.fs eve-test.fs hash-table.fs		\
-	  keccak-small.fs kregion.fs n2o.fs net2o-addr.fs		\
-	  net2o-classes.fs net2o-cmd.fs net2o-connected.fs		\
-	  net2o-connect.fs net2o-crypt.fs net2o-dht.fs net2o-err.fs	\
-	  net2o-file.fs net2o.fs net2o-ip.fs net2o-helper.fs		\
-	  net2o-keys.fs net2o-log.fs net2o-msg.fs net2o-notify.fs	\
-	  net2o-qr.fs net2o-template.fs net2o-tools.fs net2o-vault.fs	\
-	  rng.fs server-test.fs termclient.fs terminal-test.fs		\
-	  test-keys.fs xtype.fs tests/alice2-msg.fs			\
-	  tests/alice-msg.fs tests/bernd-msg.fs tests/bob-msg.fs	\
-	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
-	  tests/dht-pop.fs tests/ed25519.fs tests/insdeltest.fs		\
-	  tests/keccak.fs tests/keys.fs tests/msg.fs			\
-	  tests/teststat.fs tests/threefish.fs tests/vault.fs		\
-	  $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs			\
-	  threefishlib.fs
+	  eve-test.fs hash-table.fs keccak-small.fs kregion.fs n2o.fs	\
+	  net2o-addr.fs net2o-classes.fs net2o-cmd.fs			\
+	  net2o-connected.fs net2o-connect.fs net2o-crypt.fs		\
+	  net2o-dht.fs net2o-err.fs net2o-file.fs net2o.fs		\
+	  net2o-ip.fs net2o-helper.fs net2o-keys.fs net2o-log.fs	\
+	  net2o-msg.fs net2o-notify.fs net2o-qr.fs net2o-template.fs	\
+	  net2o-tools.fs net2o-vault.fs rng.fs server-test.fs		\
+	  termclient.fs terminal-test.fs test-keys.fs xtype.fs		\
+	  tests/alice2-msg.fs tests/alice-msg.fs tests/bernd-msg.fs	\
+	  tests/bob-msg.fs tests/copy.fs tests/cryptspeed.fs		\
+	  tests/dht.fs tests/dht-pop.fs tests/ed25519.fs		\
+	  tests/insdeltest.fs tests/keccak.fs tests/keys.fs		\
+	  tests/msg.fs tests/teststat.fs tests/threefish.fs		\
+	  tests/vault.fs tests/ed25519-table.fs $(FORTHLIB)		\
+	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs
 
 SRCDIRS = site-forth/net2o/tests home
 
@@ -96,6 +95,6 @@ wiki/commands.md:	$(SOURCES)
 	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md
 
 TAGS:	$(SOURCES)
-	gforth etags.fs -e '0 to script?' n2o.fs -e "bye"
+	gforth etags.fs n2o.fs -e "bye"
 	mv TAGS net2o.TAGS
 	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS

@@ -122,27 +122,35 @@ event: ->do-beacon ( addr -- )
 
 User host$ \ check for this hostname
 
-: insert-host ( o addr u -- o )
-    2 pick >o host>$ o> IF
-	new-addr  dup .host-id $@
-	host$ $@ str= host$ $@len 0= or IF
-	    connect( ." check addr: " dup .addr cr ) dup >r
-	    [: check-addr1 0= IF  2drop  EXIT  THEN
-	      insert-address temp-addr ins-dest
-	      connect( ." insert host: " temp-addr .addr-path cr )
-	      return-addr $10 0 skip nip 0= IF
-		  temp-addr return-addr $10 move
-	      THEN ;] addr>sock r>
-	THEN
-	>o n2o:dispose-addr o>
-    ELSE  2drop  THEN ;
+: check-host? ( o addr u -- o addr' u flag )
+    2 pick >o host>$ o> ;
+
+: host= ( o -- flag )
+    host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
+
+: insert-addr ( o -- )
+    connect( ." check addr: " dup .addr cr ) dup
+    [: check-addr1 0= IF  2drop  EXIT  THEN
+	insert-address temp-addr ins-dest
+	connect( ." insert host: " temp-addr .addr-path cr )
+	return-addr $10 0 skip nip 0= IF
+	    temp-addr return-addr $10 move
+	THEN ;] addr>sock ;
+
+: insert-host ( addr u -- )
+    new-addr  dup host=  IF  insert-addr  THEN
+    >o n2o:dispose-addr o> ;
+
+: insert-host? ( o addr u -- o )
+    check-host? IF  insert-host  ELSE  2drop  THEN ;
 
 : n2o:pklookup ( addr u -- )
     2dup keysize2 safe/string host$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
-    id dup .dht-host ['] insert-host $[]map drop 2drop ;
+    id dup .dht-host ['] insert-host? $[]map drop 2drop
+    return-addr return-address $10 move ;
 
 : search-connect ( key u -- o/0 )
     0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context

@@ -47,6 +47,8 @@ What third party technology do we use
 * [ed25519](ed25519.md) from Dan Bernstein (in the donna version from
   floodyberry)
 * [Keccak](http://keccak.noekeon.org/) (original reference implementation)
+* [Threefish](https://www.schneier.com/threefish.html) as block cipher
+  in ECB mode and in [Threefish AEAD mode](threefish.md) as backup for Keccak.
 * ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
 
 [Get it](get-it.md)

@@ -1075,11 +1075,11 @@ User outflag  outflag off
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
     outbuf hdrflags 1+ c@ stateless# and IF
-	outbuf0-encrypt  return-addr
+	outbuf0-encrypt
 	cmd0( .time ." cmd0 to: " dup .addr-path cr )
     ELSE
-	code-map @ outbuf-encrypt  return-address
-    THEN   packet-to ;
+	code-map @ outbuf-encrypt
+    THEN   ret-addr packet-to ;
 
 : send-data-packet ( -- ) +sendX
     header( ." send data " outbuf .header )
