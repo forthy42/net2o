@@ -129,36 +129,46 @@ User host$ \ check for this hostname
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
 : insert-addr ( o -- )
-    connect( ." check addr: " dup .addr cr ) dup
+    connect( ." check addr: " dup .addr cr )
     [: check-addr1 0= IF  2drop  EXIT  THEN
 	insert-address temp-addr ins-dest
 	connect( ." insert host: " temp-addr .addr-path cr )
-	return-addr $10 0 skip nip 0= IF
-	    temp-addr return-addr $10 move
+	ret-addr $10 0 skip nip 0= IF
+	    temp-addr ret-addr $10 move
 	THEN ;] addr>sock ;
 
+: insert-addr$ ( addr u -- )
+    new-addr dup insert-addr .n2o:dispose-addr ;
+
 : insert-host ( addr u -- )
-    new-addr  dup host=  IF  insert-addr  THEN  .n2o:dispose-addr ;
+    new-addr  dup host=  IF  dup insert-addr  THEN  .n2o:dispose-addr ;
 
 : insert-host? ( o addr u -- o )
     check-host? IF  insert-host  ELSE  2drop  THEN ;
+
+: make-context ( pk u -- )
+    0 n2o:new-context >o rdrop dest-pk ;
 
 : n2o:pklookup ( addr u -- )
     2dup keysize2 safe/string host$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
-    0 n2o:new-context >o rdrop 2dup dest-pk  return-addr $10 erase
-    id dup .dht-host ['] insert-host? $[]map drop 2drop
-    return-addr return-address $10 move ;
+    2dup make-context
+    id dup .dht-host ['] insert-host? $[]map drop 2drop ;
 
 : search-connect ( key u -- o/0 )
     0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
 
 :noname ( addr u cmdlen datalen -- )
-    2>r n2o:pklookup 2r>
+    2>r n2o:pklookup
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    n2o:connect +flow-control +resend ; is pk-connect
+    2r> n2o:connect +flow-control +resend ; is pk-connect
+
+: addr-connect ( key+addr u cmdlen datalen -- )
+    2>r 2dup key| make-context
+    keysize safe/string insert-addr$
+    2r> n2o:connect +flow-control +resend ;
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;
