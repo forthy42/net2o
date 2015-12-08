@@ -17,6 +17,7 @@
 
 defer avalanche-to ( addr u o:context -- )
 defer pk-connect ( key u cmdlen datalen -- )
+defer addr-connect ( key+addr u cmdlen datalen -- )
 : avalanche-msg ( msg u1 -- )
     \g forward message to all next nodes of that message group
     { d: msg }
@@ -105,12 +106,11 @@ Sema queue-sema
     2dup msg-groups #@ d0=
     IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
 
-: reconnect-chat ( -- )  EXIT
-    last# >r  peer@ key>key
-    2dup d0<> IF
-	0 >o $A $A pk-connect o { w^ con }
-	con cell r@ cell+ $+! o>
-    ELSE  2drop  THEN  peer- rdrop ;
+: reconnect-chat ( -- )
+    peer@ 2dup d0<> IF
+	0 >o $A $A addr-connect o { w^ con } o>
+	con cell last# cell+ $+!
+    ELSE  2drop  THEN  peer- ;
 
 : do-avalanche ( -- )
     msg@ parent @ .avalanche-msg msg- ;
@@ -211,7 +211,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
-+net2o: msg-reconnect ( $:pubkey -- ) \g rewire distribution tree
++net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     signed? !!signed!! $> peer+
     parent @ .wait-task @ ?dup-IF
 	<event o elit, last# elit, ->chat-reconnect event>
@@ -500,7 +500,8 @@ previous
 also net2o-base
 : reconnect, ( group -- )
     cell+ $@ cell safe/string bounds ?DO
-	I @ .pubkey $@ key| $, msg-reconnect
+	[: pubkey $@ key| type 0 punch-addrs $[]@ type ;] I @ .$tmp $,
+	msg-reconnect
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
