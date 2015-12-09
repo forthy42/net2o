@@ -74,21 +74,67 @@ Sema notify-sema
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
     : build-notification ( -- ) ;
+    [IFDEF] linux
+	[IFDEF] fork+exec
+	    Variable notify-send  $1000 notify-send $!len
+	    s" which notify-send" r/o open-pipe throw
+	    >r notify-send $@ r@ read-file throw r> close-file throw
+	    notify-send $@ rot umin #lf -skip notify-send $!len
+	    
+	    Variable net2o-logo
+	    s" doc/net2o-logo.png" open-fpath-file 0= [IF]
+		rot close-file throw
+		over c@ '/' <> [IF]
+		    pad $200 get-dir net2o-logo $! '/' net2o-logo c$+!
+		[THEN]
+		net2o-logo $+!
+	    [THEN]
+	    
+	    : 0string ( addr u -- cstr )
+		1+ save-mem over + 1- 0 swap c! ;
+	    
+	    Create notify-args
+	    "notify-send\0" drop ,
+	    "-a\0" drop ,
+	    "net2o\0" drop ,
+	    "-c\0" drop ,
+	    "im.received\0" drop ,
+	    net2o-logo $@len [IF]
+		"-i\0" drop ,
+		net2o-logo $@ 0string ,
+	    [THEN]
+	    here 0 ,
+	    here 0 ,
+	    0 , \ must be terminated by null pointer
+	    Constant content-string
+	    Constant title-string
+	    
+	    : linux-notification ( -- )  notify-send $@len 0= ?EXIT
+		title-string 0 ?free  content-string 0 ?free
+		['] notify-title $tmp 0string title-string !
+		notify$ $@ 0string content-string !
+		notify-send $@ notify-args fork+exec ;
+	[ELSE]
+	    : linux-notification ( -- ) \ shell script based
+		[ s" which notify-send >/dev/null 2>/dev/null" system
+		$? 0= ] [IF]
+		    [: .\" notify-send -a net2o -c im.received "
+			[ s" doc/net2o-logo.png" open-fpath-file 0= ] [IF]
+			    ." -i " [ over c@ '/' <> [IF]
+				pad $200 get-dir ] sliteral type ." /" [
+			    [THEN]
+			    ] sliteral 'type' [ close-file throw ]
+			[THEN]
+			."  '" notify-title
+			." ' " notify$ $@ 'type' ;] $tmp system
+		[THEN] ;
+	[THEN]
+    [THEN]
+	
     : show-notification ( -- )
 	1 pending-notifications +!
-	[IFDEF] linux
-	    [ s" which notify-send >/dev/null 2>/dev/null" system
-	    $? 0= ] [IF]
-		[: .\" notify-send -a net2o -c im.received "
-		  [ s" doc/net2o-logo.png" open-fpath-file 0= ] [IF]
-		      ." -i " [ over c@ '/' <> [IF]
-			  pad $200 get-dir ] sliteral type ." /" [
-		      [THEN]
-		      ] sliteral type [ close-file throw ]
-		  [THEN]
-		  ."  '" notify-title
-		  ." ' " notify$ $@ 'type' ;] $tmp system
-	    [THEN]
+	[IFDEF] linux-notification
+	    linux-notification
 	[THEN] ;
     : msg-builder ;
     [IFUNDEF] rendering
