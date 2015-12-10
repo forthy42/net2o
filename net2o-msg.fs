@@ -524,9 +524,11 @@ also net2o-base
 previous
 
 : send-reconnect ( group -- )
-    dup cell+ $@ cell >
-    IF  @ .send-reconnects
-    ELSE  nip @ >o o to connection +resend-cmd send-leave o>  THEN ;
+    dup cell+ $@
+    case cell of @ >o o to connection +resend-cmd send-leave o> endof
+	0 of  drop  endof
+	>r @ .send-reconnects r>
+    endcase ;
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection +resend-cmd
