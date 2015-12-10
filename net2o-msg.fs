@@ -106,9 +106,12 @@ Sema queue-sema
     2dup msg-groups #@ d0=
     IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
 
+Defer silent-join
+
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
-	0 >o $A $A addr-connect o { w^ con } o>
+	0 >o $A $A addr-connect o { w^ con }
+	o to connection silent-join o>
 	con cell last# cell+ $+!
     ELSE  2drop  THEN  peer- ;
 
@@ -279,6 +282,10 @@ also net2o-base
 	sign[ msg-start "joined" $, msg-action msg> endwith
     ELSE  2drop  THEN ;
 
+: silent-join, ( -- )
+    last# $@ dup IF  msg $, msg-join  endwith
+    ELSE  2drop  THEN ;
+
 : leave, ( -- )
     msg-group$ $@ dup IF  msg ?destpk $, msg-leave
 	sign[ msg-start "left" $, msg-action msg> endwith
@@ -291,6 +298,10 @@ previous
 : send-join ( -- )
     net2o-code ['] msg-reply expect-reply-xt join,
     ( cookie+request ) end-code| ;
+
+:noname ( -- )
+    net2o-code ['] msg-reply expect-reply-xt silent-join,
+    end-code ; is silent-join
 
 : send-leave ( -- )
     net2o-code ['] msg-reply expect-reply-xt leave,
@@ -500,8 +511,9 @@ previous
 also net2o-base
 : reconnect, ( group -- )
     cell+ $@ cell safe/string bounds ?DO
-	[: pubkey $@ key| type 0 punch-addrs $[]@ type ;] I @ .$tmp $,
-	msg-reconnect
+	[: 0 punch-addrs $[] @ o>addr forth:type
+	  pubkey $@ key| tuck forth:type forth:emit ;]
+	I @ .$tmp $, msg-reconnect
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
@@ -525,8 +537,8 @@ previous
     ret-beacon disconnect-me o>  cell +LOOP ;
 
 : leave-chat ( group -- )
-\    dup send-reconnect disconnect-group
-    disconnect-all
+    dup send-reconnect disconnect-group
+\    disconnect-all
 ;
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;

@@ -128,6 +128,7 @@ Variable routes
 
 \ add IP addresses
 
+require net2o-classes.fs
 require net2o-ip.fs
 
 begin-structure reply
@@ -469,8 +470,6 @@ User validated
 : >dest-addr ( -- )
     inbuf addr 64@ dest-addr 64!
     inbuf hdrflags w@ dest-flags w! ;
-
-require net2o-classes.fs
 
 \ : reqmask ( -- addr )
 \     task# @ reqmask[] $[] ;

@@ -165,9 +165,11 @@ User host$ \ check for this hostname
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
     2r> n2o:connect +flow-control +resend ; is pk-connect
 
-:noname ( key+addr u cmdlen datalen -- )
-    2>r 2dup key| make-context
-    keysize safe/string insert-addr$
+:noname ( addr+key u cmdlen datalen -- )
+    2>r over + 1- dup c@ dup >r -
+    2dup u>= !!keysize!!
+    dup r> make-context
+    over - insert-addr$
     2r> n2o:connect +flow-control +resend ; is addr-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
