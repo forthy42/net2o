@@ -103,7 +103,9 @@ net2o-base
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
 	return-addr return-address $10 move  resend0 $off
-	nat( ." punch done: " return-address .addr-path forth:cr )
+	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
+    ELSE
+	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
     THEN ;
 
 : cookie, ( -- )  add-cookie lit, set-cookie ;
@@ -111,7 +113,7 @@ net2o-base
 : request, ( -- )  next-request #request, ;
 
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
-    my-addr$ [: -sig nat( ." gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
+    my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
 
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
     nest[ cookie, request, ]nest ;

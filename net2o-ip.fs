@@ -261,12 +261,12 @@ Defer !my-addr
 
 : check-addr1 ( -- addr u flag )
     sockaddr1 sock-rest 2dup try-ip
-    nat( ." check: " >r 2dup .address
+    ( nat( ." check: " >r 2dup .address
     r> dup IF ."  ok"  ELSE  ."  ko"  THEN  cr ) ;
 
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
-    nat( ." ping: " 2dup .address cr )
+    nat( ticks .ticks ."  ping: " 2dup .address cr )
     2>r net2o-sock ">" 0 2r> sendto drop ;
 
 : p+ ( addr u -- addr' u' )

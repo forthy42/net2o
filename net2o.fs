@@ -1138,8 +1138,8 @@ Defer new-addr
 : send-punch ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
     insert-address temp-addr ins-dest
-    temp-addr return-addr $10 move
-    nat( ." send punch to: " return-addr .addr-path cr )
+    temp-addr ret-addr $10 move
+    nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
     punch-load $@ punch-reply ;
 
 : net2o:punch ( addr u -- )
@@ -1509,6 +1509,7 @@ Defer handle-beacon
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
     dup minpacket# u>= IF
+	( nat( ." packet from: " sockaddr alen @ .address cr )
 	sockaddr alen @ insert-address inbuf ins-source
 	over packet-size over <> !!size!! +next
 	EXIT
@@ -1770,7 +1771,7 @@ Variable beacons \ destinations to send beacons to
 	    last# $off last# cell+ $off
 	THEN
     THEN ;
-    
+
 : add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
 : sub-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> -beacon ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;

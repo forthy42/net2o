@@ -525,9 +525,10 @@ previous
 
 : send-reconnect ( group -- )
     dup cell+ $@
-    case cell of @ >o o to connection +resend-cmd send-leave o> endof
-	0 of  drop  endof
-	>r @ .send-reconnects r>
+    case
+	0    of  2drop  endof
+	cell of  @ >o o to connection +resend-cmd send-leave o>  endof
+	default: drop @ .send-reconnects
     endcase ;
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
