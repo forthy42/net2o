@@ -84,100 +84,23 @@ $10 Constant key-cksum#
     : no-hybrid ; \ cygwin can't deal with hybrid stacks
 [THEN]
 
-\ timestasts structure
-
-begin-structure timestats
-sffield: ts-delta
-sffield: ts-slack
-sffield: ts-reqrate
-sffield: ts-rate
-sffield: ts-grow
-end-structure
-
 \ per-thread memory space
 
 UValue inbuf    ( -- addr )
 UValue tmpbuf   ( -- addr )
 UValue outbuf   ( -- addr )
-
-user-o io-mem
-
-object class
-    pollfd 4 *                     uvar pollfds \ up to four file descriptors
-    sockaddr_in                    uvar sockaddr
-    sockaddr_in                    uvar sockaddr1
-    [IFDEF] no-hybrid
-	sockaddr_in                uvar sockaddr2
-    [THEN]
-    file-stat                      uvar statbuf
-    cell                           uvar ind-addr
-    cell                           uvar task#
-    $10                            uvar cmdtmp
-    $10                            uvar return-addr
-    $10                            uvar temp-addr
-    timestats                      uvar stat-tuple
-    maxdata 2/ key-salt# + key-cksum# + uvar init0buf
-    maxdata                        uvar aligned$
-    cell                           uvar code0-buf^
-    cell                           uvar code-buf^
-    cell                           uvar code-buf$^
-    cell                           uvar code-key^
-end-class io-buffers
-
 Variable routes
 
 \ add IP addresses
 
 require net2o-classes.fs
 require net2o-ip.fs
-
-begin-structure reply
-    field: reply-len
-    field: reply-offset
-    64field: reply-dest
-    64field: reply-time
-    field: reply-xt \ execute when receiving an ok
-\    field: reply-timeout# \ per-reply timeout counter
-\    field: reply-timeout-xt \ per-reply timeout xt
-end-structure
-
-: addr>bits ( addr -- bits )
-    chunk-p2 rshift ;
-: addr>bytes ( addr -- bytes )
-    [ chunk-p2 3 + ]L rshift ;
-: bytes>addr ( bytes addr -- )
-    [ chunk-p2 3 + ]L lshift ;
-: bits>bytes ( bits -- bytes )
-    1- 2/ 2/ 2/ 1+ ;
-: bytes>bits ( bytes -- bits )
-    3 lshift ;
-: addr>ts ( addr -- ts-offset )
-    addr>bits 64s ;
-: addr>64 ( addr -- ts-offset )
-    [ chunk-p2 3 - ]L rshift -8 and ;
-: addr>replies ( addr -- replies )
-    addr>bits reply * ;
-: addr>keys ( addr -- keys )
-    max-size^2 rshift [ min-size negate ]L and ;
-
-\ generic hooks and user variables
+require net2o-socks.fs
 
 UDefer other
-UValue pollfd#  0 to pollfd#
 
 : -other        ['] noop is other ;
 -other
-
-: prep-socks ( -- )
-    epiper @ fileno POLLIN  pollfds fds!+ >r
-    net2o-sock [IFDEF] no-hybrid swap [THEN] POLLIN  r> fds!+
-    [IFDEF] no-hybrid POLLIN swap fds!+ [THEN]
-    pollfds - pollfd / to pollfd# ;
-
-ustack string-stack
-ustack object-stack
-ustack t-stack
-ustack nest-stack
 
 Defer alloc-code-bufs ' noop is alloc-code-bufs
 Defer free-code-bufs  ' noop is free-code-bufs
@@ -221,188 +144,6 @@ Variable net2o-tasks
 0 warnings !@
 : bye  net2o-kills  1 ms bye ;
 warnings !
-
-\ net2o header structure
-
-begin-structure net2o-header
-    2 +field hdrflags
-   16 +field destination
-    8 +field addr
-end-structure
-
-Variable packetr
-Variable packets
-Variable packetr2 \ double received
-Variable packets2 \ double send
-
-: .packets ( -- )
-    ." IP packets send/received: " packets ? ." (" packets2 ? ." dupes)/"
-    packetr ? ." (" packetr2 ? ." dupes) " cr
-    packets off packetr off packets2 off packetr2 off ;
-
-User ptimeout  cell uallot drop
-#10000000 Value poll-timeout# \ 10ms, don't sleep too long
-poll-timeout# 0 ptimeout 2!
-
-User socktimeout cell uallot drop
-
-: sock-timeout! ( socket -- )  fileno
-    socktimeout 2@
-    ptimeout 2@ >r 1000 / r> 2dup socktimeout 2! d<> IF
-	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt THEN
-    drop ;
-
-0             Constant do-block
-MSG_DONTWAIT  Constant don't-block
-
-: read-a-packet ( blockage -- addr u / 0 0 )
-    >r sockaddr_in alen !
-    net2o-sock [IFDEF] no-hybrid drop [THEN]
-    inbuf maxpacket r> sockaddr alen recvfrom
-    dup 0< IF
-	errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
-	512 + negate throw  THEN
-    inbuf swap  1 packetr +!
-    recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
-;
-
-[IFDEF] no-hybrid
-    : read-a-packet4 ( blockage -- addr u / 0 0 )
-	>r sockaddr_in alen !
-	net2o-sock nip
-	inbuf maxpacket r> sockaddr alen recvfrom
-	dup 0< IF
-	    errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
-	THEN
-	inbuf swap  1 packetr +!
-	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
-    ;
-[THEN]
-
-$00000000 Value droprate#
-
-: %droprate ( -- )
-    1 arg dup 0= IF  2drop  EXIT  THEN
-    + 1- c@ '%' <> ?EXIT
-    1 arg prefix-number IF  1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
-	shift-args  THEN ;
-
-: send-a-packet ( addr u -- n ) +calc
-    droprate# IF  rng32 droprate# u< IF
-	    resend( ." dropping packet" cr )
-	    2drop 0  EXIT  THEN  THEN
-    2>r net2o-sock 2r> 0 sockaddr alen @ sendto +send 1 packets +!
-    sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
-
-\ clients routing table
-
-: init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
-
-: ipv4>ipv6 ( addr u -- addr' u' )
-    drop >r
-    r@ port be-uw@ sockaddr port be-w!
-    r> sin_addr be-ul@ sockaddr ipv4!
-    sockaddr sock-rest ;
-: ?>ipv6 ( addr u -- addr' u' )
-    over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
-: info@ ( info -- addr u )
-    dup ai_addr @ swap ai_addrlen l@ ;
-: info>string ( info -- addr u )
-    info@ ?>ipv6 ;
-
-0 Value lastaddr
-Variable lastn2oaddr
-
-: insert-address ( addr u -- net2o-addr )
-    address( ." Insert address " 2dup .address cr )
-    lastaddr IF  2dup lastaddr over str=
-	IF  2drop lastn2oaddr @ EXIT  THEN
-    THEN
-    2dup routes #key dup -1 = IF
-	drop s" " 2over routes #!
-	last# $@ drop to lastaddr
-	routes #key  dup lastn2oaddr !
-    ELSE
-	nip nip
-    THEN ;
-
-: insert-ip* ( addr u port hint -- net2o-addr )
-    >r SOCK_DGRAM >hints r> hints ai_family l!
-    get-info info>string insert-address ;
-
-: insert-ip ( addr u port -- net2o-addr )  PF_INET   insert-ip* ;
-: insert-ip4 ( addr u port -- net2o-addr ) PF_INET   insert-ip* ;
-: insert-ip6 ( addr u port -- net2o-addr ) PF_INET6  insert-ip* ;
-
-: address>route ( -- n/-1 )
-    sockaddr alen @ insert-address ;
-: route>address ( n -- ) dup >r
-    routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
-    $@ sockaddr swap dup alen ! move  rdrop ;
-
-\ route an incoming packet
-
-: >rpath-len ( rpath -- rpath len )
-    dup $100 u< IF  1  EXIT  THEN
-    dup $10000 u< IF  2  EXIT  THEN
-    dup $1000000 u< IF  3  EXIT  THEN
-    [IFDEF] 64bit
-	dup $100000000 u< IF  4  EXIT  THEN
-	dup $10000000000 u< IF  5  EXIT  THEN
-	dup $1000000000000 u< IF  6  EXIT  THEN
-	dup $100000000000000 u< IF  7  EXIT  THEN
-	8
-    [ELSE]
-	4
-    [THEN] ;
-: >path-len ( path -- path len )
-    dup 0= IF  0  EXIT  THEN
-    [IFDEF] 64bit
-	dup $00FFFFFFFFFFFFFF and 0= IF  1  EXIT  THEN
-	dup $0000FFFFFFFFFFFF and 0= IF  2  EXIT  THEN
-	dup $000000FFFFFFFFFF and 0= IF  3  EXIT  THEN
-	dup $00000000FFFFFFFF and 0= IF  4  EXIT  THEN
-	dup $0000000000FFFFFF and 0= IF  5  EXIT  THEN
-	dup $000000000000FFFF and 0= IF  6  EXIT  THEN
-	dup $00000000000000FF and 0= IF  7  EXIT  THEN
-	8
-    [ELSE]
-	dup $00FFFFFF and 0= IF  1  EXIT  THEN
-	dup $0000FFFF and 0= IF  2  EXIT  THEN
-	dup $000000FF and 0= IF  3  EXIT  THEN
-	4
-    [THEN] ;
-
-: <0string ( endaddr -- addr u )
-    $11 1 DO  1- dup c@ WHILE  LOOP  $10  ELSE  I  UNLOOP  THEN ;
-
-: ins-source ( addr packet -- )
-    destination >r reverse
-    dup >rpath-len { w^ rpath rplen } rpath be!
-    r@ $10 + <0string
-    over rplen - swap move
-    rpath cell+ rplen - r> $10 + rplen - rplen move ;
-: ins-dest ( n2oaddr destaddr -- )
-    >r dup >path-len { w^ path plen } path be!
-    r@ cstring>sstring over plen + swap move
-    path r> plen move ;
-: skip-dest ( addr -- )
-    $10 2dup 0 scan nip -
-    2dup p+ { addr1 u1 addr2 u2 } \ better use locals here
-    addr2 addr1 u2 move
-    addr1 u1 u2 /string erase ;
-
-: get-dest ( packet -- addr )  destination dup be@ swap skip-dest ;
-: route? ( packet -- flag )  destination c@  ;
-
-: packet-route ( orig-addr addr -- flag )
-    dup route?  IF
-	>r r@ get-dest  route>address
-	r> ins-source  false  EXIT  THEN
-    2drop true ; \ local packet
-
-: in-check ( -- flag )  address>route -1 <> ;
-: out-route ( -- )  0 outbuf packet-route drop ;
 
 \ packet&header size
 
@@ -637,33 +378,6 @@ UValue connection
     o o> ;
 
 : ret-addr ( -- addr ) o IF  return-address  ELSE  return-addr  THEN ;
-
-\ insert keys
-
-Variable 0keys
-
-sema 0key-sema
-
-: ins-0key [: { w^ addr -- }
-	addr cell 0keys $+! ;] 0key-sema c-section ;
-: del$one ( addr1 addr2 size -- pos )
-    >r over @ cell+ - tuck r> $del ;
-: next$ ( pos string -- addre addrs )
-    $@ rot /string bounds ;
-: del$cell ( addr stringaddr -- ) { string }
-    string $@ bounds ?DO
-	dup I @ = IF
-	    string I cell del$one
-	    unloop string next$ ?DO NOPE 0
-	ELSE  cell  THEN
-    +LOOP drop ;
-: del-0key ( addr -- )
-    [: 0keys del$cell ;] 0key-sema c-section ;
-: search-0key ( .. xt -- .. )
-    [: { xt } 0keys $@ bounds ?DO
-	    I xt execute 0= ?LEAVE
-	cell +LOOP
-    ;] 0key-sema c-section ;
 
 \ create new maps
 

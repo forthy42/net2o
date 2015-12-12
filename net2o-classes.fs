@@ -240,6 +240,83 @@ perm%blocked Value perm%unknown
 perm%blocked invert Value perm%myself
 Create perm$ ," cbdmrwnhs"
 
+\ timestasts structure
+
+begin-structure timestats
+sffield: ts-delta
+sffield: ts-slack
+sffield: ts-reqrate
+sffield: ts-rate
+sffield: ts-grow
+end-structure
+
+\ io per-task variables
+
+user-o io-mem
+
+object class
+    pollfd 4 *                     uvar pollfds \ up to four file descriptors
+    sockaddr_in                    uvar sockaddr
+    sockaddr_in                    uvar sockaddr1
+    [IFDEF] no-hybrid
+	sockaddr_in                uvar sockaddr2
+    [THEN]
+    file-stat                      uvar statbuf
+    cell                           uvar ind-addr
+    cell                           uvar task#
+    $10                            uvar cmdtmp
+    $10                            uvar return-addr
+    $10                            uvar temp-addr
+    timestats                      uvar stat-tuple
+    maxdata 2/ key-salt# + key-cksum# + uvar init0buf
+    maxdata                        uvar aligned$
+    cell                           uvar code0-buf^
+    cell                           uvar code-buf^
+    cell                           uvar code-buf$^
+    cell                           uvar code-key^
+end-class io-buffers
+
+\ reply structure
+
+begin-structure reply
+    field: reply-len
+    field: reply-offset
+    64field: reply-dest
+    64field: reply-time
+    field: reply-xt \ execute when receiving an ok
+\    field: reply-timeout# \ per-reply timeout counter
+\    field: reply-timeout-xt \ per-reply timeout xt
+end-structure
+
+\ address to index computations
+
+: addr>bits ( addr -- bits )
+    chunk-p2 rshift ;
+: addr>bytes ( addr -- bytes )
+    [ chunk-p2 3 + ]L rshift ;
+: bytes>addr ( bytes addr -- )
+    [ chunk-p2 3 + ]L lshift ;
+: bits>bytes ( bits -- bytes )
+    1- 2/ 2/ 2/ 1+ ;
+: bytes>bits ( bytes -- bits )
+    3 lshift ;
+: addr>ts ( addr -- ts-offset )
+    addr>bits 64s ;
+: addr>64 ( addr -- ts-offset )
+    [ chunk-p2 3 - ]L rshift -8 and ;
+: addr>replies ( addr -- replies )
+    addr>bits reply * ;
+: addr>keys ( addr -- keys )
+    max-size^2 rshift [ min-size negate ]L and ;
+
+\ net2o header structure
+
+begin-structure net2o-header
+    2 +field hdrflags
+   16 +field destination
+    8 +field addr
+end-structure
+
 0 [IF]
 Local Variables:
 forth-local-words:

@@ -507,3 +507,30 @@ comp: loadfilename 2@ postpone sliteral :, ;
     BEGIN  ''' $split dup WHILE
 	    2swap type dup IF  .\" '\"'\"'"  THEN
     REPEAT  2drop type ''' emit ;
+
+\ insert and remove keys
+
+Variable 0keys
+
+sema 0key-sema
+
+: ins-0key [: { w^ addr -- }
+	addr cell 0keys $+! ;] 0key-sema c-section ;
+: del$one ( addr1 addr2 size -- pos )
+    >r over @ cell+ - tuck r> $del ;
+: next$ ( pos string -- addre addrs )
+    $@ rot /string bounds ;
+: del$cell ( addr stringaddr -- ) { string }
+    string $@ bounds ?DO
+	dup I @ = IF
+	    string I cell del$one
+	    unloop string next$ ?DO NOPE 0
+	ELSE  cell  THEN
+    +LOOP drop ;
+: del-0key ( addr -- )
+    [: 0keys del$cell ;] 0key-sema c-section ;
+: search-0key ( .. xt -- .. )
+    [: { xt } 0keys $@ bounds ?DO
+	    I xt execute 0= ?LEAVE
+	cell +LOOP
+    ;] 0key-sema c-section ;

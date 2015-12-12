@@ -840,7 +840,8 @@ event: ->invite ( addr u -- )
 event: ->wakeme ( o -- ) <event ->wake event> ;
 
 : pk2key$-add ( addr u -- )
-    sample-key >o import#invited import-type ! cmd:nestsig o>
+    sample-key >o import#invited import-type ! cmd:nestsig
+    perm%default ke-mask ! n:o>
     import#untrusted import-type !  save-pubkeys ;
 
 : block-add ( addr u -- )

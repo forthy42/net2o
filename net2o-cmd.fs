@@ -17,6 +17,11 @@
 
 \ net2o commands are protobuf coded, not byte coded.
 
+ustack string-stack
+ustack object-stack
+ustack t-stack
+ustack nest-stack
+
 \ command buffers
 
 user-o cmdbuf-o
