@@ -110,10 +110,13 @@ Defer silent-join
 
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
-	0 >o $A $A addr-connect o { w^ con }
-	o to connection silent-join o>
+	save-mem peer-  over >r
+	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
+	0 >o last# >r $A $A addr-connect o { w^ con }
+	o to connection r> to last# silent-join o>
 	con cell last# cell+ $+!
-    ELSE  2drop  THEN  peer- ;
+	r> free throw
+    ELSE  2drop  THEN ;
 
 : do-avalanche ( -- )
     msg@ parent @ .avalanche-msg msg- ;
@@ -513,7 +516,9 @@ also net2o-base
     cell+ $@ cell safe/string bounds ?DO
 	[: 0 punch-addrs $[] @ o>addr forth:type
 	  pubkey $@ key| tuck forth:type forth:emit ;]
-	I @ .$tmp $, msg-reconnect
+	I @ .$tmp
+	reconnect( ." send reconnect: " 2dup 2dup + 1- c@ 1+ - .addr$ forth:cr )
+	$, msg-reconnect
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
