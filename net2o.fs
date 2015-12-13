@@ -1587,20 +1587,17 @@ Variable initialized
 
 \ connection cookies
 
-object class
-    64field: cc-timeout
-    field: cc-context
-end-class con-cookie
-
-con-cookie >osize @ Constant cookie-size#
+: nothing-done ( -- ) cookie( ." Emtpy done xt" cr ) ;
+: nothing-timeout ( -- ) cookie( ." Empty timeout xt" cr ) ;
+' nothing-done ' nothing-timeout 2Constant no-cookie-xt
 
 Variable cookies
 
-#5000000000. d>64 64Constant connect-timeout#
+#5.000.000.000 d>64 64Constant connect-timeout#
 
-: add-cookie ( -- cookie64 )
-    [: ticks 64dup [IFUNDEF] 64bit swap [THEN] o
-	{ 64^ cookie-adder w^ cookie-o }
+: add-cookie ( xtdone xttimeout -- cookie64 )
+    [: 2>r ticks 64dup [IFUNDEF] 64bit swap [THEN] o
+	2r> { 64^ cookie-adder cookie-o xtd xtto }
 	cookie-adder cookie-size#  cookies $+! ;]
     resize-sema c-section ;
 
@@ -1613,12 +1610,13 @@ Variable cookies
 	ELSE
 	    64dup I .cc-timeout 64@ 64= IF
 		64drop I .cc-context @
+		I .cc-done-xt @ over .execute
 		cookies I cookie-size# del$one drop
 		unloop  true  EXIT
 	    THEN
 	    cookie-size#  THEN
     +LOOP  64drop 0 ;
-  
+
 : ?cookie ( cookie -- context true / false )
     ['] do-?cookie resize-sema c-section ;
 

@@ -108,6 +108,8 @@ Sema queue-sema
 
 Defer silent-join
 
+\ !!FIXME!! should use an asynchronous "do-when-connected" thing
+
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
 	save-mem peer-  over >r

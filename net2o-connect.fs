@@ -108,7 +108,7 @@ net2o-base
 	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
     THEN ;
 
-: cookie, ( -- )  add-cookie lit, set-cookie ;
+: cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
 : request, ( -- )  next-request #request, ;
 
@@ -116,13 +116,13 @@ net2o-base
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
 
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
-    nest[ cookie, request, ]nest ;
+    nest[ no-cookie-xt cookie, request, ]nest ;
 
 : new-punchload ( -- )
     next-request punch-gen ! ;
 
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
-    nest[ cookie, punch-done punch-gen @ #request, ]nest$ punch-load, ;
+    nest[ no-cookie-xt cookie, punch-done punch-gen @ #request, ]nest$ punch-load, ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
     gen-punch ;

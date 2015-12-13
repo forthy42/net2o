@@ -366,7 +366,8 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     ind-addr @ IF  new-punchload  THEN
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
-    nest[ cookie, ind-addr @ IF  gen-punch-reply
+    nest[ no-cookie-xt cookie,
+    ind-addr @ IF  gen-punch-reply
     ELSE  request( ." gen reply" forth:cr )
 	gen-reply request,
     THEN  ]nest  other

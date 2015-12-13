@@ -221,6 +221,17 @@ end-class address-class
 
 Variable context-table
 
+\ cookies
+
+object class
+    64field: cc-timeout
+    field: cc-context
+    field: cc-done-xt
+    field: cc-timeout-xt
+end-class con-cookie
+
+con-cookie >osize @ Constant cookie-size#
+
 \ permissions
 
 1
