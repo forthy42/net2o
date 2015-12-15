@@ -92,6 +92,7 @@ code0-buf
 \ hashed key data base
 
 User >storekey
+Variable defaultkey
 
 cmd-class class
     field: ke-sk       \ secret key
@@ -321,9 +322,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
 : .secret-nicks ( -- )
-    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  dup 2 .r space .key-rest cr 1+
-      THEN o> ;] #map drop ;
+    [: 0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+	    dup 1 .r space .key-rest cr 1+
+	THEN o> ;] #map drop ;] #36 base-execute ;
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
@@ -433,8 +434,9 @@ Variable keys
     REPEAT cr ;
 
 : ">passphrase ( addr u -- ) >passphrase +key ;
-: +seckey ( -- )
-    ke-sk @ ke-pk $@ drop keypad ed-dh +key ;
+: >seckey ( -- addr u )
+    ke-sk @ ke-pk $@ drop keypad ed-dh ;
+: +seckey ( -- ) >seckey +key ;
 
 \ "" ">passphrase \ following the encrypt-everything paradigm,
 \ no password is the empty string!  It's still encrypted ;-)!
@@ -695,7 +697,7 @@ $40 buffer: nick-buf
     keys $[]# 0 ?DO
 	I keys sec[]@ dup keysize = flag xor IF
 	    try-decrypt-key IF
-		I keys $[] @ >storekey ! unloop  EXIT  THEN  THEN
+		I keys $[] @ defaultkey ! unloop  EXIT  THEN  THEN
 	2drop
     LOOP  0 0 ;
 
@@ -879,6 +881,43 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     nest[ 2r> $, invite ]tmpnest
     cookie+request
     end-code| ;
+
+\ key api helpers
+
+: del-last-key ( -- )
+    keys $[]# 1- keys $[] sec-off
+    keys $@len cell- keys $!len ;
+
+: storekey! ( -- )
+    >seckey keys $[]# 0 ?DO  2dup I keys sec[]@ str= IF
+	    I keys sec[]@ drop >storekey !  LEAVE  THEN  LOOP  2drop ;
+
+: choose-key ( -- o )
+    0 BEGIN  drop
+	." Choose key by number:" cr .secret-nicks
+	key ['] digit? #36 base-execute and secret-key dup 0= WHILE
+	    ." Please enter a base-36 number between 0 and "
+	    secret-keys# 1- ['] . #36 base-execute cr  rdrop
+    REPEAT
+    dup .storekey!
+    ." ==== key " dup ..nick ."  chosen ====" cr ;
+
+\ will ask for your password and if possible auto-select your id
+
+: get-me ( -- )
+    secret-keys# ?EXIT
+    debug-vector @ op-vector !@ >r <default>
+    secret-keys#
+    BEGIN  dup 0= WHILE drop
+	    ." Passphrase: " +passphrase   !time
+	    read-keys secret-keys# dup 0= IF
+		."  wrong passphrase, no key found" del-last-key
+	    THEN  cr
+    REPEAT
+    1 = IF  0 secret-key
+	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
+    ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
+    >raw-key ?rsk   r> op-vector ! ;
 
 0 [IF]
 Local Variables:

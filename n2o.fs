@@ -17,35 +17,6 @@
 
 require net2o.fs
 
-: del-last-key ( -- )
-    keys $[]# 1- keys $[] sec-off
-    keys $@len cell- keys $!len ;
-
-: choose-key ( -- o )
-    0 BEGIN  drop
-	." Choose key by number:" cr .secret-nicks
-	key '0' - 0 max secret-key dup 0= WHILE
-	    ." Please enter a number between 0 and " secret-keys# 1- . cr
-    REPEAT
-    ." ==== key " dup ..nick ."  chosen ====" cr ;
-
-\ will ask for your password and if possible auto-select your id
-
-: get-me ( -- )
-    secret-keys# ?EXIT
-    debug-vector @ op-vector !@ >r <default>
-    secret-keys#
-    BEGIN  dup 0= WHILE drop
-	    ." Passphrase: " +passphrase   !time
-	    read-keys secret-keys# dup 0= IF
-		."  wrong passphrase, no key found" del-last-key
-	    THEN  cr
-    REPEAT
-    1 = IF  0 secret-key
-	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
-    ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
-    >raw-key ?rsk   r> op-vector ! ;
-
 Variable key-readin
 
 : out-key ( o -- )
@@ -80,7 +51,8 @@ $20 value hash-size#
     key-readin $@ do-key ;
 
 : +dhtroot ( -- )
-    key>default  import#manual import-type !  64#-1 key-read-offset 64!
+    defaultkey @ >storekey !
+    import#manual import-type !  64#-1 key-read-offset 64!
     85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key ;
 
 : keys>search ( -- )
@@ -199,7 +171,7 @@ get-current n2o definitions
     ?nextarg 0= IF  get-nick  THEN
     +newphrase key>default
     key#user +gen-keys
-    secret-keys# 1- secret-key >raw-key
+    secret-keys# 1- secret-key >raw-key  lastkey@ drop defaultkey !
     out-me +dhtroot save-keys .keys ?rsk ;
 : keylist ( -- )
     \U keylist|listkey

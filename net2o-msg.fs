@@ -39,7 +39,7 @@ User replay-mode
 
 : init-chatlog ( -- ) ?.net2o s" ~/.net2o/chats" $1FF init-dir ;
 
-: >chatid ( group u -- id u )  lastkey@ keyed-hash#128 ;
+: >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
 : save-msgs ( group u -- )
     otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN
@@ -379,7 +379,9 @@ Variable chat-keys
 : .notify ( -- )
     ." notify " notify? ? ." led " notify-rgb hex. notify-on . notify-off .
     ." interval " delta-notify 64>d 1000000 um/mod . drop
-    ." mode " notify-mode . forth:cr ;
+    ." mode " notify-mode .
+    notify-text IF  ." visible"  ELSE  ." hidden"  THEN
+    forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
     bl skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
@@ -405,6 +407,10 @@ scope: notify-cmds
     ELSE  2drop  THEN  1000000 um* d>64 to delta-notify .notify ;
 : mode ( addr u -- )
     get-dec 3 and to notify-mode 2drop .notify msg-builder ;
+: visible ( addr u -- )
+    2drop true to notify-text .notify ;
+: hidden ( addr u -- )
+    2drop false to notify-text .notify ;
 
 }scope
 
@@ -488,7 +494,8 @@ also net2o-base scope: chat-/cmds
     \G notify: Change notificaton settings
     bl skip bl $split 2swap ['] notify-cmds >body find-name-in dup IF
 	name>int execute
-    ELSE  ." Unknown notify command" 2drop forth:cr  THEN ;
+    ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
+    THEN ;
 
 }scope
 

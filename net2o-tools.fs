@@ -504,9 +504,8 @@ comp: loadfilename 2@ postpone sliteral :, ;
 \ single quoted string with escapes of single quote for shell invocation
 
 : 'type' ( addr u -- ) ''' emit
-    BEGIN  ''' $split dup WHILE
-	    2swap type dup IF  .\" '\"'\"'"  THEN
-    REPEAT  2drop type ''' emit ;
+    bounds ?DO  I c@ ''' = IF  .\" '\"'\"'"  ELSE  I c@ emit  THEN  LOOP
+    ''' emit ;
 
 \ insert and remove keys
 

@@ -24,6 +24,7 @@
 $FFFF00 Value notify-rgb
 500 Value notify-on
 4500 Value notify-off
+true Value notify-text
 
 : tick-notify? ( -- flag )
     ticks last-notify 64- delta-notify 64< ;
@@ -38,7 +39,7 @@ Sema notify-sema
 : notify-title ( -- )
     ." net2o: " pending-notifications @ dup .
     ." Message" 1 > IF ." s"  THEN ;
-    
+
 [IFDEF] android
     also android also jni
     jvalue nb
@@ -47,6 +48,10 @@ Sema notify-sema
     jvalue notification-manager
     : notify+ ( addr u -- )  notify> notify$ $+! ;
     : notify! ( addr u -- )  notify> notify$ $! ;
+    : notify@ ( -- addr u )
+	notify-text IF  notify$ $@
+	ELSE  "hidden cryptic text"  THEN ;
+
     : ?nm ( -- )
 	notification-manager 0= IF
 	    NOTIFICATION_SERVICE clazz .getSystemService
@@ -65,21 +70,32 @@ Sema notify-sema
     : build-notification ( -- )
 	1 pending-notifications +!
 	['] notify-title $tmp make-jstring nb .setContentTitle to nb
-	notify$ $@ make-jstring nb .setContentText to nb
-	notify$ $@ make-jstring nb .setTicker to nb
+	notify@ make-jstring nb .setContentText to nb
+	notify@ make-jstring nb .setTicker to nb
 	nb .build to nf ;
     : show-notification ( -- )
 	1 nf notification-manager .notify ;
 [ELSE]
+    : escape-<&> ( addr u -- )
+	bounds ?DO  case i c@
+		'<' of  ." &lt;"  endof
+		'>' of  ." &gt;"  endof
+		'&' of  ." &amp;" endof
+		default: emit  endcase  LOOP ;
+    
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;
     : build-notification ( -- ) ;
+    : notify@ ( -- addr u )
+	notify-text IF  notify$ $@ ['] escape-<&> $tmp
+	ELSE  "<i>hidden cryptic text</i>"  THEN ;
+
     [IFDEF] linux
 	[IFDEF] fork+exec
 	    Variable notify-send  $1000 notify-send $!len
 	    s" which notify-send" r/o open-pipe throw
 	    >r notify-send $@ r@ read-file throw r> close-file throw
-	    notify-send $@ rot umin #lf -skip notify-send $!len
+	    notify-send $@ rot umin #lf -skip notify-send $!len  drop
 	    
 	    Variable net2o-logo
 	    s" doc/net2o-logo.png" open-fpath-file 0= [IF]
@@ -112,7 +128,7 @@ Sema notify-sema
 	    : linux-notification ( -- )  notify-send $@len 0= ?EXIT
 		title-string 0 ?free  content-string 0 ?free
 		['] notify-title $tmp 0string title-string !
-		notify$ $@ 0string content-string !
+		notify@ 0string content-string !
 		notify-send $@ notify-args fork+exec ;
 	[ELSE]
 	    : linux-notification ( -- ) \ shell script based
@@ -126,7 +142,7 @@ Sema notify-sema
 			    ] sliteral 'type' [ close-file throw ]
 			[THEN]
 			."  '" notify-title
-			." ' " notify$ $@ 'type' ;] $tmp system
+			." ' " notify@ 'type' ;] $tmp system
 		[THEN] ;
 	[THEN]
     [THEN]
