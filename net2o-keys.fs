@@ -697,7 +697,8 @@ $40 buffer: nick-buf
     keys $[]# 0 ?DO
 	I keys sec[]@ dup keysize = flag xor IF
 	    try-decrypt-key IF
-		I keys $[] @ defaultkey ! unloop  EXIT  THEN  THEN
+		I keys $[] @ dup >storekey ! defaultkey !
+		unloop  EXIT  THEN  THEN
 	2drop
     LOOP  0 0 ;
 
@@ -728,6 +729,7 @@ $40 buffer: nick-buf
     import#self import-type !
     ?key-sfd read-keys-loop ;
 : read-pkey-loop ( -- )
+    lastkey@ drop defaultkey ! \ at least one default key available
     pw-level# >r -1 to pw-level#  import#manual import-type !
     ?key-pfd read-keys-loop
     r> to pw-level#  ;

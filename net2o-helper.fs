@@ -186,6 +186,7 @@ User search-key$
     cookie+request end-code| disconnect-me ;
 
 : insert-keys ( -- )
+    defaultkey @ >storekey !
     import#dht import-type !
     search-key$ [: >d#id >o
       0 dht-owner $[]@ nip sigsize# u> IF
