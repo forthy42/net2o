@@ -141,8 +141,8 @@ Sema notify-sema
 			    [THEN]
 			    ] sliteral 'type' [ close-file throw ]
 			[THEN]
-			."  '" notify-title
-			." ' " notify@ 'type' ;] $tmp system
+			."  '" notify-title ." ' " 
+			notify@ 'type' ;] $tmp system
 		[THEN] ;
 	[THEN]
     [THEN]

@@ -589,7 +589,7 @@ also net2o-base
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
     ke-import @ ulit, keyimport
-    ke-mask @ slit, keymask
+    ke-mask @ nlit, keymask
     ke-pets [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
 previous
