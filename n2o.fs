@@ -147,13 +147,13 @@ scope{ n2o
 	s"     \U " ['] .usage search-help
     THEN ;
 
-set-current
+}scope
 
 : next-cmd ( -- )
-    ?nextarg 0= IF  help  EXIT  THEN  ['] n2o >body search-wordlist
-    IF  execute  ELSE  help  THEN ;
+    ?nextarg 0= IF  n2o:help  EXIT  THEN  ['] n2o >body search-wordlist
+    IF  execute  ELSE  n2o:help  THEN ;
 
-get-current n2o definitions
+scope{ n2o
 
 : keyin ( -- )
     \U keyin|inkey file1 .. filen
@@ -421,7 +421,16 @@ synonym searchkey keysearch
 	s>number drop to date?
 	next-cmd THEN ;
 
-set-current
+: -backtrace ( -- )
+    \U -backtrace <cmd>
+    \G -backtrace: Provide full error reporting ;
+    [ what's DoError ]l is DoError next-cmd ;
+
+}scope
+
+\ user friendly doerror
+
+:noname [: <err> .error-string <default> cr ;] do-debug ; is DoError
 
 \ allow issuing commands during chat
 
