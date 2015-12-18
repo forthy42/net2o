@@ -533,3 +533,16 @@ sema 0key-sema
 	    I xt execute 0= ?LEAVE
 	cell +LOOP
     ;] 0key-sema c-section ;
+
+\ unique list of cells
+
+sema resize-sema
+
+: unique$cell? ( x addr -- flag )
+    $@ bounds ?DO  dup I @ = IF  drop false unloop  EXIT  THEN
+    cell +LOOP  drop true ;
+
+: +unique$ ( x addr -- )
+    [: 2dup unique$cell? IF
+	  >r { w^ x } x cell r> $+!
+      ELSE  2drop  THEN ;] resize-sema c-section ;

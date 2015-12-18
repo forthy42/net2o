@@ -182,12 +182,7 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
 
 Defer msg:last
 
-: unique-con? ( o:con addr u -- flag )
-    bounds ?DO  I @ o = IF  false unloop  EXIT  THEN  cell +LOOP  true ;
-
-: +unique-con ( -- )
-    last# cell+ $@ unique-con?
-    IF  o { w^ group } group cell last# cell+ $+!  THEN ;
+: +unique-con ( -- ) o last# cell+ +unique$ ;
 
 scope{ net2o-base
 
