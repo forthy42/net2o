@@ -58,58 +58,6 @@ $20 value hash-size#
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
-: key-ctrlbit ( -- n )
-    \G return a bit mask for the control key pressed
-    1 key dup $20 < >r lshift r> and ;
-
-: wait-key ( -- )
-    BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
-    and 0=  UNTIL ;
-
-: wait-chat ( -- )
-    chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
-	.key-id space ;] $[]map
-    ." is not online. press key to recheck."
-    [: 0 to connection -56 throw ;] is do-disconnect
-    [: false chat-keys [: keysize umin pubkey $@ key| str= or ;] $[]map
-	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
-    wait-key cr [: up@ wait-task ! ;] IS do-connect ;
-
-: last-chat-peer ( -- chat )
-    msg-group$ $@ msg-groups #@ dup cell- 0 max /string
-    IF  @  ELSE  drop 0  THEN ;
-
-: search-peer ( -- chat )
-    false chat-keys
-    [: keysize umin rot dup 0= IF drop search-connect
-      ELSE  nip nip  THEN ;] $[]map ;
-
-: search-chat ( -- chat )
-    group-master @ IF  last-chat-peer  EXIT  THEN
-    search-peer ;
-
-: +group ( -- )
-    msg-group$ $@ dup IF
-	o { w^ group } 2dup msg-groups #@ d0<> IF
-	    group cell last# cell+ $+!
-	ELSE  group cell 2swap msg-groups #!  THEN
-    ELSE  2drop  THEN ;
-
-: chat-connect ( -- )
-    0 chat-keys $[]@ $A $A pk-connect !time
-    +resend-msg  greet +group ;
-
-: ?chat-connect ( -- )
-    BEGIN  0 chat-keys $[]@ pk-peek? 0= WHILE
-	    wait-chat  search-chat ?dup UNTIL  ELSE  0  THEN
-    ?dup-IF  >o rdrop  ELSE  10 ms chat-connect  THEN ;
-
-: chat-user ( -- )
-    ?chat-group ?chat-connect
-    o { w^ connect }
-    connect cell msg-group$ $@ msg-groups #!
-    ret+beacon group-chat ;
-
 : handle-chat ( char -- )
     '@' <> IF \ group chat
 	?nextarg drop
@@ -117,7 +65,8 @@ $20 value hash-size#
 	"" msg-group$ $@ msg-groups #!
 	dup 0<> IF  nick>chat  ELSE  2drop group-master on  THEN
     THEN
-    nicks>chat group-master @ IF  ?chat-group group-chat  ELSE  chat-user  THEN ;
+    nicks>chat group-master @ IF  ?chat-group ELSE  ?chat-user  THEN
+    group-chat ;
 
 \ commands for the command line user interface
 
@@ -353,12 +302,13 @@ synonym searchkey keysearch
     otr-mode on next-cmd ;
 
 : chat ( -- )
-    \U chat @user   to chat privately with a user
-    \U chat group@user   to chat with the chatgroup managed by user
-    \U chat group   to start a group chat (peers may connect)
+    \U chat @user1|group1@user1|group1 ... @usern|@groupn@usern|groupn
+    \G chat: @user:      to chat privately with a user
+    \G chat: group@user: to chat with the chatgroup managed by user
+    \G chat: group:      to start a group chat (peers may connect)
     \G chat: chat with an user, a group managed by an user, or start
-    \G your own group
-    get-me init-client announce-me
+    \G chat: your own group
+    announce
     ?peekarg IF  drop c@ handle-chat  THEN ;
 
 : chatlog ( -- )
@@ -373,7 +323,7 @@ synonym searchkey keysearch
 : invite ( -- )
     \U invite @user
     \G invite: send or accept an invitation to another user
-    get-me init-client announce-me nicks>chat 
+    announce nicks>chat 
     chat-keys [: 2dup n2o:pklookup send-invitation
       n2o:dispose-context ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 

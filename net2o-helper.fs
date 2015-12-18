@@ -118,7 +118,7 @@ event: ->do-beacon ( addr -- )
 : pk-lookup ( addr u -- )
     ['] pk:addme-fetch-host pk-query 0= !!host-notfound!! ;
 
-: pk-peek? ( addr u0 -- flag )  ['] c:fetch-id pk-query ;
+:noname ( pk u -- flag )  ['] c:fetch-id pk-query ; is pk-peek?
 
 User host$ \ check for this hostname
 
@@ -155,10 +155,6 @@ User host$ \ check for this hostname
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
     id dup .dht-host ['] insert-host? $[]map drop 2drop ;
-
-: search-connect ( key u -- o/0 )
-    0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context
-    nip nip  dup to connection ;
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup

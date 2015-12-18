@@ -15,9 +15,11 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-defer avalanche-to ( addr u o:context -- )
-defer pk-connect ( key u cmdlen datalen -- )
-defer addr-connect ( key+addr u cmdlen datalen -- )
+Defer avalanche-to ( addr u o:context -- )
+Defer pk-connect ( key u cmdlen datalen -- )
+Defer addr-connect ( key+addr u cmdlen datalen -- )
+Defer pk-peek? ( addr u0 -- flag )
+
 : avalanche-msg ( msg u1 -- )
     \G forward message to all next nodes of that message group
     { d: msg }
@@ -180,6 +182,13 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
 
 Defer msg:last
 
+: unique-con? ( o:con addr u -- flag )
+    bounds ?DO  I @ o = IF  false unloop  EXIT  THEN  cell +LOOP  true ;
+
+: +unique-con ( -- )
+    last# cell+ $@ unique-con?
+    IF  o { w^ group } group cell last# cell+ $+!  THEN ;
+
 scope{ net2o-base
 
 \g 
@@ -208,7 +217,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
     signed? !!signed!! $> >group
-    parent cell last# cell+ $+!
+    parent @ .+unique-con
     parent @ .wait-task @ ?dup-IF
 	<event parent @ elit, ->chat-connect event>  THEN ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
@@ -536,6 +545,70 @@ previous
     msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
     msg-group$ $@ last-chat# load-msgn ;
 
+: +group ( -- )
+    msg-group$ $@ dup IF
+	2dup msg-groups #@ d0<> IF
+	    +unique-con
+	ELSE  o { w^ group } group cell 2swap msg-groups #!  THEN
+    ELSE  2drop  THEN ;
+
+: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
+    cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
+    ELSE  EXIT  THEN
+    timeout-expired? IF
+	msg-group$ $@len IF
+	    pubkey $@ ['] left, send-avalanche .chat
+	THEN
+	n2o:dispose-context
+    THEN ;
+
+: +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
+
+: chat-connect ( -- )
+    0 chat-keys $[]@ $A $A pk-connect !time
+    +resend-msg  greet +group ;
+
+: key-ctrlbit ( -- n )
+    \G return a bit mask for the control key pressed
+    1 key dup $20 < >r lshift r> and ;
+
+: wait-key ( -- )
+    BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
+    and 0=  UNTIL ;
+
+: wait-chat ( -- )
+    chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
+	.key-id space ;] $[]map
+    ." is not online. press key to recheck."
+    [: 0 to connection -56 throw ;] is do-disconnect
+    [: false chat-keys [: keysize umin pubkey $@ key| str= or ;] $[]map
+	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
+    wait-key cr [: up@ wait-task ! ;] IS do-connect ;
+
+: last-chat-peer ( -- chat )
+    msg-group$ $@ msg-groups #@ dup cell- 0 max /string
+    IF  @  ELSE  drop 0  THEN ;
+
+: search-connect ( key u -- o/0 )
+    0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context
+    nip nip  dup to connection ;
+
+: search-peer ( -- chat )
+    false chat-keys
+    [: keysize umin rot dup 0= IF drop search-connect
+      ELSE  nip nip  THEN ;] $[]map ;
+
+: search-chat ( -- chat )
+    group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
+
+: ?chat-connect ( -- )
+    BEGIN  0 chat-keys $[]@ pk-peek? 0= WHILE
+	    wait-chat  search-chat ?dup UNTIL  ELSE  0  THEN
+    ?dup-IF  >o rdrop  ELSE  chat-connect  THEN ;
+
+: ?chat-user ( -- )
+    ?chat-group ?chat-connect +group ret+beacon ;
+
 also net2o-base
 : reconnect, ( group -- )
     cell+ $@ cell safe/string bounds ?DO
@@ -583,18 +656,6 @@ previous
 	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
 	    @ >o msg-context @ .avalanche-text o>
     REPEAT  drop 2drop leave-chats ;
-
-: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
-    cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
-    ELSE  EXIT  THEN
-    timeout-expired? IF
-	msg-group$ $@len IF
-	    pubkey $@ ['] left, send-avalanche .chat
-	THEN
-	n2o:dispose-context
-    THEN ;
-
-: +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
