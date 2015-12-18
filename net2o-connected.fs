@@ -19,13 +19,13 @@
 
 scope{ net2o-base
 
-reply-table $@ inherit-table context-table
+connect-table $@ inherit-table context-table
 
 \ generic functions
 \g 
 \g ### connection commands ###
 \g 
-$20 net2o: disconnect ( -- ) \g close connection
++net2o: disconnect ( -- ) \g close connection
     o 0= ?EXIT
     wait-task @ IF  <event o elit, ->disconnect wait-task @ event>
     ELSE  n2o:dispose-context  THEN  un-cmd ;

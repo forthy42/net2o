@@ -41,6 +41,8 @@ List of Commands
   reflection
 + $A nestsig ( $:cmd+sig -- )
   check sig+nest
++ $B secstring ( #string -- $:string )
+  secret string literal
 
 ### reply commands ###
 
@@ -62,81 +64,84 @@ List of Commands
   receive error message
 + $18 nest ( $:string -- )
   nested (self-encrypted) command
-+ $19 request-done ( ureq -- )
++ $19 token ( $:token n -- )
+  generic inspection token
+
+### connection generic commands ###
+
++ $20 request-done ( ureq -- )
   signal request is completed
-+ $1A token ( $:token n -- )
++ $21 set-cookie ( utimestamp -- )
+  cookies and round trip delays
++ $22 punch-load, ( $:string -- )
+  use for punch payload: nest it
++ $23 punch ( $:string -- )
+  punch NAT traversal hole
++ $24 punch-done ( -- )
+  punch received
 
 ### connection setup commands ###
 
-+ $20 tmpnest ( $:string -- )
++ $25 tmpnest ( $:string -- )
   nested (temporary encrypted) command
-+ $21 new-data ( addr addr u -- )
++ $26 new-data ( addr addr u -- )
   create new data mapping
-+ $22 new-code ( addr addr u -- )
++ $27 new-code ( addr addr u -- )
   crate new code mapping
-+ $23 set-cookie ( utimestamp -- )
-  cookie and round trip delay
-+ $24 store-key ( $:string -- )
++ $28 store-key ( $:string -- )
   store key
-+ $25 map-request ( addrs ucode udata -- )
++ $29 map-request ( addrs ucode udata -- )
   request mapping
-+ $26 set-tick ( uticks -- )
++ $2A set-tick ( uticks -- )
   adjust time
-+ $27 get-tick ( -- )
++ $2B get-tick ( -- )
   request time adjust
-+ $28 receive-key ( $:key -- )
++ $2C receive-key ( $:key -- )
   receive a key
-+ $29 receive-tmpkey ( $:key -- )
++ $2D receive-tmpkey ( $:key -- )
   receive emphemeral key
-+ $2A key-request ( -- )
++ $2E key-request ( -- )
   request a key
-+ $2B tmpkey-request ( -- )
++ $2F tmpkey-request ( -- )
   request ephemeral key
-+ $2C keypair ( $:yourkey $:mykey -- )
++ $30 keypair ( $:yourkey $:mykey -- )
   select a pubkey
-+ $2D update-key ( -- )
++ $31 update-key ( -- )
   update secrets
-+ $2E gen-ivs ( $:string -- )
++ $32 gen-ivs ( $:string -- )
   generate IVs
-+ $2F punch ( $:string -- )
-  punch NAT traversal hole
-+ $30 punch-load, ( $:string -- )
-  use for punch payload: nest it
-+ $31 punch-done ( -- )
-  punch received
-+ $32 punch? ( -- )
++ $33 punch? ( -- )
   Request punch addresses
-  Seed and gen all IVS
-+ $33 >time-offset ( n -- )
++ $34 >time-offset ( n -- )
   set time offset
-+ $34 context ( -- )
++ $35 context ( -- )
   make context active
-+ $35 gen-reply ( -- )
++ $36 gen-reply ( -- )
   generate a key request reply
-+ $36 gen-punch-reply ( -- )
++ $37 gen-punch-reply ( -- )
   generate a punch request reply
-+ $37 oneshot-tmpkey ( $:tmpkey -- )
++ $38 oneshot-tmpkey ( $:tmpkey -- )
   oneshot tmpkey
-+ $38 invite ( $:nick+sig -- )
++ $39 invite ( $:nick+sig -- )
   invite someone
 
 ### connection commands ###
 
-+ $20 disconnect ( -- )
++ $25 disconnect ( -- )
   close connection
-+ $21 set-ip ( $:string -- )
++ $26 set-ip ( $:string -- )
   set address information
-+ $22 get-ip ( -- )
++ $27 get-ip ( -- )
   request address information
-+ $23 set-blocksize ( n -- )
++ $28 set-blocksize ( n -- )
   set blocksize to 2^n
-+ $24 set-blockalign ( n -- )
++ $29 set-blockalign ( n -- )
   set block alignment to 2^n
-+ $25 close-all ( -- )
++ $2A close-all ( -- )
   close all files
-+ $26 set-top ( utop flag -- )
++ $2B set-top ( utop flag -- )
   set top, flag is true when all data is sent
-+ $27 slurp ( -- )
++ $2C slurp ( -- )
   slurp in tracked files
 
 ### file commands ###
@@ -201,7 +206,7 @@ List of Commands
 
 ### log commands ###
 
-+ $1A log-token ( $:token n -- )
++ $19 log-token ( $:token n -- )
 + $20 emit ( utf8 -- )
   emit character on server log
 + $21 type ( $:string -- )
@@ -224,22 +229,21 @@ List of Commands
 + $11 privkey ( $:string -- )
   private key
 + $12 keytype ( n -- )
-key type (0: anon, 1: user, 2: group)
+  key type (0: anon, 1: user, 2: group)
 + $13 keynick ( $:string -- )
-key nick
+  key nick
 + $14 keyprofile ( $:string -- )
-key profile (hash of a resource)
+  key profile (hash of a resource)
 + $15 keymask ( x -- )
-key access right mask
+  key access right mask
 + $16 keypsk ( $:string -- )
-preshared key, used for DHT encryption
+  preshared key, used for DHT encryption
 + $17 +keysig ( $:string -- )
-add a key signature
+  add a key signature
 + $18 keyimport ( n -- )
-  get the annotations with signature
-  get the annotations with signature
-  get my nick with signature
-  get my nick with signature
++ $19 rskkey ( $:string --- )
+  revoke key, temporarily stored
++ $1A keypet ( $:string -- )
   read a nested key into sample-key
 
 ### address commands ###
@@ -270,27 +274,38 @@ add a key signature
 ### dht commands ###
 
 + $33 dht-id ( $:string -- o:o )
-set dht id for further operations on it
+  set DHT id for further operations on it
 + $20 dht-host+ ( $:string -- )
+  add host to DHT
 + $21 dht-host- ( $:string -- )
+  delete host from DHT
 + $22 dht-tags+ ( $:string -- )
+  add tags to DHT
 + $23 dht-tags- ( $:string -- )
+  delete tags from DHT
 + $24 dht-owner+ ( $:string -- )
+  add owner to DHT
 + $25 dht-owner- ( $:string -- )
+  delete ownr from DHT
 + $26 dht-host? ( -- )
+  query DHT host
 + $27 dht-tags? ( -- )
+  query DHT tags
 + $28 dht-owner? ( -- )
+  query DHT owner
 
 ### vault commands ###
 
 + $20 dhe ( $:pubkey -- )
   start diffie hellman exchange
 + $21 vault-keys ( $:keys -- )
+  vault keys can be opened with the dhe secret; each key is IV+session key+checksum
 + $22 vault-file ( $:content -- )
+  this is the actual content of the vault
 + $23 vault-sig ( $:sig -- )
+  the signature of the vault, using the keyed hash over the file
 + $24 vault-crypt ( n -- )
   set encryption mode and key wrap size
-  forward message to all next nodes of that message group
 
 ### message commands ###
 
@@ -300,7 +315,6 @@ set dht id for further operations on it
   start message
 + $21 msg-group ( $:group -- )
   specify a chat group
-  already a message there
 + $22 msg-join ( $:group -- )
   join a chat group
 + $23 msg-leave ( $:group -- )
@@ -315,7 +329,7 @@ set dht id for further operations on it
   specify an object, e.g. an image
 + $28 msg-action ( $:msg -- )
   specify message string
-+ $29 msg-reconnect ( $:pubkey -- )
++ $29 msg-reconnect ( $:pubkey+addr -- )
   rewire distribution tree
 + $2A msg-last? ( tick -- )
 + $2B msg-coord ( $:gps -- )

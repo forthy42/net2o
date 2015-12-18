@@ -19,7 +19,7 @@ defer avalanche-to ( addr u o:context -- )
 defer pk-connect ( key u cmdlen datalen -- )
 defer addr-connect ( key+addr u cmdlen datalen -- )
 : avalanche-msg ( msg u1 -- )
-    \g forward message to all next nodes of that message group
+    \G forward message to all next nodes of that message group
     { d: msg }
     last# cell+ $@ dup IF
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
@@ -264,10 +264,10 @@ set-current
       ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
 
 : <msg ( -- )
-    \g start a msg block
+    \G start a msg block
     msg sign[ msg-start ;
 : msg> ( -- )
-    \g end a msg block by adding a signature and the group (if any)
+    \G end a msg block by adding a signature and the group (if any)
     msg-group$ $@ dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
     IF  $, msg-group  ELSE  2drop  THEN
     now>never ]pksign ;

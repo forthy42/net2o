@@ -643,7 +643,6 @@ comp: :, previous ;
 : ]nest$!  ( addr -- )
     neststart# @ >r cmd>nest rot $!
     r> fwd# - 1- cmdbuf$ nip - -cmdbuf ;
-
 }scope
 
 [IFDEF] 64bit
@@ -680,24 +679,8 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
     remote? off throw ;
 +net2o: nest ( $:string -- ) \g nested (self-encrypted) command
     $> cmdnest ;
-+net2o: request-done ( ureq -- ) 64>n \g signal request is completed
-    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
-+net2o: set-cookie ( utimestamp -- ) \g cookies and round trip delays
-    own-crypt? IF  trace( ." owncrypt " )
-	64dup cookie>context?
-	IF  trace( ." context " forth:cr ) >o rdrop  o to connection
-	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
-	    EXIT
-	ELSE \ just check if timeout didn't expire
-	    trace( ." ticker " forth:cr )
-	    64dup context-ticker 64!
-	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
-	THEN
-    ELSE  64drop  THEN  un-cmd ;
-
 \ inspection
-
-+net2o: token ( $:token n -- ) 64drop $> 2drop ; \ stub
++net2o: token ( $:token n -- ) 64drop $> 2drop ; \g generic inspection token
 
 :noname ( start -- )
     token-table $@ 2 pick cells safe/string bounds U+DO

@@ -59,7 +59,7 @@ $20 value hash-size#
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
 : key-ctrlbit ( -- n )
-    \g return a bit mask for the control key pressed
+    \G return a bit mask for the control key pressed
     1 key dup $20 < >r lshift r> and ;
 
 : wait-key ( -- )

@@ -858,10 +858,10 @@ Defer new-addr
 
 : net2o:punch ( addr u -- )
     o IF
-	new-addr dup >r
+	new-addr dup { w^ punch-addr }
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
 	addr>sock
-	r>  dup { w^ punch-addr } punch-addr cell punch-addrs $+!
+	punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
 
 \ send chunk

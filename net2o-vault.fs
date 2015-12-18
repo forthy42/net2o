@@ -45,6 +45,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
     v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
+    \g vault keys can be opened with the dhe secret; each key is IV+session key+checksum
     v-mode @ dup $FF and state# umax { vk# } 8 rshift $FF and >crypt
     $> bounds ?DO
 	I' I - vk# u>= IF
@@ -58,6 +59,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	THEN
     vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
+    \g this is the actual content of the vault
     v-mode>crypt2
     no-key state# >crypt-source  v-key state# >crypt-key
     key( ." vkey: " v-key state# 85type forth:cr )
@@ -65,6 +67,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     c:key@ v-kstate c:key# move
     0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
+    \g the signature of the vault, using the keyed hash over the file
     key( ." vkey: " v-key state# 85type forth:cr )
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2

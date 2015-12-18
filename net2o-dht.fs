@@ -186,20 +186,26 @@ scope{ net2o-base
 \g 
 
 $33 net2o: dht-id ( $:string -- o:o )
+    \g set DHT id for further operations on it
     perm-mask @ perm%dht and 0= !!dht-perm!!
     $> >d#id dht( ." set dht to: " dup hex. forth:cr ) n:>o ;
-\g set dht id for further operations on it
 dht-table >table
 
 reply-table $@ inherit-table dht-table
 
 :noname dht-hash $@ $, dht-id ; dht-class to start-req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
+    \g add host to DHT
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
+    \g delete host from DHT
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
+    \g add tags to DHT
 +net2o: dht-tags- ( $:string -- ) $> d#tags- ;
+    \g delete tags from DHT
 +net2o: dht-owner+ ( $:string -- ) $> d#owner+ ;
+    \g add owner to DHT
 +net2o: dht-owner- ( $:string -- ) $> d#owner- ;
+    \g delete ownr from DHT
 
 set-current
 
@@ -248,8 +254,11 @@ end-class dht-file-class
 get-current definitions
 
 +net2o: dht-host? ( -- ) d#host? ;
+    \g query DHT host
 +net2o: dht-tags? ( -- ) d#tags? ;
+    \g query DHT tags
 +net2o: dht-owner? ( -- ) d#owner? ;
+    \g query DHT owner
 \ +net2o: dht-open ( fid -- ) 64>n d#open ;
 \ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
 

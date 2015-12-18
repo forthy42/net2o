@@ -18,14 +18,52 @@
 Defer >invitations
 
 scope{ net2o-base
+\ nat traversal functions
 
-reply-table $@ inherit-table setup-table
+reply-table $@ inherit-table connect-table
+
+\g 
+\g ### connection generic commands ###
+\g 
+
+$20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
+    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
++net2o: set-cookie ( utimestamp -- ) \g cookies and round trip delays
+    own-crypt? IF  trace( ." owncrypt " )
+	64dup cookie>context?
+	IF  trace( ." context " forth:cr ) >o rdrop  o to connection
+	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
+	    EXIT
+	ELSE \ just check if timeout didn't expire
+	    trace( ." ticker " forth:cr )
+	    64dup context-ticker 64!
+	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
+	THEN
+    ELSE  64drop  THEN  un-cmd ;
++net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
+    $> dup 0= IF  2drop punch-load $off  ELSE  punch-load $!  THEN
+    punch-addrs $off ;
++net2o: punch ( $:string -- ) \g punch NAT traversal hole
+    $> net2o:punch ;
++net2o: punch-done ( -- ) \g punch received
+    o 0<> own-crypt? and IF
+	return-addr return-address $10 move  resend0 $off
+	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
+    ELSE
+	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
+    THEN ;
+
+}scope
+
+scope{ net2o-base
+
+connect-table $@ inherit-table setup-table
 
 \g 
 \g ### connection setup commands ###
 \g 
 
-$20 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
++net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     $> cmdtmpnest ;
 
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest 2drop tmpnest ;
@@ -94,20 +132,6 @@ net2o-base
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> ivs-strings receive-ivs ;
 
-\ nat traversal functions
-
-+net2o: punch ( $:string -- ) \g punch NAT traversal hole
-    $> buf-state 2@ 2>r net2o:punch 2r> buf-state 2! ;
-+net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
-    $> punch-load $! ;
-+net2o: punch-done ( -- ) \g punch received
-    o 0<> own-crypt? and IF
-	return-addr return-address $10 move  resend0 $off
-	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
-    ELSE
-	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
-    THEN ;
-
 : cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
 : request, ( -- )  next-request #request, ;
@@ -129,7 +153,7 @@ net2o-base
 
 \ create commands to send back
 
-: all-ivs ( -- ) \g Seed and gen all IVS
+: all-ivs ( -- ) \G Seed and gen all IVS
     state# rng$ 2dup sec$, gen-ivs ivs-strings send-ivs ;
 
 +net2o: >time-offset ( n -- ) \g set time offset

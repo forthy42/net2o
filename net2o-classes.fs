@@ -36,6 +36,7 @@ Variable cmd-table
 Variable reply-table
 Variable log-table
 Variable setup-table
+Variable connect-table
 Variable ack-table
 Variable msg-table
 Variable term-table

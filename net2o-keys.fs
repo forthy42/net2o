@@ -264,8 +264,8 @@ Variable sim-nick!
 : >perm-mod ( permand permor -- permand' permor )
     swap dup 0= IF  drop dup invert  THEN swap ;
 : >perm ( addr u -- permand permor )
-    \g parse permissions: + adds, - removes permissions,
-    \g no modifier sets permissons.
+    \G parse permissions: + adds, - removes permissions,
+    \G no modifier sets permissons.
     0 0 ['] or { xt }
     2swap bounds ?DO
 	I c@ case
@@ -348,11 +348,11 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
 
 : key>nick ( addrkey u1 -- nick u2 )
-    \g convert key to nick
+    \G convert key to nick
     key| key-table #@ 0= IF  drop 0.  EXIT  THEN
     cell+ .ke-nick $@ ;
 : key>key ( addrkey u1 -- key u2 )
-    \g expand key to full size and check if we know it
+    \G expand key to full size and check if we know it
     key| key-table #@ 0= IF  drop 0.  EXIT  THEN
     cell+ .ke-pk $@ ;
 
@@ -475,18 +475,18 @@ $11 net2o: privkey ( $:string -- )
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
     ke-sk sec! +seckey ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
-\g key type (0: anon, 1: user, 2: group)
+    \g key type (0: anon, 1: user, 2: group)
 +net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $!
     nick! ;
-\g key nick
+    \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
-\g key profile (hash of a resource)
+    \g key profile (hash of a resource)
 +net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n ke-mask ! ;
-\g key access right mask
+    \g key access right mask
 +net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> ke-psk sec! ;
-\g preshared key, used for DHT encryption
+    \g preshared key, used for DHT encryption
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
-\g add a key signature
+    \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
     pw-level# 0< IF  64>n import#untrusted umin ke-import !
     ELSE  64drop  THEN ;
@@ -605,20 +605,20 @@ previous
       ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
     end:key ;
 : keynick$ ( o:key -- addr u )
-    \g get the annotations with signature
+    \G get the annotations with signature
     ['] pack-core gen-cmd$ 2drop
     ke-selfsig $@ tmp$ $+! tmp$ $@ ;
 : keypk2nick$ ( o:key -- addr u )
-    \g get the annotations with signature
+    \G get the annotations with signature
     ['] pack-core gen-cmd$ 2drop
     ke-pk $@ tmp$ $+! ke-selfsig $@ tmp$ $+! tmp$ $@ ;
 : mynick-key ( -- o )
     pkc keysize key-table #@ drop cell+ ;
 : mynick$ ( -- addr u )
-    \g get my nick with signature
+    \G get my nick with signature
     mynick-key .keynick$ ;
 : mypk2nick$ ( o:key -- addr u )
-    \g get my nick with signature
+    \G get my nick with signature
     mynick-key .keypk2nick$ ;
 : key-sign ( o:key -- o:key )
     ['] pack-core gen-cmd$
