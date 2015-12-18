@@ -31,6 +31,7 @@ Variable group-master
 Variable msg-logs
 Variable otr-mode
 User replay-mode
+User skip-sig?
 
 : ?msg-context ( -- o )
     msg-context @ dup 0= IF
@@ -59,7 +60,9 @@ User replay-mode
 : load-msg ( group u -- )
     >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = ?EXIT
-    replay-mode on  vault>msg  decrypt-file  replay-mode off ;
+    replay-mode on  skip-sig? on
+    vault>msg  decrypt-file
+    replay-mode off  skip-sig? off ;
 
 : +msg-log ( addr u -- flag )
     msg-group$ $@ msg-logs #@ d0= IF
@@ -247,7 +250,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
 ' msg msg-class to start-req
-' pk-sig? msg-class to nest-sig
+:noname skip-sig? @ IF check-date ELSE pk-sig? THEN ; msg-class to nest-sig
 
 gen-table $freeze
 ' context-table is gen-table
@@ -525,9 +528,12 @@ previous
 
 50 Value last-chat#
 
+: load-msgn ( addr u n -- )
+    >r 2dup load-msg r> display-lastn ;
+
 : ?chat-group ( -- )
     msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
-    msg-group$ $@ load-msg  msg-group$ $@ last-chat# display-lastn ;
+    msg-group$ $@ last-chat# load-msgn ;
 
 also net2o-base
 : reconnect, ( group -- )

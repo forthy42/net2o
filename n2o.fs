@@ -367,8 +367,8 @@ synonym searchkey keysearch
     get-me
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
-	    ."  ===" cr msg-group$ $! msg-group$ $@ load-msg
-	    msg-group$ $@ [ -1 1 rshift cell/ ]l display-lastn REPEAT ;
+	    ."  ===" cr msg-group$ $!
+	    msg-group$ $@ [ -1 1 rshift cell/ ]l load-msgn REPEAT ;
 
 : invite ( -- )
     \U invite @user
