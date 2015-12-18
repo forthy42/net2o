@@ -52,15 +52,14 @@ User replay-mode
     [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
 
-: vault>msg ( -- )  replay-mode on
+: vault>msg ( -- )
     [: n2o:new-msg >o parent off do-cmd-loop dispose o> ;]
     is write-decrypt ;
 
 : load-msg ( group u -- )
     >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = ?EXIT
-    vault>msg decrypt-file
-    replay-mode off ;
+    replay-mode on  vault>msg  decrypt-file  replay-mode off ;
 
 : +msg-log ( addr u -- flag )
     msg-group$ $@ msg-logs #@ d0= IF
@@ -93,14 +92,22 @@ Sema queue-sema
 
 \ events
 
+: msg-display ( addr u -- )
+    sigpksize# - 2dup + sigpksize# >$  c-state off do-nestsig ;
+
 : do-msg-nestsig ( -- )
     msg@ 2dup +msg-log IF
-	sigpksize# - 2dup + sigpksize# >$  c-state off
-	do-nestsig
-	replay-mode @ 0=
-	IF  msg-notify  ELSE  notify-  THEN
+	replay-mode @ 0= IF
+	    msg-display msg-notify
+	ELSE  2drop  THEN
     ELSE  2drop  THEN
     msg- ;
+
+: display-lastn ( addr u n -- )
+    n2o:new-msg >o parent off
+    cells >r msg-logs #@ dup r> - 0 max /string bounds ?DO
+	I $@ msg-display
+    cell +LOOP   dispose o> ;
 
 : >group ( addr u -- )
     2dup msg-groups #@ d0=
@@ -131,7 +138,7 @@ event: ->chat-connect ( o -- )
 event: ->chat-reconnect ( group o -- )
     to last# .reconnect-chat ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
-    >o do-msg-nestsig o> ctrl L inskey ;
+    .do-msg-nestsig  ctrl L inskey ;
 
 \ coordinates
 
@@ -516,9 +523,11 @@ also net2o-base scope: chat-/cmds
 
 previous
 
+50 Value last-chat#
+
 : ?chat-group ( -- )
     msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
-    msg-group$ $@ load-msg ;
+    msg-group$ $@ load-msg  msg-group$ $@ last-chat# display-lastn ;
 
 also net2o-base
 : reconnect, ( group -- )
