@@ -325,7 +325,7 @@ synonym searchkey keysearch
 : announce ( -- )
     \U announce
     \G announce: Only announce ID
-    get-me announce-me ;
+    get-me init-client announce-me ;
 
 \ chat mode
 
