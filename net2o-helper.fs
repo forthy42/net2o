@@ -112,7 +112,7 @@ event: ->do-beacon ( addr -- )
 		connect( >o ke-pk $@ ." replace key: " 2dup 85type cr o o> )
 		>r 2dup c:fetch-id r> >o  REPEAT  THEN  d0<> ;
 
-: pk-query ( addr u xt -- ) >r
+: pk-query ( addr u xt -- flag ) >r
     dht-connect  2dup r> execute  replace-loop  disconnect-me ;
 
 : pk-lookup ( addr u -- )

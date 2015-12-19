@@ -58,15 +58,8 @@ $20 value hash-size#
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
-: handle-chat ( char -- )
-    '@' <> IF \ group chat
-	?nextarg drop
-	'@' $split 2swap msg-group$ $!
-	"" msg-group$ $@ msg-groups #!
-	dup 0<> IF  nick>chat  ELSE  2drop group-master on  THEN
-    THEN
-    nicks>chat group-master @ IF  ?chat-group ELSE  ?chat-user  THEN
-    group-chat ;
+: handle-chat ( -- )
+    chat-connects ?wait-chat do-chat ;
 
 \ commands for the command line user interface
 
@@ -148,7 +141,7 @@ scope{ n2o
     \G perm: = sets defaults, add or subtract permissions afterwards
     \G perm: no prefix for setting permissions exactly
     get-me
-    BEGIN  chat-keys $[]off  nicks>chat ?nextarg WHILE  >perm
+    BEGIN  chat-keys $[]off  @nicks>chat ?nextarg WHILE  >perm
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
 	    $[]map 2drop  REPEAT
     save-keys ;
@@ -302,14 +295,13 @@ synonym searchkey keysearch
     otr-mode on next-cmd ;
 
 : chat ( -- )
-    \U chat @user1|group1@user1|group1 ... @usern|@groupn@usern|groupn
+    \U chat @user1|group1@user1|group1 ... @usern|groupn@usern|groupn
     \G chat: @user:      to chat privately with a user
     \G chat: group@user: to chat with the chatgroup managed by user
     \G chat: group:      to start a group chat (peers may connect)
     \G chat: chat with an user, a group managed by an user, or start
     \G chat: your own group
-    announce
-    ?peekarg IF  drop c@ handle-chat  THEN ;
+    announce nicks>chat handle-chat ;
 
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
@@ -323,7 +315,7 @@ synonym searchkey keysearch
 : invite ( -- )
     \U invite @user
     \G invite: send or accept an invitation to another user
-    announce nicks>chat 
+    announce @nicks>chat 
     chat-keys [: 2dup n2o:pklookup send-invitation
       n2o:dispose-context ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 
@@ -379,13 +371,13 @@ synonym searchkey keysearch
 
 }scope
 
-\ user friendly doerror
+\ user friendly, but way less informative doerror
 
 :noname [: <err> .error-string <default> cr ;] do-debug ; is DoError
 
 \ allow issuing commands during chat
 
-scope{ chat-/cmds
+scope{ /chat
 
 : n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;

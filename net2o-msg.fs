@@ -122,13 +122,14 @@ Defer silent-join
 
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
+: +unique-con ( -- ) o last# cell+ +unique$ ;
+
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
 	save-mem peer-  over >r
 	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
-	0 >o last# >r $A $A addr-connect o { w^ con }
-	o to connection r> to last# silent-join o>
-	con cell last# cell+ $+!
+	0 >o last# >r $A $A addr-connect
+	o to connection r> to last# silent-join +unique-con o>
 	r> free throw
     ELSE  2drop  THEN ;
 
@@ -181,8 +182,6 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
     drop ;
 
 Defer msg:last
-
-: +unique-con ( -- ) o last# cell+ +unique$ ;
 
 scope{ net2o-base
 
@@ -372,11 +371,24 @@ previous
 
 Variable chat-keys
 
-: nick>chat ( addr u -- )
+: @/ ( addr u -- addr1 u1 addr2 u2 ) '@' $split ;
+: @/2 ( addr u -- addr2 u2 ) '@' $split 2nip ;
+
+: @nick>chat ( addr u -- )
     host.nick>pk dup 0= !!no-nick!! chat-keys $+[]! ;
 
+: @nicks>chat ( -- )
+    ['] @nick>chat @arg-loop ;
+
+: nick>chat ( addr u -- )
+    @/ dup IF
+	host.nick>pk dup 0= !!no-nick!!
+	[: 2swap type ." @" type ;] $tmp
+    ELSE  2drop  THEN
+    chat-keys $+[]! ;
+
 : nicks>chat ( -- )
-    ['] nick>chat @arg-loop ;
+    ['] nick>chat arg-loop ;
 
 \ debugging aids for classes
 
@@ -443,7 +455,7 @@ scope: notify-cmds
 : .chathelp ( addr u -- addr u )
     ." /" source 7 /string type cr ;
 
-also net2o-base scope: chat-/cmds
+also net2o-base scope: /chat
 
 : me ( addr u -- )
     \U me <action>
@@ -516,7 +528,7 @@ also net2o-base scope: chat-/cmds
 
 : do-chat-cmds ( addr u -- )
     1 /string bl $split 2swap
-    2dup ['] chat-/cmds >body find-name-in
+    2dup ['] /chat >body find-name-in
     ?dup-IF  nip nip name>int execute
     ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
 
@@ -537,7 +549,7 @@ previous
     >r 2dup load-msg r> display-lastn ;
 
 : ?chat-group ( -- )
-    msg-group$ $@len 0= IF  0 chat-keys $[]@ key| msg-group$ $!  THEN
+    msg-group$ $@len 0= IF  0 chat-keys $[]@ 1 /string key| msg-group$ $!  THEN
     msg-group$ $@ last-chat# load-msgn ;
 
 : +group ( -- )
@@ -559,9 +571,8 @@ previous
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
-: chat-connect ( -- )
-    0 chat-keys $[]@ $A $A pk-connect !time
-    +resend-msg  greet +group ;
+: chat-connect ( addr u -- )
+    $A $A pk-connect +resend-msg  greet +group ret+beacon ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
@@ -572,11 +583,12 @@ previous
     and 0=  UNTIL ;
 
 : wait-chat ( -- )
-    chat-keys [: 2dup keysize2 /string tuck <info> type IF '.' emit  THEN
-	.key-id space ;] $[]map
+    chat-keys [: @/2
+      2dup keysize2 /string tuck <info> type IF '.' emit  THEN
+      .key-id space ;] $[]map
     ." is not online. press key to recheck."
     [: 0 to connection -56 throw ;] is do-disconnect
-    [: false chat-keys [: keysize umin pubkey $@ key| str= or ;] $[]map
+    [: false chat-keys [: @/2 key| pubkey $@ key| str= or ;] $[]map
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
     wait-key cr [: up@ wait-task ! ;] IS do-connect ;
 
@@ -590,19 +602,20 @@ previous
 
 : search-peer ( -- chat )
     false chat-keys
-    [: keysize umin rot dup 0= IF drop search-connect
+    [: @/2 key| rot dup 0= IF drop search-connect
       ELSE  nip nip  THEN ;] $[]map ;
 
 : search-chat ( -- chat )
     group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
 
-: ?chat-connect ( -- )
-    BEGIN  0 chat-keys $[]@ pk-peek? 0= WHILE
-	    wait-chat  search-chat ?dup UNTIL  ELSE  0  THEN
-    ?dup-IF  >o rdrop  ELSE  chat-connect  THEN ;
+: chat-connects ( -- )
+    chat-keys [:
+      @/ 2swap tuck msg-group$ $!
+      0= IF  2dup key| msg-group$ $!  THEN \ 1:1 chat-group=key
+      dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
+      2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
-: ?chat-user ( -- )
-    ?chat-group ?chat-connect +group ret+beacon ;
+: ?wait-chat ( -- ) 0. /chat:chats ; \ stub
 
 also net2o-base
 : reconnect, ( group -- )
@@ -644,7 +657,7 @@ previous
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;
 
-: group-chat ( -- ) chat-entry \ ['] cmd( >body on
+: do-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= 0= >r
