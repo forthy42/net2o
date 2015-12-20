@@ -4,7 +4,7 @@ echo "This script builds net2o from scratch"
 
 GFORTH=gforth-0.7.9_20151126
 
-if [ $(uname -o) = Cygwin ]
+if [ "$(uname -o)" = "Cygwin" ]
 then
     CONFOPT="--prefix=/usr $*"
 else
@@ -48,7 +48,7 @@ function build {
 }
 function build-clean {
     pname=$1
-    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make clean && make && sudo make install)
+    (cd $pname; ./autogen.sh $CONFOPT && ./configure $CONFOPT && make clean && make && sudo make install)
 }
 
 # get net2o itself
@@ -82,7 +82,7 @@ do
 done
 
 # make sure libraries are found
-sudo /sbin/ldconfig
+test "$(uname -o)" = "Cygwin" || sudo /sbin/ldconfig
 
 # we test for an existing Gforth that can load net2o.fs
 # if the snapshot doesn't, try the git version
