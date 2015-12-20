@@ -24,13 +24,14 @@ ustack nest-stack
 
 \ command buffers
 
+User buf-state cell uallot drop
+User buf-dump  cell uallot drop
+
 user-o cmdbuf-o
 
 object class
     cell uvar cmdbuf#
     cell uvar cmd-reply-xt
-    2 cells uvar buf-state
-    2 cells uvar buf-dump
 
     umethod cmdlock
     umethod cmdbuf$

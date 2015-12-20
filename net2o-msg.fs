@@ -333,14 +333,16 @@ previous
 
 $200 Constant maxmsg#
 
+: xclear ( n -- )
+    1+ dup xback-restore dup spaces xback-restore ;
+
 : get-input-line ( -- addr u )  history >r  0 to history
     BEGIN  pad maxmsg# ['] accept catch
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
 	IF    drop 2drop "/bye"
 	ELSE
 	    dup 0= IF
-		drop dup 1+ xback-restore dup 1+ spaces dup 1+ xback-restore
-		pad swap
+		drop dup xclear pad swap
 	    ELSE
 		DoError drop 0  THEN
 	THEN
@@ -533,7 +535,6 @@ also net2o-base scope: /chat
     ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
 
 : avalanche-text ( addr u -- )
-    over c@ '/' = IF  do-chat-cmds  EXIT  THEN
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
 		  bl $split 2swap 1 /string ':' -skip nick>pk \ 0. if no nick
 		  2dup d0= IF  2drop 2drop oaddr ou true
@@ -582,9 +583,12 @@ previous
     BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
     and 0=  UNTIL ;
 
+: chats# ( -- n ) 0 msg-groups
+    [: dup $@len keysize < IF  drop 1  ELSE  cell+ $[]# THEN  + ;] #map ;
+
 : wait-chat ( -- )
-    chat-keys [: @/2
-      2dup keysize2 /string tuck <info> type IF '.' emit  THEN
+    chat-keys [: @/2 dup 0= IF  2drop  EXIT  THEN
+      2dup keysize2 safe/string tuck <info> type IF '.' emit  THEN
       .key-id space ;] $[]map
     ." is not online. press key to recheck."
     [: 0 to connection -56 throw ;] is do-disconnect
@@ -615,7 +619,8 @@ previous
       dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
-: ?wait-chat ( -- ) 0. /chat:chats ; \ stub
+: ?wait-chat ( -- ) 0. /chat:chats
+    BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT ; \ stub
 
 also net2o-base
 : reconnect, ( group -- )
@@ -651,19 +656,21 @@ previous
     ret-beacon disconnect-me o>  cell +LOOP ;
 
 : leave-chat ( group -- )
-    dup send-reconnect disconnect-group
-\    disconnect-all
-;
+    dup send-reconnect disconnect-group ;
+
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;
 
 : do-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
-	2dup "/bye" str= 0= >r
-	msg-group$ $@ msg-groups #@ 0> r> and  WHILE
-	    @ >o msg-context @ .avalanche-text o>
-    REPEAT  drop 2drop leave-chats ;
+	2dup "/bye" str= 0= WHILE
+	    over c@ '/' = IF  do-chat-cmds  ELSE
+		msg-group$ $@ msg-groups #@ 0> IF
+		    @ >o msg-context @ .avalanche-text o>
+		ELSE  drop  nip xclear  THEN
+	    THEN
+    REPEAT  2drop leave-chats ;
 
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
