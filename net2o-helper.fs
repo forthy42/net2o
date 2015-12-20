@@ -128,14 +128,14 @@ User host$ \ check for this hostname
 : host= ( o -- flag )
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
-: insert-addr ( o -- )
+:noname ( o -- )
     connect( ." check addr: " dup .addr cr )
     [: check-addr1 0= IF  2drop  EXIT  THEN
 	insert-address temp-addr ins-dest
 	connect( ." insert host: " temp-addr .addr-path cr )
 	ret-addr $10 0 skip nip 0= IF
 	    temp-addr ret-addr $10 move
-	THEN ;] addr>sock ;
+	THEN ;] addr>sock ; is insert-addr
 
 : insert-addr$ ( addr u -- )
     new-addr dup insert-addr .n2o:dispose-addr ;

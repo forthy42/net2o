@@ -854,13 +854,18 @@ Defer new-addr
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
     punch-load $@ punch-reply ;
 
-: net2o:punch ( addr u -- )
+: net2o:punch ( o:connection addr u -- )
     o IF
 	new-addr dup { w^ punch-addr }
 	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
 	addr>sock
 	punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
+
+: ping-addrs ( o:connection -- )
+    punch-addrs $@ bounds ?DO
+	I @ ['] ping-addr1 addr>sock
+    cell +LOOP ;
 
 \ send chunk
 
