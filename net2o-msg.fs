@@ -527,15 +527,12 @@ also net2o-base scope: /chat
     ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
     THEN ;
 
-: renat ( addr u -- ) 2drop
-    msg-groups [:
-      cell+ $@ bounds ?DO
-	  I @ >o ping-addrs  ['] net2o-base:nop punch-done-xt !
-	  ret-addr $10 erase  0 punch-addrs $[] @ insert-addr
-	  o to connection
-	  net2o-code gen-punchload gen-punch end-code o>
-      cell +LOOP
-    ;] #map ;
+: beacons ( addr u -- ) 2drop ." === beacons ===" forth:cr
+    beacons [: dup $@ .address space
+      cell+ $@ over 64@ .ticks space
+      1 64s safe/string bounds ?DO
+	  I @ .name
+      cell +LOOP forth:cr ;] #map ;
 
 }scope
 
