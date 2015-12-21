@@ -19,7 +19,6 @@ Defer avalanche-to ( addr u o:context -- )
 Defer pk-connect ( key u cmdlen datalen -- )
 Defer addr-connect ( key+addr u cmdlen datalen -- )
 Defer pk-peek? ( addr u0 -- flag )
-Defer insert-addr ( o -- )
 
 : avalanche-msg ( msg u1 -- )
     \G forward message to all next nodes of that message group
@@ -526,6 +525,8 @@ also net2o-base scope: /chat
 	name>int execute
     ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
     THEN ;
+
+: renat ( addr u -- ) 2drop renat ;
 
 : beacons ( addr u -- ) 2drop ." === beacons ===" forth:cr
     beacons [: dup $@ .address space
