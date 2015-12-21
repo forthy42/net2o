@@ -117,9 +117,10 @@ end-class msg-class
 
 cmd-class class
     \ callbacks
-    field: timeout-xt \ callback for timeout
-    field: setip-xt   \ callback for set-ip
-    field: ack-xt     \ callback for acknowledge
+    field: timeout-xt    \ callback for timeout
+    field: setip-xt      \ callback for set-ip
+    field: ack-xt        \ callback for acknowledge
+    field: punch-done-xt \ callback for NAT traversal ok
     \ maps for data and code transfer
     0 +field start-maps
     field: code-map

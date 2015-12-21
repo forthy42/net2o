@@ -34,9 +34,6 @@ here
 xc-vector @ cell- dup @ tuck - here swap dup allot move
 , here 0 , Constant utf-8*
 
-: *-width ( addr u -- n )
-    0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
-
 xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
 
 : emit-pw* ( n -- )

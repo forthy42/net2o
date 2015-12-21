@@ -530,7 +530,7 @@ also net2o-base scope: /chat
 : renat ( addr u -- ) 2drop
     msg-groups [:
       cell+ $@ bounds ?DO
-	  I @ >o ping-addrs
+	  I @ >o ping-addrs  ['] net2o-base:nop punch-done-xt !
 	  ret-addr $10 erase  0 punch-addrs $[] @ insert-addr
 	  o to connection
 	  net2o-code gen-punchload gen-punch end-code o>

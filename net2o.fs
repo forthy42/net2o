@@ -368,6 +368,7 @@ UValue connection
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
+    ['] noop punch-done-xt !
     -flow-control
     -1 blocksize !
     1 blockalign !
@@ -810,6 +811,8 @@ User outflag  outflag off
 : send-cX ( addr n -- ) +sendX2
     >send  send-code-packet  net2o:update-key ;
 
+\ !!FIXME!! use ffz>, branchless with floating point
+
 : 64ffz< ( 64b -- u / -1 )
     \G find first zero from the right, u is bit position
     64 0 DO
@@ -847,6 +850,9 @@ Defer punch-reply
 Defer addr>sock
 Defer new-addr
 
+: punch-received ( -- )
+    return-addr return-address $10 move  resend0 $off ;
+
 : send-punch ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
     insert-address temp-addr ins-dest
@@ -863,7 +869,8 @@ Defer new-addr
     ELSE  2drop  THEN ;
 
 : ping-addrs ( o:connection -- )
-    punch-addrs $@ bounds ?DO
+    \G ping all addresses except the first one
+    punch-addrs $@ cell safe/string bounds ?DO
 	I @ ['] ping-addr1 addr>sock
     cell +LOOP ;
 

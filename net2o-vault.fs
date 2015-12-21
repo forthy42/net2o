@@ -142,7 +142,7 @@ Variable key-list
 
 : encfile-rest ( key-list -- ) >vault >r
     code-buf$ cmdreset pkc keysize r@ $+[]! \ encrypt for ourself
-    vdhe, r> vkeys, vfile, vsig,
+    "v2o" 4cc, vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file
     code0-buf dispose n:o> ;

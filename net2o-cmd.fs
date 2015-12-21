@@ -214,6 +214,7 @@ drop
 	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	11 of  string@noerr  n2o.secstring  endof
+	13 of  '"' emit p@ xemit p@ xemit p@ xemit .\" \" 4cc, "  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -227,22 +228,22 @@ sema see-sema
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
 : n2o:see ( addr u -- )
+    buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup hex. t-stack $off
       o IF  token-table @ >r  THEN
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-      o IF  r> token-table !  THEN  throw  2drop ;] see-sema c-section ;
+      o IF  r> token-table !  THEN  throw  2drop ;] see-sema c-section
+    2r> buf-state 2! ;
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
 
 : n2o:see-me ( -- )
-    buf-state 2@ 2>r
     ." see-me: "
     inbuf hdrflags .dest-addr
     \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
-    buf-dump 2@ n2o:see
-    2r> buf-state 2! ;
+    buf-dump 2@ n2o:see ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
@@ -464,6 +465,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     $> cmd:nestsig ; \ balk on all wrong signatures
 +net2o: secstring ( #string -- $:string ) \g secret string literal
     string@ ;
++net2o: nop ( -- ) ; \g do nothing
++net2o: 4cc ( #3letter -- )
+    \g At the beginning of a file, this can be used as FourCC code
+    p@ 64drop p@ 64drop p@ 64drop ; 
 }scope
 
 gen-table $freeze
@@ -632,6 +637,8 @@ scope{ net2o-base
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
+: 4cc, ( addr u -- ) 2dup *-width 3 <> !!4cc!! drop
+    4cc xc@+ cmd, xc@+ cmd, xc@+ cmd, drop ;
 : float, ( r -- )  flit cmdtmp pf!+ cmdtmp tuck - +cmdbuf ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;

@@ -546,3 +546,7 @@ sema resize-sema
     [: 2dup unique$cell? IF
 	  >r { w^ x } x cell r> $+!
       ELSE  2drop  THEN ;] resize-sema c-section ;
+\ xchar tool
+
+: *-width ( addr u -- n )
+    0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
