@@ -54,16 +54,41 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
       cookie+request
     end-code| -setip n2o:send-replace ;
 
-: dht-beacon ( addr u -- )  2drop
-    dht-connect
-    beacon( ." beacon: connected" forth:cr )
-    replace-me beacon( ." beacon: replaced" forth:cr )
-    ret-beacon disconnect-me  renat ;
+\ NAT retraversal
+
+Defer insert-addr ( o -- )
+
+: renat ( -- )
+    msg-groups [:
+      cell+ $@ bounds ?DO
+	  I @ >o ret-beacon ping-addrs
+	  [: net2o-base:nop ret+beacon ;] punch-done-xt !
+	  \ !!FIXME!! should maybe do a re-loopup?
+	  ret-addr $10 erase
+	  0 punch-addrs $[] @ insert-addr
+	  o to connection
+	  net2o-code gen-punchload gen-punch end-code o>
+      cell +LOOP
+    ;] #map ;
+
+[IFDEF] android-network
+    :noname  defers android-network  .network
+	renat ; is android-network
+[THEN]
+
+Defer dht-beacon
 
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     [: dup ['] dht-beacon add-beacon ;] dht-connect'
     replace-me disconnect-me -other ;
+
+: renat-all ( -- )  !my-addr announce-me renat ;
+
+scope{ /chat
+: renat ( addr u -- ) 2drop renat-all ;
+' renat is dht-beacon
+}scope
 
 \ beacon handling
 

@@ -193,27 +193,6 @@ gen-table $freeze
 
 }scope
 
-\ NAT retraversal
-
-Defer insert-addr ( o -- )
-
-: renat ( -- )
-    msg-groups [:
-      cell+ $@ bounds ?DO
-	  I @ >o ret-beacon ping-addrs
-	  [: net2o-base:nop ret+beacon ;] punch-done-xt !
-	  \ !!FIXME!! should maybe do a re-loopup?
-	  ret-addr $10 erase
-	  0 punch-addrs $[] @ insert-addr
-	  o to connection
-	  net2o-code gen-punchload gen-punch end-code o>
-      cell +LOOP
-    ;] #map ;
-
-[IFDEF] android-network
-    :noname  defers android-network renat ; is android-network
-[THEN]
-
 0 [IF]
 Local Variables:
 forth-local-words:

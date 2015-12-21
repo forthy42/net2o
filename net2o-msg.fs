@@ -526,8 +526,6 @@ also net2o-base scope: /chat
     ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
     THEN ;
 
-: renat ( addr u -- ) 2drop renat ;
-
 : beacons ( addr u -- ) 2drop ." === beacons ===" forth:cr
     beacons [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
