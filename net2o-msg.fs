@@ -556,10 +556,6 @@ previous
 : load-msgn ( addr u n -- )
     >r 2dup load-msg r> display-lastn ;
 
-: ?chat-group ( -- )
-    msg-group$ $@len 0= IF  0 chat-keys $[]@ 1 /string key| msg-group$ $!  THEN
-    msg-group$ $@ last-chat# load-msgn ;
-
 : +group ( -- )
     msg-group$ $@ dup IF
 	2dup msg-groups #@ d0<> IF
@@ -619,11 +615,18 @@ previous
 : search-chat ( -- chat )
     group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
 
+: key>group ( addr u -- pk u )
+    @/ 2swap tuck msg-group$ $!
+    0= IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
+
+: ?load-msgn ( -- )
+    msg-group$ $@ msg-logs #@ d0= IF
+	msg-group$ $@ last-chat# load-msgn  THEN ;
+
 : chat-connects ( -- )
-    chat-keys [:
-      @/ 2swap tuck msg-group$ $!
-      0= IF  2dup key| msg-group$ $!  THEN \ 1:1 chat-group=key
+    chat-keys [: key>group ?load-msgn
       dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
+      2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
 : ?wait-chat ( -- ) 0. /chat:chats
