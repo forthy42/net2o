@@ -638,7 +638,7 @@ scope{ net2o-base
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
 : 4cc, ( addr u -- ) 2dup *-width 3 <> !!4cc!! drop
-    4cc xc@+ cmd, xc@+ cmd, xc@+ cmd, drop ;
+    4cc xc@+ n>64 cmd, xc@+ n>64 cmd, xc@+ n>64 cmd, drop ;
 : float, ( r -- )  flit cmdtmp pf!+ cmdtmp tuck - +cmdbuf ;
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
