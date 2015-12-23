@@ -87,8 +87,8 @@ false Value beacon-added?
 [IFDEF] android
     also android also jni
     :noname  defers android-network
-	network-info ?dup-IF  >o toString xref> .jstring
-	    renat-all  THEN ; is android-network
+	network-info ?dup-IF  ]xref renat-all  THEN ;
+    is android-network
     previous previous
 [THEN]
 
