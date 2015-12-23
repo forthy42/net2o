@@ -328,7 +328,7 @@ previous
 : .chat ( -- ) replay-mode on
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
     nest-string 2@ msg+ do-msg-nestsig
-    msg-group$ $@ 1 display-lastn o> o>
+    msg-group$ $@ 1 display-lastn  msg-group$ $@ save-msgs o> o>
     replay-mode off ;
 
 $200 Constant maxmsg#
