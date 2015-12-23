@@ -18,11 +18,11 @@
 Variable dhtnick "net2o-dhtroot" dhtnick $!
 
 : ins-ip ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip ;
+    net2o-host $@ net2o-port insert-ip  ind-addr off ;
 : ins-ip4 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip4 ;
+    net2o-host $@ net2o-port insert-ip4 ind-addr off ;
 : ins-ip6 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip6 ;
+    net2o-host $@ net2o-port insert-ip6 ind-addr off ;
 
 : pk:connect ( code data key u ret -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
@@ -71,24 +71,30 @@ Defer insert-addr ( o -- )
       cell +LOOP
     ;] #map ;
 
-[IFDEF] android-network
-    :noname  defers android-network  .network
-	renat ; is android-network
-[THEN]
-
 Defer dht-beacon
+
+false Value beacon-added?
 
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    [: dup ['] dht-beacon add-beacon ;] dht-connect'
+    beacon-added? IF  dht-connect
+    ELSE  [: dup ['] dht-beacon add-beacon true to beacon-added? ;] dht-connect'
+    THEN
     replace-me disconnect-me -other ;
 
 : renat-all ( -- )  !my-addr announce-me renat ;
 
+[IFDEF] android-network
+    :noname  defers android-network  .network
+	network-info ?dup-IF  ]xref renat-all  THEN ; is android-network
+[THEN]
+
 scope{ /chat
 : renat ( addr u -- ) 2drop renat-all ;
-' renat is dht-beacon
 }scope
+
+event: ->renat ( -- )  renat-all ;
+:noname <event ->renat [ up@ ]l event> ; is dht-beacon
 
 \ beacon handling
 

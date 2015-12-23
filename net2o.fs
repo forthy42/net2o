@@ -1481,7 +1481,8 @@ Variable beacons \ destinations to send beacons to
 : +beacon ( sockaddr len xt -- ) { w^ xt }
     beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
     2dup beacons #@ d0= IF
-	xt [: ticker 8 type cell type ;] $tmp 2swap beacons #!
+	xt [: ticks beacon-short-ticks# 64+ { 64^ dest }
+	    dest 1 64s type cell type ;] $tmp 2swap beacons #!
     ELSE
 	xt cell last# cell+ $+! 2drop
     THEN ;
