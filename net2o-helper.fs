@@ -84,9 +84,12 @@ false Value beacon-added?
 
 : renat-all ( -- )  !my-addr announce-me renat ;
 
-[IFDEF] android-network
-    :noname  defers android-network  .network
-	network-info ?dup-IF  ]xref renat-all  THEN ; is android-network
+[IFDEF] android
+    also android also jni
+    :noname  defers android-network
+	network-info ?dup-IF  >o toString xref> .jstring
+	    renat-all  THEN ; is android-network
+    previous previous
 [THEN]
 
 scope{ /chat
