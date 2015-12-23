@@ -214,7 +214,7 @@ drop
 	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	11 of  string@noerr  n2o.secstring  endof
-	13 of  '"' emit p@ xemit p@ xemit p@ xemit .\" \" 4cc, "  endof
+	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
