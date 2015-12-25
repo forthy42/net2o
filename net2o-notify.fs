@@ -28,9 +28,14 @@ true Value notify-text
 
 : tick-notify? ( -- flag )
     ticks last-notify 64- delta-notify 64< ;
+
 Variable notify? -2 notify? ! \ default: no notification when active
 Variable notify$
 Variable pending-notifications
+
+: notify- ( -- )
+    pending-notifications off
+    64#0 to last-notify ;
 
 Sema notify-sema
 : notify; nip (;]) ]] notify-sema c-section ; [[ ;
@@ -79,6 +84,9 @@ Sema notify-sema
     : show-notification ( -- )
 	1 nf notification-manager .notify
 	1000 clazz .screen_on ;
+
+    :noname defers android-active rendering @ IF  notify-  THEN ;
+    is android-active
 [ELSE]
     : escape-<&> ( addr u -- )
 	bounds ?DO  case i c@
@@ -162,10 +170,6 @@ Sema notify-sema
     [THEN]
     also also
 [THEN]
-
-: notify- ( -- )
-    pending-notifications off
-    64#0 to last-notify ;
 
 : msg-notify ( -- ) notify>
     ticks to latest-notify

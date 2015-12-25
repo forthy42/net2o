@@ -329,7 +329,7 @@ previous
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
     nest-string 2@ msg+ do-msg-nestsig
     msg-group$ $@ 1 display-lastn  msg-group$ $@ save-msgs o> o>
-    replay-mode off ;
+    replay-mode off  notify- ;
 
 $200 Constant maxmsg#
 
