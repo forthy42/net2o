@@ -1,4 +1,4 @@
-## ExampleLib Example: an example of using Automake to link with a library
+## keccac Autoconf
 
 AC_INIT([KECCAK], [3:2], [bernd@net2o.de], [keccak for Linux],
         [http://keccak.noekeon.org/])

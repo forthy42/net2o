@@ -1,0 +1,21 @@
+        <!-- Our activity is a homebrewn variant of the NativeAcitivity.
+             This will take care of integrating with our NDK code. -->
+        <activity android:name="gnu.gforth.Gforth_n2o"
+                android:icon="@drawable/net2o"
+                android:label="@string/net2o_app_name"
+                android:windowAnimationStyle="@android:style/Animation.Activity"
+		android:windowSoftInputMode="stateVisible|adjustResize"
+                android:configChanges="orientation|screenSize|keyboardHidden"
+                android:theme="@android:style/Theme.NoTitleBar"
+                android:launchMode="singleTop">
+            <!-- Tell NativeActivity the name of or .so -->
+            <meta-data android:name="android.app.lib_name"
+                    android:value="gforth-fast" />
+            <meta-data android:name="android.app.startfile"
+                    android:value="net2o/startn2o.fs" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
