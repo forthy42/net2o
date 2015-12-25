@@ -42,6 +42,9 @@ Sema notify-sema
 
 [IFDEF] android
     also android also jni
+
+    \ 0x01080077 Value net2o-icon# \ default
+    : net2o-icon# "gnu.gforth:drawable/net2o_notify" R.id ;
     jvalue nb
     jvalue ni
     jvalue nf
@@ -63,7 +66,6 @@ Sema notify-sema
 	clazz newNotification.Builder to nb
 	notify-rgb notify-on notify-off nb .setLights to nb
 	notify-mode nb .setDefaults to nb
-	0x01080077 nb .setSmallIcon to nb
 	ni nb .setContentIntent to nb
 	1 nb .setAutoCancel to nb ;
     msg-builder
@@ -72,9 +74,11 @@ Sema notify-sema
 	['] notify-title $tmp make-jstring nb .setContentTitle to nb
 	notify@ make-jstring nb .setContentText to nb
 	notify@ make-jstring nb .setTicker to nb
+	net2o-icon# nb .setSmallIcon to nb
 	nb .build to nf ;
     : show-notification ( -- )
-	1 nf notification-manager .notify ;
+	1 nf notification-manager .notify
+	1000 clazz .screen_on ;
 [ELSE]
     : escape-<&> ( addr u -- )
 	bounds ?DO  case i c@
