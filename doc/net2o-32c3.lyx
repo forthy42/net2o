@@ -1,0 +1,1325 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+%\usetheme{lankton-keynote}
+\usetheme{Singapore}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=43
+\use_default_options false
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8x
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-1ex
+\backslash
+lower3ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 10
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+: Make it Userfriendly
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subtitle
+reinventing the internet
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+#wefixthenet, YBTI session, 32c3, Hamburg
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Outline
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+2.5 years after Snowden
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+What happend to change the world:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+Politics Manhatten project to find 
+\begin_inset Quotes eld
+\end_inset
+
+the golden key
+\begin_inset Quotes erd
+\end_inset
+
+?
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Users don't want their dick picks be watched and use DuckDuckGo and encrypted
+ chat
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Software NSA backdoors have been refitted by attackers (Juniper)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Solutions net2o starts to be usable (somewhat)
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+net2o in a nutshell
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+net2o consists of the following 6 layers (implemented bottom up):
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+[
+\backslash
+setcounter{enumi}{2}
+\backslash
+usebeamertemplate{enumerate item}]
+\end_layout
+
+\end_inset
+
+Path switched packets with 
+\begin_inset Formula $2^{n}$
+\end_inset
+
+ size writing into shared memory buffers
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Ephemeral key exchange and signatures with Ed25519, 
+\begin_inset Newline newline
+\end_inset
+
+symmetric authenticated encryption+hash+prng with Keccak,
+\begin_inset Newline newline
+\end_inset
+
+symmetric block encryption with Threefish
+\begin_inset Newline newline
+\end_inset
+
+onion routing camouflage probably with AES
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Timing driven delay minimizing flow control
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Stack--oriented tokenized command language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Distributed data (files) and distributed metadata (prefix hash trie)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Apps in a sandboxed environment for displaying content
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Objectives
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+net2o's design objectives are
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Itemize
+lightweight, fast, scalable
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+easy to implement
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+secure
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+media capable
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+works as overlay on current networks (UDP/IP), but can replace the entire
+ stack
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+Level 7: Applications
+\end_layout
+
+\begin_layout Subsection
+Basic Framework
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Basic Framework
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+PKI Create, import, and exchange keys
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Named
+\begin_inset space ~
+\end_inset
+
+file
+\begin_inset space ~
+\end_inset
+
+copy For testing only
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Vault A container for encrypted data without metadata exposure
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+DHT Query key/value pairs (keys are pubkeys or hash keys)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Chat Instant messaging 1:1 or in chat groups
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Version
+\begin_inset space ~
+\end_inset
+
+control
+\begin_inset space ~
+\end_inset
+
+system For larger content (not yet implemented)
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+Try it
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Try it
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Linux you need:
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+git automake autoconf make gcc libtool libltdl7 fossil
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+you run:
+\family typewriter
+\series bold
+ mkdir net2o
+\begin_inset Newline newline
+\end_inset
+
+wget https://fossil.net2o.de/net2o/doc/trunk/do
+\begin_inset Newline newline
+\end_inset
+
+chmod +x do; ./do
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+This will install some stuff and take some time (I will try to improve that).
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Android Get Gforth from play store or 
+\family typewriter
+\series bold
+https://net2o.de/Gforth.apk
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+Open/close (back button) Gforth if you like; then open net2o.
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Try it --- Generate a Key
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Linux you run:
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+./n2o cmd
+\begin_inset Newline newline
+\end_inset
+
+keygen
+\family default
+\series default
+ 
+\emph on
+<nick>
+\family typewriter
+\series bold
+\emph default
+
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+Enter your passphrase twice.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Android Tap on the little nettie to start the app, it will autodetect that
+ you don't have a key generated.
+ Enter nick and passphrase twice.
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Try it --- Get another Key
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+To get my key, search for it (32 bit is sufficient)
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+keysearch
+\family default
+\series default
+ 
+\family typewriter
+\series bold
+kQusJ
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Try to chat with me
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+chat 32c3@bernd
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Aquire more keys by observing a group chat.
+ List your keys with
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+n2o keylist
+\begin_inset Newline newline
+\end_inset
+
+
+\family default
+\series default
+from within the chat.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Change networks with your Android and watch that the chat still works.
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section
+GUI framework
+\end_layout
+
+\begin_layout Subsection
+Apps in a Sandbox
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Content or Apps?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The current web is defined by content --- web apps (JavaScript) are an afterthou
+gh
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Therefore, the application logic is usually on the server side
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+This doesn't work for a P2P network!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Content is structured text, images, videos, music, etc.
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+App--Centric World
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+There's a phenomenon I call 
+\begin_inset Quotes eld
+\end_inset
+
+Turing creep
+\begin_inset Quotes erd
+\end_inset
+
+: Every sufficiently complex system contains a user--accessible Turing--complete
+ language
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Corollary: Every efficient sufficiently complex system can execute native
+ machine code
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+The application logic is to present the data; data itself is as above: structure
+d text, images, videos, music, etc.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Executing (especially efficient) code from the net raises obvious questions
+ about security
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+How to securely execute code?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+There are several options tried; as usual, things are broken:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Execute code in a controlled secure VM, see for example Java.
+ This is broken by design, as securing something from the inside doesn't
+ work.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Execute code in a sandbox.
+ This has shown as more robust, depending on how complex the outside of
+ the sandbox is.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Public inspection of code.
+ This is how the open source world works, but the underhanded C contest
+ shows that inspection is tricky.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Scan for known evil code.
+ This is the security industry's approach, and it is not working.
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Code signing can work together with public inspection --- but using it for
+ accountability doesn't work
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Therefore the choice is to sandbox public inspected code.
+\end_layout
+
+\end_deeper
+\begin_layout Subsection
+API Basics
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Formats&Requirements
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+How to display things
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename formats+io.fig
+	scale 36
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Why OpenGL?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+OpenGL can do everything
+\end_layout
+
+\begin_layout Standard
+OpenGL renders:
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Enumerate
+Triangles, lines, points --- simple components
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Textures and gradients
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+and uses shader programs --- the most powerful thing in OpenGL from 2.0.
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Standard
+Real requirement: visualization of 
+\emph on
+any 
+\emph default
+data.
+ OpenGL can do that.
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+How to connect the media?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Lemma: every glue logic will become Turing complete
+\end_layout
+
+\begin_layout Itemize
+currently used glue: HTML+CSS+JavaScript
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+conclusion: use a powerful tool right from start!
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+browser: run--time and development tool for applications
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Frameworks
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+libsoil for images (PNG+JPEG loading into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+freetype-gl for fonts (TrueType/OpenType into a texture)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+OpenMAX on Android, gstreamer on Linux: videos into a texture
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+ work in progress)
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+For Further Reading
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 3
+status open
+
+\begin_layout Plain Layout
+allowframebreaks
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+For Further Reading
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "In20"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan 
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o source repository and wiki 
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Separator
+
+\end_layout
+
+\end_body
+\end_document
