@@ -65,10 +65,13 @@ $20 value hash-size#
 
 Vocabulary n2o
 
+: set-net2o-cmds ( -- )
+    ['] n2o >body 1 set-order
+    ['] rec:word 1 set-recognizers ;
+
 : do-net2o-cmds ( xt -- )
     get-order n>r get-recognizers n>r
-    ['] n2o >body 1 set-order
-    ['] rec:word 1 set-recognizers catch
+    set-net2o-cmds catch
     nr> set-recognizers nr> set-order throw ;
 
 : n2o-cmds ( -- )
