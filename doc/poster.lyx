@@ -1,0 +1,385 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\mode<presentation> {\usetheme{Net2o}}%
+\usepackage[orientation=portrait,size=a4,scale=0.47,grid,debug]{beamerposter}%
+\renewcommand\makebeamertitle{}%
+\usepackage[activate]{pdfcprot}%
+\end_preamble
+\options final
+\use_default_options true
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net2o --- Reinventing the Internet
+\end_layout
+
+\begin_layout Author
+I've a dream: A peer--to--peer network, where services like search engines
+ or social networks aren't offered by big companies, who in turn need to
+ make money by selling the privacy of their users.
+ Where all data is encrypted, so that access is only possible for people
+ who have the key and really are authorized.
+ Which layman can use without cryptic user interfaces.
+ Where the browser is a platform for running useful applications without
+ the mess of Flash and JavaScript.
+ Without the lag of 
+\begin_inset Quotes eld
+\end_inset
+
+buffer bloat
+\begin_inset Quotes erd
+\end_inset
+
+ and without the speed problems of a protocol not designed to be assisted
+ by hardware.
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+What's broken?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+The internet bases on assumptions 20--30 years old 
+\end_layout
+
+\begin_layout Itemize
+These assumptions are wrong today
+\end_layout
+
+\begin_layout Itemize
+Much of it followed the 
+\begin_inset Quotes eld
+\end_inset
+
+good enough
+\begin_inset Quotes erd
+\end_inset
+
+ principle 
+\end_layout
+
+\begin_layout Itemize
+There's a huge pile of accumulated cruft 
+\end_layout
+
+\begin_layout Itemize
+Fixing this mess one--by--one is the wrong attempt
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Objectives
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+net2o's design objectives are
+\end_layout
+
+\begin_layout Itemize
+lightweight, fast, scalable
+\end_layout
+
+\begin_layout Itemize
+easy to implement
+\end_layout
+
+\begin_layout Itemize
+secure
+\end_layout
+
+\begin_layout Itemize
+media capable
+\end_layout
+
+\begin_layout Itemize
+works as overlay on current networks (UDP/IP), but can replace the entire
+ stack
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Layers
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Physical layer --- this is not part of net2o itself.
+\end_layout
+
+\begin_layout Enumerate
+Topology: path switching
+\end_layout
+
+\begin_layout Enumerate
+Encryption: ed25519+Keccak in duplex mode
+\end_layout
+
+\begin_layout Enumerate
+Flow Control: time based delay--minimizing
+\end_layout
+
+\begin_layout Enumerate
+Commands: structured data and multi--command RPC
+\end_layout
+
+\begin_layout Enumerate
+Distributed Data: DHT+shared files
+\end_layout
+
+\begin_layout Enumerate
+Applications: chat, vault, DVCS, GUI with browser (to be implemented)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+GUI Framework
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+libsoil for images (PNG+JPEG loading into a texture)
+\end_layout
+
+\begin_layout Itemize
+freetype-gl for fonts (TrueType/OpenType into a texture)
+\end_layout
+
+\begin_layout Itemize
+OpenMAX on Android, gstreamer on Linux: videos into a texture
+\end_layout
+
+\begin_layout Itemize
+MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+ work in progress)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Application availability
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Linux Debian package soon
+\end_layout
+
+\begin_layout Description
+Android Gforth in the Play Store contains net2o
+\end_layout
+
+\begin_layout Description
+Windows setup.exe soon
+\end_layout
+
+\begin_layout Description
+Mac
+\begin_inset space ~
+\end_inset
+
+OS
+\begin_inset space ~
+\end_inset
+
+X fink package soon
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+smash{
+\backslash
+lower2ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-qr.svg
+	lyxscale 30
+	scale 39
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_body
+\end_document
