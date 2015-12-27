@@ -20,7 +20,7 @@ GCC	 = gcc
 LIBTOOL	 = libtool
 CFLAGS	 = -O3 -fomit-frame-pointer
 HOST     = 
-FAST     = no
+FAST     = @FAST@
 FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs
 ifeq "$(FAST)" "yes"
 FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs

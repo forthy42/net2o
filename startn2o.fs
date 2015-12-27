@@ -1,10 +1,10 @@
 \ Start net2o on android
 
 e? os-type s" linux-android" str= [IF] require starta.fs [THEN]
-." loading net2o" cr stdout flush-file throw
+page ." loading n2o..."
 require n2o.fs
-." net2o load ok" cr stdout flush-file throw
-: n2o-greet
+100 0 [DO] key? drop 1 ms [LOOP]
+: n2o-greet  page
     ." net2o text UI, nerd edition for 32c3" cr
     ." type 'bye' to leave and 'help' for help" cr ;
 :noname load-rc n2o-greet
