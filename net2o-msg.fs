@@ -61,7 +61,7 @@ User skip-sig?
 
 : load-msg ( group u -- )
     >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
-    2dup file-status nip no-file# = ?EXIT
+    2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  decrypt-file
     replay-mode off  skip-sig? off ;
