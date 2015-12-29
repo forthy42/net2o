@@ -483,7 +483,7 @@ Level 7: Applications
 \end_layout
 
 \begin_layout Subsection
-Basic Framework
+Basic Frameworks
 \end_layout
 
 \begin_layout Frame
@@ -491,7 +491,7 @@ Basic Framework
 status open
 
 \begin_layout Plain Layout
-Basic Framework
+Basic Frameworks
 \end_layout
 
 \end_inset
@@ -567,7 +567,31 @@ control
 \begin_inset space ~
 \end_inset
 
-system For larger content (not yet implemented)
+system For larger content (not yet implemented) 
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Sync to synchronize your computers (RSN)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Audio/Video
+\begin_inset space ~
+\end_inset
+
+Chat Real time data streaming (RSN)
 \end_layout
 
 \end_deeper

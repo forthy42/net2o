@@ -64,7 +64,7 @@ point:
 1. Physical layer - this is not part of net2o itself.
 2. [Topology](topology.md)
 3. [Encryption](encryption.wiki)
-4. [Flow Control](flow-control.wiki)
+4. [Flow Control](flow-control.md)
 5. [Commands](commands.md)
 6. [Distributed Data](distributed-data.wiki)
 7. [Applications](applications.wiki)
