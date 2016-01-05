@@ -176,10 +176,12 @@ op-vector !
 
 \ misc
 
-: do-debug ( xt -- )
-    op-vector @ { oldout }
-    debug-vector @ op-vector !
-    catch oldout op-vector ! throw ;
+[IFUNDEF] do-debug
+    : do-debug ( xt -- )
+	op-vector @ { oldout }
+	debug-vector @ op-vector !
+	catch oldout op-vector ! throw ;
+[THEN]
 
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;

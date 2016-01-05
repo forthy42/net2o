@@ -631,7 +631,7 @@ git automake autoconf make gcc libtool libltdl7 fossil
 you run:
 \family typewriter
 \series bold
- mkdir net2o
+ mkdir net2o; cd net2o
 \begin_inset Newline newline
 \end_inset
 
