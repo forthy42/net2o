@@ -674,8 +674,8 @@ previous
 : do-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ret+beacon ;] IS do-connect
     BEGIN  get-input-line
-	2dup "/bye" str= 0= WHILE
-	    over c@ '/' = IF  do-chat-cmds  ELSE
+	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
+	    over c@ dup '/' = swap '\' = or IF  do-chat-cmds  ELSE
 		msg-group$ $@ msg-groups #@ 0> IF
 		    @ >o msg-context @ .avalanche-text o>
 		ELSE  drop  nip xclear  THEN
