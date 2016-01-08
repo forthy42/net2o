@@ -7,7 +7,8 @@ Build-Depends: debhelper, build-essential, gcc, autoconf, automake, libtool, lib
 Package: keccak
 Version: 3.2
 Architecture: any
-Depends: 
+Depends: ${shlibs:Depends}
+Multi-Arch: same
 Description: Keccak
  Keccak is the crypto primitive for SHA-3, but also can be used for
  authenticated en- and decryption (AEAD).

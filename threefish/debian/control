@@ -7,7 +7,8 @@ Build-Depends: debhelper, build-essential, gcc, autoconf, automake, libtool, lib
 Package: threefish
 Version: 1.0
 Architecture: any
-Depends: 
+Depends: ${shlibs:Depends}
+Multi-Arch: same
 Description: Threefish
  Threefish is the crypto primitive of Bruce Schneier's SHA-3 candidate,
  and also can be used for ECB mode encryption (and with other modes, for AEAD)
