@@ -1,0 +1,13 @@
+Source: threefish
+Section: programming
+Priority: optional
+Maintainer: Bernd Paysan <bernd@net2o.de>
+Build-Depends: debhelper, build-essential, gcc, autoconf, automake, libtool, libtool-bin, libc
+
+Package: threefish
+Version: 1.0
+Architecture: any
+Depends: 
+Description: Threefish
+ Threefish is the crypto primitive of Bruce Schneier's SHA-3 candidate,
+ and also can be used for ECB mode encryption (and with other modes, for AEAD)
