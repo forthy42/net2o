@@ -39,7 +39,7 @@ SRC      = .
 ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
 VERSION  = @GFVER@
-LIBCCNAMED = $(libdir)/$(notdir $(GFORTH))/$(VERSION)/libcc-named/
+LIBCCNAMED = lib/$(notdir $(GFORTH))/$(VERSION)/libcc-named/
 LIBCCDEST = $(DESTDIR)$(libccdir)
 KERNEL    = 
 PREFIX    = $(package)@prefix@
@@ -89,9 +89,9 @@ libs:
 install-libs:
 	for i in $(LIBS); do (cd $$i; make install); done
 
-extra-install:	install-libs install
+extra-install:	install-libs install libcc
 
-install:	libcc
+install:	libcc-install
 	for i in $(SRCDIRS); do \
 		mkdir -p $(DESTDIR)$(datadir)/gforth/$$i; \
 	done
@@ -107,6 +107,11 @@ libcc:	$(FORTHLIB)
 		echo "generating library $$i"; \
 		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
 	done
+
+libcc-install:	libcc
+	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
+		   $(LIBTOOL) --silent --mode=install $(INSTALL) lib/gforth$(ARCH)/$(VERSION)/libcc-named/libgf`basename $$i .fs`.la $(DESTDIR)$(libccdir)libgf`basename $$i .fs`.la; \
+		done; fi
 
 doc:	$(DOC)
 

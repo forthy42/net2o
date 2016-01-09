@@ -413,9 +413,9 @@ Variable chat-keys
     forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
-    bl skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
+    bl skip '$' skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
 : get-dec ( addr u -- addr' u' n )
-    bl skip 0. 2swap ['] >number #10 base-execute 2swap drop ;
+    bl skip '#' skip 0. 2swap ['] >number #10 base-execute 2swap drop ;
 
 scope: notify-cmds
 
