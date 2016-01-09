@@ -406,7 +406,9 @@ $100 Constant max-passphrase# \ 256 characters should be enough...
 max-passphrase# buffer: passphrase
 
 : passphrase-in ( -- addr u )
-    passphrase dup max-passphrase# accept* ;
+    "PASSPHRASE" getenv 2dup d0= IF  2drop
+	passphrase dup max-passphrase# accept*
+    THEN ;
 
 : >passphrase ( addr u -- addr u )
     \G create a 512 bit hash of the passphrase

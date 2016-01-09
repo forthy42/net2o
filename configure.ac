@@ -20,6 +20,7 @@ AC_PREREQ(2.54)
 
 AC_MSG_CHECKING([for gforth])
 GFORTH="`cd / && which gforth 2>/dev/null`"
+GFORTHFAST="`cd / && which gforth-fast 2>/dev/null`"
 test -z "$GFORTH" || read dummy GFVER GFARCH <<EOF
 $(eval $GFORTH -v 2>&1)
 EOF
@@ -34,12 +35,19 @@ case "$host_alias" in
 	;;
 esac
 
+AC_PROG_INSTALL
+
 AC_SUBST(GFORTH)
+AC_SUBST(GFORTHFAST)
 AC_SUBST(GFVER)
 AC_SUBST(GFARCH)
 AC_SUBST(FAST)
 
-AC_CONFIG_FILES([Makefile])
+test "x$prefix" = xNONE && prefix=$ac_default_prefix
+DATADIR=$(eval echo $(eval echo $datadir))
+AC_SUBST(DATADIR)
+
+AC_CONFIG_FILES([Makefile n2o])
 
 AC_OUTPUT
 AC_CONFIG_SUBDIRS(keccak threefish ed25519-donna)

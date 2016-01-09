@@ -15,6 +15,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+package =
+VPATH = @srcdir@:.
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
+datadir   = $(package)@datadir@
+srcdir    = @srcdir@
+bindir    = $(package)@bindir@
+libdir = $(package)@libdir@
+libccdir = $(subst $(DESTDIR),,$(libdir)/gforth$(ARCH)/$(VERSION)/libcc-named/)
 LIBS 	 = keccak threefish ed25519-donna
 GCC	 = gcc
 LIBTOOL	 = libtool
@@ -29,16 +39,15 @@ SRC      = .
 ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
 VERSION  = @GFVER@
-LIBCCNAMED =
-LIBCCDEST =
+LIBCCNAMED = $(libdir)/$(notdir $(GFORTH))/$(VERSION)/libcc-named/
+LIBCCDEST = $(DESTDIR)$(libccdir)
 KERNEL    = 
-PREFIX    = @prefix@
+PREFIX    = $(package)@prefix@
 INCDIR    = $(PREFIX)/include/$(VERSION)
-INSTALL	= /usr/bin/install -c
-INSTALL_DATA = ${INSTALL} -m 644
+INSTALL	= @INSTALL@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
 ARCH	  =
-datadir   = $(PREFIX)/
-srcdir    = @srcdir@
 
 SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  client-test.fs client-tests.fs crypto-api.fs debugging.fs	\
@@ -60,6 +69,8 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 
 SRCDIRS = site-forth/net2o/tests home
 
+SCRIPTS = n2o
+
 DOC = wiki/commands.md
 
 all: no-config
@@ -78,20 +89,23 @@ libs:
 install-libs:
 	for i in $(LIBS); do (cd $$i; make install); done
 
-install:	install-libs libcc
+extra-install:	install-libs install
+
+install:	libcc
 	for i in $(SRCDIRS); do \
 		mkdir -p $(DESTDIR)$(datadir)/gforth/$$i; \
 	done
 	for i in $(SOURCES); do \
 		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth/site-forth/net2o/$$i; \
 	done
+	for i in $(SCRIPTS); do \
+		$(INSTALL_SCRIPT) ./$$i $(DESTDIR)$(bindir)/$$i; \
+	done
 
 libcc:	$(FORTHLIB)
-	mkdir -p $(INCDIR)
-	-cp $(SRC)/engine/libcc.h $(SRC)/engine/config.h $(INCDIR)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
-		$(ENGINE) -p ".:~+:$(SRC)"  -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
+		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
 	done
 
 doc:	$(DOC)
@@ -107,7 +121,7 @@ TAGS:	$(SOURCES)
 configure: configure.ac
 	cd $(srcdir) && autoconf
 
-Makefile:	Makefile.in configure
+Makefile n2o:	Makefile.in n2o.in configure
 	./config.status
 
 config.status: configure
