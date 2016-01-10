@@ -78,17 +78,20 @@ Vocabulary n2o
     init-client word-args ['] quit do-net2o-cmds ;
 
 : .usage ( addr u -- addr u )
-    ." n2o " source 7 /string type cr ;
+    [IFUNDEF] android ." n2o " [THEN]
+    source 7 /string type cr ;
 
 scope{ n2o
 
 : help ( -- )
-    \U help [cmd]
+    \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
-    ?nextarg IF  BEGIN
-	2dup [: ."     \U " type ;] $tmp ['] .usage search-help
-	[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
-    ?nextarg 0= UNTIL  ELSE
+    ?nextarg IF
+	BEGIN
+	    2dup [: ."     \U " type ;] $tmp ['] .usage search-help
+	    [: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
+	?nextarg 0= UNTIL
+    ELSE
 	s"     \U " ['] .usage search-help
     THEN ;
 
@@ -219,21 +222,25 @@ synonym searchkey keysearch
 
 : -256 ( -- )
     \U -256 <next-cmd>
-    \G +256: set hash output to 256 bits (default)
+    \G -256: set hash output to 256 bits (default)
     $20 to hash-size# next-cmd ;
 
 : -512 ( -- )
     \U -512 <next-cmd>
-    \G +512: set hash output to 512 bits
+    \G -512: set hash output to 512 bits
     $40 to hash-size# next-cmd ;
 
 : hash ( -- )
     \U hash file1 .. filen
+    \G hash: hash the files and print it base85
+    \G hash: use -256 or -512 to select hash size
+    \G hash: use -threefish or -keccak to select hash algorithm
     enc-mode @ 8 rshift $FF and >crypt
     [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
 
 : sign ( -- )
     \U sign file1 .. filen
+    \G sign: create detached .s2o signatures for all files
     get-me now>never
     [: 2dup hash-file 2drop
       [: type ." .s2o" ;] $tmp w/o create-file throw >r
@@ -376,7 +383,9 @@ synonym searchkey keysearch
 
 \ user friendly, but way less informative doerror
 
-:noname [: <err> .error-string <default> cr ;] do-debug ; is DoError
+debugging-method 0= [IF]
+    :noname [: <err> .error-string <default> cr ;] do-debug ; is DoError
+[THEN]
 
 \ allow issuing commands during chat
 

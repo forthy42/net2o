@@ -1,0 +1,12 @@
+Source: net2o
+Section: net
+Priority: optional
+Maintainer: Bernd Paysan <bernd.paysan@gmx.de>
+Build-Depends: debhelper (>= 4.1.16), build-essential, gcc, autoconf, automake, autotools-dev, libffi-dev, libtool, libtool-bin, libltdl7-dev, gforth (>= 0.7.9-20151224)
+
+Package: net2o
+Version: @VERSION@
+Architecture: any
+Depends: gforth (>= 0.7.9-20151224), keccak, threefish, ed25519-prim
+Description: net2o
+ net2o reinvents the internet.

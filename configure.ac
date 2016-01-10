@@ -27,7 +27,7 @@ EOF
 
 FAST=no
 case "$host_alias" in
-     arm-linux-androideabi)
+    arm-linux-androideabi)
 	FAST=yes
 	;;
     i686-linux-android)
@@ -48,6 +48,10 @@ DATADIR=$(eval echo $(eval echo $datadir))
 AC_SUBST(DATADIR)
 
 AC_CONFIG_FILES([Makefile n2o])
+AC_CONFIG_COMMANDS([stamp-h],[[date > stamp-h
+chmod +x n2o]],[PACKAGE_VERSION=$PACKAGE_VERSION
+ machine=$machine
+ ARCH=$ARCH])
 
 AC_OUTPUT
 AC_CONFIG_SUBDIRS(keccak threefish ed25519-donna)
