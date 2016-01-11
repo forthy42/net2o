@@ -60,7 +60,7 @@ then
 else
     if [ ! -f n2o.fs ]
     then
-	fossil open
+	fossil open net2o.fossil
     fi
     fossil up
 fi
