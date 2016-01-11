@@ -58,6 +58,10 @@ then
     fossil clone http://fossil.net2o.de/net2o net2o.fossil
     fossil open net2o.fossil
 else
+    if [ ! -f n2o.fs ]
+    then
+	fossil open
+    fi
     fossil up
 fi
 
