@@ -10,14 +10,21 @@ Create a file `/etc/apt/sources.list.d/net2o.list` with the content:
 
     deb http://net2o.de/debian testing main
 
+Add my key to the trust db so that Debian can verify the packets:
+
+    wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
+
 There are actually three repositories, stable, testing and unstable;
 at the moment, all packages are the same.
 
 And then run the following commands as root:
 
-    wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
     aptitude update
     aptitude install net2o
+
+Since net2o requires a way more recent Gforth than in Debian's
+repository, you will need aptitude to resolve this; if the first
+solution doesn't work out, say "n" to get the second solution.
 
 Get it for Android
 ------------------
