@@ -61,6 +61,15 @@ else
     fossil up
 fi
 
+# get, build, and install ed25519-donna, keccak and threefish
+
+git-get https://github.com/forthy42 ed25519-donna
+
+./autogen.sh
+
+make configs libs
+sudo make install-libs
+
 # get, build, and install Gforth
 
 which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
@@ -69,17 +78,6 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
     tar zxf $GFORTH.tar.gz
     build $GFORTH
 )
-
-# get, build, and install ed25519-donna, keccak and threefish
-
-git-get https://github.com/forthy42 ed25519-donna
-
-# build and install libraries
-
-for i in ed25519-donna keccak threefish
-do
-    build-clean $i
-done
 
 # make sure libraries are found
 test "$(uname -o)" = "Cygwin" || sudo /sbin/ldconfig
@@ -91,3 +89,6 @@ gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
     git-get git://git.savannah.gnu.org gforth
     build-clean gforth
 )
+
+make libcc
+sudo make install libcc-install
