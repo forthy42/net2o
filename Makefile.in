@@ -89,27 +89,27 @@ libs:
 	for i in $(LIBS); do (cd $$i; make); done
 
 install-libs:
-	for i in $(LIBS); do (cd $$i; make install); done
+	for i in $(LIBS); do (cd $$i; make install DESTDIR=$(DESTDIR)); done
 
 extra-install:	install-libs install libcc
 
 install:	libcc-install
 	for i in $(SRCDIRS); do \
-		mkdir -p $(DESTDIR)$(datadir)/gforth/$$i; \
+		$(MKDIR) -p $(DESTDIR)$(datadir)/gforth/$$i; \
 	done
 	for i in $(SOURCES); do \
 		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth/site-forth/net2o/$$i; \
 	done
-	mkdir -p $(DESTDIR)$(bindir)
+	$(MKDIR) -p $(DESTDIR)$(bindir)
 	for i in $(SCRIPTS); do \
 		$(INSTALL_SCRIPT) ./$$i $(DESTDIR)$(bindir)/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
-	$(MKDIR) -p $(LIBCCDEST)
+	$(MKDIR) -p $(DESTDIR)$(libccdir)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
-		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
+		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(DESTDIR)$(libccdir)\" ; is replace-rpath previous" $$i -e bye; \
 	done
 
 libcc-install:	libcc
