@@ -71,12 +71,12 @@ git-get https://github.com/forthy42 ed25519-donna
 
 ./autogen.sh
 
-make configs libs all
+make
 sudo make install-libs
 
 # get, build, and install Gforth if needed
 
-gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
+test "gforth-$(gforth-fast --version 2>&1 | cut -f2 -d' ')" = "$GFORTH" || (
     which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
     (which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
 	wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
@@ -97,4 +97,4 @@ gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
 )
 
 make libcc
-sudo make install libcc-install
+sudo make install
