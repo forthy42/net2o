@@ -67,16 +67,18 @@ git-get https://github.com/forthy42 ed25519-donna
 
 ./autogen.sh
 
-make configs libs
+make configs libs all
 sudo make install-libs
 
-# get, build, and install Gforth
+# get, build, and install Gforth if needed
 
-which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
-(which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
-    wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
-    tar zxf $GFORTH.tar.gz
-    build $GFORTH
+gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
+    which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | tr ' ' '-')
+    (which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
+	wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
+	tar zxf $GFORTH.tar.gz
+	build $GFORTH
+    )
 )
 
 # make sure libraries are found
@@ -85,7 +87,7 @@ test "$(uname -o)" = "Cygwin" || sudo /sbin/ldconfig
 # we test for an existing Gforth that can load net2o.fs
 # if the snapshot doesn't, try the git version
 
-gforth-fast net2o.fs -e bye 1>/dev/null 2>/dev/null || (
+gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
     git-get git://git.savannah.gnu.org gforth
     build-clean gforth
 )
