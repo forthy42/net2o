@@ -1,4 +1,4 @@
-#! @GFORTHFAST@
+#! /usr/bin/env gforth-fast
 \ -*- mode: Forth -*-
 
 fpath+ @DATADIR@/gforth/site-forth/net2o

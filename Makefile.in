@@ -26,6 +26,7 @@ bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
 libccdir = $(subst $(DESTDIR),,$(libdir)/gforth$(ARCH)/$(VERSION)/libcc-named/)
 LIBS 	 = keccak threefish ed25519-donna
+MKDIR	 = mkdir
 GCC	 = gcc
 LIBTOOL	 = libtool
 CFLAGS	 = -O3 -fomit-frame-pointer
@@ -48,6 +49,7 @@ INSTALL	= @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 ARCH	  =
+DEBARCH   =
 
 SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  client-test.fs client-tests.fs crypto-api.fs debugging.fs	\
@@ -98,11 +100,13 @@ install:	libcc-install
 	for i in $(SOURCES); do \
 		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth/site-forth/net2o/$$i; \
 	done
+	mkdir -p $(DESTDIR)$(bindir)
 	for i in $(SCRIPTS); do \
 		$(INSTALL_SCRIPT) ./$$i $(DESTDIR)$(bindir)/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
+	$(MKDIR) -p $(LIBCCDEST)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
 		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(LIBCCDEST)\" ; is replace-rpath previous" $$i -e bye; \
@@ -124,10 +128,13 @@ TAGS:	$(SOURCES)
 	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS
 
 configure: configure.ac
-	cd $(srcdir) && autoconf
+	cd $(srcdir) && autoreconf --force --verbose $(srcdir)
 
 Makefile n2o:	Makefile.in n2o.in configure
 	./config.status
 
 config.status: configure
 	./config.status --recheck
+
+debdist:
+	dpkg-buildpackage -d -b $(DEBARCH)

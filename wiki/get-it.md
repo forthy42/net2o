@@ -1,8 +1,36 @@
 Get it
 ======
 
-Get it for PC
--------------
+Get it for Debian GNU/Linux
+---------------------------
+
+I've created a Debian repository to make it easy to install net2o.
+
+Create a file ''/etc/apt/sources.list.d/net2o.list'' with the content:
+
+    deb http://net2o.de/debian testing main
+
+There are actually three repositories, stable, testing and unstable;
+at the moment, all packages are the same.
+
+And then run the following commands as root:
+
+    wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
+    apt-get update
+    apt-get install net2o
+
+Get it for Android
+------------------
+
+You need: An Android phone with at least Android 2.3, and Gforth,
+either from the app store, or from [here](https://net2o.de/Gforth.apk).
+
+This installs Gforth with the Gforth icons, and a ready-to-run net2o
+icon.  Just tap on the net2o icon to run net2o; you'll be asked to
+create a key on the first run, and to open up a key on any further run.
+
+Get it for PC from source
+-------------------------
 
 You need: A Linux machine, Windows with Cygwin or better Cygwin64, Mac
 OS X with fink development tools (please use GCC, don't use XCode's
@@ -30,20 +58,6 @@ and enter net2o command mode, or by running each command with
 
 in the second case, you'll be asked again and again for your password
 when needed.
-
-Get it for Android
-------------------
-
-You need: An Android phone with at least Android 2.3, and Gforth,
-either from the app store, or from [here](https://net2o.de/Gforth.apk).
-
-To load net2o into Gforth, start Gforth and enter
-
-    include net2o/n2o.fs
-
-Then turn on the net2o command mode for net2o with
-
-    n2o-cmds
 
 Try it
 ------

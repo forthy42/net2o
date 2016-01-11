@@ -1,12 +1,14 @@
-Source: net2o
+Source: @PACKAGE_NAME@
 Section: net
 Priority: optional
+License: AGPL3+
 Maintainer: Bernd Paysan <bernd.paysan@gmx.de>
 Build-Depends: debhelper (>= 4.1.16), build-essential, gcc, autoconf, automake, autotools-dev, libffi-dev, libtool, libtool-bin, libltdl7-dev, gforth (>= 0.7.9-20151224)
 
-Package: net2o
-Version: @VERSION@
+Package: @PACKAGE_NAME@
+Version: @PACKAGE_VERSION@
 Architecture: any
 Depends: gforth (>= 0.7.9-20151224), keccak, threefish, ed25519-prim
-Description: net2o
- net2o reinvents the internet.
+Description: @PACKAGE_NAME@ protocol stack
+ net2o reinvents the Internet.  Applications include file copy, chat, DHT;
+ others will follow.
