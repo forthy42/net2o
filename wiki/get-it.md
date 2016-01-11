@@ -6,7 +6,7 @@ Get it for Debian GNU/Linux
 
 I've created a Debian repository to make it easy to install net2o.
 
-Create a file ''/etc/apt/sources.list.d/net2o.list'' with the content:
+Create a file `/etc/apt/sources.list.d/net2o.list` with the content:
 
     deb http://net2o.de/debian testing main
 
