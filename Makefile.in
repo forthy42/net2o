@@ -138,3 +138,6 @@ config.status: configure
 
 debdist:
 	dpkg-buildpackage -d -b $(DEBARCH)
+
+debdist32:
+	GFORTH=gforth-x32 CC="gcc -m32" dpkg-buildpackage -d -b -ai386

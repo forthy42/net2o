@@ -19,8 +19,18 @@ AC_INIT([net2o], [0.1.0-20151224], [bernd@net2ode], [net2o], [https://fossil.net
 AC_PREREQ(2.54)
 
 AC_MSG_CHECKING([for gforth])
-GFORTH="`cd / && which gforth 2>/dev/null`"
-GFORTHFAST="`cd / && which gforth-fast 2>/dev/null`"
+
+GFX=""
+
+case "$CC"
+in
+    *-m32*)
+	GFX="-x32"
+	;;
+esac
+
+GFORTH="`cd / && which gforth$GFX 2>/dev/null`"
+GFORTHFAST="`cd / && which gforth-fast$GFX 2>/dev/null`"
 test -z "$GFORTH" || read dummy GFVER GFARCH <<EOF
 $(eval $GFORTH -v 2>&1)
 EOF

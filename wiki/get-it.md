@@ -16,8 +16,8 @@ at the moment, all packages are the same.
 And then run the following commands as root:
 
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
-    apt-get update
-    apt-get install net2o
+    aptitude update
+    aptitude install net2o
 
 Get it for Android
 ------------------
