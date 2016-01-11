@@ -10,12 +10,11 @@ Create a file `/etc/apt/sources.list.d/net2o.list` with the content:
 
     deb http://net2o.de/debian testing main
 
-Add my key to the trust db so that Debian can verify the packets:
+There are actually three repositories, stable, testing and unstable;
+at the moment, all packages are the same.  Add my key to the trust db
+so that Debian can verify the packets:
 
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
-
-There are actually three repositories, stable, testing and unstable;
-at the moment, all packages are the same.
 
 And then run the following commands as root:
 
