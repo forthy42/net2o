@@ -113,7 +113,7 @@ libcc:	$(FORTHLIB)
 
 libcc-install:	libcc
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
-		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(libccdir)libgf`basename $$i .fs`.la; \
+		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(DESTDIR)$(libccdir)libgf`basename $$i .fs`.la; \
 		done; fi
 
 doc:	$(DOC)
