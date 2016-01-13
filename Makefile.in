@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package =
+package = $(DESTDIR)
 VPATH = @srcdir@:.
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -24,7 +24,8 @@ datadir   = $(package)@datadir@
 srcdir    = @srcdir@
 bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
-libccdir = $(subst $(DESTDIR),,$(libdir)/gforth$(ARCH)/$(VERSION)/libcc-named/)
+LIBCCDEST = $(libdir)/gforth/$(VERSION)/$(machine)/libcc-named/
+libccdir = $(subst $(package),,$(LIBCCDEST))
 LIBS 	 = keccak threefish ed25519-donna
 MKDIR	 = mkdir
 GCC	 = gcc
@@ -40,8 +41,8 @@ SRC      = .
 ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
 VERSION  = @GFVER@
-LIBCCNAMED = lib/$(notdir $(GFORTH))/$(VERSION)/libcc-named/
-LIBCCDEST = $(DESTDIR)$(libccdir)
+machine  = @GFARCH@
+LIBCCNAMED = lib/$(notdir $(GFORTH))/$(VERSION)/$(machine)/libcc-named/
 PREFIX    = $(package)@prefix@
 INCDIR    = $(PREFIX)/include/$(VERSION)
 INSTALL	= @INSTALL@
@@ -79,33 +80,33 @@ all: no-config
 no-config: libs
 
 clean:
-	for i in $(LIBS); do (cd $$i; make clean); done
+	for i in $(LIBS); do (cd $$i; $(MAKE) clean); done
 
 configs:
-	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && make clean); done
+	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean); done
 
 libs:
-	for i in $(LIBS); do (cd $$i; make); done
+	for i in $(LIBS); do (cd $$i; $(MAKE)); done
 
 install-libs:
-	for i in $(LIBS); do (cd $$i; make install DESTDIR=$(DESTDIR)); done
+	for i in $(LIBS); do (cd $$i; $(MAKE) package=$(package) install); done
 
 extra-install:	install-libs install
 
 install:	libcc-install
 	for i in $(SRCDIRS); do \
-		$(MKDIR) -p $(DESTDIR)$(datadir)/gforth/$$i; \
+		$(MKDIR) -p $(datadir)/gforth/$$i; \
 	done
 	for i in $(SOURCES); do \
-		$(INSTALL_DATA) ./$$i $(DESTDIR)$(datadir)/gforth/site-forth/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/gforth/site-forth/net2o/$$i; \
 	done
-	$(MKDIR) -p $(DESTDIR)$(bindir)
+	$(MKDIR) -p $(bindir)
 	for i in $(SCRIPTS); do \
-		$(INSTALL_SCRIPT) ./$$i $(DESTDIR)$(bindir)/$$i; \
+		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
-	$(MKDIR) -p $(DESTDIR)$(libccdir)
+	$(MKDIR) -p $(LIBCCDEST)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
 		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous" $$i -e bye; \
@@ -113,7 +114,7 @@ libcc:	$(FORTHLIB)
 
 libcc-install:	libcc
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
-		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(DESTDIR)$(libccdir)libgf`basename $$i .fs`.la; \
+		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)libgf`basename $$i .fs`.la; \
 		done; fi
 
 doc:	$(DOC)

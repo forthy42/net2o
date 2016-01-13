@@ -25,7 +25,7 @@ GFX=""
 case "$CC"
 in
     *-m32*)
-	GFX="-x32"
+	GFX="-386"
 	;;
 esac
 
