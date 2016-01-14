@@ -15,7 +15,7 @@ dnl Process this file with autoconf to produce a configure script.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([net2o], [0.1.0-20151224], [bernd@net2ode], [net2o], [https://fossil.net2o.de/net2o/reportlist])
+AC_INIT([net2o], [0.1.1-20150113], [bernd@net2ode], [net2o], [https://fossil.net2o.de/net2o/reportlist])
 AC_PREREQ(2.54)
 
 AC_MSG_CHECKING([for gforth])
@@ -34,6 +34,7 @@ GFORTHFAST="`cd / && which gforth-fast$GFX 2>/dev/null`"
 test -z "$GFORTH" || read dummy GFVER GFARCH <<EOF
 $(eval $GFORTH -v 2>&1)
 EOF
+GFDEBVER=$(echo $GFVER | tr '_' '-')
 
 FAST=no
 case "$host_alias" in
@@ -50,6 +51,7 @@ AC_PROG_INSTALL
 AC_SUBST(GFORTH)
 AC_SUBST(GFORTHFAST)
 AC_SUBST(GFVER)
+AC_SUBST(GFDEBVER)
 AC_SUBST(GFARCH)
 AC_SUBST(FAST)
 

@@ -8,7 +8,7 @@ Build-Depends: debhelper (>= 4.1.16), build-essential, gcc, autoconf, automake, 
 Package: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Architecture: any
-Depends: gforth (>= 0.7.9-20151224), keccak, threefish, ed25519-prim
+Depends: gforth (>= @GFDEBVER@), keccak, threefish, ed25519-prim
 Description: @PACKAGE_NAME@ protocol stack
  net2o reinvents the Internet.  Applications include file copy, chat, DHT;
  others will follow.
