@@ -78,8 +78,8 @@ sudo make install-libs
 
 which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | cut -f1-2 -d' ' | tr ' ' '-')
 (which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
-    wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.gz
-    tar zxf $GFORTH.tar.gz
+    wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.xz
+    tar Jxf $GFORTH.tar.xz
     build $GFORTH
 )
 
