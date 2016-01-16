@@ -32,8 +32,9 @@ You need: An Android phone with at least Android 2.3, and Gforth,
 either from the app store, or from [here](https://net2o.de/Gforth.apk).
 
 This installs Gforth with the Gforth icons, and a ready-to-run net2o
-icon.  Just tap on the net2o icon to run net2o; you'll be asked to
-create a key on the first run, and to open up a key on any further run.
+icon in the app drawer.  Just tap on the net2o icon to run net2o;
+you'll be asked to create a key on the first run, and to open up a key
+on any further run.
 
 Get it for PC from source
 -------------------------
