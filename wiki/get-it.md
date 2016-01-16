@@ -6,24 +6,24 @@ Get it for Debian GNU/Linux
 
 I've created a Debian repository to make it easy to install net2o.
 
-Create a file `/etc/apt/sources.list.d/net2o.list` with the content:
+Create a debian sources.list file pointing to the net2o repository,
+and add my key to the trust db so that Debian can verify the packets,
+update the repository data and install net2o, so as root enter:
 
+    cat >/etc/apt/sources.list.d/net2o.list <<EOF
     deb http://net2o.de/debian testing main
-
-There are actually three repositories, stable, testing and unstable;
-at the moment, all packages are the same.  Add my key to the trust db
-so that Debian can verify the packets:
-
+    EOF
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
-
-And then run the following commands as root:
-
     aptitude update
     aptitude install net2o
 
 Since net2o requires a way more recent Gforth than in Debian's
-repository, you will need aptitude to resolve this; if the first
+repository, aptitude may ask you to resolve this; if the first
 solution doesn't work out, say "n" to get the second solution.
+
+There are actually three repositories: stable, testing and unstable;
+at the moment, all packages are the same.  Binaries are available for
+amd64, i386, and armhf.
 
 Get it for Android
 ------------------

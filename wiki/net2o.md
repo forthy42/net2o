@@ -3,6 +3,11 @@ net2o - reinventing the Internet
 
 net2o is the attempt to reinvent the Internet.
 
+[Get it](get-it.md)
+-------------------
+
+net2o is currently under alpha test.
+
 What's broken?
 --------------
 
@@ -50,9 +55,6 @@ What third party technology do we use
 * [Threefish](https://www.schneier.com/threefish.html) as block cipher
   in ECB mode and in [Threefish AEAD mode](threefish.md) as backup for Keccak.
 * ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
-
-[Get it](get-it.md)
--------------------
 
 Documentation
 -------------
