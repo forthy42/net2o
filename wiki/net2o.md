@@ -3,10 +3,10 @@ net2o - reinventing the Internet
 
 net2o is the attempt to reinvent the Internet.
 
-[Get it](get-it.md)
--------------------
+Get it and try it
+-----------------
 
-net2o is currently under alpha test.
+net2o is currently under alpha test. [Get it](get-it.md) and [try it](try-it.md).
 
 What's broken?
 --------------
