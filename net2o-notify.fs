@@ -82,8 +82,8 @@ Sema notify-sema
 	net2o-icon# nb .setSmallIcon to nb
 	nb .build to nf ;
     : show-notification ( -- )
-	1 nf notification-manager .notify
-	1000 clazz .screen_on ;
+	1000 clazz .screen_on
+	1 nf notification-manager .notify ;
 
     :noname defers android-active rendering @ IF  notify-  THEN ;
     is android-active

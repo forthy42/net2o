@@ -69,7 +69,7 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/vault.fs tests/ed25519-table.fs $(FORTHLIB)		\
 	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs startn2o.fs
 
-SRCDIRS = site-forth/net2o/tests home
+SRCDIRS = net2o/tests
 
 SCRIPTS = n2o
 
@@ -95,10 +95,10 @@ extra-install:	install-libs install
 
 install:	libcc-install
 	for i in $(SRCDIRS); do \
-		$(MKDIR) -p $(datadir)/gforth/$$i; \
+		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
 	done
 	for i in $(SOURCES); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/gforth/site-forth/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
 	for i in $(SCRIPTS); do \

@@ -1,7 +1,7 @@
 #! /usr/bin/env gforth-fast
 \ -*- mode: Forth -*-
 
-fpath+ @DATADIR@/gforth/site-forth/net2o
+fpath+ @DATADIR@/gforth/@GFVER@/net2o
 
 require n2o.fs
 
