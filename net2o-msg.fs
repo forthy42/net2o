@@ -35,6 +35,8 @@ Variable otr-mode
 User replay-mode
 User skip-sig?
 
+sema msglog-sema
+
 : ?msg-context ( -- o )
     msg-context @ dup 0= IF
 	drop  n2o:new-msg dup msg-context !
@@ -44,13 +46,17 @@ User skip-sig?
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
+: msg-log@ ( group u -- addr u )
+    [: msg-logs #@ save-mem ;] msglog-sema c-section ;
+
 : save-msgs ( group u -- )
     otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN
     init-chatlog  enc-file $off  n2o:new-msg >o
-    2dup msg-logs #@ bounds ?DO
+    2dup msg-log@
+    over >r bounds ?DO
 	I $@ [: net2o-base:$, net2o-base:nestsig ;]
 	gen-cmd$ enc-file $+!
-    cell +LOOP  dispose o>
+    cell +LOOP  r> free throw  dispose o>
     >chatid
     [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
@@ -70,7 +76,8 @@ User skip-sig?
     msg-group$ $@ msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN
     last# cell+ $[]# >r
-    last# cell+ $ins[]date msg-group$ $@ save-msgs
+    [: last# cell+ $ins[]date ;] msglog-sema c-section
+    msg-group$ $@ save-msgs
     r> last# cell+ $[]# <> ;
 
 Sema queue-sema
@@ -110,9 +117,9 @@ Sema queue-sema
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
-    cells >r msg-logs #@ dup r> - 0 max /string bounds ?DO
+    cells >r msg-log@ over { log } dup r> - 0 max /string bounds ?DO
 	I $@ msg-display
-    cell +LOOP   dispose o> ;
+    cell +LOOP   log free throw  dispose o> ;
 
 : >group ( addr u -- )
     2dup msg-groups #@ d0=
@@ -328,8 +335,9 @@ previous
 : .chat ( -- ) replay-mode on
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
     nest-string 2@ msg+ do-msg-nestsig
-    msg-group$ $@ 1 display-lastn  msg-group$ $@ save-msgs o> o>
-    replay-mode off  notify- ;
+    msg-group$ $@ 1 display-lastn
+    replay-mode off
+    msg-group$ $@ save-msgs o> o> notify- ;
 
 $200 Constant maxmsg#
 
