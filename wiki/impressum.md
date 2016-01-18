@@ -22,7 +22,14 @@ Kontakt:
 <tr><th>PGP key:</th>
 <td><a href="//net2o.de/bernd@net2o.de.gpg.asc">67007C30</a> or (new Ed25519 key) <a href="//net2o.de/bernd@net2o.de.asc">E0B7BDE0</a></td</tr>
 <tr><th>net2o id:</th>
-<td><tt><span style="background-color: #fec">kQusJ</span><span style="background-color: #cef">zA;7*</span><span style="background-color: #fec">?t=uy</span><span style="background-color: #cef">@X}1G</span><span style="background-color: #fec">Wr!+0</span><span style="background-color: #cef">qqp_C</span><span style="background-color: #fec">n176t</span><span style="background-color: #cef">4(dQ*</span></tt></td>
+<td><tt><span style="background-color: #fec">kQusJ</span><!--
+--><span style="background-color: #cef">zA;7*</span><br /><!--
+--><span style="background-color: #ecf">?t=uy</span><!--
+--><span style="background-color: #fce">@X}1G</span><br /><!--
+--><span style="background-color: #fec">Wr!+0</span><!--
+--><span style="background-color: #cef">qqp_C</span><br /><!--
+--><span style="background-color: #ecf">n176t</span><!--
+--><span style="background-color: #fce">4(dQ*</span></tt></td>
 </tr></table>
 
 Umsatzsteuer-ID:
