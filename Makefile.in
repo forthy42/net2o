@@ -67,9 +67,10 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/insdeltest.fs tests/keccak.fs tests/keys.fs		\
 	  tests/msg.fs tests/teststat.fs tests/threefish.fs		\
 	  tests/vault.fs tests/ed25519-table.fs $(FORTHLIB)		\
-	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs startn2o.fs
+	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs		\
+	  startn2o.fs doc/net2o-logo.png
 
-SRCDIRS = net2o/tests
+SRCDIRS = net2o/tests net2o/doc
 
 SCRIPTS = n2o
 
