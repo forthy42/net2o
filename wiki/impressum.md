@@ -24,11 +24,11 @@ Kontakt:
 <tr><th>net2o id:</th>
 <td><tt><!--
 --><span style="background-color: #fec">kQusJ</span><!--
---><span style="background-color: #cef">zA;7*</span><br /><!--
+--><span style="background-color: #cef">zA;7*</span></td></tr><tr><th></th><td><!--
 --><span style="background-color: #ccf">?t=uy</span><!--
---><span style="background-color: #cfc">@X}1G</span><br /><!--
+--><span style="background-color: #cfc">@X}1G</span>/td></tr><tr><th></th><td><!--
 --><span style="background-color: #fec">Wr!+0</span><!--
---><span style="background-color: #cef">qqp_C</span><br /><!--
+--><span style="background-color: #cef">qqp_C</span>/td></tr><tr><th></th><td><!--
 --><span style="background-color: #ccf">n176t</span><!--
 --><span style="background-color: #cfc">4(dQ*</span></tt></td>
 </tr></table>
