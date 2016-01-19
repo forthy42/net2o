@@ -91,6 +91,19 @@ word-args
 : -scan ( addr u char -- addr u' ) >r
     BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
 
+\ set debugging
+
+: +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN
+    c@ ',' - abs 1 = ; \ branchless version to test for '+' and '-'
+
+: ++debug ( -- )
+    BEGIN  ?peekarg  WHILE  +?  WHILE
+		?nextarg drop debug-eval $!
+		s" db " debug-eval 1 $ins
+		s" (" debug-eval $+!
+		debug-eval $@ evaluate
+	REPEAT  THEN ;
+
 \ logic memory modifiers
 
 : or!   ( x addr -- )    >r r@ @ or   r> ! ;

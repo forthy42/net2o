@@ -396,15 +396,4 @@ scope{ /chat
 
 }scope
 
-: +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN  c@ '+' = ;
-
-: ++debug ( -- )
-    BEGIN  argc @ 1 > WHILE  1 arg +?  WHILE
-		1 arg debug-eval $!
-		s" db " debug-eval 1 $ins
-		s" (" debug-eval $+!
-		debug-eval $@ evaluate
-		shift-args
-	REPEAT  THEN ;
-
 previous

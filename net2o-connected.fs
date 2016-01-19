@@ -363,14 +363,12 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 : gen-request ( -- ) setup!
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     net2o-code0
-    ind-addr @ IF  new-punchload  THEN
     ['] end-cmd IS expect-reply?
     tpkc keysize $, receive-tmpkey
     nest[ no-cookie-xt cookie,
-    ind-addr @ IF  gen-punch-reply
-    ELSE  request( ." gen reply" forth:cr )
+    request( ." gen reply" forth:cr )
 	gen-reply request,
-    THEN  ]nest  other
+    ]nest  other
     tmpkey-request
     pubkey @ 0= IF  key-request  THEN
     ind-addr @  IF  punch?  THEN
@@ -379,10 +377,12 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     end-code ;
 
 :noname ( addr u -- )
-    cmd0! cmdreset also net2o-base
-    [ also net2o-base ]
-    ['] end-cmd IS expect-reply?
-    $, nest end-code
+    outflag @ >r  cmdbuf-o @ >r
+    [: cmd0! cmdreset also net2o-base
+      [ also net2o-base ]
+      ['] end-cmd IS expect-reply?
+      $, nest end-code ;] catch
+    r> cmdbuf-o !  r> outflag !  throw
 ; is punch-reply
 
 : 0-resend? ( -- n )

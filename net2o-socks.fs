@@ -77,9 +77,10 @@ MSG_DONTWAIT  Constant don't-block
 $00000000 Value droprate#
 
 : %droprate ( -- )
-    1 arg dup 0= IF  2drop  EXIT  THEN
+    ?peekarg 0= IF  EXIT  THEN
     + 1- c@ '%' <> ?EXIT
-    1 arg prefix-number IF  1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
+    ?nextarg drop prefix-number IF
+	1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
 	shift-args  THEN ;
 
 : send-a-packet ( addr u -- n ) +calc

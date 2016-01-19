@@ -136,8 +136,8 @@ cmd-class class
     field: mpubkey \ our side official pubkey
     field: punch-addrs
     field: punch-load
-    field: punch-gen \ punch request number
     0 +field end-strings
+    field: punch-gen \ punch request number
     field: perm-mask
     \ secrets
     0 +field start-secrets

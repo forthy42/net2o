@@ -137,14 +137,9 @@ init-keybuf
     >r dest-flags w@ addr>assembly r> state# c:tweakkey! ;
 
 : ivs>source? ( o:map -- )
-    o 0=  dest-flags 1+ c@ stateless# and  or IF  default-key  EXIT  THEN
     dest-addr 64@ dest-vaddr 64@ 64-
     64dup dest-size @ n>64 64u>= !!inv-dest!!
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
-
-: crypt-buf-init ( map -- ) >r
-    o IF  r@ .ivs>source?  ELSE  default-key  THEN
-    ( cmd( ." key: " c:key@ c:key# xtype cr ) rdrop ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over 128@ 2r> c:tweakkey!
@@ -193,11 +188,11 @@ init-keybuf
     oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    crypt-buf-init outbuf packet-data +cryptsu
+    .ivs>source? outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 
 : inbuf-decrypt ( map -- flag ) +calc
-    crypt-buf-init inbuf packet-data +cryptsu
+    .ivs>source? inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
 : set-0key ( tweak128 keyaddr u -- )

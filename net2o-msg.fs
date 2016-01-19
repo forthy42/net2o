@@ -363,9 +363,15 @@ $200 Constant maxmsg#
 : g?leave ( -- )
     msg-group$ $@len IF  +resend-cmd send-leave -timeout  THEN ;
 
+also net2o-base
+: first-msg ( -- )
+    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN  get-ip ;
+previous
+
 : greet ( -- )
-    net2o-code expect-reply  log !time endwith
-    join, get-ip end-code ;
+    net2o-code expect-reply
+    log !time endwith  first-msg
+    join, end-code ;
 
 : chat-entry ( -- )
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
@@ -534,17 +540,27 @@ also net2o-base scope: /chat
     ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
     THEN ;
 
-: beacons ( addr u -- ) 2drop ." === beacons ===" forth:cr
+: beacons ( addr u -- )
+    \U beacons
+    \G beacons: list all beacons
+    2drop ." === beacons ===" forth:cr
     beacons [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
 	  I @ .name
       cell +LOOP forth:cr ;] #map ;
 
+: debug ( addr u -- )
+    \U debug [+|-<switch>]
+    \G debug: set or clear debugging switches
+    ['] ++debug execute-parsing ;
+
+    \U n2o <cmd>
+    \G n2o: Execute normal n2o command
 }scope
 
 : do-chat-cmds ( addr u -- )
-    1 /string bl $split 2swap
+    word-args  1 /string bl $split 2swap
     2dup ['] /chat >body find-name-in
     ?dup-IF  nip nip name>int execute
     ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
