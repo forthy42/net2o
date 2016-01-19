@@ -376,6 +376,11 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     ['] push-cmd IS expect-reply?
     end-code ;
 
+also net2o-base
+: nat-punch ( -- )
+    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN  get-ip ;
+previous
+
 :noname ( addr u -- )
     outflag @ >r  cmdbuf-o @ >r
     [: cmd0! cmdreset also net2o-base

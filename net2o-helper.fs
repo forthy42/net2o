@@ -36,7 +36,8 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     $8 $8 dhtnick $@ nick>pk ins-ip r> execute pk:connect ;
 : dht-connect ( -- )  ['] noop dht-connect' ;
 
-: subme ( -- )
+Variable announced
+: subme ( -- )  announced @ 0= ?EXIT
     pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
 
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
@@ -80,7 +81,7 @@ false Value beacon-added?
     beacon-added? IF  dht-connect
     ELSE  [: dup ['] dht-beacon add-beacon true to beacon-added? ;] dht-connect'
     THEN
-    replace-me disconnect-me -other ;
+    replace-me disconnect-me -other  announced on ;
 
 : renat-all ( -- )  !my-addr announce-me renat ;
 
@@ -193,7 +194,9 @@ User host$ \ check for this hostname
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    2r> n2o:connect +flow-control +resend ; is pk-connect
+    2r> n2o:connect +flow-control +resend
+    ind-addr @ IF  net2o-code nat-punch end-code|  THEN
+; is pk-connect
 
 :noname ( addr+key u cmdlen datalen -- )
     2>r over + 1- dup c@ dup >r -

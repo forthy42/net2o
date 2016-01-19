@@ -363,15 +363,9 @@ $200 Constant maxmsg#
 : g?leave ( -- )
     msg-group$ $@len IF  +resend-cmd send-leave -timeout  THEN ;
 
-also net2o-base
-: first-msg ( -- )
-    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN  get-ip ;
-previous
-
 : greet ( -- )
     net2o-code expect-reply
-    log !time endwith  first-msg
-    join, end-code ;
+    log !time endwith join, get-ip end-code ;
 
 : chat-entry ( -- )
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
