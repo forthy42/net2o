@@ -378,7 +378,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 also net2o-base
 : nat-punch ( -- )
-    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN  get-ip ;
+    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN ;
 previous
 
 :noname ( addr u -- )
