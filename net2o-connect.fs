@@ -143,11 +143,11 @@ net2o-base
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
     nest[ no-cookie-xt cookie, request, ]nest ;
 
-: new-punchload ( -- )
-    next-request punch-gen ! ;
+: new-request ( -- )
+    next-request request-gen ! ;
 
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
-    nest[ no-cookie-xt cookie, punch-done punch-gen @ #request,
+    nest[ no-cookie-xt cookie, punch-done request-gen @ #request,
     reply-index ulit, ok \ don't reuse this buffer
     ]nest$ punch-load, net2o:expect-reply maxdata code+ ;
 
