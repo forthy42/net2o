@@ -299,6 +299,7 @@ false Value add-myip
 : addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
 	my-addr$ ['] pub-addr, $[]map
+	cookie+request
     THEN
     endwith  do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
