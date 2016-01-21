@@ -504,6 +504,9 @@ Variable mapstart $1 mapstart !
     code-map @ >o dest-vaddr 64@ dest-tail @ n>64 64+ o> ;
 : code-reply ( -- addr )
     code-map @ >o dest-tail @ addr>replies dest-replies @ + o> ;
+: send-reply ( -- addr )
+    code-map @ >o dest-addr 64@ dest-vaddr 64@ 64- 64>n addr>replies
+    dest-replies @ + o> ;
 
 : tag-addr ( -- addr )
     dest-addr 64@ code-rmap @ >o dest-vaddr 64@ 64- 64>n

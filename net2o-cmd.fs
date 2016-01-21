@@ -511,7 +511,7 @@ comp: :, also net2o-base ;
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I outflag @ stateless# and IF  send-cX
-	    ELSE  code-reply send-xt perform  THEN
+	    ELSE  send-reply send-xt perform  THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;

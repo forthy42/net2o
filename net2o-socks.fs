@@ -80,8 +80,7 @@ $00000000 Value droprate#
     ?peekarg 0= IF  EXIT  THEN
     + 1- c@ '%' <> ?EXIT
     ?nextarg drop prefix-number IF
-	1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
-	shift-args  THEN ;
+	1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#  THEN ;
 
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
