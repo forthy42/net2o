@@ -135,7 +135,6 @@ cmd-class class
     field: pubkey \ other side official pubkey
     field: mpubkey \ our side official pubkey
     field: punch-addrs
-    field: punch-load
     0 +field end-strings
     field: punch-gen \ punch request number
     field: perm-mask
@@ -296,7 +295,8 @@ begin-structure reply
     field: reply-offset
     64field: reply-dest
     64field: reply-time
-    field: reply-xt \ execute when receiving an ok
+    field: reply-xt  \ execute when receiving an ok
+    field: send-xt   \ executed to (re)send a message
 \    field: reply-timeout# \ per-reply timeout counter
 \    field: reply-timeout-xt \ per-reply timeout xt
 end-structure

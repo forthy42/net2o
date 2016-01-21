@@ -377,8 +377,8 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     end-code ;
 
 also net2o-base
-: nat-punch ( -- )
-    ind-addr @ IF  new-punchload gen-punchload gen-punch  THEN ;
+: nat-punch ( o:connection -- )
+    ind-addr @ IF  pings new-punchload gen-punchload gen-punch  THEN ;
 previous
 
 :noname ( addr u -- )
@@ -405,7 +405,7 @@ previous
     ELSE  0  THEN ;
 
 : map-resend? ( -- n )
-    code-map @ ?dup-IF  >o 0
+    code-map @ ?dup-IF  >o 0  outflag off
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
 	    I 2@ d0<> IF

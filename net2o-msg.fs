@@ -286,14 +286,15 @@ previous
 
 : msg-reply ( tag -- )
     reply( ." got reply " hex. pubkey $@ key>nick type cr )else( drop ) ;
+: expect-msg ( --- ) ['] msg-reply expect-reply-xt ;
 
 : send-text ( addr u -- )
-    net2o-code ['] msg-reply expect-reply-xt
+    net2o-code expect-msg
     <msg $, msg-text msg> endwith
     ( cookie+request ) end-code| ;
 
 : send-text-to ( msg u nick u -- )
-    net2o-code ['] msg-reply expect-reply-xt
+    net2o-code expect-msg
     <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
     $, msg-text msg> endwith
     ( cookie+request ) end-code| ;
@@ -321,15 +322,15 @@ also net2o-base
 previous
 
 : send-join ( -- )
-    net2o-code ['] msg-reply expect-reply-xt join,
+    net2o-code expect-msg join,
     ( cookie+request ) end-code| ;
 
 :noname ( -- )
-    net2o-code ['] msg-reply expect-reply-xt silent-join,
+    net2o-code expect-msg silent-join,
     end-code ; is silent-join
 
 : send-leave ( -- )
-    net2o-code ['] msg-reply expect-reply-xt leave,
+    net2o-code expect-msg leave,
     cookie+request end-code| ;
 
 : .chat ( -- ) replay-mode on
@@ -703,7 +704,7 @@ previous
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
-    net2o-code ['] msg-reply expect-reply-xt msg $, nestsig endwith
+    net2o-code expect-msg msg $, nestsig endwith
     end-code ; is avalanche-to
 
 0 [IF]

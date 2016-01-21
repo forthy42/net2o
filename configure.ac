@@ -48,12 +48,21 @@ esac
 
 AC_PROG_INSTALL
 
+PRECC=${CC%gcc*}
+PRECLANG=${PRECC%clang*}
+dnl MacOS X has a libtool that does something else
+AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
+
+LIBTOOL=${PRECLANG}${LIBTOOL}
+echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
+
 AC_SUBST(GFORTH)
 AC_SUBST(GFORTHFAST)
 AC_SUBST(GFVER)
 AC_SUBST(GFDEBVER)
 AC_SUBST(GFARCH)
 AC_SUBST(FAST)
+AC_SUBST(LIBTOOL)
 
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
 DATADIR=$(eval echo $(eval echo $datadir))

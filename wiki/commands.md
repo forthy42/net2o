@@ -43,6 +43,10 @@ List of Commands
   check sig+nest
 + $B secstring ( #string -- $:string )
   secret string literal
++ $C nop ( -- )
+  do nothing
++ $D 4cc ( #3letter -- )
+  At the beginning of a file, this can be used as FourCC code
 
 ### reply commands ###
 

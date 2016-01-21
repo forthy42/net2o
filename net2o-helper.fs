@@ -62,9 +62,9 @@ Defer insert-addr ( o -- )
 : renat ( -- )
     msg-groups [:
       cell+ $@ bounds ?DO
-	  I @ >o ret-beacon ping-addrs
+	  I @ >o ret-beacon pings
 	  [: net2o-base:nop ret+beacon ;] punch-done-xt !
-	  \ !!FIXME!! should maybe do a re-loopup?
+	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase
 	  0 punch-addrs $[] @ insert-addr
 	  o to connection

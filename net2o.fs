@@ -808,8 +808,7 @@ User outflag  outflag off
 : burst-end ( flag -- flag )
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
 
-: send-cX ( addr n -- ) +sendX2
-    >send  send-code-packet  net2o:update-key ;
+: send-cX ( addr n -- ) +sendX2  >send  send-code-packet ;
 
 \ !!FIXME!! use ffz>, branchless with floating point
 
@@ -853,26 +852,31 @@ Defer new-addr
 : punch-received ( -- )
     return-addr return-address $10 move  resend0 $off ;
 
-: send-punch ( -- )
+: send-punch ( addr u -- addr u )
+    ret-addr temp-addr $10 move  ret-addr $10 erase
     check-addr1 0= IF  2drop  EXIT  THEN
-    insert-address temp-addr ins-dest
-    temp-addr ret-addr $10 move
+    insert-address ret-addr ins-dest
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
-    punch-load $@ punch-reply ;
+    2dup send-cX
+    temp-addr ret-addr $10 move ;
 
-: net2o:punch ( o:connection addr u -- )
+: net2o:punch ( addr u o:connection -- )
     o IF
-	new-addr dup { w^ punch-addr }
-	punch-load @ IF  ['] send-punch  ELSE  ['] ping-addr1  THEN
-	addr>sock
+	new-addr { w^ punch-addr }
 	punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
 
-: ping-addrs ( o:connection -- )
+: pings ( o:connection -- )
     \G ping all addresses except the first one
     punch-addrs $@ cell safe/string bounds ?DO
 	I @ ['] ping-addr1 addr>sock
     cell +LOOP ;
+
+: punchs ( addr u o:connection -- )
+    \G send a reply to all addresses
+    punch-addrs $@ bounds ?DO
+	I @ ['] send-punch addr>sock
+    cell +LOOP  2drop ;
 
 \ send chunk
 
@@ -1293,8 +1297,8 @@ Variable timeout-tasks s" " timeout-tasks $!
 
 \ handling packets
 
-Defer queue-command ( addr u -- )
-' dump IS queue-command
+Defer cmd-exec ( addr u -- )
+' dump IS cmd-exec
 
 $01 Constant crypt-val
 $02 Constant own-crypt-val
@@ -1328,8 +1332,8 @@ User remote?
     inbuf0-decrypt 0= IF
 	." invalid packet to 0" drop cr EXIT  THEN
     validated off \ we have no validated encryption
-    stateless# outflag !  inbuf packet-data queue-command
-    remote? off ;
+    stateless# outflag !  inbuf packet-data cmd-exec
+    net2o:update-key  remote? off ;
 
 : handle-data ( addr -- )  parent @ >o  o to connection
     msg( ." Handle data to addr: " dup hex. cr )
@@ -1342,7 +1346,7 @@ User remote?
     msg( ." Handle command to addr: " dup hex. cr )
     outflag off remote? on
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
-    r> r> swap queue-command o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
+    r> r> swap cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
     remote? off ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle

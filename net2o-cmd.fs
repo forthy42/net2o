@@ -281,7 +281,8 @@ cmd-buf-c new code-buf^ !
 
 code-buf
 
-:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; to cmdreset
+:noname ( -- )  cmdbuf# off  o IF
+	req? off  ['] send-cX code-reply send-xt !  THEN ; to cmdreset
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
@@ -330,6 +331,7 @@ code0-buf \ reset default
 :noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
 ' cmd0lock to cmdlock
 ' rng64 to cmddest
+:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; to cmdreset
 
 :noname ( -- )
     cmd-buf0 new code0-buf^ !
@@ -503,20 +505,21 @@ comp: :, also net2o-base ;
     cmdreset init-reply also net2o-base ;
 comp: :, also net2o-base ;
 
-: send-cmd ( addr u dest -- size )  n64-swap { buf# }
+: send-cmd ( addr u dest -- size ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
     cmd( ." send: " outflag .dest-addr dup buf# n2o:see cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I send-cX  cmdreset  min-size I lshift  UNLOOP
+	    I outflag @ stateless# and IF  send-cX
+	    ELSE  code-reply send-xt perform  THEN
+	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
-: cmd ( -- )  cmdbuf# @ 2 u< ?EXIT \ don't send if cmdbuf is empty
+: cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest
     msg( ." send cmd to: " 64dup $64. forth:cr ) send-cmd
-    r> stateless# and 0= IF  code-update punch-load $off
-    ELSE  drop  THEN o> ;
+    r> stateless# and 0= IF  code-update  ELSE  drop  THEN o> ;
 
 also net2o-base
 
@@ -573,7 +576,7 @@ previous
     [: outflag @ >r cmdreset  do-cmd-loop
       r> outflag ! cmd-send? ;] cmdlock c-section ;
 
-' cmd-loop is queue-command
+' cmd-loop is cmd-exec
 
 \ nested commands
 
