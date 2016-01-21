@@ -1578,7 +1578,7 @@ Variable beacons \ destinations to send beacons to
 
 : requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ hex. THEN cr )
     BEGIN  stop
-    o IF  reqmask @ 0=  ELSE  false  THEN  UNTIL
+    o IF  reqmask @ 0= ( reqcount @ 0= and ) ELSE  false  THEN  UNTIL
     o IF  o-timeout  THEN  request( ." wait done" cr ) ;
 
 : client-loop ( -- )

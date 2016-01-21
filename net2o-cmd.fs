@@ -541,6 +541,7 @@ previous
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
     ticks r@ reply-time 64@ 64- ack@ .rtdelay 64!
+    -1 reqcount +!@ 1 = IF  ->wake  THEN
     0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
@@ -549,7 +550,8 @@ previous
     connection >o
     cmdbuf$ code-reply dup >r 2! code-vdest r@ reply-dest 64!
     ticks r@ reply-time 64!
-    cmd-reply-xt @ r> reply-xt ! o> ;
+    cmd-reply-xt @ r> reply-xt !
+    1 reqcount +!@ drop o> ;
 
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
