@@ -58,6 +58,9 @@ $20 value hash-size#
 : keys>search ( -- )
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
+: nicks>search ( -- )
+    search-key$ $[]off [: nick>pk search-key$ $+[]! ;] @arg-loop ;
+
 : handle-chat ( -- )
     chat-connects ?wait-chat do-chat ;
 
@@ -78,7 +81,6 @@ Vocabulary n2o
     init-client word-args ['] quit do-net2o-cmds ;
 
 : .usage ( addr u -- addr u )
-    [IFUNDEF] android ." n2o " [THEN]
     source 7 /string type cr ;
 
 scope{ n2o
@@ -274,10 +276,19 @@ synonym searchkey keysearch
     strict-keys off perm%default to perm%unknown
     get-me init-server server-loop ;
 
+\ dht commands
+
 : announce ( -- )
     \U announce
     \G announce: Only announce ID
     get-me init-client announce-me ;
+
+: lookup ( -- )
+    \U lookup
+    \G lookup: query DHT for addresses
+    get-me init-client nicks>search search-addrs
+    search-key$ [: 2dup .simple-id ." :" cr
+      >d#id >o dht-host [: .host cr ;] $[]map o> ;] $[]map ;
 
 \ chat mode
 

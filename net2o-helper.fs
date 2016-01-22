@@ -49,6 +49,11 @@ Variable announced
       cookie+request
     end-code| ;
 
+: pk:fetch-host ( key u -- )
+    net2o-code
+      expect-reply get-ip fetch-id, cookie+request
+    end-code| -setip n2o:send-replace ;
+
 : pk:addme-fetch-host ( key u -- ) +addme
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
@@ -63,7 +68,6 @@ Defer insert-addr ( o -- )
     msg-groups [:
       cell+ $@ bounds ?DO
 	  I @ >o ret-beacon pings
-	  [: net2o-base:nop ret+beacon ;] punch-done-xt !
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase
 	  0 punch-addrs $[] @ insert-addr
@@ -216,6 +220,12 @@ User search-key$
     dht-connect
     net2o-code  expect-reply
     search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
+    cookie+request end-code| disconnect-me ;
+
+: search-addrs ( -- )
+    dht-connect
+    net2o-code  expect-reply
+    search-key$ [: $, dht-id dht-host? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
 
 : insert-keys ( -- )

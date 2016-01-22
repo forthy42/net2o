@@ -49,7 +49,8 @@ Sema notify-sema
     also android also jni
 
     0x01080077 Value net2o-icon# \ default
-    \ : net2o-icon# "gnu.gforth:drawable/net2o_notify" R.id ;
+    : get-net2o-icon# "gnu.gforth:drawable/net2o_notify" R.id ;
+    get-net2o-icon# to net2o-icon#
     jvalue nb
     jvalue ni
     jvalue nf
@@ -76,13 +77,13 @@ Sema notify-sema
 	1 nb .setAutoCancel to nb ;
     msg-builder
     : build-notification ( -- )
+	1000 clazz .screen_on
 	1 pending-notifications +!
 	['] notify-title $tmp make-jstring nb .setContentTitle to nb
 	notify@ make-jstring nb .setContentText to nb
 	notify@ make-jstring nb .setTicker to nb
 	nb .build to nf ;
     : show-notification ( -- )
-	1000 clazz .screen_on
 	1 nf notification-manager .notify ;
 
     :noname defers android-active rendering @ IF  notify-  THEN ;

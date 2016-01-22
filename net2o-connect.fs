@@ -48,7 +48,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
-	punch-received  ['] noop punch-done-xt !@ execute
+	punch-received  ret+beacon
 	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
     ELSE
 	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
@@ -148,7 +148,7 @@ net2o-base
 
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
     nest[ no-cookie-xt cookie, punch-done request-gen @ #request,
-    reply-index ulit, ok \ don't reuse this buffer
+    reply-index ulit, ok push' nop \ don't reuse this buffer
     ]nest$ punch-load, net2o:expect-reply maxdata code+ ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
@@ -193,14 +193,16 @@ net2o-base
     ELSE  2drop  THEN ;
 
 \ version check
+: ?version ( addr u -- )
+    net2o-version 2over str< IF
+	<warn> ." Other side has more recent net2o version: "
+	forth:type <default> forth:cr
+    ELSE  2drop  THEN ;
 
 +net2o: check-version ( $:version -- ) \g version check
-    $> net2o-version 2over str< IF
-	<warn> ." Other side has more recent net2o version: " type <default>
-	forth:cr
-    ELSE  2drop  THEN ;
-+net2o: get-version ( -- )
-    net2o-version $, check-version ;
+    $> ?version ;
++net2o: get-version ( $:version -- ) \g version cross-check
+    $> ?version net2o-version $, check-version ;
 
 gen-table $freeze
 
