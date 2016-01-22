@@ -857,12 +857,11 @@ Defer new-addr
     return-addr return-address $10 move  resend0 $off ;
 
 : send-punch ( addr u -- addr u )
-    ret-addr temp-addr $10 move  ret-addr $10 erase
     check-addr1 0= IF  2drop  EXIT  THEN
+    temp-addr ret-addr $10 move
     insert-address ret-addr ins-dest
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
-    2dup send-cX
-    temp-addr ret-addr $10 move ;
+    2dup send-cX ;
 
 : net2o:punch ( addr u o:connection -- )
     o IF
