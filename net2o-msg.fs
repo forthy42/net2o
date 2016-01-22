@@ -500,13 +500,13 @@ also net2o-base scope: /chat
     \G invitations: handle invitations: accept, ignore or block invitations
     2drop .invitations ;
 
-: chats ( addr u -- ) 2drop ." chats: "
+: chats ( addr u -- ) 2drop ." ===== chats: "
     \U chats
     \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
       r@ .group ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
-    forth:cr ;
+    ."  =====" forth:cr ;
 
 : chat ( addr u -- )
     \U chat @user|group

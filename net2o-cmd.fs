@@ -82,7 +82,7 @@ end-class cmd-buf-c
 
 : @>$ ( addr u -- $:string addr' u' )
     bounds p@+ 64n-swap 64>n bounds ( endbuf endstring startstring )
-    >r 2dup u< IF  true !!stringfit!!  THEN
+    >r 2dup u< IF  ~~ true !!stringfit!!  THEN
     dup r> over umin tuck - >$ tuck - ;
 
 : string@ ( -- $:string )
@@ -286,7 +286,7 @@ code-buf
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( addr u -- ) dup maxstring u> IF  ~~ true  !!stringfit!!  THEN
+:noname ( addr u -- ) dup maxstring u> IF  ~~ true !!stringfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
@@ -511,7 +511,9 @@ comp: :, also net2o-base ;
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I outflag @ stateless# and IF  send-cX
-	    ELSE  send-reply send-xt perform  THEN
+	    ELSE
+		send-reply >r over buf# r@ 2!
+		r> send-xt perform  THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
@@ -547,9 +549,9 @@ previous
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
     msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
-    connection >o
-    cmdbuf$ code-reply dup >r 2! code-vdest r@ reply-dest 64!
-    ticks r@ reply-time 64!
+    connection >o code-reply >r
+    code-vdest     r@ reply-dest 64!
+    ticks          r@ reply-time 64!
     cmd-reply-xt @ r> reply-xt !
     1 reqcount +!@ drop o> ;
 

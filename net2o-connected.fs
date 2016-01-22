@@ -408,9 +408,10 @@ previous
     code-map @ ?dup-IF  >o 0  outflag off
 	dest-replies @
 	dest-size @ addr>replies bounds o> U+DO
-	    I 2@ d0<> IF
+	    I reply-xt @ IF
 		resend( ." resend: " I 2@ n2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ $64. I 2@ swap hex. hex. forth:cr )
+		ticks I reply-time 64!
 		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +! 1+
 	    THEN
