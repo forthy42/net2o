@@ -364,6 +364,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
+    get-version
     tpkc keysize $, receive-tmpkey
     nest[ no-cookie-xt cookie,
     request( ." gen reply" forth:cr )

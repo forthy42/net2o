@@ -192,6 +192,16 @@ net2o-base
 	pk2-sig? !!sig!! >invitations do-keypad sec-off
     ELSE  2drop  THEN ;
 
+\ version check
+
++net2o: check-version ( $:version -- ) \g version check
+    $> net2o-version 2over str< IF
+	<warn> ." Other side has more recent net2o version: " type <default>
+	forth:cr
+    ELSE  2drop  THEN ;
++net2o: get-version ( -- )
+    net2o-version $, check-version ;
+
 gen-table $freeze
 
 }scope

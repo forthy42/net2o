@@ -15,7 +15,7 @@ dnl Process this file with autoconf to produce a configure script.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([net2o], [0.1.2-20160121], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
+AC_INIT([net2o], [0.1.2-20160122], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
 AC_PREREQ(2.54)
 
 AC_MSG_CHECKING([for gforth])
@@ -68,7 +68,7 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 DATADIR=$(eval echo $(eval echo $datadir))
 AC_SUBST(DATADIR)
 
-AC_CONFIG_FILES([Makefile n2o debian/changelog debian/control])
+AC_CONFIG_FILES([Makefile n2o net2o-version.fs debian/changelog debian/control])
 AC_CONFIG_COMMANDS([stamp-h],[[date > stamp-h
 chmod +x n2o]],[PACKAGE_VERSION=$PACKAGE_VERSION
  machine=$machine

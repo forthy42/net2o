@@ -17,6 +17,7 @@
 
 \ helper words
 
+require net2o-version.fs
 require net2o-err.fs
 
 \ required tools

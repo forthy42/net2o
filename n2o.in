@@ -5,10 +5,6 @@ fpath+ @DATADIR@/gforth/@GFVER@/net2o
 
 require n2o.fs
 
-scope{ n2o
-: version ." n2o version @PACKAGE_VERSION@" cr ;
-}scope
-
 script? [IF] cmd-args ++debug %droprate \ read in all debugging stuff
     argc @ 1 > [IF] next-cmd [ELSE] n2o:help [THEN]
     n2o:bye [THEN]

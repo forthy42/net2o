@@ -68,17 +68,19 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  tests/msg.fs tests/teststat.fs tests/threefish.fs		\
 	  tests/vault.fs tests/ed25519-table.fs $(FORTHLIB)		\
 	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs		\
-	  startn2o.fs doc/net2o-logo.png
+	  startn2o.fs doc/net2o-logo.png net2o-version.fs.in
 
 SRCDIRS = net2o/tests net2o/doc
 
 SCRIPTS = n2o
 
+GEN = net2o-version.fs
+
 DOC = wiki/commands.md
 
 all: no-config
 
-no-config: libs
+no-config: libs $(GEN)
 
 clean:
 	for i in $(LIBS); do (cd $$i; $(MAKE) clean); done
@@ -98,7 +100,7 @@ install:	libcc-install
 	for i in $(SRCDIRS); do \
 		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
 	done
-	for i in $(SOURCES); do \
+	for i in $(SOURCES) $(GEN); do \
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
@@ -123,7 +125,7 @@ doc:	$(DOC)
 wiki/commands.md:	$(SOURCES)
 	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md
 
-TAGS:	$(SOURCES)
+TAGS:	$(SOURCES) $(GEN)
 	gforth etags.fs n2o.fs -e "bye"
 	mv TAGS net2o.TAGS
 	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS
@@ -131,7 +133,7 @@ TAGS:	$(SOURCES)
 configure: configure.ac
 	cd $(srcdir) && autoreconf --force --verbose $(srcdir)
 
-Makefile n2o:	Makefile.in n2o.in configure
+Makefile n2o net2o-version.fs debian/changelog debian/control:	Makefile.in n2o.in config.status
 	./config.status
 
 config.status: configure
