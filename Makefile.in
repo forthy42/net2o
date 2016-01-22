@@ -61,14 +61,14 @@ SOURCES = 64bit.fs alice-test.fs base64.fs base85.fs bob-test.fs	\
 	  net2o-msg.fs net2o-notify.fs net2o-qr.fs net2o-socks.fs	\
 	  net2o-tools.fs net2o-vault.fs rng.fs server-test.fs		\
 	  termclient.fs terminal-test.fs test-keys.fs xtype.fs		\
-	  tests/alice2-msg.fs tests/alice-msg.fs tests/bernd-msg.fs	\
-	  tests/bob-msg.fs tests/copy.fs tests/cryptspeed.fs		\
-	  tests/dht.fs tests/dht-pop.fs tests/ed25519.fs		\
-	  tests/insdeltest.fs tests/keccak.fs tests/keys.fs		\
-	  tests/msg.fs tests/teststat.fs tests/threefish.fs		\
-	  tests/vault.fs tests/ed25519-table.fs $(FORTHLIB)		\
-	  ed25519-donnalib.fs keccaklib.fs threefishlib.fs		\
-	  startn2o.fs doc/net2o-logo.png net2o-version.fs.in
+	  tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs	\
+	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
+	  tests/dht-pop.fs tests/ed25519.fs tests/insdeltest.fs		\
+	  tests/keccak.fs tests/keys.fs tests/msg.fs			\
+	  tests/teststat.fs tests/threefish.fs tests/vault.fs		\
+	  tests/ed25519-table.fs $(FORTHLIB) ed25519-donnalib.fs	\
+	  keccaklib.fs threefishlib.fs startn2o.fs doc/net2o-logo.png	\
+	  net2o-version.fs.in
 
 SRCDIRS = net2o/tests net2o/doc
 
