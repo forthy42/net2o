@@ -100,7 +100,8 @@ scope{ n2o
 }scope
 
 : next-cmd ( -- )
-    ?nextarg 0= IF  n2o:help  EXIT  THEN  ['] n2o >body search-wordlist
+    ?nextarg 0= IF  n2o:help  EXIT  THEN
+    ['] n2o >body search-wordlist
     IF  execute  ELSE  ['] 2drop arg-loop n2o:help  THEN ;
 
 scope{ n2o
@@ -358,7 +359,9 @@ synonym searchkey keysearch
 : debug ( -- )
     \U debug [+|-<switch>]
     \G debug: set or clear debugging switches
-    ++debug ;
+    also forth
+    BEGIN  ?peekarg  WHILE  +-?  WHILE  ?nextarg drop set-debug  REPEAT  THEN
+    previous ;
 
 \ file copy
 

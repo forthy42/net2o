@@ -94,15 +94,16 @@ word-args
 \ set debugging
 
 : +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN
-    c@ ',' - abs 1 = ; \ branchless version to test for '+' and '-'
+    c@ '+' = ;
+
+: set-debug ( addr u -- )
+    debug-eval $!
+    s" db " debug-eval 1 $ins
+    s" (" debug-eval $+!
+    debug-eval $@ evaluate ;
 
 : ++debug ( -- )
-    BEGIN  ?peekarg  WHILE  +?  WHILE
-		?nextarg drop debug-eval $!
-		s" db " debug-eval 1 $ins
-		s" (" debug-eval $+!
-		debug-eval $@ evaluate
-	REPEAT  THEN ;
+    BEGIN  ?peekarg  WHILE  +?  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
 
 \ logic memory modifiers
 
