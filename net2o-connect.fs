@@ -48,7 +48,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
-	take-ret  nop  ret+beacon
+	nop  ret+beacon
 	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
     ELSE
 	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
