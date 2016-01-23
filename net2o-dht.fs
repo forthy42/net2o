@@ -328,7 +328,7 @@ previous
 : -setip ['] .iperr setip-xt ! ;
 
 : sub-me ( -- )
-    net2o-code
+    net2o-code  expect-reply
     pkc keysize2 $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
