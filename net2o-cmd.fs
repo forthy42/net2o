@@ -262,10 +262,10 @@ Variable throwcount
     1 throwcount +!
     [: ." do-cmd-loop: " dup . .exe cr ;] $err
     dup DoError  nothrow
-    buf-state @ show-offset !  n2o:see-me  show-offset on
+    buf-state @ show-offset !  <err> n2o:see-me <default> show-offset on
     un-cmd  throwcount @ 4 < IF  >throw  THEN ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!
-    cmd( dest-flags .dest-addr 2dup n2o:see )
+    cmd( <warn> dest-flags .dest-addr 2dup n2o:see <default> )
     sp@ >r throwcount off
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     trace( ." cmd loop done" .s cr )
@@ -507,7 +507,7 @@ comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- size ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
-    cmd( ." send: " outflag .dest-addr dup buf# n2o:see cr )
+    cmd( <info> ." send: " outflag .dest-addr dup buf# n2o:see <default> cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I outflag @ stateless# and IF  send-cX
