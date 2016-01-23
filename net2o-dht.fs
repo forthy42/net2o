@@ -324,7 +324,7 @@ false Value add-myip
     ['] addme-end IS expect-reply? ;
 previous
 
-: +addme ['] addme setip-xt ! ;
+: +addme ['] addme setip-xt !  next-request request-gen ! ;
 : -setip ['] .iperr setip-xt ! ;
 
 : sub-me ( -- )
