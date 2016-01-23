@@ -72,7 +72,7 @@ Defer insert-addr ( o -- )
 	  ret-addr $10 erase
 	  0 punch-addrs $[] @ insert-addr
 	  o to connection
-	  net2o-code new-request gen-punchload gen-punch end-code o>
+	  net2o-code new-request true gen-punchload gen-punch end-code o>
       cell +LOOP
     ;] #map ;
 

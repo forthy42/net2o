@@ -48,7 +48,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
-	nop  ret+beacon
+	ret+beacon
 	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
     ELSE
 	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
@@ -146,9 +146,10 @@ net2o-base
 : new-request ( -- )
     next-request request-gen ! ;
 
-: gen-punchload ( -- ) request( ." gen punchload" forth:cr )
+: gen-punchload ( flag -- ) >r request( ." gen punchload" forth:cr )
     nest[ no-cookie-xt cookie, punch-done request-gen @ #request,
-    reply-index ulit, ok \ don't reuse this buffer
+    reply-index ulit, ok
+    r> IF  push' nop  THEN \ auto-nop if necessary
     ]nest$ punch-load, net2o:expect-reply maxdata code+ ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
@@ -178,10 +179,7 @@ net2o-base
     [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
       reply-key, ( cookie+request ) time-offset! context ]tmpnest
       push-cmd ;]  IS expect-reply? ;
-+net2o: gen-punch-reply ( -- )  o? \g generate a punch request reply
-    [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
-      reply-key, time-offset! gen-punchload gen-punch context ]tmpnest
-      push-cmd ;]  IS expect-reply? ;
++net2o: gen-punch-reply ( -- ) ( obsolete dummy ) ;
 
 \ one-shot packets
 
