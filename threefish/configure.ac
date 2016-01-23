@@ -21,7 +21,7 @@ case "$host_alias" in
 	enable_fast=yes
 	CFLAGS=""
 	;;
-    arm-*)
+    arm*-*)
 	CFLAGS="-O3 -mfpu=neon $nomflags"
 	;;
     i686-linux-android)
