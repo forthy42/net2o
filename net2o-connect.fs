@@ -196,7 +196,7 @@ net2o-base
 : ?version ( addr u -- )
     net2o-version 2over str< IF
 	<warn> ." Other side has more recent net2o version: "
-	forth:type <default> forth:cr
+	forth:type ." , ours: " net2o-version forth:type <default> forth:cr
     ELSE  2drop  THEN ;
 
 +net2o: check-version ( $:version -- ) \g version check
