@@ -853,9 +853,6 @@ Defer punch-reply
 Defer addr>sock
 Defer new-addr
 
-: punch-received ( -- )
-    return-addr return-address $10 move  resend0 $off ;
-
 : send-punch ( addr u -- addr u )
     check-addr1 0= IF  2drop  EXIT  THEN
     temp-addr ret-addr $10 move
@@ -1365,7 +1362,6 @@ User remote?
 	invalid( r> >o .inv-packet o>  drop )else( rdrop drop ) EXIT
     THEN
     crypt-val validated ! \ ok, we have a validated connection
-    return-addr return-address $10 move
     r> >o handle o IF  o>  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet

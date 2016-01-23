@@ -467,7 +467,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     $> cmd:nestsig ; \ balk on all wrong signatures
 +net2o: secstring ( #string -- $:string ) \g secret string literal
     string@ ;
-+net2o: nop ( -- ) ; \g do nothing
++net2o: nop ( -- ) nat( ." nop" forth:cr ) ; \g do nothing
 +net2o: 4cc ( #3letter -- )
     \g At the beginning of a file, this can be used as FourCC code
     p@ 64drop p@ 64drop p@ 64drop ; 
@@ -555,11 +555,16 @@ previous
     cmd-reply-xt @ r> reply-xt !
     1 reqcount +!@ drop o> ;
 
+: take-ret ( -- )
+\    nat( ." take ret: " return-addr .addr-path space ."  -> " return-address .addr-path forth:cr )
+    return-addr return-address $10 move ;
+
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
     ?dup-IF
 	cmd( dest-addr 64@ $64. ." resend canned code reply " r@ hex. forth:cr )
 	resend( ." resend canned code reply " r@ hex. forth:cr )
+	take-ret
 	r> reply-dest 64@ send-cmd drop true
 	1 packets2 +!
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
@@ -571,9 +576,10 @@ previous
     o to connection
     o IF
 	maxdata code+
-	code-buf
+	cmd!
 	tag-addr? IF
 	    2drop  ack@ .>flyburst  1 packetr2 +!  EXIT  THEN
+	take-ret
     ELSE
 	cmd0!
     THEN

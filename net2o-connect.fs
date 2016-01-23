@@ -48,7 +48,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
-	punch-received  ret+beacon
+	take-ret  nop  ret+beacon
 	nat( ticks .ticks ."  punch done: " return-address .addr-path forth:cr )
     ELSE
 	nat( ticks .ticks ."  punch not done: " return-addr .addr-path forth:cr )
@@ -148,7 +148,7 @@ net2o-base
 
 : gen-punchload ( -- ) request( ." gen punchload" forth:cr )
     nest[ no-cookie-xt cookie, punch-done request-gen @ #request,
-    reply-index ulit, ok push' nop \ don't reuse this buffer
+    reply-index ulit, ok \ don't reuse this buffer
     ]nest$ punch-load, net2o:expect-reply maxdata code+ ;
 
 +net2o: punch? ( -- ) \g Request punch addresses
