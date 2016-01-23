@@ -3,7 +3,6 @@
 e? os-type s" linux-android" str= [IF] require starta.fs [THEN]
 page ." loading n2o..."
 require n2o.fs
-100 0 [DO] key? drop 1 ms [LOOP]
 : n2o-greet  page
     ." net2o text UI, nerd edition for 32c3" cr
     ." type 'bye' to leave and 'help' for help" cr ;
