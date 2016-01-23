@@ -300,7 +300,7 @@ false Value add-myip
     add-myip IF
 	my-addr$ ['] pub-addr, $[]map
     THEN  endwith
-    no-cookie-xt cookie, request-gen @ #request,
+    nest[ no-cookie-xt cookie, request-gen @ #request, ]nest
     do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
     addr .+my-id
@@ -331,8 +331,9 @@ previous
     net2o-code
     pkc keysize2 $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
-	gen-host-del $, dht-host- ;] $[]map
+      gen-host-del $, dht-host- ;] $[]map
     endwith
+    cookie+request
     end-code| ;
 
 \ replace me stuff
