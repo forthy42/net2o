@@ -545,11 +545,6 @@ also net2o-base scope: /chat
 	  I @ .name
       cell +LOOP forth:cr ;] #map ;
 
-: debug ( addr u -- )
-    \U debug [+|-<switch>]
-    \G debug: set or clear debugging switches
-    ['] ++debug execute-parsing ;
-
     \U n2o <cmd>
     \G n2o: Execute normal n2o command
 }scope

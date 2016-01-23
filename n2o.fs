@@ -355,6 +355,11 @@ synonym searchkey keysearch
     ?nextarg 0= IF  help  EXIT  THEN
     get-me init-client word-args ['] included do-net2o-cmds ;
 
+: debug ( -- )
+    \U debug [+|-<switch>]
+    \G debug: set or clear debugging switches
+    ++debug ;
+
 \ file copy
 
 : get ( -- )
