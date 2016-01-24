@@ -9,6 +9,6 @@ require n2o.fs
 :noname load-rc n2o-greet
     "~/.net2o/seckeys.k2o" file-status nip
     IF  ." Generate a new keypair:" cr
-	['] n2o:keygen catch DoError
-    ELSE  ['] get-me catch DoError  THEN
+	['] n2o:keygen catch ?dup-IF  DoError  THEN
+    ELSE  ['] get-me catch ?dup-IF  DoError  THEN  THEN
     set-net2o-cmds ; is bootmessage

@@ -67,7 +67,7 @@ Defer insert-addr ( o -- )
 : renat ( -- )
     msg-groups [:
       cell+ $@ bounds ?DO
-	  I @ >o ret-beacon pings
+	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase
 	  0 punch-addrs $[] @ insert-addr
@@ -83,11 +83,12 @@ false Value beacon-added?
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     beacon-added? IF  dht-connect
-    ELSE  [: dup ['] dht-beacon add-beacon true to beacon-added? ;] dht-connect'
+    ELSE  [: dup ['] dht-beacon 0 .add-beacon true to beacon-added? ;] dht-connect'
     THEN
     replace-me disconnect-me -other  announced on ;
 
-: renat-all ( -- )  !my-addr announce-me renat ;
+: renat-all ( -- ) beacon( ." remove all beacons" cr )
+    beacons #offs !my-addr announce-me renat ;
 
 [IFDEF] android
     also android also jni
@@ -111,8 +112,8 @@ event: ->renat ( -- )  renat-all ;
 event: ->do-beacon ( addr -- )
     beacon( ." ->do-beacon" forth:cr )
     { beacon } beacon cell+ $@ 1 64s /string bounds ?DO
-	beacon $@ I perform
-    cell +LOOP ;
+	beacon $@ I 2@ .execute
+    2 cells +LOOP ;
 
 : do-beacon ( addr -- )  \ sign on, and do a replace-me
     <event elit, ->do-beacon ?query-task event> ;
@@ -251,9 +252,9 @@ User search-key$
 \ connect, disconnect debug
 
 : dbg-connect ( -- )  connect( <info>
-    ." connected from: " pubkey $@ .key-id <default> cr ) ;
+    ." connected from: " .con-id <default> cr ) ;
 : dbg-disconnect ( -- ) connect( <info>
-    ." disconnecting: " pubkey $@ .key-id <default> cr ) ;
+    ." disconnecting: " .con-id <default> cr ) ;
 ' dbg-connect IS do-connect
 ' dbg-disconnect IS do-disconnect
 

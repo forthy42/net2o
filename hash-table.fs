@@ -103,6 +103,13 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
+: #offs ( hash -- ) >r
+    r@ @ $100 cells bounds DO  I $off  cell +LOOP
+    r@ @ $100 cells + $80 bounds DO
+	I @ ?dup-IF  recurse  THEN
+    cell +LOOP
+    r@ @ free throw  r> off ;
+
 -1 8 rshift invert Constant msbyte#
 
 : leftalign ( key -- key' )

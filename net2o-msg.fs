@@ -415,7 +415,7 @@ Variable chat-keys
     ." rtdelay: " rtdelay 64@ 64. cr ;
 
 : .context ( o:context -- o:context )
-    ." Connected with: " pubkey $@ .key-id cr
+    ." Connected with: " .con-id cr
     ack-context @ ?dup-IF  ..ack  THEN ;
 
 : .group ( addr -- )
@@ -485,7 +485,7 @@ also net2o-base scope: /chat
     \G peers: list peers in all groups
     msg-groups [: dup .group ." : "
       cell+ $@ bounds ?DO
-	  space I @ >o pubkey $@ .key-id space
+	  space I @ >o .con-id space
 	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
       cell +LOOP  forth:cr ;] #map ;
 
@@ -530,7 +530,7 @@ also net2o-base scope: /chat
     \G nat: list nat traversal information of all peers in all groups
     msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
-	  ." --- " I @ >o pubkey $@ .key-id ." : " return-address .addr-path
+	  ." --- " I @ >o .con-id ." : " return-address .addr-path
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
@@ -549,8 +549,8 @@ also net2o-base scope: /chat
     beacons [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
-	  I @ .name
-      cell +LOOP forth:cr ;] #map ;
+	  I 2@ ?dup-IF ..con-id space THEN .name
+      2 cells +LOOP forth:cr ;] #map ;
 
     \U n2o <cmd>
     \G n2o: Execute normal n2o command
@@ -597,7 +597,7 @@ previous
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
 : chat-connect ( addr u -- )
-    $A $A pk-connect +resend-msg  greet +group ret+beacon ;
+    $A $A pk-connect +resend-msg  greet +group ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
@@ -680,11 +680,11 @@ previous
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection +resend-cmd
-    ret-beacon disconnect-me o>  cell +LOOP ;
+    disconnect-me o>  cell +LOOP ;
 : disconnect-all ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection +resend-cmd send-leave
-    ret-beacon disconnect-me o>  cell +LOOP ;
+    disconnect-me o>  cell +LOOP ;
 
 : leave-chat ( group -- )
     dup send-reconnect disconnect-group ;
@@ -693,7 +693,7 @@ previous
     msg-groups ['] leave-chat #map ;
 
 : do-chat ( -- ) chat-entry \ ['] cmd( >body on
-    [: up@ wait-task ! ret+beacon ;] IS do-connect
+    [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    over c@ dup '/' = swap '\' = or IF  do-chat-cmds  ELSE

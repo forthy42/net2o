@@ -370,6 +370,8 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ ..nick 2drop ;
 
+: .con-id ( o:connection -- ) pubkey $@ .key-id ;
+
 : .simple-id ( addr u -- ) key>nick type ;
 
 :noname ( addr u -- )

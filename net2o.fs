@@ -1391,6 +1391,7 @@ User remote?
     msg-groups [: >r o r> cell+ del$cell ;] #map ;
 
 Defer punch-dispose
+Defer o-beacon
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
@@ -1411,7 +1412,7 @@ Defer punch-dispose
 	unlink-ctx  ungroup-ctx
 	end-semas start-semas DO  I pthread_mutex_destroy drop
 	1 pthread-mutexes +LOOP
-	punch-dispose
+	punch-dispose  o-beacon
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
@@ -1479,31 +1480,28 @@ Variable beacons \ destinations to send beacons to
 : beacon? ( -- )
     next-beacon ticker 64@ 64u<= IF  send-beacons  THEN ;
 
-: >beacon ( sockaddr len xt -- addr len )
-    [: { w^ xt } type ticker 8 type xt cell type ;] $tmp ;
-: +beacon ( sockaddr len xt -- ) { w^ xt }
+: +beacon ( sockaddr len xt -- )
+    >r ticks beacon-short-ticks# 64+ o r> { 64^ dest w^ obj w^ xt }
     beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
     2dup beacons #@ d0= IF
-	xt [: ticks beacon-short-ticks# 64+ { 64^ dest }
-	    dest 1 64s type cell type ;] $tmp 2swap beacons #!
+	dest 1 64s cell+ cell+ 2swap beacons #!
     ELSE
-	xt cell last# cell+ $+! 2drop
-    THEN ;
-: -beacon ( sockaddr len xt -- ) { w^ xt }
-    beacon( ." remove beacon: " 2dup .address ."  ' " xt @ .name cr )
-    beacons #@ d0<> IF
-	last# cell+ $@ 8 /string bounds ?DO
-	    I @ xt @ = IF  last# cell+ I over $@ drop - cell $del  LEAVE  THEN
-	cell +LOOP
-	last# cell+ $@len 8 = IF
-	    last# $off last# cell+ $off
-	THEN
+	obj 2 cells last# cell+ $+! 2drop
     THEN ;
 
+:noname ( -- )
+    beacon( ." remove beacons: " o hex. cr )
+    beacons [: { bucket } bucket cell+ $@ 1 64s /string bounds ?DO
+	    I @ o = IF
+		bucket cell+ I over $@ drop - 2 cells $del  LEAVE  THEN
+	2 cells +LOOP
+	bucket cell+ $@len 8 = IF
+	    bucket $off bucket cell+ $off
+	THEN
+    ;] #map ; is o-beacon
+
 : add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
-: sub-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> -beacon ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
-: ret-beacon ( -- )  ret-addr be@ ['] 2drop sub-beacon ;
 
 \ timeout loop
 
