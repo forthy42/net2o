@@ -200,7 +200,8 @@ net2o-base
 +net2o: check-version ( $:version -- ) \g version check
     $> ?version ;
 +net2o: get-version ( $:version -- ) \g version cross-check
-    $> ?version net2o-version $, check-version ;
+    string-stack $[]# IF  $> ?version  THEN \ accept query-only
+    net2o-version $, check-version ;
 
 gen-table $freeze
 
