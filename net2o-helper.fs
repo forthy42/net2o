@@ -78,12 +78,10 @@ Defer insert-addr ( o -- )
 
 Defer dht-beacon
 
-false Value beacon-added?
-
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    beacon-added? IF  dht-connect
-    ELSE  [: dup ['] dht-beacon 0 .add-beacon true to beacon-added? ;] dht-connect'
+    beacons @ IF  dht-connect
+    ELSE  [: dup ['] dht-beacon 0 .add-beacon ;] dht-connect'
     THEN
     replace-me disconnect-me -other  announced on ;
 
@@ -93,7 +91,7 @@ false Value beacon-added?
 [IFDEF] android
     also android also jni
     :noname  defers android-network
-	beacon-added? IF
+	beacons @ IF
 	    network-info ?dup-IF  ]xref renat-all  THEN
 	THEN ;
     is android-network
