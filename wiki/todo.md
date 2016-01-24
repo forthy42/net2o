@@ -15,11 +15,33 @@ This is a short to-do list for things I have concrete plans
 * Add version control for files
 * Add streaming data
 * Add remote terminal
+* Add onion routing
+
+## Security ##
+
+* Add permission groups for easier handling of permissions
+* Add a NAT traversal permission to not reveal IP addresses depending on
+  peer
+
+## Binary packaging ##
+
+* RPM builds and repository needed (probably through OpenSuSE build service)
+* Windows and Mac OS X distributions
 
 ## High-level API ##
 
-* Produce a Gforth that can run inside a sandbox, like Linux
+* Produce a Gforth that can run inside a sandbox, e.g. Linux
   namespace+chroot+capabilities jail.
 * Get MINOS2 so far that it can be used as GUI inside the jail
 * Create a framework for structured text and pre-formatted text
 * Use streaming data for audio+video streaming and -chats
+
+## Where can you help? ##
+
+* Performance of crypto implementations:
+  + ed25519-donna has SSE2 support on Intel, but could be faster on ARM
+    with Neon instructions
+  + Threefish also could benefit from a Neon implementation
+  + Keccak already has one and may provide a starting point
+* Testing - beat it, test it, report bugs.  I'll take every bug report
+  serious.  There's a [ticket system](/net2o/reportlist)
