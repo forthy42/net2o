@@ -257,7 +257,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 \ print time
 
 64Variable tick-adjust
-: ticks ( -- u )  ntime d>64 tick-adjust 64@ 64+ ;
+: ticks ( -- u64 )  ntime d>64 tick-adjust 64@ 64+ ;
 
 : ticks-u ( -- u )  ticks 64>n ;
 

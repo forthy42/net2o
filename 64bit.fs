@@ -7,9 +7,10 @@
 
 cell 8 = [IF]
     : 64bit ;
-    : 64, drop , ;
+    ' , Alias 64,
     ' @ Alias 64@
     ' ! Alias 64!
+    ' noop Alias 64><
     ' rot Alias 64rot
     ' -rot Alias -64rot
     ' swap alias n64-swap
@@ -107,9 +108,10 @@ cell 8 = [IF]
     ' 2swap Alias 64swap
     ' 2tuck Alias 64tuck
     : over64 ( n 64 -- n 64 n ) 2 pick ;
-    : 64,  swap 2, ;
-    : 64@  2@ swap ; [IFDEF] macro macro [THEN]
-    : 64!  >r swap r> 2! ; [IFDEF] macro macro [THEN]
+    ' swap Alias 64><
+    : 64,  64>< 2, ;
+    : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
+    : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
     ' d+ Alias 64+
     ' d- Alias 64-
     : 64or rot or >r or r> ;
@@ -192,7 +194,11 @@ cell 8 = [IF]
 	postpone >l postpone >l ;
     also locals-types definitions
     ' d: alias 64:
-    ' d^ alias 64^
+    : 64^ ( "name" -- a-addr xt ) \ net2o 64-caret
+	create-local
+	['] compile-pushlocal-64
+      does> ( Compilation: -- ) ( Run-time: -- w )
+	postpone laddr# @ lp-offset, ;
     previous definitions
     : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
     : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;

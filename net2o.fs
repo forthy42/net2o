@@ -1610,7 +1610,7 @@ Variable cookies
 #5.000.000.000 d>64 64Constant connect-timeout#
 
 : add-cookie ( xtdone xttimeout -- cookie64 )
-    [: 2>r ticks 64dup [IFUNDEF] 64bit swap [THEN] o
+    [: 2>r ticks 64dup o
 	2r> { 64^ cookie-adder cookie-o xtd xtto }
 	cookie-adder cookie-size#  cookies $+! ;]
     resize-sema c-section ;
