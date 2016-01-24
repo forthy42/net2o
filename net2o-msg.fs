@@ -72,6 +72,12 @@ sema msglog-sema
     vault>msg  decrypt-file
     replay-mode off  skip-sig? off ;
 
+event: ->save-msgs save-msgs ;
+
+: save-msgs& ( addr u -- )
+    file-task 0= IF  create-file-task  THEN
+    <event e$, ->save-msgs file-task event> ;
+
 : +msg-log ( addr u -- flag )
     msg-group$ $@ msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN
@@ -174,6 +180,7 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
 	ELSE
 	    start-gps
 	THEN ;
+    :noname ctrl U inskey ctrl D inskey ; is aback
     previous
 [ELSE]
     : coord! ;
