@@ -6,7 +6,8 @@ net2o is the attempt to reinvent the Internet.
 Get it and try it
 -----------------
 
-net2o is currently under alpha test. [Get it](get-it.md) and [try it](try-it.md).
+net2o is currently under early alpha test. [Get it](get-it.md) and
+[try it](try-it.md).  There are lots of things [to do](todo.md).
 
 What's broken?
 --------------
