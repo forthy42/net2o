@@ -16,10 +16,12 @@ This is a short to-do list for things I have concrete plans
 * Add streaming data
 * Add remote terminal
 * Add onion routing
+* CGNAT experiments to get CGNAT -> NAT to work
 
 ## Security ##
 
 * Add permission groups for easier handling of permissions
+* Add a get-ip permission to control who can use your node to bounce
 * Add a NAT traversal permission to not reveal IP addresses depending on
   peer
 
