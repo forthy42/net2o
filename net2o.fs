@@ -1262,11 +1262,11 @@ Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 
 : 0timeout ( -- )
-    ack@ .rtdelay 64@ 64-2* timeout-min# 64max ticker 64@ 64+ next-timeout 64!
+    ack@ .rtdelay 64@ 64-2* timeout-min# 64max ticks 64+ next-timeout 64!
     0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
 : do-timeout ( -- )  timeout-xt perform ;
 
-: o+timeout ( -- )  !ticks  0timeout
+: o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
@@ -1282,7 +1282,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : +timeouts ( -- timeout ) 
     rtdelay 64@ 64-2* timeout-min# 64max timeouts @ sq2**
     timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
-    ticker 64@ 64+ ;
+    ticks 64+ ;
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;

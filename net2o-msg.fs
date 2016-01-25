@@ -325,7 +325,7 @@ also net2o-base
     ELSE  2drop  THEN ;
 
 : left, ( addr u -- )
-    key| $, msg-signal " left (timeout)" $, msg-action ;
+    key| $, msg-signal "left (timeout)" $, msg-action ;
 previous
 
 : send-join ( -- )
