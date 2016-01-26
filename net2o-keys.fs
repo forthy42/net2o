@@ -325,7 +325,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
-    space .nick  cr ;
+    space .nick space ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
@@ -747,7 +747,8 @@ $40 buffer: nick-buf
     o>  sim-nick! off ;
 
 : .pk2key$ ( addr u -- )
-    read-pk2key$ sample-key >o .key-invite free-key o> ;
+    read-pk2key$ sample-key >o
+    import#invited ke-import !  .key-invite free-key o> ;
 
 \ select key by nick
 
@@ -838,34 +839,25 @@ Variable revtoken
 \ invitation
 
 Variable invitations
-Variable block-table
 
 event: ->invite ( addr u -- )
-    ." invite me: " over >r .pk2key$ r> free throw ctrl L inskey ;
+    ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
 event: ->wakeme ( o -- ) <event ->wake event> ;
 
-: pk2key$-add ( addr u -- )
+: pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig
-    perm%default ke-mask ! n:o>
-    import#untrusted import-type !  save-pubkeys ;
-
-: block-add ( addr u -- )
-    sigpk2size# - + keysize 2dup block-table #!
-    ( tbd: save-blocklist ) ;
+    perm ke-mask !
+    import#untrusted import-type !  save-pubkeys o> ;
 
 : process-invitation ( addr u -- )
     key case
-	'y' of  pk2key$-add ." added"    endof
-	'n' of  2drop       ." ignored"  endof
-	'b' of  block-add   ." blocked"  endof
-	2drop
+	'y' of  perm%default pk2key$-add  ." added" cr   endof
+	'b' of  perm%blocked pk2key$-add  ." blocked" cr endof
+	2drop ." ignored" cr
     endcase ;
 
 : filter-invitation? ( addr u -- flag )
-    sigpk2size# - +
-    dup keysize block-table #@ nip keysize =
-    IF drop true  EXIT  THEN
-    keysize key-table #@ d0<> ; \ already there
+    sigpk2size# - + keysize key-table #@ d0<> ; \ already there
 
 : .invitations ( -- )
     invitations [: ." invite (y/n/b)? " 2dup .pk2key$ process-invitation
@@ -873,8 +865,12 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 
 :noname ( addr u -- )
     2dup filter-invitation? IF  2drop EXIT  THEN
-    2dup invitations $ins[]sig save-mem [ up@ ]l <hide>
-    <event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
+    invitations $[]# >r
+    2dup invitations $ins[]sig
+    invitations $[]# r> <> IF
+	save-mem [ up@ ]l <hide>
+	<event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
+    ELSE  2drop  THEN
 ; is >invitations
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
