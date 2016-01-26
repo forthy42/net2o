@@ -7,7 +7,7 @@ This is a short to-do list for things I have concrete plans
 * change flow control window so that it minimizes buffer fillup
   instead of using the rate for this purpose - should stabilize the
   flow control in case of severe congestion.
-* Add automatic and manual rearangement of multichat trees
+* Add automatic and manual rearrangement of multichat trees
 * Split up DHT into directory DHT and subnodes
 * Add sync operations to chat logs
 * Add mirror&sync to DHT subnodes
