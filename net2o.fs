@@ -350,7 +350,7 @@ UValue connection
     o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
 
 : no-timeout ( -- )  max-int64 next-timeout 64!
-    ack-context @ ?dup-IF  >o 0 timeouts ! o>  THEN ;
+    ack-context @ ?dup-IF  .timeouts off  THEN ;
 
 : -flow-control ['] noop         ack-xt ! ;
 

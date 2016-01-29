@@ -178,7 +178,7 @@ Defer gen-table
 
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
--7 dup 1+ 1 and cell 4 = and - cells 0 +field net2o.name
+-7 dup 1 and cell 4 = and - cells 0 +field net2o.name
 drop
 
 : >net2o-name ( addr -- addr' u )
@@ -542,7 +542,7 @@ previous
     nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
-    ticks r@ reply-time 64@ 64- ack@ .rtdelay 64!
+    ticks r@ reply-time 64@ 64- ack@ >o rtdelay 64! timeouts off o>
     -1 reqcount +!@ 1 = IF  ->wake  THEN
     0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
