@@ -1263,7 +1263,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 
 : 0timeout ( -- )
     ack@ .rtdelay 64@ 64-2* timeout-min# 64max ticks 64+ next-timeout 64!
-    0 ack@ .timeouts !@ IF  timeout-task wake  THEN ;
+    0 ack@ .timeouts !@  IF  timeout-task wake  THEN ;
 : do-timeout ( -- )  timeout-xt perform ;
 
 : o+timeout ( -- )  0timeout

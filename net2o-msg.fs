@@ -584,9 +584,10 @@ previous
 	ELSE  o { w^ group } group cell 2swap msg-groups #!  THEN
     ELSE  2drop  THEN ;
 
-: msg-timeout ( -- )  1 ack@ .timeouts +! >next-timeout
+: msg-timeout ( -- )
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
-    ELSE  EXIT  THEN
+	1 ack@ .timeouts +! >next-timeout
+    ELSE  -timeout EXIT  THEN
     timeout-expired? IF
 	msg-group$ $@len IF
 	    pubkey $@ ['] left, send-avalanche .chat
