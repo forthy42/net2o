@@ -515,16 +515,6 @@ also net2o-base scope: /chat
       r@ .group ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
     ."  =====" forth:cr ;
 
-: chat ( addr u -- )
-    \U chat @user|group
-    \G chat: switch to chat with user or group
-    over c@ '@' = IF  1 /string nick>pk key|  THEN
-    2dup msg-groups #@ nip 0= IF
-	." That chat isn't active" forth:cr 2drop \ !!FIXME!!
-    ELSE
-	msg-group$ $!
-    THEN  0. chats ;
-
 : nat ( addr u -- )  2drop
     \U nat
     \G nat: list nat traversal information of all peers in all groups
@@ -653,6 +643,20 @@ previous
 
 : ?wait-chat ( -- ) 0. /chat:chats
     BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT ; \ stub
+
+scope{ /chat
+: chat ( addr u -- )
+    \U chat @user|group
+    \G chat: switch to chat with user or group
+    chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
+    msg-group$ $@ msg-groups #@ dup 0= IF  2drop
+	nip IF  chat-connects
+	ELSE  ." That chat isn't active" forth:cr  THEN
+    ELSE
+	bounds ?DO  2dup I @ .pubkey $@ key2| str= 0= WHILE  cell +LOOP
+	    2drop chat-connects  ELSE  UNLOOP 2drop THEN
+    THEN  0. chats ;
+}scope
 
 also net2o-base
 : reconnect, ( group -- )

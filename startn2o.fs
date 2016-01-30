@@ -4,7 +4,7 @@ e? os-type s" linux-android" str= [IF] require starta.fs [THEN]
 page ." loading n2o..."
 require n2o.fs
 : n2o-greet  page
-    ." net2o " net2o-version type ."  text UI, nerd edition for 32c3" cr
+    ." net2o " net2o-version type ."  text UI, nerd edition" cr
     ." type 'bye' to leave and 'help' for help" cr ;
 :noname load-rc n2o-greet
     "~/.net2o/seckeys.k2o" file-status nip
