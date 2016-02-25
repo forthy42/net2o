@@ -542,7 +542,8 @@ previous
     nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
-    ticks r@ reply-time 64@ 64- ack@ >o rtdelay 64! timeouts off o>
+    ticks r@ reply-time 64@ 64- ack@ >o
+    0 timeouts !@ IF  rtdelay 64@ 64umax  THEN  rtdelay 64!  o>
     -1 reqcount +!@ 1 = IF  ->wake  THEN
     0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
