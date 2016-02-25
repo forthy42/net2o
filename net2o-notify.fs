@@ -94,7 +94,7 @@ Sema notify-sema
 		'<' of  ." &lt;"  endof
 		'>' of  ." &gt;"  endof
 		'&' of  ." &amp;" endof
-		default: emit  endcase  LOOP ;
+		emit  0 endcase  LOOP ;
     
     : notify+ notify> notify$ $+! ;
     : notify! notify> notify$ $! ;

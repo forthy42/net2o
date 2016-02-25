@@ -680,8 +680,8 @@ previous
     case
 	0    of  2drop  endof
 	cell of  @ >o o to connection +resend-cmd send-leave o>  endof
-	default: drop @ .send-reconnects
-    endcase ;
+	drop @ .send-reconnects
+    0 endcase ;
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection +resend-cmd
