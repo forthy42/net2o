@@ -104,7 +104,7 @@ init-keybuf
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
     key-assembly state# + state# move-rep
-    key-assembly key( ." >crypt-key " dup state2# xtype cr )
+    key-assembly key( ." >crypt-key " dup state2# 85type cr )
     >c:key ;
 : >crypt-source ( addr u -- )
     key-assembly state# move-rep ;
@@ -134,7 +134,8 @@ init-keybuf
 : >ivskey ( 64addr -- keyaddr )
     64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
-    >r dest-flags w@ addr>assembly r> state# c:tweakkey! ;
+    >r dest-flags w@ addr>assembly r> state# c:tweakkey!
+    key( ." tweak key: ckey@ c:key# .nnb cr ) ;
 
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64@ 64-
@@ -276,7 +277,7 @@ Sema regen-sema
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
-    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
+    dest-ivs $@len 2/ 2/ ~~ / dest-ivslastgen @ ~~ =
     IF	regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
