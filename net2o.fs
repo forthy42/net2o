@@ -1070,25 +1070,6 @@ rdata-class to rewind-partial
 	I I' fix-size raddr+ tuck clearpages
     +LOOP ;
 
-: rewind-buffer ( o:map -- )
-    1 dest-round +!
-    dest-tail off  dest-head off  dest-back off  dest-top off
-    regen-ivs-all  rewind-timestamps ;
-
-: rewind-ackbits ( o:map -- )
-    data-ack# off
-    firstack( ." rewind firstacks" cr )
-    data-ackbits @ dest-size @ addr>bytes $FF fill ;
-
-: net2o:rewind-sender ( n -- )
-    data-map @ >o dest-round @
-    +DO  rewind-buffer  LOOP o> ;
-
-: net2o:rewind-receiver ( n -- ) cookie( ." rewind" cr )
-    data-rmap @ >o dest-round @
-    +DO  rewind-buffer  LOOP
-    rewind-ackbits o> ;
-
 : net2o:rewind-sender-partial ( new-back -- )
     data-map @ >o dest-back @ umax dup rewind-partial dest-back ! o> ;
 
@@ -1330,7 +1311,7 @@ User remote?
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
-	." invalid packet to 0" drop cr EXIT  THEN
+	invalid( ." invalid packet to 0" cr ) drop EXIT  THEN
     validated off \ we have no validated encryption
     stateless# outflag !  inbuf packet-data cmd-exec
     net2o:update-key  remote? off ;

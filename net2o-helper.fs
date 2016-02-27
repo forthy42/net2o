@@ -92,10 +92,7 @@ Defer dht-beacon
     also android also jni
     :noname  defers android-network
 	beacons @ IF
-	    network-info ?dup-IF
-		dup .getType other-wait# mobil-wait# rot select
-		to avalanche-wait# ]xref
-		renat-all  THEN
+	    network-info ?dup-IF  ]xref renat-all  THEN
 	THEN ;
     is android-network
     previous previous

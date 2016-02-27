@@ -20,16 +20,11 @@ Defer pk-connect ( key u cmdlen datalen -- )
 Defer addr-connect ( key+addr u cmdlen datalen -- )
 Defer pk-peek? ( addr u0 -- flag )
 
-0 Value avalanche-wait#
-#20 Constant mobil-wait#
-#0 Constant other-wait#
-
 : avalanche-msg ( msg u1 -- )
     \G forward message to all next nodes of that message group
     { d: msg }
     last# cell+ $@ dup IF
 	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
-	    avalanche-wait# ms
 	cell +LOOP
     ELSE  2drop  THEN ;
 

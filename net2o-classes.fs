@@ -52,7 +52,6 @@ cmd-class class
     field: dest-ivsrest
     field: dest-timestamps
     field: dest-replies
-    field: dest-round \ going to be obsoleted
     \                   sender:                receiver:
     field: dest-top   \ -/-                    sender read up to here
     field: dest-head  \ read up to here        received some
