@@ -480,11 +480,12 @@ previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
     IF  timeout( ." resend commands" forth:cr )
-	1 ack@ .timeouts +!  push-timeout  THEN ;
+	push-timeout
+    ELSE  ack@ .timeouts off  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
     \ timeout( .expected )
     packets2 @ cmd-timeout packets2 @ =
-    IF  transfer-keepalive?  ELSE  push-timeout  THEN ;
+    IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
 : +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
