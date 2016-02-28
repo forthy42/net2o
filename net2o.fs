@@ -1237,7 +1237,7 @@ Defer handle-beacon
 
 #10.000.000.000 d>64 64Value timeout-max# \ 10s maximum timeout
 #100.000.000 d>64 64Value timeout-min# \ 100ms minimum timeout
-#14 Value timeouts# \ with 30ms initial timeout, gives 31.75s cummulative timeout
+#14 Value timeouts# \ with 100ms initial timeout, gives 31.75s cummulative timeout
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
@@ -1247,7 +1247,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : >timeout ( 64n n -- 64n )
     >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
 : +timeouts ( -- timeout ) 
-    rtdelay 64@ timeouts @ >timeout ticks 64+ ;
+    rtdelay 64@ timeouts @ >timeout ticks 64+ 1 timeouts +! ;
 : 0timeout ( -- )
     0 ack@ .timeouts !@  IF  timeout-task wake  THEN
     ack@ .+timeouts next-timeout 64! ;

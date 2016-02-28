@@ -576,7 +576,7 @@ previous
 
 : msg-timeout ( -- )
     cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
-	1 ack@ .timeouts +! >next-timeout
+	>next-timeout
     ELSE  -timeout EXIT  THEN
     timeout-expired? IF
 	msg-group$ $@len IF

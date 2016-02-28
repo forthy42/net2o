@@ -135,9 +135,8 @@ init-keybuf
     64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
     >r dest-flags w@ addr>assembly
-    tweak( ." tweak: " 64over 64over $64. $64. cr )
     r> state# c:tweakkey!
-    tweak( ." tweak key: " c:key@ c:key# .nnb cr ) ;
+    tweak( ." tweak key: " c:key@ @ hex. c:key@ state# + $10 .nnb cr ) ;
 
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64@ 64-
