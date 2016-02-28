@@ -1235,16 +1235,22 @@ Defer handle-beacon
 
 \ timeout handling
 
-#2.000.000.000 d>64 64Value timeout-max# \ 2s maximum timeout
-#30.000.000 d>64 64Value timeout-min# \ 30ms minimum timeout
-#14 Value timeouts# \ with 30ms initial timeout, gives 4.8s cummulative timeout
+#10.000.000.000 d>64 64Value timeout-max# \ 10s maximum timeout
+#100.000.000 d>64 64Value timeout-min# \ 100ms minimum timeout
+#14 Value timeouts# \ with 30ms initial timeout, gives 31.75s cummulative timeout
 
 Sema timeout-sema
 Variable timeout-tasks s" " timeout-tasks $!
 
+: sq2** ( 64n n -- 64n' )
+    dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
+: >timeout ( 64n n -- 64n )
+    >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
+: +timeouts ( -- timeout ) 
+    rtdelay 64@ timeouts @ >timeout ticks 64+ ;
 : 0timeout ( -- )
-    ack@ .rtdelay 64@ 64-2* timeout-min# 64max ticks 64+ next-timeout 64!
-    0 ack@ .timeouts !@  IF  timeout-task wake  THEN ;
+    0 ack@ .timeouts !@  IF  timeout-task wake  THEN
+    ack@ .+timeouts next-timeout 64! ;
 : do-timeout ( -- )  timeout-xt perform ;
 
 : o+timeout ( -- )  0timeout
@@ -1258,12 +1264,6 @@ Variable timeout-tasks s" " timeout-tasks $!
     0timeout  timeout( ." -timeout: " o hex. ." task: " task# ? cr )
     [: o timeout-tasks del$cell ;] timeout-sema c-section ;
 
-: sq2** ( 64n n -- 64n' )
-    dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
-: +timeouts ( -- timeout ) 
-    rtdelay 64@ 64-2* timeout-min# 64max timeouts @ sq2**
-    timeout-max# 64min \ timeout( ." timeout setting: " 64dup 64. cr )
-    ticks 64+ ;
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;

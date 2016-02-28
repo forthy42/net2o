@@ -134,8 +134,10 @@ init-keybuf
 : >ivskey ( 64addr -- keyaddr )
     64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
-    >r dest-flags w@ addr>assembly r> state# c:tweakkey!
-    key( ." tweak key: " c:key@ c:key# .nnb cr ) ;
+    >r dest-flags w@ addr>assembly
+    tweak( ." tweak: " 64over 64over $64. $64. cr )
+    r> state# c:tweakkey!
+    tweak( ." tweak key: " c:key@ c:key# .nnb cr ) ;
 
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64@ 64-
@@ -277,7 +279,7 @@ Sema regen-sema
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
-    dest-ivs $@len 2/ 2/ ~~ / dest-ivslastgen @ ~~ =
+    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
     IF	regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs

@@ -75,6 +75,7 @@ debug: reply( \ test replies
 debug: connect( \ connect debugging messages
 debug: reveal( \ reveal secrets
 debug: reconnect( \ reconnect
+debug: tweak( \ tweaked key
 
 -db profile( \ )
 
