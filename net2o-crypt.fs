@@ -56,6 +56,7 @@ object class
     keypack-all# uvar keypack-d
     $100      uvar vaultkey \ buffers for vault
     state2#   uvar vkey \ maximum size for session key
+    state2#   uvar voutkey \ for keydump
     keysize   uvar keygendh
     keysize   uvar vpk
     keysize   uvar vsk
@@ -136,7 +137,7 @@ init-keybuf
 : ivs-tweak ( 64addr keyaddr -- )
     >r dest-flags w@ addr>assembly
     r> state# c:tweakkey!
-    tweak( ." tweak key: " c:key@ @ hex. c:key@ state# + $10 .nnb cr ) ;
+    tweak( ." tweak key: " voutkey c:key> voutkey @ hex. voutkey state# + $10 .nnb cr ) ;
 
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64@ 64-
@@ -274,12 +275,13 @@ Sema regen-sema
 	  rest-prng
       len +LOOP
       key( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
+      tweak( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
       regen( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
-    IF	regen-ivs/2  THEN ;
+    IF	tweak( ." regen-ivs/2" cr ) regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
 

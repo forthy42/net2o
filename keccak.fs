@@ -122,8 +122,7 @@ keccak-init
 ; to c:hash
 :noname ( addr u -- )
 \G Fill buffer addr u with PRNG sequence
-    BEGIN  keccak*  2dup keccak#max umin tuck keccak>
-    /string dup 0= UNTIL  2drop
+    2dup erase @keccak -rot rounds KeccakEncryptLoop
 ; to c:prng
 :noname ( addr u -- ) >keccak keccak* ;
 \G absorb + hash for a message <= 64 bytes
