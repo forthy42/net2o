@@ -584,7 +584,7 @@ previous
     ELSE
 	cmd0!
     THEN
-    [: outflag @ >r cmdreset  do-cmd-loop
+    [: outflag @ >r cmdreset init-reply do-cmd-loop
       r> outflag ! cmd-send? ;] cmdlock c-section ;
 
 ' cmd-loop is cmd-exec
