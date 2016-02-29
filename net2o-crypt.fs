@@ -238,13 +238,14 @@ Sema regen-sema
     [: c:key@ >r
 	dest-ivsgen @ kalign reply( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
 	clear-replies
-	dest-ivs $@ dest-a/b c:prng
+	dest-ivs $@ dest-a/b c:prng ivs( ." Regen A/B IVS" cr )
 	2 dest-ivslastgen xor! r> c:key! ;]
     regen-sema c-section  ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
       dest-ivsgen @ kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
-      dest-ivs $@ c:prng r> c:key! ;]
+      dest-ivs $@ c:prng ivs( ." Regen all IVS" cr )
+      r> c:key! ;]
     regen-sema c-section ;
 
 : rest+ ( addr u -- addr u )
@@ -290,11 +291,12 @@ Sema regen-sema
     key-assembly state2# c:prng
     dest-ivsgen @ kalign c:key!  key-assembly >c:key
     dest-size @ addr>keys dest-ivs $!len
-    dest-ivs $@ c:prng
+    dest-ivs $@ c:prng ivs( ." Regen one IVS" cr )
     r> c:key! o> ;
 
 : clear-keys ( -- )
-    crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase ;
+    crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase
+    key-setup? on ;
 
 \ We generate a shared secret out of three parts:
 \ 64 bytes IV, 32 bytes from the one-time-keys and
@@ -305,6 +307,7 @@ $60 Constant rndkey#
 : receive-ivs ( -- )
     genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
+    ivs( ." regen receive IVS" cr )
     code-map one-ivs   code-rmap one-ivs
     data-map one-ivs   data-rmap one-ivs
     clear-keys ;
@@ -312,11 +315,13 @@ $60 Constant rndkey#
 : send-ivs ( -- )
     genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
+    ivs( ." regen send IVS" cr )
     code-rmap one-ivs  code-map one-ivs
     data-rmap one-ivs  data-map one-ivs
     clear-keys ;
 
 : ivs-strings ( addr u -- )
+    key-setup? @ !!doublekey!!
     dup state# <> !!ivs!! >crypt-source >crypt-key-ivs ;
 
 \ public key encryption

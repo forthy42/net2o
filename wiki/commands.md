@@ -123,11 +123,14 @@ List of Commands
 + $36 gen-reply ( -- )
   generate a key request reply
 + $37 gen-punch-reply ( -- )
-  generate a punch request reply
 + $38 oneshot-tmpkey ( $:tmpkey -- )
   oneshot tmpkey
 + $39 invite ( $:nick+sig -- )
   invite someone
++ $3A check-version ( $:version -- )
+  version check
++ $3B get-version ( $:version -- )
+  version cross-check
 
 ### connection commands ###
 

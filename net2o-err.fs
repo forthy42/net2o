@@ -80,6 +80,7 @@ s" file read permission denied"  throwcode !!filerd-perm!!
 s" file write permission denied" throwcode !!filewr-perm!!
 s" file access by name denied"   throwcode !!filename-perm!!
 s" 4cc wants 3 characters"       throwcode !!4cc!!
+s" key setup already done"       throwcode !!doublekey!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

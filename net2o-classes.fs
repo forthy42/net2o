@@ -154,7 +154,7 @@ cmd-class class
     field: msg-context
     field: file-state \ files
     \ rest of state
-\    field: ind-addr \ indirect access needs NAT traveral on connect
+    field: key-setup? \ true if key setup is done
     field: codebuf#
     field: context#
     field: wait-task

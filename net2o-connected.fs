@@ -362,6 +362,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 : gen-request ( -- ) setup!
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
+    ivs( ." gen request" forth:cr )
     net2o-code0
     ['] end-cmd IS expect-reply?
     net2o-version $, get-version
