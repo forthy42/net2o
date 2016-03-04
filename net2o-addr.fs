@@ -33,7 +33,7 @@ $11 net2o: addr-pri# ( n -- ) \g priority
 +net2o: addr-ipv4 ( n -- ) \g ip address
     64>n host-ipv4 be-l! ;
 +net2o: addr-ipv6 ( $:ipv6 -- ) \g ipv6 address
-    $> host-ipv6 swap $10 umin move ;
+    $> host-ipv6 $10 smove ;
 +net2o: addr-portv4 ( n -- ) \g ipv4 port
     64>n host-portv4 w! ;
 +net2o: addr-portv6 ( n -- ) \g ipv6 port
@@ -127,7 +127,7 @@ previous
     o my-addr[] $[]# my-addr[] $[] ! ;
 
 : !my-addrs ( -- ) n2o:new-addr >o
-    global-ip6 tuck host-ipv6 swap $10 umin move
+    global-ip6 tuck host-ipv6 $10 smove
     global-ip4 IF  be-ul@ host-ipv4 be-l!  ELSE  drop  THEN
     my-port# +my-addrs o>
     0= IF  local-ipv6  IF

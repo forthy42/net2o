@@ -1,7 +1,6 @@
 \ generic hash table functions
 
 require string.fs
-\ require wurstkessel.fs
 require rng.fs
 
 2 64s buffer: hashinit
@@ -32,19 +31,6 @@ hash-init-rng
 	false hash-state hashkey2 ;
     
     : hash$ ( -- addr u )  hash-state [ 2 64s ]L ;
-[IFDEF] use-hash-wurst
-\ hash of the first 510 bytes of the input string, 3 times slower
-    state# 8 * Constant message#
-
-    : string-hash ( addr u -- )
-	'hashinit wurst-source state# 2* move
-	message message# erase
-	dup message message# xc!+? drop
-	rot umin dup >r move
-	message r> 6 rshift $11 + rounds  message 2 rounds ;
-
-    : hash$ ( -- addr u )  wurst-state state# ;
-[THEN]
 
 \ hierarchical hash table
 

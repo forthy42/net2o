@@ -2,7 +2,7 @@
 
 85 buffer: 85>chars
 s" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~"
-85>chars swap move
+85>chars 85 smove
 $80 buffer: chars>85
 85 0 [DO] [I] dup 85>chars + c@ chars>85 + c! [LOOP]
 

@@ -252,12 +252,12 @@ Defer !my-addr
     2over ip6::0 over str= >r str= r> r> or or ;
 
 : str>merge ( addr1 u1 addr2 u2 -- )
-    2dup ip6::0 over str= IF  rot umin move  ELSE  2drop 2drop  THEN ;
+    2dup ip6::0 over str= IF  smove  ELSE  2drop 2drop  THEN ;
 
 \ insert address for punching
 
 : !temp-addr ( addr u -- ) dup 0<> ind-addr !
-    temp-addr dup $10 erase  swap $10 umin move ;
+    temp-addr dup $10 erase  $10 smove ;
 
 : check-addr1 ( -- addr u flag )
     sockaddr1 sock-rest 2dup try-ip

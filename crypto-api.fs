@@ -12,7 +12,7 @@ require user-object.fs
     2dup + 1- c@ dup >r safe/string r> skip nip 0= ;
 
 : >padded { addr1 u1 addr2 u2 -- }
-    addr1 addr2 u1 u2 umin move
+    addr1 u1 addr2 u2 smove
     u1 u2 u< IF  addr2 u1 u2 >pad 2drop  THEN ;
 
 \ For wurstkessel compatibility, the states are all 128 bytes

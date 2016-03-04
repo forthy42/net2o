@@ -754,7 +754,7 @@ $40 buffer: nick-buf
 
 : >raw-key ( o -- )
     dup 0= !!no-nick!! >o
-    ke-pk $@ pkc swap pkrk# umin move
+    ke-pk $@ pkc pkrk# smove
     ke-psk sec@ my-0key sec!
     ke-sk sec@ skc swap key| move
     >sksig o> ;

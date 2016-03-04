@@ -55,7 +55,7 @@ User threefish-t
     0 to @threefish crypto-o off ;
 
 : threefish0 ( -- )  threefish-state tf_ctx erase ;
-: >threefish ( addr u -- )  threefish-state swap move
+: >threefish ( addr u -- )  threefish-state threefish#max smove
     threefish-state tf_ctx-tweak sizeof tf_ctx-tweak erase ;
 : threefish> ( addr u -- )  threefish-state -rot threefish#max umin move ;
 : +threefish ( -- )

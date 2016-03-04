@@ -70,6 +70,13 @@ word-args
 
 \ string
 
+: smove ( a-from u-from a-to u-to -- )
+    rot 2dup u< IF
+	drop move -9 throw
+    ELSE
+	nip move
+    THEN ;
+
 [IFUNDEF] safe/string
 : safe/string ( c-addr u n -- c-addr' u' )
 \G protect /string against overflows.
