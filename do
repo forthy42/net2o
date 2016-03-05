@@ -80,6 +80,14 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | cut -f1-2 -
 (which gforth 1>/dev/null 2>/dev/null && test '!' "$GF" "<" "$GFORTH") || (
     wget -c http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH.tar.xz
     tar Jxf $GFORTH.tar.xz
+    if swig -forth $GFORTH/unix/test.i
+    then
+	echo "A Forth-capable swig is found, everything fine"
+    else
+	echo "Build a Forth-capable swig"
+	git-get https://github.com/GeraldWodni/swig.git swig
+	build swig
+    fi
     build $GFORTH
 )
 
