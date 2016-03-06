@@ -59,7 +59,8 @@ $20 value hash-size#
     search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
 
 : nicks>search ( -- )
-    search-key$ $[]off [: nick>pk search-key$ $+[]! ;] @arg-loop ;
+    search-key$ $[]off
+    [: nick>pk dup 0= !!no-nick!! search-key$ $+[]! ;] @arg-loop ;
 
 : handle-chat ( -- )
     chat-connects ?wait-chat do-chat ;
