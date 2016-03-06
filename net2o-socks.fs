@@ -140,25 +140,26 @@ Variable lastn2oaddr
 \ route an incoming packet
 
 : >rpath-len ( rpath -- rpath len )
+    dup 0= IF  0  EXIT  THEN
     [IFDEF] 64bit
 	dup $100000000 u< IF
 	    dup $10000 u< IF
-		$100 u< 2 +  EXIT
+		dup $100 u< 2 +  EXIT
 	    ELSE
-		$1000000 u< 4 + EXIT
+		dup $1000000 u< 4 + EXIT
 	    THEN
 	ELSE
 	    dup $1000000000000 u< IF
-		$10000000000 u< 6 +  EXIT
+		dup $10000000000 u< 6 +  EXIT
 	    ELSE
-		$100000000000000 u< 8 +  EXIT
+		dup $100000000000000 u< 8 +  EXIT
 	    THEN
 	THEN
     [ELSE]
 	dup $10000 u< IF
-	    $100 u< 2 +  EXIT
+	    dup $100 u< 2 +  EXIT
 	ELSE
-	    $1000000 u< 4 + EXIT
+	    dup $1000000 u< 4 + EXIT
 	THEN
     [THEN] ;
 : >path-len ( path -- path len )
@@ -166,15 +167,15 @@ Variable lastn2oaddr
     [IFDEF] 64bit
 	dup     $00000000FFFFFFFF and IF
 	    dup $000000000000FFFF and IF
-		$00000000000000FF and 0= 8 +  EXIT
+		dup $00000000000000FF and 0= 8 +  EXIT
 	    ELSE
-		$0000000000FFFFFF and 0= 6 +  EXIT
+		dup $0000000000FFFFFF and 0= 6 +  EXIT
 	    THEN
 	ELSE
 	    dup $0000FFFFFFFFFFFF and IF
-		$000000FFFFFFFFFF and 0= 4 +  EXIT
+		dup $000000FFFFFFFFFF and 0= 4 +  EXIT
 	    ELSE
-		$00FFFFFFFFFFFFFF and 0= 2 +  EXIT
+		dup $00FFFFFFFFFFFFFF and 0= 2 +  EXIT
 	    THEN
 	THEN
     [ELSE]
