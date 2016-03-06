@@ -133,41 +133,56 @@ Variable lastn2oaddr
 
 : address>route ( -- n/-1 )
     sockaddr alen @ insert-address ;
-: route>address ( n -- ) dup >r
-    routes #.key dup 0= IF  ." no address: " r> hex. cr drop  EXIT  THEN
-    $@ sockaddr swap dup alen ! move  rdrop ;
+: route>address ( n -- flag )
+    routes #.key dup 0= ?EXIT
+    $@ sockaddr swap dup alen ! move true ;
 
 \ route an incoming packet
 
 : >rpath-len ( rpath -- rpath len )
-    dup $100 u< IF  1  EXIT  THEN
-    dup $10000 u< IF  2  EXIT  THEN
-    dup $1000000 u< IF  3  EXIT  THEN
     [IFDEF] 64bit
-	dup $100000000 u< IF  4  EXIT  THEN
-	dup $10000000000 u< IF  5  EXIT  THEN
-	dup $1000000000000 u< IF  6  EXIT  THEN
-	dup $100000000000000 u< IF  7  EXIT  THEN
-	8
+	dup $100000000 u< IF
+	    dup $10000 u< IF
+		$100 u< 2 +  EXIT
+	    ELSE
+		$1000000 u< 4 + EXIT
+	    THEN
+	ELSE
+	    dup $1000000000000 u< IF
+		$10000000000 u< 6 +  EXIT
+	    ELSE
+		$100000000000000 u< 8 +  EXIT
+	    THEN
+	THEN
     [ELSE]
-	4
+	dup $10000 u< IF
+	    $100 u< 2 +  EXIT
+	ELSE
+	    $1000000 u< 4 + EXIT
+	THEN
     [THEN] ;
 : >path-len ( path -- path len )
     dup 0= IF  0  EXIT  THEN
     [IFDEF] 64bit
-	dup $00FFFFFFFFFFFFFF and 0= IF  1  EXIT  THEN
-	dup $0000FFFFFFFFFFFF and 0= IF  2  EXIT  THEN
-	dup $000000FFFFFFFFFF and 0= IF  3  EXIT  THEN
-	dup $00000000FFFFFFFF and 0= IF  4  EXIT  THEN
-	dup $0000000000FFFFFF and 0= IF  5  EXIT  THEN
-	dup $000000000000FFFF and 0= IF  6  EXIT  THEN
-	dup $00000000000000FF and 0= IF  7  EXIT  THEN
-	8
+	dup     $00000000FFFFFFFF and IF
+	    dup $000000000000FFFF and IF
+		$00000000000000FF and 0= 8 +  EXIT
+	    ELSE
+		$0000000000FFFFFF and 0= 6 +  EXIT
+	    THEN
+	ELSE
+	    dup $0000FFFFFFFFFFFF and IF
+		$000000FFFFFFFFFF and 0= 4 +  EXIT
+	    ELSE
+		$00FFFFFFFFFFFFFF and 0= 2 +  EXIT
+	    THEN
+	THEN
     [ELSE]
-	dup $00FFFFFF and 0= IF  1  EXIT  THEN
-	dup $0000FFFF and 0= IF  2  EXIT  THEN
-	dup $000000FF and 0= IF  3  EXIT  THEN
-	4
+	dup     $0000FFFF and IF
+	    dup $000000FF and 0= 4 +  EXIT
+	ELSE
+	    dup $00FFFFFF and 0= 2 +  EXIT
+	THEN
     [THEN] ;
 
 : <0string ( endaddr -- addr u )
@@ -194,8 +209,8 @@ Variable lastn2oaddr
 
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF
-	>r r@ get-dest  route>address
-	r> ins-source  false  EXIT  THEN
+	>r r@ get-dest  route>address  IF  r@ ins-source  THEN
+	rdrop false  EXIT  THEN
     2drop true ; \ local packet
 
 : in-check ( -- flag )  address>route -1 <> ;

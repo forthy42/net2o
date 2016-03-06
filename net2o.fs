@@ -1357,10 +1357,11 @@ User remote?
     THEN ;
 
 : route-packet ( -- )
-    inbuf >r r@ get-dest route>address
-    route( ." route to: " sockaddr alen @ .address space
-           inbuf destination .addr-path cr )
-    r> dup packet-size send-a-packet 0< ?ior ;
+    inbuf >r r@ get-dest route>address IF
+	route( ." route to: " sockaddr alen @ .address space
+	inbuf destination .addr-path cr )
+	r@ dup packet-size send-a-packet 0< ?ior
+    THEN  rdrop ;
 
 \ dispose context
 
@@ -1481,7 +1482,8 @@ Variable beacons \ destinations to send beacons to
 	THEN
     ;] #map ; is o-beacon
 
-: add-beacon ( net2oaddr xt -- ) >r route>address sockaddr alen @ r> +beacon ;
+: add-beacon ( net2oaddr xt -- )
+    >r route>address IF  sockaddr alen @ r@ +beacon  THEN  rdrop ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
 
 \ timeout loop
