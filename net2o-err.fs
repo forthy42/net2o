@@ -81,6 +81,7 @@ s" file write permission denied" throwcode !!filewr-perm!!
 s" file access by name denied"   throwcode !!filename-perm!!
 s" 4cc wants 3 characters"       throwcode !!4cc!!
 s" key setup already done"       throwcode !!doublekey!!
+s" host or id not found"         throwcode !!no-address!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

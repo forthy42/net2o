@@ -70,9 +70,10 @@ Defer insert-addr ( o -- )
 	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase
-	  0 punch-addrs $[] @ insert-addr
-	  o to connection
-	  net2o-code new-request true gen-punchload gen-punch end-code o>
+	  0 punch-addrs $[] @ insert-addr IF
+	      o to connection
+	      net2o-code new-request true gen-punchload gen-punch end-code
+	  THEN o>
       cell +LOOP
     ;] #map ;
 
@@ -163,28 +164,30 @@ event: ->do-beacon ( addr -- )
 User host$ \ check for this hostname
 
 : check-host? ( o addr u -- o addr' u flag )
-    2 pick >o host>$ o> ;
+    2 pick .host>$ ;
 
 : host= ( o -- flag )
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
 :noname ( o -- )
     connect( ." check addr: " dup .addr cr )
-    [: check-addr1 0= IF  2drop  EXIT  THEN
+    [: check-addr1 0= IF  2drop false  EXIT  THEN
 	insert-address temp-addr ins-dest
 	connect( ." insert host: " temp-addr .addr-path cr )
 	ret-addr $10 0 skip nip 0= IF
 	    temp-addr ret-addr $10 move
-	THEN ;] addr>sock ; is insert-addr
+	THEN  true ;] addr>sock ; is insert-addr
 
-: insert-addr$ ( addr u -- )
-    new-addr dup insert-addr .n2o:dispose-addr ;
+: insert-addr$ ( addr u -- flag )
+    new-addr dup insert-addr swap .n2o:dispose-addr ;
 
-: insert-host ( addr u -- )
-    new-addr  dup host=  IF  dup insert-addr  THEN  .n2o:dispose-addr ;
+: insert-host ( addr u -- flag )
+    new-addr  dup host=  IF  dup insert-addr  ELSE  false  THEN
+    swap .n2o:dispose-addr ;
 
-: insert-host? ( o addr u -- o )
-    check-host? IF  insert-host  ELSE  2drop  THEN ;
+: insert-host? ( flag o addr u -- flag' o )
+    check-host? IF  insert-host  ELSE  2drop false  THEN
+    rot or swap ;
 
 : make-context ( pk u -- )
     0 n2o:new-context >o rdrop dest-pk ;
@@ -194,7 +197,8 @@ User host$ \ check for this hostname
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
-    id dup .dht-host ['] insert-host? $[]map drop 2drop ;
+    false id dup .dht-host ['] insert-host? $[]map drop
+    0= !!no-address!!  2drop ;
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup
@@ -207,8 +211,9 @@ User host$ \ check for this hostname
     2>r over + 1- dup c@ dup >r -
     2dup u>= !!keysize!!
     dup r> make-context
-    over - insert-addr$
-    2r> n2o:connect +flow-control +resend ; is addr-connect
+    over - insert-addr$ IF
+	2r> n2o:connect +flow-control +resend
+    ELSE  !!no-address!! THEN ; is addr-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;
