@@ -170,13 +170,13 @@ User host$ \ check for this hostname
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
 :noname ( o -- )
-    connect( ." check addr: " dup .addr cr )
-    [: check-addr1 0= IF  2drop false  EXIT  THEN
+    connect( ." check addr: " dup .addr cr )  false swap
+    [: check-addr1 0= IF  2drop EXIT  THEN
 	insert-address temp-addr ins-dest
 	connect( ." insert host: " temp-addr .addr-path cr )
 	ret-addr $10 0 skip nip 0= IF
 	    temp-addr ret-addr $10 move
-	THEN  true ;] addr>sock ; is insert-addr
+	THEN  drop true ;] addr>sock ; is insert-addr
 
 : insert-addr$ ( addr u -- flag )
     new-addr dup insert-addr swap .n2o:dispose-addr ;
