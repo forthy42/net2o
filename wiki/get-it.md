@@ -15,11 +15,14 @@ and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so as root enter:
 
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb http://net2o.de/debian testing main
+    deb [arch=i386,amd64,armhf,all] http://net2o.de/debian testing main
     EOF
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
     aptitude update
     aptitude install net2o
+
+Remove the architectures on the list above which you don't need; on
+Debian testing, the list is not necessary.
 
 Since net2o requires a way more recent Gforth than in Debian's
 repository, aptitude may ask you to resolve this; if the first
