@@ -1,6 +1,6 @@
 \ Start net2o on android
 
-e? os-type s" linux-android" str= [IF] require starta.fs [THEN]
+e? os-type s" linux-android" string-prefix? [IF] require starta.fs [THEN]
 page ." loading n2o..."
 require n2o.fs
 : n2o-greet  page
