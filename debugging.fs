@@ -197,8 +197,6 @@ op-vector !
 
 \ extra hints for last word executed
 
-: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
-
 : m: : ;
 false [IF]
     User last-exe-xt

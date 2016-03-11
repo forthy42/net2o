@@ -134,7 +134,7 @@ Variable net2o-tasks
     dup { w^ task }
     task cell net2o-tasks $+!  pass
     alloc-io b-out op-vector @ debug-vector !
-    prep-socks catch
+    prep-socks catch-loop
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
@@ -1088,10 +1088,7 @@ event: ->save ( o -- ) .net2o:save ;
 0 Value file-task
 
 : create-file-task ( -- )
-    [:  ." created file task " up@ hex. cr
-	BEGIN  ['] event-loop catch dup -1 <> WHILE
-	    ?dup-IF  DoError  THEN  REPEAT  drop ;]
-    1 net2o-task to file-task ;
+    ['] event-loop 1 net2o-task to file-task ;
 : net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
@@ -1209,7 +1206,7 @@ Variable recvflag  recvflag off
 	send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )
-    [:  ." created sender task " up@ hex. cr
+    [:  \ ." created sender task " up@ hex. cr
 	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Defer handle-beacon
@@ -1244,7 +1241,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >timeout ( 64n n -- 64n )
-    >r 64-2* timeout-min# 64max r> 1- sq2** timeout-max# 64min ;
+    >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
 : +timeouts ( -- timeout ) 
     rtdelay 64@ timeouts @ >timeout ticks 64+ 1 timeouts +! ;
 : 0timeout ( -- )
@@ -1487,9 +1484,6 @@ Variable beacons \ destinations to send beacons to
 
 \ timeout loop
 
-: .loop-err ( throw xt -- )
-    .name dup . cr DoError cr ;
-
 : event-send ( -- )
     o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
 
@@ -1518,36 +1512,23 @@ Variable beacons \ destinations to send beacons to
     timeout( ticker 64@ ) !ticks
     timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
 
-: timeout-loop-nocatch ( -- ) [IFDEF] android jni:attach [THEN]
-    BEGIN   !ticks >next-ticks beacon? request-timeout event-send  AGAIN ;
-
-: catch-loop { xt -- flag }
-    BEGIN   nothrow xt catch dup -1 = ?EXIT
-	?int dup  WHILE  xt .loop-err  REPEAT
-    drop false ;
+: timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
+    !ticks  BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
-    [:  \ ." created timeout task " task# ? cr
-	['] timeout-loop-nocatch catch-loop drop ;]
-    1 net2o-task to timeout-task ;
+    ['] timeout-loop 1 net2o-task to timeout-task ;
 
-\ event loop
+\ packet reciver task
 
-: event-loop-nocatch ( -- ) \ 1 stick-to-core
+: packet-loop ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  event-send  AGAIN ;
 
 : n2o:request-done ( n -- )
     file-task ?dup-IF  <event swap wait-task @ elit, elit, o elit, ->reqsave event>
     ELSE  elit, o elit, ->request  THEN ;
 
-0 value core-wanted
-
 : create-receiver-task ( -- )
-    [:  \ ." created receiver task " task# ? cr
-	[IFDEF] stick-to-core  core-wanted stick-to-core drop  [THEN]
-	['] event-loop-nocatch catch-loop drop
-	    ( wait-task @ ?dup-IF  ->timeout event>  THEN ) ;]
-    1 net2o-task to receiver-task ;
+    ['] packet-loop 1 net2o-task to receiver-task ;
 
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
@@ -1564,7 +1545,7 @@ Variable beacons \ destinations to send beacons to
     event-loop-task requests->0 o> ;
 
 : server-loop ( -- )
-    1 to core-wanted  0 >o rdrop  BEGIN  client-loop  AGAIN ;
+    0 >o rdrop  BEGIN  client-loop  AGAIN ;
 
 \ client/server initializer
 

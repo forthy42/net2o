@@ -72,19 +72,22 @@ sema msglog-sema
     vault>msg  decrypt-file
     replay-mode off  skip-sig? off ;
 
-event: ->save-msgs save-msgs ;
+event: ->save-msgs over >r save-msgs r> free throw ;
 
 : save-msgs& ( addr u -- )
     file-task 0= IF  create-file-task  THEN
-    <event e$, ->save-msgs file-task event> ;
+    <event save-mem e$, ->save-msgs file-task event> ;
+
+: ?msg-log ( -- )
+    msg-group$ $@ msg-logs #@ d0= IF
+	s" " msg-group$ $@ msg-logs #!  THEN ;
 
 : +msg-log ( addr u -- flag )
-    msg-group$ $@ msg-logs #@ d0= IF
-	s" " msg-group$ $@ msg-logs #!  THEN
+    ?msg-log
     last# cell+ $[]# >r
     [: last# cell+ $ins[]date ;] msglog-sema c-section
-    msg-group$ $@ save-msgs
-    r> last# cell+ $[]# <> ;
+    r> last# cell+ $[]# <>
+    dup IF  msg-group$ $@ save-msgs  THEN ;
 
 Sema queue-sema
 
@@ -114,11 +117,9 @@ Sema queue-sema
     sigpksize# - 2dup + sigpksize# >$  c-state off do-nestsig ;
 
 : do-msg-nestsig ( -- )
-    msg@ 2dup +msg-log IF
-	replay-mode @ 0= IF
-	    msg-display msg-notify
-	ELSE  2drop  THEN
-    ELSE  2drop  THEN
+    msg@ +msg-log replay-mode @ 0= and IF
+	msg@ msg-display msg-notify
+    THEN
     msg- ;
 
 : display-lastn ( addr u n -- )

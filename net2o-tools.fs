@@ -573,7 +573,20 @@ sema resize-sema
     [: 2dup unique$cell? IF
 	  >r { w^ x } x cell r> $+!
       ELSE  2drop  THEN ;] resize-sema c-section ;
+
 \ xchar tool
 
 : *-width ( addr u -- n )
     0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
+
+\ catch loop
+
+: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
+
+: .loop-err ( throw xt -- )
+    .name dup . cr DoError cr ;
+
+: catch-loop { xt -- flag }
+    BEGIN   nothrow xt catch dup -1 = ?EXIT
+	?int dup  WHILE  xt .loop-err  REPEAT
+    drop false ;
