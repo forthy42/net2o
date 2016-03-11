@@ -276,6 +276,12 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : today? ( day -- flag )
     ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
+: .ns ( r -- )  1e-9 f*
+    fdup 1e-6 f< IF  1e9 f* 10 0 0 f.rdp ." ns"  EXIT  THEN
+    fdup 1e-3 f< IF  1e6 f* 10 3 0 f.rdp ." µs"  EXIT  THEN
+    fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
+    10 6 0 f.rdp 's' emit ;
+
 : .2 ( n -- ) s>d <# # # #> type ;
 : >day ( seconds -- fraction day )
     86400e f/ fsplit ;

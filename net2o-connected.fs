@@ -294,7 +294,7 @@ also net2o-base
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@ 64u>= IF
 	false net2o:do-resend
-	~~ ack@ .+timeouts ~~ resend-all-to 64! ~~
+	ack@ .+timeouts resend-all-to 64!
     THEN ;
 
 0 Value request-stats?

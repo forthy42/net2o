@@ -543,7 +543,10 @@ previous
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     0. 2 pick reply[] dup >r 2!
     ticks r@ reply-time 64@ 64- ack@ >o
-    0 timeouts !@ IF  rtdelay 64@ 64umax  THEN  rtdelay 64!  o>
+    rtd( ." rtdelay ok: " 64dup 64>f .ns cr )
+    0 timeouts !@ rtd( dup . ) 1 u> IF  rtdelay 64@ 64umax
+	rtd( ." rtdelay t-o: " 64dup 64>f .ns cr )  THEN
+    rtdelay 64!  o>
     -1 reqcount +!@ 1 = IF  ->wake  THEN
     0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )

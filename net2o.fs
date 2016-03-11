@@ -358,8 +358,7 @@ UValue connection
 64User context-ticker  64#0 context-ticker 64!
 
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
-    connect( 64dup ." rtdelay: " 64>f .ns cr )
-    rtdelay 64! ;
+    rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
 : n2o:new-context ( addr -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
@@ -583,7 +582,7 @@ sema timing-sema
 
 : >rtdelay ( client serv -- client serv )
     recv-tick 64@ 64dup lastack 64!
-    64over 64- rtdelay 64min! ;
+    64over 64- rtd( ." rtdelay min to " 64dup 64>f .ns cr ) rtdelay 64min! ;
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
@@ -1245,7 +1244,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >timeout ( 64n n -- 64n )
-    >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
+    >r 64-2* timeout-min# 64max r> 1- sq2** timeout-max# 64min ;
 : +timeouts ( -- timeout ) 
     rtdelay 64@ timeouts @ >timeout ticks 64+ 1 timeouts +! ;
 : 0timeout ( -- )
@@ -1620,11 +1619,6 @@ Variable cookies
 	nip return-addr be@ n2o:new-context swap
     THEN ;
 
-: .ns ( r -- )  1e-9 f*
-    fdup 1e-6 f< IF  1e9 f* 10 0 0 f.rdp ." ns"  EXIT  THEN
-    fdup 1e-3 f< IF  1e6 f* 10 3 0 f.rdp ." µs"  EXIT  THEN
-    fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
-    10 6 0 f.rdp 's' emit ;
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/
     64over 64abs 64over 64> r> and IF

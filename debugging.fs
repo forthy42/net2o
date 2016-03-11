@@ -77,6 +77,7 @@ debug: reveal( \ reveal secrets
 debug: reconnect( \ reconnect
 debug: tweak( \ tweaked key
 debug: ivs( \ IVS regen
+debug: rtd( \ round trip delay related stuff
 
 -db profile( \ )
 
