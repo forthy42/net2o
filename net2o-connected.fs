@@ -144,12 +144,11 @@ gen-table $freeze
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
-: net2o:ackflush ( n -- ) ulit, ack-flush ;
 : n2o:done ( -- ) request( ." n2o:done request" forth:cr )
     slurp next-request filereq# ! ;
 
 : rewind ( -- )
-    data-rmap @ >o dest-back @ do-slurp @ umax o> net2o:ackflush ;
+    data-rmap @ >o dest-back @ do-slurp @ umax o> ulit, ack-flush ;
 
 \ safe initialization
 
@@ -295,7 +294,7 @@ also net2o-base
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@ 64u>= IF
 	false net2o:do-resend
-	+timeouts resend-all-to 64!
+	~~ ack@ .+timeouts ~~ resend-all-to 64! ~~
     THEN ;
 
 0 Value request-stats?
@@ -432,7 +431,8 @@ previous
 
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
-    net2o-code  ack expect-reply \ ['] end-cmd IS expect-reply?
+    net2o-code
+    ack expect-reply \ ['] end-cmd IS expect-reply?
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack
@@ -440,7 +440,7 @@ previous
 	    true net2o:do-resend
 	THEN
 	0 data-rmap @ .do-slurp !@
-	?dup-IF  net2o:ackflush
+	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
     endwith  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
