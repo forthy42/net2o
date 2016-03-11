@@ -83,11 +83,6 @@ gen-table $freeze
 
 set-current
 
-Variable enc-filename
-Variable enc-file
-Variable enc-mode
-Variable enc-padding
-
 $80 Constant min-align#
 $400 Constant pow-align#
 
@@ -97,14 +92,14 @@ $400 Constant pow-align#
     1- 0 >r  BEGIN  dup pow-align# u>  WHILE  2/ r> 1+ >r  REPEAT
     1+ r> lshift  min-align# 1- + min-align# negate and ;
 
-: enc-keccak ( -- )      $60 enc-mode ! ; \ wrap with keccak
+Variable enc-mode
+
+: enc-keccak ( -- )        $60 enc-mode ! ; \ wrap with keccak
 : enc-threefish ( -- ) $010160 enc-mode ! ; \ wrap with threefish
 : enc>crypt2 ( -- )
     enc-mode @ $10 rshift $FF and >crypt ;
 
 enc-keccak
-
-Variable key-list
 
 : pk-off ( -- ) key-list $[]off ;
 

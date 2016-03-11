@@ -50,15 +50,14 @@ sema msglog-sema
     [: msg-logs #@ save-mem ;] msglog-sema c-section ;
 
 : save-msgs ( group u -- )
-    otr-mode @ replay-mode @ or IF  2drop  EXIT  THEN
-    init-chatlog  enc-file $off  n2o:new-msg >o
-    2dup msg-log@
-    over >r bounds ?DO
-	I $@ [: net2o-base:$, net2o-base:nestsig ;]
-	gen-cmd$ enc-file $+!
-    cell +LOOP  r> free throw  dispose o>
-    >chatid
-    [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
+    n2o:new-msg >o enc-file $off
+    2dup msg-log@ over >r
+    [: bounds ?DO
+	  I $@ net2o-base:$, net2o-base:nestsig
+      cell +LOOP ;]
+    gen-cmd$ 2drop tmp$ @ enc-file ! tmp$ off
+    r> free throw  dispose o>
+    >chatid [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : vault>msg ( -- )
@@ -87,7 +86,8 @@ event: ->save-msgs over >r save-msgs r> free throw ;
     last# cell+ $[]# >r
     [: last# cell+ $ins[]date ;] msglog-sema c-section
     r> last# cell+ $[]# <>
-    dup IF  msg-group$ $@ save-msgs  THEN ;
+    dup otr-mode @ replay-mode @ or 0= and
+    IF  msg-group$ $@ save-msgs&  THEN ;
 
 Sema queue-sema
 
@@ -376,7 +376,7 @@ $200 Constant maxmsg#
     net2o-code expect-reply
     log !time endwith join, get-ip end-code ;
 
-: chat-entry ( -- )
+: chat-entry ( -- )  init-chatlog
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
 also net2o-base

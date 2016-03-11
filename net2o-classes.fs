@@ -266,25 +266,30 @@ end-structure
 user-o io-mem
 
 object class
-    pollfd 4 *                     uvar pollfds \ up to four file descriptors
-    sockaddr_in                    uvar sockaddr
-    sockaddr_in                    uvar sockaddr1
+    pollfd 4 *      uvar pollfds \ up to four file descriptors
+    sockaddr_in     uvar sockaddr
+    sockaddr_in     uvar sockaddr1
     [IFDEF] no-hybrid
-	sockaddr_in                uvar sockaddr2
+	sockaddr_in uvar sockaddr2
     [THEN]
-    file-stat                      uvar statbuf
-    cell                           uvar ind-addr
-    cell                           uvar task#
-    $10                            uvar cmdtmp
-    $10                            uvar return-addr
-    $10                            uvar temp-addr
-    timestats                      uvar stat-tuple
+    file-stat       uvar statbuf
+    cell            uvar ind-addr
+    cell            uvar task#
+    $10             uvar cmdtmp
+    $10             uvar return-addr
+    $10             uvar temp-addr
+    timestats       uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
-    maxdata                        uvar aligned$
-    cell                           uvar code0-buf^
-    cell                           uvar code-buf^
-    cell                           uvar code-buf$^
-    cell                           uvar code-key^
+    maxdata         uvar aligned$
+    cell            uvar code0-buf^
+    cell            uvar code-buf^
+    cell            uvar code-buf$^
+    cell            uvar code-key^
+    \ vault variables
+    cell            uvar enc-filename
+    cell            uvar enc-file
+    cell            uvar enc-padding
+    cell            uvar key-list
 end-class io-buffers
 
 \ reply structure
