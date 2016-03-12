@@ -11,8 +11,7 @@ topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
 backdoors: I have an official front door in net2o for the NSA.
-**Update:** Obama was here and leaked the [NSA backdoor
-whitepaper](https://cryptome.org/2015/09/nsc-crypto-wapo-15-0916.pdf)
+**Update:** Obama was here and wants [weak, backdoored encryption](http://www.theregister.co.uk/2016/03/11/president_barack_obama_encryption_sxsw/).
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page.
