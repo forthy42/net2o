@@ -322,8 +322,8 @@ code-buf$
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
 : gen-cmd$ ( xt -- addr u )
-    cmdbuf-o @ >r code-buf$ cmd$ @ >r cmd$ off
-    execute  cmdbuf$ tmp$ $!  cmdreset  r> cmd$ ! r> cmdbuf-o !
+    cmdbuf-o @ >r code-buf$ cmd$ @ >r cmd$ off tmp$ $off
+    execute  cmd$ @ tmp$ !  r> cmd$ ! r> cmdbuf-o !
     tmp$ $@ ;
 
 code0-buf \ reset default
