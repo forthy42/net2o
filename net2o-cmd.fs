@@ -595,7 +595,7 @@ previous
 \ nested commands
 
 User neststart#
-User nest-string cell uallot drop
+
 2 Constant fwd# \ maximum 14 bits = 16kB
 
 : nest$ ( -- addr u )  cmdbuf$ neststart# @ safe/string ;
@@ -615,7 +615,7 @@ also net2o-base
     c:0key nest$
 \    ." sign: " 2dup xtype forth:cr
     c:hash $tmp +cmdbuf
-    cmd-resolve> nest-string 2! nestsig ;
+    cmd-resolve> 2drop  nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 
