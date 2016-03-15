@@ -139,8 +139,15 @@ Variable net2o-tasks
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
+
+event: ->kill ( task -- )
+    <event ->wake event> kill-task ;
+: send-kill ( -- ) <event up@ elit, ->kill event> ;
+
 : net2o-kills ( -- )
-    net2o-tasks $@ bounds ?DO  I @ kill  cell +LOOP  net2o-tasks $off ;
+    net2o-tasks $@ bounds ?DO  I @ send-kill  cell +LOOP
+    net2o-tasks $@len 0 ?DO  stop  cell +LOOP
+    net2o-tasks $off ;
 
 0 warnings !@
 : bye  net2o-kills  1 ms bye ;

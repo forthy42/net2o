@@ -319,7 +319,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
-		drop $# $a $[]!  EXIT  THEN
+		drop $# $a $[]@ smove \ overwrite in place
+		EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
@@ -360,7 +361,7 @@ $10 Constant datesize#
 		drop
 		2dup rest - + 64@
 		$# $a $[]@ rest - + 64@ 64u>=
-		IF   $# $a $[]!
+		IF   $# $a $[]@ smove \ overwrite in place
 		ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
@@ -383,7 +384,8 @@ $10 Constant datesize#
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
-		64drop $# $a $[]!  EXIT  THEN
+		64drop 2drop \ don't overwrite if already exists!
+		EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;

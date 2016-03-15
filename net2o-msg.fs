@@ -519,6 +519,8 @@ also net2o-base scope: /chat
 : nat ( addr u -- )  2drop
     \U nat
     \G nat: list nat traversal information of all peers in all groups
+    \U renat
+    \G renat: redo nat traversal
     msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
 	  ." --- " I @ >o .con-id ." : " return-address .addr-path
