@@ -607,10 +607,10 @@ User neststart#
 
 also net2o-base
 
+: +zero16 ( -- ) "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ;
 : sign[ ( -- ) neststart# @ nest-stack >stack
     string "\x80\x80" +cmdbuf cmdbuf$ nip neststart# ! ;
-: nest[ ( -- ) sign[
-    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ; \ add space for IV
+: nest[ ( -- ) sign[ +zero16 ; \ add space for IV
 : ']sign ( xt -- )
     c:0key nest$
 \    ." sign: " 2dup xtype forth:cr
@@ -622,7 +622,7 @@ also net2o-base
 previous
 
 : cmd> ( -- addr u )
-    "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf \ add space for checksum
+    +zero16 \ add space for checksum
     cmd-resolve> ;
 
 : cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
