@@ -341,12 +341,14 @@ previous
     net2o-code expect-msg leave,
     cookie+request end-code| ;
 
-: .chat ( -- ) replay-mode on
+: [group] ( xt -- )
     msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
-    nest-string 2@ msg+ do-msg-nestsig
-    msg-group$ $@ 1 display-lastn
-    replay-mode off
-    msg-group$ $@ save-msgs o> o> notify- ;
+    execute o> o> ;
+: .chat ( -- ) replay-mode on
+    [: do-msg-nestsig
+      msg-group$ $@ 1 display-lastn
+      replay-mode off
+      msg-group$ $@ save-msgs ;] [group] notify- ;
 
 $200 Constant maxmsg#
 
@@ -383,7 +385,8 @@ also net2o-base
 : send-avalanche ( xt -- )
     0 >o code-buf$ cmdreset init-reply
     <msg execute msg> endwith  o>
-    cmdbuf$ 4 /string 2 - msg-group$ $@ >group code-buf avalanche-msg ;
+    cmdbuf$ 4 /string 2 - 2dup ['] msg+ [group]
+    msg-group$ $@ >group code-buf avalanche-msg ;
 previous
 
 \ chat helper words
