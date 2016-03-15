@@ -381,7 +381,7 @@ $200 Constant maxmsg#
 
 also net2o-base
 : send-avalanche ( xt -- )
-    0 >o code-buf$ cmdreset
+    0 >o code-buf$ cmdreset init-reply
     <msg execute msg> endwith  o>
     cmdbuf$ 4 /string 2 - msg-group$ $@ >group code-buf avalanche-msg ;
 previous

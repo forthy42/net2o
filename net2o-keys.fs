@@ -517,7 +517,7 @@ sample-key >o key-entry-table @ token-table ! o>
 : key:code ( -- )
     code-key  cmdlock lock
     keypack keypack-all# erase
-    cmdreset also net2o-base ;
+    cmdreset init-reply also net2o-base ;
 comp: :, also net2o-base ;
 
 scope{ net2o-base

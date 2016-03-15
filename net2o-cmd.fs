@@ -662,7 +662,7 @@ scope{ net2o-base
 : end-code ( -- ) (end-code) previous ;
 comp: :, previous ;
 : push-cmd ( -- )
-    end-cmd ['] end-cmd IS expect-reply? cmdbuf$ push-reply ;
+    end-cmd cmdbuf$ push-reply ;
 
 : ]nest$  ( -- )  cmd>nest 2drop ;
 : ]nest$!  ( addr -- )

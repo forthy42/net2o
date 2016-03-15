@@ -136,7 +136,8 @@ enc-keccak
     2dup vkey state# encrypt$ $, vault-sig ;
 
 : encfile-rest ( key-list -- ) >vault >r
-    code-buf$ cmdreset pkc keysize r@ $+[]! \ encrypt for ourself
+    code-buf$ cmdreset init-reply
+    pkc keysize r@ $+[]! \ encrypt for ourself
     "v2o" 4cc, vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file

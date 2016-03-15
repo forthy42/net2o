@@ -175,12 +175,12 @@ net2o-base
 	pubkey $@ drop skc key-stage2
     ELSE  receive-key  THEN
     update-key all-ivs ;
+: reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
+    reply-key, ( cookie+request ) time-offset! context ]tmpnest
+    push-cmd ;
 
 +net2o: gen-reply ( -- ) \g generate a key request reply
-    own-crypt? 0= ?EXIT
-    [: crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
-      reply-key, ( cookie+request ) time-offset! context ]tmpnest
-      push-cmd ;]  IS expect-reply? ;
+    own-crypt? IF  ['] reply-key IS expect-reply?  THEN ;
 +net2o: gen-punch-reply ( -- ) ( obsolete dummy ) ;
 
 \ one-shot packets

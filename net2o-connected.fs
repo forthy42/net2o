@@ -156,7 +156,7 @@ gen-table $freeze
 : slit<  slit, push-slit ;
 :noname ( throwcode -- )
     remote? @ IF
-	dup  IF  dup nlit, ko end-cmd
+	dup  IF  dup nlit, ko
 	    ['] end-cmd IS expect-reply? (end-code)  THEN
     THEN  throw ; IS >throw
 
@@ -363,7 +363,6 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    ['] end-cmd IS expect-reply?
     net2o-version $, get-version
     tpkc keysize $, receive-tmpkey
     nest[ no-cookie-xt cookie,
@@ -384,9 +383,8 @@ previous
 
 :noname ( addr u -- )
     outflag @ >r  cmdbuf-o @ >r
-    [: cmd0! cmdreset also net2o-base
+    [: cmd0! cmdreset init-reply also net2o-base
       [ also net2o-base ]
-      ['] end-cmd IS expect-reply?
       $, nest end-code ;] catch
     r> cmdbuf-o !  r> outflag !  throw
 ; is punch-reply
@@ -398,7 +396,7 @@ previous
 	[:
 	  resend( ." resend0: " resend0 $@ n2o:see forth:cr )
 	  msg( ." resend0: " resend0 $@ swap hex. hex forth:cr )
-	  cmdreset resend0 $@ +cmdbuf
+	  cmdreset init-reply resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
 	  1 packets2 +! ;]
@@ -432,7 +430,7 @@ previous
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
     net2o-code
-    ack expect-reply \ ['] end-cmd IS expect-reply?
+    ack expect-reply
     dup ack-receive !@ xor >r
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack

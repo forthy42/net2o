@@ -145,7 +145,8 @@ event: ->kill ( task -- )
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
 : net2o-kills ( -- )
-    net2o-tasks $@ bounds ?DO  I @ send-kill  cell +LOOP
+    net2o-tasks $@ bounds ?DO  I @ cell +LOOP
+    net2o-tasks $@len 0 ?DO  send-kill  cell +LOOP
     net2o-tasks $@len 0 ?DO  stop  cell +LOOP
     net2o-tasks $off ;
 
