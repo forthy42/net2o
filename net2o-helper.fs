@@ -200,20 +200,22 @@ User host$ \ check for this hostname
     false id dup .dht-host ['] insert-host? $[]map drop
     0= !!no-address!!  2drop ;
 
-:noname ( addr u cmdlen datalen -- )
-    2>r n2o:pklookup
+: ?nat ( -- )
+    ind-addr @ IF  net2o-code nat-punch end-code|  THEN ;
+: direct-connect ( cmdlen datalen -- )
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    2r> n2o:connect +flow-control +resend
-    ind-addr @ IF  net2o-code nat-punch end-code|  THEN
+    n2o:connect +flow-control +resend ?nat ;
+
+:noname ( addr u cmdlen datalen -- )
+    2>r n2o:pklookup 2r> direct-connect
 ; is pk-connect
 
 :noname ( addr+key u cmdlen datalen -- )
     2>r over + 1- dup c@ dup >r -
     2dup u>= !!keysize!!
     dup r> make-context
-    over - insert-addr$ IF
-	2r> n2o:connect +flow-control +resend
-    ELSE  !!no-address!! THEN ; is addr-connect
+    over - insert-addr$ 0= !!no-address!!
+    2r> direct-connect ; is addr-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;
