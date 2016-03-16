@@ -36,10 +36,10 @@ debug: timeout(
 debug: ack(
 debug: crypt(
 debug: noens(
-debug: key(
+debug: key( \ key stuff
+debug: vkey( \ vault key stuff
 debug: genkey( \ See generated keys - never let this go to a log file!
 debug: cookie( 
-debug: cookies( \ dump all cookies on rewinding
 debug: delay( \ used to add delays at performance critical places
 debug: tag(
 debug: flush(

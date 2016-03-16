@@ -26,9 +26,7 @@ connect-table $@ inherit-table context-table
 \g ### connection commands ###
 \g 
 +net2o: disconnect ( -- ) \g close connection
-    o 0= ?EXIT
-    wait-task @ IF  <event o elit, ->disconnect wait-task @ event>
-    ELSE  n2o:dispose-context  THEN  un-cmd ;
+    o IF  n2o:dispose-context  un-cmd  THEN ;
 +net2o: set-ip ( $:string -- ) \g set address information
     $> setip-xt perform ;
 +net2o: get-ip ( -- ) \g request address information

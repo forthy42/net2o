@@ -147,7 +147,7 @@ event: ->kill ( task -- )
 : net2o-kills ( -- )
     net2o-tasks $@ bounds ?DO  I @ cell +LOOP
     net2o-tasks $@len 0 ?DO  send-kill  cell +LOOP
-    net2o-tasks $@len 0 ?DO  stop  cell +LOOP
+    net2o-tasks $@len 0 ?DO  100000000 stop-ns  cell +LOOP
     net2o-tasks $off ;
 
 0 warnings !@
@@ -1402,8 +1402,6 @@ Defer o-beacon
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
-event: ->disconnect ( connection -- ) >o do-disconnect n2o:dispose-context o> ;
-
 \ loops for server and client
 
 8 cells 1- Constant maxrequest#
@@ -1420,7 +1418,6 @@ event: ->request ( n o -- ) >o 1 over lshift invert reqmask and!
     request( ." Request completed: " . ." o " o hex. ." task: " task# ? cr )else( drop )
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
     ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN o> ;
-event: ->reqsave ( task n o -- )  <event swap elit, elit, ->request event> ;
 event: ->timeout ( o -- )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
@@ -1531,9 +1528,7 @@ Variable beacons \ destinations to send beacons to
 : packet-loop ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  event-send  AGAIN ;
 
-: n2o:request-done ( n -- )
-    file-task ?dup-IF  <event swap wait-task @ elit, elit, o elit, ->reqsave event>
-    ELSE  elit, o elit, ->request  THEN ;
+: n2o:request-done ( n -- )  elit, o elit, ->request ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;

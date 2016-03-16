@@ -105,7 +105,7 @@ init-keybuf
 : >crypt-key ( addr u -- ) key( dup . )
     dup 0= IF  2drop no-key state#  THEN
     key-assembly state# + state# move-rep
-    key-assembly key( ." >crypt-key " dup state2# 85type cr )
+    key-assembly tweak( ." >crypt-key " dup state2# 85type cr )
     >c:key ;
 : >crypt-source ( addr u -- )
     key-assembly state# move-rep ;
@@ -147,7 +147,7 @@ init-keybuf
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over 128@ 2r> c:tweakkey!
     key-salt# safe/string
-    key( ." key init: " c:key@ c:key# .nnb cr ) ;
+    tweak( ." key init: " c:key@ c:key# .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
     2>r over >r  rng128 64over 64over r> 128! 2r> c:tweakkey!
@@ -382,9 +382,9 @@ Defer search-key \ search if that is one of our pubkeys
     keypad keysize ;
 
 : net2o:update-key ( -- )
-    do-keypad sec@ dup IF
-	key( ." store key, o=" o hex. 2dup .nnb cr ) crypto-key sec!
-	do-keypad sec-off
+    o? do-keypad sec@ dup IF
+	key( ." store key, o=" o hex. 2dup .nnb cr )
+	crypto-key sec! do-keypad sec-off
 	EXIT
     THEN
     2drop ;

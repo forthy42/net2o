@@ -37,8 +37,8 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 : dht-connect ( -- )  ['] noop dht-connect' ;
 
 Variable announced
-: subme ( -- )  announced @ 0= ?EXIT
-    pub-addr$ $[]# 0= ?EXIT  dht-connect sub-me disconnect-me ;
+: subme ( -- )  announced @ pub-addr$ $[]# or IF
+	dht-connect sub-me disconnect-me  THEN ;
 
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
     disconnect-me connect( [: .packets profile( .times ) ;] $err ) ;
@@ -122,7 +122,7 @@ event: ->do-beacon ( addr -- )
     net2o-sock
     sockaddr alen @ routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
     beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
-    0 sockaddr alen @ sendto +send ;
+    0 sockaddr alen @ sendto drop +send ;
 : !-beacon ( -- )
     \G I got a reply, my address is unknown
     beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )

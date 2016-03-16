@@ -31,11 +31,11 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 +net2o: set-cookie ( utimestamp -- ) \g cookies and round trip delays
     own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
-	IF  trace( ." context " forth:cr ) >o rdrop  o to connection
+	IF  cookie( ." context " dup hex. forth:cr ) >o rdrop  o to connection
 	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
-	    trace( ." ticker " forth:cr )
+	    cookie( ." ticker " forth:cr )
 	    64dup context-ticker 64!
 	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
 	THEN

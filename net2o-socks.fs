@@ -36,7 +36,7 @@ UValue pollfd#  0 to pollfd#
     pollfds - pollfd / to pollfd# ;
 
 User ptimeout  cell uallot drop
-#10000000 Value poll-timeout# \ 10ms, don't sleep too long
+#999999999 Value poll-timeout# \ 1s, don't sleep too long
 poll-timeout# 0 ptimeout 2!
 
 User socktimeout cell uallot drop

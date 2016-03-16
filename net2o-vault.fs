@@ -53,7 +53,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 	    vaultkey vk# v-dhe keysize decrypt$ IF
 		dup state# 1+ keysize within !!keysize!!
 		v-key state# move-rep
-		key( ." vkey: " v-key state# 85type forth:cr )
+		vkey( ." vkey keyx: " v-key state# 85type forth:cr )
 		2 c-state or!  LEAVE
 	    ELSE  2drop  THEN
 	THEN
@@ -62,13 +62,13 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \g this is the actual content of the vault
     v-mode>crypt2
     no-key state# >crypt-source  v-key state# >crypt-key
-    key( ." vkey: " v-key state# 85type forth:cr )
+    vkey( ." vkey filex: " v-key state# 85type forth:cr )
     $> 2dup c:decrypt v-data 2!  c:diffuse
     c:key@ v-kstate c:key# move
     0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     \g the signature of the vault, using the keyed hash over the file
-    key( ." vkey: " v-key state# 85type forth:cr )
+    vkey( ." vkey sigx: " v-key state# 85type forth:cr )
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
@@ -107,7 +107,7 @@ enc-keccak
 : vkeys, ( key-list -- )
     vaultkey $100 erase
     enc-mode @ $FF and $20 - rng$ vkey state# move-rep
-    key( ." vkey: " vkey state# 85type forth:cr )
+    vkey( ." vkey key: " vkey state# 85type forth:cr )
     enc-mode @ dup ulit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
 	vkey vaultkey $10 + enc-mode @ $FF and $20 - move
@@ -120,7 +120,7 @@ enc-keccak
     enc-file $@len dup >r vault-aligned enc-file $!len
     enc-file $@ r> /string dup enc-padding ! erase ;
 : vfile-enc ( -- )
-    key( ." vkey: " vkey state# 85type forth:cr )
+    vkey( ." vkey file: " vkey state# 85type forth:cr )
     enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
@@ -132,7 +132,7 @@ enc-keccak
     [: $10 spaces now>never enc-padding @ n>64 cmdtmp$ forth:type
       .pk .sig $10 spaces ;] $tmp
     0 >crypt
-    key( ." vkey: " vkey state# 85type forth:cr )
+    vkey( ." vkey sig: " vkey state# 85type forth:cr )
     2dup vkey state# encrypt$ $, vault-sig ;
 
 : encfile-rest ( key-list -- ) >vault >r
