@@ -142,7 +142,7 @@ Defer silent-join
     reconnect( ." silent join " o hex. connection hex. cr )
     o to connection
     ?msg-context >o silent-last# @ to last# o>
-    reconnect( ." join: " last# $@ 85type cr )
+    reconnect( ." join: " last# $. cr )
     +unique-con silent-join ;
 
 : chat-silent-rqd ( n -- )

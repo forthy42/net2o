@@ -374,7 +374,7 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
 
 also net2o-base
 : nat-punch ( o:connection -- )
-    ind-addr @ IF  pings new-request false gen-punchload gen-punch  THEN ;
+    pings new-request false gen-punchload gen-punch ;
 previous
 
 :noname ( addr u -- )
