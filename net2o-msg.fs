@@ -139,28 +139,39 @@ Defer silent-join
 : +unique-con ( -- ) o last# cell+ +unique$ ;
 
 : chat-silent-join ( -- )
+    reconnect( ." silent join " o hex. connection hex. cr )
     o to connection
     ?msg-context >o silent-last# @ to last# o>
-    silent-join +unique-con ;
+    reconnect( ." join: " last# $@ 85type cr )
+    +unique-con silent-join ;
 
 : chat-silent-rqd ( n -- )
+    reconnect( ." silent requst" cr )
     clean-request chat-silent-join ;
 
-: ?chat-nat ( -- )
-    ind-addr @ IF
-	['] chat-silent-rqd rqd! net2o-code nat-punch end-code
-    ELSE  chat-silent-join  THEN ;
+: ?nat ( -- )  o to connection
+    net2o-code nat-punch end-code ;
 
-: chat-rqd ( n -- )
+: ?chat-nat ( -- )
+    ['] chat-silent-rqd rqd! ?nat ;
+
+: chat-rqd-nat ( n -- )
+    reconnect( ." chat req done, start nat traversal" cr )
     connect-rest  +flow-control +resend ?chat-nat ;
+
+: chat-rqd-nonat ( n -- )
+    reconnect( ." chat req done, start silent join" cr )
+    connect-rest  +flow-control +resend chat-silent-join ;
 
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
-	last# -rot save-mem peer-  over >r
+	last# -rot save-mem over >r peer-
 	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
 	reconnect( ." in group: " last# dup hex. $. cr )
-	0 >o $A $A [: ?msg-context >o silent-last# ! o>
-	  ['] chat-rqd rqd! ;] addr-connect o>
+	0 >o $A $A [: reconnect( ." prepare reconnection" cr )
+	  ?msg-context >o silent-last# ! o>
+	  ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
+	addr-connect o>
 	r> free throw
     ELSE  2drop  THEN ;
 

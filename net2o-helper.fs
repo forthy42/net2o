@@ -200,14 +200,16 @@ User host$ \ check for this hostname
     false id dup .dht-host ['] insert-host? $[]map drop
     0= !!no-address!!  2drop ;
 
-: ?nat ( -- )
-    ind-addr @ IF  net2o-code nat-punch end-code  THEN ;
 : ?nat-done ( n -- )
     nat( ." req done, issue nat request" forth:cr )
     connect-rest +flow-control +resend ?nat ;
+: no-nat-done ( n -- )
+    nat( ." req done, finished" forth:cr )
+    connect-rest +flow-control +resend ;
 : direct-connect ( cmdlen datalen -- )
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    ['] ?nat-done rqd? n2o:connect nat( ." connected" forth:cr ) ;
+    ['] ?nat-done ['] no-nat-done ind-addr @ select rqd?
+    n2o:connect nat( ." connected" forth:cr ) ;
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup 2r> direct-connect
