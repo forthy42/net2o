@@ -363,10 +363,8 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     net2o-code0
     net2o-version $, get-version
     tpkc keysize $, receive-tmpkey
-    nest[ no-cookie-xt cookie,
-    request( ." gen reply" forth:cr )
-	gen-reply request,
-    ]nest  other
+    nest[ cookie, request( ." gen reply" forth:cr )
+	gen-reply request, ]nest  other
     tmpkey-request
     pubkey @ 0= IF  key-request  THEN
     ind-addr @  IF  punch?  THEN
@@ -491,11 +489,13 @@ previous
 : +get-time     ['] get-tick is other ;
 
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
-: tail-connect ( -- )   +resend-cmd client-loop
-    -timeout tskc KEYBYTES erase ( resend0 $off ) context! ;
+: connect-rest ( n -- )
+    clean-request -timeout tskc KEYBYTES erase context! ;
+: tail-connect ( -- )   +resend-cmd client-loop ;
 
 : n2o:connect ( ucode udata -- )
-    reqsize!  gen-tmpkeys  gen-request  tail-connect ;
+    reqsize!  gen-tmpkeys  ['] connect-rest rqd?
+    gen-request  tail-connect ;
 
 : end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
 

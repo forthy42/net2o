@@ -17,7 +17,7 @@
 
 Defer avalanche-to ( addr u o:context -- )
 Defer pk-connect ( key u cmdlen datalen -- )
-Defer addr-connect ( key+addr u cmdlen datalen -- )
+Defer addr-connect ( key+addr u cmdlen datalen xt -- )
 Defer pk-peek? ( addr u0 -- flag )
 
 : avalanche-msg ( msg u1 -- )
@@ -138,12 +138,29 @@ Defer silent-join
 
 : +unique-con ( -- ) o last# cell+ +unique$ ;
 
+: chat-silent-join ( -- )
+    o to connection
+    ?msg-context >o silent-last# @ to last# o>
+    silent-join +unique-con ;
+
+: chat-silent-rqd ( n -- )
+    clean-request chat-silent-join ;
+
+: ?chat-nat ( -- )
+    ind-addr @ IF
+	['] chat-silent-rqd rqd! net2o-code nat-punch end-code
+    ELSE  chat-silent-join  THEN ;
+
+: chat-rqd ( n -- )
+    connect-rest  +flow-control +resend ?chat-nat ;
+
 : reconnect-chat ( -- )
     peer@ 2dup d0<> IF
-	save-mem peer-  over >r
+	last# -rot save-mem peer-  over >r
 	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
-	0 >o last# >r $A $A addr-connect
-	o to connection r> to last# silent-join +unique-con o>
+	reconnect( ." in group: " last# dup hex. $. cr )
+	0 >o $A $A [: ?msg-context >o silent-last# ! o>
+	  ['] chat-rqd rqd! ;] addr-connect o>
 	r> free throw
     ELSE  2drop  THEN ;
 
@@ -155,7 +172,7 @@ event: ->avalanche ( o group -- )
     to last# .do-avalanche ;
 event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
-event: ->chat-reconnect ( group o -- )
+event: ->chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
 event: ->msg-nestsig ( editor stack o -- editor stack )
     .do-msg-nestsig  ctrl L inskey ;

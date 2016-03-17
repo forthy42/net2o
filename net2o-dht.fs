@@ -300,7 +300,7 @@ false Value add-myip
     add-myip IF
 	my-addr$ ['] pub-addr, $[]map
     THEN  endwith
-    nest[ no-cookie-xt cookie, request-gen @ #request, ]nest
+    nest[ cookie, request-gen @ #request, ]nest
     do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
     addr .+my-id

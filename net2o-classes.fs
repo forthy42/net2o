@@ -112,6 +112,7 @@ end-class ack-class
 cmd-class class
     field: msgs[]
     field: peers[]
+    field: silent-last#
 end-class msg-class
 
 cmd-class class
@@ -131,16 +132,17 @@ cmd-class class
     0 +field start-strings
     field: resend0
     field: data-resend
-    field: pubkey \ other side official pubkey
-    field: mpubkey \ our side official pubkey
+    field: pubkey        \ other side official pubkey
+    field: mpubkey       \ our side official pubkey
     field: punch-addrs
+    field: rqd-xts       \ callbacks for request done (array)
     0 +field end-strings
-    field: request-gen \ pre-generated request number
+    field: request-gen   \ pre-generated request number
     field: perm-mask
     \ secrets
     0 +field start-secrets
     field: crypto-key
-    field: dest-0key    \ key for stateless connections
+    field: dest-0key     \ key for stateless connections
     0 +field end-secrets
     \ semaphores
     0 +field start-semas
@@ -148,13 +150,13 @@ cmd-class class
     1 pthread-mutexes +field code-sema
     0 +field end-semas
     \ contexts for subclasses
-    field: next-context \ link field to connect all contexts
+    field: next-context  \ link field to connect all contexts
     field: log-context
     field: ack-context
     field: msg-context
-    field: file-state \ files
+    field: file-state    \ files
     \ rest of state
-    field: key-setup? \ true if key setup is done
+    field: key-setup?    \ true if key setup is done
     field: codebuf#
     field: context#
     field: wait-task
@@ -226,8 +228,6 @@ Variable context-table
 object class
     64field: cc-timeout
     field: cc-context
-    field: cc-done-xt
-    field: cc-timeout-xt
 end-class con-cookie
 
 con-cookie >osize @ Constant cookie-size#

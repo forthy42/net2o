@@ -147,7 +147,7 @@ event: ->kill ( task -- )
 : net2o-kills ( -- )
     net2o-tasks $@ bounds ?DO  I @ cell +LOOP
     net2o-tasks $@len 0 ?DO  send-kill  cell +LOOP
-    net2o-tasks $@len 0 ?DO  100000000 stop-ns  cell +LOOP
+    net2o-tasks $@len 0 ?DO  10000000 stop-ns  cell +LOOP
     net2o-tasks $off ;
 
 0 warnings !@
@@ -1414,10 +1414,25 @@ Defer o-beacon
     next-packet !ticks nip 0= ?EXIT  inbuf route?
     IF  route-packet  ELSE  handle-packet  THEN ;
 
-event: ->request ( n o -- ) >o 1 over lshift invert reqmask and!
-    request( ." Request completed: " . ." o " o hex. ." task: " task# ? cr )else( drop )
+: clean-request ( n -- )
+    1 over lshift invert reqmask and!
+    request( ." Request completed: " . ." o " o hex. ." task: " task# ? cr
+    )else( drop ) ;
+
+: rqd@ ( n -- xt )
+    0 swap rqd-xts $[] !@ ?dup-0=-IF  ['] clean-request  THEN ;
+
+: rqd! ( xt -- )
+    \G store request
+    request# @ rqd-xts $[] ! ;
+: rqd? ( xt -- )
+    \G store request if no better is available
+    request# @ rqd-xts $[] dup @ IF  2drop  ELSE  !  THEN ;
+
+event: ->request ( n o -- ) >o maxrequest# and
+    dup rqd@ request( ." request xt: " dup .name cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
-    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN o> ;
+    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
 event: ->timeout ( o -- )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
@@ -1565,17 +1580,13 @@ Variable initialized
 
 \ connection cookies
 
-: nothing-done ( -- ) cookie( ." Emtpy done xt" cr ) ;
-: nothing-timeout ( -- ) cookie( ." Empty timeout xt" cr ) ;
-' nothing-done ' nothing-timeout 2Constant no-cookie-xt
-
 Variable cookies
 
 #5.000.000.000 d>64 64Constant connect-timeout#
 
-: add-cookie ( xtdone xttimeout -- cookie64 )
-    [: 2>r ticks 64dup o
-	2r> { 64^ cookie-adder cookie-o xtd xtto }
+: add-cookie ( -- cookie64 )
+    [: ticks 64dup o
+	{ 64^ cookie-adder cookie-o }
 	cookie-adder cookie-size#  cookies $+! ;]
     resize-sema c-section ;
 
@@ -1588,7 +1599,6 @@ Variable cookies
 	ELSE
 	    64dup I .cc-timeout 64@ 64= IF
 		64drop I .cc-context @
-		I .cc-done-xt @ over .execute
 		cookies I cookie-size# del$one drop
 		unloop  true  EXIT
 	    THEN

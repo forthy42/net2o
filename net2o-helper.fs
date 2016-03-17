@@ -201,21 +201,24 @@ User host$ \ check for this hostname
     0= !!no-address!!  2drop ;
 
 : ?nat ( -- )
-    ind-addr @ IF  net2o-code nat-punch end-code|  THEN ;
+    ind-addr @ IF  net2o-code nat-punch end-code  THEN ;
+: ?nat-done ( n -- )
+    nat( ." req done, issue nat request" forth:cr )
+    connect-rest +flow-control +resend ?nat ;
 : direct-connect ( cmdlen datalen -- )
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
-    n2o:connect +flow-control +resend ?nat ;
+    ['] ?nat-done rqd? n2o:connect nat( ." connected" forth:cr ) ;
 
 :noname ( addr u cmdlen datalen -- )
     2>r n2o:pklookup 2r> direct-connect
 ; is pk-connect
 
-:noname ( addr+key u cmdlen datalen -- )
-    2>r over + 1- dup c@ dup >r -
+:noname ( addr+key u cmdlen datalen xt -- )
+    -rot 2>r >r over + 1- dup c@ dup >r -
     2dup u>= !!keysize!!
     dup r> make-context
     over - insert-addr$ 0= !!no-address!!
-    2r> direct-connect ; is addr-connect
+    r> execute 2r> n2o:connect ; is addr-connect
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;

@@ -142,13 +142,13 @@ net2o-base
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
 
 : cookie+request ( -- ) request( ." gen cookie" forth:cr )
-    nest[ no-cookie-xt cookie, request, ]nest ;
+    nest[ cookie, request, ]nest ;
 
 : new-request ( -- )
     next-request request-gen ! ;
 
 : gen-punchload ( flag -- ) >r request( ." gen punchload" forth:cr )
-    nest[ no-cookie-xt cookie, punch-done request-gen @ #request,
+    nest[ cookie, punch-done request-gen @ #request,
     reply-index ulit, ok
     r> IF  push' nop  THEN \ auto-nop if necessary
     ]nest$ punch-load, net2o:expect-reply maxdata code+ ;
