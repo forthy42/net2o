@@ -14,9 +14,9 @@ Kontakt:
 
 <table><tr>
 <th>Telefon:</th>
-<td>+498941154655</td></tr>
+<td>+𝟦𝟵𝟴𝟵𝟰𝟣𝟣𝟱𝟰𝟲𝟱𝟱</td></tr>
 <tr><th>Telefax:</th>
-<td>+498941154656</td></tr>
+<td>+𝟦𝟵𝟴𝟵𝟰𝟣𝟣𝟱𝟰𝟲𝟱𝟲</td></tr>
 <tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
 <tr><th>PGP key:</th>
