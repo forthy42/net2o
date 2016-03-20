@@ -37,7 +37,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 : dht-connect ( -- )  ['] noop dht-connect' ;
 
 Variable announced
-: subme ( -- )  announced @ pub-addr$ $[]# or IF
+: subme ( -- )  announced @ IF
 	dht-connect sub-me disconnect-me  THEN ;
 
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )

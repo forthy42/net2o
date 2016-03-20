@@ -47,7 +47,8 @@ Variable fs-table
 \ file events
 
 : file:done ( -- )
-    ." download done: " fs-id ? fs-path $@ type cr ;
+    -1 parent @ .file-count +!
+    .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: ->file-done ( file-o -- )
     >o file-xt perform o> ;
 

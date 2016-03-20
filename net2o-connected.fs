@@ -174,7 +174,8 @@ set-current
 
 : n2o:copy ( addrsrc us addrdest ud -- )
     [: 2swap $, r/o ulit, open-tracked-file
-      file-reg# @ save-to ;] n2o>file ;
+      file-reg# @ save-to ;] n2o>file
+    1 file-count +! ;
 
 : seek! ( pos id -- ) >r d>64
     64dup r@ state-addr .fs-seek 64!

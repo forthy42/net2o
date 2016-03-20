@@ -174,6 +174,7 @@ cmd-class class
     field: reqcount \ per connection request count (for non cookie-requests)
     field: request#
     field: filereq#
+    field: file-count \ open file count
 
     field: data-b2b
     

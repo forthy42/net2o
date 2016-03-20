@@ -140,18 +140,21 @@ Variable net2o-tasks
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;
 
+Variable kills
+event: ->killed ( -- )  -1 kills +! ;
 event: ->kill ( task -- )
-    <event ->wake event> kill-task ;
+    <event ->killed event> kill-task ;
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
 : net2o-kills ( -- )
+    net2o-tasks $@len cell/ kills !
     net2o-tasks $@ bounds ?DO  I @ cell +LOOP
-    net2o-tasks $@len 0 ?DO  send-kill  cell +LOOP
-    net2o-tasks $@len 0 ?DO  10000000 stop-ns  cell +LOOP
-    net2o-tasks $off ;
+    net2o-tasks $off
+    kills @ 0 ?DO  send-kill  LOOP
+    BEGIN  stop kills @ 0= UNTIL ;
 
 0 warnings !@
-: bye  net2o-kills  1 ms bye ;
+: bye  net2o-kills  bye ;
 warnings !
 
 \ packet&header size
@@ -631,7 +634,8 @@ sema timing-sema
     64>r time-offset 64@ 64+ 64r>
     parent @ .data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ >o >offset  IF
-	dest-tail @ o> over - 0 max addr>bits window-size !
+	dest-tail @ dest-size @ o> >r over - r> 1- and
+	addr>bits 1 max window-size !
 	addr>ts r> .dest-timestamps @ swap
     ELSE  o> rdrop 0 0  THEN ;
 
@@ -1553,7 +1557,9 @@ Variable beacons \ destinations to send beacons to
 
 : requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ hex. THEN cr )
     BEGIN  stop
-    o IF  reqmask @ 0= ( reqcount @ 0= and ) ELSE  false  THEN  UNTIL
+	o IF  reqmask @ 0= file-count @ 0= and ( reqcount @ 0= and )
+	ELSE  false  THEN
+    UNTIL
     o IF  o-timeout  THEN  request( ." wait done" cr ) ;
 
 : client-loop ( -- )
