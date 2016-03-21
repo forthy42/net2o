@@ -28,3 +28,6 @@ libthreefishfast_la_SOURCES = threefish.c
 libthreefishfast_la_LIBADD = 
 libthreefishfast_la_LDFLAGS = -version-info ${VERSION} -no-undefined #-soname libthreefish.so
 libthreefishfast_la_CFLAGS = @fastflags@
+
+install-exec-hook:
+	-/sbin/ldconfig $(libdir)
