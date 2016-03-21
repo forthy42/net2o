@@ -145,14 +145,18 @@ event: ->kill ( task -- )
     <event ->killed event> kill-task ;
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
-100.000.000 2constant kill-timeout# \ 100ms
+3.000.000.000 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
     net2o-tasks stack@ kills !  net2o-tasks $off
     kills @ 0 ?DO  send-kill  LOOP
-    ntime kill-timeout# d+ \ give 100ms time to terminate
-    BEGIN  2dup ntime d- 2dup d0> kills @ and  WHILE  stop-dns  REPEAT
-    2drop 2drop ;
+    ntime  0 >r \ give time to terminate
+    BEGIN  2dup kill-timeout# d+ ntime d- 2dup d0> kills @ and  WHILE
+	    stop-dns
+	    ntime 2over d- 1000000000 um/mod nip
+	    dup r> <> IF  '.' emit  THEN  >r
+    REPEAT
+    r> IF  cr  THEN  2drop 2drop ;
 
 0 warnings !@
 : bye  net2o-kills  bye ;

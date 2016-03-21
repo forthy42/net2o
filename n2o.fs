@@ -371,7 +371,7 @@ synonym searchkey keysearch
     \G get: get files into current directory
     get-me init-client
     ?@nextarg IF
-	$A $E nick-connect ." connected" cr
+	$A $E nick-connect ." connected" cr !time
 	net2o-code expect-reply
 	$10 blocksize! $A blockalign!
 	[: 2dup 2dup '/' -scan nip /string n2o:copy ;] arg-loop
