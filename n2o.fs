@@ -56,7 +56,10 @@ $20 value hash-size#
     85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key ;
 
 : keys>search ( -- )
-    search-key$ $[]off [: base85>$ search-key$ $+[]! ;] arg-loop ;
+    search-key$ $[]off [: dup 5 mod IF
+	    ." keys in multiples of 5 base85 characters, please, ignoring '"
+	    type ." '" cr
+	ELSE  base85>$ search-key$ $+[]!  THEN ;] arg-loop ;
 
 : nicks>search ( -- )
     search-key$ $[]off
