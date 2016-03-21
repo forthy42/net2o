@@ -29,8 +29,9 @@ in
 	;;
 esac
 
-GFORTH="`cd / && which gforth$GFX 2>/dev/null`"
-GFORTHFAST="`cd / && which gforth-fast$GFX 2>/dev/null`"
+AC_CHECK_PROGS(GFORTH, gforth$GFX)
+AC_CHECK_PROGS(GFORTHFAST, gforth-fast$GFX)
+
 test -z "$GFORTH" || read dummy GFVER GFARCH <<EOF
 $(eval $GFORTH -v 2>&1)
 EOF

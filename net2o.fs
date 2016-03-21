@@ -151,7 +151,7 @@ event: ->kill ( task -- )
     net2o-tasks $@ bounds ?DO  I @ cell +LOOP
     net2o-tasks $off
     kills @ 0 ?DO  send-kill  LOOP
-    BEGIN  stop kills @ 0= UNTIL ;
+    BEGIN  kills @  WHILE  stop  REPEAT ;
 
 0 warnings !@
 : bye  net2o-kills  bye ;
