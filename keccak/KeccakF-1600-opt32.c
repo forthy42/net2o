@@ -195,7 +195,7 @@ void xorLanesIntoState(int byteCount, UINT8* state, UINT32 *input)
   int i; UINT64 tmp=0;
   for(i=0; i<(byteCount-7); i+=8)
     xor8bytesIntoInterleavedWords((UINT32*)(state+i), input+i);
-  if(bytecount & 7) {
+  if(byteCount & 7) {
     memcpy(state+i, &tmp, byteCount & 7);
     xor8bytesIntoInterleavedWords((UINT32*)(state+i), (UINT8*)&tmp);
   }
