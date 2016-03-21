@@ -374,7 +374,7 @@ synonym searchkey keysearch
 	$A $E nick-connect ." connected" cr !time
 	net2o-code expect-reply
 	$10 blocksize! $A blockalign!
-	[: 2dup 2dup '/' -scan nip /string n2o:copy ;] arg-loop
+	[: 2dup basename n2o:copy ;] arg-loop
 	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
