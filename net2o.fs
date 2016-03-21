@@ -131,8 +131,7 @@ alloc-io
 Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )
-    dup { w^ task }
-    task cell net2o-tasks $+!  pass
+    dup net2o-tasks >stack  pass
     alloc-io b-out op-vector @ debug-vector !
     prep-socks catch-loop
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
@@ -146,12 +145,14 @@ event: ->kill ( task -- )
     <event ->killed event> kill-task ;
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
+100.000.000 2constant kill-timeout# \ 100ms
+
 : net2o-kills ( -- )
-    net2o-tasks $@len cell/ kills !
-    net2o-tasks $@ bounds ?DO  I @ cell +LOOP
-    net2o-tasks $off
+    net2o-tasks stack@ kills !  net2o-tasks $off
     kills @ 0 ?DO  send-kill  LOOP
-    BEGIN  kills @  WHILE  stop  REPEAT ;
+    ntime kill-timeout# d+ \ give 100ms time to terminate
+    BEGIN  2dup ntime d- 2dup d0> kills @ and  WHILE  stop-dns  REPEAT
+    2drop 2drop ;
 
 0 warnings !@
 : bye  net2o-kills  bye ;
