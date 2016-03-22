@@ -353,8 +353,8 @@ $71 Constant sigpksize#
 $91 Constant sigpk2size#
 $10 Constant datesize#
 
-: startdate@ ( addr u -- date ) + sigsize# - 64@ ;
-: enddate@ ( addr u -- date ) + sigsize# - 64'+ 64@ ;
+: startdate@ ( addr u -- date ) + sigsize# - le-64@ ;
+: enddate@ ( addr u -- date ) + sigsize# - 64'+ le-64@ ;
 
 : $ins[]sig# ( addr u $array n -- )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
@@ -362,8 +362,8 @@ $10 Constant datesize#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
 		drop
-		2dup rest - + 64@
-		$# $a $[]@ rest - + 64@ 64u>=
+		2dup rest - + le-64@
+		$# $a $[]@ rest - + le-64@ 64u>=
 		IF   $# $a $[]@ smove \ overwrite in place
 		ELSE  2drop  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
