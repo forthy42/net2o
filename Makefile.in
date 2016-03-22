@@ -126,7 +126,7 @@ wiki/commands.md:	$(SOURCES)
 	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md
 
 TAGS:	$(SOURCES) $(GEN)
-	gforth etags.fs n2o.fs -e "bye"
+	gforth etags.fs n2o.fs -e "bye" || >TAGS
 	mv TAGS net2o.TAGS
 	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS
 
