@@ -330,7 +330,8 @@ end-structure
 \ net2o header structure
 
 begin-structure net2o-header
-    2 +field hdrflags
+    1 +field hdrflags
+    1 +field hdrtags
    16 +field destination
     8 +field addr
 end-structure

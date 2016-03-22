@@ -135,7 +135,7 @@ init-keybuf
 : >ivskey ( 64addr -- keyaddr )
     64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
-    >r dest-flags w@ addr>assembly
+    >r dest-flags le-uw@ addr>assembly
     r> state# c:tweakkey!
     tweak( ." tweak key: " voutkey c:key> voutkey @ hex. voutkey state# + $10 .nnb cr ) ;
 
@@ -145,12 +145,12 @@ init-keybuf
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
 
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
-    over 128@ 2r> c:tweakkey!
+    over le-128@ 2r> c:tweakkey!
     key-salt# safe/string
     tweak( ." key init: " c:key@ c:key# .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
-    2>r over >r  rng128 64over 64over r> 128! 2r> c:tweakkey!
+    2>r over >r  rng128 64over 64over r> le-128! 2r> c:tweakkey!
     key-salt# safe/string ;
 
 : encrypt$ ( addr u1 key u2 -- )
@@ -165,7 +165,7 @@ init-keybuf
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
-    2>r over >r  rng128 r@ 128!
+    2>r over >r  rng128 r@ le-128!
     r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
 
 : pw-diffuse ( diffuse# -- )
@@ -204,7 +204,7 @@ init-keybuf
     c:tweakkey! ;
 
 : try-0decrypt ( addr -- flag ) >r
-    inbuf addr 64@ inbuf hdrflags w@ addr>assembly
+    inbuf addr le-64@ inbuf hdrflags le-uw@ addr>assembly
     r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
@@ -216,7 +216,7 @@ init-keybuf
     false [: try-0decrypt or dup 0= ;] search-0key ;
 
 : outbuf0-encrypt ( -- ) +calc
-    outbuf addr 64@ outbuf hdrflags w@ addr>assembly
+    outbuf addr le-64@ outbuf hdrflags le-uw@ addr>assembly
     o IF  dest-0key  ELSE  my-0key  THEN  sec@ set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;

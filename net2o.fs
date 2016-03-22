@@ -214,7 +214,7 @@ $04 Constant resend-toggle#
 : .header ( addr -- ) base @ >r hex
     dup c@ >r
     min-size r> datasize# and lshift hex. ." bytes to "
-    addr 64@ 64. cr
+    addr le-64@ 64. cr
     r> base ! ;
 
 \ each source has multiple destination spaces
@@ -226,8 +226,8 @@ User validated
 : >ret-addr ( -- )
     inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
-    inbuf addr 64@ dest-addr 64!
-    inbuf hdrflags w@ dest-flags w! ;
+    inbuf addr le-64@ dest-addr 64!
+    inbuf hdrflags le-uw@ dest-flags le-w! ;
 
 \ : reqmask ( -- addr )
 \     task# @ reqmask[] $[] ;
@@ -785,15 +785,15 @@ require net2o-crypt.fs
 
 : >dest ( addr -- ) outbuf destination $10 move ;
 : set-dest ( target -- )
-    64dup dest-addr 64!  outbuf addr 64! ;
+    64dup dest-addr 64!  outbuf addr le-64! ;
 : set-dest# ( resend# -- )
-    n>64 64dup dest-addr 64+!  outbuf addr 64+! ;
+    n>64 64dup dest-addr 64+!  dest-addr 64@ outbuf addr le-64! ;
 
 User outflag  outflag off
 
 : set-flags ( -- )
-    0 outflag !@ outbuf 1+ c!
-    outbuf w@ dest-flags w! ;
+    0 outflag !@ outbuf hdrtags c!
+    outbuf hdrflags le-uw@ dest-flags le-w! ;
 
 #90 Constant EMSGSIZE
 
@@ -806,7 +806,7 @@ User outflag  outflag off
 
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
-    outbuf hdrflags 1+ c@ stateless# and IF
+    outbuf hdrtags c@ stateless# and IF
 	outbuf0-encrypt
 	cmd0( .time ." cmd0 to: " dup .addr-path cr )
     ELSE
@@ -842,8 +842,8 @@ User outflag  outflag off
 : resend#+ ( addr -- n )
     dest-raddr @ - addr>64 data-resend# @ + { addr }
     rng8 $3F and { r }
-    addr 64@ r 64ror 64ffz< r + $3F and to r
-    64#1 r 64lshift addr 64@ 64or addr 64! 
+    addr le-64@ r 64ror 64ffz< r + $3F and to r
+    64#1 r 64lshift addr le-64@ 64or addr le-64! 
     r ;
 
 : resend#? ( off addr u -- n )

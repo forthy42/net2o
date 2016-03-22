@@ -5,13 +5,20 @@
 : umin! ( n addr -- )   >r r@ @ umin r> ! ;
 : umax! ( n addr -- )   >r r@ @ umax r> ! ;
 
+1 pad ! pad c@ negate constant le?
+
 cell 8 = [IF]
     : 64bit ;
     ' , Alias 64,
     ' @ Alias 64@
     ' ! Alias 64!
-    ' le-ux@ Alias le-64@
-    ' le-x! Alias le-64!
+    le? [IF]
+	' 64@ Alias le-64@
+	' 64! Alias le-64!
+    [ELSE]
+	' le-ux@ Alias le-64@
+	' le-x! Alias le-64!
+    [THEN]
     ' noop Alias 64><
     ' rot Alias 64rot
     ' -rot Alias -64rot
@@ -83,9 +90,18 @@ cell 8 = [IF]
     ' * Alias 64*
     ' within alias 64within
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
-    : 128@ ( addr -- d ) 2@ swap ;
     ' d= Alias 128= ( d1 d2 -- flag )
+    : 128@ ( addr -- d ) 2@ swap ;
     : 128! ( d addr -- ) >r swap r> 2! ;
+    le? [IF]
+	' 128@ Alias le-128@
+	' 128! Alias le-128!
+    [ELSE]
+	: le-128@ ( addr -- d )
+	    dup >r le-64@ r> cell+ le64@ ;
+	: le-128! ( d addr -- )
+	    tuck cell+ le-64! le-64! ;
+    [THEN]
     ' stop-ns alias stop-64ns
     also locals-types definitions
     ' w: alias 64:
@@ -114,8 +130,13 @@ cell 8 = [IF]
     : 64,  64>< 2, ;
     : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
     : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
-    ' le-uxd@ Alias le-64@
-    ' le-xd! Alias le-64!
+    le? [IF]
+	' 64@ Alias le-64@
+	' 64! Alias le-64!
+    [ELSE]
+	' le-uxd@ Alias le-64@
+	' le-xd! Alias le-64!
+    [THEN]
     ' d+ Alias 64+
     ' d- Alias 64-
     : 64or rot or >r or r> ;
@@ -191,6 +212,23 @@ cell 8 = [IF]
 	r@ 2 cells + !
 	r@ cell+ !
 	r> ! ;
+    le? [IF]
+	' 128@ Alias le-128@
+	' 128! Alias le-128!
+    [ELSE]
+	: le-128@ ( addr -- x1..x4 )
+	    >r
+	    r@ le-ul@
+	    r@ cell+ le-ul@
+	    r@ 2 cells + le-ul@
+	    r> 3 cells + le-ul@ ;
+	: le-128! ( x1..x4 addr -- )
+	    >r
+	    r@ 3 cells + le-l!
+	    r@ 2 cells + le-l!
+	    r@ cell+ le-l!
+	    r> le-l! ;
+    [THEN]
     ' stop-dns alias stop-64ns
     : compile-pushlocal-64 ( a-addr -- ) ( run-time: w1 w2 -- )
 	locals-size @ alignlp-w cell+ cell+ dup locals-size !

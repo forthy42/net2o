@@ -64,7 +64,7 @@ User threefish-t
     cell +LOOP  ;
 : tf-tweak! ( 128b -- )
     threefish-state tf_ctx-tweak $10 erase
-    threefish-state tf_ctx-tweak 128! ;
+    threefish-state tf_ctx-tweak le-128! ;
 
 threefish-init
 
