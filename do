@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "This script builds net2o from scratch"
 
@@ -71,7 +71,8 @@ git-get https://github.com/forthy42 ed25519-donna
 
 ./autogen.sh
 
-make
+make configs
+make no-config
 sudo make install-libs
 
 # get, build, and install Gforth if needed
@@ -104,3 +105,4 @@ gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
 
 make libcc
 sudo make install
+make TAGS
