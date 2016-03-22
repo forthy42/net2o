@@ -190,11 +190,11 @@ void xor8bytesIntoInterleavedWords(UINT32* evenAndOdd, const UINT8* source)
     evenAndOdd[1] ^= (UINT32)(evenAndOddWord >> 32);
 }
 
-void xorLanesIntoState(int byteCount, UINT8* state, UINT32 *input)
+void xorLanesIntoState(int byteCount, UINT8* state, UINT8 *input)
 {
   int i; UINT64 tmp=0;
   for(i=0; i<(byteCount-7); i+=8)
-    xor8bytesIntoInterleavedWords((UINT32*)(state+i), input+i);
+    xor8bytesIntoInterleavedWords((UINT32*)(state+i), (UINT32*)(input+i));
   if(byteCount & 7) {
     memcpy(state+i, &tmp, byteCount & 7);
     xor8bytesIntoInterleavedWords((UINT32*)(state+i), (UINT8*)&tmp);
