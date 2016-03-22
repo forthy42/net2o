@@ -10,6 +10,8 @@ cell 8 = [IF]
     ' , Alias 64,
     ' @ Alias 64@
     ' ! Alias 64!
+    ' le-ux@ Alias le-64@
+    ' le-x! Alias le-64!
     ' noop Alias 64><
     ' rot Alias 64rot
     ' -rot Alias -64rot
@@ -112,6 +114,8 @@ cell 8 = [IF]
     : 64,  64>< 2, ;
     : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
     : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
+    ' le-uxd@ Alias le-64@
+    ' le-xd! Alias le-64!
     ' d+ Alias 64+
     ' d- Alias 64-
     : 64or rot or >r or r> ;

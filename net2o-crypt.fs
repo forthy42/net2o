@@ -408,9 +408,9 @@ Defer search-key \ search if that is one of our pubkeys
 
 \ signature printing
 
-: now>never ( -- )  ticks sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: forever ( -- )  64#0 sigdate 64! 64#-1 sigdate 64'+ 64! ;
-: now+delta ( delta64 -- )  ticks 64dup sigdate 64! 64+ sigdate 64'+ 64! ;
+: now>never ( -- )  ticks sigdate le-64! 64#-1 sigdate 64'+ le-64! ;
+: forever ( -- )  64#0 sigdate le-64! 64#-1 sigdate 64'+ le-64! ;
+: now+delta ( delta64 -- )  ticks 64dup sigdate le-64! 64+ sigdate 64'+ le-64! ;
 
 : .check ( flag -- ) '✘' '✔' rot select xemit ;
 : .sigdate ( tick -- )
@@ -448,7 +448,7 @@ drop
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize <> sig-keysize and ?dup-IF  EXIT  THEN
     2dup + sigsize# - >r
-    ticks fuzzedtime# 64+ r@ 64@ r> 64'+ 64@
+    ticks fuzzedtime# 64+ r@ le-64@ r> 64'+ le-64@
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     early/late? ;
 : verify-sig ( addr u pk -- addr u flag )  >r
