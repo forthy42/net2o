@@ -15,22 +15,20 @@ and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so as root enter:
 
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [arch=i386,amd64,armhf,all] http://net2o.de/debian testing main
+    deb [arch=i386,amd64,armhf,armel,powerpc,all] http://net2o.de/debian testing main
     EOF
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
     aptitude update
     aptitude install net2o
 
 Remove the architectures on the list above which you don't need; on
-Debian testing, the list is not necessary.
-
-Since net2o requires a way more recent Gforth than in Debian's
-repository, aptitude may ask you to resolve this; if the first
-solution doesn't work out, say "n" to get the second solution.
+Debian testing, the list is not necessary, on older versions, the all
+part is not searched if you don't have that list, then Gforth fails to
+install the gforth-common part.
 
 There are actually three repositories: stable, testing and unstable;
 at the moment, all packages are the same.  Binaries are available for
-amd64, i386, and armhf.
+amd64, i386, powerpc, armel, and armhf.
 
 Get it for Android
 ------------------
