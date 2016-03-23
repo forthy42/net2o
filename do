@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "This script builds net2o from scratch"
 
