@@ -7,8 +7,28 @@ Build-Depends: debhelper (>= 4.1.16), build-essential, gcc, autoconf, automake, 
 
 Package: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
+Architecture: all
+Depends: gforth (>= @GFDEBVER@), @PACKAGE_NAME@-libcc
+Description: @PACKAGE_NAME@ protocol stack
+ net2o reinvents the Internet.  Applications include file copy, chat, DHT;
+ others will follow.
+
+Package: @PACKAGE_NAME@-tests
+Version: @PACKAGE_VERSION@
+Architecture: all
+Depends: @PACKAGE_NAME@
+Description: @PACKAGE_NAME@ protocol stack
+ net2o reinvents the Internet.  Applications include file copy, chat, DHT;
+ others will follow.
+ .
+ This package is optional and contains the tests.
+
+Package: @PACKAGE_NAME@-libcc
+Version: @PACKAGE_VERSION@
 Architecture: any
 Depends: gforth (>= @GFDEBVER@), keccak, threefish, ed25519-prim
 Description: @PACKAGE_NAME@ protocol stack
  net2o reinvents the Internet.  Applications include file copy, chat, DHT;
  others will follow.
+ .
+ These are the architectural dependent C bindings

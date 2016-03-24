@@ -3,8 +3,26 @@
 # Simple debian/rules that uses debhelper.
 # Created by Bernd Paysan, in the public domain
 
+GFORTH_VER = `sed -e 's/.*gforth (>= \([^)]\+\).*/\1/; 6q' debian/control | tr '-' '_' | tail -n1`
+D = $(CURDIR)/debian/net2o
+DL = $(CURDIR)/debian/net2o-libcc
+DT = $(CURDIR)/debian/net2o-tests
+
 %:
 	dh $@ 
 
 override_dh_auto_test:
 override_dh_shlibdeps:
+override_dh_auto_install:
+	rm -rf $(D) $(DL) $(DT)
+	dh_auto_install -- DESTDIR=$(DL)
+	mkdir -p $(D)/usr/share/doc/
+	mkdir -p $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o/
+	mv $(DL)/usr/share/gforth/$(GFORTH_VER)/net2o/tests $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o/
+	mv $(DL)/usr/share/gforth $(D)/usr/share/
+	mv $(DL)/usr/bin $(D)/usr/
+
+override_dh_installchangelogs:
+	fossil timeline --verbose --limit 200  | gzip >$(D)/usr/share/doc/net2o/changelog.gz
+	rm -rf $(DL)/usr/share/doc
+	rm -rf $(DT)/usr/share/doc
