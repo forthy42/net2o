@@ -166,7 +166,7 @@ net2o-base
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
 +net2o: context ( -- ) \g make context active
-    o IF  context!  ELSE  connect( ." Can't " )  THEN
+    o IF  update-cdmap  context!  ELSE  connect( ." Can't " )  THEN
     connect( ." establish a context!" forth:cr ) ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
