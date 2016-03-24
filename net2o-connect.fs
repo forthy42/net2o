@@ -161,7 +161,7 @@ net2o-base
     tmp-ivs sec@ ivs-strings  tmp-receive? @ IF receive-ivs ELSE send-ivs THEN
     tmp-ivs sec-off ; is new-ivs
 : all-ivs ( -- ) \G Seed and gen all IVS
-    state# rng$ 2dup sec$, gen-ivs tmp-ivs sec! ;
+    state# rng$ 2dup sec$, gen-ivs tmp-ivs sec!  tmp-receive? off ;
 
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
