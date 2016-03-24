@@ -158,7 +158,7 @@ net2o-base
 \ create commands to send back
 
 :noname ( -- )
-    tmp-ivs sec@ ivs-strings  tmp-receive? @ IF send-ivs ELSE receive-ivs THEN
+    tmp-ivs sec@ ivs-strings  tmp-receive? @ IF receive-ivs ELSE send-ivs THEN
     tmp-ivs sec-off ; is new-ivs
 : all-ivs ( -- ) \G Seed and gen all IVS
     state# rng$ 2dup sec$, gen-ivs tmp-ivs sec! ;
