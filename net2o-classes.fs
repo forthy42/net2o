@@ -303,6 +303,8 @@ object class
     cell            uvar tmp-pubkey
     cell            uvar tmp-mpubkey
     cell            uvar $error-id
+    cell            uvar tmp-receive?
+    cell            uvar tmp-perm
 end-class io-buffers
 
 \ reply structure

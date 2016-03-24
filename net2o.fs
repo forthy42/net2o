@@ -1348,7 +1348,7 @@ User remote?
     new-code-size on  new-data-size on \ no requests for code+data
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
-    stateless# outflag !
+    stateless# outflag !  0 tmp-perm !
     inbuf packet-data cmd-exec
     update-cdmap  net2o:update-key  remote? off ;
 

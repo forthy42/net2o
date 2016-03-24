@@ -154,7 +154,9 @@ gen-table $freeze
 : slit<  slit, push-slit ;
 :noname ( throwcode -- )
     remote? @ IF
-	?dup-IF  init-reply $error-id $@ $, error-id nlit, ko  THEN
+	?dup-IF  init-reply
+	    $error-id $@ dup IF  $, error-id  ELSE  2drop  THEN
+	    nlit, ko  THEN
     ELSE
 	throw
     THEN ; IS >throw
