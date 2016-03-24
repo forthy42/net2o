@@ -444,9 +444,11 @@ Defer new-ivs ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
     new-code-size @ 0> IF  new-code@ n2o:new-code  ELSE  EXIT  THEN
     new-data-size @ 0> IF  new-data@ n2o:new-data  THEN
-    tmp-pubkey $@ pubkey $!
-    tmp-mpubkey $@ mpubkey $!
-    new-ivs ;
+    o IF
+	tmp-pubkey $@ pubkey $!
+	tmp-mpubkey $@ mpubkey $!
+	new-ivs
+    THEN ;
 
 \ dispose connection
 
