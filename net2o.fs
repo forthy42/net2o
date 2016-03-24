@@ -1344,9 +1344,10 @@ User remote?
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) drop EXIT  THEN
-    validated off \ we have no validated encryption
+    validated off     \ we have no validated encryption
     new-code-size on  new-data-size on \ no requests for code+data
     do-keypad sec-off \ no key exchange may have happened
+    $error-id $off    \ no error id so far
     stateless# outflag !
     inbuf packet-data cmd-exec
     update-cdmap  net2o:update-key  remote? off ;

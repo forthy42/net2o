@@ -70,6 +70,8 @@ List of Commands
   nested (self-encrypted) command
 + $19 token ( $:token n -- )
   generic inspection token
++ $1A error-id ( $:errorid -- )
+  error-id string
 
 ### connection generic commands ###
 

@@ -171,10 +171,16 @@ net2o-base
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
 : reply-key, ( -- )
     key-setup? @ !!doublekey!!
-    nest[ pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
-	pubkey $@ key| $, keypair
-	pubkey $@ drop skc key-stage2
-    ELSE  receive-key  THEN
+    nest[
+    \ gen-id $, error-id
+    \ !!FIXME!! this needs to be a unique per-connection unforgeable ID
+    \ this ID is never sent out in "plain", but may be received in "plain"
+    \ it will kill that particular connection.
+    \ Should be a 128 bit random string
+        pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
+	    pubkey $@ key| $, keypair
+	    pubkey $@ drop skc key-stage2
+	ELSE  receive-key  THEN
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
     reply-key, ( cookie+request ) time-offset! context ]tmpnest
