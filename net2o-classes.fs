@@ -291,6 +291,17 @@ object class
     cell            uvar enc-file
     cell            uvar enc-padding
     cell            uvar key-list
+    \ mapping buffers
+    1 64s           uvar new-code-s
+    1 64s           uvar new-code-d
+    1 64s           uvar new-data-s
+    1 64s           uvar new-data-d
+    cell            uvar new-code-size
+    cell            uvar new-data-size
+    cell            uvar do-keypad
+    cell            uvar tmp-ivs
+    cell            uvar tmp-pubkey
+    cell            uvar tmp-mpubkey
 end-class io-buffers
 
 \ reply structure
@@ -335,6 +346,20 @@ begin-structure net2o-header
    16 +field destination
     8 +field addr
 end-structure
+
+\ key related  constants
+
+64 Constant state#
+state# 2* Constant state2#
+KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
+KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
+
+: key| ( size -- size' ) keysize umin ;
+: key2| ( size -- size' ) keysize2 umin ;
+
+\ specify strength (in bytes), not length! length is 2*strength
+32 Constant hash#128 \ 128 bit hash strength is enough!
+64 Constant hash#256 \ 256 bit hash strength is more than enough!
 
 0 [IF]
 Local Variables:

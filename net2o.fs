@@ -405,9 +405,18 @@ Variable mapstart $1 mapstart !
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
     <event wait-task @ ?dup-0=-IF [ up@ ]L THEN o elit, ->connect event> ;
 
+: new-code@ ( -- addrs addrd u -- )
+    new-code-s 64@ new-code-d 64@ new-code-size @ ;
+: new-code! ( addrs addrd u -- )
+    new-code-size ! new-code-d 64! new-code-s 64! ;
+: new-data@ ( -- addrs addrd u -- )
+    new-data-s 64@ new-data-d 64@ new-data-size @ ;
+: new-data! ( addrs addrd u -- )
+    new-data-size ! new-data-d 64! new-data-s 64! ;
+
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
-    [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ; 
+    [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ;
 : n2o:new-data ( addrs addrd u -- )
     dup max-data# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
@@ -428,6 +437,16 @@ Variable mapstart $1 mapstart !
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
+
+Defer new-ivs ( -- )
+\G Init the new IVS
+: update-cdmap ( -- )
+    o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
+    new-code-size @ 0> IF  new-code@ n2o:new-code  ELSE  EXIT  THEN
+    new-data-size @ 0> IF  new-data@ n2o:new-data  THEN
+    tmp-pubkey $@ pubkey $!
+    tmp-mpubkey $@ mpubkey $!
+    new-ivs ;
 
 \ dispose connection
 
@@ -1326,8 +1345,11 @@ User remote?
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) drop EXIT  THEN
     validated off \ we have no validated encryption
-    stateless# outflag !  inbuf packet-data cmd-exec
-    net2o:update-key  remote? off ;
+    new-code-size on  new-data-size on \ no requests for code+data
+    do-keypad sec-off \ no key exchange may have happened
+    stateless# outflag !
+    inbuf packet-data cmd-exec
+    update-cdmap  net2o:update-key  remote? off ;
 
 : handle-data ( addr -- )  parent @ >o  o to connection
     msg( ." Handle data to addr: " dup hex. cr )

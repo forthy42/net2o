@@ -256,25 +256,23 @@ sema see-sema
 : un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
 
 Defer >throw
-Variable throwcount
 
 : cmd-throw ( error -- )
-    1 throwcount +!
     [: ." do-cmd-loop: " dup . .exe cr ;] $err
     dup DoError  nothrow
-    buf-state @ show-offset !  <err> n2o:see-me <default> show-offset on
-    un-cmd  throwcount @ 4 < IF  >throw  THEN ;
+    buf-state @ show-offset !  <err> cr n2o:see-me <default> show-offset on
+    un-cmd >throw ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!
     cmd( <warn> dest-flags .dest-addr 2dup n2o:see <default> )
-    sp@ >r throwcount off
+    sp@ >r
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     trace( ." cmd loop done" .s cr )
-    dup IF   cmd-throw  THEN
+    ?dup-IF   cmd-throw  THEN
     r> sp! 2drop +cmd ;
 : nest-cmd-loop ( addr u -- )
     buf-dump 2@ 2>r buf-state 2@ 2>r ['] do-cmd-loop catch
     2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN
-    2r> buf-dump 2! ?dup-IF  cmd-throw  THEN ;
+    2r> buf-dump 2! ?dup-IF  throw  THEN ;
 
 cmd-buf-c new code-buf^ !
 ' code-buf^ cmdbuf: code-buf

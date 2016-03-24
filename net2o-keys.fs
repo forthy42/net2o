@@ -894,7 +894,9 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 : choose-key ( -- o )
     0 BEGIN  drop
 	." Choose key by number:" cr .secret-nicks
-	key ['] digit? #36 base-execute and secret-key dup 0= WHILE
+	BEGIN  key dup bl < WHILE  drop  REPEAT \ swallow control keys
+	['] digit? #36 base-execute 0= IF -1 THEN
+	secret-key dup 0= WHILE
 	    ." Please enter a base-36 number between 0 and "
 	    secret-keys# 1- ['] . #36 base-execute cr  rdrop
     REPEAT

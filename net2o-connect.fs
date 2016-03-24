@@ -71,10 +71,10 @@ connect-table $@ inherit-table setup-table
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest 2drop tmpnest ;
 
 +net2o: new-data ( addr addr u -- ) \g create new data mapping
-    o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-data  EXIT  THEN
+    o 0<> tmp-crypt? and own-crypt? or IF  64>n  new-data!  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
 +net2o: new-code ( addr addr u -- ) \g crate new code mapping
-    o 0<> tmp-crypt? and own-crypt? or IF  64>n  n2o:new-code  EXIT  THEN
+    o 0<> tmp-crypt? and own-crypt? or IF  64>n  new-code!  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
 
 : n2o:create-map
@@ -85,11 +85,10 @@ connect-table $@ inherit-table setup-table
     addrd ucode udata addrs ;
 
 +net2o: store-key ( $:string -- ) $> \g store key
-    o 0= IF  2drop un-cmd  EXIT  THEN
     own-crypt? IF
 	key( ." store key: o=" o hex. 2dup .nnb forth:cr )
 	2dup do-keypad sec!
-	crypto-key sec!
+	o IF  crypto-key sec!  ELSE  2drop  THEN
     ELSE  2drop un-cmd  THEN ;
 
 +net2o: map-request ( addrs ucode udata -- ) \g request mapping
@@ -158,8 +157,10 @@ net2o-base
 
 \ create commands to send back
 
+:noname ( -- )
+    tmp-ivs sec@ ivs-strings send-ivs  tmp-ivs sec-off ; is new-ivs
 : all-ivs ( -- ) \G Seed and gen all IVS
-    state# rng$ 2dup sec$, gen-ivs ivs-strings send-ivs ;
+    state# rng$ 2dup sec$, gen-ivs tmp-ivs sec! ;
 
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;

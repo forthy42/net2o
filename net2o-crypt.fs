@@ -15,20 +15,6 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-\ key related  constants
-
-64 Constant state#
-state# 2* Constant state2#
-KEYBYTES Constant keysize \ our shared secred is only 32 bytes long
-KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
-
-: key| ( size -- size' ) keysize umin ;
-: key2| ( size -- size' ) keysize2 umin ;
-
-\ specify strength (in bytes), not length! length is 2*strength
-32 Constant hash#128 \ 128 bit hash strength is enough!
-64 Constant hash#256 \ 256 bit hash strength is more than enough!
-
 \ key storage stuff
 $1E0 Constant keypack#
 keypack# key-salt# + key-cksum# + Constant keypack-all#
@@ -223,7 +209,6 @@ init-keybuf
 
 \ IVS
 
-Variable do-keypad
 Sema regen-sema
 
 : keypad$ ( -- addr u )
@@ -365,12 +350,11 @@ Defer search-key \ search if that is one of our pubkeys
     r> rot keypad ed-dhx do-keypad sec+! ;
 : key-rest ( addr u sk -- ) >r
     ?keysize dup keysize [: check-key ;] $err
-    dup keysize pubkey $! r> key-stage2 ;
+    dup keysize tmp-pubkey $! r> key-stage2 ;
 : net2o:receive-key ( addr u -- )
     o 0= IF  2drop EXIT  THEN  pkc keysize mpubkey $! skc key-rest ;
 : net2o:keypair ( pkc uc pk u -- )
-    o 0= IF  2drop EXIT  THEN
-    2dup mpubkey $! ?keysize search-key key-rest ;
+    2dup tmp-mpubkey $! ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh
@@ -382,7 +366,7 @@ Defer search-key \ search if that is one of our pubkeys
     keypad keysize ;
 
 : net2o:update-key ( -- )
-    o? do-keypad sec@ dup IF
+    o? do-keypad sec@ dup keysize2 = IF
 	key( ." store key, o=" o hex. 2dup .nnb cr )
 	crypto-key sec! do-keypad sec-off
 	EXIT
