@@ -170,14 +170,13 @@ net2o-base
     connect( ." establish a context!" forth:cr ) ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
+Variable id-hash
+: gen-id ( -- addr u )
+    $10 rng$ o { w^ idcon } idcon cell 2over id-hash #! ; 
 : reply-key, ( -- )
     key-setup? @ !!doublekey!!
     nest[
-    \ gen-id $, error-id
-    \ !!FIXME!! this needs to be a unique per-connection unforgeable ID
-    \ this ID is never sent out in "plain", but may be received in "plain"
-    \ it will kill that particular connection.
-    \ Should be a 128 bit random string
+        gen-id $, error-id
         pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
 	    pubkey $@ drop skc key-stage2
