@@ -447,9 +447,12 @@ Defer new-ivs ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
     create-maps
     o IF
-	tmp-pubkey $@ pubkey $!
-	tmp-mpubkey $@ mpubkey $!
-	tmp-ivs sec@ nip IF  new-ivs  THEN
+	tmp-ivs sec@ nip IF
+	    new-ivs
+	    tmp-pubkey $@ pubkey $!
+	    tmp-mpubkey $@ mpubkey $!
+	    tmp-perm @ ?dup-IF  perm-mask !  THEN
+	THEN
     THEN ;
 
 \ dispose connection
@@ -1352,7 +1355,7 @@ User remote?
     new-code-size on  new-data-size on \ no requests for code+data
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
-    stateless# outflag !  0 tmp-perm !
+    stateless# outflag !  tmp-perm off
     inbuf packet-data cmd-exec
     update-cdmap  net2o:update-key  remote? off ;
 
