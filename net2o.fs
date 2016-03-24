@@ -449,7 +449,7 @@ Defer new-ivs ( -- )
     o IF
 	tmp-pubkey $@ pubkey $!
 	tmp-mpubkey $@ mpubkey $!
-	tmp-sec sec@ nip IF  new-ivs  THEN
+	tmp-ivs sec@ nip IF  new-ivs  THEN
     THEN ;
 
 \ dispose connection
