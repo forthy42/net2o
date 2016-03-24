@@ -440,14 +440,16 @@ Variable mapstart $1 mapstart !
 
 Defer new-ivs ( -- )
 \G Init the new IVS
+: create-maps ( -- )
+    new-code-size @ 0> IF  new-code@ n2o:new-code new-code-size on  ELSE  EXIT  THEN
+    new-data-size @ 0> IF  new-data@ n2o:new-data new-data-size-on  THEN ;
 : update-cdmap ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
-    new-code-size @ 0> IF  new-code@ n2o:new-code  ELSE  EXIT  THEN
-    new-data-size @ 0> IF  new-data@ n2o:new-data  THEN
+    create-maps
     o IF
 	tmp-pubkey $@ pubkey $!
 	tmp-mpubkey $@ mpubkey $!
-	new-ivs
+	tmp-sec sec@ nip IF  new-ivs  THEN
     THEN ;
 
 \ dispose connection
