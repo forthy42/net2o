@@ -50,8 +50,8 @@ clang, it takes ages to compile Gforth with clang).  You could also
 compile the Android version with Android SDK+NDK, but that's a different story.
 
 You want to have the following packets installed: git automake
-autoconf make gcc libtool libltdl7 fossil (libtool-ltdl on
-RedHat/Centos). Or get Fossil here:
+autoconf make gcc libtool libtool-bin libltdl7 fossil (libtool-ltdl on
+RedHat/Centos; the libtool-bin is for Debian). Or get Fossil here:
 [fossil](http://www.fossil-scm.org/index.html/doc/tip/www/index.wiki)
 
 Get the [do](https://fossil.net2o.de/net2o/doc/trunk/do) file
