@@ -34,7 +34,7 @@ Get it for Android
 ------------------
 
 You need: An Android phone with at least Android 2.3, and Gforth,
-either from the app store, or from [here](https://net2o.de/Gforth.apk).
+either from the app store, or from [net2o.de/android](https://net2o.de/android/Gforth.apk).
 
 This installs Gforth with the Gforth icons, and a ready-to-run net2o
 icon in the app drawer.  Just tap on the net2o icon to run net2o;
