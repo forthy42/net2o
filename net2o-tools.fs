@@ -474,6 +474,23 @@ $10 Constant datesize#
 : append-file ( addr u fd -- 64pos ) >r
     r@ file-size throw d>64 64dup { 64: pos } r> write@pos-file pos ;
 
+\ file name sanitizer
+
+$20 buffer: filechars
+filechars $20 $FF fill
+0 filechars l! \ ctrl chars are all illegal
+filechars '/' -bit
+filechars #del -bit
+[IFDEF] cygwin
+    "\\:?*\q<>|" bounds [?DO] filechars [I] c@ -bit [LOOP]
+[THEN]
+
+: fn-sanitize ( addr u -- addr' u' )
+    [: bounds ?DO
+	  I c@ filechars over bit@
+	  IF  emit  ELSE  '%' emit .2  THEN
+      LOOP ;] ['] $tmp $10 base-execute ;
+
 \ copy files
 
 #-514 Constant no-file#
