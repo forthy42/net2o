@@ -449,8 +449,8 @@ Defer new-ivs ( -- )
     o IF
 	tmp-ivs sec@ nip IF
 	    new-ivs
-	    tmp-pubkey $@ pubkey $!
-	    tmp-mpubkey $@ mpubkey $!
+	    pubkey  $@len 0= IF  tmp-pubkey  $@ pubkey  $!  THEN
+	    mpubkey $@len 0= IF  tmp-mpubkey $@ mpubkey $!  THEN
 	    tmp-perm @ ?dup-IF  perm-mask !  THEN
 	THEN
     THEN ;
