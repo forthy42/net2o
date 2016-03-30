@@ -101,6 +101,17 @@
 #  define PLATFORM_BYTE_ORDER IS_BIG_ENDIAN
 #elif defined( __LITTLE_ENDIAN__ )
 #  define PLATFORM_BYTE_ORDER IS_LITTLE_ENDIAN
+
+#if defined( __ORDER_BIG_ENDIAN__ ) && defined( __ORDER_LITTLE_ENDIAN__ )
+#  if defined( __BYTE_ORDER__ ) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#    define PLATFORM_BYTE_ORDER IS_BIG_ENDIAN
+#  elif defined( __BYTE_ORDER__ ) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#    define PLATFORM_BYTE_ORDER IS_LITTLE_ENDIAN
+#  endif
+#elif defined( __ORDER_BIG_ENDIAN__ )
+#  define PLATFORM_BYTE_ORDER IS_BIG_ENDIAN
+#elif defined( __ORDER_LITTLE_ENDIAN__ )
+#  define PLATFORM_BYTE_ORDER IS_LITTLE_ENDIAN
 #endif
 
 /*  if the platform byte order could not be determined, then try to */
