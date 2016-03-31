@@ -135,10 +135,10 @@ dht-class new constant dummy-dht
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
-	dup @ 0= IF
-	    over $40 = IF  dht-class new >o
-		o swap !  dht-hash $!  dht-table @ token-table !  o o>
-	    ELSE  2drop dummy-dht dup .dht-off  THEN
+      dup @ 0= IF
+	  over $40 = IF  dht-class new >o
+	      o swap !  dht-hash $!  dht-table @ token-table !  o o>
+	  ELSE  2drop drop dummy-dht dup .dht-off  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
     >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;

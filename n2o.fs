@@ -332,7 +332,7 @@ synonym searchkey keysearch
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
-    get-me
+    get-me init-client
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ===" cr msg-group$ $!

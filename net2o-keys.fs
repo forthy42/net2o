@@ -366,7 +366,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	    .unkey-id EXIT  THEN
-	2dup ['] dht-nick? cmd-nest
+	connection >r 2dup ['] dht-nick? cmd-nest r> to connection
 	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
     cell+ ..nick 2drop ;
 

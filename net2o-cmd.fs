@@ -46,10 +46,13 @@ end-class cmd-buf-c
 
 : cmd-nest { xt -- }
     buf-dump 2@ 2>r buf-state 2@ 2>r cmdbuf-o @ >r
-    connection >o validated @ >r
-    xt execute
-    r> validated ! o>
-    r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2! ;
+    connection dup >o IF
+	validated @ >r  xt catch  r> validated !
+    ELSE
+	xt catch
+    THEN  o to connection o>
+    r> cmdbuf-o ! 2r> buf-state 2! 2r> buf-dump 2!
+    throw ;
 
 \ command helper
 

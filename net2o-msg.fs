@@ -125,7 +125,7 @@ Sema queue-sema
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
     cells >r msg-log@ over { log } dup r> - 0 max /string bounds ?DO
-	I $@ msg-display
+	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     cell +LOOP   log free throw  dispose o> ;
 
 : >group ( addr u -- )
