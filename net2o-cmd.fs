@@ -708,7 +708,7 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 \ inspection
 +net2o: token ( $:token n -- ) 64drop $> 2drop ; \g generic inspection token
 +net2o: error-id ( $:errorid -- ) \g error-id string
-    $error-id $! ;
+    $> $error-id $! ;
 
 :noname ( start -- )
     token-table $@ 2 pick cells safe/string bounds U+DO
