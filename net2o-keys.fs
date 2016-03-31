@@ -900,7 +900,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 	    ." Please enter a base-36 number between 0 and "
 	    secret-keys# 1- ['] . #36 base-execute cr  rdrop
     REPEAT
-    dup .storekey!
+    dup .storekey!  >storekey @ defaultkey !
     ." ==== key " dup ..nick ."  chosen ====" cr ;
 
 \ will ask for your password and if possible auto-select your id
