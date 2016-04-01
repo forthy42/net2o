@@ -356,9 +356,11 @@ Defer search-key \ search if that is one of our pubkeys
     ?keysize dup keysize [: check-key ;] $err
     dup keysize tmp-pubkey $! r> key-stage2 ;
 : net2o:receive-key ( addr u -- )
-    o 0= IF  2drop EXIT  THEN  pkc keysize mpubkey $! skc key-rest ;
+    o 0= IF  2drop EXIT  THEN  pkc keysize tmp-mpubkey $! skc key-rest
+    keypair-val validated or! ;
 : net2o:keypair ( pkc uc pk u -- )
-    2dup tmp-mpubkey $! ?keysize search-key key-rest ;
+    2dup tmp-mpubkey $! ?keysize search-key key-rest
+    keypair-val validated or! ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh

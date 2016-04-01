@@ -232,14 +232,17 @@ User dest-flags
 
 User validated
 
-$01 Constant crypt-val
-$02 Constant own-crypt-val
-$04 Constant login-val
-$08 Constant cookie-val
-$10 Constant tmp-crypt-val
-$20 Constant signed-val
-$40 Constant newdata-val
-$80 Constant newcode-val
+$001 Constant crypt-val
+$002 Constant own-crypt-val
+$004 Constant login-val
+$008 Constant cookie-val
+$010 Constant tmp-crypt-val
+$020 Constant signed-val
+$040 Constant newdata-val
+$080 Constant newcode-val
+$100 Constant keypair-val
+$200 Constant receive-val
+$400 Constant ivs-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
@@ -469,12 +472,15 @@ Defer new-ivs ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
     create-maps
     o IF
-	tmp-ivs sec@ nip IF
-	    new-ivs
-	    pubkey  $@len 0= IF  tmp-pubkey  $@ pubkey  $!  THEN
-	    mpubkey $@len 0= IF  tmp-mpubkey $@ mpubkey $!  THEN
-	    tmp-perm @ ?dup-IF  perm-mask !  THEN
+	validated @ keypair-val and IF
+	    tmp-pubkey  $@ pubkey  $!
+	    tmp-mpubkey $@ mpubkey $!
 	THEN
+	validated @ ivs-val and IF
+	    new-ivs
+	THEN
+	tmp-perm @ ?dup-IF  perm-mask !  tmp-perm off  THEN
+	[ keypair-val ivs-val or invert ]L validated and!
     THEN ;
 
 \ dispose connection

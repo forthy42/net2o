@@ -131,7 +131,7 @@ net2o-base
 +net2o: update-key ( -- ) \g update secrets
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
-    $> tmp-ivs sec! tmp-receive? on ;
+    $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
 
 : cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
@@ -158,10 +158,12 @@ net2o-base
 \ create commands to send back
 
 :noname ( -- )
-    tmp-ivs sec@ ivs-strings  tmp-receive? @ IF receive-ivs ELSE send-ivs THEN
+    tmp-ivs sec@ ivs-strings
+    validated @ receive-val and  IF receive-ivs ELSE send-ivs THEN
     tmp-ivs sec-off ; is new-ivs
 : all-ivs ( -- ) \G Seed and gen all IVS
-    state# rng$ 2dup sec$, gen-ivs tmp-ivs sec!  tmp-receive? off ;
+    state# rng$ 2dup sec$, gen-ivs tmp-ivs sec!
+    validated @ ivs-val or receive-val invert and validated ! ;
 
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
