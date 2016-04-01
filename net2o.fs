@@ -221,13 +221,34 @@ $04 Constant resend-toggle#
 
 64User dest-addr
 User dest-flags
-User validated
 
 : >ret-addr ( -- )
     inbuf destination return-addr reverse$16 ;
 : >dest-addr ( -- )
     inbuf addr le-64@ dest-addr 64!
     inbuf hdrflags le-uw@ dest-flags le-w! ;
+
+\ validation stuff
+
+User validated
+
+$01 Constant crypt-val
+$02 Constant own-crypt-val
+$04 Constant login-val
+$08 Constant cookie-val
+$10 Constant tmp-crypt-val
+$20 Constant signed-val
+$40 Constant newdata-val
+$80 Constant newcode-val
+
+: crypt?     ( -- flag )  validated @ crypt-val     and ;
+: own-crypt? ( -- flag )  validated @ own-crypt-val and ;
+: login?     ( -- flag )  validated @ login-val     and ;
+: cookie?    ( -- flag )  validated @ cookie-val    and ;
+: tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
+: signed?    ( -- flag )  validated @ signed-val    and ;
+: !!signed?  ( -- ) signed? 0= !!unsigned!! ;
+: !!unsigned?  ( -- ) signed?  !!signed!! ;
 
 \ : reqmask ( -- addr )
 \     task# @ reqmask[] $[] ;
@@ -408,11 +429,11 @@ Variable mapstart $1 mapstart !
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
 : new-code! ( addrs addrd u -- )
-    new-code-size ! new-code-d 64! new-code-s 64! ;
+    new-code-size ! new-code-d 64! new-code-s 64! newcode-val validated or! ;
 : new-data@ ( -- addrs addrd u -- )
     new-data-s 64@ new-data-d 64@ new-data-size @ ;
 : new-data! ( addrs addrd u -- )
-    new-data-size ! new-data-d 64! new-data-s 64! ;
+    new-data-size ! new-data-d 64! new-data-s 64! newdata-val validated or! ;
 
 : n2o:new-map ( u -- addr )
     drop mapstart @ 1 mapstart +! reverse
@@ -440,9 +461,10 @@ Variable mapstart $1 mapstart !
 
 Defer new-ivs ( -- )
 \G Init the new IVS
-: create-maps ( -- )
-    new-code-size @ 0> IF  new-code@ n2o:new-code new-code-size on  ELSE  EXIT  THEN
-    new-data-size @ 0> IF  new-data@ n2o:new-data new-data-size on  THEN ;
+: create-maps ( -- ) validated @ >r
+    [ newcode-val newdata-val or invert ]L r@ and validated !
+    r@ newcode-val and IF  new-code@ n2o:new-code ELSE  rdrop EXIT  THEN
+    r> newdata-val and IF  new-data@ n2o:new-data THEN ;
 : update-cdmap ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
     create-maps
@@ -1320,22 +1342,6 @@ Variable timeout-tasks s" " timeout-tasks $!
 Defer cmd-exec ( addr u -- )
 ' dump IS cmd-exec
 
-$01 Constant crypt-val
-$02 Constant own-crypt-val
-$04 Constant login-val
-$08 Constant cookie-val
-$10 Constant tmp-crypt-val
-$20 Constant signed-val
-
-: crypt?     ( -- flag )  validated @ crypt-val     and ;
-: own-crypt? ( -- flag )  validated @ own-crypt-val and ;
-: login?     ( -- flag )  validated @ login-val     and ;
-: cookie?    ( -- flag )  validated @ cookie-val    and ;
-: tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
-: signed?    ( -- flag )  validated @ signed-val    and ;
-
-: !!signed?  ( -- ) signed? 0= !!unsigned!! ;
-: !!unsigned?  ( -- ) signed?  !!signed!! ;
 : !!<order?   ( n -- )  dup c-state @ u>  !!inv-order!! c-state or! ;
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
 : !!>=order?   ( n -- )  dup c-state @ u< !!inv-order!! c-state or! ;
@@ -1352,7 +1358,6 @@ User remote?
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) drop EXIT  THEN
     validated off     \ we have no validated encryption
-    new-code-size on  new-data-size on \ no requests for code+data
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
     stateless# outflag !  tmp-perm off

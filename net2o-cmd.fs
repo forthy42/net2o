@@ -389,9 +389,12 @@ Vocabulary net2o-base
 
 Defer do-req>
 
+: do-nest ( addr u flag -- )
+    dup >r  validated or!  nest-cmd-loop
+    r> invert validated and! ;
+
 : do-nestsig ( addr u -- )
-    signed-val validated or! nest-cmd-loop
-    signed-val invert validated and! ;
+    signed-val do-nest ;
 
 : cmd:nestsig ( addr u -- )
     nest-sig dup 0= IF  drop do-nestsig  ELSE  !!sig!!  THEN ;
@@ -630,10 +633,6 @@ previous
 : cmd>tmpnest ( -- addr u )
     cmd> 2dup tmpkey@ keysize umin
     key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
-
-: do-nest ( addr u flag -- )
-    validated @ >r  validated or!  
-    nest-cmd-loop  r> validated ! ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
