@@ -476,9 +476,7 @@ Defer new-ivs ( -- )
 	    tmp-pubkey  $@ pubkey  $!
 	    tmp-mpubkey $@ mpubkey $!
 	THEN
-	validated @ ivs-val and IF
-	    new-ivs
-	THEN
+	validated @ ivs-val and IF  new-ivs  THEN
 	tmp-perm @ ?dup-IF  perm-mask !  tmp-perm off  THEN
 	[ keypair-val ivs-val or invert ]L validated and!
     THEN ;
