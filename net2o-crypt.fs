@@ -41,6 +41,7 @@ object class
     keysize   uvar stskc
     keypack-all# uvar keypack-d
     $100      uvar vaultkey \ buffers for vault
+    $100      uvar keydump-buf  \ buffer for dumping keys
     state2#   uvar vkey \ maximum size for session key
     state2#   uvar voutkey \ for keydump
     keysize   uvar keygendh
@@ -130,10 +131,13 @@ init-keybuf
     64dup dest-size @ n>64 64u>= !!inv-dest!!
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
 
+: key>dump ( -- addr u )
+    keydump-buf c:key> keydump-buf c:key# ;
+
 : crypt-key-init ( addr u key u -- addr' u' ) 2>r
     over le-128@ 2r> c:tweakkey!
     key-salt# safe/string
-    tweak( ." key init: " c:key@ c:key# .nnb cr ) ;
+    tweak( ." key init: " key>dump .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
     2>r over >r  rng128 64over 64over r> le-128! 2r> c:tweakkey!
@@ -290,7 +294,7 @@ Sema regen-sema
 $60 Constant rndkey#
 
 : receive-ivs ( -- )
-    genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
+    genkey( ." ivs key: " key>dump over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
     ivs( ." regen receive IVS" cr )
     code-map one-ivs   code-rmap one-ivs
@@ -298,7 +302,7 @@ $60 Constant rndkey#
     clear-keys ;
 
 : send-ivs ( -- )
-    genkey( ." ivs key: " c:key@ c:key# over rndkey# xtype cr
+    genkey( ." ivs key: " key>dump over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
     ivs( ." regen send IVS" cr )
     code-rmap one-ivs  code-map one-ivs
