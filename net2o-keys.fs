@@ -307,8 +307,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ." nick: " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF  ." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
-    ." created: " ke-selfsig $@ drop 64@ .sigdate cr
-    ." expires: " ke-selfsig $@ drop 64'+ 64@ .sigdate cr
+    ." valid:  " ke-selfsig $@ .sigdates cr
     ." perm: " ke-mask @ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
