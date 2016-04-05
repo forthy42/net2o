@@ -44,7 +44,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 +net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
     $> $, nest  o IF
 	['] punchs code-reply send-xt !
-	punch-dispose o-beacon  THEN ;
+	extra-dispose  THEN ;
 +net2o: punch ( $:string -- ) \g punch NAT traversal hole
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
@@ -172,13 +172,33 @@ net2o-base
     connect( ." establish a context!" forth:cr ) ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
+
+\ error ID handling
+
 Variable id-hash
-: gen-id ( -- addr u )
-    $10 rng$ o { w^ idcon } idcon cell 2over id-hash #! ; 
+Sema id-sema
+
+: new-error-id ( -- addr u )
+    $10 rng$ o { w^ idcon } idcon cell 2over
+    [: id-hash #! ;] id-sema c-section
+    2dup my-error-id $! ;
+: error-id>o ( addr u -- o/0 )
+    $error-id $@ ?dup-IF
+	id-hash #@ cell = IF
+	    @  EXIT  THEN  THEN
+    drop 0 ;
+: error-id$off ( -- )
+    [: my-error-id $@ ?dup-IF  id-hash #off  ELSE  drop  THEN
+      my-error-id $off ;] id-sema c-section ;
+
+:noname  error-id$off defers extra-dispose ; IS extra-dispose
+
+\ compile a reply key
+
 : reply-key, ( -- )
     key-setup? @ !!doublekey!!
     nest[
-        gen-id $, error-id
+        new-error-id $, error-id
         pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
 	    pubkey $@ drop skc key-stage2

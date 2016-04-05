@@ -243,6 +243,7 @@ $080 Constant newcode-val
 $100 Constant keypair-val
 $200 Constant receive-val
 $400 Constant ivs-val
+$800 Constant connection-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
@@ -606,7 +607,7 @@ reply buffer: dummy-reply
     
 \ timing records
 
-sema timing-sema
+Sema timing-sema
 
 : net2o:track-timing ( -- ) \ initialize timing records
     s" " timing-stat $! ;
@@ -1377,7 +1378,8 @@ User remote?
 
 : handle-cmd ( addr -- )  parent @ >o
     msg( ." Handle command to addr: " dup hex. cr )
-    outflag off remote? on
+    outflag off  remote? on  connection-val validated !
+    $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
     remote? off ;
@@ -1424,8 +1426,7 @@ User remote?
 : ungroup-ctx ( -- )
     msg-groups [: >r o r> cell+ del$cell ;] #map ;
 
-Defer punch-dispose
-Defer o-beacon
+Defer extra-dispose
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
@@ -1446,7 +1447,6 @@ Defer o-beacon
 	unlink-ctx  ungroup-ctx
 	end-semas start-semas DO  I pthread_mutex_destroy drop
 	1 pthread-mutexes +LOOP
-	punch-dispose  o-beacon
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
@@ -1484,6 +1484,7 @@ event: ->request ( n o -- ) >o maxrequest# and
 event: ->timeout ( o -- )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
+event: ->throw ( error -- ) throw ;
 
 : timeout-expired? ( -- flag )
     ack@ .timeouts @ timeouts# >= ;
@@ -1535,7 +1536,7 @@ Variable beacons \ destinations to send beacons to
 	obj 2 cells last# cell+ $+! 2drop
     THEN ;
 
-:noname ( -- )
+: o-beacon ( -- )
     beacon( ." remove beacons: " o hex. cr )
     beacons [: { bucket } bucket cell+ $@ 1 64s /string bounds ?DO
 	    I @ o = IF
@@ -1544,7 +1545,9 @@ Variable beacons \ destinations to send beacons to
 	bucket cell+ $@len 8 = IF
 	    bucket $off bucket cell+ $off
 	THEN
-    ;] #map ; is o-beacon
+    ;] #map ;
+
+:noname o-beacon defers extra-dispose ; is extra-dispose
 
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF  sockaddr alen @ r@ +beacon  THEN  rdrop ;
@@ -1645,7 +1648,9 @@ Variable cookies
     cookies $@ bounds ?DO
 	I .cc-timeout 64@ timeout 64u< IF
 	    cookies I cookie-size# del$one
-	    unloop cookies next$ ?DO  NOPE  0
+	    cookies next$
+	    unloop  ?DO  NOPE \ this replaces the loop variables
+	    0
 	ELSE
 	    64dup I .cc-timeout 64@ 64= IF
 		64drop I .cc-context @

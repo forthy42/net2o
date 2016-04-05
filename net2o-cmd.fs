@@ -222,9 +222,9 @@ drop
 	.net2o-name
 	0 endcase ]hex ;
 
-Variable show-offset  show-offset on
+User show-offset  show-offset on
 
-sema see-sema
+Sema see-sema
 
 : cmd-see ( addr u -- addr' u' )
     dup show-offset @ = IF  ." <<< "  THEN
@@ -292,7 +292,7 @@ code-buf
 :noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
 
-sema cmd0lock
+Sema cmd0lock
 
 cmd-buf-c class
     maxdata uvar cmd0buf

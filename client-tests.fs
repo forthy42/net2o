@@ -150,8 +150,6 @@ Variable connect-nick  "test" connect-nick $!
     init-cache'
     $a $e connect-nick $@ nick>pk ins-ip pk:connect c:test-rest ;
 
-event: ->throw dup DoError throw ;
-
 : c:test& ( n -- ) \ in background
     up@ 2 stacksize4 NewTask4 pass >r
     alloc-io ['] c:test catch ?dup-IF

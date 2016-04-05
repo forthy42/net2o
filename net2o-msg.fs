@@ -35,7 +35,7 @@ Variable otr-mode
 User replay-mode
 User skip-sig?
 
-sema msglog-sema
+Sema msglog-sema
 
 : ?msg-context ( -- o )
     msg-context @ dup 0= IF

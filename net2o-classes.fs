@@ -136,6 +136,7 @@ cmd-class class
     field: mpubkey       \ our side official pubkey
     field: punch-addrs
     field: rqd-xts       \ callbacks for request done (array)
+    field: my-error-id
     0 +field end-strings
     field: request-gen   \ pre-generated request number
     field: perm-mask

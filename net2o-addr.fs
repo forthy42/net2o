@@ -58,7 +58,7 @@ gen-table $freeze
     host-revoke $off ;
 :noname ( -- )
     punch-addrs $@ bounds ?DO  I @ .n2o:dispose-addr  cell +LOOP
-    punch-addrs $off ; is punch-dispose
+    punch-addrs $off  defers extra-dispose ; is extra-dispose
 
 :noname ( addr u -- o ) \G create a new address object from string
     n2o:new-addr n:>o nest-cmd-loop o n:o> ; is new-addr

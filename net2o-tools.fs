@@ -561,7 +561,7 @@ comp: loadfilename 2@ postpone sliteral :, ;
 
 Variable 0keys
 
-sema 0key-sema
+Sema 0key-sema
 
 : ins-0key [: { w^ addr -- }
 	addr cell 0keys $+! ;] 0key-sema c-section ;
@@ -586,7 +586,7 @@ sema 0key-sema
 
 \ unique list of cells
 
-sema resize-sema
+Sema resize-sema
 
 : unique$cell? ( x addr -- flag )
     $@ bounds ?DO  dup I @ = IF  drop false unloop  EXIT  THEN

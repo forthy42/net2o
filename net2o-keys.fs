@@ -304,11 +304,12 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .rsk ( nick u -- )
     skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
-    ." nick: " .nick cr
+    ." nick:   " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
-    ke-sk @ IF  ." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
+    ke-sk @ IF
+	." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
     ." valid:  " ke-selfsig $@ .sigdates cr
-    ." perm: " ke-mask @ .perm cr
+    ." perm:   " ke-mask @ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
@@ -389,7 +390,9 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     ELSE
 	.ke-mask @ tmp-perm !
 	connect( .key# )else( 2drop )
-    THEN ; IS check-key
+    THEN
+    tmp-perm @ perm%blocked and 0<> !!unknown-key!!
+; IS check-key
 
 :noname ( pkc -- skc )
     keysize key-table #@ 0= !!unknown-key!!
