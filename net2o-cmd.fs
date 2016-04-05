@@ -261,9 +261,11 @@ Sema see-sema
 Defer >throw
 
 : cmd-throw ( error -- )
-    [: ." do-cmd-loop: " dup . .exe cr ;] $err
-    dup DoError  nothrow
-    buf-state @ show-offset !  <err> cr n2o:see-me <default> show-offset on
+    cmd( true )else( remote? @ 0= ) IF
+	[: ." do-cmd-loop: " dup . .exe cr ;] $err
+	dup DoError  nothrow
+	buf-state @ show-offset !  <err> cr n2o:see-me <default> show-offset on
+    THEN
     un-cmd >throw ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!
     cmd( <warn> dest-flags .dest-addr 2dup n2o:see <default> )

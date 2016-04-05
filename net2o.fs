@@ -243,7 +243,6 @@ $080 Constant newcode-val
 $100 Constant keypair-val
 $200 Constant receive-val
 $400 Constant ivs-val
-$800 Constant connection-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
@@ -1378,7 +1377,7 @@ User remote?
 
 : handle-cmd ( addr -- )  parent @ >o
     msg( ." Handle command to addr: " dup hex. cr )
-    outflag off  remote? on  connection-val validated !
+    outflag off  wait-task @ 0= remote? !
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN

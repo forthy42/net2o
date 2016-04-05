@@ -270,7 +270,7 @@ synonym searchkey keysearch
 : -lax ( -- )
     \U -lax <next-cmd>
     \G -lax: open for all keys
-    strict-keys off  perm%default to perm%unknown  next-cmd ;
+    perm%default to perm%unknown  next-cmd ;
 
 : server ( -- )
     \U server
@@ -278,7 +278,7 @@ synonym searchkey keysearch
 
 : rootserver ( -- )
     \U rootserver
-    strict-keys off perm%default to perm%unknown
+    perm%default to perm%unknown
     get-me init-server server-loop ;
 
 \ dht commands

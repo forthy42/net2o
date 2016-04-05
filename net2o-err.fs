@@ -73,7 +73,7 @@ s" data needs to be signed"      throwcode !!unsigned!!
 s" data needs to be unsigned"    throwcode !!signed!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
-s" Connect denied"               throwcode !!connect-perm!!
+s" connection refused"           throwcode !!connect-perm!!
 s" DHT permission denied"        throwcode !!dht-perm!!
 s" MSG permission denied"        throwcode !!msg-perm!!
 s" file read permission denied"  throwcode !!filerd-perm!!

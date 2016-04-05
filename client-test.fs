@@ -12,7 +12,7 @@ i'm anonymous
 
 init-client
 
-"test" connect-nick $!  strict-keys off
+"test" connect-nick $!
 
 !time
 

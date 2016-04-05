@@ -10,6 +10,5 @@ require test-keys.fs \ we want the test keys - never use this in production!
 
 i'm test
 
-strict-keys on \ terminal server wants strict keys
 init-server
 event-loop-task

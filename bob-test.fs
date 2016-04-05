@@ -31,7 +31,6 @@ init-client
     ." Bob replaced: " pkc $20 85type  cr
     disconnect-me ;
 
-strict-keys off
 c:bob server-loop
 \ ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
 

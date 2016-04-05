@@ -11,7 +11,6 @@ require test-keys.fs \ we want the test keys - never use this in production!
 
 i'm test
 
-strict-keys off \ server shouldn't have strict keys
 init-server
 server-loop
 

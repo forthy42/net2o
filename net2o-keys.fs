@@ -277,8 +277,6 @@ Variable sim-nick!
 
 \ key display
 
-Variable strict-keys  strict-keys on
-
 [IFUNDEF] magenta  brown constant magenta [THEN]
 [IFDEF] gl-type : bg| >bg or ; [ELSE] : bg| drop ; [THEN]
 
@@ -384,14 +382,14 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	    connect( .key# )else( 2drop )  EXIT
 	THEN  THEN
     2dup key-exist? dup 0= IF
-	drop strict-keys @ !!unknown-key!!
+	drop
 	[: ." Unknown key " 85type cr ;] $err
 	perm%unknown tmp-perm !
     ELSE
 	.ke-mask @ tmp-perm !
 	connect( .key# )else( 2drop )
     THEN
-    tmp-perm @ perm%blocked and 0<> !!unknown-key!!
+    tmp-perm @ perm%blocked and 0<> !!connect-perm!!
 ; IS check-key
 
 :noname ( pkc -- skc )
