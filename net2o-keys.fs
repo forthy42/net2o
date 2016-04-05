@@ -383,7 +383,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	THEN  THEN
     2dup key-exist? dup 0= IF
 	drop
-	[: ." Unknown key " 85type cr ;] $err
+	[: ." Unknown key, connection refused " 85type cr ;] $err
 	perm%unknown tmp-perm !
     ELSE
 	.ke-mask @ tmp-perm !

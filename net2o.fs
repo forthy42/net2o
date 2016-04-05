@@ -1425,7 +1425,7 @@ User remote?
 : ungroup-ctx ( -- )
     msg-groups [: >r o r> cell+ del$cell ;] #map ;
 
-Defer extra-dispose
+Defer extra-dispose ' noop is extra-dispose
 
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
