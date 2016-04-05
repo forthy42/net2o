@@ -317,9 +317,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
 : .secret-nicks ( -- )
-    [: 0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
-	    dup 1 .r space .key-rest cr 1+
-	THEN o> ;] #map drop ;] #36 base-execute ;
+    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+	  [: dup 1 .r ;] #36 base-execute space .key-rest cr 1+
+      THEN o> ;] #map drop ;
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-import @ >im-color 85type <default>
