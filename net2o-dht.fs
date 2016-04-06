@@ -336,6 +336,10 @@ previous
     cookie+request
     end-code| ;
 
+: addme-owndht ( -- )
+    pkc keysize2 >d#id >o  dht-host $[]off
+    my-addr$ [: dht-host $+[]! ;] $[]map o> ;
+
 \ replace me stuff
 
 also net2o-base

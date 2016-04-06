@@ -381,16 +381,13 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 	    THEN
 	    connect( .key# )else( 2drop )  EXIT
 	THEN  THEN
-    2dup key-exist? dup 0= IF
-	drop
-	[: ." Unknown key, connection refused " 85type cr ;] $err
-	perm%unknown tmp-perm !
-    ELSE
-	.ke-mask @ tmp-perm !
-	connect( .key# )else( 2drop )
-    THEN
-    tmp-perm @ perm%blocked and 0<> !!connect-perm!!
-; IS check-key
+    2dup key-exist?
+    ?dup-0=-IF  perm%unknown  ELSE  .ke-mask @  THEN  tmp-perm !
+    connect( 2dup .key# )
+    tmp-perm @ perm%blocked and IF
+	[: ." Unknown key, connection refused: " 85type cr ;] $err
+	true !!connect-perm!!
+    ELSE  2drop  THEN ; IS check-key
 
 :noname ( pkc -- skc )
     keysize key-table #@ 0= !!unknown-key!!

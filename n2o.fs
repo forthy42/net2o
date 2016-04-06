@@ -279,7 +279,7 @@ synonym searchkey keysearch
 : rootserver ( -- )
     \U rootserver
     perm%default to perm%unknown
-    get-me init-server server-loop ;
+    get-me init-server addme-owndht server-loop ;
 
 \ dht commands
 

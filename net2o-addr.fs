@@ -147,7 +147,7 @@ previous
     my-addr$ $[]off ;
 
 : !my-addr$ ( -- )
-    my-addr[] [:
+    now>never  my-addr[] [:
       nat( ." insert into my-addr$: " dup .addr forth:cr )
       o>addr gen-host my-addr$ $ins[]sig ;] $[]o-map ;
 
