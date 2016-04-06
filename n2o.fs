@@ -300,12 +300,12 @@ synonym searchkey keysearch
 : -root ( -- )
     \U -root <address[:port]> <next-cmd>
     ?nextarg 0= ?EXIT ':' $split dup IF  s>number drop to net2o-port
-    ELSE  2drop  THEN  net2o-host $!
+    ELSE  2drop  THEN  net2o-host $!  dhtroot-off
     next-cmd ;
 
 : -rootnick ( -- )
     \U -rootnick <nick> <next-cmd>
-    ?nextarg 0= ?EXIT  dhtnick $! next-cmd ;
+    ?nextarg 0= ?EXIT  dhtnick $!  dhtroot-off  next-cmd ;
 
 : -port ( -- )
     \U -port <port#> <next-cmd>

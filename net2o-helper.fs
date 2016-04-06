@@ -16,6 +16,29 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Variable dhtnick "net2o-dhtroot" dhtnick $!
+Variable dhtroot-addr$
+85" V=%}0%8((Zs63ZZca&!ZApl@5g8Xp_wSA~0ef#mK3LjR0p100000000E>c#pp5bK5IQM>+1(jN|0CsN|7hm?rb{hAT>9CcjiN9zZR`A1376>voR|&FVKZ}M5@#@rlzqx@+rsbINUJ@8&}S9~zSM_Gn^)WXKJp~h#0UZ3" dhtroot-addr$ $!
+Variable dhtroot-addr
+
+: dhtroot-addr@ ( -- addr )
+    dhtroot-addr @ ?dup-IF  EXIT  THEN
+    dhtroot-addr$ $@ dup IF
+	>host dhtnick $@ nick>pk drop date-sig? 0= IF
+	    sigsize# -  new-addr dup dhtroot-addr !
+	    EXIT  THEN  THEN
+    2drop 0 ;
+
+: dhtroot ( -- net2oaddr )
+    dhtroot-addr@ ?dup-IF  0 swap
+	[: dup ?EXIT
+	  check-addr1 IF  insert-address nip
+	  ELSE  2drop  THEN ;] addr>sock
+    ELSE  net2o-host $@ net2o-port insert-ip
+    THEN  ind-addr off ;
+
+: dhtroot-off ( --- )
+    dhtroot-addr$ $off
+    dhtroot-addr @ n2o:dispose-addr ;
 
 : ins-ip ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip  ind-addr off ;
@@ -33,7 +56,7 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
 : dht-connect' ( xt -- ) >r
-    $8 $8 dhtnick $@ nick>pk ins-ip r> execute pk:connect ;
+    $8 $8 dhtnick $@ nick>pk dhtroot r> execute pk:connect ;
 : dht-connect ( -- )  ['] noop dht-connect' ;
 
 Variable announced
