@@ -30,7 +30,7 @@ Variable dhtroot-addr
 
 : dhtroot ( -- net2oaddr )
     dhtroot-addr@ ?dup-IF  0 swap
-	[: dup ?EXIT
+	[: \ dup ?EXIT
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
@@ -38,7 +38,7 @@ Variable dhtroot-addr
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
-    dhtroot-addr @ n2o:dispose-addr ;
+    dhtroot-addr @ ?dup-IF  n2o:dispose-addr  THEN ;
 
 : ins-ip ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip  ind-addr off ;

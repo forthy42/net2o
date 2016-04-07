@@ -130,7 +130,7 @@ Variable lastn2oaddr
 : insert-ip* ( addr u port hint -- net2o-addr )
     dns>string insert-address ;
 
-: insert-ip ( addr u port -- net2o-addr )  PF_INET   insert-ip* ;
+: insert-ip ( addr u port -- net2o-addr )  0         insert-ip* ;
 : insert-ip4 ( addr u port -- net2o-addr ) PF_INET   insert-ip* ;
 : insert-ip6 ( addr u port -- net2o-addr ) PF_INET6  insert-ip* ;
 
