@@ -181,11 +181,11 @@ Defer .addr$
 [THEN]
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
-Create dummy-ipv6 \ this is my net2o ipv6 address
-$2A c, $03 c, $40 c, $00 c, $00 c, $02 c, $01 c, $88 c,
+Create dummy-ipv6 \ this is googles ipv6 address
+$2a c, $00 c, $14 c, $50 c, $40 c, $01 c, $08 c, $15 c,
 $0000 w, $0000 w, $0000 w, $00 c, $01 c,
 Create local-ipv6
-$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0100 w,
+$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c,
 
 0 Value my-port#
 
