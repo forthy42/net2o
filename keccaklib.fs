@@ -18,7 +18,7 @@
 \c #include <KeccakF-1600.h>
 \c UINT64* KeccakEncryptLoop(keccak_state state, UINT64 * data, int n, int rounds)
 \c {
-    \c   while(n>0) {
+\c   while(n>0) {
 \c     unsigned int p = n >= 128 ? 128 : n;
 \c     KeccakF(state, rounds);
 \c     KeccakEncrypt(state, data, p);
