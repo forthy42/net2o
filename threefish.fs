@@ -33,6 +33,8 @@ require rec-scope.fs
     end-c-library
 [THEN]
 
+[IFUNDEF] crypto bye [THEN] \ stop here if libcompile only
+
 UValue @threefish
 
 $40 Constant threefish#max

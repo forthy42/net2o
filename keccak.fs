@@ -33,6 +33,8 @@ require rec-scope.fs
     end-c-library
 [THEN]
 
+[IFUNDEF] crypto bye [THEN] \ stop here if libcompile only
+
 25 8 * Constant keccak#
 128 Constant keccak#max
 128 Constant keccak#cks
