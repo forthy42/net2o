@@ -1490,7 +1490,7 @@ event: ->throw ( error -- ) throw ;
 : push-timeout ( o:connection -- )
     timeout-expired? wait-task @ and  ?dup-IF
 	o elit, ->timeout event>  THEN ;
-	
+
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
 	timeout( ." do timeout: " o hex. timeout-xt @ .name cr )

@@ -113,14 +113,68 @@ Defer dht-beacon
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     beacons #offs !my-addr announce-me renat ;
 
+\ notification for address changes
+
+true Value connected?
+
 [IFDEF] android
     also android also jni
     :noname  defers android-network
 	beacons @ IF
-	    network-info ?dup-IF  ]xref renat-all  THEN
+	    network-info dup  IF  ]xref dht-beacon  true
+	    THEN   to connected?
 	THEN ;
     is android-network
     previous previous
+[THEN]
+
+[IFDEF] PF_NETLINK
+    $200 Constant netlink-size#
+    0 Value netlink-sock
+    sockaddr_nl buffer: netlink-addr
+    netlink-size# buffer: netlink-buffer
+
+    AF_NETLINK netlink-addr nl_family w!
+    0          netlink-addr nl_pad w!
+    $00d8607f5 netlink-addr nl_groups l!
+
+    : get-netlink ( -- )
+	PF_NETLINK SOCK_DGRAM NETLINK_ROUTE socket dup ?ior to netlink-sock
+	getpid     [ netlink-addr nl_pid ]L l!
+	netlink-sock netlink-addr sockaddr_nl bind ?ior ;
+    : read-netlink ( -- addr u )
+	netlink-sock netlink-buffer netlink-size# 0 recv dup ?ior
+	>r netlink-buffer netlink-buffer l@ r> umin ;
+    : address? ( addr u -- flag )
+	drop nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
+    \ debugging stuff to see what kind of things are going on
+    : .rtaddr4 ( addr -- ) $C + 4 .ip4a 2drop ;
+    : .rtaddr6 ( addr -- ) $C + $10 .ip6a 2drop ;
+    : .ifam-flags ( n -- )
+	ifa-f$ bounds DO
+	    dup 1 and IF  I c@ emit  THEN  2/
+	LOOP  drop ;
+    : .ifam-addr ( addr -- )
+	case  dup ifam_family c@
+	    AF_INET  of  .rtaddr4  endof
+	    AF_INET6 of  .rtaddr6  endof
+	    nip endcase ;
+    : .rtmsg ( addr -- )
+	case nlmsg_type w@
+	    RTM_NEWADDR of ." add " endof
+	    RTM_DELADDR of ." del " endof
+	endcase ;
+    : .rtaddr ( addr u -- ) drop
+	dup .rtmsg  nlmsghdr +
+	dup ifam_index l@ 0 .r ." : "
+	dup ifam_flags c@ .ifam-flags .ifam-addr
+	cr ;
+    : netlink-test ( -- )
+	netlink-sock 0= IF  get-netlink  THEN
+	BEGIN  key? 0= WHILE
+		read-netlink
+		2dup address? IF .rtaddr ELSE 2drop THEN
+	REPEAT ;
 [THEN]
 
 scope{ /chat
