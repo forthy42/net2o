@@ -173,7 +173,10 @@ true Value connected?
 	netlink-sock 0= IF  get-netlink  THEN
 	BEGIN  key? 0= WHILE
 		read-netlink
-		2dup address? IF .rtaddr ELSE 2drop THEN
+		2dup address? IF .rtaddr 20 ms
+		    global-ip4 .ip4a 2drop
+		    global-ip6 .ip6a 2drop cr
+		ELSE 2drop THEN
 	REPEAT ;
 [THEN]
 
