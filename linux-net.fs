@@ -24,13 +24,26 @@ AF_NETLINK netlink-addr nl_family w!
 0          netlink-addr nl_pad w!
 $00d8607f5 netlink-addr nl_groups l!
 
+: prep-netlink ( -- )
+    epiper @ fileno POLLIN  pollfds fds!+ >r
+    netlink-sock POLLIN  r> fds!+
+    pollfds - pollfd / to pollfd# ;
+
 : get-netlink ( -- )
     PF_NETLINK SOCK_DGRAM NETLINK_ROUTE socket dup ?ior to netlink-sock
     getpid     [ netlink-addr nl_pid ]L l!
-    netlink-sock netlink-addr sockaddr_nl bind ?ior ;
+    netlink-sock netlink-addr sockaddr_nl bind ?ior
+    prep-netlink ;
+
+: wait-for-netlink ( -- )
+    BEGIN  pollfds pollfd# >poll drop read-event
+	pollfds [ pollfd revents ]L + w@ POLLIN and  UNTIL ;
+
 : read-netlink ( flag -- addr u ) >r
+    r@ 0= IF  wait-for-netlink  THEN
     netlink-sock netlink-buffer netlink-size# r> recv dup ?ior-again
     >r netlink-buffer netlink-buffer l@ r> umin ;
+
 : address? ( addr u -- flag )
     drop nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
 
@@ -81,7 +94,7 @@ $00d8607f5 netlink-addr nl_groups l!
     host-ipv4   4 str= r> and 0=
     o>  connected? and ;
 : check-addresses? ( -- flag )
-    false  BEGIN  MSG_DONTWAIT read-netlink 2dup d0<> WHILE
+    false  BEGIN  MSG_DONTWAIT read-netlink dup WHILE
 	    address? or  REPEAT  2drop ;
 : wait-for-address ( -- )
     BEGIN  0 read-netlink address?  UNTIL ;
