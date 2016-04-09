@@ -1,4 +1,4 @@
-\ net2o template for new files
+\ Andoid specific network stuff
 
 \ Copyright (C) 2016   Bernd Paysan
 
@@ -14,6 +14,15 @@
 
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+also android also jni
+:noname  defers android-network
+    beacons @ IF
+	network-info dup  IF  ]xref dht-beacon  true
+	THEN   to connected?
+    THEN ;
+is android-network
+previous previous
 
 0 [IF]
 Local Variables:

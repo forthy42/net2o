@@ -101,6 +101,10 @@ word-args
 : basename ( addr u -- addr' u' )
     2dup '/' -scan nip /string ;
 
+: str0? ( addr u -- flag )
+    \ check if string is all zero
+    0 scan nip 0= ;
+
 \ set debugging
 
 : +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN
