@@ -617,3 +617,6 @@ Sema resize-sema
     BEGIN   nothrow xt catch dup -1 = ?EXIT
 	?int dup  WHILE  xt .loop-err  REPEAT
     drop false ;
+
+: ?ior-again ( n -- )
+    errno EAGAIN <> and ?ior ;

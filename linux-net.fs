@@ -29,7 +29,7 @@ $00d8607f5 netlink-addr nl_groups l!
     getpid     [ netlink-addr nl_pid ]L l!
     netlink-sock netlink-addr sockaddr_nl bind ?ior ;
 : read-netlink ( flag -- addr u ) >r
-    netlink-sock netlink-buffer netlink-size# r> recv dup ?ior
+    netlink-sock netlink-buffer netlink-size# r> recv dup ?ior-again
     >r netlink-buffer netlink-buffer l@ r> umin ;
 : address? ( addr u -- flag )
     drop nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
