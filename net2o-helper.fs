@@ -118,7 +118,7 @@ Defer dht-beacon
 true Value connected?
 
 [IFDEF] android
-    include android-net.fs
+    require android-net.fs
 [THEN]
 
 [IFDEF] PF_NETLINK

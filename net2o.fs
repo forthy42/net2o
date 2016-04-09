@@ -1619,10 +1619,12 @@ Variable beacons \ destinations to send beacons to
 
 \ client/server initializer
 
-: init-rest ( port -- )  init-mykey init-mykey \ two keys
+Defer init-rest
+
+:noname ( port -- )  init-mykey init-mykey \ two keys
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
-    sender( create-sender-task ) create-timeout-task ;
+    sender( create-sender-task ) create-timeout-task ; is init-rest
 
 Variable initialized
 

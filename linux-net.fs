@@ -94,6 +94,8 @@ $00d8607f5 netlink-addr nl_groups l!
 : create-netlink-task ( -- )
     ['] netlink-loop 1 net2o-task to netlink-task ;
 
+:noname defers init-rest  create-netlink-task ; is init-rest
+
 0 [IF]
 Local Variables:
 forth-local-words:
