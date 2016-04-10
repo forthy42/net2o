@@ -103,16 +103,6 @@ Defer insert-addr ( o -- )
 
 Defer dht-beacon
 
-: announce-me ( -- )
-    tick-adjust 64@ 64-0= IF  +get-time  THEN
-    beacons @ IF  dht-connect
-    ELSE  [: dup ['] dht-beacon 0 .add-beacon ;] dht-connect'
-    THEN
-    replace-me disconnect-me -other  announced on ;
-
-: renat-all ( -- ) beacon( ." remove all beacons" cr )
-    beacons #offs !my-addr announce-me renat ;
-
 \ notification for address changes
 
 true Value connected?
@@ -124,6 +114,21 @@ true Value connected?
 [IFDEF] PF_NETLINK
     require linux-net.fs
 [THEN]
+
+\ announce and renat
+
+: announce-me ( -- )
+    tick-adjust 64@ 64-0= IF  +get-time  THEN
+    beacons @ IF  dht-connect
+    ELSE  [: dup ['] dht-beacon 0 .add-beacon ;] dht-connect'
+    THEN
+    replace-me disconnect-me -other  announced on ;
+
+: renat-all ( -- ) beacon( ." remove all beacons" cr )
+    [IFDEF] renat-complete [: [THEN]
+    beacons #offs !my-addr announce-me renat
+    [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
+    beacon( ." done renat" cr ) ;
 
 scope{ /chat
 : renat ( addr u -- ) 2drop renat-all ;

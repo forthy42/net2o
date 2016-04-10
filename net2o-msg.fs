@@ -558,6 +558,9 @@ also net2o-base scope: /chat
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
+: myaddrs ( addr u -- )  2drop .my-addrs ;
+: !myaddrs ( addr u -- ) 2drop !my-addr ;
+
 : notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G notify: Change notificaton settings

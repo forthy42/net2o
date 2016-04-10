@@ -35,17 +35,24 @@ $00d8607f5 netlink-addr nl_groups l!
     netlink-sock netlink-addr sockaddr_nl bind ?ior
     prep-netlink ;
 
-: wait-for-netlink ( -- )
-    BEGIN  pollfds pollfd# >poll drop read-event
-	pollfds [ pollfd revents ]L + w@ POLLIN and  UNTIL ;
+: netlink? ( -- flag )
+    pollfds pollfd# >poll drop read-event
+    pollfds [ pollfd revents ]L + w@ POLLIN and ;
 
-: read-netlink ( flag -- addr u ) >r
-    r@ 0= IF  wait-for-netlink  THEN
-    netlink-sock netlink-buffer netlink-size# r> recv dup ?ior-again
-    >r netlink-buffer netlink-buffer l@ r> umin ;
+: wait-for-netlink ( -- )
+    BEGIN  netlink?  UNTIL ;
+
+: read-netlink ( -- addr u )
+    netlink-sock netlink-buffer netlink-size# MSG_DONTWAIT recv dup ?ior-again
+    netlink-buffer netlink-buffer l@ rot umin ;
+
+: read-netlink? ( -- addr u )
+    poll-timeout# 0 ptimeout 2!  wait-for-netlink
+    read-netlink ;
 
 : address? ( addr u -- flag )
-    drop nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
+    0= IF  drop false  EXIT  THEN
+    nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
 
 \ debugging stuff to see what kind of things are going on
 
@@ -73,36 +80,60 @@ $00d8607f5 netlink-addr nl_groups l!
 : netlink-test ( -- )
     netlink-sock 0= IF  get-netlink  THEN
     BEGIN  key? 0= WHILE
-	    0 read-netlink
+	    read-netlink
 	    2dup address? IF .rtaddr 20 ms
 		global-ip4 .ip4a 2drop
 		global-ip6 .ip6a 2drop cr
 	    ELSE 2drop THEN
     REPEAT ;
 
+\ renat handshale
+
+0 Value netlink-task
+Variable netlink-done?   netlink-done? on
+Variable netlink-again?  netlink-again? off
+
+event: ->netlink ( -- )
+    netlink-again? @ IF
+	 netlink-done? off netlink-again? off dht-beacon
+    ELSE  netlink-done? on  THEN ;
+: renat-complete ( -- )
+    <event ->netlink netlink-task event> ;
+
 \ netlink watchdog
 
-20 constant netlink-wait#
-0 Value netlink-task
+2 constant netlink-wait#
+
+: check-preferred? ( -- flag )
+    0 my-addr[] $[] @ >o
+    global-ip6 2dup str0? { v6z } host-ipv6 $10 str= >r
+    global-ip4 2dup str0? { v4z } host-ipv4   4 str= r> and 0=
+    v6z v4z and 0= to connected?
+    o>  connected? and ;
 
 : new-preferred? ( -- flag )
-    netlink-wait# ms
-    0 my-addr[] $[] @ >o
-    global-ip4 2dup str0? >r
-    global-ip6 2dup str0? r> and 0= to connected?
-    host-ipv6 $10 str= >r
-    host-ipv4   4 str= r> and 0=
-    o>  connected? and ;
-: check-addresses? ( -- flag )
-    false  BEGIN  MSG_DONTWAIT read-netlink dup WHILE
-	    address? or  REPEAT  2drop ;
+    netlink-wait# ptimeout ! \ 3s wait in total
+    BEGIN  netlink? WHILE  read-netlink
+	nat( 2dup address? IF  2dup .rtaddr THEN )  2drop
+    REPEAT
+    check-preferred? ;
 : wait-for-address ( -- )
-    BEGIN  0 read-netlink address?  UNTIL ;
+    BEGIN  read-netlink?
+	nat( 2dup address? IF  2dup .rtaddr THEN )
+    address? check-preferred? or  UNTIL ;
 : netlink-loop ( -- )
     netlink-sock 0= IF  get-netlink  THEN
     BEGIN
-	check-addresses? 0= IF  wait-for-address  THEN
-	new-preferred? IF  dht-beacon  THEN
+	wait-for-address
+	new-preferred? IF
+	    nat( ." new preferred IP: " )
+	    netlink-done? @ IF
+		nat( ." dht-beacon" cr )
+		netlink-done? off netlink-again? off dht-beacon
+	    ELSE
+		nat( ." netlink-again" cr ) netlink-again? on
+	    THEN
+	THEN
     AGAIN ;
 : create-netlink-task ( -- )
     ['] netlink-loop 1 net2o-task to netlink-task ;

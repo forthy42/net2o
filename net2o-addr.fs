@@ -151,6 +151,9 @@ previous
       nat( ." insert into my-addr$: " dup .addr forth:cr )
       o>addr gen-host my-addr$ $ins[]sig ;] $[]o-map ;
 
+: .my-addrs ( -- )
+    my-addr[] [: .addr cr ;] $[]o-map ;
+
 :noname addrs-off !my-addrs !my-addr$ ; is !my-addr
 
 \ merge addresses
