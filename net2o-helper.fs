@@ -17,9 +17,9 @@
 
 Variable dhtnick "net2o-dhtroot" dhtnick $!
 Variable dhtroot-addr$
-85" V=%}0%8((Zs63ZZca&!ZApl@5g8Xp_wSA~0ef#mK3LjR0p1000^_tO0j>c#ptnNW7mX@7@1(jN|0CsN|z}M)ff)MJt+=_IQO8&fY?yId>|&b+5iO_)yW>SUrVS|1E>XdEB`q+5O!@_+w)Pt@bWTT&Hlv;T&s;E5{bvZ3"
-dhtroot-addr$ $!
 Variable dhtroot-addr
+
+require net2o-dhtroot.fs
 
 : dhtroot-addr@ ( -- addr )
     dhtroot-addr @ ?dup-IF  EXIT  THEN

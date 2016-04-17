@@ -19,14 +19,6 @@ require net2o.fs
 
 Variable key-readin
 
-: out-key ( o -- )
-    >o pack-pubkey o o>
-    [: ..nick-base ." .n2o" ;] $tmp fn-sanitize w/o create-file throw
-    >r cmdbuf$ r@ write-file throw r> close-file throw ;
-: out-me ( -- )
-    pkc keysize key-table #@ 0= !!unknown-key!!
-    cell+ out-key ;
-
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
@@ -49,11 +41,6 @@ $20 value hash-size#
 : do-keyin ( addr u -- )
     key-readin $slurp-file  64#-1 key-read-offset 64!
     key-readin $@ do-key ;
-
-: +dhtroot ( -- )
-    defaultkey @ >storekey !
-    import#manual import-type !  64#-1 key-read-offset 64!
-    85" ~IIV0ZJeF4b8VIGKy;kXRvO*Z%#uVj>w`?m20n!c*_`(z=^#U_^cShx_>*%pu%=TW2JYz74d9LmgS%xC^mFi7GHGJ2fU|6V5=@_=|V?<pUYd)MQ}Gh(x%jN|0CsN|#@I{mF=Dxfzz_guXQYYMsol1ZRlwF^ol10Y)Pre*WH3YB_*P@2I1dG*gzgaEb2BFV*itIgSylm&Z7!5JeqpL350" do-key ;
 
 : keys>search ( -- )
     search-key$ $[]off [: dup 5 mod IF
@@ -124,10 +111,7 @@ scope{ n2o
     \U keygen|genkey nick
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
-    +newphrase key>default
-    key#user +gen-keys
-    secret-keys# 1- secret-key >raw-key  lastkey@ drop defaultkey !
-    out-me +dhtroot save-keys .keys ?rsk ;
+    new-key .keys ?rsk ;
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys

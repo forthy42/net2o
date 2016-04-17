@@ -1694,6 +1694,8 @@ require net2o-helper.fs
 require net2o-qr.fs
 \ require net2o-term.fs
 
+require net2o-dhtroot.fs \ configuration for DHT root
+
 0 [IF]
 Local Variables:
 forth-local-words:

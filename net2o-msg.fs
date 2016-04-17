@@ -34,6 +34,7 @@ Variable msg-logs
 Variable otr-mode
 User replay-mode
 User skip-sig?
+User logs-buf
 
 Sema msglog-sema
 
@@ -47,16 +48,17 @@ Sema msglog-sema
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
 : msg-log@ ( group u -- addr u )
-    [: msg-logs #@ save-mem ;] msglog-sema c-section ;
+    [: msg-logs #@ logs-buf $! ;] msglog-sema c-section
+    logs-buf $@ ;
 
 : save-msgs ( group u -- )
     n2o:new-msg >o enc-file $off
-    2dup msg-log@ over >r
+    2dup msg-log@
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
-    gen-cmd$ 2drop tmp$ @ enc-file ! tmp$ off
-    r> free throw  dispose o>
+    gen-cmd$ 2drop 0 tmp$ !@ enc-file !
+    dispose o>
     >chatid [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
 
@@ -105,6 +107,11 @@ Sema queue-sema
 
 : peer@ ( -- addr u )
     [: 0 peers[] $[]@ ;] queue-sema c-section ;
+: peer> ( -- addr / 0 )
+    [: peers[] $[]# dup IF
+	  drop 0 peers[] $[] @
+	  peers[] 0 cell $del
+      THEN ;] queue-sema c-section ;
 : peer+ ( addr u -- )
     [: peers[] $+[]! ;] queue-sema c-section ;
 : peer- ( -- )
@@ -124,9 +131,9 @@ Sema queue-sema
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
-    cells >r msg-log@ over { log } dup r> - 0 max /string bounds ?DO
+    cells >r msg-log@ dup r> - 0 max /string bounds ?DO
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
-    cell +LOOP   log free throw  dispose o> ;
+    cell +LOOP  dispose o> ;
 
 : >group ( addr u -- )
     2dup msg-groups #@ d0=
@@ -163,17 +170,18 @@ Defer silent-join
     reconnect( ." chat req done, start silent join" cr )
     connect-rest  +flow-control +resend chat-silent-join ;
 
+User peer-buf
+
 : reconnect-chat ( -- )
-    peer@ 2dup d0<> IF
-	last# -rot save-mem over >r peer-
+    peer> ?dup-IF
+	peer-buf $off peer-buf !  last# peer-buf $@
 	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
 	reconnect( ." in group: " last# dup hex. $. cr )
 	0 >o $A $A [: reconnect( ." prepare reconnection" cr )
 	  ?msg-context >o silent-last# ! o>
 	  ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
 	addr-connect o>
-	r> free throw
-    ELSE  2drop  THEN ;
+    THEN ;
 
 : do-avalanche ( -- )
     msg@ parent @ .avalanche-msg msg- ;
@@ -508,12 +516,12 @@ scope: notify-cmds
 also net2o-base scope: /chat
 
 : me ( addr u -- )
-    \U me <action>
+    \U me <action>          send string as action
     \G me: send remaining string as action
     [: $, msg-action ;] send-avalanche .chat ;
 
 : peers ( addr u -- ) 2drop
-    \U peers
+    \U peers                list peers
     \G peers: list peers in all groups
     msg-groups [: dup .group ." : "
       cell+ $@ bounds ?DO
@@ -522,25 +530,25 @@ also net2o-base scope: /chat
       cell +LOOP  forth:cr ;] #map ;
 
 : here ( addr u -- ) 2drop
-    \U here
+    \U here                 send coordinates
     \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE  [: $, msg-coord ;] send-avalanche .chat  THEN ;
 
 : help ( addr u -- )
-    \U help
+    \U help                 show help
     \G help: list help
     bl skip '/' skip
     2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
     [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
 
 : invitations ( addr u -- )
-    \U invitations
+    \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
     2drop .invitations ;
 
 : chats ( addr u -- ) 2drop ." ===== chats: "
-    \U chats
+    \U chats                list chats
     \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
@@ -548,9 +556,9 @@ also net2o-base scope: /chat
     ."  =====" forth:cr ;
 
 : nat ( addr u -- )  2drop
-    \U nat
+    \U nat                  list NAT info
     \G nat: list nat traversal information of all peers in all groups
-    \U renat
+    \U renat                redo NAT traversal
     \G renat: redo nat traversal
     msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
@@ -570,7 +578,7 @@ also net2o-base scope: /chat
     THEN ;
 
 : beacons ( addr u -- )
-    \U beacons
+    \U beacons              list beacons
     \G beacons: list all beacons
     2drop ." === beacons ===" forth:cr
     beacons [: dup $@ .address space
@@ -579,7 +587,7 @@ also net2o-base scope: /chat
 	  I 2@ ?dup-IF ..con-id space THEN .name
       2 cells +LOOP forth:cr ;] #map ;
 
-    \U n2o <cmd>
+    \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
 }scope
 
@@ -683,7 +691,7 @@ previous
 
 scope{ /chat
 : chat ( addr u -- )
-    \U chat @user|group
+    \U chat [group][@user]  switch/connect chat
     \G chat: switch to chat with user or group
     chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
     msg-group$ $@ msg-groups #@ dup 0= IF  2drop

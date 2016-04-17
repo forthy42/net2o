@@ -794,6 +794,29 @@ $40 buffer: nick-buf
     current-key >o replace-key o>
     >o skc keysize ke-sk sec! o o> ;
 
+\ generate new key
+
+: out-key ( o -- )
+    >o pack-pubkey o o>
+    [: ..nick-base ." .n2o" ;] $tmp fn-sanitize w/o create-file throw
+    >r cmdbuf$ r@ write-file throw r> close-file throw ;
+: out-me ( -- )
+    pkc keysize key-table #@ 0= !!unknown-key!!
+    cell+ out-key ;
+
+Variable dhtroot.n2o
+
+: +dhtroot ( -- )
+    defaultkey @ >storekey !
+    import#manual import-type !  64#-1 key-read-offset 64!
+    dhtroot.n2o $@ do-key ;
+
+: new-key ( nickaddr u -- )
+    +newphrase key>default
+    key#user +gen-keys
+    secret-keys# 1- secret-key >raw-key  lastkey@ drop defaultkey !
+    out-me +dhtroot save-keys ;
+
 \ revokation
 
 4 datesize# + keysize 9 * + Constant revsize#
@@ -902,7 +925,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 
 \ will ask for your password and if possible auto-select your id
 
-: get-me ( -- )
+: get-skc ( -- )
     secret-keys# ?EXIT
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
@@ -916,6 +939,15 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
     ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
     >raw-key ?rsk   r> op-vector ! ;
+
+: get-me ( -- )
+    "~/.net2o/seckeys.k2o" 2dup file-status nip
+    0= IF  r/o open-file throw >r r@ file-size throw d0=
+	r> close-file throw  ELSE  true  THEN
+    IF  [: ." Generate a new keypair:" cr
+	  get-nick new-key .keys ?rsk ;]
+    ELSE  ['] get-skc  THEN
+    catch ?dup-IF  DoError  THEN ;
 
 0 [IF]
 Local Variables:
