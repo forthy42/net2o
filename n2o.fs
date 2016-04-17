@@ -137,6 +137,15 @@ scope{ n2o
     \G perm: - for taking away permissions
     \G perm: = sets defaults, add or subtract permissions afterwards
     \G perm: no prefix for setting permissions exactly
+    \G perm: c onnect - allows connections
+    \G perm: b locked - denies connections
+    \G perm: d ht     - DHT read/write access
+    \G perm: m sg     - can send messages
+    \G perm: r ead    - allow to read files
+    \G perm: w rite   - allow to write files
+    \G perm: n ame    - allow to access file by name
+    \G perm: h ash    - allow to access file by hash
+    \G perm: s ync    - allow to synchronize
     get-me
     BEGIN  chat-keys $[]off  @nicks>chat ?nextarg WHILE  >perm
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
