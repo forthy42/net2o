@@ -55,6 +55,8 @@ object class
     $C0 uvar get0
     $C0 uvar get1
     $40 uvar hashtmp
+    $40 uvar sigtmp
+    $20 uvar pktmp
     keccak# uvar hstatetmp
     cell uvar task-id
 end-class edbuf-c
@@ -124,19 +126,19 @@ init-ed25519
 : ed-check? { sig pk -- flag }
     \G check a message: the keccak state contains the hash of the message.
     \G The unpacked pk is in get0, so this word can be used for batch checking.
+    \G sig and pk need to be aligned properly, ed-verify does that alignment
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
     hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
-    sig hashtmp $40 move           \ align sig
-    sct3 hashtmp $20 + raw>sc25519 \ sct3 is s
+    sct3 sig $20 + raw>sc25519     \ sct3 is s
     get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
     sigbuf $40 + get1 ge25519-pack \ =r
-    hashtmp sigbuf $40 + 32b= ;
+    sig sigbuf $40 + 32b= ;
 
-: ed-verify { sig pk -- flag } \ message digest is in keccak state
-    pk hashtmp $20 + $20 move
-    get0 hashtmp $20 + ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
-    sig pk ed-check? ;
+: ed-verify ( sig pk -- flag ) \ message digest is in keccak state
+    pktmp $20 move  sigtmp $40 move \ align inputs
+    get0 pktmp ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
+    sigtmp pktmp ed-check? ;
 
 : ed-dh { sk pk dest -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
