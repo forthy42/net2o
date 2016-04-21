@@ -436,8 +436,8 @@ drop
 
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize <> sig-keysize and ?dup-IF  EXIT  THEN
-    2dup + sigsize# - >r
-    ticks fuzzedtime# 64+ r@ le-64@ r> 64'+ le-64@
+    2dup enddate@ 64>r 2dup startdate@ 64>r
+    ticks 64r> 64r>
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
     early/late? ;
 : verify-sig ( addr u pk -- addr u flag )  >r

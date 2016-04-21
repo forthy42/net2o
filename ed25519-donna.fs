@@ -127,13 +127,15 @@ init-ed25519
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
     hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
-    sct3 sig $20 + raw>sc25519     \ sct3 is s
+    sig hashtmp $40 move           \ align sig
+    sct3 hashtmp $20 + raw>sc25519 \ sct3 is s
     get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
-    sigbuf $40 + get1 ge25519-pack         \ =r
-    sig sigbuf $40 + 32b= ;
+    sigbuf $40 + get1 ge25519-pack \ =r
+    hashtmp sigbuf $40 + 32b= ;
 
 : ed-verify { sig pk -- flag } \ message digest is in keccak state
-    get0 pk ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
+    pk hashtmp $20 + $20 move
+    get0 hashtmp $20 + ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
     sig pk ed-check? ;
 
 : ed-dh { sk pk dest -- secret len }

@@ -666,7 +666,7 @@ $40 buffer: nick-buf
 : get-nick ( -- addr u )
     ." nick: " nick-buf $40 accept nick-buf swap cr ;
 
-: yes? ( -- flag )  key cr 'y' = ;
+: yes? ( -- flag )  ."  (y/N)" key cr 'y' = ;
 
 : ?rsk ( -- )
     pkc keysize key-exist? dup 0= IF  drop  EXIT  THEN

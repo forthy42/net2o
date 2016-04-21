@@ -508,12 +508,12 @@ scope: notify-cmds
 also net2o-base scope: /chat
 
 : me ( addr u -- )
-    \U me <action>
+    \U me <action>          send string as action
     \G me: send remaining string as action
     [: $, msg-action ;] send-avalanche .chat ;
 
 : peers ( addr u -- ) 2drop
-    \U peers
+    \U peers                list peers
     \G peers: list peers in all groups
     msg-groups [: dup .group ." : "
       cell+ $@ bounds ?DO
@@ -522,25 +522,25 @@ also net2o-base scope: /chat
       cell +LOOP  forth:cr ;] #map ;
 
 : here ( addr u -- ) 2drop
-    \U here
+    \U here                 send coordinates
     \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE  [: $, msg-coord ;] send-avalanche .chat  THEN ;
 
 : help ( addr u -- )
-    \U help
+    \U help                 show help
     \G help: list help
     bl skip '/' skip
     2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
     [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
 
 : invitations ( addr u -- )
-    \U invitations
+    \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
     2drop .invitations ;
 
 : chats ( addr u -- ) 2drop ." ===== chats: "
-    \U chats
+    \U chats                list chats
     \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
@@ -548,9 +548,9 @@ also net2o-base scope: /chat
     ."  =====" forth:cr ;
 
 : nat ( addr u -- )  2drop
-    \U nat
+    \U nat                  list NAT info
     \G nat: list nat traversal information of all peers in all groups
-    \U renat
+    \U renat                redo NAT traversal
     \G renat: redo nat traversal
     msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
@@ -570,7 +570,7 @@ also net2o-base scope: /chat
     THEN ;
 
 : beacons ( addr u -- )
-    \U beacons
+    \U beacons              list beacons
     \G beacons: list all beacons
     2drop ." === beacons ===" forth:cr
     beacons [: dup $@ .address space
@@ -579,7 +579,7 @@ also net2o-base scope: /chat
 	  I 2@ ?dup-IF ..con-id space THEN .name
       2 cells +LOOP forth:cr ;] #map ;
 
-    \U n2o <cmd>
+    \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
 }scope
 
@@ -683,7 +683,7 @@ previous
 
 scope{ /chat
 : chat ( addr u -- )
-    \U chat @user|group
+    \U chat [group][@user]  switch/connect chat
     \G chat: switch to chat with user or group
     chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
     msg-group$ $@ msg-groups #@ dup 0= IF  2drop
