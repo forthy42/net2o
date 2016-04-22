@@ -388,7 +388,7 @@ previous
 
 $200 Constant maxmsg#
 
-: xclear ( n -- )
+: xclear ( addr u -- ) x-width
     1+ dup xback-restore dup spaces xback-restore ;
 
 : get-input-line ( -- addr u )  history >r  0 to history
@@ -397,7 +397,7 @@ $200 Constant maxmsg#
 	IF    drop 2drop "/bye"
 	ELSE
 	    dup 0= IF
-		drop dup xclear pad swap
+		drop pad swap 2dup xclear
 	    ELSE
 		DoError drop 0  THEN
 	THEN
@@ -417,12 +417,19 @@ $200 Constant maxmsg#
 : chat-entry ( -- )  init-chatlog  word-args
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
+: wait-2s-key ( -- )
+    200 0 DO  key? ?LEAVE  10 ms  LOOP ;
+: .nobody ( -- )
+    <info> "nobody's online" 2dup type <default>
+    wait-2s-key xclear ;
+
 also net2o-base
-: send-avalanche ( xt -- )
-    0 >o code-buf$ cmdreset init-reply
-    <msg execute msg> endwith  o>
-    cmdbuf$ 4 /string 2 - 2dup ['] msg+ [group] 0= IF 2drop THEN
-    msg-group$ $@ >group code-buf avalanche-msg ;
+: send-avalanche ( addr u xt -- )
+    [: 0 >o code-buf$ cmdreset init-reply
+      <msg execute msg> endwith  o>
+      cmdbuf$ 4 /string 2 - 2dup msg+
+      msg-group$ $@ >group code-buf avalanche-msg ;] [group]
+    0= IF  2drop .nobody  THEN ;
 previous
 
 \ chat helper words
@@ -518,7 +525,7 @@ also net2o-base scope: /chat
 : me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
-    [: $, msg-action ;] ['] send-avalanche [group] 0= IF 2drop THEN .chat ;
+    [: $, msg-action ;] send-avalanche .chat ;
     
 : peers ( addr u -- ) 2drop
     \U peers                list peers
@@ -534,8 +541,7 @@ also net2o-base scope: /chat
     \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE
-	[: $, msg-coord ;] ['] send-avalanche [group] 0= IF 2drop THEN
-	.chat
+	[: $, msg-coord ;] send-avalanche .chat
     THEN ;
 
 : help ( addr u -- )
@@ -754,9 +760,7 @@ previous
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
-	    do-chat-cmd? 0= IF
-		['] avalanche-text [group] 0= IF  nip xclear  THEN
-	    THEN
+	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats ;
 
 :noname ( addr u o:context -- )
