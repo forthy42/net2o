@@ -593,7 +593,8 @@ also net2o-base scope: /chat
     word-args  1 /string bl $split 2swap
     2dup ['] /chat >body find-name-in
     ?dup-IF  nip nip name>int execute
-    ELSE  <err> ." unknown command: " forth:type <default> forth:cr  THEN ;
+    ELSE  <err> ." unknown command: " forth:type <default> forth:cr 2drop
+    THEN ;
 
 : avalanche-text ( addr u -- )
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
