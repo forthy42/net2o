@@ -197,6 +197,7 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
 \ coordinates
 
 6 sfloats buffer: coord"
+1.23e coord" sf! 2.34e coord" sfloat+ sf!
 : coord@ ( -- addr u ) coord" 6 sfloats ;
 : sf[]@ ( addr i -- sf )  sfloats + sf@ ;
 : sf[]! ( addr i -- sf )  sfloats + sf! ;
@@ -375,14 +376,15 @@ previous
     net2o-code expect-msg leave,
     cookie+request end-code| ;
 
-: [group] ( xt -- )
-    msg-group$ $@ msg-groups #@ drop @ >o ?msg-context >o
-    execute o> o> ;
+: [group] ( xt -- flag )
+    msg-group$ $@ msg-groups #@ IF
+	@ >o ?msg-context .execute o> true
+    ELSE  2drop false  THEN ;
 : .chat ( -- ) replay-mode on
     [: do-msg-nestsig
       msg-group$ $@ 1 display-lastn
       replay-mode off
-      msg-group$ $@ save-msgs ;] [group] notify- ;
+      msg-group$ $@ save-msgs ;] [group] drop notify- ;
 
 $200 Constant maxmsg#
 
@@ -412,14 +414,14 @@ $200 Constant maxmsg#
     net2o-code expect-reply
     log !time endwith join, get-ip end-code ;
 
-: chat-entry ( -- )  init-chatlog
+: chat-entry ( -- )  init-chatlog  word-args
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
 also net2o-base
 : send-avalanche ( xt -- )
     0 >o code-buf$ cmdreset init-reply
     <msg execute msg> endwith  o>
-    cmdbuf$ 4 /string 2 - 2dup ['] msg+ [group]
+    cmdbuf$ 4 /string 2 - 2dup ['] msg+ [group] 0= IF 2drop THEN
     msg-group$ $@ >group code-buf avalanche-msg ;
 previous
 
@@ -516,8 +518,8 @@ also net2o-base scope: /chat
 : me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
-    [: $, msg-action ;] send-avalanche .chat ;
-
+    [: $, msg-action ;] ['] send-avalanche [group] 0= IF 2drop THEN .chat ;
+    
 : peers ( addr u -- ) 2drop
     \U peers                list peers
     \G peers: list peers in all groups
@@ -531,7 +533,10 @@ also net2o-base scope: /chat
     \U here                 send coordinates
     \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
-    ELSE  [: $, msg-coord ;] send-avalanche .chat  THEN ;
+    ELSE
+	[: $, msg-coord ;] ['] send-avalanche [group] 0= IF 2drop THEN
+	.chat
+    THEN ;
 
 : help ( addr u -- )
     \U help                 show help
@@ -589,9 +594,12 @@ also net2o-base scope: /chat
     \G n2o: Execute normal n2o command
 }scope
 
+: ?slash ( addr u -- addr u flag )
+    over c@ dup '/' = swap '\' = or ;
+
 : do-chat-cmd? ( addr u -- t / addr u f )
-    over c@ dup '/' = swap '\' = or dup 0= ?EXIT  drop
-    word-args  1 /string bl $split 2swap
+    ?slash dup 0= ?EXIT  drop
+    1 /string bl $split 2swap
     2dup ['] /chat >body find-name-in
     ?dup-IF  nip nip name>int execute true
     ELSE  drop 1- -rot + over - false
@@ -747,9 +755,7 @@ previous
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF
-		msg-group$ $@ msg-groups #@ 0> IF
-		    @ >o msg-context @ .avalanche-text o>
-		ELSE  drop  nip xclear  THEN
+		['] avalanche-text [group] 0= IF  nip xclear  THEN
 	    THEN
     REPEAT  2drop leave-chats ;
 
