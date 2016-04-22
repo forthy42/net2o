@@ -589,11 +589,12 @@ also net2o-base scope: /chat
     \G n2o: Execute normal n2o command
 }scope
 
-: do-chat-cmds ( addr u -- )
+: do-chat-cmd? ( addr u -- t / addr u f )
+    over c@ dup '/' = swap '\' = or dup 0= ?EXIT  drop
     word-args  1 /string bl $split 2swap
     2dup ['] /chat >body find-name-in
-    ?dup-IF  nip nip name>int execute
-    ELSE  <err> ." unknown command: " forth:type <default> forth:cr 2drop
+    ?dup-IF  nip nip name>int execute true
+    ELSE  drop 1- -rot + over - false
     THEN ;
 
 : avalanche-text ( addr u -- )
@@ -745,7 +746,7 @@ previous
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
-	    over c@ dup '/' = swap '\' = or IF  do-chat-cmds  ELSE
+	    do-chat-cmd? 0= IF
 		msg-group$ $@ msg-groups #@ 0> IF
 		    @ >o msg-context @ .avalanche-text o>
 		ELSE  drop  nip xclear  THEN
