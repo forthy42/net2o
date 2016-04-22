@@ -55,7 +55,7 @@ Sema msglog-sema
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
-    gen-cmd$ 2drop tmp$ @ enc-file ! tmp$ off
+    gen-cmd$ 2drop 0 tmp$ !@ enc-file !
     r> free throw  dispose o>
     >chatid [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
@@ -105,6 +105,11 @@ Sema queue-sema
 
 : peer@ ( -- addr u )
     [: 0 peers[] $[]@ ;] queue-sema c-section ;
+: peer> ( -- addr / 0 )
+    [: peers[] $[]# dup IF
+         drop 0 peers[] $[] @
+         peers[] 0 cell $del
+      THEN ;] queue-sema c-section ;
 : peer+ ( addr u -- )
     [: peers[] $+[]! ;] queue-sema c-section ;
 : peer- ( -- )
@@ -163,17 +168,18 @@ Defer silent-join
     reconnect( ." chat req done, start silent join" cr )
     connect-rest  +flow-control +resend chat-silent-join ;
 
+User peer-buf
+
 : reconnect-chat ( -- )
-    peer@ 2dup d0<> IF
-	last# -rot save-mem over >r peer-
+    peer> ?dup-IF
+	peer-buf $off peer-buf !  last# peer-buf $@
 	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
 	reconnect( ." in group: " last# dup hex. $. cr )
 	0 >o $A $A [: reconnect( ." prepare reconnection" cr )
 	  ?msg-context >o silent-last# ! o>
 	  ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
 	addr-connect o>
-	r> free throw
-    ELSE  2drop  THEN ;
+    THEN ;
 
 : do-avalanche ( -- )
     msg@ parent @ .avalanche-msg msg- ;
