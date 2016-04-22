@@ -143,8 +143,18 @@ Defer .addr$
     sockaddr1 sin6_addr dup $C fake-ip4 over
     str= IF  12 + 4  ELSE  $10   THEN ;
 
-128 101 machine "mips" str= select Constant ENETUNREACH
 29  Constant ESPIPE
+
+: unavail? ( n -- flag )
+    0< IF
+	errno >r
+	r@ EPFNOSUPPORT =
+	r@ EAFNOSUPPORT = or
+	r@ EADDRNOTAVAIL = or
+	r> ENETUNREACH = or
+    ELSE
+	false
+    THEN ;
 
 [IFDEF] no-hybrid
     : sock4[ ( -- )  query-sock ?EXIT
@@ -162,9 +172,9 @@ Defer .addr$
 	[:
 	  sockaddr_in4 alen !  53 sockaddr port be-w!
 	  sockaddr sin_addr be-l! query-sock sockaddr sock-rest4 connect
-	  dup 0< errno ENETUNREACH = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  query-sock sockaddr1 alen getsockname
-	  dup 0< errno ENETUNREACH = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  sockaddr1 family w@ AF_INET6 =
 	  IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
 	;] 'sock4 ;
@@ -172,9 +182,9 @@ Defer .addr$
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
 	[: sockaddr_in6 alen !  53 sockaddr port be-w!
 	  sockaddr ipv4! query-sock sockaddr sock-rest connect
-	  dup 0< errno ENETUNREACH = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  query-sock sockaddr1 alen getsockname
-	  dup 0< errno ENETUNREACH = and  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  sockaddr1 family w@ AF_INET6 =
 	  IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
 	;] 'sock ;
@@ -197,9 +207,9 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
     [:  sockaddr_in6 alen !  53 sockaddr port be-w!
 	sockaddr sin6_addr ip6!
 	query-sock sockaddr sock-rest connect
-	dup 0< errno ENETUNREACH = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
+	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
-	dup 0< errno ENETUNREACH = and  IF  drop ip6::0 $10  EXIT  THEN  ?ior
+	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	?fake-ip4
     ;] 'sock ;
 
