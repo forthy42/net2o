@@ -154,10 +154,10 @@ Defer .addr$
 : unavail? ( n -- flag )
     0< IF
 	errno >r
-	r@ EPFNOSUPPORT =
-	r@ EAFNOSUPPORT = or
-	r@ EADDRNOTAVAIL = or
-	r> ENETUNREACH = or
+	[IFDEF] EPFNOSUPPORT  r@ EPFNOSUPPORT  = [ELSE] 0 [THEN]
+	[IFDEF] EAFNOSUPPORT  r@ EAFNOSUPPORT  = or [THEN]
+	[IFDEF] EADDRNOTAVAIL r@ EADDRNOTAVAIL = or [THEN]
+	[IFDEF] ENETUNREACH   r> ENETUNREACH   = or [ELSE] rdrop [THEN]
     ELSE
 	false
     THEN ;
