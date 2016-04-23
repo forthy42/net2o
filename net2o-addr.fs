@@ -91,7 +91,8 @@ previous
     host-ipv6 ip6? IF  host-ipv6 $10 .ip6a 2drop
 	host-portv4 w@ host-portv6 w@ <> IF  host-portv6 w@ ." :" 0 .r space THEN
     THEN
-    host-ipv4 be-ul@ IF host-ipv4 4 .ip4a 2drop host-portv4 w@ ." :" 0 .r  THEN
+    host-ipv4 be-ul@ dup IF host-ipv4 4 .ip4a 2drop  THEN
+    host-portv4 w@ host-portv6 w@ = or  IF host-portv4 w@ ." :" 0 .r  THEN
     host-route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
     host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
     o> ; 
