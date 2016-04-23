@@ -123,8 +123,7 @@ previous
 
 : +my-addrs ( port o:addr -- )
     +my-id
-    host-ipv4 be-ul@ IF  dup host-portv4 w!  THEN
-    host-ipv6 ip6? IF  dup host-portv6 w!  THEN  drop
+    dup host-portv4 w!  host-portv6 w!
     o my-addr[] $[]# my-addr[] $[] ! ;
 
 : !my-addrs ( -- ) n2o:new-addr >o
