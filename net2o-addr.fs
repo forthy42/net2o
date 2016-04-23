@@ -106,10 +106,10 @@ previous
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
     host-route $@ !temp-addr ;
-    
+
 : addr>4sock ( -- )
     host-portv4 w@ sockaddr1 port be-w!
-    host-ipv4 be-ul@ sockaddr1 noipv6( sin_addr be-l! )else( ipv4! )
+    host-ipv4 be-ul@ sockaddr1 ipv4!
     host-route $@ !temp-addr ;
 
 :noname ( o xt -- ) { xt } >o

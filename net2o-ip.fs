@@ -109,10 +109,11 @@ Defer .addr$
     )else( 2drop ) ;
 
 : ipv4! ( ipv4 sockaddr -- )
+    noipv6( sin_addr be-l! )else(
     >r    r@ sin6_addr 12 + be-l!
     $FFFF r@ sin6_addr 8 + be-l!
     0     r@ sin6_addr 4 + l!
-    0     r> sin6_addr l! ;
+    0     r> sin6_addr l! ) ;
 
 : ipv4!nat ( ipv4 sockaddr -- )
     \ nat64 version...
@@ -132,7 +133,7 @@ Defer .addr$
     r> sockaddr_in4 ;
 
 : my-port ( -- port )
-    sockaddr_in6 alen !
+    noipv6( sockaddr_in4 )else( sockaddr_in6 ) alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
@@ -182,16 +183,15 @@ Defer .addr$
 	;] 'sock4 ;
 [ELSE]
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-	[: noipv6( sockaddr_in4 alen !  53 sockaddr port be-w!
-	    sockaddr sin_addr be-l!
-	    )else( sockaddr_in6 alen !  53 sockaddr port be-w!
-	    sockaddr ipv4! ) query-sock
+	[:  noipv6( sockaddr_in4 )else( sockaddr_in6 ) alen !
+	    53 sockaddr port be-w!
+	    sockaddr ipv4! query-sock
 	    sockaddr noipv6( sock-rest4 )else( sock-rest ) connect
-	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
-	  query-sock sockaddr1 alen getsockname
-	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
-	  sockaddr1 family w@ AF_INET6 =
-	  IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
+	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	    query-sock sockaddr1 alen getsockname
+	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
+	    sockaddr1 family w@ AF_INET6 =
+	    IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
 	;] 'sock ;
 [THEN]
 
@@ -222,8 +222,22 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
     2drop r> $10 + be-ul@ check-ip4 ;
 
-: try-ip ( addr u -- flag )
-    [: query-sock -rot connect 0= ;] 'sock ;
+[IFDEF] no-hybrid
+    : try-ip ( addr u -- flag )
+	noipv6( [: query-sock -rot connect 0= ;] 'sock4 )else(
+	over sin6_addr $C fake-ip4 over str= IF
+	    drop >r
+	    AF_INET r@ family w!
+	    r@ sin6_addr $C + l@ r@ sin_addr l!
+	    r> sockaddr_in4
+	    [: query-sock -rot connect 0= ;] 'sock4
+	ELSE
+	    [: query-sock -rot connect 0= ;] 'sock
+	THEN ) ;
+[ELSE]
+    : try-ip ( addr u -- flag )
+	[: query-sock -rot connect 0= ;] 'sock ;
+[THEN]
 
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
