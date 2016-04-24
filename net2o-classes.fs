@@ -218,8 +218,8 @@ cmd-class class
     wfield: host-portv4
     wfield: host-portv6
     field: host-anchor \ net2o anchor (is a pubkey)
-    field: host-route \ net2o route
-    field: host-key
+    field: host-route  \ net2o route
+    field: host-key    \ psk for connection setup
     field: host-revoke
 end-class address-class
 

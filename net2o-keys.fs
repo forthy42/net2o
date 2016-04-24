@@ -100,7 +100,6 @@ cmd-class class
     field: ke-nick#    \ to avoid colissions, add a number here
     field: ke-pets     \ key petnames
     field: ke-pets#    \ to avoid colissions, add a number here
-    field: ke-psk      \ preshared key for stateless communication
     field: ke-prof     \ profile object
     field: ke-selfsig
     field: ke-sigs
@@ -117,7 +116,6 @@ end-class key-entry
     ke-sk sec-off
     ke-pk $off
     ke-nick $off
-    ke-psk sec-off
     ke-selfsig $off
     ke-sigs $[]off
     ke-pets $[]off
@@ -481,8 +479,8 @@ $11 net2o: privkey ( $:string -- )
     \g key profile (hash of a resource)
 +net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n ke-mask ! ;
     \g key access right mask
-+net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> ke-psk sec! ;
-    \g preshared key, used for DHT encryption
++net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> 2drop ;
+    \g deprecated, preshared key is in per-address record
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
@@ -578,7 +576,6 @@ also net2o-base
 : pack-core ( o:key -- ) \ core without key
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
-    ke-psk sec@ dup IF  sec$, keypsk  ELSE  2drop  THEN
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
 
 : pack-corekey ( o:key -- )
@@ -752,7 +749,6 @@ $40 buffer: nick-buf
 : >raw-key ( o -- )
     dup 0= !!no-nick!! >o
     ke-pk $@ pkc pkrk# smove
-    ke-psk sec@ my-0key sec!
     ke-sk sec@ skc swap key| move
     >sksig o> ;
 
@@ -766,25 +762,23 @@ $40 buffer: nick-buf
 
 : dest-key ( addr u -- ) dup 0= IF  2drop  EXIT  THEN
     nick-key >o o 0= !!unknown-key!!
-    ke-psk sec@ state# umin
     ke-pk $@ o>
-    pubkey $!  dest-0key sec! ;
+    pubkey $! ;
 
 : dest-pk ( addr u -- ) key2| 2dup key| key-table #@ 0= IF
 	drop pubkey $!  perm%unknown perm-mask !
     ELSE  cell+ >o
 	ke-mask @
-	ke-psk sec@ state# umin
 	ke-pk $@ o>
-	pubkey $!  dest-0key sec!  perm-mask !  2drop  THEN ;
+	pubkey $!  perm-mask !  2drop  THEN ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
     import#self import-type !
     s" #revoked" dup >r ke-nick $+!
-    ke-nick $@ r> - ke-prof $@ ke-psk sec@ ke-sigs ke-type @
+    ke-nick $@ r> - ke-prof $@ ke-sigs ke-type @
     rev-addr pkrk# key?new >o
-    ke-type ! [: ke-sigs $+[]! ;] $[]map ke-psk sec! ke-prof $! ke-nick $!
+    ke-type ! [: ke-sigs $+[]! ;] $[]map ke-prof $! ke-nick $!
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o>

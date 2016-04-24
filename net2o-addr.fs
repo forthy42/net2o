@@ -77,7 +77,7 @@ also net2o-base
 	host-portv6 w@ ?dup-IF  ulit, addr-portv6  THEN
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
-    host-key sec@ dup IF  $, addr-key  ELSE  2drop  THEN
+    host-key sec@ dup IF  sec$, addr-key  ELSE  2drop  THEN
     host-revoke $@ dup IF  $, addr-revoke  ELSE  2drop  THEN o> ; 
 previous
 : o>addr ( o -- addr u )
@@ -94,7 +94,7 @@ previous
     host-ipv4 be-ul@ dup IF host-ipv4 4 .ip4a 2drop  THEN
     host-portv4 w@ host-portv6 w@ = or  IF host-portv4 w@ ." :" 0 .r  THEN
     host-route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
-    host-key sec@ dup IF  '$' emit 85type  ELSE  2drop  THEN
+    host-key sec@ dup IF  '$' emit .black85  ELSE  2drop  THEN
     o> ; 
 
 : .nat-addrs ( -- )
