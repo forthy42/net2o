@@ -86,6 +86,9 @@ init-keybuf
     state# rng$ mykey swap move
     genkey( ." mykey: " mykey state# xtype cr ) ;
 
+: init-my0key ( -- )
+    0key( state# 2/ rng$ my-0key sec! ) ;
+
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
 

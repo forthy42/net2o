@@ -1621,7 +1621,7 @@ Variable beacons \ destinations to send beacons to
 
 Defer init-rest
 
-:noname ( port -- )  init-mykey init-mykey \ two keys
+:noname ( port -- )  init-mykey init-mykey init-my0key \ two keys
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ; is init-rest

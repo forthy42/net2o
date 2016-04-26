@@ -479,8 +479,9 @@ $11 net2o: privkey ( $:string -- )
     \g key profile (hash of a resource)
 +net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n ke-mask ! ;
     \g key access right mask
-+net2o: keypsk ( $:string -- )     !!signed?   8 !!>order? $> 2drop ;
-    \g deprecated, preshared key is in per-address record
++net2o: keygroup ( x -- )        !!signed?   $40 !!>order? 64drop
+    ( 64>n dup key-groups# u> !!wronggroup!! cells key-groups + @ ke-mask ! ) ;
+    \g access group, stub
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?

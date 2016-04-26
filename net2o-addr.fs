@@ -103,12 +103,17 @@ previous
 :noname ( addr u -- )
     new-addr >o o .addr n2o:dispose-addr o> ; is .addr$
 
+User dest-0key> \ pointer to dest-0key
+User dest-0key< \ pointer to obtained dest-0key
+
 : addr>6sock ( -- )
+    host-key sec@ dest-0key< sec!
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
     host-route $@ !temp-addr ;
 
 : addr>4sock ( -- )
+    host-key sec@ dest-0key< sec!
     host-portv4 w@ sockaddr1 port be-w!
     host-ipv4 be-ul@ sockaddr1 ipv4!
     host-route $@ !temp-addr ;
@@ -120,7 +125,8 @@ previous
 
 : +my-id ( -- )
     myprio @ host-pri# !
-    myhost $@ host-id $! ;
+    myhost $@ host-id $!
+    my-0key @ IF  my-0key sec@ host-key sec!  THEN ;
 
 : +my-addrs ( port o:addr -- )
     +my-id

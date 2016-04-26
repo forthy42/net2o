@@ -78,6 +78,7 @@ debug: reconnect( \ reconnect
 debug: tweak( \ tweaked key
 debug: ivs( \ IVS regen
 debug: rtd( \ round trip delay related stuff
+debug: 0key( \ generate 0key, default off for now
 
 -db profile( \ )
 
