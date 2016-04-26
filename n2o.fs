@@ -272,6 +272,7 @@ synonym searchkey keysearch
 : rootserver ( -- )
     \U rootserver
     perm%default to perm%unknown
+    ['] no0key( >body on \ rootserver has no 0key
     get-me init-server addme-owndht server-loop ;
 
 \ dht commands
