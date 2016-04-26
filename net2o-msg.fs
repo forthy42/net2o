@@ -575,8 +575,15 @@ also net2o-base scope: /chat
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
-: myaddrs ( addr u -- )  2drop .my-addrs ;
-: !myaddrs ( addr u -- ) 2drop !my-addr ;
+: myaddrs ( addr u -- )
+    \U myaddrs              list my addresses
+    \G myaddrs: list my own local addresses (debugging)
+    2drop .my-addrs ;
+: !myaddrs ( addr u -- )
+    \U !myaddrs             re-obtain my addresses
+    \G !myaddrs: if automatic detection of address changes fail,
+    \G !myaddrs: you can use this command to re-obtain your local addresses
+    2drop !my-addr ;
 
 : notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
