@@ -275,6 +275,7 @@ object class
 	sockaddr_in uvar sockaddr2
     [THEN]
     file-stat       uvar statbuf
+    aligned
     cell            uvar ind-addr
     cell            uvar task#
     $10             uvar cmdtmp
@@ -283,6 +284,7 @@ object class
     timestats       uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     maxdata         uvar aligned$
+    aligned
     cell            uvar code0-buf^
     cell            uvar code-buf^
     cell            uvar code-buf$^
