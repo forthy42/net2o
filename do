@@ -86,7 +86,7 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | cut -f1-2 -
 	echo "A Forth-capable swig is found, everything fine"
     else
 	echo "Build a Forth-capable swig"
-	git-get https://github.com/GeraldWodni swig
+	git-get https://github.com/forthy42 swig
 	build swig
     fi
     build $GFORTH
