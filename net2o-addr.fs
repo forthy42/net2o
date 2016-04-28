@@ -119,8 +119,8 @@ User dest-0key< \ pointer to obtained dest-0key
     host-route $@ !temp-addr ;
 
 :noname ( o xt -- ) { xt } >o
-    noipv4( )else( host-ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
-    noipv6( )else( host-ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
+    ipv4( host-ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
+    ipv6( host-ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
     o> ; is addr>sock
 
 : +my-id ( -- )
@@ -137,7 +137,7 @@ User dest-0key< \ pointer to obtained dest-0key
     global-ip6 tuck host-ipv6 $10 smove
     global-ip4 IF  be-ul@ host-ipv4 be-l!  ELSE  drop  THEN
     my-port# +my-addrs o>
-    0= IF  noipv6( )else( local-ip6  IF
+    0= IF  ipv6( local-ip6  IF
 	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
 	ELSE  drop  THEN )
     THEN ;

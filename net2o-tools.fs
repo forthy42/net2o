@@ -107,8 +107,10 @@ word-args
 
 \ set debugging
 
-: +? ( addr u -- flag )  0= IF  drop false  EXIT  THEN
-    c@ '+' = ;
+: +-?( ( addr u -- flag )
+    2dup +-? IF 1 /string debug-eval $! '(' debug-eval c$+!
+	debug-eval $@ find-name 0<>
+    ELSE  2drop false  THEN ;
 
 : set-debug ( addr u -- )
     debug-eval $!
@@ -117,7 +119,7 @@ word-args
     debug-eval $@ evaluate ;
 
 : ++debug ( -- )
-    BEGIN  ?peekarg  WHILE  +?  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
+    BEGIN  ?peekarg  WHILE  +-?(  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
 
 \ logic memory modifiers
 

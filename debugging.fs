@@ -58,8 +58,8 @@ debug: file( \ file read/write debugging
 debug: bg( \ started in background mode
 debug: nat( \ NAT traversal stuff
 debug: route( \ do routing
-debug: noipv6( \ use only ipv4 for routing
-debug: noipv4( \ use only ipv6 for routing
+debug: ipv6( \ use ipv6
+debug: ipv4( \ use ipv4
 debug: request( \ track requests
 debug: beacon( \ debug sending beacons
 debug: replace-beacon( \ reply to every beacon
@@ -81,6 +81,8 @@ debug: rtd( \ round trip delay related stuff
 debug: no0key( \ generate 0key, default off for now
 
 -db profile( \ )
++db ipv6( \ ipv6 should be on by default )
++db ipv4( \ ipv4 should be on by default )
 
 0 [IF]
 false warnings !@

@@ -109,11 +109,12 @@ Defer .addr$
     )else( 2drop ) ;
 
 : ipv4! ( ipv4 sockaddr -- )
-    noipv6( sin_addr be-l! )else(
+    ipv6(
     >r    r@ sin6_addr 12 + be-l!
     $FFFF r@ sin6_addr 8 + be-l!
     0     r@ sin6_addr 4 + l!
-    0     r> sin6_addr l! ) ;
+    0     r> sin6_addr l!
+    )else( sin_addr be-l! ) ;
 
 : ipv4!nat ( ipv4 sockaddr -- )
     \ nat64 version...
@@ -133,13 +134,13 @@ Defer .addr$
     r> sockaddr_in4 ;
 
 : my-port ( -- port )
-    noipv6( sockaddr_in4 )else( sockaddr_in6 ) alen !
+    ipv6( )else( sockaddr_in4 )else( sockaddr_in6 ) alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
 : sock[ ( -- )  query-sock ?EXIT
-    noipv6( new-udp-socket )else(
-    noipv4( new-udp-socket6 )else( new-udp-socket46 ) ) to query-sock ;
+    ipv4( ipv6( new-udp-socket46 )else( new-udp-socket ) )else( new-udp-socket6 )
+    to query-sock ;
 : ]sock ( -- )  query-sock 0= ?EXIT
     query-sock closesocket 0 to query-sock ?ior ;
 
@@ -170,7 +171,7 @@ Defer .addr$
 
     : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
 
-    : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
+    : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
 	[:
 	  sockaddr_in4 alen !  53 sockaddr port be-w!
 	    sockaddr sin_addr be-l! query-sock
@@ -180,19 +181,19 @@ Defer .addr$
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  sockaddr1 family w@ AF_INET6 =
 	  IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
-	;] 'sock4 ;
+	;] 'sock4 )else( 0 ) ;
 [ELSE]
-    : check-ip4 ( ip4addr -- my-ip4addr 4 ) noipv4( 0 EXIT )
-	[:  noipv6( sockaddr_in4 )else( sockaddr_in6 ) alen !
+    : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
+	[:  ipv6( sockaddr_in6 )else( sockaddr_in4 ) alen !
 	    53 sockaddr port be-w!
 	    sockaddr ipv4! query-sock
-	    sockaddr noipv6( sock-rest4 )else( sock-rest ) connect
+	    sockaddr ipv6( sock-rest )else( sock-rest4 ) connect
 	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	    query-sock sockaddr1 alen getsockname
 	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	    sockaddr1 family w@ AF_INET6 =
 	    IF  ?fake-ip4  ELSE  sockaddr1 sin_addr 4  THEN
-	;] 'sock ;
+	;] 'sock )else( 0 ) ;
 [THEN]
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
@@ -207,7 +208,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 : ip6! ( addr1 addr2 -- ) $10 move ;
 : ip6? ( addr -- flag )  $10 ip6::0 over str= 0= ;
 
-: check-ip6 ( dummy -- ip6addr u ) noipv6( 0 EXIT )
+: check-ip6 ( dummy -- ip6addr u ) ipv6(
     \G return IPv6 address - if length is 0, not reachable with IPv6
     [:  sockaddr_in6 alen !  53 sockaddr port be-w!
 	sockaddr sin6_addr ip6!
@@ -216,15 +217,15 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 	query-sock sockaddr1 alen getsockname
 	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	?fake-ip4
-    ;] 'sock ;
+    ;] 'sock )else( 0 ) ;
 
-: check-ip64 ( dummy -- ipaddr u ) noipv4( check-ip6 EXIT )
+: check-ip64 ( dummy -- ipaddr u ) ipv4(
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
-    2drop r> $10 + be-ul@ check-ip4 ;
+    2drop r> $10 + be-ul@ check-ip4 )else( check-ip6 ) ;
 
 [IFDEF] no-hybrid
     : try-ip ( addr u -- flag )
-	noipv6( [: query-sock -rot connect 0= ;] 'sock4 )else(
+	ipv6(
 	over sin6_addr $C fake-ip4 over str= IF
 	    drop >r
 	    AF_INET r@ family w!
@@ -233,7 +234,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 	    [: query-sock -rot connect 0= ;] 'sock4
 	ELSE
 	    [: query-sock -rot connect 0= ;] 'sock
-	THEN ) ;
+	THEN )else( [: query-sock -rot connect 0= ;] 'sock4 ) ;
 [ELSE]
     : try-ip ( addr u -- flag )
 	[: query-sock -rot connect 0= ;] 'sock ;
@@ -289,7 +290,7 @@ Defer !my-addr
     temp-addr dup $10 erase  $10 smove ;
 
 : check-addr1 ( -- addr u flag )
-    sockaddr1 noipv6( sock-rest4 )else( sock-rest ) 2dup try-ip
+    sockaddr1 ipv6( sock-rest )else( sock-rest4 ) 2dup try-ip
     ( nat( ." check: " >r 2dup .address
     r> dup IF ."  ok"  ELSE  ."  ko"  THEN  cr ) ;
 
@@ -314,8 +315,8 @@ Defer !my-addr
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- ) dup >r
-    noipv6( create-udp-server )else(
-    noipv4( create-udp-server6 )else( create-udp-server46 ) )
+    ipv6( ipv4( create-udp-server46 )else( create-udp-server6 )
+    )else( create-udp-server )
     [IFDEF] no-hybrid 0 [THEN] to net2o-sock
     r> ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
