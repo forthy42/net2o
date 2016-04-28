@@ -92,6 +92,9 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | cut -f1-2 -
     build $GFORTH
 )
 
+# clean up set to root stuff
+sudo chown -R "$(whoami)" ~/.gforth .
+
 # make sure libraries are found
 test "$(uname -o)" = "Cygwin" || sudo /sbin/ldconfig
 
@@ -103,6 +106,7 @@ gforth-fast n2o.fs -e bye 1>/dev/null 2>/dev/null || (
     build-clean gforth
 )
 
+./configure # reconfigure, as we now have a working Gforth
 make libcc
 sudo make install
 make TAGS
