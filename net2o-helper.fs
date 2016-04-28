@@ -204,10 +204,10 @@ User host$ \ check for this hostname
     connect( ." check addr: " dup .addr cr )  false swap
     [: check-addr1 0= IF  2drop EXIT  THEN
       insert-address temp-addr ins-dest
-      dest-0key< sec@ dup IF  dest-0key> @ sec!  ELSE  2drop  THEN
       connect( ." insert host: " temp-addr .addr-path cr )
       ret-addr $10 0 skip nip 0= IF
 	  temp-addr ret-addr $10 move
+	  dest-0key< sec@ dup IF  dest-0key> @ sec!  ELSE  2drop  THEN
       THEN  drop true ;] addr>sock ; is insert-addr
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !

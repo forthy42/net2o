@@ -57,6 +57,12 @@ RedHat/Centos; the libtool-bin is for Debian). Or get Fossil here:
 Get the [do](https://fossil.net2o.de/net2o/doc/trunk/do) file
 (latest revision), put it into your net2o folder, and let it run.
 
+    mkdir net2o
+    cd net2o
+    wget https://fossil.net2o.de/net2o/doc/trunk/do
+    chmod +x do
+    ./do
+
 This script will ask for your root password to install Gforth and the
 a few libraries.
 

@@ -1360,7 +1360,7 @@ User remote?
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
-	invalid( ." invalid packet to 0" cr ) drop EXIT  THEN
+	invalid( ." invalid packet to 0" cr ) EXIT  THEN
     validated off     \ we have no validated encryption
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
