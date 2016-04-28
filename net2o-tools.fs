@@ -107,16 +107,20 @@ word-args
 
 \ set debugging
 
+debug: dummy(
+
 : +-?( ( addr u -- flag )
-    2dup +-? IF 1 /string debug-eval $! '(' debug-eval c$+!
-	debug-eval $@ find-name 0<>
+    2dup +-? IF [: 1 /string type '(' emit ;] $tmp find-name dup
+	IF  >does-code ['] dummy( >does-code =  THEN
     ELSE  2drop false  THEN ;
 
-: set-debug ( addr u -- )
-    debug-eval $!
-    s" db " debug-eval 1 $ins
-    s" (" debug-eval $+!
-    debug-eval $@ evaluate ;
+[IFUNDEF] set-debug
+    : set-debug ( addr u -- )
+	debug-eval $!
+	s" db " debug-eval 1 $ins
+	s" (" debug-eval $+!
+	debug-eval $@ evaluate ;
+[THEN]
 
 : ++debug ( -- )
     BEGIN  ?peekarg  WHILE  +-?(  WHILE  ?nextarg drop set-debug  REPEAT  THEN ;
