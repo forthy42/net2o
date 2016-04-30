@@ -200,7 +200,7 @@ User host$ \ check for this hostname
 : host= ( o -- flag )
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
-:noname ( o -- )
+:noname ( o -- flag )
     connect( ." check addr: " dup .addr cr )  false swap
     [: check-addr1 0= IF  2drop EXIT  THEN
       insert-address temp-addr ins-dest
@@ -259,24 +259,25 @@ User host$ \ check for this hostname
 
 \ search keys
 
-User search-key$
+User search-key[]
+User pings[]
 
 : search-keys ( -- )
     dht-connect
     net2o-code  expect-reply
-    search-key$ [: $, dht-id dht-owner? endwith ;] $[]map
+    search-key[] [: $, dht-id dht-owner? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
 
 : search-addrs ( -- )
     dht-connect
     net2o-code  expect-reply
-    search-key$ [: $, dht-id dht-host? endwith ;] $[]map
+    search-key[] [: $, dht-id dht-host? endwith ;] $[]map
     cookie+request end-code| disconnect-me ;
 
 : insert-keys ( -- )
     defaultkey @ >storekey !
     import#dht import-type !
-    search-key$ [: >d#id >o
+    search-key[] [: >d#id >o
       0 dht-owner $[]@ nip sigsize# u> IF
 	  64#-1 key-read-offset 64!
 	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
@@ -286,9 +287,22 @@ User search-key$
       THEN
       o> ;] $[]map ;
 
+: send-ping ( addr u -- ) sigsize# - new-addr dup >r
+    [: ret-addr $10 erase
+	check-addr1 IF
+	    2dup .address forth:cr
+	    insert-address ret-addr ins-dest
+	    net2o-code0 net2o-version $, get-version
+	    end-code
+	ELSE  2drop  THEN ;] addr>sock
+    r> .n2o:dispose-addr ;
+
+: receive-pings ( -- )
+    requests->0 ;
+
 :noname ( pk u -- )
     dup 4 < IF  2drop  EXIT  THEN
-    search-key$ $off search-key$ $+[]!
+    search-key[] $off search-key[] $+[]!
     search-keys insert-keys save-pubkeys ; is dht-nick?
 
 \ connect, disconnect debug

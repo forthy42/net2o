@@ -43,14 +43,14 @@ $20 value hash-size#
     key-readin $@ do-key ;
 
 : keys>search ( -- )
-    search-key$ $[]off [: dup 5 mod IF
+    search-key[] $[]off [: dup 5 mod IF
 	    ." keys in multiples of 5 base85 characters, please, ignoring '"
 	    type ." '" cr
-	ELSE  base85>$ search-key$ $+[]!  THEN ;] arg-loop ;
+	ELSE  base85>$ search-key[] $+[]!  THEN ;] arg-loop ;
 
 : nicks>search ( -- )
-    search-key$ $[]off
-    [: nick>pk dup 0= !!no-nick!! search-key$ $+[]! ;] @arg-loop ;
+    search-key[] $[]off
+    [: nick>pk dup 0= !!no-nick!! search-key[] $+[]! ;] @arg-loop ;
 
 : handle-chat ( -- )
     chat-connects ?wait-chat do-chat ;
@@ -169,7 +169,7 @@ scope{ n2o
 	ELSE  2drop  THEN  THEN ;
 
 : pet ( -- )
-    \U pet nick1/pet1 petnew1 .. nickn/petn petnewn
+    \U pet nick1|pet1 petnew1 .. nickn|petn petnewn
     \G pet: Add a new petname to existing <nick> or <pet>
     get-me
     [: nick-key dup 0= IF  drop EXIT  THEN
@@ -286,8 +286,16 @@ synonym searchkey keysearch
     \U lookup
     \G lookup: query DHT for addresses
     get-me init-client nicks>search search-addrs
-    search-key$ [: 2dup .simple-id ." :" cr
+    search-key[] [: 2dup .simple-id ." :" cr
       >d#id >o dht-host [: .host cr ;] $[]map o> ;] $[]map ;
+
+: ping ( -- )
+    \U ping
+    \G ping: query DHT and send a ping to the observed addresses
+    \G ping: is not ready yet
+    get-me init-client nicks>search search-addrs pings[] $[]off
+    search-key[] [: >d#id >o dht-host [: pings[] $+[]! ;] $[]map o> ;] $[]map
+    pings[] [: send-ping ;] $[]map  receive-pings ;
 
 \ chat mode
 
