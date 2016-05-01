@@ -7,7 +7,10 @@ require test-keys.fs \ we want the test keys - never use this in production!
 %droprate
 \ bg( )else( debug-task )
 
-?nextarg [IF] s>number drop to net2o-port [THEN]
++db no0key( \ )
+perm%myself dup to perm%unknown to perm%default
+
+cmd-args ?nextarg [IF] s>number drop to net2o-port [THEN]
 
 i'm test
 

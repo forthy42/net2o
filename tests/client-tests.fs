@@ -1,6 +1,6 @@
 \ Test lib clients
 
-require ./net2o.fs
+require ../net2o.fs
 
 UValue test#  0 to test#
 1 Value total-tests
@@ -150,18 +150,21 @@ Variable connect-nick  "test" connect-nick $!
     init-cache'
     $a $e connect-nick $@ nick>pk ins-ip pk:connect c:test-rest ;
 
+Variable reqdone#
+event: ->reqdone -1 reqdone# +! ;
+
 : c:test& ( n -- ) \ in background
     up@ 2 stacksize4 NewTask4 pass >r
     alloc-io ['] c:test catch ?dup-IF
 	elit, ->throw drop
-    ELSE  elit, connection elit, ->request  THEN  r> event> ;
+    ELSE  drop ->reqdone  THEN  r> event> ;
 
 #100 Value req-ms#
 
 : c:tests ( n -- )  dup 0< IF  abs to test#  1  THEN
-    dup to total-tests  1 over lshift 1- reqmask !
+    dup to total-tests  dup reqdone# !
     0 ?DO  I c:test& req-ms# ms test# 1+ to test#  LOOP
-    requests->0 ;
+    BEGIN  stop reqdone# @ 0= UNTIL ;
 
 \ lookup for other users
 

@@ -15,7 +15,7 @@ init-client
 "test" connect-nick $!
 
 !time
-
+cmd-args
 ?nextarg [IF] net2o-host $! [THEN]
 ?nextarg [IF] s>number drop to net2o-port [THEN]
 ?nextarg [IF] s>number drop [ELSE] 1 [THEN] c:tests
