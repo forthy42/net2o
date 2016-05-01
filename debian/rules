@@ -13,6 +13,8 @@ DT = $(CURDIR)/debian/net2o-tests
 
 override_dh_auto_test:
 override_dh_shlibdeps:
+override_dh_auto_build:
+	make libcc
 override_dh_auto_install:
 	rm -rf $(D) $(DL) $(DT)
 	dh_auto_install -- DESTDIR=$(DL)

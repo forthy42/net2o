@@ -110,13 +110,13 @@ install:	libcc-install
 	done
 
 libcc:	$(FORTHLIB)
-	$(MKDIR) -p $(LIBCCDEST)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
 		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous" $$i -e bye; \
 	done
 
 libcc-install:	libcc
+	$(MKDIR) -p $(LIBCCDEST)
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
 		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)libgf`basename $$i .fs`.la; \
 		done; fi
