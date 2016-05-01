@@ -532,8 +532,11 @@ comp: :, previous ;
 0 Value key-sfd \ secret keys
 0 Value key-pfd \ pubkeys
 
-: ?key-sfd ( -- fd ) key-sfd "~/.net2o/seckeys.k2o" ?fd dup to key-sfd ;
-: ?key-pfd ( -- fd ) key-pfd "~/.net2o/pubkeys.k2o" ?fd dup to key-pfd ;
+Variable pubkey-file "~/.net2o/pubkeys.k2o" pubkey-file $!
+Variable seckey-file "~/.net2o/seckeys.k2o" seckey-file $!
+
+: ?key-sfd ( -- fd ) key-sfd seckey-file $@ ?fd dup to key-sfd ;
+: ?key-pfd ( -- fd ) key-pfd pubkey-file $@ ?fd dup to key-pfd ;
 
 : key>sfile ( -- )
     keypack keypack-all# ?key-sfd append-file ke-offset 64! ;
@@ -626,7 +629,7 @@ Variable cp-tmp
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
     ?.net2o
-    "~/.net2o/pubkeys.k2o" [: to key-pfd
+    pubkey-file $@ [: to key-pfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0= IF  pack-pubkey
 	    flush( ." saving " .nick forth:cr )
@@ -637,7 +640,7 @@ Variable cp-tmp
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
     ?.net2o
-    "~/.net2o/seckeys.k2o" [: to key-sfd
+    seckey-file $@ [: to key-sfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey
 	    pw-level# >r  ke-pwlevel @ to pw-level#
@@ -936,7 +939,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     >raw-key ?rsk   r> op-vector ! ;
 
 : get-me ( -- )
-    "~/.net2o/seckeys.k2o" 2dup file-status nip
+    seckey-file $@ 2dup file-status nip
     0= IF  r/o open-file throw >r r@ file-size throw d0=
 	r> close-file throw  ELSE  true  THEN
     IF  [: ." Generate a new keypair:" cr
