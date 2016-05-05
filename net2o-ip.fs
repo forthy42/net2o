@@ -146,9 +146,9 @@ Defer .addr$
 
 : 'sock ( xt -- )  sock[ catch ]sock throw ;
 
+: fake-ip4? ( addr -- flag ) sin6_addr $C fake-ip4 over str= ;
 : ?fake-ip4 ( -- addr u )
-    sockaddr1 sin6_addr dup $C fake-ip4 over
-    str= IF  12 + 4  ELSE  $10   THEN ;
+    sockaddr1 sin6_addr dup $C fake-ip4 over str= IF  12 + 4  ELSE  $10   THEN ;
 
 29  Constant ESPIPE
 
@@ -172,10 +172,9 @@ Defer .addr$
     : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
 
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
-	[:
-	  sockaddr_in4 alen !  53 sockaddr port be-w!
-	    sockaddr sin_addr be-l! query-sock
-	    sockaddr sock-rest4 connect
+	[: sockaddr_in4 alen !  53 sockaddr port be-w!
+	  sockaddr sin_addr be-l! query-sock
+	  sockaddr sock-rest4 connect
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  query-sock sockaddr1 alen getsockname
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
@@ -223,26 +222,32 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
     >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
     2drop r> $10 + be-ul@ check-ip4 )else( check-ip6 ) ;
 
+: sock-connect? ( addr u -- flag ) query-sock -rot connect 0= ;
+
 [IFDEF] no-hybrid
+    : fake6>ip4 ( addr u -- addr u' )
+	drop >r
+	AF_INET r@ family w!
+	r@ sin6_addr $C + l@ r@ sin_addr l!
+	r> sockaddr_in4 ;
+
     : try-ip ( addr u -- flag )
 	ipv6(
-	over sin6_addr $C fake-ip4 over str= IF
-	    drop >r
-	    AF_INET r@ family w!
-	    r@ sin6_addr $C + l@ r@ sin_addr l!
-	    r> sockaddr_in4
-	    [: query-sock -rot connect 0= ;] 'sock4
+	over fake-ip4? IF
+	    fake6>ip4
+	    ['] sock-connect? 'sock4
 	ELSE
-	    [: query-sock -rot connect 0= ;] 'sock
-	THEN )else( [: query-sock -rot connect 0= ;] 'sock4 ) ;
+	    ['] sock-connect? 'sock
+	THEN )else( ['] sock-connect? 'sock4 ) ;
 [ELSE]
     : try-ip ( addr u -- flag )
-	[: query-sock -rot connect 0= ;] 'sock ;
+	['] sock-connect? 'sock ;
 [THEN]
 
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
-: local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6 over c@ $FD = and ;
+: local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6
+    IF  c@ $FD =  ELSE  drop false  THEN ;
 
 \ no-hybrid stuff
 
@@ -250,12 +255,9 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
     0 warnings !@
     : sendto { sock1 sock2 pack u1 flag addr u2 -- size }
 	addr family w@ AF_INET6 =
-	IF  addr sin6_addr $C fake-ip4 over str=
+	IF  addr fake-ip4?
 	    IF
-		AF_INET sockaddr2 family w!
-		addr port w@ sockaddr2 port w!
-		addr sin6_addr $C + l@ sockaddr2 sin_addr l!
-		sock2 pack u1 flag sockaddr2 sockaddr_in4 sendto
+		sock2 pack u1 flag addr u2 fake6>ip4 sendto
 	    ELSE
 		sock1 pack u1 flag addr u2 sendto
 	    THEN
@@ -290,9 +292,7 @@ Defer !my-addr
     temp-addr dup $10 erase  $10 smove ;
 
 : check-addr1 ( -- addr u flag )
-    sockaddr1 ipv6( sock-rest )else( sock-rest4 ) 2dup try-ip
-    ( nat( ." check: " >r 2dup .address
-    r> dup IF ."  ok"  ELSE  ."  ko"  THEN  cr ) ;
+    sockaddr1 ipv6( sock-rest )else( sock-rest4 ) 2dup try-ip ;
 
 : ping-addr1 ( -- )
     check-addr1 0= IF  2drop  EXIT  THEN
