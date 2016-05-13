@@ -68,21 +68,28 @@ Sema notify-sema
 	THEN ;
     : ?ni ( -- )
 	ni 0= IF  clazz .gforthintent to ni  THEN ;
-    : msg-builder ( -- ) ?nm ?ni
-	clazz newNotification.Builder to nb
-	notify-rgb notify-on notify-off nb .setLights to nb
-	notify-mode nb .setDefaults to nb
-	ni nb .setContentIntent to nb
-	net2o-icon# nb .setSmallIcon to nb
-	1 nb .setAutoCancel to nb ;
-    msg-builder
-    : build-notification ( -- )
-	1000 clazz .screen_on
-	1 pending-notifications +!
-	['] notify-title $tmp make-jstring nb .setContentTitle to nb
-	notify@ make-jstring nb .setContentText to nb
-	notify@ make-jstring nb .setTicker to nb
-	nb .build to nf ;
+    SDK_INT 11 >= [IF]
+	: msg-builder ( -- ) ?nm ?ni
+	    clazz newNotification.Builder to nb
+	    notify-rgb notify-on notify-off nb .setLights to nb
+	    notify-mode nb .setDefaults to nb
+	    ni nb .setContentIntent to nb
+	    net2o-icon# nb .setSmallIcon to nb
+	    1 nb .setAutoCancel to nb ;
+	msg-builder
+	: build-notification ( -- )
+	    1000 clazz .screen_on
+	    1 pending-notifications +!
+	    ['] notify-title $tmp make-jstring nb .setContentTitle to nb
+	    notify@ make-jstring nb .setContentText to nb
+	    notify@ make-jstring nb .setTicker to nb
+	    nb .build to nf ;
+    [ELSE]
+	: build-notification ( -- )
+	    net2o-icon# notify@ make-jstring
+	    ticks 1000000 ud/mod rot drop
+	    newNotification to nf ;
+    [THEN]
     : show-notification ( -- )
 	1 nf notification-manager .notify ;
 
