@@ -510,9 +510,6 @@ filechars #del -bit
 : fn-sanitize ( addr u -- addr' u' )
     ['] sane-type $tmp ;
 
-: sane-85 ( addr u -- addr' u' )
-    ['] 85type $tmp fn-sanitize ;
-
 \ copy files
 
 #-514 Constant no-file#

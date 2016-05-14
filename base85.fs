@@ -32,3 +32,6 @@ comp: execute postpone SLiteral ;
     <info> 85type <default> ;
 : .85warn ( addr u -- )
     <warn> 85type <default> ;
+
+: sane-85 ( addr u -- addr' u' )
+    ['] 85type $tmp fn-sanitize ;
