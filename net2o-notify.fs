@@ -84,14 +84,14 @@ Sema notify-sema
 	    notify@ make-jstring nb .setContentText to nb
 	    notify@ make-jstring nb .setTicker to nb
 	    nb .build to nf ;
+	: show-notification ( -- )
+	    1 nf notification-manager .notify ;
     [ELSE]
-	: build-notification ( -- )
-	    net2o-icon# notify@ make-jstring
-	    ticks 1000000 ud/mod rot drop
-	    newNotification to nf ;
+	\ no notification for Android 2.3 for now...
+	: msg-builder ( -- ) ;
+	: build-notification ( -- ) ;
+	: show-notification ( -- ) ;
     [THEN]
-    : show-notification ( -- )
-	1 nf notification-manager .notify ;
 
     :noname defers android-active rendering @ IF  notify-  THEN ;
     is android-active
