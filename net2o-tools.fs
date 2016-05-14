@@ -494,6 +494,12 @@ filechars #del -bit
 [IFDEF] cygwin
     "\\:?*\q<>|" bounds [?DO] filechars [I] c@ -bit [LOOP]
 [THEN]
+[IFDEF] android
+    \ early Androids use a vfat formated file system as /sdcard
+    SDK_INT 14 < [IF]
+	"\\:?*\q<>|" bounds [?DO] filechars [I] c@ -bit [LOOP]
+    [THEN]
+[THEN]
 
 : fn-sanitize ( addr u -- addr' u' )
     [: bounds ?DO
