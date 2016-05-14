@@ -169,6 +169,7 @@ IS attr! IS page IS at-deltaxy IS at-xy
 op-vector !
 is name
 ' ts-key  ' ts-key? input: termserver-in
+[IFDEF] traceall traceall [THEN]
 
 1 Constant file-permit#
 2 Constant socket-permit#

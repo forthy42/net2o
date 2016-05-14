@@ -501,11 +501,14 @@ filechars #del -bit
     [THEN]
 [THEN]
 
-: fn-sanitize ( addr u -- addr' u' )
+: sane-type ( addr u -- )
     [: bounds ?DO
 	  I c@ filechars over bit@
 	  IF  emit  ELSE  '%' emit .2  THEN
-      LOOP ;] ['] $tmp $10 base-execute ;
+      LOOP ;] $10 base-execute ;
+
+: fn-sanitize ( addr u -- addr' u' )
+    ['] sane-type $tmp ;
 
 \ copy files
 
@@ -514,11 +517,11 @@ filechars #del -bit
 : throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
 : >backup ( addr u -- )
-    2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
-    2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
+    2dup 2dup [: sane-type '~' emit ;] $tmp rename-file throw?exists
+    2dup [: sane-type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
 
 : >new ( addr u -- fd )
-    [: type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
+    [: sane-type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }

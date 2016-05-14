@@ -196,7 +196,7 @@ op-vector !
 op-vector @
 $-out ' (attr!) is attr!
 op-vector !
-[IFDEF] traceall  is name [THEN]
+[IFDEF] traceall  is name traceall [THEN]
 
 \ extra hints for last word executed
 
