@@ -57,7 +57,7 @@ Sema msglog-sema
       cell +LOOP ;]
     gen-cmd$ 2drop 0 tmp$ !@ enc-file !
     r> free throw  dispose o>
-    >chatid [: ." ~/.net2o/chats/" 85type ;] $tmp enc-filename $!
+    >chatid [: ." ~/.net2o/chats/" sane-85 ;] $tmp enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : vault>msg ( -- )
@@ -65,7 +65,7 @@ Sema msglog-sema
     is write-decrypt ;
 
 : load-msg ( group u -- )
-    >chatid [: ." ~/.net2o/chats/" 85type ." .v2o" ;] $tmp
+    >chatid [: ." ~/.net2o/chats/" sane-85 ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  decrypt-file

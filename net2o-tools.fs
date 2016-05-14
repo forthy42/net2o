@@ -510,6 +510,9 @@ filechars #del -bit
 : fn-sanitize ( addr u -- addr' u' )
     ['] sane-type $tmp ;
 
+: sane-85 ( addr u -- addr' u' )
+    ['] 85type $tmp fn-sanitize ;
+
 \ copy files
 
 #-514 Constant no-file#
@@ -517,11 +520,11 @@ filechars #del -bit
 : throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
 : >backup ( addr u -- )
-    2dup 2dup [: sane-type '~' emit ;] $tmp rename-file throw?exists
-    2dup [: sane-type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
+    2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
+    2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
 
 : >new ( addr u -- fd )
-    [: sane-type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
+    [: type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }
