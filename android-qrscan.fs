@@ -33,11 +33,11 @@ also opengl also android
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix
     v0 i0 >v
-     1e  1e >xy n> rot>st   $000000FF rgba>c v+
-    -1e  1e >xy n> rot>st   $000000FF rgba>c v+
-    -1e -1e >xy n> rot>st   $000000FF rgba>c v+
      1e -1e >xy n> rot>st   $000000FF rgba>c v+
-    v>  drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
+    -1e -1e >xy n> rot>st   $000000FF rgba>c v+
+    -1e  1e >xy n> rot>st   $000000FF rgba>c v+
+     1e  1e >xy n> rot>st   $000000FF rgba>c v+
+    v>  0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 : scan-once ( -- )
     scan-frame sync >looper ;
