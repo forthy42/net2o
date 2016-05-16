@@ -467,9 +467,15 @@ $10 Constant datesize#
 	r> =mkdir throw
     ELSE  2drop rdrop  THEN ;
 
-: ?.net2o ( -- )  s" ~/.net2o" $1C0 init-dir ;
+Variable net2o-dir$
+"~/.net2o" net2o-dir$ $!
 
-: init-cache ( -- ) ?.net2o s" ~/.net2o/.cache" $1FF init-dir ;
+: .net2o/ ( addr u -- addr' u' )
+    [: net2o-dir$ $. '/' emit type ;] $tmp ;
+
+: ?.net2o ( -- )  net2o-dir$ $@ $1C0 init-dir ;
+
+: init-cache ( -- ) ?.net2o s" .cache" .net2o/ $1FF init-dir ;
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
@@ -491,14 +497,12 @@ filechars $20 $FF fill
 0 filechars l! \ ctrl chars are all illegal
 filechars '/' -bit
 filechars #del -bit
-[IFDEF] cygwin
-    "\\:?*\q<>|" bounds [?DO] filechars [I] c@ -bit [LOOP]
-[THEN]
-[IFDEF] android
-    \ early Androids use a vfat formated file system as /sdcard
-    SDK_INT 14 < [IF]
-	"\\:?*\q<>|" bounds [?DO] filechars [I] c@ -bit [LOOP]
-    [THEN]
+"\\:?*\q<>|" 2Constant no-fat-chars
+
+no-fat-chars .net2o/ r/w create-file [IF] drop
+    no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
+[ELSE]
+    close-file throw no-fat-chars .net2o/ delete-file throw
 [THEN]
 
 : sane-type ( addr u -- )

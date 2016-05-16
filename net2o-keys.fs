@@ -532,8 +532,8 @@ comp: :, previous ;
 0 Value key-sfd \ secret keys
 0 Value key-pfd \ pubkeys
 
-Variable pubkey-file "~/.net2o/pubkeys.k2o" pubkey-file $!
-Variable seckey-file "~/.net2o/seckeys.k2o" seckey-file $!
+Variable pubkey-file "pubkeys.k2o" .net2o/ pubkey-file $!
+Variable seckey-file "seckeys.k2o" .net2o/ seckey-file $!
 
 : ?key-sfd ( -- fd ) key-sfd seckey-file $@ ?fd dup to key-sfd ;
 : ?key-pfd ( -- fd ) key-pfd pubkey-file $@ ?fd dup to key-pfd ;
