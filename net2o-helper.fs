@@ -107,13 +107,8 @@ Defer dht-beacon
 
 true Value connected?
 
-[IFDEF] android
-    require android-net.fs
-[THEN]
-
-[IFDEF] PF_NETLINK
-    require linux-net.fs
-[THEN]
+[IFDEF] android     require android/net.fs  [THEN]
+[IFDEF] PF_NETLINK  require linux/net.fs    [THEN]
 
 \ announce and renat
 

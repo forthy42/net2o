@@ -93,9 +93,7 @@ Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 : .keyqr ( addr u -- ) \ 64 bytes
     >keyframe >keylines >ecc keyqr keyqr# qr.block ;
 
-[IFDEF] android
-    require android-qrscan.fs
-[THEN]
+[IFDEF] android   require android/qrscan.fs  [THEN]
 
 0 [IF]
 Local Variables:
