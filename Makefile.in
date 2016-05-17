@@ -74,7 +74,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	\
 	  net2o-version.fs.in android/net.fs linux/net.fs		\
 	  net2o-dhtroot.fs android/qrscan.fs
 
-SRCDIRS = net2o/tests net2o/doc
+SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux
 
 SCRIPTS = n2o
 

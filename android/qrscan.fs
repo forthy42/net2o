@@ -49,7 +49,10 @@ also opengl also android
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
     cam-prepare ;
 
-: scan-test ( -- ) scan-start scan-loop cam-end ;
+: scan-key? ( -- )  defers key? dup 0= IF  scan-once  THEN ;
+
+: scan-bg ( -- )  scan-start ['] scan-key? is key? ;
+: scan-end ( -- ) what's key? is key?  cam-end ;
 
 previous previous
 
