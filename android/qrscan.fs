@@ -32,27 +32,28 @@ also opengl also android
     camera-init matrix-init
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix
-    v0 i0 >v
+    screen-orientation v0 i0 >v
     -1e -1e >xy n> rot>st   $000000FF rgba>c v+
      1e -1e >xy n> rot>st   $000000FF rgba>c v+
      1e  1e >xy n> rot>st   $000000FF rgba>c v+
     -1e  1e >xy n> rot>st   $000000FF rgba>c v+
-    v>  0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
+    v>  drop  0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 : scan-once ( -- )
-    scan-frame sync >looper ;
+    scan-frame sync ;
 : scan-loop ( -- )
-    1 level# +!  BEGIN  scan-once  level# @ 0= UNTIL ;
+    1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )  hidekb
     c-open-back to camera
     ['] VertexShader ['] FragmentShader create-program to program
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
     cam-prepare ;
 
-: scan-key? ( -- )  defers key? dup 0= IF  scan-once  THEN ;
+: scan-key? ( -- flag )  defers key?  scan-once ;
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key? ;
-: scan-end ( -- ) what's key? is key?  cam-end ;
+: scan-end ( -- )
+    [ what's key? ]L is key? cam-end ;
 
 previous previous
 
