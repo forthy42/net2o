@@ -128,13 +128,16 @@ $80 Value color-level#
     r> 2* dup * sfloats scan-buf1 $!len
     GL_RGBA GL_UNSIGNED_BYTE scan-buf1 $@ drop glReadPixels ;
 
-: scan-once ( -- )
-    camera-init scan-frame0 sync scan-grab search-corners
+: .xpoint ( x y -- )
     p0 2@ swap . . space
     p1 2@ swap . . space
     p2 2@ swap . . space
     p3 2@ swap . . space
-    compute-xpoint fswap f. f. cr ;
+    fswap f. f. cr ;
+
+: scan-once ( -- )
+    camera-init scan-frame0 sync scan-grab search-corners
+    compute-xpoint .xpoint ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )  hidekb
