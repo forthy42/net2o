@@ -91,6 +91,7 @@ Discussions
 * [Onion Routing](onion-routing.md)
 * [Threat Model](threat-model.md)
 * [What it's not for](whatnotfor.md)
+* [Nettie logo](nettie.md)
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
