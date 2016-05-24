@@ -7,7 +7,7 @@ well as to the German word "nett", which means "nice", "friendly" and
 ![Logo](https://fossil.net2o.de/net2o/doc/trunk/doc/net2o.png)
 
 Nettie is a little squid, and only very remotely related to the big
-data kraken, the cannibalous arch enemy of nettie:
+data kraken, the cannibalistic arch enemy of nettie:
 
 ![kraken](https://fossil.net2o.de/net2o/doc/trunk/doc/datenkrake.jpg)
 
