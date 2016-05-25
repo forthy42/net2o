@@ -1,0 +1,385 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass beamer
+\begin_preamble
+\mode<presentation> {\usetheme{Net2o}}%
+\usepackage[orientation=portrait,size=a4,scale=1.85,grid,debug]{beamerposter}%
+\renewcommand\makebeamertitle{}%
+\usepackage[activate]{pdfcprot}%
+\end_preamble
+\options final
+\use_default_options true
+\maintain_unincluded_children false
+\language ngerman
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip smallskip
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+net2o --- Das Internet neuerfinden
+\end_layout
+
+\begin_layout Author
+Ich habe einen Traum: Ein Peer--to--Peer--Netzwerk, in dem Dienste wie Suchmasch
+inen und soziale Netzwerke nicht von Großfirmen angeboten werden, die die
+ Privatsphäre der Nutzer verkaufen und zu Geld machen.
+ In der alle Daten verschlüsselt sind, und nur denen möglich, die den Schlüssel
+ haben und dazu autorisiert sind.
+ Die Laien ohne kryptische Benutzeroberfläche nutzen können.
+ In der der Browser eine Plattform ist, die sinnvolle Anwendungen ausführt
+ ohne den Verhau von Flash und JavaScript.
+ Ohne Verzögerungen durch 
+\begin_inset Quotes gld
+\end_inset
+
+buffer bloat
+\begin_inset Quotes grd
+\end_inset
+
+ und ohne Geschwindigkeitsprobleme eines Protokolls, das nicht dafür entworfen
+ wurde, von Hardware beschleunigt zu werden.
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Was ist kaputt?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Das Internet basiert auf Annahmen, die 20--30 Jahre alt sind 
+\end_layout
+
+\begin_layout Itemize
+Diese Annahmen sind inzwischen falsch 
+\end_layout
+
+\begin_layout Itemize
+Es folgt meistens dem 
+\begin_inset Quotes gld
+\end_inset
+
+gut genug
+\begin_inset Quotes grd
+\end_inset
+
+--Prinzip 
+\end_layout
+
+\begin_layout Itemize
+Es hat sich eine Menge Mist angesammelt 
+\end_layout
+
+\begin_layout Itemize
+Den Schritt für Schritt aufzuräumen ist der falsche Ansatz 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Ziele
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Die Entwurfsziele von net2o sind
+\end_layout
+
+\begin_layout Itemize
+Kompakt, schnell, skalierbar
+\end_layout
+
+\begin_layout Itemize
+Einfach zu implementieren
+\end_layout
+
+\begin_layout Itemize
+Sicher (gegen die üblichen Angriffe)
+\end_layout
+
+\begin_layout Itemize
+Medienfähig
+\end_layout
+
+\begin_layout Itemize
+Als Overlay über aktuelle Netzwerke (UDP/IP), aber kann den ganzen Stack
+ ersetzen
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Schichten
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Physical layer --- das ist nicht Teil von net2o
+\end_layout
+
+\begin_layout Enumerate
+Topologie: Pfad--switching
+\end_layout
+
+\begin_layout Enumerate
+Verschlüsselung: ed25519+Keccak im duplex mode
+\end_layout
+
+\begin_layout Enumerate
+Flusskontrolle: zeitbasiert, verzögerungsminimiert
+\end_layout
+
+\begin_layout Enumerate
+Kommanos: strukturierte Daten und RPC mit vielen Kommandos 
+\end_layout
+
+\begin_layout Enumerate
+Verteilte Daten: DHT+geteilte Dateien
+\end_layout
+
+\begin_layout Enumerate
+Anwendungen: chat, vault, DVCS, GUI mit Browser (noch zu implementieren)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+GUI Framework
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+libsoil für Bilder (PNG+JPEG in eine Texture geladen)
+\end_layout
+
+\begin_layout Itemize
+freetype-gl für Fonts (TrueType/OpenType in einer Texture)
+\end_layout
+
+\begin_layout Itemize
+OpenMAX auf Android, gstreamer auf Linux: Videos in einer Texture
+\end_layout
+
+\begin_layout Itemize
+MINOΣ2: Kompaktes OpenGL--basierte Widget--Bibliothek in Forth (noch eine
+ Menge Arbeit zu tun)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset VSpace smallskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Block
+\begin_inset Argument 2
+status collapsed
+
+\begin_layout Plain Layout
+Verfügbarkeit
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Linux Debian--Pakete verfügbar
+\end_layout
+
+\begin_layout Description
+Android Gforth im Play Store enthält net2o
+\end_layout
+
+\begin_layout Description
+Windows setup.exe bald
+\end_layout
+
+\begin_layout Description
+Mac
+\begin_inset space ~
+\end_inset
+
+OS
+\begin_inset space ~
+\end_inset
+
+X fink package bald
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+smash{
+\backslash
+lower2ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-qr.jpg
+	lyxscale 30
+	scale 30
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_body
+\end_document
