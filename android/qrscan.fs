@@ -19,35 +19,42 @@ require minos2/android-recorder.fs
 
 \ scan matrix manipulation
 
-16 sfloats buffer: scan-matrix
+Create scan-matrix
+1.0e sf, 0.0e sf, 0.0e sf, 0.0e sf,
+0.0e sf, 1.0e sf, 0.0e sf, 0.0e sf,
+0.0e sf, 0.0e sf, 1.0e sf, 0.0e sf,
+0.0e sf, 0.0e sf, 0.0e sf, 1.0e sf,
 
-: matrix-init ( -- )
-    ap-matrix scan-matrix 16 sfloats move ;
+scan-matrix  0 sfloats + Constant x-scale
+scan-matrix  5 sfloats + Constant y-scale
+scan-matrix 12 sfloats + Constant x-spos
+scan-matrix 13 sfloats + Constant y-spos
 
-matrix-init
+$40 Value scan-w
+scan-w dup * 1- 2/ 1+ Constant buf-len
 
 also opengl also android
 
-: scan-frame0 ( -- )
-    ap-matrix MVPMatrix set-matrix
-    ap-matrix MVMatrix set-matrix
-    screen-orientation v0 i0 >v
-    -0.25e -0.25e >xy n> rot>st   $000000FF rgba>c v+
-     0.25e -0.25e >xy n> rot>st   $000000FF rgba>c v+
-     0.25e  0.25e >xy n> rot>st   $000000FF rgba>c v+
-    -0.25e  0.25e >xy n> rot>st   $000000FF rgba>c v+
+: draw-scan ( orientation -- )
+    v0 i0 >v
+    1e -1e { f: s f: -s }
+    -s  s >xy n> rot>st   $000000FF rgba>c v+
+     s  s >xy n> rot>st   $000000FF rgba>c v+
+     s -s >xy n> rot>st   $000000FF rgba>c v+
+    -s -s >xy n> rot>st   $000000FF rgba>c v+
     v>  drop  0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
+
+: scan-frame0 ( -- )
+    0e fdup x-pos sf! >y-pos
+    unit-matrix MVMatrix set-matrix 0 draw-scan ;
 
 Variable scan-buf1
 Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$80 Value color-level#
-
-: scan-w ( -- n )  dpy-w @ dpy-h @ min 2/ 2/ 2/ $-4 and ;
-: buf-len ( -- n ) scan-w dup * 1- 2/ 1+ ;
+$D0 Value color-level#
 
 : extract-buf ( offset buf -- )
     buf-len over $!len
@@ -76,7 +83,9 @@ $80 Value color-level#
 
 : |min| ( a b -- ) over abs over abs < select ;
 
-: search-corner { mask -- x y } $8000 dup { x y }
+$8000 Constant init-xy
+
+: search-corner { mask -- x y } init-xy dup { x y }
     scan-buf1 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
@@ -110,11 +119,17 @@ $80 Value color-level#
     7 search-corner p3 2! \ bottom right
 ;
 
+: ?legit ( -- flag )
+    p0 2@ init-xy dup d<>
+    p1 2@ init-xy dup d<> and
+    p2 2@ init-xy dup d<> and
+    p3 2@ init-xy dup d<> and ;
+
 : compute-xpoint ( -- rx ry )
     p0 2@ s>f s>f fswap { f: x0 f: y0 }
-    p2 2@ s>f s>f fswap { f: x1 f: y1 }
+    p3 2@ s>f s>f fswap { f: x1 f: y1 }
     p1 2@ s>f s>f fswap { f: x2 f: y2 }
-    p3 2@ s>f s>f fswap { f: x3 f: y3 }
+    p2 2@ s>f s>f fswap { f: x3 f: y3 }
     x0 y1 f* y0 x1 f* f- { f: dxy01 }
     x2 y3 f* y2 x3 f* f- { f: dxy23 }
     x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- { f: det1 }
@@ -123,9 +138,8 @@ $80 Value color-level#
     x f>s y f>s px 2!  x y ;
 
 : scan-grab ( -- )
-    dpy-w @ 2/ dpy-h @ 2/  scan-w >r
-    r@ - swap r@ - swap r@ 2* dup
-    r> 2* dup * sfloats scan-buf1 $!len
+    0 0 scan-w 2* dup
+    2dup * sfloats scan-buf1 $!len
     GL_RGBA GL_UNSIGNED_BYTE scan-buf1 $@ drop glReadPixels ;
 
 : .xpoint ( x y -- )
@@ -135,13 +149,39 @@ $80 Value color-level#
     p3 2@ swap . . space
     fswap f. f. cr ;
 
+tex: scan-tex
+0 Value scan-fb
+
+: new-scantex ( -- )
+    scan-tex  0e 0e 0e 1e glClearColor
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+: scan-legit ( -- ) \ resize a legit QR code
+    compute-xpoint
+    $13 s>f p0       @ p3       @ - fm/ y-scale sf!
+    $13 s>f p3 cell+ @ p0 cell+ @ - fm/ x-scale sf!
+    scan-w fm/ fnegate y-scale sf@ f* y-spos sf!
+    scan-w fm/ fnegate x-scale sf@ f* x-spos sf!
+    scan-matrix MVPMatrix set-matrix
+    scan-matrix MVMatrix set-matrix clear
+    0 draw-scan scan-grab ;
+
+: visual-frame ( -- )
+    oes-program init
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix
+    media-tex nearest-oes screen-orientation draw-scan sync ;
+
 : scan-once ( -- )
-    camera-init scan-frame0 sync scan-grab search-corners
-    compute-xpoint .xpoint ;
+    camera-init scan-w 2* dup scan-fb >framebuffer
+    scan-frame0 scan-grab search-corners
+    ?legit IF  scan-legit  0>framebuffer
+	visual-frame x-spos sf@ y-spos sf@ .xpoint
+    ELSE  0>framebuffer ." not legit" cr  THEN
+    need-sync off ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )  hidekb
-    c-open-back to camera
+    c-open-back to camera  scan-fb 0= IF  new-scantex  THEN
     ['] VertexShader ['] FragmentShader create-program to program
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
     cam-prepare ;
