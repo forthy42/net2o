@@ -333,13 +333,13 @@ previous
 
 : send-text ( addr u -- )
     net2o-code expect-msg
-    <msg $, msg-text msg> endwith
+    <msg $, msg-text msg> end-with
     ( cookie+request ) end-code| ;
 
 : send-text-to ( msg u nick u -- )
     net2o-code expect-msg
     <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
-    $, msg-text msg> endwith
+    $, msg-text msg> end-with
     ( cookie+request ) end-code| ;
 
 : ?destpk ( addr u -- addr' u' )
@@ -348,16 +348,16 @@ previous
 also net2o-base
 : join, ( -- )
     msg-group$ $@ dup IF  msg ?destpk $, msg-join
-	sign[ msg-start "joined" $, msg-action msg> endwith
+	sign[ msg-start "joined" $, msg-action msg> end-with
     ELSE  2drop  THEN ;
 
 : silent-join, ( -- )
-    last# $@ dup IF  msg $, msg-join  endwith
+    last# $@ dup IF  msg $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
     msg-group$ $@ dup IF  msg ?destpk $, msg-leave
-	sign[ msg-start "left" $, msg-action msg> endwith
+	sign[ msg-start "left" $, msg-action msg> end-with
     ELSE  2drop  THEN ;
 
 : left, ( addr u -- )
@@ -412,7 +412,7 @@ $200 Constant maxmsg#
 
 : greet ( -- )
     net2o-code expect-reply
-    log !time endwith join, get-ip end-code ;
+    log !time end-with join, get-ip end-code ;
 
 : chat-entry ( -- )  init-chatlog  word-args
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
@@ -426,7 +426,7 @@ $200 Constant maxmsg#
 also net2o-base
 : send-avalanche ( addr u xt -- )
     [: 0 >o code-buf$ cmdreset init-reply
-      <msg execute msg> endwith  o>
+      <msg execute msg> end-with  o>
       cmdbuf$ 4 /string 2 - 2dup msg+
       msg-group$ $@ >group code-buf avalanche-msg ;] [group]
     0= IF  2drop .nobody  THEN ;
@@ -738,7 +738,7 @@ also net2o-base
     net2o-code expect-reply msg
     dup  $@ ?destpk $, msg-leave  reconnect,
     sign[ msg-start "left" $, msg-action msg>
-    endwith cookie+request end-code| ;
+    end-with cookie+request end-code| ;
 previous
 
 : send-reconnect ( group -- )
@@ -773,7 +773,7 @@ previous
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
-    net2o-code expect-msg msg $, nestsig endwith
+    net2o-code expect-msg msg $, nestsig end-with
     end-code ; is avalanche-to
 
 0 [IF]

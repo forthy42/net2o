@@ -562,6 +562,11 @@ no-fat-chars .net2o/ r/w create-file [IF] drop
 : scope: ( "vocabulary" -- addr )
     vocabulary get-current also lastxt execute definitions ;
 
+: with ( "vocabulary" -- )
+    also ' execute postpone >o ; immediate restrict
+: endwith ( -- )
+    postpone o> previous ; immediate restrict
+
 \ help display
 
 : search-help ( pattern xt file-addr u -- )

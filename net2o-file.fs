@@ -217,6 +217,8 @@ here file-classes - cell/ Constant file-classes#
 
 \ state handling
 
+scope{ mapc
+
 : dest-top! ( addr -- )
     \ dest-tail @ dest-size @ + umin
     dup dup dest-top @ U+DO
@@ -229,6 +231,8 @@ here file-classes - cell/ Constant file-classes#
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP  dest-back ! ;
+
+}scope
 
 : size! ( 64 -- )
     64dup fs-size 64!  fs-limit 64umin! ;
@@ -251,9 +255,9 @@ here file-classes - cell/ Constant file-classes#
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $off ;
 : n2o:save-block ( id -- delta )
-    rdata-back@ file( over data-rmap @ .dest-raddr @ -
+    rdata-back@ file( over data-rmap @ .mapc:dest-raddr @ -
     { os } ." file write: " 2 pick . os hex.
-\    os addr>ts data-rmap @ .dest-cookies @ + over addr>ts xtype space
+\    os addr>ts data-rmap @ .mapc:dest-cookies @ + over addr>ts xtype space
 \    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
     )
     rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
@@ -311,7 +315,7 @@ User file-reg#
 \ read in from files
 
 : n2o:slurp-block ( id -- delta )
-    data-head@ file( over data-map @ .dest-raddr @ -
+    data-head@ file( over data-map @ .mapc:dest-raddr @ -
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? .fs-read dup /head file( dup hex. residualread @ hex. cr ) ;
 

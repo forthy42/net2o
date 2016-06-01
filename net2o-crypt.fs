@@ -104,6 +104,8 @@ init-keybuf
 \ regenerate half of the ivs per time, when you reach the middle of the other half
 \ of the ivs buffer.
 
+scope{ mapc
+
 : dest-a/b ( addr u -- addr1 u1 )
     2/  dest-ivslastgen @ 1 = IF  dup >r + r>  THEN ;
 
@@ -111,6 +113,11 @@ init-keybuf
     dest-replies @ dest-size @ addr>replies dest-a/b
     reply( ." Clear replies " over hex. dup hex. cr )
     erase ;
+
+: >ivskey ( 64addr -- keyaddr )
+    64>n addr>keys dest-ivs $@ rot umin + ;
+
+}scope
 
 : crypt-key$ ( -- addr u )
     o 0= IF  no-key state#  ELSE  crypto-key sec@  THEN ;
@@ -122,17 +129,19 @@ init-keybuf
 : addr>assembly ( addr64 flag -- x128 )
     [ acks# invert 8 lshift ]L and n>64 ;
 
-: >ivskey ( 64addr -- keyaddr )
-    64>n addr>keys dest-ivs $@ rot umin + ;
 : ivs-tweak ( 64addr keyaddr -- )
     >r dest-flags le-uw@ addr>assembly
     r> state# c:tweakkey!
     tweak( ." tweak key: " voutkey c:key> voutkey @ hex. voutkey state# + $10 .nnb cr ) ;
 
+scope{ mapc
+
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64@ 64-
     64dup dest-size @ n>64 64u>= !!inv-dest!!
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
+
+}scope
 
 : key>dump ( -- addr u )
     keydump-buf c:key> keydump-buf c:key# ;
@@ -184,11 +193,11 @@ init-keybuf
     oldmykey state# decrypt$ +enc ;
 
 : outbuf-encrypt ( map -- ) +calc
-    .ivs>source? outbuf packet-data +cryptsu
+    .mapc:ivs>source? outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 
 : inbuf-decrypt ( map -- flag ) +calc
-    .ivs>source? inbuf packet-data +cryptsu
+    .mapc:ivs>source? inbuf packet-data +cryptsu
     inbuf 1+ c@ c:decrypt+auth +enc ;
 
 : set-0key ( tweak128 keyaddr u -- )
@@ -225,6 +234,8 @@ Sema regen-sema
     o 0= IF  no-key state#  ELSE  keypad$  THEN
     crypt( ." ivs key: " 2dup .nnb cr )
     >crypt-key ;
+
+scope{ mapc
 
 : regen-ivs/2 ( -- )
     [: c:key@ >r
@@ -278,13 +289,15 @@ Sema regen-sema
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
 
-: one-ivs ( addr -- )
-    @ >o c:key@ >r
+}scope
+
+: one-ivs ( map-addr -- )
+    @ with mapc c:key@ >r
     key-assembly state2# c:prng
     dest-ivsgen @ kalign c:key!  key-assembly >c:key
     dest-size @ addr>keys dest-ivs $!len
     dest-ivs $@ c:prng ivs( ." Regen one IVS" cr )
-    r> c:key! o> ;
+    r> c:key! endwith ;
 
 : clear-keys ( -- )
     crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase

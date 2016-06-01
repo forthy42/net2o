@@ -299,7 +299,7 @@ false Value add-myip
 : addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
 	my-addr$ ['] pub-addr, $[]map
-    THEN  endwith
+    THEN  end-with
     nest[ cookie, request-gen @ #request, ]nest
     do-expect-reply ;
 : addme ( addr u -- )  new-addr { addr } now>never
@@ -332,7 +332,7 @@ previous
     pkc keysize2 $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
-    endwith
+    end-with
     cookie+request
     end-code| ;
 
@@ -344,7 +344,7 @@ previous
 
 also net2o-base
 : replace-me, ( -- )
-    pkc keysize2 $, dht-id dht-host? endwith ;
+    pkc keysize2 $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
     new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
@@ -359,7 +359,7 @@ also net2o-base
     ( host $off ) ;
 
 : fetch-id, ( id-addr u -- )
-    key2| $, dht-id dht-host? endwith ;
+    key2| $, dht-id dht-host? end-with ;
 : fetch-host, ( nick u -- )
     nick>pk fetch-id, ;
 previous
@@ -371,7 +371,7 @@ previous
     r@ $[]# IF
 	net2o-code   expect-reply
 	pkc keysize2 $, dht-id
-	r@ remove-me, endwith
+	r@ remove-me, end-with
 	cookie+request
 	end-code|
     THEN  rdrop ;
@@ -384,7 +384,7 @@ previous
     net2o-code  expect-reply
 	dht-hash $@ $, dht-id dht-host remove-me,
 	revoke-key 2dup set-revocation
-	2dup $, dht-host+ endwith
+	2dup $, dht-host+ end-with
 	cookie+request
     end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
@@ -401,7 +401,7 @@ previous
     -setip n2o:send-revoke ;
 
 : disconnect-me ( -- )
-    net2o-code connect( log .time s" Disconnect" $, type cr endwith )
+    net2o-code connect( log .time s" Disconnect" $, type cr end-with )
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
     n2o:dispose-context msg( ." Disposed context" forth:cr ) ;
 

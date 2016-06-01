@@ -519,7 +519,7 @@ comp: :, also net2o-base ;
 scope{ net2o-base
 
 : end:key ( -- )
-    endwith previous cmdlock unlock ;
+    end-with previous cmdlock unlock ;
 comp: :, previous ;
 
 }scope

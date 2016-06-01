@@ -41,7 +41,8 @@ connect-table $@ inherit-table context-table
 \ better slurping
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
-    >r 64>n r> data-rmap @ >o over dest-top @ <> and dest-end or! dest-top! o> ;
+    >r 64>n r> data-rmap @ with mapc
+    over dest-top @ <> and dest-end or! dest-top! endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
@@ -88,7 +89,7 @@ gen-table $freeze
 ' context-table is gen-table
 
 :noname ( uid useek -- ) 64>r ulit, file-id
-    64r> lit, set-seek endwith ; is do-track-seek
+    64r> lit, set-seek end-with ; is do-track-seek
 
 \ flow control functions
 \g 
@@ -119,7 +120,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-b2btime ( utime addr -- ) \g burst-to-burst time at packet addr
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
-    64>n $> parent @ .data-map @ .resend#? dup 0= IF
+    64>n $> parent @ .data-map @ .mapc:resend#? dup 0= IF
 	drop ." resend# don't match!" forth:cr
 	parent @ .n2o:see-me
 	[ cookie-val $FF xor ]L validated and!
@@ -129,9 +130,9 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent @ .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \g set head
-    64>n parent @ .data-rmap @ .dest-head umax! ;
+    64>n parent @ .data-rmap @ .mapc:dest-head umax! ;
 +net2o: timeout ( uticks -- ) \g timeout request
-    parent @ >o net2o:timeout  data-map @ .dest-tail @ o> ulit, set-head ;
+    parent @ >o net2o:timeout  data-map @ .mapc:dest-tail @ o> ulit, set-head ;
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 
@@ -146,7 +147,7 @@ gen-table $freeze
     slurp next-request filereq# ! ;
 
 : rewind ( -- )
-    data-rmap @ >o dest-back @ do-slurp @ umax o> ulit, ack-flush ;
+    data-rmap @ with mapc dest-back @ do-slurp @ umax endwith ulit, ack-flush ;
 
 \ safe initialization
 
@@ -174,7 +175,7 @@ set-current
     open-file get-size get-stat ;
 
 : n2o>file ( xt -- )
-    file-reg# @ ulit, file-id  catch  endwith
+    file-reg# @ ulit, file-id  catch  end-with
     throw  1 file-reg# +! ;
 
 : n2o:copy ( addrsrc us addrdest ud -- )
@@ -184,10 +185,10 @@ set-current
 
 : seek! ( pos id -- ) >r d>64
     64dup r@ state-addr .fs-seek 64!
-    r> ulit, file-id lit, set-seek endwith ;
+    r> ulit, file-id lit, set-seek end-with ;
 
 : limit! ( pos id -- ) >r d>64
-    r@ ulit, file-id 64dup lit, set-limit endwith
+    r@ ulit, file-id 64dup lit, set-limit end-with
     r> init-limit! ;
 
 file-reg# off
@@ -236,12 +237,12 @@ also net2o-base
 \ ack bits, new code
 
 : net2o:ack-resend# ( -- )  data-rmap @ { map }
-    map .data-resend#-buf $@
+    map .mapc:data-resend#-buf $@
     bounds ?DO
 	I $@ over @ >r cell /string $FF -skip
 	dup >r $FF skip r> over - r> + ulit, $, ack-resend#
     cell +LOOP
-    map .data-resend#-buf $[]off ;
+    map .mapc:data-resend#-buf $[]off ;
 
 \ client side acknowledge
 
@@ -249,21 +250,21 @@ also net2o-base
     net2o:ack-resend#  net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
-    data-rmap @ >o
+    data-rmap @ with mapc
     data-ack# @ bytes>addr dest-top 2@ umin umin
-    dest-tail @ umax dup dest-tail !@ o>
+    dest-tail @ umax dup dest-tail !@ endwith
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
 2 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits )
-    data-rmap @ >o
+    data-rmap @ with mapc
     IF    dest-head @ addr>bits bits>bytes -4 and
     ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
     dest-tail @ addr>bytes -4 and dup data-ack# umin!
     data-ackbits @ dest-size @ addr>bytes 1-
-    dest-tail @ addr>bits o> ;
+    dest-tail @ addr>bits endwith ;
 
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
@@ -277,7 +278,7 @@ also net2o-base
 	    resend( ." resend: " dup hex. over hex. forth:cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + data-rmap @ .data-ack# !  THEN
+	    drop dup 0= IF  I 4 + data-rmap @ .mapc:data-ack# !  THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
@@ -307,25 +308,27 @@ also net2o-base
     ticks lit, push-lit push' set-rtdelay ;
 
 : data-end? ( -- flag )
-    0 data-rmap @ .dest-end !@ ;
+    0 data-rmap @ .mapc:dest-end !@ ;
 
 : rewind-transfer ( -- flag )
     rewind data-end? IF  filereq# @ n2o:request-done  false
     ELSE  true  THEN ;
 
-: request-stats   forth:true to request-stats?  ack track-timing endwith ;
+: request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
 : expected@ ( -- head top )
-    o IF  data-rmap @ >o
-	o IF  dest-tail @ dest-top @  ELSE  0.  THEN o>
+    o IF  data-rmap @ with mapc
+	o IF  dest-tail @ dest-top @  ELSE  0.  THEN endwith
     ELSE  0.  THEN  ;
 
 : expected? ( -- flag )
     expected@ tuck u>= and IF
 	expect-reply
-	msg( ." check: " data-rmap @ >o dest-back @ hex. dest-tail @ hex. dest-head @ hex.
+	msg( ." check: " data-rmap @ with mapc
+	dest-back @ hex. dest-tail @ hex. dest-head @ hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
-	o> forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
+	endwith
+	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
 	net2o:ack-resend#  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
@@ -333,6 +336,8 @@ also net2o-base
 cell 8 = [IF] 6 [ELSE] 5 [THEN] Constant cell>>
 
 Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
+
+scope{ mapc
 
 : +resend# ( bit -- ) >r
     dest-addr 64@ 64>n [ min-size 1- ]L and
@@ -348,13 +353,16 @@ Create no-resend# bursts# 4 * 0 [DO] -1 c, [LOOP]
     no-resend# [ bursts# 4 * ]L n data-resend#-buf $[]+!
     n data-resend#-buf $[]@ drop cell+ + c! ;
 
+}scope
+
 : +cookie ( -- )
-    data-rmap @ >o  ack-bit# @ >r  r@ +resend#
+    data-rmap @ with mapc  ack-bit# @ >r  r@ +resend#
     data-ackbits @ r> +bit@
-    o> negate packetr2 +! ;
+    endwith negate packetr2 +! ;
 
 : +expected ( -- flag )
-    data-rmap @ >o dest-head @ dest-top @ u>= ack-advance? @ and o>
+    data-rmap @ with mapc
+    dest-head @ dest-top @ u>= ack-advance? @ and endwith
     IF   resend-all  THEN  expected? ;
 
 \ higher level functions
@@ -406,9 +414,9 @@ previous
     ELSE  0  THEN ;
 
 : map-resend? ( -- n )
-    code-map @ ?dup-IF  >o 0  outflag off
+    code-map @ ?dup-IF  with mapc 0  outflag off
 	dest-replies @
-	dest-size @ addr>replies bounds o> U+DO
+	dest-size @ addr>replies bounds endwith U+DO
 	    I reply-xt @ IF
 		resend( ." resend: " I reply-dest 64@ $64. I 2@ n2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ $64. I 2@ swap hex. hex. forth:cr )
@@ -424,7 +432,7 @@ previous
 
 : .expected ( -- )
     forth:.time ." expected/received: " recv-addr @ hex.
-    data-rmap @ .data-ack# @ hex.
+    data-rmap @ .mapc:data-ack# @ hex.
     expected@ hex. hex. forth:cr ;
 
 \ acknowledge toplevel
@@ -439,20 +447,20 @@ previous
 	r@ resend-toggle# and IF
 	    true net2o:do-resend
 	THEN
-	0 data-rmap @ .do-slurp !@
+	0 data-rmap @ .mapc:do-slurp !@
 	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
-    endwith  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
+    end-with  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
     slurp? IF  slurp  THEN
-    stats? IF  ack send-timing endwith  THEN
+    stats? IF  ack send-timing end-with  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64! \ last received packet
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
-    acks# and data-rmap @ .ack-advance? @
+    acks# and data-rmap @ .mapc:ack-advance? @
     IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
     ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. forth:cr )
 ;
@@ -463,18 +471,18 @@ previous
 
 also net2o-base
 : .keepalive ( -- )  ." transfer keepalive " expected@ hex. hex.
-    data-rmap @ >o dest-tail @ hex. dest-back @ hex. o>
+    data-rmap @ with mapc  dest-tail @ hex. dest-back @ hex.  endwith
     forth:cr ;
 : transfer-keepalive? ( -- )
     o to connection
     timeout( .keepalive )
     rewind-transfer 0= IF  .keepalive  EXIT  THEN
     expected@ tuck u>= and IF  net2o-code
-	  ack +expected endwith IF  slurp  THEN  end-code  EXIT  THEN
+	  ack +expected end-with IF  slurp  THEN  end-code  EXIT  THEN
 \    net2o-code  expect-reply
 \      ack net2o:genack
 \      resend-all ticks lit, timeout rewind update-rtdelay
-\      endwith slurp
+\      end-with slurp
 \    end-code
 ;
 previous

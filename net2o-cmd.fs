@@ -214,7 +214,7 @@ drop
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@noerr  n2o.string  endof
 	4 of  pf@ f. ." float, " endof
-	5 of  ." endwith " cr  t# IF  t-pop  token-table !  THEN  endof
+	5 of  ." end-with " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	11 of  string@noerr  n2o.secstring  endof
 	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "  endof
@@ -458,9 +458,9 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     string@ ;
 +net2o: flit ( #dfloat -- r ) \g double float literal
     pf@ ;
-+net2o: endwith ( o:object -- ) \g end scope
++net2o: end-with ( o:object -- ) \g end scope
     do-req> n:o> ;
-:noname o IF  req? @ 0<  IF  endwith req? off  THEN  THEN ; is do-req>
+:noname o IF  req? @ 0<  IF  end-with req? off  THEN  THEN ; is do-req>
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     do-req> n:oswap ;
 +net2o: tru ( -- f:true ) \g true flag literal

@@ -42,6 +42,10 @@ Variable msg-table
 Variable term-table
 Variable address-table
 
+Vocabulary mapc
+
+also mapc definitions
+
 cmd-class class
     64field: dest-vaddr
     field: dest-size
@@ -83,6 +87,8 @@ code-class class
 end-class rcode-class
 
 rcode-class class end-class rdata-class
+
+previous definitions
 
 cmd-class class
     field: timing-stat

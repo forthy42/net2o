@@ -437,5 +437,3 @@ scope{ /chat
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
 
 }scope
-
-previous

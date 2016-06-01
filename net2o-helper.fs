@@ -260,13 +260,13 @@ User pings[]
 : search-keys ( -- )
     dht-connect
     net2o-code  expect-reply
-    search-key[] [: $, dht-id dht-owner? endwith ;] $[]map
+    search-key[] [: $, dht-id dht-owner? end-with ;] $[]map
     cookie+request end-code| disconnect-me ;
 
 : search-addrs ( -- )
     dht-connect
     net2o-code  expect-reply
-    search-key[] [: $, dht-id dht-host? endwith ;] $[]map
+    search-key[] [: $, dht-id dht-host? end-with ;] $[]map
     cookie+request end-code| disconnect-me ;
 
 : insert-keys ( -- )
