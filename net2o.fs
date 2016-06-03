@@ -116,8 +116,10 @@ Variable task-id#
     alloc-buf to tmpbuf
     alloc-buf+6 to outbuf
     alloc-code-bufs
-    init-ed25519 c:init
-    tmp$[] off ;
+    init-ed25519 c:init ;
+
+:noname ( -- ) defers thread-init
+    alloc-io b-out op-vector @ debug-vector ! ; is thread-init
 
 : free-io ( -- )
     free-ed25519 c:free
@@ -133,7 +135,6 @@ Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )
     dup net2o-tasks >stack  pass
-    alloc-io b-out op-vector @ debug-vector !
     prep-socks catch-loop
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
