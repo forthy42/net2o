@@ -48,20 +48,6 @@ Sema notify-sema
 [IFDEF] android
     require android/notify.fs
 [ELSE]
-    : escape-<&> ( addr u -- )
-	bounds ?DO  case i c@
-		'<' of  ." &lt;"  endof
-		'>' of  ." &gt;"  endof
-		'&' of  ." &amp;" endof
-		emit  0 endcase  LOOP ;
-    
-    : notify+ notify> notify$ $+! ;
-    : notify! notify> notify$ $! ;
-    : build-notification ( -- ) ;
-    : notify@ ( -- addr u )
-	notify-text IF  notify$ $@ ['] escape-<&> $tmp
-	ELSE  "<i>hidden cryptic text</i>"  THEN ;
-
     [IFDEF] linux
 	require linux/notify.fs
     [THEN]

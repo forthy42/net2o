@@ -15,6 +15,20 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+: escape-<&> ( addr u -- )
+    bounds ?DO  case i c@
+	    '<' of  ." &lt;"  endof
+	    '>' of  ." &gt;"  endof
+	    '&' of  ." &amp;" endof
+	    emit  0 endcase  LOOP ;
+
+: notify+ notify> notify$ $+! ;
+: notify! notify> notify$ $! ;
+: build-notification ( -- ) ;
+: notify@ ( -- addr u )
+    notify-text IF  notify$ $@ ['] escape-<&> $tmp
+    ELSE  "<i>hidden cryptic text</i>"  THEN ;
+
 Variable notify-send
 Variable upath
 "PATH" getenv upath $!

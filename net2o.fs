@@ -116,7 +116,8 @@ Variable task-id#
     alloc-buf to tmpbuf
     alloc-buf+6 to outbuf
     alloc-code-bufs
-    init-ed25519 c:init ;
+    init-ed25519 c:init
+    tmp$[] off ;
 
 : free-io ( -- )
     free-ed25519 c:free
