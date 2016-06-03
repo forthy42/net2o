@@ -46,55 +46,7 @@ Sema notify-sema
     ." Message" 1 > IF ." s"  THEN ;
 
 [IFDEF] android
-    also android also jni
-
-    0x01080077 Value net2o-icon# \ default
-    : get-net2o-icon# "gnu.gforth:drawable/net2o_notify" R.id ;
-    get-net2o-icon# to net2o-icon#
-    jvalue nb
-    jvalue ni
-    jvalue nf
-    jvalue notification-manager
-    : notify+ ( addr u -- )  notify> notify$ $+! ;
-    : notify! ( addr u -- )  notify> notify$ $! ;
-    : notify@ ( -- addr u )
-	notify-text IF  notify$ $@
-	ELSE  "hidden cryptic text"  THEN ;
-
-    : ?nm ( -- )
-	notification-manager 0= IF
-	    NOTIFICATION_SERVICE clazz .getSystemService
-	    to notification-manager
-	THEN ;
-    : ?ni ( -- )
-	ni 0= IF  clazz .gforthintent to ni  THEN ;
-    SDK_INT 11 >= [IF]
-	: msg-builder ( -- ) ?nm ?ni
-	    clazz newNotification.Builder to nb
-	    notify-rgb notify-on notify-off nb .setLights to nb
-	    notify-mode nb .setDefaults to nb
-	    ni nb .setContentIntent to nb
-	    net2o-icon# nb .setSmallIcon to nb
-	    1 nb .setAutoCancel to nb ;
-	msg-builder
-	: build-notification ( -- )
-	    1000 clazz .screen_on
-	    1 pending-notifications +!
-	    ['] notify-title $tmp make-jstring nb .setContentTitle to nb
-	    notify@ make-jstring nb .setContentText to nb
-	    notify@ make-jstring nb .setTicker to nb
-	    nb .build to nf ;
-	: show-notification ( -- )
-	    1 nf notification-manager .notify ;
-    [ELSE]
-	\ no notification for Android 2.3 for now...
-	: msg-builder ( -- ) ;
-	: build-notification ( -- ) ;
-	: show-notification ( -- ) ;
-    [THEN]
-
-    :noname defers android-active rendering @ IF  notify-  THEN ;
-    is android-active
+    require android/notify.fs
 [ELSE]
     : escape-<&> ( addr u -- )
 	bounds ?DO  case i c@
@@ -111,52 +63,7 @@ Sema notify-sema
 	ELSE  "<i>hidden cryptic text</i>"  THEN ;
 
     [IFDEF] linux
-	Variable notify-send
-	Variable upath
-	"PATH" getenv upath $!
-	upath $@ bounds [?DO] [I] c@ ':' = [IF] 0 [I] c! [THEN] [LOOP]
-	"notify-send" upath open-path-file 0= [IF]
-	    rot close-file throw
-	    over c@ '/' <> [IF]
-		pad $1000 get-dir notify-send $! '/' notify-send c$+!
-	    [THEN]
-	    notify-send $+!
-	[THEN]
-	upath $off
-	
-	Variable net2o-logo
-	s" doc/net2o-logo.png" open-fpath-file 0= [IF]
-	    rot close-file throw
-	    over c@ '/' <> [IF]
-		pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!
-	    [THEN]
-	    net2o-logo $+!
-	[THEN]
-	
-	: 0string ( addr u -- cstr )
-	    1+ save-mem over + 1- 0 swap c! ;
-	
-	Create notify-args
-	"notify-send\0" drop ,
-	"-a\0" drop ,
-	"net2o\0" drop ,
-	"-c\0" drop ,
-	"im.received\0" drop ,
-	net2o-logo $@len [IF]
-	    "-i\0" drop ,
-	    net2o-logo $@ 0string ,
-	[THEN]
-	here 0 ,
-	here 0 ,
-	0 , \ must be terminated by null pointer
-	Constant content-string
-	Constant title-string
-	
-	: linux-notification ( -- )  notify-send $@len 0= ?EXIT
-	    title-string 0 ?free  content-string 0 ?free
-	    ['] notify-title $tmp 0string title-string !
-	    notify@ 0string content-string !
-	    notify-send $@ notify-args fork+exec ;
+	require linux/notify.fs
     [THEN]
 	
     : show-notification ( -- )
