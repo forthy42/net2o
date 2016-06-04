@@ -144,7 +144,7 @@ Variable net2o-tasks
 Variable kills
 event: ->killed ( -- )  -1 kills +! ;
 event: ->kill ( task -- )
-    <event ->killed event> kill-task ;
+    <event ->killed event> 0 (bye) ;
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
 3.000.000.000 2constant kill-timeout# \ 3s
