@@ -532,13 +532,6 @@ comp: :, previous ;
 0 Value key-sfd \ secret keys
 0 Value key-pfd \ pubkeys
 
-: .keys/ ( addr u -- addr' u' ) [: ." keys/" type ;] $tmp .net2o/ ;
-
-: ?.net2o-keys ( -- flag )  "" .keys/ 1- $1C0 init-dir ;
-
-Variable pubkey-file "pubkeys.k2o" .keys/ pubkey-file $!
-Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
-
 \ legacy for early versions of net2o prior 20160606
 
 : net2o>keys { addr u -- }
@@ -552,7 +545,7 @@ Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
     THEN ;
 
 : gen-keys-dir ( -- )
-    ?.net2o ?.net2o-keys ?legacy-keys ;
+    init-dirs ?.net2o/keys ?legacy-keys ;
 
 : ?fd-keys ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     gen-keys-dir
@@ -561,9 +554,9 @@ Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
     THEN  throw ;
 
 : ?key-sfd ( -- fd )
-    key-sfd seckey-file $@ ?fd-keys dup to key-sfd ;
+    key-sfd "seckeys.k2o" .keys/ ?fd-keys dup to key-sfd ;
 : ?key-pfd ( -- fd )
-    key-pfd pubkey-file $@ ?fd-keys dup to key-pfd ;
+    key-pfd "pubkeys.k2o" .keys/ ?fd-keys dup to key-pfd ;
 
 : key>sfile ( -- )
     keypack keypack-all# ?key-sfd append-file ke-offset 64! ;
@@ -655,7 +648,7 @@ Variable cp-tmp
 
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
-    pubkey-file $@ [: to key-pfd
+    "pubkeys.k2o" .keys/ [: to key-pfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0= IF  pack-pubkey
 	    flush( ." saving " .nick forth:cr )
@@ -665,7 +658,7 @@ Variable cp-tmp
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
-    seckey-file $@ [: to key-sfd
+    "seckeys.k2o" .keys/ [: to key-sfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey
 	    pw-level# >r  ke-pwlevel @ to pw-level#
@@ -964,7 +957,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     >raw-key ?rsk   r> op-vector ! ;
 
 : get-me ( -- )
-    gen-keys-dir  seckey-file $@ 2dup file-status nip
+    gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
     0= IF  r/o open-file throw >r r@ file-size throw d0=
 	r> close-file throw  ELSE  true  THEN
     IF  [: ." Generate a new keypair:" cr

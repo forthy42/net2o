@@ -1675,8 +1675,9 @@ Defer init-rest
 Variable initialized
 
 : init-client ( -- )  true initialized !@ 0= IF
-	init-cache net2o-client-port init-rest  THEN ;
-: init-server ( -- )  true initialized !@ 0= IF  net2o-port init-rest  THEN ;
+	init-dirs  net2o-client-port init-rest  THEN ;
+: init-server ( -- )  true initialized !@ 0= IF
+	init-dirs  net2o-port init-rest  THEN ;
 
 \ connection cookies
 

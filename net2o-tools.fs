@@ -460,7 +460,21 @@ $10 Constant datesize#
     over @ IF  over @ swap 2dup erase  free+guard  off
     ELSE  2drop  THEN ;
 
-\ file stuff
+\ scoping
+
+: scope{ ( "vocabulary" -- addr )
+    get-current also ' execute definitions ;
+: }scope ( addr -- )
+    previous set-current ;
+: scope: ( "vocabulary" -- addr )
+    vocabulary get-current also lastxt execute definitions ;
+
+: with ( "vocabulary" -- )
+    also ' execute postpone >o ; immediate restrict
+: endwith ( -- )
+    postpone o> previous ; immediate restrict
+
+\ file&config stuff
 
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
@@ -469,15 +483,65 @@ $10 Constant datesize#
 	r> =mkdir throw  true
     ELSE  2drop rdrop  false  THEN ;
 
-Variable net2o-dir$
-"~/.net2o" net2o-dir$ $!
+Vocabulary n2o-config
+
+scope{ n2o-config
+
+Variable .net2o/$
+Variable keys/$
+Variable chats/$
+
+}scope
+
+also n2o-config
+
+"~/.net2o/" .net2o/$ $!
+"~/.net2o/keys/" keys/$ $!
+"~/.net2o/chats/" chats/$ $!
 
 : .net2o/ ( addr u -- addr' u' )
-    [: net2o-dir$ $. '/' emit type ;] $tmp ;
+    [: .net2o/$ $. type ;] $tmp ;
+: .keys/ ( addr u -- addr' u' ) [: keys/$ $. type ;] $tmp ;
+: .chats/ ( addr u -- addr' u' ) [: chats/$ $. type ;] $tmp ;
 
-: ?.net2o ( -- )  net2o-dir$ $@ $1FF init-dir drop ;
+: ?.net2o ( -- )  .net2o/$ $@ $1FF init-dir drop ;
+: ?.net2o/keys ( -- flag ) ?.net2o keys/$ $@ $1C0 init-dir ;
+: ?.net2o/chats ( -- ) ?.net2o chats/$ $@ $1FF init-dir drop ;
 
-: init-cache ( -- ) ?.net2o s" .cache" .net2o/ $1FF init-dir drop ;
+Variable pubkey-file "pubkeys.k2o" .keys/ pubkey-file $!
+Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
+
+: read-config ( -- )
+    BEGIN  refill WHILE
+	    '=' parse [: type ." /$" ;] $tmp
+	    ['] n2o-config >body find-name-in ?dup-IF
+		execute >r source >in @ /string drop c@ '"' = IF
+		    1 >in +! \"-parse r> $!
+		ELSE  rdrop
+		    ." config string parse error: '" source type ." '" cr
+		THEN
+	    ELSE
+		." config variable wrong: '" source type ." '" cr
+	    THEN
+	    source nip >in !
+    REPEAT ;
+
+: ?.net2o-config ( -- )
+    "~/.net2o/config" 2dup file-status nip #-514 = IF
+	r/w create-file throw >r
+	".net2o=\"~/.net2o/\"" r@ write-line throw
+	"keys=\"~/.net2o/keys/\"" r@ write-line throw
+	"chats=\"~/.net2o/chats/\"" r@ write-line throw
+	r> close-file throw
+    ELSE  r/o open-file throw
+	['] read-config execute-parsing-file
+    THEN ;
+
+: init-dirs ( -- ) ?.net2o ?.net2o-config ;
+
+previous
+
+\ file stuff
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
@@ -554,20 +618,6 @@ no-fat-chars .net2o/ r/w create-file [IF] drop
     \G moving the existing file to backup ("~" appended to filename)
     \G and the new ("+" appended to filename) to the original name.
     >r 2dup >new r> over >r execute r> close-file throw >backup ;
-
-\ scoping
-
-: scope{ ( "vocabulary" -- addr )
-    get-current also ' execute definitions ;
-: }scope ( addr -- )
-    previous set-current ;
-: scope: ( "vocabulary" -- addr )
-    vocabulary get-current also lastxt execute definitions ;
-
-: with ( "vocabulary" -- )
-    also ' execute postpone >o ; immediate restrict
-: endwith ( -- )
-    postpone o> previous ; immediate restrict
 
 \ help display
 

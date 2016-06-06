@@ -42,10 +42,6 @@ Sema msglog-sema
 	drop  n2o:new-msg dup msg-context !
     THEN ;
 
-: .chats/ ( addr u -- addr' u' ) [: ." chats/" type ;] $tmp .net2o/ ;
-
-: init-chatlog ( -- ) ?.net2o "" .chats/ $1FF init-dir drop ;
-
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
 : msg-log@ ( group u -- addr u )
@@ -416,7 +412,7 @@ $200 Constant maxmsg#
     net2o-code expect-reply
     log !time end-with join, get-ip end-code ;
 
-: chat-entry ( -- )  init-chatlog  word-args
+: chat-entry ( -- )  ?.net2o/chats  word-args
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
 : wait-2s-key ( -- )
