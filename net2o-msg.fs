@@ -42,7 +42,9 @@ Sema msglog-sema
 	drop  n2o:new-msg dup msg-context !
     THEN ;
 
-: init-chatlog ( -- ) ?.net2o "chats" .net2o/ $1FF init-dir ;
+: .chats/ ( addr u -- addr' u' ) [: ." chats/" type ;] $tmp .net2o/ ;
+
+: init-chatlog ( -- ) ?.net2o "" .chats/ $1FF init-dir drop ;
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
@@ -57,7 +59,7 @@ Sema msglog-sema
       cell +LOOP ;]
     gen-cmd$ 2drop 0 tmp$ !@ enc-file !
     r> free throw  dispose o>
-    >chatid sane-85 [: net2o-dir$ $. ." /chats/" type ;] $tmp enc-filename $!
+    >chatid sane-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : vault>msg ( -- )
@@ -65,7 +67,7 @@ Sema msglog-sema
     is write-decrypt ;
 
 : load-msg ( group u -- )
-    >chatid sane-85 [: net2o-dir$ $. ." /chats/" type ." .v2o" ;] $tmp
+    >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  decrypt-file

@@ -462,10 +462,12 @@ $10 Constant datesize#
 
 \ file stuff
 
-: init-dir ( addr u flags -- ) >r
+: init-dir ( addr u mode -- flag ) >r
+    \G create a directory with access mode,
+    \G return true if the dictionary is new, false if it already existed
     2dup file-status nip #-514 = IF
-	r> =mkdir throw
-    ELSE  2drop rdrop  THEN ;
+	r> =mkdir throw  true
+    ELSE  2drop rdrop  false  THEN ;
 
 Variable net2o-dir$
 "~/.net2o" net2o-dir$ $!
@@ -473,9 +475,9 @@ Variable net2o-dir$
 : .net2o/ ( addr u -- addr' u' )
     [: net2o-dir$ $. '/' emit type ;] $tmp ;
 
-: ?.net2o ( -- )  net2o-dir$ $@ $1C0 init-dir ;
+: ?.net2o ( -- )  net2o-dir$ $@ $1FF init-dir drop ;
 
-: init-cache ( -- ) ?.net2o s" .cache" .net2o/ $1FF init-dir ;
+: init-cache ( -- ) ?.net2o s" .cache" .net2o/ $1FF init-dir drop ;
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
