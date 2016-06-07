@@ -66,8 +66,12 @@ Sema msglog-sema
     >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
-    vault>msg  decrypt-file
-    replay-mode off  skip-sig? off ;
+    vault>msg  ['] decrypt-file catch
+    ?dup-IF  DoError nothrow 2drop
+	\ try read backup instead
+	[: enc-filename $. '~' emit ;] $tmp ['] decrypt-file catch
+	?dup-IF  DoError nothrow 2drop  THEN
+    THEN  replay-mode off  skip-sig? off ;
 
 event: ->save-msgs over >r save-msgs r> free throw ;
 
