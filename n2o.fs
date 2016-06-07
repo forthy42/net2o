@@ -258,17 +258,12 @@ synonym searchkey keysearch
       drop free throw cr ;]
     arg-loop ;
 
-\ extra key files
+\ select config file
 
-: -pubkeys ( -- )
-    \U -pubkeys <filename> <next-cmd>
-    \G -pubkeys: Set filename for pubkeys
-    ?nextarg 0= ?EXIT  pubkey-file $! next-cmd ;
-
-: -seckeys ( -- )
-    \U -seckeys <filename> <next-cmd>
-    \G -seckeys: Set filename for seckeys
-    ?nextarg 0= ?EXIT  seckey-file $! next-cmd ;
+: -config ( -- )
+    \U -config <filename> <next-cmd>
+    \G -config: Set filename for config file
+    ?nextarg 0= ?EXIT  config-file$ $! next-cmd ;
 
 \ server mode
 

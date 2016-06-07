@@ -474,7 +474,11 @@ $10 Constant datesize#
 : endwith ( -- )
     postpone o> previous ; immediate restrict
 
-\ file&config stuff
+\ config stuff
+
+require config.fs
+
+\ net2o specific configurations
 
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
@@ -483,63 +487,33 @@ $10 Constant datesize#
 	r> =mkdir throw  true
     ELSE  2drop rdrop  false  THEN ;
 
-Vocabulary n2o-config
+scope{ config
 
-scope{ n2o-config
-
-Variable .net2o/$
-Variable keys/$
-Variable chats/$
+Variable .net2o$
+Variable keys$
+Variable chats$
 
 }scope
 
-also n2o-config
+also config
 
-"~/.net2o/" .net2o/$ $!
-"~/.net2o/keys/" keys/$ $!
-"~/.net2o/chats/" chats/$ $!
+"~/.net2o" .net2o$ $!
+"~/.net2o/keys" keys$ $!
+"~/.net2o/chats" chats$ $!
 
-: .net2o/ ( addr u -- addr' u' )
-    [: .net2o/$ $. type ;] $tmp ;
-: .keys/ ( addr u -- addr' u' ) [: keys/$ $. type ;] $tmp ;
-: .chats/ ( addr u -- addr' u' ) [: chats/$ $. type ;] $tmp ;
+: .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
+: .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
+: .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
 
-: ?.net2o ( -- )  .net2o/$ $@ $1FF init-dir drop ;
-: ?.net2o/keys ( -- flag ) ?.net2o keys/$ $@ $1C0 init-dir ;
-: ?.net2o/chats ( -- ) ?.net2o chats/$ $@ $1FF init-dir drop ;
+: ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
+: ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
+: ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
 
-Variable pubkey-file "pubkeys.k2o" .keys/ pubkey-file $!
-Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
-
-: read-config ( -- )
-    BEGIN  refill WHILE
-	    '=' parse [: type ." /$" ;] $tmp
-	    ['] n2o-config >body find-name-in ?dup-IF
-		execute >r source >in @ /string drop c@ '"' = IF
-		    1 >in +! \"-parse r> $!
-		ELSE  rdrop
-		    ." config string parse error: '" source type ." '" cr
-		THEN
-	    ELSE
-		." config variable wrong: '" source type ." '" cr
-	    THEN
-	    source nip >in !
-    REPEAT ;
-
-: write-config ( addr u -- )
-    r/w create-file throw >r
-    [: ['] n2o-config >body
-	[: dup name>string 2 - type .\" =\""
-	    execute $@ see-voc:c-\type '"' emit cr
-	;] map-wordlist ;] r@ outfile-execute
-    r> close-file throw ;
+Variable config-file$  "~/.net2o/config" config-file$ $!
 
 : ?.net2o-config ( -- )
-    "~/.net2o/config" 2dup file-status nip #-514 = IF
-	write-config
-	ELSE  r/o open-file throw
-	['] read-config execute-parsing-file
-    THEN ;
+    config-file$ $@ 2dup file-status nip
+    #-514 = IF  write-config  ELSE  read-config  THEN ;
 
 : init-dirs ( -- ) ?.net2o ?.net2o-config ;
 
