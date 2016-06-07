@@ -526,14 +526,18 @@ Variable seckey-file "seckeys.k2o" .keys/ seckey-file $!
 	    source nip >in !
     REPEAT ;
 
+: write-config ( addr u -- )
+    r/w create-file throw >r
+    [: ['] n2o-config >body
+	[: dup name>string 2 - type .\" =\""
+	    execute $@ see-voc:c-\type '"' emit cr
+	;] map-wordlist ;] r@ outfile-execute
+    r> close-file throw ;
+
 : ?.net2o-config ( -- )
     "~/.net2o/config" 2dup file-status nip #-514 = IF
-	r/w create-file throw >r
-	".net2o=\"~/.net2o/\"" r@ write-line throw
-	"keys=\"~/.net2o/keys/\"" r@ write-line throw
-	"chats=\"~/.net2o/chats/\"" r@ write-line throw
-	r> close-file throw
-    ELSE  r/o open-file throw
+	write-config
+	ELSE  r/o open-file throw
 	['] read-config execute-parsing-file
     THEN ;
 
@@ -565,7 +569,7 @@ filechars '/' -bit
 filechars #del -bit
 "\\:?*\q<>|" 2Constant no-fat-chars
 
-no-fat-chars .net2o/ r/w create-file [IF] drop
+?.net2o no-fat-chars .net2o/ r/w create-file [IF] drop
     no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
 [ELSE]
     close-file throw no-fat-chars .net2o/ delete-file throw
