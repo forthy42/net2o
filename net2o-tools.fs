@@ -313,10 +313,14 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     fsplit .2   ''' xemit  60e f*
     fsplit .2   '"' xemit 100e f*
     f>s .2 ;
+: .never ( -- )
+    date? 3 and 1 > IF ." never" ELSE 'n' emit THEN ;
+: .forever ( -- )
+    date? 3 and 1 > IF ." forever" ELSE 'f' emit THEN ;
 
 : .ticks ( ticks -- )  date? 0= IF  64drop  EXIT  THEN
-    64dup 64-0= IF  ." never" 64drop EXIT  THEN
-    64dup -1 n>64 64= IF  ." forever" 64drop EXIT  THEN
+    64dup 64-0= IF  .never 64drop EXIT  THEN
+    64dup -1 n>64 64= IF  .forever 64drop EXIT  THEN
     64>f 1e-9 f* >day
     dup today? date? 4 and 0= and
     date? dup >r 3 and to date?

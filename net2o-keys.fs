@@ -103,7 +103,7 @@ cmd-class class
     field: ke-prof     \ profile object
     field: ke-selfsig
     field: ke-sigs
-    field: ke-import   \ type of key import
+    field: ke-imports  \ bitmask of key import
     field: ke-storekey \ used to encrypt on storage
     field: ke-mask     \ permission mask
     64field: ke-offset \ offset in key file
@@ -137,16 +137,27 @@ drop
 enum import#self      \ private key
 enum import#manual    \ manual import
 enum import#scan      \ scan import
-enum import#chat      \ chat import
+enum import#chat      \ seen in chat
 enum import#dht       \ dht import
 enum import#invited   \ invitation import
 enum import#untrusted \ must be last
 drop
+$1F enum import#new   \ new format
+drop
+
+Create imports$ $20 allot imports$ $20 bl fill
+"Imscdiu" imports$ swap move
 
 Variable import-type  import#untrusted import-type !
 
 Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
-DOES> swap cells + @ attr! ;
+DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
+  cells + @ attr! ;
+
+: .imports ( mask -- )
+    imports$ $20 bounds DO
+	dup 1 and IF  I c@ emit  THEN  2/ LOOP
+    drop ;
 
 \ sample key
 
@@ -192,7 +203,7 @@ Variable sim-nick!
     key-entry-table @ token-table !
     ke-sk ke-end over - erase  >storekey @ ke-storekey !
     key-read-offset 64@ ke-offset 64!
-    import-type @ ke-import !
+    1 import-type @ lshift [ 1 import#new lshift ]L or ke-imports !
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
     2over key| key-table #! o>
     current-key ;
@@ -233,10 +244,10 @@ Variable sim-nick!
 : .pet0-base ( o:key -- )
     ke-pets $[]# IF  0 ke-pets $[]@ type 0 ke-pets# $[] @ .#
     ELSE  .nick-base  THEN ;
-: .real-nick ( o:key -- )   ke-import @ >im-color .nick-base <default> ;
-: .nick ( o:key -- )   ke-import @ >im-color .pet0-base <default> ;
+: .real-nick ( o:key -- )   ke-imports @ >im-color .nick-base <default> ;
+: .nick ( o:key -- )   ke-imports @ >im-color .pet0-base <default> ;
 : .nick+pet ( o:key -- )
-    ke-import @ >im-color .nick-base .pet-base <default> ;
+    ke-imports @ >im-color .nick-base .pet-base <default> ;
 
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
@@ -296,7 +307,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	I 4 85type  dup cells 85colors + @ attr! 1+
     I 4 + 4 85type <default> 8 +LOOP  drop ;
 : .import85 ( addr u -- )
-    ke-import @ >im-color 85type <default> ;
+    ke-imports @ >im-color 85type <default> ;
 : .rsk ( nick u -- )
     skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- ) drop cell+ >o
@@ -310,7 +321,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
     ke-selfsig $@ .sigdates
-    space ke-mask @ .perm space .nick+pet ;
+    space ke-mask @ .perm
+    space ke-imports @ .imports
+    space .nick+pet ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
     .key-rest cr ;
@@ -320,7 +333,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
       THEN o> ;] #map drop ;
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
-    ke-import @ >im-color 85type <default>
+    ke-imports @ >im-color 85type <default>
     space .nick space ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
@@ -485,7 +498,12 @@ $11 net2o: privkey ( $:string -- )
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
-    pw-level# 0< IF  64>n import#untrusted umin ke-import !
+    pw-level# 0< IF  64>n
+	dup [ 1 import#new lshift ]L and 0= IF
+	    import#untrusted umin 1 swap lshift
+	ELSE  [ 2 import#untrusted lshift 1- 1 import#new lshift or ]L and
+	THEN
+	ke-imports !
     ELSE  64drop  THEN ;
 +net2o: rskkey ( $:string --- )
     \g revoke key, temporarily stored
@@ -607,7 +625,7 @@ also net2o-base
     pack-core
     ke-pk $@ +cmdbuf
     ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
-    ke-import @ ulit, keyimport
+    ke-imports @ ulit, keyimport
     ke-mask @ nlit, keymask
     ke-pets [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
@@ -672,7 +690,8 @@ Variable cp-tmp
 
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
-    import#self ke-import !  ke-type !  ke-nick $!  nick!
+    [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
+    ke-type !  ke-nick $!  nick!
     pw-level# ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
@@ -764,7 +783,8 @@ $40 buffer: nick-buf
 
 : .pk2key$ ( addr u -- )
     read-pk2key$ sample-key >o
-    import#invited ke-import !  .key-invite free-key o> ;
+    [ 1 import#invited lshift 1 import#new lshift or ]L ke-imports !
+    .key-invite free-key o> ;
 
 \ select key by nick
 

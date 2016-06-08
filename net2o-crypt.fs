@@ -419,8 +419,8 @@ Defer search-key \ search if that is one of our pubkeys
 
 : .check ( flag -- ) '✘' '✔' rot select xemit ;
 : .sigdate ( tick -- )
-    64dup 64#0  64= IF  64drop ." forever"  EXIT  THEN
-    64dup 64#-1 64= IF  64drop ." never"    EXIT  THEN
+    64dup 64#0  64= IF  64drop .forever  EXIT  THEN
+    64dup 64#-1 64= IF  64drop .never    EXIT  THEN
     ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
 	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
     ELSE  64drop .ticks  THEN ;
