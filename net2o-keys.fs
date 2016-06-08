@@ -549,7 +549,7 @@ comp: :, previous ;
 
 : ?fd-keys ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     gen-keys-dir
-    addr u r/w open-file dup -514 = IF
+    addr u r/w open-file dup no-file# = IF
 	2drop addr u r/w create-file
     THEN  throw ;
 

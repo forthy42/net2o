@@ -480,10 +480,12 @@ require config.fs
 
 \ net2o specific configurations
 
+#-514 Constant no-file#
+
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
     \G return true if the dictionary is new, false if it already existed
-    2dup file-status nip #-514 = IF
+    2dup file-status nip no-file# = IF
 	r> =mkdir throw  true
     ELSE  2drop rdrop  false  THEN ;
 
@@ -513,7 +515,7 @@ Variable config-file$  "~/.net2o/config" config-file$ $!
 
 : ?.net2o-config ( -- )
     config-file$ $@ 2dup file-status nip
-    #-514 = IF  write-config  ELSE  read-config  THEN ;
+    no-file# = IF  write-config  ELSE  read-config  THEN ;
 
 : init-dirs ( -- ) ?.net2o ?.net2o-config ;
 
@@ -523,7 +525,7 @@ previous
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     ?.net2o
-    addr u r/w open-file dup -514 = IF
+    addr u r/w open-file dup no-file# = IF
 	2drop addr u r/w create-file
     THEN  throw ;
 
@@ -559,8 +561,6 @@ filechars #del -bit
     ['] sane-type $tmp ;
 
 \ copy files
-
-#-514 Constant no-file#
 
 : throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
