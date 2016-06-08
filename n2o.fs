@@ -401,9 +401,9 @@ synonym searchkey keysearch
 : -date ( -- )
     \U -date n <cmd>
     \G -date: set date precision to n
-    \G -date: 0 is least, 6 is highest
+    \G -date: 0 is least, 7 is highest
     ?nextarg 0= IF help ELSE
-	s>number drop to date?
+	s>number drop config:date# !
 	next-cmd THEN ;
 
 : -backtrace ( -- )

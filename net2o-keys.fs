@@ -148,14 +148,14 @@ drop
 Create imports$ $20 allot imports$ $20 bl fill
 "Imscdiu" imports$ swap move
 
-Variable import-type  import#untrusted import-type !
+Variable import-type  import#new import-type !
 
 Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
 DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
   cells + @ attr! ;
 
 : .imports ( mask -- )
-    imports$ $20 bounds DO
+    imports$ import#new bounds DO
 	dup 1 and IF  I c@ emit  THEN  2/ LOOP
     drop ;
 
@@ -199,9 +199,9 @@ Variable sim-nick!
 
 : key:new ( addr u -- o )
     \G create new key, addr u is the public key
-    sample-key >o
+    sample-key >o  ke-sk ke-end over - erase
     key-entry-table @ token-table !
-    ke-sk ke-end over - erase  >storekey @ ke-storekey !
+    >storekey @ ke-storekey !
     key-read-offset 64@ ke-offset 64!
     1 import-type @ lshift [ 1 import#new lshift ]L or ke-imports !
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
@@ -213,7 +213,8 @@ Variable sim-nick!
 : key?new ( addr u -- o )
     \G Create or lookup new key
     2dup key| key-table #@ drop
-    dup 0= IF  drop key:new  ELSE  nip nip cell+  THEN
+    dup 0= IF  drop key:new
+    ELSE  nip nip cell+  1 import-type @ lshift over .ke-imports or!  THEN
     dup to last-key ;
 
 \ search for keys - not optimized
@@ -500,10 +501,11 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
     pw-level# 0< IF  64>n
 	dup [ 1 import#new lshift ]L and 0= IF
-	    import#untrusted umin 1 swap lshift
-	ELSE  [ 2 import#untrusted lshift 1- 1 import#new lshift or ]L and
+	    import#untrusted umin 1 swap lshift [ 1 import#new lshift ]L or
+	ELSE
+	    [ 2 import#untrusted lshift 1- 1 import#new lshift or ]L and
 	THEN
-	ke-imports !
+	ke-imports or!
     ELSE  64drop  THEN ;
 +net2o: rskkey ( $:string --- )
     \g revoke key, temporarily stored
@@ -745,7 +747,7 @@ $40 buffer: nick-buf
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key .do-cmd-loop ?perm ;
+    sample-key >o ke-sk ke-end over - erase  do-cmd-loop o> ?perm ;
 
 : .key$ ( addr u -- )
     sample-key >o  ke-sk ke-end over - erase
@@ -766,12 +768,12 @@ $40 buffer: nick-buf
     ?key-sfd read-keys-loop ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
-    pw-level# >r -1 to pw-level#  import#manual import-type !
+    pw-level# >r -1 to pw-level#  import#new import-type !
     ?key-pfd read-keys-loop
     r> to pw-level#  ;
 
 : read-keys ( -- )
-    read-key-loop read-pkey-loop import#untrusted import-type ! ;
+    read-key-loop read-pkey-loop import#new import-type ! ;
 
 : read-pk2key$ ( addr u -- )
     \g read a nested key into sample-key
@@ -824,7 +826,7 @@ $40 buffer: nick-buf
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o>
-    import#untrusted import-type ! ;
+    import#new import-type ! ;
 
 : renew-key ( revaddr u1 keyaddr u2 -- o )
     current-key >o replace-key o>
@@ -845,7 +847,7 @@ Variable dhtroot.n2o
 : +dhtroot ( -- )
     defaultkey @ >storekey !
     import#manual import-type !  64#-1 key-read-offset 64!
-    dhtroot.n2o $@ do-key ;
+    dhtroot.n2o $@ do-key  import#new import-type ! ;
 
 : new-key ( nickaddr u -- )
     +newphrase key>default
@@ -903,7 +905,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig
     perm ke-mask !
-    import#untrusted import-type !  save-pubkeys o> ;
+    import#new import-type !  save-pubkeys o> ;
 
 : process-invitation ( addr u -- )
     key case

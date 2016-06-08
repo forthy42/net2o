@@ -274,6 +274,69 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
     c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
 
+\ scoping
+
+: scope{ ( "vocabulary" -- addr )
+    get-current also ' execute definitions ;
+: }scope ( addr -- )
+    previous set-current ;
+: scope: ( "vocabulary" -- addr )
+    vocabulary get-current also lastxt execute definitions ;
+
+: with ( "vocabulary" -- )
+    also ' execute postpone >o ; immediate restrict
+: endwith ( -- )
+    postpone o> previous ; immediate restrict
+
+\ config stuff
+
+require config.fs
+
+\ net2o specific configurations
+
+#-514 Constant no-file#
+
+: init-dir ( addr u mode -- flag ) >r
+    \G create a directory with access mode,
+    \G return true if the dictionary is new, false if it already existed
+    2dup file-status nip no-file# = IF
+	r> =mkdir throw  true
+    ELSE  2drop rdrop  false  THEN ;
+
+scope{ config
+
+Variable .net2o$
+Variable keys$
+Variable chats$
+Variable date#
+
+}scope
+
+also config
+
+"~/.net2o" .net2o$ $!
+"~/.net2o/keys" keys$ $!
+"~/.net2o/chats" chats$ $!
+2 date# !
+
+: .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
+: .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
+: .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
+
+: ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
+: ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
+: ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
+
+Variable config-file$  "~/.net2o/config" config-file$ $!
+
+: ?.net2o-config ( -- )
+    config-file$ $@ 2dup file-status nip
+    no-file# = IF  write-config  ELSE  read-config  THEN ;
+
+: init-dirs ( -- ) ?.net2o ?.net2o-config ;
+
+previous
+
 \ print time
 
 64Variable tick-adjust
@@ -285,7 +348,8 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
-2 Value date?
+: date? ( -- n )  config:date# @ ;
+
 : today? ( day -- flag )
     ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
@@ -323,12 +387,12 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     64dup -1 n>64 64= IF  .forever 64drop EXIT  THEN
     64>f 1e-9 f* >day
     dup today? date? 4 and 0= and
-    date? dup >r 3 and to date?
+    date? dup >r 3 and config:date# !
     IF
 	drop .timeofday
     ELSE
 	.day date? 1 > IF .timeofday ELSE fdrop THEN
-    THEN  r> to date? ;
+    THEN  r> config:date# ! ;
 
 \ insert into sorted string array, discarding n bytes at the end
 
@@ -464,67 +528,6 @@ $10 Constant datesize#
     over @ IF  over @ swap 2dup erase  free+guard  off
     ELSE  2drop  THEN ;
 
-\ scoping
-
-: scope{ ( "vocabulary" -- addr )
-    get-current also ' execute definitions ;
-: }scope ( addr -- )
-    previous set-current ;
-: scope: ( "vocabulary" -- addr )
-    vocabulary get-current also lastxt execute definitions ;
-
-: with ( "vocabulary" -- )
-    also ' execute postpone >o ; immediate restrict
-: endwith ( -- )
-    postpone o> previous ; immediate restrict
-
-\ config stuff
-
-require config.fs
-
-\ net2o specific configurations
-
-#-514 Constant no-file#
-
-: init-dir ( addr u mode -- flag ) >r
-    \G create a directory with access mode,
-    \G return true if the dictionary is new, false if it already existed
-    2dup file-status nip no-file# = IF
-	r> =mkdir throw  true
-    ELSE  2drop rdrop  false  THEN ;
-
-scope{ config
-
-Variable .net2o$
-Variable keys$
-Variable chats$
-
-}scope
-
-also config
-
-"~/.net2o" .net2o$ $!
-"~/.net2o/keys" keys$ $!
-"~/.net2o/chats" chats$ $!
-
-: .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
-: .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
-: .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
-
-: ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
-: ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
-: ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
-
-Variable config-file$  "~/.net2o/config" config-file$ $!
-
-: ?.net2o-config ( -- )
-    config-file$ $@ 2dup file-status nip
-    no-file# = IF  write-config  ELSE  read-config  THEN ;
-
-: init-dirs ( -- ) ?.net2o ?.net2o-config ;
-
-previous
-
 \ file stuff
 
 : ?fd ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
@@ -569,6 +572,7 @@ filechars #del -bit
 : throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
 : >backup ( addr u -- )
+    1 tmp$# +!@ drop \ !!FIXME!! find out why this workaround is needed
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
     2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
 
