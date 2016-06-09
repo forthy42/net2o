@@ -571,8 +571,9 @@ filechars #del -bit
 
 : throw?exists ( throwcode -- )  dup no-file# <> and throw ;
 
+$1F to tmps# \ need more temporaries
+
 : >backup ( addr u -- )
-    1 tmp$# +!@ drop \ !!FIXME!! find out why this workaround is needed
     2dup 2dup [: type '~' emit ;] $tmp rename-file throw?exists
     2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file throw ;
 
