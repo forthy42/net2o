@@ -138,36 +138,7 @@ debug: dummy(
 : max!@ ( n addr -- )    >r r@ @ max  r> !@ ;
 : umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
 
-\ generic stack using string array primitives
-
-[IFUNDEF] deque@
-
-    : deque@ ( deque -- x1 .. xn n )
-	\G fetch everything from the generic deque to the data stack
-	$@ dup cell/ >r bounds ?DO  I @  cell +LOOP  r> ;
-    : deque! ( x1 .. xn n deque -- )
-	\G set the generic deque with values from the data stack
-	>r cells r@ $!len
-	r> $@ bounds cell- swap cell- -DO  I !  cell -LOOP ;
-    
-    : >deque ( x deque -- )
-	\G push to top of deque
-	>r r@ $@len cell+ r@ $!len
-	r> $@ + cell- ! ;
-    : deque> ( deque -- x )
-	\G pop from top of deque
-	>r r@ $@ ?dup-IF  + cell- @ r@ $@len cell- r> $!len
-	ELSE  drop rdrop  THEN ;
-    : deque< ( x deque -- )
-	\G push to bottom of deque
-	>r r@ $@len cell+ r@ $!len
-	r@ $@ cell- over cell+ swap move
-	r> $@ drop ! ;
-    : <deque ( deque -- x )
-	\G pop from bottom of deque
-	>r r@ $@ IF  @ r@ 0 cell $del  ELSE  drop 0  THEN
-	rdrop ;
-[THEN]
+\ user stack, automatic init+dispose
 
 : ustack ( "name" -- )
     \G generate user stack, including initialization and free on thread
