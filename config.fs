@@ -22,8 +22,7 @@ Vocabulary config
 Variable config-recognizer
 \G The config recognizer
 
-' rec:num A, ' rec:float A, ' rec:string A,
-3 config-recognizer !
+' rec:string ' rec:float ' rec:num 3 config-recognizer deque!
 
 : .config-err ( -- )
     ." unknown config variable: '" source type ." '" cr ;

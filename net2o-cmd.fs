@@ -123,8 +123,8 @@ end-class cmd-buf-c
 
 \ object stack
 
-: o-pop ( o:o1 o:x -- o1 o:x ) object-stack stack> ;
-: o-push ( o1 o:x -- o:o1 o:x ) object-stack >stack ;
+: o-pop ( o:o1 o:x -- o1 o:x ) object-stack deque> ;
+: o-push ( o1 o:x -- o:o1 o:x ) object-stack >deque ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
     >o r> o-push  o IF  1 req? !  THEN ;
@@ -135,8 +135,8 @@ end-class cmd-buf-c
 
 \ token stack - only for decompiling
 
-: t-push ( addr -- )  t-stack >stack ;
-: t-pop ( -- addr )   t-stack stack> ;
+: t-push ( addr -- )  t-stack >deque ;
+: t-pop ( -- addr )   t-stack deque> ;
 : t# ( -- n ) t-stack $[]# ;
 
 \ float are stored big endian.
@@ -609,12 +609,12 @@ User neststart#
 : cmd-resolve> ( -- addr u )
     nest$ over >r dup n>64 cmdtmp$ dup fwd# u> !!cmdfit!!
     r> over - swap move
-    nest-stack stack> neststart# ! ;
+    nest-stack deque> neststart# ! ;
 
 also net2o-base
 
 : +zero16 ( -- ) "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ;
-: sign[ ( -- ) neststart# @ nest-stack >stack
+: sign[ ( -- ) neststart# @ nest-stack >deque
     string "\x80\x80" +cmdbuf cmdbuf$ nip neststart# ! ;
 : nest[ ( -- ) sign[ +zero16 ; \ add space for IV
 : ']sign ( xt -- )

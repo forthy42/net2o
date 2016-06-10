@@ -140,26 +140,34 @@ debug: dummy(
 
 \ generic stack using string array primitives
 
-: stack> ( stack -- x ) >r
-    \G generic single-stack pop
-    r@ $[]# dup 0= !!stack-empty!!
-    1- dup r@ $[] @ swap cells r> $!len ;
-: >stack ( x stack -- )
-    \G generic single-stack push
-    dup $[]# swap $[] ! ;
-: bottom> ( stack -- x )
-    r@ $[]# dup 0= !!stack-empty!!
-    >r 0 r@ $[] @ r> 0 cell $del ;
-: >bottom ( x stack -- )
-    >r { w^ x } x cell r> 0 $ins ;
+[IFUNDEF] deque@
 
-: stack@ ( stack -- x1 .. xn n )
-    \G fetch everything from the generic stack to the data stack
-    $@ dup cell/ >r bounds ?DO  I @  cell +LOOP  r> ;
-: stack! ( x1 .. xn n stack -- )
-    \G set the generic stack with values from the data stack
-    >r cells r@ $!len
-    r> $@ bounds cell- swap cell- -DO  I !  cell -LOOP ;
+    : deque@ ( deque -- x1 .. xn n )
+	\G fetch everything from the generic deque to the data stack
+	$@ dup cell/ >r bounds ?DO  I @  cell +LOOP  r> ;
+    : deque! ( x1 .. xn n deque -- )
+	\G set the generic deque with values from the data stack
+	>r cells r@ $!len
+	r> $@ bounds cell- swap cell- -DO  I !  cell -LOOP ;
+    
+    : >deque ( x deque -- )
+	\G push to top of deque
+	>r r@ $@len cell+ r@ $!len
+	r> $@ + cell- ! ;
+    : deque> ( deque -- x )
+	\G pop from top of deque
+	>r r@ $@ ?dup-IF  + cell- @ r@ $@len cell- r> $!len
+	ELSE  drop rdrop  THEN ;
+    : deque< ( x deque -- )
+	\G push to bottom of deque
+	>r r@ $@len cell+ r@ $!len
+	r@ $@ cell- over cell+ swap move
+	r> $@ drop ! ;
+    : <deque ( deque -- x )
+	\G pop from bottom of deque
+	>r r@ $@ IF  @ r@ 0 cell $del  ELSE  drop 0  THEN
+	rdrop ;
+[THEN]
 
 : ustack ( "name" -- )
     \G generate user stack, including initialization and free on thread
