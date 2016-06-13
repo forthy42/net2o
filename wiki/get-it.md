@@ -27,8 +27,11 @@ part is not searched if you don't have that list, then Gforth fails to
 install the gforth-common part.
 
 There are actually three repositories: stable, testing and unstable;
-at the moment, all packages are the same.  Binaries are available for
-amd64, i386, powerpc, armel, and armhf.
+at the moment, all packages are the same; when net2o matures,
+stable/testing/unstable will get different roles, just like Debian
+(stable=old and rusted, testing=new and somewhat tested, unstable=most
+recent).  Binaries are available for amd64, i386, powerpc, armel,
+armhf, arm64, mips, and mipsel.  More to come...
 
 Get it for Android
 ------------------
