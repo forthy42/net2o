@@ -294,6 +294,8 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-last? ( tick -- ) msg:last ;
 +net2o: msg-coord ( $:gps -- )
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
++net2o: msg>group ( $:group -- ) \g just set group
+    $> >group ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop msg+
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN
@@ -745,7 +747,8 @@ also net2o-base
     end-with cookie+request end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
-    net2o-code expect-reply msg  .reconnect,  end-with  end-code| ;
+    net2o-code expect-reply msg last# $@ $, msg>group
+    .reconnect,  end-with  end-code| ;
 previous
 
 : send-reconnect ( group -- )
@@ -771,14 +774,11 @@ previous
     msg-groups ['] leave-chat #map ;
 
 : split-load ( group -- )
-    cell+ dup >r $@ bounds U+DO
-	I' I - 2 cells u>= IF
-	    I 2@ .send-reconnect1
-	    I cell+ @ >o o to connection disconnect-me o>
-	    I cell+ off
-	THEN
-    2 cells +LOOP
-    0 r> del$cell ;
+    cell+ >r 0
+    BEGIN  dup 1+ r@ $[]# u<  WHILE
+	    dup r@ $[] 2@ .send-reconnect1
+	    1+ dup r@ $[] @ >o o to connection disconnect-me o>
+    REPEAT drop rdrop ;
 
 scope{ /chat
 : split ( -- )
