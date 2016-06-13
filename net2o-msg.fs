@@ -727,20 +727,25 @@ scope{ /chat
 }scope
 
 also net2o-base
-: reconnect, ( group -- )
-    cell+ $@ cell safe/string bounds ?DO
-	[: 0 punch-addrs $[] @ o>addr forth:type
-	  pubkey $@ key| tuck forth:type forth:emit ;]
-	I @ .$tmp
-	reconnect( ." send reconnect: " 2dup 2dup + 1- c@ 1+ - .addr$ forth:cr )
-	$, msg-reconnect
+: reconnect, ( o:connection -- )
+    [: 0 punch-addrs $[] @ o>addr forth:type
+      pubkey $@ key| tuck forth:type forth:emit ;] $tmp
+    reconnect( ." send reconnect: " 2dup 2dup + 1- c@ 1+ - .addr$ forth:cr )
+    $, msg-reconnect ;
+
+: reconnects, ( group -- )
+    cell+ $@ cell safe/string bounds U+DO
+	I @ .reconnect,
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
     net2o-code expect-reply msg
-    dup  $@ ?destpk $, msg-leave  reconnect,
+    dup  $@ ?destpk $, msg-leave  reconnects,
     sign[ msg-start "left" $, msg-action msg>
     end-with cookie+request end-code| ;
+
+: send-reconnect1 ( o o:connection -- ) o to connection
+    net2o-code expect-reply msg  .reconnect,  end-with  end-code| ;
 previous
 
 : send-reconnect ( group -- )
@@ -764,6 +769,23 @@ previous
 
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;
+
+: split-load ( group -- )
+    cell+ dup >r $@ bounds U+DO
+	I' I - 2 cells u>= IF
+	    I 2@ .send-reconnect1
+	    I cell+ @ >o o to connection disconnect-me o>
+	    I cell+ off
+	THEN
+    2 cells +LOOP
+    0 r> del$cell ;
+
+scope{ /chat
+: split ( -- )
+    \U split                split load
+    \G split: reduce distribution load by reconnecting
+    msg-group$ $@ >group last# split-load ;
+}scope
 
 : do-chat ( -- ) chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
