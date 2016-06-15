@@ -17,8 +17,10 @@
 
 require net2o-err.fs
 require unix/pthread.fs
+require unix/mmap.fs
 require 64bit.fs
 require date.fs
+require ansi.fs
 
 \ enum
 
@@ -229,6 +231,16 @@ debug: dummy(
 	BEGIN  2dup or  WHILE  over $7F and $80 or r> 1- dup >r c! 7 64rshift  REPEAT
 	2drop rdrop r> ;
 [THEN]
+
+: zz>n ( 64zz -- 64n )
+    64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
+: n>zz ( 64n -- 64zz )
+    64dup 64-0< n>64 64swap 64-2* 64xor ;
+
+: ps!+ ( 64n addr -- addr' )
+    >r n>zz r> p!+ ;
+: ps@+ ( addr -- 64n addr' )
+    p@+ >r zz>n r> ;
 
 [IFUNDEF] w, : w, ( w -- )  here w! 2 allot ; [THEN]
 
@@ -660,5 +672,7 @@ Sema resize-sema
 	?int dup  WHILE  xt .loop-err  REPEAT
     drop false ;
 
-: ?ior-again ( n -- )
-    errno EAGAIN <> and ?ior ;
+[IFDEF] EAGAIN
+    : ?ior-again ( n -- )
+	errno EAGAIN <> and ?ior ;
+[THEN]

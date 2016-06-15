@@ -56,16 +56,6 @@ end-class cmd-buf-c
 
 \ command helper
 
-: zz>n ( 64zz -- 64n )
-    64dup 1 64rshift 64swap 64>n 1 and negate n>64 64xor ;
-: n>zz ( 64n -- 64zz )
-    64dup 64-0< n>64 64swap 64-2* 64xor ;
-    
-: ps!+ ( 64n addr -- addr' )
-    >r n>zz r> p!+ ;
-: ps@+ ( addr -- 64n addr' )
-    p@+ >r zz>n r> ;
-
 : p@ ( -- 64u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! ;
 : ps@ ( -- 64n ) p@ zz>n ;
 

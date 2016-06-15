@@ -24,7 +24,12 @@
 \ As all comments are stripped during the compilation, please
 \ insert the copyright notice of the original file here.
 
+require net2o-tools.fs
+require mini-oof2.fs
+
 c-library bdelta
+    \c #include <bdelta.h>
+    s" bdelta" add-lib
 
 \ ----===< int constants ===>-----
 1	constant BDELTA_GLOBAL
@@ -48,3 +53,76 @@ c-function bdelta_getError bdelta_getError a -- n
 c-function bdelta_showMatches bdelta_showMatches a -- void
 
 end-c-library
+
+Variable bfile1$
+Variable bfile2$
+
+: bslurp ( addr1 u1 addr2 u2 -- )
+    bfile2$ $slurp-file  bfile1$ $slurp-file ;
+
+: bdelta-init ( addr1 u1 addr2 u2 -- o )
+    bfile1$ $@ 0  bfile2$ $@ 0  bdelta_init_alg ;
+
+: bd-pass { bs mins flags -- } ( o:b )
+    o bs mins 0. flags bdelta_pass
+    o BDELTA_REMOVE_OVERLAP bdelta_clean_matches ;
+
+: bd-passes ( o:b -- )
+    997 1994 0 bd-pass
+    503 1006 0 bd-pass
+    127  254 0 bd-pass
+    031   62 0 bd-pass
+    007   14 0 bd-pass
+    005   10 0 bd-pass
+    003    6 0 bd-pass
+    013   26 BDELTA_GLOBAL bd-pass
+    007   14 0 bd-pass
+    005   10 0 bd-pass ;
+
+10 buffer: p-tmp
+
+: .p ( x64 -- )
+    p-tmp p!+ p-tmp tuck - type ;
+: .ps ( x64 -- )
+    p-tmp ps!+ p-tmp tuck - type ;
+
+: .diff ( o:b -- )
+    0 dup dup 64#0 64dup 64dup
+    { p1' p2' fp 64^ p1 64^ p2 64^ numr }
+    o bdelta_numMatches 0 ?DO
+	o i p1 p2 numr bdelta_getMatch
+	p2 64@ p2' n>64 64- 64dup .p 64>n >r
+	bfile2$ $@ fp /string r> umin dup >r type r> fp + to fp
+	p1 64@ p1' n>64 64- .ps
+	numr 64@ 64dup .p
+	64dup 64>n fp + to fp
+	64dup p1 64@ 64+ 64>n to p1'
+	p2 64@ 64+ 64>n to p2'
+    LOOP
+    bfile2$ $@ fp /string dup IF
+	dup n>64 .p type
+    ELSE  2drop  THEN ;
+
+Variable bdelta$
+
+: b$off ( -- )
+    bfile1$ $off bfile2$ $off  bdelta$ $off ;
+
+: bdelta ( addr1 u1 addr2 u2 -- addr3 u3 ) bslurp
+    [: bdelta-init >o bd-passes .diff o bdelta_done_alg o>
+	 ;] bdelta$ $exec bdelta$ $@ ;
+
+: .bpatch ( -- )
+    0 { fp }
+    bdelta$ $@ bounds U+DO
+	I p@+ >r 64>n r> swap 2dup <info> type +
+	dup I' < IF
+	    ps@+ >r 64>n fp + to fp
+	    bfile1$ $@ fp safe/string
+	    r> p@+ >r 64>n dup fp + to fp umin <warn> type r>
+	THEN
+    I - +LOOP <default> ;
+
+: bpatch ( addr1 u1 addr2 u2 -- addr3 u3 )
+    bslurp 0 bfile2$ !@ bdelta$ ! ['] .bpatch bfile2$ $exec
+    bfile2$ $@ ;
