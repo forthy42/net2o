@@ -26,14 +26,14 @@ bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
 LIBCCDEST = $(libdir)/gforth/$(VERSION)/$(machine)/libcc-named/
 libccdir = $(subst $(package),,$(LIBCCDEST))
-LIBS 	 = keccak threefish ed25519-donna
+LIBS 	 = keccak threefish ed25519-donna bdelta
 MKDIR	 = mkdir
 GCC	 = gcc
 LIBTOOL	 = @GNU_LIBTOOL@
 CFLAGS	 = -O3 -fomit-frame-pointer
 HOST     = 
 FAST     = @FAST@
-FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs
+FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
 ifeq "$(FAST)" "yes"
 FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
 endif

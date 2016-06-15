@@ -1,0 +1,1048 @@
+commit 45caf256ef29303a2b3ad323b6727b8106868ab8
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 23:12:24 2016 +0200
+
+    Remove read plugin; all operations now must be memory-mapped
+
+commit 0dde28511ab0b67db446ae19f57d2598e12a3002
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 16:19:44 2016 +0200
+
+    Remove index arrays, no longer needed
+
+commit 5ce6081fcffa0b8622fad3b00f2063cf57eb4077
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 02:47:40 2016 +0200
+
+    bump up file version
+
+commit 4068861a97acb666a9138cb11b3c022c5b06782d
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 02:39:59 2016 +0200
+
+    comments, rename patch file location to patch file number to improve understandability (no seeks in patch file)
+
+commit da4eb2dc45840c9c066a71b968a759dcf2234cf0
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 02:21:49 2016 +0200
+
+    use fseeko for seeks, don't write integer size into new file format
+
+commit b7161b21f4994fd3dbac051a4f9b514d0a49deac
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Wed Jun 15 02:03:24 2016 +0200
+
+    use 64 bit position data type
+
+commit 895fed8986df8d5d506b1130334fda737f7ca218
+Author: Bernd Paysan <bernd.paysan@gmx.de>
+Date:   Tue Jun 14 22:41:03 2016 +0200
+
+    applied Fefe's patch
+
+commit 53e49e1989fbc5bed12865a6dcda1e3050627249
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Tue Jan 29 22:42:30 2013 -0600
+
+    Enable exceptions in Windows for STL ("/EHsc")
+
+commit ba770e1be974f2a7a2ce9a3f054450bc15a2e233
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 15:38:12 2013 -0600
+
+    Switch licenses to MPL / public domain
+
+commit 1336d3f32dbfab140babe3b49fa550ec04b55951
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 15:29:59 2013 -0600
+
+    Add .gitignore
+
+commit a936fed8423e7b6f665e86f632fb95370c86a4e2
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 15:24:00 2013 -0600
+
+    Automatically pick version based on git repository
+
+commit 989371cffc0f0a48db5542c8ec95286fef428b91
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 12:20:07 2013 -0600
+
+    Remove Changelog
+
+commit 4f32df2f9ef47e65d32e4d0de505c6ecda7ae0cf
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 12:19:29 2013 -0600
+
+    Update Python sample code
+
+commit 38f96ca658b59c21358a575e91925ca748e90cfb
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Fri Jan 18 12:14:22 2013 -0600
+
+    Rewrite README file
+
+commit 9a769e2696a97337af77e21c52bcbf3d4b3b6a34
+Author: John Whitney <jjw@superpower.(none)>
+Date:   Wed Dec 5 12:01:37 2012 -0600
+
+    Make sure sentry Match is deleted
+    
+    Matches can be placed before the front dummy sentry Match, so a search is necessary when it's time to delete it.
+
+commit 545ddd4ef23e792f246ba6d76c9efd8c1bd02d8b
+Author: John Whitney <jjw@superpower.(none)>
+Date:   Tue Dec 4 11:37:28 2012 -0600
+
+    Don't read beyond the end of buffers
+    
+    Fixes an off-by-one error in libbdelta where one token too many was being read from the end of a buffer, and could cause a crash when the buffer was user-supplied.
+
+commit 3c6ba6eb41c1fb145648c2f726cf8d8e0ecaf20c
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Wed Nov 14 05:59:31 2012 -0600
+
+    Place longer matches first when sorting
+
+commit c0aeea5a46bf4bd793de37874bd4b7f05b0419f5
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Tue Nov 13 17:10:17 2012 -0600
+
+    Optimize and improve some functions
+
+commit 1fbff0ad8c2987eecff2cef1be744a30df538fd6
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Thu Nov 1 20:20:50 2012 -0500
+
+    Eliminate build warning for bdelta's Python library
+
+commit 55c9b3fad9b8df5d30f5811d424c1b5ea5be67e6
+Author: John Whitney <jjw@emsoftware.com>
+Date:   Thu Nov 1 19:45:57 2012 -0500
+
+    Add BSD/Mac Makefile support
+
+commit 31559b0000cd683d9f8aa3e837bea8ced1f8aaa6
+Merge: f199354 073172f
+Author: John Whitney <jjwhitney@gmail.com>
+Date:   Thu Nov 1 17:22:23 2012 -0700
+
+    Merge pull request #3 from trofi/master
+    
+    file.h: limit maximum amount of file I/O by 1MB
+
+commit 073172fa71bd995a8a1498ada9d9c024afd25153
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Thu Nov 1 13:30:15 2012 +0300
+
+    file.h: cleanup constness of buffer pointer
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit b67335235d1e72ce640aec1dd15bba20b0b4e868
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Thu Nov 1 13:04:45 2012 +0300
+
+    Makefile: drop $(LDFLAGS) variable from static library archive
+
+commit 80e163d54c710492bbf6e493cc41fa1e08a08808
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Thu Nov 1 12:57:29 2012 +0300
+
+    libbdelta.cpp: amend types for format strings (gcc's -Wformat)
+    
+    Use %lu instead of %zu (mingw32-gcc and MSVC do not understand it
+    as their libc is C99 incompatible).
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 98945619d020e38586ae240cad13dfb3fe226a7e
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Thu Nov 1 12:59:21 2012 +0300
+
+    file.h: limit maximum amount of file I/O by 1MB
+    
+    The problem was observed when I tried to run
+    bdelta.exe --all-in-ram on 32-bit windows on
+    network-mounted files.
+    
+    fread(size=170MB) failed with 'out of memory' there.
+    
+    I think it is a result of network-attached drives is
+    implemented in userspace or calling process which leads
+    to massive memory overhead when reading/writing large
+    chunks of data.
+    
+    Fixed it by limiting I/O on 1MB size. It should I/O patterns
+    slightly better for fuse-mounted linux filesystems as well.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit f1993547d3351181979cbed7786002cd03bfc7d0
+Merge: c739523 da6e18a
+Author: John Whitney <jjwhitney@gmail.com>
+Date:   Wed Oct 31 09:11:03 2012 -0700
+
+    Merge pull request #2 from trofi/master
+    
+    Achieve 25% speedup in '--all-in-ram' mode
+
+commit da6e18a86e4d20aea0cf3ce6d288b214b1b39c89
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Oct 31 14:25:38 2012 +0300
+
+    bdelta: optimize --all-in-ram case by avoiding memcpy()
+    
+    libbdelta allows avoidance of temporary buffers if
+    caller guarantees persistence of read data.
+    
+    --all-in-ram case is exactly this kind of workload!
+    
+    Adjust memory reading function to just return pointer to data.
+    
+    On my workload it speeds things up about ~25%
+    
+        time ./bdelta --all-in-ram win32.udb.{old,new,old-new.bdt}
+        time bdelta --all-in-ram win32.udb.{old,new,old-new.bdt.orig}
+    
+        real    0m33.888s
+        user    0m28.790s
+        sys     0m2.316s
+    
+        real    0m39.990s
+        user    0m35.116s
+        sys     0m2.189s
+    
+    win32.udb.old and  win32.udb.new are files 171MB sized,
+    patch is 27MB with 1 million of chunks.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit f61f24a20454dc83b3da847a7bd89b532cf2377a
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Oct 31 12:11:34 2012 +0300
+
+    match_backward(): don't overrun buffer when user supplies block size more, than 4096 bytes
+    
+    User can (And I did) pass large block sizes for initial passes,
+    but the code is not ready for it:
+    
+        match_backward() {
+            ...
+            if (numtoread > blocksize) numtoread = blocksize;
+            Token buf1[4096], buf2[4096];
+            const Token *read1 = b->read1(buf1, p1, numtoread),
+            ...
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 744c29da69dd38f8ec69fb6f11c8f19f9dc1978d
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Thu Sep 27 13:56:38 2012 +0300
+
+    Makefile: support for static library (handy to make better optimized static binary)
+    
+    Usage example:
+        make libbdelta.a bdelta LDFLAGS=-static
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 3729c8e354d0d4e11e69521c9cd78d6679a77309
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Oct 31 12:06:10 2012 +0300
+
+    constify return value of 'read' callback.
+    
+    Make sure we don't modify data supplied by user.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit c739523a87cd98753743e25cdeeb325b94661e58
+Merge: fb0a916 47d4b35
+Author: John Whitney <jjwhitney@gmail.com>
+Date:   Thu Sep 27 22:36:22 2012 -0700
+
+    Merge pull request #1 from trofi/master
+    
+    bdelta: add '--all-in-ram' commandline option
+
+commit 47d4b352b9ad625103327ccccae94aa6c12b2895
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Sep 26 16:48:54 2012 +0300
+
+    bdelta: add '--all-in-ram' commandline option
+    
+    $ time ./bdelta /tmp/foo.{old,new} foo-old-to-new.bdt;  time ./bdelta --all-in-ram /tmp/foo.{old,new} foo-old-to-new.bdt
+    
+    real    3m19.176s
+    user    2m1.324s
+    sys     1m17.076s
+    
+    real    1m46.074s
+    user    1m41.454s
+    sys     0m3.669s
+    
+    File sizes are ~80 megabytes each.
+    The option greatly reduces I/O overhead (sys time) and speeds up delta creation.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit fb0a916b878e096b877c38bcedb30afa5eb65bb2
+Merge: 0293d8a 4e65a82
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Feb 16 23:44:46 2012 -0600
+
+    Merge branch 'experimental'
+    
+    Conflicts:
+    	src/bdelta.cpp
+    	src/bdelta_python.cpp
+    	src/libbdelta.cpp
+
+commit 4e65a824f0cdeaea1826cbd1d42c7a0098761647
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Feb 16 17:34:57 2012 -0600
+
+    Delete file which was accidentally added.
+
+commit 82ee29107ecb0873235deae086a2b857c77c0dca
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Feb 15 00:00:15 2012 -0600
+
+    Fix MSVC++ compile errors.
+
+commit 35e3b32c93ab8f8ed4d5797db99908ff5fe16775
+Author: John Whitney <jjw@deltup.org>
+Date:   Fri Jan 13 12:58:53 2012 -0600
+
+    Make sure we actually process the match we found.
+
+commit 09444d6766214f98807a18f3411d1cc3327b1ede
+Author: John Whitney <jjw@deltup.org>
+Date:   Fri Jan 13 10:35:26 2012 -0600
+
+    Use BDELTA_GLOBAL as a flag, instead of BDELTA_LOCAL. Also, fix BDelta's Python wrapper for flag handling.
+
+commit fed7950236474c3b5cc33b014873e3dbc09db1d9
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 12 23:41:20 2012 -0600
+
+    Add ability to require that the hole sides be ordered or the hole side be under a specified maximum.
+
+commit dd329e96ce62e0433c3267f9a0e53b4f9f9cbcae
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 12 23:23:17 2012 -0600
+
+    Use flags instead of boolean parameters.
+
+commit 9b545e66790e6d37f405e220b45ab93eb6fdb5a2
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Jan 11 16:08:47 2012 -0600
+
+    Use Cython to create a new Python wrapper which is much more functional than the old one.
+
+commit c8dcb556119085f784ac4289028cd48b3570ab8c
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Jan 11 14:26:58 2012 -0600
+
+    Make BDelta usable again as a C library.
+
+commit 94ef9a71043006e6d5bc1f7aeae5ac6ceda65d55
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 11:03:53 2012 -0600
+
+    Checkpoint 5
+
+commit 1d5d9d0a7a9e55ec22b765e7583653398c6e3f78
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 10:23:21 2012 -0600
+
+    Remove "THOROUGH" flag altogether, because it doesn't work anymore.
+
+commit 47f05ecd5096c4b4c37e31df4e12eabc3392ee81
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 9 16:56:39 2012 -0600
+
+    Small optimization.
+
+commit 3d5bd44df9ad776cf219d2d470776975161ca9f7
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 9 16:22:29 2012 -0600
+
+    Boost performance by quickly figuring out an appropriate hash table size.
+
+commit b965982961a5a97f381dc5fc45e42d2fa2cba3a1
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 9 15:54:40 2012 -0600
+
+    bdelta_pass_2() should return void.
+
+commit eff53208b9a2b5d3ae3c7067edea75ec54cd6155
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 9 15:43:33 2012 -0600
+
+    Clean up "verbose" output messages.
+
+commit d121bf30298a48092049c5d4f2d3cbbef591c687
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 9 15:08:41 2012 -0600
+
+    Remove useless "lastChecksum" check.
+
+commit 6d9b1c38ec44683789a38c960efdaac605deafe9
+Author: John Whitney <jjw@deltup.org>
+Date:   Sat Jan 7 13:26:56 2012 -0600
+
+    More Cleanups.
+
+commit 0a29a4057c14d868c57843ed9c9da01d3afe200e
+Author: John Whitney <jjw@deltup.org>
+Date:   Fri Jan 6 17:15:02 2012 -0600
+
+    Fixes
+
+commit 838ad715f85f25a28c1e6076330665c2590a8808
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 13:36:54 2012 -0600
+
+    Cleanups and important bug fix (prevent file read error.)
+
+commit b41c5caf5c48481fd44c9f6e48a0ecc3ce998ac4
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 22:44:49 2012 -0600
+
+    Remove old stats-collecting code.
+
+commit 3dcb563d5606ae3abb7d0cf4ffcebf59973103df
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 22:39:44 2012 -0600
+
+    Use "BDelta_Instance *" types instead of passing around "void *".
+
+commit 416cb5fece3af6e6264182d9d60a3b498bdf84f3
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 22:27:17 2012 -0600
+
+    Add ability to specify "removeOverlap" when cleaning matches.
+
+commit 4abff84ebe97ccc4c36fbf02ec6890488c853800
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 22:10:58 2012 -0600
+
+    Unify hole-finding algorithm and add extra features to the lib.
+
+commit e7a92ea48f898c34e71a96c75601272df4a4d30f
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 13:30:11 2012 -0600
+
+    Don't remove overlap prematurely.
+
+commit 87d994f42eef30173f27c710c9f5c71ba24a0560
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 13:29:56 2012 -0600
+
+    Checkpoint 4
+
+commit 14d6f790e8c2ee295e88d9b259423348561ead60
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 12:06:56 2012 -0600
+
+    Better picking when more than one checksum matches.
+
+commit 43eb252636eafc48b81a50aeca5a8a6098b77c47
+Author: John Whitney <jjw@deltup.org>
+Date:   Thu Jan 5 10:47:25 2012 -0600
+
+    Checkpoint 3
+
+commit 9c0cdea3cd0086431b4d91198ddc5a5d2b85c293
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Jan 4 23:26:30 2012 -0600
+
+    Add ability to switch inputs.
+
+commit e8a5feb8eb4e104d12d4b4cec145bfbe880e4c93
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 13:17:16 2012 -0600
+
+    Fix hash table issues.
+    
+    Most importantly, make sure identical checksums are always adjacent
+    when the list is sorted, since our "removal of repeated checksums" code
+    depends on it.
+
+commit 9baefe833cc7ce33fe1ca2adf597deccf5b13bb1
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Jan 4 13:08:12 2012 -0600
+
+    Checkpoint 2
+
+commit 7ca0bb098ec6f7ba48c85086bf1d3d6e4c29d283
+Author: John Whitney <jjw@deltup.org>
+Date:   Wed Jan 4 07:39:37 2012 -0600
+
+    Checkpoint 1
+
+commit ea1ee43560eddd5720a06f637ec46c2e47b87224
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 3 11:52:34 2012 -0600
+
+    New experimental ideas...
+    
+    This commit isn't meant to be used publicly.
+
+commit 829d1f0adc7919d4a502506a1456948a9c60fde8
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 15:49:33 2012 -0600
+
+    Clean "THOROUGH" mode code.
+
+commit a76cbaee77693a5645bbecb8fd61f80a28045567
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 14:09:28 2012 -0600
+
+    Use STL lists in place of our custom double-linked list implementation.
+
+commit ca1f92a9372e43abb7cbaecdf39d2a7476fbd1a8
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 11:43:03 2012 -0600
+
+    Use STL list to store "potential" checksum matches.
+    
+    Besides the advantage of using the standard, this change actually
+    reduces the code size on my machine - both source and compiled.
+
+commit ffd9861bc2ea1919daee2e27f34d5a7036f4a3bd
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 10:54:37 2012 -0600
+
+    Select matches more carefully.
+    
+    Only recognize matches that are at least "blocksize * 2" bytes.
+    Sometimes the "next pass" will find a better-suited match.
+    
+    Sample data sets:
+    1: "*-12(Benefits for Organizations*-12(Benefits for Countries..."
+    2: "-12(Benefits for Organizations-12(Benefits for Countries..."
+    
+    Without this patch, and with a blocksize of 16, the following blocks
+    are hashed:
+    "*-12(Benefits fo", "r Organizations*", "-12(Benefits for"
+    This causes the front of dataset 2 to be linked against the third
+    hashed block of dataset 1. (BAD!)
+    
+    With this patch, the hashes match, but the match won't be recognized
+    because it's only 17 bytes (needs to be 32).
+    The next pass hashes the following blocks:
+    "*-12(Ben", "efits fo", "r Organi", "zations*", "-12(Bene", "fits for"
+    Now there are two reliable hashes to latch onto.
+
+commit 0293d8aa8274be9e6f766b6fe1b48838b28752c1
+Author: John Whitney <jjw@deltup.org>
+Date:   Tue Jan 10 13:02:04 2012 -0600
+
+    Fix hash table issues.
+    
+    Most importantly, make sure identical checksums are always adjacent
+    when the list is sorted, since our "removal of repeated checksums" code
+    depends on it.
+
+commit ccd86b64202fd7c5f85c38619f853dc37aa1c8d8
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 15:49:33 2012 -0600
+
+    Clean "THOROUGH" mode code.
+
+commit 8dda18c99b0556b39afe2146dbe8ad0eb90c096d
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 14:09:28 2012 -0600
+
+    Use STL lists in place of our custom double-linked list implementation.
+
+commit c255459c403bc06a9e5ddcb3dc18999f912c35c7
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 11:43:03 2012 -0600
+
+    Use STL list to store "potential" checksum matches.
+    
+    Besides the advantage of using the standard, this change actually
+    reduces the code size on my machine - both source and compiled.
+
+commit 28694cacd18560a37d2888119dc72ca888136053
+Author: John Whitney <jjw@deltup.org>
+Date:   Mon Jan 2 10:54:37 2012 -0600
+
+    Select matches more carefully.
+    
+    Select matches more carefully.
+    
+    Only recognize matches that are at least "blocksize * 2" bytes.
+    Sometimes the "next pass" will find a better-suited match.
+    
+    Sample data sets:
+    1: "*-12(Benefits for Organizations*-12(Benefits for Countries..."
+    2: "-12(Benefits for Organizations-12(Benefits for Countries..."
+    
+    Without this patch, and with a blocksize of 16, the following blocks
+    are hashed:
+    "*-12(Benefits fo", "r Organizations*", "-12(Benefits for"
+    This causes the front of dataset 2 to be linked against the third
+    hashed block of dataset 1. (BAD!)
+    
+    With this patch, the hashes match, but the match won't be recognized
+    because it's only 17 bytes (needs to be 32).
+    The next pass hashes the following blocks:
+    "*-12(Ben", "efits fo", "r Organi", "zations*", "-12(Bene", "fits for"
+    Now there are two reliable hashes to latch onto.
+
+commit afcaed31ba3d245065acf5d4179cc2909d2d97ee
+Author: John Whitney <jjw@deltup.org>
+Date:   Fri Dec 30 15:59:16 2011 -0600
+
+    Clean up the main loop.
+    
+    - Properly fix the bug that was causing fatal read errors.
+    
+    - Tweak for better results.
+    
+    - Reorganize code.
+
+commit 34e5632ff7d21acd5da403a8c796983b5d15cd09
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Fri Dec 16 11:42:53 2011 +0300
+
+    HACK / DIRTY WORKAROUND to prevent bdelta from death
+    
+    Found a out-of-bounds file reading on the following samples today:
+    
+        http://anti-virus.by/samples/bdelta/2011-12-16/from.bin
+        http://anti-virus.by/samples/bdelta/2011-12-16/to.bin
+    
+    The patch attempts to skip tail checksumming, but i don't
+    know if the rest of code behaves correctly.
+    
+    NEEDS PROPER FIX
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit bddeb520d7166ba2293dda4fc37e050d9cb21d67
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Fri Dec 16 10:48:44 2011 +0300
+
+    libbdelta: fix delete / delete [] mismatch
+    
+    found by valgrind:
+    
+    ==17467== Mismatched free() / delete / delete []
+    ==17467==    at 0x4C2875E: operator delete(void*) (vg_replace_malloc.c:457)
+    ==17467==    by 0x4E32FFF: bdelta_pass (in bdelta/trunk/src/libbdelta.so)
+    ==17467==  Address 0x5b82fc0 is 0 bytes inside a block of size 8 alloc'd
+    ==17467==    at 0x4C28EC9: operator new[](unsigned long) (vg_replace_malloc.c:348)
+    ==17467==    by 0x4E32C55: bdelta_pass (in bdelta/trunk/src/libbdelta.so)
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 68727c8c04ddd6c32ff3524bfdb5b47d2d45ed67
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Fri Dec 16 10:46:07 2011 +0300
+
+    bdelta, bpatch: clean usage strung when ran without parameters
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 5ea56c0ba9f5f3b34fe5113f3f3ec335029e5f85
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Fri Dec 16 10:23:29 2011 +0300
+
+    bdelta, bpatch: show thrown error string instead of generic terminate() error
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 97b9c68c21f31fb4c96b61562460ef8a78838caa
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 21:52:00 2011 +0300
+
+    Makefile: create LIBDIR as well
+    
+    Useful when DISTDIR points to empty directory hierarchy
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 19c74b38c0f4a95a4b9a7cebb03f252773778d8b
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 21:43:07 2011 +0300
+
+    Makefile: fix paralell building (bdelta depends on it's shared library)
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit b93066e77ba3f6cf51ef632ee626c0bef57184f6
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 21:01:20 2011 +0300
+
+    Makefile: add 'make clean' target
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 9428c9609cca071234933cfb2bbc7a822d048ef5
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 21:01:20 2011 +0300
+
+    libbdelta: rename NDEBUG to DO_STATS_DEBUG
+    
+    As it activates quite specific spam to stdout.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 47b1b5cb396a3a15c17361f8f1389e23da902ecc
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 20:56:37 2011 +0300
+
+    makefile: restect user's LDFLAGS, CXXFLAGS and other variables
+    
+    Distros like to push extra LDFLAGS and CXXFLAGS to allow user
+    more freedom on optimization, debugging techniquires and
+    just clever random hacks.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 1dfbceeeea7de1d164edd1d02dabf39aeb133b6c
+Author: Sergei Trofimovich <slyfox@gentoo.org>
+Date:   Wed Dec 7 20:53:20 2011 +0300
+
+    bdelta.h: make header C compatible
+    
+    Exportaged names follow C calling. It's easier to
+    to pull library in in other languages.
+    
+    Before patch:
+        $ nm libbdelta.so_ | grep bdelta_
+        0000000000002a00 T _Z11bdelta_passPvj
+        00000000000022c0 T _Z15bdelta_done_algPv
+        00000000000022b0 T _Z15bdelta_getErrorPv
+        0000000000002220 T _Z15bdelta_getMatchPvjPjS0_S0_
+        0000000000002190 T _Z15bdelta_init_algjjPFPvS_S_jjES_S_j
+    
+    After patch:
+        $ nm libbdelta.so | grep bdelta_
+        00000000000022e0 T bdelta_done_alg
+        00000000000022d0 T bdelta_getError
+        0000000000002240 T bdelta_getMatch
+        00000000000021b0 T bdelta_init_alg
+        0000000000002a20 T bdelta_pass
+    
+    Converted global constants to enum.
+    
+    Signed-off-by: Sergei Trofimovich <slyfox@gentoo.org>
+
+commit 962c7e5c0f4415c40d6b6c11f5c44013d8081c52
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Dec 7 15:53:20 2011 +0000
+
+    Use heap allocation to prevent the stack from overflowing on large diffs.
+    
+    git-svn-id: svn://deltup.org/bdelta@41 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 9984ab7d1782c31e5d416cb6f379da309e76a318
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 20:43:52 2011 +0000
+
+    Fix bug that prevented the Python module from being placed in the right directory.
+    
+    git-svn-id: svn://deltup.org/bdelta@40 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 9ee26da248e874a56e1cbbe0476a20609bc54e07
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 19:44:34 2011 +0000
+
+    Bump version number to 0.2.3.
+    
+    git-svn-id: svn://deltup.org/bdelta@39 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 8324dc392f5f6d80fe9faa9470ae6753f5b22359
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 14:34:34 2011 +0000
+
+    Update Changelog for 0.2.3 release.
+    
+    git-svn-id: svn://deltup.org/bdelta@38 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 4025786c8ff841240b15babc4b79ac2b31ddacd9
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 14:26:02 2011 +0000
+
+    Remove python options from the makefiles. (To compile the python library, use setup.py instead.)
+    
+    git-svn-id: svn://deltup.org/bdelta@37 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 34805b3c30bfd50eff40ba66cb27c389632b4211
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 14:13:41 2011 +0000
+
+    Move setup.py to the root folder.
+    
+    git-svn-id: svn://deltup.org/bdelta@36 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 4c54dc0205ed023dd48a31892001f4e4a308cf41
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 14:00:45 2011 +0000
+
+    Code style fixes.
+    
+    git-svn-id: svn://deltup.org/bdelta@35 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit d4f6656f036ebf3f75fe3502aed2d023f8a637ce
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Nov 10 14:00:31 2011 +0000
+
+    Fixed read/write functions which were causing segfaults for the bpatch/bdelta utilities.
+    
+    git-svn-id: svn://deltup.org/bdelta@34 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit e35c221af94325a4a2afbd8871d96a0492ba350f
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 15 01:56:08 2011 +0000
+
+    Use distutils instead of the Makefile for building the Python extension.
+    
+    git-svn-id: svn://deltup.org/bdelta@33 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit adad2d5d7b13065379351a31e283db4b6a707307
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 14 18:40:15 2011 +0000
+
+    Update Changelog for version 0.2.2
+    
+    git-svn-id: svn://deltup.org/bdelta@31 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit b22640d253f0b222e92dbcc7c75d35c0f8a1093c
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 14 18:04:00 2011 +0000
+
+    Added project file for Visual C++ 2008.
+    
+    git-svn-id: svn://deltup.org/bdelta@29 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit bf10a44312894404da6cb80245d81e31de0154c6
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 14 16:33:09 2011 +0000
+
+    Fixed compiler warnings and bad line endings in some headers.
+    
+    git-svn-id: svn://deltup.org/bdelta@28 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 973b4ac819bbf43e594c881550c7f83d2085fb6b
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 14 13:47:00 2011 +0000
+
+    Eliminate some MS Visual C++ warnings by using unsigned values.
+    
+    git-svn-id: svn://deltup.org/bdelta@27 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit b55b6ffa5d6aeace75d3f3b7ff2996e4ca5cf458
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 14 13:29:24 2011 +0000
+
+    Improve compatibility with MS Visual C++ by not requiring the stdint.h header.
+    
+    git-svn-id: svn://deltup.org/bdelta@26 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 1423a64b5736a410f2c2ebeefe361d7e8efd520a
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 8 06:38:22 2011 +0000
+
+    Update Changelog for 0.2.1 release.
+    
+    git-svn-id: svn://deltup.org/bdelta@25 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit f280b155dfc2387c4f93de9e42488d2692e7e940
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 8 06:32:03 2011 +0000
+
+    Fixed typo.
+    
+    git-svn-id: svn://deltup.org/bdelta@24 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 0a44a271196b67d3b146b4c5b13580b265caf860
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu May 26 03:45:30 2011 +0000
+
+    Made compatible with MS Visual C++.
+    
+    git-svn-id: svn://deltup.org/bdelta@23 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 4c1a2e827314a70c3bb72c6f3e8f128919f90fba
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed May 25 21:42:12 2011 +0000
+
+    Made spacing more consistent.
+    
+    git-svn-id: svn://deltup.org/bdelta@22 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit e02dc14ec4c6083901e43ad1cfee103ea4b5e224
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue May 17 20:37:16 2011 +0000
+
+    Update Changelog and release BDelta 0.2.0.
+    
+    git-svn-id: svn://deltup.org/bdelta@21 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 9aeacbcca85745cebbf4adccf1ecbb5c0ad4cfd6
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue May 17 20:26:58 2011 +0000
+
+    Don't print debugging information when NDEBUG is defined.
+    
+    git-svn-id: svn://deltup.org/bdelta@20 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit c44d82b31003814291186eb2898f5add8d9e37aa
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jan 19 19:21:25 2011 +0000
+
+    Minor fixes.  Added ability to keep overlapping matches.
+    
+    git-svn-id: svn://deltup.org/bdelta@19 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 0bbe8ae94734609fe41cf9b52d2fa2af264de36a
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Nov 30 23:09:37 2010 +0000
+
+    Fixed Makefile formatting problem.
+    
+    git-svn-id: svn://deltup.org/bdelta@18 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 67580f9e4ea7c3228eef69715041458c8a95e484
+Author: jjwhitney <jjw@deltup.org>
+Date:   Fri Jun 4 23:24:49 2010 +0000
+
+    Tweaks.
+    
+    git-svn-id: svn://deltup.org/bdelta@17 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 98965d3d2c8fb694f4d51eb32f784a20d4a519cc
+Author: jjwhitney <jjw@deltup.org>
+Date:   Fri Jun 4 23:07:49 2010 +0000
+
+    Major modifications to the main match-finding loop.
+    
+    git-svn-id: svn://deltup.org/bdelta@16 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 49f5244b4ea529123ef7477765386d8d04d5a468
+Author: jjwhitney <jjw@deltup.org>
+Date:   Fri Jun 4 02:55:10 2010 +0000
+
+    More tweaks.
+    
+    git-svn-id: svn://deltup.org/bdelta@15 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit b9e04d92c07059b2efa3cf6c60230e22dffb2f0e
+Author: jjwhitney <jjw@deltup.org>
+Date:   Thu Jun 3 20:31:57 2010 +0000
+
+    Hash function tweaks.
+    
+    git-svn-id: svn://deltup.org/bdelta@14 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit d54aaaab1e7e7780989906275b823e7d853a8548
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 2 22:10:42 2010 +0000
+
+    Added support for Token sizes other than 1 byte.  BDelta can now process Unicode characters natively.
+    
+    git-svn-id: svn://deltup.org/bdelta@13 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit b933c04a9bf048bfd66e40e4a7364796d7195738
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 2 21:08:28 2010 +0000
+
+    Improved hash function struct.
+    
+    git-svn-id: svn://deltup.org/bdelta@12 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 08103feb12da8ae248f17028d4081b60f169ef73
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 2 20:04:32 2010 +0000
+
+    Modified the API so that callbacks: A) don't have to perform memory-management, and B) receive a state pointer so they won't have to use global variables.
+    
+    git-svn-id: svn://deltup.org/bdelta@11 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit c475fc29d0c6b3f2bce3e126104e607db7b3181c
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 2 02:32:21 2010 +0000
+
+    The test suite framework now displays timing information.
+    
+    git-svn-id: svn://deltup.org/bdelta@10 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit bade4ecc3b6b1095c0ca1edb40f37a0afb11eb84
+Author: jjwhitney <jjw@deltup.org>
+Date:   Wed Jun 2 02:31:27 2010 +0000
+
+    Code improvements.  Replaced qsort with the STL's sort.
+    
+    git-svn-id: svn://deltup.org/bdelta@9 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 5633636a5a3e70c69a626ff74a18755b6fd821f8
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue Jun 1 22:35:21 2010 +0000
+
+    Added simple tests.
+    
+    git-svn-id: svn://deltup.org/bdelta@8 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit aee9d801c1c8c50cf5afbed86425debfe2c404e5
+Author: jjwhitney <jjw@deltup.org>
+Date:   Sat May 22 01:07:27 2010 +0000
+
+    Hacks for Unicode and Python on Linux.
+    
+    git-svn-id: svn://deltup.org/bdelta@7 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit da70c6f99899d8099cd4c08f55230539550f3526
+Author: jjwhitney <jjw@deltup.org>
+Date:   Fri May 21 00:20:11 2010 +0000
+
+    Added simple Python binding and created Makefile for OS X.
+    
+    git-svn-id: svn://deltup.org/bdelta@6 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 62a132609cc4d78e0d849b0736fecbd0218915f8
+Author: jjwhitney <jjw@deltup.org>
+Date:   Mon Jan 4 19:56:25 2010 +0000
+
+    Added Makefile dependencies and changed pow() to powChecksum() to avoid confusion.
+    
+    git-svn-id: svn://deltup.org/bdelta@5 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit e696b2278681f8256c3d5b44edddc22324278389
+Author: jjwhitney <jjw@deltup.org>
+Date:   Mon Jan 4 18:14:56 2010 +0000
+
+    Fixed buffer over-read in match_buf_forward().
+    
+    git-svn-id: svn://deltup.org/bdelta@4 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 238dca3de1c379cc545cd5f307cd0983819a6c09
+Author: jjwhitney <jjw@deltup.org>
+Date:   Mon Jan 4 07:27:39 2010 +0000
+
+    Merged in improvements from experimental versions.
+    
+    git-svn-id: svn://deltup.org/bdelta@3 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 1da1347919d3f661cb0a685b1f8e6e86ca621de5
+Author: jjwhitney <jjw@deltup.org>
+Date:   Sun Jan 3 02:21:13 2010 +0000
+
+    Updated dates and a few simple comments.
+    
+    git-svn-id: svn://deltup.org/bdelta@2 0b3c7260-62b7-4bd3-8502-661595b7e89c
+
+commit 251c9189dce4218d62713ee48c513949ad238e59
+Author: jjwhitney <jjw@deltup.org>
+Date:   Tue May 13 13:20:42 2008 +0000
+
+    Initial BDelta project taken from BDelta version 0.1.0 + code style changes.
+    
+    git-svn-id: svn://deltup.org/bdelta@1 0b3c7260-62b7-4bd3-8502-661595b7e89c
