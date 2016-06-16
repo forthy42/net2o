@@ -118,14 +118,18 @@ Variable bdelta$
 : bpatch$2 ( a$ diff$ -- )
     0 { fp }
     $@ bounds U+DO
-	I p@+ >r 64>n r> swap 2dup <info> type +
+	I p@+ >r 64>n r> swap 2dup type +
 	dup I' < IF
 	    ps@+ >r 64>n fp + to fp
 	    dup $@ fp safe/string
-	    r> p@+ >r 64>n dup fp + to fp umin <warn> type r>
+	    r> p@+ >r 64>n dup fp + to fp umin type r>
 	THEN
     I - +LOOP <default> drop ;
 
 : bpatch ( addr1 u1 addr2 u2 -- addr3 u3 )
     bslurp ['] bpatch$2 bdelta$ $exec
     bdelta$ $@ ;
+
+: spit-file ( addr1 u1 fileaddr2 u2 -- )
+    r/w create-file throw >r r@ write-file
+    r> close-file throw throw ;

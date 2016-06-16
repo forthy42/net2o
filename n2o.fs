@@ -390,21 +390,33 @@ synonym searchkey keysearch
 	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
+\ diff and patch
+
+: diff ( -- )
+    \U diff file1 file2 patchfile
+    \G diff: compute diff between two files, and write patch-file
+    ?nextarg IF  ?nextarg IF  bdelta
+	    ?nextarg IF  spit-file  b$off  EXIT  THEN THEN  THEN
+    ." diff needs three arguments!" cr b$off ;
+
+: patch ( -- )
+    \U patch file1 patchfile file2
+    \G patch: take a patchfile for file1 and produce file2
+    ?nextarg IF  ?nextarg IF  bpatch
+	    ?nextarg IF  spit-file b$off  EXIT  THEN THEN THEN
+    ." patch needs three arguments!" cr b$off ;
+
+\ others
+
 : bye ( -- )
+    \U bye
+    \G bye: quit command mode and terminate program
     subme bye ;
 
 : -bw ( -- )
     \U -bw <cmd>
     \G -bw: disable color codes
     ['] drop is attr!  next-cmd ;
-
-: -date ( -- )
-    \U -date n <cmd>
-    \G -date: set date precision to n
-    \G -date: 0 is least, 7 is highest
-    ?nextarg 0= IF help ELSE
-	s>number drop config:date# !
-	next-cmd THEN ;
 
 : -backtrace ( -- )
     \U -backtrace <cmd>

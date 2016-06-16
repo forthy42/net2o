@@ -41,6 +41,7 @@ keccak-o crypto-o !
 require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
+require bdelta.fs
 
 \ crypto selection
 
