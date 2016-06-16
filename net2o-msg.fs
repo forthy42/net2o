@@ -816,4 +816,4 @@ forth-local-indent-words:
      ((";]") (-1 . 0) (0 . -1) immediate)
     )
 End:
-[THEN][0;39;49m
+[THEN]
