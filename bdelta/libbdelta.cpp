@@ -363,7 +363,7 @@ void bdelta_clean_matches(BDelta_Instance *b, unsigned flags) {
 
 void bdelta_showMatches(BDelta_Instance *b) {
 	for (std::list<Match>::iterator l = b->matches.begin(); l != b->matches.end(); ++l)
-		printf("(%d, %d, %d), ", l->p1, l->p2, l->num);
+		printf("(%ld, %ld, %ld), ", l->p1, l->p2, l->num);
 	printf ("\n\n");
 }
 
