@@ -124,7 +124,7 @@ Variable bdelta$
 	    dup $@ fp safe/string
 	    r> p@+ >r 64>n dup fp + to fp umin type r>
 	THEN
-    I - +LOOP <default> drop ;
+    I - +LOOP  drop ;
 
 : bpatch ( addr1 u1 addr2 u2 -- addr3 u3 )
     bslurp ['] bpatch$2 bdelta$ $exec
