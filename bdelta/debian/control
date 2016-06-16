@@ -1,0 +1,13 @@
+Source: bdelta
+Section: programming
+Priority: optional
+Maintainer: Bernd Paysan <bernd@net2o.de>
+Build-Depends: debhelper, build-essential, gcc, autoconf, automake, libtool, libtool-bin, libc
+
+Package: bdelta
+Version: 3.0
+Architecture: any
+Depends: ${shlibs:Depends}
+Multi-Arch: same
+Description: BDelta
+ BDelta is a library to compute binary diffs.

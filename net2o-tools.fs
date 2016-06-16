@@ -192,7 +192,7 @@ debug: dummy(
 	0 r> THEN
     bounds ?DO  dup I +bit  LOOP  drop ;
 
-\ variable length integers
+\ variable length integers, similar to protobuf, but MSB first
 
 : p@+ ( addr -- u64 addr' )  >r 64#0 r@ 10 bounds
     DO  7 64lshift I c@ $7F and n>64 64or

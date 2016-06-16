@@ -424,10 +424,12 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 \g address.
 \g 
 \g The command interpreter is a stack machine with two data types: 64
-\g bit integers and strings.  Encoding of commands, integers and string
-\g length follows protobuf, strings are just sequences of bytes
-\g (interpretation can vary).  Command blocks contain a sequence of
-\g commands; there are no conditionals and looping instructions.
+\g bit integers and strings.  Encoding of commands, integers and
+\g string length follows protobuf conceptually (but MSB first, not LSB
+\g first as with protobuf, to simplify scanning), strings are just
+\g sequences of bytes (interpretation can vary).  Command blocks contain
+\g a sequence of commands; there are no conditionals and looping
+\g instructions.
 \g 
 \g Strings can contain encrypted nested commands, used during
 \g communication setup.
