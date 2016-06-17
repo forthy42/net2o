@@ -1,4 +1,4 @@
-\ net2o template for new files
+\ bdelta bindings and invocation
 
 \ Copyright (C) 2016   Bernd Paysan
 
@@ -23,9 +23,6 @@
 \ and could be used directly with include or require.
 \ As all comments are stripped during the compilation, please
 \ insert the copyright notice of the original file here.
-
-require net2o-tools.fs
-require mini-oof2.fs
 
 c-library bdelta
     \c #include <bdelta.h>
@@ -53,6 +50,8 @@ c-function bdelta_getError bdelta_getError a -- n
 c-function bdelta_showMatches bdelta_showMatches a -- void
 
 end-c-library
+
+[IFUNDEF] enum bye [THEN] \ stop here if libcompile only
 
 Variable bfile1$
 Variable bfile2$
