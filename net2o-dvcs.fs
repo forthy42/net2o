@@ -17,8 +17,13 @@
 
 Variable dvcs-table
 
+Vocabulary dvcs
+
+scope{ dvcs
+
 msg-class class
     field: branch$
+    field: message$
     field: files[] \ snapshot config
     field: objects# \ object hash
     field: in-files$
@@ -28,31 +33,34 @@ msg-class class
     field: fileentry
 end-class dvcs-class
 
-begin-structure
-    $40 +field dvcs-hash
-    64field: dvcs-timestamp
-    field: dvcs-perm
-    0 +field: dvcs-name
+begin-structure filehash
+    $40 +field hash
+    64field: timestamp
+    field: perm
+    0 +field name
 end-structure
 
+}scope
+
 : hash>filename ( addr u -- addr' u' )
-    0. 2swap files[] [: 2over $40 umin 2over str= IF
-	  0 dvcs-name /string 2>r 2nip 2r> 2swap
+    0. 2swap dvcs:files[] [: 2over $40 umin 2over str= IF
+	  0 dvcs:name /string 2>r 2nip 2r> 2swap
 	THEN ;] $[]map 2nip ;
 
 : search-files[] ( -- n )
-    -1 0 files[] [: 0 dvcs-name /string fileentry $@ 0 dvcs-name /string str=
+    -1 0 dvcs:files[] [: 0 dvcs:name /string
+      dvcs:fileentry $@ 0 dvcs:name /string str=
       IF  nip dup  THEN  1+ ;] $[]map  drop ;
 
 : +fileentry ( o:dvcs -- )
     \G add a file entry and replace same file if it already exists
-    fileentry $@ search-files[]
-    dup 0>= IF files[] $[]!
-    ELSE  drop files[] $+[]!  THEN ;
+    dvcs:fileentry $@ search-files[]
+    dup 0>= IF dvcs:files[] $[]!
+    ELSE  drop dvcs:files[] $+[]!  THEN ;
 
 : hash>entry ( size o:dvcs -- )
-    >r out-files$ $@ out-fileoff @ safe/string r> umin c:0key c:hash
-    fileentry $40 $!len fileentry $@ c:hash@ ;
+    >r dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string r> umin c:0key c:hash
+    dvcs:fileentry $40 $!len dvcs:fileentry $@ c:hash@ ;
 
 scope{ net2o-base
 
@@ -60,32 +68,31 @@ scope{ net2o-base
 \g ### DVCS commands ###
 \g 
 
-dvcs-table >table
+reply-table $@ inherit-table dvcs-table
 
-msg-table $@ inherit-table dvcs-table
-
-+net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
-    $> branch$ $! ;
+net2o' emit net2o: dvcs-commit ( $:branch $:message -- ) \g start a commit to branch
+    1 !!>order? $> $> dvcs:branch$ $! dvcs:message$ $! ;
 +net2o: dvcs-read ( $:hash -- ) \g read in an object
-    $> hash>filename in-files$ $+slurp-file ;
+    2 !!>=order? $> hash>filename dvcs:in-files$ $+slurp-file ;
 +net2o: dvcs-patch ( $:diff -- ) \g apply patch
-    $> patch$ $! out-fileoff off
-    in-files$ patch$ ['] bdelta$2 out-files$ $exec ;
+    4 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
+    dvcs:in-files$ dvcs:patch$ ['] bdelta$2 dvcs:out-files$ $exec ;
++net2o: dvcs-del ( $:name -- ) \g delete file
+    8 !!>=order? $> delete-file throw ;
 +net2o: dvcs-write ( perm timestamp size $:name -- ) \g write out file
-    64>n { 64^ timestamp fsize } 64>n { w^ perm }
+    $10 !!>=order? 64>n { 64^ timestamp fsize } 64>n { w^ perm }
     fsize >hash
-    timeestamp 1 64s fileentry $+!
-    perm cell fileentry $+!
-    $> 2dup fileentry $+!
+    timestamp 1 64s dvcs:fileentry $+!
+    perm cell dvcs:fileentry $+!
+    $> 2dup dvcs:fileentry $+!
     r/w create-file throw { fd }
     fd perm fchmod ?ior
-    out-files$ $@ out-fileoff @ safe/string fsize umin fd write-file throw
-    timestamp 64>d 1000000000 um/mod { d^ ts-ns }
+    dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
+    fd write-file throw
+    timestamp 64>d #1000000000 um/mod { d^ ts-ns }
     fd ts-ns futimens ?ior
     fd close-file throw
-    +fileentry fsize out-fileoff +! ;
-+net2o: dvcs-del ( $:name -- ) \g delete file
-    $> delete-file throw ;
+    +fileentry fsize dvcs:out-fileoff +! ;
 
 }scope
 
