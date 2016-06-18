@@ -4,6 +4,9 @@ Impressum
 Angaben gemäß § 5 TMG:
 ----------------------
 
+Die Domains net2o.de, net2o.com und net2o.net werden für folgendenden
+Gewerbebetrieb genutzt:
+
 Bernd Paysan<br/>
 net2o secure communication<br/>
 Wilbrechtstr. 85<br/>
@@ -41,6 +44,9 @@ DE 223 195 380
 
 Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
 ----------------------------------------------------
+
+Die Domain bernd-paysan.de wird für eine private Homepage genutzt,
+deren Inhalt lediglich presserechtliche Verantwortlichkeiten hat:
 
 Bernd Paysan<br/>
 Wilbrechtstr. 85<br/>
