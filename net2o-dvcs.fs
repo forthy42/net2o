@@ -17,9 +17,7 @@
 
 Variable dvcs-table
 
-Vocabulary dvcs
-
-scope{ dvcs
+scope: dvcs
 
 msg-class class
     field: branch$
@@ -34,9 +32,8 @@ msg-class class
 end-class dvcs-class
 
 begin-structure filehash
-    $40 +field hash
     64field: timestamp
-    field: perm
+    wfield: perm
     0 +field name
 end-structure
 
@@ -44,12 +41,12 @@ end-structure
 
 : hash>filename ( addr u -- addr' u' )
     0. 2swap dvcs:files[] [: 2over $40 umin 2over str= IF
-	  0 dvcs:name /string 2>r 2nip 2r> 2swap
+	  $40 dvcs:name /string 2>r 2nip 2r> 2swap
 	THEN ;] $[]map 2nip ;
 
 : search-files[] ( -- n )
-    -1 0 dvcs:files[] [: 0 dvcs:name /string
-      dvcs:fileentry $@ 0 dvcs:name /string str=
+    -1 0 dvcs:files[] [: $40 dvcs:name /string
+      dvcs:fileentry $@ $40 dvcs:name /string str=
       IF  nip dup  THEN  1+ ;] $[]map  drop ;
 
 : +fileentry ( o:dvcs -- )
@@ -62,6 +59,28 @@ end-structure
     >r dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string r> umin c:0key c:hash
     dvcs:fileentry $40 $!len dvcs:fileentry $@ c:hash@ ;
 
+: dvcs-outfile ( baddr u1 fname u2 -- )
+    over dvcs:timestamp le-64@ 64>d #1000000000 um/mod { d^ ts-ns }
+    over dvcs:perm le-uw@ { perm }
+    0 dvcs:name /string
+    perm S_IFMT and  case
+	S_IFLNK of
+	    2dup 2>r symlink ?ior
+	    2r> ts-ns lutimens ?ior  endof
+	S_IFREG of
+	    r/w create-file throw >r
+	    r@ write-file throw
+	    r@ fileno perm fchmod ?ior
+	    r@ fileno ts-ns futimens ?ior
+	    r> close-file throw  endof
+	S_IFDIR of
+	    2dup perm mkdir-parents throw
+	    2dup ts-ns utimens ?ior
+	    perm chmod ?ior
+	    2drop  endof  \ no content in directory
+	2drop 2drop \ unhandled types
+    endcase ;
+
 scope{ net2o-base
 
 \g 
@@ -70,28 +89,24 @@ scope{ net2o-base
 
 reply-table $@ inherit-table dvcs-table
 
-net2o' emit net2o: dvcs-commit ( $:branch $:message -- ) \g start a commit to branch
-    1 !!>order? $> $> dvcs:branch$ $! dvcs:message$ $! ;
+net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
+    1 !!>order? $> dvcs:branch$ $! ;
++net2o: dvcs-message ( $:message -- ) \g commit message
+    2 !!>order? $> dvcs:message$ $! ;
++net2o: dvcs-ref ( $:hash -- ) \ g previous patch
+    4 !!>order? $> ;
 +net2o: dvcs-read ( $:hash -- ) \g read in an object
-    2 !!>=order? $> hash>filename dvcs:in-files$ $+slurp-file ;
+    8 !!>=order? $> hash>filename dvcs:in-files$ $+slurp-file ;
 +net2o: dvcs-patch ( $:diff -- ) \g apply patch
-    4 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
+    $10 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
     dvcs:in-files$ dvcs:patch$ ['] bdelta$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-del ( $:name -- ) \g delete file
-    8 !!>=order? $> delete-file throw ;
-+net2o: dvcs-write ( perm timestamp size $:name -- ) \g write out file
-    $10 !!>=order? 64>n { 64^ timestamp fsize } 64>n { w^ perm }
+    $20 !!>=order? $> delete-file throw ;
++net2o: dvcs-write ( size $:ts+perm+name -- ) \g write out file
+    $40 !!>=order? 64>n { fsize }
     fsize >hash
-    timestamp 1 64s dvcs:fileentry $+!
-    perm cell dvcs:fileentry $+!
-    $> 2dup dvcs:fileentry $+!
-    r/w create-file throw { fd }
-    fd perm fchmod ?ior
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    fd write-file throw
-    timestamp 64>d #1000000000 um/mod { d^ ts-ns }
-    fd ts-ns futimens ?ior
-    fd close-file throw
+    $> 2dup dvcs:fileentry $+!  dvcs-outfile
     +fileentry fsize dvcs:out-fileoff +! ;
 
 }scope

@@ -406,6 +406,38 @@ synonym searchkey keysearch
 	    ?nextarg IF  spit-file b$off  EXIT  THEN THEN THEN
     ." patch needs three arguments!" cr b$off ;
 
+\ !!stubs!!
+
+: init ( -- )
+    \U init name [branchname]
+    \G init: Setup a dvcs project in the current folder
+;
+
+: add ( -- )
+    \U add file1 .. filen
+    \G add: add files to the dvcs project in the current folder
+;
+
+: rm ( -- )
+    \U rm file1 .. filen
+    \G rm: remove files from the dvcs project in the current folder
+;
+
+: ci ( -- )
+    \U ci "message"
+    \G ci: check added and modified files into the dvcs project
+;
+
+: co ( -- )
+    \U co revision|@branch|revision@branch
+    \G co: check out a specific revision
+;
+
+: fork ( -- )
+    \U fork branch
+    \G fork: create a branch
+;
+
 \ others
 
 : bye ( -- )
