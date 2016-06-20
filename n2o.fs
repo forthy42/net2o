@@ -409,24 +409,26 @@ synonym searchkey keysearch
 \ !!stubs!!
 
 : init ( -- )
-    \U init name [branchname]
+    \U init [name [branchname]]
     \G init: Setup a dvcs project in the current folder
-;
+    \G init: The default branch name is "master"
+    \G init: The default project name is the directory it resides in
+    ".n2o" $1FF init-dir drop
+    ".n2o/files" touch \ create empty file
+    ?nextarg 0= IF  pad $200 get-dir 2dup '/' -scan nip /string THEN
+    project:project$ $!
+    ?nextarg 0= IF  "master"  THEN  project:branch$ $!
+    ".n2o/config" ['] project >body write-config ;
 
 : add ( -- )
     \U add file1 .. filen
     \G add: add files to the dvcs project in the current folder
-;
-
-: rm ( -- )
-    \U rm file1 .. filen
-    \G rm: remove files from the dvcs project in the current folder
-;
+    ".n2o/newfiles" args>file ;
 
 : ci ( -- )
     \U ci "message"
     \G ci: check added and modified files into the dvcs project
-;
+    ?nextarg 0= IF "untitled checkin" THEN  dvcs-ci ;
 
 : co ( -- )
     \U co revision|@branch|revision@branch

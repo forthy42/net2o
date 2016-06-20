@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Variable dvcs-objects \ hash of objects
+
 Variable dvcs-table
 
 scope: dvcs
@@ -23,7 +25,6 @@ msg-class class
     field: branch$
     field: message$
     field: files[] \ snapshot config
-    field: objects# \ object hash
     field: in-files$
     field: patch$
     field: out-files$
@@ -39,27 +40,40 @@ end-structure
 
 }scope
 
-: hash>filename ( addr u -- addr' u' )
-    0. 2swap dvcs:files[] [: 2over $40 umin 2over str= IF
-	  $40 dvcs:name /string 2>r 2nip 2r> 2swap
-	THEN ;] $[]map 2nip ;
+scope: project \ per-project configuration values
 
-: search-files[] ( -- n )
-    -1 0 dvcs:files[] [: $40 dvcs:name /string
-      dvcs:fileentry $@ $40 dvcs:name /string str=
-      IF  nip dup  THEN  1+ ;] $[]map  drop ;
+Variable revision$
+Variable branch$
+Variable project$
+
+}scope
+
+: >file-hash ( addr u -- )
+    c:0key c:hash
+    hash#256 dvcs:fileentry $!len
+    dvcs:fileentry $@ c:hash@ ;
+
+: /name ( addr u -- addr' u' )
+    hash#256 dvcs:name /string ;
+
+: hash>filename ( addr u -- addr' u' )
+    0. 2swap hash#256 umin dvcs:files[] [: >r
+	r@ cell+ $@ hash#256 umin 2over str= IF
+	    2drop r@ $@  THEN  rdrop ;] #map 2nip ;
+
+: dvcs-filename@ ( -- addr u -- )
+    dvcs:fileentry $@ /name ;
 
 : +fileentry ( o:dvcs -- )
     \G add a file entry and replace same file if it already exists
-    dvcs:fileentry $@ search-files[]
-    dup 0>= IF dvcs:files[] $[]!
-    ELSE  drop dvcs:files[] $+[]!  THEN ;
+    dvcs:fileentry $@ drop hash#256 dvcs:name dvcs-filename@ dvcs:files[] #! ;
 
-: hash>entry ( size o:dvcs -- )
-    >r dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string r> umin c:0key c:hash
-    dvcs:fileentry $40 $!len dvcs:fileentry $@ c:hash@ ;
+: -fileentry ( o:dvcs -- )
+    dvcs-filename@ dvcs:files[] #off ;
 
-: dvcs-outfile ( baddr u1 fname u2 -- )
+Defer dvcs-outfile
+
+: dvcs-outfile-name ( baddr u1 fname u2 -- )
     over dvcs:timestamp le-64@ 64>d #1000000000 um/mod { d^ ts-ns }
     over dvcs:perm le-uw@ { perm }
     0 dvcs:name /string
@@ -81,6 +95,28 @@ end-structure
 	2drop 2drop \ unhandled types
     endcase ;
 
+: dvcs-outfile-hash ( baddr u1 fname u2 -- )
+    hash#256 umin dvcs-objects #! ;
+
+: dvcs-in-hash ( addr u -- )
+    2dup dvcs-objects $@ ?dup-IF  2nip dvcs:in-files$ $+!
+    ELSE  hash>filename dvcs:in-files$ $+slurp-file  THEN ;
+
+' dvcs-outfile-name is dvcs-outfile
+
+: filelist-print ( filelist -- )
+    [: >r r@ cell+ $@ 85type space r> $@ type cr ;] #map ;
+: filelist-out ( o:dvcs -- )
+    ".n2o/files" [: >r dvcs:files[] ['] filelist-print r> outfile-execute ;]
+    new-file ;
+
+: filelist-loop ( -- )
+    BEGIN  refill  WHILE
+	    source bl $split 2>r base85>$ 2dup 2r> dvcs:files[] #!
+	    drop free throw  REPEAT ;
+: filelist-in ( addr u o:dvcs -- )
+    r/o open-file throw ['] filelist-loop execute-parsing-file ;
+
 scope{ net2o-base
 
 \g 
@@ -96,20 +132,111 @@ net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
 +net2o: dvcs-ref ( $:hash -- ) \ g previous patch
     4 !!>order? $> ;
 +net2o: dvcs-read ( $:hash -- ) \g read in an object
-    8 !!>=order? $> hash>filename dvcs:in-files$ $+slurp-file ;
+    8 !!>=order? $> dvcs-in-hash ;
 +net2o: dvcs-patch ( $:diff -- ) \g apply patch
     $10 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
-    dvcs:in-files$ dvcs:patch$ ['] bdelta$2 dvcs:out-files$ $exec ;
+    dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-del ( $:name -- ) \g delete file
     $20 !!>=order? $> delete-file throw ;
 +net2o: dvcs-write ( size $:ts+perm+name -- ) \g write out file
     $40 !!>=order? 64>n { fsize }
-    fsize >hash
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    $> 2dup dvcs:fileentry $+!  dvcs-outfile
+    2dup >file-hash
+    $> dvcs:fileentry $+!  dvcs:fileentry $@ dvcs-outfile
     +fileentry fsize dvcs:out-fileoff +! ;
 
 }scope
+
+: n2o:new-dvcs ( -- o )
+    dvcs:dvcs-class new >o  dvcs-table @ token-table ! o o> ;
+: n2o:dispose-dvcs ( o:dvcs -- )
+    dvcs:branch$ $off  dvcs:message$ $off  dvcs:files[] #offs
+    dvcs:in-files$ $off dvcs:out-files$ $off  dispose ;
+
+Variable new-files[]
+Variable del-files[]
+Variable old-files[]
+Variable new-file$
+
+hash#256 buffer: newhash
+
+: hashstat-rest ( addr -- ) >r
+    statbuf st_mode w@ 0 { w^ perm } perm le-w!
+    perm 2 r@ 0 $ins
+    statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
+    timestamp 1 64s r@ 0 $ins
+    perm le-uw@ S_IFMT and  case
+	S_IFLNK of  $200 new-file$ $!len
+	    r@ $@ 0 dvcs:name /string new-file$ $@ readlink
+	    dup ?ior r@ $!len  endof
+	S_IFREG of  r@ $@ 0 dvcs:name /string new-file$ $slurp-file  endof
+	S_IFDIR of  "" new-file$ $!  endof
+    endcase
+    c:0key new-file$ $@ c:hash newhash hash#256 c:hash@
+    newhash hash#256 r> 0 $ins
+    new-file$ $@ newhash hash#256 dvcs-objects #! ;
+: file-hashstat ( addr -- ) >r
+    r@ $@ statbuf lstat ?ior r> hashstat-rest ;
+
+: new-files-in ( addr u -- )
+    new-files[] $[]slurp-file
+    new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP ;
+
+: config>dvcs ( o:dvcs -- )
+    "~+/.n2o/config" ['] project >body read-config ;
+: files>dvcs ( o:dvcs -- )
+    "~+/.n2o/files" filelist-in ;
+: new>dvcs ( o:dvcs -- )
+    "~+/.n2o/newfiles" new-files-in ;
+: dvcs?modified ( o:dvcs -- )
+    dvcs:files[] [: >r
+	r@ $@ statbuf lstat
+	0< IF  errno ENOENT = IF
+		r@ cell+ $@ del-files[] $+[]!
+		r> $@ del-files[] dup $[]# 1- swap $[]+!
+		EXIT  THEN  -1 ?ior  THEN
+	r@ cell+ $@ drop hash#256 + dvcs:timestamp le-64@
+	statbuf st_mtime ntime@ d>64 64<>
+	r@ cell+ $@ drop hash#256 + dvcs:perm le-uw@
+	statbuf st_mode w@ <> or  IF
+	    r@ cell+ $@ old-files[] $+[]!
+	    r@ $@ old-files[] dup $[]# 1- swap $[]+!
+	    r@ $@ new-files[] $+[]!
+	    new-files[] $@ + cell- hashstat-rest
+	THEN
+    ;] #map ;
+
+also net2o-base
+
+: compute-diff ( addr u -- )
+    project:branch$ $@ $, dvcs-commit  $, dvcs-message
+    project:revision$ $@ dup IF  $, dvcs-ref  ELSE  2drop  THEN
+    old-files[] [: hash#256 umin 2dup $, dvcs-read
+	dvcs-objects #@ dvcs:in-files$ $+! ;] $[]map
+    new-files[] [: hash#256 umin
+	dvcs-objects #@ dvcs:out-files$ $+! ;] $[]map
+    dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
+    dvcs:patch$ $@ $, dvcs-patch
+    del-files[] [: /name $, dvcs-del ;] $[]map
+    new-files[] [: hash#256 /string $, dvcs-write ;] $[]map ;
+
+previous
+
+: save-project ( -- )
+    "~+/.n2o/config" ['] project >body write-config ;
+
+: (dvcs-ci) ( addr u o:dvcs -- )
+    config>dvcs  files>dvcs  new>dvcs  dvcs?modified
+    ['] compute-diff gen-cmd$
+    2dup c:0key c:hash newhash hash#256 c:hash@
+    newhash hash#256 sane-85 2dup project:revision$ $!
+    .objects/ ?.net2o/objects spit-file
+    del-files[] [: dvcs:fileentry $! -fileentry ;] $[]map
+    new-files[] [: dvcs:fileentry $! +fileentry ;] $[]map
+    save-project filelist-out "~+/.n2o/newfiles" delete-file throw ;
+
+: dvcs-ci ( addr u -- ) \ checkin command
+    n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:

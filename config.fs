@@ -18,6 +18,7 @@
 require rec-scope.fs
 
 Vocabulary config
+' config >body Value config-wl
 
 Variable config-recognizer
 \G The config recognizer
@@ -27,7 +28,7 @@ Variable config-recognizer
 : .config-err ( -- )
     ." unknown config variable: '" source type ." '" cr ;
 : exec-config ( .. addr u char xt1 xt2 -- ) >r >r
-    [: >r type r> emit ;] $tmp ['] config >body find-name-in
+    [: >r type r> emit ;] $tmp config-wl find-name-in
     ?dup-IF  execute r> execute rdrop
     ELSE rdrop r> execute .config-err THEN ;
 
@@ -47,16 +48,16 @@ Variable config-recognizer
 	    source nip >in !
     REPEAT ;
 
-: read-config ( addr u -- )
+: read-config ( addr u wid -- )  to config-wl
     >included throw ['] read-config-loop execute-parsing-named-file ;
 
-: write-config ( addr u -- )
+: write-config ( addr u wid -- )  to config-wl
     r/w create-file throw >r
-    [: ['] config >body
+    [: config-wl
 	[: dup name>string 1- 2dup + c@ >r type .\" ="
 	    execute r>
 	    case
-		'$' of  $@ '"' emit see-voc:c-\type '"' emit cr  endof
+		'$' of  $@ [: '"' emit see-voc:c-\type '"' emit ;] $tmp type cr  endof
 		'#' of  @ 0 .r cr  endof
 		'&' of  2@ 0 d.r '.' emit cr  endof
 		'%' of  f@ fe. cr  endof

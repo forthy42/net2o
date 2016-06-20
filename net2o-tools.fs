@@ -70,6 +70,13 @@ word-args
 : @arg-loop { xt -- }
     begin  ?@nextarg  while  xt execute  repeat ;
 
+: args>file ( addr u -- )
+    2dup w/o open-file IF
+	drop w/o create-file throw
+    ELSE  nip nip  THEN
+    [: rot >r r@ write-line throw r> ;] arg-loop
+    close-file throw ;
+
 \ string
 
 : smove ( a-from u-from a-to u-to -- )
@@ -285,7 +292,8 @@ require config.fs
 
 \ net2o specific configurations
 
-#-514 Constant no-file#
+2 Constant ENOENT
+#-512 ENOENT - Constant no-file#
 
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
@@ -296,10 +304,11 @@ require config.fs
 
 scope{ config
 
-Variable .net2o$
-Variable keys$
-Variable chats$
 Variable date#
+Variable objects$
+Variable chats$
+Variable keys$
+Variable .net2o$
 
 }scope
 
@@ -308,20 +317,23 @@ also config
 "~/.net2o" .net2o$ $!
 "~/.net2o/keys" keys$ $!
 "~/.net2o/chats" chats$ $!
+"~/.net2o/objects" objects$ $!
 2 date# !
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
 : .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
+: .objects/ ( addr u -- addr' u' ) [: objects$  $. '/' emit type ;] $tmp ;
 
 : ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
 : ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
+: ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
 
 Variable config-file$  "~/.net2o/config" config-file$ $!
 
 : ?.net2o-config ( -- )
-    config-file$ $@ 2dup file-status nip
+    config-file$ $@ 2dup file-status nip  ['] config >body swap
     no-file# = IF  write-config  ELSE  read-config  THEN ;
 
 : init-dirs ( -- ) ?.net2o ?.net2o-config ;
@@ -534,6 +546,9 @@ $10 Constant datesize#
 : append-file ( addr u fd -- 64pos ) >r
     r@ file-size throw d>64 64dup { 64: pos } r> write@pos-file pos ;
 
+: touch ( addr u -- )
+    w/o create-file throw close-file throw ;
+
 \ file name sanitizer
 
 $20 buffer: filechars
@@ -541,7 +556,8 @@ filechars $20 $FF fill
 0 filechars l! \ ctrl chars are all illegal
 filechars '/' -bit
 filechars #del -bit
-"\\:?*\q<>|" 2Constant no-fat-chars
+"\\:?*\q<>|%" 2Constant no-fat-chars
+\ '%' is allowed, but we use '%' to replace the others
 
 ?.net2o no-fat-chars .net2o/ r/w create-file [IF] drop
     no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]

@@ -1741,6 +1741,7 @@ require net2o-msg.fs
 require net2o-helper.fs
 require net2o-qr.fs
 \ require net2o-term.fs
+require net2o-dvcs.fs
 
 require net2o-dhtroot.fs \ configuration for DHT root
 
