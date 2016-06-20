@@ -414,11 +414,11 @@ synonym searchkey keysearch
     \G init: The default branch name is "master"
     \G init: The default project name is the directory it resides in
     ".n2o" $1FF init-dir drop
-    ".n2o/files" touch \ create empty file
+    ".n2o/files" touch
     ?nextarg 0= IF  pad $200 get-dir 2dup '/' -scan nip /string THEN
     project:project$ $!
     ?nextarg 0= IF  "master"  THEN  project:branch$ $!
-    ".n2o/config" ['] project >body write-config ;
+    save-project ;
 
 : add ( -- )
     \U add file1 .. filen
