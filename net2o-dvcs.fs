@@ -199,6 +199,8 @@ Variable new-file$
 
 : dvcs+in ( hash u -- )
     hash#128 umin dvcs-objects #@ dvcs:in-files$ $+! ;
+: dvcs+out ( hash u -- )
+    hash#128 umin dvcs-objects #@ dvcs:out-files$ $+! ;
 
 also net2o-base
 
@@ -207,13 +209,15 @@ also net2o-base
     project:revision$ $@ dup IF  $, dvcs-ref  ELSE  2drop  THEN
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map
     del-files[] ['] dvcs+in $[]map
-    new-files[] ['] dvcs+in $[]map
+    new-files[] ['] dvcs+out $[]map
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs-patch
     del-files[] [: over hash#128 dvcs:perm le-uw@ >r /name $,
 	r> S_IFMT and S_IFDIR =
 	IF  dvcs-rmdir  ELSE  dvcs-rm  THEN ;] $[]map
-    new-files[] [: $, dvcs-write ;] $[]map ;
+    new-files[] [:
+	2dup /name statbuf lstat ?ior statbuf st_size @ ulit,
+	$, dvcs-write ;] $[]map ;
 
 previous
 
@@ -221,7 +225,8 @@ previous
     "~+/.n2o/config" ['] project >body write-config ;
 
 : append-line ( addr u file u -- )
-    w/o open-file throw \ w/o creates if not available... Unix semantics
+    2dup w/o open-file dup no-file# = IF
+	2drop w/o create-file throw  ELSE  drop nip nip  THEN
     dup >r write-line throw r> close-file throw ;
 : append-branch ( addr u -- )
     [: ." .n2o/" project:branch$ $. ." .branch" ;] $tmp

@@ -428,7 +428,9 @@ synonym searchkey keysearch
 : ci ( -- )
     \U ci "message"
     \G ci: check added and modified files into the dvcs project
-    ?nextarg 0= IF "untitled checkin" THEN  dvcs-ci ;
+    ?nextarg 0= IF "untitled checkin" THEN
+    2dup "-m" str= IF  ?nextarg IF  2nip  THEN  THEN
+    dvcs-ci ;
 
 : co ( -- )
     \U co revision|@branch|revision@branch
