@@ -133,8 +133,11 @@ net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
 +net2o: dvcs-write ( size $:hash+ts+perm+name -- ) \g write out file
     $40 !!>=order? 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
+    ." file contents:" forth:cr 2dup forth:type
     2dup >file-hash $> 2dup fn-split dvcs:outfiles #!
-    2dup hash#128 umin newhash over str= 0= !!wrong-hash!!
+    2dup hash#128 umin newhash over str= 0= IF
+	." hash mismatch: " 2dup hash#128 umin 85type space
+	newhash hash#128 85type forth:cr  THEN
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ;
 
@@ -170,7 +173,8 @@ Variable new-file$
     r@ $@ statbuf lstat ?ior r> hashstat-rest ;
 
 : new-files-in ( addr u -- )
-    new-files[] $[]slurp-file
+    r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
+    dup >r new-files[] $[]slurp  r> close-file throw
     new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP ;
 
 : config>dvcs ( o:dvcs -- )
@@ -194,7 +198,7 @@ Variable new-file$
 	    r@ $@ old-files[] dup $[]# 1- swap $[]+!
 	    r@ $@ new-files[] $+[]!
 	    new-files[] $@ + cell- hashstat-rest
-	THEN
+	THEN  rdrop
     ;] #map ;
 
 : dvcs+in ( hash u -- )
@@ -212,7 +216,7 @@ also net2o-base
     new-files[] ['] dvcs+out $[]map
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs-patch
-    del-files[] [: over hash#128 dvcs:perm le-uw@ >r /name $,
+    del-files[] [: over hash#128 dvcs:perm + le-uw@ >r /name $,
 	r> S_IFMT and S_IFDIR =
 	IF  dvcs-rmdir  ELSE  dvcs-rm  THEN ;] $[]map
     new-files[] [:
@@ -226,14 +230,29 @@ previous
 
 : append-line ( addr u file u -- )
     2dup w/o open-file dup no-file# = IF
-	2drop w/o create-file throw  ELSE  drop nip nip  THEN
-    dup >r write-line throw r> close-file throw ;
+	2drop w/o create-file throw  ELSE  throw nip nip  THEN
+    >r r@ file-size throw r@ reposition-file throw
+    r@ write-line throw r> close-file throw ;
+: branch$ ( -- addr u )
+    [: ." .n2o/" project:branch$ $. ." .branch" ;] $tmp ;
 : append-branch ( addr u -- )
-    [: ." .n2o/" project:branch$ $. ." .branch" ;] $tmp
-    append-line ;
+    branch$ append-line ;
+
+Variable patch-in$
+' n2o:new-dvcs static-a with-allocater Value sample-patch
+
+: branchlist-loop ( -- )
+    BEGIN  refill  WHILE
+	    source .objects/ patch-in$ $slurp-file
+	    patch-in$ $@ sample-patch >o
+	    c-state off do-cmd-loop o>  REPEAT ;
+: branches>dvcs ( o:dvcs -- )
+    branch$ r/o open-file dup no-file# <> IF  throw
+    ['] branchlist-loop execute-parsing-file  ELSE  drop  THEN ;
 
 : (dvcs-ci) ( addr u o:dvcs -- )
-    config>dvcs  files>dvcs  new>dvcs  dvcs?modified
+    config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
+    new-files[] $[]# del-files[] $[]# d0= IF ." Nothing to do" cr  EXIT  THEN
     ['] compute-diff gen-cmd$
     2dup c:0key c:hash newhash hash#128 c:hash@
     newhash hash#128 sane-85 2dup project:revision$ $!
@@ -241,7 +260,8 @@ previous
     .objects/ ?.net2o/objects spit-file
     del-files[] ['] -fileentry $[]map
     new-files[] ['] +fileentry $[]map
-    save-project filelist-out "~+/.n2o/newfiles" delete-file throw ;
+    save-project filelist-out
+    "~+/.n2o/newfiles" delete-file dup no-file# <> and throw ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
