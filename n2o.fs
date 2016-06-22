@@ -126,7 +126,7 @@ scope{ n2o
     \U keysearch|searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
-    get-me  init-client
+    get-me init-client
     keys>search search-keys insert-keys save-pubkeys
     keylist ;
 
@@ -264,6 +264,12 @@ synonym searchkey keysearch
     \U -config <filename> <next-cmd>
     \G -config: Set filename for config file
     ?nextarg 0= ?EXIT  config-file$ $! next-cmd ;
+
+: -conf ( -- )
+    \U -conf <value>=<thing>
+    \G -conf: Set a config value
+    get-me init-client \ read config if necessary
+    ?nextarg 0= ?EXIT ['] config-line execute-parsing next-cmd ;
 
 \ server mode
 

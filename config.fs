@@ -41,12 +41,13 @@ Variable config-recognizer
 	2drop ." can't parse config line: '" source type ." '" cr
     endcase ;
 
+: config-line ( -- )
+    '=' parse 2>r
+    parse-name config-recognizer map-recognizer 2r> eval-config
+    source nip >in ! ;
+
 : read-config-loop ( -- )
-    BEGIN  refill  WHILE
-	    '=' parse 2>r
-	    parse-name config-recognizer map-recognizer 2r> eval-config
-	    source nip >in !
-    REPEAT ;
+    BEGIN  refill  WHILE  config-line  REPEAT ;
 
 : read-config ( addr u wid -- )  to config-wl
     >included throw ['] read-config-loop execute-parsing-named-file ;
