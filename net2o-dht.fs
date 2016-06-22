@@ -347,7 +347,7 @@ also net2o-base
     pkc keysize2 $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
-    new-addr >o host-id $@ myhost $@ str= n2o:dispose-addr o> ;
+    new-addr >o host-id $@ config:host$ $@ str= n2o:dispose-addr o> ;
 
 : remove-me, ( addr -- )
     \ 0 swap !@ { w^ host } host

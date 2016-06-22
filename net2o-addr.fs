@@ -124,8 +124,8 @@ User dest-0key< \ pointer to obtained dest-0key
     o> ; is addr>sock
 
 : +my-id ( -- )
-    myprio @ host-pri# !
-    myhost $@ host-id $!
+    config:prio# @ host-pri# !
+    config:host$ $@ host-id $!
     my-0key @ IF  my-0key sec@ host-key sec!  THEN ;
 
 : +my-addrs ( port o:addr -- )

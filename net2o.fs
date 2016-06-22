@@ -1393,9 +1393,9 @@ Defer cmd-exec ( addr u -- )
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
 : !!>=order?   ( n -- )  dup c-state @ over 1- invert and u< !!inv-order!! c-state or! ;
 : !!<>order?   ( n1 n2 -- )  dup >r
-    c-state @ -rot swap ~~ within !!inv-order!! r> c-state or! ;
+    c-state @ -rot swap within !!inv-order!! r> c-state or! ;
 : !!<>=order?   ( n1 n2 -- )  dup >r 1+
-    c-state @ -rot swap ~~ within !!inv-order!! r> c-state or! ;
+    c-state @ -rot swap within !!inv-order!! r> c-state or! ;
 
 User remote?
 

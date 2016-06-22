@@ -297,6 +297,8 @@ require config.fs
 
 scope{ config
 
+Variable prio#
+Variable host$
 Variable date#
 Variable objects$
 Variable chats$
@@ -362,11 +364,13 @@ previous
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit .2 ':' emit 60e f* fsplit .2
-    date? 3 < IF  fdrop  ELSE  ':' emit
-	60e f* date? 1 and IF  f>s .2
-	ELSE  fdup 10e f< IF '0' emit 5  ELSE  6  THEN  3 3 f.rdp  THEN
-    THEN  'Z' emit ;
+    24e f* fsplit .2
+    date? 2 < IF  fdrop  ELSE  ':' emit 60e f* fsplit .2
+	date? 3 < IF  fdrop  ELSE  ':' emit
+	    60e f* date? 4 < IF  f>s .2
+	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
+		date? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
+	THEN  THEN  'Z' emit ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r '°' xemit  60e f*
@@ -374,20 +378,20 @@ previous
     fsplit .2   '"' xemit 100e f*
     f>s .2 ;
 : .never ( -- )
-    date? 3 and 1 > IF ." never" ELSE 'n' emit THEN ;
+    date? 7 and 1 > IF ." never" ELSE 'n' emit THEN ;
 : .forever ( -- )
-    date? 3 and 1 > IF ." forever" ELSE 'f' emit THEN ;
+    date? 7 and 1 > IF ." forever" ELSE 'f' emit THEN ;
 
 : .ticks ( ticks -- )  date? 0= IF  64drop  EXIT  THEN
     64dup 64-0= IF  .never 64drop EXIT  THEN
     64dup -1 n>64 64= IF  .forever 64drop EXIT  THEN
     64>f 1e-9 f* >day
-    dup today? date? 4 and 0= and
-    date? dup >r 3 and config:date# !
+    dup today? date? 8 and 0= and
+    date? dup >r 7 and config:date# !
     IF
 	drop .timeofday
     ELSE
-	.day date? 1 > IF .timeofday ELSE fdrop THEN
+	.day date? IF .timeofday ELSE fdrop THEN
     THEN  r> config:date# ! ;
 
 \ insert into sorted string array, discarding n bytes at the end
