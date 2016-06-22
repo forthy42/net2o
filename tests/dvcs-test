@@ -1,0 +1,21 @@
+#!/bin/bash
+rm -rf dvcs-test.d
+mkdir dvcs-test.d
+cd dvcs-test.d
+PASSPHRASE=1234 gforth ../n2o cmd <<EOF
+init dvcs-test
+sh echo "Eine Datei" >a
+sh echo "Noch eine Datei" >b
+sh echo "Eine dritte Datei" >c
+add a b c
+ci -m "Erster Checkin"
+sh echo "Eine zweite Zeile" >>b
+ci -m "Checkin 2"
+sh mv c d
+sh echo "Noch etwas mehr" >>d
+add d
+ci -m "Checkin 3"
+sh echo "Eine zweite Zeile" >b
+ci -m "Checkin 4"
+bye
+EOF

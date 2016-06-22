@@ -118,7 +118,7 @@ Variable bdelta$
     0 { fp }
     $@ bounds U+DO
 	I p@+ >r 64>n r> swap 2dup type +
-	dup I' < IF
+	dup I' u< IF
 	    ps@+ >r 64>n fp + to fp
 	    dup $@ fp safe/string
 	    r> p@+ >r 64>n dup fp + to fp umin type r>

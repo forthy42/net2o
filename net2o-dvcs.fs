@@ -92,7 +92,7 @@ hash#128 buffer: newhash
     hash#128 umin dvcs-objects #! ;
 
 : dvcs-in-hash ( addr u -- )
-    2dup dvcs-objects $@ dvcs:in-files$ $+! ;
+    dvcs-objects #@ dvcs:in-files$ $+! ;
 
 : filelist-print ( filelist -- )
     [: >r r@ cell+ $@ 85type space r> $@ type cr ;] #map ;
@@ -123,21 +123,22 @@ net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
     4 !!>order? $> ;
 +net2o: dvcs-read ( $:hash -- ) \g read in an object
     8 !!>=order? $> dvcs-in-hash ;
-+net2o: dvcs-patch ( $:diff -- ) \g apply patch
-    $10 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
-    dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-rm ( $:name -- ) \g delete file
-    $20 !!>=order? $> dvcs:delfiles[] $ins[] ;
+    $10 !!>=order? $> 2dup hash#128 umin dvcs-in-hash dvcs:delfiles[] $ins[] ;
 +net2o: dvcs-rmdir ( $:name -- ) \g delete directory
-    $20 !!>=order? $> dvcs:deldirs[] $ins[] ;
+    $10 !!>=order? $> dvcs:deldirs[] $ins[] ;
++net2o: dvcs-patch ( $:diff -- ) \g apply patch
+    $20 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
+    dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-write ( size $:hash+ts+perm+name -- ) \g write out file
     $40 !!>=order? 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    ." file contents:" forth:cr 2dup forth:type
     2dup >file-hash $> 2dup fn-split dvcs:outfiles #!
     2dup hash#128 umin newhash over str= 0= IF
 	." hash mismatch: " 2dup hash#128 umin 85type space
-	newhash hash#128 85type forth:cr  THEN
+	newhash hash#128 85type forth:cr
+	2over forth:type
+    THEN
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ;
 
@@ -153,6 +154,10 @@ Variable new-files[]
 Variable del-files[]
 Variable old-files[]
 Variable new-file$
+
+: clean-up ( -- )
+    new-files[] $[]off  del-files[] $[]off  old-files[] $[]off
+    new-file$ $off ;
 
 : hashstat-rest ( addr -- ) >r
     statbuf st_mode w@ 0 { w^ perm } perm le-w!
@@ -210,15 +215,15 @@ also net2o-base
 
 : compute-diff ( addr u -- )
     project:branch$ $@ $, dvcs-commit  $, dvcs-message
-    project:revision$ $@ dup IF  $, dvcs-ref  ELSE  2drop  THEN
+    project:revision$ $@ dup IF  base85>$ over >r $, r> free throw dvcs-ref
+    ELSE  2drop  THEN
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map
-    del-files[] ['] dvcs+in $[]map
+    del-files[] [: 2dup over hash#128 dvcs:perm + le-uw@ >r $,
+	r> S_IFMT and S_IFDIR =  IF  dvcs-rmdir 2drop
+	ELSE  dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map
     new-files[] ['] dvcs+out $[]map
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs-patch
-    del-files[] [: over hash#128 dvcs:perm + le-uw@ >r /name $,
-	r> S_IFMT and S_IFDIR =
-	IF  dvcs-rmdir  ELSE  dvcs-rm  THEN ;] $[]map
     new-files[] [:
 	2dup /name statbuf lstat ?ior statbuf st_size @ ulit,
 	$, dvcs-write ;] $[]map ;
@@ -245,14 +250,16 @@ Variable patch-in$
     BEGIN  refill  WHILE
 	    source .objects/ patch-in$ $slurp-file
 	    patch-in$ $@ sample-patch >o
+	    dvcs:in-files$ $off dvcs:out-files$ $off
 	    c-state off do-cmd-loop o>  REPEAT ;
 : branches>dvcs ( o:dvcs -- )
     branch$ r/o open-file dup no-file# <> IF  throw
-    ['] branchlist-loop execute-parsing-file  ELSE  drop  THEN ;
+    ['] branchlist-loop execute-parsing-file  ELSE  2drop  THEN ;
 
 : (dvcs-ci) ( addr u o:dvcs -- )
     config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
-    new-files[] $[]# del-files[] $[]# d0= IF ." Nothing to do" cr  EXIT  THEN
+    new-files[] $[]# del-files[] $[]# d0= IF
+	2drop ." Nothing to do" cr  EXIT  THEN
     ['] compute-diff gen-cmd$
     2dup c:0key c:hash newhash hash#128 c:hash@
     newhash hash#128 sane-85 2dup project:revision$ $!
@@ -260,7 +267,7 @@ Variable patch-in$
     .objects/ ?.net2o/objects spit-file
     del-files[] ['] -fileentry $[]map
     new-files[] ['] +fileentry $[]map
-    save-project filelist-out
+    save-project filelist-out clean-up
     "~+/.n2o/newfiles" delete-file dup no-file# <> and throw ;
 
 : dvcs-ci ( addr u -- ) \ checkin command

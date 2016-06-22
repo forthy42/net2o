@@ -369,6 +369,11 @@ synonym searchkey keysearch
     ?nextarg 0= IF  help  EXIT  THEN
     get-me init-client word-args ['] included do-net2o-cmds ;
 
+: sh ( -- )
+    \U sh cmd
+    \G sh: evaluate rest of command as shell command
+    source >in @ /string system  source nip >in ! ;
+
 : debug ( -- )
     \U debug [+|-<switch>]
     \G debug: set or clear debugging switches
