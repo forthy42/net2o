@@ -297,6 +297,7 @@ require config.fs
 
 scope{ config
 
+Variable rootdirs$
 Variable prio#
 Variable host$
 Variable date#
@@ -314,6 +315,7 @@ also config
 "~/.net2o/chats" chats$ $!
 "~/.net2o/objects" objects$ $!
 2 date# !
+pad $400 get-dir rootdirs$ $!
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
@@ -327,9 +329,13 @@ also config
 
 Variable config-file$  "~/.net2o/config" config-file$ $!
 
+: rootdirs>path ( -- )
+    config:rootdirs$ $@ bounds ?DO  I c@ ':' = IF 0 I c! THEN LOOP ;
+
 : ?.net2o-config ( -- )
     config-file$ $@ 2dup file-status nip  ['] config >body swap
-    no-file# = IF  write-config  ELSE  read-config  THEN ;
+    no-file# = IF  write-config  ELSE  read-config  THEN
+    rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o ?.net2o-config ;
 

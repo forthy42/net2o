@@ -17,9 +17,6 @@
 
 Sema file-sema
 
-Variable net2o-path
-pad $400 get-dir net2o-path $!
-
 cmd-class class
     64field: fs-size
     64field: fs-seek
@@ -118,7 +115,7 @@ cell 8 = [IF]
 :noname ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " type ."  with mode " . cr )
     >r 2dup absolut-path?  !!abs-path!!
-    net2o-path open-path-file throw fs-path $! fs-fid !
+    config:rootdirs$ open-path-file throw fs-path $! fs-fid !
     r@ r/o <> IF  0 fs-fid !@ close-file throw
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-poll fs-size!
