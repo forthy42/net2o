@@ -428,7 +428,8 @@ synonym searchkey keysearch
 : add ( -- )
     \U add file1 .. filen
     \G add: add files to the dvcs project in the current folder
-    ".n2o/newfiles" args>file ;
+    n2o:new-dvcs >o files>dvcs
+    ['] dvcs-add arg-loop  n2o:dispose-dvcs o> ;
 
 : ci ( -- )
     \U ci "message"

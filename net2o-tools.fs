@@ -70,13 +70,6 @@ word-args
 : @arg-loop { xt -- }
     begin  ?@nextarg  while  xt execute  repeat ;
 
-: args>file ( addr u -- )
-    2dup w/o open-file IF
-	drop w/o create-file throw
-    ELSE  nip nip  THEN
-    [: rot >r r@ write-line throw r> ;] arg-loop
-    close-file throw ;
-
 \ string
 
 : smove ( a-from u-from a-to u-to -- )

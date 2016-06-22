@@ -167,7 +167,7 @@ Variable new-file$
     perm le-uw@ S_IFMT and  case
 	S_IFLNK of  $200 new-file$ $!len
 	    r@ $@ 0 dvcs:name /string new-file$ $@ readlink
-	    dup ?ior r@ $!len  endof
+	    dup ?ior new-file$ $!len  endof
 	S_IFREG of  r@ $@ 0 dvcs:name /string new-file$ $slurp-file  endof
 	S_IFDIR of  "" new-file$ $!  endof
     endcase
@@ -225,7 +225,8 @@ also net2o-base
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs-patch
     new-files[] [:
-	2dup /name statbuf lstat ?ior statbuf st_size @ ulit,
+	2dup /name statbuf lstat ?ior statbuf st_size @
+	statbuf st_mode w@ S_IFMT and S_IFDIR <> and ulit,
 	$, dvcs-write ;] $[]map ;
 
 previous
@@ -272,6 +273,12 @@ Variable patch-in$
 
 : dvcs-ci ( addr u -- ) \ checkin command
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
+
+: dvcs-add ( addr u -- )
+    2dup '/' -scan '/' -skip dup IF  recurse  ELSE  2drop  THEN
+    2dup dvcs:files[] #@ drop IF  2drop  EXIT
+    ELSE  "dummy" 2over dvcs:files[] #!
+	"~+/.n2o/newfiles" append-line  THEN ;
 
 0 [IF]
 Local Variables:
