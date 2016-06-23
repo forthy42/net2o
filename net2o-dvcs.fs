@@ -249,10 +249,11 @@ Variable patch-in$
 
 : branchlist-loop ( -- )
     BEGIN  refill  WHILE
+	    source project:revision$ $@ <>  WHILE
 	    source .objects/ patch-in$ $slurp-file
 	    patch-in$ $@ sample-patch >o
 	    dvcs:in-files$ $off dvcs:out-files$ $off
-	    c-state off do-cmd-loop o>  REPEAT ;
+	    c-state off do-cmd-loop o>  REPEAT  THEN ;
 : branches>dvcs ( o:dvcs -- )
     branch$ r/o open-file dup no-file# <> IF  throw
     ['] branchlist-loop execute-parsing-file  ELSE  2drop  THEN ;

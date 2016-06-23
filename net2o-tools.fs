@@ -576,7 +576,7 @@ filechars #del -bit
       LOOP ;] $10 base-execute ;
 
 : fn-sanitize ( addr u -- addr' u' )
-    ['] sane-type $tmp ;
+    ['] sane-type $tmp $unescape ;
 
 \ copy files
 
