@@ -75,7 +75,7 @@ SOURCES = 64bit.fs base64.fs base85.fs config.fs crypto-api.fs		\
 	  linux/net.fs linux/notify.fs net2o-dhtroot.fs net2o-dvcs.fs	\
 	  android/qrscan.fs
 
-SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux
+SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux
 
 SCRIPTS = n2o
 
@@ -106,11 +106,13 @@ install:	libcc-install
 		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
 	done
 	for i in $(SOURCES) $(GEN); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o-@PACKAGE_VERSION@/$$i; \
 	done
+	ln -fs $(datadir)/gforth/$(VERSION)/net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
 	$(MKDIR) -p $(bindir)
 	for i in $(SCRIPTS); do \
-		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
+		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
+		ln -fs $(bindir)/$$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
 	done
 
 libcc:	$(FORTHLIB)
