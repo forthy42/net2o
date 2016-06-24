@@ -108,11 +108,11 @@ install:	libcc-install
 	for i in $(SOURCES) $(GEN); do \
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o-@PACKAGE_VERSION@/$$i; \
 	done
-	ln -fs $(datadir)/gforth/$(VERSION)/net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
+	ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
 	$(MKDIR) -p $(bindir)
 	for i in $(SCRIPTS); do \
 		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
-		ln -fs $(bindir)/$$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
+		ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
 	done
 
 libcc:	$(FORTHLIB)

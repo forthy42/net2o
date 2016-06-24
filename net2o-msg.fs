@@ -64,7 +64,7 @@ Sema msglog-sema
 
 : load-msg ( group u -- )
     >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
-    2dup file-status nip no-file# = IF  2drop EXIT  THEN
+    2dup >filename file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  ['] decrypt-file catch
     ?dup-IF  DoError nothrow 2drop
