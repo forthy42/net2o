@@ -427,9 +427,9 @@ synonym searchkey keysearch
     ".n2o" $1FF init-dir drop
     ".n2o/files" touch
     ?nextarg 0= IF  pad $200 get-dir 2dup '/' -scan nip /string THEN
-    project:project$ $!
+    n2o:new-dvcs >o project:project$ $!
     ?nextarg 0= IF  "master"  THEN  project:branch$ $!
-    save-project ;
+    save-project  n2o:dispose-dvcs o> ;
 
 : add ( -- )
     \U add file1 .. filen

@@ -1,4 +1,4 @@
-\ net2o DVCS
+\ net2o distributed version control system
 
 \ Copyright (C) 2016   Bernd Paysan
 
@@ -19,12 +19,14 @@ Variable dvcs-objects \ hash of objects
 
 Variable dvcs-table
 
+vocabulary project
+
 scope: dvcs
 
 msg-class class
     field: branch$
     field: message$
-    field: files[]    \ snapshot config
+    field: files#    \ snapshot config
     field: in-files$
     field: patch$
     field: out-files$
@@ -33,6 +35,19 @@ msg-class class
     field: delfiles[] \ list of files to delete
     field: deldirs[]  \ list of dirs to delete
     field: outfiles   \ hash of files to write
+
+    rot }scope
+    
+    scope{ project -rot \ per-project configuration values
+    
+    field: revision$
+    field: branch$
+    field: project$
+
+    rot }scope
+
+    scope{ dvcs -rot
+
 end-class dvcs-class
 
 begin-structure filehash
@@ -40,14 +55,6 @@ begin-structure filehash
     wfield: perm
     0 +field name
 end-structure
-
-}scope
-
-scope: project \ per-project configuration values
-
-Variable revision$
-Variable branch$
-Variable project$
 
 }scope
 
@@ -62,9 +69,9 @@ hash#128 buffer: newhash
 
 : +fileentry ( addr u o:dvcs -- )
     \G add a file entry and replace same file if it already exists
-    fn-split dvcs:files[] #! ;
+    fn-split dvcs:files# #! ;
 : -fileentry ( addr u o:dvcs -- )
-    /name dvcs:files[] #off ;
+    /name dvcs:files# #off ;
 
 : dvcs-outfile-name ( baddr u1 fname u2 -- )  hash#128 /string
     over dvcs:timestamp le-64@ 64>d #1000000000 um/mod { d^ ts-ns }
@@ -97,12 +104,12 @@ hash#128 buffer: newhash
 : filelist-print ( filelist -- )
     [: >r r@ cell+ $@ 85type space r> $@ type cr ;] #map ;
 : filelist-out ( o:dvcs -- )
-    ".n2o/files" [: >r dvcs:files[] ['] filelist-print r> outfile-execute ;]
+    ".n2o/files" [: >r dvcs:files# ['] filelist-print r> outfile-execute ;]
     new-file ;
 
 : filelist-loop ( -- )
     BEGIN  refill  WHILE
-	    source bl $split 2>r base85>$ 2dup 2r> dvcs:files[] #!
+	    source bl $split 2>r base85>$ 2dup 2r> dvcs:files# #!
 	    drop free throw  REPEAT ;
 : filelist-in ( addr u o:dvcs -- )
     r/o open-file throw ['] filelist-loop execute-parsing-file ;
@@ -147,8 +154,10 @@ net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
 : n2o:new-dvcs ( -- o )
     dvcs:dvcs-class new >o  dvcs-table @ token-table ! o o> ;
 : n2o:dispose-dvcs ( o:dvcs -- )
-    dvcs:branch$ $off  dvcs:message$ $off  dvcs:files[] #offs
-    dvcs:in-files$ $off dvcs:out-files$ $off  dispose ;
+    dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
+    dvcs:in-files$ $off dvcs:out-files$ $off
+    project:revision$ $off  project:branch$ $off  project:project$ $off
+    dispose ;
 
 Variable new-files[]
 Variable del-files[]
@@ -189,7 +198,7 @@ Variable new-file$
 : new>dvcs ( o:dvcs -- )
     "~+/.n2o/newfiles" new-files-in ;
 : dvcs?modified ( o:dvcs -- )
-    dvcs:files[] [: >r
+    dvcs:files# [: >r
 	r@ $@ statbuf lstat
 	0< IF  errno ENOENT = IF
 		r@ cell+ $@ del-files[] $+[]!
@@ -277,8 +286,8 @@ Variable patch-in$
 
 : dvcs-add ( addr u -- )
     2dup '/' -scan '/' -skip dup IF  recurse  ELSE  2drop  THEN
-    2dup dvcs:files[] #@ drop IF  2drop  EXIT
-    ELSE  "dummy" 2over dvcs:files[] #!
+    2dup dvcs:files# #@ drop IF  2drop  EXIT
+    ELSE  "dummy" 2over dvcs:files# #!
 	"~+/.n2o/newfiles" append-line  THEN ;
 
 0 [IF]

@@ -89,7 +89,7 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
-: #offs ( hash -- ) >r
+: #offs ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  >r
     r@ @ $100 cells bounds DO  I $off  cell +LOOP
     r@ @ $100 cells + $80 bounds DO
 	I @ ?dup-IF  recurse  THEN
