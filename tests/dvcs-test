@@ -22,3 +22,4 @@ add c
 ci -m "Checkin 4"
 bye
 EOF
+echo
