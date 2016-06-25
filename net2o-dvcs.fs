@@ -159,10 +159,11 @@ Variable new-files[]
 Variable del-files[]
 Variable old-files[]
 Variable new-file$
+Variable branches[]
 
 : clean-up ( -- )
     new-files[] $[]off  del-files[] $[]off  old-files[] $[]off
-    new-file$ $off ;
+    branches[] $[]off  new-file$ $off ;
 
 : hashstat-rest ( addr -- ) >r
     statbuf st_mode w@ 0 { w^ perm } perm le-w!
@@ -254,16 +255,19 @@ previous
 Variable patch-in$
 ' n2o:new-dvcs static-a with-allocater Value sample-patch
 
-: branchlist-loop ( -- )
-    BEGIN  refill  WHILE
-	    source project:revision$ $@ <>  WHILE
-	    source fn-sanitize .objects/ patch-in$ $slurp-file
-	    patch-in$ $@ sample-patch >o
-	    dvcs:in-files$ $off dvcs:out-files$ $off
-	    c-state off do-cmd-loop o>  REPEAT  THEN ;
+: branchlist-loop ( -- )  branches[] $[]off
+    BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
+	    r> free throw  REPEAT ;
+: apply-branch ( addr u -- )
+    ['] 85type $tmp .objects/ patch-in$ $slurp-file
+    patch-in$ $@ sample-patch >o
+    dvcs:in-files$ $off dvcs:out-files$ $off
+    c-state off do-cmd-loop o> ;
 : branches>dvcs ( o:dvcs -- )
     branch$ r/o open-file dup no-file# <> IF  throw
-    ['] branchlist-loop execute-parsing-file  ELSE  2drop  THEN ;
+	['] branchlist-loop execute-parsing-file
+	branches[] ['] apply-branch $[]map
+    ELSE  2drop  THEN ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
@@ -273,7 +277,7 @@ Variable patch-in$
     2dup c:0key c:hash newhash hash#128 c:hash@
     newhash hash#128 ['] 85type $tmp 2dup project:revision$ $!
     2dup append-branch
-    fn-sanitize .objects/ ?.net2o/objects spit-file
+    .objects/ ?.net2o/objects spit-file
     del-files[] ['] -fileentry $[]map
     new-files[] ['] +fileentry $[]map
     save-project filelist-out clean-up

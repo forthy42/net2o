@@ -279,6 +279,25 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 : endwith ( -- )
     postpone o> previous ; immediate restrict
 
+\ file name sanitizer
+
+$20 buffer: filechars
+filechars $20 $FF fill
+0 filechars l! \ ctrl chars are all illegal
+filechars '/' -bit
+filechars #del -bit
+"\\:?*\q<>|%" 2Constant no-fat-chars
+\ '%' is allowed, but we use '%' to replace the others
+
+: sane-type ( addr u -- )
+    [: bounds ?DO
+	  I c@ filechars over bit@
+	  IF  emit  ELSE  '%' emit .2  THEN
+      LOOP ;] $10 base-execute ;
+
+: fn-sanitize ( addr u -- addr' u' )
+    ['] sane-type $tmp $unescape ;
+
 \ config stuff
 
 require config.fs
@@ -320,12 +339,21 @@ pad $400 get-dir rootdirs$ $!
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
 : .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
-: .objects/ ( addr u -- addr' u' ) [: objects$  $. '/' emit type ;] $tmp ;
+: .objects/ ( addr u -- addr' u' )
+    fn-sanitize [: objects$  $. '/' emit type ;] $tmp ;
 
 : ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
 : ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
 : ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
+
+: fsane-init ( -- )
+    ?.net2o no-fat-chars .net2o/ r/w create-file IF drop
+	no-fat-chars bounds ?DO filechars I c@ -bit LOOP
+    ELSE
+	close-file throw no-fat-chars .net2o/ delete-file throw
+    THEN ;
+fsane-init
 
 Variable config-file$  "~/.net2o/config" config-file$ $!
 Variable configured?
@@ -552,31 +580,6 @@ $10 Constant datesize#
 
 : touch ( addr u -- )
     w/o create-file throw close-file throw ;
-
-\ file name sanitizer
-
-$20 buffer: filechars
-filechars $20 $FF fill
-0 filechars l! \ ctrl chars are all illegal
-filechars '/' -bit
-filechars #del -bit
-"\\:?*\q<>|%" 2Constant no-fat-chars
-\ '%' is allowed, but we use '%' to replace the others
-
-?.net2o no-fat-chars .net2o/ r/w create-file [IF] drop
-    no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
-[ELSE]
-    close-file throw no-fat-chars .net2o/ delete-file throw
-[THEN]
-
-: sane-type ( addr u -- )
-    [: bounds ?DO
-	  I c@ filechars over bit@
-	  IF  emit  ELSE  '%' emit .2  THEN
-      LOOP ;] $10 base-execute ;
-
-: fn-sanitize ( addr u -- addr' u' )
-    ['] sane-type $tmp $unescape ;
 
 \ copy files
 
