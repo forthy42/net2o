@@ -270,15 +270,17 @@ Variable patch-in$
 	branches[] ['] apply-branch $[]map?
     ELSE  2drop  THEN ;
 
+: >revision ( addr u -- )
+    2dup c:0key c:hash newhash hash#128 c:hash@
+    newhash hash#128 ['] 85type $tmp 2dup project:revision$ $!
+    2dup append-branch
+    .objects/ ?.net2o/objects spit-file ;
+
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
     new-files[] $[]# del-files[] $[]# d0= IF
 	2drop ." Nothing to do" cr  EXIT  THEN
-    ['] compute-diff gen-cmd$
-    2dup c:0key c:hash newhash hash#128 c:hash@
-    newhash hash#128 ['] 85type $tmp 2dup project:revision$ $!
-    2dup append-branch
-    .objects/ ?.net2o/objects spit-file
+    ['] compute-diff gen-cmd$ >revision
     del-files[] ['] -fileentry $[]map
     new-files[] ['] +fileentry $[]map
     save-project filelist-out clean-up
@@ -287,11 +289,23 @@ Variable patch-in$
 : dvcs-ci ( addr u -- ) \ checkin command
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
 
+: ci-args ( -- message u )
+    ?nextarg 0= IF "untitled checkin" THEN
+    2dup "-m" str= IF  ?nextarg IF  2nip  THEN  THEN ;
+
 : dvcs-add ( addr u -- )
     2dup '/' -scan '/' -skip dup IF  recurse  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
     ELSE  "dummy" 2over dvcs:files# #!
 	"~+/.n2o/newfiles" append-line  THEN ;
+
+: dvcs-snap ( addr u -- )
+    n2o:new-dvcs >o  dvcs:message$ $!
+    config>dvcs  project:revision$ $off  files>dvcs
+    dvcs:files# [: $@ new-files[] $ins[] ;] #map
+    new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP
+    ['] compute-diff gen-cmd$ >revision
+    save-project  n2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:
