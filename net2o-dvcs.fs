@@ -149,9 +149,11 @@ net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
 
 : n2o:new-dvcs ( -- o )
     dvcs:dvcs-class new >o  dvcs-table @ token-table ! o o> ;
+: clean-delta ( o:dvcs -- )
+    dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
-    dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:fileentry$ $off
+    clean-delta dvcs:fileentry$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
     dispose ;
 
@@ -260,9 +262,8 @@ Variable patch-in$
 	    r> free throw  REPEAT ;
 : apply-branch ( addr u -- flag )
     ['] 85type $tmp 2dup project:revision$ $@ str= >r
-    .objects/ patch-in$ $slurp-file
-    patch-in$ $@ sample-patch >o
-    dvcs:in-files$ $off dvcs:out-files$ $off
+    sample-patch >o clean-delta
+    .objects/ patch-in$ $slurp-file patch-in$ $@
     c-state off do-cmd-loop o> r> ;
 : branches>dvcs ( o:dvcs -- )
     branch$ r/o open-file dup no-file# <> IF  throw
