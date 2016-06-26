@@ -532,6 +532,11 @@ $10 Constant datesize#
 	    THEN
     REPEAT ;
 
+: $[]map? { addr xt -- }
+    \G execute @var{xt} for all elements of the string array @var{addr}.
+    \G xt is @var{( addr u -- flag )}, getting one string at a time
+    addr $[]# 0 ?DO  I addr $[]@ xt execute ?LEAVE  LOOP ;
+
 \ colors
 
 : <default> default-color attr! ;

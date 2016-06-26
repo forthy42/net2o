@@ -258,15 +258,16 @@ Variable patch-in$
 : branchlist-loop ( -- )  branches[] $[]off
     BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
 	    r> free throw  REPEAT ;
-: apply-branch ( addr u -- )
-    ['] 85type $tmp .objects/ patch-in$ $slurp-file
+: apply-branch ( addr u -- flag )
+    ['] 85type $tmp 2dup project:revision$ $@ str= >r
+    .objects/ patch-in$ $slurp-file
     patch-in$ $@ sample-patch >o
     dvcs:in-files$ $off dvcs:out-files$ $off
-    c-state off do-cmd-loop o> ;
+    c-state off do-cmd-loop o> r> ;
 : branches>dvcs ( o:dvcs -- )
     branch$ r/o open-file dup no-file# <> IF  throw
 	['] branchlist-loop execute-parsing-file
-	branches[] ['] apply-branch $[]map
+	branches[] ['] apply-branch $[]map?
     ELSE  2drop  THEN ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
