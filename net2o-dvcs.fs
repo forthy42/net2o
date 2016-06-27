@@ -306,7 +306,7 @@ Variable patch-in$
     dvcs:files# [: $@ new-files[] $ins[] ;] #map
     new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP
     ['] compute-diff gen-cmd$ >revision
-    save-project  n2o:dispose-dvcs o> ;
+    save-project  n2o:dispose-dvcs  clean-up o> ;
 
 0 [IF]
 Local Variables:

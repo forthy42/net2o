@@ -125,6 +125,36 @@ Variable bdelta$
 	THEN
     I - +LOOP  drop ;
 
+#80 Constant max-shorted#
+
+: <#copy> $B62 attr! ;
+: <#omit> $C62 attr! ;
+: <#new>  $D62 attr! ;
+: <#del>  $E62 attr! ;
+
+: type-shorted ( addr u -- )
+    dup [ max-shorted# 5 2 */ ]L u>
+    IF  over max-shorted# type
+	<#omit> '[' emit dup max-shorted# 2* - 0 .r ."  chars...]" <default>
+	dup max-shorted# - /string
+    THEN  type ;
+
+: color-bpatch$2 ( a$ diff$ -- )
+    0 { fp }
+    $@ bounds U+DO
+	I p@+ >r 64>n r> swap 2dup <#new> type <default> +
+	dup I' u< IF
+	    ps@+ >r 64>n dup fp + to fp { offt }
+	    offt 0> IF
+		dup $@ fp offt - /string offt umin <#del> type <default>  THEN
+	    dup $@ fp safe/string
+	    r> p@+ >r 64>n dup fp + to fp umin
+	    offt 0< IF  2dup offt negate umin <#copy> type <default>
+		offt negate safe/string
+	    THEN  type-shorted r>
+	THEN
+    I - +LOOP  drop ;
+
 : bpatch ( addr1 u1 addr2 u2 -- addr3 u3 )
     bslurp ['] bpatch$2 bdelta$ $exec
     bdelta$ $@ ;
