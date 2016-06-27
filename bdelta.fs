@@ -128,8 +128,8 @@ Variable bdelta$
 #80 Constant max-shorted#
 
 : <#copy> $B62 attr! ;
-: <#omit> $C62 attr! ;
-: <#new>  $D62 attr! ;
+: <#omit> $962 attr! ;
+: <#new>  $D62 attr! ( for color blind: $D68 ) ;
 : <#del>  $E62 attr! ;
 
 : type-shorted ( addr u -- )
@@ -140,17 +140,18 @@ Variable bdelta$
     THEN  type ;
 
 : color-bpatch$2 ( a$ diff$ -- )
-    0 { fp }
+    0 0 { fp offt }
     $@ bounds U+DO
 	I p@+ >r 64>n r> swap 2dup <#new> type <default> +
 	dup I' u< IF
-	    ps@+ >r 64>n dup fp + to fp { offt }
+	    ps@+ >r 64>n dup offt + to offt fp + to fp
 	    offt 0> IF
-		dup $@ fp offt - /string offt umin <#del> type <default>  THEN
+		dup $@ fp offt - safe/string
+		offt umin <#del> type <default> 0 to offt  THEN
 	    dup $@ fp safe/string
 	    r> p@+ >r 64>n dup fp + to fp umin
 	    offt 0< IF  2dup offt negate umin <#copy> type <default>
-		offt negate safe/string
+		offt negate /string dup 0 min to offt 0 max
 	    THEN  type-shorted r>
 	THEN
     I - +LOOP  drop ;
