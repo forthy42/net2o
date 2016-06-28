@@ -237,7 +237,7 @@ also net2o-base
     dvcs:patch$ $@ $, dvcs-patch ;
 
 : compute-diff ( -- )
-    read-old-fs  read-del-fs read-new-fs
+    read-old-fs  read-del-fs  read-new-fs
     compute-patch  write-new-fs ;
 
 previous
