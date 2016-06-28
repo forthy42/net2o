@@ -113,29 +113,26 @@ hash#128 buffer: newhash
 scope{ net2o-base
 
 \g 
-\g ### DVCS commands ###
-\g 
+\g ### DVCS patch commands ###
+\g
+\g DVCS metadata is stored in messages, containing message text, refs
+\g and patchset objects. Patchset objects are constructed in a way
+\g that makes identical transactions have the same hash.
 
 reply-table $@ inherit-table dvcs-table
 
-net2o' emit net2o: dvcs-commit ( $:branch -- ) \g start a commit to branch
-    1 !!>order? $> dvcs:branch$ $! ;
-+net2o: dvcs-message ( $:message -- ) \g commit message
-    2 !!>order? $> dvcs:message$ $! ;
-+net2o: dvcs-ref ( $:hash -- ) \ g previous patch
-    4 !!>order? $> ;
-+net2o: dvcs-read ( $:hash -- ) \g read in an object
-    8 !!>=order? $> dvcs-in-hash ;
-+net2o: dvcs-rm ( $:name -- ) \g delete file
-    $10 !!>=order? $> 2dup hash#128 /string dvcs:outfiles #off
+net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
+    1 !!>=order? $> dvcs-in-hash ;
++net2o: dvcs-rm ( $:hash+name -- ) \g delete file
+    2 !!>=order? $> 2dup hash#128 /string dvcs:outfiles #off
     hash#128 umin dvcs-in-hash ;
 +net2o: dvcs-rmdir ( $:name -- ) \g delete directory
-    $10 !!>=order? $> dvcs:outfiles #off ;
+    4 !!>=order? $> dvcs:outfiles #off ;
 +net2o: dvcs-patch ( $:diff -- ) \g apply patch
-    $20 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
+    8 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
-    $40 !!>=order? 64>n { fsize }
+    $10 !!>=order? 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
     2dup >file-hash $>
     [: newhash hash#128 forth:type
@@ -167,28 +164,31 @@ Variable branches[]
     new-files[] $[]off  del-files[] $[]off  old-files[] $[]off
     branches[] $[]off  new-file$ $off ;
 
-: hashstat-rest ( addr -- ) >r
-    statbuf st_mode w@ 0 { w^ perm } perm le-w!
-    perm 2 r@ 0 $ins
-    statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
-    timestamp 1 64s r@ 0 $ins
-    perm le-uw@ S_IFMT and  case
-	S_IFLNK of  $200 new-file$ $!len
-	    r@ $@ 0 dvcs:name /string new-file$ $@ readlink
-	    dup ?ior new-file$ $!len  endof
-	S_IFREG of  r@ $@ 0 dvcs:name /string new-file$ $slurp-file  endof
-	S_IFDIR of  "" new-file$ $!  endof
-    endcase
-    new-file$ $@ >file-hash
-    newhash hash#128 r> 0 $ins
-    new-file$ $@ newhash hash#128 dvcs-objects #! ;
-: file-hashstat ( addr -- ) >r
-    r@ $@ statbuf lstat ?ior r> hashstat-rest ;
+User tmp1$
+: $tmp1 ( xt -- ) tmp1$ $off  tmp1$ $exec  tmp1$ $@ ;
 
+: hashstat-rest ( addr u -- addr' u' )
+    [: statbuf st_mode w@ 0 { w^ perm } perm le-w!
+	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
+	perm le-uw@ S_IFMT and  case
+	    S_IFLNK of  $200 new-file$ $!len
+		2dup new-file$ $@ readlink
+		dup ?ior new-file$ $!len  endof
+	    S_IFREG of  2dup new-file$ $slurp-file  endof
+	    S_IFDIR of  0 new-file$ $!len  endof
+	endcase
+	new-file$ $@ >file-hash
+	new-file$ $@ newhash hash#128 dvcs-objects #!
+	newhash hash#128 type  timestamp 1 64s type  perm 2 type  type
+    ;] $tmp1 ;
+: file-hashstat ( addr u -- addr' u' )
+    2dup statbuf lstat ?ior  hashstat-rest ;
+
+: new-files-loop ( -- )
+    BEGIN  refill  WHILE  source file-hashstat new-files[] $ins[]  REPEAT ;
 : new-files-in ( addr u -- )
     r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
-    dup >r new-files[] $[]slurp  r> close-file throw
-    new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP ;
+    ['] new-files-loop execute-parsing-file ;
 
 : config>dvcs ( o:dvcs -- )
     "~+/.n2o/config" ['] project >body read-config ;
@@ -200,17 +200,14 @@ Variable branches[]
     dvcs:files# [: >r
 	r@ $@ statbuf lstat
 	0< IF  errno ENOENT = IF
-		r@ cell+ $@ del-files[] $+[]!
-		r> $@ del-files[] dup $[]# 1- swap $[]+!
+		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]
 		EXIT  THEN  -1 ?ior  THEN
 	r@ cell+ $@ drop hash#128 + dvcs:timestamp le-64@
 	statbuf st_mtime ntime@ d>64 64<>
 	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@
 	statbuf st_mode w@ <> or  IF
-	    r@ cell+ $@ old-files[] $+[]!
-	    r@ $@ old-files[] dup $[]# 1- swap $[]+!
-	    r@ $@ new-files[] $+[]!
-	    new-files[] $@ + cell- hashstat-rest
+	    r@ [: dup cell+ $. $. ;] $tmp1 old-files[] $ins[]
+	    r@ $@ hashstat-rest new-files[] $ins[]
 	THEN  rdrop
     ;] #map ;
 
@@ -221,14 +218,11 @@ Variable branches[]
 
 also net2o-base
 
-: compute-diff ( addr u -- )
-    project:branch$ $@ $, dvcs-commit  dvcs:message$ $@ $, dvcs-message
-    project:revision$ $@ dup IF  base85>$ over >r $, r> free throw dvcs-ref
-    ELSE  2drop  THEN
+: compute-diff ( -- )
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map
-    del-files[] [: over hash#128 dvcs:perm + le-uw@ >r
-      r> S_IFMT and S_IFDIR =  IF  /name $, dvcs-rmdir
-      ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp $,
+    del-files[] [: over hash#128 dvcs:perm + le-uw@
+      S_IFMT and S_IFDIR =  IF  /name $, dvcs-rmdir
+      ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp1 $,
 	  dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map
     new-files[] ['] dvcs+out $[]map
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
@@ -257,15 +251,15 @@ previous
 Variable patch-in$
 ' n2o:new-dvcs static-a with-allocater Value sample-patch
 
-: branchlist-loop ( -- )  branches[] $[]off
+: branchlist-loop ( -- )
     BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
 	    r> free throw  REPEAT ;
 : apply-branch ( addr u -- flag )
-    ['] 85type $tmp 2dup project:revision$ $@ str= >r
+    ['] 85type $tmp1 2dup project:revision$ $@ str= >r
     sample-patch >o clean-delta
     .objects/ patch-in$ $slurp-file patch-in$ $@
     c-state off do-cmd-loop o> r> ;
-: branches>dvcs ( o:dvcs -- )
+: branches>dvcs ( o:dvcs -- )  branches[] $[]off
     branch$ r/o open-file dup no-file# <> IF  throw
 	['] branchlist-loop execute-parsing-file
 	branches[] ['] apply-branch $[]map?
@@ -273,19 +267,21 @@ Variable patch-in$
 
 : >revision ( addr u -- )
     2dup c:0key c:hash newhash hash#128 c:hash@
-    newhash hash#128 ['] 85type $tmp 2dup project:revision$ $!
+    newhash hash#128 ['] 85type $tmp1 2dup project:revision$ $!
     2dup append-branch
     .objects/ ?.net2o/objects spit-file ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
     new-files[] $[]# del-files[] $[]# d0= IF
-	2drop ." Nothing to do" cr  EXIT  THEN
-    ['] compute-diff gen-cmd$ >revision
-    del-files[] ['] -fileentry $[]map
-    new-files[] ['] +fileentry $[]map
-    save-project filelist-out clean-up
-    "~+/.n2o/newfiles" delete-file dup no-file# <> and throw ;
+	2drop ." Nothing to do" cr
+    ELSE
+	['] compute-diff gen-cmd$ >revision
+	del-files[] ['] -fileentry $[]map
+	new-files[] ['] +fileentry $[]map
+	save-project filelist-out
+	"~+/.n2o/newfiles" delete-file dup no-file# <> and throw
+    THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
@@ -303,8 +299,7 @@ Variable patch-in$
 : dvcs-snap ( addr u -- )
     n2o:new-dvcs >o  dvcs:message$ $!
     config>dvcs  project:revision$ $off  files>dvcs
-    dvcs:files# [: $@ new-files[] $ins[] ;] #map
-    new-files[] $[]# 0 ?DO  I new-files[] $[] file-hashstat  LOOP
+    dvcs:files# [: $@ file-hashstat new-files[] $ins[] ;] #map
     ['] compute-diff gen-cmd$ >revision
     save-project  n2o:dispose-dvcs  clean-up o> ;
 
