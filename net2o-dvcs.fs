@@ -218,20 +218,27 @@ User tmp1$
 
 also net2o-base
 
-: compute-diff ( -- )
-    old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map
+: read-old-fs ( -- )
+    old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map ;
+: read-del-fs ( -- )
     del-files[] [: over hash#128 dvcs:perm + le-uw@
-      S_IFMT and S_IFDIR =  IF  /name $, dvcs-rmdir
-      ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp1 $,
-	  dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map
-    new-files[] ['] dvcs+out $[]map
+	S_IFMT and S_IFDIR =  IF  /name $, dvcs-rmdir
+	ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp1 $,
+	    dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map ;
+: read-new-fs ( -- )
+    new-files[] ['] dvcs+out $[]map ;
+: write-new-fs ( -- )
+    new-files[] [: 2dup hash#128 dvcs:perm /string $,
+	/name statbuf lstat ?ior statbuf st_size @
+	statbuf st_mode w@ S_IFMT and S_IFDIR <> and ulit,
+	dvcs-write ;] $[]map ;
+: compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
-    dvcs:patch$ $@ $, dvcs-patch
-    new-files[] [:
-      2dup hash#128 dvcs:perm /string $,
-      /name statbuf lstat ?ior statbuf st_size @
-      statbuf st_mode w@ S_IFMT and S_IFDIR <> and ulit,
-      dvcs-write ;] $[]map ;
+    dvcs:patch$ $@ $, dvcs-patch ;
+
+: compute-diff ( -- )
+    read-old-fs  read-del-fs read-new-fs
+    compute-patch  write-new-fs ;
 
 previous
 
