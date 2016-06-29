@@ -114,10 +114,11 @@ scope{ net2o-base
 
 \g 
 \g ### DVCS patch commands ###
-\g
+\g 
 \g DVCS metadata is stored in messages, containing message text, refs
 \g and patchset objects. Patchset objects are constructed in a way
 \g that makes identical transactions have the same hash.
+\g 
 
 reply-table $@ inherit-table dvcs-table
 

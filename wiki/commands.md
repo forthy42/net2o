@@ -350,9 +350,11 @@ List of Commands
   check sig+nest
 
 ### DVCS patch commands ###
+
 DVCS metadata is stored in messages, containing message text, refs
 and patchset objects. Patchset objects are constructed in a way
 that makes identical transactions have the same hash.
+
 + $20 dvcs-read ( $:hash -- )
   read in an object
 + $21 dvcs-rm ( $:hash+name -- )
