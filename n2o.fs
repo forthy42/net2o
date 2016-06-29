@@ -401,23 +401,7 @@ synonym searchkey keysearch
 	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
-\ diff and patch
-
-: diff ( -- )
-    \U diff file1 file2 patchfile
-    \G diff: compute diff between two files, and write patch-file
-    ?nextarg IF  ?nextarg IF  bdelta
-	    ?nextarg IF  spit-file  b$off  EXIT  THEN THEN  THEN
-    ." diff needs three arguments!" cr b$off ;
-
-: patch ( -- )
-    \U patch file1 patchfile file2
-    \G patch: take a patchfile for file1 and produce file2
-    ?nextarg IF  ?nextarg IF  bpatch
-	    ?nextarg IF  spit-file b$off  EXIT  THEN THEN THEN
-    ." patch needs three arguments!" cr b$off ;
-
-\ !!stubs!!
+\ dvcs commands
 
 : init ( -- )
     \U init [name [branchname]]
@@ -456,6 +440,9 @@ synonym searchkey keysearch
     \U snap
     \G snap: create a snapshot of the current revision
     ci-args dvcs-snap ;
+
+: diff ( -- )
+    dvcs-diff ;
 
 \ others
 

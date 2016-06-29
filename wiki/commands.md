@@ -7,10 +7,12 @@ requests, the address 0 is always mapped as connectionless code
 address.
 
 The command interpreter is a stack machine with two data types: 64
-bit integers and strings.  Encoding of commands, integers and string
-length follows protobuf, strings are just sequences of bytes
-(interpretation can vary).  Command blocks contain a sequence of
-commands; there are no conditionals and looping instructions.
+bit integers and strings.  Encoding of commands, integers and
+string length follows protobuf conceptually (but MSB first, not LSB
+first as with protobuf, to simplify scanning), strings are just
+sequences of bytes (interpretation can vary).  Command blocks contain
+a sequence of commands; there are no conditionals and looping
+instructions.
 
 Strings can contain encrypted nested commands, used during
 communication setup.
@@ -30,7 +32,7 @@ List of Commands
   string literal
 + $4 flit ( #dfloat -- r )
   double float literal
-+ $5 endwith ( o:object -- )
++ $5 end-with ( o:object -- )
   end scope
 + $6 oswap ( o:nest o:current -- o:current o:nest )
 + $7 tru ( -- f:true )
@@ -245,8 +247,8 @@ List of Commands
   key profile (hash of a resource)
 + $15 keymask ( x -- )
   key access right mask
-+ $16 keypsk ( $:string -- )
-  preshared key, used for DHT encryption
++ $16 keygroup ( x -- )
+  access group, stub
 + $17 +keysig ( $:string -- )
   add a key signature
 + $18 keyimport ( n -- )
@@ -342,5 +344,22 @@ List of Commands
   rewire distribution tree
 + $2A msg-last? ( tick -- )
 + $2B msg-coord ( $:gps -- )
++ $2C msg>group ( $:group -- )
+  just set group
 + $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
+
+### DVCS patch commands ###
+DVCS metadata is stored in messages, containing message text, refs
+and patchset objects. Patchset objects are constructed in a way
+that makes identical transactions have the same hash.
++ $20 dvcs-read ( $:hash -- )
+  read in an object
++ $21 dvcs-rm ( $:hash+name -- )
+  delete file
++ $22 dvcs-rmdir ( $:name -- )
+  delete directory
++ $23 dvcs-patch ( $:diff -- )
+  apply patch
++ $24 dvcs-write ( $:perm+name size -- )
+  write out file

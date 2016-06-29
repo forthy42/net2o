@@ -280,8 +280,11 @@ Variable patch-in$
     2dup append-branch
     .objects/ ?.net2o/objects spit-file ;
 
+: dvcs-readin ( -- )
+    config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
-    config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified
+    dvcs-readin
     new-files[] $[]# del-files[] $[]# d0= IF
 	2drop ." Nothing to do" cr
     ELSE
@@ -294,6 +297,12 @@ Variable patch-in$
 
 : dvcs-ci ( addr u -- ) \ checkin command
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
+
+: dvcs-diff ( -- )
+    n2o:new-dvcs >o dvcs-readin
+    ['] compute-diff gen-cmd$ 2drop
+    dvcs:in-files$ dvcs:patch$ color-bpatch$2
+    clean-up  n2o:dispose-dvcs o> ;
 
 : ci-args ( -- message u )
     ?nextarg 0= IF "untitled checkin" THEN
