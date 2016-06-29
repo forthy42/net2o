@@ -184,8 +184,10 @@ User tmp1$
 : file-hashstat ( addr u -- addr' u' )
     2dup statbuf lstat ?ior  hashstat-rest ;
 
+: $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ ;
+
 : new-files-loop ( -- )
-    BEGIN  refill  WHILE  source file-hashstat new-files[] $ins[]  REPEAT ;
+    BEGIN  refill  WHILE  source file-hashstat new-files[] $ins[]f  REPEAT ;
 : new-files-in ( addr u -- )
     r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
     ['] new-files-loop execute-parsing-file ;
@@ -200,14 +202,14 @@ User tmp1$
     dvcs:files# [: >r
 	r@ $@ statbuf lstat
 	0< IF  errno ENOENT = IF
-		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]
+		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]f
 		EXIT  THEN  -1 ?ior  THEN
 	r@ cell+ $@ drop hash#128 + dvcs:timestamp le-64@
 	statbuf st_mtime ntime@ d>64 64<>
 	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@
 	statbuf st_mode w@ <> or  IF
-	    r@ [: dup cell+ $. $. ;] $tmp1 old-files[] $ins[]
-	    r@ $@ hashstat-rest new-files[] $ins[]
+	    r@ [: dup cell+ $. $. ;] $tmp1 old-files[] $ins[]f
+	    r@ $@ hashstat-rest new-files[] $ins[]f
 	THEN  rdrop
     ;] #map ;
 
@@ -273,7 +275,7 @@ Variable patch-in$
     ELSE  2drop  THEN ;
 
 : >revision ( addr u -- )
-    2dup c:0key c:hash newhash hash#128 c:hash@
+    2dup >file-hash
     newhash hash#128 ['] 85type $tmp1 2dup project:revision$ $!
     2dup append-branch
     .objects/ ?.net2o/objects spit-file ;
@@ -306,7 +308,7 @@ Variable patch-in$
 : dvcs-snap ( addr u -- )
     n2o:new-dvcs >o  dvcs:message$ $!
     config>dvcs  project:revision$ $off  files>dvcs
-    dvcs:files# [: $@ file-hashstat new-files[] $ins[] ;] #map
+    dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >revision
     save-project  n2o:dispose-dvcs  clean-up o> ;
 

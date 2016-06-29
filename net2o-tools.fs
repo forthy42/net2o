@@ -452,6 +452,29 @@ previous
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 
+\ insert into sorted string array, discarding n bytes at the start
+
+: $ins[]/ ( addr u $array n -- )
+    \G insert O(log(n)) into pre-sorted array
+    { $a rest } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
+		drop $# $a $[]@ smove \ overwrite in place
+		EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+: $del[]/ ( addr u $array offset -- )
+    \G delete O(log(n)) from pre-sorted array
+    { $a rest } 0 $a $[]#
+    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
+		drop $# $a $[] $off
+		$a $# cells cell $del
+		2drop EXIT  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT 2drop 2drop ; \ not found
+
 \ insert into sorted string array
 
 : $ins[] ( addr u $array -- ) 0 $ins[]# ;
