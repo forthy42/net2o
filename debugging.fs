@@ -79,6 +79,7 @@ debug: tweak( \ tweaked key
 debug: ivs( \ IVS regen
 debug: rtd( \ round trip delay related stuff
 debug: no0key( \ generate 0key, default off for now
+debug: dvcs( \ print debugging for dvcs
 
 -db profile( \ )
 +db ipv6( \ ipv6 should be on by default )

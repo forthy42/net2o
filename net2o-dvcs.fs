@@ -32,7 +32,6 @@ msg-class class
     field: out-files$
     field: out-fileoff
     field: fileentry$
-    field: outfiles   \ hash of files to write
 
     rot }scope
     
@@ -67,11 +66,21 @@ hash#128 buffer: newhash
 : fn-split ( hash+ts+perm+fn u -- hash+ts+perm u1 fname u2 )
     [ hash#128 dvcs:name ]L >r 2dup r@ umin 2swap r> /string ;
 
+: .mode ( u -- )
+    dup S_IFMT and 12 rshift "0fc3d5b7f9lBsDEF" drop + c@ emit space
+    S_IFMT invert and ['] . 8 base-execute ;
+
+: .file+hash ( addr u -- )
+    over hash#128 85type space  hash#128 /string
+    over dvcs:timestamp le-64@ .ticks space
+    over dvcs:perm le-uw@ .mode
+    0 dvcs:name /string type cr ;
+
 : +fileentry ( addr u o:dvcs -- )
     \G add a file entry and replace same file if it already exists
-    fn-split dvcs:files# #! ;
+    dvcs( ." +f: " 2dup .file+hash ) fn-split dvcs:files# #! ;
 : -fileentry ( addr u o:dvcs -- )
-    /name dvcs:files# #off ;
+    dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #off ;
 
 : dvcs-outfile-name ( baddr u1 fname u2 -- )  hash#128 /string
     over dvcs:perm le-uw@ { perm }
@@ -125,21 +134,21 @@ reply-table $@ inherit-table dvcs-table
 net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     1 !!>=order? $> dvcs-in-hash ;
 +net2o: dvcs-rm ( $:hash+name -- ) \g delete file
-    2 !!>=order? $> 2dup hash#128 /string dvcs:outfiles #off
+    2 !!>=order? $> 2dup hash#128 /string
+    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
     hash#128 umin dvcs-in-hash ;
 +net2o: dvcs-rmdir ( $:name -- ) \g delete directory
-    4 !!>=order? $> dvcs:outfiles #off ;
+    4 !!>=order? $> dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off ;
 +net2o: dvcs-patch ( $:diff -- ) \g apply patch
     8 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
     $10 !!>=order? 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    2dup >file-hash $>
+    2dup >file-hash $>  dvcs:fileentry$ $off
     [: newhash hash#128 forth:type
       ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
-    2dup fn-split dvcs:outfiles #!
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ;
 
@@ -209,10 +218,18 @@ User tmp1$
 	statbuf st_mtime ntime@ d>64 64<>
 	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@
 	statbuf st_mode w@ <> or  IF
-	    r@ [: dup cell+ $. $. ;] $tmp1 old-files[] $ins[]f
-	    r@ $@ hashstat-rest new-files[] $ins[]f
+	    r@ $@ hashstat-rest 2dup fn-split dvcs:files# #@
+	    hash#128 umin 2swap hash#128 umin
+	    str=
+	    IF  2drop
+	    ELSE  new-files[] $ins[]f
+		r@ [: dup cell+ $. $. ;] $tmp1 old-files[] $ins[]f
+	    THEN
 	THEN  rdrop
-    ;] #map ;
+    ;] #map dvcs(
+    ." --- old files:" cr old-files[] ['] .file+hash $[]map
+    ." +++ new files:" cr new-files[] ['] .file+hash $[]map
+    ) ;
 
 : dvcs+in ( hash u -- )
     hash#128 umin dvcs-objects #@ dvcs:in-files$ $+! ;
