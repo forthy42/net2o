@@ -1,0 +1,27 @@
+init dvcs-test
+sh echo "Eine Datei" >a
+sh echo "Noch eine Datei" >b
+sh echo "Eine dritte Datei" >c
+add a b c
+sh echo "Erster Checkin"
+diff
+ci -m "Erster Checkin"
+sh echo "Eine zweite Zeile" >>b
+sh echo "Checkin 2"
+diff
+ci -m "Checkin 2"
+sh mkdir xx
+sh mv c xx/d
+sh echo "Noch etwas mehr" >>xx/d
+add xx/d
+sh echo "Checkin 3"
+diff
+ci -m "Checkin 3"
+sh echo "Eine zweite Zeile" >b
+sh ln -s xx/d c
+add c
+sh echo "Checkin 4"
+diff
+ci -m "Checkin 4"
+snap -m "Snapshot 1"
+bye

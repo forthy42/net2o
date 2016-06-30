@@ -67,7 +67,7 @@ hash#128 buffer: newhash
     [ hash#128 dvcs:name ]L >r 2dup r@ umin 2swap r> /string ;
 
 : .mode ( u -- )
-    dup S_IFMT and 12 rshift "0fc3d5b7f9lBsDEF" drop + c@ emit space
+    dup S_IFMT and 12 rshift "0pc3d5b7f9lBsDEF" drop + c@ emit space
     S_IFMT invert and ['] . 8 base-execute ;
 
 : .file+hash ( addr u -- )
