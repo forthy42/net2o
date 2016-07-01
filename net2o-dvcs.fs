@@ -55,7 +55,7 @@ end-structure
 
 }scope
 
-hash#128 buffer: newhash
+hash#256 buffer: newhash \ keep some space for encryption secret
 
 : >file-hash ( addr u -- )
     c:0key c:hash newhash hash#128 c:hash@ ;
@@ -275,28 +275,63 @@ previous
 : append-branch ( addr u -- )
     branch$ append-line ;
 
+\ unencrypted hash stuff
+
 Variable patch-in$
+
+: write-hashed ( addr1 u1 -- addrhash u2 )
+    2dup >file-hash
+    newhash hash#128 ['] 85type $tmp1 2>r
+    2r@ .objects/ ?.net2o/objects spit-file 2r> ;
+
+: read-hashed ( addr1 u1 -- addrhash u2 )
+    ['] 85type $tmp1 2dup 
+    .objects/ patch-in$ $slurp-file ;
+
+\ encrypted hash stuff, using signature secret as PSK
+
+: sksig>newhash ( -- )
+    sksig newhash hash#128 + keysize move
+    newhash hash#256 >file-hash ;
+
+: write-enc-hashed ( addr1 u1 -- addrhash u2 )
+    2dup >file-hash
+    newhash hash#128 ['] 85type $tmp 2>r
+    sksig>newhash  newhash hash#128 ['] 85type $tmp1 2>r
+    save-mem 2dup c:encrypt  over swap
+    2r> .objects/ ?.net2o/objects spit-file
+    free throw  2r> ;
+
+: read-enc-hashed ( addr1 u1 -- addrhash u2 )
+    2dup newhash hash#128 smove  sksig>newhash
+    newhash hash#128 ['] 85type $tmp1
+    .objects/ patch-in$ $slurp-file
+    patch-in$ $@ c:decrypt
+    ['] 85type $tmp1 ;
+
+\ patch stuff
+
 ' n2o:new-dvcs static-a with-allocater Value sample-patch
 
 : branchlist-loop ( -- )
     BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
 	    r> free throw  REPEAT ;
 : apply-branch ( addr u -- flag )
-    ['] 85type $tmp1 2dup project:revision$ $@ str= >r
+    read-hashed project:revision$ $@ str= >r
     sample-patch >o clean-delta
-    .objects/ patch-in$ $slurp-file patch-in$ $@
-    c-state off do-cmd-loop o> r> ;
+    c-state off patch-in$ $@ do-cmd-loop o> r> ;
 : branches>dvcs ( o:dvcs -- )  branches[] $[]off
     branch$ r/o open-file dup no-file# <> IF  throw
 	['] branchlist-loop execute-parsing-file
 	branches[] ['] apply-branch $[]map?
     ELSE  2drop  THEN ;
 
+\ push out a revision
+
 : >revision ( addr u -- )
-    2dup >file-hash
-    newhash hash#128 ['] 85type $tmp1 2dup project:revision$ $!
-    2dup append-branch
-    .objects/ ?.net2o/objects spit-file ;
+    write-hashed
+    2dup project:revision$ $!
+    append-branch ;
 
 : dvcs-readin ( -- )
     config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
