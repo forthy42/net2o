@@ -161,7 +161,7 @@ DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
 
 \ sample key
 
-0 Value sample-key
+key-entry ' new static-a with-allocater Constant sample-key
 
 Variable key-table \ key hash table
 Variable nick-table \ nick hash table
@@ -527,7 +527,6 @@ gen-table $freeze
     sim-nick! off c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
-key-entry ' new static-a with-allocater to sample-key
 sample-key >o key-entry-table @ token-table ! o>
 
 : key:code ( -- )

@@ -285,8 +285,9 @@ Variable patch-in$
     2r@ .objects/ ?.net2o/objects spit-file 2r> ;
 
 : read-hashed ( addr1 u1 -- addrhash u2 )
-    ['] 85type $tmp1 2dup 
-    .objects/ patch-in$ $slurp-file ;
+    2dup ['] 85type $tmp 2dup 2>r .objects/ patch-in$ $slurp-file
+    patch-in$ $@ >file-hash
+    newhash hash#128 str= 0= !!wrong-hash!! 2r> ;
 
 \ encrypted hash stuff, using signature secret as PSK
 
@@ -294,7 +295,7 @@ Variable patch-in$
     sksig newhash hash#128 + keysize move
     newhash hash#256 >file-hash ;
 
-: write-enc-hashed ( addr1 u1 -- addrhash u2 )
+: write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
     2dup >file-hash
     newhash hash#128 ['] 85type $tmp 2>r
     sksig>newhash  newhash hash#128 ['] 85type $tmp1 2>r
@@ -302,16 +303,18 @@ Variable patch-in$
     2r> .objects/ ?.net2o/objects spit-file
     free throw  2r> ;
 
-: read-enc-hashed ( addr1 u1 -- addrhash u2 )
+: read-enc-hashed ( hash1 u1 -- addrhash85 u2 )
     2dup newhash hash#128 smove  sksig>newhash
-    newhash hash#128 ['] 85type $tmp1
+    newhash hash#128 ['] 85type $tmp
     .objects/ patch-in$ $slurp-file
     patch-in$ $@ c:decrypt
+    patch-in$ $@ >file-hash
+    2dup newhash hash#128 str= 0= !!wrong-hash!!
     ['] 85type $tmp1 ;
 
 \ patch stuff
 
-' n2o:new-dvcs static-a with-allocater Value sample-patch
+' n2o:new-dvcs static-a with-allocater Constant sample-patch
 
 : branchlist-loop ( -- )
     BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
