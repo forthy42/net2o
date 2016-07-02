@@ -326,10 +326,6 @@ List of Commands
   start message
 + $21 msg-group ( $:group -- )
   specify a chat group
-+ $22 msg-join ( $:group -- )
-  join a chat group
-+ $23 msg-leave ( $:group -- )
-  leave a chat group
 + $24 msg-signal ( $:pubkey -- )
   signal message to one person
 + $25 msg-re ( $:hash )
@@ -340,12 +336,19 @@ List of Commands
   specify an object, e.g. an image
 + $28 msg-action ( $:msg -- )
   specify message string
++ $2B msg-coord ( $:gps -- )
+
+### messaging commands ###
+
++ $22 msg-join ( $:group -- )
+  join a chat group
++ $23 msg-leave ( $:group -- )
+  leave a chat group
 + $29 msg-reconnect ( $:pubkey+addr -- )
   rewire distribution tree
 + $2A msg-last? ( tick -- )
-+ $2B msg-coord ( $:gps -- )
 + $2C msg>group ( $:group -- )
-  just set group
+  just set group, for reconnect
 + $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
 
