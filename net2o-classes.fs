@@ -38,6 +38,7 @@ Variable log-table
 Variable setup-table
 Variable connect-table
 Variable ack-table
+Variable msging-table
 Variable msg-table
 Variable term-table
 Variable address-table
@@ -119,6 +120,17 @@ cmd-class class
     field: msgs[]
     field: peers[]
     field: silent-last#
+end-class msging-class
+
+cmd-class class
+    method msg:start
+    method msg:group
+    method msg:signal
+    method msg:re
+    method msg:text
+    method msg:object
+    method msg:action
+    method msg:coord
 end-class msg-class
 
 cmd-class class
@@ -160,6 +172,7 @@ cmd-class class
     field: next-context  \ link field to connect all contexts
     field: log-context
     field: ack-context
+    field: msging-context
     field: msg-context
     field: file-state    \ files
     \ rest of state

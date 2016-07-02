@@ -38,8 +38,12 @@ User skip-sig?
 Sema msglog-sema
 
 : ?msg-context ( -- o )
-    msg-context @ dup 0= IF
-	drop  n2o:new-msg dup msg-context !
+    msging-context @ dup 0= IF
+	drop
+	msg-context @ 0= IF
+	    n2o:new-msg msg-context !
+	THEN
+	n2o:new-msging dup msging-context !
     THEN ;
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
@@ -48,7 +52,7 @@ Sema msglog-sema
     [: msg-logs #@ save-mem ;] msglog-sema c-section ;
 
 : save-msgs ( group u -- )
-    n2o:new-msg >o enc-file $off
+    n2o:new-msging >o enc-file $off
     2dup msg-log@ over >r
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
@@ -59,7 +63,7 @@ Sema msglog-sema
     pk-off  key-list encfile-rest ;
 
 : vault>msg ( -- )
-    [: n2o:new-msg >o parent off do-cmd-loop dispose o> ;]
+    [: n2o:new-msging >o parent off do-cmd-loop dispose o> ;]
     is write-decrypt ;
 
 : load-msg ( group u -- )
@@ -122,11 +126,12 @@ Sema queue-sema
 \ events
 
 : msg-display ( addr u -- )
-    sigpksize# - 2dup + sigpksize# >$  c-state off do-nestsig ;
+    sigpksize# - 2dup + sigpksize# >$  c-state off
+    do-nestsig ;
 
 : do-msg-nestsig ( -- )
     msg@ +msg-log replay-mode @ 0= and IF
-	msg@ msg-display msg-notify
+	msg@ parent @ .msg-context @ .msg-display msg-notify
     THEN
     msg- ;
 
@@ -249,54 +254,66 @@ msg-table >table
 
 reply-table $@ inherit-table msg-table
 
-net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
+$20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ;
-+net2o: msg-group ( $:group -- ) \g specify a chat group
+$21 net2o: msg-group ( $:group -- ) \g specify a chat group
     $> msg-groups #@ d0= replay-mode @ or ?EXIT \ produce flag and set last#
     signed? IF  8 $10 !!<>=order? \ already a message there
 	up@ receiver-task <> IF
-	    do-avalanche
+	    parent @ .msging-context @ .do-avalanche
 	ELSE parent @ .wait-task @ ?dup-IF
-		<event o elit, last# elit, ->avalanche event>  THEN
+		<event parent @ .msging-context @ elit, last# elit, ->avalanche event>  THEN
 	THEN
     THEN ;
-+net2o: msg-join ( $:group -- ) \g join a chat group
+$24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
+    !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
+    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
+    ."  @" .key-id <default> ;
+$25 net2o: msg-re ( $:hash ) \g relate to some object
+    !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
+$26 net2o: msg-text ( $:msg -- ) \g specify message string
+    !!signed? 1 8 !!<>=order? ." : " $>
+    2dup [: ." : " forth:type ;] $tmp notify+ forth:type forth:cr ;
+$27 net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
+    !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
+$28 net2o: msg-action ( $:msg -- ) \g specify message string
+    !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
+    <warn> forth:type <default> forth:cr ;
+$2B net2o: msg-coord ( $:gps -- )
+    !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
+
+gen-table $freeze
+' context-table is gen-table
+
+\g 
+\g ### messaging commands ###
+\g 
+
+msging-table >table
+
+reply-table $@ inherit-table msging-table
+
+$22 net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
     signed? !!signed!! $> >group
     parent @ .+unique-con
     parent @ .wait-task @ ?dup-IF
 	<event parent @ elit, ->chat-connect event>  THEN ;
-+net2o: msg-leave ( $:group -- ) \g leave a chat group
+$23 net2o: msg-leave ( $:group -- ) \g leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
-
-+net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
-    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
-    ."  @" .key-id <default> ;
-+net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
-+net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? ." : " $>
-    2dup [: ." : " forth:type ;] $tmp notify+ forth:type forth:cr ;
-+net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
-+net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
-    <warn> forth:type <default> forth:cr ;
-+net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
+$29 net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     signed? !!signed!! $> peer+
     parent @ .wait-task @ ?dup-IF
 	<event o elit, last# elit, ->chat-reconnect event>
     ELSE
 	reconnect-chat
     THEN ;
-+net2o: msg-last? ( tick -- ) msg:last ;
-+net2o: msg-coord ( $:gps -- )
-    !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
-+net2o: msg>group ( $:group -- ) \g just set group, for reconnect
+$2A net2o: msg-last? ( tick -- ) msg:last ;
+$2C net2o: msg>group ( $:group -- ) \g just set group, for reconnect
     $> >group ;
+
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop msg+
 	parent @ dup IF  .wait-task @ dup up@ <> and  THEN
@@ -307,8 +324,11 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	ELSE  do-msg-nestsig  THEN
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
-' msg msg-class to start-req
-:noname skip-sig? @ IF check-date ELSE pk-sig? THEN ; msg-class to nest-sig
+:noname skip-sig? @ IF check-date ELSE pk-sig? THEN ;  ' msg  2dup
+msging-class to start-req
+msging-class to nest-sig
+msg-class to start-req
+msg-class to nest-sig
 
 gen-table $freeze
 ' context-table is gen-table

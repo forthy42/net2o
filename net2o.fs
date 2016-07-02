@@ -403,6 +403,8 @@ UValue connection
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
 : n2o:new-msg ( -- o )
     o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
+: n2o:new-msging ( -- o )
+    o msging-class new >o  parent !  msging-table @ token-table ! o o> ;
 
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  .timeouts off  THEN ;
@@ -1489,7 +1491,8 @@ Defer extra-dispose ' noop is extra-dispose
 	ack-context @ ?dup-IF
 	    >o timing-stat $off track-timing $off dispose o>
 	THEN
-	msg-context @ ?dup-IF  .dispose  THEN
+	msging-context @ ?dup-IF  .dispose  THEN
+	msg-context    @ ?dup-IF  .dispose  THEN
 	unlink-ctx  ungroup-ctx
 	end-semas start-semas DO  I pthread_mutex_destroy drop
 	1 pthread-mutexes +LOOP
