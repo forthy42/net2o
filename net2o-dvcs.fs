@@ -291,6 +291,8 @@ Variable patch-in$
 
 \ encrypted hash stuff, using signature secret as PSK
 
+\ probably needs padding...
+
 : sksig>newhash ( -- )
     sksig newhash hash#128 + keysize move
     newhash hash#256 >file-hash ;

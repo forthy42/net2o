@@ -23,7 +23,7 @@ Kontakt:
 <tr><th>E-Mail:</th>
 <td>bernd (at) net2o (dot) de</td>
 <tr><th>PGP key:</th>
-<td><a href="//net2o.de/bernd@net2o.de.gpg.asc">67007C30</a> or (new Ed25519 key) <a href="//net2o.de/bernd@net2o.de.asc">E0B7BDE0</a></td</tr>
+<td><a href="//net2o.de/bernd@net2o.de.gpg.asc">67007C30</a></td</tr>
 <tr><th>net2o id:</th>
 <td><tt><!--
 --><div><span style="background-color: #fec">kQusJ</span><!--
