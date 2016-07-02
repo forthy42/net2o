@@ -43,7 +43,7 @@ User socktimeout cell uallot drop
 
 : sock-timeout! ( socket -- )  fileno
     socktimeout 2@
-    ptimeout 2@ >r 1000 / r> 2dup socktimeout 2! d<> IF
+    ptimeout 2@ >r #1000 / r> 2dup socktimeout 2! d<> IF
 	SOL_SOCKET SO_RCVTIMEO socktimeout 2 cells setsockopt THEN
     drop ;
 
@@ -55,8 +55,8 @@ MSG_DONTWAIT  Constant don't-block
     net2o-sock [IFDEF] no-hybrid drop [THEN]
     inbuf maxpacket r> sockaddr alen recvfrom
     dup 0< IF
-	errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
-	512 + negate throw  THEN
+	errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
+	#512 + negate throw  THEN
     inbuf swap  1 packetr +!
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
 ;
@@ -67,7 +67,7 @@ MSG_DONTWAIT  Constant don't-block
 	net2o-sock nip
 	inbuf maxpacket r> sockaddr alen recvfrom
 	dup 0< IF
-	    errno dup EAGAIN =  IF  2drop 0. EXIT  THEN
+	    errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	THEN
 	inbuf swap  1 packetr +!
 	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )

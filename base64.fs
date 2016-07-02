@@ -22,7 +22,7 @@ Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
     [ 'a' 'Z' - 1- ]L - dup #62 u<= ?EXIT
     drop #62 ;
     
-: base64>n ( addr u -- n )  0. 2swap bounds +DO
+: base64>n ( addr u -- n )  #0. 2swap bounds +DO
 	I c@ b64digit over lshift rot or swap 6 +
     LOOP  drop ;
 : base64>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO

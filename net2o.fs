@@ -217,7 +217,7 @@ $04 Constant resend-toggle#
 : .header ( addr -- ) base @ >r hex
     dup c@ >r
     min-size r> datasize# and lshift hex. ." bytes to "
-    addr le-64@ 64. cr
+    addr le-64@ u64. cr
     r> base ! ;
 
 \ each source has multiple destination spaces
@@ -462,7 +462,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
-    msg( ." data map: " addrs $64. ." own: " addrd $64. u hex. cr )
+    msg( ." data map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
     addrs u map-source data-map ! ;
@@ -472,7 +472,7 @@ Variable mapstart $1 mapstart !
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
-    msg( ." code map: " addrs $64. ." own: " addrd $64. u hex. cr )
+    msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
@@ -680,7 +680,7 @@ Sema timing-sema
 
 : timestat ( client serv -- )
     64dup 64-0<=    IF  64drop 64drop  EXIT  THEN
-    timing( 64over 64. 64dup 64. ." acktime" cr )
+    timing( 64over u64. 64dup u64. ." acktime" cr )
     >rtdelay  64- 64dup lastslack 64!
     lastdeltat 64@ delta-damp# 64rshift
     64dup min-slack 64+! 64negate max-slack 64+!
@@ -704,7 +704,7 @@ scope{ mapc
     rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
-    rtdelay 64@ 64. ns/burst 64@ 64. ." rtdelay" cr )
+    rtdelay 64@ u64. ns/burst 64@ u64. ." rtdelay" cr )
     dup flybursts-max# min flyburst ! ;
 : net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
@@ -756,7 +756,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 : >slack-exp ( -- rfactor )
     lastslack 64@ min-slack 64@ 64-
     64dup 64abs slack-ignore# 64u> IF
-	msg( ." slack ignored: " 64dup 64. cr )
+	msg( ." slack ignored: " 64dup u64. cr )
 	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
     64>n stats( dup s>f stat-tuple ts-slack sf! )
@@ -1304,7 +1304,7 @@ Variable recvflag  recvflag off
 : send-read-packet ( -- addr u )
     recvs# recvflag @ > IF  read-a-packet? dup ?EXIT  2drop  THEN
     recvflag off
-    0. sendbs# 0 DO
+    #0. sendbs# 0 DO
 	2drop  send-anything?
 	sends# 0 ?DO
 	    0= IF  try-read-packet-wait
@@ -1432,7 +1432,7 @@ scope{ mapc
 
 : .inv-packet ( -- )
     ." invalid packet to "
-    dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  $64.
+    dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  x64.
     ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
 
 }scope
@@ -1451,7 +1451,7 @@ scope{ mapc
 	handle-cmd0
     ELSE
 	inbuf body-size check-dest dup 0= IF
-	    msg( ." unhandled packet to: " dest-addr 64@ $64. cr )
+	    msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
 	    drop  EXIT  THEN +dest
 	handle-dest
     THEN ;
@@ -1478,7 +1478,7 @@ Defer extra-dispose ' noop is extra-dispose
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks
-	data-rmap @ IF  0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
+	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
 	dest-0key @ del-0key
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP
@@ -1625,9 +1625,9 @@ Variable beacons \ destinations to send beacons to
     [IFDEF] android 64dup set-beacon-alarm [THEN]
     64umin ticks 64-
     64#0 64max max-timeout# 64min \ limit sleep time to 1 seconds
-    timeout( ." wait for " 64dup 64. ." ns" cr ) stop-64ns
+    timeout( ." wait for " 64dup u64. ." ns" cr ) stop-64ns
     timeout( ticker 64@ ) !ticks
-    timeout( ticker 64@ 64swap 64- ." waited for " 64. ." ns" cr ) ;
+    timeout( ticker 64@ 64swap 64- ." waited for " u64. ." ns" cr ) ;
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
     !ticks  BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
@@ -1720,10 +1720,10 @@ Variable cookies
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
     recv-tick 64@ 64- rtdelay 64@ 64dup 64-0<> >r 64-2/
     64over 64abs 64over 64> r> and IF
-	64+ adjust-timer( ." adjust timer: " 64dup 64. forth:cr )
+	64+ adjust-timer( ." adjust timer: " 64dup u64. forth:cr )
 	tick-adjust 64!
     ELSE
-	64+ adjust-timer( ." don't adjust timer: " 64dup 64. forth:cr )
+	64+ adjust-timer( ." don't adjust timer: " 64dup u64. forth:cr )
 	64drop  THEN ;
 
 \ load net2o plugins: first one with integraded command space

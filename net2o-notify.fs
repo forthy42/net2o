@@ -19,7 +19,7 @@
 
 64#0 64Value last-notify
 64#0 64Value latest-notify
-60.000000000 d>64 64Value delta-notify \ one notification per minute is enough
+#60.000000000 d>64 64Value delta-notify \ one notification per minute is enough
 3 Value notify-mode
 $FFFF00 Value notify-rgb
 500 Value notify-on

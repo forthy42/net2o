@@ -187,7 +187,7 @@ Variable sim-nick!
     dup $@ type '#' emit cell+ $@len cell/ . ;
 
 : last-pet@ ( -- addr u )
-    ke-pets $[]# ?dup-IF  1- ke-pets $[]@  ELSE  0.  THEN ;
+    ke-pets $[]# ?dup-IF  1- ke-pets $[]@  ELSE  #0.  THEN ;
 
 : pet! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
     last-pet@ nick-table #@ d0= IF
@@ -222,7 +222,7 @@ Variable sim-nick!
 : #split ( addr u -- addr u n )
     [: 2dup '#' -scan nip >r
       r@ 0= IF  rdrop 0  EXIT  THEN
-      0. 2over r@ /string >number
+      #0. 2over r@ /string >number
       0= IF  nip drop nip r> 1- swap  ELSE
 	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
 
@@ -356,11 +356,11 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 
 : key>nick ( addrkey u1 -- nick u2 )
     \G convert key to nick
-    key| key-table #@ 0= IF  drop 0.  EXIT  THEN
+    key| key-table #@ 0= IF  drop #0.  EXIT  THEN
     cell+ .ke-nick $@ ;
 : key>key ( addrkey u1 -- key u2 )
     \G expand key to full size and check if we know it
-    key| key-table #@ 0= IF  drop 0.  EXIT  THEN
+    key| key-table #@ 0= IF  drop #0.  EXIT  THEN
     cell+ .ke-pk $@ ;
 
 : .key# ( addr u -- ) key|
@@ -755,7 +755,7 @@ $40 buffer: nick-buf
     .key-short free-key o> ;
 
 : read-keys-loop ( fd -- )  code-key
-    >r 0. r@ reposition-file throw
+    >r #0. r@ reposition-file throw
     BEGIN
 	r@ file-position throw d>64 key-read-offset 64!
 	keypack keypack-all# r@ read-file throw

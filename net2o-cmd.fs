@@ -199,8 +199,8 @@ drop
 
 : net2o-see ( cmd -- ) hex[
     case
-	0 of  ." end-code" cr 0. buf-state 2!  endof
-	1 of  p@ 64. ." lit, "  endof
+	0 of  ." end-code" cr #0. buf-state 2!  endof
+	1 of  p@  u64. ." lit, "  endof
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@noerr  n2o.string  endof
 	4 of  pf@ f. ." float, " endof
@@ -230,7 +230,7 @@ Sema see-sema
     2r> buf-state 2! ;
 
 : .dest-addr ( flag -- )
-    1+ c@ stateless# and 0= IF dest-addr 64@ $64. THEN ;
+    1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
 
 : n2o:see-me ( -- )
     ." see-me: "
@@ -246,7 +246,7 @@ Sema see-sema
 
 : >cmd ( xt u -- ) gen-table $[] ! ;
 
-: un-cmd ( -- )  0. buf-state 2!  0 >o rdrop ;
+: un-cmd ( -- )  #0. buf-state 2!  0 >o rdrop ;
 
 Defer >throw
 
@@ -518,7 +518,7 @@ comp: :, also net2o-base ;
 
 : cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest
-    msg( ." send cmd to: " 64dup $64. forth:cr ) send-cmd
+    msg( ." send cmd to: " 64dup x64. forth:cr ) send-cmd
     r> stateless# and 0= IF  code-update  ELSE  drop  THEN o> ;
 
 also net2o-base
@@ -539,7 +539,7 @@ previous
     resend0 $off
     nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
-    0. 2 pick reply[] dup >r 2!
+    #0. 2 pick reply[] dup >r 2!
     ticks r@ reply-time 64@ 64- ack@ >o
     rtd( ." rtdelay ok: " 64dup 64>f .ns cr )
     0 timeouts !@ rtd( dup . ) 1 u> IF  rtdelay 64@ 64umax
@@ -564,7 +564,7 @@ previous
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
     ?dup-IF
-	cmd( dest-addr 64@ $64. ." resend canned code reply " r@ hex. forth:cr )
+	cmd( dest-addr 64@ x64. ." resend canned code reply " r@ hex. forth:cr )
 	resend( ." resend canned code reply " r@ hex. forth:cr )
 	take-ret
 	r> reply-dest 64@ send-cmd drop true

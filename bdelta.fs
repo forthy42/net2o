@@ -64,7 +64,7 @@ Variable bfile2$
     a $@ 0  b $@ 0  bdelta_init_alg ;
 
 : bd-pass { bs mins flags -- } ( o:b )
-    o bs mins 0. flags bdelta_pass
+    o bs mins #0. flags bdelta_pass
     o BDELTA_REMOVE_OVERLAP bdelta_clean_matches ;
 
 : bd-passes ( o:b -- )

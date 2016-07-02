@@ -31,7 +31,7 @@ $20 net2o: emit ( utf8 -- ) \g emit character on server log
 +net2o: cr ( -- ) \g newline on server log
     forth:cr ;
 +net2o: . ( n -- ) \g print number on server log
-    64. ;
+    u64. ;
 +net2o: f. ( r -- ) \g print fp number on server log
     forth:f. ;
 +net2o: .time ( -- ) \g print timer to server log

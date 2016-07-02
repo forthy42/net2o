@@ -52,7 +52,7 @@ cell 8 = [IF]
     ' = Alias 64=
     ' <> Alias 64<>
     -1 1 64rshift Constant max-int64
-    ' u. alias 64.
+    ' u. alias u64.
     ' . alias s64.
     ' noop Alias 64>n immediate
     ' noop Alias n>64 immediate
@@ -136,9 +136,9 @@ cell 8 = [IF]
     ' d2/ Alias 64-2/
     ' d2* Alias 64-2*
     ' dnegate Alias 64negate
-    0. 2Constant 64#0
-    1. 2Constant 64#1
-    -1. 2Constant 64#-1
+    #0. 2Constant 64#0
+    #1. 2Constant 64#1
+    #-1. 2Constant 64#-1
     ' dlshift Alias 64lshift
     ' drshift Alias 64rshift
     ' drol Alias 64rol
@@ -147,8 +147,8 @@ cell 8 = [IF]
     ' f>d Alias f>64
     ' d= Alias 64=
     ' d<> Alias 64<>
-    -1. 1 64rshift 64Constant max-int64
-    ' ud. alias 64.
+    #-1. 1 64rshift 64Constant max-int64
+    ' ud. alias u64.
     ' d. alias s64.
     ' drop Alias 64>n
     ' noop Alias 64>d immediate
@@ -176,7 +176,7 @@ cell 8 = [IF]
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;
     : 64umax  2over 2over du< IF  2swap  THEN  2drop ;
     ' dabs Alias 64abs
-    : 64off 0. rot 64! ;
+    : 64off #0. rot 64! ;
     ' m*/ Alias 64*/
     : 64* ( d1 d2 -- d3 ) { l1 h1 l2 h2 }
 	l1 l2 um* l1 h2 um* l2 h1 um* d+ drop + ;
@@ -242,4 +242,4 @@ cell 8 = [IF]
 ' dfloat+ Alias 64'+
 ' dfaligned Alias 64aligned
 ' dffield: Alias 64field:
-: $64. ( 64n -- ) ['] 64. $10 base-execute ;
+: x64. ( 64n -- ) ['] u64. $10 base-execute ;

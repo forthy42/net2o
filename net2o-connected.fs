@@ -67,11 +67,11 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
 +net2o: close-file ( -- ) \g close file
     fs-close ;
 +net2o: set-size ( size -- ) \g set size attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > size: " 64dup 64. forth:cr ) size! ;
+    track( ." file <" fs-id @ 0 .r ." > size: " 64dup u64. forth:cr ) size! ;
 +net2o: set-seek ( useek -- ) \g set seek attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > seek: " 64dup 64. forth:cr ) seekto! ;
+    track( ." file <" fs-id @ 0 .r ." > seek: " 64dup u64. forth:cr ) seekto! ;
 +net2o: set-limit ( ulimit -- ) \g set limit attribute of current file
-    track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup 64. forth:cr ) limit-min! ;
+    track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup u64. forth:cr ) limit-min! ;
 +net2o: set-stat ( umtime umod -- ) \g set time and mode of current file
     64>n n2o:set-stat ;
 +net2o: get-size ( -- ) \g requuest file size
@@ -227,7 +227,7 @@ also net2o-base
 
 : net2o:acktime ( -- )
     recv-addr 64@ ack@ .recv-tick 64@ ack@ .time-offset 64@ 64-
-    timing( 64>r 64dup $64. 64r> 64dup 64. ." acktime" forth:cr )
+    timing( 64>r 64dup x64. 64r> 64dup u64. ." acktime" forth:cr )
     lit, lit, ack-addrtime ;
 : net2o:b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64-0=
@@ -418,8 +418,8 @@ previous
 	dest-replies @
 	dest-size @ addr>replies bounds endwith U+DO
 	    I reply-xt @ IF
-		resend( ." resend: " I reply-dest 64@ $64. I 2@ n2o:see forth:cr )
-		msg( ." resend: " I reply-dest 64@ $64. I 2@ swap hex. hex. forth:cr )
+		resend( ." resend: " I reply-dest 64@ x64. I 2@ n2o:see forth:cr )
+		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!
 		I 2@ I reply-dest 64@ send-cmd drop
 		1 packets2 +! 1+
@@ -462,7 +462,7 @@ previous
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
     IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
-    ack( ." ack expected: " recv-addr 64@ $64. expected@ hex. hex. forth:cr )
+    ack( ." ack expected: " recv-addr 64@ x64. expected@ hex. hex. forth:cr )
 ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;

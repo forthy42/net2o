@@ -80,7 +80,7 @@ warnings !
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
 	+ #@? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
-    LOOP  2drop 0. ;
+    LOOP  2drop #0. ;
 
 : #off ( addrkey u hash -- )  { hash }
     2dup string-hash  hash$ bounds ?DO

@@ -295,7 +295,7 @@ net2o' emit net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-last? ( tick -- ) msg:last ;
 +net2o: msg-coord ( $:gps -- )
     !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
-+net2o: msg>group ( $:group -- ) \g just set group
++net2o: msg>group ( $:group -- ) \g just set group, for reconnect
     $> >group ;
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop msg+
@@ -481,9 +481,9 @@ Variable chat-keys
     forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
-    bl skip '$' skip 0. 2swap ['] >number $10 base-execute 2swap drop ;
+    bl skip '$' skip #0. 2swap ['] >number $10 base-execute 2swap drop ;
 : get-dec ( addr u -- addr' u' n )
-    bl skip '#' skip 0. 2swap ['] >number #10 base-execute 2swap drop ;
+    bl skip '#' skip #0. 2swap ['] >number #10 base-execute 2swap drop ;
 
 scope: notify-cmds
 
@@ -496,12 +496,12 @@ scope: notify-cmds
     get-dec #500 max to notify-off
     2drop .notify msg-builder ;
 : interval ( addr u -- )
-    0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
-	    's' of 1000 * endof
-	    'm' of 60000 * endof
-	    'h' of 36000000 * endof
+    #0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
+	    's' of     #1000 * endof
+	    'm' of    #60000 * endof
+	    'h' of #36000000 * endof
 	endcase
-    ELSE  2drop  THEN  1000000 um* d>64 to delta-notify .notify ;
+    ELSE  2drop  THEN  #1000000 um* d>64 to delta-notify .notify ;
 : mode ( addr u -- )
     get-dec 3 and to notify-mode 2drop .notify msg-builder ;
 : visible ( addr u -- )
@@ -625,7 +625,7 @@ also net2o-base scope: /chat
 
 : avalanche-text ( addr u -- )
     [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
-		  bl $split 2swap 1 /string ':' -skip nick>pk \ 0. if no nick
+		  bl $split 2swap 1 /string ':' -skip nick>pk \ #0. if no nick
 		  2dup d0= IF  2drop 2drop oaddr ou true
 		  ELSE  $, msg-signal false  THEN
 	      UNTIL  THEN  THEN
@@ -712,7 +712,7 @@ previous
       2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
-: ?wait-chat ( -- ) 0. /chat:chats
+: ?wait-chat ( -- ) #0. /chat:chats
     BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT ; \ stub
 
 scope{ /chat
@@ -726,7 +726,7 @@ scope{ /chat
     ELSE
 	bounds ?DO  2dup I @ .pubkey $@ key2| str= 0= WHILE  cell +LOOP
 	    2drop chat-connects  ELSE  UNLOOP 2drop THEN
-    THEN  0. chats ;
+    THEN  #0. chats ;
 }scope
 
 also net2o-base
