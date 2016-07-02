@@ -628,7 +628,7 @@ $1F to tmps# \ need more temporaries
 	2drop
     ELSE
 	throw 0 { fd0 w^ cpy }
-	0. fd0 reposition-file throw
+	#0. fd0 reposition-file throw
 	fd0 cpy $slurp fd0 close-file throw
 	cpy $@ fd1 write-file throw cpy $off
 	fd1 flush-file throw

@@ -318,8 +318,8 @@ also net2o-base
 
 : expected@ ( -- head top )
     o IF  data-rmap @ with mapc
-	o IF  dest-tail @ dest-top @  ELSE  0.  THEN endwith
-    ELSE  0.  THEN  ;
+	o IF  dest-tail @ dest-top @  ELSE  #0.  THEN endwith
+    ELSE  #0.  THEN  ;
 
 : expected? ( -- flag )
     expected@ tuck u>= and IF
