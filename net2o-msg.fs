@@ -103,30 +103,12 @@ event: ->save-msgs ( last# -- ) save-msgs ;
 
 Sema queue-sema
 
-\ msg queue
-
-: msg@ ( -- addr u )
-    [: 0 msgs[] $[]@ ;] queue-sema c-section ;
-: msg+ ( addr u -- )
-    [: msgs[] $+[]! ;] queue-sema c-section ;
-: msg- ( -- )
-    [: 0 msgs[] $[] $off
-      msgs[] 0 cell $del ;] queue-sema c-section ;
-
 \ peer queue
 
-: peer@ ( -- addr u )
-    [: 0 peers[] $[]@ ;] queue-sema c-section ;
 : peer> ( -- addr / 0 )
-    [: peers[] $[]# dup IF
-         drop 0 peers[] $[] @
-         peers[] 0 cell $del
-      THEN ;] queue-sema c-section ;
-: peer+ ( addr u -- )
+    [: peers[] <deque ;] queue-sema c-section ;
+: >peer ( addr u -- )
     [: peers[] $+[]! ;] queue-sema c-section ;
-: peer- ( -- )
-    [: 0 peers[] $[] $off
-      peers[] 0 cell $del ;] queue-sema c-section ;
 
 \ events
 
@@ -311,7 +293,7 @@ $23 net2o: msg-leave ( $:group -- ) \g leave a chat group
     signed? !!signed!! $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
 $29 net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
-    signed? !!signed!! $> peer+
+    signed? !!signed!! $> >peer
     parent @ .wait-task @ ?dup-IF
 	<event o elit, last# elit, ->chat-reconnect event>
     ELSE

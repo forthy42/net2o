@@ -117,7 +117,6 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
-    field: msgs[]
     field: peers[]
     field: silent-last#
 end-class msging-class
