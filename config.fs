@@ -60,7 +60,7 @@ Variable config-recognizer
 	    case
 		'$' of  $@ [: '"' emit see-voc:c-\type '"' emit ;] $tmp type cr  endof
 		'#' of  @ 0 .r cr  endof
-		'&' of  2@ 0 d.r '.' emit cr  endof
+		'&' of  '#' emit 2@ 0 d.r '.' emit cr  endof
 		'%' of  f@ fe. cr  endof
 		drop
 	    endcase

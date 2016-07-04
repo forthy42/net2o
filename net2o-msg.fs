@@ -20,7 +20,11 @@ Defer pk-connect ( key u cmdlen datalen -- )
 Defer addr-connect ( key+addr u cmdlen datalen xt -- )
 Defer pk-peek? ( addr u0 -- flag )
 
-: avalanche-msg ( msg u1 -- )
+: >group ( addr u -- )
+    2dup msg-groups #@ d0=
+    IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
+
+: avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
     { d: msg }
     last# cell+ $@ dup IF
@@ -66,7 +70,7 @@ Sema msglog-sema
     [: n2o:new-msging >o parent off do-cmd-loop dispose o> ;]
     is write-decrypt ;
 
-: load-msg ( group u -- )
+: load-msg ( group u -- )  2dup >group
     >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
     2dup [IFUNDEF] (file-status) >filename [THEN]
     file-status nip no-file# = IF  2drop EXIT  THEN
@@ -89,9 +93,10 @@ event: ->save-msgs ( last# -- ) save-msgs ;
 	s" " msg-group$ $@ msg-logs #!  THEN ;
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
-    msg-group$ $@ ( should be: last# $@ ) ?msg-log
-    [: last# cell+ $ins[]date ;] msglog-sema c-section
-    dup -1 = IF drop #0. 0 to last#  ELSE  last# cell+ $[]@  THEN ;
+    last# $@ ?msg-log
+    [: last# cell+ $ins[]date
+      dup -1 = IF drop #0. 0 to last#  ELSE  last# cell+ $[]@  THEN
+    ;] msglog-sema c-section ;
 : ?save-msg ( -- )
     last# otr-mode @ replay-mode @ or 0= and
     IF  save-msgs&  THEN ;
@@ -129,13 +134,11 @@ Sema queue-sema
     sigpksize# - 2dup + sigpksize# >$  c-state off
     do-nestsig ;
 
-: >msg-log ( -- addr u )
-    +msg-log ?save-msg ;
+: >msg-log ( addr u -- addr' u )
+    last# >r +msg-log ?save-msg r> to last# ;
 
-: do-msg-nestsig ( -- )
-    msg@ >msg-log 2dup d0<> replay-mode @ 0= and IF
-	parent @ .msg-context @ .msg-display msg-notify
-    ELSE  2drop  THEN  msg- ;
+: do-msg-nestsig ( addr u -- )
+    parent @ .msg-context @ .msg-display msg-notify ;
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
@@ -143,10 +146,6 @@ Sema queue-sema
     dup r> - 0 max /string bounds ?DO
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     cell +LOOP   log free throw  dispose o> ;
-
-: >group ( addr u -- )
-    2dup msg-groups #@ d0=
-    IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
 
 Defer silent-join
 
@@ -192,17 +191,14 @@ User peer-buf
 	addr-connect o>
     THEN ;
 
-: do-avalanche ( -- )
-    msg@ parent @ .avalanche-msg ;
-
-event: ->avalanche ( o group -- )
+event: ->avalanche ( addr u o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    to last# .do-avalanche ;
+    to last# .avalanche-msg ;
 event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
 event: ->chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
-event: ->msg-nestsig ( editor stack o group -- editor stack )
+event: ->msg-nestsig ( addr u o group -- )
     to last# .do-msg-nestsig  ctrl L inskey ;
 
 \ coordinates
@@ -243,19 +239,19 @@ event: ->msg-nestsig ( editor stack o group -- editor stack )
     drop ;
 
 Defer msg:last
-: push-msg ( -- )
+: push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
-	parent @ .msging-context @ .do-avalanche
-    ELSE parent @ .wait-task @ ?dup-IF
-	    <event parent @ .msging-context @ elit, last# elit,
-	    ->avalanche event>  THEN
+	avalanche-msg
+    ELSE wait-task @ ?dup-IF
+	    >r <event e$, o elit, last# elit,
+	    ->avalanche r> event>
+	ELSE  2drop  THEN
     THEN ;
-: show-msg ( -- )
+: show-msg ( addr u -- )
     parent @ dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	>r r@ <hide> <event o elit, last# elit, ->msg-nestsig
-	up@ elit, ->wakeme r> event>
-	stop
+	>r r@ <hide> <event e$, o elit, last# elit, ->msg-nestsig
+	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
 scope{ net2o-base
@@ -269,11 +265,8 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ;
-$21 net2o: msg-group ( $:group -- ) \g specify a chat group
-    $> msg-groups #@ d0= replay-mode @ or ?EXIT \ produce flag and set last#
-    signed? IF  8 $10 !!<>=order? \ already a message there
-	push-msg
-    THEN ;
+$21 net2o: msg-group ( $:group -- ) \g specify a chat group, obsolete here
+    $> 2drop ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
@@ -327,8 +320,9 @@ $29 net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
 $2A net2o: msg-last? ( tick -- ) msg:last ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig dup 0= IF drop msg+
-	show-msg
+    $> nest-sig ?dup-0=-IF  >msg-log 2dup d0<>
+	IF  replay-mode @ 0= IF  2dup show-msg  2dup parent @ .push-msg  THEN
+	THEN  2drop
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
 :noname skip-sig? @ IF check-date ELSE pk-sig? THEN ;  ' msg  2dup
@@ -413,8 +407,9 @@ previous
     msg-group$ $@ msg-groups #@ IF
 	@ >o ?msg-context .execute o> true
     ELSE  2drop false  THEN ;
-: .chat ( -- )
-    ['] do-msg-nestsig [group] drop notify- ;
+: .chat ( addr u -- )
+    [: last# >r 2dup do-msg-nestsig r> to last#
+      0 .avalanche-msg ;] [group] drop notify- ;
 
 $200 Constant maxmsg#
 
@@ -454,12 +449,10 @@ $200 Constant maxmsg#
     wait-2s-key xclear ;
 
 also net2o-base
-: send-avalanche ( addr u xt -- )
+: send-avalanche ( xt -- )
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
-      3 /string 1 -
-      msg-group$ $@ >group msg+
-      code-buf  msg@ avalanche-msg ;] [group]
-    0= IF  2drop .nobody  THEN  .chat ;
+      3 /string 1 - >msg-log ;] [group]
+    0= IF  2drop .nobody  ELSE  .chat  THEN ;
 previous
 
 \ chat helper words
