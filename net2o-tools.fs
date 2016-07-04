@@ -525,7 +525,7 @@ $10 Constant datesize#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 2drop \ don't overwrite if already exists!
-		-1 EXIT  THEN
+		$# EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]!  r> ;

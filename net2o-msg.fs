@@ -129,13 +129,13 @@ Sema queue-sema
     sigpksize# - 2dup + sigpksize# >$  c-state off
     do-nestsig ;
 
-: >msg-log ( -- )
-    msg@ +msg-log msg- ?save-msg ;
+: >msg-log ( -- addr u )
+    +msg-log ?save-msg ;
 
-: do-msg-nestsig ( addr u -- )
-    >msg-log 2dup d0<> replay-mode @ 0= and IF
+: do-msg-nestsig ( -- )
+    msg@ >msg-log 2dup d0<> replay-mode @ 0= and IF
 	parent @ .msg-context @ .msg-display msg-notify
-    ELSE  2drop  THEN ;
+    ELSE  2drop  THEN  msg- ;
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
@@ -193,7 +193,7 @@ User peer-buf
     THEN ;
 
 : do-avalanche ( -- )
-    msg@ parent @ .avalanche-msg msg- ;
+    msg@ parent @ .avalanche-msg ;
 
 event: ->avalanche ( o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
@@ -456,9 +456,10 @@ also net2o-base
 : send-avalanche ( addr u xt -- )
     [: 0 >o code-buf$ cmdreset init-reply
       <msg execute msg> end-with  o>
-      cmdbuf$ 4 /string 2 - 2dup msg+
-      msg-group$ $@ >group code-buf avalanche-msg ;] [group]
-    0= IF  2drop .nobody  THEN ;
+      cmdbuf$ 4 /string 2 -
+      msg-group$ $@ >group msg+
+      code-buf msg@ avalanche-msg ;] [group]
+    0= IF  2drop .nobody  THEN  .chat ;
 previous
 
 \ chat helper words
@@ -554,7 +555,7 @@ also net2o-base scope: /chat
 : me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
-    [: $, msg-action ;] send-avalanche .chat ;
+    [: $, msg-action ;] send-avalanche ;
     
 : peers ( addr u -- ) 2drop
     \U peers                list peers
@@ -570,7 +571,7 @@ also net2o-base scope: /chat
     \G here: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE
-	[: $, msg-coord ;] send-avalanche .chat
+	[: $, msg-coord ;] send-avalanche
     THEN ;
 
 : help ( addr u -- )
@@ -653,7 +654,7 @@ also net2o-base scope: /chat
 		  2dup d0= IF  2drop 2drop oaddr ou true
 		  ELSE  $, msg-signal false  THEN
 	      UNTIL  THEN  THEN
-      $, msg-text ;] send-avalanche .chat ;
+      $, msg-text ;] send-avalanche ;
 
 previous
 
@@ -675,7 +676,7 @@ previous
     ELSE  -timeout EXIT  THEN
     timeout-expired? IF
 	msg-group$ $@len IF
-	    pubkey $@ ['] left, send-avalanche .chat
+	    pubkey $@ ['] left, send-avalanche
 	THEN
 	n2o:dispose-context
     THEN ;
