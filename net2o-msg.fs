@@ -88,10 +88,12 @@ event: ->save-msgs ( last# -- ) save-msgs ;
     msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN ;
 
-: +msg-log ( addr u -- pos )
+: +msg-log ( addr u -- addr' u' / 0 0 )
     msg-group$ $@ ( should be: last# $@ ) ?msg-log
     [: last# cell+ $ins[]date ;] msglog-sema c-section
-    dup -1 <> otr-mode @ replay-mode @ or 0= and
+    dup -1 = IF drop #0. 0 to last#  ELSE  last# cell+ $[]@  THEN ;
+: ?save-msg ( -- )
+    last# otr-mode @ replay-mode @ or 0= and
     IF  save-msgs&  THEN ;
 
 Sema queue-sema
@@ -127,11 +129,13 @@ Sema queue-sema
     sigpksize# - 2dup + sigpksize# >$  c-state off
     do-nestsig ;
 
-: do-msg-nestsig ( -- )
-    msg@ +msg-log replay-mode @ 0= and IF
-	msg@ parent @ .msg-context @ .msg-display msg-notify
-    THEN
-    msg- ;
+: >msg-log ( -- )
+    msg@ +msg-log msg- ?save-msg ;
+
+: do-msg-nestsig ( addr u -- )
+    2dup d0<> replay-mode @ 0= and IF
+	parent @ .msg-context @ .msg-display msg-notify
+    ELSE  2drop  THEN ;
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
@@ -199,7 +203,7 @@ event: ->chat-connect ( o -- )
 event: ->chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
 event: ->msg-nestsig ( editor stack o group -- editor stack )
-    to last# .do-msg-nestsig  ctrl L inskey ;
+    to last# >o >msg-log do-msg-nestsig o> ctrl L inskey ;
 
 \ coordinates
 
@@ -252,7 +256,7 @@ Defer msg:last
 	>r r@ <hide> <event o elit, last# elit, ->msg-nestsig
 	up@ elit, ->wakeme r> event>
 	stop
-    ELSE  do-msg-nestsig  THEN ;
+    ELSE  >msg-log do-msg-nestsig  THEN ;
 
 scope{ net2o-base
 
