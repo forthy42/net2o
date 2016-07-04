@@ -348,14 +348,15 @@ set-current
 	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
       ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
 
+: group, ( addr u -- )
+    dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
+    IF  $, msg-group  ELSE  2drop  THEN ;
 : <msg ( -- )
     \G start a msg block
-    msg sign[ msg-start ;
+    msg-group$ $@ group, msg sign[ msg-start ;
 : msg> ( -- )
     \G end a msg block by adding a signature and the group (if any)
-    msg-group$ $@ dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
-    IF  $, msg-group  ELSE  2drop  THEN
-    now>never ]pksign ;
+    msg-group$ $@ group, now>never ]pksign ;
 
 previous
 
@@ -822,7 +823,7 @@ scope{ /chat
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
-    net2o-code expect-msg msg $, nestsig end-with
+    net2o-code expect-msg msg last# $@ group, $, nestsig end-with
     end-code ; is avalanche-to
 
 0 [IF]
