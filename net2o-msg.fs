@@ -133,7 +133,7 @@ Sema queue-sema
     msg@ +msg-log msg- ?save-msg ;
 
 : do-msg-nestsig ( addr u -- )
-    2dup d0<> replay-mode @ 0= and IF
+    >msg-log 2dup d0<> replay-mode @ 0= and IF
 	parent @ .msg-context @ .msg-display msg-notify
     ELSE  2drop  THEN ;
 
@@ -203,7 +203,7 @@ event: ->chat-connect ( o -- )
 event: ->chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
 event: ->msg-nestsig ( editor stack o group -- editor stack )
-    to last# >o >msg-log do-msg-nestsig o> ctrl L inskey ;
+    to last# .do-msg-nestsig  ctrl L inskey ;
 
 \ coordinates
 
@@ -256,7 +256,7 @@ Defer msg:last
 	>r r@ <hide> <event o elit, last# elit, ->msg-nestsig
 	up@ elit, ->wakeme r> event>
 	stop
-    ELSE  >msg-log do-msg-nestsig  THEN ;
+    ELSE  do-msg-nestsig  THEN ;
 
 scope{ net2o-base
 
