@@ -48,18 +48,18 @@ Sema msglog-sema
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
-: msg-log@ ( group u -- addr u )
-    [: msg-logs #@ save-mem ;] msglog-sema c-section ;
+: msg-log@ ( last# -- addr u )
+    [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
-: save-msgs ( group u -- )
+: save-msgs ( last -- )
     n2o:new-msging >o enc-file $off
-    2dup msg-log@ over >r
+    dup msg-log@ over >r
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
     gen-cmd$ 2drop 0 tmp$ !@ enc-file !
     r> free throw  dispose o>
-    >chatid sane-85 .chats/ enc-filename $!
+    $@ >chatid sane-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : vault>msg ( -- )
@@ -78,11 +78,11 @@ Sema msglog-sema
 	?dup-IF  DoError nothrow 2drop  THEN
     THEN  replay-mode off  skip-sig? off ;
 
-event: ->save-msgs over >r save-msgs r> free throw ;
+event: ->save-msgs ( last# -- ) save-msgs ;
 
-: save-msgs& ( addr u -- )
+: save-msgs& ( -- )
     file-task 0= IF  create-file-task  THEN
-    <event save-mem e$, ->save-msgs file-task event> ;
+    <event last# elit, ->save-msgs file-task event> ;
 
 : ?msg-log ( addr u -- )
     msg-logs #@ d0= IF
@@ -92,7 +92,7 @@ event: ->save-msgs over >r save-msgs r> free throw ;
     msg-group$ $@ ( should be: last# $@ ) ?msg-log
     [: last# cell+ $ins[]date ;] msglog-sema c-section
     dup -1 <> otr-mode @ replay-mode @ or 0= and
-    IF  msg-group$ $@ save-msgs&  THEN ;
+    IF  save-msgs&  THEN ;
 
 Sema queue-sema
 
@@ -135,7 +135,8 @@ Sema queue-sema
 
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
-    cells >r msg-log@ over { log } dup r> - 0 max /string bounds ?DO
+    cells >r ?msg-log last# msg-log@ over { log }
+    dup r> - 0 max /string bounds ?DO
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     cell +LOOP   log free throw  dispose o> ;
 
@@ -407,10 +408,8 @@ previous
     msg-group$ $@ msg-groups #@ IF
 	@ >o ?msg-context .execute o> true
     ELSE  2drop false  THEN ;
-: .chat ( -- ) replay-mode on
-    [: do-msg-nestsig
-      msg-group$ $@ 1 display-lastn
-      replay-mode off ;] [group] drop notify- ;
+: .chat ( -- )
+    ['] do-msg-nestsig [group] drop notify- ;
 
 $200 Constant maxmsg#
 
