@@ -315,7 +315,7 @@ code-buf$
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
 : gen-cmd$ ( xt -- addr u )
-    cmdbuf-o @ >r code-buf$ cmd$ @ >r cmd$ off tmp$ $off
+    cmdbuf-o @ >r code-buf$ cmd$ @ >r cmd$ off 1 tmp$# +!  tmp$ $off
     execute  cmd$ @ tmp$ !  r> cmd$ ! r> cmdbuf-o !
     tmp$ $@ ;
 

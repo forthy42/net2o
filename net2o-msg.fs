@@ -84,12 +84,12 @@ event: ->save-msgs over >r save-msgs r> free throw ;
     file-task 0= IF  create-file-task  THEN
     <event save-mem e$, ->save-msgs file-task event> ;
 
-: ?msg-log ( -- )
-    msg-group$ $@ msg-logs #@ d0= IF
+: ?msg-log ( addr u -- )
+    msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN ;
 
 : +msg-log ( addr u -- flag )
-    ?msg-log
+    msg-group$ $@ ( should be: last# $@ ) ?msg-log
     last# cell+ $[]# >r
     [: last# cell+ $ins[]date ;] msglog-sema c-section
     r> last# cell+ $[]# <>
@@ -199,8 +199,8 @@ event: ->chat-connect ( o -- )
     drop ctrl Z inskey ;
 event: ->chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
-event: ->msg-nestsig ( editor stack o -- editor stack )
-    .do-msg-nestsig  ctrl L inskey ;
+event: ->msg-nestsig ( editor stack o group -- editor stack )
+    to last# .do-msg-nestsig  ctrl L inskey ;
 
 \ coordinates
 
@@ -240,6 +240,20 @@ event: ->msg-nestsig ( editor stack o -- editor stack )
     drop ;
 
 Defer msg:last
+: push-msg ( -- )
+    up@ receiver-task <> IF
+	parent @ .msging-context @ .do-avalanche
+    ELSE parent @ .wait-task @ ?dup-IF
+	    <event parent @ .msging-context @ elit, last# elit,
+	    ->avalanche event>  THEN
+    THEN ;
+: show-msg ( -- )
+    parent @ dup IF  .wait-task @ dup up@ <> and  THEN
+    ?dup-IF
+	>r r@ <hide> <event o elit, last# elit, ->msg-nestsig
+	up@ elit, ->wakeme r> event>
+	stop
+    ELSE  do-msg-nestsig  THEN ;
 
 scope{ net2o-base
 
@@ -260,11 +274,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 $21 net2o: msg-group ( $:group -- ) \g specify a chat group
     $> msg-groups #@ d0= replay-mode @ or ?EXIT \ produce flag and set last#
     signed? IF  8 $10 !!<>=order? \ already a message there
-	up@ receiver-task <> IF
-	    parent @ .msging-context @ .do-avalanche
-	ELSE parent @ .wait-task @ ?dup-IF
-		<event parent @ .msging-context @ elit, last# elit, ->avalanche event>  THEN
-	THEN
+	push-msg
     THEN ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
@@ -316,12 +326,7 @@ $2C net2o: msg>group ( $:group -- ) \g just set group, for reconnect
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop msg+
-	parent @ dup IF  .wait-task @ dup up@ <> and  THEN
-	?dup-IF
-	    >r r@ <hide> <event o elit, ->msg-nestsig
-	    up@ elit, ->wakeme r> event>
-	    stop
-	ELSE  do-msg-nestsig  THEN
+	show-msg
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
 :noname skip-sig? @ IF check-date ELSE pk-sig? THEN ;  ' msg  2dup
