@@ -320,8 +320,6 @@ List of Commands
 
 ### message commands ###
 
-+ $34 msg ( -- o:msg )
-  push a message object
 + $20 msg-start ( $:pksig -- )
   start message
 + $21 msg-group ( $:group -- )
@@ -340,6 +338,8 @@ List of Commands
 
 ### messaging commands ###
 
++ $34 msg ( -- o:msg )
+  push a message object
 + $22 msg-join ( $:group -- )
   join a chat group
 + $23 msg-leave ( $:group -- )

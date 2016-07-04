@@ -260,11 +260,6 @@ scope{ net2o-base
 \g 
 \g ### message commands ###
 \g 
-$34 net2o: msg ( -- o:msg ) \g push a message object
-    perm-mask @ perm%msg and 0= !!msg-perm!!
-    ?msg-context n:>o c-state off ;
-
-msg-table >table
 
 reply-table $@ inherit-table msg-table
 
@@ -299,6 +294,10 @@ gen-table $freeze
 \g 
 \g ### messaging commands ###
 \g 
+
+$34 net2o: msg ( -- o:msg ) \g push a message object
+    perm-mask @ perm%msg and 0= !!msg-perm!!
+    ?msg-context n:>o c-state off ;
 
 msging-table >table
 
