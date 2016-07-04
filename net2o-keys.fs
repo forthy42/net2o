@@ -923,7 +923,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 :noname ( addr u -- )
     2dup filter-invitation? IF  2drop EXIT  THEN
     invitations $[]# >r
-    2dup invitations $ins[]sig
+    2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem [ up@ ]l <hide>
 	<event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop

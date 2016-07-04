@@ -88,12 +88,10 @@ event: ->save-msgs over >r save-msgs r> free throw ;
     msg-logs #@ d0= IF
 	s" " msg-group$ $@ msg-logs #!  THEN ;
 
-: +msg-log ( addr u -- flag )
+: +msg-log ( addr u -- pos )
     msg-group$ $@ ( should be: last# $@ ) ?msg-log
-    last# cell+ $[]# >r
     [: last# cell+ $ins[]date ;] msglog-sema c-section
-    r> last# cell+ $[]# <>
-    dup otr-mode @ replay-mode @ or 0= and
+    dup -1 <> otr-mode @ replay-mode @ or 0= and
     IF  msg-group$ $@ save-msgs&  THEN ;
 
 Sema queue-sema
@@ -303,6 +301,8 @@ msging-table >table
 
 reply-table $@ inherit-table msging-table
 
+$21 net2o: msg>group ( $:group -- ) \g just set group, for reconnect
+    $> >group ;
 $22 net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
     signed? !!signed!! $> >group
@@ -320,8 +320,6 @@ $29 net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
 	reconnect-chat
     THEN ;
 $2A net2o: msg-last? ( tick -- ) msg:last ;
-$2C net2o: msg>group ( $:group -- ) \g just set group, for reconnect
-    $> >group ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig dup 0= IF drop msg+
@@ -412,8 +410,7 @@ previous
 : .chat ( -- ) replay-mode on
     [: do-msg-nestsig
       msg-group$ $@ 1 display-lastn
-      replay-mode off
-      msg-group$ $@ save-msgs ;] [group] drop notify- ;
+      replay-mode off ;] [group] drop notify- ;
 
 $200 Constant maxmsg#
 

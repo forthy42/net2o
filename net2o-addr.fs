@@ -156,7 +156,7 @@ User dest-0key< \ pointer to obtained dest-0key
 : !my-addr$ ( -- )
     now>never  my-addr[] [:
       nat( ." insert into my-addr$: " dup .addr forth:cr )
-      o>addr gen-host my-addr$ $ins[]sig ;] $[]o-map ;
+      o>addr gen-host my-addr$ $ins[]sig drop ;] $[]o-map ;
 
 : .my-addrs ( -- )
     my-addr[] [: .addr cr ;] $[]o-map ;

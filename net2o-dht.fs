@@ -164,9 +164,9 @@ dht-class new constant dummy-dht
 : d#owner+ ( addr u -- ) \ with sanity checks
     [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-sema c-section ;
 : d#host+ ( addr u -- ) \ with sanity checks
-    [: check-host dht-host $ins[]sig dht( d#. ) ;] dht-sema c-section ;
+    [: check-host dht-host $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
-    [: check-tag dht-tags $ins[]sig dht( d#. ) ;] dht-sema c-section ;
+    [: check-tag dht-tags $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
 : d#owner- ( addr u -- ) \ with sanity checks
     [: delete-owner? 0= IF  dht-owner $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
@@ -295,7 +295,7 @@ false Value add-myip
 \ new address formats
 
 : pub-addr, ( addr u -- )
-     2dup pub-addr$ $ins[]sig $, dht-host+ ;
+     2dup pub-addr$ $ins[]sig drop $, dht-host+ ;
 : addme-end ( -- ) request( ." addme" forth:cr )
     add-myip IF
 	my-addr$ ['] pub-addr, $[]map
@@ -308,11 +308,11 @@ false Value add-myip
     addr .host-route $@len 0= IF
 	addr my-addr-merge IF  addr .n2o:dispose-addr
 	    nat( ."  merged" forth:cr ) EXIT  THEN
-	addr o>addr gen-host my-addr$ $ins[]sig
+	addr o>addr gen-host my-addr$ $ins[]sig drop
 	addr .n2o:dispose-addr
 	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
-	addr o>addr gen-host my-addr$ $ins[]sig
+	addr o>addr gen-host my-addr$ $ins[]sig drop
 	nat( ."  routed" ) THEN
     nat( forth:cr )
     what's expect-reply? ['] addme-end <> IF
@@ -377,7 +377,7 @@ previous
     THEN  rdrop ;
 
 : set-revocation ( addr u -- )
-    dht-host $ins[]sig ;
+    dht-host $ins[]sig drop ;
 
 : n2o:send-revoke ( addr u -- )
     keysize <> !!keysize!! me>d#id >o

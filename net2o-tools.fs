@@ -431,16 +431,16 @@ previous
 
 \ insert into sorted string array, discarding n bytes at the end
 
-: $ins[]# ( addr u $array n -- )
+: $ins[]# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
 		drop $# $a $[]@ smove \ overwrite in place
-		EXIT  THEN
+		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
 : $del[]# ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
     { $a rest } 0 $a $[]#
@@ -454,16 +454,16 @@ previous
 
 \ insert into sorted string array, discarding n bytes at the start
 
-: $ins[]/ ( addr u $array n -- )
+: $ins[]/ ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
 		drop $# $a $[]@ smove \ overwrite in place
-		EXIT  THEN
+		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
 : $del[]/ ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
     { $a rest } 0 $a $[]#
@@ -477,7 +477,7 @@ previous
 
 \ insert into sorted string array
 
-: $ins[] ( addr u $array -- ) 0 $ins[]# ;
+: $ins[] ( addr u $array -- pos ) 0 $ins[]# ;
     \G insert O(log(n)) into pre-sorted array
 : $del[] ( addr u $array -- ) 0 $del[]# ;
     \G delete O(log(n)) from pre-sorted array
@@ -493,7 +493,7 @@ $10 Constant datesize#
 : startdate@ ( addr u -- date ) + sigsize# - le-64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ le-64@ ;
 
-: $ins[]sig# ( addr u $array n -- )
+: $ins[]sig# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
@@ -501,13 +501,13 @@ $10 Constant datesize#
 		drop
 		2dup rest - + le-64@
 		$# $a $[]@ rest - + le-64@ 64u>=
-		IF   $# $a $[]@ smove \ overwrite in place
-		ELSE  2drop  THEN EXIT  THEN
+		IF   $# $a $[]@ smove  $# \ overwrite in place
+		ELSE  2drop  -1  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
 
-: $ins[]sig ( addr u $array -- ) sigsize# $ins[]sig# ;
+: $ins[]sig ( addr u $array -- pos ) sigsize# $ins[]sig# ;
 : $del[]sig ( addr u $array -- ) sigsize# $del[]# ;
 : $rep[]sig ( addr u $array -- ) >r
     \G replace if newer in one-element array
@@ -519,16 +519,16 @@ $10 Constant datesize#
 
 \ list sorted by sig date
 
-: $ins[]date ( addr u $array -- )
+: $ins[]date ( addr u $array -- pos )
     \G insert O(log(n)) into pre-sorted array
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 2drop \ don't overwrite if already exists!
-		EXIT  THEN
+		-1 EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r> $a $[]! ;
+    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]!  r> ;
 : $del[]date ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array
     { $a } 0 $a $[]#
