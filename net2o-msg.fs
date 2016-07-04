@@ -458,7 +458,7 @@ also net2o-base
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
       3 /string 1 -
       msg-group$ $@ >group msg+
-      code-buf ( msg@ avalanche-msg ) ;] [group]
+      code-buf  msg@ avalanche-msg ;] [group]
     0= IF  2drop .nobody  THEN  .chat ;
 previous
 
