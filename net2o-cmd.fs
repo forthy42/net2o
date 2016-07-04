@@ -316,7 +316,7 @@ code-buf$
 
 : gen-cmd$ ( xt -- addr u )
     cmdbuf-o @ >r code-buf$ cmd$ @ >r cmd$ off 1 tmp$# +!  tmp$ $off
-    execute  cmd$ @ tmp$ !  r> cmd$ ! r> cmdbuf-o !
+    catch  cmd$ @ tmp$ !  r> cmd$ ! r> cmdbuf-o !  throw
     tmp$ $@ ;
 
 code0-buf \ reset default
