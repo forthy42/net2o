@@ -454,8 +454,8 @@ $200 Constant maxmsg#
 
 also net2o-base
 : send-avalanche ( addr u xt -- )
-    [: 0 >o [: <msg execute msg> end-with ;] gen-cmd$ o>
-      4 /string 2 -
+    [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
+      3 /string 1 -
       msg-group$ $@ >group msg+
       code-buf msg@ avalanche-msg ;] [group]
     0= IF  2drop .nobody  THEN  .chat ;
