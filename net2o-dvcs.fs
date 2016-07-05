@@ -194,7 +194,7 @@ User tmp1$
 : file-hashstat ( addr u -- addr' u' )
     2dup statbuf lstat ?ior  hashstat-rest ;
 
-: $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ ;
+: $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ drop ;
 
 : new-files-loop ( -- )
     BEGIN  refill  WHILE  source file-hashstat new-files[] $ins[]f  REPEAT ;
