@@ -433,6 +433,7 @@ previous
 
 : $ins[]# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
@@ -456,6 +457,7 @@ previous
 
 : $ins[]/ ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
@@ -479,6 +481,7 @@ previous
 
 : $ins[] ( addr u $array -- pos ) 0 $ins[]# ;
     \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
 : $del[] ( addr u $array -- ) 0 $del[]# ;
     \G delete O(log(n)) from pre-sorted array
 
@@ -495,6 +498,7 @@ $10 Constant datesize#
 
 : $ins[]sig# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
+    \G @var{pos} is the insertion offset or -1 if not inserted
     { $a rest } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
@@ -508,6 +512,7 @@ $10 Constant datesize#
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
 
 : $ins[]sig ( addr u $array -- pos ) sigsize# $ins[]sig# ;
+    \G @var{pos} is the insertion offset or -1 if not inserted
 : $del[]sig ( addr u $array -- ) sigsize# $del[]# ;
 : $rep[]sig ( addr u $array -- ) >r
     \G replace if newer in one-element array
@@ -521,11 +526,12 @@ $10 Constant datesize#
 
 : $ins[]date ( addr u $array -- pos )
     \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
     { $a } 0 $a $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 2drop \ don't overwrite if already exists!
-		$# EXIT  THEN
+		-1 EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]!  r> ;
@@ -675,6 +681,7 @@ Sema 0key-sema
 : ins-0key [: { w^ addr -- }
 	addr cell 0keys $+! ;] 0key-sema c-section ;
 : del$one ( addr1 addr2 size -- pos )
+    \G @var{pos} is the deletion offset
     >r over @ cell+ - tuck r> $del ;
 : next$ ( pos string -- addre addrs )
     $@ rot /string bounds ;
