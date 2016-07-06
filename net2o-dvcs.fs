@@ -34,6 +34,7 @@ msg-class class
     field: fileentry$
     field: oldhash$
     field: hash$
+    field: equiv$
 
     rot }scope
     
@@ -162,7 +163,8 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
-    clean-delta dvcs:fileentry$ $off  dvcs:hash$ $off  dvcs:oldhash$ $off
+    clean-delta dvcs:fileentry$ $off
+    dvcs:hash$ $off  dvcs:oldhash$ $off  dvcs:equiv$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
     dispose ;
 
@@ -324,7 +326,7 @@ Variable patch-in$
 : branchlist-loop ( -- )
     BEGIN  refill  WHILE  source base85>$ branches[] $+[]!  REPEAT ;
 : apply-branch ( addr u -- flag )
-    read-hashed project:revision$ $@ str= >r
+    read-enc-hashed project:revision$ $@ str= >r
     sample-patch >o clean-delta
     c-state off patch-in$ $@ do-cmd-loop o> r> ;
 : branches>dvcs ( o:dvcs -- )  branches[] $[]off
@@ -338,7 +340,7 @@ Variable patch-in$
 \ push out a revision
 
 : >revision ( addr u -- )
-    write-hashed newhash hash#128 dvcs:hash$ $!
+    write-enc-hashed newhash hash#128 dvcs:hash$ $!
     2dup project:revision$ $!  append-branch ;
 
 : dvcs-readin ( -- )
@@ -350,6 +352,7 @@ also net2o-base
     project:project$ @ msg-group$ !
     o [: >o
 	dvcs:message$   $@
+	dvcs:equiv$     $@
 	dvcs:hash$      $@
 	dvcs:oldhash$   $@
 	project:branch$ $@
@@ -357,12 +360,13 @@ also net2o-base
 	$, msg-tag
 	dup IF  $, msg-re  ELSE  2drop  THEN
 	$, msg-object
+	dup IF  $, msg-equiv  ELSE  2drop  THEN
 	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous
 
 : dvcs-snapentry ( -- )
-    dvcs:oldhash$ $off dvcs-newsentry ;
+    0 dvcs:oldhash$ !@ dvcs:equiv$ ! dvcs-newsentry ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin

@@ -267,6 +267,8 @@ $27 net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
 $28 net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
+$29 net2o: msg-equiv ( $:object -- ) \g equivalent object
+    !!signed? 8 !!>=order? $> ."  equiv object: " 85type forth:cr ;
 $2B net2o: msg-coord ( $:gps -- )
     !!signed? 8 !!>=order? ."  GPS: " $> forth:cr .coords ;
 
