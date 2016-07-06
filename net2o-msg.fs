@@ -220,7 +220,11 @@ event: ->msg-nestsig ( addr u o group -- )
     ." Acc: " dup 5 sf[]@ 8 2 0 f.rdp cr
     drop ;
 
+Defer msg:last?
 Defer msg:last
+Defer msg:getlast
+Defer msg:open
+
 : push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
 	avalanche-msg
@@ -247,7 +251,7 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ;
-$21 net2o: msg-group ( $:group -- ) \g specify a chat group, obsolete here
+$21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
     $> 2drop ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
@@ -281,25 +285,28 @@ msging-table >table
 
 reply-table $@ inherit-table msging-table
 
-$21 net2o: msg>group ( $:group -- ) \g just set group, for reconnect
+$21 net2o: msg-group ( $:group -- ) \g just set group, for reconnect
     $> >group ;
-$22 net2o: msg-join ( $:group -- ) \g join a chat group
++net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    signed? !!signed!! $> >group
+    $> >group
     parent @ .+unique-con
     parent @ .wait-task @ ?dup-IF
 	<event parent @ elit, ->chat-connect event>  THEN ;
-$23 net2o: msg-leave ( $:group -- ) \g leave a chat group
-    signed? !!signed!! $> msg-groups #@ d0<> IF
++net2o: msg-leave ( $:group -- ) \g leave a chat group
+    $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
-$29 net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
-    signed? !!signed!! $> >peer
++net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
+    $> >peer
     parent @ .wait-task @ ?dup-IF
 	<event o elit, last# elit, ->chat-reconnect event>
     ELSE
 	reconnect-chat
     THEN ;
-$2A net2o: msg-last? ( tick -- ) msg:last ;
++net2o: msg-last? ( -- ) msg:last? ;
++net2o: msg-last ( tick -- ) msg:last ;
++net2o: msg-getlast ( tick -- ) msg:getlast ;
++net2o: msg-open ( ticks ticke -- ) msg:open ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF  >msg-log 2dup d0<>
@@ -318,11 +325,21 @@ gen-table $freeze
 
 set-current
 
-:noname ( tick -- )
+: last-msg@ ( -- ticks )
+    last# >r
+    last# $@ ?msg-log last# cell+ $[]# ?dup-IF
+	1- last# cell+ $[]@ startdate@
+    ELSE  64#0  THEN   r> to last# ;
+
+:noname ( ticks -- )
     last# 0= ?EXIT
     last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
 	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
-      ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:last
+      ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:getlast
+:noname ( -- )
+    last-msg@ lit, msg-last ; is msg:last?
+:noname ( ticks -- )
+    ." last message at: " .ticks forth:cr ; is msg:last
 
 : group, ( addr u -- )
     dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
@@ -331,8 +348,8 @@ set-current
     \G start a msg block
     msg-group$ $@ group, msg sign[ msg-start ;
 : msg> ( -- )
-    \G end a msg block by adding a signature and the group (if any)
-    msg-group$ $@ group, now>never ]pksign ;
+    \G end a msg block by adding a signature
+    now>never ]pksign ;
 
 previous
 
@@ -356,7 +373,7 @@ previous
 
 also net2o-base
 : join, ( -- )
-    msg-group$ $@ dup IF  msg ?destpk $, msg-join
+    msg-group$ $@ dup IF  msg ?destpk $, msg-join msg-last?
 	sign[ msg-start "joined" $, msg-action msg> end-with
     ELSE  2drop  THEN ;
 
@@ -748,7 +765,7 @@ also net2o-base
     end-with cookie+request end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
-    net2o-code expect-reply msg last# $@ $, msg>group
+    net2o-code expect-reply msg last# $@ $, msg-group
     .reconnect,  end-with  end-code| ;
 previous
 
