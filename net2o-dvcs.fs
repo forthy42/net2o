@@ -32,6 +32,8 @@ msg-class class
     field: out-files$
     field: out-fileoff
     field: fileentry$
+    field: oldhash$
+    field: hash$
 
     rot }scope
     
@@ -114,8 +116,8 @@ hash#256 buffer: newhash \ keep some space for encryption secret
 
 : filelist-loop ( -- )
     BEGIN  refill  WHILE
-	    source bl $split 2>r base85>$ 2dup 2r> dvcs:files# #!
-	    drop free throw  REPEAT ;
+	    source bl $split 2>r base85>$ 2r> dvcs:files# #!
+    REPEAT ;
 : filelist-in ( addr u o:dvcs -- )
     r/o open-file throw ['] filelist-loop execute-parsing-file ;
 
@@ -160,7 +162,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
-    clean-delta dvcs:fileentry$ $off
+    clean-delta dvcs:fileentry$ $off  dvcs:hash$ $off  dvcs:oldhash$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
     dispose ;
 
@@ -203,7 +205,8 @@ User tmp1$
     ['] new-files-loop execute-parsing-file ;
 
 : config>dvcs ( o:dvcs -- )
-    "~+/.n2o/config" ['] project >body read-config ;
+    "~+/.n2o/config" ['] project >body read-config
+    project:revision$ $@ base85>$ dvcs:oldhash$ $! ;
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
 : new>dvcs ( o:dvcs -- )
@@ -319,8 +322,7 @@ Variable patch-in$
 ' n2o:new-dvcs static-a with-allocater Constant sample-patch
 
 : branchlist-loop ( -- )
-    BEGIN  refill  WHILE  source base85>$ over >r branches[] $+[]!
-	    r> free throw  REPEAT ;
+    BEGIN  refill  WHILE  source base85>$ branches[] $+[]!  REPEAT ;
 : apply-branch ( addr u -- flag )
     read-hashed project:revision$ $@ str= >r
     sample-patch >o clean-delta
@@ -330,16 +332,37 @@ Variable patch-in$
 	['] branchlist-loop execute-parsing-file
 	branches[] ['] apply-branch $[]map?
     ELSE  2drop  THEN ;
+: chat>dvcs ( o:dvcs -- )
+    project:project$ $@ load-msg ;
 
 \ push out a revision
 
 : >revision ( addr u -- )
-    write-hashed
-    2dup project:revision$ $!
-    append-branch ;
+    write-hashed newhash hash#128 dvcs:hash$ $!
+    2dup project:revision$ $!  append-branch ;
 
 : dvcs-readin ( -- )
-    config>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+    config>dvcs  chat>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+
+also net2o-base
+: dvcs-newsentry ( -- )
+    msg-group$ @ >r
+    project:project$ @ msg-group$ !
+    o [: >o
+	dvcs:message$   $@
+	dvcs:hash$      $@
+	dvcs:oldhash$   $@
+	project:branch$ $@
+	o>
+	$, msg-tag
+	dup IF  $, msg-re  ELSE  2drop  THEN
+	$, msg-object
+	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
+    r> msg-group$ ! ;
+previous
+
+: dvcs-snapentry ( -- )
+    dvcs:oldhash$ $off dvcs-newsentry ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
@@ -349,7 +372,7 @@ Variable patch-in$
 	['] compute-diff gen-cmd$ >revision
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
-	save-project filelist-out
+	save-project  dvcs-newsentry  filelist-out
 	"~+/.n2o/newfiles" delete-file dup no-file# <> and throw
     THEN  clean-up ;
 
@@ -377,7 +400,7 @@ Variable patch-in$
     config>dvcs  project:revision$ $off  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >revision
-    save-project  n2o:dispose-dvcs  clean-up o> ;
+    save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:

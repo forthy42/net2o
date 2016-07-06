@@ -20,9 +20,10 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 : base85>n ( addr u -- n )  0 1 2swap bounds +DO
 	I c@ b85digit over * rot + swap 85 *
     LOOP  drop ;
-: base85>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO
-	I I' over - 5 umin base85>n over le-l! 4 +
-    5 +LOOP  drop r> 4 5 */ ;
+: (base85>$) ( addr u -- addr' u' )  bounds ?DO
+	I I' over - 5 umin dup >r base85>n 0 { w^ x } x le-l! x r> 4 5 */ type
+    5 +LOOP ;
+: base85>$ ['] (base85>$) $tmp ;
 
 : 85" ( "base85string" -- addr u )
     '"' parse base85>$ ;

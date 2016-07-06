@@ -254,21 +254,21 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 $21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
     $> 2drop ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    !!signed? 3 !!>=order? $> keysize umin 2dup pkc over str=
+    !!signed? 2 !!>=order? $> keysize umin 2dup pkc over str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ;
 $25 net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 1 4 !!<>=order? $> ."  re: " 85type forth:cr ;
+    !!signed? 4 !!>=order? $> ."  re: " 85type forth:cr ;
 $26 net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? ." : " $>
+    !!signed? 8 !!>=order? ." : " $>
     2dup [: ." : " forth:type ;] $tmp notify+ forth:type forth:cr ;
 $27 net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 1 8 !!<>=order? $> ."  wrapped object: " 85type forth:cr ;
+    !!signed? 8 !!>=order? $> ."  wrapped object: " 85type forth:cr ;
 $28 net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 1 8 !!<>=order? $> space 2dup [: space forth:type ;] $tmp notify+
+    !!signed? 8 !!>=order? $> space 2dup [: space forth:type ;] $tmp notify+
     <warn> forth:type <default> forth:cr ;
 $2B net2o: msg-coord ( $:gps -- )
-    !!signed? 1 8 !!<>=order? ."  GPS: " $> forth:cr .coords ;
+    !!signed? 8 !!>=order? ."  GPS: " $> forth:cr .coords ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -405,9 +405,12 @@ previous
 : [group] ( xt -- flag )
     msg-group$ $@ msg-groups #@ IF
 	@ >o ?msg-context .execute o> true
-    ELSE  2drop false  THEN ;
+    ELSE
+	drop "" msg-group$ $@ msg-groups #!
+	0 .execute false
+    THEN ;
 : .chat ( addr u -- )
-    [: last# >r 2dup do-msg-nestsig r> to last#
+    [: last# >r o IF  2dup do-msg-nestsig  THEN  r> to last#
       0 .avalanche-msg ;] [group] drop notify- ;
 
 $200 Constant maxmsg#
@@ -448,11 +451,12 @@ $200 Constant maxmsg#
     wait-2s-key xclear ;
 
 also net2o-base
-: send-avalanche ( xt -- )
+: (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
-      3 /string 1 - >msg-log ;] [group]
-    0= IF  2drop .nobody  ELSE  .chat  THEN ;
+      3 /string 1 - >msg-log ;] [group] ;
 previous
+: send-avalanche ( xt -- ) (send-avalanche)
+    IF   .chat  ELSE  2drop .nobody  THEN ;
 
 \ chat helper words
 
