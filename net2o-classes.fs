@@ -121,16 +121,21 @@ cmd-class class
     field: silent-last#
 end-class msging-class
 
+scope: msg
+
 cmd-class class
-    method msg:start
-    method msg:group
-    method msg:signal
-    method msg:re
-    method msg:text
-    method msg:object
-    method msg:action
-    method msg:coord
+    method start
+    method tag
+    method signal
+    method re
+    method text
+    method object
+    method equiv
+    method action
+    method coord
 end-class msg-class
+}scope
+' msg:msg-class alias msg-class
 
 cmd-class class
     \ callbacks

@@ -249,31 +249,49 @@ scope{ net2o-base
 reply-table $@ inherit-table msg-table
 
 $20 net2o: msg-start ( $:pksig -- ) \g start message
-    !!signed? 1 !!>order? $> 2dup startdate@ .ticks space 2dup .key-id
-    [: .simple-id ;] $tmp notify! ;
+    !!signed? 1 !!>order? $> msg:start ;
 $21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
-    $> 2drop ;
+    $> msg:tag ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    !!signed? 2 !!>=order? $> keysize umin 2dup pkc over str=
-    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
-    ."  @" .key-id <default> ;
+    !!signed? 2 !!>=order? $> msg:signal ;
 $25 net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 4 !!>=order? $> ."  re: " 85type forth:cr ;
+    !!signed? 4 !!>=order? $> msg:re ;
 $26 net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 8 !!>=order? ." : " $>
-    2dup [: ." : " forth:type ;] $tmp notify+ forth:type forth:cr ;
+    !!signed? 8 !!>=order? $> msg:text ;
 $27 net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 8 !!>=order? $> ."  wrapped object: " 85type forth:cr ;
+    !!signed? 8 !!>=order? $> msg:object ;
 $28 net2o: msg-action ( $:msg -- ) \g specify message string
-    !!signed? 8 !!>=order? $> space 2dup [: space forth:type ;] $tmp notify+
-    <warn> forth:type <default> forth:cr ;
+    !!signed? 8 !!>=order? $> msg:action ;
 $29 net2o: msg-equiv ( $:object -- ) \g equivalent object
-    !!signed? 8 !!>=order? $> ."  equiv object: " 85type forth:cr ;
+    !!signed? 8 !!>=order? $> msg:equiv ;
 $2B net2o: msg-coord ( $:gps -- )
-    !!signed? 8 !!>=order? ."  GPS: " $> forth:cr .coords ;
+    !!signed? 8 !!>=order? $> msg:coord ;
 
 gen-table $freeze
 ' context-table is gen-table
+
+:noname ( addr u -- )
+    2dup startdate@ .ticks space 2dup .key-id
+    [: .simple-id ;] $tmp notify! ; msg-class to msg:start
+' 2drop msg-class to msg:tag
+:noname ( addr u -- )
+    keysize umin 2dup pkc over str=
+    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
+    ."  @" .key-id <default> ; msg-class to msg:signal
+:noname ( addr u -- )
+    ."  re: " 85type forth:cr ; msg-class to msg:re
+:noname ( addr u -- )
+    [: ." : " 2dup forth:type ;] $tmp notify+
+    ." : " forth:type forth:cr ; msg-class to msg:text
+:noname ( addr u -- )
+    ."  wrapped object: " 85type forth:cr ; msg-class to msg:object
+:noname ( addr u -- )
+    [: space 2dup forth:type ;] $tmp notify+
+    space <warn> forth:type <default> forth:cr ; msg-class to msg:action
+:noname ( addr u -- )
+    ."  equiv object: " 85type forth:cr ; msg-class to msg:equiv
+:noname ( addr u -- )
+    ."  GPS: " forth:cr .coords ; msg-class to msg:coord
 
 \g 
 \g ### messaging commands ###
