@@ -81,7 +81,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 gen-table $freeze
 ' context-table is gen-table
 
-set-current
+also }scope
 
 $80 Constant min-align#
 $400 Constant pow-align#

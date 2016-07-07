@@ -207,7 +207,7 @@ net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 +net2o: dht-owner- ( $:string -- ) $> d#owner- ;
     \g delete ownr from DHT
 
-set-current
+also }scope
 
 \ queries
 

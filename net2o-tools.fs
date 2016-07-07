@@ -267,12 +267,13 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ scoping
 
-: scope{ ( "vocabulary" -- addr )
-    get-current also ' execute definitions ;
-: }scope ( addr -- )
-    previous set-current ;
-: scope: ( "vocabulary" -- addr )
-    vocabulary get-current also lastxt execute definitions ;
+Variable scope<>
+: scope{ ( "vocabulary" -- scope:addr )
+    get-current scope<> >deque also ' execute definitions ;
+: }scope ( scope:addr -- )
+    previous scope<> deque> set-current ;
+: scope: ( "vocabulary" -- scope:addr )
+    vocabulary get-current scope<> >deque also lastxt execute definitions ;
 
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict

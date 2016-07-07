@@ -164,7 +164,7 @@ gen-table $freeze
 	ELSE  throw  THEN
     THEN ; IS >throw
 
-set-current
+also }scope
 
 : blocksize! ( n -- )  max-block# umin dup ulit, set-blocksize
     1 swap lshift blocksizes! ;

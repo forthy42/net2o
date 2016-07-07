@@ -121,9 +121,8 @@ cmd-class class
     field: silent-last#
 end-class msging-class
 
-scope: msg
-
 cmd-class class
+scope: msg
     method start
     method tag
     method signal
@@ -133,9 +132,8 @@ cmd-class class
     method equiv
     method action
     method coord
-end-class msg-class
 }scope
-' msg:msg-class alias msg-class
+end-class msg-class
 
 cmd-class class
     \ callbacks

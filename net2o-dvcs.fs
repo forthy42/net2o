@@ -21,9 +21,9 @@ Variable dvcs-table
 
 vocabulary project
 
-scope: dvcs
-
 msg-class class
+    scope: dvcs
+
     field: branch$
     field: message$
     field: files#    \ snapshot config
@@ -36,17 +36,17 @@ msg-class class
     field: hash$
     field: equiv$
 
-    rot }scope
+    }scope
     
-    scope{ project -rot \ per-project configuration values
+    scope{ project \ per-project configuration values
     
     field: revision$
     field: branch$
     field: project$
 
-    rot }scope
+    }scope
 
-    scope{ dvcs -rot
+    scope{ dvcs
 
 end-class dvcs-class
 

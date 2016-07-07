@@ -343,7 +343,7 @@ msg-class to nest-sig
 gen-table $freeze
 ' context-table is gen-table
 
-set-current
+also }scope
 
 : last-msg@ ( -- ticks )
     last# >r
