@@ -89,8 +89,9 @@ event: ->save-msgs ( last# -- ) save-msgs ;
     <event last# elit, ->save-msgs file-task event> ;
 
 : ?msg-log ( addr u -- )
-    msg-logs #@ d0= IF
-	s" " msg-group$ $@ msg-logs #!  THEN ;
+    2dup msg-logs #@ d0= IF
+	s" " 2swap msg-logs #!
+    ELSE  2drop  THEN ;
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
@@ -323,7 +324,7 @@ msging-table >table
 
 reply-table $@ inherit-table msging-table
 
-$21 net2o: msg-group ( $:group -- ) \g just set group, for reconnect
+$21 net2o: msg-group ( $:group -- ) \g set group
     $> >group ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
