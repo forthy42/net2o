@@ -223,7 +223,7 @@ event: ->msg-nestsig ( addr u o group -- )
 	    fix gps:gps_fix_t-track     df@ coord" 4 sf[]!
 	    fix gps:gps_fix_t-epx df@ f**2
 	    fix gps:gps_fix_t-epy df@ f**2
-	    f+ fsqrt                    coord" 5 sf[]! ;
+	    f+ fsqrt                        coord" 5 sf[]! ;
     [ELSE]
 	: coord! ( -- ) ;
     [THEN]
