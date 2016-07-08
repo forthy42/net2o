@@ -3,6 +3,8 @@
 
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
 
+@HAS_GPSD@ [IF] : has-gpsd? ; [THEN]
+
 require n2o.fs
 
 script? [IF] cmd-args ++debug %droprate \ read in all debugging stuff

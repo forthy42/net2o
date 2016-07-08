@@ -15,8 +15,10 @@ dnl Process this file with autoconf to produce a configure script.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([net2o], [0.1.7-20160707], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
-AC_PREREQ(2.54)
+AC_INIT([net2o], [0.1.7-20160708], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
+AC_PREREQ([2.59])
+AC_CONFIG_MACRO_DIR([m4])
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_MSG_CHECKING([for gforth])
 
@@ -47,6 +49,7 @@ case "$host_alias" in
 	;;
 esac
 
+AC_PROG_CC
 AC_PROG_INSTALL
 
 PRECC=${CC%gcc*}
@@ -56,6 +59,10 @@ AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
 
 GNU_LIBTOOL=${PRECLANG}${GNU_LIBTOOL}
 echo "Libtool: $PRECC, $PRECLANG, $GNU_LIBTOOL"
+
+HAS_GPSD=0
+AC_CHECK_LIB(gps, gps_open, HAS_GPSD=1)
+AC_SUBST(HAS_GPSD)
 
 AC_SUBST(GFORTH)
 AC_SUBST(GFORTHFAST)

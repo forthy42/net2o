@@ -208,7 +208,25 @@ event: ->msg-nestsig ( addr u o group -- )
     :noname ctrl U inskey ctrl D inskey ; is aback
     previous
 [ELSE]
-    : coord! ;
+    [IFDEF] has-gpsd?
+	require unix/gpslib.fs
+	0 Value gps-opened?
+	: coord! ( -- ) gps-opened? 0= IF
+		gps-local-open 0= to gps-opened?
+		gps-opened? 0= ?EXIT
+	    THEN
+	    gps-fix { fix }
+	    fix gps:gps_fix_t-latitude  df@ coord" 0 sf[]!
+	    fix gps:gps_fix_t-longitude df@ coord" 1 sf[]!
+	    fix gps:gps_fix_t-altitude  df@ coord" 2 sf[]!
+	    fix gps:gps_fix_t-speed     df@ coord" 3 sf[]!
+	    fix gps:gps_fix_t-track     df@ coord" 4 sf[]!
+	    fix gps:gps_fix_t-epx df@ f**2
+	    fix gps:gps_fix_t-epy df@ f**2
+	    f+ fsqrt                    coord" 5 sf[]! ;
+    [ELSE]
+	: coord! ( -- ) ;
+    [THEN]
 [THEN]
 
 : .coords ( addr u -- ) $>align drop
