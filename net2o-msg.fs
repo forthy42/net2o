@@ -230,12 +230,12 @@ event: ->msg-nestsig ( addr u o group -- )
 [THEN]
 
 : .coords ( addr u -- ) $>align drop
-    ." Lat: " dup 0 sf[]@ .deg cr
-    ." Lon: " dup 1 sf[]@ .deg cr
-    ." Alt: " dup 2 sf[]@ 7 1 0 f.rdp cr
-    ." Spd: " dup 3 sf[]@ 8 2 0 f.rdp cr
-    ." Dir: " dup 4 sf[]@ 8 2 0 f.rdp cr
-    ." Acc: " dup 5 sf[]@ 8 2 0 f.rdp cr
+    dup 0 sf[]@ fdup fabs .deg f0< 'S' 'N' rot select emit space
+    dup 1 sf[]@ fdup fabs .deg f0< 'W' 'E' rot select emit space
+    dup 2 sf[]@ 7 1 0 f.rdp ." m "
+    dup 3 sf[]@ 8 2 0 f.rdp ." kph "
+    dup 4 sf[]@ 8 2 0 f.rdp ." ° ~"
+    dup 5 sf[]@ fsplit 0 .r '.' emit 100e f* f>s .2 ." m"
     drop ;
 
 Defer msg:last?
@@ -309,7 +309,7 @@ gen-table $freeze
 :noname ( addr u -- )
     ."  equiv object: " 85type forth:cr ; msg-class to msg:equiv
 :noname ( addr u -- )
-    ."  GPS: " forth:cr .coords ; msg-class to msg:coord
+    <warn> ."  GPS: " .coords <default> forth:cr ; msg-class to msg:coord
 
 \g 
 \g ### messaging commands ###

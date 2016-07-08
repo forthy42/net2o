@@ -411,8 +411,8 @@ previous
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r '°' xemit  60e f*
     fsplit .2   ''' xemit  60e f*
-    fsplit .2   '"' xemit 100e f*
-    f>s .2 ;
+    fsplit .2   '.' xemit 100e f*
+    f>s .2      '"' xemit ;
 : .never ( -- )
     date? 7 and 1 > IF ." never" ELSE 'n' emit THEN ;
 : .forever ( -- )
