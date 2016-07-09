@@ -349,11 +349,12 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-open ( ticks ticke -- ) msg:open ;
 
 : ?pkgroup ( addr u -- addr u )
+    \ if no group has been selected, use the pubkey as group
     last# 0= IF  2dup + sigpksize# - keysize >group  THEN ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
-	?pkgroup >msg-log 2dup d0<>
+	?pkgroup >msg-log 2dup d0<> \ do something if it is new
 	IF  replay-mode @ 0= IF  2dup show-msg  2dup parent @ .push-msg  THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
