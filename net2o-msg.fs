@@ -20,9 +20,10 @@ Defer pk-connect ( key u cmdlen datalen -- )
 Defer addr-connect ( key+addr u cmdlen datalen xt -- )
 Defer pk-peek? ( addr u0 -- flag )
 
-: >group ( addr u -- )
-    2dup msg-groups #@ d0=
-    IF  "" 2swap msg-groups #!  ELSE  2drop  THEN ;
+: ?hash ( addr u hash -- ) >r
+    2dup r@ #@ d0= IF  "" 2swap r> #!  ELSE  2drop rdrop  THEN ;
+
+: >group ( addr u -- )  msg-groups ?hash ;
 
 : avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
@@ -33,6 +34,7 @@ Defer pk-peek? ( addr u0 -- flag )
     ELSE  2drop  THEN ;
 
 Variable msg-group$
+Variable 1:1-chat   \ for direct chats
 Variable group-master
 Variable msg-logs
 Variable otr-mode
@@ -88,10 +90,7 @@ event: ->save-msgs ( last# -- ) save-msgs ;
     file-task 0= IF  create-file-task  THEN
     <event last# elit, ->save-msgs file-task event> ;
 
-: ?msg-log ( addr u -- )
-    2dup msg-logs #@ d0= IF
-	s" " 2swap msg-logs #!
-    ELSE  2drop  THEN ;
+: ?msg-log ( addr u -- )  msg-logs ?hash ;
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
@@ -187,7 +186,7 @@ event: ->msg-nestsig ( addr u o group -- )
 \ coordinates
 
 6 sfloats buffer: coord"
-1.23e coord" sf! 2.34e coord" sfloat+ sf!
+90e coord" sfloat+ sf!
 : coord@ ( -- addr u ) coord" 6 sfloats ;
 : sf[]@ ( addr i -- sf )  sfloats + sf@ ;
 : sf[]! ( addr i -- sf )  sfloats + sf! ;
@@ -270,7 +269,7 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> msg:start ;
 $21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
-    $> msg:tag ;
+    !!signed? $> msg:tag ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
 $25 net2o: msg-re ( $:hash ) \g relate to some object
@@ -283,11 +282,13 @@ $28 net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> msg:action ;
 $29 net2o: msg-equiv ( $:object -- ) \g equivalent object
     !!signed? 8 !!>=order? $> msg:equiv ;
-$2B net2o: msg-coord ( $:gps -- )
+$2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     !!signed? 8 !!>=order? $> msg:coord ;
 
 gen-table $freeze
 ' context-table is gen-table
+
+\ Code for displaying messages
 
 :noname ( addr u -- )
     2dup startdate@ .ticks space 2dup .key-id
@@ -318,7 +319,7 @@ gen-table $freeze
 
 $34 net2o: msg ( -- o:msg ) \g push a message object
     perm-mask @ perm%msg and 0= !!msg-perm!!
-    ?msg-context n:>o c-state off ;
+    ?msg-context n:>o c-state off  0 to last# ;
 
 msging-table >table
 
@@ -347,8 +348,12 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-getlast ( tick -- ) msg:getlast ;
 +net2o: msg-open ( ticks ticke -- ) msg:open ;
 
+: ?pkgroup ( addr u -- addr u )
+    last# 0= IF  2dup + sigpksize# - keysize >group  THEN ;
+
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig ?dup-0=-IF  >msg-log 2dup d0<>
+    $> nest-sig ?dup-0=-IF
+	?pkgroup >msg-log 2dup d0<>
 	IF  replay-mode @ 0= IF  2dup show-msg  2dup parent @ .push-msg  THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
@@ -381,8 +386,7 @@ also }scope
     ." last message at: " .ticks forth:cr ; is msg:last
 
 : group, ( addr u -- )
-    dup IF  2dup pkc over str= 0=  ELSE  dup  THEN
-    IF  $, msg-group  ELSE  2drop  THEN ;
+    $, msg-group ;
 : <msg ( -- )
     \G start a msg block
     msg-group$ $@ group, msg sign[ msg-start ;
@@ -759,8 +763,8 @@ previous
     group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
 
 : key>group ( addr u -- pk u )
-    @/ 2swap tuck msg-group$ $!
-    0= IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
+    @/ 2swap tuck msg-group$ $!  0= dup  1:1-chat !
+    IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
 
 : ?load-msgn ( -- )
     msg-group$ $@ msg-logs #@ d0= IF
@@ -858,7 +862,9 @@ scope{ /chat
 :noname ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
-    net2o-code expect-msg msg last# $@ group, $, nestsig end-with
+    net2o-code expect-msg msg
+    last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
+    $, nestsig end-with
     end-code ; is avalanche-to
 
 0 [IF]
