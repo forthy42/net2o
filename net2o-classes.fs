@@ -135,6 +135,17 @@ scope: msg
 }scope
 end-class msg-class
 
+\ object/reference types
+
+scope{ msg
+0
+enum image#
+enum thumbnail#
+enum patch#
+enum snapshot#
+enum message#
+}scope
+
 cmd-class class
     \ callbacks
     field: timeout-xt    \ callback for timeout

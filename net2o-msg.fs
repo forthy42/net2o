@@ -272,16 +272,16 @@ $21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
     !!signed? $> msg:tag ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
-$25 net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 4 !!>=order? $> msg:re ;
+$25 net2o: msg-re ( $:hash type ) \g relate to some object
+    !!signed? 4 !!>=order? 64>n $> rot msg:re ;
 $26 net2o: msg-text ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> msg:text ;
-$27 net2o: msg-object ( $:object -- ) \g specify an object, e.g. an image
-    !!signed? 8 !!>=order? $> msg:object ;
+$27 net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
+    !!signed? 8 !!>=order? 64>n $> rot msg:object ;
 $28 net2o: msg-action ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> msg:action ;
-$29 net2o: msg-equiv ( $:object -- ) \g equivalent object
-    !!signed? 8 !!>=order? $> msg:equiv ;
+$29 net2o: msg-equiv ( $:object type -- ) \g equivalent object
+    !!signed? 8 !!>=order? 64>n $> rot msg:equiv ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     !!signed? 8 !!>=order? $> msg:coord ;
 
@@ -298,18 +298,20 @@ gen-table $freeze
     keysize umin 2dup pkc over str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ; msg-class to msg:signal
-:noname ( addr u -- )
-    ."  re: " 85type forth:cr ; msg-class to msg:re
+:noname ( addr u type -- )
+    ."  re type " 0 .r ." : " 85type forth:cr ; msg-class to msg:re
 :noname ( addr u -- )
     [: ." : " 2dup forth:type ;] $tmp notify+
     ." : " forth:type forth:cr ; msg-class to msg:text
-:noname ( addr u -- )
-    ."  wrapped object: " 85type forth:cr ; msg-class to msg:object
+:noname ( addr u type -- )
+    ."  wrapped object type " 0 .r ." : " 85type forth:cr ;
+msg-class to msg:object
 :noname ( addr u -- )
     [: space 2dup forth:type ;] $tmp notify+
     space <warn> forth:type <default> forth:cr ; msg-class to msg:action
-:noname ( addr u -- )
-    ."  equiv object: " 85type forth:cr ; msg-class to msg:equiv
+:noname ( addr u type -- )
+    ."  equiv object type " 0 .r ." : " 85type forth:cr ;
+msg-class to msg:equiv
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> forth:cr ; msg-class to msg:coord
 

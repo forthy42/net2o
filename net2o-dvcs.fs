@@ -33,8 +33,11 @@ msg-class class
     field: out-fileoff
     field: fileentry$
     field: oldhash$
+    field: oldtype
     field: hash$
+    field: type
     field: equiv$
+    field: equivtype
 
     }scope
     
@@ -347,26 +350,34 @@ Variable patch-in$
     config>dvcs  chat>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
 also net2o-base
-: dvcs-newsentry ( -- )
+: (dvcs-newsentry) ( oldtype equivtype type -- )
+    dvcs:type ! dvcs:equivtype ! dvcs:oldtype !
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: >o
-	dvcs:message$   $@
-	dvcs:equiv$     $@
-	dvcs:hash$      $@
-	dvcs:oldhash$   $@
-	project:branch$ $@
-	o>
-	$, msg-tag
-	dup IF  $, msg-re  ELSE  2drop  THEN
-	$, msg-object
-	dup IF  $, msg-equiv  ELSE  2drop  THEN
-	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
+      dvcs:message$   $@
+      dvcs:equivtype  @
+      dvcs:equiv$     $@
+      dvcs:type       @
+      dvcs:hash$      $@
+      dvcs:oldtype    @
+      dvcs:oldhash$   $@
+      project:branch$ $@
+      o>
+      $, msg-tag
+      dup IF  $, ulit, msg-re      ELSE  2drop drop  THEN
+      dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
+      dup IF  $, ulit, msg-equiv   ELSE  2drop drop  THEN
+      "Checkin" $, msg-action
+      $, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous
 
 : dvcs-snapentry ( -- )
-    0 dvcs:oldhash$ !@ dvcs:equiv$ ! dvcs-newsentry ;
+    0 dvcs:oldhash$ !@ dvcs:equiv$ !
+    msg:patch# msg:patch# msg:snapshot# (dvcs-newsentry) ;
+: dvcs-newsentry ( -- )
+    msg:patch# msg:patch# msg:patch# (dvcs-newsentry) ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
