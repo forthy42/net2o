@@ -24,6 +24,7 @@ vocabulary project
 msg-class class
     scope: dvcs
 
+    field: commits \ msg class for commits
     field: branch$
     field: message$
     field: files#    \ snapshot config
@@ -60,6 +61,13 @@ begin-structure filehash
 end-structure
 
 }scope
+
+msg-class class
+    field: equiv#
+    field: re#
+    field: re$
+    field: object$
+end-class commit-class
 
 hash#256 buffer: newhash \ keep some space for encryption secret
 
@@ -161,7 +169,9 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 }scope
 
 : n2o:new-dvcs ( -- o )
-    dvcs:dvcs-class new >o  dvcs-table @ token-table ! o o> ;
+    dvcs:dvcs-class new >o  dvcs-table @ token-table !
+    commit-class new  dvcs:commits !
+    o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-dvcs ( o:dvcs -- )
@@ -337,6 +347,28 @@ Variable patch-in$
 	['] branchlist-loop execute-parsing-file
 	branches[] ['] apply-branch $[]map?
     ELSE  2drop  THEN ;
+
+\ read in branches, new version
+
+: hash+type ( addr u type -- )
+    [: { w^ x } type x cell type ;] $tmp1 ;
+
+' 2drop commit-class to msg:start
+' 2drop commit-class to msg:coord
+' 2drop commit-class to msg:signal
+' 2drop commit-class to msg:text
+' 2drop commit-class to msg:action
+
+:noname ( addr u type -- )
+    hash+type re$ $! ; commit-class to msg:re
+:noname ( addr u type -- )
+    hash+type object$ $!  re$ $@len 0= ?EXIT
+    re$ $@ object$ $@ key| re# #! ; commit-class to msg:object
+:noname ( addr u type -- )
+    object$ $@len 0= IF  drop 2drop  EXIT  THEN
+    hash+type object$ $@ 2over key| equiv# #!
+    object$ $@ key| equiv# #! ; commit-class to msg:equiv
+
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
 

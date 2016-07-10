@@ -442,7 +442,7 @@ synonym searchkey keysearch
     ci-args dvcs-snap ;
 
 : diff ( -- )
-    dvcs-diff ;
+    get-me dvcs-diff ;
 
 \ others
 
