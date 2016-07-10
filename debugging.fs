@@ -18,6 +18,7 @@ require base85.fs
 : .64b ( addr -- ) 64 .nnb ;
 
 synonym \U \G \ comment for help
+synonym \O \G \ comment for help
 
 \ debugging switches
 

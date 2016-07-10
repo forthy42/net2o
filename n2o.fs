@@ -81,10 +81,20 @@ scope{ n2o
     \G help: print commands or details about specified command
     ?nextarg IF
 	BEGIN
-	    2dup [: ."     \U " type ;] $tmp ['] .usage search-help
+	    2dup over c@ '-' = IF
+		." === Options ===" cr
+		[: ."     \O " type ;]
+	    ELSE
+		." === Commands ===" cr
+		[: ."     \U " type ;]
+	    THEN  $tmp ['] .usage search-help
+	    ." === Details ===" cr
 	    [: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
 	?nextarg 0= UNTIL
     ELSE
+	." === Options (preceed commands) ===" cr
+	s"     \O " ['] .usage search-help
+	." === Commands ===" cr
 	s"     \U " ['] .usage search-help
     THEN ;
 
@@ -196,11 +206,11 @@ synonym searchkey keysearch
 \ encryption subcommands
 
 : -threefish ( -- )
-    \U -threefish <next-cmd>
+    \O -threefish
     \G -threefish: use threefish encryption for vaults
     enc-threefish next-cmd ;
 : -keccak ( -- )
-    \U -keccak <next-cmd>
+    \O -keccak
     \G -keccak: use keccak encryption for vaults
     enc-keccak next-cmd ;
 
@@ -221,12 +231,12 @@ synonym searchkey keysearch
 \ hash+signature
 
 : -256 ( -- )
-    \U -256 <next-cmd>
+    \O -256
     \G -256: set hash output to 256 bits (default)
     $20 to hash-size# next-cmd ;
 
 : -512 ( -- )
-    \U -512 <next-cmd>
+    \O -512
     \G -512: set hash output to 512 bits
     $40 to hash-size# next-cmd ;
 
@@ -261,12 +271,12 @@ synonym searchkey keysearch
 \ select config file
 
 : -config ( -- )
-    \U -config <filename> <next-cmd>
+    \O -config <filename>
     \G -config: Set filename for config file
     ?nextarg 0= ?EXIT  config-file$ $! next-cmd ;
 
 : -conf ( -- )
-    \U -conf <value>=<thing>
+    \O -conf <value>=<thing>
     \G -conf: Set a config value
     get-me init-client \ read config if necessary
     ?nextarg 0= ?EXIT ['] config-line execute-parsing next-cmd ;
@@ -274,7 +284,7 @@ synonym searchkey keysearch
 \ server mode
 
 : -lax ( -- )
-    \U -lax <next-cmd>
+    \O -lax
     \G -lax: open for all keys
     perm%default to perm%unknown  next-cmd ;
 
@@ -313,17 +323,17 @@ synonym searchkey keysearch
 \ chat mode
 
 : -root ( -- )
-    \U -root <address[:port]> <next-cmd>
+    \O -root <address[:port]>
     ?nextarg 0= ?EXIT ':' $split dup IF  s>number drop to net2o-port
     ELSE  2drop  THEN  net2o-host $!  dhtroot-off
     next-cmd ;
 
 : -rootnick ( -- )
-    \U -rootnick <nick> <next-cmd>
+    \O -rootnick <nick>
     ?nextarg 0= ?EXIT  dhtnick $!  dhtroot-off  next-cmd ;
 
 : -port ( -- )
-    \U -port <port#> <next-cmd>
+    \O -port <port#>
     \G -port: sets port to a fixed number for reachability from outside,
     \G -port: allows to define port forwarding rules in the firewall
     \G -port: only for client; server-side port is different
@@ -331,7 +341,7 @@ synonym searchkey keysearch
     next-cmd ;
 
 : -otr ( --- )
-    \U -otr <next-cmd>
+    \O -otr
     \G -otr: Turn off-the-records mode on, so chats are not logged
     otr-mode on next-cmd ;
 
@@ -452,12 +462,12 @@ synonym searchkey keysearch
     subme bye ;
 
 : -bw ( -- )
-    \U -bw <cmd>
+    \O -bw
     \G -bw: disable color codes
     ['] drop is attr!  next-cmd ;
 
 : -backtrace ( -- )
-    \U -backtrace <cmd>
+    \O -backtrace
     \G -backtrace: Provide full error reporting ;
     [ what's DoError ]l is DoError next-cmd ;
 
