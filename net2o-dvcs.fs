@@ -354,16 +354,16 @@ also net2o-base
     dvcs:type ! dvcs:equivtype ! dvcs:oldtype !
     msg-group$ @ >r
     project:project$ @ msg-group$ !
-    o [: >o
-      dvcs:message$   $@
-      dvcs:equivtype  @
-      dvcs:equiv$     $@
-      dvcs:type       @
-      dvcs:hash$      $@
-      dvcs:oldtype    @
-      dvcs:oldhash$   $@
+    o [: with dvcs
+      message$   $@
+      equivtype  @
+      equiv$     $@
+      type       @
+      hash$      $@
+      oldtype    @
+      oldhash$   $@
       project:branch$ $@
-      o>
+      endwith
       $, msg-tag
       dup IF  $, ulit, msg-re      ELSE  2drop drop  THEN
       dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
