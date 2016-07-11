@@ -170,7 +170,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 
 : n2o:new-dvcs ( -- o )
     dvcs:dvcs-class new >o  dvcs-table @ token-table !
-    commit-class new  dvcs:commits !
+    commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
     o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
@@ -288,17 +288,12 @@ previous
 	2drop w/o create-file throw  ELSE  throw nip nip  THEN
     >r r@ file-size throw r@ reposition-file throw
     r@ write-line throw r> close-file throw ;
-: branch$ ( -- addr u )
-    [: ." .n2o/" project:branch$ $. ." .branch" ;] $tmp ;
-: append-branch ( addr u -- )
-    branch$ append-line ;
 
 \ unencrypted hash stuff
 
 Variable patch-in$
 
 : write-hashed ( addr1 u1 -- addrhash u2 )
-    2dup >file-hash
     newhash hash#128 ['] 85type $tmp1 2>r
     2r@ .objects/ ?.net2o/objects spit-file 2r> ;
 
@@ -316,7 +311,6 @@ Variable patch-in$
     newhash hash#256 >file-hash ;
 
 : write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
-    2dup >file-hash
     newhash hash#128 ['] 85type $tmp 2>r
     sksig>newhash  newhash hash#128 ['] 85type $tmp1 2>r
     save-mem 2dup c:encrypt  over swap
@@ -336,21 +330,11 @@ Variable patch-in$
 
 ' n2o:new-dvcs static-a with-allocater Constant sample-patch
 
-: branchlist-loop ( -- )
-    BEGIN  refill  WHILE  source base85>$ branches[] $+[]!  REPEAT ;
-: apply-branch ( addr u -- flag )
-    read-enc-hashed project:revision$ $@ str= >r
-    sample-patch >o clean-delta
-    c-state off patch-in$ $@ do-cmd-loop o> r> ;
-: branches>dvcs ( o:dvcs -- )  branches[] $[]off
-    branch$ r/o open-file dup no-file# <> IF  throw
-	['] branchlist-loop execute-parsing-file
-	branches[] ['] apply-branch $[]map?
-    ELSE  2drop  THEN ;
-
 \ read in branches, new version
 
-: hash+type ( addr u type -- )
+: hash+type ( addr u type addr1 -- ) >r r@ $off
+    [: { w^ x } type x cell type ;] r> $exec ;
+: hash+type$ ( addr u type -- )
     [: { w^ x } type x cell type ;] $tmp1 ;
 
 ' 2drop commit-class to msg:start
@@ -360,26 +344,43 @@ Variable patch-in$
 ' 2drop commit-class to msg:action
 
 :noname ( addr u type -- )
-    hash+type re$ $! ; commit-class to msg:re
+    re$ hash+type ; commit-class to msg:re
 :noname ( addr u type -- )
-    hash+type object$ $!  re$ $@len 0= ?EXIT
+    object$ hash+type  re$ $@len 0= ?EXIT
     re$ $@ object$ $@ key| re# #! ; commit-class to msg:object
-:noname ( addr u type -- )
-    object$ $@len 0= IF  drop 2drop  EXIT  THEN
-    hash+type object$ $@ 2over key| equiv# #!
-    object$ $@ key| equiv# #! ; commit-class to msg:equiv
+:noname ( addr u type -- ) >r
+    object$ $@len 0= IF  rdrop 2drop  EXIT  THEN
+    object$ $@ 2over equiv# #!
+    r> hash+type$ object$ $@ key| equiv# #! ; commit-class to msg:equiv
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
+: .hash ( addr -- )
+    [: dup $@ 85type ."  -> " cell+ $@ 85type cr ;] #map ;
+: chat>branches ( o:dvcs -- )
+    project:project$ $@ ?msg-log  dvcs:commits @ >o
+    last# msg-log@ over { log } bounds ?DO
+	re$ $off  object$ $off
+	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
+    cell +LOOP  log free throw
+    dvcs( ." === re ===" cr re# .hash
+    ." === equiv ===" cr equiv# .hash ) o> ;
+: re>branches ( -- )
+    branches[] $[]off  dvcs:oldhash$ $@  0 { w^ x }
+    BEGIN  x cell branches[] 0 $ins  2dup 0 branches[] $[]!
+	dvcs:commits @ .re# #@ key| 2dup d0=  UNTIL  2drop
+    dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 
 \ push out a revision
 
 : >revision ( addr u -- )
-    write-enc-hashed newhash hash#128 dvcs:hash$ $!
-    2dup project:revision$ $!  append-branch ;
+    2dup >file-hash newhash hash#128 dvcs:hash$ $!
+    write-enc-hashed
+    project:revision$ $! ;
 
 : dvcs-readin ( -- )
-    config>dvcs  chat>dvcs  branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+    config>dvcs  chat>dvcs  chat>branches  re>branches
+    files>dvcs  new>dvcs  dvcs?modified ;
 
 also net2o-base
 : (dvcs-newsentry) ( oldtype equivtype type -- )

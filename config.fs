@@ -44,7 +44,7 @@ Variable config-recognizer
 : config-line ( -- )
     '=' parse 2>r
     parse-name config-recognizer map-recognizer 2r> eval-config
-    source nip >in ! ;
+    postpone \ ;
 
 : read-config-loop ( -- )
     BEGIN  refill  WHILE  config-line  REPEAT ;
