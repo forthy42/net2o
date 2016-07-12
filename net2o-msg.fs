@@ -58,7 +58,7 @@ Sema msglog-sema
     [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
 : save-msgs ( last -- )
-    n2o:new-msging >o enc-file $off
+    ?.net2o/chats  n2o:new-msging >o enc-file $off
     dup msg-log@ over >r
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
@@ -541,10 +541,11 @@ Variable chat-keys
     $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 : .notify ( -- )
-    ." notify " notify? ? ." led " notify-rgb hex. notify-on . notify-off .
-    ." interval " delta-notify 64>d 1000000 um/mod . drop
-    ." mode " notify-mode .
-    notify-text IF  ." visible"  ELSE  ." hidden"  THEN
+    ." notify " config:notify?# ?
+    ." led " config:notify-rgb# @ hex. config:notify-on# ? config:notify-off# ?
+    ." interval " config:delta-notify& 2@ 1000000 um/mod . drop
+    ." mode " config:notify-mode# @ .
+    config:notify-text# @ IF  ." visible"  ELSE  ." hidden"  THEN
     forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
@@ -554,13 +555,13 @@ Variable chat-keys
 
 scope: notify-cmds
 
-: on ( addr u -- ) 2drop -2 notify? ! .notify ;
-: always ( addr u -- ) 2drop -3 notify? ! .notify ;
-: off ( addr u -- ) 2drop 0 notify? ! .notify ;
+: on ( addr u -- ) 2drop -2 config:notify?# ! .notify ;
+: always ( addr u -- ) 2drop -3 config:notify?# ! .notify ;
+: off ( addr u -- ) 2drop 0 config:notify?# ! .notify ;
 : led ( addr u -- ) \ "<rrggbb> <on-ms> <off-ms>"
-    get-hex to notify-rgb
-    get-dec #500 max to notify-on
-    get-dec #500 max to notify-off
+    get-hex config:notify-rgb# !
+    get-dec #500 max config:notify-on# !
+    get-dec #500 max config:notify-off# !
     2drop .notify msg-builder ;
 : interval ( addr u -- )
     #0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
@@ -568,13 +569,13 @@ scope: notify-cmds
 	    'm' of    #60000 * endof
 	    'h' of #36000000 * endof
 	endcase
-    ELSE  2drop  THEN  #1000000 um* d>64 to delta-notify .notify ;
+    ELSE  2drop  THEN  #1000000 um* config:delta-notify& 2! .notify ;
 : mode ( addr u -- )
-    get-dec 3 and to notify-mode 2drop .notify msg-builder ;
+    get-dec 3 and config:notify-mode# ! 2drop .notify msg-builder ;
 : visible ( addr u -- )
-    2drop true to notify-text .notify ;
+    2drop config:notify-text# on .notify ;
 : hidden ( addr u -- )
-    2drop false to notify-text .notify ;
+    2drop config:notify-text# off .notify ;
 
 }scope
 

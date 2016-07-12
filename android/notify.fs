@@ -27,7 +27,7 @@ jvalue notification-manager
 : notify+ ( addr u -- )  notify> notify$ $+! ;
 : notify! ( addr u -- )  notify> notify$ $! ;
 : notify@ ( -- addr u )
-    notify-text IF  notify$ $@
+    config:notify-text# @ IF  notify$ $@
     ELSE  "hidden cryptic text"  THEN ;
 
 : ?nm ( -- )
@@ -40,8 +40,8 @@ jvalue notification-manager
 SDK_INT 11 >= [IF]
     : msg-builder ( -- ) ?nm ?ni
 	clazz newNotification.Builder to nb
-	notify-rgb notify-on notify-off nb .setLights to nb
-	notify-mode nb .setDefaults to nb
+	config:notify-rgb# @ config:notify-on# @ config:notify-off# @ nb .setLights to nb
+	config:notify-mode# @ nb .setDefaults to nb
 	ni nb .setContentIntent to nb
 	net2o-icon# nb .setSmallIcon to nb
 	1 nb .setAutoCancel to nb ;

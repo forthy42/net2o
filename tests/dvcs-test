@@ -1,6 +1,18 @@
 #!/bin/bash
 rm -rf dvcs-test.d
-mkdir dvcs-test.d
+mkdir -p dvcs-test.d/.net2o
 cd dvcs-test.d
-PASSPHRASE=1234 gforth ../n2o $* script tests/dvcs-test.s2o
+cat >.net2o/config <<EOF
+.net2o="$PWD/.net2o"
+keys="$PWD/.net2o/keys"
+chats="$PWD/.net2o/chats"
+objects="$PWD/.net2o/objects"
+date=2
+host="test-host"
+prio=10
+rootdirs="$PWD"
+EOF
+export PASSPHRASE=1234
+gforth ../n2o -yes -config $PWD/.net2o/config $* keygen test
+gforth ../n2o -config $PWD/.net2o/config $* script tests/dvcs-test.s2o
 echo

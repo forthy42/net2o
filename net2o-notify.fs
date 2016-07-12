@@ -19,17 +19,20 @@
 
 64#0 64Value last-notify
 64#0 64Value latest-notify
-#60.000000000 d>64 64Value delta-notify \ one notification per minute is enough
-3 Value notify-mode
-$FFFF00 Value notify-rgb
-500 Value notify-on
-4500 Value notify-off
-true Value notify-text
+
+scope{ config
+2Variable delta-notify& #60.000.000.000 delta-notify& 2! \ one notification per minute is enough
+Variable notify-mode# 3 notify-mode# !
+Variable notify-rgb# $FFFF00 notify-rgb# !
+Variable notify-on# 500 notify-on# !
+Variable notify-off# 4500 notify-off# !
+Variable notify-text# notify-text# on
+Variable notify?# -2 notify?# ! \ default: no notification when active
+}scope
 
 : tick-notify? ( -- flag )
-    ticks last-notify 64- delta-notify 64< ;
+    ticks last-notify 64- config:delta-notify& 2@ d>64 64< ;
 
-Variable notify? -2 notify? ! \ default: no notification when active
 Variable notify$
 Variable pending-notifications
 
@@ -66,7 +69,7 @@ Sema notify-sema
 
 : msg-notify ( -- ) notify>
     ticks to latest-notify
-    rendering @ notify? @ <= dup IF
+    rendering @ config:notify?# @ <= dup IF
 	notify-
     THEN
     tick-notify? or 0= IF

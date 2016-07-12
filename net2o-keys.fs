@@ -304,9 +304,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 [IFDEF] gl-type 85colors-cl [ELSE] 85colors-bw [THEN] Value 85colors
 
 : .stripe85 ( addr u -- )  0 -rot bounds ?DO
-	cr dup cells 85colors + @ attr! 1+
+	dup cells 85colors + @ attr! 1+
 	I 4 85type  dup cells 85colors + @ attr! 1+
-    I 4 + 4 85type <default> 8 +LOOP  drop ;
+    I 4 + 4 85type <default> cr 8 +LOOP  drop ;
 : .import85 ( addr u -- )
     ke-imports @ >im-color 85type <default> ;
 : .rsk ( nick u -- )
@@ -416,17 +416,17 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 $100 Constant max-passphrase# \ 256 characters should be enough...
 max-passphrase# buffer: passphrase
 
-: passphrase-in ( -- addr u )
-    "PASSPHRASE" getenv 2dup d0= IF  2drop
-	passphrase dup max-passphrase# accept*
-    THEN ;
+: passphrase-in ( addr u -- addr u )
+    "PASSPHRASE" getenv 2dup d0= IF  2drop type
+	passphrase dup max-passphrase# accept* cr
+    ELSE  2nip  THEN ;
 
 : >passphrase ( addr u -- addr u )
     \G create a 512 bit hash of the passphrase
     no-key >c:key c:hash
     keccak-padded c:key> keccak-padded keccak#max 2/ ;
 
-: get-passphrase ( -- addr u )
+: get-passphrase ( addr u -- addr u )
     passphrase-in >passphrase ;
 
 Variable keys
@@ -434,13 +434,13 @@ Variable keys
 : lastkey@ ( -- addr u ) keys $[]# 1- keys sec[]@ ;
 : key>default ( -- ) lastkey@ drop >storekey ! ;
 : +key ( addr u -- ) keys sec+[]! ;
-: +passphrase ( -- )  get-passphrase +key ;
-: +checkphrase ( -- flag ) get-passphrase lastkey@ str= ;
+: +passphrase ( addr u -- )  get-passphrase +key ;
+: +checkphrase ( addr u -- flag ) get-passphrase lastkey@ str= ;
 : +newphrase ( -- )
     BEGIN
-	." Passphrase: " +passphrase cr
-	." Retype pls: " +checkphrase 0= WHILE
-	    ."  didn't match, try again please" cr
+	s" Passphrase: " +passphrase
+	s" Retype pls: " +checkphrase 0= WHILE
+	    cr ."  didn't match, try again please" cr
     REPEAT cr ;
 
 : ">passphrase ( addr u -- ) >passphrase +key ;
@@ -698,23 +698,23 @@ Variable cp-tmp
     skrev keysize ke-rsk sec!
     key-sign o> ;
 
-: +keypair ( type nick u -- ) +passphrase +gen-keys ;
-
 $40 buffer: nick-buf
 
 : get-nick ( -- addr u )
     ." nick: " nick-buf $40 accept nick-buf swap cr ;
 
-: yes? ( -- flag )  ."  (y/N)" key cr 'y' = ;
+false value ?yes
+: yes? ( addr u -- flag )
+    ?yes IF  2drop true  ELSE  type ."  (y/N)" key cr 'y' =  THEN ;
 
 : ?rsk ( -- )
     pkc keysize key-exist? dup 0= IF  drop  EXIT  THEN
     >o ke-rsk sec@ dup 0= IF  2drop o>  EXIT  THEN
     ." You still haven't stored your revoke key securely off-line." cr
-    ." Paper and pencil ready?" yes? IF
-	.stripe85 cr
-	." Written down?" yes? IF
-	    ." You won't see this again! Delete?" yes?
+    s" Paper and pencil ready?" yes? IF
+	.stripe85
+	s" Written down?" yes? IF
+	    s" You won't see this again! Delete?" yes?
 	    IF ke-rsk sec-off  save-keys
 		." revoke key deleted." cr o>  EXIT  THEN  THEN
     ELSE  2drop  THEN
@@ -967,10 +967,10 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= WHILE drop
-	    ." Passphrase: " +passphrase   !time
+	    s" Passphrase: " +passphrase   !time
 	    read-keys secret-keys# dup 0= IF
 		."  wrong passphrase, no key found" del-last-key
-	    THEN  cr
+	    THEN
     REPEAT
     1 = IF  0 secret-key
 	." ==== opened: " dup ..nick ."  in " .time ." ====" cr

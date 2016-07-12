@@ -26,7 +26,7 @@
 : notify! notify> notify$ $! ;
 : build-notification ( -- ) ;
 : notify@ ( -- addr u )
-    notify-text IF  notify$ $@ ['] escape-<&> $tmp
+    config:notify-text# @ IF  notify$ $@ ['] escape-<&> $tmp
     ELSE  "<i>hidden cryptic text</i>"  THEN ;
 
 Variable notify-send

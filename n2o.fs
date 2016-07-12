@@ -466,6 +466,11 @@ synonym searchkey keysearch
     \G -bw: disable color codes
     ['] drop is attr!  next-cmd ;
 
+: -yes ( -- )
+    \O -yes
+    \G -yes: say yes to every question
+    true to ?yes  next-cmd ;
+
 : -backtrace ( -- )
     \O -backtrace
     \G -backtrace: Provide full error reporting ;
