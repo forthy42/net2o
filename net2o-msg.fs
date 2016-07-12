@@ -114,7 +114,7 @@ Sema queue-sema
 
 : msg-display ( addr u -- )
     sigpksize# - 2dup + sigpksize# >$  c-state off
-    do-nestsig ;
+    do-nestsig msg:end ;
 
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log ?save-msg r> to last# ;
@@ -268,19 +268,19 @@ reply-table $@ inherit-table msg-table
 
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> msg:start ;
-$21 net2o: msg-tag ( $:group -- ) \g specify a chat group, obsolete here
++net2o: msg-tag ( $:group -- ) \g tagging (can be anywhere)
     !!signed? $> msg:tag ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
-$25 net2o: msg-re ( $:hash type ) \g relate to some object
++net2o: msg-re ( $:hash type ) \g relate to some object
     !!signed? 4 !!>=order? 64>n $> rot msg:re ;
-$26 net2o: msg-text ( $:msg -- ) \g specify message string
++net2o: msg-text ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> msg:text ;
-$27 net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
++net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
     !!signed? 8 !!>=order? 64>n $> rot msg:object ;
-$28 net2o: msg-action ( $:msg -- ) \g specify message string
++net2o: msg-action ( $:msg -- ) \g specify action string
     !!signed? 8 !!>=order? $> msg:action ;
-$29 net2o: msg-equiv ( $:object type -- ) \g equivalent object
++net2o: msg-equiv ( $:object type -- ) \g equivalent object
     !!signed? 8 !!>=order? 64>n $> rot msg:equiv ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     !!signed? 8 !!>=order? $> msg:coord ;
@@ -293,27 +293,29 @@ gen-table $freeze
 :noname ( addr u -- )
     2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ; msg-class to msg:start
-' 2drop msg-class to msg:tag
+:noname ( addr u -- )
+    space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )
     keysize umin 2dup pkc over str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u type -- )
-    ."  re type " 0 .r ." : " 85type forth:cr ; msg-class to msg:re
+    space <warn> 0 .r ." :[" 85type ." ]->" <default> ; msg-class to msg:re
 :noname ( addr u -- )
     [: ." : " 2dup forth:type ;] $tmp notify+
-    ." : " forth:type forth:cr ; msg-class to msg:text
+    ." : " forth:type ; msg-class to msg:text
 :noname ( addr u type -- )
-    ."  wrapped object type " 0 .r ." : " 85type forth:cr ;
+    space <warn> 0 .r ." :[" 85type ." ] " <default> ;
 msg-class to msg:object
 :noname ( addr u -- )
     [: space 2dup forth:type ;] $tmp notify+
-    space <warn> forth:type <default> forth:cr ; msg-class to msg:action
+    space <warn> forth:type <default> ; msg-class to msg:action
 :noname ( addr u type -- )
-    ."  equiv object type " 0 .r ." : " 85type forth:cr ;
+    <warn> ." = " 0 .r ." :[" 85type ." ] " <default> ;
 msg-class to msg:equiv
 :noname ( addr u -- )
-    <warn> ."  GPS: " .coords <default> forth:cr ; msg-class to msg:coord
+    <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
+:noname ( -- ) forth:cr ; msg-class to msg:end
 
 \g 
 \g ### messaging commands ###

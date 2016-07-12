@@ -167,7 +167,7 @@ scope{ n2o
     \G passwd: Change the password for the selected secret key
     get-me +newphrase key>default
     pkc keysize key-exist? ?dup-IF  >o >storekey @ ke-storekey !
-	?nextarg IF  >number drop 0 max pw-maxlevel# min  ke-pwlevel !  THEN  o>
+	?nextarg IF  >number drop 0 max config:pw-maxlevel# @ min  ke-pwlevel !  THEN  o>
 	save-keys
     THEN ;
 

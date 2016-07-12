@@ -19,8 +19,10 @@ require mkdir.fs
 
 \ accept for password entry
 
-2 Value pw-level# \ pw-level# 0 is lowest
-4 Value pw-maxlevel# \ pw-maxlevel# is the maximum checked
+scope{ config
+Variable pw-level# 2 pw-level# ! \ pw-level# 0 is lowest
+Variable pw-maxlevel# 4 pw-maxlevel# ! \ pw-maxlevel# is the maximum checked
+}scope
 
 [IFDEF] androidxxx '*' [ELSE] '•' [THEN] Constant pw*
 
@@ -499,7 +501,7 @@ $11 net2o: privkey ( $:string -- )
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
-    pw-level# 0< IF  64>n
+    config:pw-level# @ 0< IF  64>n
 	dup [ 1 import#new lshift ]L and 0= IF
 	    import#untrusted umin 1 swap lshift [ 1 import#new lshift ]L or
 	ELSE
@@ -514,7 +516,7 @@ $11 net2o: privkey ( $:string -- )
     $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
-    pw-level# 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
+    config:pw-level# @ 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
 }scope
 
 gen-table $freeze
@@ -546,7 +548,7 @@ comp: :, previous ;
 : key-crypt ( -- )
     keypack keypack-all#
     >storekey sec@ dup $20 u<= \ is a secret, no need to be slow
-    IF  encrypt$  ELSE  pw-level# encrypt-pw$  THEN ;
+    IF  encrypt$  ELSE  config:pw-level# @ encrypt-pw$  THEN ;
 
 0 Value key-sfd \ secret keys
 0 Value key-pfd \ pubkeys
@@ -680,9 +682,9 @@ Variable cp-tmp
     "seckeys.k2o" .keys/ [: to key-sfd
       key-table [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey
-	    pw-level# >r  ke-pwlevel @ to pw-level#
+	    config:pw-level# @ >r  ke-pwlevel @ config:pw-level# !
 	    key-crypt ke-offset 64@ key>sfile@pos
-	    r> to pw-level#
+	    r> config:pw-level# !
 	THEN o> ;] #map
     0 to key-sfd ;] save-file  ?key-sfd drop ;
 
@@ -693,7 +695,7 @@ Variable cp-tmp
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
     ke-type !  ke-nick $!  nick!
-    pw-level# ke-pwlevel !  perm%myself ke-mask !
+    config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
     key-sign o> ;
@@ -726,7 +728,7 @@ false value ?yes
     keypack keypack-d keypack-all# move
     keypack-d keypack-all# 2swap
     dup $20 = IF  decrypt$  ELSE
-	keypack c@ $F and pw-maxlevel# <= IF  decrypt-pw$
+	keypack c@ $F and config:pw-maxlevel# <= IF  decrypt-pw$
 	ELSE  2drop false  THEN
     THEN ;
 
@@ -767,9 +769,9 @@ false value ?yes
     ?key-sfd read-keys-loop ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
-    pw-level# >r -1 to pw-level#  import#new import-type !
+    config:pw-level# @ >r -1 config:pw-level# !  import#new import-type !
     ?key-pfd read-keys-loop
-    r> to pw-level#  ;
+    r> config:pw-level# !  ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;

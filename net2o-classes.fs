@@ -132,6 +132,7 @@ scope: msg
     method equiv
     method action
     method coord
+    method end
 }scope
 end-class msg-class
 

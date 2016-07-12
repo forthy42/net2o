@@ -339,14 +339,16 @@ Variable patch-in$
 : hash+type$ ( addr u type -- )
     [: { w^ x } type x cell type ;] $tmp1 ;
 
+' 2drop commit-class to msg:tag
 ' 2drop commit-class to msg:start
 ' 2drop commit-class to msg:coord
 ' 2drop commit-class to msg:signal
 ' 2drop commit-class to msg:text
 ' 2drop commit-class to msg:action
+' noop  commit-class to msg:end
 
 :noname ( addr u type -- )
-    re$ hash+type ; commit-class to msg:re
+    drop re$ $+! ; commit-class to msg:re
 :noname ( addr u type -- )
     object$ hash+type  re$ $@len 0= ?EXIT
     re$ $@ object$ $@ key| re# #! ; commit-class to msg:object
@@ -367,10 +369,15 @@ Variable patch-in$
     cell +LOOP  log free throw
     dvcs( ." === re ===" cr re# .hash
     ." === equiv ===" cr equiv# .hash ) o> ;
-: re>branches ( -- )
-    branches[] $[]off  dvcs:oldhash$ $@  0 { w^ x }
+: re>branches-loop ( addr u -- )  0 { w^ x }
     BEGIN  x cell branches[] 0 $ins  2dup 0 branches[] $[]!
-	dvcs:commits @ .re# #@ key| 2dup d0=  UNTIL  2drop
+	re# #@ 2dup d0<> WHILE
+	    bounds ?DO  I I' over - dup hash#128 <= ?LEAVE
+		hash#128 umin recurse
+	    hash#128 +LOOP
+    REPEAT  2drop ;
+: re>branches ( -- )
+    branches[] $[]off  dvcs:oldhash$ $@  dvcs:commits @ .re>branches-loop
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 
 \ push out a revision
