@@ -40,6 +40,8 @@ msg-class class
     field: type
     field: equiv$
     field: equivtype
+    field: rmdirs[]   \ sorted array of dirs to be delete
+    field: outfiles[] \ sorted array of files to write out
 
     }scope
     
@@ -97,9 +99,9 @@ hash#256 buffer: newhash \ keep some space for encryption secret
 : -fileentry ( addr u o:dvcs -- )
     dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #off ;
 
-: dvcs-outfile-name ( baddr u1 fname u2 -- )  hash#128 /string
-    over dvcs:perm le-uw@ { perm }
-    0 dvcs:name /string
+: dvcs-outfile-name ( hash+perm-addr u1 fname u2 -- )
+    2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
+    drop dvcs:perm le-uw@ { perm } 2r>
     perm S_IFMT and  case
 	S_IFLNK of
 	    symlink ?ior  endof
@@ -180,6 +182,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off
     dvcs:files# #offs  dvcs:oldfiles# #offs
+    dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
     clean-delta  dvcs:fileentry$ $off
     dvcs:hash$ $off  dvcs:oldhash$ $off  dvcs:equiv$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
@@ -372,7 +375,8 @@ Variable patch-in$
     dvcs( ." === re ===" cr re# .hash
     ." === equiv ===" cr equiv# .hash ) o> ;
 : re>branches-loop ( addr u -- )  0 { w^ x }
-    BEGIN  x cell branches[] 0 $ins  2dup 0 branches[] $[]!
+    BEGIN
+	2dup d0<> IF  x cell branches[] 0 $ins  2dup 0 branches[] $[]!  THEN
 	re# #@ 2dup d0<> WHILE
 	    bounds ?DO  I I' over - dup hash#128 <= ?LEAVE
 		hash#128 umin recurse
@@ -381,6 +385,14 @@ Variable patch-in$
 : re>branches ( -- )
     branches[] $[]off  dvcs:commits @ .re>branches-loop
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
+: branches>dvcs ( -- )
+    branches[] [: dup IF
+	    dvcs( ." read enc hash: " 2dup 85type cr )
+	    read-enc-hashed 2drop
+	    clean-delta  c-state off patch-in$ $@ do-cmd-loop
+	    clean-delta
+	ELSE  2drop  THEN
+    ;] $[]map ;
 
 \ push out a revision
 
@@ -391,7 +403,7 @@ Variable patch-in$
 
 : dvcs-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches  dvcs:oldhash$ $@  re>branches
-    files>dvcs  new>dvcs  dvcs?modified ;
+    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 : dvcs-readin-rev ( addr u -- )
     config>dvcs  chat>dvcs  chat>branches  re>branches ;
 
@@ -463,10 +475,45 @@ previous
     ['] compute-diff gen-cmd$ >revision
     save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
 
+: del-oldfile ( hash-entry -- )
+    dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
+    S_IFMT and S_IFDIR = IF
+	$@ dvcs:rmdirs[] $ins[] drop
+    ELSE  dup $@ delete-file dup 0< IF
+	    <err> >r ." can't delete file " $. ." , reason: "
+	    r> error$ type <default> cr
+	ELSE  2drop  THEN
+    THEN ;
+
+: .new->old ( -- ) dvcs( ." === remove old files ===" cr )
+    dvcs:rmdirs[] $[]off
+    dvcs:oldfiles# [: dup $@ dvcs:files# #@ drop 0= IF
+	    del-oldfile
+	ELSE  dup cell+ $@ last# cell+ $@ str= 0= IF
+		del-oldfile  THEN
+	THEN ;] #map
+    dvcs:rmdirs[] $@ bounds cell- swap cell- U-DO
+	I $@ rmdir 0< IF
+	    errno strerror <err>
+	    ." can't delete directory " I $. ." , reason: " type <default> cr
+	THEN
+    cell -LOOP  dvcs:rmdirs[] $[]off ;
+: .old->new ( -- ) dvcs( ." === write out new files ===" cr )
+    dvcs:files# [: $@ dvcs:outfiles[] $ins[] drop ;] #map
+    dvcs:outfiles[] [: dvcs:files# #@ d0<> IF
+	    last# dup >r $@ dvcs:oldfiles# #@ over IF
+		r@ cell+ $@ str=
+	    ELSE  drop
+	    THEN  0= IF
+		dvcs( ." out " r@ $. space r@ cell+ $@ 85type cr )
+		r@ cell+ $@ r@ $@ dvcs-outfile-name
+	    THEN  rdrop  THEN ;] $[]map ;
+
 : dvcs-co ( addr u -- ) \ checkout revision
-    base85>$  n2o:new-dvcs >o
-    files>dvcs   0 dvcs:files# !@ dvcs:oldfiles# !
-    dvcs-readin-rev
+    2dup base85>$  n2o:new-dvcs >o 2swap 2>r
+    config>dvcs  files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
+    dvcs-readin-rev  branches>dvcs  .new->old  .old->new
+    2r> project:revision$ $!  save-project  filelist-out
     n2o:dispose-dvcs o> ;
 
 0 [IF]

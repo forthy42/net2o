@@ -434,11 +434,12 @@ synonym searchkey keysearch
 : ci ( -- )
     \U ci "message"
     \G ci: check added and modified files into the dvcs project
-    ci-args dvcs-ci ;
+    get-me ci-args dvcs-ci ;
 
 : co ( -- )
     \U co revision|@branch|revision@branch
     \G co: check out a specific revision
+    get-me ?nextarg IF  dvcs-co  THEN
 ;
 
 : fork ( -- )
