@@ -112,7 +112,7 @@ pos match_backward(BDelta_Instance *b, pos p1, pos p2, pos blocksize) {
 template <class T>
 inline T prior(T i) {return --i;}
 template <class T>
-inline T next(T i) {return ++i;}
+inline T nexti(T i) {return ++i;}
 
 
 struct UnusedRange {
@@ -407,7 +407,7 @@ void bdelta_pass(BDelta_Instance *b, unsigned blocksize, unsigned minMatchSize, 
 			UnusedRange u1 = unused[i], u2 = unused2[i];
 			if (u1.num >= blocksize && u2.num >= blocksize)
 				if (! maxHoleSize || (u1.num <= maxHoleSize && u2.num <= maxHoleSize))
-					if (! (flags & BDELTA_SIDES_ORDERED) || (next(u1.ml) == u1.mr && next(u2.ml) == u2.mr))
+					if (! (flags & BDELTA_SIDES_ORDERED) || (nexti(u1.ml) == u1.mr && nexti(u2.ml) == u2.mr))
 						bdelta_pass_2(b, blocksize, minMatchSize, &u1, 1, &u2, 1);
 		}
 	}

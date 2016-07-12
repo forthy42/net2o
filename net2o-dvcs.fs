@@ -28,6 +28,7 @@ msg-class class
     field: branch$
     field: message$
     field: files#    \ snapshot config
+    field: oldfiles# \ old state to compare to
     field: in-files$
     field: patch$
     field: out-files$
@@ -177,8 +178,9 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 : n2o:dispose-commit ( o:commit -- )
     re$ $off  object$ $off  re# #offs  equiv# #offs  dispose ;
 : n2o:dispose-dvcs ( o:dvcs -- )
-    dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
-    clean-delta dvcs:fileentry$ $off
+    dvcs:branch$ $off  dvcs:message$ $off
+    dvcs:files# #offs  dvcs:oldfiles# #offs
+    clean-delta  dvcs:fileentry$ $off
     dvcs:hash$ $off  dvcs:oldhash$ $off  dvcs:equiv$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
     dvcs:commits @ .n2o:dispose-commit dispose ;
@@ -377,7 +379,7 @@ Variable patch-in$
 	    hash#128 +LOOP
     REPEAT  2drop ;
 : re>branches ( -- )
-    branches[] $[]off  dvcs:oldhash$ $@  dvcs:commits @ .re>branches-loop
+    branches[] $[]off  dvcs:commits @ .re>branches-loop
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 
 \ push out a revision
@@ -388,8 +390,10 @@ Variable patch-in$
     project:revision$ $! ;
 
 : dvcs-readin ( -- )
-    config>dvcs  chat>dvcs  chat>branches  re>branches
+    config>dvcs  chat>dvcs  chat>branches  dvcs:oldhash$ $@  re>branches
     files>dvcs  new>dvcs  dvcs?modified ;
+: dvcs-readin-rev ( addr u -- )
+    config>dvcs  chat>dvcs  chat>branches  re>branches ;
 
 also net2o-base
 : (dvcs-newsentry) ( oldtype equivtype type -- )
@@ -458,6 +462,12 @@ previous
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >revision
     save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
+
+: dvcs-co ( addr u -- ) \ checkout revision
+    base85>$  n2o:new-dvcs >o
+    files>dvcs   0 dvcs:files# !@ dvcs:oldfiles# !
+    dvcs-readin-rev
+    n2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:
