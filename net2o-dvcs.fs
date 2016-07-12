@@ -174,12 +174,14 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
+: n2o:dispose-commit ( o:commit -- )
+    re$ $off  object$ $off  re# #offs  equiv# #offs  dispose ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off  dvcs:files# #offs
     clean-delta dvcs:fileentry$ $off
     dvcs:hash$ $off  dvcs:oldhash$ $off  dvcs:equiv$ $off
     project:revision$ $off  project:branch$ $off  project:project$ $off
-    dispose ;
+    dvcs:commits @ .n2o:dispose-commit dispose ;
 
 Variable new-files[]
 Variable del-files[]
