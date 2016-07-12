@@ -480,12 +480,12 @@ previous
     S_IFMT and S_IFDIR = IF
 	$@ dvcs:rmdirs[] $ins[] drop
     ELSE  dup $@ delete-file dup 0< IF
-	    <err> >r ." can't delete file " $. ." , reason: "
+	    <err> >r ." can't delete file " $. ." : "
 	    r> error$ type <default> cr
 	ELSE  2drop  THEN
     THEN ;
 
-: .new->old ( -- ) dvcs( ." === remove old files ===" cr )
+: new->old ( -- ) dvcs( ." === remove old files ===" cr )
     dvcs:rmdirs[] $[]off
     dvcs:oldfiles# [: dup $@ dvcs:files# #@ drop 0= IF
 	    del-oldfile
@@ -495,11 +495,13 @@ previous
     dvcs:rmdirs[] $@ bounds cell- swap cell- U-DO
 	I $@ rmdir 0< IF
 	    errno strerror <err>
-	    ." can't delete directory " I $. ." , reason: " type <default> cr
+	    ." can't delete directory " I $. ." : " type <default> cr
 	THEN
-    cell -LOOP  dvcs:rmdirs[] $[]off ;
-: .old->new ( -- ) dvcs( ." === write out new files ===" cr )
-    dvcs:files# [: $@ dvcs:outfiles[] $ins[] drop ;] #map
+    cell -LOOP
+    dvcs:rmdirs[] $[]off ;
+: old->new ( -- ) dvcs( ." === write out new files ===" cr )
+    dvcs:outfiles[] $[]off
+    dvcs:files# [: $@ dvcs:outfiles[] $ins[] drop ;] #map \ sort filenames
     dvcs:outfiles[] [: dvcs:files# #@ d0<> IF
 	    last# dup >r $@ dvcs:oldfiles# #@ over IF
 		r@ cell+ $@ str=
@@ -507,12 +509,13 @@ previous
 	    THEN  0= IF
 		dvcs( ." out " r@ $. space r@ cell+ $@ 85type cr )
 		r@ cell+ $@ r@ $@ dvcs-outfile-name
-	    THEN  rdrop  THEN ;] $[]map ;
+	    THEN  rdrop  THEN ;] $[]map
+    dvcs:outfiles[] $[]off ;
 
 : dvcs-co ( addr u -- ) \ checkout revision
     2dup base85>$  n2o:new-dvcs >o 2swap 2>r
     config>dvcs  files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
-    dvcs-readin-rev  branches>dvcs  .new->old  .old->new
+    dvcs-readin-rev  branches>dvcs  new->old  old->new
     2r> project:revision$ $!  save-project  filelist-out
     n2o:dispose-dvcs o> ;
 
