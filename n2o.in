@@ -3,7 +3,9 @@
 
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
 
-@HAS_GPSD@ [IF] : has-gpsd? ; [THEN]
+@HAS_GPSD@ [IF] s" unix/gps.fs" open-fpath-file
+    0= [IF] 2drop close-file throw : has-gpsd? ; [THEN]
+[THEN]
 
 require n2o.fs
 
