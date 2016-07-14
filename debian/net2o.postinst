@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# Postinst for net2o, checks if libgps is available
+
+case "$1"
+in
+    configure)
+	echo "$1 net2o"
+	gforth unix/gpslib.fs -e bye 2>/dev/null || \
+	    (sed -i -e 's/1 \(\[IF\] \\ gpsd\)/0 \1/g' /usr/bin/n2o
+	     echo "gpslib not available, removing gpsd support")
+	;;
+esac
