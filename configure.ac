@@ -49,6 +49,19 @@ case "$host_alias" in
 	;;
 esac
 
+VERDIR=
+NOVERDIR='#'
+
+case "$host_alias" in
+    *android*)
+	VERDIR='#'
+	NOVERDIR=
+	;;
+esac
+
+AC_SUBST(VERDIR)
+AC_SUBST(NOVERDIR)
+
 AC_PROG_CC
 AC_PROG_INSTALL
 

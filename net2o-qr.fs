@@ -16,7 +16,6 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require net2o-tools.fs
-require ansi.fs
 
 '▀' Constant upper-half-block
 \ '▄' Constant lower-half-block

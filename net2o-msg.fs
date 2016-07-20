@@ -236,7 +236,7 @@ event: ->msg-nestsig ( addr u o group -- )
     dup 0 sf[]@ fdup fabs .deg f0< 'S' 'N' rot select emit space
     dup 1 sf[]@ fdup fabs .deg f0< 'W' 'E' rot select emit space
     dup 2 sf[]@ 7 1 0 f.rdp ." m "
-    dup 3 sf[]@ 8 2 0 f.rdp ." kph "
+    dup 3 sf[]@ 8 2 0 f.rdp ." km/h "
     dup 4 sf[]@ 8 2 0 f.rdp ." ° ~"
     dup 5 sf[]@ fsplit 0 .r '.' emit 100e f* f>s .2 ." m"
     drop ;

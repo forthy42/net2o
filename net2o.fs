@@ -22,7 +22,6 @@ require net2o-err.fs
 
 \ required tools
 
-require ansi.fs
 require mini-oof2.fs
 require user-object.fs
 require rec-scope.fs

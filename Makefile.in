@@ -76,7 +76,8 @@ SOURCES = 64bit.fs base64.fs base85.fs config.fs crypto-api.fs		\
 	  linux/net.fs linux/notify.fs net2o-dhtroot.fs net2o-dvcs.fs	\
 	  android/qrscan.fs
 
-SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux
+@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux
+@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux
 
 SCRIPTS = n2o
 
@@ -92,7 +93,7 @@ clean:
 	for i in $(LIBS); do (cd $$i; $(MAKE) clean); done
 
 configs:
-	for i in $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean); done
+	for i in . $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean); done
 
 libs:
 	for i in $(LIBS); do (cd $$i; $(MAKE)); done
@@ -106,10 +107,10 @@ install:	libcc-install
 	for i in $(SRCDIRS); do \
 		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
 	done
+	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
 	for i in $(SOURCES) $(GEN); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o-@PACKAGE_VERSION@/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
 	done
-	ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
 	$(MKDIR) -p $(bindir)
 	for i in $(SCRIPTS); do \
 		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
