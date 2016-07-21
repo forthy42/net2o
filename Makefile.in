@@ -120,7 +120,7 @@ install:	libcc-install
 libcc:	$(FORTHLIB)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
-		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous" $$i -e bye; \
+		$(ENGINE) -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous" $$i -e bye; \
 	done
 
 libcc-install:	libcc
