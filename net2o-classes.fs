@@ -270,21 +270,24 @@ con-cookie >osize @ Constant cookie-size#
 \ permissions
 
 1
-bit perm%connect  \ not set for banned people
-bit perm%blocked  \ set for banned people - makes sure one bit is set
-bit perm%dht      \ can write into the DHT
-bit perm%msg      \ can send messages
-bit perm%filerd   \ can read files
-bit perm%filewr   \ can write files
-bit perm%filename \ can access named files
-bit perm%filehash \ can access files by hash
-bit perm%sync     \ is allowed to sync
+bit perm%connect    \ not set for banned people
+bit perm%blocked    \ set for banned people - makes sure one bit is set
+bit perm%dht        \ can write into the DHT
+bit perm%msg        \ can send messages
+bit perm%filerd     \ can read files
+bit perm%filewr     \ can write files
+bit perm%filename   \ can access named files
+bit perm%socket     \ can access sockets
+bit perm%terminal   \ can access terminal
+bit perm%termserver \ can access termserver
+bit perm%filehash   \ can access files by hash
+bit perm%sync       \ is allowed to sync
 drop
 
 perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
 perm%blocked Value perm%unknown
 perm%blocked invert Value perm%myself
-Create perm$ ," cbdmrwnhs"
+Create perm$ ," cbdmrwnstvhy"
 
 \ timestasts structure
 

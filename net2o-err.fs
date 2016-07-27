@@ -73,17 +73,21 @@ s" data needs to be signed"      throwcode !!unsigned!!
 s" data needs to be unsigned"    throwcode !!signed!!
 s" invalid DHT key"              throwcode !!no-dht-key!!
 s" dht exhausted - this should not happen" throwcode !!dht-full!!
+s" 4cc wants 3 characters"       throwcode !!4cc!!
+s" key setup already done"       throwcode !!doublekey!!
+s" host or id not found"         throwcode !!no-address!!
+s" hash mismatch"                throwcode !!wrong-hash!!
 s" connection refused"           throwcode !!connect-perm!!
 s" DHT permission denied"        throwcode !!dht-perm!!
 s" MSG permission denied"        throwcode !!msg-perm!!
 s" file read permission denied"  throwcode !!filerd-perm!!
 s" file write permission denied" throwcode !!filewr-perm!!
 s" file access by name denied"   throwcode !!filename-perm!!
+s" socket access denied"         throwcode !!socket-perm!!
+s" terminal access denied"       throwcode !!terminal-perm!!
+s" termserver access denied"     throwcode !!termserver-perm!!
 s" file access by hash denied"   throwcode !!filehash-perm!!
-s" 4cc wants 3 characters"       throwcode !!4cc!!
-s" key setup already done"       throwcode !!doublekey!!
-s" host or id not found"         throwcode !!no-address!!
-s" hash mismatch"                throwcode !!wrong-hash!!
+s" sync access denied"           throwcode !!sync-perm!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

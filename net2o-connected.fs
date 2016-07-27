@@ -59,14 +59,8 @@ fs-table >table
 reply-table $@ inherit-table fs-table
 :noname fs-id @ ulit, file-id ; fs-class to start-req
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
-    parent @ .perm-mask @ >r
-    r@ perm%filename and 0= !!filename-perm!!
+    parent @ .perm-mask @ >r r@ fs-perm?
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
-+net2o: open-hash ( $:hash mode -- ) \G open hash with mode
-    parent @ .perm-mask @ >r
-    r@ perm%filehash and 0= !!filehash-perm!!
-    64>n -2 and 4 umin dup r> ?rw-perm  >r
-    $> hash>filename r> fs-open ;
 +net2o: file-type ( n -- ) \g choose file type
     fs-class! ;
 +net2o: close-file ( -- ) \g close file
@@ -180,7 +174,7 @@ also }scope
     open-file get-size get-stat ;
 
 : open-tracked-hash ( addr u mode --)
-    open-hash get-size get-stat ;
+    4 ulit, file-type open-file get-size get-stat ;
 
 : n2o>file ( xt -- )
     file-reg# @ ulit, file-id  catch  end-with

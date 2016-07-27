@@ -37,6 +37,7 @@ cmd-class class
     method fs-open
     method fs-close
     method fs-poll
+    method fs-perm?
 end-class fs-class
 
 Variable fs-table
@@ -120,6 +121,22 @@ cell 8 = [IF]
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-poll fs-size!
 ; fs-class to fs-open
+:noname ( perm -- )
+    perm%filename and 0= !!filename-perm!!
+; fs-class to fs-perm?
+
+fs-class class
+    field: fs-cryptkey
+end-class hashfs-class
+
+:noname ( addr u mode -- )  fs-close
+    msg( dup 2over ." open file: " type ."  with mode " . cr )
+    >r hash>filename 2dup fs-path $! r> open-file throw fs-fid !
+    fs-poll fs-size!
+; hashfs-class to fs-open
+:noname ( perm -- )
+    perm%filehash and 0= !!filehash-perm!!
+; hashfs-class to fs-perm?
 
 \ subclassing for other sorts of files
 
@@ -132,6 +149,9 @@ end-class socket-class
 :noname ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
     n>64 fs-size 64@ 64+ ; socket-class to fs-poll
+:noname ( perm -- )
+    perm%socket and 0= !!socket-perm!!
+; socket-class to fs-perm?
 
 fs-class class
 end-class termclient-class
@@ -141,6 +161,9 @@ end-class termclient-class
 	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class to fs-read
 :noname ( addr u 64n -- ) 64drop 2drop ; termclient-class to fs-open
 :noname ( -- ) ; termclient-class to fs-close
+:noname ( perm -- )
+    perm%terminal and 0= !!terminal-perm!!
+; termclient-class to fs-perm?
 
 termclient-class class
 end-class termserver-class
@@ -168,15 +191,8 @@ is name
 ' ts-key  ' ts-key? input: termserver-in
 [IFDEF] traceall traceall [THEN]
 
-1 Constant file-permit#
-2 Constant socket-permit#
-4 Constant ts-permit#
-8 Constant tc-permit#
-file-permit# Value fs-class-permit \ by default permit only files
-
 : >termserver-io ( -- )
-    [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section
-    ts-permit# fs-class-permit or to fs-class-permit ;
+    [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section ;
 
 event: ->termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
     termserver-in termserver-out ;
@@ -198,18 +214,21 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
 	THEN ;] file-sema c-section
 ; termserver-class to fs-close
+:noname ( perm -- )
+    perm%termserver and 0= !!termserver-perm!!
+; termserver-class to fs-perm?
 
 Create file-classes
 ' fs-class ,
 ' socket-class ,
 ' termclient-class ,
 ' termserver-class ,
+' hashfs-class ,
 
 here file-classes - cell/ Constant file-classes#
 
 : fs-class! ( n -- )
     dup file-classes# u>= !!fileclass!!
-    1 over lshift fs-class-permit and 0= !!fileclass!!
     cells file-classes + @ o cell- ! ;
 
 \ state handling
