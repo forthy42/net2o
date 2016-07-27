@@ -36,3 +36,5 @@ comp: execute postpone SLiteral ;
 
 : sane-85 ( addr u -- addr' u' )
     ['] 85type $tmp fn-sanitize ;
+: hash>filename ( addr u -- filename u' )
+    [: config:objects$ $. '/' emit sane-85 ;] $tmp ;

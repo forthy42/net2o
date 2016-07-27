@@ -15,7 +15,7 @@ and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so as root enter:
 
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [arch=i386,amd64,armhf,armel,powerpc,all] http://net2o.de/debian testing main
+    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips.mipsel,all] http://net2o.de/debian testing main
     EOF
     wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
     aptitude update

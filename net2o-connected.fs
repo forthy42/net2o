@@ -62,6 +62,11 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
     parent @ .perm-mask @ >r
     r@ perm%filename and 0= !!filename-perm!!
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
++net2o: open-hash ( $:hash mode -- ) \G open hash with mode
+    parent @ .perm-mask @ >r
+    r@ perm%filehash and 0= !!filehash-perm!!
+    64>n -2 and 4 umin dup r> ?rw-perm  >r
+    $> hash>filename r> fs-open ;
 +net2o: file-type ( n -- ) \g choose file type
     fs-class! ;
 +net2o: close-file ( -- ) \g close file
@@ -174,6 +179,9 @@ also }scope
 : open-tracked-file ( addr u mode --)
     open-file get-size get-stat ;
 
+: open-tracked-hash ( addr u mode --)
+    open-hash get-size get-stat ;
+
 : n2o>file ( xt -- )
     file-reg# @ ulit, file-id  catch  end-with
     throw  1 file-reg# +! ;
@@ -181,6 +189,11 @@ also }scope
 : n2o:copy ( addrsrc us addrdest ud -- )
     [: 2swap $, r/o ulit, open-tracked-file
       file-reg# @ save-to ;] n2o>file
+    1 file-count +! ;
+
+: n2o:copy# ( addrhash u -- )
+    [: 2dup $, r/o ulit, open-tracked-hash
+      hash>filename file-reg# @ save-to ;] n2o>file
     1 file-count +! ;
 
 : seek! ( pos id -- ) >r d>64

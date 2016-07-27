@@ -411,6 +411,18 @@ synonym searchkey keysearch
 	n2o:done end-code| n2o:close-all
 	c:disconnect  THEN ;
 
+: get# ( -- )
+    \U get# @user hash1 .. hashn
+    \G get#: get files by hash into hash directory
+    get-me init-client
+    ?@nextarg IF
+	$A $E nick-connect ." connected" cr !time
+	net2o-code expect-reply
+	$10 blocksize! $A blockalign!
+	[: base85>$ n2o:copy# ;] arg-loop
+	n2o:done end-code| n2o:close-all
+	c:disconnect  THEN ;
+
 \ dvcs commands
 
 : init ( -- )
