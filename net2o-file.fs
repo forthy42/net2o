@@ -31,7 +31,8 @@ cmd-class class
     field: fs-inbuf
     field: fs-outbuf
     field: fs-termtask
-    field: file-xt \ callback for operation completed
+    field: file-xt     \ callback for operation completed
+    field: fs-cryptkey \ for en/decrypting a file on the fly
     method fs-read
     method fs-write
     method fs-open
@@ -126,7 +127,6 @@ cell 8 = [IF]
 ; fs-class to fs-perm?
 
 fs-class class
-    field: fs-cryptkey
 end-class hashfs-class
 
 :noname ( addr u mode -- )  fs-close
@@ -219,11 +219,11 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 ; termserver-class to fs-perm?
 
 Create file-classes
-' fs-class ,
-' socket-class ,
-' termclient-class ,
-' termserver-class ,
-' hashfs-class ,
+fs-class ,
+socket-class ,
+termclient-class ,
+termserver-class ,
+hashfs-class ,
 
 here file-classes - cell/ Constant file-classes#
 
