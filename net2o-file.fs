@@ -278,7 +278,8 @@ scope{ mapc
     )
     rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
 
-\ careful: must follow exactpy the same logic as slurp (see below)
+\ careful: must follow exactly the same logic as slurp (see below)
+
 : n2o:spit ( -- ) fstates 0= ?EXIT
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
@@ -315,7 +316,7 @@ User file-reg#
 
 : blocksizes! ( n -- )
     dup blocksize !
-    file( ." file read: ======= " cr ." file write: ======= " cr )
+    file( ." file read: ======= " dup . cr ." file write: ======= " dup . cr )
     dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )

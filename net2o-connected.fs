@@ -175,9 +175,6 @@ also }scope
 : open-tracked-file ( addr u mode --)
     open-file get-size get-stat ;
 
-: open-tracked-hash ( addr u mode --)
-    1 ulit, file-type open-file get-size get-stat ;
-
 : n2o>file ( xt -- )
     file-reg# @ ulit, file-id  catch  end-with
     throw  1 file-reg# +! ;
@@ -188,7 +185,7 @@ also }scope
     1 file-count +! ;
 
 : n2o:copy# ( addrhash u -- )
-    [: 2dup $, r/o ulit, open-tracked-hash
+    [: 1 ulit, file-type 2dup $, r/o ulit, open-tracked-file
       hash>filename file-reg# @ save-to ;] n2o>file
     1 file-count +! ;
 

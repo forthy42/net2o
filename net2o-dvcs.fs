@@ -74,8 +74,8 @@ end-class commit-class
 
 hash#256 buffer: newhash \ keep some space for encryption secret
 
-: >file-hash ( addr u -- )
-    c:0key c:hash newhash hash#128 c:hash@ ;
+: >file-hash ( addr u -- addrhash u )
+    c:0key c:hash newhash hash#128 c:hash@ newhash hash#128 ;
 : /name ( addr u -- addr' u' )
     [ hash#128 dvcs:name ]L /string ;
 : /name' ( addr u -- addr' u' )
@@ -162,9 +162,8 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
     $10 !!>=order? 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    2dup >file-hash $>  dvcs:fileentry$ $off
-    [: newhash hash#128 forth:type
-      ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
+    2dup >file-hash $> 2swap  dvcs:fileentry$ $off
+    [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ;
@@ -212,7 +211,7 @@ User tmp1$
 	    S_IFDIR of  0 new-file$ $!len  endof
 	endcase
 	new-file$ $@ >file-hash
-	new-file$ $@ newhash hash#128 dvcs-objects #!
+	new-file$ $@ 2swap dvcs-objects #!
 	newhash hash#128 type  timestamp 1 64s type  perm 2 type  type
     ;] $tmp1 ;
 : file-hashstat ( addr u -- addr' u' )
@@ -306,32 +305,28 @@ Variable patch-in$
 
 : read-hashed ( addr1 u1 -- addrhash u2 )
     2dup ['] 85type $tmp 2dup 2>r .objects/ patch-in$ $slurp-file
-    patch-in$ $@ >file-hash
-    newhash hash#128 str= 0= !!wrong-hash!! 2r> ;
+    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! 2r> ;
 
 \ encrypted hash stuff, using signature secret as PSK
 
 \ probably needs padding...
 
-: sksig>newhash ( -- )
+: enchash ( -- addr u )
     sksig newhash hash#128 + keysize move
     newhash hash#256 >file-hash ;
 
 : write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
     newhash hash#128 ['] 85type $tmp 2>r
-    sksig>newhash  newhash hash#128 ['] 85type $tmp1 2>r
+    enchash  2>r
     save-mem 2dup c:encrypt  over swap
-    2r> .objects/ ?.net2o/objects spit-file
+    ?.net2o/objects  2r> hash>filename  spit-file
     free throw  2r> ;
 
-: read-enc-hashed ( hash1 u1 -- addrhash85 u2 )
-    2dup newhash hash#128 smove  sksig>newhash
-    newhash hash#128 ['] 85type $tmp
-    .objects/ patch-in$ $slurp-file
+: read-enc-hashed ( hash1 u1 -- )
+    2dup newhash hash#128 smove
+    enchash hash>filename patch-in$ $slurp-file
     patch-in$ $@ c:decrypt
-    patch-in$ $@ >file-hash
-    2dup newhash hash#128 str= 0= !!wrong-hash!!
-    ['] 85type $tmp1 ;
+    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
 
 \ patch stuff
 
@@ -388,7 +383,7 @@ Variable patch-in$
 : branches>dvcs ( -- )
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    read-enc-hashed 2drop
+	    read-enc-hashed
 	    clean-delta  c-state off patch-in$ $@ do-cmd-loop
 	    clean-delta
 	ELSE  2drop  THEN
@@ -397,9 +392,8 @@ Variable patch-in$
 \ push out a revision
 
 : >revision ( addr u -- )
-    2dup >file-hash newhash hash#128 dvcs:hash$ $!
-    write-enc-hashed
-    project:revision$ $! ;
+    2dup >file-hash dvcs:hash$ $!
+    write-enc-hashed  project:revision$ $! ;
 
 : dvcs-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches  dvcs:oldhash$ $@  re>branches
