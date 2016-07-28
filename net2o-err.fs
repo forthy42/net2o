@@ -83,10 +83,10 @@ s" MSG permission denied"        throwcode !!msg-perm!!
 s" file read permission denied"  throwcode !!filerd-perm!!
 s" file write permission denied" throwcode !!filewr-perm!!
 s" file access by name denied"   throwcode !!filename-perm!!
+s" file access by hash denied"   throwcode !!filehash-perm!!
 s" socket access denied"         throwcode !!socket-perm!!
 s" terminal access denied"       throwcode !!terminal-perm!!
 s" termserver access denied"     throwcode !!termserver-perm!!
-s" file access by hash denied"   throwcode !!filehash-perm!!
 s" sync access denied"           throwcode !!sync-perm!!
 
 : sig-enum>throw ( enum -- throwcode )
