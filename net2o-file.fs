@@ -220,10 +220,10 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 
 Create file-classes
 fs-class ,
+hashfs-class ,
 socket-class ,
 termclient-class ,
 termserver-class ,
-hashfs-class ,
 
 here file-classes - cell/ Constant file-classes#
 

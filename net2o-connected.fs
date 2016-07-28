@@ -174,7 +174,7 @@ also }scope
     open-file get-size get-stat ;
 
 : open-tracked-hash ( addr u mode --)
-    4 ulit, file-type open-file get-size get-stat ;
+    1 ulit, file-type open-file get-size get-stat ;
 
 : n2o>file ( xt -- )
     file-reg# @ ulit, file-id  catch  end-with
