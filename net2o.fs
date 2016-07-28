@@ -870,7 +870,7 @@ require net2o-crypt.fs
 : set-dest ( target -- )
     64dup dest-addr 64!  outbuf addr le-64! ;
 : set-dest# ( resend# -- )
-    n>64 64dup dest-addr 64+!  dest-addr 64@ outbuf addr le-64! ;
+    n>64 dest-addr 64+!  dest-addr 64@ outbuf addr le-64! ;
 
 User outflag  outflag off
 
