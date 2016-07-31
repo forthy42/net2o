@@ -72,12 +72,14 @@ $20 value hash-size#
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
 
+: ?cr ( -- ) script? 0= IF  cr  THEN ;
+
 scope{ n2o
 
 :noname ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
-    ?nextarg IF
+    ?cr ?nextarg IF
 	BEGIN
 	    2dup over c@ '-' = IF
 		." === Options ===" cr
@@ -119,11 +121,11 @@ scope{ n2o
     \U keygen|genkey nick
     \G keygen: generate a new keypair
     ?nextarg 0= IF  get-nick  THEN
-    new-key .keys ?rsk ;
+    new-key ?cr .keys ?rsk ;
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys
-    get-me list-keys ;
+    get-me ?cr list-keys ;
 
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]
@@ -136,7 +138,7 @@ scope{ n2o
     \G keysearch: and import them into the key chain
     get-me init-client
     keys>search search-keys insert-keys save-pubkeys
-    keylist ;
+    ?cr keylist ;
 
 : perm ( -- )
     \U perm @user1 .. @usern permissions
@@ -192,7 +194,7 @@ scope{ n2o
       >o ke-pets [: 2over str= 0= ;] $[]filter 2drop o o>
       last# cell+ del$cell
       last# cell+ $@len 0= IF  last# bucket-off  THEN ;] arg-loop
-    save-keys keylist ;
+    save-keys ?cr keylist ;
 
 synonym inkey keyin
 synonym outkey keyout
@@ -224,7 +226,7 @@ synonym searchkey keysearch
 : cat ( -- )
     \U cat file1 .. filen
     \G cat: cat encrypted files to stdout
-    vault>out dec ;
+    ?cr vault>out dec ;
 
 \ hash+signature
 
@@ -243,7 +245,7 @@ synonym searchkey keysearch
     \G hash: hash the files and print it base85
     \G hash: use -256 or -512 to select hash size
     \G hash: use -threefish or -keccak to select hash algorithm
-    enc-mode @ 8 rshift $FF and >crypt
+    ?cr enc-mode @ 8 rshift $FF and >crypt
     [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
 
 : sign ( -- )
@@ -258,7 +260,7 @@ synonym searchkey keysearch
 : verify ( -- )
     \U verify file1 .. filen
     \G verify: check integrity of files vs. detached signature
-    get-me
+    get-me ?cr
     [: 2dup hash-file 2drop 2dup type
       [: type ." .s2o" ;] $tmp slurp-file
       over date-sig? dup >r  err-color info-color r> select  attr! .check
@@ -306,7 +308,7 @@ synonym searchkey keysearch
 : lookup ( -- )
     \U lookup
     \G lookup: query DHT for addresses
-    get-me init-client nicks>search search-addrs
+    get-me ?cr init-client nicks>search search-addrs
     search-key[] [: 2dup .simple-id ." :" cr
       >d#id >o dht-host [: .host cr ;] $[]map o> ;] $[]map ;
 
@@ -355,7 +357,7 @@ synonym searchkey keysearch
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
-    get-me init-client
+    get-me ?cr init-client
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ===" cr msg-group$ $!
@@ -375,7 +377,7 @@ synonym searchkey keysearch
     \U cmd
     \G cmd: Offer a net2o command line for client stuff
     get-me ." net2o interactive shell, type 'bye' to quit"
-    n2o-cmds ;
+    0 to script? n2o-cmds ;
 
 : script ( -- )
     \U script file
@@ -463,7 +465,7 @@ synonym searchkey keysearch
     ci-args dvcs-snap ;
 
 : diff ( -- )
-    get-me dvcs-diff ;
+    get-me ?cr dvcs-diff ;
 
 \ others
 
