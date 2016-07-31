@@ -57,8 +57,6 @@ $20 value hash-size#
 
 \ commands for the command line user interface
 
-Vocabulary n2o
-
 : set-net2o-cmds ( -- )
     ['] n2o >body 1 set-order
     ['] rec:word 1 set-recognizers ;
@@ -76,7 +74,7 @@ Vocabulary n2o
 
 scope{ n2o
 
-: help ( -- )
+:noname ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
     ?nextarg IF
@@ -96,7 +94,7 @@ scope{ n2o
 	s"     \O " ['] .usage search-help
 	." === Commands ===" cr
 	s"     \U " ['] .usage search-help
-    THEN ;
+    THEN ; is help
 
 }scope
 

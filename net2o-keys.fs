@@ -964,20 +964,32 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 
 \ will ask for your password and if possible auto-select your id
 
+Variable tries#
+#10 Value maxtries#
+
 : get-skc ( -- )
-    secret-keys# ?EXIT
+    secret-keys# ?EXIT  tries# off
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
-    BEGIN  dup 0= WHILE drop
+    BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop
 	    s" Passphrase: " +passphrase   !time
 	    read-keys secret-keys# dup 0= IF
-		."  wrong passphrase, no key found" del-last-key
+		1 tries# +!
+		<err> ." Try# " tries# @ 0 .r '/' emit maxtries# .
+		." failed, no key found, waiting "
+		#10 tries# @ lshift dup . ." ms..." ms  <default> cr
+		del-last-key
 	    THEN
     REPEAT
+    dup 0= IF  #-56 throw  THEN
     1 = IF  0 secret-key
 	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
     ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
     >raw-key ?rsk   r> op-vector ! ;
+
+scope: n2o
+Defer help
+}scope
 
 : get-me ( -- )
     gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
@@ -986,7 +998,10 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     IF  [: ." Generate a new keypair:" cr
 	  get-nick new-key .keys ?rsk ;]
     ELSE  ['] get-skc  THEN
-    catch ?dup-IF  DoError  THEN ;
+    catch #-56 = IF
+	<warn> ." ==== No key opened ====" cr
+	<info> ." generate a new one with 'keygen'" cr <default>
+    THEN ;
 
 0 [IF]
 Local Variables:
