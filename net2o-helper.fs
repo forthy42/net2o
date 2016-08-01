@@ -172,7 +172,7 @@ event: ->do-beacon ( addr -- )
     endcase ; is handle-beacon
 
 : replace-loop ( addr u -- flag )
-    BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  0.  THEN o>
+    BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>
 	2dup d0<> WHILE
 	    over c@ '!' = WHILE
 		replace-key o>

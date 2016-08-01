@@ -290,10 +290,11 @@ filechars #del -bit
 "\\:?*\q<>|%" 2Constant no-fat-chars
 \ '%' is allowed, but we use '%' to replace the others
 
+: .## ( n -- ) s>d <# # # #> type ;
 : sane-type ( addr u -- )
     [: bounds ?DO
 	  I c@ filechars over bit@
-	  IF  emit  ELSE  '%' emit .2  THEN
+	  IF  emit  ELSE  '%' emit .##  THEN
       LOOP ;] $10 base-execute ;
 
 : fn-sanitize ( addr u -- addr' u' )
@@ -393,26 +394,25 @@ previous
     fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
     10 6 0 f.rdp 's' emit ;
 
-: .2 ( n -- ) s>d <# # # #> type ;
 : >day ( seconds -- fraction day )
     86400e f/ fsplit ;
 : .day ( seconds -- fraction/day )
     unix-day0 + day2ymd
-    rot 0 .r '-' emit swap .2 '-' emit .2 'T' emit ;
+    rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit .2
-    date? 2 < IF  fdrop  ELSE  ':' emit 60e f* fsplit .2
+    24e f* fsplit .##
+    date? 2 < IF  fdrop  ELSE  ':' emit 60e f* fsplit .##
 	date? 3 < IF  fdrop  ELSE  ':' emit
-	    60e f* date? 4 < IF  f>s .2
+	    60e f* date? 4 < IF  f>s .##
 	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
 		date? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
 	THEN  THEN  'Z' emit ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r '°' xemit  60e f*
-    fsplit .2   ''' xemit  60e f*
-    fsplit .2   '.' xemit 100e f*
-    f>s .2      '"' xemit ;
+    fsplit .##   ''' xemit  60e f*
+    fsplit .##   '.' xemit 100e f*
+    f>s .##      '"' xemit ;
 : .never ( -- )
     date? 7 and 1 > IF ." never" ELSE 'n' emit THEN ;
 : .forever ( -- )
