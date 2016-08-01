@@ -173,7 +173,7 @@ scope{ mapc
 : pw-diffuse ( diffuse# -- )
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
 : pw-setup ( addr u -- diffuse# )
-    \G compute between 256 and ridiculously many iteratsions
+    \G compute between 256 and ridiculously many iterations
     drop c@ $F and 2* $100 swap lshift ;
 
 : encrypt-pw$ ( addr u1 key u2 n -- )

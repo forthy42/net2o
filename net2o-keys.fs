@@ -728,8 +728,8 @@ false value ?yes
     keypack keypack-d keypack-all# move
     keypack-d keypack-all# 2swap
     dup $20 = IF  decrypt$  ELSE
-	keypack c@ $F and config:pw-maxlevel# <= IF  decrypt-pw$
-	ELSE  2drop false  THEN
+	keypack c@ $F and config:pw-maxlevel# @ <=
+	IF  decrypt-pw$  ELSE  2drop false  THEN
     THEN ;
 
 : try-decrypt ( flag -- addr u / 0 0 ) { flag }
@@ -974,10 +974,12 @@ Variable tries#
     BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop
 	    s" Passphrase: " +passphrase   !time
 	    read-keys secret-keys# dup 0= IF
-		1 tries# +!
+		\ fail right after the first try if PASSPHRASE is used
+		\ and give the maximum waiting penalty in that case
+		1 maxtries# s" PASSPHRASE" getenv d0= select tries# +!
 		<err> ." Try# " tries# @ 0 .r '/' emit maxtries# .
 		." failed, no key found, waiting "
-		#10 tries# @ lshift dup . ." ms..." ms  <default> cr
+		#1 tries# @ 2* lshift dup . ." ms..." ms  <default> cr
 		del-last-key
 	    THEN
     REPEAT
