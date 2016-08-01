@@ -87,12 +87,12 @@ cell 8 = [IF]
     64dup fs-size 64! fs-limit 64!
     64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! ;
 
-:noname ( addr u -- n )
+: fs:fs-read ( addr u -- n )
     fs-limit 64@ fs-seekto 64@ >seek
     fs-fid @ read-file throw
     dup n>64 fs-seekto 64+!
-; fs-class to fs-read
-:noname ( addr u -- n )
+; ' fs:fs-read fs-class to fs-read
+: fs:fs-write ( addr u -- n )
     fs-limit 64@ fs-size 64@ 64umin
     fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
     fs-seek 64@ >seek
@@ -101,8 +101,8 @@ cell 8 = [IF]
     fs-size 64@ fs-seek 64@ 64= IF
 	<event o elit, ->file-done parent @ .wait-task @ event>
     THEN
-; fs-class to fs-write
-:noname ( -- )
+; ' fs:fs-write fs-class to fs-write
+: fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-time 64@ 64dup 64-0= IF  64drop
     ELSE
@@ -110,7 +110,7 @@ cell 8 = [IF]
 	fs-fid @ fileno fs-timestamp!
     THEN
     fs-fid @ close-file throw  fs-fid off  fs-path $off
-; fs-class to fs-close
+; ' fs:fs-close fs-class to fs-close
 :noname ( -- size )
     fs-fid @ file-size throw d>64
 ; fs-class to fs-poll
@@ -126,17 +126,43 @@ cell 8 = [IF]
     perm%filename and 0= !!filename-perm!!
 ; fs-class to fs-perm?
 
+\ access to encrypted hash files
+
+: >file-hash ( addr u -- addrhash u )
+    c:0key c:hash keyed-hash-out hash#128 2dup c:hash@ ;
+: enchash ( -- addr u )
+    sksig keyed-hash-out hash#128 + keysize move
+    keyed-hash-out hash#256 >file-hash ;
+
 fs-class class
 end-class hashfs-class
 
 :noname ( addr u mode -- )  fs-close
-    msg( dup 2over ." open file: " type ."  with mode " . cr )
-    >r hash>filename 2dup fs-path $! r> open-file throw fs-fid !
+    keccak# fs-cryptkey $!len
+    c:key@ >r  fs-cryptkey $@ drop c:key!
+    >r msg( ." open hash: " 2dup 85type cr )
+    keyed-hash-out hash#128 smove
+    enchash hash>filename
+    msg( ." open file: " 2dup type ."  with mode " r@ . cr )
+    2dup fs-path $! r> open-file throw fs-fid !
     fs-poll fs-size!
+    r> c:key!
 ; hashfs-class to fs-open
 :noname ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
 ; hashfs-class to fs-perm?
+:noname ( addr u -- n )
+    c:key@ >r
+    over >r fs:fs-read
+    fs-cryptkey $@ drop c:key!
+    r> over c:decrypt
+    r> c:key! ; hashfs-class to fs-read
+:noname ( addr u -- )
+    c:key@ >r  fs-cryptkey $@ drop c:key!
+    save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
+    r> c:key! ; hashfs-class to fs-write
+:noname ( -- )
+    fs:fs-close fs-cryptkey $off ; hashfs-class to fs-close
 
 \ subclassing for other sorts of files
 

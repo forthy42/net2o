@@ -847,6 +847,10 @@ $20 Value mask-bits#
 
 : push-reply ( addr u -- )  resend0 $!  return-addr r0-address $10 move ;
 
+\ load crypto here
+
+require net2o-crypt.fs
+
 \ file handling
 
 require net2o-file.fs
@@ -859,10 +863,6 @@ Defer sockaddr+return
 : -sig ( addr u -- addr u' ) 2dup + 1- c@ 2* $11 + - ;
 : n2oaddrs ( xt -- )
     my-addr$ [: -sig sockaddr+return rot dup >r execute r> ;] $[]map drop ;
-
-\ load crypto here
-
-require net2o-crypt.fs
 
 \ send blocks of memory
 

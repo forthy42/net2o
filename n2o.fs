@@ -467,6 +467,11 @@ synonym searchkey keysearch
 : diff ( -- )
     get-me ?cr dvcs-diff ;
 
+: add# ( -- )
+    \U add# file1 .. filen
+    \G add#: add files to hash storage
+    get-me ['] hash-add arg-loop ;
+
 \ others
 
 : bye ( -- )

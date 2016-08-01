@@ -72,10 +72,6 @@ msg-class class
     field: object$
 end-class commit-class
 
-hash#256 buffer: newhash \ keep some space for encryption secret
-
-: >file-hash ( addr u -- addrhash u )
-    c:0key c:hash newhash hash#128 c:hash@ newhash hash#128 ;
 : /name ( addr u -- addr' u' )
     [ hash#128 dvcs:name ]L /string ;
 : /name' ( addr u -- addr' u' )
@@ -212,7 +208,7 @@ User tmp1$
 	endcase
 	new-file$ $@ >file-hash
 	new-file$ $@ 2swap dvcs-objects #!
-	newhash hash#128 type  timestamp 1 64s type  perm 2 type  type
+	keyed-hash-out hash#128 type  timestamp 1 64s type  perm 2 type  type
     ;] $tmp1 ;
 : file-hashstat ( addr u -- addr' u' )
     2dup statbuf lstat ?ior  hashstat-rest ;
@@ -300,7 +296,7 @@ previous
 Variable patch-in$
 
 : write-hashed ( addr1 u1 -- addrhash u2 )
-    newhash hash#128 ['] 85type $tmp1 2>r
+    keyed-hash-out hash#128 ['] 85type $tmp1 2>r
     2r@ .objects/ ?.net2o/objects spit-file 2r> ;
 
 : read-hashed ( addr1 u1 -- addrhash u2 )
@@ -311,19 +307,15 @@ Variable patch-in$
 
 \ probably needs padding...
 
-: enchash ( -- addr u )
-    sksig newhash hash#128 + keysize move
-    newhash hash#256 >file-hash ;
-
 : write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
-    newhash hash#128 ['] 85type $tmp 2>r
+    keyed-hash-out hash#128 ['] 85type $tmp 2>r
     enchash  2>r
     save-mem 2dup c:encrypt  over swap
     ?.net2o/objects  2r> hash>filename  spit-file
     free throw  2r> ;
 
 : read-enc-hashed ( hash1 u1 -- )
-    2dup newhash hash#128 smove
+    2dup keyed-hash-out hash#128 smove
     enchash hash>filename patch-in$ $slurp-file
     patch-in$ $@ c:decrypt
     patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
@@ -512,6 +504,9 @@ previous
     dvcs-readin-rev  branches>dvcs  new->old  old->new
     2r> project:revision$ $!  save-project  filelist-out
     n2o:dispose-dvcs o> ;
+
+: hash-add ( addr u -- )
+    slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
 
 0 [IF]
 Local Variables:
