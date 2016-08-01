@@ -1,6 +1,8 @@
 #! /usr/bin/env gforth-fast
 \ -*- mode: Forth -*-
 
+warnings off \ in production mode, we don't want any warnings
+
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
 
 @HAS_GPSD@ [IF] \ gpsd

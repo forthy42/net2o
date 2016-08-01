@@ -2,6 +2,7 @@
 
 e? os-type s" linux-android" string-prefix? [IF] require starta.fs [THEN]
 page ." loading n2o..."
+warnings off \ no warnings please
 require n2o.fs
 : n2o-greet  page
     ." net2o " net2o-version type ."  text UI, nerd edition" cr
