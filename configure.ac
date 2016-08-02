@@ -96,4 +96,4 @@ chmod +x n2o]],[PACKAGE_VERSION=$PACKAGE_VERSION
  ARCH=$ARCH])
 
 AC_OUTPUT
-AC_CONFIG_SUBDIRS(keccak threefish ed25519-donna)
+AC_CONFIG_SUBDIRS(keccak threefish ed25519-donna bdelta)
