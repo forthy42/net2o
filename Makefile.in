@@ -60,7 +60,7 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/bob-test.fs tests/eve-test.fs tests/client-test.fs	\
 	  tests/client-tests.fs tests/server-test.fs			\
 	  tests/terminal-test.fs tests/test-keys.fs tests/dvcs-test	\
-	  tests/dvcs-test.s2o
+	  tests/dvcs-test.s2o tests/termclient.fs 
 
 SOURCES = 64bit.fs base64.fs base85.fs config.fs crypto-api.fs		\
 	  debugging.fs hash-table.fs keccak-small.fs kregion.fs		\
@@ -69,8 +69,8 @@ SOURCES = 64bit.fs base64.fs base85.fs config.fs crypto-api.fs		\
 	  net2o-dht.fs net2o-err.fs net2o-file.fs net2o.fs		\
 	  net2o-ip.fs net2o-helper.fs net2o-keys.fs net2o-log.fs	\
 	  net2o-msg.fs net2o-notify.fs net2o-qr.fs net2o-socks.fs	\
-	  net2o-tools.fs net2o-vault.fs rng.fs termclient.fs xtype.fs	\
-	  $(TESTS) $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs		\
+	  net2o-tools.fs net2o-vault.fs rng.fs xtype.fs $(TESTS)	\
+	  $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs			\
 	  threefishlib.fs startn2o.fs doc/net2o-logo.png		\
 	  net2o-version.fs.in android/net.fs android/notify.fs		\
 	  linux/net.fs linux/notify.fs net2o-dhtroot.fs net2o-dvcs.fs	\
