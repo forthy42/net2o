@@ -73,7 +73,9 @@ Sema notify-sema
 	notify-
     THEN
     tick-notify? or 0= IF
-	build-notification show-notification
+	[IFDEF] build-notification
+	    build-notification show-notification
+	[THEN]
 	ticks to last-notify
     THEN  notify$ $off ;
 
