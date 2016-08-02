@@ -507,6 +507,8 @@ previous
 
 : hash-add ( addr u -- )
     slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
+: hash-out ( addr u -- )
+    base85>$ 2dup 2>r read-enc-hashed patch-in$ $@ 2r> sane-85 spit-file ;
 
 0 [IF]
 Local Variables:

@@ -472,6 +472,11 @@ synonym searchkey keysearch
     \G add#: add files to hash storage
     get-me ['] hash-add arg-loop ;
 
+: out# ( -- )
+    \U out# hash1 .. hashn
+    \G out#: get files out of hash storage in clear
+    get-me ['] hash-out arg-loop ;
+
 \ others
 
 : bye ( -- )
