@@ -24,12 +24,10 @@ jvalue nb
 jvalue ni
 jvalue nf
 jvalue notification-manager
-: notify+ ( addr u -- )  notify> notify$ $+! ;
-: notify! ( addr u -- )  notify> notify$ $! ;
+
 : notify@ ( -- addr u )
     config:notify-text# @ IF  notify$ $@
     ELSE  "hidden cryptic text"  THEN ;
-
 : ?nm ( -- )
     notification-manager 0= IF
 	NOTIFICATION_SERVICE clazz .getSystemService

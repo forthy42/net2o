@@ -43,6 +43,8 @@ Variable pending-notifications
 Sema notify-sema
 : notify; nip (;]) ]] notify-sema c-section ; [[ ;
 : notify> comp-[: ['] notify; colon-sys-xt-offset stick ; immediate
+: notify+ ( addr u -- )  notify> notify$ $+! ;
+: notify! ( addr u -- )  notify> notify$ $! ;
 
 : notify-title ( -- )
     ." net2o: " pending-notifications @ dup .

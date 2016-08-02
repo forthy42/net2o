@@ -22,8 +22,6 @@
 	    '&' of  ." &amp;" endof
 	    emit  0 endcase  LOOP ;
 
-: notify+ notify> notify$ $+! ;
-: notify! notify> notify$ $! ;
 : build-notification ( -- ) ;
 : notify@ ( -- addr u )
     config:notify-text# @ IF  notify$ $@ ['] escape-<&> $tmp
