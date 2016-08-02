@@ -36,6 +36,7 @@ cmd-class class
     method fs-read
     method fs-write
     method fs-open
+    method fs-create
     method fs-close
     method fs-poll
     method fs-perm?
@@ -122,6 +123,9 @@ cell 8 = [IF]
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-poll fs-size!
 ; fs-class to fs-open
+:noname ( addr u -- )  fs-close
+    2dup fs-path $! r/w create-file throw fs-fid !
+; fs-class to fs-create
 :noname ( perm -- )
     perm%filename and 0= !!filename-perm!!
 ; fs-class to fs-perm?
@@ -137,17 +141,22 @@ cell 8 = [IF]
 fs-class class
 end-class hashfs-class
 
-:noname ( addr u mode -- )  fs-close
-    keccak# fs-cryptkey $!len
-    c:key@ >r  fs-cryptkey $@ drop c:key!
-    >r msg( ." open hash: " 2dup 85type cr )
+: hashfs>file ( addrhash u1 -- addrfile u2 )
+    c:key@ >r  keccak# fs-cryptkey $!len
+    fs-cryptkey $@ drop c:key!
+    msg( ." open hash: " 2dup 85type cr )
     keyed-hash-out hash#128 smove
     enchash hash>filename
-    msg( ." open file: " 2dup type ."  with mode " r@ . cr )
-    2dup fs-path $! r> open-file throw fs-fid !
-    fs-poll fs-size!
-    r> c:key!
+    msg( ." open file: " 2dup type cr )
+    2dup fs-path $!
+    r> c:key! ;
+
+:noname ( addr u mode -- )  fs-close
+    >r hashfs>file r> open-file throw fs-fid ! fs-poll fs-size!
 ; hashfs-class to fs-open
+:noname ( addr u -- )  fs-close
+    hashfs>file r/w create-file throw fs-fid !
+; hashfs-class to fs-create
 :noname ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
 ; hashfs-class to fs-perm?
@@ -316,8 +325,8 @@ scope{ mapc
 	    fails states u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
     file-sema c-section ;
 
-: save-to ( addr u n -- )  state-addr >o
-    2dup fs-path $! r/w create-file throw fs-fid ! o> ;
+: save-to ( addr u n -- )  state-addr >o  fs-create o> ;
+: save-to# ( addr u n -- )  state-addr >o  1 fs-class!  fs-create o> ;
 
 \ file status stuff
 

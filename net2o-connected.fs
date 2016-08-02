@@ -186,7 +186,7 @@ also }scope
 
 : n2o:copy# ( addrhash u -- )
     [: 1 ulit, file-type 2dup $, r/o ulit, open-tracked-file
-      hash>filename file-reg# @ save-to ;] n2o>file
+      file-reg# @ save-to# ;] n2o>file
     1 file-count +! ;
 
 : seek! ( pos id -- ) >r d>64
