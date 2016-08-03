@@ -536,7 +536,7 @@ Variable chat-keys
 
 : .ack ( o:ack -- o:ack )
     ." ack context:" cr
-    ." rtdelay: " rtdelay 64@ 64. cr ;
+    ." rtdelay: " rtdelay 64@ s64. cr ;
 
 : .context ( o:context -- o:context )
     ." Connected with: " .con-id cr

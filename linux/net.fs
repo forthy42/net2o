@@ -52,7 +52,7 @@ $00d8607f5 netlink-addr nl_groups l!
 
 : address? ( addr u -- flag )
     0= IF  drop false  EXIT  THEN
-    nlmsg_type w@ RTM_NEWADDR [ RTM_DELADDR 1+ ]L within ;
+    nlmsg_type w@ RTM_NEWLINK [ RTM_DELADDR 1+ ]L within ;
 
 \ debugging stuff to see what kind of things are going on
 
@@ -138,7 +138,8 @@ event: ->netlink ( -- )
 : create-netlink-task ( -- )
     ['] netlink-loop 1 net2o-task to netlink-task ;
 
-:noname defers init-rest  create-netlink-task ; is init-rest
+:noname defers init-rest
+    [IFUNDEF] mslinux create-netlink-task [THEN] ; is init-rest
 
 0 [IF]
 Local Variables:

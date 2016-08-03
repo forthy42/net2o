@@ -312,12 +312,14 @@ Defer !my-addr
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- ) dup >r
-    ipv6( ipv4( create-udp-server46 )else( create-udp-server6 )
+    ipv6( ipv4( [IFDEF] no-hybrid
+    create-udp-server6 [ELSE] create-udp-server46 [THEN]
+    )else( create-udp-server6 )
     )else( create-udp-server )
     [IFDEF] no-hybrid 0 [THEN] to net2o-sock
     r> ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
-	net2o-sock drop my-port# create-udp-server to net2o-sock
+	ipv4( net2o-sock drop my-port# create-udp-server to net2o-sock )
     [THEN]
     !my-addr ;
 

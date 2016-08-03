@@ -688,7 +688,7 @@ Variable cp-tmp
 	THEN o> ;] #map
     0 to key-sfd ;] save-file  ?key-sfd drop ;
 
-: save-keys ( -- )
+: save-keys ( -- )  ?.net2o/keys
     save-pubkeys save-seckeys ;
 
 : +gen-keys ( nick u type -- )

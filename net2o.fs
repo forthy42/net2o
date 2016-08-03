@@ -147,7 +147,7 @@ event: ->kill ( task -- )
     <event ->killed event> 0 (bye) ;
 : send-kill ( -- ) <event up@ elit, ->kill event> ;
 
-3.000.000.000 2constant kill-timeout# \ 3s
+#3.000.000.000 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
     net2o-tasks deque@ kills !  net2o-tasks $off
