@@ -180,7 +180,8 @@ end-class socket-class
 
 :noname ( addr u port -- ) fs-close 64>n
     msg( dup 2over ." open socket: " type ."  with port " . cr )
-    open-socket fs-fid ! 64#0 fs-size! ; socket-class to fs-open
+    open-socket fs-fid ! 64#0 fs-size! ;
+dup socket-class to fs-open  socket-class to fs-create
 :noname ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
     n>64 fs-size 64@ 64+ ; socket-class to fs-poll
@@ -194,7 +195,8 @@ end-class termclient-class
 :noname ( addr u -- u ) tuck type ; termclient-class to fs-write
 :noname ( addr u -- u ) 0 -rot bounds ?DO
 	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class to fs-read
-:noname ( addr u 64n -- ) 64drop 2drop ; termclient-class to fs-open
+:noname ( addr u 64n -- ) 64drop 2drop ;
+dup termclient-class to fs-open  termclient-class to fs-create
 :noname ( -- ) ; termclient-class to fs-close
 :noname ( perm -- )
     perm%terminal and 0= !!terminal-perm!!
@@ -242,7 +244,7 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 	@ termserver-tasks 0 cell $del dup fs-termtask !
 	<event o elit, ->termfile event>
     ;] file-sema c-section
-; termserver-class to fs-open
+; dup termserver-class to fs-open  termserver-class to fs-create
 :noname ( -- )
     [: fs-termtask @ ?dup-IF
 	    <event ->termclose event>
@@ -260,11 +262,17 @@ socket-class ,
 termclient-class ,
 termserver-class ,
 
-here file-classes - cell/ Constant file-classes#
+here file-classes - cell/
+$10 over - cells allot
+
+Value file-classes#
 
 : fs-class! ( n -- )
     dup file-classes# u>= !!fileclass!!
     cells file-classes + @ o cell- ! ;
+
+: +file-classes ( addr -- )
+    file-classes file-classes# dup 1+ to file-classes# cells + ! ;
 
 \ state handling
 

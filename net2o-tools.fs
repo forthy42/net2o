@@ -529,7 +529,7 @@ $10 Constant datesize#
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
     { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+    BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 2drop \ don't overwrite if already exists!
 		-1 EXIT  THEN
@@ -539,13 +539,22 @@ $10 Constant datesize#
 : $del[]date ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array
     { $a } 0 $a $[]#
-    BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
+    BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop $# $a $[] $off
 		$a $# cells cell $del
 		2drop EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
+: $search[]date ( ticks $array -- pos )
+    \G search O(log(n)) in pre-sorted array
+    \G @var{pos} is the location of the item >= the requested date
+    { $a } 0 $a $[]#
+    BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
+	    64dup $# $a $[]@ startdate@ 64- 64dup 64-0= IF
+		64drop 64drop $# EXIT  THEN
+	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r 64drop r> dup $a $[]# = - ;
 
 \ filter entries out of a string array
 

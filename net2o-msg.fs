@@ -57,20 +57,23 @@ Sema msglog-sema
 : msg-log@ ( last# -- addr u )
     [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
-: save-msgs ( last -- )
-    ?.net2o/chats  n2o:new-msging >o enc-file $off
-    dup msg-log@ over >r
+: serialize-log ( addr u -- addr )
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
-    gen-cmd$ 2drop 0 tmp$ !@ enc-file !
+    gen-cmd$ 2drop 0 tmp$ !@ ;
+
+: save-msgs ( last -- )
+    ?.net2o/chats  n2o:new-msging >o enc-file $off
+    dup msg-log@ over >r  serialize-log enc-file !
     r> free throw  dispose o>
     $@ >chatid sane-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
+: msg-eval ( addr u -- )
+    n2o:new-msging >o parent off do-cmd-loop dispose o> ;
 : vault>msg ( -- )
-    [: n2o:new-msging >o parent off do-cmd-loop dispose o> ;]
-    is write-decrypt ;
+    ['] msg-eval is write-decrypt ;
 
 : load-msg ( group u -- )  2dup >group
     >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
@@ -383,6 +386,23 @@ also }scope
 	1- last# cell+ $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
 
+\ sync chatlog through virtual file access
+
+termserver-class class
+end-class msgfs-class
+
+file-classes# Constant msgfs-class#
+msgfs-class +file-classes
+
+: save-to-msg ( addr u n -- )
+    state-addr >o  msgfs-class# fs-class!  fs-create o> ;
+: n2o:copy-msg ( group u -- )
+    [: last-msg@ 64#-1 64- ticks { 64^ start 64^ end }
+      start 1 64s type  end 1 64s type  type ;] $tmp
+    [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-tracked-file
+      file-reg# @ save-to-msg ;] n2o>file
+    1 file-count +! ;
+
 :noname ( ticks -- )
     last# 0= ?EXIT
     last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
@@ -392,6 +412,32 @@ also }scope
     last-msg@ lit, msg-last ; is msg:last?
 :noname ( ticks -- )
     ." last message at: " .ticks forth:cr ; is msg:last
+
+:noname ( -- 64len )
+    \ poll serializes the 
+    fs-outbuf $off
+    fs-path $@ 2 64s /string ?msg-log
+    last# msg-log@ over >r
+    fs-path $@ drop le-64@ last# cell+ $search[]date \ start index
+    fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date over - >r
+    cells safe/string r> cells umin
+    serialize-log  fs-outbuf !
+    r> free throw
+    fs-inbuf $@len u>64 ; msgfs-class is fs-poll
+:noname ( addr u mode -- )  fs-close
+    \G addr u is starttick endtick name concatenated together
+    drop fs-path $!
+    fs-poll fs-size!
+; dup msgfs-class is fs-open  msgfs-class is fs-create
+:noname ( -- )
+    fs-path $@ 2 64s /string >group
+    fs-inbuf $@ dup IF  msg-eval  ELSE  2drop  THEN  fs-inbuf $off
+; msgfs-class is fs-close
+:noname ( perm -- )
+    perm%msg and 0= !!msg-perm!!
+; msgfs-class to fs-perm?
+
+\ message composer
 
 : group, ( addr u -- )
     $, msg-group ;
