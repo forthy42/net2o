@@ -435,21 +435,21 @@ previous
 : $ins[]# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
-    { $a rest } 0 $a $[]#
+    { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
-		drop $# $a $[]@ smove \ overwrite in place
+	    2dup rest - $# a[] $[]@ rest - compare dup 0= IF
+		drop $# a[] $[]@ smove \ overwrite in place
 		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
+    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 : $del[]# ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
-    { $a rest } 0 $a $[]#
+    { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
-		drop $# $a $[] $off
-		$a $# cells cell $del
+	    2dup rest - $# a[] $[]@ rest - compare dup 0= IF
+		drop $# a[] $[] $off
+		a[] $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
@@ -459,21 +459,21 @@ previous
 : $ins[]/ ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
-    { $a rest } 0 $a $[]#
+    { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
-		drop $# $a $[]@ smove \ overwrite in place
+	    2dup rest safe/string $# a[] $[]@ rest safe/string compare dup 0= IF
+		drop $# a[] $[]@ smove \ overwrite in place
 		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
+    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 : $del[]/ ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
-    { $a rest } 0 $a $[]#
+    { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup rest safe/string $# $a $[]@ rest safe/string compare dup 0= IF
-		drop $# $a $[] $off
-		$a $# cells cell $del
+	    2dup rest safe/string $# a[] $[]@ rest safe/string compare dup 0= IF
+		drop $# a[] $[] $off
+		a[] $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
@@ -500,17 +500,17 @@ $10 Constant datesize#
 : $ins[]sig# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
     \G @var{pos} is the insertion offset or -1 if not inserted
-    { $a rest } 0 $a $[]#
+    { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
-	    2dup rest - $# $a $[]@ rest - compare dup 0= IF
+	    2dup rest - $# a[] $[]@ rest - compare dup 0= IF
 		drop
 		2dup rest - + le-64@
-		$# $a $[]@ rest - + le-64@ 64u>=
-		IF   $# $a $[]@ smove  $# \ overwrite in place
+		$# a[] $[]@ rest - + le-64@ 64u>=
+		IF   $# a[] $[]@ smove  $# \ overwrite in place
 		ELSE  2drop  -1  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]! r> ;
+    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 
 : $ins[]sig ( addr u $array -- pos ) sigsize# $ins[]sig# ;
     \G @var{pos} is the insertion offset or -1 if not inserted
@@ -528,33 +528,33 @@ $10 Constant datesize#
 : $ins[]date ( addr u $array -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
-    { $a } 0 $a $[]#
+    { a[] } 0 a[] $[]#
     BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
-	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
+	    2dup startdate@ $# a[] $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 2drop \ don't overwrite if already exists!
 		-1 EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell $a r@ cells $ins r@ $a $[]!  r> ;
+    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]!  r> ;
 : $del[]date ( addr u $array -- )
     \G delete O(log(n)) from pre-sorted array
-    { $a } 0 $a $[]#
+    { a[] } 0 a[] $[]#
     BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
-	    2dup startdate@ $# $a $[]@ startdate@ 64- 64dup 64-0= IF
-		64drop $# $a $[] $off
-		$a $# cells cell $del
+	    2dup startdate@ $# a[] $[]@ startdate@ 64- 64dup 64-0= IF
+		64drop $# a[] $[] $off
+		a[] $# cells cell $del
 		2drop EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT 2drop 2drop ; \ not found
 : $search[]date ( ticks $array -- pos )
     \G search O(log(n)) in pre-sorted array
     \G @var{pos} is the location of the item >= the requested date
-    { $a } 0 $a $[]#
+    { a[] } 0 a[] $[]#
     BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
-	    64dup $# $a $[]@ startdate@ 64- 64dup 64-0= IF
+	    64dup $# a[] $[]@ startdate@ 64- 64dup 64-0= IF
 		64drop 64drop $# EXIT  THEN
 	    64-0< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT  drop >r 64drop r> dup $a $[]# = - ;
+    REPEAT  drop >r 64drop r> dup a[] $[]# = - ;
 
 \ filter entries out of a string array
 
