@@ -230,6 +230,7 @@ synonym searchkey keysearch
 
 \ hash+signature
 
+0 warnings !@ \ these options look like numbers, don't warn
 : -256 ( -- )
     \O -256
     \G -256: set hash output to 256 bits (default)
@@ -239,6 +240,7 @@ synonym searchkey keysearch
     \O -512
     \G -512: set hash output to 512 bits
     $40 to hash-size# next-cmd ;
+warnings !
 
 : hash ( -- )
     \U hash file1 .. filen

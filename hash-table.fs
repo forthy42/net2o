@@ -128,7 +128,9 @@ warnings !
 
 : #.entry ( hash-entry -- ) dup $@ type ."  -> " cell+ $@ type cr ;
 
+0 warnings !@
 : #. ( hash -- )  ['] #.entry #map ;
+warnings !
 
 \ test: move dictionary to hash
 

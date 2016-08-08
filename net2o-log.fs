@@ -30,8 +30,10 @@ $20 net2o: emit ( utf8 -- ) \g emit character on server log
     $> forth:type ;
 +net2o: cr ( -- ) \g newline on server log
     forth:cr ;
+0 warnings !@ \ disable warnings for .
 +net2o: . ( n -- ) \g print number on server log
     u64. ;
+warnings !
 +net2o: f. ( r -- ) \g print fp number on server log
     forth:f. ;
 +net2o: .time ( -- ) \g print timer to server log
