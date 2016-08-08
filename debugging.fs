@@ -214,6 +214,7 @@ false [IF]
 
 \ more phony throw stuff, only for debugging engine
 
+debugging-method [defined] record-locs and [IF] record-locs [THEN]
 debugging-method drop 0 [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
