@@ -318,6 +318,7 @@ require config.fs
 
 scope{ config
 
+Variable patchlimit&
 Variable rootdirs$
 Variable prio#
 Variable host$
@@ -337,6 +338,8 @@ also config
 "~/.net2o/objects" objects$ $!
 2 date# !
 pad $400 get-dir rootdirs$ $!
+
+$1000.0000. patchlimit& 2! \ 256MB patch limit size
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;

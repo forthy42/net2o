@@ -125,6 +125,14 @@ Variable bdelta$
 	THEN
     I - +LOOP  drop ;
 
+: bpatch$len ( diff$ -- 64len )
+    >r 64#0 r> $@ bounds U+DO
+	I p@+ >r 64dup 64>n r> + >r 64+ r>
+	dup I' u< IF
+	    ps@+ >r 64drop r> p@+ >r 64+ r>
+	THEN
+    I - +LOOP  ;
+
 #80 Constant max-shorted#
 
 : <#copy> $B62 attr! ;

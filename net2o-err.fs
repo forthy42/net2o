@@ -88,6 +88,8 @@ s" socket access denied"         throwcode !!socket-perm!!
 s" terminal access denied"       throwcode !!terminal-perm!!
 s" termserver access denied"     throwcode !!termserver-perm!!
 s" sync access denied"           throwcode !!sync-perm!!
+s" patch size exceeds limit"     throwcode !!patch-limit!!
+s" patch size wrong"             throwcode !!patch-size!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

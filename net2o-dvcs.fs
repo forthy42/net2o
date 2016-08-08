@@ -152,8 +152,10 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     hash#128 umin dvcs-in-hash ;
 +net2o: dvcs-rmdir ( $:name -- ) \g delete directory
     4 !!>=order? $> dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off ;
-+net2o: dvcs-patch ( $:diff -- ) \g apply patch
++net2o: dvcs-patch ( $:diff len -- ) \g apply patch, len is the size of the result
     8 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
+    64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
+    dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
     $10 !!>=order? 64>n { fsize }
@@ -274,7 +276,7 @@ also net2o-base
 	dvcs-write ;] $[]map ;
 : compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
-    dvcs:patch$ $@ $, dvcs-patch ;
+    dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
 
 : compute-diff ( -- )
     read-old-fs  read-del-fs  read-new-fs
