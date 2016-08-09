@@ -376,21 +376,36 @@ gen-table $freeze
 
 also }scope
 
+User hashtmp$
+
 : last-msg@ ( -- ticks )
     last# >r
     last# $@ ?msg-log last# cell+ $[]# ?dup-IF
 	1- last# cell+ $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
-: .datex ( i -- )
+: l.hashs ( end start -- )
+    hashtmp$ $free
+    [: U+DO  I last# cell+ $[]@ dup 1 64s - /string forth:type
+      LOOP ;] hashtmp$ $exec
+    hashtmp$ $@ >file-hash 1 64s umin forth:type ;
+: i.date ( i -- )
     last# cell+ $[]@ startdate@ { 64^ x } x 1 64s forth:type ;
+: date>i ( date -- i )
+    last# cell+ $search[]date last# cell+ $[]# 1- umin ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
+    \G print n intervals for messages from startdate to enddate
+    \G The intervals contain the same size of messages except the
+    \G last one, which may contain less (rounding down).
+    \G Each interval contains a 64 bit hash of the last 64 bit of
+    \G each message within the interval
     last# >r >r last# $@ ?msg-log
     last cell+ $[]#
-    ?dup-IF
-	last# cell+ $search[]date last# cell+ $[]# 1- umin >r
-	last# cell+ $search[]date r> swap
+    IF
+	date>i >r date>i r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
-	[: over >r U+DO  I .datex  dup +LOOP  r> .datex
+	[: over >r U+DO  I i.date
+	      dup I + 1+ I' umin I l.hashs
+	  dup +LOOP  r> i.date
 	  drop ;] $tmp r>
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
@@ -415,7 +430,9 @@ msgfs-class +file-classes
     last-msgs@ >r $, r> ulit, msg-last ; is msg:last?
 :noname ( $:[tick0,tick1,...,tickn] n -- )
     forth:. ." messages: ["
-    $> bounds ?DO  I 64@ .ticks ." ,"  1 64s +LOOP
+    $> bounds ?DO  I 64@ .ticks
+	I' I 64'+ u> IF  ." <" I 64'+ 64@ x64. ." >"  THEN
+    2 64s +LOOP
     ." ]" forth:cr ; is msg:last
 
 :noname ( -- 64len )
