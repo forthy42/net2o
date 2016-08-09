@@ -246,8 +246,6 @@ event: ->msg-nestsig ( addr u o group -- )
 
 Defer msg:last?
 Defer msg:last
-Defer msg:getlast
-Defer msg:open
 
 : push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
@@ -353,10 +351,8 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     ELSE
 	reconnect-chat
     THEN ;
-+net2o: msg-last? ( -- ) msg:last? ;
-+net2o: msg-last ( tick -- ) msg:last ;
-+net2o: msg-getlast ( tick -- ) msg:getlast ;
-+net2o: msg-open ( ticks ticke -- ) msg:open ;
++net2o: msg-last? ( start end n -- ) msg:last? ;
++net2o: msg-last ( $:[tick0,msgs,..tickn] -- ) msg:last ;
 
 : ?pkgroup ( addr u -- addr u )
     \ if no group has been selected, use the pubkey as group
@@ -385,6 +381,17 @@ also }scope
     last# $@ ?msg-log last# cell+ $[]# ?dup-IF
 	1- last# cell+ $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
+: last-msgs@ ( startdate enddate n -- addr u n' )
+    last# >r >r last# $@ ?msg-log
+    last cell+ $[]#
+    ?dup-IF
+	last# cell+ $search[]date >r
+	last# cell+ $search[]date r>
+	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
+	[: U+DO  I last# cell+ $[]# 1- umin
+	      last# cell+ $[]@ startdate@ { 64^ x } x 1 64s forth:type
+	  dup +LOOP drop ;] $tmp r>
+    ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
 \ sync chatlog through virtual file access
 
@@ -398,20 +405,17 @@ msgfs-class +file-classes
     state-addr >o  msgfs-class# fs-class!  fs-create o> ;
 : n2o:copy-msg ( group u -- )
     [: last-msg@ 64#-1 64- ticks { 64^ start 64^ end }
-      start 1 64s type  end 1 64s type  type ;] $tmp
+      start 1 64s forth:type  end 1 64s forth:type  forth:type ;] $tmp
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-tracked-file
       file-reg# @ save-to-msg ;] n2o>file
     1 file-count +! ;
 
-:noname ( ticks -- )
-    last# 0= ?EXIT
-    last# cell+ [: 2dup 2>r startdate@ 64over 64u> IF
-	  2r> dup maxstring $10 - u< IF  $, nestsig  ELSE  2drop  THEN
-      ELSE  rdrop rdrop   THEN ;] $[]map 64drop ; is msg:getlast
-:noname ( -- )
-    last-msg@ lit, msg-last ; is msg:last?
-:noname ( ticks -- )
-    ." last message at: " .ticks forth:cr ; is msg:last
+:noname ( start end n -- )
+    last-msgs@ >r $, r> ulit, msg-last ; is msg:last?
+:noname ( $:[tick0,tick1,...,tickn] n -- )
+    forth:. ." messages: ["
+    $> bounds ?DO  I 64@ .ticks ." ,"  1 64s +LOOP
+    ." ]" forth:cr ; is msg:last
 
 :noname ( -- 64len )
     \ poll serializes the 
@@ -451,7 +455,7 @@ msgfs-class +file-classes
 previous
 
 : msg-reply ( tag -- )
-    reply( ." got reply " hex. pubkey $@ key>nick type cr )else( drop ) ;
+    reply( ." got reply " hex. pubkey $@ key>nick forth:type forth:cr )else( drop ) ;
 : expect-msg ( --- ) ['] msg-reply expect-reply-xt ;
 
 : send-text ( addr u -- )
@@ -470,7 +474,8 @@ previous
 
 also net2o-base
 : join, ( -- )
-    msg-group$ $@ dup IF  msg ?destpk $, msg-join msg-last?
+    msg-group$ $@ dup IF  msg ?destpk $, msg-join
+	64#0 lit, 64#-1 ulit, $20 ulit, msg-last?
 	sign[ msg-start "joined" $, msg-action msg> end-with
     ELSE  2drop  THEN ;
 
