@@ -381,16 +381,17 @@ also }scope
     last# $@ ?msg-log last# cell+ $[]# ?dup-IF
 	1- last# cell+ $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
+: .datex ( i -- )
+    last# cell+ $[]@ startdate@ { 64^ x } x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     last# >r >r last# $@ ?msg-log
     last cell+ $[]#
     ?dup-IF
-	last# cell+ $search[]date >r
-	last# cell+ $search[]date r>
+	last# cell+ $search[]date last# cell+ $[]# 1- umin >r
+	last# cell+ $search[]date r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
-	[: U+DO  I last# cell+ $[]# 1- umin
-	      last# cell+ $[]@ startdate@ { 64^ x } x 1 64s forth:type
-	  dup +LOOP drop ;] $tmp r>
+	[: over >r U+DO  I .datex  dup +LOOP  r> .datex
+	  drop ;] $tmp r>
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
 \ sync chatlog through virtual file access
