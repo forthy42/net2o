@@ -741,7 +741,7 @@ Sema resize-sema
     .name dup . cr DoError cr ;
 
 : catch-loop { xt -- flag }
-    BEGIN   nothrow xt catch dup -1 = ?EXIT
+    BEGIN   xt catch dup -1 = ?EXIT
 	?int dup  WHILE  xt .loop-err  REPEAT
     drop false ;
 

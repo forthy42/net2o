@@ -81,10 +81,10 @@ Sema msglog-sema
     file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  ['] decrypt-file catch
-    ?dup-IF  DoError nothrow 2drop
+    ?dup-IF  DoError 2drop
 	\ try read backup instead
 	[: enc-filename $. '~' emit ;] $tmp ['] decrypt-file catch
-	?dup-IF  DoError nothrow 2drop  THEN
+	?dup-IF  DoError 2drop  THEN
     THEN  replay-mode off  skip-sig? off ;
 
 event: ->save-msgs ( last# -- ) save-msgs ;
@@ -426,7 +426,10 @@ msgfs-class +file-classes
       file-reg# @ save-to-msg ;] n2o>file
     1 file-count +! ;
 
+$20 Value max-last#
+
 :noname ( start end n -- )
+    max-last# umin
     last-msgs@ >r $, r> ulit, msg-last ; is msg:last?
 :noname ( $:[tick0,tick1,...,tickn] n -- )
     forth:. ." messages: ["

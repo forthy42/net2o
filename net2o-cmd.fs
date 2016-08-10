@@ -253,7 +253,7 @@ Defer >throw
 : cmd-throw ( error -- )
     cmd( true )else( remote? @ 0= ) IF
 	[: ." do-cmd-loop: " dup . .exe cr ;] $err
-	dup DoError  nothrow
+	dup DoError
 	buf-state @ show-offset !  <err> cr n2o:see-me <default> show-offset on
     THEN
     un-cmd >throw ;
