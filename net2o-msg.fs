@@ -1,6 +1,6 @@
 \ messages                                           06aug2014py
 
-\ Copyright (C) 2014   Bernd Paysan
+\ Copyright (C) 2014-2016   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -383,13 +383,14 @@ User hashtmp$
     last# $@ ?msg-log last# cell+ $[]# ?dup-IF
 	1- last# cell+ $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
-: l.hashs ( end start -- )
-    hashtmp$ $free
+: l.hashs ( end start -- hashaddr u )
+    hashtmp$ $off
     [: U+DO  I last# cell+ $[]@ dup 1 64s - /string forth:type
       LOOP ;] hashtmp$ $exec
-    hashtmp$ $@ >file-hash 1 64s umin forth:type ;
+    hashtmp$ $@ >file-hash 1 64s umin ;
 : i.date ( i -- )
-    last# cell+ $[]@ startdate@ { 64^ x } x 1 64s forth:type ;
+    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
+    x le-64! x 1 64s forth:type ;
 : date>i ( date -- i )
     last# cell+ $search[]date last# cell+ $[]# 1- umin ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
@@ -404,7 +405,7 @@ User hashtmp$
 	date>i >r date>i r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
-	      dup I + 1+ I' umin I l.hashs
+	      dup I + 1+ I' umin I l.hashs forth:type
 	  dup +LOOP  r> i.date
 	  drop ;] $tmp r>
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
@@ -419,24 +420,45 @@ msgfs-class +file-classes
 
 : save-to-msg ( addr u n -- )
     state-addr >o  msgfs-class# fs-class!  fs-create o> ;
-: n2o:copy-msg ( group u -- )
-    [: last-msg@ 64#-1 64- ticks { 64^ start 64^ end }
-      start 1 64s forth:type  end 1 64s forth:type  forth:type ;] $tmp
+: n2o:copy-msg ( filename u -- )
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-tracked-file
       file-reg# @ save-to-msg ;] n2o>file
     1 file-count +! ;
 
 $20 Value max-last#
+$20 Value ask-last#
+
+Variable ask-msg-files[]
 
 :noname ( start end n -- )
+    last# $@ $, msg-group
     max-last# umin
     last-msgs@ >r $, r> ulit, msg-last ; is msg:last?
 :noname ( $:[tick0,tick1,...,tickn] n -- )
-    forth:. ." messages: ["
-    $> bounds ?DO  I 64@ .ticks
-	I' I 64'+ u> IF  ." <" I 64'+ 64@ x64. ." >"  THEN
+    ask-msg-files[] $[]off
+    forth:. ." Messages:" forth:cr
+    64#-1 64#0 { 64^ startd 64^ endd } \ byte order of 0 and -1 don't matter
+    last# >r last# $@ ?msg-log
+    $> bounds ?DO
+	I' I 64'+ u> IF
+	    I le-64@ date>i
+	    I 64'+ 64'+ le-64@ date>i 1+ swap l.hashs drop 64@
+	    I 64'+ 64@ 64<> IF
+		I 64@ startd le-64@ 64umin startd le-64!
+		I 64'+ 64'+ 64@ endd le-64@ 64umax endd le-64!
+	    ELSE
+		endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
+		ask-msg-files[] dup $[]# swap $[] $exec
+		64#-1 startd le-64! 64#0 endd le-64!
+	    THEN
+	THEN
     2 64s +LOOP
-    ." ]" forth:cr ; is msg:last
+    startd le-64@ 64#-1 64<> IF
+	endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
+	ask-msg-files[] dup $[]# swap $[] $exec
+    THEN
+\    ask-msg-files[] [: n2o:copy-msg ;] parent @ .$[]map
+    r> to last# ; is msg:last
 
 :noname ( -- 64len )
     \ poll serializes the 
@@ -472,6 +494,8 @@ $20 Value max-last#
 : msg> ( -- )
     \G end a msg block by adding a signature
     now>never ]pksign ;
+: msg-log, ( -- addr u )
+    last-signed 2@ >msg-log ;
 
 previous
 
@@ -495,19 +519,22 @@ previous
 
 also net2o-base
 : join, ( -- )
-    msg-group$ $@ dup IF  msg ?destpk $, msg-join
-	64#0 lit, 64#-1 ulit, $20 ulit, msg-last?
+    msg-group$ $@ dup IF  msg ?destpk 2dup >group $, msg-join
+	64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last
+	64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last?
 	sign[ msg-start "joined" $, msg-action msg> end-with
+	msg-log, 2drop
     ELSE  2drop  THEN ;
 
 : silent-join, ( -- )
     last# $@ dup IF  msg $, msg-join  end-with
     ELSE  2drop  THEN ;
 
-: leave, ( -- )
-    msg-group$ $@ dup IF  msg ?destpk $, msg-leave
+: leave, ( -- )  last# >r
+    msg-group$ $@ dup IF  msg ?destpk 2dup >group $, msg-leave
 	sign[ msg-start "left" $, msg-action msg> end-with
-    ELSE  2drop  THEN ;
+	msg-log, 2drop
+    ELSE  2drop  THEN  r> to last# ;
 
 : left, ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
@@ -576,7 +603,7 @@ $200 Constant maxmsg#
 also net2o-base
 : (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
-      3 /string 1 - >msg-log ;] [group] ;
+      2drop msg-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- ) (send-avalanche)
     IF   .chat  ELSE  2drop .nobody  THEN ;
@@ -888,8 +915,9 @@ also net2o-base
 
 : send-reconnects ( group o:connection -- )  o to connection
     net2o-code expect-reply msg
-    dup  $@ ?destpk $, msg-leave  reconnects,
+    dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
     sign[ msg-start "left" $, msg-action msg>
+    msg-log, 2drop
     end-with cookie+request end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
@@ -901,7 +929,7 @@ previous
     dup cell+ $@
     case
 	0    of  2drop  endof
-	cell of  @ >o o to connection +resend-cmd send-leave o>  endof
+	cell of  nip @ >o o to connection +resend-cmd send-leave o>  endof
 	drop @ .send-reconnects
     0 endcase ;
 : disconnect-group ( group -- ) >r

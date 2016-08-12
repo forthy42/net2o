@@ -593,6 +593,7 @@ previous
 \ nested commands
 
 User neststart#
+User last-signed cell uallot drop
 
 2 Constant fwd# \ maximum 14 bits = 16kB
 
@@ -613,7 +614,7 @@ also net2o-base
     c:0key nest$
 \    ." sign: " 2dup xtype forth:cr
     c:hash $tmp +cmdbuf
-    cmd-resolve> 2drop  nestsig ;
+    cmd-resolve>  last-signed 2!  nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 
