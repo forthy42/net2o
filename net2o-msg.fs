@@ -57,15 +57,15 @@ Sema msglog-sema
 : msg-log@ ( last# -- addr u )
     [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
-: serialize-log ( addr u -- addr )
+: serialize-log ( addr u -- $addr )
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
     gen-cmd$ 2drop 0 tmp$ !@ ;
 
 : save-msgs ( last -- )
-    ?.net2o/chats  n2o:new-msging >o enc-file $off
-    dup msg-log@ over >r  serialize-log enc-file !
+    ?.net2o/chats  n2o:new-msging >o
+    dup msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
     $@ >chatid sane-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
@@ -419,9 +419,12 @@ file-classes# Constant msgfs-class#
 msgfs-class +file-classes
 
 : save-to-msg ( addr u n -- )
-    state-addr >o  msgfs-class# fs-class!  fs-create o> ;
+    state-addr >o  msgfs-class# fs-class! w/o fs-create o> ;
 : n2o:copy-msg ( filename u -- )
-    [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-tracked-file
+    ." copy msg: " 2dup
+    over le-64@ .ticks 1 64s /string  ." ->"
+    over le-64@ .ticks 1 64s /string  ." @" forth:type forth:cr
+    [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
       file-reg# @ save-to-msg ;] n2o>file
     1 file-count +! ;
 
@@ -444,20 +447,24 @@ Variable ask-msg-files[]
 	    I le-64@ date>i
 	    I 64'+ 64'+ le-64@ date>i 1+ swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
-		I 64@ startd le-64@ 64umin startd le-64!
-		I 64'+ 64'+ 64@ endd le-64@ 64umax endd le-64!
+		I 64@ startd le-64@ 64umin
+		I 64'+ 64'+ 64@ endd le-64@ 64umax
 	    ELSE
-		endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
-		ask-msg-files[] dup $[]# swap $[] $exec
-		64#-1 startd le-64! 64#0 endd le-64!
-	    THEN
+		startd le-64@ 64#-1 64<> IF
+		    endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
+		    ask-msg-files[] dup $[]# swap $[] $exec
+		THEN
+		64#-1 64#0
+	    THEN  endd le-64! startd le-64!
 	THEN
     2 64s +LOOP
     startd le-64@ 64#-1 64<> IF
 	endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
 	ask-msg-files[] dup $[]# swap $[] $exec
     THEN
-\    ask-msg-files[] [: n2o:copy-msg ;] parent @ .$[]map
+    parent @ >o $10 blocksize! $4 blockalign!
+    ask-msg-files[] [: n2o:copy-msg ;] $[]map
+    n2o:done o>
     r> to last# ; is msg:last
 
 :noname ( -- 64len )
@@ -468,21 +475,32 @@ Variable ask-msg-files[]
     fs-path $@ drop le-64@ last# cell+ $search[]date \ start index
     fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date over - >r
     cells safe/string r> cells umin
-    serialize-log  fs-outbuf !
+    req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
     r> free throw
-    fs-inbuf $@len u>64 ; msgfs-class is fs-poll
-:noname ( addr u mode -- )  fs-close
+    fs-outbuf $@len u>64 ; msgfs-class is fs-poll
+:noname ( addr u mode -- )
     \G addr u is starttick endtick name concatenated together
-    drop fs-path $!
-    fs-poll fs-size!
-; dup msgfs-class is fs-open  msgfs-class is fs-create
+    fs-close  drop fs-path $!  fs-poll fs-size!
+; msgfs-class is fs-open
+:noname ( addr u mode -- )
+    fs-close drop fs-path $!
+; msgfs-class is fs-create
 :noname ( -- )
+    fs-path @ 0= ?EXIT
     fs-path $@ 2 64s /string >group
+    replay-mode @ >r replay-mode on
     fs-inbuf $@ dup IF  msg-eval  ELSE  2drop  THEN  fs-inbuf $off
+    r> replay-mode !
+    fs-path $off
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!
 ; msgfs-class to fs-perm?
+:noname ( -- date perm )
+    64#0 0 ; msgfs-class is fs-get-stat
+:noname ( date perm -- )
+    drop 64drop ; msgfs-class is fs-set-stat
+' file-start-req msgfs-class is start-req
 
 \ message composer
 
@@ -518,23 +536,30 @@ previous
     2dup pubkey $@ key| str= IF  2drop pkc keysize  THEN ;
 
 also net2o-base
+: [msg,] ( xt -- )  last# >r
+    msg-group$ $@ dup IF  msg ?destpk 2dup >group $,
+	execute  end-with
+    ELSE  2drop drop  THEN  r> to last# ;
+
 : join, ( -- )
-    msg-group$ $@ dup IF  msg ?destpk 2dup >group $, msg-join
-	64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last
-	64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last?
-	sign[ msg-start "joined" $, msg-action msg> end-with
-	msg-log, 2drop
-    ELSE  2drop  THEN ;
+    [: msg-join
+      sign[ msg-start "joined" $, msg-action msg>
+      msg-log, 2drop ;] [msg,] ;
+
+: last, ( -- )
+    msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
+
+: last?, ( -- )
+    msg-group  64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last? ;
 
 : silent-join, ( -- )
     last# $@ dup IF  msg $, msg-join  end-with
     ELSE  2drop  THEN ;
 
-: leave, ( -- )  last# >r
-    msg-group$ $@ dup IF  msg ?destpk 2dup >group $, msg-leave
-	sign[ msg-start "left" $, msg-action msg> end-with
-	msg-log, 2drop
-    ELSE  2drop  THEN  r> to last# ;
+: leave, ( -- )
+    [: msg-leave
+      sign[ msg-start "left" $, msg-action msg>
+      msg-log, 2drop ;] [msg,] ;
 
 : left, ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
@@ -782,6 +807,16 @@ also net2o-base scope: /chat
 
     \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
+
+: sync ( addr u -- )
+    \U sync                 synchronize logs
+    \G sync: synchronize chat logs
+    2drop ." === sync ===" forth:cr
+    net2o-code ['] last?, [msg,] end-code ;
+
+: close-sync ( addr u -- )
+    2drop ." === close sync ===" forth:cr
+    n2o:close-all ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
@@ -830,8 +865,10 @@ previous
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
+$A $C 2Value chat-bufs#
+
 : chat-connect ( addr u -- )
-    $A $A pk-connect +resend-msg  greet +group ;
+    chat-bufs# pk-connect +resend-msg  greet +group ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed

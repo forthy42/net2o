@@ -57,9 +57,13 @@ $30 net2o: file-id ( uid -- o:file ) \g choose a file object
 fs-table >table
 
 reply-table $@ inherit-table fs-table
-:noname fs-id @ ulit, file-id ;
-file-classes file-classes# cells bounds [DO] dup [I] @ to start-req cell [+LOOP]
+
+: file-start-req fs-id @ ulit, file-id ;
+' file-start-req
+file-classes file-classes# cells bounds
+[DO] dup [I] @ to start-req cell [+LOOP]
 drop
+
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
     parent @ .perm-mask @ >r r@ fs-perm?
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
@@ -74,11 +78,11 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
 +net2o: set-limit ( ulimit -- ) \g set limit attribute of current file
     track( ." file <" fs-id @ 0 .r ." > seek to: " 64dup u64. forth:cr ) limit-min! ;
 +net2o: set-stat ( umtime umod -- ) \g set time and mode of current file
-    64>n n2o:set-stat ;
-+net2o: get-size ( -- ) \g requuest file size
+    64>n fs-set-stat ;
++net2o: get-size ( -- ) \g request file size
     fs-size 64@ lit, set-size ;
 +net2o: get-stat ( -- ) \g request stat of current file
-    n2o:get-stat >r lit, r> ulit, set-stat ;
+    fs-get-stat >r lit, r> ulit, set-stat ;
 +net2o: set-form ( w h -- ) \g if file is a terminal, set size
     term-h ! term-w ! ;
 +net2o: get-form ( -- ) \g if file is a terminal, request size
@@ -172,8 +176,10 @@ also }scope
 : blockalign! ( n -- ) max-block# umin dup ulit, set-blockalign
     1 swap lshift blockalign ! ;
 
+: open-sized-file ( addr u mode --)
+    open-file get-size ;
 : open-tracked-file ( addr u mode --)
-    open-file get-size get-stat ;
+    open-sized-file get-stat ;
 
 : n2o>file ( xt -- )
     file-reg# @ ulit, file-id  catch  end-with

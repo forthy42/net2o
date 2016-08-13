@@ -21,6 +21,9 @@ Like any squid, it can eject ink and go dark.
 Nettie is artwork, and covered by copyright.  Where it is part of
 net2o, you can use it under AGPLv3.  It is not covered as trademark,
 but since I've been using it for years now, don't you dare registering
-it as trademark.  I don't want to exercise this sort of control.  Any
-product which implements net2o, or provides services using net2o can
-use this logo.
+it as trademark; it is a de facto trademark, and protected against
+fraudulent registration.  I don't want to exercise this sort of
+control.  Any product which implements net2o, or provides services
+using net2o can use this logo.  If you don't use the AGPLv3 for your
+net2o implementation or services, you have to ask for permission,
+though.
