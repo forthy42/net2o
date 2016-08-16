@@ -482,9 +482,16 @@ Variable ask-msg-files[]
     \G addr u is starttick endtick name concatenated together
     fs-close  drop fs-path $!  fs-poll fs-size!
 ; msgfs-class is fs-open
+: msg-file-done ( -- )
+    fs-close ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
+    ['] msg-file-done file-xt !
 ; msgfs-class is fs-create
+:noname ( addr u -- u )
+    [ termserver-class :: fs-read ]
+    fs-inbuf $@len 0= IF  fs-close  THEN
+; msgfs-class is fs-read
 :noname ( -- )
     fs-path @ 0= ?EXIT
     fs-path $@ 2 64s /string >group
@@ -813,10 +820,6 @@ also net2o-base scope: /chat
     \G sync: synchronize chat logs
     2drop ." === sync ===" forth:cr
     net2o-code ['] last?, [msg,] end-code ;
-
-: close-sync ( addr u -- )
-    2drop ." === close sync ===" forth:cr
-    n2o:close-all ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

@@ -237,7 +237,11 @@ event: ->termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
     termserver-in termserver-out ;
 event: ->termclose ( -- ) termfile off  default-in default-out ;
 
-:noname ( addr u -- u ) tuck fs-inbuf $+! ; termserver-class to fs-write
+:noname ( addr u -- u )
+    fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
+    fs-size 64@ fs-inbuf $@len u>64 64= IF
+	<event o elit, ->file-done parent @ .wait-task @ event>
+    THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
     fs-outbuf 0 r@ $del r> ; termserver-class to fs-read
