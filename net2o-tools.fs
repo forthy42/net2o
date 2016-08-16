@@ -676,7 +676,7 @@ $1F to tmps# \ need more temporaries
     [: >r BEGIN  refill  WHILE
 	      source 2over string-prefix? IF  r@ execute  THEN
       REPEAT rdrop 2drop ;] execute-parsing-named-file ;
-comp: loadfilename 2@ postpone sliteral :, ;
+comp: sourcefilename postpone sliteral :, ;
 
 : .cmd ( addr u -- addr u )
     source 2over nip /string type cr ;
