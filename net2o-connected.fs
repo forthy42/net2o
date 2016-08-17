@@ -339,7 +339,7 @@ also net2o-base
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
-	net2o:ack-resend#  rewind-transfer
+	net2o:save&  net2o:ack-resend#  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
 
