@@ -489,13 +489,14 @@ Variable ask-msg-files[]
 : msg-file-done ( -- )
     fs-close parent @ >o
     -1 file-count +!
-    file-count @ 0<= IF
-	." === sync done ===" forth:cr
-	file-reg# off
-	last# $@ ?msg-log last# cell+ $[]#
-	sync-date 64@ date>i 1+ - 0 max
-	?dup-IF  last# $@ rot  display-lastn  THEN
-    THEN o> ;
+    file-count @ 0< IF  file-count off
+    ELSE  file-count @ 0= IF
+	    ." === sync done ===" forth:cr
+	    file-reg# off  file-count off
+	    last# $@ ?msg-log last# cell+ $[]#
+	    sync-date 64@ date>i 1+ - 0 max
+	    ?dup-IF  last# $@ rot  display-lastn  THEN
+    THEN  THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -560,16 +561,16 @@ also net2o-base
 	execute  end-with
     ELSE  2drop drop  THEN  r> to last# ;
 
-: join, ( -- )
-    [: msg-join
-      sign[ msg-start "joined" $, msg-action msg>
-      msg-log, 2drop ;] [msg,] ;
-
 : last, ( -- )
     msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
     msg-group  64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last? ;
+
+: join, ( -- )
+    [: msg-join  64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last?
+      sign[ msg-start "joined" $, msg-action msg>
+      msg-log, 2drop ;] [msg,] ;
 
 : silent-join, ( -- )
     last# $@ dup IF  msg $, msg-join  end-with
