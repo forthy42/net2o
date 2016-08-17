@@ -203,8 +203,6 @@ also }scope
     r@ ulit, file-id 64dup lit, set-limit end-with
     r> init-limit! ;
 
-file-reg# off
-
 previous
 
 \ client side timing

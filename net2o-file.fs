@@ -360,8 +360,6 @@ scope{ mapc
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 
-User file-reg#
-
 : n2o:close-file ( id -- )
     id>addr? .fs-close ;
 

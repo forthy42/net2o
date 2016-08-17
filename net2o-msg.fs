@@ -72,6 +72,7 @@ Sema msglog-sema
 
 : msg-eval ( addr u -- )
     n2o:new-msging >o parent off do-cmd-loop dispose o> ;
+
 : vault>msg ( -- )
     ['] msg-eval is write-decrypt ;
 
@@ -125,12 +126,15 @@ Sema queue-sema
 : do-msg-nestsig ( addr u -- )
     parent @ .msg-context @ .msg-display msg-notify ;
 
+64Variable sync-date \ default chat sync date
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
-    cells >r ?msg-log last# msg-log@ over { log }
+    cells >r ?msg-log last# msg-log@ 2dup { log u }
     dup r> - 0 max /string bounds ?DO
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
-    cell +LOOP   log free throw  dispose o> ;
+    cell +LOOP
+    u IF  log u + cell- $@ startdate@ sync-date 64!  THEN
+    log free throw  dispose o> ;
 
 Defer silent-join
 
@@ -423,10 +427,10 @@ msgfs-class +file-classes
 : n2o:copy-msg ( filename u -- )
     ." copy msg: " 2dup
     over le-64@ .ticks 1 64s /string  ." ->"
-    over le-64@ .ticks 1 64s /string  ." @" forth:type forth:cr
+    over le-64@ .ticks 1 64s /string  ." @" forth:type
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
       file-reg# @ save-to-msg ;] n2o>file
-    1 file-count +! ;
+    1 file-count +! forth:cr ;
 
 $20 Value max-last#
 $20 Value ask-last#
@@ -483,7 +487,15 @@ Variable ask-msg-files[]
     fs-close  drop fs-path $!  fs-poll fs-size!
 ; msgfs-class is fs-open
 : msg-file-done ( -- )
-    fs-close ;
+    fs-close parent @ >o
+    -1 file-count +!
+    file-count @ 0<= IF
+	." === sync done ===" forth:cr
+	file-reg# off
+	last# $@ ?msg-log last# cell+ $[]#
+	sync-date 64@ date>i 1+ - 0 max
+	?dup-IF  last# $@ rot  display-lastn  THEN
+    THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -818,8 +830,11 @@ also net2o-base scope: /chat
 : sync ( addr u -- )
     \U sync                 synchronize logs
     \G sync: synchronize chat logs
-    2drop ." === sync ===" forth:cr
-    net2o-code ['] last?, [msg,] end-code ;
+    2drop o 0= IF  msg-group$ $@ msg-groups #@
+	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
+    THEN  o to connection
+    ." === sync ===" forth:cr
+    net2o-code  ['] last?, [msg,] end-code ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

@@ -210,7 +210,8 @@ cmd-class class
     field: request#
     field: filereq#
     field: file-count \ open file count
-
+    field: file-reg#  \ next file id to request
+    
     field: data-b2b
     
     cfield: ack-state
