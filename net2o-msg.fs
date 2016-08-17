@@ -493,7 +493,7 @@ Variable ask-msg-files[]
     ELSE  file-count @ 0= IF
 	    ." === sync done ===" forth:cr
 	    file-reg# off  file-count off
-	    last# $@ ?msg-log last# cell+ $[]#
+	    msg-group$ $@ ?msg-log last# cell+ $[]#
 	    sync-date 64@ date>i 1+ - 0 max
 	    ?dup-IF  last# $@ rot  display-lastn  THEN
     THEN  THEN o> ;
@@ -941,7 +941,8 @@ $A $C 2Value chat-bufs#
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
 : ?wait-chat ( -- ) #0. /chat:chats
-    BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT ; \ stub
+    BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT
+    msg-group$ $@ ; \ stub
 
 scope{ /chat
 : chat ( addr u -- )
@@ -1017,7 +1018,7 @@ scope{ /chat
     msg-group$ $@ >group last# split-load ;
 }scope
 
-: do-chat ( -- ) chat-entry \ ['] cmd( >body on
+: do-chat ( -- ) msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
