@@ -404,7 +404,7 @@ User hashtmp$
     \G Each interval contains a 64 bit hash of the last 64 bit of
     \G each message within the interval
     last# >r >r last# $@ ?msg-log
-    last cell+ $[]#
+    last# cell+ $[]#
     IF
 	date>i >r date>i r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
