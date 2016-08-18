@@ -477,7 +477,8 @@ Variable ask-msg-files[]
     fs-path $@ 2 64s /string ?msg-log
     last# msg-log@ over >r
     fs-path $@ drop le-64@ last# cell+ $search[]date \ start index
-    fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date over - >r
+    fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date 1+ \ end index
+    last# cell+ $[]# 1- umin over - >r
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
     r> free throw
@@ -488,7 +489,6 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 : msg-file-done ( -- )
     fs-close parent @ >o
-    -1 file-count +!
     file-count @ 0< IF  file-count off
     ELSE  file-count @ 0= IF
 	    ." === sync done ===" forth:cr
@@ -512,6 +512,7 @@ Variable ask-msg-files[]
     fs-inbuf $@ dup IF  msg-eval  ELSE  2drop  THEN  fs-inbuf $off
     r> replay-mode !
     fs-path $off
+    -1 parent @ .file-count +!
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!

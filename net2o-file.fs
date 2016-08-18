@@ -239,7 +239,7 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 
 :noname ( addr u -- u )
     fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
-    fs-size 64@ fs-inbuf $@len u>64 64= IF
+    fs-size 64@ fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
 	<event o elit, ->file-done parent @ .wait-task @ event>
     THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
