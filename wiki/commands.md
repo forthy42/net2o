@@ -49,6 +49,8 @@ List of Commands
   do nothing
 + $D 4cc ( #3letter -- )
   At the beginning of a file, this can be used as FourCC code
++ $E padding ( #len -- )
+  add padding to align fields
 
 ### reply commands ###
 
@@ -174,7 +176,7 @@ List of Commands
 + $26 set-stat ( umtime umod -- )
   set time and mode of current file
 + $27 get-size ( -- )
-  requuest file size
+  request file size
 + $28 get-stat ( -- )
   request stat of current file
 + $29 set-form ( w h -- )
@@ -322,33 +324,37 @@ List of Commands
 
 + $20 msg-start ( $:pksig -- )
   start message
-+ $21 msg-group ( $:group -- )
-  specify a chat group
++ $21 msg-tag ( $:group -- )
+  tagging (can be anywhere)
 + $24 msg-signal ( $:pubkey -- )
   signal message to one person
-+ $25 msg-re ( $:hash )
++ $25 msg-re ( $:hash type )
   relate to some object
 + $26 msg-text ( $:msg -- )
   specify message string
-+ $27 msg-object ( $:object -- )
++ $27 msg-object ( $:object type -- )
   specify an object, e.g. an image
 + $28 msg-action ( $:msg -- )
-  specify message string
+  specify action string
++ $29 msg-equiv ( $:object type -- )
+  equivalent object
 + $2B msg-coord ( $:gps -- )
+  GPS coordinates
 
 ### messaging commands ###
 
 + $34 msg ( -- o:msg )
   push a message object
++ $21 msg-group ( $:group -- )
+  set group
 + $22 msg-join ( $:group -- )
   join a chat group
 + $23 msg-leave ( $:group -- )
   leave a chat group
-+ $29 msg-reconnect ( $:pubkey+addr -- )
++ $24 msg-reconnect ( $:pubkey+addr -- )
   rewire distribution tree
-+ $2A msg-last? ( tick -- )
-+ $2C msg>group ( $:group -- )
-  just set group, for reconnect
++ $25 msg-last? ( start end n -- )
++ $26 msg-last ( $:[tick0,msgs,..tickn] -- )
 + $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
 
@@ -364,7 +370,7 @@ that makes identical transactions have the same hash.
   delete file
 + $22 dvcs-rmdir ( $:name -- )
   delete directory
-+ $23 dvcs-patch ( $:diff -- )
-  apply patch
++ $23 dvcs-patch ( $:diff len -- )
+  apply patch, len is the size of the result
 + $24 dvcs-write ( $:perm+name size -- )
   write out file

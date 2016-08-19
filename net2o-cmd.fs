@@ -207,7 +207,9 @@ drop
 	5 of  ." end-with " cr  t# IF  t-pop  token-table !  THEN  endof
 	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
 	11 of  string@noerr  n2o.secstring  endof
-	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "  endof
+	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "
+	endof
+	14 of  string@noerr  2drop  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -470,7 +472,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: nop ( -- ) nat( ." nop" forth:cr ) ; \g do nothing
 +net2o: 4cc ( #3letter -- )
     \g At the beginning of a file, this can be used as FourCC code
-    p@ 64drop p@ 64drop p@ 64drop ; 
+    p@ 64drop p@ 64drop p@ 64drop ;
++net2o: padding ( #len -- )
+    \g add padding to align fields
+    string@ $> 2drop ;
 }scope
 
 gen-table $freeze
