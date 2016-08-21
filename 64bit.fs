@@ -85,13 +85,8 @@ cell 8 = [IF]
     ' * Alias 64*
     ' within alias 64within
     : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
-    ' d= Alias 128= ( d1 d2 -- flag )
     : 128@ ( addr -- d ) 2@ swap ;
     : 128! ( d addr -- ) >r swap r> 2! ;
-    : le-128@ ( addr -- d )
-	dup >r le-64@ r> cell+ le-64@ ;
-    : le-128! ( d addr -- )
-	tuck cell+ le-64! le-64! ;
     ' stop-ns alias stop-64ns
     also locals-types definitions
     ' w: alias 64:
@@ -190,30 +185,12 @@ cell 8 = [IF]
 	r@ cell+ @
 	r@ 2 cells + @
 	r> 3 cells + @ ;
-    : 128= ( x1..y4 y1..y4 -- flag )  128xor  or or or 0= ;
     : 128! ( x1..x4 addr -- )
 	>r
 	r@ 3 cells + !
 	r@ 2 cells + !
 	r@ cell+ !
 	r> ! ;
-    le? [IF]
-	' 128@ Alias le-128@
-	' 128! Alias le-128!
-    [ELSE]
-	: le-128@ ( addr -- x1..x4 )
-	    >r
-	    r@ le-ul@
-	    r@ cell+ le-ul@
-	    r@ 2 cells + le-ul@
-	    r> 3 cells + le-ul@ ;
-	: le-128! ( x1..x4 addr -- )
-	    >r
-	    r@ 3 cells + le-l!
-	    r@ 2 cells + le-l!
-	    r@ cell+ le-l!
-	    r> le-l! ;
-    [THEN]
     ' stop-dns alias stop-64ns
     : compile-pushlocal-64 ( a-addr -- ) ( run-time: w1 w2 -- )
 	locals-size @ alignlp-w cell+ cell+ dup locals-size !
@@ -243,3 +220,7 @@ cell 8 = [IF]
 ' dfaligned Alias 64aligned
 ' dffield: Alias 64field:
 : x64. ( 64n -- ) ['] u64. $10 base-execute ;
+: le-128@ ( addr -- d )
+    dup >r le-64@ r> cell+ le-64@ ;
+: le-128! ( d addr -- )
+    tuck cell+ le-64! le-64! ;

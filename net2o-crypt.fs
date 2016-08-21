@@ -152,7 +152,7 @@ scope{ mapc
     tweak( ." key init: " key>dump .nnb cr ) ;
 
 : crypt-key-setup ( addr u1 key u2 -- addr' u' )
-    2>r over >r  rng128 64over 64over r> le-128! 2r> c:tweakkey!
+    2>r over >r  $10 rng$ drop dup r> $10 move le-128@ 2r> c:tweakkey!
     key-salt# safe/string ;
 
 : encrypt$ ( addr u1 key u2 -- )
@@ -167,7 +167,7 @@ scope{ mapc
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
-    2>r over >r  rng128 r@ le-128!
+    2>r over >r  $10 rng$ r@ swap move
     r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
 
 : pw-diffuse ( diffuse# -- )

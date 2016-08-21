@@ -205,12 +205,11 @@ also net2o-base
 	endcase
 	addr port be-uw@ ulit, addr-port
     ;] gen-cmd$ ;
-:noname ( addr len -- addr' len' )
+: sockaddr+return ( addr len -- addr' len' )
     [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
-is sockaddr+return
 previous
-:noname ( -- addr len )
-    return-address be@ routes #.key $@ .sockaddr ; is >sockaddr
+: >sockaddr ( -- addr len )
+    return-address be@ routes #.key $@ .sockaddr ;
 
 0 [IF]
 Local Variables:

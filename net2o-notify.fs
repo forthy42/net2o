@@ -38,7 +38,7 @@ Variable pending-notifications
 
 : notify- ( -- )
     pending-notifications off
-    64#0 to last-notify ;
+    latest-notify to last-notify ;
 
 Sema notify-sema
 : notify; nip (;]) ]] notify-sema c-section ; [[ ;
@@ -78,7 +78,7 @@ Sema notify-sema
 	[IFDEF] build-notification
 	    build-notification show-notification
 	[THEN]
-	ticks to last-notify
+	latest-notify to last-notify
     THEN  notify$ $off ;
 
 previous previous

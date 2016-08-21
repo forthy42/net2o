@@ -316,12 +316,12 @@ code-buf$
 :noname ( n -- )  cmd$ $@len + cmd$ $!len ; to -cmdbuf
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
-: gen-cmd$ ( xt -- addr u )
+: gen-cmd ( xt -- $addr )
     cmdbuf-o @ >r code-buf$ cmd$ @ >r
-    cmd$ off
-    1 tmp$# +!  catch  cmd$ @ tmp$ $!buf
-    r> cmd$ ! r> cmdbuf-o !  throw
-    tmp$ $@ ;
+    cmd$ off  catch  cmd$ @  swap
+    r> cmd$ ! r> cmdbuf-o !  throw ;
+: gen-cmd$ ( xt -- addr u )
+    gen-cmd  1 tmp$# +!  tmp$ $!buf  tmp$ $@ ;
 
 code0-buf \ reset default
 

@@ -90,6 +90,7 @@ s" termserver access denied"     throwcode !!termserver-perm!!
 s" sync access denied"           throwcode !!sync-perm!!
 s" patch size exceeds limit"     throwcode !!patch-limit!!
 s" patch size wrong"             throwcode !!patch-size!!
+s" insufficiend randomness"      throwcode !!insuff-rnd!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

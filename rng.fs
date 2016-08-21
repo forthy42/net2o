@@ -28,8 +28,6 @@ require unix/pthread.fs
 
 $400 Constant rngbuf#
 
-s" /dev/urandom" r/o open-file throw Value rng-fd
-
 User rng-pos
 User rng-buffer
 User rng-pid
@@ -47,8 +45,17 @@ rngbuf# rng-pos !
     \G run @i{xt} with activated random key
     c:key@ >r  rng-key @ c:key!  catch  r> c:key!  throw ;
 
-: rng-init ( -- )
-    rng-buffer @ rngbuf# rng-fd read-file throw drop ;
+: read-rnd ( addr u -- )
+    \ read in bytes from /dev/urandom
+    s" /dev/urandom" r/o open-file throw >r
+    tuck r@ read-file r> close-file throw
+    throw <> !!insuff-rnd!! ;
+
+: rng-init ( -- ) \ reed seed into the buffer
+    \ note that reading 1k of /dev/urandom is unnecessary much
+    \ but for sake of simplicity, just do it. It will produce
+    \ good randomness even with a number of backdoor possibilities
+    rng-buffer @ rngbuf# read-rnd ;
 
 : >rng$ ( addr u -- )
     \G fill @i{addr u} with random data by encrypting it
@@ -63,7 +70,7 @@ rngbuf# rng-pos !
 \ init rng to be actually useful
 
 : random-init ( -- )
-    rng-key @ c:key# rng-fd read-file throw drop ;
+    rng-key @ c:key# read-rnd ;
 
 : read-initrng ( fd -- flag )  { fd }
     #0. fd reposition-file throw
@@ -75,10 +82,12 @@ rngbuf# rng-pos !
     rng-key @ c:key# r@ write-file throw
     r> close-file throw ;
 
+Sema rng-sema
+
 : salt-init ( -- )
     s" ~/.initrng" r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
-    rng-init rng-step write-initrng rng-init rng-step ;
+    rng-init rng-step write-initrng rng-step ;
 
 \ buffered random numbers to output 64 bit at a time
 
@@ -87,8 +96,9 @@ rngbuf# rng-pos !
     \G in case the RNG is not initialized, init it.
     \G this covers forks and new threads, as the RNG key
     \G is per-thread.
-    up@ rng-task @ <> getpid rng-pid @ <> or
-    IF  rng-allot salt-init  THEN
+    up@ rng-task @ <> dup IF   rng-allot  THEN
+    getpid rng-pid @ <> or
+    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN
     rngbuf# u> IF  rng-step  THEN ;
 
 : rng64 ( -- x64 )
@@ -96,10 +106,6 @@ rngbuf# rng-pos !
     rng-pos @ 64aligned 64'+ rng-step?
     rng-pos @ 64aligned dup 64'+ rng-pos !
     rng-buffer @ + 64@ ;
-
-: rng128 ( -- x128 )
-    \G return a 128 bit random number
-    rng64 rng64 ;
 
 : rng$ ( u -- addr u ) >r
     \G return a @i{u} bytes stream (@i{u} must be smaller than the

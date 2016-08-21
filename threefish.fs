@@ -64,8 +64,7 @@ User threefish-t
     threefish-state tf_ctx-tweak $10 bounds DO
 	1 I +! I @ ?LEAVE \ continue when wraparound
     cell +LOOP  ;
-: tf-tweak! ( 128b -- )
-    threefish-state tf_ctx-tweak $10 erase
+: tf-tweak! ( x128 -- )
     threefish-state tf_ctx-tweak le-128! ;
 
 threefish-init
@@ -126,7 +125,7 @@ threefish-init
     threefish-padded threefish#max erase
     $80 tag + threefish-state tf_ctx-tweak $F + c! \ last block flag
     threefish-state threefish-padded dup $E tf_encrypt
-    2r> + 128@ threefish-padded 128@ 128=
+    2r> + threefish-padded $10 tuck str=
 ; to c:decrypt+auth
 :noname ( addr u -- )
     \G Hash message in buffer addr u

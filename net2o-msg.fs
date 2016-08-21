@@ -15,10 +15,10 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Defer avalanche-to ( addr u o:context -- )
-Defer pk-connect ( key u cmdlen datalen -- )
-Defer addr-connect ( key+addr u cmdlen datalen xt -- )
-Defer pk-peek? ( addr u0 -- flag )
+Forward avalanche-to ( addr u o:context -- )
+Forward pk-connect ( key u cmdlen datalen -- )
+Forward addr-connect ( key+addr u cmdlen datalen xt -- )
+Forward pk-peek? ( addr u0 -- flag )
 
 : ?hash ( addr u hash -- ) >r
     2dup r@ #@ d0= IF  "" 2swap r> #!  ELSE  2drop rdrop  THEN ;
@@ -61,7 +61,7 @@ Sema msglog-sema
     [: bounds ?DO
 	  I $@ net2o-base:$, net2o-base:nestsig
       cell +LOOP ;]
-    gen-cmd$ 2drop 0 tmp$ !@ ;
+    gen-cmd ;
 
 : save-msgs ( last -- )
     ?.net2o/chats  n2o:new-msging >o
@@ -136,7 +136,7 @@ Sema queue-sema
     u IF  log u + cell- $@ startdate@ sync-date 64!  THEN
     log free throw  dispose o> ;
 
-Defer silent-join
+Forward silent-join
 
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
@@ -248,8 +248,8 @@ event: ->msg-nestsig ( addr u o group -- )
     dup 5 sf[]@ fsplit 0 .r '.' emit 100e f* f>s .## ." m"
     drop ;
 
-Defer msg:last?
-Defer msg:last
+Forward msg:last?
+Defer msg:last \ uses locals, forward not possible
 
 : push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
@@ -355,8 +355,8 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     ELSE
 	reconnect-chat
     THEN ;
-+net2o: msg-last? ( start end n -- ) msg:last? ;
-+net2o: msg-last ( $:[tick0,msgs,..tickn] -- ) msg:last ;
++net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
++net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
 
 : ?pkgroup ( addr u -- addr u )
     \ if no group has been selected, use the pubkey as group
@@ -437,10 +437,10 @@ $20 Value ask-last#
 
 Variable ask-msg-files[]
 
-:noname ( start end n -- )
+: msg:last? ( start end n -- )
     last# $@ $, msg-group
     max-last# umin
-    last-msgs@ >r $, r> ulit, msg-last ; is msg:last?
+    last-msgs@ >r $, r> ulit, msg-last ;
 :noname ( $:[tick0,tick1,...,tickn] n -- )
     ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
@@ -590,9 +590,9 @@ previous
     net2o-code expect-msg join,
     ( cookie+request ) end-code| ;
 
-:noname ( -- )
+: silent-join ( -- )
     net2o-code expect-msg silent-join,
-    end-code ; is silent-join
+    end-code ;
 
 : send-leave ( -- )
     net2o-code expect-msg leave,
@@ -1026,13 +1026,13 @@ scope{ /chat
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats ;
 
-:noname ( addr u o:context -- )
+: avalanche-to ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
     net2o-code expect-msg msg
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with
-    end-code ; is avalanche-to
+    end-code ;
 
 0 [IF]
 Local Variables:

@@ -110,8 +110,8 @@ keccak-init
     \G Decrypt message in buffer addr u, with auth check
     { tag } @keccak -rot rounds KeccakDecryptLoop
     keccak*
-    128@ keccak-checksums keccak#cks keccak>
-    keccak-checksums tag 7 and 4 lshift + 128@ 128=
+    keccak-checksums keccak#cks keccak>
+    keccak-checksums tag 7 and 4 lshift + $10 tuck str=
 ; to c:decrypt+auth ( addr u tag -- flag )
 :noname ( addr u -- )
 \G Hash message in buffer addr u

@@ -163,13 +163,13 @@ event: ->do-beacon ( addr -- )
     \G I got a punch
     nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr ) ;
 
-:noname ( char -- )
+: handle-beacon ( char -- )
     case
 	'?' of  ?-beacon  endof
 	'!' of  !-beacon  endof
 	'.' of  .-beacon  endof
 	'>' of  >-beacon  endof
-    endcase ; is handle-beacon
+    endcase ;
 
 : replace-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>
@@ -185,7 +185,7 @@ event: ->do-beacon ( addr -- )
 : pk-lookup ( addr u -- )
     ['] pk:addme-fetch-host pk-query 0= !!host-notfound!! ;
 
-:noname ( pk u -- flag )  ['] c:fetch-id pk-query ; is pk-peek?
+: pk-peek? ( pk u -- flag )  ['] c:fetch-id pk-query ;
 
 User host$ \ check for this hostname
 
@@ -238,16 +238,15 @@ User host$ \ check for this hostname
     ['] ?nat-done ['] no-nat-done ind-addr @ select rqd?
     n2o:connect nat( ." connected" forth:cr ) ;
 
-:noname ( addr u cmdlen datalen -- )
-    2>r n2o:pklookup 2r> direct-connect
-; is pk-connect
+: pk-connect ( addr u cmdlen datalen -- )
+    2>r n2o:pklookup 2r> direct-connect ;
 
-:noname ( addr+key u cmdlen datalen xt -- )
+: addr-connect ( addr+key u cmdlen datalen xt -- )
     -rot 2>r >r over + 1- dup c@ dup >r -
     2dup u>= !!keysize!!
     dup r> make-context
     over - insert-addr$ 0= !!no-address!!
-    r> execute 2r> n2o:connect ; is addr-connect
+    r> execute 2r> n2o:connect ;
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;

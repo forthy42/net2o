@@ -157,10 +157,15 @@ net2o-base
 
 \ create commands to send back
 
-:noname ( -- )
+}scope
+
+: new-ivs ( -- )
     tmp-ivs sec@ ivs-strings
     validated @ receive-val and  IF receive-ivs ELSE send-ivs THEN
-    tmp-ivs sec-off ; is new-ivs
+    tmp-ivs sec-off ;
+
+scope{ net2o-base
+
 : all-ivs ( -- ) \G Seed and gen all IVS
     state# rng$ 2dup sec$, gen-ivs tmp-ivs sec!
     validated @ ivs-val or receive-val invert and validated ! ;

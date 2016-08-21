@@ -7,7 +7,7 @@ require rng.fs
 
 \ random initializer for hash
 
-: hash-init-rng ( -- )  rng128 hashinit 128! ;
+: hash-init-rng ( -- )  $10 rng$ hashinit swap move ;
 
 hash-init-rng
 

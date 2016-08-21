@@ -22,6 +22,7 @@ require net2o-err.fs
 
 \ required tools
 
+require forward.fs
 require mini-oof2.fs
 require user-object.fs
 require rec-scope.fs
@@ -478,7 +479,7 @@ Variable mapstart $1 mapstart !
     addrd u code-rmap map-code-dest
     addrs u map-source code-map ! ;
 
-Defer new-ivs ( -- )
+Forward new-ivs ( -- )
 \G Init the new IVS
 : create-maps ( -- ) validated @ >r
     [ newcode-val newdata-val or invert ]L r@ and validated !
@@ -857,8 +858,8 @@ require net2o-file.fs
 
 \ helpers for addresses
 
-Defer >sockaddr
-Defer sockaddr+return
+Forward >sockaddr
+Forward sockaddr+return
 
 : -sig ( addr u -- addr u' ) 2dup + 1- c@ 2* $11 + - ;
 : n2oaddrs ( xt -- )
@@ -1322,7 +1323,7 @@ Variable recvflag  recvflag off
     [:  \ ." created sender task " up@ hex. cr
 	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
-Defer handle-beacon
+Forward handle-beacon
 
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
@@ -1746,6 +1747,8 @@ require net2o-qr.fs
 require net2o-dvcs.fs
 
 require net2o-dhtroot.fs \ configuration for DHT root
+
+.unresolved
 
 0 [IF]
 Local Variables:
