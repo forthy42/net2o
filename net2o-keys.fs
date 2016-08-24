@@ -386,7 +386,7 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 
 : .simple-id ( addr u -- ) key>nick type ;
 
-:noname ( addr u -- )
+: check-key ( addr u -- )
     o IF  pubkey @ IF
 	    2dup pubkey $@ key| str= 0= IF
 		[: ." want: " pubkey $@ key| 85type cr
@@ -401,11 +401,11 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
     tmp-perm @ perm%blocked and IF
 	[: ." Unknown key, connection refused: " 85type cr ;] $err
 	true !!connect-perm!!
-    ELSE  2drop  THEN ; IS check-key
+    ELSE  2drop  THEN ;
 
-:noname ( pkc -- skc )
+: search-key ( pkc -- skc )
     keysize key-table #@ 0= !!unknown-key!!
-    cell+ .ke-sk sec@ 0= !!unknown-key!! ; is search-key
+    cell+ .ke-sk sec@ 0= !!unknown-key!! ;
 
 \ apply permissions
 
@@ -922,15 +922,14 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     invitations [: ." invite (y/n/b)? " 2dup .pk2key$ process-invitation
     ;] $[]map  invitations $[]off ;
 
-:noname ( addr u -- )
+: >invitations ( addr u -- )
     2dup filter-invitation? IF  2drop EXIT  THEN
     invitations $[]# >r
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem [ up@ ]l <hide>
 	<event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
-    ELSE  2drop  THEN
-; is >invitations
+    ELSE  2drop  THEN ;
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
     gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!
@@ -990,7 +989,7 @@ Variable tries#
     >raw-key ?rsk   r> op-vector ! ;
 
 scope: n2o
-Defer help
+Forward help
 }scope
 
 : get-me ( -- )

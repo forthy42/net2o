@@ -247,7 +247,7 @@ event: ->msg-nestsig ( addr u o group -- )
     drop ;
 
 Forward msg:last?
-Defer msg:last \ uses locals, forward not possible
+Forward msg:last
 
 : push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
@@ -439,11 +439,9 @@ Variable ask-msg-files[]
     last# $@ $, msg-group
     max-last# umin
     last-msgs@ >r $, r> ulit, msg-last ;
-:noname ( $:[tick0,tick1,...,tickn] n -- )
-    ask-msg-files[] $[]off
-    forth:. ." Messages:" forth:cr
+: ?ask-msg-files ( addr u -- )
     64#-1 64#0 { 64^ startd 64^ endd } \ byte order of 0 and -1 don't matter
-    last# >r last# $@ ?msg-log
+    last# $@ ?msg-log
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
@@ -463,11 +461,15 @@ Variable ask-msg-files[]
     startd le-64@ 64#-1 64<> IF
 	endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
 	ask-msg-files[] dup $[]# swap $[] $exec
-    THEN
+    THEN ;
+: msg:last ( $:[tick0,tick1,...,tickn] n -- )
+    last# >r  ask-msg-files[] $[]off
+    forth:. ." Messages:" forth:cr
+    ?ask-msg-files
     parent @ >o $10 blocksize! $4 blockalign!
     ask-msg-files[] [: n2o:copy-msg ;] $[]map
     n2o:done o>
-    r> to last# ; is msg:last
+    r> to last# ;
 
 :noname ( -- 64len )
     \ poll serializes the 

@@ -953,9 +953,9 @@ scope{ mapc
     over data-map @ .mapc:resend#+ set-dest#
     >send  ack@ .bandwidth+  send-data-packet ;
 
-Defer punch-reply
-Defer addr>sock
-Defer new-addr
+Defer addr>sock \ uses locals
+Forward punch-reply
+Forward new-addr
 
 : send-punch ( addr u -- addr u )
     check-addr1 0= IF  2drop  EXIT  THEN
@@ -1388,8 +1388,7 @@ Variable timeout-tasks s" " timeout-tasks $!
 
 \ handling packets
 
-Defer cmd-exec ( addr u -- )
-' dump IS cmd-exec
+Forward cmd-exec ( addr u -- )
 
 : !!<order?   ( n -- )  dup c-state @ u>  !!inv-order!! c-state or! ;
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;

@@ -86,7 +86,7 @@ Variable announced
 
 \ NAT retraversal
 
-Defer insert-addr ( o -- )
+Forward insert-addr ( o -- )
 
 : renat ( -- )
     msg-groups [:
@@ -195,7 +195,7 @@ User host$ \ check for this hostname
 : host= ( o -- flag )
     host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
 
-:noname ( o -- flag )
+: insert-addr ( o -- flag )
     connect( ." check addr: " dup .addr cr )  false swap
     [: check-addr1 0= IF  2drop EXIT  THEN
       insert-address temp-addr ins-dest
@@ -203,7 +203,7 @@ User host$ \ check for this hostname
       ret-addr $10 0 skip nip 0= IF
 	  temp-addr ret-addr $10 move
 	  dest-0key< sec@ dup IF  dest-0key> @ sec!  ELSE  2drop  THEN
-      THEN  drop true ;] addr>sock ; is insert-addr
+      THEN  drop true ;] addr>sock ;
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !
     new-addr dup insert-addr swap .n2o:dispose-addr ;

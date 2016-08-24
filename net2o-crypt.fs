@@ -362,8 +362,8 @@ $60 Constant rndkey#
 : ?keysize ( u -- )
     keysize <> !!keysize!! ;
 
-Defer check-key \ check if we know that key
-Defer search-key \ search if that is one of our pubkeys
+Forward check-key \ check if we know that key
+Forward search-key \ search if that is one of our pubkeys
 
 : key-stage2 ( pk sk -- ) >r
     keypad$ keysize <> !!no-tmpkey!!

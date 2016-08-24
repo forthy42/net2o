@@ -401,13 +401,12 @@ also net2o-base
     pings new-request false gen-punchload gen-punch ;
 previous
 
-:noname ( addr u -- )
+: punch-reply ( addr u -- )
     outflag @ >r  cmdbuf-o @ >r
     [: cmd0! cmdreset init-reply also net2o-base
       [ also net2o-base ]
       $, nest end-code ;] catch
-    r> cmdbuf-o !  r> outflag !  throw
-; is punch-reply
+    r> cmdbuf-o !  r> outflag !  throw ;
 
 : 0-resend? ( -- n )
     resend0 @ IF

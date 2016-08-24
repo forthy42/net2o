@@ -99,7 +99,7 @@ User ip6:#
     over c@ '0' = IF  2 safe/string  THEN
     over c@ '?' - 0 max safe/string ;
 
-Defer .addr$
+Forward .addr$
 
 : .iperr ( addr len -- )
     connect( [: <info> .time ." connected from: " .addr$ <default> cr ;] $err
@@ -268,7 +268,7 @@ Variable myname
 
 \ new address handling is in net2o-addr.fs, loaded later
 
-Defer !my-addr
+Forward !my-addr ( -- )
 
 \ this looks ok
 

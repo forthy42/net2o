@@ -76,7 +76,7 @@ $20 value hash-size#
 
 scope{ n2o
 
-:noname ( -- )
+: help ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
     ?cr ?nextarg IF
@@ -96,7 +96,7 @@ scope{ n2o
 	s"     \O " ['] .usage search-help
 	." === Commands ===" cr
 	s"     \U " ['] .usage search-help
-    THEN ; is help
+    THEN ;
 
 }scope
 

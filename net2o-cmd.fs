@@ -376,14 +376,14 @@ Defer .n-name  ' noop is .n-name
 : cmdsig ( -- addr )  last-2o 3 cells + ;
 : net2o' ( "name" -- ) ' >body @ ;
 
-Defer net2o:words
+Forward net2o:words
 
 : inherit-table ( addr u "name" -- )
     ' dup IS gen-table  execute $! ;
 
 Vocabulary net2o-base
 
-Defer do-req>
+Forward do-req>
 
 : do-nest ( addr u flag -- )
     dup >r  validated or!  nest-cmd-loop
@@ -456,7 +456,6 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     pf@ ;
 +net2o: end-with ( o:object -- ) \g end scope
     do-req> n:o> ;
-:noname o IF  req? @ 0<  IF  end-with req? off  THEN  THEN ; is do-req>
 +net2o: oswap ( o:nest o:current -- o:current o:nest )
     do-req> n:oswap ;
 +net2o: tru ( -- f:true ) \g true flag literal
@@ -477,6 +476,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     \g add padding to align fields
     string@ $> 2drop ;
 }scope
+
+also net2o-base
+: do-req> o IF  req? @ 0<  IF  end-with req? off  THEN  THEN ;
+previous
 
 gen-table $freeze
 gen-table $@ inherit-table reply-table
@@ -578,7 +581,7 @@ previous
 	1 packets2 +!
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
 
-: cmd-loop ( addr u -- )
+: cmd-exec ( addr u -- )
     string-stack $off
     object-stack $off
     nest-stack $off
@@ -594,8 +597,6 @@ previous
     THEN
     [: outflag @ >r cmdreset init-reply do-cmd-loop
       r> outflag ! cmd-send? ;] cmdlock c-section ;
-
-' cmd-loop is cmd-exec
 
 \ nested commands
 
@@ -711,7 +712,15 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 +net2o: error-id ( $:errorid -- ) \g error-id string
     $> $error-id $! ;
 
-:noname ( start -- )
+gen-table $freeze
+
+: ]nest  ( -- )  ]nest$ push-$ push' nest ;
+
+}scope
+
+also net2o-base
+
+: net2o:words ( start -- )
     token-table $@ 2 pick cells safe/string bounds U+DO
 	I @ ?dup-IF
 	    dup >net2o-sig 2>r >net2o-name
@@ -719,13 +728,9 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 		2 pick ulit, 2r> 2swap [: type type ;] $tmp $, token
 	    ELSE  2drop rdrop rdrop  THEN
 	THEN  1+
-    cell +LOOP  drop ; IS net2o:words
+    cell +LOOP  drop ;
 
-gen-table $freeze
-
-: ]nest  ( -- )  ]nest$ push-$ push' nest ;
-
-}scope
+previous
 
 0 [IF]
 Local Variables:

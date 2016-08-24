@@ -154,7 +154,7 @@ Defer write-decrypt
     r@ write-file throw r> forth:close-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
 vault>file
-: vault>out [: forth:type ;] is write-decrypt ;
+: vault>out ['] forth:type is write-decrypt ;
 
 : decrypt-file ( filename u -- )
     enc-filename $!

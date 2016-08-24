@@ -60,8 +60,8 @@ gen-table $freeze
     punch-addrs $@ bounds ?DO  I @ .n2o:dispose-addr  cell +LOOP
     punch-addrs $off  defers extra-dispose ; is extra-dispose
 
-:noname ( addr u -- o ) \G create a new address object from string
-    n2o:new-addr n:>o nest-cmd-loop o n:o> ; is new-addr
+: new-addr ( addr u -- o ) \G create a new address object from string
+    n2o:new-addr n:>o nest-cmd-loop o n:o> ;
 
 also net2o-base
 : o-genaddr ( o -- ) >o \G create new address string from object
@@ -100,8 +100,8 @@ previous
 : .nat-addrs ( -- )
     punch-addrs $@ bounds ?DO  I @ .addr cr  cell +LOOP ;
 
-:noname ( addr u -- )
-    new-addr >o o .addr n2o:dispose-addr o> ; is .addr$
+: .addr$ ( addr u -- )
+    new-addr >o o .addr n2o:dispose-addr o> ;
 
 User dest-0key> \ pointer to dest-0key
 User dest-0key< \ pointer to obtained dest-0key
@@ -161,7 +161,7 @@ User dest-0key< \ pointer to obtained dest-0key
 : .my-addrs ( -- )
     my-addr[] [: .addr cr ;] $[]o-map ;
 
-:noname addrs-off !my-addrs !my-addr$ ; is !my-addr
+: !my-addr ( -- ) addrs-off !my-addrs !my-addr$ ;
 
 \ merge addresses
 
