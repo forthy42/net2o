@@ -126,14 +126,12 @@ Sema queue-sema
 : do-msg-nestsig ( addr u -- )
     parent @ .msg-context @ .msg-display msg-notify ;
 
-64Variable sync-date \ default chat sync date
 : display-lastn ( addr u n -- )
     n2o:new-msg >o parent off
     cells >r ?msg-log last# msg-log@ 2dup { log u }
     dup r> - 0 max /string bounds ?DO
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     cell +LOOP
-    u IF  log u + cell- $@ startdate@ sync-date 64!  THEN
     log free throw  dispose o> ;
 
 Forward silent-join
@@ -493,9 +491,8 @@ Variable ask-msg-files[]
     ELSE  file-count @ 0= IF
 	    ." === sync done ===" forth:cr
 	    file-reg# off  file-count off
-	    msg-group$ $@ ?msg-log last# cell+ $[]#
-	    sync-date 64@ date>i 1+ - 0 max
-	    ?dup-IF  last# $@ rot  display-lastn  THEN
+	    msg-group$ $@ ?msg-log
+	    last# $@ rows  display-lastn
     THEN  THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
@@ -860,8 +857,6 @@ also net2o-base scope: /chat
 
 previous
 
-50 Value last-chat#
-
 : load-msgn ( addr u n -- )
     >r 2dup load-msg r> display-lastn ;
 
@@ -933,7 +928,7 @@ $A $C 2Value chat-bufs#
 
 : ?load-msgn ( -- )
     msg-group$ $@ msg-logs #@ d0= IF
-	msg-group$ $@ last-chat# load-msgn  THEN ;
+	msg-group$ $@ rows load-msgn  THEN ;
 
 : chat-connects ( -- )
     chat-keys [: key>group ?load-msgn
