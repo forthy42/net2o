@@ -68,7 +68,7 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
     parent @ .perm-mask @ >r r@ fs-perm?
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
 +net2o: file-type ( n -- ) \g choose file type
-    fs-class! ;
+    64>n fs-class! ;
 +net2o: close-file ( -- ) \g close file
     fs-close ;
 +net2o: set-size ( size -- ) \g set size attribute of current file

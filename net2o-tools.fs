@@ -558,7 +558,7 @@ $10 Constant datesize#
 		64drop 64drop 64drop $# EXIT  THEN
 	    64u< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r r@ a[] $[]@ ?dup-IF
-	startdate@ 64> negate r> +
+	startdate@ 64u> negate r> +
     ELSE  drop 64drop r>  THEN ;
 
 \ filter entries out of a string array

@@ -485,7 +485,7 @@ Variable ask-msg-files[]
     fs-outbuf $@len u>64 ; msgfs-class is fs-poll
 :noname ( addr u mode -- )
     \G addr u is starttick endtick name concatenated together
-    fs-close  drop fs-path $!  fs-poll fs-size!
+    fs-close drop fs-path $!  fs-poll fs-size!
 ; msgfs-class is fs-open
 : msg-file-done ( -- )
     fs-close parent @ >o
@@ -565,10 +565,10 @@ also net2o-base
     msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group  64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last? ;
+    msg-group  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
-    [: msg-join  64#0 lit, 64#-1 ulit, ask-last# ulit, msg-last?
+    [: msg-join  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
       sign[ msg-start "joined" $, msg-action msg>
       msg-log, 2drop ;] [msg,] ;
 
