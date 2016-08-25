@@ -374,12 +374,23 @@ event: ->search-key  key| over >r dht-nick? r> free throw ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
+Variable unkey-id#
+#60.000.000.000 d>64 64Constant unkey-to#
+: ?unkey ( addr u -- flag )
+    unkey-id# #@
+    IF  64@ unkey-to# 64+ ticks 64- 64-0>=  THEN  0= ;
+    
 : .key-id ( addr u -- ) key| 2dup key-table #@ 0=
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
 	    .unkey-id EXIT  THEN
-	connection >r 2dup ['] dht-nick? cmd-nest r> to connection
-	2dup key-table #@ 0= IF  drop .unkey-id EXIT  THEN  THEN
+	2dup ?unkey  IF
+	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
+	    connection >r 2dup ['] dht-nick? cmd-nest r> to connection
+	    2dup key-table #@ 0= IF  drop .unkey-id EXIT
+	    ELSE  >r 2dup unkey-id# #off r>  THEN
+	ELSE  .unkey-id  EXIT  THEN
+    THEN
     cell+ ..nick 2drop ;
 
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
