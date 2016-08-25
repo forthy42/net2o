@@ -221,6 +221,6 @@ cell 8 = [IF]
 ' dffield: Alias 64field:
 : x64. ( 64n -- ) ['] u64. $10 base-execute ;
 : le-128@ ( addr -- d )
-    dup >r le-64@ r> cell+ le-64@ ;
+    dup >r le-64@ r> 64'+ le-64@ ;
 : le-128! ( d addr -- )
-    tuck cell+ le-64! le-64! ;
+    dup >r 64'+ le-64! r> le-64! ;
