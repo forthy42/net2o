@@ -123,6 +123,12 @@ Sema queue-sema
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log ?save-msg r> to last# ;
 
+Variable otr-log
+: >otr-log ( addr u -- addr' u )
+    [: otr-log $ins[]date
+      dup -1 = IF  drop #0.  ELSE  otr-log $[]@  THEN
+    ;] msglog-sema c-section ;
+
 : do-msg-nestsig ( addr u -- )
     parent @ .msg-context @ .msg-display msg-notify ;
 
@@ -329,7 +335,7 @@ msg-class to msg:equiv
 
 $34 net2o: msg ( -- o:msg ) \g push a message object
     perm-mask @ perm%msg and 0= !!msg-perm!!
-    ?msg-context n:>o c-state off  0 to last# ;
+    ?msg-context n:>o c-state off  otr-shot off  0 to last# ;
 
 msging-table >table
 
@@ -355,6 +361,8 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     THEN ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
++net2o: msg-otr ( -- ) \g this message is otr, don't save it
+    otr-shot on ;
 
 : ?pkgroup ( addr u -- addr u )
     \ if no group has been selected, use the pubkey as group
@@ -362,7 +370,8 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
-	?pkgroup >msg-log 2dup d0<> \ do something if it is new
+	?pkgroup otr-shot @ IF  >otr-log  ELSE  >msg-log  THEN
+	2dup d0<> \ do something if it is new
 	IF  replay-mode @ 0= IF  2dup show-msg  2dup parent @ .push-msg  THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
@@ -568,18 +577,16 @@ also net2o-base
     msg-group  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
-    [: msg-join  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
-      sign[ msg-start "joined" $, msg-action msg>
-      msg-log, 2drop ;] [msg,] ;
+    [: msg-otr msg-join  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
+      sign[ msg-start "joined" $, msg-action msg> ;] [msg,] ;
 
 : silent-join, ( -- )
     last# $@ dup IF  msg $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
-    [: msg-leave
-      sign[ msg-start "left" $, msg-action msg>
-      msg-log, 2drop ;] [msg,] ;
+    [: msg-otr msg-leave
+      sign[ msg-start "left" $, msg-action msg> ;] [msg,] ;
 
 : left, ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
@@ -969,10 +976,9 @@ also net2o-base
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
-    net2o-code expect-reply msg
+    net2o-code expect-reply msg msg-otr
     dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
     sign[ msg-start "left" $, msg-action msg>
-    msg-log, 2drop
     end-with cookie+request end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
