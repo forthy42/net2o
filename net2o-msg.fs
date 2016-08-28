@@ -735,17 +735,6 @@ scope: notify-cmds
 
 }scope
 
-[IFUNDEF] find-name-in
-    synonym find-name-in (search-wordlist)
-[THEN]
-[IFUNDEF] (.time)
-    : (.time) ( delta-f -- )
-	fdup 1e f>= IF  13 9 0 f.rdp ." s "   EXIT  THEN  1000 fm*
-	fdup 1e f>= IF  10 6 0 f.rdp ." ms "  EXIT  THEN  1000 fm*
-	fdup 1e f>= IF   7 3 0 f.rdp ." µs "  EXIT  THEN  1000 fm*
-	f>s 3 .r ." ns " ;
-[THEN]
-
 : .chathelp ( addr u -- addr u )
     ." /" source 7 /string type cr ;
 
@@ -755,7 +744,11 @@ also net2o-base scope: /chat
     \U me <action>          send string as action
     \G me: send remaining string as action
     [: $, msg-action ;] send-avalanche ;
-    
+
+: otr ( addr u -- )
+    \U otr on|off           turn otr mode on/off
+    s" on" str= otr-mode ! ;
+
 : peers ( addr u -- ) 2drop
     \U peers                list peers
     \G peers: list peers in all groups
