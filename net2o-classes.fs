@@ -155,6 +155,7 @@ cmd-class class
     field: setip-xt      \ callback for set-ip
     field: ack-xt        \ callback for acknowledge
     field: punch-done-xt \ callback for NAT traversal ok
+    field: sync-done-xt  \ callback for sync done
     \ maps for data and code transfer
     0 +field start-maps
     field: code-map

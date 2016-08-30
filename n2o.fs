@@ -456,9 +456,15 @@ warnings !
     get-me ?nextarg IF  dvcs-co  THEN
 ;
 
+: pull ( -- )
+    \U pull group1@user1... groupn@usern
+    \G pull: get the updates from other users (possible multiple)
+    \G pull: Similar syntax as for chats
+    get-me nicks>chat handle-pull ;
+
 : fork ( -- )
     \U fork branch
-    \G fork: create a branch
+    \G fork: create a branch, not yet implemented
 ;
 
 : snap ( -- )

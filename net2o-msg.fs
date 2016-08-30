@@ -496,15 +496,21 @@ Variable ask-msg-files[]
     \G addr u is starttick endtick name concatenated together
     fs-close drop fs-path $!  fs-poll fs-size!
 ; msgfs-class is fs-open
+
+\ syncing done
+: chat-sync-done ( -- )
+    ." === sync done ===" forth:cr
+    file-reg# off  file-count off
+    msg-group$ $@ ?msg-log ?save-msg
+    last# $@ rows  display-lastn ;
+event: ->sync-done ( o -- ) >o
+    sync-done-xt perform o> ;
+: sync-done ( -- )
+    wait-task @ ?dup-IF  <event o elit, ->sync-done event>  THEN ;
 : msg-file-done ( -- )
     fs-close parent @ >o
     file-count @ 0< IF  file-count off
-    ELSE  file-count @ 0= IF
-	    ." === sync done ===" forth:cr
-	    file-reg# off  file-count off
-	    msg-group$ $@ ?msg-log
-	    last# $@ rows  display-lastn
-    THEN  THEN o> ;
+    ELSE  file-count @ 0= IF  sync-done  THEN  THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -581,7 +587,7 @@ also net2o-base
       sign[ msg-start "joined" $, msg-action msg> ;] [msg,] ;
 
 : silent-join, ( -- )
-    last# $@ dup IF  msg $, msg-join  end-with
+    last# $@ dup IF  msg msg-otr $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
@@ -885,7 +891,8 @@ previous
 $A $C 2Value chat-bufs#
 
 : chat-connect ( addr u -- )
-    chat-bufs# pk-connect +resend-msg  greet +group ;
+    chat-bufs# pk-connect +resend-msg
+    ['] chat-sync-done sync-done-xt !  greet +group ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
@@ -1015,7 +1022,7 @@ scope{ /chat
     msg-group$ $@ >group last# split-load ;
 }scope
 
-: do-chat ( -- ) msg-group$ $! chat-entry \ ['] cmd( >body on
+: do-chat ( addr u -- ) msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE

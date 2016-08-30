@@ -316,9 +316,12 @@ Variable patch-in$
     ?.net2o/objects  2r> hash>filename  spit-file
     free throw  2r> ;
 
+: enchash>filename ( hash1 u1 -- filename u2 )
+    keyed-hash-out hash#128 smove
+    enchash hash>filename ;
+
 : read-enc-hashed ( hash1 u1 -- )
-    2dup keyed-hash-out hash#128 smove
-    enchash hash>filename patch-in$ $slurp-file
+    2dup enchash>filename patch-in$ $slurp-file
     patch-in$ $@ c:decrypt
     patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
 
@@ -511,6 +514,66 @@ previous
     slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
 : hash-out ( addr u -- )
     base85>$ 2dup 2>r read-enc-hashed patch-in$ $@ 2r> sane-85 spit-file ;
+
+\ pull and sync a database
+
+$A $E 2Value dvcs-bufs#
+
+Variable dvcs-request#
+Variable sync-file-list[]
+$10 Constant /sync-files
+
+: dvcs-sync-done ( -- )
+    file-reg# off  file-count off
+    msg-group$ $@ ?msg-log ?save-msg   0 dvcs-request# !
+    ." === metadata sync done ===" forth:cr ;
+
+: dvcs-connect ( addr u -- )
+    dvcs-bufs# pk-connect +resend-msg
+    ['] dvcs-sync-done sync-done-xt !  1 dvcs-request# ! ;
+
+: dvcs-connects ( -- )
+    chat-keys [: key>group ?load-msgn
+      dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
+      2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
+      2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;] $[]map ;
+
+: wait-dvcs-request ( -- )
+    BEGIN  stop dvcs-request# @ 0= UNTIL ;
+
+: dvcs-needed-files ( -- )
+    branches[] [: dup IF
+	  enchash>filename 2dup file-status nip no-file# = IF
+	      sync-file-list[] $+[]!
+	  ELSE  2drop  THEN
+      ELSE  2drop  THEN ;] $[]map ;
+
+: get-needed-files ( -- )
+    sync-file-list[] $[]# 0 ?DO
+	net2o-code expect-reply
+	/sync-files blocksize! $A blockalign!
+	I /sync-files + I' umin I U+DO
+	    I sync-file-list[] $[]@ n2o:copy#
+	LOOP
+	n2o:done end-code| n2o:close-all
+    /sync-files +LOOP ;
+
+: dvcs-data-sync ( -- ) \ stub
+    sync-file-list[] $[]off  re>branches
+    dvcs-needed-files get-needed-files ;
+
+: pull-readin ( -- )
+    config>dvcs  chat>dvcs ;
+
+: handle-pull ( -- )
+    n2o:new-dvcs >o  pull-readin
+    ." === syncing metadata ===" forth:cr
+    dvcs-connects wait-dvcs-request
+    ." === syncing data ===" forth:cr
+    dvcs-data-sync
+    ." === data sync done ===" forth:cr
+    msg-group$ $@ leave-chat
+    n2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:
