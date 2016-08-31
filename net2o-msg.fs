@@ -387,7 +387,7 @@ gen-table $freeze
 
 also }scope
 
-User hashtmp$
+User hashtmp$  hashtmp$ off
 
 : last-msg@ ( -- ticks )
     last# >r
@@ -396,7 +396,7 @@ User hashtmp$
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
-    [: U+DO  I last# cell+ $[]@ dup 1 64s - /string forth:type
+    [: U+DO  I last# cell+ $[]@ dup 1 64s - safe/string forth:type
       LOOP ;] hashtmp$ $exec
     hashtmp$ $@ >file-hash 1 64s umin ;
 : i.date ( i -- )
@@ -454,7 +454,7 @@ Variable ask-msg-files[]
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ date>i 1+ swap l.hashs drop 64@
+	    I 64'+ 64'+ le-64@ 64-1+ date>i swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -662,8 +662,13 @@ also net2o-base
 : (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
       2drop msg-log, ;] [group] ;
+: (send-otr-avalanche) ( xt -- addr u flag )
+    [: 0 >o [: msg-otr sign[ msg-start execute msg> ;] gen-cmd$ o>
+      2drop last-signed 2@ >otr-log ;] [group] ;
 previous
 : send-avalanche ( xt -- ) (send-avalanche)
+    IF   .chat  ELSE  2drop .nobody  THEN ;
+: send-otr-avalanche ( xt -- ) (send-otr-avalanche)
     IF   .chat  ELSE  2drop .nobody  THEN ;
 
 \ chat helper words
@@ -881,7 +886,7 @@ previous
     ELSE  -timeout EXIT  THEN
     timeout-expired? IF
 	msg-group$ $@len IF
-	    pubkey $@ ['] left, send-avalanche
+	    pubkey $@ ['] left, send-otr-avalanche
 	THEN
 	n2o:dispose-context
     THEN ;

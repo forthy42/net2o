@@ -28,6 +28,7 @@ cell 8 = [IF]
     ' tuck Alias 64tuck
     ' + Alias 64+
     ' - Alias 64-
+    ' 1+ Alias 64-1+
     ' or Alias 64or
     ' and Alias 64and
     ' xor Alias 64xor
@@ -166,6 +167,7 @@ cell 8 = [IF]
     ' du>= Alias 64u>=
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
+    : 64-1+ ( 64n -- 64n+1 ) #1. d+ ;
     ' dmin Alias 64min
     ' dmax Alias 64max
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;

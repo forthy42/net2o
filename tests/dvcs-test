@@ -13,6 +13,7 @@ prio=10
 rootdirs="$PWD"
 EOF
 export PASSPHRASE=1234
-gforth ../n2o $* -yes -config $PWD/.net2o/config keygen test
-gforth ../n2o $* -config $PWD/.net2o/config script tests/dvcs-test.s2o
+export NET2O_CONF=$PWD/.net2o/config
+gforth ../n2o $* -yes keygen test
+gforth ../n2o $* script tests/dvcs-test.s2o
 echo

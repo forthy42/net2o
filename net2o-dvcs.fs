@@ -521,16 +521,18 @@ $A $E 2Value dvcs-bufs#
 
 Variable dvcs-request#
 Variable sync-file-list[]
-$10 Constant /sync-files
+$18 Constant /sync-files
+$20 /sync-files * Constant /sync-reqs
 
 : dvcs-sync-done ( -- )
     file-reg# off  file-count off
     msg-group$ $@ ?msg-log ?save-msg   0 dvcs-request# !
-    ." === metadata sync done ===" forth:cr ;
+    ." === metadata sync done ===" forth:cr
+    msg-group$ $@ rows display-lastn ;
 
 : dvcs-connect ( addr u -- )
-    dvcs-bufs# pk-connect +resend-msg
-    ['] dvcs-sync-done sync-done-xt !  1 dvcs-request# ! ;
+    1 dvcs-request# !  dvcs-bufs# pk-connect +resend-msg
+    ['] dvcs-sync-done sync-done-xt !  greet +group ;
 
 : dvcs-connects ( -- )
     chat-keys [: key>group ?load-msgn
@@ -550,13 +552,16 @@ $10 Constant /sync-files
 
 : get-needed-files ( -- )
     sync-file-list[] $[]# 0 ?DO
-	net2o-code expect-reply
-	/sync-files blocksize! $A blockalign!
-	I /sync-files + I' umin I U+DO
-	    I sync-file-list[] $[]@ n2o:copy#
-	LOOP
-	n2o:done end-code| n2o:close-all
-    /sync-files +LOOP ;
+	I /sync-reqs + I' umin I U+DO
+	    net2o-code expect-reply
+	    $10 blocksize! $A blockalign!
+	    I /sync-files + I' umin I U+DO
+		I sync-file-list[] $[]@ n2o:copy#
+	    LOOP
+	    I /sync-files + I' u>=
+	    IF  n2o:done end-code| n2o:close-all  ELSE  end-code  THEN
+	/sync-files +LOOP
+    /sync-reqs +LOOP ;
 
 : dvcs-data-sync ( -- ) \ stub
     sync-file-list[] $[]off  re>branches
@@ -567,11 +572,11 @@ $10 Constant /sync-files
 
 : handle-pull ( -- )
     n2o:new-dvcs >o  pull-readin
-    ." === syncing metadata ===" forth:cr
+    msg( ." === syncing metadata ===" forth:cr )
     dvcs-connects wait-dvcs-request
-    ." === syncing data ===" forth:cr
+    msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
-    ." === data sync done ===" forth:cr
+    msg( ." === data sync done ===" forth:cr )
     msg-group$ $@ leave-chat
     n2o:dispose-dvcs o> ;
 

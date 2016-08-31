@@ -460,7 +460,7 @@ warnings !
     \U pull group1@user1... groupn@usern
     \G pull: get the updates from other users (possible multiple)
     \G pull: Similar syntax as for chats
-    get-me nicks>chat handle-pull ;
+    get-me init-client nicks>chat handle-pull ;
 
 : fork ( -- )
     \U fork branch

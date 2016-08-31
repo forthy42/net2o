@@ -367,6 +367,7 @@ Variable configured?
     config:rootdirs$ $@ bounds ?DO  I c@ ':' = IF 0 I c! THEN LOOP ;
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
+    "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  2drop  THEN
     config-file$ $@ 2dup file-status nip  ['] config >body swap
     no-file# = IF  ?.net2o write-config  ELSE  read-config ?.net2o  THEN
     rootdirs>path ;
