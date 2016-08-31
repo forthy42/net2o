@@ -396,9 +396,11 @@ User hashtmp$  hashtmp$ off
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
-    [: U+DO  I last# cell+ $[]@ dup 1 64s - safe/string forth:type
-      LOOP ;] hashtmp$ $exec
-    hashtmp$ $@ >file-hash 1 64s umin ;
+    last# cell+ $[]# IF
+	[: U+DO  I last# cell+ $[]@ dup 1 64s - safe/string forth:type
+	  LOOP ;] hashtmp$ $exec hashtmp$ $@
+    ELSE  2drop s" "  THEN \ we have nothing yet
+    >file-hash 1 64s umin ;
 : i.date ( i -- )
     last# cell+ $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
@@ -414,7 +416,7 @@ User hashtmp$  hashtmp$ off
     last# cell+ $[]#
     IF
 	date>i >r date>i r> swap
-	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
+	2dup - r> over 1+ >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + 1+ I' umin I l.hashs forth:type
 	  dup +LOOP  r> i.date
@@ -454,7 +456,7 @@ Variable ask-msg-files[]
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ 64-1+ date>i swap l.hashs drop 64@
+	    I 64'+ 64'+ le-64@ date>i 1+ swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -487,7 +489,7 @@ Variable ask-msg-files[]
     last# msg-log@ over >r
     fs-path $@ drop le-64@ last# cell+ $search[]date \ start index
     fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date 1+ \ end index
-    last# cell+ $[]# 1- umin over - >r
+    over - >r last# cell+ $[]# 1- umin
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
     r> free throw

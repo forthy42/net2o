@@ -1032,7 +1032,6 @@ scope{ mapc
     ack-state c@ outflag or!
     bursts# 1- data-b2b @ = IF data-tail? ELSE resend? 0= THEN
     IF  net2o:send  ELSE  net2o:resend  THEN
-    dup 0= IF  2drop 2drop  EXIT  THEN
     ?toggle-ack send-dX ;
 
 : bandwidth? ( -- flag )
