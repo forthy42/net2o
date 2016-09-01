@@ -358,14 +358,15 @@ Variable patch-in$
     project:project$ $@ load-msg ;
 : .hash ( addr -- )
     [: dup $@ 85type ."  -> " cell+ $@ 85type cr ;] #map ;
-: chat>branches ( o:dvcs -- )
-    project:project$ $@ ?msg-log  dvcs:commits @ >o
+: chat>branches-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
 	re$ $off  object$ $off
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw
     dvcs( ." === re ===" cr re# .hash
-    ." === equiv ===" cr equiv# .hash ) o> ;
+    ." === equiv ===" cr equiv# .hash ) ;
+: chat>branches ( o:dvcs -- )
+    project:project$ $@ ?msg-log  dvcs:commits @ .chat>branches-loop ;
 : re>branches-loop ( addr u -- )  0 { w^ x }
     BEGIN
 	2dup d0<> IF  x cell branches[] 0 $ins  2dup 0 branches[] $[]!  THEN
@@ -374,7 +375,7 @@ Variable patch-in$
 		hash#128 umin recurse
 	    hash#128 +LOOP
     REPEAT  2drop ;
-: re>branches ( -- )
+: re>branches ( addr u -- )
     branches[] $[]off  dvcs:commits @ .re>branches-loop
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 : branches>dvcs ( -- )
@@ -543,12 +544,13 @@ $20 /sync-files * Constant /sync-reqs
 : wait-dvcs-request ( -- )
     BEGIN  stop dvcs-request# @ 0= UNTIL ;
 
+: +needed ( addr u -- )
+    2dup enchash>filename file-status nip no-file# = IF
+	sync-file-list[] $ins[] drop
+    ELSE  2drop  THEN ;
+
 : dvcs-needed-files ( -- )
-    branches[] [: dup IF
-	  enchash>filename 2dup file-status nip no-file# = IF
-	      sync-file-list[] $+[]!
-	  ELSE  2drop  THEN
-      ELSE  2drop  THEN ;] $[]map ;
+    re# [: dup $@ +needed cell+ $@ key| +needed ;] #map ;
 
 : get-needed-files ( -- )
     sync-file-list[] $[]# 0 ?DO
@@ -563,17 +565,20 @@ $20 /sync-files * Constant /sync-reqs
 	/sync-files +LOOP
     /sync-reqs +LOOP ;
 
-: dvcs-data-sync ( -- ) \ stub
-    sync-file-list[] $[]off  re>branches
-    dvcs-needed-files get-needed-files ;
+: dvcs-data-sync ( -- )
+    sync-file-list[] $[]off  branches[] $[]off
+    msg-group$ $@ ?msg-log
+    dvcs:commits @ .chat>branches-loop
+    dvcs:commits @ .dvcs-needed-files
+    connection .get-needed-files ;
 
 : pull-readin ( -- )
     config>dvcs  chat>dvcs ;
 
-: handle-pull ( -- )
+: handle-pull ( -- )  ?.net2o/objects
     n2o:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
-    dvcs-connects wait-dvcs-request
+    0 >o dvcs-connects  wait-dvcs-request o>
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )

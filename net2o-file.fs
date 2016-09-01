@@ -349,6 +349,7 @@ scope{ mapc
     statbuf st_mtime ntime@ d>64
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] $FFF and ;
 ' n2o:get-stat fs-class to fs-get-stat
+' n2o:get-stat hashfs-class to fs-get-stat
 
 : n2o:track-mod ( mod fileno -- )
     [IFDEF] android 2drop
@@ -357,6 +358,7 @@ scope{ mapc
 : n2o:set-stat ( mtime mod -- )
     fs-fid @ fileno n2o:track-mod fs-time 64! ;
 ' n2o:set-stat fs-class to fs-set-stat
+' n2o:set-stat hashfs-class to fs-set-stat
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 
