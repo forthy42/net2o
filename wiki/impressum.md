@@ -43,14 +43,3 @@ Umsatzsteuer-ID:
 
 Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:<br/>
 DE 223 195 380
-
-Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:
-----------------------------------------------------
-
-Die Domain [bernd-paysan.de](https://bernd-paysan.de) wird für eine private
-Homepage genutzt, deren Inhalt lediglich presserechtliche
-Verantwortlichkeiten hat:
-
-Bernd Paysan<br/>
-Wilbrechtstr. 85<br/>
-81477 München
