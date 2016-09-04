@@ -501,15 +501,22 @@ Variable ask-msg-files[]
 
 \ syncing done
 : chat-sync-done ( -- )
-    ." === sync done ===" forth:cr
     file-reg# off  file-count off
     msg-group$ $@ ?msg-log ?save-msg
-    last# $@ rows  display-lastn ;
+    last# $@ rows  display-lastn
+    ." === sync done ===" forth:cr ;
 event: ->sync-done ( o -- ) >o
     sync-done-xt perform o> ;
+event: ->msg-eval ( $pack last -- )
+    $@ ?msg-log { w^ buf }
+    replay-mode @ >r replay-mode on
+    buf $@ msg-eval r> replay-mode !
+    buf $off ;
 : sync-done ( -- )
-    wait-task @ ?dup-IF  <event o elit, ->sync-done event>  THEN ;
+    wait-task @ ?dup-IF
+	<event o elit, ->sync-done event>  THEN ;
 : msg-file-done ( -- )
+    ." msg file done" forth:cr
     fs-close parent @ >o
     file-count @ 0< IF  file-count off
     ELSE  file-count @ 0= IF  sync-done  THEN  THEN o> ;
@@ -523,10 +530,16 @@ event: ->sync-done ( o -- ) >o
 ; msgfs-class is fs-read
 :noname ( -- )
     fs-path @ 0= ?EXIT
-    fs-path $@ 2 64s /string >group
-    replay-mode @ >r replay-mode on
-    fs-inbuf $@ dup IF  msg-eval  ELSE  2drop  THEN  fs-inbuf $off
-    r> replay-mode !
+    fs-inbuf $@len IF
+	fs-path $@ 2 64s /string >group
+	parent @ .wait-task @ ?dup-IF
+	    <event 0 fs-inbuf !@ elit, last# elit,
+	    ->msg-eval  event>
+	ELSE
+	    replay-mode @ >r replay-mode on
+	    fs-inbuf $@ msg-eval r> replay-mode !  fs-inbuf $off
+	THEN
+    THEN
     fs-path $off
     -1 parent @ .file-count +!
 ; msgfs-class is fs-close
