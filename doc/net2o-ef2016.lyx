@@ -979,6 +979,30 @@ kQusJ
 
 \end_deeper
 \begin_layout Itemize
+Send me an invitation
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+invite @bernd
+\family default
+\series default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
 Try to chat with me
 \begin_inset Newline newline
 \end_inset
@@ -1033,6 +1057,135 @@ from within the chat.
 \end_deeper
 \begin_layout Itemize
 Change networks with your Android and watch that the chat still works.
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Leave the chat with 
+\family typewriter
+\series bold
+/bye
+\family default
+\series default
+ or Ctrl+D (back on Android)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Try it — Vault en/decryption
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Take a file and encrypt it
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+enc test.txt
+\family default
+\series default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Show it's content
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+cat test.txt.v2o
+\family default
+\series default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Sign a file with a detached signature
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+sign test.txt
+\family default
+\series default
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Verify the signature
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+verify test.txt
 \end_layout
 
 \end_deeper
