@@ -473,7 +473,12 @@ warnings !
     ci-args dvcs-snap ;
 
 : diff ( -- )
+    \U diff
+    \G diff: diff between last checkin state and current state
     get-me ?cr dvcs-diff ;
+
+: log ( -- )
+    get-me ?cr dvcs-log ;
 
 : add# ( -- )
     \U add# file1 .. filen

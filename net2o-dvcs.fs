@@ -399,6 +399,11 @@ Variable patch-in$
 : dvcs-readin-rev ( addr u -- )
     config>dvcs  chat>dvcs  chat>branches  re>branches ;
 
+: dvcs-log ( -- )
+    n2o:new-dvcs >o  config>dvcs
+    project:project$ $@ [ -1 1 rshift cell/ ]l load-msgn
+    n2o:dispose-dvcs o> ;
+
 also net2o-base
 : (dvcs-newsentry) ( oldtype equivtype type -- )
     dvcs:type ! dvcs:equivtype ! dvcs:oldtype !
