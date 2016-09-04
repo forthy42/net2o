@@ -85,10 +85,10 @@ GEN = net2o-version.fs
 
 DOC = wiki/commands.md
 
+all: no-config TAGS
+
 distfiles:
 	@echo $(SOURCES)
-
-all: no-config TAGS
 
 no-config: libs $(GEN)
 
