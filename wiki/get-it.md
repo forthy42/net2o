@@ -52,6 +52,10 @@ install Gforth64 from the latest [Snapshot](http://www.complang.tuwien.ac.at/for
 
 Then you install the current [net2o64 Snapshot](https://net2o.de/windows/net2o64.exe).
 
+I haven't yet got a certificate to sign my executables, so for now you
+need to click through the "unknown creator" terror warning box to
+install it anyways.
+
 Get it for PC from source
 -------------------------
 
