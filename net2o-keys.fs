@@ -847,8 +847,8 @@ false value ?yes
 \ generate new key
 
 : out-key ( o -- )
-    >o pack-pubkey o o>
-    [: ..nick-base ." .n2o" ;] $tmp fn-sanitize w/o create-file throw
+    >o pack-pubkey ['] .nick-base $tmp fn-sanitize o>
+    [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
     pkc keysize key-table #@ 0= !!unknown-key!!
