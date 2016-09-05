@@ -88,7 +88,7 @@ DOC = wiki/commands.md
 all: no-config TAGS
 
 distfiles:
-	@echo $(SOURCES)
+	@echo $(SOURCES) $(GEN) $(SCRIPTS)
 
 no-config: libs $(GEN)
 

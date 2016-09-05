@@ -1,6 +1,5 @@
 \ generic hash table functions
 
-require string.fs
 require rng.fs
 
 2 64s buffer: hashinit

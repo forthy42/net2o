@@ -20,7 +20,6 @@ require unix/pthread.fs
 require unix/mmap.fs
 require 64bit.fs
 require date.fs
-require ansi.fs
 
 \ enum
 

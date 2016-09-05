@@ -91,6 +91,19 @@ done) | sed \
   -e 's,^\(..*\)\\\([^\\]*\)$,Source: "\1\\\2"; DestDir: "{app}\\\1",g' \
   -e 's,^\([^\\]*\)$,Source: "\1"; DestDir: "{app}",g')
 Source: "net2o.ico"; DestDir: "{app}"
+$(for i in */.libs/*.dll; do
+echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth$SF\"" | tr '/' '\\'
+done)
+$(for i in lib/gforth/$VERSION/$machine/libcc-named/.libs/*.dll; do
+echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth$SF\\lib\\gforth\\$VERSION\\$machine\\libcc-named\\.libs\"" | tr '/' '\\'
+done)
+$(for i in lib/gforth/$VERSION/$machine/libcc-named/.libs/*; do
+echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth$SF\\lib\\gforth\\$VERSION\\$machine\\libcc-named\\.libs\"" | tr '/' '\\'
+done)
+$(for i in lib/gforth/$VERSION/$machine/libcc-named/*; do
+echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth$SF\\lib\\gforth\\$VERSION\\$machine\\libcc-named\"" | tr '/' '\\'
+done)
+Source: "c:\\$CYGWIN\\bin\\cygstdc++-6.dll"; DestDir: "{app}\\..\\gforth$SF"
 
 [Icons]
 ; Parameter quick reference:
@@ -103,8 +116,6 @@ Name: "{group}\net2o"; Filename: "{app}\\..\\gforth$SF\\run.exe"; Parameters: ".
 [UninstallDelete]
 
 [Tasks]
-
-end;
 
 EOF
 
