@@ -89,7 +89,7 @@ $(make distfiles | tr ' ' '\n' | (while read i; do
 done) | sed \
   -e 's:/:\\:g' \
   -e 's,^\(..*\)\\\([^\\]*\)$,Source: "\1\\\2"; DestDir: "{app}\\\1",g' \
-  -e 's,^\([^\\]*\)$,Source: "\1"; DestDir: "{app}",g'
+  -e 's,^\([^\\]*\)$,Source: "\1"; DestDir: "{app}",g')
 Source: "net2o.ico"; DestDir: "{app}"
 
 [Icons]
