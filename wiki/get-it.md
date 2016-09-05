@@ -44,6 +44,14 @@ icon in the app drawer.  Just tap on the net2o icon to run net2o;
 you'll be asked to create a key on the first run, and to open up a key
 on any further run.
 
+Get it for Windows
+------------------
+
+You need: A 64 bit Windows (32 bit builds will come). You need to
+install Gforth64 from the latest [Snapshot](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth64.exe) first.
+
+Then you install the current [net2o64 Snapshot](https://net2o.de/windows/net2o64.exe).
+
 Get it for PC from source
 -------------------------
 
