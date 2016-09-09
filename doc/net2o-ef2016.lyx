@@ -703,7 +703,7 @@ Chat Real time data streaming (RSN)
 
 \end_deeper
 \begin_layout Subsection
-Try it
+Get it
 \end_layout
 
 \begin_layout Frame
@@ -711,7 +711,7 @@ Try it
 status open
 
 \begin_layout Plain Layout
-Try it
+Get it
 \end_layout
 
 \end_inset
@@ -799,7 +799,100 @@ Open/close (back button) Gforth if you like; then open net2o.
 status open
 
 \begin_layout Plain Layout
-Try it — from Source
+Get it
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Windows Get the two current setup.exes for Gforth and net2o, and install
+ them:
+\begin_inset Newline newline
+\end_inset
+
+
+\family typewriter
+\series bold
+\size small
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth64.exe
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://net2o.de/windows/net2o64.exe
+\end_layout
+
+\end_inset
+
+
+\family default
+\series default
+\size default
+
+\begin_inset Newline newline
+\end_inset
+
+You will be asked for accepting the unsigned exes, as neither Gforth nor
+ net2o are signed now
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+macOS Once I got around creating a brew tap, it will be easy to install
+ under Mac OS X (or whatever it is called now), too.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Get it — from Source
 \end_layout
 
 \end_inset
@@ -949,7 +1042,7 @@ Try it — get a key and chat
 
 \begin_deeper
 \begin_layout Itemize
-To get my key, search for it (32 bit is sufficient)
+To get my key, search for it (32 bit is sufficient now, but easy to attack)
 \begin_inset Newline newline
 \end_inset
 
@@ -1010,7 +1103,7 @@ Try to chat with me
 
 \family typewriter
 \series bold
-chat forth@bernd
+chat euroforth@bernd
 \family default
 \series default
 

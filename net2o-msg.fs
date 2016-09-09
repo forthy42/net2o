@@ -598,7 +598,8 @@ also net2o-base
     msg-group  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
-    [: msg-otr msg-join  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
+    [: msg-otr msg-join
+      \ 64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
       sign[ msg-start "joined" $, msg-action msg> ;] [msg,] ;
 
 : silent-join, ( -- )
