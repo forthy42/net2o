@@ -702,7 +702,7 @@ Chat Real time data streaming (RSN)
 \end_layout
 
 \end_deeper
-\begin_layout Subsection
+\begin_layout Section
 Get it
 \end_layout
 
@@ -711,7 +711,7 @@ Get it
 status open
 
 \begin_layout Plain Layout
-Get it
+Get it: Debian and Android
 \end_layout
 
 \end_inset
@@ -799,7 +799,7 @@ Open/close (back button) Gforth if you like; then open net2o.
 status open
 
 \begin_layout Plain Layout
-Get it
+Get it: Windows and macOS
 \end_layout
 
 \end_inset
@@ -892,7 +892,7 @@ macOS Once I got around creating a brew tap, it will be easy to install
 status open
 
 \begin_layout Plain Layout
-Get it — from Source
+Get it from Source
 \end_layout
 
 \end_inset
@@ -948,6 +948,10 @@ This will install some stuff and take some time (I will try to improve that).
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Try it
 \end_layout
 
 \begin_layout Frame
