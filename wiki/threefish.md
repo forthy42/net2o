@@ -2,15 +2,15 @@
 
 I use Keccak in Duplex mode, which gives both encryption and
 authentication in one go (it's an AEAD cipher - authenticated
-encryption and decryption).  For block ciphers, AEAD usually requires
-a second function, e.g. a hash or at least a good enough checksum
-protected by the cypher itself.
+encryption with associated data).  For block ciphers, AEAD usually
+requires a second function, e.g. a hash or at least a good enough
+checksum protected by the cypher itself.
 
 However, for Threefish, there's a reasonably good hash mode, with
 "reasonably good" as in "was finalist in the SHA-3 competition" (as
 crypto primitive for the Skein3 hash function).  None of the finalists
 failed for security weaknesses; Threefish is just slower when
-implementd in hardware.
+implemented in hardware.
 
 Now, unlike Keccak, the Skein mode for Threefish can not be used to
 encrypt and hash the plaintext in one go.  Even though the algorithm
