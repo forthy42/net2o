@@ -297,7 +297,7 @@ filechars #del -bit
       LOOP ;] $10 base-execute ;
 
 : fn-sanitize ( addr u -- addr' u' )
-    ['] sane-type $tmp $unescape ;
+    ['] sane-type $tmp [IFDEF] >filename $unescape [THEN] ;
 
 \ config stuff
 
