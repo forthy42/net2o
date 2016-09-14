@@ -125,7 +125,9 @@ scope{ n2o
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys
-    get-me ?cr list-keys ;
+    get-me ?cr
+    ." num pubkey                                   date                     perm         h nick" forth:cr
+    list-keys ;
 
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]

@@ -328,7 +328,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     space ke-imports @ .imports
     space .nick+pet ;
 : .key-list ( o:key -- o:key )
-    ke-offset 64@ 64>d keypack-all# fm/mod nip 2 .r space
+    ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
     .key-rest cr ;
 : .secret-nicks ( -- )
     0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
