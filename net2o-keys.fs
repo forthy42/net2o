@@ -341,6 +341,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
+    ." num pubkey                                   date                     perm         h nick" cr
     key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
 : list-nicks ( -- )
     nick-table [: dup $. ." :" cr cell+ $@ bounds ?DO
