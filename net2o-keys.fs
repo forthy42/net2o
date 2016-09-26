@@ -920,8 +920,18 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     perm ke-mask !
     import#new import-type !  save-pubkeys o> ;
 
+: x-erase ( len -- )
+    dup xback-restore  dup spaces  xback-restore ;
+
+: invite-key ( addr u -- key )
+    2dup x-width { addr u len }
+    BEGIN  addr u type key  len x-erase
+	dup ctrl Z =
+    WHILE  drop  BEGIN  key ctrl L =  UNTIL  REPEAT ;
+
 : process-invitation ( addr u -- )
-    key case
+    s" invite (y/n/b)?" invite-key
+    case
 	'y' of  perm%default pk2key$-add  ." added" cr   endof
 	'b' of  perm%blocked pk2key$-add  ." blocked" cr endof
 	2drop ." ignored" cr
@@ -931,8 +941,8 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     sigpk2size# - + keysize key-table #@ d0<> ; \ already there
 
 : .invitations ( -- )
-    invitations [: ." invite (y/n/b)? " 2dup .pk2key$ process-invitation
-    ;] $[]map  invitations $[]off ;
+    invitations [: 2dup .pk2key$ cr process-invitation ;] $[]map
+    invitations $[]off ;
 
 : >invitations ( addr u -- )
     2dup filter-invitation? IF  2drop EXIT  THEN
