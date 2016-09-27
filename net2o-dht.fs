@@ -351,7 +351,8 @@ also net2o-base
 
 : remove-me, ( addr -- )
     \ 0 swap !@ { w^ host } host
-    [: [: sigsize# - 2dup my-host? IF
+    [: [: false my-addr$ [: rot >r 2over str= r> or ;] $[]map
+	>r sigsize# - 2dup my-host? r> invert and IF
 	    2dup + sigdate datesize# move
 	    gen-host-del $, dht-host-
 	    false  ELSE  2drop true  THEN ;] $[]filter

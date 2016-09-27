@@ -1,7 +1,8 @@
 net2o - reinventing the Internet
 ================================
 
-net2o is the attempt to reinvent the Internet.
+net2o is the attempt to reinvent the Internet.  It's free software
+available under the [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
 Get it and try it
 -----------------
