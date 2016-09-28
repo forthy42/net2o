@@ -327,7 +327,7 @@ previous
 : +addme ['] addme setip-xt !  next-request request-gen ! ;
 : -setip ['] .iperr setip-xt ! ;
 
-: sub-me ( -- )
+: sub-me ( -- ) msg( ." sub-me" forth:cr )
     net2o-code  expect-reply
     pkc keysize2 $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
@@ -351,11 +351,12 @@ also net2o-base
 
 : remove-me, ( addr -- )
     \ 0 swap !@ { w^ host } host
-    [: [: false my-addr$ [: rot >r 2over str= r> or ;] $[]map
-	>r sigsize# - 2dup my-host? r> invert and IF
-	    2dup + sigdate datesize# move
-	    gen-host-del $, dht-host-
-	    false  ELSE  2drop true  THEN ;] $[]filter
+    [: [: false my-addr$
+	    [: rot >r sigsize# - 2over sigsize# - str= r> or ;] $[]map
+	    >r sigsize# - 2dup my-host? r> invert and IF
+		2dup + sigdate datesize# move
+		gen-host-del $, dht-host-
+		false  ELSE  2drop true  THEN ;] $[]filter
     ;] dht-sema c-section
     ( host $off ) ;
 
