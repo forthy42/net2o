@@ -236,7 +236,9 @@ end-class dht-file-class
 	THEN  mask 2/ to mask
     LOOP ;
 
-:noname $FFFFFFFF n>64 64dup fs-limit 64! fs-size 64! ; dht-file-class to fs-open
+:noname 64#-1 64dup fs-limit 64! fs-size 64! ;
+dht-file-class to fs-open
+
 :noname ( addr u -- n )  dup >r
     dht-queries $@ bounds ?DO
 	I 1+ I c@ 2dup >d#id >o + c@ >r
@@ -349,11 +351,12 @@ also net2o-base
 : my-host? ( addr u -- flag )
     new-addr >o host-id $@ config:host$ $@ str= n2o:dispose-addr o> ;
 
+: my-addr? ( addr u -- addr u flag )
+    false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;
+
 : remove-me, ( addr -- )
     \ 0 swap !@ { w^ host } host
-    [: [: false my-addr$
-	    [: rot >r sigsize# - 2over sigsize# - str= r> or ;] $[]map
-	    >r sigsize# - 2dup my-host? r> invert and IF
+    [: [: sigsize# - my-addr? >r 2dup my-host? r> invert and IF
 		2dup + sigdate datesize# move
 		gen-host-del $, dht-host-
 		false  ELSE  2drop true  THEN ;] $[]filter
