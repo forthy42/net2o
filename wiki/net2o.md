@@ -77,7 +77,7 @@ Videos
 ------
 
 + [31c3](31c3.md) presentation
-+ [32c3](32c3.md) presentation (uncut)
++ [32c3](32c3.md) presentation
 
 Discussions
 -----------
