@@ -52,6 +52,7 @@ OutputBaseFilename=net2o$SF-$N2OVER
 AppPublisher=Bernd Paysan
 AppPublisherURL=http://fossil.net2o.de/net2o
 SignTool=signtool sign /tr http://timestamp.comodoca.com/authenticode /td SHA256 \$f
+SetupIconFile=net2o.ico
 
 [Messages]
 WizardInfoBefore=License Agreement
@@ -59,10 +60,6 @@ InfoBeforeLabel=Gforth is free software.
 InfoBeforeClickLabel=You don't have to accept the GPL to run the program. You only have to accept this license if you want to modify, copy, or distribute this program.
 
 [Components]
-Name: "help"; Description: "HTML Documentation"; Types: full
-Name: "info"; Description: "GNU info Documentation"; Types: full
-Name: "print"; Description: "Postscript Documentation for printout"; Types: full
-Name: "objects"; Description: "Compiler generated intermediate stuff"; Types: full
 
 [Dirs]
 $(make distfiles | tr ' ' '\n' | (while read i; do
