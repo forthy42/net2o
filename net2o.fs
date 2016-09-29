@@ -707,7 +707,7 @@ scope{ mapc
     flybursts# +
     bursts( dup . .o ." flybursts "
     rtdelay 64@ u64. ns/burst 64@ u64. ." rtdelay" cr )
-    dup flybursts-max# min flyburst ! ;
+    dup flybursts-max# min rate( ." flyburst: " dup . ) flyburst ! ;
 : net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
@@ -800,11 +800,11 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
     bandwidth-max n>64 64max
-    rate-limit  rate-stat2
+    rate-limit  rate-stat2 rate( ." rate: " 64dup u64. )
     ns/burst 64!@ bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
-    THEN ;
+    THEN rate( cr ) ;
 
 \ acknowledge
 
