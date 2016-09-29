@@ -795,6 +795,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
            stat+ ) ;
 
 : net2o:set-rate ( rate deltat -- )
+    rate( ." r/d: " 64over u64. 64dup u64. )
     rate-stat1
     64>r tick-init 1+ validated @ 8 rshift 1 max 64*/
     64dup >extra-ns noens( 64drop )else( 64nip )
