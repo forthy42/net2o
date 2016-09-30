@@ -47,14 +47,17 @@ on any further run.
 Get it for Windows
 ------------------
 
-You need: A 64 bit Windows (32 bit builds will come). You need to
-install Gforth64 from the latest [Snapshot](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth64.exe) first.
+You need: A 32/64 bit x86/amd64 Windows. You need to install Gforth or Gforth64
+[Gforth](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe) or
+[Gforth64](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth64.exe)
+from the latest Snapshot first.
 
-Then you install the current [net2o64 Snapshot](https://net2o.de/windows/net2o64.exe).
+Then you install the current [net2o
+Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
+Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
-I haven't yet got a certificate to sign my executables, so for now you
-need to click through the "unknown creator" terror warning box to
-install it anyways.
+These files are now signed with a fresh certificate, so you still need
+to click away the unknown reputation terror warning.
 
 Get it for PC from source
 -------------------------
