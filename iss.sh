@@ -53,6 +53,7 @@ AppPublisher=Bernd Paysan
 AppPublisherURL=http://fossil.net2o.de/net2o
 SignTool=signtool sign /tr http://timestamp.comodoca.com/authenticode /td SHA256 \$f
 SetupIconFile=net2o.ico
+UninstallDisplayIcon=net2o.ico
 
 [Messages]
 WizardInfoBefore=License Agreement
