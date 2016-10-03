@@ -351,12 +351,12 @@ also net2o-base
 : my-host? ( addr u -- flag )
     new-addr >o host-id $@ config:host$ $@ str= n2o:dispose-addr o> ;
 
-: my-addr? ( addr u -- addr u flag )
+: my-addrs? ( addr u -- addr u flag )
     false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;
 
 : remove-me, ( addr -- )
     \ 0 swap !@ { w^ host } host
-    [: [: sigsize# - my-addr? >r 2dup my-host? r> invert and IF
+    [: [: sigsize# - my-addrs? >r 2dup my-host? r> invert and IF
 		2dup + sigdate datesize# move
 		gen-host-del $, dht-host-
 		false  ELSE  2drop true  THEN ;] $[]filter
