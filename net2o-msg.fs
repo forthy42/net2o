@@ -1042,12 +1042,77 @@ scope{ /chat
     msg-group$ $@ >group last# split-load ;
 }scope
 
+\ chat message, text only
+
+msg-class class
+end-class textmsg-class
+
+' 2drop textmsg-class to msg:start
+:noname space '#' emit type ; textmsg-class to msg:tag
+:noname space '@' emit .key-id ; textmsg-class to msg:signal
+' 2drop textmsg-class to msg:re
+' type textmsg-class to msg:text
+:noname drop 2drop ; textmsg-class to msg:object
+:noname drop 2drop ; textmsg-class to msg:equiv
+:noname ." /me " type ; textmsg-class to msg:action
+:noname ." /here " type ; textmsg-class to msg:coord
+' noop textmsg-class to msg:end
+
+textmsg-class ' new static-a with-allocater Constant textmsg-o
+textmsg-o >o msg-table @ token-table ! o>
+
+\ chat history browsing
+
+64Variable line-date 64#-1 line-date 64!
+Variable $lastline
+
+: !date ( addr u -- addr u )
+    2dup + sigsize# - le-64@ line-date 64! ;
+: find-prev-chatline { maxlen addr -- max span addr span }
+    msg-group$ $@ ?msg-log
+    line-date 64@ last# cell+ $search[]date
+    BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
+	dup sigpksize# - /string key| pkc over str=  UNTIL  THEN
+    last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
+    tuck addr maxlen smove
+    maxlen swap addr over ;
+: find-next-chatline { maxlen addr -- max span addr span }
+    msg-group$ $@ ?msg-log
+    line-date 64@ last# cell+ $search[]date
+    BEGIN  1+ dup last# cell+ $[]# u< WHILE  dup last# cell+ $[]@
+	dup sigpksize# - /string key| pkc over str=  UNTIL  THEN
+    dup last# cell+ $[]# u>=
+    IF    drop $lastline $@  64#-1 line-date 64!
+    ELSE  last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp  THEN
+    tuck addr maxlen smove
+    maxlen swap addr over ;
+
+: chat-prev-line  ( max span addr pos1 -- max span addr pos2 false )
+    line-date 64@ 64#-1 64= IF
+	>r 2dup swap $lastline $! r>  THEN
+    clear-line find-prev-chatline
+    2dup type 2dup cur-correct edit-update false ;
+: chat-next-line  ( max span addr pos1 -- max span addr pos2 false )
+    clear-line find-next-chatline
+    2dup type 2dup cur-correct edit-update false ;
+: chat-enter ( max span addr pos1 -- max span addr pos2 true )
+    (xenter) 64#-1 line-date 64! ;
+
+: chat-history ( -- )
+    ['] chat-next-line ctrl N bindkey
+    ['] chat-prev-line ctrl P bindkey
+    ['] chat-enter     #lf    bindkey
+    ['] chat-enter     #cr    bindkey ;
+
+\ chat toplevel
+
 : do-chat ( addr u -- ) msg-group$ $! chat-entry \ ['] cmd( >body on
+    chat-history
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
-    REPEAT  2drop leave-chats ;
+    REPEAT  2drop leave-chats  xchar-history ;
 
 : avalanche-to ( addr u o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
