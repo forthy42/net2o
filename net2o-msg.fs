@@ -643,7 +643,7 @@ end-class textmsg-class
 
 ' 2drop textmsg-class to msg:start
 :noname space '#' emit type ; textmsg-class to msg:tag
-:noname space '@' emit .key-id ; textmsg-class to msg:signal
+:noname '@' emit .simple-id space ; textmsg-class to msg:signal
 ' 2drop textmsg-class to msg:re
 ' type textmsg-class to msg:text
 :noname drop 2drop ; textmsg-class to msg:object
@@ -960,13 +960,15 @@ also net2o-base scope: /chat
     ELSE  drop 1- -rot + over - false
     THEN ;
 
+: signal-list, ( addr u -- addr' u' )  last# >r
+    BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
+		bl $split 2swap 1 /string ':' -skip nick>pk \ #0. if no nick
+		2dup d0= IF  2drop 2drop oaddr ou true
+		ELSE  $, msg-signal false  THEN
+	    UNTIL  THEN  THEN  r> to last# ;
+
 : avalanche-text ( addr u -- )
-    [: BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
-		  bl $split 2swap 1 /string ':' -skip nick>pk \ #0. if no nick
-		  2dup d0= IF  2drop 2drop oaddr ou true
-		  ELSE  $, msg-signal false  THEN
-	      UNTIL  THEN  THEN
-      $, msg-text ;] send-avalanche ;
+    [: signal-list, $, msg-text ;] send-avalanche ;
 
 previous
 
