@@ -649,7 +649,7 @@ end-class textmsg-class
 :noname drop 2drop ; textmsg-class to msg:object
 :noname drop 2drop ; textmsg-class to msg:equiv
 :noname ." /me " type ; textmsg-class to msg:action
-:noname ." /here " type ; textmsg-class to msg:coord
+:noname ." /here " 2drop ; textmsg-class to msg:coord
 ' noop textmsg-class to msg:end
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
