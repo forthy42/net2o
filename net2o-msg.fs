@@ -692,12 +692,30 @@ Variable $lastline
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
     (xenter) 64#-1 line-date 64! ;
 
-: chat-history ( -- )
-    ['] chat-next-line ctrl N bindkey
-    ['] chat-prev-line ctrl P bindkey
-    ['] chat-enter     #lf    bindkey
-    ['] chat-enter     #cr    bindkey
-    ['] false          #tab   bindkey ;
+[IFDEF] xchar-ctrlkeys
+    bl cells buffer: chat-ctrlkeys
+    xchar-ctrlkeys chat-ctrlkeys bl cells move
+    
+    chat-ctrlkeys to ctrlkeys
+    
+    ' chat-next-line ctrl N bindkey
+    ' chat-prev-line ctrl P bindkey
+    ' chat-enter     #lf    bindkey
+    ' chat-enter     #cr    bindkey
+    ' false          #tab   bindkey
+    
+    xchar-ctrlkeys to ctrlkeys
+
+    : chat-history ( -- )
+	chat-ctrlkeys to ctrlkeys ;
+[ELSE]
+    : chat-history ( -- )
+	['] chat-next-line ctrl N bindkey
+	['] chat-prev-line ctrl P bindkey
+	['] chat-enter     #lf    bindkey
+	['] chat-enter     #cr    bindkey
+	['] false          #tab   bindkey ;
+[THEN]
 
 \ chat line editor
 
