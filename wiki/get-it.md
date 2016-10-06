@@ -56,8 +56,8 @@ Then you install the current [net2o
 Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
 Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
-These files are now signed with a fresh certificate, so you still need
-to click away the unknown reputation terror warning.
+These files are now signed with a certificate with the SHA-1 fingerprint 
+8e:da:8d:df:33:b6:36:68:05:c5:b4:6a:ed:7d:bd:04:4e:13:fc:7b
 
 Get it for PC from source
 -------------------------
