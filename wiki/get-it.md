@@ -10,6 +10,11 @@ Get it for Debian GNU/Linux
 
 I've created a Debian repository to make it easy to install net2o.
 
+If you don't have https transport for apt installed, do that first,
+since I'll redirect you to https in any case:
+
+    sudo apt-get install apt-transport-https
+
 Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so as root enter:
