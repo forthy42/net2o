@@ -19,6 +19,7 @@ AC_INIT([net2o], [0.1.7-20161006], [bernd@net2o.de], [net2o], [https://fossil.ne
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
+LT_INIT
 
 AC_MSG_CHECKING([for gforth])
 

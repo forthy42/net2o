@@ -715,7 +715,7 @@ Variable cp-tmp
 $40 buffer: nick-buf
 
 : get-nick ( -- addr u )
-    ." nick: " nick-buf $40 accept nick-buf swap cr ;
+    ." nick: " nick-buf $40 accept nick-buf swap -trailing cr ;
 
 false value ?yes
 : yes? ( addr u -- flag )
@@ -1019,7 +1019,8 @@ Forward help
     0= IF  r/o open-file throw >r r@ file-size throw d0=
 	r> close-file throw  ELSE  true  THEN
     IF  [: ." Generate a new keypair:" cr
-	  get-nick new-key .keys ?rsk ;]
+	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
+	  new-key .keys ?rsk ;]
     ELSE  ['] get-skc  THEN
     catch #-56 = IF
 	<warn> ." ==== No key opened ====" cr
