@@ -332,7 +332,8 @@ also net2o-base
     ELSE  #0.  THEN  ;
 
 : expected? ( -- flag )
-    expected@ tuck u>= and IF
+    expected@ msg( ." expected: " over hex. dup hex. forth:cr )
+    tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ with mapc
 	dest-back @ hex. dest-tail @ hex. dest-head @ hex.
@@ -470,6 +471,7 @@ previous
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
+    msg( ." ack state: " dup hex. forth:cr )
     IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
     ack( ." ack expected: " recv-addr 64@ x64. expected@ hex. hex. forth:cr )
 ;

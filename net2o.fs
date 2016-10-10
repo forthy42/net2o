@@ -1025,7 +1025,7 @@ scope{ mapc
 
 : ?toggle-ack ( -- )
     data-to-send 0= IF
-	resend-toggle# outflag xor!  ack-toggle# outflag xor!
+	[ resend-toggle# ack-toggle# or ]L outflag xor!
 	never ack@ .next-tick 64!
     THEN ;
 
@@ -1203,7 +1203,8 @@ event: ->save ( o -- ) .net2o:save ;
 
 : create-file-task ( -- )
     ['] event-loop 1 net2o-task to file-task ;
-: net2o:save& ( -- ) file-task 0= IF  create-file-task  THEN
+: net2o:save& ( -- )
+    file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
 
 \ schedule delayed events
@@ -1415,7 +1416,7 @@ User remote?
 scope{ mapc
 
 : handle-data ( addr -- )  parent @ >o  o to connection
-    msg( ." Handle data to addr: " dup hex. cr )
+    msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " dup hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle

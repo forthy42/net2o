@@ -91,6 +91,7 @@ s" sync access denied"           throwcode !!sync-perm!!
 s" patch size exceeds limit"     throwcode !!patch-limit!!
 s" patch size wrong"             throwcode !!patch-size!!
 s" insufficiend randomness"      throwcode !!insuff-rnd!!
+s" no key opened"                throwcode !!no-key-open!!
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;

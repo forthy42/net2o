@@ -110,13 +110,13 @@ scope{ n2o
 : keyin ( -- )
     \U keyin|inkey file1 .. filen
     \G keyin: read a .n2o key file in
-    get-me  import#manual import-type !  key>default
+    ?get-me  import#manual import-type !  key>default
     BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
     \U keyout|outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
     \G keyout: optional: output pubkeys of other users
-    get-me ?peekarg IF  2drop out-nicks  ELSE  out-me  THEN ;
+    ?get-me ?peekarg IF  2drop out-nicks  ELSE  out-me  THEN ;
 : keygen ( -- )
     \U keygen|genkey nick
     \G keygen: generate a new keypair
@@ -125,18 +125,18 @@ scope{ n2o
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys
-    get-me ?cr list-keys ;
+    ?get-me ?cr list-keys ;
 
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
-    get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
+    ?get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
     \G keysearch: and import them into the key chain
-    get-me init-client
+    ?get-me init-client
     keys>search search-keys insert-keys save-pubkeys
     ?cr keylist ;
 
@@ -156,7 +156,7 @@ scope{ n2o
     \G perm: n ame    - allow to access file by name
     \G perm: h ash    - allow to access file by hash
     \G perm: s ync    - allow to synchronize
-    get-me
+    ?get-me
     BEGIN  chat-keys $[]off  @nicks>chat ?nextarg WHILE  >perm
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
 	    $[]map 2drop  REPEAT
@@ -165,7 +165,7 @@ scope{ n2o
 : passwd ( -- )
     \U passwd [pw-level]
     \G passwd: Change the password for the selected secret key
-    get-me +newphrase key>default
+    ?get-me +newphrase key>default
     pkc keysize key-exist? ?dup-IF  >o >storekey @ ke-storekey !
 	?nextarg IF  >number drop 0 max config:pw-maxlevel# @ min  ke-pwlevel !  THEN  o>
 	save-keys
@@ -174,14 +174,14 @@ scope{ n2o
 : nick ( -- )
     \U nick newnick
     \G nick: Change your nick to <newnick>
-    get-me ?nextarg IF  pkc keysize key-exist? ?dup-IF
+    ?get-me ?nextarg IF  pkc keysize key-exist? ?dup-IF
 	    >o ke-nick $! key-sign o> save-keys
 	ELSE  2drop  THEN  THEN ;
 
 : pet ( -- )
     \U pet nick1|pet1 petnew1 .. nickn|petn petnewn
     \G pet: Add a new petname to existing <nick> or <pet>
-    get-me
+    ?get-me
     [: nick-key dup 0= IF  drop EXIT  THEN
       >o ?nextarg IF  ke-pets $+[]! pet!  THEN  o> ;] arg-loop
     save-keys keylist ;
@@ -189,7 +189,7 @@ scope{ n2o
 : pet- ( -- )
     \U pet- pet1 .. petn
     \G pet-: remove pet name
-    get-me
+    ?get-me
     [: 2dup nick-key dup 0= IF  drop 2drop  EXIT  THEN
       >o ke-pets [: 2over str= 0= ;] $[]filter 2drop o o>
       last# cell+ del$cell
@@ -217,12 +217,12 @@ synonym searchkey keysearch
 : enc ( -- )
     \U enc @user1 .. @usern file1 .. filen
     \G enc: encrypt files for the listed users
-    get-me args>keylist
+    ?get-me args>keylist
     [: key-list encrypt-file ;] arg-loop ;
 : dec ( -- )
     \U dec file1 .. filen
     \G dec: decrypt files
-    get-me [: decrypt-file ;] arg-loop ;
+    ?get-me [: decrypt-file ;] arg-loop ;
 : cat ( -- )
     \U cat file1 .. filen
     \G cat: cat encrypted files to stdout
@@ -253,7 +253,7 @@ warnings !
 : sign ( -- )
     \U sign file1 .. filen
     \G sign: create detached .s2o signatures for all files
-    get-me now>never
+    ?get-me now>never
     [: 2dup hash-file 2drop
       [: type ." .s2o" ;] $tmp w/o create-file throw >r
       [: .pk .sig ;] $tmp r@ write-file r> close-file throw throw ;]
@@ -262,7 +262,7 @@ warnings !
 : verify ( -- )
     \U verify file1 .. filen
     \G verify: check integrity of files vs. detached signature
-    get-me ?cr
+    ?get-me ?cr
     [: 2dup hash-file 2drop 2dup type
       [: type ." .s2o" ;] $tmp slurp-file
       over date-sig? dup >r  err-color info-color r> select  attr! .check
@@ -280,7 +280,7 @@ warnings !
 : -conf ( -- )
     \O -conf <value>=<thing>
     \G -conf: Set a config value
-    get-me init-client \ read config if necessary
+    ?get-me init-client \ read config if necessary
     ?nextarg 0= ?EXIT ['] config-line execute-parsing next-cmd ;
 
 \ server mode
@@ -292,25 +292,25 @@ warnings !
 
 : server ( -- )
     \U server
-    get-me init-server announce-me server-loop ;
+    ?get-me init-server announce-me server-loop ;
 
 : rootserver ( -- )
     \U rootserver
     perm%default to perm%unknown
     ['] no0key( >body on \ rootserver has no 0key
-    get-me init-server addme-owndht server-loop ;
+    ?get-me init-server addme-owndht server-loop ;
 
 \ dht commands
 
 : announce ( -- )
     \U announce
     \G announce: Only announce ID
-    get-me init-client announce-me ;
+    ?get-me init-client announce-me ;
 
 : lookup ( -- )
     \U lookup
     \G lookup: query DHT for addresses
-    get-me ?cr init-client nicks>search search-addrs
+    ?get-me ?cr init-client nicks>search search-addrs
     search-key[] [: 2dup .simple-id ." :" cr
       >d#id >o dht-host [: .host cr ;] $[]map o> ;] $[]map ;
 
@@ -318,7 +318,7 @@ warnings !
     \U ping
     \G ping: query DHT and send a ping to the observed addresses
     \G ping: is not ready yet
-    get-me init-client nicks>search search-addrs pings[] $[]off
+    ?get-me init-client nicks>search search-addrs pings[] $[]off
     search-key[] [: >d#id >o dht-host [: pings[] $+[]! ;] $[]map o> ;] $[]map
     pings[] [: send-ping ;] $[]map  receive-pings ;
 
@@ -359,7 +359,7 @@ warnings !
 : chatlog ( -- )
     \U chatlog @user1|group1 .. @usern|groupn 
     \G chatlog: dump chat log
-    get-me ?cr init-client
+    ?get-me ?cr init-client
     BEGIN  ?nextarg  WHILE  ." === Chat log for " 2dup type
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ===" cr msg-group$ $!
@@ -404,7 +404,7 @@ warnings !
 : get ( -- )
     \U get @user file1 .. filen
     \G get: get files into current directory
-    get-me init-client
+    ?get-me init-client
     ?@nextarg IF
 	$A $E nick-connect ." connected" cr !time
 	net2o-code expect-reply
@@ -416,7 +416,7 @@ warnings !
 : get# ( -- )
     \U get# @user hash1 .. hashn
     \G get#: get files by hash into hash directory
-    get-me init-client
+    ?get-me init-client
     ?@nextarg IF
 	$A $E nick-connect ." connected" cr !time
 	net2o-code expect-reply
@@ -448,19 +448,19 @@ warnings !
 : ci ( -- )
     \U ci "message"
     \G ci: check added and modified files into the dvcs project
-    get-me ci-args dvcs-ci ;
+    ?get-me ci-args dvcs-ci ;
 
 : co ( -- )
     \U co revision|@branch|revision@branch
     \G co: check out a specific revision
-    get-me ?nextarg IF  dvcs-co  THEN
+    ?get-me ?nextarg IF  dvcs-co  THEN
 ;
 
 : pull ( -- )
     \U pull group1@user1... groupn@usern
     \G pull: get the updates from other users (possible multiple)
     \G pull: Similar syntax as for chats
-    get-me init-client nicks>chat handle-pull ;
+    ?get-me init-client nicks>chat handle-pull ;
 
 : fork ( -- )
     \U fork branch
@@ -475,20 +475,20 @@ warnings !
 : diff ( -- )
     \U diff
     \G diff: diff between last checkin state and current state
-    get-me ?cr dvcs-diff ;
+    ?get-me ?cr dvcs-diff ;
 
 : log ( -- )
-    get-me ?cr dvcs-log ;
+    ?get-me ?cr dvcs-log ;
 
 : add# ( -- )
     \U add# file1 .. filen
     \G add#: add files to hash storage
-    get-me ['] hash-add arg-loop ;
+    ?get-me ['] hash-add arg-loop ;
 
 : out# ( -- )
     \U out# hash1 .. hashn
     \G out#: get files out of hash storage in clear
-    get-me ['] hash-out arg-loop ;
+    ?get-me ['] hash-out arg-loop ;
 
 \ others
 

@@ -944,7 +944,7 @@ also net2o-base scope: /chat
     \G sync: synchronize chat logs
     2drop o 0= IF  msg-group$ $@ msg-groups #@
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
-    THEN  o to connection
+    THEN  o to connection   +flow-control
     ." === sync ===" forth:cr
     net2o-code  ['] last?, [msg,] end-code ;
 }scope
@@ -998,7 +998,7 @@ previous
 $A $C 2Value chat-bufs#
 
 : chat-connect ( addr u -- )
-    chat-bufs# pk-connect +resend-msg
+    chat-bufs# pk-connect +resend-msg +flow-control
     ['] chat-sync-done sync-done-xt !  greet +group ;
 
 : key-ctrlbit ( -- n )

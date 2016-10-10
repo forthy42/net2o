@@ -1014,17 +1014,27 @@ scope: n2o
 Forward help
 }scope
 
-: get-me ( -- )
+: get-my-key ( -- xt )
     gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
     0= IF  r/o open-file throw >r r@ file-size throw d0=
 	r> close-file throw  ELSE  true  THEN
     IF  [: ." Generate a new keypair:" cr
 	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
 	  new-key .keys ?rsk ;]
-    ELSE  ['] get-skc  THEN
-    catch #-56 = IF
-	<warn> ." ==== No key opened ====" cr
-	<info> ." generate a new one with 'keygen'" cr <default>
+    ELSE  ['] get-skc  THEN ;
+
+: .keyinfo ( -- )
+    <warn> ." ==== No key opened ====" cr
+    <info> ." generate a new one with 'keygen'" cr <default> ;
+
+: get-me ( -- )
+    get-my-key catch #-56 = IF .keyinfo
+    THEN ;
+
+: ?get-me ( -- )
+    \G this version of get-me fails hard if no key is opened
+    get-my-key catch #-56 = IF
+	.keyinfo true !!no-key-open!!
     THEN ;
 
 0 [IF]
