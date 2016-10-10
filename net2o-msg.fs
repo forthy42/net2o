@@ -705,7 +705,7 @@ Variable $lastline
     ' chat-prev-line ctrl P bindkey
     ' chat-enter     #lf    bindkey
     ' chat-enter     #cr    bindkey
-    ' false          #tab   bindkey
+    :noname #tab (xins) 0 ; #tab   bindkey
     
     xchar-ctrlkeys to ctrlkeys
 
@@ -743,10 +743,10 @@ $200 Constant maxmsg#
 \ joining and leaving
 
 : g?join ( -- )
-    msg-group$ $@len IF  +resend-cmd send-join -timeout  THEN ;
+    msg-group$ $@len IF  send-join -timeout  THEN ;
 
 : g?leave ( -- )
-    msg-group$ $@len IF  +resend-cmd send-leave -timeout  THEN ;
+    msg-group$ $@len IF  send-leave -timeout  THEN ;
 
 : greet ( -- )
     net2o-code expect-reply
@@ -1103,16 +1103,16 @@ previous
     dup cell+ $@
     case
 	0    of  2drop  endof
-	cell of  nip @ >o o to connection +resend-cmd send-leave o>  endof
+	cell of  nip @ >o o to connection send-leave o>  endof
 	drop @ .send-reconnects
     0 endcase ;
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
-    r> cell+ $@len 0 +DO  >o o to connection +resend-cmd
+    r> cell+ $@len 0 +DO  >o o to connection
     disconnect-me o>  cell +LOOP ;
 : disconnect-all ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
-    r> cell+ $@len 0 +DO  >o o to connection +resend-cmd send-leave
+    r> cell+ $@len 0 +DO  >o o to connection send-leave
     disconnect-me o>  cell +LOOP ;
 
 : leave-chat ( group -- )
