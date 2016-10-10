@@ -504,6 +504,8 @@ Variable ask-msg-files[]
     msg-group$ $@ ?msg-log ?save-msg
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
+: +sync-done ( -- )
+    ['] chat-sync-done sync-done-xt ! ;
 event: ->sync-done ( o -- ) >o
     sync-done-xt perform o> ;
 event: ->msg-eval ( $pack last -- )
@@ -944,7 +946,7 @@ also net2o-base scope: /chat
     \G sync: synchronize chat logs
     2drop o 0= IF  msg-group$ $@ msg-groups #@
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
-    THEN  o to connection   +flow-control
+    THEN  o to connection   +flow-control +sync-done
     ." === sync ===" forth:cr
     net2o-code  ['] last?, [msg,] end-code ;
 }scope
@@ -998,8 +1000,9 @@ previous
 $A $C 2Value chat-bufs#
 
 : chat-connect ( addr u -- )
-    chat-bufs# pk-connect +resend-msg +flow-control
-    ['] chat-sync-done sync-done-xt !  greet +group ;
+    chat-bufs# pk-connect
+    +resend-msg +flow-control +sync-done
+    greet +group ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
