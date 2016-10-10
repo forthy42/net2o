@@ -144,6 +144,7 @@ Forward silent-join
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
 : +unique-con ( -- ) o last# cell+ +unique$ ;
+Forward +chat-control
 
 : chat-silent-join ( -- )
     reconnect( ." silent join " o hex. connection hex. cr )
@@ -344,10 +345,10 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    $> >group
-    parent @ .+unique-con
-    parent @ .wait-task @ ?dup-IF
-	<event parent @ elit, ->chat-connect event>  THEN ;
+    $> >group parent @ >o
+    +unique-con +chat-control
+    wait-task @ ?dup-IF  <event o elit, ->chat-connect event>  THEN
+    o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     $> msg-groups #@ d0<> IF
 	parent @ last# cell+ del$cell  THEN ;
@@ -946,7 +947,7 @@ also net2o-base scope: /chat
     \G sync: synchronize chat logs
     2drop o 0= IF  msg-group$ $@ msg-groups #@
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
-    THEN  o to connection   +flow-control +sync-done
+    THEN  o to connection
     ." === sync ===" forth:cr
     net2o-code  ['] last?, [msg,] end-code ;
 }scope
@@ -999,9 +1000,11 @@ previous
 
 $A $C 2Value chat-bufs#
 
+: +chat-control ( -- )
+    +resend-msg +flow-control +sync-done ;
+
 : chat-connect ( addr u -- )
-    chat-bufs# pk-connect
-    +resend-msg +flow-control +sync-done
+    chat-bufs# pk-connect +chat-control
     greet +group ;
 
 : key-ctrlbit ( -- n )
