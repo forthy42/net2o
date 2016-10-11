@@ -507,23 +507,15 @@ Variable ask-msg-files[]
     ." === sync done ===" forth:cr ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
-event: ->sync-done ( o -- ) >o
-    sync-done-xt perform o> ;
 event: ->msg-eval ( $pack last -- )
     $@ ?msg-log { w^ buf }
     replay-mode @ >r replay-mode on
     buf $@ msg-eval r> replay-mode !
     buf $off ;
-: sync-done ( -- )
-    wait-task @ ?dup-IF
-	<event o elit, ->sync-done event>  THEN ;
 : msg-file-done ( -- )
     msg( ." msg file done" forth:cr )
     fs-close parent @ >o
-    file-count @ 0< IF
-	msg( ." File count underflowed" forth:cr ) file-count off
-    ELSE  file-count @ msg( ." File count: " dup forth:. forth:cr )
-	0= IF  sync-done  THEN  THEN o> ;
+    file-count @ 0< IF  file-count off  THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !

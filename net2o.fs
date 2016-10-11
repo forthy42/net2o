@@ -425,7 +425,7 @@ UValue connection
     init-context# @ context# !  1 init-context# +!
     dup return-addr be!  return-address be!
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
-    ['] noop punch-done-xt !
+    ['] noop punch-done-xt ! ['] noop sync-done-xt !  ['] noop ack-xt !
     -flow-control
     -1 blocksize !
     1 blockalign !
@@ -1198,6 +1198,7 @@ Defer do-track-seek
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp o elit, ->track event> o> ;
 event: ->save ( o -- ) .net2o:save ;
+event: ->save&done ( o -- ) >o net2o:save sync-done-xt perform o> ;
 
 0 Value file-task
 
@@ -1206,6 +1207,9 @@ event: ->save ( o -- ) .net2o:save ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
+: net2o:save&done
+    file-task 0= IF  create-file-task  THEN
+    o elit, ->save&done file-task event> ;
 
 \ schedule delayed events
 

@@ -332,7 +332,7 @@ also net2o-base
     ELSE  #0.  THEN  ;
 
 : expected? ( -- flag )
-    expected@ msg( ." expected: " over hex. dup hex. forth:cr )
+    expected@ \ msg( ." expected: " over hex. dup hex. forth:cr )
     tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ with mapc
@@ -340,7 +340,7 @@ also net2o-base
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
-	net2o:save&  net2o:ack-resend#  rewind-transfer
+	net2o:save&done  net2o:ack-resend#  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
 
