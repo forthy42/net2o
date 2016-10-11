@@ -518,10 +518,12 @@ event: ->msg-eval ( $pack last -- )
     wait-task @ ?dup-IF
 	<event o elit, ->sync-done event>  THEN ;
 : msg-file-done ( -- )
-    ." msg file done" forth:cr
+    msg( ." msg file done" forth:cr )
     fs-close parent @ >o
-    file-count @ 0< IF  file-count off
-    ELSE  file-count @ 0= IF  sync-done  THEN  THEN o> ;
+    file-count @ 0< IF
+	msg( ." File count underflowed" forth:cr ) file-count off
+    ELSE  file-count @ msg( ." File count: " dup forth:. forth:cr )
+	0= IF  sync-done  THEN  THEN o> ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -948,7 +950,6 @@ also net2o-base scope: /chat
     2drop o 0= IF  msg-group$ $@ msg-groups #@
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
     THEN  o to connection  +chat-control
-    wait-task @ 0= IF  ." no wait task set!" forth:cr up@ wait-task !  THEN
     ." === sync ===" forth:cr
     net2o-code  ['] last?, [msg,] end-code ;
 }scope
