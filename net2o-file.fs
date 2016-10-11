@@ -96,6 +96,7 @@ cell 8 = [IF]
     dup n>64 fs-seekto 64+!
 ; ' fs:fs-read fs-class to fs-read
 : fs:fs-write ( addr u -- n )
+    dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ fs-size 64@ 64umin
     fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
     fs-seek 64@ >seek
@@ -169,8 +170,9 @@ end-class hashfs-class
     r> over c:decrypt
     r> c:key! ; hashfs-class to fs-read
 :noname ( addr u -- )
+    dup 0= IF  nip  EXIT  THEN
     c:key@ >r  fs-cryptkey $@ drop c:key!
-    save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
+    tuck save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
     r> c:key! ; hashfs-class to fs-write
 :noname ( -- )
     fs:fs-close fs-cryptkey $off ; hashfs-class to fs-close
@@ -238,6 +240,7 @@ event: ->termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
 event: ->termclose ( -- ) termfile off  default-in default-out ;
 
 :noname ( addr u -- u )
+    dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size 64@ fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
 	<event o elit, ->file-done parent @ .wait-task @ event>

@@ -471,10 +471,7 @@ previous
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
-    msg( ." ack state: " dup hex. forth:cr )
-    IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing
-    ack( ." ack expected: " recv-addr 64@ x64. expected@ hex. hex. forth:cr )
-;
+    IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 
