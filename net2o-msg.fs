@@ -1011,7 +1011,7 @@ $A $C 2Value chat-bufs#
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
-    1 key dup $20 < >r lshift r> and ;
+    1 key dup bl < >r lshift r> and ;
 
 : wait-key ( -- )
     BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L

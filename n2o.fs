@@ -457,7 +457,7 @@ warnings !
 ;
 
 : pull ( -- )
-    \U pull group1@user1... groupn@usern
+    \U pull project1@user1... projectn@usern
     \G pull: get the updates from other users (possible multiple)
     \G pull: Similar syntax as for chats
     ?get-me init-client nicks>chat handle-pull ;
