@@ -534,6 +534,7 @@ event: ->msg-eval ( $pack last -- )
 ; msgfs-class is fs-read
 :noname ( -- )
     fs-path @ 0= ?EXIT
+    -1 parent @ .file-count +!@ drop \ make this atomic
     fs-inbuf $@len IF
 	fs-path $@ 2 64s /string >group
 	parent @ .wait-task @ ?dup-IF
@@ -545,7 +546,6 @@ event: ->msg-eval ( $pack last -- )
 	THEN
     THEN
     fs-path $off
-    -1 parent @ .file-count +!
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!
