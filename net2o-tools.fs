@@ -749,3 +749,9 @@ Sema resize-sema
     : ?ior-again ( n -- )
 	errno EAGAIN <> and ?ior ;
 [THEN]
+
+\ !wrapper: generic wrapper to store a value in a variable
+\ and restore it after catching the xt
+
+: !wrapper { addr xt -- .. }
+    addr !@ >r xt catch r> addr ! throw ;

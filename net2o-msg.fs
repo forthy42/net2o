@@ -500,22 +500,20 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-: chat-sync-done ( -- )
-    file-reg# off  file-count off
+event: ->chat-sync-done ( -- )
     msg-group$ $@ ?msg-log ?save-msg
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
+: chat-sync-done ( -- )
+    n2o:close-all <event ->chat-sync-done wait-task @ event> ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
 event: ->msg-eval ( $pack last -- )
     $@ ?msg-log { w^ buf }
-    replay-mode @ >r replay-mode on
-    buf $@ msg-eval r> replay-mode !
+    buf $@ true replay-mode ['] msg-eval !wrapper
     buf $off ;
 : msg-file-done ( -- )
-    msg( ." msg file done" forth:cr )
-    fs-close parent @ >o
-    file-count @ 0< IF  file-count off  THEN o> ;
+    msg( ." msg file done" forth:cr ) ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -533,8 +531,7 @@ event: ->msg-eval ( $pack last -- )
 	    <event 0 fs-inbuf !@ elit, last# elit,
 	    ->msg-eval  event>
 	ELSE
-	    replay-mode @ >r replay-mode on
-	    fs-inbuf $@ msg-eval r> replay-mode !  fs-inbuf $off
+	    fs-inbuf $@ true replay-mode ['] msg-eval !wrapper fs-inbuf $off
 	THEN
     THEN
     fs-path $off
