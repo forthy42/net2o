@@ -1003,9 +1003,11 @@ $A $C 2Value chat-bufs#
 : +chat-control ( -- )
     +resend-msg +flow-control +sync-done ;
 
+: chat#-connect ( addr u buf1 buf2 --- )
+    pk-connect +chat-control  greet +group ;
+
 : chat-connect ( addr u -- )
-    chat-bufs# pk-connect +chat-control
-    greet +group ;
+    chat-bufs# chat#-connect ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed

@@ -536,9 +536,11 @@ $20 /sync-files * Constant /sync-reqs
     ." === metadata sync done ===" forth:cr
     msg-group$ $@ rows display-lastn ;
 
+: +dvcs-sync-done ( -- )
+    ['] dvcs-sync-done sync-done-xt ! ;
+
 : dvcs-connect ( addr u -- )
-    1 dvcs-request# !  dvcs-bufs# pk-connect +resend-msg
-    ['] dvcs-sync-done sync-done-xt !  greet +group ;
+    1 dvcs-request# !  dvcs-bufs# chat#-connect ;
 
 : dvcs-connects ( -- )
     chat-keys [: key>group ?load-msgn
