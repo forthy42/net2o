@@ -948,6 +948,7 @@ also net2o-base scope: /chat
     2drop o 0= IF  msg-group$ $@ msg-groups #@
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
     THEN  o to connection  +chat-control
+    wait-task @ 0= IF  ." no wait task set!" forth:cr up@ wait-task !  THEN
     ." === sync ===" forth:cr
     net2o-code  ['] last?, [msg,] end-code ;
 }scope
