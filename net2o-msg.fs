@@ -34,7 +34,6 @@ Forward pk-peek? ( addr u0 -- flag )
     ELSE  2drop  THEN ;
 
 Variable msg-group$
-Variable 1:1-chat   \ for direct chats
 Variable group-master
 Variable msg-logs
 Variable otr-mode
@@ -86,6 +85,9 @@ Sema msglog-sema
 	[: enc-filename $. '~' emit ;] $tmp ['] decrypt-file catch
 	?dup-IF  DoError 2drop  THEN
     THEN  replay-mode off  skip-sig? off ;
+
+: >load-group ( group u -- )
+    2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
 
 event: ->save-msgs ( last# -- ) save-msgs ;
 
@@ -345,7 +347,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    $> >group parent @ >o
+    $> >load-group parent @ >o
     +unique-con +chat-control
     wait-task @ ?dup-IF  <event o elit, ->chat-connect event>  THEN
     o> ;
@@ -888,8 +890,10 @@ also net2o-base scope: /chat
     \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
-      r@ .group ." [" r> cell+ $@len cell/ 0 .r ." ]" space ;] #map
-    ."  =====" forth:cr ;
+      r@ .group
+      ." [" r@ cell+ $@len cell/ 0 .r ." ]#"
+      r@ $@ msg-logs #@ nip cell / u. rdrop ;] #map
+    ." =====" forth:cr ;
 
 : nat ( addr u -- )  2drop
     \U nat                  list NAT info
@@ -1038,7 +1042,7 @@ $A $C 2Value chat-bufs#
     group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
 
 : key>group ( addr u -- pk u )
-    @/ 2swap tuck msg-group$ $!  0= dup  1:1-chat !
+    @/ 2swap tuck msg-group$ $!  0=
     IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
 
 : ?load-msgn ( -- )
@@ -1047,7 +1051,7 @@ $A $C 2Value chat-bufs#
 
 : chat-connects ( -- )
     chat-keys [: key>group ?load-msgn
-      dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
+      dup 0= IF  2drop msg-group$ $@ >group  EXIT  THEN
       2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
