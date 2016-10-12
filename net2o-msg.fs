@@ -507,7 +507,7 @@ event: ->chat-sync-done ( -- )
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
-    n2o:close-all <event ->chat-sync-done wait-task @ event> ;
+    n2o:close-all close-all <event ->chat-sync-done wait-task @ event> ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
 event: ->msg-eval ( $pack last -- )
@@ -522,7 +522,6 @@ event: ->msg-eval ( $pack last -- )
 ; msgfs-class is fs-create
 :noname ( addr u -- u )
     [ termserver-class :: fs-read ]
-    fs-inbuf $@len 0= IF  fs-close  THEN
 ; msgfs-class is fs-read
 :noname ( -- )
     fs-path @ 0= ?EXIT
