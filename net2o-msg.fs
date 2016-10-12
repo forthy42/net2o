@@ -479,7 +479,7 @@ Variable ask-msg-files[]
     last# >r  ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
     ?ask-msg-files
-    parent @ >o $10 blocksize! $4 blockalign!
+    parent @ >o $10 blocksize! $10 blockalign! \ !!FIXME!! blockalign should work smaller
     ask-msg-files[] [: n2o:copy-msg ;] $[]map
     n2o:done o>
     r> to last# ;
@@ -507,7 +507,8 @@ event: ->chat-sync-done ( -- )
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
-    n2o:close-all close-all <event ->chat-sync-done wait-task @ event> ;
+    n2o:close-all net2o-code expect-reply close-all end-code
+    <event ->chat-sync-done wait-task @ event> ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
 event: ->msg-eval ( $pack last -- )
@@ -535,7 +536,7 @@ event: ->msg-eval ( $pack last -- )
 	    fs-inbuf $@ true replay-mode ['] msg-eval !wrapper fs-inbuf $off
 	THEN
     THEN
-    fs-path $off
+    fs:fs-clear
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!

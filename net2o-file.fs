@@ -106,6 +106,9 @@ cell 8 = [IF]
 	<event o elit, ->file-done parent @ .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
+: fs:fs-clear ( -- )
+    64#0 64dup fs-limit 64!  64dup fs-seekto 64!  64dup fs-seek 64!
+    64dup fs-size 64!  fs-time 64!  fs-path $off ;
 : fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-time 64@ 64dup 64-0= IF  64drop
@@ -113,13 +116,15 @@ cell 8 = [IF]
 	fs-fid @ flush-file throw
 	fs-fid @ fileno fs-timestamp!
     THEN
-    fs-fid @ close-file throw  fs-fid off  fs-path $off
+    fs-fid @ close-file throw
+    fs-fid off
+    fs:fs-clear
 ; ' fs:fs-close fs-class to fs-close
 :noname ( -- size )
     fs-fid @ file-size throw d>64
 ; fs-class to fs-poll
 :noname ( addr u mode -- ) fs-close
-    msg( dup 2over ." open file: " type ."  with mode " . cr )
+    msg( dup 2over ." open file: " type ."  with mode " . forth:cr )
     >r 2dup absolut-path?  !!abs-path!!
     config:rootdirs$ open-path-file throw fs-path $! fs-fid !
     r@ r/o <> IF  0 fs-fid !@ close-file throw
@@ -370,15 +375,14 @@ scope{ mapc
 
 : blocksizes! ( n -- )
     dup blocksize !
-    file( ." file read: ======= " dup . cr ." file write: ======= " dup . cr )
+    file( ." file read: ======= " dup . forth:cr
+    ." file write: ======= " dup . forth:cr )
     dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )
-    [: fstates 0 ?DO
-	    I n2o:close-file
-	LOOP  file-reg# off  fstate-off
-	blocksize @ blocksizes!
-	read-file# off  write-file# off ;] file-sema c-section ;
+    [: fstates 0 ?DO  I n2o:close-file  LOOP
+      file-reg# off  fstate-off  blocksize @ blocksizes!
+      read-file# off  write-file# off ;] file-sema c-section ;
 
 : n2o:open-file ( addr u mode id -- )
     state-addr .fs-open ;
@@ -388,7 +392,8 @@ scope{ mapc
 : n2o:slurp-block ( id -- delta )
     data-head@ file( over data-map @ .mapc:dest-raddr @ -
     >r ." file read: " rot dup . -rot r> hex. )
-    rot id>addr? .fs-read dup /head file( dup hex. residualread @ hex. cr ) ;
+    rot id>addr? .fs-read dup /head
+    file( dup hex. residualread @ hex. forth:cr ) ;
 
 \ careful: must follow exactpy the same loic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
@@ -399,9 +404,9 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualread off THEN to fails
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
-	    fails states u>= UNTIL  THEN msg( ." Read end" cr ) +file
+	    fails states u>= UNTIL  THEN msg( ." Read end" forth:cr ) +file
 	head@ fails states u>= ;]
-    file-sema c-section file( dup IF  ." data end" cr  THEN ) ;
+    file-sema c-section file( dup IF  ." data end" forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
