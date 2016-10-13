@@ -686,7 +686,7 @@ Variable $lastline
     clear-line find-next-chatline
     2dup type 2dup cur-correct edit-update false ;
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
-    (xenter) 64#-1 line-date 64! ;
+     .all space true 64#-1 line-date 64! ;
 
 [IFDEF] xchar-ctrlkeys
     bl cells buffer: chat-ctrlkeys
