@@ -25,11 +25,11 @@ Forward pk-peek? ( addr u0 -- flag )
 
 : >group ( addr u -- )  msg-groups ?hash ;
 
-: avalanche-msg ( msg u1 o:connect -- )
+: avalanche-msg ( msg u1 otr-flag o:connect -- )
     \G forward message to all next nodes of that message group
-    { d: msg }
+    { d: msg otr-flag }
     last# cell+ $@ dup IF
-	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
+	bounds ?DO  I @ o <> IF  msg otr-flag I @ .avalanche-to  THEN
 	cell +LOOP
     ELSE  2drop  THEN ;
 
@@ -186,7 +186,7 @@ User peer-buf
 	addr-connect o>
     THEN ;
 
-event: ->avalanche ( addr u o group -- )
+event: ->avalanche ( addr u otr-flag o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
 event: ->chat-connect ( o -- )
@@ -257,13 +257,13 @@ event: ->msg-nestsig ( addr u o group -- )
 Forward msg:last?
 Forward msg:last
 
-: push-msg ( addr u o:parent -- )
+: push-msg ( addr u otr-flag o:parent -- )
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    >r <event e$, o elit, last# elit,
+	    >r <event >r e$, r> elit, o elit, last# elit,
 	    ->avalanche r> event>
-	ELSE  2drop  THEN
+	ELSE  drop 2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
     parent @ dup IF  .wait-task @ dup up@ <> and  THEN
@@ -329,7 +329,12 @@ msg-class to msg:object
 msg-class to msg:equiv
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
-:noname ( -- ) forth:cr ; msg-class to msg:end
+:noname ( -- )
+    parent @ ?dup-IF
+	.msging-context @ ?dup-IF
+	    .otr-shot @ IF <info> ."  [otr]" <default> THEN
+	THEN
+    THEN  forth:cr ; msg-class to msg:end
 
 \g 
 \g ### messaging commands ###
@@ -374,7 +379,9 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
 	?pkgroup otr-shot @ IF  >otr-log  ELSE  >msg-log  THEN
 	2dup d0<> \ do something if it is new
-	IF  replay-mode @ 0= IF  2dup show-msg  2dup parent @ .push-msg  THEN
+	IF  replay-mode @ 0= IF
+		2dup show-msg  2dup otr-shot @ parent @ .push-msg
+	    THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
 
@@ -630,8 +637,8 @@ previous
 	0 .execute false
     THEN ;
 : .chat ( addr u -- )
-    [: last# >r o IF  2dup do-msg-nestsig  THEN  r> to last#
-      0 .avalanche-msg ;] [group] drop notify- ;
+    [: last# >r o IF  otr-shot off 2dup do-msg-nestsig  THEN  r> to last#
+      false 0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only
 
@@ -763,9 +770,9 @@ also net2o-base
     [: 0 >o [: msg-otr sign[ msg-start execute msg> ;] gen-cmd$ o>
       2drop last-signed 2@ >otr-log ;] [group] ;
 previous
-: send-avalanche ( xt -- ) (send-avalanche)
+: send-avalanche ( xt -- )      (send-avalanche)
     IF   .chat  ELSE  2drop .nobody  THEN ;
-: send-otr-avalanche ( xt -- ) (send-otr-avalanche)
+: send-otr-avalanche ( xt -- )  (send-otr-avalanche)
     IF   .chat  ELSE  2drop .nobody  THEN ;
 
 \ chat helper words
@@ -1142,10 +1149,10 @@ scope{ /chat
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats ;
 
-: avalanche-to ( addr u o:context -- )
+: avalanche-to ( addr u otr-flag o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
     o to connection +resend-msg
-    net2o-code expect-msg msg
+    net2o-code expect-msg msg IF msg-otr THEN
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with
     end-code ;
