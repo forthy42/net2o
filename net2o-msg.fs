@@ -399,8 +399,9 @@ User hashtmp$  hashtmp$ off
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
     last# cell+ $[]# IF
-	[: U+DO  I last# cell+ $[]@ dup 1 64s - safe/string forth:type
+	[: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
 	  LOOP ;] hashtmp$ $exec hashtmp$ $@
+	\ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
     ELSE  2drop s" "  THEN \ we have nothing yet
     >file-hash 1 64s umin ;
 : i.date ( i -- )
@@ -420,7 +421,7 @@ User hashtmp$  hashtmp$ off
 	date>i >r date>i r> swap
 	2dup - r> over 1+ >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
-	      dup I + 1+ I' umin I l.hashs forth:type
+	      dup I + I' umin 1+ I l.hashs forth:type
 	  dup +LOOP  r> i.date
 	  drop ;] $tmp r>
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
@@ -479,7 +480,7 @@ Variable ask-msg-files[]
     last# >r  ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
     ?ask-msg-files
-    parent @ >o $10 blocksize! $10 blockalign! \ !!FIXME!! blockalign should work smaller
+    parent @ >o $10 blocksize! $1 blockalign! \ !!FIXME!! blockalign should work smaller
     ask-msg-files[] [: n2o:copy-msg ;] $[]map
     n2o:done o>
     r> to last# ;

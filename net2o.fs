@@ -537,13 +537,19 @@ scope{ mapc
 
 : >blockalign ( n -- block )
     blockalign @ dup >r 1- + r> negate and ;
+: >maxalign ( n -- block )
+    maxdata dup >r 1- + r> negate and ;
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 
 : /head ( u -- )
     >blockalign dup negate residualread +! data-map @ .mapc:dest-head +! ;
+: max/head ( -- )
+    data-map @ .mapc:dest-head dup @ >maxalign swap +! ;
 : /back ( u -- )
     >blockalign dup negate residualwrite +!  data-rmap @ .mapc:dest-back +! ;
+: max/back ( -- )
+    data-rmap @ .mapc:dest-back dup @ >maxalign swap +! ;
 : /tail ( u -- )
     data-map @ .mapc:dest-tail +! ;
 : data-dest ( -- addr )
@@ -586,10 +592,13 @@ scope{ mapc
     dest-raddr @ dest-tail @ dest-head @ fix-size' endwith ;
 
 : data-head? ( -- flag )
+    \G return true if there is space to read data in
     data-map @ with mapc dest-head @ dest-back @ dest-size @ + u< endwith ;
 : data-tail? ( -- flag )
+    \G return true if there is data to send
     data-map @ with mapc dest-tail @ dest-head @ u< endwith ;
 : rdata-back? ( -- flag )
+    \G return true if there is data availabe to write out
     data-rmap @ with mapc dest-back @ dest-tail @ u< endwith ;
 
 \ code sending around

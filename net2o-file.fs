@@ -344,7 +344,8 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
-	    fails states u>= UNTIL  THEN msg( ." Write end" cr ) +file ;]
+	    fails states u>= UNTIL  max/back  THEN
+	msg( ." Write end" cr ) +file ;]
     file-sema c-section ;
 
 : save-to ( addr u n -- )  state-addr >o  fs-create o> ;
@@ -395,7 +396,7 @@ scope{ mapc
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. forth:cr ) ;
 
-\ careful: must follow exactpy the same loic as n2o:spit (see above)
+\ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
     data-head? 0= fstates 0= or IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
@@ -405,7 +406,8 @@ scope{ mapc
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL  THEN msg( ." Read end" forth:cr ) +file
-	head@ fails states u>= ;]
+	head@ fails states u>=
+	dup IF  max/head  THEN ;]
     file-sema c-section file( dup IF  ." data end" forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
