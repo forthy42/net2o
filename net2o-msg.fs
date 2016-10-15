@@ -486,10 +486,14 @@ Variable ask-msg-files[]
 : msg:last ( $:[tick0,tick1,...,tickn] n -- )
     last# >r  ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
-    ?ask-msg-files
-    parent @ >o $10 blocksize! $1 blockalign! \ !!FIXME!! blockalign should work smaller
-    ask-msg-files[] [: n2o:copy-msg ;] $[]map
-    n2o:done o>
+    ?ask-msg-files ask-msg-files[] $[]# IF
+	expect-reply
+	parent @ >o $10 blocksize! $1 blockalign!
+	ask-msg-files[] [: n2o:copy-msg ;] $[]map
+	n2o:done o>
+    ELSE
+	." === nothing to sync ===" forth:cr
+    THEN
     r> to last# ;
 
 :noname ( -- 64len )
@@ -952,7 +956,7 @@ also net2o-base scope: /chat
 	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
     THEN  o to connection  +chat-control
     ." === sync ===" forth:cr
-    net2o-code  ['] last?, [msg,] end-code ;
+    net2o-code  expect-reply ['] last?, [msg,] end-code ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
