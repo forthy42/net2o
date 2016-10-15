@@ -134,12 +134,19 @@ Variable otr-log
     parent @ .msg-context @ .msg-display msg-notify ;
 
 : display-lastn ( addr u n -- )
+    otr-mode @ >r otr-mode off
+    [: n2o:new-msg >o parent off
+      cells >r ?msg-log last# msg-log@ 2dup { log u }
+      dup r> - 0 max /string bounds ?DO
+	  I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
+      cell +LOOP
+      log free dispose o> throw ;] catch
+    r> otr-mode ! throw ;
+
+: display-one-msg ( addr u -- )
     n2o:new-msg >o parent off
-    cells >r ?msg-log last# msg-log@ 2dup { log u }
-    dup r> - 0 max /string bounds ?DO
-	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
-    cell +LOOP
-    log free throw  dispose o> ;
+    ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
+    dispose o> ;
 
 Forward silent-join
 
@@ -334,6 +341,8 @@ msg-class to msg:equiv
 	.msging-context @ ?dup-IF
 	    .otr-shot @ IF <info> ."  [otr]" <default> THEN
 	THEN
+    ELSE
+	otr-mode @ IF <info> ."  [otr]" <default> THEN
     THEN  forth:cr ; msg-class to msg:end
 
 \g 
@@ -571,6 +580,8 @@ event: ->msg-eval ( $pack last -- )
     now>never ]pksign ;
 : msg-log, ( -- addr u )
     last-signed 2@ >msg-log ;
+: otr-log, ( -- addr u )
+    last-signed 2@ >otr-log ;
 
 previous
 
@@ -641,8 +652,13 @@ previous
 	0 .execute false
     THEN ;
 : .chat ( addr u -- )
-    [: last# >r o IF  otr-shot off 2dup do-msg-nestsig  THEN  r> to last#
+    [: last# >r o IF  otr-shot off 2dup do-msg-nestsig
+      ELSE  display-one-msg  THEN  r> to last#
       false 0 .avalanche-msg ;] [group] drop notify- ;
+: .otr-chat ( addr u -- )
+    [: last# >r o IF  otr-shot on 2dup do-msg-nestsig
+      ELSE  display-one-msg  THEN  r> to last#
+      true 0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only
 
@@ -763,7 +779,9 @@ $200 Constant maxmsg#
 : wait-2s-key ( -- )
     200 0 DO  key? ?LEAVE  10 ms  LOOP ;
 : .nobody ( -- )
-    <info> "nobody's online" 2dup type <default>
+    <info>
+    [: ." nobody's online" otr-mode @ 0= IF ." , saving away"  THEN ;] $tmp
+    2dup type <default>
     wait-2s-key xclear ;
 
 also net2o-base
@@ -772,12 +790,12 @@ also net2o-base
       2drop msg-log, ;] [group] ;
 : (send-otr-avalanche) ( xt -- addr u flag )
     [: 0 >o [: msg-otr sign[ msg-start execute msg> ;] gen-cmd$ o>
-      2drop last-signed 2@ >otr-log ;] [group] ;
+      2drop otr-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )      (send-avalanche)
-    IF   .chat  ELSE  2drop .nobody  THEN ;
+    >r .chat r> 0= IF  .nobody  THEN ;
 : send-otr-avalanche ( xt -- )  (send-otr-avalanche)
-    IF   .chat  ELSE  2drop .nobody  THEN ;
+    >r .otr-chat r> 0= IF  .nobody  THEN ;
 
 \ chat helper words
 
@@ -866,7 +884,12 @@ also net2o-base scope: /chat
 
 : otr ( addr u -- )
     \U otr on|off           turn otr mode on/off
-    s" on" str= otr-mode ! ;
+    2dup s" on" str= >r
+    s" off" str= r@ or IF   r> otr-mode !
+	<info> ." === " otr-mode @ IF  ." enter"  ELSE  ." leave"  THEN
+	."  otr mode ==="
+    ELSE  <err> ." only 'otr on|off' are allowed" rdrop  THEN
+    <default> forth:cr ;
 
 : peers ( addr u -- ) 2drop
     \U peers                list peers
@@ -978,7 +1001,8 @@ also net2o-base scope: /chat
 	    UNTIL  THEN  THEN  r> to last# ;
 
 : avalanche-text ( addr u -- )
-    [: signal-list, $, msg-text ;] send-avalanche ;
+    [: signal-list, $, msg-text ;]
+    otr-mode @ IF  send-otr-avalanche  ELSE  send-avalanche  THEN ;
 
 previous
 
