@@ -362,6 +362,20 @@ fsane-init
 Variable config-file$  "~/.net2o/config" config-file$ $!
 Variable configured?
 
+:noname defers 'cold
+    configured? off
+    config-file$ $boot
+    config:.net2o$ $boot
+    config:keys$ $boot
+    config:objects$ $boot
+    rootdirs$ off  pad $400 get-dir rootdirs$ $! ; is 'cold
+:noname ( -- )
+    config-file$ $save
+    config:.net2o$ $save
+    config:keys$ $save
+    config:objects$ $save
+    defers 'image ; is 'image
+
 : rootdirs>path ( -- )
     config:rootdirs$ $@ bounds ?DO  I c@ ':' = IF 0 I c! THEN LOOP ;
 

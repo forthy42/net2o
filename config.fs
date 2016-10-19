@@ -66,3 +66,6 @@ Variable config-recognizer
 	    endcase
 	;] map-wordlist ;] r@ outfile-execute
     r> close-file throw ;
+
+:noname defers 'cold config-recognizer $boot ; is 'cold
+:noname config-recognizer $save defers 'image ; is 'image
