@@ -132,6 +132,8 @@ Variable task-id#
 
 alloc-io
 
+:noname defers 'cold alloc-io ; is 'cold
+
 Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )

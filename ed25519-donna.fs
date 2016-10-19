@@ -73,7 +73,6 @@ init-ed25519
     edbuf off ;
 
 :noname defers 'image edbuf off ; is 'image
-:noname defers 'cold  init-ed25519 ; is 'cold
 
 : clean-ed25519 ( -- )
     \g do this every time you computed using something secret
