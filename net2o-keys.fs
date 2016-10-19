@@ -383,7 +383,7 @@ Variable unkey-id#
     
 : .key-id ( addr u -- ) key| 2dup key-table #@ 0=
     IF  drop up@ receiver-task = IF
-	    <event 2dup save-mem e$, ->search-key [ up@ ]l event>
+	    <event 2dup save-mem e$, ->search-key main-up@ event>
 	    .unkey-id EXIT  THEN
 	2dup ?unkey  IF
 	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
@@ -948,8 +948,8 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     invitations $[]# >r
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
-	save-mem [ up@ ]l <hide>
-	<event e$, ->invite up@ elit, ->wakeme [ up@ ]l event> stop
+	save-mem main-up@ <hide>
+	<event e$, ->invite up@ elit, ->wakeme main-up@ event> stop
     ELSE  2drop  THEN ;
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r

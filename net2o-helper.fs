@@ -19,6 +19,11 @@ Variable dhtnick "net2o-dhtroot" dhtnick $!
 Variable dhtroot-addr$
 Variable dhtroot-addr
 
+:noname defers 'cold dhtnick $boot dhtroot-addr$ $boot dhtroot.n2o $boot
+    dhtroot-addr off ; is 'cold
+:noname defers 'image dhtnick $save dhtroot-addr$ $save dhtroot.n2o $save ;
+is 'image
+
 require net2o-dhtroot.fs
 
 : dhtroot-addr@ ( -- addr )
@@ -29,13 +34,13 @@ require net2o-dhtroot.fs
 	    EXIT  THEN  THEN
     2drop 0 ;
 
-: dhtroot ( -- net2oaddr )
+: dhtroot ( -- net2oaddr ) ~~
     dhtroot-addr@ ?dup-IF  0 swap
 	[: dup ?EXIT
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
-    THEN  ind-addr off ;
+    THEN  ind-addr off ~~ ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
@@ -130,7 +135,7 @@ scope{ /chat
 }scope
 
 event: ->renat ( -- )  renat-all ;
-:noname <event ->renat [ up@ ]l event> ; is dht-beacon
+:noname <event ->renat main-up@ event> ; is dht-beacon
 
 \ beacon handling
 

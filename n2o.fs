@@ -521,9 +521,15 @@ warnings !
 
 \ user friendly, but way less informative doerror
 
-debugging-method 0= [IF]
-    :noname [: <err> .error-string <default> cr ;] do-debug ; is DoError
-[THEN]
+: ?set-debug ( -- )
+    debugging-method 0= IF
+	[: [: <err> .error-string <default> cr ;] do-debug ;] is DoError
+    ELSE
+	[ what's DoError ]L is DoError
+    THEN ;
+?set-debug
+
+:noname defers 'cold ?set-debug ; is 'cold
 
 \ allow issuing commands during chat
 

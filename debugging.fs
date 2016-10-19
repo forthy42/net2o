@@ -156,6 +156,10 @@ Ustack b$
     : inskey ( key -- )  key-buffer c$+! ;
 [THEN]
 
+up@ Value main-up@
+
+:noname defers 'cold up@ to main-up@ ; is 'cold
+
 event: ->b$off b$ $off ;
 event: ->type defers type <event ->b$off event> ctrl L inskey ;
 event: ->hide ctrl Z inskey <event ->wake event> ;
@@ -164,9 +168,9 @@ event: ->hide ctrl Z inskey <event ->wake event> ;
 : <hide> ( task -- )
     <event up@ elit, ->hide event>  stop ;
 : bflush ( -- )
-    up@ [ up@ ]l = IF  b$ $. b$ $off  EXIT  THEN
-    [ up@ ]l <hide>
-    b$ $@ <event up@ elit, e$, ->type [ up@ ]l event>
+    up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
+    main-up@ <hide>
+    b$ $@ <event up@ elit, e$, ->type main-up@ event>
     BEGIN  b$ @  WHILE  stop  REPEAT ;
 : bcr    #lf bemit bflush ;
 : bat-deltaxy ( dx dy -- ) drop

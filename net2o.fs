@@ -446,7 +446,7 @@ Variable mapstart $1 mapstart !
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
-    <event wait-task @ ?dup-0=-IF [ up@ ]L THEN o elit, ->connect event> ;
+    <event wait-task @ ?dup-0=-IF main-up@ THEN o elit, ->connect event> ;
 
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
