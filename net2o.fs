@@ -132,8 +132,6 @@ Variable task-id#
 
 alloc-io
 
-:noname defers 'cold alloc-io ; is 'cold
-
 Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )
@@ -271,6 +269,7 @@ event: ->connect    ( connection -- ) .do-connect ;
 \ check for valid destination
 
 Variable dest-map s" " dest-map $!
+:noname defers 'cold alloc-io dest-map off s" " dest-map $! ; is 'cold
 
 $100 Value dests#
 56 Value dests>>
@@ -648,7 +647,7 @@ reply buffer: dummy-reply
 Sema timing-sema
 
 : net2o:track-timing ( -- ) \ initialize timing records
-    s" " timing-stat $! ;
+    timing-stat $off ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
@@ -1057,7 +1056,7 @@ field: chunk-context
 field: chunk-count
 end-structure
 
-Variable chunks s" " chunks $!
+Variable chunks
 Variable chunks+
 Create chunk-adder chunks-struct allot
 0 Value sender-task
@@ -1231,7 +1230,7 @@ field: queue-xt
 end-class queue-class
 queue-class >osize @ Constant queue-struct
 
-Variable queue s" " queue $!
+Variable queue
 queue-class >osize @ buffer: queue-adder  
 
 : add-queue ( xt us -- )
@@ -1366,7 +1365,7 @@ Forward handle-beacon
 #14 Value timeouts# \ with 100ms initial timeout, gives 31.75s cummulative timeout
 
 Sema timeout-sema
-Variable timeout-tasks s" " timeout-tasks $!
+Variable timeout-tasks
 
 : sq2** ( 64n n -- 64n' )
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
@@ -1762,6 +1761,20 @@ require net2o-qr.fs
 require net2o-dvcs.fs
 
 require net2o-dhtroot.fs \ configuration for DHT root
+
+\ freeze tables
+
+cmd-table     $save
+reply-table   $save
+log-table     $save
+setup-table   $save
+connect-table $save
+ack-table     $save
+msging-table  $save
+msg-table     $save
+term-table    $save
+address-table $save
+context-table $save
 
 .unresolved
 

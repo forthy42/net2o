@@ -42,6 +42,7 @@ Variable msging-table
 Variable msg-table
 Variable term-table
 Variable address-table
+Variable context-table
 
 Vocabulary mapc
 
@@ -259,8 +260,6 @@ cmd-class class
     field: host-key    \ psk for connection setup
     field: host-revoke
 end-class address-class
-
-Variable context-table
 
 \ cookies
 

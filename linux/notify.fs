@@ -29,44 +29,61 @@
 
 Variable notify-send
 Variable upath
-"PATH" getenv upath $!
-upath $@ bounds [?DO] [I] c@ ':' = [IF] 0 [I] c! [THEN] [LOOP]
-"notify-send" upath open-path-file 0= [IF]
-    rot close-file throw
-    over c@ '/' <> [IF]
-	pad $1000 get-dir notify-send $! '/' notify-send c$+!
-    [THEN]
-    notify-send $+!
-[THEN]
-upath $off
+
+: !upath ( -- )
+    "PATH" getenv upath $!
+    upath $@ bounds ?DO I c@ ':' = IF 0 I c! THEN LOOP
+    "notify-send" upath open-path-file 0= IF
+	rot close-file throw
+	over c@ '/' <> IF
+	    pad $1000 get-dir notify-send $! '/' notify-send c$+!
+	THEN
+	notify-send $+!
+    THEN
+    upath $off ;
 
 Variable net2o-logo
-s" doc/net2o-logo.png" open-fpath-file 0= [IF]
-    rot close-file throw
-    over c@ '/' <> [IF]
-	pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!
-    [THEN]
-    net2o-logo $+!
-[THEN]
+
+: !net2o-logo ( -- )
+    s" doc/net2o-logo.png" open-fpath-file 0= IF
+	rot close-file throw
+	over c@ '/' <> IF
+	    pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!
+	THEN
+	net2o-logo $+!
+    THEN ;
+
+!upath !net2o-logo
 
 : 0string ( addr u -- cstr )
     1+ save-mem over + 1- 0 swap c! ;
 
-Create notify-args
-"notify-send\0" drop ,
-"-a\0" drop ,
-"net2o\0" drop ,
-"-c\0" drop ,
-"im.received\0" drop ,
-net2o-logo $@len [IF]
-    "-i\0" drop ,
-    net2o-logo $@ 0string ,
-[THEN]
-here 0 ,
-here 0 ,
-0 , \ must be terminated by null pointer
-Constant content-string
-Constant title-string
+0 Value content-string
+0 Value title-string
+
+10 cells buffer: notify-args
+
+: !notify-args
+    here >r notify-args dp !
+    "notify-send\0" drop ,
+    "-a\0" drop ,
+    "net2o\0" drop ,
+    "-c\0" drop ,
+    "im.received\0" drop ,
+    net2o-logo $@len IF
+	"-i\0" drop ,
+	net2o-logo $@ 0string ,
+    THEN
+    here to title-string 0 ,
+    here to content-string 0 ,
+    0 , \ must be terminated by null pointer
+    r> dp ! ;
+
+!notify-args
+
+:noname defers 'cold
+    notify-send off upath off net2o-logo off
+    !upath !net2o-logo !notify-args ; is 'cold
 
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
     title-string 0 ?free  content-string 0 ?free

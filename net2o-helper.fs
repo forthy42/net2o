@@ -34,13 +34,13 @@ require net2o-dhtroot.fs
 	    EXIT  THEN  THEN
     2drop 0 ;
 
-: dhtroot ( -- net2oaddr ) ~~
+: dhtroot ( -- net2oaddr )
     dhtroot-addr@ ?dup-IF  0 swap
 	[: dup ?EXIT
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
-    THEN  ind-addr off ~~ ;
+    THEN  ind-addr off ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
