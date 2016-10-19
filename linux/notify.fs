@@ -63,7 +63,7 @@ Variable net2o-logo
 
 10 cells buffer: notify-args
 
-: !notify-args
+: !notify-args ( -- )
     here >r notify-args dp !
     "notify-send\0" drop ,
     "-a\0" drop ,
