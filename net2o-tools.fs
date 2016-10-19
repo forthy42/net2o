@@ -772,5 +772,5 @@ Sema resize-sema
 \ !wrapper: generic wrapper to store a value in a variable
 \ and restore it after catching the xt
 
-: !wrapper { addr xt -- .. }
+: !wrapper ( val addr xt -- .. ) { addr xt -- .. }
     addr !@ >r xt catch r> addr ! throw ;

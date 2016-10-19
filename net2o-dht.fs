@@ -131,7 +131,7 @@ Variable dht-table
 	I c@ $100 + cells hash dht@ + to hash
     LOOP  true !!dht-full!! ;
 
-dht-class new constant dummy-dht
+dht-class ' new static-a with-allocater constant dummy-dht
 
 : >d#id ( addr u -- o )
     [: 2dup d#public d#

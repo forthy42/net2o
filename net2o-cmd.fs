@@ -271,7 +271,7 @@ Defer >throw
     2r> buf-state 2@ d0<> IF  buf-state 2!  ELSE  2drop  THEN
     2r> buf-dump 2! ?dup-IF  throw  THEN ;
 
-cmd-buf-c new code-buf^ !
+cmd-buf-c ' new static-a with-allocater code-buf^ !
 ' code-buf^ cmdbuf: code-buf
 
 code-buf
@@ -292,7 +292,7 @@ cmd-buf-c class
     maxdata uvar cmd0buf
 end-class cmd-buf0
 
-cmd-buf0 new code0-buf^ !
+cmd-buf0 ' new static-a with-allocater code0-buf^ !
 ' code0-buf^ cmdbuf: code0-buf
 
 \ command buffer in a string
@@ -303,7 +303,7 @@ cmd-buf-c class
     cell uvar cmd$
 end-class cmd-buf$
 
-cmd-buf$ new code-buf$^ !
+cmd-buf$ ' new static-a with-allocater code-buf$^ !
 ' code-buf$^ cmdbuf: code-buf$
 
 code-buf$

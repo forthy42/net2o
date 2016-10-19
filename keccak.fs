@@ -75,6 +75,9 @@ User keccak-t
 
 keccak-init
 
+:noname defers 'cold keccak-init ; is 'cold
+:noname defers 'image crypto-o off  keccak-t off ; is 'image
+
 ' keccak-init to c:init
 ' keccak-free to c:free
 :noname to @keccak ; to c:key! ( addr -- )

@@ -78,6 +78,9 @@ state2# buffer: no-key \ just zeros for no key
 
 init-keybuf
 
+:noname keytmp off keybuf off defers 'image ; is 'image
+:noname defers 'cold init-keybuf ; is 'cold
+
 #10.000.000.000 d>64 64Value delta-mykey# \ new mykey every 10 seconds
 
 : init-mykey ( -- )

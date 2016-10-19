@@ -72,7 +72,7 @@ cmd-buf0 uclass cmdbuf-o
     key-cksum# uvar keypack-chksum
 end-class cmd-keybuf-c
 
-cmd-keybuf-c new code-key^ !
+cmd-keybuf-c ' new static-a with-allocater code-key^ !
 ' code-key^ cmdbuf: code-key
 
 code-key
@@ -781,9 +781,8 @@ false value ?yes
     ?key-sfd read-keys-loop ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
-    config:pw-level# @ >r -1 config:pw-level# !  import#new import-type !
-    ?key-pfd read-keys-loop
-    r> config:pw-level# !  ;
+    -1 config:pw-level#
+    [: import#new import-type ! ?key-pfd read-keys-loop ;] !wrapper ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;
@@ -1028,8 +1027,7 @@ Forward help
     <info> ." generate a new one with 'keygen'" cr <default> ;
 
 : get-me ( -- )
-    get-my-key catch #-56 = IF .keyinfo
-    THEN ;
+    get-my-key catch dup #-56 = IF drop .keyinfo ELSE throw THEN ;
 
 : ?get-me ( -- )
     \G this version of get-me fails hard if no key is opened
