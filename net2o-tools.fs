@@ -366,14 +366,19 @@ Variable configured?
     configured? off
     config-file$ $boot
     config:.net2o$ $boot
+    config:chats$ $boot
     config:keys$ $boot
     config:objects$ $boot
-    rootdirs$ off  pad $400 get-dir rootdirs$ $! ; is 'cold
+    pad $400 get-dir rootdirs$ $!
+; is 'cold
 :noname ( -- )
     config-file$ $save
     config:.net2o$ $save
+    config:chats$ $save
     config:keys$ $save
     config:objects$ $save
+    config:host$ $off
+    config:rootdirs$ $off
     defers 'image ; is 'image
 
 : rootdirs>path ( -- )

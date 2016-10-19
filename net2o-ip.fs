@@ -50,6 +50,8 @@ Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 
 default-host
 
+:noname defers 'cold default-host ; is 'cold
+
 : .myname ( -- )
     config:prio# @ IF  '0' emit config:prio# @ emit  THEN
     config:host$ $@len IF  config:host$ $@ dup '@' + emit type  THEN ;
