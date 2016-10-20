@@ -110,7 +110,7 @@ install:	libcc-install
 	for i in $(SRCDIRS); do \
 		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
 	done
-	@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
+	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
 	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
 	for i in $(SOURCES) $(GEN); do \
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
