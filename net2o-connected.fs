@@ -328,11 +328,13 @@ also net2o-base
 
 : expected@ ( -- head top )
     o IF  data-rmap @ with mapc
-	o IF  dest-tail @ dest-top @  ELSE  #0.  THEN endwith
-    ELSE  #0.  THEN  ;
+	o IF  dest-tail @ dest-top @
+	    msg( ." expected: " over hex. dup hex. forth:cr )
+	ELSE  #0. msg( ." expected: no data-rmap" forth:cr )  THEN endwith
+    ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
 
 : expected? ( -- flag )
-    expected@ \ msg( ." expected: " over hex. dup hex. forth:cr )
+    expected@
     tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ with mapc
@@ -461,9 +463,9 @@ previous
 	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
-    end-with  cmdbuf# @ 2 = IF  cmdbuf# off  THEN
+    stats? IF  send-timing  THEN
+    end-with  cmdbuf# @ 2 stats? - = IF  cmdbuf# off  THEN
     slurp? IF  slurp  THEN
-    stats? IF  ack send-timing end-with  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
 : net2o:do-ack ( -- )

@@ -396,7 +396,7 @@ scope{ mapc
     data-head@ file( over data-map @ .mapc:dest-raddr @ -
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? .fs-read dup /head
-    file( dup hex. residualread @ hex. forth:cr ) ;
+    file( dup hex. residualread @ hex. head@ hex. forth:cr ) ;
 
 \ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
