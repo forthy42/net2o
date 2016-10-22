@@ -338,7 +338,7 @@ scope{ mapc
 \ careful: must follow exactly the same logic as slurp (see below)
 
 : n2o:spit ( -- )
-    rwrite-back? 0= ?EXIT fstates 0= ?EXIT
+    rdata-back? 0= ?EXIT fstates 0= ?EXIT
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
