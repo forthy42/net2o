@@ -973,13 +973,14 @@ also net2o-base scope: /chat
     \G n2o: Execute normal n2o command
 
 : sync ( addr u -- )
-    \U sync                 synchronize logs
-    \G sync: synchronize chat logs
-    2drop o 0= IF  msg-group$ $@ msg-groups #@
-	IF  @ >o rdrop ?msg-context  ELSE  EXIT  THEN
-    THEN  o to connection  +chat-control
+    \U sync [+date] [-date] synchronize logs
+    \G sync: synchronize chat logs, starting and/or ending at specific
+    \G sync: time/date
+    2drop o 0= IF msg-group$ $@ msg-groups #@
+	IF @ >o rdrop ?msg-context ELSE EXIT THEN
+    THEN o to connection +chat-control
     ." === sync ===" forth:cr
-    net2o-code  expect-reply ['] last?, [msg,] end-code ;
+    net2o-code expect-reply ['] last?, [msg,] end-code ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

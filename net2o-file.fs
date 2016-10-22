@@ -337,15 +337,17 @@ scope{ mapc
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit ( -- ) fstates 0= ?EXIT
+: n2o:spit ( -- )
+    rwrite-back? 0= ?EXIT fstates 0= ?EXIT
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
-	    fails states u>= UNTIL  max/back  THEN
-	msg( ." Write end" cr ) +file ;]
+	    fails states u>= UNTIL  THEN
+	msg( ." Write end" cr ) +file
+	fails states u>= IF  max/back  THEN ;]
     file-sema c-section ;
 
 : save-to ( addr u n -- )  state-addr >o  fs-create o> ;
@@ -405,9 +407,9 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualread off THEN to fails
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
-	    fails states u>= UNTIL  THEN msg( ." Read end" forth:cr ) +file
-	head@ fails states u>=
-	dup IF  max/head  THEN ;]
+	    fails states u>= UNTIL THEN
+	msg( ." Read end" forth:cr ) +file
+	fails states u>= IF  max/head  THEN  head@ ;]
     file-sema c-section file( dup IF  ." data end" forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
