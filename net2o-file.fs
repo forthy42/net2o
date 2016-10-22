@@ -407,9 +407,9 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualread off THEN to fails
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
-	    fails states u>= UNTIL THEN
-	msg( ." Read end" forth:cr ) +file
-	fails states u>= IF  max/head  THEN  head@ ;]
+	    fails states u>= UNTIL  THEN  +file
+	fails states u>= IF  max/head  THEN  head@
+	msg( ." Read end: " dup hex. forth:cr ) ;]
     file-sema c-section file( dup IF  ." data end" forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
