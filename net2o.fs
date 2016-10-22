@@ -546,11 +546,11 @@ scope{ mapc
 : /head ( u -- )
     >blockalign dup negate residualread +! data-map @ .mapc:dest-head +! ;
 : max/head ( -- )
-    data-map @ .mapc:dest-head dup @ >maxalign swap +! ;
+    data-map @ .mapc:dest-head dup @ >maxalign swap ! ;
 : /back ( u -- )
     >blockalign dup negate residualwrite +!  data-rmap @ .mapc:dest-back +! ;
 : max/back ( -- )
-    data-rmap @ .mapc:dest-back dup @ >maxalign swap +! ;
+    data-rmap @ .mapc:dest-back dup @ >maxalign swap ! ;
 : /tail ( u -- )
     data-map @ .mapc:dest-tail +! ;
 : data-dest ( -- addr )
