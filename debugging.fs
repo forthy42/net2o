@@ -161,13 +161,14 @@ up@ Value main-up@
 :noname defers 'cold up@ to main-up@ ; is 'cold
 
 event: ->b$off b$ $off ;
-event: ->type defers type <event ->b$off event> ctrl L inskey ;
+event: ->type defers type <event ->b$off event>  ctrl L inskey ;
 event: ->hide ctrl Z inskey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : <hide> ( task -- )
     <event up@ elit, ->hide event>  stop ;
 : bflush ( -- )
+    b$ $@ defers type b$ $off  EXIT
     up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
     main-up@ <hide>
     b$ $@ <event up@ elit, e$, ->type main-up@ event>

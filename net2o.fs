@@ -1201,14 +1201,16 @@ rdata-class to rewind-partial
 : net2o:save ( -- )
     data-rmap @ .mapc:dest-back @ >r n2o:spit
     r> data-rmap @ with mapc dest-back !@
-    dup rewind-partial  dup  dest-back!  do-slurp !@ drop endwith ;
+    dup rewind-partial  dup  dest-back!
+    do-slurp !@ drop endwith ;
 
 Defer do-track-seek
 
 event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: ->slurp ( task o -- )  >o n2o:slurp 2drop o elit, ->track event> o> ;
-event: ->save ( o -- ) .net2o:save ;
-event: ->save&done ( o -- ) >o net2o:save sync-done-xt perform o> ;
+event: ->save ( o -- )  .net2o:save ;
+event: ->save&done ( o -- )
+    >o net2o:save sync-done-xt perform o> ;
 
 0 Value file-task
 
@@ -1217,7 +1219,7 @@ event: ->save&done ( o -- ) >o net2o:save sync-done-xt perform o> ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
     o elit, ->save file-task event> ;
-: net2o:save&done
+: net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
     o elit, ->save&done file-task event> ;
 
