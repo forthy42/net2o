@@ -22,7 +22,7 @@
 [ELSE]
     0 Value net2o-sock
 [THEN]
-0 Value query-sock
+UValue query-sock
 Variable my-addr[] \ object based hosts
 Variable my-addr$ \ string based hosts (with sigs)
 Variable pub-addr$ \ publicated addresses (with sigs)
