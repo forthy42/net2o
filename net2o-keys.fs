@@ -753,14 +753,12 @@ false value ?yes
 	2drop
     LOOP  0 0 ;
 
-: ?perm ( -- )
-    last-key >o ke-mask @ 0= IF
-	ke-sk sec@ nip IF  perm%myself  ELSE  perm%default  THEN  ke-mask !
-    THEN o> ;
+: ?perm ( o:key -- )
+    ke-sk sec@ nip IF  perm%myself  ELSE  perm%default  THEN  ke-mask ! ;
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key >o ke-sk ke-end over - erase  do-cmd-loop o> ?perm ;
+    sample-key >o ke-sk ke-end over - erase  do-cmd-loop o> last-key .?perm ;
 
 : .key$ ( addr u -- )
     sample-key >o  ke-sk ke-end over - erase

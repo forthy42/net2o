@@ -110,8 +110,9 @@ scope{ n2o
 : keyin ( -- )
     \U keyin|inkey file1 .. filen
     \G keyin: read a .n2o key file in
-    ?get-me  import#manual import-type !  key>default
-    BEGIN  ?nextarg WHILE  do-keyin  REPEAT  save-pubkeys ;
+    ?get-me  key>default
+    BEGIN  ?nextarg WHILE
+	    import#manual import-type !  do-keyin  REPEAT  save-pubkeys ;
 : keyout ( -- )
     \U keyout|outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity

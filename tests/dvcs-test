@@ -1,6 +1,6 @@
 #!/bin/bash
-rm -rf dvcs-test.d
-mkdir -p dvcs-test.d/.net2o
+rm -rf dvcs-test.d dvcs-test.2
+mkdir -p dvcs-test.d/.net2o dvcs-test.2/.net2o
 cd dvcs-test.d
 cat >.net2o/config <<EOF
 .net2o="$PWD/.net2o"
@@ -17,3 +17,44 @@ export NET2O_CONF=$PWD/.net2o/config
 gforth ../n2o $* -yes keygen test
 gforth ../n2o $* script tests/dvcs-test.s2o
 echo
+cd ..
+mkdir -p
+cd dvcs-test.2
+cat >.net2o/config <<EOF
+.net2o="$PWD/.net2o"
+keys="$PWD/.net2o/keys"
+chats="$PWD/.net2o/chats"
+objects="$PWD/.net2o/objects"
+date=2
+host="test-host"
+prio=10
+rootdirs="$PWD"
+EOF
+export NET2O_CONF=$PWD/.net2o/config
+gforth ../n2o $* -yes keygen test2
+gforth ../n2o $* -yes cmd <<EOF
+keylist
+keyin ~/test.n2o
+keylist
+bye
+EOF
+cd ../dvcs-test.d
+export NET2O_CONF=$PWD/.net2o/config
+gforth ../n2o $* cmd <<EOF
+keylist
+keyin ~/test2.n2o
+keylist
+bye
+EOF
+exec 3> >(gforth ../n2o $* chat dvcs-test)
+usleep 100000 #wait for gforth to start the chat
+cd ../dvcs-test.2
+export NET2O_CONF=$PWD/.net2o/config
+gforth ../n2o $* cmd <<EOF
+init dvcs-test
+sh #pull dvcs-test@test
+bye
+EOF
+echo "/chats" >&3
+echo "/bye" >&3
+exec 3>&-
