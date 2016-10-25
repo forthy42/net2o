@@ -50,9 +50,9 @@ exec 3> >(gforth ../n2o $* chat dvcs-test)
 usleep 100000 #wait for gforth to start the chat
 cd ../dvcs-test.2
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o $* cmd <<EOF
+gforth ../n2o +file $* cmd <<EOF
 init dvcs-test
-sh #pull dvcs-test@test
+pull dvcs-test@test
 bye
 EOF
 echo "/chats" >&3

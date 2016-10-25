@@ -530,11 +530,17 @@ Variable sync-file-list[]
 $18 Constant /sync-files
 $20 /sync-files * Constant /sync-reqs
 
-: dvcs-sync-done ( -- )
+event: ->dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
     msg-group$ $@ ?msg-log ?save-msg   0 dvcs-request# !
-    ." === metadata sync done ===" forth:cr
-    msg-group$ $@ rows display-lastn ;
+    msg( ." === metadata sync done ===" forth:cr )
+    msg-group$ $@ rows display-lastn o> ;
+
+: dvcs-sync-done ( -- )
+    msg( ." dvcs-sync-done" forth:cr )
+    n2o:close-all net2o-code expect-reply close-all end-code
+    msg( ." dvcs-sync-done closed" forth:cr )
+    <event o elit, ->dvcs-sync-done wait-task @ event> ;
 
 : +dvcs-sync-done ( -- )
     ['] dvcs-sync-done sync-done-xt ! ;
@@ -563,7 +569,7 @@ $20 /sync-files * Constant /sync-reqs
     sync-file-list[] $[]# 0 ?DO
 	I /sync-reqs + I' umin I U+DO
 	    net2o-code expect-reply
-	    $10 blocksize! $A blockalign!
+	    $10 blocksize! $4 blockalign!
 	    I /sync-files + I' umin I U+DO
 		I sync-file-list[] $[]@ n2o:copy#
 	    LOOP
@@ -585,7 +591,9 @@ $20 /sync-files * Constant /sync-reqs
 : handle-pull ( -- )  ?.net2o/objects
     n2o:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
-    0 >o dvcs-connects  wait-dvcs-request o>
+    0 >o dvcs-connects +dvcs-sync-done
+    net2o-code expect-reply ['] last?, [msg,] end-code
+    wait-dvcs-request o>
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
