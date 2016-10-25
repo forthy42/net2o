@@ -18,7 +18,6 @@ gforth ../n2o $* -yes keygen test
 gforth ../n2o $* script tests/dvcs-test.s2o
 echo
 cd ..
-mkdir -p
 cd dvcs-test.2
 cat >.net2o/config <<EOF
 .net2o="$PWD/.net2o"
