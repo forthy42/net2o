@@ -1021,15 +1021,18 @@ previous
     ELSE  2drop  THEN ;
 
 : msg-timeout ( -- )
-    cmd-resend? IF  reply( ." Resend to " pubkey $@ key>nick type cr )
-	>next-timeout
-    ELSE  -timeout EXIT  THEN
-    timeout-expired? IF
-	msg-group$ $@len IF
-	    pubkey $@ ['] left, send-otr-avalanche
+    packets2 @ >r
+    >next-timeout cmd-resend?
+    IF  reply( ." Resend to " pubkey $@ key>nick type cr )
+	timeout-expired? IF
+	    msg-group$ $@len IF
+		pubkey $@ ['] left, send-otr-avalanche
+	    THEN
+	    n2o:dispose-context
+	    rdrop EXIT
 	THEN
-	n2o:dispose-context
-    THEN ;
+    ELSE  expected@ u< IF  -timeout  THEN  THEN
+    r>  packets2 @ =  IF  transfer-keepalive?  THEN ;
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
@@ -1039,7 +1042,7 @@ $A $C 2Value chat-bufs#
     +resend-msg +flow-control +sync-done ;
 
 : chat#-connect ( addr u buf1 buf2 --- )
-    pk-connect +chat-control  greet +group ;
+    pk-connect connection .+chat-control  greet +group ;
 
 : chat-connect ( addr u -- )
     chat-bufs# chat#-connect ;

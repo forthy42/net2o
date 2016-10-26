@@ -46,6 +46,12 @@ keylist
 bye
 EOF
 exec 3> >(gforth ../n2o $* chat dvcs-test)
+export GFORTHPID=$[$!+1]
+function killgforth {
+    kill $GFORTHPID
+}
+trap killgforth EXIT
+
 usleep 100000 #wait for gforth to start the chat
 cd ../dvcs-test.2
 export NET2O_CONF=$PWD/.net2o/config

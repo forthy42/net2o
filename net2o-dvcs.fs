@@ -565,11 +565,11 @@ event: ->dvcs-sync-done ( o -- ) >o
 : dvcs-needed-files ( -- )
     re# [: dup $@ +needed cell+ $@ key| +needed ;] #map ;
 
-: get-needed-files ( -- )
+: get-needed-files ( -- ) +resend
     sync-file-list[] $[]# 0 ?DO
 	I /sync-reqs + I' umin I U+DO
 	    net2o-code expect-reply
-	    $10 blocksize! $4 blockalign!
+	    $10 blocksize! 0 blockalign!
 	    I /sync-files + I' umin I U+DO
 		I sync-file-list[] $[]@ n2o:copy#
 	    LOOP

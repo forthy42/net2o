@@ -7,8 +7,9 @@ sh echo "Erster Checkin"
 diff
 ci -m "Erster Checkin"
 sh echo "Eine zweite Zeile" >>b
+sh cp ../data/2011-06-28_06-54-09-small.jpg .
+add 2011-06-28_06-54-09-small.jpg
 sh echo "Checkin 2"
-diff
 ci -m "Checkin 2"
 sh mkdir xx
 sh mv c xx/d

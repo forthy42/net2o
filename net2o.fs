@@ -1432,14 +1432,14 @@ User remote?
 scope{ mapc
 
 : handle-data ( addr -- )  parent @ >o  o to connection
-    msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " dup hex. cr )
+    msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " inbuf addr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
 : handle-cmd ( addr -- )  parent @ >o
-    msg( ." Handle command to addr: " dup hex. cr )
+    msg( ." Handle command to addr: " inbuf addr le-64@ hex. cr )
     outflag off  wait-task @ 0= remote? !
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move

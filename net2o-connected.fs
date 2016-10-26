@@ -42,7 +42,8 @@ connect-table $@ inherit-table context-table
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ with mapc
-    over dest-top @ <> and dest-end or! dest-top! endwith ;
+    over dest-top @ <> and dest-end or! dest-top!
+    endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;

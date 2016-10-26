@@ -52,7 +52,8 @@ Variable fs-table
     -1 parent @ .file-count +!
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: ->file-done ( file-o -- )
-    >o file-xt perform o> ;
+    >o file-xt @ ?dup-IF  execute
+    ELSE  <err> ." invalid file-done xt" <default> forth:cr  THEN o> ;
 
 \ id handling
 
