@@ -600,7 +600,7 @@ event: ->dvcs-sync-done ( o -- ) >o
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
-    msg-group$ $@ leave-chat
+    leave-chats
     n2o:dispose-dvcs o> ;
 
 0 [IF]

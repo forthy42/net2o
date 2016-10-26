@@ -53,7 +53,8 @@ Variable fs-table
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: ->file-done ( file-o -- )
     >o file-xt @ ?dup-IF  execute
-    ELSE  <err> ." invalid file-done xt" <default> forth:cr  THEN o> ;
+    ELSE  file( <err> ." invalid file-done xt" <default> forth:cr )
+    THEN o> ;
 
 \ id handling
 

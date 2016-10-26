@@ -52,10 +52,10 @@ function killgforth {
 }
 trap killgforth EXIT
 
-usleep 100000 #wait for gforth to start the chat
+sleep 1 #wait for gforth to start the chat
 cd ../dvcs-test.2
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o +file $* cmd <<EOF
+gforth ../n2o $* cmd <<EOF
 init dvcs-test
 pull dvcs-test@test
 bye
