@@ -7,9 +7,10 @@ sh echo "Erster Checkin"
 diff
 ci -m "Erster Checkin"
 sh echo "Eine zweite Zeile" >>b
-sh cp ../data/2011-06-28_06-54-09-small.jpg .
-add 2011-06-28_06-54-09-small.jpg
+sh echo "Und eine dritte, und ganz viel Text" >>b
+sh echo "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet." >>b
 sh echo "Checkin 2"
+diff
 ci -m "Checkin 2"
 sh mkdir xx
 sh mv c xx/d

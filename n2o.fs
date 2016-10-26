@@ -121,7 +121,7 @@ scope{ n2o
 : keygen ( -- )
     \U keygen|genkey nick
     \G keygen: generate a new keypair
-    ?nextarg 0= IF  get-nick  THEN
+    init-dirs ?nextarg 0= IF  get-nick  THEN
     new-key ?cr .keys ?rsk ;
 : keylist ( -- )
     \U keylist|listkey
