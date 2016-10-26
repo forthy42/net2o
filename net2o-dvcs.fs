@@ -562,8 +562,11 @@ event: ->dvcs-sync-done ( o -- ) >o
 	sync-file-list[] $ins[] drop
     ELSE  2drop  THEN ;
 
+: #needed ( hash -- )
+    dup $@ +needed cell+ $@ key| +needed ;
 : dvcs-needed-files ( -- )
-    re# [: dup $@ +needed cell+ $@ key| +needed ;] #map ;
+    re#    ['] #needed #map
+    equiv# ['] #needed #map ;
 
 : get-needed-files ( -- ) +resend
     sync-file-list[] $[]# 0 ?DO

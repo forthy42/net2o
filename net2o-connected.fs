@@ -187,12 +187,15 @@ also }scope
     throw  1 file-reg# +! ;
 
 : n2o:copy ( addrsrc us addrdest ud -- )
-    [: 2swap $, r/o ulit, open-tracked-file
+    [: file( ." copy '" 2over forth:type ." ' -> '" 2dup forth:type
+      ." '" forth:cr )
+      2swap $, r/o ulit, open-tracked-file
       file-reg# @ save-to ;] n2o>file
     1 file-count +! ;
 
 : n2o:copy# ( addrhash u -- )
-    [: 1 ulit, file-type 2dup $, r/o ulit, open-tracked-file
+    [: file( ." copy# " 2dup 85type forth:cr )
+      1 ulit, file-type 2dup $, r/o ulit, open-tracked-file
       file-reg# @ save-to# ;] n2o>file
     1 file-count +! ;
 
@@ -264,6 +267,7 @@ also net2o-base
     data-rmap @ with mapc
     data-ack# @ bytes>addr dest-top 2@ umin umin
     dest-tail @ umax dup dest-tail !@ endwith
+    ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
 
@@ -271,6 +275,7 @@ also net2o-base
 
 : prepare-resend ( flag -- end start acks ackm taibits )
     data-rmap @ with mapc
+    ack( ." head/tail: " dup forth:. dest-head @ hex. dest-tail @ hex. forth:cr )
     IF    dest-head @ addr>bits bits>bytes -4 and
     ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
     dest-tail @ addr>bytes -4 and dup data-ack# umin!
@@ -280,8 +285,10 @@ also net2o-base
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
     0 swap  prepare-resend { acks ackm tailbits }
+    ack( ." ack loop: " over hex. dup hex. forth:cr )
     +DO
 	acks I ackm and + l@
+	ack( ." acks[" I ackm and 0 .r ." ]=" dup hex. forth:cr )
 	I bytes>bits tailbits u< IF
 	    -1 tailbits I bytes>bits - lshift invert or
 	THEN
@@ -308,7 +315,8 @@ also net2o-base
     ['] drop expect-reply-xt ;
 
 : resend-all ( -- )
-    ticker 64@ resend-all-to 64@ 64u>= IF
+    ticker 64@ resend-all-to 64@
+    64u>= IF
 	false net2o:do-resend
 	ack@ .+timeouts resend-all-to 64!
     THEN ;
@@ -455,9 +463,11 @@ previous
     net2o-code
     ack expect-reply
     dup ack-receive !@ xor >r
+    ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
+	    ack( ." ack: do-resend" forth:cr )
 	    true net2o:do-resend
 	THEN
 	0 data-rmap @ .mapc:do-slurp !@
@@ -508,7 +518,8 @@ previous
     IF  transfer-keepalive?  THEN ;
 
 \ : +connecting   ['] connecting-timeout timeout-xt ! ;
-: +resend       ['] connected-timeout  timeout-xt ! o+timeout ;
+: +resend       ['] connected-timeout  timeout-xt ! o+timeout
+    64#0 resend-all-to 64! ;
 : +resend-cmd   ['] cmd-timeout        timeout-xt ! o+timeout ;
 
 : +get-time     ['] get-tick is other ;
