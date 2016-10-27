@@ -271,8 +271,8 @@ also net2o-base
     new-files[] ['] dvcs+out $[]map ;
 : write-new-fs ( -- )
     new-files[] [: 2dup hash#128 dvcs:perm /string $,
-	/name statbuf lstat ?ior statbuf st_size @
-	statbuf st_mode w@ S_IFMT and S_IFDIR <> and ulit,
+	/name statbuf lstat ?ior statbuf st_size 64@
+	statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and lit,
 	dvcs-write ;] $[]map ;
 : compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
