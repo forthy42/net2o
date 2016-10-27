@@ -437,7 +437,7 @@ previous
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
     new-files[] $[]# del-files[] $[]# d0= IF
-	2drop ." Nothing to do" cr
+	." Nothing to do" cr
     ELSE
 	['] compute-diff gen-cmd$ >revision
 	del-files[] ['] -fileentry $[]map
