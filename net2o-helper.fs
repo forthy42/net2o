@@ -34,13 +34,13 @@ require net2o-dhtroot.fs
 	    EXIT  THEN  THEN
     2drop 0 ;
 
-: dhtroot ( -- net2oaddr )
+: dhtroot ( -- )
     dhtroot-addr@ ?dup-IF  0 swap
 	[: dup ?EXIT
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
-    THEN  ind-addr off ;
+    THEN  return-addr dup $10 erase be!  ind-addr off ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
@@ -53,7 +53,7 @@ require net2o-dhtroot.fs
 : ins-ip6 ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip6 ind-addr off ;
 
-: pk:connect ( code data key u ret -- )
+: pk:connect ( code data key u -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
     n2o:new-context >o rdrop o to connection  setup!
     dest-pk \ set our destination key
@@ -222,7 +222,7 @@ User host$ \ check for this hostname
     rot or swap ;
 
 : make-context ( pk u -- )
-    0 n2o:new-context >o rdrop dest-pk ;
+    return-addr $10 erase n2o:new-context >o rdrop dest-pk ;
 
 : n2o:pklookup ( addr u -- )
     2dup keysize2 safe/string host$ $! key2|

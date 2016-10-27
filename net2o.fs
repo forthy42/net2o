@@ -418,13 +418,13 @@ UValue connection
 : rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
     rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
-: n2o:new-context ( addr -- o )
+: n2o:new-context ( -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     o contexts !@ next-context !
     o to connection \ current connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
-    dup return-addr be!  return-address be!
+    return-addr return-address $10 move
     ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
     ['] noop punch-done-xt ! ['] noop sync-done-xt !  ['] noop ack-xt !
     -flow-control
@@ -464,7 +464,7 @@ Variable mapstart $1 mapstart !
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
+	n2o:new-context >o rdrop  setup!  THEN
     msg( ." data map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag off
     addrd u data-rmap map-data-dest
@@ -474,7 +474,7 @@ Variable mapstart $1 mapstart !
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	return-addr be@ n2o:new-context >o rdrop  setup!  THEN
+	n2o:new-context >o rdrop  setup!  THEN
     msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag on
     addrd u code-rmap map-code-dest
@@ -1733,7 +1733,7 @@ Variable cookies
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
-	nip return-addr be@ n2o:new-context swap
+	nip n2o:new-context swap
     THEN ;
 
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN
