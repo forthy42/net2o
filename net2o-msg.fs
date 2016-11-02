@@ -1021,7 +1021,6 @@ previous
     ELSE  2drop  THEN ;
 
 : msg-timeout ( -- )
-    packets2 @ >r
     >next-timeout cmd-resend?
     IF  reply( ." Resend to " pubkey $@ key>nick type cr )
 	timeout-expired? IF
@@ -1031,8 +1030,7 @@ previous
 	    n2o:dispose-context
 	    rdrop EXIT
 	THEN
-    ELSE  expected@ u< IF  -timeout  THEN  THEN
-    r>  packets2 @ =  IF  transfer-keepalive?  THEN ;
+    ELSE  expected@ u< IF  -timeout  THEN  THEN ;
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 

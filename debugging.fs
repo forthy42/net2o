@@ -160,19 +160,18 @@ up@ Value main-up@
 
 :noname defers 'cold up@ to main-up@ ; is 'cold
 
-event: ->b$off b$ $off ;
-event: ->type defers type <event ->b$off event>  ctrl L inskey ;
+event: ->type { w^ x } x $@ type x $off ;
 event: ->hide ctrl Z inskey <event ->wake event> ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : <hide> ( task -- )
     <event up@ elit, ->hide event>  stop ;
 : bflush ( -- )
-    b$ $@ defers type b$ $off  EXIT
-    up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
-    main-up@ <hide>
-    b$ $@ <event up@ elit, e$, ->type main-up@ event>
-    BEGIN  b$ @  WHILE  stop  REPEAT ;
+    [IFUNDEF] android    b$ $@ defers type b$ $off
+    [ELSE]
+	up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
+	0 b$ !@ <event elit, ->type main-up@ event>
+    [THEN] ;
 : bcr    #lf bemit bflush ;
 : bat-deltaxy ( dx dy -- ) drop
     dup 0> IF  0 ?DO  bl bemit  LOOP

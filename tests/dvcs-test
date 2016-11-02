@@ -1,4 +1,5 @@
 #!/bin/bash
+GFORTH=${GFORTH:-gforth}
 rm -rf dvcs-test.d dvcs-test.2
 mkdir -p dvcs-test.d/.net2o dvcs-test.2/.net2o
 cd dvcs-test.d
@@ -14,8 +15,8 @@ rootdirs="$PWD"
 EOF
 export PASSPHRASE=1234
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o $* -yes keygen test
-gforth ../n2o $* script tests/dvcs-test.s2o
+$GFORTH ../n2o $* -yes keygen test
+$GFORTH ../n2o $* script tests/dvcs-test.s2o
 echo
 cd ..
 cd dvcs-test.2
@@ -30,8 +31,8 @@ prio=10
 rootdirs="$PWD"
 EOF
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o $* -yes keygen test2
-gforth ../n2o $* -yes cmd <<EOF
+$GFORTH ../n2o $* -yes keygen test2
+$GFORTH ../n2o $* -yes cmd <<EOF
 keylist
 keyin ~/test.n2o
 keylist
@@ -39,13 +40,13 @@ bye
 EOF
 cd ../dvcs-test.d
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o $* cmd <<EOF
+$GFORTH ../n2o $* cmd <<EOF
 keylist
 keyin ~/test2.n2o
 keylist
 bye
 EOF
-exec 3> >(gforth ../n2o $* chat dvcs-test)
+exec 3> >($GFORTH ../n2o $* chat dvcs-test)
 export GFORTHPID=$[$!+1]
 function killgforth {
     kill $GFORTHPID
@@ -55,7 +56,7 @@ trap killgforth EXIT
 sleep 1 #wait for gforth to start the chat
 cd ../dvcs-test.2
 export NET2O_CONF=$PWD/.net2o/config
-gforth ../n2o $* cmd <<EOF
+$GFORTH ../n2o $* cmd <<EOF
 init dvcs-test
 pull dvcs-test@test
 bye

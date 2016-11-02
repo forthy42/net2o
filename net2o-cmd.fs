@@ -281,7 +281,7 @@ code-buf
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( addr u -- ) dup maxstring u> IF  ~~ true !!stringfit!!  THEN
+:noname ( addr u -- ) dup maxstring u> IF  ~~ true !!cmdfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
@@ -608,7 +608,7 @@ User last-signed cell uallot drop
 : nest$ ( -- addr u )  cmdbuf$ neststart# @ safe/string ;
 
 : cmd-resolve> ( -- addr u )
-    nest$ over >r dup n>64 cmdtmp$ dup fwd# u> !!cmdfit!!
+    nest$ over >r dup n>64 cmdtmp$ dup fwd# u> !!stringfit!!
     r> over - swap move
     nest-stack deque> neststart# ! ;
 
@@ -651,7 +651,10 @@ scope{ net2o-base
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
 : string, ( addr u -- )  dup n>64 cmd, +cmdbuf ;
-: $, ( addr u -- )  string string, ;
+: $, ( addr u -- )  string
+    dup maxstring u> IF  ~~ true !!stringfit!!  THEN
+    \ extra test to give meaningful error messages
+    string, ;
 : sec$, ( addr u -- )  secstring string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
