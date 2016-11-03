@@ -903,13 +903,15 @@ also net2o-base scope: /chat
 	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
       cell +LOOP  forth:cr ;] #map ;
 
-: here ( addr u -- ) 2drop
-    \U here                 send coordinates
-    \G here: send your coordinates
+: gps ( addr u -- ) 2drop
+    \U gps                  send coordinates
+    \G gps: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE
 	[: $, msg-coord ;] send-avalanche
     THEN ;
+
+' gps alias here
 
 : help ( addr u -- )
     \U help                 show help
@@ -984,6 +986,19 @@ also net2o-base scope: /chat
     THEN o to connection +chat-control
     ." === sync ===" forth:cr
     net2o-code expect-reply ['] last?, [msg,] end-code ;
+
+: version ( -- )
+    \U version              version string
+    \G version: print version string
+    ." n2o-" net2o-version forth:type space
+    ." gforth-"
+    case threading-method
+	0 of debugging-method 0= IF ." fast-"  THEN  endof
+	1 of ." itc-" endof
+	2 of ." ditc-" endof
+    endcase
+    version-string forth:type '-' forth:emit
+    machine forth:type forth:cr ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

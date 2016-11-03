@@ -28,22 +28,26 @@ require unix/pthread.fs
 
 $400 Constant rngbuf#
 
-User rng-pos
-User rng-buffer
-User rng-pid
-User rng-task
-User rng-key
-rngbuf# rng-pos !
+user-o rng-o
+
+object uclass rng-o
+    rngbuf# uvar rng-buffer
+    c:key#  uvar rng-key
+    cell uvar rng-pos
+    cell uvar rng-pid
+    cell uvar rng-task
+end-class rng-c
 
 : rng-allot ( -- )
-    rngbuf# kalloc rng-buffer !
-    c:key# kalloc rng-key !
+    rng-c >osize @ kalloc rng-o !
     rngbuf# rng-pos !
     getpid rng-pid ! up@ rng-task ! ;
 
+rng-allot
+
 : rng-exec ( xt -- )
     \G run @i{xt} with activated random key
-    c:key@ >r  rng-key @ c:key!  catch  r> c:key!  throw ;
+    c:key@ >r  rng-key c:key!  catch  r> c:key!  throw ;
 
 : read-rnd ( addr u -- )
     \ read in bytes from /dev/urandom
@@ -55,7 +59,7 @@ rngbuf# rng-pos !
     \ note that reading 1k of /dev/urandom is unnecessary much
     \ but for sake of simplicity, just do it. It will produce
     \ good randomness even with a number of backdoor possibilities
-    rng-buffer @ rngbuf# read-rnd ;
+    rng-buffer rngbuf# read-rnd ;
 
 : >rng$ ( addr u -- )
     \G fill @i{addr u} with random data by encrypting it
@@ -65,21 +69,21 @@ rngbuf# rng-pos !
 
 : rng-step ( -- )
     \G one step of random number generation 
-    rng-buffer @ rngbuf# >rng$ rng-pos off ;
+    rng-buffer rngbuf# >rng$ rng-pos off ;
 
 \ init rng to be actually useful
 
 : random-init ( -- )
-    rng-key @ c:key# read-rnd ;
+    rng-key c:key# read-rnd ;
 
 : read-initrng ( fd -- flag )  { fd }
     #0. fd reposition-file throw
-    rng-key @ c:key# fd read-file throw c:key# =
+    rng-key c:key# fd read-file throw c:key# =
     ['] c:diffuse rng-exec  fd close-file throw ;
 
 : write-initrng ( -- )
     s" ~/.initrng" r/w create-file throw >r
-    rng-key @ c:key# r@ write-file throw
+    rng-key c:key# r@ write-file throw
     r> close-file throw ;
 
 Sema rng-sema
@@ -91,36 +95,44 @@ Sema rng-sema
 
 \ buffered random numbers to output 64 bit at a time
 
+: ?rng ( -- )
+    \G alloc rng if not there
+    rng-o @ 0= IF  rng-allot  true
+    ELSE  up@ rng-task @ <> dup IF   rng-allot  THEN  THEN
+    getpid rng-pid @ <> or
+    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN ;
+
 : rng-step? ( n -- )
     \G check if n bytes are available in the buffer
     \G in case the RNG is not initialized, init it.
     \G this covers forks and new threads, as the RNG key
     \G is per-thread.
-    up@ rng-task @ <> dup IF   rng-allot  THEN
-    getpid rng-pid @ <> or
-    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN
     rngbuf# u> IF  rng-step  THEN ;
 
 : rng64 ( -- x64 )
     \G return a 64 bit random number
+    ?rng
     rng-pos @ 64aligned 64'+ rng-step?
     rng-pos @ 64aligned dup 64'+ rng-pos !
-    rng-buffer @ + 64@ ;
+    rng-buffer + 64@ ;
 
 : rng$ ( u -- addr u ) >r
     \G return a @i{u} bytes stream (@i{u} must be smaller than the
     \G buffer size}
+    ?rng
     rng-pos @ r@ + rng-step?
-    rng-buffer @ rng-pos @ + r> dup rng-pos +! ;
+    rng-buffer rng-pos @ + r> dup rng-pos +! ;
 
 : rng32 ( -- x )
     \G return a 32 bit random number
+    ?rng
     rng-pos @ 4 + rng-step?
-    rng-pos @ rng-buffer @ + l@
+    rng-pos @ rng-buffer + l@
     4 rng-pos +! ;
 
 : rng8 ( -- c )
     \G return an 8 bit random number
+    ?rng
     rng-pos @ 1+ rng-step?
-    rng-pos @ rng-buffer @ + c@
+    rng-pos @ rng-buffer + c@
     1 rng-pos +! ;
