@@ -1,0 +1,91 @@
+#!/bin/bash
+GFORTH=${GFORTH:-gforth}
+count=100
+case "$1"
+in
+    [0-9][0-9]*)
+	count=$1
+	shift
+	;;
+esac
+rm -rf chat-test.d
+mkdir -p chat-test.d/.net2o
+cd chat-test.d
+cat >.net2o/config <<EOF
+.net2o="$PWD/.net2o"
+keys="$PWD/.net2o/keys"
+chats="$PWD/.net2o/chats"
+objects="$PWD/.net2o/objects"
+date=2
+host="test-host"
+prio=10
+rootdirs="$PWD"
+EOF
+export NET2O_CONF=$PWD/.net2o/config
+PASSPHRASE=1234 $GFORTH ../n2o $* -yes keygen chat-test1
+PASSPHRASE=2345 $GFORTH ../n2o $* -yes keygen chat-test2
+PASSPHRASE=3456 $GFORTH ../n2o $* -yes keygen chat-test3
+PASSPHRASE=4567 $GFORTH ../n2o $* -yes keygen chat-test4
+
+PASSPHRASE=1234 $GFORTH ../n2o $* keyin ~/chat-test2.n2o ~/chat-test3.n2o ~/chat-test4.n2o
+PASSPHRASE=2345 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test3.n2o ~/chat-test4.n2o
+PASSPHRASE=3456 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test2.n2o ~/chat-test4.n2o
+PASSPHRASE=4567 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test2.n2o ~/chat-test3.n2o
+
+function killgforth {
+    killall $GFORTH
+    usleep 100000
+    killall -9 $GFORTH
+}
+trap killgforth EXIT
+
+export PASSPHRASE=1234
+exec 3> >($GFORTH ../n2o $* chat test)
+export GFORTHPID1=$[$!+1]
+sleep 1
+export PASSPHRASE=2345
+exec 4> >($GFORTH ../n2o 10% $* chat test@chat-test1)
+export GFORTHPID2=$[$!+1]
+sleep 2
+
+for i in $(seq 1 $count)
+do
+    echo "Test Message $i on 1/2" >&3
+    usleep 10000
+    echo "Test Message $i on 2/2" >&4
+    usleep 10000
+done
+
+export PASSPHRASE=3456
+exec 5> >($GFORTH ../n2o 5% $* chat test@chat-test1)
+export GFORTHPID3=$[$!+1]
+export PASSPHRASE=4567
+exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
+export GFORTHPID3=$[$!+1]
+sleep 1
+
+#echo "/sync" >&5
+#echo "/sync" >&6
+
+sleep 1
+
+for i in $(seq 1 $count)
+do
+    echo "Test Message $i on 1/4" >&3
+    usleep 10000
+    echo "Test Message $i on 2/4" >&4
+    usleep 10000
+    echo "Test Message $i on 3/4" >&5
+    usleep 10000
+    echo "Test Message $i on 4/4" >&6
+    usleep 10000
+done
+
+echo "/bye" >&6
+usleep 300000
+echo "/bye" >&5
+usleep 300000
+echo "/bye" >&4
+usleep 300000
+echo "/bye" >&3
+usleep 300000
