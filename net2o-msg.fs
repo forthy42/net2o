@@ -878,6 +878,19 @@ scope: notify-cmds
 : .chathelp ( addr u -- addr u )
     ." /" source 7 /string type cr ;
 
+: .n2o-version ( -- )
+    ." n2o-" net2o-version forth:type ;
+: .gforth-version ( -- )
+    ." gforth-"
+    case threading-method
+	0 of debugging-method 0= IF ." fast-"  THEN  endof
+	1 of ." itc-" endof
+	2 of ." ditc-" endof
+    endcase
+    version-string forth:type '-' forth:emit
+    machine forth:type ;
+
+
 also net2o-base scope: /chat
 
 : me ( addr u -- )
@@ -990,15 +1003,7 @@ also net2o-base scope: /chat
 : version ( -- )
     \U version              version string
     \G version: print version string
-    ." n2o-" net2o-version forth:type space
-    ." gforth-"
-    case threading-method
-	0 of debugging-method 0= IF ." fast-"  THEN  endof
-	1 of ." itc-" endof
-	2 of ." ditc-" endof
-    endcase
-    version-string forth:type '-' forth:emit
-    machine forth:type forth:cr ;
+    .n2o-version space .gforth-version forth:cr ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
