@@ -890,7 +890,6 @@ scope: notify-cmds
     version-string forth:type '-' forth:emit
     machine forth:type ;
 
-
 also net2o-base scope: /chat
 
 : me ( addr u -- )

@@ -26,7 +26,7 @@
 
 require unix/pthread.fs
 
-$400 Constant rngbuf#
+$100 Constant rngbuf#
 
 user-o rng-o
 
@@ -50,13 +50,13 @@ rng-allot
     c:key@ >r  rng-key c:key!  catch  r> c:key!  throw ;
 
 : read-rnd ( addr u -- )
-    \ read in bytes from /dev/urandom
+    \G read in bytes from /dev/urandom
     s" /dev/urandom" r/o open-file throw >r
     tuck r@ read-file r> close-file throw
     throw <> !!insuff-rnd!! ;
 
-: rng-init ( -- ) \ reed seed into the buffer
-    \ note that reading 1k of /dev/urandom is unnecessary much
+: rng-init ( -- ) \G reed seed into the buffer
+    \ note that reading 256 bytes of /dev/urandom is unnecessary much
     \ but for sake of simplicity, just do it. It will produce
     \ good randomness even with a number of backdoor possibilities
     rng-buffer rngbuf# read-rnd ;
