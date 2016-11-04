@@ -164,11 +164,14 @@ vault>file
     enc-file $@ >vault ['] do-cmd-loop catch 0 >crypt throw
     c-state @ $F = ;
 
-: decrypt-file ( filename u -- ) >decrypt
+: decrypt-file ( filename u -- ) last# >r >decrypt
     IF
-	v-sig 2@ 2dup .sigdates ."  @" .key-id forth:cr
-	v-data 2@ write-decrypt
-    THEN dispose n:o> ;
+	v-sig 2@ 2dup .sigdates space .key-id forth:cr
+	v-data 2@
+    ELSE
+	#0.
+    THEN dispose n:o> r> to last#
+    write-decrypt ;
 previous
 
 0 [IF]
