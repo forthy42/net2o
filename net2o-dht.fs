@@ -89,7 +89,7 @@ Variable dht-table
 
 : .revoke ( addr u -- )
     ." new key: " 2dup 1 /string 2dup + 1- c@ 2* umin 85type space
-    revoke? -rot .sigdates .check ;
+    revoke? -rot space .sigdates .check ;
 
 \ higher level checks
 
@@ -141,12 +141,12 @@ dht-class ' new static-a with-allocater constant dummy-dht
 	  ELSE  2drop drop dummy-dht dup .dht-off  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
-    >tag verify-tag >r sigpksize# - type r> 2r> .sigdates .check ;
+    >tag verify-tag >r sigpksize# - type r> 2r> space .sigdates .check ;
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
     2dup sigsize# - .addr$
-    2dup .sigdates >host verify-host .check 2drop ;
+    2dup space .sigdates >host verify-host .check 2drop ;
 : .owner ( addr u -- )  2dup sigsize# - .key$
-    2dup .sigdates verify-owner .check 2drop ;
+    2dup space .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host 0= >r sigsize# - r> ;
 : d#. ( -- )

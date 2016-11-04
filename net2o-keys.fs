@@ -323,7 +323,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
-    ke-selfsig $@ .sigdates
+    ke-selfsig $@ space .sigdates
     space ke-mask @ .perm
     space ke-imports @ .imports
     space .nick+pet ;

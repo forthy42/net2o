@@ -24,6 +24,7 @@ cmd-class class
     state# +field v-key \ file vault key, maximum 64 bytes
     keccak# +field v-kstate
     2field: v-data
+    2field: v-sig
     field: v-mode \ crypto mode and key size
 end-class vault-class
 
@@ -73,6 +74,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
     verify-tag !!sig!!
+    2dup dup sigpksize# - /string v-sig 2!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
     0 >crypt 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
@@ -156,11 +158,17 @@ Defer write-decrypt
 vault>file
 : vault>out ['] forth:type is write-decrypt ;
 
-: decrypt-file ( filename u -- )
+: >decrypt ( -- addr u flag )
     enc-filename $!
     enc-filename $@ enc-file $slurp-file
     enc-file $@ >vault ['] do-cmd-loop catch 0 >crypt throw
-    v-data 2@ c-state @ n:o> $F = IF write-decrypt THEN ;
+    c-state @ $F = ;
+
+: decrypt-file ( filename u -- ) >decrypt
+    IF
+	v-sig 2@ 2dup .sigdates ."  @" .key-id forth:cr
+	v-data 2@ write-decrypt
+    THEN dispose n:o> ;
 previous
 
 0 [IF]

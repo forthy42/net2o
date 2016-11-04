@@ -428,7 +428,7 @@ Forward search-key \ search if that is one of our pubkeys
 	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
     ELSE  64drop .ticks  THEN ;
 : .sigdates ( addr u -- )
-    space 2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
+    2dup startdate@ .sigdate ." ->" enddate@ .sigdate ;
 
 \ signature verification
 
