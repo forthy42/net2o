@@ -656,11 +656,11 @@ previous
     THEN ;
 : .chat ( addr u -- )
     [: last# >r o IF  otr-shot off 2dup do-msg-nestsig
-      ELSE  display-one-msg  THEN  r> to last#
+      ELSE  2dup display-one-msg  THEN  r> to last#
       false 0 .avalanche-msg ;] [group] drop notify- ;
 : .otr-chat ( addr u -- )
     [: last# >r o IF  otr-shot on 2dup do-msg-nestsig
-      ELSE  display-one-msg  THEN  r> to last#
+      ELSE  2dup display-one-msg  THEN  r> to last#
       true 0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only

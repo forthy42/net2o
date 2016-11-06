@@ -400,6 +400,25 @@ warnings !
     BEGIN  ?peekarg  WHILE  +-?  WHILE  ?nextarg drop set-debug  REPEAT  THEN
     previous ;
 
+: see ( -- )
+    \U see [::scope1] file1 .. [::scopen] filen
+    \G see: decomile a file, scopes are a global state;
+    \G see: default scope is determined by file extension,
+    \G see: setup scope if not defined
+    setup-table @ see:table !
+    [: 2dup s" ::" string-prefix? IF
+	    2 /string [: type ." -table" ;] $tmp find-name
+	    name>int execute @ see:table !
+	ELSE
+	    see:table @ >r
+	    ." ===== " 2dup forth:type ."  =====" forth:cr
+	    2dup suffix>table see:table !
+	    0 { w^ content } content $slurp-file
+	    content $@ see:table n2o:see-table forth:cr
+	    content $free  r> see:table !
+	THEN
+    ;] arg-loop ;
+
 \ file copy
 
 : get ( -- )

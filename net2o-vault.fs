@@ -17,8 +17,6 @@
 
 require net2o.fs
 
-Variable vault-table
-
 cmd-class class
     KEYBYTES +field v-dhe \ diffie hellman exchange tmpkey
     state# +field v-key \ file vault key, maximum 64 bytes

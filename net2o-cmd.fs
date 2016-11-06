@@ -180,18 +180,20 @@ drop
     net2o.name 3 cells + $@ ;
 : .net2o-num ( off -- )  cell/ '<' emit 0 .r '>' emit space ;
 
+User see:table \ current token table for see only
+
 : (net2o-see) ( addr index -- )  dup >r + @
     dup 0<> IF
 	net2o.name
-	dup 2 cells + @ ?dup-IF  @ token-table @ t-push token-table !  THEN
+	dup 2 cells + @ ?dup-IF  @ see:table @ t-push see:table !  THEN
 	body> .name
     ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
 : .net2o-name ( n -- )  cells >r
-    o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
+    see:table $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r> (net2o-see) ;
 : .net2o-name' ( n -- )  cells >r
-    o IF  token-table  ELSE  setup-table  THEN $@ r@ u<=
+    see:table $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r@ + @
     dup 0<> IF
 	net2o.name body> .name
@@ -204,12 +206,13 @@ drop
 	2 of  ps@ s64. ." slit, " endof
 	3 of  string@noerr  n2o.string  endof
 	4 of  pf@ f. ." float, " endof
-	5 of  ." end-with " cr  t# IF  t-pop  token-table !  THEN  endof
-	6 of  ." oswap " cr token-table @ t-pop token-table ! t-push  endof
+	5 of  ." end-with " cr  t# IF  t-pop see:table !  THEN  endof
+	6 of  ." oswap " cr see:table @ t-pop see:table ! t-push  endof
 	11 of  string@noerr  n2o.secstring  endof
 	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "
 	endof
 	14 of  string@noerr  2drop  endof
+	15 of  string@noerr  cr $> n2o:$. ."  sig$, "  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -222,14 +225,16 @@ Sema see-sema
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see ( addr u -- )
+: n2o:see-table ( addr u table -- ) @ see:table !
     buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup hex. t-stack $off
-      o IF  token-table @ >r  THEN
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-      o IF  r> token-table !  THEN  throw  2drop ;] see-sema c-section
+      throw  2drop ;] see-sema c-section
     2r> buf-state 2! ;
+
+: n2o:see ( addr u -- )
+    o IF  token-table  ELSE  setup-table  THEN  n2o:see-table ;
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
@@ -475,6 +480,9 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: padding ( #len -- )
     \g add padding to align fields
     string@ $> 2drop ;
++net2o: sigstring ( #string -- )
+    \g nestsig and string in one word
+    string@ $> cmd:nestsig ;
 }scope
 
 also net2o-base
@@ -647,6 +655,18 @@ previous
 
 \ net2o assembler stuff
 
+wordlist constant suffix-list
+get-current suffix-list set-current
+' vault-table alias v2o
+' key-entry-table alias n2o
+set-current
+
+: 4cc>table ( addr u -- ) \ really is just 3 characters
+    suffix-list find-name-in ?dup-IF  name>int execute @
+    ELSE  see:table @  THEN ;
+: suffix>table ( addr u -- )
+    2dup '.' -scan nip /string 4cc>table ;
+
 scope{ net2o-base
 
 : maxtiming ( -- n )  maxstring timestats - dup timestats mod - ;
@@ -656,6 +676,7 @@ scope{ net2o-base
     \ extra test to give meaningful error messages
     string, ;
 : sec$, ( addr u -- )  secstring string, ;
+: sig$, ( addr u -- )  sigstring string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;

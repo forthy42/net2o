@@ -123,8 +123,6 @@ end-class key-entry
     ke-pets $[]off
     ke-pets# $off ;
 
-Variable key-entry-table
-
 \ key class
 
 0
@@ -635,11 +633,14 @@ also net2o-base
     ke-nick $@ $, keynick
     ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
 
-: pack-corekey ( o:key -- )
+: pack-signkey ( o:key -- )
     sign[
     pack-core
     ke-pk $@ +cmdbuf
-    ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig
+    ke-selfsig $@ +cmdbuf cmd-resolve> 2drop nestsig ;
+
+: pack-corekey ( o:key -- )
+    pack-signkey
     ke-imports @ ulit, keyimport
     ke-mask @ nlit, keymask
     ke-pets [: $, keypet ;] $[]map
@@ -649,6 +650,11 @@ previous
 : pack-pubkey ( o:key -- )
     key:code
       pack-corekey
+    end:key ;
+: pack-outkey ( o:key -- )
+    key:code
+      "n2o" net2o-base:4cc,
+      pack-signkey
     end:key ;
 : pack-seckey ( o:key -- )
     key:code
@@ -845,7 +851,7 @@ false value ?yes
 \ generate new key
 
 : out-key ( o -- )
-    >o pack-pubkey ['] .nick-base $tmp fn-sanitize o>
+    >o pack-outkey ['] .nick-base $tmp fn-sanitize o>
     [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )

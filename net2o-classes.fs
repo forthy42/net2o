@@ -43,6 +43,8 @@ Variable msg-table
 Variable term-table
 Variable address-table
 Variable context-table
+Variable key-entry-table
+Variable vault-table
 
 Vocabulary mapc
 
