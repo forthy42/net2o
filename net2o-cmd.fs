@@ -212,7 +212,6 @@ User see:table \ current token table for see only
 	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "
 	endof
 	14 of  string@noerr  2drop  endof
-	15 of  string@noerr  cr $> n2o:$. ."  sig$, "  endof
 	$10 of ." push' " p@ 64>n .net2o-name  endof
 	.net2o-name
 	0 endcase ]hex ;
@@ -480,9 +479,6 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: padding ( #len -- )
     \g add padding to align fields
     string@ $> 2drop ;
-+net2o: sigstring ( #string -- )
-    \g nestsig and string in one word
-    string@ $> cmd:nestsig ;
 }scope
 
 also net2o-base
@@ -676,7 +672,6 @@ scope{ net2o-base
     \ extra test to give meaningful error messages
     string, ;
 : sec$, ( addr u -- )  secstring string, ;
-: sig$, ( addr u -- )  sigstring string, ;
 : lit, ( 64u -- )  ulit cmd, ;
 : slit, ( 64n -- )  slit n>zz cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
