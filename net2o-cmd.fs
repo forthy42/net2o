@@ -104,7 +104,11 @@ end-class cmd-buf-c
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
 : n2o.secstring ( $:string -- )
-    cr $> .\" 85\" " .black85 .\" \" sec$, " ;
+    cr $> .\" 85\" " .black85 .\" \" sec$, "
+;
+: n2o.sigstring ( $:string -- )
+    cr $> 2dup n2o:$. ."  ( " ['] .sigdates #10 base-execute
+    ."  ) $, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
@@ -140,7 +144,7 @@ end-class cmd-buf-c
 	    I 1+ I' over - unloop  EXIT  THEN
     LOOP   true !!floatfit!!  ;
 
-: pf!+ ( addr r -- addr' ) { f^ pftmp }
+: pf!+ ( addr n -- addr' n' r:float ) { f^ pftmp }
     BEGIN
 	pftmp 64@ 57 64rshift 64>n
 	pftmp 64@ 7 64lshift 64dup pftmp 64!
@@ -204,11 +208,12 @@ User see:table \ current token table for see only
 	0 of  ." end-code" cr #0. buf-state 2!  endof
 	1 of  p@  u64. ." lit, "  endof
 	2 of  ps@ s64. ." slit, " endof
-	3 of  string@noerr  n2o.string  endof
+	3 of  string@noerr buf-state 2@ drop p@+ drop 64>n 10 =
+	    IF    n2o.sigstring  ELSE  n2o.string  THEN  endof
 	4 of  pf@ f. ." float, " endof
 	5 of  ." end-with " cr  t# IF  t-pop see:table !  THEN  endof
 	6 of  ." oswap " cr see:table @ t-pop see:table ! t-push  endof
-	11 of  string@noerr  n2o.secstring  endof
+	11 of  string@noerr n2o.secstring  endof
 	13 of  '"' emit p@ 64>n xemit p@ 64>n xemit p@ 64>n xemit .\" \" 4cc, "
 	endof
 	14 of  string@noerr  2drop  endof
