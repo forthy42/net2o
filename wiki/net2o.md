@@ -87,7 +87,7 @@ Discussions
 * [Handover](handover.wiki)
 * [Ack cookies](ackcookies.wiki)
 * [Key format](key-format.wiki)
-* [Key revocation](key-revocation.wiki)
+* [Key revocation](key-revocation.md)
 * [NSA backdoor](nsa-backdoor.md)
 * [Onion Routing](onion-routing.md)
 * [Threat Model](threat-model.md)
