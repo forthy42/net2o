@@ -107,16 +107,20 @@ end-class cmd-buf-c
     cr $> .\" 85\" " .black85 .\" \" sec$, "
 ;
 
-forward .key-id
-: n2o.sigstring ( $:string -- )
-    cr $> 2dup n2o:$. ."  ( " 2dup ['] .sigdates #10 base-execute
+forward key>nick
+: .?id ( addr -- ) keysize 2dup key>nick
+    dup IF  type 2drop  ELSE  2drop $8 umin 85type  THEN ;
+: .pk(2)sig? ( addr u -- )
     2dup pk2-sig? 0= IF
-	space sigpk2size# - + keysize .key-id
+	space sigpk2size# - + .?id
 	false .check ELSE
 	2dup pk-sig? 0= IF
-	    space sigpksize# - + keysize .key-id
+	    space sigpksize# - + .?id
 	    false .check
-	ELSE  true .check  THEN  THEN
+	ELSE  2drop true .check  THEN  THEN ;
+: n2o.sigstring ( $:string -- )
+    cr $> 2dup n2o:$. ."  ( " 2dup ['] .sigdates #10 base-execute
+    2drop \ .pk(2)sig?
     ."  ) $, " ;
 
 : $.s ( $string1 .. $stringn -- )
