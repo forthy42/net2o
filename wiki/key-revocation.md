@@ -20,7 +20,7 @@ Therefore, the requirements are as follows:
 I create two random number s1 and s2.  Using these numbers, I create
 pubkeys p1=[s1]base and p2=[s2]base.  Points can be compressed to a
 32 byte number using the compress() function, and then can be treated
-as scalar values like (s).  I compute [s]=[s1×compress(p2)] as "work
+as scalar values like [s].  I compute [s]=[s1×compress(p2)] as "work
 secret" (i.e. the secret key that is proving my identity), and
 p=[s]base, my pubkey.  I publish p and p1, which together are stored
 as identity.  The assumption is that p1 can't be reversed to get s1,
@@ -31,16 +31,18 @@ give him a different identity (a suspicious identity, though).  After
 generating the key, s1 is destroyed; it is no longer needed, though it
 can be recomputed using s and p2 and the extended euclidean algorithm.
 
-I keep s2 as offline copy (it's just 64 hex digits), and s as protected
-online copy in my device; s is subject to attacks and backdoors, and therefore
-at risk.  To revoke a key, I publish p2, which the recipient can validate
-by [compress(p2)]p1==p.
+I keep s2 as offline copy (it's just 64 hex digits or 40 base85
+characters), and s as protected online copy in my device; s is subject
+to attacks and backdoors, and therefore at risk.  To revoke a key, I
+publish p2, which the recipient can validate by [compress(p2)]p1==p.
 
-To sign a new key, I use s2 as signature key, i.e. the recipient can use the
-just published p2 to verify the transition to the replacement key.  Of
-course, the new key also has a signature with s, the old key.  The format
-of the revocation attribute is actually <new pubkeys: pnew, p1new><p2,
-sig using s2> <sig using snew> <date:never> <sig using s>.
+To sign a new key, I use s2 as signature key, i.e. the recipient can
+use the just published p2 to verify the transition to the replacement
+key.  Of course, the new key also has a signature with s, the old key.
+The format of the revocation attribute is actually *<new pubkeys: pnew,
+p1new> <p2, sig using s2> <sig using snew> <date:never> <sig using s>*
+(revocations don't expire, so set the signature expiration date to
+never).
 
 Both signatures must have the same signing date, and a never expiration
 date (a revocation doesn't expire).  The revocation is in the form of an
