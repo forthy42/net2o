@@ -1,4 +1,4 @@
-# Key Revocation +
+# Key Revocation #
 
 Key revocation (for PKIs without certification authorities) usually is done
 with a signature of the lost key, i.e. both the owner and the adversary can
