@@ -39,8 +39,8 @@ publish p2, which the recipient can validate by [compress(p2)]p1==p.
 To sign a new key, I use s2 as signature key, i.e. the recipient can
 use the just published p2 to verify the transition to the replacement
 key.  Of course, the new key also has a signature with s, the old key.
-The format of the revocation attribute is actually *<new pubkeys: pnew,
-p1new> <p2, sig using s2> <sig using snew> <date:never> <sig using s>*
+The format of the revocation attribute is actually ‹new pubkeys: pnew,
+p1new› ‹p2, sig using s2› ‹sig using snew› ‹date:never› ‹sig using s›
 (revocations don't expire, so set the signature expiration date to
 never).
 
