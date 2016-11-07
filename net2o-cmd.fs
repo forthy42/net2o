@@ -106,8 +106,17 @@ end-class cmd-buf-c
 : n2o.secstring ( $:string -- )
     cr $> .\" 85\" " .black85 .\" \" sec$, "
 ;
+
+forward .key-id
 : n2o.sigstring ( $:string -- )
-    cr $> 2dup n2o:$. ."  ( " ['] .sigdates #10 base-execute
+    cr $> 2dup n2o:$. ."  ( " 2dup ['] .sigdates #10 base-execute
+    2dup pk2-sig? 0= IF
+	space sigpk2size# - + keysize .key-id
+	false .check ELSE
+	2dup pk-sig? 0= IF
+	    space sigpksize# - + keysize .key-id
+	    false .check
+	ELSE  true .check  THEN  THEN
     ."  ) $, " ;
 
 : $.s ( $string1 .. $stringn -- )

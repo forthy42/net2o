@@ -405,7 +405,7 @@ warnings !
     \G see: decomile a file, scopes are a global state;
     \G see: default scope is determined by file extension,
     \G see: setup scope if not defined
-    setup-table @ see:table !
+    ?get-me init-client  setup-table @ see:table !
     [: 2dup s" ::" string-prefix? IF
 	    2 /string [: type ." -table" ;] $tmp find-name
 	    name>int execute @ see:table !
