@@ -18,11 +18,11 @@ Therefore, the requirements are as follows:
     partner
 
 I create two random number s1 and s2.  Using these numbers, I create
-pubkeys p1=base×(s1) and p2=base×(s2).  Points can be compressed to a
+pubkeys p1=[s1]base and p2=[s2]base.  Points can be compressed to a
 32 byte number using the compress() function, and then can be treated
-as scalar values like (s).  I compute (s)=(s1×compress(p2)) as "work
+as scalar values like (s).  I compute [s]=[s1×compress(p2)] as "work
 secret" (i.e. the secret key that is proving my identity), and
-p=base×(s), my pubkey.  I publish p and p1, which together are stored
+p=[s]base, my pubkey.  I publish p and p1, which together are stored
 as identity.  The assumption is that p1 can't be reversed to get s1,
 and p won't reveal s.  An attacker who stole s can't guess s1, because
 he doesn't have p2, and so it's even more difficult to get s2.  An
@@ -34,7 +34,7 @@ can be recomputed using s and p2 and the extended euclidean algorithm.
 I keep s2 as offline copy (it's just 64 hex digits), and s as protected
 online copy in my device; s is subject to attacks and backdoors, and therefore
 at risk.  To revoke a key, I publish p2, which the recipient can validate
-by p1×(compress(p2))==p.
+by [compress(p2)]p1==p.
 
 To sign a new key, I use s2 as signature key, i.e. the recipient can use the
 just published p2 to verify the transition to the replacement key.  Of
