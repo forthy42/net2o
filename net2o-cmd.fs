@@ -144,7 +144,7 @@ end-class cmd-buf-c
 	    I 1+ I' over - unloop  EXIT  THEN
     LOOP   true !!floatfit!!  ;
 
-: pf!+ ( addr n -- addr' n' r:float ) { f^ pftmp }
+: pf!+ ( r:float addr -- addr' ) { f^ pftmp }
     BEGIN
 	pftmp 64@ 57 64rshift 64>n
 	pftmp 64@ 7 64lshift 64dup pftmp 64!
@@ -153,11 +153,6 @@ end-class cmd-buf-c
 
 : pf@ ( -- r )
     buf-state 2@ pf@+ buf-state 2! ;
-
-\ Command streams contain both commands and data
-\ the dispatcher is a byte-wise dispatcher, though
-\ commands come in junks of 8 bytes
-\ Commands are zero-terminated
 
 : net2o-crash true !!function!! ;
 
