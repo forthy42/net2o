@@ -41,7 +41,7 @@ case "$host_alias" in
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
-     arm*-*)
+     arm-*)
 	asmflags="-O3 -mfpu=neon $nomflags"
 	flags="-O3 -mfpu=neon $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
