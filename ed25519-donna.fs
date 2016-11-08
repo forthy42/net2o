@@ -25,7 +25,7 @@ require rec-scope.fs
     android:fast-lib [IF]
 	require ed25519-donnafast.fs false
     [ELSE]
-	s" libed25519_donna.so" c-lib:open-path-lib drop true
+	s" libed25519prims.so" c-lib:open-path-lib drop true
     [THEN]
 [ELSE]
     true
