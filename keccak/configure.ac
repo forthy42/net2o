@@ -1,6 +1,6 @@
 ## keccac Autoconf
 
-AC_INIT([KECCAK], [3:2], [bernd@net2o.de], [keccak for Linux],
+AC_INIT([KECCAK], [3:3], [bernd@net2o.de], [keccak for Linux],
         [http://keccak.noekeon.org/])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
