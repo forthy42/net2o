@@ -62,7 +62,7 @@ stskc pkc 2dup pad ed-dh 2drop !time pad ed-dh .time 2drop
 [ELSE] ."  failed" pad over cr xtype [THEN] cr
 xtype cr
 
-[IFDEF] ed-dhv]
+[IFDEF] ed-dhv
 ." Test EdDH variable speed "
 skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv pad $20 + swap move
 skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv 2drop
