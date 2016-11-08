@@ -367,9 +367,10 @@ warnings !
 	    msg-group$ $@ [ -1 1 rshift cell/ ]l load-msgn REPEAT ;
 
 : invite ( -- )
-    \U invite @user
+    \U invite @user ["Invitation text"]
     \G invite: send or accept an invitation to another user
-    announce @nicks>chat 
+    announce @nicks>chat
+    ?nextarg IF  config:invite$ $!  THEN
     chat-keys [: 2dup n2o:pklookup send-invitation
       n2o:dispose-context ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 

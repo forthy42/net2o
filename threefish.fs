@@ -16,15 +16,14 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require rec-scope.fs
+require unix/cpu.fs
 
-[IFDEF] android
-    android:fast-lib [IF]
-	require threefishfast.fs false
-    [ELSE]
-	s" libthreefish.so" c-lib:open-path-lib drop true
-    [THEN]
+fast-lib [IF]
+    require threefishfast.fs false
 [ELSE]
-    true
+    [IFDEF] android
+	s" libthreefish.so" c-lib:open-path-lib drop
+    [THEN] true
 [THEN]
 [IF]
     c-library threefish

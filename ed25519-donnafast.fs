@@ -16,7 +16,10 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require rec-scope.fs
-s" libed25519primsfast.so" c-lib:open-path-lib drop
+
+[IFDEF] android
+    s" libed25519primsfast.so" c-lib:open-path-lib drop
+[THEN]
 
 c-library ed25519_donnafast
     "ed25519primsfast" add-lib

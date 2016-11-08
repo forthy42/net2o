@@ -955,6 +955,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
 	save-mem main-up@ <hide>
 	<event e$, ->invite up@ elit, ->wakeme main-up@ event> stop
     ELSE  2drop  THEN ;
+
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
     gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!

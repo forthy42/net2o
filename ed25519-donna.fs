@@ -20,15 +20,14 @@
 \ dummy load for Android
 
 require rec-scope.fs
+require unix/cpu.fs
 
-[IFDEF] android
-    android:fast-lib [IF]
-	require ed25519-donnafast.fs false
-    [ELSE]
-	s" libed25519prims.so" c-lib:open-path-lib drop true
-    [THEN]
+fast-lib [IF]
+    require ed25519-donnafast.fs false
 [ELSE]
-    true
+    [IFDEF] android
+	s" libed25519prims.so" c-lib:open-path-lib drop
+    [THEN] true
 [THEN]
 [IF]
     c-library ed25519_donna

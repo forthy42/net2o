@@ -326,6 +326,7 @@ Variable objects$
 Variable chats$
 Variable keys$
 Variable .net2o$
+Variable invite$
 
 }scope
 
@@ -337,6 +338,7 @@ also config
 "~/.net2o/objects" objects$ $!
 2 date# !
 pad $400 get-dir rootdirs$ $!
+"Hello!" invite$ $!
 
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
 
@@ -369,6 +371,7 @@ Variable configured?
     config:chats$ $boot
     config:keys$ $boot
     config:objects$ $boot
+    config:invite$ $boot
     pad $400 get-dir rootdirs$ $!
 ; is 'cold
 :noname ( -- )
@@ -377,6 +380,7 @@ Variable configured?
     config:chats$ $save
     config:keys$ $save
     config:objects$ $save
+    config:invite$ $save
     config:host$ $off
     config:rootdirs$ $off
     defers 'image ; is 'image

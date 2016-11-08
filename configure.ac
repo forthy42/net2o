@@ -42,10 +42,10 @@ GFDEBVER=$(echo $GFVER | tr '_' '-')
 
 FAST=no
 case "$host_alias" in
-    arm-linux-androideabi)
+    arm-linux*)
 	FAST=yes
 	;;
-    i686-linux-android)
+    i686-linux*)
 	FAST=yes
 	;;
 esac
