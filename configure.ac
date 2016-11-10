@@ -41,11 +41,11 @@ EOF
 GFDEBVER=$(echo $GFVER | tr '_' '-')
 
 FAST=no
-case "$host_alias" in
-    arm-linux*)
+case "$host" in
+    arm-*linux*)
 	FAST=yes
 	;;
-    i686-linux*)
+    i686-*linux*|i686-*cygwin*)
 	FAST=yes
 	;;
 esac
