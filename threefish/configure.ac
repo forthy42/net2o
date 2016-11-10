@@ -24,7 +24,7 @@ case "$host_alias" in
     arm*-*)
 	CFLAGS="-O3 -mfpu=neon $nomflags"
 	;;
-    i686-linux*)
+    i686-linux*|i686-*cygwin*)
 	flags="$CFLAGS"
 	fastflags="-O3 -m32 -mssse3 $nomflags"
 	enable_fast=yes

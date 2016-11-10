@@ -50,7 +50,7 @@ case "$host_alias" in
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
-    i686-linux*)
+    i686-linux*|i686-*cygwin*)
 	# if you don't want sse, specify i586-linux-gnu
 	enable_fast=yes
         flags="$CFLAGS"
