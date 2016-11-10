@@ -39,7 +39,7 @@ libkeccak_la_CCASFLAGS = @asmflags@
 libkeccakfast_la_LIBADD = 
 libkeccakfast_la_CFLAGS = @fastflags@
 libkeccakfast_la_CCASFLAGS = @fastasmflags@
-libkeccakfast_la_LDFLAGS = -version-info ${VERSION} #-soname libkeccak.so
+libkeccakfast_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 
 install-exec-hook:
 	-/sbin/ldconfig $(libdir)

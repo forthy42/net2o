@@ -7,6 +7,11 @@ AM_INIT_AUTOMAKE([1.10 -Wall no-define])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
+AC_PROG_CC
+AM_PROG_AS
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+LT_INIT
+
 CFLAGS=${CFLAGS--O3}
 
 flags="$CFLAGS"
@@ -44,11 +49,6 @@ AC_ARG_ENABLE([fast],
   *) AC_MSG_ERROR([bad value ${enableval} for --enable-fast]) ;;
 esac],[fast=false])
 AM_CONDITIONAL([FAST], [test x$fast = xtrue])
-
-AC_PROG_CC
-AM_PROG_AS
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT
 
 PRECC=${CC%gcc*}
 PRECLANG=${PRECC%clang*}
