@@ -40,6 +40,9 @@ $(eval $GFORTH -v 2>&1)
 EOF
 GFDEBVER=$(echo $GFVER | tr '_' '-')
 
+GFORTH=$(which $GFORTH)
+GFORTHFAST=$(which $GFORTHFAST)
+
 FAST=no
 case "$host" in
     arm-*linux*)
