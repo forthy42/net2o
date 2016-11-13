@@ -19,6 +19,10 @@
     [: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-compiler
     [: ( flag -- ) @ and throw ;] set-does> ;
 
+\ make sure we start at user defined exeption
+\ net2o exception codes should be system-independent
+-$1000 next-exception !@
+
 s" gap in file handles"          throwcode !!gap!!
 s" invalid file id"              throwcode !!fileid!!
 s" could not send"               throwcode !!send!!
@@ -92,6 +96,8 @@ s" patch size exceeds limit"     throwcode !!patch-limit!!
 s" patch size wrong"             throwcode !!patch-size!!
 s" insufficiend randomness"      throwcode !!insuff-rnd!!
 s" no key opened"                throwcode !!no-key-open!!
+
+next-exception !
 
 : sig-enum>throw ( enum -- throwcode )
     [ ' !!inv-sig!! >body @ 1- ]L swap - ;
