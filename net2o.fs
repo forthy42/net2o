@@ -1341,6 +1341,7 @@ Variable recvflag  recvflag off
 	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Forward handle-beacon
+Forward handle-beacon+hash
 
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
@@ -1350,7 +1351,8 @@ Forward handle-beacon
 	over packet-size over <> !!size!! +next
 	EXIT
     THEN
-    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN ;
+    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
+    dup $11 = IF  handle-beacon+hash    0 0  EXIT  THEN ;
 
 0 Value dump-fd
 

@@ -34,9 +34,6 @@ Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 
 \ convention:
 \ '!' is a key revocation, it contains the new key
-\ '0' is a identifier, followed by an address (must be '1' or '2')
-\ '1' indicates net2o
-\ '2' IPv6+IPv4
 \ Tags are kept sorted, so you'll get revocations first, then net2o and IPv6+4
 \ Symbolic name may start with '@'+len followed by the name
 

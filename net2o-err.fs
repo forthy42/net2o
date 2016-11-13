@@ -96,6 +96,7 @@ s" patch size exceeds limit"     throwcode !!patch-limit!!
 s" patch size wrong"             throwcode !!patch-size!!
 s" insufficiend randomness"      throwcode !!insuff-rnd!!
 s" no key opened"                throwcode !!no-key-open!!
+s" unknwon protocol"             throwcode !!unknown-protocol!!
 
 next-exception !
 
