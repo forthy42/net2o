@@ -183,9 +183,6 @@ Variable my-beacon
     my-0key sec@ "beacon" keyed-hash#128 2/ my-beacon $!
     my-beacon $@ ;
 
-: gen-beacon-hash ( -- hash u )
-    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
-    
 : check-beacon-hash ( addr u -- flag )
     my-beacon-hash str= ;
 

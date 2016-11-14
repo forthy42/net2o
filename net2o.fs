@@ -1623,8 +1623,9 @@ Variable beacons \ destinations to send beacons to
 
 :noname o-beacon defers extra-dispose ; is extra-dispose
 
-forward gen-beacon-hash
-
+: gen-beacon-hash ( -- hash u )
+    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
+    
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF
 	sockaddr alen @ r@ +beacon
