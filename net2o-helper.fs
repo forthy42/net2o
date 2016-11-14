@@ -176,32 +176,18 @@ event: ->do-beacon ( addr -- )
 	'>' of  >-beacon  endof
     endcase ;
 
-: >beacon-addr ( sockaddr u1 -- addr u2 )
-    case
-	sockaddr_in4 of  [: dup sin_addr 4 type port 2 type ;] $tmp
-	endof
-	sockaddr_in6 of  [: dup sin6_addr $10
-		2dup fake-ip4 12 string-prefix?  IF  12 /string  THEN
-		type  sin6_port 2 type ;] $tmp
-	endof
-	true !!unknown-protocol!!
-    endcase ;
+Variable my-beacon
 
-: my-beacon-hash ( sockaddr u -- hash u )
-    >beacon-addr my-0key sec@
-    beacon( ." my-hash: " 2over 85type space 2dup 85type )
-    keyed-hash#128 2/
-    beacon( ."  -> " 2dup 85type forth:cr ) ;
+: my-beacon-hash ( -- hash u )
+    my-beacon $@ dup ?EXIT
+    my-0key sec@ "beacon" keyed-hash#128 2/ my-beacon $!
+    my-beacon $@ ;
 
 : gen-beacon-hash ( -- hash u )
-    beacon-tuple$ $@ dest-0key sec@
-    beacon( ." gen-hash: " 2over 85type space 2dup 85type )
-    keyed-hash#128 2/
-    beacon( ."  -> " 2dup 85type forth:cr )
-;
+    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
     
 : check-beacon-hash ( addr u -- flag )
-    sockaddr alen @ my-beacon-hash str= ;
+    my-beacon-hash str= ;
 
 : handle-beacon+hash ( addr u -- )
     over c@ >r 1 /string check-beacon-hash
