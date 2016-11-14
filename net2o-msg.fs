@@ -961,7 +961,10 @@ also net2o-base scope: /chat
 : myaddrs ( addr u -- )
     \U myaddrs              list my addresses
     \G myaddrs: list my own local addresses (debugging)
-    2drop .my-addrs ;
+    2drop
+    ." ===== all =====" forth:cr    .my-addr$s
+    ." ===== public =====" forth:cr .pub-addr$s
+    ." ===== private =====" forth:cr .priv-addr$s ;
 : !myaddrs ( addr u -- )
     \U !myaddrs             re-obtain my addresses
     \G !myaddrs: if automatic detection of address changes fail,

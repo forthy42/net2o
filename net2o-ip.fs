@@ -26,11 +26,15 @@ UValue query-sock
 Variable my-addr[] \ object based hosts
 Variable my-addr$ \ string based hosts (with sigs)
 Variable pub-addr$ \ publicated addresses (with sigs)
+Variable priv-addr$ \ unpublished addresses (with sigs)
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
 Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 \ prefix for IPv4 addresses via NAT64
+
+: >alen ( addr u -- alen )
+    sockaddr_in6 sockaddr_in4 rot family w@ AF_INET6 = select ;
 
 \ convention:
 \ '!' is a key revocation, it contains the new key

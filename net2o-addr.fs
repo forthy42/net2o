@@ -151,7 +151,9 @@ User dest-0key< \ pointer to obtained dest-0key
     \G dispose all addresses
     my-addr[] [: .n2o:dispose-addr ;] $[]o-map
     my-addr[] $off
-    my-addr$ $[]off ;
+    my-addr$ $[]off
+    pub-addr$ $[]off
+    priv-addr$ $[]off ;
 
 : !my-addr$ ( -- )
     now>never  my-addr[] [:
@@ -160,6 +162,12 @@ User dest-0key< \ pointer to obtained dest-0key
 
 : .my-addrs ( -- )
     my-addr[] [: .addr cr ;] $[]o-map ;
+: .my-addr$s ( -- )
+    my-addr$ [: sigsize# - .addr$ cr ;] $[]map ;
+: .pub-addr$s ( -- )
+    pub-addr$ [: sigsize# - .addr$ cr ;] $[]map ;
+: .priv-addr$s ( -- )
+    priv-addr$ [: sigsize# - .addr$ cr ;] $[]map ;
 
 : !my-addr ( -- ) addrs-off !my-addrs !my-addr$ ;
 
@@ -182,7 +190,7 @@ User dest-0key< \ pointer to obtained dest-0key
 : my-addr-merge ( o -- flag )
     false swap
     my-addr[] [: >o dup my-addr= IF dup my-addr-merge1
-	nip 0 swap THEN o> ;] $[]o-map
+	nip true swap THEN o> ;] $[]o-map
     drop ;
 
 \ sockaddr conversion

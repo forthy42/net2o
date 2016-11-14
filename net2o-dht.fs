@@ -288,6 +288,18 @@ gen-table $freeze
 : gen-tag-del ( addr u hash-addr uh -- addr' u' )
     gen>tag "tag" >delete tag$ ;
 
+\ Generate view for beacons
+
+Variable beacon-tuple$
+
+: beacon-tuple ( o:addr -- )
+    beacon-tuple$ $off
+    [: host-ipv4 be-ul@ 0=
+      IF    host-ipv6 $10 type  host-portv6
+      ELSE  host-ipv4   4 type  host-portv4  THEN
+      w@ dup 8 rshift emit $FF and emit ;]
+    beacon-tuple$ $exec ;
+
 \ addme stuff
 
 also net2o-base
@@ -308,9 +320,11 @@ false Value add-myip
     addr .+my-id
     nat( ." addme: " addr .addr )
     addr .host-route $@len 0= IF
-	addr my-addr-merge IF  addr .n2o:dispose-addr
-	    nat( ."  merged" forth:cr ) EXIT  THEN
-	addr o>addr gen-host my-addr$ $ins[]sig drop
+	addr my-addr-merge drop
+	addr o>addr gen-host
+	2dup my-addr$ $ins[]sig drop
+	priv-addr$ $ins[]sig drop
+	addr .beacon-tuple
 	addr .n2o:dispose-addr
 	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
