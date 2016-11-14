@@ -1783,17 +1783,22 @@ require net2o-dhtroot.fs \ configuration for DHT root
 
 \ freeze tables
 
-cmd-table     $save
-reply-table   $save
-log-table     $save
-setup-table   $save
-connect-table $save
-ack-table     $save
-msging-table  $save
-msg-table     $save
-term-table    $save
-address-table $save
-context-table $save
+cmd-table       $save
+reply-table     $save
+log-table       $save
+setup-table     $save
+connect-table   $save
+ack-table       $save
+msging-table    $save
+msg-table       $save
+term-table      $save
+address-table   $save
+context-table   $save
+key-entry-table $save
+vault-table     $save
+dht-table       $save
+dvcs-table      $save
+fs-table        $save
 
 .unresolved
 

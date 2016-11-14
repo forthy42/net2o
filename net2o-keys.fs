@@ -163,21 +163,21 @@ DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
 
 key-entry ' new static-a with-allocater Constant sample-key
 
-Variable key-table \ key hash table
-Variable nick-table \ nick hash table
+Variable key# \ key hash table
+Variable nick# \ nick hash table
 
 64Variable key-read-offset
 
 : current-key ( addr u -- o )
-    2dup key| key-table #@ drop
+    2dup key| key# #@ drop
     dup 0= IF  drop ." unknown key: " 85type cr  0 EXIT  THEN
     cell+ >o ke-pk $! o o> ;
 
 Variable sim-nick!
 
 : nick! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
-    ke-nick $@ nick-table #@ d0= IF
-	optr cell ke-nick $@ nick-table #! 0
+    ke-nick $@ nick# #@ d0= IF
+	optr cell ke-nick $@ nick# #! 0
     ELSE
 	last# cell+ $@len cell/
 	optr cell last# cell+ $+!
@@ -190,8 +190,8 @@ Variable sim-nick!
     ke-pets $[]# ?dup-IF  1- ke-pets $[]@  ELSE  #0.  THEN ;
 
 : pet! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
-    last-pet@ nick-table #@ d0= IF
-	optr cell last-pet@ nick-table #! 0
+    last-pet@ nick# #@ d0= IF
+	optr cell last-pet@ nick# #! 0
     ELSE
 	last# cell+ $@len cell/
 	optr cell last# cell+ $+!
@@ -205,14 +205,14 @@ Variable sim-nick!
     key-read-offset 64@ ke-offset 64!
     1 import-type @ lshift [ 1 import#new lshift ]L or ke-imports !
     keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
-    2over key| key-table #! o>
+    2over key| key# #! o>
     current-key ;
 
 0 Value last-key
 
 : key?new ( addr u -- o )
     \G Create or lookup new key
-    2dup key| key-table #@ drop
+    2dup key| key# #@ drop
     dup 0= IF  drop key:new
     ELSE  nip nip cell+  1 import-type @ lshift over .ke-imports or!  THEN
     dup to last-key ;
@@ -227,13 +227,13 @@ Variable sim-nick!
 	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
 
 : nick-key ( addr u -- o / 0 ) \ search for key nickname
-    #split >r nick-table #@ 2dup d0= IF  rdrop drop  EXIT  THEN
+    #split >r nick# #@ 2dup d0= IF  rdrop drop  EXIT  THEN
     r> cells safe/string 0= IF  drop 0  EXIT  THEN  @ ;
 
 : secret-keys# ( -- n )
-    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ 0<> - o> ;] #map ;
+    0 key# [: cell+ $@ drop cell+ >o ke-sk @ 0<> - o> ;] #map ;
 : secret-key ( n -- o/0 )
-    0 tuck key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+    0 tuck key# [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  2dup = IF  rot drop o -rot  THEN  1+
       THEN  o> ;] #map 2drop ;
 : .# ( n -- ) ?dup-IF  '#' emit 0 .r  THEN ;
@@ -256,7 +256,7 @@ Variable sim-nick!
     '.' $split dup 0= IF  2swap  THEN [: nick>pk type type ;] $tmp ;
 
 : key-exist? ( addr u -- o/0 )
-    key-table #@ IF  cell+  THEN ; 
+    key# #@ IF  cell+  THEN ; 
 
 \ permission modification
 
@@ -329,7 +329,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
     .key-rest cr ;
 : .secret-nicks ( -- )
-    0 key-table [: cell+ $@ drop cell+ >o ke-sk @ IF
+    0 key# [: cell+ $@ drop cell+ >o ke-sk @ IF
 	  [: dup 1 .r ;] #36 base-execute space .key-rest cr 1+
       THEN o> ;] #map drop ;
 : .key-invite ( o:key -- o:key )
@@ -340,9 +340,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
     ." num pubkey                                   date                     perm         h nick" cr
-    key-table [: cell+ $@ drop cell+ ..key-list ;] #map ;
+    key# [: cell+ $@ drop cell+ ..key-list ;] #map ;
 : list-nicks ( -- )
-    nick-table [: dup $. ." :" cr cell+ $@ bounds ?DO
+    nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
 	  I @ ..key-list  cell +LOOP ;] #map ;
 
 : dumpkey ( addr u -- ) drop cell+ >o
@@ -352,20 +352,20 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first! " ke-type @ . ." ke-type !"  cr o> ;
 
-: .keys ( -- ) key-table [: ." index: " dup $@ 85type cr cell+ $@ .key ;] #map ;
-: dumpkeys ( -- ) key-table [: cell+ $@ dumpkey ;] #map ;
+: .keys ( -- ) key# [: ." index: " dup $@ 85type cr cell+ $@ .key ;] #map ;
+: dumpkeys ( -- ) key# [: cell+ $@ dumpkey ;] #map ;
 
 : key>nick ( addrkey u1 -- nick u2 )
     \G convert key to nick
-    key| key-table #@ 0= IF  drop #0.  EXIT  THEN
+    key| key# #@ 0= IF  drop #0.  EXIT  THEN
     cell+ .ke-nick $@ ;
 : key>key ( addrkey u1 -- key u2 )
     \G expand key to full size and check if we know it
-    key| key-table #@ 0= IF  drop #0.  EXIT  THEN
+    key| key# #@ 0= IF  drop #0.  EXIT  THEN
     cell+ .ke-pk $@ ;
 
 : .key# ( addr u -- ) key|
-    ." Key '" key-table #@ 0= IF drop EXIT THEN
+    ." Key '" key# #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
 
 Defer dht-nick?
@@ -379,14 +379,14 @@ Variable unkey-id#
     unkey-id# #@
     IF  64@ unkey-to# 64+ ticks 64- 64-0>=  THEN  0= ;
     
-: .key-id ( addr u -- ) key| 2dup key-table #@ 0=
+: .key-id ( addr u -- ) key| 2dup key# #@ 0=
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key main-up@ event>
 	    .unkey-id EXIT  THEN
 	2dup ?unkey  IF
 	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
 	    connection >r 2dup ['] dht-nick? cmd-nest r> to connection
-	    2dup key-table #@ 0= IF  drop .unkey-id EXIT
+	    2dup key# #@ 0= IF  drop .unkey-id EXIT
 	    ELSE  >r 2dup unkey-id# #off r>  THEN
 	ELSE  .unkey-id  EXIT  THEN
     THEN
@@ -414,7 +414,7 @@ Variable unkey-id#
     ELSE  2drop  THEN ;
 
 : search-key ( pkc -- skc )
-    keysize key-table #@ 0= !!unknown-key!!
+    keysize key# #@ 0= !!unknown-key!!
     cell+ .ke-sk sec@ 0= !!unknown-key!! ;
 
 \ apply permissions
@@ -671,7 +671,7 @@ previous
     ['] pack-core gen-cmd$ 2drop
     ke-pk $@ tmp$ $+! ke-selfsig $@ tmp$ $+! tmp$ $@ ;
 : mynick-key ( -- o )
-    pkc keysize key-table #@ drop cell+ ;
+    pkc keysize key# #@ drop cell+ ;
 : mynick$ ( -- addr u )
     \G get my nick with signature
     mynick-key .keynick$ ;
@@ -688,7 +688,7 @@ Variable cp-tmp
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
     "pubkeys.k2o" .keys/ [: to key-pfd
-      key-table [: cell+ $@ drop cell+ >o
+      key# [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0= IF  pack-pubkey
 	    flush( ." saving " .nick forth:cr )
 	    key-crypt ke-offset 64@ key>pfile@pos
@@ -698,7 +698,7 @@ Variable cp-tmp
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
     "seckeys.k2o" .keys/ [: to key-sfd
-      key-table [: cell+ $@ drop cell+ >o
+      key# [: cell+ $@ drop cell+ >o
 	ke-sk sec@ d0<> IF  pack-seckey
 	    config:pw-level# @ >r  ke-pwlevel @ config:pw-level# !
 	    key-crypt ke-offset 64@ key>sfile@pos
@@ -813,7 +813,7 @@ false value ?yes
     >sksig o> ;
 
 : >key ( addr u -- )
-    key-table @ 0= IF  read-keys  THEN
+    key# @ 0= IF  read-keys  THEN
     nick-key >raw-key ;
 
 : i'm ( "name" -- ) parse-name >key ;
@@ -825,7 +825,7 @@ false value ?yes
     ke-pk $@ o>
     pubkey $! ;
 
-: dest-pk ( addr u -- ) key2| 2dup key| key-table #@ 0= IF
+: dest-pk ( addr u -- ) key2| 2dup key| key# #@ 0= IF
 	drop pubkey $!  perm%unknown perm-mask !
     ELSE  cell+ >o
 	ke-mask @
@@ -855,7 +855,7 @@ false value ?yes
     [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
-    pkc keysize key-table #@ 0= !!unknown-key!!
+    pkc keysize key# #@ 0= !!unknown-key!!
     cell+ out-key ;
 
 Variable dhtroot.n2o
@@ -941,7 +941,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     endcase ;
 
 : filter-invitation? ( addr u -- flag )
-    sigpk2size# - + keysize key-table #@ d0<> ; \ already there
+    sigpk2size# - + keysize key# #@ d0<> ; \ already there
 
 : .invitations ( -- )
     invitations [: 2dup .pk2key$ cr process-invitation ;] $[]map
