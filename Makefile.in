@@ -156,4 +156,4 @@ debdist:
 	PATH=/usr/bin:/bin dpkg-buildpackage -d -b $(DEBARCH)
 
 debdist32:
-	GFORTH=gforth-386 CC="gcc -m32" dpkg-buildpackage -d -b -ai386
+	PATH=/usr/bin:/bin GFORTH=gforth-386 CC="gcc -m32" dpkg-buildpackage -d -b -ai386

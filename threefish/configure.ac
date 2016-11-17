@@ -23,6 +23,7 @@ case "$host" in
 	flags="$CFLAGS"
 	#may try with -mneon-for-64bits
 	fastflags="-O3 -mfpu=neon $nomflags"
+	enable_fast+set=set
 	enable_fast=yes
 	CFLAGS=""
 	;;
@@ -32,6 +33,7 @@ case "$host" in
     i686-*linux*|i686-*cygwin*)
 	flags="$CFLAGS"
 	fastflags="-O3 -m32 -mssse3 $nomflags"
+	enable_fast+set=set
 	enable_fast=yes
 	CFLAGS=""
 	;;

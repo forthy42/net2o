@@ -37,6 +37,8 @@ case "$host" in
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	enable_fast=yes
+	enable_fast+set=set
+	enable_asm+set=set
 	plattform=neon
 	CFLAGS=""
 	CCASFLAGS=""
@@ -53,6 +55,7 @@ case "$host" in
     i686-*linux*|i686-*cygwin*)
 	# if you don't want sse, specify i586-linux-gnu
 	enable_fast=yes
+	enable_fast+set=set
         flags="$CFLAGS"
 	fastflags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
 	ws=opt64
