@@ -35,8 +35,8 @@ case "$host" in
 	fastasmflags="-O3 -mfpu=neon $nomflags"
 	fastflags="-O3 -mfpu=neon $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
-	enable_asm=set
-	enable_fast=set
+	enable_asm=yes
+	enable_fast=yes
 	plattform=neon
 	CFLAGS=""
 	CCASFLAGS=""
@@ -45,14 +45,14 @@ case "$host" in
 	asmflags="-O3 -mfpu=neon $nomflags"
 	flags="-O3 -mfpu=neon $nomflags"
 	as="inplace-armgcc-ARMv7A-NEON"
-	enable_asm=set
+	enable_asm=yes
 	plattform=neon
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
     i686-*linux*|i686-*cygwin*)
 	# if you don't want sse, specify i586-linux-gnu
-	enable_fast=set
+	enable_fast=yes
         flags="$CFLAGS"
 	fastflags="-O3 -m32 -mssse3 -DUseSSE $nomflags"
 	ws=opt64
