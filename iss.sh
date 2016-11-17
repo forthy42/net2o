@@ -22,7 +22,7 @@
 # of net2o, and start the setup compiler there.
 
 VERSION=$(gforth --version 2>&1 | cut -f2 -d' ')
-N2OVER=$(n2o version | cut -f3 -d' ')
+N2OVER=$(n2o version | cut -f1 -d' ' | cut -f2- -d-)
 machine=$(gforth --version 2>&1 | cut -f3 -d' ')
 SF=$(gforth -e 'cell 8 = [IF] ." 64" [THEN] bye')
 CYGWIN=cygwin$SF

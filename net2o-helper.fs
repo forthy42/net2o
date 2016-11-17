@@ -120,7 +120,7 @@ true Value connected?
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     beacons @ IF  dht-connect
-    ELSE  [: dup ['] dht-beacon 0 .add-beacon ;] dht-connect'
+    ELSE  [: return-addr be@ ['] dht-beacon 0 .add-beacon ;] dht-connect'
     THEN
     replace-me disconnect-me -other  announced on ;
 
@@ -175,6 +175,22 @@ event: ->do-beacon ( addr -- )
 	'.' of  .-beacon  endof
 	'>' of  >-beacon  endof
     endcase ;
+
+Variable my-beacon
+
+: my-beacon-hash ( -- hash u )
+    my-beacon $@ dup ?EXIT
+    my-0key sec@ "beacon" keyed-hash#128 2/ my-beacon $!
+    my-beacon $@ ;
+
+: check-beacon-hash ( addr u -- flag )
+    my-beacon-hash str= ;
+
+: handle-beacon+hash ( addr u -- )
+    over c@ >r 1 /string check-beacon-hash
+    IF    r>    beacon( ." hashed " ) handle-beacon
+    ELSE  rdrop beacon( ticks .ticks ."  wrong beacon hash" cr )
+    THEN ;
 
 : replace-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>

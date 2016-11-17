@@ -28,8 +28,8 @@ flags="$CFLAGS"
 nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 
 # special optimizations for some plattforms
-case "$host_alias" in
-     arm-linux*)
+case "$host" in
+     arm-*linux*)
 	flags="$CFLAGS"
 	asmflags="$CFLAGS"
 	fastasmflags="-O3 -mfpu=neon $nomflags"
@@ -50,7 +50,7 @@ case "$host_alias" in
 	CFLAGS=""
 	CCASFLAGS=""
 	;;
-    i686-linux*)
+    i686-*linux*|i686-*cygwin*)
 	# if you don't want sse, specify i586-linux-gnu
 	enable_fast=yes
         flags="$CFLAGS"

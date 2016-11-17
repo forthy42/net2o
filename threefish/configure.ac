@@ -7,14 +7,19 @@ AM_INIT_AUTOMAKE([1.10 -Wall no-define])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
+AC_PROG_CC
+AM_PROG_AS
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+LT_INIT
+
 CFLAGS=${CFLAGS--O3}
 
 flags="$CFLAGS"
 nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 
 # special optimizations for some plattforms
-case "$host_alias" in
-    arm-linux*)
+case "$host" in
+    arm-*linux*)
 	flags="$CFLAGS"
 	#may try with -mneon-for-64bits
 	fastflags="-O3 -mfpu=neon $nomflags"
@@ -24,7 +29,7 @@ case "$host_alias" in
     arm*-*)
 	CFLAGS="-O3 -mfpu=neon $nomflags"
 	;;
-    i686-linux*)
+    i686-*linux*|i686-*cygwin*)
 	flags="$CFLAGS"
 	fastflags="-O3 -m32 -mssse3 $nomflags"
 	enable_fast=yes
@@ -44,11 +49,6 @@ AC_ARG_ENABLE([fast],
   *) AC_MSG_ERROR([bad value ${enableval} for --enable-fast]) ;;
 esac],[fast=false])
 AM_CONDITIONAL([FAST], [test x$fast = xtrue])
-
-AC_PROG_CC
-AM_PROG_AS
-m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT
 
 PRECC=${CC%gcc*}
 PRECLANG=${PRECC%clang*}

@@ -175,6 +175,7 @@ cmd-class class
     field: punch-addrs
     field: rqd-xts       \ callbacks for request done (array)
     field: my-error-id
+    field: beacon-hash
     0 +field end-strings
     field: request-gen   \ pre-generated request number
     field: perm-mask

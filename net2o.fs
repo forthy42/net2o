@@ -1341,6 +1341,7 @@ Variable recvflag  recvflag off
 	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Forward handle-beacon
+Forward handle-beacon+hash
 
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
@@ -1350,7 +1351,8 @@ Forward handle-beacon
 	over packet-size over <> !!size!! +next
 	EXIT
     THEN
-    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN ;
+    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
+    dup $11 = IF  handle-beacon+hash    0 0  EXIT  THEN ;
 
 0 Value dump-fd
 
@@ -1581,12 +1583,19 @@ Variable beacons \ destinations to send beacons to
     64#-1 beacons [: cell+ $@ drop 64@ 64umin ;] #map ;
 
 : send-beacons ( -- ) !ticks
-    beacons [: { beacon } beacon $@ beacon cell+ $@ drop 64@
-	ticker 64@ 64u<= IF
-	    beacon( ticks .ticks ."  send beacon to: " 2dup .address cr )
-	    2>r ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
-	    net2o-sock s" ?" 0 2r> sendto drop +send
-	ELSE  2drop  THEN
+    beacons [: { beacon }
+	beacon $@ { baddr u }
+	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
+	    beacon( ticks .ticks ."  send beacon to: " baddr u .address cr )
+	    ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
+	    net2o-sock
+	    beacon cell+ $@ drop 64'+ @ >o o IF
+		beacon-hash $@
+	    ELSE
+		s" ?"
+	    THEN  o>
+	    0 baddr u sendto drop +send
+	THEN
 	;] #map ;
 
 : beacon? ( -- )
@@ -1614,8 +1623,16 @@ Variable beacons \ destinations to send beacons to
 
 :noname o-beacon defers extra-dispose ; is extra-dispose
 
+: gen-beacon-hash ( -- hash u )
+    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
+    
 : add-beacon ( net2oaddr xt -- )
-    >r route>address IF  sockaddr alen @ r@ +beacon  THEN  rdrop ;
+    >r route>address IF
+	sockaddr alen @ r@ +beacon
+	o IF
+	    s" ?" beacon-hash $!  gen-beacon-hash beacon-hash $+!
+	THEN
+    THEN  rdrop ;
 : ret+beacon ( -- )  ret-addr be@ ['] 2drop add-beacon ;
 
 \ timeout loop
@@ -1766,17 +1783,22 @@ require net2o-dhtroot.fs \ configuration for DHT root
 
 \ freeze tables
 
-cmd-table     $save
-reply-table   $save
-log-table     $save
-setup-table   $save
-connect-table $save
-ack-table     $save
-msging-table  $save
-msg-table     $save
-term-table    $save
-address-table $save
-context-table $save
+cmd-table       $save
+reply-table     $save
+log-table       $save
+setup-table     $save
+connect-table   $save
+ack-table       $save
+msging-table    $save
+msg-table       $save
+term-table      $save
+address-table   $save
+context-table   $save
+key-entry-table $save
+vault-table     $save
+dht-table       $save
+dvcs-table      $save
+fs-table        $save
 
 .unresolved
 

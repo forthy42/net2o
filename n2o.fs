@@ -539,6 +539,14 @@ warnings !
 
 }scope
 
+\ use a different history file for net2o
+
+: n2o-history ( -- )
+    history ?dup-IF  close-file throw  THEN
+    "~/.n2o-history" get-history ;
+
+n2o-history
+
 \ user friendly, but way less informative doerror
 
 : ?set-debug ( -- )
@@ -549,7 +557,7 @@ warnings !
     THEN ;
 ?set-debug
 
-:noname defers 'cold ?set-debug ; is 'cold
+:noname defers 'cold ?set-debug n2o-history ; is 'cold
 
 \ allow issuing commands during chat
 
