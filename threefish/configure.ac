@@ -19,7 +19,7 @@ nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 
 # special optimizations for some plattforms
 case "$host" in
-    arm-*linux*)
+    arm*-*linux*)
 	flags="$CFLAGS"
 	#may try with -mneon-for-64bits
 	fastflags="-O3 -mfpu=neon $nomflags"
