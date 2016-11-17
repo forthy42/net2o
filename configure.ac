@@ -45,7 +45,7 @@ GFORTHFAST=$(which $GFORTHFAST)
 
 FAST=no
 case "$host" in
-    arm-*linux*)
+    arm*-*linux*)
 	FAST=yes
 	;;
     i686-*linux*|i686-*cygwin*)
