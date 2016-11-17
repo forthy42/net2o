@@ -659,8 +659,8 @@ previous
 
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ drop keysize
-    key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
-    IF  tmp-crypt-val do-nest  ELSE  trace( ." tmpnest failed!" forth:cr )  un-cmd  THEN ;
+    key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$ 0= !!tmpnest!!
+    tmp-crypt-val do-nest ;
 
 \ net2o assembler stuff
 

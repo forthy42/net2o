@@ -320,12 +320,13 @@ object class
     aligned
     cell            uvar ind-addr
     cell            uvar task#
+    $F + -$10 and \ align by $10
+    maxdata         uvar aligned$
     $10             uvar cmdtmp
     $10             uvar return-addr
     $10             uvar temp-addr
     timestats       uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
-    maxdata         uvar aligned$
     aligned
     cell            uvar code0-buf^
     cell            uvar code-buf^

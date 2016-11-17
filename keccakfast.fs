@@ -16,7 +16,9 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require rec-scope.fs
-s" libkeccakfast.so" c-lib:open-path-lib drop
+[IFDEF] android
+    s" libkeccakfast.so" c-lib:open-path-lib drop
+[THEN]
 
 c-library keccakfast
     s" keccakfast" add-lib

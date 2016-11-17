@@ -16,7 +16,9 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require rec-scope.fs
-s" libthreefishfast.so" c-lib:open-path-lib drop
+[IFDEF] android
+    s" libthreefishfast.so" c-lib:open-path-lib drop
+[THEN]
 
 c-library threefishfast
     s" threefishfast" add-lib

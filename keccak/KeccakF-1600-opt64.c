@@ -295,7 +295,6 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
     fromWordToBytes(data+(i>>3), tmp);
 #endif
   }
-#ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   m >>= ((8-byteCount) & 7)*8;
   if(byteCount & 7) {
@@ -312,6 +311,7 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
     data[i>>3] = (data[i>>3] & ~m) | (tmp2 & m);
   }
 #endif
+#ifdef UseBebigokimisa
   switch((byteCount+7)>>3) {
   case 25: case 24: case 23: case 22: m = ~(UINT64)0;
   case 21:
@@ -348,7 +348,6 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
     fromWordToBytes(data+(i>>3), tmp1);
 #endif
   }
-#ifdef UseBebigokimisa
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
   m >>= ((8-byteCount) & 7)*8;
   if(byteCount & 7) {
@@ -367,6 +366,7 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
     fromWordToBytes(data+(i>>3), tmp1);
   }
 #endif
+#ifdef UseBebigokimisa
   switch((byteCount+7)>>3) {
   case 25: case 24: case 23: case 22: m = ~(UINT64)0;
   case 21:

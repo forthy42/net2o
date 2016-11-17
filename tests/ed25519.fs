@@ -23,6 +23,9 @@ require ../net2o.fs
 
 \ deterministic tests
 
+$40 buffer: testpk
+: >test ( addr i -- addr' ) testpk + tuck $20 move ;
+
 x" E09657D8C066FBAAD009A1189B3A7E418CE2002E73E6C799DA7A6F5D86CA5B76" skc swap move
 x" C8B0514857E50524DEC94FB1157EF0BB0B89FFADA3A281FF2AE06F4BBD7EE671" stskc swap move
 skc pkc sk>pk pkc $20 x" 148777AA913CA970AD23E1C71B6B5C650B0448BA6DACEA5587ADFE13BA9262BB" str= 0= [IF] ." incorrect pubkey " pkc $20 xtype cr [THEN]
@@ -51,16 +54,23 @@ dup pkc !time ed-verify .time
 0= [IF] ."  passed" [ELSE] ."  failed" [THEN] cr
 $40 xtype cr
 
-." Test EdDH "
-stskc stpkc sk>pk
-skc stpkc 2dup pad ed-dh 2drop pad ed-dh pad $20 + swap move
-skc stpkc 2dup pad ed-dh 2drop pad ed-dh 2drop
-stskc pkc 2dup pad ed-dh 2drop pad ed-dh
-stskc pkc 2dup pad ed-dh 2drop !time pad ed-dh .time 2drop
-2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
-2dup pad $20 + over str= [IF] ."  passed"
-[ELSE] ."  failed" pad over cr xtype [THEN] cr
-xtype cr
+: test-eddh
+	." Test EdDH "
+    $20 0 DO
+	stskc stpkc sk>pk
+	skc stpkc I >test 2dup pad ed-dh 2drop pad ed-dh pad $20 + swap move
+	skc stpkc I >test 2dup pad ed-dh 2drop pad ed-dh 2drop
+	stskc pkc I >test 2dup pad ed-dh 2drop pad ed-dh
+	stskc pkc I >test 2dup pad ed-dh 2drop pad
+	I 0= IF  !time ed-dh .time  ELSE  ed-dh  THEN  2drop
+	2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2"
+	str= I 0= IF  IF ."  correct" ELSE ."  incorrect" THEN
+	ELSE  '+' '-' rot select emit  THEN
+	2dup pad $20 + over str= IF I 0= IF  ."  passed"  ELSE  '+' emit  THEN
+	ELSE ."  failed" pad over cr xtype THEN
+	I 0= IF  cr xtype cr  ELSE  2drop  THEN
+    LOOP cr ;
+test-eddh
 
 [IFDEF] ed-dhv
 ." Test EdDH variable speed "

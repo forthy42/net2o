@@ -142,16 +142,19 @@ init-ed25519
     sigtmp pktmp ed-check? ;
 
 : ed-dh { sk pk dest -- secret len }
-    get0 pk ge25519-unpack- 0= !!no-ed-key!!
+    pk pktmp $20 move
+    get0 pktmp ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
     get1 get0 sct2 ge25519*
     dest get1 ge25519-pack
     clean-ed25519 dest $20  $80 dest $1F + xorc! ;
 
 : ed-dhx { offset sk pk dest -- secret len }
-    get0 pk ge25519-unpack- 0= !!no-ed-key!!
+    pk pktmp $20 move
+    get0 pktmp ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
-    sct1 offset 32b>sc25519
+    offset pktmp $20 move
+    sct1 pktmp 32b>sc25519
     sct2 sct2 sct1 sc25519*
     get1 get0 sct2 ge25519*
     dest get1 ge25519-pack
