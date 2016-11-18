@@ -13,7 +13,7 @@ keccak* pad 8 keccak> pad le-uxd@ $1B4AEC08DA6A8BA6. d= and
 
 : crypt-loop ( n -- )
     pad $180 erase
-    keccak0 keccak* pad $80 + $80 +keccak
+    keccak0 keccak* pad $80 + $80 keccak>
     pad $80 + $80 xtype cr
     1 ?DO
 	keccak0 keccak* pad I +keccak
