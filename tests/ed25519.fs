@@ -54,8 +54,8 @@ dup pkc !time ed-verify .time
 0= [IF] ."  passed" [ELSE] ."  failed" [THEN] cr
 $40 xtype cr
 
-: test-eddh
-	." Test EdDH "
+: test-eddh ( -- )
+    ." Test EdDH "
     $20 0 DO
 	stskc stpkc sk>pk
 	skc stpkc I >test 2dup pad ed-dh 2drop pad ed-dh pad $20 + swap move
