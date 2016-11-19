@@ -38,7 +38,7 @@ void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 
 void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   UINT64 m = 0xffffffffffffffffull;
   keccak_state datai;
   memcpy(datai, data, byteCount);
@@ -52,20 +52,20 @@ void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 
 void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   for(i=0; i<byteCount-7; i+=8) {
     data[i>>3] = state[i>>3] ^= data[i>>3];
   }
   if(byteCount & 7) {
     UINT64 m = 0xffffffffffffffffull >> ((8-byteCount) & 7)*8;
     state[i>>3] ^= data[i>>3] & m;
-    data[i>>3] = (data[i>>3] & ~m) | (m & state[i>>3]);
+    data[i>>3] = (data[i>>3] & ~m) | (state[i>>3] & m);
   }
 }
 
 void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
 {
-  unsigned int i;
+  int i;
   UINT64 tmp;
   for(i=0; i<byteCount-7; i+=8) {
     tmp = data[i>>3] ^ state[i>>3];
