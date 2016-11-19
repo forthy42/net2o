@@ -32,12 +32,6 @@ rootdirs="$PWD"
 EOF
 export NET2O_CONF=$PWD/.net2o/config
 $GFORTH ../n2o $* -yes keygen test2
-$GFORTH ../n2o $* -yes cmd <<EOF
-keylist
-keyin ~/test.n2o
-keylist
-bye
-EOF
 cd ../dvcs-test.d
 export NET2O_CONF=$PWD/.net2o/config
 $GFORTH ../n2o $* cmd <<EOF
@@ -57,6 +51,8 @@ sleep 1 #wait for gforth to start the chat
 cd ../dvcs-test.2
 export NET2O_CONF=$PWD/.net2o/config
 $GFORTH ../n2o $* cmd <<EOF
+keyin ~/test.n2o
+keylist
 init dvcs-test
 pull dvcs-test@test
 bye

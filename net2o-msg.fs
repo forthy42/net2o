@@ -291,6 +291,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> msg:start ;
 +net2o: msg-tag ( $:group -- ) \g tagging (can be anywhere)
     !!signed? $> msg:tag ;
++net2o: msg-id ( $:id -- ) \g a hash id
+    !!signed? 2 !!>=order? $> msg:id ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
 +net2o: msg-re ( $:hash type ) \g relate to some object
@@ -322,6 +324,8 @@ gen-table $freeze
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]->" <default> ; msg-class to msg:re
+:noname ( addr u -- )
+    space <warn> ." [" 85type ." ]: " <default> ; msg-class to msg:id
 :noname ( addr u -- )
     [: ." : " 2dup forth:type ;] $tmp notify+
     ." : " forth:type ; msg-class to msg:text

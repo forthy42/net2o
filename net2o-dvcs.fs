@@ -25,6 +25,7 @@ msg-class class
     scope: dvcs
 
     field: commits \ msg class for commits
+    field: id$     \ commit id
     field: branch$
     field: message$
     field: files#    \ snapshot config
@@ -68,6 +69,7 @@ end-structure
 msg-class class
     field: equiv#
     field: re#
+    field: id$
     field: re$
     field: object$
 end-class commit-class
@@ -113,7 +115,7 @@ end-class commit-class
 	2drop 2drop \ unhandled types
     endcase ;
 
-: dvcs-outfile-hash ( baddr u1 fname u2 -- )
+: dvcs-outfile-hash ( baddr u1 fhash u2 -- )
     hash#128 umin dvcs-objects #! ;
 
 : dvcs-in-hash ( addr u -- )
@@ -165,7 +167,11 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ;
-
++net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
+    !!FIXME!! ; \ this is a stub
++net2o: dvcs-spit ( $:perm+name -- ) \g write ot read-in
+    !!FIXME!! ; \ this is also a stub
+    
 }scope
 
 : n2o:new-dvcs ( -- o )
@@ -175,7 +181,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-commit ( o:commit -- )
-    re$ $off  object$ $off  re# #offs  equiv# #offs  dispose ;
+    id$ $off  re$ $off  object$ $off  re# #offs  equiv# #offs  dispose ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off
     dvcs:files# #offs  dvcs:oldfiles# #offs
@@ -346,6 +352,8 @@ Variable patch-in$
 
 :noname ( addr u type -- )
     drop re$ $+! ; commit-class to msg:re
+:noname ( addr u -- )
+    id$ $! ; commit-class to msg:id
 :noname ( addr u type -- )
     object$ hash+type  re$ $@len 0= ?EXIT
     re$ $@ object$ $@ key| re# #! ; commit-class to msg:object
@@ -404,27 +412,41 @@ Variable patch-in$
     project:project$ $@ [ -1 1 rshift cell/ ]l load-msgn
     n2o:dispose-dvcs o> ;
 
+Variable id-files[]
+
 also net2o-base
+: dvcs-gen-id ( -- addr u )
+    id-files[] $[]off
+    dvcs:files# [: dup cell+ $@ 2>r $@ 2r> [: forth:type forth:type ;] $tmp
+	id-files[] $ins[] drop ;] #map \ sort filenames
+    [: id-files[] [:
+	    over hash#128 $, dvcs-read hash#128 /string
+	    0 dvcs:perm /string $, dvcs-spit
+	;] $[]map ;] gen-cmd$ >file-hash ;
+
 : (dvcs-newsentry) ( oldtype equivtype type -- )
     dvcs:type ! dvcs:equivtype ! dvcs:oldtype !
+    dvcs-gen-id dvcs:id$ $!
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: with dvcs
-      message$   $@
-      equivtype  @
-      equiv$     $@
-      type       @
-      hash$      $@
-      oldtype    @
-      oldhash$   $@
-      project:branch$ $@
-      endwith
-      $, msg-tag
-      dup IF  $, ulit, msg-re      ELSE  2drop drop  THEN
-      dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
-      dup IF  $, ulit, msg-equiv   ELSE  2drop drop  THEN
-      "Checkin" $, msg-action
-      $, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
+	message$   $@
+	equivtype  @
+	equiv$     $@
+	type       @
+	hash$      $@
+	oldtype    @
+	oldhash$   $@
+	id$        $@
+	project:branch$ $@
+	endwith
+	$, msg-tag
+	$, msg-id
+	dup IF  $, ulit, msg-re      ELSE  2drop drop  THEN
+	dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
+	dup IF  $, ulit, msg-equiv   ELSE  2drop drop  THEN
+	"Checkin" $, msg-action
+	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous
 
@@ -432,7 +454,8 @@ previous
     0 dvcs:oldhash$ !@ dvcs:equiv$ !
     msg:patch# msg:patch# msg:snapshot# (dvcs-newsentry) ;
 : dvcs-newsentry ( -- )
-    msg:patch# msg:patch# msg:patch# (dvcs-newsentry) ;
+    msg:patch# msg:patch#
+    msg:patch# msg:snapshot# dvcs:oldhash$ $@len select (dvcs-newsentry) ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin

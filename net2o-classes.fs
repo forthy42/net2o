@@ -134,6 +134,7 @@ scope: msg
     method text
     method object
     method equiv
+    method id
     method action
     method coord
     method end
