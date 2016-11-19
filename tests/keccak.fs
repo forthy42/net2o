@@ -11,25 +11,27 @@ keccak* pad 8 keccak> pad le-uxd@ $6EAAAE36BE8E36D3. d= and
 keccak* pad 8 keccak> pad le-uxd@ $1B4AEC08DA6A8BA6. d= and
 [IF] ." succeeded" [ELSE] ." failed" [THEN] cr
 
-: crypt-loop ( n -- )
-    pad $180 erase
-    keccak0 keccak* pad $80 + $80 keccak>
-    pad $80 + $80 xtype cr
-    1 ?DO
-	keccak0 keccak* pad I +keccak
-	pad I over $80 + over str=
-	pad $80 I /string pad $100 + over str= and 0= IF
-	    ." encrypt size " i . ." doesn't match" cr
-	    pad $80 dump
-	ELSE  '+' emit
-	THEN
-	keccak0 keccak* pad I -keccak
-	pad $80 pad $100 + over str= 0= IF
-	    ." decrypt size " i . ." doesn't match" cr
-	    pad $80 dump
-	ELSE  '+' emit
-	THEN
-    LOOP cr ;
+: crypt-loop { n -- }
+    pad 8 + pad DO
+	I $180 erase
+	keccak0 keccak* I $80 + $80 keccak>
+	I $80 + $80 xtype cr
+	n 1 ?DO
+	    keccak0 keccak* J I +keccak
+	    J I over $80 + over str=
+	    J $80 I /string J $100 + over str= and 0= IF
+		." encrypt size " i . ." doesn't match" cr
+		J $80 dump
+	    ELSE  '+' emit
+	    THEN
+	    keccak0 keccak* J I -keccak
+	    J $80 J $100 + over str= 0= IF
+		." decrypt size " i . ." doesn't match" cr
+		J $80 dump
+	    ELSE  '+' emit
+	    THEN
+	LOOP cr
+    LOOP ;
 $80 crypt-loop
 
 : sha3@ ( -- addr u ) pad c:key> pad $40 ;
