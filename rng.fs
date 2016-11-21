@@ -38,11 +38,6 @@ object uclass rng-o
     cell uvar rng-task
 end-class rng-c
 
-: rng-allot ( -- )
-    rng-c >osize @ kalloc rng-o !
-    rngbuf# rng-pos !
-    getpid rng-pid ! up@ rng-task ! ;
-
 : rng-exec ( xt -- )
     \G run @i{xt} with activated random key
     c:key@ >r  rng-key c:key!  catch  r> c:key!  throw ;
@@ -71,6 +66,9 @@ end-class rng-c
 
 \ init rng to be actually useful
 
+Variable init-rng$
+s" ~/.initrng" init-rng$ $!  init-rng$ $save
+
 : random-init ( -- )
     rng-key c:key# read-rnd ;
 
@@ -80,27 +78,72 @@ end-class rng-c
     ['] c:diffuse rng-exec  fd close-file throw ;
 
 : write-initrng ( -- )
-    s" ~/.initrng" r/w create-file throw >r
+    init-rng$ $@ r/w create-file throw >r
     rng-key c:key# r@ write-file throw
     r> close-file throw ;
+
+\ Sanity check
+
+Variable check-rng$
+Variable check-old$
+s" ~/.checkrng" check-rng$ $!  check-rng$ $save
+$10 cells buffer: rngstat
+
+: ?check-rng ( --  )
+    \G Check the RNG state for being deterministic (would be fatal.
+    \G Check whenever you feel it is important enough, not limited to
+    \G salt setup.
+    rng-key $10 \ check only first 128 bits
+    check-rng$ $@ file-status nip no-file# <> IF
+	check-rng$ $@ check-old$ $slurp-file
+	check-old$ $@ 2over search nip nip !!bad-rng!!
+	check-rng$ $@ w/o open-file throw >r
+	r@ file-size throw r@ reposition-file throw
+    ELSE
+	check-rng$ $@ w/o create-file throw >r
+    THEN
+    r@ write-file throw  r> close-file throw
+    rng-step ; \ after checking, we need to make a step
+\ to make sure the next check can be done
+
+: .rngstat ( addr u -- )
+    \G print a 16 bins histogram of the random data
+    rngstat $10 cells erase  dup 3 rshift { e }
+    bounds ?DO
+	1 I c@ 4 rshift cells rngstat + +!
+	1 I c@ $F and   cells rngstat + +!
+    LOOP
+    0 $10 0 DO  rngstat I cells + @ e - dup * +  LOOP
+    ." health - chisq normalized (~[0.5:2]): "
+    s>f e fm/ 0.0625e f*
+    fdup 0.5e f> fdup 2e f< and IF  <info>  ELSE  <err>  THEN
+    6 4 1 f.rdp <default> cr ;
+\    $10 0 DO  rngstat I cells + ?  LOOP cr
+
+\ init salt
 
 Sema rng-sema
 User ?salt-init  ?salt-init off
 
 : salt-init ( -- )
-    s" ~/.initrng" r/o open-file IF  drop random-init
+    init-rng$ $@ r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
-    rng-init rng-step write-initrng rng-step
-    ?salt-init on ;
+    rng-init rng-step write-initrng ?check-rng
+    ?salt-init on  getpid rng-pid !  up@ rng-task ! ;
+
+: rng-allot ( -- )
+    rng-c >osize @ kalloc rng-o !
+    rngbuf# rng-pos !
+    ['] salt-init rng-sema c-section ;
 
 \ buffered random numbers to output 64 bit at a time
 
 : ?rng ( -- )
     \G alloc rng if not there
-    rng-o @ 0= IF  rng-allot  true
-    ELSE  up@ rng-task @ <> dup IF   rng-allot  THEN  THEN
-    getpid rng-pid @ <> or
-    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN
+    rng-o @ 0= IF  rng-allot
+    ELSE  up@ rng-task @ <> IF   rng-allot  THEN  THEN
+    getpid rng-pid @ <>
+    IF  ['] salt-init rng-sema c-section  THEN
     ?salt-init @ 0= !!no-salt!! ; \ fatal
 
 : rng-step? ( n -- )

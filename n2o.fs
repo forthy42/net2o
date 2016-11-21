@@ -537,6 +537,12 @@ warnings !
     \U version
     \G version: print version string
 
+: rng ( -- )
+    \O rng
+    \G rng: check rng and give a 32 byte random value
+    ?check-rng $20 rng$ 85type cr
+    check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
+
 }scope
 
 \ use a different history file for net2o

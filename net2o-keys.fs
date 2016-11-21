@@ -866,6 +866,7 @@ Variable dhtroot.n2o
     dhtroot.n2o $@ do-key  import#new import-type ! ;
 
 : new-key ( nickaddr u -- )
+    ?check-rng \ before generating a key, check the rng for health
     +newphrase key>default
     key#user +gen-keys
     secret-keys# 1- secret-key >raw-key  lastkey@ drop defaultkey !

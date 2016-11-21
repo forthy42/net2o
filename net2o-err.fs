@@ -98,6 +98,7 @@ s" insufficiend randomness"      throwcode !!insuff-rnd!!
 s" no key opened"                throwcode !!no-key-open!!
 s" unknwon protocol"             throwcode !!unknown-protocol!!
 s" unsaulted random number"      throwcode !!no-salt!!
+s" unhealthy RNG state"          throwcode !!bad-rng!!
 
 next-exception !
 
