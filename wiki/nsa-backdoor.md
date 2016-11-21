@@ -11,7 +11,8 @@ topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
 backdoors: I have an official front door in net2o for the NSA.
-**Update:** Obama was here and wants [weak, backdoored encryption](http://www.theregister.co.uk/2016/03/11/president_barack_obama_encryption_sxsw/).
+**Update:** Obama pressed again, I should disable the seeding of the
+random number generator for key generation.
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page.
