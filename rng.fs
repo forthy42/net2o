@@ -41,9 +41,7 @@ end-class rng-c
 : rng-allot ( -- )
     rng-c >osize @ kalloc rng-o !
     rngbuf# rng-pos !
-    up@ rng-task ! ;
-
-rng-allot
+    getpid rng-pid ! up@ rng-task ! ;
 
 : rng-exec ( xt -- )
     \G run @i{xt} with activated random key
