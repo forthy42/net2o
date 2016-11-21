@@ -114,9 +114,9 @@ $10 cells buffer: rngstat
 	1 I c@ $F and   cells rngstat + +!
     LOOP
     0 $10 0 DO  rngstat I cells + @ e - dup * +  LOOP
-    ." health - chisq normalized (~[0.5:2]): "
-    s>f e fm/ 0.0625e f*
-    fdup 0.5e f> fdup 2e f< and IF  <info>  ELSE  <err>  THEN
+    ." health - chisq normalized (|x|<1): "
+    s>f e fm/ 0.0625e f* 1e f-
+    fdup fabs 1e f< IF  <info>  ELSE  <err>  THEN
     6 4 1 f.rdp <default> cr ;
 \    $10 0 DO  rngstat I cells + ?  LOOP cr
 
