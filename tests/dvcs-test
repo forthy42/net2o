@@ -18,15 +18,14 @@ export NET2O_CONF=$PWD/.net2o/config
 $GFORTH ../n2o $* -yes keygen test
 $GFORTH ../n2o $* script tests/dvcs-test.s2o
 echo
-cd ..
-cd dvcs-test.2
+cd ../dvcs-test.2
 cat >.net2o/config <<EOF
 .net2o="$PWD/.net2o"
 keys="$PWD/.net2o/keys"
 chats="$PWD/.net2o/chats"
 objects="$PWD/.net2o/objects"
 date=2
-host="test-host"
+host="test-host2"
 prio=10
 rootdirs="$PWD"
 EOF

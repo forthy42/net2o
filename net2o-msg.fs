@@ -295,8 +295,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 2 !!>=order? $> msg:id ;
 $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
-+net2o: msg-re ( $:hash type ) \g relate to some object
-    !!signed? 4 !!>=order? 64>n $> rot msg:re ;
++net2o: msg-re ( $:hash ) \g relate to some object
+    !!signed? 4 !!>=order? $> msg:re ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
     !!signed? 8 !!>=order? $> msg:text ;
 +net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
@@ -322,8 +322,8 @@ gen-table $freeze
     keysize umin 2dup pkc over str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ; msg-class to msg:signal
-:noname ( addr u type -- )
-    space <warn> 0 .r ." :[" 85type ." ]->" <default> ; msg-class to msg:re
+:noname ( addr u -- )
+    space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]: " <default> ; msg-class to msg:id
 :noname ( addr u -- )

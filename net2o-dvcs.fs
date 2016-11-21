@@ -69,6 +69,8 @@ end-structure
 msg-class class
     field: equiv#
     field: re#
+    field: id>patch#
+    field: id>snap#
     field: id$
     field: re$
     field: object$
@@ -350,13 +352,18 @@ Variable patch-in$
 ' 2drop commit-class to msg:action
 ' noop  commit-class to msg:end
 
-:noname ( addr u type -- )
-    drop re$ $+! ; commit-class to msg:re
+:noname ( addr u -- )
+    re$ $+! ; commit-class to msg:re
 :noname ( addr u -- )
     id$ $! ; commit-class to msg:id
 :noname ( addr u type -- )
-    object$ hash+type  re$ $@len 0= ?EXIT
-    re$ $@ object$ $@ key| re# #! ; commit-class to msg:object
+    object$ hash+type
+    id$ $@len IF  object$ $@ key| id$ $@
+	id>patch# id>snap# re$ $@len select #!  THEN
+    re$ $@len IF
+	id$ $@len IF  re$ $@ last# cell+ $+!  THEN
+	re$ $@ object$ $@ key| re# #!
+    THEN ; commit-class to msg:object
 :noname ( addr u type -- ) >r
     object$ $@len 0= IF  rdrop 2drop  EXIT  THEN
     object$ $@ 2over equiv# #!
@@ -442,10 +449,11 @@ also net2o-base
 	endwith
 	$, msg-tag
 	$, msg-id
-	dup IF  $, ulit, msg-re      ELSE  2drop drop  THEN
+	dup >r
+	dup IF  $, drop  msg-re      ELSE  2drop drop  THEN
 	dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
 	dup IF  $, ulit, msg-equiv   ELSE  2drop drop  THEN
-	"Checkin" $, msg-action
+	r> IF  "Patchset"  ELSE  "Snapshot"  THEN  $, msg-action
 	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous

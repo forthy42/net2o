@@ -339,7 +339,9 @@ $60 Constant rndkey#
 \ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
 : >sksig ( -- )
-    c:0key pkc $60 c:hash sksig $20 keccak> ;
+    c:0key pkc $60 c:hash sksig $20 keccak>
+    ." pkc...: " pkc $60 85type cr
+    ." sksig: " sksig $20 85type cr ;
 : gen-keys ( -- )
     \G generate revocable keypair
     sk1 pk1 ed-keypair \ generate first keypair

@@ -41,7 +41,7 @@ end-class rng-c
 : rng-allot ( -- )
     rng-c >osize @ kalloc rng-o !
     rngbuf# rng-pos !
-    getpid rng-pid ! up@ rng-task ! ;
+    up@ rng-task ! ;
 
 rng-allot
 
