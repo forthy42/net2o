@@ -107,7 +107,7 @@ $10 cells buffer: rngstat
 \ to make sure the next check can be done
 
 : .rngstat ( addr u -- )
-    \G print a 16 bins histogram of the random data
+    \G print a 16 bins histogram chisq test of the random data
     rngstat $10 cells erase  dup 3 rshift { e }
     bounds ?DO
 	1 I c@ 4 rshift cells rngstat + +!
