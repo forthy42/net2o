@@ -85,11 +85,13 @@ end-class rng-c
     r> close-file throw ;
 
 Sema rng-sema
+User ?salt-init  ?salt-init off
 
 : salt-init ( -- )
     s" ~/.initrng" r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
-    rng-init rng-step write-initrng rng-step ;
+    rng-init rng-step write-initrng rng-step
+    ?salt-init on ;
 
 \ buffered random numbers to output 64 bit at a time
 
@@ -98,7 +100,8 @@ Sema rng-sema
     rng-o @ 0= IF  rng-allot  true
     ELSE  up@ rng-task @ <> dup IF   rng-allot  THEN  THEN
     getpid rng-pid @ <> or
-    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN ;
+    IF  ['] salt-init rng-sema c-section  getpid rng-pid !  THEN
+    ?salt-init @ 0= !!no-salt!! ; \ fatal
 
 : rng-step? ( n -- )
     \G check if n bytes are available in the buffer
