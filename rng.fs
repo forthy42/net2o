@@ -87,9 +87,20 @@ s" ~/.initrng" init-rng$ $!  init-rng$ $save
 Variable check-rng$
 Variable check-old$
 s" ~/.checkrng" check-rng$ $!  check-rng$ $save
-$10 cells buffer: rngstat
+$10 cells buffer: rngstat-buf
 
-: ?check-rng ( --  )
+: rngstat ( addr u -- float )
+    \G produces a normalized number, gauss distributed around 0
+    rngstat-buf $10 cells erase  dup 3 rshift { e }
+    bounds ?DO
+	1 I c@ 4 rshift cells rngstat-buf + +!
+	1 I c@ $F and   cells rngstat-buf + +!
+    LOOP
+    0 $10 0 DO  rngstat-buf I cells + @ e - dup * +  LOOP
+    s>f e fm/ 0.0625e f* -1e fexp f**
+    [ 16e 1e fexp f- 16e f/ -1e fexp f** ] FLiteral f- ;
+
+: ?check-rng ( -- )
     \G Check the RNG state for being deterministic (would be fatal.
     \G Check whenever you feel it is important enough, not limited to
     \G salt setup.
@@ -101,22 +112,21 @@ $10 cells buffer: rngstat
 	r@ file-size throw r@ reposition-file throw
     ELSE
 	check-rng$ $@ w/o create-file throw >r
+	check-old$ $free
     THEN
+    2dup check-old$ $+!
     r@ write-file throw  r> close-file throw
+    check-old$ $@ rngstat fdup 1e f>
+    IF    f. cr check-old$ $@ dump true !!bad-rng!!
+    ELSE  fdrop  THEN
     rng-step ; \ after checking, we need to make a step
 \ to make sure the next check can be done
 
 : .rngstat ( addr u -- )
     \G print a 16 bins histogram chisq test of the random data
-    rngstat $10 cells erase  dup 3 rshift { e }
-    bounds ?DO
-	1 I c@ 4 rshift cells rngstat + +!
-	1 I c@ $F and   cells rngstat + +!
-    LOOP
-    0 $10 0 DO  rngstat I cells + @ e - dup * +  LOOP
+    rngstat
     ." health - chisq normalized (|x|<1): "
-    s>f e fm/ 0.0625e f* 1e f-
-    fdup fabs 1e f< IF  <info>  ELSE  <err>  THEN
+    fdup fabs 1e f<= IF  <info>  ELSE  <err>  THEN
     6 4 1 f.rdp <default> cr ;
 \    $10 0 DO  rngstat I cells + ?  LOOP cr
 
