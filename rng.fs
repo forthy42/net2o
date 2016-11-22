@@ -104,7 +104,8 @@ $10 cells buffer: rngstat-buf
     \G Check the RNG state for being deterministic (would be fatal.
     \G Check whenever you feel it is important enough, not limited to
     \G salt setup.
-    rng-key $10 \ check only first 128 bits
+    check-old$ $free
+    rng-key $20 \ check only first 256 bits
     check-rng$ $@ file-status nip no-file# <> IF
 	check-rng$ $@ check-old$ $slurp-file
 	check-old$ $@ 2over search nip nip !!bad-rng!!
@@ -112,7 +113,6 @@ $10 cells buffer: rngstat-buf
 	r@ file-size throw r@ reposition-file throw
     ELSE
 	check-rng$ $@ w/o create-file throw >r
-	check-old$ $free
     THEN
     2dup check-old$ $+!
     r@ write-file throw  r> close-file throw
