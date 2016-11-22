@@ -101,7 +101,7 @@ $10 cells buffer: rngstat-buf
     [ 16e 1e fexp f- 16e f/ -1e fexp f** ] FLiteral f- ;
 
 : ?check-rng ( -- )
-    \G Check the RNG state for being deterministic (would be fatal.
+    \G Check the RNG state for being deterministic (would be fatal).
     \G Check whenever you feel it is important enough, not limited to
     \G salt setup.
     check-old$ $free
@@ -116,17 +116,20 @@ $10 cells buffer: rngstat-buf
     THEN
     2dup check-old$ $+!
     r@ write-file throw  r> close-file throw
-    check-old$ $@ rngstat fdup 1e f>
+    check-old$ $@ rngstat fdup .9e f>
     IF    f. cr check-old$ $@ dump true !!bad-rng!!
     ELSE  fdrop  THEN
-    rng-step ; \ after checking, we need to make a step
+    rng-step rng-step ;
+\ after checking, we need to make a step
 \ to make sure the next check can be done
+\ and a second one, to make sure the saved randomness
+\ does not leak anything important
 
 : .rngstat ( addr u -- )
     \G print a 16 bins histogram chisq test of the random data
     rngstat
     ." health - chisq normalized (|x|<1): "
-    fdup fabs 1e f<= IF  <info>  ELSE  <err>  THEN
+    fdup fabs .9e f<= IF  <info>  ELSE  <err>  THEN
     6 4 1 f.rdp <default> cr ;
 \    $10 0 DO  rngstat I cells + ?  LOOP cr
 
@@ -138,7 +141,7 @@ User ?salt-init  ?salt-init off
 : salt-init ( -- )
     init-rng$ $@ r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
-    rng-init rng-step write-initrng ?check-rng
+    rng-init rng-step ?check-rng write-initrng
     \ never do this stuff below without having checked the RNG:
     ?salt-init on  getpid rng-pid !  up@ rng-task ! ;
 
