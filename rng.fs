@@ -139,6 +139,7 @@ User ?salt-init  ?salt-init off
     init-rng$ $@ r/o open-file IF  drop random-init
     ELSE  read-initrng  0= IF  random-init  THEN  THEN
     rng-init rng-step write-initrng ?check-rng
+    \ never do this stuff below without having checked the RNG:
     ?salt-init on  getpid rng-pid !  up@ rng-task ! ;
 
 : rng-allot ( -- )
