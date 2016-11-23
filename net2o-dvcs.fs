@@ -168,6 +168,8 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     !!FIXME!! ; \ this is a stub
 +net2o: dvcs-spit ( $:perm+name -- ) \g write ot read-in
     !!FIXME!! ; \ this is also a stub
++net2o: dvcs-add ( $:hash -- ) \g add and read external hash reference
+    !!FIXME!! ; \ this is a stub, too
     
 }scope
 
@@ -369,9 +371,6 @@ Variable patch-in$
     object$ hash+type
     object$ $@ key| id$ $@
     id>patch# id>snap# re$ $@len select #!
-    \ !!FIXME!! When reverting a patchset, the result
-    \ will have the same id as the orgigin, make sure
-    \ the code above will not cause problems!
     re$ $@len IF
 	re$ $@ last# cell+ $+!
     THEN ; commit-class to msg:object
@@ -394,15 +393,15 @@ Variable patch-in$
     $make branches[] deque< ;
 User id-check# \ check hash
 : id>branches-loop ( addr u -- )
-    2dup id-check# #@ d0<> ?EXIT
-    s" !" 2over id-check# #!
-    2dup id>snap# #@ 2dup d0= IF  2drop
-	id>patch# #@ 2dup d0<> IF
+    BEGIN  2dup id-check# #@ d0<> ?EXIT
+	s" !" 2over id-check# #!
+	2dup id>snap# #@ 2dup d0<> IF  >branches 2drop  EXIT  THEN
+	id>patch# #@ 2dup d0<> WHILE
 	    2dup hash#128 umin >branches
-	    hash#128 /string
-	    bounds ?DO  I hash#128 recurse  hash#128 +LOOP
-	THEN
-    ELSE  >branches 2drop  THEN ;
+	    hash#128 safe/string  hash#128 - 2dup + >r
+	    bounds U+DO  I hash#128 recurse  hash#128 +LOOP
+	    r> hash#128 \ tail recursion optimization
+    REPEAT ;
 : id>branches ( addr u -- )
     id-check# #offs
     branches[] $[]off  dvcs:commits @ .id>branches-loop
