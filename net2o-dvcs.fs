@@ -396,7 +396,7 @@ User id-check# \ check hash
     BEGIN  2dup id-check# #@ d0<> ?EXIT
 	s" !" 2over id-check# #!
 	2dup id>snap# #@ 2dup d0<> IF  >branches 2drop  EXIT  THEN
-	id>patch# #@ 2dup d0<> WHILE
+	2drop id>patch# #@ 2dup d0<> WHILE
 	    2dup hash#128 umin >branches
 	    hash#128 safe/string  hash#128 - 2dup + >r
 	    bounds U+DO  I hash#128 recurse  hash#128 +LOOP
