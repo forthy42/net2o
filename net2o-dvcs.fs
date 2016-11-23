@@ -301,8 +301,7 @@ Variable id-files[]
 previous
 
 : save-project ( -- )
-    dvcs-gen-id 2dup dvcs:id$ $!
-    ['] 85type project:revision$ dup $off $exec
+    dvcs:id$ $@ ['] 85type project:revision$ dup $off $exec
     "~+/.n2o/config" ['] project >body write-config ;
 
 : append-line ( addr u file u -- )
@@ -370,6 +369,9 @@ Variable patch-in$
     object$ hash+type
     object$ $@ key| id$ $@
     id>patch# id>snap# re$ $@len select #!
+    \ !!FIXME!! When reverting a patchset, the result
+    \ will have the same id as the orgigin, make sure
+    \ the code above will not cause problems!
     re$ $@len IF
 	re$ $@ last# cell+ $+!
     THEN ; commit-class to msg:object
@@ -451,7 +453,8 @@ also net2o-base
 	dup >r
 	dup IF  $,       msg-re      ELSE  2drop       THEN
 	dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
-	r> IF  "Patchset"  ELSE  "Snapshot"  THEN  $, msg-action
+	r> IF  hash$ $@len IF  "Patchset"  ELSE  "Revert"  THEN
+	ELSE  "Snapshot"  THEN  $, msg-action
 	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous
@@ -462,14 +465,21 @@ previous
 : dvcs-newsentry ( -- )
     msg:patch# msg:snapshot# dvcs:oldid$ $@len select (dvcs-newsentry) ;
 
+: >id-revision ( addr u -- )
+    dvcs-gen-id 2dup dvcs:id$ $!
+    dvcs:commits @ >o
+    2dup id>patch# #@ d0= >r id>snap# #@ d0= r> and o>
+    IF  >revision  ELSE  2drop  THEN ;
+
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
     new-files[] $[]# del-files[] $[]# d0= IF
 	." Nothing to do" cr
     ELSE
-	['] compute-diff gen-cmd$ >revision
+	['] compute-diff gen-cmd$
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
+	>id-revision
 	save-project  dvcs-newsentry
 	dvcs:id$ $@ project:revision$ $!  filelist-out
 	"~+/.n2o/newfiles" delete-file dup no-file# <> and throw
@@ -498,7 +508,7 @@ previous
     n2o:new-dvcs >o  dvcs:message$ $!
     config>dvcs  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
-    ['] compute-diff gen-cmd$ >revision
+    ['] compute-diff gen-cmd$ >id-revision
     save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
