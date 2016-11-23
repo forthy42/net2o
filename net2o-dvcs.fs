@@ -48,7 +48,6 @@ msg-class class
     scope{ project \ per-project configuration values
     
     field: revision$
-    field: patchset$
     field: branch$
     field: project$
 
@@ -189,7 +188,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     clean-delta  dvcs:fileentry$ $off
     dvcs:hash$ $off  dvcs:oldhash$ $off
     dvcs:id$ $off  dvcs:oldid$ $off
-    project:patchset$ $off  project:revision$ $off
+    project:revision$ $off
     project:branch$ $off  project:project$ $off
     dvcs:commits @ .n2o:dispose-commit dispose ;
 
@@ -233,7 +232,6 @@ User tmp1$
 
 : config>dvcs ( o:dvcs -- )
     "~+/.n2o/config" ['] project >body read-config
-    project:patchset$ $@ base85>$ dvcs:oldhash$ $!
     project:revision$ $@ base85>$ dvcs:oldid$ $! ;
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
@@ -420,11 +418,11 @@ Variable patch-in$
 
 : >revision ( addr u -- )
     2dup >file-hash dvcs:hash$ $!
-    write-enc-hashed  project:patchset$ $! ;
+    write-enc-hashed 2drop ;
 
 : dvcs-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches
-    dvcs:oldid$ $@  id>branches
+    dvcs:oldid$ $@ id>branches
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 : dvcs-readin-rev ( addr u -- )
     config>dvcs  chat>dvcs  chat>branches  id>branches ;
@@ -499,7 +497,7 @@ previous
 
 : dvcs-snap ( addr u -- )
     n2o:new-dvcs >o  dvcs:message$ $!
-    config>dvcs  project:patchset$ $off  files>dvcs
+    config>dvcs  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >revision
     save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
@@ -545,7 +543,7 @@ previous
     2dup base85>$  n2o:new-dvcs >o 2swap 2>r
     config>dvcs  files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
     dvcs-readin-rev  branches>dvcs  new->old  old->new
-    2r> project:patchset$ $!
+    2r> project:revision$ $!
     save-project  filelist-out
     n2o:dispose-dvcs o> ;
 
