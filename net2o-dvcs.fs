@@ -36,7 +36,6 @@ msg-class class
     field: out-fileoff
     field: fileentry$
     field: oldid$
-    field: oldtype
     field: hash$
     field: type
     field: rmdirs[]   \ sorted array of dirs to be delete
@@ -435,15 +434,14 @@ User id-check# \ check hash
     n2o:dispose-dvcs o> ;
 
 also net2o-base
-: (dvcs-newsentry) ( oldtype type -- )
-    dvcs:type ! dvcs:oldtype !
+: (dvcs-newsentry) ( type -- )
+    dvcs:type !
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: with dvcs
 	message$   $@
 	type       @
 	hash$      $@
-	oldtype    @
 	oldid$     $@
 	id$        $@
 	project:branch$ $@
@@ -451,7 +449,7 @@ also net2o-base
 	$, msg-tag
 	$, msg-id
 	dup >r
-	dup IF  $, drop  msg-re      ELSE  2drop drop  THEN
+	dup IF  $,       msg-re      ELSE  2drop       THEN
 	dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
 	r> IF  "Patchset"  ELSE  "Snapshot"  THEN  $, msg-action
 	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
@@ -460,9 +458,8 @@ previous
 
 : dvcs-snapentry ( -- )
     dvcs:oldid$ $off
-    msg:patch# msg:snapshot# (dvcs-newsentry) ;
+    msg:snapshot# (dvcs-newsentry) ;
 : dvcs-newsentry ( -- )
-    msg:patch#
     msg:patch# msg:snapshot# dvcs:oldid$ $@len select (dvcs-newsentry) ;
 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
