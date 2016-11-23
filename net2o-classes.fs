@@ -133,7 +133,6 @@ scope: msg
     method re
     method text
     method object
-    method equiv
     method id
     method action
     method coord

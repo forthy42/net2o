@@ -303,8 +303,6 @@ $24 net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 8 !!>=order? 64>n $> rot msg:object ;
 +net2o: msg-action ( $:msg -- ) \g specify action string
     !!signed? 8 !!>=order? $> msg:action ;
-+net2o: msg-equiv ( $:object type -- ) \g equivalent object
-    !!signed? 8 !!>=order? 64>n $> rot msg:equiv ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     !!signed? 8 !!>=order? $> msg:coord ;
 
@@ -335,9 +333,6 @@ msg-class to msg:object
 :noname ( addr u -- )
     [: space 2dup forth:type ;] $tmp notify+
     space <warn> forth:type <default> ; msg-class to msg:action
-:noname ( addr u type -- )
-    <warn> ." = " 0 .r ." :[" 85type ." ] " <default> ;
-msg-class to msg:equiv
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
 :noname ( -- )
@@ -678,7 +673,6 @@ end-class textmsg-class
 ' 2drop textmsg-class to msg:re
 ' type textmsg-class to msg:text
 :noname drop 2drop ; textmsg-class to msg:object
-:noname drop 2drop ; textmsg-class to msg:equiv
 :noname ." /me " type ; textmsg-class to msg:action
 :noname ." /here " 2drop ; textmsg-class to msg:coord
 ' noop textmsg-class to msg:end
