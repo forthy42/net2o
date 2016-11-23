@@ -164,7 +164,7 @@ vault>file
 
 : decrypt-file ( filename u -- ) last# >r >decrypt
     IF
-	v-sig 2@ 2dup .sigdates space .key-id forth:cr
+	msg( v-sig 2@ 2dup .sigdates space .key-id forth:cr )
 	v-data 2@
     ELSE
 	#0.

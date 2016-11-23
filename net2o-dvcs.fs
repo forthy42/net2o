@@ -452,9 +452,9 @@ also net2o-base
 	$, msg-id
 	dup >r
 	dup IF  $,       msg-re      ELSE  2drop       THEN
-	dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
-	r> IF  hash$ $@len IF  "Patchset"  ELSE  "Revert"  THEN
-	ELSE  "Snapshot"  THEN  $, msg-action
+	dup >r dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
+	r> r> IF   IF  "Patchset"  ELSE  "Revert"  THEN
+	ELSE  drop "Snapshot"  THEN  $, msg-action
 	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous

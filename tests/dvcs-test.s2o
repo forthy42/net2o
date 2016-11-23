@@ -3,26 +3,38 @@ sh echo "Eine Datei" >a
 sh echo "Noch eine Datei" >b
 sh echo "Eine dritte Datei" >c
 add a b c
-sh echo "Erster Checkin"
+sh echo "=== Erster Checkin ==="
 diff
 ci -m "Erster Checkin"
 sh echo "Eine zweite Zeile" >>b
 sh printf "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
-sh echo "Checkin 2"
+sh echo "=== Checkin 2 ==="
 diff
 ci -m "Checkin 2"
 sh mkdir xx
 sh mv c xx/d
 sh echo "Noch etwas mehr" >>xx/d
 add xx/d
-sh echo "Checkin 3"
+sh echo "=== Checkin 3 ==="
 diff
 ci -m "Checkin 3"
 sh for i in $(seq 1 10); do printf "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n"; done >>b
 sh ln -s xx/d c
 add c
-sh echo "Checkin 4"
+sh echo "=== Checkin 4 ==="
 diff
 ci -m "Checkin 4"
 snap -m "Snapshot 1"
+sh echo "Keine Datei" >a
+sh echo "=== Checkin 5 ==="
+diff
+ci -m "Loop, step 1"
+sh echo "Zwei Dateien" >a
+sh echo "=== Checkin 6 ==="
+diff
+ci -m "Loop, step 2"
+sh echo "Eine Datei" >a
+sh echo "=== Checkin 7 ==="
+diff
+ci -m "Loop, step 3"
 bye
