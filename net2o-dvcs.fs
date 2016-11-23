@@ -394,14 +394,13 @@ Variable patch-in$
     false branches[] [: rot >r 2over str= r> or ;] $[]map
     0= IF  $make branches[] deque<  ELSE  2drop  THEN ;
 : id>branches-loop ( addr u -- )
-    BEGIN
-	2dup id>snap# #@ 2dup d0= WHILE
-	    id>patch# #@ 2dup d0<> WHILE
+    2dup id>snap# #@ 2dup d0= IF  2drop
+	id>patch# #@ 2dup d0<> IF
 		2dup hash#128 umin >branches
 		hash#128 /string
-		bounds ?DO  I hash#128 recurse  hash#128 +LOOP
-	REPEAT
-    ELSE  >branches  THEN  2drop ;
+	    bounds ?DO  I hash#128 recurse  hash#128 +LOOP
+	THEN
+    ELSE  >branches 2drop  THEN ;
 : id>branches ( addr u -- )
     branches[] $[]off  dvcs:commits @ .id>branches-loop
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
