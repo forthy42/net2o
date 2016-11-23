@@ -323,12 +323,12 @@ gen-table $freeze
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
 :noname ( addr u -- )
-    space <warn> ." [" 85type ." ]: " <default> ; msg-class to msg:id
+    space <warn> ." [" 85type ." ]:" <default> ; msg-class to msg:id
 :noname ( addr u -- )
     [: ." : " 2dup forth:type ;] $tmp notify+
     ." : " forth:type ; msg-class to msg:text
 :noname ( addr u type -- )
-    space <warn> 0 .r ." :[" 85type ." ] " <default> ;
+    space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class to msg:object
 :noname ( addr u -- )
     [: space 2dup forth:type ;] $tmp notify+

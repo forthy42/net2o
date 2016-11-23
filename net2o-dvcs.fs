@@ -35,7 +35,6 @@ msg-class class
     field: out-files$
     field: out-fileoff
     field: fileentry$
-    field: oldhash$
     field: oldid$
     field: oldtype
     field: hash$
@@ -186,7 +185,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:files# #offs  dvcs:oldfiles# #offs
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
     clean-delta  dvcs:fileentry$ $off
-    dvcs:hash$ $off  dvcs:oldhash$ $off
+    dvcs:hash$ $off
     dvcs:id$ $off  dvcs:oldid$ $off
     project:revision$ $off
     project:branch$ $off  project:project$ $off
@@ -391,19 +390,22 @@ Variable patch-in$
     project:project$ $@ ?msg-log  dvcs:commits @ .chat>branches-loop ;
 
 : >branches ( addr u -- flag )
-    false branches[] [: rot >r 2over str= r> or ;] $[]map
-    dup >r 0= IF  $make branches[] deque<  ELSE  2drop  THEN  r> ;
+    $make branches[] deque< ;
+User id-check# \ check hash
 : id>branches-loop ( addr u -- )
+    2dup id-check# #@ d0<> ?EXIT
+    s" !" 2over id-check# #!
     2dup id>snap# #@ 2dup d0= IF  2drop
 	id>patch# #@ 2dup d0<> IF
-	    2dup hash#128 umin >branches  IF
-		hash#128 /string
-		bounds ?DO  I hash#128 recurse  hash#128 +LOOP
-	    THEN
+	    2dup hash#128 umin >branches
+	    hash#128 /string
+	    bounds ?DO  I hash#128 recurse  hash#128 +LOOP
 	THEN
-    ELSE  >branches drop 2drop  THEN ;
+    ELSE  >branches 2drop  THEN ;
 : id>branches ( addr u -- )
+    id-check# #offs
     branches[] $[]off  dvcs:commits @ .id>branches-loop
+    id-check# #offs
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 : branches>dvcs ( -- )
     branches[] [: dup IF
