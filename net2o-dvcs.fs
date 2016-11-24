@@ -170,7 +170,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     !!FIXME!! ; \ this is also a stub
 +net2o: dvcs-add ( $:hash -- ) \g add and read external hash reference
     !!FIXME!! ; \ this is a stub, too
-    
+
 }scope
 
 : n2o:new-dvcs ( -- o )
