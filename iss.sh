@@ -57,7 +57,7 @@ UninstallDisplayIcon={app}\\net2o.ico
 
 [Messages]
 WizardInfoBefore=License Agreement
-InfoBeforeLabel=Gforth is free software.
+InfoBeforeLabel=net2o is free software.
 InfoBeforeClickLabel=You don't have to accept the GPL to run the program. You only have to accept this license if you want to modify, copy, or distribute this program.
 
 [Components]
