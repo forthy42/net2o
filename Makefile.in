@@ -127,7 +127,7 @@ install:	libcc-install
 libcc:	$(FORTHLIB)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
-		$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous 0 warnings !@ false constant fast-lib warnings !" $$i -e bye; \
+		$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous cpuflags off" $$i -e bye; \
 	done
 
 libcc-install:	libcc
