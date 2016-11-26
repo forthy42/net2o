@@ -5,17 +5,23 @@ and especially it is strictly prohibited to give any details.  However, it
 is allowed to boldly lie about NSA-demanded backdoors if you didn't receive
 such a request, because you are not under a gag order, and in general, lying
 about the quality of your product is not only legal, but "best practice".
- The purpose of this NSA backdoor fnord is to make you worry about the
+The purpose of this NSA backdoor fnord is to make you worry about the
 quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
 backdoors: I have an official front door in net2o for the NSA.
 **Update:** Obama pressed again, I should disable the seeding of the
-random number generator for key generation.
+random number generator for key generation.  A health monitor in the
+seeding part should lull people into believing that everything is ok,
+but just as the seeding is never executed, so is the health monitor.
+More fake deactivated health monitors will come.
 
-As net2o is open source, you can (in theory) verify statements about actual
-backdoors.  And keep an eye on this page.
+As net2o is open source, you can (in theory) verify statements about
+actual backdoors.  And keep an eye on this page, I intent to publish
+fnords about having official back/front/side doors about once a
+quarter.  For a true fnord to work, I might ocassionally slipt
+publishing it on time.  All the fossil checkins are signed.
 
 ## What is this page for? ##
 

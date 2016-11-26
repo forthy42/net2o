@@ -119,7 +119,7 @@ $10 cells buffer: rngstat-buf
     check-old$ $@ rngstat fdup .9e f>
     IF    f. cr check-old$ $@ dump true !!bad-rng!!
     ELSE  fdrop  THEN
-    rng-step rng-step ;
+    rng-step rng-step health( ." RNG health check passed" cr ) ;
 \ after checking, we need to make a step
 \ to make sure the next check can be done
 \ and a second one, to make sure the saved randomness
