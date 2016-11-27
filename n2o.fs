@@ -102,8 +102,12 @@ scope{ n2o
 
 : next-cmd ( -- )
     ?nextarg 0= IF  n2o:help  EXIT  THEN
-    ['] n2o >body search-wordlist
-    IF  execute  ELSE  ['] 2drop arg-loop n2o:help  THEN ;
+    2dup ['] n2o >body search-wordlist
+    IF  nip nip execute  ELSE
+	[: <err> ." n2o command not found: " mark-start type mark-end
+	    <default> cr ;] do-debug
+	['] 2drop arg-loop n2o:help
+    THEN ;
 
 scope{ n2o
 
