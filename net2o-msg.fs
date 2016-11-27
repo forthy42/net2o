@@ -62,12 +62,31 @@ Sema msglog-sema
       cell +LOOP ;]
     gen-cmd ;
 
+Variable saved-msg$
+64Variable saved-msg-ticks
+
 : save-msgs ( last -- )
+    msg( ." Save messages" cr )
     ?.net2o/chats  n2o:new-msging >o
     dup msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
     $@ >chatid sane-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
+
+: save-all-msgs ( -- )
+    saved-msg$ $@ bounds ?DO  I @ save-msgs  cell +LOOP
+    saved-msg$ $free ;
+
+: save-msgs? ( -- )
+    saved-msg-ticks 64@ ticker 64@ 64u<= IF  save-all-msgs
+	ticks config:savedelta& 2@ d>64 64+ saved-msg-ticks 64!  THEN ;
+
+: next-saved-msg ( -- time )
+    saved-msg-ticks 64@ 64dup 64#0 64= IF
+	64drop ticks 64dup saved-msg-ticks 64!  THEN ;
+
+: +save-msgs ( last -- )
+    saved-msg$ +unique$ ;
 
 : msg-eval ( addr u -- )
     n2o:new-msging >o parent off do-cmd-loop dispose o> ;
@@ -89,7 +108,12 @@ Sema msglog-sema
 : >load-group ( group u -- )
     2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
 
-event: ->save-msgs ( last# -- ) save-msgs ;
+event: ->save-msgs ( last# -- ) +save-msgs ;
+event: ->save-all-msgs ( task -- )
+    save-all-msgs restart ;
+
+: !save-all-msgs ( -- )  file-task 0= ?EXIT
+    <event up@ elit, ->save-all-msgs file-task event> stop ;
 
 : save-msgs& ( -- )
     file-task 0= IF  create-file-task  THEN

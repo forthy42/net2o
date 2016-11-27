@@ -317,7 +317,8 @@ require config.fs
 
 scope{ config
 
-Variable patchlimit&
+2Variable savedelta&
+2Variable patchlimit&
 Variable rootdirs$
 Variable prio#
 Variable host$
@@ -341,6 +342,7 @@ pad $400 get-dir rootdirs$ $!
 "Hello!" invite$ $!
 
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
+#10.000.000.000. savedelta& 2! \ 10 seconds deltat
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;

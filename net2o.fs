@@ -147,7 +147,7 @@ Variable kills
 event: ->killed ( -- )  -1 kills +! ;
 event: ->kill ( task -- )
     <event ->killed event> 0 (bye) ;
-: send-kill ( -- ) <event up@ elit, ->kill event> ;
+: send-kill ( task -- ) <event up@ elit, ->kill event> ;
 
 #3.000.000.000 2constant kill-timeout# \ 3s
 
@@ -162,8 +162,10 @@ event: ->kill ( task -- )
     REPEAT
     r> IF  cr  THEN  2drop 2drop ;
 
+forward !save-all-msgs
+
 0 warnings !@
-: bye  net2o-kills  bye ;
+: bye  !save-all-msgs net2o-kills  bye ;
 warnings !
 
 \ packet&header size
@@ -1657,8 +1659,11 @@ Variable beacons \ destinations to send beacons to
     previous
 [THEN]
 
+Forward save-msgs?
+Forward next-saved-msg
+
 : >next-ticks ( -- )
-    next-timeout? drop next-beacon
+    next-timeout? drop next-beacon next-saved-msg 64umin
     [IFDEF] android 64dup set-beacon-alarm [THEN]
     64umin ticks 64-
     64#0 64max max-timeout# 64min \ limit sleep time to 1 seconds
@@ -1667,7 +1672,8 @@ Variable beacons \ destinations to send beacons to
     timeout( ticker 64@ 64swap 64- ." waited for " u64. ." ns" cr ) ;
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
-    !ticks  BEGIN  >next-ticks beacon? request-timeout event-send  AGAIN ;
+    !ticks  BEGIN  >next-ticks beacon? save-msgs?
+	request-timeout event-send  AGAIN ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
