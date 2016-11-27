@@ -368,6 +368,15 @@ $60 Constant rndkey#
 Forward check-key \ check if we know that key
 Forward search-key \ search if that is one of our pubkeys
 
+Variable tmpkeys-ls16b
+
+: ?repeat-tmpkey ( addr -- )
+    tmpkeys-ls16b $@ bounds ?DO
+	dup I $10 tuck str= !!repeated-tmpkey!!
+    $10 +LOOP
+    health( ." non-repeated tmp key " dup $10 85type cr )
+    $10 tmpkeys-ls16b $+! ;
+
 : key-stage2 ( pk sk -- ) >r
     keypad$ keysize <> !!no-tmpkey!!
     r> rot keypad ed-dhx do-keypad sec+! ;
@@ -380,7 +389,10 @@ Forward search-key \ search if that is one of our pubkeys
 : net2o:keypair ( pkc uc pk u -- )
     2dup tmp-mpubkey $! ?keysize search-key key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
-    o 0= IF  gen-stkeys stskc  ELSE  tskc  THEN \ dup keysize .nnb cr
+    o 0= IF  gen-stkeys stskc
+	\ repeated tmpkeys are allowed here due to packet duplication
+    ELSE  dup ?repeat-tmpkey \ not allowed here, duplicates will be rejected
+	tskc  THEN \ dup keysize .nnb cr
     swap keypad ed-dh
     o IF  do-keypad sec!  ELSE  2drop  THEN
     ( keypad keysize .nnb cr ) ;
