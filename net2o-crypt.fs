@@ -369,13 +369,17 @@ Forward check-key \ check if we know that key
 Forward search-key \ search if that is one of our pubkeys
 
 Variable tmpkeys-ls16b
+$1000 Value max-tmpkeys# \ no more than 256 keys in queue
 
 : ?repeat-tmpkey ( addr -- )
+    tmpkeys-ls16b $@len max-tmpkeys# u>= IF
+	tmpkeys-ls16b 0 max-tmpkeys# 2/ $del
+    THEN
     tmpkeys-ls16b $@ bounds ?DO
 	dup I $10 tuck str= !!repeated-tmpkey!!
     $10 +LOOP
     health( ." non-repeated tmp key " dup $10 85type cr )
-    $10 tmpkeys-ls16b $+! ;
+    $10 tmpkeys-ls16b $+! ; \ save only half of the tmpkey
 
 : key-stage2 ( pk sk -- ) >r
     keypad$ keysize <> !!no-tmpkey!!
