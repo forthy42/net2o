@@ -85,9 +85,6 @@ Variable saved-msg$
     saved-msg-ticks 64@ 64dup 64#0 64= IF
 	64drop ticks 64dup saved-msg-ticks 64!  THEN ;
 
-: +save-msgs ( last -- )
-    saved-msg$ +unique$ ;
-
 : msg-eval ( addr u -- )
     n2o:new-msging >o parent off do-cmd-loop dispose o> ;
 
@@ -108,7 +105,7 @@ Variable saved-msg$
 : >load-group ( group u -- )
     2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
 
-event: ->save-msgs ( last# -- ) +save-msgs ;
+event: ->save-msgs ( last# -- ) saved-msg$ +unique$ ;
 event: ->save-all-msgs ( task -- )
     save-all-msgs restart ;
 
