@@ -101,16 +101,20 @@ end-class search-class
 : -fileentry ( addr u o:dvcs -- )
     dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #off ;
 
+: create-symlink-f ( addrdest udest addrlink ulink -- )
+    \G create symlink and overwrite existing file
+    2over 2over symlink dup -1 = IF
+	errno EEXIST = IF  drop
+	    2dup delete-file throw 2over 2over symlink
+	THEN
+    THEN  ?ior 2drop 2drop ;
+
 : dvcs-outfile-name ( hash+perm-addr u1 fname u2 -- )
     2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
     drop dvcs:perm le-uw@ { perm } 2r>
     perm S_IFMT and  case
 	S_IFLNK of
-	    2over 2over symlink dup 0< IF
-		drop errno EEXIST = IF
-		    2dup delete-file throw 2over 2over symlink
-		THEN
-	    THEN  ?ior 2drop 2drop  endof
+	    create-symlink-f  endof
 	S_IFREG of
 	    r/w create-file throw >r
 	    r@ write-file throw
