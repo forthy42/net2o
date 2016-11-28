@@ -514,6 +514,8 @@ warnings !
     ?get-me ?cr dvcs-diff ;
 
 : log ( -- )
+    \U log
+    \G log: print out log of current branch
     ?get-me ?cr dvcs-log ;
 
 : add# ( -- )
