@@ -54,6 +54,8 @@ keyin ~/test.n2o
 keylist
 init dvcs-test
 pull dvcs-test@test
+log
+up
 bye
 EOF
 echo "/chats" >&3

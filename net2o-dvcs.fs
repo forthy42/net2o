@@ -684,8 +684,7 @@ $20 /sync-files * Constant /sync-reqs
 event: ->dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
     msg-group$ $@ ?msg-log ?save-msg   0 dvcs-request# !
-    msg( ." === metadata sync done ===" forth:cr )
-    msg-group$ $@ rows display-lastn o> ;
+    msg( ." === metadata sync done ===" forth:cr ) o> ;
 
 : dvcs-sync-done ( -- )
     msg( ." dvcs-sync-done" forth:cr )
