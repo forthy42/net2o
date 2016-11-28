@@ -11,4 +11,4 @@ it might be possible that data retention could be necessary. However,
 the publically "assigned" IP address is always the one of the
 forwarder node (the DHT node you use to announce yourself), not the
 user's home IP itself.  Similar to a carrier grade NAT, this
-information is useless.
+information alone is useless.

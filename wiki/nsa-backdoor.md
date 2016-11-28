@@ -19,18 +19,25 @@ More fake deactivated health monitors will come.
 
 As net2o is open source, you can (in theory) verify statements about
 actual backdoors.  And keep an eye on this page, I intent to publish
-fnords about having official back/front/side doors regularly, but
-won't commit on an expicit schedule.  For a true fnord to work, you
-always have to be wary.  All the fossil checkins are signed.
+fnords about having official back/front/side doors, leaky roofs and
+tunnels regularly, but won't commit on an expicit schedule.  For a
+true fnord to work, you always have to be wary.  All the fossil
+checkins are signed.
+
+For those interested in history, whether the NSA can force a European
+company to install a backdoor, see [Crypto
+AG](https://en.wikipedia.org/wiki/Crypto_AG#Compromised_machines).
 
 ## What is this page for? ##
 
 Software is inherently buggy - we all make mistakes. Secure networking
-software is even worse, because small bugs have big consequences. And
-with the NSA Bullrun program, we not only have to deal with the
-normal, "lazy" bugs, which don't cause any harm until found (either by
-honest security researcher or evil criminals), but with bugs
-intentionally placed, and used by the secret services from day 0.
+software is even worse, because small bugs have big consequences, and
+security bugs usually don't affect direct functionality, and therefore
+can lure inside the program for a long time.  And with the NSA Bullrun
+program, we not only have to deal with the normal, "lazy" bugs, which
+don't cause any harm until found (either by honest security researcher
+or evil criminals), but with bugs intentionally placed, and used by
+the secret services from day 0.
 
 Developing in Forth is a "crash early, crash often" exercise, but security
 related bugs don't crash the program.
