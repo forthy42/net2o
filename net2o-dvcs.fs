@@ -78,6 +78,14 @@ msg-class class
     field: match-id$
 end-class search-class
 
+msg-class class
+    field: log-sig$
+    field: log-tag$
+    field: log-id$
+    field: log-action$
+    field: log-text$
+end-class dvcs-log-class
+
 : /name ( addr u -- addr' u' )
     [ hash#128 dvcs:name ]L /string ;
 : /name' ( addr u -- addr' u' )
@@ -121,6 +129,7 @@ end-class search-class
 	    r@ fileno perm fchmod ?ior
 	    r> close-file throw  endof
 	S_IFDIR of
+	    2dup delete-file drop \ try deleting it as file
 	    2dup perm mkdir-parents
 	    dup file-exist# = IF  drop  ELSE  throw  THEN
 	    perm chmod ?ior
@@ -406,9 +415,21 @@ Variable patch-in$
 ' 2drop search-class to msg:re
 ' noop  search-class to msg:end
 
+: 3drop  2drop drop ;
+
 :noname match-tag$ $@ str= match-flag ! ; search-class to msg:tag
 :noname match-flag @ IF  match-id$ $!  ELSE  2drop  THEN ; search-class to msg:id
-:noname drop 2drop ; search-class to msg:object
+' 3drop search-class to msg:object
+
+' 2drop dvcs-log-class to msg:re
+' 2drop dvcs-log-class to msg:coord
+' 3drop dvcs-log-class to msg:object
+' noop  dvcs-log-class to msg:end
+:noname log-sig$    $! ; dvcs-log-class to msg:start
+:noname log-tag$    $! ; dvcs-log-class to msg:tag
+:noname log-id$     $! ; dvcs-log-class to msg:id
+:noname log-text$   $! ; dvcs-log-class to msg:text
+:noname log-action$ $! ; dvcs-log-class to msg:action
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
@@ -465,9 +486,31 @@ User id-check# \ check hash
     dvcs:oldid$ $@ dvcs-readin-rev
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
+: n2o:new-dvcs-log ( -- o )
+    dvcs-log-class new >o msg-table @ token-table ! o o> ;
+
+: display-logn ( addr u n -- )
+    project:branch$ $@ { d: branch }
+    n2o:new-dvcs-log >o
+    cells >r ?msg-log  last# msg-log@ 2dup { log u }
+    dup r> - 0 max dup >r /string r> cell/ -rot bounds ?DO
+	I $@ ['] msg-display catch
+	IF  ." invalid entry" cr 2drop
+	ELSE
+	    branch log-tag$ $@ str= IF
+		dup 0 .r ." : [" log-id$ $@ 85type ." ] "
+		log-sig$ $@ 2dup startdate@ .ticks space
+		log-action$ $. ." : " log-text$ $. space .key-id
+		cr
+	    THEN
+	THEN  1+
+    cell +LOOP  drop
+    log free dispose o> throw ;
+
 : dvcs-log ( -- )
     n2o:new-dvcs >o  config>dvcs
-    project:project$ $@ [ -1 1 rshift cell/ ]l load-msgn
+    project:project$ $@ 2dup load-msg
+    config:logsize# @ display-logn
     n2o:dispose-dvcs o> ;
 
 also net2o-base

@@ -305,20 +305,25 @@ require config.fs
 
 \ net2o specific configurations
 
-2 Constant ENOENT
-17 Constant EEXIST
-#-512 ENOENT - Constant no-file#
-#-512 EEXIST - Constant file-exist#
+[IFUNDEF] no-file#
+    2 Constant ENOENT
+    #-512 ENOENT - Constant no-file#
+[THEN]
+[IFUNDEF] file-exist#
+    17 Constant EEXIST
+    #-512 EEXIST - Constant file-exist#
+[THEN]
 
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
     \G return true if the dictionary is new, false if it already existed
     2dup file-status nip no-file# = IF
-	r> =mkdir throw  true
+	r> mkdir-parents throw  true
     ELSE  2drop rdrop  false  THEN ;
 
 scope{ config
 
+Variable logsize#
 2Variable savedelta&
 2Variable patchlimit&
 Variable rootdirs$
@@ -339,7 +344,8 @@ also config
 "~/.net2o/keys" keys$ $!
 "~/.net2o/chats" chats$ $!
 "~/.net2o/objects" objects$ $!
-2 date# !
+#2 date# !
+#20 logsize# !
 pad $400 get-dir rootdirs$ $!
 "Hello!" invite$ $!
 

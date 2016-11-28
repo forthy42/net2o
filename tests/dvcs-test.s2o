@@ -22,12 +22,36 @@ add xx/d
 sh echo "=== Checkin 3 ==="
 diff
 ci -m "Checkin 3"
-sh for i in $(seq 2 10); do printf "$i. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n"; done >>b
+sh printf "2. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
 sh ln -s xx/d c
 add c
 sh echo "=== Checkin 4 ==="
 diff
 ci -m "Checkin 4"
+sh printf "3. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.4"
+sh printf "4. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.5"
+sh printf "5. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.6"
+sh printf "6. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.7"
+sh printf "7. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.8"
+sh printf "8. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.9"
+sh printf "9. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.10"
+sh printf "10. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+diff
+ci -m "Checkin 4.11"
 snap -m "Snapshot 1"
 sh echo "Keine Datei" >a
 sh echo "=== Checkin 5 ==="
