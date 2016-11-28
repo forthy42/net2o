@@ -106,14 +106,19 @@ end-class search-class
     drop dvcs:perm le-uw@ { perm } 2r>
     perm S_IFMT and  case
 	S_IFLNK of
-	    symlink ?ior  endof
+	    2over 2over symlink dup 0< IF
+		drop errno EEXIST = IF
+		    2dup delete-file throw 2over 2over symlink
+		THEN
+	    THEN  ?ior 2drop 2drop  endof
 	S_IFREG of
 	    r/w create-file throw >r
 	    r@ write-file throw
 	    r@ fileno perm fchmod ?ior
 	    r> close-file throw  endof
 	S_IFDIR of
-	    2dup perm mkdir-parents throw
+	    2dup perm mkdir-parents
+	    dup file-exist# = IF  drop  ELSE  throw  THEN
 	    perm chmod ?ior
 	    2drop  endof  \ no content in directory
 	2drop 2drop \ unhandled types
@@ -576,13 +581,14 @@ previous
     dvcs:outfiles[] $[]off ;
 
 : co-rest ( -- )
-    files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
+    0 dvcs:files# !@ dvcs:oldfiles# !
     branches>dvcs  new->old  old->new
     save-project  filelist-out ;
 
 : dvcs-co ( addr u -- ) \ checkout revision
     base85>$  n2o:new-dvcs >o
-    config>dvcs   2dup dvcs:id$ $!  dvcs-readin-rev  co-rest
+    config>dvcs   2dup dvcs:id$ $!  dvcs-readin-rev
+    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified  co-rest
     n2o:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
@@ -597,10 +603,21 @@ previous
 
 : dvcs-up ( -- ) \ checkout latest revision
     n2o:new-dvcs >o
-    pull-readin  search-last-rev  2dup dvcs:id$ $!
-    2dup dvcs:oldid$ $@ str= IF
-	2drop ." already up to date" cr
-    ELSE  id>branches  co-rest  THEN
+    pull-readin  files>dvcs  new>dvcs  dvcs?modified
+    new-files[] $[]# del-files[] $[]# d0= IF
+	search-last-rev  2dup dvcs:id$ $!
+	2dup dvcs:oldid$ $@ str= IF
+	    2drop ." already up to date" cr
+	ELSE  id>branches  co-rest  THEN
+    ELSE
+	." Local changes, don't update" cr
+    THEN
+    n2o:dispose-dvcs o> ;
+
+: dvcs-revert ( -- ) \ restore to last revision
+    n2o:new-dvcs >o
+    pull-readin  dvcs:oldid$ $@  2dup dvcs:id$ $!
+    id>branches  co-rest
     n2o:dispose-dvcs o> ;
 
 : hash-add ( addr u -- )

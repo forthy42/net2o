@@ -492,6 +492,11 @@ warnings !
     \G up: check out last revision of current branch
     ?get-me dvcs-up ;
 
+: revert ( -- )
+    \U revert
+    \G revert: revert changes
+    ?get-me dvcs-revert ;
+
 : fork ( -- )
     \U fork branch
     \G fork: create a branch, not yet implemented

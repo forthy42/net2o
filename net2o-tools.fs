@@ -306,7 +306,9 @@ require config.fs
 \ net2o specific configurations
 
 2 Constant ENOENT
+17 Constant EEXIST
 #-512 ENOENT - Constant no-file#
+#-512 EEXIST - Constant file-exist#
 
 : init-dir ( addr u mode -- flag ) >r
     \G create a directory with access mode,
