@@ -487,9 +487,15 @@ warnings !
     \G pull: Similar syntax as for chats
     ?get-me init-client nicks>chat handle-pull ;
 
+: up ( -- )
+    \U up
+    \G up: check out last revision of current branch
+    ?get-me dvcs-up ;
+
 : fork ( -- )
     \U fork branch
     \G fork: create a branch, not yet implemented
+    !!FIXME!!
 ;
 
 : snap ( -- )

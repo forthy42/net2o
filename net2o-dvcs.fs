@@ -25,6 +25,7 @@ msg-class class
     scope: dvcs
 
     field: commits \ msg class for commits
+    field: searchs \ msg class for searchs
     field: id$     \ commit id
     field: branch$
     field: message$
@@ -70,6 +71,12 @@ msg-class class
     field: re$
     field: object$
 end-class commit-class
+
+msg-class class
+    field: match-tag$
+    field: match-flag
+    field: match-id$
+end-class search-class
 
 : /name ( addr u -- addr' u' )
     [ hash#128 dvcs:name ]L /string ;
@@ -176,11 +183,14 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 : n2o:new-dvcs ( -- o )
     dvcs:dvcs-class new >o  dvcs-table @ token-table !
     commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
+    search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
     o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
 : n2o:dispose-commit ( o:commit -- )
     id$ $off  re$ $off  object$ $off  dispose ;
+: n2o:dispose-search ( o:commit -- )
+    match-id$ $off  match-tag$ $off  dispose ;
 : n2o:dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $off  dvcs:message$ $off
     dvcs:files# #offs  dvcs:oldfiles# #offs
@@ -190,7 +200,9 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:id$ $off  dvcs:oldid$ $off
     project:revision$ $off
     project:branch$ $off  project:project$ $off
-    dvcs:commits @ .n2o:dispose-commit dispose ;
+    dvcs:commits @ .n2o:dispose-commit
+    dvcs:searchs @ .n2o:dispose-search
+    dispose ;
 
 Variable new-files[]
 Variable del-files[]
@@ -375,6 +387,20 @@ Variable patch-in$
 	re$ $@ last# cell+ $+!
     THEN ; commit-class to msg:object
 
+\ search for a specific id
+
+' 2drop search-class to msg:start
+' 2drop search-class to msg:coord
+' 2drop search-class to msg:signal
+' 2drop search-class to msg:text
+' 2drop search-class to msg:action
+' 2drop search-class to msg:re
+' noop  search-class to msg:end
+
+:noname match-tag$ $@ str= match-flag ! ; search-class to msg:tag
+:noname match-flag @ IF  match-id$ $!  ELSE  2drop  THEN ; search-class to msg:id
+:noname drop 2drop ; search-class to msg:object
+
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
 : .hash ( addr -- )
@@ -422,12 +448,13 @@ User id-check# \ check hash
     2dup >file-hash dvcs:hash$ $!
     write-enc-hashed 2drop ;
 
-: dvcs-readin ( -- )
-    config>dvcs  chat>dvcs  chat>branches
-    dvcs:oldid$ $@ id>branches
-    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+: pull-readin ( -- )
+    config>dvcs  chat>dvcs  chat>branches ;
 : dvcs-readin-rev ( addr u -- )
-    config>dvcs  chat>dvcs  chat>branches  id>branches ;
+    pull-readin  id>branches ;
+: dvcs-readin ( -- )
+    dvcs:oldid$ $@ dvcs-readin-rev
+    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
 : dvcs-log ( -- )
     n2o:new-dvcs >o  config>dvcs
@@ -547,11 +574,30 @@ previous
 	    THEN  rdrop  THEN ;] $[]map
     dvcs:outfiles[] $[]off ;
 
+: readin-dvcs ( addr u -- )
+    dvcs-readin-rev  branches>dvcs  new->old  old->new ;
+
 : dvcs-co ( addr u -- ) \ checkout revision
     2dup base85>$  n2o:new-dvcs >o 2swap 2>r
-    config>dvcs  files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
-    dvcs-readin-rev  branches>dvcs  new->old  old->new
+    readin-dvcs
     2r> project:revision$ $!
+    save-project  filelist-out
+    n2o:dispose-dvcs o> ;
+
+: chat>searchs-loop ( o:commit -- )
+    last# msg-log@ over { log } bounds ?DO
+	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
+    cell +LOOP  log free throw ;
+: search-last-rev ( -- addr u )
+    project:project$ $@ ?msg-log
+    project:branch$ $@
+    dvcs:searchs @ >o match-tag$ $!
+    chat>searchs-loop match-id$ $@ o> ;
+
+: dvcs-up ( -- ) \ checkout latest revision
+    n2o:new-dvcs >o
+    pull-readin  search-last-rev  2dup dvcs:id$ $!
+    id>branches  branches>dvcs  new->old  old->new
     save-project  filelist-out
     n2o:dispose-dvcs o> ;
 
@@ -626,9 +672,6 @@ event: ->dvcs-sync-done ( o -- ) >o
     dvcs:commits @ .chat>branches-loop
     dvcs:commits @ .dvcs-needed-files
     connection .get-needed-files ;
-
-: pull-readin ( -- )
-    config>dvcs  chat>dvcs ;
 
 : handle-pull ( -- )  ?.net2o/objects
     n2o:new-dvcs >o  pull-readin
