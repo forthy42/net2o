@@ -540,8 +540,9 @@ previous
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
     S_IFMT and S_IFDIR = IF
-	$@ dvcs:rmdirs[] $ins[] drop
-    ELSE  dup $@ delete-file dup 0< IF
+	$@ dvcs( ." rd " 2dup type cr ) dvcs:rmdirs[] $ins[] drop
+    ELSE  dup $@ dvcs( ." rm " 2dup type cr )
+	delete-file dup 0< IF
 	    <err> >r ." can't delete file " $. ." : "
 	    r> error$ type <default> cr
 	ELSE  2drop  THEN
@@ -574,14 +575,14 @@ previous
 	    THEN  rdrop  THEN ;] $[]map
     dvcs:outfiles[] $[]off ;
 
-: readin-dvcs ( addr u -- )
-    dvcs-readin-rev  branches>dvcs  new->old  old->new ;
+: co-rest ( -- )
+    files>dvcs  0 dvcs:files# !@ dvcs:oldfiles# !
+    branches>dvcs  new->old  old->new
+    save-project  filelist-out ;
 
 : dvcs-co ( addr u -- ) \ checkout revision
-    2dup base85>$  n2o:new-dvcs >o 2swap 2>r
-    readin-dvcs
-    2r> project:revision$ $!
-    save-project  filelist-out
+    base85>$  n2o:new-dvcs >o
+    config>dvcs   2dup dvcs:id$ $!  dvcs-readin-rev  co-rest
     n2o:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
@@ -597,8 +598,9 @@ previous
 : dvcs-up ( -- ) \ checkout latest revision
     n2o:new-dvcs >o
     pull-readin  search-last-rev  2dup dvcs:id$ $!
-    id>branches  branches>dvcs  new->old  old->new
-    save-project  filelist-out
+    2dup dvcs:oldid$ $@ str= IF
+	2drop ." already up to date" cr
+    ELSE  id>branches  co-rest  THEN
     n2o:dispose-dvcs o> ;
 
 : hash-add ( addr u -- )
