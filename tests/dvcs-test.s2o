@@ -33,26 +33,17 @@ sh echo "=== Checkin 4.4 ==="
 diff
 ci -m "Checkin 4.4"
 sh printf "4. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
-sh echo "=== Checkin 4.5 ==="
-diff
-ci -m "Checkin 4.5"
 sh printf "5. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
-sh echo "=== Checkin 4.6 ==="
-diff
-ci -m "Checkin 4.6"
 sh printf "6. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
 sh echo "=== Checkin 4.7 ==="
 diff
 ci -m "Checkin 4.7"
-sh printf "7. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+sh printf "7. Yeah, I didn't care about that vanity card. In fact, I went straight\non with that one and just dispelled that one. But ... whatever. I\nagreed to do it. There's just one deal point that Jim Robinson – a\nwonderful man at Morgan Creek, a great company – need to work out is\nthey want me in it. If they do, it's a smash. If they don't, it's a\nturd that opens on a tugboat.\n\n" >>b
 sh echo "=== Checkin 4.8 ==="
 diff
 ci -m "Checkin 4.8"
-sh printf "8. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
-sh echo "=== Checkin 4.9 ==="
-diff
-ci -m "Checkin 4.9"
-sh printf "9. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+sh printf "8. Yeah, I didn't care about that vanity card. In fact, I went straight\non with that one and just dispelled that one. But ... whatever. I\nagreed to do it. There's just one deal point that Jim Robinson – a\nwonderful man at Morgan Creek, a great company – need to work out is\nthey want me in it. If they do, it's a smash. If they don't, it's a\nturd that opens on a tugboat.\n\n" >>b
+sh printf "9. Yeah, I didn't care about that vanity card. In fact, I went straight\non with that one and just dispelled that one. But ... whatever. I\nagreed to do it. There's just one deal point that Jim Robinson – a\nwonderful man at Morgan Creek, a great company – need to work out is\nthey want me in it. If they do, it's a smash. If they don't, it's a\nturd that opens on a tugboat.\n\n" >>b
 sh echo "=== Checkin 4.10 ==="
 diff
 ci -m "Checkin 4.10"
