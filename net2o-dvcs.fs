@@ -721,13 +721,13 @@ event: ->dvcs-sync-done ( o -- ) >o
 : get-needed-files ( -- ) +resend
     sync-file-list[] $[]# 0 ?DO
 	I /sync-reqs + I' umin I U+DO
-	    net2o-code expect-reply
+	    net2o-code expect+slurp
 	    $10 blocksize! 0 blockalign!
 	    I /sync-files + I' umin I U+DO
 		I sync-file-list[] $[]@ n2o:copy#
 	    LOOP
 	    I /sync-files + I' u>=
-	    IF  n2o:done end-code| n2o:close-all  ELSE  end-code  THEN
+	    IF  end-code| n2o:close-all  ELSE  end-code  THEN
 	/sync-files +LOOP
     /sync-reqs +LOOP ;
 

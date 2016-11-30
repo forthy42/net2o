@@ -149,8 +149,6 @@ gen-table $freeze
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
-: n2o:done ( -- ) request( ." n2o:done request" forth:cr )
-    slurp next-request filereq# ! ;
 
 : rewind ( -- )
     data-rmap @ with mapc dest-back @ do-slurp @ umax endwith ulit, ack-flush ;

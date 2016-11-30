@@ -432,10 +432,10 @@ warnings !
     ?get-me init-client
     ?@nextarg IF
 	$A $E nick-connect ." connected" cr !time
-	net2o-code expect-reply
+	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	[: 2dup basename n2o:copy ;] arg-loop
-	n2o:done end-code| n2o:close-all
+	end-code| n2o:close-all
 	c:disconnect  THEN ;
 
 : get# ( -- )
@@ -444,10 +444,10 @@ warnings !
     ?get-me init-client
     ?@nextarg IF
 	$A $E nick-connect ." connected" cr !time
-	net2o-code expect-reply
+	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	[: base85>$ n2o:copy# ;] arg-loop
-	n2o:done end-code| n2o:close-all
+	end-code| n2o:close-all
 	c:disconnect  THEN ;
 
 \ dvcs commands
