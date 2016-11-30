@@ -21,9 +21,23 @@ Variable dvcs-table
 
 vocabulary project
 
-msg-class class
+cmd-class class
     scope: dvcs
 
+    method read
+    method rm
+    method rmdir
+    method patch
+    method write
+    method unzip
+    method spit
+    method add
+    
+    }scope
+end-class dvcs-abstract
+
+dvcs-abstract class
+    scope{ dvcs
     field: commits \ msg class for commits
     field: searchs \ msg class for searchs
     field: id$     \ commit id
@@ -52,9 +66,9 @@ msg-class class
 
     }scope
 
-    scope{ dvcs
-
 end-class dvcs-class
+
+scope{ dvcs
 
 begin-structure filehash
     64field: timestamp
@@ -169,37 +183,51 @@ scope{ net2o-base
 reply-table $@ inherit-table dvcs-table
 
 net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
-    1 !!>=order? $> dvcs-in-hash ;
+    1 !!>=order? $> dvcs:read ;
 +net2o: dvcs-rm ( $:hash+name -- ) \g delete file
-    2 !!>=order? $> 2dup hash#128 /string
-    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
-    hash#128 umin dvcs-in-hash ;
+    2 !!>=order? $> dvcs:rm ;
 +net2o: dvcs-rmdir ( $:name -- ) \g delete directory
-    4 !!>=order? $> dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off ;
+    4 !!>=order? $> dvcs:rmdir ;
 +net2o: dvcs-patch ( $:diff len -- ) \g apply patch, len is the size of the result
-    8 !!>order? $> dvcs:patch$ $! dvcs:out-fileoff off
-    64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
-    dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
-    dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec ;
+    8 !!>order? $> dvcs:patch ;
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
-    $10 !!>=order? 64>n { fsize }
-    dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    2dup >file-hash $> 2swap  dvcs:fileentry$ $off
-    [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
-    dvcs:fileentry$ $exec dvcs:fileentry$ $@
-    2dup +fileentry  dvcs-outfile-hash
-    fsize dvcs:out-fileoff +! ;
+    $10 !!>=order? $> dvcs:write ;
 +net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
-    !!FIXME!! ; \ this is a stub
+    1 !!>=order? $> dvcs:unzip ; \ this is a stub
 +net2o: dvcs-spit ( $:perm+name -- ) \g write ot read-in
-    !!FIXME!! ; \ this is also a stub
+    $10 !!>=order? $> dvcs:spit ; \ this is also a stub
 +net2o: dvcs-add ( $:hash -- ) \g add and read external hash reference
-    !!FIXME!! ; \ this is a stub, too
+    1 !!>=order? $> dvcs:add ; \ this is a stub, too
 
 }scope
 
+' dvcs-in-hash dvcs-class to dvcs:read
+:noname ( addr u -- ) 2dup hash#128 /string
+    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
+    hash#128 umin dvcs-in-hash ; dvcs-class to dvcs:rm
+:noname ( addr u -- )
+    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
+; dvcs-class to dvcs:rmdir
+:noname ( 64len addr u -- )
+    dvcs:patch$ $! dvcs:out-fileoff off
+    64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
+    dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
+    dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
+; dvcs-class to dvcs:patch
+:noname ( 64size addr u -- )
+    2>r 64>n { fsize }
+    dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
+    2dup >file-hash 2r> 2swap  dvcs:fileentry$ $off
+    [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
+    dvcs:fileentry$ $exec dvcs:fileentry$ $@
+    2dup +fileentry  dvcs-outfile-hash
+    fsize dvcs:out-fileoff +! ; dvcs-class to dvcs:write
+' !!FIXME!! dvcs-class to dvcs:unzip
+' !!FIXME!! dvcs-class to dvcs:spit
+' !!FIXME!! dvcs-class to dvcs:add
+
 : n2o:new-dvcs ( -- o )
-    dvcs:dvcs-class new >o  dvcs-table @ token-table !
+    dvcs-class new >o  dvcs-table @ token-table !
     commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
     search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
     o o> ;
