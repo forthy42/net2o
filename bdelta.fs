@@ -69,7 +69,7 @@ Variable bfile2$
 
 : bd-passes ( o:b -- )
 \    997 0 bd-pass
-\    553 0 bd-pass
+\    503 0 bd-pass
     127 0 bd-pass
     031 0 bd-pass
     007 0 bd-pass
