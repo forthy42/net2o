@@ -331,11 +331,9 @@ scope{ mapc
     file-state $off ;
 : n2o:save-block ( id -- delta )
     rdata-back@ file( over data-rmap @ .mapc:dest-raddr @ -
-    { os } ." file write: " 2 pick . os hex.
-\    os addr>ts data-rmap @ .mapc:dest-cookies @ + over addr>ts xtype space
-\    data-rmap @ .data-ackbits @ os addr>bits 2 pick addr>bits bittype space
-    )
-    rot id>addr? .fs-write dup /back file( dup hex. residualwrite @ hex. cr ) ;
+    { os } ." file write: " 2 pick . os hex. )
+    rot id>addr? .fs-write dup /back
+    file( dup hex. residualwrite @ hex. forth:cr ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 

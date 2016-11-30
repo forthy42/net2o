@@ -307,12 +307,26 @@ also net2o-base
 	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
     THEN  ['] end-cmd IS expect-reply? ;
 
+: do-expect+slurp ( -- )
+    cmdbuf# @ 0> IF \ there's actuall something in the buffer
+	slurp next-request filereq# !
+	reply-index ulit, ok?  end-cmd
+	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
+    THEN  ['] end-cmd IS expect-reply? ;
+
 : expect-reply-xt ( xt -- ) \ cmd( ." expect reply:" forth:cr )
     ['] do-expect-reply IS expect-reply?
     cmd-reply-xt ! ;
 
 : expect-reply ( -- )
     ['] drop expect-reply-xt ;
+
+: expect+slurp-xt ( xt -- ) \ cmd( ." expect reply:" forth:cr )
+    ['] do-expect+slurp IS expect-reply?
+    cmd-reply-xt ! ;
+
+: expect+slurp ( -- )
+    ['] drop expect+slurp-xt ;
 
 : resend-all ( -- )
     ticker 64@ resend-all-to 64@

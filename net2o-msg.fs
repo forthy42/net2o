@@ -516,10 +516,9 @@ Variable ask-msg-files[]
     last# >r  ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
     ?ask-msg-files ask-msg-files[] $[]# IF
-	expect-reply
-	parent @ >o $10 blocksize! $1 blockalign!
-	ask-msg-files[] [: n2o:copy-msg ;] $[]map
-	n2o:done o>
+	parent @ >o  expect+slurp
+	cmdbuf# @ 0= IF  $10 blocksize! $1 blockalign!  THEN
+	ask-msg-files[] [: n2o:copy-msg ;] $[]map o>
     ELSE
 	." === nothing to sync ===" forth:cr
     THEN
@@ -626,6 +625,11 @@ previous
 : ?destpk ( addr u -- addr' u' )
     2dup pubkey $@ key| str= IF  2drop pkc keysize  THEN ;
 
+: last-signdate@ ( -- 64date )
+    msg-group$ $@ msg-logs #@ dup IF
+	+ cell- $@ startdate@
+    ELSE  2drop 64#-1  THEN ;
+
 also net2o-base
 : [msg,] ( xt -- )  last# >r
     msg-group$ $@ dup IF  msg ?destpk 2dup >group $,
@@ -636,7 +640,11 @@ also net2o-base
     msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group  64#0 lit, 64#-1 slit, ask-last# ulit, msg-last? ;
+    msg-group  last-signdate@ { 64: date }
+    64#0 lit, date slit, ask-last# ulit, msg-last?
+    date 64#-1 64<> IF
+	date 64#1 64+ lit, 64#-1 slit, 1 ulit, msg-last?
+    THEN ;
 
 : join, ( -- )
     [: msg-otr msg-join
