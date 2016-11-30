@@ -63,21 +63,21 @@ Variable bfile2$
 : bdelta-init { a b -- o }
     a $@ 0  b $@ 0  bdelta_init_alg ;
 
-: bd-pass { bs mins flags -- } ( o:b )
-    o bs mins #0. flags bdelta_pass
+: bd-pass { bs flags -- } ( o:b )
+    o bs dup 2* #0. flags bdelta_pass
     o BDELTA_REMOVE_OVERLAP bdelta_clean_matches ;
 
 : bd-passes ( o:b -- )
-    997 1994 0 bd-pass
-    503 1006 0 bd-pass
-    127  254 0 bd-pass
-    031   62 0 bd-pass
-    007   14 0 bd-pass
-    005   10 0 bd-pass
-    003    6 0 bd-pass
-    013   26 BDELTA_GLOBAL bd-pass
-    007   14 0 bd-pass
-    005   10 0 bd-pass ;
+\    997 0 bd-pass
+\    553 0 bd-pass
+    127 0 bd-pass
+    031 0 bd-pass
+    007 0 bd-pass
+    005 0 bd-pass
+    003 0 bd-pass
+    013 BDELTA_GLOBAL bd-pass
+    007 0 bd-pass
+    005 0 bd-pass ;
 
 10 buffer: p-tmp
 
