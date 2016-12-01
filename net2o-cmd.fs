@@ -619,6 +619,7 @@ previous
 
 User neststart#
 User last-signed cell uallot drop
+: +last-signed ( addr -- ) drop last-signed cell+ +! ;
 
 2 Constant fwd# \ maximum 14 bits = 16kB
 
@@ -633,13 +634,13 @@ also net2o-base
 
 : +zero16 ( -- ) "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ;
 : sign[ ( -- ) neststart# @ nest-stack >deque
-    string "\x80\x80" +cmdbuf cmdbuf$ nip neststart# ! ;
+    string "\x80\x00" +cmdbuf cmdbuf$ nip neststart# ! ;
 : nest[ ( -- ) sign[ +zero16 ; \ add space for IV
 : ']sign ( xt -- )
     c:0key nest$
 \    ." sign: " 2dup xtype forth:cr
     c:hash $tmp +cmdbuf
-    cmd-resolve>  last-signed 2!  nestsig ;
+    cmd-resolve>  >r cmdbuf$ drop - r> last-signed 2!  nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 

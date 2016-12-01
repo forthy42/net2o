@@ -817,10 +817,10 @@ $200 Constant maxmsg#
 also net2o-base
 : (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
-      2drop msg-log, ;] [group] ;
+      +last-signed msg-log, ;] [group] ;
 : (send-otr-avalanche) ( xt -- addr u flag )
     [: 0 >o [: msg-otr sign[ msg-start execute msg> ;] gen-cmd$ o>
-      2drop otr-log, ;] [group] ;
+      +last-signed otr-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )      (send-avalanche)
     >r .chat r> 0= IF  .nobody  THEN ;

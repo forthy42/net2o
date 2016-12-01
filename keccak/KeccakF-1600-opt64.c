@@ -276,7 +276,7 @@ void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
   m <<= ((8-byteCount) & 7)*8;
   if(byteCount & 7) {
     fromWordToBytes(&tmp, data[i>>3] & m);
-    state[i>>3] ^= data[i>>3] & m;
+    state[i>>3] ^= tmp;
   }
 #endif
 }

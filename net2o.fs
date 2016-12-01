@@ -1591,7 +1591,7 @@ Variable beacons \ destinations to send beacons to
     beacons [: { beacon }
 	beacon $@ { baddr u }
 	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
-	    beacon( ~~ ticks .ticks ."  send beacon to: " baddr u .address cr )
+	    beacon( ticks .ticks ."  send beacon to: " baddr u .address cr )
 	    ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
 	    net2o-sock
 	    beacon cell+ $@ drop 64'+ @ >o o IF

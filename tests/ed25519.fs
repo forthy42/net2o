@@ -2,19 +2,21 @@
 
 require ../net2o.fs
 
+Variable test$
+
 : gen-pairs ( -- )
     skc pkc ed-keypair
     stskc stpkc ed-keypair  >sksig ;
 : gen-sig ( -- addr )
-    keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign drop ;
+    c:0key test$ $@ c:hash sksig skc pkc ed-sign drop ;
 : check-sig ( addr -- flag )
-    keccak0 "Test 123" >keccak keccak* pkc ed-verify ;
+    c:0key test$ $@ c:hash pkc ed-verify ;
 : check-sig0 ( addr -- flag )
-    keccak0 "Test 124" >keccak keccak* pkc ed-verify ;
+    c:0key test$ $@ 1- c:hash pkc ed-verify ;
 : check-dh ( -- flag )
     skc stpkc pad ed-dh stskc pkc pad $20 + ed-dh str= ;
 
-: do-fuzz ( -- )  gen-pairs
+: do-fuzz ( -- )  s" A" test$ $+! gen-pairs
     gen-sig dup check-sig swap check-sig0 0= and check-dh and
     IF ." +" ELSE ." -" THEN ;
 : fuzzes ( n -- ) 0 ?DO  do-fuzz  LOOP ;
@@ -37,19 +39,19 @@ stskc stpkc sk>pk stpkc $20 x" 301C3345E9756348DD442B03AAE186A73272ECF145D63C3A0
 ." Test keypair "
 skc pkc 2dup sk>pk !time sk>pk .time cr
 ." Test signing "
-keccak0 "Test 123" >keccak keccak* sksig skc pkc ed-sign
+c:0key "Test 123" c:hash sksig skc pkc ed-sign
 x" 422D393D79E24CFC1CBE42D8043F97057630D1E56DD7E8B57CE5FB8D483AE2A1D86EE12500F5856B559BFD781FE9D442CD502618FA94A69C9A41109AEB3E4B0C" str= 0= [IF] ." in" [THEN] ." correct sig "
-keccak0 "Test 123" >keccak keccak*
+c:0key "Test 123" c:hash
 sksig skc pkc !time ed-sign drop .time cr
-keccak0 "Test 123" >keccak keccak* dup pkc ed-verify drop
-keccak0 "Test 123" >keccak keccak*
+c:0key "Test 123" c:hash dup pkc ed-verify drop
+c:0key "Test 123" c:hash
 ." Test verify "
 dup pkc ed-verify
 >r dup pkc !time ed-verify .time drop r>
 [IF] ."  passed" [ELSE] ."  failed" [THEN] cr
 ." Test forge "
-keccak0 "Test 124" >keccak keccak* dup pkc ed-verify drop
-keccak0 "Test 124" >keccak keccak*
+c:0key "Test 124" c:hash dup pkc ed-verify drop
+c:0key "Test 124" c:hash
 dup pkc !time ed-verify .time
 0= [IF] ."  passed" [ELSE] ."  failed" [THEN] cr
 $40 xtype cr
