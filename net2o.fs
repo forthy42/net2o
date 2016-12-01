@@ -1497,10 +1497,12 @@ scope{ mapc
 
 Defer extra-dispose ' noop is extra-dispose
 
+Forward o-beacon
+
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
-	o-timeout o-chunks
+	o-timeout o-chunks o-beacon
 	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
 	dest-0key @ del-0key
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
@@ -1589,7 +1591,7 @@ Variable beacons \ destinations to send beacons to
     beacons [: { beacon }
 	beacon $@ { baddr u }
 	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
-	    beacon( ticks .ticks ."  send beacon to: " baddr u .address cr )
+	    beacon( ~~ ticks .ticks ."  send beacon to: " baddr u .address cr )
 	    ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
 	    net2o-sock
 	    beacon cell+ $@ drop 64'+ @ >o o IF
@@ -1663,9 +1665,9 @@ Forward save-msgs?
 Forward next-saved-msg
 
 : >next-ticks ( -- )
-    next-timeout? drop next-beacon next-saved-msg 64umin
+    next-timeout? drop next-beacon
     [IFDEF] android 64dup set-beacon-alarm [THEN]
-    64umin ticks 64-
+    64umin next-saved-msg 64umin ticks 64-
     64#0 64max max-timeout# 64min \ limit sleep time to 1 seconds
     timeout( ." wait for " 64dup u64. ." ns" cr ) stop-64ns
     timeout( ticker 64@ ) !ticks
