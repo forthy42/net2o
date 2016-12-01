@@ -180,20 +180,20 @@ scope{ net2o-base
 
 \ error ID handling
 
-Variable id-hash
+Variable id#
 Sema id-sema
 
 : new-error-id ( -- addr u )
     $10 rng$ o { w^ idcon } idcon cell 2over
-    [: id-hash #! ;] id-sema c-section
+    [: id# #! ;] id-sema c-section
     2dup my-error-id $! ;
 : error-id>o ( addr u -- o/0 )
     $error-id $@ ?dup-IF
-	id-hash #@ cell = IF
+	id# #@ cell = IF
 	    @  EXIT  THEN  THEN
     drop 0 ;
 : error-id$off ( -- )
-    [: my-error-id $@ ?dup-IF  id-hash #off  ELSE  drop  THEN
+    [: my-error-id $@ ?dup-IF  id# #off  ELSE  drop  THEN
       my-error-id $off ;] id-sema c-section ;
 
 :noname  error-id$off defers extra-dispose ; IS extra-dispose

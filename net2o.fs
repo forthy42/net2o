@@ -1497,12 +1497,10 @@ scope{ mapc
 
 Defer extra-dispose ' noop is extra-dispose
 
-Forward o-beacon
-
 : n2o:dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
-	o-timeout o-chunks o-beacon
+	o-timeout o-chunks extra-dispose
 	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
 	dest-0key @ del-0key
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
