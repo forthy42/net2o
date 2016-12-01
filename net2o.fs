@@ -137,7 +137,7 @@ Variable net2o-tasks
 : net2o-pass ( params xt n task -- )
     dup net2o-tasks >deque  pass
     ?salt-init off  rng-o off \ make double sure no rng is active
-    prep-socks catch-loop
+    alloc-io prep-socks catch-loop
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
