@@ -470,6 +470,13 @@ warnings !
     n2o:new-dvcs >o files>dvcs
     ['] dvcs-add arg-loop  n2o:dispose-dvcs o> ;
 
+: ref ( -- )
+    \U ref file1 .. filen
+    \G ref: add files to the dvcs project in the current folder
+    \G ref: as references
+    n2o:new-dvcs >o files>dvcs
+    ['] dvcs-ref arg-loop  n2o:dispose-dvcs o> ;
+
 : ci ( -- )
     \U ci "message"
     \G ci: check added and modified files into the dvcs project
@@ -517,6 +524,8 @@ warnings !
     \U log
     \G log: print out log of current branch
     ?get-me ?cr dvcs-log ;
+
+\ manage your hash objects directly (no list available)
 
 : add# ( -- )
     \U add# file1 .. filen

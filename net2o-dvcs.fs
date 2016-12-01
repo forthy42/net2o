@@ -230,7 +230,12 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     fsize dvcs:out-fileoff +! ; dvcs-class to dvcs:write
 ' !!FIXME!! ( 64size algo addr u --- ) dvcs-class to dvcs:unzip
 ' !!FIXME!! ( addr u -- ) dvcs-class to dvcs:spit
-' !!FIXME!! ( addr u -- ) dvcs-class to dvcs:add
+:noname ( addr u -- ) \ hash+perm+name
+    dvcs:fileentry$ $off
+    [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
+	hash#128 /string forth:type ;] dvcs:fileentry$ $exec
+    dvcs:fileentry$ $@ +fileentry
+; dvcs-class to dvcs:add
 
 ' 2drop dvcs-adds to dvcs:read
 ' 2drop dvcs-adds to dvcs:rm
@@ -269,14 +274,16 @@ dvcs-adds to dvcs:write
     dispose ;
 
 Variable new-files[]
+Variable ref-files[]
 Variable del-files[]
 Variable old-files[]
 Variable new-file$
 Variable branches[]
 
 : clean-up ( -- )
-    new-files[] $[]off  del-files[] $[]off  old-files[] $[]off
-    branches[] $[]off  new-file$ $off ;
+    new-files[] $[]off  ref-files[] $[]off
+    del-files[] $[]off  old-files[] $[]off
+    branches[]  $[]off  new-file$ $off ;
 
 User tmp1$
 : $tmp1 ( xt -- ) tmp1$ $off  tmp1$ $exec  tmp1$ $@ ;
@@ -312,6 +319,7 @@ User tmp1$
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
 : new>dvcs ( o:dvcs -- )
+    "~+/.n2o/reffiles" new-files-in 0 new-files[] !@ ref-files[] !
     "~+/.n2o/newfiles" new-files-in ;
 : dvcs?modified ( o:dvcs -- )
     dvcs:files# [: >r
@@ -334,6 +342,7 @@ User tmp1$
     ;] #map dvcs(
     ." --- old files:" cr old-files[] ['] .file+hash $[]map
     ." +++ new files:" cr new-files[] ['] .file+hash $[]map
+    ." +++ ref files:" cr ref-files[] ['] .file+hash $[]map
     ) ;
 
 : dvcs+in ( hash u -- )
@@ -352,18 +361,22 @@ also net2o-base
 	    dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map ;
 : read-new-fs ( -- )
     new-files[] ['] dvcs+out $[]map ;
+: read-ref-fs ( -- )
+    ref-files[] ['] 2drop $[]map ; \ !!FIXME!! stub!
 : write-new-fs ( -- )
     new-files[] [: 2dup hash#128 dvcs:perm /string $,
 	/name statbuf lstat ?ior statbuf st_size 64@
 	statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and lit,
 	dvcs-write ;] $[]map ;
+: write-ref-fs ( -- )
+    ref-files[] [: $, dvcs-add ;] $[]map ;
 : compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
 
 : compute-diff ( -- )
-    read-old-fs  read-del-fs  read-new-fs
-    compute-patch  write-new-fs ;
+    read-old-fs  read-del-fs  read-new-fs  read-ref-fs
+    compute-patch  write-new-fs write-ref-fs ;
 
 Variable id-files[]
 
@@ -595,18 +608,23 @@ previous
     2dup id>patch# #@ d0= >r id>snap# #@ d0= r> and o>
     IF  >revision  ELSE  2drop  THEN ;
 
+: ?delete-file ( addr u -- )
+     delete-file dup no-file# <> and throw ;
+
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
-    new-files[] $[]# del-files[] $[]# d0= IF
+    ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
 	." Nothing to do" cr
     ELSE
 	['] compute-diff gen-cmd$
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
+	ref-files[] ['] +fileentry $[]map
 	>id-revision
 	save-project  dvcs-newsentry
 	dvcs:id$ $@ project:revision$ $!  filelist-out
-	"~+/.n2o/newfiles" delete-file dup no-file# <> and throw
+	"~+/.n2o/newfiles" ?delete-file
+	"~+/.n2o/reffiles" ?delete-file
     THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
@@ -627,6 +645,12 @@ previous
     2dup dvcs:files# #@ drop IF  2drop  EXIT
     ELSE  "dummy" 2over dvcs:files# #!
 	"~+/.n2o/newfiles" append-line  THEN ;
+
+: dvcs-ref ( addr u -- )
+    2dup '/' -scan '/' -skip dup IF  dvcs-add  ELSE  2drop  THEN
+    2dup dvcs:files# #@ drop IF  2drop  EXIT
+    ELSE  "dummy" 2over dvcs:files# #!
+	"~+/.n2o/reffiles" append-line  THEN ;
 
 : dvcs-snap ( addr u -- )
     n2o:new-dvcs >o  dvcs:message$ $!
