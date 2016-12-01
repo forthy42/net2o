@@ -488,7 +488,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: nop ( -- ) nat( ." nop" forth:cr ) ; \g do nothing
 +net2o: 4cc ( #3letter -- )
     \g At the beginning of a file, this can be used as FourCC code
-    p@ 64drop p@ 64drop p@ 64drop ;
+    buf-state 2@ 3 /string dup 0< !!stringfit!! buf-state 2! ;
 +net2o: padding ( #len -- )
     \g add padding to align fields
     string@ $> 2drop ;
