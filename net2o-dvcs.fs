@@ -505,7 +505,7 @@ Variable patch-in$
     project:project$ $@ ?msg-log  dvcs:commits @ .chat>branches-loop ;
 
 : >branches ( addr u -- flag )
-    $make branches[] deque< ;
+    $make branches[] >back ;
 User id-check# \ check hash
 : id>branches-loop ( addr u -- )
     BEGIN  2dup id-check# #@ d0<> ?EXIT

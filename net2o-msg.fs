@@ -132,7 +132,7 @@ Sema queue-sema
 \ peer queue
 
 : peer> ( -- addr / 0 )
-    [: peers[] <deque ;] queue-sema c-section ;
+    [: peers[] back> ;] queue-sema c-section ;
 : >peer ( addr u -- )
     [: peers[] $+[]! ;] queue-sema c-section ;
 

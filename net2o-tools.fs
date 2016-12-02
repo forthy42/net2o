@@ -264,15 +264,24 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
     c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
 
+\ aliases for old Gforth (pre 20161202)
+
+[IFDEF] >deque  ' >deque alias >stack [THEN]
+[IFDEF] deque>  ' deque> alias stack> [THEN]
+[IFDEF] deque<  ' deque< alias >back [THEN]
+[IFDEF] <deque  ' <deque alias back> [THEN]
+[IFDEF] deque@  ' deque@ alias get-stack [THEN]
+[IFDEF] deque!  ' deque! alias set-stack [THEN]
+
 \ scoping
 
 Variable scope<>
 : scope{ ( "vocabulary" -- scope:addr )
-    get-current scope<> >deque also ' execute definitions ;
+    get-current scope<> >stack also ' execute definitions ;
 : }scope ( scope:addr -- )
-    previous scope<> deque> set-current ;
+    previous scope<> stack> set-current ;
 : scope: ( "vocabulary" -- scope:addr )
-    vocabulary get-current scope<> >deque also lastxt execute definitions ;
+    vocabulary get-current scope<> >stack also lastxt execute definitions ;
 
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict

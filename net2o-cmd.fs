@@ -130,8 +130,8 @@ forward key>nick
 
 \ object stack
 
-: o-pop ( o:o1 o:x -- o1 o:x ) object-stack deque> ;
-: o-push ( o1 o:x -- o:o1 o:x ) object-stack >deque ;
+: o-pop ( o:o1 o:x -- o1 o:x ) object-stack stack> ;
+: o-push ( o1 o:x -- o:o1 o:x ) object-stack >stack ;
 
 : n:>o ( o1 o:o2 -- o:o2 o:o1 )
     >o r> o-push  o IF  1 req? !  THEN ;
@@ -142,8 +142,8 @@ forward key>nick
 
 \ token stack - only for decompiling
 
-: t-push ( addr -- )  t-stack >deque ;
-: t-pop ( -- addr )   t-stack deque> ;
+: t-push ( addr -- )  t-stack >stack ;
+: t-pop ( -- addr )   t-stack stack> ;
 : t# ( -- n ) t-stack $[]# ;
 
 \ float are stored big endian.
@@ -628,12 +628,12 @@ User last-signed cell uallot drop
 : cmd-resolve> ( -- addr u )
     nest$ over >r dup n>64 cmdtmp$ dup fwd# u> !!stringfit!!
     r> over - swap move
-    nest-stack deque> neststart# ! ;
+    nest-stack stack> neststart# ! ;
 
 also net2o-base
 
 : +zero16 ( -- ) "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0" +cmdbuf ;
-: sign[ ( -- ) neststart# @ nest-stack >deque
+: sign[ ( -- ) neststart# @ nest-stack >stack
     string "\x80\x00" +cmdbuf cmdbuf$ nip neststart# ! ;
 : nest[ ( -- ) sign[ +zero16 ; \ add space for IV
 : ']sign ( xt -- )

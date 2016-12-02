@@ -135,7 +135,7 @@ alloc-io
 Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )
-    dup net2o-tasks >deque  pass
+    dup net2o-tasks >stack  pass
     ?salt-init off  rng-o off \ make double sure no rng is active
     alloc-io prep-socks catch-loop
     1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
@@ -152,7 +152,7 @@ event: ->kill ( task -- )
 #3.000.000.000 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
-    net2o-tasks deque@ kills !  net2o-tasks $off
+    net2o-tasks get-stack kills !  net2o-tasks $off
     kills @ 0 ?DO  send-kill  LOOP
     ntime  0 >r \ give time to terminate
     BEGIN  2dup kill-timeout# d+ ntime d- 2dup d0> kills @ and  WHILE
