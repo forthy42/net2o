@@ -48,12 +48,15 @@ exec 4> >($GFORTH ../n2o 10% $* chat test@chat-test1)
 export GFORTHPID2=$[$!+1]
 sleep 2
 
+x=""
+
 for i in $(seq 1 $count)
 do
-    echo "Test Message $i on 1/2" >&3
+    echo "Test Message $i on 1/2 $x" >&3
     usleep 10000
-    echo "Test Message $i on 2/2" >&4
+    echo "Test Message $i on 2/2 $x" >&4
     usleep 10000
+    x="x$x"
 done
 
 export PASSPHRASE=3456
@@ -69,16 +72,19 @@ sleep 1
 
 sleep 1
 
+x=""
+
 for i in $(seq 1 $count)
 do
-    echo "Test Message $i on 1/4" >&3
+    echo "Test Message $i on 1/4 $x" >&3
     usleep 10000
-    echo "Test Message $i on 2/4" >&4
+    echo "Test Message $i on 2/4 $x" >&4
     usleep 10000
-    echo "Test Message $i on 3/4" >&5
+    echo "Test Message $i on 3/4 $x" >&5
     usleep 10000
-    echo "Test Message $i on 4/4" >&6
+    echo "Test Message $i on 4/4 $x" >&6
     usleep 10000
+    x="x$x"
 done
 
 echo "/bye" >&6
