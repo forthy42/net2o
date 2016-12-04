@@ -116,7 +116,8 @@ scope{ n2o
     \G keyin: read a .n2o key file in
     ?get-me  key>default
     BEGIN  ?nextarg WHILE
-	    import#manual import-type !  do-keyin  REPEAT  save-pubkeys ;
+	    import#manual import-type !  do-keyin  last-key .?perm
+    REPEAT  save-pubkeys ;
 : keyout ( -- )
     \U keyout|outkey [@user1 .. @usern]
     \G keyout: output pubkey of your identity
