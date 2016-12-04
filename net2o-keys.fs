@@ -503,7 +503,10 @@ $11 net2o: privkey ( $:string -- )
     \g key nick
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
     \g key profile (hash of a resource)
-+net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n ke-mask ! ;
++net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n
+    1 import-type @ lshift
+    [ 1 import#self lshift 1 import#new lshift or ]L
+    and IF  ke-mask !  ELSE  drop  THEN ;
     \g key access right mask
 +net2o: keygroup ( x -- )        !!signed?   $40 !!>order? 64drop
     ( 64>n dup key-groups# u> !!wronggroup!! cells key-groups + @ ke-mask ! ) ;
