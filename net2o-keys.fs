@@ -759,7 +759,7 @@ false value ?yes
 	2drop
     LOOP  0 0 ;
 
-: ?perm ( o:key -- )
+: ?perm ( o:key -- )  ke-mask @ ?EXIT
     ke-sk sec@ nip IF  perm%myself  ELSE  perm%default  THEN  ke-mask ! ;
 
 : do-key ( addr u / 0 0  -- )

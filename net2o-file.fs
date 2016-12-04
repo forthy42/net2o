@@ -33,7 +33,7 @@ cmd-class class
     field: fs-termtask
     field: file-xt     \ callback for operation completed
     field: fs-cryptkey \ for en/decrypting a file on the fly
-    field: fs-rename+
+    field: fs-rename+  \ temporary path for downloads
     method fs-read
     method fs-write
     method fs-open
@@ -82,7 +82,10 @@ cell 8 = [IF]
 
 : >seek ( size 64to 64seek -- size' )
     64dup 64>d fs-fid @ reposition-file throw 64- 64>usat umin ;
-
+: >rename+ ( addr u -- )
+    fs-rename+ $!
+    <<# getpid 0 #s '+' hold #> fs-rename+ $+! #>>
+    fs-rename+ $@ ;
 : fs-timestamp! ( mtime fileno -- ) >r
     [IFDEF] android  rdrop 64drop
     [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
@@ -111,7 +114,7 @@ cell 8 = [IF]
 ; ' fs:fs-write fs-class to fs-write
 : fs:fs-clear ( -- )
     64#0 64dup fs-limit 64!  64dup fs-seekto 64!  64dup fs-seek 64!
-    64dup fs-size 64!  fs-time 64!  fs-path $off ;
+    64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free ;
 : fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-time 64@ 64dup 64-0= IF  64drop
@@ -121,6 +124,9 @@ cell 8 = [IF]
     THEN
     fs-fid @ close-file throw
     fs-fid off
+    fs-rename+ $@ dup IF
+	fs-path $@ rename-file throw
+    ELSE  2drop  THEN
     fs:fs-clear
 ; ' fs:fs-close fs-class to fs-close
 :noname ( -- size )
@@ -135,7 +141,7 @@ cell 8 = [IF]
     fs-poll fs-size!
 ; fs-class to fs-open
 :noname ( addr u -- )  fs-close
-    2dup fs-path $! r/w create-file throw fs-fid !
+    2dup fs-path $! >rename+ r/w create-file throw fs-fid !
 ; fs-class to fs-create
 :noname ( perm -- )
     perm%filename and 0= !!filename-perm!!
@@ -166,9 +172,7 @@ end-class hashfs-class
     >r hashfs>file r> open-file throw fs-fid ! fs-poll fs-size!
 ; hashfs-class to fs-open
 :noname ( addr u -- )  fs-close
-    hashfs>file fs-rename+ $!
-    <<# getpid 0 #s '+' hold #> fs-rename+ $+! #>>
-    fs-rename+ $@ r/w create-file throw fs-fid !
+    hashfs>file >rename+ r/w create-file throw fs-fid !
 ; hashfs-class to fs-create
 :noname ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
@@ -185,11 +189,8 @@ end-class hashfs-class
     tuck save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
     r> c:key! ; hashfs-class to fs-write
 :noname ( -- )
-    fs-rename+ $@ dup IF
-	fs-path $@ rename-file throw
-    ELSE  2drop  THEN
     fs:fs-close
-    fs-cryptkey $off ; hashfs-class to fs-close
+    fs-cryptkey $free ; hashfs-class to fs-close
 
 \ subclassing for other sorts of files
 
@@ -335,7 +336,7 @@ scope{ mapc
 
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
-    file-state $off ;
+    file-state $free ;
 : n2o:save-block ( id -- delta )
     rdata-back@ file( over data-rmap @ .mapc:dest-raddr @ -
     { os } ." file write: " 2 pick . os hex. )
