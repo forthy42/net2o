@@ -33,6 +33,7 @@ cmd-class class
     field: fs-termtask
     field: file-xt     \ callback for operation completed
     field: fs-cryptkey \ for en/decrypting a file on the fly
+    field: fs-rename+
     method fs-read
     method fs-write
     method fs-open
@@ -165,7 +166,9 @@ end-class hashfs-class
     >r hashfs>file r> open-file throw fs-fid ! fs-poll fs-size!
 ; hashfs-class to fs-open
 :noname ( addr u -- )  fs-close
-    hashfs>file r/w create-file throw fs-fid !
+    hashfs>file fs-rename+ $!
+    <<# getpid 0 #s '+' hold #> fs-rename+ $+! #>>
+    fs-rename+ $@ r/w create-file throw fs-fid !
 ; hashfs-class to fs-create
 :noname ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
@@ -182,7 +185,11 @@ end-class hashfs-class
     tuck save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
     r> c:key! ; hashfs-class to fs-write
 :noname ( -- )
-    fs:fs-close fs-cryptkey $off ; hashfs-class to fs-close
+    fs-rename+ $@ dup IF
+	fs-path $@ rename-file throw
+    ELSE  2drop  THEN
+    fs:fs-close
+    fs-cryptkey $off ; hashfs-class to fs-close
 
 \ subclassing for other sorts of files
 

@@ -244,6 +244,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 dvcs-adds to dvcs:write
 :noname 2drop drop 64drop ; dvcs-adds to dvcs:unzip
 :noname ( addr u -- ) dvcs:adds[] $+[]! ; dvcs-adds to dvcs:add
+:noname ( addr u -- ) dvcs:adds[] dup $[]# 1- swap $[]+! ; dvcs-adds to dvcs:spit
 
 : n2o:new-dvcs ( -- o )
     dvcs-class new >o  dvcs-table @ token-table !
@@ -369,7 +370,7 @@ also net2o-base
 	statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and lit,
 	dvcs-write ;] $[]map ;
 : write-ref-fs ( -- )
-    ref-files[] [: $, dvcs-add ;] $[]map ;
+    ref-files[] [: over hash#128 $, dvcs-add hash#128 /string $, dvcs-spit ;] $[]map ;
 : compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
@@ -389,6 +390,7 @@ Variable id-files[]
 	    0 dvcs:perm /string $, dvcs-spit
 	;] $[]map ;] gen-cmd$
     dup IF  >file-hash  THEN ;
+
 previous
 
 : save-project ( -- )

@@ -1,0 +1,17 @@
+sh echo "Genrate another file" >e
+add e
+sh echo "=== Checkin 1 ==="
+diff
+ci -m "Another checkin 1"
+sh cat a b c >>e
+sh echo "Line a" >>a
+sh echo "Line b" >>b
+sh echo "Line c" >>c
+sh echo "=== Checkin 2 ==="
+diff
+ci -m "Another checkin 2"
+sh cat e a >>c
+sh echo "=== Checkin 3 ==="
+diff
+ci -m "Another checkin 3"
+bye
