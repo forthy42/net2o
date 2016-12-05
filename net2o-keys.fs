@@ -90,6 +90,8 @@ code0-buf
 
 \ hashed key data base
 
+Variable groups[] \ names of groups, sorted by order in groups file
+
 User >storekey
 Variable defaultkey
 
@@ -108,6 +110,7 @@ cmd-class class
     field: ke-imports  \ bitmask of key import
     field: ke-storekey \ used to encrypt on storage
     field: ke-mask     \ permission mask
+    field: ke-groups   \ premission groups
     64field: ke-offset \ offset in key file
     field: ke-pwlevel  \ password strength level
     0 +field ke-end
@@ -284,6 +287,49 @@ Variable sim-nick!
 		0 ( dummy for endcase )
 	    THEN  endcase
     LOOP ;
+: .permandor ( permand permor -- )
+    0 { +- }
+    1 perm$ count bounds DO  >r
+	over r@ and 0= IF  '-' dup +- <> IF  dup to +- emit
+	    ELSE  drop  THEN r>  I c@ emit  >r THEN
+	dup  r@ and    IF  '+' dup +- <> IF  dup to +- emit
+	    ELSE  drop  THEN r>  I c@ emit  >r THEN
+	r> 2*
+    LOOP  drop 2drop ;
+
+\ read in permission groups, groups is in the .net2o directory
+
+: >groups ( addr u pand por -- )
+    s" " groups[] $+[]!
+    [: { d^ pandor } pandor 2 cells type  type ;]
+    groups[] dup $[]# 1- swap $[] $exec ;
+
+: init-groups ( -- )
+    "myself"  perm%myself  dup >groups
+    "peer"    perm%default dup >groups
+    "unknown" perm%unknown dup >groups
+    "blocked" perm%blocked dup >groups ;
+
+: .groups ( -- )
+    groups[] [: 2dup 2 cells /string type space
+      drop 2@ .permandor cr ;] $[]map ;
+
+: write-groups ( -- )
+    "groups" .net2o/ w/o create-file throw >r
+    ['] .groups r@ outfile-execute
+    r> close-file throw ;
+
+: group-line ( -- )
+    parse-name parse-name >perm >groups ;
+
+: read-groups-loop ( -- )
+    BEGIN  refill  WHILE  group-line  REPEAT ;
+
+: read-groups ( -- )
+    "groups" .net2o/ 2dup file-status nip no-file# = IF
+	init-groups write-groups
+    THEN  >included throw
+    ['] read-groups-loop execute-parsing-named-file ;
 
 \ key display
 
@@ -530,6 +576,9 @@ $11 net2o: privkey ( $:string -- )
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
     config:pw-level# @ 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
++net2o: keygroups ( $:string -- )  !!unsigned?  $> ke-groups $!
+    \ !!FIXME!! verify groups and compute ke-mask
+;
 }scope
 
 gen-table $freeze

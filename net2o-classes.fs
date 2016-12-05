@@ -288,12 +288,13 @@ bit perm%socket     \ can access sockets
 bit perm%terminal   \ can access terminal
 bit perm%termserver \ can access termserver
 bit perm%sync       \ is allowed to sync
+bit perm%indirect   \ force indirect connection
 drop
 
 perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
 perm%blocked Value perm%unknown
-perm%blocked invert Value perm%myself
-Create perm$ ," cbdmrwnhstvy"
+perm%blocked perm%indirect or invert Value perm%myself
+Create perm$ ," cbdmrwnhstvyi"
 
 \ timestasts structure
 
