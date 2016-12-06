@@ -131,7 +131,7 @@ scope{ n2o
 : keylist ( -- )
     \U keylist|listkey
     \G keylist: list all known keys
-    ?get-me ?cr list-keys ;
+    ?get-me ?cr list-keys ." === groups ===" cr .groups ;
 
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]

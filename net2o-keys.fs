@@ -308,7 +308,7 @@ Variable sim-nick!
     "myself"  perm%myself  dup >groups
     "peer"    perm%default dup >groups
     "unknown" perm%unknown dup >groups
-    "blocked" perm%blocked dup >groups ;
+    "blocked" perm%blocked perm%indirect or dup >groups ;
 
 init-groups
 
@@ -318,7 +318,7 @@ init-groups
 
 : .in-groups ( addr u -- )
     bounds ?DO
-	I p@+ I - >r 64>n groups[] $[]@ 2 cells /string type space
+	I p@+ I - >r 64>n groups[] $[]@ 2 cells /string space type
     r> +LOOP ;
 
 : write-groups ( -- )
@@ -393,9 +393,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
     ke-selfsig $@ space .sigdates
-    space ke-groups $@ .in-groups
-    ke-mask @ .perm
-    space ke-imports @ .imports
+    ke-groups $@ 2dup .in-groups groups>mask invert
+    space ke-mask @ and -1 swap .permandor
+    #tab emit ke-imports @ .imports
     space .nick+pet ;
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
@@ -411,7 +411,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
-    ." num pubkey                                   date                     group+perm h nick" cr
+    ." num pubkey                                   date                     grp+perm	h nick" cr
     key# [: cell+ $@ drop cell+ ..key-list ;] #map ;
 : list-nicks ( -- )
     nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
