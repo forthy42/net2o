@@ -310,9 +310,16 @@ Variable sim-nick!
     "unknown" perm%unknown dup >groups
     "blocked" perm%blocked dup >groups ;
 
+init-groups
+
 : .groups ( -- )
     groups[] [: 2dup 2 cells /string type space
       drop 2@ .permandor cr ;] $[]map ;
+
+: .in-groups ( addr u -- )
+    bounds ?DO
+	I p@+ I - >r 64>n groups[] $[]@ 2 cells /string type space
+    r> +LOOP ;
 
 : write-groups ( -- )
     "groups" .net2o/ w/o create-file throw >r
@@ -330,6 +337,23 @@ Variable sim-nick!
 	init-groups write-groups
     THEN  >included throw
     ['] read-groups-loop execute-parsing-named-file ;
+
+: groups>mask ( addr u -- mask )
+    0 -rot bounds ?DO
+	I p@+ I - >r
+	64>n dup groups[] $[]# u>= !!no-group!!
+	groups[] $[]@ drop 2@ >r and r> or
+    r> +LOOP ;
+
+: ?>groups ( mask -- mask' )
+    ke-groups $@len 0= IF
+	4 0 DO
+	    dup I groups[] $[]@ drop cell+ @
+	    or over = IF
+		I ke-groups c$+! I groups[] $[]@ drop cell+ @ invert and
+	    THEN
+	LOOP
+    THEN  drop ;
 
 \ key display
 
@@ -363,12 +387,14 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-sk @ IF
 	." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
     ." valid:  " ke-selfsig $@ .sigdates cr
+    ." groups: " ke-groups $@ .in-groups cr
     ." perm:   " ke-mask @ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
     ke-selfsig $@ space .sigdates
-    space ke-mask @ .perm
+    space ke-groups $@ .in-groups
+    ke-mask @ .perm
     space ke-imports @ .imports
     space .nick+pet ;
 : .key-list ( o:key -- o:key )
@@ -385,7 +411,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
-    ." num pubkey                                   date                     perm         h nick" cr
+    ." num pubkey                                   date                     group+perm h nick" cr
     key# [: cell+ $@ drop cell+ ..key-list ;] #map ;
 : list-nicks ( -- )
     nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
@@ -545,18 +571,21 @@ $11 net2o: privkey ( $:string -- )
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
     \g key type (0: anon, 1: user, 2: group)
 +net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $!
-    nick! ;
     \g key nick
+    nick! ;
 +net2o: keyprofile ( $:string -- ) !!signed?   4 !!>order? $> ke-prof $! ;
     \g key profile (hash of a resource)
-+net2o: keymask ( x -- )         !!unsigned? $20 !!>=order? 64>n
++net2o: keymask ( x -- )         !!unsigned? $40 !!>=order? 64>n
+    \g key access right mask
     1 import-type @ lshift
     [ 1 import#self lshift 1 import#new lshift or ]L
-    and IF  ke-mask !  ELSE  drop  THEN ;
-    \g key access right mask
-+net2o: keygroup ( x -- )        !!signed?   $40 !!>order? 64drop
-    ( 64>n dup key-groups# u> !!wronggroup!! cells key-groups + @ ke-mask ! ) ;
-    \g access group, stub
+    and IF  dup ke-mask or! ?>groups  ELSE  drop  THEN ;
++net2o: keygroups ( $:groups -- ) !!unsigned? $20 !!>order? $>
+    \g access groups
+    1 import-type @ lshift
+    [ 1 import#self lshift 1 import#new lshift or ]L
+    and IF   2dup ke-groups $! groups>mask ke-mask !
+    ELSE  2drop  THEN ;
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
@@ -576,9 +605,6 @@ $11 net2o: privkey ( $:string -- )
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
     config:pw-level# @ 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
-+net2o: keygroups ( $:string -- )  !!unsigned?  $> ke-groups $!
-    \ !!FIXME!! verify groups and compute ke-mask
-;
 }scope
 
 gen-table $freeze
@@ -694,7 +720,10 @@ also net2o-base
 : pack-corekey ( o:key -- )
     pack-signkey
     ke-imports @ ulit, keyimport
-    ke-mask @ nlit, keymask
+    ke-mask @  ke-groups $@len IF
+	ke-groups $@ 2dup $, keygroups
+	groups>mask invert and  THEN
+    ?dup-IF  nlit, keymask  THEN
     ke-pets [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
 previous
