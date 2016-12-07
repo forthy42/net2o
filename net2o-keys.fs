@@ -342,8 +342,6 @@ Variable sim-nick!
     THEN  >included throw
     ['] read-groups-loop execute-parsing-named-file ;
 
-read-groups
-
 : groups>mask ( addr u -- mask )
     0 -rot bounds ?DO
 	I p@+ I - >r
@@ -606,13 +604,13 @@ $11 net2o: privkey ( $:string -- )
     \g key access right mask
     1 import-type @ lshift
     [ 1 import#self lshift 1 import#new lshift or ]L
-    and IF  dup ke-mask or! ?>groups  ELSE  drop  THEN ;
+    and 0= IF  drop perm%default  THEN  dup ke-mask or! ?>groups ;
 +net2o: keygroups ( $:groups -- ) !!unsigned? $20 !!>order? $>
     \g access groups
     1 import-type @ lshift
     [ 1 import#self lshift 1 import#new lshift or ]L
-    and IF   2dup ke-groups $! groups>mask ke-mask !
-    ELSE  2drop  THEN ;
+    and 0= IF  2drop "\x01"  THEN
+    2dup ke-groups $! groups>mask ke-mask ! ;
 +net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
@@ -681,7 +679,8 @@ comp: :, previous ;
     THEN ;
 
 : gen-keys-dir ( -- )
-    init-dirs ?.net2o/keys ?legacy-keys ;
+    init-dirs ?.net2o/keys ?legacy-keys
+    groups[] $[]# 0= IF  read-groups  THEN ;
 
 : ?fd-keys ( fd addr u -- fd' ) { addr u } dup ?EXIT drop
     gen-keys-dir
@@ -868,7 +867,8 @@ false value ?yes
     LOOP  0 0 ;
 
 : ?perm ( o:key -- )
-    ke-sk sec@ nip IF  perm%myself  ELSE  perm%default  THEN  ke-mask ! ;
+    ke-sk sec@ nip dup IF  perm%myself  ELSE  perm%default  THEN  ke-mask !
+    IF  "\x00"  ELSE  "\x01"  THEN  ke-groups $! ;
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
@@ -971,7 +971,8 @@ Variable dhtroot.n2o
 : +dhtroot ( -- )
     defaultkey @ >storekey !
     import#manual import-type !  64#-1 key-read-offset 64!
-    dhtroot.n2o $@ do-key  import#new import-type ! ;
+    dhtroot.n2o $@ do-key  last-key .?perm
+    import#new import-type ! ;
 
 : new-key ( nickaddr u -- )
     ?check-rng \ before generating a key, check the rng for health
