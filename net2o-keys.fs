@@ -500,14 +500,19 @@ Variable unkey-id#
 : apply-permission ( permand permor o:key -- permand permor o:key )
     over ke-mask @ and over or ke-mask ! .key-list ;
 
+: -group-perm ( o:key -- )
+    ke-groups $@ groups>mask invert ke-mask and! ;
+: +group-perm ( o:key -- )
+    ke-groups $@ groups>mask        ke-mask or! ;
+
 : add-group ( id o:key -- )
-    dup -1 = !!no-group!! cmdtmp$ ke-groups $+! ;
+    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $+! +group-perm ;
 : set-group ( id o:key -- )
-    dup -1 = !!no-group!! cmdtmp$ ke-groups $! ;
+    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $! +group-perm ;
 : sub-group ( id o:key -- )
-    dup -1 = !!no-group!! cmdtmp$ ke-groups $@ 2over search
+    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $@ 2over search
     IF   nip >r nip ke-groups dup $@len r> - rot $del
-    ELSE  2drop 2drop  THEN ;
+    ELSE  2drop 2drop  THEN +group-perm ;
 
 : apply-group ( addr u o:key -- )
     over c@ '+' = IF  1 /string >group-id add-group  EXIT  THEN
