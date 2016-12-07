@@ -316,8 +316,6 @@ Variable sim-nick!
     "unknown" perm%unknown dup >groups
     "blocked" perm%blocked perm%indirect or dup >groups ;
 
-init-groups
-
 : .groups ( -- )
     groups[] [: 2dup 2 cells /string type space
       drop 2@ .permandor cr ;] $[]map ;
@@ -344,6 +342,8 @@ init-groups
     THEN  >included throw
     ['] read-groups-loop execute-parsing-named-file ;
 
+read-groups
+
 : groups>mask ( addr u -- mask )
     0 -rot bounds ?DO
 	I p@+ I - >r
@@ -360,6 +360,8 @@ init-groups
 	    THEN
 	LOOP
     THEN  drop ;
+
+:noname defers 'cold  groups[] off read-groups ; is 'cold
 
 \ key display
 

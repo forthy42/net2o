@@ -184,6 +184,27 @@ scope{ n2o
     ?nextarg 0= UNTIL
     save-keys ;
 
+: chgroup ( -- )
+    \U chgroup group permissions
+    \G chgroup: Add or change a group
+    ?nextarg IF  2dup >group-id  dup 0< IF  drop
+	    [: #0. { d^ slot } slot 2 cells type type ;] $tmp groups[] $+[]!
+	    groups[] $[]# 1- >r  ELSE  >r 2drop  THEN
+	?nextarg IF
+	    >perm r@ groups[] $[]@ drop 2!
+	    write-groups .groups
+	THEN  rdrop
+    THEN ;
+
+: mvgroup ( -- )
+    \U mvgroup oldname1 newname1 .. oldnamen newnamen
+    \G mvgroup: Change group's name
+    BEGIN  ?nextarg  WHILE
+	    >group-id dup 0< !!no-group!! >r ?nextarg  WHILE
+		2 cells r@ groups[] $[] $!len
+		r> groups[] $[]+!  REPEAT  rdrop  THEN
+    write-groups .groups ;
+
 : passwd ( -- )
     \U passwd [pw-level]
     \G passwd: Change the password for the selected secret key
