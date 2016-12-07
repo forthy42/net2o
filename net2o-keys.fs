@@ -299,6 +299,12 @@ Variable sim-nick!
 
 \ read in permission groups, groups is in the .net2o directory
 
+: >group-id ( addr u -- id/-1 )
+    -1 0 groups[] [: 2swap 2>r 2 cells /string
+      2over string-prefix? IF  2r> nip dup
+      ELSE  2r>  THEN  1+ ;] $[]map
+    2nip drop ;
+
 : >groups ( addr u pand por -- )
     s" " groups[] $+[]!
     [: { d^ pandor } pandor 2 cells type  type ;]
@@ -493,6 +499,20 @@ Variable unkey-id#
 
 : apply-permission ( permand permor o:key -- permand permor o:key )
     over ke-mask @ and over or ke-mask ! .key-list ;
+
+: add-group ( id o:key -- )
+    dup -1 = !!no-group!! cmdtmp$ ke-groups $+! ;
+: set-group ( id o:key -- )
+    dup -1 = !!no-group!! cmdtmp$ ke-groups $! ;
+: sub-group ( id o:key -- )
+    dup -1 = !!no-group!! cmdtmp$ ke-groups $@ 2over search
+    IF   nip >r nip ke-groups dup $@len r> - rot $del
+    ELSE  2drop 2drop  THEN ;
+
+: apply-group ( addr u o:key -- )
+    over c@ '+' = IF  1 /string >group-id add-group  EXIT  THEN
+    over c@ '-' = IF  1 /string >group-id sub-group  EXIT  THEN
+    >group-id set-group ;
 
 \ get passphrase
 

@@ -147,7 +147,7 @@ scope{ n2o
     ?cr keylist ;
 
 : perm ( -- )
-    \U perm @user1 .. @usern permissions
+    \U perm @user1 .. @usern permissions ..
     \G perm: Change or set permissions. permission starts with
     \G perm: + for adding permissions
     \G perm: - for taking away permissions
@@ -170,6 +170,18 @@ scope{ n2o
     BEGIN  chat-keys $[]off  @nicks>chat ?nextarg WHILE  >perm
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
 	    $[]map 2drop  REPEAT
+    save-keys ;
+
+: group ( -- )
+    \U group @user1 .. @usern [+-]group1 .. [+-]groupn ..
+    \G group: Set, add or remove a group from a set of users
+    ?get-me
+    BEGIN  chat-keys $[]off  @nicks>chat
+	BEGIN  ?nextarg  WHILE  over c@ '@' <>  WHILE
+		    chat-keys [: key| key-exist? ?dup-IF
+			  >o 2dup apply-group o>  THEN ;]
+		    $[]map 2drop  REPEAT  2drop  THEN
+    ?nextarg 0= UNTIL
     save-keys ;
 
 : passwd ( -- )
