@@ -495,7 +495,7 @@ Variable unkey-id#
     keysize key# #@ 0= !!unknown-key!!
     cell+ .ke-sk sec@ 0= !!unknown-key!! ;
 
-\ apply permissions
+\ apply permissions&groups
 
 : apply-permission ( permand permor o:key -- permand permor o:key )
     over ke-mask @ and over or ke-mask ! .key-list ;
@@ -515,9 +515,9 @@ Variable unkey-id#
     ELSE  2drop 2drop  THEN +group-perm ;
 
 : apply-group ( addr u o:key -- )
-    over c@ '+' = IF  1 /string >group-id add-group  EXIT  THEN
-    over c@ '-' = IF  1 /string >group-id sub-group  EXIT  THEN
-    >group-id set-group ;
+    over c@ '+' = IF  1 /string >group-id add-group .key-list  EXIT  THEN
+    over c@ '-' = IF  1 /string >group-id sub-group .key-list  EXIT  THEN
+    >group-id set-group .key-list ;
 
 \ get passphrase
 
