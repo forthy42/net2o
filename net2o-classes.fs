@@ -292,6 +292,7 @@ bit perm%indirect   \ force indirect connection
 drop
 
 perm%connect perm%dht perm%msg perm%filerd perm%filehash or or or or Value perm%default
+perm%connect perm%dht perm%indirect or or Value perm%dhtroot
 perm%blocked perm%indirect or Value perm%unknown
 perm%blocked perm%indirect or invert Value perm%myself
 Create perm$ ," cbdmrwnhstvyi"

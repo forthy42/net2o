@@ -313,6 +313,7 @@ Variable sim-nick!
 : init-groups ( -- )
     "myself"  perm%myself  dup >groups
     "peer"    perm%default dup >groups
+    "dht"     perm%dhtroot dup >groups
     "unknown" perm%unknown dup >groups
     "blocked" perm%blocked perm%indirect or dup >groups ;
 
@@ -326,9 +327,9 @@ Variable sim-nick!
     r> +LOOP ;
 
 : write-groups ( -- )
-    "groups" .net2o/ w/o create-file throw >r
+    [: ." groups+" getpid 0 .r ;] $tmp .net2o/ 2dup w/o create-file throw >r
     ['] .groups r@ outfile-execute
-    r> close-file throw ;
+    r> close-file throw '+' -scan 1- >backup ;
 
 : group-line ( -- )
     parse-name parse-name >perm >groups ;
@@ -351,8 +352,8 @@ Variable sim-nick!
 
 : ?>groups ( mask -- mask' )
     ke-groups $@len 0= IF
-	4 0 DO
-	    dup I groups[] $[]@ drop cell+ @
+	groups[] $[]# 0 DO
+	    dup I groups[] $[]@ drop @
 	    or over = IF
 		I ke-groups c$+! I groups[] $[]@ drop cell+ @ invert and
 	    THEN
@@ -971,7 +972,8 @@ Variable dhtroot.n2o
 : +dhtroot ( -- )
     defaultkey @ >storekey !
     import#manual import-type !  64#-1 key-read-offset 64!
-    dhtroot.n2o $@ do-key  last-key .?perm
+    dhtroot.n2o $@ do-key
+    last-key >o "\x02" ke-groups $! perm%dhtroot ke-mask ! o>
     import#new import-type ! ;
 
 : new-key ( nickaddr u -- )
