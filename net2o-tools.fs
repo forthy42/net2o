@@ -367,7 +367,7 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 : .objects/ ( addr u -- addr' u' )
     fn-sanitize [: objects$  $. '/' emit type ;] $tmp ;
 : .no-fat-file ( -- addr u )
-    [: no-fat-chars type '.' emit getpid 0 .r ;] $tmp .net2o/ ;
+    [: no-fat-chars type '.' emit getpid 0 .r ;] $tmp .objects/ ;
 
 : ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
@@ -375,12 +375,11 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 : ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
 
 : fsane-init ( -- )
-    ?.net2o .no-fat-file r/w create-file IF drop
+    ?.net2o/objects .no-fat-file r/w create-file IF drop
 	no-fat-chars bounds ?DO filechars I c@ -bit LOOP
     ELSE
 	close-file throw .no-fat-file delete-file throw
     THEN ;
-fsane-init
 
 Variable config-file$  "~/.net2o/config" config-file$ $!
 Variable configured?
@@ -413,7 +412,7 @@ Variable configured?
     "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip  ['] config >body swap
     no-file# = IF  ?.net2o write-config  ELSE  read-config ?.net2o  THEN
-    rootdirs>path ;
+    fsane-init rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config ;
 
