@@ -366,6 +366,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 : .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
 : .objects/ ( addr u -- addr' u' )
     fn-sanitize [: objects$  $. '/' emit type ;] $tmp ;
+: .no-fat-file ( -- addr u )
+    [: no-fat-chars type '.' emit getpid 0 .r ;] $tmp .net2o/ ;
 
 : ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
@@ -373,10 +375,10 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 : ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
 
 : fsane-init ( -- )
-    ?.net2o no-fat-chars .net2o/ r/w create-file IF drop
+    ?.net2o .no-fat-file r/w create-file IF drop
 	no-fat-chars bounds ?DO filechars I c@ -bit LOOP
     ELSE
-	close-file throw no-fat-chars .net2o/ delete-file throw
+	close-file throw .no-fat-file delete-file throw
     THEN ;
 fsane-init
 
