@@ -150,7 +150,7 @@ TAGS:	$(SOURCES) $(GEN)
 configure: configure.ac
 	cd $(srcdir) && autoreconf --force --verbose $(srcdir)
 
-Makefile n2o net2o-version.fs debian/changelog debian/control:	Makefile.in n2o.in config.status
+Makefile n2o net2o-version.fs debian/changelog debian/control:	Makefile.in n2o.in config.status debian/changelog.in debian/control.in
 	./config.status
 
 config.status: configure

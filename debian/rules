@@ -4,6 +4,7 @@
 # Created by Bernd Paysan, in the public domain
 
 GFORTH_VER = `sed -e 's/.*gforth (>= \([^)]\+\).*/\1/; 6q' debian/control | tr '-' '_' | tail -n1`
+NET2O_VER = `cut -f2 -d\" net2o-version.fs | sed -e 's/ //g'`
 D = $(CURDIR)/debian/net2o
 DL = $(CURDIR)/debian/net2o-libcc
 DT = $(CURDIR)/debian/net2o-tests
@@ -19,8 +20,8 @@ override_dh_auto_install:
 	rm -rf $(D) $(DL) $(DT)
 	dh_auto_install -- DESTDIR=$(DL)
 	mkdir -p $(D)/usr/share/doc/
-	mkdir -p $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o/
-	mv $(DL)/usr/share/gforth/$(GFORTH_VER)/net2o/tests $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o/
+	mkdir -p $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
+	mv $(DL)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/tests $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
 	mv $(DL)/usr/share/gforth $(D)/usr/share/
 	mv $(DL)/usr/bin $(D)/usr/
 
