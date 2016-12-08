@@ -16,7 +16,7 @@ Key Exchange
 -------------
 
 Now, how do Alice and Bob establish a shared secret? This is a
-crucial problem to cryptography, the [key exchange](http://en.wikipedia.org/wiki/Key_exchange). The
+crucial problem to cryptography, the key exchange. The
 English Wikipedia article tells you how they could do that: If Alice
 and Bob wish to exchange encrypted messages, each must be equipped to
 encrypt messages to be sent and decrypt messages received. The nature
@@ -102,11 +102,11 @@ having to type in too many cryptic characters.
 More important howerver is to directly use the public key whenever
 possible.  Net2o uses the pubkeys as handles.  For human readability,
 these names are converted to nick- and petnames (names you have
-assigned to other people) when displayed.  In many cases, [Zooko's
-Triangle](https://en.wikipedia.org/wiki/Zooko%27s_triangle) then
-doesn't apply.  It's decentralized, as you make connections through
-peers.  The connection between keys and nick/petnames is local, in
-your "address book".  Nick- and petnames are memorizable.
+assigned to other people) when displayed.  In many cases, Zooko's
+Triangle then doesn't apply.  It's decentralized, as you make
+connections through peers.  The connection between keys and
+nick/petnames is local, in your "address book".  Nick- and petnames
+are memorizable.
 
 If you get a key, you are able to obtain a nickname corresponding to
 that key, self-signed.  This is secure, and still human meaningful.

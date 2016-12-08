@@ -25,8 +25,7 @@ true fnord to work, you always have to be wary.  All the fossil
 checkins are signed.
 
 For those interested in history, whether the NSA can force a European
-company to install a backdoor, see [Crypto
-AG](https://en.wikipedia.org/wiki/Crypto_AG#Compromised_machines).
+company to install a backdoor, google for "Crypto AG".
 
 ## What is this page for? ##
 

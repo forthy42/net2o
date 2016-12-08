@@ -3,7 +3,7 @@ Get it
 
 net2o currently is still very experimental and the protocol can have
 incompatible changes at any time, so keep net2o up to date when you
-try it.  Any day can be a "[flag day](https://en.wikipedia.org/wiki/Flag_day_(computing%29)".
+try it.  Any day can be a "flag day".
 
 Get it for Debian GNU/Linux
 ---------------------------

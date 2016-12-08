@@ -84,7 +84,7 @@ Discussions
 -----------
 
 * The [pki](pki.md) problem
-* [Client authentication](client-auth.wiki)
+* [Client authentication](client-auth.md)
 * [Handover](handover.wiki)
 * [Ack cookies](ackcookies.wiki)
 * [Key format](key-format.wiki)
@@ -98,3 +98,12 @@ Discussions
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
+
+No Wikipedia Links
+------------------
+
+Temporarily, all links to Wikipedia are deactivated here, as reaction
+to the LG Hamburg court decision which says that all links to sites
+which may contain inproperly attributed photos are copyright
+violations.  And Wikipedia contains inproperly attributed photos of
+the suspected plaintiff of that case, Thomas Wolf.
