@@ -339,7 +339,7 @@ Variable sim-nick!
 
 : read-groups ( -- )
     "groups" .net2o/ 2dup file-status nip no-file# = IF
-	init-groups write-groups
+	init-groups write-groups 2drop  EXIT
     THEN  >included throw
     ['] read-groups-loop execute-parsing-named-file ;
 
@@ -355,7 +355,8 @@ Variable sim-nick!
 	groups[] $[]# 0 DO
 	    dup I groups[] $[]@ drop @
 	    or over = IF
-		I ke-groups c$+! I groups[] $[]@ drop cell+ @ invert and
+		I ke-groups c$+!
+		I groups[] $[]@ drop cell+ @ invert and
 	    THEN
 	LOOP
     THEN  drop ;
@@ -507,11 +508,11 @@ Variable unkey-id#
     ke-groups $@ groups>mask        ke-mask or! ;
 
 : add-group ( id o:key -- )
-    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $+! +group-perm ;
+    dup -1 = !!no-group!! -group-perm u>64 cmdtmp$ ke-groups $+! +group-perm ;
 : set-group ( id o:key -- )
-    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $! +group-perm ;
+    dup -1 = !!no-group!! -group-perm u>64 cmdtmp$ ke-groups $! +group-perm ;
 : sub-group ( id o:key -- )
-    dup -1 = !!no-group!! -group-perm cmdtmp$ ke-groups $@ 2over search
+    dup -1 = !!no-group!! -group-perm u>64 cmdtmp$ ke-groups $@ 2over search
     IF   nip >r nip ke-groups dup $@len r> - rot $del
     ELSE  2drop 2drop  THEN +group-perm ;
 
@@ -593,7 +594,7 @@ $11 net2o: privkey ( $:string -- )
     keypack c@ $F and ke-pwlevel !
     $> over keypad sk>pk \ generate pubkey
     keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
-    ke-sk sec! +seckey ;
+    ke-sk sec! +seckey "\0" ke-groups $! 0 groups[] $[]@ drop @ ke-mask ! ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
     \g key type (0: anon, 1: user, 2: group)
 +net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $!
