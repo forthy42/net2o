@@ -159,8 +159,18 @@ DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
 
 : .imports ( mask -- )
     imports$ import#new bounds DO
+	1 I imports$ - lshift >im-color
 	dup 1 and IF  I c@ emit  THEN  2/ LOOP
-    drop ;
+    drop <default> ;
+
+Create import-name$
+"I myself" s, "manual" s, "scan" s, "chat" s, "dht" s, "invited" s, "untrusted" s,
+
+: .import-colors ( -- )
+    import-name$
+    import#untrusted 1+ 0 ?DO
+	1 I lshift >im-color count 2dup type <default> space + aligned
+    LOOP drop ;
 
 \ sample key
 
@@ -419,6 +429,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
 : list-keys ( -- )
+    ." colors: " .import-colors cr
     ." num pubkey                                   date                     grp+perm	h nick" cr
     key# [: cell+ $@ drop cell+ ..key-list ;] #map ;
 : list-nicks ( -- )
