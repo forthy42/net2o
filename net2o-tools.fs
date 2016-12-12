@@ -28,41 +28,50 @@ require date.fs
 
 \ argument handling that works transparent from OS and Forth command line
 
-Defer ?nextarg
-Defer ?@nextarg
-Defer ?peekarg
+user-o arg-o
 
-: ?cmd-nextarg ( -- addr u t / f )
-    argc @ 1 > IF  next-arg true  ELSE  false  THEN ;
-: ?cmd-peekarg ( -- addr u t / f )
-    argc @ 1 > IF  1 arg true  ELSE  false  THEN ;
-: ?cmd-@nextarg ( -- addr u t / f )
+object class
+    umethod ?nextarg
+    umethod ?@nextarg
+    umethod ?peekarg
+end-class cmd-args-c
+
+align cmd-args-c , here constant cmd-args^
+
+: cmd-args ( -- )  cmd-args^ arg-o ! ;
+cmd-args
+
+:noname ( -- addr u t / f )
+    argc @ 1 > IF  next-arg true  ELSE  false  THEN ; to ?nextarg
+:noname ( -- addr u t / f )
+    argc @ 1 > IF  1 arg true  ELSE  false  THEN ; to ?peekarg
+:noname ( -- addr u t / f )
     argc @ 1 > IF
 	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
-    THEN  false ;
+    THEN  false ; to ?@nextarg
 
-: cmd-args ( -- )
-    ['] ?cmd-nextarg IS ?nextarg
-    ['] ?cmd-peekarg IS ?peekarg
-    ['] ?cmd-@nextarg IS ?@nextarg ;
+cmd-args-c class
+end-class word-args-c
+
+align word-args-c , here constant word-args^
+
+: word-args ( -- )  word-args^ arg-o ! ;
+
+word-args
 
 : parse-name" ( -- addr u )
     >in @ >r parse-name
     over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
 : ?word-nextarg ( -- addr u t / f )
-    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN ;
-: ?word-peekarg ( -- addr u t / f )  >in @ >r
-    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in ! ;
-: ?word-@nextarg ( -- addr u t / f )
+    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN
+; lastxt to ?nextarg
+:noname ( -- addr u t / f )  >in @ >r
+    parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in !
+; to ?peekarg
+:noname ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
     over c@ '@' = IF  rdrop 1 /string true  EXIT  THEN
-    r> >in ! 2drop false ;
-
-: word-args ( -- )
-    ['] ?word-nextarg IS ?nextarg
-    ['] ?word-peekarg IS ?peekarg
-    ['] ?word-@nextarg IS ?@nextarg ;
-word-args
+    r> >in ! 2drop false ; to ?@nextarg
 
 : arg-loop { xt -- }
     begin  ?nextarg  while  xt execute  repeat ;
@@ -240,8 +249,6 @@ debug: dummy(
     >r n>zz r> p!+ ;
 : ps@+ ( addr -- 64n addr' )
     p@+ >r zz>n r> ;
-
-[IFUNDEF] w, : w, ( w -- )  here w! 2 allot ; [THEN]
 
 \ bit reversing
 
