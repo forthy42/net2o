@@ -34,7 +34,9 @@ comp: execute postpone SLiteral ;
 : .85warn ( addr u -- )
     <warn> 85type <default> ;
 
-: sane-85 ( addr u -- addr' u' )
-    ['] 85type $tmp fn-sanitize ;
+: hash-85 ( addr u -- addr' u' )
+    ['] 85type $tmp hash-sanitize ;
+: chat-85 ( addr u -- addr' u' )
+    ['] 85type $tmp chat-sanitize ;
 : hash>filename ( addr u -- filename u' )
-    sane-85 [: config:objects$ $. '/' emit type ;] $tmp ;
+    hash-85 [: config:objects$ $. '/' emit type ;] $tmp ;

@@ -70,7 +70,7 @@ Variable saved-msg$
     ?.net2o/chats  n2o:new-msging >o
     dup msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
-    $@ >chatid sane-85 .chats/ enc-filename $!
+    $@ >chatid chat-85 .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : save-all-msgs ( -- )
@@ -92,7 +92,7 @@ Variable saved-msg$
     ['] msg-eval is write-decrypt ;
 
 : load-msg ( group u -- )  2dup >group
-    >chatid sane-85 .chats/ [: type ." .v2o" ;] $tmp
+    >chatid chat-85 .chats/ [: type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
     vault>msg  ['] decrypt-file catch

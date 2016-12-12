@@ -296,6 +296,8 @@ filechars $20 $FF fill
 filechars '/' -bit
 filechars #del -bit
 "\\:?*\q<>|%" 2Constant no-fat-chars
+no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
+
 \ '%' is allowed, but we use '%' to replace the others
 
 : .## ( n -- ) s>d <# # # #> type ;
@@ -306,7 +308,15 @@ filechars #del -bit
       LOOP ;] $10 base-execute ;
 
 : fn-sanitize ( addr u -- addr' u' )
-    ['] sane-type $tmp [IFDEF] >filename $unescape [THEN] ;
+    ['] sane-type $tmp ;
+
+false Value chat-sanitize?
+false Value hash-sanitize?
+
+: chat-sanitize ( addr u -- addr' u' )
+    chat-sanitize? IF  fn-sanitize  THEN ;
+: hash-sanitize ( addr u -- addr' u' )
+    hash-sanitize? IF  fn-sanitize  THEN ;
 
 \ config stuff
 
@@ -365,21 +375,28 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
 : .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
 : .objects/ ( addr u -- addr' u' )
-    fn-sanitize [: objects$  $. '/' emit type ;] $tmp ;
-: .no-fat-file ( -- addr u )
-    [: no-fat-chars type '.' emit getpid 0 .r ;] $tmp .objects/ ;
+    hash-sanitize [: objects$  $. '/' emit type ;] $tmp ;
+: objects/.no-fat-file ( -- addr u )
+    [: '.' emit no-fat-chars type ;] $tmp .objects/ ;
+: chats/.no-fat-file ( -- addr u )
+    [: '.' emit no-fat-chars type ;] $tmp .chats/ ;
 
 : ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
 : ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
 : ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
 
+: ?create-file ( addr u -- flag )
+    2dup file-status IF  drop
+	r/w create-file  IF  drop false  ELSE  close-file throw  true  THEN
+    ELSE  drop 2drop true  THEN ;
+
 : fsane-init ( -- )
-    ?.net2o/objects .no-fat-file r/w create-file IF drop
-	no-fat-chars bounds ?DO filechars I c@ -bit LOOP
-    ELSE
-	close-file throw .no-fat-file delete-file throw
-    THEN ;
+    false to hash-sanitize?
+    ?.net2o/objects objects/.no-fat-file ?create-file
+    0= to hash-sanitize?
+    ?.net2o/chats   chats/.no-fat-file   ?create-file
+    0= to chat-sanitize? ;
 
 Variable config-file$  "~/.net2o/config" config-file$ $!
 Variable configured?
