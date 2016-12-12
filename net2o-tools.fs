@@ -295,7 +295,7 @@ filechars $20 $FF fill
 0 filechars l! \ ctrl chars are all illegal
 filechars '/' -bit
 filechars #del -bit
-"\\:?*\q<>|%" 2Constant no-fat-chars
+: no-fat-chars ( addr u -- ) "\\:?*\q<>|%" ;
 no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
 
 \ '%' is allowed, but we use '%' to replace the others
@@ -373,7 +373,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
-: .chats/ ( addr u -- addr' u' ) [: chats$  $. '/' emit type ;] $tmp ;
+: .chats/ ( addr u -- addr' u' )
+    chat-sanitize [: chats$  $. '/' emit type ;] $tmp ;
 : .objects/ ( addr u -- addr' u' )
     hash-sanitize [: objects$  $. '/' emit type ;] $tmp ;
 : objects/.no-fat-file ( -- addr u )
@@ -392,7 +393,7 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
     ELSE  drop 2drop true  THEN ;
 
 : fsane-init ( -- )
-    false to hash-sanitize?
+    false to hash-sanitize?  false to chat-sanitize?
     ?.net2o/objects objects/.no-fat-file ?create-file
     0= to hash-sanitize?
     ?.net2o/chats   chats/.no-fat-file   ?create-file
