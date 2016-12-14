@@ -73,8 +73,11 @@ Datenschutzerklärung wahrheitsgemäß, noch kann er rechtssicher
 garantieren, dass die Inhalte dort alle einwandfrei lizenziert
 sind. Ferner bestehen aufgrund der im Rahmen der Reputationsprüfung
 erhobenen Fakten doch berechtigte Zweifel an seiner Kompetenz in
-Sachen IT und Recht, weshalb selbst eine Abgabe einer solchen
-Erklärung durch das LG Hamburg nicht glaubwürdig wäre. Die Kontrolle
-über die Site liegt auch offensichtlich teilweise bei der Axel
-Springer AG, deren Reputationsanalyse eindeutig ein negatives Ergebnis
-hatte.
+Sachen IT und Recht (u.a. auch wegen eines Freispruchs 2. Klasse durch
+einen Kollegen des LG Hamburgs für Ronald Schill, ehemaliger Richter
+am LG Hamburg, wegen Rechtsbeugung, die meiner Meinung nach eindeutig
+zu einer Verurteilung hätte führen müssen), weshalb selbst eine Abgabe
+einer solchen Erklärung durch das LG Hamburg nicht glaubwürdig
+wäre. Die Kontrolle über die Technik der Site liegt auch
+offensichtlich teilweise bei der Axel Springer AG, deren
+Reputationsanalyse eindeutig ein negatives Ergebnis hatte.
