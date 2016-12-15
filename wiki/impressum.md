@@ -66,6 +66,22 @@ liegt daher allein bei den Betreibern dieser Sites.
 Anfragen mir gegenüber, ob meine Inhalte alle "sauber" sind, fasse ich
 als Beleidigung auf, und weise die Unterstellung zurück.
 
+### Link-Prüfung ###
+
+Bei der Prüfung lasse ich mich von folgenden Grundsätzen leiten:
+
+  + Leumund: ist mir ein Mitglied oder ehemaliges Mitglied der
+    Betreiber bekannt, das einen bekannt schlechten Leumund hat? Wenn
+    nicht, gehe ich von einer guten Reputation aus. Herangezogene
+    Quellen: Öffentliche Informationen.
+  + Wahrheitsgehalt von Angaben in Pflichtfeldern wie Impressum oder
+    Datenschutzerklärung: Werden hier keine offensichtlich erkennbaren
+    Falschangaben gemacht, gehe ich von einer guten Reputation aus.
+  + Ansonsten wird erst nach Kenntnisnahme über mögliche
+    Rechtsverletzung entschieden. Kenntnisnahme bedeutet keine
+    Anerkennung, dass die behauptete Rechtsverletzung auch zutreffend
+    ist.
+
 Hier müsste nun ein Link auf das Urteil des LG Hamburgs (Az. 310 O
 402/16) stehen; der Betreiber ist aber bei meiner Reputationsanalyse
 durchgefallen. Weder war zum Zeitpunkt der Prüfung seine
