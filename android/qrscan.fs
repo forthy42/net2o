@@ -81,6 +81,26 @@ $D0 Value color-level#
 : .green ( -- ) green-buf .buf ;
 : .blue  ( -- ) blue-buf .buf ;
 
+: mixgr>32 ( 16red 16green -- 32result )
+    0 $10 0 DO
+	2* 2*
+	over $E rshift 2 and or >r
+	over $F rshift 1 and r> or >r
+	2* swap 2* swap r>
+    LOOP  nip nip ;
+
+$40 buffer: guessbuf
+
+: >guess ( -- addr u )
+    guessbuf
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
+    [ scan-w 2 rshift dup scan-w 8 - * swap 2/ 1- + ]L DO
+	red-buf   $@ drop I + w@
+	green-buf $@ drop I + w@ mixgr>32
+	over l! 4 +
+    [ scan-w 2 rshift ]L +LOOP
+    drop guessbuf $40 ;
+
 : |min| ( a b -- ) over abs over abs < select ;
 
 $8000 Constant init-xy
@@ -176,6 +196,7 @@ tex: scan-tex
     scan-frame0 scan-grab search-corners
     ?legit IF  scan-legit  0>framebuffer
 	visual-frame x-spos sf@ y-spos sf@ .xpoint
+	extract-red extract-green >guess 85type cr
     ELSE  0>framebuffer ." not legit" cr  THEN
     need-sync off ;
 : scan-loop ( -- )

@@ -24,7 +24,7 @@ require net2o-tools.fs
 20 Constant keyqr# \ key qr codes are 20x20 blocks
 keyqr# dup * Constant keyqr#²
 $40 Constant keymax#
-  8 Constant keyline#
+  4 Constant keyline#
 
 keyqr#² buffer: keyqr
 
@@ -49,17 +49,18 @@ keyqr#² buffer: keyqr
     $06 keyqr keyqr#² + keyqr# - c!
     $07 keyqr keyqr#² + 1- c! ;
 : byte>pixel ( byte addr -- )
+    \ a byte is converted into four pixels:
+    \ MSB green red | green red | green red | green red LSB
     over 6 rshift over c! 1+
-    over 4 rshift 3 and over c! keyqr# 1- +
+    over 4 rshift 3 and over c! 1+
     over 2 rshift 3 and over c! 1+
     swap 3 and swap c! ;
 
 : >keylines ( addr u -- )
     keyqr keyqr# 1+ 2* + -rot keymax# umin bounds ?DO
-	dup I keyline# bounds ?DO
-	    I c@ over byte>pixel  2 +
-	LOOP  drop
-	[ keyqr# 2* ]L +
+	I keyline# bounds ?DO
+	    I c@ over byte>pixel 4 +
+	LOOP  4 +
     keyline# +LOOP  drop ;
 
 \ generate ECC
@@ -87,7 +88,7 @@ Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 	i c@ xor  keyqr# +LOOP	I keyqr#² keyqr# 3 * - + c!
     LOOP ;
 
-: >ecc ( addr u -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;
+: >ecc ( -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;
 
 : .keyqr ( addr u -- ) \ 64 bytes
     >keyframe >keylines >ecc keyqr keyqr# qr.block ;
