@@ -93,12 +93,12 @@ $40 buffer: guessbuf
 
 : >guess ( -- addr u )
     guessbuf
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
-    [ scan-w 2 rshift dup scan-w 8 - * swap 2/ 1- + ]L DO
-	red-buf   $@ drop I + w@
-	green-buf $@ drop I + w@ mixgr>32
-	over l! 4 +
-    [ scan-w 2 rshift ]L +LOOP
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
+    [ scan-w 2 rshift dup scan-w 7 + * swap 2/ 1- + ]L DO
+	red-buf   $@ drop I + be-uw@
+	green-buf $@ drop I + be-uw@ mixgr>32
+	over be-l! 4 +
+    [ scan-w 2 rshift ]L -LOOP
     drop guessbuf $40 ;
 
 : |min| ( a b -- ) over abs over abs < select ;
