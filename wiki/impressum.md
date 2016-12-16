@@ -97,5 +97,5 @@ einer solchen Erklärung durch das LG Hamburg nicht glaubwürdig
 wäre. Die Kontrolle über die Technik der Site liegt auch
 offensichtlich teilweise bei der Axel Springer AG, deren
 Reputationsanalyse eindeutig ein negatives Ergebnis hatte. Beiden
-Gruppen fehlt es an der erforderlichen Konsequenz, bekannte
+Betreibern fehlt es an der erforderlichen Konsequenz, bekannte
 Rechtsverstöße abzustellen, d.h. es droht Wiederholungsgefahr.
