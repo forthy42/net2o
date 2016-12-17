@@ -35,14 +35,17 @@ scan-w dup * 1- 2/ 1+ Constant buf-len
 
 also opengl also android
 
-: draw-scan ( orientation -- )
+: v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
+
+: draw-scan ( direction -- )
+    \G draw a scan rotated by rangle
     v0 i0 >v
-    1e -1e { f: s f: -s }
-    -s  s >xy n> rot>st   $000000FF rgba>c v+
-     s  s >xy n> rot>st   $000000FF rgba>c v+
-     s -s >xy n> rot>st   $000000FF rgba>c v+
-    -s -s >xy n> rot>st   $000000FF rgba>c v+
-    v>  drop  0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
+    1e fdup fnegate { f: s f: -s }
+     -s  s >xy n> rot>st   $000000FF rgba>c v+
+      s  s >xy n> rot>st   $000000FF rgba>c v+
+      s -s >xy n> rot>st   $000000FF rgba>c v+
+     -s -s >xy n> rot>st   $000000FF rgba>c v+
+    v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
 : scan-frame0 ( -- )
@@ -126,10 +129,10 @@ $8000 Constant init-xy
     scan-w + >r scan-w + r>
     scan-w 2* * + sfloats scan-buf1 $@ drop + be-ul@ ;
 
-2Variable p0
-2Variable p1
-2Variable p2
-2Variable p3
+2Variable p0 \ top left
+2Variable p1 \ top right
+2Variable p2 \ bottom left
+2Variable p3 \ bottom right
 2Variable px ( cross of the two lines )
 
 : search-corners ( -- )
@@ -157,6 +160,28 @@ $8000 Constant init-xy
     dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f/ { f: y }
     x f>s y f>s px 2!  x y ;
 
+: p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
+    rot + >r + r> ;
+: p2* ( x1 y1 -- x2 y2 )
+    2* swap 2* swap ;
+: p2/ ( x1 y1 -- x2 y2 )
+    2/ swap 2/ swap ;
+: p- ( x1 y1 x2 y2 -- x1-x2 y1-y2 )
+    rot swap - >r - r> ;
+
+
+: delta-x ( -- r )
+    p0 2@ p1 2@ p- dup * swap dup * + s>f fsqrt
+    p2 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
+: delta-y ( -- r )
+    p0 2@ p2 2@ p- dup * swap dup * + s>f fsqrt
+    p1 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
+
+: compute-angle { f: dx f: dy -- rangle }
+    p0 2@ p1 2@ p+ px 2@ p2* p- s>f s>f         fswap         fatan2
+    p2 2@ p3 2@ p+ px 2@ p2* p- s>f s>f fnegate fswap fnegate fatan2
+    f+ f2/ ;
+
 : scan-grab ( -- )
     0 0 scan-w 2* dup
     2dup * sfloats scan-buf1 $!len
@@ -176,11 +201,18 @@ tex: scan-tex
     scan-tex  0e 0e 0e 1e glClearColor
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
 : scan-legit ( -- ) \ resize a legit QR code
+    delta-x delta-y { f: dx f: dy }
     compute-xpoint
-    $13 s>f p0       @ p3       @ - fm/ y-scale sf!
-    $13 s>f p3 cell+ @ p0 cell+ @ - fm/ x-scale sf!
-    scan-w fm/ fnegate y-scale sf@ f* y-spos sf!
-    scan-w fm/ fnegate x-scale sf@ f* x-spos sf!
+    dx dy compute-angle { f: angle }
+    $13 s>f dx f/ y-scale sf!
+    $13 s>f dy f/ x-scale sf!
+    angle fsincos
+    x-scale sf@ ftuck f* x-scale             sf! f* x-scale sfloat+ sf!
+    [ pi f2/ ] FLiteral angle f+ fsincos
+    y-scale sf@ ftuck f* y-scale 1 sfloats - sf! f* y-scale         sf!
+    scan-w negate fm/ fswap  scan-w negate fm/  fover fover  fswap
+    y-scale sf@ f* fswap x-scale sfloat+     sf@ f* f+ y-spos sf!
+    x-scale sf@ f* fswap y-scale 1 sfloats - sf@ f* f+ x-spos sf!
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix clear
     0 draw-scan scan-grab ;
@@ -189,7 +221,8 @@ tex: scan-tex
     oes-program init
     unit-matrix MVPMatrix set-matrix
     unit-matrix MVMatrix set-matrix
-    media-tex nearest-oes screen-orientation draw-scan sync ;
+    media-tex nearest-oes
+    screen-orientation draw-scan sync ;
 
 : scan-once ( -- )
     camera-init scan-w 2* dup scan-fb >framebuffer
