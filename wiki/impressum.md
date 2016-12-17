@@ -90,12 +90,15 @@ garantieren, dass die Inhalte dort alle einwandfrei lizenziert
 sind. Ferner bestehen aufgrund der im Rahmen der Reputationsprüfung
 erhobenen Fakten doch berechtigte Zweifel an seiner Kompetenz in
 Sachen IT und Recht (u.a. auch wegen eines Freispruchs 2. Klasse durch
-einen Kollegen des LG Hamburgs für Ronald Schill, ehemaliger Richter
-am LG Hamburg, wegen Rechtsbeugung, die meiner Meinung nach eindeutig
-zu einer Verurteilung hätte führen müssen), weshalb selbst eine Abgabe
-einer solchen Erklärung durch das LG Hamburg nicht glaubwürdig
-wäre. Die Kontrolle über die Technik der Site liegt auch
-offensichtlich teilweise bei der Axel Springer AG, deren
-Reputationsanalyse eindeutig ein negatives Ergebnis hatte. Beiden
-Betreibern fehlt es an der erforderlichen Konsequenz, bekannte
-Rechtsverstöße abzustellen, d.h. es droht Wiederholungsgefahr.
+das LG Hamburgs für Ronald Schill, ehemaliger Amtsrichter, wegen
+Rechtsbeugung, die meiner Meinung nach eindeutig zu einer Verurteilung
+hätte führen müssen, wobei der Freispruch auch schon durch eine
+Fehleinschätzung des BGHs begünstigt wurde), weshalb selbst eine
+Abgabe einer solchen Erklärung durch das LG Hamburg nicht glaubwürdig
+wäre - dem LG Hamburg fehlt die Kraft, Unrecht auch zu verfolgen, wenn
+es aus den eigenen Reihen kommt. Die Kontrolle über die Technik der
+Site liegt auch offensichtlich teilweise bei der Axel Springer AG,
+deren Reputationsanalyse eindeutig ein negatives Ergebnis
+hatte. Beiden Betreibern fehlt es an der erforderlichen Konsequenz,
+bekannte Rechtsverstöße abzustellen, d.h. es droht
+Wiederholungsgefahr.
