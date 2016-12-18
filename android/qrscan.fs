@@ -26,6 +26,8 @@ Create scan-matrix
 0.0e sf, 0.0e sf, 0.0e sf, 1.0e sf,
 
 scan-matrix  0 sfloats + Constant x-scale
+scan-matrix  1 sfloats + Constant y-rots
+scan-matrix  4 sfloats + Constant x-rots
 scan-matrix  5 sfloats + Constant y-scale
 scan-matrix 12 sfloats + Constant x-spos
 scan-matrix 13 sfloats + Constant y-spos
@@ -204,15 +206,14 @@ tex: scan-tex
     delta-x delta-y { f: dx f: dy }
     compute-xpoint
     dx dy compute-angle { f: angle }
-    $13 s>f dx f/ y-scale sf!
-    $13 s>f dy f/ x-scale sf!
-    angle fsincos
-    x-scale sf@ ftuck f* x-scale             sf! f* x-scale sfloat+ sf!
-    [ pi f2/ ] FLiteral angle f+ fsincos
-    y-scale sf@ ftuck f* y-scale 1 sfloats - sf! f* y-scale         sf!
+    $13 s>f dx f/ { f: sx } $13 s>f dy f/ { f: sy }
+    angle fsincos fover fover
+    sx f* x-scale sf! sy f* y-rots  sf!
+    fswap fnegate
+    sx f* x-rots  sf! sy f* y-scale sf!
     scan-w negate fm/ fswap  scan-w negate fm/  fover fover  fswap
-    y-scale sf@ f* fswap x-scale sfloat+     sf@ f* f+ y-spos sf!
-    x-scale sf@ f* fswap y-scale 1 sfloats - sf@ f* f+ x-spos sf!
+    y-scale sf@ f* fswap y-rots sf@ f* f+ y-spos sf!
+    x-scale sf@ f* fswap x-rots sf@ f* f+ x-spos sf!
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix clear
     0 draw-scan scan-grab ;
