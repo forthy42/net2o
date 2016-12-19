@@ -68,24 +68,24 @@ keyqr#² buffer: keyqr
 \ swap bit 0 and bit 1
 Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 
-: >ecc1 ( -- )
+: >ecc1 ( -- ) \ left ecc
     keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
-	0 I 2 + keyqr# 4 - bounds ?DO
+	1 I 2 + keyqr# 4 - bounds ?DO
 	i c@ xor  i 1+ c@ 0.1-swap xor  2 +LOOP  I 1 + c!
     keyqr# +LOOP ;
-: >ecc2 ( -- )
+: >ecc2 ( -- ) \ right ecc
     keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
-	0 I 2 + keyqr# 4 - bounds ?DO  i c@ xor  LOOP  I keyqr# 2 - + c!
+	2 I 2 + keyqr# 4 - bounds ?DO  i c@ xor  LOOP  I keyqr# 2 - + c!
     keyqr# +LOOP ;
-: >ecc3 ( -- )
+: >ecc3 ( -- ) \ top ecc
     keyqr keyqr# + 1+ keyqr# 2 - bounds ?DO
 	0 I keyqr# + keyqr#² keyqr# 4 * - bounds ?DO
-	i c@ xor  i keyqr# + c@ 0.1-swap xor  keyqr# 2* +LOOP  I c!
+	I c@ xor  i keyqr# + c@ 0.1-swap xor  keyqr# 2* +LOOP  I c!
     LOOP ;
-: >ecc4 ( -- )
+: >ecc4 ( -- ) \ bottom ecc
     keyqr keyqr# + 1+ keyqr# 2 - bounds ?DO
-	0 I keyqr# + keyqr#² keyqr# 3 * - bounds ?DO
-	i c@ xor  keyqr# +LOOP	I keyqr#² keyqr# 3 * - + c!
+	3 I keyqr# + keyqr#² keyqr# 3 * - bounds ?DO
+	I c@ xor  keyqr# +LOOP  I keyqr#² keyqr# 3 * - + c!
     LOOP ;
 
 : >ecc ( -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;

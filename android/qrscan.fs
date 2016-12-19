@@ -106,6 +106,34 @@ $40 buffer: guessbuf
     [ scan-w 2 rshift ]L -LOOP
     drop guessbuf $40 ;
 
+$8 buffer: guessecc1
+$18 buffer: guessecc2
+
+: ecc-hor@ ( off -- w1 w2 ) >r
+    red-buf   $@ drop r@ + be-uw@
+    green-buf $@ drop r> + be-uw@ ;
+: ecc-ver@ ( -- )
+    guessecc2
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
+    [ scan-w 2 rshift dup scan-w 7 + * swap 2/ 1- + ]L DO
+	red-buf   $@ drop I + 1 - c@ 1 and 2*
+	green-buf $@ drop I + 1 - c@ 1 and or 2*
+	red-buf   $@ drop I + 2 + c@ 7 rshift 1 and or 2*
+	green-buf $@ drop I + 2 + c@ 7 rshift 1 and or 2* 6 xor
+	over c! 1+
+    [ scan-w 2 rshift ]L -LOOP drop ;
+
+: >guessecc ( -- )
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L ecc-hor@
+    mixgr>32 invert guessecc1 be-l!
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L ecc-hor@
+    swap mixgr>32 guessecc1 4 + be-l!
+    ecc-ver@ ;
+: >ecc-row ( addr u -- value )
+    0 -rot bounds ?DO  I be-ul@ xor  4 +LOOP ;
+: ecc-ok? ( addr u -- flag )
+    >ecc-row dup guessecc1 be-ul@ = swap guessecc1 4 + be-ul@ = and ;
+
 : |min| ( a b -- ) over abs over abs < select ;
 
 $8000 Constant init-xy
@@ -198,6 +226,7 @@ $8000 Constant init-xy
 
 tex: scan-tex
 0 Value scan-fb
+19e FValue scansize
 
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
@@ -206,7 +235,7 @@ tex: scan-tex
     delta-x delta-y { f: dx f: dy }
     compute-xpoint
     dx dy compute-angle { f: angle }
-    $13 s>f dx f/ { f: sx } $13 s>f dy f/ { f: sy }
+    scansize dx f/ { f: sx } scansize dy f/ { f: sy }
     angle fsincos fover fover
     sx f* x-scale sf! sy f* y-rots  sf!
     fswap fnegate
@@ -229,9 +258,13 @@ tex: scan-tex
     camera-init scan-w 2* dup scan-fb >framebuffer
     scan-frame0 scan-grab search-corners
     ?legit IF  scan-legit  0>framebuffer
-	visual-frame x-spos sf@ y-spos sf@ .xpoint
-	extract-red extract-green >guess 85type cr
-    ELSE  0>framebuffer ." not legit" cr  THEN
+	visual-frame
+	extract-red extract-green >guess
+	>guessecc 2dup ecc-ok? IF
+	    x-spos sf@ y-spos sf@ .xpoint
+	    cr 85type cr
+	ELSE  2drop ." |"  THEN
+    ELSE  0>framebuffer ." -"  THEN
     need-sync off ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
