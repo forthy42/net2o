@@ -13,17 +13,20 @@ always the one of the forwarder node (the DHT node you use to announce
 yourself), not the user's home IP itself.  Similar to a carrier grade
 NAT, this information alone is useless.
 
-## Visitor informations stored on this website ##
+## Angaben gemäß §13 TMG ##
 
-I store IP, accessed host, date, request, and browser ID for each
-access; this is log-rotated weekly and eventually deleted.  Logs are
-only analyzed occasionally, and only kept in order to analyze attacks.
+Alle hier erhobenen Daten werden in Deutschland gespeichert.
+
+Für jeden Zugtriff werden IP-Adresse, Datum, Zugriffs-Host und -URL
+und die Browser-ID gespeichert. Logs werden wöchentlich rotiert und
+nach einigen Wochen gelöscht.
 
 ## Cookies ##
 
-Cookies are only set when you log in; the cookie is kept for one year.
-If you never log in, no cookie is set.
+Cookies werden nur gesetzt, wenn man sich einloggt (auch
+anonym). Diese Cookies werden ein Jahr lang in dem Browser-Directory
+des Nutzers selbst gespeichert.
 
 ## Trackers ##
 
-I don't use trackers for this site.
+Ich verwende keine Tracker.
