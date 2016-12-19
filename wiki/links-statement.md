@@ -1,5 +1,4 @@
-Links
-=====
+# Links #
 
 Ich bin nach eingehender Überprüfung der nicht von mir selbst
 betriebenen verlinkten Seiten auf Reputationsbasis zum Ergebnis
@@ -20,7 +19,7 @@ liegt daher allein bei den Betreibern dieser Sites.
 Anfragen mir gegenüber, ob meine Inhalte alle "sauber" sind, fasse ich
 als Beleidigung auf, und weise die Unterstellung zurück.
 
-### Link-Prüfung ###
+## Link-Prüfung ##
 
 Bei der Prüfung lasse ich mich von folgenden Grundsätzen leiten:
 
