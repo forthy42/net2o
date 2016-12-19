@@ -21,15 +21,22 @@ als Beleidigung auf, und weise die Unterstellung zurück.
 
 ## Link-Prüfung ##
 
-Bei der Prüfung lasse ich mich von folgenden Grundsätzen leiten:
+Bei der Prüfung lasse ich mich von folgenden Grundsätzen, abgeleitet
+aus dem allgemeinen Persönlichkeitsrecht, der Verhältnismäßigkeit der
+Mittel und insbesondere der Unschuldsvermutung leiten:
 
   + Leumund: ist mir ein Mitglied oder ehemaliges Mitglied der
     Betreiber bekannt, das einen bekannt schlechten Leumund hat? Wenn
     nicht, gehe ich von einer guten Reputation aus. Herangezogene
     Quellen: Öffentliche Informationen.
+
   + Wahrheitsgehalt von Angaben in Pflichtfeldern wie Impressum oder
     Datenschutzerklärung: Werden hier keine offensichtlich erkennbaren
-    Falschangaben gemacht, gehe ich von einer guten Reputation aus.
+    Falschangaben gemacht, gehe ich, sofern nicht bei der
+    Leumundsprüfung bereits gegensätzliches festgestellt wurde, von
+    einer guten Reputation aus. Verwendete Werkzeuge: Browser-Info
+    über Cookies, uBlock Origin und Privacy Badger für Tracker.
+
   + Ansonsten wird erst nach Kenntnisnahme über mögliche
     Rechtsverletzung entschieden. Kenntnisnahme bedeutet keine
     Anerkennung, dass die behauptete Rechtsverletzung auch zutreffend
@@ -42,16 +49,21 @@ Datenschutzerklärung wahrheitsgemäß, noch kann er rechtssicher
 garantieren, dass die Inhalte dort alle einwandfrei lizenziert
 sind. Ferner bestehen aufgrund der im Rahmen der Reputationsprüfung
 erhobenen Fakten doch berechtigte Zweifel an seiner Kompetenz in
-Sachen IT und Recht (u.a. auch wegen eines Freispruchs 2. Klasse durch
-das LG Hamburgs für Ronald Schill, ehemaliger Amtsrichter, wegen
-Rechtsbeugung, die meiner Meinung nach eindeutig zu einer Verurteilung
-hätte führen müssen, wobei der Freispruch auch schon durch eine
-Fehleinschätzung des BGHs begünstigt wurde), weshalb selbst eine
-Abgabe einer solchen Erklärung durch das LG Hamburg nicht glaubwürdig
-wäre - dem LG Hamburg fehlt die Kraft, Unrecht auch zu verfolgen, wenn
-es aus den eigenen Reihen kommt. Die Kontrolle über die Technik der
-Site liegt auch offensichtlich teilweise bei der Axel Springer AG,
-deren Reputationsanalyse eindeutig ein negatives Ergebnis
-hatte. Beiden Betreibern fehlt es an der erforderlichen Konsequenz,
-bekannte Rechtsverstöße abzustellen, d.h. es droht
-Wiederholungsgefahr.
+Sachen IT und Recht, weshalb selbst eine Abgabe einer solchen
+Erklärung durch das LG Hamburg nicht glaubwürdig wäre. Die Kontrolle
+über die Technik der Site liegt auch offensichtlich teilweise bei der
+Axel Springer AG, deren Reputation ebenfalls fragwürdig ist
+(allerdings besteht normalerweise kein Anlass, auf deren Seiten zu
+verlinken).
+
+## Rechtsanerkennung einer Abmahnung ##
+
+Wer vorgibt, einen Mandanten zu vertreten, möge dieses bitte bei der
+Abmahnung bereits gerichtsfest nachweisen. D.h. bei innerdeutscher
+Mandatur eine Kopie der Mandatur, bei internationalem Rechtsverkehr
+mit Beglaubigung, Überbeglaubigung und Apostille oder Legalisation (je
+nach Land). Es gibt zu viele Leute, die betrügerische Abmahnungen
+verschicken, ohne das Mandat überhaupt zu haben.
+
+Abmahnungen ohne erkennbare Mandatur können nicht berücksichtigt
+werden.
