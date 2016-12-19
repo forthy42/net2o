@@ -23,10 +23,12 @@ nach einigen Wochen gelöscht.
 
 ## Cookies ##
 
-Cookies werden nur gesetzt, wenn man sich einloggt (auch
-anonym). Diese Cookies werden ein Jahr lang in dem Browser-Directory
-des Nutzers selbst gespeichert.
+Cookies werden nur gesetzt, wenn man sich im Fossil-Repository
+einloggt (auch anonym). Diese Cookies werden ein Jahr lang in dem
+Browser-Directory des Nutzers selbst gespeichert, und können dort
+jederzeit gelöscht werden.
 
 ## Trackers ##
 
-Ich verwende keine Tracker.
+Ich verwende keine Tracker wie Google Analytics. Sollte jemand einen
+finden, ist das ein Bug, der formlos gemeldet werden kann.
