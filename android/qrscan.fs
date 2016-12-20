@@ -125,14 +125,20 @@ $18 buffer: guessecc2
 
 : >guessecc ( -- )
     [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L ecc-hor@
-    mixgr>32 invert guessecc1 be-l!
+    mixgr>32 guessecc1 be-l!
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L ecc-hor@
-    swap mixgr>32 guessecc1 4 + be-l!
+    mixgr>32 guessecc1 4 + be-l!
     ecc-ver@ ;
 : >ecc-row ( addr u -- value )
     0 -rot bounds ?DO  I be-ul@ xor  4 +LOOP ;
-: ecc-ok? ( addr u -- flag )
-    >ecc-row dup guessecc1 be-ul@ = swap guessecc1 4 + be-ul@ = and ;
+: >ecc-row2 ( addr u -- value )
+    0 -rot bounds ?DO
+	I     be-ul@ xor
+	I 4 + be-ul@ dup $AAAAAAAA and 1 rshift swap $55555555 and 2* or xor
+    8 +LOOP ;
+: ecc-ok? ( addr u -- flag )  2dup
+    >ecc-row  guessecc1     be-ul@ invert = >r
+    >ecc-row2 guessecc1 4 + be-ul@        = r> and ;
 
 : |min| ( a b -- ) over abs over abs < select ;
 
@@ -179,15 +185,15 @@ $8000 Constant init-xy
     p3 2@ init-xy dup d<> and ;
 
 : compute-xpoint ( -- rx ry )
-    p0 2@ s>f s>f fswap { f: x0 f: y0 }
-    p3 2@ s>f s>f fswap { f: x1 f: y1 }
-    p1 2@ s>f s>f fswap { f: x2 f: y2 }
-    p2 2@ s>f s>f fswap { f: x3 f: y3 }
+    p0 2@ s>f s>f { f: y0 f: x0 }
+    p3 2@ s>f s>f { f: y1 f: x1 }
+    p1 2@ s>f s>f { f: y2 f: x2 }
+    p2 2@ s>f s>f { f: y3 f: x3 }
     x0 y1 f* y0 x1 f* f- { f: dxy01 }
     x2 y3 f* y2 x3 f* f- { f: dxy23 }
-    x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- { f: det1 }
-    dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- det1 f/ { f: x }
-    dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f/ { f: y }
+    x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: det1 }
+    dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- det1 f* { f: x }
+    dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f* { f: y }
     x f>s y f>s px 2!  x y ;
 
 : p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
@@ -199,7 +205,6 @@ $8000 Constant init-xy
 : p- ( x1 y1 x2 y2 -- x1-x2 y1-y2 )
     rot swap - >r - r> ;
 
-
 : delta-x ( -- r )
     p0 2@ p1 2@ p- dup * swap dup * + s>f fsqrt
     p2 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
@@ -207,10 +212,17 @@ $8000 Constant init-xy
     p0 2@ p2 2@ p- dup * swap dup * + s>f fsqrt
     p1 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
 
-: compute-angle { f: dx f: dy -- rangle }
-    p0 2@ p1 2@ p+ px 2@ p2* p- s>f s>f         fswap         fatan2
-    p2 2@ p3 2@ p+ px 2@ p2* p- s>f s>f fnegate fswap fnegate fatan2
-    f+ f2/ ;
+: compute-angle { f: dx f: dy -- angle }
+    p0 2@ p1 2@ p+ p2 2@ p3 2@ p+ p- s>f s>f dy f* fswap dx f* fatan2 ;
+
+: transform-point ( x y -- rx' ry' )
+    swap s>f scan-w fm/ s>f scan-w fm/ 0e 1e { f^ x f^ y f^ z f^ t }
+    x 0e scan-matrix [ $10 sfloats ]L bounds DO
+	dup f@ I sf@ f* f+ float+
+    [ 4 sfloats ]L +LOOP  drop
+    x 0e scan-matrix sfloat+ [ $10 sfloats ]L bounds DO
+	dup f@ I sf@ f* f+ float+
+    [ 4 sfloats ]L +LOOP  drop ;
 
 : scan-grab ( -- )
     0 0 scan-w 2* dup
@@ -231,18 +243,36 @@ tex: scan-tex
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+: >spos ( dx dy -- )
+    scan-w negate fm/ fswap  scan-w negate fm/  fover fover  fswap
+    y-scale sf@ f* fswap y-rots sf@ f* f+ y-spos sf!
+    x-scale sf@ f* fswap x-rots sf@ f* f+ x-spos sf! ;
+: sf+! ( f addr -- ) dup sf@ f+ sf! ;
+: sf*! ( f addr -- ) dup sf@ f* sf! ;
+: >shear ( pend pstart -- r )
+    2@ transform-point { f: x2 f: y2 }
+    2@ transform-point { f: x3 f: y3 }
+    y3 y2 f- x3 x2 f- f/  ;
+: >scale2 ( -- )
+    p0 2@ transform-point { f: x0 f: y0 }
+    p1 2@ transform-point { f: x1 f: y1 }
+    p2 2@ transform-point { f: x2 f: y2 }
+    p3 2@ transform-point { f: x3 f: y3 }
+    scansize scan-w fm/
+    y0 y2 f- y1 y3 f- f+ f2/ f/
+    fdup y-rots sf*! y-scale sf*! ;
 : scan-legit ( -- ) \ resize a legit QR code
     delta-x delta-y { f: dx f: dy }
     compute-xpoint
-    dx dy compute-angle { f: angle }
     scansize dx f/ { f: sx } scansize dy f/ { f: sy }
+    dx dy compute-angle { f: angle }
     angle fsincos fover fover
     sx f* x-scale sf! sy f* y-rots  sf!
     fswap fnegate
     sx f* x-rots  sf! sy f* y-scale sf!
-    scan-w negate fm/ fswap  scan-w negate fm/  fover fover  fswap
-    y-scale sf@ f* fswap y-rots sf@ f* f+ y-spos sf!
-    x-scale sf@ f* fswap x-rots sf@ f* f+ x-spos sf!
+    >spos
+    p3 p2 >shear p1 p0 >shear f+ fnegate f2/ f2/ y-rots sf+!
+    >scale2
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix clear
     0 draw-scan scan-grab ;
@@ -264,11 +294,12 @@ tex: scan-tex
 	    x-spos sf@ y-spos sf@ .xpoint
 	    cr 85type cr
 	ELSE  2drop ." |"  THEN
-    ELSE  0>framebuffer ." -"  THEN
+    ELSE  0>framebuffer visual-frame ." -"  THEN
     need-sync off ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
-: scan-start ( -- )  hidekb
+: scan-start ( -- )
+    hidekb >changed  hidestatus >changed  screen+keep
     c-open-back to camera  scan-fb 0= IF  new-scantex  THEN
     ['] VertexShader ['] FragmentShader create-program to program
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
@@ -278,7 +309,7 @@ tex: scan-tex
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key? ;
 : scan-end ( -- )
-    [ what's key? ]L is key? cam-end ;
+    [ what's key? ]L is key? cam-end screen-keep showstatus ;
 
 previous previous
 
