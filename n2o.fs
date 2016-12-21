@@ -138,6 +138,16 @@ scope{ n2o
     \G keyqr: print qr of own key (default) or selected user's qr
     ?get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
+: keyscan ( -- )
+    \U keyscan|scankey
+    \G keyscan: scan a key in color QR form
+    ?get-me
+[IFDEF] scan-qr
+    ['] scanned-key is scan-result scan-qr
+[ELSE]
+    ." I'm sorry, no scanner implemented yet." cr
+[THEN] ;
+
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
     \G keysearch: search for keys prefixed with base85 strings,
@@ -245,6 +255,7 @@ synonym genkey keygen
 synonym listkey keylist
 synonym qrkey keyqr
 synonym searchkey keysearch
+synonym scankey keyscan
 
 \ encryption subcommands
 

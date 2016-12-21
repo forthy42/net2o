@@ -829,6 +829,16 @@ Variable cp-tmp
 : save-keys ( -- )  ?.net2o/keys
     save-pubkeys save-seckeys ;
 
+\ respond to scanning keys
+
+: scanned-key ( addr u -- )
+    ." scanned "  2dup .key-id cr
+    key| key# #@ IF
+	cell+ >o import#scan ke-imports or! o>  save-keys
+    THEN ;
+
+\ generate keys
+
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !

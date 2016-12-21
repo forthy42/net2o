@@ -111,7 +111,7 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$D0 Value color-level#
+$A0 Value color-level#
 
 : extract-buf ( offset buf -- )
     buf-len over $!len
@@ -300,6 +300,8 @@ tex: scan-tex
     media-tex nearest-oes
     screen-orientation draw-scan sync ;
 
+Defer scan-result ( -- )
+
 : scan-once ( -- )
     camera-init scan-w 2* dup scan-fb >framebuffer
     scan-frame0 scan-grab search-corners
@@ -307,10 +309,9 @@ tex: scan-tex
 	visual-frame
 	extract-red extract-green >guess
 	>guessecc 2dup ecc-ok? IF
-	    x-spos sf@ y-spos sf@ .xpoint
-	    cr 85type cr scan-inverse .mat
-	ELSE  2drop  ." |"  THEN
-    ELSE  0>framebuffer visual-frame ." -"  THEN
+	    scan-result  level# @ 0> level# +!
+	ELSE  2drop  ( ." |" )  THEN
+    ELSE  0>framebuffer visual-frame ( ." -" )  THEN
     need-sync off ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
@@ -323,9 +324,12 @@ tex: scan-tex
 
 : scan-key? ( -- flag )  defers key?  scan-once ;
 
-: scan-bg ( -- )  scan-start ['] scan-key? is key? ;
+: scan-bg ( -- )  scan-start ['] scan-key? is key?
+    [: 85type cr ;] is scan-result ;
 : scan-end ( -- )
     [ what's key? ]L is key? cam-end screen-keep showstatus ;
+: scan-qr ( -- )
+    scan-start  scan-loop  cam-end  screen-keep showstatus ;
 
 previous previous
 
