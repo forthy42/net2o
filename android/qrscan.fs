@@ -25,12 +25,64 @@ Create scan-matrix
 0.0e sf, 0.0e sf, 1.0e sf, 0.0e sf,
 0.0e sf, 0.0e sf, 0.0e sf, 1.0e sf,
 
-scan-matrix  0 sfloats + Constant x-scale
-scan-matrix  1 sfloats + Constant y-rots
-scan-matrix  4 sfloats + Constant x-rots
-scan-matrix  5 sfloats + Constant y-scale
-scan-matrix 12 sfloats + Constant x-spos
-scan-matrix 13 sfloats + Constant y-spos
+32 sfloats buffer: scan-inverse
+
+\ matrix inversion
+
+' dfloats alias 8*
+: .mat { mat -- }
+    4 0 DO  cr
+	8 0 DO
+	    mat J 8* I + sfloats + sf@ f.
+	LOOP
+    LOOP ;
+: init-scan' ( -- )
+    scan-inverse [ 32 sfloats ]L 2dup erase  bounds ?DO
+	1e fdup I sf! I [ 4 sfloats ]L + sf!
+    [ 9 sfloats ]L +LOOP ;
+: sfax+y8 ( ra addr1 addr2 -- )
+    [ 8 sfloats ]L bounds ?DO
+	dup sf@ fover I sf@ f* f+ dup sf! sfloat+
+    [ 1 sfloats ]L +LOOP  drop fdrop ;
+: sfax8 ( ra addr -- )
+    [ 8 sfloats ]L bounds ?DO
+	fdup I sf@ f* I sf!
+    [ 1 sfloats ]L +LOOP  fdrop ;
+: tij8 ( addr1 addr2 -- )
+    [ 8 sfloats ]L bounds ?DO
+	dup sf@ I sf@ dup sf! I sf! sfloat+
+    [ 1 sfloats ]L +LOOP  drop ;
+    
+: matrix-invert4 { mat -- } \ shortcut to invert typical matrix
+    mat sf@ fabs mat [ 8 sfloats ]L + sf@ fabs f< IF
+	mat dup [ 8 sfloats ]L + tij8 \ exchange two lines
+    THEN
+    4 0 DO
+	4 0 DO
+	    mat J [ 9 sfloats ]L * + sf@ 1/f
+	    I J <> IF
+		mat I 8* sfloats +
+		mat J 8* sfloats +
+		over J sfloats + sf@ f* fnegate sfax+y8
+	    ELSE
+		mat J 8* sfloats + sfax8
+	    THEN
+	    ( mat .mat cr ) \ debugging output
+	LOOP
+    LOOP ;
+
+scan-inverse  0 sfloats + Constant x-scale
+scan-inverse  1 sfloats + Constant y-rots
+scan-inverse  8 sfloats + Constant x-rots
+scan-inverse  9 sfloats + Constant y-scale
+scan-inverse 24 sfloats + Constant x-spos
+scan-inverse 25 sfloats + Constant y-spos
+
+: >scan-matrix ( -- )
+    scan-inverse matrix-invert4
+    scan-matrix [ scan-inverse 4 sfloats + ]L [ 32 sfloats ]L bounds ?DO
+	I over [ 4 sfloats ]L move  [ 4 sfloats ]L +
+    [ 8 sfloats ]L +LOOP  drop ;
 
 $40 Value scan-w
 scan-w dup * 1- 2/ 1+ Constant buf-len
@@ -205,25 +257,6 @@ $8000 Constant init-xy
 : p- ( x1 y1 x2 y2 -- x1-x2 y1-y2 )
     rot swap - >r - r> ;
 
-: delta-x ( -- r )
-    p0 2@ p1 2@ p- dup * swap dup * + s>f fsqrt
-    p2 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
-: delta-y ( -- r )
-    p0 2@ p2 2@ p- dup * swap dup * + s>f fsqrt
-    p1 2@ p3 2@ p- dup * swap dup * + s>f fsqrt f+ f2/ ;
-
-: compute-angle { f: dx f: dy -- angle }
-    p0 2@ p1 2@ p+ p2 2@ p3 2@ p+ p- s>f s>f dy f* fswap dx f* fatan2 ;
-
-: transform-point ( x y -- rx' ry' )
-    swap s>f scan-w fm/ s>f scan-w fm/ 0e 1e { f^ x f^ y f^ z f^ t }
-    x 0e scan-matrix [ $10 sfloats ]L bounds DO
-	dup f@ I sf@ f* f+ float+
-    [ 4 sfloats ]L +LOOP  drop
-    x 0e scan-matrix sfloat+ [ $10 sfloats ]L bounds DO
-	dup f@ I sf@ f* f+ float+
-    [ 4 sfloats ]L +LOOP  drop ;
-
 : scan-grab ( -- )
     0 0 scan-w 2* dup
     2dup * sfloats scan-buf1 $!len
@@ -243,36 +276,19 @@ tex: scan-tex
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
-: >spos ( dx dy -- )
-    scan-w negate fm/ fswap  scan-w negate fm/  fover fover  fswap
-    y-scale sf@ f* fswap y-rots sf@ f* f+ y-spos sf!
-    x-scale sf@ f* fswap x-rots sf@ f* f+ x-spos sf! ;
-: sf+! ( f addr -- ) dup sf@ f+ sf! ;
-: sf*! ( f addr -- ) dup sf@ f* sf! ;
-: >shear ( pend pstart -- r )
-    2@ transform-point { f: x2 f: y2 }
-    2@ transform-point { f: x3 f: y3 }
-    y3 y2 f- x3 x2 f- f/  ;
-: >scale2 ( -- )
-    p0 2@ transform-point { f: x0 f: y0 }
-    p1 2@ transform-point { f: x1 f: y1 }
-    p2 2@ transform-point { f: x2 f: y2 }
-    p3 2@ transform-point { f: x3 f: y3 }
-    scansize scan-w fm/
-    y0 y2 f- y1 y3 f- f+ f2/ f/
-    fdup y-rots sf*! y-scale sf*! ;
+: scale+rotate ( -- )
+    p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
+    s>f scansize f/ y-rots sf!  s>f scansize f/ x-scale sf!
+    p0 2@ p2 2@ p- p1 2@ p3 2@ p- p+ p2/
+    s>f scansize f/ y-scale sf!  s>f scansize f/ x-rots sf! ;
+: set-scan' ( -- )
+    compute-xpoint ( .. x y )
+    scale+rotate
+    scan-w fm/ y-spos sf!
+    scan-w fm/ x-spos sf! ;
+
 : scan-legit ( -- ) \ resize a legit QR code
-    delta-x delta-y { f: dx f: dy }
-    compute-xpoint
-    scansize dx f/ { f: sx } scansize dy f/ { f: sy }
-    dx dy compute-angle { f: angle }
-    angle fsincos fover fover
-    sx f* x-scale sf! sy f* y-rots  sf!
-    fswap fnegate
-    sx f* x-rots  sf! sy f* y-scale sf!
-    >spos
-    p3 p2 >shear p1 p0 >shear f+ fnegate f2/ f2/ y-rots sf+!
-    >scale2
+    init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix clear
     0 draw-scan scan-grab ;
@@ -292,8 +308,8 @@ tex: scan-tex
 	extract-red extract-green >guess
 	>guessecc 2dup ecc-ok? IF
 	    x-spos sf@ y-spos sf@ .xpoint
-	    cr 85type cr
-	ELSE  2drop ." |"  THEN
+	    cr 85type cr scan-inverse .mat
+	ELSE  2drop  ." |"  THEN
     ELSE  0>framebuffer visual-frame ." -"  THEN
     need-sync off ;
 : scan-loop ( -- )
