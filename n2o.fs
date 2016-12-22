@@ -142,7 +142,7 @@ scope{ n2o
 : keyscan ( -- )
     \U keyscan|scankey
     \G keyscan: scan a key in color QR form
-    ?get-me
+    ?get-me  ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
 [IFDEF] scan-qr
     ['] scanned-key is scan-result scan-qr
 [ELSE]

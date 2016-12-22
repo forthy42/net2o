@@ -111,20 +111,22 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$E8 Value color-level#
+$E8 Value blue-level#
+$80 Value green-level#
+$A0 Value red-level#
 
-: extract-buf ( offset buf -- )
+: extract-buf ( offset buf level -- ) { level }
     buf-len over $!len
     $@ drop swap
     scan-buf1 $@ >r + r> bounds ?DO  0
 	I 8 sfloats bounds DO
-	    2* I c@ color-level# > -
+	    2* I c@ level > -
 	cell +LOOP  over c! 1+
     8 sfloats +LOOP  drop ;
 
-: extract-red   ( -- )  0 red-buf   extract-buf ;
-: extract-green ( -- )  1 green-buf extract-buf ;
-: extract-blue  ( -- )  2 blue-buf  extract-buf ;
+: extract-red   ( -- )  0 red-buf   red-level#   extract-buf ;
+: extract-green ( -- )  1 green-buf green-level# extract-buf ;
+: extract-blue  ( -- )  2 blue-buf  blue-level#  extract-buf ;
 
 : .buf ( addr -- )
     [: 0 swap $@ bounds ?DO  cr
@@ -200,9 +202,9 @@ $8000 Constant init-xy
     scan-buf1 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup c@ color-level# u>= 1 and
-	    over 1+ c@ color-level# u>= 2 and or
-	    over 2 + c@ color-level# u>= 4 and or
+	    dup c@ red-level# u>= 1 and
+	    over 1+ c@ green-level# u>= 2 and or
+	    over 2 + c@ blue-level# u>= 4 and or
 	    mask = IF
 		I dup * J dup * +
 		x dup * y dup * + u< IF
@@ -236,6 +238,9 @@ $8000 Constant init-xy
     p2 2@ init-xy dup d<> and
     p3 2@ init-xy dup d<> and ;
 
+0.5e FValue xp+
+0.5e FValue yp+
+
 : compute-xpoint ( -- rx ry )
     p0 2@ s>f s>f { f: y0 f: x0 }
     p3 2@ s>f s>f { f: y1 f: x1 }
@@ -246,7 +251,7 @@ $8000 Constant init-xy
     x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: det1 }
     dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- det1 f* { f: x }
     dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f* { f: y }
-    x f>s y f>s px 2!  x y ;
+    x f>s y f>s px 2!  x xp+ f+ y yp+ f+ ;
 
 : p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
     rot + >r + r> ;
@@ -312,7 +317,7 @@ Variable skip-frames
 	skip-frames @ 0= IF  visual-frame  THEN
 	extract-red extract-green >guess
 	>guessecc 2dup ecc-ok? skip-frames @ 0= and IF
-	    scan-result  level# @ 0> level# +!
+	    scan-result
 	ELSE  2drop  THEN
     ELSE  0>framebuffer skip-frames @ 0= IF  visual-frame  THEN THEN
     need-sync off skip-frames @ 0> skip-frames +! ;
@@ -328,11 +333,13 @@ Variable skip-frames
 : scan-key? ( -- flag )  defers key?  scan-once ;
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key?
-    [: 85type space guessecc1 8 xtype cr ;] is scan-result ;
+    [: 85type space guessecc1 8 xtype cr level# @ 0> level# +! ;] is scan-result ;
 : scan-end ( -- )
     [ what's key? ]L is key? cam-end screen-keep showstatus ;
 : scan-qr ( -- )
-    scan-start  scan-loop  cam-end  screen-keep showstatus ;
+    scan-start  ['] scan-loop catch  level# off
+    cam-end  screen-keep showstatus
+    throw ;
 
 previous previous
 

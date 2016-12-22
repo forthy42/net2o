@@ -831,11 +831,16 @@ Variable cp-tmp
 
 \ respond to scanning keys
 
+true Value scan-once?
+
 : scanned-key ( addr u -- )
     ." scanned "  2dup .key-id cr
     key| key# #@ IF
 	cell+ >o [ 1 import#scan lshift ]L ke-imports or! .key-list cr o>
 	save-keys
+	[IFDEF] android [ also android ]
+	    level# @ 0> scan-once? and level# +!  [ previous ]
+	[THEN]
     ELSE  drop  THEN ;
 
 \ generate keys
