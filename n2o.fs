@@ -136,7 +136,8 @@ scope{ n2o
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
-    ?get-me ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
+    ?get-me init-client announce-me
+    ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keyscan ( -- )
     \U keyscan|scankey

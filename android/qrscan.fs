@@ -188,9 +188,9 @@ $8 buffer: guessecc1
 	I     be-ul@ xor
 	I 4 + be-ul@ dup $AAAAAAAA and 1 rshift swap $55555555 and 2* or xor
     8 +LOOP ;
-: ecc-ok? ( addr u -- flag )  2dup
+: ecc-ok? ( addr u -- flag )  2dup 0 skip nip 0<> >r
     >ecc-row  guessecc1     be-ul@ invert = >r
-    >ecc-row2 guessecc1 4 + be-ul@        = r> and ;
+    >ecc-row2 guessecc1 4 + be-ul@        = r> and r> and ;
 
 : |min| ( a b -- ) over abs over abs < select ;
 

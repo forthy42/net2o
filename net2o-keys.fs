@@ -836,7 +836,7 @@ Variable cp-tmp
     key| key# #@ IF
 	cell+ >o [ 1 import#scan lshift ]L ke-imports or! .key-list cr o>
 	save-keys
-    THEN ;
+    ELSE  drop  THEN ;
 
 \ generate keys
 
