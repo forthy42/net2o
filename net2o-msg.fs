@@ -246,7 +246,7 @@ event: ->msg-nestsig ( addr u o group -- )
 	ELSE
 	    start-gps
 	THEN ;
-    :noname ctrl U inskey ctrl D inskey ; is aback
+    :noname ctrl U inskey ctrl D inskey level# @ 0> level# +! ; is aback
     previous
 [ELSE]
     [IFDEF] has-gpsd?
