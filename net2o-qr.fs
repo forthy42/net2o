@@ -21,17 +21,21 @@ require net2o-tools.fs
 \ '▄' Constant lower-half-block
 \ '█' Constant solid-block
 
-20 Constant keyqr# \ key qr codes are 20x20 blocks
+24 Constant keyqr# \ key qr codes are 20x20 blocks
 keyqr# dup * Constant keyqr#²
 $40 Constant keymax#
-  4 Constant keyline#
+4 Constant keyline#
+8 Constant keylineskp#
 
 keyqr#² buffer: keyqr
 
+\ : half-blocks ( n -- ) 0 ?DO  upper-half-block xemit  LOOP ;
 : .prelines ( -- )
     rows keyqr# 2/ - 2/ 0 ?DO
+	\ [ red >fg green >bg or ]L attr!
 	<black> cols spaces <default> cr  LOOP ;
 : .preline ( -- )
+    \ [ red >fg green >bg or ]L attr!
     <black> cols keyqr# - 2/ spaces ;
 : qr.2lines ( addr u -- ) .preline
     tuck bounds ?DO
@@ -43,11 +47,15 @@ keyqr#² buffer: keyqr
 	I over qr.2lines <default> cr
     dup 2* +LOOP  drop .prelines ;
 
+: 4xc! ( c addr -- )
+    2dup c! 2dup 1+ c!  keyqr# +
+    2dup c! 1+ c! ;
+
 : >keyframe ( -- )  keyqr keyqr#² erase
-    $04 keyqr c!
-    $05 keyqr keyqr# + 1- c!
-    $06 keyqr keyqr#² + keyqr# - c!
-    $07 keyqr keyqr#² + 1- c! ;
+    $04 keyqr 4xc!
+    $05 keyqr keyqr# + 2 - 4xc!
+    $06 keyqr keyqr#² + keyqr# 2* - 4xc!
+    $07 keyqr keyqr#² + keyqr# - 2 - 4xc! ;
 : byte>pixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
@@ -57,10 +65,10 @@ keyqr#² buffer: keyqr
     swap 3 and swap c! ;
 
 : >keylines ( addr u -- )
-    keyqr keyqr# 1+ 2* + -rot keymax# umin bounds ?DO
+    keyqr keyqr# 1+ 2* 2* + -rot keymax# umin bounds ?DO
 	I keyline# bounds ?DO
 	    I c@ over byte>pixel 4 +
-	LOOP  4 +
+	LOOP  keylineskp# +
     keyline# +LOOP  drop ;
 
 \ generate ECC
@@ -69,26 +77,26 @@ keyqr#² buffer: keyqr
 Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
 
 : >ecc1 ( -- ) \ left ecc
-    keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
-	1 I 2 + keyqr# 4 - bounds ?DO
-	I c@ xor  I 1+ c@ 0.1-swap xor  2 +LOOP  I 1 + c!
+    keyqr keyqr# 3 * + keyqr# dup 6 - * bounds ?DO
+	1 I 4 + keyqr# 7 - bounds ?DO
+	I c@ xor  I 1+ c@ 0.1-swap xor  2 +LOOP  I 3 + c!
     keyqr# +LOOP ;
 : >ecc2 ( -- ) \ right ecc
-    keyqr keyqr# + keyqr# dup 2 - * bounds ?DO
-	2 I 2 + keyqr# 4 - bounds ?DO  i c@ xor  LOOP  I keyqr# 2 - + c!
+    keyqr keyqr# 3 * + keyqr# dup 6 - * bounds ?DO
+	2 I 4 + keyqr# 7 - bounds ?DO  i c@ xor  LOOP  I keyqr# 4 - + c!
     keyqr# +LOOP ;
 : >ecc3 ( -- ) \ top ecc
-    keyqr keyqr# + 1+ keyqr# 2 - bounds ?DO
-	0 I keyqr# + keyqr#² keyqr# 4 * - bounds ?DO
+    keyqr keyqr# 1+ 3 * 1+ + keyqr# 8 - bounds ?DO
+	0 I keyqr# + keyqr#² keyqr# 7 * - bounds ?DO
 	I c@ xor  I keyqr# + c@ 0.1-swap xor  keyqr# 2* +LOOP  I c!
     LOOP ;
 : >ecc4 ( -- ) \ bottom ecc
-    keyqr keyqr# + 1+ keyqr# 2 - bounds ?DO
-	3 I keyqr# + keyqr#² keyqr# 3 * - bounds ?DO
-	I c@ xor  keyqr# +LOOP  I keyqr#² keyqr# 3 * - + c!
+    keyqr keyqr# 1+ 3 * 1+ + keyqr# 8 - bounds ?DO
+	3 I keyqr# + keyqr#² keyqr# 7 * - bounds ?DO
+	I c@ xor  keyqr# +LOOP  I keyqr#² keyqr# 7 * - + c!
     LOOP ;
 
-: >ecc ( -- ) >ecc1 >ecc2 >ecc3 >ecc4 ;
+: >ecc ( -- ) >ecc3 >ecc4 >ecc1 >ecc2 ;
 
 : .keyqr ( addr u -- ) \ 64 bytes
     >keyframe >keylines >ecc keyqr keyqr# qr.block ;

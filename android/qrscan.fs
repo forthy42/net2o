@@ -111,7 +111,7 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$A0 Value color-level#
+$E8 Value color-level#
 
 : extract-buf ( offset buf -- )
     buf-len over $!len
@@ -159,19 +159,19 @@ $40 buffer: guessbuf
     drop guessbuf $40 ;
 
 $8 buffer: guessecc1
-$18 buffer: guessecc2
+#18 buffer: guessecc2
 
 : ecc-hor@ ( off -- w1 w2 ) >r
     red-buf   $@ drop r@ + be-uw@
     green-buf $@ drop r> + be-uw@ ;
 : ecc-ver@ ( -- )
     guessecc2
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    [ scan-w 2 rshift dup scan-w 7 + * swap 2/ 1- + ]L DO
+    [ scan-w 2 rshift dup scan-w #10 - * swap 2/ 1- + ]L
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L DO
 	red-buf   $@ drop I + 1 - c@ 1 and 2*
 	green-buf $@ drop I + 1 - c@ 1 and or 2*
 	red-buf   $@ drop I + 2 + c@ 7 rshift 1 and or 2*
-	green-buf $@ drop I + 2 + c@ 7 rshift 1 and or 2* 6 xor
+	green-buf $@ drop I + 2 + c@ 7 rshift 1 and or 6 xor
 	over c! 1+
     [ scan-w 2 rshift ]L -LOOP drop ;
 
@@ -271,7 +271,7 @@ $8000 Constant init-xy
 
 tex: scan-tex
 0 Value scan-fb
-19e FValue scansize
+20.2e FValue scansize
 
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
@@ -302,17 +302,20 @@ tex: scan-tex
 
 Defer scan-result ( -- )
 
+Variable skip-frames
+8 Value skip-frames#
+
 : scan-once ( -- )
     camera-init scan-w 2* dup scan-fb >framebuffer
     scan-frame0 scan-grab search-corners
     ?legit IF  scan-legit  0>framebuffer
-	visual-frame
+	skip-frames @ 0= IF  visual-frame  THEN
 	extract-red extract-green >guess
-	>guessecc 2dup ecc-ok? IF
+	>guessecc 2dup ecc-ok? skip-frames @ 0= and IF
 	    scan-result  level# @ 0> level# +!
-	ELSE  2drop  ( ." |" )  THEN
-    ELSE  0>framebuffer visual-frame ( ." -" )  THEN
-    need-sync off ;
+	ELSE  2drop  THEN
+    ELSE  0>framebuffer skip-frames @ 0= IF  visual-frame  THEN THEN
+    need-sync off skip-frames @ 0> skip-frames +! ;
 : scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )
@@ -320,12 +323,12 @@ Defer scan-result ( -- )
     c-open-back to camera  scan-fb 0= IF  new-scantex  THEN
     ['] VertexShader ['] FragmentShader create-program to program
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
-    cam-prepare ;
+    cam-prepare  skip-frames# skip-frames ! ;
 
 : scan-key? ( -- flag )  defers key?  scan-once ;
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key?
-    [: 85type cr ;] is scan-result ;
+    [: 85type space guessecc1 8 xtype cr ;] is scan-result ;
 : scan-end ( -- )
     [ what's key? ]L is key? cam-end screen-keep showstatus ;
 : scan-qr ( -- )

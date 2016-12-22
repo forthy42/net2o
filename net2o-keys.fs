@@ -834,7 +834,8 @@ Variable cp-tmp
 : scanned-key ( addr u -- )
     ." scanned "  2dup .key-id cr
     key| key# #@ IF
-	cell+ >o import#scan ke-imports or! o>  save-keys
+	cell+ >o [ 1 import#scan lshift ]L ke-imports or! .key-list cr o>
+	save-keys
     THEN ;
 
 \ generate keys
