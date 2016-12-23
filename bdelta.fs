@@ -24,6 +24,10 @@
 \ As all comments are stripped during the compilation, please
 \ insert the copyright notice of the original file here.
 
+[IFDEF] android
+    s" libbdelta.so" c-lib:open-path-lib drop
+[THEN]
+
 c-library bdelta
     \c #include <bdelta.h>
     s" bdelta" add-lib
