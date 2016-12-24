@@ -238,9 +238,6 @@ $8000 Constant init-xy
     p2 2@ init-xy dup d<> and
     p3 2@ init-xy dup d<> and ;
 
-0.5e FValue xp+
-0.5e FValue yp+
-
 : compute-xpoint ( -- rx ry )
     p0 2@ s>f s>f { f: y0 f: x0 }
     p3 2@ s>f s>f { f: y1 f: x1 }
@@ -251,7 +248,7 @@ $8000 Constant init-xy
     x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: det1 }
     dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- det1 f* { f: x }
     dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f* { f: y }
-    x f>s y f>s px 2!  x xp+ f+ y yp+ f+ ;
+    x f>s y f>s px 2!  x y ;
 
 : p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
     rot + >r + r> ;
