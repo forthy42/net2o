@@ -11,6 +11,8 @@ sh echo "=== Checkin 2 ==="
 diff
 ci -m "Another checkin 2"
 sh cat e a >>c
+sh echo "Line e" >>e
+sh echo "Line a" >>a
 sh echo "=== Checkin 3 ==="
 diff
 ci -m "Another checkin 3"
