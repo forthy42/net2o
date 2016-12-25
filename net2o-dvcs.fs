@@ -30,7 +30,6 @@ cmd-class class
     method patch
     method write
     method unzip
-    method spit
     method add
     
     }scope
@@ -200,9 +199,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     $10 !!>=order? $> dvcs:write ;
 +net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
     1 !!>=order? 64>n $> dvcs:unzip ; \ this is a stub
-+net2o: dvcs-spit ( $:perm+name -- ) \g write ot read-in
-    $10 !!>=order? $> dvcs:spit ; \ this is also a stub
-+net2o: dvcs-add ( $:hash -- ) \g add and read external hash reference
++net2o: dvcs-add ( $:hash -- ) \g add (and read) external hash reference
     1 !!>=order? $> dvcs:add ; \ this is a stub, too
 
 }scope
@@ -229,7 +226,6 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ; dvcs-class to dvcs:write
 ' !!FIXME!! ( 64size algo addr u --- ) dvcs-class to dvcs:unzip
-' !!FIXME!! ( addr u -- ) dvcs-class to dvcs:spit
 :noname ( addr u -- ) \ hash+perm+name
     dvcs:fileentry$ $off
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
@@ -244,7 +240,6 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 dvcs-adds to dvcs:write
 :noname 2drop drop 64drop ; dvcs-adds to dvcs:unzip
 :noname ( addr u -- ) dvcs:adds[] $+[]! ; dvcs-adds to dvcs:add
-:noname ( addr u -- ) dvcs:adds[] dup $[]# 1- swap $[]+! ; dvcs-adds to dvcs:spit
 
 : n2o:new-dvcs ( -- o )
     dvcs-class new >o  dvcs-table @ token-table !
@@ -351,6 +346,10 @@ User tmp1$
 : dvcs+out ( hash u -- )
     hash#128 umin dvcs-objects #@ dvcs:out-files$ $+! ;
 
+: file-size@ ( addr u -- 64size )
+    statbuf lstat ?ior statbuf st_size 64@
+    statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and ;
+
 also net2o-base
 
 : read-old-fs ( -- )
@@ -366,11 +365,10 @@ also net2o-base
     ref-files[] ['] 2drop $[]map ; \ !!FIXME!! stub!
 : write-new-fs ( -- )
     new-files[] [: 2dup hash#128 dvcs:perm /string $,
-	/name statbuf lstat ?ior statbuf st_size 64@
-	statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and lit,
-	dvcs-write ;] $[]map ;
+	/name file-size@ lit, dvcs-write ;] $[]map ;
 : write-ref-fs ( -- )
-    ref-files[] [: over hash#128 $, dvcs-add hash#128 /string $, dvcs-spit ;] $[]map ;
+    ref-files[] [: over hash#128 $, dvcs-add hash#128 /string 2dup $,
+	2 /string file-size@ lit, dvcs-write ;] $[]map ;
 : compute-patch ( -- )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
@@ -387,7 +385,8 @@ Variable id-files[]
 	id-files[] $ins[] drop ;] #map \ sort filenames
     [: id-files[] [:
 	    over hash#128 $, dvcs-read hash#128 /string
-	    0 dvcs:perm /string $, dvcs-spit
+	    0 dvcs:perm /string 2dup $,
+	    2 /string file-size@ lit, dvcs-write
 	;] $[]map ;] gen-cmd$
     dup IF  >file-hash  THEN ;
 
