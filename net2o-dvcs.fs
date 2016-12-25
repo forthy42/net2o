@@ -781,8 +781,9 @@ event: ->dvcs-sync-done ( o -- ) >o
 
 : +needed ( addr u -- )
     2dup enchash>filename file-status nip no-file# = IF
+	dvcs( ." need: " 2dup 85type cr )
 	sync-file-list[] $ins[] drop
-    ELSE  2drop  THEN ;
+    ELSE  dvcs( ." don't need: " 2dup 85type cr ) 2drop  THEN ;
 
 : #needed ( hash -- )
     cell+ $@ key| +needed ;

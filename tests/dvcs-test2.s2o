@@ -1,4 +1,4 @@
-sh echo "Genrate another file" >e
+sh echo "Generate another file" >e
 add e
 sh echo "=== Checkin 1 ==="
 diff

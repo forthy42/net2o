@@ -58,18 +58,23 @@ log
 up
 bye
 EOF
+echo "/bye" >&3
 
-#echo "/n2o script ../tests/dvcs-test2.s2o" >&3
+cd ../dvcs-test.d
+export NET2O_CONF=$PWD/.net2o/config
+$GFORTH ../n2o $* script tests/dvcs-test2.s2o
 
-#sleep 1 #wait for gforth to start the chat
-#cd ../dvcs-test.2
-#export NET2O_CONF=$PWD/.net2o/config
-#$GFORTH ../n2o $* cmd <<EOF
-#pull dvcs-test@test
-#log
-#up
-#bye
-#EOF
+exec 3> >($GFORTH ../n2o $* chat dvcs-test)
+export GFORTHPID=$[$!+1]
+sleep 1 #wait for gforth to start the chat
+cd ../dvcs-test.2
+export NET2O_CONF=$PWD/.net2o/config
+$GFORTH ../n2o $* cmd <<EOF
+pull dvcs-test@test
+log
+up
+bye
+EOF
 echo "/chats" >&3
 echo "/bye" >&3
 exec 3>&-
