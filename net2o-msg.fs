@@ -550,8 +550,7 @@ event: ->chat-sync-done ( -- )
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
-    n2o:close-all net2o-code expect-reply close-all end-code
-    7 ack-receive xorc!
+    n2o:close-all net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
     <event ->chat-sync-done wait-task @ event> ;
 : +sync-done ( -- )

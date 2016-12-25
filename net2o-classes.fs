@@ -221,9 +221,9 @@ cmd-class class
     field: data-b2b
     
     cfield: ack-state
+    cfield: ack-receive
     cfield: ack-resend~
     cfield: ack-resend#
-    cfield: ack-receive
     cfield: is-server
     
     field: req-codesize

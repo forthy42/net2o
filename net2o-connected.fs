@@ -47,6 +47,8 @@ connect-table $@ inherit-table context-table
 +net2o: slurp ( -- ) \g slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
++net2o: ack-reset ( -- ) \g reset ack state
+    0 ack-state c! ;
 
 \ object handles
 \g 
@@ -149,6 +151,8 @@ gen-table $freeze
 
 : net2o:gen-resend ( -- )
     recv-flag @ invert resend-toggle# and ulit, ack-resend ;
+: net2o:gen-reset ( -- )
+    ack-reset 0 ack-receive c! ;
 
 : rewind ( -- )
     data-rmap @ with mapc dest-back @ do-slurp @ umax endwith ulit, ack-flush ;
