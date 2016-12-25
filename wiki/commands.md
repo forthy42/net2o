@@ -156,6 +156,8 @@ List of Commands
   set top, flag is true when all data is sent
 + $2C slurp ( -- )
   slurp in tracked files
++ $2D ack-reset ( -- )
+  reset ack state
 
 ### file commands ###
 
