@@ -249,8 +249,8 @@ List of Commands
   key profile (hash of a resource)
 + $15 keymask ( x -- )
   key access right mask
-+ $16 keygroup ( x -- )
-  access group, stub
++ $16 keygroups ( $:groups -- )
+  access groups
 + $17 +keysig ( $:string -- )
   add a key signature
 + $18 keyimport ( n -- )
@@ -326,9 +326,11 @@ List of Commands
   start message
 + $21 msg-tag ( $:group -- )
   tagging (can be anywhere)
++ $22 msg-id ( $:id -- )
+  a hash id
 + $24 msg-signal ( $:pubkey -- )
   signal message to one person
-+ $25 msg-re ( $:hash type )
++ $25 msg-re ( $:hash )
   relate to some object
 + $26 msg-text ( $:msg -- )
   specify message string
@@ -336,8 +338,6 @@ List of Commands
   specify an object, e.g. an image
 + $28 msg-action ( $:msg -- )
   specify action string
-+ $29 msg-equiv ( $:object type -- )
-  equivalent object
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
 
@@ -354,7 +354,9 @@ List of Commands
 + $24 msg-reconnect ( $:pubkey+addr -- )
   rewire distribution tree
 + $25 msg-last? ( start end n -- )
-+ $26 msg-last ( $:[tick0,msgs,..tickn] -- )
++ $26 msg-last ( $:[tick0,msgs,..tickn] n -- )
++ $27 msg-otr ( -- )
+  this message is otr, don't save it
 + $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
 
@@ -374,3 +376,9 @@ that makes identical transactions have the same hash.
   apply patch, len is the size of the result
 + $24 dvcs-write ( $:perm+name size -- )
   write out file
++ $25 dvcs-unzip ( $:diffgz size algo -- $:diff )
+  unzip an object
++ $26 dvcs-spit ( $:perm+name -- )
+  write ot read-in
++ $27 dvcs-add ( $:hash -- )
+  add and read external hash reference

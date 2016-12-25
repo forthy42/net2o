@@ -474,7 +474,7 @@ previous
     false dup { slurp? stats? }
     net2o-code
     ack expect-reply
-    dup ack-receive !@ xor >r
+    ack-receive c@ over ack-receive c! over xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
 	net2o:gen-resend  net2o:genack
@@ -496,7 +496,7 @@ previous
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
-    IF  net2o:ack-code  ELSE  ack-receive @ xor  THEN  ack-timing ;
+    IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 

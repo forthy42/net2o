@@ -223,8 +223,8 @@ cmd-class class
     cfield: ack-state
     cfield: ack-resend~
     cfield: ack-resend#
+    cfield: ack-receive
     cfield: is-server
-    field: ack-receive
     
     field: req-codesize
     field: req-datasize
