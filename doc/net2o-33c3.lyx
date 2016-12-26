@@ -392,6 +392,18 @@ Legalize
 it (dragnet surveillance)
 \end_layout
 
+\begin_layout Description
+Kill
+\begin_inset space ~
+\end_inset
+
+the
+\begin_inset space ~
+\end_inset
+
+link LG Hamburg imposes obligations on link setters
+\end_layout
+
 \begin_layout Pause
 
 \end_layout
@@ -894,6 +906,43 @@ Audio/Video
 \end_inset
 
 Chat Real time data streaming (RSN)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Color QR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+For easy key exchange, scan a color QR image (work in progress)
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename colorqr.png
+	height 60theight%
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper

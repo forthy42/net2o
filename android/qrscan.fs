@@ -198,6 +198,16 @@ $8 buffer: guessecc1
 
 $8000 Constant init-xy
 
+: get-minmax ( addr u -- min max )
+    $FF $00 2swap
+    bounds ?DO
+	I c@ tuck umax >r umin r>
+    4 +LOOP ;
+: get-minmax-rgb ( -- minr maxr ming maxg minb maxb )
+    scan-buf1 $@ swap 3 bounds DO
+	I over get-minmax rot
+    LOOP  drop ;
+
 : search-corner { mask -- x y } init-xy dup { x y }
     scan-buf1 $@ drop
     scan-w dup negate DO
@@ -226,6 +236,7 @@ $8000 Constant init-xy
 2Variable px ( cross of the two lines )
 
 : search-corners ( -- )
+    \ get-minmax-rgb . . . . . . cr
     4 search-corner p0 2! \ top left
     5 search-corner p1 2! \ top right
     6 search-corner p2 2! \ bottom left
@@ -273,7 +284,7 @@ $8000 Constant init-xy
 
 tex: scan-tex
 0 Value scan-fb
-20.2e FValue scansize
+21e FValue scansize
 
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
