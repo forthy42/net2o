@@ -46,6 +46,8 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     $> host-key sec! ;
 +net2o: addr-revoke ( $:revoke -- ) \g revocation info
     $> host-revoke $! ;
++net2o: addr-ekey ( $:ekey timeout -- ) \g ephemeral key
+    host-ekey-to 64! $> host-ekey $! ;
 }scope
 
 gen-table $freeze
@@ -78,6 +80,7 @@ also net2o-base
     THEN
     host-route $@ dup IF  $, addr-route  ELSE  2drop  THEN
     host-key sec@ dup IF  sec$, addr-key  ELSE  2drop  THEN
+    host-ekey $@ dup IF  $, host-ekey-to 64@ ulit, addr-ekey  ELSE  2drop  THEN
     host-revoke $@ dup IF  $, addr-revoke  ELSE  2drop  THEN o> ; 
 previous
 : o>addr ( o -- addr u )

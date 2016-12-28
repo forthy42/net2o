@@ -17,7 +17,7 @@ since I'll redirect you to https in any case:
 
 Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
-update the repository data and install net2o, so as root enter:
+update the repository data and install net2o, so **as root** enter:
 
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
     deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips.mipsel,all] https://net2o.de/debian testing main

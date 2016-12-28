@@ -464,6 +464,69 @@ status open
 \end_layout
 
 \begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Where are the defects?
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename bugs-pie.pdf
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Bugs by phase 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hse238"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -580,7 +643,7 @@ Stack–oriented tokenized command language
 
 \end_deeper
 \begin_layout Enumerate
-Distributed data (files) and distributed metadata (prefix hash trie)
+Distributed data (files) and distributed metadata (DHT)
 \begin_inset Separator latexpar
 \end_inset
 
@@ -1630,6 +1693,61 @@ status open
 \begin_layout Plain Layout
 
 http://fossil.net2o.de/net2o
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Bibliography
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "hse238"
+
+\end_inset
+
+H
+\noun on
+ealth & Safety Executive HSE – UK
+\noun default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\emph on
+Out of control, 2nd edition 2003
+\emph default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://www.hse.gov.uk/pubns/priced/hsg238.pdf
 \end_layout
 
 \end_inset

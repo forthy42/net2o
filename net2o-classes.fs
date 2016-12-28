@@ -262,6 +262,8 @@ cmd-class class
     field: host-route  \ net2o route
     field: host-key    \ psk for connection setup
     field: host-revoke
+    field: host-ekey   \ ephemeral key a la MinimaLT
+    64field: host-ekey-to \ ephemeral key timeout
 end-class address-class
 
 \ cookies
