@@ -1436,7 +1436,7 @@ User remote?
 
 scope{ mapc
 
-: handle-data ( addr -- )  parent @ >o  o to connection
+: handle-data ( addr -- ) parent @ >o  o to connection
     msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " inbuf addr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;

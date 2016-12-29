@@ -495,12 +495,12 @@ previous
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
-: net2o:do-ack ( -- )
+: net2o:do-ack ( flag -- )
     dest-addr 64@ recv-addr 64! \ last received packet
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
-    IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  ack-timing ;
+    IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  nip ack-timing ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 
