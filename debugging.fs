@@ -34,6 +34,7 @@ debug: firstack(
 debug: msg(
 debug: stat(
 debug: timeout(
+debug: wait(
 debug: ack(
 debug: crypt(
 debug: noens(

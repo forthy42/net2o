@@ -1202,10 +1202,10 @@ rdata-class to rewind-partial
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
-    data-rmap @ .mapc:dest-back @ >r n2o:spit
-    r> data-rmap @ with mapc dest-back !@
-    dup rewind-partial  dup  dest-back!
-    do-slurp !@ drop endwith ;
+    data-rmap @ ?dup-IF  .mapc:dest-back @ >r n2o:spit
+	r> data-rmap @ with mapc dest-back !@
+	dup rewind-partial  dup  dest-back!
+	do-slurp !@ drop endwith  THEN ;
 
 Defer do-track-seek
 
@@ -1667,9 +1667,9 @@ Forward next-saved-msg
     [IFDEF] android 64dup set-beacon-alarm [THEN]
     64umin next-saved-msg 64umin ticks 64-
     64#0 64max max-timeout# 64min \ limit sleep time to 1 seconds
-    timeout( ." wait for " 64dup u64. ." ns" cr ) stop-64ns
-    timeout( ticker 64@ ) !ticks
-    timeout( ticker 64@ 64swap 64- ." waited for " u64. ." ns" cr ) ;
+    wait( ." wait for " 64dup u64. ." ns" cr ) stop-64ns
+    wait( ticker 64@ ) !ticks
+    wait( ticker 64@ 64swap 64- ." waited for " u64. ." ns" cr ) ;
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
     !ticks  BEGIN  >next-ticks beacon? save-msgs?
