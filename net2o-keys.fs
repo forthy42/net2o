@@ -42,12 +42,12 @@ xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
     dup #esc = IF  esc-state on  THEN
     dup bl < IF  old-emit  EXIT  THEN
     esc-state @ IF  dup old-emit
-    ELSE  dup $C0 $80 within IF
+	toupper 'A' '[' within IF  esc-state off  THEN
+    ELSE  $C0 $80 within IF
 	    [ pw* ' xemit $tmp
 	    bounds [?DO] [I] c@ ]L old-emit [ [LOOP] ]
 	THEN
-    THEN
-    toupper 'A' '[' within IF  esc-state off  THEN ;
+    THEN ;
 
 : type-pw* ( addr u -- )  2dup bl skip nip 0=
     IF    bounds U+DO  bl old-emit    LOOP
@@ -95,35 +95,14 @@ Variable groups[] \ names of groups, sorted by order in groups file
 User >storekey
 Variable defaultkey
 
-cmd-class class
-    field: ke-sk       \ secret key
-    field: ke-pk       \ public key
-    field: ke-rsk      \ revoke secret (temporarily stored)
-    field: ke-type     \ key type
-    field: ke-nick     \ key nick
-    field: ke-nick#    \ to avoid colissions, add a number here
-    field: ke-pets     \ key petnames
-    field: ke-pets#    \ to avoid colissions, add a number here
-    field: ke-prof     \ profile object
-    field: ke-selfsig
-    field: ke-sigs
-    field: ke-imports  \ bitmask of key import
-    field: ke-storekey \ used to encrypt on storage
-    field: ke-mask     \ permission mask
-    field: ke-groups   \ premission groups
-    64field: ke-offset \ offset in key file
-    field: ke-pwlevel  \ password strength level
-    0 +field ke-end
-end-class key-entry
-
 : free-key ( o:key -- o:key )
     \g free all parts of the subkey
     ke-sk sec-off
     ke-pk $off
     ke-nick $off
     ke-selfsig $off
-    ke-sigs $[]off
-    ke-pets $[]off
+    ke-sigs[] $[]off
+    ke-pets[] $[]off
     ke-pets# $off ;
 
 \ key class
@@ -200,7 +179,7 @@ Variable sim-nick!
     dup $@ type '#' emit cell+ $@len cell/ . ;
 
 : last-pet@ ( -- addr u )
-    ke-pets $[]# ?dup-IF  1- ke-pets $[]@  ELSE  #0.  THEN ;
+    ke-pets[] $[]# ?dup-IF  1- ke-pets[] $[]@  ELSE  #0.  THEN ;
 
 : pet! ( -- ) sim-nick! @ ?EXIT  o { w^ optr }
     last-pet@ nick# #@ d0= IF
@@ -208,7 +187,7 @@ Variable sim-nick!
     ELSE
 	last# cell+ $@len cell/
 	optr cell last# cell+ $+!
-    THEN  ke-pets $[]# 1- ke-pets# $[] ! ;
+    THEN  ke-pets[] $[]# 1- ke-pets# $[] ! ;
 
 : key:new ( addr u -- o )
     \G create new key, addr u is the public key
@@ -253,10 +232,10 @@ Variable sim-nick!
 : .nick-base ( o:key -- )
     ke-nick $.  ke-nick# @ .# ;
 : .pet-base ( o:key -- )
-    0 ke-pets [: space type
+    0 ke-pets[] [: space type
       dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
 : .pet0-base ( o:key -- )
-    ke-pets $[]# IF  0 ke-pets $[]@ type 0 ke-pets# $[] @ .#
+    ke-pets[] $[]# IF  0 ke-pets[] $[]@ type 0 ke-pets# $[] @ .#
     ELSE  .nick-base  THEN ;
 : .real-nick ( o:key -- )   ke-imports @ >im-color .nick-base <default> ;
 : .nick ( o:key -- )   ke-imports @ >im-color .pet0-base <default> ;
@@ -504,9 +483,9 @@ Variable unkey-id#
 	true !!connect-perm!!
     ELSE  2drop  THEN ;
 
-: search-key ( pkc -- skc )
+: search-key ( pkc -- o skc )
     keysize key# #@ 0= !!unknown-key!!
-    cell+ .ke-sk sec@ 0= !!unknown-key!! ;
+    cell+ dup .ke-sk sec@ 0= !!unknown-key!! ;
 
 \ apply permissions&groups
 
@@ -624,7 +603,7 @@ $11 net2o: privkey ( $:string -- )
     [ 1 import#self lshift 1 import#new lshift or ]L
     and 0= IF  2drop "\x01"  THEN
     2dup ke-groups $! groups>mask ke-mask ! ;
-+net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs $+[]! ;
++net2o: +keysig ( $:string -- )  !!unsigned? $10 !!>=order? $> ke-sigs[] $+[]! ;
     \g add a key signature
 +net2o: keyimport ( n -- )       !!unsigned? $10 !!>=order?
     config:pw-level# @ 0< IF  64>n
@@ -642,7 +621,7 @@ $11 net2o: privkey ( $:string -- )
     $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
-    config:pw-level# @ 0< IF  ke-pets $+[]! pet!  ELSE  2drop  THEN ;
+    config:pw-level# @ 0< IF  ke-pets[] $+[]! pet!  ELSE  2drop  THEN ;
 }scope
 
 gen-table $freeze
@@ -721,10 +700,6 @@ comp: :, previous ;
 : rnd>pfile ( -- )
     keypack keypack-all# >rng$ key>pfile ;
 
-: >keys ( -- )
-    \G add shared secret to list of possible keys
-    skc pkc keypad ed-dh +key ;
-
 \ key generation
 \ for reproducibility of the selfsig, always use the same order:
 \ "pubkey" newkey <n> keytype "nick" keynick "sig" keyselfsig
@@ -734,15 +709,6 @@ User pk+sig$
 keysize2 Constant pkrk#
 
 : ]pk+sign ( addr u -- ) +cmdbuf ]sign ;
-
-: pack-key ( type nick u -- )
-    now>never
-    key:code
-      sign[
-      rot ulit, keytype $, keynick
-      pkc pkrk# ]pk+sign
-      skc keysize sec$, privkey
-    end:key ;
 
 also net2o-base
 : pack-core ( o:key -- ) \ core without key
@@ -763,7 +729,7 @@ also net2o-base
 	ke-groups $@ 2dup $, keygroups
 	groups>mask invert and  THEN
     ?dup-IF  nlit, keymask  THEN
-    ke-pets [: $, keypet ;] $[]map
+    ke-pets[] [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
 previous
 
@@ -845,6 +811,10 @@ true Value scan-once?
 
 \ generate keys
 
+: sksig! ( -- )
+    ke-pk $@ ke-sk sec@ c:0key >keyed-hash keypad $20 keccak>
+    keypad keysize ke-sksig sec! ;
+
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
@@ -852,7 +822,7 @@ true Value scan-once?
     config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
-    key-sign o> ;
+    sksig! key-sign o> ;
 
 $40 buffer: nick-buf
 
@@ -944,10 +914,11 @@ false value ?yes
 \ select key by nick
 
 : >raw-key ( o -- )
-    dup 0= !!no-nick!! >o
+    dup 0= !!no-nick!! dup my-key-default ! >o
+    sksig!
     ke-pk $@ pkc pkrk# smove
     ke-sk sec@ skc swap key| move
-    >sksig o> ;
+    ke-sksig sec@ sksig keysize smove o> ;
 
 : >key ( addr u -- )
     key# @ 0= IF  read-keys  THEN
@@ -973,9 +944,9 @@ false value ?yes
     key( ." Replace:" cr o cell- 0 .key )
     import#self import-type !
     s" #revoked" dup >r ke-nick $+!
-    ke-nick $@ r> - ke-prof $@ ke-sigs ke-type @
+    ke-nick $@ r> - ke-prof $@ ke-sigs[] ke-type @
     rev-addr pkrk# key?new >o
-    ke-type ! [: ke-sigs $+[]! ;] $[]map ke-prof $! ke-nick $!
+    ke-type ! [: ke-sigs[] $+[]! ;] $[]map ke-prof $! ke-nick $!
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
     key( ." with:" cr o cell- 0 .key ) o o>

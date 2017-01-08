@@ -36,7 +36,6 @@ object class
     keysize   uvar keypad
     hash#256  uvar keyed-hash-out
     datesize# uvar sigdate
-    1 64s     uvar last-mykey
     keysize   uvar stpkc \ server temporary keypair - once per connection setup
     keysize   uvar stskc
     keypack-all# uvar keypack-d
@@ -47,6 +46,7 @@ object class
     keysize   uvar keygendh
     keysize   uvar vpk
     keysize   uvar vsk
+    1 64s     uvar last-mykey
     cell      uvar keytmp-up
 end-class keytmp-c
 
@@ -332,21 +332,29 @@ $60 Constant rndkey#
     key-setup? @ !!doublekey!!
     dup state# <> !!ivs!! >crypt-source >crypt-key-ivs ;
 
+\ hash with key and sksig generation
+
+: >keyed-hash ( valaddr uval keyaddr ukey -- )
+    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
+    \ hash( ." hashing: " 2over 85type ':' emit 2dup 85type cr )
+    c:hash c:hash
+    \ hash( @keccak 200 85type cr cr ) \ debuggin may leak secrets!
+;
+
 \ public key encryption
 
 \ the theory here is that pkc*sks = pks*skc
 \ because pk=base*sk, so base*skc*sks = base*sks*skc
 \ base and pk are points on the curve, sk is a skalar
 \ we send our public key and query the server's public key.
-: >sksig ( -- )
-    c:0key pkc $60 c:hash sksig $20 keccak> ;
+
 : gen-keys ( -- )
     \G generate revocable keypair
     sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
     sk1 pkrev skc pkc ed-keypairx \ generate real keypair
     genkey( ." gen key: " skc keysize .85warn pkc keysize .85info cr )
-    >sksig ;
+;
 : check-rev? ( pk -- flag )
     \G check generated key if revocation is possible
     >r skrev pkrev sk>pk pkrev dup sk-mask
@@ -388,10 +396,8 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
     ?keysize dup keysize check-key
     dup keysize tmp-pubkey $! r> key-stage2
     keypair-val validated or! ;
-: net2o:receive-key ( addr u -- )
-    o 0= IF  2drop EXIT  THEN  pkc keysize tmp-mpubkey $! skc key-rest ;
 : net2o:keypair ( pkc uc pk u -- )
-    2dup tmp-mpubkey $! ?keysize search-key key-rest ;
+    ?keysize search-key swap tmp-my-key ! key-rest ;
 : net2o:receive-tmpkey ( addr u -- )  ?keysize \ dup keysize .nnb cr
     o 0= IF  gen-stkeys stskc
 	\ repeated tmpkeys are allowed here due to packet duplication
@@ -418,12 +424,6 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 \ Idea: set "r" first half to the value, "r" second half to the key, diffuse
 \ we use explicitely Keccak here, this needs to be globally the same!
 \ Keyed hashs are there for unique handles
-
-: >keyed-hash ( valaddr uval keyaddr ukey -- )
-    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
-    hash( ." hashing: " 2over 85type ':' emit 2dup 85type cr )
-    c:hash c:hash
-    hash( @keccak 200 85type cr cr ) ;
 
 : keyed-hash#128 ( valaddr uval keyaddr ukey -- hashaddr uhash )
     c:0key >keyed-hash  keyed-hash-out hash#128 2dup keccak> ;
@@ -490,9 +490,13 @@ drop
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
+: sig-params ( -- sksig sk pk )
+    my-key my-key-default o select @ ?dup-IF
+	>o ke-sksig sec@ drop ke-sk sec@ drop ke-pk $@ drop o>  EXIT
+    THEN  !!FIXME!! ( old version ) sksig skc pkc ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
-    sksig skc pkc ed-sign type keysize emit ;
+    sig-params ed-sign type keysize emit ;
 : .pk ( -- )  pkc keysize type ;
 : pk-sig ( addr u -- sig u )
     c:0key c:hash [: .pk .sig ;] $tmp ;

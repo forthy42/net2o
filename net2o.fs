@@ -344,9 +344,12 @@ scope{ mapc
 
 }scope
 
+: parent! ( o -- )
+    dup parent ! ?dup-IF  .my-key @ my-key !  THEN ;
+
 : map-data ( addr u -- o )
     o >code-flag @ IF mapc:rcode-class ELSE mapc:rdata-class THEN new
-    with mapc parent !
+    with mapc parent!
     alloc-data
     >code-flag @ 0= IF
 	dup addr>bytes allocate-bits data-ackbits !
@@ -356,7 +359,7 @@ scope{ mapc
 
 : map-source ( addr u addrx -- o )
     o >code-flag @ IF mapc:code-class ELSE mapc:data-class THEN new
-    with mapc parent !
+    with mapc parent!
     alloc-data
     >code-flag @ 0= IF
 	dup addr>ts alloz data-resend# !
@@ -392,7 +395,7 @@ UValue connection
 : n2o:new-log ( -- o )
     cmd-class new >o  log-table @ token-table ! o o> ;
 : n2o:new-ack ( -- o )
-    o ack-class new >o  parent !  ack-table @ token-table !
+    o ack-class new >o  parent!  ack-table @ token-table !
     init-delay# rtdelay 64!
     flybursts# dup flybursts ! flyburst !
     ticks lastack 64! \ asking for context creation is as good as an ack
@@ -405,9 +408,9 @@ UValue connection
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
 : n2o:new-msg ( -- o )
-    o msg-class new >o  parent !  msg-table @ token-table ! o o> ;
+    o msg-class new >o  parent!  msg-table @ token-table ! o o> ;
 : n2o:new-msging ( -- o )
-    o msging-class new >o  parent !  msging-table @ token-table ! o o> ;
+    o msging-class new >o  parent!  msging-table @ token-table ! o o> ;
 
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  .timeouts off  THEN ;
@@ -422,6 +425,7 @@ UValue connection
 
 : n2o:new-context ( -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
+    my-key-default @ my-key ! \ set default key
     o contexts !@ next-context !
     o to connection \ current connection
     context-table @ token-table ! \ copy pointer
@@ -447,7 +451,7 @@ Variable mapstart $1 mapstart !
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
-    <event wait-task @ ?dup-0=-IF main-up@ THEN o elit, ->connect event> ;
+    <event wait-task @ main-up@ over select o elit, ->connect event> ;
 
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
@@ -494,7 +498,7 @@ Forward new-ivs ( -- )
     o IF
 	validated @ keypair-val and IF
 	    tmp-pubkey  $@ pubkey  $!
-	    tmp-mpubkey $@ mpubkey $!
+	    tmp-my-key   @ my-key !
 	THEN
 	validated @ ivs-val and IF  new-ivs  THEN
 	tmp-perm @ ?dup-IF  perm-mask !  tmp-perm off  THEN

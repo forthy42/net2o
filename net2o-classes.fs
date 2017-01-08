@@ -21,9 +21,12 @@ current-o
 
 Variable contexts \G contains all command objects
 
+Variable my-key-default \G default own key
+
 object class
     field: token-table
     field: parent
+    field: my-key        \ key used for this context
     field: req?
     field: c-state \ state for checks whether everything is there
     method start-req
@@ -171,7 +174,6 @@ cmd-class class
     field: resend0
     field: data-resend
     field: pubkey        \ other side official pubkey
-    field: mpubkey       \ our side official pubkey
     field: punch-addrs
     field: rqd-xts       \ callbacks for request done (array)
     field: my-error-id
@@ -351,7 +353,7 @@ object class
     cell            uvar do-keypad
     cell            uvar tmp-ivs
     cell            uvar tmp-pubkey
-    cell            uvar tmp-mpubkey
+    cell            uvar tmp-my-key
     cell            uvar tmp-perm
     cell            uvar $error-id
 end-class io-buffers
@@ -398,6 +400,30 @@ begin-structure net2o-header
    16 +field destination
     8 +field addr
 end-structure
+
+\ key class
+
+cmd-class class
+    field: ke-sk       \ secret key
+    field: ke-pk       \ public key
+    field: ke-rsk      \ revoke secret (temporarily stored)
+    field: ke-type     \ key type
+    field: ke-nick     \ key nick
+    field: ke-nick#    \ to avoid colissions, add a number here
+    field: ke-pets[]   \ key petnames
+    field: ke-pets#    \ to avoid colissions, add a number here
+    field: ke-prof     \ profile object
+    field: ke-selfsig
+    field: ke-sigs[]
+    field: ke-imports  \ bitmask of key import
+    field: ke-storekey \ used to encrypt on storage
+    field: ke-mask     \ permission mask
+    field: ke-groups   \ premission groups
+    64field: ke-offset \ offset in key file
+    field: ke-pwlevel  \ password strength level
+    field: ke-sksig    \ signature secret, computed, never stored
+    0 +field ke-end
+end-class key-entry
 
 \ key related  constants
 

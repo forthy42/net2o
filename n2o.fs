@@ -237,7 +237,7 @@ scope{ n2o
     \G pet: Add a new petname to existing <nick> or <pet>
     ?get-me
     [: nick-key dup 0= IF  drop EXIT  THEN
-      >o ?nextarg IF  ke-pets $+[]! pet!  THEN  o> ;] arg-loop
+      >o ?nextarg IF  ke-pets[] $+[]! pet!  THEN  o> ;] arg-loop
     save-keys keylist ;
 
 : pet- ( -- )
@@ -245,7 +245,7 @@ scope{ n2o
     \G pet-: remove pet name
     ?get-me
     [: 2dup nick-key dup 0= IF  drop 2drop  EXIT  THEN
-      >o ke-pets [: 2over str= 0= ;] $[]filter 2drop o o>
+      >o ke-pets[] [: 2over str= 0= ;] $[]filter 2drop o o>
       last# cell+ del$cell
       last# cell+ $@len 0= IF  last# bucket-off  THEN ;] arg-loop
     save-keys ?cr keylist ;
@@ -614,7 +614,7 @@ warnings !
     \G version: print version string
 
 : rng ( -- )
-    \O rng
+    \U rng
     \G rng: check rng and give a 32 byte random value
     ?check-rng $20 rng$ 85type cr
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;

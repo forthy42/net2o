@@ -114,9 +114,7 @@ net2o-base
 
 \ crypto functions
 
-+net2o: receive-key ( $:key -- ) $> \g receive a key
-    crypt( ." Received key: " tmpkey@ .nnb forth:cr )
-    tmp-crypt? IF  net2o:receive-key  ELSE  2drop  THEN ;
++net2o: receive-key ( $:key -- ) !!invalid!! ; \g receive a key, invalid/obsolete
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
 +net2o: key-request ( -- ) \g request a key

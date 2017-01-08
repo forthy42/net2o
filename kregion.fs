@@ -20,7 +20,7 @@ Variable kfree64' \ free list for 64 bytes keys
 
 $4000 Constant /kregion
 
-$10 Constant crypt-align
+$20 Constant crypt-align
 
 : kalign ( addr -- addr' )
     [ crypt-align 1- ]L + [ crypt-align negate ]L and ;
