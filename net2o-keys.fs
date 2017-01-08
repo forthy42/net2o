@@ -407,10 +407,26 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     space .nick space ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;
+
+\ print sorted list of keys by nick
+
+Variable sort-list[]
+: $ins[]key ( o:key $array -- )
+    \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
+    { a[] } 0 a[] $[]#
+    BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
+	    ke-nick $@ $# a[] $[] @ .ke-nick $@ compare dup 0= IF
+		drop ke-nick# @ $# a[] $[] @ .ke-nick# @ -  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    o { w^ ins$0 } ins$0 cell a[] r> cells $ins ;
 : list-keys ( -- )
     ." colors: " .import-colors cr
     ." num pubkey                                   date                     grp+perm	h nick" cr
-    key# [: cell+ $@ drop cell+ ..key-list ;] #map ;
+    key# [: cell+ $@ drop cell+ >o sort-list[] $ins[]key o> ;] #map
+    sort-list[] $[]# 0 ?DO  I sort-list[] $[] @ ..key-list  LOOP
+    sort-list[] $off ;
 : list-nicks ( -- )
     nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
 	  I @ ..key-list  cell +LOOP ;] #map ;
@@ -816,7 +832,8 @@ true Value scan-once?
     keypad keysize ke-sksig sec! ;
 
 : +gen-keys ( nick u type -- )
-    gen-keys  64#-1 key-read-offset 64!  pkc keysize2 key:new >o
+    gen-keys  64#-1 key-read-offset 64!
+    pkc keysize2 key:new >o o my-key !
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
     ke-type !  ke-nick $!  nick!
     config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !

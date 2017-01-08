@@ -493,7 +493,7 @@ drop
 : sig-params ( -- sksig sk pk )
     my-key my-key-default o select @ ?dup-IF
 	>o ke-sksig sec@ drop ke-sk sec@ drop ke-pk $@ drop o>  EXIT
-    THEN  sksig skc pkc ;
+    THEN  !!FIXME!! ( old version ) sksig skc pkc ;
 : pk@ ( -- pk u )
     my-key my-key-default o select @ .ke-pk $@ ;
 : .sig ( -- )
