@@ -27,7 +27,8 @@ cmd-class class
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table ! ;
+    vault-class new n:>o vault-table @ token-table !
+    my-key-default @ my-key ! ;
 : v-mode>crypt2 ( -- )
     v-mode @ $10 rshift $FF and >crypt ;
 
@@ -137,7 +138,7 @@ enc-keccak
 
 : encfile-rest ( key-list -- ) >vault >r
     code-buf$ cmdreset init-reply
-    pkc keysize r@ $+[]! \ encrypt for ourself
+    pk@ key| r@ $+[]! \ encrypt for ourself
     "v2o" 4cc, vdhe, r> vkeys, vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file

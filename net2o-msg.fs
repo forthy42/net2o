@@ -339,7 +339,7 @@ gen-table $freeze
 :noname ( addr u -- )
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )
-    keysize umin 2dup pkc over str=
+    key| 2dup pk@ key| str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u -- )
@@ -624,7 +624,7 @@ previous
     ( cookie+request ) end-code| ;
 
 : ?destpk ( addr u -- addr' u' )
-    2dup pubkey $@ key| str= IF  2drop pkc keysize  THEN ;
+    2dup pubkey $@ key| str= IF  2drop pk@ key|  THEN ;
 
 : last-signdate@ ( -- 64date )
     msg-group$ $@ msg-logs #@ dup IF
@@ -721,7 +721,7 @@ Variable $lastline
     msg-group$ $@ ?msg-log
     line-date 64@ last# cell+ $search[]date
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
-	dup sigpksize# - /string key| pkc over str=  UNTIL  THEN
+	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
     tuck addr maxlen smove
     maxlen swap addr over ;
@@ -729,7 +729,7 @@ Variable $lastline
     msg-group$ $@ ?msg-log
     line-date 64@ last# cell+ $search[]date
     BEGIN  1+ dup last# cell+ $[]# u< WHILE  dup last# cell+ $[]@
-	dup sigpksize# - /string key| pkc over str=  UNTIL  THEN
+	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     dup last# cell+ $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
     ELSE  last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp  THEN

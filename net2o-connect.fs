@@ -119,7 +119,7 @@ net2o-base
     net2o:receive-tmpkey ;
 +net2o: key-request ( -- ) \g request a key
     crypt( ." Nested key: " tmpkey@ .nnb forth:cr )
-    pkc keysize $, receive-key ;
+    pk@ key| $, receive-key ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
 +net2o: keypair ( $:yourkey $:mykey -- ) \g select a pubkey
@@ -200,7 +200,7 @@ Sema id-sema
     key-setup? @ !!doublekey!!
     nest[
         new-error-id $, error-id
-        pkc keysize $, pubkey $@len 0> keypad$ nip keysize u<= and IF
+        pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
 	    pubkey $@ drop skc key-stage2
 	ELSE  receive-key  THEN

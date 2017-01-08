@@ -22,7 +22,7 @@ Variable key-readin
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
-: qr-me ( -- ) pkc keysize2 .keyqr ;
+: qr-me ( -- ) pk@ .keyqr ;
 : qr-nicks ( -- )
     [: nick-key ?dup-IF  .ke-pk $@ .keyqr  THEN ;] @arg-loop ;
 
@@ -220,7 +220,7 @@ scope{ n2o
     \U passwd [pw-level]
     \G passwd: Change the password for the selected secret key
     ?get-me +newphrase key>default
-    pkc keysize key-exist? ?dup-IF  >o >storekey @ ke-storekey !
+    pk@ key| key-exist? ?dup-IF  >o >storekey @ ke-storekey !
 	?nextarg IF  >number drop 0 max config:pw-maxlevel# @ min  ke-pwlevel !  THEN  o>
 	save-keys
     THEN ;
@@ -228,7 +228,7 @@ scope{ n2o
 : nick ( -- )
     \U nick newnick
     \G nick: Change your nick to <newnick>
-    ?get-me ?nextarg IF  pkc keysize key-exist? ?dup-IF
+    ?get-me ?nextarg IF  pk@ key| key-exist? ?dup-IF
 	    >o ke-nick $! key-sign o> save-keys
 	ELSE  2drop  THEN  THEN ;
 

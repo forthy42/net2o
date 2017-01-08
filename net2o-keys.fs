@@ -757,7 +757,7 @@ previous
     ['] pack-core gen-cmd$ 2drop
     ke-pk $@ tmp$ $+! ke-selfsig $@ tmp$ $+! tmp$ $@ ;
 : mynick-key ( -- o )
-    pkc keysize key# #@ drop cell+ ;
+    pk@ key| key# #@ drop cell+ ;
 : mynick$ ( -- addr u )
     \G get my nick with signature
     mynick-key .keynick$ ;
@@ -834,7 +834,7 @@ false value ?yes
     ?yes IF  2drop true  ELSE  type ."  (y/N)" key cr 'y' =  THEN ;
 
 : ?rsk ( -- )
-    pkc keysize key-exist? dup 0= IF  drop  EXIT  THEN
+    pk@ key| key-exist? dup 0= IF  drop  EXIT  THEN
     >o ke-rsk sec@ dup 0= IF  2drop o>  EXIT  THEN
     ." You still haven't stored your revoke key securely off-line." cr
     s" Paper and pencil ready?" yes? IF
@@ -963,7 +963,7 @@ false value ?yes
     [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
-    pkc keysize key# #@ 0= !!unknown-key!!
+    pk@ key| key# #@ 0= !!unknown-key!!
     cell+ out-key ;
 
 Variable dhtroot.n2o

@@ -332,7 +332,7 @@ false Value add-myip
 	nat( ."  routed" ) THEN
     nat( forth:cr )
     what's expect-reply? ['] addme-end <> IF
-	expect-reply pkc keysize2 $, dht-id
+	expect-reply pk@ $, dht-id
 	mynick$ $, dht-owner+
     THEN
     addr o>addr gen-host pub-addr,
@@ -345,7 +345,7 @@ previous
 
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
     net2o-code  expect-reply
-    pkc keysize2 $, dht-id
+    pk@ $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
     end-with
@@ -353,14 +353,14 @@ previous
     end-code| ;
 
 : addme-owndht ( -- )
-    pkc keysize2 >d#id >o  dht-host $[]off
+    pk@ >d#id >o  dht-host $[]off
     my-addr$ [: dht-host $+[]! ;] $[]map o> ;
 
 \ replace me stuff
 
 also net2o-base
 : replace-me, ( -- )
-    pkc keysize2 $, dht-id dht-host? end-with ;
+    pk@ $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
     new-addr >o host-id $@ config:host$ $@ str= n2o:dispose-addr o> ;
@@ -383,13 +383,13 @@ also net2o-base
     nick>pk fetch-id, ;
 previous
 
-: me>d#id ( -- ) pkc keysize2 >d#id ;
+: me>d#id ( -- ) pk@ >d#id ;
 
 : n2o:send-replace ( -- )
     me>d#id .dht-host >r
     r@ $[]# IF
 	net2o-code   expect-reply
-	pkc keysize2 $, dht-id
+	pk@ $, dht-id
 	r@ remove-me, end-with
 	cookie+request
 	end-code|
