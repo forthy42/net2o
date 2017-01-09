@@ -1205,10 +1205,12 @@ rdata-class to rewind-partial
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
-    data-rmap @ ?dup-IF  .mapc:dest-back @ >r n2o:spit
+    data-rmap @ ?dup-IF
+	.mapc:dest-back @ >r n2o:spit
 	r> data-rmap @ with mapc dest-back !@
-	dup rewind-partial  dup  dest-back!
-	do-slurp !@ drop endwith  THEN ;
+	dup rewind-partial  dup dest-back!
+	do-slurp !@ drop endwith
+    THEN ;
 
 Defer do-track-seek
 

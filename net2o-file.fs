@@ -310,7 +310,7 @@ scope{ mapc
     len +LOOP  dest-top ! ;
 
 : dest-back! ( addr -- )
-    dup dup dest-back @ U+DO
+    dup dest-back @ U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP  dest-back ! ;
