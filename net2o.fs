@@ -362,7 +362,7 @@ scope{ mapc
     with mapc parent!
     alloc-data
     >code-flag @ 0= IF
-	dup addr>ts alloz data-resend# !
+	dup addr>ts allo1 data-resend# !
     THEN
     drop
     o endwith ;
@@ -1167,7 +1167,7 @@ scope{ mapc
 
 :noname ( o:map -- ) dest-size @ addr>ts 
     dest-timestamps @ over erase
-    data-resend# @ swap erase ;
+    data-resend# @ swap $FF fill ;
 data-class to rewind-timestamps
 :noname ( o:map -- ) dest-size @ addr>ts
     dest-timestamps @ over erase ;
