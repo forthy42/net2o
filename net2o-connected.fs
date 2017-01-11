@@ -343,7 +343,7 @@ also net2o-base
     0 data-rmap @ .mapc:dest-end !@ ;
 
 : rewind-transfer ( -- flag )
-    rewind data-end? IF  filereq# @ n2o:request-done  false
+    data-end? IF  filereq# @ n2o:request-done  false
     ELSE  true  THEN ;
 
 : request-stats   forth:true to request-stats?  ack track-timing end-with ;
@@ -363,7 +363,7 @@ also net2o-base
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
-	net2o:save&done  net2o:ack-resend#  rewind-transfer
+	net2o:save&done  net2o:ack-resend#  rewind  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
 
