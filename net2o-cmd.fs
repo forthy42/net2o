@@ -298,7 +298,8 @@ code-buf
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
-:noname ( addr u -- ) dup maxstring u> IF  ~~ true !!cmdfit!!  THEN
+:noname ( addr u -- ) dup maxstring u> IF
+	cmdbuf$ ~~ n2o:see true !!cmdfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest

@@ -331,11 +331,8 @@ also net2o-base
     ['] drop expect+slurp-xt ;
 
 : resend-all ( -- )
-    ticker 64@ resend-all-to 64@
-    64u>= IF
-	false net2o:do-resend
-	ack@ .+timeouts resend-all-to 64!
-    THEN ;
+    false net2o:do-resend
+    ack@ .+timeouts resend-all-to 64! ;
 
 0 Value request-stats?
 
@@ -359,8 +356,7 @@ also net2o-base
     ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
 
 : expected? ( -- flag )
-    expected@
-    tuck u>= and IF
+    expected@ tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ with mapc
 	dest-back @ hex. dest-tail @ hex. dest-head @ hex.
@@ -398,10 +394,13 @@ scope{ mapc
     data-ackbits @ r> +bit@
     endwith negate packetr2 +! ;
 
-: +expected ( -- flag )
+: resend-all? ( -- flag )
     data-rmap @ with mapc
     dest-head @ dest-top @ u>= ack-advance? @ and endwith
-    IF   resend-all  THEN  expected? ;
+    ticker 64@ resend-all-to 64@ 64u>= and ;
+
+: +expected ( -- flag )
+    resend-all?  IF   resend-all  THEN  expected? ;
 
 \ higher level functions
 
@@ -514,14 +513,9 @@ also net2o-base
     o to connection
     timeout( .keepalive )
     rewind-transfer 0= IF  .keepalive  EXIT  THEN
-    expected@ tuck u>= and IF  net2o-code
-	  ack +expected end-with IF  slurp  THEN  end-code  EXIT  THEN
-\    net2o-code  expect-reply
-\      ack net2o:genack
-\      resend-all ticks lit, timeout rewind update-rtdelay
-\      end-with slurp
-\    end-code
-;
+    expected@ tuck u>= and resend-all? and IF  net2o-code
+	ack +expected end-with IF  slurp  THEN  end-code  EXIT
+    THEN ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
