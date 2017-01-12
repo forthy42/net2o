@@ -19,7 +19,8 @@ Alle hier erhobenen Daten werden in Deutschland gespeichert.
 
 Für jeden Zugtriff werden IP-Adresse, Datum, Zugriffs-Host und -URL
 und die Browser-ID gespeichert. Logs werden wöchentlich rotiert und
-nach einigen Wochen gelöscht.
+nach einigen Wochen gelöscht. Die IP-Adresse wird auf die ersten 2
+IPv4) bzw. die ersten 5 Bytes (IPv6) verkürzt und dann gespeichert.
 
 ## Cookies ##
 
@@ -30,5 +31,5 @@ jederzeit gelöscht werden.
 
 ## Trackers ##
 
-Ich verwende keine Tracker wie Google Analytics. Sollte jemand einen
-finden, ist das ein Bug, der formlos gemeldet werden kann.
+Ich verwende keine Tracker wie Google Analytics. Sollte jemand doch
+einen finden, ist das ein Bug, der formlos gemeldet werden kann.
