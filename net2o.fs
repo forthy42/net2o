@@ -345,7 +345,7 @@ scope{ mapc
 }scope
 
 : parent! ( o -- )
-    dup parent ! ?dup-IF  .my-key @ my-key !  THEN ;
+    dup parent ! ?dup-IF  .my-key  ELSE  my-key-default  THEN  @ my-key ! ;
 
 : map-data ( addr u -- o )
     o >code-flag @ IF mapc:rcode-class ELSE mapc:rdata-class THEN new
