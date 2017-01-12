@@ -451,6 +451,7 @@ Variable patch-in$
 ' 2drop commit-class to msg:signal
 ' 2drop commit-class to msg:text
 ' 2drop commit-class to msg:action
+' 2drop search-class to msg:msgre
 ' noop  commit-class to msg:end
 
 :noname ( addr u -- )
@@ -472,6 +473,7 @@ Variable patch-in$
 ' 2drop search-class to msg:signal
 ' 2drop search-class to msg:text
 ' 2drop search-class to msg:action
+' 2drop search-class to msg:msgre
 ' 2drop search-class to msg:re
 ' noop  search-class to msg:end
 
@@ -481,6 +483,7 @@ Variable patch-in$
 :noname match-flag @ IF  match-id$ $!  ELSE  2drop  THEN ; search-class to msg:id
 ' 3drop search-class to msg:object
 
+' 2drop dvcs-log-class to msg:msgre
 ' 2drop dvcs-log-class to msg:re
 ' 2drop dvcs-log-class to msg:coord
 ' 3drop dvcs-log-class to msg:object
