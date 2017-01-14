@@ -7,12 +7,9 @@ This is a short to-do list for things I have concrete plans
 * change flow control window so that it minimizes buffer fillup
   instead of using the rate for this purpose - should stabilize the
   flow control in case of severe congestion.
-* Add automatic and manual rearrangement of multichat trees
+* Add automatic rearrangement of multichat trees (manual is there)
 * Split up DHT into directory DHT and subnodes
-* Add sync operations to chat logs
 * Add mirror&sync to DHT subnodes
-* Add hashed files distribution
-* Add version control for files
 * Add streaming data
 * Add remote terminal
 * Add onion routing
@@ -20,16 +17,17 @@ This is a short to-do list for things I have concrete plans
 
 ## Security ##
 
-* Add permission groups for easier handling of permissions
 * Add a get-ip permission to control who can use your node to bounce
+  (half done, permission is there, but not checked)
 * Add a NAT traversal permission to not reveal IP addresses depending on
   peer
 * Add a kill switch passphrase which erases all keys when entered
+* Add a passphrase for security key export
 
 ## Binary packaging ##
 
-* RPM builds and repository needed (probably through OpenSuSE build service)
-* Windows and Mac OS X distributions
+* RPM builds and repository needed (through OpenSuSE build service)
+* Mac OS X distributions
 
 ## High-level API ##
 
