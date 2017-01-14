@@ -17,6 +17,8 @@ Therefore, the requirements are as follows:
     without another trustworthy instance, i.e. trusting only their communication
     partner
 
+## Key Creation ##
+
 I create two random number s1 and s2.  Using these numbers, I create
 pubkeys p1=[s1]base and p2=[s2]base.  Points can be compressed to a
 32 byte number using the compress() function, and then can be treated
@@ -30,6 +32,8 @@ attacker who stole s can generate a new pair of p1, p2, but that would
 give him a different identity (a suspicious identity, though).  After
 generating the key, s1 is destroyed; it is no longer needed, though it
 can be recomputed using s and p2 and the extended euclidean algorithm.
+
+## Proof of Creation ##
 
 I keep s2 as offline copy (it's just 64 hex digits or 40 base85
 characters), and s as protected online copy in my device; s is subject
