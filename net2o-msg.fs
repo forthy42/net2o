@@ -838,6 +838,13 @@ $200 Constant maxmsg#
     wait-2s-key xclear ;
 
 also net2o-base
+\ chain messages
+\ what needs to be done here:
+\ search for my previous message
+\ all messages from that to the end shall be chained
+\ Remove all messages in the chain list that already have been chained
+\ by other messages in that list
+\ chain the remaining
 : ?chain, ( -- )  chain-mode @ 0= ?EXIT
     last# >r last# $@ ?msg-log  c:0key
     last# cell+ $[]# 1- dup 0< IF  drop
