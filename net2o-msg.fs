@@ -354,8 +354,8 @@ gen-table $freeze
     ELSE  last# cell+ $[]@ dup keysize 1+ - /string 1-
 	2over 1 64s /string str=  IF  <info>  ELSE  <err>  THEN
     THEN
-    ."  [" over le-64@ .ticks
-    verbose( 1 64s /string ." ," 85type )else( 2drop ) ." ]" <default>
+    ."  <" over le-64@ .ticks
+    verbose( 1 64s /string ." ," 85type )else( 2drop ) <default>
     r> to last# ; msg-class to msg:chain
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
