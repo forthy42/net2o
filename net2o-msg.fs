@@ -336,14 +336,15 @@ gen-table $freeze
 
 \ Code for displaying messages
 
-: >sighash ( addr u1 -- hash u2 )
-    c:0key bounds U+DO
-	I le-64@ last# cell+ $search[]date
-	dup 0< IF  drop  "" UNLOOP  EXIT
-	ELSE  last# cell+ $[]@ dup keysize 1+ - /string 1- c:shorthash
-	THEN
-    1 64s +LOOP
-    hashtmp $20 2dup c:hash@ ;
+: sighash? ( addr u -- flag )
+    over le-64@ last# cell+ $search[]date
+    dup 0< IF  drop 2drop  false  EXIT  THEN  >r
+    over le-64@ 64#1 64+ last# cell+ $search[]date >r [ 1 64s ]L /string
+    r> r> +DO
+	c:0key I last# cell+ $[]@ sigonly@ >hash
+	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT  THEN
+    LOOP
+    2drop false ;
 
 :noname ( addr u -- )
     last# >r \ .key-id searches for a key, and modifies last#
@@ -358,9 +359,8 @@ gen-table $freeze
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
-    2dup keysize - >sighash
-    2over dup keysize - /string str= IF  <info>  ELSE  <err>  THEN
-    2dup keysize - bounds ?DO  ."  <" I le-64@ .ticks  1 64s +LOOP
+    2dup sighash? IF  <info>  ELSE  <err>  THEN
+    ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
     r> to last# ; msg-class to msg:chain
 :noname ( addr u -- )
@@ -838,20 +838,13 @@ $200 Constant maxmsg#
     wait-2s-key xclear ;
 
 also net2o-base
-\ chain messages
-\ what needs to be done here:
-\ search for my previous message
-\ all messages from that to the end shall be chained
-\ Remove all messages in the chain list that already have been chained
-\ by other messages in that list
-\ chain the remaining
+\ chain messages to one previous message
 : ?chain, ( -- )  chain-mode @ 0= ?EXIT
-    last# >r last# $@ ?msg-log  c:0key
+    last# >r last# $@ ?msg-log
     last# cell+ $[]# 1- dup 0< IF  drop
     ELSE  last# cell+ $[]@
 	[: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
-	  dup keysize 1+ - /string 1- >hash
-	  hashtmp $20 forth:type ;] $tmp $, msg-chain
+	  c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain
     THEN  r> to last# ;
 
 : (send-avalanche) ( xt -- addr u flag )

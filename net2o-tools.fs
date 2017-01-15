@@ -570,6 +570,7 @@ $10 Constant datesize#
 
 : startdate@ ( addr u -- date ) + sigsize# - le-64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ le-64@ ;
+: sigonly@ ( addr u -- addr' u' ) + sigonlysize# - [ sigonlysize# 1- ]L ;
 
 : $ins[]sig# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
@@ -622,11 +623,16 @@ $10 Constant datesize#
     REPEAT 2drop 2drop ; \ not found
 : $search[]date ( ticks $array -- pos )
     \G search O(log(n)) in pre-sorted array
-    \G @var{pos} is the location of the item >= the requested date
+    \G @var{pos} is the first location of the item >= the requested date
     { a[] } 0 a[] $[]#
     BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
 	    64dup $# a[] $[]@ startdate@ 64over 64over 64= IF
-		64drop 64drop 64drop $# EXIT  THEN
+		64drop 64drop
+		0 $# 1- -DO
+		    64dup I a[] $[]@ startdate@ 64<> ?LEAVE
+		    I to $#
+		1 -LOOP
+		64drop $#  EXIT  THEN
 	    64u< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r r@ a[] $[]@ ?dup-IF
 	startdate@ 64u> negate r> +
