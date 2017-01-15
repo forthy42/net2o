@@ -37,6 +37,7 @@ Variable msg-group$
 Variable group-master
 Variable msg-logs
 Variable otr-mode
+Variable chain-mode
 User replay-mode
 User skip-sig?
 
@@ -311,12 +312,12 @@ reply-table $@ inherit-table msg-table
 
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 1 !!>order? $> msg:start ;
-+net2o: msg-tag ( $:group -- ) \g tagging (can be anywhere)
++net2o: msg-tag ( $:tag -- ) \g tagging (can be anywhere)
     !!signed? $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
     !!signed? 2 !!>=order? $> msg:id ;
-+net2o: msg-msgre ( $:sigdate -- ) \g related to message object
-    !!signed? 4 !!>=order? $> msg:msgre ;
++net2o: msg-chain ( $:sigdate -- ) \g chained to previous message
+    !!signed? $10 !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
@@ -336,8 +337,10 @@ gen-table $freeze
 \ Code for displaying messages
 
 :noname ( addr u -- )
+    last# >r \ .key-id searches for a key, and modifies last#
     2dup startdate@ .ticks space 2dup .key-id
-    [: .simple-id ;] $tmp notify! ; msg-class to msg:start
+    [: .simple-id ;] $tmp notify!
+    r> to last# ; msg-class to msg:start
 :noname ( addr u -- )
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )
@@ -345,8 +348,15 @@ gen-table $freeze
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u -- )
-    space <warn> over le-64@ .sigdate 1 64s /string
-    ." [" 85type ." ]->" <default> ; msg-class to msg:msgre
+    last# >r last# $@ ?msg-log
+    over le-64@ last# cell+ $search[]date
+    dup 0< IF  drop <err>
+    ELSE  last# cell+ $[]@ dup keysize 1+ - /string 1-
+	2over 1 64s /string str=  IF  <info>  ELSE  <err>  THEN
+    THEN
+    ."  [" over le-64@ .ticks
+    verbose( 1 64s /string ." ," 85type )else( 2drop ) ." ]" <default>
+    r> to last# ; msg-class to msg:chain
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
 :noname ( addr u -- )
@@ -706,6 +716,7 @@ end-class textmsg-class
 :noname space '#' emit type ; textmsg-class to msg:tag
 :noname '@' emit .simple-id space ; textmsg-class to msg:signal
 ' 2drop textmsg-class to msg:re
+' 2drop textmsg-class to msg:chain
 ' type textmsg-class to msg:text
 :noname drop 2drop ; textmsg-class to msg:object
 :noname ." /me " type ; textmsg-class to msg:action
@@ -821,11 +832,19 @@ $200 Constant maxmsg#
     wait-2s-key xclear ;
 
 also net2o-base
+: ?chain, ( -- )  chain-mode @ 0= ?EXIT
+    last# >r last# $@ ?msg-log
+    last# cell+ $[]# 1- dup 0< IF  drop
+    ELSE  last# cell+ $[]@
+	[: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
+	  dup keysize 1+ - /string 1- forth:type ;] $tmp $, msg-chain
+    THEN  r> to last# ;
+
 : (send-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
+    [: 0 >o [: sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
 : (send-otr-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: msg-otr sign[ msg-start execute msg> ;] gen-cmd$ o>
+    [: 0 >o [: msg-otr sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
       +last-signed otr-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )      (send-avalanche)
@@ -937,6 +956,15 @@ also net2o-base scope: /chat
 	<info> ." === " otr-mode @ IF  ." enter"  ELSE  ." leave"  THEN
 	."  otr mode ==="
     ELSE  <err> ." only 'otr on|off' are allowed" rdrop  THEN
+    <default> forth:cr ;
+
+: chain ( addr u -- )
+    \U chain on|off         turn chain mode on/off
+    2dup s" on" str= >r
+    s" off" str= r@ or IF   r> chain-mode !
+	<info> ." === " chain-mode @ IF  ." enter"  ELSE  ." leave"  THEN
+	."  chain mode ==="
+    ELSE  <err> ." only 'chain on|off' are allowed" rdrop  THEN
     <default> forth:cr ;
 
 : peers ( addr u -- ) 2drop

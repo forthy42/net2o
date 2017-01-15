@@ -159,6 +159,7 @@ User dest-0key< \ pointer to obtained dest-0key
     priv-addr$ $[]off ;
 
 : !my-addr$ ( -- )
+    my-key-default @ 0= ?EXIT
     now>never  my-addr[] [:
       nat( ." insert into my-addr$: " dup .addr forth:cr )
       o>addr gen-host my-addr$ $ins[]sig drop ;] $[]o-map ;

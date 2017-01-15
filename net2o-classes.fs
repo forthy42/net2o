@@ -132,7 +132,7 @@ cmd-class class
 scope: msg
     method start
     method tag
-    method msgre
+    method chain
     method signal
     method re
     method text

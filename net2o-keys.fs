@@ -930,12 +930,15 @@ false value ?yes
 
 \ select key by nick
 
+Forward !my-addr$
+
 : >raw-key ( o -- )
     dup 0= !!no-nick!! dup my-key-default ! >o
     sksig!
     ke-pk $@ pkc pkrk# smove
     ke-sk sec@ skc swap key| move
-    ke-sksig sec@ sksig keysize smove o> ;
+    ke-sksig sec@ sksig keysize smove o>
+    !my-addr$ ;
 
 : >key ( addr u -- )
     key# @ 0= IF  read-keys  THEN
