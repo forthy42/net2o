@@ -316,7 +316,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
     !!signed? 2 !!>=order? $> msg:id ;
-+net2o: msg-chain ( $:sigdate -- ) \g chained to previous message
++net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
     !!signed? $10 !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     !!signed? 2 !!>=order? $> msg:signal ;
@@ -336,6 +336,15 @@ gen-table $freeze
 
 \ Code for displaying messages
 
+: >sighash ( addr u1 -- hash u2 )
+    c:0key bounds U+DO
+	I le-64@ last# cell+ $search[]date
+	dup 0< IF  drop  "" UNLOOP  EXIT
+	ELSE  last# cell+ $[]@ dup keysize 1+ - /string 1- c:shorthash
+	THEN
+    1 64s +LOOP
+    hashtmp $20 2dup c:hash@ ;
+
 :noname ( addr u -- )
     last# >r \ .key-id searches for a key, and modifies last#
     2dup startdate@ .ticks space 2dup .key-id
@@ -349,13 +358,10 @@ gen-table $freeze
     ."  @" .key-id <default> ; msg-class to msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
-    over le-64@ last# cell+ $search[]date
-    dup 0< IF  drop <err>
-    ELSE  last# cell+ $[]@ dup keysize 1+ - /string 1-
-	2over 1 64s /string str=  IF  <info>  ELSE  <err>  THEN
-    THEN
-    ."  <" over le-64@ .ticks
-    verbose( 1 64s /string ." ," 85type )else( 2drop ) <default>
+    2dup keysize - >sighash
+    2over dup keysize - /string str= IF  <info>  ELSE  <err>  THEN
+    2dup keysize - bounds ?DO  ."  <" I le-64@ .ticks  1 64s +LOOP
+    verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
     r> to last# ; msg-class to msg:chain
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
@@ -833,11 +839,12 @@ $200 Constant maxmsg#
 
 also net2o-base
 : ?chain, ( -- )  chain-mode @ 0= ?EXIT
-    last# >r last# $@ ?msg-log
+    last# >r last# $@ ?msg-log  c:0key
     last# cell+ $[]# 1- dup 0< IF  drop
     ELSE  last# cell+ $[]@
 	[: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
-	  dup keysize 1+ - /string 1- forth:type ;] $tmp $, msg-chain
+	  dup keysize 1+ - /string 1- >hash
+	  hashtmp $20 forth:type ;] $tmp $, msg-chain
     THEN  r> to last# ;
 
 : (send-avalanche) ( xt -- addr u flag )
