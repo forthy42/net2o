@@ -348,10 +348,8 @@ gen-table $freeze
 \ Code for displaying messages
 
 :noname ( addr u -- )
-    last# >r \ .key-id searches for a key, and modifies last#
     2dup startdate@ .ticks space 2dup .key-id
-    [: .simple-id ;] $tmp notify!
-    r> to last# ; msg-class to msg:start
+    [: .simple-id ;] $tmp notify! ; msg-class to msg:start
 :noname ( addr u -- )
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )

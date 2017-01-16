@@ -465,7 +465,7 @@ Variable unkey-id#
     unkey-id# #@
     IF  64@ unkey-to# 64+ ticks 64- 64-0>=  THEN  0= ;
     
-: .key-id ( addr u -- ) key| 2dup key# #@ 0=
+: (.key-id) ( addr u -- ) key| 2dup key# #@ 0=
     IF  drop up@ receiver-task = IF
 	    <event 2dup save-mem e$, ->search-key main-up@ event>
 	    .unkey-id EXIT  THEN
@@ -478,9 +478,12 @@ Variable unkey-id#
     THEN
     cell+ ..nick 2drop ;
 
+: .key-id ( addr u -- )
+    last# >r  (.key-id)  r> to last# ;
+
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
 
-: .simple-id ( addr u -- ) key>nick type ;
+: .simple-id ( addr u -- ) last# >r  key>nick type  r> to last# ;
 
 : check-key ( addr u -- )
     o IF  pubkey @ IF

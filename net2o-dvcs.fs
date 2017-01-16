@@ -574,7 +574,7 @@ User id-check# \ check hash
 		    ." <-" drop le-64@ .ticks  <default>
 		ELSE  2drop  THEN  space
 		log-action$ $. ." : " log-text$ $. space
-		last# >r  .key-id  r> to last#
+		.key-id
 		cr
 	    THEN
 	THEN  1+
