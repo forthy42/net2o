@@ -571,6 +571,7 @@ $10 Constant datesize#
 : startdate@ ( addr u -- date ) + sigsize# - le-64@ ;
 : enddate@ ( addr u -- date ) + sigsize# - 64'+ le-64@ ;
 : sigonly@ ( addr u -- addr' u' ) + sigonlysize# - [ sigonlysize# 1- ]L ;
+: sigdate@ ( addr u -- addr' u' ) + sigsize# - [ sigsize# 1- ]L ;
 
 : $ins[]sig# ( addr u $array n -- pos )
     \G insert O(log(n)) into pre-sorted array if sigdate is newer

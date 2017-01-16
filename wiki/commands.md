@@ -107,7 +107,7 @@ List of Commands
 + $2B get-tick ( -- )
   request time adjust
 + $2C receive-key ( $:key -- )
-  receive a key
+  receive a key, invalid/obsolete
 + $2D receive-tmpkey ( $:key -- )
   receive emphemeral key
 + $2E key-request ( -- )
@@ -285,6 +285,8 @@ List of Commands
   key for connection setup
 + $1B addr-revoke ( $:revoke -- )
   revocation info
++ $1C addr-ekey ( $:ekey timeout -- )
+  ephemeral key
 
 ### dht commands ###
 
@@ -326,10 +328,12 @@ List of Commands
 
 + $20 msg-start ( $:pksig -- )
   start message
-+ $21 msg-tag ( $:group -- )
++ $21 msg-tag ( $:tag -- )
   tagging (can be anywhere)
 + $22 msg-id ( $:id -- )
   a hash id
++ $23 msg-chain ( $:dates,sighash -- )
+  chained to message[s]
 + $24 msg-signal ( $:pubkey -- )
   signal message to one person
 + $25 msg-re ( $:hash )
@@ -380,7 +384,5 @@ that makes identical transactions have the same hash.
   write out file
 + $25 dvcs-unzip ( $:diffgz size algo -- $:diff )
   unzip an object
-+ $26 dvcs-spit ( $:perm+name -- )
-  write ot read-in
-+ $27 dvcs-add ( $:hash -- )
-  add and read external hash reference
++ $26 dvcs-add ( $:hash -- )
+  add (and read) external hash reference

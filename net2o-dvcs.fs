@@ -64,7 +64,8 @@ dvcs-abstract class
     }scope
     
     scope{ project \ per-project configuration values
-    
+
+    field: chain$
     field: revision$
     field: branch$
     field: project$
@@ -103,6 +104,7 @@ msg-class class
     field: log-id$
     field: log-action$
     field: log-text$
+    field: log-chain$
 end-class dvcs-log-class
 
 : /name ( addr u -- addr' u' )
@@ -220,14 +222,14 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 :noname ( 64size addr u -- )
     2>r 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
-    2dup >file-hash 2r> 2swap  dvcs:fileentry$ $off
+    2dup >file-hash 2r> 2swap  dvcs:fileentry$ $free
     [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
     2dup +fileentry  dvcs-outfile-hash
     fsize dvcs:out-fileoff +! ; dvcs-class to dvcs:write
 ' !!FIXME!! ( 64size algo addr u --- ) dvcs-class to dvcs:unzip
 :noname ( addr u -- ) \ hash+perm+name
-    dvcs:fileentry$ $off
+    dvcs:fileentry$ $free
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
 	hash#128 /string forth:type ;] dvcs:fileentry$ $exec
     dvcs:fileentry$ $@ +fileentry
@@ -249,22 +251,22 @@ dvcs-adds to dvcs:write
 : n2o:new-dvcs-adds ( -- o )
     dvcs-adds new >o  dvcs-table @ token-table !  o o> ;
 : clean-delta ( o:dvcs -- )
-    dvcs:in-files$ $off dvcs:out-files$ $off  dvcs:patch$ $off ;
+    dvcs:in-files$ $free dvcs:out-files$ $free  dvcs:patch$ $free ;
 : n2o:dispose-commit ( o:commit -- )
-    id$ $off  re$ $off  object$ $off  dispose ;
+    id$ $free  re$ $free  object$ $free  dispose ;
 : n2o:dispose-search ( o:commit -- )
-    match-id$ $off  match-tag$ $off  dispose ;
+    match-id$ $free  match-tag$ $free  dispose ;
 : n2o:dispose-dvcs-adds ( o:dvcs -- )
     dvcs:adds[] $[]free dispose ;
 : n2o:dispose-dvcs ( o:dvcs -- )
-    dvcs:branch$ $off  dvcs:message$ $off
+    dvcs:branch$ $free  dvcs:message$ $free
     dvcs:files# #offs  dvcs:oldfiles# #offs
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
-    clean-delta  dvcs:fileentry$ $off
-    dvcs:hash$ $off
-    dvcs:id$ $off  dvcs:oldid$ $off
-    project:revision$ $off
-    project:branch$ $off  project:project$ $off
+    clean-delta  dvcs:fileentry$ $free
+    dvcs:hash$ $free
+    dvcs:id$ $free  dvcs:oldid$ $free
+    project:revision$ $free   project:chain$ $free
+    project:branch$ $free  project:project$ $free
     dvcs:commits @ .n2o:dispose-commit
     dvcs:searchs @ .n2o:dispose-search
     dispose ;
@@ -279,10 +281,10 @@ Variable branches[]
 : clean-up ( -- )
     new-files[] $[]off  ref-files[] $[]off
     del-files[] $[]off  old-files[] $[]off
-    branches[]  $[]off  new-file$ $off ;
+    branches[]  $[]off  new-file$ $free ;
 
 User tmp1$
-: $tmp1 ( xt -- ) tmp1$ $off  tmp1$ $exec  tmp1$ $@ ;
+: $tmp1 ( xt -- ) tmp1$ $free  tmp1$ $exec  tmp1$ $@ ;
 
 : hashstat-rest ( addr u -- addr' u' )
     [: statbuf st_mode w@ 0 { w^ perm } perm le-w!
@@ -393,7 +395,7 @@ Variable id-files[]
 previous
 
 : save-project ( -- )
-    dvcs:id$ $@ ['] 85type project:revision$ dup $off $exec
+    dvcs:id$ $@ ['] 85type project:revision$ dup $free $exec
     "~+/.n2o/config" ['] project >body write-config ;
 
 : append-line ( addr u file u -- )
@@ -440,7 +442,7 @@ Variable patch-in$
 
 \ read in branches, new version
 
-: hash+type ( addr u type addr1 -- ) >r r@ $off
+: hash+type ( addr u type addr1 -- ) >r r@ $free
     [: { w^ x } type x cell type ;] r> $exec ;
 : hash+type$ ( addr u type -- )
     [: { w^ x } type x cell type ;] $tmp1 ;
@@ -451,13 +453,13 @@ Variable patch-in$
 ' 2drop commit-class to msg:signal
 ' 2drop commit-class to msg:text
 ' 2drop commit-class to msg:action
-' 2drop search-class to msg:chain
+' 2drop commit-class to msg:chain
 ' noop  commit-class to msg:end
 
 :noname ( addr u -- )
     re$ $+! ; commit-class to msg:re
 :noname ( addr u -- )
-    id$ $! re$ $off ; commit-class to msg:id
+    id$ $! re$ $free ; commit-class to msg:id
 :noname ( addr u type -- )
     object$ hash+type
     object$ $@ key| id$ $@
@@ -483,7 +485,6 @@ Variable patch-in$
 :noname match-flag @ IF  match-id$ $!  ELSE  2drop  THEN ; search-class to msg:id
 ' 3drop search-class to msg:object
 
-' 2drop dvcs-log-class to msg:chain
 ' 2drop dvcs-log-class to msg:re
 ' 2drop dvcs-log-class to msg:coord
 ' 3drop dvcs-log-class to msg:object
@@ -493,6 +494,7 @@ Variable patch-in$
 :noname log-id$     $! ; dvcs-log-class to msg:id
 :noname log-text$   $! ; dvcs-log-class to msg:text
 :noname log-action$ $! ; dvcs-log-class to msg:action
+:noname log-chain$  $! ; dvcs-log-class to msg:chain
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
@@ -500,7 +502,7 @@ Variable patch-in$
     [: dup $@ 85type ."  -> " cell+ $@ 85type cr ;] #map ;
 : chat>branches-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
-	re$ $off  object$ $off
+	re$ $free  object$ $free
 	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw
     dvcs( ." === id>patch ===" cr id>patch# .hash
@@ -551,6 +553,10 @@ User id-check# \ check hash
 
 : n2o:new-dvcs-log ( -- o )
     dvcs-log-class new >o msg-table @ token-table ! o o> ;
+: n2o:dispose-dvcs-log ( o:log -- )
+    log-sig$    $free  log-tag$  $free  log-id$    $free
+    log-action$ $free  log-text$ $free  log-chain$ $free
+    dispose ;
 
 : display-logn ( addr u n -- )
     project:branch$ $@ { d: branch }
@@ -562,13 +568,18 @@ User id-check# \ check hash
 	ELSE
 	    branch log-tag$ $@ str= IF
 		dup 0 .r ." : [" log-id$ $@ 85type ." ] "
-		log-sig$ $@ 2dup startdate@ .ticks space
-		log-action$ $. ." : " log-text$ $. space .key-id
+		log-sig$ $@ 2dup startdate@ .ticks
+		log-chain$ $@ dup IF
+		    2dup sighash? IF  <info>  ELSE  <err>  THEN
+		    ." <-" drop le-64@ .ticks  <default>
+		ELSE  2drop  THEN  space
+		log-action$ $. ." : " log-text$ $. space
+		last# >r  .key-id  r> to last#
 		cr
 	    THEN
 	THEN  1+
     cell +LOOP  drop
-    log free dispose o> throw ;
+    log free n2o:dispose-dvcs-log o> throw ;
 
 : dvcs-log ( -- )
     n2o:new-dvcs >o  config>dvcs
@@ -582,6 +593,7 @@ also net2o-base
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: with dvcs
+	project:chain$ $@ base85>$
 	message$   $@
 	type       @
 	hash$      $@
@@ -592,16 +604,18 @@ also net2o-base
 	$, msg-tag
 	$, msg-id
 	dup >r
-	dup IF  $,       msg-re      ELSE  2drop       THEN
+	dup IF  $, msg-re     ELSE  2drop  THEN
 	dup >r dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
 	r> r> IF   IF  "Patchset"  ELSE  "Revert"  THEN
 	ELSE  drop "Snapshot"  THEN  $, msg-action
-	$, msg-text ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
+	$, msg-text
+	dup IF  $, msg-chain  ELSE  2drop  THEN
+    ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
 previous
 
 : dvcs-snapentry ( -- )
-    dvcs:oldid$ $off
+    dvcs:oldid$ $free
     msg:snapshot# (dvcs-newsentry) ;
 : dvcs-newsentry ( -- )
     msg:patch# msg:snapshot# dvcs:oldid$ $@len select (dvcs-newsentry) ;
@@ -613,8 +627,12 @@ previous
     IF  >revision  ELSE  2drop  THEN ;
 
 : ?delete-file ( addr u -- )
-     delete-file dup no-file# <> and throw ;
+    delete-file dup no-file# <> and throw ;
 
+: dvcs-sig$ ( -- )
+    last-signed 2@ sigdate@ over 1 64s 85type 2 64s /string
+    c:0key >hash hashtmp hash#128 85type ;
+ 
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
     dvcs-readin
     ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
@@ -624,9 +642,9 @@ previous
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
 	ref-files[] ['] +fileentry $[]map
-	>id-revision
-	save-project  dvcs-newsentry
-	dvcs:id$ $@ project:revision$ $!  filelist-out
+	>id-revision  dvcs-newsentry
+	['] dvcs-sig$ project:chain$ dup $free $exec
+	save-project  filelist-out
 	"~+/.n2o/newfiles" ?delete-file
 	"~+/.n2o/reffiles" ?delete-file
     THEN  clean-up ;
@@ -661,7 +679,7 @@ previous
     config>dvcs  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >id-revision
-    save-project  dvcs-snapentry  clean-up n2o:dispose-dvcs o> ;
+    dvcs-snapentry  save-project  clean-up n2o:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@

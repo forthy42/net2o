@@ -302,6 +302,17 @@ Forward msg:last
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
+: sighash? ( addr u -- flag )
+    over le-64@ last# cell+ $search[]date
+    dup 0< IF  drop 2drop  false  EXIT  THEN  >r
+    over le-64@ 64#1 64+ last# cell+ $search[]date >r [ 1 64s ]L /string
+    r> r> +DO
+	c:0key I last# cell+ $[]@ sigonly@ >hash
+	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
+	ELSE  2dup 85type ."  <> " hashtmp over 85type  THEN
+    LOOP
+    2drop false ;
+
 scope{ net2o-base
 
 \g 
@@ -335,16 +346,6 @@ gen-table $freeze
 ' context-table is gen-table
 
 \ Code for displaying messages
-
-: sighash? ( addr u -- flag )
-    over le-64@ last# cell+ $search[]date
-    dup 0< IF  drop 2drop  false  EXIT  THEN  >r
-    over le-64@ 64#1 64+ last# cell+ $search[]date >r [ 1 64s ]L /string
-    r> r> +DO
-	c:0key I last# cell+ $[]@ sigonly@ >hash
-	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT  THEN
-    LOOP
-    2drop false ;
 
 :noname ( addr u -- )
     last# >r \ .key-id searches for a key, and modifies last#
