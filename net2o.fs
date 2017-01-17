@@ -1032,7 +1032,7 @@ scope{ mapc
 
 \ synchronous sending
 
-: data-to-send ( -- flag )
+: data-to-send? ( -- flag )
     resend? data-tail? or ;
 
 : net2o:resend ( -- addr n )
@@ -1042,7 +1042,7 @@ scope{ mapc
     data-tail@ data-dest net2o:prep-send /tail ;
 
 : ?toggle-ack ( -- )
-    data-to-send 0= IF
+    data-to-send? 0= IF
 	[ resend-toggle# ack-toggle# or ]L outflag xor!
 	never ack@ .next-tick 64!
     THEN ;
@@ -1076,7 +1076,7 @@ Create chunk-adder chunks-struct allot
 : ?query-task ( -- task )
     query-task 0= IF  create-query-task  THEN  query-task ;
 
-: do-send-chunks ( -- ) data-to-send 0= ?EXIT
+: do-send-chunks ( -- ) data-to-send? 0= ?EXIT
     [: chunks $@ bounds ?DO
 	  I chunk-context @ o = IF
 	      UNLOOP  EXIT
@@ -1132,8 +1132,11 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
 
 : .nosend ( -- ) ack@ >o ." done, "  4 set-precision
     .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
-    .o ." slack: " min-slack ? cr
-    .o ." rtdelay: " rtdelay ? cr o> ;
+    .o ." slack: " min-slack 64@ u64. max-slack 64@ u64. cr
+    .o ." rtdelay: " rtdelay 64@ u64. cr o>
+    data-map @ with mapc
+    ." Data h b t: " dest-head @ hex. dest-back @ hex. dest-tail @ hex. cr
+    endwith ;
 
 : send-chunks-async ( -- flag )
     chunks $@ dup 0= IF  nip  EXIT  THEN
@@ -1141,7 +1144,7 @@ event: ->send-chunks ( o -- ) .do-send-chunks ;
     IF
 	dup chunk-context @ >o rdrop
 	chunk-count
-	data-to-send IF
+	data-to-send? IF
 	    send-a-chunk
 	ELSE
 	    drop msg( .nosend )

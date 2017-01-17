@@ -150,7 +150,7 @@ gen-table $freeze
 ' context-table is gen-table
 
 : net2o:gen-resend ( -- )
-    recv-flag @ invert resend-toggle# and ulit, ack-resend ;
+    recv-flag c@ invert resend-toggle# and ulit, ack-resend ;
 : net2o:gen-reset ( -- )
     ack-reset 0 ack-receive c! ;
 
@@ -256,7 +256,9 @@ also net2o-base
     map .mapc:data-resend#-buf $@
     bounds ?DO
 	I $@ over @ >r cell /string $FF -skip
-	dup >r $FF skip r> over - r> + ulit, $, ack-resend#
+	dup >r $FF skip dup IF
+	    r> over - r> + ulit, $, ack-resend#
+	ELSE  2drop rdrop rdrop  THEN
     cell +LOOP
     map .mapc:data-resend#-buf $[]off ;
 
@@ -267,20 +269,22 @@ also net2o-base
 
 : !rdata-tail ( -- )
     data-rmap @ with mapc
-    data-ack# @ bytes>addr dest-top 2@ umin umin
+    data-ack# @ bytes>addr \ dest-back @ dest-size @ 1- invert and +
+    \ dup dest-back @ u< IF  dest-size @ +  THEN
+    dest-top 2@ umin umin
     dest-tail @ umax dup dest-tail !@ endwith
     ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
-: receive-flag ( -- flag )
-    inbuf 1+ c@ recv-flag @ xor resend-toggle# and 0<> ;
+: resend~? ( -- flag )
+    inbuf 1+ c@ recv-flag c@ xor resend-toggle# and 0<> ;
 
-2 Value max-resend#
+$40 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits )
     data-rmap @ with mapc
     ack( ." head/tail: " dup forth:. dest-head @ hex. dest-tail @ hex. forth:cr )
-    IF    dest-head @ addr>bits bits>bytes -4 and
-    ELSE  dest-head @ 1- addr>bits bits>bytes 1+  THEN 0 max
+    IF    dest-head @ addr>bytes -4 and
+    ELSE  dest-head @ 1- addr>bytes 1+  THEN 0 max
     dest-tail @ addr>bytes -4 and dup data-ack# umin!
     data-ackbits @ dest-size @ addr>bytes 1-
     dest-tail @ addr>bits endwith ;
@@ -495,31 +499,32 @@ previous
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
-: net2o:do-ack ( -- )
-    receive-flag IF
+: net2o:do-ack-rest ( -- )
+    resend~? IF
 	cmd-resend? timeout( IF  ." resend..." cr THEN )else( drop )
     THEN
-    dest-addr 64@ recv-addr 64! \ last received packet
-    +cookie
-    inbuf 1+ c@ dup recv-flag ! \ last receive flag
+    inbuf 1+ c@ dup recv-flag c! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
     IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  ack-timing ;
+
+: net2o:do-ack ( -- )
+    dest-addr 64@ recv-addr 64!  +cookie \ last received packet
+    net2o:do-ack-rest ;
 
 : +flow-control ['] net2o:do-ack ack-xt ! ;
 
 \ keepalive
 
 also net2o-base
-: .keepalive ( -- )  ." transfer keepalive " expected@ hex. hex.
-    data-rmap @ with mapc  dest-tail @ hex. dest-back @ hex.  endwith
+: .keepalive ( -- )  ." transfer keepalive e e h t b " expected@ hex. hex.
+    data-rmap @ with mapc  dest-head @ hex. dest-tail @ hex. dest-back @ hex.
+    ack( data-ackbits @ dest-size @ addr>bytes dump )
+    endwith
     forth:cr ;
 : transfer-keepalive? ( -- )
     o to connection
     timeout( .keepalive )
-    rewind-transfer 0= IF  .keepalive  EXIT  THEN
-    expected@ tuck u>= and resend-all? and IF  net2o-code
-	ack +expected end-with IF  slurp  THEN  end-code  EXIT
-    THEN ;
+    inbuf 1+ c@ 7 xor recv-flag c!  net2o:do-ack-rest ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?

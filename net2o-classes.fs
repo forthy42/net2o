@@ -207,7 +207,6 @@ cmd-class class
     $10 +field return-address \ used as return address
     $10 +field r0-address \ used for resending 0
     64field: recv-addr
-    field: recv-flag
     field: read-file#
     field: write-file#
     field: residualread
@@ -228,6 +227,7 @@ cmd-class class
     cfield: ack-resend~
     cfield: ack-resend#
     cfield: is-server
+    cfield: recv-flag
     
     field: req-codesize
     field: req-datasize

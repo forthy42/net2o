@@ -408,7 +408,7 @@ scope{ mapc
 
 \ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
-    data-head? 0= fstates 0= or IF  head@ 0  EXIT  THEN
+    data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
