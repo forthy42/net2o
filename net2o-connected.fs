@@ -271,7 +271,8 @@ also net2o-base
     dest-tail @ umax dup dest-tail !@ endwith
     ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
-: receive-flag ( -- flag )  recv-flag @ resend-toggle# and 0<> ;
+: receive-flag ( -- flag )
+    inbuf 1+ c@ recv-flag @ xor resend-toggle# and 0<> ;
 
 2 Value max-resend#
 
@@ -495,6 +496,9 @@ previous
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
 : net2o:do-ack ( -- )
+    receive-flag IF
+	cmd-resend? timeout( IF  ." resend..." cr THEN )else( drop )
+    THEN
     dest-addr 64@ recv-addr 64! \ last received packet
     +cookie
     inbuf 1+ c@ dup recv-flag ! \ last receive flag

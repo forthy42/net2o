@@ -290,8 +290,10 @@ $100 Value dests#
 scope{ mapc
 
 : >data-head ( addr o:map -- flag )  dest-size @ 1- >r
-    dup dest-back @ r@ and < IF  r@ + 1+  THEN
-    maxdata + dest-back @ r> invert and + dup dest-head umax!@ <> ;
+    dup dest-back @ r@ and u< IF  r@ + 1+  THEN
+    dest-back @ r> invert and + \ add total offset
+    maxdata +                   \ add one packet size
+    dup dest-head umax!@ <> ;
 
 }scope
 
