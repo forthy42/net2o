@@ -1110,7 +1110,7 @@ previous
     ELSE  2drop  THEN ;
 
 : msg-timeout ( -- )
-    >next-timeout cmd-resend?
+    packets2 @  connected-timeout  packets2 @ <>
     IF  reply( ." Resend to " pubkey $@ key>nick type cr )
 	timeout-expired? IF
 	    msg-group$ $@len IF

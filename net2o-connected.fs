@@ -501,7 +501,7 @@ previous
 
 : net2o:do-ack-rest ( -- )
     resend~? IF
-	cmd-resend? timeout( IF  ." resend..." cr THEN )else( drop )
+	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
     THEN
     inbuf 1+ c@ dup recv-flag c! \ last receive flag
     acks# and data-rmap @ .mapc:ack-advance? @
