@@ -572,7 +572,8 @@ event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
     n2o:close-all net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event ->chat-sync-done wait-task @ event> ;
+    <event ->chat-sync-done wait-task @ event>
+    ['] noop sync-done-xt ! ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
 event: ->msg-eval ( $pack last -- )
@@ -580,7 +581,10 @@ event: ->msg-eval ( $pack last -- )
     buf $@ true replay-mode ['] msg-eval !wrapper
     buf $off ;
 : msg-file-done ( -- )
-    msg( ." msg file done" forth:cr ) ;
+    ." msg file done: "
+    fs-path $@ drop le-64@ .ticks ." ->"
+    fs-path $@ drop 64'+ le-64@ .ticks forth:cr
+    fs-close ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -593,7 +597,7 @@ event: ->msg-eval ( $pack last -- )
     -1 parent @ .file-count +!@ drop \ make this atomic
     fs-inbuf $@len IF
 	fs-path $@ 2 64s /string >group
-	parent @ .wait-task @ ?dup-IF
+	parent @ .wait-task @ dup up@ <> and ?dup-IF
 	    <event 0 fs-inbuf !@ elit, last# elit,
 	    ->msg-eval  event>
 	ELSE
