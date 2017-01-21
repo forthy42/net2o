@@ -16,7 +16,7 @@ cat >.net2o/config <<EOF
 keys="$PWD/.net2o/keys"
 chats="$PWD/.net2o/chats"
 objects="$PWD/.net2o/objects"
-date=2
+date=5
 host="test-host"
 prio=10
 rootdirs="$PWD"
@@ -27,10 +27,10 @@ PASSPHRASE=2345 $GFORTH ../n2o $* -yes keygen chat-test2
 PASSPHRASE=3456 $GFORTH ../n2o $* -yes keygen chat-test3
 PASSPHRASE=4567 $GFORTH ../n2o $* -yes keygen chat-test4
 
-PASSPHRASE=1234 $GFORTH ../n2o $* keyin ~/chat-test2.n2o ~/chat-test3.n2o ~/chat-test4.n2o
-PASSPHRASE=2345 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test3.n2o ~/chat-test4.n2o
-PASSPHRASE=3456 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test2.n2o ~/chat-test4.n2o
-PASSPHRASE=4567 $GFORTH ../n2o $* keyin ~/chat-test1.n2o ~/chat-test2.n2o ~/chat-test3.n2o
+PASSPHRASE=1234 $GFORTH ../n2o $* keyin ~/chat-test[234].n2o
+PASSPHRASE=2345 $GFORTH ../n2o $* keyin ~/chat-test[134].n2o
+PASSPHRASE=3456 $GFORTH ../n2o $* keyin ~/chat-test[124].n2o
+PASSPHRASE=4567 $GFORTH ../n2o $* keyin ~/chat-test[123].n2o
 
 function killgforth {
     killall $GFORTH
@@ -59,7 +59,7 @@ do
     x="x$x"
     case $i in
 	*0)
-	    sleep 1
+	    sleep 2
 	    ;;
     esac
 done
@@ -91,7 +91,7 @@ do
     x="x$x"
     case $i in
 	*[05])
-	    sleep 1
+	    sleep 2
 	    ;;
     esac
 done
@@ -112,7 +112,7 @@ do
     x="y$x"
     case $i in
 	*[05])
-	    sleep 1
+	    sleep 2
 	    ;;
     esac
 done
@@ -130,7 +130,7 @@ usleep 20000
 x="y$x"
 
 echo "/sync" >&6
-sleep 1
+sleep 3
 echo "/bye" >&6
 usleep 300000
 echo "/bye" >&5
@@ -138,4 +138,4 @@ usleep 300000
 echo "/bye" >&4
 usleep 300000
 echo "/bye" >&3
-usleep 3000000
+sleep 2

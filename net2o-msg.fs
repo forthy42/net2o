@@ -493,10 +493,11 @@ msgfs-class +file-classes
 
 : save-to-msg ( addr u n -- )
     state-addr >o  msgfs-class# fs-class! w/o fs-create o> ;
-: n2o:copy-msg ( filename u -- )
-    ." copy msg: " 2dup
+: .chat-file ( addr u -- )
     over le-64@ .ticks 1 64s /string  ." ->"
-    over le-64@ .ticks 1 64s /string  ." @" forth:type
+    over le-64@ .ticks 1 64s /string  ." @" forth:type ;
+: n2o:copy-msg ( filename u -- )
+    ." copy msg: " 2dup .chat-file
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
       file-reg# @ save-to-msg ;] n2o>file
     1 file-count +! forth:cr ;
@@ -565,7 +566,7 @@ Variable ask-msg-files[]
 \ syncing done
 event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done event" forth:cr )
-    msg-group$ $@ ?msg-log ?save-msg
+    msg-group$ $@ ?msg-log
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
@@ -579,11 +580,10 @@ event: ->chat-sync-done ( -- )
 event: ->msg-eval ( $pack last -- )
     $@ ?msg-log { w^ buf }
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $off ;
+    buf $off ?save-msg ;
 : msg-file-done ( -- )
     ." msg file done: "
-    fs-path $@ drop le-64@ .ticks ." ->"
-    fs-path $@ drop 64'+ le-64@ .ticks forth:cr
+    fs-path $@ .chat-file forth:cr
     fs-close ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
@@ -594,7 +594,6 @@ event: ->msg-eval ( $pack last -- )
 ; msgfs-class is fs-read
 :noname ( -- )
     fs-path @ 0= ?EXIT
-    -1 parent @ .file-count +!@ drop \ make this atomic
     fs-inbuf $@len IF
 	fs-path $@ 2 64s /string >group
 	parent @ .wait-task @ dup up@ <> and ?dup-IF
@@ -602,9 +601,11 @@ event: ->msg-eval ( $pack last -- )
 	    ->msg-eval  event>
 	ELSE
 	    fs-inbuf $@ true replay-mode ['] msg-eval !wrapper fs-inbuf $off
+	    ?save-msg
 	THEN
     THEN
     fs:fs-clear
+    -1 parent @ ?dup-IF  .file-count +!@  THEN drop \ make this atomic
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!
