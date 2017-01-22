@@ -124,7 +124,8 @@ event: ->save-all-msgs ( task -- )
     [: last# cell+ $ins[]date
       dup -1 = IF drop #0. 0 to last#  ELSE  last# cell+ $[]@  THEN
     ;] msglog-sema c-section ;
-: ?save-msg ( -- )
+: ?save-msg ( addr u -- )
+    ?msg-log
     last# otr-mode @ replay-mode @ or 0= and
     IF  save-msgs&  THEN ;
 
@@ -144,7 +145,7 @@ Sema queue-sema
     do-nestsig msg:end ;
 
 : >msg-log ( addr u -- addr' u )
-    last# >r +msg-log ?save-msg r> to last# ;
+    last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
 
 Variable otr-log
 : >otr-log ( addr u -- addr' u )
@@ -564,26 +565,28 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: ->chat-sync-done ( -- )
+event: ->chat-sync-done ( o -- )
+    .n2o:close-all
     msg( ." chat-sync-done event" forth:cr )
     msg-group$ $@ ?msg-log
     last# $@ rows  display-lastn
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
-    n2o:close-all net2o-code expect-reply close-all net2o:gen-reset end-code
+    net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event ->chat-sync-done wait-task @ event>
+    <event o elit, ->chat-sync-done wait-task @ event>
     ['] noop sync-done-xt ! ;
 : +sync-done ( -- )
     ['] chat-sync-done sync-done-xt ! ;
 event: ->msg-eval ( $pack last -- )
-    $@ ?msg-log { w^ buf }
+    $@ ?save-msg { w^ buf }
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $off ?save-msg ;
+    buf $off ;
 : msg-file-done ( -- )
-    ." msg file done: "
-    fs-path $@ .chat-file forth:cr
+    msg( fs-path $@len IF
+	." msg file done: " fs-path $@ .chat-file forth:cr
+    THEN )
     fs-close ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
@@ -595,13 +598,12 @@ event: ->msg-eval ( $pack last -- )
 :noname ( -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
-	fs-path $@ 2 64s /string >group
+	fs-path $@ 2 64s /string ?msg-log
 	parent @ .wait-task @ dup up@ <> and ?dup-IF
 	    <event 0 fs-inbuf !@ elit, last# elit,
 	    ->msg-eval  event>
 	ELSE
 	    fs-inbuf $@ true replay-mode ['] msg-eval !wrapper fs-inbuf $off
-	    ?save-msg
 	THEN
     THEN
     fs:fs-clear

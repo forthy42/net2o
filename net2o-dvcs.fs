@@ -775,7 +775,7 @@ $20 /sync-files * Constant /sync-reqs
 
 event: ->dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
-    msg-group$ $@ ?msg-log ?save-msg   0 dvcs-request# !
+    msg-group$ $@ ?save-msg   0 dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
 
 : dvcs-sync-done ( -- )

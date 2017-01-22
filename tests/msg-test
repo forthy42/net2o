@@ -76,50 +76,53 @@ echo "/sync" >&5
 
 sleep 1
 
-x=""
-
-for i in $(seq 1 $count)
+for j in $(seq 1 4)
 do
-    echo "Test Message $i on 1/4 $x" >&3
-    usleep 20000
-    echo "Test Message $i on 2/4 $x" >&4
-    usleep 20000
-    echo "Test Message $i on 3/4 $x" >&5
-    usleep 20000
-    echo "Test Message $i on 4/4 $x" >&6
-    usleep 20000
-    x="x$x"
-    case $i in
-	*[05])
-	    sleep 2
-	    ;;
-    esac
+    x=""
+    
+    for i in $(seq 1 $count)
+    do
+	echo "Test Message $i/$j on 1/4 $x" >&3
+	usleep 20000
+	echo "Test Message $i/$j on 2/4 $x" >&4
+	usleep 20000
+	echo "Test Message $i/$j on 3/4 $x" >&5
+	usleep 20000
+	echo "Test Message $i/$j on 4/4 $x" >&6
+	usleep 20000
+	x="x$x"
+	case $i in
+	    *[05])
+		sleep 2
+		;;
+	esac
+    done
+    
+    echo "/bye" >&6
+    usleep 300000
+    
+    x=""
+
+    for i in $(seq 1 $count)
+    do
+	echo "Test Message $i/$j on 1/3 $x" >&3
+	usleep 20000
+	echo "Test Message $i/$j on 2/3 $x" >&4
+	usleep 20000
+	echo "Test Message $i/$j on 3/3 $x" >&5
+	usleep 20000
+	x="y$x"
+	case $i in
+	    *[05])
+		sleep 2
+		;;
+	esac
+    done
+
+    exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
+    export GFORTHPID5=$[$!+1]
+    sleep 1
 done
-
-echo "/bye" >&6
-usleep 300000
-
-x=""
-
-for i in $(seq 1 $count)
-do
-    echo "Test Message $i on 1/3 $x" >&3
-    usleep 20000
-    echo "Test Message $i on 2/3 $x" >&4
-    usleep 20000
-    echo "Test Message $i on 3/3 $x" >&5
-    usleep 20000
-    x="y$x"
-    case $i in
-	*[05])
-	    sleep 2
-	    ;;
-    esac
-done
-
-exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
-export GFORTHPID5=$[$!+1]
-sleep 1
 
 echo "Last Message $i on 1/3 $x" >&3
 usleep 20000
