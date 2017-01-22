@@ -40,7 +40,7 @@ $00d8607f5 netlink-addr nl_groups l!
     pollfds [ pollfd revents ]L + w@ POLLIN and ;
 
 : wait-for-netlink ( -- )
-    BEGIN  netlink?  UNTIL ;
+    BEGIN  netlink? 0= WHILE  ?events  REPEAT ;
 
 : read-netlink ( -- addr u )
     netlink-sock netlink-buffer netlink-size# MSG_DONTWAIT recv dup ?ior-again

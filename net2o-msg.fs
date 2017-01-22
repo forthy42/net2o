@@ -584,9 +584,9 @@ event: ->msg-eval ( $pack last -- )
     buf $@ true replay-mode ['] msg-eval !wrapper
     buf $off ;
 : msg-file-done ( -- )
-    msg( fs-path $@len IF
+    fs-path $@len IF
 	." msg file done: " fs-path $@ .chat-file forth:cr
-    THEN )
+    THEN
     fs-close ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
@@ -1130,7 +1130,7 @@ previous
 
 : +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
 
-$A $C 2Value chat-bufs#
+$B $E 2Value chat-bufs#
 
 : +chat-control ( -- )
     +resend-msg +flow-control +sync-done ;

@@ -141,4 +141,4 @@ usleep 300000
 echo "/bye" >&4
 usleep 300000
 echo "/bye" >&3
-sleep 2
+sleep 5
