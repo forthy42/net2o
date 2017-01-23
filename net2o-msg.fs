@@ -122,7 +122,7 @@ event: ->save-all-msgs ( task -- )
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
     [: last# cell+ $ins[]date
-      dup -1 = IF drop #0. 0 to last#  ELSE  last# cell+ $[]@  THEN
+      dup -1 = IF drop #0. ( 0 to last# )  ELSE  last# cell+ $[]@  THEN
     ;] msglog-sema c-section ;
 : ?save-msg ( addr u -- )
     ?msg-log
@@ -303,10 +303,14 @@ Forward msg:last
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
+: date>i ( date -- i )
+    last# cell+ $search[]date last# cell+ $[]# 1- umin ;
+: date>i' ( date -- i )
+    last# cell+ $search[]date last# cell+ $[]# umin ;
 : sighash? ( addr u -- flag )
-    over le-64@ last# cell+ $search[]date
+    over le-64@ date>i
     dup 0< IF  drop 2drop  false  EXIT  THEN  >r
-    over le-64@ 64#1 64+ last# cell+ $search[]date >r [ 1 64s ]L /string
+    over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
     r> r> +DO
 	c:0key I last# cell+ $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
@@ -465,8 +469,6 @@ User hashtmp$  hashtmp$ off
 : i.date ( i -- )
     last# cell+ $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
-: date>i ( date -- i )
-    last# cell+ $search[]date last# cell+ $[]# 1- umin ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     \G print n intervals for messages from startdate to enddate
     \G The intervals contain the same size of messages except the
@@ -476,8 +478,8 @@ User hashtmp$  hashtmp$ off
     last# >r >r last# $@ ?msg-log
     last# cell+ $[]#
     IF
-	date>i >r date>i r> swap
-	2dup - r> over 1+ >r 1- 1 max / 0 max 1+ -rot
+	date>i >r date>i' r> swap
+	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
 	  dup +LOOP  r> i.date
@@ -498,10 +500,10 @@ msgfs-class +file-classes
     over le-64@ .ticks 1 64s /string  ." ->"
     over le-64@ .ticks 1 64s /string  ." @" forth:type ;
 : n2o:copy-msg ( filename u -- )
-    ." copy msg: " 2dup .chat-file
+    ." copy msg: " 2dup .chat-file forth:cr
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
       file-reg# @ save-to-msg ;] n2o>file
-    1 file-count +! forth:cr ;
+    1 file-count +! ;
 
 $20 Value max-last#
 $20 Value ask-last#
@@ -518,7 +520,7 @@ Variable ask-msg-files[]
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ date>i 1+ swap l.hashs drop 64@
+	    I 64'+ 64'+ le-64@ 64#1 64+ date>i' swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -552,9 +554,9 @@ Variable ask-msg-files[]
     fs-outbuf $off
     fs-path $@ 2 64s /string ?msg-log
     last# msg-log@ over >r
-    fs-path $@ drop le-64@ last# cell+ $search[]date \ start index
-    fs-path $@ drop 64'+ le-64@ last# cell+ $search[]date 1+ \ end index
-    over - >r last# cell+ $[]# 1- umin
+    fs-path $@ drop le-64@ date>i \ start index
+    fs-path $@ drop 64'+ le-64@ 64#1 64+ date>i' \ end index
+    over - >r
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
     r> free throw
@@ -565,29 +567,33 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: ->chat-sync-done ( o -- )
-    .n2o:close-all
+event: ->close-all ( o -- )
+    .n2o:close-all ;
+event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done event" forth:cr )
     msg-group$ $@ ?msg-log
     last# $@ rows  display-lastn
+    !save-all-msgs
     ." === sync done ===" forth:cr ;
 : chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event o elit, ->chat-sync-done wait-task @ event>
+    <event o elit, ->close-all file-task event>
+    <event ->chat-sync-done wait-task @ event>
     ['] noop sync-done-xt ! ;
-: +sync-done ( -- )
-    ['] chat-sync-done sync-done-xt ! ;
-event: ->msg-eval ( $pack last -- )
-    $@ ?save-msg { w^ buf }
+event: ->msg-eval ( $pack $addr -- )
+    { w^ buf w^ group }  group $@ 2 64s /string ?msg-log
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $off ;
+    buf $free group $@ 2 64s /string ?save-msg  group $free ;
 : msg-file-done ( -- )
     fs-path $@len IF
 	." msg file done: " fs-path $@ .chat-file forth:cr
-    THEN
-    fs-close ;
+	fs-close
+	parent @ ?dup-IF  >o -1 file-count +!@ 1 =
+	    IF  chat-sync-done  THEN
+	    o>  THEN
+    THEN ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
     ['] msg-file-done file-xt !
@@ -598,16 +604,10 @@ event: ->msg-eval ( $pack last -- )
 :noname ( -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
-	fs-path $@ 2 64s /string ?msg-log
-	parent @ .wait-task @ dup up@ <> and ?dup-IF
-	    <event 0 fs-inbuf !@ elit, last# elit,
-	    ->msg-eval  event>
-	ELSE
-	    fs-inbuf $@ true replay-mode ['] msg-eval !wrapper fs-inbuf $off
-	THEN
+	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, ->msg-eval
+	parent @ .wait-task @ event>
+	fs:fs-clear
     THEN
-    fs:fs-clear
-    -1 parent @ ?dup-IF  .file-count +!@  THEN drop \ make this atomic
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!
@@ -671,7 +671,7 @@ also net2o-base
     msg-group  last-signdate@ { 64: date }
     64#0 lit, date slit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
-	date 64#1 64+ lit, 64#-1 slit, 1 ulit, msg-last?
+	date lit, 64#-1 slit, 1 ulit, msg-last?
     THEN ;
 
 : join, ( -- )
@@ -747,7 +747,7 @@ Variable $lastline
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
-    line-date 64@ last# cell+ $search[]date
+    line-date 64@ date>i
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
@@ -755,7 +755,7 @@ Variable $lastline
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
-    line-date 64@ last# cell+ $search[]date
+    line-date 64@ date>i
     BEGIN  1+ dup last# cell+ $[]# u< WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     dup last# cell+ $[]# u>=
@@ -1133,7 +1133,7 @@ previous
 $B $E 2Value chat-bufs#
 
 : +chat-control ( -- )
-    +resend-msg +flow-control +sync-done ;
+    +resend-msg +flow-control ;
 
 : chat#-connect ( addr u buf1 buf2 --- )
     pk-connect connection .+chat-control  greet +group ;
