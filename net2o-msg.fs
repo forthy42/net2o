@@ -438,7 +438,9 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 		2dup show-msg  2dup otr-shot @ parent @ .push-msg
 	    THEN
 	THEN  2drop
-    ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN  THEN ; \ balk on all wrong signatures
+    ELSE  replay-mode @ IF  drop 2drop
+	ELSE  !!sig!!  THEN \ balk on all wrong signatures
+    THEN ;
 
 :noname skip-sig? @ IF check-date ELSE pk-sig? THEN ;  ' msg  2dup
 msging-class to start-req
