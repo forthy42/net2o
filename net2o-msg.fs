@@ -569,8 +569,8 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: ->close-all ( o -- )
-    .n2o:close-all ;
+event: ->close-all ( task o -- )
+    .n2o:close-all restart ;
 event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done event" forth:cr )
     msg-group$ $@ ?msg-log
@@ -581,7 +581,7 @@ event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event o elit, ->close-all file-task event>
+    <event up@ elit, o elit, ->close-all file-task event> stop
     <event ->chat-sync-done wait-task @ event>
     ['] noop sync-done-xt ! ;
 event: ->msg-eval ( $pack $addr -- )
