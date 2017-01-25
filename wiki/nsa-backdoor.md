@@ -11,11 +11,14 @@ topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
 backdoors: I have an official front door in net2o for the NSA.
-**Update:** Obama pressed again, I should disable the seeding of the
-random number generator for key generation.  A health monitor in the
-seeding part should lull people into believing that everything is ok,
-but just as the seeding is never executed, so is the health monitor.
-More fake deactivated health monitors will come.
+**Update:** The NSA was here and wanted to [recruit
+me](http://www.burojansen.nl/bvd-aivd/dutch-secret-service-tries-to-recruit-tor-admin/).
+Or maybe someone else.  When they are trying to infiltrate Tor, why
+not try to infiltrate net2o?
+
+> He said they were mostly interested in building a community of
+> techies around the developers of Tor and Tails and that it would be an
+> international effort.
 
 As net2o is open source, you can (in theory) verify statements about
 actual backdoors.  And keep an eye on this page, I intent to publish
