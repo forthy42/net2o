@@ -58,9 +58,11 @@ gen-table $freeze
 : n2o:dispose-addr ( o:addr -- o:addr )
     host-id $off host-anchor $off host-route $off host-key sec-off
     host-revoke $off ;
-:noname ( -- )
+: n2o:dispose-punchs ( -- )
     punch-addrs $@ bounds ?DO  I @ .n2o:dispose-addr  cell +LOOP
-    punch-addrs $off  defers extra-dispose ; is extra-dispose
+    punch-addrs $off ;
+:noname ( -- )
+    n2o:dispose-punchs  defers extra-dispose ; is extra-dispose
 
 : new-addr ( addr u -- o ) \G create a new address object from string
     n2o:new-addr n:>o nest-cmd-loop o n:o> ;
