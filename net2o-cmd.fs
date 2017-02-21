@@ -404,8 +404,8 @@ Vocabulary net2o-base
 Forward do-req>
 
 : do-nest ( addr u flag -- )
-    dup >r  validated or!  nest-cmd-loop
-    r> invert validated and! ;
+    dup >r  validated or!  ['] nest-cmd-loop catch
+    r> invert validated and!  throw ;
 
 : do-nestsig ( addr u -- )
     signed-val do-nest ;
@@ -660,9 +660,10 @@ previous
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
 
 : cmdtmpnest ( addr u -- )
-    $>align tmpkey@ drop keysize
-    key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$ 0= !!tmpnest!!
-    tmp-crypt-val do-nest ;
+    $>align tmpkey@ key| dup IF
+	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
+	IF  tmp-crypt-val do-nest  ELSE  2drop un-cmd  THEN
+    ELSE  2drop 2drop un-cmd  THEN ;
 
 \ net2o assembler stuff
 
