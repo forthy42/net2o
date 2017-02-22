@@ -481,7 +481,7 @@ warnings !
     \G get: get files into current directory
     ?get-me init-client
     ?@nextarg IF
-	$A $E nick-connect +resend ." connected" cr !time
+	$C $11 nick-connect +resend ." connected" cr !time
 	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	[: 2dup basename n2o:copy ;] arg-loop
@@ -493,7 +493,7 @@ warnings !
     \G get#: get files by hash into hash directory
     ?get-me init-client
     ?@nextarg IF
-	$A $E nick-connect +resend ." connected" cr !time
+	$C $11 nick-connect +resend ." connected" cr !time
 	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	[: base85>$ n2o:copy# ;] arg-loop

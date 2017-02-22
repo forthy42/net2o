@@ -278,7 +278,7 @@ also net2o-base
 : resend~? ( -- flag )
     inbuf 1+ c@ recv-flag c@ xor resend-toggle# and 0<> ;
 
-$40 Value max-resend#
+$20 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits )
     data-rmap @ with mapc
