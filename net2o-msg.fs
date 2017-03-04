@@ -442,7 +442,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	ELSE  !!sig!!  THEN \ balk on all wrong signatures
     THEN ;
 
-:noname skip-sig? @ IF check-date ELSE pk-sig? THEN ;  ' msg  2dup
+:noname skip-sig? @ IF  pk-quick-sig?  ELSE  pk-sig?  THEN ;  ' msg  2dup
 msging-class to start-req
 msging-class to nest-sig
 msg-class to start-req

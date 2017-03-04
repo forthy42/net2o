@@ -98,6 +98,7 @@ Variable defaultkey
 : free-key ( o:key -- o:key )
     \g free all parts of the subkey
     ke-sk sec-off
+    ke-sksig sec-off
     ke-pk $off
     ke-nick $off
     ke-selfsig $off
@@ -505,6 +506,9 @@ Variable unkey-id#
 : search-key ( pkc -- o skc )
     keysize key# #@ 0= !!unknown-key!!
     cell+ dup .ke-sk sec@ 0= !!unknown-key!! ;
+: search-key? ( pkc -- false / o skc )
+    keysize key# #@ 0= IF  drop 0  EXIT  THEN
+    cell+ dup .ke-sk sec@ 0= IF  2drop 0  EXIT  THEN ;
 
 \ apply permissions&groups
 

@@ -110,19 +110,19 @@ init-ed25519
 : ed-sign { skh sk pk -- sig u }
     \G sign a message: the keccak state contains the hash of the message.
     c:key@ hstatetmp c:key# move \ we need this twice - move away
-    skh $20 >hash \ gen "random number" from secret to hashtmp
+    skh $20 >hash                \ gen "random number" from secret to hashtmp
     hstatetmp c:key@ c:key# move \ restore state
-    sct3 hashtmp 64b>sc25519
-    get0 sct3 ge25519*base   \ sct3 is k
-    sigbuf get0 ge25519-pack   \ sct0 is r=k*base
+    sct3 hashtmp 64b>sc25519     \ sct3 is k
+    get0 sct3 ge25519*base       \ get0 is r=k*base
+    sigbuf get0 ge25519-pack
     pk sigbuf $20 + $20 move
-    sigbuf $40 >hash           \ z=hash(r+pk+message)
-    sct1 hashtmp 64b>sc25519 \ sct1 is z
-    sct2 sk raw>sc25519      \ sct2 is sk
+    sigbuf $40 >hash             \ z=hash(r,pk,message)
+    sct1 hashtmp 64b>sc25519     \ sct1 is z
+    sct2 sk raw>sc25519          \ sct2 is sk
     sct1 sct1 sct2 sc25519*
-    sct1 sct1 sct3 sc25519+  \ s=z*sk+k
+    sct1 sct1 sct3 sc25519+      \ s=z*sk+k
     sigbuf $20 + sct1 sc25519>32b
-    clean-ed25519 sigbuf $40 ; \ r,s
+    clean-ed25519 sigbuf $40 ;   \ r,s
 
 : ed-check? { sig pk -- flag }
     \G check a message: the keccak state contains the hash of the message.
@@ -140,6 +140,35 @@ init-ed25519
     pktmp $20 move  sigtmp $40 move \ align inputs
     get0 pktmp ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
     sigtmp pktmp ed-check? ;
+
+: ed-quickcheck? { skh sk sig pk -- flag }
+    \G quick check a message signed by ourself: the keccak state
+    \G contains the hash of the message.
+    c:key@ hstatetmp c:key# move \ we need this twice - move away
+    skh $20 >hash                \ gen "random number" from secret to hashtmp
+    hstatetmp c:key@ c:key# move \ restore state
+    sct3 hashtmp 64b>sc25519     \ sct3 is k
+    sig hashtmp $20 move  pk hashtmp $20 + $20 move
+    hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
+    sct2 hashtmp 64b>sc25519     \ sct2 is z
+    sct1 sk raw>sc25519          \ sct1 is sk
+    sct1 sct2 sct1 sc25519*      \ sct1 is z*sk
+    sct3 sct3 sct1 sc25519+      \ sct3 is s=z*sk+k
+    sigbuf $40 + sct3 sc25519>32b
+    sigbuf $40 + sig $20 + 32b= ?dup-0=-IF
+	\ quick check failed, do slow check
+	\ old signatures had a different skh
+	sct3 sig $20 + raw>sc25519     \ sct3 is s
+	get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
+	sigbuf $40 + get1 ge25519-pack \ =r
+	sig sigbuf $40 + 32b=
+    THEN
+    clean-ed25519 ;
+
+: ed-quick-verify ( skh sk sig pk -- flag ) \ message digest is in keccak state
+    pktmp $20 move  sigtmp $40 move \ align inputs
+    get0 pktmp ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
+    sigtmp pktmp ed-quickcheck? ;
 
 : ed-dh { sk pk dest -- secret len }
     pk pktmp $20 move

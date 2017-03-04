@@ -375,6 +375,7 @@ $60 Constant rndkey#
 
 Forward check-key \ check if we know that key
 Forward search-key \ search if that is one of our pubkeys
+Forward search-key? \ search if that is one of our pubkeys
 
 Variable tmpkeys-ls16b
 $1000 Value max-tmpkeys# \ no more than 256 keys in queue
@@ -480,13 +481,26 @@ drop
 	2dup + sigonlysize# - r> ed-verify 0= sig-wrong and
 	EXIT  THEN
     rdrop ;
+: quick-verify-sig ( addr u pk -- addr u flag )  >r
+    check-date dup 0= IF  drop
+	2dup + sigonlysize# -
+	r@ dup last# >r search-key? r> to last#
+	dup 0= IF  nip nip rdrop  EXIT  THEN
+	swap .ke-sksig sec@ drop swap 2swap
+	ed-quick-verify 0= sig-wrong and
+    THEN
+    rdrop ;
+
 : date-sig? ( addr u pk -- addr u flag )
     >r >date r> verify-sig ;
 : pk-sig? ( addr u -- addr u' flag )
     dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpksize# - c:0key
-\    ." verify: " 2dup xtype forth:cr
     2dup c:hash + date-sig? ;
+: pk-quick-sig? ( addr u -- addr u' flag )
+    dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
+    2dup sigpksize# - c:0key
+    2dup c:hash + >r >date r> quick-verify-sig ;
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;

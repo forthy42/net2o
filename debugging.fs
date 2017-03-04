@@ -85,6 +85,7 @@ debug: dvcs( \ print debugging for dvcs
 debug: rate( \ print debugging for rate settings
 debug: health( \ print that a health check passed
 debug: verbose( \ print more verbose messages
+debug: quicksig( \ quick check for sigs
 
 -db profile( \ )
 +db ipv6( \ ipv6 should be on by default )
