@@ -296,20 +296,26 @@ List of Commands
   add host to DHT
 + $21 dht-host- ( $:string -- )
   delete host from DHT
-+ $22 dht-tags+ ( $:string -- )
-  add tags to DHT
-+ $23 dht-tags- ( $:string -- )
-  delete tags from DHT
-+ $24 dht-owner+ ( $:string -- )
-  add owner to DHT
-+ $25 dht-owner- ( $:string -- )
-  delete ownr from DHT
-+ $26 dht-host? ( -- )
++ $22 dht-host? ( -- )
   query DHT host
-+ $27 dht-tags? ( -- )
++ $23 dht-tags+ ( $:string -- )
+  add tags to DHT
++ $24 dht-tags- ( $:string -- )
+  delete tags from DHT
++ $25 dht-tags? ( -- )
   query DHT tags
++ $26 dht-owner+ ( $:string -- )
+  add owner to DHT
++ $27 dht-owner- ( $:string -- )
+  delete owner from DHT
 + $28 dht-owner? ( -- )
   query DHT owner
++ $29 dht-have+ ( $:string -- )
+  add have to DHT
++ $2A dht-have- ( $:string -- )
+  delete have from DHT
++ $2B dht-have? ( -- )
+  query DHT have
 
 ### vault commands ###
 

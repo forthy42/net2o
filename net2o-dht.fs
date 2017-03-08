@@ -46,9 +46,9 @@ cmd-class class
     field: dht-hash   \ hash itself is item 0
     field: dht-peers  \ distribution list - includes "where did I get this from"
                       \ managed by the hash owner himself
-    field: dht-owner  \ owner(s) of the object (pubkey+signature)
+    field: dht-owner  \ owner(s) of the object (pubkey+signature): I own
     field: dht-host   \ network id+routing from there (+signature)
-    field: dht-map    \ peers have those parts of the object
+    field: dht-have   \ peers have (parts of) the object (desc+pubkey+signature): I have
     field: dht-tags   \ tags added
 end-class dht-class
 
@@ -57,7 +57,7 @@ end-class dht-class
     dht-peers $[]off
     dht-owner $[]off
     dht-host $[]off
-    dht-map $[]off
+    dht-have $[]off
     dht-tags $[]off ;
 
 Variable dht-table
@@ -105,13 +105,21 @@ Variable dht-table
 : >tag ( addr u -- addr u )
     dup sigpksize# u< !!unsigned!!
     c:0key dht-hash $@ "tag" >keyed-hash
-    2dup sigpksize# - ':' $split 2swap >keyed-hash ;
+    2dup sigpksize# - c:hash ;
+: >have ( addr u -- addr u )
+    dup sigpksize# u< !!unsigned!!
+    c:0key dht-hash $@ "have" >keyed-hash
+    2dup sigpksize# - c:hash ;
 : verify-tag ( addr u -- addr u flag )
     2dup + sigpksize# - date-sig? ;
 : check-tag ( addr u -- addr u )
     >tag verify-tag !!sig!! ;
+: check-have ( addr u -- addr u )
+    >have verify-tag !!sig!! ;
 : delete-tag? ( addr u -- addr u flag )
     >tag "tag" >delete verify-tag ;
+: delete-have? ( addr u -- addr u flag )
+    >tag "have" >delete verify-tag ;
 : delete-host? ( addr u -- addr u flag )
     >host "host" >delete verify-host ;
 : delete-owner? ( addr u -- addr u flag )
@@ -167,6 +175,8 @@ dht-class ' new static-a with-allocater constant dummy-dht
     [: check-host dht-host $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
 : d#tags+ ( addr u -- ) \ with sanity checks
     [: check-tag dht-tags $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
+: d#have+ ( addr u -- ) \ with sanity checks
+    [: check-have dht-have $ins[]sig drop dht( d#. ) ;] dht-sema c-section ;
 : d#owner- ( addr u -- ) \ with sanity checks
     [: delete-owner? 0= IF  dht-owner $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
@@ -175,6 +185,9 @@ dht-class ' new static-a with-allocater constant dummy-dht
       ELSE  2drop  THEN ;] dht-sema c-section ;
 : d#tags- ( addr u -- ) \ with sanity checks
     [: delete-tag? 0= IF  dht-tags $del[]sig dht( d#. )
+      ELSE  2drop  THEN ;] dht-sema c-section ;
+: d#have- ( addr u -- ) \ with sanity checks
+    [: delete-have? 0= IF  dht-have $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
 
 \ commands for DHT
@@ -198,25 +211,37 @@ net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
     \g add host to DHT
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
     \g delete host from DHT
++net2o: dht-host? ( -- )  dht-host
+    [: dup $A0 + maxstring < IF  $, dht-host+  ELSE  2drop  THEN ;] $[]map ;
+    \g query DHT host
 +net2o: dht-tags+ ( $:string -- ) $> d#tags+ ;
     \g add tags to DHT
 +net2o: dht-tags- ( $:string -- ) $> d#tags- ;
     \g delete tags from DHT
++net2o: dht-tags? ( -- )  dht-tags
+    [: dup $A0 + maxstring < IF  $, dht-tags+  ELSE  2drop  THEN ;] $[]map ;
+    \g query DHT tags
 +net2o: dht-owner+ ( $:string -- ) $> d#owner+ ;
     \g add owner to DHT
 +net2o: dht-owner- ( $:string -- ) $> d#owner- ;
-    \g delete ownr from DHT
+    \g delete owner from DHT
++net2o: dht-owner? ( -- ) dht-owner
+    [: dup $A0 + maxstring < IF  $, dht-owner+  ELSE  2drop  THEN ;] $[]map ;
+    \g query DHT owner
++net2o: dht-have+ ( $:string -- ) $> d#have+ ;
+    \g add have to DHT
++net2o: dht-have- ( $:string -- ) $> d#have- ;
+    \g delete have from DHT
++net2o: dht-have? ( -- )  dht-have
+    [: dup $A0 + maxstring < IF  $, dht-have+  ELSE  2drop  THEN ;] $[]map ;
+    \g query DHT have
 
-also }scope
+\ +net2o: dht-open ( fid -- ) 64>n d#open ;
+\ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
+
+}scope
 
 \ queries
-
-: d#host? ( -- )  dht-host
-    [: dup $A0 + maxstring < IF  $, dht-host+  ELSE  2drop  THEN ;] $[]map ;
-: d#tags? ( -- )  dht-tags
-    [: dup $A0 + maxstring < IF  $, dht-tags+  ELSE  2drop  THEN ;] $[]map ;
-: d#owner? ( -- )  dht-owner
-    [: dup $A0 + maxstring < IF  $, dht-owner+  ELSE  2drop  THEN ;] $[]map ;
 
 fs-class class
     field: dht-queries
@@ -252,19 +277,6 @@ dht-file-class to fs-open
 : d#open ( fid -- )  new>dht lastfile@ .fs-open ;
 : d#query ( addr u mask fid -- )  state-addr >o
     >r dup dht-queries c$+! dht-queries $+! r> dht-queries c$+! o> ;
-
-get-current definitions
-
-+net2o: dht-host? ( -- ) d#host? ;
-    \g query DHT host
-+net2o: dht-tags? ( -- ) d#tags? ;
-    \g query DHT tags
-+net2o: dht-owner? ( -- ) d#owner? ;
-    \g query DHT owner
-\ +net2o: dht-open ( fid -- ) 64>n d#open ;
-\ +net2o: dht-query ( addr u mask fid -- ) 2*64>n d#query ;
-
-previous set-current
 
 dummy-dht >o dht-table @ token-table ! o>
 
