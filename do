@@ -51,6 +51,11 @@ function build-clean {
     (cd $pname; ./autogen.sh $CONFOPT && ./configure $CONFOPT && make clean && make && sudo make install)
 }
 
+# ask for sudo password
+
+echo "We'll install several things, caching root password..."
+sudo true
+
 # get net2o itself
 
 if [ ! -f net2o.fossil ]
