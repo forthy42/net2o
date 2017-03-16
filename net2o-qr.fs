@@ -56,50 +56,52 @@ keyqr#² buffer: keyqr
     $05 keyqr keyqr# + 2 - 4xc!
     $06 keyqr keyqr#² + keyqr# 2* - 4xc!
     $07 keyqr keyqr#² + keyqr# - 2 - 4xc! ;
-: byte>pixel ( byte addr -- )
+: byte>hpixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
     over 6 rshift over c! 1+
     over 4 rshift 3 and over c! 1+
     over 2 rshift 3 and over c! 1+
     swap 3 and swap c! ;
+: byte>vpixel ( byte addr -- )
+    \ a byte is converted into four pixels:
+    \ MSB green red | green red | green red | green red LSB
+    over 6 rshift over c! keyqr# +
+    over 4 rshift 3 and over c! keyqr# +
+    over 2 rshift 3 and over c! keyqr# +
+    swap 3 and swap c! ;
 
+: >keyhline ( destaddr srcaddr -- destaddr' )
+    keyline# bounds ?DO  I c@ over byte>hpixel 4 +  LOOP ;
+: >keyvline ( destaddr srcaddr -- destaddr' )
+    keyline# bounds ?DO  I c@ over byte>vpixel [ keyqr# 4 * ]L +  LOOP ;
 : >keylines ( addr u -- )
-    keyqr keyqr# 1+ 2* 2* + -rot keymax# umin bounds ?DO
-	I keyline# bounds ?DO
-	    I c@ over byte>pixel 4 +
-	LOOP  keylineskp# +
+    keyqr [ keyqr# 1+ 2* 2* ]L + -rot keymax# umin bounds ?DO
+	I >keyhline  keylineskp# +
     keyline# +LOOP  drop ;
 
-\ generate ECC
+\ generate checksum and tag bits
 
-\ swap bit 0 and bit 1
-Create 0.1-swap 0 c, 2 c, 1 c, 3 c, DOES> + c@ ;
+: taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )
+    hashtmp 8 smove dup >r hashtmp $8 + c!
+    hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r> ;
+: >taghash ( addr u tag -- tag )
+    $8 rng$ c:0key taghash-rest ;
+: taghash? ( addr u1 ecc u2 tag -- flag )
+    >r 2tuck r> taghash-rest drop 8 /string hashtmp 8 + 8 str= ;
+: >ecc ( addr u tag -- ) >taghash
+    keyqr [ keyqr#  #3 *  #4 + ]L +  hashtmp      >keyhline drop
+    keyqr [ keyqr# #20 *  #4 + ]L +  hashtmp $4 + >keyhline drop
+    keyqr [ keyqr#  #4 *  #3 + ]L +  hashtmp $8 + >keyvline drop
+    keyqr [ keyqr#  #4 * #20 + ]L +  hashtmp $C + >keyvline drop
+    dup 6 rshift       keyqr [ keyqr#  #3 *  #3 + ]L + c!
+    dup 4 rshift 3 and keyqr [ keyqr#  #3 * #20 + ]L + c!
+    dup 2 rshift 3 and keyqr [ keyqr# #20 *  #3 + ]L + c!
+                 3 and keyqr [ keyqr# #20 * #20 + ]L + c! ;
 
-: >ecc1 ( -- ) \ left ecc
-    keyqr keyqr# 3 * + keyqr# dup 6 - * bounds ?DO
-	1 I 4 + keyqr# 7 - bounds ?DO
-	I c@ xor  I 1+ c@ 0.1-swap xor  2 +LOOP  I 3 + c!
-    keyqr# +LOOP ;
-: >ecc2 ( -- ) \ right ecc
-    keyqr keyqr# 3 * + keyqr# dup 6 - * bounds ?DO
-	2 I 4 + keyqr# 7 - bounds ?DO  i c@ xor  LOOP  I keyqr# 4 - + c!
-    keyqr# +LOOP ;
-: >ecc3 ( -- ) \ top ecc
-    keyqr keyqr# 1+ 3 * 1+ + keyqr# 8 - bounds ?DO
-	0 I keyqr# + keyqr#² keyqr# 7 * - bounds ?DO
-	I c@ xor  I keyqr# + c@ 0.1-swap xor  keyqr# 2* +LOOP  I c!
-    LOOP ;
-: >ecc4 ( -- ) \ bottom ecc
-    keyqr keyqr# 1+ 3 * 1+ + keyqr# 8 - bounds ?DO
-	3 I keyqr# + keyqr#² keyqr# 7 * - bounds ?DO
-	I c@ xor  keyqr# +LOOP  I keyqr#² keyqr# 7 * - + c!
-    LOOP ;
-
-: >ecc ( -- ) >ecc3 >ecc4 >ecc1 >ecc2 ;
-
-: .keyqr ( addr u -- ) \ 64 bytes
-    >keyframe >keylines >ecc keyqr keyqr# qr.block ;
+: .keyqr ( addr u tag -- ) \ 64 bytes
+    >r >keyframe 2dup >keylines r> >ecc
+    keyqr keyqr# qr.block ;
 
 [IFDEF] android   require android/qrscan.fs  [THEN]
 

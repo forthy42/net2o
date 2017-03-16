@@ -160,39 +160,34 @@ $40 buffer: guessbuf
     [ scan-w 2 rshift ]L -LOOP
     drop guessbuf $40 ;
 
-$8 buffer: guessecc1
-#18 buffer: guessecc2
+$11 buffer: guessecc
 
 : ecc-hor@ ( off -- w1 w2 ) >r
     red-buf   $@ drop r@ + be-uw@
-    green-buf $@ drop r> + be-uw@ ;
-: ecc-ver@ ( -- )
-    guessecc2
+    green-buf $@ drop r> + be-uw@ mixgr>32 ;
+: tag1@ { addr bit -- tag }
+    addr red-buf   $@ drop + c@ bit rshift 1 and 2*
+    addr green-buf $@ drop + c@ bit rshift 1 and or ;
+: ecc-ver@ { off bit -- ul } 0
     [ scan-w 2 rshift dup scan-w #10 - * swap 2/ 1- + ]L
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L DO
-	red-buf   $@ drop I + 1 - c@ 1 and 2*
-	green-buf $@ drop I + 1 - c@ 1 and or 2*
-	red-buf   $@ drop I + 2 + c@ 7 rshift 1 and or 2*
-	green-buf $@ drop I + 2 + c@ 7 rshift 1 and or 6 xor
-	over c! 1+
-    [ scan-w 2 rshift ]L -LOOP drop ;
+	2* 2* I off + bit tag1@ or
+    [ scan-w 2 rshift ]L -LOOP ;
+: tag2@ ( addr -- )
+    dup 1- 0 tag1@ 2 lshift swap 3 + 7 tag1@ or ;
+: tag@ ( -- tag )
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L tag2@ 4 lshift
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ or ;
 
 : >guessecc ( -- )
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L ecc-hor@
-    mixgr>32 guessecc1 be-l!
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L ecc-hor@
-    mixgr>32 guessecc1 4 + be-l!
-    ecc-ver@ ;
-: >ecc-row ( addr u -- value )
-    0 -rot bounds ?DO  I be-ul@ xor  4 +LOOP ;
-: >ecc-row2 ( addr u -- value )
-    0 -rot bounds ?DO
-	I     be-ul@ xor
-	I 4 + be-ul@ dup $AAAAAAAA and 1 rshift swap $55555555 and 2* or xor
-    8 +LOOP ;
-: ecc-ok? ( addr u -- flag )  2dup 0 skip nip 0<> >r  2dup
-    >ecc-row  guessecc1     be-ul@ invert = >r
-    >ecc-row2 guessecc1 4 + be-ul@        = r> and r> and ;
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
+    ecc-hor@ guessecc     be-l!
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
+    ecc-hor@ guessecc 4 + be-l!
+    -1 0 ecc-ver@ guessecc 8 + be-l!
+    3  7 ecc-ver@ guessecc $C + be-l! ;
+: ecc-ok? ( addrkey u1 addrecc u2 -- flag )
+    tag@ taghash? ;
 
 : |min| ( a b -- ) over abs over abs < select ;
 
@@ -324,7 +319,7 @@ Variable skip-frames
     ?legit IF  scan-legit  0>framebuffer
 	skip-frames @ 0= IF  visual-frame  THEN
 	extract-red extract-green >guess
-	>guessecc 2dup ecc-ok? skip-frames @ 0= and IF
+	>guessecc 2dup guessecc $10 ecc-ok? skip-frames @ 0= and IF
 	    scan-result
 	ELSE  2drop  THEN
     ELSE  0>framebuffer skip-frames @ 0= IF  visual-frame  THEN THEN
@@ -341,7 +336,7 @@ Variable skip-frames
 : scan-key? ( -- flag )  defers key?  scan-once ;
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key?
-    [: 85type space guessecc1 8 xtype cr level# @ 0> level# +! ;] is scan-result ;
+    [: 85type space guessecc $10 xtype cr level# @ 0> level# +! ;] is scan-result ;
 : scan-end ( -- )
     [ what's key? ]L is key? cam-end screen-keep showstatus ;
 : scan-qr ( -- )

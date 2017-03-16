@@ -22,7 +22,7 @@ Variable key-readin
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
-: qr-me ( -- ) pk@ .keyqr ;
+: qr-me ( -- ) pk@ $00 .keyqr ;
 : qr-nicks ( -- )
     [: nick-key ?dup-IF  .ke-pk $@ .keyqr  THEN ;] @arg-loop ;
 
