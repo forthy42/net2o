@@ -501,6 +501,9 @@ drop
     dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpksize# - c:0key
     2dup c:hash + >r >date r> quick-verify-sig ;
+: pk-date? ( addr u -- addr u' flag ) \ check only the date
+    dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
+    check-date ;
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
