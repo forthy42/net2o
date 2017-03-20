@@ -456,7 +456,7 @@ Variable sort-list[]
     cell+ ..nick ." ' ok" cr ;
 
 Defer dht-nick?
-event: ->search-key  key| over >r dht-nick? r> free throw ;
+event: :>search-key  key| over >r dht-nick? r> free throw ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
@@ -468,7 +468,7 @@ Variable unkey-id#
     
 : (.key-id) ( addr u -- ) key| 2dup key# #@ 0=
     IF  drop up@ receiver-task = IF
-	    <event 2dup save-mem e$, ->search-key main-up@ event>
+	    <event 2dup save-mem e$, :>search-key main-up@ event>
 	    .unkey-id EXIT  THEN
 	2dup ?unkey  IF
 	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
@@ -1052,9 +1052,9 @@ Variable revtoken
 
 Variable invitations
 
-event: ->invite ( addr u -- )
+event: :>invite ( addr u -- )
     ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
-event: ->wakeme ( o -- ) <event ->wake event> ;
+event: :>wakeme ( o -- ) restart ;
 
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig
@@ -1091,7 +1091,7 @@ event: ->wakeme ( o -- ) <event ->wake event> ;
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem main-up@ <hide>
-	<event e$, ->invite up@ elit, ->wakeme main-up@ event> stop
+	<event e$, :>invite up@ elit, :>wakeme main-up@ event> stop
     ELSE  2drop  THEN ;
 
 : send-invitation ( pk u -- )

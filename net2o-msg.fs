@@ -106,16 +106,16 @@ Variable saved-msg$
 : >load-group ( group u -- )
     2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
 
-event: ->save-msgs ( last# -- ) saved-msg$ +unique$ ;
-event: ->save-all-msgs ( task -- )
+event: :>save-msgs ( last# -- ) saved-msg$ +unique$ ;
+event: :>save-all-msgs ( task -- )
     save-all-msgs restart ;
 
 : !save-all-msgs ( -- )  file-task 0= ?EXIT
-    <event up@ elit, ->save-all-msgs file-task event> stop ;
+    <event up@ elit, :>save-all-msgs file-task event> stop ;
 
 : save-msgs& ( -- )
     file-task 0= IF  create-file-task  THEN
-    <event last# elit, ->save-msgs file-task event> ;
+    <event last# elit, :>save-msgs file-task event> ;
 
 : ?msg-log ( addr u -- )  msg-logs ?hash ;
 
@@ -216,14 +216,14 @@ User peer-buf
 	addr-connect o>
     THEN ;
 
-event: ->avalanche ( addr u otr-flag o group -- )
+event: :>avalanche ( addr u otr-flag o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
-event: ->chat-connect ( o -- )
+event: :>chat-connect ( o -- )
     drop ctrl Z inskey ;
-event: ->chat-reconnect ( o group -- )
+event: :>chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
-event: ->msg-nestsig ( addr u o group -- )
+event: :>msg-nestsig ( addr u o group -- )
     to last# .do-msg-nestsig  ctrl L inskey ;
 
 \ coordinates
@@ -293,13 +293,13 @@ Forward msg:last
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
 	    >r <event >r e$, r> elit, o elit, last# elit,
-	    ->avalanche r> event>
+	    :>avalanche r> event>
 	ELSE  drop 2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
     parent @ dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	>r r@ <hide> <event e$, o elit, last# elit, ->msg-nestsig
+	>r r@ <hide> <event e$, o elit, last# elit, :>msg-nestsig
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
@@ -409,7 +409,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     replay-mode @ IF  $> 2drop  EXIT  THEN
     $> >load-group parent @ >o
     +unique-con +chat-control
-    wait-task @ ?dup-IF  <event o elit, ->chat-connect event>  THEN
+    wait-task @ ?dup-IF  <event o elit, :>chat-connect event>  THEN
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     $> msg-groups #@ d0<> IF
@@ -417,7 +417,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> >peer
     parent @ .wait-task @ ?dup-IF
-	<event o elit, last# elit, ->chat-reconnect event>
+	<event o elit, last# elit, :>chat-reconnect event>
     ELSE
 	reconnect-chat
     THEN ;
@@ -570,9 +570,9 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: ->close-all ( task o -- )
+event: :>close-all ( task o -- )
     .n2o:close-all restart ;
-event: ->chat-sync-done ( -- )
+event: :>chat-sync-done ( -- )
     msg( ." chat-sync-done event" forth:cr )
     msg-group$ $@ ?msg-log
     last# $@ rows  display-lastn
@@ -582,10 +582,10 @@ event: ->chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event up@ elit, o elit, ->close-all file-task event> stop
-    <event ->chat-sync-done wait-task @ event>
+    <event up@ elit, o elit, :>close-all file-task event> stop
+    <event :>chat-sync-done wait-task @ event>
     ['] noop sync-done-xt ! ;
-event: ->msg-eval ( $pack $addr -- )
+event: :>msg-eval ( $pack $addr -- )
     { w^ buf w^ group }  group $@ 2 64s /string ?msg-log
     buf $@ true replay-mode ['] msg-eval !wrapper
     buf $free group $@ 2 64s /string ?save-msg  group $free ;
@@ -607,7 +607,7 @@ event: ->msg-eval ( $pack $addr -- )
 :noname ( -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
-	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, ->msg-eval
+	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
 	parent @ .wait-task @ event>
 	fs:fs-clear
     THEN

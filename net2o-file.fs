@@ -52,7 +52,7 @@ Variable fs-table
 : file:done ( -- )
     -1 parent @ .file-count +!
     .time ." download done: " fs-id ? fs-path $@ type cr ;
-event: ->file-done ( file-o -- )
+event: :>file-done ( file-o -- )
     >o file-xt @ ?dup-IF  execute
     ELSE  file( <err> ." invalid file-done xt" <default> forth:cr )
     THEN o> ;
@@ -109,7 +109,7 @@ cell 8 = [IF]
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
     fs-size 64@ fs-seek 64@ 64= IF
-	<event o elit, ->file-done parent @ .wait-task @ event>
+	<event o elit, :>file-done parent @ .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
 : fs:fs-clear ( -- )
@@ -250,15 +250,15 @@ is name
 : >termserver-io ( -- )
     [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section ;
 
-event: ->termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
+event: :>termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
     termserver-in termserver-out ;
-event: ->termclose ( -- ) termfile off  default-in default-out ;
+event: :>termclose ( -- ) termfile off  default-in default-out ;
 
 :noname ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size 64@ fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
-	<event o elit, ->file-done parent @ .wait-task @ event>
+	<event o elit, :>file-done parent @ .wait-task @ event>
     THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
@@ -266,12 +266,12 @@ event: ->termclose ( -- ) termfile off  default-in default-out ;
 :noname ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
-	<event o elit, ->termfile event>
+	<event o elit, :>termfile event>
     ;] file-sema c-section
 ; dup termserver-class to fs-open  termserver-class to fs-create
 :noname ( -- )
     [: fs-termtask @ ?dup-IF
-	    <event ->termclose event>
+	    <event :>termclose event>
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
 	THEN ;] file-sema c-section
 ; termserver-class to fs-close

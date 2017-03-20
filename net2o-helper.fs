@@ -134,19 +134,19 @@ scope{ /chat
 : renat ( addr u -- ) 2drop renat-all ;
 }scope
 
-event: ->renat ( -- )  renat-all ;
-:noname <event ->renat main-up@ event> ; is dht-beacon
+event: :>renat ( -- )  renat-all ;
+:noname <event :>renat main-up@ event> ; is dht-beacon
 
 \ beacon handling
 
-event: ->do-beacon ( addr -- )
-    beacon( ." ->do-beacon" forth:cr )
+event: :>do-beacon ( addr -- )
+    beacon( ." :>do-beacon" forth:cr )
     { beacon } beacon cell+ $@ 1 64s /string bounds ?DO
 	beacon $@ I 2@ .execute
     2 cells +LOOP ;
 
 : do-beacon ( addr -- )  \ sign on, and do a replace-me
-    <event elit, ->do-beacon ?query-task event> ;
+    <event elit, :>do-beacon ?query-task event> ;
 
 : ?-beacon ( -- )
     \G if we don't know that address, send a reply

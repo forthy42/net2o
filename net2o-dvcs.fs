@@ -773,7 +773,7 @@ Variable sync-file-list[]
 $18 Constant /sync-files
 $20 /sync-files * Constant /sync-reqs
 
-event: ->dvcs-sync-done ( o -- ) >o
+event: :>dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
     msg-group$ $@ ?save-msg   0 dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
@@ -782,7 +782,7 @@ event: ->dvcs-sync-done ( o -- ) >o
     msg( ." dvcs-sync-done" forth:cr )
     n2o:close-all net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." dvcs-sync-done closed" forth:cr )
-    <event o elit, ->dvcs-sync-done wait-task @ event> ;
+    <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
 : +dvcs-sync-done ( -- )
     ['] dvcs-sync-done sync-done-xt ! ;

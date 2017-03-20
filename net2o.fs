@@ -143,10 +143,10 @@ Variable net2o-tasks
     stacksize4 NewTask4 dup >r net2o-pass r> ;
 
 Variable kills
-event: ->killed ( -- )  -1 kills +! ;
-event: ->kill ( task -- )
-    <event ->killed event> 0 (bye) ;
-: send-kill ( task -- ) <event up@ elit, ->kill event> ;
+event: :>killed ( -- )  -1 kills +! ;
+event: :>kill ( task -- )
+    <event :>killed event> 0 (bye) ;
+: send-kill ( task -- ) <event up@ elit, :>kill event> ;
 
 #3.000.000.000 2constant kill-timeout# \ 3s
 
@@ -266,7 +266,7 @@ $400 Constant ivs-val
 Defer do-connect
 Defer do-disconnect
 
-event: ->connect    ( connection -- ) .do-connect ;
+event: :>connect    ( connection -- ) .do-connect ;
 
 \ check for valid destination
 
@@ -453,7 +453,7 @@ Variable mapstart $1 mapstart !
 : setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
 : context! ( -- )
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
-    <event wait-task @ main-up@ over select o elit, ->connect event> ;
+    <event wait-task @ main-up@ over select o elit, :>connect event> ;
 
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
@@ -1096,10 +1096,10 @@ Create chunk-adder chunks-struct allot
 	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-sema c-section ;
 
-event: ->send-chunks ( o -- ) .do-send-chunks ;
+event: :>send-chunks ( o -- ) .do-send-chunks ;
 
 : net2o:send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
-    <event o elit, ->send-chunks sender-task event> ;
+    <event o elit, :>send-chunks sender-task event> ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1219,10 +1219,10 @@ rdata-class to rewind-partial
 
 Defer do-track-seek
 
-event: ->track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
-event: ->slurp ( task o -- )  >o n2o:slurp 2drop o elit, ->track event> o> ;
-event: ->save ( o -- )  .net2o:save ;
-event: ->save&done ( o -- )
+event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
+event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
+event: :>save ( o -- )  .net2o:save ;
+event: :>save&done ( o -- )
     >o net2o:save sync-done-xt perform o> ;
 
 0 Value file-task
@@ -1231,10 +1231,10 @@ event: ->save&done ( o -- )
     ['] event-loop 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    o elit, ->save file-task event> ;
+    o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    o elit, ->save&done file-task event> ;
+    o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
 
@@ -1557,20 +1557,20 @@ Defer extra-dispose ' noop is extra-dispose
     \G store request if no better is available
     request# @ rqd-xts $[] dup @ IF  2drop  ELSE  !  THEN ;
 
-event: ->request ( n o -- ) >o maxrequest# and
+event: :>request ( n o -- ) >o maxrequest# and
     dup rqd@ request( ." request xt: " dup .name cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
     ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
-event: ->timeout ( o -- )
+event: :>timeout ( o -- )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
-event: ->throw ( error -- ) throw ;
+event: :>throw ( error -- ) throw ;
 
 : timeout-expired? ( -- flag )
     ack@ .timeouts @ timeouts# >= ;
 : push-timeout ( o:connection -- )
     timeout-expired? wait-task @ and  ?dup-IF
-	o elit, ->timeout event>  THEN ;
+	o elit, :>timeout event>  THEN ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
@@ -1693,7 +1693,7 @@ Forward next-saved-msg
 : packet-loop ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  event-send  AGAIN ;
 
-: n2o:request-done ( n -- )  elit, o elit, ->request ;
+: n2o:request-done ( n -- )  elit, o elit, :>request ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;
