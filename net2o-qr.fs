@@ -66,10 +66,10 @@ keyqr#² buffer: keyqr
 : byte>vpixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
-    over 6 rshift over c! keyqr# +
+    over 6 rshift       over c! keyqr# +
     over 4 rshift 3 and over c! keyqr# +
     over 2 rshift 3 and over c! keyqr# +
-    swap 3 and swap c! ;
+    swap          3 and swap c! ;
 
 : >keyhline ( destaddr srcaddr -- destaddr' )
     keyline# bounds ?DO  I c@ over byte>hpixel 4 +  LOOP ;
@@ -83,17 +83,18 @@ keyqr#² buffer: keyqr
 \ generate checksum and tag bits
 
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )
-    hashtmp 8 smove dup >r hashtmp $8 + c!
-    hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r> ;
+    c:0key >r $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
+    hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
+    ." ecc= " hashtmp $10 xtype cr ;
 : >taghash ( addr u tag -- tag )
-    $8 rng$ c:0key taghash-rest ;
+    $8 rng$ rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
     >r 2tuck r> taghash-rest drop 8 /string hashtmp 8 + 8 str= ;
 : >ecc ( addr u tag -- ) >taghash
-    keyqr [ keyqr#  #3 *  #4 + ]L +  hashtmp      >keyhline drop
+    keyqr [ keyqr# #03 *  #4 + ]L +  hashtmp      >keyhline drop
     keyqr [ keyqr# #20 *  #4 + ]L +  hashtmp $4 + >keyhline drop
-    keyqr [ keyqr#  #4 *  #3 + ]L +  hashtmp $8 + >keyvline drop
-    keyqr [ keyqr#  #4 * #20 + ]L +  hashtmp $C + >keyvline drop
+    keyqr [ keyqr# #04 *  #3 + ]L +  hashtmp $8 + >keyvline drop
+    keyqr [ keyqr# #04 * #20 + ]L +  hashtmp $C + >keyvline drop
     dup 6 rshift       keyqr [ keyqr#  #3 *  #3 + ]L + c!
     dup 4 rshift 3 and keyqr [ keyqr#  #3 * #20 + ]L + c!
     dup 2 rshift 3 and keyqr [ keyqr# #20 *  #3 + ]L + c!

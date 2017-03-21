@@ -150,21 +150,19 @@ $A0 Value red-level#
 
 $40 buffer: guessbuf
 
+: ecc-hor@ ( off -- w1 w2 ) >r
+    red-buf   $@ drop r@ + be-uw@
+    green-buf $@ drop r> + be-uw@ mixgr>32 ;
 : >guess ( -- addr u )
     guessbuf
     [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
     [ scan-w 2 rshift dup scan-w 7 + * swap 2/ 1- + ]L DO
-	red-buf   $@ drop I + be-uw@
-	green-buf $@ drop I + be-uw@ mixgr>32
-	over be-l! 4 +
+	I ecc-hor@ over be-l! 4 +
     [ scan-w 2 rshift ]L -LOOP
     drop guessbuf $40 ;
 
 $11 buffer: guessecc
 
-: ecc-hor@ ( off -- w1 w2 ) >r
-    red-buf   $@ drop r@ + be-uw@
-    green-buf $@ drop r> + be-uw@ mixgr>32 ;
 : tag1@ { addr bit -- tag }
     addr red-buf   $@ drop + c@ bit rshift 1 and 2*
     addr green-buf $@ drop + c@ bit rshift 1 and or ;
@@ -180,13 +178,14 @@ $11 buffer: guessecc
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ or ;
 
 : >guessecc ( -- )
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    ecc-hor@ guessecc     be-l!
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
+    ecc-hor@ guessecc     be-l!
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
     ecc-hor@ guessecc 4 + be-l!
     -1 0 ecc-ver@ guessecc 8 + be-l!
-    3  7 ecc-ver@ guessecc $C + be-l! ;
+    2  7 ecc-ver@ guessecc $C + be-l! ;
 : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
+    ." ecc? " 2dup xtype cr
     tag@ taghash? ;
 
 : |min| ( a b -- ) over abs over abs < select ;
