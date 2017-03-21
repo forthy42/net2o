@@ -164,23 +164,23 @@ $40 buffer: guessbuf
 $11 buffer: guessecc
 
 : tag1@ { addr bit -- tag }
-    addr red-buf   $@ drop + c@ bit rshift 1 and 2*
-    addr green-buf $@ drop + c@ bit rshift 1 and or ;
+    addr red-buf   $@ drop + c@ bit rshift 1 and
+    addr green-buf $@ drop + c@ bit rshift 1 and 2* or ;
 : ecc-ver@ { off bit -- ul } 0
-    [ scan-w 2 rshift dup scan-w #10 - * swap 2/ 1- + ]L
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L DO
 	2* 2* I off + bit tag1@ or
     [ scan-w 2 rshift ]L -LOOP ;
 : tag2@ ( addr -- )
-    dup 1- 0 tag1@ 2 lshift swap 3 + 7 tag1@ or ;
+    dup 1- 0 tag1@ 2 lshift swap 2 + 7 tag1@ or ;
 : tag@ ( -- tag )
     [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L tag2@ 4 lshift
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ or ;
 
 : >guessecc ( -- )
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
-    ecc-hor@ guessecc     be-l!
     [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
+    ecc-hor@ guessecc     be-l!
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
     ecc-hor@ guessecc 4 + be-l!
     -1 0 ecc-ver@ guessecc 8 + be-l!
     2  7 ecc-ver@ guessecc $C + be-l! ;
