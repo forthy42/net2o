@@ -147,7 +147,7 @@ scope{ n2o
     ?get-me init-client
     ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
 [IFDEF] scan-qr
-    ['] scanned-key is scan-result scan-qr
+    ['] scanned-tag is scan-result scan-qr
 [ELSE]
     ." I'm sorry, no scanner implemented yet." cr
 [THEN] ;
@@ -428,8 +428,7 @@ warnings !
     \G invite: send or accept an invitation to another user
     announce @nicks>chat
     ?nextarg IF  config:invite$ $!  THEN
-    chat-keys [: 2dup n2o:pklookup send-invitation
-      n2o:dispose-context ;] $[]map
+    chat-keys [: 2dup n2o:pklookup send-invitation ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 
 
 \ script mode

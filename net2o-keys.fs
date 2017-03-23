@@ -820,17 +820,48 @@ Variable cp-tmp
 
 \ respond to scanning keys
 
+forward n2o:pklookup
+forward send-qr-invitation
+
 true Value scan-once?
 
-: scanned-key ( addr u -- )
+: scanned-key-in ( addr u -- )
     ." scanned "  2dup .key-id cr
     key| key# #@ IF
 	cell+ >o [ 1 import#scan lshift ]L ke-imports or! .key-list cr o>
 	save-keys
-	[IFDEF] android [ also android ]
-	    level# @ 0> scan-once? and level# +!  [ previous ]
-	[THEN]
     ELSE  drop  THEN ;
+: ?scan-level ( -- )
+    [IFDEF] android [ also android ]
+	level# @ 0> scan-once? and level# +!  [ previous ]
+    [THEN] ;
+
+: scanned-key ( addr u -- )
+    scanned-key-in ?scan-level ;
+: scanned-ownkey { d: key -- }
+    key scanned-key-in
+    key n2o:pklookup
+    key send-qr-invitation ;
+\ the idea of scan an own key is to send a invitation,
+\ and receive a signature that proofs the scanned device
+\ has access to the secret key
+: scanned-hash ( addr u -- )
+    ." hash: " 85type cr ;
+: scanned-keysig ( addr u -- )
+    ." sig: " 85type cr
+    ?scan-level ;
+
+Create scanned-x
+' scanned-ownkey ,
+' scanned-key ,
+' scanned-keysig ,
+' scanned-hash ,
+
+here scanned-x - cell/ constant scanned-max#
+
+: scanned-tag ( addr u tag -- )
+    dup scanned-max# u< IF  cells + scanned-x + perform
+    ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
 \ generate keys
 
@@ -1107,7 +1138,7 @@ event: :>wakeme ( o -- ) restart ;
     tpkc keysize $, oneshot-tmpkey
     nest[ 2r> $, invite ]tmpnest
     cookie+request
-    end-code| ;
+    end-code| n2o:dispose-context ;
 
 : send-qr-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
@@ -1116,7 +1147,7 @@ event: :>wakeme ( o -- ) restart ;
     tpkc keysize $, qr-tmpkey
     nest[ 2r> $, invite ]tmpnest
     cookie+request
-    end-code| ;
+    end-code| n2o:dispose-context ;
 
 \ key api helpers
 

@@ -28,7 +28,7 @@ require net2o-tools.fs
 0
 enum qr#ownkey
 enum qr#key
-enum qr#signature
+enum qr#keysig
 enum qr#hash
 drop
 
@@ -99,7 +99,7 @@ keyqr#² buffer: keyqr
     2dup qr-key keysize move-rep
     c:0key $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
     hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
-    ." ecc= " hashtmp $10 xtype space dup hex. cr ;
+    msg( ." ecc= " hashtmp $10 xtype space dup hex. cr ) ;
 : >taghash ( addr u tag -- tag )
     $8 rng$ rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )

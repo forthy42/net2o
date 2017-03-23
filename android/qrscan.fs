@@ -185,8 +185,8 @@ $11 buffer: guessecc
     -1 0 ecc-ver@ guessecc 8 + be-l!
     2  7 ecc-ver@ guessecc $C + be-l! ;
 : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
-    ." ecc? " 2dup xtype cr
-    tag@ taghash? ;
+    msg( ." ecc? " 2dup xtype cr )
+    tag@ dup guessecc $10 + c! taghash? ;
 
 : |min| ( a b -- ) over abs over abs < select ;
 
@@ -278,7 +278,7 @@ $8000 Constant init-xy
 
 tex: scan-tex
 0 Value scan-fb
-21e FValue scansize
+20e FValue scansize
 
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
@@ -319,7 +319,7 @@ Variable skip-frames
 	skip-frames @ 0= IF  visual-frame  THEN
 	extract-red extract-green >guess
 	>guessecc 2dup guessecc $10 ecc-ok? skip-frames @ 0= and IF
-	    scan-result
+	    guessecc $10 + c@ scan-result
 	ELSE  2drop  THEN
     ELSE  0>framebuffer skip-frames @ 0= IF  visual-frame  THEN THEN
     need-sync off skip-frames @ 0> skip-frames +! ;
@@ -335,7 +335,8 @@ Variable skip-frames
 : scan-key? ( -- flag )  defers key?  scan-once ;
 
 : scan-bg ( -- )  scan-start ['] scan-key? is key?
-    [: 85type space guessecc $10 xtype cr level# @ 0> level# +! ;] is scan-result ;
+    [: drop 85type space guessecc $10 xtype cr level# @ 0> level# +! ;]
+    is scan-result ;
 : scan-end ( -- )
     [ what's key? ]L is key? cam-end screen-keep showstatus ;
 : scan-qr ( -- )
