@@ -22,9 +22,11 @@ Variable key-readin
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
-: qr-me ( -- ) pk@ $00 .keyqr ;
+: qr-me ( -- ) pk@ qr#ownkey .keyqr ;
 : qr-nicks ( -- )
-    [: nick-key ?dup-IF  .ke-pk $@ .keyqr  THEN ;] @arg-loop ;
+    [: nick-key ?dup-IF  >o ke-pk $@
+	    qr#ownkey qr#key ke-sk sec@ nip select o>
+	    .keyqr  THEN ;] @arg-loop ;
 
 : +pk ( "name" -- )  pk' keysize umin key-list $+[]! ;
 
@@ -142,7 +144,8 @@ scope{ n2o
 : keyscan ( -- )
     \U keyscan|scankey
     \G keyscan: scan a key in color QR form
-    ?get-me  ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
+    ?get-me init-client
+    ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
 [IFDEF] scan-qr
     ['] scanned-key is scan-result scan-qr
 [ELSE]

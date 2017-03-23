@@ -662,7 +662,8 @@ previous
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ key| dup IF
 	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
-	IF  tmp-crypt-val do-nest  ELSE  2drop un-cmd  THEN
+	IF    tmp-crypt-val do-nest  [ qr-tmp-val invert ]L validated and!
+	ELSE  2drop un-cmd  THEN
     ELSE  2drop 2drop un-cmd  THEN ;
 
 \ net2o assembler stuff

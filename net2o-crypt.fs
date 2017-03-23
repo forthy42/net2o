@@ -65,11 +65,13 @@ object class
 end-class keybuf-c
 
 state2# buffer: no-key \ just zeros for no key
+keysize buffer: qr-key \ key used for QR challenge (can be only one)
 
 : new-keybuf ( -- )
     keybuf-c >osize @ kalloc keybuf ! ;
 
 : init-keybuf ( -- )
+    keysize rng$ qr-key swap move \ qr-key shall not be guessable
     keytmp @ IF
 	up@ keytmp-up @ <> IF  BUT  THEN
 	keytmp-c >osize @ kalloc keytmp !

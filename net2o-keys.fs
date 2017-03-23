@@ -1078,6 +1078,9 @@ event: :>wakeme ( o -- ) restart ;
 	2drop ." ignored" cr
     endcase ;
 
+: add-invitation ( addr u -- ) \ add invitation without asking
+    perm%default pk2key$-add ;
+
 : filter-invitation? ( addr u -- flag )
     sigpk2size# - + keysize key# #@ d0<> ; \ already there
 
@@ -1085,8 +1088,7 @@ event: :>wakeme ( o -- ) restart ;
     invitations [: 2dup .pk2key$ cr process-invitation ;] $[]map
     invitations $[]off ;
 
-: >invitations ( addr u -- )
-    2dup filter-invitation? IF  2drop EXIT  THEN
+: queue-invitation ( addr u -- )
     invitations $[]# >r
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
@@ -1094,11 +1096,24 @@ event: :>wakeme ( o -- ) restart ;
 	<event e$, :>invite up@ elit, :>wakeme main-up@ event> stop
     ELSE  2drop  THEN ;
 
+: >invitations ( addr u -- )
+    2dup filter-invitation? IF  2drop EXIT  THEN
+    qr-crypt? IF  add-invitation  ELSE  queue-invitation  THEN ;
+
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
     gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!
     net2o-code0
     tpkc keysize $, oneshot-tmpkey
+    nest[ 2r> $, invite ]tmpnest
+    cookie+request
+    end-code| ;
+
+: send-qr-invitation ( pk u -- )
+    setup! mypk2nick$ 2>r
+    gen-tmpkeys drop qr-key tskc rot keypad ed-dhx do-keypad sec!
+    net2o-code0
+    tpkc keysize $, qr-tmpkey
     nest[ 2r> $, invite ]tmpnest
     cookie+request
     end-code| ;

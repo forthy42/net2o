@@ -221,7 +221,8 @@ Sema id-sema
     $> keysize <> !!keysize!! skc swap keypad ed-dh do-keypad sec! ;
 +net2o: invite ( $:nick+sig -- ) \g invite someone
     $> tmp-crypt? IF
-	pk2-sig? !!sig!! >invitations do-keypad sec-off
+	pk2-sig? !!sig!! >invitations
+	do-keypad sec-off
     ELSE  2drop  THEN ;
 
 \ version check
@@ -236,6 +237,13 @@ Sema id-sema
 +net2o: get-version ( $:version -- ) \g version cross-check
     string-stack $[]# IF  $> ?version  THEN \ accept query-only
     net2o-version $, check-version ;
+
+\ more one shot stuff
+
++net2o: qr-tmpkey ( $:tmpkey -- ) \g oneshot tmpkey while qr-scanning
+    $> keysize <> !!keysize!!
+    qr-key skc rot keypad ed-dhx do-keypad sec!
+    qr-tmp-val validated or! ;
 
 gen-table $freeze
 

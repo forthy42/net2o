@@ -174,13 +174,13 @@ $11 buffer: guessecc
 : tag2@ ( addr -- )
     dup 1- 0 tag1@ 2 lshift swap 2 + 7 tag1@ or ;
 : tag@ ( -- tag )
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L tag2@ 4 lshift
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ or ;
+    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ 4 lshift
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L tag2@ or ;
 
 : >guessecc ( -- )
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    ecc-hor@ guessecc     be-l!
     [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
+    ecc-hor@ guessecc     be-l!
+    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
     ecc-hor@ guessecc 4 + be-l!
     -1 0 ecc-ver@ guessecc 8 + be-l!
     2  7 ecc-ver@ guessecc $C + be-l! ;

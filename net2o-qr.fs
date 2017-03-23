@@ -17,11 +17,24 @@
 
 require net2o-tools.fs
 
+\ unicode characters to display a color matrix
+
 '▀' Constant upper-half-block
 \ '▄' Constant lower-half-block
 \ '█' Constant solid-block
 
-24 Constant keyqr# \ key qr codes are 20x20 blocks
+\ tags
+
+0
+enum qr#ownkey
+enum qr#key
+enum qr#signature
+enum qr#hash
+drop
+
+\ constants
+
+24 Constant keyqr# \ key qr codes are 24x24 blocks
 keyqr# dup * Constant keyqr#²
 $40 Constant keymax#
 4 Constant keyline#
@@ -82,10 +95,11 @@ keyqr#² buffer: keyqr
 
 \ generate checksum and tag bits
 
-: taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )
-    c:0key >r $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
+: taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
+    2dup qr-key keysize move-rep
+    c:0key $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
     hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
-    ." ecc= " hashtmp $10 xtype cr ;
+    ." ecc= " hashtmp $10 xtype space dup hex. cr ;
 : >taghash ( addr u tag -- tag )
     $8 rng$ rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )

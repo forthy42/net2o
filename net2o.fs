@@ -248,6 +248,7 @@ $080 Constant newcode-val
 $100 Constant keypair-val
 $200 Constant receive-val
 $400 Constant ivs-val
+$800 Constant qr-tmp-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
@@ -255,6 +256,7 @@ $400 Constant ivs-val
 : cookie?    ( -- flag )  validated @ cookie-val    and ;
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
 : signed?    ( -- flag )  validated @ signed-val    and ;
+: qr-crypt?  ( -- flag )  validated @ qr-tmp-val    and ;
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
 : !!unsigned?  ( -- ) signed?  !!signed!! ;
 
