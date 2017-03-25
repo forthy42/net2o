@@ -307,8 +307,6 @@ tex: scan-tex
     media-tex nearest-oes
     screen-orientation draw-scan sync ;
 
-Defer scan-result ( -- )
-
 Variable skip-frames
 8 Value skip-frames#
 
@@ -332,13 +330,6 @@ Variable skip-frames
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
     cam-prepare  skip-frames# skip-frames ! ;
 
-: scan-key? ( -- flag )  defers key?  scan-once ;
-
-: scan-bg ( -- )  scan-start ['] scan-key? is key?
-    [: drop 85type space guessecc $10 xtype cr level# @ 0> level# +! ;]
-    is scan-result ;
-: scan-end ( -- )
-    [ what's key? ]L is key? cam-end screen-keep showstatus ;
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
     cam-end  screen-keep showstatus

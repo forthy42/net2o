@@ -147,7 +147,7 @@ scope{ n2o
     ?get-me init-client
     ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
 [IFDEF] scan-qr
-    ['] scanned-tag is scan-result scan-qr
+    scan-qr
 [ELSE]
     ." I'm sorry, no scanner implemented yet." cr
 [THEN] ;

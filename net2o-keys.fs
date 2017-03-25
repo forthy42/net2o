@@ -859,7 +859,7 @@ Create scanned-x
 
 here scanned-x - cell/ constant scanned-max#
 
-: scanned-tag ( addr u tag -- )
+: scan-result ( addr u tag -- )
     dup scanned-max# u< IF  cells + scanned-x + perform
     ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
@@ -1127,9 +1127,13 @@ event: :>wakeme ( o -- ) restart ;
 	<event e$, :>invite up@ elit, :>wakeme main-up@ event> stop
     ELSE  2drop  THEN ;
 
+forward .sigqr
+event: :>show-keysig ( addr u -- ) .sigqr ;
+
 : >invitations ( addr u -- )
     2dup filter-invitation? IF  2drop EXIT  THEN
-    qr-crypt? IF  add-invitation  ELSE  queue-invitation  THEN ;
+    qr-crypt? IF  2dup add-invitation <event e$, :>show-keysig main-up@ event>
+    ELSE  queue-invitation  THEN ;
 
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r

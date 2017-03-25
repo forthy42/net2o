@@ -95,13 +95,14 @@ keyqr#² buffer: keyqr
 
 \ generate checksum and tag bits
 
+: rng>qr-key ( -- )  $8 rng$ qr-key keysize move-rep ;
+: date>qr-key ( -- )  sigdate $8 qr-key keysize move-rep ;
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
-    2dup qr-key keysize move-rep
     c:0key $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
     hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
     msg( ." ecc= " hashtmp $10 xtype space dup hex. cr ) ;
 : >taghash ( addr u tag -- tag )
-    $8 rng$ rot taghash-rest ;
+    qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
     >r 2tuck r> taghash-rest drop 8 /string hashtmp 8 + 8 str= ;
 : >ecc ( addr u tag -- ) >taghash
@@ -112,11 +113,19 @@ keyqr#² buffer: keyqr
     dup 6 rshift       keyqr [ keyqr#  #3 *  #3 + ]L + c!
     dup 4 rshift 3 and keyqr [ keyqr#  #3 * #20 + ]L + c!
     dup 2 rshift 3 and keyqr [ keyqr# #20 *  #3 + ]L + c!
-                 3 and keyqr [ keyqr# #20 * #20 + ]L + c! ;
+    ( )          3 and keyqr [ keyqr# #20 * #20 + ]L + c! ;
 
-: .keyqr ( addr u tag -- ) \ 64 bytes
+: .qr-rest ( addr u tag -- )
     >r >keyframe 2dup >keylines r> >ecc
     keyqr keyqr# qr.block ;
+
+: .keyqr ( addr u tag -- ) \ 64 bytes
+    rng>qr-key .qr-rest ;
+
+: .sigqr ( addr u -- ) \ any string
+    c:0key c:hash now>never sigdate +date
+    sig-params ed-sign
+    date>qr-key qr#keysig .qr-rest ;
 
 [IFDEF] android   require android/qrscan.fs  [THEN]
 
