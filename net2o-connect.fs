@@ -244,6 +244,12 @@ Sema id-sema
     $> keysize <> !!keysize!!
     qr-key skc rot keypad ed-dhx do-keypad sec!
     qr-tmp-val validated or! ;
++net2o: sign-invite ( $:signature -- ) \g send you a signature
+    $> sigpksize# <> !!unsigned!!
+    \ !!FIXME!! check if the signature matches
+    ke-sigs[] $+[]!
+    \ !!FIXME!! qr scan done, do something about it
+;
 
 gen-table $freeze
 
