@@ -17,6 +17,7 @@
 
 Forward >invitations
 Forward n2o:dispose-punchs
+Forward mynick$
 
 scope{ net2o-base
 \ nat traversal functions
@@ -240,14 +241,16 @@ Sema id-sema
 
 \ more one shot stuff
 
-+net2o: qr-tmpkey ( $:tmpkey -- ) \g oneshot tmpkey while qr-scanning
++net2o: qr-tmpkey ( $:tmpkey -- )
+    \g oneshot tmpkey while qr-scanning
+    \g or while attempting to sync
     $> keysize <> !!keysize!!
     qr-key skc rot keypad ed-dhx do-keypad sec!
     qr-tmp-val validated or! ;
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!
-    \ !!FIXME!! check if the signature matches
-    ke-sigs[] $+[]!
+    c:0key mynick$ sigsize# - c:hash pk-sig?
+    IF  ke-sigs[] $+[]!  ELSE  2drop  THEN
     \ !!FIXME!! qr scan done, do something about it
 ;
 

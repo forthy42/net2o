@@ -27,6 +27,12 @@ Create scan-matrix
 
 32 sfloats buffer: scan-inverse
 
+20.0e FValue x-scansize
+20.75e FValue y-scansize
+
+0.5e FValue y-offset
+0.0e FValue x-offset
+
 \ matrix inversion
 
 ' dfloats alias 8*
@@ -112,8 +118,8 @@ Variable green-buf
 Variable blue-buf
 
 $E8 Value blue-level#
-$80 Value green-level#
-$A0 Value red-level#
+$B0 Value green-level#
+$B0 Value red-level#
 
 : extract-buf ( offset buf level -- ) { level }
     buf-len over $!len
@@ -148,45 +154,47 @@ $A0 Value red-level#
 	2* swap 2* swap r>
     LOOP  nip nip ;
 
-$40 buffer: guessbuf
+$51 buffer: guessbuf
+guessbuf $40 + Constant guessecc
+guessecc $10 + Constant guesstag
+
+scan-w 2 rshift constant scan-step
+scan-step dup scan-w 9 - * swap 2/ 1- + Constant scan-top
+scan-step dup scan-w 7 + * swap 2/ 1- + Constant scan-bot
+scan-step dup scan-w 8 + * swap 2/ 1- + Constant scan-ecc
 
 : ecc-hor@ ( off -- w1 w2 ) >r
     red-buf   $@ drop r@ + be-uw@
     green-buf $@ drop r> + be-uw@ mixgr>32 ;
 : >guess ( -- addr u )
     guessbuf
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    [ scan-w 2 rshift dup scan-w 7 + * swap 2/ 1- + ]L DO
+    scan-top scan-bot DO
 	I ecc-hor@ over be-l! 4 +
-    [ scan-w 2 rshift ]L -LOOP
+    scan-step -LOOP
     drop guessbuf $40 ;
-
-$11 buffer: guessecc
 
 : tag1@ { addr bit -- tag }
     addr red-buf   $@ drop + c@ bit rshift 1 and
     addr green-buf $@ drop + c@ bit rshift 1 and 2* or ;
 : ecc-ver@ { off bit -- ul } 0
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L DO
+    scan-top scan-bot DO
 	2* 2* I off + bit tag1@ or
-    [ scan-w 2 rshift ]L -LOOP ;
+    scan-step -LOOP ;
 : tag2@ ( addr -- )
     dup 1- 0 tag1@ 2 lshift swap 2 + 7 tag1@ or ;
 : tag@ ( -- tag )
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L tag2@ 4 lshift
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L tag2@ or ;
+    scan-ecc tag2@ 4 lshift
+    scan-top tag2@ or ;
 
 : >guessecc ( -- )
-    [ scan-w 2 rshift dup scan-w 8 + * swap 2/ 1- + ]L
-    ecc-hor@ guessecc     be-l!
-    [ scan-w 2 rshift dup scan-w 9 - * swap 2/ 1- + ]L
-    ecc-hor@ guessecc 4 + be-l!
+    scan-ecc ecc-hor@ guessecc     be-l!
+    scan-top ecc-hor@ guessecc 4 + be-l!
     -1 0 ecc-ver@ guessecc 8 + be-l!
     2  7 ecc-ver@ guessecc $C + be-l! ;
+
 : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
-    msg( ." ecc? " 2dup xtype cr )
-    tag@ dup guessecc $10 + c! taghash? ;
+    msg( ." ecc? " 2over xtype space 2dup xtype space x-scansize f. y-scansize f. x-offset f. y-offset f. cr )
+    2dup + c@ taghash? ;
 
 : |min| ( a b -- ) over abs over abs < select ;
 
@@ -278,21 +286,20 @@ $8000 Constant init-xy
 
 tex: scan-tex
 0 Value scan-fb
-20e FValue scansize
 
 : new-scantex ( -- )
     scan-tex  0e 0e 0e 1e glClearColor
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
-    s>f scansize f/ y-rots sf!  s>f scansize f/ x-scale sf!
+    s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scale sf!
     p0 2@ p2 2@ p- p1 2@ p3 2@ p- p+ p2/
-    s>f scansize f/ y-scale sf!  s>f scansize f/ x-rots sf! ;
+    s>f y-scansize f/ y-scale sf!  s>f x-scansize f/ x-rots sf! ;
 : set-scan' ( -- )
     compute-xpoint ( .. x y )
     scale+rotate
-    scan-w fm/ y-spos sf!
-    scan-w fm/ x-spos sf! ;
+    y-offset f+ scan-w fm/ y-spos sf!
+    x-offset f+ scan-w fm/ x-spos sf! ;
 
 : scan-legit ( -- ) \ resize a legit QR code
     init-scan' set-scan' >scan-matrix
@@ -307,21 +314,35 @@ tex: scan-tex
     media-tex nearest-oes
     screen-orientation draw-scan sync ;
 
+: scan-legit? ( -- addr u flag )
+    scan-legit extract-red extract-green >guess
+    >guessecc tag@ guesstag c!
+    2dup guessecc $10 ecc-ok? ;
+: scan-legits? ( -- addr u flag )
+    5 0 DO
+	I s>f f2/ f2/ to y-offset
+	85 80 DO  I s>f f2/ f2/ to y-scansize
+	    scan-legit? IF  unloop unloop true  EXIT  THEN
+	    2drop
+	LOOP
+    LOOP  0 0  false ;
+
 Variable skip-frames
 8 Value skip-frames#
 
 : scan-once ( -- )
     camera-init scan-w 2* dup scan-fb >framebuffer
     scan-frame0 scan-grab search-corners
-    ?legit IF  scan-legit  0>framebuffer
-	skip-frames @ 0= IF  visual-frame  THEN
-	extract-red extract-green >guess
-	>guessecc 2dup guessecc $10 ecc-ok? skip-frames @ 0= and IF
+    ?legit IF  scan-legit?
+	skip-frames @ 0= and IF
+	    0>framebuffer  visual-frame 
+	    msg( ." scanned ok" cr )
 	    guessecc $10 + c@ scan-result
 	ELSE  2drop  THEN
-    ELSE  0>framebuffer skip-frames @ 0= IF  visual-frame  THEN THEN
+    THEN
+    0>framebuffer skip-frames @ 0= IF visual-frame  THEN
     need-sync off skip-frames @ 0> skip-frames +! ;
-: scan-loop ( -- )
+: scan-loop ( -- )  scanned-flags off \ start with empty flags
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )
     hidekb >changed  hidestatus >changed  screen+keep

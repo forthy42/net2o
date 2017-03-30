@@ -824,11 +824,13 @@ forward n2o:pklookup
 forward send-qr-invitation
 
 true Value scan-once?
+Variable scanned-flags
 
 : scanned-key-in ( addr u -- )
     ." scanned "  2dup .key-id cr
     key| key# #@ IF
-	cell+ >o [ 1 import#scan lshift ]L ke-imports or! .key-list cr o>
+	cell+ >o [ 1 import#scan lshift ]L ke-imports or!
+	.key-list cr o>
 	save-keys
     ELSE  drop  THEN ;
 : ?scan-level ( -- )
@@ -838,10 +840,10 @@ true Value scan-once?
 
 : scanned-key ( addr u -- )
     scanned-key-in ?scan-level ;
-: scanned-ownkey { d: key -- }
-    key scanned-key-in
-    key n2o:pklookup
-    key send-qr-invitation ;
+: scanned-ownkey { d: pk -- }
+    pk scanned-key-in
+    pk ~~ n2o:pklookup
+    pk ~~ send-qr-invitation ~~ ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
@@ -850,17 +852,23 @@ true Value scan-once?
 : scanned-keysig ( addr u -- )
     ." sig: " 85type cr
     ?scan-level ;
+: scanned-secret ( addr u -- )
+    ." secret: " 85type cr
+    ?scan-level ;
 
 Create scanned-x
 ' scanned-ownkey ,
 ' scanned-key ,
 ' scanned-keysig ,
 ' scanned-hash ,
+' scanned-secret ,
 
 here scanned-x - cell/ constant scanned-max#
 
 : scan-result ( addr u tag -- )
-    dup scanned-max# u< IF  cells + scanned-x + perform
+~~    1 over lshift dup scanned-flags @ and IF  2drop 2drop  EXIT  THEN
+~~    scanned-flags or!
+    dup scanned-max# u< IF  ~~ cells scanned-x + ~~ perform ~~
     ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
 \ generate keys
@@ -1021,7 +1029,7 @@ Forward !my-addr$
     [: ." ~/" type ." .n2o" ;] $tmp w/o create-file throw
     >r cmdbuf$ r@ write-file throw r> close-file throw ;
 : out-me ( -- )
-    pk@ key| key# #@ 0= !!unknown-key!!
+    pk@ key| key# #@ 0= !!unknown-key!! \ well, you should know yourself
     cell+ out-key ;
 
 Variable dhtroot.n2o

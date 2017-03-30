@@ -30,6 +30,7 @@ enum qr#ownkey
 enum qr#key
 enum qr#keysig
 enum qr#hash
+enum qr#sync   \ sychnronizing info: key+secret
 drop
 
 \ constants
@@ -100,7 +101,7 @@ keyqr#² buffer: keyqr
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
     c:0key $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
     hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
-    msg( ." ecc= " hashtmp $10 xtype space dup hex. cr ) ;
+    msg( ) ." ecc= " hashtmp $10 xtype space dup hex. cr ( ) ;
 : >taghash ( addr u tag -- tag )
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
