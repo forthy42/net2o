@@ -958,6 +958,8 @@ scope: notify-cmds
     version-string forth:type '-' forth:emit
     machine forth:type ;
 
+forward avalanche-text
+
 also net2o-base scope: /chat
 
 : me ( addr u -- )
@@ -966,13 +968,14 @@ also net2o-base scope: /chat
     [: $, msg-action ;] send-avalanche ;
 
 : otr ( addr u -- )
-    \U otr on|off           turn otr mode on/off
+    \U otr on|off|message   turn otr mode on/off (or one-shot)
     2dup s" on" str= >r
-    s" off" str= r@ or IF   r> otr-mode !
+    2dup s" off" str= r@ or IF   2drop r> otr-mode !
 	<info> ." === " otr-mode @ IF  ." enter"  ELSE  ." leave"  THEN
-	."  otr mode ==="
-    ELSE  <err> ." only 'otr on|off' are allowed" rdrop  THEN
-    <default> forth:cr ;
+	."  otr mode ===" <default> forth:cr
+    ELSE  rdrop
+	true otr-mode !@ >r  avalanche-text  r> otr-mode !
+    THEN ;
 
 : chain ( addr u -- )
     \U chain on|off         turn chain mode on/off
