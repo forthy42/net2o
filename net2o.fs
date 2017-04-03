@@ -452,7 +452,8 @@ UValue connection
 
 Variable mapstart $1 mapstart !
 
-: setup! ( -- )   setup-table @ token-table !  dest-0key @ ins-0key ;
+: ret0 ( -- ) return-addr $10 erase ;
+: setup! ( -- )   setup-table @ token-table !  ret0  dest-0key @ ins-0key ;
 : context! ( -- )
     context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
     <event wait-task @ main-up@ over select o elit, :>connect event> ;
@@ -913,7 +914,7 @@ User outflag  outflag off
     header( ." send code " outbuf .header )
     outbuf hdrtags c@ stateless# and IF
 	outbuf0-encrypt
-	cmd0( .time ." cmd0 to: " dup .addr-path cr )
+	cmd0( .time ." cmd0 to: " ret-addr .addr-path cr )
     ELSE
 	code-map @ outbuf-encrypt
     THEN   ret-addr packet-to ;
@@ -1456,7 +1457,7 @@ scope{ mapc
 ' drop data-class to handle
 
 : handle-cmd ( addr -- )  parent @ >o
-    msg( ." Handle command to addr: " inbuf addr le-64@ hex. cr )
+    msg( ." Handle command to addr: " inbuf addr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move

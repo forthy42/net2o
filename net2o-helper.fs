@@ -238,7 +238,7 @@ User host$ \ check for this hostname
     rot or swap ;
 
 : make-context ( pk u -- )
-    return-addr $10 erase n2o:new-context >o rdrop dest-pk ;
+    ret0 n2o:new-context >o rdrop dest-pk ;
 
 : n2o:pklookup ( addr u -- )
     2dup keysize2 safe/string host$ $! key2|

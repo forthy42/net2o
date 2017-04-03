@@ -842,8 +842,8 @@ Variable scanned-flags
     scanned-key-in ?scan-level ;
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    pk ~~ n2o:pklookup
-    pk ~~ send-qr-invitation ~~ ;
+    pk n2o:pklookup
+    pk send-qr-invitation ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
@@ -866,9 +866,9 @@ Create scanned-x
 here scanned-x - cell/ constant scanned-max#
 
 : scan-result ( addr u tag -- )
-~~    1 over lshift dup scanned-flags @ and IF  2drop 2drop  EXIT  THEN
-~~    scanned-flags or!
-    dup scanned-max# u< IF  ~~ cells scanned-x + ~~ perform ~~
+    1 over lshift dup scanned-flags @ and IF  2drop 2drop  EXIT  THEN
+    scanned-flags or!
+    dup scanned-max# u< IF  cells scanned-x + perform ~~
     ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
 \ generate keys
