@@ -42,6 +42,7 @@ $40 Constant keymax#
 8 Constant keylineskp#
 
 keyqr#² buffer: keyqr
+$10 buffer: qrecc
 
 \ : half-blocks ( n -- ) 0 ?DO  upper-half-block xemit  LOOP ;
 : .prelines ( -- )
@@ -66,10 +67,10 @@ keyqr#² buffer: keyqr
     2dup c! 1+ c! ;
 
 : >keyframe ( -- )  keyqr keyqr#² erase
-    $04 keyqr 4xc!
-    $05 keyqr keyqr# + 2 - 4xc!
-    $06 keyqr keyqr#² + keyqr# 2* - 4xc!
-    $07 keyqr keyqr#² + keyqr# - 2 - 4xc! ;
+    $04 [ keyqr                        ]L 4xc!
+    $05 [ keyqr keyqr# + 2 -           ]L 4xc!
+    $06 [ keyqr keyqr#² + keyqr# 2* -  ]L 4xc!
+    $07 [ keyqr keyqr#² + keyqr# - 2 - ]L 4xc! ;
 : byte>hpixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
@@ -99,18 +100,18 @@ keyqr#² buffer: keyqr
 : rng>qr-key ( -- )  $8 rng$ qr-key keysize move-rep ;
 : date>qr-key ( -- )  sigdate $8 qr-key keysize move-rep ;
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
-    c:0key $8 umin hashtmp $8 smove r@ hashtmp $8 + c!
-    hashtmp $9 c:shorthash c:shorthash hashtmp $8 + $8 c:hash@ r>
-    msg( ) ." ecc= " hashtmp $10 xtype space dup hex. cr ( ) ;
+    c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
+    qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
+    msg( ) ." ecc= " qrecc $10 xtype space dup hex. cr ( ) ;
 : >taghash ( addr u tag -- tag )
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
-    >r 2tuck r> taghash-rest drop 8 /string hashtmp 8 + 8 str= ;
+    >r 2tuck r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
 : >ecc ( addr u tag -- ) >taghash
-    keyqr [ keyqr# #03 *  #4 + ]L +  hashtmp      >keyhline drop
-    keyqr [ keyqr# #20 *  #4 + ]L +  hashtmp $4 + >keyhline drop
-    keyqr [ keyqr# #04 *  #3 + ]L +  hashtmp $8 + >keyvline drop
-    keyqr [ keyqr# #04 * #20 + ]L +  hashtmp $C + >keyvline drop
+    keyqr [ keyqr# #03 *  #4 + ]L +  qrecc      >keyhline drop
+    keyqr [ keyqr# #20 *  #4 + ]L +  qrecc $4 + >keyhline drop
+    keyqr [ keyqr# #04 *  #3 + ]L +  qrecc $8 + >keyvline drop
+    keyqr [ keyqr# #04 * #20 + ]L +  qrecc $C + >keyvline drop
     dup 6 rshift       keyqr [ keyqr#  #3 *  #3 + ]L + c!
     dup 4 rshift 3 and keyqr [ keyqr#  #3 * #20 + ]L + c!
     dup 2 rshift 3 and keyqr [ keyqr# #20 *  #3 + ]L + c!

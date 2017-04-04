@@ -69,19 +69,23 @@ keysize buffer: qr-key \ key used for QR challenge (can be only one)
 
 : new-keybuf ( -- )
     keybuf-c >osize @ kalloc keybuf ! ;
-
-: init-keybuf ( -- )
-    keysize rng$ qr-key swap move \ qr-key shall not be guessable
+: new-keytmp ( -- )
     keytmp @ IF
 	up@ keytmp-up @ <> IF  BUT  THEN
 	keytmp-c >osize @ kalloc keytmp !
-    THEN
-    keybuf @ ?EXIT  new-keybuf ; \ we have only one global keybuf
+	up@ keytmp-up !
+    THEN ;
+
+: init-keybuf ( -- )
+    keysize rng$ qr-key swap move \ qr-key shall not be guessable
+    new-keytmp  new-keybuf ; \ we have only one global keybuf
 
 init-keybuf
 
 :noname keytmp off keybuf off defers 'image ; is 'image
 :noname defers 'cold init-keybuf ; is 'cold
+:noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
+\ :noname defers free-code-bufs ; is free-code-bufs
 
 #10.000.000.000 d>64 64Value delta-mykey# \ new mykey every 10 seconds
 

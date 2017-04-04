@@ -218,16 +218,16 @@ Sema id-sema
 
 \ one-shot packets
 
-+net2o: oneshot-tmpkey ( $:tmpkey -- ) \g oneshot tmpkey
++net2o: oneshot-tmpkey ( $:tmpkey $:pk -- ) \g oneshot tmpkey
+    $> keysize <> !!keysize!! search-key nip >r
     $> msg( ." oneshot tmpkey: " 2dup 85type forth:cr )
     keysize <> !!keysize!!
-    my-key-default @ .ke-sk sec@ drop
-    swap keypad ed-dh do-keypad sec! ;
+    r> swap keypad ed-dh do-keypad sec! ;
 +net2o: invite ( $:nick+sig -- ) \g invite someone
     $> tmp-crypt? IF
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
-    ELSE  2drop  THEN ;
+    ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
 
 \ version check
 : ?version ( addr u -- )
@@ -244,14 +244,13 @@ Sema id-sema
 
 \ more one shot stuff
 
-+net2o: qr-tmpkey ( $:tmpkey -- )
++net2o: qr-tmpkey ( $:tmpkey $:pk -- )
     \g oneshot tmpkey while qr-scanning
     \g or while attempting to sync
+    $> keysize <> !!keysize!! search-key nip >r
     $> msg( ." QR tmpkey: " 2dup 85type forth:cr )
     keysize <> !!keysize!!
-    qr-key
-    my-key-default @ .ke-sk sec@ drop
-    rot keypad ed-dhx do-keypad sec!
+    qr-key r> rot keypad ed-dhx do-keypad sec!
     qr-tmp-val validated or! ;
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!

@@ -1145,18 +1145,20 @@ event: :>show-keysig ( addr u -- ) .sigqr ;
 
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
-    gen-tmpkeys drop tskc swap keypad ed-dh do-keypad sec!
+    gen-tmpkeys
+    over tskc swap keypad ed-dh do-keypad sec!
     net2o-code0
-    tpkc keysize $, oneshot-tmpkey
+    tpkc keysize $, key| $, oneshot-tmpkey
     nest[ 2r> $, invite ]tmpnest
     cookie+request
     end-code| n2o:dispose-context ;
 
 : send-qr-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
-    gen-tmpkeys drop qr-key tskc rot keypad ed-dhx do-keypad sec!
+    gen-tmpkeys
+    over qr-key tskc rot keypad ed-dhx do-keypad sec!
     net2o-code0
-    tpkc keysize $, qr-tmpkey
+    tpkc keysize $, key| $, qr-tmpkey
     nest[ 2r> $, invite ]tmpnest
     cookie+request
     end-code| n2o:dispose-context ;
