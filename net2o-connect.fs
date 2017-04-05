@@ -248,7 +248,8 @@ Sema id-sema
     \g oneshot tmpkey while qr-scanning
     \g or while attempting to sync
     $> keysize <> !!keysize!! search-key nip >r
-    $> msg( ." QR tmpkey: " 2dup 85type forth:cr )
+    $> msg( ." QR tmpkey: " 2dup 85type forth:cr
+    ." QR key   : " qr-key keysize 85type forth:cr )
     keysize <> !!keysize!!
     qr-key r> rot keypad ed-dhx do-keypad sec!
     qr-tmp-val validated or! ;

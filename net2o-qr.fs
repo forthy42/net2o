@@ -97,8 +97,9 @@ $10 buffer: qrecc
 
 \ generate checksum and tag bits
 
-: rng>qr-key ( -- )  $8 rng$ qr-key keysize move-rep ;
-: date>qr-key ( -- )  sigdate $8 qr-key keysize move-rep ;
+: >qr-key ( addr u -- ) qr-key keysize move-rep ;
+: rng>qr-key ( -- )  $8 rng$ >qr-key ;
+: date>qr-key ( -- )  sigdate $8 >qr-key ;
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
     c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
     qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
@@ -106,7 +107,8 @@ $10 buffer: qrecc
 : >taghash ( addr u tag -- tag )
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
-    >r 2tuck r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
+    >r 2tuck over $8 >qr-key
+    r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
 : >ecc ( addr u tag -- ) >taghash
     keyqr [ keyqr# #03 *  #4 + ]L +  qrecc      >keyhline drop
     keyqr [ keyqr# #20 *  #4 + ]L +  qrecc $4 + >keyhline drop

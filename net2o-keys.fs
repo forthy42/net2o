@@ -1139,9 +1139,15 @@ forward .sigqr
 event: :>show-keysig ( addr u -- ) .sigqr ;
 
 : >invitations ( addr u -- )
-    2dup filter-invitation? IF  2drop EXIT  THEN
-    qr-crypt? IF  2dup add-invitation <event e$, :>show-keysig main-up@ event>
-    ELSE  queue-invitation  THEN ;
+    qr-crypt? IF
+	msg( ." QR invitation with signature" forth:cr )
+	2dup filter-invitation? 0= IF  2dup add-invitation  THEN
+	<event e$, :>show-keysig main-up@ event>
+    ELSE
+	2dup filter-invitation? IF  2drop EXIT  THEN
+	msg( ." queue invitation" forth:cr )
+	queue-invitation
+    THEN ;
 
 : send-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
@@ -1155,7 +1161,7 @@ event: :>show-keysig ( addr u -- ) .sigqr ;
 
 : send-qr-invitation ( pk u -- )
     setup! mypk2nick$ 2>r
-    gen-tmpkeys
+    gen-tmpkeys msg( ." QR key:" qr-key keysize 85type forth:cr )
     over qr-key tskc rot keypad ed-dhx do-keypad sec!
     net2o-code0
     tpkc keysize $, key| $, qr-tmpkey

@@ -171,7 +171,7 @@ event: :>hide ( task -- ) ctrl Z inskey restart ;
 : <hide> ( task -- )
     <event up@ elit, :>hide event>  stop ;
 : bflush ( -- )
-    [IFUNDEF] android    b$ $@ defers type b$ $off
+    [IFUNDEF] gl-emit      b$ $@ defers type b$ $off
     [ELSE]
 	up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
 	0 b$ !@ <event elit, :>type main-up@ event>
@@ -184,7 +184,7 @@ event: :>hide ( task -- ) ctrl Z inskey restart ;
 ' btype ' bemit ' bcr ' form output: b-out
 op-vector @
 b-out
-[IFUNDEF] android ' (attr!) is attr! [THEN] \ no color on android
+[IFUNDEF] gl-emit ' (attr!) is attr! [THEN] \ no color on android
 ' bat-deltaxy is at-deltaxy
 op-vector !
 \ ' noop alias b-out
