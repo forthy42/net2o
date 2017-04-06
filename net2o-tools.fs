@@ -763,7 +763,7 @@ Variable 0keys
 Sema 0key-sema
 
 : ins-0key [: { w^ addr -- }
-	addr cell 0keys $+! ;] 0key-sema c-section ;
+      addr cell 0keys $+! ;] 0key-sema c-section ;
 : del$one ( addr1 addr2 size -- pos )
     \G @var{pos} is the deletion offset
     >r over @ cell+ - tuck r> $del ;

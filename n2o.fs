@@ -428,7 +428,7 @@ warnings !
     \G invite: send or accept an invitation to another user
     announce @nicks>chat
     ?nextarg IF  config:invite$ $!  THEN
-    chat-keys [: 2dup n2o:pklookup send-invitation ;] $[]map
+    chat-keys [: n2o:pklookup send-invitation ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 
 
 \ script mode

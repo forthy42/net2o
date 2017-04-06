@@ -18,6 +18,8 @@
 Forward >invitations
 Forward n2o:dispose-punchs
 Forward mynick$
+Forward invite-me
+Forward qr-invite-me
 
 scope{ net2o-base
 \ nat traversal functions
@@ -115,14 +117,13 @@ connect-table $@ inherit-table setup-table
 
 net2o-base
 
-\ crypto functions
+\ crypto functions, !!need renumbering!!
 
 +net2o: receive-key ( $:key -- ) !!invalid!! ; \g receive a key, invalid/obsolete
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
-+net2o: key-request ( -- ) \g request a key
-    crypt( ." Nested key: " tmpkey@ .nnb forth:cr )
-    pk@ key| $, receive-key ;
++net2o: key-request ( -- ) \g request a key, invalid/obsolete
+    !!invalid!! ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
 +net2o: keypair ( $:yourkey $:mykey -- ) \g select a pubkey
@@ -172,7 +173,7 @@ scope{ net2o-base
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
 +net2o: context ( -- ) \g make context active
-    update-cdmap  o IF  context!  ELSE  connect( ." Can't " )  THEN
+    update-cdmap  o IF  ~~ context!  ELSE  connect( ." Can't " )  THEN
     connect( ." establish a context!" forth:cr ) ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
@@ -244,21 +245,33 @@ Sema id-sema
 
 \ more one shot stuff
 
-+net2o: qr-tmpkey ( $:tmpkey $:pk -- )
++net2o: qr-tmpkey ( $:tmpkey -- )
     \g oneshot tmpkey while qr-scanning
     \g or while attempting to sync
-    $> keysize <> !!keysize!! search-key nip >r
     $> msg( ." QR tmpkey: " 2dup 85type forth:cr
     ." QR key   : " qr-key keysize 85type forth:cr )
     keysize <> !!keysize!!
     qr-key r> rot keypad ed-dhx do-keypad sec!
     qr-tmp-val validated or! ;
++net2o: qrkey-request ( -- ) \g request ephemeral key
+    stpkc keysize $, qr-tmpkey nest[ ;
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!
     c:0key mynick$ sigsize# - c:hash pk-sig?
     IF  ke-sigs[] $+[]!  ELSE  2drop  THEN
     \ !!FIXME!! qr scan done, do something about it
 ;
++net2o: request-invitation ( -- )
+    \g ask for an invitation as second stage of invitation handshake
+    own-crypt? IF  invite-me  THEN ;
++net2o: request-qr-invitation ( -- )
+    \g ask for an invitation as second stage of invitation handshake
+    own-crypt? IF  qr-invite-me  THEN ;
++net2o: ']tmpnest ( -- )
+    \g cose a opened tmpnest, and add the necessary stuff
+    ]tmpnest ;
++net2o: tmp-secret, ( -- )
+    nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 
 gen-table $freeze
 

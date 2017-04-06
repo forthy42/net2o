@@ -240,7 +240,7 @@ User host$ \ check for this hostname
 : make-context ( pk u -- )
     ret0 n2o:new-context >o rdrop dest-pk ;
 
-: n2o:pklookup ( addr u -- )
+: n2o:pklookup ( pkaddr u -- )
     2dup keysize2 safe/string host$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN

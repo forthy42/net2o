@@ -842,8 +842,7 @@ Variable scanned-flags
     scanned-key-in ?scan-level ;
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    pk n2o:pklookup
-    pk send-qr-invitation ;
+    pk n2o:pklookup send-qr-invitation ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
@@ -1000,11 +999,10 @@ Forward !my-addr$
     pubkey $! ;
 
 : dest-pk ( addr u -- ) key2| 2dup key| key# #@ 0= IF
-	drop pubkey $!  perm%unknown perm-mask !
-    ELSE  cell+ >o
-	ke-mask @
-	ke-pk $@ o>
-	pubkey $!  perm-mask !  2drop  THEN ;
+	drop  perm%unknown
+    ELSE  cell+ >o 2drop
+	ke-pk $@ ke-mask @ o>  THEN
+    perm-mask ! pubkey $! ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
     key( ." Replace:" cr o cell- 0 .key )
@@ -1149,25 +1147,45 @@ event: :>show-keysig ( addr u -- ) .sigqr ;
 	queue-invitation
     THEN ;
 
-: send-invitation ( pk u -- )
-    setup! mypk2nick$ 2>r
-    gen-tmpkeys
-    over tskc swap keypad ed-dh do-keypad sec!
-    net2o-code0
-    tpkc keysize $, key| $, oneshot-tmpkey
-    nest[ 2r> $, invite ]tmpnest
-    cookie+request
-    end-code| n2o:dispose-context ;
+also net2o-base
 
-: send-qr-invitation ( pk u -- )
-    setup! mypk2nick$ 2>r
-    gen-tmpkeys msg( ." QR key:" qr-key keysize 85type forth:cr )
-    over qr-key tskc rot keypad ed-dhx do-keypad sec!
+: invite-me ( -- )
+    [: nest[ mypk2nick$ $, invite cookie+request ]tmpnest
+      end-cmd ;] is expect-reply? ;
+: qr-invite-me ( -- )
+    [: nest[ mypk2nick$ $, invite cookie+request ]tmpnest
+      end-cmd ;] is expect-reply? ;
+: send-invitation ( -- ) 
+    setup!  +resend-cmd  gen-tmpkeys
+    [: connect-rest dest-0key @ ins-0key ;] rqd?
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
+    ivs( ." gen request" forth:cr )
     net2o-code0
-    tpkc keysize $, key| $, qr-tmpkey
-    nest[ 2r> $, invite ]tmpnest
-    cookie+request
-    end-code| n2o:dispose-context ;
+    net2o-version $, get-version
+    nest[ cookie, ]nest
+    tpkc keysize $, receive-tmpkey
+    tmpkey-request tmp-secret,
+    nest[ request-invitation request, ]nest
+    ']tmpnest
+    ['] push-cmd IS expect-reply?
+    end-code|
+    n2o:dispose-context ;
+: send-qr-invitation ( -- )
+    setup!  +resend-cmd  gen-tmpkeys
+    [: connect-rest dest-0key @ ins-0key ;] rqd?
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
+    ivs( ." gen request" forth:cr )
+    net2o-code0
+    net2o-version $, get-version
+    nest[ cookie, request, ]nest
+    tpkc keysize $, qr-tmpkey
+    qrkey-request tmp-secret,
+    nest[ request-qr-invitation request, ]nest
+    ']tmpnest
+    ['] push-cmd IS expect-reply?
+    end-code|
+    n2o:dispose-context ;
+previous
 
 \ key api helpers
 

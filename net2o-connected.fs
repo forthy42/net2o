@@ -413,21 +413,6 @@ scope{ mapc
     2dup + n2o:new-map lit, swap ulit, ulit,
     map-request ;
 
-: gen-request ( -- ) setup!
-    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
-    ivs( ." gen request" forth:cr )
-    net2o-code0
-    net2o-version $, get-version
-    tpkc keysize $, receive-tmpkey
-    nest[ cookie, request( ." gen reply" forth:cr )
-	gen-reply request, ]nest  other
-    tmpkey-request
-    pubkey @ 0= IF  key-request  THEN
-    ind-addr @  IF  punch?  THEN
-    req-codesize @  req-datasize @  map-request,
-    ['] push-cmd IS expect-reply?
-    end-code ;
-
 also net2o-base
 : nat-punch ( o:connection -- )
     pings new-request false gen-punchload gen-punch ;
@@ -546,13 +531,24 @@ previous
 : reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
 : connect-rest ( n -- )
     clean-request -timeout tskc KEYBYTES erase context! ;
-: tail-connect ( -- )   +resend-cmd client-loop ;
-
-: n2o:connect ( ucode udata -- )
-    reqsize!  gen-tmpkeys  ['] connect-rest rqd?
-    gen-request  tail-connect ;
 
 : end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
+
+: gen-request ( -- )
+    setup!  +resend-cmd  gen-tmpkeys  ['] connect-rest rqd?
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
+    ivs( ." gen request" forth:cr )
+    net2o-code0
+    net2o-version $, get-version
+    tpkc keysize $, receive-tmpkey
+    nest[ cookie, gen-reply request, ]nest  other
+    tmpkey-request
+    ind-addr @  IF  punch?  THEN
+    req-codesize @  req-datasize @  map-request,
+    ['] push-cmd IS expect-reply?
+    end-code| ;
+
+: n2o:connect ( ucode udata -- )  reqsize! gen-request ;
 
 previous
 
