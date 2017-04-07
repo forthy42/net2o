@@ -21,6 +21,12 @@ Forward mynick$
 Forward invite-me
 Forward qr-invite-me
 
+: ?version ( addr u -- )
+    net2o-version 2over str< IF
+	<err> ." Other side has more recent net2o version: " forth:type
+	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
+    ELSE  2drop  THEN ;
+
 scope{ net2o-base
 \ nat traversal functions
 
@@ -68,6 +74,14 @@ connect-table $@ inherit-table setup-table
 \g ### connection setup commands ###
 \g 
 
+\ version check
+
++net2o: check-version ( $:version -- ) \g version check
+    $> ?version ;
++net2o: get-version ( $:version -- ) \g version cross-check
+    string-stack $[]# IF  $> ?version  THEN \ accept query-only
+    net2o-version $, check-version ;
+
 +net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     $> cmdtmpnest ;
 
@@ -101,7 +115,7 @@ connect-table $@ inherit-table setup-table
     max-data# umin swap max-code# umin swap
     2dup + n2o:new-map n2o:create-map
     keypad keysize sec$, store-key  stskc KEYSIZE erase
-    ]nest  n2o:create-map  nest-stack $[]# IF  ]tmpnest  THEN
+    ]nest  n2o:create-map
     64drop 2drop 64drop ;
 
 +net2o: set-tick ( uticks -- ) \g adjust time
@@ -119,11 +133,8 @@ net2o-base
 
 \ crypto functions, !!need renumbering!!
 
-+net2o: receive-key ( $:key -- ) !!invalid!! ; \g receive a key, invalid/obsolete
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
-+net2o: key-request ( -- ) \g request a key, invalid/obsolete
-    !!invalid!! ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
     stpkc keysize $, receive-tmpkey nest[ ;
 +net2o: keypair ( $:yourkey $:mykey -- ) \g select a pubkey
@@ -173,7 +184,7 @@ scope{ net2o-base
 +net2o: >time-offset ( n -- ) \g set time offset
     o IF  ack@ .time-offset 64!  ELSE  64drop  THEN ;
 +net2o: context ( -- ) \g make context active
-    update-cdmap  o IF  ~~ context!  ELSE  connect( ." Can't " )  THEN
+    update-cdmap  o IF  context!  ELSE  connect( ." Can't " )  THEN
     connect( ." establish a context!" forth:cr ) ;
 
 : time-offset! ( -- )  ticks 64dup lit, >time-offset ack@ .time-offset 64! ;
@@ -207,7 +218,7 @@ Sema id-sema
         pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
 	    pubkey $@ drop skc key-stage2
-	ELSE  receive-key  THEN
+	ELSE  !!nokey!!  THEN
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
     reply-key, ( cookie+request ) time-offset! context ]tmpnest
@@ -229,19 +240,9 @@ Sema id-sema
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
     ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
-
-\ version check
-: ?version ( addr u -- )
-    net2o-version 2over str< IF
-	<err> ." Other side has more recent net2o version: " forth:type
-	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
-    ELSE  2drop  THEN ;
-
-+net2o: check-version ( $:version -- ) \g version check
-    $> ?version ;
-+net2o: get-version ( $:version -- ) \g version cross-check
-    string-stack $[]# IF  $> ?version  THEN \ accept query-only
-    net2o-version $, check-version ;
++net2o: request-invitation ( -- )
+    \g ask for an invitation as second stage of invitation handshake
+    own-crypt? IF  invite-me  THEN ;
 
 \ more one shot stuff
 
@@ -261,15 +262,12 @@ Sema id-sema
     IF  ke-sigs[] $+[]!  ELSE  2drop  THEN
     \ !!FIXME!! qr scan done, do something about it
 ;
-+net2o: request-invitation ( -- )
-    \g ask for an invitation as second stage of invitation handshake
-    own-crypt? IF  invite-me  THEN ;
 +net2o: request-qr-invitation ( -- )
     \g ask for an invitation as second stage of invitation handshake
     own-crypt? IF  qr-invite-me  THEN ;
-+net2o: ']tmpnest ( -- )
++net2o: close-tmpnest ( -- )
     \g cose a opened tmpnest, and add the necessary stuff
-    ]tmpnest ;
+    nest-stack $[]# IF  ]tmpnest  THEN ;
 +net2o: tmp-secret, ( -- )
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 

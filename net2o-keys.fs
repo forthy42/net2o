@@ -1166,7 +1166,7 @@ also net2o-base
     tpkc keysize $, receive-tmpkey
     tmpkey-request tmp-secret,
     nest[ request-invitation request, ]nest
-    ']tmpnest
+    close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code|
     n2o:dispose-context ;
@@ -1181,7 +1181,7 @@ also net2o-base
     tpkc keysize $, qr-tmpkey
     qrkey-request tmp-secret,
     nest[ request-qr-invitation request, ]nest
-    ']tmpnest
+    close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code|
     n2o:dispose-context ;
