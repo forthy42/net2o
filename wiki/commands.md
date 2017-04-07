@@ -92,26 +92,26 @@ List of Commands
 
 ### connection setup commands ###
 
-+ $25 tmpnest ( $:string -- )
++ $25 check-version ( $:version -- )
+  version check
++ $26 get-version ( $:version -- )
+  version cross-check
++ $27 tmpnest ( $:string -- )
   nested (temporary encrypted) command
-+ $26 new-data ( addr addr u -- )
++ $28 new-data ( addr addr u -- )
   create new data mapping
-+ $27 new-code ( addr addr u -- )
++ $29 new-code ( addr addr u -- )
   crate new code mapping
-+ $28 store-key ( $:string -- )
++ $2A store-key ( $:string -- )
   store key
-+ $29 map-request ( addrs ucode udata -- )
++ $2B map-request ( addrs ucode udata -- )
   request mapping
-+ $2A set-tick ( uticks -- )
++ $2C set-tick ( uticks -- )
   adjust time
-+ $2B get-tick ( -- )
++ $2D get-tick ( -- )
   request time adjust
-+ $2C receive-key ( $:key -- )
-  receive a key, invalid/obsolete
-+ $2D receive-tmpkey ( $:key -- )
++ $2E receive-tmpkey ( $:key -- )
   receive emphemeral key
-+ $2E key-request ( -- )
-  request a key
 + $2F tmpkey-request ( -- )
   request ephemeral key
 + $30 keypair ( $:yourkey $:mykey -- )
@@ -129,14 +129,24 @@ List of Commands
 + $36 gen-reply ( -- )
   generate a key request reply
 + $37 gen-punch-reply ( -- )
-+ $38 oneshot-tmpkey ( $:tmpkey -- )
++ $38 oneshot-tmpkey ( $:tmpkey $:pk -- )
   oneshot tmpkey
 + $39 invite ( $:nick+sig -- )
   invite someone
-+ $3A check-version ( $:version -- )
-  version check
-+ $3B get-version ( $:version -- )
-  version cross-check
++ $3A request-invitation ( -- )
+  ask for an invitation as second stage of invitation handshake
++ $3B qr-tmpkey ( $:tmpkey -- )
+  oneshot tmpkey while qr-scanning
+  or while attempting to sync
++ $3C qrkey-request ( -- )
+  request ephemeral key
++ $3D sign-invite ( $:signature -- )
+  send you a signature
++ $3E request-qr-invitation ( -- )
+  ask for an invitation as second stage of invitation handshake
++ $3F close-tmpnest ( -- )
+  cose a opened tmpnest, and add the necessary stuff
++ $40 tmp-secret, ( -- )
 
 ### connection commands ###
 
