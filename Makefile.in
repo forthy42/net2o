@@ -157,7 +157,7 @@ config.status: configure
 	./config.status --recheck
 
 debdist:
-	PATH=/usr/bin:/bin dpkg-buildpackage -d -b $(DEBARCH)
+	PATH=/usr/bin:/bin dpkg-buildpackage -us -uc -d -b $(DEBARCH)
 
 debdist32:
-	PATH=/usr/bin:/bin GFORTH=gforth-386 CC="gcc -m32" dpkg-buildpackage -d -b -ai386
+	PATH=/usr/bin:/bin GFORTH=gforth-386 CC="gcc -m32" dpkg-buildpackage -us -uc -d -b -ai386
