@@ -1150,7 +1150,11 @@ event: :>show-keysig ( addr u -- ) .sigqr ;
 also net2o-base
 
 : invite-me ( -- )
-    [: nest[ mypk2nick$ $, invite cookie+request ]tmpnest
+    [: nest[
+      pk@ key| $, pubkey $@ key| $, keypair
+      pubkey $@ drop sk@ key-stage2
+      nest[ mypk2nick$ $, invite cookie+request ]encnest
+      ]tmpnest
       end-cmd ;] is expect-reply? ;
 : qr-invite-me ( -- )
     [: nest[ mypk2nick$ $, invite cookie+request ]tmpnest
@@ -1178,8 +1182,8 @@ also net2o-base
     net2o-code0
     net2o-version $, get-version
     nest[ cookie, request, ]nest
-    tpkc keysize $, qr-tmpkey
-    qrkey-request tmp-secret,
+    tpkc keysize $, receive-tmpkey
+    tmpkey-request tmp-secret,
     nest[ request-qr-invitation request, ]nest
     close-tmpnest
     ['] push-cmd IS expect-reply?

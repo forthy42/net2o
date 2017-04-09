@@ -237,18 +237,19 @@ User dest-flags
 
 User validated
 
-$001 Constant crypt-val
-$002 Constant own-crypt-val
-$004 Constant login-val
-$008 Constant cookie-val
-$010 Constant tmp-crypt-val
-$020 Constant signed-val
-$040 Constant newdata-val
-$080 Constant newcode-val
-$100 Constant keypair-val
-$200 Constant receive-val
-$400 Constant ivs-val
-$800 Constant qr-tmp-val
+$0001 Constant crypt-val
+$0002 Constant own-crypt-val
+$0004 Constant login-val
+$0008 Constant cookie-val
+$0010 Constant tmp-crypt-val
+$0020 Constant signed-val
+$0040 Constant newdata-val
+$0080 Constant newcode-val
+$0100 Constant keypair-val
+$0200 Constant receive-val
+$0400 Constant ivs-val
+$0800 Constant qr-tmp-val
+$1000 Constant enc-crypt-val
 
 : crypt?     ( -- flag )  validated @ crypt-val     and ;
 : own-crypt? ( -- flag )  validated @ own-crypt-val and ;
@@ -257,6 +258,7 @@ $800 Constant qr-tmp-val
 : tmp-crypt? ( -- flag )  validated @ tmp-crypt-val and ;
 : signed?    ( -- flag )  validated @ signed-val    and ;
 : qr-crypt?  ( -- flag )  validated @ qr-tmp-val    and ;
+: enc-crypt? ( -- flag )  validated @ enc-crypt-val and ;
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
 : !!unsigned?  ( -- ) signed?  !!signed!! ;
 

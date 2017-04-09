@@ -84,8 +84,18 @@ connect-table $@ inherit-table setup-table
 
 +net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     $> cmdtmpnest ;
++net2o: encnest ( $:string -- ) \g nested (completely encrypted) command
+    $> cmdencnest ;
 
 : ]tmpnest ( -- )  end-cmd cmd>tmpnest 2drop tmpnest ;
+: ]encnest ( -- )  end-cmd cmd>encnest 2drop encnest ;
+
++net2o: close-tmpnest ( -- )
+    \g cose a opened tmpnest, and add the necessary stuff
+    nest-stack $[]# IF  ]tmpnest  THEN ;
++net2o: close-encnest ( -- )
+    \g cose a opened tmpnest, and add the necessary stuff
+    nest-stack $[]# IF  ]encnest  THEN ;
 
 +net2o: new-data ( addr addr u -- ) \g create new data mapping
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  new-data!  EXIT  THEN
@@ -217,7 +227,7 @@ Sema id-sema
         new-error-id $, error-id
         pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
-	    pubkey $@ drop skc key-stage2
+	    pubkey $@ drop sk@ key-stage2
 	ELSE  !!nokey!!  THEN
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
@@ -230,13 +240,8 @@ Sema id-sema
 
 \ one-shot packets
 
-+net2o: oneshot-tmpkey ( $:tmpkey $:pk -- ) \g oneshot tmpkey
-    $> keysize <> !!keysize!! search-key nip >r
-    $> msg( ." oneshot tmpkey: " 2dup 85type forth:cr )
-    keysize <> !!keysize!!
-    r> swap keypad ed-dh do-keypad sec! ;
 +net2o: invite ( $:nick+sig -- ) \g invite someone
-    $> tmp-crypt? IF
+    $> enc-crypt? IF
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
     ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
@@ -246,16 +251,6 @@ Sema id-sema
 
 \ more one shot stuff
 
-+net2o: qr-tmpkey ( $:tmpkey -- )
-    \g oneshot tmpkey while qr-scanning
-    \g or while attempting to sync
-    $> msg( ." QR tmpkey: " 2dup 85type forth:cr
-    ." QR key   : " qr-key keysize 85type forth:cr )
-    keysize <> !!keysize!!
-    qr-key r> rot keypad ed-dhx do-keypad sec!
-    qr-tmp-val validated or! ;
-+net2o: qrkey-request ( -- ) \g request ephemeral key
-    stpkc keysize $, qr-tmpkey nest[ ;
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!
     c:0key mynick$ sigsize# - c:hash pk-sig?
@@ -265,9 +260,6 @@ Sema id-sema
 +net2o: request-qr-invitation ( -- )
     \g ask for an invitation as second stage of invitation handshake
     own-crypt? IF  qr-invite-me  THEN ;
-+net2o: close-tmpnest ( -- )
-    \g cose a opened tmpnest, and add the necessary stuff
-    nest-stack $[]# IF  ]tmpnest  THEN ;
 +net2o: tmp-secret, ( -- )
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 

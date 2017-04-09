@@ -655,6 +655,9 @@ previous
 : cmd>tmpnest ( -- addr u )
     cmd> 2dup tmpkey@ keysize umin
     key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
+: cmd>encnest ( -- addr u )
+    cmd> 2dup tmpkey@
+    key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
     IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
@@ -662,7 +665,13 @@ previous
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ key| dup IF
 	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
-	IF    tmp-crypt-val do-nest  [ qr-tmp-val invert ]L validated and!
+	IF    tmp-crypt-val do-nest
+	ELSE  msg( ." tmpnest failed" cr ) 2drop un-cmd  THEN
+    ELSE  2drop 2drop un-cmd  THEN ;
+: cmdencnest ( addr u -- )
+    $>align tmpkey@ dup IF
+	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
+	IF    enc-crypt-val do-nest  [ qr-tmp-val invert ]L validated and!
 	ELSE  msg( ." tmpnest failed" cr ) 2drop un-cmd  THEN
     ELSE  2drop 2drop un-cmd  THEN ;
 

@@ -519,6 +519,8 @@ drop
     THEN  !!FIXME!! ( old version ) sksig skc pkc ;
 : pk@ ( -- pk u )
     my-key my-key-default o select @ .ke-pk $@ ;
+: sk@ ( -- pk u )
+    my-key my-key-default o select @ .ke-sk sec@ ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sig-params ed-sign type keysize emit ;
