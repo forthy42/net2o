@@ -141,7 +141,7 @@ connect-table $@ inherit-table setup-table
 
 net2o-base
 
-\ crypto functions, !!need renumbering!!
+\ crypto functions
 
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
@@ -153,10 +153,13 @@ net2o-base
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
++net2o: set-cmd0key ( $:string -- ) \g set key for reply
+    $> dup keysize <> !!keysize!! your-0key sec! ;
 
 : cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
 : request, ( -- )  next-request #request, ;
+: 0key, ( -- ) my-0key sec@ sec$, set-cmd0key ;
 
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
@@ -227,7 +230,7 @@ Sema id-sema
         new-error-id $, error-id
         pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
-	    pubkey $@ drop sk@ key-stage2
+	    pubkey $@ drop sk@ drop key-stage2
 	ELSE  !!nokey!!  THEN
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )

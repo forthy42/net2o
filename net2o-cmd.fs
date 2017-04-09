@@ -103,9 +103,8 @@ end-class cmd-buf-c
 	.\" 85\" " 85type
     THEN  '"' emit ;
 : n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
-: n2o.secstring ( $:string -- )
-    cr $> .\" 85\" " .black85 .\" \" sec$, "
-;
+: n2o.secstring ( $:string -- ) attr @ >r
+    cr $> .\" 85\" " .black85 r> attr! .\" \" sec$, " ;
 
 forward key>nick
 : .?id ( addr -- ) keysize 2dup key>nick

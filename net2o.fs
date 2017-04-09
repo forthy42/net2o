@@ -455,9 +455,9 @@ UValue connection
 Variable mapstart $1 mapstart !
 
 : ret0 ( -- ) return-addr $10 erase ;
-: setup! ( -- )   setup-table @ token-table !  ret0  dest-0key @ ins-0key ;
+: setup! ( -- )   setup-table @ token-table !  ret0 ;
 : context! ( -- )
-    context-table @ token-table !  dest-0key @ ?dup-IF del-0key THEN
+    context-table @ token-table !
     <event wait-task @ main-up@ over select o elit, :>connect event> ;
 
 : new-code@ ( -- addrs addrd u -- )
@@ -1517,7 +1517,6 @@ Defer extra-dispose ' noop is extra-dispose
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks extra-dispose
 	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
-	dest-0key @ del-0key
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP
 	end-secrets start-secrets DO  I sec-off  cell +LOOP

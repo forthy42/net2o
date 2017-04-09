@@ -756,14 +756,8 @@ comp: sourcefilename postpone sliteral :, ;
     bounds ?DO  I c@ ''' = IF  .\" '\"'\"'"  ELSE  I c@ emit  THEN  LOOP
     ''' emit ;
 
-\ insert and remove keys
+\ insert and remove single cell items
 
-Variable 0keys
-
-Sema 0key-sema
-
-: ins-0key [: { w^ addr -- }
-      addr cell 0keys $+! ;] 0key-sema c-section ;
 : del$one ( addr1 addr2 size -- pos )
     \G @var{pos} is the deletion offset
     >r over @ cell+ - tuck r> $del ;
@@ -776,13 +770,6 @@ Sema 0key-sema
 	    unloop string next$ ?DO NOPE 0
 	ELSE  cell  THEN
     +LOOP drop ;
-: del-0key ( addr -- )
-    [: 0keys del$cell ;] 0key-sema c-section ;
-: search-0key ( .. xt -- .. )
-    [: { xt } 0keys $@ bounds ?DO
-	    I xt execute 0= ?LEAVE
-	cell +LOOP
-    ;] 0key-sema c-section ;
 
 \ unique list of cells
 

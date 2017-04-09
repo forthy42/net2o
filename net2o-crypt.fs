@@ -21,6 +21,7 @@ keypack# key-salt# + key-cksum# + Constant keypack-all#
 key-salt# key-cksum# + Constant wrapper#
 
 Variable my-0key
+Variable your-0key
 
 user-o keytmp \ storage for secure temporary keys
 
@@ -96,7 +97,7 @@ init-keybuf
     genkey( ." mykey: " mykey state# xtype cr ) ;
 
 : init-my0key ( -- )
-    no0key( EXIT ) state# 2/ rng$ my-0key sec! ;
+    no0key( EXIT ) keysize rng$ my-0key sec! ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
@@ -223,12 +224,11 @@ scope{ mapc
     dup IF  tmpbuf inbuf packet-data move  THEN ;
 
 : inbuf0-decrypt ( -- flag ) +calc
-    my-0key try-0decrypt dup IF  EXIT  THEN  drop
-    false [: try-0decrypt or dup 0= ;] search-0key ;
+    my-0key try-0decrypt ;
 
 : outbuf0-encrypt ( -- ) +calc
     outbuf addr le-64@ outbuf hdrflags le-uw@ addr>assembly
-    o IF  dest-0key  ELSE  my-0key  THEN  sec@ set-0key
+    o IF  dest-0key  ELSE  your-0key  THEN  sec@ set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 

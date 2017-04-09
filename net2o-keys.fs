@@ -1161,7 +1161,7 @@ also net2o-base
       end-cmd ;] is expect-reply? ;
 : send-invitation ( -- ) 
     setup!  +resend-cmd  gen-tmpkeys
-    [: connect-rest dest-0key @ ins-0key ;] rqd?
+    ['] connect-rest rqd?
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
@@ -1176,7 +1176,7 @@ also net2o-base
     n2o:dispose-context ;
 : send-qr-invitation ( -- )
     setup!  +resend-cmd  gen-tmpkeys
-    [: connect-rest dest-0key @ ins-0key ;] rqd?
+    ['] connect-rest rqd?
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
