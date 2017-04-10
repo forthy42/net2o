@@ -67,6 +67,7 @@ end-class keybuf-c
 
 state2# buffer: no-key \ just zeros for no key
 keysize buffer: qr-key \ key used for QR challenge (can be only one)
+state#  buffer: qr-hash \ hash of challenge
 
 : new-keybuf ( -- )
     keybuf-c >osize @ kalloc keybuf ! ;

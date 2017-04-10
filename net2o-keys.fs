@@ -867,7 +867,7 @@ here scanned-x - cell/ constant scanned-max#
 : scan-result ( addr u tag -- )
     1 over lshift dup scanned-flags @ and IF  2drop 2drop  EXIT  THEN
     scanned-flags or!
-    dup scanned-max# u< IF  cells scanned-x + perform ~~
+    dup scanned-max# u< IF  cells scanned-x + perform
     ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
 \ generate keys
@@ -1134,7 +1134,7 @@ event: :>wakeme ( o -- ) restart ;
     ELSE  2drop  THEN ;
 
 forward .sigqr
-event: :>show-keysig ( addr u -- ) .sigqr ;
+event: :>show-keysig ( addr u -- ) page .sigqr ;
 
 : >invitations ( addr u -- )
     qr-crypt? IF
@@ -1150,22 +1150,24 @@ event: :>show-keysig ( addr u -- ) .sigqr ;
 also net2o-base
 
 : invite-me ( -- )
-    [: nest[
-      pk@ key| $, pubkey $@ key| $, keypair
-      pubkey $@ drop sk@ key-stage2
-      nest[ mypk2nick$ $, invite cookie+request ]encnest
-      ]tmpnest
-      end-cmd ;] is expect-reply? ;
+    [: 0key, nest[ mypk2nick$ $, pubkey $@ key| $, invite cookie+request
+      ]tmpnest end-cmd ;] is expect-reply? ;
+: qr-challenge, ( -- )
+    $10 rng$ 2dup $, qr-key $8
+    msg( ." challenge: " 2over 85type space 2dup xtype forth:cr )
+    c:0key >keyed-hash
+    qr-hash $40 c:hash@ qr-hash $10 $, qr-challenge ;
 : qr-invite-me ( -- )
-    [: nest[ mypk2nick$ $, invite cookie+request ]tmpnest
-      end-cmd ;] is expect-reply? ;
+    [: 0key, nest[ qr-challenge,
+      mypk2nick$ $, pubkey $@ key| $, invite cookie+request
+      ]tmpnest end-cmd ;] is expect-reply? ;
 : send-invitation ( -- ) 
     setup!  +resend-cmd  gen-tmpkeys
     ['] connect-rest rqd?
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    net2o-version $, get-version
+    net2o-version $, get-version  0key,
     nest[ cookie, ]nest
     tpkc keysize $, receive-tmpkey
     tmpkey-request tmp-secret,
@@ -1180,7 +1182,7 @@ also net2o-base
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    net2o-version $, get-version
+    net2o-version $, get-version  0key,
     nest[ cookie, request, ]nest
     tpkc keysize $, receive-tmpkey
     tmpkey-request tmp-secret,

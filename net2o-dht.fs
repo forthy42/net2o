@@ -411,7 +411,7 @@ previous
     dht-host $ins[]sig drop ;
 
 : n2o:send-revoke ( addr u -- )
-    keysize <> !!keysize!! me>d#id >o
+    ?keysize me>d#id >o
     net2o-code  expect-reply
 	dht-hash $@ $, dht-id dht-host remove-me,
 	revoke-key 2dup set-revocation

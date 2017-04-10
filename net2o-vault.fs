@@ -42,7 +42,7 @@ cmd-table $@ inherit-table vault-table
 \g 
 net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \g start diffie hellman exchange
-    $> keysize <> !!keysize!! skc swap v-dhe ed-dh 2drop
+    $> ?keysize sk@ drop swap v-dhe ed-dh 2drop
     v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
     \g vault keys can be opened with the dhe secret; each key is IV+session key+checksum

@@ -154,12 +154,12 @@ net2o-base
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
 +net2o: set-cmd0key ( $:string -- ) \g set key for reply
-    $> dup keysize <> !!keysize!! your-0key sec! ;
+    $> dup ?keysize your-0key sec! ;
 
 : cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
 : request, ( -- )  next-request #request, ;
-: 0key, ( -- ) my-0key sec@ sec$, set-cmd0key ;
+: 0key, ( -- ) my-0key sec@ $, set-cmd0key ;
 
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
@@ -243,8 +243,9 @@ Sema id-sema
 
 \ one-shot packets
 
-+net2o: invite ( $:nick+sig -- ) \g invite someone
-    $> enc-crypt? IF
++net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
+    $> ?keysize search-key 2drop
+    $> tmp-crypt? IF
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
     ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
@@ -252,7 +253,7 @@ Sema id-sema
     \g ask for an invitation as second stage of invitation handshake
     own-crypt? IF  invite-me  THEN ;
 
-\ more one shot stuff
+\ more one shot stuff for QR codes
 
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!
@@ -265,6 +266,15 @@ Sema id-sema
     own-crypt? IF  qr-invite-me  THEN ;
 +net2o: tmp-secret, ( -- )
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
++net2o: qr-challenge ( $:challenge $:respose -- )
+    $> $> c:0key qr-key $8 >keyed-hash
+    qr-hash $40 c:hash@ qr-hash over str=
+    IF  msg( ." challenge accepted" forth:cr )
+	qr-tmp-val validated or!
+    ELSE
+	msg( ." challenge failed: " qr-hash $40 85type
+	forth:cr ." qr-key: " qr-key 8 xtype forth:cr )
+    THEN ;
 
 gen-table $freeze
 
