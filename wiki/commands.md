@@ -98,55 +98,55 @@ List of Commands
   version cross-check
 + $27 tmpnest ( $:string -- )
   nested (temporary encrypted) command
-+ $28 new-data ( addr addr u -- )
-  create new data mapping
-+ $29 new-code ( addr addr u -- )
-  crate new code mapping
-+ $2A store-key ( $:string -- )
-  store key
-+ $2B map-request ( addrs ucode udata -- )
-  request mapping
-+ $2C set-tick ( uticks -- )
-  adjust time
-+ $2D get-tick ( -- )
-  request time adjust
-+ $2E receive-tmpkey ( $:key -- )
-  receive emphemeral key
-+ $2F tmpkey-request ( -- )
-  request ephemeral key
-+ $30 keypair ( $:yourkey $:mykey -- )
-  select a pubkey
-+ $31 update-key ( -- )
-  update secrets
-+ $32 gen-ivs ( $:string -- )
-  generate IVs
-+ $33 punch? ( -- )
-  Request punch addresses
-+ $34 >time-offset ( n -- )
-  set time offset
-+ $35 context ( -- )
-  make context active
-+ $36 gen-reply ( -- )
-  generate a key request reply
-+ $37 gen-punch-reply ( -- )
-+ $38 oneshot-tmpkey ( $:tmpkey $:pk -- )
-  oneshot tmpkey
-+ $39 invite ( $:nick+sig -- )
-  invite someone
-+ $3A request-invitation ( -- )
-  ask for an invitation as second stage of invitation handshake
-+ $3B qr-tmpkey ( $:tmpkey -- )
-  oneshot tmpkey while qr-scanning
-  or while attempting to sync
-+ $3C qrkey-request ( -- )
-  request ephemeral key
-+ $3D sign-invite ( $:signature -- )
-  send you a signature
-+ $3E request-qr-invitation ( -- )
-  ask for an invitation as second stage of invitation handshake
-+ $3F close-tmpnest ( -- )
++ $28 encnest ( $:string -- )
+  nested (completely encrypted) command
++ $29 close-tmpnest ( -- )
   cose a opened tmpnest, and add the necessary stuff
++ $2A close-encnest ( -- )
+  cose a opened tmpnest, and add the necessary stuff
++ $2B new-data ( addr addr u -- )
+  create new data mapping
++ $2C new-code ( addr addr u -- )
+  crate new code mapping
++ $2D store-key ( $:string -- )
+  store key
++ $2E map-request ( addrs ucode udata -- )
+  request mapping
++ $2F set-tick ( uticks -- )
+  adjust time
++ $30 get-tick ( -- )
+  request time adjust
++ $31 receive-tmpkey ( $:key -- )
+  receive emphemeral key
++ $32 tmpkey-request ( -- )
+  request ephemeral key
++ $33 keypair ( $:yourkey $:mykey -- )
+  select a pubkey
++ $34 update-key ( -- )
+  update secrets
++ $35 gen-ivs ( $:string -- )
+  generate IVs
++ $36 set-cmd0key ( $:string -- )
+  set key for reply
++ $37 punch? ( -- )
+  Request punch addresses
++ $38 >time-offset ( n -- )
+  set time offset
++ $39 context ( -- )
+  make context active
++ $3A gen-reply ( -- )
+  generate a key request reply
++ $3B gen-punch-reply ( -- )
++ $3C invite ( $:nick+sig $:pk -- )
+  invite someone
++ $3D request-invitation ( -- )
+  ask for an invitation as second stage of invitation handshake
++ $3E sign-invite ( $:signature -- )
+  send you a signature
++ $3F request-qr-invitation ( -- )
+  ask for an invitation as second stage of invitation handshake
 + $40 tmp-secret, ( -- )
++ $41 qr-challenge ( $:challenge $:respose -- )
 
 ### connection commands ###
 
