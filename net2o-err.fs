@@ -101,6 +101,7 @@ s" unsaulted random number"      throwcode !!no-salt!!
 s" unhealthy RNG state"          throwcode !!bad-rng!!
 s" repeated tmpkey"              throwcode !!repeated-tmpkey!!
 s" Unknown group"                throwcode !!no-group!!
+s" Challenge failed"             throwcode !!challenge!!
 
 next-exception !
 

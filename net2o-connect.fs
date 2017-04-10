@@ -267,13 +267,14 @@ Sema id-sema
 +net2o: tmp-secret, ( -- )
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 +net2o: qr-challenge ( $:challenge $:respose -- )
-    $> $> c:0key qr-key $8 >keyed-hash
-    qr-hash $40 c:hash@ qr-hash over str=
+    $> $> c:0key qr-key $8 >keyed-hash qr-hash $40 c:hash@
+    qr-hash over $10 umax str= \ challenge will fail if less than 16 bytes
     IF  msg( ." challenge accepted" forth:cr )
 	qr-tmp-val validated or!
     ELSE
 	msg( ." challenge failed: " qr-hash $40 85type
 	forth:cr ." qr-key: " qr-key 8 xtype forth:cr )
+	!!challenge!!
     THEN ;
 
 gen-table $freeze
