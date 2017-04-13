@@ -436,6 +436,12 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 	." + " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
 [THEN]
 
+: ?version ( addr u -- )
+    net2o-version 2over str< IF
+	<err> ." Other side has more recent net2o version: " forth:type
+	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
+    ELSE  2drop  THEN ;
+
 \g Commands
 \g ========
 \g 
@@ -492,6 +498,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: padding ( #len -- )
     \g add padding to align fields
     string@ $> 2drop ;
++net2o: version ( $:version -- ) \g version check
+    $> ?version ;
 }scope
 
 also net2o-base
@@ -755,6 +763,9 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 +net2o: token ( $:token n -- ) 64drop $> 2drop ; \g generic inspection token
 +net2o: error-id ( $:errorid -- ) \g error-id string
     $> $error-id $! ;
++net2o: version? ( $:version -- ) \g version cross-check
+    string-stack $[]# IF  $> ?version  THEN \ accept query-only
+    net2o-version $, version ;
 
 gen-table $freeze
 

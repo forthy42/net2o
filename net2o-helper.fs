@@ -307,7 +307,7 @@ User pings[]
 	check-addr1 IF
 	    2dup .address forth:cr
 	    insert-address ret-addr ins-dest
-	    net2o-code0 net2o-version $, get-version
+	    net2o-code0 net2o-version $, version?
 	    end-code
 	ELSE  2drop  THEN ;] addr>sock
     r> .n2o:dispose-addr ;

@@ -539,7 +539,7 @@ previous
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    net2o-version $, get-version  0key,
+    net2o-version $, version?  0key,
     tpkc keysize $, receive-tmpkey
     nest[ cookie, gen-reply request, ]nest  other
     tmpkey-request

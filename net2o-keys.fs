@@ -1167,7 +1167,7 @@ also net2o-base
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    net2o-version $, get-version  0key,
+    net2o-version $, version?  0key,
     nest[ cookie, ]nest
     tpkc keysize $, receive-tmpkey
     tmpkey-request tmp-secret,
@@ -1182,7 +1182,7 @@ also net2o-base
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
     ivs( ." gen request" forth:cr )
     net2o-code0
-    net2o-version $, get-version  0key,
+    net2o-version $, version?  0key,
     nest[ cookie, request, ]nest
     tpkc keysize $, receive-tmpkey
     tmpkey-request tmp-secret,

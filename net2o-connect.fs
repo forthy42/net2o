@@ -21,12 +21,6 @@ Forward mynick$
 Forward invite-me
 Forward qr-invite-me
 
-: ?version ( addr u -- )
-    net2o-version 2over str< IF
-	<err> ." Other side has more recent net2o version: " forth:type
-	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
-    ELSE  2drop  THEN ;
-
 scope{ net2o-base
 \ nat traversal functions
 
@@ -74,15 +68,7 @@ connect-table $@ inherit-table setup-table
 \g ### connection setup commands ###
 \g 
 
-\ version check
-
-+net2o: check-version ( $:version -- ) \g version check
-    $> ?version ;
-+net2o: get-version ( $:version -- ) \g version cross-check
-    string-stack $[]# IF  $> ?version  THEN \ accept query-only
-    net2o-version $, check-version ;
-
-+net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
+$30 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     $> cmdtmpnest ;
 +net2o: encnest ( $:string -- ) \g nested (completely encrypted) command
     $> cmdencnest ;
