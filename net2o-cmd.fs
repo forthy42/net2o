@@ -445,6 +445,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 \g Commands
 \g ========
 \g 
+\g Version @VERSION@.
+\g 
 \g net2o separates data and commands.  Data is pass through to higher
 \g layers, commands are interpreted when they arrive.  For connection
 \g requests, the address 0 is always mapped as connectionless code

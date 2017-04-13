@@ -140,7 +140,7 @@ libcc-install:	libcc
 doc:	$(DOC)
 
 wiki/commands.md:	$(SOURCES)
-	gforth -e ': docgen ;' n2o.fs -e bye >wiki/commands.md
+	gforth -e ': docgen ;' n2o.fs -e bye | sed -e 's/@VERSION@/@PACKAGE_VERSION@/g' >wiki/commands.md
 
 TAGS:	$(SOURCES) $(GEN)
 	gforth etags.fs n2o.fs -e "bye" || >TAGS

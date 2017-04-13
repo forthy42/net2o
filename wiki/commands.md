@@ -1,6 +1,8 @@
 Commands
 ========
 
+Version 0.5.0-20170414.
+
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
 requests, the address 0 is always mapped as connectionless code
@@ -51,6 +53,8 @@ List of Commands
   At the beginning of a file, this can be used as FourCC code
 + $E padding ( #len -- )
   add padding to align fields
++ $F version ( $:version -- )
+  version check
 
 ### reply commands ###
 
@@ -76,6 +80,8 @@ List of Commands
   generic inspection token
 + $1A error-id ( $:errorid -- )
   error-id string
++ $1B version? ( $:version -- )
+  version cross-check
 
 ### connection generic commands ###
 
@@ -92,61 +98,57 @@ List of Commands
 
 ### connection setup commands ###
 
-+ $25 check-version ( $:version -- )
-  version check
-+ $26 get-version ( $:version -- )
-  version cross-check
-+ $27 tmpnest ( $:string -- )
++ $30 tmpnest ( $:string -- )
   nested (temporary encrypted) command
-+ $28 encnest ( $:string -- )
++ $31 encnest ( $:string -- )
   nested (completely encrypted) command
-+ $29 close-tmpnest ( -- )
++ $32 close-tmpnest ( -- )
   cose a opened tmpnest, and add the necessary stuff
-+ $2A close-encnest ( -- )
++ $33 close-encnest ( -- )
   cose a opened tmpnest, and add the necessary stuff
-+ $2B new-data ( addr addr u -- )
++ $34 new-data ( addr addr u -- )
   create new data mapping
-+ $2C new-code ( addr addr u -- )
++ $35 new-code ( addr addr u -- )
   crate new code mapping
-+ $2D store-key ( $:string -- )
++ $36 store-key ( $:string -- )
   store key
-+ $2E map-request ( addrs ucode udata -- )
++ $37 map-request ( addrs ucode udata -- )
   request mapping
-+ $2F set-tick ( uticks -- )
++ $38 set-tick ( uticks -- )
   adjust time
-+ $30 get-tick ( -- )
++ $39 get-tick ( -- )
   request time adjust
-+ $31 receive-tmpkey ( $:key -- )
++ $3A receive-tmpkey ( $:key -- )
   receive emphemeral key
-+ $32 tmpkey-request ( -- )
++ $3B tmpkey-request ( -- )
   request ephemeral key
-+ $33 keypair ( $:yourkey $:mykey -- )
++ $3C keypair ( $:yourkey $:mykey -- )
   select a pubkey
-+ $34 update-key ( -- )
++ $3D update-key ( -- )
   update secrets
-+ $35 gen-ivs ( $:string -- )
++ $3E gen-ivs ( $:string -- )
   generate IVs
-+ $36 set-cmd0key ( $:string -- )
++ $3F set-cmd0key ( $:string -- )
   set key for reply
-+ $37 punch? ( -- )
++ $40 punch? ( -- )
   Request punch addresses
-+ $38 >time-offset ( n -- )
++ $41 >time-offset ( n -- )
   set time offset
-+ $39 context ( -- )
++ $42 context ( -- )
   make context active
-+ $3A gen-reply ( -- )
++ $43 gen-reply ( -- )
   generate a key request reply
-+ $3B gen-punch-reply ( -- )
-+ $3C invite ( $:nick+sig $:pk -- )
++ $44 gen-punch-reply ( -- )
++ $45 invite ( $:nick+sig $:pk -- )
   invite someone
-+ $3D request-invitation ( -- )
++ $46 request-invitation ( -- )
   ask for an invitation as second stage of invitation handshake
-+ $3E sign-invite ( $:signature -- )
++ $47 sign-invite ( $:signature -- )
   send you a signature
-+ $3F request-qr-invitation ( -- )
++ $48 request-qr-invitation ( -- )
   ask for an invitation as second stage of invitation handshake
-+ $40 tmp-secret, ( -- )
-+ $41 qr-challenge ( $:challenge $:respose -- )
++ $49 tmp-secret, ( -- )
++ $4A qr-challenge ( $:challenge $:respose -- )
 
 ### connection commands ###
 
