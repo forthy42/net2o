@@ -103,7 +103,7 @@ $10 buffer: qrecc
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
     c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
     qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
-    msg( ) ." ecc= " qrecc $10 xtype space dup hex. cr ( ) ;
+    msg( ." ecc= " qrecc $10 xtype space dup hex. cr ) ;
 : >taghash ( addr u tag -- tag )
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )

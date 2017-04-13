@@ -353,7 +353,12 @@ Variable skip-frames
 
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
-    cam-end  screen-keep showstatus ." Scan completed" forth:cr
+    cam-end  screen-keep showstatus
+    dup IF
+	." Scan failed"
+    ELSE
+	." Scan completed"
+    THEN  forth:cr
     throw ;
 
 previous previous
