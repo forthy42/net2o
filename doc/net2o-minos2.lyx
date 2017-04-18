@@ -1,0 +1,1077 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass beamer
+\begin_preamble
+%\usetheme{lankton-keynote}
+\usetheme{Singapore}
+
+\setbeamercovered{transparent}
+% or whatever (possibly just delete it)
+\usepackage{fontspec}
+%\newfontface\cjk{ShanHeiSun-Uni}
+%\newfontface\cjk{BousungEG-Light-GB}
+\newfontface\cjk{GBZenKai-Medium}
+%\newfontface\cjk{ZenKai-Medium}
+%\newfontface\cjk{ShanHeiSun-Light}
+%\newfontface\cjk{ZenKai-Uni}
+\end_preamble
+\options aspectratio=43
+\use_default_options false
+\maintain_unincluded_children false
+\language ngerman
+\language_package auto
+\inputencoding utf8x
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format pdf5
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Stichwortverzeichnis
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language german
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+MINOΣ2: GUI für net
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+kern-1ex
+\backslash
+lower1.8ex
+\backslash
+hbox{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 10
+	scale 7
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\backslash
+kern-.5ex
+\end_layout
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+MINOΣ2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subtitle
+Widgets und Layout Engine
+\end_layout
+
+\begin_layout Author
+Bernd Paysan
+\end_layout
+
+\begin_layout Date
+Forth–Tagung 2017, Kalkar Wunderland
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+addtobeamertemplate{headline}{}{
+\backslash
+vbox{
+\backslash
+vspace{3ex}
+\backslash
+hbox to
+\backslash
+paperwidth{
+\backslash
+hfill
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename net2o-logo.pdf
+	lyxscale 5
+	scale 5
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+~~~}}}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Übersicht
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Section
+Motivation
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Ausblick aus 2013
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout FrameSubtitle
+Diese Präsentation ist mit \SpecialChar LaTeX
+ Beamer gerendert\SpecialChar ldots
+
+\end_layout
+
+\begin_layout Itemize
+Die nächste Präsentation muss komplett in MINOΣ2 gerendert sein
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Texte und Videos müssen über net2o geholt werden, und nicht schon vorbereitet
+ auf dem Gerät sein
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Dazu fehlt noch eine Typesetting–Engine mit Boxes und Glues, Absatzumbruch
+ und Silbentrennung
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Viel weniger Klassen als in MINOΣ — dafür dann mehr Objekte
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Neben der hbox und vbox noch eine zbox für übereinander gestapeltes
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Animationen integriert
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Die einzelnen GLSL–Programme müssen in einem Programm sein, mit Switch–Statement
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Fortschritt beim Protokoll
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Einschub: Fortschritt beim Protokoll
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+chat Läuft stabil, Synchronisation des Logs funktioniert
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Versionskontrolle Läuft für kleine Testprojekte, Syncen größerer Projekte
+ geht noch nicht
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Color
+\begin_inset space ~
+\end_inset
+
+QR–Code
+\begin_inset space ~
+\end_inset
+
+scannen zum Keys austauschen geht
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Großer
+\begin_inset space ~
+\end_inset
+
+Firewall Test liefert 300kB/s statt 80kB/s bei SSH, Dateiübertragung bleibt
+ noch manchmal hängen
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Sync um mehrere Computer zu syncen (RSN)
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Audio/Video
+\begin_inset space ~
+\end_inset
+
+Chat In Echtzeit Daten streamen (RSN)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Color QR
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Zum einfachen Schlüsselaustausch: Scanner für farbige QR--Codes
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\lang english
+\begin_inset Graphics
+	filename colorqr2.png
+	height 60theight%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+MINOΣ2 Widgets
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+MINOΣ2 vs.
+ MINOΣ
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Rendering OpenGL (ES) statt Xlib, später auch Vulkan–Backend geplant
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Koordinaten Single Float statt Integer, Ursprung links unten (statt oben)
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Typesetting Boxes&Glues viel näher an LaTeX — Ober- und Unterlängen, Glues
+ können auch schrumpfen, nicht nur wachsen
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Objekt–System Mini–OOF2 statt BerndOOF
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Klassenzahl Viel weniger Klassen, viel mehr Kombination durch Zusammensetzen
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+MINOΣ2 Widgets
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Grundprinzip ist ein Lego–artiges Zusammenstecken von sehr einfachen Komponenten
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+actor Basisklasse, die auf alle Aktionen reagiert
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+widget Basisklasse für alle sichtbaren Objekte
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+glue Dimensionierung für flexible Objekte (nach oben, zur Seite, nach unten)
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+tile Farbige Fläche
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+frame Farbige Fläche mit Rändern
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+text Text–Element
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+icon Bild aus einer Icons–Textur (TBD)
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+image Großes Bild (TBD)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+MINOΣ2 Boxes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Wie bei LaTeX: Boxes, um Widgets anzuordnen
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+hbox Horizontale Box, ausgerichtet auf die Grundlinie
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+vbox Vertikale Box, Mindestabstand ein Baselineskip
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+zbox Stapel mehrere Boxen übereinander
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+grid Box mit freier Anordnung der Kinder (TBD)
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Es wird noch weitere Varianten geben, die Tabellen und umgebrochene Absätze
+ ermöglichen
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+MINOΣ2 Displays
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Rendern in verschiedene Arten von Displays (TBD)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+texture In eine Textur, die dann als Bild verwendet wird
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+display Auf das normale Display
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+viewport In einen Ausschnitt des Displays
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Draw–Calls minimieren
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+OpenGL möchte möglichst wenige Draw–Calls pro Durchgang, also werden verschieden
+e Contexte stapelweise gezeichnet und mit einem Draw–Call abgesetzt
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+init Initialisierungs-Runde
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+bg Hintergrund–Runde
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+icon Ausschnitte aus der Icon–Textur
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+thumbnail Ausschnitte aus der Thumbnail–Textur
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+image Verschiedene Bilder mit einem Draw–Call pro Bild
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+text Buchstaben aus der Buchstaben–Textur
+\end_layout
+
+\end_deeper
+\begin_layout Section*
+\start_of_appendix
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+Literatur&Links
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Literatur&Links
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Bibliography
+\labelwidthstring Literaturverzeichnis
+\begin_inset CommandInset bibitem
+LatexCommand bibitem
+key "net2o"
+
+\end_inset
+
+
+\noun on
+Bernd Paysan
+\noun default
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+
+\emph on
+net2o fossil repository
+\emph default
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+newblock
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+http://fossil.net2o.de/net2o/
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\end_body
+\end_document
