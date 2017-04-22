@@ -355,7 +355,7 @@ gen-table $freeze
 :noname ( addr u -- )
     2dup startdate@ .ticks space 2dup .key-id
     [: .simple-id ;] $tmp notify! ; msg-class to msg:start
-:noname ( addr u -- )
+:noname ( addr u -- ) $utf8>
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )
     key| 2dup pk@ key| str=
@@ -371,13 +371,13 @@ gen-table $freeze
     space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]:" <default> ; msg-class to msg:id
-:noname ( addr u -- )
+:noname ( addr u -- ) $utf8>
     [: ." : " 2dup forth:type ;] $tmp notify+
     ." : " forth:type ; msg-class to msg:text
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class to msg:object
-:noname ( addr u -- )
+:noname ( addr u -- ) $utf8>
     [: space 2dup forth:type ;] $tmp notify+
     space <warn> forth:type <default> ; msg-class to msg:action
 :noname ( addr u -- )
@@ -1106,7 +1106,7 @@ also net2o-base scope: /chat
 		ELSE  $, msg-signal false  THEN
 	    UNTIL  THEN  THEN  r> to last# ;
 
-: avalanche-text ( addr u -- )
+: avalanche-text ( addr u -- ) >utf8$
     [: signal-list, $, msg-text ;]
     otr-mode @ IF  send-otr-avalanche  ELSE  send-avalanche  THEN ;
 

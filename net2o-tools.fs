@@ -788,6 +788,16 @@ Sema resize-sema
 
 : *-width ( addr u -- n )
     0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
+e? max-xchar $100 u< [IF]
+    : >utf8$ ( addr u -- addr' u' )
+	[: bounds ?DO  I c@ u8emit  LOOP ;] $tmp ;
+    : $utf8> ( addr u -- addr' u' )
+	[: bounds ?DO  I u8@+ '?' over $100 u< select emit
+	  I - +LOOP ;] $tmp ;
+[ELSE]
+    ' noop alias >utf8$ immediate
+    ' noop alias $utf8> immediate
+[THEN]
 
 \ catch loop
 
