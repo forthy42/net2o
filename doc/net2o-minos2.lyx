@@ -19,7 +19,6 @@
 %\newfontface\cjk{ShanHeiSun-Light}
 %\newfontface\cjk{ZenKai-Uni}
 \end_preamble
-\options aspectratio=43
 \use_default_options false
 \maintain_unincluded_children false
 \language ngerman
@@ -206,10 +205,6 @@ status open
 \end_inset
 
 
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -232,13 +227,168 @@ Motivation
 status open
 
 \begin_layout Plain Layout
-Ausblick aus 2013
+Motivation
 \end_layout
 
 \end_inset
 
 
-\begin_inset Separator latexpar
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename bad-gateway.png
+	width 50text%
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+4 Jahre nach Snowden
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Was hat sich seitdem geändert?
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+Politik 
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+Postfaktisch/Hate
+\begin_inset space ~
+\end_inset
+
+Speech als Ausrede für Zensurgesetze
+\end_layout
+
+\begin_layout Description
+Crypto
+\begin_inset space ~
+\end_inset
+
+Wars
+\begin_inset space ~
+\end_inset
+
+4.0 Mal wieder werden Cryptoverbote diskutiert
+\end_layout
+
+\begin_layout Description
+Legalize
+\begin_inset space ~
+\end_inset
+
+it (die Totalüberwachung)
+\end_layout
+
+\begin_layout Description
+Kill
+\begin_inset space ~
+\end_inset
+
+the
+\begin_inset space ~
+\end_inset
+
+link LG Humbug möchte Störerhaftung für den Link
+\end_layout
+
+\begin_layout Description
+Datenschutz Niemand wird gezwungen, das Internet zu nutzen (
+\noun on
+Jim Sensenbrenner
+\noun default
+)
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Konkurrenz sieht sich Stasi–artiger Zersetzung ausgesetzt (Das Tor–Projekt)
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Lösungen net2o wird langsam benutzbar (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+reflectbox{
+\end_layout
+
+\end_inset
+
+em rof skrow
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Ausblick aus 2013
+\end_layout
+
 \end_inset
 
 
@@ -253,10 +403,6 @@ Diese Präsentation ist mit \SpecialChar LaTeX
 
 \begin_layout Itemize
 Die nächste Präsentation muss komplett in MINOΣ2 gerendert sein
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -268,10 +414,6 @@ Die nächste Präsentation muss komplett in MINOΣ2 gerendert sein
 \begin_layout Itemize
 Texte und Videos müssen über net2o geholt werden, und nicht schon vorbereitet
  auf dem Gerät sein
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -283,10 +425,6 @@ Texte und Videos müssen über net2o geholt werden, und nicht schon vorbereitet
 \begin_layout Itemize
 Dazu fehlt noch eine Typesetting–Engine mit Boxes und Glues, Absatzumbruch
  und Silbentrennung
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -297,10 +435,6 @@ Dazu fehlt noch eine Typesetting–Engine mit Boxes und Glues, Absatzumbruch
 \end_deeper
 \begin_layout Itemize
 Viel weniger Klassen als in MINOΣ — dafür dann mehr Objekte
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -311,10 +445,6 @@ Viel weniger Klassen als in MINOΣ — dafür dann mehr Objekte
 \end_deeper
 \begin_layout Itemize
 Neben der hbox und vbox noch eine zbox für übereinander gestapeltes
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -325,10 +455,6 @@ Neben der hbox und vbox noch eine zbox für übereinander gestapeltes
 \end_deeper
 \begin_layout Itemize
 Animationen integriert
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -364,19 +490,11 @@ Einschub: Fortschritt beim Protokoll
 \end_inset
 
 
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
 \begin_layout Description
 chat Läuft stabil, Synchronisation des Logs funktioniert
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -388,10 +506,6 @@ chat Läuft stabil, Synchronisation des Logs funktioniert
 \begin_layout Description
 Versionskontrolle Läuft für kleine Testprojekte, Syncen größerer Projekte
  geht noch nicht
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -410,10 +524,6 @@ QR–Code
 \end_inset
 
 scannen zum Keys austauschen geht
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -429,10 +539,6 @@ Großer
 
 Firewall Test liefert 300kB/s statt 80kB/s bei SSH, Dateiübertragung bleibt
  noch manchmal hängen
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -443,10 +549,6 @@ Firewall Test liefert 300kB/s statt 80kB/s bei SSH, Dateiübertragung bleibt
 \end_deeper
 \begin_layout Description
 Sync um mehrere Computer zu syncen (RSN)
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -510,6 +612,161 @@ Zum einfachen Schlüsselaustausch: Scanner für farbige QR--Codes
 
 \end_layout
 
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Einfach installierbare Versionen
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Standard
+Alles hier beschrieben: 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://fossil.net2o.de/net2o/doc/trunk/wiki/get-it.md
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Pause
+
+\end_layout
+
+\begin_layout Description
+Debian Mit eigenem Debian–Repository einfach aktuell zu halten
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Windows setup.exe ohne Auto–Update
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Android Derzeit nur als Teil der Gforth–App
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Description
+Sourcen Wer nur selbstcompiliertem traut, oder einen Mac hat\SpecialChar ldots
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Versionskontrolle: Details
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Patches werden mit bdelta berechnet
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Patchformat: { Insert 
+\begin_inset Formula $\langle$
+\end_inset
+
+String
+\begin_inset Formula $\rangle$
+\end_inset
+
+, Seek, Copy }*
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Versionen werden als Patchset (mit Vorgänger) oder Snapshot (ohne) abgespeichert
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Patchset–Format: Einlesen aller über Hash referenzierter Quellen, Patch,
+ 'rausschreiben der geänderten Dateien
+\end_layout
+
+\begin_deeper
+\begin_layout Pause
+
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Patchsets werden von einer Chat–Message in einem Chatlog referenziert
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 MINOΣ2 Widgets
 \end_layout
@@ -526,19 +783,11 @@ MINOΣ2 vs.
 \end_inset
 
 
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
 \begin_layout Description
 Rendering OpenGL (ES) statt Xlib, später auch Vulkan–Backend geplant
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -549,10 +798,6 @@ Rendering OpenGL (ES) statt Xlib, später auch Vulkan–Backend geplant
 \end_deeper
 \begin_layout Description
 Koordinaten Single Float statt Integer, Ursprung links unten (statt oben)
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -562,12 +807,9 @@ Koordinaten Single Float statt Integer, Ursprung links unten (statt oben)
 
 \end_deeper
 \begin_layout Description
-Typesetting Boxes&Glues viel näher an LaTeX — Ober- und Unterlängen, Glues
- können auch schrumpfen, nicht nur wachsen
-\begin_inset Separator latexpar
-\end_inset
-
-
+Typesetting Boxes&Glues viel näher an \SpecialChar LaTeX
+ — Ober- und Unterlängen, Glues können
+ auch schrumpfen, nicht nur wachsen
 \end_layout
 
 \begin_deeper
@@ -578,10 +820,6 @@ Typesetting Boxes&Glues viel näher an LaTeX — Ober- und Unterlängen, Glues
 \end_deeper
 \begin_layout Description
 Objekt–System Mini–OOF2 statt BerndOOF
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -613,10 +851,6 @@ MINOΣ2 Widgets
 \end_inset
 
 
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -630,10 +864,6 @@ Grundprinzip ist ein Lego–artiges Zusammenstecken von sehr einfachen Komponent
 
 \begin_layout Description
 actor Basisklasse, die auf alle Aktionen reagiert
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -644,10 +874,6 @@ actor Basisklasse, die auf alle Aktionen reagiert
 \end_deeper
 \begin_layout Description
 widget Basisklasse für alle sichtbaren Objekte
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -658,10 +884,6 @@ widget Basisklasse für alle sichtbaren Objekte
 \end_deeper
 \begin_layout Description
 glue Dimensionierung für flexible Objekte (nach oben, zur Seite, nach unten)
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -672,10 +894,6 @@ glue Dimensionierung für flexible Objekte (nach oben, zur Seite, nach unten)
 \end_deeper
 \begin_layout Description
 tile Farbige Fläche
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -686,10 +904,6 @@ tile Farbige Fläche
 \end_deeper
 \begin_layout Description
 frame Farbige Fläche mit Rändern
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -700,10 +914,6 @@ frame Farbige Fläche mit Rändern
 \end_deeper
 \begin_layout Description
 text Text–Element
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -714,10 +924,6 @@ text Text–Element
 \end_deeper
 \begin_layout Description
 icon Bild aus einer Icons–Textur (TBD)
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -753,7 +959,8 @@ MINOΣ2 Boxes
 
 \begin_deeper
 \begin_layout Standard
-Wie bei LaTeX: Boxes, um Widgets anzuordnen
+Wie bei \SpecialChar LaTeX
+: Boxes, um Widgets anzuordnen
 \end_layout
 
 \begin_layout Pause
@@ -762,10 +969,6 @@ Wie bei LaTeX: Boxes, um Widgets anzuordnen
 
 \begin_layout Description
 hbox Horizontale Box, ausgerichtet auf die Grundlinie
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -776,10 +979,6 @@ hbox Horizontale Box, ausgerichtet auf die Grundlinie
 \end_deeper
 \begin_layout Description
 vbox Vertikale Box, Mindestabstand ein Baselineskip
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -790,10 +989,6 @@ vbox Vertikale Box, Mindestabstand ein Baselineskip
 \end_deeper
 \begin_layout Description
 zbox Stapel mehrere Boxen übereinander
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -804,10 +999,6 @@ zbox Stapel mehrere Boxen übereinander
 \end_deeper
 \begin_layout Description
 grid Box mit freier Anordnung der Kinder (TBD)
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -853,10 +1044,6 @@ Rendern in verschiedene Arten von Displays (TBD)
 
 \begin_layout Description
 texture In eine Textur, die dann als Bild verwendet wird
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -867,10 +1054,6 @@ texture In eine Textur, die dann als Bild verwendet wird
 \end_deeper
 \begin_layout Description
 display Auf das normale Display
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -916,10 +1099,6 @@ e Contexte stapelweise gezeichnet und mit einem Draw–Call abgesetzt
 
 \begin_layout Description
 init Initialisierungs-Runde
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -930,10 +1109,6 @@ init Initialisierungs-Runde
 \end_deeper
 \begin_layout Description
 bg Hintergrund–Runde
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -944,10 +1119,6 @@ bg Hintergrund–Runde
 \end_deeper
 \begin_layout Description
 icon Ausschnitte aus der Icon–Textur
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -958,10 +1129,6 @@ icon Ausschnitte aus der Icon–Textur
 \end_deeper
 \begin_layout Description
 thumbnail Ausschnitte aus der Thumbnail–Textur
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper
@@ -972,10 +1139,6 @@ thumbnail Ausschnitte aus der Thumbnail–Textur
 \end_deeper
 \begin_layout Description
 image Verschiedene Bilder mit einem Draw–Call pro Bild
-\begin_inset Separator latexpar
-\end_inset
-
-
 \end_layout
 
 \begin_deeper

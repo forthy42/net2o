@@ -19,7 +19,7 @@ require net2o-tools.fs
 
 \ unicode characters to display a color matrix
 
-'▀' Constant upper-half-block
+e? max-xchar $100 < [IF] '^' [ELSE] '▀' [THEN] Constant upper-half-block
 \ '▄' Constant lower-half-block
 \ '█' Constant solid-block
 

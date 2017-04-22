@@ -480,7 +480,7 @@ previous
 	THEN  THEN  'Z' emit ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
-    fsplit 0 .r '°' xemit  60e f*
+    fsplit 0 .r  $B0 ( '°' ) xemit  60e f*
     fsplit .##   ''' xemit  60e f*
     fsplit .##   '.' xemit 100e f*
     f>s .##      '"' xemit ;

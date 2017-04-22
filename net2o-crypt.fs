@@ -444,7 +444,11 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 : forever ( -- )  64#0 sigdate le-64! 64#-1 sigdate 64'+ le-64! ;
 : now+delta ( delta64 -- )  ticks 64dup sigdate le-64! 64+ sigdate 64'+ le-64! ;
 
-: .check ( flag -- ) '✘' '✔' rot select xemit ;
+e? max-xchar $100 < [IF]
+    : .check ( flag -- ) 'x' 'v' rot select xemit ;
+[ELSE]
+    : .check ( flag -- ) '✘' '✔' rot select xemit ;
+[THEN]
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  64drop .forever  EXIT  THEN
     64dup 64#-1 64= IF  64drop .never    EXIT  THEN

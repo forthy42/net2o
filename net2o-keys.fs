@@ -24,7 +24,8 @@ Variable pw-level# 2 pw-level# ! \ pw-level# 0 is lowest
 Variable pw-maxlevel# 4 pw-maxlevel# ! \ pw-maxlevel# is the maximum checked
 }scope
 
-[IFDEF] mslinux '*' [ELSE] '•' [THEN] Constant pw*
+[IFDEF] mslinux '*' [ELSE]
+    e? max-xchar $100 < [IF] '*' [ELSE] '•' [THEN] [THEN] Constant pw*
 
 xc-vector up@ - class-o !
 
