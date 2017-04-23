@@ -448,8 +448,8 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 \g 
 \g net2o separates data and commands.  Data is pass through to higher
 \g layers, commands are interpreted when they arrive.  For connection
-\g requests, the address 0 is always mapped as connectionless code
-\g address.
+\g requests, a special bit is set, and the address then isn't used as
+\g address, but as IV for the opportunistic encoding.
 \g 
 \g The command interpreter is a stack machine with two data types: 64
 \g bit integers and strings (floats are also suppored, but used

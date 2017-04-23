@@ -87,7 +87,7 @@ Variable saved-msg$
 	64drop ticks 64dup saved-msg-ticks 64!  THEN ;
 
 : msg-eval ( addr u -- )
-    n2o:new-msging >o parent off do-cmd-loop dispose o> ;
+    n2o:new-msging >o 0 to parent do-cmd-loop dispose o> ;
 
 : vault>msg ( -- )
     ['] msg-eval is write-decrypt ;
@@ -154,11 +154,11 @@ Variable otr-log
     ;] msglog-sema c-section ;
 
 : do-msg-nestsig ( addr u -- )
-    parent @ .msg-context @ .msg-display msg-notify ;
+    parent .msg-context @ .msg-display msg-notify ;
 
 : display-lastn ( addr u n -- )
     otr-mode @ >r otr-mode off
-    [: n2o:new-msg >o parent off
+    [: n2o:new-msg >o 0 to parent
       cells >r ?msg-log last# msg-log@ 2dup { log u }
       dup r> - 0 max /string bounds ?DO
 	  I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
@@ -167,7 +167,7 @@ Variable otr-log
     r> otr-mode ! throw ;
 
 : display-one-msg ( addr u -- )
-    n2o:new-msg >o parent off
+    n2o:new-msg >o 0 to parent
     ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     dispose o> ;
 
@@ -297,7 +297,7 @@ Forward msg:last
 	ELSE  drop 2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
-    parent @ dup IF  .wait-task @ dup up@ <> and  THEN
+    parent dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
 	>r r@ <hide> <event e$, o elit, last# elit, :>msg-nestsig
 	r> event>
@@ -383,7 +383,7 @@ msg-class to msg:object
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
 :noname ( -- )
-    parent @ ?dup-IF
+    parent ?dup-IF
 	.msging-context @ ?dup-IF
 	    .otr-shot @ IF <info> ."  [otr]" <default> THEN
 	THEN
@@ -407,16 +407,16 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
     replay-mode @ IF  $> 2drop  EXIT  THEN
-    $> >load-group parent @ >o
+    $> >load-group parent >o
     +unique-con +chat-control
     wait-task @ ?dup-IF  <event o elit, :>chat-connect event>  THEN
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     $> msg-groups #@ d0<> IF
-	parent @ last# cell+ del$cell  THEN ;
+	parent last# cell+ del$cell  THEN ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> >peer
-    parent @ .wait-task @ ?dup-IF
+    parent .wait-task @ ?dup-IF
 	<event o elit, last# elit, :>chat-reconnect event>
     ELSE
 	reconnect-chat
@@ -435,7 +435,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	?pkgroup otr-shot @ IF  >otr-log  ELSE  >msg-log  THEN
 	2dup d0<> \ do something if it is new
 	IF  replay-mode @ 0= IF
-		2dup show-msg  2dup otr-shot @ parent @ .push-msg
+		2dup show-msg  2dup otr-shot @ parent .push-msg
 	    THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop 2drop
@@ -544,7 +544,7 @@ Variable ask-msg-files[]
     last# >r  ask-msg-files[] $[]off
     forth:. ." Messages:" forth:cr
     ?ask-msg-files ask-msg-files[] $[]# IF
-	parent @ >o  expect+slurp
+	parent >o  expect+slurp
 	cmdbuf# @ 0= IF  $10 blocksize! $1 blockalign!  THEN
 	ask-msg-files[] [: n2o:copy-msg ;] $[]map o>
     ELSE
@@ -593,7 +593,7 @@ event: :>msg-eval ( $pack $addr -- )
     fs-path $@len IF
 	." msg file done: " fs-path $@ .chat-file forth:cr
 	fs-close
-	parent @ ?dup-IF  >o -1 file-count +!@ 1 =
+	parent ?dup-IF  >o -1 file-count +!@ 1 =
 	    IF  chat-sync-done  THEN
 	    o>  THEN
     THEN ;
@@ -608,7 +608,7 @@ event: :>msg-eval ( $pack $addr -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
 	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
-	parent @ .wait-task @ event>
+	parent .wait-task @ event>
 	fs:fs-clear
     THEN
 ; msgfs-class is fs-close

@@ -25,6 +25,7 @@ require net2o-err.fs
 require forward.fs
 require mini-oof2.fs
 require user-object.fs
+require struct-val.fs
 require rec-scope.fs
 require unix/socket.fs
 require unix/mmap.fs
@@ -315,7 +316,7 @@ scope{ mapc
 	    IF
 		dup addr>bits ack-bit# !
 		dest-raddr @ swap dup >data-head ack-advance? ! +
-		o parent @ o> >o rdrop
+		o parent o> >o rdrop
 		UNLOOP  rot drop  EXIT  THEN
 	    drop endwith
 	THEN
@@ -351,7 +352,7 @@ scope{ mapc
 }scope
 
 : parent! ( o -- )
-    dup parent ! ?dup-IF  .my-key  ELSE  my-key-default  THEN  @ my-key ! ;
+    dup to parent ?dup-IF  .my-key  ELSE  my-key-default  THEN  @ my-key ! ;
 
 : map-data ( addr u -- o )
     o >code-flag @ IF mapc:rcode-class ELSE mapc:rdata-class THEN new
@@ -744,7 +745,7 @@ scope{ mapc
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
     >flyburst
     64>r time-offset 64@ 64+ 64r>
-    parent @ .data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
+    parent .data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ with mapc >offset  IF
 	dest-tail @ dest-size @ endwith  >r over - r> 1- and
 	addr>bits 1 max window-size !
@@ -1451,14 +1452,14 @@ User remote?
 
 scope{ mapc
 
-: handle-data ( addr -- ) parent @ >o  o to connection
+: handle-data ( addr -- ) parent >o  o to connection
     msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " inbuf addr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt perform +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
-: handle-cmd ( addr -- )  parent @ >o
+: handle-cmd ( addr -- )  parent >o
     msg( ." Handle command to addr: " inbuf addr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
     $error-id $off    \ no error id so far

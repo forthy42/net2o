@@ -68,7 +68,7 @@ file-classes file-classes# cells bounds
 drop
 
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
-    parent @ .perm-mask @ >r r@ fs-perm?
+    parent .perm-mask @ >r r@ fs-perm?
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
 +net2o: file-type ( n -- ) \g choose file type
     64>n fs-class! ;
@@ -113,12 +113,12 @@ reply-table $@ inherit-table ack-table
 $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \g set resend toggle flag
-    64>n  parent @ .net2o:ack-resend ;
+    64>n  parent .net2o:ack-resend ;
 +net2o: set-rate ( urate udelta-t -- ) \g set rate 
-    parent @ >o cookie? IF  ack@ .net2o:set-rate
+    parent >o cookie? IF  ack@ .net2o:set-rate
     ELSE  64drop 64drop ack@ .ns/burst dup >r 64@ 64-2* 64-2* r> 64!  THEN o> ;
 +net2o: resend-mask ( addr umask -- ) \g resend mask blocks starting at addr
-    2*64>n parent @ >o net2o:resend-mask net2o:send-chunks o> ;
+    2*64>n parent >o net2o:resend-mask net2o:send-chunks o> ;
 +net2o: track-timing ( -- ) \g track timing
     net2o:track-timing ;
 +net2o: rec-timing ( $:string -- ) \g recorded timing
@@ -128,19 +128,19 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-b2btime ( utime addr -- ) \g burst-to-burst time at packet addr
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
-    64>n $> parent @ .data-map @ .mapc:resend#? dup 0= IF
+    64>n $> parent .data-map @ .mapc:resend#? dup 0= IF
 	drop ." resend# don't match!" forth:cr
-	parent @ .n2o:see-me
+	parent .n2o:see-me
 	[ cookie-val $FF xor ]L validated and!
     ELSE
 	8 lshift validated +! cookie-val validated or!
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
-    64>n parent @ .net2o:rewind-sender-partial ;
+    64>n parent .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \g set head
-    64>n parent @ .data-rmap @ .mapc:dest-head umax! ;
+    64>n parent .data-rmap @ .mapc:dest-head umax! ;
 +net2o: timeout ( uticks -- ) \g timeout request
-    parent @ >o net2o:timeout  data-map @ .mapc:dest-tail @ o> ulit, set-head ;
+    parent >o net2o:timeout  data-map @ .mapc:dest-tail @ o> ulit, set-head ;
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 

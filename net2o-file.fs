@@ -50,7 +50,7 @@ Variable fs-table
 \ file events
 
 : file:done ( -- )
-    -1 parent @ .file-count +!
+    -1 parent .file-count +!
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: :>file-done ( file-o -- )
     >o file-xt @ ?dup-IF  execute
@@ -109,7 +109,7 @@ cell 8 = [IF]
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
     fs-size 64@ fs-seek 64@ 64= IF
-	<event o elit, :>file-done parent @ .wait-task @ event>
+	<event o elit, :>file-done parent .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
 : fs:fs-clear ( -- )
@@ -258,7 +258,7 @@ event: :>termclose ( -- ) termfile off  default-in default-out ;
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size 64@ fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
-	<event o elit, :>file-done parent @ .wait-task @ event>
+	<event o elit, :>file-done parent .wait-task @ event>
     THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move

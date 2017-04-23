@@ -25,7 +25,7 @@ Variable my-key-default \G default own key
 
 object class
     field: token-table
-    field: parent
+    value: parent
     field: my-key        \ key used for this context
     field: req?
     field: c-state \ state for checks whether everything is there
