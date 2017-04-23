@@ -442,8 +442,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
     ELSE  2drop  THEN ;
 
-\g Commands
-\g ========
+\g # Commands #
 \g 
 \g Version @VERSION@.
 \g 
@@ -453,18 +452,19 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 \g address.
 \g 
 \g The command interpreter is a stack machine with two data types: 64
-\g bit integers and strings.  Encoding of commands, integers and
-\g string length follows protobuf conceptually (but MSB first, not LSB
-\g first as with protobuf, to simplify scanning), strings are just
-\g sequences of bytes (interpretation can vary).  Command blocks contain
-\g a sequence of commands; there are no conditionals and looping
-\g instructions.
+\g bit integers and strings (floats are also suppored, but used
+\g infrequently).  Encoding of commands, integers and string length
+\g follows protobuf conceptually (but MSB first, not LSB first as with
+\g protobuf, to simplify scanning), strings are just sequences of
+\g bytes (interpretation can vary).  Command blocks contain a sequence
+\g of commands; there are no conditionals and looping instructions.
 \g 
 \g Strings can contain encrypted nested commands, used during
 \g communication setup.
 \g 
-\g List of Commands
-\g ----------------
+\g ## List of Commands ##
+\g 
+\g Commands are context-sensitive in an OOP method hierarchy sense.
 \g 
 \g ### base commands ###
 \g 

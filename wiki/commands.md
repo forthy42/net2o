@@ -1,5 +1,4 @@
-Commands
-========
+# Commands #
 
 Version 0.5.0-20170414.
 
@@ -9,18 +8,18 @@ requests, the address 0 is always mapped as connectionless code
 address.
 
 The command interpreter is a stack machine with two data types: 64
-bit integers and strings.  Encoding of commands, integers and
-string length follows protobuf conceptually (but MSB first, not LSB
-first as with protobuf, to simplify scanning), strings are just
-sequences of bytes (interpretation can vary).  Command blocks contain
-a sequence of commands; there are no conditionals and looping
-instructions.
+bit integers and strings (floats are also suppored, but used
+infrequently).  Encoding of commands, integers and string length
+follows protobuf conceptually (but MSB first, not LSB first as with
+protobuf, to simplify scanning), strings are just sequences of
+bytes (interpretation can vary).  Command blocks contain a sequence
+of commands; there are no conditionals and looping instructions.
 
 Strings can contain encrypted nested commands, used during
 communication setup.
 
-List of Commands
-----------------
+## List of Commands ##
+Commands are context-sensitive in an OOP method hierarchy sense.
 
 ### base commands ###
 
