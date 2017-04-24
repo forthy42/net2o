@@ -54,7 +54,7 @@ Vocabulary mapc
 also mapc definitions
 
 cmd-class class
-    64field: dest-vaddr
+    64value: dest-vaddr
     field: dest-size
     field: dest-raddr
     field: dest-ivs
