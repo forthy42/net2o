@@ -311,7 +311,7 @@ scope{ mapc
     dest-index 2 cells bounds ?DO
 	I @ IF
 	    dup dest-addr 64@ I @ with mapc
-	    dest-vaddr 64@ 64- 64>n and dup
+	    dest-vaddr 64- 64>n and dup
 	    dest-size @ u<
 	    IF
 		dup addr>bits ack-bit# !
@@ -338,7 +338,7 @@ User >code-flag
 scope{ mapc
 
 : alloc-data ( addr u -- u )
-    dup >r dest-size ! dest-vaddr 64! r>
+    dup >r dest-size ! to dest-vaddr r>
     dup alloc+guard dest-raddr !
     c:key# crypt-align + alloz dest-ivsgen ! \ !!FIXME!! should be a kalloc
     >code-flag @
@@ -569,7 +569,7 @@ scope{ mapc
     data-map @ .mapc:dest-tail +! ;
 : data-dest ( -- addr )
     data-map @ with mapc
-    dest-vaddr 64@ dest-tail @ dest-size @ 1- and n>64 64+ endwith ;
+    dest-vaddr dest-tail @ dest-size @ 1- and n>64 64+ endwith ;
 
 \ new data sending around stuff, with front+back
 
@@ -621,15 +621,15 @@ scope{ mapc
 : code-dest ( -- addr )
     code-map @ with mapc dest-raddr @ dest-tail @ maxdata negate and + endwith ;
 : code-vdest ( -- addr )
-    code-map @ with mapc dest-vaddr 64@ dest-tail @ n>64 64+ endwith ;
+    code-map @ with mapc dest-vaddr dest-tail @ n>64 64+ endwith ;
 : code-reply ( -- addr )
     code-map @ with mapc dest-tail @ addr>replies dest-replies @ + endwith ;
 : send-reply ( -- addr )
-    code-map @ with mapc dest-addr 64@ dest-vaddr 64@ 64- 64>n addr>replies
+    code-map @ with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
     dest-replies @ + endwith ;
 
 : tag-addr ( -- addr )
-    dest-addr 64@ code-rmap @ with mapc dest-vaddr 64@ 64- 64>n
+    dest-addr 64@ code-rmap @ with mapc dest-vaddr 64- 64>n
     maxdata negate and addr>replies dest-replies @ + endwith ;
 
 reply buffer: dummy-reply
@@ -720,7 +720,7 @@ Sema timing-sema
 scope{ mapc
 
 : >offset ( addr -- addr' flag )
-    dest-vaddr 64@ 64- 64>n dup dest-size @ u< ;
+    dest-vaddr 64- 64>n dup dest-size @ u< ;
 
 }scope
 
@@ -861,7 +861,7 @@ $20 Value mask-bits#
     data-resend $@  IF  @ 0<>  ELSE  drop false  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop n>64 data-map @ .mapc:dest-vaddr 64@ 64+ ;
+    data-resend $@ drop 2@ drop n>64 data-map @ .mapc:dest-vaddr 64+ ;
 : /resend ( u -- )
     0 +DO
 	data-resend $@ drop
@@ -1471,7 +1471,7 @@ scope{ mapc
 
 : .inv-packet ( -- )
     ." invalid packet to "
-    dest-addr 64@ o IF  dest-vaddr 64@ 64-  THEN  x64.
+    dest-addr 64@ o IF  dest-vaddr 64-  THEN  x64.
     ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
 
 }scope
@@ -1517,7 +1517,7 @@ Defer extra-dispose ' noop is extra-dispose
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks extra-dispose
-	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr 64@ >dest-map 2!  THEN
+	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr >dest-map 2!  THEN
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP
 	end-secrets start-secrets DO  I sec-off  cell +LOOP

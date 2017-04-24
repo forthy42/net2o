@@ -784,6 +784,10 @@ Sema resize-sema
 	  >r { w^ x } x cell r> $+!
       ELSE  2drop  THEN ;] resize-sema c-section ;
 
+\ string values
+
+cell      ' aligned   ' $@  ' $!  wrap+value: $value: ( u1 "name" -- u2 )
+
 \ xchar tool
 
 : *-width ( addr u -- n )

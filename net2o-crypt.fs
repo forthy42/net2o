@@ -148,7 +148,7 @@ scope{ mapc
 scope{ mapc
 
 : ivs>source? ( o:map -- )
-    dest-addr 64@ dest-vaddr 64@ 64-
+    dest-addr 64@ dest-vaddr 64-
     64dup dest-size @ n>64 64u>= !!inv-dest!!
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
 

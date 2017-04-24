@@ -1,5 +1,7 @@
 \ test ed25519-donna basepoint multiplication
 
+debug: health(
+
 require ansi.fs
 require mini-oof2.fs
 require user-object.fs

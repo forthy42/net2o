@@ -446,6 +446,9 @@ forth-local-words:
     (
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("64value:")
+       non-immediate (font-lock-type-face . 2)
+       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )

@@ -4,6 +4,9 @@ require ../net2o.fs
 
 Variable test$
 
+: >sksig ( -- )
+    pkc keysize skc keysize
+    c:0key >keyed-hash sksig $20 keccak> ;
 : gen-pairs ( -- )
     skc pkc ed-keypair
     stskc stpkc ed-keypair  >sksig ;

@@ -226,3 +226,4 @@ cell 8 = [IF]
     dup >r le-64@ r> 64'+ le-64@ ;
 : le-128! ( d addr -- )
     dup >r 64'+ le-64! r> le-64! ;
+1 64s ' 64aligned ' 64@ ' 64! wrap+value: 64value: ( u1 "name" -- u2 )
