@@ -374,8 +374,6 @@ scope{ mapc
     drop
     o endwith ;
 
-' @ Alias m@
-
 : map-data-dest ( vaddr u addr -- )
     >r >r 64dup r> map-data r@ ! >dest-map r> @ swap ! ;
 : map-code-dest ( vaddr u addr -- )
@@ -481,8 +479,8 @@ Variable mapstart $1 mapstart !
 	n2o:new-context >o rdrop  setup!  THEN
     msg( ." data map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag off
-    addrd u data-rmap map-data-dest
-    addrs u map-source data-map ! ;
+    addrd u addr data-rmap map-data-dest
+    addrs u map-source to data-map ;
 : n2o:new-code ( addrs addrd u -- )
     dup max-code# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
@@ -491,8 +489,8 @@ Variable mapstart $1 mapstart !
 	n2o:new-context >o rdrop  setup!  THEN
     msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag on
-    addrd u code-rmap map-code-dest
-    addrs u map-source code-map ! ;
+    addrd u addr code-rmap map-code-dest
+    addrs u map-source to code-map ;
 
 Forward new-ivs ( -- )
 \G Init the new IVS
@@ -559,18 +557,18 @@ scope{ mapc
 
 : /head ( u -- )
     >blockalign dup negate residualread +!
-    data-map @ with mapc +to dest-head endwith ;
+    data-map with mapc +to dest-head endwith ;
 : max/head ( -- )
-    data-map @ with mapc dest-head >maxalign to dest-head endwith ;
+    data-map with mapc dest-head >maxalign to dest-head endwith ;
 : /back ( u -- )
     >blockalign dup negate residualwrite +!
-    data-rmap @ with mapc +to dest-back endwith ;
+    data-rmap with mapc +to dest-back endwith ;
 : max/back ( -- )
-    data-rmap @ with mapc dest-back >maxalign to dest-back endwith ;
+    data-rmap with mapc dest-back >maxalign to dest-back endwith ;
 : /tail ( u -- )
-    data-map @ >o +to mapc:dest-tail o> ;
+    data-map >o +to mapc:dest-tail o> ;
 : data-dest ( -- addr )
-    data-map @ with mapc
+    data-map with mapc
     dest-vaddr dest-tail dest-size 1- and n>64 64+ endwith ;
 
 \ new data sending around stuff, with front+back
@@ -591,47 +589,47 @@ scope{ mapc
 
 }scope
 
-: head@ ( -- head )  data-map @ .mapc:dest-head ;
+: head@ ( -- head )  data-map .mapc:dest-head ;
 
 : data-head@ ( -- addr u )
     \G you can read into this, it's a block at a time (wraparound!)
-    data-map @ with mapc
+    data-map with mapc
     dest-head dest-back dest-size + fix-size raddr+ endwith
     residualread @ umin ;
 : rdata-back@ ( -- addr u )
     \G you can write from this, also a block at a time
-    data-rmap @ with mapc
+    data-rmap with mapc
     dest-back dest-tail fix-size raddr+ endwith
     residualwrite @ umin ;
 : data-tail@ ( -- addr u )
     \G you can send from this - as long as you stay block aligned
-    data-map @ with mapc
+    data-map with mapc
     dest-raddr dest-tail dest-head fix-size' endwith ;
 
 : data-head? ( -- flag )
     \G return true if there is space to read data in
-    data-map @ with mapc dest-head dest-back dest-size + u< endwith ;
+    data-map with mapc dest-head dest-back dest-size + u< endwith ;
 : data-tail? ( -- flag )
     \G return true if there is data to send
-    data-map @ with mapc dest-tail dest-head u< endwith ;
+    data-map with mapc dest-tail dest-head u< endwith ;
 : rdata-back? ( -- flag )
     \G return true if there is data availabe to write out
-    data-rmap @ with mapc dest-back dest-tail u< endwith ;
+    data-rmap with mapc dest-back dest-tail u< endwith ;
 
 \ code sending around
 
 : code-dest ( -- addr )
-    code-map @ with mapc dest-raddr dest-tail maxdata negate and + endwith ;
+    code-map with mapc dest-raddr dest-tail maxdata negate and + endwith ;
 : code-vdest ( -- addr )
-    code-map @ with mapc dest-vaddr dest-tail n>64 64+ endwith ;
+    code-map with mapc dest-vaddr dest-tail n>64 64+ endwith ;
 : code-reply ( -- addr )
-    code-map @ with mapc dest-tail addr>replies dest-replies + endwith ;
+    code-map with mapc dest-tail addr>replies dest-replies + endwith ;
 : send-reply ( -- addr )
-    code-map @ with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
+    code-map with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
     dest-replies + endwith ;
 
 : tag-addr ( -- addr )
-    dest-addr 64@ code-rmap @ with mapc dest-vaddr 64- 64>n
+    dest-addr 64@ code-rmap with mapc dest-vaddr 64- 64>n
     maxdata negate and addr>replies dest-replies + endwith ;
 
 reply buffer: dummy-reply
@@ -639,19 +637,19 @@ reply buffer: dummy-reply
 ' noop dummy-reply reply-xt !
 
 : reply[] ( index -- addr )
-    code-map @ with mapc
+    code-map with mapc
     dup dest-size addr>bits u<
     IF  reply * dest-replies +  ELSE  dummy-reply  THEN  endwith ;
 
 : reply-index ( -- index )
-    code-map @ .mapc:dest-tail addr>bits ;
+    code-map .mapc:dest-tail addr>bits ;
 
 : code+ ( n -- )
-    connection .code-map @ with mapc dup negate dest-tail and +
+    connection .code-map with mapc dup negate dest-tail and +
     dest-size 1- and to dest-back endwith ;
 
 : code-update ( n -- ) drop \ to be used later
-    connection .code-map @ with mapc dest-back to dest-tail endwith ;
+    connection .code-map with mapc dest-back to dest-tail endwith ;
 
 \ aligned buffer to make encryption/decryption fast
 
@@ -747,7 +745,7 @@ scope{ mapc
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
     >flyburst
     64>r time-offset 64@ 64+ 64r>
-    parent .data-map @ dup 0= IF  drop 0 0  EXIT  THEN  >r
+    parent .data-map dup 0= IF  drop 0 0  EXIT  THEN  >r
     r@ with mapc >offset  IF
 	dest-tail dest-size endwith  >r over - r> 1- and
 	addr>bits 1 max window-size !
@@ -839,7 +837,7 @@ $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 : net2o:resend-mask ( addr mask -- ) >mask0
-    >r dup data-rmap @ .mapc:dest-size u>= IF
+    >r dup data-rmap .mapc:dest-size u>= IF
 	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
     THEN  r>
     resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
@@ -857,13 +855,13 @@ $20 Value mask-bits#
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ >mask0 1 and IF  maxdata  ELSE  0  THEN
-	swap data-map @ .mapc:dest-raddr + swap
+	swap data-map .mapc:dest-raddr + swap
     ELSE  drop 0 0  THEN ;
 : resend? ( -- flag )
     data-resend $@  IF  @ 0<>  ELSE  drop false  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop n>64 data-map @ .mapc:dest-vaddr 64+ ;
+    data-resend $@ drop 2@ drop n>64 data-map .mapc:dest-vaddr 64+ ;
 : /resend ( u -- )
     0 +DO
 	data-resend $@ drop
@@ -921,12 +919,12 @@ User outflag  outflag off
 	outbuf0-encrypt
 	cmd0( .time ." cmd0 to: " ret-addr .addr-path cr )
     ELSE
-	code-map @ outbuf-encrypt
+	code-map outbuf-encrypt
     THEN   ret-addr packet-to ;
 
 : send-data-packet ( -- ) +sendX
     header( ." send data " outbuf .header )
-    data-map @  outbuf-encrypt
+    data-map  outbuf-encrypt
     ret-addr packet-to ;
 
 : >send ( addr n -- )
@@ -977,7 +975,7 @@ scope{ mapc
 }scope
 
 : send-dX ( addr n -- ) +sendX2
-    over data-map @ .mapc:resend#+ set-dest#
+    over data-map .mapc:resend#+ set-dest#
     >send  ack@ .bandwidth+  send-data-packet ;
 
 Defer addr>sock \ uses locals
@@ -1030,7 +1028,7 @@ scope{ mapc
 }scope
 
 : net2o:send-tick ( addr -- )
-    data-map @ with mapc
+    data-map with mapc
     dest-raddr - dup dest-size u<
     IF  ts-ticks!  ELSE  drop  THEN  endwith ;
 
@@ -1142,7 +1140,7 @@ event: :>send-chunks ( o -- ) .do-send-chunks ;
     .o ." rate: " ns/burst @ s>f tick-init chunk-p2 lshift s>f 1e9 f* fswap f/ fe. cr
     .o ." slack: " min-slack 64@ u64. max-slack 64@ u64. cr
     .o ." rtdelay: " rtdelay 64@ u64. cr o>
-    data-map @ with mapc
+    data-map with mapc
     ." Data h b t: " dest-head hex. dest-back hex. dest-tail hex. cr
     endwith ;
 
@@ -1212,15 +1210,15 @@ rdata-class to rewind-partial
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map @ with mapc dest-back umax dup rewind-partial to dest-back
+    data-map with mapc dest-back umax dup rewind-partial to dest-back
     endwith ;
 
 \ separate thread for loading and saving...
 
 : net2o:save ( -- )
-    data-rmap @ ?dup-IF
+    data-rmap ?dup-IF
 	.mapc:dest-back >r n2o:spit
-	r> data-rmap @ with mapc addr dest-back !@
+	r> data-rmap with mapc addr dest-back !@
 	dup rewind-partial  dup dest-back!
 	do-slurp !@ drop endwith
     THEN ;
@@ -1519,7 +1517,7 @@ Defer extra-dispose ' noop is extra-dispose
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks extra-dispose
-	data-rmap @ IF  #0. data-rmap @ .mapc:dest-vaddr >dest-map 2!  THEN
+	data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
 	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
 	end-strings start-strings DO  I $off     cell +LOOP
 	end-secrets start-secrets DO  I sec-off  cell +LOOP

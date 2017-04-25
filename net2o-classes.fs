@@ -165,10 +165,10 @@ cmd-class class
     field: sync-done-xt  \ callback for sync done
     \ maps for data and code transfer
     0 +field start-maps
-    field: code-map
-    field: code-rmap
-    field: data-map
-    field: data-rmap
+    value: code-map
+    value: code-rmap
+    value: data-map
+    value: data-rmap
     0 +field end-maps
     \ strings
     0 +field start-strings

@@ -302,7 +302,7 @@ scope{ mapc
 }scope
 
 : one-ivs ( map-addr -- )
-    @ with mapc c:key@ >r
+    with mapc c:key@ >r
     key-assembly state2# c:prng
     dest-ivsgen kalign c:key!  key-assembly >c:key
     dest-size addr>keys addr dest-ivs$ $!len
