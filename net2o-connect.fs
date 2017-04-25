@@ -46,7 +46,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
     ELSE  64drop  THEN  un-cmd ;
 \ punch-stuff needs to be moved to connected
 +net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
-    $> $, nest  o IF  ['] punchs code-reply send-xt !  THEN
+    $> $, nest  o IF  ['] punchs code-reply is send-xt  THEN
     n2o:dispose-punchs ;
 +net2o: punch ( $:string -- ) \g punch NAT traversal hole
     $> net2o:punch ;

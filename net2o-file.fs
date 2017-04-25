@@ -31,7 +31,7 @@ cmd-class class
     field: fs-inbuf
     field: fs-outbuf
     field: fs-termtask
-    field: file-xt     \ callback for operation completed
+    defer: file-xt     \ callback for operation completed
     field: fs-cryptkey \ for en/decrypting a file on the fly
     field: fs-rename+  \ temporary path for downloads
     method fs-read
@@ -48,14 +48,13 @@ end-class fs-class
 Variable fs-table
 
 \ file events
-
+: file:err ( -- )
+    <err> ." invalid file-done xt" <default> forth:cr ;
 : file:done ( -- )
     -1 parent .file-count +!
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: :>file-done ( file-o -- )
-    >o file-xt @ ?dup-IF  execute
-    ELSE  file( <err> ." invalid file-done xt" <default> forth:cr )
-    THEN o> ;
+    >o addr file-xt @ IF  file-xt  ELSE  file:err  THEN o> ;
 
 \ id handling
 
@@ -65,7 +64,7 @@ event: :>file-done ( file-o -- )
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
     [: fs-class new { w^ fsp } fsp cell file-state $+!
-      o fsp @ >o parent! fs-id ! ['] file:done file-xt !
+      o fsp @ >o parent! fs-id ! ['] file:done is file-xt
       fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
     filestate-sema c-section ;
 

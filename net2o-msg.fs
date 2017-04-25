@@ -567,6 +567,7 @@ Variable ask-msg-files[]
 :noname ( addr u mode -- )
     \G addr u is starttick endtick name concatenated together
     fs-close drop fs-path $!  fs-poll fs-size!
+    ['] noop is file-xt
 ; msgfs-class is fs-open
 
 \ syncing done
@@ -584,7 +585,7 @@ event: :>chat-sync-done ( -- )
     msg( ." chat-sync-done closed" forth:cr )
     <event up@ elit, o elit, :>close-all file-task event> stop
     <event :>chat-sync-done wait-task @ event>
-    ['] noop sync-done-xt ! ;
+    ['] noop is sync-done-xt ;
 event: :>msg-eval ( $pack $addr -- )
     { w^ buf w^ group }  group $@ 2 64s /string ?msg-log
     buf $@ true replay-mode ['] msg-eval !wrapper
@@ -599,7 +600,7 @@ event: :>msg-eval ( $pack $addr -- )
     THEN ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
-    ['] msg-file-done file-xt !
+    ['] msg-file-done is file-xt
 ; msgfs-class is fs-create
 :noname ( addr u -- u )
     [ termserver-class :: fs-read ]
@@ -1134,7 +1135,7 @@ previous
 	THEN
     ELSE  expected@ u< IF  -timeout  THEN  THEN ;
 
-: +resend-msg  ['] msg-timeout  timeout-xt ! o+timeout ;
+: +resend-msg  ['] msg-timeout is timeout-xt o+timeout ;
 
 $B $E 2Value chat-bufs#
 

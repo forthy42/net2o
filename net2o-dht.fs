@@ -352,8 +352,8 @@ false Value add-myip
     ['] addme-end IS expect-reply? ;
 previous
 
-: +addme ['] addme setip-xt !  next-request request-gen ! ;
-: -setip ['] .iperr setip-xt ! ;
+: +addme ['] addme  is setip-xt  next-request request-gen ! ;
+: -setip ['] .iperr is setip-xt ;
 
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
     net2o-code  expect-reply

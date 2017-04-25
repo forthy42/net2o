@@ -420,7 +420,7 @@ UValue connection
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  .timeouts off  THEN ;
 
-: -flow-control ['] noop         ack-xt ! ;
+: -flow-control ['] noop is ack-xt ;
 
 64User ticker
 64User context-ticker  64#0 context-ticker 64!
@@ -436,8 +436,8 @@ UValue connection
     context-table @ token-table ! \ copy pointer
     init-context# @ context# !  1 init-context# +!
     return-addr return-address $10 move
-    ['] no-timeout timeout-xt ! ['] .iperr setip-xt !
-    ['] noop punch-done-xt ! ['] noop sync-done-xt !  ['] noop ack-xt !
+    ['] no-timeout is timeout-xt ['] .iperr is setip-xt
+    ['] noop is punch-done-xt ['] noop is sync-done-xt  ['] noop is ack-xt
     -flow-control
     -1 blocksize !
     1 blockalign !
@@ -633,8 +633,7 @@ scope{ mapc
     maxdata negate and addr>replies dest-replies + endwith ;
 
 reply buffer: dummy-reply
-\ ' noop dummy-reply reply-timeout-xt !
-' noop dummy-reply reply-xt !
+' noop dummy-reply is reply-xt
 
 : reply[] ( index -- addr )
     code-map with mapc
@@ -1229,7 +1228,7 @@ event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
 event: :>save ( o -- )  .net2o:save ;
 event: :>save&done ( o -- )
-    >o net2o:save sync-done-xt perform o> ;
+    >o net2o:save sync-done-xt o> ;
 
 0 Value file-task
 
@@ -1247,7 +1246,7 @@ event: :>save&done ( o -- )
 object class
 64field: queue-timestamp
 field: queue-job
-field: queue-xt
+defer: queue-xt
 end-class queue-class
 queue-class >osize @ Constant queue-struct
 
@@ -1256,13 +1255,13 @@ queue-class >osize @ buffer: queue-adder
 
 : add-queue ( xt us -- )
     ticker 64@ +  o queue-adder >o queue-job !  queue-timestamp 64!
-    queue-xt !  o queue-struct queue $+! o> ;
+    is queue-xt  o queue-struct queue $+! o> ;
 
 : eval-queue ( -- )
     queue $@len 0= ?EXIT  ticker 64@
     queue $@ bounds ?DO  I >o
 	64dup queue-timestamp 64@ 64u> IF
-	    queue-xt @ queue-job @ .execute o>
+	    addr queue-xt @ queue-job @ .execute o>
 	    queue I queue-struct del$one
 	    unloop queue next$ ?DO  NOPE 0
 	ELSE  o>  queue-struct  THEN
@@ -1399,7 +1398,6 @@ Variable timeout-tasks
 : 0timeout ( -- )
     0 ack@ .timeouts !@  IF  timeout-task wake  THEN
     ack@ .+timeouts next-timeout 64! ;
-: do-timeout ( -- )  timeout-xt perform ;
 
 : o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? cr )
@@ -1422,7 +1420,7 @@ Variable timeout-tasks
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 
-: -timeout      ['] no-timeout  timeout-xt ! o-timeout ;
+: -timeout      ['] no-timeout  is timeout-xt o-timeout ;
 
 \ handling packets
 
@@ -1455,7 +1453,7 @@ scope{ mapc
 : handle-data ( addr -- ) parent >o  o to connection
     msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " inbuf mapaddr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
-    +inmove ack-xt perform +ack 0timeout o> ;
+    +inmove ack-xt +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
@@ -1579,8 +1577,8 @@ event: :>throw ( error -- ) throw ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	timeout( ." do timeout: " o hex. timeout-xt @ .name cr )
-	do-timeout
+	timeout( ." do timeout: " o hex. addr timeout-xt @ .name cr )
+	timeout-xt
     THEN ;
 
 \ beacons

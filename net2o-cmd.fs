@@ -293,7 +293,7 @@ cmd-buf-c ' new static-a with-allocater code-buf^ !
 code-buf
 
 :noname ( -- )  cmdbuf# off  o IF
-	req? off  ['] send-cX code-reply send-xt !  THEN ; to cmdreset
+	req? off  ['] send-cX code-reply is send-xt  THEN ; to cmdreset
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
@@ -548,7 +548,7 @@ comp: :, also net2o-base ;
 	    I outflag @ stateless# and IF  send-cX
 	    ELSE
 		send-reply >r over buf# r@ 2!
-		r> send-xt @ ?dup-IF  execute  THEN  THEN
+		r> addr send-xt @ ?dup-IF  execute  THEN  THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
@@ -583,7 +583,7 @@ previous
 	rtd( ." rtdelay t-o: " 64dup 64>f .ns cr )  THEN
     rtdelay 64!  o>
     -1 reqcount +!@ 1 = IF  [IFDEF] ->wake ->wake [ELSE] :>wake [THEN]  THEN
-    0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
+    0 r> addr reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
     timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
@@ -591,7 +591,7 @@ previous
     connection >o code-reply >r
     code-vdest     r@ reply-dest 64!
     ticks          r@ reply-time 64!
-    cmd-reply-xt @ r> reply-xt !
+    cmd-reply-xt @ r> is reply-xt
     1 reqcount +!@ drop o> ;
 
 : take-ret ( -- )

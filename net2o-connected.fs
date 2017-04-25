@@ -28,7 +28,7 @@ connect-table $@ inherit-table context-table
 +net2o: disconnect ( -- ) \g close connection
     o IF  n2o:dispose-context  un-cmd  THEN ;
 +net2o: set-ip ( $:string -- ) \g set address information
-    $> setip-xt perform ;
+    $> setip-xt ;
 +net2o: get-ip ( -- ) \g request address information
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
@@ -442,7 +442,7 @@ previous
     code-map ?dup-IF  with mapc 0  outflag off
 	dest-replies
 	dest-size addr>replies bounds endwith U+DO
-	    I reply-xt @ IF
+	    I addr reply-xt @ IF
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ n2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!
@@ -495,7 +495,7 @@ previous
     dest-addr 64@ recv-addr 64!  +cookie \ last received packet
     net2o:do-ack-rest ;
 
-: +flow-control ['] net2o:do-ack ack-xt ! ;
+: +flow-control ['] net2o:do-ack is ack-xt ;
 
 \ keepalive
 
@@ -520,10 +520,10 @@ previous
     packets2 @ cmd-timeout packets2 @ =
     IF  transfer-keepalive?  THEN ;
 
-\ : +connecting   ['] connecting-timeout timeout-xt ! ;
-: +resend       ['] connected-timeout  timeout-xt ! o+timeout
+\ : +connecting   ['] connecting-timeout is timeout-xt ;
+: +resend       ['] connected-timeout  is timeout-xt o+timeout
     64#0 resend-all-to 64! ;
-: +resend-cmd   ['] cmd-timeout        timeout-xt ! o+timeout ;
+: +resend-cmd   ['] cmd-timeout        is timeout-xt o+timeout ;
 
 : +get-time     ['] get-tick is other ;
 

@@ -158,11 +158,11 @@ drop
 
 cmd-class class
     \ callbacks
-    field: timeout-xt    \ callback for timeout
-    field: setip-xt      \ callback for set-ip
-    field: ack-xt        \ callback for acknowledge
-    field: punch-done-xt \ callback for NAT traversal ok
-    field: sync-done-xt  \ callback for sync done
+    defer: timeout-xt    \ callback for timeout
+    defer: setip-xt      \ callback for set-ip
+    defer: ack-xt        \ callback for acknowledge
+    defer: punch-done-xt \ callback for NAT traversal ok
+    defer: sync-done-xt  \ callback for sync done
     \ maps for data and code transfer
     0 +field start-maps
     value: code-map
@@ -366,8 +366,8 @@ begin-structure reply
     field: reply-offset
     64field: reply-dest
     64field: reply-time
-    field: reply-xt  \ execute when receiving an ok
-    field: send-xt   \ executed to (re)send a message
+    defer: reply-xt  \ execute when receiving an ok
+    defer: send-xt   \ executed to (re)send a message
 \    field: reply-timeout# \ per-reply timeout counter
 \    field: reply-timeout-xt \ per-reply timeout xt
 end-structure

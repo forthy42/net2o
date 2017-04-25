@@ -785,7 +785,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
 : +dvcs-sync-done ( -- )
-    ['] dvcs-sync-done sync-done-xt ! ;
+    ['] dvcs-sync-done is sync-done-xt ;
 
 : dvcs-connect ( addr u -- )
     1 dvcs-request# !  dvcs-bufs# chat#-connect ;
