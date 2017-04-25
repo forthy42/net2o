@@ -118,15 +118,15 @@ init-keybuf
 scope{ mapc
 
 : dest-a/b ( addr u -- addr1 u1 )
-    2/  dest-ivslastgen @ 1 = IF  dup >r + r>  THEN ;
+    2/  dest-ivslastgen 1 = IF  dup >r + r>  THEN ;
 
 : clear-replies ( -- )
-    dest-replies @ dest-size @ addr>replies dest-a/b
+    dest-replies dest-size addr>replies dest-a/b
     reply( ." Clear replies " over hex. dup hex. cr )
     erase ;
 
 : >ivskey ( 64addr -- keyaddr )
-    64>n addr>keys dest-ivs $@ rot umin + ;
+    64>n addr>keys dest-ivs$ rot umin + ;
 
 }scope
 
@@ -149,7 +149,7 @@ scope{ mapc
 
 : ivs>source? ( o:map -- )
     dest-addr 64@ dest-vaddr 64-
-    64dup dest-size @ n>64 64u>= !!inv-dest!!
+    64dup dest-size n>64 64u>= !!inv-dest!!
     64dup 64dup >ivskey ivs-tweak 64>n addr>keys regen-ivs ;
 
 }scope
@@ -217,7 +217,7 @@ scope{ mapc
     c:tweakkey! ;
 
 : try-0decrypt ( addr -- flag ) >r
-    inbuf addr le-64@ inbuf hdrflags le-uw@ addr>assembly
+    inbuf mapaddr le-64@ inbuf hdrflags le-uw@ addr>assembly
     r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
@@ -228,7 +228,7 @@ scope{ mapc
     my-0key try-0decrypt ;
 
 : outbuf0-encrypt ( -- ) +calc
-    outbuf addr le-64@ outbuf hdrflags le-uw@ addr>assembly
+    outbuf mapaddr le-64@ outbuf hdrflags le-uw@ addr>assembly
     o IF  dest-0key  ELSE  your-0key  THEN  sec@ set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
@@ -249,23 +249,23 @@ scope{ mapc
 
 : regen-ivs/2 ( -- )
     [: c:key@ >r
-	dest-ivsgen @ kalign reply( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
+	dest-ivsgen kalign reply( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
 	clear-replies
-	dest-ivs $@ dest-a/b c:prng ivs( ." Regen A/B IVS" cr )
-	2 dest-ivslastgen xor! r> c:key! ;]
+	dest-ivs$ dest-a/b c:prng ivs( ." Regen A/B IVS" cr )
+	2 addr dest-ivslastgen xorc! r> c:key! ;]
     regen-sema c-section  ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
-      dest-ivsgen @ kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
-      dest-ivs $@ c:prng ivs( ." Regen all IVS" cr )
+      dest-ivsgen kalign key( ." regen-ivs " dup c:key# .nnb cr ) c:key!
+      dest-ivs$ c:prng ivs( ." Regen all IVS" cr )
       r> c:key! ;]
     regen-sema c-section ;
 
 : rest+ ( addr u -- addr u )
-    dest-ivsrest $@len IF
-	2dup dest-ivsrest $@ rot umin >r swap r@ move
+    addr dest-ivsrest$ $@len IF
+	2dup dest-ivsrest$ rot umin >r swap r@ move
 	r@ safe/string
-	dest-ivsrest 0 r> $del
+	addr dest-ivsrest$ 0 r> $del
     THEN ;
 
 : rest-prng ( addr u -- )
@@ -273,28 +273,28 @@ scope{ mapc
     2dup dup keccak#max negate and safe/string 2>r
     keccak#max negate and c:prng
     2r> dup IF
-	keccak#max dest-ivsrest $!len  dest-ivsrest $@ c:prng
+	keccak#max addr dest-ivsrest$ $!len  dest-ivsrest$ c:prng
 	rest+
     THEN  2drop ;
 
 : regen-ivs-part ( new-back -- )
     [: c:key@ >r
-      dest-ivsgen @ kalign
-      key( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
-      regen( ." regen-ivs-part " dest-back @ hex. over hex. dup c:key# .nnb cr )
+      dest-ivsgen kalign
+      key( ." regen-ivs-part " dest-back hex. over hex. dup c:key# .nnb cr )
+      regen( ." regen-ivs-part " dest-back hex. over hex. dup c:key# .nnb cr )
       c:key!
-      dest-back @ U+DO
+      dest-back U+DO
 	  I I' fix-size dup { len }
-	  addr>keys >r addr>keys >r dest-ivs $@ r> safe/string r> umin
+	  addr>keys >r addr>keys >r dest-ivs$ r> safe/string r> umin
 	  rest-prng
       len +LOOP
-      key( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
-      tweak( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
-      regen( ." regen-ivs-part' " dest-ivsgen @ kalign c:key# .nnb cr )
+      key( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
+      tweak( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
+      regen( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
       r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
-    dest-ivs $@len 2/ 2/ / dest-ivslastgen @ =
+    addr dest-ivs$ $@len 2/ 2/ / dest-ivslastgen =
     IF	tweak( ." regen-ivs/2" cr ) regen-ivs/2  THEN ;
 ' (regen-ivs) code-class to regen-ivs
 ' (regen-ivs) rcode-class to regen-ivs
@@ -304,9 +304,9 @@ scope{ mapc
 : one-ivs ( map-addr -- )
     @ with mapc c:key@ >r
     key-assembly state2# c:prng
-    dest-ivsgen @ kalign c:key!  key-assembly >c:key
-    dest-size @ addr>keys dest-ivs $!len
-    dest-ivs $@ c:prng ivs( ." Regen one IVS" cr )
+    dest-ivsgen kalign c:key!  key-assembly >c:key
+    dest-size addr>keys addr dest-ivs$ $!len
+    dest-ivs$ c:prng ivs( ." Regen one IVS" cr )
     r> c:key! endwith ;
 
 : clear-keys ( -- )
@@ -518,14 +518,15 @@ drop
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
+: my-key? ( -- o )  o IF  my-key  ELSE  my-key-default  THEN ;
 : sig-params ( -- sksig sk pk )
-    my-key my-key-default o select @ ?dup-IF
+    my-key? ?dup-IF
 	>o ke-sksig sec@ drop ke-sk sec@ drop ke-pk $@ drop o>  EXIT
     THEN  !!FIXME!! ( old version ) sksig skc pkc ;
 : pk@ ( -- pk u )
-    my-key my-key-default o select @ .ke-pk $@ ;
+    my-key? .ke-pk $@ ;
 : sk@ ( -- pk u )
-    my-key my-key-default o select @ .ke-sk sec@ ;
+    my-key? .ke-sk sec@ ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sig-params ed-sign type keysize emit ;

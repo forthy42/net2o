@@ -42,7 +42,7 @@ connect-table $@ inherit-table context-table
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
     >r 64>n r> data-rmap @ with mapc
-    over dest-top @ <> and dest-end or! dest-top!
+    over dest-top <> and dest-end or! dest-top!
     endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
     n2o:slurp swap ulit, flag, set-top
@@ -138,9 +138,9 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \g set head
-    64>n parent .data-rmap @ .mapc:dest-head umax! ;
+    64>n parent .data-rmap @ >o addr mapc:dest-head o> umax! ;
 +net2o: timeout ( uticks -- ) \g timeout request
-    parent >o net2o:timeout  data-map @ .mapc:dest-tail @ o> ulit, set-head ;
+    parent >o net2o:timeout  data-map @ .mapc:dest-tail o> ulit, set-head ;
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 
@@ -155,7 +155,7 @@ gen-table $freeze
     ack-reset 0 ack-receive c! ;
 
 : rewind ( -- )
-    data-rmap @ with mapc dest-back @ do-slurp @ umax endwith ulit, ack-flush ;
+    data-rmap @ with mapc dest-back do-slurp @ umax endwith ulit, ack-flush ;
 
 \ safe initialization
 
@@ -269,10 +269,9 @@ also net2o-base
 
 : !rdata-tail ( -- )
     data-rmap @ with mapc
-    data-ack# @ bytes>addr \ dest-back @ dest-size @ 1- invert and +
-    \ dup dest-back @ u< IF  dest-size @ +  THEN
-    dest-top 2@ umin umin
-    dest-tail @ umax dup dest-tail !@ endwith
+    data-ack# @ bytes>addr
+    dest-head umin dest-top umin
+    dest-tail umax dup addr dest-tail !@ endwith
     ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : resend~? ( -- flag )
@@ -282,12 +281,12 @@ $20 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits )
     data-rmap @ with mapc
-    ack( ." head/tail: " dup forth:. dest-head @ hex. dest-tail @ hex. forth:cr )
-    IF    dest-head @ addr>bytes -4 and
-    ELSE  dest-head @ 1- addr>bytes 1+  THEN 0 max
-    dest-tail @ addr>bytes -4 and dup data-ack# umin!
-    data-ackbits @ dest-size @ addr>bytes 1-
-    dest-tail @ addr>bits endwith ;
+    ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
+    IF    dest-head addr>bytes -4 and
+    ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
+    dest-tail addr>bytes -4 and dup data-ack# umin!
+    data-ackbits @ dest-size addr>bytes 1-
+    dest-tail addr>bits endwith ;
 
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap @ 0= IF  drop EXIT  THEN
@@ -355,7 +354,7 @@ $20 Value max-resend#
 
 : expected@ ( -- head top )
     o IF  data-rmap @ with mapc
-	o IF  dest-tail @ dest-top @
+	o IF  dest-tail dest-top
 	    msg( ." expected: " over hex. dup hex. forth:cr )
 	ELSE  #0. msg( ." expected: no data-rmap" forth:cr )  THEN endwith
     ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
@@ -364,7 +363,7 @@ $20 Value max-resend#
     expected@ tuck u>= and IF
 	expect-reply
 	msg( ." check: " data-rmap @ with mapc
-	dest-back @ hex. dest-tail @ hex. dest-head @ hex.
+	dest-back hex. dest-tail hex. dest-head hex.
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
@@ -401,7 +400,7 @@ scope{ mapc
 
 : resend-all? ( -- flag )
     data-rmap @ with mapc
-    dest-head @ dest-top @ u>= ack-advance? @ and endwith
+    dest-head dest-top u>= ack-advance? @ and endwith
     ticker 64@ resend-all-to 64@ 64u>= and ;
 
 : +expected ( -- flag )
@@ -441,8 +440,8 @@ previous
 
 : map-resend? ( -- n )
     code-map @ ?dup-IF  with mapc 0  outflag off
-	dest-replies @
-	dest-size @ addr>replies bounds endwith U+DO
+	dest-replies
+	dest-size addr>replies bounds endwith U+DO
 	    I reply-xt @ IF
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ n2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
@@ -502,8 +501,8 @@ previous
 
 also net2o-base
 : .keepalive ( -- )  ." transfer keepalive e e h t b " expected@ hex. hex.
-    data-rmap @ with mapc  dest-head @ hex. dest-tail @ hex. dest-back @ hex.
-    ack( data-ackbits @ dest-size @ addr>bytes dump )
+    data-rmap @ with mapc  dest-head hex. dest-tail hex. dest-back hex.
+    ack( data-ackbits @ dest-size addr>bytes dump )
     endwith
     forth:cr ;
 : transfer-keepalive? ( -- )

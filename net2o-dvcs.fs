@@ -792,8 +792,8 @@ event: :>dvcs-sync-done ( o -- ) >o
 
 : dvcs-connects ( -- )
     chat-keys [: key>group ?load-msgn
-      dup 0= IF  msg-group$ $@ msg-groups #!  EXIT  THEN
-      2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
+      dup 0= IF  2drop msg-group$ $@ msg-groups #!  EXIT  THEN
+      2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
       2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;] $[]map ;
 
 : wait-dvcs-request ( -- )

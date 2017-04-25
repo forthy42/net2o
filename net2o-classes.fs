@@ -21,12 +21,12 @@ current-o
 
 Variable contexts \G contains all command objects
 
-Variable my-key-default \G default own key
+0 Value my-key-default \G default own key
 
 object class
     field: token-table
     value: parent
-    field: my-key        \ key used for this context
+    value: my-key        \ key used for this context
     field: req?
     field: c-state \ state for checks whether everything is there
     method start-req
@@ -55,19 +55,19 @@ also mapc definitions
 
 cmd-class class
     64value: dest-vaddr
-    field: dest-size
-    field: dest-raddr
-    field: dest-ivs
-    field: dest-ivsgen
-    field: dest-ivslastgen
-    field: dest-ivsrest
-    field: dest-timestamps
-    field: dest-replies
+    value: dest-size
+    value: dest-raddr
+    $value: dest-ivs$
+    value: dest-ivsgen
+    cvalue: dest-ivslastgen
+    $value: dest-ivsrest$
+    value: dest-timestamps
+    value: dest-replies
     \                   sender:                receiver:
-    field: dest-top   \ -/-                    sender read up to here
-    field: dest-head  \ read up to here        received some
-    field: dest-tail  \ send from here         received all
-    field: dest-back  \ flushed on destination flushed
+    value: dest-top   \ -/-                    sender read up to here
+    value: dest-head  \ read up to here        received some
+    value: dest-tail  \ send from here         received all
+    value: dest-back  \ flushed on destination flushed
     field: dest-end   \ -/-                    true if last chunk
     field: do-slurp
     method free-data
@@ -305,11 +305,11 @@ Create perm$ ," cbdmrwnhstvyi"
 \ timestasts structure
 
 begin-structure timestats
-sffield: ts-delta
-sffield: ts-slack
-sffield: ts-reqrate
-sffield: ts-rate
-sffield: ts-grow
+sfvalue: ts-delta
+sfvalue: ts-slack
+sfvalue: ts-reqrate
+sfvalue: ts-rate
+sfvalue: ts-grow
 end-structure
 
 \ io per-task variables
@@ -399,7 +399,7 @@ begin-structure net2o-header
     1 +field hdrflags
     1 +field hdrtags
    16 +field destination
-    8 +field addr
+    8 +field mapaddr
 end-structure
 
 \ key class

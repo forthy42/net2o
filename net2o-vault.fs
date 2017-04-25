@@ -28,7 +28,7 @@ end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
     vault-class new n:>o vault-table @ token-table !
-    my-key-default @ my-key ! ;
+    my-key-default to my-key ;
 : v-mode>crypt2 ( -- )
     v-mode @ $10 rshift $FF and >crypt ;
 

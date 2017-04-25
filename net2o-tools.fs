@@ -786,7 +786,9 @@ Sema resize-sema
 
 \ string values
 
-cell      ' aligned   ' $@  ' $!  wrap+value: $value: ( u1 "name" -- u2 )
+[IFUNDEF] $value:
+    cell      ' aligned   ' $@  ' $!  wrap+value: $value: ( u1 "name" -- u2 )
+[THEN]
 
 \ xchar tool
 

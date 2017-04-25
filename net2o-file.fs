@@ -303,17 +303,16 @@ Value file-classes#
 scope{ mapc
 
 : dest-top! ( addr -- )
-    \ dest-tail @ dest-size @ + umin
-    dup dup dest-top @ U+DO
+    dup dup dest-top U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
-    len +LOOP  dest-top ! ;
+    len +LOOP  to dest-top ;
 
 : dest-back! ( addr -- )
-    dup dest-back @ U+DO
+    dup dest-back U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
-    len +LOOP  dest-back ! ;
+    len +LOOP  to dest-back ;
 
 }scope
 

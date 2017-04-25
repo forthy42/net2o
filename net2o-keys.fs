@@ -879,7 +879,7 @@ here scanned-x - cell/ constant scanned-max#
 
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!
-    pkc keysize2 key:new >o o my-key !
+    pkc keysize2 key:new >o o to my-key
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
     ke-type !  ke-nick $!  nick!
     config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !
@@ -979,7 +979,7 @@ false value ?yes
 Forward !my-addr$
 
 : >raw-key ( o -- )
-    dup 0= !!no-nick!! dup my-key-default ! >o
+    dup 0= !!no-nick!! dup to my-key-default >o
     sksig!
     ke-pk $@ pkc pkrk# smove
     ke-sk sec@ skc swap key| move

@@ -591,7 +591,7 @@ event: :>msg-eval ( $pack $addr -- )
     buf $free group $@ 2 64s /string ?save-msg  group $free ;
 : msg-file-done ( -- )
     fs-path $@len IF
-	." msg file done: " fs-path $@ .chat-file forth:cr
+	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
 	fs-close
 	parent ?dup-IF  >o -1 file-count +!@ 1 =
 	    IF  chat-sync-done  THEN
@@ -1142,7 +1142,7 @@ $B $E 2Value chat-bufs#
     +resend-msg +flow-control ;
 
 : chat#-connect ( addr u buf1 buf2 --- )
-    pk-connect connection .+chat-control  greet +group ;
+    pk-connect connection >o rdrop +chat-control  greet +group ;
 
 : chat-connect ( addr u -- )
     chat-bufs# chat#-connect ;
