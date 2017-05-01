@@ -583,7 +583,8 @@ event: :>chat-sync-done ( -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
-    <event up@ elit, o elit, :>close-all file-task event> stop
+    n2o:close-all
+    \ <event up@ elit, o elit, :>close-all file-task event> stop
     <event :>chat-sync-done wait-task @ event>
     ['] noop is sync-done-xt ;
 event: :>msg-eval ( $pack $addr -- )
@@ -593,7 +594,7 @@ event: :>msg-eval ( $pack $addr -- )
 : msg-file-done ( -- )
     fs-path $@len IF
 	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
-	fs-close
+	fs-close \ <event o elit, :>close-file file-task event>
 	parent ?dup-IF  >o -1 file-count +!@ 1 =
 	    IF  chat-sync-done  THEN
 	    o>  THEN

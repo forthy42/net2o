@@ -49,12 +49,12 @@ Variable fs-table
 
 \ file events
 : file:err ( -- )
-    <err> ." invalid file-done xt" <default> forth:cr ;
+    <err> ." invalid file-done xt" <default> ~~bt ;
 : file:done ( -- )
     -1 parent .file-count +!
     .time ." download done: " fs-id ? fs-path $@ type cr ;
-event: :>file-done ( file-o -- )
-    >o addr file-xt @ IF  file-xt  ELSE  file:err  THEN o> ;
+event: :>file-done ( file-o -- ) \ .file-xt ;
+    >o action-of file-xt IF  file-xt  ELSE  file:err  THEN o> ;
 
 \ id handling
 
@@ -113,7 +113,8 @@ cell 8 = [IF]
 ; ' fs:fs-write fs-class to fs-write
 : fs:fs-clear ( -- )
     64#0 64dup fs-limit 64!  64dup fs-seekto 64!  64dup fs-seek 64!
-    64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free ;
+    64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free
+    ['] noop to file-xt ;
 : fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-time 64@ 64dup 64-0= IF  64drop

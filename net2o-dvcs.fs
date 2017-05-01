@@ -780,7 +780,9 @@ event: :>dvcs-sync-done ( o -- ) >o
 
 : dvcs-sync-done ( -- )
     msg( ." dvcs-sync-done" forth:cr )
-    n2o:close-all net2o-code expect-reply close-all net2o:gen-reset end-code
+    net2o-code expect-reply close-all net2o:gen-reset end-code
+    \ <event up@ elit, o elit, :>close-all file-task event> stop
+    n2o:close-all
     msg( ." dvcs-sync-done closed" forth:cr )
     <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
