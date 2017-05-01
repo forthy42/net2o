@@ -299,13 +299,13 @@ Forward !my-addr ( -- )
     nat( ticks .ticks ."  ping: " 2dup .address cr )
     2>r net2o-sock ">" 0 2r> sendto drop ;
 
-: p+ ( addr u -- addr' u' )
+: pathc+ ( addr u -- addr' u' )
     BEGIN  dup  WHILE  over c@ $80 < >r 1 /string r>  UNTIL  THEN ;
 
 : .addr-path ( addr -- )
     dup be@ routes #.key dup 0= IF  drop $10 xtype  ELSE
 	$@ .address
-	$10 p+ 0 -skip dup IF  '|' emit  THEN xtype  THEN ;
+	$10 pathc+ 0 -skip dup IF  '|' emit  THEN xtype  THEN ;
 
 \ Create udp socket
 

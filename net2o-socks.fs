@@ -204,7 +204,7 @@ Variable lastn2oaddr
     path r> plen move ;
 : skip-dest ( addr -- )
     $10 2dup 0 scan nip -
-    2dup p+ { addr1 u1 addr2 u2 } \ better use locals here
+    2dup pathc+ { addr1 u1 addr2 u2 } \ better use locals here
     addr2 addr1 u2 move
     addr1 u1 u2 /string erase ;
 
