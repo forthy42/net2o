@@ -827,3 +827,17 @@ e? max-xchar $100 u< [IF]
 
 : !wrapper ( val addr xt -- .. ) { addr xt -- .. }
     addr !@ >r xt catch r> addr ! throw ;
+
+\ blocking event, also available in most recent Gforth
+
+[IFUNDEF] event|
+    event: :>restart ( task -- ) restart ;
+    
+    : event| ( task -- )
+	\G send an event and block
+	dup up@ = IF \ don't block, just eval if we send to ourselves
+	    event> ?events
+	ELSE
+	    up@ elit, :>restart event> stop
+	THEN ;
+[THEN]

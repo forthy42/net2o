@@ -1092,7 +1092,6 @@ Variable invitations
 
 event: :>invite ( addr u -- )
     ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
-event: :>wakeme ( o -- ) restart ;
 
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig
@@ -1131,7 +1130,7 @@ event: :>wakeme ( o -- ) restart ;
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem main-up@ <hide>
-	<event e$, :>invite up@ elit, :>wakeme main-up@ event> stop
+	<event e$, :>invite main-up@ event|
     ELSE  2drop  THEN ;
 
 forward .sigqr

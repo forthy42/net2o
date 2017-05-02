@@ -164,12 +164,11 @@ up@ Value main-up@
 
 :noname defers 'cold up@ to main-up@ ; is 'cold
 
-event: :>type ( $string -- ) { w^ x } x $@ type x $off ;
-event: :>hide ( task -- ) ctrl Z inskey restart ;
+event: :>type ( $string -- ) { w^ x } x $@ type x $free ;
+event: :>hide ( -- ) ctrl Z inskey ;
+: <hide> ( task -- ) <event :>hide event| ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
-: <hide> ( task -- )
-    <event up@ elit, :>hide event>  stop ;
 : bflush ( -- )
     [IFUNDEF] gl-emit      b$ $@ defers type b$ $off
     [ELSE]

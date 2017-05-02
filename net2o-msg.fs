@@ -107,11 +107,11 @@ Variable saved-msg$
     2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
 
 event: :>save-msgs ( last# -- ) saved-msg$ +unique$ ;
-event: :>save-all-msgs ( task -- )
-    save-all-msgs restart ;
+event: :>save-all-msgs ( -- )
+    save-all-msgs ;
 
 : !save-all-msgs ( -- )  file-task 0= ?EXIT
-    <event up@ elit, :>save-all-msgs file-task event> stop ;
+    <event :>save-all-msgs file-task event| ;
 
 : save-msgs& ( -- )
     file-task 0= IF  create-file-task  THEN
@@ -571,8 +571,8 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: :>close-all ( task o -- )
-    .n2o:close-all restart ;
+event: :>close-all ( o -- )
+    .n2o:close-all ;
 event: :>chat-sync-done ( -- )
     msg( ." chat-sync-done event" forth:cr )
     msg-group$ $@ ?msg-log
@@ -584,7 +584,7 @@ event: :>chat-sync-done ( -- )
     net2o-code expect-reply close-all net2o:gen-reset end-code
     msg( ." chat-sync-done closed" forth:cr )
     n2o:close-all
-    \ <event up@ elit, o elit, :>close-all file-task event> stop
+    \ <event o elit, :>close-all file-task event|
     <event :>chat-sync-done wait-task @ event>
     ['] noop is sync-done-xt ;
 event: :>msg-eval ( $pack $addr -- )
@@ -594,7 +594,7 @@ event: :>msg-eval ( $pack $addr -- )
 : msg-file-done ( -- )
     fs-path $@len IF
 	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
-	fs-close \ <event o elit, :>close-file file-task event>
+	['] fs-flush file-sema c-section
 	parent ?dup-IF  >o -1 file-count +!@ 1 =
 	    IF  chat-sync-done  THEN
 	    o>  THEN
@@ -607,11 +607,15 @@ event: :>msg-eval ( $pack $addr -- )
     [ termserver-class :: fs-read ]
 ; msgfs-class is fs-read
 :noname ( -- )
-    fs-path @ 0= ?EXIT
-    fs-inbuf $@len IF
 	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
 	parent .wait-task @ event>
 	fs:fs-clear
+; msgfs-class is fs-flush    
+:noname ( -- )
+    fs-path @ 0= ?EXIT
+    fs-inbuf $@len IF
+	msg( ." Closing file " fs-path $@ .chat-file forth:cr )
+	fs-flush
     THEN
 ; msgfs-class is fs-close
 :noname ( perm -- )

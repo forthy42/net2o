@@ -39,6 +39,7 @@ cmd-class class
     method fs-open
     method fs-create
     method fs-close
+    method fs-flush
     method fs-poll
     method fs-perm?
     method fs-get-stat
@@ -115,12 +116,15 @@ cell 8 = [IF]
     64#0 64dup fs-limit 64!  64dup fs-seekto 64!  64dup fs-seek 64!
     64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free
     ['] noop to file-xt ;
+: fs:fs-flush ( -- )
+    fs-fid @ flush-file throw
+    fs-fid @ fileno fs-timestamp!
+; ' fs:fs-flush fs-class to fs-flush
 : fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-time 64@ 64dup 64-0= IF  64drop
     ELSE
-	fs-fid @ flush-file throw
-	fs-fid @ fileno fs-timestamp!
+	fs-flush
     THEN
     fs-fid @ close-file throw
     fs-fid off
@@ -390,6 +394,7 @@ scope{ mapc
     dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )
+    ." Closing all files" forth:cr
     [: fstates 0 ?DO  I n2o:close-file  LOOP
       file-reg# off  fstate-off  blocksize @ blocksizes!
       read-file# off  write-file# off ;] file-sema c-section ;
