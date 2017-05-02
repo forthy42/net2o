@@ -394,7 +394,7 @@ scope{ mapc
     dup residualread !  residualwrite ! ;
 
 : n2o:close-all ( -- )
-    ." Closing all files" forth:cr
+    msg( ." Closing all files" forth:cr )
     [: fstates 0 ?DO  I n2o:close-file  LOOP
       file-reg# off  fstate-off  blocksize @ blocksizes!
       read-file# off  write-file# off ;] file-sema c-section ;

@@ -587,17 +587,17 @@ event: :>chat-sync-done ( -- )
     \ <event o elit, :>close-all file-task event|
     <event :>chat-sync-done wait-task @ event>
     ['] noop is sync-done-xt ;
-event: :>msg-eval ( $pack $addr -- )
+event: :>msg-eval ( parent $pack $addr -- )
     { w^ buf w^ group }  group $@ 2 64s /string ?msg-log
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $free group $@ 2 64s /string ?save-msg  group $free ;
+    buf $free group $@ 2 64s /string ?save-msg  group $free
+    >o -1 file-count +!@ 1 =
+    IF  chat-sync-done  THEN
+    o> ;
 : msg-file-done ( -- )
     fs-path $@len IF
 	msg( ." msg file done: " fs-path $@ .chat-file forth:cr )
 	['] fs-flush file-sema c-section
-	parent ?dup-IF  >o -1 file-count +!@ 1 =
-	    IF  chat-sync-done  THEN
-	    o>  THEN
     THEN ;
 :noname ( addr u mode -- )
     fs-close drop fs-path $!
@@ -607,7 +607,7 @@ event: :>msg-eval ( $pack $addr -- )
     [ termserver-class :: fs-read ]
 ; msgfs-class is fs-read
 :noname ( -- )
-	<event 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
+	<event parent elit, 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
 	parent .wait-task @ event>
 	fs:fs-clear
 ; msgfs-class is fs-flush    

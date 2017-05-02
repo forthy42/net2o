@@ -20,7 +20,7 @@ require rec-scope.fs
 Vocabulary config
 ' config >body Value config-wl
 
-Variable config-recognizer
+3 stack: config-recognizer
 \G The config recognizer
 
 ' rec:string ' rec:num ' rec:float 3 config-recognizer set-stack
