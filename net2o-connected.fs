@@ -129,11 +129,11 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
     64>n $> parent .data-map .mapc:resend#? dup 0= IF
-	drop ." resend# don't match!" forth:cr
-	parent .n2o:see-me
-	[ cookie-val $FF xor ]L validated and!
+	drop timeout( ." resend# don't match!" forth:cr
+	parent .n2o:see-me ~~ )
+	[ cookie-val 1 validated# lshift 1- xor ]L validated and!
     ELSE
-	8 lshift validated +! cookie-val validated or!
+	validated# lshift validated +! cookie-val validated or!
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent .net2o:rewind-sender-partial ;
