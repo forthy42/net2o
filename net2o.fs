@@ -955,7 +955,9 @@ scope{ mapc
     dest-raddr - addr>64 data-resend# @ + { addr }
     rng8 $3F and { r }
     addr le-64@ r 64ror 64ffz< r + $3F and to r
-    64#1 r 64lshift addr le-64@ 64or addr le-64! 
+    64#1 r 64lshift addr le-64@ 64or
+    timeout( ." resend#: " data-resend# @ addr - hex. 64dup x64. cr )
+    addr le-64! 
     r ;
 
 : resend#? ( off addr u -- n )
@@ -965,12 +967,12 @@ scope{ mapc
     64s data-resend# @ + swap ?DO
 	dup c@ $40 u< IF
 	    dup c@ >r 64#1 r> 64lshift
-	    I 64@
-	    \ 64over 64invert 64over 64and I 64! \ ack only once!
+	    I le-64@
+	    \ 64over 64invert 64over 64and I le-64! \ ack only once!
 	    64and 64-0= IF \ check if had been zero already
 		timeout( ." resend# unmatch: "
 		I data-resend# @ - hex.
-		dup c@ hex. I 64@ x64. cr )
+		dup c@ hex. I le-64@ x64. cr )
 		2drop 0 UNLOOP  EXIT
 	    THEN  swap 1+ swap
 	THEN  1+
