@@ -500,7 +500,7 @@ previous
 \ keepalive
 
 also net2o-base
-: .keepalive ( -- )  ." transfer keepalive e e h t b " expected@ hex. hex.
+: .keepalive ( -- )  ." transfer keepalive e/e h t b " expected@ hex. hex.
     data-rmap with mapc  dest-head hex. dest-tail hex. dest-back hex.
     data-ackbits @ dest-size addr>bytes dump
     endwith
