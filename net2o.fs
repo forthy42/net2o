@@ -956,7 +956,7 @@ scope{ mapc
     rng8 $3F and { r }
     addr le-64@ r 64ror 64ffz< r + $3F and to r
     64#1 r 64lshift addr le-64@ 64or
-    timeout( ." resend#: " data-resend# @ addr - hex. 64dup x64. cr )
+    timeout( ." resend#: " addr data-resend# @ dup hex. - hex. 64dup x64. cr )
     addr le-64! 
     r ;
 
@@ -971,7 +971,7 @@ scope{ mapc
 	    \ 64over 64invert 64over 64and I le-64! \ ack only once!
 	    64and 64-0= IF \ check if had been zero already
 		timeout( ." resend# unmatch: "
-		I data-resend# @ - hex.
+		I data-resend# @ dup hex. - hex.
 		dup c@ hex. I le-64@ x64. cr )
 		2drop 0 UNLOOP  EXIT
 	    THEN  swap 1+ swap
@@ -1196,7 +1196,8 @@ rdata-class to rewind-timestamps
     len +LOOP ;
 : rewind-ts-partial ( new-back addr o:map -- )
     { addr } addr>ts dest-back addr>ts U+DO
-	I I' fix-tssize { len } addr + len erase
+	I I' fix-tssize timeout( ." rewind: " over hex. dup hex. cr )
+	{ len } addr + len erase
     len +LOOP ;
 :noname ( new-back o:map -- )
     dup data-resend# @ rewind-ts-partial
