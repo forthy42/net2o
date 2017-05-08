@@ -969,7 +969,7 @@ scope{ mapc
 	    \ 64over 64invert 64over 64and I 64! \ ack only once!
 	    64and 64-0= IF \ check if had been zero already
 		timeout( ." resend# unmatch: "
-		dup data-resend# @ - hex.
+		I data-resend# @ - hex.
 		dup c@ hex. I 64@ x64. cr )
 		2drop 0 UNLOOP  EXIT
 	    THEN  swap 1+ swap
