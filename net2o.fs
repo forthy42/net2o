@@ -966,7 +966,7 @@ scope{ mapc
 	dup c@ $40 u< IF
 	    dup c@ >r 64#1 r> 64lshift
 	    I 64@
-	    64over 64invert 64over 64and I 64! \ ack only once!
+	    \ 64over 64invert 64over 64and I 64! \ ack only once!
 	    64and 64-0= IF \ check if had been zero already
 		2drop 0 UNLOOP  EXIT
 	    THEN  swap 1+ swap

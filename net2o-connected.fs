@@ -130,7 +130,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
     64>n $> parent .data-map .mapc:resend#? dup 0= IF
 	drop timeout( ." resend# don't match!" forth:cr
-	parent .n2o:see-me ~~ )
+	parent .n2o:see-me )
 	[ cookie-val 1 validated# lshift 1- xor ]L validated and!
     ELSE
 	validated# lshift validated +! cookie-val validated or!
@@ -502,7 +502,7 @@ previous
 also net2o-base
 : .keepalive ( -- )  ." transfer keepalive e e h t b " expected@ hex. hex.
     data-rmap with mapc  dest-head hex. dest-tail hex. dest-back hex.
-    ack( data-ackbits @ dest-size addr>bytes dump )
+    data-ackbits @ dest-size addr>bytes dump
     endwith
     forth:cr ;
 : transfer-keepalive? ( -- )
