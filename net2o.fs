@@ -1198,8 +1198,7 @@ rdata-class to rewind-timestamps
     len +LOOP ;
 : rewind-ts-partial ( new-back addr o:map -- )
     { addr } addr>ts dest-back addr>ts U+DO
-	I I' fix-tssize timeout( ." rewind: " over hex. dup hex. cr )
-	{ len } addr + len erase
+	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
 :noname ( new-back o:map -- )
     dup data-resend# @ rewind-ts-partial
