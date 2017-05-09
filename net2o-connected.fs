@@ -144,7 +144,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 +net2o: set-ack# ( n -- ) \g set the ack number and check for smaller
-    64>n parent .data-map >o to send-ack# o> ;
+    64>n parent .data-map >o to mapc:send-ack# o> ;
 
 \ profiling, nat traversal
 
