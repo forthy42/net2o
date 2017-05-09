@@ -958,7 +958,7 @@ scope{ mapc
     rng8 $3F and { r }
     addr le-64@ r 64ror 64ffz< r + $3F and to r
     64#1 r 64lshift addr le-64@ 64or
-    timeout( ." resend#: " addr data-resend# @ dup hex. - hex. 64dup x64. cr )
+    \ timeout( ." resend#: " addr data-resend# @ dup hex. - hex. 64dup x64. cr )
     addr le-64! 
     r ;
 
