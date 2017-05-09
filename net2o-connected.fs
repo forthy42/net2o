@@ -128,12 +128,17 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: ack-b2btime ( utime addr -- ) \g burst-to-burst time at packet addr
     net2o:ack-b2btime ;
 +net2o: ack-resend# ( addr $:string -- ) \g resend numbers
-    64>n $> parent .data-map .mapc:resend#? dup 0= IF
-	drop timeout( ." resend# don't match!" forth:cr
-	parent .n2o:see-me )
-	[ cookie-val 1 validated# lshift 1- xor ]L validated and!
-    ELSE
-	validated# lshift validated +! cookie-val validated or!
+    64>n $>
+    ack-order? IF
+	parent .data-map .mapc:resend#? dup 0= IF
+	    drop timeout( ." resend# don't match!" forth:cr
+	    parent .n2o:see-me )
+	    [ cookie-val 1 validated# lshift 1- xor ]L validated and!
+	ELSE
+	    validated# lshift validated +! cookie-val validated or!
+	THEN
+    ELSE  timeout( ." out of order arrival of ack" forth:cr )
+	2drop drop
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent .net2o:rewind-sender-partial ;
@@ -144,7 +149,11 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 +net2o: set-ack# ( n -- ) \g set the ack number and check for smaller
-    64>n parent .data-map >o to mapc:send-ack# o> ;
+    64>n parent .data-map with mapc
+    dup send-ack# u> IF  to send-ack#  ack-order-val validated or!  ELSE
+	[ ack-order-val invert ]L validated and!
+    THEN
+    endwith ;
 
 \ profiling, nat traversal
 
