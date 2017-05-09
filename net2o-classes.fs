@@ -90,8 +90,8 @@ code-class class
     field: data-ackbits-buf
     field: data-ack#     \ fully acked bursts
     field: ack-bit#      \ actual ack bit
-    field: ack-advance?  \ ack is advancing state
     field: data-resend#-buf
+    cvalue: ack-advance?  \ ack is advancing state
 end-class rcode-class
 
 rcode-class class

@@ -319,7 +319,7 @@ scope{ mapc
 	    dest-size u<
 	    IF
 		dup addr>bits ack-bit# !
-		dest-raddr swap dup >data-head ack-advance? ! +
+		dest-raddr swap dup >data-head to ack-advance? +
 		o parent o> >o rdrop
 		UNLOOP  rot drop  EXIT  THEN
 	    drop endwith

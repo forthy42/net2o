@@ -421,7 +421,7 @@ scope{ mapc
 
 : resend-all? ( -- flag )
     data-rmap with mapc
-    dest-head dest-top u>= ack-advance? @ and endwith
+    dest-head dest-top u>= ack-advance? and endwith
     ticker 64@ resend-all-to 64@ 64u>= and ;
 
 : +expected ( -- flag )
@@ -502,7 +502,7 @@ previous
     THEN  +expected slurp? or to slurp?
     stats? IF  send-timing  THEN
     end-with  cmdbuf# @ 2 stats? - = IF  cmdbuf# off
-    ELSE  1 data-rmap >o +to mapc:rec-ack# o>  THEN
+    ELSE  1 data-rmap with mapc +to rec-ack# endwith  THEN
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
@@ -511,7 +511,7 @@ previous
 	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
     THEN
     inbuf 1+ c@ dup recv-flag c! \ last receive flag
-    acks# and data-rmap .mapc:ack-advance? @
+    acks# and data-rmap .mapc:ack-advance?
     IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  ack-timing ;
 
 : net2o:do-ack ( -- )
@@ -530,8 +530,10 @@ also net2o-base
     forth:cr ;
 : transfer-keepalive? ( -- )
     o to connection
-    timeout( .keepalive )
-    inbuf 1+ c@ 7 xor recv-flag c!  net2o:do-ack-rest ;
+    timeout( .keepalive ['] cmd( >body on )
+    recv-flag c@ 7 xor inbuf 1+ c!
+    data-rmap with mapc true to ack-advance? endwith
+    net2o:do-ack-rest ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
