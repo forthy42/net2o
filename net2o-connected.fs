@@ -143,6 +143,8 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     parent >o net2o:timeout  data-map .mapc:dest-tail o> ulit, set-head ;
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
++net2o: set-ack# ( n -- ) \g set the ack number and check for smaller
+    64>n parent .rdata-map >o to rec-ack# o> ;
 
 \ profiling, nat traversal
 
@@ -334,7 +336,13 @@ $20 Value max-resend#
 : expect+slurp ( -- )
     ['] drop expect+slurp-xt ;
 
+: rec-ack#, ( -- )
+    cmdbuf# @ 1 = IF
+	data-rmap .mapc:rec-ack# ulit, set-ack#
+    THEN ;
+
 : resend-all ( -- )
+    rec-ack#,
     false net2o:do-resend
     ack@ .+timeouts resend-all-to 64! ;
 
@@ -367,6 +375,7 @@ $20 Value max-resend#
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
+	rec-ack#,
 	net2o:save&done  net2o:ack-resend#  rewind  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
@@ -469,6 +478,7 @@ previous
     ack-receive c@ over ack-receive c! xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
+	rec-ack#,
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    ack( ." ack: do-resend" forth:cr )
@@ -479,7 +489,8 @@ previous
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected slurp? or to slurp?
     stats? IF  send-timing  THEN
-    end-with  cmdbuf# @ 2 stats? - = IF  cmdbuf# off  THEN
+    end-with  cmdbuf# @ 2 stats? - = IF  cmdbuf# off
+    ELSE  1 data-rmap >o +to mapc:rec-ack# o>  THEN
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 

@@ -82,18 +82,20 @@ end-class code-class
 
 code-class class
     field: data-resend# \ resend tokens; only for data
+    value: send-ack#
 end-class data-class
 
 code-class class
-end-class rcode-class
-
-data-class class
     field: data-ackbits
     field: data-ackbits-buf
     field: data-ack#     \ fully acked bursts
     field: ack-bit#      \ actual ack bit
     field: ack-advance?  \ ack is advancing state
     field: data-resend#-buf
+end-class rcode-class
+
+rcode-class class
+    value: rec-ack#
 end-class rdata-class
 
 previous definitions
