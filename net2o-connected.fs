@@ -136,8 +136,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 	validated# lshift validated +! cookie-val validated or!
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
-    64>n parent .net2o:rewind-sender-partial
-    timeout( ." ack-flush " forth:cr n2o:see-me ) ;
+    64>n parent .net2o:rewind-sender-partial ;
 +net2o: set-head ( addr -- ) \g set head
     64>n parent .data-rmap >o addr mapc:dest-head o> umax! ;
 +net2o: timeout ( uticks -- ) \g timeout request

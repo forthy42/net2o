@@ -85,15 +85,16 @@ code-class class
 end-class data-class
 
 code-class class
+end-class rcode-class
+
+data-class class
     field: data-ackbits
     field: data-ackbits-buf
     field: data-ack#     \ fully acked bursts
     field: ack-bit#      \ actual ack bit
     field: ack-advance?  \ ack is advancing state
     field: data-resend#-buf
-end-class rcode-class
-
-rcode-class class end-class rdata-class
+end-class rdata-class
 
 previous definitions
 
