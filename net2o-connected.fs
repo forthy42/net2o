@@ -528,7 +528,7 @@ also net2o-base
     o to connection
     timeout( .keepalive )
     data-rmap with mapc true to ack-advance? endwith
-    ack-toggle# ack-resend# or net2o:do-ack-rest ;
+    [ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
