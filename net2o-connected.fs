@@ -526,7 +526,7 @@ also net2o-base
     forth:cr ;
 : transfer-keepalive? ( -- )
     o to connection
-    timeout( .keepalive ['] cmd( >body on )
+    timeout( .keepalive )
     data-rmap with mapc true to ack-advance? endwith
     ack-toggle# ack-resend# or net2o:do-ack-rest ;
 previous

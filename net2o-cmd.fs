@@ -570,7 +570,7 @@ previous
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r> reply-dest 64! ;
 : net2o:ok ( tag -- )
-    timeout( ." ok: " dup hex. forth:cr )
+    \ timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
     resend0 $off
