@@ -311,7 +311,7 @@ scope{ mapc
 
 : clear-keys ( -- )
     crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase
-    key-setup? on ;
+    true to key-setup? ;
 
 \ We generate a shared secret out of three parts:
 \ 64 bytes IV, 32 bytes from the one-time-keys and
@@ -336,7 +336,7 @@ $60 Constant rndkey#
     clear-keys ;
 
 : ivs-strings ( addr u -- )
-    key-setup? @ !!doublekey!!
+    key-setup? !!doublekey!!
     dup state# <> !!ivs!! >crypt-source >crypt-key-ivs ;
 
 \ hash with key and sksig generation

@@ -203,7 +203,6 @@ cmd-class class
     field: msg-context
     field: file-state    \ files
     \ rest of state
-    field: key-setup?    \ true if key setup is done
     field: codebuf#
     field: context#
     field: wait-task
@@ -225,15 +224,16 @@ cmd-class class
     
     field: data-b2b
     
+    value: ack-resends#
     cfield: ack-state
-    cfield: ack-receive
-    cfield: ack-resend~
-    cfield: ack-resend#
-    cfield: is-server
-    cfield: recv-flag
+    cvalue: ack-receive
+    cvalue: ack-resend~
+    cvalue: recv-flag
     
-    field: req-codesize
-    field: req-datasize
+    cvalue: req-codesize
+    cvalue: req-datasize
+
+    cvalue: key-setup?    \ true if key setup is done
     \ flow control, sender part
 
     64field: next-timeout \ ns

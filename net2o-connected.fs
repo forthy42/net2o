@@ -164,9 +164,9 @@ gen-table $freeze
 ' context-table is gen-table
 
 : net2o:gen-resend ( -- )
-    recv-flag c@ invert resend-toggle# and ulit, ack-resend ;
+    recv-flag invert resend-toggle# and ulit, ack-resend ;
 : net2o:gen-reset ( -- )
-    ack-reset 0 ack-receive c! ;
+    ack-reset 0 to ack-receive ;
 
 : rewind ( -- )
     data-rmap with mapc dest-back do-slurp @ umax endwith ulit, ack-flush ;
@@ -289,7 +289,7 @@ also net2o-base
     ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 : resend~? ( -- flag )
-    inbuf 1+ c@ recv-flag c@ xor resend-toggle# and 0<> ;
+    inbuf 1+ c@ recv-flag xor resend-toggle# and 0<> ;
 
 $20 Value max-resend#
 
@@ -430,8 +430,7 @@ scope{ mapc
 \ higher level functions
 
 : map-request, ( ucode udata -- )
-    2dup + n2o:new-map lit, swap ulit, ulit,
-    map-request ;
+    n2o:new-map lit, swap ulit, ulit, map-request ;
 
 also net2o-base
 : nat-punch ( o:connection -- )
@@ -487,7 +486,7 @@ previous
     false dup { slurp? stats? }
     net2o-code
     ack expect-reply
-    ack-receive c@ over ack-receive c! xor >r
+    ack-receive over to ack-receive xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
 	rec-ack#,
@@ -510,9 +509,9 @@ previous
     resend~? IF
 	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
     THEN
-    inbuf 1+ c@ dup recv-flag c! \ last receive flag
+    inbuf 1+ c@ dup to recv-flag \ last receive flag
     acks# and data-rmap .mapc:ack-advance?
-    IF  net2o:ack-code  ELSE  ack-receive c@ xor  THEN  ack-timing ;
+    IF  net2o:ack-code  ELSE  ack-receive xor  THEN  ack-timing ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64!  +cookie \ last received packet
@@ -531,7 +530,7 @@ also net2o-base
 : transfer-keepalive? ( -- )
     o to connection
     timeout( .keepalive ['] cmd( >body on )
-    recv-flag c@ 7 xor inbuf 1+ c!
+    recv-flag 7 xor inbuf 1+ c!
     data-rmap with mapc true to ack-advance? endwith
     net2o:do-ack-rest ;
 previous
@@ -552,7 +551,7 @@ previous
 
 : +get-time     ['] get-tick is other ;
 
-: reqsize! ( ucode udata -- )  req-datasize !  req-codesize ! ;
+: reqsize! ( ucode udata -- )  to req-datasize  to req-codesize ;
 : connect-rest ( n -- )
     clean-request -timeout tskc KEYBYTES erase context! ;
 
@@ -568,7 +567,7 @@ previous
     nest[ cookie, gen-reply request, ]nest  other
     tmpkey-request
     ind-addr @  IF  punch?  THEN
-    req-codesize @  req-datasize @  map-request,  close-tmpnest
+    req-codesize  req-datasize  map-request,  close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code| ;
 

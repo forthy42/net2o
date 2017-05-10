@@ -109,7 +109,7 @@ $30 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     nest[
     ?new-mykey  ticker 64@ lit, set-cookie
     max-data# umin swap max-code# umin swap
-    2dup + n2o:new-map n2o:create-map
+    n2o:new-map n2o:create-map
     keypad keysize sec$, store-key  stskc KEYSIZE erase
     ]nest  n2o:create-map
     64drop 2drop 64drop ;
@@ -211,7 +211,7 @@ Sema id-sema
 \ compile a reply key
 
 : reply-key, ( -- )
-    key-setup? @ !!doublekey!!
+    key-setup? !!doublekey!!
     nest[
         new-error-id $, error-id
         pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF

@@ -472,8 +472,8 @@ Variable mapstart $1 mapstart !
 : new-data! ( addrs addrd u -- )
     new-data-size ! new-data-d 64! new-data-s 64! newdata-val validated or! ;
 
-: n2o:new-map ( u -- addr )
-    drop mapstart @ 1 mapstart +! reverse
+: n2o:new-map ( -- addr )
+    mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ;
 : n2o:new-data ( addrs addrd u -- )
     dup max-data# u> !!mapsize!! min-size swap lshift
@@ -854,7 +854,7 @@ $20 Value mask-bits#
 	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP { d^ mask+ } mask+ 2 cells data-resend $+! ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and ack-resend~ c! ;
+: net2o:ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ >mask0 1 and IF  maxdata  ELSE  0  THEN
@@ -1119,11 +1119,11 @@ event: :>send-chunks ( o -- ) .do-send-chunks ;
     dup @
     dup 0= IF
 	ack-toggle# ack-state xorc!
-	ack-resend# c@
-	ack-resend~ c@ ack-state c@ xor resend-toggle# and 0<> +
-	0 max dup ack-resend# c!
-	0= IF  ack-resend~ c@ ack-state c@ resend-toggle# invert and or
-	    ack-state c!  ack@ .flybursts @ ack-resend# c!  THEN
+	ack-resends#
+	ack-resend~ ack-state c@ xor resend-toggle# and 0<> +
+	0 max dup to ack-resends#
+	0= IF  ack-resend~ ack-state c@ resend-toggle# invert and or
+	    ack-state c!  ack@ .flybursts @ to ack-resends#  THEN
 	-1 ack@ .flybursts +! bursts( ." bursts: " ack@ .flybursts ? ack@ .flyburst ? cr )
 	ack@ .flybursts @ 0<= IF
 	    bursts( .o ." no bursts in flight " ack@ .ns/burst ? data-tail@ swap hex. hex. cr )
