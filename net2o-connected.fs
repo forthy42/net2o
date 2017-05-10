@@ -164,7 +164,7 @@ gen-table $freeze
 ' context-table is gen-table
 
 : net2o:gen-resend ( -- )
-    recv-flag invert resend-toggle# and ulit, ack-resend ;
+    ack-receive invert resend-toggle# and ulit, ack-resend ;
 : net2o:gen-reset ( -- )
     ack-reset 0 to ack-receive ;
 
@@ -288,8 +288,6 @@ also net2o-base
     dest-tail umax dup addr dest-tail !@ endwith
     ack( ." tail: " over hex. dup hex. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
-: resend~? ( -- flag )
-    inbuf 1+ c@ recv-flag xor resend-toggle# and 0<> ;
 
 $20 Value max-resend#
 
@@ -505,17 +503,16 @@ previous
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
-: net2o:do-ack-rest ( -- )
-    resend~? IF
+: net2o:do-ack-rest ( recv-flag -- )
+    dup ack-receive xor resend-toggle# and IF
 	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
     THEN
-    inbuf 1+ c@ dup to recv-flag \ last receive flag
     acks# and data-rmap .mapc:ack-advance?
     IF  net2o:ack-code  ELSE  ack-receive xor  THEN  ack-timing ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64!  +cookie \ last received packet
-    net2o:do-ack-rest ;
+    inbuf 1+ c@ net2o:do-ack-rest ;
 
 : +flow-control ['] net2o:do-ack is ack-xt ;
 
@@ -530,9 +527,8 @@ also net2o-base
 : transfer-keepalive? ( -- )
     o to connection
     timeout( .keepalive ['] cmd( >body on )
-    recv-flag 7 xor inbuf 1+ c!
     data-rmap with mapc true to ack-advance? endwith
-    net2o:do-ack-rest ;
+    ack-toggle# ack-resend# or net2o:do-ack-rest ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?

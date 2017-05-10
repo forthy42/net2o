@@ -228,7 +228,6 @@ cmd-class class
     cfield: ack-state
     cvalue: ack-receive
     cvalue: ack-resend~
-    cvalue: recv-flag
     
     cvalue: req-codesize
     cvalue: req-datasize
