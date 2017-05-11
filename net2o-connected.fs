@@ -419,8 +419,9 @@ scope{ mapc
 
 : resend-all? ( -- flag )
     data-rmap with mapc
-    dest-head dest-top u>= ack-advance? and endwith
-    ticker 64@ resend-all-to 64@ 64u>= and ;
+    ack-advance?  dest-head dest-top u>=  and endwith
+    ticker 64@ resend-all-to 64@ 64u>= and
+    timeout( dup IF  ." resend all" forth:cr  THEN ) ;
 
 : +expected ( -- flag )
     resend-all?  IF   resend-all  THEN  expected? ;
@@ -525,7 +526,7 @@ also net2o-base
     endwith
     forth:cr ;
 : transfer-keepalive? ( -- )
-    o to connection
+    o to connection  !ticks ticker 64@ resend-all-to 64!
     timeout( .keepalive )
     data-rmap with mapc true to ack-advance? endwith
     [ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest ;
