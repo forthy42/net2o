@@ -484,11 +484,11 @@ previous
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
     net2o-code
-    ack expect-reply cmdbuf# { dummylen }
+    ack expect-reply cmdbuf# @ { dummylen }
     ack-receive over to ack-receive xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
-	rec-ack#, cmdbuf# to dummylen
+	rec-ack#, cmdbuf# @ to dummylen
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    ack( ." ack: do-resend" forth:cr )
@@ -497,7 +497,8 @@ previous
 	0 data-rmap .mapc:do-slurp !@
 	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
-    THEN  +expected slurp? or to slurp?
+    THEN  +expected  dummylen 1 = IF  cmdbuf# @ to dummylen  THEN
+    slurp? or to slurp?
     stats? IF  send-timing  THEN
     end-with  cmdbuf# @ dummylen 1+ stats? - = IF  cmdbuf# off
     ELSE  1 data-rmap with mapc +to rec-ack# endwith  THEN
