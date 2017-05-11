@@ -533,8 +533,8 @@ also net2o-base
 : transfer-keepalive? ( -- )
     o to connection  !ticks ticker 64@ resend-all-to 64!
     timeout( .keepalive )
-\    data-rmap with mapc true to ack-advance? endwith
-    [ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest ;
+    data-rmap with mapc dest-req dup ack-advance? or to ack-advance? endwith
+    IF  [ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest  THEN ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
