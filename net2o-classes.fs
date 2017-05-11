@@ -60,6 +60,7 @@ cmd-class class
     $value: dest-ivs$
     value: dest-ivsgen
     cvalue: dest-ivslastgen
+    cvalue: dest-req   \ -/-                    true if ongoing request
     $value: dest-ivsrest$
     value: dest-timestamps
     value: dest-replies

@@ -327,7 +327,7 @@ $20 Value max-resend#
 
 : do-expect+slurp ( -- )
     cmdbuf# @ 0> IF \ there's actuall something in the buffer
-	slurp next-request filereq# !
+	slurp next-request filereq# !  true data-rmap >o to mapc:dest-req o>
 	reply-index ulit, ok?  end-cmd
 	net2o:expect-reply  maxdata code+ \ don't reuse this buffer
     THEN  ['] end-cmd IS expect-reply? ;
@@ -346,9 +346,12 @@ $20 Value max-resend#
 : expect+slurp ( -- )
     ['] drop expect+slurp-xt ;
 
+UValue rec-ack-pos#
+
 : rec-ack#, ( -- )
     cmdbuf# @ 1 = IF
 	data-rmap .mapc:rec-ack# ulit, set-ack#
+	cmdbuf# @ to rec-ack-pos#
     THEN ;
 
 : resend-all ( -- )
@@ -366,7 +369,8 @@ $20 Value max-resend#
 
 : rewind-transfer ( -- flag )
     data-end? IF  filereq# @ n2o:request-done  false
-    ELSE  true  THEN ;
+	data-rmap >o dup to mapc:dest-req o>
+    ELSE  data-rmap .mapc:dest-req  THEN ;
 
 : request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
@@ -484,11 +488,11 @@ previous
 : net2o:ack-code ( ackflag -- ackflag' )
     false dup { slurp? stats? }
     net2o-code
-    ack expect-reply cmdbuf# @ { dummylen }
+    ack expect-reply  1 to rec-ack-pos#
     ack-receive over to ack-receive xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
-	rec-ack#, cmdbuf# @ to dummylen
+	rec-ack#,
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    ack( ." ack: do-resend" forth:cr )
@@ -497,10 +501,10 @@ previous
 	0 data-rmap .mapc:do-slurp !@
 	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
-    THEN  +expected  dummylen 1 = IF  cmdbuf# @ to dummylen  THEN
+    THEN  +expected
     slurp? or to slurp?
     stats? IF  send-timing  THEN
-    end-with  cmdbuf# @ dummylen 1+ stats? - = IF  cmdbuf# off
+    end-with  cmdbuf# @ rec-ack-pos# 1+ stats? - = IF  cmdbuf# off
     ELSE  1 data-rmap with mapc +to rec-ack# endwith  THEN
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
