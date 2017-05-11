@@ -377,12 +377,12 @@ UValue rec-ack-pos#
 : rewind-transfer ( -- flag )
     data-end? IF  filereq# @ n2o:request-done  false
 	data-rmap >o dup to mapc:dest-req o>
-    ELSE  expected@ u> ( data-rmap .mapc:dest-req )  THEN ;
+    ELSE  data-rmap .mapc:dest-req  THEN ;
 
 : request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
 : expected? ( -- flag )
-    expected@ data-rmap .mapc:dest-req IF  u>=  ELSE  u>  THEN IF
+    expected@ u>= IF
 	expect-reply
 	msg( ." check: " data-rmap with mapc
 	dest-back hex. dest-tail hex. dest-head hex.
