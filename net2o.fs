@@ -1406,6 +1406,8 @@ Variable timeout-tasks
     >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
 : +timeouts ( -- timeout ) 
     rtdelay 64@ timeouts @ >timeout ticks 64+ 1 timeouts +! ;
+: +timeout0 ( -- timeout )
+    rtdelay 64@ ticker 64@ 64+ ;
 : 0timeout ( -- )
     0 ack@ .timeouts !@  IF  timeout-task wake  THEN
     ack@ .+timeouts next-timeout 64! ;

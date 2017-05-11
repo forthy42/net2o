@@ -154,7 +154,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 +net2o: set-ack# ( n -- ) \g set the ack number and check for smaller
     64>n parent .data-map with mapc
     dup send-ack# u> IF  to send-ack#  ack-order-val validated or!  ELSE
-	[ ack-order-val invert ]L validated and!
+	drop [ ack-order-val invert ]L validated and!
     THEN
     endwith ;
 
@@ -488,11 +488,10 @@ previous
 
 \ acknowledge toplevel
 
-: net2o:ack-code ( ackflag -- ackflag' )
+: net2o:ack-code ( ackflag -- ackflag )  >r
     false dup { slurp? stats? }
     net2o-code
     ack expect-reply  1 to rec-ack-pos#
-    ack-receive over to ack-receive xor >r
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
 	rec-ack#,
@@ -512,16 +511,18 @@ previous
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
-: net2o:do-ack-rest ( recv-flag -- )
-    dup ack-receive xor resend-toggle# and IF
+: net2o:do-ack-rest ( ackflag -- )
+    dup resend-toggle# and IF
 	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
     THEN
     acks# and data-rmap .mapc:ack-advance?
-    IF  net2o:ack-code  ELSE  ack-receive xor  THEN  ack-timing ;
+    IF  net2o:ack-code  THEN  ack-timing ;
 
 : net2o:do-ack ( -- )
     dest-addr 64@ recv-addr 64!  +cookie \ last received packet
-    inbuf 1+ c@ net2o:do-ack-rest ;
+    inbuf 1+ c@ ack-receive over to ack-receive xor
+    +timeout0 resend-all-to 64!
+    net2o:do-ack-rest ;
 
 : +flow-control ['] net2o:do-ack is ack-xt ;
 
@@ -539,8 +540,7 @@ also net2o-base
     data-rmap with mapc dest-req dup ack-advance? or to ack-advance? endwith
     dup IF
 	!ticks ticker 64@ resend-all-to 64!
-	[ ack-toggle# resend-toggle# or ]L ack-receive xor
-	net2o:do-ack-rest  THEN ;
+	[ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest  THEN ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
