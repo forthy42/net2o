@@ -370,7 +370,7 @@ UValue rec-ack-pos#
 : rewind-transfer ( -- flag )
     data-end? IF  filereq# @ n2o:request-done  false
 	data-rmap >o dup to mapc:dest-req o>
-    ELSE  data-rmap .mapc:dest-req  THEN ;
+    ELSE  expected@ u> ( data-rmap .mapc:dest-req )  THEN ;
 
 : request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
