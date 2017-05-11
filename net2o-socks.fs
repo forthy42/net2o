@@ -87,7 +87,7 @@ $00000000 Value droprate#
 : send-a-packet ( addr u -- n ) +calc
     droprate# IF  rng32 droprate# u< IF
 	    resend( ." dropping packet" cr )
-	    2drop 0  EXIT  THEN  THEN
+	    1 packets +! 2drop 0  EXIT  THEN  THEN
     2>r net2o-sock 2r> 0 sockaddr alen @ sendto +send 1 packets +!
     sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
 

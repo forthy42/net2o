@@ -168,8 +168,11 @@ gen-table $freeze
 : net2o:gen-reset ( -- )
     ack-reset 0 to ack-receive ;
 
+: slurp@ ( -- addr )
+    data-rmap with mapc dest-back do-slurp @ umax endwith ;
+
 : rewind ( -- )
-    data-rmap with mapc dest-back do-slurp @ umax endwith ulit, ack-flush ;
+    slurp@ ulit, ack-flush ;
 
 \ safe initialization
 
@@ -530,11 +533,14 @@ also net2o-base
     data-ackbits @ dest-size addr>bytes dump
     endwith
     forth:cr ;
-: transfer-keepalive? ( -- )
-    o to connection  !ticks ticker 64@ resend-all-to 64!
+: transfer-keepalive? ( -- flag )
+    o to connection
     timeout( .keepalive )
     data-rmap with mapc dest-req dup ack-advance? or to ack-advance? endwith
-    IF  [ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest  THEN ;
+    dup IF
+	!ticks ticker 64@ resend-all-to 64!
+	[ ack-toggle# resend-toggle# or ]L ack-receive xor
+	net2o:do-ack-rest  THEN ;
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
@@ -542,9 +548,12 @@ previous
 	push-timeout
     ELSE  ack@ .timeouts off  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
-    \ timeout( .expected )
-    packets2 @ cmd-timeout packets2 @ =
-    IF  transfer-keepalive?  THEN ;
+    >next-timeout cmd-resend?
+    IF  timeout( ." resend commands" forth:cr )
+	push-timeout
+    ELSE
+	transfer-keepalive? 0= IF  ack@ .timeouts off  THEN
+    THEN ;
 
 \ : +connecting   ['] connecting-timeout is timeout-xt ;
 : +resend       ['] connected-timeout  is timeout-xt o+timeout
