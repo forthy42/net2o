@@ -367,19 +367,19 @@ UValue rec-ack-pos#
 : data-end? ( -- flag )
     0 data-rmap .mapc:dest-end !@ ;
 
-: rewind-transfer ( -- flag )
-    data-end? IF  filereq# @ n2o:request-done  false
-	data-rmap >o dup to mapc:dest-req o>
-    ELSE  expected@ u> ( data-rmap .mapc:dest-req )  THEN ;
-
-: request-stats   forth:true to request-stats?  ack track-timing end-with ;
-
 : expected@ ( -- head top )
     o IF  data-rmap with mapc
 	o IF  dest-tail dest-top
 	    msg( ." expected: " over hex. dup hex. forth:cr )
 	ELSE  #0. msg( ." expected: no data-rmap" forth:cr )  THEN endwith
     ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
+
+: rewind-transfer ( -- flag )
+    data-end? IF  filereq# @ n2o:request-done  false
+	data-rmap >o dup to mapc:dest-req o>
+    ELSE  expected@ u> ( data-rmap .mapc:dest-req )  THEN ;
+
+: request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
 : expected? ( -- flag )
     expected@ tuck u>= and IF
