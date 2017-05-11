@@ -1228,7 +1228,7 @@ rdata-class to rewind-partial
 	.mapc:dest-back >r n2o:spit
 	r> data-rmap with mapc addr dest-back !@
 	dup rewind-partial  dup dest-back!
-	do-slurp !@ drop endwith
+	dest-req IF  do-slurp !@  THEN  drop endwith
     THEN ;
 
 Defer do-track-seek
@@ -1844,7 +1844,8 @@ forth-local-words:
     )
 forth-local-indent-words:
     (
-     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+    (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+    (("with" "endwith") (0 . 2) (0 . 2) non-immediate)
     )
 End:
 [THEN]
