@@ -382,7 +382,7 @@ UValue rec-ack-pos#
 : request-stats   forth:true to request-stats?  ack track-timing end-with ;
 
 : expected? ( -- flag )
-    expected@ tuck u>= and IF
+    expected@ data-rmap .mapc:dest-req IF  u>=  ELSE  u>  THEN IF
 	expect-reply
 	msg( ." check: " data-rmap with mapc
 	dest-back hex. dest-tail hex. dest-head hex.
