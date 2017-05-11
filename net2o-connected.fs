@@ -552,7 +552,8 @@ previous
     IF  timeout( ." resend commands" forth:cr )
 	push-timeout
     ELSE
-	transfer-keepalive? 0= IF  ack@ .timeouts off  THEN
+	transfer-keepalive? 0=
+	IF  ack@ .timeouts off  ELSE  push-timeout  THEN
     THEN ;
 
 \ : +connecting   ['] connecting-timeout is timeout-xt ;
