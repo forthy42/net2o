@@ -1,11 +1,11 @@
 # Commands #
 
-Version 0.5.0-20170414.
+Version 0.5.3-20170511.
 
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
-requests, the address 0 is always mapped as connectionless code
-address.
+requests, a special bit is set, and the address then isn't used as
+address, but as IV for the opportunistic encoding.
 
 The command interpreter is a stack machine with two data types: 64
 bit integers and strings (floats are also suppored, but used
@@ -19,6 +19,7 @@ Strings can contain encrypted nested commands, used during
 communication setup.
 
 ## List of Commands ##
+
 Commands are context-sensitive in an OOP method hierarchy sense.
 
 ### base commands ###
@@ -229,6 +230,8 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   timeout request
 + $2C set-rtdelay ( ticks -- )
   set round trip delay only
++ $2D seq# ( n -- )
+  set the ack number and check for smaller
 
 ### log commands ###
 

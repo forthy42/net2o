@@ -151,7 +151,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     parent >o net2o:timeout  data-map .mapc:dest-tail o> ulit, set-head ;
 +net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
-+net2o: set-ack# ( n -- ) \g set the ack number and check for smaller
++net2o: seq# ( n -- ) \g set the ack number and check for smaller
     64>n parent .data-map with mapc
     dup send-ack# u> IF  to send-ack#  ack-order-val validated or!  ELSE
 	drop [ ack-order-val invert ]L validated and!
@@ -351,14 +351,14 @@ $20 Value max-resend#
 
 UValue rec-ack-pos#
 
-: rec-ack#, ( -- )
+: seq#, ( -- )
     cmdbuf# @ 1 = IF
-	data-rmap .mapc:rec-ack# ulit, set-ack#
+	data-rmap .mapc:rec-ack# ulit, seq#
 	cmdbuf# @ to rec-ack-pos#
     THEN ;
 
 : resend-all ( -- )
-    rec-ack#,
+    seq#,
     false net2o:do-resend
     ack@ .+timeouts resend-all-to 64! ;
 
@@ -392,7 +392,7 @@ UValue rec-ack-pos#
 	data-ackbits @ data-ack# @ dup hex. + l@ hex.
 	endwith
 	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
-	rec-ack#,
+	seq#,
 	net2o:save&done  net2o:ack-resend#  rewind  rewind-transfer
 	64#0 burst-ticks 64!
     ELSE  false  THEN ;
@@ -494,7 +494,7 @@ previous
     ack expect-reply  1 to rec-ack-pos#
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
-	rec-ack#,
+	seq#,
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    ack( ." ack: do-resend" forth:cr )
