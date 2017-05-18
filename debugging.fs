@@ -211,7 +211,6 @@ op-vector !
 
 \ extra hints for last word executed
 
-: m: : ;
 false [IF]
     User last-exe-xt
     : .exe ( -- ) last-exe-xt @ .name ;

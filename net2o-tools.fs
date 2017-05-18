@@ -167,38 +167,7 @@ debug: dummy(
 	drop 2drop ; immediate restrict
 [THEN]
 
-\ bit vectors, lsb first
-
-: bits ( n -- n ) 1 swap lshift ;
-
-: >bit ( addr n -- c-addr mask ) 8 /mod rot + swap bits ;
-: +bit ( addr n -- )  >bit over c@ or swap c! ;
-: +bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
-    or swap c! r> 0<> ;
-: -bit ( addr n -- )  >bit invert over c@ and swap c! ;
-: -bit@ ( addr n -- flag )  >bit over c@ 2dup and >r
-    invert or invert swap c! r> 0<> ;
-: bit! ( flag addr n -- ) rot IF  +bit  ELSE  -bit  THEN ;
-: bit@ ( addr n -- flag )  >bit swap c@ and 0<> ;
-
-: bittype ( addr base n -- )  bounds +DO
-	dup I bit@ '+' '-' rot select emit  LOOP  drop ;
-
-: bit-erase ( addr off len -- )
-    dup 8 u>= IF
-	>r dup 7 and >r 3 rshift + r@ bits 1- over andc!
-	1+ 8 r> - r> swap -
-	dup 7 and >r 3 rshift 2dup erase +
-	0 r> THEN
-    bounds ?DO  dup I -bit  LOOP  drop ;
-
-: bit-fill ( addr off len -- )
-    dup 8 u>= IF
-	>r dup 7 and >r 3 rshift + r@ bits 1- invert over orc!
-	1+ 8 r> - r> swap -
-	dup 7 and >r 3 rshift 2dup $FF fill +
-	0 r> THEN
-    bounds ?DO  dup I +bit  LOOP  drop ;
+require bits.fs
 
 \ variable length integers, similar to protobuf, but MSB first
 
