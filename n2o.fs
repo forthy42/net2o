@@ -483,11 +483,16 @@ warnings !
     \G get: get files into current directory
     ?get-me init-client
     ?@nextarg IF
-	$A $E nick-connect +resend ." connected" cr !time
-	net2o-code expect+slurp
-	$10 blocksize! $A blockalign!
-	[: 2dup basename n2o:copy ;] arg-loop
-	end-code| n2o:close-all
+	dvcs-bufs# nick-connect ." connected" cr !time
+	BEGIN  +resend
+	    net2o-code expect+slurp
+	    $10 blocksize! $A blockalign!
+	    $10 [: 2dup basename n2o:copy ;] arg-loop#
+	    end-code|  n2o:close-all
+	    +resend-cmd
+	    net2o-code expect-reply  close-all end-code|
+	    ?peekarg  WHILE  2drop
+	REPEAT
 	c:disconnect  THEN ;
 
 : get# ( -- )
@@ -495,11 +500,15 @@ warnings !
     \G get#: get files by hash into hash directory
     ?get-me init-client
     ?@nextarg IF
-	$A $E nick-connect +resend ." connected" cr !time
-	net2o-code expect+slurp
-	$10 blocksize! $A blockalign!
-	[: base85>$ n2o:copy# ;] arg-loop
-	end-code| n2o:close-all
+	dvcs-bufs# nick-connect ." connected" cr !time
+	BEGIN  +resend
+	    net2o-code expect+slurp
+	    $10 blocksize! $A blockalign!
+	    $10 [: base85>$ n2o:copy# ;] arg-loop#
+	    end-code|
+	    net2o-code expect-reply  close-all end-code|
+	    ?peekarg  WHILE  2drop
+	REPEAT
 	c:disconnect  THEN ;
 
 \ dvcs commands

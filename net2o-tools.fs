@@ -75,6 +75,8 @@ word-args
 
 : arg-loop { xt -- }
     begin  ?nextarg  while  xt execute  repeat ;
+: arg-loop# ( n xt -- ) { xt -- }
+    0 ?DO  ?nextarg 0= ?LEAVE  xt execute  LOOP ;
 : @arg-loop { xt -- }
     begin  ?@nextarg  while  xt execute  repeat ;
 

@@ -109,6 +109,7 @@ cell 8 = [IF]
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
     fs-size 64@ fs-seek 64@ 64= IF
+	fs-flush
 	<event o elit, :>file-done parent .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
@@ -118,19 +119,19 @@ cell 8 = [IF]
     ['] noop to file-xt ;
 : fs:fs-flush ( -- )
     fs-fid @ flush-file throw
-    fs-fid @ fileno fs-timestamp!
+    fs-time 64@ 64-0<> IF
+	fs-time 64@ fs-fid @ fileno fs-timestamp!
+    THEN
+    fs-rename+ $@ dup IF
+	fs-path $@ rename-file throw
+	fs-rename+ $free
+    ELSE  2drop  THEN
 ; ' fs:fs-flush fs-class to fs-flush
 : fs:fs-close ( -- )
     fs-fid @ 0= ?EXIT
-    fs-time 64@ 64dup 64-0= IF  64drop
-    ELSE
-	fs-flush
-    THEN
+    fs-flush
     fs-fid @ close-file throw
     fs-fid off
-    fs-rename+ $@ dup IF
-	fs-path $@ rename-file throw
-    ELSE  2drop  THEN
     fs:fs-clear
 ; ' fs:fs-close fs-class to fs-close
 :noname ( -- size )
@@ -395,9 +396,9 @@ scope{ mapc
 
 : n2o:close-all ( -- )
     msg( ." Closing all files" forth:cr )
-    [: fstates 0 ?DO  I n2o:close-file  LOOP
-      file-reg# off  fstate-off  blocksize @ blocksizes!
-      read-file# off  write-file# off ;] file-sema c-section ;
+    [:  fstates 0 ?DO  I n2o:close-file  LOOP
+	file-reg# off  fstate-off  blocksize @ blocksizes!
+	read-file# off  write-file# off ;] file-sema c-section ;
 
 : n2o:open-file ( addr u mode id -- )
     state-addr .fs-open ;
