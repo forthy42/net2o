@@ -271,11 +271,13 @@ Variable scope<>
 : ?sane-file ( addr u -- addr u )
     \G check if file name is sane, and if not, fail
     dup 0= !!filename!!                      \ no nullstring allowed
-    2dup ['] type $tmp compact-filename 2over 2over str= 0= !!filename!!
-                                             \ must be the same as compacted
     '\' scan nip 0<> !!filename!!            \ no backslash allowed
-    over c@ '/' = !!filename!!               \ no absolute filename allowed
+    s" /../"     search !!filename!!         \ no embedded .. allowed
+    s" /./"      search !!filename!!         \ no embedded . allowed
+    s" //"       search !!filename!!         \ no double slash allowed
     2dup s" ../" string-prefix? !!filename!! \ no parent directory allowed
+    2dup s" ./"  string-prefix? !!filename!! \ no same directory allowed
+    over c@ '/' =               !!filename!! \ no absolute filename allowed
 ;
 
 $20 buffer: filechars
