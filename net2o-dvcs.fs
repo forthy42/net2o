@@ -207,10 +207,12 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 }scope
 
 ' dvcs-in-hash ( addr u -- ) dvcs-class to dvcs:read
-:noname ( addr u -- ) 2dup hash#128 /string ?sane-file
+:noname ( addr u -- ) 2dup hash#128 /string
+    2dup 2 /string ?sane-file 2drop
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
     hash#128 umin dvcs-in-hash ; dvcs-class to dvcs:rm
-:noname ( addr u -- ) ?sane-file
+:noname ( addr u -- )
+    2dup 2 /string ?sane-file 2drop
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
 ; dvcs-class to dvcs:rmdir
 :noname ( 64len addr u -- )
@@ -220,7 +222,7 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
 ; dvcs-class to dvcs:patch
 :noname ( 64size addr u -- )
-    ?sane-file
+    2dup 2 /string ?sane-file 2drop
     2>r 64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
     2dup >file-hash 2r> 2swap  dvcs:fileentry$ $free

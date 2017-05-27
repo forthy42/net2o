@@ -276,8 +276,8 @@ Variable scope<>
     dup 1- $FFF u>= !!filename!!             \ check nullstring+maxpath
     2dup printable? 0= !!filename!!          \ must be printable
     [IFDEF] cygwin                           \ rules for Windows
-	2dup '\' scan nip       !!filename!! \ no backslash allowed
-	2dup ':' scan nip       !!filename!! \ no colon allowed
+	2dup '\' scan nip 0<>   !!filename!! \ no backslash allowed
+	2dup ':' scan nip 0<>   !!filename!! \ no colon allowed
     [THEN]
     s" /../"     search         !!filename!! \ no embedded .. allowed
     s" /./"      search         !!filename!! \ no embedded . allowed

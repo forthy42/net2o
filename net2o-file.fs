@@ -139,7 +139,7 @@ cell 8 = [IF]
 ; fs-class to fs-poll
 :noname ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " forth:type ."  with mode " . forth:cr )
-    >r 2dup ?sane-file
+    >r ?sane-file
     config:rootdirs$ open-path-file throw fs-path $! fs-fid !
     r@ r/o <> IF  0 fs-fid !@ close-file throw
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
@@ -147,7 +147,7 @@ cell 8 = [IF]
 ; fs-class to fs-open
 :noname ( addr u -- )  fs-close
     msg( dup 2over ." create file: " forth:type forth:cr )
-    2dup ?sane-file
+    ?sane-file
     2dup fs-path $! >rename+ r/w create-file throw fs-fid !
 ; fs-class to fs-create
 :noname ( perm -- )
