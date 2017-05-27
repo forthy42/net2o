@@ -78,3 +78,4 @@ EOF
 echo "/chats" >&3
 echo "/bye" >&3
 exec 3>&-
+sleep 1

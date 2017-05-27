@@ -190,10 +190,10 @@ end-class hashfs-class
     fs-cryptkey $@ drop c:key!
     r> over c:decrypt
     r> c:key! ; hashfs-class to fs-read
-:noname ( addr u -- )
+:noname ( addr u -- n )
     dup 0= IF  nip  EXIT  THEN
     c:key@ >r  fs-cryptkey $@ drop c:key!
-    tuck save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
+    save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
     r> c:key! ; hashfs-class to fs-write
 :noname ( -- )
     fs:fs-close

@@ -1086,8 +1086,7 @@ Create chunk-adder chunks-struct allot
 0 Value timeout-task
 0 Value query-task    \ for background queries initiated in other tasks
 
-: event-loop' ( -- )  BEGIN stop  depth 0<> IF
-	    ~~ clearstack ( !!depth!! )  THEN AGAIN ;
+: event-loop' ( -- )  BEGIN  stop  depth 0<> IF  ~~ true !!depth!!  THEN AGAIN ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
 : ?query-task ( -- task )

@@ -269,7 +269,11 @@ Variable scope<>
 \ file name sanitizer
 
 : printable? ( addr u -- flag )
-    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
+    true -rot bounds ?DO  I c@ $80 u>= IF
+	    I ['] u8@+ catch IF  drop 0 true
+	    ELSE  drop dup I - swap I' u>  THEN
+	ELSE  1 I c@ $7F bl within  THEN
+	IF  2drop false  LEAVE  THEN  +LOOP ;
 
 : ?sane-file ( addr u -- addr u )
     \G check if file name is sane, and if not, fail
