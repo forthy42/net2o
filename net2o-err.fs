@@ -43,7 +43,7 @@ s" invalid tmpnest"              throwcode !!tmpnest!!
 s" cookie recieved twice"        throwcode !!double-cookie!!
 s" code destination is 0"        throwcode !!no-dest!!
 s" no IP addr"                   throwcode !!no-addr!!
-s" absolute path not allowed!"   throwcode !!abs-path!!
+s" Invalid file name"            throwcode !!filename!!
 s" invalid packet destination"   throwcode !!inv-dest!!
 s" unknown key"                  throwcode !!unknown-key!!
 s" wrong key"                    throwcode !!wrong-key!!
@@ -103,7 +103,6 @@ s" repeated tmpkey"              throwcode !!repeated-tmpkey!!
 s" Unknown group"                throwcode !!no-group!!
 s" Challenge failed"             throwcode !!challenge!!
 s" Stack should always be empty" throwcode !!depth!!
-s" Invalid file name"            throwcode !!filename!!
 
 next-exception !
 

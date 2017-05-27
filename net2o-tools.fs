@@ -268,18 +268,26 @@ Variable scope<>
 
 \ file name sanitizer
 
+: printable? ( addr u -- flag )
+    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
+
 : ?sane-file ( addr u -- addr u )
     \G check if file name is sane, and if not, fail
-    dup 0= !!filename!!                      \ no nullstring allowed
-    '\' scan nip 0<> !!filename!!            \ no backslash allowed
-    0 scan nip 0<> !!filename!!              \ no \0 in string allowed
-    s" /../"     search !!filename!!         \ no embedded .. allowed
-    s" /./"      search !!filename!!         \ no embedded . allowed
-    s" //"       search !!filename!!         \ no double slash allowed
+    dup 1- $FFF u>= !!filename!!             \ check nullstring+maxpath
+    2dup printable? 0= !!filename!!          \ must be printable
+    [IFDEF] cygwin                           \ rules for Windows
+	2dup '\' scan nip       !!filename!! \ no backslash allowed
+	2dup ':' scan nip       !!filename!! \ no colon allowed
+    [THEN]
+    s" /../"     search         !!filename!! \ no embedded .. allowed
+    s" /./"      search         !!filename!! \ no embedded . allowed
+    s" //"       search         !!filename!! \ no double slash allowed
     2dup s" ../" string-prefix? !!filename!! \ no parent directory allowed
     2dup s" ./"  string-prefix? !!filename!! \ no same directory allowed
     over c@ '/' =               !!filename!! \ no absolute filename allowed
-;
+    2dup '/' scan nip IF
+	over c@ '~' =           !!filename!! \ no tilde allowed if it's a path
+    THEN ;
 
 $20 buffer: filechars
 filechars $20 $FF fill

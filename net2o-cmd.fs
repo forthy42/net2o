@@ -93,9 +93,6 @@ end-class cmd-buf-c
 : .black85 ( addr u -- )
     <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
-: printable? ( addr u -- flag )
-    true -rot bounds ?DO  I c@ $7F and bl < IF  drop false  LEAVE  THEN  LOOP ;
-
 : n2o:$. ( addr u -- )
     2dup printable? IF
 	.\" \"" type
