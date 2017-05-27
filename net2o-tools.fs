@@ -272,6 +272,7 @@ Variable scope<>
     \G check if file name is sane, and if not, fail
     dup 0= !!filename!!                      \ no nullstring allowed
     '\' scan nip 0<> !!filename!!            \ no backslash allowed
+    0 scan nip 0<> !!filename!!              \ no \0 in string allowed
     s" /../"     search !!filename!!         \ no embedded .. allowed
     s" /./"      search !!filename!!         \ no embedded . allowed
     s" //"       search !!filename!!         \ no double slash allowed
