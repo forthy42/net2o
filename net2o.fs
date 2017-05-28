@@ -1701,7 +1701,8 @@ Forward next-saved-msg
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
     !ticks  BEGIN  >next-ticks beacon? save-msgs?
-	request-timeout event-send  depth 0<> !!depth!!  AGAIN ;
+	request-timeout event-send
+	depth IF  ~~ true !!depth!!  THEN  AGAIN ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
@@ -1709,7 +1710,8 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  event-send  depth 0<> !!depth!!  AGAIN ;
+    BEGIN  packet-event  event-send
+	depth IF  ~~ true !!depth!!  THEN  AGAIN ;
 
 : n2o:request-done ( n -- )  elit, o elit, :>request ;
 
@@ -1741,8 +1743,8 @@ Defer init-rest
 
 :noname ( port -- )  init-mykey init-mykey init-my0key \ two keys
     \ hash-init-rng
-    init-timer net2o-socket init-route prep-socks
-    sender( create-sender-task ) create-timeout-task ; is init-rest
+    init-timer create-timeout-task net2o-socket init-route prep-socks
+    sender( create-sender-task ) ; is init-rest
 
 Variable initialized
 
