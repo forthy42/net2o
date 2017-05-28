@@ -451,7 +451,17 @@ previous
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
 
 : date? ( -- n )  config:date# @ ;
+: datehms? ( -- n )  config:date# @ 7 and ;
+$8 Constant #today
+$10 Constant #splitdate
+$20 Constant #splithour
+$40 Constant #splitminute
+-1 Value last-day
+-1 Value last-hour
+-1 Value last-minute
 
+: reset-time ( -- )
+    -1 to last-day  -1 to last-hour  -1 to last-minute ;
 : today? ( day -- flag )
     ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
 
@@ -467,13 +477,19 @@ previous
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit .##
-    date? 2 < IF  fdrop  ELSE  ':' emit 60e f* fsplit .##
-	date? 3 < IF  fdrop  ELSE  ':' emit
-	    60e f* date? 4 < IF  f>s .##
+    24e f* fsplit
+    date? #splithour and IF
+	dup last-hour <> IF  ." ==== " dup .## ." Z ====" cr  THEN  to last-hour
+    ELSE  .##  THEN
+    datehms? 2 < IF  fdrop  ELSE  60e f* fsplit
+    date? #splitminute and IF
+	dup last-minute <> IF  ." === :" dup .## ." m ===" cr  THEN  to last-minute
+	ELSE  ':' emit .##  THEN
+	datehms? 3 < IF  fdrop  ELSE  ':' emit
+	    60e f* datehms? 4 < IF  f>s .##
 	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
-		date? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
-	THEN  THEN  'Z' emit ;
+		datehms? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
+	THEN  THEN  date? #splithour and 0= IF  'Z' emit  THEN ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r  $B0 ( '°' ) xemit  60e f*
@@ -481,19 +497,23 @@ previous
     fsplit .##   '.' xemit 100e f*
     f>s .##      '"' xemit ;
 : .never ( -- )
-    date? 7 and 1 > IF ." never" ELSE 'n' emit THEN ;
+    datehms? 1 > IF ." never" ELSE 'n' emit THEN ;
 : .forever ( -- )
-    date? 7 and 1 > IF ." forever" ELSE 'f' emit THEN ;
+    datehms? 1 > IF ." forever" ELSE 'f' emit THEN ;
 
 : f.ticks ( rticks -- )
     1e-9 f* >day
-    dup today? date? 8 and 0= and
-    date? dup >r 7 and config:date# !
+    dup today? date? #today and 0= and
     IF
 	drop .timeofday
     ELSE
-	.day date? IF .timeofday ELSE fdrop THEN
-    THEN  r> config:date# ! ;
+	date? #splitdate and IF
+	    dup last-day <> IF
+		." ===== " dup .day ."  =====" cr
+	    THEN  to last-day
+	ELSE  .day  THEN
+	datehms? IF .timeofday ELSE fdrop THEN
+    THEN ;
 
 : .ticks ( ticks -- )  date? 0= IF  64drop  EXIT  THEN
     64dup 64-0= IF  .never 64drop EXIT  THEN

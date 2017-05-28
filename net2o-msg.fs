@@ -156,7 +156,7 @@ Variable otr-log
 : do-msg-nestsig ( addr u -- )
     parent .msg-context @ .msg-display msg-notify ;
 
-: display-lastn ( addr u n -- )
+: display-lastn ( addr u n -- )  reset-time
     otr-mode @ >r otr-mode off
     [: n2o:new-msg >o 0 to parent
       cells >r ?msg-log last# msg-log@ 2dup { log u }
@@ -646,7 +646,7 @@ previous
 
 : msg-reply ( tag -- )
     reply( ." got reply " hex. pubkey $@ key>nick forth:type forth:cr )else( drop ) ;
-: expect-msg ( --- ) ['] msg-reply expect-reply-xt ;
+: expect-msg ( --- ) ['] msg-reply expect-reply-xt +chat-control ;
 
 : send-text ( addr u -- )
     net2o-code expect-msg
@@ -1138,7 +1138,7 @@ previous
 	    n2o:dispose-context
 	    rdrop EXIT
 	THEN
-    ELSE  expected@ u< IF  -timeout  THEN  THEN ;
+    ELSE  expected@ u<= IF  -timeout  THEN  THEN ;
 
 : +resend-msg  ['] msg-timeout is timeout-xt o+timeout ;
 
