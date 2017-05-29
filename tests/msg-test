@@ -16,7 +16,7 @@ cat >.net2o/config <<EOF
 keys="$PWD/.net2o/keys"
 chats="$PWD/.net2o/chats"
 objects="$PWD/.net2o/objects"
-date=5
+date=\$75
 host="test-host"
 prio=10
 rootdirs="$PWD"
@@ -42,7 +42,7 @@ trap killgforth EXIT
 export PASSPHRASE=1234
 exec 3> >($GFORTH ../n2o $* chat test)
 export GFORTHPID1=$[$!+1]
-sleep 1
+sleep 3
 export PASSPHRASE=2345
 exec 4> >($GFORTH ../n2o 10% $* chat test@chat-test1)
 export GFORTHPID2=$[$!+1]
@@ -70,7 +70,7 @@ export GFORTHPID3=$[$!+1]
 export PASSPHRASE=4567
 exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
 export GFORTHPID4=$[$!+1]
-sleep 1
+sleep 2
 
 echo "/sync" >&5
 
@@ -121,7 +121,7 @@ do
 
     exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
     export GFORTHPID5=$[$!+1]
-    sleep 1
+    sleep 2
 done
 
 echo "Last Message $i on 1/3 $x" >&3
