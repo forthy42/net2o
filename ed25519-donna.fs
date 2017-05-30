@@ -36,7 +36,7 @@ fast-lib [IF]
     end-c-library
 [THEN]
 
-[IFUNDEF] user-o bye [THEN] \ stop here if libcompile only
+[IFUNDEF] class bye [THEN] \ stop here if libcompile only
 
 : 32b>sc25519 32 nb>sc25519 ;
 : 64b>sc25519 64 nb>sc25519 ;
