@@ -777,12 +777,12 @@ Variable $lastline
     line-date 64@ 64#-1 64= IF
 	>r 2dup swap $lastline $! r>  THEN
     clear-line find-prev-chatline
-    2dup type 2dup cur-correct edit-update false ;
+    edit-update false ;
 : chat-next-line  ( max span addr pos1 -- max span addr pos2 false )
     clear-line find-next-chatline
-    2dup type 2dup cur-correct edit-update false ;
+    edit-update false ;
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
-     .all space true 64#-1 line-date 64! ;
+    drop over edit-update space true 64#-1 line-date 64! ;
 
 [IFDEF] xchar-ctrlkeys
     bl cells buffer: chat-ctrlkeys
@@ -813,8 +813,7 @@ Variable $lastline
 
 $200 Constant maxmsg#
 
-: xclear ( addr u -- ) x-width
-    1+ dup xback-restore dup spaces xback-restore ;
+: xclear ( addr u -- ) x-width 1+ x-erase ;
 
 : get-input-line ( -- addr u )  chat-history
     BEGIN  pad maxmsg# ['] accept catch

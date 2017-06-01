@@ -1098,8 +1098,8 @@ event: :>invite ( addr u -- )
     perm ke-mask !
     import#new import-type !  save-pubkeys o> ;
 
-: x-erase ( len -- )
-    dup xback-restore  dup spaces  xback-restore ;
+: x-erase ( len -- )  edit-curpos !
+    xedit-startpos  edit-curpos @ spaces  xedit-startpos ;
 
 : invite-key ( addr u -- key )
     2dup x-width { addr u len }
