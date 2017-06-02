@@ -24,46 +24,6 @@ Variable pw-level# 2 pw-level# ! \ pw-level# 0 is lowest
 Variable pw-maxlevel# 4 pw-maxlevel# ! \ pw-maxlevel# is the maximum checked
 }scope
 
-[IFDEF] mslinux '*' [ELSE]
-    e? max-xchar $100 < [IF] '*' [ELSE] '•' [THEN] [THEN] Constant pw*
-
-xc-vector up@ - class-o !
-
-0 cell uvar esc-state drop
-
-Defer old-emit  what's emit is old-emit
-
-here
-xc-vector @ cell- dup @ tuck - here swap dup allot move
-, here 0 , Constant utf-8*
-
-xc-vector @  utf-8* xc-vector ! ' *-width is x-width  xc-vector !
-
-: emit-pw* ( n -- )
-    dup #esc = IF  esc-state on  THEN
-    dup bl < IF  old-emit  EXIT  THEN
-    esc-state @ IF  dup old-emit
-	toupper 'A' '[' within IF  esc-state off  THEN
-    ELSE  $C0 $80 within IF
-	    [ pw* ' xemit $tmp
-	    bounds [?DO] [I] c@ ]L old-emit [ [LOOP] ]
-	THEN
-    THEN ;
-
-: type-pw* ( addr u -- )  2dup bl skip nip 0=
-    IF    bounds U+DO  bl old-emit    LOOP
-    ELSE  bounds U+DO  I c@ emit-pw*  LOOP  THEN ;
-
-: accept* ( addr u -- u' )
-    \G accept-like input, but types * instead of the character
-    \G don't save into history
-    history >r  what's type >r  what's emit is old-emit
-    utf-8* xc-vector !@ >r  ['] type-pw* is type  ['] emit-pw* is emit
-    0 to history
-    ['] accept catch
-    r> xc-vector !  what's old-emit is emit  r> is type  r> to history
-    throw -1 0 at-deltaxy space ;
-
 \ Keys are passwords and private keys (self-keyed, i.e. private*public key)
 
 cmd-buf0 uclass cmdbuf-o

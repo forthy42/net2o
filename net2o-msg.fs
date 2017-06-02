@@ -756,7 +756,7 @@ Variable $lastline
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
-    line-date 64@ date>i
+    line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
@@ -782,7 +782,7 @@ Variable $lastline
     clear-line find-next-chatline
     edit-update false ;
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
-    drop over edit-update space true 64#-1 line-date 64! ;
+    drop over edit-update true 64#-1 line-date 64! ;
 
 [IFDEF] xchar-ctrlkeys
     bl cells buffer: chat-ctrlkeys

@@ -810,6 +810,7 @@ Sema resize-sema
 
 : *-width ( addr u -- n )
     0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
+
 e? max-xchar $100 u< [IF]
     : >utf8$ ( addr u -- addr' u' )
 	[: bounds ?DO  I c@ u8emit  LOOP ;] $tmp ;
@@ -820,6 +821,43 @@ e? max-xchar $100 u< [IF]
     ' noop alias >utf8$ immediate
     ' noop alias $utf8> immediate
 [THEN]
+
+\ accept* derivative
+
+[IFDEF] mslinux '*' [ELSE]
+    e? max-xchar $100 < [IF] '*' [ELSE] '•' [THEN] [THEN] Constant pw*
+
+: *type ( addr u -- )
+    *-width 0 ?DO  pw* xemit  LOOP ;
+: .*resizeline ( span addr pos -- span addr pos )
+    >r 2dup swap *-width setstring$ $@ *-width +
+    dup >r edit-linew @ u< IF
+	xedit-startpos  edit-linew @ spaces  edit-linew @ edit-curpos !
+    THEN
+    r> edit-linew !  r> ;
+: .*all ( span addr pos -- span addr pos )
+    xedit-startpos  2dup *type  setstring$ $@
+    dup IF  ['] *type setstring-color color-execute  ELSE  2drop  THEN
+    >edit-rest *type  edit-linew @ edit-curpos !  ;
+: .*rest ( span addr pos -- span addr pos )
+    xedit-startpos  2dup *-width edit-curpos !  2dup *type ;
+: *edit-update ( -- )
+    .*resizeline .*all .*rest ;
+
+align here
+' (xins) , ' kill-prefix ,  ' edit-curpos-off , ' *edit-update  , \ kernel stuff
+' xpaste! , \ extended stuff
+, here  0 , 0 , 0 , 0 , 0 ,
+Constant *edit-terminal
+
+: accept* ( addr u -- u' )
+    \G accept-like input, but types * instead of the character
+    \G don't save into history
+    history >r  edit-out @ >r  *edit-terminal edit-out !
+    0 to history
+    ['] accept catch
+    r> edit-out !  r> to history
+    throw space ;
 
 \ catch loop
 
