@@ -849,13 +849,16 @@ Variable *insflag
 	0 of  *-width  endof
     endcase ;
 : .*resizeline ( span addr pos -- span addr pos )
-    >r 2dup swap *-width1 setstring$ $@ *-width1 +
+    2dup *insflag @ IF  *-width2  ELSE  *-width1  THEN >r
+    setstring$ $@ *-width1 >r
+    >edit-rest *-width1 r> r> + +
     dup >r edit-linew @ u< IF
 	xedit-startpos  edit-linew @ spaces  edit-linew @ edit-curpos !
     THEN
-    r> edit-linew !  r> ;
+    r> edit-linew ! ;
 : .*all ( span addr pos -- span addr pos )
-    xedit-startpos  2dup *type  setstring$ $@
+    xedit-startpos  2dup *insflag @ IF  *type2  ELSE  *type  THEN
+    setstring$ $@
     dup IF  ['] *type setstring-color color-execute  ELSE  2drop  THEN
     >edit-rest *type  edit-linew @ edit-curpos !  ;
 : .*rest ( span addr pos -- span addr pos )
