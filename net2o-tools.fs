@@ -833,11 +833,14 @@ Variable *insflag
 
 : *type ( addr u -- )  config:passmode# @ 2 = IF  type  EXIT  THEN
     *-width 0 ?DO  pw* xemit  LOOP ;
+: *type1 ( addr u -- )  config:passmode# @ 0= IF  *type  ELSE  type  THEN ;
 : *type2 ( addr u -- )  config:passmode# @ 1 <> IF  *type  EXIT  THEN
     dup IF  2dup over + xchar- over - dup >r 2swap r> /string 2swap
     ELSE  0 0 2swap  THEN
     *-width 0 ?DO  pw* xemit  LOOP
     dup IF  type  ELSE  2drop  THEN ;
+: *-width0 ( addr u -- )
+    config:passmode# @ 0 = IF  *-width  ELSE  x-width  THEN ;
 : *-width1 ( addr u -- )
     config:passmode# @ 2 = IF  x-width  ELSE  *-width  THEN ;
 : *-width2 ( addr u -- )
@@ -850,7 +853,7 @@ Variable *insflag
     endcase ;
 : .*resizeline ( span addr pos -- span addr pos )
     2dup *insflag @ IF  *-width2  ELSE  *-width1  THEN >r
-    setstring$ $@ *-width1 >r
+    setstring$ $@ *-width0 >r
     >edit-rest *-width1 r> r> + +
     dup >r edit-linew @ u< IF
 	xedit-startpos  edit-linew @ spaces  edit-linew @ edit-curpos !
@@ -859,7 +862,7 @@ Variable *insflag
 : .*all ( span addr pos -- span addr pos )
     xedit-startpos  2dup *insflag @ IF  *type2  ELSE  *type  THEN
     setstring$ $@
-    dup IF  ['] *type setstring-color color-execute  ELSE  2drop  THEN
+    dup IF  ['] *type1 setstring-color color-execute  ELSE  2drop  THEN
     >edit-rest *type  edit-linew @ edit-curpos !  ;
 : .*rest ( span addr pos -- span addr pos )
     xedit-startpos
