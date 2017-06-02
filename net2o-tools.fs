@@ -345,6 +345,7 @@ require config.fs
 
 scope{ config
 
+Variable passmode#
 Variable logsize#
 2Variable savedelta&
 2Variable patchlimit&
@@ -370,6 +371,7 @@ also config
 #20 logsize# !
 pad $400 get-dir rootdirs$ $!
 "Hello!" invite$ $!
+[defined] android 1 and passmode# ! \ default is all entry is masked out
 
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
@@ -827,10 +829,27 @@ e? max-xchar $100 u< [IF]
 [IFDEF] mslinux '*' [ELSE]
     e? max-xchar $100 < [IF] '*' [ELSE] '•' [THEN] [THEN] Constant pw*
 
-: *type ( addr u -- )
+Variable *insflag
+
+: *type ( addr u -- )  config:passmode# @ 2 = IF  type  EXIT  THEN
     *-width 0 ?DO  pw* xemit  LOOP ;
+: *type2 ( addr u -- )  config:passmode# @ 1 <> IF  *type  EXIT  THEN
+    dup IF  2dup over + xchar- over - dup >r 2swap r> /string 2swap
+    ELSE  0 0 2swap  THEN
+    *-width 0 ?DO  pw* xemit  LOOP
+    dup IF  type  ELSE  2drop  THEN ;
+: *-width1 ( addr u -- )
+    config:passmode# @ 2 = IF  x-width  ELSE  *-width  THEN ;
+: *-width2 ( addr u -- )
+    case  config:passmode# @
+	2 of  x-width  endof
+	1 of
+	    dup IF  2dup over + xchar- over - dup >r 2swap r> /string
+		x-width >r *-width r> +  ELSE  nip  THEN  endof
+	0 of  *-width  endof
+    endcase ;
 : .*resizeline ( span addr pos -- span addr pos )
-    >r 2dup swap *-width setstring$ $@ *-width +
+    >r 2dup swap *-width1 setstring$ $@ *-width1 +
     dup >r edit-linew @ u< IF
 	xedit-startpos  edit-linew @ spaces  edit-linew @ edit-curpos !
     THEN
@@ -840,12 +859,16 @@ e? max-xchar $100 u< [IF]
     dup IF  ['] *type setstring-color color-execute  ELSE  2drop  THEN
     >edit-rest *type  edit-linew @ edit-curpos !  ;
 : .*rest ( span addr pos -- span addr pos )
-    xedit-startpos  2dup *-width edit-curpos !  2dup *type ;
+    xedit-startpos
+    2dup *insflag @ IF  *-width2  ELSE  *-width1  THEN  edit-curpos !
+    2dup *insflag @ IF  *type2  ELSE  *type  THEN ;
 : *edit-update ( -- )
     .*resizeline .*all .*rest ;
+: (*xins)  *insflag on (xins) ;
+: *kill-prefix  *insflag off kill-prefix ;
 
 align here
-' (xins) , ' kill-prefix ,  ' edit-curpos-off , ' *edit-update  , \ kernel stuff
+' (*xins) , ' *kill-prefix ,  ' edit-curpos-off , ' *edit-update  , \ kernel stuff
 ' xpaste! , \ extended stuff
 , here  0 , 0 , 0 , 0 , 0 ,
 Constant *edit-terminal
