@@ -435,9 +435,9 @@ Variable configured?
     "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip  ['] config >body swap
     no-file# = IF  ?.net2o write-config  ELSE  read-config ?.net2o  THEN
-    fsane-init rootdirs>path ;
+    rootdirs>path ;
 
-: init-dirs ( -- ) ?.net2o-config ;
+: init-dirs ( -- ) ?.net2o-config fsane-init ;
 
 previous
 

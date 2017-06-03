@@ -338,7 +338,7 @@ warnings !
 : -conf ( -- )
     \O -conf <value>=<thing>
     \G -conf: Set a config value
-    ?get-me init-client \ read config if necessary
+    ?.net2o-config \ read config if necessary
     ?nextarg 0= ?EXIT ['] config-line execute-parsing next-cmd ;
 
 \ server mode
