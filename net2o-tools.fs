@@ -875,7 +875,7 @@ Variable *insflag
 
 align here
 ' (*xins) , ' *kill-prefix ,  ' edit-curpos-off , ' *edit-update  , \ kernel stuff
-' xpaste! , \ extended stuff
+' xpaste! , ' xgrow-tib , \ extended stuff
 , here  0 , 0 , 0 , 0 , 0 ,
 Constant *edit-terminal
 
