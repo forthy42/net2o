@@ -165,7 +165,7 @@ up@ Value main-up@
 :noname defers 'cold up@ to main-up@ ; is 'cold
 
 event: :>type ( $string -- ) { w^ x } x $@ type x $free ;
-event: :>hide ( -- ) ctrl Z inskey ;
+event: :>hide ( -- ) ctrl Z unkey ;
 : <hide> ( task -- ) <event :>hide event| ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;

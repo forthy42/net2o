@@ -889,10 +889,10 @@ edit-terminal edit-out !
 : accept* ( addr u -- u' )
     \G accept-like input, but types * instead of the character
     \G don't save into history
-    history >r  edit-out @ >r  *edit-terminal edit-out !
-    0 to history
+    get-order n>r history >r  edit-out @ >r  *edit-terminal edit-out !
+    0 to history  0 set-order
     ['] accept catch
-    r> edit-out !  r> to history
+    r> edit-out !  r> to history  nr> set-order
     throw space ;
 
 \ catch loop

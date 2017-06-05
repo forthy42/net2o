@@ -219,8 +219,6 @@ User peer-buf
 event: :>avalanche ( addr u otr-flag o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
-event: :>chat-connect ( o -- )
-    drop ctrl Z inskey ;
 event: :>chat-reconnect ( o group -- )
     to last# .reconnect-chat ;
 event: :>msg-nestsig ( addr u o group -- )
@@ -409,7 +407,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     replay-mode @ IF  $> 2drop  EXIT  THEN
     $> >load-group parent >o
     +unique-con +chat-control
-    wait-task @ ?dup-IF  <event o elit, :>chat-connect event>  THEN
+    wait-task @ ?dup-IF  <hide>  THEN
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
     $> msg-groups #@ d0<> IF
