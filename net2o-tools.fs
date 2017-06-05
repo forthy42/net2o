@@ -873,12 +873,18 @@ Variable *insflag
 : (*xins)  *insflag on (xins) ;
 : *kill-prefix  *insflag off kill-prefix ;
 
-align here
-' (*xins) , ' xins-string , ' (edit-control) ,
-' *kill-prefix ,  ' edit-curpos-off , ' *edit-update  , \ kernel stuff
-' xpaste! , ' xgrow-tib , \ extended stuff
-, here  0 , 0 , 0 , 0 , 0 ,
-Constant *edit-terminal
+edit-terminal-c class
+end-class *edit-terminal-c
+
+*edit-terminal-c ' new static-a with-allocater Constant *edit-terminal
+
+*edit-terminal edit-out !
+
+' (*xins) is insert-char
+' *kill-prefix is everychar
+' *edit-update  is edit-update
+
+edit-terminal edit-out !
 
 : accept* ( addr u -- u' )
     \G accept-like input, but types * instead of the character

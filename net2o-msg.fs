@@ -784,30 +784,27 @@ Variable $lastline
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
     drop over edit-update true 64#-1 line-date 64! ;
 
-[IFDEF] xchar-ctrlkeys
-    bl cells buffer: chat-ctrlkeys
-    xchar-ctrlkeys chat-ctrlkeys bl cells move
-    
-    chat-ctrlkeys to ctrlkeys
-    
-    ' chat-next-line ctrl N bindkey
-    ' chat-prev-line ctrl P bindkey
-    ' chat-enter     #lf    bindkey
-    ' chat-enter     #cr    bindkey
-    :noname #tab (xins) 0 ; #tab   bindkey
-    
-    xchar-ctrlkeys to ctrlkeys
+edit-terminal-c class
+end-class chat-terminal-c
+chat-terminal-c ' new static-a with-allocater Constant chat-terminal
 
-    : chat-history ( -- )
-	chat-ctrlkeys to ctrlkeys ;
-[ELSE]
-    : chat-history ( -- )
-	['] chat-next-line ctrl N bindkey
-	['] chat-prev-line ctrl P bindkey
-	['] chat-enter     #lf    bindkey
-	['] chat-enter     #cr    bindkey
-	['] false          #tab   bindkey ;
-[THEN]
+bl cells buffer: chat-ctrlkeys
+xchar-ctrlkeys chat-ctrlkeys bl cells move
+
+chat-terminal edit-out !
+
+' chat-ctrlkeys is ctrlkeys
+
+' chat-next-line ctrl N bindkey
+' chat-prev-line ctrl P bindkey
+' chat-enter     #lf    bindkey
+' chat-enter     #cr    bindkey
+:noname #tab (xins) 0 ; #tab   bindkey
+
+edit-terminal edit-out !
+
+: chat-history ( -- )
+    chat-terminal edit-out ! ;
 
 \ chat line editor
 
@@ -815,7 +812,7 @@ $200 Constant maxmsg#
 
 : xclear ( addr u -- ) x-width 1+ x-erase ;
 
-: get-input-line ( -- addr u )  chat-history
+: get-input-line ( -- addr u )
     BEGIN  pad maxmsg# ['] accept catch
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
 	IF    drop 2drop "/bye"
@@ -825,8 +822,7 @@ $200 Constant maxmsg#
 	    ELSE
 		DoError drop 0  THEN
 	THEN
-	dup 0= WHILE  2drop  REPEAT
-    xchar-history ;
+	dup 0= WHILE  2drop  REPEAT ;
 
 \ joining and leaving
 
@@ -1282,12 +1278,13 @@ scope{ /chat
 
 \ chat toplevel
 
-: do-chat ( addr u -- ) msg-group$ $! chat-entry \ ['] cmd( >body on
+: do-chat ( addr u -- )  chat-history
+    msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
-    REPEAT  2drop leave-chats ;
+    REPEAT  2drop leave-chats  xchar-history ;
 
 : avalanche-to ( addr u otr-flag o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
