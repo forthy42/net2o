@@ -23,14 +23,14 @@ cmd-class class
     keccak# +field v-kstate
     2field: v-data
     2field: v-sig
-    field: v-mode \ crypto mode and key size
+    value: v-mode \ crypto mode and key size
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
     vault-class new n:>o vault-table @ token-table !
     my-key-default to my-key ;
 : v-mode>crypt2 ( -- )
-    v-mode @ $10 rshift $FF and >crypt ;
+    v-mode $10 rshift $FF and >crypt ;
 
 vault-table >table
 
@@ -46,7 +46,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     v-key state# erase 1 c-state or! ;
 +net2o: vault-keys ( $:keys -- ) c-state @ 1 <> !!no-tmpkey!!
     \g vault keys can be opened with the dhe secret; each key is IV+session key+checksum
-    v-mode @ dup $FF and state# umax { vk# } 8 rshift $FF and >crypt
+    v-mode dup $FF and state# umax { vk# } 8 rshift $FF and >crypt
     $> bounds ?DO
 	I' I - vk# u>= IF
 	    I vaultkey vk# move
@@ -77,7 +77,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
     0 >crypt 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
-    64>n v-mode ! ;
+    64>n to v-mode ;
 
 gen-table $freeze
 ' context-table is gen-table
