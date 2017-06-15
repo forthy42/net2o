@@ -10,15 +10,12 @@ quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
-backdoors: I have an official front door in net2o for the NSA.
-**Update:** The NSA was here and wanted to [recruit
-me](http://www.burojansen.nl/bvd-aivd/dutch-secret-service-tries-to-recruit-tor-admin/).
-Or maybe someone else.  When they are trying to infiltrate Tor, why
-not try to infiltrate net2o?
-
-> He said they were mostly interested in building a community of
-> techies around the developers of Tor and Tails and that it would be an
-> international effort.
+backdoors: I have a backdoor in net2o for the BND.  [Thomas de
+Maizière forced
+me](https://www.heise.de/newsticker/meldung/Innenminister-wollen-Messenger-wie-WhatsApp-ueberwachen-3743669.html)
+to put a backdoor in my messenger, and the [feds bribed me,
+too](https://www.theregister.co.uk/2017/06/14/telegram_boss_backdoor_offer_claim/).
+Or someone else.
 
 As net2o is open source, you can (in theory) verify statements about
 actual backdoors.  And keep an eye on this page, I intent to publish

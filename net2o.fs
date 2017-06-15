@@ -1086,7 +1086,8 @@ Create chunk-adder chunks-struct allot
 0 Value timeout-task
 0 Value query-task    \ for background queries initiated in other tasks
 
-: event-loop' ( -- )  BEGIN  stop  depth 0<> IF  ~~ true !!depth!!  THEN AGAIN ;
+: !!0depth!! ( -- ) ]] depth IF  ~~ true !!depth!!  THEN [[ ; immediate
+: event-loop' ( -- )  BEGIN  stop  !!0depth!!  AGAIN ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
 : ?query-task ( -- task )
@@ -1363,7 +1364,7 @@ Variable recvflag  recvflag off
 : send-loop ( -- )
     send-anything?
     BEGIN  0= IF   wait-send drop read-event  THEN
-	send-another-chunk  depth 0<> !!depth!!  AGAIN ;
+	!!0depth!! send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )
     [:  \ ." created sender task " up@ hex. cr
@@ -1700,9 +1701,12 @@ Forward next-saved-msg
     wait( ticker 64@ 64swap 64- ." waited for " u64. ." ns" cr ) ;
 
 : timeout-loop ( -- ) [IFDEF] android jni:attach [THEN]
-    !ticks  BEGIN  >next-ticks beacon? save-msgs?
-	request-timeout event-send
-	depth IF  ~~ true !!depth!!  THEN  AGAIN ;
+    !ticks  BEGIN
+	>next-ticks     !!0depth!!
+	beacon?         !!0depth!!
+	save-msgs?      !!0depth!!
+	request-timeout !!0depth!!
+	event-send      !!0depth!!  AGAIN ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
@@ -1710,8 +1714,7 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  event-send
-	depth IF  ~~ true !!depth!!  THEN  AGAIN ;
+    BEGIN  packet-event  !!0depth!!  event-send  !!0depth!!  AGAIN ;
 
 : n2o:request-done ( n -- )  elit, o elit, :>request ;
 

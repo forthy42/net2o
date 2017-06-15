@@ -124,14 +124,14 @@ event: ->netlink ( -- )
 : netlink-loop ( -- )
     netlink-sock 0= IF  get-netlink  THEN
     BEGIN
-	wait-for-address
+	wait-for-address  !!0depth!!
 	new-preferred? IF
 	    nat( ." new preferred IP: " )
 	    netlink-done? @ IF
 		nat( ." dht-beacon" cr )
-		netlink-done? off netlink-again? off dht-beacon
+		netlink-done? off netlink-again? off dht-beacon  !!0depth!!
 	    ELSE
-		nat( ." netlink-again" cr ) netlink-again? on
+		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN
 	THEN
     AGAIN ;

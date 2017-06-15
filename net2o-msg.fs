@@ -569,28 +569,24 @@ Variable ask-msg-files[]
 ; msgfs-class is fs-open
 
 \ syncing done
-event: :>close-all ( o -- )
-    .n2o:close-all ;
-event: :>chat-sync-done ( -- )
-    msg( ." chat-sync-done event" forth:cr )
-    msg-group$ $@ ?msg-log
-    last# $@ rows  display-lastn
-    !save-all-msgs
-    ." === sync done ===" forth:cr ;
-: chat-sync-done ( -- )
+: chat-sync-done ( group-addr u -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
-    msg( ." chat-sync-done closed" forth:cr )
     n2o:close-all
-    \ <event o elit, :>close-all file-task event|
-    <event :>chat-sync-done wait-task @ event>
+    ?msg-log last# $@ rows  display-lastn
+    !save-all-msgs
+    ." === sync done ===" forth:cr
     ['] noop is sync-done-xt ;
 event: :>msg-eval ( parent $pack $addr -- )
-    { w^ buf w^ group }  group $@ 2 64s /string ?msg-log
+    { w^ buf w^ group }
+    group $@ 2 64s /string ?msg-log
+    group $@ 2 64s /string msg-logs #@ nip cell/ u.
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $free group $@ 2 64s /string ?save-msg  group $free
+    buf $free group $@ 2 64s /string ?save-msg
+    group $@ .chat-file ."  saved "
+    group $@ 2 64s /string msg-logs #@ nip cell/ u. forth:cr
     >o -1 file-count +!@ 1 =
-    IF  chat-sync-done  THEN
+    IF  group $@ 2 64s /string chat-sync-done  THEN  group $free
     o> ;
 : msg-file-done ( -- )
     fs-path $@len IF
@@ -1023,7 +1019,7 @@ also net2o-base scope: /chat
       r@ $@ msg-group$ $@ str= IF ." *" THEN
       r@ .group
       ." [" r@ cell+ $@len cell/ 0 .r ." ]#"
-      r@ $@ msg-logs #@ nip cell / u. rdrop ;] #map
+      r@ $@ msg-logs #@ nip cell/ u. rdrop ;] #map
     ." =====" forth:cr ;
 
 : nat ( addr u -- )  2drop
@@ -1129,7 +1125,7 @@ previous
 		pubkey $@ ['] left, send-otr-avalanche
 	    THEN
 	    n2o:dispose-context
-	    rdrop EXIT
+	    EXIT
 	THEN
     ELSE  expected@ u<= IF  -timeout  THEN  THEN ;
 

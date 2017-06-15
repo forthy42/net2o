@@ -42,7 +42,7 @@ trap killgforth EXIT
 export PASSPHRASE=1234
 exec 3> >($GFORTH ../n2o $* chat test)
 export GFORTHPID1=$[$!+1]
-sleep 3
+sleep 5
 export PASSPHRASE=2345
 exec 4> >($GFORTH ../n2o 10% $* chat test@chat-test1)
 export GFORTHPID2=$[$!+1]
