@@ -28,6 +28,7 @@ LIBCCDEST = $(libdir)/gforth/$(VERSION)/$(machine)/libcc-named/
 libccdir = $(subst $(package),,$(LIBCCDEST))
 LIBS 	 = keccak threefish ed25519-donna bdelta
 MKDIR	 = mkdir
+RMDIR	 = rm -rf
 GCC	 = gcc
 LIBTOOL	 = @GNU_LIBTOOL@
 CFLAGS	 = -O3 -fomit-frame-pointer
@@ -125,6 +126,16 @@ install:	libcc-install
 		ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
 	done
 
+uninstall:	libcc-uninstall
+	for i in $(SRCDIRS); do \
+		$(RMDIR) $(datadir)/gforth/$(VERSION)/$$i; \
+	done
+	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
+	for i in $(SCRIPTS); do \
+		$(RM) $(bindir)/$$i-@PACKAGE_VERSION@; \
+		$(RM) $(bindir)/$$i; \
+	done
+
 libcc:	$(FORTHLIB)
 	-for i in $(FORTHLIB); do \
 		echo "generating library $$i"; \
@@ -135,6 +146,11 @@ libcc-install:	libcc
 	$(MKDIR) -p $(LIBCCDEST)
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
 		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)libgf`basename $$i .fs`.la; \
+		done; fi
+
+libcc-uninstall:
+	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
+		   $(LIBTOOL) --silent --mode=uninstall $(RM) $(LIBCCDEST)libgf`basename $$i .fs`.*; \
 		done; fi
 
 doc:	$(DOC)
