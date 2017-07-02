@@ -794,6 +794,15 @@ chat-terminal edit-out !
 ' chat-enter     #lf    bindkey
 ' chat-enter     #cr    bindkey
 :noname #tab (xins) 0 ; #tab   bindkey
+[IFDEF] ebindkey
+    keycode-limit keycode-start - cells buffer: chat-ekeys
+    std-ekeys chat-ekeys keycode-limit keycode-start - cells move
+    
+    ' chat-ekeys is ekeys
+    
+    ' chat-next-line k-down ebindkey
+    ' chat-prev-line k-up   ebindkey
+[THEN]
 
 edit-terminal edit-out !
 

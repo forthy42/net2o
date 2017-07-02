@@ -135,7 +135,7 @@ scope{ /chat
 }scope
 
 event: :>renat ( -- )  renat-all ;
-:noname <event :>renat main-up@ event> ; is dht-beacon
+:noname <event :>renat main-up@ event> 2drop ; is dht-beacon
 
 \ beacon handling
 
