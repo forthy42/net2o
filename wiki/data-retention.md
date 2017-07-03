@@ -25,6 +25,8 @@ gespeichert. Damit ist eine individuelle Zuordnung nicht mehr
 verhältnismäßig möglich. Auch 6to4-Adressen werden zumindest um das
 letzte IPv4-Byte reduziert.
 
+Nach einem Monat werden die Logs regulär gelöscht.
+
 ## Cookies ##
 
 Cookies werden nur gesetzt, wenn man sich im Fossil-Repository
