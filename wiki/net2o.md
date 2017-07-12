@@ -91,7 +91,7 @@ Discussions
 * [Key format](key-format.wiki)
 * [Key revocation](key-revocation.md)
 * [NSA backdoor](nsa-backdoor.md)
-* [Date retention](data-retention.md)
+* [Data retention](data-retention.md)
 * [Onion Routing](onion-routing.md)
 * [Threat Model](threat-model.md)
 * [What it's not for](whatnotfor.md)
