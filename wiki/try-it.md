@@ -53,7 +53,12 @@ You can try a group chat with several ids, start the group "test" with <id1>
 
     chat test
 
-And connect from the other ids with
+If you want to talk to someone else, you need to make sure they accept
+your connection, so you first need to send an invitation
+
+    invite @<id1>
+
+And after acceptance of that id connect from the other ids with
 
     chat test@<id1>
 
@@ -69,7 +74,12 @@ from <id2> on several computers/terminals.  The chat mode works a bit like IRC,
 you can use /help to list the commands, /peers to see the direct
 neighbors, and /me <action> if you aren't actually talking.
 
-You can copy small or large files:
+You can copy small or large files, when the corresponding id has the
+named file permission.  Set the permission with
+
+    perm @<id2> +n
+
+and start the server
 
     server
 
@@ -77,5 +87,4 @@ to supply things on <id1>, and e.g.
 
     get @<id1> data/2011-05-20_17-01-12.jpg
 
-to copy one of the test images.  A fine-grained access right system
-with default deny will follow, so this section will change.
+to copy one of the test images.
