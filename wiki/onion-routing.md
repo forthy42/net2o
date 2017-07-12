@@ -29,15 +29,17 @@ the load, and can't easily be scared to turn it off.
 
 *This is not yet implemented*
 
-As onion routing uses cryptography on already encrypted and authenticated
-packets, and should not increase the size of the packets, I will use a block
-cipher, with an AES-XEX variant.  The destination memory address and the
-second flag byte will also be encrypted, using ECB (taking the first part of
-the message to fill the 16 bytes), the decrypted memory address is the sector
-index for AES-XEX. This encryption is not tamper-proof, but tampered packets
-will be filtered out at the legitimate destination.  The requirement here
-is that it is harder to correlate input and output of a relay through
-decryption than through other means.
+As onion routing uses cryptography on already encrypted and
+authenticated packets, and should not increase the size of the
+packets, I will use a block cipher, with an AES-XEX variant or
+Threefish when the cost of AES is too high.  The destination memory
+address and the second flag byte will also be encrypted, using ECB
+(taking the first part of the message to fill the 16 bytes), the
+decrypted memory address is the sector index for AES-XEX or the tweak
+for Threefish. This encryption is not tamper-proof, but tampered
+packets will be filtered out at the legitimate destination.  The
+requirement here is that it is harder to correlate input and output of
+a relay through decryption than through other means.
 
 The most interesting problem however here is how to not expose the
 routing field, because it contains the path through the onion routing
