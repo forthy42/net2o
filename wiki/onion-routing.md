@@ -96,7 +96,7 @@ fair queuing to help the flow control.
 
 Relay generation is just one single command:
 
-    create-relay ( $key -- )
+    create-relay ( $key algo -- )
 
 Relays automatically are shut down after 1 minute of inactivity;
 relays are created with only one-time keys, because you don't want the
