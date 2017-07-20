@@ -106,16 +106,20 @@ Forward insert-addr ( o -- )
       cell +LOOP
     ;] #map ;
 
-Defer dht-beacon
-
 \ notification for address changes
 
 true Value connected?
+
+Forward dht-beacon
+Forward renat-all
 
 [IFDEF] android     require android/net.fs  [THEN]
 [IFDEF] PF_NETLINK  require linux/net.fs    [THEN]
 
 \ announce and renat
+
+event: :>renat ( -- )  renat-all ;
+: dht-beacon <event :>renat main-up@ event> 2drop ;
 
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
@@ -133,9 +137,6 @@ true Value connected?
 scope{ /chat
 : renat ( addr u -- ) 2drop renat-all ;
 }scope
-
-event: :>renat ( -- )  renat-all ;
-:noname <event :>renat main-up@ event> 2drop ; is dht-beacon
 
 \ beacon handling
 

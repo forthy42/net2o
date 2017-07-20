@@ -95,7 +95,7 @@ Variable netlink-again?  netlink-again? off
 
 event: ->netlink ( -- )
     netlink-again? @ IF
-	 netlink-done? off netlink-again? off dht-beacon
+	 netlink-done? off netlink-again? off #0. dht-beacon
     ELSE  netlink-done? on  THEN ;
 : renat-complete ( -- )
     <event ->netlink netlink-task event> ;
@@ -129,7 +129,7 @@ event: ->netlink ( -- )
 	    nat( ." new preferred IP: " )
 	    netlink-done? @ IF
 		nat( ." dht-beacon" cr )
-		netlink-done? off netlink-again? off dht-beacon  !!0depth!!
+		netlink-done? off netlink-again? off #0. dht-beacon  !!0depth!!
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN

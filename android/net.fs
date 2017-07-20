@@ -18,7 +18,7 @@
 also android also jni
 :noname  defers android-network
     beacons @ IF
-	network-info dup  IF  ]xref dht-beacon  true
+	network-info dup  IF  ]xref #0. dht-beacon  true
 	THEN   to connected?
     THEN ;
 is android-network

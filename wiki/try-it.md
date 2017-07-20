@@ -88,3 +88,11 @@ to supply things on <id1>, and e.g.
     get @<id1> data/2011-05-20_17-01-12.jpg
 
 to copy one of the test images.
+
+## Low-level benchmarks ##
+
+Run some encryption benchmarks from the shell:
+
+   gforth-fast net2o/tests/keccak.fs
+   gforth-fast net2o/tests/threefish.fs
+   gforth-fast net2o/tests/ed25519.fs

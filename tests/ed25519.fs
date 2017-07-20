@@ -78,13 +78,14 @@ $40 xtype cr
 test-eddh
 
 [IFDEF] ed-dhv
-." Test EdDH variable speed "
-skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv pad $20 + swap move
-skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv 2drop
-stskc pkc 2dup pad ed-dhv 2drop pad ed-dhv
-stskc pkc 2dup pad ed-dhv 2drop !time pad ed-dhv .time 2drop
-2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
-2dup pad $20 + over str= [IF] ."  passed"
-[ELSE] ."  failed" pad over cr xtype [THEN] cr
-xtype cr
+    ." Test EdDH variable speed "
+    skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv pad $20 + swap move
+    skc stpkc 2dup pad ed-dhv 2drop pad ed-dhv 2drop
+    stskc pkc 2dup pad ed-dhv 2drop pad ed-dhv
+    stskc pkc 2dup pad ed-dhv 2drop !time pad ed-dhv .time 2drop
+    2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
+    2dup pad $20 + over str= [IF] ."  passed"
+    [ELSE] ."  failed" pad over cr xtype [THEN] cr
+    xtype cr
 [THEN]
+script? [IF] bye [THEN]
