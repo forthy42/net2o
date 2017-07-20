@@ -93,6 +93,6 @@ to copy one of the test images.
 
 Run some encryption benchmarks from the shell:
 
-   gforth-fast net2o/tests/keccak.fs
-   gforth-fast net2o/tests/threefish.fs
-   gforth-fast net2o/tests/ed25519.fs
+    gforth-fast net2o/tests/keccak.fs
+    gforth-fast net2o/tests/threefish.fs
+    gforth-fast net2o/tests/ed25519.fs
