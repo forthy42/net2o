@@ -35,7 +35,7 @@ interception to those who know the psk.  Neither is there a protocol
 change necessary, nor can anything prevent such a weakening of a
 particular implementation (the one used inside banks).  Only a code
 audit can reveal such malicious backdoors, and therefore, only
-communication between trusted peers are secure.
+communications between trusted peers are secure.
 
 As net2o is open source, you can (in theory) verify statements about
 actual backdoors.  And keep an eye on this page, I intent to publish
