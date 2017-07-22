@@ -99,10 +99,15 @@ Forward insert-addr ( o -- )
 	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase  dest-0key dest-0key> !
-	  0 punch-addrs $[] @ insert-addr IF
-	      o to connection
-	      net2o-code new-request true gen-punchload gen-punch end-code
-	  THEN o>
+	  punch-addrs $@ bounds ?DO
+	      I @ .host-route $@len IF
+		  I @ insert-addr IF
+		      o to connection
+		      net2o-code new-request true gen-punchload gen-punch
+		      end-code
+		  THEN
+	      THEN
+	  cell +LOOP o>
       cell +LOOP
     ;] #map ;
 

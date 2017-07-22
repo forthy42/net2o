@@ -1549,6 +1549,8 @@ Defer extra-dispose ' noop is extra-dispose
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
+event: :>dispose-context ( o -- ) .n2o:dispose-context ;
+  
 \ loops for server and client
 
 8 cells 1- Constant maxrequest#
