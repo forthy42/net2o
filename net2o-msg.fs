@@ -843,7 +843,8 @@ $200 Constant maxmsg#
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
 : wait-2s-key ( -- )
-    200 0 DO  key? ?LEAVE  10 ms  LOOP ;
+    ntime 50 0 DO  key? ?LEAVE
+    2dup i #40000000 um* d+ deadline  LOOP  2drop ;
 : .nobody ( -- )
     <info>
     [: ." nobody's online" otr-mode @ 0= IF ." , saving away"  THEN ;] $tmp

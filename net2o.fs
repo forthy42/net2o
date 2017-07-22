@@ -1746,15 +1746,15 @@ Defer init-rest
 
 :noname ( port -- )  init-mykey init-mykey init-my0key \ two keys
     \ hash-init-rng
-    init-timer create-timeout-task net2o-socket init-route prep-socks
-    sender( create-sender-task ) ; is init-rest
+    init-timer net2o-socket init-route prep-socks
+    sender( create-sender-task ) create-timeout-task ; is init-rest
 
 Variable initialized
 
 : init-client ( -- )  true initialized !@ 0= IF
-	init-dirs  net2o-client-port init-rest  THEN ;
+	init-dirs  net2o-client-port  init-rest  THEN ;
 : init-server ( -- )  true initialized !@ 0= IF
-	init-dirs  net2o-port init-rest  THEN ;
+	init-dirs  net2o-port  init-rest  THEN ;
 
 \ connection cookies
 
