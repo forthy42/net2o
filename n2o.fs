@@ -68,8 +68,29 @@ $20 value hash-size#
     set-net2o-cmds catch
     nr> set-recognizers nr> set-order throw ;
 
+: (n2o-quit) ( -- )
+    \ exits only through THROW etc.
+    BEGIN
+	.status cr refill  WHILE
+	    interpret prompt
+    REPEAT  -56 throw ;
+
+: n2o-quit ( -- )
+    clear-tibstack
+    BEGIN
+	[compile] [  ['] (n2o-quit) catch dup #-56 <> and dup
+    WHILE
+	    <# \ reset hold area, or we may get another error
+	    DoError
+	    \ stack depths may be arbitrary still (or again), so clear them
+	    clearstacks
+	    clear-tibstack
+    REPEAT
+    drop clear-tibstack #-56 throw ;
+
 : n2o-cmds ( -- )
-    init-client word-args ['] quit do-net2o-cmds ;
+    init-client word-args ['] n2o-quit ['] do-net2o-cmds catch
+    dup #-56 = swap #-28 = or IF  drop subme bye  ELSE  throw  THEN ;
 
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
