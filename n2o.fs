@@ -371,13 +371,13 @@ warnings !
 
 : server ( -- )
     \U server
-    ?get-me init-server announce-me server-loop ;
+    ?get-me init-server announce-me server-loop-catch ;
 
 : rootserver ( -- )
     \U rootserver
     perm%default to perm%unknown
     ['] no0key( >body on \ rootserver has no 0key
-    ?get-me init-server addme-owndht server-loop ;
+    ?get-me init-server addme-owndht server-loop-catch ;
 
 \ dht commands
 

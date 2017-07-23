@@ -1742,6 +1742,10 @@ Forward next-saved-msg
 : server-loop ( -- )
     0 >o rdrop  BEGIN  client-loop  AGAIN ;
 
+: server-loop-catch ( -- )
+    ['] server-loop catch
+    dup #-28 <> over #-56 <> and and throw ;
+
 \ client/server initializer
 
 Defer init-rest
