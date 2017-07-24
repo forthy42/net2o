@@ -100,12 +100,10 @@ Forward insert-addr ( o -- )
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase  dest-0key dest-0key> !
 	  punch-addrs $@ bounds ?DO
-	      I @ .host-route $@len IF
-		  I @ insert-addr IF
-		      o to connection
-		      net2o-code new-request true gen-punchload gen-punch
-		      end-code
-		  THEN
+	      I @ insert-addr IF
+		  o to connection
+		  net2o-code new-request true gen-punchload gen-punch
+		  end-code
 	      THEN
 	  cell +LOOP o>
       cell +LOOP
