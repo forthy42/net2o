@@ -116,8 +116,9 @@ true Value connected?
 Forward dht-beacon
 Forward renat-all
 
-[IFDEF] android     require android/net.fs  [THEN]
-[IFDEF] PF_NETLINK  require linux/net.fs    [THEN]
+[IFDEF] android     require android/net.fs  [ELSE]
+    [IFDEF] PF_NETLINK  require linux/net.fs    [THEN]
+[THEN]
 
 \ announce and renat
 
