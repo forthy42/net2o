@@ -1,6 +1,7 @@
 # Try it #
 
-You can try net2o (see below) either by starting net2o with
+After you [got it](get-it.md), you can try net2o (see below) either by
+starting net2o with
 
     n2o cmd
 
