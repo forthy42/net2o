@@ -510,7 +510,7 @@ warnings !
 	    $10 blocksize! $A blockalign!
 	    $10 [: 2dup basename n2o:copy ;] arg-loop#
 	    end-code|  n2o:close-all
-	    +resend-cmd
+	    \ +resend-cmd
 	    net2o-code expect-reply  close-all end-code|
 	    ?peekarg  WHILE  2drop
 	REPEAT
