@@ -506,14 +506,13 @@ warnings !
     ?@nextarg IF
 	dvcs-bufs# nick-connect ." connected" cr !time
 	BEGIN  +resend
-	    net2o-code expect+slurp
+	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
 	    $10 [: 2dup basename n2o:copy ;] arg-loop#
 	    end-code|  n2o:close-all
-	    \ +resend-cmd
-	    net2o-code expect-reply  close-all end-code|
 	    ?peekarg  WHILE  2drop
 	REPEAT
+	net2o-code expect-reply  close-all end-code|
 	c:disconnect  THEN ;
 
 : get# ( -- )
@@ -523,13 +522,13 @@ warnings !
     ?@nextarg IF
 	dvcs-bufs# nick-connect ." connected" cr !time
 	BEGIN  +resend
-	    net2o-code expect+slurp
+	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
 	    $10 [: base85>$ n2o:copy# ;] arg-loop#
-	    end-code|
-	    net2o-code expect-reply  close-all end-code|
+	    end-code|  n2o:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
+	net2o-code expect-reply  close-all end-code|
 	c:disconnect  THEN ;
 
 \ dvcs commands
