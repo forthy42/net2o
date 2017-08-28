@@ -1373,6 +1373,9 @@ Variable recvflag  recvflag off
 Forward handle-beacon
 Forward handle-beacon+hash
 
+: add-source ( -- )
+    sockaddr alen @ insert-address inbuf ins-source ;
+
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
     dup minpacket# u>= IF
@@ -1452,9 +1455,6 @@ Forward cmd-exec ( addr u -- )
     c-state @ -rot swap within !!inv-order!! r> c-state or! ;
 
 User remote?
-
-: add-source ( -- )
-    sockaddr alen @ insert-address inbuf ins-source ;
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
     cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
