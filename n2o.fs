@@ -512,7 +512,6 @@ warnings !
 	    end-code|  n2o:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
-	net2o-code expect-reply  close-all end-code|
 	c:disconnect  THEN ;
 
 : get# ( -- )
@@ -528,7 +527,6 @@ warnings !
 	    end-code|  n2o:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
-	net2o-code expect-reply  close-all end-code|
 	c:disconnect  THEN ;
 
 \ dvcs commands
