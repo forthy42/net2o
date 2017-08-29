@@ -213,7 +213,7 @@ Variable lastn2oaddr
 
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF
-	>r r@ get-dest  route>address  IF  r@ ins-source  THEN
+	>r r@ get-dest  route>address  IF  r@ ins-source  ELSE  drop  THEN
 	rdrop false  EXIT  THEN
     2drop true ; \ local packet
 
