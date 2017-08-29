@@ -1461,7 +1461,7 @@ User remote?
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) EXIT  THEN
-    \ add-source
+    add-source  >ret-addr
     validated off     \ we have no validated encryption, only anonymous
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
@@ -1500,19 +1500,19 @@ scope{ mapc
     dup >r inbuf-decrypt 0= IF
 	invalid( r> .mapc:.inv-packet drop )else( rdrop drop ) EXIT
     THEN
-    \ add-source
+    add-source  >ret-addr
     crypt-val validated ! \ ok, we have a validated connection
     r> with mapc handle o IF  endwith  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
-    >ret-addr >dest-addr +desta
+    >dest-addr +desta
     dest-flags 1+ c@ stateless# and  IF
-	add-source  handle-cmd0
+	handle-cmd0
     ELSE
 	inbuf body-size check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
 	    drop  EXIT  THEN +dest
-	add-source  handle-dest
+	handle-dest
     THEN ;
 
 : route-packet ( -- )
