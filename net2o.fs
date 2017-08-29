@@ -1505,14 +1505,14 @@ scope{ mapc
     r> with mapc handle o IF  endwith  ELSE  rdrop  THEN ;
 
 : handle-packet ( -- ) \ handle local packet
-    add-source  >ret-addr >dest-addr +desta
+    >ret-addr >dest-addr +desta
     dest-flags 1+ c@ stateless# and  IF
-	handle-cmd0
+	add-source  handle-cmd0
     ELSE
 	inbuf body-size check-dest dup 0= IF
 	    msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
 	    drop  EXIT  THEN +dest
-	handle-dest
+	add-source  handle-dest
     THEN ;
 
 : route-packet ( -- )
