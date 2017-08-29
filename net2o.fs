@@ -1382,7 +1382,7 @@ Forward handle-beacon+hash
 	( nat( ." packet from: " sockaddr alen @ .address cr )
 	over packet-size over <>
 	header( ~~ !!size!! )else( IF  2drop 0 0 EXIT  !!size!!  THEN )
-	+next  add-source
+	+next
 	EXIT
     THEN
     dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
@@ -1461,7 +1461,7 @@ User remote?
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) EXIT  THEN
-    \ add-source
+    add-source
     validated off     \ we have no validated encryption, only anonymous
     do-keypad sec-off \ no key exchange may have happened
     $error-id $off    \ no error id so far
@@ -1500,7 +1500,7 @@ scope{ mapc
     dup >r inbuf-decrypt 0= IF
 	invalid( r> .mapc:.inv-packet drop )else( rdrop drop ) EXIT
     THEN
-    \ add-source
+    add-source
     crypt-val validated ! \ ok, we have a validated connection
     r> with mapc handle o IF  endwith  ELSE  rdrop  THEN ;
 
@@ -1516,7 +1516,7 @@ scope{ mapc
     THEN ;
 
 : route-packet ( -- )
-    \ add-source
+    add-source
     inbuf >r r@ get-dest route>address IF
 	route( ." route to: " sockaddr alen @ .address space
 	inbuf destination .addr-path cr )
