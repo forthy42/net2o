@@ -152,10 +152,10 @@ event: :>kill ( task -- )
 #3.000.000.000 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
-    net2o-tasks get-stack kills !  net2o-tasks $off
+    net2o-tasks get-stack kills !  net2o-tasks $free
     kills @ 0 ?DO  send-kill  LOOP
-    ntime  0 >r \ give time to terminate
-    BEGIN  2dup kill-timeout# d+ ntime d- 2dup d0> kills @ and  WHILE
+    ntime kill-timeout# d+  0 >r \ give time to terminate
+    BEGIN  2dup ntime d- 2dup d0> kills @ and  WHILE
 	    stop-dns
 	    ntime 2over d- 1000000000 um/mod nip
 	    dup r> <> IF  '.' emit  THEN  >r

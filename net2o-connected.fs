@@ -189,7 +189,7 @@ gen-table $freeze
 	    nlit, ko  THEN
     ELSE
 	error-id>o ?dup-IF
-	    >o <event elit, ->throw wait-task @ event> o>
+	    >o <event elit, :>throw wait-task @ event> o>
 	ELSE  throw  THEN
     THEN ; IS >throw
 

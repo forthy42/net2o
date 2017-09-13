@@ -110,8 +110,10 @@ word-args
 : -scan ( addr u char -- addr u' ) >r
     BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
 
+[IFUNDEF] basename
 : basename ( addr u -- addr' u' )
     2dup '/' -scan nip /string ;
+[THEN]
 
 : str0? ( addr u -- flag )
     \ check if string is all zero
