@@ -15,7 +15,7 @@ dnl Process this file with autoconf to produce a configure script.
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT([net2o], [0.5.4-20170725], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
+AC_INIT([net2o], [0.5.5-20170914], [bernd@net2o.de], [net2o], [https://fossil.net2o.de/net2o/reportlist])
 AC_PREREQ([2.59])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
