@@ -354,7 +354,7 @@ scope{ mapc
 : n2o:spit ( -- )
     rdata-back? 0= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-    write-file# ? residualwrite @ hex. forth:cr )
+    write-file# ? residualwrite @ hex. )
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
@@ -365,7 +365,9 @@ scope{ mapc
 	THEN
 	msg( ." Write end" cr ) +file
 	fails states u>= IF  max/back  THEN ;]
-    file-sema c-section ;
+    file-sema c-section
+    slurp( ."  left: "  rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
+    write-file# ? residualwrite @ hex. forth:cr ) ;
 
 : save-to ( addr u n -- )  state-addr >o  fs-create o> ;
 : save-to# ( addr u n -- )  state-addr >o  1 fs-class!  fs-create o> ;
@@ -420,7 +422,7 @@ scope{ mapc
 : n2o:slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
     slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
-    read-file# ? residualread @ hex. forth:cr )
+    read-file# ? residualread @ hex. )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
@@ -431,7 +433,11 @@ scope{ mapc
 	THEN  +file
 	fails states u>= dup IF  max/head  THEN  head@ swap
 	msg( ." Read end: " over hex. forth:cr ) ;]
-    file-sema c-section file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
+    file-sema c-section
+    slurp( ."  left: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
+    read-file# ? residualread @ hex. forth:cr )
+
+    file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
     8 cells 0 DO
