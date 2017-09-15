@@ -359,10 +359,10 @@ scope{ mapc
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
-		residualwrite @ 0= WHILE
-		    write-file# file+ blocksize @ residualwrite !
-		fails states u>= UNTIL
-	THEN  THEN
+		residualwrite @ 0= IF
+		    write-file# file+ blocksize @ residualwrite !  THEN
+	    fails states u>= UNTIL
+	THEN
 	msg( ." Write end" cr ) +file
 	fails states u>= IF  max/back  THEN ;]
     file-sema c-section ;
@@ -425,10 +425,10 @@ scope{ mapc
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
 		IF 0 ELSE fails 1+ residualread off THEN to fails
-		residualread @ 0= WHILE
-		    read-file# file+  blocksize @ residualread !
-		fails states u>= UNTIL
-	THEN  THEN  +file
+		residualread @ 0= IF
+		    read-file# file+  blocksize @ residualread !  THEN
+	    fails states u>= UNTIL
+	THEN  +file
 	fails states u>= dup IF  max/head  THEN  head@ swap
 	msg( ." Read end: " over hex. forth:cr ) ;]
     file-sema c-section file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
