@@ -418,7 +418,7 @@ scope{ mapc
 \ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
-    slurp( ." slurp: " dest-head@ drop hex.
+    slurp( ." slurp: " data-head@ drop hex.
     read-file# ? residualread @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
