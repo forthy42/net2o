@@ -361,7 +361,7 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
-	    fails states u>= residualwrite @ blocksize @ u< or UNTIL
+	    fails states u>= UNTIL
 	THEN
 	msg( ." Write end" cr ) +file
 	fails states u>= IF  max/back  THEN ;]
@@ -427,7 +427,7 @@ scope{ mapc
 		IF 0 ELSE fails 1+ residualread off THEN to fails
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
-	    fails states u>= residualread @ blocksize @ u< or  UNTIL
+	    fails states u>= UNTIL
 	THEN  +file
 	fails states u>= dup IF  max/head  THEN  head@ swap
 	msg( ." Read end: " over hex. forth:cr ) ;]
