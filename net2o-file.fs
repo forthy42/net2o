@@ -344,7 +344,7 @@ scope{ mapc
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $free ;
 : n2o:save-block ( id -- delta )
-    rdata-back@ file( over data-rmap .mapc:dest-raddr @ -
+    rdata-back@ file( over data-rmap .mapc:dest-raddr -
     { os } ." file write: " 2 pick . os hex. )
     rot id>addr? .fs-write dup /back
     file( dup hex. residualwrite @ hex. forth:cr ) ;
@@ -413,7 +413,7 @@ scope{ mapc
 \ read in from files
 
 : n2o:slurp-block ( id -- delta )
-    data-head@ file( over data-map .mapc:dest-raddr @ -
+    data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. head@ hex. forth:cr ) ;
