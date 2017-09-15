@@ -353,7 +353,7 @@ scope{ mapc
 
 : n2o:spit ( -- )
     rdata-back? 0= ?EXIT fstates 0= ?EXIT
-    slurp( ." spit: " rdata-back@ drop hex.
+    slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
@@ -418,7 +418,7 @@ scope{ mapc
 \ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
-    slurp( ." slurp: " data-head@ drop hex.
+    slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
     read-file# ? residualread @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
