@@ -105,7 +105,7 @@ cell 8 = [IF]
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ fs-size 64@ 64umin
     fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
-    fs-seek 64@ >seek file( ." len: " dup hex. )
+    fs-seek 64@ >seek
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
     fs-size 64@ fs-seek 64@ 64= IF
@@ -118,7 +118,9 @@ cell 8 = [IF]
     64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free
     ['] noop to file-xt ;
 : fs:fs-flush ( -- )
-\    fs-fid @ flush-file throw
+    fs-fid @ flush-file throw
+    \ write away all buffered stuff, so that setting the
+    \ timestamp works
     fs-time 64@ 64-0<> IF
 	fs-time 64@ fs-fid @ fileno fs-timestamp!
     THEN
@@ -354,7 +356,7 @@ scope{ mapc
 : n2o:spit ( -- )
     rdata-back? 0= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-    write-file# ? residualwrite @ hex. )
+    write-file# ? residualwrite @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	BEGIN  rdata-back?  WHILE
 		write-file# @ n2o:save-block
@@ -416,13 +418,13 @@ scope{ mapc
     data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " rot dup . -rot r> hex. )
     rot id>addr? .fs-read dup /head
-    file( dup hex. residualread @ hex. head@ hex. forth:cr ) ;
+    file( dup hex. residualread @ hex. forth:cr ) ;
 
 \ careful: must follow exactpy the same logic as n2o:spit (see above)
 : n2o:slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
     slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
-    read-file# ? residualread @ hex. )
+    read-file# ? residualread @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ n2o:slurp-block
