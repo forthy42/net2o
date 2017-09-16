@@ -96,16 +96,16 @@ cell 8 = [IF]
     64dup fs-size 64! fs-limit 64!
     64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! ;
 
-: fs:fs-read ( addr u -- n )
+: fs:fs-read ( addr u -- u )
     fs-limit 64@ fs-seekto 64@ >seek
     fs-fid @ read-file throw
     dup n>64 fs-seekto 64+!
 ; ' fs:fs-read fs-class to fs-read
-: fs:fs-write ( addr u -- n )
+: fs:fs-write ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64@ fs-size 64@ 64umin
     fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
-    fs-seek 64@ >seek
+    fs-seek 64@ >seek file( ." len: " dup hex. )
     tuck fs-fid @ write-file throw
     dup n>64 fs-seek 64+!
     fs-size 64@ fs-seek 64@ 64= IF
