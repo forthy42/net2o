@@ -40,6 +40,14 @@ $20 value hash-size#
     c:0key slurp-file 2dup c:hash drop free throw pad c:key>
     pad hash-size# ;
 
+: hash-file-blocks ( addr u -- )
+    slurp-file over { start } bounds ?DO
+	c:0key I dup $400 + I' umin over - c:hash
+	pad c:key>
+	I start - $400 / hex. pad hash-size# .85info cr
+    $400 +LOOP
+    start free throw ;
+
 : do-keyin ( addr u -- )
     key-readin $slurp-file  64#-1 key-read-offset 64!
     key-readin $@ do-key ;
@@ -328,6 +336,15 @@ warnings !
     \G hash: use -threefish or -keccak to select hash algorithm
     ?cr enc-mode @ 8 rshift $FF and >crypt
     [: 2dup hash-file .85info space type cr ;] arg-loop 0 >crypt ;
+
+: hash-blocks ( -- )
+    \U hash-blocks file1 .. filen
+    \G hash: hash the files in blocks of 1k and print it base85
+    \G hash: use -256 or -512 to select hash size
+    \G hash: use -threefish or -keccak to select hash algorithm
+    ?cr enc-mode @ 8 rshift $FF and >crypt
+    [: 2dup type ." :" cr
+	hash-file-blocks ;] arg-loop 0 >crypt ;
 
 : sign ( -- )
     \U sign file1 .. filen
