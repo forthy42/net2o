@@ -118,7 +118,7 @@ cell 8 = [IF]
     64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free
     ['] noop to file-xt ;
 : fs:fs-flush ( -- )
-    fs-fid @ flush-file throw
+\    fs-fid @ flush-file throw
     fs-time 64@ 64-0<> IF
 	fs-time 64@ fs-fid @ fileno fs-timestamp!
     THEN
