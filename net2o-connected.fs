@@ -321,7 +321,11 @@ $20 Value max-resend#
 	    resend( ." resend: " dup hex. over hex. forth:cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF  I 4 + data-rmap .mapc:data-ack# !  THEN
+	    drop dup 0= IF
+		data-rmap .mapc:data-ack# @ I = IF
+		    I 4 + data-rmap .mapc:data-ack# !
+		THEN
+	    THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
     4 +LOOP  drop !rdata-tail ;
