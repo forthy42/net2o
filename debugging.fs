@@ -36,6 +36,7 @@ debug: stat(
 debug: timeout(
 debug: wait(
 debug: ack(
+debug: acks(
 debug: crypt(
 debug: noens(
 debug: key( \ key stuff

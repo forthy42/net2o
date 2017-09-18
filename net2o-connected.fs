@@ -313,7 +313,7 @@ $20 Value max-resend#
     ack( ." ack loop: " over hex. dup hex. forth:cr )
     +DO
 	acks I ackm and + l@
-	ack( ." acks[" I ackm and 0 .r ." ]=" dup hex. forth:cr )
+	acks( ." acks[" I ackm and 0 .r ." ]=" dup hex. forth:cr )
 	I bytes>bits tailbits u< IF
 	    -1 tailbits I bytes>bits - lshift invert or
 	THEN
