@@ -303,7 +303,7 @@ $20 Value max-resend#
     ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
     IF    dest-head addr>bytes -4 and
     ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
-    dest-tail addr>bytes -4 and dup data-ack# umin!
+    dest-tail addr>bytes -4 and \ dup data-ack# umin!
     data-ackbits @ dest-size addr>bytes 1-
     dest-tail addr>bits endwith ;
 
@@ -321,10 +321,8 @@ $20 Value max-resend#
 	    resend( ." resend: " dup hex. over hex. forth:cr )
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
-	    drop dup 0= IF
-		data-rmap .mapc:data-ack# @ I = IF
-		    I 4 + data-rmap .mapc:data-ack# !
-		THEN
+	    drop dup 0= IF \ if we didn't have a resend yet, increase data-ack#
+		I 4 + data-rmap .mapc:data-ack# !
 	    THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
