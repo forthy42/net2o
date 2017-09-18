@@ -315,7 +315,7 @@ $20 Value max-resend#
 	acks I ackm and + l@
 	acks( ." acks[" I hex.
 	I data-rmap .mapc:data-ack# @ = IF '*' emit THEN
-	." ]=" dup hex. backbits . forth:cr )
+	." ]=" dup hex. backbits hex. forth:cr )
 	I bytes>bits tailbits u< IF
 	    -1 tailbits I bytes>bits - lshift invert or
 	THEN
