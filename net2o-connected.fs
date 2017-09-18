@@ -313,7 +313,7 @@ $20 Value max-resend#
     ack( ." ack loop: " over hex. dup hex. forth:cr )
     +DO
 	acks I ackm and + l@
-	acks( ." acks[" I hex.
+	acks( ." acks[" I bytes>bits hex.
 	I data-rmap .mapc:data-ack# @ = IF '*' emit THEN
 	." ]=" dup hex. backbits hex. forth:cr )
 	I bytes>bits tailbits u< IF
