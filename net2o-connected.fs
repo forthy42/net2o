@@ -298,24 +298,24 @@ also net2o-base
 
 $20 Value max-resend#
 
-: prepare-resend ( flag -- end start acks ackm taibits )
+: prepare-resend ( flag -- end start acks ackm taibits backbits )
     data-rmap with mapc
     ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
     IF    dest-head addr>bytes -4 and
     ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
     dest-tail addr>bytes -4 and \ dup data-ack# umin!
     data-ackbits @ dest-size addr>bytes 1-
-    dest-tail addr>bits endwith ;
+    dest-tail addr>bits dest-back dest-size + addr>bits endwith ;
 
 : net2o:do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap 0= IF  drop EXIT  THEN
-    0 swap  prepare-resend { acks ackm tailbits }
+    0 swap  prepare-resend { acks ackm tailbits backbits }
     ack( ." ack loop: " over hex. dup hex. forth:cr )
     +DO
 	acks I ackm and + l@
 	acks( ." acks[" I hex.
 	I data-rmap .mapc:data-ack# @ = IF '*' emit THEN
-	." ]=" dup hex. forth:cr )
+	." ]=" dup hex. backbits . forth:cr )
 	I bytes>bits tailbits u< IF
 	    -1 tailbits I bytes>bits - lshift invert or
 	THEN
@@ -324,7 +324,7 @@ $20 Value max-resend#
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF \ if we didn't have a resend yet, increase data-ack#
-		I bytes>bits tailbits u>= IF \ no tailbits, please
+		I 4 + bytes>bits backbits u<= IF \ no backbits, please
 		    I 4 + data-rmap .mapc:data-ack# umax!
 		THEN
 	    THEN
