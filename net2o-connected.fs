@@ -324,7 +324,7 @@ $20 Value max-resend#
 	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF \ if we didn't have a resend yet, increase data-ack#
-		I 4 + data-rmap .mapc:data-ack# !
+		I 4 + data-rmap .mapc:data-ack# umax!
 	    THEN
 	THEN
 	dup max-resend# >= ?LEAVE \ no more than x resends
