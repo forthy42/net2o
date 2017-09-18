@@ -348,7 +348,7 @@ scope{ mapc
 : n2o:save-block ( id -- delta )
     rdata-back@ file( over data-rmap .mapc:dest-raddr -
     { os } ." file write: " 2 pick .
-    dup id>addr? .fs-seek 64@ #10 64rshift 64>n hex. os hex. )
+    2 pick id>addr? .fs-seek 64@ #10 64rshift 64>n hex. os hex. )
     rot id>addr? .fs-write dup /back
     file( dup hex. residualwrite @ hex. forth:cr ) ;
 
@@ -417,8 +417,8 @@ scope{ mapc
 
 : n2o:slurp-block ( id -- delta )
     data-head@ file( over data-map .mapc:dest-raddr -
-    >r ." file read: " rot dup .
-    dup id>addr? .fs-seek 64@ #10 64rshift 64>n hex. -rot r> hex. )
+    >r ." file read: " 2 pick .
+    2 pick id>addr? .fs-seek 64@ #10 64rshift 64>n hex. r> hex. )
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. forth:cr ) ;
 
