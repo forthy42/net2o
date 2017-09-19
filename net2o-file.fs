@@ -317,12 +317,11 @@ scope{ mapc
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP  to dest-top ;
 
-: dest-back! ( addr -- )
-    file( ." back: " dup addr>bits hex. dest-back addr>bits hex. forth:cr )
-    dup dest-back U+DO
+: ackbits-erase ( newback oldback -- )
+    U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
-    len +LOOP  to dest-back ;
+    len +LOOP ;
 
 }scope
 

@@ -558,7 +558,6 @@ scope{ mapc
     maxdata dup >r 1- + r> negate and ;
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
-
 : /head ( u -- )
     >blockalign dup negate residualread +!
     data-map with mapc +to dest-head endwith ;
@@ -1195,10 +1194,6 @@ data-class to rewind-timestamps
     dest-timestamps over erase ;
 rdata-class to rewind-timestamps
 
-: rewind-bits-partial ( new-back addr o:map -- )
-    { addr } addr>bits dest-back addr>bits U+DO
-	I I' fix-bitsize { len } addr + len $FF fill
-    len +LOOP ;
 : rewind-ts-partial ( new-back addr o:map -- )
     { addr } addr>ts dest-back addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
@@ -1230,7 +1225,8 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	.mapc:dest-back >r n2o:spit
 	r> data-rmap with mapc addr dest-back !@
-	dup rewind-partial  dup dest-back!
+	dup rewind-partial
+	dup dest-back over to dest-back ackbit-erase
 	dest-req IF  do-slurp !@  THEN  drop endwith
     THEN ;
 
