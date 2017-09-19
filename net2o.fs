@@ -1226,7 +1226,7 @@ rdata-class to rewind-partial
 	.mapc:dest-back >r n2o:spit
 	r> data-rmap with mapc addr dest-back !@
 	dup rewind-partial
-	dup dest-back over to dest-back ackbit-erase
+	dup dest-back over to dest-back ackbits-erase
 	dest-req IF  do-slurp !@  THEN  drop endwith
     THEN ;
 
