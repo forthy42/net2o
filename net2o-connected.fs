@@ -49,6 +49,7 @@ connect-table $@ inherit-table context-table
     over dest-top <> and dest-end or! dest-top!
     endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
+    \ !!FIXME!! this should probably be asynchronous
     n2o:slurp swap ulit, flag, set-top
     ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
 +net2o: ack-reset ( -- ) \g reset ack state

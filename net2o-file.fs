@@ -367,8 +367,8 @@ scope{ mapc
 	    fails states u>= UNTIL
 	THEN
 	msg( ." Write end" cr ) +file
-	fails states u>= IF  max/back  THEN ;]
-    file-sema c-section
+	fails states u>= IF  max/back  THEN \ if all files are done, align
+    ;] file-sema c-section
     slurp( ."  left: "  rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
 
@@ -435,7 +435,8 @@ scope{ mapc
 		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL
 	THEN  +file
-	fails states u>= dup IF  max/head  THEN  head@ swap
+	fails states u>= dup IF  max/head  THEN \ if all files are done, align
+	head@ swap
 	msg( ." Read end: " over hex. forth:cr ) ;]
     file-sema c-section
     slurp( ."  left: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
