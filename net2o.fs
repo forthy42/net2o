@@ -149,23 +149,25 @@ event: :>kill ( task -- )
     <event :>killed event> 0 (bye) ;
 : send-kill ( task -- ) <event up@ elit, :>kill event> ;
 
-#3.000.000.000 2constant kill-timeout# \ 3s
+2 Constant kill-seconds#
+kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
     net2o-tasks get-stack kills !  net2o-tasks $free
     kills @ 0 ?DO  send-kill  LOOP
-    ntime kill-timeout# d+  0 >r \ give time to terminate
-    BEGIN  2dup ntime d- 2dup d0> kills @ and  WHILE
+    ntime kill-timeout# d+ { d: timeout }
+    kill-seconds# >r \ give time to terminate
+    BEGIN  timeout ntime d- 2dup d0> kills @ and  WHILE
 	    stop-dns
-	    ntime 2over d- 1000000000 um/mod nip
+	    timeout ntime d- 1000000000 um/mod nip
 	    dup r> <> IF  '.' emit  THEN  >r
     REPEAT
-    r> IF  cr  THEN  2drop 2drop ;
+    r> kill-seconds# <> IF  cr  THEN  2drop ;
 
 forward !save-all-msgs
 
 0 warnings !@
-: bye  !save-all-msgs net2o-kills  bye ;
+: bye  !save-all-msgs net2o-kills bye ;
 warnings !
 
 \ packet&header size

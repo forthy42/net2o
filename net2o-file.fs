@@ -350,7 +350,7 @@ scope{ mapc
     2 pick dup >r id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
     rot id>addr? .fs-write dup /back
     file( dup IF ." file write: "
-    r> . r> hex. r> hex. dup hex. residualwrite @ hex. forth:cr
+    r> r> . hex. r> hex. dup hex. residualwrite @ hex. forth:cr
     ELSE  rdrop rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
