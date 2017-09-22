@@ -1192,7 +1192,7 @@ data-class to rewind-timestamps
     dest-timestamps over erase ;
 rdata-class to rewind-timestamps
 
-: rewind-ts-partial ( new-back addr o:map -- )
+: rewind-ts-partial ( new-back old-back o:map -- )
     { addr } addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
@@ -1209,7 +1209,8 @@ rdata-class to rewind-partial
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back umax dest-back over rewind-partial to dest-back
+    data-map with mapc dest-back umax dup dest-back
+    rewind-partial to dest-back
     endwith ;
 
 \ separate thread for loading and saving...
