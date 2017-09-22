@@ -149,20 +149,15 @@ event: :>kill ( task -- )
     <event :>killed event> 0 (bye) ;
 : send-kill ( task -- ) <event up@ elit, :>kill event> ;
 
-2 Constant kill-seconds#
-kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
+#3000000000. 2constant kill-timeout# \ 3s
 
 : net2o-kills ( -- )
     net2o-tasks get-stack kills !  net2o-tasks $free
     kills @ 0 ?DO  send-kill  LOOP
-    ntime kill-timeout# d+ { d: timeout }
-    kill-seconds# >r \ give time to terminate
-    BEGIN  timeout ntime d- 2dup d0> kills @ and  WHILE
+    ntime kill-timeout# d+
+    BEGIN  2dup ntime d- 2dup d0> kills @ and  WHILE ( dtimeout ddelta )
 	    stop-dns
-	    timeout ntime d- 1000000000 fm/mod nip
-	    dup r> <> IF  '.' emit  THEN  >r
-    REPEAT
-    r> kill-seconds# <> IF  cr  THEN  2drop ;
+    REPEAT  2drop 2drop ;
 
 forward !save-all-msgs
 
@@ -182,14 +177,15 @@ $80 Constant qos2#
 $C0 Constant qos3# \ lowest
 
 $30 Constant headersize#
-$00 Constant 16bit# \ protocol for very small networks
-$10 Constant 64bit# \ standard, encrypted protocol
+$00 Constant 16bit#   \ protocol for very small networks
+$10 Constant 64bit#   \ standard, encrypted protocol
+$20 Constant 64onion# \ onion routing on 64 bits, adds 32*4=$80 onion routes
 $0F Constant datasize#
 
-Create header-sizes  $06 c, $1a c, $FF c, $FF c,
-Create tail-sizes    $00 c, $10 c, $FF c, $FF c,
-Create add-sizes     $06 c, $2a c, $FF c, $FF c,
-\ we don't know the header sizes of protocols 2 and 3 yet ;-)
+Create header-sizes  $06 c, $1a c, $9a c, $FF c,
+Create tail-sizes    $00 c, $10 c, $10 c, $FF c,
+Create add-sizes     $06 c, $2a c, $aa c, $FF c,
+\ we don't know the header sizes of protocol 3 yet ;-)
 
 : header-size ( addr -- n )  c@ headersize# and 4 rshift header-sizes + c@ ;
 : tail-size ( addr -- n )  c@ headersize# and 4 rshift tail-sizes + c@ ;
@@ -1197,16 +1193,16 @@ data-class to rewind-timestamps
 rdata-class to rewind-timestamps
 
 : rewind-ts-partial ( new-back addr o:map -- )
-    { addr } addr>ts dest-back addr>ts U+DO
+    { addr } addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
-:noname ( new-back o:map -- )
-    dup data-resend# @ rewind-ts-partial
-    dup dest-timestamps rewind-ts-partial
+:noname ( old-back new-back o:map -- )
+    2dup data-resend# @ rewind-ts-partial
+    2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
 data-class to rewind-partial
-:noname ( new-back o:map -- )
-    dup dest-timestamps rewind-ts-partial
+:noname ( old-back new-back o:map -- )
+    2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
 
@@ -1223,12 +1219,12 @@ rdata-class to rewind-partial
 
 \ separate thread for loading and saving...
 
-: net2o:save ( -- )
+: net2o:save { back tail -- }
     data-rmap ?dup-IF
-	with mapc dest-back dest-tail over ackbits-erase endwith >r
+	with mapc tail back ackbits-erase endwith
 	n2o:spit
-	r> data-rmap with mapc addr dest-back !@
-	dup rewind-partial dup to dest-back
+	back data-rmap with mapc addr dest-back !@
+	back over rewind-partial dup to dest-back
 	dest-req IF  do-slurp !@  THEN  drop endwith
     THEN ;
 
@@ -1236,8 +1232,8 @@ Defer do-track-seek
 
 event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
-event: :>save ( o -- )  .net2o:save ;
-event: :>save&done ( o -- )
+event: :>save ( back tail o -- )  .net2o:save ;
+event: :>save&done ( back tail o -- )
     >o net2o:save sync-done-xt o> ;
 
 0 Value file-task
@@ -1246,9 +1242,11 @@ event: :>save&done ( o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
+    data-rmap with mapc dest-back elit, dest-tail elit, endwith
     o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
+    data-rmap with mapc dest-back elit, dest-tail elit, endwith
     o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
