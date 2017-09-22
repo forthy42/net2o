@@ -355,13 +355,13 @@ scope{ mapc
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit ( -- )
-    rdata-back? 0= ?EXIT fstates 0= ?EXIT
+: n2o:spit { back tail -- }
+    back tail u< 0= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
-	BEGIN  rdata-back?  WHILE
-		write-file# @ n2o:save-block
+	BEGIN  back tail u<  WHILE
+		write-file# @ n2o:save-block dup >blockalign +to back
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
