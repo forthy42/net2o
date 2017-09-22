@@ -1209,7 +1209,7 @@ rdata-class to rewind-partial
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back umax dup rewind-partial to dest-back
+    data-map with mapc dest-back umax dest-back over rewind-partial to dest-back
     endwith ;
 
 \ separate thread for loading and saving...
