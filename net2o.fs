@@ -1206,11 +1206,6 @@ data-class to rewind-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
 
-: clearpages-partial ( new-back o:map -- )
-    dest-back U+DO
-	I I' fix-size raddr+ tuck clearpages
-    +LOOP ;
-
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
@@ -1223,9 +1218,8 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc tail back ackbits-erase endwith
 	n2o:spit
-	back data-rmap with mapc addr dest-back !@
-	back over rewind-partial dup to dest-back
-	dest-req IF  do-slurp !@  THEN  drop endwith
+	data-rmap with  back tail rewind-partial
+	dest-req IF  tail do-slurp !@ drop  THEN  endwith
     THEN ;
 
 Defer do-track-seek
