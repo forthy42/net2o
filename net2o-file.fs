@@ -355,7 +355,7 @@ scope{ mapc
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit { back tail -- }
+: n2o:spit { tail back -- }
     back tail u< 0= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr )

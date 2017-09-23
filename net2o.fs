@@ -1192,8 +1192,8 @@ data-class to rewind-timestamps
     dest-timestamps over erase ;
 rdata-class to rewind-timestamps
 
-: rewind-ts-partial ( new-back old-back o:map -- )
-    { addr } addr>ts swap addr>ts U+DO
+: rewind-ts-partial ( old-back new-back back addr o:map -- )
+    { addr } swap addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
 :noname ( old-back new-back o:map -- )
@@ -1215,10 +1215,10 @@ rdata-class to rewind-partial
 
 \ separate thread for loading and saving...
 
-: net2o:save { back tail -- }
+: net2o:save { tail back -- }
     data-rmap ?dup-IF
 	with mapc tail back ackbits-erase endwith
-	back tail n2o:spit
+	tail back n2o:spit
 	data-rmap with mapc  tail back rewind-partial
 	dest-req IF  tail do-slurp !@ drop  THEN  endwith
     THEN ;
@@ -1237,11 +1237,11 @@ event: :>save&done ( back tail o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-back elit, dest-tail elit, endwith
+    data-rmap with mapc dest-tail elit, dest-back elit, endwith
     o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-back elit, dest-tail elit, endwith
+    data-rmap with mapc dest-tail elit, dest-back elit, endwith
     o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
