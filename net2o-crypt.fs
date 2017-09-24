@@ -277,15 +277,21 @@ scope{ mapc
 	rest+
     THEN  2drop ;
 
-: regen-ivs-part ( new-back old-back -- )
-    [: c:key@ >r dest-ivsgen kalign c:key!
-	U+DO
-	    I I' fix-size dup { len }
-	    addr>keys >r addr>keys >r dest-ivs$ r> safe/string r> umin
-	    rest-prng
-	len +LOOP
-	regen( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
-	r> c:key! ;] regen-sema c-section ;
+: regen-ivs-part ( new-back -- )
+    [: c:key@ >r
+      dest-ivsgen kalign
+      key( ." regen-ivs-part " dest-back hex. over hex. dup c:key# .nnb cr )
+      regen( ." regen-ivs-part " dest-back hex. over hex. dup c:key# .nnb cr )
+      c:key!
+      dest-back U+DO
+	  I I' fix-size dup { len }
+	  addr>keys >r addr>keys >r dest-ivs$ r> safe/string r> umin
+	  rest-prng
+      len +LOOP
+      key( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
+      tweak( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
+      regen( ." regen-ivs-part' " dest-ivsgen kalign c:key# .nnb cr )
+      r> c:key! ;] regen-sema c-section ;
 
 : (regen-ivs) ( offset o:map -- )
     addr dest-ivs$ $@len 2/ 2/ / dest-ivslastgen =

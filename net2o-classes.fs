@@ -79,7 +79,7 @@ cmd-class class
 end-class code-class
 ' drop code-class to regen-ivs
 ' noop code-class to rewind-timestamps
-' 2drop code-class to rewind-partial
+' drop code-class to rewind-partial
 
 code-class class
     field: data-resend# \ resend tokens; only for data
