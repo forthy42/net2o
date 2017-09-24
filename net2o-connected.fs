@@ -500,7 +500,7 @@ previous
 \ acknowledge toplevel
 
 : net2o:ack-code ( ackflag -- ackflag )  >r
-    false { slurp? stats? }
+    false dup { slurp? stats? }
     net2o-code
     ack expect-reply  1 to rec-ack-pos#
     ack( ." ack: " r@ hex. forth:cr )
@@ -515,6 +515,7 @@ previous
 	?dup-IF  ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected
+    slurp? ~~ or to slurp?
     stats? IF  send-timing  THEN
     end-with  cmdbuf# @ rec-ack-pos# 1+ stats? - = IF  cmdbuf# off
     ELSE  1 data-rmap with mapc +to rec-ack# endwith  THEN
