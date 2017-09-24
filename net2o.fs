@@ -602,6 +602,10 @@ scope{ mapc
     data-rmap with mapc
     dest-back dest-tail fix-size raddr+ endwith
     residualwrite @ umin ;
+: rdata-fix ( back tail -- addr u )
+    \G you can write from this, also a block at a time
+    data-rmap with mapc fix-size raddr+ endwith
+    residualwrite @ umin ;
 : data-tail@ ( -- addr u )
     \G you can send from this - as long as you stay block aligned
     data-map with mapc
@@ -1192,7 +1196,7 @@ data-class to rewind-timestamps
     dest-timestamps over erase ;
 rdata-class to rewind-timestamps
 
-: rewind-ts-partial ( new-back old-back back addr o:map -- )
+: rewind-ts-partial ( new-back old-back addr o:map -- )
     { addr } swap addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;

@@ -345,24 +345,25 @@ scope{ mapc
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $free ;
-: n2o:save-block ( id -- delta )
-    rdata-back@ file( over data-rmap .mapc:dest-raddr - >r
-    2 pick dup >r id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
-    rot id>addr? .fs-write dup /back
+: n2o:save-block ( back tail id -- delta )
+    { id } rdata-fix file( over data-rmap .mapc:dest-raddr - >r
+    id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
+    id id>addr? .fs-write dup /back
     file( dup IF ." file write: "
-    r> r> . hex. r> hex. dup hex. residualwrite @ hex. forth:cr
-    ELSE  rdrop rdrop rdrop  THEN ) ;
+    r> id . hex. r> hex. dup hex. residualwrite @ hex. forth:cr
+    ELSE  rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
 : n2o:spit { tail back -- }
-    back tail u< 0= ?EXIT fstates 0= ?EXIT
+    back tail u>= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr )
-    back tail [: { back tail } +calc fstates 0 { states fails }
+    tail back [: { tail back } +calc fstates 0 { states fails }
 	BEGIN  back tail u<  WHILE
-		write-file# @ n2o:save-block dup >blockalign +to back
-		IF 0 ELSE fails 1+ residualwrite off THEN to fails
+		back tail write-file# @ n2o:save-block dup
+		IF    >blockalign +to back 0
+		ELSE  drop fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
 	    fails states u>= UNTIL

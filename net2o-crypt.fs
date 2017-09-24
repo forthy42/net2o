@@ -278,10 +278,7 @@ scope{ mapc
     THEN  2drop ;
 
 : regen-ivs-part ( new-back old-back -- )
-    [: c:key@ >r
-	dest-ivsgen kalign
-	regen( ." regen-ivs-part " dest-back hex. over hex. dup c:key# .nnb cr )
-	c:key!
+    [: c:key@ >r dest-ivsgen kalign c:key!
 	U+DO
 	    I I' fix-size dup { len }
 	    addr>keys >r addr>keys >r dest-ivs$ r> safe/string r> umin
