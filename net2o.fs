@@ -1239,6 +1239,8 @@ event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
 event: :>save ( o -- )  .net2o:save ;
 event: :>save&done ( o -- )
     >o net2o:save sync-done-xt o> ;
+event: :>close-all ( o -- )
+    .n2o:close-all ;
 
 0 Value file-task
 

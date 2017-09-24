@@ -105,6 +105,11 @@ $20 value hash-size#
 
 : ?cr ( -- ) script? 0= IF  cr  THEN ;
 
+: file:close-all ( -- )
+    \ close files of current connection in file-task
+    <event o elit, :>close-all
+    up@ elit, :>restart file-task event> stop ;
+
 scope{ n2o
 
 : help ( -- )
@@ -526,7 +531,7 @@ warnings !
 	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
 	    $10 [: 2dup basename n2o:copy ;] arg-loop#
-	    end-code|  n2o:close-all
+	    end-code|  file:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
 	c:disconnect  THEN ;
@@ -541,7 +546,7 @@ warnings !
 	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
 	    $10 [: base85>$ n2o:copy# ;] arg-loop#
-	    end-code|  n2o:close-all
+	    end-code|  file:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
 	c:disconnect  THEN ;
