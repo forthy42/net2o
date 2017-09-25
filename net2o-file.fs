@@ -345,23 +345,23 @@ scope{ mapc
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $free ;
-: n2o:save-block ( id -- delta )
-    rdata-back@ file( over data-rmap .mapc:dest-raddr - >r
-    2 pick dup >r id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
-    rot id>addr? .fs-write dup /back
+: n2o:save-block { tail id -- delta }
+    tail rdata-back@ file( over data-rmap .mapc:dest-raddr - >r
+    id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
+    id id>addr? .fs-write dup /back
     file( dup IF ." file write: "
-    r> r> . hex. r> hex. dup hex. residualwrite @ hex. forth:cr
+    id . r> hex. r> hex. dup hex. residualwrite @ hex. forth:cr
     ELSE  rdrop rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit ( -- )
-    rdata-back? 0= ?EXIT fstates 0= ?EXIT
-    slurp( ." spit: " rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-    write-file# ? residualwrite @ hex. forth:cr )
-    [: +calc fstates 0 { states fails }
-	BEGIN  rdata-back?  WHILE
-		write-file# @ n2o:save-block
+: n2o:spit { tail -- }
+    tail rdata-back? 0= ?EXIT fstates 0= ?EXIT
+    slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
+    write-file# ? residualwrite @ hex. forth:cr ) tail
+    [: +calc fstates 0 { tail states fails }
+	BEGIN  tail rdata-back?  WHILE
+		tail write-file# @ n2o:save-block
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
@@ -370,7 +370,7 @@ scope{ mapc
 	msg( ." Write end" cr ) +file
 	fails states u>= IF  max/back  THEN \ if all files are done, align
     ;] file-sema c-section
-    slurp( ."  left: "  rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
+    slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
 
 : save-to ( addr u n -- )  state-addr >o  fs-create o> ;

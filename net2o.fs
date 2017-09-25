@@ -601,10 +601,10 @@ scope{ mapc
     data-map with mapc
     dest-head dest-back dest-size + fix-size raddr+ endwith
     residualread @ umin ;
-: rdata-back@ ( -- addr u )
+: rdata-back@ ( tail -- addr u )
     \G you can write from this, also a block at a time
     data-rmap with mapc
-    dest-back dest-tail fix-size raddr+ endwith
+    dest-back swap fix-size raddr+ endwith
     residualwrite @ umin ;
 : data-tail@ ( -- addr u )
     \G you can send from this - as long as you stay block aligned
@@ -617,9 +617,9 @@ scope{ mapc
 : data-tail? ( -- flag )
     \G return true if there is data to send
     data-map with mapc dest-tail dest-head u< endwith ;
-: rdata-back? ( -- flag )
+: rdata-back? ( tail -- flag )
     \G return true if there is data availabe to write out
-    data-rmap with mapc dest-back dest-tail u< endwith ;
+    data-rmap .mapc:dest-back u> ;
 
 \ code sending around
 
@@ -1223,10 +1223,10 @@ rdata-class to rewind-partial
 
 \ separate thread for loading and saving...
 
-: net2o:save ( -- )
+: net2o:save { tail -- }
     data-rmap ?dup-IF
-	with mapc dest-back dest-tail over ackbits-erase endwith >r
-	n2o:spit
+	with mapc dest-back tail over ackbits-erase endwith >r
+	tail n2o:spit
 	r> data-rmap with mapc addr dest-back !@
 	dup rewind-partial dup to dest-back
 	dest-req IF  do-slurp !@  THEN  drop endwith
@@ -1236,8 +1236,8 @@ Defer do-track-seek
 
 event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
-event: :>save ( o -- )  .net2o:save ;
-event: :>save&done ( o -- )
+event: :>save ( tail o -- )  .net2o:save ;
+event: :>save&done ( tail o -- )
     >o net2o:save sync-done-xt o> ;
 event: :>close-all ( o -- )
     .n2o:close-all ;
@@ -1248,10 +1248,10 @@ event: :>close-all ( o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    o elit, :>save file-task event> ;
+    dest-tail elit, o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    o elit, :>save&done file-task event> ;
+    dest-tail elit, o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
 
