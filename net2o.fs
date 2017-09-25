@@ -1203,11 +1203,11 @@ rdata-class to rewind-timestamps
 :noname ( old-back new-back o:map -- )
     dest-back over data-resend# @ rewind-ts-partial
     dest-back over dest-timestamps rewind-ts-partial
-    nip regen-ivs-part ;
+    regen-ivs-part ;
 data-class to rewind-partial
 :noname ( old-back new-back o:map -- )
     dest-back over dest-timestamps rewind-ts-partial
-    nip regen-ivs-part ;
+    regen-ivs-part ;
 rdata-class to rewind-partial
 
 }scope
@@ -1222,8 +1222,10 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
-	r> tail  data-rmap with mapc rewind-partial
-	dest-req IF  tail do-slurp !  THEN  endwith
+	r>  data-rmap with mapc to dest-back
+	    tail rewind-partial tail to dest-back
+	    dest-req IF  tail do-slurp !  THEN
+	endwith
     THEN ;
 
 Defer do-track-seek
