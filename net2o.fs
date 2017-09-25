@@ -1248,10 +1248,10 @@ event: :>close-all ( o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    dest-tail elit, o elit, :>save file-task event> ;
+    data-rmap .mapc:dest-tail elit, o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    dest-tail elit, o elit, :>save&done file-task event> ;
+    data-rmap .mapc:dest-tail elit, o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
 
