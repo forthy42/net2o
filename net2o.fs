@@ -1227,8 +1227,9 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
-	r> data-rmap with mapc tail rewind-partial tail to dest-back
-	dest-req IF  tail do-slurp !  THEN  endwith
+	r> data-rmap with mapc dup to dest-back
+	tail rewind-partial tail to dest-back
+	dest-req IF  tail do-slurp !@ drop  THEN  endwith
     THEN ;
 
 Defer do-track-seek
