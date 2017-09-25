@@ -1200,13 +1200,13 @@ rdata-class to rewind-timestamps
     { addr } addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
-:noname ( new-back o:map -- )
-    dest-back over data-resend# @ rewind-ts-partial
-    dest-back over dest-timestamps rewind-ts-partial
-    regen-ivs-part ;
+:noname ( old-back new-back o:map -- )
+    2dup data-resend# @ rewind-ts-partial
+    2dup dest-timestamps rewind-ts-partial
+    nip regen-ivs-part ;
 data-class to rewind-partial
-:noname ( new-back o:map -- )
-    dest-back over dest-timestamps rewind-ts-partial
+:noname ( old-back new-back o:map -- )
+    2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
 
@@ -1218,8 +1218,7 @@ rdata-class to rewind-partial
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back umax dup rewind-partial to dest-back
-    endwith ;
+    data-map with mapc dest-back tuck umax rewind-partial endwith ;
 
 \ separate thread for loading and saving...
 
@@ -1227,8 +1226,7 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
-	r> data-rmap with mapc to dest-back
-	tail rewind-partial tail to dest-back
+	r> data-rmap with mapc  tail rewind-partial
 	dest-req IF  tail do-slurp !@ drop  THEN  endwith
     THEN ;
 
