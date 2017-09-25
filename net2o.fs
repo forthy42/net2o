@@ -631,26 +631,26 @@ scope{ mapc
     code-map with mapc dest-tail addr>replies dest-replies + endwith ;
 : send-reply ( -- addr )
     code-map with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
-    dest-replies + endwith ;
+	dest-replies + endwith ;
 
 : tag-addr ( -- addr )
     dest-addr 64@ code-rmap with mapc dest-vaddr 64- 64>n
-    maxdata negate and addr>replies dest-replies + endwith ;
+	maxdata negate and addr>replies dest-replies + endwith ;
 
 reply buffer: dummy-reply
 ' noop dummy-reply is reply-xt
 
 : reply[] ( index -- addr )
     code-map with mapc
-    dup dest-size addr>bits u<
-    IF  reply * dest-replies +  ELSE  dummy-reply  THEN  endwith ;
+	dup dest-size addr>bits u<
+	IF  reply * dest-replies +  ELSE  dummy-reply  THEN  endwith ;
 
 : reply-index ( -- index )
     code-map .mapc:dest-tail addr>bits ;
 
 : code+ ( n -- )
     connection .code-map with mapc dup negate dest-tail and +
-    dest-size 1- and to dest-back endwith ;
+	dest-size 1- and to dest-back endwith ;
 
 : code-update ( n -- ) drop \ to be used later
     connection .code-map with mapc dest-back to dest-tail endwith ;
@@ -1201,12 +1201,12 @@ rdata-class to rewind-timestamps
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
 :noname ( old-back new-back o:map -- )
-    2dup data-resend# @ rewind-ts-partial
-    2dup dest-timestamps rewind-ts-partial
+    dest-back over data-resend# @ rewind-ts-partial
+    dest-back over dest-timestamps rewind-ts-partial
     nip regen-ivs-part ;
 data-class to rewind-partial
 :noname ( old-back new-back o:map -- )
-    2dup dest-timestamps rewind-ts-partial
+    dest-back over dest-timestamps rewind-ts-partial
     nip regen-ivs-part ;
 rdata-class to rewind-partial
 
