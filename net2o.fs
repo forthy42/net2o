@@ -1203,11 +1203,11 @@ rdata-class to rewind-timestamps
 :noname ( new-back o:map -- )
     dest-back over data-resend# @ rewind-ts-partial
     dest-back over dest-timestamps rewind-ts-partial
-    regen-ivs-part ;
+    dest-back swap regen-ivs-part ;
 data-class to rewind-partial
 :noname ( new-back o:map -- )
     dest-back over dest-timestamps rewind-ts-partial
-    regen-ivs-part ;
+    dest-back swap regen-ivs-part ;
 rdata-class to rewind-partial
 
 : clearpages-partial ( new-back o:map -- )
