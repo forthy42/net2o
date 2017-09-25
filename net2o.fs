@@ -1200,14 +1200,14 @@ rdata-class to rewind-timestamps
     { addr } addr>ts swap addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
-:noname ( new-back o:map -- )
-    dest-back over data-resend# @ rewind-ts-partial
-    dest-back over dest-timestamps rewind-ts-partial
-    dest-back swap regen-ivs-part ;
+:noname ( old-back new-back o:map -- )
+    2dup data-resend# @ rewind-ts-partial
+    2dup dest-timestamps rewind-ts-partial
+    regen-ivs-part ;
 data-class to rewind-partial
-:noname ( new-back o:map -- )
-    dest-back over dest-timestamps rewind-ts-partial
-    dest-back swap regen-ivs-part ;
+:noname ( old-back new-back o:map -- )
+    2dup dest-timestamps rewind-ts-partial
+    regen-ivs-part ;
 rdata-class to rewind-partial
 
 : clearpages-partial ( new-back o:map -- )
@@ -1227,9 +1227,8 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
-	r> data-rmap with mapc to dest-back
-	tail rewind-partial tail to dest-back
-	dest-req IF  tail do-slurp !@ drop  THEN  endwith
+	r> data-rmap with mapc tail rewind-partial
+	dest-req IF  tail do-slurp !  THEN  endwith
     THEN ;
 
 Defer do-track-seek
