@@ -1203,17 +1203,18 @@ rdata-class to rewind-timestamps
 :noname ( old-back new-back o:map -- )
     2dup data-resend# @ rewind-ts-partial
     2dup dest-timestamps rewind-ts-partial
-    drop regen-ivs-part ;
+    nip regen-ivs-part ;
 data-class to rewind-partial
 :noname ( old-back new-back o:map -- )
     2dup dest-timestamps rewind-ts-partial
-    drop regen-ivs-part ;
+    nip regen-ivs-part ;
 rdata-class to rewind-partial
 
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back tuck umax rewind-partial endwith ;
+    data-map with mapc dest-back tuck umax tuck rewind-partial endwith
+    to dest-back ;
 
 \ separate thread for loading and saving...
 
@@ -1221,7 +1222,7 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
-	r> tail  data-rmap with mapc rewind-partial  tail to dest-back
+	r> tail  data-rmap with mapc rewind-partial
 	dest-req IF  tail do-slurp !  THEN  endwith
     THEN ;
 
