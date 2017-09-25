@@ -317,14 +317,14 @@ scope{ mapc
     dest-index 2 cells bounds ?DO
 	I @ IF
 	    dup dest-addr 64@ I @ with mapc
-	    dest-vaddr 64- 64>n and dup
-	    dest-size u<
-	    IF
-		dup addr>bits ack-bit# !
-		dest-raddr swap dup >data-head to ack-advance? +
-		o parent o> >o rdrop
-		UNLOOP  rot drop  EXIT  THEN
-	    drop endwith
+		dest-vaddr 64- 64>n and dup
+		dest-size u<
+		IF
+		    dup addr>bits ack-bit# !
+		    dest-raddr swap dup >data-head to ack-advance? +
+		    o parent o> >o rdrop
+		    UNLOOP  rot drop  EXIT  THEN
+		drop endwith
 	THEN
     cell +LOOP
     drop false ;
@@ -363,22 +363,22 @@ scope{ mapc
 : map-data ( addr u -- o )
     o >code-flag @ IF mapc:rcode-class ELSE mapc:rdata-class THEN new
     with mapc parent!
-    alloc-data
-    >code-flag @ 0= IF
-	dup addr>bytes allocate-bits data-ackbits !
-    THEN
-    drop
+	alloc-data
+	>code-flag @ 0= IF
+	    dup addr>bytes allocate-bits data-ackbits !
+	THEN
+	drop
     o endwith ;
 
 : map-source ( addr u addrx -- o )
     o >code-flag @ IF mapc:code-class ELSE mapc:data-class THEN new
     with mapc parent!
-    alloc-data
-    >code-flag @ 0= IF
-	dup addr>ts allo1 data-resend# !
-    THEN
-    drop
-    o endwith ;
+	alloc-data
+	>code-flag @ 0= IF
+	    dup addr>ts allo1 data-resend# !
+	THEN
+	drop
+	o endwith ;
 
 : map-data-dest ( vaddr u addr -- )
     >r >r 64dup r> map-data r@ ! >dest-map r> @ swap ! ;
@@ -574,7 +574,7 @@ scope{ mapc
     data-map >o +to mapc:dest-tail o> ;
 : data-dest ( -- addr )
     data-map with mapc
-    dest-vaddr dest-tail dest-size 1- and n>64 64+ endwith ;
+	dest-vaddr dest-tail dest-size 1- and n>64 64+ endwith ;
 
 \ new data sending around stuff, with front+back
 
@@ -599,17 +599,17 @@ scope{ mapc
 : data-head@ ( -- addr u )
     \G you can read into this, it's a block at a time (wraparound!)
     data-map with mapc
-    dest-head dest-back dest-size + fix-size raddr+ endwith
+	dest-head dest-back dest-size + fix-size raddr+ endwith
     residualread @ umin ;
 : rdata-back@ ( tail -- addr u )
     \G you can write from this, also a block at a time
     data-rmap with mapc
-    dest-back swap fix-size raddr+ endwith
+	dest-back swap fix-size raddr+ endwith
     residualwrite @ umin ;
 : data-tail@ ( -- addr u )
     \G you can send from this - as long as you stay block aligned
     data-map with mapc
-    dest-raddr dest-tail dest-head fix-size' endwith ;
+	dest-raddr dest-tail dest-head fix-size' endwith ;
 
 : data-head? ( -- flag )
     \G return true if there is space to read data in
@@ -1213,8 +1213,8 @@ rdata-class to rewind-partial
 }scope
 
 : net2o:rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back tuck umax tuck rewind-partial endwith
-    to dest-back ;
+    data-map with mapc dest-back tuck umax tuck rewind-partial
+    to dest-back endwith ;
 
 \ separate thread for loading and saving...
 
@@ -1857,11 +1857,15 @@ forth-local-words:
       "[ \t\n]" t name (font-lock-function-name-face . 3))
      (("64field:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
+     (("with") compile-only (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
+     (("endwith") compile-only (font-lock-type-face . 2))
     )
 forth-local-indent-words:
     (
     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-    (("with" "endwith") (0 . 2) (0 . 2) non-immediate)
+    (("with") (0 . 2) (0 . 2) compile-only)
+    (("endwith") (-2 . 0) (0 . -2) compile-only)
     )
 End:
 [THEN]
