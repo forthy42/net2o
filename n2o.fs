@@ -107,8 +107,7 @@ $20 value hash-size#
 
 : file:close-all ( -- )
     \ close files of current connection in file-task
-    <event o elit, :>close-all
-    up@ elit, :>restart file-task event> stop ;
+    <event o elit, :>close-all file-task event| ;
 
 scope{ n2o
 
