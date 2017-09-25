@@ -1196,11 +1196,11 @@ data-class to rewind-timestamps
     dest-timestamps over erase ;
 rdata-class to rewind-timestamps
 
-: rewind-ts-partial ( old-back new-back addr o:map -- )
-    { addr } addr>ts swap addr>ts U+DO
+: rewind-ts-partial ( new-back addr o:map -- )
+    { addr } addr>ts dest-back addr>ts U+DO
 	I I' fix-tssize	{ len } addr + len erase
     len +LOOP ;
-:noname ( old-back new-back o:map -- )
+:noname ( new-back o:map -- )
     dup data-resend# @ rewind-ts-partial
     dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
