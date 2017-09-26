@@ -345,9 +345,9 @@ scope{ mapc
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $free ;
-: n2o:save-block { back tail id -- delta }
-    back tail data-rmap with mapc fix-size raddr+ endwith
-    residualwrite @ umin file( over data-rmap .mapc:dest-raddr - >r
+: n2o:save-block ( back tail id -- delta ) { id -- delta }
+    data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
+    file( over data-rmap .mapc:dest-raddr - >r
     id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
     id id>addr? .fs-write dup /back
     file( dup IF ." file write: "
@@ -361,7 +361,7 @@ scope{ mapc
     slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) back tail
     [: +calc fstates 0 { back tail states fails }
-	BEGIN  tail back u<  WHILE
+	BEGIN  tail back u>  WHILE
 		back tail write-file# @ n2o:save-block  dup >blockalign +to back
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
