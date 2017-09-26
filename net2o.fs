@@ -1222,10 +1222,10 @@ rdata-class to rewind-partial
 : net2o:save { tail -- }
     data-rmap ?dup-IF
 	.mapc:dest-back { oldback }
-	oldback tail n2o:spit
+	oldback tail n2o:spit { back }
 	data-rmap with mapc
-	    oldback dest-back rewind-partial
-	    dest-req IF  dup do-slurp !  THEN  to dest-back
+	    oldback back rewind-partial
+	    dest-req IF  back do-slurp !  THEN  back to dest-back
 	endwith
     THEN ;
 
