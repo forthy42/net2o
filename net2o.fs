@@ -1231,8 +1231,6 @@ rdata-class to rewind-partial
 
 Defer do-track-seek
 
-event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
-event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
 event: :>save ( tail o -- )  .net2o:save ;
 event: :>save&done ( tail o -- )
     >o net2o:save sync-done-xt o> ;
@@ -1245,12 +1243,12 @@ event: :>close-all ( o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-tail elit, endwith
+    data-rmap .mapc:dest-tail elit,
     o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-tail elit, endwith
-    o elit, :>save&done file-task event> ;
+    data-rmap .mapc:dest-tail elit,
+    o elit, :>save&done file-task event| ;
 
 \ schedule delayed events
 

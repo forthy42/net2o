@@ -173,11 +173,8 @@ gen-table $freeze
 : net2o:gen-reset ( -- )
     ack-reset 0 to ack-receive ;
 
-: slurp@ ( -- addr )
-    data-rmap with mapc dest-back do-slurp @ umax endwith ;
-
 : rewind ( -- )
-    slurp@ ulit, ack-flush ;
+    data-rmap .mapc:dest-back ulit, ack-flush ;
 
 \ safe initialization
 
