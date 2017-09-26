@@ -1206,6 +1206,7 @@ rdata-class to rewind-timestamps
     regen-ivs-part ;
 data-class to rewind-partial
 :noname ( old-back new-back o:map -- )
+    2dup ackbits-erase
     2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
 rdata-class to rewind-partial
@@ -1220,10 +1221,12 @@ rdata-class to rewind-partial
 
 : net2o:save { tail -- }
     data-rmap ?dup-IF
-	with mapc dest-back tail over ackbits-erase endwith >r
-	r@ tail n2o:spit { back }
-	r> data-rmap with mapc tail rewind-partial  back to dest-back
-	dest-req IF  tail do-slurp !@ drop  THEN  endwith
+	.mapc:dest-back { oldback }
+	oldback tail n2o:spit { back }
+	data-rmap with mapc
+	    oldback tail rewind-partial  back to dest-back
+	    dest-req IF  tail do-slurp !@ drop  THEN
+	endwith
     THEN ;
 
 Defer do-track-seek
