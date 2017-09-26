@@ -512,7 +512,8 @@ previous
 	    true net2o:do-resend
 	THEN
 	0 data-rmap .mapc:do-slurp !@
-	?dup-IF  ulit, ack-flush
+	?dup-IF  data-rmap with mapc dup to dest-back  endwith
+	    ulit, ack-flush
 	    request-stats? to stats?  true to slurp?  THEN
     THEN  +expected
     slurp? or to slurp?

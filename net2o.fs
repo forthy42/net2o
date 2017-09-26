@@ -1223,9 +1223,9 @@ rdata-class to rewind-partial
     data-rmap ?dup-IF
 	.mapc:dest-back { oldback }
 	oldback tail n2o:spit
-	data-rmap with mapc to dest-back
+	data-rmap with mapc
 	    oldback dest-back rewind-partial
-	    dest-req IF  tail do-slurp !  THEN
+	    dest-req IF  do-slurp !  ELSE  to dest-back  THEN
 	endwith
     THEN ;
 
