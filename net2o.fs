@@ -1218,7 +1218,7 @@ rdata-class to rewind-partial
 
 \ separate thread for loading and saving...
 
-: net2o:save { back tail -- }
+: net2o:save { tail -- }
     data-rmap ?dup-IF
 	with mapc dest-back tail over ackbits-erase endwith >r
 	tail n2o:spit
@@ -1230,8 +1230,8 @@ Defer do-track-seek
 
 event: :>track ( o -- )  >o ['] do-track-seek n2o:track-all-seeks o> ;
 event: :>slurp ( task o -- )  >o n2o:slurp 2drop o elit, :>track event> o> ;
-event: :>save ( back tail o -- )  .net2o:save ;
-event: :>save&done ( back tail o -- )
+event: :>save ( tail o -- )  .net2o:save ;
+event: :>save&done ( tail o -- )
     >o net2o:save sync-done-xt o> ;
 event: :>close-all ( o -- )
     .n2o:close-all ;
@@ -1242,11 +1242,11 @@ event: :>close-all ( o -- )
     ['] event-loop' 1 net2o-task to file-task ;
 : net2o:save& ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-back elit, dest-tail elit, endwith
+    data-rmap with mapc dest-tail elit, endwith
     o elit, :>save file-task event> ;
 : net2o:save&done ( -- )
     file-task 0= IF  create-file-task  THEN
-    data-rmap with mapc dest-back elit, dest-tail elit, endwith
+    data-rmap with mapc dest-tail elit, endwith
     o elit, :>save&done file-task event> ;
 
 \ schedule delayed events
