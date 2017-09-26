@@ -356,7 +356,7 @@ scope{ mapc
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit { back tail -- }
+: n2o:spit { back tail -- newback }
     tail back u<= ?EXIT fstates 0= ?EXIT
     slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) back tail
@@ -370,8 +370,7 @@ scope{ mapc
 	    fails states u>= UNTIL
 	THEN
 	msg( ." Write end" cr ) +file
-	back  fails states u>= IF   >maxalign  THEN
-	data-rmap with mapc to dest-back endwith  \ if all files are done, align
+	back  fails states u>= IF   >maxalign  THEN  \ if all files are done, align
     ;] file-sema c-section
     slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
