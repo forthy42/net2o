@@ -1218,9 +1218,9 @@ rdata-class to rewind-partial
 
 \ separate thread for loading and saving...
 
-: net2o:save { back tail -- }
+: net2o:save nip dest-back { tail back -- }
     data-rmap ?dup-IF
-	with mapc tail back ackbits-erase endwith
+	with mapc tail dest-back ackbits-erase endwith
 	tail n2o:spit
 	back data-rmap with mapc tail rewind-partial
 	dest-req IF  tail do-slurp !@ drop  THEN  endwith
