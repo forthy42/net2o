@@ -349,10 +349,10 @@ scope{ mapc
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
     file( over data-rmap .mapc:dest-raddr - >r
     id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
-    id id>addr? .fs-write ( dup /back )
+    id id>addr? .fs-write
     file( dup IF ." file write: "
     id . r> hex. r> hex. dup hex. residualwrite @ hex. forth:cr
-    ELSE  rdrop rdrop rdrop  THEN ) ;
+    ELSE  rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
@@ -362,15 +362,16 @@ scope{ mapc
     write-file# ? residualwrite @ hex. forth:cr ) back tail
     [: +calc fstates 0 { back tail states fails }
 	BEGIN  tail back u>  WHILE
-		back tail write-file# @ n2o:save-block  dup
-		>blockalign dup negate residualwrite +! +to back
+		back tail write-file# @ n2o:save-block
+		>blockalign dup negate residualwrite +!  dup +to back
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN
 	    fails states u>= UNTIL
 	THEN
-	msg( ." Write end" cr ) +file  back data-rmap with mapc to dest-back endwith
-	fails states u>= IF  max/back  THEN \ if all files are done, align
+	msg( ." Write end" cr ) +file
+	back  fails states u>= IF   >maxalign  THEN
+	data-rmap with mapc to dest-back endwith  \ if all files are done, align
     ;] file-sema c-section
     slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
