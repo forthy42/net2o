@@ -317,8 +317,8 @@ scope{ mapc
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP  to dest-top ;
 
-: ackbits-erase ( newback oldback -- )
-    U+DO
+: ackbits-erase ( oldback newback -- )
+    swap U+DO
 	data-ackbits @ I I' fix-size dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP ;
@@ -351,7 +351,7 @@ scope{ mapc
     id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
     id id>addr? .fs-write
     file( dup IF ." file write: "
-    id . r> hex. r> hex. dup hex. residualwrite @ hex. forth:cr
+    id . r> hex. r> #10 rshift hex. dup hex. residualwrite @ hex. forth:cr
     ELSE  rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
@@ -421,7 +421,7 @@ scope{ mapc
 : n2o:slurp-block ( id -- delta )
     data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " 2 pick .
-    2 pick id>addr? .fs-seek 64@ #10 64rshift 64>n hex. r> hex. )
+    2 pick id>addr? .fs-seek 64@ #10 64rshift $64. r> #10 rshift hex. )
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. forth:cr ) ;
 

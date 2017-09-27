@@ -100,6 +100,13 @@ Discussions
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
 
+Authors
+-------
+
+Principal author of net2o is
+
+* Bernd Paysan <bernd@net2o.de>
+
 No Wikipedia Links
 ------------------
 
