@@ -4,6 +4,13 @@ net2o - reinventing the Internet
 net2o is the attempt to reinvent the Internet.  It's free software
 available under the [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
+Authors
+-------
+
+Principal author of net2o is
+
+* Bernd Paysan <bernd@net2o.de>
+
 Get it and try it
 -----------------
 
@@ -99,13 +106,6 @@ Discussions
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
-
-Authors
--------
-
-Principal author of net2o is
-
-* Bernd Paysan <bernd@net2o.de>
 
 No Wikipedia Links
 ------------------
