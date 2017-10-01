@@ -26,13 +26,9 @@ debug: timing(
 debug: bursts(
 debug: resend(
 debug: track(
-debug: data(
 debug: cmd(
 debug: cmd0(
-debug: send(
-debug: firstack(
 debug: msg(
-debug: stat(
 debug: timeout(
 debug: wait(
 debug: ack(
@@ -43,33 +39,22 @@ debug: key( \ key stuff
 debug: vkey( \ vault key stuff
 debug: genkey( \ See generated keys - never let this go to a log file!
 debug: cookie( 
-debug: delay( \ used to add delays at performance critical places
 debug: tag(
 debug: flush(
-debug: flush1(
-debug: flush2(
-debug: flush3(
-debug: waitkey(
 debug: address(
-debug: dump(
 debug: trace(
 debug: header(
 debug: sender( \ extra sender task
 debug: dht( \ debugging for dht functions
-debug: hash( \ dht hasing function debug
 debug: file( \ file read/write debugging
-debug: bg( \ started in background mode
 debug: nat( \ NAT traversal stuff
 debug: route( \ do routing
 debug: ipv6( \ use ipv6
 debug: ipv4( \ use ipv4
 debug: request( \ track requests
 debug: beacon( \ debug sending beacons
-debug: replace-beacon( \ reply to every beacon
-debug: kalloc( \ secure allocate
 debug: invalid( \ print invalid packets
 debug: regen( \ regenerate keys
-debug: sema( \ semaphores
 debug: recvfrom(
 debug: sendto(
 debug: avalanche( \ distribution tree

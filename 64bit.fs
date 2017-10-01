@@ -9,14 +9,11 @@
 
 cell 8 = [IF]
     : 64bit ;
-    ' , Alias 64,
     ' @ Alias 64@
     ' ! Alias 64!
     ' le-ux@ Alias le-64@
     ' le-x! Alias le-64!
     ' noop Alias 64><
-    ' rot Alias 64rot
-    ' -rot Alias -64rot
     ' swap alias n64-swap
     ' swap alias 64n-swap
     ' dup Alias 64dup
@@ -24,16 +21,12 @@ cell 8 = [IF]
     ' drop Alias 64drop
     ' nip Alias 64nip
     ' swap Alias 64swap
-    ' over Alias over64 ( n 64 -- n 64 n )
     ' tuck Alias 64tuck
     ' + Alias 64+
     ' - Alias 64-
-    ' 1+ Alias 64-1+
     ' or Alias 64or
     ' and Alias 64and
     ' xor Alias 64xor
-    ' invert Alias 64invert
-    ' l@ Alias 32@
     ' Variable Alias 64Variable
     ' User Alias 64User
     ' Constant Alias 64Constant
@@ -61,7 +54,6 @@ cell 8 = [IF]
     ' s>d Alias 64>d
     ' drop Alias d>64
     ' >r Alias 64>r
-    ' r@ Alias 64r@
     ' r> Alias 64r>
     ' 0= Alias 64-0=
     ' 0<> Alias 64-0<>
@@ -84,8 +76,6 @@ cell 8 = [IF]
     ' off Alias 64off
     ' */ Alias 64*/
     ' * Alias 64*
-    ' within alias 64within
-    : 128xor ( ud1 ud2 -- ud3 )  rot xor >r xor r> ;
     : 128@ ( addr -- d ) 2@ swap ;
     : 128! ( d addr -- ) >r swap r> 2! ;
     ' stop-ns alias stop-64ns
@@ -101,8 +91,6 @@ cell 8 = [IF]
     ' be-ux@ Alias be@
     ' be-x! Alias be!
 [ELSE]
-    ' 2swap alias 64rot
-    ' 2swap alias -64rot
     ' rot alias n64-swap
     ' -rot alias 64n-swap
     ' 2drop alias 64drop
@@ -111,9 +99,7 @@ cell 8 = [IF]
     ' 2over Alias 64over
     ' 2swap Alias 64swap
     ' 2tuck Alias 64tuck
-    : over64 ( n 64 -- n 64 n ) 2 pick ;
     ' swap Alias 64><
-    : 64,  64>< 2, ;
     : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
     : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
     ' le-uxd@ Alias le-64@
@@ -123,8 +109,6 @@ cell 8 = [IF]
     : 64or rot or >r or r> ;
     : 64and rot and >r and r> ;
     : 64xor rot xor >r xor r> ;
-    : 64invert  invert swap invert swap ;
-    ' @ Alias 32@
     ' 2Variable Alias 64Variable
     : 64User  User cell uallot drop ;
     ' 2Constant Alias 64Constant
@@ -153,7 +137,6 @@ cell 8 = [IF]
     ' false Alias u>64
     ' 2>r Alias 64>r
     ' 2r> Alias 64r>
-    ' 2r@ Alias 64r@
     ' d0= Alias 64-0=
     ' d0<> Alias 64-0<>
     ' d0>= Alias 64-0>=
@@ -167,7 +150,6 @@ cell 8 = [IF]
     ' du>= Alias 64u>=
     : 64on ( addr -- )  >r 64#-1 r> 64! ;
     : 64+!  ( 64n addr -- )  dup >r 64@ 64+ r> 64! ;
-    : 64-1+ ( 64n -- 64n+1 ) #1. d+ ;
     ' dmin Alias 64min
     ' dmax Alias 64max
     : 64umin  2over 2over du> IF  2swap  THEN  2drop ;
@@ -177,10 +159,6 @@ cell 8 = [IF]
     ' m*/ Alias 64*/
     : 64* ( d1 d2 -- d3 ) { l1 h1 l2 h2 }
 	l1 l2 um* l1 h2 um* l2 h1 um* d+ drop + ;
-    : 64within ( d1 d2 d3 -- flag )
-	2over d- 2>r d- 2r> du< ;
-    : 128xor { x1 x2 x3 x4 y1 y2 y3 y4 -- z1 z2 z3 z4 }
-	x1 y1 xor  x2 y2 xor  x3 y3 xor  x4 y4 xor ;
     : 128@ ( addr -- x1..x4 )
 	>r
 	r@ @
