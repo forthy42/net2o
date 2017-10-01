@@ -28,8 +28,6 @@ Variable key-readin
 	    qr#ownkey qr#key ke-sk sec@ nip select o>
 	    .keyqr  THEN ;] @arg-loop ;
 
-: +pk ( "name" -- )  pk' keysize umin key-list $+[]! ;
-
 : args>keylist ( -- )
     [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
     @arg-loop ;

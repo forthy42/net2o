@@ -109,8 +109,6 @@ end-class dvcs-log-class
 
 : /name ( addr u -- addr' u' )
     [ hash#128 dvcs:name ]L /string ;
-: /name' ( addr u -- addr' u' )
-    [ hash#128 2 + ]L /string ;
 : fn-split ( hash+ts+perm+fn u -- hash+ts+perm u1 fname u2 )
     [ hash#128 dvcs:name ]L >r 2dup r@ umin 2swap r> /string ;
 
@@ -272,6 +270,7 @@ dvcs-adds to dvcs:write
     project:branch$ $free  project:project$ $free
     dvcs:commits @ .n2o:dispose-commit
     dvcs:searchs @ .n2o:dispose-search
+    n2o:dispose-dvcs-adds
     dispose ;
 
 Variable new-files[]
@@ -407,10 +406,11 @@ previous
     >r r@ file-size throw r@ reposition-file throw
     r@ write-line throw r> close-file throw ;
 
-\ unencrypted hash stuff
+\ unencrypted hash stuff, unsued
 
 Variable patch-in$
 
+0 [IF]
 : write-hashed ( addr1 u1 -- addrhash u2 )
     keyed-hash-out hash#128 ['] 85type $tmp1 2>r
     2r@ .objects/ ?.net2o/objects spit-file 2r> ;
@@ -418,6 +418,7 @@ Variable patch-in$
 : read-hashed ( addr1 u1 -- addrhash u2 )
     2dup ['] 85type $tmp 2dup 2>r .objects/ patch-in$ $slurp-file
     patch-in$ $@ >file-hash str= 0= !!wrong-hash!! 2r> ;
+[THEN]
 
 \ encrypted hash stuff, using signature secret as PSK
 
@@ -441,14 +442,10 @@ Variable patch-in$
 
 \ patch stuff
 
-' n2o:new-dvcs static-a with-allocater Constant sample-patch
-
 \ read in branches, new version
 
 : hash+type ( addr u type addr1 -- ) >r r@ $free
     [: { w^ x } type x cell type ;] r> $exec ;
-: hash+type$ ( addr u type -- )
-    [: { w^ x } type x cell type ;] $tmp1 ;
 
 ' 2drop commit-class to msg:tag
 ' 2drop commit-class to msg:start
