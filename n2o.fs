@@ -103,10 +103,6 @@ $20 value hash-size#
 
 : ?cr ( -- ) script? 0= IF  cr  THEN ;
 
-: file:close-all ( -- )
-    \ close files of current connection in file-task
-    <event o elit, :>close-all file-task event| ;
-
 scope{ n2o
 
 : help ( -- )

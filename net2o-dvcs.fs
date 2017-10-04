@@ -270,7 +270,6 @@ dvcs-adds to dvcs:write
     project:branch$ $free  project:project$ $free
     dvcs:commits @ .n2o:dispose-commit
     dvcs:searchs @ .n2o:dispose-search
-    n2o:dispose-dvcs-adds
     dispose ;
 
 Variable new-files[]
@@ -778,11 +777,13 @@ event: :>dvcs-sync-done ( o -- ) >o
     msg-group$ $@ ?save-msg   0 dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
 
+: file:close-all ( -- )
+    \ close files of current connection in file-task
+    <event o elit, :>close-all file-task event| ;
+
 : dvcs-sync-done ( -- )
     msg( ." dvcs-sync-done" forth:cr )
-    net2o-code expect-reply close-all net2o:gen-reset end-code
-    \ <event up@ elit, o elit, :>close-all file-task event> stop
-    n2o:close-all
+    file:close-all
     msg( ." dvcs-sync-done closed" forth:cr )
     <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
