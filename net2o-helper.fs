@@ -15,14 +15,11 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Variable dhtnick "net2o-dhtroot" dhtnick $!
-Variable dhtroot-addr$
+$Variable dhtnick "net2o-dhtroot" dhtnick $!
+$Variable dhtroot-addr$
 Variable dhtroot-addr
 
-:noname defers 'cold dhtnick $boot dhtroot-addr$ $boot dhtroot.n2o $boot
-    dhtroot-addr off ; is 'cold
-:noname defers 'image dhtnick $save dhtroot-addr$ $save dhtroot.n2o $save ;
-is 'image
+:noname defers 'cold dhtroot-addr off ; is 'cold
 
 require net2o-dhtroot.fs
 

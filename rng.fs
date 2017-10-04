@@ -66,8 +66,8 @@ end-class rng-c
 
 \ init rng to be actually useful
 
-Variable init-rng$
-s" ~/.initrng" init-rng$ $!  init-rng$ $save
+$Variable init-rng$
+s" ~/.initrng" init-rng$ $!
 
 : random-init ( -- )
     rng-key c:key# read-rnd ;

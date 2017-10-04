@@ -355,11 +355,11 @@ Variable rootdirs$
 Variable prio#
 Variable host$
 Variable date#
-Variable objects$
-Variable chats$
-Variable keys$
-Variable .net2o$
-Variable invite$
+$Variable objects$
+$Variable chats$
+$Variable keys$
+$Variable .net2o$
+$Variable invite$
 
 }scope
 
@@ -406,26 +406,14 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
     ?.net2o/chats   chats/.no-fat-file   ?create-file
     0= to chat-sanitize? ;
 
-Variable config-file$  "~/.net2o/config" config-file$ $!
+$Variable config-file$  "~/.net2o/config" config-file$ $!
 Variable configured?
 
 :noname defers 'cold
     configured? off
-    config-file$ $boot
-    config:.net2o$ $boot
-    config:chats$ $boot
-    config:keys$ $boot
-    config:objects$ $boot
-    config:invite$ $boot
     pad $400 get-dir rootdirs$ $!
 ; is 'cold
 :noname ( -- )
-    config-file$ $save
-    config:.net2o$ $save
-    config:chats$ $save
-    config:keys$ $save
-    config:objects$ $save
-    config:invite$ $save
     config:host$ $off
     config:rootdirs$ $off
     defers 'image ; is 'image

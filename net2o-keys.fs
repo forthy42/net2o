@@ -991,7 +991,7 @@ Forward !my-addr$
     pk@ key| key# #@ 0= !!unknown-key!! \ well, you should know yourself
     cell+ out-key ;
 
-Variable dhtroot.n2o
+$Variable dhtroot.n2o
 
 : +dhtroot ( -- )
     defaultkey @ >storekey !
