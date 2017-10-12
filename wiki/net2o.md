@@ -106,6 +106,7 @@ Discussions
 * [Threat Model](threat-model.md)
 * [What it's not for](whatnotfor.md)
 * [Nettie logo](nettie.md)
+* [$quid CryptoCurrency](squid.md)
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
