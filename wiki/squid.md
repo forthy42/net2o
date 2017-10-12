@@ -1,5 +1,7 @@
 # The $quid – CryptoCurrency and BlockChain
 
+![$quid](https://fossil.net2o.de/net2o/doc/trunk/doc/net2o-squid-200.jpg)
+
 ## Abstract
 
 10 years after BitCoins original document, the BlockChain and crypto
