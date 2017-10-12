@@ -1,6 +1,6 @@
 # The $quid – CryptoCurrency and BlockChain
 
-![$quid](https://fossil.net2o.de/net2o/doc/trunk/doc/net2o-squid-200.jpg)
+![Squid](https://fossil.net2o.de/net2o/doc/trunk/doc/net2o-squid-200.png)
 
 ## Abstract
 
