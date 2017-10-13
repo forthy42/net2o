@@ -200,7 +200,7 @@ Isaac Newton lost a fortune in crashes.  The madness of humans however
 can be calculated, though certainly not to the finest details.  The
 BitCoin chart however looks like a classic.
 
-![BitCoin Chart](https://c.finanzen.net/cst/FinanzenDe/chart.aspx?instruments=300011,676,,&style=snapshot_mountain_big_oneyear_3digit&period=Maximum)
+![BitCoin Chart](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iFKLTQNYjslA/v4/800x-1.png)
 
 Speculation bubbles don't mean the money disappears.  The money is
 still there, it's just owned by someone else now.  Despite that the
