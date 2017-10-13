@@ -70,16 +70,18 @@ another idea.
 The first early forms of banknote were financial products, the
 promissory note.  Instead of actually paying, you just gave the
 promise.  That allows to inflate the amount of available money to keep
-business going.  That however comes with a problem of trust: You have
-to trust that promise.
+business going.  Song dynasty China e.g. had a thriving economy, and
+the social reforms of Wang Anshi allowed even small farmers to take
+credits and buy the land they were using.  That however comes with a
+problem of trust: You have to trust that promise.
 
 Eventually, in the 12th century, the first state took over the role of
 the trustee, and China's Song dynasty created the first legal tender
-as a banknote, the 会子 (huizi, literally: a child will come), which
-still is a promissory note, but now issued by a much larger and more
-powerful entity, operating under the rule of law, and therefore easier
-to trust.  And the state definitely in power to force you to use the
-currency, so if you don't trust, you still have to obey.
+as a banknote, the 会子 (huizi, contemporary Chinese means “a while”),
+which still is a promissory note, but now issued by a much larger and
+more powerful entity, operating under the rule of law, and therefore
+easier to trust.  And the state definitely in power to force you to
+use the currency, so if you don't trust, you still have to obey.
 
 Of course, the issue that came up in Song dynasty China quickly was
 forgery, because the whole point of paper money is to make it quick
@@ -92,11 +94,10 @@ you proof that you own the seal.
 
 The result of using such a legal tender was a boom of trade and
 economy; and at the same time, the relation between the silver price
-and the legal tender shifted by a factor 100 within a few hundred
-years.  We are talking about a few percent of inflation per year,
-something that perfectly correlates with the economic growth.  If you
-had based the currency on a high-volume traded good such as rice, the
-inflation ratio would probably look different.
+increased by a factor 100 within a few hundred years.  It should be
+noted that since the end of Bretton Woods and the gold standard of the
+USD in 1971, the gold price inflated by a factor of 50, and that is
+not the same as the inflation rate.
 
 The Song dynasty's huizi was somehow experimental, the following Yuan
 dynasty kept the concept, and expanded it a lot.  Tanks to Marco Polo,
@@ -152,7 +153,7 @@ transactions.  BitCoin exchanges pop up that allow people to trade
 with them without actually making transactions in the BitCoin
 protocol; and without those transactions, that money is not secured.
 Virtual bankrobbery occurs, and it shows that people who don't know
-history are doomed to repeat it.
+history are doomed to repeat it: Regulation is there for good reasons.
 
 ### How to cheaply secure the BlockChain
 
@@ -189,4 +190,86 @@ actually exchange coins are the ones who want anonymity.
 How money shapes a society, and why the limited supply of BitCoins is
 far worse than neoliberalism
 
+### Speculation object
+
+![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
+
+Many humans like to gamble, and the pattern of gambling with
+speculation objects are remarkable similar.  Even smart persons like
+Isaac Newton lost a fortune in crashes.  The madness of humans however
+can be calculated, though certainly not to the finest details.  The
+BitCoin chart however looks like a classic.
+
+![BitCoin Chart](https://c.finanzen.net/cst/FinanzenDe/chart.aspx?instruments=300011,676,,&style=snapshot_mountain_big_oneyear_3digit&period=Maximum&timezone=W.%20Europe%20Standard%20Time)
+
+Speculation bubbles don't mean the money disappears.  The money is
+still there, it's just owned by someone else now.  Despite that the
+total amount of money is constant through a speculation bubble, they
+have a deep impact on economy.
+
+That's because those who entered the bubble early got the money, and
+those who entered late lost.  The tragedy is that the early ones are
+smart and rare, and the late ones are stupid and many.  And that means
+a huge concentration in money, and especially a loss for those who
+didn't really have that money.
+
+But let's assume BitCoin is not a bubble going bust, but it's supposed
+to last (all 21 millions), and used as currency for everything by
+everybody.  That means the price per coin would sore until the total
+market cap equals the wealth of the entire earth.  And that would mean
+all those people who were there in the early phase would be incredible
+rich, just by being early.
+
 ## How to really distribute book-keeping
+
+An important design goal for me is to handle massive ammounts of
+micropayments, because that's an application where I see a need for a
+crypto currency.
+
+### Double entry bookkeeping system
+
+First of all, if you are somehow familiar with bookkeeping, “a ledger”
+has something fundamentally wrong in it: The singular.  You are
+supposed to have more than one ledger, and every transaction needs to
+go to two ledgers, one as debit, one as credit (the two columns of the
+ledgers).
+
+If you want to scale a crypto currency, you want to separate ledgers
+by some arbitrary criteria so that the individual nodes are not
+overloaded, and millions of bookings can get in per second; which is a
+fairly reasonable number for micropayment.
+
+Since you want to check if a coin someone offers you has already been
+spent, you want to ask the corresponding ledger for it.  The ledger
+records incoming and outgoing (credit and debit) in two log files, and
+keeps the active coins available for query.  So you want to select the
+ledger based on the pubkey of the coin — some reduction of it to a
+reasonable size.  DDoS attacks at particular ledgers can be easily
+mittigated: if the ledger you want to book to is attacked, you just
+select a new pubkey; if the ledger you want to book from is attacked,
+you may need to use another coin in your wallet.
+
+The ledger units repsonsible for the same ledger each verify that they
+have a consensus over the transactions; by syncing their positions.
+They are put together into a tree of balance sheet ledgers, and the
+next layer records sums of transactions signed (with reference to the
+block) by the ledger units below.  And the top layer does the
+bilancing: There can't be a change in value of the sum, it absolutely
+has to be zero.
+
+That will make the transaction protocol a bit tricky, because you have
+to make sure that both ledgers really enter your transaction.  The
+usual way to deal with that is to have a write intent (going to both
+sides), and when the write intents have succeeded, do a commit.
+
+To enter a coin into a double booking system, you need two
+transactions: One is the coin itself (debit), and the other is a promise to
+buy it back for its nominal value (credit).
+
+## Literature
+
+  1. [Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/stages_in_a_bubble.html)
+  2. [Historic Stock Market Crashes, Bubbles & Financial Crises](http://www.thebubblebubble.com/historic-crashes/)
+  3. [Extraordinary Popular Delusions and the Madness of Crowds (1841)](https://en.wikipedia.org/wiki/Extraordinary_Popular_Delusions_and_the_Madness_of_Crowds)
+  4. [Online resource for double entry bookkeeping](http://www.double-entry-bookkeeping.com/double-entry-bookkeeping-tutorial/)
+  5. [Distributed atomic transactions](https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/)
