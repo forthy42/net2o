@@ -28,7 +28,7 @@ Where does the need for money come from?
 Stone age society started with share economy: When you had something
 in abundance, you'd share it with your larger family, the small tribe
 you were associated with.  You'd expect the other members to share
-their pray or whatever they had to share with you, too.  You can do
+their prey or whatever they had to share with you, too.  You can do
 that, because there's trust and established relationship.
 
 When society grew larger, this no longer worked.  You would trade
