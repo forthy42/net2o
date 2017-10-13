@@ -200,7 +200,7 @@ Isaac Newton lost a fortune in crashes.  The madness of humans however
 can be calculated, though certainly not to the finest details.  The
 BitCoin chart however looks like a classic.
 
-![BitCoin Chart](https://c.finanzen.net/cst/FinanzenDe/chart.aspx?instruments=300011,676,,&style=snapshot_mountain_big_oneyear_3digit&period=Maximum&timezone=W.%20Europe%20Standard%20Time)
+![BitCoin Chart](https://c.finanzen.net/cst/FinanzenDe/chart.aspx?instruments=300011,676,,&style=snapshot_mountain_big_oneyear_3digit&period=Maximum)
 
 Speculation bubbles don't mean the money disappears.  The money is
 still there, it's just owned by someone else now.  Despite that the
@@ -219,6 +219,11 @@ everybody.  That means the price per coin would sore until the total
 market cap equals the wealth of the entire earth.  And that would mean
 all those people who were there in the early phase would be incredible
 rich, just by being early.
+
+Trickle down however doesn't work.  Money inherently trickles up.  In
+a deflationary system, there is no decay of money; instead the money
+of the wealthy becomes more and more just on its own.  They don't even
+have to invest it to gain wealth.
 
 ## How to really distribute book-keeping
 
