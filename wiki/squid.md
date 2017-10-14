@@ -31,7 +31,7 @@ Here's the bullshit bingo chart for all valid critics on BitCoins:
 <tr>
 <th>the bubble</th>
 <td>busts next week</td>
-<td>already is busted<td>
+<td>already is busted</td>
 <td>inflated too much</td>
 <td>deflated too much</td>
 <td>is obviously a bubble</td>
