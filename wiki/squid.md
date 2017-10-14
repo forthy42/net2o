@@ -17,6 +17,51 @@ secure protocols meet money, it's not just technology that
 matters. This paper therefore will therefore take both sides into
 consideration.
 
+Here's the bullshit bingo chart for all valid critics on BitCoins:
+
+<table>
+<tr>
+<th>BitCoin</th>
+<td>doesn't scale</td>
+<td>is a snowball system</td>
+<td>will be destroyed by China</td>
+<td>is a plot to destoy capitalism</td>
+<td>is used by drug dealers and terrorists</td>
+</tr>
+<tr>
+<th>the bubble</th>
+<td>busts next week</td>
+<td>already is busted<td>
+<td>inflated too much</td>
+<td>deflated too much</td>
+<td>is obviously a bubble</td>
+</tr>
+<tr>
+<th></th>
+<td>BitCoin is deflationary</td>
+<td>The BlockChain is too big</td>
+<td>Joker</td>
+<td>blocks are too big</td>
+<td>blocks are too small</td>
+</tr>
+<tr>
+<th>BitCoin</th>
+<td>is unregulated</td>
+<td>is illeal</td>
+<td>is only an experiment and now ended</td>
+<td>is worse than Fiat because not backed by material things</td>
+<td>is worse than my fork</td>
+</tr>
+<tr>
+<th></th>
+<td>Too many digits behind the point</td>
+<td>Too few dicits behind the point</td>
+<td>BitCoin is not anonymous</td>
+<td>BitCoin is used for money laundering</td>
+<td>Told you so!</td>
+</tr>
+</table>
+
 ## Purpose of a currency (with history lesson)
 
 ### Trade vs. speculation object
