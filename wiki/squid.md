@@ -22,43 +22,43 @@ Here's the bullshit bingo chart for all valid critics on BitCoins:
 <table>
 <tr>
 <th>BitCoin</th>
-<td>doesn't scale</td>
-<td>is a snowball system</td>
-<td>will be destroyed by China</td>
-<td>is a plot to destoy capitalism</td>
-<td>is used by drug dealers and terrorists</td>
+<td border=1>doesn't scale</td>
+<td border=1>is a snowball system</td>
+<td border=1>will be destroyed by China</td>
+<td border=1>is a plot to destoy capitalism</td>
+<td border=1>is used by drug dealers and terrorists</td>
 </tr>
 <tr>
-<th>the bubble</th>
-<td>busts next week</td>
-<td>already is busted</td>
-<td>inflated too much</td>
-<td>deflated too much</td>
-<td>is obviously a bubble</td>
+<th>Bubble</th>
+<td border=1>busts next week</td>
+<td border=1>already is busted</td>
+<td border=1>inflated too much</td>
+<td border=1>deflated too much</td>
+<td border=1>is obviously a bubble</td>
 </tr>
 <tr>
 <th></th>
-<td>BitCoin is deflationary</td>
-<td>The BlockChain is too big</td>
-<td>Joker</td>
-<td>blocks are too big</td>
-<td>blocks are too small</td>
+<td border=1>BitCoin is deflationary</td>
+<td border=1>The BlockChain is too big</td>
+<td border=1>Joker</td>
+<td border=1>blocks are too big</td>
+<td border=1>blocks are too small</td>
 </tr>
 <tr>
 <th>BitCoin</th>
-<td>is unregulated</td>
-<td>is illeal</td>
-<td>is only an experiment and now ended</td>
-<td>is worse than Fiat because not backed by material things</td>
-<td>is worse than my fork</td>
+<td border=1>is unregulated</td>
+<td border=1>is illeal</td>
+<td border=1>is only an experiment and now ended</td>
+<td border=1>is worse than Fiat because not backed by material things</td>
+<td border=1>is worse than my fork</td>
 </tr>
 <tr>
 <th></th>
-<td>Too many digits behind the point</td>
-<td>Too few dicits behind the point</td>
-<td>BitCoin is not anonymous</td>
-<td>BitCoin is used for money laundering</td>
-<td>Told you so!</td>
+<td border=1>Too many digits behind the point</td>
+<td border=1>Too few dicits behind the point</td>
+<td border=1>BitCoin is not anonymous</td>
+<td border=1>BitCoin is used for money laundering</td>
+<td border=1>Told you so!</td>
 </tr>
 </table>
 
