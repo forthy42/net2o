@@ -448,17 +448,17 @@ scope{ mapc
 
     file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
     
-: n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
-    [: 8 cells 0 DO
+: n2o:track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
+    [: { xt } 8 cells 0 DO
 	    dup 1 and IF
 		I dup id>addr? >o fs-seek fs-seekto 64<> IF
 		    fs-seekto 64dup to fs-seek o>
 		    xt execute  ELSE  drop o>  THEN
 	    THEN  2/
-	LOOP  drop ;] file-sema c-setction ;
+	LOOP  drop ;] file-sema c-section ;
 
-: n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
-    [: fstates 0 ?DO
+: n2o:track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
+    [: { xt } fstates 0 ?DO
 	    I dup id>addr? >o fs-seek fs-seekto 64<> IF
 		fs-seekto 64dup to fs-seek o>
 		xt execute  ELSE  drop o>  THEN
