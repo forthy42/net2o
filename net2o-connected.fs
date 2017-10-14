@@ -88,7 +88,7 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
 +net2o: set-stat ( umtime umod -- ) \g set time and mode of current file
     64>n fs-set-stat ;
 +net2o: get-size ( -- ) \g request file size
-    fs-size 64@ lit, set-size ;
+    fs-size lit, set-size ;
 +net2o: get-stat ( -- ) \g request stat of current file
     fs-get-stat >r lit, r> ulit, set-stat ;
 +net2o: set-form ( w h -- ) \g if file is a terminal, set size
@@ -221,7 +221,7 @@ also }scope
     1 file-count +! ;
 
 : seek! ( pos id -- ) >r d>64
-    64dup r@ state-addr .fs-seek 64!
+    64dup r@ state-addr >o to fs-seek o>
     r> ulit, file-id lit, set-seek end-with ;
 
 : limit! ( pos id -- ) >r d>64

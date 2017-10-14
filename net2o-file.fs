@@ -18,11 +18,11 @@
 Sema file-sema
 
 cmd-class class
-    64field: fs-size
-    64field: fs-seek
-    64field: fs-seekto
-    64field: fs-limit
-    64field: fs-time
+    64value: fs-size
+    64value: fs-seek
+    64value: fs-seekto
+    64value: fs-limit
+    64value: fs-time
     field: fs-fid
     field: fs-path
     field: fs-id
@@ -66,7 +66,7 @@ event: :>file-done ( file-o -- ) \ .file-xt ;
 : new>file ( id -- )
     [: fs-class new { w^ fsp } fsp cell file-state $+!
       o fsp @ >o parent! fs-id ! ['] file:done is file-xt
-      fs-table @ token-table ! 64#-1 fs-limit 64! o> ;]
+      fs-table @ token-table ! 64#-1 to fs-limit o> ;]
     filestate-sema c-section ;
 
 : lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;
@@ -86,43 +86,44 @@ cell 8 = [IF]
     fs-rename+ $!
     <<# getpid 0 #s '+' hold #> fs-rename+ $+! #>>
     fs-rename+ $@ ;
-: fs-timestamp! ( mtime fileno -- ) >r
+: fs-timestamp! ( mtime fid -- ) fileno >r
     [IFDEF] android  rdrop 64drop
     [ELSE]  \ ." Set time: " r@ . 64dup 64>d d. cr
 	64>d 2dup statbuf ntime!
 	statbuf 2 cells + ntime!
 	r> statbuf futimens ?ior [THEN] ;
 : fs-size! ( 64size -- )
-    64dup fs-size 64! fs-limit 64!
-    64#0 fs-seek 64! 64#0 fs-seekto 64! 64#0 fs-time 64! ;
+    64dup to fs-size to fs-limit
+    64#0 to fs-seek 64#0 to fs-seekto 64#0 to fs-time ;
 
 : fs:fs-read ( addr u -- u )
-    fs-limit 64@ fs-seekto 64@ >seek
+    fs-limit fs-seekto >seek
     fs-fid @ read-file throw
-    dup n>64 fs-seekto 64+!
+    dup n>64 +to fs-seekto
 ; ' fs:fs-read fs-class to fs-read
 : fs:fs-write ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
-    fs-limit 64@ fs-size 64@ 64umin
-    fs-size 64@ fs-seek 64@ 64u<= IF  64drop 2drop 0  EXIT  THEN
-    fs-seek 64@ >seek
+    fs-limit fs-size 64umin
+    64dup fs-seek 64u<= IF  64drop 2drop 0  EXIT  THEN
+    fs-seek >seek
     tuck fs-fid @ write-file throw
-    dup n>64 fs-seek 64+!
-    fs-size 64@ fs-seek 64@ 64= IF
+    dup n>64 +to fs-seek  fs-seek to fs-seekto
+    fs-size fs-seek 64= IF
 	fs-flush
 	<event o elit, :>file-done parent .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
 : fs:fs-clear ( -- )
-    64#0 64dup fs-limit 64!  64dup fs-seekto 64!  64dup fs-seek 64!
-    64dup fs-size 64!  fs-time 64!  fs-path $free  fs-rename+ $free
+    64#0
+    64dup to fs-limit  64dup to fs-seekto  64dup to fs-seek
+    64dup to fs-size  to fs-time  fs-path $free  fs-rename+ $free
     ['] noop to file-xt ;
 : fs:fs-flush ( -- )
     fs-fid @ flush-file throw
     \ write away all buffered stuff, so that setting the
     \ timestamp works
-    fs-time 64@ 64-0<> IF
-	fs-time 64@ fs-fid @ fileno fs-timestamp!
+    fs-time 64-0<> IF
+	fs-time fs-fid @ fs-timestamp!
     THEN
     fs-rename+ $@ dup IF
 	fs-path $@ rename-file throw
@@ -136,7 +137,7 @@ cell 8 = [IF]
     fs-fid off
     fs:fs-clear
 ; ' fs:fs-close fs-class to fs-close
-:noname ( -- size )
+:noname ( -- 64size )
     fs-fid @ file-size throw d>64
 ; fs-class to fs-poll
 :noname ( addr u mode -- ) fs-close
@@ -212,7 +213,7 @@ end-class socket-class
 dup socket-class to fs-open  socket-class to fs-create
 :noname ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
-    n>64 fs-size 64@ 64+ ; socket-class to fs-poll
+    n>64 fs-size 64+ ; socket-class to fs-poll
 :noname ( perm -- )
     perm%socket and 0= !!socket-perm!!
 ; socket-class to fs-perm?
@@ -265,8 +266,8 @@ event: :>termclose ( -- ) termfile off  default-in default-out ;
 
 :noname ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
-    fs-limit 64@ 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
-    fs-size 64@ fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
+    fs-limit 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
+    fs-size fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
 	<event o elit, :>file-done parent .wait-task @ event>
     THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
@@ -326,16 +327,16 @@ scope{ mapc
 }scope
 
 : size! ( 64 -- )
-    64dup fs-size 64!  fs-limit 64umin! ;
+    64dup to fs-size  addr fs-limit 64umin! ;
 : seek-off ( -- )
-    64#0 fs-seekto 64! 64#0 fs-seek 64! ;
+    64#0 to fs-seekto 64#0 to fs-seek ;
 : seekto! ( 64 -- )
-    fs-size 64@ 64umin fs-seekto 64umax! ;
+    fs-size 64umin addr fs-seekto 64umax! ;
 : limit-min! ( 64 id -- )
-    fs-size 64@ 64umin fs-limit 64! ;
-: init-limit! ( 64 id -- )  state-addr .fs-limit 64! ;
+    fs-size 64umin to fs-limit ;
+: init-limit! ( 64 id -- )  state-addr >o to fs-limit o> ;
 : poll! ( 64 -- 64 )
-    fs-limit 64! fs-poll 64dup size! ;
+    to fs-limit fs-poll 64dup size! ;
 
 : file+ ( addr -- ) >r 1 r@ +!
     r@ @ id>addr nip 0<= IF  r@ off  THEN  rdrop ;
@@ -348,7 +349,7 @@ scope{ mapc
 : n2o:save-block ( back tail id -- delta ) { id -- delta }
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
     file( over data-rmap .mapc:dest-raddr - >r
-    id id>addr? .fs-seek 64@ #10 64rshift 64>n >r )
+    id id>addr? .fs-seek #10 64rshift 64>n >r )
     id id>addr? .fs-write
     file( dup IF ." file write: "
     id . r> hex. r> #10 rshift hex. dup hex. residualwrite @ hex. forth:cr
@@ -392,7 +393,7 @@ scope{ mapc
     [ELSE] swap fchmod ?ior [THEN] ;
 
 : n2o:set-stat ( mtime mod -- )
-    fs-fid @ fileno n2o:track-mod fs-time 64! ;
+    fs-fid @ fileno n2o:track-mod to fs-time ;
 ' n2o:set-stat fs-class to fs-set-stat
 ' n2o:set-stat hashfs-class to fs-set-stat
 
@@ -421,7 +422,7 @@ scope{ mapc
 : n2o:slurp-block ( id -- delta )
     data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " 2 pick .
-    2 pick id>addr? .fs-seek 64@ #10 64rshift $64. r> #10 rshift hex. )
+    2 pick id>addr? .fs-seek #10 64rshift $64. r> #10 rshift hex. )
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. forth:cr ) ;
 
@@ -448,20 +449,20 @@ scope{ mapc
     file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
     
 : n2o:track-seeks ( idbits xt -- ) { xt } ( i seeklen -- )
-    8 cells 0 DO
-	dup 1 and IF
-	    I dup id>addr? >o fs-seek 64@ fs-seekto 64@ 64<> IF
-		fs-seekto 64@ 64dup fs-seek 64! o>
-		xt execute  ELSE  drop o>  THEN
-	THEN  2/
-    LOOP  drop ;
+    [: 8 cells 0 DO
+	    dup 1 and IF
+		I dup id>addr? >o fs-seek fs-seekto 64<> IF
+		    fs-seekto 64dup to fs-seek o>
+		    xt execute  ELSE  drop o>  THEN
+	    THEN  2/
+	LOOP  drop ;] file-sema c-setction ;
 
 : n2o:track-all-seeks ( xt -- ) { xt } ( i seeklen -- )
-    fstates 0 ?DO
-	I dup id>addr? >o fs-seek 64@ fs-seekto 64@ 64<> IF
-	    fs-seekto 64@ 64dup fs-seek 64! o>
-	    xt execute  ELSE  drop o>  THEN
-    LOOP ;
+    [: fstates 0 ?DO
+	    I dup id>addr? >o fs-seek fs-seekto 64<> IF
+		fs-seekto 64dup to fs-seek o>
+		xt execute  ELSE  drop o>  THEN
+	LOOP ;] file-sema c-section ;
 
 \ permission checks
 
@@ -479,7 +480,7 @@ forth-local-words:
     (
      (("event:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:") non-immediate (font-lock-type-face . 2)
+     (("debug:" "field:" "2field:" "sffield:" "dffield:" "64field:" "64value:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))

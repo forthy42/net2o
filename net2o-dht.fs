@@ -261,7 +261,7 @@ end-class dht-file-class
 	THEN  mask 2/ to mask
     LOOP ;
 
-:noname 64#-1 64dup fs-limit 64! fs-size 64! ;
+:noname 64#-1 64dup to fs-limit to fs-size ;
 dht-file-class to fs-open
 
 :noname ( addr u -- n )  dup >r
