@@ -369,7 +369,8 @@ software is ultimately lost to humanity, and the pay-back for the
 investors is through profits, the effort of free software developers
 is not lost; it can be shared and it can be used to improve and base
 upon; so paying them and still having the $quid as currency to trade
-is a fair deal.
+is a fair deal: Society as a whole got richer through the creation of
+free software, so increasing the amount of money in circulation is ok.
 
 It's like when you buy a house: you have to pay the builders.  If it
 was a short-lasting product of consumption, that's it, your money is
