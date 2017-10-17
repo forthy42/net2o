@@ -163,7 +163,7 @@ USD in 1971, the gold price inflated by a factor of 50, and that is
 not the same as the inflation rate.
 
 The Song dynasty's huizi was somehow experimental, the following Yuan
-dynasty kept the concept, and expanded it a lot.  Tanks to Marco Polo,
+dynasty kept the concept, and expanded it a lot.  Thanks to Marco Polo,
 Europe soon got a pretty good description of how it worked, because
 Marco Polo as merchant was interested in this kind of things.  One
 reason why the banknote didn't catch on at that time was that neither
