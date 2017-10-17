@@ -45,12 +45,12 @@ Here's the bingo chart for all valid critics on BitCoins:
 <td>blocks are too small</td>
 </tr>
 <tr>
-<th>BitCoin</th>
-<td>is unregulated</td>
-<td>is illeal</td>
-<td>is only an experiment and now ended</td>
-<td>is worse than Fiat because not backed by material things</td>
-<td>is worse than my fork</td>
+<th>BitCoin is</th>
+<td>unregulated</td>
+<td>illegal</td>
+<td>only an experiment and now ended</td>
+<td>worse than Fiat because not backed by material things</td>
+<td>worse than my fork</td>
 </tr>
 <tr>
 <th></th>
@@ -61,6 +61,12 @@ Here's the bingo chart for all valid critics on BitCoins:
 <td>Told you so!</td>
 </tr>
 </table>
+
+The ideology behind BitCoins certainly is that of a libertarian
+cypherpunk, with no trust in the state, but a lot of trust in anarchic
+communities.  With fear of inflation, and the other disease of
+currencies, deflation, as “solution”.  Pest is not a solution to
+cholera, either.
 
 ## Purpose of a currency (with history lesson)
 
@@ -84,8 +90,9 @@ same time provides something you have a need for.
 That could be solved by exchanging tokens that everybody considered
 valuable, that were easy to carry, but rare enough nobody could get
 them too easily: That is the birth of money.  The first known money
-mankind used was “shell money” (in Chinese: 貝/贝 still means
-“money”), shells of maritime snails.  They were picked up at the
+mankind used (earliest at least 30000 years ago) was “shell money” or
+“cowry money”, shells of maritime snails (in Chinese: 貝/贝 “bei”,
+still means “money” as well as “cowry”).  They were picked up at the
 shore, so you had to invest a certain amount of work to get them.
 
 Shell money was the more valuable the further away from the shore, so
@@ -98,27 +105,35 @@ for exchanged values, so you can exchange the things you have and the
 things you need with different persons.  The money itself decouples
 the individual acts of trade.
 
-### Paper money
+The work to get the shell or the coin is only invested once, but the
+coin remains an interchangeable object of value, it can be traded many
+times.
+
+### Banknotes
 
 These scarce tokens were chosen to ensure that you need a certain
 amount of work to gather them, so when your time has a value, you
 wouldn't waste too much on collecting shells or mining gold.  The
-problem is: these things have a limited availability, and when society
-and economy grows, you run out of tokens.  This leads to deflation,
-and in deflation, people tend to hord their money (spending it
-tomorrow gets you more than spending today), which is instable, and
+problem is: these things have an upper limit of availability (even if
+more people collect or mine them), and when society and economy grows,
+you run out of tokens.  This leads to deflation, and in deflation,
+people tend to hoard their money (spending it tomorrow gets you more
+than spending today), which creates an economic downcycle, and
 deflation gets worse.  If it was just lack of work to get the tokens,
 society would ramp up collecting shells and mining noble metals, but
 if there is a natural limit to get more shells or gold, you need
 another idea.
 
-The first early forms of banknote were financial products, the
+The first early forms of banknotes were financial products, the
 promissory note.  Instead of actually paying, you just gave the
 promise.  That allows to inflate the amount of available money to keep
-business going.  Song dynasty China e.g. had a thriving economy, and
-the social reforms of Wang Anshi allowed even small farmers to take
-credits and buy the land they were using.  That however comes with a
-problem of trust: You have to trust that promise.
+business going, because now almost any valuable, even real estate,
+could be converted into easy to carry paper.  Song dynasty China
+e.g. had a thriving economy, and money went almost everywhere; even
+the small farmers lend it to buy the land they were using from the
+landlords, using state-granted credits (invented by social reformer
+Wang Anshi).  But banks or private persons creating promissory notes
+has trust problems.
 
 Eventually, in the 12th century, the first state took over the role of
 the trustee, and China's Song dynasty created the first legal tender
@@ -127,6 +142,8 @@ which still is a promissory note, but now issued by a much larger and
 more powerful entity, operating under the rule of law, and therefore
 easier to trust.  And the state definitely in power to force you to
 use the currency, so if you don't trust, you still have to obey.
+
+![Huizi](https://upload.wikimedia.org/wikipedia/commons/6/6a/Hui_zi.jpg)
 
 Of course, the issue that came up in Song dynasty China quickly was
 forgery, because the whole point of paper money is to make it quick
@@ -213,12 +230,12 @@ BitCoin's concept is that you need to invest a certain amount of work
 to sign a block, so the older a block is, the more work it takes to
 forge it.  That concept originates from a crypto-anarchic design: in
 the BitCoin world, everybody is pseudonymous, so even the signature
-for the blocks are done by anonymous cowards.  We are back beyond the
+for the blocks are done by anonymous cowards.  We are back before the
 first promissory notes, who at least had identifyable individuals as
 signers.
 
-We have to go a step back further, to see where that attack comes from
-in the threat model: it's a man in the middle (MITM) attack to prevent the
+We have to go a step back, to see where that attack comes from in the
+threat model: it's a man in the middle (MITM) attack to prevent the
 proper spread-out of the current block.  A MITM attack to a P2P
 network.  Preventing MITM attacks has other attempts to solve them,
 either, even trust on first use (TOFU) does a descent job.
@@ -229,6 +246,10 @@ PKI takes away the anonymity is not a problem: A big warehouse of
 ASICs to mine BitCoins also completely blows the anonymity of the
 miner.  The miner or signer doesn't need anonymity; the parties that
 actually exchange coins are the ones who want anonymity.
+
+So you can just make sure you have enough sanctions and auditable
+signers of these blocks to make sure you need a simpler form of
+byzantine set consensus than proof of work.
 
 ## Money and wealth
 
@@ -262,15 +283,39 @@ didn't really have that money.
 
 But let's assume BitCoin is not a bubble going bust, but it's supposed
 to last (all 21 millions), and used as currency for everything by
-everybody.  That means the price per coin would sore until the total
-market cap equals the wealth of the entire earth.  And that would mean
-all those people who were there in the early phase would be incredible
-rich, just by being early.
+everybody.  That means the price per coin would soar until the total
+market cap equals the cash wealth of the entire planet.  And that
+would mean all those people who were there in the early phase would be
+incredible rich, just by being early.
 
 Trickle down however doesn't work.  Money inherently trickles up.  In
 a deflationary system, there is no decay of money; instead the money
 of the wealthy becomes more and more just on its own.  They don't even
-have to invest it to gain wealth.
+have to invest it to gain wealth.  The result will be an increasingly
+absurd distribution of wealth, and all the assorted problems: economic
+power leads to political power, corruption, tax cuts for the rich,
+slavery-like work relationships, because only the rich can afford
+hiring people; the poor can't.
+
+That's not what I think as future I want.  Fiat money has its
+downsides, too; but mostly when the state that controls it is in deep
+troubles, and fails to create or establish rules that work for the
+greater good.
+
+### Why a BlockChain?
+
+So when I'm bought into fiat money, and use the BlockChain only for
+trading with valueables created outside, like fiat money or real
+estate, then why not use a system like GNU TALER, which hands over the
+job of checking the double spending to the banks?
+
+Well, seems to be a good idea, but it turned out that the banks have
+deep troubles with trust, either.
+
+![In capitalist America, bank robs you](https://pics.me.me/do-you-think-russians-have-in-capitalist-america-memes-in-27816895.png)
+
+So actually, the banks see the BlockChain as the saviour of their
+inability to mutual trust.
 
 ### The $quid: Useful Investment
 
@@ -350,8 +395,9 @@ Ah, yes, and penguins eat squids, too.
 ## How to really distribute book-keeping
 
 An important design goal for me is to handle massive ammounts of
-micropayments, because that's an application where I see a need for a
-crypto currency.
+micropayments, because that's an application where I see a legitime
+need for a crypto currency.  Ransomware fees, tax evasion, and illegal
+business are probably already handled well by BitCoin.
 
 All coins have a value, a unit (if you want to keep different kinds of
 values in the same ledger, you need that), a creation date (time of
@@ -386,6 +432,17 @@ These are the operations you want to perform in the ledger:
   match against the smaller coin.  It can't be replayed if you later
   merge the coin up to the same value, as it also has a transaction
   date, and that would be earlier than the created coin.
+
+Coins are pseudonymous, and you can have many different pseudonyms.
+However, coins have readable values attached.  It's likely that mix
+services will be offered for gaining anonymity.  You transfer to one
+coin of the mix service, and you get back several coins from other
+coins of that same mix service, and you split and merge them
+accordingly when you want to do your next transaction.
+
+There is no need for a nonce, the key as id of the owner is
+sufficient.  The check of the balance is sufficient to prevent any
+abuse.
 
 ### Double entry bookkeeping system
 
@@ -442,7 +499,6 @@ ledgers to sum them up all in one go.
 
 The single balance makes it easy: You can take coins from any ledger
 to any other in one single step (all ledgers are peers of each other).
-If you need to create new keys, any key will do.
 
 But that may be too many connections from one ledger server to all the
 others.  So here's a way to scale:
@@ -475,17 +531,10 @@ the ledger is responsible that can move the transaction to the correct
 foreign group in the next cycle.  If the current mode is global, the
 ledger is responsible that can move the transaction to the correct
 local ledger in the next cycle.  So after two further cycles, the
-transaction has reached its destination.
-
-This scaling comes at a cost for the participants: For every
-transaction, you need to find a target that has the same color.
-Targets are keys, so for n ledgers in total, and sqrt(n) ledgers
-connected together, you need to try on average sqrt(n) times to find a
-suitable key.
-
-As net2o uses ed25519 for keys, the operation to generate related keys
-(through addition of base to the previous key) is not very expensive,
-but reducing the effort to sqrt(n) is still good.
+transaction has reached its destination.  All the transactions satisfy
+the balance rules, the better scalability only comes at the cost of
+more cycles to complete a transaction.  But better scalability means
+that the cycle time can be shorter.
 
 ### Share and enjoy!
 
