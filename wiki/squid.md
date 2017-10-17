@@ -455,11 +455,11 @@ can do either transactions within one local group, or within a global
 group that has one element of each local group as possible
 destination.  We have 16 groups here, and each ledger needs 30 open
 connections, instead of 255 if all were connected to every other
-ledger.  So we get to 2'*'sqrt(n)-2 instead of n-1.  More dimensions
-mean higher roots, so with m dimensions, it is m'*'(n)^(1/m)-m.
+ledger.  So we get to 2\*sqrt(n)-2 instead of n-1.  More dimensions
+mean higher roots, so with m dimensions, it is m\*(n)^(1/m)-m.
 
 ![Stage 1](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
-![Stage 2](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
+![Stage 2](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage2.svg)
 
 ### Share and enjoy!
 
