@@ -152,7 +152,8 @@ by authoritive decisions, not by how much work was available for doing
 that job.  The money got stamped with seals which were difficult to
 make, but could be used for many notes, and can be kept under control.
 That is a proof of ownership and authority: You can issue a note if
-you proof that you own the seal.
+you prove that you own the seal.  The seal owner is not anonymous,
+it's a government clerk.
 
 The result of using such a legal tender was a boom of trade and
 economy; and at the same time, the relation between the silver price
