@@ -237,6 +237,8 @@ far worse than neoliberalism
 
 ### Speculation object
 
+Or is BitCoin's course a bubble?
+
 ![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
 
 Many humans like to gamble, and the pattern of gambling with
@@ -270,11 +272,120 @@ a deflationary system, there is no decay of money; instead the money
 of the wealthy becomes more and more just on its own.  They don't even
 have to invest it to gain wealth.
 
+### The $quid: Useful Investment
+
+People who devend BitCoins against the “it's a bubble” argument told
+me they think of this (and of ICOs of other crypto currency projects)
+as investment into a technology.  I doubt that Satoshi Nakamoto will
+actually sell his coins, so it doesn't quite work, but I'm fine with
+the idea of investment.
+
+I therefore propose a useful speculation object for humans who like
+the proof of work concept to back a currency (not to back the security
+of the transactions!) that is in the collection of cowry shells and
+the mining of gold, or in good rules for fiat money, which are also
+backed by big, real economies, and the real work that happens there.
+The common idea between these two concepts is that they are valuable,
+because it is hard work to obtain them.  And once you have them, you
+can exchange them for other goods that are equally hard work, and they
+retain their value.
+
+But first, I want to explain the name: $quid a combination of the $
+symbol (pronounced simply “S” here), and the word quid.  Quid is a
+word for a metal-backed currency, the pound sterling (240 pennies of
+silver of sterling quality are a imperial pound).  But it also is the
+first word in “quid pro quo”, a very important concept in society, and
+the foundation why trade actually works.  It's about cooperative
+behavior even when the persons participating are egoists, forced by
+game theory to be cooperative.
+
+One thing we have in society that lacks a bit quid pro quo is free
+software development.  You give, people take, most of them without
+giving back.  Developers participating in free software development
+take and give back, and that's why we do it: We all stand on the
+shoulders of others.  Even if you scroll through the licenses of a
+proprietary OS like iOS, you see an amazing amount of free software
+that has been used there.
+
+So how do you mine $quids?  You create useful free software, and then
+you get the right to issue $quids.  It's up to organizations like the
+Linux Foundation or the GNU project to figure out who qualifies and if
+the amount of work that allegedly went into the project is plausible,
+this supervision will avoid fraud.  Of course, like BitCoin, the $quid
+is an experiment, and the number of $quids that can go onto that
+market depend on the acceptance.
+
+The difference between normal sponsorship and this approach is that
+while the issuers of $quids get paid for their work, the people who
+pay can trade the $quid, like investors in corporations can sell
+stocks.  And while the effort of a corporation to develop proprieatary
+software is ultimately lost to humanity, and the pay-back for the
+investors is through profits, the effort of free software developers
+is not lost; it can be shared and it can be used to improve and base
+upon; so paying them and still having the $quid as currency to trade
+is a fair deal.
+
+It's like when you buy a house: you have to pay the builders.  If it
+was a short-lasting product of consumption, that's it, your money is
+spent, no tradeable value returned.  But a house is long-lasting, and
+becomes a tradeable object of value itself.  That works, because it is
+a rivalrous good, you can not easily copy it, they are expensive to
+build, you need real estate in the right place for them.  So in
+effect, the value of a house depends on how much people can afford,
+and in a growing economy, the price of houses rise.  So depending on
+the price development, you can make a profit even including the costs
+of maintenance, heating and so on.
+
+Free software is a non-rivalrous good.  You can copy it as much as you
+like, you can change it and fit it to your purpose (supposed it is
+constructed lean enough, and you have the qualification for doing
+that), so it's not directly tradeable.
+
+So therefore I propose to turn free software development effort, which
+is a scarce resource, into a tradeable currency, and thereby make this
+work valuable.
+
+Ah, yes, and penguins eat squids, too.
+
 ## How to really distribute book-keeping
 
 An important design goal for me is to handle massive ammounts of
 micropayments, because that's an application where I see a need for a
 crypto currency.
+
+All coins have a value, a unit (if you want to keep different kinds of
+values in the same ledger, you need that), a creation date (time of
+the creating transaction, which also is the index into the
+corresponding block), and an owner pubkey.
+
+All transactions contain a block hash that refers to the state of the
+ledger at the beginning of this transaction, a list of origins, and
+the credited amount, a list of destinations and the debited amount, a
+contract, a list of signatures of all originators (showing the consent
+of those) and finally a list of signatures of all destinations.  All
+sources must be from the same ledger, all destinations must be direct
+peers of that ledger.
+
+These are the operations you want to perform in the ledger:
+
+  1. You want to move a coin from one ledger to another (implies key
+  change, so it is a transaction between different pseudonymous
+  owners)
+
+  2. You want to be able to join several coins into one, i.e you allow
+  several transactions to have the same destination, and all of these
+  are merged together into one coin there.  One of the sources can
+  have the same owner as the destination, just an earlier transaction
+  date.
+
+  3. You want to split a coin.  As long as the balance is ok, you can
+  take from a coin and leave a smaller coin under the same id, it's
+  just a double output transaction, and the transaction itself is
+  valid.  You can't do that transaction again, because the transaction
+  has the original value and the resulting value embedded, it won't
+  match against the smaller coin.  It can't be replayed if you later
+  merge the coin up to the same value, as it also has a transaction
+  date, and that would be earlier than the created coin.
 
 ### Double entry bookkeeping system
 
@@ -293,28 +404,64 @@ Since you want to check if a coin someone offers you has already been
 spent, you want to ask the corresponding ledger for it.  The ledger
 records incoming and outgoing (credit and debit) in two log files, and
 keeps the active coins available for query.  So you want to select the
-ledger based on the pubkey of the coin — some reduction of it to a
-reasonable size.  DDoS attacks at particular ledgers can be easily
-mittigated: if the ledger you want to book to is attacked, you just
-select a new pubkey; if the ledger you want to book from is attacked,
-you may need to use another coin in your wallet.
+ledger based on the pubkey of the coin — a short part of it (or its
+hash) to a reasonable size.  DDoS attacks at particular ledgers can be
+easily mittigated: if the ledger you want to book to is attacked, you
+just select a new pubkey; if the ledger you want to book from is
+attacked, you may need to use another coin in your wallet, and hope
+the attacked ledger is getting unstuck.
 
-The ledger units repsonsible for the same ledger each verify that they
+The ledger units responsible for the same ledger each verify that they
 have a consensus over the transactions; by syncing their positions.
-They are put together into a tree of balance sheet ledgers, and the
-next layer records sums of transactions signed (with reference to the
-block) by the ledger units below.  And the top layer does the
-bilancing: There can't be a change in value of the sum, it absolutely
-has to be zero.
+And then we combine the ledgers and check the balance: It ought to be
+zero.
 
 That will make the transaction protocol a bit tricky, because you have
-to make sure that both ledgers really enter your transaction.  The
-usual way to deal with that is to have a write intent (going to both
-sides), and when the write intents have succeeded, do a commit.
+to make sure that both ledgers really enter your transaction in the
+same time slot.  The easy way to do that is to do a staged entry:
+First, you queue the credit entries (the „take out“), then you send
+them to the debit ledger, and if that succeeds, you can commit both.
 
-To enter a coin into a double booking system, you need two
-transactions: One is the coin itself (debit), and the other is a promise to
-buy it back for its nominal value (credit).
+To enter a coin from outside into a double booking system, you need
+two transactions: One is the coin itself (debit), and the other is a
+promise to buy it back (credit).
+
+The Purpose of that conservation of all transactions is to make it
+easy to cross-check the ledgers for consistency.  If you have n
+ledgers, you summ all the columns in them (which can be done in
+parallel), and you cross-check by summing all the n results: The
+balance ought to be zero.
+
+### Subdividing further
+
+So the first stage scaling is that of individual ledgers for parts of
+the coin space, and cross-checking the balance of all of them in one
+go.  I don't know when that starts to become an issue, but you have to
+think about it to scale further.  You might want to have too many
+ledgers to sum them up all in one go.
+
+The single balance makes it easy: You can take coins from any ledger
+to any other in one single step (all ledgers are peers of each other).
+If you need to create new keys, any key will do.
+
+But that may be too many connections from one ledger server to all the
+others.  So here's a way to scale:
+
+We break the ledgers into groups, which are supposed to balance within
+one transaction.  This is a 2D example, but it works in any number of
+dimensions.  We have two maps of the leger groups, and the
+transactions alternate between one and the other group.  That means we
+can do either transactions within one local group, or within a global
+group that has one element of each local group as possible
+destination.  We have 16 groups here, and each ledger needs 30 open
+connections, instead of 255 if all were connected to every other
+ledger.  So we get to 2*sqrt(n)-2 instead of n-1.  More dimensions
+mean higher roots, so with m dimensions, it is m*(n)^(1/m)-m.
+
+![Stage 1](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
+![Stage 2](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
+
+### Share and enjoy!
 
 ## Literature
 
