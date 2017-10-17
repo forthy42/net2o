@@ -320,7 +320,7 @@ inability to mutual trust.
 
 ### The $quid: Useful Investment
 
-People who devend BitCoins against the “it's a bubble” argument told
+People who defend BitCoins against the “it's a bubble” argument told
 me they think of this (and of ICOs of other crypto currency projects)
 as investment into a technology.  I doubt that Satoshi Nakamoto will
 actually sell his coins, so it doesn't quite work, but I'm fine with
