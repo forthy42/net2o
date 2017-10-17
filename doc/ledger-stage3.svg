@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!-- Creator: fig2dev Version 3.2.6a -->
-<!-- CreationDate: 2017-10-17 03:15:06 -->
+<!-- CreationDate: 2017-10-17 03:16:51 -->
 <!-- Magnification: 0.525 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -812,15 +812,15 @@
 <defs>
 <clipPath id="cp1">
 	<path clip-rule="evenodd" d="M 867,1317 H 8133 V 9640 H 867 z
-		M 3192,4281 3135,4110 2902,4264 2914,4298z"/>
+		M 1760,5657 1841,5818 2049,5633 2033,5601z"/>
 </clipPath>
 </defs>
-<polyline points=" 4275,3825 2925,4275" clip-path="url(#cp1)"
+<polyline points=" 1125,6075 2025,5625" clip-path="url(#cp1)"
 	stroke="#000000" stroke-width="30px" stroke-dasharray="80 80"/>
-<!-- Forward arrow to point 2925,4275 -->
-<polygon points=" 3135,4110 2936,4271 3192,4281 3135,4110"
+<!-- Forward arrow to point 2025,5625 -->
+<polygon points=" 1841,5818 2015,5630 1760,5657 1841,5818"
 	stroke="#000000" stroke-width="8px" stroke-miterlimit="8" fill="#000000"/>
 <!-- Text -->
-<text xml:space="preserve" x="4500" y="9450" fill="#000000" font-family="Helvetica" font-style="normal" font-weight="bold" font-size="432" text-anchor="middle">Stage 1</text>
+<text xml:space="preserve" x="4500" y="9450" fill="#000000" font-family="Helvetica" font-style="normal" font-weight="bold" font-size="432" text-anchor="middle">Stage 3</text>
 </g>
 </svg>

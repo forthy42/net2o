@@ -460,6 +460,32 @@ mean higher roots, so with m dimensions, it is m\*(n)^(1/m)-m.
 
 ![Stage 1](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
 ![Stage 2](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage2.svg)
+![Stage 3](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage3.svg)
+
+In each stage, the ledgers of the same color are connected.  The
+balance is calculated only for the group of connected ledgers; the
+signatures for the verified balance goes into the next block.  By
+interleaving the two modes of connectivity, after only two cycles (or
+m in the general case), all previous records from all ledgers are
+chained together.
+
+In order to allow routing destinations, ledgers take responsibility of
+out-group destinations for one cycle: If the current mode is local,
+the ledger is responsible that can move the transaction to the correct
+foreign group in the next cycle.  If the current mode is global, the
+ledger is responsible that can move the transaction to the correct
+local ledger in the next cycle.  So after two further cycles, the
+transaction has reached its destination.
+
+This scaling comes at a cost for the participants: For every
+transaction, you need to find a target that has the same color.
+Targets are keys, so for n ledgers in total, and sqrt(n) ledgers
+connected together, you need to try on average sqrt(n) times to find a
+suitable key.
+
+As net2o uses ed25519 for keys, the operation to generate related keys
+(through addition of base to the previous key) is not very expensive,
+but reducing the effort to sqrt(n) is still good.
 
 ### Share and enjoy!
 
