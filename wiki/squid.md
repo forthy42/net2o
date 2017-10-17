@@ -1,6 +1,6 @@
 # The $quid – CryptoCurrency and BlockChain
 
-![Squid](https://fossil.net2o.de/net2o/doc/trunk/doc/net2o-squid-200.png)
+![Squid](../doc/net2o-squid-200.png)
 
 ## Abstract
 
@@ -458,9 +458,9 @@ connections, instead of 255 if all were connected to every other
 ledger.  So we get to 2\*sqrt(n)-2 instead of n-1.  More dimensions
 mean higher roots, so with m dimensions, it is m\*(n)^(1/m)-m.
 
-![Stage 1](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage1.svg)
-![Stage 2](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage2.svg)
-![Stage 3](https://fossil.net2o.de/net2o/doc/trunk/doc/ledger-stage3.svg)
+![Stage 1](../doc/ledger-stage1.svg)
+![Stage 2](../doc/ledger-stage2.svg)
+![Stage 3](../doc/ledger-stage3.svg)
 
 In each stage, the ledgers of the same color are connected.  The
 balance is calculated only for the group of connected ledgers; the
