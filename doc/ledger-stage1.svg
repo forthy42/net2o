@@ -1,11 +1,11 @@
 <?xml version="1.0" standalone="no"?>
 <!-- Creator: fig2dev Version 3.2.6a -->
-<!-- CreationDate: 2017-10-17 00:28:06 -->
+<!-- CreationDate: 2017-10-17 02:53:29 -->
 <!-- Magnification: 1.05 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
-	width="458pt" height="458pt"
-	viewBox="867 1317 7266 7266">
+	width="458pt" height="525pt"
+	viewBox="867 1317 7266 8323">
 <g fill="none">
 <!-- Line -->
 <rect x="900" y="1350" width="450" height="450" fill="#ffff00"
@@ -793,5 +793,7 @@
 <!-- Line -->
 <rect x="900" y="6750" width="7200" height="1800"
 	stroke="#000000" stroke-width="30px"/>
+<!-- Text -->
+<text xml:space="preserve" x="4500" y="9450" fill="#000000" font-family="Helvetica" font-style="normal" font-weight="bold" font-size="432" text-anchor="middle">Stage 1</text>
 </g>
 </svg>
