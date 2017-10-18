@@ -40,7 +40,7 @@ stable/testing/unstable will get different roles, just like Debian
 recent).  Binaries are available for amd64, i386, powerpc, armel,
 armhf, arm64, mips, and mipsel.  More to come...
 
-### New Key from October 18th, 2017
+### Key information (new Key from October 18th, 2017)
 
 I changed to a Yubikey-based signature.  The key's finger print is:
 
@@ -63,6 +63,8 @@ This installs Gforth with the Gforth icons, and a ready-to-run net2o
 icon in the app drawer.  Just tap on the net2o icon to run net2o;
 you'll be asked to create a key on the first run, and to open up a key
 on any further run.
+
+### Key information
 
 The [certifcate](https://net2o.de/bernd@net2o.de-android.cer) has the
 SHA-1 fingerprint and the informations as follows:
@@ -88,7 +90,7 @@ Then you install the current [net2o
 Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
 Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
-### New key for 28 September 2017
+### Key information (new key for 28 September 2017)
 
 I changed my key to a Certum smartcard based rsa2048 key.
 
