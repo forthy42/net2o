@@ -578,7 +578,7 @@ In each stage, the ledgers of the same color are connected.  The
 balance is calculated only for the group of connected ledgers; the
 signatures for the verified balance goes into the next block.  By
 interleaving the two modes of connectivity, after only two cycles (or
-_m in the general case), all previous records from all ledgers are
+_m_ in the general case), all previous records from all ledgers are
 chained together.
 
 In order to allow routing destinations, ledgers take responsibility of
