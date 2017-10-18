@@ -46,6 +46,13 @@ I changed to a Yubikey-based signature.  The key's finger print is:
 
     60E71A15 93575330 99A0AAF9 CAF021DB 3B7FA946
 
+When you do an `apt-key list`, the result should contain this key:
+
+    pub   4096R/3B7FA946 2017-09-20
+    uid                  Bernd Paysan (yubikey) <bernd@net2o.de>
+    sub   4096R/3E1896A1 2017-09-20
+    sub   4096R/50C9A69B 2017-09-20
+
 Get it for Android
 ------------------
 
@@ -69,8 +76,20 @@ Then you install the current [net2o
 Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
 Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
-These files are now signed with a certificate with the SHA-1 fingerprint 
-8e:da:8d:df:33:b6:36:68:05:c5:b4:6a:ed:7d:bd:04:4e:13:fc:7b
+### New key for 28 September 2017
+
+I changed my key to a Certum smartcard based rsa2048 key.
+
+These files are now signed with a sha256rsa2048 certificate with the
+SHA-1 fingerprint
+`f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b` and the
+following informations:
+
+    E = bernd@net2o.de
+    CN = Open Source Developer, Bernd Paysan
+    L = München
+    O = Open Source Developer
+    C = DE
 
 Get it for PC from source
 -------------------------
