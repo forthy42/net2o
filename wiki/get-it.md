@@ -40,6 +40,12 @@ stable/testing/unstable will get different roles, just like Debian
 recent).  Binaries are available for amd64, i386, powerpc, armel,
 armhf, arm64, mips, and mipsel.  More to come...
 
+### New Key from October 18th, 2017
+
+I changed to a Yubikey-based signature.  The key's finger print is:
+
+    60E71A15 93575330 99A0AAF9 CAF021DB 3B7FA946
+
 Get it for Android
 ------------------
 
