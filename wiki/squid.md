@@ -513,18 +513,17 @@ can do either transactions within one local group, or within a global
 group that has one element of each local group as possible
 destination.  We have 16 groups here, and each ledger needs 30 open
 connections, instead of 255 if all were connected to every other
-ledger.  So we get to 2\*sqrt(n)-2 instead of n-1.  More dimensions
-mean higher roots, so with m dimensions, it is m\*(n)^(1/m)-m.
+ledger.  So we get to _2\*sqrt(n)-2_ instead of _n-1._  More dimensions
+mean higher roots, so with m dimensions, it is _m\*(n)^(1/m)-m._
 
 ![Stage 1](../doc/ledger-stage1.svg)
 ![Stage 2](../doc/ledger-stage2.svg)
-![Stage 3](../doc/ledger-stage3.svg)
 
 In each stage, the ledgers of the same color are connected.  The
 balance is calculated only for the group of connected ledgers; the
 signatures for the verified balance goes into the next block.  By
 interleaving the two modes of connectivity, after only two cycles (or
-m in the general case), all previous records from all ledgers are
+_m in the general case), all previous records from all ledgers are
 chained together.
 
 In order to allow routing destinations, ledgers take responsibility of
