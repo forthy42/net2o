@@ -252,7 +252,48 @@ So you can just make sure you have enough sanctions and auditable
 signers of these blocks to make sure you need a simpler form of
 byzantine set consensus than proof of work.
 
-## Money and wealth
+Of course, every transaction within the block ought to include the
+previous block's hash as starting key for the hash calculation, so
+that they contribute to the unchangeable chain.  When you want to fork
+and fake a chain, you wouldn't be able to add other transactions with
+existing coins, because you don't have their private keys.
+
+### Where to hijack the proof of work BlockChain
+
+Let's assume we can attack BitCoins block chain: Where would we attack
+it?  At the end, which allows us to do double spending of the coins we
+ordered?  Who would do that?  Probably someone with a lot of coins
+inside, so proof of stake is a bad idea.
+
+Or attack it at the front, where most coins have not yet been mined,
+and by producing a fake fork of all the transactions afterwards, you
+could turn over all the coins in the entire BitCoin universe to you.
+All you need is enough power to calculate a full chain considerably
+faster than the miners.
+
+Is that viable?  It won't go in undetected, but since the early mining
+was more profitable in numbers of coins, and far easier (because the
+difficulty was much less than today), it's technically not that hard.
+And “longest chain” is not sufficient to defend that attack: It needs
+to be the chain with most work involved in.  The fake chain could be
+one where the adjustment for the difficulty is set to low.
+
+BitCoin addresses that, the chain length is the sum of the
+difficulties.  But the problem remains: Let's say China confiscates
+the ASIC miner's equipment, which will result in a significantly
+reduced difficulty in the rest of the world's BlockChain.  And then it
+uses the confiscated equipment to construct a chain that has more
+difficulty in it than the entire chain from the rest of the world — it
+might take a year or two, but it's doable.
+
+And then it busts the entire BitCoin ledger by releasing that chain,
+which essentially has only unspendable coins inside, because in that
+revision of history, they were all mined by someone else.
+
+You still need to spend more effort on that as the miners spend, but
+you then own all the cheap, easy to earn early coins.
+
+## Money and wealth — Society in a deflationary world
 
 How money shapes a society, and why the limited supply of BitCoins is
 far worse than neoliberalism
@@ -357,9 +398,25 @@ So how do you mine $quids?  You create useful free software, and then
 you get the right to issue $quids.  It's up to organizations like the
 Linux Foundation or the GNU project to figure out who qualifies and if
 the amount of work that allegedly went into the project is plausible,
-this supervision will avoid fraud.  Of course, like BitCoin, the $quid
-is an experiment, and the number of $quids that can go onto that
-market depend on the acceptance.
+this supervision will avoid fraud; but the market liberals probably
+would suggest that a bidding system like for ICOs (initial coin
+offerings) is completely sufficient.  I doubt, but you could have a
+combination of both: Bidding and evaluation plus recommendation from
+trustworthy organizations.  Of course, like BitCoin, the $quid is an
+experiment, and the number of $quids that can go onto that market
+depend on the acceptance.
+
+A bidding system would work like this: _n_ $quids are offered.  When
+you buy _m,_ you also offer a factor _x>1._ The buyers are sorted by
+factor, and the highest bidder gets his _x*m_ $quids, paying _x*m_ the
+price of a nominal $quid, but that deduces just _m_ from the offered
+_n,_ so more $quids are generated from higher biddings.
+
+To stabilize the $quid, you can either pay in fiat money (generating
+more $quids in process), or in $quid (keep the number of $quids
+constant), that can help to avoid inflation, but it also avoids
+deflation, because if the $quid is rising, paying fiat money is more
+cost-effective.
 
 The difference between normal sponsorship and this approach is that
 while the issuers of $quids get paid for their work, the people who
@@ -371,17 +428,9 @@ is not lost; it can be shared and it can be used to improve and base
 upon; so paying them and still having the $quid as currency to trade
 is a fair deal: Society as a whole got richer through the creation of
 free software, so increasing the amount of money in circulation is ok.
-
-It's like when you buy a house: you have to pay the builders.  If it
-was a short-lasting product of consumption, that's it, your money is
-spent, no tradeable value returned.  But a house is long-lasting, and
-becomes a tradeable object of value itself.  That works, because it is
-a rivalrous good, you can not easily copy it, they are expensive to
-build, you need real estate in the right place for them.  So in
-effect, the value of a house depends on how much people can afford,
-and in a growing economy, the price of houses rise.  So depending on
-the price development, you can make a profit even including the costs
-of maintenance, heating and so on.
+I view free software as infrastructure, and investment in
+infrastructure pays off for the entire economy.  Increasing the amount
+of liquidity therefore is a good way to finance infrastructure.
 
 Free software is a non-rivalrous good.  You can copy it as much as you
 like, you can change it and fit it to your purpose (supposed it is
@@ -389,8 +438,10 @@ constructed lean enough, and you have the qualification for doing
 that), so it's not directly tradeable.
 
 So therefore I propose to turn free software development effort, which
-is a scarce resource, into a tradeable currency, and thereby make this
-work valuable.
+is a scarce resource, and creates public infrastructure, into a
+tradeable currency, and thereby make this work valuable.  Instead of
+financing startups, which are classical economy, the intial $quid
+offer goes into work for the public.
 
 Ah, yes, and penguins eat squids, too.
 
@@ -451,8 +502,7 @@ abuse.
 First of all, if you are somehow familiar with bookkeeping, “a ledger”
 has something fundamentally wrong in it: The singular.  You are
 supposed to have more than one ledger, and every transaction needs to
-go to two ledgers, one as debit, one as credit (the two columns of the
-ledgers).
+go to two columns, one as debit, one as credit.
 
 If you want to scale a crypto currency, you want to separate ledgers
 by some arbitrary criteria so that the individual nodes are not
