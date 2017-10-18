@@ -22,7 +22,7 @@ update the repository data and install net2o, so **as root** enter:
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
     deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips.mipsel,all] https://net2o.de/debian testing main
     EOF
-    wget -O - https://net2o.de/bernd@net2o.de.gpg.asc | apt-key add -
+    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp | apt-key add -
     aptitude update
     aptitude install net2o
 
