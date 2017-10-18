@@ -266,7 +266,7 @@ existing coins, because you don't have their private keys.
 
 Let's assume we can attack BitCoins block chain: Where would we attack
 it?  At the end, which allows us to do double spending of the coins we
-ordered?  Who would do that?  Probably someone with a lot of coins
+own?  Who would do that?  Probably someone with a lot of coins
 inside, so proof of stake is a bad idea.
 
 Or attack it at the front, where most coins have not yet been mined,
@@ -304,7 +304,7 @@ far worse than neoliberalism
 
 ### Speculation object
 
-Or is BitCoin's course a bubble?
+Or is BitCoin's price a bubble?  Who could have that strange idea?
 
 ![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
 
