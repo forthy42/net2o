@@ -64,9 +64,13 @@ Here's the bingo chart for all valid critics on BitCoins:
 
 The ideology behind BitCoins certainly is that of a libertarian
 cypherpunk, with no trust in the state, but a lot of trust in anarchic
-communities.  With fear of inflation, and the other disease of
-currencies, deflation, as “solution”.  Pest is not a solution to
+communities.  With fear of inflation, offer the other disease of
+currencies, deflation, as “solution”.  Plague is not a solution to
 cholera, either.
+
+BTW: BlockChains cure cancer, protect you from evil eye, prevent
+flood, plague (though not cholera), and drought, and they can walk
+over water (even when not frozen).
 
 ## Purpose of a currency (with history lesson)
 
@@ -348,8 +352,9 @@ greater good.
 
 So when I'm bought into fiat money, and use the BlockChain only for
 trading with valueables created outside, like fiat money or real
-estate, then why not use a system like GNU TALER, which hands over the
-job of checking the double spending to the banks?
+estate, then why not use a system like [GNU
+Taler](https://taler.net/), which hands over the job of checking the
+double spending to the banks?
 
 Well, seems to be a good idea, but it turned out that the banks have
 deep troubles with trust, either.
