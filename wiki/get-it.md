@@ -99,14 +99,7 @@ certificate](https://net2o.de/bernd@net2o.de-windows.crt) with the
 SHA-1 fingerprint
 
     f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b
-
-and the following informations:
-
-    E = bernd@net2o.de
-    CN = Open Source Developer, Bernd Paysan
-    L = München
-    O = Open Source Developer
-    C = DE
+    E=bernd@net2o.de, CN=Open Source Developer, Bernd Paysan, L=München, O=Open Source Developer, C=DE
 
 Get it for PC from source
 -------------------------
