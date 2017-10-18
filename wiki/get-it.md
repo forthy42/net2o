@@ -64,6 +64,18 @@ icon in the app drawer.  Just tap on the net2o icon to run net2o;
 you'll be asked to create a key on the first run, and to open up a key
 on any further run.
 
+The [certifcate](https://net2o.de/bernd@net2o.de-android.cer) has the
+SHA-1 fingerprint and the informations as follows:
+
+    00:44:1B:9D:F8:0B:9D:9E:2F:68:9D:0F:B9:B4:85:28:D4:10:5C:7E
+    CN=Bernd Paysan, OU=dev, O=net2o, L=München, ST=Deutschland, C=DE
+
+and signs with sha1rsa2048 (Google!).  If you want to verify the apk
+yourself, thet the certificate, add it to your keyring and check:
+
+    keytool -importcert -file bernd@net2o.de-android.cer
+    jarsigner -verify -verbose Gforth.apk
+
 Get it for Windows
 ------------------
 
@@ -80,10 +92,13 @@ Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
 I changed my key to a Certum smartcard based rsa2048 key.
 
-These files are now signed with a sha256rsa2048 certificate with the
+These files are now signed with a [sha256rsa2048
+certificate](https://net2o.de/bernd@net2o.de-windows.crt) with the
 SHA-1 fingerprint
-`f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b` and the
-following informations:
+
+    f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b
+
+and the following informations:
 
     E = bernd@net2o.de
     CN = Open Source Developer, Bernd Paysan
