@@ -90,7 +90,7 @@ Then you install the current [net2o
 Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
 Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
 
-### Key information (new key for 28 September 2017)
+### Key information (new key for September 28th 2017)
 
 I changed my key to a Certum smartcard based rsa2048 key.
 
