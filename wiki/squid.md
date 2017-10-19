@@ -601,3 +601,4 @@ that the cycle time can be shorter.
   3. [Extraordinary Popular Delusions and the Madness of Crowds (1841)](https://en.wikipedia.org/wiki/Extraordinary_Popular_Delusions_and_the_Madness_of_Crowds)
   4. [Online resource for double entry bookkeeping](http://www.double-entry-bookkeeping.com/double-entry-bookkeeping-tutorial/)
   5. [Distributed atomic transactions](https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/)
+  6. [Adam Ludwin explains crypto currencies](https://blog.chain.com/a-letter-to-jamie-dimon-de89d417cb80)
