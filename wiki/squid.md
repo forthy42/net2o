@@ -1,6 +1,6 @@
 # The $quid – CryptoCurrency and BlockChain
 
-![Squid](../doc/net2o-squid-200.png)
+![Squid](../doc/squid-logo-200.png)
 
 ## Abstract
 
@@ -12,10 +12,9 @@ society, and propose improvements.
 ## Introduction
 
 I figured out that the user layer of my net2o peer to peer protocol
-needs some sort of contract/currency transaction protocol, and when
-secure protocols meet money, it's not just technology that
-matters. This paper therefore will therefore take both sides into
-consideration.
+needs some sort of asset transaction protocol (cryptocurrency), and
+when secure protocols meet money, it's not just technology that
+matters. This paper will therefore take both sides into consideration.
 
 Here's the bingo chart for all valid critics on BitCoins:
 
@@ -160,11 +159,12 @@ you prove that you own the seal.  The seal owner is not anonymous,
 it's a government clerk.
 
 The result of using such a legal tender was a boom of trade and
-economy; and at the same time, the relation between the silver price
-increased by a factor 100 within a few hundred years.  It should be
-noted that since the end of Bretton Woods and the gold standard of the
-USD in 1971, the gold price inflated by a factor of 50, and that is
-not the same as the inflation rate.
+economy (and of course also some crashes when bubbles busted); and at
+the same time, the relation between the silver price increased by a
+factor 100 within a few hundred years.  It should be noted that since
+the end of Bretton Woods and the gold standard of the USD in 1971, the
+gold price inflated by a factor of 50, and that is not the same as the
+inflation rate.
 
 The Song dynasty's huizi was somehow experimental, the following Yuan
 dynasty kept the concept, and expanded it a lot.  Thanks to Marco Polo,
@@ -602,3 +602,4 @@ that the cycle time can be shorter.
   4. [Online resource for double entry bookkeeping](http://www.double-entry-bookkeeping.com/double-entry-bookkeeping-tutorial/)
   5. [Distributed atomic transactions](https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/)
   6. [Adam Ludwin explains crypto currencies](https://blog.chain.com/a-letter-to-jamie-dimon-de89d417cb80)
+  7. [Bangladesh Bank Robbery](https://en.wikipedia.org/wiki/Bangladesh_Bank_robbery)
