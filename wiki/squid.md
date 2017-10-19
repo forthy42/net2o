@@ -1,6 +1,6 @@
 # The $quid – CryptoCurrency and BlockChain
 
-![Squid](../doc/squid-logo-200.png)
+![Squid](../doc/squid-logo.png)
 
 ## Abstract
 
