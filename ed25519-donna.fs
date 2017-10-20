@@ -23,13 +23,11 @@ require rec-scope.fs
 require unix/cpu.fs
 
 fast-lib [IF]
-    require ed25519-donnafast.fs false
+    require ed25519-donnafast.fs
 [ELSE]
     [IFDEF] android
 	s" libed25519prims.so" c-lib:open-path-lib drop
-    [THEN] true
-[THEN]
-[IF]
+    [THEN]
     c-library ed25519_donna
 	"ed25519prims" add-lib
 	include ed25519-donnalib.fs

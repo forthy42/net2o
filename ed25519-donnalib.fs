@@ -36,6 +36,7 @@ c-function sc25519+ add256_modm a a a -- void ( r x y -- )
 
 c-function ge25519*base ge25519_scalarmult_base a a -- void ( ger x -- )
 c-function ge25519-pack ge25519_pack a a -- void ( r ger -- )
+c-function ge25519+ ge25519_add a a a -- void ( a a a -- )
 c-function ge25519-unpack- ge25519_unpack_negative_vartime a a -- n ( r p -- flag )
 c-function ge25519*+ ge25519_double_scalarmult_vartime a a a a -- void ( r p s1 s2 -- )
 c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
