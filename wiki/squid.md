@@ -253,21 +253,35 @@ miner.  The miner or signer doesn't need anonymity; the parties that
 actually exchange coins are the ones who want anonymity.
 
 So you can just make sure you have enough sanctions and auditable
-signers of these blocks to make sure you need a simpler form of
-byzantine set consensus than proof of work.
+signers of these blocks.  The block chain with the highest amount of
+trust wins.  How do you **measure** trust?  Reliable signers have
+signed many blocks.  The more signers you have, the better.  Verified
+signers are better than anonymous signers.  One single signature is
+not enough.  When the signature is cheap, you can have severals.
 
 Of course, every transaction within the block ought to include the
 previous block's hash as starting key for the hash calculation, so
-that they contribute to the unchangeable chain.  When you want to fork
-and fake a chain, you wouldn't be able to add other transactions with
-existing coins, because you don't have their private keys.
+that they contribute to the unchangeable chain, and can't be moved to
+any other fake chain.  Furthermore, each transaction (despite
+anonymous) adds to the trust value: more transactions in one block
+means that it is more trustworthy.
+
+Note that the distributed BlockChain below makes it far more expensive
+to fake a chain: You need to generate signatures and activities in all
+of them; the fake activities you generate are with the coins you own;
+you have no others.  Sanctions for misbehavoir can make sure these
+coins are lost; the fake chain is the proof of misbehavior.
+
+Those additional coins could be used to compensate for the loss of the
+victim of double spending.
 
 ### Where to hijack the proof of work BlockChain
 
 Let's assume we can attack BitCoins block chain: Where would we attack
 it?  At the end, which allows us to do double spending of the coins we
-own?  Who would do that?  Probably someone with a lot of coins
-inside, so proof of stake is a bad idea.
+own?  Who would do that?  Probably someone with a lot of coins inside,
+so proof of stake is a bad idea (unless you make a rule that whoever
+gets caught double spending loses his stake).
 
 Or attack it at the front, where most coins have not yet been mined,
 and by producing a fake fork of all the transactions afterwards, you
@@ -363,92 +377,6 @@ deep troubles with trust, either.
 
 So actually, the banks see the BlockChain as the saviour of their
 inability to mutual trust.
-
-### The $quid: Useful Investment
-
-People who defend BitCoins against the “it's a bubble” argument told
-me they think of this (and of ICOs of other crypto currency projects)
-as investment into a technology.  I doubt that Satoshi Nakamoto will
-actually sell his coins, so it doesn't quite work, but I'm fine with
-the idea of investment.
-
-I therefore propose a useful speculation object for humans who like
-the proof of work concept to back a currency (not to back the security
-of the transactions!) that is in the collection of cowry shells and
-the mining of gold, or in good rules for fiat money, which are also
-backed by big, real economies, and the real work that happens there.
-The common idea between these two concepts is that they are valuable,
-because it is hard work to obtain them.  And once you have them, you
-can exchange them for other goods that are equally hard work, and they
-retain their value.
-
-But first, I want to explain the name: $quid a combination of the $
-symbol (pronounced simply “S” here), and the word quid.  Quid is a
-word for a metal-backed currency, the pound sterling (240 pennies of
-silver of sterling quality are a imperial pound).  But it also is the
-first word in “quid pro quo”, a very important concept in society, and
-the foundation why trade actually works.  It's about cooperative
-behavior even when the persons participating are egoists, forced by
-game theory to be cooperative.
-
-One thing we have in society that lacks a bit quid pro quo is free
-software development.  You give, people take, most of them without
-giving back.  Developers participating in free software development
-take and give back, and that's why we do it: We all stand on the
-shoulders of others.  Even if you scroll through the licenses of a
-proprietary OS like iOS, you see an amazing amount of free software
-that has been used there.
-
-So how do you mine $quids?  You create useful free software, and then
-you get the right to issue $quids.  It's up to organizations like the
-Linux Foundation or the GNU project to figure out who qualifies and if
-the amount of work that allegedly went into the project is plausible,
-this supervision will avoid fraud; but the market liberals probably
-would suggest that a bidding system like for ICOs (initial coin
-offerings) is completely sufficient.  I doubt, but you could have a
-combination of both: Bidding and evaluation plus recommendation from
-trustworthy organizations.  Of course, like BitCoin, the $quid is an
-experiment, and the number of $quids that can go onto that market
-depend on the acceptance.
-
-A bidding system would work like this: _n_ $quids are offered.  When
-you buy _m,_ you also offer a factor _x>1._ The buyers are sorted by
-factor, and the highest bidder gets his _x*m_ $quids, paying _x*m_ the
-price of a nominal $quid, but that deduces just _m_ from the offered
-_n,_ so more $quids are generated from higher biddings.
-
-To stabilize the $quid, you can either pay in fiat money (generating
-more $quids in process), or in $quid (keep the number of $quids
-constant), that can help to avoid inflation, but it also avoids
-deflation, because if the $quid is rising, paying fiat money is more
-cost-effective.
-
-The difference between normal sponsorship and this approach is that
-while the issuers of $quids get paid for their work, the people who
-pay can trade the $quid, like investors in corporations can sell
-stocks.  And while the effort of a corporation to develop proprieatary
-software is ultimately lost to humanity, and the pay-back for the
-investors is through profits, the effort of free software developers
-is not lost; it can be shared and it can be used to improve and base
-upon; so paying them and still having the $quid as currency to trade
-is a fair deal: Society as a whole got richer through the creation of
-free software, so increasing the amount of money in circulation is ok.
-I view free software as infrastructure, and investment in
-infrastructure pays off for the entire economy.  Increasing the amount
-of liquidity therefore is a good way to finance infrastructure.
-
-Free software is a non-rivalrous good.  You can copy it as much as you
-like, you can change it and fit it to your purpose (supposed it is
-constructed lean enough, and you have the qualification for doing
-that), so it's not directly tradeable.
-
-So therefore I propose to turn free software development effort, which
-is a scarce resource, and creates public infrastructure, into a
-tradeable currency, and thereby make this work valuable.  Instead of
-financing startups, which are classical economy, the intial $quid
-offer goes into work for the public.
-
-Ah, yes, and penguins eat squids, too.
 
 ## How to really distribute book-keeping
 
@@ -591,6 +519,96 @@ transaction has reached its destination.  All the transactions satisfy
 the balance rules, the better scalability only comes at the cost of
 more cycles to complete a transaction.  But better scalability means
 that the cycle time can be shorter.
+
+I call it the SwapDragonChain, as the swap dragon is the mascott of
+Forth (the SWAP operation).  I'm sure the swap dragon can handle
+double booking quite well with his two heads.
+
+## The $quid: Useful Investment
+
+People who defend BitCoins against the “it's a bubble” argument told
+me they think of this (and of ICOs of other crypto currency projects)
+as investment into a technology.  I doubt that Satoshi Nakamoto will
+actually sell his coins, so it doesn't quite work, but I'm fine with
+the idea of investment.
+
+I therefore propose a useful speculation object for humans who like
+the proof of work concept to back a currency (not to back the security
+of the transactions!) that is in the collection of cowry shells and
+the mining of gold, or in good rules for fiat money, which are also
+backed by big, real economies, and the real work that happens there.
+The common idea between these two concepts is that they are valuable,
+because it is hard work to obtain them.  And once you have them, you
+can exchange them for other goods that are equally hard work, and they
+retain their value.
+
+But first, I want to explain the name: $quid a combination of the $
+symbol (pronounced simply “S” here), and the word quid.  Quid is a
+word for a metal-backed currency, the pound sterling (240 pennies of
+silver of sterling quality are a imperial pound).  But it also is the
+first word in “quid pro quo”, a very important concept in society, and
+the foundation why trade actually works.  It's about cooperative
+behavior even when the persons participating are egoists, forced by
+game theory to be cooperative.
+
+One thing we have in society that lacks a bit quid pro quo is free
+software development.  You give, people take, most of them without
+giving back.  Developers participating in free software development
+take and give back, and that's why we do it: We all stand on the
+shoulders of others.  Even if you scroll through the licenses of a
+proprietary OS like iOS, you see an amazing amount of free software
+that has been used there.
+
+So how do you mine $quids?  You create useful free software, and then
+you get the right to issue $quids.  It's up to organizations like the
+Linux Foundation or the GNU project to figure out who qualifies and if
+the amount of work that allegedly went into the project is plausible,
+this supervision will avoid fraud; but the market liberals probably
+would suggest that a bidding system like for ICOs (initial coin
+offerings) is completely sufficient.  I doubt, but you could have a
+combination of both: Bidding and evaluation plus recommendation from
+trustworthy organizations.  Of course, like BitCoin, the $quid is an
+experiment, and the number of $quids that can go onto that market
+depend on the acceptance.
+
+A bidding system would work like this: _n_ $quids are offered.  When
+you buy _m,_ you also offer a factor _x>1._ The buyers are sorted by
+factor, and the highest bidder gets his _x*m_ $quids, paying _x*m_ the
+price of a nominal $quid, but that deduces just _m_ from the offered
+_n,_ so more $quids are generated from higher biddings.
+
+To stabilize the $quid, you can either pay in fiat money (generating
+more $quids in process), or in $quid (keep the number of $quids
+constant), that can help to avoid inflation, but it also avoids
+deflation, because if the $quid is rising, paying fiat money is more
+cost-effective.
+
+The difference between normal sponsorship and this approach is that
+while the issuers of $quids get paid for their work, the people who
+pay can trade the $quid, like investors in corporations can sell
+stocks.  And while the effort of a corporation to develop proprieatary
+software is ultimately lost to humanity, and the pay-back for the
+investors is through profits, the effort of free software developers
+is not lost; it can be shared and it can be used to improve and base
+upon; so paying them and still having the $quid as currency to trade
+is a fair deal: Society as a whole got richer through the creation of
+free software, so increasing the amount of money in circulation is ok.
+I view free software as infrastructure, and investment in
+infrastructure pays off for the entire economy.  Increasing the amount
+of liquidity therefore is a good way to finance infrastructure.
+
+Free software is a non-rivalrous good.  You can copy it as much as you
+like, you can change it and fit it to your purpose (supposed it is
+constructed lean enough, and you have the qualification for doing
+that), so it's not directly tradeable.
+
+So therefore I propose to turn free software development effort, which
+is a scarce resource, and creates public infrastructure, into a
+tradeable currency, and thereby make this work valuable.  Instead of
+financing startups, which are classical economy, the intial $quid
+offer goes into work for the public.
+
+Ah, yes, and penguins eat squids, too.
 
 ### Share and enjoy!
 
