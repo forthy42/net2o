@@ -151,7 +151,7 @@ state-issued feiqians were issued, and in the 12th century, the 会子
 
 ![Huizi](https://upload.wikimedia.org/wikipedia/commons/6/6a/Hui_zi.jpg)
 
-Song dynasty banknotes had similar properties to pre-Bretton-Woods
+Song dynasty banknotes had similar properties to gold standard
 dollars, they could be turned into metal coins.  And of course,
 forgery became an issue, because the whole point of paper money is to
 make it quick and easy to produce, and regulate the amount of money in
