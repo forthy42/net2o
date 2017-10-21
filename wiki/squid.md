@@ -132,53 +132,60 @@ promissory note.  Instead of actually paying, you just gave the
 promise.  That allows to inflate the amount of available money to keep
 business going, because now almost any valuable, even real estate,
 could be converted into easy to carry paper.  Song dynasty China
-e.g. had a thriving economy, and money went almost everywhere; even
-the small farmers lend it to buy the land they were using from the
-landlords, using state-granted credits (invented by social reformer
-Wang Anshi).  But banks or private persons creating promissory notes
-has trust problems.
+e.g. had a booming economy (with an estimated 200 billion coins
+minted), and the availability of cash to exchange the vast amount of
+traded goods was always a problem, even with this large amount of
+minted coins.
 
-Eventually, in the 12th century, the first state took over the role of
-the trustee, and China's Song dynasty created the first legal tender
-as a banknote, the 会子 (huizi, contemporary Chinese means “a while”),
-which still is a promissory note, but now issued by a much larger and
-more powerful entity, operating under the rule of law, and therefore
-easier to trust.  And the state definitely in power to force you to
-use the currency, so if you don't trust, you still have to obey.
+The earliest form of banknotes were check-like promissory notes,
+issued by banks, which promised coins in exchange; the notes themself
+(飞钱, feiqian, flying money) were very popular due to the shortage of
+actual coins.  In the late Tang dynasty the first such notes appeared,
+and became quickly popular.
+
+![feiqian](http://lishi.dugoogle.com/wp-content/uploads/2015/04/48c3b774accb494a80636253fc950dd2.jpg)
+
+These notes were produced and cashed in by banks.  In 1024, the first
+state-issued feiqians were issued, and in the 12th century, the 会子
+(huizi) was established as legal tender.
 
 ![Huizi](https://upload.wikimedia.org/wikipedia/commons/6/6a/Hui_zi.jpg)
 
-Of course, the issue that came up in Song dynasty China quickly was
-forgery, because the whole point of paper money is to make it quick
-and easy to produce, and regulate the amount of money in circulation
-by authoritive decisions, not by how much work was available for doing
-that job.  The money got stamped with seals which were difficult to
-make, but could be used for many notes, and can be kept under control.
-That is a proof of ownership and authority: You can issue a note if
-you prove that you own the seal.  The seal owner is not anonymous,
-it's a government clerk.
+Song dynasty banknotes had similar properties to pre-Bretton-Woods
+dollars, they could be turned into metal coins.  And of course,
+forgery became an issue, because the whole point of paper money is to
+make it quick and easy to produce, and regulate the amount of money in
+circulation by authoritive decisions, not by how much work was
+available for doing that job.  The money got stamped with seals which
+were difficult to make, but could be used for many notes, and can be
+kept under control.  That is a proof of ownership and authority: You
+can issue a note if you prove that you own the seal.  The seal owner
+is not anonymous, it's a government clerk.
 
-The result of using such a legal tender was a boom of trade and
-economy (and of course also some crashes when bubbles busted); and at
-the same time, the relation between the silver price increased by a
-factor 100 within a few hundred years.  It should be noted that since
-the end of Bretton Woods and the gold standard of the USD in 1971, the
-gold price inflated by a factor of 50, and that is not the same as the
-inflation rate.
+The Song dynasty's huizi was somehow experimental, and took care to
+base the paper money's value on bronze (northern Song) and silver
+(southern Song), with bronze price fluctuating a lot in southern Song.
 
-The Song dynasty's huizi was somehow experimental, the following Yuan
-dynasty kept the concept, and expanded it a lot.  Thanks to Marco Polo,
-Europe soon got a pretty good description of how it worked, because
-Marco Polo as merchant was interested in this kind of things.  One
-reason why the banknote didn't catch on at that time was that neither
-paper nor a sufficiently good printing press were invented here.  In
-the western world, banknotes were usually exchangeable with noble
-metal coins until 1970, when Bretton Woods broke.
+The following mongolian Yuan dynasty took the concept further to the
+first fiat money.  They didn't allow private ownership of silver and
+gold (compare: Roosevelt's America after the great depression), so the
+banknote was not a promise to give you noble metal.  Inflation was a
+problem in both the Yuan dynasty and the early Ming dynasty following,
+and stopped issuing banknotes in 1450; the circulating notes however
+were still accepted — and the currency system was privatized.
 
-However, most money transactions in the meantime are no longer cash,
+Thanks to Marco Polo, Europe soon got a pretty good description of how
+it worked, because Marco Polo as merchant was interested in this kind
+of things.  One reason why the banknote didn't catch on at that time
+was that neither paper nor a sufficiently good printing press were
+invented here.  In the western world, banknotes were usually
+exchangeable with noble metal coins until 1970, when Bretton Woods
+broke.
+
+However, most contemporary money transactions are no longer cash,
 neither coins nor banknotes, they are “fiat money”, money that's only
 in the books, and only has a promise to be exchanged with banknotes,
-which were promises to buy gold some time ago (but no longer are).
+and the notes are not a promise to get you noble metal.
 
 The act of creating “fiat money” is an act of state, the central bank
 lends money to other banks, money it doesn't actually have, and when
@@ -189,12 +196,19 @@ electronic ledger.  And that it is a political decision how much money
 to create or let disappear is of concern to those who don't trust
 politicians — even if the lawmaker only sets rules for the conditions
 to create and annihilate book money, it is unclear to many people why
-these rules make sense.
+these rules make sense.  A lot of early fiat money experiments ended
+in hyperinflation, and a return to some noble metal standard.
 
-And the only security these books have nowadays is that it require
+However, the lessons were learned, and today, most fiat currencies are
+pretty stable, and survive even major disruptions of the economy.
+Money in the information age is just an entry in an electronic ledger.
+It's backed by the economy, and it's availability is adjusted to keep
+it pretty stable.
+
+But the only security these ledgers have nowadays is that it require
 physical access to the computers that hold it.  And we know how secure
 computers are.  The idea of a crypto currency therefore is to provide
-security of these books through mathematical magic.
+security of these ledgers through mathematical magic.
 
 ## Proof of What?
 
@@ -621,3 +635,4 @@ Ah, yes, and penguins eat squids, too.
   5. [Distributed atomic transactions](https://www.cockroachlabs.com/blog/how-cockroachdb-distributes-atomic-transactions/)
   6. [Adam Ludwin explains crypto currencies](https://blog.chain.com/a-letter-to-jamie-dimon-de89d417cb80)
   7. [Bangladesh Bank Robbery](https://en.wikipedia.org/wiki/Bangladesh_Bank_robbery)
+  8. [Flying Money](http://www.baike.com/wiki/%E9%A3%9E%E9%92%B1)
