@@ -38,11 +38,10 @@ bp8 bp8 bp8 ge25519+ \ *8
 
 : search-key-prefix ( l1 -- )
     sk0 gen-sk  sk0 pk0 sk>pk
-    pk0 pk~  pkt0 pk0 ge25519-unpack- drop  0 >r
+    pk0 pk~  pkt0 pk0 ge25519-unpack- drop
     BEGIN  dup pk0 l@ <> WHILE  next-key 8 u>64 sk0 64+!
-	    r> 1+ dup >r $ffff and 0= IF  '.' emit  THEN
-    REPEAT
-    rdrop ;
+	    dup $FFFF and pk0 w@ = IF  '.' emit  THEN
+    REPEAT ;
 
 0 [IF]
 Local Variables:
