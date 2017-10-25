@@ -288,12 +288,18 @@ ASICs to mine BitCoins also completely blows the anonymity of the
 miner.  The miner or signer doesn't need anonymity; the parties that
 actually exchange coins are the ones who want anonymity.
 
-So you can just make sure you have enough sanctions and auditable
+So to secure the BlockChain requires two things: First, the operators
+of full nodes (those who take and validate transactions) need to have
+known keys, so you can connect to them without MITM attacks.
+
+Second, you can just make sure you have enough sanctions and auditable
 signers of these blocks.  The block chain with the highest amount of
-trust wins.  How do you **measure** trust?  Reliable signers have
-signed many blocks.  The more signers you have, the better.  Verified
-signers are better than anonymous signers.  One single signature is
-not enough.  When the signature is cheap, you can have many.
+trust wins.  How do you **measure** trust?  Can you enumerate trust?
+Reliable signers have signed many blocks.  Game theory shows that
+repeated collaorative interactions are more rewarding than cheating,
+which can be punished with long-term effects.  Also: the more signers
+you have, the better.  Verified signers are better than anonymous
+signers, because anonymous signers can be a sybill attack.
 
 To avoid intruders re-signing older blocks, rotate signatures
 frequently.  net2o's [key revokation](key-revokation.md) allows doing
@@ -304,8 +310,8 @@ the root anchor as a-priory knowledge.
 You can have a proof of work to prevent sybill attacks, e.g. mandating
 that to enter the trust ring, you need to have a key with a certain
 prefix.  That would be one-off work, because then you want to stay
-there with that identity, and accumulate more trust by signing and
-signing in consensus.
+there with that identity, and accumulate more trust by signing in
+consensus.  It just creates an entry barrier.
 
 Of course, every transaction within the block ought to include the
 previous block's hash as starting key for the hash calculation, so
@@ -313,7 +319,7 @@ that they contribute to the unchangeable chain, and can't be moved to
 any other fake chain (they won't verify there).  Furthermore, each
 transaction (despite anonymous) adds to the trust value: more
 transactions in one block means that it is more trustworthy, because
-more people found its way to this reality.
+more people found its way to this branch of BlockChain reality.
 
 Note that the distributed BlockChain below makes it far more expensive
 to fake a chain: You need to generate signatures and activities in all
