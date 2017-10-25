@@ -73,6 +73,10 @@ over water (even when not frozen).
 
 ## Purpose of a currency (with history lesson)
 
+We'll mostly look into Chinese history, because all the important
+inventions in currencies happened there.  Except maybe the cowry shell
+money, but we don't know.
+
 ### Trade vs. speculation object
 
 Where does the need for money come from?
@@ -119,13 +123,15 @@ amount of work to gather them, so when your time has a value, you
 wouldn't waste too much on collecting shells or mining gold.  The
 problem is: these things have an upper limit of availability (even if
 more people collect or mine them), and when society and economy grows,
-you run out of tokens.  This leads to deflation, and in deflation,
-people tend to hoard their money (spending it tomorrow gets you more
-than spending today), which creates an economic downcycle, and
-deflation gets worse.  If it was just lack of work to get the tokens,
-society would ramp up collecting shells and mining noble metals, but
-if there is a natural limit to get more shells or gold, you need
-another idea.
+you run out of tokens, and grafting more just for the sake to haven
+enough coins is a waste of ressources: You'd rather spend your time
+with the actual real products.  This leads to deflation, and in
+deflation, people tend to hoard their money (spending it tomorrow gets
+you more than spending today), which creates an economic downcycle,
+and deflation gets worse.  If it was just lack of work to get the
+tokens, society would ramp up collecting shells and mining noble
+metals, but if there is a natural limit to get more shells or gold,
+you need another idea.
 
 The first early forms of banknotes were financial products, the
 promissory note.  Instead of actually paying, you just gave the
@@ -597,7 +603,7 @@ group that has one element of each local group as possible
 destination.  We have 16 groups here, and each ledger needs 30 open
 connections, instead of 255 if all were connected to every other
 ledger.  So we get to _2\*sqrt(n)-2_ instead of _n-1._  More dimensions
-mean higher roots, so with m dimensions, it is _m\*(n)^(1/m)-m._
+mean higher roots, so with _m_ dimensions, it is _m\*(n)^(1/m)-m._
 
 ![Stage 1](../doc/ledger-stage1.svg)
 ![Stage 2](../doc/ledger-stage2.svg)
@@ -618,7 +624,9 @@ local ledger in the next cycle.  So after two further cycles, the
 transaction has reached its destination.  All the transactions satisfy
 the balance rules, the better scalability only comes at the cost of
 more cycles to complete a transaction.  But better scalability means
-that the cycle time can be shorter.
+that the cycle time can be shorter.  If you settle down to a fixed
+group size, and let the numbers of groups grow appropriate, it's an
+_O(log n)_ algorithm.
 
 I call it the SwapDragonChain, as the swap dragon is the mascott of
 Forth (the SWAP operation).  I'm sure the swap dragon can handle
@@ -626,18 +634,21 @@ double booking quite well with his two heads.
 
 ## The $quid: Useful Investment
 
+_What valuable to base a crypto currency on? Or what is a worse crime
+than robbing a bank?  What's worse than inventing a crypto currency?_
+
 People who defend BitCoins against the “it's a bubble” argument told
 me they think of this (and of ICOs of other crypto currency projects)
 as investment into a technology.  I doubt that Satoshi Nakamoto will
 actually sell his coins, so it doesn't quite work, but I'm fine with
-the idea of investment.
+the idea of investment as such.
 
 I therefore propose a useful speculation object for humans who like
 the proof of work concept to back a currency (not to back the security
 of the transactions!) that is in the collection of cowry shells and
 the mining of gold, or in good rules for fiat money, which are also
 backed by big, real economies, and the real work that happens there.
-The common idea between these two concepts is that they are valuable,
+The common idea between these concepts is that they are valuable,
 because it is hard work to obtain them.  And once you have them, you
 can exchange them for other goods that are equally hard work, and they
 retain their value.
@@ -649,7 +660,8 @@ silver of sterling quality are a imperial pound).  But it also is the
 first word in “quid pro quo”, a very important concept in society, and
 the foundation why trade actually works.  It's about cooperative
 behavior even when the persons participating are egoists, forced by
-game theory to be cooperative.
+game theory to be cooperative.  But after all, “quid” on its own just
+means “what?“, a question always valid to ask.
 
 One thing we have in society that lacks a bit quid pro quo is free
 software development.  You give, people take, most of them without
@@ -657,7 +669,7 @@ giving back.  Developers participating in free software development
 take and give back, and that's why we do it: We all stand on the
 shoulders of others.  Even if you scroll through the licenses of a
 proprietary OS like iOS, you see an amazing amount of free software
-that has been used there.
+that has been used there.  The value of free software is incredible.
 
 So how do you mine $quids?  You create useful free software, and then
 you get the right to issue $quids.  It's up to organizations like the
@@ -665,21 +677,26 @@ Linux Foundation or the GNU project to figure out who qualifies and if
 the amount of work that allegedly went into the project is plausible,
 this supervision will avoid fraud; but the market liberals probably
 would suggest that a bidding system like for ICOs (initial coin
-offerings) is completely sufficient.  I doubt, but you could have a
-combination of both: Bidding and evaluation plus recommendation from
-trustworthy organizations.  Of course, like BitCoin, the $quid is an
-experiment, and the number of $quids that can go onto that market
-depend on the acceptance.
+offerings) is completely sufficient.  You could have a combination of
+both: Bidding and evaluation plus recommendation from trustworthy
+organizations.  Of course, like BitCoin, the $quid is an experiment,
+and the number of $quids that can go onto that market depend on the
+acceptance.  If the acceptance is high, many projects will ask for
+funding, if it's low, few, so the value of the $quid is
+self-stabilizing.
 
 A bidding system would work like this: _n_ $quids are offered.  When
 you buy _m,_ you also offer a factor _x>1._ The buyers are sorted by
 factor, and the highest bidder gets his _x*m_ $quids, paying _x*m_ the
 price of a nominal $quid, but that deduces just _m_ from the offered
-_n,_ so more $quids are generated from higher biddings.
+_n,_ so more $quids are generated from higher biddings.  High bidding
+thus makes other projects want to be funded through that channel, so
+it increases the amount of coins quickly.  Low bidding makes that
+funding channel unattractive.
 
-To stabilize the $quid, you can either pay in fiat money (generating
-more $quids in process), or in $quid (keep the number of $quids
-constant), that can help to avoid inflation, but it also avoids
+To stabilize the $quid further, you can either pay in fiat money
+(generating more $quids in process), or in $quid (keep the number of
+$quids constant), that can help to avoid inflation, but it also avoids
 deflation, because if the $quid is rising, paying fiat money is more
 cost-effective.
 
@@ -700,17 +717,30 @@ of liquidity therefore is a good way to finance infrastructure.
 Free software is a non-rivalrous good.  You can copy it as much as you
 like, you can change it and fit it to your purpose (supposed it is
 constructed lean enough, and you have the qualification for doing
-that), so it's not directly tradeable.
+that), so it's not reasonable to trade it on its own.  The whole
+concept behind copyright to turn knowledge and wisdom into rivalrous
+goods is a bad idea.  To society, they are much more worth when they
+are non-rivalrous.
 
 So therefore I propose to turn free software development effort, which
-is a scarce resource, and creates public infrastructure, into a
-tradeable currency, and thereby make this work valuable.  Instead of
-financing startups, which are classical economy, the intial $quid
-offer goes into work for the public.
+is a scarce resource, and creates knowledge (public infrastructure of
+the information age), into a tradeable currency, and thereby make this
+work valuable.  Instead of financing startups, which are classical
+economy, the intial $quid offer goes into work for the public.
 
-Ah, yes, and penguins eat squids, too.
+_Ah, yes, and penguins eat squids, too._
 
 ### Share and enjoy!
+
+I want to point out that a service-oriented business model for free
+software works, but inevitably pushes the companies into a business
+model, where only the complaint department makes money.  If you don't
+want to stick your head into a pig, because the depressive AI of the
+useless Sirius Cypernetics Corporation products you got, make sure
+that there is a business model for creating good, easy to use, and
+cheap to maintain software.
+
+Incentives matter.  Economy is all about game theory.
 
 ## Literature
 
