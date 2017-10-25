@@ -125,13 +125,15 @@ problem is: these things have an upper limit of availability (even if
 more people collect or mine them), and when society and economy grows,
 you run out of tokens, and grafting more just for the sake to haven
 enough coins is a waste of ressources: You'd rather spend your time
-with the actual real products.  This leads to deflation, and in
-deflation, people tend to hoard their money (spending it tomorrow gets
-you more than spending today), which creates an economic downcycle,
-and deflation gets worse.  If it was just lack of work to get the
-tokens, society would ramp up collecting shells and mining noble
-metals, but if there is a natural limit to get more shells or gold,
-you need another idea.
+with the actual real products, instead of running after the next gold
+rush.
+
+This leads to deflation, and in deflation, people tend to hoard
+their money (spending it tomorrow gets you more than spending today),
+which creates an economic downcycle, and deflation gets worse.  If it
+was just lack of work to get the tokens, society would ramp up
+collecting shells and mining noble metals, but if there is a natural
+limit to get more shells or gold, you need another idea.
 
 The first early forms of banknotes were financial products, the
 promissory note.  Instead of actually paying, you just gave the
@@ -264,7 +266,7 @@ you know it's _the_ valid last block?
 
 BitCoin's proof of work concept is that you need to invest a certain
 amount of work to sign a block, so the older a block is, the more work
-it takes to forge it, and reciprocally, the more work that went into a
+it takes to forge it, and reciprocal, the more work that went into a
 chain, the more “true” it is.  That concept originates from a
 crypto-anarchic design: in the BitCoin world, everybody is
 pseudonymous, so even the signature for the blocks are done by
