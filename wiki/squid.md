@@ -302,7 +302,7 @@ you have, the better.  Verified signers are better than anonymous
 signers, because anonymous signers can be a sybill attack.
 
 To avoid intruders re-signing older blocks, rotate signatures
-frequently.  net2o's [key revokation](key-revokation.md) allows doing
+frequently.  net2o's [key revokation](key-revocation.md) allows doing
 that without losing trust, and allows it to be done outside the
 signing machine.  All trust anchors must be part of the chain, with
 the root anchor as a-priory knowledge.
