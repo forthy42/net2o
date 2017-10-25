@@ -236,31 +236,45 @@ protocol; and without those transactions, that money is not secured.
 Virtual bankrobbery occurs, and it shows that people who don't know
 history are doomed to repeat it: Regulation is there for good reasons.
 
+### What is a BlockChain?
+
+We need an actual definition; technically, even a git repository has
+some important properties of a BlockChain.  The chain of hashed blocks
+is one aspect, the consensus algorithm the other:
+
+  + Merkle-tree or equivalent hash-it-all approach (loose definition)
+  + no single point of trust
+  + consensus algorithm based on the contents only (no external arbiter)
+
 ### How to cheaply secure the BlockChain
 
 So let's take a step back, and look at what's the point of the proof
-of work: The basic idea is that of securing the BlockChain against an
-attack.  The BlockChain itself is immutable if you have access to the
-last signed block: Through a link of hashes, every other block before
-can't be changed without changing the last block, too.  The problem
-is: how do you know it's _the_ valid last block?
+of work (the consensus algorithm): The basic idea is that of securing
+the BlockChain against an attack that allows double spending.  The
+BlockChain itself is immutable if you have access to the last hashed
+block: Through a link of hashes, every other block before can't be
+changed without changing the last block, too.  The problem is: how do
+you know it's _the_ valid last block?
 
-BitCoin's concept is that you need to invest a certain amount of work
-to sign a block, so the older a block is, the more work it takes to
-forge it.  That concept originates from a crypto-anarchic design: in
-the BitCoin world, everybody is pseudonymous, so even the signature
-for the blocks are done by anonymous cowards.  We are back before the
-first promissory notes, who at least had identifyable individuals as
-signers.
+BitCoin's proof of work concept is that you need to invest a certain
+amount of work to sign a block, so the older a block is, the more work
+it takes to forge it, and reciprocally, the more work that went into a
+chain, the more “true” it is.  That concept originates from a
+crypto-anarchic design: in the BitCoin world, everybody is
+pseudonymous, so even the signature for the blocks are done by
+anonymous cowards.  We are back before the first promissory notes, who
+at least had identifyable individuals as signers.
 
-We have to go a step back, to see where that attack comes from in the
-threat model: it's a man in the middle (MITM) attack to prevent the
-proper spread-out of the current block.  A MITM attack to a P2P
+We have to go one more step back, to see where that attack originates
+in the threat model: it's a man in the middle (MITM) attack to prevent
+the proper spread-out of the current block.  A MITM attack to a P2P
 network.  Preventing MITM attacks has other attempts to solve them,
-either, even trust on first use (TOFU) does a descent job.
+either, even trust on first use (TOFU) does a descent job.  And that's
+likely the explanation, why even AltCoins with very little work didn't
+get hacked on that part.
 
 Any sane secure peer to peer network ought to have something better
-than nothing, TOFU or PKIs that improve trust.  And that a full-blown
+than nothing: TOFU or PKIs that improve trust.  And that a full-blown
 PKI takes away the anonymity is not a problem: A big warehouse of
 ASICs to mine BitCoins also completely blows the anonymity of the
 miner.  The miner or signer doesn't need anonymity; the parties that
@@ -271,14 +285,27 @@ signers of these blocks.  The block chain with the highest amount of
 trust wins.  How do you **measure** trust?  Reliable signers have
 signed many blocks.  The more signers you have, the better.  Verified
 signers are better than anonymous signers.  One single signature is
-not enough.  When the signature is cheap, you can have severals.
+not enough.  When the signature is cheap, you can have many.
+
+To avoid intruders re-signing older blocks, rotate signatures
+frequently.  net2o's [key revokation](key-revokation.md) allows doing
+that without losing trust, and allows it to be done outside the
+signing machine.  All trust anchors must be part of the chain, with
+the root anchor as a-priory knowledge.
+
+You can have a proof of work to prevent sybill attacks, e.g. mandating
+that to enter the trust ring, you need to have a key with a certain
+prefix.  That would be one-off work, because then you want to stay
+there with that identity, and accumulate more trust by signing and
+signing in consensus.
 
 Of course, every transaction within the block ought to include the
 previous block's hash as starting key for the hash calculation, so
 that they contribute to the unchangeable chain, and can't be moved to
-any other fake chain.  Furthermore, each transaction (despite
-anonymous) adds to the trust value: more transactions in one block
-means that it is more trustworthy.
+any other fake chain (they won't verify there).  Furthermore, each
+transaction (despite anonymous) adds to the trust value: more
+transactions in one block means that it is more trustworthy, because
+more people found its way to this reality.
 
 Note that the distributed BlockChain below makes it far more expensive
 to fake a chain: You need to generate signatures and activities in all
@@ -325,14 +352,32 @@ revision of history, they were all mined by someone else.
 You still need to spend more effort on that as the miners spend, but
 you then own all the cheap, easy to earn early coins.
 
+But in fact the by far easiest hijack is to create a slightly
+incompatible protocol.  This is deliberately splitting the network,
+out in the open, with effectively not much work required, and this
+allows to double-spend, even though the BitCoin fork doesn't have the
+same price. But the price is not the point: The point is the promise
+of the unique asset.  By having forks, BitCoin shows that it can only
+fulfill that within a consent of the protocol, and that's actually
+outside the chain itself.
+
+So the executable protocol spec, the code for checking a block for
+validity itself should be part of the chain, and only updated in
+consensus.  And any transaction need to link to the protocol block,
+and if a transaction is found that links to a not accepted protocol
+block, it will cause a quarantine of the corresponding coin.  That
+means you get punished for spending it in the fork.
+
+It needs to be done in a way to keep the balance.
+
 ## Money and wealth — Society in a deflationary world
 
 How money shapes a society, and why the limited supply of BitCoins is
-far worse than neoliberalism
+far worse than neoliberalism.
 
 ### Speculation object
 
-Or is BitCoin's price a bubble?  Who could have that strange idea?
+Is BitCoin's price a bubble?  Who could have that strange idea?
 
 ![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
 
@@ -345,29 +390,38 @@ BitCoin chart however looks like a classic.
 ![BitCoin Chart](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iFKLTQNYjslA/v4/800x-1.png)
 
 Speculation bubbles don't mean the money disappears.  The money is
-still there, it's just owned by someone else now.  Despite that the
-total amount of money is constant through a speculation bubble, they
-have a deep impact on economy.
+still there, it's just owned by someone else now; only if you include
+the market cap of the speculation object, it disappeared.  Despite
+that the total amount of money is constant through a speculation
+bubble, they have a deep impact on economy.
 
-That's because those who entered the bubble early got the money, and
-those who entered late lost.  The tragedy is that the early ones are
-smart and rare, and the late ones are stupid and many.  And that means
-a huge concentration in money, and especially a loss for those who
-didn't really have that money.
+That's because those who entered the bubble early and sold at the
+right time got the money, and those who entered late lost.  The
+tragedy is that the early ones are smart and rare, and the late ones
+are stupid and many.  And that means a huge concentration in money,
+and especially a loss for those who didn't really have that money.
+Speculation inevitably is a move from the crowd to the few who behaved
+differently, not necessarily smart; a counter-action to the crowd can
+improve your chances of winning.  You shouldn't go to “buy high, sell
+low”, though.
 
 But let's assume BitCoin is not a bubble going bust, but it's supposed
 to last (all 21 millions), and used as currency for everything by
 everybody.  That means the price per coin would soar until the total
-market cap equals the cash wealth of the entire planet.  And that
-would mean all those people who were there in the early phase would be
-incredible rich, just by being early.
+market cap equals the wealth of the entire planet.  And that would
+mean all those people who were there in the early phase would be
+incredible rich, just by being early.  Instead of creating most coins
+in the last, bit growth phase, BitCoin created them in the early
+phase, where it was essentially worthless and no effort needed to mine
+the coins.
 
-Trickle down however doesn't work.  Money inherently trickles up.  In
-a deflationary system, there is no decay of money; instead the money
-of the wealthy becomes more and more just on its own.  They don't even
-have to invest it to gain wealth.  The result will be an increasingly
-absurd distribution of wealth, and all the assorted problems: economic
-power leads to political power, corruption, tax cuts for the rich,
+So maybe that wealth is going to trickle down?  Trickle down however
+doesn't work.  Money inherently trickles up.  In a deflationary
+system, there is no decay of money; instead the money of the wealthy
+becomes more and more just on its own.  They don't even have to invest
+it to gain wealth.  The result will be an increasingly absurd
+distribution of wealth, and all the assorted problems: economic power
+leads to political power, corruption, tax cuts for the rich,
 slavery-like work relationships, because only the rich can afford
 hiring people; the poor can't.
 
@@ -376,13 +430,43 @@ downsides, too; but mostly when the state that controls it is in deep
 troubles, and fails to create or establish rules that work for the
 greater good.
 
+### The (in)stability of spending money
+
+When trade happens in an inflationary system, people buy quick,
+because money is the hot potato.  That by itself increases the amount
+of money in circulation, because there are more hot potato
+transactions.  More demand increases the prices, so the inflation
+accellerates.
+
+If you don't print new money, the inflation will inevitable stop: The
+increased prices now match the increased turnaround speed, and
+inherent delays stop the speed to increase even more.  So people will
+stop spending their money early, and return to normal (and first
+consume the stocked goods).  That causes deflation, so people will
+rather keep their money, instead of spending it, waiting for the price
+to go down further.  Low demand causes the prices to go lower, indeed.
+If you don't take out money of the system, the lower circulation speed
+will find a stable point, too.
+
+We know these periodic oscillations of prices in many parts of the
+economy, they are a consequence of a badly regulated closed loop
+system; they tend to oscillate if not properly compensated.  If the
+compensation is very bad, the oscillation is high, and annoying
+everybody.
+
+To remove such oscillation by proper compensation is just solid
+engineering.  Super-fast transactions might not actually be a good
+idea, the seemingly arbitrary delays in current banking systems might
+just stabilize the value of our money.  It doesn't work against the
+long cycles, a phenomenon known as “pork cycle”.
+
 ### Why a BlockChain?
 
-So when I'm bought into fiat money, and use the BlockChain only for
-trading with valueables created outside, like fiat money or real
-estate, then why not use a system like [GNU
-Taler](https://taler.net/), which hands over the job of checking the
-double spending to the banks?
+So when I'm ok with fiat money (at least with the big ones where the
+regulation works), and would use the BlockChain only for trading with
+valueables created outside, like fiat money or real estate, then why
+not use a system like [GNU Taler](https://taler.net/), which hands
+over the job of checking the double spending to the banks?
 
 Well, seems to be a good idea, but it turned out that the banks have
 deep troubles with trust, either.
@@ -390,27 +474,31 @@ deep troubles with trust, either.
 ![In capitalist America, bank robs you](https://pics.me.me/do-you-think-russians-have-in-capitalist-america-memes-in-27816895.png)
 
 So actually, the banks see the BlockChain as the saviour of their
-inability to mutual trust.
+inability to mutual trust.  Or maybe they just have those dollar signs
+in the eyes, and fall for the hype?  Who knows.  Proper
+decentralization is also a way to create reliable software, so it's
+still worth to pursue.
 
 ## How to really distribute book-keeping
 
 An important design goal for me is to handle massive ammounts of
 micropayments, because that's an application where I see a legitime
-need for a crypto currency.  Ransomware fees, tax evasion, and illegal
-business are probably already handled well by BitCoin.
+need for cryptographic payment protection.  Ransomware fees, tax
+evasion, and illegal business are probably already handled well by
+BitCoin.
 
 All coins have a value, a unit (if you want to keep different kinds of
 values in the same ledger, you need that), a creation date (time of
 the creating transaction, which also is the index into the
 corresponding block), and an owner pubkey.
 
-All transactions contain a block hash that refers to the state of the
-ledger at the beginning of this transaction, a list of origins, and
-the credited amount, a list of destinations and the debited amount, a
-contract, a list of signatures of all originators (showing the consent
-of those) and finally a list of signatures of all destinations.  All
-sources must be from the same ledger, all destinations must be direct
-peers of that ledger.
+All transactions contain an implicit block hash that refers to the
+state of the ledger at the beginning of this transaction, a list of
+origins, and the credited amount, a list of destinations and the
+debited amount, a contract, a list of signatures of all originators
+(showing the consent of those) and finally a list of signatures of all
+destinations.  All sources must be from the same ledger, destinations
+will be routed there.
 
 These are the operations you want to perform in the ledger:
 
@@ -420,9 +508,8 @@ These are the operations you want to perform in the ledger:
 
   2. You want to be able to join several coins into one, i.e you allow
   several transactions to have the same destination, and all of these
-  are merged together into one coin there.  One of the sources can
-  have the same owner as the destination, just an earlier transaction
-  date.
+  are added together into one coin there.  One of the sources can have
+  the same owner as the destination, just an earlier transaction date.
 
   3. You want to split a coin.  As long as the balance is ok, you can
   take from a coin and leave a smaller coin under the same id, it's
@@ -482,11 +569,10 @@ To enter a coin from outside into a double booking system, you need
 two transactions: One is the coin itself (debit), and the other is a
 promise to buy it back (credit).
 
-The Purpose of that conservation of all transactions is to make it
-easy to cross-check the ledgers for consistency.  If you have n
-ledgers, you summ all the columns in them (which can be done in
-parallel), and you cross-check by summing all the n results: The
-balance ought to be zero.
+The Purpose of that is to make it easy to cross-check the ledgers for
+consistency.  If you have _n_ ledgers, you summ all the columns in them
+(which can be done in parallel), and you cross-check by summing all
+the _n_ results: The balance ought to be zero.
 
 ### Subdividing further
 
@@ -636,3 +722,6 @@ Ah, yes, and penguins eat squids, too.
   6. [Adam Ludwin explains crypto currencies](https://blog.chain.com/a-letter-to-jamie-dimon-de89d417cb80)
   7. [Bangladesh Bank Robbery](https://en.wikipedia.org/wiki/Bangladesh_Bank_robbery)
   8. [Flying Money](http://www.baike.com/wiki/%E9%A3%9E%E9%92%B1)
+  9. [Is a git repository a BlockChain](https://medium.com/@shemnon/is-a-git-repository-a-blockchain-35cb1cd2c491)
+  10. [Is my blockchain a blockchain](https://gist.github.com/joepie91/e49d2bdc9dfec4adc9da8a8434fd029b)
+  11. [Der „Wolf of Wall Street“ warnt vor ICOs](http://www.handelsblatt.com/finanzen/maerkte/devisen-rohstoffe/hype-um-krypto-boersengaenge-der-wolf-of-wall-street-warnt-vor-icos/20490646.html)

@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!-- Creator: fig2dev Version 3.2.6a -->
-<!-- CreationDate: 2017-10-18 22:34:18 -->
+<!-- CreationDate: 2017-10-26 00:03:05 -->
 <!-- Magnification: 0.525 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -8,819 +8,132 @@
 	viewBox="867 1317 7266 8323">
 <g fill="none">
 <!-- Line -->
-<rect x="900" y="1350" width="450" height="450" fill="#ffff00"
+<rect x="900" y="1350" width="7200" height="450" fill="#ffff00"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1350" y="1350" width="450" height="450" fill="#ffff00"
+<rect x="900" y="1800" width="7200" height="450" fill="#00ffff"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1800" y="1350" width="450" height="450" fill="#ffff00"
+<rect x="900" y="2250" width="7200" height="450" fill="#00ff00"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="2250" y="1350" width="450" height="450" fill="#ffff00"
+<rect x="900" y="2700" width="7200" height="450" fill="#87cfff"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="900" y="1800" width="450" height="450" fill="#ffff00"
+<rect x="900" y="3150" width="7200" height="450" fill="#803000"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1350" y="1800" width="450" height="450" fill="#ffff00"
+<rect x="900" y="3600" width="7200" height="450" fill="#ffffff"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1800" y="1800" width="450" height="450" fill="#ffff00"
+<rect x="900" y="4050" width="7200" height="450" fill="#d10000"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="2250" y="1800" width="450" height="450" fill="#ffff00"
+<rect x="900" y="4500" width="7200" height="450" fill="#008f8f"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="900" y="2250" width="450" height="450" fill="#ffff00"
+<rect x="900" y="4950" width="7200" height="450" fill="#ff0000"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1350" y="2250" width="450" height="450" fill="#ffff00"
+<rect x="900" y="6750" width="7200" height="450" fill="#ffe0e0"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1800" y="2250" width="450" height="450" fill="#ffff00"
+<rect x="900" y="7200" width="7200" height="450" fill="#00008f"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="2250" y="2250" width="450" height="450" fill="#ffff00"
+<rect x="900" y="7650" width="7200" height="450" fill="#b46100"
 	stroke="#000000" stroke-width="8px"/>
+<!-- Text -->
+<text xml:space="preserve" x="4500" y="9450" fill="#000000" font-family="Helvetica" font-style="normal" font-weight="bold" font-size="432" text-anchor="middle">Stage 1</text>
 <!-- Line -->
-<rect x="900" y="2700" width="450" height="450" fill="#ffff00"
+<rect x="900" y="6300" width="7200" height="450" fill="#0000ff"
 	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
-<rect x="1350" y="2700" width="450" height="450" fill="#ffff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="2700" width="450" height="450" fill="#ffff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="2700" width="450" height="450" fill="#ffff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="1350" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="1350" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="1350" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="1350" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="1800" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="1800" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="1800" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="1800" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="2250" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="2250" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="2250" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="2250" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="2700" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="2700" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="2700" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="2700" width="450" height="450" fill="#00ffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="1350" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="1350" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="1350" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="1350" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="1800" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="1800" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="1800" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="1800" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="2250" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="2250" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="2250" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="2250" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="2700" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="2700" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="2700" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="2700" width="450" height="450" fill="#00ff00"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="1350" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="1350" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="1350" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="1350" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="1800" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="1800" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="1800" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="1800" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="2250" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="2250" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="2250" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="2250" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="2700" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="2700" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="2700" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="2700" width="450" height="450" fill="#87cfff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="3150" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="3150" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="3150" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="3150" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="3600" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="3600" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="3600" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="3600" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="4050" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="4050" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="4050" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="4050" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="4500" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="4500" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="4500" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="4500" width="450" height="450" fill="#ffa1a1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="3150" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="3150" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="3150" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="3150" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="3600" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="3600" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="3600" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="3600" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="4050" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="4050" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="4050" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="4050" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="4500" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="4500" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="4500" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="4500" width="450" height="450" fill="#803000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="4950" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="4950" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="4950" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="4950" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="5400" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="5400" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="5400" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="5400" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="5850" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="5850" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="5850" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="5850" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="6300" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="6300" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="6300" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="6300" width="450" height="450" fill="#ffe0e0"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="4950" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="4950" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="4950" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="4950" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="5400" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="5400" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="5400" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="5400" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="5850" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="5850" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="5850" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="5850" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="6300" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="6300" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="6300" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="6300" width="450" height="450" fill="#b46100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="4950" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="4950" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="4950" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="4950" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="5400" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="5400" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="5400" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="5400" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="5850" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="5850" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="5850" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="5850" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="6300" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="6300" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="6300" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="6300" width="450" height="450" fill="#008f8f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="6750" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="6750" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="6750" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="6750" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="7200" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="7200" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="7200" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="7200" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="7650" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="7650" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="7650" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="7650" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6300" y="8100" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="6750" y="8100" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7200" y="8100" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="7650" y="8100" width="450" height="450" fill="#00d100"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="6750" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="6750" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="6750" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="6750" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="7200" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="7200" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="7200" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="7200" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="7650" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="7650" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="7650" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="7650" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="8100" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="8100" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="8100" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="8100" width="450" height="450" fill="#00008f"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="4950" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="4950" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="4950" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="4950" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="5400" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="5400" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="5400" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="5400" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="5850" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="5850" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="5850" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="5850" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="6300" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1350" y="6300" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="1800" y="6300" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2250" y="6300" width="450" height="450" fill="#ff0000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="3150" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="3150" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="3150" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="3150" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="3600" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="3600" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="3600" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="3600" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="4050" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="4050" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="4050" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="4050" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="4500" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="4500" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="4500" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="4500" width="450" height="450" fill="#d10000"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="3150" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="3150" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="3150" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="3150" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="3600" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="3600" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="3600" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="3600" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="4050" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="4050" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="4050" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="4050" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="4500" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="4500" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="4500" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="4500" width="450" height="450" fill="#ffffff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="6750" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="6750" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="6750" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="6750" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="7200" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="7200" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="7200" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="7200" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="7650" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="7650" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="7650" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="7650" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="2700" y="8100" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3150" y="8100" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="3600" y="8100" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4050" y="8100" width="450" height="450" fill="#d100d1"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="6750" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="6750" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="6750" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="6750" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="7200" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="7200" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="7200" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="7200" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="7650" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="7650" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="7650" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="7650" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4500" y="8100" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="4950" y="8100" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5400" y="8100" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="5850" y="8100" width="450" height="450" fill="#0000ff"
-	stroke="#000000" stroke-width="8px"/>
-<!-- Line -->
-<rect x="900" y="1350" width="1800" height="7200"
+<rect x="900" y="1350" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
-<rect x="2700" y="1350" width="1800" height="7200"
+<rect x="900" y="2250" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
-<rect x="4500" y="1350" width="1800" height="7200"
+<rect x="900" y="3150" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
-<rect x="6300" y="1350" width="1800" height="7200"
+<rect x="900" y="4050" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
-<rect x="900" y="3150" width="7200" height="1800"
+<rect x="900" y="4950" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
-<rect x="900" y="6750" width="7200" height="1800"
+<rect x="900" y="5400" width="7200" height="450" fill="#00d100"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="900" y="5850" width="7200" height="450" fill="#ffa1a1"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="900" y="5850" width="7200" height="450"
 	stroke="#000000" stroke-width="30px"/>
+<!-- Line -->
+<rect x="900" y="6750" width="7200" height="450"
+	stroke="#000000" stroke-width="30px"/>
+<!-- Line -->
+<rect x="900" y="7650" width="7200" height="450"
+	stroke="#000000" stroke-width="30px"/>
+<!-- Line -->
+<rect x="900" y="8100" width="7200" height="450" fill="#d100d1"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="900" y="1800" width="7200" height="6750"
+	stroke="#000000" stroke-width="30px"/>
+<!-- Line -->
+<rect x="1350" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="2250" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="3150" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="4050" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="4950" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="5850" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="6750" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
+<!-- Line -->
+<rect x="7650" y="1350" width="450" height="7200"
+	stroke="#000000" stroke-width="8px"/>
 <!-- Circle -->
-<circle cx="4275" cy="3825" r="225"
+<circle cx="4253" cy="3803" r="225"
 	stroke="#000000" stroke-width="30px"/>
 <!-- Line -->
 <defs>
 <clipPath id="cp0">
 	<path clip-rule="evenodd" d="M 867,1317 H 8133 V 9640 H 867 z
-		M 1320,2657 1391,2491 1116,2451 1101,2484z"/>
+		M 1298,2635 1369,2469 1094,2429 1079,2462z"/>
 </clipPath>
 </defs>
-<polyline points=" 4275,3825 1125,2475" clip-path="url(#cp0)"
+<polyline points=" 4253,3803 1103,2453" clip-path="url(#cp0)"
 	stroke="#000000" stroke-width="30px"/>
-<!-- Forward arrow to point 1125,2475 -->
-<polygon points=" 1391,2491 1135,2479 1320,2657 1391,2491"
+<!-- Forward arrow to point 1103,2453 -->
+<polygon points=" 1369,2469 1113,2457 1298,2635 1369,2469"
 	stroke="#000000" stroke-width="8px" stroke-miterlimit="8" fill="#000000"/>
 <!-- Line -->
 <defs>
 <clipPath id="cp1">
 	<path clip-rule="evenodd" d="M 867,1317 H 8133 V 9640 H 867 z
-		M 3192,4281 3135,4110 2902,4264 2914,4298z"/>
+		M 1354,3893 1354,3713 1085,3785 1085,3821z"/>
 </clipPath>
 </defs>
-<polyline points=" 4275,3825 2925,4275" clip-path="url(#cp1)"
-	stroke="#000000" stroke-width="30px" stroke-dasharray="80 80"/>
-<!-- Forward arrow to point 2925,4275 -->
-<polygon points=" 3135,4110 2936,4271 3192,4281 3135,4110"
+<polyline points=" 4253,3803 1103,3803" clip-path="url(#cp1)"
+	stroke="#000000" stroke-width="30px" stroke-dasharray="60 30 10 30"/>
+<!-- Forward arrow to point 1103,3803 -->
+<polygon points=" 1354,3713 1114,3803 1354,3893 1354,3713"
 	stroke="#000000" stroke-width="8px" stroke-miterlimit="8" fill="#000000"/>
-<!-- Text -->
-<text xml:space="preserve" x="4500" y="9450" fill="#000000" font-family="Helvetica" font-style="normal" font-weight="bold" font-size="432" text-anchor="middle">Stage 1</text>
 </g>
 </svg>
