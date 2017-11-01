@@ -321,7 +321,7 @@ transaction (despite anonymous) adds to the trust value: more
 transactions in one block means that it is more trustworthy, because
 more people found its way to this branch of BlockChain reality.
 
-Note that the distributed BlockChain below makes it far more expensive
+Note that the partitioned BlockChain below makes it far more expensive
 to fake a chain: You need to generate signatures and activities in all
 of them; the fake activities you generate are with the coins you own;
 you have no others.  Sanctions for misbehavoir can make sure these
@@ -494,6 +494,11 @@ decentralization is also a way to create reliable software, so it's
 still worth to pursue.
 
 ## How to really distribute book-keeping
+
+A distributed database can be replicated or partitioned (or both).
+BlockChains as of now are replicated; that's the scaling problem
+mentioned in the bullshit bingo sheet above.  They also need to be
+partitioned to gain all the benefits of modern distributed databases.
 
 An important design goal for me is to handle massive ammounts of
 micropayments, because that's an application where I see a legitime

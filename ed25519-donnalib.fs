@@ -43,4 +43,5 @@ c-function ge25519*v ge25519_scalarmult_vartime a a a -- void ( r p s -- )
 c-function ge25519* ge25519_scalarmult a a a -- void ( r p s -- )
 c-function 32b= str32eq a a -- n ( addr1 addr2 -- flag )
 c-variable ge25519-basepoint ge25519_basepoint ( --  addr )
+c-value ge25519 sizeof(ge25519) -- u
 \ c-variable ge25519-niels*[] ge25519_niels_sliding_multiples ( -- addr )

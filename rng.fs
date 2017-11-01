@@ -85,8 +85,8 @@ s" ~/.initrng" init-rng$ $!
 \ Sanity check
 
 Variable check-rng$
-Variable check-old$
-s" ~/.checkrng" check-rng$ $!  check-rng$ $save
+$Variable check-old$
+s" ~/.checkrng" check-rng$ $!
 $10 cells buffer: rngstat-buf
 
 : rngstat ( addr u -- float )

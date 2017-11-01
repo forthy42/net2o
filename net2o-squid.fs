@@ -27,7 +27,7 @@ Constant pk0 Constant sk0
 
 : pk~ ( pk -- )  $1F + dup >r c@ $80 xor r> c! ;
 
-ge25519-basepoint bp8 $C0 move
+ge25519-basepoint bp8 ge25519 move
 bp8 bp8 bp8 ge25519+ \ *2
 bp8 bp8 bp8 ge25519+ \ *4
 bp8 bp8 bp8 ge25519+ \ *8
