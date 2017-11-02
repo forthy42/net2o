@@ -768,3 +768,4 @@ Incentives matter.  Economy is all about game theory.
   9. [Is a git repository a BlockChain](https://medium.com/@shemnon/is-a-git-repository-a-blockchain-35cb1cd2c491)
   10. [Is my blockchain a blockchain](https://gist.github.com/joepie91/e49d2bdc9dfec4adc9da8a8434fd029b)
   11. [Der „Wolf of Wall Street“ warnt vor ICOs](http://www.handelsblatt.com/finanzen/maerkte/devisen-rohstoffe/hype-um-krypto-boersengaenge-der-wolf-of-wall-street-warnt-vor-icos/20490646.html)
+  12. [„Warum BitCoin (jetzt aber wirklich!) TOT ist“-Kwizz](https://www.heise.de/forum/heise-online/News-Kommentare/Bitcoin-klettert-auf-ueber-7000-US-Dollar/Das-monatliche-Warum-Bitcoin-jetzt-aber-wirklich-TOT-ist-Kwizz/posting-31300715/show/)

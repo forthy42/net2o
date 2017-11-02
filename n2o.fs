@@ -693,3 +693,10 @@ scope{ /chat
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
 
 }scope
+
+: start-n2o ( -- )
+    cmd-args ++debug %droprate \ read in all debugging stuff
+    argc @ 1 > IF next-cmd ELSE n2o:help THEN
+    n2o:bye ;
+
+' start-n2o is process-args
