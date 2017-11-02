@@ -143,7 +143,7 @@ libcc:	$(FORTHLIB)
 	done
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
-	gforthmi net2o.fi n2o.fs
+	gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
 
 libcc-install:	libcc
 	$(MKDIR) -p $(LIBCCDEST)
