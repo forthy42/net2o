@@ -282,7 +282,7 @@ event: :>connect    ( connection -- ) .do-connect ;
 \ check for valid destination
 
 Variable dest-map s" " dest-map $!
-:noname defers 'cold alloc-io dest-map off s" " dest-map $! ; is 'cold
+:noname defers 'cold alloc-io dest-map $init ; is 'cold
 
 $100 Value dests#
 56 Value dests>>

@@ -84,8 +84,8 @@ s" ~/.initrng" init-rng$ $!
 
 \ Sanity check
 
-Variable check-rng$
-$Variable check-old$
+$Variable check-rng$
+Variable check-old$
 s" ~/.checkrng" check-rng$ $!
 $10 cells buffer: rngstat-buf
 
@@ -194,3 +194,5 @@ User ?salt-init  ?salt-init off
     rng-pos @ 1+ rng-step?
     rng-pos @ rng-buffer + c@
     1 rng-pos +! ;
+
+:noname defers 'image check-old$ $free ?salt-init off rng-o off ; is 'image

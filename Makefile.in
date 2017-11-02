@@ -142,6 +142,9 @@ libcc:	$(FORTHLIB)
 		$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous cpuflags off" $$i -e bye; \
 	done
 
+net2o.fi:	$(SOURCES) $(FORTHLIB)
+	gforthmi net2o.fi n2o.fs
+
 libcc-install:	libcc
 	$(MKDIR) -p $(LIBCCDEST)
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
