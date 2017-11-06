@@ -471,8 +471,10 @@ bane, but they way they are constructed now, they just create a new
 one.
 
 And finally, in the age of information, copyright and concepts like
-“work for hire” concentrate the available knowledge in the hand of the
-few.
+“work for hire” (i.e. the copyright is handed over as part of an
+employment contract) concentrate the available knowledge in the hand
+of the few.  Since Bill Gates, the super-rich all base their wealth on
+author's rights of things they actually didn't author.
 
 ### The (in)stability of spending money
 
