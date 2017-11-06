@@ -179,8 +179,9 @@ first fiat money.  They didn't allow private ownership of silver and
 gold (compare: Roosevelt's America after the great depression), so the
 banknote was not a promise to give you noble metal.  Inflation was a
 problem in both the Yuan dynasty and the early Ming dynasty following,
-and stopped issuing banknotes in 1450; the circulating notes however
-were still accepted — and the currency system was privatized.
+which stopped issuing banknotes in 1450; the circulating notes however
+were still accepted — and the currency system was privatized,
+i.e. they went back to the feiqian promissory notes.
 
 Thanks to Marco Polo, Europe soon got a pretty good description of how
 it worked, because Marco Polo as merchant was interested in this kind
@@ -739,12 +740,6 @@ thus makes other projects want to be funded through that channel, so
 it increases the amount of coins quickly.  Low bidding makes that
 funding channel unattractive.
 
-To stabilize the $quid further, you can either pay in fiat money
-(generating more $quids in process), or in $quid (keep the number of
-$quids constant), that can help to avoid inflation, but it also avoids
-deflation, because if the $quid is rising, paying fiat money is more
-cost-effective.
-
 The difference between normal sponsorship and this approach is that
 while the issuers of $quids get paid for their work, the people who
 pay can trade the $quid, like investors in corporations can sell
@@ -772,6 +767,12 @@ is a scarce resource, and creates knowledge (public infrastructure of
 the information age), into a tradeable currency, and thereby make this
 work valuable.  Instead of financing startups, which are classical
 economy, the intial $quid offer goes into work for the public.
+
+What's missing for a real fiat money: There's no way to actually
+remove coins out of the system to reduce the money supply.  The
+authorities (and the market) that grant projects with funding can only
+create money, not take it out of the system.  But a coin system works
+the same way: you can mint coins, and they are going to last.
 
 _Ah, yes, and penguins eat squids, too._
 
