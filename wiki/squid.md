@@ -39,7 +39,7 @@ Here's the bingo chart for all valid critics on BitCoins:
 <th></th>
 <td>BitCoin is deflationary</td>
 <td>The BlockChain is too big</td>
-<td>Joker</td>
+<td>Tulipmania!</td>
 <td>blocks are too big</td>
 <td>blocks are too small</td>
 </tr>
@@ -422,12 +422,15 @@ low”, though.
 But let's assume BitCoin is not a bubble going bust, but it's supposed
 to last (all 21 millions), and used as currency for everything by
 everybody.  That means the price per coin would soar until the total
-market cap equals the wealth of the entire planet.  And that would
-mean all those people who were there in the early phase would be
-incredible rich, just by being early.  Instead of creating most coins
-in the last, bit growth phase, BitCoin created them in the early
-phase, where it was essentially worthless and no effort needed to mine
-the coins.
+market cap equals the wealth of the entire planet.  BitCoin's wealth
+allocation is that of colonization or gold rushs: the first to arrive
+are the ones who get the by far largest claims.
+
+And that would mean all those people who were there in the early phase
+would be incredible rich, just by being early.  Instead of creating
+most coins in the last, bit growth phase, BitCoin created them in the
+early phase, where it was essentially worthless and no effort needed
+to mine the coins.
 
 So maybe that wealth is going to trickle down?  Trickle down however
 doesn't work.  Money inherently trickles up.  In a deflationary
@@ -443,6 +446,29 @@ That's not what I think as future I want.  Fiat money has its
 downsides, too; but mostly when the state that controls it is in deep
 troubles, and fails to create or establish rules that work for the
 greater good.
+
+### Driving forces to servitude
+
+Historical societies often had driven most of the population into one
+or the other form of servitude.  Ownership of production means,
+i.e. land in agricultural societies, factories in industrial
+societies, and a strict copyright regime in a knowledge society are
+usual means to give power to few and exploit the many.
+
+Sometimes, the concentration of power is a natural consequence,
+e.g. for industrial production, economy of scale results in
+concentration of wealth and power.  In medieval Europe, the choice was
+either become a knight and serve the king, or become a serf, and thus
+being owned by the local knight.  Even when servitude was abolished, a
+similar relation between gentry and tenants were common, and the
+gentry makes sure that their political influence works to stabilize
+their properties.
+
+Fiat money requires an intermediary (banks) to distribute the money
+handed out by the central bank; this gives a lot of power to the
+banks.  Crypto currencies, which don't require banks, could lift that
+bane, but they way they are constructed now, they just create a new
+one.
 
 ### The (in)stability of spending money
 
@@ -769,3 +795,7 @@ Incentives matter.  Economy is all about game theory.
   10. [Is my blockchain a blockchain](https://gist.github.com/joepie91/e49d2bdc9dfec4adc9da8a8434fd029b)
   11. [Der „Wolf of Wall Street“ warnt vor ICOs](http://www.handelsblatt.com/finanzen/maerkte/devisen-rohstoffe/hype-um-krypto-boersengaenge-der-wolf-of-wall-street-warnt-vor-icos/20490646.html)
   12. [„Warum BitCoin (jetzt aber wirklich!) TOT ist“-Kwizz](https://www.heise.de/forum/heise-online/News-Kommentare/Bitcoin-klettert-auf-ueber-7000-US-Dollar/Das-monatliche-Warum-Bitcoin-jetzt-aber-wirklich-TOT-ist-Kwizz/posting-31300715/show/)
+  13. [Bitcoin Mining Electricy Consumption](https://motherboard.vice.com/en_us/article/ywbbpm/bitcoin-mining-electricity-consumption-ethereum-energy-climate-change
+)
+  14. [BitCoin Stromverbrauch Energie](http://t3n.de/news/bitcoin-stromverbrauch-energie-872715/)
+  15. [BitCoin Energy Consumption Index](https://digiconomist.net/bitcoin-energy-consumption)

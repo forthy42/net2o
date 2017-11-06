@@ -68,6 +68,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 ARCH	  =
 DEBARCH   =
+GFORTH_FAST = `which gforth-fast`-`gforth-fast --version 2>&1| cut -f2- -d' ' | tr ' ' '-'`
 
 TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
@@ -143,7 +144,7 @@ libcc:	$(FORTHLIB)
 	done
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
-	gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
+	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
 
 libcc-install:	libcc
 	$(MKDIR) -p $(LIBCCDEST)
