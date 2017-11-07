@@ -115,8 +115,8 @@ libs:	$(LIBS:%=%.libs)
 
 install-libs: $(LIBS:%=%.instlibs)
 
-%.instlibs:	%.libs
-	cd $(@:%.instlibs:%); $(MAKE) package=$(package) install
+%.instlibs:
+	cd $(@:%.instlibs=%); $(MAKE) package=$(package) install
 
 extra-install:	install-libs install
 
