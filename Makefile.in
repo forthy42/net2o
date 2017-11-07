@@ -91,24 +91,32 @@ GEN = net2o-version.fs
 
 DOC = wiki/commands.md
 
-all: no-config TAGS
+all: no-config TAGS doc
 
 distfiles:
 	@echo $(SOURCES) $(GEN) $(SCRIPTS)
 
 no-config: libs $(GEN)
 
-clean:
-	for i in $(LIBS); do (cd $$i; $(MAKE) clean); done
+clean:  $(LIBS:%=%.clean)
 
-configs:
-	for i in . $(LIBS); do (cd $$i; ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean); done
+%.clean:
+	cd $(@:%.clean=%); $(MAKE) clean
 
-libs:
-	for i in $(LIBS); do (cd $$i; $(MAKE)); done
+configs:  $(LIBS:%=%.configs)
 
-install-libs:
-	for i in $(LIBS); do (cd $$i; $(MAKE) package=$(package) install); done
+%.configs:
+	cd $(@:%.configs=%); ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean
+
+libs:	$(LIBS:%=%.libs)
+
+%.libs:
+	cd $(@:%.libs=%); $(MAKE) all
+
+install-libs: $(LIBS:%=%.instlibs)
+
+%.instlibs:
+	cd $(@:%.instlibs:%); $(MAKE) package=$(package) install
 
 extra-install:	install-libs install
 
@@ -127,27 +135,29 @@ install:	libcc-install
 		ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
 	done
 
-uninstall:	libcc-uninstall
-	for i in $(SRCDIRS); do \
-		$(RMDIR) $(datadir)/gforth/$(VERSION)/$$i; \
-	done
-	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
-	for i in $(SCRIPTS); do \
-		$(RM) $(bindir)/$$i-@PACKAGE_VERSION@; \
-		$(RM) $(bindir)/$$i; \
-	done
+%.dirui:
+	$(RMDIR) $(datadir)/gforth/$(VERSION)/$(@:%.dirui=%); \
 
-libcc:	$(FORTHLIB)
-	-for i in $(FORTHLIB); do \
-		echo "generating library $$i"; \
-		$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous cpuflags off" $$i -e bye; \
-	done
+%.scriptui:
+		$(RM) $(bindir)/$(@:%.scriptui=%)-@PACKAGE_VERSION@; \
+		$(RM) $(bindir)/$(@:%.scriptui=%); \
+
+uninstall:	libcc-uninstall $(SRCDIRS:%=%.dirui) $(SCRIPTS:%=%.scriptui)
+	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
+
+libcc:	$(FORTHLIB:%=%.libcc)
+
+%.libcc:
+	-echo "generating library $(@:%.libcc=%)"
+	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
 	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
 
-libcc-install:	libcc
+libccdest:
 	$(MKDIR) -p $(LIBCCDEST)
+
+libcc-install:	libcc libccdest
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
 		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)libgf`basename $$i .fs`.la; \
 		done; fi
