@@ -460,12 +460,11 @@ User hashtmp$  hashtmp$ off
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
-    last# cell+ $[]# IF
-	[: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
-	  LOOP ;] hashtmp$ $exec hashtmp$ $@
-	\ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
-    ELSE  2drop s" "  THEN \ we have nothing yet
-    >file-hash 1 64s umin ;
+    swap last# cell+ $[]# umin swap
+    [: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
+      LOOP ;] hashtmp$ $exec hashtmp$ $@
+    \ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
+    ?dup-IF  >file-hash 1 64s umin  THEN ;
 : i.date ( i -- )
     last# cell+ $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
