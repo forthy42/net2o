@@ -479,7 +479,7 @@ User hashtmp$  hashtmp$ off
     last# >r >r last# $@ ?msg-log
     last# cell+ $[]#
     IF
-	date>i >r  64#1 64+ date>i' r> swap
+	64#1 64+ date>i >r  date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
@@ -514,7 +514,7 @@ Variable ask-msg-files[]
 : msg:last? ( start end n -- )
     last# $@ $, msg-group
     max-last# umin
-    last-msgs@ >r $, r> ulit, msg-last ;
+    last-msgs@ >r $, r> 1+ ulit, msg-last ;
 : ?ask-msg-files ( addr u -- )
     64#-1 64#0 { 64^ startd 64^ endd } \ byte order of 0 and -1 don't matter
     last# $@ ?msg-log
