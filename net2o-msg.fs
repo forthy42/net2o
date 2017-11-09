@@ -524,7 +524,7 @@ Variable ask-msg-files[]
 	I' I 64'+ u> IF
 	    I 64'+ 64'+ le-64@  64#1 64+ date>i \ end
 	    I le-64@ date>i \ start
-	    ~~ l.hashs ~~ IF
+	    l.hashs IF
 		64@ I 64'+ 64@ 64<> IF
 		    I 64@ startd le-64@ 64umin
 		    I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -537,6 +537,8 @@ Variable ask-msg-files[]
 		THEN  endd le-64! startd le-64!
 	    ELSE
 		drop
+		I 64'+ 64'+  I [: 1 64s forth:type 1 64s forth:type last# $. ;]
+		ask-msg-files[] dup $[]# swap $[] $exec
 	    THEN
 	THEN
     2 64s +LOOP
