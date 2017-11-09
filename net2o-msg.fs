@@ -464,7 +464,7 @@ User hashtmp$  hashtmp$ off
     [: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
       LOOP ;] hashtmp$ $exec hashtmp$ $@
     \ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
-    ?dup-IF  >file-hash 1 64s umin  THEN ;
+    dup IF  >file-hash 1 64s umin  THEN ;
 : i.date ( i -- )
     64#0 { 64^ x }
     dup last# cell+ $[]# u>= IF  64#-1
@@ -536,7 +536,7 @@ Variable ask-msg-files[]
 		    64#-1 64#0
 		THEN  endd le-64! startd le-64!
 	    ELSE
-		~~
+		drop
 	    THEN
 	THEN
     2 64s +LOOP
