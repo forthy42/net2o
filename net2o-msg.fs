@@ -525,8 +525,7 @@ Variable ask-msg-files[]
 	    I le-64@ date>i \ start
 	    I 64'+ 64'+ le-64@  64#1 64+ date>i \ end
 	    swap l.hashs IF
-		64@
-		I 64'+ 64@ 64<> IF
+		64@ I 64'+ 64@ 64<> IF
 		    I 64@ startd le-64@ 64umin
 		    I 64'+ 64'+ 64@ endd le-64@ 64umax
 		ELSE
@@ -536,6 +535,8 @@ Variable ask-msg-files[]
 		    THEN
 		    64#-1 64#0
 		THEN  endd le-64! startd le-64!
+	    ELSE
+		drop
 	    THEN
 	THEN
     2 64s +LOOP
