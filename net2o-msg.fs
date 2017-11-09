@@ -303,7 +303,7 @@ Forward msg:last
 
 : date>i ( date -- i )
     last# cell+ $search[]date last# cell+ $[]# 1- umin ;
-: date>i' ( date -- i )  64#1 64+ 
+: date>i' ( date -- i )
     last# cell+ $search[]date last# cell+ $[]# umin ;
 : sighash? ( addr u -- flag )
     over le-64@ date>i
@@ -479,7 +479,7 @@ User hashtmp$  hashtmp$ off
     last# >r >r last# $@ ?msg-log
     last# cell+ $[]#
     IF
-	date>i >r date>i' r> swap
+	date>i >r  64#1 64+ date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
@@ -521,7 +521,7 @@ Variable ask-msg-files[]
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ date>i' swap l.hashs drop 64@
+	    I 64'+ 64'+ le-64@  64#1 64+ date>i' swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -556,7 +556,7 @@ Variable ask-msg-files[]
     fs-path $@ 2 64s /string ?msg-log
     last# msg-log@ over >r
     fs-path $@ drop le-64@ date>i \ start index
-    fs-path $@ drop 64'+ le-64@ date>i' \ end index
+    fs-path $@ drop 64'+ le-64@  64#1 64+ date>i' \ end index
     over - >r
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
@@ -750,7 +750,7 @@ Variable $lastline
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
-    line-date 64@ date>i'
+    line-date 64@  date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
