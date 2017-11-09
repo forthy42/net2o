@@ -514,7 +514,7 @@ Variable ask-msg-files[]
 : msg:last? ( start end n -- )
     last# $@ $, msg-group
     max-last# umin
-    last-msgs@ >r $, r> 1+ ulit, msg-last ;
+    last-msgs@ >r $, r> ulit, msg-last ;
 : ?ask-msg-files ( addr u -- )
     64#-1 64#0 { 64^ startd 64^ endd } \ byte order of 0 and -1 don't matter
     last# $@ ?msg-log
