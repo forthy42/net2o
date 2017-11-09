@@ -467,7 +467,7 @@ User hashtmp$  hashtmp$ off
     ?dup-IF  >file-hash 1 64s umin  THEN ;
 : i.date ( i -- )
     64#0 { 64^ x }
-    dup last# cell+ $[]# u> IF  64#-1
+    dup last# cell+ $[]# u>= IF  64#-1
     ELSE  last# cell+ $[]@ startdate@  THEN
     x le-64! x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
