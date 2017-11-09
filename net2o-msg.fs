@@ -536,7 +536,7 @@ Variable ask-msg-files[]
 		    64#-1 64#0
 		THEN  endd le-64! startd le-64!
 	    ELSE
-		drop
+		~~
 	    THEN
 	THEN
     2 64s +LOOP
