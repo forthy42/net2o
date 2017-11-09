@@ -466,7 +466,9 @@ User hashtmp$  hashtmp$ off
     \ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
     ?dup-IF  >file-hash 1 64s umin  THEN ;
 : i.date ( i -- )
-    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
+    64#0 { 64^ x }
+    dup last# cell+ $[]# u> IF  64#-1
+    ELSE  last# cell+ $[]@ startdate@  THEN
     x le-64! x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     \G print n intervals for messages from startdate to enddate
