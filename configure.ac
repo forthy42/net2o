@@ -56,7 +56,7 @@ esac
 VERDIR=
 NOVERDIR='#'
 
-case "$host_alias" in
+case "$host" in
     *android*)
 	VERDIR='#'
 	NOVERDIR=

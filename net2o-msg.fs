@@ -303,12 +303,12 @@ Forward msg:last
 
 : date>i ( date -- i )
     last# cell+ $search[]date last# cell+ $[]# 1- umin ;
-: date>i' ( date -- i )
+: date>i' ( date -- i )  64#1 64+ 
     last# cell+ $search[]date last# cell+ $[]# umin ;
 : sighash? ( addr u -- flag )
     over le-64@ date>i
     dup 0< IF  drop 2drop  false  EXIT  THEN  >r
-    over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
+    over le-64@ date>i' >r [ 1 64s ]L /string
     r> r> +DO
 	c:0key I last# cell+ $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
@@ -521,7 +521,7 @@ Variable ask-msg-files[]
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ 64#1 64+ date>i' swap l.hashs drop 64@
+	    I 64'+ 64'+ le-64@ date>i' swap l.hashs drop 64@
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -556,7 +556,7 @@ Variable ask-msg-files[]
     fs-path $@ 2 64s /string ?msg-log
     last# msg-log@ over >r
     fs-path $@ drop le-64@ date>i \ start index
-    fs-path $@ drop 64'+ le-64@ 64#1 64+ date>i' \ end index
+    fs-path $@ drop 64'+ le-64@ date>i' \ end index
     over - >r
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf

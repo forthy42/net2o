@@ -106,6 +106,7 @@ clean:  $(LIBS:%=%.clean)
 	cd $(@:%.clean=%); $(MAKE) clean
 
 configs:  $(LIBS:%=%.configs)
+	./configure --host=$(HOST) --prefix=$(PREFIX) 
 
 %.configs:
 	cd $(@:%.configs=%); ./autogen.sh CFLAGS="$(subst O2,O3,$(CFLAGS))" --host=$(HOST) --prefix=$(PREFIX) && $(MAKE) clean
@@ -132,17 +133,20 @@ install:	libcc-install
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
-	for i in $(SCRIPTS); do \
-		$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
-		ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
-	done
+	@VERDIR@for i in $(SCRIPTS); do \
+	@VERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
+	@VERDIR@	ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
+	@VERDIR@done
+	@NOVERDIR@for i in $(SCRIPTS); do \
+	@NOVERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
+	@NOVERDIR@done
 
 %.dirui:
 	$(RMDIR) $(datadir)/gforth/$(VERSION)/$(@:%.dirui=%); \
 
 %.scriptui:
-		$(RM) $(bindir)/$(@:%.scriptui=%)-@PACKAGE_VERSION@; \
-		$(RM) $(bindir)/$(@:%.scriptui=%); \
+	-@VERDIR@$(RM) $(bindir)/$(@:%.scriptui=%)-@PACKAGE_VERSION@; \
+	$(RM) $(bindir)/$(@:%.scriptui=%); \
 
 uninstall:	libcc-uninstall $(SRCDIRS:%=%.dirui) $(SCRIPTS:%=%.scriptui)
 	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
