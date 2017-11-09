@@ -4,10 +4,14 @@
 
 ## Abstract
 
-10 years after BitCoins original document, the BlockChain and crypto
+*10 years after BitCoins original document, the BlockChain and crypto
 currencies are a big hype. Time to look at the results of the
 experiment, see what failed and what works, check the consequences for
-society, and propose improvements.
+society, and propose improvements.*
+
+*BitCoin's technology has three problems which need to be fixed: The
+unfair distribution of coins, the energy consumption of proof of
+work, and the non-scaleable replicated, but not partitioned ledger.*
 
 ## Introduction
 
