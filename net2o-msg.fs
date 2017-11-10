@@ -674,7 +674,7 @@ also net2o-base
     msg-group  last-signdate@ { 64: date }
     64#0 lit, date slit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
-	date lit, 64#-1 slit, 1 ulit, msg-last?
+	date 64#1 64+ lit, 64#-1 slit, 1 ulit, msg-last?
     THEN ;
 
 : join, ( -- )
