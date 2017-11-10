@@ -302,12 +302,13 @@ Forward msg:last
     ELSE  do-msg-nestsig  THEN ;
 
 : date>i ( date -- i )
-    \ convert date into index of message 0..n
+    last# cell+ $search[]date last# cell+ $[]# 1- umin ;
+: date>i' ( date -- i )
     last# cell+ $search[]date last# cell+ $[]# umin ;
 : sighash? ( addr u -- flag )
     over le-64@ date>i
-    dup last# cell+ $[]# = IF  drop 2drop  false  EXIT  THEN  >r
-    over le-64@ 64#1 64+ date>i >r [ 1 64s ]L /string
+    dup 0< IF  drop 2drop  false  EXIT  THEN  >r
+    over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
     r> r> +DO
 	c:0key I last# cell+ $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
@@ -460,15 +461,14 @@ User hashtmp$  hashtmp$ off
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
-    swap last# cell+ $[]# umin swap
-    [: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
-      LOOP ;] hashtmp$ $exec hashtmp$ $@
-    \ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
-    dup IF  >file-hash 1 64s umin  THEN ;
+    last# cell+ $[]# IF
+	[: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
+	  LOOP ;] hashtmp$ $exec hashtmp$ $@
+	\ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
+    ELSE  2drop s" "  THEN \ we have nothing yet
+    >file-hash 1 64s umin ;
 : i.date ( i -- )
-    64#0 { 64^ x }
-    dup last# cell+ $[]# u>= IF  64#-1
-    ELSE  last# cell+ $[]@ startdate@  THEN
+    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     \G print n intervals for messages from startdate to enddate
@@ -479,9 +479,7 @@ User hashtmp$  hashtmp$ off
     last# >r >r last# $@ ?msg-log
     last# cell+ $[]#
     IF
-	64dup 64#-1 64<> IF  64#1 64+  THEN
-	date>i >r \ end
-	date>i r> swap \ start
+	date>i >r date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
@@ -522,24 +520,18 @@ Variable ask-msg-files[]
     last# $@ ?msg-log
     $> bounds ?DO
 	I' I 64'+ u> IF
-	    I 64'+ 64'+ le-64@  64#1 64+ date>i \ end
-	    I le-64@ date>i \ start
-	    l.hashs IF
-		64@ I 64'+ 64@ 64<> IF
-		    I 64@ startd le-64@ 64umin
-		    I 64'+ 64'+ 64@ endd le-64@ 64umax
-		ELSE
-		    startd le-64@ 64#-1 64<> IF
-			endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
-			ask-msg-files[] dup $[]# swap $[] $exec
-		    THEN
-		    64#-1 64#0
-		THEN  endd le-64! startd le-64!
+	    I le-64@ date>i
+	    I 64'+ 64'+ le-64@ 64#1 64+ date>i' swap l.hashs drop 64@
+	    I 64'+ 64@ 64<> IF
+		I 64@ startd le-64@ 64umin
+		I 64'+ 64'+ 64@ endd le-64@ 64umax
 	    ELSE
-		drop
-		I 64'+ 64'+  I [: 1 64s forth:type 1 64s forth:type last# $. ;]
-		ask-msg-files[] dup $[]# swap $[] $exec
-	    THEN
+		startd le-64@ 64#-1 64<> IF
+		    endd startd [: 1 64s forth:type 1 64s forth:type last# $. ;]
+		    ask-msg-files[] dup $[]# swap $[] $exec
+		THEN
+		64#-1 64#0
+	    THEN  endd le-64! startd le-64!
 	THEN
     2 64s +LOOP
     startd le-64@ 64#-1 64<> IF
@@ -564,7 +556,7 @@ Variable ask-msg-files[]
     fs-path $@ 2 64s /string ?msg-log
     last# msg-log@ over >r
     fs-path $@ drop le-64@ date>i \ start index
-    fs-path $@ drop 64'+ le-64@  64#1 64+ date>i \ end index
+    fs-path $@ drop 64'+ le-64@ 64#1 64+ date>i' \ end index
     over - >r
     cells safe/string r> cells umin
     req? @ >r req? off  serialize-log   r> req? !  fs-outbuf $!buf
@@ -758,7 +750,7 @@ Variable $lastline
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
-    line-date 64@  date>i
+    line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
