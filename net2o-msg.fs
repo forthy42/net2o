@@ -485,7 +485,7 @@ User hashtmp$  hashtmp$ off
 	date>i' >r date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
-	      dup I + I' umin I 2dup . . l.hashs over le-64@ $64. cr forth:type
+	      dup I + I' umin I 2dup forth:. forth:. l.hashs over le-64@ $64. forth:cr forth:type
 	  dup +LOOP
 	  r> dup last# cell+ $[]# u< IF  i.date
 	  ELSE  1- i.date+1  THEN
@@ -527,7 +527,7 @@ Variable ask-msg-files[]
 	I' I 64'+ u> IF
 	    I le-64@ date>i
 	    I 64'+ 64'+ le-64@ 64#1 64+ date>i' swap
-	    2dup . . l.hashs drop le-64@ 64dup $64. cr
+	    2dup forth:. forth:. l.hashs drop le-64@ 64dup $64. forth:cr
 	    I 64'+ 64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
