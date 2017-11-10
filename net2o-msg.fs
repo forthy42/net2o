@@ -484,7 +484,7 @@ User hashtmp$  hashtmp$ off
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
 	  dup +LOOP  r> i.date
-	  drop ;] $tmp r> over 0<> -
+	  drop ;] $tmp r> ~~ over 0<> -
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
 \ sync chatlog through virtual file access
