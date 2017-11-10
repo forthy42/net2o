@@ -482,7 +482,7 @@ User hashtmp$  hashtmp$ off
 	date>i' >r date>i' r> swap ~~
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
-	      dup I + I' umin 1+ I l.hashs forth:type
+	      dup I + I' umin I l.hashs forth:type
 	  dup +LOOP  r> i.date
 	  drop ;] $tmp r> over 1 64s u> -
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
