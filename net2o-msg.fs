@@ -470,6 +470,9 @@ User hashtmp$  hashtmp$ off
 : i.date ( i -- )
     last# cell+ $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
+: i.date+1 ( i -- )
+    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
+    64#1 64+ x le-64! x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     \G print n intervals for messages from startdate to enddate
     \G The intervals contain the same size of messages except the
@@ -484,7 +487,8 @@ User hashtmp$  hashtmp$ off
 	[: over >r U+DO  I i.date
 	      dup I + I' umin I l.hashs forth:type
 	  dup +LOOP
-	  r> 1- i.date
+	  r> dup last# cell+ $[]# u< IF  i.date
+	  ELSE  1- i.date+1  THEN
 	  drop ;] $tmp r> \ over 1 64s u> -
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
