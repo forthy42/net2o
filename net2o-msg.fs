@@ -479,7 +479,7 @@ User hashtmp$  hashtmp$ off
     last# >r >r last# $@ ?msg-log
     last# cell+ $[]#
     IF
-	date>i >r date>i' r> swap
+	date>i >r date>i' r> swap ~~
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
@@ -674,12 +674,14 @@ also net2o-base
     msg-group  last-signdate@ { 64: date }
     64#0 lit, date slit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
-	date 64#1 64+ lit, 64#-1 slit, 1 ulit, msg-last?
+	date lit, 64#-1 slit, 1 ulit, msg-last?
     THEN ;
 
+: sync-ahead?, ( -- )
+    last-signdate@ 64#1 64+ lit, 64#-1 slit, ask-last# ulit, msg-last? ;
+
 : join, ( -- )
-    [: msg-otr msg-join
-      \ 64#0 lit, 64#-1 slit, ask-last# ulit, msg-last?
+    [: msg-otr msg-join sync-ahead?,
       sign[ msg-start "joined" $, msg-action msg> ;] [msg,] ;
 
 : silent-join, ( -- )
