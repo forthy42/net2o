@@ -309,7 +309,7 @@ Forward msg:last
     over le-64@ date>i
     dup 0< IF  drop 2drop  false  EXIT  THEN  >r
     over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
-    r> r> +DO
+    r> r> U+DO
 	c:0key I last# cell+ $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
 	ELSE  2dup 85type ."  <> " hashtmp over 85type  THEN
@@ -484,7 +484,7 @@ User hashtmp$  hashtmp$ off
 	[: over >r U+DO  I i.date
 	      dup I + I' umin 1+ I l.hashs forth:type
 	  dup +LOOP  r> i.date
-	  drop ;] $tmp r>
+	  drop ;] $tmp r> 1+
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
 
 \ sync chatlog through virtual file access
