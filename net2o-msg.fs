@@ -485,7 +485,7 @@ User hashtmp$  hashtmp$ off
 	date>i' >r date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
-	      dup I + I' umin I ~~ l.hashs over le-64@ ~~ 64drop forth:type
+	      dup I + I' umin I l.hashs forth:type
 	  dup +LOOP
 	  r> dup last# cell+ $[]# u< IF  i.date
 	  ELSE  1- i.date+1  THEN
@@ -525,9 +525,9 @@ Variable ask-msg-files[]
     last# $@ ?msg-log
     $> bounds ?DO
 	I' I 64'+ u> IF
-	    I le-64@ date>i
-	    I 64'+ 64'+ le-64@ 64#1 64+ date>i' swap
-	    ~~ l.hashs drop le-64@ ~~
+	    I le-64@ date>i'
+	    I 64'+ 64'+ le-64@ date>i' swap
+	    l.hashs drop le-64@
 	    I 64'+ le-64@ 64<> IF
 		I 64@ startd le-64@ 64umin
 		I 64'+ 64'+ 64@ endd le-64@ 64umax
@@ -677,7 +677,7 @@ also net2o-base
     msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group  last-signdate@ { 64: date }
+    msg-group  last-signdate@ 64#1 64+ { 64: date }
     64#0 lit, date slit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
 	date lit, 64#-1 slit, 1 ulit, msg-last?
