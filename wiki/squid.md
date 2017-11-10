@@ -558,29 +558,29 @@ will be routed there.
 
 These are the operations you want to perform in the ledger:
 
-  1. You want to move a coin from one ledger to another (implies key
-  change, so it is a transaction between different pseudonymous
-  owners)
+  1. You want to move a coin from one owner to another (may imply
+  ledger change)
 
-  2. You want to be able to join several coins into one, i.e you allow
-  several transactions to have the same destination, and all of these
-  are added together into one coin there.  One of the sources can have
-  the same owner as the destination, just an earlier transaction date.
+  2. You want to be able to join several coins into one
 
-  3. You want to split a coin.  As long as the balance is ok, you can
-  take from a coin and leave a smaller coin under the same id, it's
-  just a double output transaction, and the transaction itself is
-  valid.  You can't do that transaction again, because the transaction
-  has the original value and the resulting value embedded, it won't
-  match against the smaller coin.  It can't be replayed if you later
-  merge the coin up to the same value, as it also has a transaction
-  date, and that would be earlier than the created coin.
+  3. You want to split a coin
+
+I don't want to have complex multi-source and -sink transaction which
+are difficult to verify.  Instead, I propose a single transaction,
+which takes a part of one coin, and adds it up to the destination coin.
+
+![Coin transaction](https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Feynmandiagram.svg/220px-Feynmandiagram.svg.png)
+
+I represent this transaction as Feynman diagram, because that almost
+fits the concept.  It the source coin (or account) results in a value
+of 0, it can disappear, if the destination coin doesn't yet exist, it
+starts with the transaction as initial value.
 
 Coins are pseudonymous, and you can have many different pseudonyms.
-However, coins have readable values attached.  It's likely that mix
-services will be offered for gaining anonymity.  You transfer to one
-coin of the mix service, and you get back several coins from other
-coins of that same mix service, and you split and merge them
+However, coins as of now have readable values attached.  It's likely
+that mix services will be offered for gaining anonymity.  You transfer
+to one coin of the mix service, and you get back several coins from
+other coins of that same mix service, and you split and merge them
 accordingly when you want to do your next transaction.
 
 There is no need for a nonce, the key as id of the owner is
@@ -681,6 +681,25 @@ _O(log n)_ algorithm.
 I call it the SwapDragonChain, as the swap dragon is the mascott of
 Forth (the SWAP operation).  I'm sure the swap dragon can handle
 double booking quite well with his two heads.
+
+### Zero-Knowledge Proof?
+
+Zcash tries to hide the transactions by using zero-knowledge proofs
+for accounting them.  These proofs are a bit difficult and especially
+quite time-consuming.  So if someone has an efficient zero-knowledge
+proof that works for this simple transaction, then I could use that.
+Homomorphic encryption could do that job.
+
+It needs to proof that if you shift an amount of money from account A
+to B (where both accounts share a secret unknown to the auditor), you
+can audit that the sums are correct.  And if you change the secret,
+you can audit that the change didn't affect the account's value.
+
+That allows you to split a transaction into several steps: First
+separate the desired amount from your account, then change the secret
+and hand it over to the recipient (who gains knowledge of that secret),
+change the secret again, and finally merge it with the destination
+account (if wanted).
 
 ## The $quid: Useful Investment
 
