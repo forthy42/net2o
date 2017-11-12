@@ -424,16 +424,19 @@ differently, not necessarily smart; a counter-action to the crowd can
 improve your chances of winning.  You shouldn't go to “buy high, sell
 low”, though.
 
+### BitCoin is Reactionary
+
 But let's assume BitCoin is not a bubble going bust, but it's supposed
 to last (all 21 millions), and used as currency for everything by
 everybody.  That means the price per coin would soar until the total
-market cap equals the wealth of the entire planet.  BitCoin's wealth
-allocation is that of colonization or gold rushs: the first to arrive
-are the ones who get the by far largest claims.
+market cap equals the wealth of the entire planet (plus hot air for
+the first movers).  BitCoin's wealth allocation is that of
+colonization or gold rushs: the first to arrive are the ones who get
+the by far largest claims.
 
 And that would mean all those people who were there in the early phase
 would be incredible rich, just by being early.  Instead of creating
-most coins in the last, bit growth phase, BitCoin created them in the
+most coins in the last, big growth phase, BitCoin created them in the
 early phase, where it was essentially worthless and no effort needed
 to mine the coins.
 
@@ -445,7 +448,10 @@ it to gain wealth.  The result will be an increasingly absurd
 distribution of wealth, and all the assorted problems: economic power
 leads to political power, corruption, tax cuts for the rich,
 slavery-like work relationships, because only the rich can afford
-hiring people; the poor can't.
+hiring people; the poor can't.  The instability of deflationary money
+leads to speculation bubbles, which burst, and this instability moves
+the money even faster to the first movers, who don't lose anything in
+the downcycles.
 
 That's not what I think as future I want.  Fiat money has its
 downsides, too; but mostly when the state that controls it is in deep
@@ -458,12 +464,13 @@ Historical societies often had driven most of the population into one
 or the other form of servitude.  Ownership of production means,
 i.e. land in agricultural societies, factories in industrial
 societies, and a strict copyright regime in a knowledge society are
-usual means to give power to few and exploit the many.
+means to give power to few and exploit the many.
 
 Sometimes, the concentration of power is a natural consequence,
 e.g. for industrial production, economy of scale results in
-concentration of wealth and power.  In medieval Europe, the choice was
-either become a knight and serve the king, or become a serf, and thus
+concentration of wealth and power.  Or, in medieval Europe, the choice
+was either become a knight and serve the king (and that includes the
+risk of being killed in the next war), or become a serf, and thus
 being owned by the local knight.  Even when servitude was abolished, a
 similar relation between gentry and tenants were common, and the
 gentry makes sure that their political influence works to stabilize
@@ -472,8 +479,8 @@ their properties.
 Fiat money requires an intermediary (banks) to distribute the money
 handed out by the central bank; this gives a lot of power to the
 banks.  Crypto currencies, which don't require banks, could lift that
-bane, but they way they are constructed now, they just create a new
-one.
+bane, but they way they are constructed now, they just create a new,
+worse one.
 
 And finally, in the age of information, copyright and concepts like
 “work for hire” (i.e. the copyright is handed over as part of an
@@ -486,8 +493,8 @@ author's rights of things they actually didn't author.
 When trade happens in an inflationary system, people buy quick,
 because money is the hot potato.  That by itself increases the amount
 of money in circulation, because there are more hot potato
-transactions.  More demand increases the prices, so the inflation
-accellerates.
+transactions (money spent per time increases).  More demand increases
+the prices, so the inflation accellerates.
 
 If you don't print new money, the inflation will inevitable stop: The
 increased prices now match the increased turnaround speed, and
@@ -503,13 +510,11 @@ We know these periodic oscillations of prices in many parts of the
 economy, they are a consequence of a badly regulated closed loop
 system; they tend to oscillate if not properly compensated.  If the
 compensation is very bad, the oscillation is high, and annoying
-everybody.
+everybody.  Big osciallation is shifting wealth from the poor (who
+can't survive the downturns) to the rich (who can).
 
 To remove such oscillation by proper compensation is just solid
-engineering.  Super-fast transactions might not actually be a good
-idea, the seemingly arbitrary delays in current banking systems might
-just stabilize the value of our money.  It doesn't work against the
-long cycles, a phenomenon known as “pork cycle”.
+engineering.  We don't want pork cycles.
 
 ### Why a BlockChain?
 
@@ -829,3 +834,4 @@ Incentives matter.  Economy is all about game theory.
 )
   14. [BitCoin Stromverbrauch Energie](http://t3n.de/news/bitcoin-stromverbrauch-energie-872715/)
   15. [BitCoin Energy Consumption Index](https://digiconomist.net/bitcoin-energy-consumption)
+  16. [BitCoin is reactionary](http://www.ianwelsh.net/bitcoin-is-a-bad-way-to-do-something-necessary/)

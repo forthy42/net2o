@@ -58,11 +58,11 @@ endif
 SRC      = .
 ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
-VERSION  = @GFVER@
+GFVER  = @GFVER@
 machine  = @GFARCH@
-LIBCCNAMED = lib/$(notdir $(GFORTH))/$(VERSION)/$(machine)/libcc-named/
+LIBCCNAMED = lib/$(notdir $(GFORTH))/$(GFVER)/$(machine)/libcc-named/
 PREFIX    = $(package)@prefix@
-INCDIR    = $(PREFIX)/include/$(VERSION)
+INCDIR    = $(PREFIX)/include/$(GFVER)
 INSTALL	= @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -125,12 +125,12 @@ extra-install:	install-libs install
 
 install:	libcc-install
 	for i in $(SRCDIRS); do \
-		$(MKDIR) -p $(datadir)/gforth/$(VERSION)/$$i; \
+		$(MKDIR) -p $(datadir)/gforth/$(GFVER)/$$i; \
 	done
-	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
-	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(VERSION)/net2o
+	-@VERDIR@rm $(datadir)/gforth/$(GFVER)/net2o
+	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(GFVER)/net2o
 	for i in $(SOURCES) $(GEN); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(VERSION)/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
 	@VERDIR@for i in $(SCRIPTS); do \
@@ -142,14 +142,14 @@ install:	libcc-install
 	@NOVERDIR@done
 
 %.dirui:
-	$(RMDIR) $(datadir)/gforth/$(VERSION)/$(@:%.dirui=%); \
+	$(RMDIR) $(datadir)/gforth/$(GFVER)/$(@:%.dirui=%); \
 
 %.scriptui:
 	-@VERDIR@$(RM) $(bindir)/$(@:%.scriptui=%)-@PACKAGE_VERSION@; \
 	$(RM) $(bindir)/$(@:%.scriptui=%); \
 
 uninstall:	libcc-uninstall $(SRCDIRS:%=%.dirui) $(SCRIPTS:%=%.scriptui)
-	-@VERDIR@rm $(datadir)/gforth/$(VERSION)/net2o
+	-@VERDIR@rm $(datadir)/gforth/$(GFVER)/net2o
 
 libcc:	$(FORTHLIB:%=%.libcc)
 
