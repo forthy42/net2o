@@ -96,10 +96,10 @@ Variable bfile2$
     o bdelta_numMatches 0 ?DO
 	o i p1 p2 numr bdelta_getMatch
 	p2 64@ p2' n>64 64- 64dup .p 64>n >r
-	b $@ fp /string r> umin dup >r type r> fp + to fp
+	b $@ fp /string r> umin dup >r type r> +to fp
 	p1 64@ p1' n>64 64- .ps
 	numr 64@ 64dup .p
-	64dup 64>n fp + to fp
+	64dup 64>n +to fp
 	64dup p1 64@ 64+ 64>n to p1'
 	p2 64@ 64+ 64>n to p2'
     LOOP
@@ -123,9 +123,9 @@ Variable bdelta$
     $@ bounds U+DO
 	I p@+ >r 64>n r> swap 2dup type +
 	dup I' u< IF
-	    ps@+ >r 64>n fp + to fp
+	    ps@+ >r 64>n +to fp
 	    dup $@ fp safe/string
-	    r> p@+ >r 64>n dup fp + to fp umin type r>
+	    r> p@+ >r 64>n dup +to fp umin type r>
 	THEN
     I - +LOOP  drop ;
 
@@ -156,13 +156,13 @@ Variable bdelta$
     $@ bounds U+DO
 	I p@+ >r 64>n r> swap 2dup <#new> type <default> +
 	dup I' u< IF
-	    ps@+ >r 64>n dup >r fp + to fp
+	    ps@+ >r 64>n dup >r +to fp
 	    r@ 0> IF
 		dup $@ fp r@ - safe/string  offt negate r@ umin safe/string
 		r> umin <#del> type <default> 0 >r  THEN
 	    r> to offt
 	    dup $@ fp safe/string
-	    r> p@+ >r 64>n dup fp + to fp umin
+	    r> p@+ >r 64>n dup +to fp umin
 	    offt 0< IF  2dup offt negate umin <#copy> type <default>
 		offt negate /string dup 0 min to offt 0 max
 	    THEN  type-shorted r>

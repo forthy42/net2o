@@ -664,7 +664,7 @@ previous
 
 : last-signdate@ ( -- 64date )
     msg-group$ $@ msg-logs #@ dup IF
-	+ cell- $@ startdate@
+	+ cell- $@ startdate@ 64#1 64+
     ELSE  2drop 64#-1  THEN ;
 
 also net2o-base
@@ -677,7 +677,7 @@ also net2o-base
     msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group  last-signdate@ 64#1 64+ { 64: date }
+    msg-group  last-signdate@ { 64: date }
     64#0 lit, date slit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
 	date lit, 64#-1 slit, 1 ulit, msg-last?

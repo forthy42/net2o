@@ -128,7 +128,7 @@ end-class dvcs-log-class
 : -fileentry ( addr u o:dvcs -- )
     dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #off ;
 
-: create-symlink-f ( addrdest udest addrlink ulink -- )
+: create-symlink-f ( addrdest udest addrlink ulink perm -- ) { perm }
     \G create symlink and overwrite existing file
     2over 2over symlink dup -1 = IF
 	errno EEXIST = IF  drop
@@ -136,31 +136,38 @@ end-class dvcs-log-class
 	THEN
     THEN  ?ior 2drop 2drop ;
 
+: create-file-f ( addr u addrfile ufile perm -- ) { perm }
+    r/w create-file throw >r
+    dvcs( ." write " dup . ." bytes" cr )
+    r@ write-file throw
+    r@ fileno perm fchmod ?ior
+    r> close-file throw ;
+
+: create-dir-f ( addr 0 addrdir udir perm -- ) { perm }
+    2dup delete-file drop \ try deleting it as file
+    2dup perm mkdir-parents
+    dup file-exist# = IF  drop  ELSE  throw  THEN
+    perm chmod ?ior
+    2drop ;
+
 : dvcs-outfile-name ( hash+perm-addr u1 fname u2 -- )
     2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
     drop dvcs:perm le-uw@ { perm } 2r>
     perm S_IFMT and  case
-	S_IFLNK of
-	    create-symlink-f  endof
-	S_IFREG of
-	    r/w create-file throw >r
-	    r@ write-file throw
-	    r@ fileno perm fchmod ?ior
-	    r> close-file throw  endof
-	S_IFDIR of
-	    2dup delete-file drop \ try deleting it as file
-	    2dup perm mkdir-parents
-	    dup file-exist# = IF  drop  ELSE  throw  THEN
-	    perm chmod ?ior
-	    2drop  endof  \ no content in directory
-	2drop 2drop \ unhandled types
+	S_IFLNK of  perm create-symlink-f  endof
+	S_IFREG of  perm create-file-f     endof
+	S_IFDIR of  perm create-dir-f      endof  \ no content in directory
+	dvcs( ." unhandled type " hex. type space hex. drop cr 0 )else(
+	2drop 2drop ) \ unhandled types
     endcase ;
 
 : dvcs-outfile-hash ( baddr u1 fhash u2 -- )
     hash#128 umin dvcs-objects #! ;
 
 : dvcs-in-hash ( addr u -- )
-    dvcs-objects #@ dvcs:in-files$ $+! ;
+    dvcs( ." +read: " 2dup 85type cr )
+    dvcs-objects #@ over 0= !!dvcs-hash!!
+    dvcs:in-files$ $+! ;
 
 : filelist-print ( filelist -- )
     [: >r r@ cell+ $@ 85type space r> $@ type cr ;] #map ;
@@ -214,14 +221,17 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
 ; dvcs-class to dvcs:rmdir
 :noname ( 64len addr u -- )
-    dvcs:patch$ $! dvcs:out-fileoff off
+    dvcs:patch$ $! dvcs( ." -patch: " 64dup u64. )
+    dvcs:out-fileoff off
     64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
     dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
+    dvcs( ." real len " dvcs:out-files$ $@len u. cr )
 ; dvcs-class to dvcs:patch
 :noname ( 64size addr u -- )
     2dup 2 /string ?sane-file 2drop
-    2>r 64>n { fsize }
+    2>r dvcs( ." -write: " 64dup u64. cr )
+    64>n { fsize }
     dvcs:out-files$ $@ dvcs:out-fileoff @ safe/string fsize umin
     2dup >file-hash 2r> 2swap  dvcs:fileentry$ $free
     [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
@@ -287,11 +297,14 @@ Variable branches[]
 User tmp1$
 : $tmp1 ( xt -- ) tmp1$ $free  tmp1$ $exec  tmp1$ $@ ;
 
+: mode@ ( -- mode )
+    statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] ;
+
 : hashstat-rest ( addr u -- addr' u' )
-    [: statbuf st_mode w@ 0 { w^ perm } perm le-w!
+    [: mode@ 0 { w^ perm } perm le-w!
 	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
 	perm le-uw@ S_IFMT and  case
-	    S_IFLNK of  $200 new-file$ $!len
+	    S_IFLNK of  $1000 new-file$ $!len \ pathmax: 4k
 		2dup new-file$ $@ readlink
 		dup ?ior new-file$ $!len  endof
 	    S_IFREG of  2dup new-file$ $slurp-file  endof
@@ -329,7 +342,7 @@ User tmp1$
 	r@ cell+ $@ drop hash#128 + dvcs:timestamp le-64@
 	statbuf st_mtime ntime@ d>64 64<>
 	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@
-	statbuf st_mode w@ <> or  IF
+	mode@ <> or  IF
 	    r@ $@ hashstat-rest 2dup fn-split dvcs:files# #@
 	    hash#128 umin 2swap hash#128 umin
 	    str=
@@ -351,7 +364,7 @@ User tmp1$
 
 : file-size@ ( addr u -- 64size )
     statbuf lstat ?ior statbuf st_size 64@
-    statbuf st_mode w@ S_IFMT and S_IFDIR <> n>64 64and ;
+    mode@ S_IFMT and S_IFDIR <> n>64 64and ;
 
 also net2o-base
 
@@ -686,7 +699,7 @@ previous
 	$@ dvcs( ." rd " 2dup type cr ) dvcs:rmdirs[] $ins[] drop
     ELSE  dup $@ dvcs( ." rm " 2dup type cr )
 	delete-file dup 0< IF
-	    <err> >r ." can't delete file " $. ." : "
+	    <warn> >r ." can't delete file " $. ." : "
 	    r> error$ type <default> cr
 	ELSE  2drop  THEN
     THEN ;
@@ -700,7 +713,7 @@ previous
 	THEN ;] #map
     dvcs:rmdirs[] $@ bounds cell- swap cell- U-DO
 	I $@ rmdir 0< IF
-	    errno strerror <err>
+	    errno strerror <warn>
 	    ." can't delete directory " I $. ." : " type <default> cr
 	THEN
     cell -LOOP
@@ -838,7 +851,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     n2o:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
     0 >o dvcs-connects +dvcs-sync-done
-    net2o-code expect-reply ['] last?, [msg,] end-code
+\    net2o-code expect-reply ['] last?, [msg,] end-code
     wait-dvcs-request o>
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
