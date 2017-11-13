@@ -139,10 +139,10 @@ Variable bdelta$
 
 #80 Constant max-shorted#
 
-: <#copy> $B62 attr! ;
-: <#omit> $962 attr! ;
-: <#new>  $D62 attr! ( for color blind: $D68 ) ;
-: <#del>  $E62 attr! ;
+: <#copy> $B602 attr! ;
+: <#omit> $9602 attr! ;
+: <#new>  $D602 attr! ( for color blind: $D608 ) ;
+: <#del>  $E610 attr! ;
 
 : type-shorted ( addr u -- )
     dup [ max-shorted# 5 2 */ ]L u>

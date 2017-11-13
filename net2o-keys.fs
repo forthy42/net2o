@@ -94,7 +94,7 @@ Create imports$ $20 allot imports$ $20 bl fill
 
 Variable import-type  import#new import-type !
 
-Create >im-color  $B60 , $D60 , $960 , $C60 , $A60 , $8B1 , $E60 ,
+Create >im-color  $B600 , $D600 , $9600 , $C600 , $A600 , $8B01 , $E600 ,
 DOES> swap 8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP
   cells + @ attr! ;
 
