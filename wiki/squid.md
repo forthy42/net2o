@@ -400,11 +400,16 @@ Is BitCoin's price a bubble?  Who could have that strange idea?
 
 ![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
 
-Many humans like to gamble, and the pattern of gambling with
-speculation objects are remarkable similar.  Even smart persons like
-Isaac Newton lost a fortune in crashes.  The madness of humans however
-can be calculated, though certainly not to the finest details.  The
-BitCoin chart however looks like a classic.
+Mammals like to gamble.  The reason for why gambling is so rewarding
+has been found by B. F. Skinner.  Erratic, random reward reinforces
+behavior better than constant, predictable.  Humans don't show any
+more meta-insights than mice in this respect.
+
+The pattern of gambling with speculation objects are remarkable
+similar.  Even smart persons like Isaac Newton lost a fortune in
+bursting bubbles.  The madness of humans however can be calculated,
+though certainly not to the finest details.  The BitCoin chart however
+looks like a classic:
 
 ![BitCoin Chart](https://assets.bwbx.io/images/users/iqjWHBFdfxIU/iFKLTQNYjslA/v4/800x-1.png)
 
@@ -418,8 +423,9 @@ That's because those who entered the bubble early and sold at the
 right time got the money, and those who entered late lost.  The
 tragedy is that the early ones are smart and rare, and the late ones
 are stupid and many.  And that means a huge concentration in money,
-and especially a loss for those who didn't really have that money.
-Speculation inevitably is a move from the crowd to the few who behaved
+and especially a loss for those who didn't really have that money,
+causing them to default, and sink into poverty.  Speculation
+inevitably is a move from the crowd to the few who behaved
 differently, not necessarily smart; a counter-action to the crowd can
 improve your chances of winning.  You shouldn't go to “buy high, sell
 low”, though.
@@ -835,3 +841,4 @@ Incentives matter.  Economy is all about game theory.
   14. [BitCoin Stromverbrauch Energie](http://t3n.de/news/bitcoin-stromverbrauch-energie-872715/)
   15. [BitCoin Energy Consumption Index](https://digiconomist.net/bitcoin-energy-consumption)
   16. [BitCoin is reactionary](http://www.ianwelsh.net/bitcoin-is-a-bad-way-to-do-something-necessary/)
+  17. [Skinner box](https://en.wikipedia.org/wiki/Operant_conditioning_chamber)
