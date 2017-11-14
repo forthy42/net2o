@@ -419,6 +419,7 @@ Variable id-files[]
 previous
 
 : save-project ( -- )
+    dvcs( ." saving '" dvcs:id$ $@ 85type cr )
     dvcs:id$ $@ ['] 85type project:revision$ dup $free $exec
     "~+/.n2o/config" ['] project >body write-config ;
 
@@ -536,7 +537,7 @@ Variable patch-in$
     $make branches[] >back ;
 User id-check# \ check hash
 : id>branches-loop ( addr u -- )
-    BEGIN  2dup id-check# #@ d0<> ?EXIT
+    BEGIN  2dup id-check# #@ d0<> IF  2drop  EXIT  THEN
 	s" !" 2over id-check# #!
 	2dup id>snap# #@ 2dup d0<> IF  >branches 2drop  EXIT  THEN
 	2drop id>patch# #@ 2dup d0<> WHILE
@@ -544,7 +545,7 @@ User id-check# \ check hash
 	    hash#128 safe/string  hash#128 - 2dup + >r
 	    bounds U+DO  I hash#128 recurse  hash#128 +LOOP
 	    r> hash#128 \ tail recursion optimization
-    REPEAT ;
+    REPEAT  2drop ;
 : id>branches ( addr u -- )
     id-check# #offs
     branches[] $[]off  dvcs:commits @ .id>branches-loop
@@ -568,8 +569,8 @@ User id-check# \ check hash
 
 : pull-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches ;
-: dvcs-readin ( addr u -- )
-    pull-readin  id>branches
+: dvcs-readin ( $addr -- )
+    pull-readin  $@ id>branches
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
 : n2o:new-dvcs-log ( -- o )
@@ -655,7 +656,7 @@ previous
     c:0key >hash hashtmp hash#128 85type ;
  
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
-    dvcs:oldid$ $@ dvcs-readin
+    dvcs:oldid$ dvcs-readin
     ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
 	." Nothing to do" cr
     ELSE
@@ -675,7 +676,7 @@ previous
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
 
 : dvcs-diff ( -- )
-    n2o:new-dvcs >o dvcs:oldid$ $@ dvcs-readin
+    n2o:new-dvcs >o dvcs:oldid$ dvcs-readin
     ['] compute-diff gen-cmd$ 2drop
     dvcs( ." ===== diff len: " dvcs:patch$ $@len . ." =====" cr )
     dvcs:in-files$ dvcs:patch$ color-bpatch$2
@@ -749,7 +750,7 @@ previous
 
 : dvcs-co ( addr u -- ) \ checkout revision
     base85>$  n2o:new-dvcs >o
-    config>dvcs   2dup dvcs:id$ $!  dvcs-readin  co-rest
+    config>dvcs   dvcs:id$ $! dvcs:id$  dvcs-readin  co-rest
     n2o:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
