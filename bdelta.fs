@@ -157,7 +157,7 @@ Variable bdelta$
 	I p@+ >r 64>n r> swap 2dup <#new> type <default> +
 	dup I' u< IF
 	    ps@+ >r 64>n dup >r +to fp
-	    r@ 0> IF
+	    r@ 0>= IF
 		dup $@ fp r@ - safe/string  offt negate r@ umin safe/string
 		r> umin <#del> type <default> 0 >r  THEN
 	    r> to offt
@@ -170,6 +170,7 @@ Variable bdelta$
     I - +LOOP  drop ;
 
 : bpatch ( addr1 u1 addr2 u2 -- addr3 u3 )
+    bdelta$ $free
     bslurp ['] bpatch$2 bdelta$ $exec
     bdelta$ $@ ;
 

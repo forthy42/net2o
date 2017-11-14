@@ -225,8 +225,12 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     dvcs:out-fileoff off
     64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
     dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
+    dvcs( ." ===== in files =====" cr dvcs:in-files$ $. ." ===== diff =====" cr
+    dvcs:in-files$ dvcs:patch$ color-bpatch$2 )
+    dvcs:out-files$ $free
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
-    dvcs( ." real len " dvcs:out-files$ $@len u. cr )
+    dvcs( ." ===== " dvcs:out-files$ $@len u. ."  =====" cr
+    dvcs:out-files$ $. ." ========================" cr )
 ; dvcs-class to dvcs:patch
 :noname ( 64size addr u -- )
     2dup 2 /string ?sane-file 2drop
@@ -355,12 +359,16 @@ User tmp1$
     ." --- old files:" cr old-files[] ['] .file+hash $[]map
     ." +++ new files:" cr new-files[] ['] .file+hash $[]map
     ." +++ ref files:" cr ref-files[] ['] .file+hash $[]map
+    ." ===" cr
     ) ;
 
 : dvcs+in ( hash u -- )
-    hash#128 umin dvcs-objects #@ dvcs:in-files$ $+! ;
+    dvcs( ." read in: " 2dup 85type forth:cr )
+    hash#128 umin dvcs-objects #@ over 0= !!wrong-hash!!
+    dvcs:in-files$ $+! ;
 : dvcs+out ( hash u -- )
-    hash#128 umin dvcs-objects #@ dvcs:out-files$ $+! ;
+    hash#128 umin dvcs-objects #@ over 0= !!wrong-hash!!
+    dvcs:out-files$ $+! ;
 
 : file-size@ ( addr u -- 64size )
     statbuf lstat ?ior statbuf st_size 64@
@@ -368,7 +376,7 @@ User tmp1$
 
 also net2o-base
 
-: read-old-fs ( -- )
+: read-old-fs ( -- ) dvcs:in-files$ $free
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map ;
 : read-del-fs ( -- )
     del-files[] [: over hash#128 dvcs:perm + le-uw@
@@ -386,6 +394,8 @@ also net2o-base
     ref-files[] [: over hash#128 $, dvcs-add hash#128 /string 2dup $,
 	2 /string file-size@ lit, dvcs-write ;] $[]map ;
 : compute-patch ( -- )
+    dvcs( ." ===== in-files$ ====" forth:cr dvcs:in-files$ $.
+    ." ===== out-files$ =====" forth:cr dvcs:out-files$ $. )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
 
@@ -553,14 +563,13 @@ User id-check# \ check hash
 
 : >revision ( addr u -- )
     2dup >file-hash dvcs:hash$ $!
+    dvcs( ." ===== ci '" dvcs:hash$ $@ 85type ." ' =====" cr )
     write-enc-hashed 2drop ;
 
 : pull-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches ;
-: dvcs-readin-rev ( addr u -- )
-    pull-readin  id>branches ;
-: dvcs-readin ( -- )
-    dvcs:oldid$ $@ dvcs-readin-rev
+: dvcs-readin ( addr u -- )
+    pull-readin  id>branches
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
 : n2o:new-dvcs-log ( -- o )
@@ -646,11 +655,12 @@ previous
     c:0key >hash hashtmp hash#128 85type ;
  
 : (dvcs-ci) ( addr u o:dvcs -- ) dvcs:message$ $!
-    dvcs-readin
+    dvcs:oldid$ $@ dvcs-readin
     ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
 	." Nothing to do" cr
     ELSE
 	['] compute-diff gen-cmd$
+	dvcs( ." ===== patch len: " dvcs:patch$ $@len . ." =====" cr )
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
 	ref-files[] ['] +fileentry $[]map
@@ -665,8 +675,9 @@ previous
     n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
 
 : dvcs-diff ( -- )
-    n2o:new-dvcs >o dvcs-readin
+    n2o:new-dvcs >o dvcs:oldid$ $@ dvcs-readin
     ['] compute-diff gen-cmd$ 2drop
+    dvcs( ." ===== diff len: " dvcs:patch$ $@len . ." =====" cr )
     dvcs:in-files$ dvcs:patch$ color-bpatch$2
     clean-up  n2o:dispose-dvcs o> ;
 
@@ -738,8 +749,7 @@ previous
 
 : dvcs-co ( addr u -- ) \ checkout revision
     base85>$  n2o:new-dvcs >o
-    config>dvcs   2dup dvcs:id$ $!  dvcs-readin-rev
-    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified  co-rest
+    config>dvcs   2dup dvcs:id$ $!  dvcs-readin  co-rest
     n2o:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
