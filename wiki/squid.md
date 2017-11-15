@@ -842,3 +842,4 @@ Incentives matter.  Economy is all about game theory.
   15. [BitCoin Energy Consumption Index](https://digiconomist.net/bitcoin-energy-consumption)
   16. [BitCoin is reactionary](http://www.ianwelsh.net/bitcoin-is-a-bad-way-to-do-something-necessary/)
   17. [Skinner box](https://en.wikipedia.org/wiki/Operant_conditioning_chamber)
+  18. [BitCoin bubble from 2013](https://www.forbes.com/sites/jessecolombo/2013/12/19/bitcoin-may-be-following-this-classic-bubble-stages-chart/#61f0969d36b8)

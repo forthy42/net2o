@@ -24,7 +24,7 @@ datadir   = $(package)@datadir@
 srcdir    = @srcdir@
 bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
-LIBCCDEST = $(libdir)/gforth/$(GFVER)/$(machine)/libcc-named/
+LIBCCDEST = $(libdir)/gforth/$(GFVER)/$(machine)/libcc-named
 libccdir = $(subst $(package),,$(LIBCCDEST))
 LIBS 	 = keccak threefish ed25519-donna bdelta
 MKDIR	 = mkdir
@@ -60,7 +60,7 @@ ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
 GFVER  = @GFVER@
 machine  = @GFARCH@
-LIBCCNAMED = lib/$(notdir $(GFORTH))/$(GFVER)/$(machine)/libcc-named/
+LIBCCNAMED = lib/$(notdir $(GFORTH))/$(GFVER)/$(machine)/libcc-named
 PREFIX    = $(package)@prefix@
 INCDIR    = $(PREFIX)/include/$(GFVER)
 INSTALL	= @INSTALL@
@@ -155,7 +155,7 @@ libcc:	$(FORTHLIB:%=%.libcc)
 
 %.libcc:
 	-echo "generating library $(@:%.libcc=%)"
-	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
+	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
 	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
@@ -165,12 +165,12 @@ libccdest:
 
 libcc-install:	libcc libccdest
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
-		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)libgf`basename $$i .fs`.la $(LIBCCDEST)libgf`basename $$i .fs`.la; \
+		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)/libgf`basename $$i .fs`.la; \
 		done; fi
 
 libcc-uninstall:
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
-		   $(LIBTOOL) --silent --mode=uninstall $(RM) $(LIBCCDEST)libgf`basename $$i .fs`.*; \
+		   $(LIBTOOL) --silent --mode=uninstall $(RM) $(LIBCCDEST)/libgf`basename $$i .fs`.*; \
 		done; fi
 
 doc:	$(DOC)
