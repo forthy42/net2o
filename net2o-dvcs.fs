@@ -858,7 +858,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     dvcs:commits @ .dvcs-needed-files
     connection .get-needed-files ;
 
-: handle-pull ( -- )  ?.net2o/objects
+: handle-fetch ( -- )  ?.net2o/objects
     n2o:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
     0 >o dvcs-connects +dvcs-sync-done
