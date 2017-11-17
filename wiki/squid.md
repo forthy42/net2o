@@ -83,7 +83,19 @@ money, but we don't know.
 
 ### Trade vs. speculation object
 
-Where does the need for money come from?
+_Where does the need for money come from?  And what's money?_
+
+Terms:
+
+  + Commodity money: Objects with inherent value used as money
+  + Representative money: Note promising exchange with objects with
+    inherent values used as money (also: promissory notes)
+  + Fiat money: Medium with no inherent value and no promise for
+    exchange with such an object used as money
+  + Legal tender: Medium of payment by law, can be any of the above
+
+People tend to confuse legal tender with fiat money, because nobody
+would accept a fiat money if it's not a legal tender.  Or would you?
 
 ### Early forms of money
 
@@ -158,8 +170,9 @@ and became quickly popular.
 ![feiqian](http://lishi.dugoogle.com/wp-content/uploads/2015/04/48c3b774accb494a80636253fc950dd2.jpg)
 
 These notes were produced and cashed in by banks.  In 1024, the first
-state-issued feiqians were issued, and in the 12th century, the 会子
-(huizi) was established as legal tender.
+state-issued feiqians were issued, and in the 12th century (in the
+southern Song dynasty), the 会子(huizi) was established as legal
+tender.
 
 ![Huizi](https://upload.wikimedia.org/wikipedia/commons/6/6a/Hui_zi.jpg)
 
