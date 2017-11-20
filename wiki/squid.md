@@ -79,15 +79,13 @@ over water (even when not frozen).
 
 ## Purpose of a currency (with history lesson)
 
+_Where does the need for money come from?  And what's money?_
+
 We'll mostly look into Chinese history, because all the important
 inventions in currencies happened there.  Except maybe the cowry shell
 money, but we don't know.
 
-### Trade vs. speculation object
-
-_Where does the need for money come from?  And what's money?_
-
-Terms:
+### Terms
 
   + Commodity money: Objects with inherent value used as money
   + Representative money: Note promising exchange with objects with
