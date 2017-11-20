@@ -43,7 +43,7 @@ Here's the bingo chart for all valid critics on BitCoins:
 <th></th>
 <td>BitCoin is deflationary</td>
 <td>The BlockChain is too big</td>
-<td>Tulipmania!</td>
+<td class="joker">Tulipmania!</td>
 <td>blocks are too big</td>
 <td>blocks are too small</td>
 </tr>
@@ -96,6 +96,8 @@ Terms:
 
 People tend to confuse legal tender with fiat money, because nobody
 would accept a fiat money if it's not a legal tender.  Or would you?
+So the common English definition of “fiat money” implies that it is a
+legal tender.
 
 ### Early forms of money
 
