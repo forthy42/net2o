@@ -2,7 +2,7 @@
 
 echo "This script builds net2o from scratch"
 
-GFORTH=gforth-0.7.9_20171115
+GFORTH=gforth-0.7.9_20171123
 
 if [ "$(uname -o)" = "Cygwin" ]
 then
@@ -91,7 +91,7 @@ which gforth 1>/dev/null 2>/dev/null && GF=$(gforth --version 2>&1 | cut -f1-2 -
 	echo "A Forth-capable swig is found, everything fine"
     else
 	echo "Build a Forth-capable swig"
-	git-get https://github.com/forthy42 swig
+	git-get https://github.com/GeraldWodni swig
 	build swig
     fi
     build $GFORTH
