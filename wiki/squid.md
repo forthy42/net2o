@@ -15,10 +15,13 @@ society, and propose improvements.*
   + *The energy consumption of proof of work*
   + *The non-scaleable replicated, but not partitioned ledger*
 
+The lightning network tries to address the last point, by doing transactions
+off-chain.
+
 ## Introduction
 
 I figured out that the user layer of my net2o peer to peer protocol
-needs some sort of asset transaction protocol (cryptocurrency), and
+needs some sort of asset transaction protocol (“cryptocurrency”), and
 when secure protocols meet money, it's not just technology that
 matters. This paper will therefore take both sides into consideration.
 
@@ -240,29 +243,38 @@ security of these ledgers through mathematical magic.
 
 ## Proof of What?
 
-It is pretty obvious that BitCoin went back all the way through human
-money history, and uses the same principle shell money had to give
-value to a coin: the miners do a proof of work.  Like the shells, the
-amount is limited, and the difficulty raises with the amount of work
-available.  The limited amount of mineable BitCoins mimics another
-property of shell money, and with a quickly growing economy that
-actually uses cryptocurrencies, it becomes a quickly deflating
-currency.  That makes it ideal as speculation object, and very bad as
-trade token.
+It is pretty obvious that BitCoin went back all the way through human money
+history, and uses the same principle shell money had to give value to a coin:
+the miners do a proof of work.  Like the shells, the amount is limited, and
+the difficulty raises with the amount of work available.  The limited amount
+of mineable BitCoins mimics another property of shell money, and with a
+quickly growing economy that actually uses cryptocurrencies, it becomes a
+quickly deflating currency.  That makes it ideal as speculation object, and
+very bad as trade token.
 
-There is a disastrous side effect to this: Mining burns energy, ASICs
-are developed and manufactured, if you try to avoid ASIC mining, all
-available cost-efficient GPUs are bought and gamers are frustated,
-because they simply can't get hold of them.  This is far worse to
-hoarding gold, because nobody actually needs gold anywhere near the
-available quantities used as money.
+There is a disastrous side effect to this: Mining burns energy, ASICs are
+developed and manufactured, if you try to avoid ASIC mining, all available
+cost-efficient GPUs are bought and gamers are frustated, because they simply
+can't get hold of them.  This is far worse to hoarding gold, because nobody
+actually needs gold anywhere near the available quantities used as money.
 
 And all that big amount of work is converted into very few actual
-transactions.  BitCoin exchanges pop up that allow people to trade
-with them without actually making transactions in the BitCoin
-protocol; and without those transactions, that money is not secured.
-Virtual bankrobbery occurs, and it shows that people who don't know
-history are doomed to repeat it: Regulation is there for good reasons.
+transactions.  BitCoin exchanges pop up that allow people to trade with them
+without actually making transactions in the BitCoin protocol; and without
+those transactions, that money is not secured.  Virtual bankrobbery occurs,
+and it shows that people who don't know history are doomed to repeat it:
+Regulation is there for good reasons.
+
+Note that the energy consumption is not a function of how many transactions
+happen, it's a function of how much reward the miners get.  That means higher
+bitcoin prices result in higher energy consumption, because the proof of work
+skales with the amount of available work, and that inflates with the price per
+coin.
+
+That means that the lightning network, while improving scalability, does not
+cut down the hidden transaction costs: the liquidity required for the
+lightning network will drive the price per coin up, so that mining is so
+lucrative that miners will buy more ASICs and burn more coal in turn.
 
 ### What is a BlockChain?
 
@@ -276,22 +288,21 @@ is one aspect, the consensus algorithm the other:
 
 ### How to cheaply secure the BlockChain
 
-So let's take a step back, and look at what's the point of the proof
-of work (the consensus algorithm): The basic idea is that of securing
-the BlockChain against an attack that allows double spending.  The
-BlockChain itself is immutable if you have access to the last hashed
-block: Through a link of hashes, every other block before can't be
-changed without changing the last block, too.  The problem is: how do
-you know it's _the_ valid last block?
+So let's take a step back, and look why there's a need for the proof of work
+(the consensus algorithm): The basic idea is that of securing the BlockChain
+against an attack that allows double spending.  The BlockChain itself is
+immutable if you have access to the last hashed block: Through a link of
+hashes, every other block before can't be changed without changing the last
+block, too.  The problem is: how do you know it's _the_ valid last block?
 
-BitCoin's proof of work concept is that you need to invest a certain
-amount of work to sign a block, so the older a block is, the more work
-it takes to forge it, and reciprocal, the more work that went into a
-chain, the more “true” it is.  That concept originates from a
-crypto-anarchic design: in the BitCoin world, everybody is
-pseudonymous, so even the signature for the blocks are done by
-anonymous cowards.  We are back before the first promissory notes, who
-at least had identifyable individuals as signers.
+BitCoin's proof of work concept is that you need to invest a certain amount of
+work to sign a block, so the older a block is, the more work it takes to forge
+it, and reciprocal, the more work that went into a chain, the more “true” it
+is.  That concept originates from a crypto-anarchic design: in the BitCoin
+world, everybody is pseudonymous, so even the signature for the blocks are
+done by anonymous cowards (and that is just a hash, there's no identity
+associated with that hash).  We are back before the first promissory notes,
+who at least had identifyable individuals or institutions as signers.
 
 We have to go one more step back, to see where that attack originates
 in the threat model: it's a man in the middle (MITM) attack to prevent
@@ -558,29 +569,32 @@ still worth to pursue.
 
 ## How to really distribute book-keeping
 
-A distributed database can be replicated or partitioned (or both).
-BlockChains as of now are replicated; that's the scaling problem
-mentioned in the bullshit bingo sheet above.  They also need to be
-partitioned to gain all the benefits of modern distributed databases.
+_For the record: WeChat's payment system has in the order of 1 million TPS
+peak on Chinese New Year_
+
+A “distributed database” can be replicated or partitioned (or both).
+BlockChains as of now are replicated; that's the scaling problem mentioned in
+the bullshit bingo sheet above.  They also need to be partitioned to gain all
+the benefits of modern distributed databases.  Doing the partitioning
+off-chain is sidestepping the problem instead of solving it.  Note that the
+lightning network hints at possible solutions, without being one.
 
 An important design goal for me is to handle massive ammounts of
-micropayments, because that's an application where I see a legitime
-need for cryptographic payment protection.  Ransomware fees, tax
-evasion, and illegal business are probably already handled well by
-BitCoin.
+micropayments, because that's an application where I see a legitime need for
+cryptographic payment protection.  Ransomware fees, tax evasion, and illegal
+business are fringe cases without benefit to mankind, and therefore not
+interesting.
 
-All coins have a value, a unit (if you want to keep different kinds of
-values in the same ledger, you need that), a creation date (time of
-the creating transaction, which also is the index into the
-corresponding block), and an owner pubkey.
+All coins/accounts have a value, a unit (if you want to keep different kinds
+of values in the same ledger, you need that), a creation date (time of the
+creating transaction, which also is the index into the corresponding block),
+and an owner pubkey+signature, making it immutable without consent of the
+owner.
 
 All transactions contain an implicit block hash that refers to the
-state of the ledger at the beginning of this transaction, a list of
-origins, and the credited amount, a list of destinations and the
-debited amount, a contract, a list of signatures of all originators
-(showing the consent of those) and finally a list of signatures of all
-destinations.  All sources must be from the same ledger, destinations
-will be routed there.
+state of the ledger at the beginning of this transaction, an origin state
+transition, and a destination state transition with the same delta
+(transaction fees left out).
 
 These are the operations you want to perform in the ledger:
 
@@ -597,17 +611,17 @@ which takes a part of one coin, and adds it up to the destination coin.
 
 ![Coin transaction](https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Feynmandiagram.svg/220px-Feynmandiagram.svg.png)
 
-I represent this transaction as Feynman diagram, because that almost
-fits the concept.  It the source coin (or account) results in a value
-of 0, it can disappear, if the destination coin doesn't yet exist, it
-starts with the transaction as initial value.
+I represent this transaction as Feynman diagram, because that almost fits the
+concept.  It the source coin (or account) results in a value of 0, it can
+disappear, if the destination coin doesn't yet exist, it starts with the
+transaction as initial value.
 
-Coins are pseudonymous, and you can have many different pseudonyms.
-However, coins as of now have readable values attached.  It's likely
-that mix services will be offered for gaining anonymity.  You transfer
-to one coin of the mix service, and you get back several coins from
-other coins of that same mix service, and you split and merge them
-accordingly when you want to do your next transaction.
+Coins are pseudonymous, and you can have many different pseudonyms.  However,
+coins as proposed here have readable values attached.  It's likely that mix
+services will be offered for gaining anonymity.  You transfer to one coin of
+the mix service, and you get back several coins from other coins of that same
+mix service, and you split and merge them accordingly when you want to do your
+next transaction.
 
 There is no need for a nonce, the key as id of the owner is
 sufficient.  The check of the balance is sufficient to prevent any
@@ -618,7 +632,8 @@ abuse.
 First of all, if you are somehow familiar with bookkeeping, “a ledger”
 has something fundamentally wrong in it: The singular.  You are
 supposed to have more than one ledger, and every transaction needs to
-go to two columns, one as debit, one as credit.
+go to two columns, one as debit, one as credit.  All values are outside the
+accountant's hands, so the accountant's balance is always zero (poor gal).
 
 If you want to scale a crypto currency, you want to separate ledgers
 by some arbitrary criteria so that the individual nodes are not
@@ -634,10 +649,10 @@ hash) to a reasonable size.  DDoS attacks at particular ledgers can be
 easily mittigated: if the ledger you want to book to is attacked, you
 just select a new pubkey; if the ledger you want to book from is
 attacked, you may need to use another coin in your wallet, and hope
-the attacked ledger is getting unstuck.
+the attacked ledger is getting unstuck over time.
 
 The ledger units responsible for the same ledger each verify that they
-have a consensus over the transactions; by syncing their positions.
+have a consensus over the transactions: by syncing their positions.
 And then we combine the ledgers and check the balance: It ought to be
 zero.
 
@@ -647,25 +662,26 @@ same time slot.  The easy way to do that is to do a staged entry:
 First, you queue the credit entries (the „take out“), then you send
 them to the debit ledger, and if that succeeds, you can commit both.
 
-To enter a coin from outside into a double booking system, you need
-two transactions: One is the coin itself (debit), and the other is a
-promise to buy it back (credit).
+To enter a coin from outside into a double booking system, you need two
+transactions: One is the coin itself (debit), and the other is a promise to
+buy it back (credit).  The promise might not actually be truthful, in which
+case the credit is written off: it is however still in the books as loss.
 
 The Purpose of that is to make it easy to cross-check the ledgers for
-consistency.  If you have _n_ ledgers, you summ all the columns in them
+consistency.  If you have _n_ ledgers, you sum all the columns in them
 (which can be done in parallel), and you cross-check by summing all
 the _n_ results: The balance ought to be zero.
 
 ### Subdividing further
 
-So the first stage scaling is that of individual ledgers for parts of
-the coin space, and cross-checking the balance of all of them in one
-go.  I don't know when that starts to become an issue, but you have to
-think about it to scale further.  You might want to have too many
-ledgers to sum them up all in one go.
+So the first stage scaling is that of individual ledgers for parts of the coin
+space, and cross-checking the balance of all of them in one go.  I don't know
+when that starts to become an issue, but you have to think about it to scale
+further.  You might want to have too many ledgers to sum them up all in one
+go, and it's not feasible to connect each of them to every other.
 
-The single balance makes it easy: You can take coins from any ledger
-to any other in one single step (all ledgers are peers of each other).
+The single balance makes operation easy: You can take coins from any ledger to
+any other in one single step (all ledgers are peers of each other).
 
 But that may be too many connections from one ledger server to all the
 others.  So here's a way to scale:
@@ -707,6 +723,12 @@ _O(log n)_ algorithm.
 I call it the SwapDragonChain, as the swap dragon is the mascott of
 Forth (the SWAP operation).  I'm sure the swap dragon can handle
 double booking quite well with his two heads.
+
+Note that unlike the lightning network, there is no need to worry about the
+transactions: they are all public.  Nothing can be lost or stolen.  The
+topology is derived from the pubkey values, and not from randomly connected
+peers.  The full nodes who want to be responsible for a certain part of the
+ledgers know where to connect to.
 
 ### Zero-Knowledge Proof?
 
@@ -858,3 +880,5 @@ Incentives matter.  Economy is all about game theory.
   16. [BitCoin is reactionary](http://www.ianwelsh.net/bitcoin-is-a-bad-way-to-do-something-necessary/)
   17. [Skinner box](https://en.wikipedia.org/wiki/Operant_conditioning_chamber)
   18. [BitCoin bubble from 2013](https://www.forbes.com/sites/jessecolombo/2013/12/19/bitcoin-may-be-following-this-classic-bubble-stages-chart/#61f0969d36b8)
+  19. [760,000 transactions per second](http://shanghaiist.com/2017/01/31/14-billion-virtual-hongbao.php)
+  20. [Math proof of why lightning network won't work](https://medium.com/@jonaldfyookball/mathematical-proof-that-the-lightning-network-cannot-be-a-decentralized-bitcoin-scaling-solution-1b8147650800)

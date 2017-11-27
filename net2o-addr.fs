@@ -130,7 +130,7 @@ User dest-0key< \ pointer to obtained dest-0key
 
 : +my-id ( -- )
     config:prio# @ host-pri# !
-    config:host$ $@ host-id $!
+    host$ $@ host-id $!
     my-0key @ IF  my-0key sec@ host-key sec!  THEN ;
 
 : +my-addrs ( port o:addr -- )

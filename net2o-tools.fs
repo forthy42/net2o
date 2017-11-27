@@ -353,7 +353,8 @@ Variable logsize#
 2Variable patchlimit&
 Variable rootdirs$
 Variable prio#
-Variable host$
+Variable host$		\g set host to this name
+Variable orighost$	\g if the host is orighost$
 Variable date#
 $Variable objects$
 $Variable chats$

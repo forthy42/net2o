@@ -375,7 +375,7 @@ also net2o-base
     pk@ $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
-    new-addr >o host-id $@ config:host$ $@ str= n2o:dispose-addr o> ;
+    new-addr >o host-id $@ host$ $@ str= n2o:dispose-addr o> ;
 
 : my-addrs? ( addr u -- addr u flag )
     false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;

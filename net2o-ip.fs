@@ -41,10 +41,17 @@ Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 \ Tags are kept sorted, so you'll get revocations first, then net2o and IPv6+4
 \ Symbolic name may start with '@'+len followed by the name
 
+Variable host$
+
 : default-host ( -- )
-    pad $100 gethostname drop pad cstring>sstring config:host$ $!
-    config:host$ $@ s" .site" string-suffix? IF
-	config:host$ dup $@len 5 - 5 $del
+    pad $100 gethostname drop pad cstring>sstring host$ $!
+    host$ $@ s" .site" string-suffix? IF
+	host$ dup $@len 5 - 5 $del
+    THEN
+    config:orighost$ $@ host$ $@ str= IF
+	config:host$ $@ host$ $!
+    ELSE
+	config:host$ $free  host$ $@ config:orighost$ $!
     THEN
     [IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
     config:prio# ! ;
@@ -52,10 +59,6 @@ Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 default-host
 
 :noname defers 'cold default-host ; is 'cold
-
-: .myname ( -- )
-    config:prio# @ IF  '0' emit config:prio# @ emit  THEN
-    config:host$ $@len IF  config:host$ $@ dup '@' + emit type  THEN ;
 
 Create ip6::0 here 16 dup allot erase
 : .ip6::0 ( -- )  ip6::0 $10 type ;
