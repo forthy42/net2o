@@ -430,7 +430,7 @@ Typical spam I received 2016:
 
 The only spam I received late 2017:
 
-![Spam 2016](../doc/spam-2016.jpg)
+![Spam 2017](../doc/spam-2017.jpg)
 
 And that's how a bubble looks like:
 
