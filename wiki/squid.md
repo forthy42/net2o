@@ -422,7 +422,17 @@ far worse than neoliberalism.
 
 ### Speculation object
 
-Is BitCoin's price a bubble?  Who could have that strange idea?
+_Is BitCoin's price a bubble?  Who could have that strange idea?_
+
+Typical spam I received 2016:
+
+![Spam 2016](../doc/spam-2016.jpg)
+
+The only spam I received late 2017:
+
+![Spam 2016](../doc/spam-2016.jpg)
+
+And that's how a bubble looks like:
 
 ![Stages in a bubble](https://people.hofstra.edu/geotrans/eng/ch7en/conc7en/img/stages_bubble.png)
 
