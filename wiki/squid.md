@@ -892,3 +892,4 @@ Incentives matter.  Economy is all about game theory.
   18. [BitCoin bubble from 2013](https://www.forbes.com/sites/jessecolombo/2013/12/19/bitcoin-may-be-following-this-classic-bubble-stages-chart/#61f0969d36b8)
   19. [760,000 transactions per second](http://shanghaiist.com/2017/01/31/14-billion-virtual-hongbao.php)
   20. [Math proof of why lightning network won't work](https://medium.com/@jonaldfyookball/mathematical-proof-that-the-lightning-network-cannot-be-a-decentralized-bitcoin-scaling-solution-1b8147650800)
+  21. [A short summary of Chinese money history](https://www.nbbmuseum.be/en/2007/09/chinese-invention.htm)
