@@ -10,32 +10,8 @@ quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
 
 Therefore, here is the official statement about NSA-demanded
-backdoors: I have a backdoor in net2o for the banks.  The banks asked
-me, just like the [IETF](https://github.com/sftcd/tinfoil) to add a
-backdoor for banking compliance appliances.  Those require a
-non-emphemeral key exchange.
-
-Instead, I suggested to weaken the PRNG generating the ephemeral
-secrets esk, and instead of using
-
-    esk=good_prng();
-
-write
-
-    esk=good_hash({psk, ip, port, timestamp});
-
-or
-
-    esk=good_block_cipher(psk, {ip, port, timestamp, padding});
-
-so that the appliance only has to try a few timestamps to decrypt any
-connection, as long as it knows the psk.  This would be untraceable
-outside by checking the ephemeral keys, and would also limit the
-interception to those who know the psk.  Neither is there a protocol
-change necessary, nor can anything prevent such a weakening of a
-particular implementation (the one used inside banks).  Only a code
-audit can reveal such malicious backdoors, and therefore, only
-communications between trusted peers are secure.
+backdoors: I have a backdoor in net2o requested by our minister of interior,
+[Thomas de Maizière](https://www.thelocal.de/20171201/german-government-wants-backdoor-access-to-every-digital-device-report)
 
 As net2o is open source, you can (in theory) verify statements about
 actual backdoors.  And keep an eye on this page, I intent to publish
