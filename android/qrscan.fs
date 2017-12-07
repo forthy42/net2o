@@ -341,7 +341,7 @@ Variable skip-frames
 	ELSE  2drop  THEN
     THEN
     0>framebuffer skip-frames @ 0= IF visual-frame  THEN
-    need-sync off skip-frames @ 0> skip-frames +! ;
+    -sync skip-frames @ 0> skip-frames +! ;
 : scan-loop ( -- )  scanned-flags off \ start with empty flags
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )

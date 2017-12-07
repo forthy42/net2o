@@ -43,22 +43,23 @@ Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 
 Variable host$
 
-: default-host ( -- )
-    pad $100 gethostname drop pad cstring>sstring host$ $!
+: get-host$ ( -- )
+    pad $100 gethostname drop pad cstring>sstring host$ $! ;
+: skip.site ( -- )
     host$ $@ s" .site" string-suffix? IF
 	host$ dup $@len 5 - 5 $del
-    THEN
+    THEN ;
+: replace-host ( -- )
     config:orighost$ $@ host$ $@ str= IF
 	config:host$ $@ host$ $!
     ELSE
 	config:host$ $free  host$ $@ config:orighost$ $!
-    THEN
+    THEN ;
+
+: default-host ( -- )
+    get-host$ skip.site replace-host
     [IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
     config:prio# ! ;
-
-default-host
-
-:noname defers 'cold default-host ; is 'cold
 
 Create ip6::0 here 16 dup allot erase
 : .ip6::0 ( -- )  ip6::0 $10 type ;

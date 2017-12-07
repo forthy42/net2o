@@ -422,10 +422,13 @@ Variable configured?
 : rootdirs>path ( -- )
     config:rootdirs$ $@ bounds ?DO  I c@ ':' = IF 0 I c! THEN LOOP ;
 
+forward default-host
+
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip  ['] config >body swap
-    no-file# = IF  ?.net2o write-config  ELSE  read-config ?.net2o  THEN
+    no-file# = IF  ?.net2o write-config
+    ELSE  read-config ?.net2o default-host  THEN
     rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config fsane-init ;
