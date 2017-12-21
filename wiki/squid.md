@@ -172,7 +172,7 @@ issued by banks, which promised coins in exchange; the notes themself
 actual coins.  In the late Tang dynasty the first such notes appeared,
 and became quickly popular.
 
-![feiqian](http://lishi.dugoogle.com/wp-content/uploads/2015/04/48c3b774accb494a80636253fc950dd2.jpg)
+![feiqian](https://gss3.bdstatic.com/-Po3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike92%2C5%2C5%2C92%2C30/sign=fa7e505f8b025aafc73f76999a84c001/359b033b5bb5c9ea3ea3157cdc39b6003bf3b3d8.jpg)
 
 These notes were produced and cashed in by banks.  In 1024, the first
 state-issued feiqians were issued, and in the 12th century (in the
