@@ -332,17 +332,17 @@ which can be punished with long-term effects.  Also: the more signers
 you have, the better.  Verified signers are better than anonymous
 signers, because anonymous signers can be a sybill attack.
 
-To avoid intruders re-signing older blocks, rotate signatures
-frequently.  net2o's [key revokation](key-revocation.md) allows doing
-that without losing trust, and allows it to be done outside the
-signing machine.  All trust anchors must be part of the chain, with
-the root anchor as a-priory knowledge.
+To avoid intruders re-signing older blocks, rotate signature subkeys each
+round.  A well-behaving signer will lose the old key each round (just keep it
+long enough so that the commitment of the new key in the next block is
+confirmed), and therefore is unable to tamper old blocks; similar to ephemeral
+encryption, where you are unable to decrypt the traffic yourself later.
 
-You can have a proof of work to prevent sybill attacks, e.g. mandating
-that to enter the trust ring, you need to have a key with a certain
-prefix.  That would be one-off work, because then you want to stay
-there with that identity, and accumulate more trust by signing in
-consensus.  It just creates an entry barrier.
+You can have a proof of work to prevent sybill attacks, e.g. mandating that to
+enter the trust ring, you need to have a key with a certain prefix.  That
+would be one-off work, because then you want to stay there with that identity,
+and accumulate more trust by signing in consensus.  It just creates an entry
+barrier and avoids DDoSing the ledgers with applications for participation.
 
 Of course, every transaction within the block ought to include the
 previous block's hash as starting key for the hash calculation, so
@@ -363,11 +363,12 @@ victim of double spending.
 
 ### Where to hijack the proof of work BlockChain
 
-Let's assume we can attack BitCoins block chain: Where would we attack
-it?  At the end, which allows us to do double spending of the coins we
-own?  Who would do that?  Probably someone with a lot of coins inside,
-so proof of stake is a bad idea (unless you make a rule that whoever
-gets caught double spending loses his stake).
+Let's assume we can attack BitCoins block chain: Where would we attack it?  At
+the end, which allows us to do double spending of the coins we own?  Who would
+do that?  Probably someone with a lot of coins inside, so proof of stake is a
+bad idea (especially, since that allows you to spend the same coin not just
+twice, but many times; even if you lose the stake in question, it's still a
+big win).
 
 Or attack it at the front, where most coins have not yet been mined,
 and by producing a fake fork of all the transactions afterwards, you
@@ -390,21 +391,21 @@ uses the confiscated equipment to construct a chain that has more
 difficulty in it than the entire chain from the rest of the world — it
 might take a year or two, but it's doable.
 
-And then it busts the entire BitCoin ledger by releasing that chain,
-which essentially has only unspendable coins inside, because in that
-revision of history, they were all mined by someone else.
+And then it busts the entire BitCoin ledger by releasing that chain, which
+essentially has only unspendable coins inside (coins owned by the Chinese),
+because in that revision of history, they were all mined by someone else.
 
 You still need to spend more effort on that as the miners spend, but
 you then own all the cheap, easy to earn early coins.
 
-But in fact the by far easiest hijack is to create a slightly
-incompatible protocol.  This is deliberately splitting the network,
-out in the open, with effectively not much work required, and this
-allows to double-spend, even though the BitCoin fork doesn't have the
-same price. But the price is not the point: The point is the promise
-of the unique asset.  By having forks, BitCoin shows that it can only
-fulfill that within a consent of the protocol, and that's actually
-outside the chain itself.
+But in fact the by far easiest hijack is to create a slightly incompatible
+protocol.  This is deliberately splitting the network, out in the open, with
+effectively not much work required, and this allows to double-spend, even
+though the BitCoin fork doesn't have the same price. But the price is not the
+point: The point is the promise of the unique asset.  Just think of real
+estate in the BlockChain.  By having forks, BitCoin shows that it can only
+fulfill that within a consent of the protocol, and that's actually outside the
+chain itself.
 
 So the executable protocol spec, the code for checking a block for
 validity itself should be part of the chain, and only updated in
@@ -558,13 +559,13 @@ can't survive the downturns) to the rich (who can).
 To remove such oscillation by proper compensation is just solid
 engineering.  We don't want pork cycles.
 
-### Why a BlockChain?
+## Why a BlockChain?
 
-So when I'm ok with fiat money (at least with the big ones where the
+So when I'm kind of ok with fiat money (at least with the big ones where the
 regulation works), and would use the BlockChain only for trading with
-valueables created outside, like fiat money or real estate, then why
-not use a system like [GNU Taler](https://taler.net/), which hands
-over the job of checking the double spending to the banks?
+valueables created outside, like fiat money or real estate, then why not use a
+system like [GNU Taler](https://taler.net/), which hands over the job of
+checking the double spending to the banks?
 
 Well, seems to be a good idea, but it turned out that the banks have
 deep troubles with trust, either.
@@ -577,7 +578,7 @@ in the eyes, and fall for the hype?  Who knows.  Proper
 decentralization is also a way to create reliable software, so it's
 still worth to pursue.
 
-## How to really distribute book-keeping
+### How to really distribute book-keeping
 
 _For the record: WeChat's payment system has in the order of 1 million TPS
 peak on Chinese New Year_
@@ -586,8 +587,12 @@ A “distributed database” can be replicated or partitioned (or both).
 BlockChains as of now are replicated; that's the scaling problem mentioned in
 the bullshit bingo sheet above.  They also need to be partitioned to gain all
 the benefits of modern distributed databases.  Doing the partitioning
-off-chain is sidestepping the problem instead of solving it.  Note that the
-lightning network hints at possible solutions, without being one.
+off-chain is sidestepping the problem instead of solving it.  (Note that the
+lightning network (LN) hints at possible solutions, without being one.  The
+main problem of the LN is that it requires on-chain conflict resolution, and
+due to the limited amount of on-chain transactions, rogue actors are
+encouraged to produce so many conflicts that the external arbiter, the
+BlockChain, collapses under the load, and most conflicts are never resolved.)
 
 An important design goal for me is to handle massive ammounts of
 micropayments, because that's an application where I see a legitime need for
@@ -604,7 +609,7 @@ owner.
 All transactions contain an implicit block hash that refers to the
 state of the ledger at the beginning of this transaction, an origin state
 transition, and a destination state transition with the same delta
-(transaction fees left out).
+(possible transaction fees left out for simplification).
 
 These are the operations you want to perform in the ledger:
 
@@ -717,18 +722,29 @@ interleaving the two modes of connectivity, after only two cycles (or
 _m_ in the general case), all previous records from all ledgers are
 chained together.
 
-In order to allow routing destinations, ledgers take responsibility of
-out-group destinations for one cycle: If the current mode is local,
-the ledger is responsible that can move the transaction to the correct
-foreign group in the next cycle.  If the current mode is global, the
-ledger is responsible that can move the transaction to the correct
-local ledger in the next cycle.  So after two further cycles, the
-transaction has reached its destination.  All the transactions satisfy
-the balance rules, the better scalability only comes at the cost of
-more cycles to complete a transaction.  But better scalability means
-that the cycle time can be shorter.  If you settle down to a fixed
-group size, and let the numbers of groups grow appropriate, it's an
-_O(log n)_ algorithm.
+Now you have to route your coin to a destination.  There are two possible
+approaches: Let the ledgers do that for you (which is then out of your control
+and requires trust that they handle it correctly), or you do it yourself.  I
+suppose “do it yourself“ is a good option.
+
+A transaction can move within the currently active ledger group, since that's
+where the balance is computed.  You present the original payer a target that
+is in his currently active ledger group, doing the first step of the route
+there.
+
+Having many accounts active can become a backup problem; remember, quite some
+BitCoins where lost by people who scrapped their hard disks.  So ideally,
+you'd write down the secret of your wallet on a piece of paper (which is known
+to last quite well, and can be easily stored away securely, e.g. in a small
+safe).  Now with thousands of wallets spread all over the ledger space, that
+could become a big stack of paper, and impossible to reenter.
+
+Suggestion: Only store the seed of a secure PRNG.  The seed (128 bits is
+sufficiently strong for Ed25519 keys) generates the secret keys for all the
+accounts you want to use.  You run the PRNG long enough to get a pubkey for
+every ledger you need.  If the number of ledgers go up over time (due to
+scaling), you need to compute more pubkeys, but the same pubkeys you found in
+the shorter run remain active.
 
 I call it the SwapDragonChain, as the swap dragon is the mascott of
 Forth (the SWAP operation).  I'm sure the swap dragon can handle
