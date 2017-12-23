@@ -268,7 +268,7 @@ Regulation is there for good reasons.
 Note that the energy consumption is not a function of how many transactions
 happen, it's a function of how much reward the miners get.  That means higher
 bitcoin prices result in higher energy consumption, because the proof of work
-skales with the amount of available work, and that inflates with the price per
+scales with the amount of available work, and that inflates with the price per
 coin.
 
 That means that the lightning network, while improving scalability, does not
@@ -327,7 +327,7 @@ Second, you can just make sure you have enough sanctions and auditable
 signers of these blocks.  The block chain with the highest amount of
 trust wins.  How do you **measure** trust?  Can you enumerate trust?
 Reliable signers have signed many blocks.  Game theory shows that
-repeated collaorative interactions are more rewarding than cheating,
+repeated collaborative interactions are more rewarding than cheating,
 which can be punished with long-term effects.  Also: the more signers
 you have, the better.  Verified signers are better than anonymous
 signers, because anonymous signers can be a sybill attack.
@@ -348,7 +348,7 @@ Of course, every transaction within the block ought to include the
 previous block's hash as starting key for the hash calculation, so
 that they contribute to the unchangeable chain, and can't be moved to
 any other fake chain (they won't verify there).  Furthermore, each
-transaction (despite anonymous) adds to the trust value: more
+transaction (despite being anonymous) adds to the trust value: more
 transactions in one block means that it is more trustworthy, because
 more people found its way to this branch of BlockChain reality.
 
@@ -381,7 +381,7 @@ was more profitable in numbers of coins, and far easier (because the
 difficulty was much less than today), it's technically not that hard.
 And “longest chain” is not sufficient to defend that attack: It needs
 to be the chain with most work involved in.  The fake chain could be
-one where the adjustment for the difficulty is set to low.
+one where the adjustment for the difficulty is set too low.
 
 BitCoin addresses that, the chain length is the sum of the
 difficulties.  But the problem remains: Let's say China confiscates
@@ -522,7 +522,7 @@ their properties.
 Fiat money requires an intermediary (banks) to distribute the money
 handed out by the central bank; this gives a lot of power to the
 banks.  Crypto currencies, which don't require banks, could lift that
-bane, but they way they are constructed now, they just create a new,
+bane, but the way they are constructed now, they just create a new,
 worse one.
 
 And finally, in the age of information, copyright and concepts like
@@ -568,7 +568,7 @@ system like [GNU Taler](https://taler.net/), which hands over the job of
 checking the double spending to the banks?
 
 Well, seems to be a good idea, but it turned out that the banks have
-deep troubles with trust, either.
+deep troubles with trust, as well.
 
 ![In capitalist America, bank robs you](https://pics.me.me/do-you-think-russians-have-in-capitalist-america-memes-in-27816895.png)
 
@@ -622,12 +622,12 @@ These are the operations you want to perform in the ledger:
 
 I don't want to have complex multi-source and -sink transaction which
 are difficult to verify.  Instead, I propose a single transaction,
-which takes a part of one coin, and adds it up to the destination coin.
+which takes a part of one coin, and adds it to the destination coin.
 
 ![Coin transaction](https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Feynmandiagram.svg/220px-Feynmandiagram.svg.png)
 
 I represent this transaction as Feynman diagram, because that almost fits the
-concept.  It the source coin (or account) results in a value of 0, it can
+concept.  If the source coin (or account) results in a value of 0, it can
 disappear, if the destination coin doesn't yet exist, it starts with the
 transaction as initial value.
 
@@ -859,29 +859,30 @@ concept behind copyright to turn knowledge and wisdom into rivalrous
 goods is a bad idea.  To society, they are much more worth when they
 are non-rivalrous.
 
-So therefore I propose to turn free software development effort, which
-is a scarce resource, and creates knowledge (public infrastructure of
-the information age), into a tradeable currency, and thereby make this
-work valuable.  Instead of financing startups, which are classical
-economy, the intial $quid offer goes into work for the public.
+So therefore I propose to turn the sponsorship of free software development
+effort, which is a scarce resource (both the sponsorship itself and the
+development), and creates knowledge (public infrastructure of the information
+age), into a tradeable currency, and thereby make this work valuable in a
+classical free market economy sense — just like your summer's harvest can be
+traded already in winter by means of a “future”.  Instead of financing startups,
+which are classical economy, the initial $quid offer goes into work for the
+public.
 
-What's missing for a real fiat money: There's no way to actually
-remove coins out of the system to reduce the money supply.  The
-authorities (and the market) that grant projects with funding can only
-create money, not take it out of the system.  But a coin system works
-the same way: you can mint coins, and they are going to last.
+To take out coins that are no longer good use for circulation, I propose that
+they can be used as donation receipt to get a tax deduction. Ideally, the free
+market would then shift the tax deduction to countries with very high taxes
+and rich people who are very eager to get a tax deduction.
 
 _Ah, yes, and penguins eat squids, too._
 
 ### Share and enjoy!
 
-I want to point out that a service-oriented business model for free
-software works, but inevitably pushes the companies into a business
-model, where only the complaint department makes money.  If you don't
-want to stick your head into a pig, because the depressive AI of the
-useless Sirius Cypernetics Corporation products you got, make sure
-that there is a business model for creating good, easy to use, and
-cheap to maintain software.
+_Note: I want to point out that a service-oriented business model for free
+software works, but inevitably pushes the companies into a business model,
+where only the complaint department makes money.  If you don't want to stick
+your head into a pig due to the depressive AI of the useless Sirius
+Cypernetics Corporation products you got, make sure that there is a business
+model for creating good, easy to use, and cheap to maintain software._
 
 Incentives matter.  Economy is all about game theory.
 
