@@ -655,11 +655,11 @@ tex: feiqian
 tex: huizi
 tex: chao
 glue*1 }}glue
-' shell-coins "shell-coins.jpg" 0.666e }}image-file drop
+' shell-coins "shell-coins.png" 0.666e }}image-file drop
 glue*1 }}glue
-' feiqian "feiqian.jpg" 0.666e }}image-file drop
+' feiqian "feiqian.png" 0.666e }}image-file drop
 glue*1 }}glue
-' huizi "huizi.jpg" 0.666e }}image-file drop
+' huizi "huizi.png" 0.666e }}image-file drop
 glue*1 }}glue
 ' chao "chao.jpg" 0.666e }}image-file drop
 glue*1 }}glue
