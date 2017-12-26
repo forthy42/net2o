@@ -263,8 +263,8 @@ Variable slide#
 0 Value m2-img
 0 Value $q-img
 
-4 Constant n/m-switch
-9 Constant m/$-switch
+5 Constant n/m-switch
+10 Constant m/$-switch
 
 : >slides ( o -- ) slides[] >stack ;
 
@@ -490,6 +490,24 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 4
 {{
+$BFFFBFFF pres-frame
+{{
+largesize# to x-baseline
+large dark-blue "Realtime Mixnet" }}text /center
+medium blackish
+"Problem with onion routing: Time correlation" \\
+fontsize# baselinesmall# f* to x-baseline
+"Problem with mixnets: need to wait for enough messages" \\
+"Solution: Fill up the output with constant bandwidth garbage" \\
+"and otherwise set up the network as with a mixnet" \\
+"Bonus: Evenly distribute packets over a set of mix routes, to get more bandwidth" \\
+"Otherwise, the same technology as with Onion routing applies" \\
+glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+}}v box[] >bdr
+}}z box[] /flip dup >slides
+
+\ page 5
+{{
 $BFBFFFFF pres-frame
 {{
 largesize# to x-baseline
@@ -509,8 +527,7 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 5
-{{
+\ page 6
 {{
 $FFBFFFFF pres-frame
 {{
@@ -522,7 +539,7 @@ fontsize# baselinesmall# f* to x-baseline
 "actor" " base class that reacts on all actions (clicks, touchs, keys)" bb\\
 "widget" " base class for all visible objects" bb\\
 {{ "edit" b1 blackish " editable text element " }}text
-chinese "中秋节快乐！" }}edit dup Value edit-field glue*1 }}glue }}h edit-field edit[] >bl
+chinese "新年快乐！" }}edit dup Value edit-field glue*1 }}glue }}h edit-field edit[] >bl
 medium "glue" " base class for flexible objects" bb\\
 "tile" " colored rectangle" bb\\
 "frame" " colored rectangle with borders" bb\\
@@ -540,10 +557,9 @@ medium "glue" " base class for flexible objects" bb\\
 glue*1 }}glue
 }}v box[] >bdr
 }}z box[]
-tex: vp1 glue*1 ' vp1 }}vp vp[]
 /flip dup >slides
 
-\ page 6
+\ page 7
 {{
 $BFFFFFFF pres-frame
 {{
@@ -567,7 +583,7 @@ glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 7
+\ page 8
 {{
 $FFFFBFFF pres-frame
 {{
@@ -583,7 +599,7 @@ glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 8
+\ page 9
 {{
 $BFDFFFFF pres-frame
 {{
@@ -607,7 +623,7 @@ glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 9
+\ page 10
 {{
 $D4AF37FF pres-frame
 {{
@@ -632,7 +648,8 @@ tex: $quid-logo-large
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 10
+\ page 11
+{{
 {{
 $e4cF77FF pres-frame
 {{
@@ -665,9 +682,11 @@ glue*1 }}glue
 glue*1 }}glue
 }}h box[]
 }}v box[] >bdr
-}}z box[] /flip dup >slides
+}}z box[]
+tex: vp1 glue*1 ' vp1 }}vp vp[]
+/flip dup >slides
 
-\ page 11
+\ page 12
 {{
 $f4cF57FF pres-frame
 {{
@@ -689,7 +708,7 @@ tex: bitcoin-bubble
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 12
+\ page 13
 {{
 $e4df67ff pres-frame
 {{
@@ -699,6 +718,7 @@ medium blackish
 "•  Huge first mover advantage" \\
 fontsize# baselinesmall# f* to x-baseline medium
 "•  Already worse wealth distribution than neoliberal economy" \\
+"•  Huge inequality drives society into servitude, not into freedom" \\
 "•  No concept of a credit" \\
 "•  Lightning network also binds assets (will have fees as consequence)" \\
 glue*1 }}glue
@@ -710,7 +730,7 @@ tex: free-market
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 13
+\ page 14
 {{
 $a4df87ff pres-frame
 {{
@@ -733,7 +753,7 @@ glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 14
+\ page 15
 {{
 $a4df87ff pres-frame
 {{
@@ -759,23 +779,25 @@ tex: bank-robs-you
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 15
+\ page 16
 {{
 $a4df87ff pres-frame
 {{
 largesize# to x-baseline
 large dark-blue "$quid: Ethical mining" }}text /center
 medium blackish
-"•  " \\
+"•  Concept of mining: Provide difficult and rare work" \\
 fontsize# baselinesmall# f* to x-baseline medium
-"•  " \\
-"•  " \\
-"•  " \\
+"•  Suggesting: Provide vouchers for free software development sponsorships" \\
+"•  These vouchers are tradeable on their own" \\
+"•  Free software is public infrastructure for the information age" \\
+"•  That way, we can encourage people to sponsor out of self–interest" \\
+"•  They get a useful and valueable token back" \\
 glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 16
+\ page 17
 {{
 $FFFFFFFF pres-frame
 {{
