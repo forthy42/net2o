@@ -482,7 +482,7 @@ fontsize# baselinesmall# f* to x-baseline
 "" " onion routing camouflage probably with AES" b\\
 "4. " " Timing driven delay minimizing flow control" b\\
 "5. " " Stack–oriented tokenized command language" b\\
-"6. " " Distributed data (files) and distributed metadata (DHT)" b\\
+"6. " " Distributed data (files, messages) and distributed metadata (DHT)" b\\
 "7. " " Apps in a sandboxed environment for displaying content" b\\
 glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
