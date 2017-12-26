@@ -495,7 +495,7 @@ $BFFFBFFF pres-frame
 largesize# to x-baseline
 large dark-blue "Realtime Mixnet" }}text /center
 medium blackish
-"Problem with onion routing: Time correlation" \\
+"Problem with onion routing: Timing correlation" \\
 fontsize# baselinesmall# f* to x-baseline
 "Problem with mixnets: need to wait for enough messages" \\
 "Solution: Fill up the output with constant bandwidth garbage" \\
@@ -698,6 +698,7 @@ fontsize# baselinesmall# f* to x-baseline medium
 "•  Inflation is money’s cancer, deflation its infarct" \\
 "•  Consequences: unstable exange rate, high transaction fees" \\
 "•  Ponzi scheme–style bubble" \\
+"•  (Instead of getting Viagra spam I now get BitCoin spam)" \\
 "•  Can’t even do the exchange transaction on–chain" \\
 glue*1 }}glue
 }}v box[] >bdr
@@ -747,6 +748,7 @@ fontsize# baselinesmall# f* to x-baseline medium
 "How?" " Having signed many blocks in the chain gains points" b2\\
 "Multiple signers" " Not only have one signer, but many" b2\\
 "Suspicion" " Don't accept transactions in low confidence blocks" b2\\
+"Idea" " Repeated prisoner’s dilemma rewards cooperation" b2\\
 largesize# to x-baseline
 "BTW: The attack for double spending also requires a MITM–attack" \\
 glue*1 }}glue
