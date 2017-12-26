@@ -1,11 +1,13 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass beamer
 \begin_preamble
 \mode<presentation> {\usetheme{Net2o}}%
-\usepackage[orientation=portrait,size=a4,scale=0.47,grid,debug]{beamerposter}%
+\usepackage[orientation=portrait,size=a4,scale=1.9,grid,debug]{beamerposter}%
 \renewcommand\makebeamertitle{}%
 \usepackage[activate]{pdfcprot}%
 \end_preamble
@@ -16,16 +18,16 @@
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts true
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
 \graphics default
 \default_output_format pdf5
 \output_sync 0
@@ -77,11 +79,11 @@
 \begin_body
 
 \begin_layout Title
-net2o --- Reinventing the Internet
+net2o — Reinventing the Internet
 \end_layout
 
 \begin_layout Author
-I've a dream: A peer--to--peer network, where services like search engines
+I've a dream: A peer–to–peer network, where services like search engines
  or social networks aren't offered by big companies, who in turn need to
  make money by selling the privacy of their users.
  Where all data is encrypted, so that access is only possible for people
@@ -112,6 +114,10 @@ status open
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -126,11 +132,15 @@ What's broken?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-The internet bases on assumptions 20--30 years old 
+The internet bases on assumptions 20–30 years old 
 \end_layout
 
 \begin_layout Itemize
@@ -154,7 +164,7 @@ There's a huge pile of accumulated cruft
 \end_layout
 
 \begin_layout Itemize
-Fixing this mess one--by--one is the wrong attempt
+Fixing this mess one–by–one is the wrong attempt
 \end_layout
 
 \end_deeper
@@ -173,6 +183,10 @@ status collapsed
 Objectives
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -223,11 +237,15 @@ Layers
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Enumerate
-Physical layer --- this is not part of net2o itself.
+Physical layer — this is not part of net2o itself.
 \end_layout
 
 \begin_layout Enumerate
@@ -239,11 +257,11 @@ Encryption: ed25519+Keccak in duplex mode
 \end_layout
 
 \begin_layout Enumerate
-Flow Control: time based delay--minimizing
+Flow Control: time based delay–minimizing
 \end_layout
 
 \begin_layout Enumerate
-Commands: structured data and multi--command RPC
+Commands: structured data and multi–command RPC
 \end_layout
 
 \begin_layout Enumerate
@@ -251,7 +269,8 @@ Distributed Data: DHT+shared files
 \end_layout
 
 \begin_layout Enumerate
-Applications: chat, vault, DVCS, GUI with browser (to be implemented)
+Applications: chat, vault, DVCS, $quid cyptocurrency (in progress), GUI
+ with browser (…)
 \end_layout
 
 \end_deeper
@@ -273,6 +292,10 @@ GUI Framework
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -289,8 +312,7 @@ OpenMAX on Android, gstreamer on Linux: videos into a texture
 \end_layout
 
 \begin_layout Itemize
-MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
- work in progress)
+MINOΣ2: Lightweight OpenGL–based widget library in Forth (work in progress)
 \end_layout
 
 \end_deeper
@@ -306,7 +328,13 @@ MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
 status collapsed
 
 \begin_layout Plain Layout
-Application availability
+Application availability, see 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://fossil.net2o.de/net2o/doc/trunk/wiki/get-it.md
 \end_layout
 
 \end_inset
@@ -314,17 +342,59 @@ Application availability
 
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
 \begin_deeper
 \begin_layout Description
-Linux Debian package soon
+Linux Debian package on 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://net2o.de/debian
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Description
-Android Gforth in the Play Store contains net2o
+Android Gforth in the Play Store or on 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://net2o.de/android
+\end_layout
+
+\end_inset
+
+ contains net2o
 \end_layout
 
 \begin_layout Description
-Windows setup.exe soon
+Windows setup.exe on 
+\begin_inset Flex URL
+status open
+
+\begin_layout Plain Layout
+
+https://net2o.de/windows
+\end_layout
+
+\end_inset
+
+, needs Gforth snapshot
 \end_layout
 
 \begin_layout Description
@@ -359,9 +429,9 @@ hbox{
 
 
 \begin_inset Graphics
-	filename net2o-qr.svg
+	filename net2o-qr.png
 	lyxscale 30
-	scale 39
+	scale 30
 
 \end_inset
 

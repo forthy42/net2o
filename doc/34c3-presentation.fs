@@ -501,7 +501,6 @@ fontsize# baselinesmall# f* to x-baseline
 "Solution: Fill up the output with constant bandwidth garbage" \\
 "and otherwise set up the network as with a mixnet" \\
 "Bonus: Evenly distribute packets over a set of mix routes, to get more bandwidth" \\
-"Otherwise, the same technology as with Onion routing applies" \\
 glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -511,18 +510,22 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 $BFBFFFFF pres-frame
 {{
 largesize# to x-baseline
-large dark-blue "MINOΣ2 vs. MINOΣ" }}text /center
+large dark-blue "MINOΣ2 technology" }}text /center
 medium blackish
-"Rendering:" " OpenGL (ES) instead of Xlib, Vulkan backend planned" b2\\
+"MINOΣ2 starts at the DOM layer" \\
+"Rendering:" " OpenGL (ES), Vulkan backend possible" b2\\
 fontsize# baselinesmall# f* to x-baseline
-"Coordinates:" " Single float instead of integer, origin bottom left (Xlib: top left)" b2\\
+"Font to texture:" " Freetype–GL (with own improvements)" b2\\
+"Image to texture:" " SOIL2 (needs some bugs fixed)" b2\\
+"Video to texture:" " OpenMAX AL (Android), gstreamer for Linux (planned)" b2\\
+"Coordinates:" " Single float, origin bottom left" b2\\
 {{ "Typesetting:" b2 blackish
-" Boxes&Glues closer to " }}text
+" Boxes&Glues close to " }}text
 \LaTeX
 " — including ascender&descender" }}text glue*1 }}h box[] >bl
 "" " Glues can shrink, not just grow" b2\\
-"Object System:" " Mini–OOF2 instead of BerndOOF" b2\\
-"Class number:" " Fewer classes, more combinations" b2\\
+"Object System:" " extremely lightweight Mini–OOF2" b2\\
+"Class number:" " Few classes, many possible combinations" b2\\
 glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
