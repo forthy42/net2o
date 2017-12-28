@@ -779,8 +779,20 @@ glue*1 }}glue
 }}v box[] >bdr
 {{
 glue*1 }}glue
+tex: stage1
+tex: stage2
 tex: bank-robs-you
-' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop /right
+{{
+{{
+glue*1 }}glue
+{{
+' stage1 "ledger-stage1.png" 0.666e }}image-file drop
+' stage2 "ledger-stage2.png" 0.666e }}image-file drop
+}}h box[]
+}}v box[]
+glue*1 }}glue
+' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop
+}}h box[]
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
