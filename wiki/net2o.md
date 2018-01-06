@@ -90,6 +90,7 @@ Videos
 + [EuroForth 2016](https://wiki.forth-ev.de/doku.php/events:euroforth-2016:using-net2o) presentation
 + [33c3](33c3.md) presentation
 + [EuroForth 2017](https://wiki.forth-ev.de/lib/exe/fetch.php/events:ef2017:minos2.mp4) presentation (MINOΣ 2)
++ [34c3](34c3.md) presentation
 
 Discussions
 -----------
