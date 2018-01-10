@@ -411,6 +411,7 @@ cmd-class class
     field: ke-sk       \ secret key
     field: ke-pk       \ public key
     field: ke-rsk      \ revoke secret (temporarily stored)
+    field: ke-wallet   \ wallet
     field: ke-type     \ key type
     field: ke-nick     \ key nick
     field: ke-nick#    \ to avoid colissions, add a number here

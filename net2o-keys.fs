@@ -345,12 +345,15 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF
 	." seckey: " ke-sk sec@ .black85 ."  (keep secret!)" cr  THEN
+    ke-wallet @ IF
+	." wallet: " ke-wallet sec@ .black85 ."  (keep secret!)" cr  THEN
     ." valid:  " ke-selfsig $@ .sigdates cr
     ." groups: " ke-groups $@ .in-groups cr
     ." perm:   " ke-mask @ .perm cr
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
+    ke-wallet sec@ nip IF  wallet( space ke-wallet sec@ .black85 )else( ."  W" ) ELSE  wallet( $15 )else( 2 ) spaces THEN
     ke-selfsig $@ space .sigdates
     ke-groups $@ 2dup .in-groups groups>mask invert
     space ke-mask @ and -1 swap .permandor
@@ -385,7 +388,9 @@ Variable sort-list[]
     o { w^ ins$0 } ins$0 cell a[] r> cells $ins ;
 : list-keys ( -- )
     ." colors: " .import-colors cr
-    ." num pubkey                                   date                     grp+perm	h nick" cr
+    ." num pubkey                                   "
+    wallet( ." wallet             " )
+    ."   date                     grp+perm	h nick" cr
     key# [: cell+ $@ drop cell+ >o sort-list[] $ins[]key o> ;] #map
     sort-list[] $[]# 0 ?DO  I sort-list[] $[] @ ..key-list  LOOP
     sort-list[] $off ;
@@ -606,6 +611,8 @@ $11 net2o: privkey ( $:string -- )
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
     config:pw-level# @ 0< IF  ke-pets[] $+[]! pet!  ELSE  2drop  THEN ;
++net2o: walletkey ( $:seed -- ) !!unsigned?  $>
+    ke-wallet sec! ;
 }scope
 
 gen-table $freeze
@@ -731,6 +738,7 @@ previous
       pack-corekey
       ke-sk sec@ sec$, privkey
       ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
+      ke-wallet sec@ dup IF  sec$, walletkey  ELSE  2drop  THEN
     end:key ;
 : keynick$ ( o:key -- addr u )
     \G get the annotations with signature
@@ -845,7 +853,9 @@ here scanned-x - cell/ constant scanned-max#
     config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
-    sksig! key-sign o> ;
+    sksig!
+    $10 rng$ ke-wallet sec! \ wallet key is just $10
+    key-sign o> ;
 
 $40 buffer: nick-buf
 
@@ -892,9 +902,18 @@ false value ?yes
     ke-sk sec@ nip dup IF  perm%myself  ELSE  perm%default  THEN  ke-mask !
     IF  "\x00"  ELSE  "\x01"  THEN  ke-groups $! ;
 
+Variable save-keys-again
+
+: ?wallet ( o:key -- )
+    ke-sk sec@ nip IF
+	ke-wallet sec@ nip 0= IF
+	    $10 rng$ ke-wallet sec!  save-keys-again on
+	THEN
+    THEN ;
+
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key >o ke-sk ke-end over - erase  do-cmd-loop o> ;
+    sample-key >o ke-sk ke-end over - erase  do-cmd-loop  last-key .?wallet o> ;
 
 : .key$ ( addr u -- )
     sample-key >o  ke-sk ke-end over - erase
@@ -902,7 +921,8 @@ false value ?yes
     signed-val invert validated and!
     .key-short free-key o> ;
 
-: read-keys-loop ( fd -- )  code-key
+: read-keys-loop ( fd -- )  save-keys-again off
+    code-key
     >r #0. r@ reposition-file throw
     BEGIN
 	r@ file-position throw d>64 key-read-offset 64!
@@ -912,7 +932,8 @@ false value ?yes
     REPEAT  rdrop  code0-buf ;
 : read-key-loop ( -- )
     import#self import-type !
-    ?key-sfd read-keys-loop ;
+    ?key-sfd read-keys-loop
+    save-keys-again @ IF  save-seckeys  THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
     -1 config:pw-level#

@@ -53,7 +53,10 @@ $20 Constant crypt-align
     over 0= IF  sec-off 2drop  EXIT  THEN
     >r r@ kalloc64? dup r> ! $40 smove ;
 : sec@ ( addr -- addr1 u1 )
-    @ dup IF  $40 over $20 + $20 zero32 over str= IF  2/  THEN
+    @ dup IF  $40
+	over $20 + $20 zero32 over str= IF  2/
+	    over $10 + $10 zero32 over str= IF  2/  THEN
+	THEN
     ELSE 0 THEN ;
 : sec+! ( addr1 u1 addr2 -- )
     dup @ 0= IF  sec!  ELSE  sec@ dup >r + $40 r> - smove  THEN ;

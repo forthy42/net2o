@@ -73,6 +73,7 @@ debug: health( \ print that a health check passed
 debug: verbose( \ print more verbose messages
 debug: quicksig( \ quick check for sigs
 debug: slurp( \ debug slurp&spit
+debug: wallet( \ debug wallet stuff
 
 -db profile( \ )
 +db ipv6( \ ipv6 should be on by default )
