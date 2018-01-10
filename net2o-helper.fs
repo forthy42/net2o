@@ -210,13 +210,13 @@ Variable my-beacon
 
 : pk-peek? ( pk u -- flag )  ['] c:fetch-id pk-query ;
 
-User host$ \ check for this hostname
+User hostc$ \ check for this hostname
 
 : check-host? ( o addr u -- o addr' u flag )
     2 pick .host>$ ;
 
 : host= ( o -- flag )
-    host$ $@len IF  .host-id $@ host$ $@ str=  ELSE  drop true  THEN ;
+    hostc$ $@len IF  .host-id $@ hostc$ $@ str=  ELSE  drop true  THEN ;
 
 : insert-addr ( o -- flag )
     connect( ." check addr: " dup .addr cr )  false swap
@@ -243,7 +243,7 @@ User host$ \ check for this hostname
     ret0 n2o:new-context >o rdrop dest-pk ;
 
 : n2o:pklookup ( pkaddr u -- )
-    2dup keysize2 safe/string host$ $! key2|
+    2dup keysize2 safe/string hostc$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
