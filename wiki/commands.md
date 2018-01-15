@@ -419,22 +419,22 @@ that makes identical transactions have the same hash.
 + $22 pay-contract ( $:contract -- )
   contract, signed by a source
 
-### contract commands ###
-
-Contracts are now very simple logic: each contract statement may fail. If
-it does, the contract is not valid. The time the contract is valid is
-defined by the signature's time.
-Example for an exchange contract: “I offer 20 USD and want to receive 5
-$cams on my account” (with the $cam as traditional deflationary
-CryptoCurrency used for speculation only).  The contract is only valid, if
-the source USD account is present, and someone added enough transactions to
-allow those 5 $scams to be deduced from.  All contracts are execute-once,
-since their sources must exit, and all contracts have implicit asset
-transfers by mandating sinks.
-
-Hashes are taken from the signature only.
-
-+ $20 ?source ( $:source-hash -- )
-  source must be present
-+ $21 ?sink ( $:sink-hash -- )
-  sink must be present
+### Contracts ###
+Contracts are now extremely simple: They just sign the sources and sinks
+provided.  Every source needs a contract signature by the source owner.
+All sources and sinks are signed by the contracts in order, including the
+additional contracts.  Since all sources, sinks and previous contracts are
+signed, too, hashes are only computed of the signatures (64 bytes), making
+the hashing easier.  Contract validity is expressed by the start and end
+date of the contract signature.
+Example for an exchange bid: “I offer 20 USD and want to receive 5 $cams on
+my account” (with the $cam as traditional deflationary CryptoCurrency used
+for speculation only).  The contract is only valid, if the source USD
+account is present, and someone added another source to allow those 5
+$scams to be deduced from.  All contracts are execute-once, since their
+sources must exit, will be replaced by the sinks on execution, and all
+contracts have implicit asset transfers by mandating sinks.
+If you want to implement more complex contracts, add a trigger asset to
+your chain.  The simple contract mandates the trigger source, and if not
+present, it can't execute.  So the more complex contract language outputs
+trigger assets, and then triggers the simple contract.

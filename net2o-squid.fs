@@ -91,12 +91,16 @@ Variable wallet[]
 \ Payments are atomic operations; they can involve more than one asset
 \ transfer, but must be embedded within a signed chat message.
 \
-\ Payment offers are partially, the receiver needs to add a sink coin
-\ to get control over the transferred value.
+\ Payment offers are partially, the receiver needs to add a sink coin to get
+\ control over the transferred value.  BlockChain payments are full.  Active
+\ data of a full node is just the coins, not the contracts.
 \
-\ Exchange contracts may require that the receiver also needs to add
-\ a source coin of a different asset type to make the transaction valid.
-\ The contract is signed by the source; handed in by the sink
+\ Exchange contracts may require that the receiver also needs to add a source
+\ coin of a different asset type to make the transaction valid.  The contract
+\ is signed by the source; handed in by the sink.  For each source, there must
+\ be a contract in the transaction to be valid.  All sources and sinks must be
+\ required by at least one of the contracts.  All balances must match.  Assets
+\ must be in the list of accepted assets of the chain.
 \
 \ A coin is a 128 bit big endian number for the value, followed by the asset
 \ type string, and the signature of its owner.
@@ -114,36 +118,35 @@ $20 net2o: pay-source ( $:source -- ) \g source coin, signed by source
 +net2o: pay-sink ( $:remain -- ) \g remain coin, signed by sink
     $> 2 !!>=order? pay:sink ;
 +net2o: pay-contract ( $:contract -- ) \g contract, signed by a source
-    $> 4 !!>order? pay:contract ;
+    $> 4 !!>=order? pay:contract ;
 
 gen-table $freeze
 
 \g 
-\g ### contract commands ###
-\g 
-\g Contracts are now very simple logic: each contract statement may fail. If
-\g it does, the contract is not valid. The time the contract is valid is
-\g defined by the signature's time.
+\g ### Contracts ###
 \g
-\g Example for an exchange contract: “I offer 20 USD and want to receive 5
-\g $cams on my account” (with the $cam as traditional deflationary
-\g CryptoCurrency used for speculation only).  The contract is only valid, if
-\g the source USD account is present, and someone added enough transactions to
-\g allow those 5 $scams to be deduced from.  All contracts are execute-once,
-\g since their sources must exit, and all contracts have implicit asset
-\g transfers by mandating sinks.
-\g 
-\g Hashes are taken from the signature only.
-\g 
+\g Contracts are now extremely simple: They just sign the sources and sinks
+\g provided.  Every source needs a contract signature by the source owner.
+\g All sources and sinks are signed by the contracts in order, including the
+\g additional contracts.  Since all sources, sinks and previous contracts are
+\g signed, too, hashes are only computed of the signatures (64 bytes), making
+\g the hashing easier.  Contract validity is expressed by the start and end
+\g date of the contract signature.
+\g
+\g Example for an exchange bid: “I offer 20 USD and want to receive 5 $cams on
+\g my account” (with the $cam as traditional deflationary CryptoCurrency used
+\g for speculation only).  The contract is only valid, if the source USD
+\g account is present, and someone added another source to allow those 5
+\g $scams to be deduced from.  All contracts are execute-once, since their
+\g sources must exit, will be replaced by the sinks on execution, and all
+\g contracts have implicit asset transfers by mandating sinks.
+\g
+\g If you want to implement more complex contracts, add a trigger asset to
+\g your chain.  The simple contract mandates the trigger source, and if not
+\g present, it can't execute.  So the more complex contract language outputs
+\g trigger assets, and then triggers the simple contract.
+\g
 
-cmd-table $@ inherit-table contract-table
-
-$20 net2o: ?source ( $:source-hash -- ) \g source must be present
-    $> contract:source ;
-+net2o: ?sink ( $:sink-hash -- ) \g sink must be present
-    $> contract:sink ;
-
-gen-table $freeze
 }scope
 
 0 [IF]
