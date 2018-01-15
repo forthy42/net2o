@@ -137,6 +137,7 @@ gen-table $freeze
 \g 
 
 cmd-table $@ inherit-table contract-table
+
 $20 net2o: ?source ( $:source-hash -- ) \g source must be present
     $> contract:source ;
 +net2o: ?sink ( $:sink-hash -- ) \g sink must be present
