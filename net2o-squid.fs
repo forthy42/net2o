@@ -134,6 +134,7 @@ gen-table $freeze
 \g transfers by mandating sinks.
 \g 
 \g Hashes are taken from the signature only.
+\g 
 
 cmd-table $@ inherit-table contract-table
 $20 net2o: ?source ( $:source-hash -- ) \g source must be present
