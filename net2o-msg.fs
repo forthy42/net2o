@@ -342,6 +342,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     !!signed? 8 !!>=order? 64>n $> rot msg:object ;
 +net2o: msg-action ( $:msg -- ) \g specify action string
     !!signed? 8 !!>=order? $> msg:action ;
++net2o: msg-payment ( $:contract -- ) \g payment transaction
+    !!signed? 8 !!>=order? $> msg:payment ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     !!signed? 8 !!>=order? $> msg:coord ;
 

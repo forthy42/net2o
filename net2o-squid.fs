@@ -55,7 +55,8 @@ $8 Value wallets# \ 8 wallet bits, dummy value for testing
 Variable wallet[]
 
 : >walletkey ( addr u -- )
-    walletkey keccak# move-rep  walletkey c:key!  c:diffuse ;
+    2>r 64#0 64dup 2r> walletkey keccak# c:tweakkey!
+    walletkey c:key!  c:diffuse ;
 : prng>pk ( -- )
     sk0 KEYSIZE c:prng
     sk0 sk-mask  sk0 pk0 sk>pk ;
@@ -77,6 +78,71 @@ Variable wallet[]
     1 wallets# lshift 0 U+DO
 	I wallet[] $[]@ KEYSIZE /string over c@ hex. space 85type cr
     LOOP ;
+
+\ payment handling
+
+\ payments are handled in chat messages.  A payment is essentially
+\ a smart contract with some simple functions:
+\
+\ * source coins which is owned by the sender, will be taken out of the block chain
+\ * sink coins (owned by sender or receiver), will be added to the block chain
+\ * a contract (which states what things are exchanged), must be valid to process the transaction
+\
+\ Payments are atomic operations; they can involve more than one asset
+\ transfer, but must be embedded within a signed chat message.
+\
+\ Payment offers are partially, the receiver needs to add a sink coin
+\ to get control over the transferred value.
+\
+\ Exchange contracts may require that the receiver also needs to add
+\ a source coin of a different asset type to make the transaction valid.
+\ The contract is signed by the source; handed in by the sink
+\
+\ A coin is a 128 bit big endian number for the value, followed by the asset
+\ type string, and the signature of its owner.
+
+scope{ net2o-base
+
+\g 
+\g ### payment commands ###
+\g 
+
+cmd-table $@ inherit-table pay-table
+
+$20 net2o: pay-source ( $:source -- ) \g source coin, signed by source
+    $> 1 !!>=order? pay:source ;
++net2o: pay-sink ( $:remain -- ) \g remain coin, signed by sink
+    $> 2 !!>=order? pay:sink ;
++net2o: pay-contract ( $:contract -- ) \g contract, signed by a source
+    $> 4 !!>order? pay:contract ;
+
+gen-table $freeze
+
+\g 
+\g ### contract commands ###
+\g 
+\g Contracts are now very simple logic: each contract statement may fail. If
+\g it does, the contract is not valid. The time the contract is valid is
+\g defined by the signature's time.
+\g
+\g Example for an exchange contract: “I offer 20 USD and want to receive 5
+\g $cams on my account” (with the $cam as traditional deflationary
+\g CryptoCurrency used for speculation only).  The contract is only valid, if
+\g the source USD account is present, and someone added enough transactions to
+\g allow those 5 $scams to be deduced from.  All contracts are execute-once,
+\g since their sources must exit, and all contracts have implicit asset
+\g transfers by mandating sinks.
+\g 
+\g Hashes are taken from the signature only.
+
+cmd-table $@ inherit-table contract-table
+$20 net2o: ?source ( $:source-hash -- ) \g source must be present
+    $> contract:source ;
++net2o: ?sink ( $:sink-hash -- ) \g sink must be present
+    $> contract:sink ;
+
+gen-table $freeze
+}scope
 
 0 [IF]
 Local Variables:

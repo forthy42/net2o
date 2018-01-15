@@ -141,5 +141,5 @@ to c:hash@
 	64over 64over I le-128!  $10 +LOOP  64drop 64drop
     keccak0 keccak-padded keccak#max >keccak ;
 to c:tweakkey!
-    
+
 crypto-o @ Constant keccak-o

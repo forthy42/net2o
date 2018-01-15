@@ -48,6 +48,8 @@ Variable address-table
 Variable context-table
 Variable key-entry-table
 Variable vault-table
+Variable pay-table
+Variable contract-table
 
 Vocabulary mapc
 
@@ -144,9 +146,25 @@ scope: msg
     method id
     method action
     method coord
+    method payment
     method end
 }scope
 end-class msg-class
+
+cmd-class class
+scope: pay
+    method source
+    method sink
+    method contract
+}scope
+end-class pay-class
+
+cmd-class class
+scope: contract
+    method source
+    method sink
+}scope
+end-class contract-class
 
 \ object/reference types
 
