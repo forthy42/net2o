@@ -433,6 +433,7 @@ since their sources must exit, and all contracts have implicit asset
 transfers by mandating sinks.
 
 Hashes are taken from the signature only.
+
 + $20 ?source ( $:source-hash -- )
   source must be present
 + $21 ?sink ( $:sink-hash -- )
