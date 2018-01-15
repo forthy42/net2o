@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.5.6-20171206.
+Version 0.5.6-20180103.
 
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -273,6 +273,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 + $19 rskkey ( $:string --- )
   revoke key, temporarily stored
 + $1A keypet ( $:string -- )
++ $1B walletkey ( $:seed -- )
   read a nested key into sample-key
 
 ### address commands ###
@@ -364,6 +365,8 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   specify an object, e.g. an image
 + $28 msg-action ( $:msg -- )
   specify action string
++ $29 msg-payment ( $:contract -- )
+  payment transaction
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
 
@@ -406,3 +409,31 @@ that makes identical transactions have the same hash.
   unzip an object
 + $26 dvcs-add ( $:hash -- )
   add (and read) external hash reference
+
+### payment commands ###
+
++ $20 pay-source ( $:source -- )
+  source coin, signed by source
++ $21 pay-sink ( $:remain -- )
+  remain coin, signed by sink
++ $22 pay-contract ( $:contract -- )
+  contract, signed by a source
+
+### contract commands ###
+
+Contracts are now very simple logic: each contract statement may fail. If
+it does, the contract is not valid. The time the contract is valid is
+defined by the signature's time.
+Example for an exchange contract: “I offer 20 USD and want to receive 5
+$cams on my account” (with the $cam as traditional deflationary
+CryptoCurrency used for speculation only).  The contract is only valid, if
+the source USD account is present, and someone added enough transactions to
+allow those 5 $scams to be deduced from.  All contracts are execute-once,
+since their sources must exit, and all contracts have implicit asset
+transfers by mandating sinks.
+
+Hashes are taken from the signature only.
++ $20 ?source ( $:source-hash -- )
+  source must be present
++ $21 ?sink ( $:sink-hash -- )
+  sink must be present
