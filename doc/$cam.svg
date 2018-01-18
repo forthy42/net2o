@@ -45,7 +45,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -58,7 +58,7 @@
        cx="107.34524"
        cy="120.86309"
        r="86.178574"
-       style="stroke-width:5;stroke-miterlimit:4;stroke-dasharray:none;fill-opacity:1;fill:none;stroke:#000000;stroke-opacity:1" />
+       style="stroke-width:5;stroke-miterlimit:4;stroke-dasharray:none;fill-opacity:1;fill:#d3bc5f;stroke:#000000;stroke-opacity:1" />
     <path
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 38.440955,150.90084 23.319603,-0.0324 c 17.024258,-0.0476 34.212674,-66.206601 45.460382,-66.236989 11.714,0.308463 24.93991,66.353359 44.40242,66.504259 l 22.43467,-0.22349"
@@ -105,11 +105,5 @@
          x="78.85144"
          y="190.6001"
          style="stroke-width:0.62118268">$cam</tspan></text>
-    <path
-       sodipodi:nodetypes="ccccc"
-       inkscape:connector-curvature="0"
-       id="path4572"
-       d="m 40.708812,154.11364 23.319603,-0.0324 c 17.024258,-0.0476 34.212676,-66.206604 45.460385,-66.236992 11.714,0.308463 24.93991,66.353362 44.40242,66.504262 l 22.43467,-0.22349"
-       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.24710424" />
   </g>
 </svg>
