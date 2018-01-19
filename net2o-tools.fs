@@ -669,6 +669,7 @@ $10 Constant datesize#
 : <info>    info-color attr! ;
 : <err>     err-color attr! ;
 : <black>   [ black >fg black >bg or ]l attr! ;
+: <white>   [ white >fg white >bg or bold or ]l attr! ;
 
 \ Memory words
 

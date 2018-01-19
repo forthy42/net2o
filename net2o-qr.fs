@@ -45,16 +45,17 @@ keyqr#² buffer: keyqr
 $10 buffer: qrecc
 
 \ : half-blocks ( n -- ) 0 ?DO  upper-half-block xemit  LOOP ;
+\ : blocks ( n -- ) 0 U+DO solid-block xemit LOOP ;
 : .prelines ( -- )
     rows keyqr# 2/ - 2/ 0 ?DO
 	\ [ red >fg green >bg or ]L attr!
-	<black> cols spaces <default> cr  LOOP ;
+	<white> cols spaces <default> cr  LOOP ;
 : .preline ( -- )
     \ [ red >fg green >bg or ]L attr!
-    <black> cols keyqr# - 2/ spaces ;
+    <white> cols keyqr# - 2/ spaces ;
 : qr.2lines ( addr u -- ) .preline
     tuck bounds ?DO
-	I c@ over I + c@ $F xor >bg swap $F xor >fg or attr!
+	I c@ over I + c@ $8 xor >bg swap $8 xor >fg or attr!
 	upper-half-block xemit
     LOOP  drop .preline ;
 : qr.block ( addr u -- ) .prelines

@@ -126,7 +126,7 @@ $B0 Value red-level#
     $@ drop swap
     scan-buf1 $@ >r + r> bounds ?DO  0
 	I 8 sfloats bounds DO
-	    2* I c@ level > -
+	    2* I c@ level u< -
 	cell +LOOP  over c! 1+
     8 sfloats +LOOP  drop ;
 
@@ -142,9 +142,9 @@ $B0 Value red-level#
 	    LOOP
 	scan-w 2 rshift +LOOP drop ;] $10 base-execute ;
 
-: .red   ( -- ) red-buf .buf ;
+: .red   ( -- ) red-buf   .buf ;
 : .green ( -- ) green-buf .buf ;
-: .blue  ( -- ) blue-buf .buf ;
+: .blue  ( -- ) blue-buf  .buf ;
 
 : mixgr>32 ( 16red 16green -- 32result )
     0 $10 0 DO
@@ -214,9 +214,9 @@ $8000 Constant init-xy
     scan-buf1 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup c@ red-level# u>= 1 and
-	    over 1+ c@ green-level# u>= 2 and or
-	    over 2 + c@ blue-level# u>= 4 and or
+	    dup      c@ red-level#   u< 1 and
+	    over 1+  c@ green-level# u< 2 and or
+	    over 2 + c@ blue-level#  u< 4 and or
 	    mask = IF
 		I dup * J dup * +
 		x dup * y dup * + u< IF
