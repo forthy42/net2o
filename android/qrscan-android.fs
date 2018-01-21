@@ -15,14 +15,22 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require minos2/android-recorder.fs
-require qrscan-base.fs
+also opengl also android
+
+: visual-frame ( -- )
+    oes-program init
+    0e fdup x-pos sf! >y-pos
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix
+    media-tex nearest-oes
+    screen-orientation draw-scan sync ;
 
 Variable skip-frames
 8 Value skip-frames#
 
 : scan-once ( -- )
-    camera-init scan-w 2* dup scan-fb >framebuffer
+    camera-init
+    scan-w 2* dup scan-fb0 >framebuffer  visual-frame
     scan-frame0 scan-grab0 search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
@@ -37,7 +45,8 @@ Variable skip-frames
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )
     hidekb >changed  hidestatus >changed  screen+keep
-    c-open-back to camera  scan-fb 0= IF  new-scantex  THEN
+    c-open-back to camera
+    scan-fb0 0= IF  new-scantex0 new-scantex1  THEN
     ['] VertexShader ['] FragmentShader create-program to program
     .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
     cam-prepare  skip-frames# skip-frames ! ;

@@ -142,7 +142,7 @@ $8 Value 2b>col
     sig-params ed-sign
     date>qr-key qr#keysig .qr-rest ;
 
-[IFDEF] android   require android/qrscan.fs  [THEN]
+require qrscan.fs
 
 0 [IF]
 Local Variables:

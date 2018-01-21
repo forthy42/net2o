@@ -15,6 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require minos2/gl-helper.fs
+
+[IFDEF] android
+    require minos2/android-recorder.fs
+[THEN]
+
 \ scan matrix manipulation
 
 Create scan-matrix
@@ -91,8 +97,6 @@ scan-inverse 25 sfloats + Constant y-spos
 $40 Value scan-w
 scan-w dup * 1- 2/ 1+ Constant buf-len
 
-also opengl also android
-
 : v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
 
 : draw-scan ( direction -- )
@@ -107,8 +111,7 @@ also opengl also android
     GL_TRIANGLES draw-elements ;
 
 : scan-frame0 ( -- )
-    0e fdup x-pos sf! >y-pos
-    unit-matrix MVMatrix set-matrix 0 draw-scan ;
+    0 draw-scan ;
 
 Variable scan-buf0
 Variable scan-buf1
@@ -191,9 +194,14 @@ scan-step dup scan-w 8 + * swap 2/ 1- + Constant scan-ecc
     -1 0 ecc-ver@ guessecc 8 + be-l!
     2  7 ecc-ver@ guessecc $C + be-l! ;
 
-: ecc-ok? ( addrkey u1 addrecc u2 -- flag )
-    msg( ." ecc? " 2over xtype space 2dup xtype space x-scansize f. y-scansize f. x-offset f. y-offset f. cr )
-    2dup + c@ taghash? ;
+[IFDEF] taghash?
+    : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
+	msg( ." ecc? " 2over xtype space 2dup xtype space x-scansize f. y-scansize f. x-offset f. y-offset f. cr )
+	2dup + c@ taghash? ;
+[ELSE]
+    : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
+	2drop 2drop true ;
+[THEN]
 
 : |min| ( a b -- ) over abs over abs < select ;
 
@@ -282,12 +290,17 @@ $8000 Constant init-xy
     p3 2@ swap . . space
     fswap f. f. cr ;
 
-tex: scan-tex
-0 Value scan-fb
+tex: scan-tex0
+tex: scan-tex1
+0 Value scan-fb0
+0 Value scan-fb1
 
-: new-scantex ( -- )
-    scan-tex  0e 0e 0e 1e glClearColor
-    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+: new-scantex0 ( -- )
+    scan-tex0 0>clear
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb0 ;
+: new-scantex1 ( -- )
+    scan-tex1 0>clear
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb1 ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
     s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scale sf!
@@ -303,14 +316,8 @@ tex: scan-tex
     init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix set-matrix clear
+    scan-w 2* dup scan-fb1 >framebuffer
     0 draw-scan scan-grab1 ;
-
-: visual-frame ( -- )
-    oes-program init
-    unit-matrix MVPMatrix set-matrix
-    unit-matrix MVMatrix set-matrix
-    media-tex nearest-oes
-    screen-orientation draw-scan sync ;
 
 : scan-legit? ( -- addr u flag )
     scan-legit extract-red extract-green >guess
@@ -324,3 +331,28 @@ tex: scan-tex
 	    2drop
 	LOOP
     LOOP  0 0  false ;
+
+previous
+
+[IFDEF] android
+    require android/qrscan-android.fs
+[THEN]
+[IFDEF] linux
+    require linux/qrscan-linux.fs
+[THEN]
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
+      ")" nil comment (font-lock-comment-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+    )
+End:
+[THEN]
