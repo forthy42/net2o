@@ -44,18 +44,28 @@ $40 Constant keymax#
 keyqr#² buffer: keyqr
 $10 buffer: qrecc
 
+Defer <rest>  ' <white> is <rest>
+$8 Value 2b>col
+
+: white-qr ( -- )
+    ['] <white> is <rest>
+    $8 to 2b>col ;
+: black-qr ( -- )
+    ['] <black> is <rest>
+    $F to 2b>col ;
+
 \ : half-blocks ( n -- ) 0 ?DO  upper-half-block xemit  LOOP ;
 \ : blocks ( n -- ) 0 U+DO solid-block xemit LOOP ;
 : .prelines ( -- )
     rows keyqr# 2/ - 2/ 0 ?DO
 	\ [ red >fg green >bg or ]L attr!
-	<white> cols spaces <default> cr  LOOP ;
+	<rest> cols spaces <default> cr  LOOP ;
 : .preline ( -- )
     \ [ red >fg green >bg or ]L attr!
-    <white> cols keyqr# - 2/ spaces ;
+    <rest> cols keyqr# - 2/ spaces ;
 : qr.2lines ( addr u -- ) .preline
     tuck bounds ?DO
-	I c@ over I + c@ $8 xor >bg swap $8 xor >fg or attr!
+	I c@ over I + c@ 2b>col xor >bg swap 2b>col xor >fg or attr!
 	upper-half-block xemit
     LOOP  drop .preline ;
 : qr.block ( addr u -- ) .prelines
