@@ -99,6 +99,8 @@ scan-w dup * 1- 2/ 1+ Constant buf-len
 
 : v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
 
+also opengl
+
 : draw-scan ( direction -- )
     \G draw a scan rotated by rangle
     v0 i0 >v
@@ -109,9 +111,6 @@ scan-w dup * 1- 2/ 1+ Constant buf-len
      -s -s >xy n> rot>st   $000000FF rgba>c v+
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
-
-: scan-frame0 ( -- )
-    0 draw-scan ;
 
 Variable scan-buf0
 Variable scan-buf1
@@ -283,6 +282,14 @@ $8000 Constant init-xy
 : scan-grab0 ( -- )  scan-buf0 scan-grab-buf ;
 : scan-grab1 ( -- )  scan-buf1 scan-grab-buf ;
 
+also soil
+
+: save-pngs ( -- )
+    s" scanimg0.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image
+    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
+
+previous
+
 : .xpoint ( x y -- )
     p0 2@ swap . . space
     p1 2@ swap . . space
@@ -290,11 +297,16 @@ $8000 Constant init-xy
     p3 2@ swap . . space
     fswap f. f. cr ;
 
+tex: scan-tex-raw
 tex: scan-tex0
 tex: scan-tex1
+0 Value scan-fb-raw
 0 Value scan-fb0
 0 Value scan-fb1
 
+: new-scantex-raw ( -- )
+    scan-tex-raw 0>clear
+    cam-w cam-h GL_RGBA new-textbuffer to scan-fb-raw ;
 : new-scantex0 ( -- )
     scan-tex0 0>clear
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb0 ;

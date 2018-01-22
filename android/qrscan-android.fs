@@ -22,19 +22,24 @@ also opengl also android
     0e fdup x-pos sf! >y-pos
     unit-matrix MVPMatrix set-matrix
     unit-matrix MVMatrix set-matrix
-    media-tex nearest-oes
-    screen-orientation draw-scan sync ;
+    media-tex nearest-oes ;
+: tex-frame ( -- )
+    program init
+    scan-tex-raw linaer-mipmap mipmap ;
 
 Variable skip-frames
 8 Value skip-frames#
 
 : scan-once ( -- )
     camera-init
-    scan-w 2* dup scan-fb0 >framebuffer  visual-frame
-    scan-frame0 scan-grab0 search-corners
+    cam-w cam-h scan-fb-raw >framebuffer
+    visual-frame 0 draw-scan
+    scan-w 2* dup scan-fb0 >framebuffer
+    tex-frame 0 draw-scan
+    scan-grab0 search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
-	    0>framebuffer  visual-frame 
+	    0>framebuffer  visual-frame  screen-orientation draw-scan sync
 	    msg( ." scanned ok" cr )
 	    guessecc $10 + c@ scan-result
 	ELSE  2drop  THEN
@@ -54,9 +59,12 @@ Variable skip-frames
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
     cam-end
-    unit-matrix MVPMatrix set-matrix
-    unit-matrix MVMatrix set-matrix
-    screen-keep showstatus
+    level# @ 0= IF
+	terminal-program terminal-init
+	unit-matrix MVPMatrix set-matrix
+	unit-matrix MVMatrix set-matrix
+	screen-keep showstatus
+    THEN
     dup IF
 	." Scan failed"
     ELSE
