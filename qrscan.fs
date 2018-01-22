@@ -112,6 +112,7 @@ also opengl
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
+Variable scan-buf-raw
 Variable scan-buf0
 Variable scan-buf1
 Variable red-buf
@@ -274,19 +275,34 @@ $8000 Constant init-xy
 : p- ( x1 y1 x2 y2 -- x1-x2 y1-y2 )
     rot swap - >r - r> ;
 
+[IFUNDEF] cam-w
+    $100 value cam-w
+    $100 value cam-h
+[THEN]
+
 : scan-grab-buf ( addr -- )
     >r  0 0 scan-w 2* dup
     2dup * sfloats r@ $!len
     GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
+: scan-grab-cam ( addr -- )
+    >r  0 0 cam-w cam-h
+    2dup * sfloats r@ $!len
+    GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
 
-: scan-grab0 ( -- )  scan-buf0 scan-grab-buf ;
-: scan-grab1 ( -- )  scan-buf1 scan-grab-buf ;
+tex: scan-tex-raw
+tex: scan-tex0
+tex: scan-tex1
+
+: scan-grab-raw ( -- )  scan-tex-raw scan-buf-raw scan-grab-cam ;
+: scan-grab0 ( -- )  scan-tex0 scan-buf0 scan-grab-buf ;
+: scan-grab1 ( -- )  scan-tex1 scan-buf1 scan-grab-buf ;
 
 also soil
 
 : save-pngs ( -- )
     s" scanimg0.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image
-    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
+    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image
+    s" scanimgraw.png" SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
 
 previous
 
@@ -297,9 +313,6 @@ previous
     p3 2@ swap . . space
     fswap f. f. cr ;
 
-tex: scan-tex-raw
-tex: scan-tex0
-tex: scan-tex1
 0 Value scan-fb-raw
 0 Value scan-fb0
 0 Value scan-fb1
@@ -327,7 +340,7 @@ tex: scan-tex1
 : scan-legit ( -- ) \ resize a legit QR code
     init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
-    scan-matrix MVMatrix set-matrix clear
+    scan-matrix MVMatrix  set-matrix
     scan-w 2* dup scan-fb1 >framebuffer
     0 draw-scan scan-grab1 ;
 

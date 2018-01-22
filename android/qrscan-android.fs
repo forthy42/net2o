@@ -17,44 +17,45 @@
 
 also opengl also android
 
-: visual-frame ( -- )
-    oes-program init
-    0e fdup x-pos sf! >y-pos
-    unit-matrix MVPMatrix set-matrix
-    unit-matrix MVMatrix set-matrix
-    media-tex nearest-oes ;
 : tex-frame ( -- )
     program init
-    scan-tex-raw linaer-mipmap mipmap ;
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix
+    scan-tex-raw linear-mipmap mipmap ;
 
 Variable skip-frames
 8 Value skip-frames#
 
+: draw-cam ( -- )
+    0>framebuffer screen-orientation draw-scan sync ;
+: draw-raw ( -- )
+    cam-w cam-h scan-fb-raw >framebuffer  1 draw-scan
+    scan-grab-raw ;
+: draw-scaled ( -- )
+    tex-frame scan-w 2* dup scan-fb0 >framebuffer
+    scan-tex-raw 0 draw-scan
+    scan-grab0 ;
 : scan-once ( -- )
-    camera-init
-    cam-w cam-h scan-fb-raw >framebuffer
-    visual-frame 0 draw-scan
-    scan-w 2* dup scan-fb0 >framebuffer
-    tex-frame 0 draw-scan
-    scan-grab0 search-corners
+    camera-init draw-cam draw-raw draw-scaled
+    search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
-	    0>framebuffer  visual-frame  screen-orientation draw-scan sync
 	    msg( ." scanned ok" cr )
 	    guessecc $10 + c@ scan-result
 	ELSE  2drop  THEN
     THEN
-    0>framebuffer skip-frames @ 0= IF visual-frame  THEN
-    -sync skip-frames @ 0> skip-frames +! ;
+    skip-frames @ 0> skip-frames +! ;
 : scan-loop ( -- )  scanned-flags off \ start with empty flags
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )
     hidekb >changed  hidestatus >changed  screen+keep
     c-open-back to camera
-    scan-fb0 0= IF  new-scantex0 new-scantex1  THEN
-    ['] VertexShader ['] FragmentShader create-program to program
-    .01e 100e dpy-w @ dpy-h @ min s>f f2/ 100 fm* >ap
-    cam-prepare  skip-frames# skip-frames ! ;
+    program 0= IF
+	['] VertexShader ['] FragmentShader create-program to program
+    THEN
+    cam-prepare
+    scan-fb-raw 0= IF  new-scantex-raw new-scantex0 new-scantex1  THEN
+    skip-frames# skip-frames ! ;
 
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
