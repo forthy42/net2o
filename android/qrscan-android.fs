@@ -15,38 +15,10 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require minos2/android-recorder.fs
+
 also opengl also android
 
-: tex-frame ( -- )
-    program init
-    unit-matrix MVPMatrix set-matrix
-    unit-matrix MVMatrix set-matrix
-    scan-tex-raw linear-mipmap mipmap ;
-
-Variable skip-frames
-8 Value skip-frames#
-
-: draw-cam ( -- )
-    0>framebuffer screen-orientation draw-scan sync ;
-: draw-raw ( -- )
-    cam-w cam-h scan-fb-raw >framebuffer  1 draw-scan
-    scan-grab-raw ;
-: draw-scaled ( -- )
-    tex-frame scan-w 2* dup scan-fb0 >framebuffer
-    scan-tex-raw 0 draw-scan
-    scan-grab0 ;
-: scan-once ( -- )
-    camera-init draw-cam draw-raw draw-scaled
-    search-corners
-    ?legit IF  scan-legit?
-	skip-frames @ 0= and IF
-	    msg( ." scanned ok" cr )
-	    guessecc $10 + c@ scan-result
-	ELSE  2drop  THEN
-    THEN
-    skip-frames @ 0> skip-frames +! ;
-: scan-loop ( -- )  scanned-flags off \ start with empty flags
-    1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 : scan-start ( -- )
     hidekb >changed  hidestatus >changed  screen+keep
     c-open-back to camera
@@ -54,24 +26,13 @@ Variable skip-frames
 	['] VertexShader ['] FragmentShader create-program to program
     THEN
     cam-prepare
-    scan-fb-raw 0= IF  new-scantex-raw new-scantex0 new-scantex1  THEN
     skip-frames# skip-frames ! ;
 
-: scan-qr ( -- )
-    scan-start  ['] scan-loop catch  level# off
-    cam-end
-    level# @ 0= IF
-	terminal-program terminal-init
-	unit-matrix MVPMatrix set-matrix
-	unit-matrix MVMatrix set-matrix
-	screen-keep showstatus
-    THEN
-    dup IF
-	." Scan failed"
-    ELSE
-	." Scan completed"
-    THEN  forth:cr
-    throw ;
+: draw-cam ( -- )
+    camera-init
+    0>framebuffer screen-orientation draw-scan sync
+    cam-w cam-h scan-fb-raw >framebuffer  1 draw-scan
+    scan-tex-raw linear-mipmap mipmap ;
 
 previous previous
 

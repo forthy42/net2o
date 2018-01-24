@@ -17,10 +17,6 @@
 
 require minos2/gl-helper.fs
 
-[IFDEF] android
-    require minos2/android-recorder.fs
-[THEN]
-
 \ scan matrix manipulation
 
 Create scan-matrix
@@ -105,10 +101,10 @@ also opengl
     \G draw a scan rotated by rangle
     v0 i0 >v
     1e fdup fnegate { f: s f: -s }
-     -s  s >xy n> rot>st   $000000FF rgba>c v+
-      s  s >xy n> rot>st   $000000FF rgba>c v+
-      s -s >xy n> rot>st   $000000FF rgba>c v+
-     -s -s >xy n> rot>st   $000000FF rgba>c v+
+     -s  s >xy n> rot>st   $FFFFFFFF rgba>c v+
+      s  s >xy n> rot>st   $FFFFFFFF rgba>c v+
+      s -s >xy n> rot>st   $FFFFFFFF rgba>c v+
+     -s -s >xy n> rot>st   $FFFFFFFF rgba>c v+
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
@@ -119,9 +115,9 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$E8 Value blue-level#
-$B0 Value green-level#
-$B0 Value red-level#
+$60 Value blue-level#
+$60 Value green-level#
+$40 Value red-level#
 
 : extract-buf ( offset buf level -- ) { level }
     buf-len over $!len
@@ -293,16 +289,30 @@ tex: scan-tex-raw
 tex: scan-tex0
 tex: scan-tex1
 
-: scan-grab-raw ( -- )  scan-tex-raw scan-buf-raw scan-grab-cam ;
-: scan-grab0 ( -- )  scan-tex0 scan-buf0 scan-grab-buf ;
-: scan-grab1 ( -- )  scan-tex1 scan-buf1 scan-grab-buf ;
+0 Value scan-fb-raw
+0 Value scan-fb0
+0 Value scan-fb1
+
+: scan-grab-raw ( -- )
+    cam-w cam-h scan-fb-raw >framebuffer scan-buf-raw scan-grab-cam ;
+: scan-grab0 ( -- )
+    scan-w 2* dup scan-fb0 >framebuffer scan-buf0 scan-grab-buf ;
+: scan-grab1 ( -- )
+    scan-w 2* dup scan-fb1 >framebuffer scan-buf1 scan-grab-buf ;
 
 also soil
 
-: save-pngs ( -- )
-    s" scanimg0.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image
-    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image
+: save-png0 ( -- )
+    s" scanimg0.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image ;
+: save-png1 ( -- )
+    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
+: save-png-raw ( -- )
     s" scanimgraw.png" SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
+: save-pngs ( -- )
+    scan-grab0 save-png0
+    scan-grab1 save-png1
+    scan-grab-raw save-png-raw
+    0>framebuffer ;
 
 previous
 
@@ -313,10 +323,6 @@ previous
     p3 2@ swap . . space
     fswap f. f. cr ;
 
-0 Value scan-fb-raw
-0 Value scan-fb0
-0 Value scan-fb1
-
 : new-scantex-raw ( -- )
     scan-tex-raw 0>clear
     cam-w cam-h GL_RGBA new-textbuffer to scan-fb-raw ;
@@ -326,6 +332,11 @@ previous
 : new-scantex1 ( -- )
     scan-tex1 0>clear
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb1 ;
+: new-scantex ( -- )
+    scan-fb-raw 0= IF
+	new-scantex-raw new-scantex0 new-scantex1
+	0>framebuffer
+    THEN ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
     s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scale sf!
@@ -339,10 +350,10 @@ previous
 
 : scan-legit ( -- ) \ resize a legit QR code
     init-scan' set-scan' >scan-matrix
+    scan-w 2* dup scan-fb1 >framebuffer
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix  set-matrix
-    scan-w 2* dup scan-fb1 >framebuffer
-    0 draw-scan scan-grab1 ;
+    scan-tex-raw linear-mipmap 0 draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
     scan-legit extract-red extract-green >guess
@@ -357,14 +368,70 @@ previous
 	LOOP
     LOOP  0 0  false ;
 
+: tex-frame ( -- )
+    program init-program set-uniforms
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix ;
+: draw-scaled ( -- )
+    tex-frame scan-w 2* dup scan-fb0 >framebuffer
+    scan-tex-raw linear-mipmap 0 draw-scan
+    scan-grab0 ;
+
 previous
+
+Variable skip-frames
+8 Value skip-frames#
 
 [IFDEF] android
     require android/qrscan-android.fs
+[ELSE]
+    [IFDEF] linux
+	require linux/qrscan-linux.fs
+    [THEN]
 [THEN]
-[IFDEF] linux
-    require linux/qrscan-linux.fs
+
+[IFUNDEF] scan-result
+    : scan-result ( addr u tag -- )
+	." Scan tag: " hex. cr
+	." Scan result: " dump ;
+    Variable scanned-flags
 [THEN]
+
+: scan-once ( -- )
+    draw-cam  draw-scaled
+    search-corners
+    ?legit IF  scan-legit?
+	skip-frames @ 0= and IF
+\	    msg( ." scanned ok" cr )
+	    guessecc $10 + c@ scan-result
+	ELSE  2drop  THEN
+    THEN
+    skip-frames @ 0> skip-frames +! ;
+: scan-loop ( -- )  scanned-flags off \ start with empty flags
+    1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
+
+: reset-terminal ( -- )
+    terminal-program terminal-init
+    unit-matrix MVPMatrix set-matrix
+    unit-matrix MVMatrix set-matrix
+    [IFDEF] screen-keep
+	screen-keep showstatus
+    [THEN] ;
+
+: scan-qr ( -- )
+    new-scantex  scan-start  ['] scan-loop catch  level# off
+    cam-end
+    level# @ 0= IF
+	[IFDEF] terminal-program
+	    reset-terminal
+	[THEN]
+    THEN
+    dup IF
+	." Scan failed" cr
+    ELSE
+	." Scan completed" cr
+    THEN
+    throw ;
 
 0 [IF]
 Local Variables:

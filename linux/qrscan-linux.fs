@@ -15,6 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require minos2/soil-texture.fs
+
+: draw-cam ( -- ) ;
+: cam-end ( -- ) ;
+: scan-start ( -- )
+    scan-tex-raw "android/scanimgraw.png" load-texture to cam-h to cam-w ;
 
 0 [IF]
 Local Variables:
