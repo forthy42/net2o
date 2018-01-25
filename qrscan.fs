@@ -410,22 +410,22 @@ Variable skip-frames
 : scan-loop ( -- )  scanned-flags off \ start with empty flags
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 
-: reset-terminal ( -- )
-    terminal-program terminal-init
-    unit-matrix MVPMatrix set-matrix
-    unit-matrix MVMatrix set-matrix
-    [IFDEF] screen-keep
-	screen-keep showstatus
-    [THEN] ;
+[IFDEF] terminal-progam
+    : reset-terminal ( -- )
+	terminal-program terminal-init
+	unit-matrix MVPMatrix set-matrix
+	unit-matrix MVMatrix set-matrix
+	[IFDEF] screen-keep
+	    screen-keep showstatus
+	[THEN] ;
+[THEN]
 
 : scan-qr ( -- )
     new-scantex  scan-start  ['] scan-loop catch  level# off
     cam-end
-    level# @ 0= IF
-	[IFDEF] terminal-program
-	    reset-terminal
-	[THEN]
-    THEN
+    [IFDEF] reset-terminal
+	level# @ 0= IF  reset-terminal  THEN
+    [THEN]
     dup IF
 	." Scan failed" cr
     ELSE
