@@ -80,9 +80,15 @@ point:
 6. [Distributed Data](distributed-data.wiki)
 7. [Applications](applications.wiki)
 
-Videos
-------
+Videos & Presentations
+----------------------
 
++ [Original whitepaper (for historical purposes
+  only)](https://net2o.de/internet-2.0.html)
++ [EuroForth 2009 presentation](https://net2o.de/internet-2.0.pdf)
++ [EuroForth 2010 presentation](https://net2o.de/net2o.pdf)
++ [EuroForth 2011 presentation](https://net2o.de/net2o-al.pdf)
++ [EuroForth 2012 presentation](https://net2o.de/net2o-tl2.pdf)
 + [EuroForth 2013 — net2o application layer](https://wiki.forth-ev.de/doku.php/events:euroforth-2013:n2oal)
 + [EuroForth 2014 — net2o command language](https://wiki.forth-ev.de/doku.php/events:euroforth-2014:net2ocl)
 + [31c3](31c3.md) presentation
