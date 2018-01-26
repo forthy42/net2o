@@ -213,36 +213,31 @@ $8000 Constant init-xy
 	I over get-minmax rot
     LOOP  drop ;
 
-: search-corner { mask -- x y } init-xy dup { x y }
+#10 Cells buffer: p0
+p0 2 cells + Constant p1
+p1 2 cells + Constant p2
+p2 2 cells + Constant p3
+p3 2 cells + Constant px
+
+: search-corners
+    init-xy p0 !  p0 p0 cell+ 7 cells cmove \ fill all with the same contents
     scan-buf0 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup      c@ red-level#   u< 1 and
-	    over 1+  c@ green-level# u< 2 and or
-	    over 2 + c@ blue-level#  u< 4 and or
-	    mask = IF
+	    dup 2 + c@ blue-level#  u< IF
+		dup 1+  c@ green-level# u< 2*
+		over    c@ red-level#   u< - 3 and
+		2* cells p0 +
 		I dup * J dup * +
-		x dup * y dup * + u< IF
-		    I to x  J to y
+		over 2@ dup * swap dup * + u< IF
+		    I J rot 2!
+		ELSE
+		    drop
 		THEN
 	    THEN
 	    sfloat+
 	LOOP
-    LOOP  drop x y ;
-
-2Variable p0 \ top left
-2Variable p1 \ top right
-2Variable p2 \ bottom left
-2Variable p3 \ bottom right
-2Variable px ( cross of the two lines )
-
-: search-corners ( -- )
-    \ get-minmax-rgb . . . . . . cr
-    4 search-corner p0 2! \ top left
-    5 search-corner p1 2! \ top right
-    6 search-corner p2 2! \ bottom left
-    7 search-corner p3 2! \ bottom right
-;
+    LOOP  drop ;
 
 : ?legit ( -- flag )
     p0 2@ init-xy dup d<>
