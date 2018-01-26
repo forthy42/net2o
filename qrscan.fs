@@ -27,11 +27,11 @@ Create scan-matrix
 
 32 sfloats buffer: scan-inverse
 
-20.0e FValue x-scansize
-20.75e FValue y-scansize
+43e FValue x-scansize
+43e FValue y-scansize
 
-0.5e FValue y-offset
-0.0e FValue x-offset
+0e FValue y-offset
+0e FValue x-offset
 
 \ matrix inversion
 
@@ -91,7 +91,7 @@ scan-inverse 25 sfloats + Constant y-spos
     [ 8 sfloats ]L +LOOP  drop ;
 
 $40 Value scan-w
-scan-w dup * 1- 2/ 1+ Constant buf-len
+scan-w 2/ dup * 1- 2/ 2/ 1+ Constant buf-len
 
 : v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
 
@@ -115,18 +115,18 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$60 Value blue-level#
-$60 Value green-level#
-$40 Value red-level#
+$40 Value blue-level#
+$50 Value green-level#
+$50 Value red-level#
 
 : extract-buf ( offset buf level -- ) { level }
     buf-len over $!len
     $@ drop swap
     scan-buf1 $@ >r + r> bounds ?DO  0
-	I 8 sfloats bounds DO
+	I [ 32 sfloats ]L + [ 64 sfloats ]L bounds DO
 	    2* I c@ level u< -
-	cell +LOOP  over c! 1+
-    8 sfloats +LOOP  drop ;
+	[ 2 sfloats ]L +LOOP  over be-l! sfloat+
+    [ 256 sfloats ]L +LOOP  drop ;
 
 : extract-red   ( -- )  0 red-buf   red-level#   extract-buf ;
 : extract-green ( -- )  1 green-buf green-level# extract-buf ;
@@ -135,10 +135,10 @@ $40 Value red-level#
 : .buf ( addr -- )
     [: 0 swap $@ bounds ?DO  cr
 	    dup 3 .r space 1+
-	    I scan-w 2 rshift bounds ?DO
+	    I scan-w 4 rshift bounds ?DO
 		I c@ 0 <# # # #> type
 	    LOOP
-	scan-w 2 rshift +LOOP drop ;] $10 base-execute ;
+	scan-w 4 rshift +LOOP drop ;] $10 base-execute ;
 
 : .red   ( -- ) red-buf   .buf ;
 : .green ( -- ) green-buf .buf ;
@@ -156,7 +156,7 @@ $51 buffer: guessbuf
 guessbuf $40 + Constant guessecc
 guessecc $10 + Constant guesstag
 
-scan-w 2 rshift constant scan-step
+scan-w 3 rshift constant scan-step
 scan-step dup scan-w 9 - * swap 2/ 1- + Constant scan-top
 scan-step dup scan-w 7 + * swap 2/ 1- + Constant scan-bot
 scan-step dup scan-w 8 + * swap 2/ 1- + Constant scan-ecc
@@ -286,19 +286,17 @@ $8000 Constant init-xy
     GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
 
 tex: scan-tex-raw
-tex: scan-tex0
-tex: scan-tex1
+tex: scan-tex
 
 0 Value scan-fb-raw
-0 Value scan-fb0
-0 Value scan-fb1
+0 Value scan-fb
 
 : scan-grab-raw ( -- )
     cam-w cam-h scan-fb-raw >framebuffer scan-buf-raw scan-grab-cam ;
 : scan-grab0 ( -- )
-    scan-w 2* dup scan-fb0 >framebuffer scan-buf0 scan-grab-buf ;
+    scan-buf0 scan-grab-buf ;
 : scan-grab1 ( -- )
-    scan-w 2* dup scan-fb1 >framebuffer scan-buf1 scan-grab-buf ;
+    scan-buf1 scan-grab-buf ;
 
 also soil
 
@@ -309,9 +307,8 @@ also soil
 : save-png-raw ( -- )
     s" scanimgraw.png" SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
 : save-pngs ( -- )
-    scan-grab0 save-png0
-    scan-grab1 save-png1
     scan-grab-raw save-png-raw
+    save-png0 save-png1
     0>framebuffer ;
 
 previous
@@ -326,16 +323,12 @@ previous
 : new-scantex-raw ( -- )
     scan-tex-raw 0>clear
     cam-w cam-h GL_RGBA new-textbuffer to scan-fb-raw ;
-: new-scantex0 ( -- )
-    scan-tex0 0>clear
-    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb0 ;
-: new-scantex1 ( -- )
-    scan-tex1 0>clear
-    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb1 ;
 : new-scantex ( -- )
-    scan-fb-raw 0= IF
-	new-scantex-raw new-scantex0 new-scantex1
-	0>framebuffer
+    scan-tex 0>clear
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+: new-scantexes ( -- )
+    scan-fb 0= IF
+	new-scantex-raw new-scantex 0>framebuffer
     THEN ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
@@ -349,8 +342,7 @@ previous
     x-offset f+ scan-w fm/ x-spos sf! ;
 
 : scan-legit ( -- ) \ resize a legit QR code
-    init-scan' set-scan' >scan-matrix
-    scan-w 2* dup scan-fb1 >framebuffer
+    clear init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix  set-matrix
     scan-tex-raw linear-mipmap 0 draw-scan scan-grab1 ;
@@ -373,7 +365,7 @@ previous
     unit-matrix MVPMatrix set-matrix
     unit-matrix MVMatrix set-matrix ;
 : draw-scaled ( -- )
-    tex-frame scan-w 2* dup scan-fb0 >framebuffer
+    tex-frame scan-w 2* dup scan-fb >framebuffer
     scan-tex-raw linear-mipmap 0 draw-scan
     scan-grab0 ;
 
@@ -406,7 +398,8 @@ Variable skip-frames
 	    guessecc $10 + c@ scan-result
 	ELSE  2drop  THEN
     THEN
-    skip-frames @ 0> skip-frames +! ;
+    skip-frames @ 0> skip-frames +!
+    ekey? IF  ekey k-volup =  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )  scanned-flags off \ start with empty flags
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 
@@ -421,7 +414,7 @@ Variable skip-frames
 [THEN]
 
 : scan-qr ( -- )
-    new-scantex  scan-start  ['] scan-loop catch  level# off
+    new-scantexes  scan-start  ['] scan-loop catch  level# off
     cam-end
     [IFDEF] reset-terminal
 	level# @ 0= IF  reset-terminal  THEN
