@@ -183,7 +183,7 @@ scope{ pay
 :noname ( addr-source u -- )
     ?pk-size
     2dup ?token-exists
-    ?chain-sig
+    ?chain-sig 2dup sigpksize# + sources[] $+[]!
     ?value-size { d: val }
     val balance-in# #@ dup IF
 	drop >r drop be-128@ r@ be-128@ d+ r> be-128!
@@ -192,7 +192,7 @@ scope{ pay
     THEN ; pay-class to source
 :noname ( addr-source u -- )
     ?pk-size
-    ?chain-sig
+    ?chain-sig 2dup sigpksize# + sinks[] $+[]!
     ?value-size { d: val }
     val balance-out# #@ dup IF
 	drop >r drop be-128@ r@ be-128@ 128+ r> be-128!

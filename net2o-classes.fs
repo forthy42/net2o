@@ -152,10 +152,12 @@ end-class msg-class
 
 cmd-class class
 scope: pay
-    field: $sigs \ all the signatures stored here, a string
-    field: pks[] \ all the pks stored here, an array
-    field: balance-in# \ all the values going in, a hash
+    field: $sigs        \ all the signatures stored here, a string
+    field: pks[]        \ all the pks stored here, an array
+    field: balance-in#  \ all the values going in, a hash
     field: balance-out# \ all the values going out, a hash
+    field: sources[]    \ all the sources going in --- remove if accepted
+    field: sinks[]      \ all the sinks going out --- add if accepted
     method source
     method sink
     method intent
