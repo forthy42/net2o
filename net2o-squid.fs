@@ -105,6 +105,8 @@ Variable wallet[]
 \ A coin is a 128 bit big endian number for the value, followed by the asset
 \ type string, and the signature of its owner.
 
+$10 constant value-size#
+
 scope{ net2o-base
 
 \g 
@@ -115,12 +117,16 @@ cmd-table $@ inherit-table pay-table
 
 $20 net2o: pay-source ( $:source -- ) \g source coin, signed by source
     $> 1 !!>=order? pay:source ;
-+net2o: pay-sink ( $:remain -- ) \g remain coin, signed by sink
-    $> 2 !!>=order? pay:sink ;
-+net2o: pay-contract ( $:contract -- ) \g contract, signed by a source
++net2o: pay-sink ( $:remain -- ) \g sink coin, signed by sink
+    $> 1 !!>=order? pay:sink ;
++net2o: pay-intent ( $:contract -- ) \g ask for a contract, signed by a source or sink
+    $> 2 !!>=order? pay:intent ;
++net2o: pay-contract ( $:contract -- ) \g contract, signed by a sink
     $> 4 !!>=order? pay:contract ;
 
 gen-table $freeze
+
+}scope
 
 \g 
 \g ### Contracts ###
@@ -137,15 +143,73 @@ gen-table $freeze
 \g my account” (with the $cam as traditional deflationary CryptoCurrency used
 \g for speculation only).  The contract is only valid, if the source USD
 \g account is present, and someone added another source to allow those 5
-\g $scams to be deduced from.  All contracts are execute-once, since their
-\g sources must exit, will be replaced by the sinks on execution, and all
-\g contracts have implicit asset transfers by mandating sinks.
+\g $scams to be deduced from, and a sink to move those 20 USD to.  All
+\g contracts are execute-once, since their sources must exist and will be
+\g replaced by the sinks on execution, and all contracts have implicit asset
+\g transfers by mandating sinks.  If you want to implement more complex
+\g contracts, use intents: The intent is for incomplete transactions, which
+\g are completed by a contract signature; this contract signature may evaluate
+\g other conditions.
 \g
-\g If you want to implement more complex contracts, add a trigger asset to
-\g your chain.  The simple contract mandates the trigger source, and if not
-\g present, it can't execute.  So the more complex contract language outputs
-\g trigger assets, and then triggers the simple contract.
-\g
+
+Variable SwapDragonChain#
+
+scope{ pay
+
+: +sigs ( addr u -- )
+    + sigonlysize# - sigonlysize# 1- $sigs $+! ;
+: >sigs ( addr u -- )
+    + sigonlysize# - sigonlysize# 1- $sigs $! ;
+: +pks ( addr u -- )
+    + sigpksize# - KEYSIZE pks[] $ins[] drop ;
+: -pks ( addr u -- )
+    + sigpksize# - KEYSIZE pks[] $del[] ;
+: ?pk-size ( addr u -- addr u )
+    dup sigpksize# u< !!no-sig!! ;
+: ?chain-sig ( addr u -- addr' u' )
+    \G check for a signature, and append the sig itself to the sigs
+    2dup +sigs 2dup +pks
+    pk-sig? !!sig!! ;
+: ?value-size ( addr u -- addrval uval addrunit uunit )
+    dup value-size# u<= !!no-unit!!
+    2dup value-size# umin 2swap value-size# /string ;
+: ?contract-sig ( addr u -- )
+    c:0key $sigs $@ c:hash
+    over date-sig? !!sig!! ;
+: ?token-exists ( addr-source u -- )
+    \G check if the token exists and fail if not
+    2dup + sigpksize# - KEYSIZE SwapDragonChain# #@ str= 0= !!no-coin!! ;
+
+:noname ( addr-source u -- )
+    ?pk-size
+    2dup ?token-exists
+    ?chain-sig
+    ?value-size { d: val }
+    val balance-in# #@ dup IF
+	drop >r drop be-128@ r@ be-128@ d+ r> be-128!
+    ELSE
+	val balance-in# #!
+    THEN ; pay-class to source
+:noname ( addr-source u -- )
+    ?pk-size
+    ?chain-sig
+    ?value-size { d: val }
+    val balance-out# #@ dup IF
+	drop >r drop be-128@ r@ be-128@ 128+ r> be-128!
+    ELSE
+	val balance-out# #!
+    THEN ; pay-class to sink
+:noname ( addr-sig u -- )
+    2dup ?contract-sig 2dup >sigs +pks ; pay-class to intent
+:noname ( addr-sig u -- )
+    2dup ?contract-sig 2dup >sigs -pks ; pay-class to contract
+
+: balance-sum ( hash -- 128sum )
+    64#0 64dup r> [: cell+ $@ $10 = IF  be-128@ 128+  ELSE  drop  THEN ;] #map ;
+
+: balance-ok? ( -- flag )
+    balance-in# balance-sum  balance-out# balance-sum 128-
+    64-0= >r 64-0= r> and ;
 
 }scope
 

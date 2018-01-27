@@ -13,6 +13,8 @@ cell 8 = [IF]
     ' ! Alias 64!
     ' le-ux@ Alias le-64@
     ' le-x! Alias le-64!
+    ' be-ux@ Alias be-64@
+    ' be-x! Alias be-64!
     ' noop Alias 64><
     ' swap alias n64-swap
     ' swap alias 64n-swap
@@ -78,6 +80,8 @@ cell 8 = [IF]
     ' * Alias 64*
     : 128@ ( addr -- d ) 2@ swap ;
     : 128! ( d addr -- ) >r swap r> 2! ;
+    ' d+ Alias 128+ \ 128 bit addition
+    ' d- Alias 128- \ 128 bit addition
     ' stop-ns alias stop-64ns
     also locals-types definitions
     ' w: alias 64:
@@ -104,6 +108,8 @@ cell 8 = [IF]
     : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
     ' le-uxd@ Alias le-64@
     ' le-xd! Alias le-64!
+    ' be-uxd@ Alias be-64@
+    ' be-xd! Alias be-64!
     ' d+ Alias 64+
     ' d- Alias 64-
     : 64or rot or >r or r> ;
@@ -193,6 +199,12 @@ cell 8 = [IF]
     : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
     ' be-ul@ alias be@
     ' be-l! alias be!
+    : 128+ ( 128a 128b -- 128c ) \ 128 bit addition
+	{ d: a1 d: a2 d: b1 d: b2 }
+	a1 b1 d+ a2 b2 d+ 2over a1 du< s>d d- ;
+    : 128- ( 128a 128b -- 128c ) \ 128 bit addition
+	{ d: a1 d: a2 d: b1 d: b2 }
+	a1 b1 d- a2 b2 d- 2over a1 du> s>d d+ ;
 [THEN]
 \ independent of cell size, using dfloats:
 ' dfloats Alias 64s
@@ -204,5 +216,9 @@ cell 8 = [IF]
     dup >r le-64@ r> 64'+ le-64@ ;
 : le-128! ( d addr -- )
     dup >r 64'+ le-64! r> le-64! ;
+: be-128@ ( addr -- d )
+    dup >r 64'+ be-64@ r> be-64@ ;
+: be-128! ( d addr -- )
+    dup >r be-64! r> 64'+ be-64! ;
 Create 64!-table ' 64! , ' 64+! ,
 1 64s ' 64aligned ' 64@ 64!-table wrap+value: 64value: ( u1 "name" -- u2 )

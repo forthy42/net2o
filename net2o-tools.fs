@@ -518,9 +518,10 @@ $40 Constant #splitminute
 
 \ insert into sorted string array, discarding n bytes at the end
 
-: $ins[]# ( addr u $array n -- pos )
+: $ins[]# ( addr u $array[] rest -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
+    \G @var{rest} is the rest of the array chopped off for comparison
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# a[] $[]@ rest - compare dup 0= IF
@@ -529,7 +530,7 @@ $40 Constant #splitminute
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
-: $del[]# ( addr u $array offset -- )
+: $del[]# ( addr u $array[] rest -- )
     \G delete O(log(n)) from pre-sorted array
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }

@@ -104,6 +104,8 @@ s" Unknown group"                throwcode !!no-group!!
 s" Challenge failed"             throwcode !!challenge!!
 s" Stack should always be empty" throwcode !!depth!!
 s" hashed object not read in"    throwcode !!dvcs-hash!!
+s" Value has no unit"            throwcode !!no-unit!!
+s" Token/Coin doesn't exist"     throwcode !!no-coin!!
 
 next-exception !
 

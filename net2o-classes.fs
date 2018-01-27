@@ -152,8 +152,13 @@ end-class msg-class
 
 cmd-class class
 scope: pay
+    field: $sigs \ all the signatures stored here, a string
+    field: pks[] \ all the pks stored here, an array
+    field: balance-in# \ all the values going in, a hash
+    field: balance-out# \ all the values going out, a hash
     method source
     method sink
+    method intent
     method contract
 }scope
 end-class pay-class
