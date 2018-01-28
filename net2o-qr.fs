@@ -82,20 +82,22 @@ $8 Value 2b>col
     $05 [ keyqr keyqr# + 2 -           ]L 4xc!
     $06 [ keyqr keyqr#² + keyqr# 2* -  ]L 4xc!
     $07 [ keyqr keyqr#² + keyqr# - 2 - ]L 4xc! ;
+: byte>pixel ( byte addr dist -- )
+    \ a byte is converted into four pixels:
+    \ MSB green red | green red | green red | green red LSB
+    >r
+    over 6 rshift       over c! r@ +
+    over 4 rshift 3 and over c! r@ +
+    over 2 rshift 3 and over c! r> +
+    swap          3 and swap c! ;
 : byte>hpixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
-    over 6 rshift over c! 1+
-    over 4 rshift 3 and over c! 1+
-    over 2 rshift 3 and over c! 1+
-    swap 3 and swap c! ;
+    1 byte>pixel ;
 : byte>vpixel ( byte addr -- )
     \ a byte is converted into four pixels:
     \ MSB green red | green red | green red | green red LSB
-    over 6 rshift       over c! keyqr# +
-    over 4 rshift 3 and over c! keyqr# +
-    over 2 rshift 3 and over c! keyqr# +
-    swap          3 and swap c! ;
+    keyqr# byte>pixel ;
 
 : >keyhline ( destaddr srcaddr -- destaddr' )
     keyline# bounds ?DO  I c@ over byte>hpixel 4 +  LOOP ;

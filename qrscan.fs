@@ -27,11 +27,11 @@ Create scan-matrix
 
 32 sfloats buffer: scan-inverse
 
-43e FValue x-scansize
-43e FValue y-scansize
+84e FValue x-scansize
+86e FValue y-scansize
 
-0e FValue y-offset
-0e FValue x-offset
+0.0e FValue y-offset
+0.0e FValue x-offset
 
 \ matrix inversion
 
@@ -119,76 +119,48 @@ $40 Value blue-level#
 $50 Value green-level#
 $50 Value red-level#
 
-: extract-buf ( offset buf level -- ) { level }
-    buf-len over $!len
-    $@ drop swap
-    scan-buf1 $@ >r + r> bounds ?DO  0
-	I [ 32 sfloats ]L + [ 64 sfloats ]L bounds DO
-	    2* I c@ level u< -
-	[ 2 sfloats ]L +LOOP  over be-l! sfloat+
-    [ 256 sfloats ]L +LOOP  drop ;
+' sfloats alias rgbas ( one rgba is the size of an sfloat )
+' sfloat+ alias rgba+
 
-: extract-red   ( -- )  0 red-buf   red-level#   extract-buf ;
-: extract-green ( -- )  1 green-buf green-level# extract-buf ;
-: extract-blue  ( -- )  2 blue-buf  blue-level#  extract-buf ;
-
-: .buf ( addr -- )
-    [: 0 swap $@ bounds ?DO  cr
-	    dup 3 .r space 1+
-	    I scan-w 4 rshift bounds ?DO
-		I c@ 0 <# # # #> type
-	    LOOP
-	scan-w 4 rshift +LOOP drop ;] $10 base-execute ;
-
-: .red   ( -- ) red-buf   .buf ;
-: .green ( -- ) green-buf .buf ;
-: .blue  ( -- ) blue-buf  .buf ;
-
-: mixgr>32 ( 16red 16green -- 32result )
-    0 $10 0 DO
-	2* 2*
-	over $E rshift 2 and or >r
-	over $F rshift 1 and r> or >r
-	2* swap 2* swap r>
-    LOOP  nip nip ;
+: extract-strip ( addr u step -- strip ) { step }
+    0 -rot bounds U+DO
+	2* I 1+ c@ green-level# u< -
+	2* I    c@ red-level#   u< -
+    step rgbas +LOOP ;
 
 $51 buffer: guessbuf
 guessbuf $40 + Constant guessecc
 guessecc $10 + Constant guesstag
 
 scan-w 3 rshift constant scan-step
-scan-step dup scan-w 9 - * swap 2/ 1- + Constant scan-top
-scan-step dup scan-w 7 + * swap 2/ 1- + Constant scan-bot
-scan-step dup scan-w 8 + * swap 2/ 1- + Constant scan-ecc
 
-: ecc-hor@ ( off -- w1 w2 ) >r
-    red-buf   $@ drop r@ + be-uw@
-    green-buf $@ drop r> + be-uw@ mixgr>32 ;
+: >strip ( index --- addr )
+    2* 2* scan-w + scan-w 2* * scan-w + rgbas
+    scan-buf1 $@ rot safe/string drop ;
+: >strip32 ( addr -- addr' u step )
+    $80 - $100 4 ;
 : >guess ( -- addr u )
-    guessbuf
-    scan-top scan-bot DO
-	I ecc-hor@ over be-l! 4 +
-    scan-step -LOOP
-    drop guessbuf $40 ;
-
-: tag1@ { addr bit -- tag }
-    addr red-buf   $@ drop + c@ bit rshift 1 and
-    addr green-buf $@ drop + c@ bit rshift 1 and 2* or ;
-: ecc-ver@ { off bit -- ul } 0
-    scan-top scan-bot DO
-	2* 2* I off + bit tag1@ or
-    scan-step -LOOP ;
-: tag2@ ( addr -- )
-    dup 1- 0 tag1@ 2 lshift swap 2 + 7 tag1@ or ;
+    guessbuf $40 2dup bounds -8 -rot U+DO
+	dup >strip >strip32
+	extract-strip I be-l!
+	1+
+    4 +LOOP  drop ;
+: ecc-hor@ ( off -- l )
+    >strip >strip32 extract-strip ;
+: ecc-ver@ ( bit -- ul )
+    $80 $-90 rot select #-9 >strip +
+    scan-w $200 * scan-w 2* 2* extract-strip ;
 : tag@ ( -- tag )
-    scan-ecc tag2@ 4 lshift
-    scan-top tag2@ or ;
+    #-9 >strip $90 - $4 1 extract-strip    2* 2*
+    #-9 >strip $80 + $4 1 extract-strip or 2* 2*
+    #08 >strip $90 - $4 1 extract-strip or 2* 2*
+    #08 >strip $80 + $4 1 extract-strip or ;
 
 : >guessecc ( -- )
-    scan-ecc ecc-hor@ guessecc     be-l!
-    scan-top ecc-hor@ guessecc 4 + be-l!
-    -1 0 ecc-ver@ guessecc 8 + be-l!
-    2  7 ecc-ver@ guessecc $C + be-l! ;
+    #-9 ecc-hor@ guessecc      be-l!
+    #08 ecc-hor@ guessecc  4 + be-l!
+    0   ecc-ver@ guessecc  8 + be-l!
+    -1  ecc-ver@ guessecc $C + be-l! ;
 
 [IFDEF] taghash?
     : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
@@ -226,7 +198,7 @@ p3 2 cells + Constant px
 	scan-w dup negate DO
 	    dup 2 + c@ blue-level#  u< IF
 		dup 1+  c@ green-level# u< 2*
-		over    c@ red-level#   u< - 3 and
+		over    c@ red-level#   u< - 3 and 2 xor
 		2* cells p0 +
 		I dup * J dup * +
 		over 2@ dup * swap dup * + u< IF
@@ -235,7 +207,7 @@ p3 2 cells + Constant px
 		    drop
 		THEN
 	    THEN
-	    sfloat+
+	    rgba+
 	LOOP
     LOOP  drop ;
 
@@ -273,11 +245,11 @@ p3 2 cells + Constant px
 
 : scan-grab-buf ( addr -- )
     >r  0 0 scan-w 2* dup
-    2dup * sfloats r@ $!len
+    2dup * rgbas r@ $!len
     GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
 : scan-grab-cam ( addr -- )
     >r  0 0 cam-w cam-h
-    2dup * sfloats r@ $!len
+    2dup * rgbas r@ $!len
     GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
 
 tex: scan-tex-raw
@@ -343,7 +315,7 @@ previous
     scan-tex-raw linear-mipmap 0 draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
-    scan-legit extract-red extract-green >guess
+    scan-legit >guess
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
 : scan-legits? ( -- addr u flag )
