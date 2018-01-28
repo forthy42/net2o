@@ -55,7 +55,7 @@ Sema notify-sema
 [ELSE]
     [IFDEF] linux
 	require linux/notify.fs
-	forward rendering
+	[IFUNDEF] rendering  forward rendering [THEN]
     [THEN]
 	
     : show-notification ( -- )

@@ -20,18 +20,18 @@ require minos2/gl-helper.fs
 \ scan matrix manipulation
 
 Create scan-matrix
-1.0e sf, 0.0e sf, 0.0e sf, 0.0e sf,
-0.0e sf, 1.0e sf, 0.0e sf, 0.0e sf,
-0.0e sf, 0.0e sf, 1.0e sf, 0.0e sf,
-0.0e sf, 0.0e sf, 0.0e sf, 1.0e sf,
+1e sf, 0e sf, 0e sf, 0e sf,
+0e sf, 1e sf, 0e sf, 0e sf,
+0e sf, 0e sf, 1e sf, 0e sf,
+0e sf, 0e sf, 0e sf, 1e sf,
 
 32 sfloats buffer: scan-inverse
 
 84e FValue x-scansize
 86e FValue y-scansize
 
-0.0e FValue y-offset
-0.0e FValue x-offset
+0e FValue y-offset
+0e FValue x-offset
 
 \ matrix inversion
 
@@ -243,14 +243,14 @@ p3 2 cells + Constant px
     $100 value cam-h
 [THEN]
 
+: scan-grab ( w h addr -- )
+    >r  0 0 2swap
+    2dup * rgbas r@ $!len
+    GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
 : scan-grab-buf ( addr -- )
-    >r  0 0 scan-w 2* dup
-    2dup * rgbas r@ $!len
-    GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
+    scan-w 2* dup rot scan-grab ;
 : scan-grab-cam ( addr -- )
-    >r  0 0 cam-w cam-h
-    2dup * rgbas r@ $!len
-    GL_RGBA GL_UNSIGNED_BYTE r> $@ drop glReadPixels ;
+    cam-w cam-h rot scan-grab ;
 
 tex: scan-tex-raw
 tex: scan-tex
