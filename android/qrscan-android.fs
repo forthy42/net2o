@@ -30,8 +30,9 @@ also opengl also android
 
 : draw-cam ( -- )
     camera-init
-    0>framebuffer screen-orientation draw-scan sync
-    cam-w cam-h scan-fb-raw >framebuffer  1 draw-scan
+    0>framebuffer screen-orientation 1e 1e draw-scan sync
+    cam-w cam-h umin dup scan-fb-raw >framebuffer
+    1 1e 1e draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 
 previous previous

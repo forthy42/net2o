@@ -28,7 +28,7 @@ Create scan-matrix
 32 sfloats buffer: scan-inverse
 
 84e FValue x-scansize
-86e FValue y-scansize
+84e FValue y-scansize
 
 0e FValue y-offset
 0e FValue x-offset
@@ -97,14 +97,14 @@ scan-w 2/ dup * 1- 2/ 2/ 1+ Constant buf-len
 
 also opengl
 
-: draw-scan ( direction -- )
-    \G draw a scan rotated by rangle
+: draw-scan ( direction xscale yscale -- )
+    \G draw a scan rotated/tilted by scan matrix
+    fover fnegate fover fnegate { f: sx f: sy f: -sx f: -sy }
     v0 i0 >v
-    1e fdup fnegate { f: s f: -s }
-     -s  s >xy n> rot>st   $FFFFFFFF rgba>c v+
-      s  s >xy n> rot>st   $FFFFFFFF rgba>c v+
-      s -s >xy n> rot>st   $FFFFFFFF rgba>c v+
-     -s -s >xy n> rot>st   $FFFFFFFF rgba>c v+
+     -sx  sy >xy n> rot>st   $FFFFFFFF rgba>c v+
+      sx  sy >xy n> rot>st   $FFFFFFFF rgba>c v+
+      sx -sy >xy n> rot>st   $FFFFFFFF rgba>c v+
+     -sx -sy >xy n> rot>st   $FFFFFFFF rgba>c v+
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
@@ -308,11 +308,15 @@ previous
     y-offset f+ scan-w fm/ y-spos sf!
     x-offset f+ scan-w fm/ x-spos sf! ;
 
+: scan-xy ( -- )
+    1e cam-h cam-w over umin swap fm*/
+    1e cam-w cam-h over umin      fm*/ ;
+
 : scan-legit ( -- ) \ resize a legit QR code
     clear init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix  set-matrix
-    scan-tex-raw linear-mipmap 0 draw-scan scan-grab1 ;
+    scan-tex-raw linear-mipmap 0 scan-xy draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
     scan-legit >guess
@@ -333,7 +337,7 @@ previous
     unit-matrix MVMatrix set-matrix ;
 : draw-scaled ( -- )
     tex-frame scan-w 2* dup scan-fb >framebuffer
-    scan-tex-raw linear-mipmap 0 draw-scan
+    scan-tex-raw linear-mipmap 0 scan-xy draw-scan
     scan-grab0 ;
 
 previous

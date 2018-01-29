@@ -17,10 +17,11 @@
 
 require minos2/soil-texture.fs
 
-: draw-cam ( -- ) ;
+: draw-cam ( -- )
+    scan-tex-raw "android/scanimgraw1.png" load-texture to cam-h to cam-w ;
 : cam-end ( -- ) ;
 : scan-start ( -- )
-    scan-tex-raw "android/scanimgraw1.png" load-texture to cam-h to cam-w ;
+    dpy 0= IF window-init THEN ;
 
 0 [IF]
 Local Variables:
