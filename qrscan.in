@@ -1,0 +1,9 @@
+#! @GFORTHFAST@
+\ -*- mode: Forth -*-
+
+warnings off \ in production mode, we don't want any warnings
+
+fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
+
+require qrscan.fs
+scan-qr bye

@@ -93,9 +93,9 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 DATADIR=$(eval echo $(eval echo $datadir))
 AC_SUBST(DATADIR)
 
-AC_CONFIG_FILES([Makefile n2o net2o-version.fs debian/changelog debian/control])
+AC_CONFIG_FILES([Makefile n2o qrscan net2o-version.fs debian/changelog debian/control])
 AC_CONFIG_COMMANDS([stamp-h],[[date > stamp-h
-chmod +x n2o]],[PACKAGE_VERSION=$PACKAGE_VERSION
+chmod +x n2o qrscan]],[PACKAGE_VERSION=$PACKAGE_VERSION
  machine=$machine
  ARCH=$ARCH])
 

@@ -18,7 +18,10 @@
 require minos2/soil-texture.fs
 
 : draw-cam ( -- )
-    scan-tex-raw "android/scanimgraw1.png" load-texture to cam-h to cam-w ;
+    scan-tex-raw next-arg load-texture to cam-h to cam-w
+    argc @ 1 <= IF
+	level# off
+    THEN ;
 : cam-end ( -- ) ;
 : scan-start ( -- )
     dpy 0= IF window-init THEN ;

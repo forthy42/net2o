@@ -361,12 +361,13 @@ Variable skip-frames
 [THEN]
 
 : scan-once ( -- )
-    draw-cam  draw-scaled
+    draw-cam
+    !time draw-scaled
     search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
 \	    msg( ." scanned ok" cr )
-	    guessecc $10 + c@ scan-result
+	    guessecc $10 + c@ scan-result .time
 	ELSE  2drop  THEN
     THEN
     skip-frames @ 0> skip-frames +!

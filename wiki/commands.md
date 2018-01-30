@@ -415,9 +415,11 @@ that makes identical transactions have the same hash.
 + $20 pay-source ( $:source -- )
   source coin, signed by source
 + $21 pay-sink ( $:remain -- )
-  remain coin, signed by sink
-+ $22 pay-contract ( $:contract -- )
-  contract, signed by a source
+  sink coin, signed by sink
++ $22 pay-intent ( $:contract -- )
+  ask for a contract, signed by a source or sink
++ $23 pay-contract ( $:contract -- )
+  contract, signed by a sink
 
 ### Contracts ###
 Contracts are now extremely simple: They just sign the sources and sinks
@@ -431,10 +433,10 @@ Example for an exchange bid: “I offer 20 USD and want to receive 5 $cams on
 my account” (with the $cam as traditional deflationary CryptoCurrency used
 for speculation only).  The contract is only valid, if the source USD
 account is present, and someone added another source to allow those 5
-$scams to be deduced from.  All contracts are execute-once, since their
-sources must exit, will be replaced by the sinks on execution, and all
-contracts have implicit asset transfers by mandating sinks.
-If you want to implement more complex contracts, add a trigger asset to
-your chain.  The simple contract mandates the trigger source, and if not
-present, it can't execute.  So the more complex contract language outputs
-trigger assets, and then triggers the simple contract.
+$scams to be deduced from, and a sink to move those 20 USD to.  All
+contracts are execute-once, since their sources must exist and will be
+replaced by the sinks on execution, and all contracts have implicit asset
+transfers by mandating sinks.  If you want to implement more complex
+contracts, use intents: The intent is for incomplete transactions, which
+are completed by a contract signature; this contract signature may evaluate
+other conditions.
