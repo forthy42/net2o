@@ -267,15 +267,21 @@ tex: scan-tex
 
 also soil
 
+0 Value scan#
+
 : save-png0 ( -- )
-    s" scanimg0.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image ;
+    [: ." scanimg0-" scan# 0 .r ." .png" ;] $tmp
+    SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image ;
 : save-png1 ( -- )
+    [: ." scanimg1-" scan# 0 .r ." .png" ;] $tmp
     s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
 : save-png-raw ( -- )
-    s" scanimgraw.png" SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
+    [: ." scanimgraw-" scan# 0 .r ." .png" ;] $tmp
+    SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
 : save-pngs ( -- )
     scan-grab-raw save-png-raw
     save-png0 save-png1
+    1 +to scan#
     0>framebuffer ;
 
 previous
