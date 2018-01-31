@@ -118,9 +118,9 @@ Variable red-buf
 Variable green-buf
 Variable blue-buf
 
-$40 Value blue-level#
-$50 Value green-level#
-$50 Value red-level#
+$28 Value blue-level#
+$70 Value green-level#
+$70 Value red-level#
 
 ' sfloats alias rgbas ( one rgba is the size of an sfloat )
 ' sfloat+ alias rgba+
@@ -183,8 +183,8 @@ $8000 Constant init-xy
     bounds ?DO
 	I c@ tuck umax >r umin r>
     4 +LOOP ;
-: get-minmax-rgb ( -- minr maxr ming maxg minb maxb )
-    scan-buf1 $@ swap 3 bounds DO
+: get-minmax-rgb ( addr u -- minr maxr ming maxg minb maxb )
+    swap 3 bounds DO
 	I over get-minmax rot
     LOOP  drop ;
 
@@ -194,7 +194,7 @@ p1 2 cells + Constant p2
 p2 2 cells + Constant p3
 p3 2 cells + Constant px
 
-: search-corners
+: search-corners ( -- )
     init-xy p0 !  p0 p0 cell+ 7 cells cmove \ fill all with the same contents
     scan-buf0 $@ drop
     scan-w dup negate DO
@@ -277,7 +277,7 @@ also soil
     SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image ;
 : save-png1 ( -- )
     [: ." scanimg1-" scan# 0 .r ." .png" ;] $tmp
-    s" scanimg1.png" SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
+    SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
 : save-png-raw ( -- )
     [: ." scanimgraw-" scan# 0 .r ." .png" ;] $tmp
     SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
@@ -370,9 +370,15 @@ Variable skip-frames
     Variable scanned-flags
 [THEN]
 
+: adapt-rgb ( -- )
+    scan-buf0 $@ get-minmax-rgb
+    over - 2/ 2/ + to blue-level#   \ blue level is 1/4 of total
+    over - 2/    + to green-level#  \ green and red are in the middle
+    over - 2/    + to red-level# ;
+
 : scan-once ( -- )
     draw-cam
-    !time draw-scaled
+    !time draw-scaled adapt-rgb
     search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
