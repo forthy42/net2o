@@ -16,6 +16,9 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require minos2/gl-helper.fs
+[IFDEF] android
+    require minos2/android-recorder.fs
+[THEN]
 
 \ scan matrix manipulation
 
@@ -314,7 +317,7 @@ previous
     y-offset f+ scan-w fm/ y-spos sf!
     x-offset f+ scan-w fm/ x-spos sf! ;
 
-: scan-xy ( -- )
+: scan-xy ( -- sx sy )
     1e cam-h cam-w over umin swap fm*/
     1e cam-w cam-h over umin      fm*/ ;
 
@@ -353,6 +356,7 @@ Variable skip-frames
 
 [IFDEF] android
     require android/qrscan-android.fs
+    also android
 [ELSE]
     [IFDEF] linux
 	require linux/qrscan-linux.fs
@@ -403,6 +407,10 @@ Variable skip-frames
 	." Scan completed" cr
     THEN
     throw ;
+
+[IFDEF] android
+    previous
+[THEN]
 
 0 [IF]
 Local Variables:

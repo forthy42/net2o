@@ -15,24 +15,22 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require minos2/android-recorder.fs
-
 also opengl also android
 
 : scan-start ( -- )
-    hidekb >changed  hidestatus >changed  screen+keep
+    hidekb hidestatus >changed  screen+keep
     c-open-back to camera
     program 0= IF
 	['] VertexShader ['] FragmentShader create-program to program
     THEN
-    cam-prepare
+    cam-prepare  new-scantexes
     skip-frames# skip-frames ! ;
 
 : draw-cam ( -- )
-    camera-init
-    0>framebuffer screen-orientation 1e 1e draw-scan sync
-    cam-w cam-h umin dup scan-fb-raw >framebuffer
-    1 1e 1e draw-scan
+    0>framebuffer
+    camera-init screen-orientation 1e 1e draw-scan sync
+    cam-w cam-h scan-fb-raw >framebuffer
+    1 scan-xy draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 
 previous previous

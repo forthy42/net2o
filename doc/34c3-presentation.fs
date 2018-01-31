@@ -842,7 +842,13 @@ $quid-img   dup to $q-img /flip
 }}z slide[]
 to top-widget
 
-: !widgets ( -- ) top-widget .htop-resize ;
+also opengl
+
+: !widgets ( -- ) top-widget .htop-resize
+    .3e ambient% sf! set-uniforms
+    -1.6e 1.6e 3e lightpos glUniform3f ;
+
+previous
 
 also [IFDEF] android android [THEN]
 
