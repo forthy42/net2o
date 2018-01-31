@@ -23,14 +23,13 @@ also opengl also android
     program 0= IF
 	['] VertexShader ['] FragmentShader create-program to program
     THEN
-    cam-prepare  new-scantexes
-    skip-frames# skip-frames ! ;
+    cam-prepare  new-scantexes  skip-frames# skip-frames ! ;
 
 : draw-cam ( -- )
     0>framebuffer
     camera-init screen-orientation 1e 1e draw-scan sync
     cam-w cam-h scan-fb-raw >framebuffer
-    1 scan-xy draw-scan
+    1 1e 1e draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 
 previous previous

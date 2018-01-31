@@ -24,7 +24,8 @@ require minos2/soil-texture.fs
     THEN ;
 : cam-end ( -- ) ;
 : scan-start ( -- )
-    dpy 0= IF window-init THEN ;
+    dpy 0= IF window-init THEN
+    new-scantexes ;
 
 0 [IF]
 Local Variables:

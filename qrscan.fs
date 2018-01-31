@@ -396,7 +396,7 @@ Variable skip-frames
 [THEN]
 
 : scan-qr ( -- )
-    new-scantexes  scan-start  ['] scan-loop catch  level# off
+    scan-start  ['] scan-loop catch  level# off
     cam-end
     [IFDEF] reset-terminal
 	level# @ 0= IF  reset-terminal  THEN
