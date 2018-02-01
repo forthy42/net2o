@@ -100,6 +100,8 @@ scan-inverse 25 sfloats + Constant y-spos
 
 $40 Value scan-w
 scan-w 2/ dup * 1- 2/ 2/ 1+ Constant buf-len
+scan-w 2* Value scan-right
+scan-w 2* dup 3 rshift + negate Value scan-left
 
 : v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
 
@@ -146,7 +148,7 @@ scan-w 3 rshift constant scan-step
     2* 2* scan-w + scan-w 2* * scan-w + rgbas
     scan-buf1 $@ rot safe/string drop ;
 : >strip32 ( addr -- addr' u step )
-    $80 - $100 4 ;
+    scan-right - $100 4 ;
 : >guess ( -- addr u )
     guessbuf $40 2dup bounds -8 -rot U+DO
 	dup >strip >strip32
@@ -156,13 +158,13 @@ scan-w 3 rshift constant scan-step
 : ecc-hor@ ( off -- l )
     >strip >strip32 extract-strip ;
 : ecc-ver@ ( bit -- ul )
-    $80 $-90 rot select #-8 >strip +
+    scan-right scan-left rot select #-8 >strip +
     scan-w dup 3 lshift * scan-w 3 lshift extract-strip ;
 : tag@ ( -- tag )
-    #-9 >strip $90 - $4 1 extract-strip    2* 2*
-    #-9 >strip $80 + $4 1 extract-strip or 2* 2*
-    #08 >strip $90 - $4 1 extract-strip or 2* 2*
-    #08 >strip $80 + $4 1 extract-strip or ;
+    #-9 >strip scan-left  + $4 1 extract-strip    2* 2*
+    #-9 >strip scan-right + $4 1 extract-strip or 2* 2*
+    #08 >strip scan-left  + $4 1 extract-strip or 2* 2*
+    #08 >strip scan-right + $4 1 extract-strip or ;
 
 : >guessecc ( -- )
     #-9 ecc-hor@ guessecc      be-l!
