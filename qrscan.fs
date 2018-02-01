@@ -20,6 +20,11 @@ require minos2/gl-helper.fs
     require minos2/android-recorder.fs
 [THEN]
 
+[IFUNDEF] qr(
+    debug: qr(
+    +db qr( \ turn it on )
+[THEN]
+
 \ scan matrix manipulation
 
 Create scan-matrix
@@ -125,11 +130,11 @@ $70 Value red-level#
 ' sfloats alias rgbas ( one rgba is the size of an sfloat )
 ' sfloat+ alias rgba+
 
-: extract-strip ( addr u step -- strip ) { step }
+: extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
 	2* I 1+ c@ green-level# u< -
 	2* I    c@ red-level#   u< -
-    step rgbas +LOOP ;
+    step +LOOP ;
 
 $51 buffer: guessbuf
 guessbuf $40 + Constant guessecc
@@ -151,8 +156,8 @@ scan-w 3 rshift constant scan-step
 : ecc-hor@ ( off -- l )
     >strip >strip32 extract-strip ;
 : ecc-ver@ ( bit -- ul )
-    $80 $-90 rot select #-9 >strip +
-    scan-w $200 * scan-w 2* 2* extract-strip ;
+    $80 $-90 rot select #-8 >strip +
+    scan-w dup 3 lshift * scan-w 3 lshift extract-strip ;
 : tag@ ( -- tag )
     #-9 >strip $90 - $4 1 extract-strip    2* 2*
     #-9 >strip $80 + $4 1 extract-strip or 2* 2*
@@ -364,17 +369,24 @@ Variable skip-frames
 [THEN]
 
 [IFUNDEF] scan-result
+    : hex[ ]] [: [[ ; immediate
+    : ]hex ]] ;] $10 base-execute [[ ; immediate
+    : xtype ( addr u -- )  hex[
+	bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
+
     : scan-result ( addr u tag -- )
-	." Scan tag: " hex. cr
-	." Scan result: " dump ;
+	qr( >r
+	bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
+	r> ." tag: " dup hex. cr
+	." ecc: " guessecc $10 xtype cr ) ;
     Variable scanned-flags
 [THEN]
 
 : adapt-rgb ( -- )
     scan-buf0 $@ get-minmax-rgb
-    over - 2/ 2/ + to blue-level#   \ blue level is 1/4 of total
-    over - 2/    + to green-level#  \ green and red are in the middle
-    over - 2/    + to red-level# ;
+    over - 2/ 2/  + to blue-level#   \ blue level is 1/4 of total
+    over - 2/     + to green-level#  \ green and red are in the middle
+    over - 2/     + to red-level# ;
 
 : scan-once ( -- )
     draw-cam
@@ -382,8 +394,7 @@ Variable skip-frames
     search-corners
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
-\	    msg( ." scanned ok" cr )
-	    guessecc $10 + c@ scan-result .time
+	    guessecc $10 + c@ scan-result qr( ." took: " .time cr )
 	ELSE  2drop  THEN
     THEN
     skip-frames @ 0> skip-frames +!

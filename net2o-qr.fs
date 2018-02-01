@@ -123,6 +123,7 @@ $8 Value 2b>col
     >r 2tuck over $8 >qr-key
     r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
 : >ecc ( addr u tag -- ) >taghash
+    qr( ." ecc: " qrecc $10 xtype cr )
     keyqr [ keyqr# #03 *  #4 + ]L +  qrecc      >keyhline drop
     keyqr [ keyqr# #20 *  #4 + ]L +  qrecc $4 + >keyhline drop
     keyqr [ keyqr# #04 *  #3 + ]L +  qrecc $8 + >keyvline drop
@@ -137,6 +138,8 @@ $8 Value 2b>col
     keyqr keyqr# qr.block ;
 
 : .keyqr ( addr u tag -- ) \ 64 bytes
+    qr( >r 2dup bounds U+DO ." qr : " I $10 xtype cr $10 +LOOP
+    r> ." tag: " dup hex. cr )
     rng>qr-key .qr-rest ;
 
 : .sigqr ( addr u -- ) \ any string
