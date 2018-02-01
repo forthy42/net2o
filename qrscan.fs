@@ -132,11 +132,23 @@ $70 Value red-level#
 ' sfloats alias rgbas ( one rgba is the size of an sfloat )
 ' sfloat+ alias rgba+
 
-Variable hamming0
-Variable hamming1
-
-: ?? ( value level -- flag )
-    - dup dup 0< IF  negate hamming0  ELSE  hamming1  THEN +! 0< ;
+[IFDEF] distdebug
+    3 cells buffer: dist0
+    dist0 cell+ Constant dist0-max
+    dist0-max cell+ Constant dist0-min
+    3 cells buffer: dist1
+    dist1 cell+ Constant dist1-max
+    dist1-max cell+ Constant dist1-min
+    
+    : ?? ( value level -- flag )
+	- dup dup 0< IF  negate dist0  ELSE  dist1  THEN
+	2dup +! cell+
+	2dup @ umax over ! cell+
+	tuck @ umin swap !
+	0< ;
+[ELSE]
+    ' u< alias ??
+[THEN]
 
 : extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
@@ -338,7 +350,10 @@ previous
     scan-tex-raw linear-mipmap 0 scan-xy draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
-    hamming0 off hamming1 off
+    [IFDEF] distdebug
+	dist0 off dist0-max off dist0-min on
+	dist1 off dist1-max off dist1-min on
+    [THEN]
     scan-legit >guess
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
@@ -377,10 +392,12 @@ Variable skip-frames
 	bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
 	r> ." tag: " dup hex. cr
 	." ecc: " guessecc $10 xtype cr
-	." hamming: "
-	hamming0 @ s>f [ 18 18 * ]L fm/ f.
-	hamming1 @ s>f [ 18 18 * ]L fm/ f.
-	cr ) ;
+	[IFDEF] distdebug
+	    ." dist/min/max: "
+	    dist0 @ s>f [ 18 18 * ]L fm/ f>s . dist0-min ? dist0-max ? space
+	    dist1 @ s>f [ 18 18 * ]L fm/ f>s . dist1-min ? dist1-max ? cr
+	[THEN]
+	) ;
     Variable scanned-flags
 [THEN]
 
@@ -428,9 +445,7 @@ Variable skip-frames
     THEN
     throw ;
 
-[IFDEF] android
-    previous
-[THEN]
+previous
 
 0 [IF]
 Local Variables:

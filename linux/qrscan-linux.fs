@@ -18,7 +18,8 @@
 require minos2/soil-texture.fs
 
 : draw-cam ( -- )
-    scan-tex-raw next-arg load-texture to cam-h to cam-w
+    scan-tex-raw next-arg qr( ." image: " 2dup type cr )
+    load-texture to cam-h to cam-w
     argc @ 1 <= IF
 	level# off
     THEN ;
