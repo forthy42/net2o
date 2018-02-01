@@ -132,10 +132,16 @@ $70 Value red-level#
 ' sfloats alias rgbas ( one rgba is the size of an sfloat )
 ' sfloat+ alias rgba+
 
+Variable hamming0
+Variable hamming1
+
+: ?? ( value level -- flag )
+    - dup dup 0< IF  negate hamming0  ELSE  hamming1  THEN +! 0< ;
+
 : extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
-	2* I 1+ c@ green-level# u< -
-	2* I    c@ red-level#   u< -
+	2* I 1+ c@ green-level# ?? -
+	2* I    c@ red-level#   ?? -
     step +LOOP ;
 
 $51 buffer: guessbuf
@@ -157,20 +163,17 @@ scan-w 3 rshift constant scan-step
     4 +LOOP  drop ;
 : ecc-hor@ ( off -- l )
     >strip >strip32 extract-strip ;
-: ecc-ver@ ( bit -- ul )
-    scan-right scan-left rot select #-8 >strip +
-    scan-w dup 3 lshift * scan-w 3 lshift extract-strip ;
+: ecc-ver@ ( offset -- ul )
+    #-8 >strip + scan-w dup 3 lshift * scan-w 3 lshift extract-strip ;
 : tag@ ( -- tag )
-    #-9 >strip scan-left  + $4 1 extract-strip    2* 2*
-    #-9 >strip scan-right + $4 1 extract-strip or 2* 2*
-    #08 >strip scan-left  + $4 1 extract-strip or 2* 2*
-    #08 >strip scan-right + $4 1 extract-strip or ;
+    #-9 >strip scan-left + $130 [ #17 4 * ]L extract-strip 4 lshift
+    #08 >strip scan-left + $130 [ #17 4 * ]L extract-strip or ;
 
 : >guessecc ( -- )
-    #-9 ecc-hor@ guessecc      be-l!
-    #08 ecc-hor@ guessecc  4 + be-l!
-    0   ecc-ver@ guessecc  8 + be-l!
-    -1  ecc-ver@ guessecc $C + be-l! ;
+    #-9        ecc-hor@ guessecc      be-l!
+    #08        ecc-hor@ guessecc  4 + be-l!
+    scan-left  ecc-ver@ guessecc  8 + be-l!
+    scan-right ecc-ver@ guessecc $C + be-l! ;
 
 [IFDEF] taghash?
     : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
@@ -335,17 +338,10 @@ previous
     scan-tex-raw linear-mipmap 0 scan-xy draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
+    hamming0 off hamming1 off
     scan-legit >guess
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
-: scan-legits? ( -- addr u flag )
-    5 0 DO
-	I s>f f2/ f2/ to y-offset
-	85 80 DO  I s>f f2/ f2/ to y-scansize
-	    scan-legit? IF  unloop unloop true  EXIT  THEN
-	    2drop
-	LOOP
-    LOOP  0 0  false ;
 
 : tex-frame ( -- )
     program init-program set-uniforms
@@ -380,15 +376,19 @@ Variable skip-frames
 	qr( >r
 	bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
 	r> ." tag: " dup hex. cr
-	." ecc: " guessecc $10 xtype cr ) ;
+	." ecc: " guessecc $10 xtype cr
+	." hamming: "
+	hamming0 @ s>f [ 18 18 * ]L fm/ f.
+	hamming1 @ s>f [ 18 18 * ]L fm/ f.
+	cr ) ;
     Variable scanned-flags
 [THEN]
 
 : adapt-rgb ( -- )
     scan-buf0 $@ get-minmax-rgb
-    over - 2/ 2/  + to blue-level#   \ blue level is 1/4 of total
-    over - 2/     + to green-level#  \ green and red are in the middle
-    over - 2/     + to red-level# ;
+    over - 2/ 2/   + to blue-level#   \ blue level is 1/4 of total
+    over - 2 5 */  + to green-level#  \ green at 40% of total
+    over - 2/      + to red-level# ;  \ red at 50% of total
 
 : scan-once ( -- )
     draw-cam
@@ -397,6 +397,7 @@ Variable skip-frames
     ?legit IF  scan-legit?
 	skip-frames @ 0= and IF
 	    guessecc $10 + c@ scan-result qr( ." took: " .time cr )
+	    qr( save-png1 1 +to scan# )
 	ELSE  2drop  THEN
     THEN
     skip-frames @ 0> skip-frames +!
