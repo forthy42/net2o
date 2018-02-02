@@ -18,11 +18,30 @@
 require minos2/gl-helper.fs
 [IFDEF] android
     require minos2/android-recorder.fs
+[ELSE]
+    [IFUNDEF] cam-w
+	$100 value cam-w
+	$100 value cam-h
+    [THEN]
 [THEN]
+
+\ replace some tools available under net2o
 
 [IFUNDEF] qr(
     debug: qr(
     +db qr( \ turn it on )
+[THEN]
+
+[IFUNDEF] xtype
+    : hex[ ]] [: [[ ; immediate
+    : ]hex ]] ;] $10 base-execute [[ ; immediate
+    : xtype ( addr u -- )  hex[
+	bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
+[THEN]
+
+[IFUNDEF] taghash?
+    : taghash? ( addrkey u1 addrecc u2 tag -- flag )
+	drop 2drop 2drop true ;
 [THEN]
 
 \ scan matrix manipulation
@@ -98,12 +117,12 @@ scan-inverse 25 sfloats + Constant y-spos
 	I over [ 4 sfloats ]L move  [ 4 sfloats ]L +
     [ 8 sfloats ]L +LOOP  drop ;
 
+\ scan constants
+
 $40 Value scan-w
 scan-w 2/ dup * 1- 2/ 2/ 1+ Constant buf-len
 scan-w 2* Value scan-right
 scan-w 2* dup 3 rshift + negate Value scan-left
-
-: v2scale ( x y scale -- ) ftuck f* frot frot f* fswap ;
 
 also opengl
 
@@ -187,16 +206,8 @@ scan-w 3 rshift constant scan-step
     scan-left  ecc-ver@ guessecc  8 + be-l!
     scan-right ecc-ver@ guessecc $C + be-l! ;
 
-[IFDEF] taghash?
-    : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
-	msg( ." ecc? " 2over xtype space 2dup xtype space x-scansize f. y-scansize f. x-offset f. y-offset f. cr )
-	2dup + c@ taghash? ;
-[ELSE]
-    : ecc-ok? ( addrkey u1 addrecc u2 -- flag )
-	2drop 2drop true ;
-[THEN]
-
-: |min| ( a b -- ) over abs over abs < select ;
+: ecc-ok? ( addrkey u1 addrecc u2 -- flag )
+    2dup + c@ taghash? ;
 
 $8000 Constant init-xy
 
@@ -216,6 +227,12 @@ p1 2 cells + Constant p2
 p2 2 cells + Constant p3
 p3 2 cells + Constant px
 
+: max²! ( x y addr -- ) >r
+    over dup * over dup * +
+    r@ 2@ dup * swap dup * + u< IF
+	r> 2!  EXIT
+    THEN  2drop rdrop ;
+
 : search-corners ( -- )
     init-xy p0 !  p0 p0 cell+ 7 cells cmove \ fill all with the same contents
     scan-buf0 $@ drop
@@ -224,13 +241,7 @@ p3 2 cells + Constant px
 	    dup 2 + c@ blue-level#  u< IF
 		dup 1+  c@ green-level# u< 2*
 		over    c@ red-level#   u< - 3 and 2 xor
-		2* cells p0 +
-		I dup * J dup * +
-		over 2@ dup * swap dup * + u< IF
-		    I J rot 2!
-		ELSE
-		    drop
-		THEN
+		2* cells p0 + I J rot max²!
 	    THEN
 	    rgba+
 	LOOP
@@ -249,24 +260,17 @@ p3 2 cells + Constant px
     p2 2@ s>f s>f { f: y3 f: x3 }
     x0 y1 f* y0 x1 f* f- { f: dxy01 }
     x2 y3 f* y2 x3 f* f- { f: dxy23 }
-    x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: det1 }
-    dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- det1 f* { f: x }
-    dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- det1 f* { f: y }
-    x f>s y f>s px 2!  x y ;
+    x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: /det1 }
+    dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- /det1 f* \ x
+    dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- /det1 f* \ y
+    fover f>s fdup f>s px 2! ;
 
 : p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
     rot + >r + r> ;
-: p2* ( x1 y1 -- x2 y2 )
-    2* swap 2* swap ;
 : p2/ ( x1 y1 -- x2 y2 )
     2/ swap 2/ swap ;
 : p- ( x1 y1 x2 y2 -- x1-x2 y1-y2 )
     rot swap - >r - r> ;
-
-[IFUNDEF] cam-w
-    $100 value cam-w
-    $100 value cam-h
-[THEN]
 
 : scan-grab ( w h addr -- )
     >r  0 0 2swap
@@ -382,11 +386,6 @@ Variable skip-frames
 [THEN]
 
 [IFUNDEF] scan-result
-    : hex[ ]] [: [[ ; immediate
-    : ]hex ]] ;] $10 base-execute [[ ; immediate
-    : xtype ( addr u -- )  hex[
-	bounds ?DO  I c@ 0 <# # # #> type  LOOP  ]hex ;
-
     : scan-result ( addr u tag -- )
 	qr( >r
 	bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP

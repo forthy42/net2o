@@ -14,6 +14,7 @@ This is a short to-do list for things I have concrete plans
 * Add remote terminal
 * Add onion routing
 * CGNAT experiments to get CGNAT -> NAT to work
+* Add p2p payment (aka BlockChain)
 
 ## Security ##
 
@@ -22,7 +23,7 @@ This is a short to-do list for things I have concrete plans
 * Add a NAT traversal permission to not reveal IP addresses depending on
   peer
 * Add a kill switch passphrase which erases all keys when entered
-* Add a passphrase for security key export
+* Add a passphrase for secret key export
 
 ## Binary packaging ##
 
@@ -32,10 +33,14 @@ This is a short to-do list for things I have concrete plans
 ## High-level API ##
 
 * Produce a Gforth that can run inside a sandbox, e.g. Linux
-  namespace+chroot+capabilities jail.
+  namespace+chroot+capabilities jail
 * Get MINOS2 so far that it can be used as GUI inside the jail
 * Create a framework for structured text and pre-formatted text
 * Use streaming data for audio+video streaming and -chats
+
+## GUI wishlist ##
+
+* Text marker function for received messages
 
 ## Where can you help? ##
 
