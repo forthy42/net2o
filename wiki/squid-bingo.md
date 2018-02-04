@@ -1,4 +1,4 @@
-[up](squid.md) [next](squid-money.md)
+[up](squid.md) back [next](squid-money.md)
 
 # Introduction to $quid
 
@@ -62,4 +62,4 @@ BTW: BlockChains cure cancer, protect you from evil eye, prevent
 flood, plague (though not cholera), and drought, and they can walk
 over water (even when not frozen).
 
-[up](squid.md) [next](squid-money.md)
+[up](squid.md) back [next](squid-money.md)
