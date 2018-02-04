@@ -1,4 +1,4 @@
-[up](squid.md) [back](squid-bingo.md) [next](squid-pot.md)
+[up](squid.md) [back](squid-bingo.md) [next](squid-pow.md)
 
 # Purpose of a currency (with history lesson)
 
