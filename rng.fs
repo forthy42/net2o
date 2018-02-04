@@ -21,8 +21,12 @@
 \ reading entropy.
 
 \ The PRNG itself works by repeatedly encrypting the same block of memory
-\ using Keccak in duplex mode.  This is a huge amount of state (1.2kB),
-\ of which the 200 bytes Keccak state is kept hidden.
+\ using Keccak in duplex mode.  This is a huge amount of state (1.2kB), of
+\ which the 200 bytes Keccak state is kept hidden.  Since each round replaces
+\ the previous Keccak state, this is (of course!) a key-erasing RNG.  Even the
+\ saved .initrng cannot be used to reconstruct the stream, as it is not the
+\ actual key which is written there, but generated random data.  The buffer
+\ used therefore must be bigger than the state needed.
 
 require unix/pthread.fs
 
@@ -79,8 +83,8 @@ s" ~/.initrng" init-rng$ $!
 
 : write-initrng ( -- )
     init-rng$ $@ r/w create-file throw >r
-    rng-key c:key# r@ write-file throw
-    r> close-file throw ;
+    rng-buffer c:key# r@ write-file throw
+    r> close-file throw  rng-step ;
 
 \ Sanity check
 
