@@ -1,5 +1,9 @@
 [up](squid.md) [back](squid-chain.md) [next](squid-fed.md)
 
+_“Mining” (or better called “Minting“) is the process of creating coins (money
+in circulation). It shall not be confused with earning money, where no new
+coins are created, just existing coins are transferred._
+
 # The $quid: Useful Investment & Ethical Mining
 
 _What valuable to base a crypto currency on? Or what is a worse crime
