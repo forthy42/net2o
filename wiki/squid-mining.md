@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-chain.md) [next](squid-fed.md)
+
 # The $quid: Useful Investment & Ethical Mining
 
 _What valuable to base a crypto currency on? Or what is a worse crime
@@ -97,3 +99,5 @@ market would then shift the tax deduction to countries with very high taxes
 and rich people who are very eager to get a tax deduction.
 
 _Ah, yes, and penguins eat squids, too._
+
+[up](squid.md) [back](squid-chain.md) [next](squid-fed.md)

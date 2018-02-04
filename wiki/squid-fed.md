@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-mining.md)
+
 # The Decentral Bank
 
 One question is left for a decentralized monetary system: can you replace the
@@ -32,3 +34,5 @@ a credit for that, and only part of the money paid upfront has to be their
 own.  Once the project is finished, they have to pay the full amount to
 actually get the product they ordered, but that way, the money needed for
 circling between funding and production can be created as fiat money.
+
+[up](squid.md) [back](squid-mining.md)

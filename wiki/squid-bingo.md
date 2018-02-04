@@ -1,3 +1,5 @@
+[up](squid.md) [next](squid-money.md)
+
 # Introduction to $quid
 
 I figured out that the user layer of my net2o peer to peer protocol
@@ -59,3 +61,5 @@ cholera, either.
 BTW: BlockChains cure cancer, protect you from evil eye, prevent
 flood, plague (though not cholera), and drought, and they can walk
 over water (even when not frozen).
+
+[up](squid.md) [next](squid-money.md)

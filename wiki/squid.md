@@ -22,7 +22,7 @@ off-chain.
 
 + [Bullshit Bingo Sheet](squid-bingo.md)
 + [Purpose & History of Currencies](squid-money.md)
-+ [Proof of What?](squid-pot.md)
++ [Proof of What?](squid-pow.md)
 + [Speculation Objects?](squid-speculation.md)
 + [SwapDragonChain](squid-chain.md)
 + [Ethical Mining](squid-mining.md)

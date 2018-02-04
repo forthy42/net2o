@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-bingo.md) [next](squid-pot.md)
+
 # Purpose of a currency (with history lesson)
 
 _Where does the need for money come from?  And what's money?_
@@ -158,3 +160,5 @@ But the only security these ledgers have nowadays is that it require
 physical access to the computers that hold it.  And we know how secure
 computers are.  The idea of a crypto currency therefore is to provide
 security of these ledgers through mathematical magic.
+
+[up](squid.md) [back](squid-bingo.md) [next](squid-pow.md)

@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-pow.md) [next](squid-chain.md)
+
 # Money and wealth — Society in a deflationary world
 
 How money shapes a society, and why the limited supply of BitCoins is
@@ -140,3 +142,5 @@ can't survive the downturns) to the rich (who can).
 
 To remove such oscillation by proper compensation is just solid
 engineering.  We don't want pork cycles.
+
+[up](squid.md) [back](squid-pow.md) [next](squid-chain.md)

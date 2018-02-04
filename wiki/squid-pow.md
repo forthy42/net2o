@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-money.md) [next](squid-fed.md)
+
 # Proof of What?
 
 It is pretty obvious that BitCoin went back all the way through human money
@@ -172,3 +174,5 @@ block, it will cause a quarantine of the corresponding coin.  That
 means you get punished for spending it in the fork.
 
 It needs to be done in a way to keep the balance.
+
+[up](squid.md) [back](squid-money.md) [next](squid-fed.md)

@@ -1,3 +1,5 @@
+[up](squid.md) [back](squid-speculation.md) [next](squid-mining.md)
+
 # Why a BlockChain?
 
 So when I'm kind of ok with fiat money (at least with the big ones where the
@@ -213,3 +215,5 @@ separate the desired amount from your account, then change the secret
 and hand it over to the recipient (who gains knowledge of that secret),
 change the secret again, and finally merge it with the destination
 account (if wanted).
+
+[up](squid.md) [back](squid-speculation.md) [next](squid-mining.md)
