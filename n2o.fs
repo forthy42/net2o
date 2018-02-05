@@ -22,10 +22,10 @@ Variable key-readin
 : out-nicks ( -- )
     [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
-: qr-me ( -- ) pk@ qr#ownkey .keyqr ;
+: qr-me ( -- ) pk@ qr:ownkey# .keyqr ;
 : qr-nicks ( -- )
     [: nick-key ?dup-IF  >o ke-pk $@
-	    qr#ownkey qr#key ke-sk sec@ nip select o>
+	    qr:ownkey# qr:key# ke-sk sec@ nip select o>
 	    .keyqr  THEN ;] @arg-loop ;
 
 : args>keylist ( -- )
@@ -169,7 +169,7 @@ scope{ n2o
     ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
 
 : keyscan ( -- )
-    \U keyscan|scankey
+    \U keyscan|scankey|scanqr|qrscan
     \G keyscan: scan a key in color QR form
     ?get-me init-client
     ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
@@ -287,6 +287,8 @@ synonym listkey keylist
 synonym qrkey keyqr
 synonym searchkey keysearch
 synonym scankey keyscan
+synonym qrscan keyscan
+synonym scanqr keyscan
 
 \ encryption subcommands
 

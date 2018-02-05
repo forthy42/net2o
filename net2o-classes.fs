@@ -322,6 +322,19 @@ perm%blocked perm%indirect or Value perm%unknown
 perm%blocked perm%indirect or invert Value perm%myself
 Create perm$ ," cbdmrwnhstvyi"
 
+\ QR tags
+
+scope: qr
+0
+enum ownkey#
+enum key#
+enum keysig#
+enum hash#
+enum sync#    \ sychnronizing info: key+secret
+enum payment# \ payment is value+cointype+wallet
+drop
+}scope
+
 \ timestasts structure
 
 begin-structure timestats

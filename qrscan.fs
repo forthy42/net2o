@@ -227,7 +227,7 @@ p1 2 cells + Constant p2
 p2 2 cells + Constant p3
 p3 2 cells + Constant px
 
-: max²! ( x y addr -- ) >r
+: min²! ( x y addr -- ) >r
     over dup * over dup * +
     r@ 2@ dup * swap dup * + u< IF
 	r> 2!  EXIT
@@ -241,7 +241,7 @@ p3 2 cells + Constant px
 	    dup 2 + c@ blue-level#  u< IF
 		dup 1+  c@ green-level# u< 2*
 		over    c@ red-level#   u< - 3 and 2 xor
-		2* cells p0 + I J rot max²!
+		2* cells p0 + I J rot min²!
 	    THEN
 	    rgba+
 	LOOP
@@ -397,7 +397,6 @@ Variable skip-frames
 	    dist1 @ s>f [ 18 18 * ]L fm/ f>s . dist1-min ? dist1-max ? cr
 	[THEN]
 	) ;
-    Variable scanned-flags
 [THEN]
 
 : adapt-rgb ( -- )
@@ -418,7 +417,7 @@ Variable skip-frames
     THEN
     skip-frames @ 0> skip-frames +!
     ekey? IF  ekey k-volup =  IF  save-pngs  THEN  THEN ;
-: scan-loop ( -- )  scanned-flags off \ start with empty flags
+: scan-loop ( -- )
     1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
 
 [IFDEF] terminal-progam

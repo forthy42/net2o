@@ -23,16 +23,6 @@ e? max-xchar $100 < [IF] '^' [ELSE] '▀' [THEN] Constant upper-half-block
 \ '▄' Constant lower-half-block
 \ '█' Constant solid-block
 
-\ tags
-
-0
-enum qr#ownkey
-enum qr#key
-enum qr#keysig
-enum qr#hash
-enum qr#sync   \ sychnronizing info: key+secret
-drop
-
 \ constants
 
 24 Constant keyqr# \ key qr codes are 24x24 blocks
@@ -145,7 +135,7 @@ $8 Value 2b>col
 : .sigqr ( addr u -- ) \ any string
     c:0key c:hash now>never sigdate +date
     sig-params ed-sign
-    date>qr-key qr#keysig .qr-rest ;
+    date>qr-key qr:keysig# .qr-rest ;
 
 require qrscan.fs
 

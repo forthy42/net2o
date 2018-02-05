@@ -790,10 +790,8 @@ Variable cp-tmp
 \ respond to scanning keys
 
 forward n2o:pklookup
-forward send-qr-invitation
 
 true Value scan-once?
-Variable scanned-flags
 
 : scanned-key-in ( addr u -- )
     ." scanned "  2dup .key-id cr
@@ -809,12 +807,6 @@ Variable scanned-flags
 
 : scanned-key ( addr u -- )
     scanned-key-in ?scan-level ;
-: scanned-ownkey { d: pk -- }
-    pk scanned-key-in
-    pk n2o:pklookup send-qr-invitation ;
-\ the idea of scan an own key is to send a invitation,
-\ and receive a signature that proofs the scanned device
-\ has access to the secret key
 : scanned-hash ( addr u -- )
     ." hash: " 85type cr ;
 : scanned-keysig ( addr u -- )
@@ -823,19 +815,28 @@ Variable scanned-flags
 : scanned-secret ( addr u -- )
     ." secret: " 85type cr
     ?scan-level ;
+: scanned-payment ( addr u -- )
+    ." payment: " 85type cr
+    ?scan-level ;
 
 Create scanned-x
-' scanned-ownkey ,
+' noop , \ stub for ownkey
 ' scanned-key ,
 ' scanned-keysig ,
 ' scanned-hash ,
 ' scanned-secret ,
+' scanned-payment ,
 
 here scanned-x - cell/ constant scanned-max#
 
+Variable lastscan$
+
+: lastscan? ( addr u tag -- flag )
+    >r $make { w^ just$ } r> just$ c$+!
+    just$ $@ lastscan$ $@ str=
+    lastscan$ $free just$ @ lastscan$ ! ;
 : scan-result ( addr u tag -- )
-    1 over lshift dup scanned-flags @ and IF  2drop 2drop  EXIT  THEN
-    scanned-flags or!
+    dup 2over rot lastscan? IF drop 2drop EXIT THEN
     dup scanned-max# u< IF  cells scanned-x + perform
     ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
 
@@ -1173,6 +1174,17 @@ also net2o-base
     end-code|
     n2o:dispose-context ;
 previous
+
+event: :>qr-invitation ( pk -- )
+    n2o:pklookup send-qr-invitation ;
+
+: scanned-ownkey { d: pk -- }
+    pk scanned-key-in
+    <event pk e$, :>qr-invitation ?query-task event> ;
+\ the idea of scan an own key is to send a invitation,
+\ and receive a signature that proofs the scanned device
+\ has access to the secret key
+' scanned-ownkey scanned-x qr:ownkey# cells + !
 
 \ key api helpers
 
