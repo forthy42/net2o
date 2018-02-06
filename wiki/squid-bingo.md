@@ -30,7 +30,7 @@ Here's the bingo chart for all valid critics on BitCoins:
 <th></th>
 <td>BitCoin is deflationary</td>
 <td>The BlockChain is too big</td>
-<td class="joker">Tulipmania!</td>
+<td class="joker">[Tulipmania!](https://en.wikipedia.org/wiki/Tulip_mania)</td>
 <td>blocks are too big</td>
 <td>blocks are too small</td>
 </tr>

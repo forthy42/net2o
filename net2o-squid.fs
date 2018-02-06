@@ -86,7 +86,7 @@ Variable wallet[]
 \
 \ * source coins which is owned by the sender, will be taken out of the block chain
 \ * sink coins (owned by sender or receiver), will be added to the block chain
-\ * a contract (which states what things are exchanged), must be valid to process the transaction
+\ * a bracket, which holds source and sink coins together
 \
 \ Payments are atomic operations; they can involve more than one asset
 \ transfer, but must be embedded within a signed chat message.
@@ -115,14 +115,14 @@ scope{ net2o-base
 
 cmd-table $@ inherit-table pay-table
 
-$20 net2o: pay-source ( $:source -- ) \g source coin, signed by source
-    $> 1 !!>=order? pay:source ;
-+net2o: pay-sink ( $:remain -- ) \g sink coin, signed by sink
-    $> 1 !!>=order? pay:sink ;
-+net2o: pay-intent ( $:contract -- ) \g ask for a contract, signed by a source or sink
-    $> 2 !!>=order? pay:intent ;
-+net2o: pay-contract ( $:contract -- ) \g contract, signed by a sink
-    $> 4 !!>=order? pay:contract ;
+$20 net2o: pay-source ( $:source -- ) \g source coin, signed by source, final
+    $> pay:source ;
++net2o: pay-sink ( $:remain -- ) \g sink coin, signed by sink, final
+    $> pay:sink ;
++net2o: pay-bracket ( $:contract -- ) \g bracket, final
+    $> pay:bracket ;
++net2o: pay-bracket+ ( $:contract -- ) \g bracket, non-final
+    $> pay:bracket+ ;
 
 gen-table $freeze
 
@@ -200,9 +200,9 @@ scope{ pay
 	val balance-out# #!
     THEN ; pay-class to sink
 :noname ( addr-sig u -- )
-    2dup ?contract-sig 2dup >sigs +pks ; pay-class to intent
+    2dup ?contract-sig 2dup >sigs +pks ; pay-class to bracket+
 :noname ( addr-sig u -- )
-    2dup ?contract-sig 2dup >sigs -pks ; pay-class to contract
+    2dup ?contract-sig 2dup >sigs -pks ; pay-class to bracket
 
 : balance-sum ( hash -- 128sum )
     64#0 64dup r> [: cell+ $@ $10 = IF  be-128@ 128+  ELSE  drop  THEN ;] #map ;

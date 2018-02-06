@@ -1,4 +1,4 @@
-[up](squid.md) [back](squid-mining.md)
+[up](squid.md) [back](squid-mining.md) [next](squid-contracts.md)
 
 # The Decentral Bank
 
@@ -40,4 +40,4 @@ own.  Once the project is finished, they have to pay the full amount to
 actually get the product they ordered, but that way, the money needed for
 circling between funding and production can be created as fiat money.
 
-[up](squid.md) [back](squid-mining.md)
+[up](squid.md) [back](squid-mining.md) [next](squid-contracts.md)

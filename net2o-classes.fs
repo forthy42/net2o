@@ -160,8 +160,8 @@ scope: pay
     field: sinks[]      \ all the sinks going out --- add if accepted
     method source
     method sink
-    method intent
-    method contract
+    method bracket
+    method bracket+
 }scope
 end-class pay-class
 
