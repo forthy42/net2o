@@ -28,9 +28,10 @@ promising businesses doesn't happen.
 
 So this sort of funding doesn't work that well for the internet age, which is
 why crowdfunding has been invented.  The idea here is that many people give
-small credits, and actually receive the mass-produced good when it's actually
-produced.  The missing point is that the central bank doesn't step in and
-gives the crowdfunder credits, so that they could crowd-fund with a lever.
+small credits, and really receive the mass-produced good when it's actually
+produced (so unlike futures, the contract itself is not tradeable).  The
+missing point is that the central bank doesn't step in and gives the
+crowdfunder credits, so that they could crowd-fund with a lever.
 
 And so that's the decentral bank: It's a crowdfunding system, where people
 have to sign for the risk of the fund, but not for the actual money — they get
