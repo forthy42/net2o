@@ -16,15 +16,19 @@ share the profit with them, so their interest rate is more a control
 instrument than a profit tool; they can also issue money with negative
 interest rates.
 
-So in fact, the system is already decentralized: The central bank outsources
-the job to evaluate the actual credibility to banks.  This gives a lot of
-power into their hand, and it favors big credits over small credits (there,
-the effort for verifying the credibility is small compared to the overall
-profit).
+So in fact, the system is already somewhat decentralized: The central bank
+outsources the job to evaluate the actual credibility to banks.  This gives a
+lot of power into their hand, and it favors big credits over small credits
+(there, the effort for verifying the credibility is small compared to the
+overall profit).  Even further: Since the banks have their own need for money
+(their Ponzi-scheme department, also called „investment bankers“), they prefer
+to give the central bank's money to that department, and it creates stock
+bubbles, real estate bubbles, or even BitCoin bubbles.  Real funding of
+promising businesses doesn't happen.
 
-This sort of funding doesn't work that well for the internet age, which is why
-crowdfunding has been invented.  The idea here is that many people give small
-credits, and actually receive the mass-produced good when it's actually
+So this sort of funding doesn't work that well for the internet age, which is
+why crowdfunding has been invented.  The idea here is that many people give
+small credits, and actually receive the mass-produced good when it's actually
 produced.  The missing point is that the central bank doesn't step in and
 gives the crowdfunder credits, so that they could crowd-fund with a lever.
 
