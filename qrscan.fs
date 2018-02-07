@@ -52,6 +52,8 @@ Create scan-matrix
 0e sf, 0e sf, 1e sf, 0e sf,
 0e sf, 0e sf, 0e sf, 1e sf,
 
+scan-matrix 11 sfloats + Constant 3d-enabler
+
 32 sfloats buffer: scan-inverse
 32 sfloats buffer: inverse-default
 inverse-default 32 sfloats bounds
@@ -116,7 +118,8 @@ scan-inverse 25 sfloats + Constant y-spos
     scan-inverse matrix-invert4
     scan-matrix [ scan-inverse 4 sfloats + ]L [ 32 sfloats ]L bounds ?DO
 	I over [ 4 sfloats ]L move  [ 4 sfloats ]L +
-    [ 8 sfloats ]L +LOOP  drop ;
+    [ 8 sfloats ]L +LOOP  drop
+    -1e 3d-enabler sf! ;
 
 \ scan constants
 
@@ -129,12 +132,12 @@ also opengl
 
 : draw-scan ( direction xscale yscale -- )
     \G draw a scan rotated/tilted by scan matrix
-    fover fnegate fover fnegate { f: sx f: sy f: -sx f: -sy }
+    fover fnegate fover fnegate 0e { f: sx f: sy f: -sx f: -sy f: z }
     v0 i0 >v
-     -sx  sy >xy n> rot>st   $FFFFFFFF rgba>c v+
-      sx  sy >xy n> rot>st   $FFFFFFFF rgba>c v+
-      sx -sy >xy n> rot>st   $FFFFFFFF rgba>c v+
-     -sx -sy >xy n> rot>st   $FFFFFFFF rgba>c v+
+     -sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
+      sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
+      sx -sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
+     -sx -sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
