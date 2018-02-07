@@ -53,6 +53,9 @@ Create scan-matrix
 0e sf, 0e sf, 0e sf, 1e sf,
 
 32 sfloats buffer: scan-inverse
+32 sfloats buffer: inverse-default
+inverse-default 32 sfloats bounds
+[?DO] 1e fdup [I] sf! [I] 4 sfloats + sf! 9 sfloats [+LOOP]
 
 84e FValue x-scansize
 84e FValue y-scansize
@@ -70,9 +73,7 @@ Create scan-matrix
 	LOOP
     LOOP ;
 : init-scan' ( -- )
-    scan-inverse [ 32 sfloats ]L 2dup erase  bounds ?DO
-	1e fdup I sf! I [ 4 sfloats ]L + sf!
-    [ 9 sfloats ]L +LOOP ;
+    inverse-default scan-inverse [ 32 sfloats ]L move ;
 : sfax+y8 ( ra addr1 addr2 -- )
     [ 8 sfloats ]L bounds ?DO
 	dup sf@ fover I sf@ f* f+ dup sf! sfloat+
@@ -179,7 +180,7 @@ $51 buffer: guessbuf
 guessbuf $40 + Constant guessecc
 guessecc $10 + Constant guesstag
 
-scan-w 3 rshift constant scan-step
+scan-w 3 rshift Constant scan-step
 
 : >strip ( index --- addr )
     2* 2* scan-w + scan-w 2* * scan-w + rgbas
@@ -260,9 +261,11 @@ p3 2 cells + Constant px
     p2 2@ s>f s>f { f: y3 f: x3 }
     x0 y1 f* y0 x1 f* f- { f: dxy01 }
     x2 y3 f* y2 x3 f* f- { f: dxy23 }
-    x0 x1 f- y2 y3 f- f* y0 y1 f- x2 x3 f- f* f- 1/f { f: /det1 }
-    dxy01 x2 x3 f- f* dxy23 x0 x1 f- f* f- /det1 f* \ x
-    dxy01 y2 y3 f- f* dxy23 y0 y1 f- f* f- /det1 f* \ y
+    x0 x1 f- x2 x3 f- { f: dx01 f: dx23 }
+    y0 y1 f- y2 y3 f- { f: dy01 f: dy23 }
+    dx01 dy23 f* dy01 dx23 f* f- 1/f { f: /det1 }
+    dxy01 dx23 f* dxy23 dx01 f* f- /det1 f* \ x
+    dxy01 dy23 f* dxy23 dy01 f* f- /det1 f* \ y
     fover f>s fdup f>s px 2! ;
 
 : p+ ( x1 y1 x2 y2 -- x1+x2 y1+y2 )
