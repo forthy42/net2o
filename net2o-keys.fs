@@ -353,7 +353,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     o> ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
-    ke-wallet sec@ nip IF  wallet( space ke-wallet sec@ .black85 )else( ."  W" ) ELSE  wallet( $15 )else( 2 ) spaces THEN
+    ke-wallet sec@ nip IF
+	wallet( space ke-wallet sec@ .black85 )else( ."  W" )
+    ELSE  wallet( $15 )else( 2 ) spaces THEN
     ke-selfsig $@ space .sigdates
     ke-groups $@ 2dup .in-groups groups>mask invert
     space ke-mask @ and -1 swap .permandor
@@ -914,7 +916,8 @@ Variable save-keys-again
 
 : do-key ( addr u / 0 0  -- )
     dup 0= IF  2drop  EXIT  THEN
-    sample-key >o ke-sk ke-end over - erase  do-cmd-loop  last-key .?wallet o> ;
+    sample-key >o ke-sk ke-end over - erase  do-cmd-loop
+    ( last-key .?wallet ) o> ;
 
 : .key$ ( addr u -- )
     sample-key >o  ke-sk ke-end over - erase
