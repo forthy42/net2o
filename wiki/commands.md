@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.5.6-20180103.
+Version 0.5.6-20180208.
 
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -413,13 +413,13 @@ that makes identical transactions have the same hash.
 ### payment commands ###
 
 + $20 pay-source ( $:source -- )
-  source coin, signed by source
+  source coin, signed by source, final
 + $21 pay-sink ( $:remain -- )
-  sink coin, signed by sink
-+ $22 pay-intent ( $:contract -- )
-  ask for a contract, signed by a source or sink
-+ $23 pay-contract ( $:contract -- )
-  contract, signed by a sink
+  sink coin, signed by sink, final
++ $22 pay-bracket ( $:contract -- )
+  bracket, final
++ $23 pay-bracket+ ( $:contract -- )
+  bracket, non-final
 
 ### Contracts ###
 Contracts are now extremely simple: They just sign the sources and sinks

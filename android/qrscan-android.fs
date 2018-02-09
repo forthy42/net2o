@@ -23,7 +23,7 @@ also opengl also android
     program 0= IF
 	['] VertexShader ['] FragmentShader create-program to program
     THEN
-    cam-prepare  new-scantexes  skip-frames# skip-frames ! ;
+    cam-prepare  new-scantexes ;
 
 : draw-cam ( -- )
     0>framebuffer

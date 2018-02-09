@@ -379,9 +379,6 @@ previous
 
 previous
 
-Variable skip-frames
-8 Value skip-frames#
-
 [IFDEF] android
     require android/qrscan-android.fs
     also android
@@ -415,33 +412,21 @@ Variable skip-frames
     draw-cam
     !time draw-scaled adapt-rgb
     search-corners
-    ?legit IF  scan-legit?
-	skip-frames @ 0= and IF
+    ?legit IF  scan-legit? IF
 	    guessecc $10 + c@ scan-result qr( ." took: " .time cr )
 	    qr( save-png1 1 +to scan# )
 	ELSE  2drop  THEN
     THEN
-    skip-frames @ 0> skip-frames +!
     ekey? IF  ekey k-volup =  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
-    1 level# +!  BEGIN  scan-once >looper level# @ 0= UNTIL ;
-
-[IFDEF] terminal-progam
-    : reset-terminal ( -- )
-	terminal-program terminal-init
-	unit-matrix MVPMatrix set-matrix
-	unit-matrix MVMatrix set-matrix
-	[IFDEF] screen-keep
-	    screen-keep showstatus
-	[THEN] ;
-[THEN]
+    1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL
+    rdrop ;
 
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
-    cam-end
-    [IFDEF] reset-terminal
-	level# @ 0= IF  reset-terminal  THEN
-    [THEN]
+    cam-end 0>framebuffer
+    [IFDEF] showstatus showstatus [THEN]
+    [IFDEF] terminal-program terminal-program terminal-init [THEN]
     dup IF
 	." Scan failed" cr
     ELSE

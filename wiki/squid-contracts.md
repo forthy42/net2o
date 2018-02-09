@@ -12,8 +12,8 @@ BlockChain.
 
 A dumb contract represents the state transition of the active data in the
 BlockChain to fulfill that contract.  So you have sources (existing tokens in
-existing accounts) and sinks (the same tokens, now in different accounts), and
-brackets to hold tokens in a contract together.
+existing accounts) and sinks (the same accounts, now different values), and
+brackets to hold tokens together if a contract needs to be atomic.
 
 To shorten sources, it could be possible to replace them by hashes.  This
 however means that a contract on its own, outside the BlockChain, can't be
