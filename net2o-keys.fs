@@ -1178,6 +1178,7 @@ also net2o-base
     n2o:dispose-context ;
 previous
 
+forward >qr-key
 event: :>qr-invitation { w^ pk -- }
     pk $@ keysize2 /string >qr-key
     pk $@ keysize2 umin n2o:pklookup send-qr-invitation pk $free ;
