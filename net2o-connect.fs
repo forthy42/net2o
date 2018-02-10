@@ -260,7 +260,7 @@ Sema id-sema
     ELSE
 	msg( ." challenge failed: " qr-hash $40 85type
 	forth:cr ." qr-key: " qr-key 8 xtype forth:cr )
-	!!challenge!!
+	true !!challenge!!
     THEN ;
 
 gen-table $freeze

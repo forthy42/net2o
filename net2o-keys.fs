@@ -1179,11 +1179,12 @@ also net2o-base
 previous
 
 event: :>qr-invitation { w^ pk -- }
-    pk $@ n2o:pklookup send-qr-invitation pk $free ;
+    pk $@ keysize2 /string >qr-key
+    pk $@ keysize2 umin n2o:pklookup send-qr-invitation pk $free ;
 
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    <event pk $make elit, :>qr-invitation ?query-task event> ;
+    <event pk $10 + $make elit, :>qr-invitation ?query-task event> ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
