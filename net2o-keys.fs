@@ -1119,13 +1119,17 @@ event: :>invite ( addr u -- )
     ELSE  2drop  THEN ;
 
 forward .sigqr
-event: :>show-keysig ( addr u -- ) page .sigqr ;
+event: :>show-keysig ( $addr -- )
+    { w^ pk } msg( ." Sign invitation QR" forth:cr )
+    pk $@ 2dup filter-invitation? 0= IF
+	msg( ." Add invitation " 2dup 85type forth:cr )
+	2dup add-invitation  THEN
+    .sigqr pk $free ;
 
 : >invitations ( addr u -- )
     qr-crypt? IF
 	msg( ." QR invitation with signature" forth:cr )
-	2dup filter-invitation? 0= IF  2dup add-invitation  THEN
-	<event e$, :>show-keysig main-up@ event>
+	<event $make elit, :>show-keysig main-up@ event>
     ELSE
 	2dup filter-invitation? IF  2drop EXIT  THEN
 	msg( ." queue invitation" forth:cr )
