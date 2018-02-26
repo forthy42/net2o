@@ -5,13 +5,13 @@ warnings off \ in production mode,
 \ we don't want any warnings
 
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
-fpath+ ~+
 
 require qrscan.fs
 argc @ 1 <= [IF]
     ." usage: qrscan file[s]" cr
     ."   PNG and JPG files accepted" cr
 [ELSE]
+    fpath+ ~+
     scan-qr
 [THEN]
 bye
