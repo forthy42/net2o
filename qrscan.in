@@ -1,9 +1,17 @@
 #! @GFORTHFAST@
 \ -*- mode: Forth -*-
 
-warnings off \ in production mode, we don't want any warnings
+warnings off \ in production mode,
+\ we don't want any warnings
 
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
+fpath+ ~+
 
 require qrscan.fs
-scan-qr bye
+argc @ 1 <= [IF]
+    ." usage: qrscan file[s]" cr
+    ."   PNG and JPG files accepted" cr
+[ELSE]
+    scan-qr
+[THEN]
+bye
