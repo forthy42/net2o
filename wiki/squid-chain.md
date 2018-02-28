@@ -27,7 +27,7 @@ peak on Chinese New Year_
 A “distributed database” can be replicated or partitioned (or both).
 BlockChains as of now are replicated; that's the scaling problem mentioned in
 the bullshit bingo sheet above.  They also need to be partitioned to gain all
-the benefits of modern distributed databases.  Doing the partitioning
+the benefits of modern distributed databases.  Doing the partitioning/sharding
 off-chain is sidestepping the problem instead of solving it.  (Note that the
 lightning network (LN) hints at possible solutions, without being one.  The
 main problem of the LN is that it requires on-chain conflict resolution, and
@@ -55,22 +55,24 @@ transition, and a destination state transition with the same delta
 These are the operations you want to perform in the ledger:
 
   1. You want to move a coin from one owner to another (may imply
-  ledger change)
+     ledger/shard change)
 
   2. You want to be able to join several coins into one
 
   3. You want to split a coin
 
-I don't want to have complex multi-source and -sink transaction which
-are difficult to verify.  Instead, I propose a single transaction,
-which takes a part of one coin, and adds it to the destination coin.
+Transactions are handled by [dump contracts](squid-contracts.md), the rules
+are simple enough that even multi-participant transactions are easy to
+verify.  All transactions must happen in the active ledger group, i.e. spooky
+actions at a distance are strictly limited to the one active dimension of the
+hypercube.
 
 ![Coin transaction](https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Feynmandiagram.svg/220px-Feynmandiagram.svg.png)
 
 I represent this transaction as Feynman diagram, because that almost fits the
 concept.  If the source coin (or account) results in a value of 0, it can
-disappear, if the destination coin doesn't yet exist, it starts with the
-transaction as initial value.
+disappear from the active states, if the destination coin doesn't yet exist,
+it starts with the transaction as initial value.
 
 Coins are pseudonymous, and you can have many different pseudonyms.  However,
 coins as proposed here have readable values attached.  It's likely that mix
@@ -91,10 +93,10 @@ supposed to have more than one ledger, and every transaction needs to
 go to two columns, one as debit, one as credit.  All values are outside the
 accountant's hands, so the accountant's balance is always zero (poor gal).
 
-If you want to scale a crypto currency, you want to separate ledgers
-by some arbitrary criteria so that the individual nodes are not
-overloaded, and millions of bookings can get in per second; which is a
-fairly reasonable number for micropayment.
+If you want to scale a crypto currency, you want to separate ledgers by some
+arbitrary criteria (sharding in database language) so that the individual
+nodes are not overloaded, and millions of bookings can get in per second;
+which is a fairly reasonable number for micropayment.
 
 Since you want to check if a coin someone offers you has already been
 spent, you want to ask the corresponding ledger for it.  The ledger
