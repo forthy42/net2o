@@ -179,7 +179,6 @@ gen-table $freeze
 \ safe initialization
 
 : lit<   lit, push-lit ;
-: slit<  slit, push-slit ;
 :noname ( throwcode -- )
     remote? @ IF
 	?dup-IF  init-reply

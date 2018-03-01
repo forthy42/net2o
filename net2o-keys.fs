@@ -934,14 +934,16 @@ Variable save-keys-again
 	keypack-all# = WHILE
 	    import-type @ import#self = try-decrypt do-key
     REPEAT  rdrop  code0-buf ;
-: read-key-loop ( -- )
+: read-key-loop ( -- )  deprecated off
     import#self import-type !
     ?key-sfd read-keys-loop
-    save-keys-again @ IF  save-seckeys  THEN ;
+    save-keys-again @ deprecated @ or IF  save-seckeys  THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
     -1 config:pw-level#
-    [: import#new import-type ! ?key-pfd read-keys-loop ;] !wrapper ;
+    [: import#new import-type ! ?key-pfd  deprecated off
+      read-keys-loop
+      deprecated @ IF  save-keys  THEN ;] !wrapper ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;

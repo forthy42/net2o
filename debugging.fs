@@ -75,6 +75,7 @@ debug: quicksig( \ quick check for sigs
 debug: slurp( \ debug slurp&spit
 debug: wallet( \ debug wallet stuff
 debug: qr( \ qr code stuff
+debug: deprecated( \ deprecated stuff
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )

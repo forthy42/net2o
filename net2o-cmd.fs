@@ -226,6 +226,7 @@ User see:table \ current token table for see only
 	0 endcase ]hex ;
 
 User show-offset  show-offset on
+User deprecated   deprecated off \ set to on if a deprecated command was seen
 
 Sema see-sema
 
@@ -471,7 +472,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 +net2o: ulit ( #u -- u ) \g unsigned literal
     p@ ;
 +net2o: slit ( #n -- n ) \g signed literal, zig-zag encoded
-    ps@ ;
+    ps@ deprecated( ." deprecated: slit" cr n2o:see-me ) deprecated on ;
 +net2o: string ( #string -- $:string ) \g string literal
     string@ ;
 +net2o: flit ( #dfloat -- r ) \g double float literal
@@ -705,7 +706,7 @@ scope{ net2o-base
     string, ;
 : sec$, ( addr u -- )  secstring string, ;
 : lit, ( 64u -- )  ulit cmd, ;
-: slit, ( 64n -- )  slit n>zz cmd, ;
+: slit, ( 64n -- )  ulit cmd, ;
 : nlit, ( n -- )  n>64 slit, ;
 : ulit, ( u -- )  u>64 lit, ;
 : 4cc, ( addr u -- ) 2dup *-width 3 <> !!4cc!! drop
@@ -743,9 +744,7 @@ $10 net2o: push' ( #cmd -- ) \g push command into answer packet
 +net2o: push-lit ( u -- ) \g push unsigned literal into answer packet
     lit, ;
 ' push-lit alias push-char
-+net2o: push-slit ( n -- ) \g push singed literal into answer packet
-    slit, ;
-+net2o: push-$ ( $:string -- ) \g push string into answer packet
+$13 net2o: push-$ ( $:string -- ) \g push string into answer packet
     $> $, ;
 +net2o: push-float ( r -- ) \g push floating point number
     float, ;
