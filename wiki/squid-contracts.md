@@ -85,7 +85,9 @@ signature of the contract again.
 To formalize a contract, Sources are written as S (timestamp), destinations as
 D (new timestamp + signature), obligations as O, assets as A, delta amounts as
 + or - (give or take), and numbers to select the correct source if unclear
-(the last source is always the active one).
+(the last source is always the active one).  B is a shortcut for balancing an
+asset, and can be used instead of the last value on that asset type.  Also,
+previously used assets can be selected by number.
 
 All sources specify the date of the source state, so that a contract can be
 performed only once — the destination date must be later than the source date.
@@ -93,18 +95,18 @@ performed only once — the destination date must be later than the source date.
 + Claimed money cheque (anybody who has the transaction can claim the money;
   requires trust to the ledger node that accepts the cheque): SA-DSA+D
 + Money transfer (only the designated recipient can claim the money): SA-SA+D1D
-+ Creation of asset and obligation: SA+O-D
-+ Two party purchase: SA¹+A²-SA¹-A²+1D2D
-+ Two party purchase delivery: SA-SO+1D2D (annihilates the asset)
-+ Bid/Ask in an exchange: SA¹+A²-D, finalized by SA¹+A²-DSA¹-A²+D. Note that
++ Creation of asset and obligation: SA+OBD
++ Two party purchase: SA¹+A²-S¹B²B1D2D
++ Two party purchase delivery: SA-SOB1D2D (annihilates the asset)
++ Bid/Ask in an exchange: SA¹+A²-D, finalized by SA¹+A²-DS¹B²BD. Note that
   bids/asks in an exchange can be more complicated when they are only partly
   fulfilled; the splitting requires action by the bidder; and also note that
   this kind of bid requires, like the cheque, trust in the ledger node; but
   less than: The ledger node can only buy for the same price, not steal the
   money.
   Better finalize the contract with the other side.
-+ Auction offer: SA¹-, auction bid: SA¹-SA¹+A²-D, auction conclusion:
-  SA¹-SA¹+A²-D1A²+D. Auction offers are signed with an end-of-auction
++ Auction offer: SA¹-, auction bid: SA¹-S¹BA²-D, auction conclusion:
+  SA¹-S¹BA²-D1²BD. Auction offers are signed with an end-of-auction
   beginning to indicate the timeout, and the offering party can select the
   best match, allowing other algorithms as maximum price, too, or other
   timeout algorithms than the fixed deadline; e.g. 15 minutes after last bid
