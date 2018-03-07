@@ -583,6 +583,9 @@ Variable keys
     ke-selfsig $@ drop 64! ;
 
 Variable save-keys-again
+Variable key-version
+: key-version$ "1" ;
+key-version$ evaluate Constant key-version#
 
 scope{ net2o-base
 
@@ -591,9 +594,10 @@ cmd-table $@ inherit-table key-entry-table
 \g ### key storage commands ###
 \g
 $2 net2o: slit ( #lit -- ) \g deprecated slit version
-    ps@ save-keys-again on ;
+    p@ key-version @ 0= IF  zz>n save-keys-again on  ELSE  64invert  THEN ;
 $F net2o: kversion ( $:string -- ) \g key version
-    "1" str< save-keys-again or! ;
+    $> s>unumber? IF  drop  ELSE  2drop 0  THEN  dup key-version !
+    key-version# u< save-keys-again or! ;
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
@@ -754,18 +758,18 @@ previous
 
 : pack-pubkey ( o:key -- )
     key:code
-      "1" $, version
+      key-version$ $, version
       pack-corekey
     end:key ;
 : pack-outkey ( o:key -- )
     key:code
       "n2o" net2o-base:4cc,
-      "1" $, version
+      key-version$ $, version
       pack-signkey
     end:key ;
 : pack-seckey ( o:key -- )
     key:code
-      "1" $, version
+      key-version$ $, version
       pack-corekey
       ke-sk sec@ sec$, privkey
       ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
@@ -941,9 +945,10 @@ false value ?yes
 	THEN
     THEN ;
 
-: do-key ( addr u / 0 0  -- )
+: do-key ( addr u / 0 0  -- )  key-version off
     dup 0= IF  2drop  EXIT  THEN
     sample-key >o ke-sk ke-end over - erase  do-cmd-loop
+    key-version @ key-version# u< save-keys-again or!
     ( last-key .?wallet ) o> ;
 
 : .key$ ( addr u -- )
