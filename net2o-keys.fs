@@ -369,7 +369,8 @@ Variable secret-nicks#
 : .secret-nicks-insert ( -- )
     secret-nicks[] $[]free  secret-nicks# $free
     0 key# [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  ['] .key-rest $tmp secret-nicks[] $ins[] >r
+	  [: ke-pk $@ key| 85type space .nick-base ;] $tmp
+	  secret-nicks[] $29 $ins[]/ >r
 	  dup { c^ x } x 1 secret-nicks# r> $ins  1+
       THEN o> ;] #map drop ;
 : nick#>key# ( n1 -- n2 )
