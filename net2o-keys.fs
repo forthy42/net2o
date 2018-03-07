@@ -364,21 +364,9 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
     .key-rest cr ;
-Variable secret-nicks[]
-Variable secret-nicks#
-: .secret-nicks-insert ( -- )
-    secret-nicks[] $[]free  secret-nicks# $free
-    0 key# [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  [: ke-pk $@ key| 85type space .nick-base ;] $tmp
-	  secret-nicks[] $29 $ins[]/ >r
-	  dup { c^ x } x 1 secret-nicks# r> $ins  1+
-      THEN o> ;] #map drop ;
-: nick#>key# ( n1 -- n2 )
-    secret-nicks# $@ rot safe/string IF  c@  ELSE  drop -1  THEN ;
-: .secret-nicks ( -- )
-    .secret-nicks-insert
-    0 secret-nicks[] [: 2 pick 1 ['] .r #36 base-execute space
-      type cr 1+ ;] $[]map drop ;
+
+\ print invitations
+
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-imports @ >im-color 85type <default>
@@ -389,7 +377,7 @@ Variable secret-nicks#
 \ print sorted list of keys by nick
 
 Variable sort-list[]
-: $ins[]key ( o:key $array -- )
+: $ins[]key ( o:key $array -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
     { a[] } 0 a[] $[]#
@@ -398,18 +386,39 @@ Variable sort-list[]
 		drop ke-nick# @ $# a[] $[] @ .ke-nick# @ -  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    o { w^ ins$0 } ins$0 cell a[] r> cells $ins ;
+    o { w^ ins$0 } ins$0 cell a[] r@ cells $ins r> ;
 : list-keys ( -- )
     ." colors: " .import-colors cr
     ." num pubkey                                   "
     wallet( ." wallet             " )
     ."   date                     grp+perm	h nick" cr
-    key# [: cell+ $@ drop cell+ >o sort-list[] $ins[]key o> ;] #map
+    key# [: cell+ $@ drop cell+ >o sort-list[] $ins[]key drop o> ;] #map
     sort-list[] $[]# 0 ?DO  I sort-list[] $[] @ ..key-list  LOOP
-    sort-list[] $off ;
+    sort-list[] $free ;
 : list-nicks ( -- )
     nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
-	  I @ ..key-list  cell +LOOP ;] #map ;
+      I @ ..key-list  cell +LOOP ;] #map ;
+
+\ list of secret keys to select from
+
+Variable secret-nicks[]
+Variable secret-nicks#
+: .secret-nicks-insert ( -- )
+    secret-nicks[] $free  secret-nicks# $free
+    0 key# [: cell+ $@ drop cell+ >o ke-sk @ IF
+	  secret-nicks[] $ins[]key >r
+	  dup { c^ x } x 1 secret-nicks# r> $ins  1+
+      THEN o> ;] #map drop ;
+: nick#>key# ( n1 -- n2 )
+    secret-nicks# $@ rot safe/string IF  c@  ELSE  drop -1  THEN ;
+: .secret-nicks ( -- )
+    .secret-nicks-insert
+    secret-nicks[] $[]# 0 ?DO
+	I 1 ['] .r #36 base-execute space
+	I secret-nicks[] $[] @ ..key-rest cr
+    LOOP ;
+
+\ dump keys
 
 : dumpkey ( addr u -- ) drop cell+ >o
     .\" x\" " ke-pk $@ 85type .\" \" key?new" cr
