@@ -210,8 +210,8 @@ User see:table \ current token table for see only
 : net2o-see ( cmd -- ) hex[
     case
 	0 of  ." end-code" cr #0. buf-state 2!  endof
-	1 of  p@  u64. ." lit, "  endof
-	2 of  ps@ s64. ." slit, " endof
+	1 of  p@          u64. ." lit, "  endof
+	2 of  p@ 64invert s64. ." lit, "  endof
 	3 of  string@noerr buf-state 2@ drop p@+ drop 64>n 10 =
 	    IF    n2o.sigstring  ELSE  n2o.string  THEN  endof
 	4 of  pf@ f. ." float, " endof
@@ -226,7 +226,6 @@ User see:table \ current token table for see only
 	0 endcase ]hex ;
 
 User show-offset  show-offset on
-User deprecated   deprecated off \ set to on if a deprecated command was seen
 
 Sema see-sema
 
@@ -469,10 +468,10 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 
 0 net2o: end-cmd ( -- ) \g end command buffer
     0 buf-state ! ;
-+net2o: ulit ( #u -- u ) \g unsigned literal
++net2o: lit ( #u -- u ) \g literal
     p@ ;
-+net2o: slit ( #n -- n ) \g signed literal, zig-zag encoded
-    ps@ deprecated( ." deprecated: slit" cr n2o:see-me ) deprecated on ;
++net2o: -lit ( #n -- n ) \g negative literal, inverted encoded
+    p@ 64invert ;
 +net2o: string ( #string -- $:string ) \g string literal
     string@ ;
 +net2o: flit ( #dfloat -- r ) \g double float literal
@@ -705,9 +704,8 @@ scope{ net2o-base
     \ extra test to give meaningful error messages
     string, ;
 : sec$, ( addr u -- )  secstring string, ;
-: lit, ( 64u -- )  ulit cmd, ;
-: slit, ( 64n -- )  ulit cmd, ;
-: nlit, ( n -- )  n>64 slit, ;
+: lit, ( 64n -- )  dup 0< IF  -lit 64invert ELSE lit THEN cmd, ;
+: nlit, ( n -- )  n>64 lit, ;
 : ulit, ( u -- )  u>64 lit, ;
 : 4cc, ( addr u -- ) 2dup *-width 3 <> !!4cc!! drop
     4cc xc@+ n>64 cmd, xc@+ n>64 cmd, xc@+ n>64 cmd, drop ;

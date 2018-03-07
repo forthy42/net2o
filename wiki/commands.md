@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.5.6-20180208.
+Version 0.6.0-20180307.
 
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -26,10 +26,10 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 
 + $0 end-cmd ( -- )
   end command buffer
-+ $1 ulit ( #u -- u )
-  unsigned literal
-+ $2 slit ( #n -- n )
-  signed literal, zig-zag encoded
++ $1 lit ( #u -- u )
+  literal
++ $2 -lit ( #n -- n )
+  negative literal, inverted encoded
 + $3 string ( #string -- $:string )
   string literal
 + $4 flit ( #dfloat -- r )
@@ -62,8 +62,6 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   push command into answer packet
 + $11 push-lit ( u -- )
   push unsigned literal into answer packet
-+ $12 push-slit ( n -- )
-  push singed literal into answer packet
 + $13 push-$ ( $:string -- )
   push string into answer packet
 + $14 push-float ( r -- )
@@ -254,7 +252,10 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   free all parts of the subkey
 
 ### key storage commands ###
-
++ $2 slit ( #lit -- )
+  deprecated slit version
++ $F kversion ( $:string -- )
+  key version
 + $11 privkey ( $:string -- )
   private key
 + $12 keytype ( n -- )

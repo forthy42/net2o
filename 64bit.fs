@@ -36,6 +36,7 @@ cell 8 = [IF]
     ' 2/ Alias 64-2/
     ' 2* Alias 64-2*
     ' negate Alias 64negate
+    ' invert Alias 64invert
     0 Constant 64#0
     1 Constant 64#1
     -1 Constant 64#-1
@@ -122,6 +123,7 @@ cell 8 = [IF]
     ' d2/ Alias 64-2/
     ' d2* Alias 64-2*
     ' dnegate Alias 64negate
+    : 64invert invert swap invert swap ;
     #0. 2Constant 64#0
     #1. 2Constant 64#1
     #-1. 2Constant 64#-1

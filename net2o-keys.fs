@@ -364,10 +364,20 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 : .key-list ( o:key -- o:key )
     ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
     .key-rest cr ;
-: .secret-nicks ( -- )
+Variable secret-nicks[]
+Variable secret-nicks#
+: .secret-nicks-insert ( -- )
+    secret-nicks[] $[]free  secret-nicks# $free
     0 key# [: cell+ $@ drop cell+ >o ke-sk @ IF
-	  [: dup 1 .r ;] #36 base-execute space .key-rest cr 1+
+	  ['] .key-rest $tmp secret-nicks[] $ins[] >r
+	  dup { c^ x } x 1 secret-nicks# r> $ins  1+
       THEN o> ;] #map drop ;
+: nick#>key# ( n1 -- n2 )
+    secret-nicks# $@ rot safe/string IF  c@  ELSE  drop -1  THEN ;
+: .secret-nicks ( -- )
+    .secret-nicks-insert
+    0 secret-nicks[] [: 2 pick 1 ['] .r #36 base-execute space
+      type cr 1+ ;] $[]map drop ;
 : .key-invite ( o:key -- o:key )
     ke-pk $@ keysize umin
     ke-imports @ >im-color 85type <default>
@@ -562,12 +572,18 @@ Variable keys
 : ke-first! ( 64date -- ) 64#-1 ke-last!
     ke-selfsig $@ drop 64! ;
 
+Variable save-keys-again
+
 scope{ net2o-base
 
 cmd-table $@ inherit-table key-entry-table
 \g 
 \g ### key storage commands ###
-\g 
+\g
+$2 net2o: slit ( #lit -- ) \g deprecated slit version
+    ps@ save-keys-again on ;
+$F net2o: kversion ( $:string -- ) \g key version
+    "1" str< save-keys-again or! ;
 $11 net2o: privkey ( $:string -- )
     \g private key
     \ does not need to be signed, the secret key verifies itself
@@ -721,22 +737,25 @@ also net2o-base
     ke-mask @  ke-groups $@len IF
 	ke-groups $@ 2dup $, keygroups
 	groups>mask invert and  THEN
-    ?dup-IF  nlit, keymask  THEN
+    ?dup-IF  ulit, keymask  THEN
     ke-pets[] [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
 previous
 
 : pack-pubkey ( o:key -- )
     key:code
+      "1" $, version
       pack-corekey
     end:key ;
 : pack-outkey ( o:key -- )
     key:code
       "n2o" net2o-base:4cc,
+      "1" $, version
       pack-signkey
     end:key ;
 : pack-seckey ( o:key -- )
     key:code
+      "1" $, version
       pack-corekey
       ke-sk sec@ sec$, privkey
       ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
@@ -905,8 +924,6 @@ false value ?yes
     ke-sk sec@ nip dup IF  perm%myself  ELSE  perm%default  THEN  ke-mask !
     IF  "\x00"  ELSE  "\x01"  THEN  ke-groups $! ;
 
-Variable save-keys-again
-
 : ?wallet ( o:key -- )
     ke-sk sec@ nip IF
 	ke-wallet sec@ nip 0= IF
@@ -934,16 +951,16 @@ Variable save-keys-again
 	keypack-all# = WHILE
 	    import-type @ import#self = try-decrypt do-key
     REPEAT  rdrop  code0-buf ;
-: read-key-loop ( -- )  deprecated off
+: read-key-loop ( -- )
     import#self import-type !
     ?key-sfd read-keys-loop
-    save-keys-again @ deprecated @ or IF  save-seckeys  THEN ;
+    save-keys-again @ IF  save-seckeys  THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
     -1 config:pw-level#
-    [: import#new import-type ! ?key-pfd  deprecated off
-      read-keys-loop
-      deprecated @ IF  save-keys  THEN ;] !wrapper ;
+    [: import#new import-type !
+      ?key-pfd read-keys-loop
+      save-keys-again @ IF  save-keys  THEN ;] !wrapper ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;
@@ -1211,8 +1228,9 @@ event: :>qr-invitation { w^ pk -- }
     0 BEGIN  drop
 	." Choose key by number:" cr .secret-nicks
 	BEGIN  key dup bl < WHILE  drop  REPEAT \ swallow control keys
-	['] digit? #36 base-execute 0= IF -1 THEN
-	secret-key dup 0= WHILE
+	['] digit? #36 base-execute 0= IF  drop 0
+	ELSE  nick#>key# secret-key  THEN
+	dup 0= WHILE
 	    ." Please enter a base-36 number between 0 and "
 	    secret-keys# 1- ['] . #36 base-execute cr  rdrop
     REPEAT

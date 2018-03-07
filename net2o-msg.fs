@@ -680,13 +680,13 @@ also net2o-base
 
 : last?, ( -- )
     msg-group  last-signdate@ { 64: date }
-    64#0 lit, date slit, ask-last# ulit, msg-last?
+    64#0 lit, date lit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
-	date lit, 64#-1 slit, 1 ulit, msg-last?
+	date lit, 64#-1 lit, 1 ulit, msg-last?
     THEN ;
 
 : sync-ahead?, ( -- )
-    last-signdate@ 64#1 64+ lit, 64#-1 slit, ask-last# ulit, msg-last? ;
+    last-signdate@ 64#1 64+ lit, 64#-1 lit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
     [: msg-otr msg-join sync-ahead?,
