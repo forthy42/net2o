@@ -29,6 +29,7 @@
 [THEN]
 
 c-library bdelta
+    \c #include <stdint.h>
     \c #include <bdelta.h>
     s" bdelta" add-lib
 

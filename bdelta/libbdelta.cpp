@@ -5,7 +5,7 @@
 #include "compatibility.h"
 
 typedef uint8_t Token; // all tokens are bytes
-typedef int64_t pos;   // positions are 64 bit
+typedef uint64_t pos;   // positions are 64 bit
 
 #include <stdio.h>
 #include "bdelta.h"
