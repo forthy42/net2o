@@ -26,12 +26,13 @@ e? max-xchar $100 < [IF] '^' [ELSE] '▀' [THEN] Constant upper-half-block
 \ constants
 
 24 Constant keyqr# \ key qr codes are 24x24 blocks
-keyqr# dup * Constant keyqr#²
+keyqr# dup * Constant keyqr#² \ code block size
 $40 Constant keymax#
 4 Constant keyline#
 8 Constant keylineskp#
 
-keyqr#² buffer: keyqr
+keyqr#² buffer: keyqr \ code block buffer
+keyqr#² sfloats buffer: keyqr-rgba \ code block in RGBA
 $10 buffer: qrecc
 
 Defer <rest>  ' <white> is <rest>
@@ -97,6 +98,31 @@ $8 Value 2b>col
     keyqr [ keyqr# 1+ 2* 2* ]L + -rot keymax# umin bounds ?DO
 	I >keyhline  keylineskp# +
     keyline# +LOOP  drop ;
+
+\ qr to RGBA
+
+Create >rgba
+$00000000 ,
+$FF000000 ,
+$00FF0000 ,
+$FFFF0000 ,
+$0000FF00 ,
+$FF00FF00 ,
+$00FFFF00 ,
+$FFFFFF00 ,
+$000000FF ,
+$FF0000FF ,
+$00FF00FF ,
+$FFFF00FF ,
+$0000FFFF ,
+$FF00FFFF ,
+$00FFFFFF ,
+$FFFFFFFF ,
+
+: qr>rgba ( -- )
+    keyqr-rgba keyqr keyqr#² bounds DO
+	I c@ 2b>col xor 7 xor cells >rgba + @ over be-l! sfloat+
+    LOOP drop ;
 
 \ generate checksum and tag bits
 

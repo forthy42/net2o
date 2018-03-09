@@ -4,7 +4,7 @@
 warnings off \ in production mode,
 \ we don't want any warnings
 
-fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
+fpath+ @DATADIR@/gforth/@GFVER@/net2o
 
 require qrscan.fs
 argc @ 1 <= [IF]
