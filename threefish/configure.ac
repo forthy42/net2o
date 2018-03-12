@@ -12,8 +12,6 @@ AM_PROG_AS
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
-CFLAGS=${CFLAGS--O3}
-
 flags="$CFLAGS"
 nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 
@@ -38,6 +36,15 @@ case "$host" in
     i686-*)
 	# if you don't want sse, specify i586-<your-os>
 	CFLAGS="-O3 -m32 -mssse3 $nomflags"
+	;;
+esac
+
+CFLAGS=`echo $CFLAGS | sed -e 's/-O2/-O3/g'`
+case "$CFLAGS" in
+    *-O3*)
+	;;
+    *)
+	CFLAGS="$CFLAGS -O3"
 	;;
 esac
 
