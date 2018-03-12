@@ -21,16 +21,25 @@
 
 #include <stdint.h>
 
-typedef struct tf_ctx {
+typedef struct tf_ctx_256 {
+	uint64_t key[5];
+	uint64_t tweak[3];
+} tf_ctx_256;
+
+typedef struct tf_ctx_512 {
 	uint64_t key[9];
 	uint64_t tweak[3];
-} tf_ctx;
+} tf_ctx_512;
 
+static void tf_prep_256(struct tf_ctx_256 *ctx);
+static void tf_tweak_256(struct tf_ctx_256 *ctx);
+void tf_encrypt_256(struct tf_ctx_256 *ctx, const uint64_t *p, uint64_t *out, int flags);
+void tf_decrypt_256(struct tf_ctx_256 *ctx, const uint64_t *c, uint64_t *out, int flags);
 
-static void tf_prep(struct tf_ctx *ctx);
-static void tf_tweak(struct tf_ctx *ctx);
-void tf_encrypt(struct tf_ctx *ctx, const uint64_t *p, uint64_t *out, int flags);
-void tf_decrypt(struct tf_ctx *ctx, const uint64_t *c, uint64_t *out, int flags);
+static void tf_prep_512(struct tf_ctx_512 *ctx);
+static void tf_tweak_512(struct tf_ctx_512 *ctx);
+void tf_encrypt_512(struct tf_ctx_512 *ctx, const uint64_t *p, uint64_t *out, int flags);
+void tf_decrypt_512(struct tf_ctx_512 *ctx, const uint64_t *c, uint64_t *out, int flags);
 
 static uint64_t rot_l64(uint64_t x, uint16_t N);
 static uint64_t rot_r64(uint64_t x, uint16_t N);

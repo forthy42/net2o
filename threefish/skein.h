@@ -24,7 +24,7 @@
 struct skein_ctx {
 	uint32_t  digest_bits;
 	uint32_t  b_cnt;
-	struct tf_ctx tf;
+	struct tf_ctx_512 tf;
 	uint8_t   b[64];
 };
 

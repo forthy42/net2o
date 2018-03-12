@@ -45,14 +45,14 @@ also freetype-gl
 [IFDEF] android
     "/system/fonts/DroidSans.ttf"
 [ELSE]
-    "/usr/share/fonts/truetype/LiberationSans-Regular.ttf"
+    "/usr/share/fonts/truetype/NotoSans-Regular.ttf"
     2dup file-status nip [IF]
-	2drop "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+	2drop "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
 	2dup file-status nip [IF]
-	    2drop "/usr/share/fonts/truetype/NotoSans-Regular.ttf"
+	    "/usr/share/fonts/truetype/LiberationSans-Regular.ttf"
 	    2dup file-status nip [IF]
-		2drop "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf"
-	    [THEN]
+		2drop "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+		[THEN]
 	[THEN]
     [THEN]
 [THEN]
@@ -77,13 +77,13 @@ also freetype-gl
 [IFDEF] android
     "/system/fonts/DroidSans.ttf"
 [ELSE]
-    "/usr/share/fonts/truetype/LiberationSans-Italic.ttf"
+    "/usr/share/fonts/truetype/NotoSans-Italic.ttf"
     2dup file-status nip [IF]
-	2drop "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf"
+	2drop "/usr/share/fonts/truetype/noto/NotoSans-Italic.ttf"
 	2dup file-status nip [IF]
-	    2drop "/usr/share/fonts/truetype/NotoSans-Italic.ttf"
+	    2drop "/usr/share/fonts/truetype/LiberationSans-Italic.ttf"
 	    2dup file-status nip [IF]
-		2drop "/usr/share/fonts/truetype/noto/NotoSans-Italic.ttf"
+		2drop "/usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf"
 	    [THEN]
 	[THEN]
     [THEN]
@@ -510,9 +510,9 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 $BFBFFFFF pres-frame
 {{
 largesize# to x-baseline
-large dark-blue "MINOΣ2 technology" }}text /center
+large dark-blue "ΜΙΝΟΣ2 technology" }}text /center
 medium blackish
-"MINOΣ2 starts at the DOM layer" \\
+"ΜΙΝΟΣ2 starts at the DOM layer" \\
 "Rendering:" " OpenGL (ES), Vulkan backend possible" b2\\
 fontsize# baselinesmall# f* to x-baseline
 "Font to texture:" " Freetype–GL (with own improvements)" b2\\
@@ -535,7 +535,7 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 $FFBFFFFF pres-frame
 {{
 largesize# to x-baseline
-large dark-blue "MINOΣ2 Widgets" }}text /center
+large dark-blue "ΜΙΝΟΣ2 Widgets" }}text /center
 medium blackish
 "Design principle is a Lego–style combination of many extremely simple objects" \\
 fontsize# baselinesmall# f* to x-baseline
@@ -567,7 +567,7 @@ glue*1 }}glue
 $BFFFFFFF pres-frame
 {{
 largesize# to x-baseline
-large dark-blue "MINOΣ2 Boxes" }}text /center
+large dark-blue "ΜΙΝΟΣ2 Boxes" }}text /center
 medium blackish
 {{
 "Just like " }}text
@@ -591,7 +591,7 @@ glue*1 }}glue
 $FFFFBFFF pres-frame
 {{
 largesize# to x-baseline
-large dark-blue "MINOΣ2 Displays" }}text /center
+large dark-blue "ΜΙΝΟΣ2 Displays" }}text /center
 medium blackish
 "Render into different kinds of displays" \\
 fontsize# baselinemedium# f* to x-baseline
