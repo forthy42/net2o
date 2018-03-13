@@ -131,6 +131,8 @@ warnings !
 : #. ( hash -- )  ['] #.entry #map ;
 warnings !
 
+' Variable alias hash:
+
 \ test: move dictionary to hash
 
 0 [IF]

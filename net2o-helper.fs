@@ -153,7 +153,7 @@ event: :>do-beacon ( addr -- )
 : ?-beacon ( -- )
     \G if we don't know that address, send a reply
     net2o-sock
-    sockaddr alen @ routes #key -1 = IF  s" !"  ELSE  s" ."  THEN
+    sockaddr alen @ routes# #key -1 = IF  s" !"  ELSE  s" ."  THEN
     beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
     0 sockaddr alen @ sendto drop +send ;
 : !-beacon ( -- )
@@ -225,7 +225,8 @@ User hostc$ \ check for this hostname
       connect( ." insert host: " temp-addr .addr-path cr )
       ret-addr $10 0 skip nip 0= IF
 	  temp-addr ret-addr $10 move
-	  dest-0key< sec@ dup IF  dest-0key> @ sec!  ELSE  2drop  THEN
+	  dest-0key< sec@ dup IF
+	      2dup lastaddr# cell+ $! dest-0key> @ sec!  ELSE  2drop  THEN
       THEN  drop true ;] addr>sock ;
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !

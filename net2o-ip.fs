@@ -307,7 +307,7 @@ Forward !my-addr ( -- )
     BEGIN  dup  WHILE  over c@ $80 < >r 1 /string r>  UNTIL  THEN ;
 
 : .addr-path ( addr -- )
-    dup be@ routes #.key dup 0= IF  drop $10 xtype  ELSE
+    dup be@ routes# #.key dup 0= IF  drop $10 xtype  ELSE
 	$@ .address
 	$10 pathc+ 0 -skip dup IF  '|' emit  THEN xtype  THEN ;
 

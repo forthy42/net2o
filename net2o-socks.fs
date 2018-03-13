@@ -93,7 +93,7 @@ $00000000 Value droprate#
 
 \ clients routing table
 
-: init-route ( -- )  s" " routes hash@ $! ; \ field 0 is me, myself
+: init-route ( -- )  s" " routes# hash@ $! ; \ field 0 is me, myself
 
 : ipv4>ipv6 ( addr u -- addr' u' )
     drop >r
@@ -107,18 +107,18 @@ $00000000 Value droprate#
 : info>string ( info -- addr u )
     info@ ?>ipv6 ;
 
-0 Value lastaddr
+0 Value lastaddr#
 Variable lastn2oaddr
 
 : insert-address ( addr u -- net2o-addr )
     address( ." Insert address " 2dup .address cr )
-    lastaddr IF  2dup lastaddr over str=
+    lastaddr# IF  2dup lastaddr# $@ str=
 	IF  2drop lastn2oaddr @ EXIT  THEN
     THEN
-    2dup routes #key dup -1 = IF
-	drop s" " 2over routes #!
-	last# $@ drop to lastaddr
-	routes #key  dup lastn2oaddr !
+    2dup routes# #key dup -1 = IF
+	drop s" " 2over routes# #!
+	last# to lastaddr#
+	routes# #key  dup lastn2oaddr !
     ELSE
 	nip nip
     THEN ;
@@ -134,10 +134,8 @@ Variable lastn2oaddr
 : insert-ip4 ( addr u port -- net2o-addr ) PF_INET   insert-ip* ;
 : insert-ip6 ( addr u port -- net2o-addr ) PF_INET6  insert-ip* ;
 
-: address>route ( -- n/-1 )
-    sockaddr alen @ insert-address ;
 : route>address ( n -- flag )
-    routes #.key dup 0= ?EXIT
+    routes# #.key dup 0= ?EXIT
     $@ sockaddr swap dup alen ! move true ;
 
 \ route an incoming packet
@@ -217,7 +215,6 @@ Variable lastn2oaddr
 	rdrop false  EXIT  THEN
     2drop true ; \ local packet
 
-: in-check ( -- flag )  address>route -1 <> ;
 : out-route ( -- )  0 outbuf packet-route drop ;
 
 0 [IF]

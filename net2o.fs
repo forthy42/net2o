@@ -91,7 +91,7 @@ $10 Constant key-cksum#
 UValue inbuf    ( -- addr )
 UValue tmpbuf   ( -- addr )
 UValue outbuf   ( -- addr )
-Variable routes
+hash: routes#
 
 \ add IP addresses
 

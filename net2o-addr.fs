@@ -112,13 +112,13 @@ User dest-0key> \ pointer to dest-0key
 User dest-0key< \ pointer to obtained dest-0key
 
 : addr>6sock ( -- )
-    host-key sec@ dest-0key< sec!
+    host-key sec@ 2dup lastaddr# $! dest-0key< sec!
     host-portv6 w@ sockaddr1 port be-w!
     host-ipv6 sockaddr1 sin6_addr ip6!
     host-route $@ !temp-addr ;
 
 : addr>4sock ( -- )
-    host-key sec@ dest-0key< sec!
+    host-key sec@ 2dup lastaddr# $! dest-0key< sec!
     host-portv4 w@ sockaddr1 port be-w!
     host-ipv4 be-ul@ sockaddr1 ipv4!
     host-route $@ !temp-addr ;
@@ -223,7 +223,7 @@ also net2o-base
     [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
 previous
 : >sockaddr ( -- addr len )
-    return-address be@ routes #.key $@ .sockaddr ;
+    return-address be@ routes# #.key $@ .sockaddr ;
 
 0 [IF]
 Local Variables:

@@ -80,7 +80,7 @@ $30 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     \g cose a opened tmpnest, and add the necessary stuff
     nest-stack $[]# IF  ]tmpnest  THEN ;
 +net2o: close-encnest ( -- )
-    \g cose a opened tmpnest, and add the necessary stuff
+    \g cose a opened encnest, and add the necessary stuff
     nest-stack $[]# IF  ]encnest  THEN ;
 
 +net2o: new-data ( addr addr u -- ) \g create new data mapping
@@ -139,13 +139,13 @@ net2o-base
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
-+net2o: set-cmd0key ( $:string -- ) \g set key for reply
-    $> dup ?keysize your-0key sec! ;
++net2o: addr-key! ( $:string -- ) \g set key for reply
+    $> dup ?keysize lastaddr# cell+ $! ;
 
 : cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
 : #request, ( -- )  ulit, request-done ;
 : request, ( -- )  next-request #request, ;
-: 0key, ( -- ) my-0key sec@ $, set-cmd0key ;
+: 0key, ( -- ) my-0key sec@ sec$, addr-key! ;
 
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;

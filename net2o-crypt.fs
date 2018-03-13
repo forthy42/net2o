@@ -21,7 +21,8 @@ keypack# key-salt# + key-cksum# + Constant keypack-all#
 key-salt# key-cksum# + Constant wrapper#
 
 Variable my-0key
-Variable your-0key
+: your-0key ( -- addr u )
+    o IF  dest-0key sec@  ELSE  lastaddr# cell+ $@  THEN ;
 
 user-o keytmp \ storage for secure temporary keys
 
@@ -97,8 +98,16 @@ init-keybuf
     state# rng$ mykey swap move
     genkey( ." mykey: " mykey state# xtype cr ) ;
 
+0 Value header-key
+0 Value header-your-key
+$20 buffer: dummy-buf
+
 : init-my0key ( -- )
-    no0key( EXIT ) keysize rng$ my-0key sec! ;
+    no0key( EXIT ) keysize rng$ my-0key sec!
+    kalloc64 dup to header-key $40 erase
+    kalloc64 dup to header-your-key $40 erase
+    my-0key sec@  header-key swap move
+    header-key dummy-buf dup $C tf_encrypt_256 ( sets tweaks ) ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
@@ -193,6 +202,14 @@ scope{ mapc
 : decrypt-pw$ ( addr u1 key u2 -- addr' u' flag )  2over pw-setup >r
     crypt-key-init   r> pw-diffuse key-cksum# - 2dup 0 c:decrypt+auth ;
 
+\ encrypt/decrypt header
+
+: header-encrypt ( addr -- )
+    your-0key header-your-key swap move
+    header-your-key swap dup $C tf_encrypt_256 ;
+: header-decrypt ( addr -- )
+    header-key swap dup $0 tf_decrypt_256 ;
+
 \ encrypt with own key
 
 : mykey-encrypt$ ( addr u -- ) +calc
@@ -229,7 +246,7 @@ scope{ mapc
 
 : outbuf0-encrypt ( -- ) +calc
     outbuf mapaddr le-64@ outbuf hdrflags le-uw@ addr>assembly
-    o IF  dest-0key  ELSE  your-0key  THEN  sec@ set-0key
+    your-0key  set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
 
