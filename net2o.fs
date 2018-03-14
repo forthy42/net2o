@@ -1662,7 +1662,7 @@ Variable beacons \ destinations to send beacons to
 :noname o-beacon defers extra-dispose ; is extra-dispose
 
 : gen-beacon-hash ( -- hash u )
-    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
+    last# cell+ $@ "beacon" keyed-hash#128 2/ ;
     
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF
@@ -1754,7 +1754,8 @@ Forward next-saved-msg
 
 Defer init-rest
 
-:noname ( port -- )  init-mykey init-mykey init-my0key \ two keys
+:noname ( port -- )  init-mykey init-mykey \ generate two keys
+    my-0key @ 0= IF  init-my0key  THEN
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ; is init-rest

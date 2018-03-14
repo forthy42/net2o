@@ -103,12 +103,14 @@ init-keybuf
 0 Value header-your-key
 $20 buffer: dummy-buf
 
-: init-my0key ( -- )
-    no0key( EXIT ) keysize rng$ my-0key sec!
+: init-header-key ( -- )
     kalloc64 dup to header-key $40 erase
     kalloc64 dup to header-your-key $40 erase
     my-0key sec@  header-key swap move
     header-key dummy-buf dup $C tf_encrypt_256 ( sets tweaks ) ;
+
+: init-my0key ( -- )
+    no0key( EXIT ) keysize rng$ my-0key sec!  init-header-key ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;

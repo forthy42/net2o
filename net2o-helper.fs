@@ -41,7 +41,7 @@ require net2o-dhtroot.fs
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
-    THEN  return-addr dup $10 erase be! ( !0key ) ind-addr off ;
+    THEN  return-addr dup $10 erase be!  !0key  ind-addr off ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
