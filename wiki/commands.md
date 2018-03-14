@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.6.0-20180307.
+Version 0.6.1-20180314.
 
 net2o separates data and commands.  Data is pass through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -103,7 +103,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 + $32 close-tmpnest ( -- )
   cose a opened tmpnest, and add the necessary stuff
 + $33 close-encnest ( -- )
-  cose a opened tmpnest, and add the necessary stuff
+  cose a opened encnest, and add the necessary stuff
 + $34 new-data ( addr addr u -- )
   create new data mapping
 + $35 new-code ( addr addr u -- )
@@ -126,7 +126,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   update secrets
 + $3E gen-ivs ( $:string -- )
   generate IVs
-+ $3F set-cmd0key ( $:string -- )
++ $3F addr-key! ( $:string -- )
   set key for reply
 + $40 punch? ( -- )
   Request punch addresses
