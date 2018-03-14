@@ -22,7 +22,7 @@ key-salt# key-cksum# + Constant wrapper#
 
 Variable my-0key
 : your-0key ( -- addr u )
-    o IF  dest-0key sec@  THEN
+    o IF  dest-0key sec@  ELSE  #0.  THEN
     dup 0= IF  2drop lastaddr# cell+ $@  THEN ;
 
 user-o keytmp \ storage for secure temporary keys
