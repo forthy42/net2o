@@ -34,8 +34,7 @@ require net2o-dhtroot.fs
 : !0key ( -- )
     dest-0key< @ IF
 	dest-0key< sec@ lastaddr# cell+ $!
-	dest-0key> @ IF  dest-0key< @ dest-0key> @ !
-	    dest-0key> off  THEN
+	dest-0key> @ IF  dest-0key< sec@ dest-0key> @ sec!  THEN
     THEN ;
 
 : dhtroot ( -- )
@@ -189,7 +188,7 @@ event: :>do-beacon ( addr -- )
 Variable my-beacon
 
 : my-beacon-hash ( -- hash u )
-    my-beacon $@ dup ?EXIT
+    my-beacon $@ dup ?EXIT  2drop
     my-0key sec@ "beacon" keyed-hash#128 2/ my-beacon $!
     my-beacon $@ ;
 
@@ -199,7 +198,7 @@ Variable my-beacon
 : handle-beacon+hash ( addr u -- )
     over c@ >r 1 /string check-beacon-hash
     IF    r>    beacon( ." hashed " ) handle-beacon
-    ELSE  rdrop beacon( ticks .ticks ."  wrong beacon hash" cr ) 2drop
+    ELSE  rdrop beacon( ticks .ticks ."  wrong beacon hash" cr )
     THEN ;
 
 : replace-loop ( addr u -- flag )
