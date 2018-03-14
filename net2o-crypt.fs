@@ -22,8 +22,8 @@ key-salt# key-cksum# + Constant wrapper#
 
 Variable my-0key
 : your-0key ( -- addr u )
-    lastaddr# cell+ $@
-    dup 0= IF  ~~bt  THEN ;
+    o IF  dest-0key sec@  THEN
+    dup 0= IF  2drop lastaddr# cell+ $@  THEN ;
 
 user-o keytmp \ storage for secure temporary keys
 
@@ -110,7 +110,7 @@ $20 buffer: dummy-buf
     header-key dummy-buf dup $C tf_encrypt_256 ( sets tweaks ) ;
 
 : init-my0key ( -- )
-    no0key( EXIT ) keysize rng$ my-0key sec!  init-header-key ;
+    no0key( EXIT ) keysize rng$ my-0key sec! ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;

@@ -108,6 +108,7 @@ previous
 : .addr$ ( addr u -- )
     new-addr >o o .addr n2o:dispose-addr o> ;
 
+User dest-0key> \ pointer to dest-0key
 User dest-0key< \ pointer to obtained dest-0key
 
 : addr>6sock ( -- )

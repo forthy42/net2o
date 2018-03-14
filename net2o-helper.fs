@@ -33,7 +33,10 @@ require net2o-dhtroot.fs
 
 : !0key ( -- )
     dest-0key< @ IF
-	dest-0key< sec@ lastaddr# cell+ $!  THEN ;
+	dest-0key< sec@ lastaddr# cell+ $!
+	dest-0key> @ IF  dest-0key< @ dest-0key> @ !
+	    dest-0key> off  THEN
+    THEN ;
 
 : dhtroot ( -- )
     dhtroot-addr@ ?dup-IF  0 swap
@@ -41,7 +44,8 @@ require net2o-dhtroot.fs
 	  check-addr1 IF  insert-address nip
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
-    THEN  return-addr dup $10 erase be!  !0key  ind-addr off ;
+    THEN  return-addr dup $10 erase be!
+    !0key  ind-addr off ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
@@ -99,7 +103,7 @@ Forward insert-addr ( o -- )
       cell+ $@ bounds ?DO
 	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
-	  ret-addr $10 erase
+	  ret-addr $10 erase  dest-0key dest-0key> !
 	  punch-addrs $@ bounds ?DO
 	      I @ insert-addr IF
 		  o to connection
@@ -231,10 +235,10 @@ User hostc$ \ check for this hostname
 	  temp-addr ret-addr $10 move
       THEN  drop true ;] addr>sock ;
 
-: insert-addr$ ( addr u -- flag )
+: insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !
     new-addr dup insert-addr swap .n2o:dispose-addr ;
 
-: insert-host ( addr u -- flag )
+: insert-host ( addr u -- flag )  dest-0key dest-0key> !
     new-addr  dup host=  IF  dup insert-addr  ELSE  false  THEN
     swap .n2o:dispose-addr ;
 

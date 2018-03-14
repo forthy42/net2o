@@ -1755,7 +1755,7 @@ Forward next-saved-msg
 Defer init-rest
 
 :noname ( port -- )  init-mykey init-mykey \ generate two keys
-    my-0key @ 0= IF  init-my0key  THEN
+    my-0key @ 0= IF  init-my0key  THEN  init-header-key
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ; is init-rest
