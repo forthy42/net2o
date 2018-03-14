@@ -197,9 +197,9 @@ Variable my-beacon
 
 : handle-beacon+hash ( addr u -- )
     over c@ >r 1 /string check-beacon-hash
-    IF    r>    beacon( ." hashed " ) handle-beacon
-    ELSE  rdrop beacon( ticks .ticks ."  wrong beacon hash" cr )
-    THEN ;
+    IF    r> beacon( ." hashed " ) handle-beacon
+    ELSE  r> beacon( ticks .ticks ."  wrong beacon hash" cr ) handle-beacon
+    THEN ; \ !!FIXME!! we ignore wrong hashes for now, until that is fixed
 
 : replace-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>
