@@ -399,7 +399,7 @@ previous
 
 : n2o:send-replace ( -- )
     me>d#id .dht-host >r
-    r@ $[]# IF
+    r@ $[]# IF  +resend
 	net2o-code   expect-reply
 	pk@ $, dht-id
 	r@ remove-me, end-with
@@ -431,7 +431,7 @@ previous
     net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip n2o:send-revoke ;
 
-: disconnect-me ( -- )
+: disconnect-me ( -- )  +resend
     net2o-code connect( log .time s" Disconnect" $, type cr end-with )
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
     n2o:dispose-context msg( ." Disposed context" forth:cr ) ;

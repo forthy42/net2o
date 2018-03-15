@@ -85,13 +85,13 @@ Variable announced
 : pk:fetch-host ( key u -- )
     net2o-code
       expect-reply get-ip fetch-id, cookie+request
-    end-code| -setip n2o:send-replace ;
+    end-code| +resend -setip n2o:send-replace ;
 
 : pk:addme-fetch-host ( key u -- ) +addme
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
-    end-code| -setip n2o:send-replace ;
+    end-code| +resend -setip n2o:send-replace ;
 
 \ NAT retraversal
 
