@@ -157,27 +157,28 @@ event: :>do-beacon ( addr -- )
 : do-beacon ( addr -- )  \ sign on, and do a replace-me
     <event elit, :>do-beacon ?query-task event> ;
 
-: ?-beacon ( -- )
+: ?-beacon ( has-hash -- )
     \G if we don't know that address, send a reply
+    invert need-beacon# @ and ?EXIT
     net2o-sock
     sockaddr alen @ routes# #key -1 = IF  s" !"  ELSE  s" ."  THEN
     beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
     0 sockaddr alen @ sendto drop +send ;
-: !-beacon ( -- )
+: !-beacon ( has-hash -- ) drop
     \G I got a reply, my address is unknown
     beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
-: .-beacon ( -- )
+: .-beacon ( has-hash -- ) drop
     \G I got a reply, my address is known
     beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
     sockaddr alen @ beacons #@ IF
 	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
     THEN ;
-: >-beacon ( -- )
+: >-beacon ( has-hash -- ) drop
     \G I got a punch
     nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr ) ;
 
-: handle-beacon ( char -- )
+: handle-beacon ( has-hash char -- )
     case
 	'?' of  ?-beacon  endof
 	'!' of  !-beacon  endof
@@ -197,8 +198,10 @@ Variable my-beacon
 
 : handle-beacon+hash ( addr u -- )
     2dup over c@ >r 1 /string check-beacon-hash
-    IF    2drop r> beacon( ." hashed " ) handle-beacon
-    ELSE  r> beacon( ticks .ticks ."  wrong beacon hash" cr ) handle-beacon
+    IF    true r> beacon( ." hashed by " 85type cr )else( 2drop )
+	handle-beacon
+    ELSE  false r> beacon( ticks .ticks ."  wrong beacon hash" cr )
+	handle-beacon
 	." wrong hash: " 85type ."  instead of " my-beacon $@ 85type cr
     THEN ; \ !!FIXME!! we ignore wrong hashes for now, until that is fixed
 

@@ -1382,7 +1382,7 @@ Forward handle-beacon+hash
 	+next
 	EXIT
     THEN
-    dup 1 = IF  drop c@ handle-beacon   0 0  EXIT  THEN
+    dup 1 = IF  drop c@ false swap handle-beacon   0 0  EXIT  THEN
     dup $11 = IF  handle-beacon+hash    0 0  EXIT  THEN ;
 
 0 Value dump-fd
@@ -1616,6 +1616,7 @@ event: :>throw ( error -- ) throw ;
 #2.000.000.000 d>64 64Value beacon-short-ticks# \ 2s short beacon tick rate
 
 Variable beacons \ destinations to send beacons to
+Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 : next-beacon ( -- 64tick )
     64#-1 beacons [: cell+ $@ drop 64@ 64umin ;] #map ;
@@ -1664,7 +1665,7 @@ Variable beacons \ destinations to send beacons to
 
 : gen-beacon-hash ( -- hash u )
     dest-0key sec@ "beacon" keyed-hash#128 2/ ;
-    
+
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF
 	sockaddr alen @ r@ +beacon

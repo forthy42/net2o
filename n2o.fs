@@ -395,6 +395,7 @@ warnings !
     perm%default to perm%unknown
     \ well known 0key of a dht root, !!FIXME!! to allow changing that
     85" 4mzuLhu{7P*8hkQlK%$h7DJC%X}$dzEru6B{BdlX" my-0key sec!
+    need-beacon# off \ as DHT root server, we don't need beacon hashes
     ?get-me init-server addme-owndht server-loop-catch ;
 
 \ dht commands
