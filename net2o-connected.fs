@@ -564,9 +564,11 @@ previous
     THEN ;
 
 \ : +connecting   ['] connecting-timeout is timeout-xt ;
-: +resend       ['] connected-timeout  is timeout-xt o+timeout
+: +resend ( -- ) resend( ." +resend" cr )
+    ['] connected-timeout  is timeout-xt o+timeout
     64#0 resend-all-to 64! ;
-: +resend-cmd   ['] cmd-timeout        is timeout-xt o+timeout ;
+: +resend-cmd ( -- ) resend( ." +resend-cmd" cr )
+    ['] cmd-timeout        is timeout-xt o+timeout ;
 
 : +get-time     ['] get-tick is other ;
 
