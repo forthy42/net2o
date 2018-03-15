@@ -1624,14 +1624,15 @@ Variable beacons \ destinations to send beacons to
     beacons [: { beacon }
 	beacon $@ { baddr u }
 	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
-	    beacon( ticks .ticks ."  send beacon to: " baddr u .address cr )
+	    beacon( ticks .ticks ."  send beacon to: " baddr u .address )
 	    ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
 	    net2o-sock
 	    beacon cell+ $@ drop 64'+ @ >o o IF
-		beacon-hash $@
+		beacon-hash $@ beacon( ."  hash: " 2dup 85type )
 	    ELSE
 		s" ?"
 	    THEN  o>
+	    beacon( cr )
 	    0 baddr u sendto drop +send
 	THEN
 	;] #map ;
@@ -1662,7 +1663,7 @@ Variable beacons \ destinations to send beacons to
 :noname o-beacon defers extra-dispose ; is extra-dispose
 
 : gen-beacon-hash ( -- hash u )
-    last# cell+ $@ "beacon" keyed-hash#128 2/ ;
+    dest-0key sec@ "beacon" keyed-hash#128 2/ ;
     
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF

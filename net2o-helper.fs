@@ -33,7 +33,7 @@ require net2o-dhtroot.fs
 
 : !0key ( -- )
     dest-0key< @ IF
-	dest-0key< sec@ lastaddr# cell+ $!
+	ind-addr @ 0= IF  dest-0key< sec@ lastaddr# cell+ $!  THEN
 	dest-0key> @ IF  dest-0key< sec@ dest-0key> @ sec!  THEN
     THEN ;
 
@@ -44,7 +44,7 @@ require net2o-dhtroot.fs
 	  ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
     THEN  return-addr dup $10 erase be!
-    !0key  ind-addr off ;
+    ind-addr off  !0key ;
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
@@ -196,9 +196,10 @@ Variable my-beacon
     my-beacon-hash str= ;
 
 : handle-beacon+hash ( addr u -- )
-    over c@ >r 1 /string check-beacon-hash
-    IF    r> beacon( ." hashed " ) handle-beacon
+    2dup over c@ >r 1 /string check-beacon-hash
+    IF    2drop r> beacon( ." hashed " ) handle-beacon
     ELSE  r> beacon( ticks .ticks ."  wrong beacon hash" cr ) handle-beacon
+	." wrong hash: " 85type ."  instead of " my-beacon $@ 85type cr
     THEN ; \ !!FIXME!! we ignore wrong hashes for now, until that is fixed
 
 : replace-loop ( addr u -- flag )
@@ -228,11 +229,11 @@ User hostc$ \ check for this hostname
 : insert-addr ( o -- flag )
     connect( ." check addr: " dup .addr cr )  false swap
     [: check-addr1 0= IF  2drop EXIT  THEN
-      insert-address temp-addr ins-dest  !0key
+      insert-address temp-addr ins-dest
       connect( ." insert host: " temp-addr .addr-path cr )
       ret-addr $10 0 skip nip 0= IF
 	  temp-addr ret-addr $10 move
-      THEN  drop true ;] addr>sock ;
+      THEN  !0key  drop true ;] addr>sock ;
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !
     new-addr dup insert-addr swap .n2o:dispose-addr ;
