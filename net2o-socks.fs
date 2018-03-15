@@ -50,6 +50,8 @@ User socktimeout cell uallot drop
 0             Constant do-block
 MSG_DONTWAIT  Constant don't-block
 
+$00000000 Value rec-droprate#
+
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN]
@@ -58,6 +60,9 @@ MSG_DONTWAIT  Constant don't-block
 	errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	#512 + negate throw  THEN
     inbuf swap  1 packetr +!
+    rec-droprate# IF  rng32 rec-droprate# u< IF
+	    resend( ." dropping incoming packet" cr )
+	    2drop #0.  THEN  THEN
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
 ;
 
@@ -75,7 +80,6 @@ MSG_DONTWAIT  Constant don't-block
 [THEN]
 
 $00000000 Value droprate#
-$00000000 Value rec-droprate#
 
 : %droprate ( -- )
     ?peekarg 0= IF  EXIT  THEN
