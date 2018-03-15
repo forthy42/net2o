@@ -12,6 +12,4 @@ fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
 
 require n2o.fs
 
-script? [IF] cmd-args ++debug %droprate \ read in all debugging stuff
-    argc @ 1 > [IF] next-cmd [ELSE] n2o:help [THEN]
-    n2o:bye [THEN]
+script? [IF] start-n2o [THEN]

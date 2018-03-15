@@ -88,10 +88,11 @@ $00000000 Value droprate#
 	1e fmin -1e fmax
 	fdup f0< IF  fnegate
 	    $FFFFFFFF fm* f>s to rec-droprate#
+	    ." Set rec drop rate to " rec-droprate# s>f 42949672.96e f/ f. ." %" cr
 	ELSE
 	    $FFFFFFFF fm* f>s to droprate#
+	    ." Set drop rate to " droprate# s>f 42949672.96e f/ f. ." %" cr
 	THEN
-	." Set drop rate to " droprate# s>f 42949672.96e f/ f. ." %" cr
     THEN ;
 
 : send-a-packet ( addr u -- n ) +calc
