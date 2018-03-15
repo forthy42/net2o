@@ -198,10 +198,10 @@ Variable my-beacon
 
 : handle-beacon+hash ( addr u -- )
     2dup over c@ >r 1 /string check-beacon-hash
-    IF    true r> beacon( ." hashed by " 85type cr )else( 2drop )
-	handle-beacon
-    ELSE  false r> beacon( ticks .ticks ."  wrong beacon hash" cr )
-	handle-beacon
+    IF    true r> handle-beacon
+	beacon( ." hashed by " 85type cr )else( 2drop )
+    ELSE  false r> handle-beacon
+	beacon( ticks .ticks ."  wrong beacon hash" cr )
 	." wrong hash: " 85type ."  instead of " my-beacon $@ 85type cr
     THEN ; \ !!FIXME!! we ignore wrong hashes for now, until that is fixed
 
