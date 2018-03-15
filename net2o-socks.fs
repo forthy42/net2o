@@ -52,6 +52,11 @@ MSG_DONTWAIT  Constant don't-block
 
 $00000000 Value rec-droprate#
 
+: ?drop-inc ( addr u -- addr u / 0 0 )
+    rec-droprate# IF  rng32 rec-droprate# u< IF
+	    resend( ." dropping incoming packet" cr )
+	    2drop #0.  THEN  THEN ;
+
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN]
@@ -59,10 +64,7 @@ $00000000 Value rec-droprate#
     dup 0< IF
 	errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	#512 + negate throw  THEN
-    inbuf swap  1 packetr +!
-    rec-droprate# IF  rng32 rec-droprate# u< IF
-	    resend( ." dropping incoming packet" cr )
-	    2drop #0.  THEN  THEN
+    inbuf swap  1 packetr +!  ?drop-inc
     recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
 ;
 
@@ -74,7 +76,7 @@ $00000000 Value rec-droprate#
 	dup 0< IF
 	    errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	THEN
-	inbuf swap  1 packetr +!
+	inbuf swap  1 packetr +!  ?drop-inc
 	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
     ;
 [THEN]
@@ -85,12 +87,11 @@ $00000000 Value droprate#
     ?peekarg 0= IF  EXIT  THEN
     + 1- c@ '%' <> ?EXIT
     ?nextarg drop prefix-number IF
-	1e fmin -1e fmax
-	fdup f0< IF  fnegate
-	    $FFFFFFFF fm* f>s to rec-droprate#
+	1e fmin -1e fmax $FFFFFFFF fm* f>d
+	0< IF  negate to rec-droprate#
 	    ." Set rec drop rate to " rec-droprate# s>f 42949672.96e f/ f. ." %" cr
 	ELSE
-	    $FFFFFFFF fm* f>s to droprate#
+	    to droprate#
 	    ." Set drop rate to " droprate# s>f 42949672.96e f/ f. ." %" cr
 	THEN
     THEN ;
