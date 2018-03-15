@@ -87,6 +87,7 @@ $00000000 Value droprate#
     ?peekarg 0= IF  EXIT  THEN
     + 1- c@ '%' <> ?EXIT
     ?nextarg drop prefix-number IF
+	4 set-precision
 	1e fmin -1e fmax $FFFFFFFF fm* f>d
 	0< IF  negate to rec-droprate#
 	    ." Set rec drop rate to " rec-droprate# s>f 42949672.96e f/ f. ." %" cr
