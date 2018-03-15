@@ -75,12 +75,18 @@ MSG_DONTWAIT  Constant don't-block
 [THEN]
 
 $00000000 Value droprate#
+$00000000 Value rec-droprate#
 
 : %droprate ( -- )
     ?peekarg 0= IF  EXIT  THEN
     + 1- c@ '%' <> ?EXIT
     ?nextarg drop prefix-number IF
-	1e fmin 0e fmax $FFFFFFFF fm* f>s to droprate#
+	1e fmin -1e fmax
+	fdup f0< IF  fnegate
+	    $FFFFFFFF fm* f>s to rec-droprate#
+	ELSE
+	    $FFFFFFFF fm* f>s to droprate#
+	THEN
 	." Set drop rate to " droprate# s>f 42949672.96e f/ f. ." %" cr
     THEN ;
 
