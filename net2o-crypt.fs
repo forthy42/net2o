@@ -91,7 +91,7 @@ init-keybuf
 :noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
 \ :noname defers free-code-bufs ; is free-code-bufs
 
-#10.000.000.000 d>64 64Value delta-mykey# \ new mykey every 10 seconds
+#60.000.000.000 d>64 64Value delta-mykey# \ new mykey every 60 seconds
 
 : init-mykey ( -- )
     ticks delta-mykey# 64+ last-mykey 64!

@@ -432,7 +432,9 @@ UValue connection
 64User context-ticker  64#0 context-ticker 64!
 
 : rtdelay! ( time -- )
-    timeouts @ IF  64drop  EXIT  THEN
+    timeouts @ IF \ don't update rtdelay if there were timeouts
+	rtdelay 64@ init-delay# 64<> IF  64drop  EXIT  THEN
+    THEN
     recv-tick 64@ 64swap 64-
     rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
