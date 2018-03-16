@@ -1479,8 +1479,6 @@ scope{ mapc
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
-forward n2o:see
-
 : handle-cmd ( addr -- )  parent >o
     msg( ." Handle command to addr: " inbuf mapaddr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
@@ -1488,7 +1486,7 @@ forward n2o:see
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap
     resend( o IF
-    ack@ .timeouts @ IF  ~~ <warn> 2dup n2o:see <default>  THEN
+    ack@ .timeouts @ IF  ~~ <warn> 2dup dump <default>  THEN
     THEN )
     cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
     remote? off ;
