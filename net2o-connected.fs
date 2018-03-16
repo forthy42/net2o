@@ -463,7 +463,7 @@ previous
 	cmd0!
 	[:
 	  resend( ." resend0: " resend0 $@ n2o:see forth:cr )
-	  msg( ." resend0: " resend0 $@ swap hex. hex forth:cr )
+	  msg( ." resend0: " resend0 $@ swap hex. hex. forth:cr )
 	  cmdreset init-reply resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
