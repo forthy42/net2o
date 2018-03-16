@@ -245,7 +245,7 @@ Sema see-sema
     o IF  token-table  ELSE  setup-table  THEN  @ see:table ! ;
 
 : n2o:see ( addr u -- )
-    >see-table (n2o:see-table) ;
+    >see-table (n2o:see) ;
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
