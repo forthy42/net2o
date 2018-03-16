@@ -1479,6 +1479,8 @@ scope{ mapc
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
+forward n2o:see
+
 : handle-cmd ( addr -- )  parent >o
     msg( ." Handle command to addr: " inbuf mapaddr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
