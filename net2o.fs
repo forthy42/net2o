@@ -431,7 +431,9 @@ UValue connection
 64User ticker
 64User context-ticker  64#0 context-ticker 64!
 
-: rtdelay! ( time -- ) recv-tick 64@ 64swap 64-
+: rtdelay! ( time -- )
+    timeouts @ IF  64drop  EXIT  THEN
+    recv-tick 64@ 64swap 64-
     rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
 : n2o:new-context ( -- o )
