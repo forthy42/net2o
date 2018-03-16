@@ -554,7 +554,7 @@ previous
     IF  timeout( ." resend commands" forth:cr )
 	push-timeout
     ELSE  ack@ .timeouts off  THEN ;
-: connected-timeout ( -- ) timeout( ." connected timeout" forth:cr )
+: connected-timeout ( -- ) timeout( ." connected timeout " ack@ .timeouts ? forth:cr )
     >next-timeout cmd-resend?
     IF  timeout( ." resend commands" forth:cr )
 	push-timeout
