@@ -1484,7 +1484,9 @@ scope{ mapc
     outflag off  wait-task @ 0= remote? !
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
-    r> r> swap cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
+    r> r> swap
+    resend( ack@ .timeouts @ IF  <warn> dest-flags .dest-addr 2dup n2o:see <default>  THEN )
+    cmd-exec o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
     remote? off ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
