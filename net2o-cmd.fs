@@ -233,7 +233,7 @@ Sema see-sema
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: n2o:see-table ( addr u table -- ) @ see:table !
+: (n2o:see) ( addr u -- )
     buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup hex. t-stack $off
@@ -241,8 +241,11 @@ Sema see-sema
       throw  2drop ;] see-sema c-section
     2r> buf-state 2! ;
 
+: >see-table ( -- )
+    o IF  token-table  ELSE  setup-table  THEN  @ see:table ! ;
+
 : n2o:see ( addr u -- )
-    o IF  token-table  ELSE  setup-table  THEN  n2o:see-table ;
+    >see-table (n2o:see-table) ;
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
@@ -255,7 +258,7 @@ Sema see-sema
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
-    cmd@ trace( dup IF dup .net2o-name' THEN >r .s r> $.s cr ) n>cmd
+    cmd@ trace( dup IF dup >see-table .net2o-name' THEN >r .s r> $.s cr ) n>cmd
     @ ?dup-IF  execute  ELSE
 	trace( ." crashing" cr cr ) net2o-crash  THEN  buf-state 2@ ;
 
