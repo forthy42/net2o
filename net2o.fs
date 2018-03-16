@@ -1485,11 +1485,9 @@ scope{ mapc
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap
-    resend( o IF ack@ .timeouts @ IF ['] trace( >body on THEN
-    THEN THEN )
+    resend( o IF ack@ .timeouts @ IF ['] trace( >body on THEN THEN )
     cmd-exec
-    resend( o IF ack@ .timeouts @ IF ['] trace( >body off THEN
-    THEN THEN )
+    resend( o IF ack@ .timeouts @ IF ['] trace( >body off THEN THEN )
     o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
     remote? off ;
 ' handle-cmd rcode-class to handle
