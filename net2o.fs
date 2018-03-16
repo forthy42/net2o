@@ -1778,7 +1778,7 @@ Variable initialized
 
 Variable cookies
 
-#5.000.000.000 d>64 64Constant connect-timeout#
+#60.000.000.000 d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie64 )
     [: ticks 64dup o

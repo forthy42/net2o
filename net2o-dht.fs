@@ -343,7 +343,7 @@ false Value add-myip
 	addr o>addr gen-host my-addr$ $ins[]sig drop
 	nat( ."  routed" ) THEN
     nat( forth:cr )
-    what's expect-reply? ['] addme-end <> IF
+    action-of expect-reply? ['] addme-end <> IF
 	expect-reply pk@ $, dht-id
 	mynick$ $, dht-owner+
     THEN
