@@ -1417,7 +1417,7 @@ Variable timeout-tasks
     ack@ .+timeouts next-timeout 64! ;
 
 : o+timeout ( -- )  0timeout
-    timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt .name cr )
+    timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ .name cr )
     [: timeout-tasks $@ bounds ?DO  I @ o = IF
 	      UNLOOP  EXIT  THEN
       cell +LOOP
