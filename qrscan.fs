@@ -59,8 +59,8 @@ scan-matrix 11 sfloats + Constant 3d-enabler
 inverse-default 32 sfloats bounds
 [?DO] 1e fdup [I] sf! [I] 4 sfloats + sf! 9 sfloats [+LOOP]
 
-84e FValue x-scansize
-84e FValue y-scansize
+83e FValue x-scansize
+83e FValue y-scansize
 
 0e FValue y-offset
 0e FValue x-offset
@@ -170,13 +170,17 @@ $70 Value red-level#
 	tuck @ umin swap !
 	0< ;
 [ELSE]
-    ' u< alias ??
+    ' < alias ??
 [THEN]
+
+: rgb@ ( addr -- r g b )
+    >r r@ c@ r@ 1+ c@ r> 2 + c@ ;
 
 : extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
-	2* I 1+ c@ green-level# ?? -
-	2* I    c@ red-level#   ?? -
+	I rgb@ drop 2>r
+	2* r> green-level# ?? -
+	2* r> red-level#   ?? -
     step +LOOP ;
 
 $51 buffer: guessbuf
@@ -215,15 +219,14 @@ scan-w 3 rshift Constant scan-step
 
 $8000 Constant init-xy
 
-: get-minmax ( addr u -- min max )
-    $FF $00 2swap
-    bounds ?DO
-	I c@ tuck umax >r umin r>
-    4 +LOOP ;
 : get-minmax-rgb ( addr u -- minr maxr ming maxg minb maxb )
-    swap 3 bounds DO
-	I over get-minmax rot
-    LOOP  drop ;
+    $FFF -$FFF 2dup 2dup { minr maxr ming maxg minb maxb }
+    bounds ?DO
+	I rgb@
+	dup maxb max to maxb  minb min to minb
+	dup maxg max to maxg  ming min to ming
+	dup maxr max to maxr  minr min to minr
+    4 +LOOP minr maxr ming maxg minb maxb ;
 
 #10 Cells buffer: p0
 p0 2 cells + Constant p1
@@ -242,10 +245,12 @@ p3 2 cells + Constant px
     scan-buf0 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup 2 + c@ blue-level#  u< IF
-		dup 1+  c@ green-level# u< 2*
-		over    c@ red-level#   u< - 3 and 2 xor
+	    dup rgb@ blue-level#  < IF
+		green-level#     < 2*
+		swap red-level#  < - 3 and 2 xor
 		2* cells p0 + I J rot min²!
+	    ELSE
+		2drop
 	    THEN
 	    rgba+
 	LOOP
@@ -417,7 +422,7 @@ previous
 	    qr( save-png1 1 +to scan# )
 	ELSE  2drop  THEN
     THEN
-    ekey? IF  ekey k-volup =  IF  save-pngs  THEN  THEN ;
+    ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
     1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL
     rdrop ;
@@ -425,6 +430,7 @@ previous
 : scan-qr ( -- )
     scan-start  ['] scan-loop catch  level# off
     cam-end 0>framebuffer
+    [IFDEF] saturate% 1.0e saturate% sf! [THEN]
     [IFDEF] showstatus showstatus [THEN]
     [IFDEF] terminal-program terminal-program terminal-init [THEN]
     dup IF

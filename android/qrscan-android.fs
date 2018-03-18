@@ -27,10 +27,12 @@ also opengl also android
 
 : draw-cam ( -- )
     0>framebuffer
+    [IFDEF] saturate% saturate% sf@ { f: sat } 2.0e saturate% sf! [THEN]
     camera-init screen-orientation 1e 1e draw-scan sync
     cam-w cam-h scan-fb-raw >framebuffer
     1 1e 1e draw-scan
-    scan-tex-raw linear-mipmap mipmap ;
+    scan-tex-raw linear-mipmap mipmap
+    [IFDEF] saturate% sat saturate% sf! [THEN] ;
 
 previous previous
 
