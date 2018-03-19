@@ -105,6 +105,7 @@ Discussions
 * [Client authentication](client-auth.md)
 * [Handover](handover.wiki)
 * [Ack cookies](ackcookies.wiki)
+* [Random number seat belts](rng.md)
 * [Key format](key-format.wiki)
 * [Key revocation](key-revocation.md)
 * [NSA backdoor](nsa-backdoor.md)

@@ -362,7 +362,7 @@ $60 Constant rndkey#
     \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
     \ hash( ." hashing: " 2over 85type ':' emit 2dup 85type cr )
     c:hash c:hash
-    \ hash( @keccak 200 85type cr cr ) \ debuggin may leak secrets!
+    \ hash( @keccak 200 85type cr cr ) \ debugging may leak secrets!
 ;
 
 \ public key encryption

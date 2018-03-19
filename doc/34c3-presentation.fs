@@ -338,6 +338,14 @@ end-class slide-actor
 	k-next    of  next-slide  endof
 	k-volup   of  prev-slide  endof
 	k-voldown of  next-slide  endof
+	k-f5      of  saturate% sf@ 0.1e f+ saturate% sf!
+	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
+	k-f6      of  saturate% sf@ 0.1e f- saturate% sf!
+	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
+	k-f7      of  ambient% sf@ 0.1e f+  ambient% sf!
+	    Ambient 1 ambient% opengl:glUniform1fv  +sync endof
+	k-f8      of  ambient% sf@ 0.1e f-  ambient% sf!
+	    Ambient 1 ambient% opengl:glUniform1fv  +sync endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase ; slide-actor to ekeyed
 \ :noname ( $xy b -- )  dup 1 > IF
