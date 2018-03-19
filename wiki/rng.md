@@ -9,9 +9,9 @@ random number (CSPRNG).
   + An entropy source — I use the OS for that, ''/dev/urandom'' is known good.
   + A secure, non-reversible expansion algorithm — I use keccak, which
     encrypts again and again the same output buffer using an ever-changing
-    secret state.  An attacker should not be able to guess past random numbers
-    from the current state, and should have difficulties to guess future ones
-    after re-injection of entropy.
+    secret state (key erasure).  An attacker should not be able to guess past
+    random numbers from the current state, and should have difficulties to
+    guess future ones after re-injection of entropy.
 
 These two things are good enough, but here's about the seat belts, the
 additional level of security to make sure even if one of these two fails
@@ -28,10 +28,12 @@ collission.  Your history file will be far too long by then, and you will want
 to delete it.  This is the check part of the seat belt: if it's not attached,
 it will beep.
 
-I store an initializing state for the PRNG, first generated on the first start
-together with your sekret key.  This is the time when a low-entropy system can
-ask the user to add more entropy by e.g. moving the mouse or walking over the
-keyboard.  That initial state has enough randomness.
+## Key erasure and rolling tag
+
+I store an initializing state for the PRNG, first generated together with your
+sekret key.  This is the time when a low-entropy system can ask the user to
+add more entropy by e.g. moving the mouse or walking over the keyboard.  That
+initial state then has enough randomness.
 
 On every start of net2o, I mix it together with entropy from ''/dev/random''
 and replace the previous saved content.  This is to prevent a forward security
@@ -46,3 +48,7 @@ the states of the previous init files.  If the entropy is very lousy, and only
 related to the system time when reading it, recovery of old keys is still
 possible.  Therefore, you should not store the random number initializer on a
 version controlling file system.
+
+## Literature
+
+1. [DJB on key erasure](https://blog.cr.yp.to/20170723-random.html)
