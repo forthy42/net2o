@@ -20,6 +20,7 @@ Forward n2o:dispose-punchs
 Forward mynick$
 Forward invite-me
 Forward qr-invite-me
+Defer <invite-result>
 
 scope{ net2o-base
 \ nat traversal functions
@@ -231,11 +232,9 @@ Sema id-sema
 
 \ one-shot packets
 
-$4B net2o: invite-result ( flag -- )
-    o IF  to invite-result#  THEN ;
-$45 net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
++net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
     $> ?keysize search-key 2drop
-    $> tmp-crypt? dup invit:pend# and ulit, invite-result
+    $> tmp-crypt? dup invit:pend# and ulit, <invite-result>
     IF
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
@@ -259,7 +258,7 @@ $45 net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 +net2o: qr-challenge ( $:challenge $:respose -- )
     $> $> c:0key qr-key $8 >keyed-hash qr-hash $40 c:hash@
-    qr-hash over $10 umax str= dup invit:qr# and ulit, invite-result
+    qr-hash over $10 umax str= dup invit:qr# and ulit, <invite-result>
     \ challenge will fail if less than 16 bytes
     IF  msg( ." challenge accepted" forth:cr )
 	qr-tmp-val validated or!
@@ -267,6 +266,9 @@ $45 net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
 	msg( ." challenge failed: " qr-hash $40 85type
 	forth:cr ." qr-key: " qr-key 8 xtype forth:cr )
     THEN ;
++net2o: invite-result ( flag -- )
+    o IF  to invite-result#  THEN ;
+' invite-result is <invite-result>
 
 gen-table $freeze
 

@@ -873,7 +873,7 @@ Variable lastscan$
 : scan-result ( addr u tag -- )
     dup 2over rot lastscan? IF drop 2drop EXIT THEN
     dup scanned-max# u< IF  cells scanned-x + perform
-    ELSE  ." unknown tag " hex. ." scanned " 85type cr  THEN ;
+    ELSE  ." unknown tag " hex. ." scanned " 85type cr ?scan-level  THEN ;
 
 \ generate keys
 
@@ -1221,6 +1221,7 @@ event: :>?scan-level ( -- ) ?scan-level ;
 event: :>qr-invitation { task w^ pk -- }
     pk $@ keysize2 /string >qr-key
     pk $@ keysize2 umin n2o:pklookup send-qr-invitation
+    ." sent qr invitation, got " hex. forth:cr
     0= IF  <event :>?scan-level task event>  THEN  pk $free ;
 
 : scanned-ownkey { d: pk -- }

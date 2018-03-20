@@ -147,6 +147,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   ask for an invitation as second stage of invitation handshake
 + $49 tmp-secret, ( -- )
 + $4A qr-challenge ( $:challenge $:respose -- )
++ $4B invite-result ( flag -- )
 
 ### connection commands ###
 

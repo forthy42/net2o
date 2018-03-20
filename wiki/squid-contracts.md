@@ -147,4 +147,16 @@ actually have checked for the source state in the corresponding ledger.
 A minimal transaction is somewhat less than 300 bytes, and that's already
 non-emtpy to non-empty account.
 
+## Descriptive Assets
+
+Monetary assets are just units of a currency; interchangeable, summable, and
+it is irrelevant who's obligation will be used to fulfill the contract.
+
+Real world assets may need a description.  The description however reveals a
+lot about the transaction, and therefore must be encrypted.  Assets have
+two-party transfers, so a DHE between the sender and receiver vault key is
+sufficient.  The DHE is mixed with an IV generated from the contract so far,
+and the description string has a 128 bit HMAC to check that the decryption was
+likely correct.
+
 [up](squid.md) [back](squid-fed.md) [next](squid-literature.md)
