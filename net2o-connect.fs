@@ -231,9 +231,12 @@ Sema id-sema
 
 \ one-shot packets
 
-+net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
+$4B net2o: invite-result ( flag -- )
+    o IF  to invite-result#  THEN ;
+$45 net2o: invite ( $:nick+sig $:pk -- ) \g invite someone
     $> ?keysize search-key 2drop
-    $> tmp-crypt? IF
+    $> tmp-crypt? dup invit:pend# and ulit, invite-result
+    IF
 	pk2-sig? !!sig!! >invitations
 	do-keypad sec-off
     ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
@@ -256,13 +259,13 @@ Sema id-sema
     nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
 +net2o: qr-challenge ( $:challenge $:respose -- )
     $> $> c:0key qr-key $8 >keyed-hash qr-hash $40 c:hash@
-    qr-hash over $10 umax str= \ challenge will fail if less than 16 bytes
+    qr-hash over $10 umax str= dup invit:qr# and ulit, invite-result
+    \ challenge will fail if less than 16 bytes
     IF  msg( ." challenge accepted" forth:cr )
 	qr-tmp-val validated or!
     ELSE
 	msg( ." challenge failed: " qr-hash $40 85type
 	forth:cr ." qr-key: " qr-key 8 xtype forth:cr )
-	true !!challenge!!
     THEN ;
 
 gen-table $freeze

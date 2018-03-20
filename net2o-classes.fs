@@ -177,6 +177,14 @@ enum message#
 drop
 }scope
 
+scope: invit
+0
+enum none#
+enum pend#
+enum qr#
+drop
+}scope
+
 cmd-class class
     \ callbacks
     defer: timeout-xt    \ callback for timeout
@@ -250,7 +258,8 @@ cmd-class class
     cvalue: req-codesize
     cvalue: req-datasize
 
-    cvalue: key-setup?    \ true if key setup is done
+    cvalue: key-setup?     \ true if key setup is done
+    cvalue: invite-result# \ invitation result
     \ flow control, sender part
 
     64field: next-timeout \ ns

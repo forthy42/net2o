@@ -1199,7 +1199,7 @@ also net2o-base
     ['] push-cmd IS expect-reply?
     end-code|
     n2o:dispose-context ;
-: send-qr-invitation ( -- )
+: send-qr-invitation ( -- success-bit )
     setup!  +resend-cmd  gen-tmpkeys
     ['] connect-rest rqd?
     cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
@@ -1212,18 +1212,20 @@ also net2o-base
     nest[ request-qr-invitation request, ]nest
     close-tmpnest
     ['] push-cmd IS expect-reply?
-    end-code|
+    end-code| invite-result#
     n2o:dispose-context ;
 previous
 
 forward >qr-key
-event: :>qr-invitation { w^ pk -- }
+event: :>?scan-level ( -- ) ?scan-level ;
+event: :>qr-invitation { task w^ pk -- }
     pk $@ keysize2 /string >qr-key
-    pk $@ keysize2 umin n2o:pklookup send-qr-invitation pk $free ;
+    pk $@ keysize2 umin n2o:pklookup send-qr-invitation
+    invit:qr# = IF  <event :>?scan-level task event>  THEN  pk $free ;
 
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    <event pk $10 + $make elit, :>qr-invitation ?query-task event> ;
+    <event up@ elit, pk $10 + $make elit, :>qr-invitation ?query-task event> ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
