@@ -1220,8 +1220,10 @@ forward >qr-key
 event: :>?scan-level ( -- ) ?scan-level ;
 event: :>qr-invitation { task w^ pk -- }
     pk $@ keysize2 /string >qr-key
-    pk $@ keysize2 umin n2o:pklookup send-qr-invitation
-    ." sent qr invitation, got " dup hex. forth:cr
+    pk $@ keysize2 umin [: n2o:pklookup send-qr-invitation ;] catch
+    IF    ." send qr invitation, aborted" 0
+    ELSE  ." sent qr invitation, got " dup hex. THEN
+    forth:cr
     0= IF  <event :>?scan-level task event>  THEN  pk $free ;
 
 : scanned-ownkey { d: pk -- }
