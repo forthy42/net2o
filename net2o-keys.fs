@@ -1221,7 +1221,7 @@ event: :>?scan-level ( -- ) ?scan-level ;
 event: :>qr-invitation { task w^ pk -- }
     pk $@ keysize2 /string >qr-key
     pk $@ keysize2 umin n2o:pklookup send-qr-invitation
-    invit:qr# = IF  <event :>?scan-level task event>  THEN  pk $free ;
+    0= IF  <event :>?scan-level task event>  THEN  pk $free ;
 
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
