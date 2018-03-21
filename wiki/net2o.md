@@ -96,7 +96,7 @@ Videos & Presentations
 + [EuroForth 2016](https://wiki.forth-ev.de/doku.php/events:euroforth-2016:using-net2o) presentation
 + [33c3](33c3.md) presentation
 + [EuroForth 2017](https://wiki.forth-ev.de/lib/exe/fetch.php/events:ef2017:minos2.mp4) presentation (MINOΣ 2)
-+ [34c3](34c3.md) presentation
++ [34c3](34c3.md) presentation (alternative source: [Chaos West's capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
 
 Discussions
 -----------
