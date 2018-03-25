@@ -220,8 +220,8 @@ scope{ mapc
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc 2dup mykey state# decrypt$
-    IF  +enc 2nip true  EXIT  THEN  2drop
-    oldmykey state# decrypt$ +enc ;
+    IF  +enc 2nip true  EXIT  THEN  2drop ." try oldmykey "
+    oldmykey state# decrypt$ +enc dup 0= IF  ." failed..."  THEN cr ;
 
 : outbuf-encrypt ( map -- ) +calc
     .mapc:ivs>source? outbuf packet-data +cryptsu
