@@ -40,7 +40,7 @@ cell 8 = [IF]
     0 Constant 64#0
     1 Constant 64#1
     -1 Constant 64#-1
-    ' literal Alias 64literal immediate
+    synonym 64literal literal
     ' rshift Alias 64rshift
     ' lshift Alias 64lshift
     ' rol Alias 64rol
@@ -128,7 +128,7 @@ cell 8 = [IF]
     #0. 2Constant 64#0
     #1. 2Constant 64#1
     #-1. 2Constant 64#-1
-    ' 2literal Alias 64literal immediate
+    synonym 64literal 2literal
     ' dlshift Alias 64lshift
     ' drshift Alias 64rshift
     ' drol Alias 64rol
