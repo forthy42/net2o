@@ -43,9 +43,11 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 	    cookie( ." ticker " forth:cr )
 	    64dup context-ticker 64!
 	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
+	    <err> ." cookie: no context, un-cmd" <default> forth:cr
 	THEN
-    ELSE  64drop  THEN
-    <err> ." cookie: no owncrypt, un-cmd" <default> forth:cr
+    ELSE  64drop
+	<err> ." cookie: no owncrypt, un-cmd" <default> forth:cr
+    THEN
     un-cmd ;
 \ punch-stuff needs to be moved to connected
 +net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
