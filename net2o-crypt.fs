@@ -217,7 +217,9 @@ scope{ mapc
 \ encrypt with own key
 
 : mykey-encrypt$ ( addr u -- ) +calc
-    mykey state# encrypt$ +enc ;
+    2dup mykey state# encrypt$ +enc
+    <info> ." mykey enc: " mykey 4 85type space
+    dup 4 - /string 85type <default> cr ;
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc 2dup mykey state# decrypt$
