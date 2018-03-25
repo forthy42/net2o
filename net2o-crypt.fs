@@ -97,7 +97,7 @@ init-keybuf
     ticks delta-mykey# 64+ last-mykey 64!
     mykey oldmykey state# move
     state# rng$ mykey swap move
-    <info> ." Generate new mykey" cr <default>
+    mykey( <info> ." Generate new mykey" cr <default> )
     genkey( ." mykey: " mykey state# xtype cr ) ;
 
 0 Value header-key
