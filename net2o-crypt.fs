@@ -92,6 +92,7 @@ init-keybuf
 \ :noname defers free-code-bufs ; is free-code-bufs
 
 #60.000.000.000 d>64 64Value delta-mykey# \ new mykey every 0.6 seconds
+#60.000.000.000 d>64 64Constant :01'# \ one minute
 
 : init-mykey ( -- )
     ticks delta-mykey# 64+ last-mykey 64!
@@ -475,7 +476,7 @@ e? max-xchar $100 < [IF]
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  64drop .forever  EXIT  THEN
     64dup 64#-1 64= IF  64drop .never    EXIT  THEN
-    ticks 64over 64- 64dup [ #60.000.000.000 d>64 ] 64Literal 64u< IF
+    ticks 64over 64- 64dup :01'# 64u< IF
 	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
     ELSE  64drop .ticks  THEN ;
 : .sigdates ( addr u -- )

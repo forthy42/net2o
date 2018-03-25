@@ -1789,18 +1789,19 @@ Variable cookies
 : do-?cookie ( cookie -- context true / false )
     ticker 64@ connect-timeout# 64- { 64: timeout }
     cookies $@ bounds ?DO
+	64dup I .cc-timeout 64@ 64= IF \ if we have a hit, use that
+	    64drop I .cc-context @
+	    cookies I cookie-size# del$one drop
+	    unloop  true  EXIT
+	THEN
 	I .cc-timeout 64@ timeout 64u< IF
 	    cookies I cookie-size# del$one
 	    cookies next$
 	    unloop  ?DO  NOPE \ this replaces the loop variables
-	    0
+	    0 \ we re-iterate over the exactly same index
 	ELSE
-	    64dup I .cc-timeout 64@ 64= IF
-		64drop I .cc-context @
-		cookies I cookie-size# del$one drop
-		unloop  true  EXIT
-	    THEN
-	    cookie-size#  THEN
+	    cookie-size#
+	THEN
     +LOOP  64drop 0 ;
 
 : ?cookie ( cookie -- context true / false )
