@@ -91,12 +91,13 @@ init-keybuf
 :noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
 \ :noname defers free-code-bufs ; is free-code-bufs
 
-#60.000.000.000 d>64 64Value delta-mykey# \ new mykey every 60 seconds
+#6.000.000.000 d>64 64Value delta-mykey# \ new mykey every 6 seconds
 
 : init-mykey ( -- )
     ticks delta-mykey# 64+ last-mykey 64!
     mykey oldmykey state# move
     state# rng$ mykey swap move
+    <info> ." Generate new mykey" cr <default>
     genkey( ." mykey: " mykey state# xtype cr ) ;
 
 0 Value header-key
@@ -220,8 +221,9 @@ scope{ mapc
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc 2dup mykey state# decrypt$
-    IF  +enc 2nip true  EXIT  THEN  2drop ." try oldmykey "
-    oldmykey state# decrypt$ +enc dup 0= IF  ." failed..."  THEN cr ;
+    IF  +enc 2nip true  EXIT  THEN  2drop <info> ." try oldmykey "
+    oldmykey state# decrypt$ +enc dup 0= IF  <err> ." failed..."  THEN
+    <default>  cr ;
 
 : outbuf-encrypt ( map -- ) +calc
     .mapc:ivs>source? outbuf packet-data +cryptsu
@@ -469,7 +471,7 @@ e? max-xchar $100 < [IF]
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  64drop .forever  EXIT  THEN
     64dup 64#-1 64= IF  64drop .never    EXIT  THEN
-    ticks 64over 64- 64dup #60.000.000.000 d>64 64u< IF
+    ticks 64over 64- 64dup [ #60.000.000.000 d>64 ] 64Literal 64u< IF
 	64>f -1e-9 f* 10 6 0 f.rdp 's' emit 64drop
     ELSE  64drop .ticks  THEN ;
 : .sigdates ( addr u -- )
