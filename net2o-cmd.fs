@@ -669,7 +669,9 @@ previous
     key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
 
 : cmdnest ( addr u -- )  mykey-decrypt$
-    IF  own-crypt-val do-nest  ELSE  un-cmd  THEN ;
+    IF  own-crypt-val do-nest  ELSE
+	<err> ." cmdnest: no owncrypt, un-cmd" <default> forth:cr
+	un-cmd  THEN ;
 
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ key| dup IF

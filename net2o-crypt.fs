@@ -91,7 +91,7 @@ init-keybuf
 :noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
 \ :noname defers free-code-bufs ; is free-code-bufs
 
-#6.000.000.000 d>64 64Value delta-mykey# \ new mykey every 6 seconds
+#6.00.000.000 d>64 64Value delta-mykey# \ new mykey every 0.6 seconds
 
 : init-mykey ( -- )
     ticks delta-mykey# 64+ last-mykey 64!
@@ -221,7 +221,8 @@ scope{ mapc
 
 : mykey-decrypt$ ( addr u -- addr' u' flag )
     +calc 2dup mykey state# decrypt$
-    IF  +enc 2nip true  EXIT  THEN  2drop <info> ." try oldmykey "
+    IF  +enc <info> ." mykey decrypted" cr <default>
+	2nip true  EXIT  THEN  2drop <warn> ." try oldmykey "
     oldmykey state# decrypt$ +enc dup 0= IF  <err> ." failed..."  THEN
     <default>  cr ;
 
