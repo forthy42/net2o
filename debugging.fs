@@ -38,6 +38,7 @@ debug: noens(
 debug: key( \ key stuff
 debug: vkey( \ vault key stuff
 debug: genkey( \ See generated keys - never let this go to a log file!
+debug: mykey( \ debug mykey things
 debug: cookie( 
 debug: tag(
 debug: flush(
