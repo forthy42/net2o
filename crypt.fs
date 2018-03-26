@@ -510,7 +510,9 @@ drop
     2dup enddate@ 64>r 2dup startdate@ 64>r
     ticks fuzzedtime# 64+ 64r> 64r>
     64dup 64#-1 64<> IF  fuzzedtime# 64-2* 64+  THEN
-    early/late? ;
+    early/late?
+    msg( dup IF  <err> ." sig out of date: " ticks .ticks ." sigdate: "
+    >r 2dup startdate@ .ticks 2dup enddate@ .ticks r> <default> cr  THEN ) ;
 : verify-sig ( addr u pk -- addr u flag )  >r
     check-date dup 0= IF  drop
 	2dup + sigonlysize# - r> ed-verify 0= sig-wrong and
