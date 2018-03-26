@@ -91,8 +91,10 @@ init-keybuf
 :noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
 \ :noname defers free-code-bufs ; is free-code-bufs
 
-#60.000.000.000 d>64 64Value delta-mykey# \ new mykey every 0.6 seconds
 #60.000.000.000 d>64 64Constant :01'# \ one minute
+#1.000.000.000 d>64 64Constant 10"#   \ ten second
+:01'# 64Value delta-mykey# \ new mykey every 0.6 seconds
+10"#  64Constant fuzzedtime# \ allow clients to be 10s off
 
 : init-mykey ( -- )
     ticks delta-mykey# 64+ last-mykey 64!
@@ -490,8 +492,6 @@ e? max-xchar $100 < [IF]
     2dup + sigsize# - +date ;
 : gen>host ( addr u -- addr u )
     2dup c:0key "host" >keyed-hash ;
-
-#10.000.000.000 d>64 64Constant fuzzedtime# \ allow clients to be 10s off
 
 -5
 enum sig-keysize

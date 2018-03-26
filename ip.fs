@@ -273,7 +273,7 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 
 Variable myname
 
-\ new address handling is in net2o-addr.fs, loaded later
+\ new address handling is in addr.fs, loaded later
 
 Forward !my-addr ( -- )
 
