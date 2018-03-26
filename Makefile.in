@@ -36,18 +36,15 @@ HOST     =
 FAST     = @FAST@
 FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
 
-SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
-	  hash-table.fs keccak-small.fs kregion.fs n2o.fs net2o-addr.fs	      \
-	  net2o-classes.fs net2o-cmd.fs net2o-connected.fs net2o-connect.fs   \
-	  net2o-crypt.fs net2o-dht.fs net2o-err.fs net2o-file.fs net2o-gui.fs \
-	  net2o.fs net2o-ip.fs net2o-helper.fs net2o-keys.fs net2o-log.fs     \
-	  net2o-msg.fs net2o-notify.fs net2o-qr.fs net2o-socks.fs	      \
-	  net2o-squid.fs net2o-tools.fs net2o-vault.fs rng.fs xtype.fs	      \
-	  $(TESTS) $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs		      \
-	  threefishlib.fs startn2o.fs doc/net2o-logo.png net2o-version.fs.in  \
-	  android/net.fs android/notify.fs linux/net.fs linux/notify.fs	      \
-	  net2o-dhtroot.fs net2o-dvcs.fs qrscan.fs android/qrscan-android.fs  \
-	  linux/qrscan-linux.fs
+SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
+	  hash-table.fs keccak-small.fs kregion.fs n2o.fs addr.fs classes.fs \
+	  cmd.fs connected.fs connect.fs crypt.fs dht.fs err.fs file.fs	     \
+	  gui.fs net2o.fs ip.fs helper.fs keys.fs log.fs msg.fs notify.fs    \
+	  qr.fs socks.fs squid.fs tools.fs vault.fs rng.fs xtype.fs $(TESTS) \
+	  $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs threefishlib.fs	     \
+	  startn2o.fs doc/net2o-logo.png version.fs.in android/net.fs	     \
+	  android/notify.fs linux/net.fs linux/notify.fs dhtroot.fs dvcs.fs  \
+	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs
 
 ifeq "$(FAST)" "yes"
 FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
@@ -69,7 +66,7 @@ ARCH	  =
 DEBARCH   =
 GFORTH_FAST = `which gforth-fast`-`gforth-fast --version 2>&1| cut -f2- -d' ' | tr ' ' '-'`
 
-INS = Makefile n2o qrscan net2o-version.fs debian/changelog debian/control
+INS = Makefile n2o qrscan version.fs debian/changelog debian/control
 
 TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/copy.fs tests/cryptspeed.fs tests/dht.fs		\
@@ -88,7 +85,7 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 
 SCRIPTS = n2o
 
-GEN = net2o-version.fs
+GEN = version.fs
 
 DOC = wiki/commands.md
 

@@ -21,7 +21,7 @@ Variable dhtroot-addr
 
 :noname defers 'cold dhtroot-addr off ; is 'cold
 
-require net2o-dhtroot.fs
+require dhtroot.fs
 
 : dhtroot-addr@ ( -- addr )
     dhtroot-addr @ ?dup-IF  EXIT  THEN

@@ -17,8 +17,8 @@
 
 \ helper words
 
-require net2o-version.fs
-require net2o-err.fs
+require version.fs
+require err.fs
 
 \ required tools
 
@@ -31,7 +31,7 @@ require unix/socket.fs
 require unix/mmap.fs
 require unix/pthread.fs
 require unix/filestat.fs
-require net2o-tools.fs
+require tools.fs
 require debugging.fs
 require kregion.fs
 require crypto-api.fs
@@ -95,9 +95,9 @@ hash: routes#
 
 \ add IP addresses
 
-require net2o-classes.fs
-require net2o-ip.fs
-require net2o-socks.fs
+require classes.fs
+require ip.fs
+require socks.fs
 
 UDefer other
 
@@ -883,11 +883,11 @@ $20 Value mask-bits#
 
 \ load crypto here
 
-require net2o-crypt.fs
+require crypt.fs
 
 \ file handling
 
-require net2o-file.fs
+require file.fs
 
 \ helpers for addresses
 
@@ -1823,25 +1823,25 @@ Variable cookies
 
 \ load net2o plugins: first one with integraded command space
 
-require net2o-notify.fs
-require net2o-cmd.fs
-require net2o-connect.fs
-require net2o-connected.fs
-require net2o-log.fs
-require net2o-keys.fs
-require net2o-addr.fs
-require net2o-dht.fs
-require net2o-vault.fs
-require net2o-msg.fs
-require net2o-helper.fs
-require net2o-qr.fs
-\ require net2o-term.fs
-require net2o-dvcs.fs
-require net2o-squid.fs
+require notify.fs
+require cmd.fs
+require connect.fs
+require connected.fs
+require log.fs
+require keys.fs
+require addr.fs
+require dht.fs
+require vault.fs
+require msg.fs
+require helper.fs
+require qr.fs
+\ require term.fs
+require dvcs.fs
+require squid.fs
 
 \ configuration stuff
 
-require net2o-dhtroot.fs \ configuration for DHT root
+require dhtroot.fs \ configuration for DHT root
 
 \ freeze tables
 
