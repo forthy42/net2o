@@ -475,7 +475,8 @@ previous
     code-map ?dup-IF  with mapc 0  outflag off
 	dest-replies
 	dest-size addr>replies bounds endwith U+DO
-	    I addr reply-xt @ IF
+	    I action-of reply-xt IF
+		timeout( ." resend: " I action-of reply-xt .name forth:cr )
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ n2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!
@@ -486,8 +487,8 @@ previous
     ELSE  0  THEN ;
 
 : cmd-resend? ( -- n )
-    0-resend? map-resend? +
-    timeout( ." resend " dup . ." commands" cr ) ;
+    0-resend? map-resend?
+    timeout( ." resend " over . dup . ." commands 0/map" cr ) + ;
 
 : .expected ( -- )
     forth:.time ." expected/received: " recv-addr @ hex.
