@@ -1,13 +1,11 @@
 #!/bin/bash
 GFORTH=${GFORTH:-gforth}
-count=100
-case "$1"
-in
-    [0-9][0-9]*)
-	count=$1
-	shift
-	;;
-esac
+count=${count:-100}
+while [ "$1" != "${1#+}" ]
+do
+    debugs="$debugs $1"
+    shift
+done
 rm -rf chat-test.d
 mkdir -p chat-test.d/.net2o
 cd chat-test.d
@@ -22,15 +20,15 @@ prio=10
 rootdirs="$PWD"
 EOF
 export NET2O_CONF=$PWD/.net2o/config
-PASSPHRASE=1234 $GFORTH ../n2o $* -yes keygen chat-test1
-PASSPHRASE=2345 $GFORTH ../n2o $* -yes keygen chat-test2
-PASSPHRASE=3456 $GFORTH ../n2o $* -yes keygen chat-test3
-PASSPHRASE=4567 $GFORTH ../n2o $* -yes keygen chat-test4
+PASSPHRASE=1234 $GFORTH ../n2o $debugs -yes keygen chat-test1
+PASSPHRASE=2345 $GFORTH ../n2o $debugs -yes keygen chat-test2
+PASSPHRASE=3456 $GFORTH ../n2o $debugs -yes keygen chat-test3
+PASSPHRASE=4567 $GFORTH ../n2o $debugs -yes keygen chat-test4
 
-PASSPHRASE=1234 $GFORTH ../n2o $* keyin ~/chat-test[234].n2o
-PASSPHRASE=2345 $GFORTH ../n2o $* keyin ~/chat-test[134].n2o
-PASSPHRASE=3456 $GFORTH ../n2o $* keyin ~/chat-test[124].n2o
-PASSPHRASE=4567 $GFORTH ../n2o $* keyin ~/chat-test[123].n2o
+PASSPHRASE=1234 $GFORTH ../n2o $debugs keyin ~/chat-test[234].n2o
+PASSPHRASE=2345 $GFORTH ../n2o $debugs keyin ~/chat-test[134].n2o
+PASSPHRASE=3456 $GFORTH ../n2o $debugs keyin ~/chat-test[124].n2o
+PASSPHRASE=4567 $GFORTH ../n2o $debugs keyin ~/chat-test[123].n2o
 
 function killgforth {
     killall $GFORTH
@@ -40,11 +38,11 @@ function killgforth {
 trap killgforth EXIT
 
 export PASSPHRASE=1234
-exec 3> >($GFORTH ../n2o $* chat test)
+exec 3> >($GFORTH ../n2o $debugs $* chat test >msg-test.out.1)
 export GFORTHPID1=$[$!+1]
 sleep 5
 export PASSPHRASE=2345
-exec 4> >($GFORTH ../n2o 10% $* chat test@chat-test1)
+exec 4> >($GFORTH ../n2o $debugs 10% $* chat test@chat-test1 >msg-test.out.2)
 export GFORTHPID2=$[$!+1]
 sleep 2
 
@@ -52,9 +50,9 @@ x=""
 
 for i in $(seq 1 $count)
 do
-    echo "Test Message $i on 1/2 $x" >&3
+    echo "Phase 1: Test Message $i on 1/2 $x" >&3
     usleep 20000
-    echo "Test Message $i on 2/2 $x" >&4
+    echo "Phase 1: Test Message $i on 2/2 $x" >&4
     usleep 20000
     x="x$x"
     case $i in
@@ -65,16 +63,16 @@ do
 done
 
 export PASSPHRASE=3456
-exec 5> >($GFORTH ../n2o 5% $* chat test@chat-test1)
+exec 5> >($GFORTH ../n2o $debugs 5% $* chat test@chat-test1 >msg-test.out.3)
 export GFORTHPID3=$[$!+1]
 export PASSPHRASE=4567
-exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
+exec 6> >($GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >msg-test.out.4)
 export GFORTHPID4=$[$!+1]
 sleep 2
 
-echo "/sync" >&5
+#echo "/sync" >&5
 
-sleep 1
+#sleep 1
 
 for j in $(seq 1 4)
 do
@@ -82,13 +80,13 @@ do
     
     for i in $(seq 1 $count)
     do
-	echo "Test Message $i/$j on 1/4 $x" >&3
+	echo "Phase 2: Test Message $i/$j on 1/4 $x" >&3
 	usleep 20000
-	echo "Test Message $i/$j on 2/4 $x" >&4
+	echo "Phase 2: Test Message $i/$j on 2/4 $x" >&4
 	usleep 20000
-	echo "Test Message $i/$j on 3/4 $x" >&5
+	echo "Phase 2: Test Message $i/$j on 3/4 $x" >&5
 	usleep 20000
-	echo "Test Message $i/$j on 4/4 $x" >&6
+	echo "Phase 2: Test Message $i/$j on 4/4 $x" >&6
 	usleep 20000
 	x="x$x"
 	case $i in
@@ -105,11 +103,11 @@ do
 
     for i in $(seq 1 $count)
     do
-	echo "Test Message $i/$j on 1/3 $x" >&3
+	echo "Phase 3: Test Message $i/$j on 1/3 $x" >&3
 	usleep 20000
-	echo "Test Message $i/$j on 2/3 $x" >&4
+	echo "Phase 3: Test Message $i/$j on 2/3 $x" >&4
 	usleep 20000
-	echo "Test Message $i/$j on 3/3 $x" >&5
+	echo "Phase 3: Test Message $i/$j on 3/3 $x" >&5
 	usleep 20000
 	x="y$x"
 	case $i in
@@ -119,7 +117,7 @@ do
 	esac
     done
 
-    exec 6> >($GFORTH ../n2o 15% $* chat test@chat-test1)
+    exec 6> >($GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >>msg-test.out.4)
     export GFORTHPID5=$[$!+1]
     sleep 2
 done

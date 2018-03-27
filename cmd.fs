@@ -446,7 +446,7 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 \g 
 \g Version @VERSION@.
 \g 
-\g net2o separates data and commands.  Data is pass through to higher
+\g net2o separates data and commands.  Data is passed through to higher
 \g layers, commands are interpreted when they arrive.  For connection
 \g requests, a special bit is set, and the address then isn't used as
 \g address, but as IV for the opportunistic encoding.
@@ -677,14 +677,18 @@ previous
     $>align tmpkey@ key| dup IF
 	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
 	IF    tmp-crypt-val do-nest
-	ELSE  msg( ." tmpnest failed" cr ) 2drop un-cmd  THEN
+	ELSE
+	    <err> ." tmpnest failed, uncmd" <default> forth:cr
+	    2drop un-cmd  THEN
     ELSE  2drop 2drop un-cmd  THEN ;
 : cmdencnest ( addr u -- )
     $>align tmpkey@ dup IF
-	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
+	key( ." encnest key: " 2dup 85type forth:cr ) decrypt$
 	IF    enc-crypt-val do-nest  [ qr-tmp-val invert ]L validated and!
-	ELSE  msg( ." tmpnest failed" cr ) 2drop un-cmd  THEN
-    ELSE  2drop 2drop un-cmd  THEN ;
+	ELSE <err> ." encnest failed, uncmd" <default> forth:cr
+	    2drop un-cmd  THEN
+    ELSE  <err> ." encnest: no tmpkey" <default> forth:cr
+	2drop 2drop un-cmd  THEN ;
 
 \ net2o assembler stuff
 

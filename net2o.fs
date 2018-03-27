@@ -1592,6 +1592,7 @@ event: :>request ( n o -- ) >o maxrequest# and
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
     ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
 event: :>timeout ( o -- )
+    timeout( ." Request timed out" forth:cr )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     r> 0<> !!timeout!! ;
 event: :>throw ( error -- ) throw ;

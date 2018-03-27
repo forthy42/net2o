@@ -486,7 +486,8 @@ previous
     ELSE  0  THEN ;
 
 : cmd-resend? ( -- n )
-    0-resend? map-resend? + ;
+    0-resend? map-resend? +
+    timeout( ." resend " dup . ." commands" cr ) ;
 
 : .expected ( -- )
     forth:.time ." expected/received: " recv-addr @ hex.
@@ -520,7 +521,7 @@ previous
 
 : net2o:do-ack-rest ( ackflag -- )
     dup resend-toggle# and IF
-	cmd-resend? timeout( dup IF  ." resend " dup . cr THEN ) drop
+	cmd-resend? drop
     THEN
     acks# and data-rmap .mapc:ack-advance?
     IF  net2o:ack-code  THEN  ack-timing ;
@@ -551,12 +552,10 @@ also net2o-base
 previous
 
 : cmd-timeout ( -- )  >next-timeout cmd-resend?
-    IF  timeout( ." resend commands" forth:cr )
-	push-timeout
-    ELSE  ack@ .timeouts off  THEN ;
+    IF  push-timeout  ELSE  ack@ .timeouts off  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout " ack@ >o rtdelay 64@ u64. timeouts ? o> forth:cr )
     >next-timeout cmd-resend?
-    IF  timeout( ." resend commands" forth:cr )
+    IF
 	push-timeout
     ELSE
 	transfer-keepalive? 0=

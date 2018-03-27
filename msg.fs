@@ -1141,6 +1141,9 @@ previous
     packets2 @  connected-timeout  packets2 @ <>
     IF  reply( ." Resend to " pubkey $@ key>nick type cr )
 	timeout-expired? IF
+	    timeout( <err> ." Excessive timeouts from "
+	    pubkey $@ key>nick type ." : "
+	    ack@ .timeouts @ . <default> cr )
 	    msg-group$ $@len IF
 		pubkey $@ ['] left, send-otr-avalanche
 	    THEN
