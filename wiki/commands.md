@@ -2,7 +2,7 @@
 
 Version 0.6.2-20180320.
 
-net2o separates data and commands.  Data is pass through to higher
+net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
 requests, a special bit is set, and the address then isn't used as
 address, but as IV for the opportunistic encoding.
@@ -414,31 +414,37 @@ that makes identical transactions have the same hash.
 
 ### payment commands ###
 
-+ $20 pay-source ( $:source -- )
-  source coin, signed by source, final
-+ $21 pay-sink ( $:remain -- )
-  sink coin, signed by sink, final
-+ $22 pay-bracket ( $:contract -- )
-  bracket, final
-+ $23 pay-bracket+ ( $:contract -- )
-  bracket, non-final
++ $20 pay-last-contract ( $:hash -- )
+  hash of last contract
++ $21 pay-source ( $:source -- )
+  source, pk+timestamp for lookup
++ $22 pay-#source ( n -- )
+  select source/sink
++ $23 pay-sink ( $:sig -- )
+  sink, signature
++ $24 pay-asset ( 64asset -- )
+  select asset type
++ $25 pay-#asset ( n -- )
+  select last asset
++ $26 pay-amount ( 64amount -- )
+  add/subtract amount
++ $27 pay-damount ( 64amountlo 64amoutnhi -- )
+  add/subtract 128 bit amount
++ $28 pay-balance ( n -- )
+  select&balance asset
++ $29 pay-comment ( $:enc-comment -- )
+  comment, encrypted for selected key
 
 ### Contracts ###
-Contracts are now extremely simple: They just sign the sources and sinks
-provided.  Every source needs a contract signature by the source owner.
-All sources and sinks are signed by the contracts in order, including the
-additional contracts.  Since all sources, sinks and previous contracts are
-signed, too, hashes are only computed of the signatures (64 bytes), making
-the hashing easier.  Contract validity is expressed by the start and end
-date of the contract signature.
-Example for an exchange bid: “I offer 20 USD and want to receive 5 $cams on
-my account” (with the $cam as traditional deflationary CryptoCurrency used
-for speculation only).  The contract is only valid, if the source USD
-account is present, and someone added another source to allow those 5
-$scams to be deduced from, and a sink to move those 20 USD to.  All
-contracts are execute-once, since their sources must exist and will be
-replaced by the sinks on execution, and all contracts have implicit asset
-transfers by mandating sinks.  If you want to implement more complex
-contracts, use intents: The intent is for incomplete transactions, which
-are completed by a contract signature; this contract signature may evaluate
-other conditions.
+Contracts are state changes to wallets.  A serialized wallet is a contract
+that contains all the changes from an empty wallet to fill it; it is not
+checked for balance.
+A dumb contract is checked for balance.  It consists of several selectors
+(source/account, asset), transactions (amounts added or subtracted from an
+asset), comments (encoded for the receiver, with a ephermeral pubkey as
+start and a HMAC as end). Comments are fixed 64 bytes, either plain text or
+hashes to files.  Transactions have to balance, which is facilitated with
+the balance command, which balances the selected asset.
+The signature of a contract signs the wallet's state (serialized in
+normalized form) after the contract has been executed.  The current
+contract's hash is part of the serialization.
