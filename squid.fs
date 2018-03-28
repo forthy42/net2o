@@ -115,14 +115,27 @@ scope{ net2o-base
 
 cmd-table $@ inherit-table pay-table
 
-$20 net2o: pay-source ( $:source -- ) \g source coin, signed by source, final
+$20 net2o: pay-last-contract ( $:hash -- ) \g hash of last contract
+    \ this is for serializing accounts only!
+    !!wallet? $> pay:last-contract ;
++net2o: pay-source ( $:source -- ) \g source, pk+timestamp for lookup
     $> pay:source ;
-+net2o: pay-sink ( $:remain -- ) \g sink coin, signed by sink, final
++net2o: pay-#source ( n -- ) \g select source/sink
+    64>n pay:#source ;
++net2o: pay-sink ( $:sig -- ) \g sink, signature
     $> pay:sink ;
-+net2o: pay-bracket ( $:contract -- ) \g bracket, final
-    $> pay:bracket ;
-+net2o: pay-bracket+ ( $:contract -- ) \g bracket, non-final
-    $> pay:bracket+ ;
++net2o: pay-asset ( 64asset -- ) \g select asset type
+    pay:asset ;
++net2o: pay-#asset ( n -- ) \g select last asset
+    64>n pay:#asset ;
++net2o: pay-amount ( 64amount -- ) \g add/subtract amount
+    64dup 64-0< n>64 pay:amount ;
++net2o: pay-damount ( 64amountlo 64amoutnhi -- ) \g add/subtract 128 bit amount
+    pay:amount ;
++net2o: pay-balance ( n -- ) \g select&balance asset
+    64>n pay:balance ;
++net2o: pay-comment ( $:enc-comment -- ) \g comment, encrypted for selected key
+    $> pay:comment ;
 
 gen-table $freeze
 
@@ -131,85 +144,24 @@ gen-table $freeze
 \g 
 \g ### Contracts ###
 \g
-\g Contracts are now extremely simple: They just sign the sources and sinks
-\g provided.  Every source needs a contract signature by the source owner.
-\g All sources and sinks are signed by the contracts in order, including the
-\g additional contracts.  Since all sources, sinks and previous contracts are
-\g signed, too, hashes are only computed of the signatures (64 bytes), making
-\g the hashing easier.  Contract validity is expressed by the start and end
-\g date of the contract signature.
+\g Contracts are state changes to wallets.  A serialized wallet is a contract
+\g that contains all the changes from an empty wallet to fill it; it is not
+\g checked for balance.
 \g
-\g Example for an exchange bid: “I offer 20 USD and want to receive 5 $cams on
-\g my account” (with the $cam as traditional deflationary CryptoCurrency used
-\g for speculation only).  The contract is only valid, if the source USD
-\g account is present, and someone added another source to allow those 5
-\g $scams to be deduced from, and a sink to move those 20 USD to.  All
-\g contracts are execute-once, since their sources must exist and will be
-\g replaced by the sinks on execution, and all contracts have implicit asset
-\g transfers by mandating sinks.  If you want to implement more complex
-\g contracts, use intents: The intent is for incomplete transactions, which
-\g are completed by a contract signature; this contract signature may evaluate
-\g other conditions.
+\g A dumb contract is checked for balance.  It consists of several selectors
+\g (source/account, asset), transactions (amounts added or subtracted from an
+\g asset), comments (encoded for the receiver, with a ephermeral pubkey as
+\g start and a HMAC as end). Comments are fixed 64 bytes, either plain text or
+\g hashes to files.  Transactions have to balance, which is facilitated with
+\g the balance command, which balances the selected asset.
 \g
+\g The signature of a contract signs the wallet's state (serialized in
+\g normalized form) after the contract has been executed.  The current
+\g contract's hash is part of the serialization.
 
 Variable SwapDragonChain#
 
 scope{ pay
-
-: +sigs ( addr u -- )
-    + sigonlysize# - sigonlysize# 1- $sigs $+! ;
-: >sigs ( addr u -- )
-    + sigonlysize# - sigonlysize# 1- $sigs $! ;
-: +pks ( addr u -- )
-    + sigpksize# - KEYSIZE pks[] $ins[] drop ;
-: -pks ( addr u -- )
-    + sigpksize# - KEYSIZE pks[] $del[] ;
-: ?pk-size ( addr u -- addr u )
-    dup sigpksize# u< !!no-sig!! ;
-: ?chain-sig ( addr u -- addr' u' )
-    \G check for a signature, and append the sig itself to the sigs
-    2dup +sigs 2dup +pks
-    pk-sig? !!sig!! ;
-: ?value-size ( addr u -- addrval uval addrunit uunit )
-    dup value-size# u<= !!no-unit!!
-    2dup value-size# umin 2swap value-size# /string ;
-: ?contract-sig ( addr u -- )
-    c:0key $sigs $@ c:hash
-    over date-sig? !!sig!! ;
-: ?token-exists ( addr-source u -- )
-    \G check if the token exists and fail if not
-    2dup + sigpksize# - KEYSIZE SwapDragonChain# #@ str= 0= !!no-coin!! ;
-
-:noname ( addr-source u -- )
-    ?pk-size
-    2dup ?token-exists
-    ?chain-sig 2dup sigpksize# + sources[] $+[]!
-    ?value-size { d: val }
-    val balance-in# #@ dup IF
-	drop >r drop be-128@ r@ be-128@ d+ r> be-128!
-    ELSE
-	val balance-in# #!
-    THEN ; pay-class to source
-:noname ( addr-source u -- )
-    ?pk-size
-    ?chain-sig 2dup sigpksize# + sinks[] $+[]!
-    ?value-size { d: val }
-    val balance-out# #@ dup IF
-	drop >r drop be-128@ r@ be-128@ 128+ r> be-128!
-    ELSE
-	val balance-out# #!
-    THEN ; pay-class to sink
-:noname ( addr-sig u -- )
-    2dup ?contract-sig 2dup >sigs +pks ; pay-class to bracket+
-:noname ( addr-sig u -- )
-    2dup ?contract-sig 2dup >sigs -pks ; pay-class to bracket
-
-: balance-sum ( hash -- 128sum )
-    64#0 64dup r> [: cell+ $@ $10 = IF  be-128@ 128+  ELSE  drop  THEN ;] #map ;
-
-: balance-ok? ( -- flag )
-    balance-in# balance-sum  balance-out# balance-sum 128-
-    64-0= >r 64-0= r> and ;
 
 }scope
 

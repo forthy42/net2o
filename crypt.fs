@@ -397,6 +397,17 @@ $60 Constant rndkey#
 : gen-stkeys ( -- ) stskc stpkc ed-keypair
     genkey( ." tmpskey: " stskc keysize .85warn stpkc keysize .85info cr ) ;
 
+\ encrypt for one single receiver
+
+: pk-encrypt ( addr u pk -- pktmp )
+    gen-stkeys
+    stskc swap keypad ed-dh 2>r 64#0 64dup 2r> c:tweakkey!
+    0 c:encrypt+auth stpkc ;
+
+: pk-decrypt ( addr u sk -- flag )
+    >r over r> swap keypad ed-dh 2>r 64#0 64dup 2r> c:tweakkey!
+    keysize /string 0 c:decrypt+auth ;
+
 \ setting of keys
 
 : set-key ( addr -- ) o 0= IF drop  ." key, no context!" cr  EXIT  THEN

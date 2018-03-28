@@ -24,11 +24,19 @@ PASSPHRASE=1234 $GFORTH ../n2o $debugs -yes keygen chat-test1
 PASSPHRASE=2345 $GFORTH ../n2o $debugs -yes keygen chat-test2
 PASSPHRASE=3456 $GFORTH ../n2o $debugs -yes keygen chat-test3
 PASSPHRASE=4567 $GFORTH ../n2o $debugs -yes keygen chat-test4
+PASSPHRASE=4321 $GFORTH ../n2o $debugs -yes keygen chat-test5
+PASSPHRASE=5432 $GFORTH ../n2o $debugs -yes keygen chat-test6
+PASSPHRASE=6543 $GFORTH ../n2o $debugs -yes keygen chat-test7
+PASSPHRASE=7654 $GFORTH ../n2o $debugs -yes keygen chat-test8
 
-PASSPHRASE=1234 $GFORTH ../n2o $debugs keyin ~/chat-test[234].n2o
-PASSPHRASE=2345 $GFORTH ../n2o $debugs keyin ~/chat-test[134].n2o
-PASSPHRASE=3456 $GFORTH ../n2o $debugs keyin ~/chat-test[124].n2o
-PASSPHRASE=4567 $GFORTH ../n2o $debugs keyin ~/chat-test[123].n2o
+PASSPHRASE=1234 $GFORTH ../n2o $debugs keyin ~/chat-test[2-8].n2o
+PASSPHRASE=2345 $GFORTH ../n2o $debugs keyin ~/chat-test[13-8].n2o
+PASSPHRASE=3456 $GFORTH ../n2o $debugs keyin ~/chat-test[124-8].n2o
+PASSPHRASE=4567 $GFORTH ../n2o $debugs keyin ~/chat-test[1-35-8].n2o
+PASSPHRASE=4321 $GFORTH ../n2o $debugs keyin ~/chat-test[1-46-8].n2o
+PASSPHRASE=5432 $GFORTH ../n2o $debugs keyin ~/chat-test[1-578].n2o
+PASSPHRASE=6543 $GFORTH ../n2o $debugs keyin ~/chat-test[1-68].n2o
+PASSPHRASE=7654 $GFORTH ../n2o $debugs keyin ~/chat-test[1-7].n2o
 
 function killgforth {
     killall $GFORTH
@@ -62,12 +70,18 @@ do
     esac
 done
 
-export PASSPHRASE=3456
-exec 5> >($GFORTH ../n2o $debugs 5% $* chat test@chat-test1 >msg-test.out.3)
+exec 5> >(PASSPHRASE=3456 $GFORTH ../n2o $debugs 5% $* chat test@chat-test1 >msg-test.out.3)
 export GFORTHPID3=$[$!+1]
-export PASSPHRASE=4567
-exec 6> >($GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >msg-test.out.4)
+exec 6> >(PASSPHRASE=4567 $GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >msg-test.out.4)
 export GFORTHPID4=$[$!+1]
+exec 7> >(PASSPHRASE=4321 $GFORTH ../n2o $debugs 5% $* chat test@chat-test1 >msg-test.out.5)
+export GFORTHPID5=$[$!+1]
+exec 8> >(PASSPHRASE=5432 $GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >msg-test.out.6)
+export GFORTHPID6=$[$!+1]
+exec 9> >(PASSPHRASE=6543 $GFORTH ../n2o $debugs 5% $* chat test@chat-test1 >msg-test.out.7)
+export GFORTHPID7=$[$!+1]
+exec 10> >(PASSPHRASE=7654 $GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >msg-test.out.8)
+export GFORTHPID8=$[$!+1]
 sleep 2
 
 #echo "/sync" >&5
@@ -122,15 +136,37 @@ do
     sleep 2
 done
 
-echo "Last Message $i on 1/3 $x" >&3
+echo "Last Message $i on 1/8 $x" >&3
 usleep 20000
-echo "Last Message $i on 2/3 $x" >&4
+echo "Last Message $i on 2/8 $x" >&4
 usleep 20000
-echo "Last Message $i on 3/3 $x" >&5
+echo "Last Message $i on 3/8 $x" >&5
+usleep 20000
+echo "Last Message $i on 4/8 $x" >&6
+usleep 20000
+echo "Last Message $i on 5/8 $x" >&7
+usleep 20000
+echo "Last Message $i on 6/8 $x" >&8
+usleep 20000
+echo "Last Message $i on 7/8 $x" >&9
+usleep 20000
+echo "Last Message $i on 8/8 $x" >&10
 usleep 20000
 
 echo "/sync" >&6
 sleep 3
+echo "/chats" >&10
+echo "/bye" >&10
+usleep 300000
+echo "/chats" >&9
+echo "/bye" >&9
+usleep 300000
+echo "/chats" >&8
+echo "/bye" >&8
+usleep 300000
+echo "/chats" >&7
+echo "/bye" >&7
+usleep 300000
 echo "/chats" >&6
 echo "/bye" >&6
 usleep 300000

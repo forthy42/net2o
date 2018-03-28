@@ -152,18 +152,31 @@ end-class msg-class
 
 cmd-class class
 scope: pay
-    field: $sigs        \ all the signatures stored here, a string
     field: pks[]        \ all the pks stored here, an array
-    field: balance-in#  \ all the values going in, a hash
-    field: balance-out# \ all the values going out, a hash
-    field: sources[]    \ all the sources going in --- remove if accepted
-    field: sinks[]      \ all the sinks going out --- add if accepted
+    field: sigs[]       \ all the signatures stored here, an array
+    field: wallets[]    \ array of wallets
+    field: assets[]     \ all selected assets
+    value: current-pk
+    value: current-asset
+    method last-contract
     method source
+    method #source
     method sink
-    method bracket
-    method bracket+
+    method asset
+    method #asset
+    method amount
+    method balance
+    method comment
 }scope
 end-class pay-class
+
+begin-structure wallet
+    field: contract#
+    field: assets[]
+    field: amounts[]
+    field: $comments[]
+    field: $sig
+end-structure
 
 \ object/reference types
 

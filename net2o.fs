@@ -254,6 +254,7 @@ $0400 Constant ivs-val
 $0800 Constant qr-tmp-val
 $1000 Constant enc-crypt-val
 $2000 Constant ack-order-val
+$4000 Constant wallet-val
 
 $10 Constant validated#
 
@@ -266,6 +267,7 @@ $10 Constant validated#
 : qr-crypt?  ( -- flag )  validated @ qr-tmp-val    and ;
 : enc-crypt? ( -- flag )  validated @ enc-crypt-val and ;
 : ack-order? ( -- flag )  validated @ ack-order-val and ;
+: !!wallet?  ( -- )       validated @ wallet-val    and 0= !!wallet!! ;
 : !!signed?  ( -- ) signed? 0= !!unsigned!! ;
 : !!unsigned?  ( -- ) signed?  !!signed!! ;
 

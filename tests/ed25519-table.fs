@@ -2,11 +2,12 @@
 
 debug: health(
 
+require forward.fs
 require ansi.fs
 require mini-oof2.fs
 require user-object.fs
 require unix/mmap.fs
-require ../net2o-tools.fs
+require ../tools.fs
 require ../xtype.fs
 require ../base64.fs
 require ../base85.fs

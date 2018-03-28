@@ -24,7 +24,11 @@ Variable test$
     IF ." +" ELSE ." -" THEN ;
 : fuzzes ( n -- ) 0 ?DO  do-fuzz  LOOP ;
 : fuzzl ( n -- )  0 ?DO  cols I' I - umin fuzzes cols +LOOP ;
-!time 1024 fuzzl cr .time ."  for 1024 checks" cr
+: sigs ( n -- )   0 ?DO  gen-sig drop  LOOP ;
+: checksigs ( n -- )  gen-sig swap  0 ?DO  dup check-sig drop  LOOP  drop ;
+!time 1000 fuzzl cr .time ."  for 1000 checks" cr
+!time 1000 sigs  .time ."  for 1000 sigs" cr
+!time 1000 checksigs  .time ."  for 1000 sigs" cr
 
 \ deterministic tests
 

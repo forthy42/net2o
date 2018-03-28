@@ -106,6 +106,7 @@ s" Stack should always be empty" throwcode !!depth!!
 s" hashed object not read in"    throwcode !!dvcs-hash!!
 s" Value has no unit"            throwcode !!no-unit!!
 s" Token/Coin doesn't exist"     throwcode !!no-coin!!
+s" not a wallet"                 throwcode !!wallet!!
 
 next-exception !
 
