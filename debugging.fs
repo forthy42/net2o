@@ -162,7 +162,8 @@ Variable edit-restart
 
 event: :>type ( $string -- ) { w^ x } x $@ type x $free ;
 event: :>hide ( -- ) ctrl Z unkey ;
-: <hide> ( task -- ) up@ edit-restart ! <event :>hide event> stop ;
+: <hide> ( task -- ) up@ edit-restart ! <event :>hide event>
+    #1000000 stop-ns ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )
