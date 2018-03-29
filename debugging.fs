@@ -155,9 +155,14 @@ up@ Value main-up@
 
 :noname defers 'cold up@ to main-up@ ; is 'cold
 
+Variable edit-restart
+:noname ( span addr u -- )
+    2 pick 0= IF  0 edit-restart !@ ?dup-IF  wake  THEN  THEN
+    defers edit-update ; is edit-update
+
 event: :>type ( $string -- ) { w^ x } x $@ type x $free ;
 event: :>hide ( -- ) ctrl Z unkey ;
-: <hide> ( task -- ) <event :>hide event| ;
+: <hide> ( task -- ) up@ edit-restart ! <event :>hide event> stop ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )
