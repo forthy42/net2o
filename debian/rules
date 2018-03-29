@@ -4,7 +4,7 @@
 # Created by Bernd Paysan, in the public domain
 
 GFORTH_VER = `sed -e 's/.*gforth (>= \([^)]\+\).*/\1/; 6q' debian/control | tr '-' '_' | tail -n1`
-NET2O_VER = `cut -f2 -d\" net2o-version.fs | sed -e 's/ //g'`
+NET2O_VER = `cut -f2 -d\" version.fs | sed -e 's/ //g'`
 D = $(CURDIR)/debian/net2o
 DL = $(CURDIR)/debian/net2o-libcc
 DT = $(CURDIR)/debian/net2o-tests
