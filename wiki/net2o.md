@@ -4,23 +4,6 @@ net2o - reinventing the Internet
 net2o is the attempt to reinvent the Internet.  It's free software
 available under the [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
-+++ April 1st, 2018: Facebook bought net2o for 100000 BTCs +++
---------------------------------------------------------------
-
-In order to strengthen his position after the Cambride Analytics scandal, Mark
-Zuckerberg reached out and bought net2o as technical foundation of a “we don't
-need to know anything” social network, which doesn't have any data of its
-customers, doesn't need advertizing to operate, since the data stays with the
-computers of the users instead of expensive server farms, and doesn't need to
-filter contents, because it doesn't know about that contents.  Facebook also
-aquires the technology of a scaleable BlockChain, allowing people to send
-gifts to each others and do online shopping within the social network.
-
-“Even if some people die through terrorism or drug abuse, this is a good
-result for mankind, because we are connecting people”, Zuckerberg said in his
-press release.  The offer was worth 666 million USDs at the time of the deal.
-The devil declined to comment.
-
 Authors
 -------
 
