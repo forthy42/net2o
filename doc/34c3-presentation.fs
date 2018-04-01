@@ -387,18 +387,18 @@ $BFFFBFFF pres-frame
 "net2o in a nutshell" /title
 "net2o consists of the following 6 layers (implemented bottom up):" \\
 {{
-"2. " b0 blackish " Path switched packets with 2" }}text
+"2." b0 blackish " Path switched packets with 2" }}text
 "n" }}smalltext >o fontsize# -0.4e f* to raise o o>
-" size writing into shared memory buffers" }}text  glue*1 }}glue }}h box[] >bl
+" size writing into shared memory buffers" }}text  glue*1 }}glue }}h box[] >bl
 fontsize# baselinesmall# f* to x-baseline
-"3. " " Ephemeral key exchange and signatures with Ed25519," b\\
+"3." " Ephemeral key exchange and signatures with Ed25519," b\\
 "" " symmetric authenticated encryption+hash+prng with Keccak," b\\
 "" " symmetric block encryption with Threefish" b\\
 "" " onion routing camouflage probably with AES" b\\
-"4. " " Timing driven delay minimizing flow control" b\\
-"5. " " Stack–oriented tokenized command language" b\\
-"6. " " Distributed data (files, messages) and distributed metadata (DHT)" b\\
-"7. " " Apps in a sandboxed environment for displaying content" b\\
+"4." " Timing driven delay minimizing flow control" b\\
+"5." " Stack–oriented tokenized command language" b\\
+"6." " Distributed data (files, messages) and distributed metadata (DHT)" b\\
+"7." " Apps in a sandboxed environment for displaying content" b\\
 glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -422,8 +422,8 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 {{
 $BFBFFFFF pres-frame
 {{
-"ΜΙΝΟΣ2 technology" /title
-"ΜΙΝΟΣ2 starts at the DOM layer" \\
+"ΜΙΝΩΣ2 technology" /title
+"ΜΙΝΩΣ2 starts at the DOM layer" \\
 "Rendering:" " OpenGL (ES), Vulkan backend possible" b2\\
 fontsize# baselinesmall# f* to x-baseline
 "Font to texture:" " Freetype–GL (with own improvements)" b2\\
@@ -445,8 +445,9 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 {{
 $FFBFFFFF pres-frame
 {{
-"ΜΙΝΟΣ2 Widgets" /title
+"ΜΙΝΩΣ2 Widgets" /title
 "Design principle is a Lego–style combination of many extremely simple objects" \\
+{{ {{
 fontsize# baselinesmall# f* to x-baseline
 "actor" " base class that reacts on all actions (clicks, touchs, keys)" bb\\
 "widget" " base class for all visible objects" bb\\
@@ -469,6 +470,11 @@ previous
 "canvas" " vector graphics (TBD)" bb\\
 "video" " video player (TBD)" bb\\
 glue*1 }}glue
+tex: vp0 glue*1 ' vp0 }}vp vp[]
+$FFBFFFFF to slider-color
+fontsize# f2/ f2/ to slider-border
+dup fontsize# f2/ fdup vslider
+}}h box[]
 }}v box[] >bdr
 }}z box[]
 /flip dup >slides
@@ -477,7 +483,7 @@ glue*1 }}glue
 {{
 $BFFFFFFF pres-frame
 {{
-"ΜΙΝΟΣ2 Boxes" /title
+"ΜΙΝΩΣ2 Boxes" /title
 {{
 "Just like " }}text
 \LaTeX
@@ -489,6 +495,7 @@ fontsize# baselinesmall# f* to x-baseline
 "vbox" " Vertical box, minimum distance a baselineskip (of the hboxes below)" bb\\
 "zbox" " Overlapping several boxes" bb\\
 "grid" " Free widget placements (TBD)" bb\\
+"slider" " horizontal and vertical sliders (composite object)" bb\\
 fontsize# baselinemedium# f* to x-baseline
 "There will be some more variants for tables and wrapped paragraphs" \\
 glue*1 }}glue
@@ -499,7 +506,7 @@ glue*1 }}glue
 {{
 $FFFFBFFF pres-frame
 {{
-"ΜΙΝΟΣ2 Displays" /title
+"ΜΙΝΩΣ2 Displays" /title
 "Render into different kinds of displays" \\
 fontsize# baselinemedium# f* to x-baseline
 "viewport" " Into a texture, used as viewport" bb\\
@@ -556,7 +563,6 @@ tex: $quid-logo-large
 
 \ page 11
 {{
-{{
 $e4cF77FF pres-frame
 {{
 "What’s Money?" /title
@@ -570,6 +576,7 @@ glue*1 }}glue
 }}v box[] >bdr
 {{
 glue*1 }}glue
+{{
 {{
 tex: shell-coins
 tex: feiqian
@@ -585,9 +592,9 @@ glue*1 }}glue
 ' chao "chao.jpg" 0.666e }}image-file drop
 glue*1 }}glue
 }}h box[]
+tex: vp1 glue*1 ' vp1 }}vp vp[]
 }}v box[] >bdr
 }}z box[]
-tex: vp1 glue*1 ' vp1 }}vp vp[]
 /flip dup >slides
 
 \ page 12
@@ -595,13 +602,13 @@ tex: vp1 glue*1 ' vp1 }}vp vp[]
 $f4cF57FF pres-frame
 {{
 "BitCoins — early “Crypto” shortcomings" /title
-"• Proof of work: wasteful and yet only marginally secure" \\
+"•" " Proof of work: wasteful and yet only marginally secure" b\\
 fontsize# baselinesmall# f* to x-baseline medium
-"• Inflation is money’s cancer, deflation its infarct" \\
-"• Consequences: unstable exange rate, high transaction fees" \\
-"• Ponzi scheme–style bubble" \\
-"• (Instead of getting Viagra spam I now get BitCoin spam)" \\
-"• Can’t even do the exchange transaction on–chain" \\
+"•" " Inflation is money’s cancer, deflation its infarct" b\\
+"•" " Consequences: unstable exange rate, high transaction fees" b\\
+"•" " Ponzi scheme–style bubble" b\\
+"•" " (Instead of getting Viagra spam I now get BitCoin spam)" b\\
+"•" " Can’t even do the exchange transaction on–chain" b\\
 glue*1 }}glue
 }}v box[] >bdr
 {{
@@ -616,12 +623,12 @@ tex: bitcoin-bubble
 $e4df67ff pres-frame
 {{
 "Wealth & Ethics" /title
-"• Huge first mover advantage" \\
+"•" " Huge first mover advantage" b\\
 fontsize# baselinesmall# f* to x-baseline medium
-"• Already worse wealth distribution than neoliberal economy" \\
-"• Huge inequality drives society into servitude, not into freedom" \\
-"• No concept of a credit" \\
-"• Lightning network also binds assets (will have fees as consequence)" \\
+"•" " Already worse wealth distribution than neoliberal economy" b\\
+"•" " Huge inequality drives society into servitude, not into freedom" b\\
+"•" " No concept of a credit" b\\
+"•" " Lightning network also binds assets (will have fees as consequence)" b\\
 glue*1 }}glue
 }}v box[] >bdr
 {{
@@ -658,16 +665,16 @@ glue*1 }}glue
 $a4df87ff pres-frame
 {{
 "BlockChain" /title
-"• Banks distrust each others, too (i. e. GNU Taler is not a solution)" \\
+"•" " Banks distrust each others, too (i. e. GNU Taler is not a solution)" b\\
 fontsize# baselinesmall# f* to x-baseline medium
-"• Problem size: WeChat Pay peaks at 0.5MTPS (BTC at 5TPS)" \\
-"• Lightning Network doesn’t stand an overrun–the–arbiter attack" \\
-"• Therefore, the BlockChain itself needs to scale" \\
-largesize# to x-baseline
-"• Introduce double entry booking into the distributed ledger" \\
+"•" " Problem size: WeChat Pay peaks at 0.5MTPS (BTC at 5TPS)" b\\
+"•" " Lightning Network doesn’t stand an overrun–the–arbiter attack" b\\
+"•" " Therefore, the BlockChain itself needs to scale" b\\
+largesize# fontsize# baselinesmall# f* f+ f2/ to x-baseline
+"•" " Introduce double entry booking into the distributed ledger" b\\
 fontsize# baselinesmall# f* to x-baseline medium
-"• Partitionate the ledgers by coin pubkey" \\
-"• Use an n–dimensional ledger space to route transactions" \\
+"•" " Partitionate the ledgers by coin pubkey" b\\
+"•" " Use n–dimensional ledger space to route transactions" b\\
 glue*1 }}glue
 }}v box[] >bdr
 {{
@@ -694,13 +701,13 @@ glue*1 }}glue
 $a4df87ff pres-frame
 {{
 "$quid: Ethical mining" /title
-"• Concept of mining: Provide difficult and rare work" \\
+"•" " Concept of mining: Provide difficult and rare work" b\\
 fontsize# baselinesmall# f* to x-baseline medium
-"• Suggesting: Provide vouchers for free software development sponsorships" \\
-"• These vouchers are tradeable on their own" \\
-"• Free software is public infrastructure for the information age" \\
-"• That way, we can encourage people to sponsor out of self–interest" \\
-"• They get a useful and valueable token back" \\
+"•" " Suggesting: Provide vouchers for free software development sponsorships" b\\
+"•" " These vouchers are tradeable on their own" b\\
+"•" " Free software is public infrastructure for the information age" b\\
+"•" " That way, we can encourage people to sponsor out of self–interest" b\\
+"•" " They get a useful and valueable token back" b\\
 glue*1 }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides

@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.6.2-20180320.
+Version 0.6.2-20180329.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
