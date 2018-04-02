@@ -168,43 +168,15 @@ tex: $quid
 ' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue
 ' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue
 
-: net2o-img ( -- o )
+: img ( xt xt -- o ) 2>r
     baseline# 0e to baseline#
-    {{
-    ['] net2o-logo net2o-glue }}image-tex /right
-    glue*1 }}glue
-    }}v outside[] >o font-size# f2/ to border o o>
-    to baseline# ;
-: minos2-img ( -- o )
-    baseline# 0e to baseline#
-    {{
-    ['] minos2 minos2-glue }}image-tex /right
-    glue*1 }}glue
-    }}v outside[] >o font-size# f2/ to border o o>
-    to baseline# ;
-: $quid-img ( -- o )
-    baseline# 0e to baseline#
-    {{
-    ['] $quid $quid-glue }}image-tex /right
+    {{ 2r> }}image-tex /right
     glue*1 }}glue
     }}v outside[] >o font-size# f2/ to border o o>
     to baseline# ;
 
 : pres-frame ( color -- o1 o2 )
     glue*wh swap slide-frame dup .button1 simple[] ;
-: vp-frame ( color -- o1 o2 )
-    glue*1 swap slide-frame dup .button3 simple[] ;
-
-\ high level style
-
-: /title ( addr u -- )
-    \huge cbl \sans \latin \bold dark-blue }}text /center blackish
-    \normal \regular x-baseline 80% f* to x-baseline ;
-: /subtitle ( addr u -- ) \small dark-blue }}text /center blackish \normal ;
-: /author ( addr u -- ) \normal \large \bold dark-blue }}text /center blackish
-    \normal \regular \skip ;
-: /location ( addr u -- ) \normal  dark-blue }}text /center blackish \normal ;
-: /subsection ( addr u -- ) \normal \bold dark-blue \\ blackish \normal \regular ;
 
 {{
 {{ glue-left }}glue
@@ -618,9 +590,9 @@ glue*1 }}glue
 glue-right }}glue
 }}h box[]
 {{
-net2o-img   dup to n2-img
-minos2-img  dup to m2-img /flip
-$quid-img   dup to $q-img /flip
+' net2o-logo net2o-glue  img dup to n2-img
+' minos2     minos2-glue img dup to m2-img /flip
+' $quid      $quid-glue  img dup to $q-img /flip
 }}z
 }}z slide[]
 to top-widget
