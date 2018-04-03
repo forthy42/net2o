@@ -50,15 +50,31 @@ Variable slide#
 : glue0 ( -- )
     glue-left  >o 0glue hglue-c glue! o>
     glue-right >o 0glue hglue-c glue! o> ;
+: trans-frame ( o -- )
+    >o $00000000 to frame-color o> ;
+: solid-frame ( o -- )
+    >o $FFFFFFFF to frame-color o> ;
 : !slides ( nprev n -- )
     over >r
     n2-img m2-img $q-img
     r@ m/$-switch u>= IF swap THEN
     r> n/m-switch u>= IF rot  THEN
-    /flip drop /flip drop /flop drop
+    /flip rot /flop rot /flop rot
+    trans-frame trans-frame solid-frame
     update-size# update-glue
     slides[] $[] @ /flip drop
     dup slide# ! slides[] $[] @ /flop drop glue0 ;
+: fade-img ( r0..1 img1 img2 -- ) >r >r
+    $FF fm* f>s $FFFFFF00 or dup
+    r> >o to frame-color o> invert $FFFFFF00 or
+    r> >o to frame-color o> ;
+: fade!slides ( r0..1 n -- )
+    dup m/$-switch = IF
+	fdup $q-img m2-img fade-img
+    THEN
+    dup n/m-switch = IF
+	fdup m2-img n2-img fade-img
+    THEN ;
 : anim!slides ( r0..1 n -- )
     slides[] $[] @ /flop drop
     fdup fnegate dpy-w @ fm* glue-left  .hglue-c df!
@@ -69,14 +85,15 @@ Variable slide#
     fdup 1e f>= IF  fdrop
 	dup 1- swap !slides  EXIT
     THEN
-    sin-t 1e fswap f- 1- anim!slides +sync ;
+    1e fswap f-
+    fdup dup fade!slides 1- sin-t anim!slides +sync ;
 
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
 	dup 1+ swap !slides  EXIT
     THEN
-    sin-t 1+ anim!slides +sync ;
+    1+ fdup dup fade!slides sin-t anim!slides +sync ;
 
 1e FValue slide-time%
 
@@ -171,12 +188,12 @@ tex: $quid
 ' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue
 ' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue
 
-: logo-img ( xt xt -- o ) 2>r
+: logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
-    {{ 2r> }}image-tex /right
-    glue*1 }}glue
+    {{ 2r> }}image-tex dup >r /right
+    glue*l }}glue
     }}v outside[] >o font-size# f2/ to border o o>
-    to baseline# ;
+    to baseline# r> ;
 
 : pres-frame ( color -- o1 o2 )
     glue*wh swap slide-frame dup .button1 simple[] ;
@@ -188,13 +205,13 @@ tex: $quid
 {{
 $FFFFFFFF pres-frame
 {{
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
 "($quid = Ethisches Micropayment mit effizienter BlockChain)" /subtitle
 glue*2 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "Bernd Paysan" /author
 "Forth–Tagung 2018, Essen" /location
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >o font-size# to border o Value title-page o o>
 }}z box[] dup >slides
 
@@ -203,11 +220,11 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 $FFFFFFFF pres-frame
 {{
 "Motivation" /title
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 tex: bad-gateway
 ' bad-gateway "bad-gateway.png" 0.666e }}image-file
 Constant bgw-glue /center
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -232,7 +249,7 @@ blackish
 \skip
 "Lösungen" /subsection
 "  net2o fängt an, benutztbar zu werden" \\
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >o o Value snowden-page font-size# to border o o>
 }}z box[] /flip dup >slides
 
@@ -252,12 +269,12 @@ vt{{
 {{ "Typesetting: " b0 blackish
 "Boxes & Glues ähnlich wie " }}text
 \LaTeX
-" — mit Ober– & Unterlängen" }}text glue*1 }}h box[] >bl
+" — mit Ober– & Unterlängen" }}text glue*l }}h box[] >bl
 "" "Glues können schrumpfen, nicht nur wachsen" b\\
 "Object System: " "extrem leichtgewichtiges Mini–OOF2" b\\
 "Klassenzahl: " "Weniger Klassen, viele mögliche Kombinationen" b\\
 }}vt
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -271,7 +288,7 @@ $FFBFFFFF pres-frame
 "actor " "Basis–Klasse, die auf alle Aktionen reagiert (Klicks, Touch, Tasten)" b\\
 "widget " "Basis–Klasse für alle sichtbaren Objekte" b\\
 {{ "edit " b0 blackish "Editierbarer Text: " }}text
-\chinese "复活节快乐！" }}edit dup Value edit-field glue*1 }}glue }}h edit-field edit[] >bl
+\chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field edit[] >bl
 \latin \normal "glue " "Basis–Klasse für flexible Objekte" b\\
 "tile " "Farbiges Rechteck" b\\
 "frame " "Farbiges Rechteck mit Rand" b\\
@@ -289,8 +306,8 @@ previous
 "canvas " "Vektor–Grafik (TBD)" b\\
 "video " "Video–Player (TBD)" b\\
 }}vt
-glue*1 }}glue
-tex: vp0 glue*1 ' vp0 }}vp vp[]
+glue*l }}glue
+tex: vp0 glue*l ' vp0 }}vp vp[]
 $FFBFFFFF to slider-color
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
@@ -305,7 +322,7 @@ $BFFFFFFF pres-frame
 {{
 "ΜΙΝΩΣ2 Boxen" /title
 {{
-"Wie bei " }}text \LaTeX " werden Texte/Widgets in Boxen angeordnet" }}text glue*1 }}h box[]
+"Wie bei " }}text \LaTeX " werden Texte/Widgets in Boxen angeordnet" }}text glue*l }}h box[]
 >bl
 \skip
 vt{{
@@ -317,7 +334,7 @@ vt{{
 \skip
 "Für Tabellen gibt es einen Hilfs–Glue, und formatierte Absätze sind auch geplant" \\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -332,7 +349,7 @@ vt{{
 "viewport " "In eine Textur, genutzt als Viewport" b\\
 "display " "Zum tatsächlichen Display" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -354,7 +371,7 @@ vt{{
 "text " "Text–Runde" b\\
 "emoji " "Emoji–Runde" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -374,10 +391,10 @@ vt{{
 "Scale " "Wie skaliert man eine BlockChain?" b\\
 "$quid " "Kann man ethisch Geld schaffen?" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: $quid-logo-large
 ' $quid-logo-large "squid-logo.png" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -395,27 +412,27 @@ vt{{
 "Fiat~: " "Kein inhärenter Wert, Versprechen ggf. als gesetzliches…" b\\
 "Zahlungsmittel: " "Vom Gesetzgeber vorgeschriebenes Zahlungsmittel" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 {{
 {{
 tex: shell-coins
 tex: feiqian
 tex: huizi
 tex: chao
-glue*1 }}glue
+glue*l }}glue
 ' shell-coins "shell-coins.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' feiqian "feiqian.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' huizi "huizi.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' chao "chao.jpg" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 }}h box[]
-tex: vp1 glue*1 ' vp1 }}vp vp[]
+tex: vp1 glue*l ' vp1 }}vp vp[]
 }}v box[] >bdr
 }}z box[]
 /flip dup >slides
@@ -424,19 +441,19 @@ tex: vp1 glue*1 ' vp1 }}vp vp[]
 {{
 $f4cF57FF pres-frame
 {{
-"BitCoins — early “Crypto” shortcomings" /title
+"BitCoins — Mängel früher “Cryptos”" /title
 vt{{
-"• " "Proof of work: wasteful and yet only marginally secure" b\\
-"• " "Inflation is money’s cancer, deflation its infarct" b\\
-"• " "Consequences: unstable exange rate, high transaction fees" b\\
-"• " "Ponzi scheme–style bubble" b\\
-"• " "(Instead of getting Viagra spam I now get BitCoin spam)" b\\
-"• " "Can’t even do the exchange transaction on–chain" b\\
+"• " "Proof of work: Verschwendet Ressourcen, bei zweifelhafter Sicherheit" b\\
+"• " "Inflation ist der Krebs des Geldes, Deflation sein Infarkt" b\\
+"• " "Konsequenzen: instabiler Kurs, hohe Transaktionskosten" b\\
+"• " "Ponzi-Schema–artige Blase" b\\
+"• " "(statt Viagra bekomme ich jetzt BitCoin–Spam)" b\\
+"• " "Es kann nicht mal das Spekulationsgeschäft in der Chain abwickeln" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: bitcoin-bubble
 ' bitcoin-bubble "bitcoin-bubble.png" 0.85e }}image-file drop /right
 }}v box[] >bdr
@@ -446,18 +463,18 @@ tex: bitcoin-bubble
 {{
 $e4df67ff pres-frame
 {{
-"Wealth & Ethics" /title
+"Reichtum & Ethik" /title
 vt{{
-"• " "Huge first mover advantage" b\\
-"• " "Already worse wealth distribution than neoliberal economy" b\\
-"• " "Huge inequality drives society into servitude, not into freedom" b\\
-"• " "No concept of a credit" b\\
-"• " "Lightning network also binds assets (will have fees as consequence)" b\\
+"• " "Enormer Vorteil des ersten Handelnden" b\\
+"• " "Hat schon eine schlimmere Vermögensverteilung als der Neoliberalismus" b\\
+"• " "Große Ungleichheit führt zu Knechtschaft, nicht zu Freiheit" b\\
+"• " "Es gibt nicht mal das Konzept des Kredits" b\\
+"• " "Das neue Lightning Network bindet auch Vermögen (Folge: Gebühren)" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: free-market
 ' free-market "free-market.jpg" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -467,22 +484,22 @@ tex: free-market
 {{
 $a4df87ff pres-frame
 {{
-"Proof of What?!" /title
+"Proof von was?!" /title
 vt{{
-"Challenge " "Avoid double–spending" b\\
-"State of the art: " "Proof of work" b\\
-"Problem: " "Proof of work burns energy and GPUs" b\\
-"Suggestion 1: " "Proof of stake (money buys influence)" b\\
-"Problem: " "Money corrupts, and corrupt entities misbehave" b\\
-"Suggestion 2: " "Proof of well–behaving (trust, trustworthyness)" b\\
-"How? " "Having signed many blocks in the chain gains points" b\\
-"Multiple signers " "Not only have one signer, but many" b\\
-"Suspicion " "Don't accept transactions in low confidence blocks" b\\
-"Idea " "Repeated prisoner’s dilemma rewards cooperation" b\\
+"Herausforderung " "Jede Coin darf nur einmal ausgegeben werden" b\\
+"Stand der Technik: " "Proof of work" b\\
+"Problem: " "PoW verbrennt Energie und GPUs/ASICs" b\\
+"Vorschlag 1: " "Proof of Stake (Geld kauft Einfluss)" b\\
+"Problem: " "Geld korrumpiert, korrupte Teilnehmer betrügen" b\\
+"Vorschlag 2: " "Beweis von Wohlverhalten/Vertrauen" b\\
+"Wie? " "Wer viele Blöcke signiert hat, bekommt viele Punkte" b\\
+"Viele Signierer " "Nicht nur einer (und damit byzantine Fehlertoleranz)" b\\
+"Verdacht " "Transaktionen aus Blöcken niedriger Konfidenz nicht annehmen" b\\
+"Idee " "Wiederholtes Gefangenendilemma belohnt Kooperation" b\\
 }}vt
 \skip
-"BTW: The attack for double spending also requires a MITM–attack" \\
-glue*1 }}glue
+"BTW: Der Angriff für “double spending” bedarf einer MITM–Attacke" \\
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -490,29 +507,29 @@ glue*1 }}glue
 {{
 $a4df87ff pres-frame
 {{
-"BlockChain" /title
+"SwapDragon BlockChain" /title
 vt{{
-"• " "Banks distrust each others, too (i. e. GNU Taler is not a solution)" b\\
-"• " "Problem size: WeChat Pay peaks at 0.5MTPS (BTC at 5TPS)" b\\
-"• " "Lightning Network doesn’t stand an overrun–the–arbiter attack" b\\
-"• " "Therefore, the BlockChain itself needs to scale" b\\
+"• " "Banken misstrauen sich gegenseitig (d.h. GNU Taler ist keine Lösung)" b\\
+"• " "Problemgröße: WeChat Pay peak ~ 0.5MTPS (BTC bei 5TPS)" b\\
+"• " "Überrenne den Arbiter: Problem für Lightning Network" b\\
+"• " "Also muss die BlockChain selbst skalieren" b\\
 \skip
-"• " "Introduce double entry booking into the distributed ledger" b\\
-"• " "Partitionate the ledgers by coin pubkey" b\\
-"• " "Use n–dimensional ledger space to route transactions" b\\
+"• " "Doppelte Buchführung für die verteilte Buchhaltung" b\\
+"• " "Fragmentiere die Datenbank nach coin pubkey" b\\
+"• " "Route Transaktionen in einem n–dimensionalen Raum" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 {{
 tex: stage1
 tex: stage2
 ' stage1 "ledger-stage1.png" 0.666e }}image-file drop
 "   " }}text
 ' stage2 "ledger-stage2.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 }}h box[]
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: bank-robs-you
 ' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -522,16 +539,21 @@ tex: bank-robs-you
 {{
 $a4df87ff pres-frame
 {{
-"$quid: Ethical mining" /title
+"$quid: Ethische Gewinnung" /title
 vt{{
-"• " "Concept of mining: Provide difficult and rare work" b\\
-"• " "Suggesting: Provide vouchers for free software development sponsorships" b\\
-"• " "These vouchers are tradeable on their own" b\\
-"• " "Free software is public infrastructure for the information age" b\\
-"• " "That way, we can encourage people to sponsor out of self–interest" b\\
-"• " "They get a useful and valueable token back" b\\
+"• " "Konzept der Gewinnung: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
+"• " "Vorschlag: Coupons für die Unterstützung der Entwicklung freier Software" b\\
+"• " "Diese Coupons wärend dann handelbar" b\\
+"• " "Freie Software ist öffentliche Infrastruktur im Informationszeitalter" b\\
+"• " "Damit regen wir die Leute an, FOSS aus Eigeninteresse zu unterstützen" b\\
+"• " "Sie bekommen ein nutzbares und wertvolles Token zurück" b\\
+\skip
+"• " "Oder doch besser eine Dezentralbank?" b\\
+"• " "Zentralbank gibt Kredite an Großbanken, die sie dann an der Börse verzocken" b\\
+"• " "Die Dezentralbank gibt Kredite an Kleinunternehmen" b\\
+"• " "Bonitätsprüfung eher wie Crowdfunding" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -539,14 +561,14 @@ glue*1 }}glue
 {{
 $FFFFFFFF pres-frame
 {{
-"Literature & Links" /title
+"Literatur & Links" /title
 vt{{
 "Bernd Paysan " "net2o fossil repository" bi\\
 "" "https://fossil.net2o.de/net2o/" bm\\
 "Bernd Paysan " "$quid cryptocurrency & SwapDragonChain" bi\\
 "" "https://squid.cash/" bm\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -554,9 +576,9 @@ glue*1 }}glue
 glue-right }}glue
 }}h box[]
 {{
-' net2o-logo net2o-glue  logo-img dup to n2-img
-' minos2     minos2-glue logo-img dup to m2-img /flip
-' $quid      $quid-glue  logo-img dup to $q-img /flip
+' net2o-logo net2o-glue  logo-img to n2-img
+' minos2     minos2-glue logo-img dup to m2-img trans-frame
+' $quid      $quid-glue  logo-img dup to $q-img trans-frame
 }}z
 }}z slide[]
 to top-widget

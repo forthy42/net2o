@@ -38,6 +38,8 @@ platform for running useful applications without the mess of Flash and
 JavaScript. Without the lag of "buffer bloat" and without the speed problems of
 a protocol not designed to be assisted by hardware.
 
+[Richard Stallman on how to fix the surveillance systems](https://www.theguardian.com/commentisfree/2018/apr/03/facebook-abusing-data-law-privacy-big-tech-surveillance)
+
 What needs to be fixed?
 -----------------------
 
