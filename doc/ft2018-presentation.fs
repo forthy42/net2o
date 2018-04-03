@@ -86,14 +86,14 @@ Variable slide#
 	dup 1- swap !slides  EXIT
     THEN
     1e fswap f-
-    fdup dup fade!slides 1- sin-t anim!slides +sync ;
+    fade!slides 1- sin-t anim!slides +sync ;
 
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
 	dup 1+ swap !slides  EXIT
     THEN
-    1+ fdup dup fade!slides sin-t anim!slides +sync ;
+    1+ fade!slides sin-t anim!slides +sync ;
 
 1e FValue slide-time%
 
