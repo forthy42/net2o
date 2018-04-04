@@ -270,7 +270,7 @@ vt{{
 {{ "Typesetting: " b0 blackish
 "Boxes & Glues ähnlich wie " }}text
 \LaTeX
-" — mit Ober– & Unterlängen" }}text glue*l }}h box[] >bl
+" — mit Ober– & Unterlängen" }}text glue*l }}glue }}h box[] >bl
 "" "Glues können schrumpfen, nicht nur wachsen" b\\
 "Object System: " "extrem leichtgewichtiges Mini–OOF2" b\\
 "Klassenzahl: " "Weniger Klassen, viele mögliche Kombinationen" b\\
