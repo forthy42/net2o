@@ -246,6 +246,7 @@ blackish
 \skip
 "Mitbewerber" /subsection
 "  Stasi–artige Zersetzung (Tor project)" \\
+"  Cambridge Analytica–Skandal (Facebook)" \\
 \skip
 "Lösungen" /subsection
 "  net2o fängt an, benutztbar zu werden" \\
@@ -263,7 +264,7 @@ $BFBFFFFF pres-frame
 vt{{
 "Rendering: " "OpenGL (ES), Vulkan backend möglich" b\\
 "Font nach Textur: " "Freetype–GL (mit eigenen Verbesserungen)" b\\
-"Image nach Textur: " "SOIL2 (AV1 stills?)" b\\
+"Image nach Textur: " "SOIL2 (TBD: AV1 photo?)" b\\
 "Video nach Textur: " "OpenMAX AL (Android), gstreamer für Linux (geplant)" b\\
 "Koordinaten: " "Single float, Ursprung links unten" b\\
 {{ "Typesetting: " b0 blackish
@@ -447,7 +448,7 @@ vt{{
 "• " "Proof of work: Verschwendet Ressourcen, bei zweifelhafter Sicherheit" b\\
 "• " "Inflation ist der Krebs des Geldes, Deflation sein Infarkt" b\\
 "• " "Konsequenzen: instabiler Kurs, hohe Transaktionskosten" b\\
-"• " "Ponzi-Schema–artige Blase" b\\
+"• " "Ponzi–Schema–artige Blase" b\\
 "• " "(statt Viagra bekomme ich jetzt BitCoin–Spam)" b\\
 "• " "Es kann nicht mal das Spekulationsgeschäft in der Chain abwickeln" b\\
 }}vt
@@ -506,7 +507,7 @@ glue*l }}glue
 
 \ page 15
 {{
-$a4df87ff pres-frame
+$a4d8f7ff pres-frame
 {{
 "SwapDragon BlockChain" /title
 vt{{
@@ -538,23 +539,23 @@ tex: bank-robs-you
 
 \ page 16
 {{
-$a4df87ff pres-frame
+$a487dfff pres-frame
 {{
 "Dumb Contrats" /title
 vt{{
-"• " "Smart Contracts sind in ihrer Wirkung kaum begreifbar" b\\
+"• " "Für Smart Contracts braucht man einen Rechtsanwalt und einen Programmierer" b\\
 "• " "Keep it simple: Ein Kontrakt muss eine ausgeglichene Bilanz haben" b\\
-"• " "Auswahl der Quellen, Auswahl der Assets dort, Setzen des Wertes" b\\
-"• " "Auswahl des/der Ziele, Setzen des Assets und Wert dort" b\\
-"• " "Abkürzung: Wert des Assets ausgleichen" b\\
-"• " "Signieren der Ziel—Wallets mit neuem Inhalt+Hash des Kontrakts" b\\
+"• " "Auswahl der Quellen (S), Auswahl der Assets (A) dort, Setzen des Wertes (±)" b\\
+"• " "Auswahl des/der Ziele (D), Setzen des Assets und Wert dort" b\\
+"• " "Abkürzung: Wert des Assets ausgleichen (B)" b\\
+"• " "Signieren der Ziel–Wallets mit neuem Inhalt+Hash des Kontrakts" b\\
 }}vt
 \skip
 "Beispiele:" /subsection    
 vt{{
 "Überweisung " "SA-SBD1D" b\\
 "Scheck " "SA-D, Einlösen: SA-DSBD" b\\
-"Umtausch/ " "SA+A-DSB¹BD" b\\
+"Umtausch/Kauf " "SA+A-DSB¹BD" b\\
 }}vt
 glue*l }}glue
 }}v box[] >bdr
@@ -562,18 +563,19 @@ glue*l }}glue
 
 \ page 17
 {{
-$a4df87ff pres-frame
+$df87a4ff pres-frame
 {{
-"$quid: Ethische Gewinnung" /title
+"$quid: Ethisches Mining" /title
 vt{{
-"• " "Konzept der Gewinnung: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
+"• " "Konzept des Minings: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
 "• " "Vorschlag: Coupons für die Unterstützung der Entwicklung freier Software" b\\
 "• " "Diese Coupons wärend dann handelbar" b\\
 "• " "Freie Software ist öffentliche Infrastruktur im Informationszeitalter" b\\
 "• " "Damit regen wir die Leute an, FOSS aus Eigeninteresse zu unterstützen" b\\
 "• " "Sie bekommen ein nutzbares und wertvolles Token zurück" b\\
+"• " "Oder sie entwickeln selbst FOSS, weil es Fiatgeld einbringt" b\\
 \skip
-"• " "Oder doch besser eine Dezentralbank?" b\\
+"Dezentralbank?" /subsection
 "• " "Zentralbank gibt Kredite an Großbanken, die sie dann an der Börse verzocken" b\\
 "• " "Die Dezentralbank gibt Kredite an Kleinunternehmen" b\\
 "• " "Bonitätsprüfung eher wie Crowdfunding" b\\
