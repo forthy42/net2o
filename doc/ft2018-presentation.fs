@@ -389,6 +389,7 @@ vt{{
 "Proof of " "Vertrauen statt Arbeit" b\\
 "BlockChain " "Wozu braucht man das überhaupt?" b\\
 "Scale " "Wie skaliert man eine BlockChain?" b\\
+"Contracts " "Smart oder dumb?" b\\
 "$quid " "Kann man ethisch Geld schaffen?" b\\
 }}vt
 glue*l }}glue
@@ -594,7 +595,7 @@ vt{{
 }}vt
 glue*l }}glue
 tex: qr-code
-' qr-code "qr-code.png" 1.666e }}image-file drop /center
+' qr-code "qr-code.png" 0.8333e }}image-file drop /center
 glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
