@@ -539,6 +539,30 @@ tex: bank-robs-you
 {{
 $a4df87ff pres-frame
 {{
+"Dumb Contrats" /title
+vt{{
+"• " "Smart Contracts sind in ihrer Wirkung kaum begreifbar" b\\
+"• " "Keep it simple: Ein Kontrakt muss eine ausgeglichene Bilanz haben" b\\
+"• " "Auswahl der Quellen, Auswahl der Assets dort, Setzen des Wertes" b\\
+"• " "Auswahl des/der Ziele, Setzen des Assets und Wert dort" b\\
+"• " "Abkürzung: Wert des Assets ausgleichen" b\\
+"• " "Signieren der Ziel—Wallets mit neuem Inhalt+Hash des Kontrakts" b\\
+}}vt
+\skip
+"Beispiele:" /subsection    
+vt{{
+"Überweisung " "SA-SBD1D" b\\
+"Scheck " "SA-D, Einlösen: SA-DSBD" b\\
+"Umtausch/ " "SA+A-DSB¹BD" b\\
+}}vt
+glue*l }}glue
+}}v box[] >bdr
+}}z box[] /flip dup >slides
+
+\ page 17
+{{
+$a4df87ff pres-frame
+{{
 "$quid: Ethische Gewinnung" /title
 vt{{
 "• " "Konzept der Gewinnung: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
@@ -568,6 +592,9 @@ vt{{
 "Bernd Paysan " "$quid cryptocurrency & SwapDragonChain" bi\\
 "" "https://squid.cash/" bm\\
 }}vt
+glue*l }}glue
+tex: qr-code
+' qr-code "qr-code.png" 1.666e }}image-file drop /center
 glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
