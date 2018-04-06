@@ -428,6 +428,7 @@ previous
     rdrop ;
 
 : scan-qr ( -- )
+    guessbuf $51 erase
     scan-start  ['] scan-loop catch  level# off
     cam-end 0>framebuffer
     [IFDEF] saturate% 1.0e saturate% sf! [THEN]
