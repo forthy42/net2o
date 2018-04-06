@@ -541,13 +541,15 @@ tex: bank-robs-you
 {{
 $a487dfff pres-frame
 {{
-"Dumb Contrats" /title
+"Dumb Contracts" /title
 vt{{
-"• " "Für Smart Contracts braucht man einen Rechtsanwalt und einen Programmierer" b\\
+"• " "Smart Contracts: Token–Forth–Subset (BitCoin), JavaScript (Ethereum)" b\\
+{{ "• " b0 blackish "Für Smart Contracts braucht man einen Rechtsanwalt " }}text \italic "und" }}text \regular " einen Programmierer" }}text glue*l }}glue }}h box[] >bl
 "• " "Keep it simple: Ein Kontrakt muss eine ausgeglichene Bilanz haben" b\\
 "• " "Auswahl der Quellen (S), Auswahl der Assets (A) dort, Setzen des Wertes (±)" b\\
 "• " "Auswahl des/der Ziele (D), Setzen des Assets und Wert dort" b\\
 "• " "Abkürzung: Wert des Assets ausgleichen (B)" b\\
+"• " "Obligations für Schulden und Terminkontrakte (O)" b\\
 "• " "Signieren der Ziel–Wallets mit neuem Inhalt+Hash des Kontrakts" b\\
 }}vt
 \skip
