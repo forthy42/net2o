@@ -559,6 +559,11 @@ vt{{
 }}vt
 glue*l }}glue
 }}v box[] >bdr
+{{
+glue*l }}glue
+tex: feynman-diag
+' feynman-diag "feynman-diag.png" 1.333e }}image-file drop /right
+}}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 17
