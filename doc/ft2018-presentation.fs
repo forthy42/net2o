@@ -195,7 +195,7 @@ tex: $quid
     }}v outside[] >o font-size# f2/ to border o o>
     to baseline# r> ;
 
-: pres-frame ( color -- o1 o2 )
+: pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
 
 {{
@@ -604,7 +604,8 @@ vt{{
 }}vt
 glue*l }}glue
 tex: qr-code
-' qr-code "qr-code.png" 0.8333e }}image-file drop /center
+' qr-code "qr-code.png" 13e }}image-file drop /center
+qr-code nearest
 glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
