@@ -25,5 +25,6 @@
   20. [Math proof of why lightning network won't work](https://medium.com/@jonaldfyookball/mathematical-proof-that-the-lightning-network-cannot-be-a-decentralized-bitcoin-scaling-solution-1b8147650800)
   21. [A short summary of Chinese money history](https://www.nbbmuseum.be/en/2007/09/chinese-invention.htm)
   22. [I am a time-traveler from the future, here to beg you to stop what you are doing.](https://www.reddit.com/r/Bitcoin/comments/1lfobc/i_am_a_timetraveler_from_the_future_here_to_beg/)
+  23. [Decentralized and trustless crypto-paradise is actually a medieval hellhole](https://medium.com/@kaistinchcombe/decentralized-and-trustless-crypto-paradise-is-actually-a-medieval-hellhole-c1ca122efdec)
 
 [up](squid.md) [back](squid-contracts.md)
