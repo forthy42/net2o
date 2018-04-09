@@ -1,6 +1,6 @@
 [up](squid.md) [back](squid-money.md) [next](squid-fed.md)
 
-# Proof of What?
+# Proof of What? Proof of Trust!
 
 It is pretty obvious that BitCoin went back all the way through human money
 history, and uses the same principle shell money had to give value to a coin:
