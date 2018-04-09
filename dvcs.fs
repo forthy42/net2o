@@ -258,22 +258,22 @@ dvcs-adds to dvcs:write
 :noname 2drop drop 64drop ; dvcs-adds to dvcs:unzip
 :noname ( addr u -- ) dvcs:adds[] $+[]! ; dvcs-adds to dvcs:add
 
-: n2o:new-dvcs ( -- o )
+in net2o : new-dvcs ( -- o )
     dvcs-class new >o  dvcs-table @ token-table !
     commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
     search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
     o o> ;
-: n2o:new-dvcs-adds ( -- o )
+in net2o : new-dvcs-adds ( -- o )
     dvcs-adds new >o  dvcs-table @ token-table !  o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $free dvcs:out-files$ $free  dvcs:patch$ $free ;
-: n2o:dispose-commit ( o:commit -- )
+in net2o : dispose-commit ( o:commit -- )
     id$ $free  re$ $free  object$ $free  dispose ;
-: n2o:dispose-search ( o:commit -- )
+in net2o : dispose-search ( o:commit -- )
     match-id$ $free  match-tag$ $free  dispose ;
-: n2o:dispose-dvcs-adds ( o:dvcs -- )
+in net2o : dispose-dvcs-adds ( o:dvcs -- )
     dvcs:adds[] $[]free dispose ;
-: n2o:dispose-dvcs ( o:dvcs -- )
+in net2o : dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $free  dvcs:message$ $free
     dvcs:files# #offs  dvcs:oldfiles# #offs
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
@@ -282,8 +282,8 @@ dvcs-adds to dvcs:write
     dvcs:id$ $free  dvcs:oldid$ $free
     project:revision$ $free   project:chain$ $free
     project:branch$ $free  project:project$ $free
-    dvcs:commits @ .n2o:dispose-commit
-    dvcs:searchs @ .n2o:dispose-search
+    dvcs:commits @ .net2o:dispose-commit
+    dvcs:searchs @ .net2o:dispose-search
     dispose ;
 
 Variable new-files[]
@@ -573,16 +573,16 @@ User id-check# \ check hash
     pull-readin  $@ id>branches
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
-: n2o:new-dvcs-log ( -- o )
+in net2o : new-dvcs-log ( -- o )
     dvcs-log-class new >o msg-table @ token-table ! o o> ;
-: n2o:dispose-dvcs-log ( o:log -- )
+in net2o : dispose-dvcs-log ( o:log -- )
     log-sig$    $free  log-tag$  $free  log-id$    $free
     log-action$ $free  log-text$ $free  log-chain$ $free
     dispose ;
 
 : display-logn ( addr u n -- )
     project:branch$ $@ { d: branch }
-    n2o:new-dvcs-log >o
+    net2o:new-dvcs-log >o
     cells >r ?msg-log  last# msg-log@ 2dup { log u }
     dup r> - 0 max dup >r /string r> cell/ -rot bounds ?DO
 	I $@ ['] msg-display catch
@@ -601,13 +601,13 @@ User id-check# \ check hash
 	    THEN
 	THEN  1+
     cell +LOOP  drop
-    log free n2o:dispose-dvcs-log o> throw ;
+    log free net2o:dispose-dvcs-log o> throw ;
 
 : dvcs-log ( -- )
-    n2o:new-dvcs >o  config>dvcs
+    net2o:new-dvcs >o  config>dvcs
     project:project$ $@ 2dup load-msg
     config:logsize# @ display-logn
-    n2o:dispose-dvcs o> ;
+    net2o:dispose-dvcs o> ;
 
 also net2o-base
 : (dvcs-newsentry) ( type -- )
@@ -673,14 +673,14 @@ previous
     THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
-    n2o:new-dvcs >o (dvcs-ci)  n2o:dispose-dvcs o> ;
+    net2o:new-dvcs >o (dvcs-ci)  net2o:dispose-dvcs o> ;
 
 : dvcs-diff ( -- )
-    n2o:new-dvcs >o dvcs:oldid$ dvcs-readin
+    net2o:new-dvcs >o dvcs:oldid$ dvcs-readin
     ['] compute-diff gen-cmd$ 2drop
     dvcs( ." ===== diff len: " dvcs:patch$ $@len . ." =====" cr )
     dvcs:in-files$ dvcs:patch$ color-bpatch$2
-    clean-up  n2o:dispose-dvcs o> ;
+    clean-up  net2o:dispose-dvcs o> ;
 
 : ci-args ( -- message u )
     ?nextarg 0= IF "untitled checkin" THEN
@@ -699,11 +699,11 @@ previous
 	"~+/.n2o/reffiles" append-line  THEN ;
 
 : dvcs-snap ( addr u -- )
-    n2o:new-dvcs >o  dvcs:message$ $!
+    net2o:new-dvcs >o  dvcs:message$ $!
     config>dvcs  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >id-revision
-    dvcs-snapentry  save-project  clean-up n2o:dispose-dvcs o> ;
+    dvcs-snapentry  save-project  clean-up net2o:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
@@ -749,9 +749,9 @@ previous
     save-project  filelist-out ;
 
 : dvcs-co ( addr u -- ) \ checkout revision
-    base85>$  n2o:new-dvcs >o
+    base85>$  net2o:new-dvcs >o
     config>dvcs   dvcs:id$ $! dvcs:id$  dvcs-readin  co-rest
-    n2o:dispose-dvcs o> ;
+    net2o:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
@@ -764,7 +764,7 @@ previous
     chat>searchs-loop match-id$ $@ o> ;
 
 : dvcs-up ( -- ) \ checkout latest revision
-    n2o:new-dvcs >o
+    net2o:new-dvcs >o
     pull-readin  files>dvcs  new>dvcs  dvcs?modified
     new-files[] $[]# del-files[] $[]# d0= IF
 	search-last-rev  2dup dvcs:id$ $!
@@ -774,13 +774,13 @@ previous
     ELSE
 	." Local changes, don't update" cr
     THEN
-    n2o:dispose-dvcs o> ;
+    net2o:dispose-dvcs o> ;
 
 : dvcs-revert ( -- ) \ restore to last revision
-    n2o:new-dvcs >o
+    net2o:new-dvcs >o
     pull-readin  dvcs:oldid$ $@  2dup dvcs:id$ $!
     id>branches  co-rest
-    n2o:dispose-dvcs o> ;
+    net2o:dispose-dvcs o> ;
 
 : hash-add ( addr u -- )
     slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
@@ -844,10 +844,10 @@ event: :>dvcs-sync-done ( o -- ) >o
 	    net2o-code expect+slurp
 	    $10 blocksize! 0 blockalign!
 	    I /sync-files + I' umin I U+DO
-		I sync-file-list[] $[]@ n2o:copy#
+		I sync-file-list[] $[]@ net2o:copy#
 	    LOOP
 	    I /sync-files + I' u>=
-	    IF  end-code| n2o:close-all  ELSE  end-code  THEN
+	    IF  end-code| net2o:close-all  ELSE  end-code  THEN
 	/sync-files +LOOP
     /sync-reqs +LOOP ;
 
@@ -859,7 +859,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     connection .get-needed-files ;
 
 : handle-fetch ( -- )  ?.net2o/objects
-    n2o:new-dvcs >o  pull-readin
+    net2o:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
     0 >o dvcs-connects +dvcs-sync-done
 \    net2o-code expect-reply ['] last?, [msg,] end-code
@@ -868,7 +868,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
     leave-chats
-    n2o:dispose-dvcs o> ;
+    net2o:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:

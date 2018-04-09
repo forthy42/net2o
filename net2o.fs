@@ -405,9 +405,9 @@ Variable msg-groups
 
 UValue connection
 
-: n2o:new-log ( -- o )
+in net2o : new-log ( -- o )
     cmd-class new >o  log-table @ token-table ! o o> ;
-: n2o:new-ack ( -- o )
+in net2o : new-ack ( -- o )
     o ack-class new >o  parent!  ack-table @ token-table !
     init-delay# rtdelay 64!
     flybursts# dup flybursts ! flyburst !
@@ -419,10 +419,10 @@ UValue connection
     max-int64 64-2/ 64negate max-slack 64!
     o o> ;
 : ack@ ( -- o )
-    ack-context @ ?dup-0=-IF  n2o:new-ack dup ack-context !  THEN ;
-: n2o:new-msg ( -- o )
+    ack-context @ ?dup-0=-IF  net2o:new-ack dup ack-context !  THEN ;
+in net2o : new-msg ( -- o )
     o msg-class new >o  parent!  msg-table @ token-table ! o o> ;
-: n2o:new-msging ( -- o )
+in net2o : new-msging ( -- o )
     o msging-class new >o  parent!  msging-table @ token-table ! o o> ;
 
 : no-timeout ( -- )  max-int64 next-timeout 64!
@@ -440,7 +440,7 @@ UValue connection
     recv-tick 64@ 64swap 64-
     rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
-: n2o:new-context ( -- o )
+in net2o : new-context ( -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     my-key-default to my-key \ set default key
     o contexts !@ next-context !
@@ -480,25 +480,25 @@ Variable mapstart $1 mapstart !
 : new-data! ( addrs addrd u -- )
     new-data-size ! new-data-d 64! new-data-s 64! newdata-val validated or! ;
 
-: n2o:new-map ( -- addr )
+in net2o : new-map ( -- addr )
     mapstart @ 1 mapstart +! reverse
     [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ;
-: n2o:new-data ( addrs addrd u -- )
+in net2o : new-data ( addrs addrd u -- )
     dup max-data# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	n2o:new-context >o rdrop  setup!  THEN
+	net2o:new-context >o rdrop  setup!  THEN
     msg( ." data map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag off
     addrd u addr data-rmap map-data-dest
     addrs u map-source to data-map ;
-: n2o:new-code ( addrs addrd u -- )
+in net2o : new-code ( addrs addrd u -- )
     dup max-code# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
     o 0= IF
 	addrd >dest-map @ ?EXIT
-	n2o:new-context >o rdrop  setup!  THEN
+	net2o:new-context >o rdrop  setup!  THEN
     msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
     >code-flag on
     addrd u addr code-rmap map-code-dest
@@ -508,8 +508,8 @@ Forward new-ivs ( -- )
 \G Init the new IVS
 : create-maps ( -- ) validated @ >r
     [ newcode-val newdata-val or invert ]L r@ and validated !
-    r@ newcode-val and IF  new-code@ n2o:new-code ELSE  rdrop EXIT  THEN
-    r> newdata-val and IF  new-data@ n2o:new-data THEN ;
+    r@ newcode-val and IF  new-code@ net2o:new-code ELSE  rdrop EXIT  THEN
+    r> newdata-val and IF  new-data@ net2o:new-data THEN ;
 : update-cdmap ( -- )
     o 0= IF  do-keypad sec@ nip keysize2 <> ?EXIT  THEN
     create-maps
@@ -670,15 +670,15 @@ reply buffer: dummy-reply
 
 Sema timing-sema
 
-: net2o:track-timing ( -- ) \ initialize timing records
+in net2o : track-timing ( -- ) \ initialize timing records
     timing-stat $off ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
 
-: net2o:timing$ ( -- addr u )
+in net2o : timing$ ( -- addr u )
     stats( timing-stat $@  EXIT ) ." no timing stats" cr s" " ;
-: net2o:/timing ( n -- )
+in net2o : /timing ( n -- )
     stats( timing-stat 0 rot $del ) ;
 
 : .rec-timing ( addr u -- )
@@ -697,7 +697,7 @@ Sema timing-sema
       timestats +LOOP
       track-timing $off o> ;] timing-sema c-section ;
 
-: net2o:rec-timing ( addr u -- )
+in net2o : rec-timing ( addr u -- )
     [: track-timing $+! ;] timing-sema c-section ;
 
 : stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
@@ -736,13 +736,13 @@ scope{ mapc
 
 #5000000 Value rt-bias# \ 5ms additional flybursts allowed
 
-: net2o:set-flyburst ( -- bursts )
+in net2o : set-flyburst ( -- bursts )
     rtdelay 64@ 64>f rt-bias# s>f f+ ns/burst 64@ 64>f f/ f>s
     flybursts# +
     bursts( dup . .o ." flybursts "
     rtdelay 64@ u64. ns/burst 64@ u64. ." rtdelay" cr )
     dup flybursts-max# min rate( ." flyburst: " dup . ) flyburst ! ;
-: net2o:max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
+in net2o : max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
     bursts( 0= IF  .o ." start bursts" cr THEN )else( drop ) ;
 
 : >flyburst ( -- )
@@ -762,7 +762,7 @@ scope{ mapc
 	addr>ts r> .mapc:dest-timestamps swap
     ELSE  o> rdrop 0 0  THEN ;
 
-: net2o:ack-addrtime ( ticks addr -- )
+in net2o : ack-addrtime ( ticks addr -- )
     >timestamp over  IF
 	dup tick-init 1+ 64s u>
 	IF  + dup >r  64@
@@ -773,7 +773,7 @@ scope{ mapc
 	64@ timestat
     ELSE  2drop 64drop  THEN ;
 
-: net2o:ack-b2btime ( ticks addr -- )
+in net2o : ack-b2btime ( ticks addr -- )
     >timestamp over  IF  + 64@ b2b-timestat
     ELSE  2drop 64drop  THEN ;
 
@@ -828,7 +828,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
            slackgrow 64@ 64>f stat-tuple to ts-grow
            stat+ ) ;
 
-: net2o:set-rate ( rate deltat -- )
+in net2o : set-rate ( rate deltat -- )
     rate( ." r/d: " 64over u64. 64dup u64. )
     rate-stat1
     64>r tick-init 1+ validated @ validated# rshift 1 max 64*/
@@ -846,7 +846,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
-: net2o:resend-mask ( addr mask -- ) >mask0
+in net2o : resend-mask ( addr mask -- ) >mask0
     >r dup data-rmap .mapc:dest-size u>= IF
 	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
     THEN  r>
@@ -861,7 +861,7 @@ $20 Value mask-bits#
 	    I 2!  UNLOOP  EXIT
 	THEN
     2 cells +LOOP { d^ mask+ } mask+ 2 cells data-resend $+! ;
-: net2o:ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
+in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ >mask0 1 and IF  maxdata  ELSE  0  THEN
@@ -1004,7 +1004,7 @@ Forward new-addr
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
     2dup send-cX ;
 
-: net2o:punch ( addr u o:connection -- )
+in net2o : punch ( addr u o:connection -- )
     o IF
 	new-addr { w^ punch-addr }
 	punch-addr cell punch-addrs $+!
@@ -1042,12 +1042,12 @@ scope{ mapc
 
 }scope
 
-: net2o:send-tick ( addr -- )
+in net2o : send-tick ( addr -- )
     data-map with mapc
     dest-raddr - dup dest-size u<
     IF  ts-ticks!  ELSE  drop  THEN  endwith ;
 
-: net2o:prep-send ( addr u dest -- addr n len )
+in net2o : prep-send ( addr u dest -- addr n len )
     set-dest  over  net2o:send-tick
     send-size min-size over lshift ;
 
@@ -1056,10 +1056,10 @@ scope{ mapc
 : data-to-send? ( -- flag )
     resend? data-tail? or ;
 
-: net2o:resend ( -- addr n )
+in net2o : resend ( -- addr n )
     resend$@ resend-dest net2o:prep-send /resend ;
 
-: net2o:send ( -- addr n )
+in net2o : send ( -- addr n )
     data-tail@ data-dest net2o:prep-send /tail ;
 
 : ?toggle-ack ( -- )
@@ -1068,7 +1068,7 @@ scope{ mapc
 	never ack@ .next-tick 64!
     THEN ;
 
-: net2o:send-chunk ( -- )  +chunk
+in net2o : send-chunk ( -- )  +chunk
     ack-state c@ outflag or!
     bursts# 1- data-b2b @ = IF data-tail? ELSE resend? 0= THEN
     IF  net2o:send  ELSE  net2o:resend  THEN
@@ -1122,7 +1122,7 @@ Create chunk-adder chunks-struct allot
 
 event: :>send-chunks ( o -- ) .do-send-chunks ;
 
-: net2o:send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
+in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
     <event o elit, :>send-chunks sender-task event> ;
 
 : chunk-count+ ( counter -- )
@@ -1219,16 +1219,16 @@ rdata-class to rewind-partial
 
 }scope
 
-: net2o:rewind-sender-partial ( new-back -- )
+in net2o : rewind-sender-partial ( new-back -- )
     data-map with mapc dest-back umax dest-back over rewind-partial to dest-back
     endwith ;
 
 \ separate thread for loading and saving...
 
-: net2o:save { tail -- }
+in net2o : save { tail -- }
     data-rmap ?dup-IF
 	.mapc:dest-back { oldback }
-	oldback tail n2o:spit { back }
+	oldback tail net2o:spit { back }
 	data-rmap with mapc
 	    oldback back rewind-partial
 	    dest-req IF  back do-slurp !  THEN  back to dest-back
@@ -1241,17 +1241,17 @@ event: :>save ( tail o -- )  .net2o:save ;
 event: :>save&done ( tail o -- )
     >o net2o:save sync-done-xt o> ;
 event: :>close-all ( o -- )
-    .n2o:close-all ;
+    .net2o:close-all ;
 
 0 Value file-task
 
 : create-file-task ( -- )
     ['] event-loop' 1 net2o-task to file-task ;
-: net2o:save& ( -- )
+in net2o : save& ( -- )
     file-task 0= IF  create-file-task  THEN
     data-rmap .mapc:dest-tail elit,
     o elit, :>save file-task event> ;
-: net2o:save&done ( -- )
+in net2o : save&done ( -- )
     file-task 0= IF  create-file-task  THEN
     data-rmap .mapc:dest-tail elit,
     o elit, :>save&done file-task event| ;
@@ -1393,7 +1393,7 @@ Forward handle-beacon+hash
 
 0 Value dump-fd
 
-: net2o:timeout ( ticks -- ) \ print why there is nothing to send
+in net2o : timeout ( ticks -- ) \ print why there is nothing to send
     ack@ .>flyburst net2o:send-chunks
     timeout( ." timeout? " .ticks space
     resend? . data-tail? . data-head? . fstates .
@@ -1538,7 +1538,7 @@ scope{ mapc
 
 Defer extra-dispose ' noop is extra-dispose
 
-: n2o:dispose-context ( o:addr -- o:addr )
+in net2o : dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
 	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
 	o-timeout o-chunks extra-dispose
@@ -1560,7 +1560,7 @@ Defer extra-dispose ' noop is extra-dispose
 	dispose  0 to connection
 	cmd( ." disposed" cr ) ;] file-sema c-section ;
 
-event: :>dispose-context ( o -- ) .n2o:dispose-context ;
+event: :>dispose-context ( o -- ) .net2o:dispose-context ;
   
 \ loops for server and client
 
@@ -1732,7 +1732,7 @@ Forward next-saved-msg
 : packet-loop ( -- ) \ 1 stick-to-core
     BEGIN  packet-event  !!0depth!!  event-send  !!0depth!!  AGAIN ;
 
-: n2o:request-done ( n -- )  elit, o elit, :>request ;
+in net2o : request-done ( n -- )  elit, o elit, :>request ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;
@@ -1812,7 +1812,7 @@ Variable cookies
 
 : cookie>context? ( cookie -- context true / false )
     ?cookie over 0= over and IF
-	nip n2o:new-context swap
+	nip net2o:new-context swap
     THEN ;
 
 : adjust-ticks ( time -- )  o 0= IF  64drop  EXIT  THEN

@@ -346,7 +346,7 @@ scope{ mapc
 : fstate-off ( -- )  file-state @ 0= ?EXIT
     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
     file-state $free ;
-: n2o:save-block ( back tail id -- delta ) { id -- delta }
+in net2o : save-block ( back tail id -- delta ) { id -- delta }
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
     file( over data-rmap .mapc:dest-raddr - >r
     id id>addr? .fs-seek #10 64rshift 64>n >r )
@@ -357,13 +357,13 @@ scope{ mapc
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: n2o:spit { back tail -- newback }
+in net2o : spit { back tail -- newback }
     back tail back u<= ?EXIT fstates 0= ?EXIT drop
     slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) back tail
     [: +calc fstates 0 { back tail states fails }
 	BEGIN  tail back u>  WHILE
-		back tail write-file# @ n2o:save-block
+		back tail write-file# @ net2o:save-block
 		>blockalign dup negate residualwrite +!  dup +to back
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
@@ -381,25 +381,25 @@ scope{ mapc
 
 \ file status stuff
 
-: n2o:get-stat ( -- mtime mod )
+in net2o : get-stat ( -- mtime mod )
     fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] $FFF and ;
-' n2o:get-stat fs-class to fs-get-stat
-' n2o:get-stat hashfs-class to fs-get-stat
+' net2o:get-stat fs-class to fs-get-stat
+' net2o:get-stat hashfs-class to fs-get-stat
 
-: n2o:track-mod ( mod fileno -- )
+in net2o : track-mod ( mod fileno -- )
     [IFDEF] android 2drop
     [ELSE] swap fchmod ?ior [THEN] ;
 
-: n2o:set-stat ( mtime mod -- )
-    fs-fid @ fileno n2o:track-mod to fs-time ;
-' n2o:set-stat fs-class to fs-set-stat
-' n2o:set-stat hashfs-class to fs-set-stat
+in net2o : set-stat ( mtime mod -- )
+    fs-fid @ fileno net2o:track-mod to fs-time ;
+' net2o:set-stat fs-class to fs-set-stat
+' net2o:set-stat hashfs-class to fs-set-stat
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 
-: n2o:close-file ( id -- )
+in net2o : close-file ( id -- )
     id>addr? .fs-close ;
 
 : blocksizes! ( n -- )
@@ -408,32 +408,32 @@ scope{ mapc
     ." file write: ======= " dup . forth:cr )
     dup residualread !  residualwrite ! ;
 
-: n2o:close-all ( -- )
+in net2o : close-all ( -- )
     msg( ." Closing all files" forth:cr )
-    [:  fstates 0 ?DO  I n2o:close-file  LOOP
+    [:  fstates 0 ?DO  I net2o:close-file  LOOP
 	file-reg# off  fstate-off  blocksize @ blocksizes!
 	read-file# off  write-file# off ;] file-sema c-section ;
 
-: n2o:open-file ( addr u mode id -- )
+in net2o : open-file ( addr u mode id -- )
     state-addr .fs-open ;
 
 \ read in from files
 
-: n2o:slurp-block ( id -- delta )
+in net2o : slurp-block ( id -- delta )
     data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " 2 pick .
     2 pick id>addr? .fs-seek #10 64rshift $64. r> #10 rshift hex. )
     rot id>addr? .fs-read dup /head
     file( dup hex. residualread @ hex. forth:cr ) ;
 
-\ careful: must follow exactpy the same logic as n2o:spit (see above)
-: n2o:slurp ( -- head end-flag )
+\ careful: must follow exactpy the same logic as net2o:spit (see above)
+in net2o : slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
     slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
     read-file# ? residualread @ hex. forth:cr )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
-		read-file# @ n2o:slurp-block
+		read-file# @ net2o:slurp-block
 		IF 0 ELSE fails 1+ residualread off THEN to fails
 		residualread @ 0= IF
 		    read-file# file+  blocksize @ residualread !  THEN
@@ -448,7 +448,7 @@ scope{ mapc
 
     file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
     
-: n2o:track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
+in net2o : track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
     [: { xt } 8 cells 0 DO
 	    dup 1 and IF
 		I dup id>addr? >o fs-seek fs-seekto 64<> IF
@@ -457,7 +457,7 @@ scope{ mapc
 	    THEN  2/
 	LOOP  drop ;] file-sema c-section ;
 
-: n2o:track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
+in net2o : track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
     [: { xt } fstates 0 ?DO
 	    I dup id>addr? >o fs-seek fs-seekto 64<> IF
 		fs-seekto 64dup to fs-seek o>

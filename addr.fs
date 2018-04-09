@@ -53,19 +53,19 @@ $11 net2o: addr-pri# ( n -- ) \g priority
 gen-table $freeze
 ' context-table is gen-table
 
-: n2o:new-addr ( -- o )
+in net2o : new-addr ( -- o )
     address-class new >o  address-table @ token-table ! o o> ;
-: n2o:dispose-addr ( o:addr -- o:addr )
+in net2o : dispose-addr ( o:addr -- o:addr )
     host-id $off host-anchor $off host-route $off host-key sec-off
     host-revoke $off ;
-: n2o:dispose-punchs ( -- )
-    punch-addrs $@ bounds ?DO  I @ .n2o:dispose-addr  cell +LOOP
+in net2o : dispose-punchs ( -- )
+    punch-addrs $@ bounds ?DO  I @ .net2o:dispose-addr  cell +LOOP
     punch-addrs $off ;
 :noname ( -- )
-    n2o:dispose-punchs  defers extra-dispose ; is extra-dispose
+    net2o:dispose-punchs  defers extra-dispose ; is extra-dispose
 
 : new-addr ( addr u -- o ) \G create a new address object from string
-    n2o:new-addr n:>o nest-cmd-loop o n:o> ;
+    net2o:new-addr n:>o nest-cmd-loop o n:o> ;
 
 also net2o-base
 : o-genaddr ( o -- ) >o \G create new address string from object
@@ -106,7 +106,7 @@ previous
     punch-addrs $@ bounds ?DO  I @ .addr cr  cell +LOOP ;
 
 : .addr$ ( addr u -- )
-    new-addr >o o .addr n2o:dispose-addr o> ;
+    new-addr >o o .addr net2o:dispose-addr o> ;
 
 User dest-0key> \ pointer to dest-0key
 User dest-0key< \ pointer to obtained dest-0key
@@ -138,12 +138,12 @@ User dest-0key< \ pointer to obtained dest-0key
     dup host-portv4 w!  host-portv6 w!
     o my-addr[] $[]# my-addr[] $[] ! ;
 
-: !my-addrs ( -- ) n2o:new-addr >o
+: !my-addrs ( -- ) net2o:new-addr >o
     global-ip6 tuck host-ipv6 $10 smove
     global-ip4 IF  be-ul@ host-ipv4 be-l!  ELSE  drop  THEN
     my-port# +my-addrs o>
     0= IF  ipv6( local-ip6  IF
-	    n2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
+	    net2o:new-addr >o  host-ipv6 ip6!  my-port# +my-addrs  o>
 	ELSE  drop  THEN )
     THEN ;
 
@@ -154,7 +154,7 @@ User dest-0key< \ pointer to obtained dest-0key
 
 : addrs-off ( -- )
     \G dispose all addresses
-    my-addr[] [: .n2o:dispose-addr ;] $[]o-map
+    my-addr[] [: .net2o:dispose-addr ;] $[]o-map
     my-addr[] $off
     my-addr$ $[]off
     pub-addr$ $[]off

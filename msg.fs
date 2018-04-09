@@ -47,9 +47,9 @@ Sema msglog-sema
     msging-context @ dup 0= IF
 	drop
 	msg-context @ 0= IF
-	    n2o:new-msg msg-context !
+	    net2o:new-msg msg-context !
 	THEN
-	n2o:new-msging dup msging-context !
+	net2o:new-msging dup msging-context !
     THEN ;
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
@@ -68,7 +68,7 @@ Variable saved-msg$
 
 : save-msgs ( last -- )
     msg( ." Save messages" cr )
-    ?.net2o/chats  n2o:new-msging >o
+    ?.net2o/chats  net2o:new-msging >o
     dup msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
     $@ >chatid chat-85 .chats/ enc-filename $!
@@ -87,7 +87,7 @@ Variable saved-msg$
 	64drop ticks 64dup saved-msg-ticks 64!  THEN ;
 
 : msg-eval ( addr u -- )
-    n2o:new-msging >o 0 to parent do-cmd-loop dispose o> ;
+    net2o:new-msging >o 0 to parent do-cmd-loop dispose o> ;
 
 : vault>msg ( -- )
     ['] msg-eval is write-decrypt ;
@@ -158,7 +158,7 @@ Variable otr-log
 
 : display-lastn ( addr u n -- )  reset-time
     otr-mode @ >r otr-mode off
-    [: n2o:new-msg >o 0 to parent
+    [: net2o:new-msg >o 0 to parent
       cells >r ?msg-log last# msg-log@ 2dup { log u }
       dup r> - 0 max /string bounds ?DO
 	  I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
@@ -167,7 +167,7 @@ Variable otr-log
     r> otr-mode ! throw ;
 
 : display-one-msg ( addr u -- )
-    n2o:new-msg >o 0 to parent
+    net2o:new-msg >o 0 to parent
     ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
     dispose o> ;
 
@@ -507,7 +507,7 @@ msgfs-class +file-classes
 : .chat-file ( addr u -- )
     over le-64@ .ticks 1 64s /string  ." ->"
     over le-64@ .ticks 1 64s /string  ." @" forth:type ;
-: n2o:copy-msg ( filename u -- )
+in net2o : copy-msg ( filename u -- )
     ." copy msg: " 2dup .chat-file forth:cr
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
       file-reg# @ save-to-msg ;] n2o>file
@@ -552,7 +552,7 @@ Variable ask-msg-files[]
     ?ask-msg-files ask-msg-files[] $[]# IF
 	parent >o  expect+slurp
 	cmdbuf# @ 0= IF  $10 blocksize! $1 blockalign!  THEN
-	ask-msg-files[] [: n2o:copy-msg ;] $[]map o>
+	ask-msg-files[] ['] net2o:copy-msg $[]map o>
     ELSE
 	." === nothing to sync ===" forth:cr
     THEN
@@ -580,7 +580,7 @@ Variable ask-msg-files[]
 : chat-sync-done ( group-addr u -- )
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-reply close-all net2o:gen-reset end-code
-    n2o:close-all
+    net2o:close-all
     ?msg-log last# $@ rows  display-lastn
     !save-all-msgs
     ." === sync done ===" forth:cr
@@ -1147,7 +1147,7 @@ previous
 	    msg-group$ $@len IF
 		pubkey $@ ['] left, send-otr-avalanche
 	    THEN
-	    n2o:dispose-context
+	    net2o:dispose-context
 	    EXIT
 	THEN
     ELSE  expected@ u<= IF  -timeout  THEN  THEN ;

@@ -824,7 +824,7 @@ Variable cp-tmp
 
 \ respond to scanning keys
 
-forward n2o:pklookup
+in net2o forward pklookup
 
 true Value scan-once?
 
@@ -1198,7 +1198,7 @@ also net2o-base
     close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code|
-    n2o:dispose-context ;
+    net2o:dispose-context ;
 : send-qr-invitation ( -- success-bit )
     setup!  +resend-cmd  gen-tmpkeys
     ['] connect-rest rqd?
@@ -1213,14 +1213,14 @@ also net2o-base
     close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code| invite-result#
-    n2o:dispose-context ;
+    net2o:dispose-context ;
 previous
 
 forward >qr-key
 event: :>?scan-level ( -- ) ?scan-level ;
 event: :>qr-invitation { task w^ pk -- }
     pk $@ keysize2 /string >qr-key
-    pk $@ keysize2 umin [: n2o:pklookup send-qr-invitation ;] catch
+    pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch
     IF    2drop ." send qr invitation, aborted" 0
     ELSE  ." sent qr invitation, got " dup hex. THEN
     forth:cr

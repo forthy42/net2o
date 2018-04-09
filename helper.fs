@@ -48,7 +48,7 @@ require dhtroot.fs
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
-    dhtroot-addr @ ?dup-IF  n2o:dispose-addr  THEN ;
+    dhtroot-addr @ ?dup-IF  net2o:dispose-addr  THEN ;
 
 : ins-ip ( -- net2oaddr )
     net2o-host $@ net2o-port insert-ip  ind-addr off ;
@@ -59,9 +59,9 @@ require dhtroot.fs
 
 : pk:connect ( code data key u -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
-    n2o:new-context >o rdrop o to connection  setup!
+    net2o:new-context >o rdrop o to connection  setup!
     dest-pk \ set our destination key
-    +resend-cmd n2o:connect
+    +resend-cmd net2o:connect
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
@@ -85,13 +85,13 @@ Variable announced
 : pk:fetch-host ( key u -- )
     net2o-code
       expect-reply get-ip fetch-id, cookie+request
-    end-code| -setip n2o:send-replace ;
+    end-code| -setip net2o:send-replace ;
 
 : pk:addme-fetch-host ( key u -- ) +addme
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
-    end-code| -setip n2o:send-replace ;
+    end-code| -setip net2o:send-replace ;
 
 \ NAT retraversal
 
@@ -239,20 +239,20 @@ User hostc$ \ check for this hostname
       THEN  !0key  drop true ;] addr>sock ;
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !
-    new-addr dup insert-addr swap .n2o:dispose-addr ;
+    new-addr dup insert-addr swap .net2o:dispose-addr ;
 
 : insert-host ( addr u -- flag )  dest-0key dest-0key> !
     new-addr  dup host=  IF  dup insert-addr  ELSE  false  THEN
-    swap .n2o:dispose-addr ;
+    swap .net2o:dispose-addr ;
 
 : insert-host? ( flag o addr u -- flag' o )
     check-host? IF  insert-host  ELSE  2drop false  THEN
     rot or swap ;
 
 : make-context ( pk u -- )
-    ret0 n2o:new-context >o rdrop dest-pk ;
+    ret0 net2o:new-context >o rdrop dest-pk ;
 
-: n2o:pklookup ( pkaddr u -- )
+in net2o : pklookup ( pkaddr u -- )
     2dup keysize2 safe/string hostc$ $! key2|
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
@@ -269,17 +269,17 @@ User hostc$ \ check for this hostname
 : direct-connect ( cmdlen datalen -- )
     cmd0( ." attempt to connect to: " return-addr .addr-path cr )
     ['] ?nat-done ['] no-nat-done ind-addr @ select rqd?
-    n2o:connect nat( ." connected" forth:cr ) ;
+    net2o:connect nat( ." connected" forth:cr ) ;
 
 : pk-connect ( addr u cmdlen datalen -- )
-    2>r n2o:pklookup 2r> direct-connect ;
+    2>r net2o:pklookup 2r> direct-connect ;
 
 : addr-connect ( addr+key u cmdlen datalen xt -- )
     -rot 2>r >r over + 1- dup c@ dup >r -
     2dup u>= !!keysize!!
     dup r> make-context
     over - insert-addr$ 0= !!no-address!!
-    r> execute 2r> n2o:connect ;
+    r> execute 2r> net2o:connect ;
 
 : nick-connect ( addr u cmdlen datalen -- )
     2>r host.nick>pk 2r> pk-connect ;
@@ -322,7 +322,7 @@ User pings[]
 	    net2o-code0 net2o-version $, version?
 	    end-code
 	ELSE  2drop  THEN ;] addr>sock
-    r> .n2o:dispose-addr ;
+    r> .net2o:dispose-addr ;
 
 : receive-pings ( -- )
     requests->0 ;

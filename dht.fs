@@ -337,7 +337,7 @@ false Value add-myip
 	2dup my-addr$ $ins[]sig drop
 	priv-addr$ $ins[]sig drop
 	addr .beacon-tuple
-	addr .n2o:dispose-addr
+	addr .net2o:dispose-addr
 	nat( ."  public" forth:cr ) EXIT  THEN
     addr my-addr? 0= IF
 	addr o>addr gen-host my-addr$ $ins[]sig drop
@@ -348,7 +348,7 @@ false Value add-myip
 	mynick$ $, dht-owner+
     THEN
     addr o>addr gen-host pub-addr,
-    addr .n2o:dispose-addr
+    addr .net2o:dispose-addr
     ['] addme-end IS expect-reply? ;
 previous
 
@@ -375,7 +375,7 @@ also net2o-base
     pk@ $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
-    new-addr >o host-id $@ host$ $@ str= n2o:dispose-addr o> ;
+    new-addr >o host-id $@ host$ $@ str= net2o:dispose-addr o> ;
 
 : my-addrs? ( addr u -- addr u flag )
     false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;
@@ -397,7 +397,7 @@ previous
 
 : me>d#id ( -- ) pk@ >d#id ;
 
-: n2o:send-replace ( -- )
+in net2o : send-replace ( -- )
     me>d#id .dht-host >r
     r@ $[]# IF  +resend
 	net2o-code   expect-reply
@@ -410,7 +410,7 @@ previous
 : set-revocation ( addr u -- )
     dht-host $ins[]sig drop ;
 
-: n2o:send-revoke ( addr u -- )
+in net2o : send-revoke ( addr u -- )
     ?keysize me>d#id >o
     net2o-code  expect-reply
 	dht-hash $@ $, dht-id dht-host remove-me,
@@ -423,18 +423,18 @@ previous
 : replace-me ( -- )  +addme
     net2o-code   expect-reply get-ip replace-me, cookie+request
     end-code| -setip
-    n2o:send-replace ;
+    net2o:send-replace ;
 
 : revoke-me ( addr u -- )
     \G give it your revocation secret
     +addme
     net2o-code   expect-reply replace-me, cookie+request  end-code|
-    -setip n2o:send-revoke ;
+    -setip net2o:send-revoke ;
 
 : disconnect-me ( -- )  +resend
     net2o-code connect( log .time s" Disconnect" $, type cr end-with )
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
-    n2o:dispose-context msg( ." Disposed context" forth:cr ) ;
+    net2o:dispose-context msg( ." Disposed context" forth:cr ) ;
 
 0 [IF]
 Local Variables:

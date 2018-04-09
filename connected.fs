@@ -29,7 +29,7 @@ connect-table $@ inherit-table context-table
     o IF
 	wait-task @ ?dup-IF
 	    <event o elit, :>dispose-context event>
-	ELSE  n2o:dispose-context  THEN
+	ELSE  net2o:dispose-context  THEN
 	un-cmd  THEN ;
 +net2o: set-ip ( $:string -- ) \g set address information
     $> setip-xt ;
@@ -41,7 +41,7 @@ connect-table $@ inherit-table context-table
 +net2o: set-blockalign ( n -- ) \g set block alignment to 2^n
     64>n 1 swap max-block# umin lshift blockalign ! ;
 +net2o: close-all ( -- ) \g close all files
-    n2o:close-all ;
+    net2o:close-all ;
 \ better slurping
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
@@ -50,8 +50,8 @@ connect-table $@ inherit-table context-table
     endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
     \ !!FIXME!! this should probably be asynchronous
-    n2o:slurp swap ulit, flag, set-top
-    ['] do-track-seek n2o:track-all-seeks net2o:send-chunks ;
+    net2o:slurp swap ulit, flag, set-top
+    ['] do-track-seek net2o:track-all-seeks net2o:send-chunks ;
 +net2o: ack-reset ( -- ) \g reset ack state
     0 ack-state c! ;
 
@@ -140,7 +140,7 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     ack-order? IF
 	parent .data-map .mapc:resend#? dup 0= IF
 	    drop timeout( ." resend# don't match!" forth:cr
-	    parent .n2o:see-me )
+	    parent .net2o:see-me )
 	    [ cookie-val 1 validated# lshift 1- xor ]L validated and!
 	ELSE
 	    validated# lshift validated +! cookie-val validated or!
@@ -168,9 +168,9 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
 gen-table $freeze
 ' context-table is gen-table
 
-: net2o:gen-resend ( -- )
+in net2o : gen-resend ( -- )
     ack-receive invert resend-toggle# and ulit, ack-resend ;
-: net2o:gen-reset ( -- )
+in net2o : gen-reset ( -- )
     ack-reset 0 to ack-receive ;
 
 : rewind ( -- )
@@ -206,14 +206,14 @@ also }scope
     file-reg# @ ulit, file-id  catch  end-with
     throw  1 file-reg# +! ;
 
-: n2o:copy ( addrsrc us addrdest ud -- )
+in net2o : copy ( addrsrc us addrdest ud -- )
     [: file( ." copy '" 2over forth:type ." ' -> '" 2dup forth:type
       ." '" forth:cr )
       2swap $, r/o ulit, open-tracked-file
       file-reg# @ save-to ;] n2o>file
     1 file-count +! ;
 
-: n2o:copy# ( addrhash u -- )
+in net2o : copy# ( addrhash u -- )
     [: file( ." copy# " 2dup 85type forth:cr )
       1 ulit, file-type 2dup $, r/o ulit, open-tracked-file
       file-reg# @ save-to# ;] n2o>file
@@ -259,18 +259,18 @@ also net2o-base
     THEN
     delta-ticks 64off  max-dticks 64off  acks off ;
 
-: net2o:acktime ( -- )
+in net2o : acktime ( -- )
     recv-addr 64@ ack@ .recv-tick 64@ ack@ .time-offset 64@ 64-
     timing( 64>r 64dup x64. 64r> 64dup u64. ." acktime" forth:cr )
     lit, lit, ack-addrtime ;
-: net2o:b2btime ( -- )
+in net2o : b2btime ( -- )
     last-raddr 64@ last-rtick 64@ 64dup 64-0=
     IF  64drop 64drop
     ELSE  ack@ .time-offset 64@ 64- lit, lit, ack-b2btime  THEN ;
 
 \ ack bits, new code
 
-: net2o:ack-resend# ( -- )  data-rmap { map }
+in net2o : ack-resend# ( -- )  data-rmap { map }
     map .mapc:data-resend#-buf $@
     bounds ?DO
 	I $@ over @ >r cell /string $FF -skip
@@ -282,7 +282,7 @@ also net2o-base
 
 \ client side acknowledge
 
-: net2o:genack ( -- )
+in net2o : genack ( -- )
     net2o:ack-resend#  net2o:b2btime  net2o:acktime  >rate ;
 
 : !rdata-tail ( -- )
@@ -304,7 +304,7 @@ $20 Value max-resend#
     data-ackbits @ dest-size addr>bytes 1-
     dest-tail addr>bits dest-back dest-size + addr>bits endwith ;
 
-: net2o:do-resend ( flag -- )
+in net2o : do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap 0= IF  drop EXIT  THEN
     0 swap  prepare-resend { acks ackm tailbits backbits }
     ack( ." ack loop: " over hex. dup hex. forth:cr )
@@ -385,7 +385,7 @@ UValue rec-ack-pos#
     ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
 
 : rewind-transfer ( -- flag )
-    data-end? IF  filereq# @ n2o:request-done  false
+    data-end? IF  filereq# @ net2o:request-done  false
 	data-rmap >o dup to mapc:dest-req o>
     ELSE  data-rmap .mapc:dest-req  THEN ;
 
@@ -443,7 +443,7 @@ scope{ mapc
 \ higher level functions
 
 : map-request, ( ucode udata -- )
-    n2o:new-map lit, swap ulit, ulit, map-request ;
+    net2o:new-map lit, swap ulit, ulit, map-request ;
 
 also net2o-base
 : nat-punch ( o:connection -- )
@@ -462,7 +462,7 @@ previous
 	\ ." Resend to 0" cr
 	cmd0!
 	[:
-	  resend( ." resend0: " resend0 $@ n2o:see forth:cr )
+	  resend( ." resend0: " resend0 $@ net2o:see forth:cr )
 	  msg( ." resend0: " resend0 $@ swap hex. hex. forth:cr )
 	  cmdreset init-reply resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
@@ -477,7 +477,7 @@ previous
 	dest-size addr>replies bounds endwith U+DO
 	    I action-of reply-xt IF
 		timeout( ." resend: " I action-of reply-xt .name forth:cr )
-		resend( ." resend: " I reply-dest 64@ x64. I 2@ n2o:see forth:cr )
+		resend( ." resend: " I reply-dest 64@ x64. I 2@ net2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!
 		I 2@ I reply-dest 64@ send-cmd drop
@@ -497,7 +497,7 @@ previous
 
 \ acknowledge toplevel
 
-: net2o:ack-code ( ackflag -- ackflag )  >r
+in net2o : ack-code ( ackflag -- ackflag )  >r
     false dup { slurp? stats? }
     net2o-code
     ack expect-reply  1 to rec-ack-pos#
@@ -520,14 +520,14 @@ previous
     slurp? IF  slurp  THEN
     end-code r> ( dup ack-toggle# and IF  map-resend?  THEN ) ;
 
-: net2o:do-ack-rest ( ackflag -- )
+in net2o : do-ack-rest ( ackflag -- )
     dup resend-toggle# and IF
 	cmd-resend? drop
     THEN
     acks# and data-rmap .mapc:ack-advance?
     IF  net2o:ack-code  THEN  ack-timing ;
 
-: net2o:do-ack ( -- )
+in net2o : do-ack ( -- )
     dest-addr 64@ recv-addr 64!  +cookie \ last received packet
     inbuf 1+ c@ ack-receive over to ack-receive xor
     +timeout0 resend-all-to 64!
@@ -592,7 +592,7 @@ previous
     ['] push-cmd IS expect-reply?
     end-code| ;
 
-: n2o:connect ( ucode udata -- )  reqsize! gen-request ;
+in net2o : connect ( ucode udata -- )  reqsize! gen-request ;
 
 previous
 

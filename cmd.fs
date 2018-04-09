@@ -93,13 +93,13 @@ end-class cmd-buf-c
 : .black85 ( addr u -- )
     <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
-: n2o:$. ( addr u -- )
+in net2o : $. ( addr u -- )
     2dup printable? IF
 	.\" \"" type
     ELSE
 	.\" 85\" " 85type
     THEN  '"' emit ;
-: n2o.string ( $:string -- )  cr $> n2o:$. ."  $, " ;
+: n2o.string ( $:string -- )  cr $> net2o:$. ."  $, " ;
 : n2o.secstring ( $:string -- ) attr @ >r
     cr $> .\" 85\" " .black85 r> attr! .\" \" sec$, " ;
 
@@ -115,13 +115,13 @@ forward key>nick
 	    false .check
 	ELSE  2drop true .check  THEN  THEN ;
 : n2o.sigstring ( $:string -- )
-    cr $> 2dup n2o:$. ."  ( " 2dup ['] .sigdates #10 base-execute
+    cr $> 2dup net2o:$. ."  ( " 2dup ['] .sigdates #10 base-execute
     2drop \ .pk(2)sig?
     ."  ) $, " ;
 
 : $.s ( $string1 .. $stringn -- )
     string-stack $@ bounds U+DO
-	cr i 2@ n2o:$.
+	cr i 2@ net2o:$.
     2 cells +LOOP ;
 
 \ object stack
@@ -233,7 +233,7 @@ Sema see-sema
     dup show-offset @ = IF  ." <<< "  THEN
     buf-state 2! p@ 64>n net2o-see buf-state 2@ ;
 
-: (n2o:see) ( addr u -- )
+in net2o : (see) ( addr u -- )
     buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup hex. t-stack $off
@@ -244,17 +244,17 @@ Sema see-sema
 : >see-table ( -- )
     o IF  token-table  ELSE  setup-table  THEN  @ see:table ! ;
 
-: n2o:see ( addr u -- )
-    >see-table (n2o:see) ;
+in net2o : see ( addr u -- )
+    >see-table net2o:(see) ;
 
 : .dest-addr ( flag -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
 
-: n2o:see-me ( -- )
+in net2o : see-me ( -- )
     ." see-me: "
     inbuf hdrflags .dest-addr
     \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
-    buf-dump 2@ n2o:see ;
+    buf-dump 2@ net2o:see ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
@@ -272,11 +272,11 @@ Defer >throw
     cmd( true )else( remote? @ 0= ) IF
 	[: ." do-cmd-loop: " dup . .exe cr ;] $err
 	dup DoError
-	buf-state @ show-offset !  <err> cr n2o:see-me <default> show-offset on
+	buf-state @ show-offset !  <err> cr net2o:see-me <default> show-offset on
     THEN
     un-cmd >throw ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!
-    cmd( <warn> dest-flags .dest-addr 2dup n2o:see <default> )
+    cmd( <warn> dest-flags .dest-addr 2dup net2o:see <default> )
     sp@ >r
     [: BEGIN   cmd-dispatch dup 0<=  UNTIL ;] catch
     trace( ." cmd loop done" .s cr )
@@ -298,7 +298,7 @@ code-buf
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
 :noname ( addr u -- ) dup maxstring u> IF
-	cmdbuf$ ~~ n2o:see true !!cmdfit!!  THEN
+	cmdbuf$ ~~ net2o:see true !!cmdfit!!  THEN
     tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
 :noname ( n -- )  cmdbuf# +! ; to -cmdbuf
 :noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
@@ -542,7 +542,7 @@ comp: :, also net2o-base ;
 
 : send-cmd ( addr u dest -- size ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
-    cmd( <info> ." send: " outflag .dest-addr dup buf# n2o:see <default> cr )
+    cmd( <info> ." send: " outflag .dest-addr dup buf# net2o:see <default> cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
 	    I outflag @ stateless# and IF  send-cX
@@ -586,7 +586,7 @@ previous
     0 r> addr reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
-    timeout( cmd( ." expect: " cmdbuf$ n2o:see ) )
+    timeout( cmd( ." expect: " cmdbuf$ net2o:see ) )
     msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
     connection >o code-reply >r
     code-vdest     r@ reply-dest 64!

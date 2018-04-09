@@ -244,15 +244,6 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
     count reverse8 r@ $9 + c@ reverse8 dst 6 + c! dst $9 + c!
     c@    reverse8 r> $8 + c@ reverse8 dst 7 + c! dst $8 + c! ;
 
-\ aliases for old Gforth (pre 20161202)
-
-[IFDEF] >deque  ' >deque alias >stack [THEN]
-[IFDEF] deque>  ' deque> alias stack> [THEN]
-[IFDEF] deque<  ' deque< alias >back [THEN]
-[IFDEF] <deque  ' <deque alias back> [THEN]
-[IFDEF] deque@  ' deque@ alias get-stack [THEN]
-[IFDEF] deque!  ' deque! alias set-stack [THEN]
-
 \ scoping
 
 Variable scope<>
@@ -267,6 +258,10 @@ Variable scope<>
     also ' execute postpone >o ; immediate restrict
 : endwith ( -- )
     postpone o> previous ; immediate restrict
+: in ( "vocabulary" "defining-word" "name" -- )
+    scope{ ' execute }scope ;
+
+Vocabulary net2o
 
 \ file name sanitizer
 

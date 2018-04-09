@@ -468,7 +468,7 @@ warnings !
     \G invite: send or accept an invitation to another user
     announce @nicks>chat
     ?nextarg IF  config:invite$ $!  THEN
-    chat-keys [: n2o:pklookup send-invitation ;] $[]map
+    chat-keys [: net2o:pklookup send-invitation ;] $[]map
     ." invitation" chat-keys $[]# 1 > IF ." s" THEN  ."  send" forth:cr ; 
 
 \ script mode
@@ -511,7 +511,7 @@ warnings !
 	    ." ===== " 2dup forth:type ."  =====" forth:cr
 	    2dup suffix>table see:table !
 	    0 { w^ content } content $slurp-file
-	    content $@ (n2o:see) forth:cr
+	    content $@ net2o:(see) forth:cr
 	    content $free  r> see:table !
 	THEN
     ;] arg-loop ;
@@ -527,7 +527,7 @@ warnings !
 	BEGIN  +resend
 	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
-	    $10 [: 2dup basename n2o:copy ;] arg-loop#
+	    $10 [: 2dup basename net2o:copy ;] arg-loop#
 	    end-code|  file:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
@@ -542,7 +542,7 @@ warnings !
 	BEGIN  +resend
 	    net2o-code expect+slurp  close-all
 	    $10 blocksize! $A blockalign!
-	    $10 [: base85>$ n2o:copy# ;] arg-loop#
+	    $10 [: base85>$ net2o:copy# ;] arg-loop#
 	    end-code|  file:close-all
 	    ?peekarg  WHILE  2drop
 	REPEAT
@@ -558,22 +558,22 @@ warnings !
     ".n2o" $1FF init-dir drop
     ".n2o/files" touch
     ?nextarg 0= IF  pad $1000 get-dir 2dup '/' -scan nip /string THEN
-    n2o:new-dvcs >o project:project$ $!
+    net2o:new-dvcs >o project:project$ $!
     ?nextarg 0= IF  "master"  THEN  project:branch$ $!
-    save-project  n2o:dispose-dvcs o> ;
+    save-project  net2o:dispose-dvcs o> ;
 
 : add ( -- )
     \U add file1 .. filen
     \G add: add files to the dvcs project in the current folder
-    n2o:new-dvcs >o files>dvcs
-    ['] dvcs-add arg-loop  n2o:dispose-dvcs o> ;
+    net2o:new-dvcs >o files>dvcs
+    ['] dvcs-add arg-loop  net2o:dispose-dvcs o> ;
 
 : ref ( -- )
     \U ref file1 .. filen
     \G ref: add files to the dvcs project in the current folder
     \G ref: as references
-    n2o:new-dvcs >o files>dvcs
-    ['] dvcs-ref arg-loop  n2o:dispose-dvcs o> ;
+    net2o:new-dvcs >o files>dvcs
+    ['] dvcs-ref arg-loop  net2o:dispose-dvcs o> ;
 
 : ci ( -- )
     \U ci "message"

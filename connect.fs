@@ -16,7 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Forward >invitations
-Forward n2o:dispose-punchs
+in net2o Forward dispose-punchs
 Forward mynick$
 Forward invite-me
 Forward qr-invite-me
@@ -32,7 +32,7 @@ reply-table $@ inherit-table connect-table
 \g 
 
 $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
-    o 0<> own-crypt? and IF  n2o:request-done  ELSE  drop  THEN ;
+    o 0<> own-crypt? and IF  net2o:request-done  ELSE  drop  THEN ;
 +net2o: set-cookie ( utimestamp -- ) \g cookies and round trip delays
     own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
@@ -52,7 +52,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 \ punch-stuff needs to be moved to connected
 +net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
     $> $, nest  o IF  ['] punchs code-reply is send-xt  THEN
-    n2o:dispose-punchs ;
+    net2o:dispose-punchs ;
 +net2o: punch ( $:string -- ) \g punch NAT traversal hole
     $> net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
@@ -95,7 +95,7 @@ $30 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     o 0<> tmp-crypt? and own-crypt? or IF  64>n  new-code!  EXIT  THEN
     64drop 64drop 64drop  un-cmd ;
 
-: n2o:create-map
+in net2o : create-map
     { 64: addrs ucode udata 64: addrd -- addrd ucode udata addrs }
     addrs lit, addrd lit, ucode ulit, new-code
     addrs min-size ucode lshift n>64 64+ lit,
@@ -114,9 +114,9 @@ $30 net2o: tmpnest ( $:string -- ) \g nested (temporary encrypted) command
     nest[
     ?new-mykey  ticker 64@ lit, set-cookie
     max-data# umin swap max-code# umin swap
-    n2o:new-map n2o:create-map
+    net2o:new-map net2o:create-map
     keypad keysize sec$, store-key  stskc KEYSIZE erase
-    ]nest  n2o:create-map
+    ]nest  net2o:create-map
     64drop 2drop 64drop ;
 
 +net2o: set-tick ( uticks -- ) \g adjust time

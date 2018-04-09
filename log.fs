@@ -46,7 +46,7 @@ gen-table $freeze
 
 $32 net2o: log ( -- o:log )
     log-context @ dup 0= IF
-	drop  n2o:new-log dup log-context !
+	drop  net2o:new-log dup log-context !
     THEN  n:>o ;
 log-table >table
 
