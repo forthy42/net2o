@@ -93,12 +93,14 @@ end-class cmd-buf-c
 : .black85 ( addr u -- )
     <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
+0 warnings !@ \ $. could be mistaken as double 0
 in net2o : $. ( addr u -- )
     2dup printable? IF
 	.\" \"" type
     ELSE
 	.\" 85\" " 85type
     THEN  '"' emit ;
+warnings !
 : n2o.string ( $:string -- )  cr $> net2o:$. ."  $, " ;
 : n2o.secstring ( $:string -- ) attr @ >r
     cr $> .\" 85\" " .black85 r> attr! .\" \" sec$, " ;
@@ -570,7 +572,7 @@ previous
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r> reply-dest 64! ;
 : net2o:ok ( tag -- )
-    timeout( ." ok: " dup hex. forth:cr )
+\    timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
     resend0 $off

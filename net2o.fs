@@ -1093,7 +1093,7 @@ Create chunk-adder chunks-struct allot
 0 Value timeout-task
 0 Value query-task    \ for background queries initiated in other tasks
 
-: !!0depth!! ( -- ) ]] depth IF  ~~ true !!depth!!  THEN [[ ; immediate
+: !!0depth!! ( -- ) ]] depth IF  ~~bt "Stack should always be empty!" type cr  THEN [[ ; immediate
 : event-loop' ( -- )  BEGIN  stop  !!0depth!!  AGAIN ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
@@ -1393,13 +1393,13 @@ Forward handle-beacon+hash
 
 0 Value dump-fd
 
-in net2o : timeout ( ticks -- ) \ print why there is nothing to send
-    ack@ .>flyburst net2o:send-chunks
-    timeout( ." timeout? " .ticks space
-    resend? . data-tail? . data-head? . fstates .
-    chunks+ ? ack@ .bandwidth? . next-chunk-tick .ticks cr
-    data-rmap @ with mapc data-ackbits @ dest-size addr>bytes dump endwith
-    )else( 64drop ) ;
+\ in net2o : timeout ( ticks -- ) \ print why there is nothing to send
+\     ack@ .>flyburst net2o:send-chunks
+\     timeout( ." timeout? " .ticks space
+\     resend? . data-tail? . data-head? . fstates .
+\     chunks+ ? ack@ .bandwidth? . next-chunk-tick .ticks cr
+\     data-rmap @ with mapc data-ackbits @ dest-size addr>bytes dump endwith
+\     )else( 64drop ) ;
 
 \ timeout handling
 

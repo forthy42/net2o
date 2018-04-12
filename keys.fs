@@ -443,7 +443,7 @@ Variable secret-nicks#
     ." Key '" key# #@ 0= IF drop EXIT THEN
     cell+ ..nick ." ' ok" cr ;
 
-Defer dht-nick?
+Forward dht-nick?
 event: :>search-key  key| over >r dht-nick? r> free throw ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
@@ -455,12 +455,12 @@ Variable unkey-id#
     IF  64@ unkey-to# 64+ ticks 64- 64-0>=  THEN  0= ;
     
 : (.key-id) ( addr u -- ) key| 2dup key# #@ 0=
-    IF  drop up@ receiver-task = IF
-	    <event 2dup save-mem e$, :>search-key main-up@ event>
+    IF  drop up@ main-up@ <> IF
+	    <event 2dup save-mem e$, :>search-key main-up@ event|
 	    .unkey-id EXIT  THEN
 	2dup ?unkey  IF
 	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
-	    connection >r 2dup ['] dht-nick? cmd-nest r> to connection
+	    connection >r 2dup [: dht-nick? ;] cmd-nest r> to connection
 	    2dup key# #@ 0= IF  drop .unkey-id EXIT
 	    ELSE  >r 2dup unkey-id# #off r>  THEN
 	ELSE  .unkey-id  EXIT  THEN
@@ -468,7 +468,7 @@ Variable unkey-id#
     cell+ ..nick 2drop ;
 
 : .key-id ( addr u -- )
-    last# >r  (.key-id)  r> to last# ;
+    last# >r (.key-id) r> to last# ;
 
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
 

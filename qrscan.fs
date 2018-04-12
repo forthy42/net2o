@@ -427,7 +427,8 @@ previous
     1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL
     rdrop ;
 
-: scan-qr ( -- )  lastscan$ $free
+: scan-qr ( -- )
+    [IFDEF] lastscan$  lastscan$ $free  [THEN]
     scan-start  ['] scan-loop catch  level# off
     cam-end 0>framebuffer
     [IFDEF] saturate% 1.0e saturate% sf! [THEN]

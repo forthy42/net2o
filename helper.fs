@@ -327,10 +327,10 @@ User pings[]
 : receive-pings ( -- )
     requests->0 ;
 
-:noname ( pk u -- )
+: dht-nick? ( pk u -- )
     dup 4 < IF  2drop  EXIT  THEN
     search-key[] $off search-key[] $+[]!
-    search-keys insert-keys save-pubkeys ; is dht-nick?
+    search-keys insert-keys save-pubkeys ;
 
 \ connect, disconnect debug
 

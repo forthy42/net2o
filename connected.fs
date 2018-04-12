@@ -46,7 +46,8 @@ connect-table $@ inherit-table context-table
 
 +net2o: set-top ( utop flag -- ) \g set top, flag is true when all data is sent
     >r 64>n r> data-rmap with mapc
-    over dest-top <> and dest-end or! dest-top!
+	over dest-top <> and false dest-end ?!@ drop \ atomic, replaces or!
+	dest-top!
     endwith ;
 +net2o: slurp ( -- ) \g slurp in tracked files
     \ !!FIXME!! this should probably be asynchronous
@@ -150,11 +151,11 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent .net2o:rewind-sender-partial ;
-+net2o: set-head ( addr -- ) \g set head
-    64>n parent .data-rmap >o addr mapc:dest-head o> umax! ;
-+net2o: timeout ( uticks -- ) \g timeout request
-    parent >o net2o:timeout  data-map .mapc:dest-tail o> ulit, set-head ;
-+net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
+\ +net2o: set-head ( addr -- ) \g set head
+\     64>n parent .data-rmap >o addr mapc:dest-head o> umax! ;
+\ +net2o: timeout ( uticks -- ) \g timeout request
+\     parent >o net2o:timeout data-map .mapc:dest-back ulit, set-head o> ;
+$2C net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 +net2o: seq# ( n -- ) \g set the ack number and check for smaller
     64>n parent .data-map with mapc
@@ -488,7 +489,7 @@ previous
 
 : cmd-resend? ( -- n )
     0-resend? map-resend?
-    timeout( ." resend " over . dup . ." commands 0/map" cr ) + ;
+    timeout( 2dup d0<> IF ." resend " over . dup . ." commands 0/map" cr THEN ) + ;
 
 : .expected ( -- )
     forth:.time ." expected/received: " recv-addr @ hex.

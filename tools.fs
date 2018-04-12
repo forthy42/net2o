@@ -258,8 +258,6 @@ Variable scope<>
     also ' execute postpone >o ; immediate restrict
 : endwith ( -- )
     postpone o> previous ; immediate restrict
-: in ( "vocabulary" "defining-word" "name" -- )
-    scope{ ' execute }scope ;
 
 Vocabulary net2o
 
