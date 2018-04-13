@@ -244,7 +244,7 @@ User hostc$ \ check for this hostname
 
 : insert-host ( addr u -- flag )  dest-0key dest-0key> !
     new-addr  dup host=  IF
-	." insert: " dup .host-id $@ type cr
+	msg( ." insert: " dup .host-id $@ type cr )
 	dup insert-addr  ELSE  false  THEN
     swap .net2o:dispose-addr ;
 

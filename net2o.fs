@@ -1541,27 +1541,27 @@ Defer extra-dispose ' noop is extra-dispose
 
 in net2o : dispose-context ( o:addr -- o:addr )
     [: cmd( ." Disposing context... " o hex. cr )
-	timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
-	o-timeout o-chunks extra-dispose
-	data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
-	end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
-	end-strings start-strings DO  I $off     cell +LOOP
-	end-secrets start-secrets DO  I sec-off  cell +LOOP
-	fstate-off
-	\ erase crypto keys
-	log-context @ ?dup-IF  .dispose  THEN
-	ack-context @ ?dup-IF
-	    >o timing-stat $off track-timing $off dispose o>
-	THEN
-	msging-context @ ?dup-IF  .dispose  THEN
-	msg-context    @ ?dup-IF  .dispose  THEN
-	unlink-ctx  ungroup-ctx
-	end-semas start-semas DO  I pthread_mutex_destroy drop
-	1 pthread-mutexes +LOOP
-	dispose  0 to connection
-	cmd( ." disposed" cr ) ;] file-sema c-section ;
+      timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
+      o-timeout o-chunks extra-dispose
+      data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
+      end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
+      end-strings start-strings DO  I $off     cell +LOOP
+      end-secrets start-secrets DO  I sec-off  cell +LOOP
+      fstate-off
+      \ erase crypto keys
+      log-context @ ?dup-IF  .dispose  THEN
+      ack-context @ ?dup-IF
+	  >o timing-stat $off track-timing $off dispose o>
+      THEN
+      msging-context @ ?dup-IF  .dispose  THEN
+      msg-context    @ ?dup-IF  .dispose  THEN
+      unlink-ctx  ungroup-ctx
+      end-semas start-semas DO  I pthread_mutex_destroy drop
+      1 pthread-mutexes +LOOP
+      dispose  0 to connection
+      cmd( ." disposed" cr ) ;] file-sema c-section ;
 
-event: :>dispose-context ( o -- ) .net2o:dispose-context ;
+event: :>dispose-context ( o -- )  .net2o:dispose-context ;
   
 \ loops for server and client
 
