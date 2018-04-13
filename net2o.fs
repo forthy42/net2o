@@ -1088,12 +1088,13 @@ end-structure
 Variable chunks
 Variable chunks+
 Create chunk-adder chunks-struct allot
-0 Value sender-task
-0 Value receiver-task
-0 Value timeout-task
+0 Value sender-task   \ asynchronous sender thread (unused)
+0 Value receiver-task \ receiver thread
+0 Value timeout-task  \ for handling timeouts
 0 Value query-task    \ for background queries initiated in other tasks
 
-: !!0depth!! ( -- ) ]] depth IF  ~~bt "Stack should always be empty!" type cr  THEN [[ ; immediate
+: .0depth ( -- ) <warn> "Stack should always be empty!" type cr <default> ;
+: !!0depth!! ( -- ) ]] depth IF  .0depth ~~bt clearstack  THEN [[ ; immediate
 : event-loop' ( -- )  BEGIN  stop  !!0depth!!  AGAIN ;
 : create-query-task ( -- )
     ['] event-loop' 1 net2o-task to query-task ;
@@ -1686,7 +1687,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 \ timeout loop
 
 : event-send ( -- )
-    o IF  wait-task @  ?dup-IF  event>  THEN  0 >o rdrop  THEN ;
+    o IF  wait-task @ ?query-task over select event> 0 >o rdrop  THEN ;
 
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 #10.000000000 d>64 64Constant max-timeout# \ 10s sleep, no more
