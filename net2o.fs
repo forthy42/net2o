@@ -1476,7 +1476,7 @@ Sema lp-sema
 : last-packet? ( addr -- flag )
     [: last-packets $@ bounds U+DO
 	  64dup I lp-addr 64= IF
-	      mst( ." resend last packet @" 64dup x64. cr )
+	      msg( ." resend last packet @" 64dup x64. cr )
 	      I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
 	      64drop true unloop  EXIT
 	  THEN
