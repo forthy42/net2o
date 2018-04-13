@@ -1465,7 +1465,7 @@ Variable last-packets
 Sema lp-sema
 
 : last-packet! ( -- )
-    msg( ." last packet @" dest-addr 64@ x64. cr )
+    unhandled( ." last packet @" dest-addr 64@ x64. cr )
     outbuf dup packet-size last-packet-desc to lp$
     dest-addr 64@ last-packet-desc to lp-addr
     ticks last-packet-desc to lp-time
@@ -1476,7 +1476,7 @@ Sema lp-sema
 : last-packet? ( addr -- flag )
     [: last-packets $@ bounds U+DO
 	  64dup I lp-addr 64= IF
-	      msg( ." resend last packet @" 64dup x64. cr )
+	      unhandled( ." resend last packet @" 64dup x64. cr )
 	      I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
 	      64drop true unloop  EXIT
 	  THEN
@@ -1485,7 +1485,7 @@ Sema lp-sema
 : last-packet-tos ( -- )
     ticks connect-timeout# 64-
     [: last-packets $@ bounds U+DO
-	  64dup I lp-time 64u< IF
+	  64dup I lp-time 64u> IF
 	      I addr lp$ $free
 	  ELSE
 	      last-packets 0 I last-packets $@ drop - $del
@@ -1564,7 +1564,7 @@ scope{ mapc
     ELSE
 	inbuf body-size check-dest dup 0= IF
 	    drop  dest-addr 64@ last-packet? 0= IF
-		msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
+		unhandled( ." unhandled packet to: " dest-addr 64@ x64. cr )
 	    THEN  EXIT  THEN +dest
 	handle-dest
     THEN ;

@@ -77,6 +77,7 @@ debug: slurp( \ debug slurp&spit
 debug: wallet( \ debug wallet stuff
 debug: qr( \ qr code stuff
 debug: deprecated( \ deprecated stuff
+debug: unhandled( \ unhandled commands
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
