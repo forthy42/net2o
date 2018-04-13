@@ -399,6 +399,7 @@ bursts# 2* 2* 1- Value tick-init \ ticks without ack
 $100 Value flybursts-max#
 $20 cells Value resend-size#
 #50.000.000 d>64 64Constant init-delay# \ 50ms initial timeout step
+#60.000.000.000 d>64 64Constant connect-timeout# \ 60s connect timeout
 
 Variable init-context#
 Variable msg-groups
@@ -1461,20 +1462,37 @@ last-packet buffer: last-packet-desc
 
 Variable last-packets
 
+Sema lp-sema
+
 : last-packet! ( -- )
+    msg( ." last packet @" dest-addr 64@ x64. cr )
     outbuf dup packet-size last-packet-desc to lp$
     dest-addr 64@ last-packet-desc to lp-addr
     ticks last-packet-desc to lp-time
-    last-packet-desc last-packet last-packets $+!
+    [: last-packet-desc last-packet last-packets $+! ;]
+    lp-sema c-section
     last-packet-desc addr lp$ off ;
 
 : last-packet? ( addr -- flag )
-    last-packets $@ bounds U+DO
-	64dup I lp-addr 64= IF
-	    I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
-	    64drop true unloop  EXIT
-	THEN
-    last-packet +LOOP  64drop false ;
+    [: last-packets $@ bounds U+DO
+	  64dup I lp-addr 64= IF
+	      mst( ." resend last packet @" 64dup x64. cr )
+	      I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
+	      64drop true unloop  EXIT
+	  THEN
+      last-packet +LOOP  64drop false ;] lp-sema c-section ;
+
+: last-packet-tos ( -- )
+    ticks connect-timeout# 64-
+    [: last-packets $@ bounds U+DO
+	  64dup I lp-time 64u< IF
+	      I addr lp$ $free
+	  ELSE
+	      last-packets 0 I last-packets $@ drop - $del
+	      64drop unloop  EXIT
+	  THEN
+      last-packet +LOOP  64drop ;]
+    lp-sema c-section ;
 
 \ handling packets
 
@@ -1812,8 +1830,6 @@ Variable initialized
 \ connection cookies
 
 Variable cookies
-
-#60.000.000.000 d>64 64Constant connect-timeout#
 
 : add-cookie ( -- cookie64 )
     [: ticks 64dup o
