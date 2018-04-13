@@ -444,17 +444,20 @@ Variable secret-nicks#
     cell+ ..nick ." ' ok" cr ;
 
 Forward dht-nick?
+Variable keysearchs#
 event: :>search-key ( $addr -- )
     { w^ key } key $@ dht-nick? key $free
-    [: ." search-key " .time cr ;] $tmp stderr write-file throw ;
+    [: ." search-key " .time cr ;] $tmp stderr write-file throw
+    1 keysearch# +!@ ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
-    IF  drop ?events
+    IF  drop keysearch# @ >r
 	<event 2dup $make elit, :>search-key ?query-task event|
-	[: ." keyid-wait " .time cr ;] $tmp type
-	2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
+	BEGIN  keysearch# @ r@ =  WHILE  <event  query-task event|  REPEAT
+	[: ." key-id " .time cr ;] $tmp stderr write-file throw
+	rdrop  2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
     THEN
     cell+ ..nick 2drop r> to last# ;
 
