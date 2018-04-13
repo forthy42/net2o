@@ -451,7 +451,7 @@ event: :>search-key ( $addr -- )
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
-    IF  drop
+    IF  drop ?events
 	<event 2dup $make elit, :>search-key ?query-task event|
 	[: ." keyid-wait " .time cr ;] $tmp type
 	2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
