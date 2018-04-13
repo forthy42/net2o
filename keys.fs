@@ -445,14 +445,13 @@ Variable secret-nicks#
 
 Forward dht-nick?
 event: :>search-key ( $addr -- )
-    connection { w^ key c } key $@ [: dht-nick? ;] cmd-nest key $free
-    c to connection ;
+    { w^ key } key $@ [: dht-nick? ;] cmd-nest key $free ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
     IF  drop
-	<event 2dup $make elit, :>search-key main-up@ event|
+	<event 2dup $make elit, :>search-key ?query-task event|
 	2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
     THEN
     cell+ ..nick 2drop r> to last# ;
