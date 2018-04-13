@@ -1772,7 +1772,9 @@ Forward next-saved-msg
 	beacon?         !!0depth!!
 	save-msgs?      !!0depth!!
 	request-timeout !!0depth!!
-	event-send      !!0depth!!  AGAIN ;
+	event-send      !!0depth!!
+	last-packet-tos !!0depth!!
+    AGAIN ;
 
 : create-timeout-task ( -- )  timeout-task ?EXIT
     ['] timeout-loop 1 net2o-task to timeout-task ;
