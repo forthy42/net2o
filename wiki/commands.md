@@ -223,10 +223,6 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   resend numbers
 + $29 ack-flush ( addr -- )
   flushed to addr
-+ $2A set-head ( addr -- )
-  set head
-+ $2B timeout ( uticks -- )
-  timeout request
 + $2C set-rtdelay ( ticks -- )
   set round trip delay only
 + $2D seq# ( n -- )

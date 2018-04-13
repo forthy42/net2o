@@ -444,31 +444,17 @@ Variable secret-nicks#
     cell+ ..nick ." ' ok" cr ;
 
 Forward dht-nick?
-event: :>search-key  key| over >r dht-nick? r> free throw ;
+event: :>search-key ( $addr -- )
+    { w^ key } key $@ [: dht-nick? ;] cmd-nest key $free ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
-Variable unkey-id#
-#60.000.000.000 d>64 64Constant unkey-to#
-: ?unkey ( addr u -- flag )
-    unkey-id# #@
-    IF  64@ unkey-to# 64+ ticks 64- 64-0>=  THEN  0= ;
-    
-: (.key-id) ( addr u -- ) key| 2dup key# #@ 0=
-    IF  drop up@ main-up@ <> IF
-	    <event 2dup save-mem e$, :>search-key main-up@ event|
-	    .unkey-id EXIT  THEN
-	2dup ?unkey  IF
-	    ticks { 64^ tx } tx 1 64s 2over unkey-id# #!
-	    connection >r 2dup [: dht-nick? ;] cmd-nest r> to connection
-	    2dup key# #@ 0= IF  drop .unkey-id EXIT
-	    ELSE  >r 2dup unkey-id# #off r>  THEN
-	ELSE  .unkey-id  EXIT  THEN
+: .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
+    IF  drop
+	<event 2dup $make elit, :>search-key main-up@ event|
+	2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
     THEN
-    cell+ ..nick 2drop ;
-
-: .key-id ( addr u -- )
-    last# >r (.key-id) r> to last# ;
+    cell+ ..nick 2drop r> to last# ;
 
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
 
