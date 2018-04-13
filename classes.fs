@@ -273,6 +273,7 @@ cmd-class class
 
     cvalue: key-setup?     \ true if key setup is done
     cvalue: invite-result# \ invitation result
+    cvalue: closing?
     \ flow control, sender part
 
     64field: next-timeout \ ns

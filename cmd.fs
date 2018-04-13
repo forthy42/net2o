@@ -550,7 +550,8 @@ comp: :, also net2o-base ;
 	    I outflag @ stateless# and IF  send-cX
 	    ELSE
 		send-reply >r over buf# r@ 2!
-		r> addr send-xt @ ?dup-IF  execute  THEN  THEN
+		r> send-xt
+	    THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
@@ -563,7 +564,7 @@ comp: :, also net2o-base ;
 also net2o-base
 
 : cmd-send? ( -- )
-    cmdbuf# @ IF  expect-reply? cmd  THEN ;
+    cmdbuf# @ 1 u> IF  expect-reply? cmd  THEN ;
 
 previous
 

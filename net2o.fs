@@ -916,12 +916,15 @@ User outflag  outflag off
 
 #90 Constant EMSGSIZE
 
-: packet-to ( addr -- )  >dest
-    out-route  outbuf dup packet-size
-    send-a-packet 0< IF
+: ?msgsize ( ior -- )
+    0< IF
 	errno EMSGSIZE <> ?ior
 	max-size^2 1- to max-size^2  ." pmtu/2" cr
     THEN ;
+
+: packet-to ( -- )
+    out-route  outbuf dup packet-size
+    send-a-packet ?msgsize ;
 
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
@@ -930,12 +933,12 @@ User outflag  outflag off
 	cmd0( .time ." cmd0 to: " ret-addr .addr-path cr )
     ELSE
 	code-map outbuf-encrypt
-    THEN   ret-addr packet-to ;
+    THEN   ret-addr >dest packet-to ;
 
 : send-data-packet ( -- ) +sendX
     header( ." send data " outbuf .header )
     data-map  outbuf-encrypt
-    ret-addr packet-to ;
+    ret-addr >dest packet-to ;
 
 : >send ( addr n -- )
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
@@ -1446,6 +1449,33 @@ Variable timeout-tasks
 
 : -timeout      ['] no-timeout  is timeout-xt o-timeout ;
 
+\ handling last packets
+
+begin-structure last-packet
+    64value: lp-addr
+    64value: lp-time
+    $value: lp$
+end-structure
+
+last-packet buffer: last-packet-desc
+
+Variable last-packets
+
+: last-packet! ( -- )
+    outbuf dup packet-size last-packet-desc to lp$
+    dest-addr 64@ last-packet-desc to lp-addr
+    ntime last-packet-desc to lp-time
+    last-packet-desc last-packet last-packets $+!
+    last-packet-desc addr lp$ off ;
+
+: last-packet? ( addr -- flag )
+    last-packets $@ bounds U+DO
+	64dup I lp-addr 64= IF
+	    I lp$ over 0 swap packet-route drop send-a-packet ?msgsize
+	    64drop true unloop  EXIT
+	THEN
+    last-packet +LOOP  64drop false ;
+
 \ handling packets
 
 Forward cmd-exec ( addr u -- )
@@ -1488,7 +1518,7 @@ scope{ mapc
     $error-id $off    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap cmd-exec
-    o IF  ( 0timeout ) o>  ELSE  rdrop  THEN
+    o IF  closing?  IF  last-packet!  THEN  o>  ELSE  rdrop  THEN
     remote? off ;
 ' handle-cmd rcode-class to handle
 ' drop code-class to handle
@@ -1515,8 +1545,9 @@ scope{ mapc
 	handle-cmd0
     ELSE
 	inbuf body-size check-dest dup 0= IF
-	    msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
-	    drop  EXIT  THEN +dest
+	    drop  dest-addr 64@ last-packet? 0= IF
+		msg( ." unhandled packet to: " dest-addr 64@ x64. cr )
+	    THEN  EXIT  THEN +dest
 	handle-dest
     THEN ;
 

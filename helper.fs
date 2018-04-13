@@ -184,6 +184,7 @@ event: :>do-beacon ( addr -- )
 	'!' of  !-beacon  endof
 	'.' of  .-beacon  endof
 	'>' of  >-beacon  endof
+	nip
     endcase ;
 
 Variable my-beacon
