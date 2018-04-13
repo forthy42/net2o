@@ -446,7 +446,7 @@ Variable secret-nicks#
 Forward dht-nick?
 event: :>search-key ( $addr -- )
     { w^ key } key $@ dht-nick? key $free
-    [: ." search-key " .time cr ;] $tmp type ;
+    [: ." search-key " .time cr ;] $tmp stderr write-file throw ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
