@@ -445,7 +445,8 @@ Variable secret-nicks#
 
 Forward dht-nick?
 event: :>search-key ( $addr -- )
-    { w^ key } key $@ [: dht-nick? ;] cmd-nest key $free ;
+    connection { w^ key c } key $@ [: dht-nick? ;] cmd-nest key $free
+    c to connection ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
