@@ -448,14 +448,14 @@ Variable keysearchs#
 event: :>search-key ( $addr -- )
     { w^ key } key $@ dht-nick? key $free
     [: ." search-key " .time cr ;] $tmp stderr write-file throw
-    1 keysearch# +!@ ;
+    1 keysearchs# +!@ ;
 
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
-    IF  drop keysearch# @ >r
+    IF  drop keysearchs# @ >r
 	<event 2dup $make elit, :>search-key ?query-task event|
-	BEGIN  keysearch# @ r@ =  WHILE  <event  query-task event|  REPEAT
+	BEGIN  keysearchs# @ r@ =  WHILE  <event  query-task event|  REPEAT
 	[: ." key-id " .time cr ;] $tmp stderr write-file throw
 	rdrop  2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
     THEN
