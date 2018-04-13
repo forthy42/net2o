@@ -431,7 +431,7 @@ in net2o : send-revoke ( addr u -- )
     net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip net2o:send-revoke ;
 
-: disconnect-me ( -- )  +resend
+: disconnect-me ( -- )  -timeout
     net2o-code connect( log .time s" Disconnect" $, type cr end-with )
       close-all disconnect  end-code msg( ." disconnected" forth:cr )
     net2o:dispose-context msg( ." Disposed context" forth:cr ) ;

@@ -381,25 +381,27 @@ in net2o : spit { back tail -- newback }
 
 \ file status stuff
 
-in net2o : get-stat ( -- mtime mod )
+scope{ net2o
+
+: get-stat ( -- mtime mod )
     fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] $FFF and ;
 ' net2o:get-stat fs-class to fs-get-stat
 ' net2o:get-stat hashfs-class to fs-get-stat
 
-in net2o : track-mod ( mod fileno -- )
+: track-mod ( mod fileno -- )
     [IFDEF] android 2drop
     [ELSE] swap fchmod ?ior [THEN] ;
 
-in net2o : set-stat ( mtime mod -- )
+: set-stat ( mtime mod -- )
     fs-fid @ fileno net2o:track-mod to fs-time ;
 ' net2o:set-stat fs-class to fs-set-stat
 ' net2o:set-stat hashfs-class to fs-set-stat
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 
-in net2o : close-file ( id -- )
+: close-file ( id -- )
     id>addr? .fs-close ;
 
 : blocksizes! ( n -- )
@@ -408,18 +410,18 @@ in net2o : close-file ( id -- )
     ." file write: ======= " dup . forth:cr )
     dup residualread !  residualwrite ! ;
 
-in net2o : close-all ( -- )
+: close-all ( -- )
     msg( ." Closing all files" forth:cr )
     [:  fstates 0 ?DO  I net2o:close-file  LOOP
 	file-reg# off  fstate-off  blocksize @ blocksizes!
 	read-file# off  write-file# off ;] file-sema c-section ;
 
-in net2o : open-file ( addr u mode id -- )
+: open-file ( addr u mode id -- )
     state-addr .fs-open ;
 
 \ read in from files
 
-in net2o : slurp-block ( id -- delta )
+: slurp-block ( id -- delta )
     data-head@ file( over data-map .mapc:dest-raddr -
     >r ." file read: " 2 pick .
     2 pick id>addr? .fs-seek #10 64rshift $64. r> #10 rshift hex. )
@@ -427,7 +429,7 @@ in net2o : slurp-block ( id -- delta )
     file( dup hex. residualread @ hex. forth:cr ) ;
 
 \ careful: must follow exactpy the same logic as net2o:spit (see above)
-in net2o : slurp ( -- head end-flag )
+: slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
     slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
     read-file# ? residualread @ hex. forth:cr )
@@ -448,7 +450,7 @@ in net2o : slurp ( -- head end-flag )
 
     file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
     
-in net2o : track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
+: track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
     [: { xt } 8 cells 0 DO
 	    dup 1 and IF
 		I dup id>addr? >o fs-seek fs-seekto 64<> IF
@@ -457,12 +459,14 @@ in net2o : track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
 	    THEN  2/
 	LOOP  drop ;] file-sema c-section ;
 
-in net2o : track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
+: track-all-seeks ( xt -- ) \ xt: ( i seeklen -- )
     [: { xt } fstates 0 ?DO
 	    I dup id>addr? >o fs-seek fs-seekto 64<> IF
 		fs-seekto 64dup to fs-seek o>
 		xt execute  ELSE  drop o>  THEN
 	LOOP ;] file-sema c-section ;
+
+}scope
 
 \ permission checks
 

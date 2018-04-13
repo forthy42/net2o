@@ -37,7 +37,7 @@ connect-table $@ inherit-table context-table
     >sockaddr $, set-ip [: $, set-ip ;] n2oaddrs ;
 
 +net2o: set-blocksize ( n -- ) \g set blocksize to 2^n
-    64>n 1 swap max-block# umin lshift blocksizes! ;
+    64>n 1 swap max-block# umin lshift net2o:blocksizes! ;
 +net2o: set-blockalign ( n -- ) \g set block alignment to 2^n
     64>n 1 swap max-block# umin lshift blockalign ! ;
 +net2o: close-all ( -- ) \g close all files
@@ -194,7 +194,7 @@ in net2o : gen-reset ( -- )
 also }scope
 
 : blocksize! ( n -- )  max-block# umin dup ulit, set-blocksize
-    1 swap lshift blocksizes! ;
+    1 swap lshift net2o:blocksizes! ;
 : blockalign! ( n -- ) max-block# umin dup ulit, set-blockalign
     1 swap lshift blockalign ! ;
 
