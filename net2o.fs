@@ -1464,7 +1464,7 @@ Variable last-packets
 : last-packet! ( -- )
     outbuf dup packet-size last-packet-desc to lp$
     dest-addr 64@ last-packet-desc to lp-addr
-    ntime last-packet-desc to lp-time
+    ticks last-packet-desc to lp-time
     last-packet-desc last-packet last-packets $+!
     last-packet-desc addr lp$ off ;
 
