@@ -1491,7 +1491,7 @@ Sema lp-sema
 	      last-packets 0 I last-packets $@ drop - $del
 	      64drop unloop  EXIT
 	  THEN
-      last-packet +LOOP  64drop ;]
+      last-packet +LOOP  s" " last-packets $! ;]
     lp-sema c-section ;
 
 \ handling packets
