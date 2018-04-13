@@ -85,13 +85,13 @@ Variable announced
 : pk:fetch-host ( key u -- )
     net2o-code
       expect-reply get-ip fetch-id, cookie+request
-    end-code| -setip net2o:send-replace ;
+    end-code| -setip ;
 
 : pk:addme-fetch-host ( key u -- ) +addme
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
-    end-code| -setip net2o:send-replace ;
+    end-code| -setip net2o:send-replace  announced on ;
 
 \ NAT retraversal
 
@@ -217,9 +217,10 @@ Variable my-beacon
     dht-connect  2dup r> execute  replace-loop  disconnect-me ;
 
 : pk-lookup ( addr u -- )
-    ['] pk:addme-fetch-host pk-query 0= !!host-notfound!! ;
+    ['] pk:fetch-host  ['] pk:addme-fetch-host  announced @ select
+    pk-query 0= !!host-notfound!! ;
 
-: pk-peek? ( pk u -- flag )  ['] c:fetch-id pk-query ;
+: pk-peek? ( pk u -- flag )  ['] pk:fetch-host pk-query ;
 
 User hostc$ \ check for this hostname
 
