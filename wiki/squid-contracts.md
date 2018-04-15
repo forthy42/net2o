@@ -128,6 +128,15 @@ sources are never reordered.  Sources are written as pk+timestamp, but hashed
 in as their signature, so you can only verify the destination signature if you
 actually have checked for the source state in the corresponding ledger.
 
+## Mixer
+
+Note that there can be an arbitrary amount of participants in one contract, so
+it is possible to merge contracts with the consent of all participants.  If
+you want to anonymize your account, you need to distribute the value into
+difficult to track coins (e.g. powers of two), and to do so without being
+tracked, many other people have to do the same thing, and do it in the same
+big merged contract.
+
 ## Size of a transaction
 
 + Opcodes are one byte (there aren't that many); literals are bytewise encoded
@@ -136,11 +145,10 @@ actually have checked for the source state in the corresponding ledger.
 + Sources are 8+32=40 bytes strings
 + Assets are an integer (index into the set of assets), an optional describing
   string (not needed for a currency)
-+ Values are (for negative values zigzag encoded) 64 bit integers, for a legal
-  tender, the scale is in cents, for deflationary coins the scale can be
-  considerably larger.  Sums are always kept in 128 bits, so for really large
-  transactions, you can use double values (two 64 bit integers, one normal,
-  one zigzag encoded).
++ Values are 64 bit integers.  For a legal tender, the scale is in cents, for
+  deflationary coins the scale can be considerably larger.  Sums are always
+  kept in 128 bits, so for really large transactions, you can use double
+  values (two 64 bit integers).
 + Destinations are signatures with timestamp and expiration, i.e. 80 bytes
   strings.
 
@@ -153,10 +161,10 @@ Monetary assets are just units of a currency; interchangeable, summable, and
 it is irrelevant who's obligation will be used to fulfill the contract.
 
 Real world assets may need a description.  The description however reveals a
-lot about the transaction, and therefore must be encrypted.  Assets have
-two-party transfers, so a DHE between the sender and receiver vault key is
-sufficient.  The DHE is mixed with an IV generated from the contract so far,
-and the description string has a 128 bit HMAC to check that the decryption was
-likely correct.
+lot about the transaction, and therefore must be encrypted.  Real-world assets
+have two-party transfers (you can't split real world assets), so a DHE between
+the sender and receiver vault key is sufficient.  The DHE is mixed with an IV
+generated from the contract so far, and the description string has a 128 bit
+HMAC to check that the decryption was likely correct.
 
 [up](squid.md) [back](squid-fed.md) [next](squid-literature.md)

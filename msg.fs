@@ -142,7 +142,7 @@ Sema queue-sema
 
 : msg-display ( addr u -- )
     sigpksize# - 2dup + sigpksize# >$  c-state off
-    do-nestsig msg:end ;
+    nest-cmd-loop msg:end ;
 
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
@@ -219,8 +219,8 @@ event: :>avalanche ( addr u otr-flag o group -- )
     to last# .avalanche-msg ;
 event: :>chat-reconnect ( $chat o group -- )
     to last# .reconnect-chat ;
-event: :>msg-nestsig ( addr u o group -- )
-    to last# .do-msg-nestsig  ctrl L inskey ;
+event: :>msg-nestsig ( $addr o group -- )
+    to last# >o { w^ m } m $@ do-msg-nestsig m $free o>  ctrl L inskey ;
 
 \ coordinates
 
@@ -295,7 +295,7 @@ Forward msg:last
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	>r r@ <hide> <event e$, o elit, last# elit, :>msg-nestsig
+	>r r@ <hide> <event $make elit, o elit, last# elit, :>msg-nestsig
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
@@ -323,27 +323,27 @@ scope{ net2o-base
 reply-table $@ inherit-table msg-table
 
 $20 net2o: msg-start ( $:pksig -- ) \g start message
-    !!signed? 1 !!>order? $> msg:start ;
+    1 !!>order? $> msg:start ;
 +net2o: msg-tag ( $:tag -- ) \g tagging (can be anywhere)
-    !!signed? $> msg:tag ;
+    $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
-    !!signed? 2 !!>=order? $> msg:id ;
+    2 !!>=order? $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
-    !!signed? $10 !!>=order? $> msg:chain ;
+    $10 !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    !!signed? 2 !!>=order? $> msg:signal ;
+    2 !!>=order? $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
-    !!signed? 4 !!>=order? $> msg:re ;
+    4 !!>=order? $> msg:re ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    !!signed? 8 !!>=order? $> msg:text ;
+    8 !!>=order? $> msg:text ;
 +net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
-    !!signed? 8 !!>=order? 64>n $> rot msg:object ;
+    8 !!>=order? 64>n $> rot msg:object ;
 +net2o: msg-action ( $:msg -- ) \g specify action string
-    !!signed? 8 !!>=order? $> msg:action ;
+    8 !!>=order? $> msg:action ;
 +net2o: msg-payment ( $:contract -- ) \g payment transaction
-    !!signed? 8 !!>=order? $> msg:payment ;
+    8 !!>=order? $> msg:payment ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
-    !!signed? 8 !!>=order? $> msg:coord ;
+    8 !!>=order? $> msg:coord ;
 
 gen-table $freeze
 ' context-table is gen-table
@@ -645,17 +645,6 @@ event: :>msg-eval ( parent $pack $addr -- )
 
 previous
 
-: send-text ( addr u -- )
-    net2o-code expect-msg
-    <msg $, msg-text msg> end-with
-    ( cookie+request ) end-code| ;
-
-: send-text-to ( msg u nick u -- )
-    net2o-code expect-msg
-    <msg nick>pk dup IF  keysize umin $, msg-signal  ELSE  2drop  THEN
-    $, msg-text msg> end-with
-    ( cookie+request ) end-code| ;
-
 : ?destpk ( addr u -- addr' u' )
     2dup pubkey $@ key| str= IF  2drop pk@ key|  THEN ;
 
@@ -755,6 +744,7 @@ Variable $lastline
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
+    last# cell+ $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
     line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
