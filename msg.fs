@@ -205,21 +205,19 @@ Forward +chat-control
 
 User peer-buf
 
-: reconnect-chat ( -- )
-    peer> ?dup-IF
-	peer-buf $off peer-buf !  last# peer-buf $@
-	reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
-	reconnect( ." in group: " last# dup hex. $. cr )
-	0 >o $A $A [: reconnect( ." prepare reconnection" cr )
-	  ?msg-context >o silent-last# ! o>
-	  ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
-	addr-connect o>
-    THEN ;
+: reconnect-chat ( $chat -- )
+    peer-buf $!buf  last# peer-buf $@
+    reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
+    reconnect( ." in group: " last# dup hex. $. cr )
+    0 >o $A $A [: reconnect( ." prepare reconnection" cr )
+      ?msg-context >o silent-last# ! o>
+      ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
+    addr-connect o> ;
 
 event: :>avalanche ( addr u otr-flag o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
-event: :>chat-reconnect ( o group -- )
+event: :>chat-reconnect ( $chat o group -- )
     to last# .reconnect-chat ;
 event: :>msg-nestsig ( addr u o group -- )
     to last# .do-msg-nestsig  ctrl L inskey ;
@@ -415,12 +413,9 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> msg-groups #@ d0<> IF
 	parent last# cell+ del$cell  THEN ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
-    $> >peer
-    parent .wait-task @ ?dup-IF
-	<event o elit, last# elit, :>chat-reconnect event>
-    ELSE
-	reconnect-chat
-    THEN ;
+    $> $make
+    <event elit, o elit, last# elit, :>chat-reconnect
+    parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
 +net2o: msg-otr ( -- ) \g this message is otr, don't save it
@@ -453,6 +448,10 @@ gen-table $freeze
 ' context-table is gen-table
 
 also }scope
+
+: msg-reply ( tag -- )
+    reply( ." got reply " hex. pubkey $@ key>nick forth:type forth:cr )else( drop ) ;
+: expect-msg ( --- ) ['] msg-reply expect-reply-xt +chat-control ;
 
 User hashtmp$  hashtmp$ off
 
@@ -579,7 +578,7 @@ Variable ask-msg-files[]
 \ syncing done
 : chat-sync-done ( group-addr u -- )
     msg( ." chat-sync-done" forth:cr )
-    net2o-code expect-reply close-all net2o:gen-reset end-code
+    net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
     ?msg-log last# $@ rows  display-lastn
     !save-all-msgs
@@ -645,10 +644,6 @@ event: :>msg-eval ( parent $pack $addr -- )
     last-signed 2@ >otr-log ;
 
 previous
-
-: msg-reply ( tag -- )
-    reply( ." got reply " hex. pubkey $@ key>nick forth:type forth:cr )else( drop ) ;
-: expect-msg ( --- ) ['] msg-reply expect-reply-xt +chat-control ;
 
 : send-text ( addr u -- )
     net2o-code expect-msg
@@ -846,7 +841,7 @@ $200 Constant maxmsg#
     msg-group$ $@len IF  send-leave -timeout  THEN ;
 
 : greet ( -- )
-    net2o-code expect-reply
+    net2o-code expect-msg
     log !time end-with join, get-ip end-code ;
 
 : chat-entry ( -- )  ?.net2o/chats  word-args
@@ -1095,7 +1090,7 @@ also net2o-base scope: /chat
 	IF @ >o rdrop ?msg-context ELSE EXIT THEN
     THEN o to connection +chat-control
     ." === sync ===" forth:cr
-    net2o-code expect-reply ['] last?, [msg,] end-code ;
+    net2o-code expect-msg ['] last?, [msg,] end-code ;
 
 : version ( -- )
     \U version              version string
@@ -1235,8 +1230,14 @@ scope{ /chat
 }scope
 
 also net2o-base
+: punch-addr-ind@ ( -- o )
+    punch-addrs $[]# 0 U+DO
+	I punch-addrs $[] @ .host-route $@len IF
+	    I punch-addrs $[] @ unloop  EXIT
+	THEN
+    LOOP  0 punch-addrs $[] @ ;
 : reconnect, ( o:connection -- )
-    [: 0 punch-addrs $[] @ o>addr forth:type
+    [: punch-addr-ind@ o>addr forth:type
       pubkey $@ key| tuck forth:type forth:emit ;] $tmp
     reconnect( ." send reconnect: " 2dup 2dup + 1- c@ 1+ - .addr$ forth:cr )
     $, msg-reconnect ;
@@ -1247,14 +1248,16 @@ also net2o-base
     cell +LOOP ;
 
 : send-reconnects ( group o:connection -- )  o to connection
-    net2o-code expect-reply msg msg-otr
-    dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
-    sign[ msg-start "left" $, msg-action msg>
-    end-with cookie+request end-code| ;
+    net2o-code expect-msg
+    [: msg-otr
+      dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
+      sign[ msg-start "left" $, msg-action msg> ;] [msg,]
+    end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
-    net2o-code expect-reply msg last# $@ $, msg-group
-    .reconnect,  end-with  end-code| ;
+    net2o-code expect-msg
+    [: last# $@ $, msg-group .reconnect, ;] [msg,]
+    end-code| ;
 previous
 
 : send-reconnect ( group -- )
@@ -1305,7 +1308,7 @@ scope{ /chat
 
 : avalanche-to ( addr u otr-flag o:context -- )
     avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
-    o to connection +resend-msg
+    o to connection +chat-control
     net2o-code expect-msg msg IF msg-otr THEN
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with

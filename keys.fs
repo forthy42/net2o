@@ -452,9 +452,9 @@ event: :>search-key ( $addr -- )
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
-    IF  drop keysearchs# @ >r
+    IF  drop keysearchs# @ 1+ >r
 	<event 2dup $make elit, :>search-key ?query-task event|
-	BEGIN  keysearchs# @ r@ =  WHILE  <event  query-task event|  REPEAT
+	BEGIN  keysearchs# @ r@ - 0<  WHILE  <event  query-task event|  REPEAT
 	rdrop  2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
     THEN
     cell+ ..nick 2drop r> to last# ;

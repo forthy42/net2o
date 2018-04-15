@@ -157,25 +157,25 @@ echo "/sync" >&6
 sleep 3
 echo "/chats" >&10
 echo "/bye" >&10
-usleep 300000
+sleep 3
 echo "/chats" >&9
 echo "/bye" >&9
-usleep 300000
+sleep 3
 echo "/chats" >&8
 echo "/bye" >&8
-usleep 300000
+sleep 3
 echo "/chats" >&7
 echo "/bye" >&7
-usleep 300000
+sleep 3
 echo "/chats" >&6
 echo "/bye" >&6
-usleep 300000
+sleep 3
 echo "/chats" >&5
 echo "/bye" >&5
-usleep 300000
+sleep 3
 echo "/chats" >&4
 echo "/bye" >&4
-usleep 300000
+sleep 3
 echo "/chats" >&3
 echo "/bye" >&3
 sleep 5
