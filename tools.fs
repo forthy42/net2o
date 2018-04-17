@@ -817,7 +817,7 @@ e? max-xchar $100 u< [IF]
 \ accept* derivative
 
 [IFDEF] mslinux '*' [ELSE]
-    e? max-xchar $100 < [IF] '*' [ELSE] '•' [THEN] [THEN] Constant pw*
+    e? max-xchar $100 < [IF] '*' [ELSE] '●' ( '•' ) [THEN] [THEN] Constant pw*
 
 Variable *insflag
 

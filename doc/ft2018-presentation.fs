@@ -290,7 +290,8 @@ $FFBFFFFF pres-frame
 "widget " "Basis–Klasse für alle sichtbaren Objekte" b\\
 {{ "edit " b0 blackish "Editierbarer Text: " }}text
 \chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field edit[] >bl
-\latin \normal "glue " "Basis–Klasse für flexible Objekte" b\\
+\sans \latin \normal
+"glue " "Basis–Klasse für flexible Objekte" b\\
 "tile " "Farbiges Rechteck" b\\
 "frame " "Farbiges Rechteck mit Rand" b\\
 "text " "Text–Element" b\\
