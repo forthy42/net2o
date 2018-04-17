@@ -111,7 +111,7 @@ do
     done
     
     echo "/bye" >&6
-    usleep 300000
+    sleep 3
     
     x=""
 
@@ -133,7 +133,7 @@ do
 
     exec 6> >($GFORTH ../n2o $debugs 15% $* chat test@chat-test2 >>msg-test.out.4)
     export GFORTHPID5=$[$!+1]
-    sleep 2
+    sleep 5
 done
 
 echo "Last Message $i on 1/8 $x" >&3
@@ -154,28 +154,28 @@ echo "Last Message $i on 8/8 $x" >&10
 usleep 20000
 
 echo "/sync" >&6
-sleep 3
 echo "/chats" >&10
+sleep 3
 echo "/bye" >&10
-sleep 3
 echo "/chats" >&9
+sleep 3
 echo "/bye" >&9
-sleep 3
 echo "/chats" >&8
+sleep 3
 echo "/bye" >&8
-sleep 3
 echo "/chats" >&7
+sleep 3
 echo "/bye" >&7
-sleep 3
-echo "/chats" >&6
-echo "/bye" >&6
-sleep 3
 echo "/chats" >&5
+sleep 3
 echo "/bye" >&5
-sleep 3
 echo "/chats" >&4
-echo "/bye" >&4
 sleep 3
+echo "/bye" >&4
 echo "/chats" >&3
+sleep 3
 echo "/bye" >&3
+echo "/chats" >&6
+sleep 3
+echo "/bye" >&6
 sleep 5

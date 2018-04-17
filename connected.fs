@@ -477,7 +477,9 @@ previous
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ net2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!
-		I 2@ I reply-dest 64@ send-cmd drop
+		I 2@ I reply-dest 64@
+		avalanche( ." resend cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup hex. 64r> forth:cr )
+		send-cmd drop
 		1 packets2 +! 1+
 	    THEN
 	reply +LOOP
@@ -497,7 +499,7 @@ previous
 in net2o : ack-code ( ackflag -- ackflag )  >r
     false dup { slurp? stats? }
     net2o-code
-    ack expect-reply  1 to rec-ack-pos#
+    expect-reply ack 1 to rec-ack-pos#
     ack( ." ack: " r@ hex. forth:cr )
     r@ ack-toggle# and IF
 	seq#,

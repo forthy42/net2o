@@ -220,7 +220,8 @@ event: :>avalanche ( addr u otr-flag o group -- )
 event: :>chat-reconnect ( $chat o group -- )
     to last# .reconnect-chat ;
 event: :>msg-nestsig ( $addr o group -- )
-    to last# >o { w^ m } m $@ do-msg-nestsig m $free o>  ctrl L inskey ;
+    to last# >o { w^ m } m $@ do-msg-nestsig m $free o>
+    ctrl L inskey ;
 
 \ coordinates
 
@@ -430,7 +431,8 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	?pkgroup otr-shot @ IF  >otr-log  ELSE  >msg-log  THEN
 	2dup d0<> \ do something if it is new
 	IF  replay-mode @ 0= IF
-		2dup show-msg  2dup otr-shot @ parent .push-msg
+		2dup show-msg
+		2dup otr-shot @ parent .push-msg
 	    THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop 2drop
@@ -450,8 +452,9 @@ gen-table $freeze
 also }scope
 
 : msg-reply ( tag -- )
-    reply( ." got reply " hex. pubkey $@ key>nick forth:type forth:cr )else( drop ) ;
-: expect-msg ( --- ) ['] msg-reply expect-reply-xt +chat-control ;
+    ." got reply " hex. pubkey $@ key>nick forth:type forth:cr ;
+: expect-msg ( --- )
+    reply( ['] msg-reply )else( ['] drop ) expect-reply-xt +chat-control ;
 
 User hashtmp$  hashtmp$ off
 
@@ -1078,7 +1081,7 @@ also net2o-base scope: /chat
     \G sync: time/date
     2drop o 0= IF msg-group$ $@ msg-groups #@
 	IF @ >o rdrop ?msg-context ELSE EXIT THEN
-    THEN o to connection +chat-control
+    THEN o to connection
     ." === sync ===" forth:cr
     net2o-code expect-msg ['] last?, [msg,] end-code ;
 
@@ -1260,11 +1263,13 @@ previous
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection
-    disconnect-me o>  cell +LOOP ;
+	disconnect-me o>
+    cell +LOOP ;
 : disconnect-all ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
-    r> cell+ $@len 0 +DO  >o o to connection send-leave
-    disconnect-me o>  cell +LOOP ;
+    r> cell+ $@len 0 +DO  >o o to connection
+	send-leave  disconnect-me o>
+    cell +LOOP ;
 
 : leave-chat ( group -- )
     dup send-reconnect disconnect-group ;
@@ -1297,8 +1302,8 @@ scope{ /chat
     REPEAT  2drop leave-chats  xchar-history ;
 
 : avalanche-to ( addr u otr-flag o:context -- )
-    avalanche( ." Send avalance to: " pubkey $@ key>nick type cr )
-    o to connection +chat-control
+    avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
+    o to connection
     net2o-code expect-msg msg IF msg-otr THEN
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with

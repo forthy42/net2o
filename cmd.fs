@@ -253,10 +253,7 @@ in net2o : see ( addr u -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
 
 in net2o : see-me ( -- )
-    ." see-me: "
-    inbuf hdrflags .dest-addr
-    \ tag-addr dup hex. 2@ swap hex. hex. forth:cr
-    buf-dump 2@ net2o:see ;
+    ." see-me: "  inbuf hdrflags .dest-addr  buf-dump 2@ net2o:see ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
@@ -550,7 +547,8 @@ comp: :, also net2o-base ;
 	    I outflag @ stateless# and IF  send-cX
 	    ELSE
 		send-reply >r over buf# r@ 2!
-		r> send-xt
+		r> action-of send-xt ?dup-IF  execute
+		ELSE  2drop <err> ." send-xt is 0" cr <default>  THEN
 	    THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
@@ -558,6 +556,7 @@ comp: :, also net2o-base ;
 
 : cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest
+    avalanche( ." send cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup hex. 64r> cr )
     msg( ." send cmd to: " 64dup x64. forth:cr ) send-cmd
     r> stateless# and 0= IF  code-update  ELSE  drop  THEN o> ;
 
@@ -568,11 +567,12 @@ also net2o-base
 
 previous
 
-: net2o:ok? ( -- )  o?
+in net2o : ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
-    code-vdest r> reply-dest 64! ;
-: net2o:ok ( tag -- )
+    code-vdest r@ reply-dest 64!
+    r> code-reply to reply-tag ;
+in net2o : ok ( tag -- )
 \    timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
@@ -592,6 +592,7 @@ previous
     timeout( cmd( ." expect: " cmdbuf$ net2o:see ) )
     msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
     connection >o code-reply >r
+    r@ reply-tag ?dup-IF  off  THEN
     code-vdest     r@ reply-dest 64!
     ticks          r@ reply-time 64!
     cmd-reply-xt @ r> is reply-xt
@@ -612,19 +613,16 @@ previous
     ELSE  dest-addr 64@ [ cell 4 = ] [IF] 0<> - [THEN] dup 0 r> 2! u>=  THEN ;
 
 : cmd-exec ( addr u -- )
-    string-stack $off
-    object-stack $off
-    nest-stack $off
     o to connection
     o IF
-	maxdata code+
-	cmd!
+	maxdata code+  cmd!
 	tag-addr? IF
 	    2drop  ack@ .>flyburst  1 packetr2 +!  EXIT  THEN
 	take-ret
     ELSE
 	cmd0!
     THEN
+    string-stack $free  object-stack $free  nest-stack $free
     [: outflag @ >r cmdreset init-reply do-cmd-loop
       r> outflag ! cmd-send? ;] cmdlock c-section ;
 

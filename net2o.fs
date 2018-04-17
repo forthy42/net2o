@@ -638,11 +638,11 @@ scope{ mapc
     code-map with mapc dest-tail addr>replies dest-replies + endwith ;
 : send-reply ( -- addr )
     code-map with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
-    dest-replies + endwith ;
+	dest-replies + endwith ;
 
 : tag-addr ( -- addr )
-    dest-addr 64@ code-rmap with mapc dest-vaddr 64- 64>n
-    maxdata negate and addr>replies dest-replies + endwith ;
+    code-rmap with mapc dest-addr 64@ dest-vaddr 64- 64>n addr>replies
+	dest-replies + endwith ;
 
 reply buffer: dummy-reply
 ' noop dummy-reply is reply-xt
@@ -1646,7 +1646,7 @@ event: :>request ( n o -- ) >o maxrequest# and
 event: :>timeout ( o -- )
     timeout( ." Request timed out" forth:cr )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
-    r> 0<> !!timeout!! ;
+    0<> !!timeout!! ;
 event: :>throw ( error -- ) throw ;
 
 : timeout-expired? ( -- flag )

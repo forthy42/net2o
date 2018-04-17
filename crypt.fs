@@ -137,8 +137,10 @@ scope{ mapc
     2/  dest-ivslastgen 1 = IF  dup >r + r>  THEN ;
 
 : clear-replies ( -- )
-    dest-replies dest-size addr>replies dest-a/b
-    reply( ." Clear replies " over hex. dup hex. cr )
+    dest-replies dest-size addr>replies dest-a/b 2dup
+    bounds U+DO
+	I reply-tag ?dup-IF  off  THEN
+    reply +LOOP
     erase ;
 
 : >ivskey ( 64addr -- keyaddr )

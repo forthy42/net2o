@@ -424,6 +424,7 @@ begin-structure reply
     64field: reply-time
     defer: reply-xt  \ execute when receiving an ok
     defer: send-xt   \ executed to (re)send a message
+    value: reply-tag \ pointer to reply tag
 \    field: reply-timeout# \ per-reply timeout counter
 \    field: reply-timeout-xt \ per-reply timeout xt
 end-structure
