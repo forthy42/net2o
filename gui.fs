@@ -49,8 +49,8 @@ glue*lll }}glue
 {{
 glue*l }}glue
 {{
-glue*l $CCCCCCFF 4e }}frame dup .button3
-\mono 0 to x-color "|ggggAgggg|" }}text
+glue*l $EEFFEEFF 4e }}frame dup .button3
+\mono 0 to x-color "|Password long enough|" }}text
 >o font-size# 25% f* to border o o>
 blackish \skip
 {{
@@ -65,7 +65,11 @@ glue*lll }}glue
 }}v box[]
 }}z box[] Value pw-frame
 
+: activate ( o -- )
+    >o x y o> 0 0 pw-frame .act .clicked ;
+
 : !widgets ( -- ) top-widget .htop-resize
+    pw-field activate
     1e ambient% sf! set-uniforms ;
 
 : net2o-gui ( -- )  pw-frame to top-widget

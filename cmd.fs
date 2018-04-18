@@ -571,7 +571,7 @@ in net2o : ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r@ reply-dest 64!
-    r> code-reply to reply-tag ;
+    r> code-reply dup off  to reply-tag ;
 in net2o : ok ( tag -- )
 \    timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
@@ -592,7 +592,7 @@ in net2o : ok ( tag -- )
     timeout( cmd( ." expect: " cmdbuf$ net2o:see ) )
     msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
     connection >o code-reply >r
-    r@ reply-tag ?dup-IF  off  THEN
+    r@ reply-tag ?dup-IF  off  0 r@ to reply-tag  tHEN
     code-vdest     r@ reply-dest 64!
     ticks          r@ reply-time 64!
     cmd-reply-xt @ r> is reply-xt
