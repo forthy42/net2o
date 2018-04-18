@@ -24,10 +24,13 @@ require minos2/widgets.fs
 
 also minos
 
+ctx 0= [IF]  window-init  [THEN]
+
 require minos2/font-style.fs
 
 : update-size# ( -- )
     dpy-w @ s>f 42e f/ fround to font-size#
+    font-size# 16e f/ m2c:curminwidth% f!
     dpy-h @ s>f dpy-w @ s>f f/ 45% f/ font-size# f* fround to baseline#
     dpy-w @ s>f 1280e f/ to pixelsize# ;
 
@@ -577,7 +580,7 @@ $df87a4ff pres-frame
 vt{{
 "• " "Konzept des Minings: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
 "• " "Vorschlag: Coupons für die Unterstützung der Entwicklung freier Software" b\\
-"• " "Diese Coupons wärend dann handelbar" b\\
+"• " "Diese Coupons wären dann handelbar" b\\
 "• " "Freie Software ist öffentliche Infrastruktur im Informationszeitalter" b\\
 "• " "Damit regen wir die Leute an, FOSS aus Eigeninteresse zu unterstützen" b\\
 "• " "Sie bekommen ein nutzbares und wertvolles Token zurück" b\\
@@ -631,7 +634,8 @@ previous
 
 also [IFDEF] android android [THEN]
 
-: presentation ( -- )  1config
+: presentation ( -- )
+    1config
     [IFDEF] hidestatus hidekb hidestatus [THEN]
     !widgets widgets-loop ;
 

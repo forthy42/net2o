@@ -138,6 +138,9 @@ scope{ n2o
 	['] 2drop arg-loop n2o:help
     THEN ;
 
+Defer run-gui
+:noname ." gui not implemented yet" cr ; is run-gui
+
 scope{ n2o
 
 : keyin ( -- )
@@ -674,6 +677,10 @@ warnings !
     ?check-rng $20 rng$ 85type cr
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
 
+: gui ( -- )
+    \U gui
+    \G gui: start net2o's graphical user interface
+    "gui.fs" required run-gui ;
 }scope
 
 \ use a different history file for net2o

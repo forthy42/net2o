@@ -1915,6 +1915,8 @@ dht-table       $save
 dvcs-table      $save
 fs-table        $save
 
+\ show problems
+
 .unresolved
 
 0 [IF]

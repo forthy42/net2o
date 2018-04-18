@@ -17,6 +17,64 @@
 
 require minos2/widgets.fs
 
+also minos
+
+ctx 0= [IF]  window-init  [THEN]
+
+require minos2/font-style.fs
+
+: slide-frame ( glue color -- o )
+    font-size# 70% f* }}frame ;
+: update-size# ( -- )
+    16e fround to font-size#
+    font-size# 133% f* fround to baseline#
+    1e to pixelsize# ;
+
+update-size#
+
+require minos2/text-style.fs
+
+: pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
+    glue*wh swap slide-frame dup .button1 simple[] ;
+
+tex: net2o-logo
+
+{{ $FFFFFFFF pres-frame
+{{
+glue*lll }}glue
+' net2o-logo "doc/net2o-200.png" 1e }}image-file Constant net2o-glue /center
+\latin \sans \regular
+"net2o GUI" /title
+"Enter Password to unlock" /subtitle
+{{
+glue*l }}glue
+{{
+glue*l $CCCCCCFF 4e }}frame dup .button3
+\mono 0 to x-color "|ggggAgggg|" }}text
+>o font-size# 25% f* to border o o>
+blackish \skip
+{{
+"" }}pw dup Value pw-field
+>o font-size# 25% f* to border o o>
+glue*l
+}}h box[]
+}}z box[]
+glue*l }}glue
+}}h box[] pw-field edit[] >bl
+glue*lll }}glue
+}}v box[]
+}}z box[] Value pw-frame
+
+: !widgets ( -- ) top-widget .htop-resize
+    1e ambient% sf! set-uniforms ;
+
+: net2o-gui ( -- )  pw-frame to top-widget
+    1config  !widgets  widgets-loop ;
+
+' net2o-gui is run-gui
+
+previous
+
 0 [IF]
 Local Variables:
 forth-local-words:
