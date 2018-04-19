@@ -253,6 +253,8 @@ Variable scope<>
     previous scope<> stack> set-current ;
 : scope: ( "vocabulary" -- scope:addr )
     vocabulary get-current scope<> >stack also lastxt execute definitions ;
+: cs-scope: ( "vocabulary" -- scope:addr )
+    cs-vocabulary get-current scope<> >stack also lastxt execute definitions ;
 
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict

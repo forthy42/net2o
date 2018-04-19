@@ -90,7 +90,7 @@ glue*lll }}glue
 
 previous
 
-scope: lang
+cs-scope: lang
 
 locale en \ may differ from native
 locale de \ German
@@ -102,7 +102,10 @@ lang:en include-locale lang/en
 lang:de include-locale lang/de
 lang:zh include-locale lang/zh
 
-s" LANG" getenv '_' $split 2drop ' lang >body find-name-in execute
+s" LANG" getenv '_' $split 2swap
+' lang >body find-name-in ?dup [IF] execute [THEN]
+'.' $split 2drop
+' lang >body find-name-in ?dup [IF] execute [THEN]
 
 0 [IF]
 Local Variables:
