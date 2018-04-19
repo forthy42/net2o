@@ -37,11 +37,13 @@ require minos2/text-style.fs
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
 
-: pw-done ( -- flag )
-    2dup >passphrase +key
+: pw-done ( max span addr pos -- max span addr pos flag )
+    over 3 pick >passphrase +key
     read-keys secret-keys# 0= IF
+	." Wrong passphrase" cr
 	drop nip 0 tuck false
     ELSE
+	." Right passphrase" cr
 	true
     THEN ;
 
@@ -52,23 +54,27 @@ tex: net2o-logo
 glue*lll }}glue
 ' net2o-logo "doc/net2o-200.png" 1e }}image-file Constant net2o-glue /center
 \latin \sans \regular
-"net2o GUI" /title
-"Enter Password to unlock" /subtitle
+!i18n l" net2o GUI" /title
+l" Enter passphrase to unlock" /subtitle
+!lit
 {{
 glue*l }}glue
 {{
-glue*l $EEFFEEFF 4e }}frame dup .button3
-\mono 0 to x-color "|Password long enough|" }}text
+glue*l $FFFFFFFF 4e }}frame dup .button3
+{{ \mono $FF000018 to x-color "12345678" }}text
 >o font-size# 25% f* to border o o>
-blackish \skip
+glue*l }}h box[]
+\mono $0000FF18 to x-color "Horse Battery Staple" }}text
+>o font-size# 25% f* to border o o>
+blackish
 {{
-"" }}pw dup Value pw-field pw-field ' pw-done edit[] >bl
+"" }}pw dup Value pw-field pw-field ' pw-done edit[]
 >o font-size# 25% f* to border o o>
 glue*l
 }}h box[]
 }}z box[]
 glue*l }}glue
-}}h box[]
+}}h box[] cbl >bl
 glue*lll }}glue
 }}v box[]
 }}z box[] Value pw-frame
@@ -83,6 +89,20 @@ glue*lll }}glue
 ' net2o-gui is run-gui
 
 previous
+
+scope: lang
+
+locale en \ may differ from native
+locale de \ German
+locale zh \ Chinese
+
+}scope
+
+lang:en include-locale lang/en
+lang:de include-locale lang/de
+lang:zh include-locale lang/zh
+
+s" LANG" getenv '_' $split 2drop ' lang >body find-name-in execute
 
 0 [IF]
 Local Variables:
