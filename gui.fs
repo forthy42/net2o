@@ -98,9 +98,9 @@ locale zh \ Chinese
 
 }scope
 
-lang:en include-locale lang/en
 lang:de include-locale lang/de
 lang:zh include-locale lang/zh
+lang:en include-locale lang/en
 
 s" LANG" getenv '_' $split 2swap
 ' lang >body find-name-in ?dup [IF] execute [THEN]
