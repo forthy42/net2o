@@ -47,6 +47,8 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs	     \
 	  doc/net2o-200.png
 
+LANGS =	  lang/en lang/de lang/zh
+
 ifeq "$(FAST)" "yes"
 FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
 else
@@ -93,7 +95,7 @@ DOC = wiki/commands.md
 all: no-config TAGS doc
 
 distfiles:
-	@echo $(SOURCES) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
+	@echo $(SOURCES) $(LANGS) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
 
 no-config: libs $(GEN)
 
@@ -126,7 +128,7 @@ install:	libcc-install
 	done
 	-@VERDIR@rm $(datadir)/gforth/$(GFVER)/net2o
 	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(GFVER)/net2o
-	for i in $(SOURCES) $(GEN); do \
+	for i in $(SOURCES) $(LANGS) $(GEN); do \
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
