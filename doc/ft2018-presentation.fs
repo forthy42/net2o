@@ -292,7 +292,7 @@ $FFBFFFFF pres-frame
 "actor " "Basis–Klasse, die auf alle Aktionen reagiert (Klicks, Touch, Tasten)" b\\
 "widget " "Basis–Klasse für alle sichtbaren Objekte" b\\
 {{ "edit " b0 blackish "Editierbarer Text: " }}text
-\chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field edit[] >bl
+\chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
 \sans \latin \normal
 "glue " "Basis–Klasse für flexible Objekte" b\\
 "tile " "Farbiges Rechteck" b\\

@@ -37,6 +37,14 @@ require minos2/text-style.fs
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
 
+: pw-done ( -- flag )
+    2dup >passphrase +key
+    read-keys secret-keys# 0= IF
+	drop nip 0 tuck false
+    ELSE
+	true
+    THEN ;
+
 tex: net2o-logo
 
 {{ $FFFFFFFF pres-frame
@@ -54,22 +62,19 @@ glue*l $EEFFEEFF 4e }}frame dup .button3
 >o font-size# 25% f* to border o o>
 blackish \skip
 {{
-"" }}pw dup Value pw-field
+"" }}pw dup Value pw-field pw-field ' pw-done edit[] >bl
 >o font-size# 25% f* to border o o>
 glue*l
 }}h box[]
 }}z box[]
 glue*l }}glue
-}}h box[] pw-field edit[] >bl
+}}h box[]
 glue*lll }}glue
 }}v box[]
 }}z box[] Value pw-frame
 
-: activate ( o -- )
-    >o x y o> 0 0 pw-frame .act .clicked ;
-
 : !widgets ( -- ) top-widget .htop-resize
-    pw-field activate
+    pw-field engage
     1e ambient% sf! set-uniforms ;
 
 : net2o-gui ( -- )  pw-frame to top-widget
