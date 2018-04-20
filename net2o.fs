@@ -1515,7 +1515,7 @@ User remote?
 	invalid( ." invalid packet to 0" cr ) EXIT  THEN
     add-source  >ret-addr
     validated off     \ we have no validated encryption, only anonymous
-    do-keypad sec-off \ no key exchange may have happened
+    do-keypad sec-free \ no key exchange may have happened
     $error-id $off    \ no error id so far
     stateless# outflag !  tmp-perm off
     inbuf packet-data cmd-exec
@@ -1594,8 +1594,8 @@ in net2o : dispose-context ( o:addr -- o:addr )
       o-timeout o-chunks extra-dispose
       data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
       end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
-      end-strings start-strings DO  I $off     cell +LOOP
-      end-secrets start-secrets DO  I sec-off  cell +LOOP
+      end-strings start-strings DO  I $off      cell +LOOP
+      end-secrets start-secrets DO  I sec-free  cell +LOOP
       fstate-off
       \ erase crypto keys
       log-context @ ?dup-IF  .dispose  THEN

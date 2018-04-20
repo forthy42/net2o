@@ -48,9 +48,9 @@ $20 Constant crypt-align
 
 32 buffer: zero32
 
-: sec-off ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
+: sec-free ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
 : sec! ( addr1 u1 addr2 -- )
-    over 0= IF  sec-off 2drop  EXIT  THEN
+    over 0= IF  sec-free 2drop  EXIT  THEN
     >r r@ kalloc64? dup r> ! $40 smove ;
 : sec@ ( addr -- addr1 u1 )
     @ dup IF  $40
@@ -65,6 +65,12 @@ $20 Constant crypt-align
     0 { w^ sec } sec sec! sec cell r> $+! ;
 
 : sec[]@ ( i addr -- addr u )  $[] sec@ ;
+
+: sec[]free ( addr -- ) >r
+    r@ $@ bounds ?DO
+	I sec-free
+    cell +LOOP
+    r> $free ;
 
 storage class end-class crypto-alloc
 

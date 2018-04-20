@@ -58,14 +58,14 @@ Variable defaultkey
 
 : free-key ( o:key -- o:key )
     \g free all parts of the subkey
-    ke-sk sec-off
-    ke-sksig sec-off
-    ke-pk $off
-    ke-nick $off
-    ke-selfsig $off
-    ke-sigs[] $[]off
-    ke-pets[] $[]off
-    ke-pets# $off ;
+    ke-sk sec-free
+    ke-sksig sec-free
+    ke-pk $free
+    ke-nick $free
+    ke-selfsig $free
+    ke-sigs[] $[]free
+    ke-pets[] $[]free
+    ke-pets# $free ;
 
 \ key class
 
@@ -899,7 +899,7 @@ false value ?yes
 	.stripe85
 	s" Written down?" yes? IF
 	    s" You won't see this again! Delete?" yes?
-	    IF ke-rsk sec-off  save-keys
+	    IF ke-rsk sec-free  save-keys
 		." revoke key deleted." cr o>  EXIT  THEN  THEN
     ELSE  2drop  THEN
     ." I'm keeping your revoke key.  This will show up again." cr o> ;
@@ -1131,7 +1131,7 @@ event: :>invite ( addr u -- )
 
 : .invitations ( -- )
     invitations [: 2dup .pk2key$ cr process-invitation ;] $[]map
-    invitations $[]off ;
+    invitations $[]free ;
 
 : queue-invitation ( addr u -- )
     invitations $[]# >r
@@ -1226,7 +1226,7 @@ event: :>qr-invitation { task w^ pk -- }
 \ key api helpers
 
 : del-last-key ( -- )
-    keys $[]# 1- keys $[] sec-off
+    keys $[]# 1- keys $[] sec-free
     keys $@len cell- keys $!len ;
 
 : storekey! ( -- )

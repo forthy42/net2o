@@ -56,7 +56,7 @@ gen-table $freeze
 in net2o : new-addr ( -- o )
     address-class new >o  address-table @ token-table ! o o> ;
 in net2o : dispose-addr ( o:addr -- o:addr )
-    host-id $off host-anchor $off host-route $off host-key sec-off
+    host-id $off host-anchor $off host-route $off host-key sec-free
     host-revoke $off ;
 in net2o : dispose-punchs ( -- )
     punch-addrs $@ bounds ?DO  I @ .net2o:dispose-addr  cell +LOOP

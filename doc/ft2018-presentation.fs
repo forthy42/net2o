@@ -50,6 +50,9 @@ Variable slide#
 
 : >slides ( o -- ) slides[] >stack ;
 
+glue new Constant glue-left
+glue new Constant glue-right
+
 : glue0 ( -- )
     glue-left  >o 0glue hglue-c glue! o>
     glue-right >o 0glue hglue-c glue! o> ;

@@ -177,7 +177,7 @@ net2o-base
 : new-ivs ( -- )
     tmp-ivs sec@ ivs-strings
     validated @ receive-val and  IF receive-ivs ELSE send-ivs THEN
-    tmp-ivs sec-off ;
+    tmp-ivs sec-free ;
 
 scope{ net2o-base
 
@@ -239,7 +239,7 @@ Sema id-sema
     $> tmp-crypt? dup invit:pend# and ulit, <invite-result>
     IF
 	pk2-sig? !!sig!! >invitations
-	do-keypad sec-off
+	do-keypad sec-free
     ELSE  ." invitation didn't decrypt" forth:cr 2drop  THEN ;
 +net2o: request-invitation ( -- )
     \g ask for an invitation as second stage of invitation handshake

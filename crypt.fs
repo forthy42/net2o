@@ -338,7 +338,7 @@ scope{ mapc
     r> c:key! endwith ;
 
 : clear-keys ( -- )
-    crypto-key sec-off  tskc KEYBYTES erase  stskc KEYBYTES erase
+    crypto-key sec-free  tskc KEYBYTES erase  stskc KEYBYTES erase
     true to key-setup? ;
 
 \ We generate a shared secret out of three parts:
@@ -461,7 +461,7 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 : net2o:update-key ( -- )
     o? do-keypad sec@ dup keysize2 = IF
 	key( ." store key, o=" o hex. 2dup .nnb cr )
-	crypto-key sec! do-keypad sec-off
+	crypto-key sec! do-keypad sec-free
 	EXIT
     THEN
     2drop ;

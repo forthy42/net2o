@@ -34,14 +34,41 @@ update-size#
 
 require minos2/text-style.fs
 
+glue new Constant glue-left
+glue new Constant glue-right
+0 Value pw-err
+0 Value pw-num
+
+: err-fade ( r addr -- )
+    1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
+    $FF swap .fade ;
+
+: shake-lr ( r addr -- )
+    [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
+    font-size# f2/ f* font-size# f2/ fover f-
+    glue-left  >o 0g 0g hglue-c glue! o>
+    glue-right >o 0g 0g hglue-c glue! o> +sync drop ;
+
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
 
+: err-fade? ( -- flag ) 0 { flag }
+    anims@ 0 ?DO
+	>o action-of animate ['] err-fade = flag or to flag
+	o anims[] >stack o>
+    LOOP  flag ;
+
 : pw-done ( max span addr pos -- max span addr pos flag )
+    err-fade? IF  false  EXIT  THEN
     over 3 pick >passphrase +key
     read-keys secret-keys# 0= IF
 	." Wrong passphrase" cr
+	1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ +glyphs o>
+	keys sec[]free
 	drop nip 0 tuck false
+	1e o ['] shake-lr >animate
+	2e 1 tries# @ 2* lshift 0.001e fm* f+
+	pw-err ['] err-fade >animate
     ELSE
 	." Right passphrase" cr
 	true
@@ -58,14 +85,20 @@ glue*lll }}glue
 l" Enter passphrase to unlock" /subtitle
 !lit
 {{
-glue*l }}glue
+glue*lll }}glue
+glue-left }}glue
 {{
 glue*l $FFFFFFFF 4e }}frame dup .button3
-{{ \mono $FF000018 to x-color "12345678" }}text
+\mono
+{{ $0000FF18 to x-color "Horse Battery Staple" }}text
 >o font-size# 25% f* to border o o>
-glue*l }}h box[]
-\mono $0000FF18 to x-color "Horse Battery Staple" }}text
->o font-size# 25% f* to border o o>
+glue*l }}h
+{{
+glue-right }}glue
+!i18n l" wrong passphrase!" $FF000000 to x-color }}text' !lit
+>o font-size# 25% f* to border o o> dup to pw-err
+$FF0000FF to x-color s" " }}text dup to pw-num
+glue*l }}h
 blackish
 {{
 "" }}pw dup Value pw-field pw-field ' pw-done edit[]
@@ -73,7 +106,8 @@ blackish
 glue*l
 }}h box[]
 }}z box[]
-glue*l }}glue
+glue-right }}glue
+glue*lll }}glue
 }}h box[] cbl >bl
 glue*lll }}glue
 }}v box[]
