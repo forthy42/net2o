@@ -41,6 +41,7 @@ glue new Constant glue-right
 
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
+    2 tries# @ lshift s>f f* 1e fmin
     $FF swap .fade ;
 
 : shake-lr ( r addr -- )
@@ -67,8 +68,7 @@ glue new Constant glue-right
 	keys sec[]free
 	drop nip 0 tuck false
 	1e o ['] shake-lr >animate
-	2e 1 tries# @ 2* lshift 0.001e fm* f+
-	pw-err ['] err-fade >animate
+	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
     ELSE
 	." Right passphrase" cr
 	true

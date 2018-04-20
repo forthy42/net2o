@@ -1263,7 +1263,7 @@ Variable tries#
 		1 maxtries# s" PASSPHRASE" getenv d0= select tries# +!
 		<err> ." Try# " tries# @ 0 .r '/' emit maxtries# .
 		." failed, no key found, waiting "
-		#1 tries# @ 2* lshift dup . ." ms..." ms  <default> cr
+		#1000 tries# @ lshift dup . ." ms..." ms  <default> cr
 		del-last-key
 	    THEN
     REPEAT
