@@ -295,7 +295,7 @@ $FFBFFFFF pres-frame
 "actor " "Basis–Klasse, die auf alle Aktionen reagiert (Klicks, Touch, Tasten)" b\\
 "widget " "Basis–Klasse für alle sichtbaren Objekte" b\\
 {{ "edit " b0 blackish "Editierbarer Text: " }}text
-\chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
+"复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
 \sans \latin \normal
 "glue " "Basis–Klasse für flexible Objekte" b\\
 "tile " "Farbiges Rechteck" b\\
@@ -366,8 +366,8 @@ glue*l }}glue
 $BFDFFFFF pres-frame
 {{
 "Draw–Calls minimieren" /title
-"OpenGL möchte so wenig wie mögliche Draw–Calls pro Frame, also werden verschiedene" \\
-"Contexte mit einem Draw–Call pro Stack gezeichnet" \\
+"OpenGL möchte so wenig wie mögliche Draw–Calls pro Frame, also werden" \\
+"verschiedene Contexte mit einem Draw–Call pro Stack gezeichnet" \\
 \skip
 vt{{
 "init " "Initialisierungs–Runde" b\\

@@ -36,19 +36,28 @@ require minos2/text-style.fs
 
 glue new Constant glue-left
 glue new Constant glue-right
+
+: 0glue ( -- )
+    glue-left  >o 0g fdup hglue-c glue! o>
+    glue-right >o 0g fdup hglue-c glue! o> ;
+
+0glue
+
+\ password screen
+
 0 Value pw-err
 0 Value pw-num
 
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
-    2 tries# @ lshift s>f f* 1e fmin
+    2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e -sync ELSE +sync THEN
     $FF swap .fade ;
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
     font-size# f2/ f* font-size# f2/ fover f-
-    glue-left  >o 0g 0g hglue-c glue! o>
-    glue-right >o 0g 0g hglue-c glue! o> +sync drop ;
+    glue-left  >o 0g fdup hglue-c glue! o>
+    glue-right >o 0g fdup hglue-c glue! o> +sync drop ;
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
