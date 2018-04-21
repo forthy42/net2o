@@ -300,14 +300,7 @@ $FFBFFFFF pres-frame
 "glue " "Basis–Klasse für flexible Objekte" b\\
 "tile " "Farbiges Rechteck" b\\
 "frame " "Farbiges Rechteck mit Rand" b\\
-"text " "Text–Element" b\\
-also fonts
-[IFDEF] emoji
-    "emoji " "Emoji–Element " "😀🤭😁😂😇😈🙈🙉🙊💓💔💕💖💗💘🍺🍻🎉🎻🎺🎷" bbe\\
-[ELSE]
-    "emoji " "emoji element (no emoji font found)" b\\
-[THEN]
-previous
+"text " "Text–Element+Emoji 😀🤭😁😂😇😈🙈🙉🙊💓💔💕💖💗💘🍺🍻🎉🎻🎺🎷" b\\
 "icon " "Bild aus der Icon–Textur" b\\
 "image " "Größeres Bild" b\\
 "animation " "Klasse für Animationen" b\\
@@ -377,7 +370,6 @@ vt{{
 "image " "Zeichne Bilder mit einem Draw–Call pro Image" b\\
 "marking " "Cursor/Auswahl–Runde" b\\
 "text " "Text–Runde" b\\
-"emoji " "Emoji–Runde" b\\
 }}vt
 glue*l }}glue
 }}v box[] >bdr

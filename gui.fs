@@ -91,7 +91,7 @@ glue*lll }}glue
 ' net2o-logo "doc/net2o-200.png" 1e }}image-file Constant net2o-glue /center
 \latin \sans \regular
 !i18n l" net2o GUI" /title
-l" Enter passphrase to unlock" /subtitle
+l" Enter passphrase to unlock 🔐" /subtitle
 !lit
 {{
 glue*lll }}glue
@@ -99,15 +99,18 @@ glue-left }}glue
 {{
 glue*l $FFFFFFFF 4e }}frame dup .button3
 \mono
-{{ $0000FF18 to x-color "Horse Battery Staple" }}text
+{{ $0000FF10 to x-color "Horse Battery Staple" }}text
 >o font-size# 25% f* to border o o>
 glue*l }}h
 {{
 glue-right }}glue
 !i18n l" wrong passphrase!" $FF000000 to x-color }}text' !lit
 >o font-size# 25% f* to border o o> dup to pw-err
-$FF0000FF to x-color s" " }}text dup to pw-num
-glue*l }}h
+glue*l
+$FF0000FF to x-color s" " }}text
+>o font-size# 25% f* to border o o> dup to pw-num
+glue-left }}glue
+}}h
 blackish
 {{
 "" }}pw dup Value pw-field pw-field ' pw-done edit[]
@@ -117,7 +120,7 @@ glue*l
 }}z box[]
 glue-right }}glue
 glue*lll }}glue
-}}h box[] cbl >bl
+}}h box[] \skip >bl
 glue*lll }}glue
 }}v box[]
 }}z box[] Value pw-frame
