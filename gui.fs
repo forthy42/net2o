@@ -26,7 +26,7 @@ require minos2/font-style.fs
 : slide-frame ( glue color -- o )
     font-size# 70% f* }}frame ;
 : update-size# ( -- )
-    16e fround to font-size#
+    dpy-h @ rows / s>f to font-size#
     font-size# 133% f* fround to baseline#
     1e to pixelsize# ;
 
@@ -91,15 +91,16 @@ glue*lll }}glue
 ' net2o-logo "doc/net2o-200.png" 1e }}image-file Constant net2o-glue /center
 \latin \sans \regular
 !i18n l" net2o GUI" /title
-l" Enter passphrase to unlock 🔐" /subtitle
+l" Enter passphrase to unlock" /subtitle
 !lit
 {{
 glue*lll }}glue
 glue-left }}glue
+\large \sans "🔐" }}text \normal
 {{
 glue*l $FFFFFFFF 4e }}frame dup .button3
 \mono
-{{ $0000FF10 to x-color "Horse Battery Staple" }}text
+{{ $0000FF08 to x-color "Horse Battery Staple" }}text
 >o font-size# 25% f* to border o o>
 glue*l }}h
 {{
@@ -113,9 +114,17 @@ glue-left }}glue
 }}h
 blackish
 {{
-"" }}pw dup Value pw-field pw-field ' pw-done edit[]
->o font-size# 25% f* to border o o>
-glue*l
+{{
+"" }}pw dup Value pw-field
+>o font-size# 25% f* to border config:passmode# @ to pw-mode o o>
+glue*l }}h
+pw-field ' pw-done edit[]
+\large \sans $60606060 to x-color "👁" }}text blackish
+: pw-show/hide ( flag -- )
+    2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
+    pw-field engage +sync ;
+' pw-show/hide false toggle[]
+\normal
 }}h box[]
 }}z box[]
 glue-right }}glue
@@ -125,7 +134,8 @@ glue*lll }}glue
 }}v box[]
 }}z box[] Value pw-frame
 
-: !widgets ( -- ) top-widget .htop-resize
+: !widgets ( -- )
+    top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
 
@@ -136,9 +146,11 @@ glue*lll }}glue
 
 previous
 
+\ localization
+
 cs-scope: lang
 
-locale en \ may differ from native
+locale en \ may differ from development language
 locale de \ German
 locale zh \ Chinese
 

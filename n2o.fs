@@ -680,6 +680,7 @@ warnings !
 : gui ( -- )
     \U gui
     \G gui: start net2o's graphical user interface
+    ?.net2o-config
     "gui.fs" required run-gui ;
 }scope
 
