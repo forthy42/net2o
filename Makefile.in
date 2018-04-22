@@ -45,7 +45,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  startn2o.fs doc/net2o-logo.png version.fs.in android/net.fs	     \
 	  android/notify.fs linux/net.fs linux/notify.fs dhtroot.fs dvcs.fs  \
 	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs	     \
-	  doc/net2o-200.png
+	  doc/net2o-200.png doc/net2o.png
 
 LANGS =	  lang/en lang/de lang/zh
 
@@ -83,8 +83,8 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux
-@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux
+@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang
+@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang
 
 SCRIPTS = n2o
 

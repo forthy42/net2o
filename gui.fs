@@ -28,7 +28,7 @@ require minos2/font-style.fs
 : update-size# ( -- )
     dpy-h @ rows / s>f to font-size#
     font-size# 133% f* fround to baseline#
-    1e to pixelsize# ;
+    font-size# 32e f/ to pixelsize# ;
 
 update-size#
 
@@ -88,7 +88,7 @@ tex: net2o-logo
 {{ $FFFFFFFF pres-frame
 {{
 glue*lll }}glue
-' net2o-logo "doc/net2o-200.png" 1e }}image-file Constant net2o-glue /center
+' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
 \latin \sans \regular
 !i18n l" net2o GUI" /title
 l" Enter passphrase to unlock" /subtitle
