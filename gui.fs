@@ -37,11 +37,10 @@ require minos2/text-style.fs
 glue new Constant glue-left
 glue new Constant glue-right
 
-: 0glue ( -- )
-    glue-left  >o 0g fdup hglue-c glue! o>
-    glue-right >o 0g fdup hglue-c glue! o> ;
+\ frames
 
-0glue
+0 Value pw-frame
+0 Value id-frame
 
 \ password screen
 
@@ -59,6 +58,8 @@ glue new Constant glue-right
     glue-left  >o 0g fdup hglue-c glue! o>
     glue-right >o 0g fdup hglue-c glue! o> +sync drop ;
 
+0e 0 shake-lr
+
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh swap slide-frame dup .button1 simple[] ;
 
@@ -67,6 +68,8 @@ glue new Constant glue-right
 	>o action-of animate ['] err-fade = flag or to flag
 	o anims[] >stack o>
     LOOP  flag ;
+
+forward show-nicks
 
 : pw-done ( max span addr pos -- max span addr pos flag )
     err-fade? IF  false  EXIT  THEN
@@ -81,7 +84,10 @@ glue new Constant glue-right
     ELSE
 	." Right passphrase" cr
 	true
+	show-nicks
     THEN ;
+
+\ password frame
 
 tex: net2o-logo
 
@@ -123,7 +129,7 @@ pw-field ' pw-done edit[]
 : pw-show/hide ( flag -- )
     2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
     pw-field engage +sync ;
-' pw-show/hide false toggle[]
+' pw-show/hide config:passmode# @ 1 > toggle[]
 \normal
 }}h box[]
 }}z box[]
@@ -132,7 +138,40 @@ glue*lll }}glue
 }}h box[] \skip >bl
 glue*lll }}glue
 }}v box[]
-}}z box[] Value pw-frame
+}}z box[] to pw-frame
+
+\ id frame
+
+0 Value mykey-box
+0 Value nicks-box
+
+htab-glue new tab-glue: name-tab
+htab-glue new tab-glue: group-tab
+
+: show-nick ( o:key -- )
+    {{
+    {{ \large ke-nick $@ }}text glue*l }}glue }}h box[] name-tab
+    }}h box[]
+    mykey-box nicks-box ke-sk sec@ nip select .+child ;
+
+: fill-nicks ( -- )
+    keys>sort[]
+    key-list[] $@ bounds ?DO
+	I @ .show-nick
+    cell +LOOP ;
+
+{{ $FFFF80FF pres-frame
+{{
+{{ }}v box[] dup to mykey-box
+{{
+tex: vp-nicks glue*ll ' vp-nicks }}vp vp[] dup to nicks-box
+glue*l }}glue
+}}v box[]
+}}z box[] to id-frame
+
+: show-nicks ( -- )
+    fill-nicks id-frame dup to top-widget .htop-resize
+    +sync ;
 
 : !widgets ( -- )
     top-widget .htop-resize

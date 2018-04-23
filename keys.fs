@@ -376,7 +376,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 
 \ print sorted list of keys by nick
 
-Variable sort-list[]
+Variable key-list[]
 : $ins[]key ( o:key $array -- pos )
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
@@ -387,14 +387,15 @@ Variable sort-list[]
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     o { w^ ins$0 } ins$0 cell a[] r@ cells $ins r> ;
+: keys>sort[] ( -- )  key-list[] $free
+    key# [: cell+ $@ drop cell+ >o key-list[] $ins[]key drop o> ;] #map ;
 : list-keys ( -- )
+    keys>sort[]
     ." colors: " .import-colors cr
     ." num pubkey                                   "
     wallet( ." wallet             " )
-    ."   date                     grp+perm	h nick" cr
-    key# [: cell+ $@ drop cell+ >o sort-list[] $ins[]key drop o> ;] #map
-    sort-list[] $[]# 0 ?DO  I sort-list[] $[] @ ..key-list  LOOP
-    sort-list[] $free ;
+    ."   date                     grp+prm h nick" cr
+    key-list[] $@ bounds ?DO  I @ ..key-list  cell +LOOP ;
 : list-nicks ( -- )
     nick# [: dup $. ." :" cr cell+ $@ bounds ?DO
       I @ ..key-list  cell +LOOP ;] #map ;
