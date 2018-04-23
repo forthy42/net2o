@@ -87,6 +87,9 @@ forward show-nicks
 	show-nicks
     THEN ;
 
+: 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
+: 40%b ( o -- o ) >o font-size# 40% f* to border o o> ;
+
 \ password frame
 
 tex: net2o-logo
@@ -106,23 +109,22 @@ glue-left }}glue
 {{
 glue*l $FFFFFFFF 4e }}frame dup .button3
 \mono
-{{ $0000FF08 to x-color "Horse Battery Staple" }}text
->o font-size# 25% f* to border o o>
+{{ $0000FF08 to x-color "Horse Battery Staple" }}text 25%b
 glue*l }}h
 {{
 glue-right }}glue
 !i18n l" wrong passphrase!" $FF000000 to x-color }}text' !lit
->o font-size# 25% f* to border o o> dup to pw-err
+25%b dup to pw-err
 glue*l
 $FF0000FF to x-color s" " }}text
->o font-size# 25% f* to border o o> dup to pw-num
+25%b dup to pw-num
 glue-left }}glue
 }}h
 blackish
 {{
 {{
 "" }}pw dup Value pw-field
->o font-size# 25% f* to border config:passmode# @ to pw-mode o o>
+25%b >o config:passmode# @ to pw-mode o o>
 glue*l }}h
 pw-field ' pw-done edit[]
 \large \sans $60606060 to x-color "👁" }}text blackish
@@ -146,28 +148,56 @@ glue*lll }}glue
 0 Value nicks-box
 
 htab-glue new tab-glue: name-tab
+htab-glue new tab-glue: pk-tab
 htab-glue new tab-glue: group-tab
 
+[IFUNDEF] child+
+    : child+ ( o -- ) o over >o to parent-w o> childs[] >stack ;
+[THEN]
+
+Create ke-imports#rgb
+
+Create imports#rgb-bg
+$FFFFFFFF  , $CCAA00FF  , $FFFFFFFF  , $FFFFFFFF  , $FFFFFFFF  , $0000FFFF  , $FFFFFFFF  ,
+Create imports#rgb-fg
+$FFFF  , $FF00FF  , $FFFFFF  , $FFFF00FF  , $FF00FFFF  , $FFFFFFFF  , $FF0000FF  ,
+
 : show-nick ( o:key -- )
+    ke-imports @ >im-color# cells { ki }
+    {{ glue*l imports#rgb-bg ki + @ slide-frame
     {{
-    {{ \large ke-nick $@ }}text glue*l }}glue }}h box[] name-tab
-    }}h box[]
-    mykey-box nicks-box ke-sk sec@ nip select .+child ;
+    {{ \large imports#rgb-fg ki + @ to x-color
+    ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
+    ke-nick $@ }}text 40%b glue*l }}glue }}h box[] name-tab
+    {{ \script \mono ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] pk-tab
+    glue*lll }}glue }}h box[]
+    }}z box[]
+    mykey-box nicks-box ke-sk sec@ nip select .child+ ;
 
 : fill-nicks ( -- )
     keys>sort[]
     key-list[] $@ bounds ?DO
 	I @ .show-nick
-    cell +LOOP ;
+    cell +LOOP
+    glue*l }}glue nicks-box .child+ ;
 
 {{ $FFFF80FF pres-frame
 {{
-{{ }}v box[] dup to mykey-box
+{{ glue*l $000000FF slide-frame
 {{
-tex: vp-nicks glue*ll ' vp-nicks }}vp vp[] dup to nicks-box
-glue*l }}glue
-}}v box[]
-}}z box[] to id-frame
+{{ \large $FFFFFFFF to x-color
+\bold \sans !i18n
+l" Name" }}text' 40%b glue*l }}glue }}h box[] name-tab
+{{ \script \mono l" Pubkey" }}text' 25%b glue*l }}glue }}h box[] pk-tab
+glue*lll }}glue }}h box[]
+}}z box[] !lit
+{{ }}v box[] dup to mykey-box
+{{ {{
+tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup to nicks-box
+$FFFF80FF to slider-color
+font-size# f2/ to slider-border
+dup font-size# fdup vslider }}h box[]
+}}v box[] }}z box[] to id-frame
 
 : show-nicks ( -- )
     fill-nicks id-frame dup to top-widget .htop-resize
