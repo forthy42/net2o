@@ -61,7 +61,7 @@ glue new Constant glue-right
 0e 0 shake-lr
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    glue*wh swap slide-frame dup .button1 simple[] ;
+    glue*wh swap slide-frame dup .button1 ;
 
 : err-fade? ( -- flag ) 0 { flag }
     anims@ 0 ?DO
@@ -158,9 +158,21 @@ htab-glue new tab-glue: group-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$FFFFFFFF  , $CCAA00FF  , $FFFFFFFF  , $FFFFFFFF  , $FFFFFFFF  , $0000FFFF  , $FFFFFFFF  ,
+$FFFFFFFF ,
+$4400CCFF ,
+$FFFFFFFF ,
+$44CCFFFF ,
+$4488FFFF ,
+$FFFFFFFF ,
+$FFFFFFFF ,
 Create imports#rgb-fg
-$FFFF  , $FF00FF  , $FFFFFF  , $FFFF00FF  , $FF00FFFF  , $FFFFFFFF  , $FF0000FF  ,
+$0000FFFF ,
+$00FF00FF ,
+$00FFFFFF ,
+$88CC00FF ,
+$FFFFFFFF ,
+$8800FFFF ,
+$FF0000FF ,
 
 : show-nick ( o:key -- )
     ke-imports @ >im-color# cells { ki }
@@ -169,7 +181,10 @@ $FFFF  , $FF00FF  , $FFFFFF  , $FFFF00FF  , $FF00FFFF  , $FFFFFFFF  , $FF0000FF 
     {{ \large imports#rgb-fg ki + @ to x-color
     ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
     ke-nick $@ }}text 40%b glue*l }}glue }}h box[] name-tab
-    {{ \script \mono ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] pk-tab
+    {{
+    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text
+    !i18n l" (signed)" }}text' !lit 25%b glue*l }}glue }}h box[]
+    {{ \mono \bold \tiny ke-pk $@ key| ['] 85type $tmp }}text glue*l }}glue }}h box[] }}v box[] pk-tab
     glue*lll }}glue }}h box[]
     }}z box[]
     mykey-box nicks-box ke-sk sec@ nip select .child+ ;
@@ -194,7 +209,8 @@ glue*lll }}glue }}h box[]
 {{ }}v box[] dup to mykey-box
 {{ {{
 tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup to nicks-box
-$FFFF80FF to slider-color
+$444444FF to slider-color
+$CCCCCCFF to slider-fgcolor
 font-size# f2/ to slider-border
 dup font-size# fdup vslider }}h box[]
 }}v box[] }}z box[] to id-frame
