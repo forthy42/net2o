@@ -25,6 +25,8 @@ require minos2/font-style.fs
 
 : slide-frame ( glue color -- o )
     font-size# 70% f* }}frame ;
+: bar-frame ( glue color -- o )
+    font-size# 20% f* }}frame dup .button3 ;
 : update-size# ( -- )
     dpy-h @ rows / s>f to font-size#
     font-size# 133% f* fround to baseline#
@@ -113,7 +115,7 @@ glue*l $FFFFFFFF 4e }}frame dup .button3
 glue*l }}h
 {{
 glue-right }}glue
-!i18n l" wrong passphrase!" $FF000000 to x-color }}text' !lit
+l" wrong passphrase!" $FF000000 to x-color }}i18n-text
 25%b dup to pw-err
 glue*l
 $FF0000FF to x-color s" " }}text
@@ -145,6 +147,7 @@ glue*lll }}glue
 \ id frame
 
 0 Value mykey-box
+0 Value groups-box
 0 Value nicks-box
 
 htab-glue new tab-glue: name-tab
@@ -158,7 +161,7 @@ htab-glue new tab-glue: group-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$FFFFFFFF ,
+$FFFFCCFF ,
 $4400CCFF ,
 $FFFFFFFF ,
 $44CCFFFF ,
@@ -200,43 +203,64 @@ $FF0000FF ,
     key-list[] $@ bounds ?DO
 	I @ .show-nick
     cell +LOOP
-    glue*l }}glue nicks-box .child+ ;
+    glue*l }}glue nicks-box .child+ nicks-box .parent-w /flop ;
 
 {{ $FFFF80FF pres-frame
 {{
 {{ glue*l $000000FF slide-frame
 {{
 {{ \large $FFFFFFFF to x-color
-\bold \sans !i18n
-l" Nick+Pet" }}text' 40%b glue*l }}glue }}h box[] name-tab
+\bold \sans
+l" Nick+Pet" }}i18n-text 40%b glue*l }}glue }}h name-tab
 {{
-{{ \tiny \mono l" Pubkey" }}text' 25%b glue*l }}glue }}h box[]
-{{ \script \bold l" Key date" }}text' 25%b glue*l }}glue }}h box[]
-}}v box[] pk-tab
+{{ \tiny \mono l" Pubkey" }}i18n-text 25%b glue*l }}glue }}h
+{{ \script \bold l" Key date" }}i18n-text 25%b glue*l }}glue }}h
+}}v pk-tab
 glue*lll }}glue }}h box[]
-}}z box[] !lit
+}}z
+{{ glue*l $303000FF bar-frame
+{{ \script l" My key" }}i18n-text 25%b glue*l }}glue }}h }}z
 {{ }}v box[] dup to mykey-box
+{{ glue*l $300030FF bar-frame
+{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
+{{ {{
+tex: vp-groups glue*lll ' vp-groups }}vp vp[] dup to groups-box
+$444444FF to slider-color
+$CCCCCCFF to slider-fgcolor
+font-size# 33% f* to slider-border
+dup font-size# 66% f* fdup vslider }}h box[] /flip
+{{ glue*l $003030FF bar-frame
+{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 {{ {{
 tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup to nicks-box
 $444444FF to slider-color
 $CCCCCCFF to slider-fgcolor
-font-size# f2/ to slider-border
-dup font-size# fdup vslider }}h box[]
-}}v box[] }}z box[] to id-frame
+font-size# 33% f* to slider-border
+dup font-size# 66% f* fdup vslider }}h box[] /flip
+}}v box[]
+}}z box[] to id-frame
 
 : show-nicks ( -- )
     fill-nicks id-frame to top-widget +glyphs +sync
     top-widget >o htop-resize
     <draw-init     draw-init      draw-init>
     htop-resize o>
-    nicks-box >o vp-h h f- to vp-y o> ;
+    groups-box .vp-top
+    nicks-box .vp-top ;
 
 : !widgets ( -- )
     top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
 
-: net2o-gui ( -- )  pw-frame to top-widget
+: net2o-gui ( -- )
+    pw-frame to top-widget
+    "PASSPHRASE" getenv 2dup d0= IF  2drop
+    ELSE
+	>passphrase +key  read-keys  secret-keys# IF
+	    show-nicks
+	THEN
+    THEN
     1config  !widgets  widgets-loop ;
 
 ' net2o-gui is run-gui
