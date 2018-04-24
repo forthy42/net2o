@@ -180,11 +180,17 @@ $FF0000FF ,
     {{
     {{ \large imports#rgb-fg ki + @ to x-color
     ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
-    ke-nick $@ }}text 40%b glue*l }}glue }}h box[] name-tab
+    ['] .nick-base $tmp }}text 40%b
+    ke-pets[] $[]# IF
+	{{ glue*l $00FF0020 slide-frame
+	['] .pet-base $tmp }}text 40%b
+	}}z box[]
+    THEN
+    glue*l }}glue }}h box[] name-tab
     {{
-    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text
-    !i18n l" (signed)" }}text' !lit 25%b glue*l }}glue }}h box[]
-    {{ \mono \bold \tiny ke-pk $@ key| ['] 85type $tmp }}text glue*l }}glue }}h box[] }}v box[] pk-tab
+    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text 25%b glue*l }}glue }}h box[]
+    {{ \mono \bold \tiny ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] swap
+    }}v box[] pk-tab
     glue*lll }}glue }}h box[]
     }}z box[]
     mykey-box nicks-box ke-sk sec@ nip select .child+ ;
@@ -202,8 +208,11 @@ $FF0000FF ,
 {{
 {{ \large $FFFFFFFF to x-color
 \bold \sans !i18n
-l" Name" }}text' 40%b glue*l }}glue }}h box[] name-tab
-{{ \script \mono l" Pubkey" }}text' 25%b glue*l }}glue }}h box[] pk-tab
+l" Nick+Pet" }}text' 40%b glue*l }}glue }}h box[] name-tab
+{{
+{{ \tiny \mono l" Pubkey" }}text' 25%b glue*l }}glue }}h box[]
+{{ \script \bold l" Key date" }}text' 25%b glue*l }}glue }}h box[]
+}}v box[] pk-tab
 glue*lll }}glue }}h box[]
 }}z box[] !lit
 {{ }}v box[] dup to mykey-box
@@ -216,8 +225,11 @@ dup font-size# fdup vslider }}h box[]
 }}v box[] }}z box[] to id-frame
 
 : show-nicks ( -- )
-    fill-nicks id-frame dup to top-widget .htop-resize
-    +sync ;
+    fill-nicks id-frame to top-widget +glyphs +sync
+    top-widget >o htop-resize
+    <draw-init     draw-init      draw-init>
+    htop-resize o>
+    nicks-box >o vp-h h f- to vp-y o> ;
 
 : !widgets ( -- )
     top-widget .htop-resize

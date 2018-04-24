@@ -196,7 +196,7 @@ Variable sim-nick!
 : .nick-base ( o:key -- )
     ke-nick $.  ke-nick# @ .# ;
 : .pet-base ( o:key -- )
-    0 ke-pets[] [: space type
+    0 ke-pets[] [: 2 pick IF space THEN type
       dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
 : .pet0-base ( o:key -- )
     ke-pets[] $[]# IF  0 ke-pets[] $[]@ type 0 ke-pets# $[] @ .#
