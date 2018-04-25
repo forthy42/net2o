@@ -269,9 +269,11 @@ dup font-size# 66% f* fdup vslider }}h box[] /flip
 
 : show-nicks ( -- )
     fill-nicks fill-groups id-frame to top-widget +glyphs +sync
-    top-widget >o htop-resize
+    top-widget >o
+    htop-resize
     <draw-init     draw-init      draw-init>
-    htop-resize o>
+    2 0 ?DO  htop-resize  LOOP
+    o>
     groups-box .vp-top
     nicks-box .vp-top ;
 
