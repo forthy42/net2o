@@ -396,7 +396,7 @@ msg-class to msg:object
 \g ### group description commands ###
 \g
 
-hash: group-desc#
+hash: group#
 
 static-a to allocater
 align here
@@ -409,7 +409,7 @@ here over - 2Constant sample-group$
     last# cell+ $@ drop cell+ >o rdrop ;
 
 : make-group ( addr u -- o:group )
-    sample-group$ 2over group-desc# #! last>o to groups:id$ ;
+    sample-group$ 2over group# #! last>o to groups:id$ ;
 
 cmd-table $@ inherit-table group-table
 
@@ -460,19 +460,35 @@ previous
 
 : save-chatgroups ( -- )
     .chats/group enc-filename $!
-    [: group-desc# ['] serialize-chatgroup #map ;] gen-cmd enc-file $!buf
+    [: group# ['] serialize-chatgroup #map ;] gen-cmd enc-file $!buf
     pk-off  key-list encfile-rest ;
 
+Variable group-list[]
+: $ins[]group ( o:group $array -- pos )
+    \G insert O(log(n)) into pre-sorted array
+    \G @var{pos} is the insertion offset or -1 if not inserted
+    { a[] } 0 a[] $[]#
+    BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
+	    o $@ $# a[] $[] @ $@ compare dup 0= IF
+		drop o cell+ $@ drop cell+ .groups:id$
+		$# a[] $[] @ cell+ $@ drop cell+ .groups:id$ compare  THEN
+	    0< IF  left $#  ELSE  $# 1+ right  THEN
+    REPEAT  drop >r
+    o { w^ ins$0 } ins$0 cell a[] r@ cells $ins r> ;
+: groups>sort[] ( -- )  group-list[] $free
+    group# [: >o group-list[] $ins[]group o> drop ;] #map ;
+
 : .chatgroup ( last# -- )
-    dup $. space cell+ $@ drop cell+ >o
-    groups:id$ last# $@ 2over str=
+    dup $. space dup $@ rot cell+ $@ drop cell+ >o
+    groups:id$ 2tuck str=
     IF  ." ="  ELSE  ''' emit <info> 85type <default> ''' emit THEN space
     groups:member[] [: '@' emit .simple-id space ;] $[]map
     ." admin " groups:admin[] [: '@' emit .simple-id space ;] $[]map
     ." +" groups:perms# x64.
     o> cr ;
 : .chatgroups ( -- )
-    group-desc# ['] .chatgroup #map ;
+    groups>sort[]
+    group-list[] $@ bounds ?DO  I @ .chatgroup  cell +LOOP ;
 
 \g 
 \g ### messaging commands ###

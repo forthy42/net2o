@@ -84,6 +84,8 @@ forward show-nicks
 	1e o ['] shake-lr >animate
 	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
     ELSE
+	0 secret-key >raw-key
+	read-chatgroups
 	." Right passphrase" cr
 	true
 	show-nicks
@@ -203,10 +205,32 @@ $FF0000FF ,
     key-list[] $@ bounds ?DO
 	I @ .show-nick
     cell +LOOP
-    glue*l }}glue nicks-box .child+ nicks-box .parent-w /flop ;
+    glue*lll }}glue nicks-box .child+ nicks-box .parent-w /flop ;
+
+: show-group ( last# -- )
+    dup cell+ $@ drop cell+ >o { g -- }
+    {{ glue*l $CCAA44FF slide-frame
+    {{
+    {{ \large blackish
+    \regular \sans g $@ }}text 40%b
+    glue*l }}glue }}h box[] name-tab
+    {{
+    {{
+    \mono \bold \tiny groups:id$
+    2dup g $@ str= 0= IF  key| ['] 85type $tmp  THEN
+    }}text 25%b glue*l }}glue }}h box[]
+    glue*l }}glue
+    }}v box[] pk-tab
+    glue*lll }}glue }}h box[]
+    }}z box[] o>
+    groups-box .child+
+    groups-box .parent-w /flop ;
 
 : fill-groups ( -- )
-    ;
+    groups>sort[]
+    group-list[] $@ bounds ?DO
+	I @ show-group
+    cell +LOOP ;
 
 {{ $FFFF80FF pres-frame
 {{
