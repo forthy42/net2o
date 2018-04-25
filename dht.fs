@@ -241,6 +241,8 @@ net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
 
 }scope
 
+dht-table $save
+
 \ queries
 
 fs-class class
@@ -282,7 +284,6 @@ dummy-dht >o dht-table @ token-table ! o>
 
 \ value reading requires constructing answer packet
 
-gen-table $freeze
 ' context-table is gen-table
 
 \ facility stuff

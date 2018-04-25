@@ -49,6 +49,7 @@ Variable context-table
 Variable key-entry-table
 Variable vault-table
 Variable pay-table
+Variable group-table
 
 Vocabulary mapc
 
@@ -497,6 +498,17 @@ KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
 \ specify strength (in bytes), not length! length is 2*strength
 32 Constant hash#128 \ 128 bit hash strength is enough!
 64 Constant hash#256 \ 256 bit hash strength is more than enough!
+
+\ group description
+
+cmd-class class
+    scope: groups
+    $value: id$
+    field: member[]
+    field: admin[]
+    64value: perms#
+    }scope
+end-class group-class
 
 0 [IF]
 Local Variables:

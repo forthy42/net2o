@@ -316,7 +316,7 @@ synonym scanqr keyscan
 : cat ( -- )
     \U cat file1 .. filen
     \G cat: cat encrypted files to stdout
-    ?cr vault>out dec ;
+    ?cr vault>out dec vault>file ;
 
 \ hash+signature
 
@@ -465,6 +465,31 @@ warnings !
 	    over c@ '@' = IF  1 /string nick>pk key| ."  key: " 2dup 85type  THEN
 	    ."  ======" cr msg-group$ $!
 	    msg-group$ $@ [ -1 1 rshift cell/ ]l load-msgn REPEAT ;
+
+: chatgroup ( -- )
+    \U chatgroup name [id] @user1 .. @usern [admin @useri .. @userj] [+perm]
+    \G chatgroup: define a chat group
+    ?get-me ?nextarg 0= ?EXIT  make-group
+    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
+    over c@ '@' <> IF  2drop ?nextarg drop
+	2dup s" =" str= IF  2drop
+	ELSE  base85>$ to groups:id$  THEN
+    ELSE  $20 rng$ to groups:id$  THEN
+    BEGIN  ?@nextarg  WHILE  nick>pk key| groups:member[] $+[]!  REPEAT
+    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
+    s" admin" str= IF  ?nextarg drop 2drop
+	BEGIN  ?@nextarg  WHILE  nick>pk key| groups:admin[] $+[]!  REPEAT
+    THEN
+    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
+    over c@ '+' = IF  2drop ?nextarg drop
+	s>unumber? drop d>64 to groups:perms#
+    THEN
+    save-chatgroups ;
+
+: chatgroups ( -- )
+    \U chatgroups
+    \g chatgroups: list chatgroups
+    ?get-me .chatgroups ;
 
 : invite ( -- )
     \U invite @user ["Invitation text"]

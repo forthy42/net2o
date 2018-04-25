@@ -272,9 +272,10 @@ Sema id-sema
     o IF  to invite-result#  THEN ;
 ' invite-result is <invite-result>
 
-gen-table $freeze
-
 }scope
+
+setup-table $save
+connect-table $save
 
 0 [IF]
 Local Variables:

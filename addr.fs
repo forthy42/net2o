@@ -50,7 +50,7 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     host-ekey-to 64! $> host-ekey $! ;
 }scope
 
-gen-table $freeze
+address-table $save
 ' context-table is gen-table
 
 in net2o : new-addr ( -- o )

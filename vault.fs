@@ -79,7 +79,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 +net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
     64>n to v-mode ;
 
-gen-table $freeze
+vault-table $save
 ' context-table is gen-table
 
 also }scope
@@ -125,7 +125,7 @@ enc-keccak
     enc>crypt2
     no-key state# >crypt-source
     vkey state# >crypt-key enc-file $@ c:encrypt c:diffuse
-    enc-file $@ $, vault-file 0 >crypt enc-file $off ;
+    enc-file $@ $, vault-file 0 >crypt enc-file $free ;
 : vfile, ( -- )
     vfile-pad vfile-enc ;
 : vsig, ( -- )
@@ -163,14 +163,16 @@ vault>file
     enc-file $@ >vault ['] do-cmd-loop catch 0 >crypt throw
     c-state @ $F = ;
 
-: decrypt-file ( filename u -- ) last# >r >decrypt
+: decrypt@ ( filename u -- addr u ) last# >r >decrypt
     IF
 	msg( v-sig 2@ 2dup .sigdates space .key-id forth:cr )
 	v-data 2@
     ELSE
 	#0.
-    THEN dispose n:o> r> to last#
-    write-decrypt ;
+    THEN dispose n:o> r> to last# ;
+
+: decrypt-file ( filename u -- )
+    decrypt@ write-decrypt enc-file $free ;
 previous
 
 0 [IF]

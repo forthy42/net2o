@@ -41,7 +41,7 @@ warnings !
 +net2o: !time ( -- ) \g start timer
     forth:!time init-timer ;
 
-gen-table $freeze
+log-table $save
 ' context-table is gen-table
 
 $32 net2o: log ( -- o:log )

@@ -170,11 +170,6 @@ forward key>nick
 Defer gen-table
 ' cmd-table IS gen-table
 
-: $freeze ( addr -- )
-    \ copy string to dictionary
-    >r r@ $@  align here r> !
-    dup , here swap dup allot move align ;
-
 : n>cmd ( n -- addr ) cells >r
     o IF  token-table  ELSE  setup-table  THEN
     $@ r@ u<= !!function!! r> + ;
@@ -503,11 +498,12 @@ comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     $> ?version ;
 }scope
 
+cmd-table $save
+
 also net2o-base
 : do-req> o IF  req? @ 0<  IF  end-with req? off  THEN  THEN ;
 previous
 
-gen-table $freeze
 gen-table $@ inherit-table reply-table
 
 \ net2o assembler
@@ -773,11 +769,11 @@ $13 net2o: push-$ ( $:string -- ) \g push string into answer packet
     string-stack $[]# IF  $> ?version  THEN \ accept query-only
     net2o-version $, version ;
 
-gen-table $freeze
-
 : ]nest  ( -- )  ]nest$ push-$ push' nest ;
 
 }scope
+
+reply-table $save
 
 also net2o-base
 

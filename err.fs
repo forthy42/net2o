@@ -107,6 +107,8 @@ s" hashed object not read in"    throwcode !!dvcs-hash!!
 s" Value has no unit"            throwcode !!no-unit!!
 s" Token/Coin doesn't exist"     throwcode !!no-coin!!
 s" not a wallet"                 throwcode !!wallet!!
+s" no group name"                throwcode !!no-group-name!!
+s" no base85 digit"              throwcode !!no-85-digit!!
 
 next-exception !
 

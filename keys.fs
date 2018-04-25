@@ -639,7 +639,8 @@ $11 net2o: privkey ( $:string -- )
     ke-wallet sec! ;
 }scope
 
-gen-table $freeze
+key-entry-table $save
+
 ' context-table is gen-table
 
 : key:nest-sig ( addr u -- addr u' flag )
@@ -649,7 +650,7 @@ gen-table $freeze
     sim-nick! off c-state off sig-ok ;
 ' key:nest-sig key-entry to nest-sig
 
-sample-key >o key-entry-table @ token-table ! o>
+key-entry-table @ sample-key .token-table !
 
 : key:code ( -- )
     code-key  cmdlock lock
@@ -1254,8 +1255,10 @@ event: :>qr-invitation { task w^ pk -- }
 Variable tries#
 #10 Value maxtries#
 
+forward read-chatgroups
+
 : get-skc ( -- )
-    secret-keys# ?EXIT  tries# off
+    secret-keys# IF  read-chatgroups  EXIT  THEN  tries# off
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop
@@ -1274,7 +1277,7 @@ Variable tries#
     1 = IF  0 secret-key
 	." ==== opened: " dup ..nick ."  in " .time ." ====" cr
     ELSE  ." ==== opened in " .time ." ====" cr choose-key  THEN
-    >raw-key ?rsk   r> op-vector ! ;
+    >raw-key ?rsk read-chatgroups  r> op-vector ! ;
 
 scope: n2o
 Forward help
@@ -1286,7 +1289,7 @@ Forward help
 	r> close-file throw  ELSE  true  THEN
     IF  [: ." Generate a new keypair:" cr
 	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
-	  new-key .keys ?rsk ;]
+	  new-key .keys ?rsk read-chatgroups ;]
     ELSE  ['] get-skc  THEN ;
 
 : .keyinfo ( -- )

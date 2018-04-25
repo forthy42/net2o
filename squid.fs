@@ -137,7 +137,7 @@ $20 net2o: pay-last-contract ( $:hash -- ) \g hash of last contract
 +net2o: pay-comment ( $:enc-comment -- ) \g comment, encrypted for selected key
     $> pay:comment ;
 
-gen-table $freeze
+pay-table $save
 
 }scope
 

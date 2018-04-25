@@ -211,6 +211,8 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 
 }scope
 
+dvcs-table $save
+
 ' dvcs-in-hash ( addr u -- ) dvcs-class to dvcs:read
 :noname ( addr u -- )
     2dup hash#128 /string ?sane-file

@@ -71,7 +71,7 @@ Variable saved-msg$
     ?.net2o/chats  net2o:new-msging >o
     dup msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
-    $@ >chatid chat-85 .chats/ enc-filename $!
+    $@ >chatid .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : save-all-msgs ( -- )
@@ -89,19 +89,18 @@ Variable saved-msg$
 : msg-eval ( addr u -- )
     net2o:new-msging >o 0 to parent do-cmd-loop dispose o> ;
 
-: vault>msg ( -- )
-    ['] msg-eval is write-decrypt ;
-
 : load-msg ( group u -- )  2dup >group
-    >chatid chat-85 .chats/ [: type ." .v2o" ;] $tmp
+    >chatid .chats/ [: type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop EXIT  THEN
     replay-mode on  skip-sig? on
-    vault>msg  ['] decrypt-file catch
+    ['] decrypt@ catch
     ?dup-IF  DoError 2drop
 	\ try read backup instead
-	[: enc-filename $. '~' emit ;] $tmp ['] decrypt-file catch
-	?dup-IF  DoError 2drop  THEN
-    THEN  replay-mode off  skip-sig? off ;
+	[: enc-filename $. '~' emit ;] $tmp ['] decrypt@ catch
+	?dup-IF  DoError 2drop
+	ELSE  msg-eval  THEN
+    ELSE  msg-eval  THEN
+    replay-mode off  skip-sig? off  enc-file $free ;
 
 : >load-group ( group u -- )
     2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
@@ -346,7 +345,10 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     8 !!>=order? $> msg:coord ;
 
-gen-table $freeze
+}scope
+
+msg-table $save
+
 ' context-table is gen-table
 
 \ Code for displaying messages
@@ -390,9 +392,93 @@ msg-class to msg:object
 	otr-mode @ IF <info> ."  [otr]" <default> THEN
     THEN  forth:cr ; msg-class to msg:end
 
+\g
+\g ### group description commands ###
+\g
+
+hash: group-desc#
+
+static-a to allocater
+align here
+group-class new Constant group-o
+dynamic-a to allocater
+here over - 2Constant sample-group$
+
+: last>o ( -- )
+    \G use last hash access as object
+    last# cell+ $@ drop cell+ >o rdrop ;
+
+: make-group ( addr u -- o:group )
+    sample-group$ 2over group-desc# #! last>o to groups:id$ ;
+
+cmd-table $@ inherit-table group-table
+
+scope{ net2o-base
+
+$20 net2o: group-name ( $:name -- ) \g group symbolic name
+    $> make-group ;
++net2o: group-id ( $:group -- ) \g group id
+    group-o o = !!no-group-name!! $> to groups:id$ ;
++net2o: group-member ( $:memberkey -- ) \g add member key
+    group-o o = !!no-group-name!! $> groups:member[] $+[]! ;
++net2o: group-admin ( $:adminkey -- ) \g add admin key
+    group-o o = !!no-group-name!! $> groups:admin[] $+[]! ;
++net2o: group-perms ( 64u -- ) \g permission/modes bitmask
+    group-o o = !!no-group-name!! to groups:perms# ;
+
+}scope
+
+group-table $save
+
+group-table @ group-o .token-table !
+
+' context-table is gen-table
+
+: .chats/group ( -- addr u )
+    pkc keysize 3 * \ hash of pkc+pk1+skc keyed with "group"
+    "group" keyed-hash#128 .chats/ ( [: type ." .v2o" ;] $tmp ) ;
+
+: read-chatgroups ( -- )
+    .chats/group [: type ." .v2o" ;] $tmp
+    2dup file-status nip no-file# = IF  2drop  EXIT  THEN
+    decrypt@ group-o .do-cmd-loop  enc-file $free ;
+
+also net2o-base
+
+: serialize-chatgroup ( last# -- )
+    dup $@ 2dup $, group-name
+    rot cell+ $@ drop cell+ >o
+    groups:id$ dup IF
+	2tuck str= 0= IF  $, group-id  ELSE  2drop  THEN
+    ELSE  2drop 2drop  THEN
+    groups:member[] [: $, group-member ;] $[]map
+    groups:admin[] [: $, group-admin ;] $[]map
+    groups:perms# 64dup 64-0<> IF  lit, group-perms  ELSE  64drop  THEN
+    o> ;
+
+previous
+
+: save-chatgroups ( -- )
+    .chats/group enc-filename $!
+    [: group-desc# ['] serialize-chatgroup #map ;] gen-cmd enc-file $!buf
+    pk-off  key-list encfile-rest ;
+
+: .chatgroup ( last# -- )
+    dup $. space cell+ $@ drop cell+ >o
+    groups:id$ last# $@ 2over str=
+    IF  ." ="  ELSE  ''' emit <info> 85type <default> ''' emit THEN space
+    groups:member[] [: '@' emit .simple-id space ;] $[]map
+    ." admin " groups:admin[] [: '@' emit .simple-id space ;] $[]map
+    ." +" groups:perms# x64.
+    o> cr ;
+: .chatgroups ( -- )
+    group-desc# ['] .chatgroup #map ;
+
 \g 
 \g ### messaging commands ###
 \g 
+
+scope{ net2o-base
 
 $34 net2o: msg ( -- o:msg ) \g push a message object
     perm-mask @ perm%msg and 0= !!msg-perm!!
@@ -446,10 +532,11 @@ msging-class to nest-sig
 msg-class to start-req
 msg-class to nest-sig
 
-gen-table $freeze
 ' context-table is gen-table
 
 also }scope
+
+msging-table $save
 
 : msg-reply ( tag -- )
     ." got reply " hex. pubkey $@ key>nick forth:type forth:cr ;

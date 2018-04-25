@@ -95,7 +95,8 @@ $20 net2o: open-file ( $:string mode -- ) \g open file with mode
 +net2o: poll-request ( ulimit -- ) \g poll a file to check for size changes
     poll! lit, set-size ;
 
-gen-table $freeze
+fs-table $save
+
 ' context-table is gen-table
 
 :noname ( uid useek -- ) 64>r ulit, file-id
@@ -160,9 +161,10 @@ $2C net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     THEN
     endwith ;
 
+ack-table $save
+
 \ profiling, nat traversal
 
-gen-table $freeze
 ' context-table is gen-table
 
 in net2o : gen-resend ( -- )

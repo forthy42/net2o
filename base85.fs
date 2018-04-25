@@ -4,6 +4,7 @@
 s" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~"
 85>chars 85 smove
 $80 buffer: chars>85
+chars>85 $80 $FF fill
 85 0 [DO] [I] dup 85>chars + c@ chars>85 + c! [LOOP]
 
 : .b85 ( n -- n' ) 0 85 um/mod swap 85>chars + c@ emit ;
@@ -15,8 +16,9 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 : 85type ( addr u -- )
     bounds ?DO  I I' over - 4 umin cells .base85s + perform  4 +LOOP ;
 
-: b85digit ( char -- n ) $7F umin chars>85 + c@ ;
-    
+: b85digit ( char -- n ) $7F umin chars>85 + c@
+    dup $FF = !!no-85-digit!! ;
+
 : base85>n ( addr u -- n )  0 1 2swap bounds +DO
 	I c@ b85digit over * rot + swap 85 *
     LOOP  drop ;
@@ -40,3 +42,5 @@ comp: execute postpone SLiteral ;
     ['] 85type $tmp chat-sanitize ;
 : hash>filename ( addr u -- filename u' )
     hash-85 [: config:objects$ $. '/' emit type ;] $tmp ;
+: .chats/ ( addr u -- addr' u' )
+    chat-85 [: config:chats$  $. '/' emit type ;] $tmp ;
