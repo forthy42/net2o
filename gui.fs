@@ -111,7 +111,7 @@ glue-left }}glue
 {{
 glue*l $FFFFFFFF 4e }}frame dup .button3
 \mono
-{{ $0000FF08 to x-color "Horse Battery Staple" }}text 25%b
+{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
 glue*l }}h
 {{
 glue-right }}glue
@@ -205,6 +205,9 @@ $FF0000FF ,
     cell +LOOP
     glue*l }}glue nicks-box .child+ nicks-box .parent-w /flop ;
 
+: fill-groups ( -- )
+    ;
+
 {{ $FFFF80FF pres-frame
 {{
 {{ glue*l $000000FF slide-frame
@@ -241,7 +244,7 @@ dup font-size# 66% f* fdup vslider }}h box[] /flip
 }}z box[] to id-frame
 
 : show-nicks ( -- )
-    fill-nicks id-frame to top-widget +glyphs +sync
+    fill-nicks fill-groups id-frame to top-widget +glyphs +sync
     top-widget >o htop-resize
     <draw-init     draw-init      draw-init>
     htop-resize o>
