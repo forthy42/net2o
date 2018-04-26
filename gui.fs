@@ -28,7 +28,9 @@ require minos2/font-style.fs
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
 : update-size# ( -- )
-    dpy-h @ rows / s>f to font-size#
+    dpy-h @ s>f
+    default-diag screen-diag f/ fsqrt default-scale f* 1/f 32 fm*
+    f/ fround to font-size#
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
 
@@ -99,51 +101,51 @@ forward show-nicks
 tex: net2o-logo
 
 {{ $FFFFFFFF pres-frame
-{{
-glue*lll }}glue
-' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
-\latin \sans \regular
-!i18n l" net2o GUI" /title
-l" Enter passphrase to unlock" /subtitle
-!lit
-{{
-glue*lll }}glue
-glue-left }}glue
-\large \sans "🔐" }}text \normal
-{{
-glue*l $FFFFFFFF 4e }}frame dup .button3
-\mono
-{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
-glue*l }}h
-{{
-glue-right }}glue
-l" wrong passphrase!" $FF000000 to x-color }}i18n-text
-25%b dup to pw-err
-glue*l
-$FF0000FF to x-color s" " }}text
-25%b dup to pw-num
-glue-left }}glue
-}}h
-blackish
-{{
-{{
-"" }}pw dup Value pw-field
-25%b >o config:passmode# @ to pw-mode o o>
-glue*l }}h
-pw-field ' pw-done edit[]
-\large \sans $60606060 to x-color "👁" }}text blackish
-: pw-show/hide ( flag -- )
-    2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
-    pw-field engage +sync ;
-' pw-show/hide config:passmode# @ 1 > toggle[]
-\normal
-}}h box[]
-}}z box[]
-glue-right }}glue
-glue*lll }}glue
-}}h box[] \skip >bl
-glue*lll }}glue
-}}v box[]
+    {{
+	glue*lll }}glue
+	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
+	\latin \sans \regular
+	!i18n l" net2o GUI" /title
+	l" Enter passphrase to unlock" /subtitle
+	!lit
+	{{
+	    glue*lll }}glue
+	    glue-left }}glue
+	    \large \sans "🔐" }}text \normal
+	    {{
+		glue*l $FFFFFFFF 4e }}frame dup .button3
+		\mono
+		{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
+		glue*l }}h
+		{{
+		    glue-right }}glue
+		    l" wrong passphrase!" $FF000000 to x-color }}i18n-text
+		    25%b dup to pw-err
+		    glue*l
+		    $FF0000FF to x-color s" " }}text
+		    25%b dup to pw-num
+		    glue-left }}glue
+		}}h
+		blackish
+		{{
+		    {{
+			"" }}pw dup Value pw-field
+			25%b >o config:passmode# @ to pw-mode o o>
+		    glue*l }}h
+		    pw-field ' pw-done edit[]
+		    \large \sans $60606060 to x-color "👁" }}text blackish
+		    : pw-show/hide ( flag -- )
+			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
+			pw-field engage +sync ;
+		    ' pw-show/hide config:passmode# @ 1 > toggle[]
+		    \normal
+		}}h box[]
+	    }}z box[]
+	    glue-right }}glue
+	    glue*lll }}glue
+	}}h box[] \skip >bl
+	glue*lll }}glue
+    }}v box[]
 }}z box[] to pw-frame
 
 \ id frame
@@ -194,7 +196,7 @@ $FF0000FF ,
     glue*l }}glue }}h box[] name-tab
     {{
     {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text 25%b glue*l }}glue }}h box[]
-    {{ \mono \bold \tiny ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] swap
+    {{ \mono \bold \script ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] swap
     }}v box[] pk-tab
     glue*lll }}glue }}h box[]
     }}z box[]
@@ -205,7 +207,7 @@ $FF0000FF ,
     key-list[] $@ bounds ?DO
 	I @ .show-nick
     cell +LOOP
-    glue*lll }}glue nicks-box .child+ nicks-box .parent-w /flop ;
+    glue*lll }}glue nicks-box .child+ nicks-box /flop ;
 
 : show-group ( last# -- )
     dup cell+ $@ drop cell+ >o { g -- }
@@ -216,7 +218,7 @@ $FF0000FF ,
     glue*l }}glue }}h box[] name-tab
     {{
     {{
-    \mono \bold \tiny groups:id$
+    \mono \bold \script groups:id$
     2dup g $@ str= 0= IF  key| ['] 85type $tmp  THEN
     }}text 25%b glue*l }}glue }}h box[]
     glue*l }}glue
@@ -224,7 +226,7 @@ $FF0000FF ,
     glue*lll }}glue }}h box[]
     }}z box[] o>
     groups-box .child+
-    groups-box .parent-w /flop ;
+    groups-box /flop ;
 
 : fill-groups ( -- )
     groups>sort[]
@@ -233,38 +235,35 @@ $FF0000FF ,
     cell +LOOP ;
 
 {{ $FFFF80FF pres-frame
-{{
-{{ glue*l $000000FF slide-frame
-{{
-{{ \large $FFFFFFFF to x-color
-\bold \sans
-l" Nick+Pet" }}i18n-text 40%b glue*l }}glue }}h name-tab
-{{
-{{ \tiny \mono l" Pubkey" }}i18n-text 25%b glue*l }}glue }}h
-{{ \script \bold l" Key date" }}i18n-text 25%b glue*l }}glue }}h
-}}v pk-tab
-glue*lll }}glue }}h box[]
-}}z
-{{ glue*l $303000FF bar-frame
-{{ \script l" My key" }}i18n-text 25%b glue*l }}glue }}h }}z
-{{ }}v box[] dup to mykey-box
-{{ glue*l $300030FF bar-frame
-{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
-{{ {{
-tex: vp-groups glue*lll ' vp-groups }}vp vp[] dup to groups-box
-$444444FF to slider-color
-$CCCCCCFF to slider-fgcolor
-font-size# 33% f* to slider-border
-dup font-size# 66% f* fdup vslider }}h box[] /flip
-{{ glue*l $003030FF bar-frame
-{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
-{{ {{
-tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup to nicks-box
-$444444FF to slider-color
-$CCCCCCFF to slider-fgcolor
-font-size# 33% f* to slider-border
-dup font-size# 66% f* fdup vslider }}h box[] /flip
-}}v box[]
+    {{
+	{{ glue*l $000000FF slide-frame
+	    {{
+		{{ \large \bold \sans $FFFFFFFF to x-color
+		l" Nick+Pet" }}i18n-text 40%b glue*l }}glue }}h name-tab
+		{{
+		    {{ \script \mono l" Pubkey" }}i18n-text 25%b glue*l }}glue }}h
+		    {{ \script \bold l" Key date" }}i18n-text 25%b glue*l }}glue }}h
+		}}v pk-tab
+	    glue*lll }}glue }}h
+	}}z
+	{{
+	    {{
+		{{ glue*l $303000FF bar-frame
+		{{ \script l" My key" }}i18n-text 25%b glue*l }}glue }}h }}z
+		{{ }}v box[] dup to mykey-box
+		{{ glue*l $300030FF bar-frame
+		{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
+		{{ }}v box[] dup to groups-box /flip
+		{{ glue*l $003030FF bar-frame
+		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
+		{{ }}v box[] dup to nicks-box /flip
+		glue*lll }}glue
+	    tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
+	    $444444FF to slider-color
+	    $CCCCCCFF to slider-fgcolor
+	    font-size# 33% f* to slider-border
+	dup font-size# 66% f* fdup vslider }}h box[]
+    }}v box[]
 }}z box[] to id-frame
 
 : show-nicks ( -- )
@@ -274,8 +273,7 @@ dup font-size# 66% f* fdup vslider }}h box[] /flip
     <draw-init     draw-init      draw-init>
     2 0 ?DO  htop-resize  LOOP
     o>
-    groups-box .vp-top
-    nicks-box .vp-top ;
+    peers-box .vp-top ;
 
 : !widgets ( -- )
     top-widget .htop-resize
@@ -327,6 +325,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("{{") (0 . 2) (0 . 2) non-immediate)
+     (("}}h" "}}v" "}}z" "}}vp") (-2 . 0) (-2 . 0) non-immediate)
     )
 End:
 [THEN]

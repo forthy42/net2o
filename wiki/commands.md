@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.6.3-20180418.
+Version 0.6.4-20180426.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -367,6 +367,17 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   payment transaction
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
+### group description commands ###
++ $20 group-name ( $:name -- )
+  group symbolic name
++ $21 group-id ( $:group -- )
+  group id
++ $22 group-member ( $:memberkey -- )
+  add member key
++ $23 group-admin ( $:adminkey -- )
+  add admin key
++ $24 group-perms ( 64u -- )
+  permission/modes bitmask
 
 ### messaging commands ###
 
@@ -444,3 +455,4 @@ the balance command, which balances the selected asset.
 The signature of a contract signs the wallet's state (serialized in
 normalized form) after the contract has been executed.  The current
 contract's hash is part of the serialization.
+  chatgroups: list chatgroups
