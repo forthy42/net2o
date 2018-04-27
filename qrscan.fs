@@ -133,7 +133,7 @@ also opengl
 : draw-scan ( direction xscale yscale -- )
     \G draw a scan rotated/tilted by scan matrix
     fover fnegate fover fnegate 0e { f: sx f: sy f: -sx f: -sy f: z }
-    v0 i0 >v
+    vi0 >v
      -sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
       sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
       sx -sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
