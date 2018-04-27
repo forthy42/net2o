@@ -69,10 +69,14 @@ $20 value hash-size#
     ['] n2o >body 1 set-order
     ['] rec-word 1 set-recognizers ;
 
+Variable recs
+
 : do-net2o-cmds ( xt -- )
-    get-order n>r get-recognizers n>r
+    get-order n>r
+    get-recognizers recs set-stack
     set-net2o-cmds catch
-    nr> set-recognizers nr> set-order throw ;
+    recs get-stack set-recognizers
+    nr> set-order throw ;
 
 : (n2o-quit) ( -- )
     \ exits only through THROW etc.
@@ -709,6 +713,8 @@ Variable gui.fs$
     \U gui
     \G gui: start net2o's graphical user interface
     ?.net2o-config
+    only forth also definitions
+    recs get-stack ?dup-IF  set-recognizers  THEN
     gui.fs$ $@ required run-gui ;
 }scope
 

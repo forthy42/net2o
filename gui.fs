@@ -86,8 +86,8 @@ forward show-nicks
 	1e o ['] shake-lr >animate
 	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
     ELSE
-	0 secret-key >raw-key
-	read-chatgroups
+	0 >o 0 secret-key init-client >raw-key
+	read-chatgroups o>
 	\ ." Right passphrase" cr
 	show-nicks
 	true

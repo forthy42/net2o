@@ -107,10 +107,10 @@ inverse-default 32 sfloats bounds
 	LOOP
     LOOP ;
 
-scan-inverse  0 sfloats + Constant x-scale
+scan-inverse  0 sfloats + Constant x-scl
 scan-inverse  1 sfloats + Constant y-rots
 scan-inverse  8 sfloats + Constant x-rots
-scan-inverse  9 sfloats + Constant y-scale
+scan-inverse  9 sfloats + Constant y-scl
 scan-inverse 24 sfloats + Constant x-spos
 scan-inverse 25 sfloats + Constant y-spos
 
@@ -345,9 +345,9 @@ previous
     THEN ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
-    s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scale sf!
+    s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scl sf!
     p0 2@ p2 2@ p- p1 2@ p3 2@ p- p+ p2/
-    s>f y-scansize f/ y-scale sf!  s>f x-scansize f/ x-rots sf! ;
+    s>f y-scansize f/ y-scl sf!  s>f x-scansize f/ x-rots sf! ;
 : set-scan' ( -- )
     compute-xpoint ( .. x y )
     scale+rotate

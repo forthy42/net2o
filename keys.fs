@@ -871,7 +871,7 @@ Variable lastscan$
 \ generate keys
 
 : sksig! ( -- )
-    ke-pk $@ ke-sk sec@ c:0key >keyed-hash keypad $20 keccak>
+    ke-pk $@ ke-sk sec@ c:0key >keyed-hash keypad keysize keccak>
     keypad keysize ke-sksig sec! ;
 
 : +gen-keys ( nick u type -- )
