@@ -73,11 +73,12 @@ Variable old-order
     get-order old-order set-stack
     ['] n2o >body 1 set-order
     ['] rec-word 1 set-recognizers ;
+: reset-net2o-cmds ( -- )
+    old-recs get-stack ?dup-IF  set-recognizers  THEN
+    old-order get-stack ?dup-IF  set-order definitions  THEN ;
 
 : do-net2o-cmds ( xt -- )
-    set-net2o-cmds catch
-    old-recs get-stack set-recognizers
-    old-order get-stack set-order throw ;
+    set-net2o-cmds catch reset-net2o-cmds throw ;
 
 : (n2o-quit) ( -- )
     \ exits only through THROW etc.
@@ -714,8 +715,7 @@ Variable gui.fs$
     \U gui
     \G gui: start net2o's graphical user interface
     ?.net2o-config
-    old-order get-stack set-order definitions
-    old-recs get-stack ?dup-IF  set-recognizers  THEN
+    reset-net2o-cmds
     gui.fs$ $@ required run-gui ;
 }scope
 

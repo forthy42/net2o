@@ -209,7 +209,7 @@ $FF0000FF ,
     key-list[] $@ bounds ?DO
 	I @ .show-nick
     cell +LOOP
-    glue*lll }}glue nicks-box .child+ nicks-box /flop ;
+    glue*lll }}glue nicks-box .child+ nicks-box /flop drop ;
 
 : show-group ( last# -- )
     dup cell+ $@ drop cell+ >o { g -- }
@@ -228,7 +228,7 @@ $FF0000FF ,
     glue*lll }}glue }}h box[]
     }}z box[] o>
     groups-box .child+
-    groups-box /flop ;
+    groups-box /flop drop ;
 
 : fill-groups ( -- )
     groups>sort[]
@@ -269,7 +269,8 @@ $FF0000FF ,
 }}z box[] to id-frame
 
 : show-nicks ( -- )
-    fill-nicks fill-groups id-frame to top-widget +glyphs +sync
+    fill-nicks fill-groups
+    id-frame to top-widget +glyphs +sync
     top-widget >o
     htop-resize
     <draw-init     draw-init      draw-init>
