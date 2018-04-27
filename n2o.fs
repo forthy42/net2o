@@ -702,11 +702,14 @@ warnings !
     ?check-rng $20 rng$ 85type cr
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
 
+Variable gui.fs$
+"gui.fs" open-fpath-file throw rot close-file throw gui.fs$ $!
+
 : gui ( -- )
     \U gui
     \G gui: start net2o's graphical user interface
     ?.net2o-config
-    "gui.fs" required run-gui ;
+    gui.fs$ $@ required run-gui ;
 }scope
 
 \ use a different history file for net2o

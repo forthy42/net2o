@@ -111,19 +111,21 @@ tex: net2o-logo
 	{{
 	    glue*lll }}glue
 	    glue-left }}glue
-	    \large \sans "🔐" }}text \normal
+	    {{
+		\large \sans "🔐" }}text
+		$FF0040FF to x-color s" " }}text
+		25%b dup to pw-num /center
+	    }}z
 	    {{
 		glue*l $FFFFFFFF 4e }}frame dup .button3
-		\mono
+		\mono \normal
 		{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
 		glue*l }}h
 		{{
 		    glue-right }}glue
 		    l" wrong passphrase!" $FF000000 to x-color }}i18n-text
 		    25%b dup to pw-err
-		    glue*l
-		    $FF0000FF to x-color s" " }}text
-		    25%b dup to pw-num
+		    glue*l }}glue
 		    glue-left }}glue
 		}}h
 		blackish
