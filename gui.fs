@@ -79,7 +79,7 @@ forward show-nicks
     err-fade? IF  false  EXIT  THEN
     over 3 pick >passphrase +key
     read-keys secret-keys# 0= IF
-	." Wrong passphrase" cr
+	\ ." Wrong passphrase" cr
 	1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ +glyphs o>
 	keys sec[]free
 	drop nip 0 tuck false
@@ -88,9 +88,9 @@ forward show-nicks
     ELSE
 	0 secret-key >raw-key
 	read-chatgroups
-	." Right passphrase" cr
-	true
+	\ ." Right passphrase" cr
 	show-nicks
+	true
     THEN ;
 
 : 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
@@ -255,10 +255,10 @@ $FF0000FF ,
 		{{ }}v box[] dup to mykey-box
 		{{ glue*l $300030FF bar-frame
 		{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
-		{{ }}v box[] dup to groups-box /flip
+		{{ }}v box[] dup to groups-box /vflip
 		{{ glue*l $003030FF bar-frame
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
-		{{ }}v box[] dup to nicks-box /flip
+		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
 	    tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
 	    $444444FF to slider-color
