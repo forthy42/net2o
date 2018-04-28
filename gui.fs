@@ -54,7 +54,7 @@ glue new Constant glue-right
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
     2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e -sync ELSE +sync THEN
-    $FF swap .fade ;
+    $FF swap .fade fdrop ;
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
