@@ -123,6 +123,7 @@ tex: net2o-logo
 		glue*l }}h
 		{{
 		    glue-right }}glue
+		    glue*l }}glue
 		    l" wrong passphrase!" $FF000000 to x-color }}i18n-text
 		    25%b dup to pw-err
 		    glue*l }}glue
@@ -131,9 +132,11 @@ tex: net2o-logo
 		blackish
 		{{
 		    {{
+			glue*l }}glue
 			"" }}pw dup Value pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
-		    glue*l }}h
+			glue*l }}glue
+		    }}h
 		    pw-field ' pw-done edit[]
 		    \large \sans $60606060 to x-color "👁" }}text blackish
 		    : pw-show/hide ( flag -- )
