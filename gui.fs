@@ -202,14 +202,13 @@ $FF0000FF ,
     }}v box[] pk-tab
     glue*lll }}glue }}h box[]
     }}z box[]
-    mykey-box nicks-box ke-sk sec@ nip select .child+ ;
+    mykey-box nicks-box ke-sk sec@ nip select /flop .child+ ;
 
 : fill-nicks ( -- )
     keys>sort[]
     key-list[] $@ bounds ?DO
 	I @ .show-nick
-    cell +LOOP
-    glue*lll }}glue nicks-box .child+ nicks-box /flop drop ;
+    cell +LOOP ;
 
 : show-group ( last# -- )
     dup cell+ $@ drop cell+ >o { g -- }
@@ -227,8 +226,7 @@ $FF0000FF ,
     }}v box[] pk-tab
     glue*lll }}glue }}h box[]
     }}z box[] o>
-    groups-box .child+
-    groups-box /flop drop ;
+    groups-box /flop .child+ ;
 
 : fill-groups ( -- )
     groups>sort[]

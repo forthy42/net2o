@@ -812,7 +812,7 @@ Variable cp-tmp
 	THEN o> ;] #map
     0 to key-sfd ;] save-file  ?key-sfd drop ;
 
-: save-keys ( -- )  ?.net2o/keys
+: save-keys ( -- )  ?.net2o/keys drop
     save-pubkeys save-seckeys ;
 
 \ respond to scanning keys
