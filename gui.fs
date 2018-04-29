@@ -186,6 +186,9 @@ $FFFFFFFF ,
 $8800FFFF ,
 $FF0000FF ,
 
+: nick[] ( box o:nick -- box )
+    [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
+
 : show-nick ( o:key -- )
     ke-imports @ >im-color# cells { ki }
     {{ glue*l imports#rgb-bg ki + @ slide-frame
@@ -196,15 +199,15 @@ $FF0000FF ,
     ke-pets[] $[]# IF
 	{{ glue*l $00FF0020 slide-frame
 	['] .pet-base $tmp }}text 40%b
-	}}z box[]
+	}}z
     THEN
-    glue*l }}glue }}h box[] name-tab
+    glue*l }}glue }}h name-tab
     {{
-    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text 25%b glue*l }}glue }}h box[]
-    {{ \mono \bold \script ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h box[] swap
-    }}v box[] pk-tab
-    glue*lll }}glue }}h box[]
-    }}z box[]
+    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text 25%b glue*l }}glue }}h
+    {{ \mono \bold \script ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h swap
+    }}v pk-tab
+    glue*lll }}glue }}h
+    }}z nick[]
     mykey-box nicks-box ke-sk sec@ nip select /flop .child+ ;
 
 : fill-nicks ( -- )
@@ -213,22 +216,25 @@ $FF0000FF ,
 	I @ .show-nick
     cell +LOOP ;
 
+: group[] ( box group -- box )
+    [: data { g } ." clicked on " g $. cr ;] swap click[] ;
+
 : show-group ( last# -- )
     dup cell+ $@ drop cell+ >o { g -- }
     {{ glue*l $CCAA44FF slide-frame
     {{
     {{ \large blackish
     \regular \sans g $@ }}text 40%b
-    glue*l }}glue }}h box[] name-tab
+    glue*l }}glue }}h name-tab
     {{
     {{
     \mono \bold \script groups:id$
     2dup g $@ str= 0= IF  key| ['] 85type $tmp  THEN
-    }}text 25%b glue*l }}glue }}h box[]
+    }}text 25%b glue*l }}glue }}h
     glue*l }}glue
-    }}v box[] pk-tab
-    glue*lll }}glue }}h box[]
-    }}z box[] o>
+    }}v pk-tab
+    glue*lll }}glue }}h
+    }}z g group[] o>
     groups-box /flop .child+ ;
 
 : fill-groups ( -- )
