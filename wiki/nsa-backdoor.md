@@ -39,10 +39,11 @@ it generated it itself by taking in _pkn-1_ and multiplying its own secret key
 _skn_ with it.
 
 The device does not need to keep this pubkey as plaintext, it is sufficient if
-this pubkey (or a salted hash over it) is used for actually decrypting the
-flash drive.  The pubkey therefore is stored encrypted by its owner's
-password.  If an unlock message is received and the calculated remaining
-pubkey hashed with the salt opens the encrypted drive, it's legitimate.
+this pubkey (or a salted hash over it; using that salt as _z_ value of the
+signature) is used for actually decrypting the flash drive.  The pubkey
+therefore is stored encrypted by its owner's password.  If an unlock message
+is received and the calculated remaining pubkey hashed with the salt opens the
+encrypted drive, it's legitimate.
 
 All parties necessary to open the device must collaborate, and it is possible
 to configure the devices so that only the appropriate chain of authorities can
