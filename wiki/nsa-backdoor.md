@@ -4,7 +4,7 @@ As you all know, it is not allowed to speak about NSA-demanded backdoors,
 and especially it is strictly prohibited to give any details.  However, it
 is allowed to boldly lie about NSA-demanded backdoors if you didn't receive
 such a request, because you are not under a gag order, and in general, lying
-about the quality of your product is not only legal, but "best practice".
+about the quality of your product is not only legal, but “best practice”.
 The purpose of this NSA backdoor fnord is to make you worry about the
 quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
@@ -47,14 +47,15 @@ encrypted drive, it's legitimate.
 
 All parties necessary to open the device must collaborate, and it is possible
 to configure the devices so that only the appropriate chain of authorities can
-open it, and all the relevant keys are stored in trusted enclaves (device
-itself) and HSMs.  The only data base with larger amount of data are the
-signatures the devices itself created on manufacturing; it is useless without
-the other keys.  Since only the device itself can verify that the signature is
-correct, any party in the chain can be non-cooperative without the others
-knowing who wasn't cooperative.  This makes sure that all parties (except the
-device itself) are truely convinced that the case is legitimate, and no
-pressure from outside can force them to comply.
+open it (i.e. the local authorities, not the FBI), and all the relevant keys
+are stored in trusted enclaves (device itself) and HSMs (courts, state
+attorneys and manufacturer).  The only database with larger amount of data are
+the signatures the devices themselves created on manufacturing; it is useless
+without the other keys.  Since only the device itself can verify that the
+signature is correct, any party in the chain can be non-cooperative without
+the others knowing who wasn't cooperative.  This makes sure that all parties
+(except the device itself) are truely convinced that the case is legitimate,
+and no pressure from outside can force them to comply.
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about
@@ -63,7 +64,7 @@ won't commit on an expicit schedule.  For a true fnord to work, you always
 have to be wary.  All the git checkins are signed.
 
 For those interested in history, whether the NSA can force a European
-company to install a backdoor, google for "Crypto AG".
+company to install a backdoor, google for “Crypto AG”.
 
 ## What is this page for? ##
 
@@ -71,20 +72,20 @@ Software is inherently buggy — we all make mistakes. Secure networking
 software is even worse, because small bugs have big consequences, and
 security bugs usually don't affect direct functionality, and therefore
 can lure inside the program for a long time.  And with the NSA Bullrun
-program, we not only have to deal with the normal, "lazy" bugs, which
+program, we not only have to deal with the normal, ”lazy” bugs, which
 don't cause any harm until found (either by honest security researcher
 or evil criminals), but with bugs intentionally placed, and used by
 the secret services from day 0.
 
-Developing in Forth is a "crash early, crash often" exercise, but security
+Developing in Forth is a “crash early, crash often” exercise, but security
 related bugs don't crash the program.
 
 net2o is not ready for wide-spread use, so bugs do happen, and get
 fixed, but the bugs described here usually are real bugs I found and
 fixed during development. All of them look like professionally
 implanted backdoors by the NSA, because that's the state of the art
-how to implant backdoors: It must provide its author with "reasonable
-denial", claiming incompetence.
+how to implant backdoors: It must provide its author with “reasonable
+denial”, claiming incompetence.
 
 However, in order to get things right, we need a culture of accepting
 our mistakes, and fixing them.  Many programmers deny bugs, and
@@ -97,11 +98,11 @@ actual exploit.
 
 ## Warrant Canary ##
 
-This sort of thing I'm doing here is called "warrant canary", named
+This sort of thing I'm doing here is called “warrant canary”, named
 after the canaries used by miners which are more sensitive to
 poisonous gas leaks than humans.  The thing would be impossible if the
-other side would say "continue with business as usual, so that nobody
-knows we were here".  Takedowns like the one of Lavabit (which was
+other side would say “continue with business as usual, so that nobody
+knows we were here”.  Takedowns like the one of Lavabit (which was
 triggered by an NSL) or more recently by TrueCrypt (which we don't
 know why they did it) aren't such continuations, people can guess that
 the NSA was there.
@@ -112,8 +113,8 @@ especially initiated by Moxie Marlinspike, whether a canary is
 effective, and whether a court can order you to silence (yes, they
 can), or to say something specific (sometimes, they can), but so far,
 a court has not forced anybody to give false speech on his own
-(instead of just answering a question with a false "No", because
-saying "yes" would violate the gag order).  That's why this canary is
+(instead of just answering a question with a false ”No”, because
+saying “yes” would violate the gag order).  That's why this canary is
 a provable lie (i.e. even when the bugs were there, the text here is
 checked in with the fix).  I have no idea if that actually works, and
 would prefer to never find out.
