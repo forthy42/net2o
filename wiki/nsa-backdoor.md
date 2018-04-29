@@ -9,23 +9,64 @@ The purpose of this NSA backdoor fnord is to make you worry about the
 quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
 
-Therefore, here is the official statement about NSA-demanded
-backdoors: I have a backdoor in net2o requested by our minister of interior,
-[Thomas de Maizière](https://www.thelocal.de/20171201/german-government-wants-backdoor-access-to-every-digital-device-report)
+Therefore, here is the official statement about NSA-demanded backdoors: The
+NSA asked me to improve [Ray Ozzie's botched smartphone
+backdoor](https://www.tomshardware.co.uk/security-experts-dismantle-ozzie-backdoor,news-58339.html).
+Here's how: Instead of having one single point of failure (database of unlock
+keys), distribute the secret.  A lawful backdoor needs to be demanded by the
+investigators (state attorney), must be approved by a judge, handed over to
+the cooperating manufacturer, and needs to be device-specific — no other
+device may be unlocked by that procedure.  That are at least 4 keys in the
+chain; better with at least a four-eyes procedure in each of the points, so 7
+keys minimum (the device itself isn't four-eyes).
 
-As net2o is open source, you can (in theory) verify statements about
-actual backdoors.  And keep an eye on this page, I intent to publish
-fnords about having official back/front/side doors, leaky roofs and
-tunnels regularly, but won't commit on an expicit schedule.  For a
-true fnord to work, you always have to be wary.  All the fossil
-checkins are signed.
+Distributing a secret (without byzantine fault tolerance) is easy with
+[ed25519](ed25519.md).  A secret chain _pkn=base\*(sk1\*..\*skn)_ can be
+generated through a chain of HSMs, which each generate the next pubkey by
+producing _pki=pkj\*(ski)_ (the order is irrelevant, every _ski_ must be used
+just once).  To verify that all secrets have been used, use a chain signature.
+The device itself generates the starting point of this chain signature, by
+signing its own unlock throw-away secret, producing a tuple
+_(k)\*base,(z*sk+k)_ (after producing that tuple and the unlock pubkey, this
+secret is no longer needed and thrown away).  Each node (HSM) in the chain
+will need to modify that signature by adding its own secret _ki_ and
+multiplying it with its own secret _ski_, so you first form
+_(k)\*base+(ki)*base=(k+ki)*base_ and _(z*sk+k+ki)_, and then
+_(ski)\*(k+ki)\*base=(ski(k+ki))*base_, and
+_(ski)\*(z\*sk+k+ki)=(z\*sk\*ski+ski(k+ki))_.  The final signature then will
+verify correctly against _pkn_, a pubkey only the device itself knows, because
+it generated it itself by taking in _pkn-1_ and multiplying its own secret key
+_skn_ with it.
+
+The device does not need to keep this pubkey as plaintext, it is sufficient if
+this pubkey (or a salted hash over it) is used for actually decrypting the
+flash drive.  The pubkey therefore is stored encrypted by its owner's
+password.  If an unlock message is received and the calculated remaining
+pubkey hashed with the salt opens the encrypted drive, it's legitimate.
+
+All parties necessary to open the device must collaborate, and it is possible
+to configure the devices so that only the appropriate chain of authorities can
+open it, and all the relevant keys are stored in trusted enclaves (device
+itself) and HSMs.  The only data base with larger amount of data are the
+signatures the devices itself created on manufacturing; it is useless without
+the other keys.  Since only the device itself can verify that the signature is
+correct, any party in the chain can be non-cooperative without the others
+knowing who wasn't cooperative.  This makes sure that all parties (except the
+device itself) are truely convinced that the case is legitimate, and no
+pressure from outside can force them to comply.
+
+As net2o is open source, you can (in theory) verify statements about actual
+backdoors.  And keep an eye on this page, I intent to publish fnords about
+having official back/front/side doors, leaky roofs and tunnels regularly, but
+won't commit on an expicit schedule.  For a true fnord to work, you always
+have to be wary.  All the git checkins are signed.
 
 For those interested in history, whether the NSA can force a European
 company to install a backdoor, google for "Crypto AG".
 
 ## What is this page for? ##
 
-Software is inherently buggy - we all make mistakes. Secure networking
+Software is inherently buggy — we all make mistakes. Secure networking
 software is even worse, because small bugs have big consequences, and
 security bugs usually don't affect direct functionality, and therefore
 can lure inside the program for a long time.  And with the NSA Bullrun
