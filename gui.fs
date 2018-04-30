@@ -40,11 +40,14 @@ require minos2/text-style.fs
 
 glue new Constant glue-left
 glue new Constant glue-right
+glue new Constant glue-sleft
+glue new Constant glue-sright
 
 \ frames
 
 0 Value pw-frame
 0 Value id-frame
+0 Value chat-frame
 
 \ password screen
 
@@ -59,8 +62,8 @@ glue new Constant glue-right
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
     font-size# f2/ f* font-size# f2/ fover f-
-    glue-left  >o 0g fdup hglue-c glue! o>
-    glue-right >o 0g fdup hglue-c glue! o> +sync drop ;
+    glue-sleft  >o 0g fdup hglue-c glue! o>
+    glue-sright >o 0g fdup hglue-c glue! o> +sync drop ;
 
 0e 0 shake-lr
 
@@ -93,6 +96,7 @@ forward show-nicks
 	true
     THEN ;
 
+: 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;
 : 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
 : 40%b ( o -- o ) >o font-size# 40% f* to border o o> ;
 
@@ -110,7 +114,7 @@ tex: net2o-logo
 	!lit
 	{{
 	    glue*lll }}glue
-	    glue-left }}glue
+	    glue-sleft }}glue
 	    {{
 		\large \sans "🔐" }}text
 		$FF0040FF to x-color s" " }}text
@@ -122,17 +126,19 @@ tex: net2o-logo
 		{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
 		glue*l }}h
 		{{
-		    glue-right }}glue
+		    glue-sright }}glue
 		    glue*l }}glue
 		    l" wrong passphrase!" $FF000000 to x-color }}i18n-text
 		    25%b dup to pw-err
 		    glue*l }}glue
-		    glue-left }}glue
+		    glue-sleft }}glue
 		}}h
 		blackish
 		{{
 		    {{
-			glue*l }}glue
+			[IFDEF] android
+			    glue*l }}glue
+			[THEN]
 			"" }}pw dup Value pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
 			glue*l }}glue
@@ -146,7 +152,7 @@ tex: net2o-logo
 		    \normal
 		}}h box[]
 	    }}z box[]
-	    glue-right }}glue
+	    glue-sright }}glue
 	    glue*lll }}glue
 	}}h box[] \skip >bl
 	glue*lll }}glue
@@ -158,6 +164,7 @@ tex: net2o-logo
 0 Value mykey-box
 0 Value groups-box
 0 Value nicks-box
+0 Value msg-box
 
 htab-glue new tab-glue: name-tab
 htab-glue new tab-glue: pk-tab
@@ -192,22 +199,22 @@ $FF0000FF ,
 : show-nick ( o:key -- )
     ke-imports @ >im-color# cells { ki }
     {{ glue*l imports#rgb-bg ki + @ slide-frame
-    {{
-    {{ \large imports#rgb-fg ki + @ to x-color
-    ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
-    ['] .nick-base $tmp }}text 40%b
-    ke-pets[] $[]# IF
-	{{ glue*l $00FF0020 slide-frame
-	['] .pet-base $tmp }}text 40%b
-	}}z
-    THEN
-    glue*l }}glue }}h name-tab
-    {{
-    {{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text 25%b glue*l }}glue }}h
-    {{ \mono \bold \script ke-pk $@ key| ['] 85type $tmp }}text 25%b glue*l }}glue }}h swap
-    }}v pk-tab
-    glue*lll }}glue }}h
-    }}z nick[]
+	{{
+	    {{ \large imports#rgb-fg ki + @ to x-color
+		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
+		['] .nick-base $tmp }}text 25%b
+		ke-pets[] $[]# IF
+		    {{ glue*l $00FF0020 slide-frame
+			['] .pet-base $tmp }}text 25%b
+		    }}z
+		THEN
+	    glue*l }}glue }}h name-tab
+	    {{
+		{{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text glue*l }}glue }}h
+		{{ \mono \script ke-pk $@ key| ['] 85type $tmp }}text 20%bt glue*l }}glue }}h swap
+	    }}v pk-tab
+	glue*lll }}glue }}h
+    }}z nick[]  \regular
     mykey-box nicks-box ke-sk sec@ nip select /flop .child+ ;
 
 : fill-nicks ( -- )
@@ -222,18 +229,18 @@ $FF0000FF ,
 : show-group ( last# -- )
     dup cell+ $@ drop cell+ >o { g -- }
     {{ glue*l $CCAA44FF slide-frame
-    {{
-    {{ \large blackish
-    \regular \sans g $@ }}text 40%b
-    glue*l }}glue }}h name-tab
-    {{
-    {{
-    \mono \bold \script groups:id$
-    2dup g $@ str= 0= IF  key| ['] 85type $tmp  THEN
-    }}text 25%b glue*l }}glue }}h
-    glue*l }}glue
-    }}v pk-tab
-    glue*lll }}glue }}h
+	{{
+	    {{ \large blackish
+		\regular \sans g $@ }}text 25%b
+	    glue*l }}glue }}h name-tab
+	    {{
+		{{
+		    \mono \bold \script groups:id$
+		    2dup g $@ str= 0= IF  key| ['] 85type $tmp  THEN
+		}}text 20%bt glue*l }}glue }}h
+		glue*l }}glue
+	    }}v pk-tab
+	glue*lll }}glue }}h
     }}z g group[] o>
     groups-box /flop .child+ ;
 
@@ -243,18 +250,21 @@ $FF0000FF ,
 	I @ show-group
     cell +LOOP ;
 
+: nicks-title ( -- )
+    {{ glue*l $000000FF slide-frame
+	{{
+	    {{ \large \bold \sans $FFFFFFFF to x-color
+	    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
+	    {{
+		{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
+		{{ \script \sans \bold l" Key date" }}i18n-text glue*l }}glue }}h
+	    }}v pk-tab
+	glue*lll }}glue }}h
+    }}z ;
+
 {{ $FFFF80FF pres-frame
     {{
-	{{ glue*l $000000FF slide-frame
-	    {{
-		{{ \large \bold \sans $FFFFFFFF to x-color
-		l" Nick+Pet" }}i18n-text 40%b glue*l }}glue }}h name-tab
-		{{
-		    {{ \script \mono l" Pubkey" }}i18n-text 25%b glue*l }}glue }}h
-		    {{ \script \bold l" Key date" }}i18n-text 25%b glue*l }}glue }}h
-		}}v pk-tab
-	    glue*lll }}glue }}h
-	}}z
+	nicks-title
 	{{
 	    {{
 		{{ glue*l $303000FF bar-frame
@@ -284,6 +294,62 @@ $FF0000FF ,
     2 0 ?DO  htop-resize  LOOP
     o>
     peers-box .vp-top ;
+
+\ messages
+
+msg-class class
+end-class wmsg-class
+
+$FF4444FF Value my-signal#
+$CCCCCCFF Value other-signal#
+$4444CCFF color: link-blue
+$44CC44FF color: re-green
+$CC4444FF color: obj-red
+
+:noname ( addr u -- o )
+    {{
+	{{
+	    glue*l imports#rgb-bg ( ki + ) @ slide-frame
+	    \sans \large \bold ['] .key-id $tmp }}text 25%b
+	    \regular \normal
+	}}z ; wmsg-class to msg:start
+:noname ( addr u -- o )
+    link-blue \mono [: '#' emit type ;] $tmp }}text 25%b blackish \sans
+; wmsg-class to msg:tag
+:noname ( addr u -- o )
+    }}text 25%b
+; wmsg-class to msg:text
+:noname ( addr u -- o )
+    \italic }}text 25%b \regular
+; wmsg-class to msg:action
+:noname ( addr u -- )
+    [: ."  GPS: " .coords ;] $tmp }}text 25%b ; wmsg-class to msg:coord
+:noname ( addr u -- o )
+    {{
+	key| 2dup pk@ key| str= my-signal# other-signal# rot select
+	glue*l swap slide-frame
+	[: '@' emit .key-id ;] $tmp }}text 25%b
+    }}z
+; wmsg-class to msg:signal
+:noname ( addr u -- )
+    re-green [: ." [" 85type ." ]→" ;] $tmp }}text blackish ; msg-class to msg:re
+:noname ( addr u -- )
+    obj-red [: ." [" 85type ." ]:" ;] $tmp }}text blackish ; msg-class to msg:id
+:noname ( -- )
+    }}h box[] msg-box .+child ; wmsg-class to msg:end
+
+wmsg-class ' new static-a with-allocater Constant wmsg-o
+wmsg-o >o msg-table @ token-table ! o>
+
+: wmsg-display ( addr u -- )
+    !date wmsg-o .msg-display ;
+
+{{ $80FFFFFF pres-frame
+    {{
+    }}v box[] dup to msg-box
+}}z box[] to chat-frame
+
+\ top widgets
 
 : !widgets ( -- )
     top-widget .htop-resize
@@ -335,8 +401,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("{{") (0 . 2) (0 . 2) non-immediate)
-     (("}}h" "}}v" "}}z" "}}vp") (-2 . 0) (-2 . 0) non-immediate)
+     (("{{") (0 . 2) (0 . 2) immediate)
+     (("}}h" "}}v" "}}z" "}}vp") (-2 . 0) (-2 . 0) immediate)
     )
 End:
 [THEN]

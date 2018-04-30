@@ -355,7 +355,7 @@ msg-table $save
 
 :noname ( addr u -- )
     2dup startdate@ .ticks space 2dup .key-id
-    [: .simple-id ;] $tmp notify! ; msg-class to msg:start
+    ['] .simple-id $tmp notify! ; msg-class to msg:start
 :noname ( addr u -- ) $utf8>
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )

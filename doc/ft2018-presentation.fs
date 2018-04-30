@@ -202,7 +202,7 @@ tex: $quid
     to baseline# r> ;
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    glue*wh swap slide-frame dup .button1 simple[] ;
+    color, glue*wh swap slide-frame dup .button1 simple[] ;
 
 {{
 {{ glue-left }}glue
@@ -309,7 +309,7 @@ $FFBFFFFF pres-frame
 }}vt
 glue*l }}glue
 tex: vp0 glue*l ' vp0 }}vp vp[]
-$FFBFFFFF to slider-color
+$FFBFFFFF color, to slider-color
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
 }}h box[]
