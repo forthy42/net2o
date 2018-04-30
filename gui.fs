@@ -305,6 +305,7 @@ $CCCCCCFF Value other-signal#
 $4444CCFF color: link-blue
 $44CC44FF color: re-green
 $CC4444FF color: obj-red
+$BBDDDDFF color: msg-bg
 
 :noname ( addr u -- o )
     {{
@@ -312,7 +313,16 @@ $CC4444FF color: obj-red
 	    glue*l imports#rgb-bg ( ki + ) @ slide-frame
 	    \sans \large \bold ['] .key-id $tmp }}text 25%b
 	    \regular \normal
-	}}z ; wmsg-class to msg:start
+	}}z
+	{{
+	    glue*l @ msg-bg slide-frame
+	    {{
+	    ; wmsg-class to msg:start
+	    :noname ( -- )
+	    }}h box[]
+	}}z box[]
+	glue*ll }}glue
+    }}h box[] msg-box .+child ; wmsg-class to msg:end
 :noname ( addr u -- o )
     link-blue \mono [: '#' emit type ;] $tmp }}text 25%b blackish \sans
 ; wmsg-class to msg:tag
@@ -335,14 +345,24 @@ $CC4444FF color: obj-red
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text blackish ; msg-class to msg:re
 :noname ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text blackish ; msg-class to msg:id
-:noname ( -- )
-    }}h box[] msg-box .+child ; wmsg-class to msg:end
 
 wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
 
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
+
+100 Value gui-msgs# \ display last 100 messages
+
+: gui-msgs ( gaddr u -- )
+    2dup >load-group ?msg-log
+    last# msg-log@ { log u }
+    dup gui-msgs# cells - 0 max /string bounds ?DO
+	I $@ ['] wmsg-display catch IF
+	    <err> ." invalid entry" <default> cr 2drop
+	THEN
+    cell +LOOP
+    log free ;
 
 {{ $80FFFFFF pres-frame
     {{
