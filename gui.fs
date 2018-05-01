@@ -77,6 +77,7 @@ glue new Constant glue-sright
     LOOP  flag ;
 
 forward show-nicks
+forward gui-msgs
 
 : pw-done ( max span addr pos -- max span addr pos flag )
     err-fade? IF  false  EXIT  THEN
@@ -198,13 +199,13 @@ $FF0000FF ,
 
 : show-nick ( o:key -- )
     ke-imports @ >im-color# cells { ki }
-    {{ glue*l imports#rgb-bg ki + @ slide-frame
+    {{ glue*l imports#rgb-bg ki + @ slide-frame dup .button1
 	{{
 	    {{ \large imports#rgb-fg ki + @ to x-color
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
-		    {{ glue*l $00FF0020 slide-frame
+		    {{ glue*l $00FF0020 slide-frame dup .button3
 			['] .pet-base $tmp }}text 25%b
 		    }}z
 		THEN
@@ -223,12 +224,22 @@ $FF0000FF ,
 	I @ .show-nick
     cell +LOOP ;
 
+: refresh-top ( -- )
+    +glyphs +sync
+    top-widget >o
+    htop-resize
+    <draw-init     draw-init      draw-init>
+    2 0 ?DO  htop-resize  LOOP
+    o> ;
+
 : group[] ( box group -- box )
-    [: data { g } ." clicked on " g $. cr ;] swap click[] ;
+    [: data ." clicked on " data $. space
+	data cell+ $@ drop cell+ .groups:id$ 2dup type cr
+	gui-msgs chat-frame to top-widget refresh-top ;] swap click[] ;
 
 : show-group ( last# -- )
-    dup cell+ $@ drop cell+ >o { g -- }
-    {{ glue*l $CCAA44FF slide-frame
+    dup { g -- } cell+ $@ drop cell+ >o
+    {{ glue*l $CCAA44FF slide-frame dup .button1
 	{{
 	    {{ \large blackish
 		\regular \sans g $@ }}text 25%b
@@ -251,7 +262,7 @@ $FF0000FF ,
     cell +LOOP ;
 
 : nicks-title ( -- )
-    {{ glue*l $000000FF slide-frame
+    {{ glue*l $000000FF slide-frame dup .button1
 	{{
 	    {{ \large \bold \sans $FFFFFFFF to x-color
 	    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
@@ -287,12 +298,8 @@ $FF0000FF ,
 
 : show-nicks ( -- )
     fill-nicks fill-groups
-    id-frame to top-widget +glyphs +sync
-    top-widget >o
-    htop-resize
-    <draw-init     draw-init      draw-init>
-    2 0 ?DO  htop-resize  LOOP
-    o>
+    id-frame to top-widget
+    refresh-top
     peers-box .vp-top ;
 
 \ messages
@@ -310,12 +317,12 @@ $BBDDDDFF color: msg-bg
 :noname ( addr u -- o )
     {{
 	{{
-	    glue*l imports#rgb-bg ( ki + ) @ slide-frame
+	    glue*l imports#rgb-bg ( ki + ) @ slide-frame dup .button2
 	    \sans \large \bold ['] .key-id $tmp }}text 25%b
 	    \regular \normal
 	}}z
 	{{
-	    glue*l @ msg-bg slide-frame
+	    glue*l @ msg-bg slide-frame dup .button2
 	    {{
 	    ; wmsg-class to msg:start
 	    :noname ( -- )
@@ -337,7 +344,7 @@ $BBDDDDFF color: msg-bg
 :noname ( addr u -- o )
     {{
 	key| 2dup pk@ key| str= my-signal# other-signal# rot select
-	glue*l swap slide-frame
+	glue*l swap slide-frame dup .button1
 	[: '@' emit .key-id ;] $tmp }}text 25%b
     }}z
 ; wmsg-class to msg:signal
@@ -356,7 +363,7 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : gui-msgs ( gaddr u -- )
     2dup >load-group ?msg-log
-    last# msg-log@ { log u }
+    last# msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
 	I $@ ['] wmsg-display catch IF
 	    <err> ." invalid entry" <default> cr 2drop
@@ -366,7 +373,10 @@ wmsg-o >o msg-table @ token-table ! o>
 
 {{ $80FFFFFF pres-frame
     {{
-    }}v box[] dup to msg-box
+	{{
+	    glue*lll }}glue \ glue on top
+	tex: vp-chats glue*lll ' vp-chats }}vp vp[] dup to msg-box
+    dup font-size# 66% f* fdup vslider }}h box[]
 }}z box[] to chat-frame
 
 \ top widgets

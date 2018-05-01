@@ -309,7 +309,7 @@ $FFBFFFFF pres-frame
 }}vt
 glue*l }}glue
 tex: vp0 glue*l ' vp0 }}vp vp[]
-$FFBFFFFF color, to slider-color
+$FFBFFFFF color, dup to slider-color to slider-fgcolor
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
 }}h box[]
@@ -397,7 +397,9 @@ glue*l }}glue
 {{
 glue*l }}glue
 tex: $quid-logo-large
-' $quid-logo-large "squid-logo.png" 0.666e }}image-file drop /right
+' $quid-logo-large "squid-logo.png" 0.666e }}image-file
+drop >o $FFFFFFC0 to frame-color o o>
+/right
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
