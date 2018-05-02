@@ -181,11 +181,11 @@ htab-glue new tab-glue: chatname-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$44FF44FF , \ myself is pretty green
+$33EE33FF , \ myself is pretty green
 $66CC66FF , \ manually imported is green, too
 $55DD55FF , \ scanned is more green
-$88CC55FF , \ seen in chat is more yellow
-$DDCC55FF , \ imported from DHT is pretty yellow
+$CCEE55FF , \ seen in chat is more yellow
+$EECC55FF , \ imported from DHT is pretty yellow
 $FF8844FF , \ invited is very yellow
 $FF0000FF , \ untrusted is last
 Create imports#rgb-fg
