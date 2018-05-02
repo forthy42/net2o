@@ -202,7 +202,10 @@ Variable sim-nick!
     ke-pets[] $[]# IF  0 ke-pets[] $[]@ type 0 ke-pets# $[] @ .#
     ELSE  .nick-base  THEN ;
 : .real-nick ( o:key -- )   ke-imports @ >im-color .nick-base <default> ;
-: .nick ( o:key -- )   ke-imports @ >im-color .pet0-base <default> ;
+
+0 Value last-ki
+
+: .nick ( o:key -- )   ke-imports @ dup to last-ki >im-color .pet0-base <default> ;
 : .nick+pet ( o:key -- )
     ke-imports @ >im-color .nick-base .pet-base <default> ;
 

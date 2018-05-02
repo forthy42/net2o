@@ -84,7 +84,7 @@ forward gui-msgs
     over 3 pick >passphrase +key
     read-keys secret-keys# 0= IF
 	\ ." Wrong passphrase" cr
-	1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ +glyphs o>
+	1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ o>
 	keys sec[]free
 	drop nip 0 tuck false
 	1e o ['] shake-lr >animate
@@ -109,7 +109,6 @@ tex: net2o-logo
     {{
 	glue*lll }}glue
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
-	\latin \sans \regular
 	!i18n l" net2o GUI" /title
 	l" Enter passphrase to unlock" /subtitle
 	!lit
@@ -165,11 +164,15 @@ tex: net2o-logo
 0 Value mykey-box
 0 Value groups-box
 0 Value nicks-box
+0 Value msgs-box
 0 Value msg-box
+
+0 Value group-name
 
 htab-glue new tab-glue: name-tab
 htab-glue new tab-glue: pk-tab
 htab-glue new tab-glue: group-tab
+htab-glue new tab-glue: chatname-tab
 
 [IFUNDEF] child+
     : child+ ( o -- ) o over >o to parent-w o> childs[] >stack ;
@@ -178,21 +181,21 @@ htab-glue new tab-glue: group-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$FFFFCCFF ,
-$4400CCFF ,
-$FFFFFFFF ,
-$44CCFFFF ,
-$4488FFFF ,
-$FFFFFFFF ,
-$FFFFFFFF ,
+$44FF44FF , \ myself is pretty green
+$66CC66FF , \ manually imported is green, too
+$55DD55FF , \ scanned is more green
+$88CC55FF , \ seen in chat is more yellow
+$DDCC55FF , \ imported from DHT is pretty yellow
+$FF8844FF , \ invited is very yellow
+$FF0000FF , \ untrusted is last
 Create imports#rgb-fg
+$003300FF ,
+$000000FF ,
+$000000FF ,
+$000000FF ,
 $0000FFFF ,
-$00FF00FF ,
+$0000FFFF ,
 $00FFFFFF ,
-$88CC00FF ,
-$FFFFFFFF ,
-$8800FFFF ,
-$FF0000FF ,
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -225,17 +228,14 @@ $FF0000FF ,
     cell +LOOP ;
 
 : refresh-top ( -- )
-    +glyphs +sync
-    top-widget >o
-    htop-resize
-    <draw-init     draw-init      draw-init>
-    2 0 ?DO  htop-resize  LOOP
-    o> ;
+    +sync +lang
+    top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize o> ;
 
 : group[] ( box group -- box )
-    [: data ." clicked on " data $. space
-	data cell+ $@ drop cell+ .groups:id$ 2dup type cr
-	gui-msgs chat-frame to top-widget refresh-top ;] swap click[] ;
+    [: data $@ group-name >o to text$ o>
+	data cell+ $@ drop cell+ .groups:id$
+	gui-msgs chat-frame to top-widget refresh-top
+	msgs-box >o resized vp-top o> ;] swap click[] ;
 
 : show-group ( last# -- )
     dup { g -- } cell+ $@ drop cell+ >o
@@ -264,7 +264,7 @@ $FF0000FF ,
 : nicks-title ( -- )
     {{ glue*l $000000FF slide-frame dup .button1
 	{{
-	    {{ \large \bold \sans $FFFFFFFF to x-color
+	    {{ \large \bold \sans whitish
 	    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
 	    {{
 		{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
@@ -288,7 +288,7 @@ $FF0000FF ,
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
-	    tex: vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
+	    tex: vp-nicks vp-nicks nearest glue*lll ' vp-nicks }}vp vp[] dup value peers-box
 	    $444444FF to slider-color
 	    $CCCCCCFF to slider-fgcolor
 	    font-size# 33% f* to slider-border
@@ -307,51 +307,64 @@ $FF0000FF ,
 msg-class class
 end-class wmsg-class
 
-$FF4444FF Value my-signal#
-$CCCCCCFF Value other-signal#
+$88FF88FF Value my-signal#
+$CCFFCCFF Value other-signal#
 $4444CCFF color: link-blue
 $44CC44FF color: re-green
 $CC4444FF color: obj-red
 $BBDDDDFF color: msg-bg
 
-:noname ( addr u -- o )
+:noname { d: pk -- o }
     {{
 	{{
-	    glue*l imports#rgb-bg ( ki + ) @ slide-frame dup .button2
-	    \sans \large \bold ['] .key-id $tmp }}text 25%b
-	    \regular \normal
-	}}z
-	{{
-	    glue*l @ msg-bg slide-frame dup .button2
 	    {{
-	    ; wmsg-class to msg:start
-	    :noname ( -- )
-	    }}h box[]
-	}}z box[]
+		glue*l }}glue
+		\sans \normal \bold pk ['] .key-id $tmp }}text 25%b
+		>o imports#rgb-fg last-ki >im-color# cells + @ to text-color
+		o o>
+		\regular
+	    }}h
+	    glue*l imports#rgb-bg last-ki >im-color# cells + @
+	    slide-frame dup .button2
+	    swap
+	}}z chatname-tab
+	{{
+	    glue*l $FFFFFFFF slide-frame dup .button1
+	    {{ }}h dup to msg-box
+	}}z
 	glue*ll }}glue
-    }}h box[] msg-box .+child ; wmsg-class to msg:end
-:noname ( addr u -- o )
-    link-blue \mono [: '#' emit type ;] $tmp }}text 25%b blackish \sans
+    }}h msgs-box .child+
+; wmsg-class to msg:start
+:noname ( -- )
+; wmsg-class to msg:end
+:noname { d: string -- o }
+    link-blue \mono string [: '#' emit type ;] $tmp }}text 25%b blackish \sans
+    msg-box .child+
 ; wmsg-class to msg:tag
-:noname ( addr u -- o )
-    }}text 25%b
+:noname { d: string -- o }
+    blackish string }}text 25%b msg-box .child+
 ; wmsg-class to msg:text
-:noname ( addr u -- o )
-    \italic }}text 25%b \regular
+:noname { d: string -- o }
+    \italic string }}text 25%b \regular msg-box .child+
 ; wmsg-class to msg:action
-:noname ( addr u -- )
-    [: ."  GPS: " .coords ;] $tmp }}text 25%b ; wmsg-class to msg:coord
-:noname ( addr u -- o )
+:noname { d: string -- o }
+    string [: ."  GPS: " .coords ;] $tmp }}text 25%b  msg-box .child+
+; wmsg-class to msg:coord
+:noname { d: pk -- o }
     {{
-	key| 2dup pk@ key| str= my-signal# other-signal# rot select
-	glue*l swap slide-frame dup .button1
-	[: '@' emit .key-id ;] $tmp }}text 25%b
-    }}z
+	pk key| 2dup 0 .pk@ key| str= my-signal# other-signal# rot select
+	glue*l swap slide-frame dup .button1 >r
+	[: '@' emit .key-id ;] $tmp }}text 25%b r> swap
+    }}z msg-box .child+
 ; wmsg-class to msg:signal
 :noname ( addr u -- )
-    re-green [: ." [" 85type ." ]→" ;] $tmp }}text blackish ; msg-class to msg:re
+    re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
+    blackish
+; msg-class to msg:re
 :noname ( addr u -- )
-    obj-red [: ." [" 85type ." ]:" ;] $tmp }}text blackish ; msg-class to msg:id
+    obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
+    blackish
+; msg-class to msg:id
 
 wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
@@ -359,7 +372,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-100 Value gui-msgs# \ display last 100 messages
+80 Value gui-msgs# \ display last 100 messages
 
 : gui-msgs ( gaddr u -- )
     2dup >load-group ?msg-log
@@ -369,14 +382,37 @@ wmsg-o >o msg-table @ token-table ! o>
 	    <err> ." invalid entry" <default> cr 2drop
 	THEN
     cell +LOOP
-    log free ;
+    log free throw  msgs-box .resized ;
 
 {{ $80FFFFFF pres-frame
     {{
 	{{
-	    glue*lll }}glue \ glue on top
-	tex: vp-chats glue*lll ' vp-chats }}vp vp[] dup to msg-box
-    dup font-size# 66% f* fdup vslider }}h box[]
+	    glue*l $000000FF slide-frame dup .button1
+	    {{
+		\large whitish !i18n l" Chat Log" }}text' !lit 40%b
+		"" }}text 40%b dup to group-name
+		glue*l }}glue
+	    }}h
+	}}z
+	{{
+	    {{
+		{{
+		    glue*lll }}glue \ glue on top
+		}}v box[] dup to msgs-box
+	    tex: vp-chats vp-chats nearest glue*lll ' vp-chats }}vp vp[]
+	dup font-size# 66% f* fdup vslider }}h box[]
+	{{
+	    {{ glue*lll $FFFFFFFF 4e }}frame dup .button3
+		{{ \normal \regular blackish "" }}edit 40%b dup value chat-edit glue*l }}glue
+		    glue*lll }}glue
+		}}h box[]
+	    }}z chat-edit ' false edit[]
+	    {{
+		glue*l $80FF80FF 4e }}frame dup .button2
+		!i18n l" Send" }}text' !lit 40%b
+	    }}z box[]
+	}}h box[]
+    }}v box[]
 }}z box[] to chat-frame
 
 \ top widgets
