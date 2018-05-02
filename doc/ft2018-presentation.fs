@@ -50,12 +50,12 @@ Variable slide#
 
 : >slides ( o -- ) slides[] >stack ;
 
-glue new Constant glue-left
-glue new Constant glue-right
+glue ' new static-a with-allocater Constant glue-left
+glue ' new static-a with-allocater Constant glue-right
 
-: glue0 ( -- )
-    glue-left  >o 0glue hglue-c glue! o>
-    glue-right >o 0glue hglue-c glue! o> ;
+: glue0 ( -- ) 0e fdup
+    [ glue-left  .hglue-c ]L df!
+    [ glue-right .hglue-c ]L df! ;
 : trans-frame ( o -- )
     >o $00000000 to frame-color o> ;
 : solid-frame ( o -- )
@@ -65,15 +65,18 @@ glue new Constant glue-right
     n2-img m2-img $q-img
     r@ m/$-switch u>= IF swap THEN
     r> n/m-switch u>= IF rot  THEN
-    /flip rot /flop rot /flop rot
+    rot dup .parent-w .parent-w /flop drop
+    rot dup .parent-w .parent-w /flop drop
+    rot dup .parent-w .parent-w /flip drop
     trans-frame trans-frame solid-frame
     update-size# update-glue
+    over slide# !
     slides[] $[] @ /flip drop
-    dup slide# ! slides[] $[] @ /flop drop glue0 ;
+    slides[] $[] @ /flop drop glue0 ;
 : fade-img ( r0..1 img1 img2 -- ) >r >r
     $FF fm* f>s $FFFFFF00 or dup
-    r> >o to frame-color o> invert $FFFFFF00 or
-    r> >o to frame-color o> ;
+    r> >o to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
+    r> >o to frame-color parent-w .parent-w /flop drop o> ;
 : fade!slides ( r0..1 n -- )
     dup m/$-switch = IF
 	fdup $q-img m2-img fade-img
@@ -616,8 +619,8 @@ glue-right }}glue
 }}h box[]
 {{
 ' net2o-logo net2o-glue  logo-img to n2-img
-' minos2     minos2-glue logo-img dup to m2-img trans-frame
-' $quid      $quid-glue  logo-img dup to $q-img trans-frame
+' minos2     minos2-glue logo-img dup to m2-img trans-frame /flip
+' $quid      $quid-glue  logo-img dup to $q-img trans-frame /flip
 }}z
 }}z slide[]
 to top-widget
