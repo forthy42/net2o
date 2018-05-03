@@ -163,7 +163,9 @@ $FFFFFFFF ,
     sig-params ed-sign
     date>qr-key qr:keysig# .qr-rest ;
 
-require qrscan.fs
+[IFUNDEF] mslinux
+    require qrscan.fs
+[THEN]
 
 0 [IF]
 Local Variables:

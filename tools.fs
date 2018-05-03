@@ -814,8 +814,7 @@ e? max-xchar $100 u< [IF]
 
 \ accept* derivative
 
-[IFDEF] mslinux '*' [ELSE]
-    e? max-xchar $100 < [IF] '*' [ELSE] ( '●' ) '•' [THEN] [THEN] Value pw*
+e? max-xchar $100 < [IF] '*' [ELSE] ( '●' ) '•' [THEN] Value pw*
 
 Variable *insflag
 
@@ -834,7 +833,7 @@ Variable *insflag
     0= IF  *-width  ELSE  x-width  THEN ;
 : *-width1 ( addr u -- w )
     config:passmode# @ dup 0< IF  drop 2drop 0  EXIT  THEN
-    config:passmode# @ 2 = IF  x-width  ELSE  *-width  THEN ;
+    2 = IF  x-width  ELSE  *-width  THEN ;
 : *-width2 ( addr u -- w )
     case  config:passmode# @
 	2 of  x-width  endof
@@ -843,7 +842,7 @@ Variable *insflag
 		x-width >r *-width r> +  ELSE  nip  THEN  endof
 	0 of  *-width  endof
 	-1 of  2drop 0  endof
-	swap
+	drop swap
     endcase ;
 : .*resizeline ( span addr pos -- span addr pos )
     2dup *insflag @ IF  *-width2  ELSE  *-width1  THEN >r

@@ -330,8 +330,11 @@ $BBDDDDFF color: msg-bg
 	    swap
 	}}z me? 0= IF  chatname-tab  THEN
 	{{
-	    glue*l $FFFFFFFF slide-frame dup .lbubble
-	    {{ }}h dup to msg-box >o font-size# 25% f* to borderl o o>
+	    glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+	    {{ }}h dup to msg-box >o font-size# 25% f*
+	    me? IF
+		fdup to border fnegate fdup to borderl to borderv
+	    ELSE  to borderl  THEN o o>
 	}}z
 	glue*ll }}glue me? IF  swap rot  THEN
     }}h msgs-box .child+

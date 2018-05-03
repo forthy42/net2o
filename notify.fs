@@ -56,7 +56,11 @@ Sema notify-sema
     [IFDEF] linux
 	require linux/notify.fs
 	[IFUNDEF] rendering
-	    require minos2/gl-helper.fs
+	    [IFUNDEF] mslinux
+		require minos2/gl-helper.fs
+	    [ELSE]
+		: ftime ( -- r ) ntime d>f 1e-9 f* ;
+	    [THEN]
 	[THEN]
     [THEN]
 	

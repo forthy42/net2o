@@ -723,7 +723,7 @@ Variable gui.fs$
 
 : n2o-history ( -- )
     history ?dup-IF  close-file throw  THEN
-    "~/.n2o-history" get-history ;
+    "history" .net2o/ get-history ;
 
 n2o-history
 
