@@ -819,25 +819,31 @@ e? max-xchar $100 u< [IF]
 
 Variable *insflag
 
-: *type ( addr u -- )  config:passmode# @ 2 = IF  type  EXIT  THEN
+: *type ( addr u -- )
+    config:passmode# @ dup 0< IF  drop 2drop  EXIT  THEN
+    2 = IF  type  EXIT  THEN
     *-width 0 ?DO  pw* xemit  LOOP ;
-: *type1 ( addr u -- )  config:passmode# @ 0= IF  *type  ELSE  type  THEN ;
+: *type1 ( addr u -- )  config:passmode# @ 0<= IF  *type  ELSE  type  THEN ;
 : *type2 ( addr u -- )  config:passmode# @ 1 <> IF  *type  EXIT  THEN
     dup IF  2dup over + xchar- over - dup >r 2swap r> /string 2swap
     ELSE  0 0 2swap  THEN
     *-width 0 ?DO  pw* xemit  LOOP
     dup IF  type  ELSE  2drop  THEN ;
-: *-width0 ( addr u -- )
-    config:passmode# @ 0 = IF  *-width  ELSE  x-width  THEN ;
-: *-width1 ( addr u -- )
+: *-width0 ( addr u -- w )
+    config:passmode# @ dup 0< IF  drop 2drop 0  EXIT  THEN
+    0= IF  *-width  ELSE  x-width  THEN ;
+: *-width1 ( addr u -- w )
+    config:passmode# @ dup 0< IF  drop 2drop 0  EXIT  THEN
     config:passmode# @ 2 = IF  x-width  ELSE  *-width  THEN ;
-: *-width2 ( addr u -- )
+: *-width2 ( addr u -- w )
     case  config:passmode# @
 	2 of  x-width  endof
 	1 of
 	    dup IF  2dup over + xchar- over - dup >r 2swap r> /string
 		x-width >r *-width r> +  ELSE  nip  THEN  endof
 	0 of  *-width  endof
+	-1 of  2drop 0  endof
+	swap
     endcase ;
 : .*resizeline ( span addr pos -- span addr pos )
     2dup *insflag @ IF  *-width2  ELSE  *-width1  THEN >r

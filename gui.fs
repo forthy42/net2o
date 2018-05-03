@@ -330,8 +330,8 @@ $BBDDDDFF color: msg-bg
 	    swap
 	}}z me? 0= IF  chatname-tab  THEN
 	{{
-	    glue*l $FFFFFFFF slide-frame dup .button1
-	    {{ }}h dup to msg-box
+	    glue*l $FFFFFFFF slide-frame dup .lbubble
+	    {{ }}h dup to msg-box >o font-size# 25% f* to borderl o o>
 	}}z
 	glue*ll }}glue me? IF  swap rot  THEN
     }}h msgs-box .child+
@@ -343,7 +343,8 @@ $BBDDDDFF color: msg-bg
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
-    blackish string }}text 25%b msg-box .child+
+    blackish string }}text 25%b
+    msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
     \italic string }}text 25%b \regular msg-box .child+
