@@ -315,24 +315,25 @@ $CC4444FF color: obj-red
 $BBDDDDFF color: msg-bg
 
 :noname { d: pk -- o }
+    pk key| pkc over str= { me? }
     {{
-	{{
+	{{ \sans \normal
 	    {{
 		glue*l }}glue
-		\sans \normal \bold pk ['] .key-id $tmp }}text 25%b
+		\bold pk ['] .key-id $tmp }}text 25%b
 		>o imports#rgb-fg last-ki >im-color# cells + @ to text-color
-		o o>
+		o o> me? IF  swap  THEN
 		\regular
 	    }}h
 	    glue*l imports#rgb-bg last-ki >im-color# cells + @
 	    slide-frame dup .button2
 	    swap
-	}}z chatname-tab
+	}}z me? 0= IF  chatname-tab  THEN
 	{{
 	    glue*l $FFFFFFFF slide-frame dup .button1
 	    {{ }}h dup to msg-box
 	}}z
-	glue*ll }}glue
+	glue*ll }}glue me? IF  swap rot  THEN
     }}h msgs-box .child+
 ; wmsg-class to msg:start
 :noname ( -- )
@@ -372,7 +373,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-80 Value gui-msgs# \ display last 100 messages
+100 Value gui-msgs# \ display last 100 messages
 
 : gui-msgs ( gaddr u -- )
     2dup >load-group ?msg-log
