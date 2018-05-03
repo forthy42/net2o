@@ -105,7 +105,23 @@ forward gui-msgs
 
 tex: net2o-logo
 
-{{ $FFFFFFFF pres-frame
+[IFDEF] light-login \ light color sceme
+    $0000BFFF Value dark-blue#
+    $FF0040FF Value pw-num-col#
+    $FFFFFFFF Value pw-bg-col#
+    $AAAAAAFF Value pw-text-col#
+    $0000FF08 Value chbs-col#
+    $FFFFFFFF Value login-bg-col#
+[ELSE]
+    $88FF00FF Value dark-blue#
+    $FF0040FF Value pw-num-col#
+    $400000FF Value pw-bg-col#
+    $804000FF Value pw-text-col#
+    $00FF0020 Value chbs-col#
+    $000020FF Value login-bg-col#
+[THEN]
+
+{{ login-bg-col# pres-frame dark-blue# ' dark-blue >body !
     {{
 	glue*lll }}glue
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
@@ -117,13 +133,13 @@ tex: net2o-logo
 	    glue-sleft }}glue
 	    {{
 		\large \sans "🔐" }}text
-		$FF0040FF to x-color s" " }}text
+		pw-num-col# to x-color s" " }}text
 		25%b dup to pw-num /center
 	    }}z
 	    {{
-		glue*l $FFFFFFFF 4e }}frame dup .button3
+		glue*l pw-bg-col# 4e }}frame dup .button3
 		\mono \normal
-		{{ $0000FF08 to x-color "Correct Horse Battery Staple" }}text 25%b
+		{{ chbs-col# to x-color "Correct Horse Battery Staple" }}text 25%b
 		glue*l }}h
 		{{
 		    glue-sright }}glue
@@ -139,12 +155,13 @@ tex: net2o-logo
 			[IFDEF] android
 			    glue*l }}glue
 			[THEN]
+			pw-text-col# to x-color
 			"" }}pw dup Value pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
 			glue*l }}glue
 		    }}h
 		    pw-field ' pw-done edit[]
-		    \large \sans $60606060 to x-color "👁" }}text blackish
+		    \large \sans $80808080 to x-color "👁" }}text blackish
 		    : pw-show/hide ( flag -- )
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
@@ -158,6 +175,8 @@ tex: net2o-logo
 	glue*lll }}glue
     }}v box[]
 }}z box[] to pw-frame
+
+$0000BFFF ' dark-blue >body !
 
 \ id frame
 
