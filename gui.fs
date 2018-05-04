@@ -185,6 +185,7 @@ $0000BFFF ' dark-blue >body !
 0 Value nicks-box
 0 Value msgs-box
 0 Value msg-box
+0 Value msg-vbox
 
 0 Value group-name
 
@@ -333,30 +334,45 @@ $44CC44FF color: re-green
 $CC4444FF color: obj-red
 $BBDDDDFF color: msg-bg
 
+Variable last-bubble-pk
+0 Value last-bubble
+
 :noname { d: pk -- o }
     pk key| pkc over str= { me? }
-    {{
-	{{ \sans \normal
-	    {{
-		glue*l }}glue
-		\bold pk ['] .key-id $tmp }}text 25%b
-		>o imports#rgb-fg last-ki >im-color# cells + @ to text-color
-		o o> me? IF  swap  THEN
-		\regular
-	    }}h
-	    glue*l imports#rgb-bg last-ki >im-color# cells + @
-	    slide-frame dup .button2
-	    swap
-	}}z me? 0= IF  chatname-tab  THEN
+    pk key| last-bubble-pk $@ str= IF
+	{{ }}h dup to msg-box >r
+	{{ r> glue*l }}glue }}h >bl
+	msg-vbox .child+
+    ELSE
+	pk key| last-bubble-pk $!
 	{{
-	    glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
-	    {{ }}h dup to msg-box >o font-size# 25% f*
-	    me? IF
-		fdup to border fnegate fdup to borderl to borderv
-	    ELSE  to borderl  THEN o o>
-	}}z
-	glue*ll }}glue me? IF  swap rot  THEN
-    }}h msgs-box .child+
+	    {{ glue*l }}glue
+		{{ \sans \normal
+		    {{
+			glue*l }}glue
+			\bold pk ['] .key-id $tmp }}text 25%b
+			>o imports#rgb-fg last-ki >im-color# cells + @ to text-color
+			o o> me? IF  swap  THEN
+			\regular
+		    }}h
+		    glue*l imports#rgb-bg last-ki >im-color# cells + @
+		    slide-frame dup .button2
+		    swap
+		}}z me? 0= IF  chatname-tab  THEN
+	    }}v
+	    {{
+		glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+		{{
+		    {{ }}h dup to msg-box
+		    >r {{ r> glue*l }}glue }}h >bl
+		}}v >o font-size# 25% f*
+		me? IF
+		    fdup to border fnegate fdup to borderl to borderv
+		ELSE  to borderl  THEN o o> dup to msg-vbox
+	    }}z
+	    glue*ll }}glue me? IF  swap rot  THEN
+	}}h msgs-box .child+
+    THEN
 ; wmsg-class to msg:start
 :noname ( -- )
 ; wmsg-class to msg:end

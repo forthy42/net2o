@@ -1325,8 +1325,6 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("[:" "key:code") (0 . 1) (0 . 1) immediate)
-     ((";]" "end:key") (-1 . 0) (0 . -1) immediate)
     )
 End:
 [THEN]
