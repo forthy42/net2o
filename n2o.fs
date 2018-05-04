@@ -446,7 +446,7 @@ warnings !
     \G -port: sets port to a fixed number for reachability from outside,
     \G -port: allows to define port forwarding rules in the firewall
     \G -port: only for client; server-side port is different
-    ?nextarg 0= ?EXIT  s>number drop to net2o-client-port
+    ?nextarg 0= ?EXIT  s>number drop config:port# !
     next-cmd ;
 
 : -otr ( --- )

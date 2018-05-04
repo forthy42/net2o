@@ -111,7 +111,7 @@ Forward insert-addr ( o -- )
 	      THEN
 	  cell +LOOP o>
       cell +LOOP
-    ;] #map ;
+    ;] #map #0. n2o:nat ;
 
 \ notification for address changes
 
@@ -143,7 +143,7 @@ event: :>renat ( -- )  renat-all ;
     beacon( ." done renat" cr ) ;
 
 scope{ /chat
-: renat ( addr u -- ) 2drop renat-all ;
+: renat ( addr u -- ) renat-all nat ;
 }scope
 
 \ beacon handling

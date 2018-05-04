@@ -1422,7 +1422,7 @@ Variable timeout-tasks
 : +next-timeouts ( -- timeout )
     rtdelay 64@ timeouts @ >timeout ticks 64+ ;
 : +timeouts ( -- timeout ) 
-    +next-timeouts 1 timeouts +! '+' forth:emit ( @ ." TO inc: " . cr ) ;
+    +next-timeouts 1 timeouts +! ( @ ." TO inc: " . cr ) ;
 : +timeout0 ( -- timeout )
     rtdelay 64@ ticker 64@ 64+ ;
 : 0timeout ( -- )
@@ -1827,9 +1827,9 @@ Defer init-rest
 Variable initialized
 
 : init-client ( -- )  true initialized !@ 0= IF
-	init-dirs  net2o-client-port  init-rest  THEN ;
+	init-dirs  config:port# @  init-rest  THEN ;
 : init-server ( -- )  true initialized !@ 0= IF
-	init-dirs  net2o-port  init-rest  THEN ;
+	init-dirs  config:port# @ net2o-port over select  init-rest  THEN ;
 
 \ connection cookies
 

@@ -313,8 +313,7 @@ Forward !my-addr ( -- )
 
 \ Create udp socket
 
-4242 Value net2o-port
-0    Value net2o-client-port \ client port by default unassigned
+4242 Value net2o-port \ fix server port
 
 Variable net2o-host "net2o.de" net2o-host $!
 

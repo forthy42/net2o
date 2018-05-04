@@ -349,6 +349,7 @@ Variable logsize#
 Variable rootdirs$
 Variable prio#
 Variable host$		\g set host to this name
+Variable port#          \g if not zero, use this port
 Variable orighost$	\g if the host is orighost$
 Variable date#
 $Variable objects$
