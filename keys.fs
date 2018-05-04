@@ -1308,7 +1308,7 @@ Forward help
     case
 	#-56 of .keyinfo true !!no-key-open!! endof
 	#-28 of .keyinfo true !!no-key-open!! endof
-	throw
+	throw  0
     endcase ;
 
 0 [IF]
