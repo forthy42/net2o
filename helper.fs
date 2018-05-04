@@ -111,7 +111,7 @@ Forward insert-addr ( o -- )
 	      THEN
 	  cell +LOOP o>
       cell +LOOP
-    ;] #map #0. n2o:nat ;
+    ;] #map ;
 
 \ notification for address changes
 
