@@ -106,8 +106,8 @@ event: ->netlink ( -- )
 
 : check-preferred? ( -- flag )
     0 my-addr[] $[] @ >o
-    global-ip6 2dup str0? { v6z } host-ipv6 $10 str= >r
-    global-ip4 2dup str0? { v4z } host-ipv4   4 str= r> and 0=
+    global-ip6 2dup str0? { v6z } host:ipv6 $10 str= >r
+    global-ip4 2dup str0? { v4z } host:ipv4   4 str= r> and 0=
     v6z v4z and 0= to connected?
     o>  connected? and ;
 

@@ -1328,7 +1328,7 @@ scope{ /chat
 also net2o-base
 : punch-addr-ind@ ( -- o )
     punch-addrs $[]# 0 U+DO
-	I punch-addrs $[] @ .host-route $@len IF
+	I punch-addrs $[] @ .host:route $@len IF
 	    I punch-addrs $[] @ unloop  EXIT
 	THEN
     LOOP  0 punch-addrs $[] @ ;

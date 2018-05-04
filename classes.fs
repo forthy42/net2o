@@ -299,18 +299,20 @@ cmd-class class
 end-class context-class
 
 cmd-class class
-    field: host-pri#
-    field: host-id
-    lfield: host-ipv4
-    $10 +field host-ipv6
-    wfield: host-portv4
-    wfield: host-portv6
-    field: host-anchor \ net2o anchor (is a pubkey)
-    field: host-route  \ net2o route
-    field: host-key    \ psk for connection setup
-    field: host-revoke
-    field: host-ekey   \ ephemeral key a la MinimaLT
-    64field: host-ekey-to \ ephemeral key timeout
+    scope: host
+    field: pri#
+    field: id
+    lfield: ipv4
+    $10 +field ipv6
+    wfield: portv4
+    wfield: portv6
+    field: anchor \ net2o anchor (is a pubkey)
+    field: route  \ net2o route
+    field: revoke \ is a revoke path
+    field: key    \ psk for connection setup
+    field: ekey   \ ephemeral key a la MinimaLT
+    64field: ekey-to \ ephemeral key timeout
+    }scope
 end-class address-class
 
 \ cookies

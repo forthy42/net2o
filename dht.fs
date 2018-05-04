@@ -307,9 +307,9 @@ Variable beacon-tuple$
 
 : beacon-tuple ( o:addr -- )
     beacon-tuple$ $off
-    [: host-ipv4 be-ul@ 0=
-      IF    host-ipv6 $10 type  host-portv6
-      ELSE  host-ipv4   4 type  host-portv4  THEN
+    [: host:ipv4 be-ul@ 0=
+      IF    host:ipv6 $10 type  host:portv6
+      ELSE  host:ipv4   4 type  host:portv4  THEN
       w@ dup 8 rshift emit $FF and emit ;]
     beacon-tuple$ $exec ;
 
@@ -332,7 +332,7 @@ false Value add-myip
 : addme ( addr u -- )  new-addr { addr } now>never
     addr .+my-id
     nat( ." addme: " addr .addr )
-    addr .host-route $@len 0= IF
+    addr .host:route $@len 0= IF
 	addr my-addr-merge drop
 	addr o>addr gen-host
 	2dup my-addr$ $ins[]sig drop
@@ -376,7 +376,7 @@ also net2o-base
     pk@ $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
-    new-addr >o host-id $@ host$ $@ str= net2o:dispose-addr o> ;
+    new-addr >o host:id $@ host$ $@ str= net2o:dispose-addr o> ;
 
 : my-addrs? ( addr u -- addr u flag )
     false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;

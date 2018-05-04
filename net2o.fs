@@ -1011,8 +1011,7 @@ Forward new-addr
 in net2o : punch ( addr u o:connection -- )
     o IF
 	new-addr { w^ punch-addr }
-	punch-addr $@ punch-addrs $ins[] drop
-	punch-addr $free
+	punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
 
 : pings ( o:connection -- )

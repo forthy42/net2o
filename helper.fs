@@ -229,7 +229,7 @@ User hostc$ \ check for this hostname
     2 pick .host>$ ;
 
 : host= ( o -- flag )
-    >o hostc$ $@ dup IF  host-id $@ str=  ELSE  2drop true  THEN  o> ;
+    >o hostc$ $@ dup IF  host:id $@ str=  ELSE  2drop true  THEN  o> ;
 
 : insert-addr ( o -- flag )
     connect( ." check addr: " dup .addr cr )  false swap
@@ -245,7 +245,7 @@ User hostc$ \ check for this hostname
 
 : insert-host ( addr u -- flag )  dest-0key dest-0key> !
     new-addr  dup host=  IF
-	msg( ." insert: " dup .host-id $@ type cr )
+	msg( ." insert: " dup .host:id $@ type cr )
 	dup insert-addr  ELSE  false  THEN
     swap .net2o:dispose-addr ;
 
