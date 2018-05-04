@@ -56,11 +56,11 @@ address-table $save
 in net2o : new-addr ( -- o )
     address-class new >o  address-table @ token-table ! o o> ;
 in net2o : dispose-addr ( o:addr -- o:addr )
-    host-id $off host-anchor $off host-route $off host-key sec-free
-    host-revoke $off ;
+    host-id $free host-anchor $free host-route $free host-key sec-free
+    host-revoke $free ;
 in net2o : dispose-punchs ( -- )
     punch-addrs $@ bounds ?DO  I @ .net2o:dispose-addr  cell +LOOP
-    punch-addrs $off ;
+    punch-addrs $free ;
 :noname ( -- )
     net2o:dispose-punchs  defers extra-dispose ; is extra-dispose
 
@@ -155,10 +155,10 @@ User dest-0key< \ pointer to obtained dest-0key
 : addrs-off ( -- )
     \G dispose all addresses
     my-addr[] [: .net2o:dispose-addr ;] $[]o-map
-    my-addr[] $off
-    my-addr$ $[]off
-    pub-addr$ $[]off
-    priv-addr$ $[]off ;
+    my-addr[] $free
+    my-addr$ $[]free
+    pub-addr$ $[]free
+    priv-addr$ $[]free ;
 
 : !my-addr$ ( -- )
     my-key-default 0= ?EXIT
