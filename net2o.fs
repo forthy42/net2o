@@ -1422,7 +1422,7 @@ Variable timeout-tasks
 : +next-timeouts ( -- timeout )
     rtdelay 64@ timeouts @ >timeout ticks 64+ ;
 : +timeouts ( -- timeout ) 
-    +next-timeouts 1 timeouts +! ( @ ." TO inc: " . cr ) ;
+    +next-timeouts 1 timeouts +! '+' forth:emit ( @ ." TO inc: " . cr ) ;
 : +timeout0 ( -- timeout )
     rtdelay 64@ ticker 64@ 64+ ;
 : 0timeout ( -- )

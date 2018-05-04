@@ -568,7 +568,7 @@ in net2o : ok? ( -- )  o?
     tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
     code-vdest r@ reply-dest 64!
     r> code-reply dup off  to reply-tag ;
-in net2o : ok ( tag -- ) \ ." ok" forth:cr
+in net2o : ok ( tag -- ) 'o' forth:emit  \ ." ok" forth:cr
 \    timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )

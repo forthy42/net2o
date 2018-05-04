@@ -388,7 +388,10 @@ Variable last-bubble-pk
     \italic string }}text 25%b \regular msg-box .child+
 ; wmsg-class to msg:action
 :noname { d: string -- o }
-    string [: ."  GPS: " .coords ;] $tmp }}text 25%b  msg-box .child+
+    {{
+	glue*l $FFccccFF slide-frame dup .button1
+	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
+    }}z msg-box .child+
 ; wmsg-class to msg:coord
 :noname { d: pk -- o }
     {{
