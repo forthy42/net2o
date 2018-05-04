@@ -1419,13 +1419,15 @@ Variable timeout-tasks
     dup 1 and >r 2/ 64lshift r> IF  64dup 64-2/ 64+  THEN ;
 : >timeout ( 64n n -- 64n )
     >r 64-2* timeout-min# 64max r> sq2** timeout-max# 64min ;
+: +next-timeouts ( -- timeout )
+    rtdelay 64@ timeouts @ >timeout ticks 64+ ;
 : +timeouts ( -- timeout ) 
-    rtdelay 64@ timeouts @ >timeout ticks 64+ 1 timeouts +! ;
+    +next-timeouts 1 timeouts +! ( @ ." TO inc: " . cr ) ;
 : +timeout0 ( -- timeout )
     rtdelay 64@ ticker 64@ 64+ ;
 : 0timeout ( -- )
     0 ack@ .timeouts !@  IF  timeout-task wake  THEN
-    ack@ .+timeouts next-timeout 64! ;
+    ack@ .+next-timeouts next-timeout 64! ;
 
 : o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ .name cr )

@@ -553,15 +553,15 @@ also net2o-base
 	[ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest  THEN ;
 previous
 
-: cmd-timeout ( -- )  >next-timeout cmd-resend?
-    IF  push-timeout  ELSE  ack@ .timeouts off  THEN ;
+: cmd-timeout ( -- )  cmd-resend?
+    IF  >next-timeout push-timeout  ELSE  ack@ .timeouts off  THEN ;
 : connected-timeout ( -- ) timeout( ." connected timeout " ack@ >o rtdelay 64@ u64. timeouts ? o> forth:cr )
-    >next-timeout cmd-resend?
+    cmd-resend?
     IF
-	push-timeout
+	>next-timeout push-timeout
     ELSE
 	transfer-keepalive? 0=
-	IF  ack@ .timeouts off  ELSE  push-timeout  THEN
+	IF  ack@ .timeouts off  ELSE  >next-timeout push-timeout  THEN
     THEN ;
 
 \ : +connecting   ['] connecting-timeout is timeout-xt ;
