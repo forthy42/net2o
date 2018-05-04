@@ -45,7 +45,7 @@ Variable upath
 Variable net2o-logo
 
 : !net2o-logo ( -- )
-    s" doc/net2o-logo.png" open-fpath-file 0= IF
+    s" ../doc/net2o-logo.png" open-fpath-file 0= IF
 	rot close-file throw
 	over c@ '/' <> IF
 	    pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!

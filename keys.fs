@@ -1304,9 +1304,12 @@ Forward help
 
 : ?get-me ( -- )
     \G this version of get-me fails hard if no key is opened
-    get-my-key catch #-56 = IF
-	.keyinfo true !!no-key-open!!
-    THEN ;
+    get-my-key catch
+    case
+	#-56 of .keyinfo true !!no-key-open!! endof
+	#-28 of .keyinfo true !!no-key-open!! endof
+	throw
+    endcase ;
 
 0 [IF]
 Local Variables:
