@@ -112,6 +112,7 @@ tex: net2o-logo
     $AAAAAAFF Value pw-text-col#
     $0000FF08 Value chbs-col#
     $FFFFFFFF Value login-bg-col#
+    $000000FF Value show-sign-color#
 [ELSE]
     $88FF00FF Value dark-blue#
     $FF0040FF Value pw-num-col#
@@ -119,6 +120,7 @@ tex: net2o-logo
     $804000FF Value pw-text-col#
     $00FF0020 Value chbs-col#
     $000020FF Value login-bg-col#
+    $FFFFFFFF Value show-sign-color#
 [THEN]
 
 {{ login-bg-col# pres-frame dark-blue# ' dark-blue >body !
@@ -152,17 +154,18 @@ tex: net2o-logo
 		blackish
 		{{
 		    {{
-			[IFDEF] android
-			    glue*l }}glue
-			[THEN]
 			pw-text-col# to x-color
 			"" }}pw dup Value pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
 			glue*l }}glue
 		    }}h
 		    pw-field ' pw-done edit[]
-		    \large \sans $80808080 to x-color "👁" }}text blackish
+		    {{
+			\large \sans $FFFFFFFF to x-color "👁" }}text
+			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
+		    }}z \regular
 		    : pw-show/hide ( flag -- )
+			dup 0 show-sign-color# rot select show-pw-sign >o to text-color o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
