@@ -235,7 +235,7 @@ in net2o : (see) ( addr u -- )
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
       dup hex. t-stack $off
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
-      throw  2drop ;] see-sema c-section
+      ."  end-code" cr throw  2drop ;] see-sema c-section
     2r> buf-state 2! ;
 
 : >see-table ( -- )

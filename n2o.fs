@@ -494,7 +494,7 @@ warnings !
 
 : chatgroups ( -- )
     \U chatgroups
-    \g chatgroups: list chatgroups
+    \G chatgroups: list chatgroups
     ?get-me .chatgroups ;
 
 : invite ( -- )
