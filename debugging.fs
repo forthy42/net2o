@@ -49,6 +49,7 @@ debug: sender( \ extra sender task
 debug: dht( \ debugging for dht functions
 debug: file( \ file read/write debugging
 debug: nat( \ NAT traversal stuff
+debug: netlink( \ Netlink changes
 debug: route( \ do routing
 debug: ipv6( \ use ipv6
 debug: ipv4( \ use ipv4

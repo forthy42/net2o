@@ -114,12 +114,12 @@ event: ->netlink ( -- )
 : new-preferred? ( -- flag )
     netlink-wait# ptimeout ! \ 3s wait in total
     BEGIN  netlink? WHILE  read-netlink
-	nat( 2dup address? IF  2dup .rtaddr THEN )  2drop
+	netlink( 2dup address? IF  2dup .rtaddr THEN )  2drop
     REPEAT
     check-preferred? ;
 : wait-for-address ( -- )
     BEGIN  read-netlink?
-	nat( 2dup address? IF  2dup .rtaddr THEN )
+	netlink( 2dup address? IF  2dup .rtaddr THEN )
     address? check-preferred? or  UNTIL ;
 : netlink-loop ( -- )
     netlink-sock 0= IF  get-netlink  THEN

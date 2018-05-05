@@ -299,7 +299,8 @@ Forward !my-addr ( -- )
     sockaddr1 ipv6( sock-rest )else( sock-rest4 ) 2dup try-ip ;
 
 : ping-addr1 ( -- )
-    check-addr1 0= IF  2drop  EXIT  THEN
+    check-addr1 0= IF  nat( ticks .tick ." don't ping: " 2dup .address cr )
+	2drop  EXIT  THEN
     nat( ticks .ticks ."  ping: " 2dup .address cr )
     2>r net2o-sock ">" 0 2r> sendto drop ;
 
