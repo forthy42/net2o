@@ -1016,6 +1016,7 @@ in net2o : punch ( addr u o:connection -- )
 
 : pings ( o:connection -- )
     \G ping all addresses except the first one
+    nat( ." pings" ~~bt )
     punch-addrs $@ cell safe/string bounds ?DO
 	I @ ['] ping-addr1 addr>sock
     cell +LOOP ;
