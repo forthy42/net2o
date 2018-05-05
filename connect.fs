@@ -55,7 +55,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 	['] punchs code-reply is send-xt  THEN
     net2o:dispose-punchs ;
 +net2o: punch ( $:string -- ) \g punch NAT traversal hole
-    $> nat( ." punch to: " 2dup net2o:see ) net2o:punch ;
+    $> nat( ." punch to: " 2dup .addr$ ) net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received
     o 0<> own-crypt? and IF
 	o-beacon ret+beacon
