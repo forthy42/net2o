@@ -455,4 +455,3 @@ the balance command, which balances the selected asset.
 The signature of a contract signs the wallet's state (serialized in
 normalized form) after the contract has been executed.  The current
 contract's hash is part of the serialization.
-  chatgroups: list chatgroups

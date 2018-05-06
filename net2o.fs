@@ -1015,16 +1015,19 @@ in net2o : punch ( addr u o:connection -- )
     ELSE  2drop  THEN ;
 
 : pings ( o:connection -- )
-    \G ping all addresses except the first one
-    punch-addrs $@ ( cell safe/string ) bounds ?DO
+    \G ping all addresses (why except the first one?)
+    punch-addrs $@ cell safe/string bounds ?DO
 	I @ ['] ping-addr1 addr>sock
     cell +LOOP ;
 
 : punchs ( addr u o:connection -- )
     \G send a reply to all addresses
+\    ret-addr $10 $make { w^ ret }
     punch-addrs $@ bounds ?DO
 	I @ ['] send-punch addr>sock
-    cell +LOOP  2drop ;
+    cell +LOOP  2drop
+\    ret $@ ret-addr swap move ret $free
+;
 
 \ send chunk
 
