@@ -116,15 +116,21 @@ $00000000 Value droprate#
 : ?>ipv6 ( addr u -- addr' u' )
     over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
 : info@ ( info -- addr u )
-    dup ai_addr @ swap ai_addrlen l@ ;
+    dup dup ai_addr @ swap ai_addrlen l@ ;
 : info>string ( info -- addr u )
     info@ ?>ipv6 ;
 
+: -$split ( addr u char -- addr1 u1 addr2 u2 ) \ gforth-string string-split
+    \G divides a string into two, with one char as separator (e.g. '?'
+    \G for arguments in an HTML query)
+    >r 2dup r> -scan dup >r dup IF  1-  THEN
+    2swap r> /string ;
 : ping ( "addr:port" -- )
     net2o-sock ">" 0
-    parse-name ':' $split s>unumber? 2drop
+    parse-name ':' -$split s>unumber? 2drop
     SOCK_DGRAM >hints 0 hints ai_family l!
-    get-info info@ sendto ?ior ;
+    get-info dup >r info@ 2dup dump sendto
+    r> freeaddrinfo ?ior ;
 
 0 Value lastaddr#
 Variable lastn2oaddr
@@ -142,12 +148,12 @@ Variable lastn2oaddr
 	nip nip
     THEN ;
 
-: dns>string ( addr u port hint -- net2o-addr )
+: dns>string ( addr u port hint -- info net2o-addr u )
     >r SOCK_DGRAM >hints r> hints ai_family l!
-    get-info info>string ;
+    get-info dup info>string ;
 
 : insert-ip* ( addr u port hint -- net2o-addr )
-    dns>string insert-address ;
+    dns>string rot >r insert-address r> freeaddrinfo ;
 
 : insert-ip ( addr u port -- net2o-addr )  0         insert-ip* ;
 : insert-ip4 ( addr u port -- net2o-addr ) PF_INET   insert-ip* ;
