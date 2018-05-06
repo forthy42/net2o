@@ -1014,20 +1014,21 @@ in net2o : punch ( addr u o:connection -- )
 	punch-addr cell punch-addrs $+!
     ELSE  2drop  THEN ;
 
+: ret-wrap ( xt -- )
+    ret-addr $10 $make { w^ ret } catch
+    ret $@ ret-addr swap move ret $free throw ;
+
 : pings ( o:connection -- )
     \G ping all addresses (why except the first one?)
-    punch-addrs $@ cell safe/string bounds ?DO
-	I @ ['] ping-addr1 addr>sock
-    cell +LOOP ;
+    [: punch-addrs $@ ( cell safe/string ) bounds ?DO
+	    I @ ['] ping-addr1 addr>sock
+	cell +LOOP ;] ret-wrap ;
 
 : punchs ( addr u o:connection -- )
     \G send a reply to all addresses
-\    ret-addr $10 $make { w^ ret }
-    punch-addrs $@ bounds ?DO
-	I @ ['] send-punch addr>sock
-    cell +LOOP  2drop
-\    ret $@ ret-addr swap move ret $free
-;
+    [: punch-addrs $@ bounds ?DO
+	    I @ ['] send-punch addr>sock
+	cell +LOOP  2drop ;] ret-wrap ;
 
 \ send chunk
 

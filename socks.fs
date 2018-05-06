@@ -120,6 +120,12 @@ $00000000 Value droprate#
 : info>string ( info -- addr u )
     info@ ?>ipv6 ;
 
+: ping ( "addr:port" -- )
+    net2o-sock ">" 0
+    parse-name ':' $split s>unumber? 2drop
+    SOCK_DGRAM >hints 0 hints ai_family l!
+    get-info info@ sendto ?ior ;
+
 0 Value lastaddr#
 Variable lastn2oaddr
 

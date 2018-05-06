@@ -319,12 +319,12 @@ Forward !my-addr ( -- )
 Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- )
-    BEGIN  [: dup
+    BEGIN  dup
 	  ipv6( ipv4( [IFDEF] no-hybrid
-	  create-udp-server6 [ELSE] create-udp-server46 [THEN]
-	  )else( create-udp-server6 )
-	  )else( create-udp-server )
-	;] catch WHILE  1+  REPEAT
+	  ['] create-udp-server6 [ELSE] ['] create-udp-server46 [THEN]
+	  )else( ['] create-udp-server6 )
+	  )else( ['] create-udp-server )
+	catch WHILE  drop 1+  REPEAT
     [IFDEF] no-hybrid 0 [THEN] to net2o-sock
     ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
