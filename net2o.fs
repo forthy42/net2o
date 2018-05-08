@@ -1010,7 +1010,7 @@ Forward new-addr
 
 in net2o : punch ( addr u o:connection -- )
     o IF
-	new-addr punch-addrs >back
+	new-addr punch-addrs >stack
     ELSE  2drop  THEN ;
 
 : ret-wrap ( xt -- )

@@ -127,8 +127,9 @@ $00000000 Value droprate#
     2swap r> /string ;
 : ping ( "addr:port" -- )
     net2o-sock ">" 0
-    parse-name ':' -$split s>unumber? 2drop
-    SOCK_DGRAM >hints 0 hints ai_family l!
+    parse-name ':' -$split s>unumber? 2drop >r
+    over c@ '[' = negate /string 2dup + 1- c@ ']' = +
+    r> SOCK_DGRAM >hints 0 hints ai_family l!
     get-info dup >r info@ 2dup dump sendto
     r> freeaddrinfo ?ior ;
 

@@ -201,6 +201,8 @@ Variable my-beacon
     \G I got a punch
     nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr )
     check-punch-hash ?dup-IF
+	\ !!FIXME!! accept only two: one IPv4, one IPv6.
+	\ !!FIXME!! and try merging the two into existent
 	>o sockaddr alen @ .sockaddr punch-addrs $make >stack o>
     THEN ;
 
