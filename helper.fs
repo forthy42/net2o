@@ -157,35 +157,6 @@ event: :>do-beacon ( addr -- )
 : do-beacon ( addr -- )  \ sign on, and do a replace-me
     <event elit, :>do-beacon ?query-task event> ;
 
-: ?-beacon ( has-hash -- )
-    \G if we don't know that address, send a reply
-    invert need-beacon# @ and ?EXIT
-    net2o-sock
-    sockaddr alen @ routes# #key -1 = IF  s" !"  ELSE  s" ."  THEN
-    beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
-    0 sockaddr alen @ sendto drop +send ;
-: !-beacon ( has-hash -- ) drop
-    \G I got a reply, my address is unknown
-    beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
-    sockaddr alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
-: .-beacon ( has-hash -- ) drop
-    \G I got a reply, my address is known
-    beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
-    sockaddr alen @ beacons #@ IF
-	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
-    THEN ;
-: >-beacon ( has-hash -- ) drop
-    \G I got a punch
-    nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr ) ;
-
-: handle-beacon ( has-hash char -- )
-    case
-	'?' of  ?-beacon  endof
-	'!' of  !-beacon  endof
-	'.' of  .-beacon  endof
-	'>' of  >-beacon  endof
-	nip
-    endcase ;
 
 Variable my-beacon
 
@@ -197,14 +168,53 @@ Variable my-beacon
 : check-beacon-hash ( addr u -- flag )
     my-beacon-hash str= ;
 
+: check-punch-hash ( addr u -- connection/false )
+    0 >o dest-addr 64@ { 64: da }
+    dup $18 < IF  2drop false o>  EXIT  THEN
+    over le-64@ dest-addr 64! 8 /string
+    $1000 check-dest 2drop punch# over key| str=
+    da dest-addr 64! o and o> ;
+
+: ?-beacon ( addr u -- )
+    \G if we don't know that address, send a reply
+    need-beacon# @ IF
+	2dup check-beacon-hash 0= IF
+	    beacon( ticks .ticks ."  wrong beacon hash"
+	    85type ."  instead of " my-beacon $@ 85type cr )else( 2drop )  EXIT
+	THEN
+    THEN  2drop
+    net2o-sock
+    sockaddr alen @ routes# #key -1 = IF  s" !"  ELSE  s" ."  THEN
+    beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
+    0 sockaddr alen @ sendto drop +send ;
+: !-beacon ( addr u -- ) 2drop
+    \G I got a reply, my address is unknown
+    beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
+    sockaddr alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
+: .-beacon ( addr u -- ) 2drop
+    \G I got a reply, my address is known
+    beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
+    sockaddr alen @ beacons #@ IF
+	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
+    THEN ;
+: >-beacon ( addr u -- )
+    \G I got a punch
+    nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr )
+    check-punch-hash ?dup-IF
+	>o sockaddr alen @ .sockaddr punch-addrs $make >stack o>
+    THEN ;
+
+: handle-beacon ( addr u char -- )
+    case
+	'?' of  ?-beacon  endof
+	'!' of  !-beacon  endof
+	'.' of  .-beacon  endof
+	'>' of  >-beacon  endof
+	nip
+    endcase ;
+
 : handle-beacon+hash ( addr u -- )
-    2dup over c@ >r 1 /string check-beacon-hash
-    IF    true r> handle-beacon
-	beacon( ." hashed by " 85type cr )else( 2drop )
-    ELSE  false r> handle-beacon
-	beacon( ticks .ticks ."  wrong beacon hash" cr )
-	." wrong hash: " 85type ."  instead of " my-beacon $@ 85type cr
-    THEN ; \ !!FIXME!! we ignore wrong hashes for now, until that is fixed
+    dup IF  over c@ >r 1 /string r> handle-beacon  ELSE  2drop  THEN ;
 
 : replace-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>

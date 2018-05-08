@@ -1010,8 +1010,7 @@ Forward new-addr
 
 in net2o : punch ( addr u o:connection -- )
     o IF
-	new-addr { w^ punch-addr }
-	punch-addr cell punch-addrs $+!
+	new-addr punch-addrs >back
     ELSE  2drop  THEN ;
 
 : ret-wrap ( xt -- )
@@ -1398,8 +1397,7 @@ Forward handle-beacon+hash
 	+next
 	EXIT
     THEN
-    dup 1 = IF  drop c@ false swap handle-beacon   0 0  EXIT  THEN
-    dup $11 = IF  handle-beacon+hash    0 0  EXIT  THEN ;
+    dup $19 u<= IF    handle-beacon+hash   0 0  EXIT  THEN ;
 
 0 Value dump-fd
 

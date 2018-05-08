@@ -202,7 +202,7 @@ scope{ mapc
 : pw-diffuse ( diffuse# -- )
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
 : pw-setup ( addr u -- diffuse# )
-    \G compute between 256 and ridiculously many iterations
+    \g compute between 256 and ridiculously many iterations
     drop c@ $F and 2* $100 swap lshift ;
 
 : encrypt-pw$ ( addr u1 key u2 n -- )
@@ -347,14 +347,16 @@ scope{ mapc
 
 $60 Constant rndkey#
 
-: punch-hash ( -- ) punch-hash $10 c:prng ;
+: punch#! ( -- )
+    \g generate a shared secret for punching NAT holes
+    punch# $20 c:prng ;
 : receive-ivs ( -- )
     genkey( ." ivs key: " key>dump over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
     ivs( ." regen receive IVS" cr )
     code-map one-ivs   code-rmap one-ivs
     data-map one-ivs   data-rmap one-ivs
-    !punch-hash clear-keys ;
+    punch#! clear-keys ;
 
 : send-ivs ( -- )
     genkey( ." ivs key: " key>dump over rndkey# xtype cr
@@ -362,7 +364,7 @@ $60 Constant rndkey#
     ivs( ." regen send IVS" cr )
     code-rmap one-ivs  code-map one-ivs
     data-rmap one-ivs  data-map one-ivs
-    !punch-hash clear-keys ;
+    punch#! clear-keys ;
 
 : ivs-strings ( addr u -- )
     key-setup? !!doublekey!!
@@ -371,7 +373,7 @@ $60 Constant rndkey#
 \ hash with key and sksig generation
 
 : >keyed-hash ( valaddr uval keyaddr ukey -- )
-    \G generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
+    \g generate a keyed hash: keyaddr ukey is the key for hasing valaddr uval
     \ hash( ." hashing: " 2over 85type ':' emit 2dup 85type cr )
     c:hash c:hash
     \ hash( @keccak 200 85type cr cr ) \ debugging may leak secrets!
@@ -385,14 +387,14 @@ $60 Constant rndkey#
 \ we send our public key and query the server's public key.
 
 : gen-keys ( -- )
-    \G generate revocable keypair
+    \g generate revocable keypair
     sk1 pk1 ed-keypair \ generate first keypair
     skrev pkrev ed-keypair \ generate keypair for recovery
     sk1 pkrev skc pkc ed-keypairx \ generate real keypair
     genkey( ." gen key: " skc keysize .85warn pkc keysize .85info cr )
 ;
 : check-rev? ( pk -- flag )
-    \G check generated key if revocation is possible
+    \g check generated key if revocation is possible
     >r skrev pkrev sk>pk pkrev dup sk-mask
     r@ keysize + keypad ed-dh r> keysize str= ;
 : gen-tmpkeys ( -- ) tskc tpkc ed-keypair
