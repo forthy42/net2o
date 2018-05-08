@@ -347,13 +347,14 @@ scope{ mapc
 
 $60 Constant rndkey#
 
+: punch-hash ( -- ) punch-hash $10 c:prng ;
 : receive-ivs ( -- )
     genkey( ." ivs key: " key>dump over rndkey# xtype cr
             ." con key: " rndkey# /string xtype cr )
     ivs( ." regen receive IVS" cr )
     code-map one-ivs   code-rmap one-ivs
     data-map one-ivs   data-rmap one-ivs
-    clear-keys ;
+    !punch-hash clear-keys ;
 
 : send-ivs ( -- )
     genkey( ." ivs key: " key>dump over rndkey# xtype cr
@@ -361,7 +362,7 @@ $60 Constant rndkey#
     ivs( ." regen send IVS" cr )
     code-rmap one-ivs  code-map one-ivs
     data-rmap one-ivs  data-map one-ivs
-    clear-keys ;
+    !punch-hash clear-keys ;
 
 : ivs-strings ( addr u -- )
     key-setup? !!doublekey!!

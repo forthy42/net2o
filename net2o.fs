@@ -1015,8 +1015,9 @@ in net2o : punch ( addr u o:connection -- )
     ELSE  2drop  THEN ;
 
 : ret-wrap ( xt -- )
-    ret-addr $10 $make { w^ ret } catch
-    ret $@ ret-addr swap move ret $free throw ;
+    return-address $10 $make { w^ ret } catch
+    ret $@ return-address $10 smove
+    ret $free throw ;
 
 : pings ( o:connection -- )
     \G ping all addresses (why except the first one?)

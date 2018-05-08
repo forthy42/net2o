@@ -248,6 +248,7 @@ cmd-class class
     field: wait-task
     $10 +field return-address \ used as return address
     $10 +field r0-address \ used for resending 0
+    $10 +field punch-hash
     64field: recv-addr
     field: read-file#
     field: write-file#
