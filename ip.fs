@@ -302,7 +302,10 @@ Forward !my-addr ( -- )
     check-addr1 0= IF  nat( ticks .ticks ." don't ping: " 2dup .address cr )
 	2drop  EXIT  THEN
     nat( ticks .ticks ."  ping: " 2dup .address cr )
-    2>r net2o-sock ">" 0 2r> sendto drop ;
+    2>r net2o-sock
+    [: 64#0 { 64^ x } '>' emit code-map .mapc:dest-vaddr x le-64!
+	x 8 type punch# $10 type ;] $tmp 2dup dump
+    0 2r> sendto drop ;
 
 : pathc+ ( addr u -- addr' u' )
     BEGIN  dup  WHILE  over c@ $80 < >r 1 /string r>  UNTIL  THEN ;

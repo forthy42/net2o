@@ -169,11 +169,12 @@ Variable my-beacon
     my-beacon-hash str= ;
 
 : check-punch-hash ( addr u -- connection/false )
-    0 >o dest-addr 64@ { 64: da }
-    dup $18 < IF  2drop false o>  EXIT  THEN
-    over le-64@ dest-addr 64! 8 /string
-    $1000 check-dest 2drop punch# over key| str=
-    da dest-addr 64! o and o> ;
+\    2dup dump
+    dup $18 < IF  2drop false  EXIT  THEN
+    over le-64@ >dest-map @ dup IF  .parent >o
+	8 /string punch# over key| str= o and o>
+    ELSE  nip nip  THEN ;
+
 
 : ?-beacon ( addr u -- )
     \G if we don't know that address, send a reply
@@ -203,7 +204,8 @@ Variable my-beacon
     check-punch-hash ?dup-IF
 	\ !!FIXME!! accept only two: one IPv4, one IPv6.
 	\ !!FIXME!! and try merging the two into existent
-	>o sockaddr alen @ .sockaddr punch-addrs $make >stack o>
+	>o sockaddr alen @ nat( ." +punch " 2dup .address forth:cr )
+	.sockaddr new-addr punch-addrs >stack o>
     THEN ;
 
 : handle-beacon ( addr u char -- )
