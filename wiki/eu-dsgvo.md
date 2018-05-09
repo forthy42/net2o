@@ -23,7 +23,8 @@ technical and organizational measures to ensure the most complete protection
 of personal data processed through this website. However, Internet-based data
 transmissions may in principle have security gaps, so absolute protection may
 not be guaranteed. For this reason, every data subject is free to transfer
-personal data to us via alternative means, e.g. by telephone.
+personal data to us via alternative means, e.g. by telephone or net2o, our
+secure communication protocoll.
 
 ## 1. Definitions ##
 
@@ -125,8 +126,9 @@ Controller for the purposes of the General Data Protection Regulation (GDPR),
 other data protection laws applicable in Member states of the European Union
 and other provisions related to data protection is:
 
-    net2o secure communication
-    Wilbrechtstr., 85
+    Bernd Paysan
+	net2o secure communication
+    Wilbrechtstr. 85
     81477 München
 	
 	Deutschland
@@ -136,6 +138,9 @@ and other provisions related to data protection is:
     Email: bernd (at) net2o (dot) de
 
     Website: net2o.de
+	
+    net2o ID: kQusJzA;7*?t=uy@X}1GWr!+0qqp_Cn176t4(dQ*
+
 
 ## 3. Cookies ##
 

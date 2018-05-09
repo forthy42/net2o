@@ -28,7 +28,8 @@ personenbezogenen Daten sicherzustellen. Dennoch können Internetbasierte
 Datenübertragungen grundsätzlich Sicherheitslücken aufweisen, sodass ein
 absoluter Schutz nicht gewährleistet werden kann. Aus diesem Grund steht es
 jeder betroffenen Person frei, personenbezogene Daten auch auf alternativen
-Wegen, beispielsweise telefonisch, an uns zu übermitteln.
+Wegen, beispielsweise telefonisch, oder über net2o, unser sicheres
+Kommunikationsprotokoll, an uns zu übermitteln.
 
 ## 1. Begriffsbestimmungen ##
 
@@ -143,8 +144,9 @@ Verarbeitung der sie betreffenden personenbezogenen Daten einverstanden ist.
 
 Verantwortlicher im Sinne der Datenschutz-Grundverordnung, sonstiger in den Mitgliedstaaten der Europäischen Union geltenden Datenschutzgesetze und anderer Bestimmungen mit datenschutzrechtlichem Charakter ist die:
 
+    Bernd Paysan
     net2o secure communication
-    Wilbrechtstr., 85
+    Wilbrechtstr. 85
     81477 München
 
     Deutschland
@@ -154,6 +156,8 @@ Verantwortlicher im Sinne der Datenschutz-Grundverordnung, sonstiger in den Mitg
     E-Mail: bernd (at) net2o (dot) de
 
     Website: net2o.de
+	
+	net2o ID: kQusJzA;7*?t=uy@X}1GWr!+0qqp_Cn176t4(dQ*
 
 ## 3. Cookies ##
 

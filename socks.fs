@@ -116,7 +116,7 @@ $00000000 Value droprate#
 : ?>ipv6 ( addr u -- addr' u' )
     over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
 : info@ ( info -- addr u )
-    dup dup ai_addr @ swap ai_addrlen l@ ;
+    dup ai_addr @ swap ai_addrlen l@ ;
 : info>string ( info -- addr u )
     info@ ?>ipv6 ;
 

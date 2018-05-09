@@ -418,7 +418,8 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-100 Value gui-msgs# \ display last 100 messages
+#80 Value gui-msgs# \ display last 80 messages
+\ !!FIXME!! more if viewport can grow indefinite
 
 : gui-msgs ( gaddr u -- )
     2dup >load-group ?msg-log
