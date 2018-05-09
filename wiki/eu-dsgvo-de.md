@@ -452,8 +452,7 @@ ungeachtet der Richtlinie 2002/58/EG, ihr Widerspruchsrecht mittels
 automatisierter Verfahren auszuüben, bei denen technische Spezifikationen
 verwendet werden.
 
-### h)    Automatisierte Entscheidungen im Einzelfall einschließlich Profiling
-###
+### h)    Automatisierte Entscheidungen im Einzelfall einschließlich Profiling ###
 
 Jede von der Verarbeitung personenbezogener Daten betroffene Person hat das
 vom Europäischen Richtlinien- und Verordnungsgeber gewährte Recht, nicht einer

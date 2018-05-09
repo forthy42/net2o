@@ -19,13 +19,13 @@ Alle hier erhobenen Daten werden in Deutschland gespeichert.
 
 Für jeden Zugtriff werden IP-Adresse, Datum, Zugriffs-Host und -URL
 und die Browser-ID gespeichert. Logs werden wöchentlich rotiert und
-nach einigen Wochen gelöscht. Die IP-Adresse wird auf die ersten 3
+nach 12 Wochen gelöscht. Die IP-Adresse wird auf die ersten 3
 (IPv4, /24) bzw. die ersten 5 Bytes (IPv6, /40) verkürzt und dann
 gespeichert. Damit ist eine individuelle Zuordnung nicht mehr
 verhältnismäßig möglich. Auch 6to4-Adressen werden zumindest um das
 letzte IPv4-Byte reduziert.
 
-Nach einem Monat werden die Logs regulär gelöscht.
+Nach 12 Wochen werden die Logs regulär gelöscht.
 
 ## Cookies ##
 
