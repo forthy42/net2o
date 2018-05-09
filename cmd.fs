@@ -541,9 +541,7 @@ comp: :, also net2o-base ;
 	    [:
 	      outbuf destination $10 erase \ only direct packets
 	      punch-addrs $@ bounds ?DO
-		  I @ [: check-addr1 0= IF  2drop  EXIT  THEN
-		    ind-addr @ IF  nat( ." indirect punch, dropped" cr )
-			2drop  EXIT  THEN
+		  I @ [: check-addr1 0= ind-addr @ or IF  2drop  EXIT  THEN
 		    nat( ticks .ticks ."  punch-cmd: " 2dup .address cr )
 		    2>r net2o-sock outbuf dup packet-size 0 2r> sendto drop
 		  ;] addr>sock
