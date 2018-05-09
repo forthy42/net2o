@@ -535,16 +535,18 @@ comp: :, also net2o-base ;
     cmdreset init-reply also net2o-base ;
 comp: :, also net2o-base ;
 
+: punch-out ( -- )
+    check-addr1 0= ind-addr @ or IF  2drop  EXIT  THEN
+    nat( ticks .ticks ."  punch-cmd: " 2dup .address cr )
+    2>r net2o-sock outbuf dup packet-size 0 2r> sendto drop ;
+
 : ?punch-cmds ( -- )
     o IF
 	punch-addrs @ IF
 	    [:
 	      outbuf destination $10 erase \ only direct packets
 	      punch-addrs $@ bounds ?DO
-		  I @ [: check-addr1 0= ind-addr @ or IF  2drop  EXIT  THEN
-		    nat( ticks .ticks ."  punch-cmd: " 2dup .address cr )
-		    2>r net2o-sock outbuf dup packet-size 0 2r> sendto drop
-		  ;] addr>sock
+		  I @ ['] punch-out addr>sock
 	      cell +LOOP  ;] punch-wrap
 	THEN
     THEN ;
