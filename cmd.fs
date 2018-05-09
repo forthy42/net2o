@@ -535,12 +535,28 @@ comp: :, also net2o-base ;
     cmdreset init-reply also net2o-base ;
 comp: :, also net2o-base ;
 
+: ?punch-cmds ( -- )
+    o IF
+	punch-addrs @ IF
+	    [:
+	      outbuf destination $10 erase \ only direct packets
+	      punch-addrs $@ bounds ?DO
+		  I @ [: check-addr1 0= IF  2drop  EXIT  THEN
+		    ind-addr @ IF  nat( ." indirect punch, dropped" cr )
+			2drop  EXIT  THEN
+		    nat( ticks .ticks ."  punch-cmd: " 2dup .address cr )
+		    2>r net2o-sock outbuf dup packet-size 0 2r> sendto drop
+		  ;] addr>sock
+	      cell +LOOP  ;] punch-wrap
+	THEN
+    THEN ;
+
 : send-cmd ( addr u dest -- size ) n64-swap { buf# }
     +send-cmd dest-addr 64@ 64>r set-dest
     cmd( <info> ." send: " outflag .dest-addr dup buf# net2o:see <default> cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I outflag @ stateless# and IF  send-cX
+	    I outflag @ stateless# and IF  send-cX ?punch-cmds
 	    ELSE
 		send-reply >r over buf# r@ 2!
 		r> action-of send-xt ?dup-IF  execute

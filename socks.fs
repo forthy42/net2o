@@ -130,7 +130,7 @@ $00000000 Value droprate#
     parse-name ':' -$split s>unumber? 2drop >r
     over c@ '[' = negate /string 2dup + 1- c@ ']' = +
     r> SOCK_DGRAM >hints 0 hints ai_family l!
-    get-info dup >r info@ 2dup dump sendto
+    get-info dup >r info@ sendto
     r> freeaddrinfo ?ior ;
 
 0 Value lastaddr#

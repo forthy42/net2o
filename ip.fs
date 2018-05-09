@@ -304,7 +304,7 @@ Forward !my-addr ( -- )
     nat( ticks .ticks ."  ping: " 2dup .address cr )
     2>r net2o-sock
     [: 64#0 { 64^ x } '>' emit code-map .mapc:dest-vaddr x le-64!
-	x 8 type punch# $10 type ;] $tmp 2dup dump
+	x 8 type punch# $10 type ;] $tmp
     0 2r> sendto drop ;
 
 : pathc+ ( addr u -- addr' u' )

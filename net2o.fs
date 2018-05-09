@@ -1013,22 +1013,22 @@ in net2o : punch ( addr u o:connection -- )
 	new-addr punch-addrs >stack
     ELSE  2drop  THEN ;
 
-: ret-wrap ( xt -- )
+: punch-wrap ( xt -- )
     return-address $10 $make { w^ ret } catch
     ret $@ return-address $10 smove
     ret $free throw ;
 
 : pings ( o:connection -- )
     \G ping all addresses (why except the first one?)
-    [: punch-addrs $@ ( cell safe/string ) bounds ?DO
+    [: punch-addrs $@ bounds ?DO
 	    I @ ['] ping-addr1 addr>sock
-	cell +LOOP ;] ret-wrap ;
+	cell +LOOP ;] punch-wrap ;
 
 : punchs ( addr u o:connection -- )
     \G send a reply to all addresses
     [: punch-addrs $@ bounds ?DO
 	    I @ ['] send-punch addr>sock
-	cell +LOOP  2drop ;] ret-wrap ;
+	cell +LOOP ;] punch-wrap 2drop ;
 
 \ send chunk
 
