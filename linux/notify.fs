@@ -24,8 +24,11 @@
 
 : build-notification ( -- ) ;
 : notify@ ( -- addr u )
-    config:notify-text# @ IF  notify$ $@ ['] escape-<&> $tmp
-    ELSE  "<i>hidden cryptic text</i>"  THEN ;
+    config:notify-text# @ IF
+	notify-otr? @ config:notify-text# @ 0> and IF
+	    "<i>[otr] message</i>"
+	ELSE  notify$ $@ ['] escape-<&> $tmp  THEN
+    ELSE  "<i>encrypted message</i>"  THEN ;
 
 Variable notify-send
 Variable upath

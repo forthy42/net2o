@@ -26,7 +26,7 @@ Variable notify-mode# 3 notify-mode# !
 Variable notify-rgb# $FFFF00 notify-rgb# !
 Variable notify-on# 500 notify-on# !
 Variable notify-off# 4500 notify-off# !
-Variable notify-text# notify-text# on
+Variable notify-text# 1 notify-text# !
 Variable notify?# -2 notify?# ! \ default: no notification when active
 }scope
 
@@ -34,6 +34,7 @@ Variable notify?# -2 notify?# ! \ default: no notification when active
     ticks last-notify 64- config:delta-notify& 2@ d>64 64< ;
 
 Variable notify$
+Variable notify-otr?
 Variable pending-notifications
 
 : notify- ( -- )

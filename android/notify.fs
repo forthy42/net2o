@@ -26,8 +26,11 @@ jvalue nf
 jvalue notification-manager
 
 : notify@ ( -- addr u )
-    config:notify-text# @ IF  notify$ $@
-    ELSE  "hidden cryptic text"  THEN ;
+    config:notify-text# @ IF
+	notify-otr? @ config:notify-text# @ 0> and IF
+	    "<i>[otr] message</i>"
+	ELSE  notify$ $@  THEN
+    ELSE  "encrypted message"  THEN ;
 : ?nm ( -- )
     notification-manager 0= IF
 	NOTIFICATION_SERVICE clazz .getSystemService

@@ -383,14 +383,16 @@ msg-class to msg:object
     space <warn> forth:type <default> ; msg-class to msg:action
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
+: .otr-info ( -- )
+    <info> ."  [otr]" <default> " [otr]" notify+ notify-otr? on ;
 :noname ( -- )
     parent ?dup-IF
-	.msging-context @ ?dup-IF
-	    .otr-shot @ IF <info> ."  [otr]" <default> THEN
-	THEN
+	.msging-context @ dup IF  .otr-shot @  THEN
     ELSE
-	otr-mode @ IF <info> ."  [otr]" <default> THEN
-    THEN  forth:cr ; msg-class to msg:end
+	otr-mode @
+    THEN
+    IF  .otr-info  ELSE  notify-otr? off  THEN
+    forth:cr ; msg-class to msg:end
 
 \g
 \g ### group description commands ###
