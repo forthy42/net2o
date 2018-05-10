@@ -92,7 +92,7 @@ init-keybuf
 \ :noname defers free-code-bufs ; is free-code-bufs
 
 #60.000.000.000 d>64 64Constant :01'# \ one minute
-#1.000.000.000 d>64 64Constant 10"#   \ ten second
+#10.000.000.000 d>64 64Constant 10"#  \ ten second
 :01'# 64Value delta-mykey# \ new mykey every 0.6 seconds
 10"#  64Constant fuzzedtime# \ allow clients to be 10s off
 
