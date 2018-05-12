@@ -33,14 +33,27 @@ jvalue notification-manager
     ELSE  "encrypted message"  THEN ;
 : ?nm ( -- )
     notification-manager 0= IF
-	NOTIFICATION_SERVICE clazz .getSystemService
-	to notification-manager
+	clazz .notificationManager to notification-manager
     THEN ;
 : ?ni ( -- )
     ni 0= IF  clazz .gforthintent to ni  THEN ;
 SDK_INT 11 >= [IF]
-    : msg-builder ( -- ) ?nm ?ni
-	clazz newNotification.Builder to nb
+    [IFDEF] newNotificationChannel
+	Variable channel$ "gnu.gforth.notifications" channel$ $!
+	Variable ch-name$ "net2o messages" ch-name$ $!
+	3 Value channel-prio#
+	JValue nc
+	: ?nc ( -- )
+	    nc 0= IF
+		clazz .notificationChannel to nc
+		ch-name$ $@ make-jstring nc .setName
+	    THEN ;
+    [THEN]
+    : msg-builder ( -- ) ?nm ?ni [IFDEF] ?nc ?nc
+	    clazz channel$ $@ make-jstring newNotification.Builder+Id to nb
+	[ELSE]
+	    clazz newNotification.Builder to nb
+	[THEN]
 	config:notify-rgb# @ config:notify-on# @ config:notify-off# @ nb .setLights to nb
 	config:notify-mode# @ nb .setDefaults to nb
 	ni nb .setContentIntent to nb
@@ -55,7 +68,10 @@ SDK_INT 11 >= [IF]
 	notify@ make-jstring nb .setTicker to nb
 	nb .build to nf ;
     : show-notification ( -- )
-	1 nf notification-manager .notify ;
+	clazz >o 1 0 to argj0
+	nf to argnotify o>
+	['] notifyer post-it ;
+\       1 nf notification-manager .notify ;
 [ELSE]
     \ no notification for Android 2.3 for now...
     : msg-builder ( -- ) ;

@@ -1753,7 +1753,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 	64dup old-beacon 64!
 	64>d 1000000 ud/mod clazz .set_alarm drop ;
     : android-wakeup ( 0 -- ) drop
-	timeout-task wake ;
+	timeout-task ?dup-IF  wake  THEN ;
     also android
     ' android-wakeup is android-alarm
     previous

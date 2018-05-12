@@ -138,8 +138,7 @@ event: ->netlink ( -- )
 : create-netlink-task ( -- )
     ['] netlink-loop 1 net2o-task to netlink-task ;
 
-:noname defers init-rest
-    [IFUNDEF] mslinux create-netlink-task [THEN] ; is init-rest
+:noname defers init-rest create-netlink-task ; is init-rest
 
 0 [IF]
 Local Variables:
