@@ -63,11 +63,11 @@ SDK_INT 11 >= [IF]
     : build-notification ( -- )
 	1000 clazz .screen_on
 	1 pending-notifications +!
-	['] notify-title $tmp make-jstring nb .setContentTitle to nb
-	notify@ make-jstring nb .setContentText to nb
-	notify@ make-jstring nb .setTicker to nb
-	pending-notifications @ nb .setNumber to nb
-	nb .build to nf ;
+	['] notify-title $tmp make-jstring nb .setContentTitle >o
+	notify@ make-jstring setContentText o> >o
+	notify@ make-jstring setTicker o> >o
+	pending-notifications @ setNumber o> >o
+	js" net2o notifications" setGroup o> .build to nf ;
     : show-notification ( -- )
 	clazz >o 1 0 to argj0
 	nf to argnotify o>
