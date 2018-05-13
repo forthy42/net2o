@@ -50,15 +50,15 @@ SDK_INT 11 >= [IF]
 	    THEN ;
     [THEN]
     : msg-builder ( -- ) ?nm ?ni [IFDEF] ?nc ?nc
-	    clazz channel$ $@ make-jstring newNotification.Builder+Id to nb
+	    clazz channel$ $@ make-jstring newNotification.Builder+Id >o
 	[ELSE]
-	    clazz newNotification.Builder to nb
+	    clazz newNotification.Builder >o
 	[THEN]
-	config:notify-rgb# @ config:notify-on# @ config:notify-off# @ nb .setLights to nb
-	config:notify-mode# @ nb .setDefaults to nb
-	ni nb .setContentIntent to nb
-	net2o-icon# nb .setSmallIcon to nb
-	1 nb .setAutoCancel to nb ;
+	config:notify-rgb# @ config:notify-on# @ config:notify-off# @ setLights o> >o
+	config:notify-mode# @ setDefaults o> >o
+	ni setContentIntent o> >o
+	net2o-icon# setSmallIcon o> >o
+	1 setAutoCancel o> to nb ;
     msg-builder
     : build-notification ( -- )
 	1000 clazz .screen_on
@@ -66,6 +66,7 @@ SDK_INT 11 >= [IF]
 	['] notify-title $tmp make-jstring nb .setContentTitle to nb
 	notify@ make-jstring nb .setContentText to nb
 	notify@ make-jstring nb .setTicker to nb
+	pending-notifications @ nb .setNumber to nb
 	nb .build to nf ;
     : show-notification ( -- )
 	clazz >o 1 0 to argj0

@@ -34,6 +34,7 @@ Variable notify?# -2 notify?# ! \ default: no notification when active
     ticks last-notify 64- config:delta-notify& 2@ d>64 64< ;
 
 Variable notify$
+Variable notify-nick$
 Variable notify-otr?
 Variable pending-notifications
 
@@ -45,11 +46,15 @@ Sema notify-sema
 : notify; nip (;]) ]] notify-sema c-section ; [[ ;
 : notify> comp-[: ['] notify; colon-sys-xt-offset stick ; immediate
 : notify+ ( addr u -- )  notify> notify$ $+! ;
+: notify-nick+ ( addr u -- )  notify> s"  @" notify-nick$ $+! notify-nick$ $+! ;
+: notify-nick! ( addr u -- )  notify> s"  @" notify-nick$ $!
+    notify-nick$ $+! notify$ $free ;
 : notify! ( addr u -- )  notify> notify$ $! ;
 
 : notify-title ( -- )
     ." net2o: " pending-notifications @ dup .
-    ." Message" 1 > IF ." s"  THEN ;
+    ." Message" 1 > IF ." s"  THEN
+    ."  from" notify-nick$ $. ;
 
 [IFDEF] android
     require android/notify.fs
@@ -64,7 +69,7 @@ Sema notify-sema
 	    [THEN]
 	[THEN]
     [THEN]
-	
+    
     : show-notification ( -- )
 	1 pending-notifications +!
 	[IFDEF] linux-notification

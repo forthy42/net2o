@@ -355,7 +355,7 @@ msg-table $save
 
 :noname ( addr u -- )
     2dup startdate@ .ticks space 2dup .key-id
-    ['] .simple-id $tmp notify! ; msg-class to msg:start
+    ['] .simple-id $tmp notify-nick! ; msg-class to msg:start
 :noname ( addr u -- ) $utf8>
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
 :noname ( addr u -- )
@@ -1017,7 +1017,12 @@ Variable chat-keys
     ." led " config:notify-rgb# @ hex. config:notify-on# ? config:notify-off# ?
     ." interval " config:delta-notify& 2@ 1000000 um/mod . drop
     ." mode " config:notify-mode# @ .
-    config:notify-text# @ IF  ." visible"  ELSE  ." hidden"  THEN
+    config:notify-text# @
+    case
+	-1 of  ." visible"  endof
+	0 of  ." hidden"  endof
+	1 of  ." hide-otr"  endof
+    endcase
     forth:cr ;
 
 : get-hex ( addr u -- addr' u' n )
@@ -1048,6 +1053,8 @@ scope: notify-cmds
     2drop config:notify-text# on .notify ;
 : hidden ( addr u -- )
     2drop config:notify-text# off .notify ;
+: hide-otr ( addr u -- )
+    2drop 1 config:notify-text# ! .notify ;
 
 }scope
 
