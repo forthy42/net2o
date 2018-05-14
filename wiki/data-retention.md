@@ -1,42 +1,61 @@
 # Data Retention #
 
-Germany, like many other countries, has a [data retention
-law](https://dejure.org/gesetze/TKG/113b.html), which requires ISPs to
-store data like the IP addresses or telephone numbers assigned to
-their customers.
+## General Data Protection Regulation ##
 
-While I'm not providing actual interconnection infrastructure, and
-therefore I'm not a direct service provider, the net2o DHT does store
-data about net2o users, and it might be possible that data retention
-could be necessary. However, the publically "assigned" IP address is
-always the one of the forwarder node (the DHT node you use to announce
-yourself), not the user's home IP itself.  Similar to a carrier grade
-NAT, this information alone is useless.
+The GPDR wasn't created with decentralized or P2P services in mind, because
+those don't matter much in the current Internet.  However, the principles
+certainly apply, and a P2P system gives you way more control over your data
+than any centralized system.  So this section explains what happens to your
+data when you use net2o.
 
-## Angaben gemäß §13 TMG ##
+### DHT servers ###
 
-Alle hier erhobenen Daten werden in Deutschland gespeichert.
+First, in order to be accessible, you announce yourself to a DHT server.  This
+announcement is done either explicit or implicit in other functions that
+require an announcemt.
 
-Für jeden Zugtriff werden IP-Adresse, Datum, Zugriffs-Host und -URL
-und die Browser-ID gespeichert. Logs werden wöchentlich rotiert und
-nach 12 Wochen gelöscht. Die IP-Adresse wird auf die ersten 3
-(IPv4, /24) bzw. die ersten 5 Bytes (IPv6, /40) verkürzt und dann
-gespeichert. Damit ist eine individuelle Zuordnung nicht mehr
-verhältnismäßig möglich. Auch 6to4-Adressen werden zumindest um das
-letzte IPv4-Byte reduziert.
+An announcement does the following things:
 
-Nach 12 Wochen werden die Logs regulär gelöscht.
+1. It sends a very brief information about your net2o ID to the DHT;
+   essentially this is your nick, your pubkey, and a signature of your nick.
+   An avatar image is optional.  The index to get to your nick is your pubkey.
+2. It establishs a lightweight UDP connection to this DHT node that allows to
+   route addresses through the DHT node to you.  The DHT node creates a path
+   from itself to you and keeps that as long as the connection is up.
+3. It announces the path from the DHT to you.
 
-## Cookies ##
+DHT nodes are redundant and distribute these information as appropriate.  As
+long as you are connected using said lightweight UDP connection, the path is
+retained.  The static information about you is retained for longer.  DHT nodes
+may purge those information infrequently; usually during a restart after an
+update.  The entire design supposes that a DHT can forget everything and will
+be repopulated by the users.  Therefore, DHTs don't store anything
+permanently.
 
-Cookies werden nur gesetzt, wenn man sich im Fossil-Repository
-einloggt (auch anonym). Diese Cookies werden ein Jahr lang in dem
-Browser-Directory des Nutzers selbst gespeichert, und können dort
-jederzeit gelöscht werden.
+### Chat logs ###
 
-## Trackers ##
+Every chat partner keeps a chat log.  Chat logs remember all the chat messages
+except those who are set to OTR (“off the record”).  OTR logs are kept in main
+memory, but not stored permanently.  Chat logs of group chats can be synced
+with any group member.  OTR logs can't be synced; they are only seen by people
+who are active at the time of their sending.
 
-Ich verwende keine Tracker wie Google Analytics. Sollte jemand doch
-einen finden, ist das ein Bug, der formlos gemeldet werden kann.
+In near future, you can ```/otrify``` your own messages; if honored by your
+peers, they will disappear.  Note that only active peers in a group will be
+able to see an ```/otrify``` request.  This honors your right to be
+forgotten.
 
-[EU-DSGVO (en)](eu-gdpr.md) [EU-DSGVO (de)](eu-dsgvo.md)
+### DVCS projects ###
+
+All your DVCS projects create an immutable chain of commits which are signed
+by you and the other contributors.  History revision is only possible when all
+signers agree to it, and everybody who holds a copy accepts the recall.
+
+### $quid payments ###
+
+$quid payments are stored in a hypercubemesh style BlockChain.  All signers
+committed to never create an alternative revision of this chain.  This is on
+purpose.  $quid payments happen under pseudonymous IDs which are not tied to
+your connection pubkey; but people can record that association and make it
+public.  You can move all your coins to other pubkeys, which is
+indistinguishable from spending them.

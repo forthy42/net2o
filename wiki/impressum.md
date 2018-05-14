@@ -44,5 +44,5 @@ Umsatzsteuer-ID:
 Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br/>
 DE 223 195 380
 
-[Links](links-statement.md) [Datenschutz](data-retention.md) [EU-GDPR
-(en)](eu-gdpr.md) [EU-DSGVO (de)](eu-dsgvo.md)
+[Links](links-statement.md) [EU-GDPR (en)](eu-gdpr.md) [EU-DSGVO
+(de)](eu-dsgvo.md)
