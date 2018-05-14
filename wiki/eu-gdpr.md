@@ -1,6 +1,6 @@
 # Privacy Policy #
 
-[→Deutsch](eu-dsgvo-de.md)
+[→Deutsch](eu-dsgvo.md)
 
 We are very delighted that you have shown interest in our enterprise. Data
 protection is of a particularly high priority for the management of the net2o
