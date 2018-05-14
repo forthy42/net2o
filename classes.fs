@@ -136,6 +136,7 @@ end-class msging-class
 
 cmd-class class
 scope: msg
+    $value: id$
     method start
     method tag
     method chain
@@ -146,6 +147,7 @@ scope: msg
     method id
     method action
     method coord
+    method otrify
     method payment
     method end
 }scope
@@ -509,7 +511,7 @@ cmd-class class
     scope: groups
     $value: id$
     field: member[]
-    field: admin[]
+    field: admin     \ secret key, only known to the admins
     64value: perms#
     }scope
 end-class group-class

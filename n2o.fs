@@ -473,7 +473,7 @@ warnings !
 	    msg-group$ $@ [ -1 1 rshift cell/ ]l load-msgn REPEAT ;
 
 : chatgroup ( -- )
-    \U chatgroup name [id] @user1 .. @usern [admin @useri .. @userj] [+perm]
+    \U chatgroup name [id] @user1 .. @usern [admin <sk>] [+perm]
     \G chatgroup: define a chat group
     ?get-me ?nextarg 0= ?EXIT  make-group
     ?peekarg 0= IF  save-chatgroups  EXIT  THEN
@@ -484,7 +484,10 @@ warnings !
     BEGIN  ?@nextarg  WHILE  nick>pk key| groups:member[] $+[]!  REPEAT
     ?peekarg 0= IF  save-chatgroups  EXIT  THEN
     s" admin" str= IF  ?nextarg drop 2drop
-	BEGIN  ?@nextarg  WHILE  nick>pk key| groups:admin[] $+[]!  REPEAT
+	?nextarg  IF  base85>$ groups:admin sec!
+	    keysize addr groups:id$ $!len
+	    groups:admin sec@ drop groups:id$ drop sk>pk
+	THEN
     THEN
     ?peekarg 0= IF  save-chatgroups  EXIT  THEN
     over c@ '+' = IF  2drop ?nextarg drop
@@ -743,7 +746,7 @@ n2o-history
 
 scope{ /chat
 
-: n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
+: /n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
 
 }scope

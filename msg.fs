@@ -118,9 +118,11 @@ event: :>save-all-msgs ( -- )
 
 : ?msg-log ( addr u -- )  msg-logs ?hash ;
 
+0 Value log#
+
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
-    [: last# cell+ $ins[]date
+    [: last# cell+ $ins[]date  dup to log#
       dup -1 = IF drop #0. ( 0 to last# )  ELSE  last# cell+ $[]@  THEN
     ;] msglog-sema c-section ;
 : ?save-msg ( addr u -- )
@@ -158,11 +160,12 @@ Variable otr-log
 : display-lastn ( addr u n -- )  reset-time
     otr-mode @ >r otr-mode off
     [: net2o:new-msg >o 0 to parent
-      cells >r ?msg-log last# msg-log@ 2dup { log u }
-      dup r> - 0 max /string bounds ?DO
-	  I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
-      cell +LOOP
-      log free dispose o> throw ;] catch
+	cells >r ?msg-log last# msg-log@ 2dup { log u }
+	dup r> - 0 max /string bounds ?DO
+	    I log - cell/ to log#
+	    I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
+	cell +LOOP
+	log free dispose o> throw ;] catch
     r> otr-mode ! throw ;
 
 : display-one-msg ( addr u -- )
@@ -314,6 +317,8 @@ Forward msg:last
     LOOP
     2drop false ;
 
+\ message commands
+
 scope{ net2o-base
 
 \g 
@@ -342,6 +347,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     8 !!>=order? $> msg:action ;
 +net2o: msg-payment ( $:contract -- ) \g payment transaction
     8 !!>=order? $> msg:payment ;
++net2o: msg-otrify ( $:date+sig -- ) \g turn a past message into OTR
+    $> msg:otrify ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     8 !!>=order? $> msg:coord ;
 
@@ -353,8 +360,21 @@ msg-table $save
 
 \ Code for displaying messages
 
+Defer .log-num
+Defer .log-date
+
+scope: logstyles
+: +num [: '#' emit log# u. ;] is .log-num ;
+: -num ['] noop is .log-num ;
+: +date [: .ticks space ;] is .log-date ;
+: -date ['] 64drop is .log-date ;
+
++date -num
+}scope
+
 :noname ( addr u -- )
-    2dup startdate@ .ticks space 2dup .key-id
+    2dup key| to msg:id$
+    .log-num 2dup startdate@ .log-date 2dup .key-id
     ['] .simple-id $tmp notify-nick! ; msg-class to msg:start
 :noname ( addr u -- ) $utf8>
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
@@ -383,8 +403,15 @@ msg-class to msg:object
     space <warn> forth:type <default> ; msg-class to msg:action
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
+:noname ( addr u -- )
+    2dup key| msg:id$ str= IF
+	2dup startdate@ date>i ." OTRify #" u. forth:cr
+    ELSE
+	." Invalid attempt to otrify a message" forth:cr
+    THEN ; msg-class to msg:otrify
 : .otr-info ( -- )
     <info> ."  [otr]" <default> " [otr]" notify+ notify-otr? on ;
+
 :noname ( -- )
     parent ?dup-IF
 	.msging-context @ dup IF  .otr-shot @  THEN
@@ -419,12 +446,12 @@ scope{ net2o-base
 
 $20 net2o: group-name ( $:name -- ) \g group symbolic name
     $> make-group ;
-+net2o: group-id ( $:group -- ) \g group id
++net2o: group-id ( $:group -- ) \g group id, is a pubkey
     group-o o = !!no-group-name!! $> to groups:id$ ;
 +net2o: group-member ( $:memberkey -- ) \g add member key
     group-o o = !!no-group-name!! $> groups:member[] $+[]! ;
-+net2o: group-admin ( $:adminkey -- ) \g add admin key
-    group-o o = !!no-group-name!! $> groups:admin[] $+[]! ;
++net2o: group-admin ( $:adminkey -- ) \g set admin key
+    group-o o = !!no-group-name!! $> groups:admin sec! ;
 +net2o: group-perms ( 64u -- ) \g permission/modes bitmask
     group-o o = !!no-group-name!! to groups:perms# ;
 
@@ -454,7 +481,7 @@ also net2o-base
 	2tuck str= 0= IF  $, group-id  ELSE  2drop  THEN
     ELSE  2drop 2drop  THEN
     groups:member[] [: $, group-member ;] $[]map
-    groups:admin[] [: $, group-admin ;] $[]map
+    groups:admin sec@ dup IF  sec$, group-admin  ELSE  2drop  THEN
     groups:perms# 64dup 64-0<> IF  lit, group-perms  ELSE  64drop  THEN
     o> ;
 
@@ -485,7 +512,7 @@ Variable group-list[]
     groups:id$ 2tuck str=
     IF  ." ="  ELSE  ''' emit <info> 85type <default> ''' emit THEN space
     groups:member[] [: '@' emit .simple-id space ;] $[]map
-    ." admin " groups:admin[] [: '@' emit .simple-id space ;] $[]map
+\    ." admin " groups:admin[] [: '@' emit .simple-id space ;] $[]map
     ." +" groups:perms# x64.
     o> cr ;
 : .chatgroups ( -- )
@@ -1195,10 +1222,37 @@ also net2o-base scope: /chat
     ." === sync ===" forth:cr
     net2o-code expect-msg ['] last?, [msg,] end-code ;
 
-: /version ( -- )
+: /version ( addr u -- )
     \U version              version string
     \G version: print version string
-    .n2o-version space .gforth-version forth:cr ;
+    2drop .n2o-version space .gforth-version forth:cr ;
+
+: /log ( addr u -- )
+    \U log [#lines]         show log
+    \G log: show the log, default is a screenful
+    s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
+    msg-group$ $@ ?msg-log last# $@ r>  display-lastn ;
+
+: /logstyle ( addr u -- )
+    \U logstyle [+-style]   set log style
+    \G logstyle: set log styles, the following settings exist:
+    \G logstyle: +date      a date per log line
+    \G logstyle: +num       a message number per log line
+    get-order n>r ['] logstyles >body 1 set-order
+    ['] evaluate catch nr> set-order throw ;
+
+: /otrify ( -- )
+    \U otrify #line         otrify message
+    \G otrify: turn an older message of yours into an OTR message
+    s>unumber? IF  drop >r  ELSE  2drop  EXIT  THEN
+    msg-group$ $@ ?msg-log last# cell+ $@ r> cells safe/string
+    IF  $@  + sigpksize# - sigpksize#
+	over keysize pkc over str= IF
+	    [: $, msg-otrify ;] (send-otr-avalanche) drop 2drop
+	ELSE
+	    2drop ." not your message!" forth:cr
+	THEN
+    THEN ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
