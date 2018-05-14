@@ -2,6 +2,21 @@
 
 [→English](eu-gdpr.md)
 
+## TL;DR ##
+
+Tatsächliche Speicherung auf dieser Web-Site:
+
+### Angaben gemäß § 13 TMG ###
+
+Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert
+
+Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
+
+IP-Adressen werden auf 3 Bytes (IPv4) bzw. 5 Bytes (IPv6) verkürzt im Log
+gespeichert. Die Logs werden nach 12 Wochen endgültig gelöscht.
+
+## Willkommen ##
+
 Wir freuen uns sehr über Ihr Interesse an unserem Unternehmen. Datenschutz hat
 einen besonders hohen Stellenwert für die Geschäftsleitung der net2o secure
 communication. Eine Nutzung der Internetseiten der net2o secure communication
