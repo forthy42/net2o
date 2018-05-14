@@ -1,6 +1,6 @@
 # Datenschutzerklärung #
 
-[english](eu-dsgvo.md)
+[→English](eu-dsgvo.md)
 
 Wir freuen uns sehr über Ihr Interesse an unserem Unternehmen. Datenschutz hat
 einen besonders hohen Stellenwert für die Geschäftsleitung der net2o secure
