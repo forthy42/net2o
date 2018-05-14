@@ -896,7 +896,7 @@ chat-terminal edit-out !
 ' chat-prev-line ctrl P bindkey
 ' chat-enter     #lf    bindkey
 ' chat-enter     #cr    bindkey
-:noname #tab (xins) 0 ; #tab   bindkey
+\ :noname #tab (xins) 0 ; #tab   bindkey
 [IFDEF] ebindkey
     keycode-limit keycode-start - cells buffer: chat-ekeys
     std-ekeys chat-ekeys keycode-limit keycode-start - cells move
@@ -1025,36 +1025,36 @@ Variable chat-keys
     endcase
     forth:cr ;
 
-: get-hex ( addr u -- addr' u' n )
-    bl skip '$' skip #0. 2swap ['] >number $10 base-execute 2swap drop ;
-: get-dec ( addr u -- addr' u' n )
-    bl skip '#' skip #0. 2swap ['] >number #10 base-execute 2swap drop ;
+: get-hex ( -- n )
+    parse-name '$' skip #0. 2swap ['] >number $10 base-execute 2swap drop ;
+: get-dec ( -- n )
+    parse-name '#' skip #0. 2swap ['] >number #10 base-execute 2swap drop ;
 
 scope: notify-cmds
 
-: on ( addr u -- ) 2drop -2 config:notify?# ! .notify ;
-: always ( addr u -- ) 2drop -3 config:notify?# ! .notify ;
-: off ( addr u -- ) 2drop 0 config:notify?# ! .notify ;
-: led ( addr u -- ) \ "<rrggbb> <on-ms> <off-ms>"
+: on ( -- ) -2 config:notify?# ! ;
+: always ( -- ) -3 config:notify?# ! ;
+: off ( -- ) 0 config:notify?# ! ;
+: led ( -- ) \ "<rrggbb> <on-ms> <off-ms>"
     get-hex config:notify-rgb# !
     get-dec #500 max config:notify-on# !
     get-dec #500 max config:notify-off# !
-    2drop .notify msg-builder ;
-: interval ( addr u -- )
+    msg-builder ;
+: interval ( -- ) parse-name
     #0. 2swap ['] >number #10 base-execute 1 = IF  nip c@ case
 	    's' of     #1000 * endof
 	    'm' of    #60000 * endof
 	    'h' of #36000000 * endof
 	endcase
-    ELSE  2drop  THEN  #1000000 um* config:delta-notify& 2! .notify ;
-: mode ( addr u -- )
-    get-dec 3 and config:notify-mode# ! 2drop .notify msg-builder ;
-: visible ( addr u -- )
-    2drop config:notify-text# on .notify ;
-: hidden ( addr u -- )
-    2drop config:notify-text# off .notify ;
-: hide-otr ( addr u -- )
-    2drop 1 config:notify-text# ! .notify ;
+    ELSE  2drop  THEN  #1000000 um* config:delta-notify& 2! ;
+: mode ( -- )
+    get-dec 3 and config:notify-mode# ! msg-builder ;
+: visible ( -- )
+    config:notify-text# forth:on ;
+: hidden ( -- )
+    config:notify-text# forth:off ;
+: hide-otr ( -- )
+    1 config:notify-text# ! ;
 
 }scope
 
@@ -1077,12 +1077,12 @@ forward avalanche-text
 
 also net2o-base scope: /chat
 
-: me ( addr u -- )
+: /me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
     [: $, msg-action ;] send-avalanche ;
 
-: otr ( addr u -- )
+: /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)
     2dup s" on" str= >r
     2dup s" off" str= r@ or IF   2drop r> otr-mode !
@@ -1092,7 +1092,7 @@ also net2o-base scope: /chat
 	true otr-mode !@ >r  avalanche-text  r> otr-mode !
     THEN ;
 
-: chain ( addr u -- )
+: /chain ( addr u -- )
     \U chain on|off         turn chain mode on/off
     2dup s" on" str= >r
     s" off" str= r@ or IF   r> chain-mode !
@@ -1101,7 +1101,7 @@ also net2o-base scope: /chat
     ELSE  <err> ." only 'chain on|off' are allowed" rdrop  THEN
     <default> forth:cr ;
 
-: peers ( addr u -- ) 2drop
+: /peers ( addr u -- ) 2drop
     \U peers                list peers
     \G peers: list peers in all groups
     msg-groups [: dup .group ." : "
@@ -1110,7 +1110,7 @@ also net2o-base scope: /chat
 	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
       cell +LOOP  forth:cr ;] #map ;
 
-: gps ( addr u -- ) 2drop
+: /gps ( addr u -- ) 2drop
     \U gps                  send coordinates
     \G gps: send your coordinates
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
@@ -1118,21 +1118,21 @@ also net2o-base scope: /chat
 	[: $, msg-coord ;] send-avalanche
     THEN ;
 
-' gps alias here
+' /gps alias /here
 
-: help ( addr u -- )
+: /help ( addr u -- )
     \U help                 show help
     \G help: list help
     bl skip '/' skip
     2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
     [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
 
-: invitations ( addr u -- )
+: /invitations ( addr u -- )
     \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
     2drop .invitations ;
 
-: chats ( addr u -- ) 2drop ." ===== chats: "
+: /chats ( addr u -- ) 2drop ." ===== chats: "
     \U chats                list chats
     \G chats: list all chats
     msg-groups [: >r
@@ -1142,7 +1142,7 @@ also net2o-base scope: /chat
       r@ $@ msg-logs #@ nip cell/ u. rdrop ;] #map
     ." =====" forth:cr ;
 
-: nat ( addr u -- )  2drop
+: /nat ( addr u -- )  2drop
     \U nat                  list NAT info
     \G nat: list nat traversal information of all peers in all groups
     \U renat                redo NAT traversal
@@ -1153,28 +1153,26 @@ also net2o-base scope: /chat
 	  ."  ---" forth:cr .nat-addrs o>
       cell +LOOP ;] #map ;
 
-: myaddrs ( addr u -- )
+: /myaddrs ( addr u -- )
     \U myaddrs              list my addresses
     \G myaddrs: list my own local addresses (debugging)
     2drop
     ." ===== all =====" forth:cr    .my-addr$s
     ." ===== public =====" forth:cr .pub-addr$s
     ." ===== private =====" forth:cr .priv-addr$s ;
-: !myaddrs ( addr u -- )
+: /!myaddrs ( addr u -- )
     \U !myaddrs             re-obtain my addresses
     \G !myaddrs: if automatic detection of address changes fail,
     \G !myaddrs: you can use this command to re-obtain your local addresses
     2drop !my-addr ;
 
-: notify ( addr u -- )
+: /notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G notify: Change notificaton settings
-    bl skip bl $split 2swap ['] notify-cmds >body find-name-in dup IF
-	name>int execute
-    ELSE  nip IF  ." Unknown notify command" forth:cr  ELSE  .notify  THEN
-    THEN ;
+    get-order n>r ['] notify-cmds >body 1 set-order
+    ['] evaluate catch nr> set-order throw .notify ;
 
-: beacons ( addr u -- )
+: /beacons ( addr u -- )
     \U beacons              list beacons
     \G beacons: list all beacons
     2drop ." === beacons ===" forth:cr
@@ -1187,7 +1185,7 @@ also net2o-base scope: /chat
     \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
 
-: sync ( addr u -- )
+: /sync ( addr u -- )
     \U sync [+date] [-date] synchronize logs
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
@@ -1197,7 +1195,7 @@ also net2o-base scope: /chat
     ." === sync ===" forth:cr
     net2o-code expect-msg ['] last?, [msg,] end-code ;
 
-: version ( -- )
+: /version ( -- )
     \U version              version string
     \G version: print version string
     .n2o-version space .gforth-version forth:cr ;
@@ -1208,7 +1206,7 @@ also net2o-base scope: /chat
 
 : do-chat-cmd? ( addr u -- t / addr u f )
     ?slash dup 0= ?EXIT  drop
-    1 /string bl $split 2swap
+    over '/' swap c! bl $split 2swap
     2dup ['] /chat >body find-name-in
     ?dup-IF  nip nip name>int execute true
     ELSE  drop 1- -rot + over - false
@@ -1316,12 +1314,12 @@ $B $E 2Value chat-bufs#
       2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
-: ?wait-chat ( -- ) #0. /chat:chats
+: ?wait-chat ( -- ) #0. /chat:/chats
     BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT
     msg-group$ $@ ; \ stub
 
 scope{ /chat
-: chat ( addr u -- )
+: /chat ( addr u -- )
     \U chat [group][@user]  switch/connect chat
     \G chat: switch to chat with user or group
     chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
@@ -1331,7 +1329,7 @@ scope{ /chat
     ELSE
 	bounds ?DO  2dup I @ .pubkey $@ key2| str= 0= WHILE  cell +LOOP
 	    2drop chat-connects  ELSE  UNLOOP 2drop THEN
-    THEN  #0. chats ;
+    THEN  #0. /chats ;
 }scope
 
 also net2o-base
@@ -1397,7 +1395,7 @@ previous
     REPEAT drop rdrop ;
 
 scope{ /chat
-: split ( -- )
+: /split ( addr u -- )  2drop
     \U split                split load
     \G split: reduce distribution load by reconnecting
     msg-group$ $@ >group last# split-load ;
@@ -1405,13 +1403,16 @@ scope{ /chat
 
 \ chat toplevel
 
-: do-chat ( addr u -- )  chat-history
+: do-chat ( addr u -- )
+    get-order n>r
+    chat-history  ['] /chat >body 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  get-input-line
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
-    REPEAT  2drop leave-chats  xchar-history ;
+    REPEAT  2drop leave-chats  xchar-history
+    nr> set-order ;
 
 : avalanche-to ( addr u otr-flag o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )

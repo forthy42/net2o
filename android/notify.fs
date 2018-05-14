@@ -61,7 +61,7 @@ SDK_INT 11 >= [IF]
 	1 setAutoCancel o> to nb ;
     msg-builder
     : build-notification ( -- )
-	1000 clazz .screen_on
+\	1000 clazz .screen_on
 	1 pending-notifications +!
 	['] notify-title $tmp make-jstring nb .setContentTitle >o
 	notify@ make-jstring setContentText o> >o

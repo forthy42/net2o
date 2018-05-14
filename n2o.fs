@@ -698,7 +698,7 @@ warnings !
     \G -backtrace: Provide full error reporting ;
     [ what's DoError ]l is DoError next-cmd ;
 
-' /chat:version alias version
+' /chat:/version alias version
     \U version
     \G version: print version string
 

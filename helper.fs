@@ -143,7 +143,7 @@ event: :>renat ( -- )  renat-all ;
     beacon( ." done renat" cr ) ;
 
 scope{ /chat
-: renat ( addr u -- ) renat-all nat ;
+: /renat ( addr u -- ) renat-all /nat ;
 }scope
 
 \ beacon handling

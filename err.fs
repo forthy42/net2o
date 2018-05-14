@@ -109,6 +109,7 @@ s" Token/Coin doesn't exist"     throwcode !!no-coin!!
 s" not a wallet"                 throwcode !!wallet!!
 s" no group name"                throwcode !!no-group-name!!
 s" no base85 digit"              throwcode !!no-85-digit!!
+s" Vault auth block error"       throwcode !!vault-auth!!
 
 next-exception !
 

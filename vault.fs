@@ -24,6 +24,9 @@ cmd-class class
     2field: v-data
     2field: v-sig
     value: v-mode \ crypto mode and key size
+    value: v/blk2 \ block size power of two
+    defer: v-chunk-out \ write a chunk out
+    defer: v-chunk-in  \ slurp a chunk in
 end-class vault-class
 
 : >vault ( -- o:vault ) \ push a vault object
@@ -60,15 +63,16 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     vk# +LOOP  0 >crypt ;
 +net2o: vault-file ( $:content -- ) c-state @ 3 <> !!no-tmpkey!!
     \g this is the actual content of the vault
+    \g if blockwise, there may be multiple parts
     v-mode>crypt2
     no-key state# >crypt-source  v-key state# >crypt-key
     vkey( ." vkey filex: " v-key state# 85type forth:cr )
-    $> 2dup c:decrypt v-data 2!  c:diffuse
-    c:key@ v-kstate c:key# move
+    $> 2dup c:decrypt v-data 2!
     0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     \g the signature of the vault, using the keyed hash over the file
     vkey( ." vkey sigx: " v-key state# 85type forth:cr )
+    c:diffuse  c:key@ v-kstate c:key# move
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
@@ -77,7 +81,14 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     sigpksize# - IF  p@+ drop 64>n negate v-data +!  ELSE  drop  THEN
     0 >crypt 8 c-state or! ;
 +net2o: vault-crypt ( n -- ) \g set encryption mode and key wrap size
-    64>n to v-mode ;
+    c-state @ 1 u> !!inv-order!!  64>n to v-mode ;
++net2o: vault-auth ( $:auth -- )
+    \g block authentication, 64 byte block
+    c-state @ 7 <> !!no-data!!
+    $> v-kstate c:key> v-kstate $40 str= 0= !!vault-auth!!
+    v-chunk-out \ write a chunk out
+    4 c-state xor! ; \ step back to allow fault-file
+
 
 vault-table $save
 ' context-table is gen-table
