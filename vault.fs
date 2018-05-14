@@ -68,11 +68,12 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     no-key state# >crypt-source  v-key state# >crypt-key
     vkey( ." vkey filex: " v-key state# 85type forth:cr )
     $> 2dup c:decrypt v-data 2!
+    c:diffuse \ one extra diffusion round
     0 >crypt  4 c-state or! ; \ keep for signature
 +net2o: vault-sig ( $:sig -- ) c-state @ 7 <> !!no-data!!
     \g the signature of the vault, using the keyed hash over the file
     vkey( ." vkey sigx: " v-key state# 85type forth:cr )
-    c:diffuse  c:key@ v-kstate c:key# move
+    c:key@ v-kstate c:key# move
     $> v-key state# decrypt$ 0= !!no-decrypt!!
     v-mode>crypt2
     v-kstate c:key@ c:key# move
@@ -85,6 +86,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
 +net2o: vault-auth ( $:auth -- )
     \g block authentication, 64 byte block
     c-state @ 7 <> !!no-data!!
+    \ otherwise would expose some data
     $> v-kstate c:key> v-kstate $40 str= 0= !!vault-auth!!
     v-chunk-out \ write a chunk out
     4 c-state xor! ; \ step back to allow fault-file
