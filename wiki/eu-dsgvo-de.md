@@ -1,5 +1,7 @@
 # Datenschutzerklärung #
 
+[english](eu-dsgvo.md)
+
 Wir freuen uns sehr über Ihr Interesse an unserem Unternehmen. Datenschutz hat
 einen besonders hohen Stellenwert für die Geschäftsleitung der net2o secure
 communication. Eine Nutzung der Internetseiten der net2o secure communication

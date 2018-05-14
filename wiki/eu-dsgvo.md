@@ -1,5 +1,7 @@
 # Privacy Policy #
 
+[Deutsch](eu-dsgvo-de.md)
+
 We are very delighted that you have shown interest in our enterprise. Data
 protection is of a particularly high priority for the management of the net2o
 secure communication. The use of the Internet pages of the net2o secure

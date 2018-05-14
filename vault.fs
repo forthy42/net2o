@@ -25,9 +25,10 @@ cmd-class class
     2field: v-sig
     value: v-mode \ crypto mode and key size
     value: v/blk2 \ block size power of two
-    defer: v-chunk-out \ write a chunk out
-    defer: v-chunk-in  \ slurp a chunk in
 end-class vault-class
+
+Defer write-decrypt
+Defer read-encrypt
 
 : >vault ( -- o:vault ) \ push a vault object
     vault-class new n:>o vault-table @ token-table !
@@ -88,7 +89,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     c-state @ 7 <> !!no-data!!
     \ otherwise would expose some data
     $> v-kstate c:key> v-kstate $40 str= 0= !!vault-auth!!
-    v-chunk-out \ write a chunk out
+    write-decrypt \ write a chunk out
     4 c-state xor! ; \ step back to allow fault-file
 
 
@@ -160,12 +161,13 @@ enc-keccak
 : encrypt-file ( filename u key-list -- )
     >r enc-filename $! vfile-in r> encfile-rest ;
 
-Defer write-decrypt
-: write-1file ( addr u -- )
+: ?enc-fd ( -- fd )
+    enc-fd @ dup IF  EXIT  THEN
     enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
     IF  enc-filename dup $@len 4 - 4 $del  THEN
-    enc-filename $@ w/o create-file throw >r
-    r@ write-file throw r> forth:close-file throw ;
+    enc-filename $@ w/o create-file throw  dup enc-fd ! ;
+
+: write-1file ( addr u -- ) ?enc-fd write-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
 vault>file
 : vault>out ['] forth:type is write-decrypt ;
@@ -185,7 +187,8 @@ vault>file
     THEN dispose n:o> r> to last# ;
 
 : decrypt-file ( filename u -- )
-    decrypt@ write-decrypt enc-file $free ;
+    decrypt@ write-decrypt enc-file $free
+    enc-fd @ ?dup-IF  close-file throw  THEN ;
 previous
 
 0 [IF]

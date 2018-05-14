@@ -402,6 +402,7 @@ object class
     \ vault variables
     cell            uvar enc-filename
     cell            uvar enc-file
+    cell            uvar enc-fd
     cell            uvar enc-padding
     cell            uvar key-list
     \ mapping buffers
