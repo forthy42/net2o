@@ -39,4 +39,4 @@ jederzeit gelöscht werden.
 Ich verwende keine Tracker wie Google Analytics. Sollte jemand doch
 einen finden, ist das ein Bug, der formlos gemeldet werden kann.
 
-[EU-DSGVO (en)](eu-dsgvo.md) [EU-DSGVO (de)](eu-dsgvo-de.md)
+[EU-DSGVO (en)](eu-gdpr.md) [EU-DSGVO (de)](eu-dsgvo.md)
