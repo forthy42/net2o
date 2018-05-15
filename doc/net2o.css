@@ -172,6 +172,7 @@ pre.verbatim, blockquote pre {
 }
 
 blockquote pre {
+    display: block;
     border: 1px #000 dashed;
     border-radius: 4px;
     background-color: #f1f8e9;
