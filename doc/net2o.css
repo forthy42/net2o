@@ -164,22 +164,19 @@ div.footer a:hover { background-color: white; color: #558195; }
 
 /* <verbatim> blocks */
 pre.verbatim, blockquote pre {
-  font-family: Dejavu Sans Mono, Monaco, Lucida Console, monospace;
-  background-color: #f1f8e9;
-  padding: 0.5em;
-  white-space: pre-wrap;
-  font-size: 1.2em;
+    display: block;
+    font-family: Dejavu Sans Mono, Monaco, Lucida Console, monospace;
+    padding: 4px 4px;
+    border-radius: 4px;
+    background-color: #f1f8e9;
+    padding: 0.5em;
+    white-space: pre-wrap;
+    font-size: 1.2em;
 }
 
 blockquote pre {
     display: block;
     border: 1px #000 dashed;
-    border-radius: 4px;
-    background-color: #f1f8e9;
-}
-
-code {
-    padding: 4px 4px;
     border-radius: 4px;
     background-color: #f1f8e9;
 }
