@@ -93,14 +93,25 @@ end-class cmd-buf-c
 : .black85 ( addr u -- )
     <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
+$20 constant maxstr#
+
+: $.maxstr ( addr u xt -- ) >r
+    dup maxstr# 2* u> IF
+	2dup maxstr# umin r@ execute
+	." [..$" dup maxstr# 2* - 0 u.r ." ..]"
+	dup maxstr# - /string r@ execute
+    THEN
+    r> execute ;
+
 0 warnings !@ \ $. could be mistaken as double 0
 in net2o : $. ( addr u -- )
     2dup printable? IF
-	.\" \"" type
+	.\" \"" ['] type $.maxstr
     ELSE
-	.\" 85\" " 85type
+	.\" 85\" " ['] 85type $.maxstr
     THEN  '"' emit ;
 warnings !
+
 : n2o.string ( $:string -- )  cr $> net2o:$. ."  $, " ;
 : n2o.secstring ( $:string -- ) attr @ >r
     cr $> .\" 85\" " .black85 r> attr! .\" \" sec$, " ;

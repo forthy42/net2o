@@ -347,8 +347,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     8 !!>=order? $> msg:action ;
 +net2o: msg-payment ( $:contract -- ) \g payment transaction
     8 !!>=order? $> msg:payment ;
-+net2o: msg-otrify ( $:date+sig -- ) \g turn a past message into OTR
-    $> msg:otrify ;
++net2o: msg-otrify ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR
+    $> $> msg:otrify ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     8 !!>=order? $> msg:coord ;
 
@@ -362,26 +362,34 @@ msg-table $save
 
 Defer .log-num
 Defer .log-date
+Defer .log-end
 
 scope: logstyles
 : +num [: '#' emit log# u. ;] is .log-num ;
 : -num ['] noop is .log-num ;
 : +date [: .ticks space ;] is .log-date ;
 : -date ['] 64drop is .log-date ;
+: +end [: .ticks space ;] is .log-end ;
+: -end ['] 64drop is .log-end ;
 
-+date -num
++date -num -end
 }scope
 
 :noname ( addr u -- )
-    2dup key| to msg:id$
-    .log-num 2dup startdate@ .log-date 2dup .key-id
-    ['] .simple-id $tmp notify-nick! ; msg-class to msg:start
+    last# >r  2dup key| to msg:id$
+    .log-num
+    2dup startdate@ .log-date
+    2dup enddate@ .log-end
+    2dup .key-id
+    ['] .simple-id $tmp notify-nick!
+    r> to last# ; msg-class to msg:start
 :noname ( addr u -- ) $utf8>
     space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
-:noname ( addr u -- )
+:noname ( addr u -- ) last# >r
     key| 2dup pk@ key| str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
-    ."  @" .key-id <default> ; msg-class to msg:signal
+    ."  @" .key-id <default>
+    r> to last# ; msg-class to msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
     2dup sighash? IF  <info>  ELSE  <err>  THEN
@@ -403,11 +411,30 @@ msg-class to msg:object
     space <warn> forth:type <default> ; msg-class to msg:action
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
-:noname ( addr u -- )
-    2dup key| msg:id$ str= IF
-	2dup startdate@ date>i ." OTRify #" u. forth:cr
-    ELSE
-	." Invalid attempt to otrify a message" forth:cr
+: replace-sig { addrsig usig addrmsg umsg -- }
+    \ !!dummy!! need to verify signature!
+    addrsig usig addrmsg umsg usig - [: type type ;] $tmp
+    2dup pk-sig? !!sig!! 2drop addrmsg umsg smove ;
+: new-otrsig ( addr u -- addrsig usig )
+    2dup startdate@ old>otr
+    c:0key sigpksize# - c:hash ['] .sig $tmp 1 64s /string ;
+
+:noname { sig u' addr u -- }
+    u' 64'+ u =  u sigsize# = and IF
+	last# >r last# $@ ?msg-log
+	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
+	U+DO
+	    I last# cell+ $[]@
+	    2dup dup sigpksize# - /string key| msg:id$ str= IF
+		dup u - /string addr u str= IF
+		    ." OTRify #" I u.
+		    sig u' I last# cell+ $[]@ replace-sig
+		THEN
+	    ELSE
+		2drop
+	    THEN
+	LOOP
+	r> to last#
     THEN ; msg-class to msg:otrify
 : .otr-info ( -- )
     <info> ."  [otr]" <default> " [otr]" notify+ notify-otr? on ;
@@ -1246,11 +1273,13 @@ also net2o-base scope: /chat
     \G otrify: turn an older message of yours into an OTR message
     s>unumber? IF  drop >r  ELSE  2drop  EXIT  THEN
     msg-group$ $@ ?msg-log last# cell+ $@ r> cells safe/string
-    IF  $@  + sigpksize# - sigpksize#
+    IF  $@ 2dup + sigpksize# - sigpksize#
 	over keysize pkc over str= IF
-	    [: $, msg-otrify ;] (send-otr-avalanche) drop 2drop
+	    keysize /string 2swap new-otrsig 2swap
+	    [: $, $, msg-otrify ;] (send-otr-avalanche) drop
+	    .otr-chat
 	ELSE
-	    2drop ." not your message!" forth:cr
+	    2drop 2drop ." not your message!" forth:cr
 	THEN
     THEN ;
 }scope

@@ -250,8 +250,8 @@ Sema id-sema
 
 +net2o: sign-invite ( $:signature -- ) \g send you a signature
     $> sigpksize# <> !!unsigned!!
-    c:0key mynick$ sigsize# - c:hash pk-sig?
-    IF  ke-sigs[] $+[]!  ELSE  2drop  THEN
+    c:0key mynick$ sigsize# - c:hash pk-sig? \ 0 is valid signature
+    0= IF  ke-sigs[] $+[]!  ELSE  2drop  THEN
     \ !!FIXME!! qr scan done, do something about it
 ;
 +net2o: request-qr-invitation ( -- )
