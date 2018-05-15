@@ -172,7 +172,9 @@ pre.verbatim, blockquote pre {
 }
 
 blockquote pre {
-  border: 1px #000 dashed;
+    border: 1px #000 dashed;
+    border-raduis: 4px;
+    background-color: #f1f8e9;
 }
 
 /* The label/value pairs on (for example) the ci page */
