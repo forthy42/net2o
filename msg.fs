@@ -57,6 +57,17 @@ Sema msglog-sema
 : msg-log@ ( last# -- addr u )
     [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
+: cleanup-log ( -- )
+    [: last# cell+ { a[] }
+	0  BEGIN  dup a[] $[]# u<  WHILE
+		dup a[] $[]@ check-date nip nip IF
+		    dup a[] $[] $free
+		    a[] over cells cell $del
+		ELSE
+		    1+
+		THEN
+	REPEAT  drop ;] msglog-sema c-section ;
+
 : serialize-log ( addr u -- $addr )
     [: bounds ?DO
 	    I $@ check-date 0= IF  net2o-base:$, net2o-base:nestsig
@@ -371,8 +382,8 @@ Defer .log-end
     <err> ." [exp] " <default> 1 notify-otr? ! ;
 : .otr ( tick -- )
     64dup 64#-1 64= IF  64drop  EXIT  THEN
-    ticks 64- 64dup 64-0< IF  64drop .otr-err  EXIT  THEN
-    otrsig-delta# 64< IF  .otr-info  THEN ;
+    ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
+    otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
 
 scope: logstyles
 : +num [: '#' emit log# u. ;] is .log-num ;
@@ -1253,7 +1264,8 @@ also net2o-base scope: /chat
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
-    msg-group$ $@ ?msg-log last# $@ r>  display-lastn ;
+    msg-group$ $@ ?msg-log cleanup-log
+    last# $@ r>  display-lastn ;
 
 : /logstyle ( addr u -- )
     \U logstyle [+-style]   set log style
