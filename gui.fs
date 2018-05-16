@@ -116,8 +116,8 @@ tex: net2o-logo
 [ELSE]
     $88FF00FF Value dark-blue#
     $FF0040FF Value pw-num-col#
-    $400000FF Value pw-bg-col#
-    $804000FF Value pw-text-col#
+    $330000FF Value pw-bg-col#
+    $cc6600FF Value pw-text-col#
     $00FF0020 Value chbs-col#
     $000020FF Value login-bg-col#
     $FFFFFFFF Value show-sign-color#
@@ -135,11 +135,11 @@ tex: net2o-logo
 	    glue-sleft }}glue
 	    {{
 		\large \sans "🔐" }}text
-		pw-num-col# to x-color s" " }}text
+		\large pw-num-col# to x-color s" " }}text
 		25%b dup to pw-num /center
 	    }}z
 	    {{
-		glue*l pw-bg-col# 4e }}frame dup .button3
+		glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
 		\mono \normal
 		{{ chbs-col# to x-color "Correct Horse Battery Staple" }}text 25%b
 		glue*l }}h
@@ -444,10 +444,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    {{
 		{{
-		    glue*lll }}glue \ glue on top
-		}}v box[] dup to msgs-box
-	    tex: vp-chats vp-chats nearest glue*lll ' vp-chats }}vp vp[]
-	dup font-size# 66% f* fdup vslider }}h box[]
+		    {{
+			glue*lll }}glue \ glue on top
+		    }}v box[] dup to msgs-box
+		tex: vp-chats vp-chats nearest glue*lll ' vp-chats }}vp vp[]
+		dup font-size# 66% f* fdup vslider
+	    over >r }}h box[] r> font-size# 66% f* fdup hslider
+	}}v box[]
 	{{
 	    {{ glue*lll $FFFFFFFF 4e }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup value chat-edit glue*l }}glue
