@@ -444,11 +444,12 @@ msg-class to msg:object
     u' 64'+ u =  u sigsize# = and IF
 	last# >r last# $@ ?msg-log
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
+	2dup = IF  ."  [otrified] "  THEN
 	U+DO
 	    I last# cell+ $[]@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
-		    ." OTRify #" I u.
+		    ."  OTRify #" I u.
 		    sig u' I last# cell+ $[]@ replace-sig
 		    \ !!Schedule message saving!!
 		THEN
