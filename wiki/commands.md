@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.6.5-20180510.
+Version 0.6.6-20180517.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -338,10 +338,13 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   vault keys can be opened with the dhe secret; each key is IV+session key+checksum
 + $22 vault-file ( $:content -- )
   this is the actual content of the vault
+  if blockwise, there may be multiple parts
 + $23 vault-sig ( $:sig -- )
   the signature of the vault, using the keyed hash over the file
 + $24 vault-crypt ( n -- )
   set encryption mode and key wrap size
++ $25 vault-auth ( $:auth -- )
+  block authentication, 64 byte block
 
 ### message commands ###
 
@@ -365,17 +368,19 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   specify action string
 + $29 msg-payment ( $:contract -- )
   payment transaction
++ $2A msg-otrify ( $:date+sig $:newdate+sig -- )
+  turn a past message into OTR
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
 ### group description commands ###
 + $20 group-name ( $:name -- )
   group symbolic name
 + $21 group-id ( $:group -- )
-  group id
+  group id, is a pubkey
 + $22 group-member ( $:memberkey -- )
   add member key
 + $23 group-admin ( $:adminkey -- )
-  add admin key
+  set admin key
 + $24 group-perms ( 64u -- )
   permission/modes bitmask
 
@@ -393,8 +398,6 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   rewire distribution tree
 + $25 msg-last? ( start end n -- )
 + $26 msg-last ( $:[tick0,msgs,..tickn] n -- )
-+ $27 msg-otr ( -- )
-  this message is otr, don't save it
 + $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
 
