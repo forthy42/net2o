@@ -25,11 +25,11 @@ Forward pk-peek? ( addr u0 -- flag )
 
 : >group ( addr u -- )  msg-groups ?hash ;
 
-: avalanche-msg ( msg u1 otr-flag o:connect -- )
+: avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
-    { d: msg otr-flag }
+    { d: msg }
     last# cell+ $@ dup IF
-	bounds ?DO  I @ o <> IF  msg otr-flag I @ .avalanche-to  THEN
+	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
 	cell +LOOP
     ELSE  2drop  THEN ;
 
@@ -59,7 +59,8 @@ Sema msglog-sema
 
 : serialize-log ( addr u -- $addr )
     [: bounds ?DO
-	  I $@ net2o-base:$, net2o-base:nestsig
+	    I $@ check-date 0= IF  net2o-base:$, net2o-base:nestsig
+	    ELSE   2drop  THEN
       cell +LOOP ;]
     gen-cmd ;
 
@@ -216,7 +217,7 @@ User peer-buf
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
     addr-connect o> ;
 
-event: :>avalanche ( addr u otr-flag o group -- )
+event: :>avalanche ( addr u o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
 event: :>chat-reconnect ( $chat o group -- )
@@ -287,11 +288,11 @@ event: :>msg-nestsig ( $addr o group -- )
 Forward msg:last?
 Forward msg:last
 
-: push-msg ( addr u otr-flag o:parent -- )
+: push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    >r <event >r e$, r> elit, o elit, last# elit,
+	    <event >r e$, o elit, last# elit,
 	    :>avalanche r> event>
 	ELSE  drop 2drop  THEN
     THEN ;
@@ -364,13 +365,22 @@ Defer .log-num
 Defer .log-date
 Defer .log-end
 
+: .otr-info ( -- )
+    <info> ." [otr] " <default> "[otr] " notify+ notify-otr? on ;
+: .otr-err ( -- )
+    <err> ." [exp] " <default> 1 notify-otr? ! ;
+: .otr ( tick -- )
+    64dup 64#-1 64= IF  64drop  EXIT  THEN
+    ticks 64- 64dup 64-0< IF  64drop .otr-err  EXIT  THEN
+    otrsig-delta# 64< IF  .otr-info  THEN ;
+
 scope: logstyles
 : +num [: '#' emit log# u. ;] is .log-num ;
 : -num ['] noop is .log-num ;
 : +date [: .ticks space ;] is .log-date ;
 : -date ['] 64drop is .log-date ;
-: +end [: .ticks space ;] is .log-end ;
-: -end ['] 64drop is .log-end ;
+: +end [: 64dup .ticks space .otr ;] is .log-end ;
+: -end ['] .otr is .log-end ;
 
 +date -num -end
 }scope
@@ -429,6 +439,7 @@ msg-class to msg:object
 		dup u - /string addr u str= IF
 		    ." OTRify #" I u.
 		    sig u' I last# cell+ $[]@ replace-sig
+		    \ !!Schedule message saving!!
 		THEN
 	    ELSE
 		2drop
@@ -436,16 +447,8 @@ msg-class to msg:object
 	LOOP
 	r> to last#
     THEN ; msg-class to msg:otrify
-: .otr-info ( -- )
-    <info> ."  [otr]" <default> " [otr]" notify+ notify-otr? on ;
 
 :noname ( -- )
-    parent ?dup-IF
-	.msging-context @ dup IF  .otr-shot @  THEN
-    ELSE
-	otr-mode @
-    THEN
-    IF  .otr-info  ELSE  notify-otr? off  THEN
     forth:cr ; msg-class to msg:end
 
 \g
@@ -554,7 +557,7 @@ scope{ net2o-base
 
 $34 net2o: msg ( -- o:msg ) \g push a message object
     perm-mask @ perm%msg and 0= !!msg-perm!!
-    ?msg-context n:>o c-state off  otr-shot off  0 to last# ;
+    ?msg-context n:>o c-state off  0 to last# ;
 
 msging-table >table
 
@@ -577,8 +580,6 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
-+net2o: msg-otr ( -- ) \g this message is otr, don't save it
-    otr-shot on ;
 
 : ?pkgroup ( addr u -- addr u )
     \ if no group has been selected, use the pubkey as group
@@ -586,11 +587,11 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
-	?pkgroup otr-shot @ IF  >otr-log  ELSE  >msg-log  THEN
+	?pkgroup >msg-log
 	2dup d0<> \ do something if it is new
 	IF  replay-mode @ 0= IF
 		2dup show-msg
-		2dup otr-shot @ parent .push-msg
+		2dup parent .push-msg
 	    THEN
 	THEN  2drop
     ELSE  replay-mode @ IF  drop 2drop
@@ -799,7 +800,10 @@ event: :>msg-eval ( parent $pack $addr -- )
     msg-group$ $@ group, msg sign[ msg-start ;
 : msg> ( -- )
     \G end a msg block by adding a signature
-    now>never ]pksign ;
+    otr-mode @ IF  now>otr  ELSE  now>never  THEN ]pksign ;
+: msg-otr> ( -- )
+    \G end a msg block by adding a short-time signature
+    now>otr ]pksign ;
 : msg-log, ( -- addr u )
     last-signed 2@ >msg-log ;
 : otr-log, ( -- addr u )
@@ -835,16 +839,16 @@ also net2o-base
     last-signdate@ 64#1 64+ lit, 64#-1 lit, ask-last# ulit, msg-last? ;
 
 : join, ( -- )
-    [: msg-otr msg-join sync-ahead?,
-      sign[ msg-start "joined" $, msg-action msg> ;] [msg,] ;
+    [: msg-join sync-ahead?,
+      sign[ msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
 
 : silent-join, ( -- )
-    last# $@ dup IF  msg msg-otr $, msg-join  end-with
+    last# $@ dup IF  msg $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
-    [: msg-otr msg-leave
-      sign[ msg-start "left" $, msg-action msg> ;] [msg,] ;
+    [: msg-leave
+      sign[ msg-start "left" $, msg-action msg-otr> ;] [msg,] ;
 
 : left, ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
@@ -870,13 +874,9 @@ previous
 	0 .execute false
     THEN ;
 : .chat ( addr u -- )
-    [: last# >r o IF  otr-shot off 2dup do-msg-nestsig
+    [: last# >r o IF  2dup do-msg-nestsig
       ELSE  2dup display-one-msg  THEN  r> to last#
-      false 0 .avalanche-msg ;] [group] drop notify- ;
-: .otr-chat ( addr u -- )
-    [: last# >r o IF  otr-shot on 2dup do-msg-nestsig
-      ELSE  2dup display-one-msg  THEN  r> to last#
-      true 0 .avalanche-msg ;] [group] drop notify- ;
+      0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only
 
@@ -1021,14 +1021,9 @@ also net2o-base
 : (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
-: (send-otr-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: msg-otr sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
-      +last-signed otr-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )      (send-avalanche)
     >r .chat r> 0= IF  .nobody  THEN ;
-: send-otr-avalanche ( xt -- )  (send-otr-avalanche)
-    >r .otr-chat r> 0= IF  .nobody  THEN ;
 
 \ chat helper words
 
@@ -1276,8 +1271,9 @@ also net2o-base scope: /chat
     IF  $@ 2dup + sigpksize# - sigpksize#
 	over keysize pkc over str= IF
 	    keysize /string 2swap new-otrsig 2swap
-	    [: $, $, msg-otrify ;] (send-otr-avalanche) drop
-	    .otr-chat
+	    true otr-mode [:
+		[: $, $, msg-otrify ;] (send-avalanche) drop ;] !wrapper
+	    .chat
 	ELSE
 	    2drop 2drop ." not your message!" forth:cr
 	THEN
@@ -1303,8 +1299,7 @@ also net2o-base scope: /chat
 	    UNTIL  THEN  THEN  r> to last# ;
 
 : avalanche-text ( addr u -- ) >utf8$
-    [: signal-list, $, msg-text ;]
-    otr-mode @ IF  send-otr-avalanche  ELSE  send-avalanche  THEN ;
+    [: signal-list, $, msg-text ;] send-avalanche ;
 
 previous
 
@@ -1326,7 +1321,8 @@ previous
 	    pubkey $@ key>nick type ." : "
 	    ack@ .timeouts @ . <default> cr )
 	    msg-group$ $@len IF
-		pubkey $@ ['] left, send-otr-avalanche
+		true otr-mode
+		[: pubkey $@ ['] left, send-avalanche ;] !wrapper
 	    THEN
 	    net2o:dispose-context
 	    EXIT
@@ -1435,8 +1431,7 @@ also net2o-base
 
 : send-reconnects ( group o:connection -- )  o to connection
     net2o-code expect-msg
-    [: msg-otr
-      dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
+    [: dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
       sign[ msg-start "left" $, msg-action msg> ;] [msg,]
     end-code| ;
 
@@ -1497,10 +1492,10 @@ scope{ /chat
     REPEAT  2drop leave-chats  xchar-history
     nr> set-order ;
 
-: avalanche-to ( addr u otr-flag o:context -- )
+: avalanche-to ( addr u o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
     o to connection
-    net2o-code expect-msg msg IF msg-otr THEN
+    net2o-code expect-msg msg
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with
     end-code ;

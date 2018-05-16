@@ -131,7 +131,6 @@ end-class ack-class
 cmd-class class
     field: peers[]
     field: silent-last#
-    field: otr-shot
 end-class msging-class
 
 cmd-class class

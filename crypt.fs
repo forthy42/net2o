@@ -484,11 +484,11 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 
 #10.000.000.000 d>64 64Value otrsig-delta# \ OTR: live for 10s, then die
 
-: now>never ( -- )  ticks sigdate le-64! 64#-1 sigdate 64'+ le-64! ;
-: forever ( -- )  64#0 sigdate le-64! 64#-1 sigdate 64'+ le-64! ;
-: now+delta ( delta64 -- )  ticks 64dup sigdate le-64! 64+ sigdate 64'+ le-64! ;
-: old>otr ( oldtime -- ) sigdate le-64!
-    ticks otrsig-delta# 64+ sigdate 64'+ le-64! ;
+: now>never ( -- )          ticks 64#-1 sigdate le-128! ;
+: forever ( -- )            64#0 64#-1 sigdate le-128! ;
+: now+delta ( delta64 -- )  ticks 64tuck 64+ sigdate le-128! ;
+: old>otr ( oldtime -- )    ticks otrsig-delta# 64+ sigdate le-128! ;
+: now>otr ( -- )            otrsig-delta# now+delta ;
 
 e? max-xchar $100 < [IF]
     : .check ( flag -- ) 'x' 'v' rot select xemit ;

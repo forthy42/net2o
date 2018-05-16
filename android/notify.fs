@@ -26,6 +26,7 @@ jvalue nf
 jvalue notification-manager
 
 : notify@ ( -- addr u )
+    notify-otr? @ 0> IF  "expired message"  EXIT  THEN
     config:notify-text# @ IF
 	notify-otr? @ config:notify-text# @ 0> and IF
 	    "<i>[otr] message</i>"
