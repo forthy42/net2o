@@ -455,7 +455,8 @@ event: :>search-key ( $addr -- )
     { w^ key } key $@ dht-nick? key $free
     1 keysearchs# +!@ drop ;
 
-: .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default> ;
+: .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default>
+    [ 1 import#untrusted lshift ]L to last-ki ;
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
     IF  drop keysearchs# @ 1+ >r
