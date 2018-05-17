@@ -57,7 +57,7 @@ Sema msglog-sema
 : msg-log@ ( last# -- addr u )
     [: cell+ $@ save-mem ;] msglog-sema c-section ;
 
-: cleanup-log ( -- )
+: purge-log ( -- )
     [: last# cell+ { a[] }
 	0  BEGIN  dup a[] $[]# u<  WHILE
 		dup a[] $[]@ check-date nip nip IF
@@ -655,7 +655,7 @@ User hashtmp$  hashtmp$ off
     \G last one, which may contain less (rounding down).
     \G Each interval contains a 64 bit hash of the last 64 bit of
     \G each message within the interval
-    last# >r >r last# $@ ?msg-log
+    last# >r >r last# $@ ?msg-log purge-log
     last# cell+ $[]#
     IF
 	date>i' >r date>i' r> swap
@@ -1265,7 +1265,7 @@ also net2o-base scope: /chat
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
-    msg-group$ $@ ?msg-log cleanup-log
+    msg-group$ $@ ?msg-log purge-log
     last# $@ r>  display-lastn ;
 
 : /logstyle ( addr u -- )

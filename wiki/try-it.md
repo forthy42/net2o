@@ -37,6 +37,13 @@ exported with the keygen command into a <nick>.n2o file.  You can
 import that in your other id(s) with
 
     keyin <nick>.n2o
+	
+Or you can announce your identity to the DHT with
+
+    announce
+
+and then import the key into other accounts by doing a ```keysearch```
+as above (but with the first 5 characters of the pubkey you created).
 
 Try encrypt and decrypt a test file for yourself:
 
