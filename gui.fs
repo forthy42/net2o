@@ -257,8 +257,7 @@ $00FFFFFF ,
 : group[] ( box group -- box )
     [: data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ .groups:id$
-	gui-msgs chat-frame to top-widget refresh-top
-	msgs-box >o resized vp-top o> ;] swap click[] ;
+	gui-msgs chat-frame to top-widget refresh-top ;] swap click[] ;
 
 : show-group ( last# -- )
     dup { g -- } cell+ $@ drop cell+ >o
@@ -373,7 +372,8 @@ Variable last-bubble-pk
 		    fdup to border fnegate fdup to borderl to borderv
 		ELSE  to borderl  THEN o o> dup to msg-vbox
 	    }}z
-	    glue*ll }}glue me? IF  swap rot  THEN
+	    glue*ll }}glue
+	    me? IF  swap rot  THEN
 	}}h msgs-box .child+
     THEN
 ; wmsg-class to msg:start
@@ -421,6 +421,7 @@ wmsg-o >o msg-table @ token-table ! o>
 #512 Value gui-msgs# \ display last 300 messages
 
 : gui-msgs ( gaddr u -- )
+    glue*lll }}glue msgs-box .child+
     2dup >load-group ?msg-log
     last# msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
@@ -428,7 +429,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    <err> ." invalid entry" <default> cr 2drop
 	THEN
     cell +LOOP
-    log free throw  msgs-box .resized ;
+    log free throw  msgs-box >o resized vp-bottom o> ;
 
 {{ $80FFFFFF pres-frame
     {{
@@ -443,10 +444,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    {{
 		{{
-		    {{
-			glue*lll }}glue \ glue on top
-		    }}v box[] dup to msgs-box
 		tex: vp-chats vp-chats nearest glue*lll ' vp-chats }}vp vp[]
+		dup to msgs-box
 		dup font-size# 66% f* fdup vslider
 	    over >r }}h box[] r> font-size# 66% f* fdup hslider
 	}}v box[]
