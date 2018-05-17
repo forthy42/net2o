@@ -380,19 +380,19 @@ Variable last-bubble-pk
 :noname ( -- )
 ; wmsg-class to msg:end
 :noname { d: string -- o }
-    link-blue \mono string [: '#' emit type ;] $tmp }}text 25%b blackish \sans
+    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text 25%b blackish \sans
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
-    blackish string }}text 25%b
+    blackish string ['] utf8-sanitize $tmp }}text 25%b
     msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
-    \italic string }}text 25%b \regular msg-box .child+
+    \italic string ['] utf8-sanitize $tmp }}text 25%b \regular msg-box .child+
 ; wmsg-class to msg:action
 :noname { d: string -- o }
     {{
-	glue*l $FFccccFF slide-frame dup .button1
+	glue*l $FFCCCCFF slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z msg-box .child+
 ; wmsg-class to msg:coord
@@ -400,7 +400,7 @@ Variable last-bubble-pk
     {{
 	pk key| 2dup 0 .pk@ key| str= my-signal# other-signal# rot select
 	glue*l swap slide-frame dup .button1 >r
-	[: '@' emit .key-id ;] $tmp }}text 25%b r> swap
+	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
     }}z msg-box .child+
 ; wmsg-class to msg:signal
 :noname ( addr u -- )

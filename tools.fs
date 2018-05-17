@@ -318,6 +318,16 @@ false Value hash-sanitize?
 : hash-sanitize ( addr u -- addr' u' )
     hash-sanitize? IF  fn-sanitize  THEN ;
 
+\ utf8 sanitizer
+
+: utf8-sanitize ( addr u -- )
+    bounds ?DO
+	I ['] xc@+ catch IF
+	    '�' xemit
+	    drop  I I' over - x-size
+	ELSE  xemit I -  THEN
+    +LOOP ;
+
 \ config stuff
 
 require config.fs
