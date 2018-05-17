@@ -106,9 +106,9 @@ $20 constant maxstr#
 0 warnings !@ \ $. could be mistaken as double 0
 in net2o : $. ( addr u -- )
     2dup printable? IF
-	.\" \"" ['] type $.maxstr
+	.\" \"" type \ $.maxstr
     ELSE
-	.\" 85\" " ['] 85type $.maxstr
+	.\" 85\" " 85type \ $.maxstr
     THEN  '"' emit ;
 warnings !
 
