@@ -56,14 +56,14 @@ glue new Constant glue-sright
 
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
-    2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e -sync ELSE +sync THEN
+    2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e ELSE +sync +config THEN
     $FF swap .fade fdrop ;
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
     font-size# f2/ f* font-size# f2/ fover f-
     glue-sleft  >o 0g fdup hglue-c glue! o>
-    glue-sright >o 0g fdup hglue-c glue! o> +sync drop ;
+    glue-sright >o 0g fdup hglue-c glue! o> +sync +config drop ;
 
 0e 0 shake-lr
 
@@ -311,7 +311,7 @@ $00FFFFFF ,
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
-	    tex: vp-nicks vp-nicks nearest glue*lll ' vp-nicks }}vp vp[] dup value peers-box
+	    tex: vp-nicks vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
 	    $444444FF to slider-color
 	    $CCCCCCFF to slider-fgcolor
 	    font-size# 33% f* to slider-border
@@ -440,7 +440,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-#64 #1024 * Value gui-msgs# \ display last 300 messages
+#512 Value gui-msgs# \ display last 300 messages
 
 : gui-msgs ( gaddr u -- )
     -1 to last-day
@@ -469,7 +469,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    {{
 		{{
-		tex: vp-chats vp-chats nearest glue*lll ' vp-chats }}vp vp[]
+		tex: vp-chats vp-chats glue*lll ' vp-chats }}vp vp[]
 		dup to msgs-box
 		dup font-size# 66% f* fdup vslider
 	    over >r }}h box[] r> font-size# 66% f* fdup hslider
