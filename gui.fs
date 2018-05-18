@@ -99,6 +99,7 @@ forward gui-msgs
 
 : 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;
 : 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
+: 25%bv ( o -- o ) >o font-size# 25% f* fdup to border fnegate to borderv o o> ;
 : 40%b ( o -- o ) >o font-size# 40% f* to border o o> ;
 
 \ password frame
@@ -335,10 +336,30 @@ $4444CCFF color: link-blue
 $44CC44FF color: re-green
 $CC4444FF color: obj-red
 $BBDDDDFF color: msg-bg
+$33883366 Value day-color#
+$88333366 Value hour-color#
 
 Variable last-bubble-pk
 0 Value last-bubble
 
+: add-dtms ( ticks -- )
+    \small
+    1n fm* >day { day } day last-day <> IF
+	{{
+	    glue*l day-color# slide-frame dup .button1
+	    \bold day ['] .day $tmp }}text 25%b \regular
+	}}z /center msgs-box .child+
+    THEN  day to last-day
+    24 fm* fsplit { hour } hour last-hour <>
+    60 fm* fsplit { minute } minute 10 / last-minute 10 / <> or
+    IF
+	{{
+	    glue*l hour-color# slide-frame dup .button1
+	    60 fm* fsplit minute hour
+	    [: .## ':' emit .## ':' emit .## 'Z' emit ;] $tmp }}text 25%b
+	}}z /center msgs-box .child+
+    THEN  hour to last-hour  minute to last-minute
+    fdrop \normal ;
 :noname { d: pk -- o }
     pk key| pkc over str= { me? }
     pk key| last-bubble-pk $@ str= IF
@@ -346,6 +367,7 @@ Variable last-bubble-pk
 	{{ r> glue*l }}glue }}h >bl
 	msg-vbox .child+
     ELSE
+	pk startdate@ add-dtms
 	pk key| last-bubble-pk $!
 	{{
 	    {{ glue*l }}glue
@@ -380,15 +402,15 @@ Variable last-bubble-pk
 :noname ( -- )
 ; wmsg-class to msg:end
 :noname { d: string -- o }
-    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text 25%b blackish \sans
+    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text 25%bv blackish \sans
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
-    blackish string ['] utf8-sanitize $tmp }}text 25%b
+    blackish string ['] utf8-sanitize $tmp }}text 25%bv
     msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
-    \italic string ['] utf8-sanitize $tmp }}text 25%b \regular msg-box .child+
+    \italic dark-blue string ['] utf8-sanitize $tmp }}text 25%bv \regular blackish msg-box .child+
 ; wmsg-class to msg:action
 :noname { d: string -- o }
     {{
@@ -399,7 +421,7 @@ Variable last-bubble-pk
 :noname { d: pk -- o }
     {{
 	pk key| 2dup 0 .pk@ key| str= my-signal# other-signal# rot select
-	glue*l swap slide-frame dup .button1 >r
+	glue*l swap slide-frame dup .button1 40%b >r
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
     }}z msg-box .child+
 ; wmsg-class to msg:signal
@@ -418,9 +440,12 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-#512 Value gui-msgs# \ display last 300 messages
+#64 #1024 * Value gui-msgs# \ display last 300 messages
 
 : gui-msgs ( gaddr u -- )
+    -1 to last-day
+    -1 to last-hour
+    -1 to last-minute
     glue*lll }}glue msgs-box .child+
     2dup >load-group ?msg-log
     last# msg-log@ 2dup { log u }

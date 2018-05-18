@@ -95,14 +95,14 @@ glue ' new static-a with-allocater Constant glue-right
 	dup 1- swap !slides  EXIT
     THEN
     1e fswap f-
-    fade!slides 1- sin-t anim!slides +sync ;
+    fade!slides 1- sin-t anim!slides +sync +config ;
 
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
 	dup 1+ swap !slides  EXIT
     THEN
-    1+ fade!slides sin-t anim!slides +sync ;
+    1+ fade!slides sin-t anim!slides +sync +config ;
 
 1e FValue slide-time%
 

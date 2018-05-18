@@ -324,9 +324,10 @@ false Value hash-sanitize?
     bounds ?DO
 	I ['] xc@+ catch IF
 	    '�' xemit
-	    drop  I I' over - x-size
+	    drop  I I' over -
+	    ['] x-size catch IF  2drop  1  THEN
 	ELSE  xemit I -  THEN
-    +LOOP ;
+    +LOOP  nothrow ;
 
 \ config stuff
 
@@ -461,7 +462,7 @@ $40 Constant #splitminute
 : reset-time ( -- )
     -1 to last-day  -1 to last-hour  -1 to last-minute ;
 : today? ( day -- flag )
-    ticks 64>f 1e-9 f* 86400e f/ floor f>s = ;
+    ticks 64>f 1e-9 f* 86400 fm/ floor f>s = ;
 
 : .ns ( r -- )  1e-9 f*
     fdup 1e-6 f< IF  1e9 f* 10 0 0 f.rdp ." ns"  EXIT  THEN
@@ -470,29 +471,29 @@ $40 Constant #splitminute
     10 6 0 f.rdp 's' emit ;
 
 : >day ( seconds -- fraction day )
-    86400e f/ fsplit ;
-: .day ( seconds -- fraction/day )
+    86400 fm/ fsplit ;
+: .day ( day -- )
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
 : .timeofday ( fraction/day -- )
-    24e f* fsplit
+    24 fm* fsplit
     date? #splithour and IF
 	dup last-hour <> IF  ." ==== " dup .## ." Z ====" cr  THEN  to last-hour
     ELSE  .##  THEN
-    datehms? 2 < IF  fdrop  ELSE  60e f* fsplit
+    datehms? 2 < IF  fdrop  ELSE  60 fm* fsplit
     date? #splitminute and IF
 	dup last-minute <> IF  ." === :" dup .## ." m ===" cr  THEN  to last-minute
 	ELSE  ':' emit .##  THEN
 	datehms? 3 < IF  fdrop  ELSE  ':' emit
-	    60e f* datehms? 4 < IF  f>s .##
+	    60 fm* datehms? 4 < IF  f>s .##
 	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
 		datehms? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
 	THEN  THEN  date? #splithour and 0= IF  'Z' emit  THEN ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
-    fsplit 0 .r  $B0 ( '°' ) xemit  60e f*
-    fsplit .##   ''' xemit  60e f*
-    fsplit .##   '.' xemit 100e f*
+    fsplit 0 .r  $B0 ( '°' ) xemit  60 fm*
+    fsplit .##   ''' xemit  60 fm*
+    fsplit .##   '.' xemit 100 fm*
     f>s .##      '"' xemit ;
 : .never ( -- )
     datehms? 1 > IF ." never" ELSE 'n' emit THEN ;
