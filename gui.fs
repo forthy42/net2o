@@ -117,7 +117,7 @@ tex: net2o-logo
 [ELSE]
     $88FF00FF Value dark-blue#
     $FF0040FF Value pw-num-col#
-    $330000FF Value pw-bg-col#
+    $550000FF Value pw-bg-col#
     $cc6600FF Value pw-text-col#
     $00FF0020 Value chbs-col#
     $000020FF Value login-bg-col#

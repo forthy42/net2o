@@ -12,6 +12,9 @@ Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert
 
 Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
 
+Tickets können anonym erstellt werden und händisch auf Anfrage wieder gelöscht
+werden. Geben Sie keine privaten Informationen in das Ticket-System ein!
+
 IP-Adressen werden auf 3 Bytes (IPv4) bzw. 5 Bytes (IPv6) verkürzt im Log
 gespeichert. Die Logs werden nach 12 Wochen endgültig gelöscht.
 

@@ -923,6 +923,12 @@ edit-terminal edit-out !
 : !wrapper ( val addr xt -- .. ) { addr xt -- .. }
     addr !@ >r xt catch r> addr ! throw ;
 
+\ evaluate in
+
+: evaluate-in ( addr u voc-addr -- )
+    get-order n>r >body 1 set-order ['] evaluate catch
+    nr> set-order throw ;
+
 \ blocking event, also available in most recent Gforth
 
 [IFUNDEF] event|

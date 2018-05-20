@@ -1060,6 +1060,23 @@ Variable chat-keys
 : nicks>chat ( -- )
     ['] nick>chat arg-loop ;
 
+\ do otrify
+
+also net2o-base
+
+: do-otrify ( n -- ) >r
+    msg-group$ $@ ?msg-log last# cell+ $@ r> cells safe/string
+    IF  $@ 2dup + sigpksize# - sigpksize#
+	over keysize pkc over str= IF
+	    keysize /string 2swap new-otrsig 2swap
+	    $, $, msg-otrify
+	ELSE
+	    2drop 2drop ." not your message!" forth:cr
+	THEN
+    THEN ;
+
+previous
+
 \ debugging aids for classes
 
 : .ack ( o:ack -- o:ack )
@@ -1230,8 +1247,7 @@ also net2o-base scope: /chat
 : /notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G notify: Change notificaton settings
-    get-order n>r ['] notify-cmds >body 1 set-order
-    ['] evaluate catch nr> set-order throw .notify ;
+    ['] notify-cmds evaluate-in .notify ;
 
 : /beacons ( addr u -- )
     \U beacons              list beacons
@@ -1273,24 +1289,17 @@ also net2o-base scope: /chat
     \G logstyle: set log styles, the following settings exist:
     \G logstyle: +date      a date per log line
     \G logstyle: +num       a message number per log line
-    get-order n>r ['] logstyles >body 1 set-order
-    ['] evaluate catch nr> set-order throw ;
+    ['] logstyles evaluate-in ;
 
-: /otrify ( -- )
-    \U otrify #line         otrify message
+: /otrify ( addr u -- )
+    \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
-    s>unumber? IF  drop >r  ELSE  2drop  EXIT  THEN
-    msg-group$ $@ ?msg-log last# cell+ $@ r> cells safe/string
-    IF  $@ 2dup + sigpksize# - sigpksize#
-	over keysize pkc over str= IF
-	    keysize /string 2swap new-otrsig 2swap
-	    true otr-mode [:
-		[: $, $, msg-otrify ;] (send-avalanche) drop ;] !wrapper
-	    .chat
-	ELSE
-	    2drop 2drop ." not your message!" forth:cr
-	THEN
-    THEN ;
+    true otr-mode [:
+	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
+			drop do-otrify  2r>  REPEAT THEN
+	    2drop 2r> 2drop
+	;] (send-avalanche) drop .chat
+    ;] !wrapper ;
 }scope
 
 : ?slash ( addr u -- addr u flag )
@@ -1350,7 +1359,7 @@ $B $E 2Value chat-bufs#
     +resend-msg +flow-control ;
 
 : chat#-connect ( addr u buf1 buf2 --- )
-    pk-connect connection >o rdrop +chat-control  greet +group ;
+    pk-connect connection >o rdrop +chat-control  +group greet ;
 
 : chat-connect ( addr u -- )
     chat-bufs# chat#-connect ;
@@ -1403,7 +1412,7 @@ $B $E 2Value chat-bufs#
 : chat-connects ( -- )
     chat-keys [: key>group ?load-msgn
       dup 0= IF  2drop msg-group$ $@ >group  EXIT  THEN
-      2dup search-connect ?dup-IF  .+group 2drop EXIT  THEN
+      2dup search-connect ?dup-IF  >o +group greet o> 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
 : ?wait-chat ( -- ) #0. /chat:/chats

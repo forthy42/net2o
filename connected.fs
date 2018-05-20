@@ -475,7 +475,7 @@ previous
 	dest-replies
 	dest-size addr>replies bounds endwith U+DO
 	    I action-of reply-xt IF
-		timeout( ." resend: " I action-of reply-xt .name forth:cr )
+		timeout( ." resend: " I action-of reply-xt .name I 2@ net2o:see forth:cr )
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ net2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!

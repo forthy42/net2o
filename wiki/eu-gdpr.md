@@ -12,6 +12,9 @@ All data retained on this site are stored in Germany.
 
 If you log into Fossil, you'll get a cookie set, otherwise not.
 
+Tickets can be created anonymously and deleted by hand upon request. Never
+enter any personal data into the ticket system!
+
 IP addresses are shorted to 3 bytes (IPv4) resp. 5 bytes (IPv6) before stored
 in the log.  The logs are deleted after 12 weeks.
 
