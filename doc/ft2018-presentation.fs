@@ -92,7 +92,7 @@ glue ' new static-a with-allocater Constant glue-right
 : prev-anim ( n r0..1 -- )
     dup 0<= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1- swap !slides  EXIT
+	dup 1- swap !slides +sync +config  EXIT
     THEN
     1e fswap f-
     fade!slides 1- sin-t anim!slides +sync +config ;
@@ -100,7 +100,7 @@ glue ' new static-a with-allocater Constant glue-right
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1+ swap !slides  EXIT
+	dup 1+ swap !slides +sync +config  EXIT
     THEN
     1+ fade!slides sin-t anim!slides +sync +config ;
 

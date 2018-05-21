@@ -18,6 +18,13 @@ enter any personal data into the ticket system!
 IP addresses are shorted to 3 bytes (IPv4) resp. 5 bytes (IPv6) before stored
 in the log.  The logs are deleted after 12 weeks.
 
+Received e-mails with useful contents will be (as usual) stored permanently.
+E-mail is a store&forward protocol, i.e. all relays in the path will store the
+e-mail at least temporarily.  We therefore strongly recommend encrypting your
+mails.  We don't respond to e-mails with this GDPR explanation, as From:
+addresses in e-mails still are spoofed in Spam, and the innocent person
+mentioned there shouldn't suffer from being spammed with our GDPR document.
+
 ## Welcome ##
 
 We are very delighted that you have shown interest in our enterprise. Data
