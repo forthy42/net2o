@@ -163,10 +163,6 @@ $FFFFFFFF ,
     sig-params ed-sign
     date>qr-key qr:keysig# .qr-rest ;
 
-[IFUNDEF] mslinux
-    require qrscan.fs
-[THEN]
-
 0 [IF]
 Local Variables:
 forth-local-words:

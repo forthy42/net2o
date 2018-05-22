@@ -443,6 +443,11 @@ previous
 
 previous
 
+:noname ( -- )
+    ?get-me init-client
+    ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
+    scan-qr ; is run-scan-qr
+
 0 [IF]
 Local Variables:
 forth-local-words:

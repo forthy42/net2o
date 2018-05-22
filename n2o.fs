@@ -145,7 +145,14 @@ scope{ n2o
     THEN ;
 
 Defer run-gui
-:noname ." gui not implemented yet" cr ; is run-gui
+:noname ." gui not implemented" cr ; is run-gui
+Defer run-scan-qr
+:noname ." scan-qur not implemented" cr ; is run-scan-qr
+
+Variable gui.fs$
+"gui.fs" open-fpath-file throw rot close-file throw gui.fs$ $!
+Variable qrscan.fs$
+"qrscan.fs" open-fpath-file throw rot close-file throw qrscan.fs$ $!
 
 scope{ n2o
 
@@ -180,13 +187,9 @@ scope{ n2o
 : keyscan ( -- )
     \U keyscan|scankey|scanqr|qrscan
     \G keyscan: scan a key in color QR form
-    ?get-me init-client
-    ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
-[IFDEF] scan-qr
-    scan-qr
-[ELSE]
-    ." I'm sorry, no scanner implemented yet." cr
-[THEN] ;
+    ?.net2o-config
+    reset-net2o-cmds
+    qrscan.fs$ $@ required run-scan-qr ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
@@ -710,9 +713,6 @@ warnings !
     \G rng: check rng and give a 32 byte random value
     ?check-rng $20 rng$ 85type cr
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
-
-Variable gui.fs$
-"gui.fs" open-fpath-file throw rot close-file throw gui.fs$ $!
 
 : gui ( -- )
     \U gui
