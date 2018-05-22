@@ -384,6 +384,8 @@ Defer .log-end
     64dup 64#-1 64= IF  64drop  EXIT  THEN
     ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
     otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
+: .group ( addr u -- )
+    2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 scope: logstyles
 : +num [: '#' emit log# u. ;] is .log-num ;
@@ -405,7 +407,7 @@ scope: logstyles
     ['] .simple-id $tmp notify-nick!
     r> to last# ; msg-class to msg:start
 :noname ( addr u -- ) $utf8>
-    space <warn> '#' forth:emit forth:type <default> ; msg-class to msg:tag
+    space <warn> '#' forth:emit .group <default> ; msg-class to msg:tag
 :noname ( addr u -- ) last# >r
     key| 2dup pk@ key| str=
     IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
@@ -680,7 +682,8 @@ msgfs-class +file-classes
     state-addr >o  msgfs-class# fs-class! w/o fs-create o> ;
 : .chat-file ( addr u -- )
     over le-64@ .ticks 1 64s /string  ." ->"
-    over le-64@ .ticks 1 64s /string  ." @" forth:type ;
+    over le-64@ .ticks 1 64s /string  ." @"
+    .group ;
 in net2o : copy-msg ( filename u -- )
     ." copy msg: " 2dup .chat-file forth:cr
     [: msgfs-class# ulit, file-type 2dup $, r/o ulit, open-sized-file
@@ -1087,9 +1090,6 @@ previous
     ." Connected with: " .con-id cr
     ack-context @ ?dup-IF  ..ack  THEN ;
 
-: .group ( addr -- )
-    $@ 2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
-
 : .notify ( -- )
     ." notify " config:notify?# ?
     ." led " config:notify-rgb# @ hex. config:notify-on# ? config:notify-off# ?
@@ -1182,7 +1182,7 @@ also net2o-base scope: /chat
 : /peers ( addr u -- ) 2drop
     \U peers                list peers
     \G peers: list peers in all groups
-    msg-groups [: dup .group ." : "
+    msg-groups [: dup $@ .group ." : "
       cell+ $@ bounds ?DO
 	  space I @ >o .con-id space
 	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
@@ -1215,7 +1215,7 @@ also net2o-base scope: /chat
     \G chats: list all chats
     msg-groups [: >r
       r@ $@ msg-group$ $@ str= IF ." *" THEN
-      r@ .group
+      r@ $@ .group
       ." [" r@ cell+ $@len cell/ 0 .r ." ]#"
       r@ $@ msg-logs #@ nip cell/ u. rdrop ;] #map
     ." =====" forth:cr ;
@@ -1225,7 +1225,7 @@ also net2o-base scope: /chat
     \G nat: list nat traversal information of all peers in all groups
     \U renat                redo NAT traversal
     \G renat: redo nat traversal
-    msg-groups [: dup ." ===== Group: " .group ."  =====" forth:cr
+    msg-groups [: dup ." ===== Group: " $@ .group ."  =====" forth:cr
       cell+ $@ bounds ?DO
 	  ." --- " I @ >o .con-id ." : " return-address .addr-path
 	  ."  ---" forth:cr .nat-addrs o>
