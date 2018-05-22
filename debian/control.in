@@ -9,10 +9,20 @@ Package: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Architecture: all
 Depends: gforth (>= @GFDEBVER@), @PACKAGE_NAME@-libcc
-Recommends: gpsd, libgps-dev
+Recommends: gpsd, libgps-dev, @PACKAGE_NAME@-gui
 Description: @PACKAGE_NAME@ protocol stack
  net2o reinvents the Internet.  Applications include file copy, chat, DHT;
  others will follow.
+
+Package: @PACKAGE_NAME@-gui
+Version: @PACKAGE_VERSION@
+Architecture: all
+Depends: gforth-minos2 (>= @GFDEBVER@), @PACKAGE_NAME@, fonts-emoji
+Description: @PACKAGE_NAME@ protocol stack
+ net2o reinvents the Internet.  Applications include file copy, chat, DHT;
+ others will follow.
+ .
+ This package is optional and contains GUI and other parts that use OpenGL.
 
 Package: @PACKAGE_NAME@-tests
 Version: @PACKAGE_VERSION@
