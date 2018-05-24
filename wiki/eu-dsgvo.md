@@ -19,13 +19,18 @@ IP-Adressen werden auf 3 Bytes (IPv4) bzw. 5 Bytes (IPv6) verkürzt im Log
 gespeichert. Die Logs werden nach 12 Wochen endgültig gelöscht.
 
 Ankommende E-Mails mit sinnvollem Inhalt werden (wie üblich) dauerhaft
-gespeichert. E-Mail ist ein Store&Forward-Protokoll, d.h. auch alle Relays
-dazwischen speichern die E-Mail zumindest temporär. Es wird deshalb stark
-empfohlen, E-Mail verschlüsselt zu schicken. Wir senden keine
-Datenschutzbelehrung an die Absender ankommender E-Mails, weil Absender gerade
-in Spam-Mails immer noch gefälscht werden, und der unschuldige als Absender
-eingetragene nicht auch noch mit unserer Datenschutzbelehrung zugespammt
-werden soll.
+gespeichert, und zwar alle Informationen, die in der E-Mail drin sind. Wir
+gehen davon aus, dass der Absender durch das Absenden uns das Recht dazu
+gibt. E-Mail ist ein Store&Forward-Protokoll, d.h. auch alle Relays dazwischen
+speichern die E-Mail zumindest temporär. Nein, wir delegieren E-Mail-Empfang
+an keine dritte Partei, aber der E-Mail-Server des Senders kann dies tun. Es
+wird auf jeden Fall stark empfohlen, E-Mail verschlüsselt (z.B. mit PGP) zu
+schicken.
+
+Wir senden keine Datenschutzbelehrung an die Absender ankommender E-Mails,
+weil Absender gerade in Spam-Mails immer noch gefälscht werden, und der
+unschuldige als Absender eingetragene nicht auch noch mit unserer
+Datenschutzbelehrung zugespammt werden soll.
 
 ## Willkommen ##
 
