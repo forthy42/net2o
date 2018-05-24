@@ -149,10 +149,10 @@ Defer run-gui
 Defer run-scan-qr
 :noname ." scan-qur not implemented" cr ; is run-scan-qr
 
-Variable gui.fs$
-"gui.fs" open-fpath-file throw rot close-file throw gui.fs$ $!
-Variable qrscan.fs$
-"qrscan.fs" open-fpath-file throw rot close-file throw qrscan.fs$ $!
+$Variable gui.fs$
+"gui.fs" open-fpath-file 0= [IF] rot close-file throw gui.fs$ $! [THEN]
+$Variable qrscan.fs$
+"qrscan.fs" open-fpath-file 0= [IF] rot close-file throw qrscan.fs$ $! [THEN]
 
 scope{ n2o
 
@@ -189,7 +189,7 @@ scope{ n2o
     \G keyscan: scan a key in color QR form
     ?.net2o-config
     reset-net2o-cmds
-    qrscan.fs$ $@ required run-scan-qr ;
+    qrscan.fs$ $@ dup IF  required  ELSE  -#514 throw  THEN  run-scan-qr ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
@@ -719,7 +719,7 @@ warnings !
     \G gui: start net2o's graphical user interface
     ?.net2o-config
     reset-net2o-cmds
-    gui.fs$ $@ required run-gui ;
+    gui.fs$ $@ dup IF  required  ELSE  -#514 throw  THEN  run-gui ;
 }scope
 
 \ use a different history file for net2o

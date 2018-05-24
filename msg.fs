@@ -115,7 +115,7 @@ Variable saved-msg$
     replay-mode off  skip-sig? off  enc-file $free ;
 
 : >load-group ( group u -- )
-    2dup msg-logs #@ d0= IF  2dup load-msg  THEN >group ;
+    2dup msg-logs #@ d0= IF  load-msg  ELSE  >group  THEN ;
 
 event: :>save-msgs ( last# -- ) saved-msg$ +unique$ ;
 event: :>save-all-msgs ( -- )
