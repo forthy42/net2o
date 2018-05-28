@@ -628,7 +628,7 @@ to top-widget
 also opengl
 
 : !widgets ( -- ) top-widget .htop-resize
-    .3e ambient% sf! set-uniforms ;
+    1e ambient% sf! set-uniforms ;
 
 previous
 

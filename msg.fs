@@ -114,12 +114,16 @@ Variable saved-msg$
     ELSE  msg-eval  THEN
     replay-mode off  skip-sig? off  enc-file $free ;
 
-: >load-group ( group u -- )
-    2dup msg-logs #@ d0= IF  load-msg  ELSE  >group  THEN ;
-
 event: :>save-msgs ( last# -- ) saved-msg$ +unique$ ;
 event: :>save-all-msgs ( -- )
     save-all-msgs ;
+event: :>load-msg ( last# -- )
+    $@ load-msg ;
+
+: >load-group ( group u -- )
+    2dup msg-logs #@ d0= >r >group r>
+    IF  <event last# elit, :>load-msg
+	parent .wait-task @ event>  THEN ;
 
 : !save-all-msgs ( -- )  file-task 0= ?EXIT
     <event :>save-all-msgs file-task event| ;
@@ -580,7 +584,6 @@ reply-table $@ inherit-table msging-table
 $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group ;
 +net2o: msg-join ( $:group -- ) \g join a chat group
-    replay-mode @ IF  $> 2drop  EXIT  THEN
     $> >load-group parent >o
     +unique-con +chat-control
     wait-task @ ?dup-IF  <hide>  THEN
