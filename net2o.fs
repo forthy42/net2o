@@ -1256,14 +1256,15 @@ event: :>close-all ( o -- )
 
 : create-file-task ( -- )
     ['] event-loop' 1 net2o-task to file-task ;
+: ?file-task ( -- file-task )
+    file-task 0= IF  create-file-task  THEN
+    file-task ;
 in net2o : save& ( -- )
-    file-task 0= IF  create-file-task  THEN
     data-rmap .mapc:dest-tail elit,
-    o elit, :>save file-task event> ;
+    o elit, :>save ?file-task event> ;
 in net2o : save&done ( -- )
-    file-task 0= IF  create-file-task  THEN
     data-rmap .mapc:dest-tail elit,
-    o elit, :>save&done file-task event| ;
+    o elit, :>save&done ?file-task event| ;
 
 \ schedule delayed events
 
@@ -1838,10 +1839,12 @@ Variable initialized
 
 Variable cookies
 
+cookie-size# buffer: tmp-cookie
+
 : add-cookie ( -- cookie64 )
-    [: ticks 64dup o
-	{ 64^ cookie-adder cookie-o }
-	cookie-adder cookie-size#  cookies $+! ;]
+    [: ticks 64dup [ tmp-cookie .cc-timeout ]L 64!
+	o [ tmp-cookie .cc-context ]L !
+	tmp-cookie cookie-size#  cookies $+! ;]
     resize-sema c-section ;
 
 : do-?cookie ( cookie -- context true / false )
@@ -1849,8 +1852,9 @@ Variable cookies
     cookies $@ bounds ?DO
 	64dup I .cc-timeout 64@ 64= IF \ if we have a hit, use that
 	    64drop I .cc-context @
+	    I .cc-secret [ tmp-cookie .cc-secret ]L KEYBYTES move
 	    cookies I cookie-size# del$one drop
-	    unloop  true  EXIT
+	    unloop  dup IF  true  THEN  EXIT
 	THEN
 	I .cc-timeout 64@ timeout 64u< IF
 	    cookies I cookie-size# del$one

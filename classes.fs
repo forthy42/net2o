@@ -322,6 +322,7 @@ end-class address-class
 object class
     64field: cc-timeout
     field: cc-context
+    KEYBYTES +field cc-secret
 end-class con-cookie
 
 con-cookie >osize @ Constant cookie-size#

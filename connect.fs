@@ -42,6 +42,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 	ELSE \ just check if timeout didn't expire
 	    cookie( ." ticker " forth:cr )
 	    64dup context-ticker 64!
+	    [ tmp-cookie .cc-secret ]L KEYBYTES do-keypad sec!
 	    ticker 64@ 64swap 64- connect-timeout# 64< ?EXIT
 	    <err> ." cookie: no context, un-cmd" <default> forth:cr
 	THEN
@@ -103,20 +104,26 @@ in net2o : create-map
     addrd min-size ucode lshift n>64 64+ lit, udata ulit, new-data
     addrd ucode udata addrs ;
 
+: cookie, ( -- )  add-cookie lit, set-cookie ;
+: #request, ( -- )  ulit, request-done ;
+: request, ( -- )  next-request #request, ;
+
 +net2o: store-key ( $:string -- ) $> \g store key
-    own-crypt? IF
+    own-crypt? IF  true !!deprecated!!
 	key( ." store key: o=" o hex. 2dup .nnb forth:cr )
 	2dup do-keypad sec!
 	o IF  crypto-key sec!  ELSE  2drop  THEN
     ELSE  2drop un-cmd  THEN ;
 
+: sec-cookie, ( -- )  ?new-mykey
+    keypad [ tmp-cookie .cc-secret ]L keysize move
+    0 >o cookie, o> stskc KEYSIZE erase ;
+
 +net2o: map-request ( addrs ucode udata -- ) \g request mapping
     2*64>n
-    nest[
-    ?new-mykey  ticker 64@ lit, set-cookie
+    nest[ sec-cookie,
     max-data# umin swap max-code# umin swap
     net2o:new-map net2o:create-map
-    keypad keysize sec$, store-key  stskc KEYSIZE erase
     ]nest  net2o:create-map
     64drop 2drop 64drop ;
 
@@ -148,11 +155,7 @@ net2o-base
 +net2o: addr-key! ( $:string -- ) \g set key for reply
     $> dup ?keysize lastaddr# cell+ $! ;
 
-: cookie, ( xtd xtto -- )  add-cookie lit, set-cookie ;
-: #request, ( -- )  ulit, request-done ;
-: request, ( -- )  next-request #request, ;
 : 0key, ( -- ) my-0key sec@ sec$, addr-key! ;
-
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
     my-addr$ [: -sig nat( ticks .ticks ."  gen punch: " 2dup .addr$ forth:cr ) $, punch ;] $[]map ;
 
@@ -258,7 +261,7 @@ Sema id-sema
     \g ask for an invitation as second stage of invitation handshake
     own-crypt? IF  qr-invite-me  THEN ;
 +net2o: tmp-secret, ( -- )
-    nest[ ?new-mykey keypad keysize sec$, store-key  stskc KEYSIZE erase ]nest ;
+    nest[ sec-cookie, ]nest ;
 +net2o: qr-challenge ( $:challenge $:respose -- )
     $> $> c:0key qr-key $8 >keyed-hash qr-hash $40 c:hash@
     qr-hash over $10 umax str= dup invit:qr# and ulit, <invite-result>

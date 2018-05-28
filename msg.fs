@@ -123,14 +123,14 @@ event: :>load-msg ( last# -- )
 : >load-group ( group u -- )
     2dup msg-logs #@ d0= >r >group r>
     IF  <event last# elit, :>load-msg
-	parent .wait-task @ event>  THEN ;
+	parent .wait-task @
+	dup 0= IF  drop ?file-task  THEN  event>  THEN ;
 
-: !save-all-msgs ( -- )  file-task 0= ?EXIT
-    <event :>save-all-msgs file-task event| ;
+: !save-all-msgs ( -- )
+    <event :>save-all-msgs ?file-task event| ;
 
 : save-msgs& ( -- )
-    file-task 0= IF  create-file-task  THEN
-    <event last# elit, :>save-msgs file-task event> ;
+    <event last# elit, :>save-msgs ?file-task event> ;
 
 : ?msg-log ( addr u -- )  msg-logs ?hash ;
 
