@@ -8,9 +8,13 @@ Tatsächliche Speicherung auf dieser Web-Site:
 
 ### Angaben gemäß § 13 TMG ###
 
-Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert
+Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert.
 
 Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
+
+Diese Site nutzt HSTS und HPKP, womit Informationen über die TLS-Fähigkeit und
+den verwendeten Public Key in Ihrem Browser gespeichert werden, um Sie vor
+Man-in-the-Middle-Attacken zu bewahren.
 
 Tickets können anonym erstellt werden und händisch auf Anfrage wieder gelöscht
 werden. Geben Sie keine privaten Informationen in das Ticket-System ein!
