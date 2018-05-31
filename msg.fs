@@ -450,7 +450,7 @@ msg-class to msg:object
     u' 64'+ u =  u sigsize# = and IF
 	last# >r last# $@ ?msg-log
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
-	2dup = IF  ."  [otrified] "  THEN
+	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
 	    I last# cell+ $[]@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
@@ -458,6 +458,8 @@ msg-class to msg:object
 		    ."  OTRify #" I u.
 		    sig u' I last# cell+ $[]@ replace-sig
 		    \ !!Schedule message saving!!
+		ELSE
+		    ."  [OTRified] #" I u.
 		THEN
 	    ELSE
 		2drop
@@ -948,6 +950,7 @@ Variable $lastline
     clear-line find-prev-chatline
     edit-update false ;
 : chat-next-line  ( max span addr pos1 -- max span addr pos2 false )
+    line-date 64@ 64#-1 64= IF  false  EXIT  THEN
     clear-line find-next-chatline
     edit-update false ;
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
@@ -975,8 +978,10 @@ chat-terminal edit-out !
     
     ' chat-ekeys is ekeys
     
-    ' chat-next-line k-down ebindkey
-    ' chat-prev-line k-up   ebindkey
+    ' chat-next-line k-down  ebindkey
+    ' chat-prev-line k-up    ebindkey
+    ' chat-next-line k-next  ebindkey
+    ' chat-prev-line k-prior ebindkey
 [THEN]
 
 edit-terminal edit-out !

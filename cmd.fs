@@ -703,7 +703,7 @@ previous
 	IF    tmp-crypt-val do-nest
 	ELSE
 	    <err> ." tmpnest failed, uncmd" <default> forth:cr
-	    2drop un-cmd  THEN
+	    net2o:see-me 2drop un-cmd  THEN
     ELSE  2drop 2drop un-cmd  THEN ;
 : cmdencnest ( addr u -- )
     $>align tmpkey@ dup IF

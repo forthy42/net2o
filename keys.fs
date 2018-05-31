@@ -196,8 +196,7 @@ Variable sim-nick!
 : .nick-base ( o:key -- )
     ke-nick $.  ke-nick# @ .# ;
 : .pet-base ( o:key -- )
-    0 ke-pets[] [: 2 pick IF space THEN type
-      dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
+    0 ke-pets[] [: space type dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
 : .pet0-base ( o:key -- )
     ke-pets[] $[]# IF  0 ke-pets[] $[]@ type 0 ke-pets# $[] @ .#
     ELSE  .nick-base  THEN ;
@@ -641,9 +640,8 @@ $11 net2o: privkey ( $:string -- )
     $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
-    config:pw-level# @ 0< IF  new-pet? IF
-	    ke-pets[] $+[]! pet!  EXIT
-	THEN
+    new-pet? IF
+	ke-pets[] $+[]! pet!  EXIT
     THEN  2drop ;
 +net2o: walletkey ( $:seed -- ) !!unsigned?  $>
     ke-wallet sec! ;
