@@ -238,6 +238,15 @@ allen gängigen Internetbrowsern möglich. Deaktiviert die betroffene Person die
 Setzung von Cookies in dem genutzten Internetbrowser, sind unter Umständen
 nicht alle Funktionen unserer Internetseite vollumfänglich nutzbar.
 
+## 3a. HSTS & HPKP ##
+
+Wir weisen Ihren Browser beim Besuch unserer Webseiten an, sich zu merken,
+dass diese Webseiten nur verschlüsselt erreichbar sind, und mit welchem
+Schlüssel dies geschieht. Diese Information speichert ihr Browser und wird bei
+einem späteren Zugriff nicht mehr versuchen, eine unverschlüsselte Verbindung
+herzustellen. Zur Löschung dieser Information konsultieren Sie bitte die
+Anleitung Ihres Browsers.
+
 ## 4. Erfassung von allgemeinen Daten und Informationen ##
 
 Die Internetseite der net2o secure communication erfasst mit jedem Aufruf der

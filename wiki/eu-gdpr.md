@@ -214,6 +214,14 @@ programs. This is possible in all popular Internet browsers. If the data
 subject deactivates the setting of cookies in the Internet browser used, not
 all functions of our website may be entirely usable.
 
+## 3a. HSTS & HPKP ##
+
+We advise your browser when visiting this site to memorize that this site is
+only reachable encrypted, and to memorize the key used for the
+encryption. This information is stored by your browser and it will not try
+later to open an unencrypted information. To delete this information please
+consult the manual of your browser.
+
 ## 4. Collection of general data and information ##
 
 The website of the net2o secure communication collects a series of general
