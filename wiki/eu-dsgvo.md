@@ -11,7 +11,7 @@ Tatsächliche Speicherung auf dieser Web-Site:
 Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert.  Das
 bedeutet, dass alle Zugriffe vom
 [BND](https://de.wikipedia.org/wiki/Bundesnachrichtendienst) mit
-[Xkeyscore](https://de.wikipedia.org/wiki/XKeyscore) am
+[XKeyscore](https://de.wikipedia.org/wiki/XKeyscore) am
 [DE-CIX](https://de.wikipedia.org/wiki/DE-CIX) abgegriffen und verarbeitet
 werden, und wenn sie einem
 [Selektor](https://de.wikipedia.org/wiki/Selektor_%28Geheimdienstabfrage%29)
@@ -20,13 +20,13 @@ beispielsweise der
 [NSA](https://de.wikipedia.org/wiki/National_Security_Agency) und dem
 [GCHQ](https://de.wikipedia.org/wiki/Government_Communications_Headquarters)
 geteilt.  Durch Verschlüsselung allen Datenverkehrs minimieren wir die
-Auswirkungen für Sie.
+Auswirkungen für Sie.  Dazu verwenden wir
+[HSTS](https://de.wikipedia.org/wiki/HTTP_Strict_Transport_Security) und
+[HPKP](https://de.wikipedia.org/wiki/HTTP_Public_Key_Pinning), um Ihrem
+Browser mitzuteilen, dass und mit welchem Schlüssel verschlüsselt wird.  Ihr
+Browser speichert diese Informationen, um Lauschangriffe abzuwenden.
 
 Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
-
-Diese Site nutzt HSTS und HPKP, womit Informationen über die TLS-Fähigkeit und
-den verwendeten Public Key in Ihrem Browser gespeichert werden, um Sie vor
-Man-in-the-Middle-Attacken zu bewahren.
 
 Tickets können anonym erstellt werden und händisch auf Anfrage wieder gelöscht
 werden. Geben Sie keine privaten Informationen in das Ticket-System ein!

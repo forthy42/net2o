@@ -16,7 +16,11 @@ with [XKeyscore](https://en.wikipedia.org/wiki/XKeyscore), and if they match a
 selector, will be stored and possibly shared with partners, for example
 [NSA](https://en.wikipedia.org/wiki/National_Security_Agency) or
 [GCHQ](https://en.wikipedia.org/wiki/Government_Communications_Headquarters).
-By encrypting all traffic, we minimize the impact for you.
+By encrypting all traffic, we minimize the impact for you.  Therefore we use
+[HSTS](https://de.wikipedia.org/wiki/HTTP_Strict_Transport_Security) and
+[HPKP](https://de.wikipedia.org/wiki/HTTP_Public_Key_Pinning), to tell your
+browser that we encrypt and which key we use.  Your browser stores this
+information for several months to prevent eavesdropping.
 
 If you log into Fossil, you'll get a cookie set, otherwise not.
 
