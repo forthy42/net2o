@@ -24,7 +24,8 @@ Auswirkungen für Sie.  Dazu verwenden wir
 [HSTS](https://de.wikipedia.org/wiki/HTTP_Strict_Transport_Security) und
 [HPKP](https://de.wikipedia.org/wiki/HTTP_Public_Key_Pinning), um Ihrem
 Browser mitzuteilen, dass und mit welchem Schlüssel verschlüsselt wird.  Ihr
-Browser speichert diese Informationen, um Lauschangriffe abzuwenden.
+Browser speichert diese Informationen für mehrere Monate, um Lauschangriffe
+abzuwenden.
 
 Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
 
