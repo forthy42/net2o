@@ -8,7 +8,9 @@ Actual data storage on this web site:
 
 ### Declaration according to § 13 TMG ###
 
-All data retained on this site are stored in Germany.
+All data retained on this site are stored in Germany.  This means that all
+accesses are processed by the BND with Xkeyscore.  By encrypting all traffic,
+we minimize the impact for you.
 
 If you log into Fossil, you'll get a cookie set, otherwise not.
 

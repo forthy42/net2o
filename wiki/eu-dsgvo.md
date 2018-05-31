@@ -8,7 +8,9 @@ Tatsächliche Speicherung auf dieser Web-Site:
 
 ### Angaben gemäß § 13 TMG ###
 
-Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert.
+Alle auf dieser Site erhobenen Daten werden in Deutschland gespeichert.  Das
+bedeutet, dass alle Zugriffe vom BND mit Xkeyscore verarbeitet werden.  Durch
+Verschlüsselung allen Datenverkehrs minimieren wir die Auswirkungen für Sie.
 
 Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
 
