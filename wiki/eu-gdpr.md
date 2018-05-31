@@ -24,10 +24,6 @@ information for several months to prevent eavesdropping.
 
 If you log into Fossil, you'll get a cookie set, otherwise not.
 
-This site uses HSTS and HPKP, which stores information about its TLS
-capability and used public key in your browser to protect you against a man in
-the middle attack.
-
 Tickets can be created anonymously and deleted by hand upon request. Never
 enter any personal data into the ticket system!
 
