@@ -583,6 +583,9 @@ Variable key-version
 : key-version$ "1" ;
 key-version$ evaluate Constant key-version#
 
+: new-pet? ( addr u -- addr u flag )
+    0 ke-pets[] [: rot >r 2over str= r> or ;] $[]map 0= ;
+
 scope{ net2o-base
 
 cmd-table $@ inherit-table key-entry-table
@@ -638,7 +641,10 @@ $11 net2o: privkey ( $:string -- )
     $> 2dup skrev swap key| move ke-pk $@ drop check-rev? 0= !!not-my-revsk!!
     pkrev keysize2 erase  ke-rsk sec! ;
 +net2o: keypet ( $:string -- )  !!unsigned?  $>
-    config:pw-level# @ 0< IF  ke-pets[] $+[]! pet!  ELSE  2drop  THEN ;
+    config:pw-level# @ 0< IF  new-pet? IF
+	    ke-pets[] $+[]! pet!  EXIT
+	THEN
+    THEN  2drop ;
 +net2o: walletkey ( $:seed -- ) !!unsigned?  $>
     ke-wallet sec! ;
 }scope

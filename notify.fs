@@ -78,7 +78,7 @@ Sema notify-sema
     : msg-builder ;
     [IFUNDEF] rendering
 	Variable rendering
-    [THEN]  -1 rendering !
+    [THEN]  -2 rendering !
     also also
 [THEN]
 

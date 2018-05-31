@@ -28,7 +28,7 @@ require minos2/font-style.fs
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
 : update-size# ( -- )
-    dpy-h @ s>f
+    screen-pwh nip s>f
     default-diag screen-diag f/ fsqrt default-scale f* 1/f 32 fm*
     f/ fround to font-size#
     font-size# 133% f* fround to baseline#
@@ -447,7 +447,7 @@ wmsg-o >o msg-table @ token-table ! o>
     -1 to last-hour
     -1 to last-minute
     glue*lll }}glue msgs-box .child+
-    2dup >load-group ?msg-log
+    2dup load-msg ?msg-log
     last# msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
 	I $@ ['] wmsg-display catch IF
