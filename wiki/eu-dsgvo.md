@@ -14,7 +14,7 @@ bedeutet, dass alle Zugriffe vom
 [Xkeyscore](https://de.wikipedia.org/wiki/XKeyscore) am
 [DE-CIX](https://de.wikipedia.org/wiki/DE-CIX) abgegriffen und verarbeitet
 werden, und wenn sie einem
-[Selektor](https://de.wikipedia.org/wiki/Selektor_(Geheimdienstabfrage))
+[Selektor](https://de.wikipedia.org/wiki/Selektor_%28Geheimdienstabfrage%29)
 entsprechen, werden sie gespeichert und womöglich mit Partnerdiensten wie
 beispielsweise der
 [NSA](https://de.wikipedia.org/wiki/National_Security_Agency) und dem
