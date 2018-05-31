@@ -9,8 +9,13 @@ Actual data storage on this web site:
 ### Declaration according to § 13 TMG ###
 
 All data retained on this site are stored in Germany.  This means that all
-accesses are processed by the BND with Xkeyscore, and if they match a
-selector, will be stored and possibly shared with partners like GCHQ and NSA.
+accesses are captured at [DE-CIX](https://en.wikipedia.org/wiki/DE-CIX) and
+processed by the
+[BND](https://en.wikipedia.org/wiki/Federal_Intelligence_Service_%28Germany%29)
+with [XKeyscore](https://en.wikipedia.org/wiki/XKeyscore), and if they match a
+selector, will be stored and possibly shared with partners, for example
+[NSA](https://en.wikipedia.org/wiki/National_Security_Agency) or
+[GCHQ](https://en.wikipedia.org/wiki/Government_Communications_Headquarters).
 By encrypting all traffic, we minimize the impact for you.
 
 If you log into Fossil, you'll get a cookie set, otherwise not.

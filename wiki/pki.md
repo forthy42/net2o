@@ -15,23 +15,22 @@ routing information of the packets she sees).
 Key Exchange
 -------------
 
-Now, how do Alice and Bob establish a shared secret? This is a
-crucial problem to cryptography, the key exchange. The
-English Wikipedia article tells you how they could do that: If Alice
-and Bob wish to exchange encrypted messages, each must be equipped to
-encrypt messages to be sent and decrypt messages received. The nature
-of the equipping they require depends on the encryption technique they
-might use. If they use a code, both will require a copy of the same
-codebook. If they use a cipher, they will need appropriate keys. If
-the cipher is a symmetric key cipher, both will need a copy of the
-same key. If an asymmetric key cipher with the public/private key
-property, both will need the other's public key. For the cases, where
-both parties need the same thing, they need a secure channel to
-exchange this. Now, if they already have a secure channel, they might
-as well exchange the message using this secure channel—the only
-advantage cryptography has then, is that the secure channel might be
-costly, or rarely available (e.g. a personal meeting is required to
-set up the system).
+Now, how do Alice and Bob establish a shared secret? This is a crucial problem
+to cryptography, the [key
+exchange](http://en.wikipedia.org/wiki/Key_exchange). The English Wikipedia
+article tells you how they could do that: If Alice and Bob wish to exchange
+encrypted messages, each must be equipped to encrypt messages to be sent and
+decrypt messages received. The nature of the equipping they require depends on
+the encryption technique they might use. If they use a code, both will require
+a copy of the same codebook. If they use a cipher, they will need appropriate
+keys. If the cipher is a symmetric key cipher, both will need a copy of the
+same key. If an asymmetric key cipher with the public/private key property,
+both will need the other's public key. For the cases, where both parties need
+the same thing, they need a secure channel to exchange this. Now, if they
+already have a secure channel, they might as well exchange the message using
+this secure channel—the only advantage cryptography has then, is that the
+secure channel might be costly, or rarely available (e.g. a personal meeting
+is required to set up the system).
 
 Diffie-Hellman
 --------------
@@ -99,14 +98,14 @@ direct key exchange shall be facilitated by using QR-codes and
 scanners (smartphone cameras) and search for key prefixes to avoid
 having to type in too many cryptic characters.
 
-More important howerver is to directly use the public key whenever
-possible.  Net2o uses the pubkeys as handles.  For human readability,
-these names are converted to nick- and petnames (names you have
-assigned to other people) when displayed.  In many cases, Zooko's
-Triangle then doesn't apply.  It's decentralized, as you make
-connections through peers.  The connection between keys and
-nick/petnames is local, in your "address book".  Nick- and petnames
-are memorizable.
+More important howerver is to directly use the public key whenever possible.
+Net2o uses the pubkeys as handles.  For human readability, these names are
+converted to nick- and petnames (names you have assigned to other people) when
+displayed.  In many cases, [Zooko's
+Triangle](https://en.wikipedia.org/wiki/Zooko%27s_triangle) then doesn't
+apply.  It's decentralized, as you make connections through peers.  The
+connection between keys and nick/petnames is local, in your "address book".
+Nick- and petnames are memorizable.
 
 If you get a key, you are able to obtain a nickname corresponding to
 that key, self-signed.  This is secure, and still human meaningful.

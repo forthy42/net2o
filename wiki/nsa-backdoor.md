@@ -63,8 +63,9 @@ having official back/front/side doors, leaky roofs and tunnels regularly, but
 won't commit on an expicit schedule.  For a true fnord to work, you always
 have to be wary.  All the git checkins are signed.
 
-For those interested in history, whether the NSA can force a European
-company to install a backdoor, google for “Crypto AG”.
+For those interested in history, whether the NSA can force a European company
+to install a backdoor, see [Crypto
+AG](https://en.wikipedia.org/wiki/Crypto_AG#Compromised_machines)
 
 ## What is this page for? ##
 

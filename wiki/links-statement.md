@@ -6,7 +6,7 @@ gekommen, dass kein hinreichender Anfangsverdacht zur Annahme besteht,
 die Betreiber würden unzureichend lizenziertes Material auf ihre
 Seiten stellen. Ohne diesen Anfangsverdacht wäre allein die Frage
 schon eine Beleidigung, nämlich die Unterstellung eines sogar
-strafbaren Rechtsbruchs. Ein Irrtum "in dubio pro reo" ist rein aus
+strafbaren Rechtsbruchs. Ein Irrtum „in dubio pro reo“ ist rein aus
 rechtsstaatlichen Prinzipien nicht nur möglich, sondern bis zum Beweis
 des Gegenteils geboten.
 
@@ -16,7 +16,7 @@ Quellenangabe, die gängige Praxis ist und deren Fehlen als
 Pflichtverletzung gesehen wird. Die Verantwortlichkeit für die Inhalte
 liegt daher allein bei den Betreibern dieser Sites.
 
-Anfragen mir gegenüber, ob meine Inhalte alle "sauber" sind, fasse ich
+Anfragen mir gegenüber, ob meine Inhalte alle „sauber“ sind, fasse ich
 als Beleidigung auf, und weise die Unterstellung zurück.
 
 ## Link-Prüfung ##
@@ -54,7 +54,7 @@ Erklärung durch das LG Hamburg nicht glaubwürdig wäre. Die Kontrolle
 über die Technik der Site liegt auch offensichtlich teilweise bei der
 Axel Springer AG, deren Reputation ebenfalls fragwürdig ist
 (allerdings besteht normalerweise kein Anlass, auf deren Seiten zu
-verlinken).
+verlinken, weil sie keinen wissenschaftlichen Standards genügen).
 
 ## Rechtsanerkennung einer Abmahnung ##
 
