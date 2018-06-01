@@ -256,9 +256,13 @@ $00FFFFFF ,
     top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize o> ;
 
 : group[] ( box group -- box )
-    [: data $@ group-name >o to text$ o>
+    [:  top-widget >r
+	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ .groups:id$
-	gui-msgs chat-frame to top-widget refresh-top ;] swap click[] ;
+	gui-msgs chat-frame to top-widget refresh-top
+	widgets-loop
+	r> to top-widget +sync
+    ;] swap click[] ;
 
 : show-group ( last# -- )
     dup { g -- } cell+ $@ drop cell+ >o
@@ -323,7 +327,7 @@ $00FFFFFF ,
     fill-nicks fill-groups
     id-frame to top-widget
     refresh-top
-    peers-box .vp-top ;
+    peers-box .vp-top +sync +config ;
 
 \ messages
 
@@ -446,6 +450,7 @@ wmsg-o >o msg-table @ token-table ! o>
     -1 to last-day
     -1 to last-hour
     -1 to last-minute
+    msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
     2dup load-msg ?msg-log
     last# msg-log@ 2dup { log u }
@@ -461,11 +466,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    glue*l $000000FF slide-frame dup .button1
 	    {{
-		\large whitish !i18n l" Chat Log" }}text' !lit 40%b
+		\large whitish
+		"⬅" }}text 40%b [: -1 level# +! ;] over click[]
+		!i18n l" Chat Log" }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
 		glue*l }}glue
-	    }}h
-	}}z
+	    }}h box[]
+	}}z box[]
 	{{
 	    {{
 		{{
@@ -499,10 +506,9 @@ wmsg-o >o msg-table @ token-table ! o>
     pw-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
-	>passphrase +key  read-keys  secret-keys# IF
-	    show-nicks
-	THEN
+	>passphrase +key  read-keys
     THEN
+    secret-keys# IF  show-nicks  THEN
     1config  !widgets  widgets-loop ;
 
 ' net2o-gui is run-gui

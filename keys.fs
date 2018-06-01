@@ -63,6 +63,7 @@ Variable defaultkey
     ke-pk $free
     ke-nick $free
     ke-selfsig $free
+    ke-chat $free
     ke-sigs[] $[]free
     ke-pets[] $[]free
     ke-pets# $free ;
