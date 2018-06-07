@@ -143,7 +143,7 @@ true Value connected?
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
-    beacons #offs !my-addr announce-me renat
+    beacons #offs 0 .!my-addr announce-me renat
     [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
     beacon( ." done renat" cr ) ;
 
