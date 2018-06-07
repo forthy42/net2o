@@ -1462,7 +1462,7 @@ also net2o-base
 : send-reconnects ( group o:connection -- )  o to connection
     net2o-code expect-msg
     [: dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
-      sign[ msg-start "left" $, msg-action msg> ;] [msg,]
+      sign[ msg-start "left" $, msg-action msg-otr> ;] [msg,]
     end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection

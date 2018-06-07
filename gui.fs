@@ -469,6 +469,8 @@ wmsg-o >o msg-table @ token-table ! o>
     cell +LOOP
     log free throw  msgs-box >o resized vp-bottom o> ;
 
+[IFDEF] android also android [THEN]
+
 {{ $80FFFFFF pres-frame
     {{
 	{{
@@ -504,6 +506,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	}}h box[]
     }}v box[]
 }}z box[] to chat-frame
+
+[IFDEF] android previous [THEN]
 
 \ top widgets
 

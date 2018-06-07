@@ -70,7 +70,10 @@ require dhtroot.fs
 Forward renat-all
 
 event: :>renat ( -- )  renat-all ;
-: dht-beacon <event :>renat main-up@ event> 2drop ;
+event: :>disconnect ( addr -- )  .disconnect-me ;
+: dht-beacon ( addr u -- )
+    <event 0 addr dht-connection !@ elit, :>disconnect ?query-task event>
+    <event :>renat main-up@ event> 2drop ;
 
 : dht-connect ( -- )
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
