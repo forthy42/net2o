@@ -190,7 +190,7 @@ Variable my-beacon
 	THEN
     THEN  2drop
     net2o-sock
-    sockaddr alen @ routes# #@ dup 0= IF  2drop s" !"  THEN
+    sockaddr alen @ routes# #@ dup 0= IF  2drop "!"  THEN
     beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
     0 sockaddr alen @ sendto drop +send ;
 : !-beacon ( addr u -- ) 2drop
