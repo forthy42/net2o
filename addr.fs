@@ -224,7 +224,8 @@ also net2o-base
     [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
 previous
 : >sockaddr ( -- addr len )
-    return-address be@ routes# #.key $@ .sockaddr ;
+    return-address be@ routes# #.key dup >r s" ." r> cell+ $!
+    $@ .sockaddr ;
 
 0 [IF]
 Local Variables:
