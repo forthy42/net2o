@@ -65,13 +65,24 @@ require dhtroot.fs
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
-: dht-connect' ( xt -- ) >r
-    $8 $8 dhtnick $@ nick>pk dhtroot r> execute pk:connect ;
-: dht-connect ( -- )  ['] noop dht-connect' ;
+0 Value dht-connection
+
+Forward renat-all
+
+event: :>renat ( -- )  renat-all ;
+: dht-beacon <event :>renat main-up@ event> 2drop ;
+
+: dht-connect ( -- )
+    dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
+    $8 $8 dhtnick $@ nick>pk dhtroot
+    beacons @ 0= IF  return-addr be@ ['] dht-beacon 0 .add-beacon  THEN
+    pk:connect  o to dht-connection ;
+: dht-disconnect ( -- )
+    0 addr dht-connection !@  ?dup-IF  .disconnect-me  THEN ;
 
 Variable announced
 : subme ( -- )  announced @ IF
-	dht-connect sub-me disconnect-me  THEN ;
+	dht-connect sub-me THEN ;
 
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
     disconnect-me connect( [: .packets profile( .times ) ;] $err ) ;
@@ -117,24 +128,15 @@ Forward insert-addr ( o -- )
 
 true Value connected?
 
-Forward dht-beacon
-Forward renat-all
-
 [IFDEF] android     require android/net.fs  [ELSE]
     [IFDEF] PF_NETLINK  require linux/net.fs    [THEN]
 [THEN]
 
 \ announce and renat
 
-event: :>renat ( -- )  renat-all ;
-: dht-beacon <event :>renat main-up@ event> 2drop ;
-
 : announce-me ( -- )
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    beacons @ IF  dht-connect
-    ELSE  [: return-addr be@ ['] dht-beacon 0 .add-beacon ;] dht-connect'
-    THEN
-    replace-me disconnect-me -other  announced on ;
+    dht-connect replace-me -other  announced on ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
@@ -229,7 +231,7 @@ Variable my-beacon
 		>r 2dup c:fetch-id r> >o  REPEAT  THEN  d0<> ;
 
 : pk-query ( addr u xt -- flag ) >r
-    dht-connect  2dup r> execute  replace-loop  disconnect-me ;
+    dht-connect  2dup r> execute  replace-loop ;
 
 : pk-lookup ( addr u -- )
     ['] pk:fetch-host  ['] pk:addme-fetch-host  announced @ select
@@ -242,6 +244,11 @@ User hostc$ \ check for this hostname
 : check-host? ( o addr u -- o addr' u flag )
     2 pick .host>$ ;
 
+0 Value ?myself
+
+: myhost= ( o -- flag )
+    .host:id $@ host$ $@ str= ?myself and ;
+    
 : host= ( o -- flag )
     >o hostc$ $@ dup IF  host:id $@ str=  ELSE  2drop true  THEN  o> ;
 
@@ -258,7 +265,7 @@ User hostc$ \ check for this hostname
     new-addr dup insert-addr swap .net2o:dispose-addr ;
 
 : insert-host ( addr u -- flag )  dest-0key dest-0key> !
-    new-addr  dup host=  IF
+    new-addr  dup host=  over myhost= 0= and  IF
 	msg( ." insert: " dup .host:id $@ type cr )
 	dup insert-addr  ELSE  false  THEN
     swap .net2o:dispose-addr ;
@@ -272,7 +279,7 @@ User hostc$ \ check for this hostname
     ret0 net2o:new-context >o rdrop dest-pk ;
 
 in net2o : pklookup ( pkaddr u -- )
-    2dup keysize2 safe/string hostc$ $! key2|
+    2dup keysize2 safe/string hostc$ $! key2| 2dup pkc over str= to ?myself
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
@@ -312,13 +319,13 @@ User pings[]
     dht-connect
     net2o-code  expect-reply
     search-key[] [: $, dht-id dht-owner? end-with ;] $[]map
-    cookie+request end-code| disconnect-me ;
+    cookie+request end-code| ;
 
 : search-addrs ( -- )
     dht-connect
     net2o-code  expect-reply
     search-key[] [: $, dht-id dht-host? end-with ;] $[]map
-    cookie+request end-code| disconnect-me ;
+    cookie+request end-code| ;
 
 : insert-keys ( -- )
     defaultkey @ >storekey !

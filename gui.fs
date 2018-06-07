@@ -91,7 +91,7 @@ forward gui-msgs
 	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
     ELSE
 	0 >o 0 secret-key init-client >raw-key
-	read-chatgroups o>
+	read-chatgroups announce-me o>
 	\ ." Right passphrase" cr
 	show-nicks
 	true
@@ -192,6 +192,7 @@ $0000BFFF ' dark-blue >body !
 0 Value msg-vbox
 
 0 Value group-name
+0 Value group-members
 
 htab-glue new tab-glue: name-tab
 htab-glue new tab-glue: pk-tab
@@ -255,13 +256,20 @@ $00FFFFFF ,
     +sync +lang
     top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize o> ;
 
+: gui-chat-connects ( -- )
+    chat-keys [: key>group
+	2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
+	2dup pk-peek? IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
+
 : group[] ( box group -- box )
     [:  top-widget >r
 	data $@ group-name >o to text$ o>
-	data cell+ $@ drop cell+ .groups:id$
+	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
+	[: [: 2over type '@' emit type ;] $tmp chat-keys $+[]! ;] $[]map
 	gui-msgs chat-frame to top-widget refresh-top
-	widgets-loop
-	r> to top-widget +sync
+	gui-chat-connects
+	widgets-loop \ connection .send-leave
+	r> to top-widget +sync +config
     ;] swap click[] ;
 
 : show-group ( last# -- )
@@ -444,7 +452,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .msg-display ;
 
-#512 Value gui-msgs# \ display last 300 messages
+#128 Value gui-msgs# \ display last 128 messages
 
 : gui-msgs ( gaddr u -- )
     -1 to last-day
@@ -470,6 +478,8 @@ wmsg-o >o msg-table @ token-table ! o>
 		"⬅" }}text 40%b [: -1 level# +! ;] over click[]
 		!i18n l" Chat Log" }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
+		{{
+		}}h box[] dup to group-members
 		glue*l }}glue
 	    }}h box[]
 	}}z box[]
