@@ -456,7 +456,8 @@ wmsg-o >o msg-table @ token-table ! o>
 : wmsg-display ( addr u -- )
     !date wmsg-o .tmsg-display ;
 :noname ( addr u -- ) wmsg-display
-    msgs-box >o [: +sync +config ;] vp-needed vp-bottom o> ; is msg-display
+    msgs-box >o [: +sync +config ;] vp-needed vp-bottom
+    +sync +config o> ; is msg-display
 
 #128 Value gui-msgs# \ display last 128 messages
 
