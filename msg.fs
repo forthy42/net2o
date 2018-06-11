@@ -157,9 +157,11 @@ Sema queue-sema
 
 \ events
 
-: msg-display ( addr u -- )
+Defer msg-display
+: tmsg-display ( addr u -- )
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
+' tmsg-display is msg-display
 
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;

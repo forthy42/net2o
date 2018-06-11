@@ -256,10 +256,14 @@ $00FFFFFF ,
     +sync +lang
     top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize o> ;
 
+: show-connected ( -- ) ;
+
 : gui-chat-connects ( -- )
-    chat-keys [: key>group
-	2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
-	2dup pk-peek? IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
+    [: chat-keys [: key>group
+	    2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
+	    2dup pk-peek? IF  chat-connect true !!connected!!
+	    ELSE  2drop  THEN ;] $[]map ;] catch
+    [ ' !!connected!! >body @ ]L = IF  show-connected  THEN ;
 
 : group[] ( box group -- box )
     [:  top-widget >r
@@ -450,7 +454,9 @@ wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
 
 : wmsg-display ( addr u -- )
-    !date wmsg-o .msg-display ;
+    !date wmsg-o .tmsg-display ;
+:noname ( addr u -- ) wmsg-display
+    msgs-box >o [: +sync +config ;] vp-needed vp-bottom o> ; is msg-display
 
 #128 Value gui-msgs# \ display last 128 messages
 
