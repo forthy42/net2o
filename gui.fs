@@ -478,6 +478,9 @@ wmsg-o >o msg-table @ token-table ! o>
 
 [IFDEF] android also android [THEN]
 
+: chat-edit-enter ( o:edit-w -- )
+    text$ do-chat-cmd? 0= IF  avalanche-text  THEN ;
+
 {{ $80FFFFFF pres-frame
     {{
 	{{
@@ -501,14 +504,15 @@ wmsg-o >o msg-table @ token-table ! o>
 	    over >r }}h box[] r> font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ glue*lll $FFFFFFFF 4e }}frame dup .button3
+	    {{ glue*lll $FFFFFFFF font-size# 40% f* }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup value chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
-	    }}z chat-edit ' false edit[]
+	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[]
 	    {{
-		glue*l $80FF80FF 4e }}frame dup .button2
+		glue*l $80FF80FF font-size# 40% f* }}frame dup .button2
 		!i18n l" Send" }}text' !lit 40%b
+		[: data >o chat-edit-enter "" to text$ o> ;] chat-edit click[]
 	    }}z box[]
 	}}h box[]
     }}v box[]
