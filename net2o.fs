@@ -1621,7 +1621,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
       cmd( ." disposed" cr ) ;] file-sema c-section ;
 
 event: :>dispose-context ( o -- )  .net2o:dispose-context ;
-  
+
 \ loops for server and client
 
 8 cells 1- Constant maxrequest#

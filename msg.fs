@@ -347,7 +347,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
     $10 !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    2 !!>=order? $> msg:signal ;
+    $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
     4 !!>=order? $> msg:re ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
@@ -402,37 +402,37 @@ scope: logstyles
     .log-num
     2dup startdate@ .log-date
     2dup enddate@ .log-end
-    2dup .key-id
-    ['] .simple-id $tmp notify-nick!
-    r> to last# ; msg-class to msg:start
+    2dup .key-id ." : " 
+    [: .simple-id ." : " ;] $tmp notify-nick!
+    r> to last# ; msg-class is msg:start
 :noname ( addr u -- ) $utf8>
-    space <warn> '#' forth:emit .group <default> ; msg-class to msg:tag
+    <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
     key| 2dup pk@ key| str=
-    IF   <err>  THEN  2dup [: ."  @" .simple-id ;] $tmp notify+
-    ."  @" .key-id <default>
-    r> to last# ; msg-class to msg:signal
+    IF   <err>  THEN  2dup [: ." @" .simple-id ;] $tmp notify+
+    ." @" .key-id <default>
+    r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
     2dup sighash? IF  <info>  ELSE  <err>  THEN
     ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
-    r> to last# ; msg-class to msg:chain
+    r> to last# ; msg-class is msg:chain
 :noname ( addr u -- )
-    space <warn> ." [" 85type ." ]->" <default> ; msg-class to msg:re
+    space <warn> ." [" 85type ." ]->" <default> ; msg-class is msg:re
 :noname ( addr u -- )
-    space <warn> ." [" 85type ." ]:" <default> ; msg-class to msg:id
+    space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
 :noname ( addr u -- ) $utf8>
-    [: ." : " 2dup forth:type ;] $tmp notify+
-    ." : " forth:type ; msg-class to msg:text
+    [: 2dup forth:type ;] $tmp notify+
+    forth:type ; msg-class is msg:text
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
-msg-class to msg:object
+msg-class is msg:object
 :noname ( addr u -- ) $utf8>
     [: space 2dup forth:type ;] $tmp notify+
-    space <warn> forth:type <default> ; msg-class to msg:action
+    space <warn> forth:type <default> ; msg-class is msg:action
 :noname ( addr u -- )
-    <warn> ."  GPS: " .coords <default> ; msg-class to msg:coord
+    <warn> ."  GPS: " .coords <default> ; msg-class is msg:coord
 : replace-sig { addrsig usig addrmsg umsg -- }
     \ !!dummy!! need to verify signature!
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
@@ -461,10 +461,10 @@ msg-class to msg:object
 	    THEN
 	LOOP
 	r> to last#
-    THEN ; msg-class to msg:otrify
+    THEN ; msg-class is msg:otrify
 
 :noname ( -- )
-    forth:cr ; msg-class to msg:end
+    forth:cr ; msg-class is msg:end
 
 \g
 \g ### group description commands ###
@@ -898,21 +898,21 @@ previous
 : msg-tdisplay ( addr u -- )
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
-' msg-tdisplay msg-class to msg:display
+' msg-tdisplay msg-class is msg:display
 
 msg-class class
 end-class textmsg-class
 
-' 2drop textmsg-class to msg:start
-:noname space '#' emit type ; textmsg-class to msg:tag
-:noname '@' emit .simple-id space ; textmsg-class to msg:signal
-' 2drop textmsg-class to msg:re
-' 2drop textmsg-class to msg:chain
-' type textmsg-class to msg:text
-:noname drop 2drop ; textmsg-class to msg:object
-:noname ." /me " type ; textmsg-class to msg:action
-:noname ." /here " 2drop ; textmsg-class to msg:coord
-' noop textmsg-class to msg:end
+' 2drop textmsg-class is msg:start
+:noname '#' emit type ; textmsg-class is msg:tag
+:noname '@' emit .simple-id ; textmsg-class is msg:signal
+' 2drop textmsg-class is msg:re
+' 2drop textmsg-class is msg:chain
+' type textmsg-class is msg:text
+:noname drop 2drop ; textmsg-class is msg:object
+:noname ." /me " type ; textmsg-class is msg:action
+:noname ." /here " 2drop ; textmsg-class is msg:coord
+' noop textmsg-class is msg:end
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
 textmsg-o >o msg-table @ token-table ! o>
@@ -1328,8 +1328,51 @@ also net2o-base scope: /chat
 		ELSE  $, msg-signal false  THEN
 	    UNTIL  THEN  THEN  r> to last# ;
 
+0 Value last->in
+
+: ?flush-text ( addr -- )
+    last->in ?dup-0=-IF  source drop  THEN
+    tuck - dup IF
+	\ ." text: '" forth:type ''' forth:emit forth:cr
+	$, msg-text
+    ELSE  2drop  THEN ;
+
+: text-rec ( addr u -- )
+    2drop ['] noop rectype-name ;
+: tag-rec ( addr u -- )
+    over c@ '#' = IF
+	over ?flush-text 2dup + to last->in
+	[: 1 /string
+	    \ ." tag: '" forth:type ''' forth:emit forth:cr
+	    $, msg-tag
+	;] rectype-name
+    ELSE  2drop rectype-null  THEN ;
+: pk-rec ( addr u -- )
+    over c@ '@' = IF  2dup 1 /string ':' -skip nick>pk
+	2dup d0= IF  2drop 2drop rectype-null
+	ELSE
+	    2>r over ?flush-text + to last->in  2r>
+	    [:
+		\ ." signal: '" 85type ''' forth:emit forth:cr
+		$, msg-signal
+	    ;] rectype-name
+	THEN
+    ELSE  2drop rectype-null  THEN ;
+
+$Variable msg-recognizer
+' text-rec ' tag-rec ' pk-rec 3 msg-recognizer set-stack
+
+: parse-text ( addr u -- ) last# >r  forth-recognizer >r
+    0 to last->in
+    msg-recognizer to forth-recognizer 2dup evaluate
+    last->in IF  + last->in tuck -  THEN  dup IF
+	\ ." text: '" forth:type ''' forth:emit forth:cr
+	$, msg-text
+    ELSE  2drop  THEN
+    r> to forth-recognizer  r> to last# ;
+
 : avalanche-text ( addr u -- ) >utf8$
-    [: signal-list, $, msg-text ;] send-avalanche ;
+    [: parse-text ;] send-avalanche ;
 
 previous
 

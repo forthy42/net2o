@@ -418,7 +418,7 @@ Variable last-bubble-pk
 :noname ( -- )
 ; wmsg-class to msg:end
 :noname { d: string -- o }
-    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text 25%bv blackish \sans
+    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text blackish \sans
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
