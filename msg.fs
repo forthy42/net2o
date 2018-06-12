@@ -170,15 +170,14 @@ Variable otr-log
     parent .msg-context @ .msg:display msg-notify ;
 
 : display-lastn ( addr u n -- )  reset-time
-    otr-mode @ >r otr-mode off
+    0 otr-mode
     [: net2o:new-msg >o 0 to parent
 	cells >r ?msg-log last# msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
 	    I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
 	cell +LOOP
-	log free dispose o> throw ;] catch
-    r> otr-mode ! throw ;
+	log free dispose o> throw ;] !wrapper ;
 
 : display-one-msg ( addr u -- )
     net2o:new-msg >o 0 to parent
@@ -896,13 +895,14 @@ previous
 
 \ chat message, text only
 
-msg-class class
-end-class textmsg-class
-
 : msg-tdisplay ( addr u -- )
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
-' msg-tdisplay textmsg-class to msg:display
+' msg-tdisplay msg-class to msg:display
+
+msg-class class
+end-class textmsg-class
+
 ' 2drop textmsg-class to msg:start
 :noname space '#' emit type ; textmsg-class to msg:tag
 :noname '@' emit .simple-id space ; textmsg-class to msg:signal
