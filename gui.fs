@@ -273,6 +273,7 @@ $00FFFFFF ,
 	gui-msgs chat-frame to top-widget refresh-top
 	gui-chat-connects
 	widgets-loop \ connection .send-leave
+	leave-chats
 	r> to top-widget +sync +config
     ;] swap click[] ;
 
