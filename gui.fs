@@ -513,6 +513,8 @@ wmsg-o >o msg-table @ token-table ! o>
 		    glue*lll }}glue
 		}}h box[]
 	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[]
+	    >o act >o [: connection .chat-next-line ;] is edit-next-line o> o o>
+	    >o act >o [: connection .chat-prev-line ;] is edit-prev-line o> o o>
 	    {{
 		glue*l $80FF80FF font-size# 40% f* }}frame dup .button2
 		!i18n l" Send" }}text' !lit 40%b

@@ -931,6 +931,8 @@ Variable $lastline
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp 
+    dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
+	2drop to addr drop to maxlen  THEN
     tuck addr maxlen smove
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
@@ -941,6 +943,8 @@ Variable $lastline
     dup last# cell+ $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
     ELSE  last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp  THEN
+    dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
+	2drop to addr drop to maxlen  THEN
     tuck addr maxlen smove
     maxlen swap addr over ;
 
@@ -1320,13 +1324,6 @@ also net2o-base scope: /chat
     ?dup-IF  nip nip name>int execute true
     ELSE  drop 1- -rot + over - false
     THEN ;
-
-: signal-list, ( addr u -- addr' u' )  last# >r
-    BEGIN  dup  WHILE  over c@ '@' = WHILE  2dup { oaddr ou }
-		bl $split 2swap 1 /string ':' -skip nick>pk \ #0. if no nick
-		2dup d0= IF  2drop 2drop oaddr ou true
-		ELSE  $, msg-signal false  THEN
-	    UNTIL  THEN  THEN  r> to last# ;
 
 0 Value last->in
 
