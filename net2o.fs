@@ -1583,7 +1583,8 @@ scope{ mapc
     inbuf >r r@ get-dest route>address IF
 	route( ." route to: " sockaddr alen @ .address space
 	inbuf destination .addr-path cr )
-	r@ dup packet-size send-a-packet 0< ?ior
+	r@ dup packet-size send-a-packet 0<
+	IF  ." failed to send to: " sockaddr alen @ .address cr true ?ior  THEN
     THEN  rdrop ;
 
 \ dispose context
