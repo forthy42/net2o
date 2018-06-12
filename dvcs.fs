@@ -528,7 +528,7 @@ Variable patch-in$
 : chat>branches-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
 	re$ $free  object$ $free
-	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
+	I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw
     dvcs( ." === id>patch ===" cr id>patch# .hash
     ." === id>snap ===" cr id>snap# .hash ) ;
@@ -587,7 +587,7 @@ in net2o : dispose-dvcs-log ( o:log -- )
     net2o:new-dvcs-log >o
     cells >r ?msg-log  last# msg-log@ 2dup { log u }
     dup r> - 0 max dup >r /string r> cell/ -rot bounds ?DO
-	I $@ ['] msg-display catch
+	I $@ ['] msg:display catch
 	IF  ." invalid entry" cr 2drop
 	ELSE
 	    branch log-tag$ $@ str= IF
@@ -757,7 +757,7 @@ previous
 
 : chat>searchs-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
-	I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop THEN
+	I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw ;
 : search-last-rev ( -- addr u )
     project:project$ $@ ?msg-log

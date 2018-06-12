@@ -157,12 +157,6 @@ Sema queue-sema
 
 \ events
 
-Defer msg-display
-: tmsg-display ( addr u -- )
-    sigpksize# - 2dup + sigpksize# >$  c-state off
-    nest-cmd-loop msg:end ;
-' tmsg-display is msg-display
-
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
 
@@ -173,7 +167,7 @@ Variable otr-log
     ;] msglog-sema c-section ;
 
 : do-msg-nestsig ( addr u -- )
-    parent .msg-context @ .msg-display msg-notify ;
+    parent .msg-context @ .msg:display msg-notify ;
 
 : display-lastn ( addr u n -- )  reset-time
     otr-mode @ >r otr-mode off
@@ -181,14 +175,14 @@ Variable otr-log
 	cells >r ?msg-log last# msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
-	    I $@ ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
+	    I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
 	cell +LOOP
 	log free dispose o> throw ;] catch
     r> otr-mode ! throw ;
 
 : display-one-msg ( addr u -- )
     net2o:new-msg >o 0 to parent
-    ['] msg-display catch IF  ." invalid entry" cr 2drop  THEN
+    ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
     dispose o> ;
 
 Forward silent-join
@@ -905,6 +899,10 @@ previous
 msg-class class
 end-class textmsg-class
 
+: msg-tdisplay ( addr u -- )
+    sigpksize# - 2dup + sigpksize# >$  c-state off
+    nest-cmd-loop msg:end ;
+' msg-tdisplay textmsg-class to msg:display
 ' 2drop textmsg-class to msg:start
 :noname space '#' emit type ; textmsg-class to msg:tag
 :noname '@' emit .simple-id space ; textmsg-class to msg:signal
@@ -932,7 +930,7 @@ Variable $lastline
     line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp 
+    last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp 
     tuck addr maxlen smove
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
@@ -942,7 +940,7 @@ Variable $lastline
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
     dup last# cell+ $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
-    ELSE  last# cell+ $[]@ !date ['] msg-display textmsg-o .$tmp  THEN
+    ELSE  last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp  THEN
     tuck addr maxlen smove
     maxlen swap addr over ;
 

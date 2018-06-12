@@ -149,6 +149,7 @@ scope: msg
     method otrify
     method payment
     method end
+    method display
 }scope
 end-class msg-class
 

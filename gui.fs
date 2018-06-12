@@ -450,14 +450,18 @@ Variable last-bubble-pk
     blackish
 ; msg-class to msg:id
 
+in net2o : new-wmsg ( o:connection -- o )
+    o wmsg-class new >o  parent!  msg-table @ token-table ! o o> ;
+' net2o:new-wmsg is net2o:new-msg
+
 wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
 
 : wmsg-display ( addr u -- )
-    !date wmsg-o .tmsg-display ;
-:noname ( addr u -- ) wmsg-display
+    !date msg-tdisplay
     msgs-box >o [: +sync +config ;] vp-needed vp-bottom
-    +sync +config o> ; is msg-display
+    +sync +config o> ;
+' wmsg-display wmsg-class to msg:display
 
 #128 Value gui-msgs# \ display last 128 messages
 
@@ -470,7 +474,7 @@ wmsg-o >o msg-table @ token-table ! o>
     2dup load-msg ?msg-log
     last# msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
-	I $@ ['] wmsg-display catch IF
+	I $@ ['] wmsg-display wmsg-o .catch IF
 	    <err> ." invalid entry" <default> cr 2drop
 	THEN
     cell +LOOP

@@ -421,11 +421,14 @@ in net2o : new-ack ( -- o )
     o o> ;
 : ack@ ( -- o )
     ack-context @ ?dup-0=-IF  net2o:new-ack dup ack-context !  THEN ;
-in net2o : new-msg ( -- o )
+scope{ net2o
+: new-tmsg ( -- o )
     o msg-class new >o  parent!  msg-table @ token-table ! o o> ;
-in net2o : new-msging ( -- o )
+: new-msging ( -- o )
     o msging-class new >o  parent!  msging-table @ token-table ! o o> ;
-
+defer new-msg  ' new-tmsg is new-msg
+}scope
+    
 : no-timeout ( -- )  max-int64 next-timeout 64!
     ack-context @ ?dup-IF  .timeouts off  THEN ;
 
