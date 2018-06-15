@@ -33,7 +33,7 @@ Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
 \ prefix for IPv4 addresses via NAT64
 
-: >alen ( addr u -- alen )
+: >alen ( addr -- alen )
     sockaddr_in6 sockaddr_in4 rot family w@ AF_INET6 = select ;
 
 \ convention:
@@ -176,9 +176,9 @@ Forward .addr$
     : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
 
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
-	[: sockaddr_in4 alen !  53 sockaddr port be-w!
-	  sockaddr sin_addr be-l! query-sock
-	  sockaddr sock-rest4 connect
+	[: sockaddr_in4 alen !  53 sockaddr< port be-w!
+	  sockaddr< sin_addr be-l! query-sock
+	  sockaddr< sock-rest4 connect
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  query-sock sockaddr1 alen getsockname
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
@@ -188,9 +188,9 @@ Forward .addr$
 [ELSE]
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
 	[:  ipv6( sockaddr_in6 )else( sockaddr_in4 ) alen !
-	    53 sockaddr port be-w!
-	    sockaddr ipv4! query-sock
-	    sockaddr ipv6( sock-rest )else( sock-rest4 ) connect
+	    53 sockaddr< port be-w!
+	    sockaddr< ipv4! query-sock
+	    sockaddr< ipv6( sock-rest )else( sock-rest4 ) connect
 	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	    query-sock sockaddr1 alen getsockname
 	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
@@ -213,9 +213,9 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 
 : check-ip6 ( dummy -- ip6addr u ) ipv6(
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    [:  sockaddr_in6 alen !  53 sockaddr port be-w!
-	sockaddr sin6_addr ip6!
-	query-sock sockaddr sock-rest connect
+    [:  sockaddr_in6 alen !  53 sockaddr< port be-w!
+	sockaddr< sin6_addr ip6!
+	query-sock sockaddr< sock-rest connect
 	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior
 	query-sock sockaddr1 alen getsockname
 	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior

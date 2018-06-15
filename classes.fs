@@ -381,7 +381,8 @@ user-o io-mem
 
 object class
     pollfd 4 *      uvar pollfds \ up to four file descriptors
-    sockaddr_in     uvar sockaddr
+    sockaddr_in     uvar sockaddr< \ incoming socket
+    sockaddr_in     uvar sockaddr> \ outgoing socket
     sockaddr_in     uvar sockaddr1
     [IFDEF] no-hybrid
 	sockaddr_in uvar sockaddr2

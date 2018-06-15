@@ -191,26 +191,26 @@ Variable my-beacon
 	THEN
     THEN  2drop
     net2o-sock
-    sockaddr alen @ routes# #@ dup 0= IF  2drop "!"  THEN
-    beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr alen @ .address forth:cr )
-    0 sockaddr alen @ sendto drop +send ;
+    sockaddr< alen @ routes# #@ dup 0= IF  2drop "!"  THEN
+    beacon( ticks .ticks ."  Send '" 2dup type ." ' reply to: " sockaddr< alen @ .address forth:cr )
+    0 sockaddr< alen @ sendto drop +send ;
 : !-beacon ( addr u -- ) 2drop
     \G I got a reply, my address is unknown
-    beacon( ticks .ticks ."  Got unknown reply: " sockaddr alen @ .address forth:cr )
-    sockaddr alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
+    beacon( ticks .ticks ."  Got unknown reply: " sockaddr< alen @ .address forth:cr )
+    sockaddr< alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
 : .-beacon ( addr u -- ) 2drop
     \G I got a reply, my address is known
-    beacon( ticks .ticks ."  Got known reply: " sockaddr alen @ .address forth:cr )
-    sockaddr alen @ beacons #@ IF
+    beacon( ticks .ticks ."  Got known reply: " sockaddr< alen @ .address forth:cr )
+    sockaddr< alen @ beacons #@ IF
 	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
     THEN ;
 : >-beacon ( addr u -- )
     \G I got a punch
-    nat( ticks .ticks ."  Got punch: " sockaddr alen @ .address forth:cr )
+    nat( ticks .ticks ."  Got punch: " sockaddr< alen @ .address forth:cr )
     check-punch-hash ?dup-IF
 	\ !!FIXME!! accept only two: one IPv4, one IPv6.
 	\ !!FIXME!! and try merging the two into existent
-	>o sockaddr alen @ nat( ." +punch " 2dup .address forth:cr )
+	>o sockaddr< alen @ nat( ." +punch " 2dup .address forth:cr )
 	.sockaddr new-addr punch-addrs >stack o>
     THEN ;
 

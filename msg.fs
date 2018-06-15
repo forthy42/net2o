@@ -135,12 +135,13 @@ event: :>load-msg ( last# -- )
 : ?msg-log ( addr u -- )  msg-logs ?hash ;
 
 0 Value log#
+2Variable last-msg
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
     [: last# cell+ $ins[]date  dup to log#
       dup -1 = IF drop #0. ( 0 to last# )  ELSE  last# cell+ $[]@  THEN
-    ;] msglog-sema c-section ;
+    ;] msglog-sema c-section 2dup last-msg 2! ;
 : ?save-msg ( addr u -- )
     ?msg-log
     last# otr-mode @ replay-mode @ or 0= and
@@ -159,12 +160,6 @@ Sema queue-sema
 
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
-
-Variable otr-log
-: >otr-log ( addr u -- addr' u )
-    [: otr-log $ins[]date
-      dup -1 = IF  drop #0.  ELSE  otr-log $[]@  THEN
-    ;] msglog-sema c-section ;
 
 : do-msg-nestsig ( addr u -- )
     parent .msg-context @ .msg:display msg-notify ;
@@ -218,19 +213,19 @@ Forward +chat-control
 
 User peer-buf
 
-: reconnect-chat ( $chat -- )
+: reconnect-chat ( addr u $chat -- )
     peer-buf $!buf  last# peer-buf $@
     reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
     reconnect( ." in group: " last# dup hex. $. cr )
     0 >o $A $A [: reconnect( ." prepare reconnection" cr )
       ?msg-context >o silent-last# ! o>
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
-    addr-connect o> ;
+    addr-connect 2dup d0= IF  2drop  ELSE  avalanche-to  THEN o> ;
 
 event: :>avalanche ( addr u o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
     to last# .avalanche-msg ;
-event: :>chat-reconnect ( $chat o group -- )
+event: :>chat-reconnect ( addr u $chat o group -- )
     to last# .reconnect-chat ;
 event: :>msg-nestsig ( $addr o group -- )
     to last# >o { w^ m } m $@ do-msg-nestsig m $free o>
@@ -590,7 +585,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 	parent last# cell+ del$cell  THEN ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
-    <event elit, o elit, last# elit, :>chat-reconnect
+    <event last-msg 2@ e$, elit, o elit, last# elit, :>chat-reconnect
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
@@ -821,8 +816,6 @@ event: :>msg-eval ( parent $pack $addr -- )
     now>otr ]pksign ;
 : msg-log, ( -- addr u )
     last-signed 2@ >msg-log ;
-: otr-log, ( -- addr u )
-    last-signed 2@ >otr-log ;
 
 previous
 
@@ -1501,13 +1494,16 @@ also net2o-base
 
 : send-reconnects ( group o:connection -- )  o to connection
     net2o-code expect-msg
-    [: dup  $@ ?destpk 2dup >group $, msg-leave  reconnects,
-      sign[ msg-start "left" $, msg-action msg-otr> ;] [msg,]
+    [: dup  $@ ?destpk 2dup >group $, msg-leave
+	sign[ msg-start "left" $, msg-action msg-otr>
+	reconnects, ;] [msg,]
     end-code| ;
 
 : send-reconnect1 ( o o:connection -- ) o to connection
     net2o-code expect-msg
-    [: last# $@ $, msg-group .reconnect, ;] [msg,]
+    [: last# $@ $, msg-leave
+	sign[ msg-start "left" $, msg-action msg-otr>
+	.reconnect, ;] [msg,]
     end-code| ;
 previous
 

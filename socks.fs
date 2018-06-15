@@ -60,24 +60,24 @@ $00000000 Value rec-droprate#
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN]
-    inbuf maxpacket r> sockaddr alen recvfrom
+    inbuf maxpacket r> sockaddr< alen recvfrom
     dup 0< IF
 	errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	#512 + negate throw  THEN
     inbuf swap  1 packetr +!  ?drop-inc
-    recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
+    recvfrom( ." received from: " sockaddr< alen @ .address space dup . cr )
 ;
 
 [IFDEF] no-hybrid
     : read-a-packet4 ( blockage -- addr u / 0 0 )
 	>r sockaddr_in alen !
 	net2o-sock nip
-	inbuf maxpacket r> sockaddr alen recvfrom
+	inbuf maxpacket r> sockaddr< alen recvfrom
 	dup 0< IF
 	    errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	THEN
 	inbuf swap  1 packetr +!  ?drop-inc
-	recvfrom( ." received from: " sockaddr alen @ .address space dup . cr )
+	recvfrom( ." received from: " sockaddr< alen @ .address space dup . cr )
     ;
 [THEN]
 
@@ -101,8 +101,8 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    resend( ." dropping packet" cr )
 	    1 packets +! 2drop 0  EXIT  THEN  THEN
-    2>r net2o-sock 2r> 0 sockaddr alen @ sendto +send 1 packets +!
-    sendto( ." send to: " sockaddr alen @ .address space dup . cr ) ;
+    2>r net2o-sock 2r> 0 sockaddr> alen @ sendto +send 1 packets +!
+    sendto( ." send to: " sockaddr> alen @ .address space dup . cr ) ;
 
 \ clients routing table
 
@@ -110,9 +110,9 @@ $00000000 Value droprate#
 
 : ipv4>ipv6 ( addr u -- addr' u' )
     drop >r
-    r@ port be-uw@ sockaddr port be-w!
-    r> sin_addr be-ul@ sockaddr ipv4!
-    sockaddr sock-rest ;
+    r@ port be-uw@ sockaddr> port be-w!
+    r> sin_addr be-ul@ sockaddr> ipv4!
+    sockaddr> sock-rest ;
 : ?>ipv6 ( addr u -- addr' u' )
     over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
 : info@ ( info -- addr u )
@@ -162,7 +162,7 @@ Variable lastn2oaddr
 
 : route>address ( n -- flag )
     routes# #.key dup 0= ?EXIT
-    $@ sockaddr swap dup alen ! move true ;
+    $@ sockaddr> over alen ! sockaddr_in smove true ;
 
 \ route an incoming packet
 

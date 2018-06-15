@@ -113,7 +113,7 @@ warnings !
 	hash 0= IF  drop 0  EXIT  THEN
 	$100 um* dup $80 and WHILE
 	    $80 + cells hash + @ to hash
-    REPEAT
+    REPEAT \ stack: pathlow pathhigh (<=$7F)
     nip 2* cells hash + ;
 
 : #map  { hash xt -- } \ xt: ( ... node -- ... )

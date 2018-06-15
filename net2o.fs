@@ -1390,12 +1390,12 @@ Forward handle-beacon
 Forward handle-beacon+hash
 
 : add-source ( -- )
-    sockaddr alen @ insert-address inbuf ins-source ;
+    sockaddr< alen @ insert-address inbuf ins-source ;
 
 : next-packet ( -- addr u )
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
     dup minpacket# u>= IF
-	( nat( ." packet from: " sockaddr alen @ .address cr )
+	( nat( ." packet from: " sockaddr< alen @ .address cr )
 	over packet-size over <>
 	header( ~~ !!size!! )else( IF  2drop 0 0 EXIT  !!size!!  THEN )
 	+next
@@ -1518,7 +1518,7 @@ Forward cmd-exec ( addr u -- )
 User remote?
 
 : handle-cmd0 ( -- ) \ handle packet to address 0
-    cmd0( .time ." handle cmd0 " sockaddr alen @ .address cr )
+    cmd0( .time ." handle cmd0 " sockaddr< alen @ .address cr )
     0 >o rdrop remote? on \ address 0 has no job context!
     inbuf0-decrypt 0= IF
 	invalid( ." invalid packet to 0" cr ) EXIT  THEN
@@ -1581,10 +1581,11 @@ scope{ mapc
 : route-packet ( -- )
     add-source
     inbuf >r r@ get-dest route>address IF
-	route( ." route to: " sockaddr alen @ .address space
+	route( ." route to: " sockaddr> alen @ .address space
 	inbuf destination .addr-path cr )
 	r@ dup packet-size send-a-packet 0<
-	IF  ." failed to send to: " sockaddr alen @ .address cr true ?ior  THEN
+	IF  ." failed to send from: " sockaddr< dup >alen .address
+	    ."  to: " sockaddr> alen @ .address cr true ?ior  THEN
     THEN  rdrop ;
 
 \ dispose context
@@ -1736,7 +1737,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 : add-beacon ( net2oaddr xt -- )
     >r route>address IF
-	sockaddr alen @ r@ +beacon
+	sockaddr> alen @ r@ +beacon
 	o IF
 	    s" ?" beacon-hash $!  gen-beacon-hash beacon-hash $+!
 	THEN
