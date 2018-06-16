@@ -149,7 +149,8 @@ scope: msg
     method otrify
     method payment
     method end
-    method display
+    method display   \ display one message
+    method redisplay \ display full set
 }scope
 end-class msg-class
 

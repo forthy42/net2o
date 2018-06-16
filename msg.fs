@@ -164,15 +164,8 @@ Sema queue-sema
 : do-msg-nestsig ( addr u -- )
     parent .msg-context @ .msg:display msg-notify ;
 
-: display-lastn ( addr u n -- )  reset-time
-    0 otr-mode
-    [: net2o:new-msg >o 0 to parent
-	cells >r ?msg-log last# msg-log@ 2dup { log u }
-	dup r> - 0 max /string bounds ?DO
-	    I log - cell/ to log#
-	    I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
-	cell +LOOP
-	log free dispose o> throw ;] !wrapper ;
+: display-lastn ( n -- )
+    net2o:new-msg >o 0 to parent msg:redisplay dispose o> ;
 
 : display-one-msg ( addr u -- )
     net2o:new-msg >o 0 to parent
@@ -753,7 +746,7 @@ Variable ask-msg-files[]
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
-    ?msg-log last# $@ rows  display-lastn
+    ?msg-log rows  display-lastn
     !save-all-msgs
     ." === sync done ===" forth:cr
     ['] noop is sync-done-xt ;
@@ -892,6 +885,15 @@ previous
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
+: msg-tredisplay ( n -- )
+    reset-time  0 otr-mode
+    [:  cells >r last# msg-log@ 2dup { log u }
+	dup r> - 0 max /string bounds ?DO
+	    I log - cell/ to log#
+	    I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
+	cell +LOOP
+	log free throw ;] !wrapper ;
+' msg-tredisplay msg-class is msg:redisplay
 
 msg-class class
 end-class textmsg-class
@@ -1287,7 +1289,7 @@ also net2o-base scope: /chat
     \G log: show the log, default is a screenful
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
     msg-group$ $@ ?msg-log purge-log
-    last# $@ r>  display-lastn ;
+    r>  display-lastn ;
 
 : /logstyle ( addr u -- )
     \U logstyle [+-style]   set log style
@@ -1367,7 +1369,7 @@ $Variable msg-recognizer
 previous
 
 : load-msgn ( addr u n -- )
-    >r 2dup load-msg r> display-lastn ;
+    >r load-msg r> display-lastn ;
 
 : +group ( -- )
     msg-group$ $@ dup IF
@@ -1430,8 +1432,8 @@ $B $E 2Value chat-bufs#
     msg-group$ $@ msg-groups #@ dup cell- 0 max /string
     IF  @  ELSE  drop 0  THEN ;
 
-: search-connect ( key u -- o/0 )
-    0 [: drop 2dup key| pubkey $@ key| str= o and  dup 0= ;] search-context
+: search-connect ( key u -- o/0 )  key|
+    0 [: drop 2dup pubkey $@ key| str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
 
 : search-peer ( -- chat )
