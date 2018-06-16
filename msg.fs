@@ -166,6 +166,8 @@ Sema queue-sema
 
 : display-lastn ( n -- )
     net2o:new-msg >o 0 to parent msg:redisplay dispose o> ;
+: display-sync-done ( -- )
+    rows  msg-context @ .msg:redisplay ;
 
 : display-one-msg ( addr u -- )
     net2o:new-msg >o 0 to parent
@@ -746,7 +748,7 @@ Variable ask-msg-files[]
     msg( ." chat-sync-done" forth:cr )
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
-    ?msg-log rows  display-lastn
+    ?msg-log display-sync-done
     !save-all-msgs
     ." === sync done ===" forth:cr
     ['] noop is sync-done-xt ;
@@ -1273,11 +1275,11 @@ also net2o-base scope: /chat
     \U sync [+date] [-date] synchronize logs
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
-    2drop o 0= IF msg-group$ $@ msg-groups #@
-	IF @ >o rdrop ?msg-context ELSE EXIT THEN
-    THEN o to connection
+    0 >o 2drop msg-group$ $@ msg-groups #@
+    IF @ >o rdrop ?msg-context ELSE o> EXIT THEN
+    o to connection
     ." === sync ===" forth:cr
-    net2o-code expect-msg ['] last?, [msg,] end-code ;
+    net2o-code expect-msg ['] last?, [msg,] end-code o> ;
 
 : /version ( addr u -- )
     \U version              version string
@@ -1369,7 +1371,7 @@ $Variable msg-recognizer
 previous
 
 : load-msgn ( addr u n -- )
-    >r load-msg r> display-lastn ;
+    >r 2dup load-msg ?msg-log r> display-lastn ;
 
 : +group ( -- )
     msg-group$ $@ dup IF

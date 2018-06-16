@@ -467,9 +467,7 @@ wmsg-o >o msg-table @ token-table ! o>
 #128 Value gui-msgs# \ display last 128 messages
 
 : gui-msgs ( gaddr u -- )
-    -1 to last-day
-    -1 to last-hour
-    -1 to last-minute
+    reset-time
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
     2dup load-msg ?msg-log
@@ -480,6 +478,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	THEN
     cell +LOOP
     log free throw  msgs-box >o resized vp-bottom o> ;
+
+: msg-wredisplay ( n -- )
+    drop 0 otr-mode
+    [: last# $@ gui-msgs ;] !wrapper
+    msgs-box >o [: +sync +config ;] vp-needed vp-bottom
+    +sync +config o>  ;
+' msg-wredisplay wmsg-class is msg:redisplay
 
 [IFDEF] android also android [THEN]
 
