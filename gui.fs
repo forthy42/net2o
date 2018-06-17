@@ -465,6 +465,7 @@ wmsg-o >o msg-table @ token-table ! o>
 ' wmsg-display wmsg-class to msg:display
 
 #128 Value gui-msgs# \ display last 128 messages
+0 Value chat-edit    \ chat edit field
 
 : gui-msgs ( gaddr u -- )
     reset-time
@@ -477,7 +478,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	    <err> ." invalid entry" <default> cr 2drop
 	THEN
     cell +LOOP
-    log free throw  msgs-box >o resized vp-bottom o> ;
+    log free throw  msgs-box >o resized vp-bottom o>
+    chat-edit engage ;
 
 : msg-wredisplay ( n -- )
     drop 0 otr-mode
@@ -515,7 +517,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	}}v box[]
 	{{
 	    {{ glue*lll $FFFFFFFF font-size# 40% f* }}frame dup .button3
-		{{ \normal \regular blackish "" }}edit 40%b dup value chat-edit glue*l }}glue
+		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
 	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[]
