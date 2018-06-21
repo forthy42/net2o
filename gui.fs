@@ -513,7 +513,8 @@ wmsg-o >o msg-table @ token-table ! o>
 		tex: vp-chats vp-chats glue*lll ' vp-chats }}vp vp[]
 		dup to msgs-box
 		dup font-size# 66% f* fdup vslider
-	    over >r }}h box[] r> font-size# 66% f* fdup hslider
+	    over >r }}h box[] r>
+	    font-size# 33% f* fdup hslider
 	}}v box[]
 	{{
 	    {{ glue*lll $FFFFFFFF font-size# 40% f* }}frame dup .button3
