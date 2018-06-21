@@ -294,7 +294,7 @@ Forward msg:last
     ELSE wait-task @ ?dup-IF
 	    <event >r e$, o elit, last# elit,
 	    :>avalanche r> event>
-	ELSE  drop 2drop  THEN
+	ELSE  2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
@@ -1309,6 +1309,11 @@ also net2o-base scope: /chat
 	    2drop 2r> 2drop
 	;] (send-avalanche) drop .chat
     ;] !wrapper ;
+
+: /bye ( addr u -- )
+    \U bye
+    \G bye: leaves the current chat
+    2drop -1 level# +! ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

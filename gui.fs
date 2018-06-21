@@ -259,6 +259,7 @@ $00FFFFFF ,
 : show-connected ( -- ) ;
 
 : gui-chat-connects ( -- )
+    [: up@ wait-task ! ;] IS do-connect
     [: chat-keys [: key>group
 	    2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
 	    2dup pk-peek? IF  chat-connect true !!connected!!
@@ -457,6 +458,12 @@ in net2o : new-wmsg ( o:connection -- o )
 
 wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
+
+: vp-softbottom ( o:viewport -- )
+    act >o o anim-del  set-startxy
+    0e           to vmotion-dx
+    vp-y fnegate to vmotion-dy
+    0.333e o ['] vp-scroll >animate o> ;
 
 : wmsg-display ( addr u -- )
     !date msg-tdisplay
