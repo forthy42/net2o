@@ -196,7 +196,7 @@ Variable my-beacon
     THEN  2drop
     net2o-sock
     sockaddr< alen @ routes# #@ nip 0= IF  "!"  ELSE  "."  THEN
-    beacon( ticks .ticks ."  Send '" 2dup printable? IF  type  ELSE  85type  THEN
+    beacon( ticks .ticks ."  Send '" 2dup 2dup printable? IF  type  ELSE  85type  THEN
     ." ' reply to: " sockaddr< alen @ .address forth:cr )
     0 sockaddr< alen @ sendto drop +send ;
 : !-beacon ( addr u -- ) 2drop
