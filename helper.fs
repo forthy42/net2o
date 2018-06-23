@@ -76,10 +76,12 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     ?dup-IF <event elit, :>disconnect ?query-task event> THEN
     <event :>renat main-up@ event> 2drop ;
 
+: +dht-beacon ( -- )
+    beacons @ 0= IF  ret-addr be@ ['] dht-beacon 0 .add-beacon  THEN ;
+
 : dht-connect ( -- )
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
-    $8 $8 dhtnick $@ nick>pk dhtroot
-    beacons @ 0= IF  return-addr be@ ['] dht-beacon 0 .add-beacon  THEN
+    $8 $8 dhtnick $@ nick>pk dhtroot +dht-beacon
     pk:connect  o to dht-connection ;
 : dht-disconnect ( -- )
     0 addr dht-connection !@  ?dup-IF  .disconnect-me  THEN ;
@@ -144,7 +146,9 @@ true Value connected?
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
-    beacons #offs 0 .!my-addr announce-me renat
+	beacons #offs
+	dht-connection .+dht-beacon
+	0 .!my-addr announce-me renat
     [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
     beacon( ." done renat" cr ) ;
 
@@ -192,7 +196,8 @@ Variable my-beacon
     THEN  2drop
     net2o-sock
     sockaddr< alen @ routes# #@ dup 0= IF  2drop "!"  THEN
-    beacon( ticks .ticks ."  Send '" 2dup 85type ." ' reply to: " sockaddr< alen @ .address forth:cr )
+    beacon( ticks .ticks ."  Send '" 2dup printable? IF  type  ELSE  85type  THEN
+    ." ' reply to: " sockaddr< alen @ .address forth:cr )
     0 sockaddr< alen @ sendto drop +send ;
 : !-beacon ( addr u -- ) 2drop
     \G I got a reply, my address is unknown

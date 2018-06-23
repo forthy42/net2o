@@ -1396,12 +1396,13 @@ Forward handle-beacon+hash
     sender-task 0= IF  send-read-packet  ELSE  try-read-packet-wait  THEN
     dup minpacket# u>= IF
 	( nat( ." packet from: " sockaddr< alen @ .address cr )
-	over packet-size over <>
-	header( ~~ !!size!! )else( IF  2drop 0 0 EXIT  !!size!!  THEN )
+	over packet-size tuck u<
+	header( ~~ !!size!! )else( IF  2drop 0 0 EXIT  THEN )
 	+next
 	EXIT
-    THEN
-    dup $19 u<= IF    handle-beacon+hash   0 0  EXIT  THEN ;
+    ELSE
+	handle-beacon+hash   0 0
+    THEN ;
 
 0 Value dump-fd
 
