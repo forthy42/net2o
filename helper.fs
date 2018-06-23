@@ -77,7 +77,7 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     <event :>renat main-up@ event> 2drop ;
 
 : +dht-beacon ( -- )
-    beacons @ 0= IF  ret-addr be@ ['] dht-beacon 0 .add-beacon  THEN ;
+    beacons# @ 0= IF  ret-addr be@ ['] dht-beacon 0 .add-beacon  THEN ;
 
 : dht-connect ( -- )
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
@@ -146,7 +146,7 @@ true Value connected?
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
-	beacons #offs
+	beacons# #offs
 	dht-connection .+dht-beacon
 	0 .!my-addr announce-me renat
     [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
@@ -195,18 +195,18 @@ Variable my-beacon
 	THEN
     THEN  2drop
     net2o-sock
-    sockaddr< alen @ routes# #@ dup 0= IF  2drop "!"  THEN
+    sockaddr< alen @ routes# #@ nip 0= IF  "!"  ELSE  "."  THEN
     beacon( ticks .ticks ."  Send '" 2dup printable? IF  type  ELSE  85type  THEN
     ." ' reply to: " sockaddr< alen @ .address forth:cr )
     0 sockaddr< alen @ sendto drop +send ;
 : !-beacon ( addr u -- ) 2drop
     \G I got a reply, my address is unknown
     beacon( ticks .ticks ."  Got unknown reply: " sockaddr< alen @ .address forth:cr )
-    sockaddr< alen @ beacons #@ d0<> IF  last# do-beacon  THEN ;
+    sockaddr< alen @ beacons# #@ d0<> IF  last# do-beacon  THEN ;
 : .-beacon ( addr u -- ) 2drop
     \G I got a reply, my address is known
     beacon( ticks .ticks ."  Got known reply: " sockaddr< alen @ .address forth:cr )
-    sockaddr< alen @ beacons #@ IF
+    sockaddr< alen @ beacons# #@ IF
 	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
     THEN ;
 : >-beacon ( addr u -- )

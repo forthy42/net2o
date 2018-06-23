@@ -1685,14 +1685,14 @@ event: :>throw ( error -- ) throw ;
 #50.000.000.000 d>64 64Value beacon-ticks# \ 50s beacon tick rate
 #2.000.000.000 d>64 64Value beacon-short-ticks# \ 2s short beacon tick rate
 
-Variable beacons \ destinations to send beacons to
+hash: beacons# \ destinations to send beacons to
 Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 : next-beacon ( -- 64tick )
-    64#-1 beacons [: cell+ $@ drop 64@ 64umin ;] #map ;
+    64#-1 beacons# [: cell+ $@ drop 64@ 64umin ;] #map ;
 
 : send-beacons ( -- ) !ticks
-    beacons [: { beacon }
+    beacons# [: { beacon }
 	beacon $@ { baddr u }
 	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
 	    beacon( ticks .ticks ."  send beacon to: " baddr u .address )
@@ -1714,15 +1714,15 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 : +beacon ( sockaddr len xt -- )
     >r ticks beacon-short-ticks# 64+ o r> { 64^ dest w^ obj w^ xt }
     beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
-    2dup beacons #@ d0= IF
-	dest 1 64s cell+ cell+ 2swap beacons #!
+    2dup beacons# #@ d0= IF
+	dest 1 64s cell+ cell+ 2swap beacons# #!
     ELSE
 	obj 2 cells last# cell+ $+! 2drop
     THEN ;
 
 : o-beacon ( -- )
     beacon( ." remove beacons: " o hex. cr )
-    beacons [: { bucket } bucket cell+ $@ 1 64s /string bounds ?DO
+    beacons# [: { bucket } bucket cell+ $@ 1 64s /string bounds ?DO
 	    I @ o = IF
 		bucket cell+ I over $@ drop - 2 cells $del  LEAVE  THEN
 	2 cells +LOOP

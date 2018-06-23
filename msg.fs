@@ -1262,7 +1262,7 @@ also net2o-base scope: /chat
     \U beacons              list beacons
     \G beacons: list all beacons
     2drop ." === beacons ===" forth:cr
-    beacons [: dup $@ .address space
+    beacons# [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
 	  I 2@ ?dup-IF ..con-id space THEN .name
