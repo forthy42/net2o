@@ -93,12 +93,12 @@ $00d8607f5 netlink-addr nl_groups l!
 Variable netlink-done?   netlink-done? on
 Variable netlink-again?  netlink-again? off
 
-event: ->netlink ( -- )
+event: :>netlink ( -- )
     netlink-again? @ IF
 	 netlink-done? off netlink-again? off #0. dht-beacon
     ELSE  netlink-done? on  THEN ;
 : renat-complete ( -- )
-    <event ->netlink netlink-task event> ;
+    <event :>netlink netlink-task event> ;
 
 \ netlink watchdog
 
@@ -129,7 +129,8 @@ event: ->netlink ( -- )
 	    nat( ." new preferred IP: " )
 	    netlink-done? @ IF
 		nat( ." dht-beacon" cr )
-		netlink-done? off netlink-again? off #0. dht-beacon  !!0depth!!
+		netlink-done? off netlink-again? off
+		beacons# [: >r ticks r> $@ drop 64! ;] #map !!0depth!!
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN

@@ -72,8 +72,6 @@ Forward renat-all
 event: :>renat ( -- )  renat-all ;
 event: :>disconnect ( addr -- )  .disconnect-me ;
 : dht-beacon ( addr u -- )
-    0 addr dht-connection !@
-    ?dup-IF <event elit, :>disconnect ?query-task event> THEN
     <event :>renat main-up@ event> 2drop ;
 
 : +dht-beacon ( -- )
