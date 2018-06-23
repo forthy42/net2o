@@ -130,7 +130,8 @@ event: :>netlink ( -- )
 	    netlink-done? @ IF
 		nat( ." dht-beacon" cr )
 		netlink-done? off netlink-again? off
-		beacons# [: >r ticks r> $@ drop 64! ;] #map !!0depth!!
+		ticks beacons# [: >r 64dup r> $@ drop 64! ;] #map
+		64drop !!0depth!!
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN
