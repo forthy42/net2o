@@ -1731,6 +1731,10 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 	THEN
     ;] #map ;
 
+: beacons-now! ( -- )
+    ticks beacons# [: >r 64dup r> cell+ $@ drop 64! ;] #map
+    64drop ;
+
 :noname o-beacon defers extra-dispose ; is extra-dispose
 
 : gen-beacon-hash ( -- hash u )
