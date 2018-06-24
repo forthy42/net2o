@@ -1692,17 +1692,16 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
     64#-1 beacons# [: cell+ $@ drop 64@ 64umin ;] #map ;
 
 : send-beacons ( -- ) !ticks
-    beacons# [: { beacon }
-	beacon $@ { baddr u }
-	beacon cell+ $@ drop 64@ ticker 64@ 64u<= IF
+    beacons# [: dup $@ { baddr u } cell+ $@ drop { beacon }
+	beacon 64@ ticker 64@ 64u<= IF
 	    beacon( ticks .ticks ."  send beacon to: " baddr u .address )
-	    ticker 64@ beacon-short-ticks# 64+ beacon cell+ $@ drop 64!
+	    ticker 64@ beacon-short-ticks# 64+ beacon 64!
 	    net2o-sock
-	    beacon cell+ $@ drop 64'+ @ >o o IF
-		beacon-hash $@ beacon( ."  hash: " 2dup 85type )
+	    beacon 64'+ @ ?dup-IF
+		.beacon-hash $@ beacon( ."  hash: " 2dup 85type )
 	    ELSE
 		s" ?"
-	    THEN  o>
+	    THEN
 	    beacon( cr )
 	    0 baddr u sendto drop +send
 	THEN

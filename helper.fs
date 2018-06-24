@@ -146,7 +146,7 @@ true Value connected?
     [IFDEF] renat-complete [: [THEN]
 	0 .!my-addr announce-me \ if we succeed here, we can try the rest
 	beacons# #offs
-	dht-connection .+dht-beacon
+	0 >o dhtroot +dht-beacon o>
 	renat
     [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
     beacon( ." done renat" cr ) ;
