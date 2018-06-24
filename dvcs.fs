@@ -816,8 +816,17 @@ event: :>dvcs-sync-done ( o -- ) >o
 : +dvcs-sync-done ( -- )
     ['] dvcs-sync-done is sync-done-xt ;
 
+also net2o-base
+: dvcs-join, ( -- )
+    [: msg-join sync-ahead?, ;] [msg,] ;
+previous
+
+: dvcs-greet ( -- )
+    net2o-code expect-msg
+    log !time end-with dvcs-join, get-ip end-code ;
+
 : dvcs-connect ( addr u -- )
-    1 dvcs-request# !  dvcs-bufs# chat#-connect ;
+    1 dvcs-request# !  dvcs-bufs# chat#-connect dvcs-greet ;
 
 : dvcs-connects ( -- )
     chat-keys [: key>group ?load-msgn
@@ -869,7 +878,7 @@ event: :>dvcs-sync-done ( o -- ) >o
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
-    leave-chats
+    msg-group$ $@ >group last# silent-leave-chat
     net2o:dispose-dvcs o> ;
 
 0 [IF]

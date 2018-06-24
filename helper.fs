@@ -82,7 +82,8 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     $8 $8 dhtnick $@ nick>pk dhtroot +dht-beacon
     pk:connect  o to dht-connection ;
 : dht-disconnect ( -- )
-    0 addr dht-connection !@  ?dup-IF  .disconnect-me  THEN ;
+    0 addr dht-connection !@  ?dup-IF
+	>o o to connection disconnect-me o>  THEN ;
 
 Variable announced
 : subme ( -- )  announced @ IF

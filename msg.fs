@@ -853,6 +853,9 @@ also net2o-base
     [: msg-leave
       sign[ msg-start "left" $, msg-action msg-otr> ;] [msg,] ;
 
+: silent-leave, ( -- )
+    ['] msg-leave [msg,] ;
+
 : left, ( addr u -- )
     key| $, msg-signal "left (timeout)" $, msg-action ;
 previous
@@ -866,8 +869,9 @@ previous
     end-code ;
 
 : send-leave ( -- )
-    net2o-code expect-msg leave,
-    cookie+request end-code| ;
+    net2o-code expect-msg leave, end-code| ;
+: send-silent-leave ( -- )
+    net2o-code expect-msg silent-leave, end-code| ;
 
 : [group] ( xt -- flag )
     msg-group$ $@ msg-groups #@ IF
@@ -1409,10 +1413,10 @@ $B $E 2Value chat-bufs#
     +resend-msg +flow-control ;
 
 : chat#-connect ( addr u buf1 buf2 --- )
-    pk-connect connection >o rdrop +chat-control  +group greet ;
+    pk-connect connection >o rdrop +chat-control  +group ;
 
 : chat-connect ( addr u -- )
-    chat-bufs# chat#-connect ;
+    chat-bufs# chat#-connect greet ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
@@ -1523,6 +1527,13 @@ previous
 	cell of  nip @ >o o to connection send-leave o>  endof
 	drop @ .send-reconnects
     0 endcase ;
+: send-silent-reconnect ( group -- )
+    dup cell+ $@
+    case
+	0    of  2drop  endof
+	cell of  nip @ >o o to connection send-silent-leave o>  endof
+	drop @ .send-reconnects
+    0 endcase ;
 : disconnect-group ( group -- ) >r
     r@ cell+ $@ bounds ?DO  I @  cell +LOOP
     r> cell+ $@len 0 +DO  >o o to connection
@@ -1536,6 +1547,8 @@ previous
 
 : leave-chat ( group -- )
     dup send-reconnect disconnect-group ;
+: silent-leave-chat ( group -- )
+    dup send-silent-reconnect disconnect-group ;
 
 : leave-chats ( -- )
     msg-groups ['] leave-chat #map ;
