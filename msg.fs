@@ -1317,7 +1317,7 @@ also net2o-base scope: /chat
 : /bye ( addr u -- )
     \U bye
     \G bye: leaves the current chat
-    2drop -1 level# +! ;
+    2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ;
 }scope
 
 : ?slash ( addr u -- addr u flag )

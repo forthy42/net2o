@@ -17,11 +17,9 @@
 
 also android also jni
 :noname  defers android-network
-    beacons @ IF
-	network-info dup  IF  ]xref
-	    beacons-now! !!0depth!!  true
-	THEN   to connected?
-    THEN ;
+    network-info dup  IF  ]xref
+	beacons-now! !!0depth!!  true
+    THEN   to connected? ;
 is android-network
 previous previous
 
