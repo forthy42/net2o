@@ -598,22 +598,22 @@ warnings !
     ".n2o" $1FF init-dir drop
     ".n2o/files" touch
     ?nextarg 0= IF  pad $1000 get-dir 2dup '/' -scan nip /string THEN
-    net2o:new-dvcs >o project:project$ $!
+    dvcs:new-dvcs >o project:project$ $!
     ?nextarg 0= IF  "master"  THEN  project:branch$ $!
-    save-project  net2o:dispose-dvcs o> ;
+    save-project  dvcs:dispose-dvcs o> ;
 
 : add ( -- )
     \U add file1 .. filen
     \G add: add files to the dvcs project in the current folder
-    net2o:new-dvcs >o files>dvcs
-    ['] dvcs-add arg-loop  net2o:dispose-dvcs o> ;
+    dvcs:new-dvcs >o files>dvcs
+    ['] dvcs-add arg-loop  dvcs:dispose-dvcs o> ;
 
 : ref ( -- )
     \U ref file1 .. filen
     \G ref: add files to the dvcs project in the current folder
     \G ref: as references
-    net2o:new-dvcs >o files>dvcs
-    ['] dvcs-ref arg-loop  net2o:dispose-dvcs o> ;
+    dvcs:new-dvcs >o files>dvcs
+    ['] dvcs-ref arg-loop  dvcs:dispose-dvcs o> ;
 
 : ci ( -- )
     \U ci "message"

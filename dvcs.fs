@@ -93,18 +93,22 @@ msg-class class
 end-class commit-class
 
 msg-class class
-    field: match-tag$
-    field: match-flag
-    field: match-id$
+    scope: match
+    field: tag$
+    field: flag
+    field: id$
+    }scope
 end-class search-class
 
 msg-class class
-    field: log-sig$
-    field: log-tag$
-    field: log-id$
-    field: log-action$
-    field: log-text$
-    field: log-chain$
+    scope: dvcs-log
+    field: sig$
+    field: tag$
+    field: id$
+    field: action$
+    field: text$
+    field: chain$
+    }scope
 end-class dvcs-log-class
 
 : /name ( addr u -- addr' u' )
@@ -260,22 +264,23 @@ dvcs-adds to dvcs:write
 :noname 2drop drop 64drop ; dvcs-adds to dvcs:unzip
 :noname ( addr u -- ) dvcs:adds[] $+[]! ; dvcs-adds to dvcs:add
 
-in net2o : new-dvcs ( -- o )
+scope{ dvcs
+: new-dvcs ( -- o )
     dvcs-class new >o  dvcs-table @ token-table !
     commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
     search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
     o o> ;
-in net2o : new-dvcs-adds ( -- o )
+: new-dvcs-adds ( -- o )
     dvcs-adds new >o  dvcs-table @ token-table !  o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $free dvcs:out-files$ $free  dvcs:patch$ $free ;
-in net2o : dispose-commit ( o:commit -- )
+: dispose-commit ( o:commit -- )
     id$ $free  re$ $free  object$ $free  dispose ;
-in net2o : dispose-search ( o:commit -- )
-    match-id$ $free  match-tag$ $free  dispose ;
-in net2o : dispose-dvcs-adds ( o:dvcs -- )
+: dispose-search ( o:commit -- )
+    match:id$ $free  match:tag$ $free  dispose ;
+: dispose-dvcs-adds ( o:dvcs -- )
     dvcs:adds[] $[]free dispose ;
-in net2o : dispose-dvcs ( o:dvcs -- )
+: dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $free  dvcs:message$ $free
     dvcs:files# #offs  dvcs:oldfiles# #offs
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
@@ -284,9 +289,10 @@ in net2o : dispose-dvcs ( o:dvcs -- )
     dvcs:id$ $free  dvcs:oldid$ $free
     project:revision$ $free   project:chain$ $free
     project:branch$ $free  project:project$ $free
-    dvcs:commits @ .net2o:dispose-commit
-    dvcs:searchs @ .net2o:dispose-search
+    dvcs:commits @ .dvcs:dispose-commit
+    dvcs:searchs @ .dvcs:dispose-search
     dispose ;
+}scope
 
 Variable new-files[]
 Variable ref-files[]
@@ -506,20 +512,20 @@ Variable patch-in$
 
 : 3drop  2drop drop ;
 
-:noname match-tag$ $@ str= match-flag ! ; search-class to msg:tag
-:noname match-flag @ IF  match-id$ $!  ELSE  2drop  THEN ; search-class to msg:id
+:noname match:tag$ $@ str= match:flag ! ; search-class to msg:tag
+:noname match:flag @ IF  match:id$ $!  ELSE  2drop  THEN ; search-class to msg:id
 ' 3drop search-class to msg:object
 
 ' 2drop dvcs-log-class to msg:re
 ' 2drop dvcs-log-class to msg:coord
 ' 3drop dvcs-log-class to msg:object
 ' noop  dvcs-log-class to msg:end
-:noname log-sig$    $! ; dvcs-log-class to msg:start
-:noname log-tag$    $! ; dvcs-log-class to msg:tag
-:noname log-id$     $! ; dvcs-log-class to msg:id
-:noname log-text$   $! ; dvcs-log-class to msg:text
-:noname log-action$ $! ; dvcs-log-class to msg:action
-:noname log-chain$  $! ; dvcs-log-class to msg:chain
+:noname dvcs-log:sig$    $! ; dvcs-log-class to msg:start
+:noname dvcs-log:tag$    $! ; dvcs-log-class to msg:tag
+:noname dvcs-log:id$     $! ; dvcs-log-class to msg:id
+:noname dvcs-log:text$   $! ; dvcs-log-class to msg:text
+:noname dvcs-log:action$ $! ; dvcs-log-class to msg:action
+:noname dvcs-log:chain$  $! ; dvcs-log-class to msg:chain
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
@@ -557,8 +563,8 @@ User id-check# \ check hash
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
 	    read-enc-hashed
-	    clean-delta  c-state off patch-in$ $@ do-cmd-loop
-	    clean-delta
+	    dvcs:clean-delta  c-state off patch-in$ $@ do-cmd-loop
+	    dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;
 
@@ -575,41 +581,44 @@ User id-check# \ check hash
     pull-readin  $@ id>branches
     branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
 
-in net2o : new-dvcs-log ( -- o )
+scope{ dvcs
+: new-dvcs-log ( -- o )
     dvcs-log-class new >o msg-table @ token-table ! o o> ;
-in net2o : dispose-dvcs-log ( o:log -- )
-    log-sig$    $free  log-tag$  $free  log-id$    $free
-    log-action$ $free  log-text$ $free  log-chain$ $free
-    dispose ;
+: clear-log ( -- )
+    dvcs-log:sig$    $free  dvcs-log:tag$  $free  dvcs-log:id$    $free
+    dvcs-log:action$ $free  dvcs-log:text$ $free  dvcs-log:chain$ $free ;
+: dispose-dvcs-log ( o:log -- )
+    clear-log dispose ;
+}scope
 
 : display-logn ( addr u n -- )
     project:branch$ $@ { d: branch }
-    net2o:new-dvcs-log >o
+    dvcs:new-dvcs-log >o
     cells >r ?msg-log  last# msg-log@ 2dup { log u }
     dup r> - 0 max dup >r /string r> cell/ -rot bounds ?DO
-	I $@ ['] msg:display catch
+	dvcs:clear-log  I $@ ['] msg:display catch
 	IF  ." invalid entry" cr 2drop
 	ELSE
-	    branch log-tag$ $@ str= IF
-		dup 0 .r ." : [" log-id$ $@ 85type ." ] "
-		log-sig$ $@ 2dup startdate@ .ticks
-		log-chain$ $@ dup IF
+	    branch dvcs-log:tag$ $@ str= IF
+		dup 0 .r ." : [" dvcs-log:id$ $@ 85type ." ] "
+		dvcs-log:sig$ $@ 2dup startdate@ .ticks
+		dvcs-log:chain$ $@ dup IF
 		    2dup sighash? IF  <info>  ELSE  <err>  THEN
 		    ." <-" drop le-64@ .ticks  <default>
 		ELSE  2drop  THEN  space
-		log-action$ $. ." : " log-text$ $. space
+		dvcs-log:action$ $. ." : " dvcs-log:text$ $. space
 		.key-id
 		cr
 	    THEN
 	THEN  1+
     cell +LOOP  drop
-    log free net2o:dispose-dvcs-log o> throw ;
+    log free dvcs:dispose-dvcs-log o> throw ;
 
 : dvcs-log ( -- )
-    net2o:new-dvcs >o  config>dvcs
+    dvcs:new-dvcs >o  config>dvcs
     project:project$ $@ 2dup load-msg
     config:logsize# @ display-logn
-    net2o:dispose-dvcs o> ;
+    dvcs:dispose-dvcs o> ;
 
 also net2o-base
 : (dvcs-newsentry) ( type -- )
@@ -675,14 +684,14 @@ previous
     THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
-    net2o:new-dvcs >o (dvcs-ci)  net2o:dispose-dvcs o> ;
+    dvcs:new-dvcs >o (dvcs-ci)  dvcs:dispose-dvcs o> ;
 
 : dvcs-diff ( -- )
-    net2o:new-dvcs >o dvcs:oldid$ dvcs-readin
+    dvcs:new-dvcs >o dvcs:oldid$ dvcs-readin
     ['] compute-diff gen-cmd$ 2drop
     dvcs( ." ===== diff len: " dvcs:patch$ $@len . ." =====" cr )
     dvcs:in-files$ dvcs:patch$ color-bpatch$2
-    clean-up  net2o:dispose-dvcs o> ;
+    clean-up  dvcs:dispose-dvcs o> ;
 
 : ci-args ( -- message u )
     ?nextarg 0= IF "untitled checkin" THEN
@@ -701,11 +710,11 @@ previous
 	"~+/.n2o/reffiles" append-line  THEN ;
 
 : dvcs-snap ( addr u -- )
-    net2o:new-dvcs >o  dvcs:message$ $!
+    dvcs:new-dvcs >o  dvcs:message$ $!
     config>dvcs  files>dvcs
     dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
     ['] compute-diff gen-cmd$ >id-revision
-    dvcs-snapentry  save-project  clean-up net2o:dispose-dvcs o> ;
+    dvcs-snapentry  save-project  clean-up dvcs:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
@@ -751,9 +760,9 @@ previous
     save-project  filelist-out ;
 
 : dvcs-co ( addr u -- ) \ checkout revision
-    base85>$  net2o:new-dvcs >o
+    base85>$  dvcs:new-dvcs >o
     config>dvcs   dvcs:id$ $! dvcs:id$  dvcs-readin  co-rest
-    net2o:dispose-dvcs o> ;
+    dvcs:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
     last# msg-log@ over { log } bounds ?DO
@@ -762,11 +771,11 @@ previous
 : search-last-rev ( -- addr u )
     project:project$ $@ ?msg-log
     project:branch$ $@
-    dvcs:searchs @ >o match-tag$ $!
-    chat>searchs-loop match-id$ $@ o> ;
+    dvcs:searchs @ >o match:tag$ $!
+    chat>searchs-loop match:id$ $@ o> ;
 
 : dvcs-up ( -- ) \ checkout latest revision
-    net2o:new-dvcs >o
+    dvcs:new-dvcs >o
     pull-readin  files>dvcs  new>dvcs  dvcs?modified
     new-files[] $[]# del-files[] $[]# d0= IF
 	search-last-rev  2dup dvcs:id$ $!
@@ -776,13 +785,13 @@ previous
     ELSE
 	." Local changes, don't update" cr
     THEN
-    net2o:dispose-dvcs o> ;
+    dvcs:dispose-dvcs o> ;
 
 : dvcs-revert ( -- ) \ restore to last revision
-    net2o:new-dvcs >o
+    dvcs:new-dvcs >o
     pull-readin  dvcs:oldid$ $@  2dup dvcs:id$ $!
     id>branches  co-rest
-    net2o:dispose-dvcs o> ;
+    dvcs:dispose-dvcs o> ;
 
 : hash-add ( addr u -- )
     slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
@@ -870,7 +879,7 @@ previous
     connection .get-needed-files ;
 
 : handle-fetch ( -- )  ?.net2o/objects
-    net2o:new-dvcs >o  pull-readin
+    dvcs:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
     0 >o dvcs-connects +dvcs-sync-done
 \    net2o-code expect-reply ['] last?, [msg,] end-code
@@ -879,7 +888,7 @@ previous
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
     msg-group$ $@ >group last# silent-leave-chat
-    net2o:dispose-dvcs o> ;
+    dvcs:dispose-dvcs o> ;
 
 0 [IF]
 Local Variables:
