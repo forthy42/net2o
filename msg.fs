@@ -829,10 +829,10 @@ also net2o-base
     ELSE  2drop drop  THEN  r> to last# ;
 
 : last, ( -- )
-    msg-group  64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
+    64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group  last-signdate@ { 64: date }
+    last-signdate@ { 64: date }
     64#0 lit, date lit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
 	date lit, 64#-1 lit, 1 ulit, msg-last?

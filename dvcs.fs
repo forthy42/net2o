@@ -827,7 +827,7 @@ event: :>dvcs-sync-done ( o -- ) >o
 
 also net2o-base
 : dvcs-join, ( -- )
-    [: msg-join sync-ahead?, ;] [msg,] ;
+    [: msg-join last?, ;] [msg,] ;
 previous
 
 : dvcs-greet ( -- )
