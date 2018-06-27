@@ -254,7 +254,8 @@ $00FFFFFF ,
 
 : refresh-top ( -- )
     +sync +lang
-    top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize o> ;
+    top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize
+    false to grab-move? o> ;
 
 : show-connected ( -- ) ;
 
