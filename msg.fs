@@ -832,7 +832,6 @@ also net2o-base
     64#0 64#-1 ask-last# last-msgs@ >r $, r> ulit, msg-last ;
 
 : last?, ( -- )
-    msg-group
     last-signdate@ { 64: date }
     64#0 lit, date lit, ask-last# ulit, msg-last?
     date 64#-1 64<> IF
@@ -1284,7 +1283,7 @@ also net2o-base scope: /chat
     IF @ >o rdrop ?msg-context ELSE o> EXIT THEN
     o to connection
     ." === sync ===" forth:cr
-    net2o-code expect-msg ['] last?, [msg,] end-code o> ;
+    net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
 
 : /version ( addr u -- )
     \U version              version string
