@@ -91,7 +91,8 @@ forward gui-msgs
 	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
     ELSE
 	0 >o 0 secret-key init-client >raw-key
-	read-chatgroups announce-me o>
+	read-chatgroups announce-me
+	o>
 	\ ." Right passphrase" cr
 	show-nicks
 	true
@@ -257,7 +258,7 @@ $00FFFFFF ,
     top-widget >o htop-resize  <draw-init draw-init draw-init> htop-resize
     false to grab-move? o> ;
 
-: show-connected ( -- ) ;
+: show-connected ( -- ) main-up@ connection .wait-task ! ;
 
 : gui-chat-connects ( -- )
     [: up@ wait-task ! ;] IS do-connect
@@ -267,13 +268,16 @@ $00FFFFFF ,
 	    ELSE  2drop  THEN ;] $[]map ;] catch
     [ ' !!connected!! >body @ ]L = IF  show-connected  THEN ;
 
+event: :>chat-connects  gui-chat-connects ;
+
 : group[] ( box group -- box )
     [:  top-widget >r
 	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
 	[: [: 2over type '@' emit type ;] $tmp chat-keys $+[]! ;] $[]map
 	gui-msgs chat-frame to top-widget refresh-top
-	gui-chat-connects
+	<event :>chat-connects ?query-task event>
+	\ gui-chat-connects
 	widgets-loop \ connection .send-leave
 	leave-chats
 	r> to top-widget +sync +config

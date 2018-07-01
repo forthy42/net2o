@@ -79,6 +79,7 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
 
 : dht-connect ( -- )
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
+    tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk dhtroot +dht-beacon
     pk:connect  o to dht-connection ;
 : dht-disconnect ( -- )
@@ -140,7 +141,6 @@ true Value connected?
 \ announce and renat
 
 : announce-me ( -- )
-    tick-adjust 64@ 64-0= IF  +get-time  THEN
     dht-connect replace-me -other  announced on ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
