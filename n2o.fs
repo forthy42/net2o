@@ -483,13 +483,13 @@ warnings !
     over c@ '@' <> IF  2drop ?nextarg drop
 	2dup s" =" str= IF  2drop
 	ELSE  base85>$ to groups:id$  THEN
-    ELSE  $20 rng$ to groups:id$  THEN
+    ELSE  gen-admin-key
+    THEN
     BEGIN  ?@nextarg  WHILE  nick>pk key| groups:member[] $+[]!  REPEAT
     ?peekarg 0= IF  save-chatgroups  EXIT  THEN
     s" admin" str= IF  ?nextarg drop 2drop
-	?nextarg  IF  base85>$ groups:admin sec!
-	    keysize addr groups:id$ $!len
-	    groups:admin sec@ drop groups:id$ drop sk>pk
+	?nextarg  IF
+	    base85>$ groups:admin sec! admin>pk
 	THEN
     THEN
     ?peekarg 0= IF  save-chatgroups  EXIT  THEN

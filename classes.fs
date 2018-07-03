@@ -513,7 +513,7 @@ KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
 
 cmd-class class
     scope: groups
-    $value: id$
+    $value: id$ \ is the pubkey
     field: member[]
     field: admin     \ secret key, only known to the admins
     64value: perms#

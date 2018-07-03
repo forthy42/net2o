@@ -522,6 +522,14 @@ also net2o-base
 
 previous
 
+: admin>pk ( -- )
+    groups:admin sec@ drop dup sk-mask
+    keysize addr groups:id$ $!len
+    groups:id$ drop sk>pk ;
+
+: gen-admin-key ( -- )
+    $20 rng$ groups:admin sec! admin>pk ;
+
 : save-chatgroups ( -- )
     .chats/group enc-filename $!
     [: group# ['] serialize-chatgroup #map ;] gen-cmd enc-file $!buf
