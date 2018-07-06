@@ -9,6 +9,7 @@ D = $(CURDIR)/debian/net2o
 DL = $(CURDIR)/debian/net2o-libcc
 DT = $(CURDIR)/debian/net2o-tests
 DG = $(CURDIR)/debian/net2o-gui
+SHELL	 = /bin/bash
 
 %:
 	dh $@ 

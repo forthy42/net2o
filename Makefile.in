@@ -35,7 +35,6 @@ CFLAGS	 = -O3 -fomit-frame-pointer
 HOST     = 
 FAST     = @FAST@
 FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
-SHELL	 = /bin/bash
 
 SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  hash-table.fs keccak-small.fs kregion.fs n2o.fs addr.fs classes.fs \
