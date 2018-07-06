@@ -668,7 +668,7 @@ warnings !
 : log ( -- )
     \U log
     \G log: print out log of current branch
-    ?get-me ?cr dvcs-log ;
+    ?get-me ?cr .dvcs-log ;
 
 \ manage your hash objects directly (no list available)
 

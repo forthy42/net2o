@@ -614,7 +614,7 @@ scope{ dvcs
     cell +LOOP  drop
     log free dvcs:dispose-dvcs-log o> throw ;
 
-: dvcs-log ( -- )
+: .dvcs-log ( -- )
     dvcs:new-dvcs >o  config>dvcs
     project:project$ $@ 2dup load-msg
     config:logsize# @ display-logn
