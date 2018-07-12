@@ -158,12 +158,14 @@ mean higher roots, so with _m_ dimensions, it is _m\*(n)^(1/m)-m._
 ![Stage 1](../doc/ledger-stage1.svg)
 ![Stage 2](../doc/ledger-stage2.svg)
 
-In each stage, the ledgers of the same color are connected.  The
-balance is calculated only for the group of connected ledgers; the
-signatures for the verified balance goes into the next block.  By
-interleaving the two modes of connectivity, after only two cycles (or
-_m_ in the general case), all previous records from all ledgers are
-chained together.
+In each stage, the ledgers of the same color are connected (that is the actual
+shard of the database, operations within the shard are atomic).  The balance
+is calculated only for the group of connected ledgers; the signatures for the
+verified balance goes into the next block.  By interleaving the two modes of
+connectivity, after only two cycles (or _m_ in the general case), all previous
+records from all ledgers are chained together (in a hypercube, not a linear
+chain).  Changing one block later requires to change the signatures of all
+active blocks.
 
 Now you have to route your coin to a destination.  There are two possible
 approaches: Let the ledgers do that for you (which is then out of your control
@@ -196,8 +198,8 @@ double booking quite well with his two heads.
 Note that unlike the lightning network, there is no need to worry about the
 transactions: they are all public.  Nothing can be lost or stolen.  The
 topology is derived from the pubkey values, and not from randomly connected
-peers.  The full nodes who want to be responsible for a certain part of the
-ledgers know where to connect to.
+peers.  The “full nodes” (rather: shard nodes) who want to be responsible for
+a certain part of the ledgers know where to connect to.
 
 ## Zero-Knowledge Proof?
 

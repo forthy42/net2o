@@ -471,7 +471,7 @@ wmsg-o >o msg-table @ token-table ! o>
     0.333e o ['] vp-scroll >animate o> ;
 
 : wmsg-display ( addr u -- )
-    !date msg-tdisplay
+    msg-tdisplay
     msgs-box >o [: +sync +config ;] vp-needed vp-bottom
     +sync +config o> ;
 ' wmsg-display wmsg-class to msg:display
@@ -503,7 +503,9 @@ wmsg-o >o msg-table @ token-table ! o>
 [IFDEF] android also android [THEN]
 
 : chat-edit-enter ( o:edit-w -- )
-    text$ do-chat-cmd? 0= IF  avalanche-text  THEN ;
+    text$ dup IF  do-chat-cmd? 0= IF  avalanche-text  THEN
+    ELSE  2drop  THEN
+    64#-1 line-date 64!  $lastline $free ;
 
 {{ $80FFFFFF pres-frame
     {{
