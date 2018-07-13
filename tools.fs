@@ -532,7 +532,7 @@ $40 Constant #splitminute
 		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
+    { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 : $del[]# ( addr u $array[] rest -- )
     \G delete O(log(n)) from pre-sorted array
     { a[] rest } 0 a[] $[]#
@@ -556,7 +556,7 @@ $40 Constant #splitminute
 		$# EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
+    { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 : $del[]/ ( addr u $array offset -- )
     \G delete O(log(n)) from pre-sorted array
     { a[] rest } 0 a[] $[]#
@@ -602,7 +602,7 @@ $10 Constant datesize#
 		ELSE  2drop  -1  THEN EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
+    { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
 
 : $ins[]sig ( addr u $array -- pos ) sigsize# $ins[]sig# ;
     \G @var{pos} is the insertion offset or -1 if not inserted
@@ -628,7 +628,7 @@ $10 Constant datesize#
 		0<  ELSE  64u<  THEN
 	    IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
-    0 { w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]!  r> ;
+    { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]!  r> ;
 : $search[]date ( ticks $array -- pos )
     \G search O(log(n)) in pre-sorted array
     \G @var{pos} is the first location of the item >= the requested date

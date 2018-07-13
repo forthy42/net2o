@@ -23,7 +23,7 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 	I c@ b85digit over * rot + swap 85 *
     LOOP  drop ;
 : (base85>$) ( addr u -- addr' u' )  bounds ?DO
-	I I' over - 5 umin dup >r base85>n 0 { w^ x } x le-l! x r> 4 5 */ type
+	I I' over - 5 umin dup >r base85>n { | w^ x } x le-l! x r> 4 5 */ type
     5 +LOOP ;
 : base85>$ ( addr u -- addr' u' ) ['] (base85>$) $tmp ;
 

@@ -550,7 +550,7 @@ warnings !
 	    see:table @ >r
 	    ." ===== " 2dup forth:type ."  =====" forth:cr
 	    2dup suffix>table see:table !
-	    0 { w^ content } content $slurp-file
+	    { | w^ content } content $slurp-file
 	    content $@ net2o:(see) forth:cr
 	    content $free  r> see:table !
 	THEN

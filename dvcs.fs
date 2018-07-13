@@ -313,7 +313,7 @@ User tmp1$
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] ;
 
 : hashstat-rest ( addr u -- addr' u' )
-    [: mode@ 0 { w^ perm } perm le-w!
+    [: mode@ { | w^ perm } perm le-w!
 	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
 	perm le-uw@ S_IFMT and  case
 	    S_IFLNK of  $1000 new-file$ $!len \ pathmax: 4k

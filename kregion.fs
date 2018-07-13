@@ -62,7 +62,7 @@ $20 Constant crypt-align
     dup @ 0= IF  sec!  ELSE  sec@ dup >r + $40 r> - smove  THEN ;
 
 : sec+[]! ( addr1 u1 addr2 -- ) >r
-    0 { w^ sec } sec sec! sec cell r> $+! ;
+    { | w^ sec } sec sec! sec cell r> $+! ;
 
 : sec[]@ ( i addr -- addr u )  $[] sec@ ;
 
