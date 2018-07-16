@@ -27,7 +27,9 @@ Browser mitzuteilen, dass und mit welchem Schlüssel verschlüsselt wird.  Ihr
 Browser speichert diese Informationen für mehrere Monate, um Lauschangriffe
 abzuwenden.
 
-Cookies werden nur gespeichert, wenn man sich im Fossil einloggt, sonst nicht.
+Cookies werden nur gespeichert, wenn man sich im Fossil einloggt. Wenn man im
+Fossil navigiert, kann man auch einen Cookie bekommen, abhängig davon, was man
+tut.  Gleiches gilt für gitlab.
 
 Tickets können anonym erstellt werden und händisch auf Anfrage wieder gelöscht
 werden. Geben Sie keine privaten Informationen in das Ticket-System ein!

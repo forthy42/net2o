@@ -22,7 +22,8 @@ By encrypting all traffic, we minimize the impact for you.  Therefore we use
 browser that we encrypt and which key we use.  Your browser stores this
 information for several months to prevent eavesdropping.
 
-If you log into Fossil, you'll get a cookie set, otherwise not.
+If you log into Fossil, you'll get a cookie set.  If you navigate in Fossil,
+you also may get a cookie set (depends on what you do).
 
 Tickets can be created anonymously and deleted by hand upon request. Never
 enter any personal data into the ticket system!
