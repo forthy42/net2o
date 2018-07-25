@@ -47,6 +47,9 @@ Variable slide#
 5 Constant n/m-switch
 10 Constant m/$-switch
 
+glue new Constant glue-left
+glue new Constant glue-right
+
 : >slides ( o -- ) slides[] >stack ;
 
 : glue0 ( -- )
@@ -176,7 +179,7 @@ tex: $quid
 : img ( xt xt -- o ) 2>r
     baseline# 0e to baseline#
     {{ 2r> }}image-tex /right
-    glue*1 }}glue
+    glue*l }}glue
     }}v outside[] >o font-size# f2/ to border o o>
     to baseline# ;
 
@@ -190,13 +193,13 @@ tex: $quid
 {{
 $FFFFFFFF pres-frame
 {{
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: GUI, realtime mixnet, $quid" /title
 "($quid = Ethical micropayment with efficient BlockChain)" /subtitle
 glue*2 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "Bernd Paysan" /author
 "34c3, Leipzig #wefixthenet" /location
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >o font-size# to border o Value title-page o o>
 }}z box[] dup >slides
 
@@ -205,11 +208,11 @@ glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 $FFFFFFFF pres-frame
 {{
 "Motivation" /title
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 tex: bad-gateway
 ' bad-gateway "bad-gateway.png" 0.666e }}image-file
 Constant bgw-glue /center
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -234,7 +237,7 @@ blackish
 \skip
 "Solutions" /subsection
 "  net2o starts becoming useable" \\
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >o o Value snowden-page font-size# to border o o>
 }}z box[] /flip dup >slides
 
@@ -249,7 +252,7 @@ $BFFFBFFF pres-frame
 vt{{
 "2. " b0 blackish "Path switched packets with 2" }}text
 "n" }}smalltext >o font-size# -0.4e f* to raise o o>
-" size writing into shared memory buffers" }}text  glue*1 }}glue }}h box[] >bl
+" size writing into shared memory buffers" }}text  glue*l }}glue }}h box[] >bl
 "3. " "Ephemeral key exchange and signatures with Ed25519," b\\
 "" "symmetric authenticated encryption+hash+prng with Keccak," b\\
 "" "symmetric block encryption with Threefish" b\\
@@ -259,7 +262,7 @@ vt{{
 "6. " "Distributed data (files, messages) and distributed metadata (DHT)" b\\
 "7. " "Apps in a sandboxed environment for displaying content" b\\
 }}vt
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -273,7 +276,7 @@ $BFFFBFFF pres-frame
 "Solution: Fill up the output with constant bandwidth garbage" \\
 "and otherwise set up the network as with a mixnet" \\
 "Bonus: Evenly distribute packets over a set of mix routes, to get more bandwidth" \\
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -293,12 +296,12 @@ vt{{
 {{ "Typesetting: " b0 blackish
 "Boxes & Glues close to " }}text
 \LaTeX
-" — including ascender & descender" }}text glue*1 }}h box[] >bl
+" — including ascender & descender" }}text glue*l }}h box[] >bl
 "" "Glues can shrink, not just grow" b\\
 "Object System: " "extremely lightweight Mini–OOF2" b\\
 "Class number: " "Few classes, many possible combinations" b\\
 }}vt
-glue*1 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -312,7 +315,7 @@ $FFBFFFFF pres-frame
 "actor " "base class that reacts on all actions (clicks, touchs, keys)" b\\
 "widget " "base class for all visible objects" b\\
 {{ "edit " b0 blackish "editable text element " }}text
-\chinese "复活节快乐！" }}edit dup Value edit-field glue*1 }}glue }}h edit-field edit[] >bl
+\chinese "复活节快乐！" }}edit dup Value edit-field glue*l }}glue }}h edit-field edit[] >bl
 \latin \normal "glue " "base class for flexible objects" b\\
 "tile " "colored rectangle" b\\
 "frame " "colored rectangle with borders" b\\
@@ -330,8 +333,8 @@ previous
 "canvas " "vector graphics (TBD)" b\\
 "video " "video player (TBD)" b\\
 }}vt
-glue*1 }}glue
-tex: vp0 glue*1 ' vp0 }}vp vp[]
+glue*l }}glue
+tex: vp0 glue*l ' vp0 }}vp vp[]
 $FFBFFFFF to slider-color
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
@@ -346,7 +349,7 @@ $BFFFFFFF pres-frame
 {{
 "ΜΙΝΩΣ2 Boxes" /title
 {{
-"Just like " }}text \LaTeX ", boxes arrange widgets/text" }}text glue*1 }}h box[]
+"Just like " }}text \LaTeX ", boxes arrange widgets/text" }}text glue*l }}h box[]
 >bl
 \skip
 vt{{
@@ -358,7 +361,7 @@ vt{{
 \skip
 "There will be some more variants for tables and wrapped paragraphs" \\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -373,7 +376,7 @@ vt{{
 "viewport " "Into a texture, used as viewport" b\\
 "display " "To the actual display" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -395,7 +398,7 @@ vt{{
 "text " "text round" b\\
 "emoji " "emoji round" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -415,10 +418,10 @@ vt{{
 "Scale " "How to scale a BlockChain?" b\\
 "$quid " "Ethical ways to create money" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: $quid-logo-large
 ' $quid-logo-large "squid-logo.png" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -436,27 +439,27 @@ vt{{
 "Fiat ~: " "No inherent value; promise, if any, as legal tender" b\\
 "Legal tender: " "Medium of payment by law" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 {{
 {{
 tex: shell-coins
 tex: feiqian
 tex: huizi
 tex: chao
-glue*1 }}glue
+glue*l }}glue
 ' shell-coins "shell-coins.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' feiqian "feiqian.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' huizi "huizi.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 ' chao "chao.jpg" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 }}h box[]
-tex: vp1 glue*1 ' vp1 }}vp vp[]
+tex: vp1 glue*l ' vp1 }}vp vp[]
 }}v box[] >bdr
 }}z box[]
 /flip dup >slides
@@ -474,10 +477,10 @@ vt{{
 "• " "(Instead of getting Viagra spam I now get BitCoin spam)" b\\
 "• " "Can’t even do the exchange transaction on–chain" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: bitcoin-bubble
 ' bitcoin-bubble "bitcoin-bubble.png" 0.85e }}image-file drop /right
 }}v box[] >bdr
@@ -495,10 +498,10 @@ vt{{
 "• " "No concept of a credit" b\\
 "• " "Lightning network also binds assets (will have fees as consequence)" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: free-market
 ' free-market "free-market.jpg" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -523,7 +526,7 @@ vt{{
 }}vt
 \skip
 "BTW: The attack for double spending also requires a MITM–attack" \\
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -542,18 +545,18 @@ vt{{
 "• " "Partitionate the ledgers by coin pubkey" b\\
 "• " "Use n–dimensional ledger space to route transactions" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 {{
 tex: stage1
 tex: stage2
 ' stage1 "ledger-stage1.png" 0.666e }}image-file drop
 "   " }}text
 ' stage2 "ledger-stage2.png" 0.666e }}image-file drop
-glue*1 }}glue
+glue*l }}glue
 }}h box[]
 }}v box[] >bdr
 {{
-glue*1 }}glue
+glue*l }}glue
 tex: bank-robs-you
 ' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop /right
 }}v box[] >bdr
@@ -572,7 +575,7 @@ vt{{
 "• " "That way, we can encourage people to sponsor out of self–interest" b\\
 "• " "They get a useful and valueable token back" b\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -587,7 +590,7 @@ vt{{
 "Bernd Paysan " "$quid cryptocurrency & SwapDragonChain" bi\\
 "" "https://squid.cash/" bm\\
 }}vt
-glue*1 }}glue
+glue*l }}glue
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
