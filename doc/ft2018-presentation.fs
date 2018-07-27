@@ -217,8 +217,7 @@ $FFFFFFFF pres-frame
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
 "($quid = Ethisches Micropayment mit effizienter BlockChain)" /subtitle
-\ {{ blackish \tiny s" Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." }}text glue*l }}glue }}p
-\ dpy-w @ .666e fm* dup .par-split /center
+\ {{ blackish \tiny "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. " }}text \bold " Ut enim ad minim veniam," }}text \regular \italic " quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat." }}text \regular " Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." }}text glue*l }}glue }}p dpy-w @ .666e fm* dup .par-split /center
 glue*2 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "Bernd Paysan" /author
 "Forth–Tagung 2018, Essen" /location

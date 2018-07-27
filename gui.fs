@@ -125,12 +125,14 @@ tex: net2o-logo
     $FFFFFFFF Value show-sign-color#
 [THEN]
 
+glue new Constant glue*lll±
+glue*lll± >o 1Mglue hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
+
 {{ login-bg-col# pres-frame dark-blue# ' dark-blue >body !
     {{
-	glue*lll }}glue
+	glue*lll± }}glue
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
 	!i18n l" net2o GUI" /title
-	l" Enter passphrase to unlock" /subtitle
 	!lit
 	{{
 	    glue*lll }}glue
@@ -177,6 +179,7 @@ tex: net2o-logo
 	    glue-sright }}glue
 	    glue*lll }}glue
 	}}h box[] \skip >bl
+	!i18n l" Enter passphrase to unlock" /subtitle !lit
 	glue*lll }}glue
     }}v box[]
 }}z box[] to pw-frame
