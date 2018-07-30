@@ -372,8 +372,12 @@ Variable last-bubble-pk
 : >bubble-border ( o me? -- )
     swap >o font-size# 25% f*
     IF
-	fdup to border fnegate fdup to borderl to borderv
-    ELSE  to borderl  THEN o o> ;
+	fdup f2* to border
+	fnegate fdup to borderl fdup to borderv to bordert
+    ELSE
+	fdup f2* to border
+	0e to borderl fnegate f2* to bordert 0e to borderv
+    THEN o o> ;
 : add-dtms ( ticks -- )
     \small
     1n fm* >day { day } day last-day <> IF
@@ -395,13 +399,12 @@ Variable last-bubble-pk
 
 :noname ( -- )
     glue*ll }}glue msg-box .child+
-    dpy-w @ 80% fm* msg-par .par-split
+    dpy-w @ 90% fm* msg-par .par-split
     {{ msg-par unbox }} msg-vbox .+childs
 ; wmsg-class to msg:end
 :noname { d: pk -- o }
     pk key| pkc over str= { me? }
     pk key| last-bubble-pk $@ str= IF
-	msg:end
 	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
     ELSE
 	pk startdate@ add-dtms
@@ -424,11 +427,9 @@ Variable last-bubble-pk
 	    {{
 		glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
 		{{
-		    {{
-			{{ }}p cbl >bl dup .subbox to msg-box to msg-par
-		    }}v
-		    dup to msg-vbox
-		}}h me? >bubble-border
+		    {{ }}p cbl >bl dup .subbox to msg-box to msg-par
+		}}v me? >bubble-border
+		dup to msg-vbox
 	    }}z
 	    glue*ll }}glue
 	    me? IF  swap rot  THEN
