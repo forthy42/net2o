@@ -217,8 +217,10 @@ $FFFFFFFF pres-frame
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
 "($quid = Ethisches Micropayment mit effizienter BlockChain)" /subtitle
-\ {{ blackish \tiny "Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. " }}text \bold " Ut enim ad minim veniam," }}text \regular \italic " quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat." }}text \regular " Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." }}text glue*l }}glue }}p dpy-w @ .666e fm* dup .par-split /center
-glue*2 }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+{{ {{ glue*l }}glue
+{{ $0000007F to x-color \tiny " Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum " }}text \bold-italic "qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ 44.5% fm* dup .par-split /center
+glue*l }}glue }}v
+glue*2 }}glue }}z  \ ) $CCDDDD3F 4e }}frame dup .button1
 "Bernd Paysan" /author
 "Forth–Tagung 2018, Essen" /location
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
@@ -363,8 +365,7 @@ glue*l }}glue
 $BFDFFFFF pres-frame
 {{
 "Draw–Calls minimieren" /title
-"OpenGL möchte so wenig wie mögliche Draw–Calls pro Frame, also werden" \\
-"verschiedene Contexte mit einem Draw–Call pro Stack gezeichnet" \\
+"OpenGL möchte so wenig wie mögliche Draw–Calls pro Frame, also werden ver­schie­dene Contexte mit einem Draw–Call pro Stack gezeichnet" p\\
 \skip
 vt{{
 "init " "Initialisierungs–Runde" b\\

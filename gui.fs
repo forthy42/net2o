@@ -193,6 +193,7 @@ $0000BFFF ' dark-blue >body !
 0 Value nicks-box
 0 Value msgs-box
 0 Value msg-box
+0 Value msg-par
 0 Value msg-vbox
 
 0 Value group-name
@@ -368,6 +369,11 @@ $88333366 Value hour-color#
 Variable last-bubble-pk
 0 Value last-bubble
 
+: >bubble-border ( o me? -- )
+    swap >o font-size# 25% f*
+    IF
+	fdup to border fnegate fdup to borderl to borderv
+    ELSE  to borderl  THEN o o> ;
 : add-dtms ( ticks -- )
     \small
     1n fm* >day { day } day last-day <> IF
@@ -386,12 +392,17 @@ Variable last-bubble-pk
 	}}z /center msgs-box .child+
     THEN  hour to last-hour  minute to last-minute
     fdrop \normal ;
+
+:noname ( -- )
+    glue*ll }}glue msg-box .child+
+    dpy-w @ 80% fm* msg-par .par-split
+    {{ msg-par unbox }} msg-vbox .+childs
+; wmsg-class to msg:end
 :noname { d: pk -- o }
     pk key| pkc over str= { me? }
     pk key| last-bubble-pk $@ str= IF
-	{{ }}h dup to msg-box >r
-	{{ r> glue*l }}glue }}h >bl
-	msg-vbox .child+
+	msg:end
+	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
     ELSE
 	pk startdate@ add-dtms
 	pk key| last-bubble-pk $!
@@ -413,20 +424,17 @@ Variable last-bubble-pk
 	    {{
 		glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
 		{{
-		    {{ }}h dup to msg-box
-		    >r {{ r> glue*l }}glue }}h >bl
-		}}v >o font-size# 25% f*
-		me? IF
-		    fdup to border fnegate fdup to borderl to borderv
-		ELSE  to borderl  THEN o o> dup to msg-vbox
+		    {{
+			{{ }}p cbl >bl dup .subbox to msg-box to msg-par
+		    }}v
+		    dup to msg-vbox
+		}}h me? >bubble-border
 	    }}z
 	    glue*ll }}glue
 	    me? IF  swap rot  THEN
 	}}h msgs-box .child+
     THEN
 ; wmsg-class to msg:start
-:noname ( -- )
-; wmsg-class to msg:end
 :noname { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text blackish \sans
     msg-box .child+
@@ -479,7 +487,7 @@ wmsg-o >o msg-table @ token-table ! o>
     +sync +config o> ;
 ' wmsg-display wmsg-class to msg:display
 
-#128 Value gui-msgs# \ display last 128 messages
+#1024 Value gui-msgs# \ display last 128 messages
 0 Value chat-edit    \ chat edit field
 
 : gui-msgs ( gaddr u -- )
@@ -604,7 +612,7 @@ forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
      (("{{") (0 . 2) (0 . 2) immediate)
-     (("}}h" "}}v" "}}z" "}}vp") (-2 . 0) (-2 . 0) immediate)
+     (("}}h" "}}v" "}}z" "}}vp" "}}p") (-2 . 0) (-2 . 0) immediate)
     )
 End:
 [THEN]
