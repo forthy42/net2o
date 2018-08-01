@@ -212,7 +212,7 @@ Create ke-imports#rgb
 
 Create imports#rgb-bg
 $33EE33FF , \ myself is pretty green
-$66CC66FF , \ manually imported is green, too
+$BBDD66FF , \ manually imported is green, too
 $55DD55FF , \ scanned is more green
 $CCEE55FF , \ seen in chat is more yellow
 $EECC55FF , \ imported from DHT is pretty yellow
