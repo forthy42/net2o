@@ -284,7 +284,7 @@ event: :>chat-connects  gui-chat-connects ;
 	\ gui-chat-connects
 	widgets-loop \ connection .send-leave
 	leave-chats
-	r> to top-widget +sync +config
+	r> to top-widget +sync +config +resize
     ;] swap click[] ;
 
 : show-group ( last# -- )
