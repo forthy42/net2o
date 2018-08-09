@@ -108,13 +108,14 @@ $00000000 Value droprate#
 
 : init-route ( -- )  s" " routes# hash@ $! ; \ field 0 is me, myself
 
-: ipv4>ipv6 ( addr u -- addr' u' )
-    drop >r
-    r@ port be-uw@ sockaddr> port be-w!
-    r> sin_addr be-ul@ sockaddr> ipv4!
-    sockaddr> sock-rest ;
+: ipv4>ipv6 ( addr u dest -- addr' u' )
+    >r drop
+    dup port be-uw@ swap sin_addr be-ul@
+    r@ ipv4! r@ port be-w! r> sock-rest ;
 : ?>ipv6 ( addr u -- addr' u' )
-    over family w@ AF_INET = IF  ipv4>ipv6  THEN ;
+    over family w@ AF_INET = IF  sockaddr> ipv4>ipv6  THEN ;
+: ?<ipv6 ( addr u -- addr' u' )
+    over family w@ AF_INET = IF  sockaddr< ipv4>ipv6  THEN ;
 : info@ ( info -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 : info>string ( info -- addr u )
@@ -136,7 +137,7 @@ $00000000 Value droprate#
 0 Value lastaddr#
 Variable lastn2oaddr
 
-: insert-address ( addr u -- net2o-addr )
+: insert-address ( addr u -- net2o-addr ) ?<ipv6
     address( ." Insert address " 2dup .address cr )
     lastaddr# IF  2dup lastaddr# $@ str=
 	IF  2drop lastn2oaddr @ EXIT  THEN
