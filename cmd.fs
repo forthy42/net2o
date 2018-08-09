@@ -577,6 +577,10 @@ comp: :, also net2o-base ;
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
 
+[IFUNDEF] ftime
+    : ftime ( -- r ) ntime d>f 1e-9 f* ;
+[THEN]
+
 : cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest
     avalanche( ." send cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup hex. 64r> cr )
