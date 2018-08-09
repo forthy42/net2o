@@ -208,7 +208,7 @@ Variable my-beacon
     beacon( ticks .ticks ."  Got known reply: " sockaddr< alen @ .address forth:cr )
     sockaddr< alen @ beacons# #@ IF
 	>r r@ 64@ ticks 64umin beacon-ticks# 64+ r> 64!
-    THEN ;
+    ELSE  drop  THEN ;
 : >-beacon ( addr u -- )
     \G I got a punch
     nat( ticks .ticks ."  Got punch: " sockaddr< alen @ .address forth:cr )

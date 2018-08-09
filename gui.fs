@@ -484,11 +484,11 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : wmsg-display ( addr u -- )
     msg-tdisplay
-    msgs-box >o [: +sync +config ;] vp-needed vp-bottom
+    msgs-box >o [: +sync +config +resize ;] vp-needed vp-bottom
     +sync +config o> ;
 ' wmsg-display wmsg-class to msg:display
 
-#1024 Value gui-msgs# \ display last 128 messages
+#128 Value gui-msgs# \ display last 128 messages
 0 Value chat-edit    \ chat edit field
 
 : gui-msgs ( gaddr u -- )
@@ -508,7 +508,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : msg-wredisplay ( n -- )
     drop 0 otr-mode
     [: last# $@ gui-msgs ;] !wrapper
-    msgs-box >o [: +sync +config ;] vp-needed vp-bottom
+    msgs-box >o [: +sync +config +resize ;] vp-needed vp-bottom
     +sync +config o>  ;
 ' msg-wredisplay wmsg-class is msg:redisplay
 
