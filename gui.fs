@@ -38,10 +38,52 @@ update-size#
 
 require minos2/text-style.fs
 
-glue new Constant glue-left
-glue new Constant glue-right
 glue new Constant glue-sleft
 glue new Constant glue-sright
+glue ' new static-a with-allocater Constant glue-left
+glue ' new static-a with-allocater Constant glue-right
+
+: glue0 ( -- ) 0e fdup
+    [ glue-left  .hglue-c ]L df!
+    [ glue-right .hglue-c ]L df! ;
+glue0
+
+Variable slides[]
+Variable slide#
+
+: >slides ( o -- ) slides[] >stack ;
+
+: !slides ( nprev n -- )
+    over slide# !
+    slides[] $[] @ /flip drop
+    slides[] $[] @ /flop drop glue0 ;
+: anim!slides ( r0..1 n -- )
+    slides[] $[] @ /flop drop
+    fdup fnegate dpy-w @ fm* glue-left  .hglue-c df!
+    -1e f+       dpy-w @ fm* glue-right .hglue-c df! ;
+
+: prev-anim ( n r0..1 -- )
+    dup 0<= IF  drop fdrop  EXIT  THEN
+    fdup 1e f>= IF  fdrop
+	dup 1- swap !slides +sync +config  EXIT
+    THEN
+    1e fswap f- 1- sin-t anim!slides +sync +config ;
+
+: next-anim ( n r0..1 -- )
+    dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
+    fdup 1e f>= IF  fdrop
+	dup 1+ swap !slides +sync +config  EXIT
+    THEN
+    1+ sin-t anim!slides +sync +config ;
+
+1e FValue slide-time%
+
+: prev-slide ( -- )
+    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
+    slide# @ ['] prev-anim >animate ;
+: next-slide ( -- )
+    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
+    slide# @ ['] next-anim >animate ;
 
 \ frames
 
@@ -275,16 +317,11 @@ $00FFFFFF ,
 event: :>chat-connects  gui-chat-connects ;
 
 : group[] ( box group -- box )
-    [:  top-widget >r
-	data $@ group-name >o to text$ o>
+    [:	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
 	[: [: 2over type '@' emit type ;] $tmp chat-keys $+[]! ;] $[]map
-	gui-msgs chat-frame to top-widget refresh-top
-	<event :>chat-connects ?query-task event>
-	\ gui-chat-connects
-	widgets-loop \ connection .send-leave
-	leave-chats
-	r> to top-widget +sync +config +resize
+	gui-msgs  <event :>chat-connects ?query-task event>
+	next-slide
     ;] swap click[] ;
 
 : show-group ( last# -- )
@@ -347,10 +384,8 @@ event: :>chat-connects  gui-chat-connects ;
 }}z box[] to id-frame
 
 : show-nicks ( -- )
-    fill-nicks fill-groups
-    id-frame to top-widget
-    refresh-top
-    peers-box .vp-top +sync +config ;
+    fill-nicks fill-groups next-slide
+    0.01e peers-box [: .vp-top ;] >animate ;
 
 \ messages
 
@@ -543,7 +578,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    glue*l $000000FF slide-frame dup .button1
 	    {{
 		\large whitish
-		"⬅" }}text 40%b [: -1 level# +! ;] over click[]
+		"⬅" }}text 40%b [: leave-chats prev-slide ;] over click[]
 		!i18n l" Chat Log" }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
 		{{
@@ -579,6 +614,17 @@ wmsg-o >o msg-table @ token-table ! o>
 
 [IFDEF] android previous [THEN]
 
+\ top box
+
+{{
+    glue-left }}glue
+    pw-frame          dup >slides
+    id-frame   /flip  dup >slides
+    chat-frame /flip  dup >slides
+    glue-right }}glue
+}}h box[]
+Value n2o-frame
+
 \ top widgets
 
 : !widgets ( -- )
@@ -587,7 +633,7 @@ wmsg-o >o msg-table @ token-table ! o>
     1e ambient% sf! set-uniforms ;
 
 : net2o-gui ( -- )
-    pw-frame to top-widget
+    n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
 	>passphrase +key  read-keys
@@ -613,10 +659,10 @@ lang:de include-locale lang/de
 lang:zh include-locale lang/zh
 lang:en include-locale lang/en
 
-s" LANG" getenv '_' $split 2swap
-' lang >body find-name-in ?dup [IF] execute [THEN]
-'.' $split 2drop
-' lang >body find-name-in ?dup [IF] execute [THEN]
+: ?lang ( addr u -- )
+    ['] lang >body find-name-in ?dup-IF  execute  THEN ;
+
+s" LANG" getenv '_' $split 2swap ?lang '.' $split ?lang ?lang
 
 0 [IF]
 Local Variables:

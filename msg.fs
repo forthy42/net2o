@@ -753,11 +753,10 @@ Variable ask-msg-files[]
 
 \ syncing done
 : chat-sync-done ( group-addr u -- )
-    msg( ." chat-sync-done" forth:cr )
+    msg( ." chat-sync-done " 2dup forth:type forth:cr )
+    ?msg-log display-sync-done !save-all-msgs
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
-    ?msg-log display-sync-done
-    !save-all-msgs
     ." === sync done ===" forth:cr
     ['] noop is sync-done-xt ;
 event: :>msg-eval ( parent $pack $addr -- )
