@@ -365,6 +365,8 @@ $4444CCFF color: link-blue
 $44CC44FF color: re-green
 $CC4444FF color: obj-red
 $BBDDDDFF color: msg-bg
+$00BFFFFF color: light-blue
+$44FF44FF color: greenish
 $33883366 Value day-color#
 $88333366 Value hour-color#
 
