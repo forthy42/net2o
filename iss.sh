@@ -118,4 +118,4 @@ Name: "{group}\net2o"; Filename: "{app}\\..\\gforth$SF\\run.exe"; Parameters: ".
 
 EOF
 
-sed -e 's/$/\r/' <README >README.txt
+sed -e 's/$/\r/' <README.md >README.txt
