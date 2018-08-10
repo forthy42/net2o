@@ -359,6 +359,8 @@ end-class wmsg-class
 
 $88FF88FF Value my-signal#
 $CCFFCCFF Value other-signal#
+$CC00CCFF Value my-signal-otr#
+$880088FF Value other-signal-otr#
 $4444CCFF color: link-blue
 $44CC44FF color: re-green
 $CC4444FF color: obj-red
@@ -367,6 +369,7 @@ $33883366 Value day-color#
 $88333366 Value hour-color#
 
 Variable last-bubble-pk
+0 Value last-otr?
 0 Value last-bubble
 
 : >bubble-border ( o me? -- )
@@ -397,6 +400,10 @@ Variable last-bubble-pk
     THEN  hour to last-hour  minute to last-minute
     fdrop \normal ;
 
+: otr? ( tick -- flag )
+    64dup 64#-1 64<> ;
+: text-color! ( -- ) last-otr? IF  greenish  ELSE  blackish  THEN ;
+
 :noname ( -- )
     glue*ll }}glue msg-box .child+
     dpy-w @ 90% fm* msg-par .par-split
@@ -404,11 +411,12 @@ Variable last-bubble-pk
 ; wmsg-class to msg:end
 :noname { d: pk -- o }
     pk key| pkc over str= { me? }
-    pk key| last-bubble-pk $@ str= IF
+    pk enddate@ otr? { otr }
+    pk key| last-bubble-pk $@ str= otr last-otr? = and IF
 	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
     ELSE
 	pk startdate@ add-dtms
-	pk key| last-bubble-pk $!
+	pk key| last-bubble-pk $!  otr to last-otr?  text-color
 	{{
 	    {{ glue*l }}glue
 		{{ \sans \normal
@@ -425,7 +433,8 @@ Variable last-bubble-pk
 		}}z me? 0= IF  chatname-tab  THEN
 	    }}v
 	    {{
-		glue*l $FFFFFFFF slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+		glue*l $000000FF $FFFFFFFF last-otr? select
+		slide-frame dup me? IF .rbubble ELSE .lbubble THEN
 		{{
 		    {{ }}p cbl >bl dup .subbox to msg-box to msg-par
 		}}v me? >bubble-border
@@ -437,15 +446,20 @@ Variable last-bubble-pk
     THEN
 ; wmsg-class to msg:start
 :noname { d: string -- o }
-    link-blue \mono string [: '#' emit type ;] $tmp ['] utf8-sanitize $tmp }}text blackish \sans
+    link-blue \mono string [: '#' emit type ;] $tmp
+    ['] utf8-sanitize $tmp }}text text-color! \sans
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
-    blackish string ['] utf8-sanitize $tmp }}text 25%bv
+    text-color!
+    string ['] utf8-sanitize $tmp }}text 25%bv
     msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
-    \italic dark-blue string ['] utf8-sanitize $tmp }}text 25%bv \regular blackish msg-box .child+
+    \italic last-otr? IF light-blue ELSE dark-blue THEN
+    string ['] utf8-sanitize $tmp }}text 25%bv \regular
+    text-color!
+    msg-box .child+
 ; wmsg-class to msg:action
 :noname { d: string -- o }
     {{
@@ -455,18 +469,20 @@ Variable last-bubble-pk
 ; wmsg-class to msg:coord
 :noname { d: pk -- o }
     {{
-	pk key| 2dup 0 .pk@ key| str= my-signal# other-signal# rot select
+	pk key| 2dup 0 .pk@ key| str=
+	last-otr? IF  my-signal-otr# other-signal-otr#
+	ELSE  my-signal# other-signal#  THEN  rot select
 	glue*l swap slide-frame dup .button1 40%b >r
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
     }}z msg-box .child+
 ; wmsg-class to msg:signal
 :noname ( addr u -- )
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
-    blackish
+    text-color!
 ; msg-class to msg:re
 :noname ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
-    blackish
+    text-color!
 ; msg-class to msg:id
 
 in net2o : new-wmsg ( o:connection -- o )
