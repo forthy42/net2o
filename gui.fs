@@ -314,7 +314,9 @@ $00FFFFFF ,
 	    ELSE  2drop  THEN ;] $[]map ;] catch
     [ ' !!connected!! >body @ ]L = IF  show-connected  THEN ;
 
-event: :>chat-connects  gui-chat-connects ;
+event: :>!connection    to connection ;
+event: :>chat-connects  gui-chat-connects
+    <event connection dup elit, :>!connection .wait-task @ event> ;
 
 : group[] ( box group -- box )
     [:	data $@ group-name >o to text$ o>
