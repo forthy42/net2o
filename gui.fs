@@ -418,7 +418,7 @@ Variable last-bubble-pk
 	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
     ELSE
 	pk startdate@ add-dtms
-	pk key| last-bubble-pk $!  otr to last-otr?  text-color
+	pk key| last-bubble-pk $!  otr to last-otr?  text-color!
 	{{
 	    {{ glue*l }}glue
 		{{ \sans \normal
