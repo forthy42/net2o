@@ -81,7 +81,7 @@ $(make distfiles | tr ' ' '\n' | (while read i; do
 done) | sort -u | sed \
   -e 's:/:\\:g' \
   -e 's,^\(..*\)$,Name: "{app}\\\1",g')
-ame: "{app}\\lib\\gforth\\$VERSION\\amd64\\libcc-named"; Check: Is64BitInstallMode
+Name: "{app}\\lib\\gforth\\$VERSION\\amd64\\libcc-named"; Check: Is64BitInstallMode
 Name: "{app}\\lib\\gforth\\$VERSION\\386\\libcc-named"; Check: not Is64BitInstallMode
 Name: "{app}\\..\\bin"
 Name: "{app}\\..\\tmp"; Permissions: users-modify
