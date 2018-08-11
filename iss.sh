@@ -107,10 +107,10 @@ Source: "net2o.ico"; DestDir: "{app}"
 $(for i in */.libs/*.dll; do
 echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth\"" | tr '/' '\\'
 done)
-$(ls lib/gforth/$VERSION/amd64/libcc-named/*.la | sed -e 's:/:\\:g' -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named"; Check: Is64BitInstallMode,g')
-$(ls lib/gforth/$VERSION/amd64/libcc-named/.libs/*.dll | sed -e 's:/:\\:g' -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named\\.libs"; Check: Is64BitInstallMode,g')
-$(ls lib/gforth/$VERSION/386/libcc-named/*.la | sed -e 's,^\(..*\)$,Source: "C:\\cygwin'$(pwd)'\\\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\386\\libcc-named"; Check: not Is64BitInstallMode,g' | sed -e 's:/:\\:g')
-$(ls lib/gforth/$VERSION/386/libcc-named/.libs/*.dll | sed -e 's,^\(..*\)$,Source: "C:\\cygwin'$(pwd)'\\\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\386\\libcc-named\.libs"; Check: not Is64BitInstallMode,g' | sed -e 's:/:\\:g')
+$(ls lib/gforth/$VERSION/amd64/libcc-named/*.la | sed -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named"; Check: Is64BitInstallMode,g' -e 's:/:\\:g')
+$(ls lib/gforth/$VERSION/amd64/libcc-named/.libs/*.dll | sed -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named\\.libs"; Check: Is64BitInstallMode,g' -e 's:/:\\:g')
+$(ls lib/gforth/$VERSION/386/libcc-named/*.la | sed -e 's,^\(..*\)$,Source: "C:\\cygwin'$(pwd)'\\\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\386\\libcc-named"; Check: not Is64BitInstallMode,g' -e 's:/:\\:g')
+$(ls lib/gforth/$VERSION/386/libcc-named/.libs/*.dll | sed -e 's,^\(..*\)$,Source: "C:\\cygwin'$(pwd)'\\\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\386\\libcc-named\.libs"; Check: not Is64BitInstallMode,g' -e 's:/:\\:g')
 Source: "c:\\$CYGWIN64\\bin\\cygstdc++-6.dll"; DestDir: "{app}\\..\\gforth"; Check: Is64BitInstallMode
 Source: "c:\\$CYGWIN32\\bin\\cygstdc++-6.dll"; DestDir: "{app}\\..\\gforth"; Check: not Is64BitInstallMode
 
