@@ -1,9 +1,9 @@
 Get it
 ======
 
-net2o currently is still very experimental and the protocol can have
-incompatible changes at any time, so keep net2o up to date when you
-try it.  Any day can be a "flag day".
+net2o currently is still experimental and the protocol can have incompatible
+changes at any time, so keep net2o up to date when you try it.  Any day can be
+a “flag day”.
 
 Get it for Debian GNU/Linux
 ---------------------------
@@ -33,16 +33,17 @@ Debian testing, the list is not necessary, on older versions, the all
 part is not searched if you don't have that list, then Gforth fails to
 install the gforth-common part.
 
-There are actually three repositories: stable, testing and unstable;
-at the moment, all packages are the same; when net2o matures,
-stable/testing/unstable will get different roles, just like Debian
-(stable=old and rusted, testing=new and somewhat tested, unstable=most
-recent).  Binaries are available for amd64, i386, powerpc, armel,
-armhf, arm64, mips, and mipsel.  More to come...
+There are actually three repositories: stable, testing and unstable; at the
+moment, all packages are the same; when net2o matures, stable/testing/unstable
+will get different roles, just like Debian (stable=old and rusted, testing=new
+and somewhat tested, unstable=most recent).  Binaries are available for amd64,
+i386, armhf, arm64, powerpc, armel, mips, and mipsel (in order of how often
+they get updated).  More depend on availability of Debian distributions that
+run on qemu…
 
 ### Key information (new Key from October 18th, 2017)
 
-I changed to a Yubikey-based signature.  The key's finger print is:
+I changed to a Yubikey-based signature.  The key's fingerprint is:
 
     60E71A15 93575330 99A0AAF9 CAF021DB 3B7FA946
 
@@ -56,7 +57,7 @@ When you do an `apt-key list`, the result should contain this key:
 Get it for Android
 ------------------
 
-You need: An Android phone with at least Android 2.3, and Gforth,
+You need: An Android phone with at least Android 4.0, and Gforth,
 either from the app store, or from [net2o.de/android](https://net2o.de/android/Gforth.apk).
 
 This installs Gforth with the Gforth icons, and a ready-to-run net2o
@@ -66,14 +67,15 @@ on any further run.
 
 ### Key information
 
-The [certifcate](https://net2o.de/bernd@net2o.de-android.cer) has the
+The [certificate](https://net2o.de/bernd@net2o.de-android.cer) has the
 SHA-1 fingerprint and the informations as follows:
 
     00:44:1B:9D:F8:0B:9D:9E:2F:68:9D:0F:B9:B4:85:28:D4:10:5C:7E
     CN=Bernd Paysan, OU=dev, O=net2o, L=München, ST=Deutschland, C=DE
 
-and signs with sha1rsa2048 (Google!).  If you want to verify the apk
-yourself, thet the certificate, add it to your keyring and check:
+and signs with sha1rsa2048 (Google!).  If you want to verify the apk yourself,
+download the [certificate](https://net2o.de/bernd@net2o.de-android.cer), add
+it to your keyring and check:
 
     keytool -importcert -file bernd@net2o.de-android.cer
     jarsigner -verify -verbose Gforth.apk
@@ -81,14 +83,12 @@ yourself, thet the certificate, add it to your keyring and check:
 Get it for Windows
 ------------------
 
-You need: A 32/64 bit x86/amd64 Windows. You need to install Gforth or Gforth64
-[Gforth](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe) or
-[Gforth64](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth64.exe)
+You need: A 32/64 bit x86/amd64 Windows. You need to install Gforth
+[Gforth](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe)
 from the latest Snapshot first.
 
 Then you install the current [net2o
-Snapshot](https://net2o.de/windows/net2o.exe) or [net2o64
-Snapshot](https://net2o.de/windows/net2o64.exe), needs to be the same wordsize.
+Snapshot](https://net2o.de/windows/net2o.exe).
 
 ### Key information (new key for September 28th 2017)
 
@@ -96,7 +96,7 @@ I changed my key to a Certum smartcard based rsa2048 key.
 
 These files are now signed with a [sha256rsa2048
 certificate](https://net2o.de/bernd@net2o.de-windows.crt) with the
-SHA-1 fingerprint
+SHA-1 fingerprint (why are fingerprints still SHA-1?)
 
     f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b
     E=bernd@net2o.de, CN=Open Source Developer, Bernd Paysan, L=München, O=Open Source Developer, C=DE
@@ -104,10 +104,10 @@ SHA-1 fingerprint
 Get it for PC from source
 -------------------------
 
-You need: A Linux machine, Windows with Cygwin or better Cygwin64, Mac
-OS X with fink development tools (please use GCC, don't use XCode's
-clang, it takes ages to compile Gforth with clang).  You could also
-compile the Android version with Android SDK+NDK, but that's a different story.
+You need: A Linux machine, Windows with Cygwin or better Cygwin64, Mac OS X
+with fink/brew development tools (please use GCC, don't use XCode's clang, it
+takes ages to compile Gforth with clang).  You could also compile the Android
+version with Android SDK+NDK, but that's a different story.
 
 You want to have the following packets installed: git automake
 autoconf make gcc libtool libtool-bin libltdl7-dev yodl emacs
