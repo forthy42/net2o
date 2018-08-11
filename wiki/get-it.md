@@ -83,12 +83,12 @@ it to your keyring and check:
 Get it for Windows
 ------------------
 
-You need: A 32/64 bit x86/amd64 Windows. You need to install Gforth
+You need: A 32/64 bit x86/amd64 Windows. You need to install
 [Gforth](http://www.complang.tuwien.ac.at/forth/gforth/Snapshots/current/gforth.exe)
 from the latest Snapshot first.
 
-Then you install the current [net2o
-Snapshot](https://net2o.de/windows/net2o.exe).
+Then you install the current [net2o](https://net2o.de/windows/net2o.exe)
+snapshot.
 
 ### Key information (new key for September 28th 2017)
 
