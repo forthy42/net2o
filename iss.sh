@@ -28,7 +28,7 @@ SF=$(gforth -e 'cell 8 = [IF] ." 64" [THEN] bye')
 CYGWIN=cygwin$SF
 CYGWIN64=cygwin64
 CYGWIN32=cygwin
-X64=$(./gforth -e 'cell 8 = [IF] ." x64" [THEN] bye')
+X64=$(gforth -e 'cell 8 = [IF] ." x64" [THEN] bye')
 
 ln -fs /cygdrive/c/cygwin$(pwd)/lib/gforth/$VERSION/386 lib/gforth/$VERSION/
 
