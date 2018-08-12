@@ -742,11 +742,6 @@ n2o-history
 
 :noname defers 'cold ?set-debug n2o-history ; is 'cold
 
-[IFDEF] android
-    :noname  -1 android:level# +!
-	android:level# @ 0< IF  n2o:bye  THEN ; IS android:aback
-[THEN]
-
 \ allow issuing commands during chat
 
 scope{ /chat
