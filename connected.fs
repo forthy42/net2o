@@ -148,10 +148,6 @@ $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     THEN ;
 +net2o: ack-flush ( addr -- ) \g flushed to addr
     64>n parent .net2o:rewind-sender-partial ;
-\ +net2o: set-head ( addr -- ) \g set head
-\     64>n parent .data-rmap >o addr mapc:dest-head o> umax! ;
-\ +net2o: timeout ( uticks -- ) \g timeout request
-\     parent >o net2o:timeout data-map .mapc:dest-back ulit, set-head o> ;
 $2C net2o: set-rtdelay ( ticks -- ) \g set round trip delay only
     rtdelay! ;
 +net2o: seq# ( n -- ) \g set the ack number and check for smaller

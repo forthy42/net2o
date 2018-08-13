@@ -883,6 +883,29 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 	0= IF  data-resend 0 2 cells $del  THEN
     maxdata +LOOP ;
 
+: data-resend-flush ( -- )
+    data-resend $@len 0 U+DO
+	data-resend $@ I /string drop @ 0= IF
+	    data-resend I 2 cells $del
+	    0  data-resend $@len I unloop U+DO NOPE
+	ELSE
+	    [ 2 cells ]L
+	THEN
+    +LOOP ;
+
+: remove-resend { addr len -- }
+    data-resend $@ bounds U+DO
+	I cell+ @ addr - dup addr>bits $20 u< IF
+	    dup I cell+ +! addr>bits I @ swap rshift I !
+	ELSE  len u< IF  I off  THEN  THEN
+    [ 2 cells ]L +LOOP
+    data-resend-flush ;
+
+: rewind-resend ( oback nback o:map -- )
+    swap U+DO
+	I I' mapc:fix-size dup >r parent .remove-resend
+    r> +LOOP ;
+
 \ resend third handshake
 
 : push-reply ( addr u -- )  resend0 $!  return-addr r0-address $10 move ;
@@ -1232,7 +1255,8 @@ rdata-class to rewind-partial
 }scope
 
 in net2o : rewind-sender-partial ( new-back -- )
-    data-map with mapc dest-back umax dest-back over rewind-partial to dest-back
+    data-map with mapc dest-back umax dest-back over rewind-partial
+	dest-back over rewind-resend to dest-back
     endwith ;
 
 \ separate thread for loading and saving...
