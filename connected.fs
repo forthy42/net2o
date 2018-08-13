@@ -313,7 +313,8 @@ in net2o : do-resend ( flag -- )
 	THEN
 	dup $FFFFFFFF <> IF
 	    resend( ." resend: " dup hex. over hex. forth:cr )
-	    I ackm and bytes>addr ulit, $FFFFFFFF xor ulit, resend-mask  1+
+	    I ackm and bytes>addr data-rmap .mapc:>linear
+	    ulit, $FFFFFFFF xor ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF \ if we didn't have a resend yet, increase data-ack#
 		I 4 + bytes>bits backbits u<= IF \ no backbits, please

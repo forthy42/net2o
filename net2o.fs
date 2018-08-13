@@ -308,6 +308,10 @@ scope{ mapc
     maxdata +                   \ add one packet size
     dup addr dest-head umax!@ <> ;
 
+: >linear ( addr -- addr' ) \ o:map
+    dup dest-back dest-size 1- and u< dest-size and +
+    dest-back dest-size negate and + ;
+
 }scope
 
 : dest-index ( -- addr ) dest-addr 64@ >dest-map ;
@@ -851,9 +855,6 @@ $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
 in net2o : resend-mask ( addr mask -- ) >mask0
-    >r dup data-rmap .mapc:dest-size u>= IF
-	msg( ." Invalid resend: " hex. r> hex. cr )else( drop rdrop ) EXIT
-    THEN  r>
     resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
     data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
@@ -869,13 +870,14 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 : resend$@ ( -- addr u )
     data-resend $@  IF
 	2@ >mask0 1 and IF  maxdata  ELSE  0  THEN
-	swap data-map .mapc:dest-raddr + swap
+	swap data-map >o mapc:dest-size 1- and mapc:dest-raddr + o> swap
     ELSE  drop 0 0  THEN ;
 : resend? ( -- flag )
     data-resend $@  IF  @ 0<>  ELSE  drop false  THEN ;
 
 : resend-dest ( -- addr )
-    data-resend $@ drop 2@ drop n>64 data-map .mapc:dest-vaddr 64+ ;
+    data-resend $@ drop cell+ @
+    data-map with mapc dest-size 1- and n>64 dest-vaddr 64+ endwith ;
 : /resend ( u -- )
     0 +DO
 	data-resend $@ drop
@@ -893,18 +895,19 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 	THEN
     +LOOP ;
 
-: remove-resend { addr len -- }
+: remove-resend { nback -- }
     data-resend $@ bounds U+DO
-	I cell+ @ addr - dup addr>bits $20 u< IF
-	    dup I cell+ +! addr>bits I @ swap rshift I !
-	ELSE  len u< IF  I off  THEN  THEN
+	I cell+ @ nback [ maxdata $20 * ]L - u< IF  I off
+	ELSE  I cell+ @ nback u< IF
+		nback dup I cell+ !@ -
+		addr>bits I @ swap rshift I !
+	    THEN
+	THEN
     [ 2 cells ]L +LOOP
     data-resend-flush ;
 
 : rewind-resend ( oback nback o:map -- )
-    swap U+DO
-	I I' mapc:fix-size dup >r parent .remove-resend
-    r> +LOOP ;
+    parent .remove-resend drop ;
 
 \ resend third handshake
 

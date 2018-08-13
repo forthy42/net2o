@@ -52,7 +52,7 @@ Variable fs-table
 : file:err ( -- )
     <err> ." invalid file-done xt" <default> ~~bt ;
 : file:done ( -- )
-    -1 parent .file-count +!
+    -1 parent .file-count +!@ .
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: :>file-done ( file-o -- ) \ .file-xt ;
     >o action-of file-xt IF  file-xt  ELSE  file:err  THEN o> ;
@@ -96,12 +96,14 @@ cell 8 = [IF]
     64dup to fs-size to fs-limit
     64#0 to fs-seek 64#0 to fs-seekto 64#0 to fs-time ;
 
-: fs:fs-read ( addr u -- u )
+Vocabulary fs
+
+in fs : fs-read ( addr u -- u )
     fs-limit fs-seekto >seek
     fs-fid @ read-file throw
     dup n>64 +to fs-seekto
 ; ' fs:fs-read fs-class to fs-read
-: fs:fs-write ( addr u -- u )
+in fs : fs-write ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit fs-size 64umin
     64dup fs-seek 64u<= IF  64drop 2drop 0  EXIT  THEN
@@ -113,12 +115,12 @@ cell 8 = [IF]
 	<event o elit, :>file-done parent .wait-task @ event>
     THEN
 ; ' fs:fs-write fs-class to fs-write
-: fs:fs-clear ( -- )
+in fs : fs-clear ( -- )
     64#0
     64dup to fs-limit  64dup to fs-seekto  64dup to fs-seek
     64dup to fs-size  to fs-time  fs-path $free  fs-rename+ $free
     ['] noop to file-xt ;
-: fs:fs-flush ( -- )
+in fs : fs-flush ( -- )
     fs-fid @ flush-file throw
     \ write away all buffered stuff, so that setting the
     \ timestamp works
@@ -130,7 +132,7 @@ cell 8 = [IF]
 	fs-rename+ $free
     ELSE  2drop  THEN
 ; ' fs:fs-flush fs-class to fs-flush
-: fs:fs-close ( -- )
+in fs : fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-flush
     fs-fid @ close-file throw
@@ -414,7 +416,9 @@ scope{ net2o
     msg( ." Closing all files" forth:cr )
     [:  fstates 0 ?DO  I net2o:close-file  LOOP
 	file-reg# off  fstate-off  blocksize @ blocksizes!
-	read-file# off  write-file# off ;] file-sema c-section ;
+        read-file# off  write-file# off
+        data-resend $free
+    ;] file-sema c-section ;
 
 : open-file ( addr u mode id -- )
     state-addr .fs-open ;
