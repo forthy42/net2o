@@ -154,7 +154,7 @@ in fs : fs-close ( -- )
     fs-poll fs-size!
 ; fs-class to fs-open
 :noname ( addr u -- )  fs-close
-    msg( dup 2over ." create file: " forth:type forth:cr )
+    msg( 2dup ." create file: " forth:type forth:cr )
     ?sane-file
     2dup fs-path $! >rename+ r/w create-file throw fs-fid !
 ; fs-class to fs-create
@@ -420,7 +420,6 @@ scope{ net2o
     [:  fstates 0 ?DO  I net2o:close-file  LOOP
 	file-reg# off  fstate-off  blocksize @ blocksizes!
         read-file# off  write-file# off
-        data-resend $free
     ;] file-sema c-section ;
 
 : open-file ( addr u mode id -- )

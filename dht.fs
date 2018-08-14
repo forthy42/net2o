@@ -357,6 +357,7 @@ previous
 : -setip ['] .iperr is setip-xt ;
 
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
+    o to connection  +resend
     net2o-code  expect-reply
     pk@ $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
@@ -435,7 +436,8 @@ in net2o : send-revoke ( addr u -- )
 : disconnect-me ( -- )  connection >o +resend -flow-control \ -timeout
     net2o-code expect-reply
       connect( log .time s" Disconnect" $, type cr end-with )
-      close-all disconnect  end-code| msg( ." disconnected" forth:cr )
+      close-all ack rewind end-with disconnect
+    end-code| msg( ." disconnected" forth:cr )
     net2o:dispose-context msg( ." Disposed context" forth:cr ) o> ;
 
 0 [IF]

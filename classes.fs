@@ -61,8 +61,8 @@ cmd-class class
     value: dest-raddr
     $value: dest-ivs$
     value: dest-ivsgen
-    cvalue: dest-ivslastgen
-    cvalue: dest-req   \ -/-                    true if ongoing request
+    scvalue: dest-ivslastgen
+    scvalue: dest-req   \ -/-                    true if ongoing request
     $value: dest-ivsrest$
     value: dest-timestamps
     value: dest-replies
@@ -94,7 +94,7 @@ code-class class
     field: data-ack#     \ fully acked bursts
     field: ack-bit#      \ actual ack bit
     field: data-resend#-buf
-    cvalue: ack-advance?  \ ack is advancing state
+    scvalue: ack-advance?  \ ack is advancing state
 end-class rcode-class
 
 rcode-class class
@@ -276,7 +276,7 @@ cmd-class class
     cvalue: req-codesize
     cvalue: req-datasize
 
-    cvalue: key-setup?     \ true if key setup is done
+    scvalue: key-setup?     \ true if key setup is done
     cvalue: invite-result# \ invitation result
     cvalue: closing?
     \ flow control, sender part

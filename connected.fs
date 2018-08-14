@@ -434,7 +434,7 @@ scope{ mapc
     timeout( dup IF  ." resend all" forth:cr  THEN ) ;
 
 : +expected ( -- flag )
-    resend-all?  IF   resend-all  THEN  expected? ;
+    resend-all?  IF  resend-all  THEN  expected? ;
 
 \ higher level functions
 

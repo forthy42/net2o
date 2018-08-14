@@ -564,13 +564,16 @@ warnings !
     ?get-me init-client
     ?@nextarg IF
 	dvcs-bufs# nick-connect ." connected" cr !time
+	+resend +flow-control
 	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
-	BEGIN  +resend
+	BEGIN
 	    $10 [: 2dup basename net2o:copy ;] arg-loop#
-	    end-code|  file:close-all
+	    end-code| file:close-all
 	    ?peekarg  WHILE  2drop
-		net2o-code expect+slurp  close-all ack rewind end-with
+		+resend +flow-control
+		net2o-code expect+slurp  close-all  ack rewind end-with
+		[ previous ]
 	REPEAT  disconnect-me
     THEN ;
 
@@ -580,14 +583,18 @@ warnings !
     ?get-me init-client
     ?@nextarg IF
 	dvcs-bufs# nick-connect ." connected" cr !time
-	BEGIN  +resend
-	    net2o-code expect+slurp  close-all
-	    $10 blocksize! $A blockalign!
+	+resend +flow-control
+	net2o-code expect+slurp
+	$10 blocksize! $A blockalign!
+	BEGIN
 	    $10 [: base85>$ net2o:copy# ;] arg-loop#
 	    end-code|  file:close-all
 	    ?peekarg  WHILE  2drop
-	REPEAT
-	c:disconnect  THEN ;
+		+resend +flow-control
+		net2o-code expect+slurp  close-all  ack rewind end-with
+		[ previous ]
+	REPEAT  disconnect-me
+    THEN ;
 
 \ dvcs commands
 
