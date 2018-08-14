@@ -612,7 +612,9 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     0 timeouts !@ rtd( dup . ) 1 u> IF  rtdelay 64@ 64umax
 	rtd( ." rtdelay t-o: " 64dup 64>f .ns cr )  THEN
     rtdelay 64!  o>
-    -1 reqcount +!@ 1 = IF  [IFDEF] wake#  wake# @ 1+ elit,  [THEN] :>wake  THEN
+    -1 reqcount +!@ 1 = IF
+	wait-task @ ?dup-IF  wake# 's @ 1+ elit, :>wake  THEN
+    THEN
     0 r> addr reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN

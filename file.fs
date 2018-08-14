@@ -52,7 +52,10 @@ Variable fs-table
 : file:err ( -- )
     <err> ." invalid file-done xt" <default> ~~bt ;
 : file:done ( -- )
-    -1 parent .file-count +!@ .
+    parent >o -1 file-count +!@ 1 = IF
+	wait-task @ ?dup-IF  <event
+	    wake# over 's @ 1+ elit, :>wake  event>  THEN
+    THEN o>
     .time ." download done: " fs-id ? fs-path $@ type cr ;
 event: :>file-done ( file-o -- ) \ .file-xt ;
     >o action-of file-xt IF  file-xt  ELSE  file:err  THEN o> ;

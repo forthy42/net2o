@@ -564,15 +564,15 @@ warnings !
     ?get-me init-client
     ?@nextarg IF
 	dvcs-bufs# nick-connect ." connected" cr !time
+	net2o-code expect+slurp
+	$10 blocksize! $A blockalign!
 	BEGIN  +resend
-	    net2o-code expect+slurp  close-all
-	    $10 blocksize! $A blockalign!
 	    $10 [: 2dup basename net2o:copy ;] arg-loop#
 	    end-code|  file:close-all
-	    \ net2o-code net2o:expect-reply close-all end-code|
 	    ?peekarg  WHILE  2drop
-	REPEAT
-	c:disconnect  THEN ;
+		net2o-code expect+slurp  close-all ack rewind end-with
+	REPEAT  disconnect-me
+    THEN ;
 
 : get# ( -- )
     \U get# @user hash1 .. hashn
