@@ -427,12 +427,15 @@ scope{ net2o
 
 \ read in from files
 
-: slurp-block ( id -- delta )
-    data-head@ file( over data-map .mapc:dest-raddr -
-    >r ." file read: " 2 pick .
-    2 pick id>addr? .fs-seek #10 64rshift $64. r> #10 rshift hex. )
-    rot id>addr? .fs-read dup /head
-    file( dup hex. residualread @ hex. forth:cr ) ;
+: slurp-block { id -- delta }
+    data-head@
+    file( over data-map .mapc:dest-raddr - >r
+    id id>addr? .fs-seek #10 64rshift 64>n >r  )
+    id id>addr? .fs-read dup /head
+    file( dup IF ." file read: "
+    id . r> hex. r> #10 rshift hex.
+    dup hex. residualread @ hex. forth:cr
+    ELSE  rdrop rdrop  THEN ) ;
 
 \ careful: must follow exactpy the same logic as net2o:spit (see above)
 : slurp ( -- head end-flag )
