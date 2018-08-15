@@ -205,7 +205,7 @@ in net2o : copy ( addrsrc us addrdest ud -- )
     [: file( ." copy '" 2over forth:type ." ' -> '" 2dup forth:type
       ." '" forth:cr )
       2swap $, r/o ulit, open-tracked-file
-      file-reg# @ save-to ;] n2o>file
+      file-reg# @ ~~ save-to ;] n2o>file
     1 file-count +! ;
 
 in net2o : copy# ( addrhash u -- )
@@ -290,18 +290,21 @@ in net2o : genack ( -- )
 
 $20 Value max-resend#
 
-: prepare-resend ( flag -- end start acks ackm taibits backbits )
+: prepare-resend ( flag -- end start acks ackm taibits backbits headbits )
     data-rmap with mapc
-    ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
-    IF    dest-head addr>bytes -4 and
-    ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
-    dest-tail addr>bytes -4 and \ dup data-ack# umin!
-    data-ackbits @ dest-size addr>bytes 1-
-    dest-tail addr>bits dest-back dest-size + addr>bits endwith ;
+	ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
+	IF    dest-head addr>bytes -4 and
+	ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
+	dest-tail addr>bytes -4 and \ dup data-ack# umin!
+	data-ackbits @ dest-size addr>bytes 1-
+	dest-tail addr>bits
+	dest-back dest-size + addr>bits
+	dest-head addr>bits
+    endwith ;
 
 in net2o : do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap 0= IF  drop EXIT  THEN
-    0 swap  prepare-resend { acks ackm tailbits backbits }
+    0 swap  prepare-resend { acks ackm tailbits backbits headbits }
     ack( ." ack loop: " over hex. dup hex. forth:cr )
     +DO
 	acks I ackm and + l@
@@ -309,12 +312,15 @@ in net2o : do-resend ( flag -- )
 	I data-rmap .mapc:data-ack# @ = IF '*' emit THEN
 	." ]=" dup hex. backbits hex. forth:cr )
 	I bytes>bits tailbits u< IF
-	    -1 tailbits I bytes>bits - lshift invert or
+	    -1 tailbits I bytes>bits - lshift invert $FFFFFFFF and or
+	THEN  $FFFFFFFF xor
+	I bytes>bits $20 + headbits u> IF
+	    $FFFFFFFF I bytes>bits $20 + headbits - rshift and
 	THEN
-	dup $FFFFFFFF <> IF
+	dup IF
 	    resend( ." resend: " dup hex. over hex. forth:cr )
 	    I ackm and bytes>addr data-rmap .mapc:>linear
-	    ulit, $FFFFFFFF xor ulit, resend-mask  1+
+	    ulit, ulit, resend-mask  1+
 	ELSE
 	    drop dup 0= IF \ if we didn't have a resend yet, increase data-ack#
 		I 4 + bytes>bits backbits u<= IF \ no backbits, please

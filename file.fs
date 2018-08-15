@@ -63,7 +63,8 @@ event: :>file-done ( file-o -- ) \ .file-xt ;
 \ id handling
 
 : id>addr ( id -- addr remainder )
-    >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;
+    [: >r file-state $@ r> cells /string >r dup IF  @  THEN r> ;]
+    filestate-sema c-section ;
 : id>addr? ( id -- addr )
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
@@ -348,9 +349,9 @@ scope{ mapc
 
 : fstates ( -- n )  file-state $@len cell/ ;
 
-: fstate-off ( -- )  file-state @ 0= ?EXIT
-    file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
-    file-state $free ;
+: fstate-free ( -- )  file-state @ 0= ?EXIT
+    [: file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
+      file-state $free ;] file-sema c-section ;
 in net2o : save-block ( back tail id -- delta ) { id -- delta }
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
     file( over data-rmap .mapc:dest-raddr - >r
@@ -381,7 +382,7 @@ in net2o : spit { back tail -- newback }
     slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
 
-: save-to ( addr u n -- )  state-addr >o  fs-create o> ;
+: save-to ( addr u n -- )  state-addr .fs-create ;
 : save-to# ( addr u n -- )  state-addr >o  1 fs-class!  fs-create o> ;
 
 \ file status stuff
@@ -417,10 +418,9 @@ scope{ net2o
 
 : close-all ( -- )
     msg( ." Closing all files" forth:cr )
-    [:  fstates 0 ?DO  I net2o:close-file  LOOP
-	file-reg# off  fstate-off  blocksize @ blocksizes!
-        read-file# off  write-file# off
-    ;] file-sema c-section ;
+    fstates 0 ?DO  I net2o:close-file  LOOP
+    file-reg# off  fstate-free  blocksize @ blocksizes!
+    read-file# off  write-file# off ;
 
 : open-file ( addr u mode id -- )
     state-addr .fs-open ;

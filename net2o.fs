@@ -873,7 +873,9 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 	swap data-map >o mapc:dest-size 1- and mapc:dest-raddr + o> swap
     ELSE  drop 0 0  THEN ;
 : resend? ( -- flag )
-    data-resend $@  IF  @ 0<>  ELSE  drop false  THEN ;
+    data-resend $@  IF
+	2@ 0<> swap data-map .mapc:dest-head u< and
+    ELSE  drop false  THEN ;
 
 : resend-dest ( -- addr )
     data-resend $@ drop cell+ @
@@ -1635,7 +1637,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
       end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
       end-strings start-strings DO  I $off      cell +LOOP
       end-secrets start-secrets DO  I sec-free  cell +LOOP
-      fstate-off
+      fstate-free
       \ erase crypto keys
       log-context @ ?dup-IF  .dispose  THEN
       ack-context @ ?dup-IF
