@@ -205,7 +205,7 @@ in net2o : copy ( addrsrc us addrdest ud -- )
     [: file( ." copy '" 2over forth:type ." ' -> '" 2dup forth:type
       ." '" forth:cr )
       2swap $, r/o ulit, open-tracked-file
-      file-reg# @ ~~ save-to ;] n2o>file
+      file-reg# @ save-to ;] n2o>file
     1 file-count +! ;
 
 in net2o : copy# ( addrhash u -- )
