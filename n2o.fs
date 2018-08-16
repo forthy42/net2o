@@ -569,7 +569,7 @@ warnings !
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: 2dup basename net2o:copy ;] arg-loop#
-	    end-code| file:close-all
+	    end-code| net2o:close-all -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with
@@ -588,7 +588,7 @@ warnings !
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: base85>$ net2o:copy# ;] arg-loop#
-	    end-code|  file:close-all
+	    end-code| net2o:close-all -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with

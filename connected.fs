@@ -490,6 +490,13 @@ previous
 	reply +LOOP
     ELSE  0  THEN ;
 
+: -map-resend ( -- ) \G clear all resend requests
+    code-map ?dup-IF  with mapc
+	dest-replies dest-size addr>replies bounds endwith U+DO
+	    0 I is reply-xt
+	reply +LOOP
+    THEN ;
+
 : cmd-resend? ( -- n )
     0-resend? map-resend?
     timeout( 2dup d0<> IF ." resend " over . dup . ." commands 0/map" cr THEN ) + ;

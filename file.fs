@@ -349,9 +349,10 @@ scope{ mapc
 
 : fstates ( -- n )  file-state $@len cell/ ;
 
+: fstates-free ( -- )
+     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP ;
 : fstate-free ( -- )  file-state @ 0= ?EXIT
-    [: file-state $@ bounds ?DO  I @ .dispose  cell +LOOP
-      file-state $free ;] file-sema c-section ;
+    [: fstates-free file-state $free ;] file-sema c-section ;
 in net2o : save-block ( back tail id -- delta ) { id -- delta }
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
     file( over data-rmap .mapc:dest-raddr - >r
@@ -419,7 +420,8 @@ scope{ net2o
 : close-all ( -- )
     msg( ." Closing all files" forth:cr )
     fstates 0 ?DO  I net2o:close-file  LOOP
-    file-reg# off  fstate-free  blocksize @ blocksizes!
+    file-reg# off  fstate-free
+    blocksize @ blocksizes!
     read-file# off  write-file# off ;
 
 : open-file ( addr u mode id -- )
