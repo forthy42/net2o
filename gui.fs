@@ -170,6 +170,9 @@ tex: net2o-logo
 glue new Constant glue*lll±
 glue*lll± >o 1Mglue hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
 
+glue new Constant glue*shrink
+glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue! o>
+
 {{ login-bg-col# pres-frame dark-blue# ' dark-blue >body !
     {{
 	glue*lll± }}glue
@@ -364,7 +367,10 @@ event: :>chat-connects  gui-chat-connects
 
 {{ $FFFF80FF pres-frame
     {{
-	nicks-title
+	{{
+	    nicks-title
+	    glue*shrink }}glue
+	}}h
 	{{
 	    {{
 		{{ glue*l $303000FF bar-frame
