@@ -78,7 +78,7 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     beacons# @ 0= IF  ret-addr be@ ['] dht-beacon 0 .add-beacon  THEN ;
 
 : dht-connect ( -- )
-    dht-connection ?dup-IF  >o rdrop  EXIT  THEN
+    dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk dhtroot +dht-beacon
     pk:connect  o to dht-connection ;
