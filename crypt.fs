@@ -136,12 +136,14 @@ scope{ mapc
 : dest-a/b ( addr u -- addr1 u1 )
     2/  dest-ivslastgen 1 = IF  dup >r + r>  THEN ;
 
-: clear-replies ( -- )
-    dest-replies dest-size addr>replies dest-a/b 2dup
-    bounds U+DO
+: replies-erase ( addr len -- )
+    2dup bounds U+DO
 	I reply-tag ?dup-IF  off  THEN
-    reply +LOOP
-    erase ;
+    reply +LOOP  erase ;
+
+: clear-replies ( -- )
+    dest-replies dest-size addr>replies dest-a/b
+    replies-erase ;
 
 : >ivskey ( 64addr -- keyaddr )
     64>n addr>keys dest-ivs$ rot umin + ;

@@ -492,9 +492,7 @@ previous
 
 : -map-resend ( -- ) \G clear all resend requests
     code-map ?dup-IF  with mapc
-	dest-replies dest-size addr>replies bounds endwith U+DO
-	    0 I is reply-xt
-	reply +LOOP
+	dest-replies dest-size addr>replies replies-erase  endwith
     THEN ;
 
 : cmd-resend? ( -- n )

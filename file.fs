@@ -358,6 +358,7 @@ in net2o : save-block ( back tail id -- delta ) { id -- delta }
     file( over data-rmap .mapc:dest-raddr - >r
     id id>addr? .fs-seek #10 64rshift 64>n >r )
     id id>addr? .fs-write
+    >blockalign dup negate residualwrite +!
     file( dup IF ." file write: "
     id . r> hex. r> #10 rshift hex. dup hex. residualwrite @ hex. forth:cr
     ELSE  rdrop rdrop  THEN ) ;
@@ -370,8 +371,7 @@ in net2o : spit { back tail -- newback }
     write-file# ? residualwrite @ hex. forth:cr ) back tail
     [: +calc fstates 0 { back tail states fails }
 	BEGIN  tail back u>  WHILE
-		back tail write-file# @ net2o:save-block
-		>blockalign dup negate residualwrite +!  dup +to back
+		back tail write-file# @ net2o:save-block dup +to back
 		IF 0 ELSE fails 1+ residualwrite off THEN to fails
 		residualwrite @ 0= IF
 		    write-file# file+ blocksize @ residualwrite !  THEN

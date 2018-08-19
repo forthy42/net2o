@@ -854,7 +854,15 @@ in net2o : set-rate ( rate deltat -- )
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
     BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
-in net2o : resend-mask ( addr mask -- ) >mask0
+: >legit ( addr mask -- addr' mask' )
+    data-map .mapc:dest-back >r
+    over r@ [ maxdata $20 * ]L umax [ maxdata $20 * ]L  - u<
+    IF  r> 2drop 0  EXIT  THEN
+    over r@ u< IF  r@ rot - addr>bits rshift r> swap  EXIT  THEN
+    rdrop ;
+in net2o : resend-mask ( addr mask -- )
+    >legit dup 0= IF  2drop  EXIT  THEN
+    >mask0
     resend( ." mask: " hex[ >r dup u. r> dup u. ]hex cr )
     data-resend $@ bounds ?DO
 	over I cell+ @ swap dup maxdata mask-bits# * + within IF
@@ -899,7 +907,8 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
 
 : remove-resend { nback -- }
     data-resend $@ bounds U+DO
-	I cell+ @ nback [ maxdata $20 * ]L - u< IF  I off
+	I cell+ @ nback [ maxdata $20 * ]L umax [ maxdata $20 * ]L -
+	u< IF  I off
 	ELSE  I cell+ @ nback u< IF
 		nback dup I cell+ !@ -
 		addr>bits I @ swap rshift I !

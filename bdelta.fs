@@ -80,6 +80,7 @@ Variable bfile2$
     007 0 bd-pass
     005 0 bd-pass
     003 0 bd-pass
+    001 0 bd-pass
     013 BDELTA_GLOBAL bd-pass
     007 0 bd-pass
     005 0 bd-pass ;
@@ -167,6 +168,27 @@ Variable bdelta$
 	    offt 0< IF  2dup offt negate umin <#copy> type <default>
 		offt negate /string dup 0 min to offt 0 max
 	    THEN  type-shorted r>
+	THEN
+    I - +LOOP  drop ;
+
+: #type ( addr u -- )
+    nip ?dup-IF  hex.  THEN ;
+
+: color-bpatch# ( a$ diff$ -- )
+    0 0 { fp offt }
+    $@ bounds U+DO
+	I p@+ >r 64>n r> swap 2dup <#new> #type <default> +
+	dup I' u< IF
+	    ps@+ >r 64>n dup >r +to fp
+	    r@ 0>= IF
+		dup $@ fp r@ - safe/string  offt negate r@ umin safe/string
+		r> umin <#del> #type <default> 0 >r  THEN
+	    r> to offt
+	    dup $@ fp safe/string
+	    r> p@+ >r 64>n dup +to fp umin
+	    offt 0< IF  2dup offt negate umin <#copy> #type <default>
+		offt negate /string dup 0 min to offt 0 max
+	    THEN  #type r>
 	THEN
     I - +LOOP  drop ;
 

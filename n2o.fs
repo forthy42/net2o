@@ -355,8 +355,25 @@ warnings !
     \G hash: use -256 or -512 to select hash size
     \G hash: use -threefish or -keccak to select hash algorithm
     ?cr enc-mode @ 8 rshift $FF and >crypt
-    [: 2dup type ." :" cr
-	hash-file-blocks ;] arg-loop 0 >crypt ;
+    [: 2dup type ." :" cr hash-file-blocks ;] arg-loop 0 >crypt ;
+
+: bdiff ( -- )
+    \U bdiff file1 file2
+    \G bdiff: diffs two files binary and displays a numeric summary
+    \G bdiff: of how they differ
+    ?nextarg IF  ?nextarg  IF
+	    2over type ." .." 2dup type ." : "
+	    bdelta 2drop bfile1$ bdelta$ color-bpatch# cr
+	ELSE  2drop  THEN  THEN ;
+
+: adiff ( -- )
+    \U bdiff file1 file2
+    \G bdiff: diffs two files binary and displays a numeric summary
+    \G bdiff: of how they differ
+    ?nextarg IF  ?nextarg  IF
+	    2over type ." .." 2dup type ." : "
+	    bdelta 2drop bfile1$ bdelta$ color-bpatch$2 cr
+	ELSE  2drop  THEN  THEN ;
 
 : sign ( -- )
     \U sign file1 .. filen
@@ -569,7 +586,7 @@ warnings !
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: 2dup basename net2o:copy ;] arg-loop#
-	    end-code| net2o:close-all -map-resend
+	    end-code| net2o:close-all \ -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with
@@ -588,7 +605,7 @@ warnings !
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: base85>$ net2o:copy# ;] arg-loop#
-	    end-code| net2o:close-all -map-resend
+	    end-code| net2o:close-all \ -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with
