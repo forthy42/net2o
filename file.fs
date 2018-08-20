@@ -56,7 +56,7 @@ Variable fs-table
 	wait-task @ ?dup-IF  <event
 	    wake# over 's @ 1+ elit, :>wake  event>  THEN
     THEN o>
-    .time ." download done: " fs-id ? fs-path $@ type cr ;
+    [: .time ." download done: " fs-id ? fs-path $@ type cr ;] do-debug ;
 event: :>file-done ( file-o -- ) \ .file-xt ;
     >o action-of file-xt IF  file-xt  ELSE  file:err  THEN o> ;
 
@@ -349,19 +349,23 @@ scope{ mapc
 
 : fstates ( -- n )  file-state $@len cell/ ;
 
+Variable f-rid -1 f-rid !
+Variable f-ramount
+Variable f-wid -1 f-wid !
+Variable f-wamount
+
 : fstates-free ( -- )
      file-state $@ bounds ?DO  I @ .dispose  cell +LOOP ;
 : fstate-free ( -- )  file-state @ 0= ?EXIT
     [: fstates-free file-state $free ;] file-sema c-section ;
 in net2o : save-block ( back tail id -- delta ) { id -- delta }
     data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
-    file( over data-rmap .mapc:dest-raddr - >r
-    id id>addr? .fs-seek #10 64rshift 64>n >r )
     id id>addr? .fs-write
-    >blockalign dup negate residualwrite +!
-    file( dup IF ." file write: "
-    id . r> hex. r> #10 rshift hex. dup hex. residualwrite @ hex. forth:cr
-    ELSE  rdrop rdrop  THEN ) ;
+    file1( id f-wid @ = IF  dup f-wamount +!
+    ELSE  f-wid @ 0>= f-wamount @ 0> and IF
+	    ." split: " f-wid @ . f-wamount @ hex. cr  THEN
+        id f-wid ! dup f-wamount !  THEN )
+    >blockalign dup negate residualwrite +! ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
@@ -431,13 +435,11 @@ scope{ net2o
 
 : slurp-block { id -- delta }
     data-head@
-    file( over data-map .mapc:dest-raddr - >r
-    id id>addr? .fs-seek #10 64rshift 64>n >r  )
     id id>addr? .fs-read dup /head
-    file( dup IF ." file read: "
-    id . r> hex. r> #10 rshift hex.
-    dup hex. residualread @ hex. forth:cr
-    ELSE  rdrop rdrop  THEN ) ;
+    file1( id f-rid @ = IF  dup f-ramount +!
+    ELSE  f-rid @ 0>=  f-ramount @ 0> and IF
+	    ." split: " f-rid @ . f-ramount @ hex. cr  THEN
+        id f-rid ! dup f-ramount !  THEN ) ;
 
 \ careful: must follow exactpy the same logic as net2o:spit (see above)
 : slurp ( -- head end-flag )

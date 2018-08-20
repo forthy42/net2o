@@ -5,7 +5,7 @@
 #include "compatibility.h"
 
 typedef uint8_t Token; // all tokens are bytes
-typedef uint64_t pos;   // positions are 64 bit
+typedef int64_t pos;   // positions are 64 bit
 
 #include <stdio.h>
 #include "bdelta.h"
@@ -68,12 +68,12 @@ struct Checksums_Instance {
 };
 
 
-pos match_buf_forward(const void *buf1, const void *buf2, unsigned num) { 
+pos match_buf_forward(const void *buf1, const void *buf2, pos num) { 
 	pos i = 0;
 	while (i < num && ((const Token*)buf1)[i]==((const Token*)buf2)[i]) ++i;
 	return i;
 }
-pos match_buf_backward(const void *buf1, const void *buf2, unsigned num) { 
+pos match_buf_backward(const void *buf1, const void *buf2, pos num) { 
 	pos i = num;
 	do --i;
 	while (i >= 0 && ((const Token*)buf1)[i] == ((const Token*)buf2)[i]);

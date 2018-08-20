@@ -80,7 +80,6 @@ Variable bfile2$
     007 0 bd-pass
     005 0 bd-pass
     003 0 bd-pass
-    001 0 bd-pass
     013 BDELTA_GLOBAL bd-pass
     007 0 bd-pass
     005 0 bd-pass ;
@@ -98,7 +97,7 @@ Variable bfile2$
     o bdelta_numMatches 0 ?DO
 	o i p1 p2 numr bdelta_getMatch
 	p2 64@ p2' n>64 64- 64dup .p 64>n >r
-	b $@ fp /string r> umin dup >r type r> +to fp
+	b $@ fp safe/string r> umin dup >r type r> +to fp
 	p1 64@ p1' n>64 64- .ps
 	numr 64@ 64dup .p
 	64dup 64>n +to fp
@@ -111,13 +110,13 @@ Variable bfile2$
 
 Variable bdelta$
 
-: b$off ( -- )
-    bfile1$ $off bfile2$ $off  bdelta$ $off ;
+: b$free ( -- )
+    bfile1$ $free bfile2$ $free  bdelta$ $free ;
 
 : bdelta$2 ( a$ b$ -- )
     tuck bdelta-init >o bd-passes .diff o bdelta_done_alg o> ;
 
-: bdelta ( addr1 u1 addr2 u2 -- addr3 u3 ) bslurp
+: bdelta ( addr1 u1 addr2 u2 -- addr3 u3 ) bslurp bdelta$ $free
     ['] bdelta$2 bdelta$ $exec bdelta$ $@ ;
 
 : bpatch$2 ( a$ diff$ -- )

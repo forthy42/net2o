@@ -1280,8 +1280,8 @@ in net2o : save { tail -- }
 	.mapc:dest-back { oldback }
 	oldback tail net2o:spit { back }
 	data-rmap with mapc
-	    oldback back rewind-partial
-	    dest-req IF  back do-slurp !  THEN  back to dest-back
+	    oldback back rewind-partial  back to dest-back
+	    dest-req IF  back do-slurp !  THEN
 	endwith
     THEN ;
 
@@ -1301,11 +1301,13 @@ event: :>close-all ( o -- )
     file-task 0= IF  create-file-task  THEN
     file-task ;
 in net2o : save& ( -- )
+    syncspit( data-rmap .mapc:dest-tail net2o:save )else(
     data-rmap .mapc:dest-tail elit,
-    o elit, :>save ?file-task event> ;
+    o elit, :>save ?file-task event> ) ;
 in net2o : save&done ( -- )
+    syncspit( data-rmap .mapc:dest-tail net2o:save sync-done-xt )else(
     data-rmap .mapc:dest-tail elit,
-    o elit, :>save&done ?file-task event| ;
+    o elit, :>save&done ?file-task event| ) ;
 
 \ schedule delayed events
 

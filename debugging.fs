@@ -48,6 +48,7 @@ debug: header(
 debug: sender( \ extra sender task
 debug: dht( \ debugging for dht functions
 debug: file( \ file read/write debugging
+debug: file1( \ simple file read/write debugging
 debug: nat( \ NAT traversal stuff
 debug: netlink( \ Netlink changes
 debug: route( \ do routing
@@ -79,6 +80,7 @@ debug: wallet( \ debug wallet stuff
 debug: qr( \ qr code stuff
 debug: deprecated( \ deprecated stuff
 debug: unhandled( \ unhandled commands
+debug: syncspit( \ synchronous spit
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )

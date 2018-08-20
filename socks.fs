@@ -90,10 +90,12 @@ $00000000 Value droprate#
 	4 set-precision
 	1e fmin -1e fmax $FFFFFFFF fm* f>d
 	0< IF  negate to rec-droprate#
-	    ." Set rec drop rate to " rec-droprate# s>f 42949672.96e f/ f. ." %" cr
+	    [: ." Set rec drop rate to "
+	      rec-droprate# s>f 42949672.96e f/ f. ." %" cr ;] do-debug
 	ELSE
 	    to droprate#
-	    ." Set drop rate to " droprate# s>f 42949672.96e f/ f. ." %" cr
+	    [: ." Set drop rate to "
+	      droprate# s>f 42949672.96e f/ f. ." %" cr ;] do-debug
 	THEN
     THEN ;
 

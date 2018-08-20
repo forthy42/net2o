@@ -357,23 +357,25 @@ warnings !
     ?cr enc-mode @ 8 rshift $FF and >crypt
     [: 2dup type ." :" cr hash-file-blocks ;] arg-loop 0 >crypt ;
 
-: bdiff ( -- )
-    \U bdiff file1 file2
-    \G bdiff: diffs two files binary and displays a numeric summary
-    \G bdiff: of how they differ
-    ?nextarg IF  ?nextarg  IF
-	    2over type ." .." 2dup type ." : "
-	    bdelta 2drop bfile1$ bdelta$ color-bpatch# cr
-	ELSE  2drop  THEN  THEN ;
+: bdiff2 ( -- )
+    \U bdiff2 file1 file2 .. filen1 filen2
+    \G bdiff2: diffs two files binary and displays a numeric summary
+    \G bdiff2: of how they differ
+    BEGIN  ?nextarg  WHILE  ?nextarg  IF
+		2over type ." .." 2dup type ." : "
+		bdelta 2drop bfile1$ bdelta$ color-bpatch# cr
+	    ELSE  2drop  THEN
+    REPEAT ;
 
-: adiff ( -- )
-    \U bdiff file1 file2
-    \G bdiff: diffs two files binary and displays a numeric summary
-    \G bdiff: of how they differ
-    ?nextarg IF  ?nextarg  IF
-	    2over type ." .." 2dup type ." : "
-	    bdelta 2drop bfile1$ bdelta$ color-bpatch$2 cr
-	ELSE  2drop  THEN  THEN ;
+: diff2 ( -- )
+    \U diff2 file1 file2 .. filen1 filen2
+    \G diff2: diffs two text files and displays a numeric summary
+    \G diff2: of how they differ
+    BEGIN  ?nextarg  WHILE  ?nextarg  IF
+		." --- " 2over type cr ." +++ " 2dup type ." :" cr
+		bdelta 2drop bfile1$ bdelta$ color-bpatch$2 cr
+	    ELSE  2drop  THEN
+    REPEAT ;
 
 : sign ( -- )
     \U sign file1 .. filen
@@ -580,13 +582,13 @@ warnings !
     \G get: get files into current directory
     ?get-me init-client
     ?@nextarg IF
-	dvcs-bufs# nick-connect ." connected" cr !time
+	dvcs-bufs# nick-connect [: ." connected" cr ;] do-debug !time
 	+resend +flow-control
 	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: 2dup basename net2o:copy ;] arg-loop#
-	    end-code| net2o:close-all \ -map-resend
+	    end-code| net2o:close-all -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with
@@ -599,13 +601,13 @@ warnings !
     \G get#: get files by hash into hash directory
     ?get-me init-client
     ?@nextarg IF
-	dvcs-bufs# nick-connect ." connected" cr !time
+	dvcs-bufs# nick-connect [: ." connected" cr ;] do-debug !time
 	+resend +flow-control
 	net2o-code expect+slurp
 	$10 blocksize! $A blockalign!
 	BEGIN
 	    $10 [: base85>$ net2o:copy# ;] arg-loop#
-	    end-code| net2o:close-all \ -map-resend
+	    end-code| net2o:close-all -map-resend
 	    ?peekarg  WHILE  2drop
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with

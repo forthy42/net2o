@@ -8,7 +8,7 @@ extern "C" {
 
 typedef struct _BDelta_Instance BDelta_Instance;
 
-typedef uint64_t pos;
+typedef int64_t pos;
 
 BDelta_Instance *bdelta_init_alg(void *handle1, pos data1_size,
 				 void *handle2, pos data2_size);
