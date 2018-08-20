@@ -571,7 +571,7 @@ scope{ mapc
 : >blockalign ( n -- block )
     blockalign @ dup >r 1- + r> negate and ;
 : >maxalign ( n -- block )
-    maxdata dup >r 1- + r> negate and ;
+    maxdata 5 lshift dup >r 1- + r> negate and ;
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 : /head ( u -- )
