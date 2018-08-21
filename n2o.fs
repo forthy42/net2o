@@ -593,7 +593,7 @@ warnings !
 		+resend +flow-control
 		net2o-code expect+slurp  close-all  ack rewind end-with
 		[ previous ]
-	REPEAT  disconnect-me
+	REPEAT  4 to max-timeouts disconnect-me
     THEN ;
 
 : get# ( -- )
