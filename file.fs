@@ -382,7 +382,7 @@ in net2o : spit { back tail -- newback }
 	    fails states u>= UNTIL
 	THEN
 	msg( ." Write end" cr ) +file
-	back  fails states u>= IF   >maxalign  THEN  \ if all files are done, align
+	back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
     ;] file-sema c-section
     slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
@@ -434,8 +434,7 @@ scope{ net2o
 \ read in from files
 
 : slurp-block { id -- delta }
-    data-head@
-    id id>addr? .fs-read dup /head
+    data-head@ id id>addr? .fs-read dup /head
     file1( id f-rid @ = IF  dup f-ramount +!
     ELSE  f-rid @ 0>=  f-ramount @ 0> and IF
 	    ." split: " f-rid @ . f-ramount @ hex. cr  THEN
