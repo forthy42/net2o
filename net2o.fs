@@ -461,6 +461,7 @@ in net2o : new-context ( -- o )
     -flow-control
     -1 blocksize !
     1 blockalign !
+    config:timeouts# @ to max-timeouts
     end-semas start-semas DO  I 0 pthread_mutex_init drop
     1 pthread-mutexes +LOOP
     64#0 context-ticker 64!@ 64dup 64#0 64<> IF
@@ -1466,7 +1467,6 @@ Forward handle-beacon+hash
 
 #10.000.000.000 d>64 64Value timeout-max# \ 10s maximum timeout
 #100.000.000 d>64 64Value timeout-min# \ 100ms minimum timeout
-#14 Value timeouts# \ with 100ms initial timeout, gives 31.75s cummulative timeout
 
 Sema timeout-sema
 Variable timeout-tasks
@@ -1710,7 +1710,7 @@ event: :>timeout ( o -- )
 event: :>throw ( error -- ) throw ;
 
 : timeout-expired? ( -- flag )
-    ack@ .timeouts @ timeouts# >= ;
+    ack@ .timeouts @ max-timeouts >= ;
 : push-timeout ( o:connection -- )
     timeout-expired? wait-task @ and  ?dup-IF
 	o elit, :>timeout event>  THEN ;

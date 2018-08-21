@@ -249,6 +249,7 @@ cmd-class class
     field: codebuf#
     field: context#
     field: wait-task
+    value: max-timeouts \ initialized with timeouts#
     $10 +field return-address \ used as return address
     $10 +field r0-address \ used for resending 0
     $20 +field punch#

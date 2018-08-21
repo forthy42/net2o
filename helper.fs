@@ -145,7 +145,8 @@ true Value connected?
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
-	0 .!my-addr announce-me \ if we succeed here, we can try the rest
+	0 .!my-addr dht-disconnect \ old DHT may be stale
+	announce-me \ if we succeed here, we can try the rest
 	beacons# #offs
 	0 >o dhtroot +dht-beacon o>
 	renat

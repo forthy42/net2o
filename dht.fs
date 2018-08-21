@@ -433,7 +433,9 @@ in net2o : send-revoke ( addr u -- )
     net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip net2o:send-revoke ;
 
-: disconnect-me ( -- )  connection >o +resend -flow-control \ -timeout
+: disconnect-me ( -- )  connection >o
+    max-timeouts 4 umin to max-timeouts \ be impatient with disconnects
+    +resend -flow-control
     net2o-code expect-reply
       connect( log .time s" Disconnect" $, type cr end-with )
       close-all ack rewind end-with disconnect
