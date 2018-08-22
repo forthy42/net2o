@@ -127,10 +127,12 @@ event: :>load-msg ( last# -- )
 	dup 0= IF  drop ?file-task  THEN  event>  THEN ;
 
 : !save-all-msgs ( -- )
-    <event :>save-all-msgs ?file-task event| ;
+    syncfile( save-all-msgs )else(
+    <event :>save-all-msgs ?file-task event| ) ;
 
 : save-msgs& ( -- )
-    <event last# elit, :>save-msgs ?file-task event> ;
+    syncfile( last# saved-msg$ +unique$ )else(
+    <event last# elit, :>save-msgs ?file-task event> ) ;
 
 : ?msg-log ( addr u -- )  msg-logs ?hash ;
 

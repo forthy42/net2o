@@ -1310,11 +1310,11 @@ event: :>close-all ( o -- )
     file-task 0= IF  create-file-task  THEN
     file-task ;
 in net2o : save& ( -- )
-    syncspit( data-rmap .mapc:dest-tail net2o:save )else(
+    syncfile( data-rmap .mapc:dest-tail net2o:save )else(
     data-rmap .mapc:dest-tail elit,
     o elit, :>save ?file-task event> ) ;
 in net2o : save&done ( -- )
-    syncspit( data-rmap .mapc:dest-tail net2o:save sync-done-xt )else(
+    syncfile( data-rmap .mapc:dest-tail net2o:save sync-done-xt )else(
     data-rmap .mapc:dest-tail elit,
     o elit, :>save&done ?file-task event| ) ;
 

@@ -80,11 +80,12 @@ debug: wallet( \ debug wallet stuff
 debug: qr( \ qr code stuff
 debug: deprecated( \ deprecated stuff
 debug: unhandled( \ unhandled commands
-debug: syncspit( \ synchronous spit
+debug: syncfile( \ synchronous file operations
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
 +db ipv4( \ ipv4 should be on by default )
++db syncfile( \ disable async file operations for now )
 
 0 [IF]
 false warnings !@

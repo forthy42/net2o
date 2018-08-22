@@ -812,13 +812,9 @@ event: :>dvcs-sync-done ( o -- ) >o
     msg-group$ $@ ?save-msg   0 dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
 
-: file:close-all ( -- )
-    \ close files of current connection in file-task
-    <event o elit, :>close-all file-task event| ;
-
 : dvcs-sync-done ( -- )
     msg( ." dvcs-sync-done" forth:cr )
-    file:close-all
+    net2o:close-all
     msg( ." dvcs-sync-done closed" forth:cr )
     <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
