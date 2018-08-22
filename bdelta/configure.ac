@@ -1,6 +1,6 @@
 ## ExampleLib Example: an example of using Automake to link with a library
 
-AC_INIT([BDELTA], [3:0], [bernd@net2o.de], [bdelta library],
+AC_INIT([BDELTA], [3:1], [bernd@net2o.de], [bdelta library],
         [https://github.com/jjwhitney/BDelta])
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 -Wall no-define])
