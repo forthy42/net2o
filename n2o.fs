@@ -392,7 +392,7 @@ warnings !
     ?get-me ?cr
     [: 2dup hash-file 2drop 2dup type
       [: type ." .s2o" ;] $tmp slurp-file
-      over date-sig? dup >r  err-color info-color r> select  attr! .check
+      over date-sig? dup >r  error-color info-color r> select  attr! .check
       space over keysize .key-id <default>
       drop free throw cr ;]
     arg-loop ;

@@ -671,9 +671,10 @@ $10 Constant datesize#
 \ colors
 
 : <default> default-color attr! ;
-: <warn>    warn-color attr! ;
-: <info>    info-color attr! ;
-: <err>     err-color attr! ;
+: <warn>    warning-color attr! ;
+: <info>    info-color    attr! ;
+: <err>     error-color   attr! ;
+: <success> success-color attr! ;
 : <black>   [ black >fg black >bg or ]l attr! ;
 : <white>   [ white >fg white >bg or bold or ]l attr! ;
 
