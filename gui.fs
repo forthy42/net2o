@@ -393,7 +393,7 @@ event: :>chat-connects  gui-chat-connects
 
 : show-nicks ( -- )
     fill-nicks fill-groups next-slide
-    0.01e peers-box [: .vp-top ;] >animate ;
+    0.01e peers-box [: .vp-top fdrop ;] >animate ;
 
 \ messages
 
