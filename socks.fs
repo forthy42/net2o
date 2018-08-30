@@ -167,6 +167,16 @@ Variable lastn2oaddr
     routes# #.key dup 0= ?EXIT
     $@ sockaddr> over alen ! sockaddr_in smove true ;
 
+\ query if we have a DNS64 environment
+
+Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
+
+: dns64? ( -- flag )
+    net2o-ipv4 $@ net2o-port get-info info@
+    sockaddr_in6 = over family w@ AF_INET6 = IF
+	sin6_addr $C nat64-ip4 over str=
+    ELSE  drop false  THEN ;
+
 \ route an incoming packet
 
 : >rpath-len ( rpath -- rpath len )

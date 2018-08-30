@@ -30,7 +30,7 @@ Variable priv-addr$ \ unpublished addresses (with sigs)
 
 Create fake-ip4  $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $FFFF w,
 \ prefix for IPv4 addresses encoded as IPv6
-Create nat64-ip4 $0064 w, $ff9b w, $0000 w, $0000 w, $0000 w, $0000 w,
+Create nat64-ip4 $0064 wbe w, $ff9b wbe w, $0000 w, $0000 w, $0000 w, $0000 w,
 \ prefix for IPv4 addresses via NAT64
 
 : >alen ( addr -- alen )
