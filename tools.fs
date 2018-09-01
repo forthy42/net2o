@@ -368,16 +368,22 @@ $Variable objects$
 $Variable chats$
 $Variable keys$
 $Variable .net2o$
+$Variable .net2o-config$
+$Variable .net2o-cache$
 $Variable invite$
 
 }scope
 
 also config
 
-"~/.net2o" .net2o$ $!
-"~/.net2o/keys" keys$ $!
-"~/.net2o/chats" chats$ $!
-"~/.net2o/objects" objects$ $!
+: default-dir-config
+    "~/.local/share/net2o" .net2o$ $!
+    "~/.config/net2o" .net2o-config$ $!
+    "~/.cache/net2o" .net2o-cache$ $!
+    "~/.local/share/net2o/keys" keys$ $!
+    "~/.local/share/net2o/chats" chats$ $!
+    "~/.local/share/net2o/objects" objects$ $! ;
+default-dir-config
 #2 date# !
 #20 logsize# !
 pad $400 get-dir rootdirs$ $!
@@ -389,13 +395,18 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
+: .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
+: .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
 : objects/.no-fat-file ( -- addr u )
     [: objects$  $. ." /." no-fat-chars type ;] $tmp ;
 : chats/.no-fat-file ( -- addr u )
     [: chats$  $. ." /." no-fat-chars type ;] $tmp ;
 
-: ?.net2o ( -- )  .net2o$ $@ $1FF init-dir drop ;
+: ?.net2o ( -- )
+    .net2o$ $@ $1FF init-dir drop
+    .net2o-config$ $@ $1FF init-dir drop
+    .net2o-cache$ $@ $1FF init-dir drop ;
 : ?.net2o/keys ( -- flag ) ?.net2o keys$ $@ $1C0 init-dir ;
 : ?.net2o/chats ( -- ) ?.net2o chats$ $@ $1FF init-dir drop ;
 : ?.net2o/objects ( -- ) ?.net2o objects$ $@ $1FF init-dir drop ;
@@ -412,7 +423,7 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
     ?.net2o/chats   chats/.no-fat-file   ?create-file
     0= to chat-sanitize? ;
 
-$Variable config-file$  "~/.net2o/config" config-file$ $!
+$Variable config-file$  "~/.config/net2o/config" config-file$ $!
 Variable configured?
 
 :noname defers 'cold
@@ -429,10 +440,25 @@ Variable configured?
 
 forward default-host
 
+: ?move-config ( -- )
+    \G move from legacy config to ~/.config and ~/.cache
+    "~/.net2o/config" file-status nip no-file# <> IF
+	"~/.cache/net2o" $1FF init-dir drop
+	"~/.local/share/net2o" $1FF init-dir drop
+	"~/.net2o/chats" "~/.local/share/net2o/chats" rename-file throw
+	"~/.net2o/objects" "~/.local/share/net2o/objects" rename-file throw
+	"~/.net2o/keys" "~/.local/share/net2o/keys" rename-file throw
+	"~/.net2o/history" "~/.cache/net2o/history" rename-file throw
+	"~/.net2o" "~/.config/net2o" rename-file throw
+	config-file$ $@ ['] config >body read-config
+	default-dir-config
+    THEN ;
+
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
-    config-file$ $@ 2dup file-status nip  ['] config >body swap
-    no-file# = IF  ?.net2o write-config
+    config-file$ $@ 2dup file-status nip ['] config >body swap
+    no-file# = IF
+	?move-config ?.net2o write-config
     ELSE  read-config ?.net2o default-host  THEN
     rootdirs>path ;
 
