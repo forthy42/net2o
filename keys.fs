@@ -294,7 +294,7 @@ Variable sim-nick!
     BEGIN  refill  WHILE  group-line  REPEAT ;
 
 : read-groups ( -- )
-    "groups" .net2o/ 2dup file-status nip no-file# = IF
+    "groups" .net2o-config/ 2dup file-status nip no-file# = IF
 	init-groups write-groups 2drop  EXIT
     THEN  >included throw
     ['] read-groups-loop execute-parsing-named-file ;
