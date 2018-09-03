@@ -967,11 +967,19 @@ false value ?yes
 	keypack keypack-all# r@ read-file throw
 	keypack-all# = WHILE
 	    import-type @ import#self = try-decrypt do-key
-    REPEAT  rdrop  code0-buf ;
+	REPEAT  rdrop  code0-buf ;
+: migrate-key-loop ( -- )  secret-keys# >r
+    old-pw-diffuse  ?key-sfd read-keys-loop  new-pw-diffuse
+    secret-keys# r> u> IF
+	[: ." Migrating password hash to ECC+keccak" cr ;]
+	info-color ['] color-execute do-debug
+	save-keys-again on
+    THEN ;
 : read-key-loop ( -- )
-    import#self import-type !
+    import#self import-type !  secret-keys# >r
     ?key-sfd read-keys-loop
-    save-keys-again @ IF  save-seckeys  THEN ;
+    secret-keys# r> = IF  migrate-key-loop  THEN
+    save-keys-again @ IF  save-seckeys      THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
     -1 config:pw-level#

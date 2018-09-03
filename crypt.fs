@@ -197,15 +197,39 @@ scope{ mapc
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
+$100 Value pw-level0
+
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
     2>r over >r  $10 rng$ r@ swap move
-    r@ c@ n $F0 mux r> c! 2r> crypt-key-init $100 n 2* lshift ;
+    r@ c@ n $F0 mux r> c! 2r> crypt-key-init pw-level0 n 2* lshift ;
 
-: pw-diffuse ( diffuse# -- )
+: pw-diffuse-keccak ( diffuse# -- )
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
+
+keysize buffer: diffuse-ecc
+
+: pw-diffuse-ecc ( diffuse# -- )
+    c:diffuse
+    -1 +DO \ do at least 1 time even if supplied with 0
+	diffuse-ecc keysize  2dup c:hash@
+	over dup dup sk-mask  sk>pk  c:shorthash
+    LOOP
+    diffuse-ecc keysize erase
+; \ just to waste time in a way that is difficult to built into ASICs
+
+Defer pw-diffuse
+
+: new-pw-diffuse ( -- )
+    ['] pw-diffuse-ecc is pw-diffuse  4 to pw-level0 ;
+
+: old-pw-diffuse ( -- )
+    ['] pw-diffuse-keccak is pw-diffuse  $100 to pw-level0 ;
+
+new-pw-diffuse
+
 : pw-setup ( addr u -- diffuse# )
     \g compute between 256 and ridiculously many iterations
-    drop c@ $F and 2* $100 swap lshift ;
+    drop c@ $F and 2* pw-level0 swap lshift ;
 
 : encrypt-pw$ ( addr u1 key u2 n -- )
     crypt-pw-setup  pw-diffuse  key-cksum# - 0 c:encrypt+auth ;
