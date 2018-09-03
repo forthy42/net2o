@@ -112,6 +112,8 @@ s" no base85 digit"              throwcode !!no-85-digit!!
 s" Vault auth block error"       throwcode !!vault-auth!!
 s" Deprecated command"           throwcode !!deprecated!!
 s" Connection successful"        throwcode !!connected!!
+s" Invalid index"                throwcode !!inv-index!!
+s" hash not last pk's state"     throwcode !!squid-hash!!
 
 next-exception !
 

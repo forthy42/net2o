@@ -115,27 +115,28 @@ scope{ net2o-base
 
 cmd-table $@ inherit-table pay-table
 
-$20 net2o: pay-last-contract ( $:hash -- ) \g hash of last contract
-    \ this is for serializing accounts only!
-    !!wallet? $> pay:last-contract ;
-+net2o: pay-source ( $:source -- ) \g source, pk+timestamp for lookup
+$20 net2o: pay-source ( $:source -- ) \g source, pk[+hash] for lookup
+    \ existing sources always had a previous transaction
+    \ new sources have only a pk and can only become a sink
     $> pay:source ;
-+net2o: pay-#source ( n -- ) \g select source/sink
-    64>n pay:#source ;
-+net2o: pay-sink ( $:sig -- ) \g sink, signature
-    $> pay:sink ;
-+net2o: pay-asset ( 64asset -- ) \g select asset type
-    pay:asset ;
-+net2o: pay-#asset ( n -- ) \g select last asset
-    64>n pay:#asset ;
++net2o: pay-sink ( n $:sig -- ) \g sink, signature
+    \ sink that already exists as source number n in the contract
+    64>n $> pay:sink ;
++net2o: pay-asset ( asset -- ) \g select asset type
+    64>n pay:asset ;
 +net2o: pay-amount ( 64amount -- ) \g add/subtract amount
-    64dup 64-0< n>64 pay:amount ;
-+net2o: pay-damount ( 64amountlo 64amoutnhi -- ) \g add/subtract 128 bit amount
+    64>128 pay:amount ;
++net2o: pay-damount ( 128amount -- ) \g add/subtract 128 bit amount
     pay:amount ;
-+net2o: pay-balance ( n -- ) \g select&balance asset
-    64>n pay:balance ;
 +net2o: pay-comment ( $:enc-comment -- ) \g comment, encrypted for selected key
     $> pay:comment ;
++net2o: pay-#source ( u -- ) \g select source
+    64>n pay:#source ;
++net2o: pay-#asset ( u -- ) \g select asset
+    64>n pay:#asset ;
++net2o: pay-balance ( u -- ) \g select&balance asset
+    \ a balance modifies the asset of the current active source
+    64>n pay:balance ;
 
 pay-table $save
 
@@ -159,9 +160,32 @@ pay-table $save
 \g normalized form) after the contract has been executed.  The current
 \g contract's hash is part of the serialization.
 
-Variable SwapDragonChain#
+Variable SwapDragonChain# ( "hash" -- "contract" )
+Variable SwapDragonKeys#  ( "pk" -- "hash+[asset,amount]*" )
 
 scope{ pay
+:noname ( addr u -- ) \ pk[+hash]
+    2dup sources[] dup $[]# to current-pk $+[]!
+    2dup keysize /string  2swap key| SwapDragonKeys# #@
+    2dup 2>r key| str= 0= !!squid-hash!!
+    2r> current-pk assets[] $[]!
+    last# cell+ $@len keysize = IF \ new contract
+	keysize 2* last# cell+ $!len \ add space for hash
+    THEN
+; pay-class is source
+:noname ( n addr u -- )
+    rot  dup sources[] $[]# u>= !!inv-index!! to current-pk
+    sigsize# <> !!no-sig!! { sig }
+    cmdbuf$ over + sig umin over umax over - 2 - \ cmdbuf up to the sig string
+    c:0key 2dup c:hash
+    current-pk sources[] $[]@ { d: pk+hash }
+    pk+hash keysize /string
+    2dup c:hash@ SwapDragonChain# #!
+    sig sigsize# pk+hash drop pk-sig? !!sig!! 2drop
+    [:  current-pk sources[] $[]@ keysize /string type
+	current-pk assets[]  $[]@ type ;] $tmp
+    pk+hash key| SwapDragonKeys# #!
+; pay-class is sink
 
 }scope
 

@@ -224,5 +224,6 @@ cell 8 = [IF]
     dup >r 64'+ be-64@ r> be-64@ ;
 : be-128! ( d addr -- )
     dup >r be-64! r> 64'+ be-64! ;
+: 64>128 ( 64 -- 128 ) 64dup 64-0< n>64 ;
 Create 64!-table ' 64! , ' 64+! ,
 1 64s ' 64aligned ' 64@ 64!-table wrap+value: 64value: ( u1 "name" -- u2 )

@@ -156,21 +156,20 @@ end-class msg-class
 
 cmd-class class
 scope: pay
-    field: pks[]        \ all the pks stored here, an array
-    field: sigs[]       \ all the signatures stored here, an array
-    field: wallets[]    \ array of wallets
-    field: assets[]     \ all selected assets
+    field: sources[]    \ all the sources stored here, an array
+    field: sinks[]      \ all the signatures stored here, an array
+    field: assets[]     \ all selected assets (array [asset,amount]*)
     value: current-pk
     value: current-asset
     method last-contract
     method source
-    method #source
     method sink
     method asset
-    method #asset
     method amount
-    method balance
     method comment
+    method #source
+    method #asset
+    method balance
 }scope
 end-class pay-class
 
