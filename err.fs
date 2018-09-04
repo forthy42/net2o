@@ -114,6 +114,11 @@ s" Deprecated command"           throwcode !!deprecated!!
 s" Connection successful"        throwcode !!connected!!
 s" Invalid index"                throwcode !!inv-index!!
 s" hash not last pk's state"     throwcode !!squid-hash!!
+s" Double transaction!"          throwcode !!double-transaction!!
+s" Insufficient asset!"          throwcode !!insufficient-asset!!
+s" Transaction not balanced!"    throwcode !!not-balanced!!
+s" Sink already cleared!"        throwcode !!sink-cleared!!
+s" Sink not cleared!"            throwcode !!not-sunk!!
 
 next-exception !
 

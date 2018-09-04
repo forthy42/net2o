@@ -105,7 +105,7 @@ Variable wallet[]
 \ A coin is a 128 bit big endian number for the value, followed by the asset
 \ type string, and the signature of its owner.
 
-$10 constant value-size#
+false Value sink?
 
 scope{ net2o-base
 
@@ -118,25 +118,26 @@ cmd-table $@ inherit-table pay-table
 $20 net2o: pay-source ( $:source -- ) \g source, pk[+hash] for lookup
     \ existing sources always had a previous transaction
     \ new sources have only a pk and can only become a sink
-    $> pay:source ;
+    $> pay:source  false to sink? ;
 +net2o: pay-sink ( n $:sig -- ) \g sink, signature
     \ sink that already exists as source number n in the contract
-    64>n $> pay:sink ;
-+net2o: pay-asset ( asset -- ) \g select asset type
-    64>n pay:asset ;
-+net2o: pay-amount ( 64amount -- ) \g add/subtract amount
-    64>128 pay:amount ;
+    64>n $> pay:sink  true to sink? ;
++net2o: pay-asset ( asset -- ) \g select global asset type
+    64>n pay:asset  false to sink? ;
++net2o: pay-obligation ( $:enc-asset -- ) \g select per-contract obligation
+    \ encrypted with the receiver's pubkey
+    $> pay:obligation  false to sink? ;
++net2o: pay-amount ( 64amount -- ) \g add/subtract amount to current asset
+    64>128 pay:amount  false to sink? ;
 +net2o: pay-damount ( 128amount -- ) \g add/subtract 128 bit amount
-    pay:amount ;
+    pay:amount  false to sink? ;
 +net2o: pay-comment ( $:enc-comment -- ) \g comment, encrypted for selected key
-    $> pay:comment ;
-+net2o: pay-#source ( u -- ) \g select source
-    64>n pay:#source ;
-+net2o: pay-#asset ( u -- ) \g select asset
-    64>n pay:#asset ;
+    $> pay:comment  false to sink? ;
 +net2o: pay-balance ( u -- ) \g select&balance asset
     \ a balance modifies the asset of the current active source
-    64>n pay:balance ;
+    64>n pay:balance  false to sink? ;
++net2o: pay-#source ( u -- ) \g select source
+    64>n pay:#source  false to sink? ;
 
 pay-table $save
 
@@ -162,31 +163,92 @@ pay-table $save
 
 Variable SwapDragonChain# ( "hash" -- "contract" )
 Variable SwapDragonKeys#  ( "pk" -- "hash+[asset,amount]*" )
+\ Updates go to SwapDragonKeys'#; only one transaction per pk&cycle!
+Variable SwapDragonKeys'#  ( "pk" -- "hash+[asset,amount]*" )
+Variable $SwapAssets[] ( n -- asset u )
 
 scope{ pay
-:noname ( addr u -- ) \ pk[+hash]
-    2dup sources[] dup $[]# to current-pk $+[]!
-    2dup keysize /string  2swap key| SwapDragonKeys# #@
-    2dup 2>r key| str= 0= !!squid-hash!!
-    2r> current-pk assets[] $[]!
-    last# cell+ $@len keysize = IF \ new contract
-	keysize 2* last# cell+ $!len \ add space for hash
+$10 buffer: balance0
+$10 cell+ buffer: new-asset
+
+:noname { d: pk -- } \ pk[+hash]
+    pk dup keysize = IF  [: type keysize spaces ;] $tmp  THEN
+    sources[] dup $[]# to current-pk $+[]!
+    pk key| SwapDragonKeys# #@
+    2dup d0<> IF
+	pk keysize /string 2over key| str= 0= !!squid-hash!!
+	keysize /string
     THEN
+    current-pk assets[] $[]!
 ; pay-class is source
+
+: ?double-transaction ( hash u pk u -- hash u )
+     SwapDragonKeys'# #@ 2dup d0= IF
+	2drop
+    ELSE \ you can check the same transaction twice
+	2over str= 0= !!double-transaction!!
+    THEN ;
+
+:noname ( n -- )
+    dup sources[] $[]# u>= !!inv-index!! to current-pk
+; pay-class is #source
+
 :noname ( n addr u -- )
-    rot  dup sources[] $[]# u>= !!inv-index!! to current-pk
+    rot #source
     sigsize# <> !!no-sig!! { sig }
     cmdbuf$ over + sig umin over umax over - 2 - \ cmdbuf up to the sig string
     c:0key 2dup c:hash
-    current-pk sources[] $[]@ { d: pk+hash }
+    current-pk sources[] $[]@ dup 0= !!sink-cleared!! { d: pk+hash }
     pk+hash keysize /string
     2dup c:hash@ SwapDragonChain# #!
     sig sigsize# pk+hash drop pk-sig? !!sig!! 2drop
     [:  current-pk sources[] $[]@ keysize /string type
 	current-pk assets[]  $[]@ type ;] $tmp
-    pk+hash key| SwapDragonKeys# #!
+    pk+hash key| ?double-transaction
+    pk+hash key| SwapDragonKeys'# #!
+    current-pk sources[] $[]free
 ; pay-class is sink
 
+:noname ( n -- )
+    dup $SwapAssets[] $[]# u>= !!inv-index!!
+    to current-asset
+    current-asset balances[] $[]@ nip 0= IF
+	balance0 $10 current-asset balances[] $[]!
+    THEN
+; pay-class is asset
+
+: 128+!? ( 128x addr -- flag )
+    dup >r 128@ 128+ r> over >r 128! r> 0< ;
+
+:noname ( 128asset -- )
+    64over 64over current-asset balances[] $[]@ drop 128+!? drop
+    current-pk assets[] $[]@ bounds U+DO
+	I @ current-asset = IF  I cell+ 128+!? !!insufficient-asset!!
+	    UNLOOP  EXIT  THEN
+    $10 cell+ +LOOP
+    dup 0< !!insufficient-asset!!
+    current-asset new-asset !  new-asset cell+ 128!
+    new-asset $10 cell+ current-pk assets[] $[]+!
+; pay-class is amount
+
+:noname ( n -- ) asset
+    64#0 64dup current-asset balances[] $[]@ drop 128@ 128- \ just a 128negate
+    amount
+; pay-class is balance
+
+:noname ( -- )  sink? invert !!not-sunk!!
+    balances[] $[]# 0 ?DO
+	I balances[] $[]@ balance0 over str= 0= !!not-balanced!!
+    LOOP
+    sources[] $[]# 0 ?DO
+	I sources[] $[]@ nip !!not-sunk!!
+    LOOP
+; pay-class is finalize
+
+: update ( -- )
+    SwapDragonKeys'#
+    [: ( last -- ) >r r@ cell+ $@ r@ $@ SwapDragonKeys# #! ;] #map
+    SwapDragonKeys'# #frees ;
 }scope
 
 0 [IF]

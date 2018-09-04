@@ -159,17 +159,19 @@ scope: pay
     field: sources[]    \ all the sources stored here, an array
     field: sinks[]      \ all the signatures stored here, an array
     field: assets[]     \ all selected assets (array [asset,amount]*)
+    field: balances[]   \ all balances (amount[asset])
     value: current-pk
     value: current-asset
     method last-contract
     method source
     method sink
     method asset
+    method obligation
     method amount
     method comment
     method #source
-    method #asset
     method balance
+    method finalize
 }scope
 end-class pay-class
 

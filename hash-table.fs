@@ -89,11 +89,14 @@ warnings !
     LOOP  2drop ;
 
 : #offs ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  >r
-    r@ @ $100 cells bounds DO  I $off  cell +LOOP
+    r@ @ $100 cells bounds DO  I $free  cell +LOOP
     r@ @ $100 cells + $80 bounds DO
 	I @ ?dup-IF  recurse  THEN
     cell +LOOP
     r@ @ free throw  r> off ;
+
+' #off  alias #free
+' #offs alias #frees
 
 -1 8 rshift invert Constant msbyte#
 
