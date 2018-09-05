@@ -107,8 +107,10 @@ word-args
 
 : -skip ( addr u char -- ) >r
     BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
-: -scan ( addr u char -- addr u' ) >r
-    BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
+[IFUNDEF] -scan
+    : -scan ( addr u char -- addr u' ) >r
+	BEGIN  dup  WHILE  1- 2dup + c@ r@ =  UNTIL  1+  THEN  rdrop ;
+[THEN]
 
 [IFUNDEF] basename
 : basename ( addr u -- addr' u' )
@@ -376,14 +378,16 @@ $Variable invite$
 
 also config
 
-: default-dir-config
+: .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
+: default-dir-config ( -- )
     "~/.local/share/net2o" .net2o$ $!
-    "~/.config/net2o" .net2o-config$ $!
-    "~/.cache/net2o" .net2o-cache$ $!
-    "~/.local/share/net2o/keys" keys$ $!
-    "~/.local/share/net2o/chats" chats$ $!
-    "~/.local/share/net2o/objects" objects$ $! ;
+    "~/.config/net2o"      .net2o-config$ $!
+    "~/.cache/net2o"       .net2o-cache$ $!
+    "keys"    .net2o/ keys$ $!
+    "chats"   .net2o/ chats$ $!
+    "objects" .net2o/ objects$ $! ;
 default-dir-config
+
 #2 date# !
 #20 logsize# !
 pad $400 get-dir rootdirs$ $!
@@ -394,7 +398,6 @@ pad $400 get-dir rootdirs$ $!
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
 
-: .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
@@ -443,19 +446,18 @@ forward default-host
 : ?move-config ( -- )
     \G move from legacy config to ~/.config and ~/.cache
     "~/.net2o/config" file-status nip no-file# <> IF
-	"~/.cache/net2o" $1FF init-dir drop
-	"~/.local/share/net2o" $1FF init-dir drop
-	"~/.net2o/chats" "~/.local/share/net2o/chats" rename-file throw
-	"~/.net2o/objects" "~/.local/share/net2o/objects" rename-file throw
-	"~/.net2o/keys" "~/.local/share/net2o/keys" rename-file throw
-	"~/.net2o/history" "~/.cache/net2o/history" rename-file throw
-	"~/.net2o" "~/.config/net2o" rename-file throw
+	config:.net2o$ $@ $1FF init-dir drop
+	"~/.net2o/chats"   "chats"   .net2o/ rename-file throw
+	"~/.net2o/objects" "objects" .net2o/ rename-file throw
+	"~/.net2o/keys"    "keys"    .net2o/ rename-file throw
+	"~/.net2o/history" "history" .net2o/ rename-file throw
+	"~/.net2o" .net2o-config$ $@ rename-file throw
 	config-file$ $@ ['] config >body read-config
 	default-dir-config
     THEN ;
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
-    "NET2O_CONF" getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
+    "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip ['] config >body swap
     no-file# = IF
 	?move-config ?.net2o write-config

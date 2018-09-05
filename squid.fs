@@ -82,11 +82,10 @@ Variable wallet[]
 \ payment handling
 
 \ payments are handled in chat messages.  A payment is essentially
-\ a smart contract with some simple functions:
+\ a dumb contract with some simple functions:
 \
 \ * source coins which is owned by the sender, will be taken out of the block chain
 \ * sink coins (owned by sender or receiver), will be added to the block chain
-\ * a bracket, which holds source and sink coins together
 \
 \ Payments are atomic operations; they can involve more than one asset
 \ transfer, but must be embedded within a signed chat message.

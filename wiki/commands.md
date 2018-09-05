@@ -424,26 +424,24 @@ that makes identical transactions have the same hash.
 
 ### payment commands ###
 
-+ $20 pay-last-contract ( $:hash -- )
-  hash of last contract
-+ $21 pay-source ( $:source -- )
-  source, pk+timestamp for lookup
-+ $22 pay-#source ( n -- )
-  select source/sink
-+ $23 pay-sink ( $:sig -- )
++ $20 pay-source ( $:source -- )
+  source, pk[+hash] for lookup
++ $21 pay-sink ( n $:sig -- )
   sink, signature
-+ $24 pay-asset ( 64asset -- )
-  select asset type
-+ $25 pay-#asset ( n -- )
-  select last asset
-+ $26 pay-amount ( 64amount -- )
-  add/subtract amount
-+ $27 pay-damount ( 64amountlo 64amoutnhi -- )
++ $22 pay-asset ( asset -- )
+  select global asset type
++ $23 pay-obligation ( $:enc-asset -- )
+  select per-contract obligation
++ $24 pay-amount ( 64amount -- )
+  add/subtract amount to current asset
++ $25 pay-damount ( 128amount -- )
   add/subtract 128 bit amount
-+ $28 pay-balance ( n -- )
-  select&balance asset
-+ $29 pay-comment ( $:enc-comment -- )
++ $26 pay-comment ( $:enc-comment -- )
   comment, encrypted for selected key
++ $27 pay-balance ( u -- )
+  select&balance asset
++ $28 pay-#source ( u -- )
+  select source
 
 ### Contracts ###
 Contracts are state changes to wallets.  A serialized wallet is a contract

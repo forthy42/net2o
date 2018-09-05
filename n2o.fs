@@ -753,7 +753,7 @@ warnings !
 
 : n2o-history ( -- )
     history ?dup-IF  close-file throw  THEN
-    "history" .net2o-cache/ get-history ;
+    "history" .net2o/ get-history ;
 
 n2o-history
 
