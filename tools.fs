@@ -447,11 +447,11 @@ forward default-host
     \G move from legacy config to ~/.config and ~/.cache
     "~/.net2o/config" file-status nip no-file# <> IF
 	config:.net2o$ $@ $1FF init-dir drop
-	"~/.net2o/chats"   "chats"   .net2o/ rename-file throw
-	"~/.net2o/objects" "objects" .net2o/ rename-file throw
-	"~/.net2o/keys"    "keys"    .net2o/ rename-file throw
-	"~/.net2o/history" "history" .net2o/ rename-file throw
-	"~/.net2o" .net2o-config$ $@ rename-file throw
+	"~/.net2o/chats"   "chats"   .net2o/ rename-file drop
+	"~/.net2o/objects" "objects" .net2o/ rename-file drop
+	"~/.net2o/keys"    "keys"    .net2o/ rename-file drop
+	"~/.net2o/history" "history" .net2o/ rename-file drop
+	"~/.net2o" .net2o-config$ $@ rename-file drop
 	config-file$ $@ ['] config >body read-config
 	default-dir-config
     THEN ;
