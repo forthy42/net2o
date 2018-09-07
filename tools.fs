@@ -379,13 +379,15 @@ $Variable invite$
 also config
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
+: subdir-config ( -- )
+    "keys"    .net2o/ keys$ $!
+    "chats"   .net2o/ chats$ $!
+    "objects" .net2o/ objects$ $! ;
 : default-dir-config ( -- )
     "~/.local/share/net2o" .net2o$ $!
     "~/.config/net2o"      .net2o-config$ $!
     "~/.cache/net2o"       .net2o-cache$ $!
-    "keys"    .net2o/ keys$ $!
-    "chats"   .net2o/ chats$ $!
-    "objects" .net2o/ objects$ $! ;
+    subdir-config ;
 default-dir-config
 
 #2 date# !
@@ -443,27 +445,22 @@ Variable configured?
 
 forward default-host
 
-: ?move-config ( -- )
+: ?old-config ( addr u wid -- )
     \G move from legacy config to ~/.config and ~/.cache
     "~/.net2o/config" file-status nip no-file# <> IF
-	.net2o$ $@ $1FF init-dir drop
-	.net2o-config$ $@ $1FF init-dir drop
-	"~/.net2o/chats"   "chats"   .net2o/ rename-file drop
-	"~/.net2o/objects" "objects" .net2o/ rename-file drop
-	"~/.net2o/keys"    "keys"    .net2o/ rename-file drop
-	"~/.net2o/history" "history" .net2o/ rename-file drop
-	"~/.net2o" .net2o-config$ $@ rename-file drop
-	config-file$ $@ ['] config >body read-config
-	default-dir-config
+	"~/.net2o" .net2o$ $!
+	"~/.net2o/config" .net2o-config$ $!
+	subdir-config
+	read-config
+    ELSE
+	?.net2o write-config
     THEN ;
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip ['] config >body swap
-    no-file# = IF
-	?move-config ?.net2o write-config
-    ELSE  read-config ?.net2o default-host  THEN
-    rootdirs>path ;
+    no-file# = IF  ?old-config  ELSE  read-config  THEN
+    default-host rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config fsane-init ;
 
