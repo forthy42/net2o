@@ -54,12 +54,12 @@ Variable host$
 	config:host$ $@ host$ $!
     ELSE
 	config:host$ $free  host$ $@ config:orighost$ $!
+	[IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
+	config:prio# !
     THEN ;
 
 : default-host ( -- )
-    get-host$ skip.site replace-host
-    [IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
-    config:prio# ! ;
+    get-host$ skip.site replace-host ;
 
 Create ip6::0 here 16 dup allot erase
 : .ip6::0 ( -- )  ip6::0 $10 type ;

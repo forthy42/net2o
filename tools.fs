@@ -446,14 +446,14 @@ Variable configured?
 forward default-host
 
 : ?old-config ( addr u wid -- )
-    \G move from legacy config to ~/.config and ~/.cache
+    \G check if we have an old config; then keep it.
     "~/.net2o/config" file-status nip no-file# <> IF
 	"~/.net2o" .net2o$ $!
 	"~/.net2o/config" .net2o-config$ $!
 	subdir-config
 	read-config
     ELSE
-	?.net2o write-config
+	?.net2o default-host write-config
     THEN ;
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
