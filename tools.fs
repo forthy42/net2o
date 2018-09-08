@@ -451,7 +451,7 @@ forward default-host
 	"~/.net2o" .net2o$ $!
 	"~/.net2o/config" .net2o-config$ $!
 	subdir-config
-	read-config
+	read-config default-host
     ELSE
 	?.net2o default-host write-config
     THEN ;
@@ -459,8 +459,8 @@ forward default-host
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip ['] config >body swap
-    no-file# = IF  ?old-config  ELSE  read-config  THEN
-    default-host rootdirs>path ;
+    no-file# = IF  ?old-config  ELSE  read-config default-host  THEN
+    rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config fsane-init ;
 
