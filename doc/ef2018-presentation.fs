@@ -237,14 +237,14 @@ $FFFFFFFF pres-frame
 \ page 1
 {{
 $FFFFFFFF pres-frame
-{{
-l" Motivation" /title
-glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-tex: bad-gateway
-' bad-gateway "bad-gateway.png" 0.666e }}image-file
-Constant bgw-glue /center
-glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-}}v box[] >bdr
+    {{
+	l" Motivation" /title
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	tex: bad-gateway
+	' bad-gateway "bad-gateway.png" 0.666e }}image-file
+	Constant bgw-glue /center
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 2
@@ -276,331 +276,330 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 6
 {{
-$FFBFFFFF pres-frame
-{{
-l" ΜΙΝΩΣ2 Widgets" /title
-l" Design principle is a Lego–style combination of many extremely simple objects" \\
-{{ {{ vt{{
-l" actor " l" base class that reacts on all actions (clicks, touchs, keys)" b\\
-l" animation " l" action for animations" b\\
-l" widget " l" base class for all visible objects" b\\
-l" glue " l" base class for flexible objects" b\\
-l" tile " l" colored rectangle" b\\
-l" frame " l" colored rectangle with border" b\\
-l" icon " l" icon from an icon texture" b\\
-l" image " l" larger image" b\\
-{{ l" edit " b0 blackish l" editable text: " }}text'
-"中秋节快乐！ Happy autumn festival! 🌙🌕" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
-\sans \latin \normal
-l" text " l" text element/Emoji/中文/… 😀🤭😁😂😇😈🙈🙉🙊💓💔💕💖💗💘🍺🍻🎉🎻🎺🎷" b\\
-l" part-text " l" pseudo–element for paragraph breaking" b\\
-l" canvas " l" vector graphics (TBD)" b\\
-l" video " l" video player (TBD)" b\\
-}}vt
-glue*l }}glue
-tex: vp0 glue*l ' vp0 }}vp vp[]
-$FFBFFFFF color, dup to slider-color to slider-fgcolor
-font-size# f2/ f2/ to slider-border
-dup font-size# f2/ fdup vslider
-}}h box[]
-}}v box[] >bdr
+    $FFBFFFFF pres-frame
+    {{
+	l" ΜΙΝΩΣ2 Widgets" /title
+	l" Design principle is a Lego–style combination of many extremely simple objects" \\
+	{{ {{ vt{{
+		    l" actor " l" base class that reacts on all actions (clicks, touchs, keys)" b\\
+		    l" animation " l" action for animations" b\\
+		    l" widget " l" base class for all visible objects" b\\
+		    l" glue " l" base class for flexible objects" b\\
+		    l" tile " l" colored rectangle" b\\
+		    l" frame " l" colored rectangle with border" b\\
+		    l" icon " l" icon from an icon texture" b\\
+		    l" image " l" larger image" b\\
+		    {{ l" edit " b0 blackish l" editable text: " }}text'
+		    "中秋节快乐！ Happy autumn festival! 🌙🌕" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
+		    \sans \latin \normal
+		    l" text " l" text element/Emoji/中文/… 😀🤭😁😂😇😈🙈🙉🙊💓💔💕💖💗💘🍺🍻🎉🎻🎺🎷" b\\
+		    l" part-text " l" pseudo–element for paragraph breaking" b\\
+		    l" canvas " l" vector graphics (TBD)" b\\
+		    l" video " l" video player (TBD)" b\\
+		}}vt
+		glue*l }}glue
+	    tex: vp0 glue*l ' vp0 }}vp vp[]
+	    $FFBFFFFF color, dup to slider-color to slider-fgcolor
+	    font-size# f2/ f2/ to slider-border
+	    dup font-size# f2/ fdup vslider
+	}}h box[]
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 7
 {{
 $BFFFFFFF pres-frame
 {{
-l" ΜΙΝΩΣ2 Boxes" /title
-{{
-l" Just like " }}text' \LaTeX l" , boxes arrange widgets/text" }}text' glue*l }}h box[]
->bl
-\skip
-vt{{
-l" hbox " l" Horizontal box, common baseline" b\\
-l" vbox " l" Vertical box, minimum distance a baselineskip (of the hboxes below)" b\\
-l" zbox " l" Overlapping several boxes" b\\
-l" slider " l" horizontal and vertical sliders (composite object)" b\\
-l" parbox " l" box for breaking paragraphs" b\\
-l" grid " l" Free widget placements (TBD)" b\\
-\skip
-l" Tables uses helper glues, no special boxes needed" \\
-}}vt
-{{ {{ glue*l }}glue
-{{ \tiny l"  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}i18n-text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum" }}text \bold-italic " qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ s>f font-size# 140% f* f- 1e text-shrink% f2/ f- f/ dup .par-split unbox
-glue*l }}glue }}v
-glue*2 }}glue }}z  \ ) $CCDDDD3F 4e }}frame dup .button1
+    l" ΜΙΝΩΣ2 Boxes" /title
+    {{
+    l" Just like " }}text' \LaTeX l" , boxes arrange widgets/text" }}text' glue*l }}h box[]
+    >bl
+    \skip
+    vt{{
+	l" hbox " l" Horizontal box, common baseline" b\\
+	l" vbox " l" Vertical box, minimum distance a baselineskip (of the hboxes below)" b\\
+	l" zbox " l" Overlapping several boxes" b\\
+	l" slider " l" horizontal and vertical sliders (composite object)" b\\
+	l" parbox " l" box for breaking paragraphs" b\\
+	l" grid " l" Free widget placements (TBD)" b\\
+	\skip
+	l" Tables uses helper glues, no special boxes needed" \\
+    }}vt
+    {{ {{ glue*l }}glue
+	    {{ \tiny l"  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}i18n-text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum" }}text \bold-italic " qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ s>f font-size# 140% f* f- 1e text-shrink% f2/ f- f/ dup .par-split unbox
+	glue*l }}glue }}v
+    glue*2 }}glue }}z  \ ) $CCDDDD3F 4e }}frame dup .button1
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 8
 {{
-$FFFFBFFF pres-frame
-{{
-l" ΜΙΝΩΣ2 Displays" /title
-l" Render into different kinds of displays" \\
-\skip
-vt{{
-l" viewport " l" Into a texture, used as viewport" b\\
-l" display " l" To the actual display (no class, just the default)" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
+    $FFFFBFFF pres-frame
+    {{
+	l" ΜΙΝΩΣ2 Displays" /title
+	l" Render into different kinds of displays" \\
+	\skip
+	vt{{
+	    l" viewport " l" Into a texture, used as viewport" b\\
+	    l" display " l" To the actual display (no class, just the default)" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 9
 {{
-$BFDFFFFF pres-frame
-{{
-l" Minimize Draw Calls" /title
-l" OpenGL wants as few draw–calls per frame, so different contexts are drawn in stacks with a draw–call each" p\\
-\skip
-vt{{
-l" init " l" Initialization round" b\\
-l" bg " l" background round" b\\
-l" text " l" text round (same draw call as bg round, just different code)" b\\
-l" image " l" draw images with one draw–call per image" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
+    $BFDFFFFF pres-frame
+    {{
+	l" Minimize Draw Calls" /title
+	l" OpenGL wants as few draw–calls per frame, so different contexts are drawn in stacks with a draw–call each" p\\
+	\skip
+	vt{{
+	    l" init " l" Initialization round" b\\
+	    l" bg " l" background round" b\\
+	    l" text " l" text round (same draw call as bg round, just different code)" b\\
+	    l" image " l" draw images with one draw–call per image" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
-
-' }}text is }}text'
 
 \ page 10
 {{
-$D4AF37FF pres-frame
-{{
-"$quid & SwapDragonChain" /title
-"Inhalt:" /subsection
-\skip
-vt{{
-"Geld " "Worum geht es da überhaupt?" b\\
-"BitCoin " "Mängel einer Machbarkeitsstudie" b\\
-"Wealth " "Ethische Konsequenzen einer deflationären Welt" b\\
-"Proof of " "Vertrauen statt Arbeit" b\\
-"BlockChain " "Wozu braucht man das überhaupt?" b\\
-"Scale " "Wie skaliert man eine BlockChain?" b\\
-"Contracts " "Smart oder dumb?" b\\
-"$quid " "Kann man ethisch Geld schaffen?" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
-{{
-glue*l }}glue
-tex: $quid-logo-large
-' $quid-logo-large "squid-logo.png" 0.666e }}image-file
-drop >o $FFFFFFC0 to frame-color o o>
-/right
-}}v box[] >bdr
+    $D4AF37FF pres-frame
+    {{
+	l" $quid & SwapDragonChain" /title
+	l" Content:" /subsection
+	\skip
+	vt{{
+	    l" Money " l" What’s that all about?" b\\
+	    l" BitCoin " l" Shortcomings of a first proof of concept" b\\
+	    l" Wealth " l" Ethical implication in deflationary systems" b\\
+	    l" Proof of " l" Trust instead Work" b\\
+	    l" BlockChain " l" What’s the actual point?" b\\
+	    l" Scale " l" How to scale a BlockChain?" b\\
+	    l" Contracts " l" Smart oder dumb?" b\\
+	    l" $quid " l" Ethical ways to create money" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	tex: $quid-logo-large
+	' $quid-logo-large "squid-logo.png" 0.666e }}image-file
+	drop >o $FFFFFFC0 to frame-color o o>
+	/right
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 11
 {{
-$e4cF77FF pres-frame
-{{
-"Was ist Geld?" /title
-vt{{
-"Primitiv~: " "Objekte mit inhärentem Wert" b\\
-"Wechsel: " "Tauschversprechen einer Bank gegen Primitivgeld" b\\
-"Repräsentatives ~: " "Staatliches Versprechen zum Tausch gegen „Geldstandard“" b\\
-"Fiat~: " "Kein inhärenter Wert, Versprechen ggf. als gesetzliches…" b\\
-"Zahlungsmittel: " "Vom Gesetzgeber vorgeschriebenes Zahlungsmittel" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
-{{
-glue*l }}glue
-{{
-{{
-tex: shell-coins
-tex: feiqian
-tex: huizi
-tex: chao
-glue*l }}glue
-' shell-coins "shell-coins.png" 0.666e }}image-file drop
-glue*l }}glue
-' feiqian "feiqian.png" 0.666e }}image-file drop
-glue*l }}glue
-' huizi "huizi.png" 0.666e }}image-file drop
-glue*l }}glue
-' chao "chao.jpg" 0.666e }}image-file drop
-glue*l }}glue
-}}h box[]
-tex: vp1 glue*l ' vp1 }}vp vp[]
-}}v box[] >bdr
+    $e4cF77FF pres-frame
+    {{
+	l" What’s Money?" /title
+	vt{{
+	    l" Commodity ~: " l" Objects with inherent value" b\\
+	    l" Promissory note: " l" Bank created paper for commodity" b\\
+	    l" Representative ~: " l" Promise to exchange with “standard object” (e.g. gold)" b\\
+	    l" Fiat ~: " l" No inherent value; promise, if any, as legal tender" b\\
+	    l" Legal tender: " l" Medium of payment by law" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	{{
+	    {{
+		tex: shell-coins
+		tex: feiqian
+		tex: huizi
+		tex: chao
+		glue*l }}glue
+	    ' shell-coins "shell-coins.png" 0.666e }}image-file drop
+		glue*l }}glue
+		' feiqian "feiqian.png" 0.666e }}image-file drop
+		glue*l }}glue
+		' huizi "huizi.png" 0.666e }}image-file drop
+		glue*l }}glue
+		' chao "chao.jpg" 0.666e }}image-file drop
+		glue*l }}glue
+	    }}h box[]
+	tex: vp1 glue*l ' vp1 }}vp vp[]
+    }}v box[] >bdr
 }}z box[]
 /flip dup >slides
 
 \ page 12
 {{
-$f4cF57FF pres-frame
-{{
-"BitCoins — Mängel früher “Cryptos”" /title
-vt{{
-"• " "Proof of work: Verschwendet Ressourcen, bei zweifelhafter Sicherheit" b\\
-"• " "Inflation ist der Krebs des Geldes, Deflation sein Infarkt" b\\
-"• " "Konsequenzen: instabiler Kurs, hohe Transaktionskosten" b\\
-"• " "Ponzi–Schema–artige Blase" b\\
-"• " "(statt Viagra bekomme ich jetzt BitCoin–Spam)" b\\
-"• " "Es kann nicht mal das Spekulationsgeschäft in der Chain abwickeln" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
-{{
-glue*l }}glue
-tex: bitcoin-bubble
-' bitcoin-bubble "bitcoin-bubble.png" 0.85e }}image-file drop /right
-}}v box[] >bdr
+    $f4cF57FF pres-frame
+    {{
+	l" BitCoins — early “Crypto” shortcomings" /title
+	vt{{
+	    l" • " l" Proof of work: wasteful and yet only marginally secure" b\\
+	    l" • " l" Inflation is money’s cancer, deflation its infarct" b\\
+	    l" • " l" Consequences: unstable exange rate, high transaction fees" b\\
+	    l" • " l" Ponzi scheme–style bubble" b\\
+	    l" • " l" (Instead of getting Viagra spam I now get BitCoin spam)" b\\
+	    l" • " l" Can’t even do the exchange transaction on–chain" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	tex: bitcoin-bubble
+	' bitcoin-bubble "bitcoin-bubble.png" 0.85e }}image-file drop /right
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 13
 {{
-$e4df67ff pres-frame
-{{
-"Reichtum & Ethik" /title
-vt{{
-"• " "Enormer Vorteil des ersten Handelnden" b\\
-"• " "Hat schon eine schlimmere Vermögensverteilung als der Neoliberalismus" b\\
-"• " "Große Ungleichheit führt zu Knechtschaft, nicht zu Freiheit" b\\
-"• " "Es gibt nicht mal das Konzept des Kredits" b\\
-"• " "Das neue Lightning Network bindet auch Vermögen (Folge: Gebühren)" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
-{{
-glue*l }}glue
-tex: free-market
-' free-market "free-market.jpg" 0.666e }}image-file drop /right
-}}v box[] >bdr
+    $e4df67ff pres-frame
+    {{
+	l" Wealth & Ethics" /title
+	vt{{
+	    l" • " l" Huge first mover advantage" b\\
+	    l" • " l" Already worse wealth distribution than neoliberal economy" b\\
+	    l" • " l" Huge inequality drives society into servitude, not into freedom" b\\
+	    l" • " l" No concept of a credit" b\\
+	    l" • " l" Lightning network also binds assets (will have fees as consequence)" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	tex: free-market
+	' free-market "free-market.jpg" 0.666e }}image-file drop /right
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 14
 {{
-$a4df87ff pres-frame
-{{
-"Proof von was?!" /title
-vt{{
-"Herausforderung " "Jede Coin darf nur einmal ausgegeben werden" b\\
-"Stand der Technik: " "Proof of work" b\\
-"Problem: " "PoW verbrennt Energie und GPUs/ASICs" b\\
-"Vorschlag 1: " "Proof of Stake (Geld kauft Einfluss)" b\\
-"Problem: " "Geld korrumpiert, korrupte Teilnehmer betrügen" b\\
-"Vorschlag 2: " "Beweis von Wohlverhalten/Vertrauen" b\\
-"Wie? " "Wer viele Blöcke signiert hat, bekommt viele Punkte" b\\
-"Viele Signierer " "Nicht nur einer (und damit byzantine Fehlertoleranz)" b\\
-"Verdacht " "Transaktionen aus Blöcken niedriger Konfidenz nicht annehmen" b\\
-"Idee " "Wiederholtes Gefangenendilemma belohnt Kooperation" b\\
-}}vt
-\skip
-"BTW: Der Angriff für “double spending” bedarf einer MITM–Attacke" \\
-glue*l }}glue
-}}v box[] >bdr
+    $a4df87ff pres-frame
+    {{
+	l" Proof of What?!" /title
+	vt{{
+	    l" Challenge " l" Avoid double–spending" b\\
+	    l" State of the art: " l" Proof of work" b\\
+	    l" Problem: " l" Proof of work burns energy and GPUs" b\\
+	    l" Suggestion 1: " l" Proof of stake (money buys influence)" b\\
+	    l" Problem: " l" Money corrupts, and corrupt entities misbehave" b\\
+	    l" Suggestion 2: " l" Proof of well–behaving (trust, trustworthyness)" b\\
+	    l" How? " l" Having signed many blocks in the chain gains points" b\\
+	    l" Multiple signers " l" Not only have one signer, but many" b\\
+	    l" Suspicion " l" Don't accept transactions in low confidence blocks" b\\
+	    l" Idea " l" Repeated prisoner’s dilemma rewards cooperation" b\\
+	}}vt
+	\skip
+	l" BTW: The attack for double spending also requires a MITM–attack" \\
+	glue*l }}glue
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 15
 {{
-$a4d8f7ff pres-frame
-{{
-"SwapDragon BlockChain" /title
-vt{{
-"• " "Banken misstrauen sich gegenseitig (d.h. GNU Taler ist keine Lösung)" b\\
-"• " "Problemgröße: WeChat Pay peak ~ 0.5MTPS (BTC bei 5TPS)" b\\
-"• " "Überrenne den Arbiter: Problem für Lightning Network" b\\
-"• " "Also muss die BlockChain selbst skalieren" b\\
-\skip
-"• " "Doppelte Buchführung für die verteilte Buchhaltung" b\\
-"• " "Fragmentiere die Datenbank nach coin pubkey" b\\
-"• " "Route Transaktionen in einem n–dimensionalen Raum" b\\
-}}vt
-glue*l }}glue
-{{
-tex: stage1
-tex: stage2
-' stage1 "ledger-stage1.png" 0.666e }}image-file drop
-"   " }}text
-' stage2 "ledger-stage2.png" 0.666e }}image-file drop
-glue*l }}glue
-}}h box[]
-}}v box[] >bdr
-{{
-glue*l }}glue
-tex: bank-robs-you
-' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop /right
-}}v box[] >bdr
+    $a4d8f7ff pres-frame
+    {{
+	l" SwapDragon BlockChain" /title
+	vt{{
+	    l" • " l" Banks distrust each others, too (i. e. GNU Taler is not a solution)" b\\
+	    l" • " l" Problem size: WeChat Pay peaks at 0.5MTPS (BTC at 5TPS)" b\\
+	    l" • " l" Lightning Network doesn’t stand an overrun–the–arbiter attack" b\\
+	    l" • " l" Therefore, the BlockChain itself needs to scale" b\\
+	    l" • " l" Introduce double entry booking into the distributed ledger" b\\
+	    l" • " l" Partitionate the ledgers by coin pubkey" b\\
+	    l" • " l" Use n–dimensional ledger space to route transactions" b\\
+	}}vt
+	glue*l }}glue
+	{{
+	    tex: stage1
+	    tex: stage2
+	    ' stage1 "ledger-stage1.png" 0.666e }}image-file drop
+	    "   " }}text
+	    ' stage2 "ledger-stage2.png" 0.666e }}image-file drop
+	    glue*l }}glue
+	}}h box[]
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	tex: bank-robs-you
+	' bank-robs-you "bank-robs-you.jpg" 0.666e }}image-file drop /right
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 16
 {{
 $a487dfff pres-frame
-{{
-"Dumb Contracts" /title
-vt{{
-"• " "Smart Contracts: Token–Forth–Subset (BitCoin), JavaScript (Ethereum)" b\\
-{{ "• " b0 blackish "Für Smart Contracts braucht man einen Rechtsanwalt " }}text \italic "und" }}text \regular " einen Programmierer" }}text glue*l }}glue }}h box[] >bl
-"• " "Keep it simple: Ein Kontrakt muss eine ausgeglichene Bilanz haben" b\\
-"• " "Auswahl der Quellen (S), Auswahl der Assets (A) dort, Setzen des Wertes (±)" b\\
-"• " "Auswahl des/der Ziele (D), Setzen des Assets und Wert dort" b\\
-"• " "Abkürzung: Wert des Assets ausgleichen (B)" b\\
-"• " "Obligations für Schulden und Terminkontrakte (O)" b\\
-"• " "Signieren der Ziel–Wallets mit neuem Inhalt+Hash des Kontrakts" b\\
-}}vt
-\skip
-"Beispiele:" /subsection    
-vt{{
-"Überweisung " "SA-SBD1D" b\\
-"Scheck " "SA-D, Einlösen: SA-DSBD" b\\
-"Umtausch/Kauf " "SA+A-DSB¹BD" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
-{{
-glue*l }}glue
-tex: feynman-diag
-' feynman-diag "feynman-diag.png" 1.333e }}image-file drop /right
-}}v box[] >bdr
+    {{
+	l" Dumb Contracts" /title
+	vt{{
+	    l" • " l" Smart Contracts: Token–Forth subset (BitCoin), JavaScript (Ethereum)" b\\
+	    {{ l" • " b0 blackish l" For Smart Contracts you need a lawyer, a programmer, " }}text' \italic l" and" }}text' \regular l"  a pentester" }}text' glue*l }}glue }}h box[] >bl
+	    l" • " l" Keep it simple: A contract must have a balanced balance" b\\
+	    l" • " l" Select sources (S), select their assets (A), debit them (±)" b\\
+	    l" • " l" select destinations (D), set assets&credit them" b\\
+	    l" • " l" Shortcut: balance an asset (B)" b\\
+	    l" • " l" Obligations for debt and futures (O)" b\\
+	    l" • " l" Sign the target account with new content+hash of the contrat" b\\
+	}}vt
+	\skip
+	l" Examples:" /subsection    
+	vt{{
+	    l" Transfer " l" SA–SBDD" b\\
+	    l" Cheque " l" SA–D, cash: SA–DSBD" b\\
+	    l" Exchange/Purchase " l" SA+A–DSBBD" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
+	glue*l }}glue
+	tex: feynman-diag
+	' feynman-diag "feynman-diag.png" 1.333e }}image-file drop /right
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 17
 {{
-$df87a4ff pres-frame
-{{
-"$quid: Ethisches Mining" /title
-vt{{
-"• " "Konzept des Minings: Bewerkstellige harte Arbeit mit rarem Ergebnis" b\\
-"• " "Vorschlag: Coupons für die Unterstützung der Entwicklung freier Software" b\\
-"• " "Diese Coupons wären dann handelbar" b\\
-"• " "Freie Software ist öffentliche Infrastruktur im Informationszeitalter" b\\
-"• " "Damit regen wir die Leute an, FOSS aus Eigeninteresse zu unterstützen" b\\
-"• " "Sie bekommen ein nutzbares und wertvolles Token zurück" b\\
-"• " "Oder sie entwickeln selbst FOSS, weil es Fiatgeld einbringt" b\\
+    $df87a4ff pres-frame
+    {{
+	l" $quid: Ethical mining" /title
+	vt{{
+	    l" • " l" Concept of mining: Provide difficult and rare work" b\\
+	    l" • " l" Suggesting: Provide vouchers for free software development sponsorships" b\\
+	    l" • " l" These vouchers are tradeable on their own" b\\
+	    l" • " l" Free software is public infrastructure for the information age" b\\
+	    l" • " l" That way, we can encourage people to sponsor out of self–interest" b\\
+	    l" • " l" They get a useful and valueable token back" b\\
+	    l" • " l" Or they develop FOSS themselves to earn (fiat) money" b\\
 \skip
-"Dezentralbank?" /subsection
-"• " "Zentralbank gibt Kredite an Großbanken, die sie dann an der Börse verzocken" b\\
-"• " "Die Dezentralbank gibt Kredite an Kleinunternehmen" b\\
-"• " "Bonitätsprüfung eher wie Crowdfunding" b\\
-}}vt
-glue*l }}glue
-}}v box[] >bdr
+	    l" Decentral bank?" /subsection
+	    l" • " l" Central bank grants big banks credits, which then are gambled in the stock market" b\\
+	    l" • " l" The decentral bank gives credits to small business" b\\
+	    l" • " l" Credit assessment more like croudfunding" b\\
+	}}vt
+	glue*l }}glue
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 17
 {{
-$FFFFFFFF pres-frame
-{{
-"Literatur & Links" /title
-vt{{
-"Bernd Paysan " "net2o fossil repository" bi\\
-"" "https://fossil.net2o.de/net2o/" bm\\
-"Bernd Paysan " "$quid cryptocurrency & SwapDragonChain" bi\\
-"" "https://squid.cash/" bm\\
-}}vt
-glue*l }}glue
-tex: qr-code
-' qr-code "qr-code.png" 13e }}image-file drop /center
-qr-code nearest
-glue*l }}glue
-}}v box[] >bdr
+    $FFFFFFFF pres-frame
+    {{
+	l" Literatur & Links" /title
+	vt{{
+	    l" Bernd Paysan " l" net2o fossil repository" bi\\
+	    l" 🔗" l" https://net2o.de/" bm\\
+	    l" Bernd Paysan " l" $quid cryptocurrency & SwapDragonChain" bi\\
+	    l" 🔗" l" https://squid.cash/" bm\\
+	}}vt
+	glue*l }}glue
+	tex: qr-code
+	' qr-code "qr-code.png" 13e }}image-file drop /center
+	qr-code nearest
+	glue*l }}glue
+    }}v box[] >bdr
 }}z box[] /flip dup >slides
+
+' }}text is }}text'
 
 \ end
 glue-right }}glue
@@ -617,6 +616,11 @@ also opengl
 
 : !widgets ( -- ) top-widget .htop-resize
     1e ambient% sf! set-uniforms ;
+
+[IFDEF] writeout-en
+    lsids ' .lsids s" ef2018/en" r/w create-file throw
+    dup >r outfile-execute r> close-file throw
+[THEN]
 
 previous
 
@@ -650,8 +654,8 @@ forth-local-words:
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
-     (("{{") (0 . 2) (0 . 2) immediate)
-     (("}}h" "}}v" "}}z" "}}vp" "}}p") (-2 . 0) (-2 . 0) immediate)
+     (("{{" "vt{{") (0 . 2) (0 . 2) immediate)
+     (("}}h" "}}v" "}}z" "}}vp" "}}p" "}}vt") (-2 . 0) (-2 . 0) immediate)
     )
 End:
 [THEN]
