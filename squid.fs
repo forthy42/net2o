@@ -200,6 +200,8 @@ $10 cell+ buffer: new-asset
     current-pk sources[] $[]@ dup 0= !!sink-cleared!! { d: pk+hash }
     pk+hash keysize /string
     2dup c:hash@ SwapDragonChain# #!
+    !!FIXME!!
+    \ missing here: normalize the sink's account, and calculate a hash over that
     sig sigsize# pk+hash drop pk-sig? !!sig!! 2drop
     [:  current-pk sources[] $[]@ keysize /string type
 	current-pk assets[]  $[]@ type ;] $tmp
