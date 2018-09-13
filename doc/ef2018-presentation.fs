@@ -255,13 +255,21 @@ $FFFFFFFF pres-frame
 	l" What changed?" \\
 	\skip
 	l" Politics" /subsection
-	blackish
-	l"   Upload filters everywhere, please" "🤦" e\\
-	l"   The link needs to be taxed!" "🤦🤦" e\\
-	l"   Backdoors still wanted (“reasonable encryption”)" "🤦🤦🤦" e\\
-	l"   Legalize it (dragnet surveillance)" "🤦🤦🤦🤦" e\\
-	l"   You can't reasonably expect privacy on your own PC" "🤦🤦🤦🤦🤦" e\\
-	l"   “Crypto” now means BitCoin" "🤦🤦🤦🤦🤦🤦" e\\
+	{{ {{
+	    blackish l" " \\
+	    l"   EU parliament wants upload filters" "🤦" e\\
+	    l"   EU parliament taxes the link (instead: “right”)" "🤦🤦" e\\
+	    l"   EU parliament wants filtering “terrorist contents”" "🤦🤦🤦" e\\
+	    l"   Germany wants a Cyberadministration like CAC (Medienstaatsvertrag)" "🤦🤦🤦🤦" e\\
+	    l"   Backdoors still wanted (“reasonable encryption”)" "🤦🤦🤦🤦🤦" e\\
+	    l"   Legalize it (dragnet surveillance)" "🤦🤦🤦🤦🤦🤦" e\\
+	    l"   You can't reasonably expect privacy on your own PC" "🤦🤦🤦🤦🤦🤦🤦" e\\
+	    l"   “Crypto” now means BitCoin" "🤦🤦🤦🤦🤦🤦🤦🤦" e\\
+	    tex: vp-eu glue*l ' vp-eu }}vp vp[]
+	    $FFBFFFFF color, dup to slider-color to slider-fgcolor
+	    font-size# f2/ f2/ to slider-border
+	    dup font-size# f2/ fdup vslider
+	}}h box[]
 	\skip
 	l" Competition" /subsection
 	l"   Cambridge Analytica scandal (Facebook)" \\
@@ -270,7 +278,7 @@ $FFFFFFFF pres-frame
 	\skip
 	l" Solutions" /subsection
 	l"   net2o becomes more and more usable" \\
-	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+\	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >o o Value snowden-page font-size# to border o o>
 }}z box[] /flip dup >slides
 
@@ -291,16 +299,14 @@ $FFFFFFFF pres-frame
 		    l" image " l" larger image" b\\
 		    {{ l" edit " b0 blackish l" editable text: " }}text'
 		    "中秋节快乐！ Happy autumn festival! 🌙🌕" }}edit dup Value edit-field glue*l }}glue }}h edit-field ' true edit[] >bl
-		    \sans \latin \normal
+		    \sans \latin \normal \regular
 		    l" text " l" text element/Emoji/中文/… 😀🤭😁😂😇😈🙈🙉🙊💓💔💕💖💗💘🍺🍻🎉🎻🎺🎷" b\\
 		    l" part-text " l" pseudo–element for paragraph breaking" b\\
 		    l" canvas " l" vector graphics (TBD)" b\\
 		    l" video " l" video player (TBD)" b\\
 		}}vt
 		glue*l }}glue
-	    tex: vp0 glue*l ' vp0 }}vp vp[]
-	    $FFBFFFFF color, dup to slider-color to slider-fgcolor
-	    font-size# f2/ f2/ to slider-border
+	    tex: vp0 glue*lll ' vp0 }}vp vp[]
 	    dup font-size# f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
