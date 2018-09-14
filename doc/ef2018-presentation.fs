@@ -273,10 +273,11 @@ $FFFFFFFF pres-frame
 	\skip
 	l" Competition" /subsection
 	l"   Cambridge Analytica scandal (Facebook)" \\
-	l"   Passwords pawned (too many to list)" \\
+	l"   Security fuckups: Passwords pawned, chat log saved unprotected in the cloud, etc." \\
 	
 	\skip
-	l" Solutions" /subsection
+	l" Progress" /subsection
+	l"   The ECHR ruled that GCHQ’s dragnet surveillances violates your rights" \\
 	l"   net2o becomes more and more usable" \\
 \	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >o o Value snowden-page font-size# to border o o>
