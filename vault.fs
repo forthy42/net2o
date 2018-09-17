@@ -162,10 +162,10 @@ enc-keccak
     >r enc-filename $! vfile-in r> encfile-rest ;
 
 : ?enc-fd ( -- fd )
-    enc-fd @ dup IF  EXIT  THEN
-    enc-filename $@ dup 4 - 0 max safe/string s" .v2o" str=
-    IF  enc-filename dup $@len 4 - 4 $del  THEN
-    enc-filename $@ w/o create-file throw  dup enc-fd ! ;
+    enc-fd @ dup ?EXIT  drop
+    enc-filename $@ 2dup dup 4 - 0 max safe/string s" .v2o" str=
+    IF  4 -  THEN
+    w/o create-file throw  dup enc-fd ! ;
 
 : write-1file ( addr u -- ) ?enc-fd write-file throw ;
 : vault>file ['] write-1file is write-decrypt ;
@@ -188,7 +188,7 @@ vault>file
 
 : decrypt-file ( filename u -- )
     decrypt@ write-decrypt enc-file $free
-    enc-fd @ ?dup-IF  close-file throw  THEN ;
+    enc-fd @ ?dup-IF  forth:close-file throw  THEN ;
 previous
 
 0 [IF]
