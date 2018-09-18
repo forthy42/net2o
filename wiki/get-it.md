@@ -90,16 +90,21 @@ from the latest Snapshot first.
 Then you install the current [net2o](https://net2o.de/windows/net2o.exe)
 snapshot.
 
-### Key information (new key for September 28th 2017)
+### Key information (new key for September 18th 2018)
 
-I changed my key to a Certum smartcard based rsa2048 key.
+I changed my key to a Certum smartcard based rsa2048 key, this is the first
+update, and I generated a new key pair for that.
 
 These files are now signed with a [sha256rsa2048
 certificate](https://net2o.de/bernd@net2o.de-windows.crt) with the
 SHA-1 fingerprint (why are fingerprints still SHA-1?)
 
-    f0:db:1a:7c:c4:22:49:d6:9f:cd:40:3b:dc:6b:a3:9c:6b:a4:ac:4b
-    E=bernd@net2o.de, CN=Open Source Developer, Bernd Paysan, L=München, O=Open Source Developer, C=DE
+	62:a8:43:a4:38:68:ab:46:db:ad:c6:c3:18:18:e5:02:12:fe:47:de
+	E = bernd@net2o.de
+	CN = Open Source Developer, Bernd Paysan
+	L = München
+	O = Open Source Developer
+	C = DE
 
 Get it for PC from source
 -------------------------

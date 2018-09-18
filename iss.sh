@@ -105,7 +105,10 @@ done) | sed \
   -e 's,^\([^\\]*\)$,Source: "\1"; DestDir: "{app}",g')
 Source: "net2o.ico"; DestDir: "{app}"
 $(for i in */.libs/*.dll; do
-echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth\"" | tr '/' '\\'
+echo "Source: \"$i\"; DestDir: \"{app}\\..\\gforth\"; Check: Is64BitInstallMode" | tr '/' '\\'
+done)
+$(for i in */.libs/*.dll; do
+echo "Source: \"C:\\cygwin$(pwd)\\$i\"; DestDir: \"{app}\\..\\gforth\"; Check: not Is64BitInstallMode" | tr '/' '\\'
 done)
 $(ls lib/gforth/$VERSION/amd64/libcc-named/*.la | sed -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named"; Check: Is64BitInstallMode,g' -e 's:/:\\:g')
 $(ls lib/gforth/$VERSION/amd64/libcc-named/.libs/*.dll | sed -e 's,^\(..*\)$,Source: "\1"; DestDir: "{app}\\..\\gforth\\lib\\gforth\\'$VERSION'\\amd64\\libcc-named\\.libs"; Check: Is64BitInstallMode,g' -e 's:/:\\:g')
