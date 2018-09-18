@@ -99,7 +99,7 @@ Variable import-type  import#new import-type !
     8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP ;
 
 Create >im-color  $B600 , $D600 , $9600 , $C600 , $A600 , $8B01 , $E600 ,
-DOES> swap >im-color# cells + @ attr! ;
+DOES> swap >im-color# 6 umin cells + @ attr! ;
 
 : .imports ( mask -- )
     imports$ import#new bounds DO
