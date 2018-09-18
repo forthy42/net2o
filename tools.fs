@@ -448,8 +448,7 @@ forward default-host
 : ?old-config ( addr u wid -- )
     \G check if we have an old config; then keep it.
     "~/.net2o/config" file-status nip no-file# <> IF
-	"~/.net2o" .net2o$ $!
-	"~/.net2o/config" .net2o-config$ $!
+	"~/.net2o" 2dup .net2o$ $! .net2o-config$ $!
 	subdir-config
 	nip nip "~/.net2o/config" rot
 	read-config default-host
