@@ -451,6 +451,7 @@ forward default-host
 	"~/.net2o" .net2o$ $!
 	"~/.net2o/config" .net2o-config$ $!
 	subdir-config
+	nip nip "~/.net2o/config" rot
 	read-config default-host
     ELSE
 	?.net2o default-host write-config
