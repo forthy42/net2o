@@ -515,7 +515,7 @@ warnings !
     over c@ '+' = IF  2drop ?nextarg drop
 	s>unumber? drop d>64 to groups:perms#
     THEN
-    save-chatgroups ;
+    save-chatgroups .chatgroups ;
 
 : chatgroups ( -- )
     \U chatgroups

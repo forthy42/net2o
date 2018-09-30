@@ -179,8 +179,8 @@ Variable sim-nick!
 : #split ( addr u -- addr u n )
     [: 2dup '#' -scan nip >r
       r@ 0= IF  rdrop 0  EXIT  THEN
-      #0. 2over r@ /string >number
-      0= IF  nip drop nip r> 1- swap  ELSE
+      #0. 2over r@ 1+ /string >number
+      0= IF  nip drop nip r> swap  ELSE
 	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
 
 : nick-key ( addr u -- o / 0 ) \ search for key nickname
@@ -436,14 +436,14 @@ Variable secret-nicks#
 : .keys ( -- ) key# [: ." index: " dup $@ 85type cr cell+ $@ .key ;] #map ;
 : dumpkeys ( -- ) key# [: cell+ $@ dumpkey ;] #map ;
 
+: key>o ( addrkey u1 -- o / 0 )
+    key| key# #@ 0= IF  drop 0  EXIT  THEN  cell+ ;
 : key>nick ( addrkey u1 -- nick u2 )
     \G convert key to nick
-    key| key# #@ 0= IF  drop #0.  EXIT  THEN
-    cell+ .ke-nick $@ ;
+    key>o dup IF  .ke-nick $@  ELSE  0  THEN ;
 : key>key ( addrkey u1 -- key u2 )
     \G expand key to full size and check if we know it
-    key| key# #@ 0= IF  drop #0.  EXIT  THEN
-    cell+ .ke-pk $@ ;
+    key>o dup IF  .ke-pk $@  ELSE  0  THEN ;
 
 : .key# ( addr u -- ) key|
     ." Key '" key# #@ 0= IF drop EXIT THEN
@@ -468,7 +468,9 @@ event: :>search-key ( $addr -- )
 
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
 
-: .simple-id ( addr u -- ) last# >r  key>nick type  r> to last# ;
+: .simple-id ( addr u -- ) last# >r
+    key>o dup IF  ..nick-base  ELSE  drop ." unknown"  THEN
+    r> to last# ;
 
 : check-key ( addr u -- )
     o IF  pubkey @ IF

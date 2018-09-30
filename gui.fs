@@ -311,7 +311,7 @@ $00FFFFFF ,
 
 : gui-chat-connects ( -- )
     [: up@ wait-task ! ;] IS do-connect
-    [: chat-keys [: key>group
+    [: chat-keys [: key| \ key>group
 	    2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
 	    2dup pk-peek? IF  chat-connect true !!connected!!
 	    ELSE  2drop  THEN ;] $[]map ;] catch
@@ -552,7 +552,7 @@ wmsg-o >o msg-table @ token-table ! o>
 #128 Value gui-msgs# \ display last 128 messages
 0 Value chat-edit    \ chat edit field
 
-: gui-msgs ( gaddr u -- )
+: (gui-msgs) ( gaddr u -- )
     reset-time
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
@@ -566,9 +566,12 @@ wmsg-o >o msg-table @ token-table ! o>
     log free throw  msgs-box >o resized vp-bottom o>
     chat-edit engage ;
 
+: gui-msgs ( gaddr u -- )
+    2dup msg-group$ $! (gui-msgs) ;
+
 : msg-wredisplay ( n -- )
     drop 0 otr-mode
-    [: last# $@ gui-msgs ;] !wrapper
+    [: msg-group$ $@ (gui-msgs) ;] !wrapper
     msgs-box >o [: +sync +config +resize ;] vp-needed vp-bottom
     +sync +config o>  ;
 ' msg-wredisplay wmsg-class is msg:redisplay
