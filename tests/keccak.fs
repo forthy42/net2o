@@ -2,6 +2,8 @@
 
 require ../net2o.fs
 
+Variable kerrs
+
 keccak0
 pad $80 erase s" SX{9" pad swap move $80 pad $7F + c! $80
 pad $80 >keccak
@@ -9,7 +11,7 @@ keccak* pad 8 keccak> pad le-uxd@ $466624B803BF072F. d=
 keccak* pad 8 keccak> pad le-uxd@ $993340D7F9153F02. d= and
 keccak* pad 8 keccak> pad le-uxd@ $6EAAAE36BE8E36D3. d= and
 keccak* pad 8 keccak> pad le-uxd@ $1B4AEC08DA6A8BA6. d= and
-[IF] ." succeeded" [ELSE] ." failed" [THEN] cr
+[IF] ." succeeded" [ELSE] ." failed" 1 kerrs +! [THEN] cr
 
 : crypt-loop { n -- }
     pad 8 + pad DO
@@ -37,7 +39,8 @@ $80 crypt-loop
 : sha3@ ( -- addr u ) pad c:key> pad $40 ;
 : .sha3 ( -- )  sha3@ xtype cr ;
 : >sha3 ( addr u -- ) c:0key c:hash ;
-: ?sha3 ( addr u -- ) sha3@ str= '+' '-' rot select emit ;
+: ?sha3 ( addr u -- ) sha3@ str= dup 1+ kerrs +!
+    '+' '-' rot select emit ;
 
 \ the digests her are all different from the Keccak reference, because we do
 \ padding differently
@@ -2093,4 +2096,4 @@ x" 36CF74E3561474F90A2B62718C8740CE553A207334A1EDC7F95B702848595EC23285F826C989C
 x" 1F42ADD25C0A80A4C82AAE3A0E302ABF9261DCA7E7884FD869D96ED4CE88AAAA25304D2D79E1FA5CC1FA2C95899229BC87431AD06DA524F2140E70BD0536E9685EE7808F598D8A9FE15D40A72AEFF431239292C5F64BDB7F620E5D160B329DEB58CF6D5C0665A3DED61AE4ADBCA94DC2B7B02CDF3992FDF79B3D93E546D5823C3A630923064ED24C3D974C4602A49DF75E49CF7BD51EDC7382214CBA850C4D3D11B40A70B1D926E3755EC79693620C242AB0F23EA206BA337A7EDC5421D63126CB6C7094F6BC1CF9943796BE2A0D9EB74FC726AA0C0D3B3D39039DEAD39A7169F8C3E2365DD349E358BF08C717D2E436D65172A76ED5E1F1E694A75C19280B15" >sha3 x" EADC37FAAF4181E51EDBEB4F49B16C165DE40D614355C6ADD63BDB30AF067605A2F79DC2D911DE0C4D90E63B4378BA7CBE9EEC9530F58D33DD0050590AC91280" ?sha3 cr .time ."  for 2048 hashes" cr ;
 run-tests
 10 0 [DO] c:0key pad $100000 !time c:encrypt .time ."  for 1MB" cr [LOOP]
-script? [IF] bye [THEN]
+script? [IF] kerrs @ [IF] 1 (bye) [THEN] bye [THEN]
