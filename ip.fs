@@ -50,10 +50,11 @@ Variable host$
 	host$ dup $@len 5 - 5 $del
     THEN ;
 : replace-host ( -- )
-    config:orighost$ $@ host$ $@ str= IF
+    config:orighost$ $@ host$ $@ str=
+    config:host$ $@len 0> and  IF
 	config:host$ $@ host$ $!
     ELSE
-	config:host$ $free  host$ $@ config:orighost$ $!
+	host$ $@ 2dup config:orighost$ $!  config:host$ $!
 	[IFDEF] android 20 [ELSE] 10 [THEN] \ mobile has lower prio
 	config:prio# !
     THEN ;
