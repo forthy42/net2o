@@ -24,19 +24,19 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    not limited to physical harm, but also character assassination, doxxing,
    mobbing, etc.
 
-(Ridcully's Razor)
+_(Ridcully's Razor)_
 
 2. Thy level in the wizardry bases on talent, education, proven wizardry
    performance, and availability of positions in the level you want to
    achieve. Raise in level is chosen by your teachers. There are in total
    8^(8-n) positions in level n.
 
-(Previous Supreme Law Number 1, <s>cast in</s> _turned into_ stone)
+_(Previous Supreme Law Number 1, <s>cast in</s> ***turned into*** stone)_
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
    that this is fun.
 
-(Albert Malich's Rule 1)
+_(Albert Malich's Rule 1)_
 
 ## <s>Guidelines</s> _Suggestions_
 
