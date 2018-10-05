@@ -49,8 +49,8 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 7. Dress and grow thy white facial hair accordingly to look authentic.
 
 8. Monitor thy caffeine level to avoid being too far into the sober side, eat
-   enough pizza, go to bed late, and sleep long.  Unless you are one of those
-   early risers, then just stay quiet during your morning exercise.
+   enough pizza, go to bed late, and sleep long.  Unless thou arst one of those
+   early risers, then just stay quiet during thy morning exercise.
 
 ## <s>Suggestions</s> _The End_
 
