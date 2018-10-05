@@ -22,20 +22,17 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
 1. Thou shallst not assassinate any superior to get into their place. This is
    not limited to physical harm, but also character assassination, doxxing,
-   mobbing, etc.
-
+   mobbing, etc.<br />
    _(Ridcully's Razor)_
 
 2. Thy level in the wizardry bases on talent, education, proven wizardry
    performance, and availability of positions in the level you want to
    achieve. Raise in level is chosen by your teachers. There are in total
-   8^(8-n) positions in level n.
-
+   8^(8-n) positions in level n.<br />
    _(Previous Supreme Law Number 1, <s>cast in</s> ***turned into*** stone)_
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
-   that this is fun.
-
+   that this is fun.<br />
    _(Albert Malich's Rule 1)_
 
 ## <s>Guidelines</s> _Suggestions_
