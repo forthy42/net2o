@@ -18,7 +18,7 @@ well debugged spells give them a chance.
 
 Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
-## ~~Rules~~ _Guidelines_
+## <s>Rules</s> _Guidelines_
 
 1. Thou shallst not assassinate any superior to get into their place. This is
    not limited to physical harm, but also character assassination, doxxing,
@@ -31,14 +31,14 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    achieve. Raise in level is chosen by your teachers. There are in total
    8^(8-n) positions in level n.
 
-(Previous Supreme Law Number 1, ~~cast in~~ _turned into_ stone)
+(Previous Supreme Law Number 1, <s>cast in</s> _turned into_ stone)
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
    that this is fun.
 
 (Albert Malich's Rule 1)
 
-## ~~Guidelines~~ _Suggestions_
+## <s>Guidelines</s> _Suggestions_
 
 4. Thou art supposed to teach what thou knowest to those with the appropriate
    talent, and learn what thou doest not if thou hast the talent.
@@ -56,6 +56,6 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    enough pizza, go to bed late, and sleep long.  Unless you are one of those
    early risers, then just stay quiet during your morning exercise.
 
-## ~~Suggestions~~ _The End_
+## <s>Suggestions</s> _The End_
 
 Signed by Mustrum Ridcully in invisible ink.
