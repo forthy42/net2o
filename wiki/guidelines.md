@@ -3,7 +3,7 @@
 ![Wizards](wizards.jpg)
 
 This project adopts the Unseen University's Wizards Guidelines of Slightly
-Posh Behavior as revised by Mustrum Ridcully as ~~Code~~ _Guideline_ of
+Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> _Guideline_ of
 Conduct.
 
 The current UUWGoSPB is a gamified hierarchic meritocratic system, which
