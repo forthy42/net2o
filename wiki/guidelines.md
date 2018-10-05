@@ -7,7 +7,7 @@ Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> _Guideline_ of
 Conduct.
 
 The current UUWGoSPB is a gamified hierarchic meritocratic system, which
-considders evidence based science as foundation.  Wizardry is casting spells
+considers evidence based science as foundation.  Wizardry is casting spells
 that make the universe doing what you want it to do, and it can't deny that
 order.  In Roundworld, the only wizardry that exists is computer programming:
 you cast spells (write source code) that, when executed on an appropriate
