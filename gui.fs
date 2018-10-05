@@ -311,7 +311,7 @@ $00FFFFFF ,
 
 : gui-chat-connects ( -- )
     [: up@ wait-task ! ;] IS do-connect
-    [: chat-keys [: key| \ key>group
+    [: chat-keys [:
 	    2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
 	    2dup pk-peek? IF  chat-connect true !!connected!!
 	    ELSE  2drop  THEN ;] $[]map ;] catch
@@ -324,7 +324,7 @@ event: :>chat-connects  gui-chat-connects
 : group[] ( box group -- box )
     [:	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
-	[: [: 2over type '@' emit type ;] $tmp chat-keys $+[]! ;] $[]map
+	[: chat-keys $+[]! ;] $[]map
 	gui-msgs  <event :>chat-connects ?query-task event>
 	next-slide
     ;] swap click[] ;
