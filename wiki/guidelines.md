@@ -40,8 +40,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 4. Thou art supposed to teach what thou knowest to those with the appropriate
    talent, and learn what thou doest not if thou hast the talent.
 
-5. In case thy temper is getting full bursar, eat dry frog pills and calm
-   down.
+5. In case thy temper is going full bursar, eat dry frog pills and calm down.
 
 6. Celibacy is mandatory.  Up to seven sons are tolerated, but keep track of
    all of them.  Daughters count as sons.  They all start at level 1, and need
