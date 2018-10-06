@@ -27,7 +27,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
 2. Thy level in the wizardry bases on talent, education, proven wizardry
    performance, and availability of positions in the level you want to
-   achieve. Raise in level is chosen by your teachers. There are in total
+   achieve. Raise in level is granted by your teachers. There are in total
    8^(8-n) positions in level n.<br />
    _(Previous Supreme Law Number 1, <s>cast in</s> ***turned into*** stone)_
 
