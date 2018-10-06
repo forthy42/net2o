@@ -33,7 +33,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
    that this is fun.<br />
-   _(Albert Malich's Rule 1)_
+   _(Alberto Malich's Rule 1)_
 
 ## <s>Guidelines</s> _Suggestions_
 
