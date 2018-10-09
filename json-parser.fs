@@ -30,9 +30,9 @@ Variable key$
 : set-float ( r -- )
     fdrop
 ;
-: begin-scope ( -- )
+: begin-element ( -- )
 ;
-: end-scope ( -- )
+: end-element ( -- )
 ;
 : begin-array ( -- )
 ;
@@ -60,9 +60,9 @@ s" JSON error" exception Value json-throw
     endcase ;
 
 scope: json
-: } end-scope ;
+: } end-element ;
 synonym }, }
-: {  "{}" key$ $+! begin-scope ;
+: {  "{}" key$ $+! begin-element ;
 : [{ "[]" key$ $+! begin-array ;
 : }] end-array ;
 synonym }], }]
