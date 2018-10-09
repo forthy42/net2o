@@ -18,8 +18,11 @@
 require err.fs
 require unix/pthread.fs
 require unix/mmap.fs
+require struct-val.fs
 require 64bit.fs
 require date.fs
+require mini-oof2.fs
+require forward.fs
 
 \ enum
 
@@ -830,12 +833,6 @@ Sema resize-sema
     [: 2dup unique$cell? IF
 	  >r { w^ x } x cell r> $+!
       ELSE  2drop  THEN ;] resize-sema c-section ;
-
-\ string values
-
-[IFUNDEF] $value:
-    cell      ' aligned   ' $@  ' $!  wrap+value: $value: ( u1 "name" -- u2 )
-[THEN]
 
 \ xchar tool
 
