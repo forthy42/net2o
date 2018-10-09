@@ -122,7 +122,7 @@ $10 stack: element-stack
 ;
 : eval-json ( .. tag -- )
     case
-	rectype-name   of  name?int execute endof
+	rectype-name   of  name?int execute       endof
 	rectype-string of
 	    '!' key$ c$+! key$ $@ find-name IF
 		?date IF  date>ticks set-val
@@ -130,9 +130,9 @@ $10 stack: element-stack
 	    ELSE
 		'$' key$ $@ + 1- c! set-val
 	    THEN  endof
-	rectype-num    of  '#' key$ c$+! set-val     endof
-	rectype-dnum   of  '&' key$ c$+! set-val     endof
-	rectype-float  of  '%' key$ c$+! set-val    endof
+	rectype-num    of  '#' key$ c$+! set-val  endof
+	rectype-dnum   of  '&' key$ c$+! set-val  endof
+	rectype-float  of  '%' key$ c$+! set-val  endof
 	.json-err
     endcase ;
 
