@@ -42,7 +42,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
 5. In case thy temper is going full bursar, eat dried frog pills and calm down.
 
-6. Celibacy is mandatory.  Up to seven sons are tolerated, but keep track of
+6. Celibacy is mandatory¹.  Up to seven sons are tolerated, but keep track of
    all of them.  Daughters count as sons.  They all start at level 1, and need
    magical potty training.
 
@@ -55,3 +55,6 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 ## <s>Suggestions</s> _The End_
 
 Signed by Mustrum Ridcully in invisible ink.
+
+¹) Note: All available data from the seamstresses guild suggests that the
+closest thing to actual celibacy is a stable relationship, i.e. a marriage.
