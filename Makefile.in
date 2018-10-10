@@ -45,7 +45,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  startn2o.fs doc/net2o-logo.png version.fs.in android/net.fs	     \
 	  android/notify.fs linux/net.fs linux/notify.fs dhtroot.fs dvcs.fs  \
 	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs	     \
-	  doc/net2o-200.png doc/net2o.png
+	  doc/net2o-200.png doc/net2o.png json/parser.fs json/g+-schema.fs
 
 LANGS =	  lang/en lang/de lang/zh
 
