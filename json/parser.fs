@@ -31,7 +31,7 @@ s" JSON date error" exception Value json-date-throw
     ." can't parse json line " sourceline# 0 .r ." : '" source type ." '" cr
     json-throw throw ;
 
-require g+-scheme.fs
+require g+-schema.fs
 
 $10 stack: element-stack
 $10 stack: key-stack
