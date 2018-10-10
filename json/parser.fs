@@ -116,7 +116,12 @@ synonym next-element noop ( -- )
     drop rectype-null ;
 
 : ?json-token ( addr u -- addr u' )
-    2dup 1- + c@ cells json-tokens + @ 0<> + ;
+    bounds 2dup U+DO
+	I c@ cells json-tokens + @ IF
+	    nip I swap
+	    I source drop - >in !
+	THEN
+    LOOP  tuck - ;
 : rec-num' ( addr u -- ... )
     ?json-token rec-num ;
 : rec-float' ( addr u -- ... )
