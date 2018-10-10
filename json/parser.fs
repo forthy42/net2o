@@ -34,39 +34,50 @@ s" JSON date error" exception Value json-date-throw
 require g+-scheme.fs
 
 $10 stack: element-stack
+$10 stack: key-stack
+$10 stack: array-stack
+Variable array-item
 
 : set-val ( addr u -- )
-    \ ... key$ $@ 2dup type
-    find-name dup 0=
+    key$ $@ find-name dup 0=
     IF  order cr json-throw throw  THEN
     (int-to) ;
 : begin-element ( -- )
     \ '"' emit key$ $. .\" \": {" cr
     key$ $@ ['] g+ >body find-name-in
-    ?dup-IF  >body >r
+    ?dup-IF  name>int >body >r
 	[: ." g+-" key$ $. ;] $tmp ['] forth >body find-name-in
 	?dup-IF
-	    execute new
-	    dup s" {}" key$ $+! set-val
+	    name>int execute new
+	    dup array-item @ ?dup-IF
+		>stack
+	    ELSE
+		s" {}" key$ $+! set-val
+	    THEN
 	    >o r> element-stack >stack
+	    key$ @ key-stack >stack key$ off
 	    get-order r> swap 1+ set-order
+	    array-item @ array-stack >stack array-item off
 	ELSE
 	    rdrop
 	THEN
-    THEN
-;
-: end-element ( -- )
-    previous element-stack stack> >o rdrop ;
-: begin-array ( -- )
-    key$ $. ." []:" ." ["
-    s" item" key$ $!
-;
+    THEN ;
+
 : end-array ( -- )
-    ." ]" cr
-;
-: next-element ( -- )
-    \ ." ," cr
-;
+    array-stack stack> array-item ! ;
+: end-element ( -- )
+    key$ $free  key-stack stack> key$ !
+    previous element-stack stack> >o rdrop  end-array ;
+: begin-array ( -- )
+    [: key$ $. ." []" ;] $tmp find-name dup IF
+	array-item @ array-stack >stack
+	name>int execute array-item !
+    ELSE
+	json-throw throw
+    THEN ;
+
+synonym next-element noop ( -- )
+
 : eval-json ( .. tag -- )
     case
 	rectype-name   of  name?int execute       endof
@@ -113,8 +124,9 @@ $10 stack: element-stack
 ' rec-string ' rec-num' ' rec-float' ' rec-json 4 json-recognizer set-stack
 
 : json-load ( addr u -- o )
-    g+-comment new >o
-    get-order n>r ['] g+:comment >body 1 set-order
+    g+-comments new >o
+    o element-stack >stack  0 key-stack >stack  0 array-stack >stack
+    get-order n>r ['] g+:comments >body 1 set-order
     forth-recognizer >r  json-recognizer to forth-recognizer
     ['] included catch
     r> to forth-recognizer nr> set-order

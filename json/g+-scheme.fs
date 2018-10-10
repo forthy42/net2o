@@ -43,7 +43,7 @@ previous
 
 object class
     scope: g+
-    cs-scope: comment
+    cs-scope: comments
     $value: url$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
     64value: creationTime!
@@ -55,10 +55,11 @@ object class
     $value: resourceName$
     field: comments[]
     field: plusOnes[]
+    field: reshares[]
     value: postAcl{} \ only for message, not for comment
     }scope
     }scope
-end-class g+-comment
+end-class g+-comments
 
 object class
     scope{ g+
@@ -69,9 +70,11 @@ object class
     $value: resourceName$
     }scope
     synonym plusOner author
+    synonym resharer author
     }scope
 end-class g+-author
 synonym g+-plusOner g+-author
+synonym g+-resharer g+-author
 
 object class
     scope{ g+
@@ -85,26 +88,42 @@ end-class g+-link
 
 object class
     scope{ g+
-    cs-scope: plusOne
+    cs-scope: plusOnes
     value: plusOner{}
     }scope
     }scope
-end-class g+-plusOne
+end-class g+-plusOnes
+
+object class
+    scope{ g+
+    cs-scope: reshares
+    value: resharer{}
+    }scope
+    }scope
+end-class g+-reshares
 
 object class
     scope{ g+
     cs-scope: postAcl
-    value: collection{}
-    field: users[]
+    value: collectionAcl{}
     }scope
     }scope
 end-class g+-postAcl
 
 object class
     scope{ g+
+    cs-scope: collectionAcl
+    value: collection{}
+    field: users[]
+    }scope
+    }scope
+end-class g+-collectionAcl
+
+object class
+    scope{ g+
     cs-scope: collection
-    $value: resourceName
-    $value: displayName
+    $value: resourceName$
+    $value: displayName$
     }scope
     synonym users collection
     }scope
