@@ -15,25 +15,10 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-require tools.fs
+require ../tools.fs
 scope: regexps
 require regexp.fs
 }scope
-
-also regexps
-charclass [+-] '+' +char '-' +char
-: ?date ( addr u -- flag )
-    (( \( \d \d \d \d \) ` - \( \d \d \) ` - \( \d \d \) \s
-    \( \d \d \) ` : \( \d \d \) ` : \( \d \d \)
-    {{ ` + \( || \( ` - }} \d \d \) `? : \( \d \d \) )) ;
-: date>ticks ( -- ticks )
-    \1 s>number drop \2 s>number drop \3 s>number drop ymd2day unix-day0 -
-    #24 *
-    \4 s>number drop + #60 * \5 s>number drop +
-    \7 s>number drop   #60 * \8 s>number drop over 0< IF - ELSE + THEN -
-    #60 * \6 s>number drop +
-    #1000000000 um* d>64 ;
-previous
 
 $Variable key$ \ key string
 256 cells buffer: json-tokens
@@ -46,45 +31,7 @@ s" JSON date error" exception Value json-date-throw
     ." can't parse json line " sourceline# 0 .r ." : '" source type ." '" cr
     json-throw throw ;
 
-object class
-    scope: g+
-    cs-scope: comment
-    $value: url$
-    synonym postUrl$ url$ \ comment has postUrl$ instead of url$
-    64value: creationTime!
-    64value: updateTime!
-    value: author{}
-    value: media{}
-    value: link{}
-    $value: content$
-    $value: resourceName$
-    field: comments[]
-    field: plusOnes[]
-    value: postAcl{} \ only for message, not for comment
-    }scope
-    }scope
-end-class g+-comment
-
-object class
-    scope{ g+
-    cs-scope: author
-    $value: displayName$
-    $value: profilePageUrl$
-    $value: avatarImageUrl$
-    $value: resourceName$
-    }scope
-    }scope
-end-class g+-author
-
-object class
-    scope{ g+
-    cs-scope: link
-    $value: title$
-    $value: url$
-    $value: imageUrl$
-    }scope
-    }scope
-end-class g+-link
+require g+-scheme.fs
 
 $10 stack: element-stack
 
