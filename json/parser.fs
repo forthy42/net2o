@@ -37,6 +37,7 @@ $10 stack: element-stack
 $10 stack: key-stack
 $10 stack: array-stack
 Variable array-item
+' g+ >body Value schema-scope
 
 : set-val ( addr u -- )
     key$ $@ find-name dup 0=
@@ -44,9 +45,9 @@ Variable array-item
     (int-to) ;
 : begin-element ( -- )
     \ '"' emit key$ $. .\" \": {" cr
-    key$ $@ ['] g+ >body find-name-in
+    key$ $@ schema-scope find-name-in
     ?dup-IF  name>int >body >r
-	[: ." g+-" key$ $. ;] $tmp ['] forth >body find-name-in
+	[: key$ $. ." -class" ;] $tmp schema-scope find-name-in
 	?dup-IF
 	    name>int execute new
 	    dup array-item @ ?dup-IF
@@ -124,7 +125,7 @@ synonym next-element noop ( -- )
 ' rec-string ' rec-num' ' rec-float' ' rec-json 4 json-recognizer set-stack
 
 : json-load ( addr u -- o )
-    g+-comments new >o
+    g+:comments-class new >o
     o element-stack >stack  0 key-stack >stack  0 array-stack >stack
     get-order n>r ['] g+:comments >body 1 set-order
     forth-recognizer >r  json-recognizer to forth-recognizer

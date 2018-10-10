@@ -41,8 +41,9 @@ Charclass [blT] bl +char 'T' +char
     d>64 ;
 previous
 
+scope: g+
+
 object class
-    scope: g+
     cs-scope: comments
     $value: url$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
@@ -58,11 +59,9 @@ object class
     field: reshares[]
     value: postAcl{} \ only for message, not for comment
     }scope
-    }scope
-end-class g+-comments
+end-class comments-class
 
 object class
-    scope{ g+
     cs-scope: author
     $value: displayName$
     $value: profilePageUrl$
@@ -71,61 +70,50 @@ object class
     }scope
     synonym plusOner author
     synonym resharer author
-    }scope
-end-class g+-author
-synonym g+-plusOner g+-author
-synonym g+-resharer g+-author
+end-class author-class
+synonym plusOner-class author-class
+synonym resharer-class author-class
 
 object class
-    scope{ g+
     cs-scope: link
     $value: title$
     $value: url$
     $value: imageUrl$
     }scope
-    }scope
-end-class g+-link
+end-class link-class
 
 object class
-    scope{ g+
     cs-scope: plusOnes
     value: plusOner{}
     }scope
-    }scope
-end-class g+-plusOnes
+end-class plusOnes-class
 
 object class
-    scope{ g+
     cs-scope: reshares
     value: resharer{}
     }scope
-    }scope
-end-class g+-reshares
+end-class reshares-class
 
 object class
-    scope{ g+
     cs-scope: postAcl
     value: collectionAcl{}
     }scope
-    }scope
-end-class g+-postAcl
+end-class postAcl-class
 
 object class
-    scope{ g+
     cs-scope: collectionAcl
     value: collection{}
     field: users[]
     }scope
-    }scope
-end-class g+-collectionAcl
+end-class collectionAcl-class
 
 object class
-    scope{ g+
     cs-scope: collection
     $value: resourceName$
     $value: displayName$
     }scope
     synonym users collection
-    }scope
-end-class g+-collection
-synonym g+-users g+-collection
+end-class collection-class
+synonym users-class collection-class
+
+}scope
