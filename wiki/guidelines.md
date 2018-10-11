@@ -1,14 +1,14 @@
-# The Unseen University's Wizards Guidelines of Slightly Posh Behavior
+# The Unseen University’s Wizards Guidelines of Slightly Posh Behavior
 
 ![Wizards](wizards.jpg)
 
-This project adopts the Unseen University's Wizards Guidelines of Slightly
+This project adopts the Unseen University’s Wizards Guidelines of Slightly
 Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> <u>Guideline</u> of
 Conduct.
 
 The current UUWGoSPB is a gamified hierarchic meritocratic system, which
 considers evidence based science as foundation.  Wizardry is casting spells
-that make the universe doing what you want it to do, and it can't deny that
+that make the universe doing what you want it to do, and it can’t deny that
 order.  In Roundworld, the only wizardry that exists is computer programming:
 you cast spells (write source code) that, when executed on an appropriate
 machine, make that machine do what you told it to.
@@ -16,7 +16,7 @@ machine, make that machine do what you told it to.
 The harder part of all those spells is to make sure the wizard survives.  Only
 well debugged spells give them a chance.
 
-Wizards are depicted as old, bearded white men, but that's just a stereotype.
+Wizards are depicted as old, bearded white men, but that’s just a stereotype.
 
 ## <s>Rules</s> <u>Guidelines</u>
 
@@ -33,7 +33,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
    that this is fun.<br />
-   _(Alberto Malich's Rule 1)_
+   _(Alberto Malich’s Rule 1)_
 
 ## <s>Guidelines</s> <u>Suggestions</u>
 
