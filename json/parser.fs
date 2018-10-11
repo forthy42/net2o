@@ -118,8 +118,6 @@ synonym next-element noop ( -- )
 : key-value ( addr u -- ) over >r key$ $! r> free throw
     parse-name json-recognizer recognize eval-json ;
 
-: string-parse ( -- ) \"-parse ;
-
 ' begin-element '{' cells json-tokens + !
 ' end-element   '}' cells json-tokens + !
 ' next-element  ',' cells json-tokens + !
@@ -130,8 +128,7 @@ synonym next-element noop ( -- )
 : rec-json ( addr u -- )
     1 = IF
 	c@ cells json-tokens + @
-	dup IF
-	    rectype-name  EXIT  THEN
+	dup IF  rectype-name  EXIT  THEN
     THEN
     drop rectype-null ;
 
