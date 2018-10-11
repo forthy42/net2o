@@ -157,5 +157,6 @@ $Variable entries[]
     REPEAT ;
 
 : json-loads ( addr u -- )
-    r/o open-file throw ['] json-read-loop execute-parsing-file
-    ." read " entries[] $[]# . ." in " .time cr ;
+    !time r/o open-file throw ['] json-read-loop execute-parsing-file
+    [: ." read " entries[] $[]# . ." postings in " .time ;]
+    success-color color-execute cr ;
