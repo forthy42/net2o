@@ -170,12 +170,15 @@ true  rectype-bool 2constant true
 
 $Variable entries[]
 
-: json-read-loop ( -- )
-    BEGIN  refill  WHILE
-	    source json-load entries[] >stack
-    REPEAT ;
-
-: json-loads ( addr u -- )
-    !time r/o open-file throw ['] json-read-loop execute-parsing-file
+: json-load-dir ( addr u -- )
+    2dup fpath dup $@len >r also-path
+    !time open-dir throw { dd }
+    BEGIN
+	pad $100 dd read-dir throw  WHILE  pad swap
+	    2dup "*.json" filename-match IF
+		json-load entries[] >stack
+	    ELSE  2drop  THEN
+    REPEAT  drop
     [: ." read " entries[] $[]# . ." postings in " .time ;]
-    success-color color-execute cr ;
+    success-color color-execute cr
+    r> fpath $!len ;
