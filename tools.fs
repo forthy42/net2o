@@ -261,6 +261,13 @@ Variable scope<>
 : cs-scope: ( "vocabulary" -- scope:addr )
     cs-vocabulary get-current scope<> >stack also lastxt execute definitions ;
 
+: class{ ( parent "scope" -- methods vars )
+    class cs-scope: ;
+: }class ( methods vars -- )
+    context @ }scope
+    [: body> name>string type ." -class" ;] $tmp nextname
+    end-class ;
+
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict
 : endwith ( -- )

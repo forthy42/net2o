@@ -43,8 +43,7 @@ previous
 
 cs-scope: g+
 
-object class
-    cs-scope: comments
+object class{ comments
     $value: resourceName$
     $value: url$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
@@ -64,19 +63,18 @@ object class
     field: plusOnes[]
     field: reshares[]
     value: postAcl{} \ only for message, not for comment
-    }scope
-    synonym resharedPost comments
-end-class comments-class
+}class
+
+synonym resharedPost comments
 synonym resharedPost-class comments-class
 
-object class
-    cs-scope: author
+object class{ author
     $value: resourceName$
     $value: displayName$
     $value: profilePageUrl$
     $value: avatarImageUrl$
-    }scope
-end-class author-class
+}class
+
 synonym plusOner author
 synonym resharer author
 synonym voter author
@@ -87,134 +85,104 @@ synonym resharer-class author-class
 synonym voter-class author-class
 synonym owner-class author-class
 
-object class
-    cs-scope: link
+object class{ link
     $value: title$
     $value: url$
     $value: imageUrl$
-    }scope
-end-class link-class
+}class
 
-object class
-    cs-scope: plusOnes
+object class{ plusOnes
     value: plusOner{}
-    }scope
-end-class plusOnes-class
+}class
 
-object class
-    cs-scope: reshares
+object class{ reshares
     value: resharer{}
-    }scope
-end-class reshares-class
+}class
 
-object class
-    cs-scope: postAcl
+object class{ postAcl
     value: collectionAcl{}
     value: communityAcl{}
     value: visibleToStandardAcl{}
     value: isLegacyAcl?
-    }scope
-end-class postAcl-class
+}class
 
-object class
-    cs-scope: collectionAcl
+object class{ collectionAcl
     value: collection{}
     field: users[]
-    }scope
-end-class collectionAcl-class
+}class
 
-object class
-    cs-scope: communityAcl
+object class{ communityAcl
     value: community{}
     field: users[]
-    }scope
-end-class communityAcl-class
+}class
 
-object class
-    cs-scope: visibleToStandardAcl
+object class{ visibleToStandardAcl
     field: users[]
     field: circles[]
-    }scope
-end-class visibleToStandardAcl-class
+}class
 
-object class
-    cs-scope: circles
+object class{ circles
     $value: resourceName$
     $value: displayName$
     $value: type$
-    }scope
-end-class circles-class
+}class
 
-object class
-    cs-scope: collection
+object class{ collection
     $value: resourceName$
     $value: displayName$
-    }scope
-    synonym users collection
-    synonym community collection
-end-class collection-class
+}class
+
+synonym users collection
+synonym community collection
+
 synonym users-class collection-class
 synonym community-class collection-class
 
-object class
-    cs-scope: album
+object class{ album
     field: media[]
-    }scope
-end-class album-class
+}class
 
-object class
-    cs-scope: media
+object class{ media
     $value: resourceName$
     $value: url$
     $value: contentType$
     $value: description$
     value: width#
     value: height#
-    }scope
-end-class media-class
+}class
 
-object class
-    cs-scope: location
+object class{ location
     fvalue: latitude%
     fvalue: longitude%
     $value: displayName$
     $value: physicalAddress$
-    }scope
-end-class location-class
+}class
 
-object class
-    cs-scope: poll
+object class{ poll
     field: choices[]
     $value: totalVotes$
     $value: viewerPollChoiceResourceName$
-    }scope
-end-class poll-class
+}class
 
-object class
-    cs-scope: choices
+object class{ choices
     $value: resourceName$
     $value: description$
     $value: imageUrl$
     $value: voteCount$
     field: votes[]
-    }scope
-end-class choices-class
+}class
 
-object class
-    cs-scope: votes
+object class{ votes
     value: voter{}
-    }scope
-end-class votes-class
+}class
 
-object class
-    cs-scope: collectionAttachment
+object class{ collectionAttachment
     $value: resourceName$
     $value: displayName$
     $value: permalink$
     $value: coverPhotoUrl$
     value: owner{}
-    }scope
-end-class collectionAttachment-class
+}class
 
 synonym communityAttachment collectionAttachment
 synonym communityAttachment-class collectionAttachment-class
