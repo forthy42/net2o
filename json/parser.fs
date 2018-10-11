@@ -143,9 +143,15 @@ bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
     dup 1 U+DO  over I + c@ stop-chars + c@  IF  drop I  LEAVE  THEN  LOOP
     2dup + source drop - >in ! 2dup input-lexeme! ;
 
+cs-scope: bools
+false constant false
+true constant true
+}scope
+
 : rec-bool ( addr u -- ... )
-    2dup s" true" str= IF  2drop true rectype-bool  EXIT  THEN
-    s" false" str= IF  false rectype-bool  ELSE  rectype-null  THEN ;
+    ['] bools >body find-name-in ?dup-IF
+	name>int execute rectype-bool
+    ELSE  rectype-null  THEN ;
 
 ' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5 json-recognizer set-stack
 
