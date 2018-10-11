@@ -116,6 +116,8 @@ synonym next-element noop ( -- )
 : key-value ( addr u -- ) key$ $!
     parse-name json-recognizer recognize eval-json ;
 
+: string-parse ( -- ) \"-parse ;
+
 ' begin-element '{' cells json-tokens + !
 ' end-element   '}' cells json-tokens + !
 ' next-element  ',' cells json-tokens + !
@@ -124,39 +126,37 @@ synonym next-element noop ( -- )
 ' key-value     ':' cells json-tokens + !
 
 : rec-json ( addr u -- )
-    1 u>= IF
-	dup 1+ >r c@ cells json-tokens + @
+    1 = IF
+	c@ cells json-tokens + @
 	dup IF
-	    r> source drop - >in @ drop >in !
 	    rectype-name  EXIT  THEN
-	rdrop
     THEN
     drop rectype-null ;
 
-: ?json-token ( addr u -- addr u' )
-    bounds 2dup U+DO
-	I c@ cells json-tokens + @ IF
-	    nip I swap
-	    I source drop - >in !
-	THEN
-    LOOP  tuck - ;
-: rec-num' ( addr u -- ... )
-    ?json-token rec-num ;
-: rec-float' ( addr u -- ... )
-    ?json-token rec-float ;
+256 buffer: stop-chars
+bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
+"{}[],:\"" bounds [do] 1 stop-chars [i] c@ + c! [loop]
+
+: parse-json ( -- addr u )
+    source >in @ safe/string
+    dup 0 U+DO  over c@ bl u> ?LEAVE  1 safe/string  LOOP
+    dup 1 U+DO  over I + c@ stop-chars + c@  IF  drop I  LEAVE  THEN  LOOP
+    2dup + source drop - >in ! 2dup input-lexeme! ;
+
 : rec-bool ( addr u -- ... )
     2dup s" true" str= IF  2drop true rectype-bool  EXIT  THEN
     s" false" str= IF  false rectype-bool  ELSE  rectype-null  THEN ;
 
-' rec-string ' rec-bool ' rec-num' ' rec-float' ' rec-json 5 json-recognizer set-stack
+' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5 json-recognizer set-stack
 
 : json-load ( addr u -- o )
     g+:comments-class new >o
     o element-stack >stack  0 key-stack >stack  0 array-stack >stack
     get-order n>r ['] g+:comments >body 1 set-order
     forth-recognizer >r  json-recognizer to forth-recognizer
+    action-of parse-name >r ['] parse-json is parse-name
     ['] included catch
-    r> to forth-recognizer nr> set-order
+    r> is parse-name  r> to forth-recognizer  nr> set-order
     throw o o> ;
 
 $Variable entries[]
