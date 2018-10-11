@@ -90,7 +90,7 @@ synonym next-element noop ( -- )
 : eval-json ( .. tag -- )
     case
 	rectype-name   of  name?int execute       endof
-	rectype-string of
+	rectype-string of  over >r
 	    '$' key$ c$+! key$ $@ find-name ?dup-IF
 		(int-to)
 	    ELSE
@@ -106,7 +106,7 @@ synonym next-element noop ( -- )
 			'!' key$ $@ + 1- c! date>ticks set-val
 		    ELSE  json-date-throw throw  THEN
 		THEN
-	    THEN  endof
+	    THEN  r> free throw                   endof
 	rectype-num    of  '#' key$ c$+! set-val  endof
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
@@ -115,7 +115,7 @@ synonym next-element noop ( -- )
 	.json-err
     endcase ;
 
-: key-value ( addr u -- ) key$ $!
+: key-value ( addr u -- ) over >r key$ $! r> free throw
     parse-name json-recognizer recognize eval-json ;
 
 : string-parse ( -- ) \"-parse ;
