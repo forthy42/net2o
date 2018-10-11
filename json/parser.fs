@@ -30,18 +30,30 @@ s" JSON error" exception Value json-throw
     ." can't parse json line " sourceline# 0 .r ." : '" source type ." '" cr
     json-throw throw ;
 
+0 Value schema-scope
+0 Value outer-class
+0 Value schema-wid
+
 require g+-schema.fs
+require fb-schema.fs
 
 $10 stack: element-stack
 $10 stack: key-stack
 $10 stack: array-stack
 Variable array-item
-' g+ >body Value schema-scope
 
-: set-val ( addr u -- )
-    key$ $@ find-name dup 0=
-    IF  order cr .json-err  THEN
-    (int-to) ;
+: set-val ( value -- )
+    key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
+    order cr .json-err ;
+
+: set-int ( value -- )
+    key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
+    '%' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
+	>r s>f r> (int-to) EXIT  THEN
+    '!' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
+	>r #1000000000 um* d>64 r> (int-to) EXIT  THEN
+    order cr .json-err ;
+
 : begin-element ( -- )
     \ '"' emit key$ $. .\" \": {" cr
     key$ $@ schema-scope find-name-in
@@ -109,7 +121,7 @@ synonym next-element noop ( -- )
     case
 	rectype-name   of  name?int execute       endof
 	rectype-string of  json-string!           endof
-	rectype-num    of  '#' key$ c$+! set-val  endof
+	rectype-num    of  '#' key$ c$+! set-int  endof
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
 	rectype-bool   of  '?' key$ c$+! set-val  endof
@@ -158,9 +170,9 @@ true  rectype-bool 2constant true
 ' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5 json-recognizer set-stack
 
 : json-load ( addr u -- o )
-    g+:comments-class new >o
+    outer-class new >o
     o element-stack >stack  0 key-stack >stack  0 array-stack >stack
-    get-order n>r ['] g+:comments >body 1 set-order
+    get-order n>r schema-wid 1 set-order
     forth-recognizer >r  json-recognizer to forth-recognizer
     action-of parse-name >r ['] parse-json is parse-name
     ['] included catch

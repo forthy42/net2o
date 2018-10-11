@@ -188,3 +188,26 @@ synonym communityAttachment collectionAttachment
 synonym communityAttachment-class collectionAttachment-class
 
 }scope
+
+: g+-scan ( -- )
+    ['] g+ >body to schema-scope
+    g+:comments-class to outer-class
+    ['] g+:comments >body to schema-wid ;
+
+g+-scan
+
+0 [IF]
+Local Variables:
+forth-local-words:
+    (
+     (("class{") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("}class") definition-ender (font-lock-keyword-face . 1))
+    )
+forth-local-indent-words:
+    (
+     (("class{") (0 . 2) (0 . 2))
+     (("}class") (-2 . 0) (0 . -2))
+    )
+End:
+[THEN]
