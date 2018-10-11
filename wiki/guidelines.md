@@ -3,7 +3,7 @@
 ![Wizards](wizards.jpg)
 
 This project adopts the Unseen University's Wizards Guidelines of Slightly
-Posh Behavior as revised by Mustrum Ridcully as <s>Code</s><u>Guideline</u> of
+Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> <u>Guideline</u> of
 Conduct.
 
 The current UUWGoSPB is a gamified hierarchic meritocratic system, which
@@ -18,12 +18,12 @@ well debugged spells give them a chance.
 
 Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
-## <s>Rules</s><u>Guidelines</u>
+## <s>Rules</s> <u>Guidelines</u>
 
 1. Thou shallst not assassinate any superior to get into their place. This is
    not limited to physical harm, but also character assassination, doxxing,
    mobbing, etc.<br />
-   _(Ridcully's Razor)_
+   _(Ridcully’s Razor)_
 
 2. Thy level in the wizardry bases on talent, education, proven wizardry
    performance, and availability of positions in the level you want to
@@ -35,14 +35,14 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    that this is fun.<br />
    _(Alberto Malich's Rule 1)_
 
-## <s>Guidelines</s><u>Suggestions</u>
+## <s>Guidelines</s> <u>Suggestions</u>
 
 4. Thou art supposed to teach what thou knowest to those with the appropriate
    talent, and learn what thou doest not if thou hast the talent.
 
 5. In case thy temper is going full bursar, eat dried frog pills and calm down.
 
-6. Celibacy is mandatory¹.  Up to seven sons are tolerated, but keep track of
+6. Celibacy¹ is mandatory.  Up to seven sons are tolerated, but keep track of
    all of them.  Daughters count as sons.  They all start at level 1, and need
    magical potty training.
 
@@ -52,7 +52,7 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    enough pizza, go to bed late, and sleep long.  Unless thou art one of those
    early risers, then just stay quiet during thy morning exercise.
 
-## <s>Suggestions</s><u>The End</u>
+## <s>Suggestions</s> <u>The End</u>
 
 Signed by Mustrum Ridcully in invisible ink.
 
