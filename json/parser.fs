@@ -85,6 +85,7 @@ Variable array-item
 synonym next-element noop ( -- )
 
 ' noop ' lit, dup rectype: rectype-bool
+' noop ' lit, dup rectype: rectype-nil
 
 : eval-json ( .. tag -- )
     case
@@ -110,6 +111,7 @@ synonym next-element noop ( -- )
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
 	rectype-bool   of  '?' key$ c$+! set-val  endof
+	rectype-nil    of  drop                   endof \ default is null
 	.json-err
     endcase ;
 
@@ -144,13 +146,14 @@ bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
     2dup + source drop - >in ! 2dup input-lexeme! ;
 
 cs-scope: bools
-false constant false
-true constant true
+false rectype-bool 2constant false
+true  rectype-bool 2constant true
+0     rectype-nil  2constant null
 }scope
 
 : rec-bool ( addr u -- ... )
     ['] bools >body find-name-in ?dup-IF
-	name>int execute rectype-bool
+	name>int execute
     ELSE  rectype-null  THEN ;
 
 ' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5 json-recognizer set-stack
