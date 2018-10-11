@@ -3,7 +3,7 @@
 ![Wizards](wizards.jpg)
 
 This project adopts the Unseen University's Wizards Guidelines of Slightly
-Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> _Guideline_ of
+Posh Behavior as revised by Mustrum Ridcully as <s>Code</s><u>Guideline</u> of
 Conduct.
 
 The current UUWGoSPB is a gamified hierarchic meritocratic system, which
@@ -18,7 +18,7 @@ well debugged spells give them a chance.
 
 Wizards are depicted as old, bearded white men, but that's just a stereotype.
 
-## <s>Rules</s> _Guidelines_
+## <s>Rules</s><u>Guidelines</u>
 
 1. Thou shallst not assassinate any superior to get into their place. This is
    not limited to physical harm, but also character assassination, doxxing,
@@ -29,13 +29,13 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    performance, and availability of positions in the level you want to
    achieve. Raise in level is granted by your teachers. There are in total
    8^(8-n) positions in level n.<br />
-   _(Previous Supreme Law Number 1, <s>cast in</s> ***turned into*** stone)_
+   _(Previous Supreme Law Number 1, <s>cast in</s> <u>turned into</u> stone)_
 
 3. It matters what thou doest for the magic, not what thou art, and it matters
    that this is fun.<br />
    _(Alberto Malich's Rule 1)_
 
-## <s>Guidelines</s> _Suggestions_
+## <s>Guidelines</s><u>Suggestions</u>
 
 4. Thou art supposed to teach what thou knowest to those with the appropriate
    talent, and learn what thou doest not if thou hast the talent.
@@ -52,9 +52,9 @@ Wizards are depicted as old, bearded white men, but that's just a stereotype.
    enough pizza, go to bed late, and sleep long.  Unless thou art one of those
    early risers, then just stay quiet during thy morning exercise.
 
-## <s>Suggestions</s> _The End_
+## <s>Suggestions</s><u>The End</u>
 
 Signed by Mustrum Ridcully in invisible ink.
 
-¹) Note: All available data from the seamstresses guild suggests that the
+¹) Note: All available data from the seamstresses’ guild suggests that the
 closest thing to actual celibacy is a stable relationship, i.e. a marriage.
