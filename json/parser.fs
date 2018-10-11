@@ -90,11 +90,21 @@ synonym next-element noop ( -- )
     case
 	rectype-name   of  name?int execute       endof
 	rectype-string of
-	    '!' key$ c$+! key$ $@ find-name IF
-		?date IF  date>ticks set-val
-		ELSE  json-date-throw throw  THEN
+	    '$' key$ c$+! key$ $@ find-name ?dup-IF
+		(int-to)
 	    ELSE
-		'$' key$ $@ + 1- c! set-val
+		2dup s>number? IF
+		    '&' key$ $@ + 1- c!
+		    key$ $@ find-name ?dup-IF  (int-to)
+		    ELSE  '#' key$ $@ + 1- c!
+			key$ $@ find-name ?dup-IF  nip (int-to)
+			ELSE  json-throw throw  THEN
+		    ELSE  json-throw throw  THEN  2drop
+		ELSE  2drop
+		    ?date IF
+			'!' key$ $@ + 1- c! date>ticks set-val
+		    ELSE  json-date-throw throw  THEN
+		THEN
 	    THEN  endof
 	rectype-num    of  '#' key$ c$+! set-val  endof
 	rectype-dnum   of  '&' key$ c$+! set-val  endof

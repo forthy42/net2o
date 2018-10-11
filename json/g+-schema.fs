@@ -160,7 +160,7 @@ object class{ location
 
 object class{ poll
     field: choices[]
-    $value: totalVotes$
+    value: totalVotes#
     $value: viewerPollChoiceResourceName$
 }class
 
@@ -168,7 +168,7 @@ object class{ choices
     $value: resourceName$
     $value: description$
     $value: imageUrl$
-    $value: voteCount$
+    value: voteCount#
     field: votes[]
 }class
 
