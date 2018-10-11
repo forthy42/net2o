@@ -171,14 +171,14 @@ true  rectype-bool 2constant true
 $Variable entries[]
 
 : json-load-dir ( addr u -- )
-    2dup fpath dup $@len >r also-path
-    !time open-dir throw { dd }
-    BEGIN
-	pad $100 dd read-dir throw  WHILE  pad swap
-	    2dup "*.json" filename-match IF
-		json-load entries[] >stack
-	    ELSE  2drop  THEN
-    REPEAT  drop
-    [: ." read " entries[] $[]# . ." postings in " .time ;]
-    success-color color-execute cr
-    r> fpath $!len ;
+    2dup open-dir throw { dd } fpath dup $@len >r also-path dd
+    [: { dd } !time
+	BEGIN
+	    pad $100 dd read-dir throw  WHILE  pad swap
+		2dup "*.json" filename-match IF
+		    json-load entries[] >stack
+		ELSE  2drop  THEN
+	REPEAT  drop
+	[: ." read " entries[] $[]# . ." postings in " .time ;]
+	success-color color-execute cr ;] catch
+    r> fpath $!len  dd close-dir throw  throw ;
