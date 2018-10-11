@@ -25,7 +25,6 @@ $Variable key$ \ key string
 4 stack: json-recognizer
 
 s" JSON error" exception Value json-throw
-s" JSON date error" exception Value json-date-throw
 
 : .json-err
     ." can't parse json line " sourceline# 0 .r ." : '" source type ." '" cr
@@ -41,7 +40,7 @@ Variable array-item
 
 : set-val ( addr u -- )
     key$ $@ find-name dup 0=
-    IF  order cr json-throw throw  THEN
+    IF  order cr .json-err  THEN
     (int-to) ;
 : begin-element ( -- )
     \ '"' emit key$ $. .\" \": {" cr
@@ -60,11 +59,11 @@ Variable array-item
 	    get-order r> swap 1+ set-order
 	    array-item @ array-stack >stack array-item off
 	ELSE
-	    cr key$ $. ."  class not found" cr ~~ rdrop json-throw throw
+	    cr key$ $. ."  class not found" cr rdrop .json-err
 	THEN
     ELSE
 	key$ $@len IF
-	    cr key$ $. ."  key not found" cr ~~ json-throw throw
+	    cr key$ $. ."  key not found" cr .json-err
 	THEN
     THEN ;
 
@@ -79,7 +78,7 @@ Variable array-item
 	name>int execute array-item !
     ELSE
 	cr order
-	json-throw throw
+	.json-err
     THEN ;
 
 synonym next-element noop ( -- )
@@ -87,26 +86,29 @@ synonym next-element noop ( -- )
 ' noop ' lit, dup rectype: rectype-bool
 ' noop ' lit, dup rectype: rectype-nil
 
+: json-string! ( addr u -- )
+    over >r
+    '$' key$ c$+! key$ $@ find-name ?dup-IF
+	(int-to)
+    ELSE \ workaround if you mean number but wrote string
+	2dup s>number? IF
+	    '&' key$ $@ + 1- c!
+	    key$ $@ find-name ?dup-IF  (int-to)
+	    ELSE  '#' key$ $@ + 1- c!
+		key$ $@ find-name ?dup-IF  nip (int-to)
+		ELSE  .json-err  THEN
+	    ELSE  .json-err  THEN  2drop
+	ELSE  2drop \ convert date type into ticks
+	    ?date IF
+		'!' key$ $@ + 1- c! date>ticks set-val
+	    ELSE  .json-err  THEN
+	THEN
+    THEN  r> free throw ;
+
 : eval-json ( .. tag -- )
     case
 	rectype-name   of  name?int execute       endof
-	rectype-string of  over >r
-	    '$' key$ c$+! key$ $@ find-name ?dup-IF
-		(int-to)
-	    ELSE
-		2dup s>number? IF
-		    '&' key$ $@ + 1- c!
-		    key$ $@ find-name ?dup-IF  (int-to)
-		    ELSE  '#' key$ $@ + 1- c!
-			key$ $@ find-name ?dup-IF  nip (int-to)
-			ELSE  json-throw throw  THEN
-		    ELSE  json-throw throw  THEN  2drop
-		ELSE  2drop
-		    ?date IF
-			'!' key$ $@ + 1- c! date>ticks set-val
-		    ELSE  json-date-throw throw  THEN
-		THEN
-	    THEN  r> free throw                   endof
+	rectype-string of  json-string!           endof
 	rectype-num    of  '#' key$ c$+! set-val  endof
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
