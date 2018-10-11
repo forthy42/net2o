@@ -83,8 +83,8 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang
-@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang
+@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang net2o-@PACKAGE_VERSION@/json
+@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang net2o/json
 
 SCRIPTS = n2o
 
