@@ -41,38 +41,51 @@ Charclass [blT] bl +char 'T' +char
     d>64 ;
 previous
 
-scope: g+
+cs-scope: g+
 
 object class
     cs-scope: comments
+    $value: resourceName$
     $value: url$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
     64value: creationTime!
     64value: updateTime!
     value: author{}
+    value: album{}
     value: media{}
+    value: location{}
     value: link{}
+    value: resharedPost{}
+    value: poll{}
+    value: collectionAttachment{}
+    value: communityAttachment{}
     $value: content$
-    $value: resourceName$
     field: comments[]
     field: plusOnes[]
     field: reshares[]
     value: postAcl{} \ only for message, not for comment
     }scope
+    synonym resharedPost comments
 end-class comments-class
+synonym resharedPost-class comments-class
 
 object class
     cs-scope: author
+    $value: resourceName$
     $value: displayName$
     $value: profilePageUrl$
     $value: avatarImageUrl$
-    $value: resourceName$
     }scope
-    synonym plusOner author
-    synonym resharer author
 end-class author-class
+synonym plusOner author
+synonym resharer author
+synonym voter author
+synonym owner author
+
 synonym plusOner-class author-class
 synonym resharer-class author-class
+synonym voter-class author-class
+synonym owner-class author-class
 
 object class
     cs-scope: link
@@ -97,6 +110,9 @@ end-class reshares-class
 object class
     cs-scope: postAcl
     value: collectionAcl{}
+    value: communityAcl{}
+    value: visibleToStandardAcl{}
+    value: isLegacyAcl?
     }scope
 end-class postAcl-class
 
@@ -108,12 +124,99 @@ object class
 end-class collectionAcl-class
 
 object class
+    cs-scope: communityAcl
+    value: community{}
+    field: users[]
+    }scope
+end-class communityAcl-class
+
+object class
+    cs-scope: visibleToStandardAcl
+    field: users[]
+    field: circles[]
+    }scope
+end-class visibleToStandardAcl-class
+
+object class
+    cs-scope: circles
+    $value: resourceName$
+    $value: displayName$
+    $value: type$
+    }scope
+end-class circles-class
+
+object class
     cs-scope: collection
     $value: resourceName$
     $value: displayName$
     }scope
     synonym users collection
+    synonym community collection
 end-class collection-class
 synonym users-class collection-class
+synonym community-class collection-class
+
+object class
+    cs-scope: album
+    field: media[]
+    }scope
+end-class album-class
+
+object class
+    cs-scope: media
+    $value: resourceName$
+    $value: url$
+    $value: contentType$
+    $value: description$
+    value: width#
+    value: height#
+    }scope
+end-class media-class
+
+object class
+    cs-scope: location
+    fvalue: latitude%
+    fvalue: longitude%
+    $value: displayName$
+    $value: physicalAddress$
+    }scope
+end-class location-class
+
+object class
+    cs-scope: poll
+    field: choices[]
+    $value: totalVotes$
+    $value: viewerPollChoiceResourceName$
+    }scope
+end-class poll-class
+
+object class
+    cs-scope: choices
+    $value: resourceName$
+    $value: description$
+    $value: imageUrl$
+    $value: voteCount$
+    field: votes[]
+    }scope
+end-class choices-class
+
+object class
+    cs-scope: votes
+    value: voter{}
+    }scope
+end-class votes-class
+
+object class
+    cs-scope: collectionAttachment
+    $value: resourceName$
+    $value: displayName$
+    $value: permalink$
+    $value: coverPhotoUrl$
+    value: owner{}
+    }scope
+end-class collectionAttachment-class
+
+synonym communityAttachment collectionAttachment
+synonym communityAttachment-class collectionAttachment-class
 
 }scope

@@ -60,7 +60,11 @@ Variable array-item
 	    get-order r> swap 1+ set-order
 	    array-item @ array-stack >stack array-item off
 	ELSE
-	    rdrop
+	    cr key$ $. ."  class not found" cr ~~ rdrop json-throw throw
+	THEN
+    ELSE
+	key$ $@len IF
+	    cr key$ $. ."  key not found" cr ~~ json-throw throw
 	THEN
     THEN ;
 
@@ -74,10 +78,13 @@ Variable array-item
 	array-item @ array-stack >stack
 	name>int execute array-item !
     ELSE
+	cr order
 	json-throw throw
     THEN ;
 
 synonym next-element noop ( -- )
+
+' noop ' lit, dup rectype: rectype-bool
 
 : eval-json ( .. tag -- )
     case
@@ -92,6 +99,7 @@ synonym next-element noop ( -- )
 	rectype-num    of  '#' key$ c$+! set-val  endof
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
+	rectype-bool   of  '?' key$ c$+! set-val  endof
 	.json-err
     endcase ;
 
@@ -126,8 +134,11 @@ synonym next-element noop ( -- )
     ?json-token rec-num ;
 : rec-float' ( addr u -- ... )
     ?json-token rec-float ;
+: rec-bool ( addr u -- ... )
+    2dup s" true" str= IF  2drop true rectype-bool  EXIT  THEN
+    s" false" str= IF  false rectype-bool  ELSE  rectype-null  THEN ;
 
-' rec-string ' rec-num' ' rec-float' ' rec-json 4 json-recognizer set-stack
+' rec-string ' rec-bool ' rec-num' ' rec-float' ' rec-json 5 json-recognizer set-stack
 
 : json-load ( addr u -- o )
     g+:comments-class new >o
@@ -137,3 +148,13 @@ synonym next-element noop ( -- )
     ['] included catch
     r> to forth-recognizer nr> set-order
     throw o o> ;
+
+$Variable entries[]
+
+: json-read-loop ( -- )
+    BEGIN  refill  WHILE
+	    source json-load entries[] >stack
+    REPEAT ;
+
+: json-loads ( addr u -- )
+    r/o open-file throw ['] json-read-loop execute-parsing-file ;
