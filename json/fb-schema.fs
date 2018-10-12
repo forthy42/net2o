@@ -52,11 +52,17 @@ object class{ media
     $value: description$
     64value: creation_timestamp!
     value: media_metadata{}
+    value: thumbnail{}
     field: comments[]
 }class
 
 object class{ media_metadata
     value: photo_metadata{}
+    value: video_metadata{}
+}class
+
+object class{ thumbnail
+    $value: uri$
 }class
 
 object class{ comments
@@ -71,6 +77,11 @@ object class{ photo_metadata
     value: orientation#
     value: original_width#
     value: original_height#
+    $value: upload_ip$
+}class
+
+object class{ video_metadata
+    value: upload_timestamp#
     $value: upload_ip$
 }class
 
