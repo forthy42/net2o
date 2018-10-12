@@ -15,37 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-also regexps
-Charclass [blT] bl +char 'T' +char
-: ?date ( addr u -- flag )
-    (( \( \d \d \d \d \) ` - \( \d \d \) ` - \( \d \d \) [blT] c?
-    \( \d \d \) ` : \( \d \d \) ` : \( \d \d \)
-    {{ ` . \( {++ \d \d \d ++} \) || \( \) }}
-    {{ ` Z \( \) \( \) ||
-       {{ ` + \( || \( ` - }} \d \d `? : \d \d \)
-    }} )) ;
-: date>ticks ( -- ticks )
-    \1 s>number drop \2 s>number drop \3 s>number drop ymd2day unix-day0 -
-    #24 *
-    \4 s>number drop + #60 * \5 s>number drop +
-    \8 2 umin s>number drop   #60 *
-    \8 dup 2 - /string s>unumber? 2drop over 0< IF - ELSE + THEN -
-    #60 * \6 s>number drop +
-    #1000000000 um*
-    \7 s>unumber? 2drop
-    case \7 nip
-	3 of  #1000000 um*  endof
-	6 of  #1000    um*  endof
-	0 swap
-    endcase  d+
-    d>64 ;
-previous
-
 cs-scope: g+
 
 object class{ comments
     $value: resourceName$
     $value: url$
+    $value: content$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
     64value: creationTime!
     64value: updateTime!
@@ -58,7 +33,6 @@ object class{ comments
     value: poll{}
     value: collectionAttachment{}
     value: communityAttachment{}
-    $value: content$
     field: comments[]
     field: plusOnes[]
     field: reshares[]
@@ -189,7 +163,7 @@ synonym communityAttachment-class collectionAttachment-class
 
 }scope
 
-: g+-scan ( -- )
+: g+-scan ( -- )  iso-date
     ['] g+ >body to schema-scope
     g+:comments-class to outer-class
     ['] g+:comments >body to schema-wid ;

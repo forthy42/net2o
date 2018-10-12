@@ -27,6 +27,8 @@ require forward.fs
 \ enum
 
 : enum ( n "name" -- n+1 )  dup Constant 1+ ;
+: enums ( start n "name1" .. "namen" -- )
+    0 ?DO enum LOOP drop ;
 : bit ( n "name" -- n*2 )   dup Constant 2* ;
 
 \ argument handling that works transparent from OS and Forth command line

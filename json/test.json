@@ -1,0 +1,10 @@
+{
+  "strings": [ "la", "le", "lu" ],
+  "numbers": [ 1, "2", 3, 4.5 ],
+  "floats": [ 1.23, 2.34e, "3.45e6" ]
+  "objects": [
+     { "name": "bla", "number": 123 },
+     { "name": "foo", "number": 234 },
+     { "name": "bar", "number": "567" }
+   ]
+}

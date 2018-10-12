@@ -20,15 +20,52 @@ scope: regexps
 require regexp.fs
 }scope
 
+also regexps
+Charclass [blT] bl +char 'T' +char
+: iso-?date ( addr u -- flag )
+    (( \( \d \d \d \d \) ` - \( \d \d \) ` - \( \d \d \) [blT] c?
+    \( \d \d \) ` : \( \d \d \) ` : \( \d \d \)
+    {{ ` . \( {++ \d \d \d ++} \) || \( \) }}
+    {{ ` Z \( \) \( \) ||
+       {{ ` + \( || \( ` - }} \d \d `? : \d \d \)
+    }} )) ;
+: iso-date>ticks ( -- ticks )
+    \1 s>number drop \2 s>number drop \3 s>number drop ymd2day unix-day0 -
+    #24 *
+    \4 s>number drop + #60 * \5 s>number drop +
+    \8 2 umin s>number drop   #60 *
+    \8 dup 2 - /string s>unumber? 2drop over 0< IF - ELSE + THEN -
+    #60 * \6 s>number drop +
+    #1000000000 um*
+    \7 s>unumber? 2drop
+    case \7 nip
+	3 of  #1000000 um*  endof
+	6 of  #1000    um*  endof
+	0 swap
+    endcase  d+
+    d>64 ;
+previous
+
+Defer ?date
+Defer date>ticks
+
+: iso-date
+    ['] iso-?date is ?date
+    ['] iso-date>ticks is date>ticks ;
+
 $Variable key$ \ key string
 256 cells buffer: json-tokens
-4 stack: json-recognizer
+5 stack: jsons-recognizer
+1 stack: json-recognizer
+
+' noop ' lit, dup rectype: rectype-bool
+' noop ' lit, dup rectype: rectype-nil
 
 s" JSON error" exception Value json-throw
+s" JSON key not found" exception Value json-key-throw
+s" JSON class not found" exception Value json-class-throw
 
-: .json-err
-    ." can't parse json line " sourceline# 0 .r ." : '" source type ." '" cr
-    json-throw throw ;
+: json-err  cr order json-throw throw ;
 
 0 Value schema-scope
 0 Value outer-class
@@ -36,15 +73,18 @@ s" JSON error" exception Value json-throw
 
 require g+-schema.fs
 require fb-schema.fs
+require twitter-schema.fs
 
 $10 stack: element-stack
 $10 stack: key-stack
 $10 stack: array-stack
-Variable array-item
+0 Value array-item
+0 Value last-type
+0 Value previous-type
 
 : set-val ( value -- )
     key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
-    order cr .json-err ;
+    json-err ;
 
 : set-int ( value -- )
     key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
@@ -52,7 +92,55 @@ Variable array-item
 	>r s>f r> (int-to) EXIT  THEN
     '!' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
 	>r #1000000000 um* d>64 r> (int-to) EXIT  THEN
-    order cr .json-err ;
+    json-err ;
+
+Defer next-element
+
+: next-element# ( element -- )
+    array-item ?dup-IF  >r
+	case previous-type
+	    rectype-name   of                   endof
+	    rectype-num    of        r@ >stack  endof
+	    rectype-dnum   of  drop  r@ >stack  endof
+	    rectype-string of  s>number? 0= IF json-err THEN
+		drop r@ >stack  endof
+	    rectype-float  of  f>s   r@ >stack  endof
+	    rectype-bool   of        r@ >stack  endof
+	    rectype-nil    of        r@ >stack  endof
+	endcase  rdrop
+    THEN ;
+
+: f>stack ( r stack -- )
+    { f^ r } r 1 floats rot $+! ;
+
+: next-element% ( element -- )
+    array-item ?dup-IF  >r
+	case previous-type
+	    rectype-name   of                    endof
+	    rectype-float  of        r@ f>stack  endof
+	    rectype-string of  over >r >float r> free throw
+		0= IF json-err THEN  r@ f>stack  endof
+	    rectype-num    of  s>f   r@ f>stack  endof
+	    rectype-dnum   of  d>f   r@ f>stack  endof
+	    rectype-bool   of  s>f   r@ f>stack  endof
+	    rectype-nil    of  s>f   r@ f>stack  endof
+	endcase  rdrop
+    THEN ;
+
+: next-element$ ( element -- )
+    array-item ?dup-IF  >r
+	case previous-type
+	    rectype-name   of                    endof
+	    rectype-string of  over >r $make r> free throw  r@ >stack  endof
+	    rectype-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
+	    rectype-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
+	    rectype-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
+	    rectype-bool   of  IF "true" ELSE "false" THEN $make r@ >stack  endof
+	    rectype-nil    of  r@ >stack  endof
+	endcase  rdrop
+    THEN ;
+
+' next-element$ is next-element
 
 : begin-element ( -- )
     \ '"' emit key$ $. .\" \": {" cr
@@ -61,7 +149,7 @@ Variable array-item
 	[: key$ $. ." -class" ;] $tmp schema-scope find-name-in
 	?dup-IF
 	    name>int execute new
-	    dup array-item @ ?dup-IF
+	    dup array-item ?dup-IF
 		>stack
 	    ELSE
 		s" {}" key$ $+! set-val
@@ -69,34 +157,34 @@ Variable array-item
 	    >o r> element-stack >stack
 	    key$ @ key-stack >stack key$ off
 	    get-order r> swap 1+ set-order
-	    array-item @ array-stack >stack array-item off
+	    array-item array-stack >stack 0 to array-item
 	ELSE
-	    cr key$ $. ."  class not found" cr rdrop .json-err
+	    cr key$ $. json-class-throw throw
 	THEN
     ELSE
 	key$ $@len IF
-	    cr key$ $. ."  key not found" cr .json-err
+	    cr key$ $. json-key-throw throw
 	THEN
     THEN ;
 
 : end-array ( -- )
-    array-stack stack> array-item ! ;
+    next-element
+    array-stack stack> to array-item ;
 : end-element ( -- )
     key$ $free  key-stack stack> key$ !
     previous element-stack stack> >o rdrop  end-array ;
 : begin-array ( -- )
-    [: key$ $. ." []" ;] $tmp find-name dup IF
-	array-item @ array-stack >stack
-	name>int execute array-item !
-    ELSE
-	cr order
-	.json-err
-    THEN ;
-
-synonym next-element noop ( -- )
-
-' noop ' lit, dup rectype: rectype-bool
-' noop ' lit, dup rectype: rectype-nil
+    array-item array-stack >stack
+    [: key$ $. ." []" ;] $tmp find-name ?dup-IF
+	name>int execute to array-item
+	['] next-element$ is next-element  EXIT  THEN
+    [: key$ $. ." []#" ;] $tmp find-name ?dup-IF
+	name>int execute to array-item
+	['] next-element# is next-element  EXIT  THEN
+    [: key$ $. ." []%" ;] $tmp find-name ?dup-IF
+	name>int execute to array-item
+	['] next-element% is next-element  EXIT  THEN
+    json-err ;
 
 : json-string! ( addr u -- )
     over >r
@@ -108,12 +196,12 @@ synonym next-element noop ( -- )
 	    key$ $@ find-name ?dup-IF  (int-to)
 	    ELSE  '#' key$ $@ + 1- c!
 		key$ $@ find-name ?dup-IF  nip (int-to)
-		ELSE  .json-err  THEN
-	    ELSE  .json-err  THEN  2drop
+		ELSE  json-err  THEN
+	    THEN  2drop
 	ELSE  2drop \ convert date type into ticks
 	    ?date IF
 		'!' key$ $@ + 1- c! date>ticks set-val
-	    ELSE  .json-err  THEN
+	    ELSE  json-err  THEN
 	THEN
     THEN  r> free throw ;
 
@@ -125,12 +213,12 @@ synonym next-element noop ( -- )
 	rectype-dnum   of  '&' key$ c$+! set-val  endof
 	rectype-float  of  '%' key$ c$+! set-val  endof
 	rectype-bool   of  '?' key$ c$+! set-val  endof
-	rectype-nil    of  drop                   endof \ default is null
-	.json-err
+	rectype-nil    of  drop                   endof \ default is null, anyhow
+	json-err
     endcase ;
 
 : key-value ( addr u -- ) over >r key$ $! r> free throw
-    parse-name json-recognizer recognize eval-json ;
+    parse-name jsons-recognizer recognize eval-json ;
 
 ' begin-element '{' cells json-tokens + !
 ' end-element   '}' cells json-tokens + !
@@ -167,7 +255,14 @@ true  rectype-bool 2constant true
 	name>int execute
     ELSE  rectype-null  THEN ;
 
-' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5 json-recognizer set-stack
+' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json
+5 jsons-recognizer set-stack
+
+: rec-jsons ( addr u -- ... json-type )
+    last-type to previous-type
+    jsons-recognizer recognize dup to last-type ;
+
+' rec-jsons 1 json-recognizer set-stack
 
 : json-load ( addr u -- o )
     outer-class new >o
