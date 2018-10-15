@@ -88,6 +88,7 @@ object class{ video_metadata
 }scope
 
 : fb-scan ( -- )
+    fixed-width set-encoding \ UTF-8 fuckup for \u
     ['] fb >body to schema-scope
     fb:timeline-class to outer-class
     ['] fb:timeline >body to schema-wid ;

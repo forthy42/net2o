@@ -352,6 +352,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     8 !!>=order? $> msg:payment ;
 +net2o: msg-otrify ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR
     $> $> msg:otrify ;
++net2o: msg-url ( $:url -- ) \g print a payment
+    $> msg:url ;
 $2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     8 !!>=order? $> msg:coord ;
 
@@ -372,7 +374,7 @@ Defer .log-end
 : .otr-err ( -- )
     <err> ." [exp] " <default> 1 notify-otr? ! ;
 : .otr ( tick -- )
-    64dup 64#-1 64= IF  64drop  EXIT  THEN
+    64dup 64#-1 64= IF  64drop  notify-otr? off  EXIT  THEN
     ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
     otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
 : .group ( addr u -- )
@@ -415,8 +417,11 @@ scope: logstyles
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
 :noname ( addr u -- ) $utf8>
-    [: 2dup forth:type ;] $tmp notify+
+    2dup notify+
     forth:type ; msg-class is msg:text
+:noname ( addr u -- ) $utf8>
+    2dup notify+
+    <info> forth:type <default> ; msg-class is msg:url
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class is msg:object
@@ -466,7 +471,7 @@ hash: group#
 
 static-a to allocater
 align here
-group-class new Constant group-o
+groups-class new Constant group-o
 dynamic-a to allocater
 here over - 2Constant sample-group$
 

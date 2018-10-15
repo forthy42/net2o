@@ -133,8 +133,7 @@ cmd-class class
     field: silent-last#
 end-class msging-class
 
-cmd-class class
-scope: msg
+cmd-class class{ msg
     $value: id$
     method start
     method tag
@@ -148,14 +147,13 @@ scope: msg
     method coord
     method otrify
     method payment
+    method url
     method end
     method display   \ display one message
     method redisplay \ display full set
-}scope
-end-class msg-class
+}class
 
-cmd-class class
-scope: pay
+cmd-class class{ pay
     field: sources[]    \ all the sources stored here, an array
     field: sinks[]      \ all the signatures stored here, an array
     field: assets[]     \ all selected assets (array [asset,amount]*)
@@ -172,8 +170,7 @@ scope: pay
     method #source
     method balance
     method finalize
-}scope
-end-class pay-class
+}class
 
 begin-structure wallet
     field: contract#
@@ -513,14 +510,12 @@ KEYBYTES 2* Constant keysize2 \ pubkey+revkey=64 bytes
 
 \ group description
 
-cmd-class class
-    scope: groups
+cmd-class class{ groups
     $value: id$ \ is the pubkey
     field: member[]
     field: admin     \ secret key, only known to the admins
     64value: perms#
-    }scope
-end-class group-class
+}class
 
 0 [IF]
 Local Variables:
