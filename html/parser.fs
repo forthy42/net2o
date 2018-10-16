@@ -24,11 +24,10 @@ scope: html-chars
 '"' constant quot
 }scope
 
-: scan-vals ( wid -- ) config-wl >r  to config-wl
+: scan-vals ( wid -- ) to config-wl
     BEGIN  '=' parse bl skip dup  WHILE  2>r
 	    parse-name config-recognizer recognize 2r> eval-config
-    REPEAT  2drop
-    r> to config-wl ;
+    REPEAT  2drop ;
 
 scope: html-tags
 : b  ." **" 2drop ;
@@ -94,10 +93,11 @@ Variable oid$
 	name>int execute
     ELSE  html-throw throw  THEN ;
 
-: html-untag ( addr u -- )
+: html-untag ( addr u -- ) config-wl >r
     BEGIN  '<' $split dup  WHILE  2swap html-unescape
 	    '>' $split 2swap html-tag
-    REPEAT  2drop html-unescape ;
+    REPEAT  2drop html-unescape
+    r> to config-wl ;
 
 [IFDEF] entries[]
     : .un-htmls
