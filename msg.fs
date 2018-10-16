@@ -160,11 +160,16 @@ Sema queue-sema
 
 \ events
 
+msg-class class end-class msg-notify-class
+
+msg-notify-class ' new static-a with-allocater Constant msg-notify-o
+
 : >msg-log ( addr u -- addr' u )
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
 
 : do-msg-nestsig ( addr u -- )
-    parent .msg-context @ .msg:display msg-notify ;
+    2dup parent .msg-context @ .msg:display
+    msg-notify-o .msg:display ;
 
 : display-lastn ( n -- )
     net2o:new-msg >o 0 to parent msg:redisplay dispose o> ;
@@ -393,18 +398,31 @@ scope: logstyles
 
 :noname ( addr u -- )
     last# >r  2dup key| to msg:id$
+    [: .simple-id ." : " ;] $tmp notify-nick!
+    r> to last# ; msg-notify-class is msg:start
+:noname ( addr u -- ) "#" notify+ $utf8> notify+
+; msg-notify-class is msg:tag
+:noname ( addr u -- )
+    2dup [: ." @" .simple-id ;] $tmp notify+ ; msg-notify-class is msg:signal
+:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
+:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
+:noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
+' 2drop msg-notify-class is msg:coord
+:noname 2drop 2drop ; msg-notify-class is msg:otrify
+:noname ( -- ) msg-notify ; msg-notify-class is msg:end
+
+:noname ( addr u -- )
+    last# >r  2dup key| to msg:id$
     .log-num
     2dup startdate@ .log-date
     2dup enddate@ .log-end
-    2dup .key-id ." : " 
-    [: .simple-id ." : " ;] $tmp notify-nick!
+    .key-id ." : " 
     r> to last# ; msg-class is msg:start
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
     key| 2dup pk@ key| str=
-    IF   <err>  THEN  2dup [: ." @" .simple-id ;] $tmp notify+
-    ." @" .key-id <default>
+    IF   <err>  THEN ." @" .key-id <default>
     r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
@@ -416,18 +434,14 @@ scope: logstyles
     space <warn> ." [" 85type ." ]->" <default> ; msg-class is msg:re
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
+:noname ( addr u -- ) $utf8> forth:type ; msg-class is msg:text
 :noname ( addr u -- ) $utf8>
-    2dup notify+
-    forth:type ; msg-class is msg:text
-:noname ( addr u -- ) $utf8>
-    2dup notify+
     <info> forth:type <default> ; msg-class is msg:url
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class is msg:object
 :noname ( addr u -- ) $utf8>
-    [: space 2dup forth:type ;] $tmp notify+
-    space <warn> forth:type <default> ; msg-class is msg:action
+    <warn> forth:type <default> ; msg-class is msg:action
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class is msg:coord
 : replace-sig { addrsig usig addrmsg umsg -- }
@@ -905,6 +919,7 @@ previous
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
+' msg-tdisplay msg-notify-class is msg:display
 : msg-tredisplay ( n -- )
     reset-time  0 otr-mode
     [:  cells >r last# msg-log@ 2dup { log u }
@@ -930,6 +945,7 @@ end-class textmsg-class
 ' noop textmsg-class is msg:end
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
+msg-notify-o >o msg-table @ token-table ! o>
 textmsg-o >o msg-table @ token-table ! o>
 
 \ chat history browsing

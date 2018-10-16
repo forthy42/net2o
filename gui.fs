@@ -497,13 +497,11 @@ Variable last-bubble-pk
     msg-box .child+
 ; wmsg-class to msg:tag
 :noname { d: string -- o }
-    string notify+
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
     msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
-    string [: space forth:type ;] $tmp notify+
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
@@ -518,7 +516,6 @@ Variable last-bubble-pk
 :noname { d: pk -- o }
     {{
 	pk key|
-	2dup [: ." @" .simple-id ;] $tmp notify+
 	2dup 0 .pk@ key| str=
 	last-otr? IF  my-signal-otr# other-signal-otr#
 	ELSE  my-signal# other-signal#  THEN  rot select
