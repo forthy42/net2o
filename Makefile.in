@@ -47,7 +47,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs	     \
 	  doc/net2o-200.png doc/net2o.png json/parser.fs json/g+-schema.fs   \
 	  json/fb-schema.fs json/twitter-schema.fs json/test.fs		     \
-	  json/test.json
+	  json/test.json html/parser.fs
 
 LANGS =	  lang/en lang/de lang/zh
 
@@ -85,8 +85,8 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang net2o-@PACKAGE_VERSION@/json
-@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang net2o/json
+@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang net2o-@PACKAGE_VERSION@/json net2o-@PACKAGE_VERSION@/html
+@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang net2o/json net2o/html
 
 SCRIPTS = n2o
 
