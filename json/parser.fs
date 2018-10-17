@@ -199,9 +199,13 @@ Defer next-element
 		ELSE  json-err  THEN
 	    THEN  2drop
 	ELSE  2drop \ convert date type into ticks
-	    ?date IF
+	    2dup ?date IF  2drop
 		'!' key$ $@ + 1- c! date>ticks set-val
-	    ELSE  json-err  THEN
+	    ELSE \ or should it have been a float instead?
+		>float IF
+		    '%' key$ $@ + 1- c! set-val
+		ELSE  json-err  THEN
+	    THEN
 	THEN
     THEN  r> free throw ;
 
