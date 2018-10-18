@@ -47,7 +47,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	     \
 	  qrscan.fs android/qrscan-android.fs linux/qrscan-linux.fs	     \
 	  doc/net2o-200.png doc/net2o.png json/parser.fs json/g+-schema.fs   \
 	  json/fb-schema.fs json/twitter-schema.fs json/test.fs		     \
-	  json/test.json html/parser.fs
+	  json/test.json html/parser.fs xml/parser.fs xml/blogger-atom.fs
 
 LANGS =	  lang/en lang/de lang/zh
 
