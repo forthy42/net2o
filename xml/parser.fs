@@ -71,7 +71,7 @@ $10 stack: tags-match
     find-name ?dup-IF
 	    also name>int execute
     ELSE  xml-throw throw  THEN
-    [: context @ body> name>string ... str=
+    [: context @ body> name>string str=
 	IF  previous  ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
 
 : find-string-tag ( addr u nt -- ) tags-match >stack 2drop
@@ -111,33 +111,43 @@ $10 stack: tags-match
 : xml-tag ( addr u -- )
     over c@ '/' = IF
 	1 /string xml-end-tag
+	xml-element$ $free
 	end-tags stack> is xml-end-tag
     ELSE
 	action-of xml-end-tag end-tags >stack
 	xml-start-tag
     THEN ;
 
+false value in-tag?
+
+: parse-end? ( char -- addr u flag )
+    parse 2dup + source + = ;
+
+: xml-<tag ( -- )
+    '<' parse-end? >r
+    ['] html-unescape xml-element$ $exec
+    r> IF  #lf xml-element$ c$+!
+    ELSE  true to in-tag?  THEN ;
+
+: xml-tag> ( -- )
+    '>' parse-end? >r xml-tag$ $+!
+    r> 0= IF
+	xml-tag$ $@ xml-tag
+	xml-tag$ $free  false to in-tag?
+    THEN ;
+
+: xml-untags ( -- )
+    BEGIN  in-tag? IF  xml-tag>  ELSE  xml-<tag  THEN
+    source nip >in @ = UNTIL ;
+
 : xml-untag ( addr u -- )
-    BEGIN  '<' $split dup  WHILE  2swap
-	    xml-element$ $free
-	    ['] html-unescape xml-element$ $exec
-	    '>' $split 2swap xml-tag
-    REPEAT  2drop html-unescape ;
+    ['] xml-untags execute-parsing ;
 
 : atom-file ( addr u -- )
-    2dup open-file throw -rot
-    $execstr-ptr @ op-vector @ config-wl { oldstr oldout wl }
-    try
-	xml-tag$ $execstr-ptr !  $-out
-	[: BEGIN  refill  WHILE  source xml-untag  REPEAT ;]
-	execute-parsing-named-file
-	0 \ throw ball
-    restore
-	oldstr $execstr-ptr !
-	oldout op-vector !
-	wl to config-wl
-    endtry
-    throw ;
+    false to in-tag?
+    2dup r/o open-file throw -rot
+    [: BEGIN  refill  WHILE  xml-untags  REPEAT ;]
+    execute-parsing-named-file ;
 
 0 [IF]
 Local Variables:

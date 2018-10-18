@@ -30,31 +30,35 @@ object class{ atom-tags
     }class
     xml-class class{ feed
 	$value: id$
-	$value: blogger:parent$
-	$value: blogger:type$
-	$value: blogger:status$
-	value: author{}
-	xml-class class{ author
-	    $value: name$
-	    $value: uri$
-	    $value: blogger:type$
-	}class
 	$value: title$
-	$value: content$
-	object class{ content-attrs
-	    $value: type$
+	value: entry{}
+	xml-class class{ entry
+	    $value: blogger:parent$
+	    $value: blogger:type$
+	    $value: blogger:status$
+	    value: author{}
+	    xml-class class{ author
+		$value: name$
+		$value: uri$
+	    $value: blogger:type$
+	    }class
+	    $value: title$
+	    $value: content$
+	    object class{ content-attrs
+		$value: type$
+	    }class
+	    64value: blogger:created!
+	    64value: blogger:published!
+	    64value: blogger:updated!
+	    value: blogger:location{}
+	    xml-class class{ blogger:location
+		$value: blogger:name$
+		fvalue: blogger:latitude%
+		fvalue: blogger:longitude%
+		$value: blogger:span$
+	    }class
+	    $value: blogger:filename$
 	}class
-	64value: blogger:created!
-	64value: blogger:published!
-	64value: blogger:updated!
-	value: blogger:location{}
-	xml-class class{ blogger:location
-	    $value: blogger:name$
-	    fvalue: blogger:latitude%
-	    fvalue: blogger:longitude%
-	    $value: blogger:span$
-	}class
-	$value: blogger:filename$
     }class
 }class
 
