@@ -62,22 +62,22 @@ Defer xml-end-tag
 $10 stack: end-tags
 $10 stack: tags-match
 
-: find-class-tag ( addr u nt -- )
+: find-class-tag ( addr u nt xt -- ) >r
     >r 2dup [: type ." -class" ;] $tmp find-name ?dup-IF
 	name>int execute new
-	dup r> (int-to)
+	dup r> r> execute
 	>o attrs-o to xml:attrs  r> o-stack >stack
     ELSE
 	xml-throw throw
     THEN
     find-name ?dup-IF
 	    also name>int execute
-    ELSE  xml-throw throw  THEN  2drop
+    ELSE  xml-throw throw  THEN
     [: context @ body> name>string str=
 	IF    previous  o-stack stack> >r o>
 	ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
 
-: find-string-tag ( addr u nt -- ) tags-match >stack 2drop 2drop
+: find-string-tag ( addr u nt -- ) tags-match >stack 2drop
     [: 2dup tags-match stack> name>string 1- str= IF
 	    key$ $! xml-element$ $@ save-mem json-string!
 	ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
@@ -86,9 +86,11 @@ $10 stack: tags-match
     >r 2dup + 1- r> swap c!  2dup find-name ;
 
 : find-tag ( addr u -- )  2dup input-lexeme 2!
-    2dup [: type ." {}" ;] $tmp 2dup find-name ?dup-IF
-	-2 under+ find-class-tag  EXIT  THEN  1-
-    xml-element$ $free
+    [: type ." {}" ;] $tmp 2dup find-name ?dup-IF
+	-2 under+ ['] (int-to) find-class-tag  EXIT  THEN
+    2dup + 2 - s" []" >r swap r> move 2dup find-name ?dup-IF
+	-2 under+ [: name>int execute >stack ;] find-class-tag  EXIT  THEN
+    1- xml-element$ $free
     '$' find-name? ?dup-IF  find-string-tag  EXIT  THEN
     '#' find-name? ?dup-IF  find-string-tag  EXIT  THEN
     '&' find-name? ?dup-IF  find-string-tag  EXIT  THEN
@@ -150,7 +152,7 @@ false value in-tag?
     [: BEGIN  refill  WHILE  xml-untags  REPEAT ;]
     execute-parsing-named-file ;
 
-: read-atoms ( addr u -- o )
+: read-atoms ( addr u -- )
     get-order n>r  ['] atom-tags >body 1 set-order
     atom-tags-class new >o ['] xml-file catch
     o o> nr> set-order  swap throw ;

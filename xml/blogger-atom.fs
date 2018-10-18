@@ -31,7 +31,7 @@ object class{ atom-tags
     xml-class class{ feed
 	$value: id$
 	$value: title$
-	value: entry{}
+	field: entry[]
 	xml-class class{ entry
 	    $value: id$
 	    $value: blogger:parent$
