@@ -186,28 +186,22 @@ Defer next-element
 	['] next-element% is next-element  EXIT  THEN
     json-err ;
 
+: key-find? ( char -- nt )
+    key$ $@ + 1- c! key$ $@ find-name ;
+
 : json-string! ( addr u -- )
     over >r
-    '$' key$ c$+! key$ $@ find-name ?dup-IF
-	(int-to)
-    ELSE \ workaround if you mean number but wrote string
-	2dup s>number? IF
-	    '&' key$ $@ + 1- c!
-	    key$ $@ find-name ?dup-IF  (int-to)
-	    ELSE  '#' key$ $@ + 1- c!
-		key$ $@ find-name ?dup-IF  nip (int-to)
-		ELSE  json-err  THEN
-	    THEN  2drop
-	ELSE  2drop \ convert date type into ticks
-	    2dup ?date IF  2drop
-		'!' key$ $@ + 1- c! date>ticks set-val
-	    ELSE \ or should it have been a float instead?
-		>float IF
-		    '%' key$ $@ + 1- c! set-val
-		ELSE  json-err  THEN
-	    THEN
-	THEN
-    THEN  r> free throw ;
+    '$' key$ c$+! key$ $@ find-name ?dup-IF  (int-to) r> free throw  EXIT  THEN
+    \ workaround if you mean number but wrote string
+    '&' key-find? ?dup-IF
+	>r s>number?  IF  r> (int-to) r> free throw  EXIT  THEN  json-err  THEN
+    '#' key-find? ?dup-IF
+	>r s>number?  IF  drop r> (int-to) r> free throw  EXIT  THEN  json-err  THEN
+    '!' key-find? ?dup-IF  drop
+	?date IF  date>ticks set-val r> free throw  EXIT  THEN  json-err  THEN
+    '%' key-find? ?dup-IF  drop
+	>float IF  set-val r> free throw  EXIT  THEN  json-err  THEN
+    r> free throw json-err ;
 
 : eval-json ( .. tag -- )
     case

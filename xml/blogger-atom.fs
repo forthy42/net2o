@@ -33,6 +33,7 @@ object class{ atom-tags
 	$value: title$
 	value: entry{}
 	xml-class class{ entry
+	    $value: id$
 	    $value: blogger:parent$
 	    $value: blogger:type$
 	    $value: blogger:status$
@@ -48,8 +49,8 @@ object class{ atom-tags
 		$value: type$
 	    }class
 	    64value: blogger:created!
-	    64value: blogger:published!
-	    64value: blogger:updated!
+	    64value: published!
+	    64value: updated!
 	    value: blogger:location{}
 	    xml-class class{ blogger:location
 		$value: blogger:name$

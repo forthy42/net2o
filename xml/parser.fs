@@ -25,6 +25,7 @@ s" Value is not an XML string" exception Constant xml-string-throw
 
 Variable xml-tag$
 Variable xml-element$
+0 Value attrs-o
 
 object class{ xml
     value: attrs
@@ -39,15 +40,16 @@ require blogger-atom.fs
 
 : xml-scan-vals ( -- )
     BEGIN  '=' parse bl skip dup  WHILE
-	    key$ $! xml-parse json-string!
+	    2dup input-lexeme 2! key$ $! xml-parse json-string!
     REPEAT  2drop ;
 
 : parse-attrs ( addr-tag u1 addr-attrs u -- )
     2swap 2dup [: type ." -attrs" ;] $tmp find-name ?dup-IF
 	also name>int execute
 	2dup [: type ." -attrs-class" ;] $tmp find-name ?dup-IF
-	    name>int execute new >o r> o-stack >stack
+	    name>int execute new >o
 	    2swap ['] xml-scan-vals execute-parsing
+	    o to attrs-o o>
 	ELSE
 	    xml-attrs-throw throw
 	THEN
@@ -64,46 +66,46 @@ $10 stack: tags-match
     >r 2dup [: type ." -class" ;] $tmp find-name ?dup-IF
 	name>int execute new
 	dup r> (int-to)
-	>o r> to xml:attrs
+	>o attrs-o to xml:attrs  r> o-stack >stack
     ELSE
 	xml-throw throw
     THEN
     find-name ?dup-IF
 	    also name>int execute
-    ELSE  xml-throw throw  THEN
+    ELSE  xml-throw throw  THEN  2drop
     [: context @ body> name>string str=
-	IF  previous  ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
+	IF    previous  o-stack stack> >r o>
+	ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
 
-: find-string-tag ( addr u nt -- ) tags-match >stack 2drop
+: find-string-tag ( addr u nt -- ) tags-match >stack 2drop 2drop
     [: 2dup tags-match stack> name>string 1- str= IF
 	    key$ $! xml-element$ $@ save-mem json-string!
 	ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
 
-: find-tag ( addr u -- )
-    2dup [: type ." {}" ;] $tmp find-name ?dup-IF
-	find-class-tag  EXIT  THEN
-    2dup [: type ." $" ;] $tmp find-name ?dup-IF
-	find-string-tag  EXIT  THEN
-    2dup [: type ." #" ;] $tmp find-name ?dup-IF
-	find-string-tag  EXIT  THEN
-    2dup [: type ." &" ;] $tmp find-name ?dup-IF
-	find-string-tag  EXIT  THEN
-    2dup [: type ." %" ;] $tmp find-name ?dup-IF
-	find-string-tag  EXIT  THEN
-    2dup [: type ." !" ;] $tmp find-name ?dup-IF
-	find-string-tag  EXIT  THEN
+: find-name? ( addr u char -- addr u nt )
+    >r 2dup + 1- r> swap c!  2dup find-name ;
+
+: find-tag ( addr u -- )  2dup input-lexeme 2!
+    2dup [: type ." {}" ;] $tmp 2dup find-name ?dup-IF
+	-2 under+ find-class-tag  EXIT  THEN  1-
+    xml-element$ $free
+    '$' find-name? ?dup-IF  find-string-tag  EXIT  THEN
+    '#' find-name? ?dup-IF  find-string-tag  EXIT  THEN
+    '&' find-name? ?dup-IF  find-string-tag  EXIT  THEN
+    '%' find-name? ?dup-IF  find-string-tag  EXIT  THEN
+    '!' find-name? ?dup-IF  find-string-tag  EXIT  THEN
     xml-throw throw ;
 
-: xml-find-tag ( -- )
+: xml-find-tag ( addr u -- )
     bl $split dup IF
 	parse-attrs find-tag
     ELSE
-	2drop find-tag
+	0 to attrs-o 2drop find-tag
     THEN ;
 
 : xml-start-tag ( addr u -- )
     2dup + 1- c@ dup '?' = swap '/' = or IF
-	1- xml-find-tag previous
+	1- xml-find-tag previous  o-stack stack> >r o>
     ELSE
 	xml-find-tag
     THEN ;
@@ -111,7 +113,6 @@ $10 stack: tags-match
 : xml-tag ( addr u -- )
     over c@ '/' = IF
 	1 /string xml-end-tag
-	xml-element$ $free
 	end-tags stack> is xml-end-tag
     ELSE
 	action-of xml-end-tag end-tags >stack
@@ -121,7 +122,7 @@ $10 stack: tags-match
 false value in-tag?
 
 : parse-end? ( char -- addr u flag )
-    parse 2dup + source + = ;
+    parse 2dup input-lexeme 2! 2dup + source + = ;
 
 : xml-<tag ( -- )
     '<' parse-end? >r
@@ -143,11 +144,16 @@ false value in-tag?
 : xml-untag ( addr u -- )
     ['] xml-untags execute-parsing ;
 
-: atom-file ( addr u -- )
+: xml-file ( addr u -- )
     false to in-tag?
     2dup r/o open-file throw -rot
     [: BEGIN  refill  WHILE  xml-untags  REPEAT ;]
     execute-parsing-named-file ;
+
+: read-atoms ( addr u -- o )
+    get-order n>r  ['] atom-tags >body 1 set-order
+    atom-tags-class new >o ['] xml-file catch
+    o o> nr> set-order  swap throw ;
 
 0 [IF]
 Local Variables:
