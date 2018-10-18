@@ -65,7 +65,7 @@ scope: html-tags
 : /ul 2drop
     list-class$ $free list-stack stack> list-class$ ! ;
 : li 2drop
-    list-class$ $. ;
+    cr list-class$ $. ;
 : /li 2drop ;
 : h1 2drop ." # " ;
 : /h1 2drop ."  #" cr cr ;
@@ -75,9 +75,10 @@ scope: html-tags
 : /h3 2drop ."  ###" cr cr ;
 
 : blockquote 2drop
-    s" > " br$ $+! cr br$ $. ;
+    br$ $@len 0= IF  "\\\n"  br$ $!  THEN
+    "> " br$ $+! br$ $@ 1 /string type ;
 : /blockquote 2drop
-    br$ $@len 2 u>= IF  br$ 0 2 $del  THEN  cr cr ;
+    br$ $@len 4 u> IF  br$ 2 2 $del  ELSE  br$ $free  THEN  cr cr ;
 
 object class{ a-params
     field: href$
@@ -180,7 +181,7 @@ synonym /th /table
 synonym /tr /table
 synonym /td /table
 
-: br 2drop cr br$ @ IF  br$ $.  THEN ;
+: br 2drop br$ @ IF  br$ $.  ELSE  cr  THEN ;
 }scope
 
 : un-html ( addr u -- )
