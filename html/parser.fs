@@ -24,6 +24,7 @@ scope: html-chars
 '>' constant gt
 '"' constant quot
 ''' constant apos \ for XML
+$A0 constant nbsp
 }scope
 
 $10 stack: o-stack
@@ -32,6 +33,10 @@ $10 stack: o-stack
     BEGIN  '=' parse bl skip dup  WHILE  2>r
 	    parse-name config-recognizer recognize 2r> eval-config
     REPEAT  2drop ;
+
+Variable list-class$
+Variable br$
+$10 stack: list-stack
 
 scope: html-tags
 : b  ." **" 2drop ;
@@ -45,23 +50,58 @@ scope: html-tags
 : u ." __" 2drop ; \ not the common markdown, though
 : /u ." __" 2drop ;
 
+: ol 2drop
+    list-class$ @ list-stack >stack
+    list-class$ $@ 2dup bl skip nip -
+    list-class$ off list-class$ $!
+    s"   1. " list-class$ $+! ;
+: /ol 2drop
+    list-class$ $free list-stack stack> list-class$ ! ;
+: ul 2drop
+    list-class$ @ list-stack >stack
+    list-class$ $@ 2dup bl skip nip -
+    list-class$ off list-class$ $!
+    s"   * " list-class$ $+! ;
+: /ul 2drop
+    list-class$ $free list-stack stack> list-class$ ! ;
+: li 2drop
+    list-class$ $. ;
+: /li 2drop ;
+: h1 2drop ." # " ;
+: /h1 2drop ."  #" cr cr ;
+: h2 2drop ." ## " ;
+: /h2 2drop ."  ##" cr cr ;
+: h3 2drop ." ### " ;
+: /h3 2drop ."  ###" cr cr ;
+
+: blockquote 2drop
+    s" > " br$ $+! cr br$ $. ;
+: /blockquote 2drop
+    br$ $@len 2 u>= IF  br$ 0 2 $del  THEN  cr cr ;
+
 object class{ a-params
     field: href$
     field: rel$
     field: class$
+    field: style$
+    field: imageanchor$
     field: target$
     field: jslog$
     field: dir$
     field: oid$
+    field: type$
     : dispose ( -- )
     href$ $free
     rel$ $free
     class$ $free
+    style$ $free
+    imageanchor$ $free
     target$ $free
     jslog$ $free
     dir$ $free
     oid$ $free
-    forth:dispose ;
+    type$ $free
+    dispose ;
 }class
 
 : a ( -- )
@@ -74,13 +114,73 @@ object class{ a-params
     a-params:class$ $@ s" ot-hashtag" string-prefix? 0= IF
 	." ](" a-params:href$ $@ type ')' emit
     THEN a-params:dispose o-stack stack> >r o> ;
+
+object class{ img-params
+    field: src$
+    field: alt$
+    field: border$
+    field: height$
+    field: width$
+    field: class$
+    field: style$
+    : dispose ( -- )
+    src$ $free
+    alt$ $free
+    border$ $free
+    height$ $free
+    width$ $free
+    class$ $free
+    style$ $free
+    dispose ;
+}class
+
+: img ( -- )
+    a-params-class new >o r> o-stack >stack
+    '/' -skip [: ['] img-params >body scan-vals ;] execute-parsing
+    ." ![" img-params:alt$ $@ type
+    ." ](" img-params:src$ $@ type ')' emit
+    img-params:dispose o-stack stack> >r o> ;
 : span ( -- )
     a-params-class new >o r> o-stack >stack
-    [: ['] a-params >body scan-vals ;] execute-parsing
-;
+    [: ['] a-params >body scan-vals ;] execute-parsing ;
 : /span 2drop
     a-params:dispose o-stack stack> >r o> ;
-: br 2drop cr ;
+synonym div span
+synonym /div /span
+synonym style span
+synonym /style /span
+
+object class{ table-params
+    field: align$
+    field: cellpadding$
+    field: cellspacing$
+    field: class$
+    field: style$
+    : dispose ( -- )
+    align$ $free
+    cellpadding$ $free
+    cellspacing$ $free
+    class$ $free
+    style$ $free
+    dispose ;
+}class
+
+: table ( -- ) cr
+    table-params-class new >o r> o-stack >stack
+    [: ['] table-params >body scan-vals ;] execute-parsing
+;
+: /table 2drop cr
+    table-params:dispose o-stack stack> >r o> ;
+synonym tbody table
+synonym th table
+synonym tr table
+synonym td table
+synonym /tbody /table
+synonym /th /table
+synonym /tr /table
+synonym /td /table
+
+: br 2drop cr br$ @ IF  br$ $.  THEN ;
 }scope
 
 : un-html ( addr u -- )
@@ -91,14 +191,19 @@ object class{ a-params
 	    IF  drop emit 2drop  EXIT  THEN
 	THEN
 	2dup ['] html-chars >body find-name-in ?dup-IF
-	    name>int execute emit  2drop  EXIT
+	    name>int execute xemit  2drop  EXIT
 	THEN  source type cr html-char-throw throw
     ELSE  2drop  THEN ;
 
+: type-nolf ( addr u -- )
+    BEGIN  #lf $split  dup WHILE  2swap dup IF type space ELSE 2drop THEN
+    REPEAT
+    2drop type ;
+
 : html-unescape ( addr u -- )
-    BEGIN  '&' $split dup  WHILE  2swap type
+    BEGIN  '&' $split dup  WHILE  2swap type-nolf
 	    ';' $split 2swap un-html
-    REPEAT  2drop type ;
+    REPEAT  2drop type-nolf ;
 
 : html-tag ( addr u -- )
     bl $split 2swap ['] html-tags >body find-name-in ?dup-IF
