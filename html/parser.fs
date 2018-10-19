@@ -143,7 +143,7 @@ object class{ img-params
     ." ![" img-params:alt$ $@ type
     ." ](" img-params:src$ $@ basename type ')' emit
     img-params:src$ $@ basename file-status nip no-file# = IF
-	[: ." curl '" img-params:src$ $. ." ' --output "
+	[: ." curl '" img-params:src$ $. ." ' -s -S --output "
 	    img-params:src$ $@ basename type ;] $tmp system
     THEN
     img-params:dispose o-stack stack> >r o> ;
