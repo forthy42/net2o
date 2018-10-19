@@ -41,7 +41,7 @@ object class{ atom-tags
 	    xml-class class{ author
 		$value: name$
 		$value: uri$
-	    $value: blogger:type$
+		$value: blogger:type$
 	    }class
 	    $value: title$
 	    $value: content$
