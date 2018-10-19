@@ -55,15 +55,17 @@ scope: html-tags
     list-class$ $@ 2dup bl skip nip -
     list-class$ off list-class$ $!
     s"   1. " list-class$ $+! ;
-: /ol 2drop
-    list-class$ $free list-stack stack> list-class$ ! ;
+: /ol 2drop cr
+    list-class$ $free list-stack stack> list-class$ !
+    list-class$ $@len 0= IF  cr  THEN ;
 : ul 2drop
     list-class$ @ list-stack >stack
     list-class$ $@ 2dup bl skip nip -
     list-class$ off list-class$ $!
     s"   * " list-class$ $+! ;
-: /ul 2drop
-    list-class$ $free list-stack stack> list-class$ ! ;
+: /ul 2drop cr
+    list-class$ $free list-stack stack> list-class$ !
+    list-class$ $@len 0= IF  cr  THEN ;
 : li 2drop
     cr list-class$ $. ;
 : /li 2drop ;
@@ -139,7 +141,11 @@ object class{ img-params
     a-params-class new >o r> o-stack >stack
     '/' -skip [: ['] img-params >body scan-vals ;] execute-parsing
     ." ![" img-params:alt$ $@ type
-    ." ](" img-params:src$ $@ type ')' emit
+    ." ](" img-params:src$ $@ basename type ')' emit
+    img-params:src$ $@ basename file-status nip no-file# = IF
+	[: ." curl '" img-params:src$ $. ." ' --output "
+	    img-params:src$ $@ basename type ;] $tmp system
+    THEN
     img-params:dispose o-stack stack> >r o> ;
 : span ( -- )
     a-params-class new >o r> o-stack >stack
@@ -147,7 +153,7 @@ object class{ img-params
 : /span 2drop
     a-params:dispose o-stack stack> >r o> ;
 synonym div span
-synonym /div /span
+: /div /span cr ;
 synonym style span
 synonym /style /span
 
@@ -166,20 +172,31 @@ object class{ table-params
     dispose ;
 }class
 
-: table ( -- ) cr
+: tr ( -- )
     table-params-class new >o r> o-stack >stack
     [: ['] table-params >body scan-vals ;] execute-parsing
 ;
+: table ( -- ) cr tr ;
 : /table 2drop cr
     table-params:dispose o-stack stack> >r o> ;
 synonym tbody table
-synonym th table
-synonym tr table
-synonym td table
+in forth : <extra-space ( -- )
+    space table-params:style$ $@
+    2dup s" center" search nip nip  IF  2drop space  ELSE
+	s" right" search nip nip  IF space  THEN  THEN ;
+in forth : extra-space> ( -- )
+    space table-params:style$ $@
+    2dup s" center" search nip nip  IF  2drop space  ELSE
+	s" left" search nip nip  IF space  THEN  THEN ;
+: th table '|' emit <extra-space ;
+: td table '|' emit <extra-space ;
 synonym /tbody /table
-synonym /th /table
-synonym /tr /table
-synonym /td /table
+: /th 2drop extra-space> '|' emit
+    table-params:dispose o-stack stack> >r o> ;
+: /tr 2drop '|' emit
+    table-params:dispose o-stack stack> >r o> ;
+: /td 2drop extra-space>
+    table-params:dispose o-stack stack> >r o> ;
 
 : br 2drop br$ @ IF  br$ $.  ELSE  cr  THEN ;
 }scope

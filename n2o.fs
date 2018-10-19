@@ -189,7 +189,7 @@ scope{ n2o
     \G keyscan: scan a key in color QR form
     ?.net2o-config
     reset-net2o-cmds
-    qrscan.fs$ $@ dup IF  required  ELSE  -#514 throw  THEN  run-scan-qr ;
+    qrscan.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-scan-qr ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
@@ -746,7 +746,7 @@ warnings !
     \G gui: start net2o's graphical user interface
     ?.net2o-config
     reset-net2o-cmds
-    gui.fs$ $@ dup IF  required  ELSE  -#514 throw  THEN  run-gui ;
+    gui.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-gui ;
 }scope
 
 \ use a different history file for net2o
