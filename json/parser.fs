@@ -71,6 +71,9 @@ s" JSON class not found" exception Value json-class-throw
 0 Value outer-class
 0 Value schema-wid
 
+Defer process-element  ' noop is process-element
+Defer process-elements ' noop is process-elements
+
 require g+-schema.fs
 require fb-schema.fs
 require twitter-schema.fs
@@ -270,7 +273,7 @@ true  rectype-bool 2constant true
     action-of parse-name >r ['] parse-json is parse-name
     ['] included catch
     r> is parse-name  r> to forth-recognizer  nr> set-order
-    throw o o> ;
+    throw process-element o o> ;
 
 $Variable entries[]
 
@@ -278,8 +281,9 @@ $Variable entries[]
     2dup open-dir throw { dd } fpath dup $@len >r also-path dd
     [: { dd } !time
 	BEGIN
-	    pad $100 dd read-dir throw  WHILE  pad swap
-		2dup "*.json" filename-match IF
+	    pad $100 dd read-dir throw  WHILE
+		pad swap 2dup "*.json" filename-match IF
+		    \ 2dup type cr
 		    json-load entries[] >stack
 		ELSE  2drop  THEN
 	REPEAT  drop

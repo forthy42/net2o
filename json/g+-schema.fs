@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require ../hash-table.fs
+
 cs-scope: g+
 
 object class{ comments
@@ -47,6 +49,12 @@ object class{ author
     $value: displayName$
     $value: profilePageUrl$
     $value: avatarImageUrl$
+    : dispose ( o:author -- )
+    addr resourceName$ $free
+    addr displayName$ $free
+    addr profilePageUrl$ $free
+    addr avatarImageUrl$ $free
+    dispose ;
 }class
 
 synonym plusOner author
@@ -163,12 +171,42 @@ synonym communityAttachment-class collectionAttachment-class
 
 }scope
 
+Variable authors#
+
+also g+
+
+: dedup-author { a -- }
+    a @ >o
+    author:resourceName$ basename authors# #@ 0= IF
+	drop  o author-class >osize @ -1 cells /string
+	author:resourceName$ basename authors# #!
+	last# cell+ $@ drop
+    THEN
+    cell+ a !
+    author:dispose
+    o> ;
+
+: dedup-authors ( o:comment -- )
+    addr comments:author{} dedup-author
+    comments:comments[] $@ bounds U+DO
+	I @ >o recurse o>
+    cell +LOOP
+    comments:plusOnes[] $@ bounds U+DO
+	I @ >o addr plusOnes:plusOner{} dedup-author o>
+    cell +LOOP
+    comments:reshares[] $@ bounds U+DO
+	I @ >o addr reshares:resharer{} dedup-author o>
+    cell +LOOP ;
+
 : g+-scan ( -- )  iso-date
     ['] g+ >body to schema-scope
     g+:comments-class to outer-class
-    ['] g+:comments >body to schema-wid ;
+    ['] g+:comments >body to schema-wid
+    ['] dedup-authors is process-element ;
 
 g+-scan
+
+previous
 
 0 [IF]
 Local Variables:

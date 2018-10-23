@@ -1,35 +1,15 @@
 \ generic hash table functions
 
-require rng.fs
-
 2 64s buffer: hashinit
 
-\ random initializer for hash
+\ this computes a cryptographic somewhat secure hash over the input string
 
-: hash-init-rng ( -- )  $10 rng$ hashinit swap move ;
+2 64s buffer: hash-state
 
-hash-init-rng
+: string-hash ( addr u -- )  hashinit hash-state [ 2 64s ]L move
+    false hash-state hashkey2 ;
 
-\ this computes a cryptographic secure hash over the input string -
-\ in three variants: a medium speed 64 bit hash, a very fast 128 bit hash,
-\ and a slow cryptographically secure 512 bit hash
-
-: use-hash-128 ;
-
-[IFDEF] use-hash-64
-    64Variable hash-state
-    
-    : string-hash ( addr u -- )  hashinit 64@ hash64 hash-state 64! ;
-    
-    : hash$ ( -- addr u )  hash-state [ 1 64s ]L ;
-[THEN]
-[IFDEF] use-hash-128
-    2 64s buffer: hash-state
-    
-    : string-hash ( addr u -- )  hashinit hash-state [ 2 64s ]L move
-	false hash-state hashkey2 ;
-    
-    : hash$ ( -- addr u )  hash-state [ 2 64s ]L ;
+: hash$ ( -- addr u )  hash-state [ 2 64s ]L ;
 
 \ hierarchical hash table
 

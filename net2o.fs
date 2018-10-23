@@ -43,6 +43,12 @@ require ed25519-donna.fs
 require hash-table.fs
 require bdelta.fs
 
+\ random initializer for hash
+
+: hash-init-rng ( -- )  $10 rng$ hashinit swap move ;
+
+hash-init-rng
+
 \ crypto selection
 
 Create crypt-modes ' keccak-t , ' threefish-t ,
