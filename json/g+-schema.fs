@@ -177,7 +177,6 @@ also g+
 
 : dedup-author { a -- }
     a @ >o
-    author:displayName$ type cr
     author:resourceName$ basename authors# #@ 0= IF
 	drop  o { w^ x }
 	x cell  author:resourceName$ basename authors# #!
@@ -190,7 +189,7 @@ also g+
 : dedup-authors ( o:comment -- )
     addr comments:author{} dedup-author
     comments:comments[] $@ bounds U+DO
-	\ I @ >o recurse o>
+	I @ >o recurse o>
     cell +LOOP
     comments:plusOnes[] $@ bounds U+DO
 	I @ >o addr plusOnes:plusOner{} dedup-author o>
