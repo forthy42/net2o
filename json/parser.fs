@@ -23,12 +23,13 @@ require regexp.fs
 also regexps
 Charclass [blT] bl +char 'T' +char
 : iso-?date ( addr u -- flag )
-    (( \( \d \d \d \d \) ` - \( \d \d \) ` - \( \d \d \) [blT] c?
+    (( \( \d \d \d \d \) ` - \( \d \d \) ` - \( \d \d \)
+    {{ [blT] c?
     \( \d \d \) ` : \( \d \d \) ` : \( \d \d \)
     {{ ` . \( {++ \d \d \d ++} \) || \( \) }}
     {{ ` Z \( \) \( \) ||
        {{ ` + \( || \( ` - }} \d \d `? : \d \d \)
-    }} )) ;
+    }} || \( \) \( \) \( \) \( \) \( \) }} \$ )) ;
 : iso-date>ticks ( -- ticks )
     \1 s>number drop \2 s>number drop \3 s>number drop ymd2day unix-day0 -
     #24 *
@@ -77,6 +78,7 @@ Defer process-elements ' noop is process-elements
 require g+-schema.fs
 require fb-schema.fs
 require twitter-schema.fs
+require diaspora-schema.fs
 
 $10 stack: element-stack
 $10 stack: key-stack

@@ -188,6 +188,7 @@ also g+
 
 : dedup-authors ( o:comment -- )
     addr comments:author{} dedup-author
+    comments:resharedPost{} ?dup-IF  >o recurse o>  THEN
     comments:comments[] $@ bounds U+DO
 	I @ >o recurse o>
     cell +LOOP
