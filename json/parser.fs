@@ -244,7 +244,9 @@ bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
 : parse-json ( -- addr u )
     source >in @ safe/string
     dup 0 U+DO  over c@ bl u> ?LEAVE  1 safe/string  LOOP
-    dup 1 U+DO  over I + c@ stop-chars + c@  IF  drop I  LEAVE  THEN  LOOP
+    over c@ stop-chars + c@  IF  1 umin  ELSE
+	dup 1 U+DO  over I + c@ stop-chars + c@  IF  drop I  LEAVE  THEN  LOOP
+    THEN
     2dup + source drop - >in ! 2dup input-lexeme! ;
 
 cs-scope: bools

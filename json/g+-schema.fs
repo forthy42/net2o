@@ -49,6 +49,7 @@ object class{ author
     $value: displayName$
     $value: profilePageUrl$
     $value: avatarImageUrl$
+    value: mapped-key
     : dispose ( o:author -- )
     addr resourceName$ $free
     addr displayName$ $free
@@ -172,6 +173,7 @@ synonym communityAttachment-class collectionAttachment-class
 }scope
 
 Variable authors#
+Variable names#
 
 also g+
 
@@ -180,6 +182,11 @@ also g+
     author:resourceName$ basename authors# #@ 0= IF
 	drop  o { w^ x }
 	x cell  author:resourceName$ basename authors# #!
+	x cell  author:displayName$ names# #!
+	[IFDEF] dummy-key
+	    author:resourceName$ basename author:displayName$
+	    0 .dummy-key to author:mapped-key
+	[THEN]
     ELSE
 	@ a !
 	author:dispose

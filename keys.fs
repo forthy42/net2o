@@ -79,27 +79,28 @@ drop
 \ key import type
 
 0
-enum import#self      \ private key
-enum import#manual    \ manual import
-enum import#scan      \ scan import
-enum import#chat      \ seen in chat
-enum import#dht       \ dht import
-enum import#invited   \ invitation import
-enum import#untrusted \ must be last
+enum import#self        \ private key
+enum import#manual      \ manual import
+enum import#scan        \ scan import
+enum import#chat        \ seen in chat
+enum import#dht         \ dht import
+enum import#invited     \ invitation import
+enum import#provisional \ provisional key
+enum import#untrusted   \ must be last
 drop
 $1F enum import#new   \ new format
 drop
 
 Create imports$ $20 allot imports$ $20 bl fill
-"Imscdiu" imports$ swap move
+"Imscdipu" imports$ swap move
 
 Variable import-type  import#new import-type !
 
 : >im-color# ( mask -- color# )
     8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP ;
 
-Create >im-color  $B600 , $D600 , $9600 , $C600 , $A600 , $8B01 , $E600 ,
-DOES> swap >im-color# 6 umin cells + @ attr! ;
+Create >im-color  $B600 , $D600 , $9600 , $C600 , $A600 , $8B01 , $8C01 , $E600 ,
+DOES> swap >im-color# 7 umin cells + @ attr! ;
 
 : .imports ( mask -- )
     imports$ import#new bounds DO
@@ -108,7 +109,7 @@ DOES> swap >im-color# 6 umin cells + @ attr! ;
     drop <default> ;
 
 Create import-name$
-"I myself" s, "manual" s, "scan" s, "chat" s, "dht" s, "invited" s, "untrusted" s,
+"I myself" s, "manual" s, "scan" s, "chat" s, "dht" s, "invited" s, "provisional" s, "untrusted" s,
 
 : .import-colors ( -- )
     import-name$
@@ -896,6 +897,19 @@ Variable lastscan$
     sksig!
     $10 rng$ ke-wallet sec! \ wallet key is just $10
     key-sign o> ;
+
+: dummy-key ( raddr u nick u -- o )
+    \G Generate a deterministic key based on the address and our sksig
+    2>r
+    2dup sksig@ keyed-hash#128 sk1 swap move sk1 pk1 sk>pk
+    sksig@ 2over keyed-hash#128 skrev swap move skrev pkrev sk>pk
+    sk1 pkrev skc pkc ed-keypairx 2r>
+    import#provisional import-type !
+    pkc keysize2 key:new >o ke-pets[] $+[]! ke-nick $! nick!
+    skc keysize ke-sk sec!  skrev keysize ke-rsk sec!  sksig!
+    perm%default ke-mask ! "\x01" ke-groups $!
+    my-key >r o to my-key  key-sign  r> to my-key
+    o o> ;
 
 $40 buffer: nick-buf
 

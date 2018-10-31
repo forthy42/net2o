@@ -595,8 +595,10 @@ $a487dfff pres-frame
 	vt{{
 	    l" Bernd Paysan " l" net2o fossil repository" bi\\
 	    l" 🔗" l" https://net2o.de/" bm\\
+	    [: s" xdg-open https://net2o.de/" system ;] 0 click[]
 	    l" Bernd Paysan " l" $quid cryptocurrency & SwapDragonChain" bi\\
 	    l" 🔗" l" https://squid.cash/" bm\\
+	    [: s" xdg-open https://squid.cash/" system ;] 0 click[]
 	}}vt
 	glue*l }}glue
 	tex: qr-code

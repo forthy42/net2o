@@ -602,8 +602,10 @@ drop
     THEN  !!FIXME!! ( old version ) sksig skc pkc ;
 : pk@ ( -- pk u )
     my-key? .ke-pk $@ ;
-: sk@ ( -- pk u )
+: sk@ ( -- sk u )
     my-key? .ke-sk sec@ ;
+: sksig@ ( -- sksig u )
+    my-key? .ke-sksig sec@ ;
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sig-params ed-sign type keysize emit ;

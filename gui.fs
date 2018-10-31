@@ -262,12 +262,14 @@ $55DD55FF , \ scanned is more green
 $CCEE55FF , \ seen in chat is more yellow
 $EECC55FF , \ imported from DHT is pretty yellow
 $FF8844FF , \ invited is very yellow
+$FF6600FF , \ provisional is very orange
 $FF0000FF , \ untrusted is last
 Create imports#rgb-fg
 $003300FF ,
 $000000FF ,
 $000000FF ,
 $000000FF ,
+$0000FFFF ,
 $0000FFFF ,
 $0000FFFF ,
 $00FFFFFF ,
