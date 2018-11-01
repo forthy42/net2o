@@ -793,8 +793,10 @@ previous
     id>branches  co-rest
     dvcs:dispose-dvcs o> ;
 
+: hash-in ( addr u -- hash u )
+    2dup >file-hash 2>r write-enc-hashed 2drop 2r> ;
 : hash-add ( addr u -- )
-    slurp-file 2dup >file-hash 2drop write-enc-hashed 2drop ;
+    slurp-file hash-in 2drop ;
 : hash-out ( addr u -- )
     base85>$ 2dup 2>r read-enc-hashed patch-in$ $@ 2r> hash-85 spit-file ;
 

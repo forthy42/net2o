@@ -649,6 +649,8 @@ $11 net2o: privkey ( $:string -- )
     THEN  2drop ;
 +net2o: walletkey ( $:seed -- ) !!unsigned?  $>
     ke-wallet sec! ;
++net2o: avatar ( $:string -- ) !!signed?   8 !!>order? $> ke-avatar $! ;
+    \g key profile (hash of a resource)
 }scope
 
 key-entry-table $save
@@ -742,7 +744,8 @@ also net2o-base
 : pack-core ( o:key -- ) \ core without key
     ke-type @ ulit, keytype
     ke-nick $@ $, keynick
-    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN ;
+    ke-prof $@ dup IF  $, keyprofile  ELSE  2drop  THEN
+    ke-avatar $@ dup IF  $, avatar  ELSE  2drop  THEN ;
 
 : pack-signkey ( o:key -- )
     sign[
@@ -803,11 +806,15 @@ previous
 
 Variable cp-tmp
 
+: sec-key? ( o:key -- flag )
+    ke-sk sec@ d0<>
+    ke-groups $@ $01 scan nip 0= and ;
+
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
     "pubkeys.k2o" .keys/ [: to key-pfd
       key# [: cell+ $@ drop cell+ >o
-	ke-sk sec@ d0= IF  pack-pubkey
+	sec-key? 0= IF  pack-pubkey
 	    flush( ." saving " .nick forth:cr )
 	    key-crypt ke-offset 64@ key>pfile@pos
 	THEN o> ;] #map
@@ -817,7 +824,7 @@ Variable cp-tmp
     key-sfd ?dup-IF  close-file throw  THEN
     "seckeys.k2o" .keys/ [: to key-sfd
       key# [: cell+ $@ drop cell+ >o
-	ke-sk sec@ d0<> IF  pack-seckey
+	sec-key? IF  pack-seckey
 	    config:pw-level# @ >r  ke-pwlevel @ config:pw-level# !
 	    key-crypt ke-offset 64@ key>sfile@pos
 	    r> config:pw-level# !
@@ -898,6 +905,9 @@ Variable lastscan$
     $10 rng$ ke-wallet sec! \ wallet key is just $10
     key-sign o> ;
 
+: this-key-sign ( -- )
+    my-key >r o to my-key  key-sign  r> to my-key ;
+
 : dummy-key ( raddr u nick u -- o )
     \G Generate a deterministic key based on the address and our sksig
     2>r
@@ -908,8 +918,7 @@ Variable lastscan$
     pkc keysize2 key:new >o ke-pets[] $+[]! ke-nick $! nick!
     skc keysize ke-sk sec!  skrev keysize ke-rsk sec!  sksig!
     perm%default ke-mask ! "\x01" ke-groups $!
-    my-key >r o to my-key  key-sign  r> to my-key
-    o o> ;
+    this-key-sign o o> ;
 
 $40 buffer: nick-buf
 

@@ -481,6 +481,7 @@ cmd-class class
     field: ke-pets[]   \ key petnames
     field: ke-pets#    \ to avoid colissions, add a number here
     field: ke-prof     \ profile object
+    field: ke-avatar   \ avatar object
     field: ke-chat     \ chat group for 1:1 chat with that person
     field: ke-selfsig
     field: ke-sigs[]
