@@ -418,6 +418,8 @@ $88333366 Value hour-color#
 Variable last-bubble-pk
 0 Value last-otr?
 0 Value last-bubble
+64#0 64Value last-tick
+#300 #1000000000 um* d>64 64Constant delta-bubble
 
 : >bubble-border ( o me? -- )
     swap >o font-size# 25% f*
@@ -460,7 +462,10 @@ Variable last-bubble-pk
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
     pk enddate@ otr? { otr }
-    pk key| last-bubble-pk $@ str= otr last-otr? = and IF
+    pk key| last-bubble-pk $@ str= otr last-otr? = and
+    pk startdate@ last-tick 64over to last-tick
+    64- delta-bubble 64< and
+    IF
 	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
     ELSE
 	pk startdate@ add-dtms
