@@ -357,10 +357,12 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     8 !!>=order? $> msg:payment ;
 +net2o: msg-otrify ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR
     $> $> msg:otrify ;
++net2o: msg-coord ( $:gps -- ) \g GPS coordinates
+    8 !!>=order? $> msg:coord ;
 +net2o: msg-url ( $:url -- ) \g print a payment
     $> msg:url ;
-$2B net2o: msg-coord ( $:gps -- ) \g GPS coordinates
-    8 !!>=order? $> msg:coord ;
++net2o: msg-like ( xchar -- ) \g add a like
+    64>n msg:like ;
 
 }scope
 
@@ -407,6 +409,7 @@ scope: logstyles
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
+:noname ( xchar -- ) drop ; msg-notify-class is msg:like
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
 :noname ( -- ) msg-notify ; msg-notify-class is msg:end
@@ -436,7 +439,9 @@ scope: logstyles
     space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
 :noname ( addr u -- ) $utf8> forth:type ; msg-class is msg:text
 :noname ( addr u -- ) $utf8>
-    <info> forth:type <default> ; msg-class is msg:url
+    <warn> forth:type <default> ; msg-class is msg:url
+:noname ( xchar -- )
+    <info> utf8emit <default> ; msg-class is msg:like
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class is msg:object
@@ -1391,9 +1396,15 @@ also net2o-base scope: /chat
 	    ;] rectype-name
 	THEN
     ELSE  2drop rectype-null  THEN ;
+: http-rec ( addr u -- )
+    2dup "https://" string-prefix? >r
+    2dup "http://" string-prefix? r> or IF
+	over ?flush-text 2dup + to last->in
+	[: $, msg-url ;] rectype-name
+    ELSE  2drop rectype-null  THEN ;
 
 $Variable msg-recognizer
-' text-rec ' tag-rec ' pk-rec 3 msg-recognizer set-stack
+' text-rec ' http-rec ' tag-rec ' pk-rec 4 msg-recognizer set-stack
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in

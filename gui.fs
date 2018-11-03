@@ -456,8 +456,15 @@ Variable last-bubble-pk
 :noname ( -- )
     glue*ll }}glue msg-box .child+
     dpy-w @ 90% fm* msg-par .par-split
-    {{ msg-par unbox }} msg-vbox .+childs
+    {{ msg-par unbox }}
+    dup >r 0 ?DO  I pick box[] "unboxed" name! drop  LOOP  r>
+    msg-vbox .+childs
 ; wmsg-class to msg:end
+: new-msg-par ( -- )
+    {{ }}p "msg-par" name!
+    dup .subbox box[] drop box[] cbl >bl
+    dup .subbox "msg-box" name!
+    to msg-box to msg-par ;
 :noname { d: pk -- o }
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
@@ -466,7 +473,7 @@ Variable last-bubble-pk
     pk startdate@ last-tick 64over to last-tick
     64- delta-bubble 64< and
     IF
-	{{ }}p cbl >bl dup .subbox to msg-box to msg-par
+	new-msg-par
     ELSE
 	pk startdate@ add-dtms
 	pk key| last-bubble-pk $!  otr to last-otr?  text-color!
@@ -488,14 +495,15 @@ Variable last-bubble-pk
 	    {{
 		glue*l $000000FF $FFFFFFFF last-otr? select
 		slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+		"bubble" name!
 		{{
-		    {{ }}p cbl >bl dup .subbox to msg-box to msg-par
-		}}v me? >bubble-border
-		dup to msg-vbox
-	    }}z
+		    new-msg-par
+		}}v box[] dup to msg-vbox "msg-vbox" name!
+		me? >bubble-border
+	    }}z box[] "msg-zbox" name!
 	    glue*ll }}glue
 	    me? IF  swap rot  THEN
-	}}h msgs-box .child+
+	}}h box[] "msgs-box" name! msgs-box .child+
     THEN
 ; wmsg-class to msg:start
 :noname { d: string -- o }
@@ -506,19 +514,28 @@ Variable last-bubble-pk
 :noname { d: string -- o }
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
-    msg-box .child+
+    "text" name! msg-box .child+
 ; wmsg-class to msg:text
 :noname { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
-    msg-box .child+
+    "action" name! msg-box .child+
 ; wmsg-class to msg:action
+:noname { d: string -- o }
+    last-otr? IF light-blue ELSE dark-blue THEN
+    string ['] utf8-sanitize $tmp }}text 25%bv
+    text-color!
+    [: data >o text$ o> [: ." xdg-open " type ;] $tmp system ;]
+    over click[]
+    click( ." url: " dup ..parents cr )
+    "url" name! msg-box .child+
+; wmsg-class to msg:url
 :noname { d: string -- o }
     {{
 	glue*l $FFCCCCFF slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
-    }}z msg-box .child+
+    }}z "gps" name! msg-box .child+
 ; wmsg-class to msg:coord
 :noname { d: pk -- o }
     {{
@@ -591,6 +608,8 @@ wmsg-o >o msg-table @ token-table ! o>
     text$ dup IF  do-chat-cmd? 0= IF  avalanche-text  THEN
     ELSE  2drop  THEN
     64#-1 line-date 64!  $lastline $free ;
+
+\ +db click( \ )
 
 {{ $80FFFFFF pres-frame
     {{

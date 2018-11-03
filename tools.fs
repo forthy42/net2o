@@ -270,6 +270,13 @@ Variable scope<>
     [: body> name>string type ." -class" ;] $tmp nextname
     end-class ;
 
+: struct{ ( "scope" -- vars )
+    >in @ >r
+    parse-name [: type ." -struct" ;] $tmp nextname
+    begin-structure  r> >in !  cs-scope: ;
+: }struct ( vars -- )
+    }scope end-structure ;
+
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict
 : endwith ( -- )
@@ -364,6 +371,21 @@ require config.fs
     2dup file-status nip no-file# = IF
 	r> mkdir-parents throw  true
     ELSE  2drop rdrop  false  THEN ;
+
+\ dirstack
+
+$10 stack: dirstack
+
+: >dir ( -- )
+    s" " $make { w^ dir }
+    $4000 dir $!len dir $@ get-dir dir $!len drop
+    dir @ dirstack >stack ;
+: dir> ( -- )
+    dirstack $@len 0= ?EXIT
+    dirstack stack> { w^ dir }
+    dir $@ set-dir dir $free ;
+: dir@ ( -- addr u )
+    dirstack $[]# 1- dirstack $[]@ ;
 
 scope{ config
 
@@ -849,12 +871,15 @@ Sema resize-sema
     0 -rot bounds ?DO  I c@ $C0 $80 within -  LOOP ;
 
 e? max-xchar $100 u< [IF]
+    : utf8emit ( xchar -- )
+	 '?' over $100 u< select emit ;
     : >utf8$ ( addr u -- addr' u' )
 	[: bounds ?DO  I c@ u8emit  LOOP ;] $tmp ;
     : $utf8> ( addr u -- addr' u' )
-	[: bounds ?DO  I u8@+ '?' over $100 u< select emit
+	[: bounds ?DO  I u8@+ utf8emit
 	  I - +LOOP ;] $tmp ;
 [ELSE]
+    ' xemit alias utf8emit
     ' noop alias >utf8$ immediate
     ' noop alias $utf8> immediate
 [THEN]

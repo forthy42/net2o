@@ -372,10 +372,12 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   payment transaction
 + $2A msg-otrify ( $:date+sig $:newdate+sig -- )
   turn a past message into OTR
-+ $2B msg-url ( $:url -- )
-  print a payment
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
++ $2C msg-url ( $:url -- )
+  print a payment
++ $2D msg-like ( xchar -- )
+  add a like
 ### group description commands ###
 + $20 group-name ( $:name -- )
   group symbolic name

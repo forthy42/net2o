@@ -180,46 +180,8 @@ true Value first-key?
 
 also g+
 
-: get-avatars ( -- )
-    avatars[] $[]# 0= ?EXIT \ nothing to do
-    "avatars" .net2o-cache/ { d: dir }
-    dir $1FF init-dir drop
-    dir [: ." cd " type ." ; sort -k 3 | split -l128 - avatars.sh." ;] $tmp
-    w/o open-pipe throw >r
-    avatars[] ['] $[]. r@ outfile-execute
-    r> close-pipe throw to $?
-    dir [: ." cd " type ." ;time eval '(for i in avatars.sh.*; do curl -s $(cat $i) & done; wait)'; rm avatars.sh.*" ;] $tmp system ;
-
-: .avatar-file ( o:author -- addr u )
-    [: ." avatars/" author:resourceName$ basename type ." .png" ;] $tmp
-    .net2o-cache/ ;
-
 [IFDEF] dummy-key
-    : hash-in-avatars ( -- )
-	authors# [: cell+ $@ drop @ >o
-	    author:avatarImageUrl$ nip IF
-		.avatar-file slurp-file over >r hash-in r> free throw
-		author:mapped-key >o ke-avatar $! this-key-sign o>
-	    THEN
-	    o> ;] #map ;
-    
-    : key-author ( o:author -- )
-	first-key? IF
-	    my-key-default  false to first-key?
-	ELSE
-	    author:resourceName$ basename  author:displayName$
-	    0 .dummy-key
-	THEN  to author:mapped-key ;
-    
-    : +avatar-author ( o:author -- )
-	author:avatarImageUrl$ dup IF
-	    .avatar-file file-status 0= IF
-		drop 2drop
-	    ELSE
-		[: ." -o " author:resourceName$ basename type ." .png "
-		    type ;] $tmp avatars[] $+[]!
-	    THEN
-	ELSE  2drop  THEN ;
+    require g+-export.fs
 [THEN]
 
 : dedup-author { a -- }

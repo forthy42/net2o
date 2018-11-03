@@ -148,6 +148,7 @@ cmd-class class{ msg
     method otrify
     method payment
     method url
+    method like
     method end
     method display   \ display one message
     method redisplay \ display full set

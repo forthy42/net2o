@@ -209,9 +209,9 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
 +net2o: dvcs-write ( $:perm+name size -- ) \g write out file
     $10 !!>=order? $> dvcs:write ;
 +net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
-    1 !!>=order? 64>n $> dvcs:unzip ; \ this is a stub
+    1 !!>=order? 64>n $> dvcs:unzip ;
 +net2o: dvcs-add ( $:hash -- ) \g add (and read) external hash reference
-    1 !!>=order? $> dvcs:add ; \ this is a stub, too
+    1 !!>=order? $> dvcs:add ;
 
 }scope
 
