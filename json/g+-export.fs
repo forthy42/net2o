@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require ../html/parser.fs
+
 : get-avatars ( -- )
     avatars[] $[]# 0= ?EXIT \ nothing to do
     "avatars" .net2o-cache/ { d: dir }
@@ -55,37 +57,64 @@
 	THEN
     ELSE  2drop  THEN ;
 
+: execute>file ( ... xt addr u -- )
+    r/w create-file throw dup >r outfile-execute
+    r> close-file throw ;
+
 : add-post { dvcs -- }
     comments:content$ [: html-untag cr ;]
-    "post" r/w create-file throw dup >r outfile-execute
-    r> close-file throw
-    "post" dvcs .dvcs-add ;
+    "post.md" execute>file
+    "post.md" dvcs .dvcs-add ;
+
+: add-media { dvcs -- }
+    media:url$ basename 2dup
+    [: dir@ type ." /" 2dup type ;] $tmp symlink ?ior
+    dvcs .dvcs-ref ;
 
 : add-album { dvcs -- }
     comments:album{} ?dup-IF
 	.album:media[] $@ bounds U+DO
-	    I @ >o
-	    media:url$ basename 2dup
-	    [: dir@ type ." /" 2dup type ;] $tmp link ?ior
-	    dvcs .dvcs-ref
-	    o>
+	    dvcs I @ .add-media
 	cell +LOOP
     THEN ;
 
-: add-comments { dvcs -- }
-;
-
 : add-plusones { dvcs -- }
-;
+    comments:plusOnes[] $@ bounds U+DO
+	I @ >o plusOnes:plusOner{} o>
+	drop \ stub
+    cell +LOOP ;
+
+: add-reshares { dvcs -- }
+    comments:reshares[] $@ bounds U+DO
+	I @ >o reshares:resharer{} o>
+	drop \ stub
+    cell +LOOP ;
+
+: add-comment { dvcs -- }
+    comments:content$ [: html-untag cr ;]
+    comments:url$ basename [: type ." .md" ;] $tmp 2dup 2>r execute>file
+    2r> dvcs .dvcs-add ;
+
+: add-comments { dvcs -- }
+    comments:comments[] $@ bounds U+DO
+	I @ >o
+	dvcs add-comment
+	dvcs add-media
+	dvcs add-plusones
+	dvcs add-reshares
+	o>
+    cell +LOOP ;
 
 : write-out-article ( o:comment -- )
-    dvcs:new-dvcs { dvcs }
-    recourceName$ basename [: ." posts/" type ." /.n2o" ;] $tmp
+    dvcs:new-dvcs { dvcsp }
+    comments:resourceName$ basename [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir '/' -scan set-dir throw
     ".n2o/files" touch
-    url$ basename dvcs >o project:project$ $! "master" project:branch$ $! o>
-    dvcs add-post
-    dvcs add-album
-    dvcs add-comments
-    dvcs add-plusones
-    dvcs >o save-project dvcs:dispose-dvcs o> ;
+    comments:url$ basename dvcsp >o project:project$ $! "master" project:branch$ $! o>
+    dvcsp add-post
+    dvcsp add-album
+    dvcsp add-media
+    dvcsp add-comments
+    dvcsp add-plusones
+    dvcsp add-reshares
+    dvcsp >o save-project dvcs:dispose-dvcs o> ;

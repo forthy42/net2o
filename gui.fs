@@ -355,6 +355,12 @@ event: :>chat-connects  gui-chat-connects
 	I @ show-group
     cell +LOOP ;
 
+: }}button-lit { d: text color -- o }
+    {{
+        glue*l color font-size# 40% f* }}frame dup .button2
+        text }}text 25%b /center
+    }}z box[] ;
+
 : nicks-title ( -- )
     {{ glue*l $000000FF slide-frame dup .button1
 	{{
@@ -364,15 +370,17 @@ event: :>chat-connects  gui-chat-connects
 		{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
 		{{ \script \sans \bold l" Key date" }}i18n-text glue*l }}glue }}h
 	    }}v pk-tab
-	glue*lll }}glue }}h
-    }}z ;
+	    glue*lll }}glue
+	    \large s" ❌" $444444FF }}button-lit [: -1 data +! ;] level# click[]
+	}}h box[]
+    }}z box[] ;
 
 {{ $FFFF80FF pres-frame
     {{
 	{{
 	    nicks-title
 	    glue*shrink }}glue
-	}}h
+	}}h box[]
 	{{
 	    {{
 		{{ glue*l $303000FF bar-frame
@@ -453,6 +461,19 @@ Variable last-bubble-pk
     64dup 64#-1 64<> ;
 : text-color! ( -- ) last-otr? IF  greenish  ELSE  blackish  THEN ;
 
+[IFDEF] android
+    also jni
+    : open-url ( addr u -- )
+	clazz >o make-jstring to args0 o>
+	['] startbrowser post-it ;
+    previous
+[ELSE]
+    [IFDEF] linux
+	: open-url ( addr u -- )
+	    [: ." xdg-open " type ;] $tmp system ;
+    [THEN]
+[THEN]
+
 :noname ( -- )
     glue*ll }}glue msg-box .child+
     dpy-w @ 90% fm* msg-par .par-split
@@ -526,7 +547,7 @@ Variable last-bubble-pk
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv
     text-color!
-    [: data >o text$ o> [: ." xdg-open " type ;] $tmp system ;]
+    [: data >o text$ o> open-url ;]
     over click[]
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
