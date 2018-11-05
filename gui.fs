@@ -545,7 +545,7 @@ Variable last-bubble-pk
 ; wmsg-class to msg:action
 :noname { d: string -- o }
     last-otr? IF light-blue ELSE dark-blue THEN
-    string ['] utf8-sanitize $tmp }}text 25%bv
+    string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
     text-color!
     [: data >o text$ o> open-url ;]
     over click[]
