@@ -137,7 +137,7 @@ forward gui-msgs
 	o>
 	\ ." Right passphrase" cr
 	show-nicks
-	true
+	drop nip 0 tuck true
     THEN ;
 
 : 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;

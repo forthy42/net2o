@@ -30,16 +30,16 @@ cmd-class class
     method patch
     method write
     method unzip
-    method add
+    method ref
     
     }scope
 end-class dvcs-abstract
 
 dvcs-abstract class
     scope{ dvcs
-    field: adds[]
+    field: refs[]
     }scope
-end-class dvcs-adds
+end-class dvcs-refs
 
 dvcs-abstract class
     scope{ dvcs
@@ -210,8 +210,8 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     $10 !!>=order? $> dvcs:write ;
 +net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
     1 !!>=order? 64>n $> dvcs:unzip ;
-+net2o: dvcs-add ( $:hash -- ) \g add (and read) external hash reference
-    1 !!>=order? $> dvcs:add ;
++net2o: dvcs-ref ( $:hash -- ) \g add (and read) external hash reference
+    1 !!>=order? $> dvcs:ref ;
 
 }scope
 
@@ -254,15 +254,17 @@ dvcs-table $save
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
 	hash#128 /string forth:type ;] dvcs:fileentry$ $exec
     dvcs:fileentry$ $@ +fileentry
-; dvcs-class to dvcs:add
+; dvcs-class to dvcs:ref
 
-' 2drop dvcs-adds to dvcs:read
-' 2drop dvcs-adds to dvcs:rm
-' 2drop dvcs-adds to dvcs:rmdir
-:noname 2drop 64drop ; dup dvcs-adds to dvcs:patch
-dvcs-adds to dvcs:write
-:noname 2drop drop 64drop ; dvcs-adds to dvcs:unzip
-:noname ( addr u -- ) dvcs:adds[] $+[]! ; dvcs-adds to dvcs:add
+\ DVCS refs are scanned for in patchsets, and then fetched
+
+' 2drop dvcs-refs to dvcs:read
+' 2drop dvcs-refs to dvcs:rm
+' 2drop dvcs-refs to dvcs:rmdir
+:noname 2drop 64drop ; dup dvcs-refs to dvcs:patch
+dvcs-refs to dvcs:write
+:noname 2drop drop 64drop ; dvcs-refs to dvcs:unzip
+:noname ( addr u -- ) dvcs:refs[] $+[]! ; dvcs-refs to dvcs:ref
 
 scope{ dvcs
 : new-dvcs ( -- o )
@@ -270,16 +272,16 @@ scope{ dvcs
     commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
     search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
     o o> ;
-: new-dvcs-adds ( -- o )
-    dvcs-adds new >o  dvcs-table @ token-table !  o o> ;
+: new-dvcs-refs ( -- o )
+    dvcs-refs new >o  dvcs-table @ token-table !  o o> ;
 : clean-delta ( o:dvcs -- )
     dvcs:in-files$ $free dvcs:out-files$ $free  dvcs:patch$ $free ;
 : dispose-commit ( o:commit -- )
     id$ $free  re$ $free  object$ $free  dispose ;
 : dispose-search ( o:commit -- )
     match:id$ $free  match:tag$ $free  dispose ;
-: dispose-dvcs-adds ( o:dvcs -- )
-    dvcs:adds[] $[]free dispose ;
+: dispose-dvcs-refs ( o:dvcs -- )
+    dvcs:refs[] $[]free dispose ;
 : dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $free  dvcs:message$ $free
     dvcs:files# #offs  dvcs:oldfiles# #offs
@@ -312,30 +314,71 @@ User tmp1$
 : mode@ ( -- mode )
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] ;
 
+$1000 Constant path-max#
+
+Defer xstat ' lstat is xstat
+Defer xfiles[] ' new-files[] is xfiles[]
+Defer hash-import ' noop is hash-import
+
+\ encrypted hash stuff, using signature secret as PSK
+
+\ probably needs padding...
+
+: write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
+    keyed-hash-out hash#128 ['] 85type $tmp 2>r
+    enchash  2>r
+    save-mem 2dup c:encrypt  over swap
+    ?.net2o/objects  2r> hash>filename  spit-file
+    free throw  2r> ;
+
+: enchash>filename ( hash1 u1 -- filename u2 )
+    keyed-hash-out hash#128 smove
+    enchash hash>filename ;
+
+Variable patch-in$
+
+: read-enc-hashed ( hash1 u1 -- )
+    2dup enchash>filename patch-in$ $slurp-file
+    patch-in$ $@ c:decrypt
+    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
+
+: ref-hash-import ( hash u -- hash u )
+    2>r new-file$ $@ write-enc-hashed 2drop 2r> ;
+
 : hashstat-rest ( addr u -- addr' u' )
     [: mode@ { | w^ perm } perm le-w!
 	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
 	perm le-uw@ S_IFMT and  case
-	    S_IFLNK of  $1000 new-file$ $!len \ pathmax: 4k
+	    S_IFLNK of  path-max# new-file$ $!len \ pathmax: 4k
 		2dup new-file$ $@ readlink
 		dup ?ior new-file$ $!len  endof
 	    S_IFREG of  2dup new-file$ $slurp-file  endof
 	    S_IFDIR of  0 new-file$ $!len  endof
 	endcase
-	new-file$ $@ >file-hash
+	new-file$ $@ >file-hash hash-import
 	new-file$ $@ 2swap dvcs-objects #!
 	keyed-hash-out hash#128 type  timestamp 1 64s type  perm 2 type  type
     ;] $tmp1 ;
+
 : file-hashstat ( addr u -- addr' u' )
-    2dup statbuf lstat ?ior  hashstat-rest ;
+    2dup statbuf xstat ?ior  hashstat-rest ;
 
 : $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ drop ;
 
 : new-files-loop ( -- )
-    BEGIN  refill  WHILE  source file-hashstat new-files[] $ins[]f  REPEAT ;
+    BEGIN  refill  WHILE  source file-hashstat xfiles[] $ins[]f  REPEAT ;
 : new-files-in ( addr u -- )
     r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
     ['] new-files-loop execute-parsing-file ;
+: ref-files-in ( addr u -- )
+    ['] stat is xstat
+    ['] ref-files[] is xfiles[]
+    ['] ref-hash-import is hash-import
+    ['] new-files-in catch
+    ['] lstat is xstat
+    ['] new-files[] is xfiles[]
+    ['] noop is hash-import
+    throw ;
 
 : config>dvcs ( o:dvcs -- )
     "~+/.n2o/config" ['] project >body read-config
@@ -343,7 +386,7 @@ User tmp1$
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
 : new>dvcs ( o:dvcs -- )
-    "~+/.n2o/reffiles" new-files-in 0 new-files[] !@ ref-files[] !
+    "~+/.n2o/reffiles" ref-files-in
     "~+/.n2o/newfiles" new-files-in ;
 : dvcs?modified ( o:dvcs -- )
     dvcs:files# [: >r
@@ -378,8 +421,11 @@ User tmp1$
     hash#128 umin dvcs-objects #@ over 0= !!wrong-hash!!
     dvcs:out-files$ $+! ;
 
-: file-size@ ( addr u -- 64size )
+: file-lsize@ ( addr u -- 64size )
     statbuf lstat ?ior statbuf st_size 64@
+    mode@ S_IFMT and S_IFDIR <> n>64 64and ;
+: file-size@ ( addr u -- 64size )
+    statbuf stat ?ior statbuf st_size 64@
     mode@ S_IFMT and S_IFDIR <> n>64 64and ;
 
 also net2o-base
@@ -393,14 +439,16 @@ also net2o-base
 	    dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map ;
 : read-new-fs ( -- )
     new-files[] ['] dvcs+out $[]map ;
+: dvcs+hash ( addr u -- ) 2drop ; \ !!STUB!!
 : read-ref-fs ( -- )
-    ref-files[] ['] 2drop $[]map ; \ !!FIXME!! stub!
+    ref-files[] ['] dvcs+hash $[]map ;
 : write-new-fs ( -- )
     new-files[] [: 2dup hash#128 dvcs:perm /string $,
-	/name file-size@ lit, dvcs-write ;] $[]map ;
+	/name file-lsize@ lit, dvcs-write ;] $[]map ;
 : write-ref-fs ( -- )
-    ref-files[] [: over hash#128 $, dvcs-add hash#128 /string 2dup $,
-	2 /string file-size@ lit, dvcs-write ;] $[]map ;
+    ref-files[] [: over hash#128 $, dvcs-ref
+	2dup hash#128 dvcs:perm /string $,
+	/name file-size@ lit, dvcs-write ;] $[]map ;
 : compute-patch ( -- )
     dvcs( ." ===== in-files$ ====" forth:cr dvcs:in-files$ $.
     ." ===== out-files$ =====" forth:cr dvcs:out-files$ $. )
@@ -420,7 +468,7 @@ Variable id-files[]
     [: id-files[] [:
 	    over hash#128 $, dvcs-read hash#128 /string
 	    0 dvcs:perm /string 2dup $,
-	    2 /string file-size@ lit, dvcs-write
+	    2 /string file-lsize@ lit, dvcs-write
 	;] $[]map ;] gen-cmd$
     dup IF  >file-hash  THEN ;
 
@@ -439,8 +487,6 @@ previous
 
 \ unencrypted hash stuff, unsued
 
-Variable patch-in$
-
 0 [IF]
 : write-hashed ( addr1 u1 -- addrhash u2 )
     keyed-hash-out hash#128 ['] 85type $tmp1 2>r
@@ -450,26 +496,6 @@ Variable patch-in$
     2dup ['] 85type $tmp 2dup 2>r .objects/ patch-in$ $slurp-file
     patch-in$ $@ >file-hash str= 0= !!wrong-hash!! 2r> ;
 [THEN]
-
-\ encrypted hash stuff, using signature secret as PSK
-
-\ probably needs padding...
-
-: write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
-    keyed-hash-out hash#128 ['] 85type $tmp 2>r
-    enchash  2>r
-    save-mem 2dup c:encrypt  over swap
-    ?.net2o/objects  2r> hash>filename  spit-file
-    free throw  2r> ;
-
-: enchash>filename ( hash1 u1 -- filename u2 )
-    keyed-hash-out hash#128 smove
-    enchash hash>filename ;
-
-: read-enc-hashed ( hash1 u1 -- )
-    2dup enchash>filename patch-in$ $slurp-file
-    patch-in$ $@ c:decrypt
-    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
 
 \ patch stuff
 
