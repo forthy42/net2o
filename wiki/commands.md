@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.8.2-20181101.
+Version 0.8.3-20181107.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -425,7 +425,7 @@ that makes identical transactions have the same hash.
   write out file
 + $25 dvcs-unzip ( $:diffgz size algo -- $:diff )
   unzip an object
-+ $26 dvcs-add ( $:hash -- )
++ $26 dvcs-ref ( $:hash -- )
   add (and read) external hash reference
 
 ### payment commands ###
