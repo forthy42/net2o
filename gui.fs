@@ -697,6 +697,7 @@ Value n2o-frame
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
 	>passphrase +key  read-keys
+	"PASSPHRASE" getenv erase \ erase passphrase after use!
     THEN
     secret-keys# IF  show-nicks  THEN
     1config  !widgets  widgets-loop ;

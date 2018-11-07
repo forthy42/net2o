@@ -567,7 +567,7 @@ previous
 : chat>branches ( o:dvcs -- )
     project:project$ $@ ?msg-log  dvcs:commits @ .chat>branches-loop ;
 
-: >branches ( addr u -- flag )
+: >branches ( addr u -- )
     $make branches[] >back ;
 User id-check# \ check hash
 : id>branches-loop ( addr u -- )
@@ -604,8 +604,8 @@ User id-check# \ check hash
 : pull-readin ( -- )
     config>dvcs  chat>dvcs  chat>branches ;
 : dvcs-readin ( $addr -- )
-    pull-readin  $@ id>branches
-    branches>dvcs  files>dvcs  new>dvcs  dvcs?modified ;
+    pull-readin  $@ id>branches  branches>dvcs
+    files>dvcs  new>dvcs  dvcs?modified ;
 
 scope{ dvcs
 : new-dvcs-log ( -- o )
@@ -882,13 +882,13 @@ previous
     id>patch# ['] #needed #map
     id>snap#  ['] #needed #map ;
 
-: get-needed-files ( -- ) +resend
-    sync-file-list[] $[]# 0 ?DO
+: get-needed-files { list -- } +resend
+    list $[]# 0 ?DO
 	I /sync-reqs + I' umin I U+DO
 	    net2o-code expect+slurp
 	    $10 blocksize! 0 blockalign!
 	    I /sync-files + I' umin I U+DO
-		I sync-file-list[] $[]@ net2o:copy#
+		I list $[]@ net2o:copy#
 	    LOOP
 	    I /sync-files + I' u>=
 	    IF  end-code| net2o:close-all  ELSE  end-code  THEN
@@ -900,7 +900,12 @@ previous
     msg-group$ $@ ?msg-log
     dvcs:commits @ .chat>branches-loop
     dvcs:commits @ .dvcs-needed-files
-    connection .get-needed-files ;
+    sync-file-list[] connection .get-needed-files ;
+
+: dvcs-ref-sync ( -- )
+    dvcs:new-dvcs-refs >o branches>dvcs
+    dvcs:refs[] connection .get-needed-files
+    dvcs:dispose-dvcs-refs o> ;
 
 : handle-fetch ( -- )  ?.net2o/objects
     dvcs:new-dvcs >o  pull-readin
@@ -911,6 +916,8 @@ previous
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
+    dvcs-ref-sync
+    msg( ." === ref sync done ===" forth:cr )
     msg-group$ $@ >group last# silent-leave-chat
     dvcs:dispose-dvcs o> ;
 

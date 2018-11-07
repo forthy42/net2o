@@ -380,7 +380,7 @@ end-structure
 
 user-o io-mem
 
-object class
+object uclass io-mem
     pollfd 4 *      uvar pollfds \ up to four file descriptors
     sockaddr_in     uvar sockaddr< \ incoming socket
     sockaddr_in     uvar sockaddr> \ outgoing socket

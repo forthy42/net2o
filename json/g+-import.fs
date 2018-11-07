@@ -1,4 +1,4 @@
-\ Google+ export
+\ Google+ import
 
 \ Copyright (C) 2018   Bernd Paysan
 

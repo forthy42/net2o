@@ -27,7 +27,7 @@ Variable my-0key
 
 user-o keytmp \ storage for secure temporary keys
 
-object class
+object uclass keytmp
     state2#   uvar key-assembly
     state2#   uvar ivs-assembly
     state#    uvar mykey    \ instance's rotating private key
@@ -55,7 +55,7 @@ end-class keytmp-c
 
 user-o keybuf \ storage for secure permanent keys
 
-object class
+object uclass keybuf
     \ key storage
     \ client keys
     keysize uvar pkc   \ pubkey

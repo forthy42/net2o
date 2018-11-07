@@ -35,7 +35,7 @@ require forward.fs
 
 user-o arg-o
 
-object class
+object uclass arg-o
     umethod ?nextarg
     umethod ?@nextarg
     umethod ?peekarg
@@ -55,7 +55,7 @@ cmd-args
 	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
     THEN  false ; to ?@nextarg
 
-cmd-args-c class
+cmd-args-c uclass arg-o
 end-class word-args-c
 
 align word-args-c , here constant word-args^
@@ -938,7 +938,7 @@ Variable *insflag
 : (*xins)  *insflag on (xins) ;
 : *kill-prefix  *insflag off kill-prefix ;
 
-edit-terminal-c class
+edit-terminal-c uclass edit-out
 end-class *edit-terminal-c
 
 *edit-terminal-c ' new static-a with-allocater Constant *edit-terminal
