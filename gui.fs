@@ -587,6 +587,31 @@ Variable last-bubble-pk
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
     text-color!
 ; msg-class to msg:id
+:noname { sig u' addr u -- }
+    u' 64'+ u =  u sigsize# = and IF
+	last# >r last# $@ ?msg-log
+	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
+	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
+	U+DO
+	    I last# cell+ $[]@
+	    2dup dup sigpksize# - /string key| msg:id$ str= IF
+		dup u - /string addr u str= IF
+		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
+		    I [: ."  OTRify #" u. ;] $tmp
+		    \italic }}text 25%bv \regular light-blue text-color!
+		    "otrify" name! msg-box .child+
+		    sig u' I last# cell+ $[]@ replace-sig
+		    \ !!Schedule message saving!!
+		ELSE
+		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
+		THEN
+	    ELSE
+		I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug
+		2drop
+	    THEN
+	LOOP
+	r> to last#
+    THEN ; msg-class is msg:otrify
 
 in net2o : new-wmsg ( o:connection -- o )
     o wmsg-class new >o  parent!  msg-table @ token-table ! o o> ;
@@ -738,6 +763,8 @@ lang:en include-locale lang/en
     ['] lang >body find-name-in ?dup-IF  execute  THEN ;
 
 s" LANG" getenv '_' $split 2swap ?lang '.' $split ?lang ?lang
+
+\ lsids .lsids
 
 0 [IF]
 Local Variables:

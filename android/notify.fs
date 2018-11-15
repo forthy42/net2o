@@ -63,8 +63,9 @@ SDK_INT 11 >= [IF]
     msg-builder
     : build-notification ( -- )
 \	1000 clazz .screen_on
+	['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN
 	1 pending-notifications +!
-	['] notify-title $tmp make-jstring nb .setContentTitle
+	make-jstring nb .setContentTitle
 	>o notify@ make-jstring setContentText o>
 	>o notify@ make-jstring setTicker o>
 	>o pending-notifications @ setNumber o>

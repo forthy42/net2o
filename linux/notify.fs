@@ -59,6 +59,7 @@ Variable net2o-logo
 !upath !net2o-logo
 
 : 0string ( addr u -- cstr )
+    over 0= IF  2drop s" "  THEN
     1+ save-mem over + 1- 0 swap c! ;
 
 0 Value content-string
@@ -90,6 +91,8 @@ Variable net2o-logo
 
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
     title-string 0 ?free  content-string 0 ?free
-    ['] notify-title $tmp 0string title-string !
-    notify@ 0string content-string !
+    ['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN
+    notify@ dup 0= IF  2drop 2drop  EXIT  THEN
+    0string content-string !
+    0string title-string !
     notify-send $@ notify-args fork+exec ;
