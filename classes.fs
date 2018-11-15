@@ -149,6 +149,7 @@ cmd-class class{ msg
     method payment
     method url
     method like
+    method away
     method end
     method display   \ display one message
     method redisplay \ display full set
@@ -530,10 +531,15 @@ forth-local-words:
        "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
+     (("class{") definition-starter (font-lock-keyword-face . 1)
+      "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("}class") definition-ender (font-lock-keyword-face . 1))
     )
 forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
+     (("class{") (0 . 2) (0 . 2))
+     (("}class") (-2 . 0) (0 . -2))
     )
 End:
 [THEN]

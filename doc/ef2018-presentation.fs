@@ -77,7 +77,7 @@ glue ' new static-a with-allocater Constant glue-right
     $FF fm* f>s $FFFFFF00 or dup
     r> >o to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
     r> >o to frame-color parent-w .parent-w /flop drop o> ;
-: fade!slides ( r0..1 n -- )
+: fade!slides ( r0..1 n -- r0..1 n )
     dup m/$-switch = IF
 	fdup $q-img m2-img fade-img
     THEN

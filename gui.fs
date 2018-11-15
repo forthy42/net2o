@@ -120,6 +120,7 @@ Variable slide#
 
 forward show-nicks
 forward gui-msgs
+0 Value title-vp
 
 : pw-done ( max span addr pos -- max span addr pos flag )
     err-fade? IF  false  EXIT  THEN
@@ -168,7 +169,7 @@ tex: net2o-logo
 [THEN]
 
 glue new Constant glue*lll±
-glue*lll± >o 1Mglue hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
+glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
 
 glue new Constant glue*shrink
 glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue! o>
@@ -361,19 +362,29 @@ event: :>chat-connects  gui-chat-connects
         text }}text 25%b /center
     }}z box[] ;
 
+also [ifdef] android android [then]
+
+tex: vp-title
+
 : nicks-title ( -- )
     {{ glue*l $000000FF slide-frame dup .button1
 	{{
-	    {{ \large \bold \sans whitish
-	    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
 	    {{
-		{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
-		{{ \script \sans \bold l" Key date" }}i18n-text glue*l }}glue }}h
-	    }}v pk-tab
-	    glue*lll }}glue
+		{{
+		    {{ \large \bold \sans whitish
+		    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
+		    {{
+			{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
+			{{ \script \sans \bold l" Key date" }}i18n-text glue*l }}glue }}h
+		    }}v pk-tab
+		    glue*lll± }}glue
+		}}h box[]
+	    vp-title glue*lll ['] vp-title }}vp vp[] dup to title-vp
 	    \large s" ❌" $444444FF }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[]
     }}z box[] ;
+
+previous
 
 {{ $FFFF80FF pres-frame
     {{
@@ -403,7 +414,7 @@ event: :>chat-connects  gui-chat-connects
 
 : show-nicks ( -- )
     fill-nicks fill-groups next-slide
-    0.01e peers-box [: .vp-top fdrop ;] >animate ;
+    0.01e peers-box [: .vp-top fdrop title-vp .vp-top ;] >animate ;
 
 \ messages
 
@@ -700,7 +711,10 @@ Value n2o-frame
 	"PASSPHRASE" getenv erase \ erase passphrase after use!
     THEN
     secret-keys# IF  show-nicks  THEN
-    1config  !widgets  widgets-loop ;
+    1config  !widgets
+    get-order n>r ['] /chat >body 1 set-order
+    ['] widgets-loop catch
+    nr> set-order throw ;
 
 ' net2o-gui is run-gui
 

@@ -409,7 +409,8 @@ scope: logstyles
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
-:noname ( xchar -- ) drop ; msg-notify-class is msg:like
+' drop  msg-notify-class is msg:like
+' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
 :noname ( -- ) msg-notify ; msg-notify-class is msg:end
@@ -442,6 +443,7 @@ scope: logstyles
     <warn> forth:type <default> ; msg-class is msg:url
 :noname ( xchar -- )
     <info> utf8emit <default> ; msg-class is msg:like
+' drop msg-class is msg:away
 :noname ( addr u type -- )
     space <warn> 0 .r ." :[" 85type ." ]" <default> ;
 msg-class is msg:object
@@ -1201,11 +1203,22 @@ scope: notify-cmds
 
 forward avalanche-text
 
+false value away?
+
 also net2o-base scope: /chat
 
 : /me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
+    [: $, msg-action ;] send-avalanche ;
+
+: /away ( addr u -- )
+    \U away [<action>]      send string or "away from keyboard" as action
+    \G away: send string or "away from keyboard" as action
+    dup 0= IF  2drop
+	away? IF  "I'm back"  ELSE  "Away from keyboard"  THEN
+	away? 0= to away?
+    THEN
     [: $, msg-action ;] send-avalanche ;
 
 : /otr ( addr u -- )
