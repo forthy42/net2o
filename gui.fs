@@ -65,16 +65,16 @@ Variable slide#
 : prev-anim ( n r0..1 -- )
     dup 0<= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1- swap !slides +sync +config  EXIT
+	dup 1- swap !slides +sync +resize  EXIT
     THEN
-    1e fswap f- 1- sin-t anim!slides +sync +config ;
+    1e fswap f- 1- sin-t anim!slides +sync +resize ;
 
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1+ swap !slides +sync +config  EXIT
+	dup 1+ swap !slides +sync +resize  EXIT
     THEN
-    1+ sin-t anim!slides +sync +config ;
+    1+ sin-t anim!slides +sync +resize ;
 
 1e FValue slide-time%
 
@@ -98,14 +98,14 @@ Variable slide#
 
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
-    2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e ELSE +sync +config THEN
+    2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e ELSE +sync +resize THEN
     $FF swap .fade fdrop ;
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
     font-size# f2/ f* font-size# f2/ fover f-
     glue-sleft  >o 0g fdup hglue-c glue! o>
-    glue-sright >o 0g fdup hglue-c glue! o> +sync +config drop ;
+    glue-sright >o 0g fdup hglue-c glue! o> +sync +resize drop ;
 
 0e 0 shake-lr
 
@@ -414,7 +414,7 @@ previous
 
 : show-nicks ( -- )
     fill-nicks fill-groups next-slide
-    0.01e peers-box [: .vp-top fdrop title-vp .vp-top ;] >animate ;
+    0.01e peers-box [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
 
 \ messages
 
@@ -628,8 +628,8 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : wmsg-display ( addr u -- )
     msg-tdisplay
-    msgs-box >o [: +sync +config +resize ;] vp-needed vp-bottom
-    +sync +config o> ;
+    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
+    +sync +resize o> ;
 ' wmsg-display wmsg-class to msg:display
 
 #128 Value gui-msgs# \ display last 128 messages
@@ -655,8 +655,8 @@ wmsg-o >o msg-table @ token-table ! o>
 : msg-wredisplay ( n -- )
     drop 0 otr-mode
     [: msg-group$ $@ (gui-msgs) ;] !wrapper
-    msgs-box >o [: +sync +config +resize ;] vp-needed vp-bottom
-    +sync +config o>  ;
+    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
+    +sync +resize o>  ;
 ' msg-wredisplay wmsg-class is msg:redisplay
 
 [IFDEF] android also android [THEN]
@@ -724,6 +724,7 @@ Value n2o-frame
 \ top widgets
 
 : !widgets ( -- )
+    top-widget .htop-resize
     top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
