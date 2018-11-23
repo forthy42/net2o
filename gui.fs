@@ -80,10 +80,10 @@ Variable slide#
 
 : prev-slide ( -- )
     slide-time% anims[] $@len IF  anim-end .2e f*  THEN
-    slide# @ ['] prev-anim >animate ;
+    slide# @ ['] prev-anim >animate +textures ;
 : next-slide ( -- )
     slide-time% anims[] $@len IF  anim-end .2e f*  THEN
-    slide# @ ['] next-anim >animate ;
+    slide# @ ['] next-anim >animate +textures ;
 
 \ frames
 
