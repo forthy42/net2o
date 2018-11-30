@@ -76,13 +76,13 @@ Variable slide#
     THEN
     1+ sin-t anim!slides +sync +resize ;
 
-1e FValue slide-time%
+0.4e FValue slide-time%
 
 : prev-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
+    slide-time% anims[] $@len IF  anim-end 50% f*  THEN
     slide# @ ['] prev-anim >animate +textures ;
 : next-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end .2e f*  THEN
+    slide-time% anims[] $@len IF  anim-end 50% f*  THEN
     slide# @ ['] next-anim >animate +textures ;
 
 \ frames
@@ -245,10 +245,10 @@ $0000BFFF ' dark-blue >body !
 0 Value group-name
 0 Value group-members
 
-htab-glue new tab-glue: name-tab
-htab-glue new tab-glue: pk-tab
-htab-glue new tab-glue: group-tab
-htab-glue new tab-glue: chatname-tab
+new-htab tab-glue: name-tab
+new-htab tab-glue: pk-tab
+new-htab tab-glue: group-tab
+new-htab tab-glue: chatname-tab
 
 [IFUNDEF] child+
     : child+ ( o -- ) o over >o to parent-w o> childs[] >stack ;
@@ -536,6 +536,7 @@ Variable last-bubble-pk
 	    glue*ll }}glue
 	    me? IF  swap rot  THEN
 	}}h box[] "msgs-box" name! msgs-box .child+
+	blackish
     THEN
 ; wmsg-class to msg:start
 :noname { d: string -- o }
@@ -702,7 +703,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	    {{
 		glue*l $80FF80FF font-size# 40% f* }}frame dup .button2
 		!i18n l" Send" }}text' !lit 40%b
-		[: data >o chat-edit-enter "" to text$ o> ;] chat-edit click[]
+		[: data >o chat-edit-enter "" to text$ o>
+		    chat-edit engage ;] chat-edit click[]
 	    }}z box[]
 	}}h box[]
     }}v box[]
