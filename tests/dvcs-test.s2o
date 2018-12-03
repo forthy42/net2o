@@ -2,6 +2,7 @@ init dvcs-test
 sh echo "Eine Datei" >a
 sh echo "Noch eine Datei" >b
 sh echo "Eine dritte Datei" >c
+sh ln -s ../data/2011-06-24_11-26-36.jpg .
 add a b c
 sh echo "=== Erster Checkin ==="
 diff
@@ -30,8 +31,8 @@ sh echo "=== Checkin 4 ==="
 diff
 ci -m "Checkin 4"
 sh printf "3. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
+ref 2011-06-24_11-26-36.jpg
 sh echo "=== Checkin 4.4 ==="
-diff
 ci -m "Checkin 4.4"
 sh printf "4. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b
 sh printf "5. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy\neirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam\nvoluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet\nclita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit\namet.\n\n" >>b

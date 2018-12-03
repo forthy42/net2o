@@ -71,6 +71,7 @@ debug: ivs( \ IVS regen
 debug: rtd( \ round trip delay related stuff
 debug: no0key( \ generate 0key, default off for now
 debug: dvcs( \ print debugging for dvcs
+debug: dvcsfiles( \ print debugging for dvcs
 debug: rate( \ print debugging for rate settings
 debug: health( \ print that a health check passed
 debug: verbose( \ print more verbose messages

@@ -117,7 +117,7 @@ end-class dvcs-log-class
     [ hash#128 dvcs:name ]L >r 2dup r@ umin 2swap r> /string ;
 
 : .mode ( u -- )
-    dup S_IFMT and 12 rshift "0pc3d5b7f9lBsDEF" drop + c@ emit space
+    dup S_IFMT and 12 rshift "0pc3d5b7frlBsDEF" drop + c@ emit space
     S_IFMT invert and ['] . 8 base-execute ;
 
 : .file+hash ( addr u -- )
@@ -158,15 +158,47 @@ end-class dvcs-log-class
     2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
     drop dvcs:perm le-uw@ { perm } 2r>
     perm S_IFMT and  case
-	S_IFLNK of  perm create-symlink-f  endof
-	S_IFREG of  perm create-file-f     endof
-	S_IFDIR of  perm create-dir-f      endof  \ no content in directory
+	S_IFLNK         of  perm create-symlink-f  endof
+	[ S_IFLNK 1+ ]L of  perm create-file-f     endof \ is a reference
+	S_IFREG         of  perm create-file-f     endof
+	[ S_IFREG 1+ ]L of  perm create-file-f     endof \ also reference
+	S_IFDIR         of  perm create-dir-f      endof  \ no content in directory
 	dvcs( ." unhandled type " hex. type space hex. drop cr 0 )else(
 	2drop 2drop ) \ unhandled types
     endcase ;
 
+\ encrypted hash stuff, using signature secret as PSK
+
+\ probably needs padding...
+
+: write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
+    keyed-hash-out hash#128 ['] 85type $tmp 2>r
+    enchash  2>r
+    save-mem 2dup c:encrypt  over swap
+    ?.net2o/objects  2r> hash>filename  spit-file
+    free throw  2r> ;
+
+: enchash>filename ( hash1 u1 -- filename u2 )
+    keyed-hash-out hash#128 smove
+    enchash hash>filename ;
+
+Variable patch-in$
+
+: read-enc-hashed ( hash1 u1 -- )
+    2dup enchash>filename patch-in$ $slurp-file
+    patch-in$ $@ c:decrypt
+    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
+
+\ in-memory file hash+contents database
+
 : dvcs-outfile-hash ( baddr u1 fhash u2 -- )
     hash#128 umin dvcs-objects #! ;
+
+: ?fileentry-hash ( -- )
+    dvcs:fileentry$ $@ hash#128 umin
+    2dup dvcs-objects #@ d0<> IF  2drop  EXIT  THEN
+    read-enc-hashed
+    patch-in$ $@ dvcs:fileentry$ $@ dvcs-outfile-hash ;
 
 : dvcs-in-hash ( addr u -- )
     dvcs( ." +read: " 2dup 85type cr )
@@ -210,34 +242,35 @@ net2o' emit net2o: dvcs-read ( $:hash -- ) \g read in an object
     $10 !!>=order? $> dvcs:write ;
 +net2o: dvcs-unzip ( $:diffgz size algo -- $:diff ) \g unzip an object
     1 !!>=order? 64>n $> dvcs:unzip ;
-+net2o: dvcs-ref ( $:hash -- ) \g add (and read) external hash reference
-    1 !!>=order? $> dvcs:ref ;
++net2o: dvcs-ref ( $:hash+perm+name -- ) \g external hash reference
+    $10 !!>=order? $> dvcs:ref ;
 
 }scope
 
 dvcs-table $save
 
-' dvcs-in-hash ( addr u -- ) dvcs-class to dvcs:read
+' dvcs-in-hash ( addr u -- ) dvcs-class is dvcs:read
 :noname ( addr u -- )
     2dup hash#128 /string ?sane-file
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
-    hash#128 umin dvcs-in-hash ; dvcs-class to dvcs:rm
+    hash#128 umin dvcs-in-hash ; dvcs-class is dvcs:rm
 :noname ( addr u -- )
     2dup 2 /string ?sane-file 2drop
     dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
-; dvcs-class to dvcs:rmdir
+; dvcs-class is dvcs:rmdir
 :noname ( 64len addr u -- )
     dvcs:patch$ $! dvcs( ." -patch: " 64dup u64. )
     dvcs:out-fileoff off
     64dup config:patchlimit& 2@ d>64 64u> !!patch-limit!!
     dvcs:patch$ bpatch$len 64<> !!patch-size!! \ sanity check!
-    dvcs( ." ===== in files =====" cr dvcs:in-files$ $. ." ===== diff =====" cr
+    dvcsfiles( ." ===== in files =====" cr dvcs:in-files$ $. cr )
+    dvcs( ." ===== diff =====" cr
     dvcs:in-files$ dvcs:patch$ color-bpatch$2 )
     dvcs:out-files$ $free
     dvcs:in-files$ dvcs:patch$ ['] bpatch$2 dvcs:out-files$ $exec
-    dvcs( ." ===== " dvcs:out-files$ $@len u. ."  =====" cr
+    dvcsfiles( ." ===== " dvcs:out-files$ $@len u. ."  =====" cr
     dvcs:out-files$ $. ." ========================" cr )
-; dvcs-class to dvcs:patch
+; dvcs-class is dvcs:patch
 :noname ( 64size addr u -- )
     2dup 2 /string ?sane-file 2drop
     2>r dvcs( ." -write: " 64dup u64. cr )
@@ -247,24 +280,25 @@ dvcs-table $save
     [: forth:type ticks { 64^ ts } ts 1 64s forth:type forth:type ;]
     dvcs:fileentry$ $exec dvcs:fileentry$ $@
     2dup +fileentry  dvcs-outfile-hash
-    fsize dvcs:out-fileoff +! ; dvcs-class to dvcs:write
-' !!FIXME!! ( 64size algo addr u --- ) dvcs-class to dvcs:unzip
+    fsize dvcs:out-fileoff +! ; dvcs-class is dvcs:write
+' !!FIXME!! ( 64size algo addr u --- ) dvcs-class is dvcs:unzip
 :noname ( addr u -- ) \ hash+perm+name
     dvcs:fileentry$ $free
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
 	hash#128 /string forth:type ;] dvcs:fileentry$ $exec
     dvcs:fileentry$ $@ +fileentry
-; dvcs-class to dvcs:ref
+    ?fileentry-hash
+; dvcs-class is dvcs:ref
 
 \ DVCS refs are scanned for in patchsets, and then fetched
 
-' 2drop dvcs-refs to dvcs:read
-' 2drop dvcs-refs to dvcs:rm
-' 2drop dvcs-refs to dvcs:rmdir
-:noname 2drop 64drop ; dup dvcs-refs to dvcs:patch
-dvcs-refs to dvcs:write
-:noname 2drop drop 64drop ; dvcs-refs to dvcs:unzip
-:noname ( addr u -- ) dvcs:refs[] $+[]! ; dvcs-refs to dvcs:ref
+' 2drop dvcs-refs is dvcs:read
+' 2drop dvcs-refs is dvcs:rm
+' 2drop dvcs-refs is dvcs:rmdir
+:noname 2drop 64drop ; dup dvcs-refs is dvcs:patch
+dvcs-refs is dvcs:write
+:noname 2drop drop 64drop ; dvcs-refs is dvcs:unzip
+:noname ( addr u -- ) hash#128 umin dvcs:refs[] $+[]! ; dvcs-refs is dvcs:ref
 
 scope{ dvcs
 : new-dvcs ( -- o )
@@ -313,34 +347,14 @@ User tmp1$
 
 : mode@ ( -- mode )
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] ;
+: mode! ( -- mode )
+    statbuf st_mode [ sizeof st_mode 2 = ] [IF] w! [ELSE] l! [THEN] ;
 
 $1000 Constant path-max#
 
 Defer xstat ' lstat is xstat
 Defer xfiles[] ' new-files[] is xfiles[]
 Defer hash-import ' noop is hash-import
-
-\ encrypted hash stuff, using signature secret as PSK
-
-\ probably needs padding...
-
-: write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
-    keyed-hash-out hash#128 ['] 85type $tmp 2>r
-    enchash  2>r
-    save-mem 2dup c:encrypt  over swap
-    ?.net2o/objects  2r> hash>filename  spit-file
-    free throw  2r> ;
-
-: enchash>filename ( hash1 u1 -- filename u2 )
-    keyed-hash-out hash#128 smove
-    enchash hash>filename ;
-
-Variable patch-in$
-
-: read-enc-hashed ( hash1 u1 -- )
-    2dup enchash>filename patch-in$ $slurp-file
-    patch-in$ $@ c:decrypt
-    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
 
 : ref-hash-import ( hash u -- hash u )
     2>r new-file$ $@ write-enc-hashed 2drop 2r> ;
@@ -357,7 +371,7 @@ Variable patch-in$
 	endcase
 	new-file$ $@ >file-hash hash-import
 	new-file$ $@ 2swap dvcs-objects #!
-	keyed-hash-out hash#128 type  timestamp 1 64s type  perm 2 type  type
+	keyed-hash-out hash#128 type  timestamp 1 64s type  perm 2 type type
     ;] $tmp1 ;
 
 : file-hashstat ( addr u -- addr' u' )
@@ -366,19 +380,21 @@ Variable patch-in$
 : $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ drop ;
 
 : new-files-loop ( -- )
-    BEGIN  refill  WHILE  source file-hashstat xfiles[] $ins[]f  REPEAT ;
+    BEGIN  refill  WHILE  source type cr
+	    source file-hashstat xfiles[] $ins[]f  REPEAT ;
 : new-files-in ( addr u -- )
     r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
     ['] new-files-loop execute-parsing-file ;
-: ref-files-in ( addr u -- )
-    ['] stat is xstat
+: do-refs ( -- )
+    [: stat mode@ $1000 + mode! ;] is xstat
     ['] ref-files[] is xfiles[]
-    ['] ref-hash-import is hash-import
-    ['] new-files-in catch
+    ['] ref-hash-import is hash-import ;
+: do-files ( -- )
     ['] lstat is xstat
     ['] new-files[] is xfiles[]
-    ['] noop is hash-import
-    throw ;
+    ['] noop is hash-import ;
+: ref-files-in ( addr u -- )
+    do-refs  ['] new-files-in catch  do-files  throw ;
 
 : config>dvcs ( o:dvcs -- )
     "~+/.n2o/config" ['] project >body read-config
@@ -388,16 +404,21 @@ Variable patch-in$
 : new>dvcs ( o:dvcs -- )
     "~+/.n2o/reffiles" ref-files-in
     "~+/.n2o/newfiles" new-files-in ;
+: mode<> ( mode1 mode2 -- flag )
+    over S_IFMT invert and over S_IFMT invert and <> >r
+    S_IFMT and swap S_IFMT and dup $1000 and IF
+	$-2000 and swap dup S_IFLNK = IF  drop S_IFREG  THEN
+    THEN  <> r> or ;
 : dvcs?modified ( o:dvcs -- )
     dvcs:files# [: >r
-	r@ $@ statbuf lstat
+	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@ { perm }
+	r@ $@ statbuf perm $1000 and IF  stat  ELSE  lstat  THEN
 	0< IF  errno ENOENT = IF
 		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]f
 		EXIT  THEN  -1 ?ior  THEN
 	r@ cell+ $@ drop hash#128 + dvcs:timestamp le-64@
 	statbuf st_mtime ntime@ d>64 64<>
-	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@
-	mode@ <> or  IF
+	perm mode@ mode<> or  IF
 	    r@ $@ hashstat-rest 2dup fn-split dvcs:files# #@
 	    hash#128 umin 2swap hash#128 umin
 	    str=
@@ -446,11 +467,12 @@ also net2o-base
     new-files[] [: 2dup hash#128 dvcs:perm /string $,
 	/name file-lsize@ lit, dvcs-write ;] $[]map ;
 : write-ref-fs ( -- )
-    ref-files[] [: over hash#128 $, dvcs-ref
-	2dup hash#128 dvcs:perm /string $,
-	/name file-size@ lit, dvcs-write ;] $[]map ;
+    ref-files[] [:
+	[: over hash#128 forth:type
+	    hash#128 dvcs:perm /string forth:type ;] $tmp $,
+	dvcs-ref ;] $[]map ;
 : compute-patch ( -- )
-    dvcs( ." ===== in-files$ ====" forth:cr dvcs:in-files$ $.
+    dvcsfiles( ." ===== in-files$ ====" forth:cr dvcs:in-files$ $.
     ." ===== out-files$ =====" forth:cr dvcs:out-files$ $. )
     dvcs:in-files$ dvcs:out-files$ ['] bdelta$2 dvcs:patch$ $exec
     dvcs:patch$ $@ $, dvcs:out-files$ $@len ulit, dvcs-patch ;
@@ -485,18 +507,6 @@ previous
     >r r@ file-size throw r@ reposition-file throw
     r@ write-line throw r> close-file throw ;
 
-\ unencrypted hash stuff, unsued
-
-0 [IF]
-: write-hashed ( addr1 u1 -- addrhash u2 )
-    keyed-hash-out hash#128 ['] 85type $tmp1 2>r
-    2r@ .objects/ ?.net2o/objects spit-file 2r> ;
-
-: read-hashed ( addr1 u1 -- addrhash u2 )
-    2dup ['] 85type $tmp 2dup 2>r .objects/ patch-in$ $slurp-file
-    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! 2r> ;
-[THEN]
-
 \ patch stuff
 
 \ read in branches, new version
@@ -504,54 +514,54 @@ previous
 : hash+type ( addr u type addr1 -- ) >r r@ $free
     [: { w^ x } type x cell type ;] r> $exec ;
 
-' 2drop commit-class to msg:tag
-' 2drop commit-class to msg:start
-' 2drop commit-class to msg:coord
-' 2drop commit-class to msg:signal
-' 2drop commit-class to msg:text
-' 2drop commit-class to msg:action
-' 2drop commit-class to msg:chain
-' noop  commit-class to msg:end
+' 2drop commit-class is msg:tag
+' 2drop commit-class is msg:start
+' 2drop commit-class is msg:coord
+' 2drop commit-class is msg:signal
+' 2drop commit-class is msg:text
+' 2drop commit-class is msg:action
+' 2drop commit-class is msg:chain
+' noop  commit-class is msg:end
 
 :noname ( addr u -- )
-    re$ $+! ; commit-class to msg:re
+    re$ $+! ; commit-class is msg:re
 :noname ( addr u -- )
-    id$ $! re$ $free ; commit-class to msg:id
+    id$ $! re$ $free ; commit-class is msg:id
 :noname ( addr u type -- )
     object$ hash+type
     object$ $@ key| id$ $@
     id>patch# id>snap# re$ $@len select #!
     re$ $@len IF
 	re$ $@ last# cell+ $+!
-    THEN ; commit-class to msg:object
+    THEN ; commit-class is msg:object
 
 \ search for a specific id
 
-' 2drop search-class to msg:start
-' 2drop search-class to msg:coord
-' 2drop search-class to msg:signal
-' 2drop search-class to msg:text
-' 2drop search-class to msg:action
-' 2drop search-class to msg:chain
-' 2drop search-class to msg:re
-' noop  search-class to msg:end
+' 2drop search-class is msg:start
+' 2drop search-class is msg:coord
+' 2drop search-class is msg:signal
+' 2drop search-class is msg:text
+' 2drop search-class is msg:action
+' 2drop search-class is msg:chain
+' 2drop search-class is msg:re
+' noop  search-class is msg:end
 
 : 3drop  2drop drop ;
 
-:noname match:tag$ $@ str= match:flag ! ; search-class to msg:tag
-:noname match:flag @ IF  match:id$ $!  ELSE  2drop  THEN ; search-class to msg:id
-' 3drop search-class to msg:object
+:noname match:tag$ $@ str= match:flag ! ; search-class is msg:tag
+:noname match:flag @ IF  match:id$ $!  ELSE  2drop  THEN ; search-class is msg:id
+' 3drop search-class is msg:object
 
-' 2drop dvcs-log-class to msg:re
-' 2drop dvcs-log-class to msg:coord
-' 3drop dvcs-log-class to msg:object
-' noop  dvcs-log-class to msg:end
-:noname dvcs-log:sig$    $! ; dvcs-log-class to msg:start
-:noname dvcs-log:tag$    $! ; dvcs-log-class to msg:tag
-:noname dvcs-log:id$     $! ; dvcs-log-class to msg:id
-:noname dvcs-log:text$   $! ; dvcs-log-class to msg:text
-:noname dvcs-log:action$ $! ; dvcs-log-class to msg:action
-:noname dvcs-log:chain$  $! ; dvcs-log-class to msg:chain
+' 2drop dvcs-log-class is msg:re
+' 2drop dvcs-log-class is msg:coord
+' 3drop dvcs-log-class is msg:object
+' noop  dvcs-log-class is msg:end
+:noname dvcs-log:sig$    $! ; dvcs-log-class is msg:start
+:noname dvcs-log:tag$    $! ; dvcs-log-class is msg:tag
+:noname dvcs-log:id$     $! ; dvcs-log-class is msg:id
+:noname dvcs-log:text$   $! ; dvcs-log-class is msg:text
+:noname dvcs-log:action$ $! ; dvcs-log-class is msg:action
+:noname dvcs-log:chain$  $! ; dvcs-log-class is msg:chain
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
@@ -589,7 +599,8 @@ User id-check# \ check hash
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
 	    read-enc-hashed
-	    dvcs:clean-delta  c-state off patch-in$ $@ do-cmd-loop
+	    dvcs:clean-delta  c-state off
+	    patch-in$ $@ do-cmd-loop
 	    dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;
@@ -724,13 +735,13 @@ previous
     2dup "-m" str= IF  ?nextarg IF  2nip  THEN  THEN ;
 
 : dvcs-add ( addr u -- )
-    2dup '/' -scan '/' -skip dup IF  recurse  ELSE  2drop  THEN
+    2dup dirname dup 0<> + dup IF  recurse  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
     ELSE  "dummy" 2over dvcs:files# #!
 	"~+/.n2o/newfiles" append-line  THEN ;
 
 : dvcs-ref ( addr u -- )
-    2dup '/' -scan '/' -skip dup IF  dvcs-add  ELSE  2drop  THEN
+    2dup dirname dup 0<> + dup IF  dvcs-add  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
     ELSE  "dummy" 2over dvcs:files# #!
 	"~+/.n2o/reffiles" append-line  THEN ;
