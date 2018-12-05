@@ -10,6 +10,10 @@ false [IF]
 
 : nodebug: ['] ( Alias immediate ;
 
+:noname ( ... -- ... )
+    depth IF  ...  THEN
+    fdepth IF  cr "F:" type f.s  THEN ; is printdebugdata
+
 require xtype.fs
 require base64.fs
 require base85.fs

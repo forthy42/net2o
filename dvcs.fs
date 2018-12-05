@@ -154,15 +154,15 @@ end-class dvcs-log-class
     perm chmod ?ior
     2drop ;
 
+S_IFMT $1000 invert and Constant S_IFMT?
+
 : dvcs-outfile-name ( hash+perm-addr u1 fname u2 -- )
     2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
     drop dvcs:perm le-uw@ { perm } 2r>
-    perm S_IFMT and  case
-	S_IFLNK         of  perm create-symlink-f  endof
-	[ S_IFLNK 1+ ]L of  perm create-file-f     endof \ is a reference
-	S_IFREG         of  perm create-file-f     endof
-	[ S_IFREG 1+ ]L of  perm create-file-f     endof \ also reference
-	S_IFDIR         of  perm create-dir-f      endof  \ no content in directory
+    perm S_IFMT? and  case
+	S_IFLNK              of  perm create-symlink-f  endof
+	S_IFREG              of  perm create-file-f     endof
+	S_IFDIR              of  perm create-dir-f      endof  \ no content in directory
 	dvcs( ." unhandled type " hex. type space hex. drop cr 0 )else(
 	2drop 2drop ) \ unhandled types
     endcase ;
@@ -298,7 +298,10 @@ dvcs-table $save
 :noname 2drop 64drop ; dup dvcs-refs is dvcs:patch
 dvcs-refs is dvcs:write
 :noname 2drop drop 64drop ; dvcs-refs is dvcs:unzip
-:noname ( addr u -- ) hash#128 umin dvcs:refs[] $+[]! ; dvcs-refs is dvcs:ref
+:noname ( addr u -- )
+    hash#128 umin 2dup dvcs-objects #@ d0<> IF  2drop  EXIT  THEN
+    2dup enchash>filename file-status nip no-file# <> IF  2drop  EXIT  THEN
+    dvcs:refs[] $+[]! ; dvcs-refs is dvcs:ref
 
 scope{ dvcs
 : new-dvcs ( -- o )
@@ -362,16 +365,16 @@ Defer hash-import ' noop is hash-import
 : hashstat-rest ( addr u -- addr' u' )
     [: mode@ { | w^ perm } perm le-w!
 	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
-	perm le-uw@ S_IFMT and  case
+	perm le-uw@ S_IFMT? and  case
 	    S_IFLNK of  path-max# new-file$ $!len \ pathmax: 4k
 		2dup new-file$ $@ readlink
 		dup ?ior new-file$ $!len  endof
 	    S_IFREG of  2dup new-file$ $slurp-file  endof
-	    S_IFDIR of  0 new-file$ $!len  endof
+	    0 new-file$ $!len
 	endcase
-	new-file$ $@ >file-hash hash-import
+	new-file$ $@ >file-hash 2dup type hash-import
 	new-file$ $@ 2swap dvcs-objects #!
-	keyed-hash-out hash#128 type  timestamp 1 64s type  perm 2 type type
+	timestamp 1 64s type  perm 2 type type
     ;] $tmp1 ;
 
 : file-hashstat ( addr u -- addr' u' )
@@ -380,21 +383,24 @@ Defer hash-import ' noop is hash-import
 : $ins[]f ( addr u array -- ) [ hash#128 dvcs:name ]L $ins[]/ drop ;
 
 : new-files-loop ( -- )
-    BEGIN  refill  WHILE  source type cr
+    BEGIN  refill  WHILE  \ source type cr
 	    source file-hashstat xfiles[] $ins[]f  REPEAT ;
 : new-files-in ( addr u -- )
     r/o open-file dup no-file# = IF  2drop  EXIT  THEN  throw
     ['] new-files-loop execute-parsing-file ;
-: do-refs ( -- )
-    [: stat mode@ $1000 + mode! ;] is xstat
+: do-refs ( xt -- )
+    [: stat mode@ $1000 or mode! ;] is xstat
     ['] ref-files[] is xfiles[]
-    ['] ref-hash-import is hash-import ;
-: do-files ( -- )
+    ['] ref-hash-import is hash-import
+    catch
     ['] lstat is xstat
     ['] new-files[] is xfiles[]
-    ['] noop is hash-import ;
+    ['] noop is hash-import
+    throw ;
+: ref-hashstat ( addr u -- addr' u' )
+    ['] file-hashstat do-refs ;
 : ref-files-in ( addr u -- )
-    do-refs  ['] new-files-in catch  do-files  throw ;
+    ['] new-files-in do-refs ;
 
 : config>dvcs ( o:dvcs -- )
     "~+/.n2o/config" ['] project >body read-config
@@ -444,10 +450,10 @@ Defer hash-import ' noop is hash-import
 
 : file-lsize@ ( addr u -- 64size )
     statbuf lstat ?ior statbuf st_size 64@
-    mode@ S_IFMT and S_IFDIR <> n>64 64and ;
+    mode@ S_IFMT? and S_IFDIR <> n>64 64and ;
 : file-size@ ( addr u -- 64size )
     statbuf stat ?ior statbuf st_size 64@
-    mode@ S_IFMT and S_IFDIR <> n>64 64and ;
+    mode@ S_IFMT? and S_IFDIR <> n>64 64and ;
 
 also net2o-base
 
@@ -455,7 +461,7 @@ also net2o-base
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map ;
 : read-del-fs ( -- )
     del-files[] [: over hash#128 dvcs:perm + le-uw@
-	S_IFMT and S_IFDIR =  IF  /name $, dvcs-rmdir
+	S_IFMT? and S_IFDIR =  IF  /name $, dvcs-rmdir
 	ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp1 $,
 	    dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map ;
 : read-new-fs ( -- )
@@ -604,6 +610,14 @@ User id-check# \ check hash
 	    dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;
+: branches>dvcs' ( -- )
+    branches[] [: dup IF
+	    dvcs( ." read enc hash: " 2dup 85type cr )
+	    read-enc-hashed
+	    c-state off
+	    patch-in$ $@ do-cmd-loop
+	ELSE  2drop  THEN
+    ;] $[]map ;
 
 \ push out a revision
 
@@ -708,7 +722,7 @@ previous
     ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
 	." Nothing to do" cr
     ELSE
-	['] compute-diff gen-cmd$
+	['] compute-diff gen-cmd$ \ 2dup net2o:see
 	dvcs( ." ===== patch len: " dvcs:patch$ $@len . ." =====" cr )
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
@@ -749,13 +763,17 @@ previous
 : dvcs-snap ( addr u -- )
     dvcs:new-dvcs >o  dvcs:message$ $!
     config>dvcs  files>dvcs
-    dvcs:files# [: $@ file-hashstat new-files[] $ins[]f ;] #map
+    dvcs:files# [:
+	dup cell+ $@ drop hash#128 + dvcs:perm le-uw@ $1000 and
+	IF    $@  ref-hashstat ref-files[]
+	ELSE  $@ file-hashstat new-files[]  THEN
+	$ins[]f ;] #map
     ['] compute-diff gen-cmd$ >id-revision
     dvcs-snapentry  save-project  clean-up dvcs:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
-    S_IFMT and S_IFDIR = IF
+    S_IFMT? and S_IFDIR = IF
 	$@ dvcs( ." rd " 2dup type cr ) dvcs:rmdirs[] $ins[] drop
     ELSE  dup $@ dvcs( ." rm " 2dup type cr )
 	delete-file dup 0< IF
@@ -914,7 +932,11 @@ previous
     sync-file-list[] connection .get-needed-files ;
 
 : dvcs-ref-sync ( -- )
-    dvcs:new-dvcs-refs >o branches>dvcs
+    search-last-rev id>branches
+    dvcs:new-dvcs-refs >o
+    branches>dvcs'
+    dvcs:refs[] $[]# 0 ?DO
+	." ref: " I dvcs:refs[] $[]@ 85type cr  LOOP
     dvcs:refs[] connection .get-needed-files
     dvcs:dispose-dvcs-refs o> ;
 
@@ -922,14 +944,13 @@ previous
     dvcs:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
     0 >o dvcs-connects +dvcs-sync-done
-\    net2o-code expect-reply ['] last?, [msg,] end-code
     wait-dvcs-request o>
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
     dvcs-ref-sync
     msg( ." === ref sync done ===" forth:cr )
-    msg-group$ $@ >group last# silent-leave-chat
+    >group last# silent-leave-chat
     dvcs:dispose-dvcs o> ;
 
 0 [IF]
