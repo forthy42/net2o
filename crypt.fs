@@ -609,7 +609,7 @@ drop
 : .sig ( -- )
     sigdate +date sigdate datesize# type
     sig-params ed-sign type keysize emit ;
-: .pk ( -- )  pkc keysize type ;
+: .pk ( -- )  pk@ type ;
 : pk-sig ( addr u -- sig u )
     c:0key c:hash [: .pk .sig ;] $tmp ;
 

@@ -62,8 +62,7 @@ require ../html/parser.fs
     r> close-file throw ;
 
 : add-post { dvcs -- }
-    comments:content$ [: html-untag cr ;]
-    "post.md" execute>file
+    comments:content$ [: html-untag cr ;] "post.md" execute>file
     "post.md" dvcs .dvcs-add ;
 
 : add-media { dvcs -- }
@@ -78,17 +77,25 @@ require ../html/parser.fs
 	cell +LOOP
     THEN ;
 
+also net2o-base
+
+: add-message ( xt -- )
+    project:project$ $@ ?msg-log
+    [: sign[ msg-start execute ( ?chain, ) msg> ;] gen-cmd$ >msg-log ;
+
 : add-plusones { dvcs -- }
     comments:plusOnes[] $@ bounds U+DO
-	I @ >o plusOnes:plusOner{} o>
-	drop \ stub
+	I @ .plusOnes:plusOner{} .author:mapped-key dvcs >o to my-key
+	[: '👍' ulit, msg-like ;] add-message drop 2drop o>
     cell +LOOP ;
 
 : add-reshares { dvcs -- }
     comments:reshares[] $@ bounds U+DO
-	I @ >o reshares:resharer{} o>
-	drop \ stub
+	I @ >o reshares:resharer{} .author:mapped-key dvcs >o to my-key
+	[: '🔃' ( '🐙' ) ulit, msg-like ;] add-message drop 2drop o>
     cell +LOOP ;
+
+previous
 
 : add-comment { dvcs -- }
     comments:content$ [: html-untag cr ;]
@@ -100,6 +107,8 @@ require ../html/parser.fs
 	I @ >o
 	dvcs add-comment
 	dvcs add-media
+	comments:author{} .author:mapped-key dvcs >o to my-key o>
+	"comment" dvcs .(dvcs-ci)
 	dvcs add-plusones
 	dvcs add-reshares
 	o>
@@ -114,7 +123,8 @@ require ../html/parser.fs
     dvcsp add-post
     dvcsp add-album
     dvcsp add-media
-    dvcsp add-comments
+    "post" dvcsp .(dvcs-ci)
     dvcsp add-plusones
     dvcsp add-reshares
-    dvcsp >o save-project dvcs:dispose-dvcs o> ;
+    dvcsp add-comments
+    dvcsp .dvcs:dispose-dvcs ;

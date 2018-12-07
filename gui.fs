@@ -450,7 +450,7 @@ Variable last-bubble-pk
 	0e to borderl fnegate f2* to bordert 0e to borderv
     THEN o o> ;
 : add-dtms ( ticks -- )
-    \small
+    \small blackish
     1n fm* >day { day } day last-day <> IF
 	{{
 	    glue*l day-color# slide-frame dup .button1
