@@ -1075,12 +1075,14 @@ $200 Constant maxmsg#
 
 also net2o-base
 \ chain messages to one previous message
+: chain, ( msgaddr u -- )
+    [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
+	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
+
 : ?chain, ( -- )  chain-mode @ 0= ?EXIT
     last# >r last# $@ ?msg-log
     last# cell+ $[]# 1- dup 0< IF  drop
-    ELSE  last# cell+ $[]@
-	[: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
-	  c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain
+    ELSE  last# cell+ $[]@ chain,
     THEN  r> to last# ;
 
 : (send-avalanche) ( xt -- addr u flag )

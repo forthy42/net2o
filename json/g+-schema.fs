@@ -88,6 +88,7 @@ object class{ postAcl
     value: communityAcl{}
     value: visibleToStandardAcl{}
     value: isLegacyAcl?
+    value: isPublic?
 }class
 
 object class{ collectionAcl

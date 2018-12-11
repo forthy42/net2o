@@ -751,13 +751,13 @@ previous
 : dvcs-add ( addr u -- )
     2dup dirname dup 0<> + dup IF  recurse  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
-    ELSE  "dummy" 2over dvcs:files# #!
+    ELSE  "dummy128dummy128dummy128dummy128" 2over dvcs:files# #!
 	"~+/.n2o/newfiles" append-line  THEN ;
 
 : dvcs-ref ( addr u -- )
     2dup dirname dup 0<> + dup IF  dvcs-add  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
-    ELSE  "dummy" 2over dvcs:files# #!
+    ELSE  "dummy128dummy128dummy128dummy128" 2over dvcs:files# #!
 	"~+/.n2o/reffiles" append-line  THEN ;
 
 : dvcs-snap ( addr u -- )

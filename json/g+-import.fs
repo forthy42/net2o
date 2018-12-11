@@ -17,6 +17,38 @@
 
 require ../html/parser.fs
 
+Variable pics#
+
+".metadata.csv" nip Constant .mtcvs#
+
+: get-pic-filename { d: mtcvs -- }
+    mtcvs r/o open-file throw { fd }
+    pad $100 + $1000 fd read-line throw 2drop
+    pad $100 + $1000 fd read-line throw drop pad $100 + swap
+    ',' $split 2drop
+    over c@ '"' = negate /string
+    2dup + 1- c@ '"' = +
+    mtcvs .mtcvs# -
+    2dup + 4 - 4 2dup ".png" str= >r ".jpg" str= r> or 0= IF
+	[: type ." .jpg" ;] $tmp
+    THEN
+    2swap pics# #!
+    fd close-file throw ;
+
+: get-pic-filenames ( addr u -- )
+    2dup open-dir throw { dd } fpath @ >r fpath off fpath also-path dd
+    [: { dd } !time { | nn }
+	BEGIN
+	    pad $100 dd read-dir throw  WHILE
+		pad swap 2dup "*.metadata.csv" filename-match IF
+		    get-pic-filename
+		ELSE  2drop  THEN
+		1 +to nn
+	REPEAT  drop
+	nn [: ." read " . ." pics in " .time ;]
+	success-color color-execute cr ;] catch
+    fpath $free r> fpath !  dd close-dir throw  throw ;
+
 : get-avatars ( -- )
     avatars[] $[]# 0= ?EXIT \ nothing to do
     "avatars" .net2o-cache/ { d: dir }
@@ -52,7 +84,7 @@ require ../html/parser.fs
 	.avatar-file file-status 0= IF
 	    drop 2drop
 	ELSE
-	    [: ." -o g+:" author:resourceName$ basename type ." .png "
+	    drop [: ." -o g+:" author:resourceName$ basename type ." .png "
 		type ;] $tmp avatars[] $+[]!
 	THEN
     ELSE  2drop  THEN ;
@@ -61,13 +93,15 @@ require ../html/parser.fs
     r/w create-file throw dup >r outfile-execute
     r> close-file throw ;
 
-: add-post { dvcs -- }
-    comments:content$ [: html-untag cr ;] "post.md" execute>file
-    "post.md" dvcs .dvcs-add ;
+: add-file { dvcs d: file -- }
+    comments:content$ [: html-untag cr ;] file execute>file
+    file dvcs .dvcs-add ;
+
+: add-post ( dvcs -- ) "post.md" add-file ;
 
 : add-media { dvcs -- }
-    media:url$ basename 2dup
-    [: dir@ type ." /" 2dup type ;] $tmp symlink ?ior
+    media:url$ basename
+    2dup pics# #@ [: dir@ type ." /" type ;] $tmp 2over symlink ?ior
     dvcs .dvcs-ref ;
 
 : add-album { dvcs -- }
@@ -79,9 +113,11 @@ require ../html/parser.fs
 
 also net2o-base
 
+2Variable post-ref
+
 : add-message ( xt -- )
     project:project$ $@ ?msg-log
-    [: sign[ msg-start execute ( ?chain, ) msg> ;] gen-cmd$ >msg-log ;
+    [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$ >msg-log ;
 
 : add-plusones { dvcs -- }
     comments:plusOnes[] $@ bounds U+DO
@@ -97,34 +133,40 @@ also net2o-base
 
 previous
 
-: add-comment { dvcs -- }
-    comments:content$ [: html-untag cr ;]
-    comments:url$ basename [: type ." .md" ;] $tmp 2dup 2>r execute>file
-    2r> dvcs .dvcs-add ;
+: add-comment ( dvcs -- )
+    comments:url$ basename [: type ." .md" ;] $tmp add-file ;
+
+: create>never ( o:comments -- )
+    comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;
 
 : add-comments { dvcs -- }
     comments:comments[] $@ bounds U+DO
 	I @ >o
 	dvcs add-comment
-	dvcs add-media
+	comments:media{} ?dup-IF  >o dvcs add-media o>  THEN
 	comments:author{} .author:mapped-key dvcs >o to my-key o>
-	"comment" dvcs .(dvcs-ci)
+	create>never
+	"comment" dvcs .(dvcs-ci)  last-msg 2@ post-ref 2!
 	dvcs add-plusones
 	dvcs add-reshares
 	o>
     cell +LOOP ;
 
 : write-out-article ( o:comment -- )
+    >dir
     dvcs:new-dvcs { dvcsp }
-    comments:resourceName$ basename [: ." posts/" type ." /.n2o" ;] $tmp
-    .net2o-cache/ 2dup $1FF init-dir '/' -scan set-dir throw
+    comments:url$ basename [: ." posts/" type ." /.n2o" ;] $tmp
+    .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
     ".n2o/files" touch
-    comments:url$ basename dvcsp >o project:project$ $! "master" project:branch$ $! o>
+    comments:url$ basename dvcsp >o project:project$ $!
+    "master" project:branch$ $! save-project o>
     dvcsp add-post
     dvcsp add-album
-    dvcsp add-media
-    "post" dvcsp .(dvcs-ci)
+    comments:media{} ?dup-IF  >o dvcsp add-media o>  THEN
+    create>never
+    "post" dvcsp .(dvcs-ci)  last-msg 2@ post-ref 2!
     dvcsp add-plusones
     dvcsp add-reshares
     dvcsp add-comments
-    dvcsp .dvcs:dispose-dvcs ;
+    dvcsp .dvcs:dispose-dvcs
+    dir> ;
