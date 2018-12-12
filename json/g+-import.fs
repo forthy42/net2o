@@ -94,13 +94,18 @@ Variable pics#
     r> close-file throw ;
 
 : add-file { dvcs d: file -- }
-    comments:content$ [: html-untag cr ;] file execute>file
+    [:
+	comments:content$ html-untag cr
+	comments:link{} ?dup-IF cr >o
+	    '[' emit link:title$ type ." ](" link:url$ type ')' emit cr
+	    o>  THEN
+    ;] file execute>file
     file dvcs .dvcs-add ;
 
 : add-post ( dvcs -- ) "post.md" add-file ;
 
 : add-media { dvcs -- }
-    media:url$ basename
+    media:url$ basename 2dup delete-file drop
     2dup pics# #@ [: dir@ type ." /" type ;] $tmp 2over symlink ?ior
     dvcs .dvcs-ref ;
 
@@ -117,24 +122,25 @@ also net2o-base
 
 : add-message ( xt -- )
     project:project$ $@ ?msg-log
-    [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$ >msg-log ;
+    [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$
+    +last-signed last-signed 2@ >msg-log ;
 
 : add-plusones { dvcs -- }
     comments:plusOnes[] $@ bounds U+DO
 	I @ .plusOnes:plusOner{} .author:mapped-key dvcs >o to my-key
-	[: '👍' ulit, msg-like ;] add-message drop 2drop o>
+	[: '👍' ulit, msg-like ;] add-message o>
     cell +LOOP ;
 
 : add-reshares { dvcs -- }
     comments:reshares[] $@ bounds U+DO
-	I @ >o reshares:resharer{} .author:mapped-key dvcs >o to my-key
-	[: '🔃' ( '🐙' ) ulit, msg-like ;] add-message drop 2drop o>
+	I @ .reshares:resharer{} .author:mapped-key dvcs >o to my-key
+	[: '🔃' ( '🐙' ) ulit, msg-like ;] add-message o>
     cell +LOOP ;
 
 previous
 
 : add-comment ( dvcs -- )
-    comments:url$ basename [: type ." .md" ;] $tmp add-file ;
+    comments:resourceName$ basename [: type ." .md" ;] $tmp add-file ;
 
 : create>never ( o:comments -- )
     comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;

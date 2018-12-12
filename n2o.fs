@@ -779,8 +779,11 @@ scope{ /chat
 }scope
 
 : start-n2o ( -- )
+    [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug %droprate %droprate \ read in all debugging stuff
     argc @ 1 > IF next-cmd ELSE n2o:help THEN
+    [IFDEF] cov+ save-cov annotate-cov cov% [THEN]
     n2o:bye ;
 
 ' start-n2o is process-args
+
