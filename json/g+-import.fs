@@ -159,7 +159,7 @@ previous
     cell +LOOP ;
 
 : write-out-article ( o:comment -- )
-    >dir
+    >dir redate-mode on
     dvcs:new-dvcs { dvcsp }
     comments:url$ basename [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
@@ -175,4 +175,4 @@ previous
     dvcsp add-reshares
     dvcsp add-comments
     dvcsp .dvcs:dispose-dvcs
-    dir> ;
+    dir> redate-mode off ;

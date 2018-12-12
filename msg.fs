@@ -38,6 +38,7 @@ Variable group-master
 Variable msg-logs
 Variable otr-mode
 Variable chain-mode
+Variable redate-mode
 User replay-mode
 User skip-sig?
 
@@ -840,7 +841,8 @@ event: :>msg-eval ( parent $pack $addr -- )
     msg-group$ $@ group, msg sign[ msg-start ;
 : msg> ( -- )
     \G end a msg block by adding a signature
-    otr-mode @ IF  now>otr  ELSE  now>never  THEN ]pksign ;
+    otr-mode @ IF  now>otr  ELSE
+	redate-mode @ 0= IF  now>never  THEN  THEN ]pksign ;
 : msg-otr> ( -- )
     \G end a msg block by adding a short-time signature
     now>otr ]pksign ;
