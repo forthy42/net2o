@@ -762,12 +762,14 @@ lang:de include-locale lang/de
 lang:zh include-locale lang/zh
 lang:en include-locale lang/en
 
-: ?lang ( addr u -- )
+: ??lang ( addr u -- )
     ['] lang >body find-name-in ?dup-IF  execute  THEN ;
 
-s" LANG" getenv '_' $split 2swap ?lang '.' $split ?lang ?lang
+s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
 \ lsids .lsids
+
+[IFDEF] load-cov  load-cov [THEN]
 
 0 [IF]
 Local Variables:
