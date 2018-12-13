@@ -139,8 +139,10 @@ also net2o-base
 
 previous
 
+Variable comment#
+
 : add-comment ( dvcs -- )
-    comments:resourceName$ basename [: type ." .md" ;] $tmp add-file ;
+    [: ." comment-" 1 comment# +!@ 0 <# # # # #> type ." .md" ;] $tmp add-file ;
 
 : create>never ( o:comments -- )
     comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;
@@ -159,7 +161,7 @@ previous
     cell +LOOP ;
 
 : write-out-article ( o:comment -- )
-    >dir redate-mode on
+    >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcsp }
     comments:url$ basename [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw

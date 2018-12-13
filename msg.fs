@@ -322,7 +322,7 @@ Forward msg:last
     r> r> U+DO
 	c:0key I last# cell+ $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
-	ELSE  2dup 85type ."  <> " hashtmp over 85type  THEN
+	ELSE  ( 2dup 85type ."  <> " hashtmp over 85type )  THEN
     LOOP
     2drop false ;
 
@@ -415,6 +415,7 @@ scope: logstyles
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
 :noname ( -- ) msg-notify ; msg-notify-class is msg:end
+:noname ( xchar -- ) ['] xemit $tmp notify+ ; msg-notify-class is msg:like
 
 :noname ( addr u -- )
     last# >r  2dup key| to msg:id$
@@ -841,8 +842,7 @@ event: :>msg-eval ( parent $pack $addr -- )
     msg-group$ $@ group, msg sign[ msg-start ;
 : msg> ( -- )
     \G end a msg block by adding a signature
-    otr-mode @ IF  now>otr  ELSE
-	redate-mode @ 0= IF  now>never  THEN  THEN ]pksign ;
+    ]pksign ;
 : msg-otr> ( -- )
     \G end a msg block by adding a short-time signature
     now>otr ]pksign ;
@@ -1091,7 +1091,9 @@ also net2o-base
     [: 0 >o [: sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
 previous
-: send-avalanche ( xt -- )      (send-avalanche)
+: send-avalanche ( xt -- )
+    otr-mode @ IF  now>otr  ELSE  now>never  THEN
+    (send-avalanche)
     >r .chat r> 0= IF  .nobody  THEN ;
 
 \ chat helper words
@@ -1359,7 +1361,7 @@ also net2o-base scope: /chat
 : /otrify ( addr u -- )
     \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
-    true otr-mode [:
+    true otr-mode [: now>otr
 	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop

@@ -527,6 +527,7 @@ previous
 ' 2drop commit-class is msg:text
 ' 2drop commit-class is msg:action
 ' 2drop commit-class is msg:chain
+' drop  commit-class is msg:like
 ' noop  commit-class is msg:end
 
 :noname ( addr u -- )
@@ -551,6 +552,7 @@ previous
 ' 2drop search-class is msg:chain
 ' 2drop search-class is msg:re
 ' noop  search-class is msg:end
+' drop  search-class is msg:like
 
 : 3drop  2drop drop ;
 
@@ -568,6 +570,7 @@ previous
 :noname dvcs-log:text$   $! ; dvcs-log-class is msg:text
 :noname dvcs-log:action$ $! ; dvcs-log-class is msg:action
 :noname dvcs-log:chain$  $! ; dvcs-log-class is msg:chain
+' drop dvcs-log-class is msg:like
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ load-msg ;
@@ -735,7 +738,7 @@ previous
     THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command
-    dvcs:new-dvcs >o (dvcs-ci)  dvcs:dispose-dvcs o> ;
+    dvcs:new-dvcs >o now>never (dvcs-ci)  dvcs:dispose-dvcs o> ;
 
 : dvcs-diff ( -- )
     dvcs:new-dvcs >o dvcs:oldid$ dvcs-readin
@@ -771,7 +774,8 @@ previous
 	ELSE  $@ file-hashstat new-files[]  THEN
 	$ins[]f ;] #map
     ['] compute-diff gen-cmd$ >id-revision
-    dvcs-snapentry  save-project  clean-up dvcs:dispose-dvcs o> ;
+    now>never  dvcs-snapentry
+    save-project  clean-up dvcs:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
     dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
