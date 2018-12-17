@@ -185,9 +185,19 @@ S_IFMT $1000 invert and Constant S_IFMT?
 Variable patch-in$
 
 : read-enc-hashed ( hash1 u1 -- )
+    \ 2dup 85type space
     2dup enchash>filename patch-in$ $slurp-file
     patch-in$ $@ c:decrypt
-    patch-in$ $@ >file-hash str= 0= !!wrong-hash!! ;
+    patch-in$ $@ >file-hash \ 2dup 85type cr
+    str= 0= !!wrong-hash!! ;
+
+: ?read-enc-hashed ( hash1 u1 -- )
+    2dup dvcs-objects #@ 2dup d0= IF
+	2drop 2dup read-enc-hashed
+	patch-in$ $@ 2swap dvcs-objects #!
+    ELSE
+	patch-in$ $! 2drop
+    THEN ;
 
 \ in-memory file hash+contents database
 
@@ -607,7 +617,7 @@ User id-check# \ check hash
 : branches>dvcs ( -- )
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    read-enc-hashed
+	    ?read-enc-hashed
 	    dvcs:clean-delta  c-state off
 	    patch-in$ $@ do-cmd-loop
 	    dvcs:clean-delta
@@ -616,7 +626,7 @@ User id-check# \ check hash
 : branches>dvcs' ( -- )
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    read-enc-hashed
+	    ?read-enc-hashed
 	    c-state off
 	    patch-in$ $@ do-cmd-loop
 	ELSE  2drop  THEN

@@ -123,7 +123,7 @@ also net2o-base
 : add-message ( xt -- )
     project:project$ $@ ?msg-log
     [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$
-    +last-signed last-signed 2@ >msg-log ;
+    +last-signed last-signed 2@ >msg-log 2drop ;
 
 : add-plusones { dvcs -- }
     comments:plusOnes[] $@ bounds U+DO
@@ -172,7 +172,7 @@ Variable comment#
     dvcsp add-album
     comments:media{} ?dup-IF  >o dvcsp add-media o>  THEN
     create>never
-    "post" dvcsp .(dvcs-ci)  last-msg 2@ post-ref 2!
+    "post" dvcsp .(dvcs-ci)  last-msg 2@ ~~ post-ref 2!
     dvcsp add-plusones
     dvcsp add-reshares
     dvcsp add-comments

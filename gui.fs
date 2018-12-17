@@ -80,10 +80,10 @@ Variable slide#
 
 : prev-slide ( -- )
     slide-time% anims[] $@len IF  anim-end 50% f*  THEN
-    slide# @ ['] prev-anim >animate +textures ;
+    slide# @ ['] prev-anim >animate +textures +lang ;
 : next-slide ( -- )
     slide-time% anims[] $@len IF  anim-end 50% f*  THEN
-    slide# @ ['] next-anim >animate +textures ;
+    slide# @ ['] next-anim >animate +textures +lang ;
 
 \ frames
 
@@ -99,7 +99,7 @@ Variable slide#
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
     2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e ELSE +sync +resize THEN
-    $FF swap .fade fdrop ;
+    .fade fdrop ;
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
@@ -110,7 +110,7 @@ Variable slide#
 0e 0 shake-lr
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    glue*wh swap slide-frame dup .button1 ;
+    glue*wh slide-frame dup .button1 ;
 
 : err-fade? ( -- flag ) 0 { flag }
     anims@ 0 ?DO
@@ -151,21 +151,21 @@ forward gui-msgs
 tex: net2o-logo
 
 [IFDEF] light-login \ light color sceme
-    $0000BFFF Value dark-blue#
-    $FF0040FF Value pw-num-col#
-    $FFFFFFFF Value pw-bg-col#
-    $AAAAAAFF Value pw-text-col#
-    $0000FF08 Value chbs-col#
-    $FFFFFFFF Value login-bg-col#
-    $000000FF Value show-sign-color#
+    $FF0040FF text-color, FValue pw-num-col#
+    $AAAAAAFF text-color, FValue pw-text-col#
+    $000000FF text-color, FValue show-sign-color#
+    $FFFFFFFF color, FValue pw-bg-col#
+    $0000BFFF color, FValue dark-blue#
+    $0000FF08 color, FValue chbs-col#
+    $FFFFFFFF color, FValue login-bg-col#
 [ELSE]
-    $88FF00FF Value dark-blue#
-    $FF0040FF Value pw-num-col#
-    $550000FF Value pw-bg-col#
-    $cc6600FF Value pw-text-col#
-    $00FF0020 Value chbs-col#
-    $000020FF Value login-bg-col#
-    $FFFFFFFF Value show-sign-color#
+    $FF0040FF text-color, FValue pw-num-col#
+    $cc6600FF text-color, FValue pw-text-col#
+    $FFFFFFFF text-color, FValue show-sign-color#
+    $550000FF color, FValue pw-bg-col#
+    $88FF00FF color, FValue dark-blue#
+    $00FF0020 color, FValue chbs-col#
+    $000020FF color, FValue login-bg-col#
 [THEN]
 
 glue new Constant glue*lll±
@@ -174,10 +174,11 @@ glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglu
 glue new Constant glue*shrink
 glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue! o>
 
-{{ login-bg-col# pres-frame dark-blue# ' dark-blue >body !
+{{ login-bg-col# pres-frame dark-blue# ' dark-blue >body f!
     {{
 	glue*lll± }}glue
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
+	1 ms \ dummy wait
 	!i18n l" net2o GUI" /title
 	!lit
 	{{
@@ -195,8 +196,9 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		glue*l }}h
 		{{
 		    glue-sright }}glue
-		    glue*l }}glue
-		    l" wrong passphrase!" $FF000000 to x-color }}i18n-text
+		    glue*l }}glue \bold
+		    l" wrong passphrase!" $FF000000 $FF0000FF fade-color,
+		    to x-color }}i18n-text \regular
 		    25%b dup to pw-err
 		    glue*l }}glue
 		    glue-sleft }}glue
@@ -211,11 +213,11 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    }}h
 		    pw-field ' pw-done edit[]
 		    {{
-			\large \sans $FFFFFFFF to x-color "👁" }}text
+			\large \sans $FFFFFFFF text-color, to x-color "👁" }}text
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
 		    }}z \regular
 		    : pw-show/hide ( flag -- )
-			dup 0 show-sign-color# rot select show-pw-sign >o to text-color o>
+			dup IF  0 text-color,  ELSE  show-sign-color#  THEN  show-pw-sign >o to text-color o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
@@ -230,7 +232,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
     }}v box[]
 }}z box[] to pw-frame
 
-$0000BFFF ' dark-blue >body !
+$0000BFFF text-color, ' dark-blue >body f!
 
 \ id frame
 
@@ -280,13 +282,13 @@ $00FFFFFF ,
 
 : show-nick ( o:key -- )
     ke-imports @ >im-color# cells { ki }
-    {{ glue*l imports#rgb-bg ki + @ slide-frame dup .button1
+    {{ glue*l imports#rgb-bg ki + @ color, slide-frame dup .button1
 	{{
-	    {{ \large imports#rgb-fg ki + @ to x-color
+	    {{ \large imports#rgb-fg ki + @ color, to x-color
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
-		    {{ glue*l $00FF0020 slide-frame dup .button3
+		    {{ glue*l $00FF0020 color, slide-frame dup .button3
 			['] .pet-base $tmp }}text 25%b
 		    }}z
 		THEN
@@ -334,7 +336,7 @@ event: :>chat-connects  gui-chat-connects
 
 : show-group ( last# -- )
     dup { g -- } cell+ $@ drop cell+ >o
-    {{ glue*l $CCAA44FF slide-frame dup .button1
+    {{ glue*l $CCAA44FF color, slide-frame dup .button1
 	{{
 	    {{ \large blackish
 		\regular \sans g $@ }}text 25%b
@@ -358,7 +360,7 @@ event: :>chat-connects  gui-chat-connects
 
 : }}button-lit { d: text color -- o }
     {{
-        glue*l color font-size# 40% f* }}frame dup .button2
+        glue*l color color, font-size# 40% f* }}frame dup .button2
         text }}text 25%b /center
     }}z box[] ;
 
@@ -367,7 +369,7 @@ also [ifdef] android android [then]
 tex: vp-title
 
 : nicks-title ( -- )
-    {{ glue*l $000000FF slide-frame dup .button1
+    {{ glue*l $000000FF color, slide-frame dup .button1
 	{{
 	    {{
 		{{
@@ -386,7 +388,7 @@ tex: vp-title
 
 previous
 
-{{ $FFFF80FF pres-frame
+{{ $FFFF80FF color, pres-frame
     {{
 	{{
 	    nicks-title
@@ -394,19 +396,19 @@ previous
 	}}h box[]
 	{{
 	    {{
-		{{ glue*l $303000FF bar-frame
+		{{ glue*l $303000FF color, bar-frame
 		{{ \script l" My key" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to mykey-box
-		{{ glue*l $300030FF bar-frame
+		{{ glue*l $300030FF color, bar-frame
 		{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to groups-box /vflip
-		{{ glue*l $003030FF bar-frame
+		{{ glue*l $003030FF color, bar-frame
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
 	    tex: vp-nicks vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
-	    $444444FF to slider-color
-	    $CCCCCCFF to slider-fgcolor
+	    $444444FF color, to slider-color
+	    $CCCCCCFF color, to slider-fgcolor
 	    font-size# 33% f* to slider-border
 	dup font-size# 66% f* fdup vslider }}h box[]
     }}v box[]
@@ -453,7 +455,7 @@ Variable last-bubble-pk
     \small blackish
     1n fm* >day { day } day last-day <> IF
 	{{
-	    glue*l day-color# slide-frame dup .button1
+	    glue*l day-color# color, slide-frame dup .button1
 	    \bold day ['] .day $tmp }}text 25%b \regular
 	}}z /center msgs-box .child+
     THEN  day to last-day
@@ -461,7 +463,7 @@ Variable last-bubble-pk
     60 fm* fsplit { minute } minute 10 / last-minute 10 / <> or
     IF
 	{{
-	    glue*l hour-color# slide-frame dup .button1
+	    glue*l hour-color# color, slide-frame dup .button1
 	    60 fm* fsplit minute hour
 	    [: .## ':' emit .## ':' emit .## 'Z' emit ;] $tmp }}text 25%b
 	}}z /center msgs-box .child+
@@ -515,18 +517,19 @@ Variable last-bubble-pk
 		    {{
 			glue*l }}glue
 			\bold pk ['] .key-id $tmp }}text 25%b
-			>o imports#rgb-fg last-ki >im-color# cells + @ to text-color
+			>o imports#rgb-fg last-ki >im-color# cells + @
+			color, to text-color
 			o o> me? IF  swap  THEN
 			\regular
 		    }}h
 		    glue*l imports#rgb-bg last-ki >im-color# cells + @
-		    slide-frame dup .button2
+		    color, slide-frame dup .button2
 		    swap
 		}}z me? 0= IF  chatname-tab  THEN
 	    }}v
 	    {{
 		glue*l $000000FF $FFFFFFFF last-otr? select
-		slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+		color, slide-frame dup me? IF .rbubble ELSE .lbubble THEN
 		"bubble" name!
 		{{
 		    new-msg-par
@@ -566,7 +569,7 @@ Variable last-bubble-pk
 ; wmsg-class to msg:url
 :noname { d: string -- o }
     {{
-	glue*l $FFCCCCFF slide-frame dup .button1
+	glue*l $FFCCCCFF color, slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
 ; wmsg-class to msg:coord
@@ -575,8 +578,8 @@ Variable last-bubble-pk
 	pk key|
 	2dup 0 .pk@ key| str=
 	last-otr? IF  my-signal-otr# other-signal-otr#
-	ELSE  my-signal# other-signal#  THEN  rot select
-	glue*l swap slide-frame dup .button1 40%b >r
+	ELSE  my-signal# other-signal#  THEN  rot select color,
+	glue*l slide-frame dup .button1 40%b >r
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
     }}z msg-box .child+
 ; wmsg-class to msg:signal
@@ -669,10 +672,10 @@ wmsg-o >o msg-table @ token-table ! o>
 
 \ +db click( \ )
 
-{{ $80FFFFFF pres-frame
+{{ $80FFFFFF color, pres-frame
     {{
 	{{
-	    glue*l $000000FF slide-frame dup .button1
+	    glue*l $000000FF color, slide-frame dup .button1
 	    {{
 		\large whitish
 		"⬅" }}text 40%b [: leave-chats prev-slide ;] over click[]
@@ -693,7 +696,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ glue*lll $FFFFFFFF font-size# 40% f* }}frame dup .button3
+	    {{ glue*lll $FFFFFFFF color, font-size# 40% f* }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
@@ -701,7 +704,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    >o act >o [: connection .chat-next-line ;] is edit-next-line o> o o>
 	    >o act >o [: connection .chat-prev-line ;] is edit-prev-line o> o o>
 	    {{
-		glue*l $80FF80FF font-size# 40% f* }}frame dup .button2
+		glue*l $80FF80FF color, font-size# 40% f* }}frame dup .button2
 		!i18n l" Send" }}text' !lit 40%b
 		[: data >o chat-edit-enter "" to text$ o>
 		    chat-edit engage ;] chat-edit click[]
@@ -767,7 +770,7 @@ lang:en include-locale lang/en
 
 s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
-\ lsids .lsids
+lsids .lsids
 
 [IFDEF] load-cov  load-cov [THEN]
 

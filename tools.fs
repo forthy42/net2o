@@ -686,7 +686,8 @@ $10 Constant datesize#
     BEGIN  2dup u<  WHILE  2dup + 2/ { left right $# }
 	    2dup startdate@ $# a[] $[]@ startdate@ 64over 64over 64= IF
 		64drop 64drop
-		2dup $# a[] $[]@ compare dup 0= IF  drop 2drop  -1  EXIT  THEN
+		2dup $# a[] $[]@ compare dup 0= IF
+		    drop 2drop  $# invert  EXIT  THEN
 		0<  ELSE  64u<  THEN
 	    IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r

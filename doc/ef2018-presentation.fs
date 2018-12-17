@@ -2,7 +2,6 @@
 
 \ Copyright (C) 2018 Bernd Paysan
 
-
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
 \ the Free Software Foundation, either version 3 of the License, or
@@ -57,9 +56,9 @@ glue ' new static-a with-allocater Constant glue-right
     [ glue-left  .hglue-c ]L df!
     [ glue-right .hglue-c ]L df! ;
 : trans-frame ( o -- )
-    >o $00000000 to frame-color o> ;
+    >o transp# to frame-color o> ;
 : solid-frame ( o -- )
-    >o $FFFFFFFF to frame-color o> ;
+    >o white# to frame-color o> ;
 : !slides ( nprev n -- )
     over >r
     n2-img m2-img $q-img
@@ -74,8 +73,9 @@ glue ' new static-a with-allocater Constant glue-right
     slides[] $[] @ /flip drop
     slides[] $[] @ /flop drop glue0 ;
 : fade-img ( r0..1 img1 img2 -- ) >r >r
-    $FF fm* f>s $FFFFFF00 or dup
-    r> >o to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
+    [ whitish x-color 1e f+ ] Fliteral fover f-
+    r> >o to frame-color parent-w .parent-w /flop drop o>
+    [ whitish x-color ] Fliteral f+
     r> >o to frame-color parent-w .parent-w /flop drop o> ;
 : fade!slides ( r0..1 n -- r0..1 n )
     dup m/$-switch = IF
@@ -193,9 +193,9 @@ glue-right >o 1glue vglue-c glue! 1glue dglue-c glue! o>
 tex: net2o-logo
 tex: minos2
 tex: $quid
-' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue
-' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue
-' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue
+' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue drop
+' minos2 "net2o-minos2.png" 0.666e }}image-file Constant minos2-glue drop
+' $quid  "squid-logo-200.png" 0.5e }}image-file Constant $quid-glue drop
 
 : logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
@@ -205,45 +205,46 @@ tex: $quid
     to baseline# r> ;
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    color, glue*wh swap slide-frame dup .button1 simple[] ;
+    color, glue*wh slide-frame dup .button1 simple[] ;
+
+' }}i18n-text is }}text'
 
 {{
 {{ glue-left }}glue
 
 \ page 0
 {{
-$FFFFFFFF pres-frame
-{{
-    glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-    ' }}i18n-text is }}text'
-    l" net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
-    l" ($quid = ethical micropayment with efficient BlockChain)" /subtitle
+    $FFFFFFFF pres-frame
     {{
-	tex: edinburgh-coa
+	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+	l" net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
+	l" ($quid = ethical micropayment with efficient BlockChain)" /subtitle
 	{{
-	    glue*l }}glue
-	    ' edinburgh-coa "edinburgh-coa.jpg" 0.5e }}image-file
-	    Constant coa-glue /center
-	    0e to x-baseline
-	    glue*l }}glue
-	}}v
+	    {{
+		glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+		tex: edinburgh-coa
+		' edinburgh-coa "edinburgh-coa.jpg" 0.5e }}image-file
+		Constant coa-glue /center
+		0e to x-baseline
+		glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+	    }}v
 	glue*2 }}glue }}z
-    l" Bernd Paysan" /author
-    l" EuroForth 2018, Edinburgh" /location
-    glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-}}v box[] >o font-size# to border o Value title-page o o>
+	l" Bernd Paysan" /author
+	l" EuroForth 2018, Edinburgh" /location
+	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+    }}v box[] >o font-size# to border o Value title-page o o>
 }}z box[] dup >slides
 
 \ page 1
 {{
-$FFFFFFFF pres-frame
+    $FFFFFFFF pres-frame
     {{
 	l" Motivation" /title
-	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
 	tex: bad-gateway
 	' bad-gateway "bad-gateway.png" 0.666e }}image-file
 	Constant bgw-glue /center
-	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -266,7 +267,7 @@ $FFFFFFFF pres-frame
 	    l"   You can't reasonably expect privacy on your own PC" "🤦🤦🤦🤦🤦🤦🤦" e\\
 	    l"   “Crypto” now means BitCoin" "🤦🤦🤦🤦🤦🤦🤦🤦" e\\
 	    tex: vp-eu glue*l ' vp-eu }}vp vp[]
-	    $FFBFFFFF color, dup to slider-color to slider-fgcolor
+	    $FFBFFFFF color, fdup to slider-color to slider-fgcolor
 	    font-size# f2/ f2/ to slider-border
 	    dup font-size# f2/ fdup vslider
 	}}h box[]
@@ -394,7 +395,7 @@ $BFFFFFFF pres-frame
 	glue*l }}glue
 	tex: $quid-logo-large
 	' $quid-logo-large "squid-logo.png" 0.666e }}image-file
-	drop >o $FFFFFFC0 to frame-color o o>
+	drop >o $FFFFFFC0 color, to frame-color o o>
 	/right
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -624,7 +625,6 @@ to top-widget
 also opengl
 
 : !widgets ( -- )
-    top-widget .htop-resize
     top-widget .htop-resize
     1e ambient% sf! set-uniforms ;
 

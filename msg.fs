@@ -142,9 +142,10 @@ event: :>load-msg ( last# -- )
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
     last# $@ ?msg-log
-    [: last# cell+ $ins[]date  dup to log#
-      dup -1 = IF drop #0. ( 0 to last# )  ELSE  last# cell+ $[]@  THEN
-    ;] msglog-sema c-section 2dup last-msg 2! ;
+    [: last# cell+ $ins[]date  dup  dup 0< xor to log#
+	log# last# cell+ $[]@ last-msg 2!
+	0< IF  #0.  ELSE  last-msg 2@  THEN
+    ;] msglog-sema c-section ;
 : ?save-msg ( addr u -- )
     ?msg-log
     last# otr-mode @ replay-mode @ or 0= and
