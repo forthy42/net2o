@@ -201,8 +201,9 @@ end-class hashfs-class
     r> c:key! ; hashfs-class to fs-read
 :noname ( addr u -- n )
     dup 0= IF  nip  EXIT  THEN
+    $make { w^ file-pad$ } file-pad$ $@
     c:key@ >r  fs-cryptkey $@ drop c:key!
-    save-mem 2dup c:encrypt over >r fs:fs-write r> free throw
+    2dup c:encrypt fs:fs-write file-pad$ $free
     r> c:key! ; hashfs-class to fs-write
 :noname ( -- )
     fs:fs-close

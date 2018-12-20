@@ -340,9 +340,9 @@ code-buf$
 :noname ( -- 64dest ) 64#0 ; to cmddest
 
 : gen-cmd ( xt -- $addr )
-    cmdbuf-o @ >r code-buf$ 0 cmd$ !@ >r
+    cmdbuf-o @ >r code-buf$ 0 cmd$ !@ >r cmdbuf# @ >r
     catch
-    r> cmd$ !@ r> cmdbuf-o !  swap throw ;
+    r> cmdbuf# !  r> cmd$ !@ r> cmdbuf-o !  swap throw ;
 : gen-cmd$ ( xt -- addr u )
     gen-cmd  1 tmp$# +!  tmp$ $!buf  tmp$ $@ ;
 

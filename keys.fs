@@ -346,7 +346,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ke-imports @ >im-color 85type <default> ;
 : .rsk ( nick u -- )
     skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
-: .key ( addr u -- ) drop cell+ >o
+: .key ( addr u -- )
     ." nick:   " .nick cr
     ." pubkey: " ke-pk $@ 85type cr
     ke-sk @ IF
@@ -355,8 +355,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	." wallet: " ke-wallet sec@ .black85 ."  (keep secret!)" cr  THEN
     ." valid:  " ke-selfsig $@ .sigdates cr
     ." groups: " ke-groups $@ .in-groups cr
-    ." perm:   " ke-mask @ .perm cr
-    o> ;
+    ." perm:   " ke-mask @ .perm cr ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
     ke-wallet sec@ nip IF
@@ -434,7 +433,8 @@ Variable secret-nicks#
     ke-selfsig $@ drop 64@ 64>d [: '$' emit 0 ud.r ;] $10 base-execute
     ." . d>64 ke-first! " ke-type @ . ." ke-type !"  cr o> ;
 
-: .keys ( -- ) key# [: ." index: " dup $@ 85type cr cell+ $@ .key ;] #map ;
+: .keys ( -- ) key# [: ." index: " dup $@ 85type cr cell+ $@
+	 drop cell+ ..key ;] #map ;
 : dumpkeys ( -- ) key# [: cell+ $@ dumpkey ;] #map ;
 
 : key>o ( addrkey u1 -- o / 0 )
@@ -1061,7 +1061,7 @@ Forward !my-addr$
     perm-mask ! pubkey $! ;
 
 : replace-key 1 /string { rev-addr u -- o } \ revocation ticket
-    key( ." Replace:" cr o cell- 0 .key )
+    key( ." Replace:" cr .key )
     import#self import-type !
     s" #revoked" dup >r ke-nick $+!
     ke-nick $@ r> - ke-prof $@ ke-sigs[] ke-type @
@@ -1069,7 +1069,7 @@ Forward !my-addr$
     ke-type ! [: ke-sigs[] $+[]! ;] $[]map ke-prof $! ke-nick $!
     rev-addr pkrk# ke-pk $!
     rev-addr u + 1- dup c@ 2* - $10 - $10 ke-selfsig $!
-    key( ." with:" cr o cell- 0 .key ) o o>
+    key( ." with:" cr .key ) o o>
     import#new import-type ! ;
 
 : renew-key ( revaddr u1 keyaddr u2 -- o )

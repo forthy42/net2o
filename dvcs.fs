@@ -172,11 +172,12 @@ S_IFMT $1000 invert and Constant S_IFMT?
 \ probably needs padding...
 
 : write-enc-hashed ( addr1 u1 -- addrhash85 u2 )
+    $make { w^ enc-pad$ } enc-pad$ $@
     keyed-hash-out hash#128 ['] 85type $tmp 2>r
     enchash  2>r
-    save-mem 2dup c:encrypt  over swap
+    2dup c:encrypt
     ?.net2o/objects  2r> hash>filename  spit-file
-    free throw  2r> ;
+    enc-pad$ $free 2r> ;
 
 : enchash>filename ( hash1 u1 -- filename u2 )
     keyed-hash-out hash#128 smove
@@ -503,8 +504,8 @@ Variable id-files[]
     id-files[] $[]off
     dvcs:files# [: dup cell+ $@ 2>r $@ 2r> [: forth:type forth:type ;] $tmp
 	id-files[] $ins[] drop ;] #map \ sort filenames
-    [: id-files[] [:
-	    over hash#128 $, dvcs-read hash#128 /string
+    [:  id-files[] [: drop hash#128 $, dvcs-read ;] $[]map
+	id-files[] [: hash#128 /string
 	    0 dvcs:perm /string 2dup $,
 	    2 /string file-lsize@ lit, dvcs-write
 	;] $[]map ;] gen-cmd$
@@ -735,7 +736,8 @@ previous
     ref-files[] $[]# new-files[] $[]# del-files[] $[]# or or 0= IF
 	." Nothing to do" cr
     ELSE
-	['] compute-diff gen-cmd$ \ 2dup net2o:see
+	['] compute-diff gen-cmd$
+	$make { w^ diff$ } diff$ $@ \ 2dup net2o:see
 	dvcs( ." ===== patch len: " dvcs:patch$ $@len . ." =====" cr )
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
@@ -745,6 +747,7 @@ previous
 	save-project  filelist-out
 	"~+/.n2o/newfiles" ?delete-file
 	"~+/.n2o/reffiles" ?delete-file
+	diff$ $free
     THEN  clean-up ;
 
 : dvcs-ci ( addr u -- ) \ checkin command

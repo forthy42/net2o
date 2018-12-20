@@ -148,17 +148,19 @@ Variable comment#
     comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;
 
 : add-comments { dvcs -- }
+    my-key-default >r
     comments:comments[] $@ bounds U+DO
 	I @ >o
 	dvcs add-comment
 	comments:media{} ?dup-IF  >o dvcs add-media o>  THEN
-	comments:author{} .author:mapped-key dvcs >o to my-key o>
+	comments:author{} .author:mapped-key to my-key-default
 	create>never
 	"comment" dvcs .(dvcs-ci)  last-msg 2@ post-ref 2!
-	dvcs add-plusones
-	dvcs add-reshares
+	dvcs add-plusones \ plusones not exported at the moment
+	\ dvcs add-reshares \ reshares of comments not possible
 	o>
-    cell +LOOP ;
+    cell +LOOP
+    r> to my-key-default ;
 
 : write-out-article ( o:comment -- )
     >dir redate-mode on  comment# off
@@ -172,7 +174,7 @@ Variable comment#
     dvcsp add-album
     comments:media{} ?dup-IF  >o dvcsp add-media o>  THEN
     create>never
-    "post" dvcsp .(dvcs-ci)  last-msg 2@ ~~ post-ref 2!
+    "post" dvcsp .(dvcs-ci)  last-msg 2@ post-ref 2!
     dvcsp add-plusones
     dvcsp add-reshares
     dvcsp add-comments
