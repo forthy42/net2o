@@ -97,6 +97,7 @@ Variable slide#
 0 Value pw-num
 0 Value phrase-unlock
 0 Value create-new-id
+0 Value phrase-again
 0 Value plus-login
 0 Value minus-login
 0 Value nick-edit
@@ -196,11 +197,13 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		\large "👤" }}text \normal
 		{{
 		    glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
+		    transp# to x-color
+		    "f(g" }}text /left 25%b
 		    {{
 			nt
-			pw-text-col# to x-color
+			white# to x-color \bold
 			"nick" }}edit 25%b dup Value nick-field
-			glue*lll }}glue
+			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
 		}}z box[] blackish
 		{{ \large "👤" }}text \normal }}h /phantom
@@ -279,13 +282,12 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	    glue-sright }}glue
 	    glue*lll }}glue
 	}}h box[] \skip >bl
-	{{  \small
-	    glue*ll }}glue
-	    !i18n l" Enter passphrase to unlock" /subtitle !lit dup to phrase-unlock
-	    !i18n l" Create new ID" /subtitle !lit /hflip dup to create-new-id
-	    !i18n l" Enter passphrase again" /subtitle !lit /hflip dup to create-new-id
-	    glue*ll }}glue
-	}}h box[] >bl
+	{{  \small dark-blue !i18n
+	    l" Enter passphrase to unlock" }}text' /center dup to phrase-unlock
+	    l" Create new ID" }}text' /center dup to create-new-id /hflip
+	    l" Enter passphrase again" }}text' /center dup to phrase-again /hflip
+	    !lit
+	}}z box[] /center >bl
 	{{ glue*lll }}glue }}v
     }}v box[]
 }}z box[] to pw-frame
