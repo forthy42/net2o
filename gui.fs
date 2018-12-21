@@ -95,6 +95,11 @@ Variable slide#
 
 0 Value pw-err
 0 Value pw-num
+0 Value phrase-unlock
+0 Value create-new-id
+0 Value plus-login
+0 Value minus-login
+0 Value nick-edit
 
 : err-fade ( r addr -- )
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
@@ -121,6 +126,11 @@ Variable slide#
 forward show-nicks
 forward gui-msgs
 0 Value title-vp
+
+Variable nick$
+
+: nick-done ( max span addr pos -- max span addr pos flag )
+    over 3 pick nick$ $! true ;
 
 : pw-done ( max span addr pos -- max span addr pos flag )
     err-fade? IF  false  EXIT  THEN
@@ -176,11 +186,27 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 
 {{ login-bg-col# pres-frame dark-blue# ' dark-blue >body f!
     {{
-	glue*lll± }}glue
+	{{ glue*lll± }}glue }}v
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
-	1 ms \ dummy wait
 	!i18n l" net2o GUI" /title
 	!lit
+	{{
+	    {{
+		glue*ll }}glue
+		\large "👤" }}text \normal
+		{{
+		    glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
+		    {{
+			nt
+			pw-text-col# to x-color
+			"nick" }}edit 25%b dup Value nick-field
+			glue*lll }}glue
+		    }}h bx-tab nick-field ' nick-done edit[]
+		}}z box[] blackish
+		{{ \large "👤" }}text \normal }}h /phantom
+		glue*ll }}glue
+	    }}h box[]
+	}}v box[] /vflip dup to nick-edit
 	{{
 	    glue*lll }}glue
 	    glue-sleft }}glue
@@ -209,7 +235,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			pw-text-col# to x-color
 			"" }}pw dup Value pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
-			glue*l }}glue
+			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[]
 		    {{
@@ -223,12 +249,44 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
 		    \normal
 		}}h box[]
-	    }}z box[]
+	    }}z box[] bx-tab
+	    {{
+		\large
+		"🔴" }}text \normal  >o font-size# 10% f* to raise o o>
+		$000000FF dup text-emoji-color, to x-color
+		"➕" }}text /center dup to plus-login
+		"➖" }}text /center dup to minus-login /vflip
+		\large
+		: id-show-hide ( flag -- )
+		    IF
+			phrase-unlock /hflip
+			create-new-id /flop
+			plus-login /flip
+			minus-login /flop
+			nick-edit /flop
+			[ x-baseline ] FLiteral nick-edit >o
+			fdup gap% f* to gap to baseline o>
+		    ELSE
+			phrase-unlock /flop
+			create-new-id /hflip
+			plus-login /flop
+			minus-login /flip
+			nick-edit /vflip
+			0e nick-edit >o to baseline o>
+		    THEN +resize +lang ;
+		\normal
+	    }}z ' id-show-hide false toggle[]
 	    glue-sright }}glue
 	    glue*lll }}glue
 	}}h box[] \skip >bl
-	!i18n l" Enter passphrase to unlock" /subtitle !lit
-	glue*lll }}glue
+	{{  \small
+	    glue*ll }}glue
+	    !i18n l" Enter passphrase to unlock" /subtitle !lit dup to phrase-unlock
+	    !i18n l" Create new ID" /subtitle !lit /hflip dup to create-new-id
+	    !i18n l" Enter passphrase again" /subtitle !lit /hflip dup to create-new-id
+	    glue*ll }}glue
+	}}h box[] >bl
+	{{ glue*lll }}glue }}v
     }}v box[]
 }}z box[] to pw-frame
 
@@ -259,32 +317,32 @@ new-htab tab-glue: chatname-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$33EE33FF , \ myself is pretty green
-$BBDD66FF , \ manually imported is green, too
-$55DD55FF , \ scanned is more green
-$CCEE55FF , \ seen in chat is more yellow
-$EECC55FF , \ imported from DHT is pretty yellow
-$FF8844FF , \ invited is very yellow
-$FF6600FF , \ provisional is very orange
-$FF0000FF , \ untrusted is last
+$33EE33FF color, sf, \ myself is pretty green
+$BBDD66FF color, sf, \ manually imported is green, too
+$55DD55FF color, sf, \ scanned is more green
+$CCEE55FF color, sf, \ seen in chat is more yellow
+$EECC55FF color, sf, \ imported from DHT is pretty yellow
+$FF8844FF color, sf, \ invited is very yellow
+$FF6600FF color, sf, \ provisional is very orange
+$FF0000FF color, sf, \ untrusted is last
 Create imports#rgb-fg
-$003300FF ,
-$000000FF ,
-$000000FF ,
-$000000FF ,
-$0000FFFF ,
-$0000FFFF ,
-$0000FFFF ,
-$00FFFFFF ,
+$003300FF color, sf,
+$000000FF color, sf,
+$000000FF color, sf,
+$000000FF color, sf,
+$0000FFFF color, sf,
+$0000FFFF color, sf,
+$0000FFFF color, sf,
+$00FFFFFF color, sf,
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
 
 : show-nick ( o:key -- )
-    ke-imports @ >im-color# cells { ki }
-    {{ glue*l imports#rgb-bg ki + @ color, slide-frame dup .button1
+    ke-imports @ >im-color# sfloats { ki }
+    {{ glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
-	    {{ \large imports#rgb-fg ki + @ color, to x-color
+	    {{ \large imports#rgb-fg ki + sf@ to x-color
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
@@ -517,13 +575,13 @@ Variable last-bubble-pk
 		    {{
 			glue*l }}glue
 			\bold pk ['] .key-id $tmp }}text 25%b
-			>o imports#rgb-fg last-ki >im-color# cells + @
-			color, to text-color
+			>o imports#rgb-fg last-ki >im-color# sfloats + sf@
+			to text-color
 			o o> me? IF  swap  THEN
 			\regular
 		    }}h
-		    glue*l imports#rgb-bg last-ki >im-color# cells + @
-		    color, slide-frame dup .button2
+		    glue*l imports#rgb-bg last-ki >im-color# sfloats + sf@
+		    slide-frame dup .button2
 		    swap
 		}}z me? 0= IF  chatname-tab  THEN
 	    }}v
@@ -671,6 +729,7 @@ wmsg-o >o msg-table @ token-table ! o>
     64#-1 line-date 64!  $lastline $free ;
 
 \ +db click( \ )
+\ +db gui( \ )
 
 {{ $80FFFFFF color, pres-frame
     {{
@@ -730,7 +789,6 @@ Value n2o-frame
 
 : !widgets ( -- )
     top-widget .htop-resize
-    top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
 
@@ -770,7 +828,7 @@ lang:en include-locale lang/en
 
 s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
-lsids .lsids
+\ lsids .lsids
 
 [IFDEF] load-cov  load-cov [THEN]
 
