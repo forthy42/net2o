@@ -177,10 +177,8 @@ glue-right >o 1glue vglue-c glue! 1glue dglue-c glue! o>
 
 tex: net2o-logo
 tex: 35c3-logo
-1 ms \ strange delay necessary here
 ' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue drop
 ' 35c3-logo "35c3-logo.png" 0.666e }}image-file Constant 35c3-glue drop
-1 ms \ strange delay necessary here
 
 : logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
@@ -195,8 +193,8 @@ tex: 35c3-logo
     baseline# 0e to baseline#
     {{  {{ leftimg }}image-tex glue*ll }}glue
 	rightimg }}image-tex }}h
-	\small transparent
-	l" logo" }}i18n-text /right
+	\large transparent
+	l" Logo" }}i18n-text /right
     glue*l }}glue
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
@@ -319,6 +317,24 @@ $10 stack: vp-tops
 }}z box[] /flip dup >slides
 
 \ page 4
+
+{{
+    $FFFFFFFF pres-frame
+    {{
+	l" Right to data portability" /title
+	l" Art. 20 GDPR" /subtitle
+	\skip \footnote
+	l" 1. The data subject shall have the right to receive the personal data concerning him or her, which he or she has provided to a controller, in a structured, commonly used and machine-readable format and have the right to transmit those data to another controller without hindrance from the controller to which the personal data have been provided, where:" p\\ \skip 
+	    l"  (a) the processing is based on consent pursuant to point (a) of Article 6(1) or point (a) of Article 9(2) or on a contract pursuant to point (b) of Article 6(1); and" p\\
+	    l"  (b) the processing is carried out by automated means." p\\ \skip 
+	    l" 2. In exercising his or her right to data portability pursuant to paragraph 1, the data subject shall have the right to have the personal data transmitted directly from one controller to another, where technically feasible." p\\ \skip 
+	    l" 3. The exercise of the right referred to in paragraph 1 of this Article shall be without prejudice to Article 17. That right shall not apply to processing necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the controller." p\\ \skip 
+	    l" 4. The right referred to in paragraph 1 shall not adversely affect the rights and freedoms of others." p\\
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+    }}v box[] >bdr
+}}z box[] /flip dup >slides
+
+\ page 4
 {{
     $BFFFBFFF pres-frame
     {{
@@ -348,7 +364,80 @@ $10 stack: vp-tops
     $E8E8E7FF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
-	\skip \mono \small !lit
+	\skip \mono \footnote !lit
+	"~/Downloads/Takeout/Stream in Google+/Beiträge> cat '20181101 - +++ #net2o Import von Google+_ Avatare_.json'" p\\
+	{{
+	    {{
+	"{" \\
+	"  \"url\": \"https://plus.google.com/+BerndPaysan/posts/P6CiHfAJgpy\"," \\
+	"  \"creationTime\": \"2018-11-01 17:51:40+0100\"," \\
+	"  \"updateTime\": \"2018-11-01 17:51:40+0100\"," \\
+	"  \"author\": {" \\
+	"    \"displayName\": \"Bernd Paysan\"," \\
+	"    \"profilePageUrl\": \"https://plus.google.com/+BerndPaysan\"," \\
+	"    \"avatarImageUrl\": \"https://lh3.googleusercontent.com/a-/AN66SAyasgoOyZqe-kQqoDpoFmrBKAll3N1-jLFUel43iAg\\u003ds64-c\"," p\\
+	"    \"resourceName\": \"users/114020517704693241828\"" \\
+	"  }," \\
+        "  \"content\": \"\\u003cb\\u003e+++ \\u003c/b\\u003e\\u003cb\\u003e\\u003ca rel\\u003d\\\"nofollow\\\" class\\u003d\\\"ot-hashtag bidi_isolate\\\" href\\u003d\\\"https://plus.google.com/s/%23net2o/posts\\\" \\u003e#net2o\\u003c/a\\u003e\\u003c/b\\u003e\\u003cb\\u003e Import von Google+: Avatare importieren +++\\u003c/b\\u003e\\u003cbr\\u003e\\u003cbr\\u003eDer Takeout von Google+ enthält nur die URLs der Avatare. Für einen vernünftig aussehenden Import ist der Avatar aber unverzichtbar. Und es sind nicht nur ein paar Avatare, mein Takeout hat über 4000 Avatar-URLs drin. Die Datenmenge hält sich in Grenzen, das sind 23MB. Wie importiert man die jetzt flott? Da das alles kleine Dateien sind, bestimmt die Latenz die Ladezeit — also müssen mehrere Verbindungen parallel geöffnet werden. Bei um die 32 Verbindungen habe ich derzeit das Maximum gesehen (etwas über eine Sekunde Download-Zeit für die 4000 Avatare), das ist sicher auch noch abhängig davon, was für eine Bandbreite man zur Verfügung hat — das ist jetzt am mit einem Gigabit angebundenen Server gemessen, auf einem Client am WLAN sieht man auch mit 16 Verbindungen keinen schnelleren Download. Ich splitte die Liste der herunterzuladenden Avatare also auf 128 Stück auf, und starte pro Liste einen parallelen curl-Prozess.\\u003cbr\\u003e\\u003cbr\\u003eZusätzlich haben die Dateien noch die großartige Eigenschaft, dass jeder Avatar als “photo.jpg” in der URL ist, was schon mal blöd ist, weil man keine Zuordnung von User-Profile zum Dateinamen hat, und zum zweiten, weil das in Wahrheit ein PNG ist, und kein JPEG (ja, wirklich!). Ich hätte gern die Dateien als \\u0026lt;user-id\\u0026gt;.png, danke. Gut, muss man also für jede URL noch ein -o konfigurieren.\\u003cbr\\u003e\\u003cbr\\u003eDann hat Google natürlich noch mehrere Server-Namen, um die Avatare aufzuteilen (4, um genau zu sein), und um die Verbindung wiederzuverwenden (curl kann sogar Pipelining!), muss man also Requests nach Server aufteilen. Der Einfachheit halber sortiere ich die Liste also vorher.\\u003cbr\\u003e\\u003cbr\\u003eUnd dann muss man natürlich noch warten, bis alle Prozesse wieder beendet sind, denn erst dann sind die Dateien ja da. Das geht aber zum Glück, dafür gibt es den Bash-Befehl wait. Damit man sieht, wie lange das dauert, mit time:\\u003cbr\\u003e\\u003cbr\\u003etime eval \\u0026#39;(for i in avatars.sh.*; do curl -s $(cat $i) \\u0026amp; done; wait)\\u0026#39;\\u003cbr\\u003e\\u003cbr\\u003eWie schon vorher angekündigt: Jeder fremde User bekommt ein vorläufiges Keypair (also eine ID), mit dem seine Messages signiert werden können. Und natürlich wird der Avatar Teil dieser ID. In net2o sind Objekte alle über Hashes indiziert, also auch diese Datei.\\u003cbr\\u003e\\u003cbr\\u003eIch musste dann noch das SAVE-KEYS anpassen, weil das alles “secret keys” sind, die aber nicht so behandelt werden dürfen. Der secret key ist da ja nur vorläufig drin.\\u003cbr\\u003e\\u003cbr\\u003eNatürlich werden schon heruntergeladene Avatare nur einmal heruntergeladen, d.h. wenn man den nächsten Import startet, nur für die neuen Kontakte. Die vorläufigen IDs werden deterministisch gebaut, d.h. die ändern sich auch nicht, wenn man mehrmals importiert.\\u003cbr\\u003e\\u003cbr\\u003eDamit ist der erste Schritt erledigt: IDs sind importiert. Mit diesen IDs kann ich dann den nächsten Schritt angreifen: Tatsächliche Postings importieren. Die müssen ja der jeweiligen ID zugeordnet werden.\"," p\\
+        "  \"link\": {" \\
+        "    \"title\": \"json/g+-schema.fs · master · Bernd Paysan / net2o\"," p\\
+        "    \"url\": \"https://git.net2o.de/bernd/net2o/blob/master/json/g+-schema.fs\"," p\\
+        "    \"imageUrl\": \"http://git.net2o.de/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png\"" p\\
+        "  }," \\
+        "  \"resourceName\": \"users/114020517704693241828/posts/UgiEEMxaTyXK0ngCoAEC\"," p\\
+        "  \"plusOnes\": [{" \\
+        "    \"plusOner\": {" \\
+        "      \"displayName\": \"Alexander Nolting\"," \\
+        "      \"profilePageUrl\": \"https://plus.google.com/+AlexanderNolting\"," p\\
+        "      \"avatarImageUrl\": \"https://lh3.googleusercontent.com/a-/AN66SAznEomPiCcn4UwcKFyxeN_PF8MZ4OfR_eBAk_71OQ\\u003ds64-c\"," p\\
+        "      \"resourceName\": \"users/109141459210065659338\"" \\
+        "    }" \\
+        "  }, {" \\
+        "    \"plusOner\": {" \\
+        "      \"displayName\": \"Michael Stuhr\"," \\
+        "      \"profilePageUrl\": \"https://plus.google.com/100221681241123059187\"," p\\
+        "      \"avatarImageUrl\": \"https://lh3.googleusercontent.com/a-/AN66SAypGjmduWzTrkGMuqsOM2WFbSCLCL5LpeMTriUNYQ\\u003ds64-c\"," p\\
+        "      \"resourceName\": \"users/100221681241123059187\"" \\
+        "    }" \\
+        "  }, {" \\
+        "    \"plusOner\": {" \\
+        "      \"displayName\": \"Thomas Bindewald\"," \\
+        "      \"profilePageUrl\": \"https://plus.google.com/111230804128406013164\"," p\\
+        "      \"avatarImageUrl\": \"https://lh3.googleusercontent.com/a-/AN66SAxVa3SNIL9rWdnxffPfWBpKhYZDZzSwfX8HtMjIyXs\\u003ds64-c\"," p\\
+        "      \"resourceName\": \"users/111230804128406013164\"" \\
+        "    }" \\
+        "  }, {" \\
+        "    \"plusOner\": {" \\
+        "      \"displayName\": \"Christoph S\"," \\
+        "      \"profilePageUrl\": \"https://plus.google.com/+ChristophS\"," \\
+        "      \"avatarImageUrl\": \"https://lh3.googleusercontent.com/a-/AN66SAyVPtuSrWHDhSNA6dy0TkdVcVJYiXYQZWZfdRAh7Q8\\u003ds64-c\"," p\\
+        "      \"resourceName\": \"users/109481623926683998721\"" \\
+        "    }" \\
+        "  }]," \\
+        "  \"postAcl\": {" \\
+        "    \"collectionAcl\": {" \\
+        "      \"collection\": {" \\
+        "        \"resourceName\": \"collections/UWXXX\"," \\
+        "        \"displayName\": \"Softwarethemen\"" \\
+        "      }" \\
+        "    }," \\
+        "    \"isPublic\": true" \\
+        "  }" \\
+        "}" \\
+	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
+	    !i18n \sans \normal
+	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    dup font-size# f2/ f2/ fdup vslider
+	}}h box[]
+    }}v box[] >bdr
+}}z box[] /flip dup >slides    
+
+\ page 5b
+{{
+    $E8E8E7FF pres-frame
+    {{
+	l" Google+ JSON Takeout" /title
+	\skip \mono \footnote !lit
 	"~/Downloads/Takeout/Stream in Google+/Beiträge> cat '20181101 - +++ #net2o Import von Google+_ Avatare_.json'" p\\
 	{{
 	    {{
@@ -408,10 +497,10 @@ $10 stack: vp-tops
         "    \"isPublic\": true" \\
         "  }" \\
         "}" \\
-	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
+	tex: vp-google2+ glue*lll ' vp-google2+ }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
 	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ fdup vslider
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides    
@@ -421,7 +510,7 @@ $10 stack: vp-tops
     $C8E8E7FF pres-frame
     {{
 	l" Facebook JSON takeout" /title
-	\skip \mono \small !lit
+	\skip \mono \footnote !lit
 	"~/Downloads/Facebook/posts> cat your_posts.json" \\
 	{{
 	    {{
@@ -432,7 +521,7 @@ $10 stack: vp-tops
 		"      \"attachments\": [" \\
 		"        {" \\
 		"          \"data\": [" \\
-		"            {," \\
+		"            {" \\
 		"              \"media\": {" \\
 		"                \"uri\": \"photos_and_videos/videos/10000000_1829816733782306_2429950629012045824_n_10215835485911416.mp4\"," p\\
 		"                \"creation_timestamp\": 1539297649," \\
@@ -468,7 +557,7 @@ $10 stack: vp-tops
 	        tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
 	    $C8E8E7FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ fdup vslider
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -478,7 +567,7 @@ $10 stack: vp-tops
     $E8E8E7FF pres-frame
     {{
 	l" Twitter JSON takeout" /title
-	\skip \mono \small !lit
+	\skip \mono \footnote !lit
 	"~/Downloads/Twitter> cat tweet.js " \\
 	{{
 	    {{
@@ -522,7 +611,7 @@ $10 stack: vp-tops
 	        tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
 	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ fdup vslider
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides    
@@ -532,7 +621,7 @@ $10 stack: vp-tops
     $F8F8F7FF pres-frame
     {{
 	l" Blogger Atom feed takeout" /title
-	\skip \mono \small !lit
+	\skip \mono \footnote !lit
 	"~/Downloads/Takeout/Blogger/Blogs/Bernds Blog> cat feed.atom " \\
 	{{
 	    {{
@@ -566,7 +655,7 @@ $10 stack: vp-tops
 		tex: vp-blogger glue*lll ' vp-blogger }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
 	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ fdup vslider
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides    
@@ -586,7 +675,52 @@ $10 stack: vp-tops
     }}v box[] >bdr
 }}z box[] /flip dup >slides    
 
-\ page 17
+\ page 10
+{{
+    $E8FFE7FF pres-frame
+    {{
+	l" Social Networks in net2o" /title
+	vt{{
+	    l" Texts " l" as markdown" b\\
+	    l" Images " l" JPEG, PNG" b\\
+	    l" Movies " l" mkv/webm" b\\
+	    l" Timeline " l" Chat log with link to DVCS project" b\\
+	    l" Posting " l" DVCS project, keeping data+comments together" b\\
+	    l" DVCS project " l" Chat log with link to patchsets/snapshots" b\\
+	    l" Reshare " l" Fork+added posting+log message in own timeline" b\\
+	    l" Comment " l" Fork+added posting+pull request" b\\
+	    l" Likes " l" Chat log messages direct in DVCS project" b\\
+	}}vt
+    }}v box[] >bdr
+}}z box[] /flip dup >slides    
+
+\ page 11
+{{
+    $C8CFF7FF pres-frame
+    {{
+	l" Things still to do" /title
+	vt{{
+	    l" • " l" Finish bulk importer for Google+" b\\
+	    l" • " l" Writ bulk importers for Facebook/Twitter/Blogger/etc." b\\
+	    l" • " l" Use avatars to display users's ID" b\\
+	    l" • " l" Markdown renderer" b\\
+	    l" • " l" Key handover to actual contact (temporary keypair)" b\\
+	}}vt
+    }}v box[] >bdr
+}}z box[] /flip dup >slides    
+
+\ page 12
+{{
+    $C8CFF7FF pres-frame
+    {{
+	l" The non–technical problem" /title
+	vt{{
+	    l" • " l" Get your contacts over to net2o" b\\
+	}}vt
+    }}v box[] >bdr
+}}z box[] /flip dup >slides    
+
+\ page 13
 {{
     $FFFFFFFF pres-frame
     {{
@@ -621,6 +755,7 @@ to top-widget
 also opengl
 
 : !widgets ( -- )
+    set-fullscreen-hint 1 set-compose-hint
     top-widget .htop-resize
     vp-tops get-stack 0 ?DO  .vp-top  LOOP
     1e ambient% sf! set-uniforms ;
@@ -633,6 +768,8 @@ also opengl
 previous
 
 also [IFDEF] android android [THEN]
+
+\ 3 0 [DO] reload-textures [LOOP]
 
 : presentation ( -- )
     1config
