@@ -100,6 +100,9 @@ glue ' new static-a with-allocater Constant glue-right
 
 : slide-frame ( glue color -- o )
     font-size# 70% f* }}frame ;
+: vp-frame ( color -- o ) \ drop $FFFFFFFF
+    color, glue*wh slide-frame dup .button3 simple[] ;
+: -25%b >o current-font-size% -25% f* to border o o> ;
 
 box-actor class
     \ sfvalue: s-x
@@ -183,8 +186,6 @@ tex: 35c3-logo
 : logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
     {{ 2r> }}image-tex dup >r /right
-	\small transparent
-	l" logo" }}i18n-text /right
     glue*l }}glue
     }}v >o font-size# f2/ to border o o>
     to baseline# r> ;
@@ -193,8 +194,6 @@ tex: 35c3-logo
     baseline# 0e to baseline#
     {{  {{ leftimg }}image-tex glue*ll }}glue
 	rightimg }}image-tex }}h
-	\large transparent
-	l" Logo" }}i18n-text /right
     glue*l }}glue
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
@@ -230,7 +229,7 @@ $10 stack: vp-tops
 		    l" Bernd Paysan" /author
 		    l" 35c3 Leipzig, Chaos West Stage, #wefixthenet" /location
 		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
-		tex: vp-title glue*l ' vp-title }}vp vp[]
+		tex: vp-title2 glue*l ' vp-title2 }}vp vp[]
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
 
@@ -289,15 +288,15 @@ $10 stack: vp-tops
     $FFdFdFFF pres-frame
     {{
 	l" Cloud[o]Calypse" /title
-	l" something went terminally wrong in a cloud" /subtitle
+	l" something went terminally wrong in a cloud [2]" /subtitle
 	\skip
 	l" Clouds failing" /subsection
 	l"   Microsoft bought github (install gitlab-ee)" \\
 	l"   Dropbox dropped Linux client (except ext4 unencrypted)" \\
-	l"   Facebook: Cambridge Analytica scandal+many API holes" \\
+	l"   Facebook: Cambridge Analytica scandal+many API holes [3]" \\
 	l"   Google+ closing due to possible leak (both users affected)" \\
 	l"   tumblr deleted all porn (remains: 1% contents)" \\
-	l"   Tinder only allows buddhist monks to sign in (just kidding)" \\
+	l"   Can't date on Tinder, dating violates Facebook’s policy" \\
 	\skip
 	l" Root causes" /subsection
 	l"   toxic ad–based revenue model" \\
@@ -317,7 +316,61 @@ $10 stack: vp-tops
 }}z box[] /flip dup >slides
 
 \ page 4
+{{
+    $222222FF pres-frame
+    ' dark-blue >body f@  ' blackish >body f@
+    $FFFF88FF text-color, ' dark-blue >body f!
+    ' whitish >body f@    ' blackish >body f!
+    {{
+	l" Ad–based business = toxic?" /title
+	vt{{
+	    l" • " l" Incentive to keep you on the site" b\\
+	    l" • " l" Best way to keep you: controversial discussion" b\\
+	    l"   " l" (no dislikes to force you to comment if you don't agree)" b\\
+	    l" • " l" Incentive to make you easily manipulated" b\\
+	    l" • " l" Worst “fake news” are indeed the ads themselves" b\\
+	    l" • " l" Incentive to gather all kinds of information to target ads to you" b\\
+	    l" • " l" Make you post about your private things" b\\
+	    l" • " l" Incentive for participants to do influencer marketing" b\\
+	    \skip
+	    l" Beware: applies to journals and TV, too" \\
+	}}vt
+	glue*ll }}glue
+    }}v box[] >bdr
+    {{
+	glue*ll }}glue
+	tex: duty-calls
+	' duty-calls "duty_calls.png" 0.95e }}image-file drop /right
+    }}v box[] >bdr
+    ' blackish >body f!  ' dark-blue >body f!
+}}z box[] /flip dup >slides
 
+\ page 5
+{{
+    $FFDDBBFF pres-frame
+    {{
+	l" Centralized/Federated/P2P?" /title
+	vt{{
+	    l" Centralized" /subsection
+	    l" + " l" good funding, robust hardware and attack protection" b\\
+	    l" – " l" lacks privacy, honeypot, captive, EOL at whim of CEO" b\\
+	    l" – " l" diverse global censorship, possible toxic business model" b\\
+	    l" Federated" /subsection
+	    l" + " l" not captive, small business models" b\\
+	    l" ± " l" regional censorship (nodes blacklisted, e.g. Lolicon Mastodon nodes)" b\\
+	    l" – " l" poor funding, underpowered hardware/attack protection" b\\
+	    l" – " l" lacks privacy, EOL of notes at whim of node admin" b\\
+	    l" Peer2Peer" /subsection
+	    l" + " l" Full control over your node, good privacy" b\\
+	    l" ± " l" non–existend censorship (attracts censorship refugees)" b\\
+	    l" – " l" Full responsibility for your node" b\\
+	    l" – " l" Development funding? Otherwise cheap" b\\
+	}}vt
+	glue*ll }}glue
+    }}v box[] >bdr
+}}z box[] /flip dup >slides
+
+\ page 6
 {{
     $FFFFFFFF pres-frame
     {{
@@ -334,7 +387,7 @@ $10 stack: vp-tops
     }}v box[] >bdr
 }}z box[] /flip dup >slides
 
-\ page 4
+\ page 6
 {{
     $BFFFBFFF pres-frame
     {{
@@ -430,7 +483,7 @@ $10 stack: vp-tops
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 5b
 {{
@@ -503,7 +556,7 @@ $10 stack: vp-tops
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 6
 {{
@@ -614,7 +667,7 @@ $10 stack: vp-tops
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 8
 {{
@@ -658,7 +711,7 @@ $10 stack: vp-tops
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 9
 {{
@@ -673,7 +726,7 @@ $10 stack: vp-tops
 	    l" • " l" Temporary secret keys for all those other authors" b\\
 	}}vt
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 10
 {{
@@ -689,10 +742,10 @@ $10 stack: vp-tops
 	    l" DVCS project " l" Chat log with link to patchsets/snapshots" b\\
 	    l" Reshare " l" Fork+added posting+log message in own timeline" b\\
 	    l" Comment " l" Fork+added posting+pull request" b\\
-	    l" Likes " l" Chat log messages direct in DVCS project" b\\
+	    l" Likes " l" Chat log messages directly in DVCS project" b\\
 	}}vt
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 11
 {{
@@ -701,30 +754,35 @@ $10 stack: vp-tops
 	l" Things still to do" /title
 	vt{{
 	    l" • " l" Finish bulk importer for Google+" b\\
-	    l" • " l" Writ bulk importers for Facebook/Twitter/Blogger/etc." b\\
+	    l" • " l" Write bulk importers for Facebook/Twitter/Blogger/etc." b\\
 	    l" • " l" Use avatars to display users's ID" b\\
 	    l" • " l" Markdown renderer" b\\
-	    l" • " l" Key handover to actual contact (temporary keypair)" b\\
+	    l" • " l" Album viewer" b\\
+	    l" • " l" Movie player" b\\
+	    l" • " l" Key handover to contact in net2o world (temporary keypair)" b\\
+	    l" • " l" Mark imported keys as not trustworthy" b\\
 	}}vt
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 12
 {{
     $C8CFF7FF pres-frame
     {{
-	l" The non–technical problem" /title
+	l" The non–technical problems" /title
 	vt{{
 	    l" • " l" Get your contacts over to net2o" b\\
+	    l" • " l" How to make a social network a nice place?" b\\
+	    l" • " l" Funding of net2o?" b\\
 	}}vt
     }}v box[] >bdr
-}}z box[] /flip dup >slides    
+}}z box[] /flip dup >slides
 
 \ page 13
 {{
     $FFFFFFFF pres-frame
     {{
-	l" Literatur & Links" /title
+	l" Literatur & Links" /title \small
 	vt{{
 	    l" Bernd Paysan  " l" net2o fossil repository" bi\\
 	    l" 🔗" l" https://net2o.de/" bm\\
@@ -734,10 +792,13 @@ $10 stack: vp-tops
 	    [: s" xdg-open https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" system ;] 0 click[]
 	    l"  " l" worlds-biggest-data-breaches-hacks/" bm\\
 	    [: s" xdg-open https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" system ;] 0 click[]
+	    l" Marvin Strathmann  " l" Hallo Mark, viel Spaß mit Deinen Erinnerungen auf Facebook 2018" bi\\
+	    l" 🔗" l" https://heise.de/-4254681" bm\\
+	    [: s" xdg-open https://heise.de/-4254681" system ;] 0 click[]
 	}}vt
 	glue*l }}glue
 	tex: qr-code
-	' qr-code "qr-code.png" 13e }}image-file drop /center
+	' qr-code "qr-code.png" 12e }}image-file drop /center
 	qr-code nearest
 	glue*l }}glue
     }}v box[] >bdr

@@ -392,7 +392,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 
 ### messaging commands ###
 
-+ $34 msg ( -- o:msg )
++ $34 message ( -- o:msg )
   push a message object
 + $21 msg-group ( $:group -- )
   set group

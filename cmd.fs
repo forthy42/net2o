@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require set-compsem.fs
+
 \ net2o commands are protobuf coded, not byte coded.
 
 ustack string-stack
@@ -430,7 +432,7 @@ Defer doc(gen  ' noop is doc(gen
 	s" )" str= UNTIL  ELSE  2drop  THEN ;
 
 : ( ( "type"* "--" "type"* "rparen" -- ) ')' parse 2drop ;
-comp: drop cmdsig @ IF  ')' parse 2drop  EXIT  THEN
+compsem: cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     doc(gen (>sig ;
 
 0 net2o: dummy ( -- ) ;

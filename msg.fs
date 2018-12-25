@@ -599,7 +599,7 @@ Variable group-list[]
 
 scope{ net2o-base
 
-$34 net2o: msg ( -- o:msg ) \g push a message object
+$34 net2o: message ( -- o:msg ) \g push a message object
     perm-mask @ perm%msg and 0= !!msg-perm!!
     ?msg-context n:>o c-state off  0 to last# ;
 
@@ -642,7 +642,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     THEN ;
 
 :noname skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
-    ELSE  pk-sig?  THEN ;  ' msg  2dup
+    ELSE  pk-sig?  THEN ;  ' message  2dup
 msging-class to start-req
 msging-class to nest-sig
 msg-class to start-req
@@ -840,12 +840,12 @@ event: :>msg-eval ( parent $pack $addr -- )
     $, msg-group ;
 : <msg ( -- )
     \G start a msg block
-    msg-group$ $@ group, msg sign[ msg-start ;
+    msg-group$ $@ group, message sign[ msg-start ;
 : msg> ( -- )
-    \G end a msg block by adding a signature
+    \G end a message block by adding a signature
     ]pksign ;
 : msg-otr> ( -- )
-    \G end a msg block by adding a short-time signature
+    \G end a message block by adding a short-time signature
     now>otr ]pksign ;
 : msg-log, ( -- addr u )
     last-signed 2@ >msg-log ;
@@ -862,7 +862,7 @@ previous
 
 also net2o-base
 : [msg,] ( xt -- )  last# >r
-    msg-group$ $@ dup IF  msg ?destpk 2dup >group $,
+    msg-group$ $@ dup IF  message ?destpk 2dup >group $,
 	execute  end-with
     ELSE  2drop drop  THEN  r> to last# ;
 
@@ -884,7 +884,7 @@ also net2o-base
       sign[ msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
 
 : silent-join, ( -- )
-    last# $@ dup IF  msg $, msg-join  end-with
+    last# $@ dup IF  message $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
@@ -1644,7 +1644,7 @@ scope{ /chat
 : avalanche-to ( addr u o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
     o to connection
-    net2o-code expect-msg msg
+    net2o-code expect-msg message
     last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with
     end-code ;
