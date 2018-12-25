@@ -213,8 +213,9 @@ $10 stack: vp-tops
 	\ page 0
 	{{
 	    $FFFFFF00 pres-frame
-	    ' dark-blue >body f@
+	    ' dark-blue >body f@  ' blackish >body f@
 	    ' redish >body f@ ' dark-blue >body f!
+	    $00CCCCFF dup text-emoji-color, ' blackish >body f!
 
 	    tex: cloudcalypse
 	    1 ms
@@ -225,7 +226,23 @@ $10 stack: vp-tops
 		    l" CloudCalypse" /title
 		    l" It looks like you’ve reached the end." /subtitle
 		    l" How to take your data into net2o" /subtitle
-		    glue*2 }}glue
+		    {{
+			{{ \tiny
+			    glue*l }}glue
+			    {{  nt
+				{{ glue*lll }}glue l" ἀποκάλυψις" }}text' }}h bx-tab
+				l"  ➡ " }}text'
+				{{ l" uncovering" }}text' glue*lll }}glue }}h bx-tab
+			    }}h /center
+			    {{
+				{{ glue*lll }}glue l" cloud[o]calypse" }}text' }}h bx-tab
+				l"  ➡ " }}text'
+				{{ l" σύννεφο καταστροφή" }}text' glue*lll }}glue }}h bx-tab
+			    }}h /center
+			    glue*l }}glue
+			}}v box[]
+			glue*2 }}glue
+		    }}z box[]
 		    l" Bernd Paysan" /author
 		    l" 35c3 Leipzig, Chaos West Stage, #wefixthenet" /location
 		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
@@ -233,7 +250,7 @@ $10 stack: vp-tops
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
 
-	    ' dark-blue >body f!
+	    ' blackish >body f!  ' dark-blue >body f!
 	}}z box[] dup >slides
 
 \ page 1
@@ -245,16 +262,6 @@ $10 stack: vp-tops
 	tex: bad-gateway
 	' bad-gateway "bad-gateway.png" 0.666e }}image-file
 	Constant bgw-glue /center
-	{{  nt
-	    {{ glue*lll }}glue l" ἀποκάλυψις" }}text' }}h bx-tab
-	    l"  ➡ " }}text'
-	    {{ l" uncovering" }}text' glue*lll }}glue }}h bx-tab
-	}}h /center
-	{{
-	    {{ glue*lll }}glue l" cloud[o]calypse" }}text' }}h bx-tab
-	    l"  ➡ " }}text'
-	    {{ l" σύννεφο καταστροφή" }}text' glue*lll }}glue }}h bx-tab
-	}}h /center
 	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -301,7 +308,7 @@ $10 stack: vp-tops
 	l" Root causes" /subsection
 	l"   toxic ad–based revenue model" \\
 	l"   user+password authentication" \\
-	l"   your data is on someone else's computer" \\
+	l"   your data is on someone else’s computer" \\
 	
 	glue*l }}glue
     }}v box[] >bdr
@@ -326,7 +333,7 @@ $10 stack: vp-tops
 	vt{{
 	    l" • " l" Incentive to keep you on the site" b\\
 	    l" • " l" Best way to keep you: controversial discussion" b\\
-	    l"   " l" (no dislikes to force you to comment if you don't agree)" b\\
+	    l" 👎 " l" (no dislikes to force you to comment if you don't agree)" b\\
 	    l" • " l" Incentive to make you easily manipulated" b\\
 	    l" • " l" Worst “fake news” are indeed the ads themselves" b\\
 	    l" • " l" Incentive to gather all kinds of information to target ads to you" b\\
@@ -362,9 +369,9 @@ $10 stack: vp-tops
 	    l" – " l" lacks privacy, EOL of notes at whim of node admin" b\\
 	    l" Peer2Peer" /subsection
 	    l" + " l" Full control over your node, good privacy" b\\
+	    l" + " l" Development funding? Otherwise cheap" b\\
 	    l" ± " l" non–existend censorship (attracts censorship refugees)" b\\
 	    l" – " l" Full responsibility for your node" b\\
-	    l" – " l" Development funding? Otherwise cheap" b\\
 	}}vt
 	glue*ll }}glue
     }}v box[] >bdr
@@ -767,7 +774,7 @@ $10 stack: vp-tops
 
 \ page 12
 {{
-    $C8CFF7FF pres-frame
+    $F8CFF7FF pres-frame
     {{
 	l" The non–technical problems" /title
 	vt{{
