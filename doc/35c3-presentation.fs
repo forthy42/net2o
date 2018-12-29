@@ -213,7 +213,6 @@ $10 stack: vp-tops
 	\ page 0
 	{{
 	    $FFFFFF00 pres-frame
-	    ' dark-blue >body f@  ' blackish >body f@
 	    ' redish >body f@ ' dark-blue >body f!
 	    $00CCCCFF dup text-emoji-color, ' blackish >body f!
 
@@ -250,12 +249,12 @@ $10 stack: vp-tops
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
 
-	    ' blackish >body f!  ' dark-blue >body f!
 	}}z box[] dup >slides
 
 \ page 1
 {{
-    $FFFFFFFF pres-frame
+    ' whitish >body f@ ' blackish >body f!
+    $000000FF pres-frame
     {{
 	l" Motivation" /title
 	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
@@ -268,7 +267,7 @@ $10 stack: vp-tops
 
 \ page 2
 {{
-    $FF7F7FFF pres-frame
+    $3F0000FF pres-frame
     {{
 	l" 5 Years after Snowden" /title
 	l" What changed?" \\
@@ -292,7 +291,7 @@ $10 stack: vp-tops
 
 \ page 3
 {{
-    $FFdFdFFF pres-frame
+    $3F2020FF pres-frame
     {{
 	l" Cloud[o]Calypse" /title
 	l" something went terminally wrong in a cloud [2]" /subtitle
@@ -354,7 +353,7 @@ $10 stack: vp-tops
 
 \ page 5
 {{
-    $FFDDBBFF pres-frame
+    $442200FF pres-frame
     {{
 	l" Centralized/Federated/P2P?" /title
 	vt{{
@@ -379,7 +378,7 @@ $10 stack: vp-tops
 
 \ page 6
 {{
-    $FFFFFFFF pres-frame
+    $000000FF pres-frame
     {{
 	l" Right to data portability" /title
 	l" Art. 20 GDPR" /subtitle
@@ -396,7 +395,7 @@ $10 stack: vp-tops
 
 \ page 6
 {{
-    $BFFFBFFF pres-frame
+    $200020FF pres-frame
     {{
 	l" net2o in a nutshell" /title
 	l" net2o consists of the following 6 layers (implemented bottom up):" \\
@@ -413,7 +412,8 @@ $10 stack: vp-tops
 	    l" 4. " l" Timing driven delay minimizing flow control" b\\
 	    l" 5. " l" Stack–oriented tokenized command language" b\\
 	    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
-	    l" 7. " l" Apps in a sandboxed environment for displaying content" b\\
+	    l" 7. " l" Apps in a sandboxed environment for displaying content"
+	    b\\
 	}}vt
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
@@ -421,7 +421,21 @@ $10 stack: vp-tops
 
 \ page 5
 {{
-    $E8E8E7FF pres-frame
+    $202020FF pres-frame
+    {{
+	l" Google+ JSON Takeout" /title
+	\skip
+	l" 🔗" l" https://takeout.google.com/settings/takeout" bm\\
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	tex: g+takeout
+	' g+takeout "google-takeout.png" 1.333e }}image-file drop /center
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+    }}v box[] >bdr
+}}z box[] /flip dup >slides
+    
+\ page 5
+{{
+    $202020FF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
 	\skip \mono \footnote !lit
@@ -486,7 +500,7 @@ $10 stack: vp-tops
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -494,7 +508,7 @@ $10 stack: vp-tops
 
 \ page 5b
 {{
-    $E8E8E7FF pres-frame
+    $202020FF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
 	\skip \mono \footnote !lit
@@ -559,7 +573,7 @@ $10 stack: vp-tops
         "}" \\
 	tex: vp-google2+ glue*lll ' vp-google2+ }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -567,7 +581,7 @@ $10 stack: vp-tops
 
 \ page 6
 {{
-    $C8E8E7FF pres-frame
+    $000040FF pres-frame
     {{
 	l" Facebook JSON takeout" /title
 	\skip \mono \footnote !lit
@@ -616,7 +630,7 @@ $10 stack: vp-tops
         "    }," \\
 	        tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $C8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    $000040FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -624,7 +638,7 @@ $10 stack: vp-tops
 
 \ page 7
 {{
-    $E8E8E7FF pres-frame
+    $202020FF pres-frame
     {{
 	l" Twitter JSON takeout" /title
 	\skip \mono \footnote !lit
@@ -670,7 +684,7 @@ $10 stack: vp-tops
         "}, {" \\
 	        tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -678,7 +692,7 @@ $10 stack: vp-tops
 
 \ page 8
 {{
-    $F8F8F7FF pres-frame
+    $202020FF pres-frame
     {{
 	l" Blogger Atom feed takeout" /title
 	\skip \mono \footnote !lit
@@ -714,7 +728,7 @@ $10 stack: vp-tops
         "  </entry>" \\
 		tex: vp-blogger glue*lll ' vp-blogger }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $E8E8E7FF color, fdup to slider-color to slider-fgcolor
+	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -722,7 +736,7 @@ $10 stack: vp-tops
 
 \ page 9
 {{
-    $F8FFE7FF pres-frame
+    $101010FF pres-frame
     {{
 	l" Things needed for import" /title
 	vt{{
@@ -737,7 +751,7 @@ $10 stack: vp-tops
 
 \ page 10
 {{
-    $E8FFE7FF pres-frame
+    $200020FF pres-frame
     {{
 	l" Social Networks in net2o" /title
 	vt{{
@@ -756,7 +770,7 @@ $10 stack: vp-tops
 
 \ page 11
 {{
-    $C8CFF7FF pres-frame
+    $202000FF pres-frame
     {{
 	l" Things still to do" /title
 	vt{{
@@ -774,7 +788,7 @@ $10 stack: vp-tops
 
 \ page 12
 {{
-    $F8CFF7FF pres-frame
+    $000000FF pres-frame
     {{
 	l" The non–technical problems" /title
 	vt{{
@@ -787,7 +801,7 @@ $10 stack: vp-tops
 
 \ page 13
 {{
-    $FFFFFFFF pres-frame
+    $000000FF pres-frame
     {{
 	l" Literatur & Links" /title \small
 	vt{{
