@@ -291,7 +291,7 @@ $10 stack: vp-tops
 
 \ page 3
 {{
-    $3F2020FF pres-frame
+    $201010FF pres-frame
     {{
 	l" Cloud[o]Calypse" /title
 	l" something went terminally wrong in a cloud [2]" /subtitle
@@ -354,7 +354,7 @@ $10 stack: vp-tops
 
 \ page 5
 {{
-    $442200FF pres-frame
+    $221100FF pres-frame
     {{
 	l" Centralized/Federated/P2P?" /title
 	vt{{
