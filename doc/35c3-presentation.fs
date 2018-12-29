@@ -344,10 +344,11 @@ $10 stack: vp-tops
 	glue*ll }}glue
     }}v box[] >bdr
     {{
-	glue*ll }}glue
-	tex: duty-calls
+	glue*ll }}glue \tiny \mono dark-blue
+	{{ glue*ll }}glue l" 🔗xkcd.com/386" }}text' }}h box[]
+	tex: duty-calls \normal \sans
 	' duty-calls "duty_calls.png" 0.95e }}image-file drop /right
-    }}v box[] >bdr
+    }}v box[] >bdr blackish
     ' blackish >body f!  ' dark-blue >body f!
 }}z box[] /flip dup >slides
 
@@ -819,7 +820,7 @@ $10 stack: vp-tops
 	}}vt
 	glue*l }}glue
 	tex: qr-code
-	' qr-code "qr-code.png" 12e }}image-file drop /center
+	' qr-code "qr-code-inv.png" 12e }}image-file drop /center
 	qr-code nearest
 	glue*l }}glue
     }}v box[] >bdr
