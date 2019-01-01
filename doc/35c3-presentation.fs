@@ -28,7 +28,7 @@ ctx 0= [IF]  window-init  [THEN]
 require minos2/font-style.fs
 
 : update-size# ( -- )
-    dpy-w @ s>f 42e f/ fround to font-size#
+    dpy-w @ s>f 44e f/ fround to font-size#
     font-size# 16e f/ m2c:curminwidth% f!
     dpy-h @ s>f dpy-w @ s>f f/ 45% f/ font-size# f* fround to baseline#
     dpy-w @ s>f 1280e f/ to pixelsize# ;
@@ -122,7 +122,7 @@ end-class slide-actor
 	    fdup 0.1e f< IF  fdrop  2drop fdrop fdrop  prev-slide  EXIT
 	    ELSE  0.9e f> IF  2drop fdrop fdrop  next-slide  EXIT  THEN  THEN
 	THEN  THEN
-    [ box-actor :: clicked ] +sync +resize ; slide-actor to clicked
+    [ box-actor :: clicked ] +sync +resize ; slide-actor is clicked
 :noname ( ekey -- )
     case
 	k-up      of  prev-slide  endof
@@ -143,6 +143,7 @@ end-class slide-actor
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
 	k-f6      of  saturate% sf@ 0.1e f- 0e fmax saturate% sf!
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
+	k-f1      of  top-widget ..widget  endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase +sync +resize ; slide-actor to ekeyed
 \ :noname ( $xy b -- )  dup 1 > IF
@@ -180,8 +181,8 @@ glue-right >o 1glue vglue-c glue! 1glue dglue-c glue! o>
 
 tex: net2o-logo
 tex: 35c3-logo
-' net2o-logo "net2o-200.png" 0.666e }}image-file Constant net2o-glue drop
-' 35c3-logo "35c3-logo.png" 0.666e }}image-file Constant 35c3-glue drop
+' net2o-logo "net2o-200.png" 0.666e }}image-file 2Constant net2o-img
+' 35c3-logo "35c3-logo.png" 0.666e }}image-file 2Constant 35c3-img
 
 : logo-img ( xt xt -- o o-img ) 2>r
     baseline# 0e to baseline#
@@ -190,10 +191,9 @@ tex: 35c3-logo
     }}v >o font-size# f2/ to border o o>
     to baseline# r> ;
 
-: logo-img2 ( xt1 xt2 xt3 xt4 -- o o-img ) { d: leftimg d: rightimg }
+: logo-img2 ( o1 o2 -- o o-img ) { leftimg rightimg }
     baseline# 0e to baseline#
-    {{  {{ leftimg }}image-tex glue*ll }}glue
-	rightimg }}image-tex }}h
+    {{  {{ leftimg glue*ll }}glue rightimg }}h
     glue*l }}glue
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
@@ -240,15 +240,20 @@ $10 stack: vp-tops
 			    }}h /center
 			    glue*l }}glue
 			}}v box[]
-			glue*2 }}glue
+			glue*2 }}glue	
 		    }}z box[]
 		    l" Bernd Paysan" /author
 		    l" 35c3 Leipzig, Chaos West Stage, #wefixthenet" /location
-		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
-		tex: vp-title2 glue*l ' vp-title2 }}vp vp[]
+		    {{
+			glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+			{{
+			    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
+			    \tiny l" Photo: Ralph W. Lambrecht" }}text' /right \normal
+			}}v box[]
+		    }}z box[]
+		tex: vp-title glue*l ' vp-title }}vp vp[] dup value title-vp
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
-
 	}}z box[] dup >slides
 
 \ page 1
@@ -345,7 +350,8 @@ $10 stack: vp-tops
     }}v box[] >bdr
     {{
 	glue*ll }}glue \tiny \mono dark-blue
-	{{ glue*ll }}glue l" 🔗xkcd.com/386" }}text' }}h box[]
+	{{ glue*ll }}glue l" 🔗xkcd.com/386" }}text' }}h
+	[: s" xdg-open https://xkcd.com/386" system ;] 0 click[]
 	tex: duty-calls \normal \sans
 	' duty-calls "duty_calls.png" 0.95e }}image-file drop /right
     }}v box[] >bdr blackish
@@ -366,7 +372,7 @@ $10 stack: vp-tops
 	    l" + " l" not captive, small business models" b\\
 	    l" ± " l" regional censorship (nodes blacklisted, e.g. Lolicon Mastodon nodes)" b\\
 	    l" – " l" poor funding, underpowered hardware/attack protection" b\\
-	    l" – " l" lacks privacy, EOL of notes at whim of node admin" b\\
+	    l" – " l" lacks privacy, EOL of nodes at whim of node admin" b\\
 	    l" Peer2Peer" /subsection
 	    l" + " l" Full control over your node, good privacy" b\\
 	    l" + " l" Development funding? Otherwise cheap" b\\
@@ -427,6 +433,7 @@ $10 stack: vp-tops
 	l" Google+ JSON Takeout" /title
 	\skip
 	l" 🔗" l" https://takeout.google.com/settings/takeout" bm\\
+	[: s" xdg-open https://takeout.google.com/settings/takeout" system ;] 0 click[]
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	tex: g+takeout
 	' g+takeout "google-takeout.png" 1.333e }}image-file drop /center
@@ -831,7 +838,7 @@ $10 stack: vp-tops
 \ end
 glue-right }}glue
 }}h box[]
-' 35c3-logo  35c3-glue  ' net2o-logo net2o-glue  logo-img2
+35c3-img drop net2o-img drop  logo-img2
 }}z slide[]
 to top-widget
 
@@ -851,8 +858,6 @@ also opengl
 previous
 
 also [IFDEF] android android [THEN]
-
-\ 3 0 [DO] reload-textures [LOOP]
 
 : presentation ( -- )
     1config
