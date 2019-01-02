@@ -25,12 +25,8 @@ also opengl also android
     THEN
     cam-prepare  new-scantexes ;
 
-Create sat%s 1.0e sf, 1.666e sf, 1.333e sf, 2.0e sf,
-does> ( n -- ) swap sfloats + sf@ ;
-Variable sat%-state
-
 : draw-cam ( -- )
-    0>framebuffer saturate% sf@ { f: sat }
+    0>framebuffer
     camera-init screen-orientation 1e 1e draw-scan sync
     cam-w cam-h scan-fb-raw >framebuffer
     1 1e 1e draw-scan

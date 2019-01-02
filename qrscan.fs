@@ -134,10 +134,10 @@ also opengl
     \G draw a scan rotated/tilted by scan matrix
     fover fnegate fover fnegate 0e { f: sx f: sy f: -sx f: -sy f: z }
     vi0 >v
-     -sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
-      sx  sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
-      sx -sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
-     -sx -sy z >xyz n> rot>st   $FFFFFFFF rgba>c v+
+     -sx  sy z >xyz n> rot>st   white# i>c v+
+      sx  sy z >xyz n> rot>st   white# i>c v+
+      sx -sy z >xyz n> rot>st   white# i>c v+
+     -sx -sy z >xyz n> rot>st   white# i>c v+
     v> drop 0 i, 1 i, 2 i, 0 i, 2 i, 3 i,
     GL_TRIANGLES draw-elements ;
 
@@ -176,13 +176,13 @@ $70 Value red-level#
 : rgb@ ( addr -- r g b )
     >r r@ c@ r@ 1+ c@ r> 2 + c@ ;
 
-0 Value strip-xor
+0 Value rgb-xor
 
 : rgb? ( addr -- rgbbit )
     rgb@
     blue-level#  ?? negate 2* swap
     green-level# ?? - 2* swap
-    red-level#   ?? - strip-xor xor ;
+    red-level#   ?? - rgb-xor xor ;
 
 : extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
@@ -251,7 +251,7 @@ p3 2 cells + Constant px
     scan-buf0 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup rgb dup 4 and IF  3 and 2 xor
+	    dup rgb? dup 4 and IF  3 and 2 xor
 		2* cells p0 + I J rot min²!
 	    ELSE
 		drop
@@ -382,6 +382,9 @@ previous
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
 
+Create sat%s 1.0e sf, 1.666e sf, 1.333e sf, 2.0e sf,
+does> ( n -- ) swap sfloats + sf@ ;
+
 : tex-frame ( -- )
     program init-program set-uniforms
     unit-matrix MVPMatrix set-matrix
@@ -389,12 +392,11 @@ previous
 : draw-scaled ( i -- )
     3 and sat%s saturate% sf!
     Saturate 1 saturate% glUniform1fv
-    tex-frame scan-w 2* dup scan-fb >framebuffer
+    tex-frame   scan-w 2* dup scan-fb >framebuffer
     scan-tex-raw linear-mipmap 0 scan-xy draw-scan
-    scan-grab0  scan-fb-final >framebuffer ;
-: sat-reset ( -- )
-    sat saturate% sf!
-    Saturate 1 saturate% glUniform1fv ;
+    scan-grab0  scan-w 2* dup scan-fb-final >framebuffer ;
+: sat-reset ( sat -- )
+    saturate% sf! Saturate 1 saturate% glUniform1fv ;
 
 previous
 
@@ -436,11 +438,12 @@ previous
     THEN ;
 
 : scan-once ( -- )
+    saturate% sf@ { f: sat }
     draw-cam qr( !time ) 3 0 DO
 	I draw-scaled adapt-rgb
 	7 to rgb-xor scan-it
 	0 to rgb-xor scan-it
-    LOOP  sat-reset
+    LOOP  sat sat-reset
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
     1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL
