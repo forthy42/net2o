@@ -176,11 +176,17 @@ $70 Value red-level#
 : rgb@ ( addr -- r g b )
     >r r@ c@ r@ 1+ c@ r> 2 + c@ ;
 
+0 Value strip-xor
+
+: rgb? ( addr -- rgbbit )
+    rgb@
+    blue-level#  ?? negate 2* swap
+    green-level# ?? - 2* swap
+    red-level#   ?? - strip-xor xor ;
+
 : extract-strip ( addr u step -- strip ) rgbas { step }
     0 -rot bounds U+DO
-	I rgb@ drop 2>r
-	2* r> green-level# ?? -
-	2* r> red-level#   ?? -
+	2* 2* I rgb? 3 and +
     step +LOOP ;
 
 $51 buffer: guessbuf
@@ -245,12 +251,10 @@ p3 2 cells + Constant px
     scan-buf0 $@ drop
     scan-w dup negate DO
 	scan-w dup negate DO
-	    dup rgb@ blue-level#  < IF
-		green-level#     < 2*
-		swap red-level#  < - 3 and 2 xor
+	    dup rgb dup 4 and IF  3 and 2 xor
 		2* cells p0 + I J rot min²!
 	    ELSE
-		2drop
+		drop
 	    THEN
 	    rgba+
 	LOOP
@@ -294,9 +298,11 @@ p3 2 cells + Constant px
 
 tex: scan-tex-raw
 tex: scan-tex
+tex: scan-tex-final
 
 0 Value scan-fb-raw
 0 Value scan-fb
+0 Value scan-fb-final
 
 : scan-grab-raw ( -- )
     cam-w cam-h scan-fb-raw >framebuffer scan-buf-raw scan-grab-cam ;
@@ -339,9 +345,12 @@ previous
 : new-scantex ( -- )
     scan-tex 0>clear
     scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+: new-scantex-final ( -- )
+    scan-tex-final 0>clear
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb-final ;
 : new-scantexes ( -- )
     scan-fb 0= IF
-	new-scantex-raw new-scantex 0>framebuffer
+	new-scantex-raw new-scantex new-scantex-final 0>framebuffer
     THEN ;
 : scale+rotate ( -- )
     p1 2@ p0 2@ p- p3 2@ p2 2@ p- p+ p2/
@@ -377,10 +386,15 @@ previous
     program init-program set-uniforms
     unit-matrix MVPMatrix set-matrix
     unit-matrix MVMatrix set-matrix ;
-: draw-scaled ( -- )
+: draw-scaled ( i -- )
+    3 and sat%s saturate% sf!
+    Saturate 1 saturate% glUniform1fv
     tex-frame scan-w 2* dup scan-fb >framebuffer
     scan-tex-raw linear-mipmap 0 scan-xy draw-scan
-    scan-grab0 ;
+    scan-grab0  scan-fb-final >framebuffer ;
+: sat-reset ( -- )
+    sat saturate% sf!
+    Saturate 1 saturate% glUniform1fv ;
 
 previous
 
@@ -408,20 +422,25 @@ previous
 [THEN]
 
 : adapt-rgb ( -- )
-    scan-buf0 $@ get-minmax-rgb
-    over - 2/ 2/   + to blue-level#   \ blue level is 1/4 of total
-    over - 2 5 */  + to green-level#  \ green at 40% of total
-    over - 2/      + to red-level# ;  \ red at 50% of total
+    scan-buf0 $@ get-minmax-rgb { d: r d: g d: b }
+    b over - 2/ 2/   + to blue-level#    \ blue level is 1/4 of total
+    g over - 2 5 */  + to green-level#   \ green at 40% of total
+    r over - 2/      + to red-level# ;   \ red at 50% of total
 
-: scan-once ( -- )
-    draw-cam
-    !time draw-scaled adapt-rgb
+: scan-it ( -- )
     search-corners
     ?legit IF  scan-legit? IF
 	    guessecc $10 + c@ scan-result qr( ." took: " .time cr )
 	    qr( save-png1 1 +to scan# )
 	ELSE  2drop  THEN
-    THEN
+    THEN ;
+
+: scan-once ( -- )
+    draw-cam qr( !time ) 3 0 DO
+	I draw-scaled adapt-rgb
+	7 to rgb-xor scan-it
+	0 to rgb-xor scan-it
+    LOOP  sat-reset
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
     1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL

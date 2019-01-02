@@ -33,12 +33,8 @@ Variable sat%-state
     0>framebuffer saturate% sf@ { f: sat }
     camera-init screen-orientation 1e 1e draw-scan sync
     cam-w cam-h scan-fb-raw >framebuffer
-    sat%-state @ 3 and sat%s saturate% sf!  1 sat%-state +!
-    Saturate 1 saturate% glUniform1fv
     1 1e 1e draw-scan
-    scan-tex-raw linear-mipmap mipmap
-    sat saturate% sf!
-    Saturate 1 saturate% glUniform1fv ;
+    scan-tex-raw linear-mipmap mipmap ;
 
 previous previous
 
