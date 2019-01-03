@@ -246,7 +246,9 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
 		    }}z \regular
 		    : pw-show/hide ( flag -- )
-			dup IF  0 text-color,  ELSE  show-sign-color#  THEN  show-pw-sign >o to text-color o>
+			dup IF  ['] transparent >body f@
+			ELSE  show-sign-color#  THEN
+			show-pw-sign >o to text-color o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
@@ -269,6 +271,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			nick-edit /flop
 			[ x-baseline ] FLiteral nick-edit >o
 			fdup gap% f* to gap to baseline o>
+			"nick" nick-field engage-edit
 		    ELSE
 			phrase-unlock /flop
 			create-new-id /hflip
