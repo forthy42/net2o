@@ -191,6 +191,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
 	!i18n l" net2o GUI" /title
 	!lit
+	\footnote cbl dark-blue net2o-version }}text /center
 	{{
 	    {{
 		glue*ll }}glue
