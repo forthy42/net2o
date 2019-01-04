@@ -350,7 +350,7 @@ $10 stack: vp-tops
     }}v box[] >bdr
     {{
 	glue*ll }}glue \tiny \mono dark-blue
-	{{ glue*ll }}glue l" 🔗xkcd.com/386" }}text' }}h
+	{{ glue*ll }}glue l" 🔗" }}text' l" xkcd.com/386" }}text' _underline_ }}h
 	[: s" xdg-open https://xkcd.com/386" system ;] 0 click[]
 	tex: duty-calls \normal \sans
 	' duty-calls "duty_calls.png" 0.95e }}image-file drop /right

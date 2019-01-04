@@ -243,7 +243,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    }}h
 		    pw-field ' pw-done edit[]
 		    {{
-			\large \sans $FFFFFFFF text-color, to x-color "👁" }}text
+			\large \sans whitish "👁" }}text
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
 		    }}z \regular
 		    : pw-show/hide ( flag -- )
@@ -487,18 +487,18 @@ previous
 msg-class class
 end-class wmsg-class
 
-$88FF88FF Value my-signal#
-$CCFFCCFF Value other-signal#
-$CC00CCFF Value my-signal-otr#
-$880088FF Value other-signal-otr#
-$4444CCFF color: link-blue
-$44CC44FF color: re-green
-$CC4444FF color: obj-red
-$BBDDDDFF color: msg-bg
-$00BFFFFF color: light-blue
-$44FF44FF color: greenish
-$33883366 Value day-color#
-$88333366 Value hour-color#
+$88FF88FF color: my-signal
+$CCFFCCFF color: other-signal
+$CC00CCFF color: my-signal-otr
+$880088FF color: other-signal-otr
+$4444CCFF text-color: link-blue
+$44CC44FF text-color: re-green
+$CC4444FF text-color: obj-red
+$BBDDDDFF text-color: msg-bg
+$00BFFFFF text-color: light-blue
+$44FF44FF text-color: greenish
+$33883366 color: day-color
+$88333366 color: hour-color
 
 Variable last-bubble-pk
 0 Value last-otr?
@@ -519,7 +519,9 @@ Variable last-bubble-pk
     \small blackish
     1n fm* >day { day } day last-day <> IF
 	{{
-	    glue*l day-color# color, slide-frame dup .button1
+	    x-color { f: xc }
+	    glue*l day-color x-color slide-frame dup .button1
+	    xc to x-color
 	    \bold day ['] .day $tmp }}text 25%b \regular
 	}}z /center msgs-box .child+
     THEN  day to last-day
@@ -527,7 +529,9 @@ Variable last-bubble-pk
     60 fm* fsplit { minute } minute 10 / last-minute 10 / <> or
     IF
 	{{
-	    glue*l hour-color# color, slide-frame dup .button1
+	    x-color { f: xc }
+	    glue*l hour-color x-color slide-frame dup .button1
+	    xc to x-color
 	    60 fm* fsplit minute hour
 	    [: .## ':' emit .## ':' emit .## 'Z' emit ;] $tmp }}text 25%b
 	}}z /center msgs-box .child+
@@ -639,11 +643,13 @@ Variable last-bubble-pk
 ; wmsg-class to msg:coord
 :noname { d: pk -- o }
     {{
+	x-color { f: xc }
 	pk key|
 	2dup 0 .pk@ key| str=
-	last-otr? IF  my-signal-otr# other-signal-otr#
-	ELSE  my-signal# other-signal#  THEN  rot select color,
-	glue*l slide-frame dup .button1 40%b >r
+	last-otr? IF  IF  my-signal-otr  ELSE  other-signal-otr  THEN
+	ELSE  IF  my-signal  ELSE  other-signal  THEN  THEN
+	x-color glue*l slide-frame dup .button1 40%b >r
+	xc to x-color
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
     }}z msg-box .child+
 ; wmsg-class to msg:signal
