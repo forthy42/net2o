@@ -1095,12 +1095,15 @@ $Variable dhtroot.n2o
     last-key >o "\x02" ke-groups $! perm%dhtroot ke-mask ! o>
     import#new import-type ! ;
 
-: new-key ( nickaddr u -- )
+: new-key, ( nickaddr u -- )
     ?check-rng \ before generating a key, check the rng for health
-    +newphrase key>default
+    key>default
     key#user +gen-keys
     secret-keys# 1- secret-key >raw-key  lastkey@ drop defaultkey !
     out-me +dhtroot save-keys ;
+
+: new-key ( nickaddr u -- )
+    +newphrase new-key, ;
 
 \ revokation
 

@@ -127,30 +127,62 @@ Variable slide#
 forward show-nicks
 forward gui-msgs
 0 Value title-vp
+0 Value pw-field
+0 Value nick-pw
 
 Variable nick$
 
 : nick-done ( max span addr pos -- max span addr pos flag )
-    over 3 pick nick$ $! true ;
+    over 3 pick nick$ $!
+    pw-field engage 1 to nick-pw  true ;
+
+: clear-edit ( max span addr pos -- max 0 addr 0 true )
+    drop nip 0 tuck true ;
+
+: do-shake ( max span addr pos -- max span addr pos flag )
+    keys sec[]free
+    clear-edit invert
+    1e o ['] shake-lr >animate
+    1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate ;
+
+: right-phrase ( max span addr pos -- max span addr pos flag )
+    \ ." Right passphrase" cr
+    0 >o 0 secret-key init-client >raw-key
+    read-chatgroups announce-me
+    o>
+    show-nicks clear-edit ;
 
 : pw-done ( max span addr pos -- max span addr pos flag )
-    err-fade? IF  false  EXIT  THEN
-    over 3 pick >passphrase +key
-    read-keys secret-keys# 0= IF
-	\ ." Wrong passphrase" cr
-	1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ o>
-	keys sec[]free
-	drop nip 0 tuck false
-	1e o ['] shake-lr >animate
-	1 tries# @ lshift s>f f2/ pw-err ['] err-fade >animate
-    ELSE
-	0 >o 0 secret-key init-client >raw-key
-	read-chatgroups announce-me
-	o>
-	\ ." Right passphrase" cr
-	show-nicks
-	drop nip 0 tuck true
-    THEN ;
+    case nick-pw
+	1 of
+	    1 +to nick-pw
+	    over 3 pick >passphrase +key
+	    create-new-id /hflip
+	    phrase-again /flop
+	    clear-edit invert
+	endof
+	2 of
+	    over 3 pick >passphrase lastkey@ str= IF
+		." Create nick " nick$ $. ."  with passphrase (hashed) " lastkey@ 85type cr
+		nick$ $@ new-key,
+		right-phrase
+	    ELSE
+		1 to nick-pw
+		create-new-id /flop
+		phrase-again /hflip
+		1 tries# ! do-shake
+	    THEN
+	endof
+	err-fade? IF  false  EXIT  THEN
+	over 3 pick >passphrase +key
+	read-keys secret-keys# 0= IF
+	    \ ." Wrong passphrase" cr
+	    1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ o>
+	    do-shake
+	ELSE
+	    right-phrase
+	THEN
+    endcase ;
 
 : 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;
 : 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
@@ -237,7 +269,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		{{
 		    {{
 			pw-text-col# to x-color
-			"" }}pw dup Value pw-field
+			"" }}pw dup to pw-field
 			25%b >o config:passmode# @ to pw-mode o o>
 			glue*lll }}glue
 		    }}h
