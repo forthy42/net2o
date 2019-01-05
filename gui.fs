@@ -97,6 +97,7 @@ Variable slide#
 0 Value pw-num
 0 Value phrase-unlock
 0 Value create-new-id
+0 Value phrase-first
 0 Value phrase-again
 0 Value plus-login
 0 Value minus-login
@@ -128,13 +129,17 @@ forward show-nicks
 forward gui-msgs
 0 Value title-vp
 0 Value pw-field
+0 Value nick-field
 0 Value nick-pw
 
 Variable nick$
 
 : nick-done ( max span addr pos -- max span addr pos flag )
     over 3 pick nick$ $!
-    pw-field engage 1 to nick-pw  true ;
+    0e pw-field [: data .engage fdrop ;] >animate \ engage delayed
+    create-new-id /hflip
+    phrase-first /flop +lang
+    1 to nick-pw  true ;
 
 : clear-edit ( max span addr pos -- max 0 addr 0 true )
     drop nip 0 tuck true ;
@@ -157,19 +162,19 @@ Variable nick$
 	1 of
 	    1 +to nick-pw
 	    over 3 pick >passphrase +key
-	    create-new-id /hflip
+	    phrase-first /hflip
 	    phrase-again /flop
-	    clear-edit invert
+	    clear-edit invert +lang
 	endof
 	2 of
 	    over 3 pick >passphrase lastkey@ str= IF
-		." Create nick " nick$ $. ."  with passphrase (hashed) " lastkey@ 85type cr
-		nick$ $@ new-key,
+		\ ." Create nick " nick$ $. ."  with passphrase (hashed) " lastkey@ 85type cr
+		gen-keys-dir nick$ $@ 0 .new-key,
 		right-phrase
 	    ELSE
 		1 to nick-pw
-		create-new-id /flop
-		phrase-again /hflip
+		phrase-first /flop
+		phrase-again /hflip +lang
 		1 tries# ! do-shake
 	    THEN
 	endof
@@ -235,7 +240,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    {{
 			nt
 			white# to x-color \bold
-			"nick" }}edit 25%b dup Value nick-field
+			"nick" }}edit 25%b dup to nick-field
 			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
 		}}z box[] blackish
@@ -321,7 +326,8 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	{{  \small dark-blue !i18n
 	    l" Enter passphrase to unlock" }}text' /center dup to phrase-unlock
 	    l" Create new ID" }}text' /center dup to create-new-id /hflip
-	    l" Enter passphrase again" }}text' /center dup to phrase-again /hflip
+	    l" Enter new passphrase" }}text' /center dup to phrase-first /hflip
+	    l" Enter new passphrase again" }}text' /center dup to phrase-again /hflip
 	    !lit
 	}}z box[] /center >bl
 	{{ glue*lll }}glue }}v

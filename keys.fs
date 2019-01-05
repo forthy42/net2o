@@ -895,14 +895,14 @@ Variable lastscan$
 
 : +gen-keys ( nick u type -- )
     gen-keys  64#-1 key-read-offset 64!
-    pkc keysize2 key:new >o o to my-key
+    pkc keysize2 key:new >o o to my-key-default  o to my-key
     [ 1 import#self lshift 1 import#new lshift or ]L ke-imports !
     ke-type !  ke-nick $!  nick!
     config:pw-level# @ ke-pwlevel !  perm%myself ke-mask !
     skc keysize ke-sk sec!  +seckey
     skrev keysize ke-rsk sec!
     sksig!
-    $10 rng$ ke-wallet sec! \ wallet key is just $10
+\    $10 rng$ ke-wallet sec! \ wallet key is just $10
     key-sign o> ;
 
 : this-key-sign ( -- )
