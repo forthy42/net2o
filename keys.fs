@@ -540,7 +540,7 @@ $100 cells buffer: ph-histogram
     LOOP ;
 
 : g-test ( n -- entropy )
-    1e fm/ fln { f: n0 }
+    [ 1e $100 fm/ ] Fliteral fm* fln { f: n0 }
     0e  ph-histogram $100 cells bounds DO
 	I @ ?dup-IF  s>f fdup fln n0 f- f* f+  THEN
     cell +LOOP ;
