@@ -180,14 +180,14 @@ Variable nick$
 	    THEN
 	endof
 	err-fade? IF  false  EXIT  THEN
-	over 3 pick >passphrase +key
+	drop over 3 pick >passphrase +key
 	read-keys secret-keys# 0= IF
 	    \ ." Wrong passphrase" cr
 	    1 tries# +! tries# @ 0 <# #s #> pw-num >o to text$ o>
 	    do-shake
 	ELSE
 	    right-phrase
-	THEN
+	THEN  0
     endcase ;
 
 : 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;
