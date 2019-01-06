@@ -131,6 +131,7 @@ forward gui-msgs
 0 Value pw-field
 0 Value nick-field
 0 Value nick-pw
+0 Value pw-back
 
 Variable nick$
 
@@ -202,7 +203,7 @@ tex: net2o-logo
     $FF0040FF text-color, FValue pw-num-col#
     $AAAAAAFF text-color, FValue pw-text-col#
     $000000FF text-color, FValue show-sign-color#
-    $FFFFFFFF color, FValue pw-bg-col#
+    $FF0000FF $00FF00FF fade-color, FValue pw-bg-col#
     $0000BFFF color, FValue dark-blue#
     $0000FF08 color, FValue chbs-col#
     $FFFFFFFF color, FValue login-bg-col#
@@ -210,7 +211,7 @@ tex: net2o-logo
     $FF0040FF text-color, FValue pw-num-col#
     $cc6600FF text-color, FValue pw-text-col#
     $FFFFFFFF text-color, FValue show-sign-color#
-    $550000FF color, FValue pw-bg-col#
+    $550000FF $005500FF fade-color, FValue pw-bg-col#
     $88FF00FF color, FValue dark-blue#
     $00FF0020 color, FValue chbs-col#
     $000020FF color, FValue login-bg-col#
@@ -256,6 +257,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	    }}z
 	    {{
 		glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
+		dup to pw-back
 		\mono \normal
 		{{ chbs-col# to x-color "Correct Horse Battery Staple" }}text 25%b
 		glue*l }}h
@@ -277,6 +279,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[]
+		    >o act >o [: edit-w .text$ passphrase-entropy 1e fmin pw-bg-col# f+ pw-back >o to w-color o> ;] is edit-filter o> o o>
 		    {{
 			\large \sans whitish "👁" }}text
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
@@ -302,6 +305,8 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    IF
 			phrase-unlock /hflip
 			create-new-id /flop
+			phrase-first /hflip
+			phrase-again /hflip
 			plus-login /flip
 			minus-login /flop
 			nick-edit /flop
@@ -311,6 +316,8 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    ELSE
 			phrase-unlock /flop
 			create-new-id /hflip
+			phrase-first /hflip
+			phrase-again /hflip
 			plus-login /flop
 			minus-login /flip
 			nick-edit /vflip
@@ -849,7 +856,7 @@ Value n2o-frame
 	"PASSPHRASE" getenv erase \ erase passphrase after use!
     THEN
     secret-keys# IF  show-nicks  ELSE
-	has-key?  IF
+	lacks-key?  IF
 	    0e 0 [: drop k-enter id-toggler .act .ekeyed ;] >animate
 	THEN
     THEN

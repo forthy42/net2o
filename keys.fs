@@ -521,6 +521,37 @@ event: :>search-key ( $addr -- )
     over c@ '-' = IF  1 /string >group-id sub-group .key-list  EXIT  THEN
     >group-id set-group .key-list ;
 
+\ calculate passphrase entropy
+
+$100 cells buffer: ph-histogram
+
+: >ph-histogram ( addr u -- )
+    \G generate a histogram of bytes in a string
+    ph-histogram $100 cells erase
+    bounds ?DO  1 I c@ cells ph-histogram + +!  LOOP ;
+
+: ph-sqsum ( addr u -- fsqsum )
+    \G compute the distance of neighboring letters relative to the used set
+    \G (i.e. only the populated slots count)
+    0e 1- 0 max bounds ?DO
+	0 I c@ I 1+ c@ 2dup min >r max r> ?DO
+	    I cells ph-histogram + @ 0<> - LOOP
+	dup * [ 1e $10000 fm/ ] FLiteral fm* f+
+    LOOP ;
+
+: g-test ( n -- entropy )
+    1e fm/ fln { f: n0 }
+    0e  ph-histogram $100 cells bounds DO
+	I @ ?dup-IF  s>f fdup fln n0 f- f* f+  THEN
+    cell +LOOP ;
+
+: passphrase-entropy ( addr u -- fentropy )
+    \G estimate passphrase entropy
+    dup 0= IF  2drop 0e  EXIT  THEN  2dup
+    dup >r >ph-histogram
+    r@ g-test  1e-20 fmax 1/f r> fm*
+    ph-sqsum f* $100 fm* fsqrt ;
+
 \ get passphrase
 
 3 Value passphrase-retry#
@@ -1326,16 +1357,15 @@ forward read-chatgroups
     >raw-key ?rsk read-chatgroups  r> op-vector ! ;
 
 scope: n2o
-Forward help
 }scope
 
-: has-key? ( -- flag )
+: lacks-key? ( -- flag )
     gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
     0= IF  r/o open-file throw >r r@ file-size throw d0=
 	r> close-file throw  ELSE  true  THEN ;
 
 : get-my-key ( -- xt )
-    has-key?
+    lacks-key?
     IF  [: ." Generate a new keypair:" cr
 	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
 	  new-key .keys ?rsk read-chatgroups ;]
