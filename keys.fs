@@ -1329,10 +1329,13 @@ scope: n2o
 Forward help
 }scope
 
-: get-my-key ( -- xt )
+: has-key? ( -- flag )
     gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
     0= IF  r/o open-file throw >r r@ file-size throw d0=
-	r> close-file throw  ELSE  true  THEN
+	r> close-file throw  ELSE  true  THEN ;
+
+: get-my-key ( -- xt )
+    has-key?
     IF  [: ." Generate a new keypair:" cr
 	  get-nick dup 0= #-56 and throw \ empty nick: pretend to quit
 	  new-key .keys ?rsk read-chatgroups ;]

@@ -235,8 +235,6 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		\large "👤" }}text \normal
 		{{
 		    glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
-		    transp# to x-color
-		    "f(g" }}text /left 25%b
 		    {{
 			nt
 			white# to x-color \bold
@@ -319,10 +317,11 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			0e nick-edit >o to baseline o>
 		    THEN +resize +lang ;
 		\normal
-	    }}z ' id-show-hide false toggle[]
+	    }}z ' id-show-hide false toggle[] dup Value id-toggler
 	    glue-sright }}glue
 	    glue*lll }}glue
 	}}h box[] \skip >bl
+	\ Advices, context sensitive
 	{{  \small dark-blue !i18n
 	    l" Enter passphrase to unlock" }}text' /center dup to phrase-unlock
 	    l" Create new ID" }}text' /center dup to create-new-id /hflip
@@ -849,7 +848,11 @@ Value n2o-frame
 	>passphrase +key  read-keys
 	"PASSPHRASE" getenv erase \ erase passphrase after use!
     THEN
-    secret-keys# IF  show-nicks  THEN
+    secret-keys# IF  show-nicks  ELSE
+	has-key?  IF
+	    0e 0 [: drop k-enter id-toggler .act .ekeyed ;] >animate
+	THEN
+    THEN
     1config  !widgets
     get-order n>r ['] /chat >body 1 set-order
     ['] widgets-loop catch
