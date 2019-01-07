@@ -217,6 +217,11 @@ tex: net2o-logo
     $000020FF color, FValue login-bg-col#
 [THEN]
 
+: entropy-colorize ( -- )
+    prev-text$ erase  addr prev-text$ $free
+    edit-w .text$ passphrase-entropy 1e fmin pw-bg-col# f+
+    pw-back >o to w-color o> ;
+
 glue new Constant glue*lll±
 glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
 
@@ -279,7 +284,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[]
-		    >o act >o [: edit-w .text$ passphrase-entropy 1e fmin pw-bg-col# f+ pw-back >o to w-color o> ;] is edit-filter o> o o>
+		    >o act >o ' entropy-colorize is edit-filter o> o o>
 		    {{
 			\large \sans whitish "👁" }}text
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
