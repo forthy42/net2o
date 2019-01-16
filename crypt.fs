@@ -621,7 +621,7 @@ drop
 : gen-host-del ( addr u -- addr' u' )
     gen>host "host" >delete +sig$ ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

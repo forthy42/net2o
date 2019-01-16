@@ -93,7 +93,7 @@ object class{ video_metadata
     fb:timeline-class to outer-class
     ['] fb:timeline >body to schema-wid ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

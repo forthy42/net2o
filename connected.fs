@@ -605,7 +605,7 @@ in net2o : connect ( ucode udata -- )  reqsize! gen-request ;
 
 previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

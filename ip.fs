@@ -336,7 +336,7 @@ Variable net2o-host "net2o.de" net2o-host $!
     [THEN]
     !my-addr ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

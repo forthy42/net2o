@@ -23,7 +23,7 @@ also android also jni
 is android-network
 previous previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

@@ -141,7 +141,7 @@ event: :>netlink ( -- )
 
 :noname defers init-rest create-netlink-task ; is init-rest
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

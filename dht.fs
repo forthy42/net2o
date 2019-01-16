@@ -442,7 +442,7 @@ in net2o : send-revoke ( addr u -- )
     end-code| msg( ." disconnected" forth:cr )
     net2o:dispose-context msg( ." Disposed context" forth:cr ) o> ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

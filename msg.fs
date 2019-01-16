@@ -1649,7 +1649,7 @@ scope{ /chat
     $, nestsig end-with
     end-code ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

@@ -377,7 +377,7 @@ User pings[]
 ' dbg-connect IS do-connect
 ' dbg-disconnect IS do-disconnect
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

@@ -191,7 +191,7 @@ vault>file
     enc-fd @ ?dup-IF  forth:close-file throw  THEN ;
 previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

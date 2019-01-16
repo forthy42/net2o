@@ -972,7 +972,7 @@ previous
     >group last# silent-leave-chat
     dvcs:dispose-dvcs o> ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

@@ -252,7 +252,7 @@ $10 cell+ buffer: new-asset
     SwapDragonKeys'# #frees ;
 }scope
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

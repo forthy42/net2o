@@ -825,7 +825,7 @@ also net2o-base
 
 previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

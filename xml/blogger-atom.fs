@@ -63,7 +63,7 @@ object class{ atom-tags
     }class
 }class
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

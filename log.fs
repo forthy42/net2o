@@ -52,7 +52,7 @@ log-table >table
 
 }scope
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

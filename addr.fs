@@ -228,7 +228,7 @@ previous
     r@ cell+ $@len 0= IF  s" ." r@ cell+ $!  THEN \ set route to known
     r> $@ .sockaddr ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

@@ -520,7 +520,7 @@ cmd-class class{ groups
     64value: perms#
 }class
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

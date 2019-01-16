@@ -1976,7 +1976,7 @@ context-table   $save
 
 .unresolved
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

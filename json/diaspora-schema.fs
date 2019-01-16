@@ -121,7 +121,7 @@ object class{ posts
     ['] diaspora:takeout >body to schema-wid
     ['] noop is process-element ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

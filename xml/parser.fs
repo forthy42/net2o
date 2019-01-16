@@ -157,7 +157,7 @@ false value in-tag?
     atom-tags-class new >o ['] xml-file catch
     o o> nr> set-order  swap throw ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

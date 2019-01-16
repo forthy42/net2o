@@ -7,3 +7,4 @@ sed -e "s/AC_INIT(\([^ ,]*, *\[\)[0-9._\-]*/AC_INIT(\1$V/g" configure.ac >config
 make doc
 dvcs ci -m "Bump version number"
 dvcs tag add $V
+git-push

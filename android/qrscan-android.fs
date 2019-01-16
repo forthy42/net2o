@@ -34,7 +34,7 @@ also opengl also android
 
 previous previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

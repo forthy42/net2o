@@ -118,7 +118,7 @@ warnings !
 
 \ test: move dictionary to hash
 
-0 [IF]
+\\\
 variable ht
 : test ( -- )
     context @ cell+ BEGIN  @ dup  WHILE
@@ -132,4 +132,3 @@ variable ht
     context @ cell+ BEGIN  @ dup  WHILE
 	    dup name>string 2dup ht #key dup hex. cr ht #.key $@ str= 0= IF ." unequal" cr THEN
     REPEAT  drop ;
-[THEN]

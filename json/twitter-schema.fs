@@ -189,7 +189,7 @@ object class{ options
     [: (name) 2drop (name) 2drop s" tweet" key$ $!
 	['] noop is before-line ;] is before-line ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

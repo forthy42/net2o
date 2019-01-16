@@ -40,7 +40,7 @@ object class{ objects
 
 test-scan "test.json" json-load value test-result
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

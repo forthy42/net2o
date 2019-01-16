@@ -897,7 +897,7 @@ s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
 [IFDEF] load-cov  load-cov [THEN]
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

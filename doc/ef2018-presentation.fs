@@ -651,7 +651,7 @@ script? [IF]
     presentation
 [THEN]
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

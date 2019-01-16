@@ -491,7 +491,7 @@ DOES>  + w@ ;
 : ?rw-perm ( n perm -- )
     >r >file-perm r> invert and dup ?rd-perm ?wr-perm ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

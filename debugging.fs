@@ -92,23 +92,6 @@ debug: syncfile( \ synchronous file operations
 +db ipv4( \ ipv4 should be on by default )
 +db syncfile( \ disable async file operations for now )
 
-0 [IF]
-false warnings !@
-
-: c-section ( xt addr -- ) 
-    \G implement a critical section that will unlock the semaphore
-    \G even in case there's an exception within.
-    { sema }
-    sema lock
-    sema( ." sema: " sema dup hex. body> >name .name ." lock" cr )
-    catch
-    sema( ." sema: " sema dup hex. body> >name .name ." unlock" cr )
-    sema unlock
-    throw ;
-
-warnings !
-[THEN]
-
 \ key debugging task
 
 : toggle ( addr -- )  dup @ 0= swap ! ;
@@ -225,7 +208,7 @@ false [IF]
 \ more phony throw stuff, only for debugging engine
 
 debugging-method [defined] record-locs and [IF] record-locs [THEN]
-debugging-method drop 0 [IF]
+debugging-method drop false [IF]
 :noname  ." Store backtrace..." cr defers store-backtrace
     dobacktrace ; is store-backtrace
 
@@ -235,7 +218,7 @@ debugging-method drop 0 [IF]
 
 \ Emacs fontlock mode: Highlight more stuff
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

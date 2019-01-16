@@ -256,7 +256,7 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
 
 : out-route ( -- )  0 outbuf packet-route drop ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

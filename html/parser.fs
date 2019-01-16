@@ -244,7 +244,7 @@ synonym /tbody /table
 	LOOP ;
 [THEN]
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

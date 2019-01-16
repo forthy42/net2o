@@ -281,7 +281,7 @@ Sema id-sema
 setup-table $save
 connect-table $save
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

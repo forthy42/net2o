@@ -28,7 +28,7 @@ require minos2/soil-texture.fs
     dpy 0= IF window-init THEN
     new-scantexes ;
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (

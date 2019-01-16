@@ -224,7 +224,7 @@ g+-scan
 
 previous
 
-0 [IF]
+\\\
 Local Variables:
 forth-local-words:
     (
