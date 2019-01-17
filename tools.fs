@@ -383,7 +383,7 @@ $10 stack: dirstack
 : dir> ( -- )
     dirstack $@len 0= ?EXIT
     dirstack stack> { w^ dir }
-    dir $@ set-dir dir $free ;
+    dir $@ set-dir throw  dir $free ;
 : dir@ ( -- addr u )
     dirstack $[]# 1- dirstack $[]@ ;
 

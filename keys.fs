@@ -467,6 +467,10 @@ event: :>search-key ( $addr -- )
     THEN
     cell+ ..nick 2drop r> to last# ;
 
+: .key-id? ( addr u -- )  last# >r  key| 2dup key# #@ 0=
+    IF  drop .unkey-id  r> to last# EXIT  THEN
+    cell+ ..nick 2drop r> to last# ;
+
 : .con-id ( o:connection -- ) pubkey $@ .key-id ;
 
 : .simple-id ( addr u -- ) last# >r

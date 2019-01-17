@@ -361,7 +361,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     $> $> msg:otrify ;
 +net2o: msg-coord ( $:gps -- ) \g GPS coordinates
     8 !!>=order? $> msg:coord ;
-+net2o: msg-url ( $:url -- ) \g print a payment
++net2o: msg-url ( $:url -- ) \g specify message URL
     $> msg:url ;
 +net2o: msg-like ( xchar -- ) \g add a like
     64>n msg:like ;

@@ -42,9 +42,9 @@ scope: html-tags
 : b  ." **" 2drop ;
 : /b 2drop
     2dup s" <b>" string-prefix? IF  3 /string  ELSE  ." **"  THEN ;
-: i  '*' emit 2drop ;
+: i  '_' emit 2drop ;
 : /i 2drop
-    2dup s" <i>" string-prefix? IF  3 /string  ELSE  ." *"  THEN ;
+    2dup s" <i>" string-prefix? IF  3 /string  ELSE  '_' emit  THEN ;
 : del ." ~~" 2drop ;
 : /del ." ~~" 2drop ;
 : u ." __" 2drop ; \ not the common markdown, though

@@ -375,7 +375,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 + $2B msg-coord ( $:gps -- )
   GPS coordinates
 + $2C msg-url ( $:url -- )
-  print a payment
+  specify message URL
 + $2D msg-like ( xchar -- )
   add a like
 ### group description commands ###

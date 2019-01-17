@@ -102,11 +102,22 @@ Variable pics#
     ;] file execute>file
     file dvcs .dvcs-add ;
 
-: add-post ( dvcs -- ) "post.md" add-file ;
+Variable pfile$
+: post-file ( -- )
+    pfile$ $free
+    [: ." post-" project:project$ $. ." .md" ;]
+    pfile$ $exec pfile$ $@ ;
+: comment-file ( -- addr u )
+    pfile$ $free
+    [: ." comment-" comments:resourceName$ dup 11 - /string type ." .md" ;]
+    pfile$ $exec pfile$ $@ ;
+
+: add-post ( dvcs -- ) dup .post-file add-file ;
 
 : add-media { dvcs -- }
-    media:url$ basename 2dup delete-file drop
-    2dup pics# #@ [: dir@ type ." /" type ;] $tmp 2over symlink ?ior
+    media:url$ basename 2dup pics# #@ d0= IF  2drop  EXIT  THEN
+    2dup delete-file drop
+    2dup pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp 2over symlink ?ior
     dvcs .dvcs-ref ;
 
 : add-album { dvcs -- }
@@ -142,41 +153,52 @@ previous
 Variable comment#
 
 : add-comment ( dvcs -- )
-    [: ." comment-" 1 comment# +!@ 0 <# # # # #> type ." .md" ;] $tmp add-file ;
+    comment-file add-file ;
 
 : create>never ( o:comments -- )
     comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;
 
-: add-comments { dvcs -- }
-    my-key-default >r
+: wrap-key ( ... xt key -- )
+    my-key-default >r to my-key-default catch r> to my-key-default throw ;
+
+: add-comments { dvcs-o -- }
     comments:comments[] $@ bounds U+DO
 	I @ >o
-	dvcs add-comment
-	comments:media{} ?dup-IF  >o dvcs add-media o>  THEN
-	comments:author{} .author:mapped-key to my-key-default
+	dvcs-o add-comment
+	comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
+	comments:author{} .author:mapped-key { mkey }
 	create>never
-	"comment" dvcs .(dvcs-ci)  last-msg 2@ post-ref 2!
-	dvcs add-plusones \ plusones not exported at the moment
-	\ dvcs add-reshares \ reshares of comments not possible
+	dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]!
+	"comment:" ['] (dvcs-ci) mkey wrap-key o>
+	last-msg 2@ post-ref 2!
+	dvcs-o add-plusones \ plusones not exported at the moment
+	\ dvcs-o add-reshares \ reshares of comments not possible
 	o>
-    cell +LOOP
-    r> to my-key-default ;
+    cell +LOOP ;
 
 : write-out-article ( o:comment -- )
     >dir redate-mode on  comment# off
-    dvcs:new-dvcs { dvcsp }
+    dvcs:new-dvcs { dvcs-o }
     comments:url$ basename [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
     ".n2o/files" touch
-    comments:url$ basename dvcsp >o project:project$ $!
+    comments:url$ basename dvcs-o >o project:project$ $!
     "master" project:branch$ $! save-project o>
-    dvcsp add-post
-    dvcsp add-album
-    comments:media{} ?dup-IF  >o dvcsp add-media o>  THEN
+    dvcs-o add-post
+    dvcs-o add-album
+    comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
     create>never
-    "post" dvcsp .(dvcs-ci)  last-msg 2@ post-ref 2!
-    dvcsp add-plusones
-    dvcsp add-reshares
-    dvcsp add-comments
-    dvcsp .dvcs:dispose-dvcs
+    dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]! "post:" (dvcs-ci) o>
+    last-msg 2@ post-ref 2!
+    dvcs-o add-plusones
+    dvcs-o add-reshares
+    dvcs-o add-comments
+    dvcs-o .dvcs:dispose-dvcs
     dir> redate-mode off ;
+
+: g+-import ( -- )
+    ?get-me
+    ." Read pics metadata" cr   "." get-pic-filenames
+    ." Read JSON files" cr      "." json-load-dir
+    ." Write entries" cr
+    entries[] $@ bounds ?DO  I @ .write-out-article  cell +LOOP ;

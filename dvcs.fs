@@ -43,13 +43,14 @@ end-class dvcs-refs
 
 dvcs-abstract class
     scope{ dvcs
-    field: commits \ msg class for commits
-    field: searchs \ msg class for searchs
-    field: id$     \ commit id
+    field: commits    \ msg class for commits
+    field: searchs    \ msg class for searchs
+    field: id$        \ commit id
     field: branch$
-    field: message$
-    field: files#    \ snapshot config
-    field: oldfiles# \ old state to compare to
+    field: message$   \ commit message
+    field: fileref[]  \ file refs
+    field: files#     \ snapshot config
+    field: oldfiles#  \ old state to compare to
     field: in-files$
     field: patch$
     field: out-files$
@@ -108,6 +109,7 @@ msg-class class
     field: action$
     field: text$
     field: chain$
+    field: urls[]
     }scope
 end-class dvcs-log-class
 
@@ -331,7 +333,7 @@ scope{ dvcs
 : dispose-dvcs-refs ( o:dvcs -- )
     dvcs:refs[] $[]free dispose ;
 : dispose-dvcs ( o:dvcs -- )
-    dvcs:branch$ $free  dvcs:message$ $free
+    dvcs:branch$ $free  dvcs:message$ $free  dvcs:fileref[] $[]free
     dvcs:files# #offs  dvcs:oldfiles# #offs
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
     clean-delta  dvcs:fileentry$ $free
@@ -536,6 +538,7 @@ previous
 ' 2drop commit-class is msg:coord
 ' 2drop commit-class is msg:signal
 ' 2drop commit-class is msg:text
+' 2drop commit-class is msg:url
 ' 2drop commit-class is msg:action
 ' 2drop commit-class is msg:chain
 ' drop  commit-class is msg:like
@@ -562,6 +565,7 @@ previous
 ' 2drop search-class is msg:action
 ' 2drop search-class is msg:chain
 ' 2drop search-class is msg:re
+' 2drop search-class is msg:url
 ' noop  search-class is msg:end
 ' drop  search-class is msg:like
 
@@ -581,6 +585,7 @@ previous
 :noname dvcs-log:text$   $! ; dvcs-log-class is msg:text
 :noname dvcs-log:action$ $! ; dvcs-log-class is msg:action
 :noname dvcs-log:chain$  $! ; dvcs-log-class is msg:chain
+:noname dvcs-log:urls[] $+[]! ; dvcs-log-class is msg:url
 ' drop dvcs-log-class is msg:like
 
 : chat>dvcs ( o:dvcs -- )
@@ -651,7 +656,8 @@ scope{ dvcs
     dvcs-log-class new >o msg-table @ token-table ! o o> ;
 : clear-log ( -- )
     dvcs-log:sig$    $free  dvcs-log:tag$  $free  dvcs-log:id$    $free
-    dvcs-log:action$ $free  dvcs-log:text$ $free  dvcs-log:chain$ $free ;
+    dvcs-log:action$ $free  dvcs-log:text$ $free  dvcs-log:chain$ $free
+    dvcs-log:urls[] $[]free ;
 : dispose-dvcs-log ( o:log -- )
     clear-log dispose ;
 }scope
@@ -672,7 +678,8 @@ scope{ dvcs
 		    ." <-" drop le-64@ .ticks  <default>
 		ELSE  2drop  THEN  space
 		dvcs-log:action$ $. ." : " dvcs-log:text$ $. space
-		.key-id
+		dvcs-log:urls[] [: <warn> type <default> space ;] $[]map
+		.key-id?
 		cr
 	    THEN
 	THEN  1+
@@ -692,6 +699,7 @@ also net2o-base
     project:project$ @ msg-group$ !
     o [: with dvcs
 	project:chain$ $@ base85>$
+	fileref[]
 	message$   $@
 	type       @
 	hash$      $@
@@ -707,6 +715,7 @@ also net2o-base
 	r> r> IF   IF  "Patchset"  ELSE  "Revert"  THEN
 	ELSE  drop "Snapshot"  THEN  $, msg-action
 	$, msg-text
+	dup [: [: ." file:" forth:type ;] $tmp $, msg-url ;] $[]map $[]free
 	dup IF  $, msg-chain  ELSE  2drop  THEN
     ;] (send-avalanche) IF  .chat  ELSE   2drop  THEN
     r> msg-group$ ! ;
@@ -986,4 +995,3 @@ forth-local-indent-words:
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
-[THEN]

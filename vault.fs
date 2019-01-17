@@ -205,4 +205,3 @@ forth-local-indent-words:
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
-[THEN]
