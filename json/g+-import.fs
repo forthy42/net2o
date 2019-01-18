@@ -225,11 +225,10 @@ Variable comment#
 : write-articles ( -- ) { | nn }
     entries[] $@ bounds ?DO
 	I @ .write-out-article
-	nn #13 mod 0= IF
-	    nn [: ." write " 6 .r ."  postings" ;]
-	    warning-color color-execute
-	    #-21 0 at-deltaxy
-	THEN  1 +to nn
+	1 +to nn
+	nn [: ." write " 6 .r ."  postings" ;]
+	warning-color color-execute
+	#-21 0 at-deltaxy
     cell +LOOP
     nn [: ." write "  6 .r ."  postings in " .time ;]
     success-color color-execute cr ;

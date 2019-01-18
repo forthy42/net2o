@@ -287,13 +287,12 @@ $Variable entries[]
 	BEGIN
 	    pad $100 dd read-dir throw  WHILE
 		pad swap 2dup "*.json" filename-match IF
+		    json-load entries[] >stack  1 +to nn
 		    nn #37 mod 0= IF
 			nn [: ." read " 6 .r ."  postings" ;]
 			warning-color color-execute
 			#-20 0 at-deltaxy
 		    THEN
-		    1 +to nn
-		    json-load entries[] >stack
 		ELSE  2drop  THEN
 	REPEAT  drop
 	nn [: ." read " 6 .r ."  postings in " .time ;]
