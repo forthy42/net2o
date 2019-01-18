@@ -18,8 +18,20 @@
 require ../html/parser.fs
 
 Variable pics#
+Variable dir#
 
 ".metadata.csv" nip Constant .mtcvs#
+
+: match-jpg/png ( key u addr u -- ) $make { w^ fn$ }
+    fn$ $@ dir# #@ d0= IF
+	".png" fn$ $+! fn$ $@ dir# #@ d0= IF
+	    ".jpg" fn$ $@ + over - swap move
+	    fn$ $@ dir# #@ d0= IF
+		2drop fn$ $free  EXIT  THEN
+	THEN
+    THEN
+    fn$ $@ 2swap pics# #!
+    fn$ $free ;
 
 : get-pic-filename { d: mtcvs -- }
     mtcvs r/o open-file throw { fd }
@@ -28,26 +40,23 @@ Variable pics#
     ',' $split 2drop
     over c@ '"' = negate /string
     2dup + 1- c@ '"' = +
-    mtcvs .mtcvs# -
-    2dup + 4 - 4 2dup ".png" str= >r ".jpg" str= r> or 0= IF
-	[: type ." .jpg" ;] $tmp
-    THEN
-    2swap pics# #!
+    mtcvs .mtcvs# - match-jpg/png
     fd close-file throw ;
 
 : get-pic-filenames ( addr u -- )
     2dup open-dir throw { dd } fpath @ >r fpath off fpath also-path dd
-    [: { dd } !time { | nn }
+    [: { dd } !time
 	BEGIN
 	    pad $100 dd read-dir throw  WHILE
-		pad swap 2dup "*.metadata.csv" filename-match IF
-		    get-pic-filename
-		ELSE  2drop  THEN
-		1 +to nn
+		pad swap s" " 2swap dir# #!
 	REPEAT  drop
-	nn [: ." read " . ." pics in " .time ;]
+	0 dir# [: $@ 2dup "*.metadata.csv" filename-match IF
+		get-pic-filename 1-
+	    ELSE  2drop  THEN ;] #map
+	[: ." read " . ." pics in " .time ;]
 	success-color color-execute cr ;] catch
-    fpath $free r> fpath !  dd close-dir throw  throw ;
+    fpath $free r> fpath !  dd close-dir throw  throw
+    dir# #offs ;
 
 : get-avatars ( -- )
     avatars[] $[]# 0= ?EXIT \ nothing to do
@@ -176,13 +185,21 @@ Variable comment#
 	o>
     cell +LOOP ;
 
+: comments-base ( -- addr u )
+    comments:comments[] $@len IF
+	comments:comments[] $@ drop @ .comments:url$
+    ELSE
+	comments:url$
+    THEN  basename ;
+
 : write-out-article ( o:comment -- )
     >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcs-o }
-    comments:url$ basename [: ." posts/" type ." /.n2o" ;] $tmp
+    comments-base 2dup type cr
+    2dup [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
     ".n2o/files" touch
-    comments:url$ basename dvcs-o >o project:project$ $!
+    dvcs-o >o project:project$ $!
     "master" project:branch$ $! save-project o>
     dvcs-o add-post
     dvcs-o add-album
