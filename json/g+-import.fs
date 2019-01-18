@@ -115,7 +115,7 @@ Variable dir#
 : .html ( -- )
     comments:content$ html-untag cr ;
 : .plain ( -- )
-    comments:content$ html>text cr ;
+    comments:content$ html>text ;
 : .link ( -- )
     comments:link{} ?dup-IF cr >o
 	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
