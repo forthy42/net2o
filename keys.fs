@@ -367,6 +367,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     #tab emit ke-imports @ .imports
     space .nick+pet ;
 : .key-list ( o:key -- o:key )
+    ke-imports @ [ 1 import#provisional lshift ]L and ?EXIT
     ke-offset 64@ 64>d keypack-all# fm/mod nip 3 .r space
     .key-rest cr ;
 

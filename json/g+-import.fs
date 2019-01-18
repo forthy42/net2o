@@ -33,13 +33,23 @@ Variable dir#
     fn$ $@ 2swap pics# #!
     fn$ $free ;
 
+: unquote ( addr u -- addr' u' )
+    over c@ '"' = negate safe/string ?dup-IF  2dup + 1- c@ '"' = +  THEN ;
+
+: dir-skips ( addr u n -- addr' u' )
+    0 ?DO '/' $split 2nip LOOP ;
+
+: basedir+name ( addr u -- addr' u' )
+    [: 2dup basename 2>r 3 dir-skips
+	2dup 2 dir-skips drop nip over - type
+	2r> type ;] $tmp ;
+
 : get-pic-filename { d: mtcvs -- }
     mtcvs r/o open-file throw { fd }
-    pad $100 + $1000 fd read-line throw 2drop
-    pad $100 + $1000 fd read-line throw drop pad $100 + swap
-    ',' $split 2drop
-    over c@ '"' = negate /string
-    2dup + 1- c@ '"' = +
+    pad $100 + $10000 fd read-line throw 2drop
+    pad $100 + $10000 fd read-file throw pad $100 + swap
+    ',' $split 2nip ',' $split 2nip ',' $split 2drop unquote
+    basedir+name
     mtcvs .mtcvs# - match-jpg/png
     fd close-file throw ;
 
@@ -104,6 +114,8 @@ Variable dir#
 
 : .html ( -- )
     comments:content$ html-untag cr ;
+: .plain ( -- )
+    comments:content$ html>text cr ;
 : .link ( -- )
     comments:link{} ?dup-IF cr >o
 	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
@@ -133,10 +145,11 @@ Variable pfile$
 : add-post ( dvcs -- ) dup .post-file add-file ;
 
 : add-media { dvcs -- }
-    media:url$ basename 2dup pics# #@ d0= IF  2drop  EXIT  THEN
-    2dup delete-file drop
-    2dup pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp 2over symlink ?ior
-    dvcs .dvcs-ref ;
+    media:url$ basedir+name 2dup pics# #@ d0= IF  2drop  EXIT  THEN
+    2dup basename delete-file drop
+    2dup pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp
+    2over basename symlink ?ior
+    basename dvcs .dvcs-ref ;
 
 : add-album { dvcs -- }
     comments:album{} ?dup-IF
@@ -186,8 +199,9 @@ Variable comment#
 	comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
 	comments:author{} .author:mapped-key { mkey }
 	create>never
+	['] .plain $tmp $100 umin
 	dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]!
-	"comment:" ['] (dvcs-ci) mkey wrap-key o>
+	['] (dvcs-ci) mkey wrap-key o>
 	last-msg 2@ post-ref 2!
 	dvcs-o add-plusones \ plusones not exported at the moment
 	\ dvcs-o add-reshares \ reshares of comments not possible
@@ -214,7 +228,8 @@ Variable comment#
     dvcs-o add-album
     comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
     create>never
-    dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]! "post:" (dvcs-ci) o>
+    ['] .plain $tmp $100 umin
+    dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]! (dvcs-ci) o>
     last-msg 2@ post-ref 2!
     dvcs-o add-plusones
     dvcs-o add-reshares
@@ -237,4 +252,6 @@ Variable comment#
     ?get-me
     ." Read pics metadata" cr   "." get-pic-filenames
     ." Read JSON files" cr      "." json-load-dir
-    ." Write entries" cr        write-articles ;
+    ." Write entries" cr        write-articles
+    ." Get avatars" cr          get-avatars hash-in-avatars
+    !save-all-msgs save-keys ;

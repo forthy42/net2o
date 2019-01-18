@@ -490,7 +490,7 @@ cmd-class class
     field: ke-imports  \ bitmask of key import
     field: ke-storekey \ used to encrypt on storage
     field: ke-mask     \ permission mask
-    field: ke-groups   \ premission groups
+    field: ke-groups   \ permission groups
     64field: ke-offset \ offset in key file
     field: ke-pwlevel  \ password strength level
     field: ke-sksig    \ signature secret, computed, never stored

@@ -394,6 +394,7 @@ $00FFFFFF color, sf,
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
 
 : show-nick ( o:key -- )
+    ke-imports @ [ 1 import#provisional lshift ]L and ?EXIT
     ke-imports @ >im-color# sfloats { ki }
     {{ glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
@@ -858,6 +859,7 @@ Value n2o-frame
     1e ambient% sf! set-uniforms ;
 
 : net2o-gui ( -- )
+    dpy win l" net2o GUI" locale@ x11:XStoreName drop
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE

@@ -234,6 +234,11 @@ synonym /tbody /table
     REPEAT  2drop html-unescape
     r> to config-wl ;
 
+: html>text ( addr u -- )
+    BEGIN  '<' $split dup  WHILE  2swap html-unescape
+	    '>' $split 2swap "br" str= IF  space  THEN
+    REPEAT  2drop html-unescape ;
+
 [IFDEF] entries[]
     : .un-htmls
 	entries[] $[]# 0 ?DO i entries[] $[] @ .g+:comments:content$
