@@ -296,11 +296,13 @@ dvcs-table $save
     fsize dvcs:out-fileoff +! ; dvcs-class is dvcs:write
 ' !!FIXME!! ( 64size algo addr u --- ) dvcs-class is dvcs:unzip
 :noname ( addr u -- ) \ hash+perm+name
+    0 patch-in$ !@ >r
     dvcs:fileentry$ $free
     [: over hash#128 forth:type ticks { 64^ ts } ts 1 64s forth:type
 	hash#128 /string forth:type ;] dvcs:fileentry$ $exec
     dvcs:fileentry$ $@ +fileentry
     ?fileentry-hash
+    patch-in$ $free  r> patch-in$ !
 ; dvcs-class is dvcs:ref
 
 \ DVCS refs are scanned for in patchsets, and then fetched
@@ -623,18 +625,9 @@ User id-check# \ check hash
 : branches>dvcs ( -- )
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    ?read-enc-hashed
-	    dvcs:clean-delta  c-state off
+	    ?read-enc-hashed  c-state off
 	    patch-in$ $@ do-cmd-loop
 	    dvcs:clean-delta
-	ELSE  2drop  THEN
-    ;] $[]map ;
-: branches>dvcs' ( -- )
-    branches[] [: dup IF
-	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    ?read-enc-hashed
-	    c-state off
-	    patch-in$ $@ do-cmd-loop
 	ELSE  2drop  THEN
     ;] $[]map ;
 
@@ -962,7 +955,7 @@ previous
 : dvcs-ref-sync ( -- )
     search-last-rev id>branches
     dvcs:new-dvcs-refs >o
-    branches>dvcs'
+    branches>dvcs
     dvcs:refs[] $[]# 0 ?DO
 	." ref: " I dvcs:refs[] $[]@ 85type cr  LOOP
     dvcs:refs[] connection .get-needed-files

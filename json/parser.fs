@@ -283,14 +283,19 @@ $Variable entries[]
 
 : json-load-dir ( addr u -- )
     2dup open-dir throw { dd } fpath dup $@len >r also-path dd
-    [: { dd } !time
+    [: { dd | nn } !time
 	BEGIN
 	    pad $100 dd read-dir throw  WHILE
 		pad swap 2dup "*.json" filename-match IF
-		    \ 2dup type cr
+		    nn #37 mod 0= IF
+			nn [: ." read " 6 .r ."  postings" ;]
+			warning-color color-execute
+			#-20 0 at-deltaxy
+		    THEN
+		    1 +to nn
 		    json-load entries[] >stack
 		ELSE  2drop  THEN
 	REPEAT  drop
-	[: ." read " entries[] $[]# . ." postings in " .time ;]
+	nn [: ." read " 6 .r ."  postings in " .time ;]
 	success-color color-execute cr ;] catch
     r> fpath $!len  dd close-dir throw  throw ;

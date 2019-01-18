@@ -51,7 +51,7 @@ Variable dir#
 		pad swap s" " 2swap dir# #!
 	REPEAT  drop
 	0 dir# [: $@ 2dup "*.metadata.csv" filename-match IF
-		get-pic-filename 1-
+		get-pic-filename 1+
 	    ELSE  2drop  THEN ;] #map
 	[: ." read " . ." pics in " .time ;]
 	success-color color-execute cr ;] catch
@@ -102,24 +102,33 @@ Variable dir#
     r/w create-file throw dup >r outfile-execute
     r> close-file throw ;
 
+: .html ( -- )
+    comments:content$ html-untag cr ;
+: .link ( -- )
+    comments:link{} ?dup-IF cr >o
+	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
+	o>  THEN ;
+: .album ( -- )
+    comments:album{} ?dup-IF cr
+	.album:media[] $@ bounds U+DO
+	    I @ >o
+	    ." ![" media:description$ type ." ](" media:url$ basename type ')' emit cr
+	    o>
+	cell +LOOP
+    THEN ;
+
 : add-file { dvcs d: file -- }
-    [:
-	comments:content$ html-untag cr
-	comments:link{} ?dup-IF cr >o
-	    '[' emit link:title$ type ." ](" link:url$ type ')' emit cr
-	    o>  THEN
-    ;] file execute>file
+    [: .html .link .album ;] file execute>file
     file dvcs .dvcs-add ;
 
 Variable pfile$
+: $pfile ( xt -- addr u )
+    pfile$ $free  pfile$ $exec  pfile$ $@ ;
 : post-file ( -- )
-    pfile$ $free
-    [: ." post-" project:project$ $. ." .md" ;]
-    pfile$ $exec pfile$ $@ ;
+    [: ." post-" project:project$ $. ." .md" ;] $pfile ;
 : comment-file ( -- addr u )
-    pfile$ $free
     [: ." comment-" comments:resourceName$ dup 11 - /string type ." .md" ;]
-    pfile$ $exec pfile$ $@ ;
+    $pfile ;
 
 : add-post ( dvcs -- ) dup .post-file add-file ;
 
@@ -195,7 +204,7 @@ Variable comment#
 : write-out-article ( o:comment -- )
     >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcs-o }
-    comments-base 2dup type cr
+    comments-base
     2dup [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
     ".n2o/files" touch
@@ -213,9 +222,20 @@ Variable comment#
     dvcs-o .dvcs:dispose-dvcs
     dir> redate-mode off ;
 
+: write-articles ( -- ) { | nn }
+    entries[] $@ bounds ?DO
+	I @ .write-out-article
+	nn #13 mod 0= IF
+	    nn [: ." write " 6 .r ."  postings" ;]
+	    warning-color color-execute
+	    #-21 0 at-deltaxy
+	THEN  1 +to nn
+    cell +LOOP
+    nn [: ." write "  6 .r ."  postings in " .time ;]
+    success-color color-execute cr ;
+
 : g+-import ( -- )
     ?get-me
     ." Read pics metadata" cr   "." get-pic-filenames
     ." Read JSON files" cr      "." json-load-dir
-    ." Write entries" cr
-    entries[] $@ bounds ?DO  I @ .write-out-article  cell +LOOP ;
+    ." Write entries" cr        write-articles ;
