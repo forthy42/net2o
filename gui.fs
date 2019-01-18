@@ -439,8 +439,11 @@ event: :>!connection    to connection ;
 event: :>chat-connects  gui-chat-connects
     <event connection dup elit, :>!connection .wait-task @ event> ;
 
+false Value in-group?
+
 : group[] ( box group -- box )
-    [:	data $@ group-name >o to text$ o>
+    [:  in-group? ?EXIT  true to in-group?
+	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
 	[: chat-keys $+[]! ;] $[]map
 	gui-msgs  <event :>chat-connects ?query-task event>
@@ -798,7 +801,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	    glue*l $000000FF color, slide-frame dup .button1
 	    {{
 		\large whitish
-		"⬅" }}text 40%b [: leave-chats prev-slide ;] over click[]
+		"⬅" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
+		    leave-chats prev-slide ;] over click[]
 		!i18n l" Chat Log" }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
 		{{
