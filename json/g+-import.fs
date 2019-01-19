@@ -17,6 +17,16 @@
 
 require ../html/parser.fs
 
+: replace-user ( addr u -- )
+    2dup "https://plus.google.com/" string-prefix? IF
+	2dup #24 /string authors# #@ IF
+	    ." key:" @ .author:mapped-key .ke-pk $@ key| 64type
+	    2drop EXIT  THEN
+	drop  THEN
+    type ;
+
+' replace-user IS href-replace
+
 Variable pics#
 Variable dir#
 

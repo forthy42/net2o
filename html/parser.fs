@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Defer href-replace ( addr u -- ) ' type is href-replace
+
 s" Unknown HTML character" exception Constant html-char-throw
 s" Unknown HTML tag" exception Constant html-throw
 
@@ -115,7 +117,7 @@ object class{ a-params
     THEN ;
 : /a 2drop
     a-params:class$ $@ s" ot-hashtag" string-prefix? 0= IF
-	." ](" a-params:href$ $@ type ')' emit
+	." ](" a-params:href$ $@ href-replace ')' emit
     THEN a-params:dispose o-stack stack> >r o> ;
 
 object class{ img-params
