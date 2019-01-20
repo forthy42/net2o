@@ -31,6 +31,7 @@ require ../html/parser.fs
 ' replace-user IS href-replace
 
 Variable pics#
+Variable picbase#
 Variable dir#
 
 ".metadata.csv" nip Constant .mtcvs#
@@ -47,6 +48,7 @@ Variable dir#
     fn$ $free ;
 
 : unquote ( addr u -- addr' u' )
+    2dup + 1- c@ ',' = +
     over c@ '"' = negate safe/string ?dup-IF  2dup + 1- c@ '"' = +  THEN ;
 
 : dir-skips ( addr u n -- addr' u' )
@@ -66,9 +68,11 @@ Variable dir#
     mtcvs r/o open-file throw { fd }
     pad $100 + $10000 fd read-line throw 2drop
     pad $100 + $10000 fd read-file throw pad $100 + swap
-    next, next, 2dup next, drop nip over - 2dup + 1- c@ ',' = + unquote
+    2dup next, 2tuck drop nip over - unquote { d: basefn }
+    next, 2dup next, drop nip over - unquote
     basedir+name
     mtcvs .mtcvs# - match-jpg/png
+    basefn last# cell+ $@ picbase# #!
     fd close-file throw ;
 
 : get-pic-filenames ( addr u -- )
@@ -147,10 +151,10 @@ filter-out bl 1- 1 fill
 	o>  THEN ;
 
 : .mfile ( -- )
-    media:url$ basedir+name pics# #@ d0= IF
-	media:url$ type
+    media:url$ basedir+name pics# #@ 2dup d0= IF
+	2drop media:url$ type
     ELSE
-	." file:" media:url$ basename type
+	." file:" picbase# #@ type
     THEN ;
 : .media ( -- )
     comments:media{} ?dup-IF cr >o
@@ -195,8 +199,9 @@ Variable pfile$
 	media:contentType$ "image/*" str= IF
 	    ." media unavailable: " media:url$ type cr  THEN
 	2drop  EXIT  THEN
-    media:url$ basename 2dup delete-file drop
-    2swap pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp
+    pics# #@
+    2dup picbase# #@ 2dup delete-file drop 2swap
+    [: dir@ forth:type ." /" forth:type ;] $tmp
     2over symlink ?ior
     dvcs .dvcs-ref ;
 
