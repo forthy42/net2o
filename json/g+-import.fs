@@ -58,13 +58,15 @@ Variable dir#
 	( 2r> type ) ;] $tmp ;
 
 : next, ( addr u -- addr' u' )
-    '"' $split 2nip '"' $split 2nip ',' $split 2nip ;
+    2dup "\"\"," string-prefix? IF  3 /string  EXIT  THEN
+    BEGIN  1 /string "\","  search  WHILE
+	    over 1- c@ '"' <>  UNTIL  2 safe/string  THEN ;
 
 : get-pic-filename { d: mtcvs -- }
     mtcvs r/o open-file throw { fd }
     pad $100 + $10000 fd read-line throw 2drop
     pad $100 + $10000 fd read-file throw pad $100 + swap
-    next, next, 2dup next, drop nip over - ',' -skip unquote
+    next, next, 2dup next, drop nip over - 2dup + 1- c@ ',' = + unquote
     basedir+name
     mtcvs .mtcvs# - match-jpg/png
     fd close-file throw ;
