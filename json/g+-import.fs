@@ -32,9 +32,11 @@ require ../html/parser.fs
 
 Variable pics#
 Variable picbase#
+Variable picdesc#
+Variable album#
 Variable dir#
 
-".metadata.csv" nip Constant .mtcvs#
+".metadata.csv" nip Constant .mtcsv#
 
 : match-jpg/png ( key u addr u -- ) $make { w^ fn$ }
     fn$ $@ dir# #@ d0= IF
@@ -62,17 +64,36 @@ Variable dir#
 : next, ( addr u -- addr' u' )
     2dup "\"\"," string-prefix? IF  3 /string  EXIT  THEN
     BEGIN  1 /string "\","  search  WHILE
-	    over 1- c@ '"' <>  UNTIL  2 safe/string  THEN ;
+	over 1- c@ '"' <>  UNTIL  2 safe/string  THEN ;
 
-: get-pic-filename { d: mtcvs -- }
-    mtcvs r/o open-file throw { fd }
+: next-csv ( addr u -- addr' u' addr1 u1 )
+    2dup next, 2tuck drop nip over - unquote ;
+
+: un-dquote ( addr u -- )
+    BEGIN
+	2dup "\"\"" search  WHILE
+	    2dup 2 /string 2>r drop 1+ nip over - type
+	    2r>  REPEAT  2drop type ;
+
+: +album ( addr u -- )
+    2dup 5 umin album# #@ d0= IF
+	$make { w^ fn } fn cell over $@ 5 umin album# #!
+    ELSE
+	last# cell+ $ins[] drop
+    THEN ;
+
+: get-pic-filename { d: mtcsv -- }
+    mtcsv r/o open-file throw { fd }
+    mtcsv .mtcsv# - to mtcsv \ for the rest, need only the basename of the file
     pad $100 + $10000 fd read-line throw 2drop
     pad $100 + $10000 fd read-file throw pad $100 + swap
-    2dup next, 2tuck drop nip over - unquote { d: basefn }
-    next, 2dup next, drop nip over - unquote
-    basedir+name
-    mtcvs .mtcvs# - match-jpg/png
-    basefn last# cell+ $@ picbase# #!
+    next-csv { d: basefn }
+    next-csv { d: desc }
+    next-csv 2nip basedir+name mtcsv match-jpg/png
+    last# cell+ $@
+    basefn 2over picbase# #!
+    desc ['] un-dquote $tmp 2over picdesc# #!
+    +album
     fd close-file throw ;
 
 : get-pic-filenames ( addr u -- )
@@ -156,17 +177,27 @@ filter-out bl 1- 1 fill
     ELSE
 	." file:" picbase# #@ type
     THEN ;
+: .csv-link { d: fn -- }
+    ." ![" fn picdesc# #@ .simple-text ." ](file:" fn picbase# #@ type ." )" cr ;
 : .media ( -- )
     comments:media{} ?dup-IF cr >o
 	." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
 	o>  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
-	.album:media[] $@ bounds U+DO
-	    I @ >o
-	    ." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
-	    o>
-	cell +LOOP
+	.album:media[] $@ over @ .media:url$
+	basedir+name pics# #@ d0= IF
+	    bounds U+DO
+		I @ >o
+		." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
+		o>
+	    cell +LOOP
+	ELSE
+	    2drop
+	    last# cell+ $@ 5 umin album# #@ bounds U+DO
+		I $@ .csv-link
+	    cell +LOOP
+	THEN
     THEN ;
 : .reshared ( -- )
     comments:resharedPost{} ?dup-IF  cr >o
@@ -194,22 +225,33 @@ Variable pfile$
 
 : add-post ( dvcs -- ) dup .post-file add-file ;
 
-: add-media { dvcs -- }
-    media:url$ basedir+name 2dup pics# #@ d0= IF
-	media:contentType$ "image/*" str= IF
-	    ." media unavailable: " media:url$ type cr  THEN
-	2drop  EXIT  THEN
-    pics# #@
+: csv-media ( filename u o:dsvc -- )
     2dup picbase# #@ 2dup delete-file drop 2swap
     [: dir@ forth:type ." /" forth:type ;] $tmp
     2over symlink ?ior
-    dvcs .dvcs-ref ;
+    dvcs-ref ;
+
+: add-media { dvcs -- }
+    media:url$ basedir+name pics# #@ d0= IF
+	media:contentType$ "image/*" str= IF
+	    ." media unavailable: " media:url$ type cr  THEN
+	EXIT  THEN
+    last# cell+ $@ dvcs .csv-media ;
 
 : add-album { dvcs -- }
     comments:album{} ?dup-IF
-	.album:media[] $@ bounds U+DO
-	    dvcs I @ .add-media
-	cell +LOOP
+	.album:media[] $@
+	over @ .media:url$
+	basedir+name pics# #@ d0= IF
+	    bounds U+DO
+		dvcs I @ .add-media
+	    cell +LOOP
+	ELSE
+	    2drop
+	    last# cell+ $@ 5 umin album# #@ bounds U+DO
+		I $@ dvcs .csv-media
+	    cell +LOOP
+	THEN
     THEN ;
 
 also net2o-base
