@@ -53,15 +53,18 @@ Variable dir#
     0 ?DO '/' $split 2nip LOOP ;
 
 : basedir+name ( addr u -- addr' u' )
-    [: 2dup basename 2>r 3 dir-skips
+    [: ( 2dup basename 2>r ) 3 dir-skips
 	2dup 2 dir-skips drop nip over - type
-	2r> type ;] $tmp ;
+	( 2r> type ) ;] $tmp ;
+
+: next, ( addr u -- addr' u' )
+    '"' $split 2nip '"' $split 2nip ',' $split 2nip ;
 
 : get-pic-filename { d: mtcvs -- }
     mtcvs r/o open-file throw { fd }
     pad $100 + $10000 fd read-line throw 2drop
     pad $100 + $10000 fd read-file throw pad $100 + swap
-    ',' $split 2nip ',' $split 2nip ',' $split 2drop unquote
+    next, next, 2dup next, drop nip over - ',' -skip unquote
     basedir+name
     mtcvs .mtcvs# - match-jpg/png
     fd close-file throw ;
@@ -140,11 +143,22 @@ filter-out bl 1- 1 fill
     comments:link{} ?dup-IF cr >o
 	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
 	o>  THEN ;
+
+: .mfile ( -- )
+    media:url$ basedir+name pics# #@ d0= IF
+	media:url$ type
+    ELSE
+	." file:" media:url$ basename type
+    THEN ;
+: .media ( -- )
+    comments:media{} ?dup-IF cr >o
+	." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
+	o>  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
 	.album:media[] $@ bounds U+DO
 	    I @ >o
-	    ." ![" media:description$ type ." ](" media:url$ basename type ')' emit cr
+	    ." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
 	    o>
 	cell +LOOP
     THEN ;
@@ -156,11 +170,11 @@ filter-out bl 1- 1 fill
 	'[' emit comments:content$ ['] html>text $tmp $40 umin .simple-text
 	." ](post:" comments:author{} ..key64 '/' emit
 	comments:url$ basename type ') emit cr cr
-	.html .link .album
+	.html .link .media .album
     o> THEN ;
 
 : add-file { dvcs d: file -- }
-    [: .html .link .reshared .album ;] file execute>file
+    [: .html .link .media .reshared .album ;] file execute>file
     file dvcs .dvcs-add ;
 
 Variable pfile$
@@ -175,11 +189,14 @@ Variable pfile$
 : add-post ( dvcs -- ) dup .post-file add-file ;
 
 : add-media { dvcs -- }
-    media:url$ basedir+name 2dup pics# #@ d0= IF  2drop  EXIT  THEN
-    2dup basename delete-file drop
-    2dup pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp
-    2over basename symlink ?ior
-    basename dvcs .dvcs-ref ;
+    media:url$ basedir+name 2dup pics# #@ d0= IF
+	media:contentType$ "image/*" str= IF
+	    ." media unavailable: " media:url$ type cr  THEN
+	2drop  EXIT  THEN
+    media:url$ basename 2dup delete-file drop
+    2swap pics# #@ [: dir@ forth:type ." /" forth:type ;] $tmp
+    2over symlink ?ior
+    dvcs .dvcs-ref ;
 
 : add-album { dvcs -- }
     comments:album{} ?dup-IF
