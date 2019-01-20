@@ -17,10 +17,13 @@
 
 require ../html/parser.fs
 
+: .key64 ( o:key -- )
+    author:mapped-key .ke-pk $@ key| 64type ;
+
 : replace-user ( addr u -- )
     2dup "https://plus.google.com/" string-prefix? IF
 	2dup #24 /string authors# #@ IF
-	    ." key:" @ .author:mapped-key .ke-pk $@ key| 64type
+	    ." key:" @ ..key64
 	    2drop EXIT  THEN
 	drop  THEN
     type ;
@@ -122,6 +125,13 @@ Variable dir#
     r/w create-file throw dup >r outfile-execute
     r> close-file throw ;
 
+$100 buffer: filter-out
+filter-out bl 1- 1 fill
+1 filter-out ']' + c!
+
+: .simple-text ( addr u -- )
+    bounds ?DO  i c@ filter-out + c@ 0= IF  I c@ emit  THEN  LOOP ;
+
 : .html ( -- )
     comments:content$ html-untag cr ;
 : .plain ( -- )
@@ -138,9 +148,19 @@ Variable dir#
 	    o>
 	cell +LOOP
     THEN ;
+: .reshared ( -- )
+    comments:resharedPost{} ?dup-IF  cr >o
+	." > " comments:author{} ?dup-IF >o
+	    ." +[" author:displayName$ type ." ](key:" .key64 ." ): " o>
+	THEN
+	'[' emit comments:content$ ['] html>text $tmp $40 umin .simple-text
+	." ](post:" comments:author{} ..key64 '/' emit
+	comments:url$ basename type ') emit cr cr
+	.html .link .album
+    o> THEN ;
 
 : add-file { dvcs d: file -- }
-    [: .html .link .album ;] file execute>file
+    [: .html .link .reshared .album ;] file execute>file
     file dvcs .dvcs-add ;
 
 Variable pfile$
