@@ -199,14 +199,16 @@ filter-out bl 1- 1 fill
 	    cell +LOOP
 	THEN
     THEN ;
-: .reshared ( -- )
+: .post ( o:comments -- )
+    ." post:" comments:author{} ..key64 '/' emit
+    ." g+:" comments:url$ basename type ;
+: .reshared ( o:comments -- )
     comments:resharedPost{} ?dup-IF  cr >o
 	." > " comments:author{} ?dup-IF >o
 	    ." +[" author:displayName$ type ." ](key:" .key64 ." ): " o>
 	THEN
 	'[' emit comments:content$ ['] html>text $tmp $40 umin .simple-text
-	." ](post:" comments:author{} ..key64 '/' emit
-	." g+:" comments:url$ basename type ') emit cr cr
+	." ](" .post ') emit cr cr
 	.html .link .media .album
     o> THEN ;
 
@@ -295,7 +297,7 @@ Variable comment#
 	comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
 	comments:author{} .author:mapped-key { mkey }
 	create>never
-	['] .plain $tmp $100 umin
+	['] .plain $tmp $80 umin -trailing-garbage
 	dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]!
 	['] (dvcs-ci) mkey wrap-key o>
 	last-msg 2@ post-ref 2!
@@ -311,6 +313,41 @@ Variable comment#
 	comments:url$
     THEN  basename ;
 
+: ?make-group ( -- )
+    msg-group$ $@ group# #@ d0= IF
+	msg-group$ $@ make-group
+    THEN ;
+
+: add-collection { dvcso | w^ groups[] -- }
+    comments:postAcl{} ?dup-IF >o
+	postAcl:collectionAcl{} ?dup-IF
+	    .collectionAcl:collection{} ?dup-IF
+		[: ." g+:" .collection:displayName$ type ;] $tmp
+		groups[] $+[]!
+	    THEN
+	THEN
+	postAcl:visibleToStandardAcl{} ?dup-IF
+	    .visibleToStandardAcl:circles[] $@ bounds U+DO
+		I @ .circles:displayName$ dup IF
+		    [: ." g+:circle:"  type ;] $tmp groups[] $+[]!
+		ELSE  2drop  THEN
+	    cell +LOOP
+	THEN
+	groups[] $[]# 0= IF
+	    postAcl:isPublic? IF  "g+:<public>"  ELSE  "g+:<private>"  THEN
+	    groups[] $+[]!
+	THEN
+	o>
+    THEN
+    ['] .plain $tmp $80 umin -trailing-garbage  ['] .post $tmp
+    groups[] [: msg-group$ $! 0 .?make-group
+	[ also net2o-base ]
+	[: 2over $, msg-text 2dup $, msg-url ;]
+	[ previous ]
+	(send-avalanche) drop msg-group$ $. space .chat ;]
+    $[]map  2drop 2drop
+    groups[] $[]free ;
+
 : write-out-article ( o:comment -- )
     >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcs-o }
@@ -324,22 +361,24 @@ Variable comment#
     dvcs-o add-album
     comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
     create>never
-    ['] .plain $tmp $100 umin
+    ['] .plain $tmp $100 umin -trailing-garbage
     dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]! (dvcs-ci) o>
     last-msg 2@ post-ref 2!
     dvcs-o add-plusones
     dvcs-o add-reshares
     dvcs-o add-comments
     dvcs-o .dvcs:dispose-dvcs
+    create>never
+    dvcs-o add-collection
     dir> redate-mode off ;
 
 : write-articles ( -- ) { | nn }
     entries[] $@ bounds ?DO
-	I @ .write-out-article
-	1 +to nn
 	nn [: ." write " 6 .r ."  postings" ;]
 	warning-color color-execute
 	#-21 0 at-deltaxy
+	I @ .write-out-article
+	1 +to nn
     cell +LOOP
     nn [: ." write "  6 .r ."  postings in " .time ;]
     success-color color-execute cr ;
@@ -354,4 +393,5 @@ Variable comment#
     ." Read JSON files" cr      dir json-load-dir
     ." Write entries" cr        write-articles
     ." Get avatars" cr          get-avatars hash-in-avatars
-    !save-all-msgs save-keys ;
+    !save-all-msgs save-keys
+    save-chatgroups .chatgroups ;

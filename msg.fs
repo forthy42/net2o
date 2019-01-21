@@ -530,6 +530,7 @@ group-table @ group-o .token-table !
 ' context-table is gen-table
 
 : .chats/group ( -- addr u )
+    pk@ pkc swap move  sk@ skc swap move \ normalize pkc
     pkc keysize 3 * \ hash of pkc+pk1+skc keyed with "group"
     "group" keyed-hash#128 .chats/ ( [: type ." .v2o" ;] $tmp ) ;
 
@@ -584,7 +585,8 @@ Variable group-list[]
 : .chatgroup ( last# -- )
     dup $. space dup $@ rot cell+ $@ drop cell+ >o
     groups:id$ 2tuck str=
-    IF  ." ="  ELSE  ''' emit <info> 85type <default> ''' emit THEN space
+    IF  ." =" 2drop
+    ELSE  ''' emit <info> 85type <default> ''' emit THEN space
     groups:member[] [: '@' emit .simple-id space ;] $[]map
 \    ." admin " groups:admin[] [: '@' emit .simple-id space ;] $[]map
     ." +" groups:perms# x64.

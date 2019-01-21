@@ -504,24 +504,25 @@ warnings !
 : chatgroup ( -- )
     \U chatgroup name [id] @user1 .. @usern [admin <sk>] [+perm]
     \G chatgroup: define a chat group
-    ?get-me ?nextarg 0= ?EXIT  make-group
-    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
-    over c@ '@' <> IF  2drop ?nextarg drop
-	2dup s" =" str= IF  2drop
-	ELSE  base85>$ to groups:id$  THEN
-    ELSE  gen-admin-key
-    THEN
-    BEGIN  ?@nextarg  WHILE  nick>pk key| groups:member[] $+[]!  REPEAT
-    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
-    s" admin" str= IF  ?nextarg drop 2drop
-	?nextarg  IF
-	    base85>$ groups:admin sec! admin>pk
+    ?get-me ?nextarg 0= ?EXIT
+    [: make-group
+	?peekarg 0= ?EXIT
+	over c@ '@' <> IF  2drop ?nextarg drop
+	    2dup s" =" str= IF  2drop
+	    ELSE  base85>$ to groups:id$  THEN
+	ELSE  gen-admin-key
 	THEN
-    THEN
-    ?peekarg 0= IF  save-chatgroups  EXIT  THEN
-    over c@ '+' = IF  2drop ?nextarg drop
-	s>unumber? drop d>64 to groups:perms#
-    THEN
+	BEGIN  ?@nextarg  WHILE  nick>pk key| groups:member[] $+[]!  REPEAT
+	?peekarg 0= ?EXIT
+	s" admin" str= IF  ?nextarg drop 2drop
+	    ?nextarg  IF
+		base85>$ groups:admin sec! admin>pk
+	    THEN
+	THEN
+	?peekarg 0= ?EXIT
+	over c@ '+' = IF  2drop ?nextarg drop
+	    s>unumber? drop d>64 to groups:perms#
+	THEN ;] execute
     save-chatgroups .chatgroups ;
 
 : chatgroups ( -- )
