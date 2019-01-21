@@ -153,6 +153,13 @@ $Variable gui.fs$
 "gui.fs" open-fpath-file 0= [IF] rot close-file throw gui.fs$ $! [THEN]
 $Variable qrscan.fs$
 "qrscan.fs" open-fpath-file 0= [IF] rot close-file throw qrscan.fs$ $! [THEN]
+$Variable parser.fs$
+"json/parser.fs" open-fpath-file 0= [IF] rot close-file throw parser.fs$ $! [THEN]
+
+scope: importer
+: g+ parser.fs$ $@ required
+    ?nextarg 0= IF  "."  THEN  "g+-import" evaluate ;
+}scope
 
 scope{ n2o
 
@@ -740,6 +747,13 @@ warnings !
     \G rng: check rng and give a 32 byte random value
     ?check-rng $20 rng$ 85type cr
     check-old$ $@ ['] .rngstat stderr outfile-execute  check-old$ $free ;
+
+: import ( -- )
+    \U import g+|... [directory]
+    ?nextarg IF
+	['] importer >body find-name-in ?dup-IF
+	    name>int execute  EXIT  THEN  THEN
+    ." unknown import" ;
 
 : gui ( -- )
     \U gui

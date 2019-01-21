@@ -182,6 +182,7 @@ true Value first-key?
 also g+
 
 [IFDEF] dummy-key
+    $Variable entries[] \ list of google+ entries
     require g+-import.fs
 [THEN]
 

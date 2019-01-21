@@ -206,7 +206,7 @@ filter-out bl 1- 1 fill
 	THEN
 	'[' emit comments:content$ ['] html>text $tmp $40 umin .simple-text
 	." ](post:" comments:author{} ..key64 '/' emit
-	comments:url$ basename type ') emit cr cr
+	." g+:" comments:url$ basename type ') emit cr cr
 	.html .link .media .album
     o> THEN ;
 
@@ -318,7 +318,7 @@ Variable comment#
     2dup [: ." posts/" type ." /.n2o" ;] $tmp
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
     ".n2o/files" touch
-    dvcs-o >o project:project$ $!
+    dvcs-o >o "g+:" project:project$ $! project:project$ $+!
     "master" project:branch$ $! save-project o>
     dvcs-o add-post
     dvcs-o add-album
@@ -344,10 +344,14 @@ Variable comment#
     nn [: ." write "  6 .r ."  postings in " .time ;]
     success-color color-execute cr ;
 
-: g+-import ( -- )
+[IFUNDEF] json-load-dir
+    forward json-load-dir
+[THEN]
+
+: g+-import { d: dir -- }
     ?get-me
-    ." Read pics metadata" cr   "." get-pic-filenames
-    ." Read JSON files" cr      "." json-load-dir
+    ." Read pics metadata" cr   dir get-pic-filenames
+    ." Read JSON files" cr      dir json-load-dir
     ." Write entries" cr        write-articles
     ." Get avatars" cr          get-avatars hash-in-avatars
     !save-all-msgs save-keys ;

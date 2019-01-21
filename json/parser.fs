@@ -279,8 +279,6 @@ true  rectype-bool 2constant true
     r> is parse-name  r> to forth-recognizer  nr> set-order
     throw process-element o o> ;
 
-$Variable entries[]
-
 : json-load-dir ( addr u -- )
     2dup open-dir throw { dd } fpath dup $@len >r also-path dd
     [: { dd | nn } !time
