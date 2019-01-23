@@ -47,10 +47,16 @@ end-class rng-c
     c:key@ >r  rng-key c:key!  catch  r> c:key!  throw ;
 
 : read-rnd ( addr u -- )
-    \G read in bytes from /dev/urandom
-    s" /dev/urandom" r/o open-file throw >r
-    tuck r@ read-file r> close-file throw
-    throw <> !!insuff-rnd!! ;
+    \G read in entropy bytes from the systems entropy source
+    [IFDEF] getentropy
+	bounds U+DO \ getentropy reads $100 bytes at maximum
+	    I I' over - $100 umin getentropy ?ior
+	$100 +LOOP
+    [ELSE]
+	s" /dev/urandom" r/o open-file throw >r
+	tuck r@ read-file r> close-file throw
+	throw <> !!insuff-rnd!!
+    [THEN] ;
 
 : rng-init ( -- ) \G reed seed into the buffer
     \ note that reading 256 bytes of /dev/urandom is unnecessary much
