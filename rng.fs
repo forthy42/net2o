@@ -48,7 +48,10 @@ end-class rng-c
 
 : read-rnd ( addr u -- )
     \G read in entropy bytes from the systems entropy source
-    [IFDEF] getentropy
+    [ [defined] getentropy [defined] linux and [IF]
+	"getentropy" "libc.so.6" open-lib lib-sym 0<>
+    [ELSE] false [THEN] ]
+    [IF]
 	bounds U+DO \ getentropy reads $100 bytes at maximum
 	    I I' over - $100 umin getentropy ?ior
 	$100 +LOOP
