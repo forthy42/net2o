@@ -859,7 +859,9 @@ Value n2o-frame
     1e ambient% sf! set-uniforms ;
 
 : net2o-gui ( -- )
-    dpy win l" net2o GUI" locale@ x11:XStoreName drop
+    [IFDEF] x11
+	dpy win l" net2o GUI" locale@ x11:XStoreName drop
+    [THEN]
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
