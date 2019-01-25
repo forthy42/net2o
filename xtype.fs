@@ -17,4 +17,4 @@
 
 : x" ( "hexstring" -- addr u )
     '"' parse hex>$ ;
-comp: execute postpone SLiteral ;
+compsem: [compile] x" postpone SLiteral ;

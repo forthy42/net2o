@@ -542,12 +542,12 @@ previous
     \G start a statefull command
     cmd!  cmdlock lock
     cmdreset init-reply 1 code+ also net2o-base ;
-comp: :, also net2o-base ;
+compsem: ['] net2o-code compile, also net2o-base ;
 : net2o-code0
     \G start a stateless command
     cmd0!  cmdlock lock
     cmdreset init-reply also net2o-base ;
-comp: :, also net2o-base ;
+compsem: ['] net2o-code0 compile, also net2o-base ;
 
 : punch-out ( -- )
     check-addr1 0= ind-addr @ or IF  2drop  EXIT  THEN
@@ -755,7 +755,7 @@ scope{ net2o-base
 : flag, ( flag -- ) IF tru ELSE fals THEN ;
 : (end-code) ( -- ) expect-reply? cmd  cmdlock unlock ;
 : end-code ( -- ) (end-code) previous ;
-comp: :, previous ;
+compsem: ['] end-code compile, previous ;
 : push-cmd ( -- )
     end-cmd cmdbuf$ push-reply ;
 

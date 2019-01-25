@@ -31,5 +31,5 @@ Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
 
 : 64" ( "base64string" -- addr u )
     '"' parse base64>$ ;
-comp: execute postpone SLiteral ;
+compsem: [compile] 64" postpone SLiteral ;
 

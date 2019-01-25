@@ -23,6 +23,7 @@ require 64bit.fs
 require date.fs
 require mini-oof2.fs
 require forward.fs
+require set-compsem.fs
 
 \ enum
 
@@ -827,7 +828,7 @@ $1F to tmps# \ need more temporaries
     [: >r BEGIN  refill  WHILE
 	      source 2over string-prefix? IF  r@ execute  THEN
       REPEAT rdrop 2drop ;] execute-parsing-named-file ;
-comp: sourcefilename postpone sliteral :, ;
+compsem: sourcefilename postpone sliteral ['] search-help compile, ;
 
 : .cmd ( addr u -- addr u )
     source 2over nip /string type cr ;

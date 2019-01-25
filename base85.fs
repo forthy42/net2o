@@ -29,7 +29,7 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 
 : 85" ( "base85string" -- addr u )
     '"' parse base85>$ ;
-comp: execute postpone SLiteral ;
+compsem: [compile] 85" postpone SLiteral ;
 
 : .85info ( addr u -- )
     <info> 85type <default> ;

@@ -706,13 +706,13 @@ key-entry-table @ sample-key .token-table !
     code-key  cmdlock lock
     keypack keypack-all# erase
     cmdreset init-reply also net2o-base ;
-comp: :, also net2o-base ;
+compsem: ['] key:code compile, also net2o-base ;
 
 scope{ net2o-base
 
 : end:key ( -- )
     end-with previous cmdlock unlock ;
-comp: :, previous ;
+compsem: ['] end:key compile, previous ;
 
 }scope
 
