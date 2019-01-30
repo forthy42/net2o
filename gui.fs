@@ -709,11 +709,11 @@ Variable last-bubble-pk
 :noname ( addr u -- )
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
     text-color!
-; msg-class to msg:re
+; wmsg-class to msg:re
 :noname ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
     text-color!
-; msg-class to msg:id
+; wmsg-class to msg:id
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	last# >r last# $@ ?msg-log
@@ -738,7 +738,24 @@ Variable last-bubble-pk
 	    THEN
 	LOOP
 	r> to last#
-    THEN ; msg-class is msg:otrify
+    THEN ; wmsg-class is msg:otrify
+:noname ( addr u type -- )
+    obj-red
+    [: case
+	    msg:image#     of  ." img["      85type  endof
+	    msg:thumbnail# of  ." thumb["    85type  endof
+	    msg:patch#     of  ." patch["    85type  endof
+	    msg:snapshot#  of  ." snapshot[" 85type  endof
+	    msg:message#   of  ." message["  85type  endof
+	    msg:project#   of
+		2dup keysize /string
+		2dup printable? IF  '[' emit  type '@' emit
+		ELSE  ." #["  85type ." /@"  THEN
+		key| .key-id
+	    endof
+	endcase ." ]" ;] $tmp }}text msg-box .child+
+    text-color!
+; wmsg-class is msg:object
 
 in net2o : new-wmsg ( o:connection -- o )
     o wmsg-class new >o  parent!  msg-table @ token-table ! o o> ;
@@ -769,8 +786,9 @@ wmsg-o >o msg-table @ token-table ! o>
     2dup load-msg ?msg-log
     last# msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
-	I $@ ['] wmsg-display wmsg-o .catch IF
-	    <err> ." invalid entry" <default> cr 2drop
+	I $@ { d: msgt }
+	msgt ['] wmsg-display wmsg-o .catch IF
+	    <err> ." invalid entry" <default> 2drop
 	THEN
     cell +LOOP
     log free throw  msgs-box >o resized vp-bottom o>

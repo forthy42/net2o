@@ -178,9 +178,9 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
 : display-sync-done ( -- )
     rows  msg-context @ .msg:redisplay ;
 
-: display-one-msg ( addr u -- )
+: display-one-msg { d: msgt -- }
     net2o:new-msg >o 0 to parent
-    ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
+    msgt ['] msg:display catch IF  ." invalid entry"  cr  2drop  THEN
     dispose o> ;
 
 Forward silent-join
@@ -448,7 +448,19 @@ scope: logstyles
     <info> utf8emit <default> ; msg-class is msg:like
 ' drop msg-class is msg:away
 :noname ( addr u type -- )
-    space <warn> 0 .r ." :[" 85type ." ]" <default> ;
+    space <warn> case
+	msg:image#     of  ." img["      85type  endof
+	msg:thumbnail# of  ." thumb["    85type  endof
+	msg:patch#     of  ." patch["    85type  endof
+	msg:snapshot#  of  ." snapshot[" 85type  endof
+	msg:message#   of  ." message["  85type  endof
+	msg:project#   of
+	    2dup keysize /string
+	    2dup printable? IF  '[' emit  type '@' emit
+	    ELSE  ." #["  85type ." /@"  THEN
+	    key| .key-id
+	endof
+    endcase ." ]" <default> ;
 msg-class is msg:object
 :noname ( addr u -- ) $utf8>
     <warn> forth:type <default> ; msg-class is msg:action
@@ -937,7 +949,9 @@ previous
     [:  cells >r last# msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
-	    I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop  THEN
+	    I $@ { d: msgt }
+	    msgt ['] msg:display catch IF  ." invalid entry" cr
+		2drop  THEN
 	cell +LOOP
 	log free throw ;] !wrapper ;
 ' msg-tredisplay msg-class is msg:redisplay

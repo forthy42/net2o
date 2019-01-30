@@ -17,8 +17,11 @@
 
 require ../html/parser.fs
 
+: key-pk@ ( o:key -- addr u )
+    author:mapped-key .ke-pk $@ key| ;
+
 : .key64 ( o:key -- )
-    author:mapped-key .ke-pk $@ key| 64type ;
+    key-pk@ 64type ;
 
 : replace-user ( addr u -- )
     2dup "https://plus.google.com/" string-prefix? IF
@@ -202,6 +205,9 @@ filter-out bl 1- 1 fill
 : .post ( o:comments -- )
     ." post:" comments:author{} ..key64 '/' emit
     ." g+:" comments:url$ basename type ;
+: .project ( o:comments -- )
+    comments:author{} .key-pk@ type
+    ." g+:" comments:url$ basename type ;
 : .reshared ( o:comments -- )
     comments:resharedPost{} ?dup-IF  cr >o
 	." > " comments:author{} ?dup-IF >o
@@ -339,10 +345,10 @@ Variable comment#
 	THEN
 	o>
     THEN
-    ['] .plain $tmp $80 umin -trailing-garbage  ['] .post $tmp
+    ['] .plain $tmp $80 umin -trailing-garbage  ['] .project $tmp
     groups[] [: msg-group$ $! 0 .?make-group
 	[ also net2o-base ]
-	[: 2over $, msg-text 2dup $, msg-url ;]
+	[: 2over $, msg-text 2dup $, msg:project# ulit, msg-object ;]
 	[ previous ]
 	(send-avalanche) drop msg-group$ $. space .chat ;]
     $[]map  2drop 2drop

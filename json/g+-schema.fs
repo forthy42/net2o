@@ -23,6 +23,8 @@ object class{ comments
     $value: resourceName$
     $value: url$
     $value: content$
+    $value: activityId$
+    synonym commentActivityId$ activityId$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
     64value: creationTime!
     64value: updateTime!

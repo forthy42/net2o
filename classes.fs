@@ -191,6 +191,7 @@ enum thumbnail#
 enum patch#
 enum snapshot#
 enum message#
+enum project#
 drop
 }scope
 
