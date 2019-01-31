@@ -626,16 +626,13 @@ warnings !
 \ dvcs commands
 
 : init ( -- )
-    \U init [name [branchname]]
+    \U init [name][#branchname][@owner]
     \G init: Setup a dvcs project in the current folder
     \G init: The default branch name is "master"
     \G init: The default project name is the directory it resides in
-    ".n2o" $1FF init-dir drop
-    ".n2o/files" touch
+    ?get-me
     ?nextarg 0= IF  pad path-max# get-dir basename  THEN
-    dvcs:new-dvcs >o project:project$ $!
-    ?nextarg 0= IF  "master"  THEN  project:branch$ $!
-    save-project  dvcs:dispose-dvcs o> ;
+    dvcs-init ;
 
 : add ( -- )
     \U add file1 .. filen
@@ -662,8 +659,8 @@ warnings !
 ;
 
 : fetch ( -- )
-    \U fetch project1@user1... projectn@usern
-    \G fetch: get the updates from other users (possible multiple)
+    \U fetch project1@user1
+    \G fetch: get the updates from other users (later possible multiple)
     \G fetch: Similar syntax as for chats
     ?get-me init-client nicks>chat handle-fetch ;
 
@@ -673,11 +670,17 @@ warnings !
     ?get-me dvcs-up ;
 
 : pull ( -- )
-    \U pull project1@user1... projectn@usern
+    \U pull project1@user1
     \G pull: get the updates from other users (possible multiple)
     \G pull: and checkout the last revision (fetch+up).
     \G pull: Similar syntax as for chats
     ?get-me init-client nicks>chat handle-fetch dvcs-up ;
+
+: clone ( -- )
+    \U clone project1@user1
+    \G create dictionary, init repository and pull project
+    ?get-me init-client nicks>chat ( handle-init )
+    handle-fetch dvcs-up ;
 
 : revert ( -- )
     \U revert

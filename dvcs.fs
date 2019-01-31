@@ -68,6 +68,7 @@ dvcs-abstract class
 
     field: chain$
     field: revision$
+    field: owner$
     field: branch$
     field: project$
 
@@ -517,10 +518,26 @@ Variable id-files[]
 
 previous
 
+: 85$! ( addr u $addr -- )
+    ['] 85type swap dup $free $exec ;
+
 : save-project ( -- )
     dvcs( ." saving '" dvcs:id$ $@ 85type cr )
-    dvcs:id$ $@ ['] 85type project:revision$ dup $free $exec
+    dvcs:id$ $@ project:revision$ 85$!
     "~+/.n2o/config" ['] project >body write-config ;
+
+\ init project
+
+: dvcs-init ( project u -- )
+    ".n2o" $1FF init-dir drop
+    ".n2o/files" touch
+    dvcs:new-dvcs >o
+    '@' $split  dup IF  nick>pk  ELSE  2drop  pk@  THEN  project:owner$ 85$!
+    '#' $split  dup 0= IF  2drop "master"  THEN  project:branch$ $!
+    $split project:project$ $!
+    save-project  dvcs:dispose-dvcs o> ;
+
+\ append a line
 
 : append-line ( addr u file u -- )
     2dup w/o open-file dup no-file# = IF
