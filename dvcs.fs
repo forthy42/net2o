@@ -68,7 +68,6 @@ dvcs-abstract class
 
     field: chain$
     field: revision$
-    field: owner$
     field: branch$
     field: project$
 
@@ -532,9 +531,8 @@ previous
     ".n2o" $1FF init-dir drop
     ".n2o/files" touch
     dvcs:new-dvcs >o
-    '@' $split  dup IF  nick>pk  ELSE  2drop  pk@  THEN  project:owner$ 85$!
-    '#' $split  dup 0= IF  2drop "master"  THEN  project:branch$ $!
-    $split project:project$ $!
+    '#' $split  dup 0= IF  2drop "master"  ELSE  2swap  THEN
+    project:branch$ $!  project:project$ $!
     save-project  dvcs:dispose-dvcs o> ;
 
 \ append a line
@@ -990,6 +988,15 @@ previous
     msg( ." === ref sync done ===" forth:cr )
     >group last# silent-leave-chat
     dvcs:dispose-dvcs o> ;
+
+: handle-clone ( -- )
+    chat-keys [: >dir
+	@/ 2swap
+	'#' $split dup 0= IF  2drop  ELSE  2nip  THEN
+	2dup $1FF init-dir drop 2dup set-dir throw
+	[: type '@' emit .key-id? ;] $tmp dvcs-init
+	handle-fetch dvcs-up dir>
+    ;] $[]map ;
 
 \\\
 Local Variables:

@@ -1,6 +1,6 @@
 \ net2o command line interface
 
-\ Copyright (C) 2015   Bernd Paysan
+\ Copyright (C) 2015-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -626,7 +626,7 @@ warnings !
 \ dvcs commands
 
 : init ( -- )
-    \U init [name][#branchname][@owner]
+    \U init [branchname#][name][@owner]
     \G init: Setup a dvcs project in the current folder
     \G init: The default branch name is "master"
     \G init: The default project name is the directory it resides in
@@ -679,8 +679,7 @@ warnings !
 : clone ( -- )
     \U clone project1@user1
     \G create dictionary, init repository and pull project
-    ?get-me init-client nicks>chat ( handle-init )
-    handle-fetch dvcs-up ;
+    ?get-me init-client nicks>chat handle-clone ;
 
 : revert ( -- )
     \U revert
