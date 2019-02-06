@@ -210,6 +210,7 @@ cmd-class class
     defer: ack-xt        \ callback for acknowledge
     defer: punch-done-xt \ callback for NAT traversal ok
     defer: sync-done-xt  \ callback for sync done
+    defer: sync-none-xt  \ callback for sync not needed
     \ maps for data and code transfer
     0 +field start-maps
     value: code-map

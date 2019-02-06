@@ -775,6 +775,7 @@ Variable ask-msg-files[]
 	ask-msg-files[] ['] net2o:copy-msg $[]map o>
     ELSE
 	." === nothing to sync ===" forth:cr
+	parent .sync-none-xt \ sync-nothing-xt???
     THEN
     r> to last# ;
 

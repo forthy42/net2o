@@ -1,6 +1,6 @@
 \ net2o distributed version control system
 
-\ Copyright (C) 2016   Bernd Paysan
+\ Copyright (C) 2016-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -606,7 +606,7 @@ previous
 ' drop dvcs-log-class is msg:like
 
 : chat>dvcs ( o:dvcs -- )
-    project:project$ $@ load-msg ;
+    project:project$ $@ @/ 2drop load-msg ;
 : .hash ( addr -- )
     [: dup $@ 85type ."  -> " cell+ $@ 85type cr ;] #map ;
 : chat>branches-loop ( o:commit -- )
@@ -617,7 +617,7 @@ previous
     dvcs( ." === id>patch ===" cr id>patch# .hash
     ." === id>snap ===" cr id>snap# .hash ) ;
 : chat>branches ( o:dvcs -- )
-    project:project$ $@ ?msg-log  dvcs:commits @ .chat>branches-loop ;
+    project:project$ $@ @/ 2drop ?msg-log  dvcs:commits @ .chat>branches-loop ;
 
 : >branches ( addr u -- )
     $make branches[] >back ;
@@ -696,7 +696,7 @@ scope{ dvcs
 
 : .dvcs-log ( -- )
     dvcs:new-dvcs >o  config>dvcs
-    project:project$ $@ 2dup load-msg
+    project:project$ $@ @/ 2drop 2dup load-msg
     config:logsize# @ display-logn
     dvcs:dispose-dvcs o> ;
 
@@ -860,7 +860,7 @@ previous
 	I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw ;
 : search-last-rev ( -- addr u )
-    project:project$ $@ ?msg-log
+    project:project$ $@ @/ 2drop ?msg-log
     project:branch$ $@
     dvcs:searchs @ >o match:tag$ $!
     chat>searchs-loop match:id$ $@ o> ;
@@ -900,9 +900,12 @@ Variable sync-file-list[]
 $18 Constant /sync-files
 $20 /sync-files * Constant /sync-reqs
 
+: dvcs-sync-none ( -- )
+    -1 dvcs-request# +!@ 0<= IF  dvcs-request# off  THEN ;
+
 event: :>dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
-    msg-group$ $@ ?save-msg   0 dvcs-request# !
+    msg-group$ $@ ?save-msg  dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
 
 : dvcs-sync-done ( -- )
@@ -912,7 +915,8 @@ event: :>dvcs-sync-done ( o -- ) >o
     <event o elit, :>dvcs-sync-done wait-task @ event> ;
 
 : +dvcs-sync-done ( -- )
-    ['] dvcs-sync-done is sync-done-xt ;
+    ['] dvcs-sync-done is sync-done-xt
+    ['] dvcs-sync-none is sync-none-xt ;
 
 also net2o-base
 : dvcs-join, ( -- )
@@ -924,13 +928,16 @@ previous
     log !time end-with dvcs-join, get-ip end-code ;
 
 : dvcs-connect ( addr u -- )
-    1 dvcs-request# !  dvcs-bufs# chat#-connect dvcs-greet ;
+    2 dvcs-request# !  dvcs-bufs# chat#-connect dvcs-greet ;
+
+: dvcs-connect-key ( addr u -- )
+    key>group ?load-msgn
+    dup 0= IF  2drop msg-group$ $@ msg-groups #!  EXIT  THEN
+    2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
+    2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;
 
 : dvcs-connects ( -- )
-    chat-keys [: key>group ?load-msgn
-      dup 0= IF  2drop msg-group$ $@ msg-groups #!  EXIT  THEN
-      2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
-      2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;] $[]map ;
+    chat-keys ['] dvcs-connect-key $[]map ;
 
 : wait-dvcs-request ( -- )
     BEGIN  stop dvcs-request# @ 0= UNTIL ;
@@ -990,12 +997,13 @@ previous
     dvcs:dispose-dvcs o> ;
 
 : handle-clone ( -- )
-    chat-keys [: >dir
-	@/ 2swap
-	'#' $split dup 0= IF  2drop  ELSE  2nip  THEN
-	2dup $1FF init-dir drop 2dup set-dir throw
-	[: type '@' emit .key-id? ;] $tmp dvcs-init
-	handle-fetch dvcs-up dir>
+    chat-keys [: >dir 0 chat-keys !@ >r  2dup chat-keys $+[]!
+	[: @/ 2swap
+	    '#' $split dup 0= IF  2drop  ELSE  2nip  THEN
+	    2dup $1FF init-dir drop 2dup set-dir throw
+	    [: type '@' emit .key-id? ;] $tmp dvcs-init
+	    handle-fetch dvcs-up ;] catch
+	chat-keys $[]free r> chat-keys !  dir>  throw
     ;] $[]map ;
 
 \\\

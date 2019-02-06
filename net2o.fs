@@ -463,7 +463,8 @@ in net2o : new-context ( -- o )
     init-context# @ context# !  1 init-context# +!
     return-addr return-address $10 move
     ['] no-timeout is timeout-xt ['] .iperr is setip-xt
-    ['] noop is punch-done-xt ['] noop is sync-done-xt  ['] noop is ack-xt
+    ['] noop is punch-done-xt ['] noop is sync-done-xt
+    ['] noop is sync-none-xt  ['] noop is ack-xt
     -flow-control
     -1 blocksize !
     1 blockalign !
