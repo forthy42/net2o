@@ -803,8 +803,7 @@ Variable ask-msg-files[]
     ?msg-log display-sync-done !save-all-msgs
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
-    ." === sync done ===" forth:cr
-    ['] noop is sync-done-xt ;
+    ." === sync done ===" forth:cr ;
 event: :>msg-eval ( parent $pack $addr -- )
     { w^ buf w^ group }
     group $@ 2 64s /string ?msg-log
@@ -1483,7 +1482,8 @@ previous
 	THEN
     ELSE  expected@ u<= IF  -timeout  THEN  THEN ;
 
-: +resend-msg  ['] msg-timeout is timeout-xt o+timeout ;
+: +resend-msg ( -- )
+    ['] msg-timeout is timeout-xt  o+timeout ;
 
 $B $E 2Value chat-bufs#
 

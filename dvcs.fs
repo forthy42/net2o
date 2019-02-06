@@ -560,6 +560,7 @@ previous
 ' 2drop commit-class is msg:chain
 ' drop  commit-class is msg:like
 ' noop  commit-class is msg:end
+' drop  commit-class is msg:redisplay
 
 :noname ( addr u -- )
     re$ $+! ; commit-class is msg:re
@@ -585,6 +586,7 @@ previous
 ' 2drop search-class is msg:url
 ' noop  search-class is msg:end
 ' drop  search-class is msg:like
+' drop  search-class is msg:redisplay
 
 : 3drop  2drop drop ;
 
@@ -604,6 +606,7 @@ previous
 :noname dvcs-log:chain$  $! ; dvcs-log-class is msg:chain
 :noname dvcs-log:urls[] $+[]! ; dvcs-log-class is msg:url
 ' drop dvcs-log-class is msg:like
+' drop dvcs-log-class is msg:redisplay
 
 : chat>dvcs ( o:dvcs -- )
     project:project$ $@ @/ 2drop load-msg ;
