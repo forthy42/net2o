@@ -60,11 +60,11 @@ end-class rng-c
     [IF]
 	bounds U+DO \ getentropy reads $100 bytes at maximum
 	    I I' over - $100 umin getentropy
-	    dup 0< IF  errno #38 = IF  drop
+	    dup -1 = IF  errno #38 = IF  drop
 		    \ oops, we don't have getentropy in the kernel
 		    I I' over - $100 umin read-urnd
-		ELSE  ?ior  THEN
-	    ELSE  ?ior  THEN
+		ELSE  BUT  THEN \ resolve the other IF
+		?ior  THEN
 	$100 +LOOP
     [ELSE]
 	read-urnd
