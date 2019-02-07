@@ -518,7 +518,7 @@ Variable id-files[]
 previous
 
 : 85$! ( addr u $addr -- )
-    ['] 85type swap dup $free $exec ;
+    ['] 85type swap $set ;
 
 : save-project ( -- )
     dvcs( ." saving '" dvcs:id$ $@ 85type cr )
@@ -763,7 +763,7 @@ previous
 	new-files[] ['] +fileentry $[]map
 	ref-files[] ['] +fileentry $[]map
 	>id-revision  dvcs-newsentry
-	['] dvcs-sig$ project:chain$ dup $free $exec
+	['] dvcs-sig$ project:chain$ $set
 	save-project  filelist-out
 	"~+/.n2o/newfiles" ?delete-file
 	"~+/.n2o/reffiles" ?delete-file

@@ -53,7 +53,14 @@ end-class rng-c
     [ELSE] false [THEN] ]
     [IF]
 	bounds U+DO \ getentropy reads $100 bytes at maximum
-	    I I' over - $100 umin getentropy ?ior
+	    I I' over - $100 umin getentropy
+	    dup 0< IF  errno #38 = IF  drop
+		    I I' over - $100 umin
+		    s" /dev/urandom" r/o open-file throw >r
+		    tuck r@ read-file r> close-file throw
+		    throw <> !!insuff-rnd!!
+		ELSE  ?ior  THEN
+	    ELSE  ?ior  THEN
 	$100 +LOOP
     [ELSE]
 	s" /dev/urandom" r/o open-file throw >r

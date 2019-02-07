@@ -418,10 +418,19 @@ also config
     "keys"    .net2o/ keys$ $!
     "chats"   .net2o/ chats$ $!
     "objects" .net2o/ objects$ $! ;
+: $set ( xt addr -- ) dup $free $exec ;
+: xdg-config ( env u addr -- ) >r
+    getenv 2dup d0= IF  rdrop 2drop  EXIT  THEN
+    [: type ." /net2o" ;] r> $set ;
+: xdg-dir-config ( -- )
+    "XDG_DATA_HOME"   .net2o$        xdg-config
+    "XDG_CONFIG_HOME" .net2o-config$ xdg-config
+    "XDG_CACHE_HOME"  .net2o-cache$  xdg-config ;
 : default-dir-config ( -- )
     "~/.local/share/net2o" .net2o$ $!
     "~/.config/net2o"      .net2o-config$ $!
     "~/.cache/net2o"       .net2o-cache$ $!
+    xdg-dir-config
     subdir-config ;
 default-dir-config
 
