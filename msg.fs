@@ -803,17 +803,18 @@ Variable ask-msg-files[]
     ?msg-log display-sync-done !save-all-msgs
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
-    ." === sync done ===" forth:cr ;
+    ." === sync done ===" forth:cr sync-done-xt ;
 event: :>msg-eval ( parent $pack $addr -- )
     { w^ buf w^ group }
-    group $@ 2 64s /string ?msg-log
-    group $@ 2 64s /string msg-logs #@ nip cell/ u.
+    group $@ 2 64s /string { d: gname }
+    gname ?msg-log
+    gname msg-logs #@ nip cell/ u.
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $free group $@ 2 64s /string ?save-msg
+    buf $free gname ?save-msg
     group $@ .chat-file ."  saved "
-    group $@ 2 64s /string msg-logs #@ nip cell/ u. forth:cr
+    gname msg-logs #@ nip cell/ u. forth:cr
     >o -1 file-count +!@ 1 =
-    IF  group $@ 2 64s /string chat-sync-done  THEN  group $free
+    IF  gname chat-sync-done  THEN  group $free
     o> ;
 : msg-file-done ( -- )
     fs-path $@len IF

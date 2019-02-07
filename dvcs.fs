@@ -327,7 +327,7 @@ scope{ dvcs
 : new-dvcs-refs ( -- o )
     dvcs-refs new >o  dvcs-table @ token-table !  o o> ;
 : clean-delta ( o:dvcs -- )
-    dvcs:in-files$ $free dvcs:out-files$ $free  dvcs:patch$ $free ;
+    in-files$ $free out-files$ $free patch$ $free ;
 : dispose-commit ( o:commit -- )
     id$ $free  re$ $free  object$ $free  dispose ;
 : dispose-search ( o:commit -- )
@@ -645,7 +645,7 @@ User id-check# \ check hash
 	    dvcs( ." read enc hash: " 2dup 85type cr )
 	    ?read-enc-hashed  c-state off
 	    patch-in$ $@ do-cmd-loop
-	    dvcs:clean-delta
+	    \ dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;
 
@@ -900,7 +900,7 @@ $A $E 2Value dvcs-bufs#
 
 Variable dvcs-request#
 Variable sync-file-list[]
-$18 Constant /sync-files
+$10 Constant /sync-files
 $20 /sync-files * Constant /sync-reqs
 
 : dvcs-sync-none ( -- )
@@ -908,7 +908,7 @@ $20 /sync-files * Constant /sync-reqs
 
 event: :>dvcs-sync-done ( o -- ) >o
     file-reg# off  file-count off
-    msg-group$ $@ ?save-msg  dvcs-request# !
+    msg-group$ $@ ?save-msg  0 dvcs-request# !
     msg( ." === metadata sync done ===" forth:cr ) o> ;
 
 : dvcs-sync-done ( -- )
@@ -965,8 +965,14 @@ previous
 	    I /sync-files + I' umin I U+DO
 		I list $[]@ net2o:copy#
 	    LOOP
-	    I /sync-files + I' u>=
-	    IF  end-code| net2o:close-all  ELSE  end-code  THEN
+\	    I /sync-files + I' u>= IF
+	    end-code| net2o:close-all -map-resend
+	    I /sync-files + I' u>= IF
+		+resend +flow-control
+		net2o-code expect+slurp  close-all  ack rewind end-with
+		[ previous ]
+	    THEN
+\	    ELSE  end-code  THEN
 	/sync-files +LOOP
     /sync-reqs +LOOP ;
 
