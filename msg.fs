@@ -547,7 +547,7 @@ group-table @ group-o .token-table !
     "group" keyed-hash#128 .chats/ ( [: type ." .v2o" ;] $tmp ) ;
 
 : read-chatgroups ( -- )
-    .chats/group [: type ." .v2o" ;] $tmp
+    0 ..chats/group [: type ." .v2o" ;] $tmp
     2dup file-status nip no-file# = IF  2drop  EXIT  THEN
     decrypt@ group-o .do-cmd-loop  enc-file $free ;
 
@@ -575,7 +575,7 @@ previous
     $20 rng$ groups:admin sec! admin>pk ;
 
 : save-chatgroups ( -- )
-    .chats/group enc-filename $!
+    0 ..chats/group enc-filename $!
     [: group# ['] serialize-chatgroup #map ;] gen-cmd enc-file $!buf
     pk-off  key-list encfile-rest ;
 
