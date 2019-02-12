@@ -215,31 +215,65 @@ synonym /tbody /table
 	THEN  source type cr html-char-throw throw
     ELSE  2drop  THEN ;
 
+$100 buffer: escape-chars
+'\' escape-chars '*' + c!
+'\' escape-chars '_' + c!
+'\' escape-chars '\' + c!
+'\' escape-chars '~' + c!
+'\' escape-chars '[' + c!
+
+: type-esc'd ( addr u -- )
+    bounds ?DO
+	I c@ dup escape-chars + c@ ?dup-IF  emit  THEN  emit
+    LOOP ;
+
 : type-nolf ( addr u -- )
-    BEGIN  #lf $split  dup WHILE  2swap dup IF type space ELSE 2drop THEN
+    BEGIN  #lf $split  dup WHILE  2swap dup IF type-esc'd space ELSE 2drop THEN
     REPEAT
-    2drop type ;
+    2drop type-esc'd ;
 
 : html-unescape ( addr u -- )
     BEGIN  '&' $split dup  WHILE  2swap type-nolf
 	    ';' $split 2swap un-html
     REPEAT  2drop type-nolf ;
 
+: type-nolf' ( addr u -- )
+    BEGIN  #lf $split  dup WHILE  2swap dup IF type space ELSE 2drop THEN
+    REPEAT
+    2drop type ;
+
+: html-unescape' ( addr u -- )
+    BEGIN  '&' $split dup  WHILE  2swap type-nolf'
+	    ';' $split 2swap un-html
+    REPEAT  2drop type-nolf' ;
+
 : html-tag ( addr u -- )
     bl $split 2swap ['] html-tags >body find-name-in ?dup-IF
 	name>int execute
     ELSE  html-throw throw  THEN ;
 
-: html-untag ( addr u -- ) config-wl >r
-    BEGIN  '<' $split dup  WHILE  2swap html-unescape
-	    '>' $split 2swap html-tag
-    REPEAT  2drop html-unescape
-    r> to config-wl ;
+\ post-process to cleanup
+
+: process-pattern ( addr u -- addr' u' )
+    2dup "_**_"     string-prefix? IF  4 safe/string ." **"  EXIT  THEN
+    2dup "**+++ "   string-prefix? IF  6 safe/string ." # "  EXIT  THEN
+    2dup " +++**\n" string-prefix? IF  7 safe/string ."  #" cr  EXIT  THEN
+    dup IF  over c@ emit 1 safe/string  THEN ;
+: process-patterns ( addr u -- )
+    BEGIN  process-pattern  dup 0<=  UNTIL  2drop ;
+
+Variable html$
+
+: html-untag ( addr u -- ) config-wl >r  html$ $free
+    [: BEGIN  '<' $split dup  WHILE  2swap html-unescape
+		'>' $split 2swap html-tag
+	REPEAT  2drop html-unescape ;] html$ $exec
+    r> to config-wl html$ $@ process-patterns ;
 
 : html>text ( addr u -- )
-    BEGIN  '<' $split dup  WHILE  2swap html-unescape
+    BEGIN  '<' $split dup  WHILE  2swap html-unescape'
 	    '>' $split 2swap "br" str= IF  space  THEN
-    REPEAT  2drop html-unescape ;
+    REPEAT  2drop html-unescape' ;
 
 [IFDEF] entries[]
     : .un-htmls

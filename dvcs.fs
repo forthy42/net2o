@@ -645,7 +645,7 @@ User id-check# \ check hash
 	    dvcs( ." read enc hash: " 2dup 85type cr )
 	    ?read-enc-hashed  c-state off
 	    patch-in$ $@ do-cmd-loop
-	    \ dvcs:clean-delta
+	    dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;
 
@@ -896,7 +896,7 @@ previous
 
 \ pull and sync a database
 
-$A $E 2Value dvcs-bufs#
+$B $E 2Value dvcs-bufs#
 
 Variable dvcs-request#
 Variable sync-file-list[]
