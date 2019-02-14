@@ -122,7 +122,7 @@ Variable dir#
     w/o open-pipe throw >r
     avatars[] ['] $[]. r@ outfile-execute
     r> close-pipe throw to $?
-    dir [: ." cd " type ." ;time eval '(for i in avatars.sh.*; do curl -s $(cat $i) & done; wait)'; rm avatars.sh.*" ;] $tmp system ;
+    dir [: ." cd " type ." ;time eval '(for i in avatars.sh.*; do curl -s $(cat $i) & done; wait)'; #rm avatars.sh.*" ;] $tmp system ;
 
 : .avatar-file ( o:author -- addr u )
     [: ." avatars/g+:" author:resourceName$ basename type ." .png" ;] $tmp
@@ -144,13 +144,17 @@ Variable dir#
 	0 .dummy-key
     THEN  to author:mapped-key ;
 
+: .url ( addr u -- )
+    2dup "http" string-prefix? 0= IF  ." https:"  THEN  type ;
+
 : +avatar-author ( o:author -- )
     author:avatarImageUrl$ dup IF
 	.avatar-file file-status 0= IF
 	    drop 2drop
 	ELSE
 	    drop [: ." -o g+:" author:resourceName$ basename type ." .png "
-		type ;] $tmp avatars[] $+[]!
+		.url
+	    ;] $tmp avatars[] $+[]!
 	THEN
     ELSE  2drop  THEN ;
 
@@ -174,9 +178,12 @@ filter-out bl 1- 1 fill
 	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
 	o>  THEN ;
 
-: .mfile ( -- )
-    media:url$ basedir+name pics# #@ 2dup d0= IF
-	2drop media:url$ type
+0 Value img-req-fid
+
+: .mfile { d: fn -- }
+    fn basedir+name pics# #@ 2dup d0= IF
+	2drop fn .url
+	fn [: .url cr ;] img-req-fid outfile-execute
     ELSE
 	." file:" picbase# #@ type
     THEN ;
@@ -184,7 +191,7 @@ filter-out bl 1- 1 fill
     ." ![" fn picdesc# #@ .simple-text ." ](file:" fn picbase# #@ type ." )" cr ;
 : .media ( -- )
     comments:media{} ?dup-IF cr >o
-	." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
+	." ![" media:description$ .simple-text ." ](" media:url$ .mfile ')' emit cr
 	o>  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
@@ -192,7 +199,7 @@ filter-out bl 1- 1 fill
 	basedir+name pics# #@ d0= IF
 	    bounds U+DO
 		I @ >o
-		." ![" media:description$ .simple-text ." ](" .mfile ')' emit cr
+		." ![" media:description$ .simple-text ." ](" media:url$ .mfile ')' emit cr
 		o>
 	    cell +LOOP
 	ELSE
@@ -208,18 +215,42 @@ filter-out bl 1- 1 fill
 : .project ( o:comments -- )
     comments:author{} .key-pk@ type
     ." g+:" comments:url$ basename type ;
+: .author ( o:author -- )
+    ." +[" author:displayName$ type ." ](key:" .key64 ." )" ;
 : .reshared ( o:comments -- )
     comments:resharedPost{} ?dup-IF  cr >o
-	." > " comments:author{} ?dup-IF >o
-	    ." +[" author:displayName$ type ." ](key:" .key64 ." ): " o>
-	THEN
+	." > " comments:author{} ?dup-IF  ..author ." : " THEN
 	'[' emit comments:content$ ['] html>text $tmp $40 umin .simple-text
 	." ](" .post ') emit cr cr
-	.html .link .media .album
-    o> THEN ;
+	.html .link .media .album o>
+    THEN ;
+: .choice ( total o:choices -- )
+    '#' emit choices:voteCount# 0 .r '/' emit 0 .r
+    ." # ![" choices:description$ type ." ]("
+    choices:imageUrl$ .mfile ." ) "
+    choices:votes[] $@ bounds U+DO
+	I @ .votes:voter{} ..author space
+    cell +LOOP ;
+: .polls ( o:comments -- )
+    comments:poll{} ?dup-IF  cr >o
+	poll:choices[] $@ bounds U+DO
+	    poll:totalVotes# I @ ..choice cr
+	cell +LOOP o>
+    THEN ;
+: .com/col ( o:collection -- ) cr
+    collectionAttachment:displayName$
+    ." [!["	2dup type ." ](" collectionAttachment:coverPhotoUrl$ .mfile
+    ." )](chat:g+:" type
+    collectionAttachment:owner{} ?dup-IF  '@' emit ..key64  THEN
+    ')' emit ;
+
+: .collection ( o:comments -- )
+    comments:collectionAttachment{} ?dup-IF  ..com/col  THEN ;
+: .community ( o:comments -- )
+    comments:communityAttachment{} ?dup-IF  ..com/col  THEN ;
 
 : add-file { dvcs d: file -- }
-    [: .html .link .media .reshared .album ;] file execute>file
+    [: .html .link .media .reshared .album .polls .collection .community ;] file execute>file
     file dvcs .dvcs-add ;
 
 Variable pfile$
@@ -379,6 +410,7 @@ Variable comment#
     dir> redate-mode off ;
 
 : write-articles ( -- ) { | nn }
+    "img-req.lst" w/o create-file throw to img-req-fid
     entries[] $@ bounds ?DO
 	nn [: ." write " 6 .r ."  postings" ;]
 	warning-color color-execute
@@ -386,6 +418,7 @@ Variable comment#
 	I @ .write-out-article
 	1 +to nn
     cell +LOOP
+    img-req-fid close-file throw  0 to img-req-fid
     nn [: ." write "  6 .r ."  postings in " .time ;]
     success-color color-execute cr ;
 

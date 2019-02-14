@@ -214,7 +214,17 @@ also g+
     cell +LOOP
     comments:reshares[] $@ bounds U+DO
 	I @ >o addr reshares:resharer{} dedup-author o>
-    cell +LOOP ;
+    cell +LOOP
+    comments:poll{} ?dup-IF
+	.poll:choices[] $@ bounds U+DO
+	    I @ .choices:votes[] $@ bounds U+DO
+		I @ >o addr votes:voter{} dedup-author o>
+	    cell +LOOP
+	cell +LOOP
+    THEN
+    comments:collectionAttachment{} ?dup-IF
+	>o addr collectionAttachment:owner{} dedup-author o>
+    THEN ;
 
 : g+-scan ( -- )  iso-date
     ['] g+ >body to schema-scope
