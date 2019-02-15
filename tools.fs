@@ -31,7 +31,7 @@ require set-compsem.fs
 : enums ( start n "name1" .. "namen" -- )
     0 ?DO enum LOOP drop ;
 : bit ( n "name" -- n*2 )   dup Constant 2* ;
-: bits ( start n "name1" .. "namen" -- )
+: bits: ( start n "name1" .. "namen" -- )
     0 ?DO bit LOOP drop ;
 
 \ argument handling that works transparent from OS and Forth command line

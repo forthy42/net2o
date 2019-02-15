@@ -30,7 +30,7 @@ Variable us-state
 0 Value p-box \ paragraph box
 0 Value v-box \ vertical box
 
-1 7 bits italic underline 2underline sitalic bold mono strikethrough
+1 7 bits: italic underline 2underline sitalic bold mono strikethrough
 
 : +emphs ( flags -- )
     \regular \sans
