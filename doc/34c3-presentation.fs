@@ -24,12 +24,13 @@ require minos2/widgets.fs
 
 also minos
 
-0e FValue pixelsize#
+ctx 0= [IF]  window-init  [THEN]
 
 require minos2/font-style.fs
 
 : update-size# ( -- )
-    dpy-w @ s>f 42e f/ fround to font-size#
+    dpy-w @ s>f 44e f/ fround to font-size#
+    font-size# 16e f/ m2c:curminwidth% f!
     dpy-h @ s>f dpy-w @ s>f f/ 45% f/ font-size# f* fround to baseline#
     dpy-w @ s>f 1280e f/ to pixelsize# ;
 
@@ -47,23 +48,28 @@ Variable slide#
 5 Constant n/m-switch
 10 Constant m/$-switch
 
-glue new Constant glue-left
-glue new Constant glue-right
+glue ' new static-a with-allocater Constant glue-left
+glue ' new static-a with-allocater Constant glue-right
 
 : >slides ( o -- ) slides[] >stack ;
 
-: glue0 ( -- )
-    glue-left  >o 0glue hglue-c glue! o>
-    glue-right >o 0glue hglue-c glue! o> ;
+: glue0 ( -- ) 0e fdup
+    [ glue-left  .hglue-c ]L df!
+    [ glue-right .hglue-c ]L df! ;
+: trans-frame ( o -- )
+    >o transp# to frame-color o> ;
+: solid-frame ( o -- )
+    >o white# to frame-color o> ;
 : !slides ( nprev n -- )
-    over >r
-    n2-img m2-img $q-img
-    r@ m/$-switch u>= IF swap THEN
-    r> n/m-switch u>= IF rot  THEN
-    /flip drop /flip drop /flop drop
     update-size# update-glue
+    over slide# !
     slides[] $[] @ /flip drop
-    dup slide# ! slides[] $[] @ /flop drop glue0 ;
+    slides[] $[] @ /flop drop glue0 ;
+: fade-img ( r0..1 img1 img2 -- ) >r >r
+    [ whitish x-color 1e f+ ] Fliteral fover f-
+    r> >o to frame-color parent-w .parent-w /flop drop o>
+    [ whitish x-color ] Fliteral f+
+    r> >o to frame-color parent-w .parent-w /flop drop o> ;
 : anim!slides ( r0..1 n -- )
     slides[] $[] @ /flop drop
     fdup fnegate dpy-w @ fm* glue-left  .hglue-c df!
@@ -72,16 +78,17 @@ glue new Constant glue-right
 : prev-anim ( n r0..1 -- )
     dup 0<= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1- swap !slides  EXIT
+	dup 1- swap !slides +sync +resize  EXIT
     THEN
-    sin-t 1e fswap f- 1- anim!slides +sync ;
+    1e fswap f-
+    1- sin-t anim!slides +sync +resize ;
 
 : next-anim ( n r0..1 -- )
     dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
     fdup 1e f>= IF  fdrop
-	dup 1+ swap !slides  EXIT
+	dup 1+ swap !slides +sync +resize  EXIT
     THEN
-    sin-t 1+ anim!slides +sync ;
+    1+ sin-t anim!slides +sync +resize ;
 
 1e FValue slide-time%
 
@@ -180,11 +187,11 @@ tex: $quid
     baseline# 0e to baseline#
     {{ 2r> }}image-tex /right
     glue*l }}glue
-    }}v outside[] >o font-size# f2/ to border o o>
+    }}v >o font-size# f2/ to border o o>
     to baseline# ;
 
 : pres-frame ( color -- o1 o2 )
-    glue*wh swap slide-frame dup .button1 simple[] ;
+    glue*wh swap color, slide-frame dup .button1 simple[] ;
 
 {{
 {{ glue-left }}glue
@@ -335,7 +342,7 @@ previous
 }}vt
 glue*l }}glue
 tex: vp0 glue*l ' vp0 }}vp vp[]
-$FFBFFFFF to slider-color
+$FFBFFFFF color, to slider-color
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
 }}h box[]
@@ -423,7 +430,8 @@ glue*l }}glue
 {{
 glue*l }}glue
 tex: $quid-logo-large
-' $quid-logo-large "squid-logo.png" 0.666e }}image-file drop /right
+	' $quid-logo-large "squid-logo.png" 0.666e }}image-file drop
+	>o $FFFFFFBB color, to w-color o o> /right
 }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -607,7 +615,9 @@ to top-widget
 
 also opengl
 
-: !widgets ( -- ) top-widget .htop-resize
+: !widgets ( -- )
+    set-fullscreen-hint 1 set-compose-hint
+    top-widget .htop-resize
     .3e ambient% sf! set-uniforms ;
 
 previous
