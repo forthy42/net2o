@@ -1812,6 +1812,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 #10.000000000 d>64 64Constant max-timeout# \ 10s sleep, no more
 
 [IFDEF] android
+    also jni
     64Variable old-beacon 64#-1 old-beacon 64!
     : set-beacon-alarm ( beacon-tick -- )
 	64dup old-beacon 64@ 64= IF  64drop  EXIT  THEN
@@ -1821,7 +1822,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 	timeout-task ?dup-IF  wake  THEN ;
     also android
     ' android-wakeup is android-alarm
-    previous
+    previous previous
 [THEN]
 
 Forward save-msgs?
