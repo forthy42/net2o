@@ -1,24 +1,20 @@
-net2o - reinventing the Internet
-================================
+# net2o — reinventing the Internet #
 
 net2o is the attempt to reinvent the Internet.  It's free software
 available under the [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html).
 
-Authors
--------
+## Authors ##
 
 Principal author of net2o is
 
 * Bernd Paysan <bernd@net2o.de>
 
-Get it and try it
------------------
+## Get it and try it ##
 
 net2o is currently under early alpha test. [Get it](get-it.md) and
 [try it](try-it.md).  There are lots of things [to do](todo.md).
 
-What's broken?
---------------
+## What's broken? ##
 
 * The internet bases on assumptions 20-30 years old
 * These assumptions are wrong today
@@ -26,8 +22,7 @@ What's broken?
 * There's a huge pile of accumulated cruft
 * Fixing this mess one-by-one is the wrong attempt
 
-What for?
----------
+## What for? ##
 
 I've a dream: A peer-to-peer network, where services like search engines or
 social networks aren't offered by big companies, who in turn need to make money
@@ -40,8 +35,7 @@ a protocol not designed to be assisted by hardware.
 
 [Richard Stallman on how to fix the surveillance systems](https://www.theguardian.com/commentisfree/2018/apr/03/facebook-abusing-data-law-privacy-big-tech-surveillance)
 
-What needs to be fixed?
------------------------
+## What needs to be fixed? ##
 
 * IP: Use switch-based simple routing, don't route every packet
 * TCP: Most data just needs to be obtained reliable, the order doesn't
@@ -49,7 +43,7 @@ What needs to be fixed?
 * Encryption everywhere: This is no longer an expensive operation (and for
   symmetric encryption, fast hardware implementation is feasible)
 * P2P instead of client-server
-* A new API (render layer, markup language, scripting) - the browser is there
+* A new API (render layer, markup language, scripting) — the browser is there
   for serious applications now.
 
 Rendering is done with OpenGL ES, GUI layer is
@@ -57,24 +51,22 @@ Rendering is done with OpenGL ES, GUI layer is
 
 net2o has been inspired by Open Network Forth from Heinz Schnitter.
 
-What third party technology do we use
--------------------------------------
+## What third party technology do we use ##
 
 * [ed25519](ed25519.md) from Dan Bernstein (in the donna version from
   floodyberry)
 * [Keccak](http://keccak.noekeon.org/) (original reference implementation)
 * [Threefish](https://www.schneier.com/threefish.html) as block cipher
   in ECB mode and in [Threefish AEAD mode](threefish.md) as backup for Keccak.
-* ([wurstkessel](wurstkessel.wiki) from myself - now replaced by Keccak)
+* ([wurstkessel](wurstkessel.wiki) from myself — now replaced by Keccak)
 
-Documentation
--------------
+## Documentation ##
 
 The documentation is work in progress. The seven layers of net2o are not
 equal to the ISO-OSI layers, but this layering provides a familiar starting
 point:
 
-1. Physical layer - this is not part of net2o itself.
+1. Physical layer — this is not part of net2o itself.
 2. [Topology](topology.md)
 3. [Encryption](encryption.wiki)
 4. [Flow Control](flow-control.md)
@@ -82,32 +74,32 @@ point:
 6. [Distributed Data](distributed-data.wiki)
 7. [Applications](applications.wiki)
 
-Videos & Presentations
-----------------------
+## Videos & Presentations ##
 
-+ [Original whitepaper (for historical purposes
-  only)](https://net2o.de/internet-2.0.html)
-+ [EuroForth 2009 presentation](https://net2o.de/internet-2.0.pdf)
-+ [EuroForth 2010 presentation](https://net2o.de/net2o.pdf)
-+ [EuroForth 2011 presentation](https://net2o.de/net2o-al.pdf)
-+ [EuroForth 2012 presentation](https://net2o.de/net2o-tl2.pdf)
-+ [EuroForth 2013 — net2o application layer](https://wiki.forth-ev.de/doku.php/events:euroforth-2013:n2oal)
-+ [EuroForth 2014 — net2o command language](https://wiki.forth-ev.de/doku.php/events:euroforth-2014:net2ocl)
-+ [31c3](31c3.md) presentation
-+ [32c3](32c3.md) presentation
-+ [EuroForth 2016](https://wiki.forth-ev.de/doku.php/events:euroforth-2016:using-net2o) presentation
-+ [33c3](33c3.md) presentation
-+ [EuroForth 2017](https://wiki.forth-ev.de/lib/exe/fetch.php/events:ef2017:minos2.mp4) presentation (MINOΣ 2)
-+ [34c3](34c3.md) presentation (alternative source: [Chaos West's
-  capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
-+ [EuroForth 2018](https://wiki.forth-ev.de/doku.php/events:ef2018:net2o)
-  presentation (MINOΣ 2 + $quid)
-+ [35c3](https://media.ccc.de/v/35c3chaoswest-21-cloudcalypse-it-looks-like-you-ve-reached-the-end-how-to-take-your-data-into-net2o)
-  presentation (only Chaos West capture this time, as they did a very
-  professional job).
+* EuroForth
+  * [Original whitepaper (for historical purposes only)](https://net2o.de/internet-2.0.html)
+  * [EuroForth 2009 presentation](https://net2o.de/internet-2.0.pdf)
+  * [EuroForth 2010 presentation](https://net2o.de/net2o.pdf)
+  * [EuroForth 2011 presentation](https://net2o.de/net2o-al.pdf)
+  * [EuroForth 2012 presentation](https://net2o.de/net2o-tl2.pdf)
+  * [EuroForth 2013 — net2o application layer](https://wiki.forth-ev.de/doku.php/events:euroforth-2013:n2oal)
+  * [EuroForth 2014 — net2o command
+    language](https://wiki.forth-ev.de/doku.php/events:euroforth-2014:net2ocl)
+  * [EuroForth 2016](https://wiki.forth-ev.de/doku.php/events:euroforth-2016:using-net2o) presentation
+  * [EuroForth 2017](https://wiki.forth-ev.de/lib/exe/fetch.php/events:ef2017:minos2.mp4) presentation (MINOΣ 2)
+  * [EuroForth 2018](https://wiki.forth-ev.de/doku.php/events:ef2018:net2o)
+    presentation (MINOΣ 2 + $quid)
+* Chaos Communication Congress
+  * [31c3](31c3.md) presentation
+  * [32c3](32c3.md) presentation
+  * [33c3](33c3.md) presentation
+  * [34c3](34c3.md) presentation (alternative source: [Chaos West's
+	capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
+  * [35c3](https://media.ccc.de/v/35c3chaoswest-21-cloudcalypse-it-looks-like-you-ve-reached-the-end-how-to-take-your-data-into-net2o)
+	presentation (only Chaos West capture this time, as they did a very
+	professional job).
 
-Discussions
------------
+## Discussions ##
 
 * The [pki](pki.md) problem
 * [Client authentication](client-auth.md)

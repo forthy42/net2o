@@ -46,7 +46,12 @@ Variable us-state
     endcase ;
 
 : .md-text ( -- )
-    us-state @ md-text$ $@ }}text-us p-box .+childs md-text$ $free ;
+    md-text$ $@len IF
+	us-state @ md-text$ $@ }}text-us p-box .+childs md-text$ $free
+    THEN ;
+
+: /source ( -- addr u )
+    source >in @ safe/string ;
 
 : default-char ( char -- )
     emph-flags @ last-emph-flags @ over last-emph-flags ! <> IF
@@ -76,43 +81,59 @@ md-char: _ ( char -- )
     italic up-emph @ 0= IF  negate  THEN  emph-flags +! ;
 md-char: ` ( char -- )
     mono swap ?count-emph
-    count-emph @ 2 = IF
+    /source "``" string-prefix? IF
+	2 >in +!
 	mono up-emph @ 0= IF  negate  THEN  emph-flags +!
-    THEN ;
+    ELSE  '`' .char  THEN ;
 md-char: ~ ( char -- )
     strikethrough swap ?count-emph
-    count-emph @ 1 = IF
+    /source "~" string-prefix? IF
+	1 >in +!
 	strikethrough up-emph @ 0= IF  negate  THEN  emph-flags +!
-    THEN ;
+    ELSE  '~' .char  THEN ;
 md-char: \ ( char -- )
-    drop source >in @ /string IF  c@ .char  1 >in +!
+    drop /source IF  c@ .char  1 >in +!
     ELSE  drop ( add line break )  THEN ;
+md-char: [ ( char -- )
+    drop ']' parse 2dup "![" search nip nip IF
+	drop ')' parse 2drop ']' parse + over -  THEN
+    1 -rot }}text-us p-box .+childs
+    /source IF  c@ '(' =  IF  1 >in +! ')' parse }}link  THEN  THEN ;
 
 : render-line ( addr u -- )
     \G render a line
     0 +emphs
-    bounds U+DO
-	I c@ dup cells do-char + perform
-    LOOP  .md-text ;
+    [: BEGIN  /source  WHILE  1 >in +!
+		c@ dup cells do-char + perform
+	REPEAT ;] execute-parsing  .md-text ;
+
+$10 cells buffer: indent#s
+0 Value cur#indent
+
+: indent# ( n -- ) cur#indent cells indent#s + @ ;
 
 : >indent ( n -- )
-    >in @ + 2/ 4 * spaces ;
+    >in @ + 2/ dup to cur#indent
+    cells >r indent#s [ $10 cells ]L r> /string
+    over 1 swap +! [ 1 cells ]L /string erase ;
 
 scope: markdown
 \ headlines limited to h1..h3
 : # ( -- )
-    source 2dup + 2 - 2 " #" str= -2 and +
+    /source 2dup + 2 - 2 " #" str= -2 and +
     \huge \bold \sans render-line \normal \regular ;
 : ## ( -- )
-    source 2dup + 3 - 3 " ##" str= -3 and +
+    /source 2dup + 3 - 3 " ##" str= -3 and +
     \large \bold \sans render-line \normal \regular ;
 : ### ( -- )
-    source 2dup + 4 - 4 " ###" str= -4 and +
+    /source 2dup + 4 - 4 " ###" str= -4 and +
     \normal \bold \sans render-line \normal \regular ;
 : 1. ( -- )
     \ render counted line
     -3 >indent
-;
+    0 [: cur#indent 2* spaces indent# 0 .r ." . " ;]
+    $tmp }}text-us p-box .+childs
+    /source render-line ;
 synonym 2. 1.
 synonym 3. 1.
 synonym 4. 1.
@@ -123,10 +144,25 @@ synonym 8. 1.
 synonym 9. 1.
 : * ( -- )
     -2 >indent \ "•‒⋆‧"
-;
-synonym + *
-synonym - *
-synonym ± *
+    0 [: cur#indent 2* spaces
+	"•‒⋆‧" drop cur#indent 0 ?DO xchar+ LOOP
+	xc@ xemit space ;] $tmp }}text-us p-box .+childs
+    /source render-line ;
+: +  ( -- )
+    -2 >indent
+    0 [: cur#indent 2* spaces
+	'+' xemit space ;] $tmp }}text-us p-box .+childs
+    /source render-line ;
+: -  ( -- )
+    -2 >indent
+    0 [: cur#indent 2* spaces
+	'–' xemit space ;] $tmp }}text-us p-box .+childs
+    /source render-line ;
+: ±  ( -- )
+    -2 >indent
+    0 [: cur#indent 2* spaces
+	'±' xemit space ;] $tmp }}text-us p-box .+childs
+    /source render-line ;
 
 }scope
 
@@ -136,6 +172,7 @@ synonym ± *
 : markdown-loop ( -- )
     BEGIN  refill  WHILE
 	    source nip 0= IF
+		indent#s [ $10 cells ]L erase
 		p-box ?dup-IF  .subbox .par-init  THEN
 		+p-box
 	    ELSE
@@ -146,7 +183,7 @@ synonym ± *
     REPEAT ;
 
 : markdown-parse ( addr u -- )
-    {{ }}v to v-box +p-box
+    {{ }}v to v-box +p-box open-fpath-file throw
     ['] markdown-loop execute-parsing-named-file ;
 
 \\\
