@@ -83,8 +83,7 @@ point:
   * [EuroForth 2011 presentation](https://net2o.de/net2o-al.pdf)
   * [EuroForth 2012 presentation](https://net2o.de/net2o-tl2.pdf)
   * [EuroForth 2013 — net2o application layer](https://wiki.forth-ev.de/doku.php/events:euroforth-2013:n2oal)
-  * [EuroForth 2014 — net2o command
-    language](https://wiki.forth-ev.de/doku.php/events:euroforth-2014:net2ocl)
+  * [EuroForth 2014 — net2o command language](https://wiki.forth-ev.de/doku.php/events:euroforth-2014:net2ocl)
   * [EuroForth 2016](https://wiki.forth-ev.de/doku.php/events:euroforth-2016:using-net2o) presentation
   * [EuroForth 2017](https://wiki.forth-ev.de/lib/exe/fetch.php/events:ef2017:minos2.mp4) presentation (MINOΣ 2)
   * [EuroForth 2018](https://wiki.forth-ev.de/doku.php/events:ef2018:net2o)
@@ -93,8 +92,7 @@ point:
   * [31c3](31c3.md) presentation
   * [32c3](32c3.md) presentation
   * [33c3](33c3.md) presentation
-  * [34c3](34c3.md) presentation (alternative source: [Chaos West's
-	capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
+  * [34c3](34c3.md) presentation (alternative source: [Chaos West's	capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
   * [35c3](https://media.ccc.de/v/35c3chaoswest-21-cloudcalypse-it-looks-like-you-ve-reached-the-end-how-to-take-your-data-into-net2o)
 	presentation (only Chaos West capture this time, as they did a very
 	professional job).

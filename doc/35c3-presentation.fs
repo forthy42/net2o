@@ -435,7 +435,7 @@ $10 stack: vp-tops
 	l" Google+ JSON Takeout" /title
 	\skip
 	l" 🔗" l" https://takeout.google.com/settings/takeout" bm\\
-	[: s" xdg-open https://takeout.google.com/settings/takeout" system ;] 0 click[]
+	"https://takeout.google.com/settings/takeout" link[]
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	tex: g+takeout
 	' g+takeout "google-takeout.png" 1.333e }}image-file drop /center
@@ -817,15 +817,15 @@ $10 stack: vp-tops
 	vt{{
 	    l" Bernd Paysan  " l" net2o fossil repository" bi\\
 	    l" 🔗" l" https://net2o.de/" bm\\
-	    [: s" xdg-open https://net2o.de/" system ;] 0 click[]
+	    "https://net2o.de/" link[]
 	    l" Information  " l" World's Biggest Data Breaches & Hacks" bi\\
 	    l" is beautiful 🔗" l" https://informationisbeautiful.net/visualizations/" bm\\
-	    [: s" xdg-open https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" system ;] 0 click[]
+	    "https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" link[]
 	    l"  " l" worlds-biggest-data-breaches-hacks/" bm\\
-	    [: s" xdg-open https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" system ;] 0 click[]
+	    "https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" link[]
 	    l" Marvin Strathmann  " l" Hallo Mark, viel Spaß mit Deinen Erinnerungen auf Facebook 2018" bi\\
 	    l" 🔗" l" https://heise.de/-4254681" bm\\
-	    [: s" xdg-open https://heise.de/-4254681" system ;] 0 click[]
+	    "https://heise.de/-4254681" link[]
 	}}vt
 	glue*l }}glue
 	tex: qr-code
