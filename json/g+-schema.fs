@@ -133,6 +133,7 @@ object class{ media
     $value: url$
     $value: contentType$
     $value: description$
+    $value: localFilePath$
     value: width#
     value: height#
 }class
@@ -154,6 +155,7 @@ object class{ choices
     $value: resourceName$
     $value: description$
     $value: imageUrl$
+    $value: imageLocalFilePath$
     value: voteCount#
     field: votes[]
 }class
