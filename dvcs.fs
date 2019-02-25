@@ -794,9 +794,7 @@ previous
 : dvcs-ref ( addr u -- )
     2dup dirname dup 0<> + dup IF  dvcs-add  ELSE  2drop  THEN
     2dup dvcs:files# #@ drop IF  2drop  EXIT
-    ELSE
-	\ "dummy128dummy128dummy128dummy128" 2over dvcs:files# #!
-	"~+/.n2o/reffiles" append-line  THEN ;
+    ELSE  "~+/.n2o/reffiles" append-line  THEN ;
 
 : dvcs-snap ( addr u -- )
     dvcs:new-dvcs >o  dvcs:message$ $!
@@ -935,7 +933,7 @@ previous
 
 : dvcs-connect-key ( addr u -- )
     key>group ?load-msgn
-    dup 0= IF  2drop msg-group$ $@ msg-groups #!  EXIT  THEN
+    dup 0= IF  2drop "" msg-group$ $@ msg-groups #!  THEN
     2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
     2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;
 

@@ -199,7 +199,9 @@ filter-out bl 1- 1 fill
 	basedir+name pics# #@ d0= IF
 	    bounds U+DO
 		I @ >o
-		." ![" media:description$ .simple-text ." ](" media:url$ .mfile ')' emit cr
+		." ![" media:description$ .simple-text ." ]("
+		media:localFilePath$ nip IF  media:url$ basename type
+		ELSE  media:url$ .mfile  THEN ')' emit cr
 		o>
 	    cell +LOOP
 	ELSE
@@ -224,17 +226,15 @@ filter-out bl 1- 1 fill
 	." ](" .post ') emit cr cr
 	.html .link .media .album o>
     THEN ;
-: .choice ( total o:choices -- )
-    '#' emit choices:voteCount# 0 .r '/' emit 0 .r
-    ." # ![" choices:description$ type ." ]("
-    choices:imageUrl$ .mfile ." ) "
-    choices:votes[] $@ bounds U+DO
-	I @ .votes:voter{} ..author space
-    cell +LOOP ;
+: .choice ( n o:choices -- )
+    '1' + emit ." . ::votes:: ![" choices:description$ type ." ]("
+    choices:imageLocalFilePath$ dup IF  basename type
+    ELSE  2drop choices:imageUrl$ .mfile  THEN  ." ) " ;
 : .polls ( o:comments -- )
     comments:poll{} ?dup-IF  cr >o
+	0 { n }
 	poll:choices[] $@ bounds U+DO
-	    poll:totalVotes# I @ ..choice cr
+	    n I @ ..choice cr  1 +to n
 	cell +LOOP o>
     THEN ;
 : .com/col ( o:collection -- ) cr
@@ -264,13 +264,33 @@ Variable pfile$
 
 : add-post ( dvcs -- ) dup .post-file add-file ;
 
+: /dirs ( addr u n -- addr' u' )
+    0 ?DO  '/' scan 1 safe/string  LOOP ;
+
+Variable photo-dir$ "../../Google Fotos" photo-dir$ $!
+
+: find-file { d: fn-orig d: fn -- fn-orig addr' u' flag }
+    fn-orig
+    fn [: dir@ forth:type ." /" forth:type ;]
+    $tmp compact-filename 2dup file-status nip 0= dup ?EXIT  drop 2drop
+    fn-orig fn [:
+	photo-dir$ $@ drop c@ '/' <> IF  dir@ forth:type '/' emit  THEN
+	photo-dir$ $. '/' emit 3 /dirs
+	dirname forth:type '/' emit basename forth:type ;]
+    $tmp compact-filename 2dup file-status nip 0= ;
+
+: local-media ( filename u basename u o:dsvc -- )
+    2dup delete-file drop 2swap
+    find-file IF  2over symlink ?ior  dvcs-ref
+    ELSE  2drop 2drop  THEN ;
+
 : csv-media ( filename u o:dsvc -- )
-    2dup picbase# #@ 2dup delete-file drop 2swap
-    [: dir@ forth:type ." /" forth:type ;] $tmp
-    2over symlink ?ior
-    dvcs-ref ;
+    2dup picbase# #@ local-media ;
 
 : add-media { dvcs -- }
+    media:localFilePath$ dup IF
+	media:url$ basename dvcs .local-media  EXIT
+    THEN  2drop
     media:url$ basedir+name pics# #@ d0= IF
 	media:contentType$ "image/*" str= IF
 	    ." media unavailable: " media:url$ type cr  THEN
@@ -293,6 +313,16 @@ Variable pfile$
 	THEN
     THEN ;
 
+: add-poll-photo { dvcs -- }
+    choices:imageLocalFilePath$ 2dup basename dvcs .local-media ;
+
+: add-poll-photos { dvcs -- }
+    comments:poll{} ?dup-IF
+	.poll:choices[] $@ bounds U+DO
+	    dvcs I @ .add-poll-photo
+	cell +LOOP
+    THEN ;
+
 also net2o-base
 
 2Variable post-ref
@@ -302,18 +332,36 @@ also net2o-base
     [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$
     +last-signed last-signed 2@ >msg-log 2drop ;
 
+: sigdate+ ( -- )
+    sigdate le-64@ 64#1 64+ sigdate le-64! ;
+
 : add-plusones { dvcs -- }
     comments:plusOnes[] $@ bounds U+DO
+	sigdate+
 	I @ .plusOnes:plusOner{} .author:mapped-key dvcs >o to my-key
 	[: '👍' ulit, msg-like ;] add-message o>
     cell +LOOP ;
 
 : add-reshares { dvcs -- }
     comments:reshares[] $@ bounds U+DO
+	sigdate+
 	I @ .reshares:resharer{} .author:mapped-key dvcs >o to my-key
 	[: '🔃' ( '🐙' ) ulit, msg-like ;] add-message o>
     cell +LOOP ;
 
+: add-votes { dvcs -- }
+    comments:poll{} ?dup-IF
+	0 { n }
+	.poll:choices[] $@ bounds U+DO
+	    I @ .choices:votes[] $@ bounds U+DO
+		sigdate+
+		I @ .votes:voter{} .author:mapped-key dvcs >o to my-key
+		n [{: n :}L n '1' + ulit, msg-like ;] add-message o>
+	    cell +LOOP
+	    1 +to n
+	cell +LOOP
+    THEN ;
+    
 previous
 
 Variable comment#
@@ -396,6 +444,7 @@ Variable comment#
     "master" project:branch$ $! save-project o>
     dvcs-o add-post
     dvcs-o add-album
+    dvcs-o add-poll-photos
     comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
     create>never
     ['] .plain $tmp $100 umin -trailing-garbage
@@ -403,6 +452,7 @@ Variable comment#
     last-msg 2@ post-ref 2!
     dvcs-o add-plusones
     dvcs-o add-reshares
+    dvcs-o add-votes
     dvcs-o add-comments
     dvcs-o .dvcs:dispose-dvcs
     create>never
