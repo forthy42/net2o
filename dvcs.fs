@@ -23,6 +23,9 @@ vocabulary project
 
 cmd-class class
     scope: dvcs
+    field: in-files$
+    field: patch$
+    field: out-files$
 
     method read
     method rm
@@ -51,9 +54,6 @@ dvcs-abstract class
     field: fileref[]  \ file refs
     field: files#     \ snapshot config
     field: oldfiles#  \ old state to compare to
-    field: in-files$
-    field: patch$
-    field: out-files$
     field: out-fileoff
     field: fileentry$
     field: oldid$
