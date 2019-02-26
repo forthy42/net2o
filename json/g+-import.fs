@@ -227,7 +227,7 @@ filter-out bl 1- 1 fill
 	.html .link .media .album o>
     THEN ;
 : .choice ( n o:choices -- )
-    '1' + emit ." . ::votes:: ![" choices:description$ type ." ]("
+    '1' + emit dup ." . ::votes#" emit ." :: ![" choices:description$ type ." ]("
     choices:imageLocalFilePath$ dup IF  basename type
     ELSE  2drop choices:imageUrl$ .mfile  THEN  ." ) " ;
 : .polls ( o:comments -- )
@@ -267,17 +267,25 @@ Variable pfile$
 : /dirs ( addr u n -- addr' u' )
     0 ?DO  '/' scan 1 safe/string  LOOP ;
 
-Variable photo-dir$ "../../Google Fotos" photo-dir$ $!
+Variable photo-path
+
+: +photo-paths ( -- )
+    "../.." open-dir throw >r
+    BEGIN  pad $100 r@ read-dir throw  WHILE
+	    pad over "." str= >r pad over ".." str= r> or 0= IF
+		[: dir@ type ." /../../" pad swap type ;] $tmp
+		compact-filename photo-path also-path
+	    ELSE  drop  THEN
+    REPEAT  drop r> close-dir throw ;
 
 : find-file { d: fn-orig d: fn -- fn-orig addr' u' flag }
     fn-orig
     fn [: dir@ forth:type ." /" forth:type ;]
     $tmp compact-filename 2dup file-status nip 0= dup ?EXIT  drop 2drop
     fn-orig fn [:
-	photo-dir$ $@ drop c@ '/' <> IF  dir@ forth:type '/' emit  THEN
-	photo-dir$ $. '/' emit 3 /dirs
-	dirname forth:type '/' emit basename forth:type ;]
-    $tmp compact-filename 2dup file-status nip 0= ;
+	3 /dirs	dirname forth:type '/' emit basename forth:type ;]
+    $tmp photo-path open-path-file IF  0 0 false
+    ELSE  rot close-file throw true  THEN ;
 
 : local-media ( filename u basename u o:dsvc -- )
     2dup delete-file drop 2swap
@@ -457,7 +465,8 @@ Variable comment#
     dvcs-o .dvcs:dispose-dvcs
     create>never
     dvcs-o add-collection
-    dir> redate-mode off ;
+    dir> redate-mode off
+    dvcs-objects #frees ;
 
 : write-articles ( -- ) { | nn }
     "img-req.lst" w/o create-file throw to img-req-fid
@@ -477,8 +486,8 @@ Variable comment#
 [THEN]
 
 : g+-import { d: dir -- }
-    ?get-me
-    ." Read pics metadata" cr   dir get-pic-filenames
+    ?get-me >dir +photo-paths dir>
+    ." Read pics metadata" cr   dir get-pic-filenames \ legacy for old takeout
     ." Read JSON files" cr      dir json-load-dir
     ." Write entries" cr        write-articles
     ." Get avatars" cr          get-avatars hash-in-avatars
