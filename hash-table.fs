@@ -32,7 +32,7 @@ uvalue last#
 
 : bucket-off ( bucket -- ) dup $off cell+ $off ;
 
-: #off? ( addrkey u bucket -- true / addrkey u false )
+: #free? ( addrkey u bucket -- true / addrkey u false )
     >r r@ @ 0= IF  rdrop false  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r> bucket-off true  EXIT  THEN
     rdrop false ;    
@@ -61,20 +61,17 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop #0. ;
 
-: #off ( addrkey u hash -- )  { hash }
+: #free ( addrkey u hash -- )  { hash }
     2dup string-hash  hash$ bounds ?DO
 	I c@ $7F and 2* cells hash @ dup 0= IF  2drop  LEAVE  THEN
-	+ #off? IF  UNLOOP  EXIT  THEN
+	+ #free? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
-: #offs ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  >r
-    r@ @       $100 cells bounds DO  I $free    cell +LOOP
-    r@ @ $100 cells + $80 bounds DO  I recurse  cell +LOOP
+: #frees ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  >r
+    r@ @             $100 cells bounds DO  I $free    cell +LOOP
+    r@ @ $100 cells + $80 cells bounds DO  I recurse  cell +LOOP
     r@ @ free throw  r> off ;
-
-' #off  alias #free
-' #offs alias #frees
 
 -1 8 rshift invert Constant msbyte#
 

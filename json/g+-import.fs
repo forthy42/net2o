@@ -112,7 +112,7 @@ Variable dir#
 	[: ." read " . ." pics in " .time ;]
 	success-color color-execute cr ;] catch
     fpath $free r> fpath !  dd close-dir throw  throw
-    dir# #offs ;
+    dir# #frees ;
 
 : get-avatars ( -- )
     avatars[] $[]# 0= ?EXIT \ nothing to do
@@ -195,6 +195,7 @@ filter-out bl 1- 1 fill
 	o>  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
+	." ::album::" cr cr
 	.album:media[] $@ over @ .media:url$
 	basedir+name pics# #@ d0= IF
 	    bounds U+DO
@@ -227,7 +228,7 @@ filter-out bl 1- 1 fill
 	.html .link .media .album o>
     THEN ;
 : .choice ( n o:choices -- )
-    '1' + emit dup ." . ::votes#" emit ." :: ![" choices:description$ type ." ]("
+    '1' + dup emit ." . ::votes#" emit ." :: ![" choices:description$ type ." ]("
     choices:imageLocalFilePath$ dup IF  basename type
     ELSE  2drop choices:imageUrl$ .mfile  THEN  ." ) " ;
 : .polls ( o:comments -- )

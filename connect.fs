@@ -212,7 +212,7 @@ Sema id-sema
 	    @  EXIT  THEN  THEN
     drop 0 ;
 : error-id$off ( -- )
-    [: my-error-id $@ ?dup-IF  id# #off  ELSE  drop  THEN
+    [: my-error-id $@ ?dup-IF  id# #free  ELSE  drop  THEN
       my-error-id $off ;] id-sema c-section ;
 
 :noname  error-id$off defers extra-dispose ; IS extra-dispose

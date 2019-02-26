@@ -132,7 +132,7 @@ end-class dvcs-log-class
     \G add a file entry and replace same file if it already exists
     dvcs( ." +f: " 2dup .file+hash ) fn-split dvcs:files# #! ;
 : -fileentry ( addr u o:dvcs -- )
-    dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #off ;
+    dvcs( ." -f: " 2dup .file+hash ) /name dvcs:files# #free ;
 
 : create-symlink-f ( addrdest udest addrlink ulink perm -- ) { perm }
     \G create symlink and overwrite existing file
@@ -265,11 +265,11 @@ dvcs-table $save
 ' dvcs-in-hash ( addr u -- ) dvcs-class is dvcs:read
 :noname ( addr u -- )
     2dup hash#128 /string ?sane-file
-    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
+    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #free
     hash#128 umin dvcs-in-hash ; dvcs-class is dvcs:rm
 :noname ( addr u -- )
     2dup 2 /string ?sane-file 2drop
-    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #off
+    dvcs( ." -f: " 2dup forth:type forth:cr ) dvcs:files# #free
 ; dvcs-class is dvcs:rmdir
 :noname ( 64len addr u -- )
     dvcs:patch$ $! dvcs( ." -patch: " 64dup u64. )
@@ -336,7 +336,7 @@ scope{ dvcs
     dvcs:refs[] $[]free dispose ;
 : dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $free  dvcs:message$ $free  dvcs:fileref[] $[]free
-    dvcs:files# #offs  dvcs:oldfiles# #offs
+    dvcs:files# #frees  dvcs:oldfiles# #frees
     dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
     clean-delta  dvcs:fileentry$ $free
     dvcs:hash$ $free
@@ -636,9 +636,9 @@ User id-check# \ check hash
 	    r> hash#128 \ tail recursion optimization
     REPEAT  2drop ;
 : id>branches ( addr u -- )
-    id-check# #offs
+    id-check# #frees
     branches[] $[]off  dvcs:commits @ .id>branches-loop
-    id-check# #offs
+    id-check# #frees
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 : branches>dvcs ( -- )
     branches[] [: dup IF
