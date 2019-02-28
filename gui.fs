@@ -475,12 +475,6 @@ false Value in-group?
 	I @ show-group
     cell +LOOP ;
 
-: }}button-lit { d: text color -- o }
-    {{
-        glue*l color color, font-size# 40% f* }}frame dup .button2
-        text }}text 25%b /center
-    }}z box[] ;
-
 also [ifdef] android android [then]
 
 tex: vp-title
@@ -499,7 +493,7 @@ tex: vp-title
 		    glue*lll± }}glue
 		}}h box[]
 	    vp-title glue*lll ['] vp-title }}vp vp[] dup to title-vp
-	    \large s" ❌" $444444FF }}button-lit [: -1 data +! ;] level# click[]
+	    \large s" ❌" $444444FF color, }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[]
     }}z box[] ;
 
