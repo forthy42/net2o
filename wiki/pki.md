@@ -117,12 +117,12 @@ Why Still Use a PKI?
 
 What advantages does a public key system still offer?
 
-* In the client-server communication case, it is sufficient that the
-client verifies the server, the other way round doesn't matter. Thus, while
-every client should verify the identity of the server, it is not necessary that
-the server verifies the identity of the client. It therefore also does not need
-to store the client's identity, and—that is more important—maybe the client
-wants to change its presented public key frequently to avoid being tracked
+* In the client-server communication case, it is sufficient that the client
+verifies the server, the other way round doesn't matter. Thus, while every
+client should verify the identity of the server, it is not necessary that the
+server verifies the identity of the client. It therefore also does not need to
+store the client's identity, and—that is more important—maybe the client wants
+to change its presented public key frequently to avoid being tracked
 (anonymity)
 * When we allow one indirection in the server's identity, we can
 have temporary server keys, signed by a constant identity—this allows to

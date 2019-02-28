@@ -18,7 +18,7 @@ net2o is currently under early alpha test. [Get it](get-it.md) and
 
 * The internet bases on assumptions 20-30 years old
 * These assumptions are wrong today
-* Much of it followed the "good enough" principle
+* Much of it followed the “good enough” principle
 * There's a huge pile of accumulated cruft
 * Fixing this mess one-by-one is the wrong attempt
 
@@ -30,7 +30,7 @@ by selling the privacy of their users. Where all data is encrypted, so that
 access is only possible for people who have the key and really are authorized.
 Which layman can use without cryptic user interfaces. Where the browser is a
 platform for running useful applications without the mess of Flash and
-JavaScript. Without the lag of "buffer bloat" and without the speed problems of
+JavaScript. Without the lag of “buffer bloat” and without the speed problems of
 a protocol not designed to be assisted by hardware.
 
 [Richard Stallman on how to fix the surveillance
