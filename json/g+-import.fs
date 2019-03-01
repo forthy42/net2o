@@ -416,7 +416,13 @@ Variable comment#
     comments:postAcl{} ?dup-IF >o
 	postAcl:collectionAcl{} ?dup-IF
 	    .collectionAcl:collection{} ?dup-IF
-		[: ." g+:" .collection:displayName$ type ;] $tmp
+		[: ." g+:coll:" .collection:displayName$ type ;] $tmp
+		groups[] $+[]!
+	    THEN
+	THEN
+	postAcl:communityAcl{} ?dup-IF
+	    .communityAcl:community{} ?dup-IF
+		[: ." g+:comm:" .collection:displayName$ type ;] $tmp
 		groups[] $+[]!
 	    THEN
 	THEN

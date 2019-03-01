@@ -530,6 +530,11 @@ warnings !
     \G chatgroups: list chatgroups
     ?get-me .chatgroups ;
 
+: chatgroup- ( -- )
+    \U chatgroup- group1 .. groupn
+    ?get-me [: group# #free ;] arg-loop
+    save-chatgroups .chatgroups ;
+
 : invite ( -- )
     \U invite @user ["Invitation text"]
     \G invite: send or accept an invitation to another user
