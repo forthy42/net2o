@@ -40,9 +40,9 @@ memory, but not stored permanently.  Chat logs of group chats can be synced
 with any group member.  OTR logs can't be synced; they are only seen by people
 who are active at the time of their sending.
 
-In near future, you can ```/otrify``` your own messages; if honored by your
+In near future, you can `/otrify` your own messages; if honored by your
 peers, they will disappear.  Note that only active peers in a group will be
-able to see an ```/otrify``` request.  This honors your right to be
+able to see an `/otrify` request.  This honors your right to be
 forgotten.
 
 ### DVCS projects ###

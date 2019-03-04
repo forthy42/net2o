@@ -50,25 +50,25 @@ what SSL does to ensure that identities are correct:
 SSL's PKI attempt
 -----------------
 
-SSL uses Certificate Authorities (CAs) to sign public
-keys. The message of this signature is "someone gave us some money, told us he
-has this domain, and he gave us this public key." The "premium" signatures
-usually mean "he gave us more money". This is big business, so you can expect
-that the most trustworthy members drop out earliest—because someone paid them
-a lot of money (Mark Shuttleworth sold Thawte, the first CA, for $500M to
-VeriSign in 1999). However, the actual trustworthyness of the CAs itself is not
-the real problem. The real problem is that any CA can sign any combination of
-domain name and public key, as they like. And any intruder into one of the CAs,
-who get access to the signing script can do the same. This is what happened
-with DigiNotar. An intruder used DigiNotar's signing key to create a
-*.google.com certificate. Iran used this certificate to spy on users who used
-Google. This came to light, because Google does not really trust the SSL
+SSL uses Certificate Authorities (CAs) to sign public keys. The message of
+this signature is "someone gave us some money, told us he has this domain, and
+he gave us this public key." The "premium" signatures usually mean "he gave us
+more money". This is big business, so you can expect that the most trustworthy
+members drop out earliest—because someone paid them a lot of money (Mark
+Shuttleworth sold Thawte, the first CA, for $500M to VeriSign in
+1999). However, the actual trustworthyness of the CAs itself is not the real
+problem. The real problem is that any CA can sign any combination of domain
+name and public key, as they like. And any intruder into one of the CAs, who
+get access to the signing script can do the same. This is what happened with
+DigiNotar. An intruder used DigiNotar's signing key to create a
+`*.google.com` certificate. Iran used this certificate to spy on users who
+used Google. This came to light, because Google does not really trust the SSL
 scheme, and Chrome has a priori knowledge over the google.com domain
 signatures, which are signed by Google's own CA. Iran needed to intrude some
 other CAs like DigiNotar, because they don't have their own CA, while e.g.
 China or the USA have one. Now you have that trust problem again: You don't
 know which of the 600 CAs are trustworthy and which are not. And it is
-sufficient if <b>one</b> of them is not, even when the vast majority would be
+sufficient if **one** of them is not, even when the vast majority would be
 ok. Oh shit!
 
 The Broken Promise

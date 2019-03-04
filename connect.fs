@@ -124,6 +124,7 @@ in net2o : create-map
     nest[ sec-cookie,
     max-data# umin swap max-code# umin swap
     net2o:new-map net2o:create-map
+    \ keypad keysize sec$, store-key  stskc KEYSIZE erase
     ]nest  net2o:create-map
     64drop 2drop 64drop ;
 
