@@ -39,13 +39,13 @@ The packet contains these elements:
 
 1. 2 bytes flags: 2 bits QoS (00 highest to 11 lowest), 2 bits
    protocol version (default is now 01), 4 bits packet size
-   (64*2^_n_), 2 bit switch flags (broadcast, multicast), 3 bits
+   (64\*2^_n_), 2 bit switch flags (broadcast, multicast), 3 bits
    reserved, 3 bits for flow control (resend-toggle, burst-toggle,
    ack-toggle).
 2. 16 bytes path (rough Internet 1.0 equivalent: "address")
 3. 8 bytes address: this is the address in the destination buffer where the
    packet will be stored (roughly equivalent to port+sequence number)
-4. 64*2^_size_ bytes data
+4. 64\*2^_size_ bytes data
 5. 16 bytes authentication data (keyed cryptographic checksum)
 
 The "abstraction" at packet level is shared memory; the model is read
