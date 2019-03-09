@@ -157,7 +157,7 @@ object class{ img-params
 synonym div span
 : /div /span cr ;
 synonym p div
-synonym /p /div
+: /p /div cr ;
 synonym style span
 synonym /style /span
 

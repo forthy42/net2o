@@ -109,8 +109,8 @@ point:
 
 * The [pki](pki.md) problem
 * [Client authentication](client-auth.md)
-* [Handover](handover.wiki)
-* [Ack cookies](ackcookies.wiki)
+* [Handover](handover.md)
+* [Ack cookies](ackcookies.md)
 * [Random number seat belts](rng.md)
 * [Key format](key-format.md)
 * [Key revocation](key-revocation.md)
