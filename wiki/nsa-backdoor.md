@@ -27,12 +27,12 @@ producing _pki=pkj\*(ski)_ (the order is irrelevant, every _ski_ must be used
 just once).  To verify that all secrets have been used, use a chain signature.
 The device itself generates the starting point of this chain signature, by
 signing its own unlock throw-away secret, producing a tuple
-_(k)\*base,(z*sk+k)_ (after producing that tuple and the unlock pubkey, this
+_(k)\*base,(z\*sk+k)_ (after producing that tuple and the unlock pubkey, this
 secret is no longer needed and thrown away).  Each node (HSM) in the chain
 will need to modify that signature by adding its own secret _ki_ and
 multiplying it with its own secret _ski_, so you first form
-_(k)\*base+(ki)*base=(k+ki)*base_ and _(z*sk+k+ki)_, and then
-_(ski)\*(k+ki)\*base=(ski(k+ki))*base_, and
+_(k)\*base+(ki)\*base=(k+ki)\*base_ and _(z\*sk+k+ki)_, and then
+_(ski)\*(k+ki)\*base=(ski(k+ki))\*base_, and
 _(ski)\*(z\*sk+k+ki)=(z\*sk\*ski+ski(k+ki))_.  The final signature then will
 verify correctly against _pkn_, a pubkey only the device itself knows, because
 it generated it itself by taking in _pkn-1_ and multiplying its own secret key

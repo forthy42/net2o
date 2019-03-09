@@ -5,7 +5,7 @@ solve the trust problem in a PKI system where the client has to trust
 the server. The centralized Certification Authority scheme is broken,
 and a distributed system is hard.
 
-However, let's take a step back, and look <b>when</b> do we really want a
+However, let's take a step back, and look **when** do we really want a
 secure connection? When we have private data on a server, when we want to
 authenticate us, and send our credentials over the Internet.
 
@@ -20,7 +20,7 @@ attack has to replace both identities to actually intercept the communication
 
 So what happens if we use the public key as sign-in to the server? The user
 presents its public key, which establishes a shared secret that allows to
-verify that this user is legitimate (i.e. knows his secret key), <b>and</b> at
+verify that this user is legitimate (i.e. knows his secret key), **and** at
 the same time allows to establish a secure connection.
 
 The trust model is again "we know each other" model. This time, we have a
@@ -40,7 +40,7 @@ connection with something that is hard for an automatic interception system to
 emulate. You send a normal captcha (a distorted image, voice, a program that
 generates the text through some non-trivial logic, etc.), which the automatic
 interception is not able to process. You encrypt the answer to this captcha on
-the client side using the shared secret, and sending <b>only</b> the encryption
+the client side using the shared secret, and sending **only** the encryption
 checksum of this answer. The intercepting system can not generate the answer to
 the captcha itself, and therefore can not generate the correct checksum. The
 intercepted client does not have the correct shared secret, and therefore can't
@@ -64,6 +64,6 @@ to solve for humans) is done to reduce that risk.
 
 If identity providers like Google, Yahoo, or Facebook would simply use
 client certificates to verify the identity of their customers (self-singed
-client certificates are perfect, what matters is that the certificate <b>does
-not change</b>), much of the SSL dilemma would already be solved in a practical
+client certificates are perfect, what matters is that the certificate **does
+not change**), much of the SSL dilemma would already be solved in a practical
 way. No trust chain with the weakest CA as link anymore.

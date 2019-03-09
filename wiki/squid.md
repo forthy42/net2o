@@ -4,31 +4,31 @@
 
 ## Abstract
 
-*10 years after BitCoins “whitepaper”, the BlockChain and crypto
+_10 years after BitCoins “whitepaper”, the BlockChain and crypto
 currencies are a big hype. Time to look at the results of the
 experiment, see what failed and what works, check the consequences for
-society, and propose improvements.*
+society, and propose improvements._
 
-*BitCoin's technology has three problems which need to be fixed:*
+_BitCoin's technology has three problems which need to be fixed:_
 
-  + *The unfair distribution of coins*
-  + *The energy consumption of proof of work*
-  + *The non-scaleable replicated, but not partitioned ledger*
+* _The unfair distribution of coins_
+* _The energy consumption of proof of work_
+* _The non-scaleable replicated, but not partitioned ledger_
 
 The lightning network tries to address the last point, by doing transactions
 off-chain.
 
 ## Subtopic List
 
-+ [Bullshit Bingo Sheet](squid-bingo.md)
-+ [Purpose & History of Currencies](squid-money.md)
-+ [Proof of What?](squid-pow.md)
-+ [Speculation Objects?](squid-speculation.md)
-+ [SwapDragonChain](squid-chain.md)
-+ [Ethical Mining](squid-mining.md)
-+ [The Decentral Bank](squid-fed.md)
-+ [Dumb Contracts](squid-contracts.md)
-+ [Appendix: Literature](squid-literature.md)
+* [Bullshit Bingo Sheet](squid-bingo.md)
+* [Purpose & History of Currencies](squid-money.md)
+* [Proof of What?](squid-pow.md)
+* [Speculation Objects?](squid-speculation.md)
+* [SwapDragonChain](squid-chain.md)
+* [Ethical Mining](squid-mining.md)
+* [The Decentral Bank](squid-fed.md)
+* [Dumb Contracts](squid-contracts.md)
+* [Appendix: Literature](squid-literature.md)
 
 ### Share and enjoy!
 

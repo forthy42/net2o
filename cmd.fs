@@ -441,7 +441,7 @@ compsem: cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     :noname ( -- )
 	>in @ >r ')' parse ."  ( " type ." )" cr r> >in ! ; is doc(gen
     :noname ( n "name" -- )
-	." + " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
+	." * " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
 [THEN]
 
 : ?version ( addr u -- )

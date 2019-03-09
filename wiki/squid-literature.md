@@ -14,8 +14,7 @@
   10. [Is my blockchain a blockchain](https://gist.github.com/joepie91/e49d2bdc9dfec4adc9da8a8434fd029b)
   11. [Der „Wolf of Wall Street“ warnt vor ICOs](http://www.handelsblatt.com/finanzen/maerkte/devisen-rohstoffe/hype-um-krypto-boersengaenge-der-wolf-of-wall-street-warnt-vor-icos/20490646.html)
   12. [„Warum BitCoin (jetzt aber wirklich!) TOT ist“-Kwizz](https://www.heise.de/forum/heise-online/News-Kommentare/Bitcoin-klettert-auf-ueber-7000-US-Dollar/Das-monatliche-Warum-Bitcoin-jetzt-aber-wirklich-TOT-ist-Kwizz/posting-31300715/show/)
-  13. [Bitcoin Mining Electricy Consumption](https://motherboard.vice.com/en_us/article/ywbbpm/bitcoin-mining-electricity-consumption-ethereum-energy-climate-change
-)
+  13. [Bitcoin Mining Electricy Consumption](https://motherboard.vice.com/en_us/article/ywbbpm/bitcoin-mining-electricity-consumption-ethereum-energy-climate-change)
   14. [BitCoin Stromverbrauch Energie](http://t3n.de/news/bitcoin-stromverbrauch-energie-872715/)
   15. [BitCoin Energy Consumption Index](https://digiconomist.net/bitcoin-energy-consumption)
   16. [BitCoin is reactionary](http://www.ianwelsh.net/bitcoin-is-a-bad-way-to-do-something-necessary/)

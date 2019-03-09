@@ -10,12 +10,12 @@ money, but we don't know.
 
 ### Terms
 
-  + Commodity money: Objects with inherent value used as money
-  + Representative money: Note promising exchange with objects with
-    inherent values used as money (also: promissory notes)
-  + Fiat money: Medium with no inherent value and no promise for
-    exchange with such an object used as money
-  + Legal tender: Medium of payment by law, can be any of the above
+* Commodity money: Objects with inherent value used as money
+* Representative money: Note promising exchange with objects with
+  inherent values used as money (also: promissory notes)
+* Fiat money: Medium with no inherent value and no promise for
+  exchange with such an object used as money
+* Legal tender: Medium of payment by law, can be any of the above
 
 People tend to confuse legal tender with fiat money, because nobody
 would accept a fiat money if it's not a legal tender.  Or would you?

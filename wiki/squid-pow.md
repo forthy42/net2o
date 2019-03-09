@@ -41,9 +41,9 @@ We need an actual definition; technically, even a git repository has
 some important properties of a BlockChain.  The chain of hashed blocks
 is one aspect, the consensus algorithm the other:
 
-  + Merkle-tree or equivalent hash-it-all approach (loose definition)
-  + no single point of trust
-  + consensus algorithm based on the contents only (no external arbiter)
+* Merkle-tree or equivalent hash-it-all approach (loose definition)
+* no single point of trust
+* consensus algorithm based on the contents only (no external arbiter)
 
 ## How to cheaply secure the BlockChain
 

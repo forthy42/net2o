@@ -61,7 +61,7 @@ problem. The real problem is that any CA can sign any combination of domain
 name and public key, as they like. And any intruder into one of the CAs, who
 get access to the signing script can do the same. This is what happened with
 DigiNotar. An intruder used DigiNotar's signing key to create a
-`*.google.com` certificate. Iran used this certificate to spy on users who
+`\*.google.com` certificate. Iran used this certificate to spy on users who
 used Google. This came to light, because Google does not really trust the SSL
 scheme, and Chrome has a priori knowledge over the google.com domain
 signatures, which are signed by Google's own CA. Iran needed to intrude some

@@ -82,7 +82,7 @@ terminology used.
 
 In this data protection declaration, we use, inter alia, the following terms:
 
-### a)    Personal data ###
+### a) Personal data ###
 
 Personal data means any information relating to an identified or identifiable
 natural person (“data subject”). An identifiable natural person is one who can
@@ -91,12 +91,12 @@ identifier such as a name, an identification number, location data, an online
 identifier or to one or more factors specific to the physical, physiological,
 genetic, mental, economic, cultural or social identity of that natural person.
 
-### b)    Data subject ###
+### b) Data subject ###
 
 Data subject is any identified or identifiable natural person, whose personal
 data is processed by the controller responsible for the processing.
 
-### c)    Processing ###
+### c) Processing ###
 
 Processing is any operation or set of operations which is performed on
 personal data or on sets of personal data, whether or not by automated means,
@@ -105,12 +105,12 @@ or alteration, retrieval, consultation, use, disclosure by transmission,
 dissemination or otherwise making available, alignment or combination,
 restriction, erasure or destruction.
 
-### d)    Restriction of processing ###
+### d) Restriction of processing ###
 
 Restriction of processing is the marking of stored personal data with the aim
 of limiting their processing in the future.
 
-### e)    Profiling ###
+### e) Profiling ###
 
 Profiling means any form of automated processing of personal data consisting
 of the use of personal data to evaluate certain personal aspects relating to a
@@ -118,7 +118,7 @@ natural person, in particular to analyse or predict aspects concerning that
 natural person's performance at work, economic situation, health, personal
 preferences, interests, reliability, behaviour, location or movements.
 
-### f)     Pseudonymisation ###
+### f) Pseudonymisation ###
 
 Pseudonymisation is the processing of personal data in such a manner that the
 personal data can no longer be attributed to a specific data subject without
@@ -127,7 +127,7 @@ is kept separately and is subject to technical and organisational measures to
 ensure that the personal data are not attributed to an identified or
 identifiable natural person.
 
-### g)    Controller or controller responsible for the processing ###
+### g) Controller or controller responsible for the processing ###
 
 Controller or controller responsible for the processing is the natural or
 legal person, public authority, agency or other body which, alone or jointly
@@ -136,12 +136,12 @@ data; where the purposes and means of such processing are determined by Union
 or Member State law, the controller or the specific criteria for its
 nomination may be provided for by Union or Member State law.
 
-### h)    Processor ###
+### h) Processor ###
 
 Processor is a natural or legal person, public authority, agency or other body
 which processes personal data on behalf of the controller.
 
-### i)      Recipient ###
+### i) Recipient ###
 
 Recipient is a natural or legal person, public authority, agency or another
 body, to which the personal data are disclosed, whether a third party or
@@ -151,14 +151,14 @@ shall not be regarded as recipients; the processing of those data by those
 public authorities shall be in compliance with the applicable data protection
 rules according to the purposes of the processing.
 
-### j)      Third party ###
+### j) Third party ###
 
 Third party is a natural or legal person, public authority, agency or body
 other than the data subject, controller, processor and persons who, under the
 direct authority of the controller or processor, are authorised to process
 personal data.
 
-### k)    Consent ###
+### k) Consent ###
 
 Consent of the data subject is any freely given, specific, informed and
 unambiguous indication of the data subject's wishes by which he or she, by a
@@ -172,18 +172,18 @@ other data protection laws applicable in Member states of the European Union
 and other provisions related to data protection is:
 
     Bernd Paysan
-	net2o secure communication
+    net2o secure communication
     Wilbrechtstr. 85
     81477 München
-	
-	Deutschland
+    
+    Deutschland
     
     Phone: +𝟦𝟫‧𝟪𝟫‧𝟦𝟣 𝟣𝟧 𝟦𝟨 𝟧𝟧
 
     Email: bernd (at) net2o (dot) de
 
     Website: net2o.de
-	
+    
     net2o ID: kQusJzA;7*?t=uy@X}1GWr!+0qqp_Cn176t4(dQ*
 
 
@@ -286,25 +286,25 @@ stored at any time and a copy of this information. Furthermore, the European
 directives and regulations grant the data subject access to the following
 information:
 
-  + the purposes of the processing;
-  + the categories of personal data concerned;
-  + the recipients or categories of recipients to whom the personal data have
-    been or will be disclosed, in particular recipients in third countries or
-    international organisations;
-  + where possible, the envisaged period for which the personal data will be
-    stored, or, if not possible, the criteria used to determine that period;
-  + the existence of the right to request from the controller rectification or
-    erasure of personal data, or restriction of processing of personal data
-    concerning the data subject, or to object to such processing;
-  + the existence of the right to lodge a complaint with a supervisory
-    authority;
-  + where the personal data are not collected from the data subject, any
-    available information as to their source;
-  + the existence of automated decision-making, including profiling, referred
-    to in Article 22(1) and (4) of the GDPR and, at least in those cases,
-    meaningful information about the logic involved, as well as the
-    significance and envisaged consequences of such processing for the data
-    subject.
+* the purposes of the processing;
+* the categories of personal data concerned;
+* the recipients or categories of recipients to whom the personal data have
+  been or will be disclosed, in particular recipients in third countries or
+  international organisations;
+* where possible, the envisaged period for which the personal data will be
+  stored, or, if not possible, the criteria used to determine that period;
+* the existence of the right to request from the controller rectification or
+  erasure of personal data, or restriction of processing of personal data
+  concerning the data subject, or to object to such processing;
+* the existence of the right to lodge a complaint with a supervisory
+  authority;
+* where the personal data are not collected from the data subject, any
+  available information as to their source;
+* the existence of automated decision-making, including profiling, referred
+  to in Article 22(1) and (4) of the GDPR and, at least in those cases,
+  meaningful information about the logic involved, as well as the
+  significance and envisaged consequences of such processing for the data
+  subject.
 
 Furthermore, the data subject shall have a right to obtain information as to
 whether personal data are transferred to a third country or to an
@@ -334,21 +334,21 @@ without undue delay, and the controller shall have the obligation to erase
 personal data without undue delay where one of the following grounds applies,
 as long as the processing is not necessary:
 
-  + The personal data are no longer necessary in relation to the purposes for
-    which they were collected or otherwise processed.
-  + The data subject withdraws consent to which the processing is based
-    according to point (a) of Article 6(1) of the GDPR, or point (a) of
-    Article 9(2) of the GDPR, and where there is no other legal ground for the
-    processing.
-  + The data subject objects to the processing pursuant to Article 21(1) of
-    the GDPR and there are no overriding legitimate grounds for the
-    processing, or the data subject objects to the processing pursuant to
-    Article 21(2) of the GDPR.
-  + The personal data have been unlawfully processed.
-  + The personal data must be erased for compliance with a legal obligation in
-    Union or Member State law to which the controller is subject.
-  + The personal data have been collected in relation to the offer of
-    information society services referred to in Article 8(1) of the GDPR.
+* The personal data are no longer necessary in relation to the purposes for
+  which they were collected or otherwise processed.
+* The data subject withdraws consent to which the processing is based
+  according to point (a) of Article 6(1) of the GDPR, or point (a) of
+  Article 9(2) of the GDPR, and where there is no other legal ground for the
+  processing.
+* The data subject objects to the processing pursuant to Article 21(1) of
+  the GDPR and there are no overriding legitimate grounds for the
+  processing, or the data subject objects to the processing pursuant to
+  Article 21(2) of the GDPR.
+* The personal data have been unlawfully processed.
+* The personal data must be erased for compliance with a legal obligation in
+  Union or Member State law to which the controller is subject.
+* The personal data have been collected in relation to the offer of
+  information society services referred to in Article 8(1) of the GDPR.
 
 If one of the aforementioned reasons applies, and a data subject wishes to
 request the erasure of personal data stored by the net2o secure communication,
@@ -371,17 +371,17 @@ Each data subject shall have the right granted by the European legislator to
 obtain from the controller restriction of processing where one of the
 following applies:
 
-  + The accuracy of the personal data is contested by the data subject, for a
-    period enabling the controller to verify the accuracy of the personal
-    data.
-  + The processing is unlawful and the data subject opposes the erasure of the
-    personal data and requests instead the restriction of their use instead.
-  + The controller no longer needs the personal data for the purposes of the
-    processing, but they are required by the data subject for the
-    establishment, exercise or defence of legal claims.
-  + The data subject has objected to processing pursuant to Article 21(1) of
-    the GDPR pending the verification whether the legitimate grounds of the
-    controller override those of the data subject.
+* The accuracy of the personal data is contested by the data subject, for a
+  period enabling the controller to verify the accuracy of the personal
+  data.
+* The processing is unlawful and the data subject opposes the erasure of the
+  personal data and requests instead the restriction of their use instead.
+* The controller no longer needs the personal data for the purposes of the
+  processing, but they are required by the data subject for the
+  establishment, exercise or defence of legal claims.
+* The data subject has objected to processing pursuant to Article 21(1) of
+  the GDPR pending the verification whether the legitimate grounds of the
+  controller override those of the data subject.
 
 If one of the aforementioned conditions is met, and a data subject wishes to
 request the restriction of the processing of personal data stored by the net2o

@@ -18,7 +18,7 @@ well debugged spells give them a chance.
 
 Wizards are depicted as old, bearded white men, but that’s just a stereotype.
 
-## <s>Rules</s> <u>Guidelines</u>
+## ~~Rules~~ __Guidelines__
 
 1. Thou shallst not assassinate any superior to get into their place. This is
    not limited to physical harm, but also character assassination, doxxing,
@@ -35,7 +35,7 @@ Wizards are depicted as old, bearded white men, but that’s just a stereotype.
    that this is fun.<br />
    _(Alberto Malich’s Rule 1)_
 
-## <s>Guidelines</s> <u>Suggestions</u>
+## ~~Guidelines~~ __Suggestions__
 
 4. Thou art supposed to teach what thou knowest to those with the appropriate
    talent, and learn what thou doest not if thou hast the talent.
@@ -52,7 +52,7 @@ Wizards are depicted as old, bearded white men, but that’s just a stereotype.
    enough pizza, go to bed late, and sleep long.  Unless thou art one of those
    early risers, then just stay quiet during thy morning exercise.
 
-## <s>Suggestions</s> <u>The End</u>
+## ~~Suggestions~~ __The End__
 
 Signed by Mustrum Ridcully in invisible ink.
 

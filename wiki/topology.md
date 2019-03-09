@@ -1,14 +1,14 @@
 # Topology
 
-net2o assumes a hierarchical topology, i.e. a tree topology. &nbsp;There may
+net2o assumes a hierarchical topology, i.e. a tree topology.  There may
 be multiple paths reaching the same destination, so this doesn't exclude that
-parts of the tree are actually mesh networks. &nbsp;This reflects reality in
+parts of the tree are actually mesh networks.  This reflects reality in
 the current Internet, and the expensive layer 1 infrastructure isn't likely to
 be replaced soon.
 
 Most connections send a larger number of packets, so routing each packet is
-wasteful, drives up costs and lowers speed. &nbsp;Therefore the decision is to
-switch packets, and route connections - at the source. &nbsp;I call this
+wasteful, drives up costs and lowers speed.  Therefore the decision is to
+switch packets, and route connections — at the source.  I call this
 combination
 
 ## Path Switching
@@ -23,7 +23,7 @@ follows:
   path field to mark the way back
 
 The receiver bit-reverses the entire path, and thereby gets a way back to
-the sender. &nbsp;This makes spoofing impossible, and eases
+the sender.  This makes spoofing impossible, and eases
 [handover](handover.wiki), as only the device that
 switches networks needs to calculate a new path; the receiver will accept any
 properly authenticated packet and use the new path to send data back.
@@ -42,16 +42,16 @@ The packet contains these elements:
    (64\*2^_n_), 2 bit switch flags (broadcast, multicast), 3 bits
    reserved, 3 bits for flow control (resend-toggle, burst-toggle,
    ack-toggle).
-2. 16 bytes path (rough Internet 1.0 equivalent: "address")
+2. 16 bytes path (rough Internet 1.0 equivalent: “address”)
 3. 8 bytes address: this is the address in the destination buffer where the
    packet will be stored (roughly equivalent to port+sequence number)
 4. 64\*2^_size_ bytes data
 5. 16 bytes authentication data (keyed cryptographic checksum)
 
-The "abstraction" at packet level is shared memory; the model is read
+The “abstraction” at packet level is shared memory; the model is read
 locally and write remotely (you can't read remotely, you can ask for the other
-side to send you packets). &nbsp;Of course, the addresses are virtual, so you
-can't write into arbitrary memory - only into the buffers provided by the other
+side to send you packets).  Of course, the addresses are virtual, so you
+can't write into arbitrary memory — only into the buffers provided by the other
 side.
 
 ## Why Source Routing?

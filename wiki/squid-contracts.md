@@ -39,9 +39,9 @@ contract, which is a good thing.
 
 An asset account contains the following state:
 
-+ A hash of the contract that last changed the state
-+ A table of assets and their values (how many)
-+ A timestamped signature of all that in canonical form
+* A hash of the contract that last changed the state
+* A table of assets and their values (how many)
+* A timestamped signature of all that in canonical form
 
 An asset account is addressed by its pubkey.  Contracts are addressed by their
 hashes.
@@ -92,20 +92,20 @@ previously used assets can be selected by number.
 All sources specify the date of the source state, so that a contract can be
 performed only once — the destination date must be later than the source date.
 
-+ Claimed money cheque (anybody who has the transaction can claim the money;
+* Claimed money cheque (anybody who has the transaction can claim the money;
   requires trust to the ledger node that accepts the cheque): SA-DSA+D
-+ Money transfer (only the designated recipient can claim the money): SA-SA+D1D
-+ Creation of asset and obligation: SA+OBD
-+ Two party purchase: SA¹+A²-S¹B²B1D2D
-+ Two party purchase delivery: SA-SOB1D2D (annihilates the asset)
-+ Bid/Ask in an exchange: SA¹+A²-D, finalized by SA¹+A²-DS¹B²BD. Note that
+* Money transfer (only the designated recipient can claim the money): SA-SA+D1D
+* Creation of asset and obligation: SA+OBD
+* Two party purchase: SA¹+A²-S¹B²B1D2D
+* Two party purchase delivery: SA-SOB1D2D (annihilates the asset)
+* Bid/Ask in an exchange: SA¹+A²-D, finalized by SA¹+A²-DS¹B²BD. Note that
   bids/asks in an exchange can be more complicated when they are only partly
   fulfilled; the splitting requires action by the bidder; and also note that
   this kind of bid requires, like the cheque, trust in the ledger node; but
   less than: The ledger node can only buy for the same price, not steal the
   money.
   Better finalize the contract with the other side.
-+ Auction offer: SA¹-, auction bid: SA¹-S¹BA²-D, auction conclusion:
+* Auction offer: SA¹-, auction bid: SA¹-S¹BA²-D, auction conclusion:
   SA¹-S¹BA²-D1²BD. Auction offers are signed with an end-of-auction
   beginning to indicate the timeout, and the offering party can select the
   best match, allowing other algorithms as maximum price, too, or other
@@ -139,17 +139,17 @@ big merged contract.
 
 ## Size of a transaction
 
-+ Opcodes are one byte (there aren't that many); literals are bytewise encoded
+* Opcodes are one byte (there aren't that many); literals are bytewise encoded
   and strings have a length preceeding the raw data — see
   [commands](commands.md)
-+ Sources are 8+32=40 bytes strings
-+ Assets are an integer (index into the set of assets), an optional describing
+* Sources are 8+32=40 bytes strings
+* Assets are an integer (index into the set of assets), an optional describing
   string (not needed for a currency)
-+ Values are 64 bit integers.  For a legal tender, the scale is in cents, for
+* Values are 64 bit integers.  For a legal tender, the scale is in cents, for
   deflationary coins the scale can be considerably larger.  Sums are always
   kept in 128 bits, so for really large transactions, you can use double
   values (two 64 bit integers).
-+ Destinations are signatures with timestamp and expiration, i.e. 80 bytes
+* Destinations are signatures with timestamp and expiration, i.e. 80 bytes
   strings.
 
 A minimal transaction is somewhat less than 300 bytes, and that's already

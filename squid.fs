@@ -144,18 +144,18 @@ pay-table $save
 
 \g 
 \g ### Contracts ###
-\g
+\g 
 \g Contracts are state changes to wallets.  A serialized wallet is a contract
 \g that contains all the changes from an empty wallet to fill it; it is not
 \g checked for balance.
-\g
+\g 
 \g A dumb contract is checked for balance.  It consists of several selectors
 \g (source/account, asset), transactions (amounts added or subtracted from an
 \g asset), comments (encoded for the receiver, with a ephermeral pubkey as
 \g start and a HMAC as end). Comments are fixed 64 bytes, either plain text or
 \g hashes to files.  Transactions have to balance, which is facilitated with
 \g the balance command, which balances the selected asset.
-\g
+\g 
 \g The signature of a contract signs the wallet's state (serialized in
 \g normalized form) after the contract has been executed.  The current
 \g contract's hash is part of the serialization.
