@@ -69,7 +69,7 @@ point:
 
 1. Physical layer — this is not part of net2o itself.
 2. [Topology](topology.md)
-3. [Encryption](encryption.wiki)
+3. [Encryption](encryption.md)
 4. [Flow Control](flow-control.md)
 5. [Commands](commands.md)
 6. [Distributed Data](distributed-data.wiki)
@@ -112,7 +112,7 @@ point:
 * [Handover](handover.wiki)
 * [Ack cookies](ackcookies.wiki)
 * [Random number seat belts](rng.md)
-* [Key format](key-format.wiki)
+* [Key format](key-format.md)
 * [Key revocation](key-revocation.md)
 * [NSA backdoor](nsa-backdoor.md)
 * [Data retention](data-retention.md)

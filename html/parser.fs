@@ -69,13 +69,13 @@ scope: html-tags
     list-class$ $free list-stack stack> list-class$ !
     list-class$ $@len 0= IF  cr  THEN ;
 : li 2drop
-    cr list-class$ $. ;
+    cr list-class$ $@ 2 safe/string type ;
 : /li 2drop ;
 : h1 2drop ." # " ;
 : /h1 2drop ."  #" cr cr ;
-: h2 2drop ." ## " ;
+: h2 2drop cr ." ## " ;
 : /h2 2drop ."  ##" cr cr ;
-: h3 2drop ." ### " ;
+: h3 2drop cr ." ### " ;
 : /h3 2drop ."  ###" cr cr ;
 
 : blockquote 2drop
@@ -156,6 +156,8 @@ object class{ img-params
     a-params:dispose o-stack stack> >r o> ;
 synonym div span
 : /div /span cr ;
+synonym p div
+synonym /p /div
 synonym style span
 synonym /style /span
 
@@ -221,6 +223,7 @@ $100 buffer: escape-chars
 '\' escape-chars '\' + c!
 '\' escape-chars '~' + c!
 '\' escape-chars '[' + c!
+'\' escape-chars '`' + c!
 
 : type-esc'd ( addr u -- )
     bounds ?DO
