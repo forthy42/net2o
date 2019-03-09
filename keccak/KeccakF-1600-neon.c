@@ -33,14 +33,14 @@ void KeccakInitialize()
 
 void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 {
-  memcpy(data, state, byteCount);
+  memmove(data, state, byteCount);
 }
 
 void KeccakAbsorb(keccak_state state, UINT64 *data, int byteCount)
 {
   int i;
   keccak_state datai;
-  memcpy(datai, data, byteCount);
+  memmove(datai, data, byteCount);
   for(i=0; i<byteCount-7; i+=8) {
     state[i>>3] ^= datai[i>>3];
   }
@@ -54,7 +54,7 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
 {
   int i;
   keccak_state datai;
-  memcpy(datai, data, byteCount);
+  memmove(datai, data, byteCount);
   for(i=0; i<byteCount-7; i+=8) {
     datai[i>>3] = state[i>>3] ^= datai[i>>3];
   }
@@ -63,7 +63,7 @@ void KeccakEncrypt(keccak_state state, UINT64 *data, int byteCount)
     state[i>>3] ^= datai[i>>3] & m;
     datai[i>>3] = state[i>>3];
   }
-  memcpy(data, datai, byteCount);
+  memmove(data, datai, byteCount);
 }
 
 void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
@@ -71,7 +71,7 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
   int i;
   UINT64 tmp;
   keccak_state datai;
-  memcpy(datai, data, byteCount);
+  memmove(datai, data, byteCount);
   for(i=0; i<byteCount-7; i+=8) {
     tmp = datai[i>>3] ^ state[i>>3];
     state[i>>3] = datai[i>>3];
@@ -83,5 +83,5 @@ void KeccakDecrypt(keccak_state state, UINT64 *data, int byteCount)
     state[i>>3] = (datai[i>>3] & m) | (state[i>>3] & ~m);
     datai[i>>3] = tmp;
   }
-  memcpy(data, datai, byteCount);
+  memmove(data, datai, byteCount);
 }

@@ -224,7 +224,7 @@ void KeccakExtract(keccak_state state, UINT64 *data, int byteCount)
 {
   UINT64 m = ~(UINT64)0;
 #if (PLATFORM_BYTE_ORDER == IS_LITTLE_ENDIAN)
-  memcpy(data, state, byteCount);
+  memmove(data, state, byteCount);
 #else
   int i;
   

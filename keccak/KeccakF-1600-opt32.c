@@ -83,7 +83,7 @@ void xorLanesIntoState(int byteCount, UINT32* state, UINT8* input)
   for(i=0; i<(byteCount-7); i+=8)
     xor8bytesIntoInterleavedWords(state+(i>>2), state+(i>>2)+1, input+i);
   if(byteCount & 7) {
-    memcpy(&tmp, input+i, byteCount & 7);
+    memmove(&tmp, input+i, byteCount & 7);
     xor8bytesIntoInterleavedWords(state+(i>>2), state+(i>>2)+1, (UINT8*)&tmp);
   }
 }
@@ -106,7 +106,7 @@ extractLanes(int byteCount, UINT32* state, UINT8* data) \
       setInterleavedWordsInto8bytes(data+i, state[i>>2], state[(i>>2)+1]);
   }
   setInterleavedWordsInto8bytes(&tmp, state[i>>2], state[(i>>2)+1]);
-  memcpy(data+i, &tmp, byteCount & 7);
+  memmove(data+i, &tmp, byteCount & 7);
 }
 
 #else // No interleaving tables
@@ -196,7 +196,7 @@ void xorLanesIntoState(int byteCount, UINT8* state, UINT8 *input)
   for(i=0; i<(byteCount-7); i+=8)
     xor8bytesIntoInterleavedWords((UINT32*)(state+i), (UINT32*)(input+i));
   if(byteCount & 7) {
-    memcpy(&tmp, input+i, byteCount & 7);
+    memmove(&tmp, input+i, byteCount & 7);
     xor8bytesIntoInterleavedWords((UINT32*)(state+i), (UINT32*)&tmp);
   }
 }
@@ -243,7 +243,7 @@ void extractLanes(int byteCount, UINT32* state, UINT8 *data)
     setInterleavedWordsInto8bytes(data+i, state+(i>>2));
   }
   setInterleavedWordsInto8bytes((UINT8*)&tmp, state+(i>>2));
-  memcpy(data+i, (UINT8*)&tmp, byteCount & 7);
+  memmove(data+i, (UINT8*)&tmp, byteCount & 7);
 }
 
 #endif // With or without interleaving tables

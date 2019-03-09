@@ -138,7 +138,7 @@ void tf_encrypt_256(struct tf_ctx_256 *ctx, const uint64_t *p,
       ctx->key[i] ^= X[i] ^ p[i];
     }
   case 0: // ECB mode
-    memcpy(out, X, 32);
+    memmove(out, X, 32);
     break;
   case 1: // SKEIN mode
     for (i=0; i<4; i++) {
@@ -196,7 +196,7 @@ void tf_encrypt_512(struct tf_ctx_512 *ctx, const uint64_t *p,
       ctx->key[i] ^= X[i] ^ p[i];
     }
   case 0: // ECB mode
-    memcpy(out, X, 64);
+    memmove(out, X, 64);
     break;
   case 1: // SKEIN mode
     for (i=0; i<8; i++) {
@@ -236,7 +236,7 @@ void tf_decrypt_256(struct tf_ctx_256 *ctx, const uint64_t *c, uint64_t *out, in
     tf_tweak_256(ctx);
   }
   
-  memcpy(X, c, 32);
+  memmove(X, c, 32);
   
   /* The rounds: */
   ROUNDD_256(18); ROUNDD_256(17); ROUNDD_256(16); ROUNDD_256(15); ROUNDD_256(14); ROUNDD_256(13);
@@ -255,7 +255,7 @@ void tf_decrypt_256(struct tf_ctx_256 *ctx, const uint64_t *c, uint64_t *out, in
       ctx->key[i] ^= X[i] ^ c[i];
     }
   case 0: // ECB mode
-    memcpy(out, X, 32);
+    memmove(out, X, 32);
     break;
   default: break;
   }
@@ -293,7 +293,7 @@ void tf_decrypt_512(struct tf_ctx_512 *ctx, const uint64_t *c, uint64_t *out, in
     tf_tweak_512(ctx);
   }
   
-  memcpy(X, c, 64);
+  memmove(X, c, 64);
   
   /* The rounds: */
   ROUNDD_512(18); ROUNDD_512(17); ROUNDD_512(16); ROUNDD_512(15); ROUNDD_512(14); ROUNDD_512(13);
@@ -312,7 +312,7 @@ void tf_decrypt_512(struct tf_ctx_512 *ctx, const uint64_t *c, uint64_t *out, in
       ctx->key[i] ^= X[i] ^ c[i];
     }
   case 0: // ECB mode
-    memcpy(out, X, 64);
+    memmove(out, X, 64);
     break;
   default: break;
   }
