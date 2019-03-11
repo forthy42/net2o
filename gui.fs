@@ -602,6 +602,15 @@ Variable last-bubble-pk
     [THEN]
 [THEN]
 
+: .project ( addr u -- )
+    2dup keysize /string
+    2dup printable? IF  '[' emit type '@' emit
+    ELSE  ." #["  85type ." /@"  THEN
+    key| .key-id? ;
+: open-project ( addr u -- ) ." open " 2dup .project cr
+    2dup keysize /string [: type '@' emit .key-id? ;] $tmp
+    nick>chat handle-clone ;
+
 :noname ( -- )
     glue*ll }}glue msg-box .child+
     dpy-w @ 90% fm* msg-par .par-split
@@ -735,19 +744,18 @@ Variable last-bubble-pk
     THEN ; wmsg-class is msg:otrify
 :noname ( addr u type -- )
     obj-red
-    [: case
+    [: case 0 >r
 	    msg:image#     of  ." img["      85type  endof
 	    msg:thumbnail# of  ." thumb["    85type  endof
 	    msg:patch#     of  ." patch["    85type  endof
 	    msg:snapshot#  of  ." snapshot[" 85type  endof
 	    msg:message#   of  ." message["  85type  endof
-	    msg:project#   of
-		2dup keysize /string
-		2dup printable? IF  '[' emit  type '@' emit
-		ELSE  ." #["  85type ." /@"  THEN
-		key| .key-id
+	    msg:project#   of  ." project"
+		rdrop 2dup [{: d: prj :}H prj open-project ;] >r
+		.project
 	    endof
-	endcase ." ]" ;] $tmp }}text msg-box .child+
+	endcase ." ]" r> ;] $tmp }}text
+    swap ?dup-IF  0 click[]  THEN  msg-box .child+
     text-color!
 ; wmsg-class is msg:object
 

@@ -112,11 +112,14 @@ box-actor class
     \ sfvalue: speed
 end-class slide-actor
 
+0 Value scroll<<
+
 :noname ( axis dir -- ) nip
     0< IF  prev-slide  ELSE  next-slide  THEN ; slide-actor is scrolled
 :noname ( rx ry b n -- )  dup 1 and 0= IF
-	over $8  and IF  prev-slide  2drop fdrop fdrop  EXIT  THEN
-	over $10 and IF  next-slide  2drop fdrop fdrop  EXIT  THEN
+	over $180 and IF  4 to scroll<<  THEN
+	over $08 scroll<< lshift and IF  prev-slide  2drop fdrop fdrop  EXIT  THEN
+	over $10 scroll<< lshift and IF  next-slide  2drop fdrop fdrop  EXIT  THEN
 	over -$2 and 0= IF
 	    fover caller-w >o x f- w f/ o>
 	    fdup 0.1e f< IF  fdrop  2drop fdrop fdrop  prev-slide  EXIT
@@ -390,14 +393,12 @@ $10 stack: vp-tops
 	l" Right to data portability" /title
 	l" Art. 20 GDPR" /subtitle
 	\skip \footnote nt
-	{{ {{ l" 1. " }}text' }}h dup value num-tab bx-tab l" The data subject shall have the right to receive the personal data concerning him or her, which he or she has provided to a controller, in a structured, commonly used and machine-readable format and have the right to transmit those data to another controller without hindrance from the controller to which the personal data have been provided, where:" }}text' glue*l }}glue }}p box[] >bl
-    dpy-w @ s>f font-size# 140% f* f- 1e text-shrink% f2/ f- f/ ' bx-tab over .par-split-hang
-    unbox \skip 
-	    l"  (a) the processing is based on consent pursuant to point (a) of Article 6(1) or point (a) of Article 9(2) or on a contract pursuant to point (b) of Article 6(1); and" p\\
-	    l"  (b) the processing is carried out by automated means." p\\ \skip 
-	    l" 2. In exercising his or her right to data portability pursuant to paragraph 1, the data subject shall have the right to have the personal data transmitted directly from one controller to another, where technically feasible." p\\ \skip 
-	    l" 3. The exercise of the right referred to in paragraph 1 of this Article shall be without prejudice to Article 17. That right shall not apply to processing necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the controller." p\\ \skip 
-	    l" 4. The right referred to in paragraph 1 shall not adversely affect the rights and freedoms of others." p\\
+	l" 1. " l" The data subject shall have the right to receive the personal data concerning him or her, which he or she has provided to a controller, in a structured, commonly used and machine-readable format and have the right to transmit those data to another controller without hindrance from the controller to which the personal data have been provided, where:" p2\\ \skip
+	l"   (a) " l" the processing is based on consent pursuant to point (a) of Article 6(1) or point (a) of Article 9(2) or on a contract pursuant to point (b) of Article 6(1); and" p2\\
+	l"   (b) " l" the processing is carried out by automated means." p2\\ \skip 
+	l" 2. " l" In exercising his or her right to data portability pursuant to paragraph 1, the data subject shall have the right to have the personal data transmitted directly from one controller to another, where technically feasible." p2\\ \skip
+	l" 3. " l" The exercise of the right referred to in paragraph 1 of this Article shall be without prejudice to Article 17. That right shall not apply to processing necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the controller." p2\\ \skip
+	l" 4. " l" The right referred to in paragraph 1 shall not adversely affect the rights and freedoms of others." p2\\
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides

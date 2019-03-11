@@ -429,7 +429,7 @@ scope: logstyles
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
     key| 2dup pk@ key| str=
-    IF   <err>  THEN ." @" .key-id <default>
+    IF   <err>  THEN ." @" .key-id? <default>
     r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
     last# >r last# $@ ?msg-log
