@@ -448,6 +448,10 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
+: ~net2o-cache/ ( addr u -- )
+    .net2o-cache/ 2dup $1FF init-dir drop set-dir throw ;
+: ~net2o-cache/.. ( addr u -- )
+    .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw ;
 : .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
 : objects/.no-fat-file ( -- addr u )
     [: objects$  $. ." /." no-fat-chars type ;] $tmp ;

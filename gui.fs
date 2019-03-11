@@ -607,9 +607,15 @@ Variable last-bubble-pk
     2dup printable? IF  '[' emit type '@' emit
     ELSE  ." #["  85type ." /@"  THEN
     key| .key-id? ;
-: open-project ( addr u -- ) ." open " 2dup .project cr
-    2dup keysize /string [: type '@' emit .key-id? ;] $tmp
-    nick>chat handle-clone ;
+: open-project { d: prj -- }
+    ." open " prj .project cr
+    prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
+    >dir
+    "posts" ~net2o-cache/
+    handle-clone
+    prj keysize /string set-dir throw
+    .dvcs-log
+    dir> ;
 
 :noname ( -- )
     glue*ll }}glue msg-box .child+

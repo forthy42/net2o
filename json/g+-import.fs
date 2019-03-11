@@ -452,8 +452,7 @@ Variable comment#
     >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcs-o }
     comments-base
-    2dup [: ." posts/" type ." /.n2o" ;] $tmp
-    .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw
+    2dup [: ." posts/" type ." /.n2o" ;] $tmp ~net2o-cache/..
     ".n2o/files" touch
     dvcs-o >o "g+:" project:project$ $! project:project$ $+!
     "master" project:branch$ $! save-project o>
