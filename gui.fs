@@ -37,6 +37,7 @@ require minos2/font-style.fs
 update-size#
 
 require minos2/text-style.fs
+require minos2/md-viewer.fs
 
 glue new Constant glue-sleft
 glue new Constant glue-sright
@@ -90,6 +91,7 @@ Variable slide#
 0 Value pw-frame
 0 Value id-frame
 0 Value chat-frame
+0 Value post-frame
 
 \ password screen
 
@@ -607,6 +609,62 @@ Variable last-bubble-pk
     2dup printable? IF  '[' emit type '@' emit
     ELSE  ." #["  85type ." /@"  THEN
     key| .key-id? ;
+
+scope{ dvcs
+dvcs-log-class class
+end-class project-log-class
+
+:noname ( addr u -- )
+    + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
+; project-log-class is msg:start
+' 2drop project-log-class is msg:tag
+' 2drop project-log-class is msg:id
+' 2drop project-log-class is msg:text
+' 2drop project-log-class is msg:action
+' 2drop project-log-class is msg:chain
+:noname ( addr u -- )
+    [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec
+; project-log-class is msg:url
+
+: new-project-log ( -- o )
+    project-log-class new >o msg-table @ token-table ! o o> ;
+}scope
+
+0 Value project-vp
+
+{{
+    $FFFFFFFF color, pres-frame
+    {{
+	glue*ll }}glue
+	tex: vp-md
+    glue*l ' vp-md }}vp vp[] dup to project-vp
+    >o font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
+}}z box[] to post-frame
+
+: display-file ( addr u -- )
+    2dup key| .key-id?
+    over keysize + le-64@ .ticks space
+    [ keysize $10 + ]L safe/string
+    2dup "file:" string-prefix? IF
+	5 /string [: ." ~+/" type ;] $tmp markdown-parse
+	v-box project-vp .+child
+	dpy-w @ s>f font-size# fover 25% f* f+ f2* f- ~~ p-format
+    ELSE  2drop  THEN ;
+: display-project ( addr u -- )
+    project:branch$ $@ { d: branch }
+    dvcs:new-project-log >o
+    ?msg-log  last# msg-log@ 2dup { log u }
+    bounds ?DO
+	I $@ msg:display \ this will only set the URLs
+    cell +LOOP
+    log free
+    dvcs-log:urls[] ['] display-file $[]map
+    dvcs:dispose-dvcs-log o> throw ;
+: .project-log ( -- )
+    dvcs:new-dvcs >o  config>dvcs
+    project:project$ $@ @/ 2drop 2dup load-msg
+    display-project
+    dvcs:dispose-dvcs o> ;
 : open-project { d: prj -- }
     ." open " prj .project cr
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
@@ -614,7 +672,7 @@ Variable last-bubble-pk
     "posts" ~net2o-cache/
     handle-clone
     prj keysize /string set-dir throw
-    .dvcs-log
+    .project-log
     dir> ;
 
 :noname ( -- )
@@ -873,6 +931,7 @@ wmsg-o >o msg-table @ token-table ! o>
     pw-frame          dup >slides
     id-frame   /flip  dup >slides
     chat-frame /flip  dup >slides
+    post-frame /flip  dup >slides
     glue-right }}glue
 }}h box[]
 Value n2o-frame
