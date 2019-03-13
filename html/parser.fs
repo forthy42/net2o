@@ -223,6 +223,7 @@ $100 buffer: escape-chars
 '\' escape-chars '\' + c!
 '\' escape-chars '~' + c!
 '\' escape-chars '[' + c!
+'\' escape-chars ']' + c!
 '\' escape-chars '`' + c!
 
 : type-esc'd ( addr u -- )
@@ -260,7 +261,12 @@ $100 buffer: escape-chars
 : process-pattern ( addr u -- addr' u' )
     2dup "_**_"     string-prefix? IF  4 safe/string ." **"  EXIT  THEN
     2dup "**+++ "   string-prefix? IF  6 safe/string ." # "  EXIT  THEN
-    2dup " +++**\n" string-prefix? IF  7 safe/string ."  #" cr  EXIT  THEN
+    2dup " +++**\n" string-prefix? IF  7 safe/string ."  #" cr
+    ELSE
+	dup 2 u>= IF  2dup #lf skip nip over swap - >r
+	    r@ 1 = IF  '\' emit  THEN
+	    over r@ type r> safe/string  THEN
+    THEN
     dup IF  over c@ emit 1 safe/string  THEN ;
 : process-patterns ( addr u -- )
     BEGIN  process-pattern  dup 0<=  UNTIL  2drop ;

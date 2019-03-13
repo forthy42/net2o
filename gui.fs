@@ -635,28 +635,51 @@ end-class project-log-class
 {{
     $FFFFFFFF color, pres-frame
     {{
-	glue*ll }}glue
-	tex: vp-md
-    glue*l ' vp-md }}vp vp[] dup to project-vp
-    >o font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
+	{{
+	    glue*l $000000FF color, slide-frame dup .button1
+	    {{
+		\large whitish
+		"⬅" }}text 40%b [: prev-slide ;] over click[]
+		!i18n l" Post" }}text' !lit 40%b
+		glue*l }}glue
+	    }}h box[]
+	}}z box[]
+	{{
+	    {{
+		glue*ll }}glue
+		tex: vp-md
+	    glue*l ' vp-md }}vp vp[] dup to project-vp
+	    >o font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
+	dup font-size# 66% f* fdup vslider }}h box[]
+    }}v box[]
 }}z box[] to post-frame
 
-: display-file ( addr u -- )
-    2dup key| .key-id?
-    over keysize + le-64@ .ticks space
-    [ keysize $10 + ]L safe/string
+: display-file { d: prj -- }
+    {{
+	glue*l $000000FF color, slide-frame dup .button1
+	{{
+	    \large whitish prj key| ['] .key-id? $tmp }}text 40%b
+	    glue*ll }}glue
+	    \small prj drop keysize + le-64@ ['] .ticks $tmp }}text 40%b
+	    \normal blackish
+	}}h box[]
+    }}z box[] project-vp .child+
+    prj [ keysize $10 + ]L safe/string
     2dup "file:" string-prefix? IF
+	0 to v-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
-	v-box project-vp .+child
-	dpy-w @ s>f font-size# fover 25% f* f+ f2* f- ~~ p-format
+	v-box project-vp .child+
+	dpy-w @ s>f font-size# fover 25% f* f+ f2* f- p-format
     ELSE  2drop  THEN ;
 : display-project ( addr u -- )
+    project-vp >o dispose-childs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-project-log >o
     ?msg-log  last# msg-log@ 2dup { log u }
     bounds ?DO
 	I $@ msg:display \ this will only set the URLs
     cell +LOOP
+    glue*lll }}glue project-vp .child+
     log free
     dvcs-log:urls[] ['] display-file $[]map
     dvcs:dispose-dvcs-log o> throw ;
@@ -672,7 +695,7 @@ end-class project-log-class
     "posts" ~net2o-cache/
     handle-clone
     prj keysize /string set-dir throw
-    .project-log
+    .project-log next-slide
     dir> ;
 
 :noname ( -- )
@@ -986,7 +1009,7 @@ lang:en include-locale lang/en
 
 s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
-\ lsids .lsids
+lsids .lsids
 
 [IFDEF] load-cov  load-cov [THEN]
 

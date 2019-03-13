@@ -175,7 +175,7 @@ filter-out bl 1- 1 fill
     comments:content$ html>text ;
 : .link ( -- )
     comments:link{} ?dup-IF cr >o
-	'[' emit link:title$ type ." ](" link:url$ type ')' emit cr
+	'[' emit link:title$ type-esc'd ." ](" link:url$ type ')' emit cr
 	o>  THEN ;
 
 0 Value img-req-fid
@@ -379,7 +379,8 @@ Variable comment#
     comment-file add-file ;
 
 : create>never ( o:comments -- )
-    comments:creationTime! comments:updateTime! 64umax 64#-1 sigdate le-128! ;
+    comments:creationTime! ( comments:updateTime! 64umax )
+    64#-1 sigdate le-128! ;
 
 : wrap-key ( ... xt key -- )
     my-key-default >r to my-key-default catch r> to my-key-default throw ;

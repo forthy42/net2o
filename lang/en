@@ -1,16 +1,17 @@
-Gforth
+FORTH
 ⚪
 net2o GUI
-Wrong passphrase!
+wrong passphrase!
 Enter passphrase to unlock
 Create new ID
 Enter new passphrase
 Enter new passphrase again
 Nick+Pet
-Public key
-Key signature date
-My keys
+Pubkey
+Key date
+My key
 My groups
 My peers
-chat log
-send
+Post
+Chat Log
+Send
