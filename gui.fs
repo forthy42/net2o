@@ -529,7 +529,7 @@ previous
 
 : show-nicks ( -- )
     fill-nicks fill-groups next-slide
-    0.01e peers-box [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
+    peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
 
 \ messages
 
@@ -696,6 +696,7 @@ end-class project-log-class
     handle-clone
     prj keysize /string set-dir throw
     .project-log next-slide
+    project-vp 0.01e [: .vp-top fdrop +sync +resize ;] >animate
     dir> ;
 
 :noname ( -- )
