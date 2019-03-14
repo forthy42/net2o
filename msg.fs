@@ -485,7 +485,7 @@ msg-class is msg:object
 		dup u - /string addr u str= IF
 		    ."  OTRify #" I u.
 		    sig u' I last# cell+ $[]@ replace-sig
-		    \ !!Schedule message saving!!
+		    save-msgs&
 		ELSE
 		    ."  [OTRified] #" I u.
 		THEN

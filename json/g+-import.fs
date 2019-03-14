@@ -181,32 +181,32 @@ filter-out bl 1- 1 fill
 0 Value img-req-fid
 
 : .mfile { d: fn -- }
-    fn basedir+name pics# #@ 2dup d0= IF
+    fn basedir+name ~~ pics# #@ ~~ 2dup d0= IF
 	2drop fn .url
 	fn [: .url cr ;] img-req-fid outfile-execute
     ELSE
-	." file:" picbase# #@ type
+	." file:" picbase# #@ ~~ type
     THEN ;
 : .csv-link { d: fn -- }
     ." ![" fn picdesc# #@ .simple-text ." ](file:" fn picbase# #@ type ." )" cr ;
+: .media-file ( -- )
+    media:url$ basename nip $100 > IF
+	." file:" media:localFilePath$ basename type
+    ELSE
+	media:localFilePath$ nip IF  ." file:" media:url$ basename type
+	ELSE  media:url$ .mfile  THEN
+    THEN ;
+: inline-image ( -- )
+    ." ![" media:description$ .simple-text ." ](" .media-file ')' emit cr ;
 : .media ( -- )
-    comments:media{} ?dup-IF cr >o
-	." ![" media:description$ .simple-text ." ]("
-	media:url$ 2dup basename nip $100 > IF
-	    ." file:" 2drop media:localFilePath$ basename type
-	ELSE  .mfile  THEN  ')' emit cr
-	o>  THEN ;
+    comments:media{} ?dup-IF cr .inline-image  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
 	." ::album::" cr cr
 	.album:media[] $@ over @ .media:url$
 	basedir+name pics# #@ d0= IF
 	    bounds U+DO
-		I @ >o
-		." ![" media:description$ .simple-text ." ]("
-		media:localFilePath$ nip IF  ." file:" media:url$ basename type
-		ELSE  media:url$ .mfile  THEN ')' emit cr
-		o>
+		I @ .inline-image
 	    cell +LOOP
 	ELSE
 	    2drop

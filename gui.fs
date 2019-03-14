@@ -223,6 +223,10 @@ tex: net2o-logo
     prev-text$ erase  addr prev-text$ $free
     edit-w .text$ passphrase-entropy 1e fmin pw-bg-col# f+
     pw-back >o to w-color o> ;
+: size-limit ( -- )
+    edit-w .text$ nip #800 u> IF
+	prev-text$ edit-w >o to text$ o>
+    THEN ;
 
 glue new Constant glue*lll±
 glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
@@ -285,8 +289,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			25%b >o config:passmode# @ to pw-mode o o>
 			glue*lll }}glue
 		    }}h
-		    pw-field ' pw-done edit[]
-		    >o act >o ' entropy-colorize is edit-filter o> o o>
+		    pw-field ' pw-done edit[] ' entropy-colorize filter[]
 		    {{
 			\large \sans whitish "👁" }}text
 			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
@@ -938,7 +941,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
-	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[]
+	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[] ' size-limit filter[]
 	    >o act >o [: connection .chat-next-line ;] is edit-next-line o> o o>
 	    >o act >o [: connection .chat-prev-line ;] is edit-prev-line o> o o>
 	    {{
