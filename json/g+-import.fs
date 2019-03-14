@@ -191,7 +191,10 @@ filter-out bl 1- 1 fill
     ." ![" fn picdesc# #@ .simple-text ." ](file:" fn picbase# #@ type ." )" cr ;
 : .media ( -- )
     comments:media{} ?dup-IF cr >o
-	." ![" media:description$ .simple-text ." ](" media:url$ .mfile ')' emit cr
+	." ![" media:description$ .simple-text ." ]("
+	media:url$ 2dup basename nip $100 > IF
+	    2drop media:localFilePath$ basename type
+	ELSE  .mfile  THEN  ')' emit cr
 	o>  THEN ;
 : .album ( -- )
     comments:album{} ?dup-IF cr
@@ -298,7 +301,9 @@ Variable photo-path
 
 : add-media { dvcs -- }
     media:localFilePath$ dup IF
-	media:url$ basename dvcs .local-media  EXIT
+	media:url$ basename dup $100 > IF
+	    2drop media:localFilePath$ basename
+	THEN  dvcs .local-media  EXIT
     THEN  2drop
     media:url$ basedir+name pics# #@ d0= IF
 	media:contentType$ "image/*" str= IF
@@ -435,28 +440,33 @@ Variable comment#
 	    cell +LOOP
 	THEN
 	groups[] $[]# 0= IF
-	    postAcl:isPublic? IF  "g+:<public>"  ELSE  "g+:<private>"  THEN
+	    postAcl:isPublic?
+	    IF  "g+:<public>"  ELSE  "g+:<private>"  THEN
 	    groups[] $+[]!
 	THEN
 	o>
+    THEN
+    comments:postKind$ "EXTERNAL_SITE_COMMENT" str= IF
+	"g+:external-site-comment" groups[] $+[]!
     THEN
     ['] .plain $tmp $80 umin -trailing-garbage  ['] .project $tmp
     groups[] [: msg-group$ $! 0 .?make-group
 	[ also net2o-base ]
 	[: 2over $, msg-text 2dup $, msg:project# ulit, msg-object ;]
 	[ previous ]
-	(send-avalanche) drop msg-group$ $. space .chat ;]
-    $[]map  2drop 2drop
-    groups[] $[]free ;
+	(send-avalanche) drop msg-group$ $. space
+	2dup d0= IF  ." <dupe>" 2drop cr  ELSE  .chat  THEN ;] $[]map
+    2drop 2drop  groups[] $[]free ;
 
 : write-out-article ( o:comment -- )
+    \ <info> ." write out: " comments:url$ type cr <default>
     >dir redate-mode on  comment# off
     dvcs:new-dvcs { dvcs-o }
     comments-base
     2dup [: ." posts/" type ." /.n2o" ;] $tmp ~net2o-cache/..
     ".n2o/files" touch
     dvcs-o >o "g+:" project:project$ $! project:project$ $+!
-    "master" project:branch$ $! save-project o>
+    "master" project:branch$ $!  save-project o>
     dvcs-o add-post
     dvcs-o add-album
     dvcs-o add-poll-photos

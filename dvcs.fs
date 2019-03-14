@@ -704,8 +704,11 @@ scope{ dvcs
     dvcs:dispose-dvcs o> ;
 
 also net2o-base
+true Value add-object?
+
 : (dvcs-newsentry) ( type -- )
     dvcs:type !
+    dvcs:hash$ $@len 0= ?EXIT
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: with dvcs
@@ -722,7 +725,8 @@ also net2o-base
 	$, msg-id
 	dup >r
 	dup IF  $, msg-re     ELSE  2drop  THEN
-	dup >r dup IF  $, ulit, msg-object  ELSE  2drop drop  THEN
+	dup >r dup IF  $, ulit, msg-object
+	ELSE  2drop drop  THEN
 	r> r> IF   IF  "Patchset"  ELSE  "Revert"  THEN
 	ELSE  drop "Snapshot"  THEN  $, msg-action
 	$, msg-text

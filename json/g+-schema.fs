@@ -24,6 +24,7 @@ object class{ comments
     $value: url$
     $value: content$
     $value: activityId$
+    $value: postKind$
     synonym commentActivityId$ activityId$
     synonym postUrl$ url$ \ comment has postUrl$ instead of url$
     64value: creationTime!

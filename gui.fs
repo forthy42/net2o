@@ -649,10 +649,14 @@ end-class project-log-class
 		glue*ll }}glue
 		tex: vp-md
 	    glue*l ' vp-md }}vp vp[] dup to project-vp
-	    >o font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
+	    >o "project" to name$ font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
 	dup font-size# 66% f* fdup vslider }}h box[]
+	>o "project-slider" to name$ o o>
     }}v box[]
-}}z box[] to post-frame
+    >o "project-vbox" to name$ o o>
+}}z box[]
+>o "project-zbox" to name$ o o>
+to post-frame
 
 : display-file { d: prj -- }
     {{
@@ -696,7 +700,8 @@ end-class project-log-class
     handle-clone
     prj keysize /string set-dir throw
     .project-log next-slide
-    project-vp 0.01e [: .vp-top fdrop +sync +resize ;] >animate
+    project-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
+	fdrop +sync +resize ;] >animate
     dir> ;
 
 :noname ( -- )
@@ -1010,7 +1015,7 @@ lang:en include-locale lang/en
 
 s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
-lsids .lsids
+\ lsids .lsids
 
 [IFDEF] load-cov  load-cov [THEN]
 
