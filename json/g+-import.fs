@@ -388,7 +388,8 @@ Variable comment#
     64#-1 sigdate le-128! ;
 
 : wrap-key ( ... xt key -- )
-    my-key-default >r to my-key-default catch r> to my-key-default throw ;
+    my-key-default >r to my-key-default catch
+    r> to my-key-default throw ;
 
 : add-comments { dvcs-o -- }
     comments:comments[] $@ bounds U+DO
@@ -449,7 +450,8 @@ Variable comment#
     comments:postKind$ "EXTERNAL_SITE_COMMENT" str= IF
 	"g+:external-site-comment" groups[] $+[]!
     THEN
-    ['] .plain $tmp $80 umin -trailing-garbage  ['] .project $tmp
+    ['] .plain $tmp $80 umin -trailing-garbage
+    dup 0= IF  2drop "<no text>"  THEN  ['] .project $tmp
     groups[] [: msg-group$ $! 0 .?make-group
 	[ also net2o-base ]
 	[: 2over $, msg-text 2dup $, msg:project# ulit, msg-object ;]
@@ -473,7 +475,10 @@ Variable comment#
     comments:media{} ?dup-IF  >o dvcs-o add-media o>  THEN
     create>never
     ['] .plain $tmp $100 umin -trailing-garbage
-    dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]! (dvcs-ci) o>
+    dup 0= IF  2drop "<no text>"  THEN
+    comments:author{} .author:mapped-key { mkey }
+    dvcs-o >o pfile$ $@ dvcs:fileref[] $+[]!
+    ['] (dvcs-ci) mkey wrap-key o>
     last-msg 2@ post-ref 2!
     dvcs-o add-plusones
     dvcs-o add-reshares
@@ -481,7 +486,7 @@ Variable comment#
     dvcs-o add-comments
     dvcs-o .dvcs:dispose-dvcs
     create>never
-    dvcs-o add-collection
+    dvcs-o ['] add-collection mkey wrap-key
     dir> redate-mode off
     dvcs-objects #frees ;
 

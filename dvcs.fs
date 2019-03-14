@@ -708,7 +708,7 @@ true Value add-object?
 
 : (dvcs-newsentry) ( type -- )
     dvcs:type !
-    dvcs:hash$ $@len 0= ?EXIT
+    dvcs:hash$ $@len 0= IF  #0. last-signed 2!  EXIT  THEN
     msg-group$ @ >r
     project:project$ @ msg-group$ !
     o [: with dvcs
@@ -746,7 +746,7 @@ previous
     dvcs-gen-id 2dup dvcs:id$ $!
     dvcs:commits @ >o
     2dup id>patch# #@ d0= >r id>snap# #@ d0= r> and o>
-    IF  >revision  ELSE  2drop  THEN ;
+    IF  >revision  ELSE  >file-hash dvcs:hash$ $!  THEN ;
 
 : ?delete-file ( addr u -- )
     delete-file dup no-file# <> and throw ;
@@ -766,7 +766,9 @@ previous
 	del-files[] ['] -fileentry $[]map
 	new-files[] ['] +fileentry $[]map
 	ref-files[] ['] +fileentry $[]map
-	>id-revision  dvcs-newsentry
+	>id-revision  my-key >r
+	my-key-default to my-key  dvcs-newsentry
+	r> to my-key
 	['] dvcs-sig$ project:chain$ $set
 	save-project  filelist-out
 	"~+/.n2o/newfiles" ?delete-file
