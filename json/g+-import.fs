@@ -193,7 +193,7 @@ filter-out bl 1- 1 fill
     comments:media{} ?dup-IF cr >o
 	." ![" media:description$ .simple-text ." ]("
 	media:url$ 2dup basename nip $100 > IF
-	    2drop media:localFilePath$ basename type
+	    ." file:" 2drop media:localFilePath$ basename type
 	ELSE  .mfile  THEN  ')' emit cr
 	o>  THEN ;
 : .album ( -- )
@@ -204,7 +204,7 @@ filter-out bl 1- 1 fill
 	    bounds U+DO
 		I @ >o
 		." ![" media:description$ .simple-text ." ]("
-		media:localFilePath$ nip IF  media:url$ basename type
+		media:localFilePath$ nip IF  ." file:" media:url$ basename type
 		ELSE  media:url$ .mfile  THEN ')' emit cr
 		o>
 	    cell +LOOP
