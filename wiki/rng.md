@@ -6,12 +6,12 @@ random number (CSPRNG).
 
 ## What do you need for a CSPRNG?
 
-  + An entropy source — I use the OS for that, ''/dev/urandom'' is known good.
-  + A secure, non-reversible expansion algorithm — I use keccak, which
-    encrypts again and again the same output buffer using an ever-changing
-    secret state (key erasure).  An attacker should not be able to guess past
-    random numbers from the current state, and should have difficulties to
-    guess future ones after re-injection of entropy.
+* An entropy source — I use the OS for that, `/dev/urandom` is known good.
+* A secure, non-reversible expansion algorithm — I use keccak, which
+  encrypts again and again the same output buffer using an ever-changing
+  secret state (key erasure).  An attacker should not be able to guess past
+  random numbers from the current state, and should have difficulties to
+  guess future ones after re-injection of entropy.
 
 These two things are good enough, but here's about the seat belts, the
 additional level of security to make sure even if one of these two fails
@@ -35,8 +35,8 @@ sekret key.  This is the time when a low-entropy system can ask the user to
 add more entropy by e.g. moving the mouse or walking over the keyboard.  That
 initial state then has enough randomness.
 
-On every start of net2o, I mix it together with entropy from ''/dev/random''
-and replace the previous saved content.  This is to prevent a forward security
+On every start of net2o, I mix it together with entropy from `/dev/random`
+and replace the previous saved content.  This is to prevent a forward secrecy
 attack.  To make sure the initial state can't be used to recover forward
 secrecy, it's just a part of the overall state, and overwritten by generating
 more random numbers afterwards; generating more random numbers will replace

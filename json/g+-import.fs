@@ -181,11 +181,11 @@ filter-out bl 1- 1 fill
 0 Value img-req-fid
 
 : .mfile { d: fn -- }
-    fn basedir+name ~~ pics# #@ ~~ 2dup d0= IF
+    fn basedir+name pics# #@ 2dup d0= IF
 	2drop fn .url
 	fn [: .url cr ;] img-req-fid outfile-execute
     ELSE
-	." file:" picbase# #@ ~~ type
+	." file:" picbase# #@ type
     THEN ;
 : .csv-link { d: fn -- }
     ." ![" fn picdesc# #@ .simple-text ." ](file:" fn picbase# #@ type ." )" cr ;

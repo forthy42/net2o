@@ -935,7 +935,7 @@ previous
     log !time end-with dvcs-join, get-ip end-code ;
 
 : dvcs-connect ( addr u -- )
-    2 dvcs-request# !  dvcs-bufs# chat#-connect dvcs-greet ;
+    dvcs-bufs# chat#-connect? IF  2 dvcs-request# !  dvcs-greet  THEN ;
 
 : dvcs-connect-key ( addr u -- )
     key>group ?load-msgn
@@ -943,11 +943,11 @@ previous
     2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
     2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;
 
-: dvcs-connects ( -- )
-    chat-keys ['] dvcs-connect-key $[]map ;
+: dvcs-connects? ( -- flag )
+    chat-keys ['] dvcs-connect-key $[]map dvcs-request# @ 0> ;
 
 : wait-dvcs-request ( -- )
-    BEGIN  stop dvcs-request# @ 0= UNTIL ;
+    BEGIN  dvcs-request# @  WHILE  stop  REPEAT ;
 
 : +needed ( addr u -- )
     2dup enchash>filename file-status nip no-file# = IF
@@ -999,14 +999,13 @@ previous
 : handle-fetch ( -- )  ?.net2o/objects
     dvcs:new-dvcs >o  pull-readin
     msg( ." === syncing metadata ===" forth:cr )
-    0 >o dvcs-connects +dvcs-sync-done
-    wait-dvcs-request o>
+    0 >o dvcs-connects? IF  +dvcs-sync-done  wait-dvcs-request  THEN o>
     msg( ." === syncing data ===" forth:cr )
     dvcs-data-sync
     msg( ." === data sync done ===" forth:cr )
     dvcs-ref-sync
     msg( ." === ref sync done ===" forth:cr )
-    >group last# silent-leave-chat
+    connection .data-rmap IF  msg-group$ $@ >group last# silent-leave-chat  THEN
     dvcs:dispose-dvcs o> ;
 
 : handle-clone ( -- )

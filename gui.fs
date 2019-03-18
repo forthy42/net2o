@@ -651,7 +651,7 @@ end-class project-log-class
 	    {{
 		glue*ll }}glue
 		tex: vp-md
-	    glue*l ' vp-md }}vp vp[] dup to project-vp
+	    glue*l ' vp-md }}vp dup to project-vp
 	    >o "project" to name$ font-size# dpy-w @ s>f 25% f* fdup fnegate to borderv f+ to border o o>
 	dup font-size# 66% f* fdup vslider }}h box[]
 	>o "project-slider" to name$ o o>
@@ -661,16 +661,21 @@ end-class project-log-class
 >o "project-zbox" to name$ o o>
 to post-frame
 
-: display-file { d: prj -- }
+: display-title { d: prj | ki -- }
+    prj key>o ?dup-IF  .ke-imports @ >im-color# sfloats to ki  THEN
     {{
-	glue*l $000000FF color, slide-frame dup .button1
+	glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
-	    \large whitish prj key| ['] .key-id? $tmp }}text 40%b
+	    \large imports#rgb-fg ki + sf@ to x-color
+	    prj key| ['] .key-id? $tmp }}text 40%b
 	    glue*ll }}glue
 	    \small prj drop keysize + le-64@ ['] .ticks $tmp }}text 40%b
 	    \normal blackish
 	}}h box[]
-    }}z box[] project-vp .child+
+    }}z box[] project-vp .child+ ;
+
+: display-file { d: prj -- }
+    prj display-title
     prj [ keysize $10 + ]L safe/string
     2dup "file:" string-prefix? IF
 	0 to v-box
@@ -686,7 +691,7 @@ to post-frame
     bounds ?DO
 	I $@ msg:display \ this will only set the URLs
     cell +LOOP
-    glue*lll }}glue project-vp .child+
+    glue*lll }}glue project-vp dup .act 0= IF  vp[]  THEN  .child+
     log free
     dvcs-log:urls[] ['] display-file $[]map
     dvcs:dispose-dvcs-log o> throw ;
@@ -909,7 +914,7 @@ wmsg-o >o msg-table @ token-table ! o>
     ELSE  2drop  THEN
     64#-1 line-date 64!  $lastline $free ;
 
-\ +db click( \ )
++db click( \ )
 \ +db gui( \ )
 
 {{ $80FFFFFF color, pres-frame

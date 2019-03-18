@@ -288,13 +288,15 @@ User hostc$ \ check for this hostname
 : make-context ( pk u -- )
     ret0 net2o:new-context >o rdrop dest-pk ;
 
-in net2o : pklookup ( pkaddr u -- )
+in net2o : pklookup? ( pkaddr u -- flag )
     2dup keysize2 safe/string hostc$ $! key2| 2dup pkc over str= to ?myself
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
     false id dup .dht-host ['] insert-host? $[]map drop
-    0= !!no-address!!  2drop ;
+    nip nip ;
+in net2o : pklookup ( pkaddr u -- )
+    net2o:pklookup? 0= !!no-address!! ;
 
 : ?nat-done ( n -- )
     nat( ." req done, issue nat request" forth:cr )
@@ -309,6 +311,8 @@ in net2o : pklookup ( pkaddr u -- )
 
 : pk-connect ( addr u cmdlen datalen -- )
     2>r net2o:pklookup 2r> direct-connect ;
+: pk-connect? ( addr u cmdlen datalen -- flag )
+    2>r net2o:pklookup? dup IF   2r> direct-connect  ELSE  2rdrop  THEN ;
 
 : addr-connect ( addr+key u cmdlen datalen xt -- )
     -rot 2>r >r over + 1- dup c@ dup >r -

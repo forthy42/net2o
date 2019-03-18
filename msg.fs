@@ -17,6 +17,7 @@
 
 Forward avalanche-to ( addr u o:context -- )
 Forward pk-connect ( key u cmdlen datalen -- )
+Forward pk-connect? ( key u cmdlen datalen -- flag )
 Forward addr-connect ( key+addr u cmdlen datalen xt -- )
 Forward pk-peek? ( addr u0 -- flag )
 
@@ -922,9 +923,9 @@ previous
     end-code ;
 
 : send-leave ( -- )
-    net2o-code expect-msg leave, end-code| ;
+    connection .data-rmap IF  net2o-code expect-msg leave, end-code|  THEN ;
 : send-silent-leave ( -- )
-    net2o-code expect-msg silent-leave, end-code| ;
+    connection .data-rmap IF  net2o-code expect-msg silent-leave, end-code|  THEN ;
 
 : [group] ( xt -- flag )
     msg-group$ $@ msg-groups #@ IF
@@ -1078,6 +1079,7 @@ $200 Constant maxmsg#
     msg-group$ $@len IF  send-leave -timeout  THEN ;
 
 : greet ( -- )
+    connection .data-rmap 0= ?EXIT
     net2o-code expect-msg
     log !time end-with join, get-ip end-code ;
 
@@ -1463,7 +1465,7 @@ previous
 : +group ( -- )
     msg-group$ $@ dup IF
 	2dup msg-groups #@ d0<> IF
-	    +unique-con
+	    +unique-con 2drop
 	ELSE  o { w^ group } group cell 2swap msg-groups #!  THEN
     ELSE  2drop  THEN ;
 
@@ -1491,11 +1493,11 @@ $B $E 2Value chat-bufs#
 : +chat-control ( -- )
     +resend-msg +flow-control ;
 
-: chat#-connect ( addr u buf1 buf2 --- )
-    pk-connect connection >o rdrop +chat-control  +group ;
+: chat#-connect? ( addr u buf1 buf2 --- flag )
+    pk-connect? dup IF  connection >o rdrop +chat-control  +group  THEN ;
 
 : chat-connect ( addr u -- )
-    chat-bufs# chat#-connect greet ;
+    chat-bufs# chat#-connect? IF  greet  THEN ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
