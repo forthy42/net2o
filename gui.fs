@@ -398,12 +398,37 @@ $00FFFFFF color, sf,
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
 
+Hash: avatar#
+
+glue new Constant glue*avatar
+glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
+
+: show-avatar ( addr u -- o )
+    2dup avatar# #@ nip 0= IF
+	2dup ?read-enc-hashed
+	patch-in$ $@ mem>thumb atlas-region 2swap avatar# #!
+    ELSE  2drop  THEN
+    thumbnail new >o
+    "avatar" to name$
+    white# to frame-color
+    last# cell+ $@ drop to frame#
+    glue*avatar to tile-glue o o>
+    >r {{ r> }}v 40%b ;
+
+: ?avatar ( addr u -- o / )
+    key# #@ IF
+	cell+ .ke-avatar $@ dup IF
+	    show-avatar
+	ELSE  2drop  THEN
+    ELSE  drop  THEN ;
+
 : show-nick ( o:key -- )
     ke-imports @ [ 1 import#provisional lshift ]L and ?EXIT
     ke-imports @ >im-color# sfloats { ki }
     {{ glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
 	    {{ \large imports#rgb-fg ki + sf@ to x-color
+		ke-avatar $@ dup IF  show-avatar  ELSE  2drop  THEN
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
@@ -666,10 +691,11 @@ to post-frame
     {{
 	glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
+	    prj key| ?avatar
 	    \large imports#rgb-fg ki + sf@ to x-color
-	    prj key| ['] .key-id? $tmp }}text 40%b
+	    prj key| ['] .key-id? $tmp }}text 25%b
 	    glue*ll }}glue
-	    \small prj drop keysize + le-64@ ['] .ticks $tmp }}text 40%b
+	    \small prj drop keysize + le-64@ [: .ticks space ;] $tmp }}text 25%b
 	    \normal blackish
 	}}h box[]
     }}z box[] project-vp .child+ ;
@@ -741,10 +767,14 @@ to post-frame
 		{{ \sans \normal
 		    {{
 			glue*l }}glue
-			\bold pk ['] .key-id $tmp }}text 25%b
-			>o imports#rgb-fg last-ki >im-color# sfloats + sf@
-			to text-color
-			o o> me? IF  swap  THEN
+			0 pk key| ?avatar dup IF  nip
+			    pk ['] .key-id $tmp 2drop
+			ELSE  drop
+			    \bold pk ['] .key-id $tmp }}text 25%b
+			    >o imports#rgb-fg last-ki >im-color# sfloats + sf@
+			    to text-color  o o>
+			THEN
+			me? IF  swap  THEN
 			\regular
 		    }}h
 		    glue*l imports#rgb-bg last-ki >im-color# sfloats + sf@
@@ -914,7 +944,7 @@ wmsg-o >o msg-table @ token-table ! o>
     ELSE  2drop  THEN
     64#-1 line-date 64!  $lastline $free ;
 
-+db click( \ )
+\ +db click( \ )
 \ +db gui( \ )
 
 {{ $80FFFFFF color, pres-frame

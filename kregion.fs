@@ -19,8 +19,11 @@
 Variable kfree64' \ free list for 64 bytes keys
 
 $4000 Constant /kregion
+$10000 Constant /kregion-max \ the usual maximum locked memory is pathetic
 
 $20 Constant crypt-align
+
+0 Value /kregion#
 
 : kalign ( addr -- addr' )
     [ crypt-align 1- ]L + [ crypt-align negate ]L and ;
@@ -30,10 +33,13 @@ $20 Constant crypt-align
     kalign >r
     r@ /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
-	2drop /kregion alloc+lock /kregion 2dup kregion 2!  THEN
+	/kregion +to /kregion#  2drop /kregion
+	\ we have to fall back to alloc+guard if we want more than 64k
+	/kregion# /kregion-max u> IF  alloc+guard  ELSE  alloc+lock  THEN
+	/kregion 2dup kregion 2!  THEN
     over swap r> safe/string kregion 2! ( kalloc( ." kalloc: " dup hex. cr ) ;
 
-:noname defers 'image  #0. kregion 2! kfree64' off ; is 'image
+:noname defers 'image  #0. kregion 2!  0 to /kregion# kfree64' off ; is 'image
 
 \ fixed size secrets are assumed to be all 64 bytes long
 \ if they are just 32 bytes, the second half is all zero

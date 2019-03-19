@@ -66,7 +66,8 @@ Variable defaultkey
     ke-chat $free
     ke-sigs[] $[]free
     ke-pets[] $[]free
-    ke-pets# $free ;
+    ke-pets# $free
+    ke-avatar $free ;
 
 \ key class
 
@@ -362,6 +363,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	wallet( space ke-wallet sec@ .black85 )else( ."  W" )
     ELSE  wallet( $15 )else( 2 ) spaces THEN
     ke-selfsig $@ space .sigdates
+    ke-avatar $@ dup IF space 85type  ELSE  2drop  THEN
     ke-groups $@ 2dup .in-groups groups>mask invert
     space ke-mask @ and -1 swap .permandor
     #tab emit ke-imports @ .imports

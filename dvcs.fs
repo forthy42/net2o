@@ -891,8 +891,12 @@ previous
     id>branches  co-rest
     dvcs:dispose-dvcs o> ;
 
+hash#128 buffer: hash-save
+
 : hash-in ( addr u -- hash u )
-    2dup >file-hash 2>r write-enc-hashed 2drop 2r> ;
+    2dup >file-hash hash-save hash#128 smove
+    write-enc-hashed 2drop
+    hash-save hash#128 ;
 : hash-add ( addr u -- )
     slurp-file hash-in 2drop ;
 : hash-out ( addr u -- )
