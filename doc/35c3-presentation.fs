@@ -220,7 +220,7 @@ $10 stack: vp-tops
 	    $00CCCCFF dup text-emoji-color, ' blackish >body f!
 
 	    tex: cloudcalypse
-	    1 ms
+	    \ 1 ms
 	    ' cloudcalypse "cloudcalypse-16-9.jpg" 2e 3e f/ }}image-file drop /center
 	    {{
 		{{
