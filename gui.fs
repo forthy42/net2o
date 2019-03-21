@@ -408,11 +408,7 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 	2dup ?read-enc-hashed
 	patch-in$ $@ mem>thumb atlas-region 2swap avatar# #!
     ELSE  2drop  THEN
-    thumbnail new >o
-    "avatar" to name$
-    white# to frame-color
-    last# cell+ $@ drop to frame#
-    glue*avatar to tile-glue o o>
+    glue*avatar last# cell+ $@ drop }}thumb
     >r {{ r> }}v 40%b ;
 
 : ?avatar ( addr u -- o / )
