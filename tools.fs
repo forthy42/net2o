@@ -802,13 +802,18 @@ $10 Constant datesize#
 
 $1F to tmps# \ need more temporaries
 
+Variable tmp-file$
+: $tmp-file ( addr u -- addr' u' )
+    [: type '+' emit getpid 0 .r ;] tmp-file$ $set
+    tmp-file$ $@ ;
+
 : >backup ( addr u -- )
     2dup 2dup [: type '~' emit ;] $tmp rename-file >r
-    2dup [: type '+' emit getpid 0 .r ;] $tmp 2swap rename-file
+    tmp-file$ $@ 2swap rename-file
     r> throw?exists throw?exists ;
 
 : >new ( addr u -- fd )
-    [: type '+' emit getpid 0 .r ;] $tmp r/w create-file throw ;
+    $tmp-file r/w create-file throw ;
 
 : >copy ( addr u -- fd )
     2dup >new { fd1 }

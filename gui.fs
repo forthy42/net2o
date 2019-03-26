@@ -403,13 +403,20 @@ Hash: avatar#
 glue new Constant glue*avatar
 glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
 
+: read-avatar ( addr u -- addr' u' )
+    ?read-enc-hashed patch-in$ $@ mem>thumb atlas-region ;
 : show-avatar ( addr u -- o )
     2dup avatar# #@ nip 0= IF
-	2dup ?read-enc-hashed
-	patch-in$ $@ mem>thumb atlas-region 2swap avatar# #!
+	2dup read-avatar 2swap avatar# #!
     ELSE  2drop  THEN
     glue*avatar last# cell+ $@ drop }}thumb
     >r {{ r> }}v 40%b ;
+
+: re-avatar ( last# -- )
+    >r r@ $@ read-avatar r> cell+ $@ smove ;
+
+:noname defers free-thumbs
+    avatar# ['] re-avatar #map ; is free-thumbs
 
 : ?avatar ( addr u -- o / )
     key# #@ IF
@@ -706,7 +713,7 @@ to post-frame
 	dpy-w @ 50% fm* p-format
     ELSE  2drop  THEN ;
 : display-project ( addr u -- )
-    project-vp >o dispose-childs  0 to active-w o>
+    project-vp >o dispose-childs  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-project-log >o
     ?msg-log  last# msg-log@ 2dup { log u }
