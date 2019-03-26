@@ -194,13 +194,13 @@ Variable patch-in$
     patch-in$ $@ >file-hash \ 2dup 85type cr
     str= 0= !!wrong-hash!! ;
 
-: ?read-enc-hashed ( hash1 u1 -- )
+: ?read-enc-hashed ( hash1 u1 -- addr u )
     2dup dvcs-objects #@ 2dup d0= IF
 	2drop 2dup read-enc-hashed
 	patch-in$ $@ 2swap dvcs-objects #!
     ELSE
-	patch-in$ $! 2drop
-    THEN ;
+	2drop 2drop
+    THEN  last# cell+ $@ ;
 
 \ in-memory file hash+contents database
 
@@ -643,8 +643,7 @@ User id-check# \ check hash
 : branches>dvcs ( -- )
     branches[] [: dup IF
 	    dvcs( ." read enc hash: " 2dup 85type cr )
-	    ?read-enc-hashed  c-state off
-	    patch-in$ $@ do-cmd-loop
+	    ?read-enc-hashed  c-state off  do-cmd-loop
 	    dvcs:clean-delta
 	ELSE  2drop  THEN
     ;] $[]map ;

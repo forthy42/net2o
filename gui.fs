@@ -404,7 +404,7 @@ glue new Constant glue*avatar
 glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
 
 : read-avatar ( addr u -- addr' u' )
-    ?read-enc-hashed patch-in$ $@ mem>thumb atlas-region ;
+    ?read-enc-hashed mem>thumb atlas-region ;
 : show-avatar ( addr u -- o )
     2dup avatar# #@ nip 0= IF
 	2dup read-avatar 2swap avatar# #!
