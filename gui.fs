@@ -680,7 +680,7 @@ end-class project-log-class
 		glue*ll }}glue
 		tex: vp-md
 	    glue*l ' vp-md }}vp dup to project-vp
-	    >o "project" to name$ font-size# dpy-w @ s>f 25% f* fover f- fdup fnegate to borderv f+ to border o o>
+	    >o "project" to name$ font-size# dpy-w @ dpy-h @ > [IF]  dpy-w @ 25% fm* fover f- [ELSE] 0e [THEN] fdup fnegate to borderv f+ to border o o>
 	dup font-size# 66% f* fdup vslider }}h box[]
 	>o "project-slider" to name$ o o>
     }}v box[]
@@ -710,7 +710,8 @@ to post-frame
 	0 to v-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
 	v-box project-vp .child+
-	dpy-w @ 50% fm* p-format
+	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*  ELSE  dpy-w @ s>f font-size# f2* f-  THEN
+	p-format
     ELSE  2drop  THEN ;
 : display-project ( addr u -- )
     project-vp >o dispose-childs  free-thumbs  0 to active-w o>
