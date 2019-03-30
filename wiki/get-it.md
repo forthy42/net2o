@@ -25,7 +25,7 @@ update the repository data and install net2o, so enter:
     EOF
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
     aptitude update
-    aptitude install net2o
+    aptitude install net2o-gui
     exit
 
 Remove the architectures on the list above which you don't need; on

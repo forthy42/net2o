@@ -710,7 +710,8 @@ to post-frame
 	0 to v-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
 	v-box project-vp .child+
-	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*  ELSE  dpy-w @ s>f font-size# f2* f-  THEN
+	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*
+	ELSE  dpy-w @ s>f font-size# f2* f-  THEN
 	p-format
     ELSE  2drop  THEN ;
 : display-project ( addr u -- )
@@ -959,7 +960,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		\large whitish
 		"⬅" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
 		    leave-chats prev-slide ;] over click[]
-		!i18n l" Chat Log" }}text' !lit 40%b
+		!i18n l" " }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
 		{{
 		}}h box[] dup to group-members
