@@ -197,7 +197,11 @@ filter-out bl 1- 1 fill
 	ELSE  media:url$ .mfile  THEN
     THEN ;
 : inline-image ( -- )
-    ." ![" media:description$ .simple-text ." ](" .media-file ')' emit cr ;
+    media:contentType$ "image/*" str= IF
+	." ![" media:description$ .simple-text ." ](" .media-file ')' emit cr
+    ELSE
+	media:url$ ." [" 2dup type ." ](" type ')' emit cr
+    THEN ;
 : .media ( -- )
     comments:media{} ?dup-IF cr .inline-image  THEN ;
 : .album ( -- )
@@ -231,7 +235,8 @@ filter-out bl 1- 1 fill
 	.html .link .media .album o>
     THEN ;
 : .choice ( n o:choices -- )
-    '1' + dup emit ." . ::votes#" emit ." :: ![" choices:description$ type ." ]("
+    '1' + dup emit ." . ::votes#" emit ." :: " choices:description$ type
+    '\' emit cr ."   ![" choices:description$ type ." ]("
     choices:imageLocalFilePath$ dup IF  basename type
     ELSE  2drop choices:imageUrl$ .mfile  THEN  ." ) " ;
 : .polls ( o:comments -- )
@@ -308,6 +313,9 @@ Variable photo-path
     media:url$ basedir+name pics# #@ d0= IF
 	media:contentType$ "image/*" str= IF
 	    ." media unavailable: " media:url$ type cr  THEN
+	EXIT  THEN
+    media:contentType$ "video/*" str= IF
+	media:url$ ." [" 2dup type ." ](" type ." )" cr
 	EXIT  THEN
     last# cell+ $@ dvcs .csv-media ;
 

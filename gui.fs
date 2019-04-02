@@ -725,7 +725,7 @@ to post-frame
     glue*lll }}glue project-vp dup .act 0= IF  vp[]  THEN  .child+
     log free
     dvcs-log:urls[] ['] display-file $[]map
-    dvcs:dispose-dvcs-log o> throw ;
+    dvcs:dispose-dvcs-log o> ;
 : .project-log ( -- )
     dvcs:new-dvcs >o  config>dvcs
     project:project$ $@ @/ 2drop 2dup load-msg
