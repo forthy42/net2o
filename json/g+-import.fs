@@ -368,7 +368,7 @@ also net2o-base
     comments:reshares[] $@ bounds U+DO
 	sigdate+
 	I @ .reshares:resharer{} .author:mapped-key dvcs >o to my-key
-	[: '🔃' ( '🐙' ) ulit, msg-like ;] add-message o>
+	[: '' ( '🔃' or '🐙' ) ulit, msg-like ;] add-message o>
     cell +LOOP ;
 
 : add-votes { dvcs -- }

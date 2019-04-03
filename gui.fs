@@ -290,14 +290,12 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[] ' entropy-colorize filter[]
-		    {{
-			\large \sans whitish "👁" }}text
-			\normal \bold show-sign-color# to x-color "＼" }}text dup value show-pw-sign /center blackish
-		    }}z \regular
+		    \normal \sans whitish
+		    "" }}text blackish
+		    dup value show-pw-sign
+		    \regular
 		    : pw-show/hide ( flag -- )
-			dup IF  ['] transparent >body f@
-			ELSE  show-sign-color#  THEN
-			show-pw-sign >o to text-color o>
+			dup IF  ""  ELSE  ""  THEN  show-pw-sign >o to text$ o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
@@ -641,18 +639,34 @@ Variable last-bubble-pk
     ELSE  ." #["  85type ." /@"  THEN
     key| .key-id? ;
 
+hash: chain-tags#
+
 scope{ dvcs
 dvcs-log-class class
 end-class project-log-class
 
+Variable like-char
+
 :noname ( addr u -- )
     + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
+    like-char off
 ; project-log-class is msg:start
+:noname ( xchar -- )  like-char ! ; project-log-class is msg:like
 ' 2drop project-log-class is msg:tag
 ' 2drop project-log-class is msg:id
 ' 2drop project-log-class is msg:text
 ' 2drop project-log-class is msg:action
-' 2drop project-log-class is msg:chain
+:noname ( addr u -- )
+    like-char @ 0= IF  2drop  EXIT  THEN
+    8 umin { | w^ id+like }
+    like-char @ dvcs-log:id$ $@ [: forth:type forth:xemit ;] id+like $exec
+    id+like cell
+    2over chain-tags# #@ d0= IF
+	2swap chain-tags# #!
+    ELSE
+	2nip last# cell+ $+!
+    THEN
+; project-log-class is msg:chain
 :noname ( addr u -- )
     [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec
 ; project-log-class is msg:url
@@ -689,6 +703,28 @@ end-class project-log-class
 >o "project-zbox" to name$ o o>
 to post-frame
 
+hash: buckets#
+
+: #!+ ( addr u hash -- ) >r
+    2dup r@ #@ IF
+	1 swap +!  rdrop 2drop
+    ELSE
+	drop 1 { w^ one }
+	one cell 2swap r> #!
+    THEN ;
+
+Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ list need to be bigger
+
+: chain-string ( addr u -- addr' u' )
+    buckets# #frees
+    bounds U+DO
+	I $@ [ keysize 2 64s + ]L /string buckets# #!+
+    cell +LOOP
+    emojis$ $@ bounds DO
+	I dup I' over - x-size 2dup buckets# #@
+	IF    @ >r tuck type r> .
+	ELSE  drop nip  THEN
+    +LOOP ;
 : display-title { d: prj | ki -- }
     prj key>o ?dup-IF  .ke-imports @ >im-color# sfloats to ki  THEN
     {{
@@ -700,6 +736,8 @@ to post-frame
 	    glue*ll }}glue
 	    \small prj drop keysize + le-64@ [: .ticks space ;] $tmp }}text 25%b
 	    \normal blackish
+	    prj drop keysize + 8 chain-tags# #@
+	    ['] chain-string $tmp }}text 25%b
 	}}h box[]
     }}z box[] project-vp .child+ ;
 
