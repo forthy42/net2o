@@ -988,6 +988,7 @@ wmsg-o >o msg-table @ token-table ! o>
     64#-1 line-date 64!  $lastline $free ;
 
 \ +db click( \ )
+\ +db click-o( \ )
 \ +db gui( \ )
 
 {{ $80FFFFFF color, pres-frame
