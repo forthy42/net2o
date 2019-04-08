@@ -455,12 +455,12 @@ scope: logstyles
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof
-	msg:project#   of
-	    2dup keysize /string
-	    2dup printable? IF  '[' emit  type '@' emit
-	    ELSE  ." #["  85type ." /@"  THEN
-	    key| .key-id
-	endof
+	drop
+	2dup keysize /string
+	2dup printable? IF  '[' emit  type '@' emit
+	ELSE  ." #["  85type ." /@"  THEN
+	key| .key-id
+	0
     endcase ." ]" <default> ;
 msg-class is msg:object
 :noname ( addr u -- ) $utf8>
@@ -545,7 +545,7 @@ group-table @ group-o .token-table !
 : .chats/group ( -- addr u )
     pk@ pkc swap move  sk@ skc swap move \ normalize pkc
     pkc keysize 3 * \ hash of pkc+pk1+skc keyed with "group"
-    "group" keyed-hash#128 .chats/ ( [: type ." .v2o" ;] $tmp ) ;
+    "group" keyed-hash#128 .chats/ ;
 
 : read-chatgroups ( -- )
     0 ..chats/group [: type ." .v2o" ;] $tmp

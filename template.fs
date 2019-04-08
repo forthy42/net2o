@@ -1,6 +1,6 @@
 \ net2o template for new files
 
-\ Copyright (C) 2016   Bernd Paysan
+\ Copyright (C) 2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -29,4 +29,3 @@ forth-local-indent-words:
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
-[THEN]

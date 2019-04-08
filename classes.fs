@@ -191,7 +191,11 @@ enum thumbnail#
 enum patch#
 enum snapshot#
 enum message#
-enum project#
+enum posting#   \ dvcs project, posting
+enum files#     \ dvcs project, files
+enum chatlog#   \ chatlog of instant messages
+enum timeline#  \ chatlog of postings
+enum loggroups# \ logs of logs
 drop
 }scope
 

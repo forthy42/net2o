@@ -201,23 +201,19 @@ Variable nick$
 
 tex: net2o-logo
 
-[IFDEF] light-login \ light color sceme
-    $FF0040FF text-color, FValue pw-num-col#
-    $AAAAAAFF text-color, FValue pw-text-col#
-    $000000FF text-color, FValue show-sign-color#
-    $FF0000FF $00FF00FF fade-color, FValue pw-bg-col#
-    $0000BFFF color, FValue dark-blue#
-    $0000FF08 color, FValue chbs-col#
-    $FFFFFFFF color, FValue login-bg-col#
-[ELSE]
-    $FF0040FF text-color, FValue pw-num-col#
-    $cc6600FF text-color, FValue pw-text-col#
-    $FFFFFFFF text-color, FValue show-sign-color#
-    $550000FF $005500FF fade-color, FValue pw-bg-col#
-    $88FF00FF color, FValue dark-blue#
-    $00FF0020 color, FValue chbs-col#
-    $000020FF color, FValue login-bg-col#
-[THEN]
+$FF0040FF text-color, FValue pw-num-col#
+$666666FF text-color, FValue pw-text-col#
+$000000FF text-color, FValue show-sign-color#
+$FFCCCCFF $44FF44FF fade-color, FValue pw-bg-col#
+$0000BFFF new-color, FValue dark-blue#
+$0000FF08 new-color, FValue chbs-col#
+$FFFFFFFF new-color, FValue login-bg-col#
+$FF000000 $FF0000FF fade-color, FValue pw-err-col#
+$000000FF dup text-emoji-color: black-emoji
+$000000FF new-color, FValue otr-col#
+$FFFFFFFF new-color, FValue chat-col#
+$80FFFFFF new-color, FValue chat-bg-col#
+$FFFFFFFF new-color, FValue posting-bg-col#
 
 : entropy-colorize ( -- )
     prev-text$ erase  addr prev-text$ $free
@@ -234,7 +230,10 @@ glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglu
 glue new Constant glue*shrink
 glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue! o>
 
-{{ login-bg-col# pres-frame dark-blue# ' dark-blue >body f!
+' dark-blue >body f@
+
+{{ login-bg-col# pres-frame
+    dark-blue# ' dark-blue >body f!
     {{
 	{{ glue*lll± }}glue }}v
 	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
@@ -249,7 +248,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
 		    {{
 			nt
-			white# to x-color \bold
+			whitish \bold
 			"nick" }}edit 25%b dup to nick-field
 			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
@@ -275,7 +274,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		{{
 		    glue-sright }}glue
 		    glue*l }}glue \bold
-		    l" wrong passphrase!" $FF000000 $FF0000FF fade-color,
+		    l" wrong passphrase!" pw-err-col#
 		    to x-color }}i18n-text \regular
 		    25%b dup to pw-err
 		    glue*l }}glue
@@ -290,7 +289,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[] ' entropy-colorize filter[]
-		    \normal \sans whitish
+		    \normal \sans white# to x-color
 		    "" }}text blackish
 		    dup value show-pw-sign
 		    \regular
@@ -305,7 +304,6 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	    {{
 		\large
 		"🔴" }}text \normal  >o font-size# 10% f* to raise o o>
-		$000000FF dup text-emoji-color, to x-color
 		"➕" }}text /center dup to plus-login
 		"➖" }}text /center dup to minus-login /vflip
 		\large
@@ -348,7 +346,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
     }}v box[]
 }}z box[] to pw-frame
 
-$0000BFFF text-color, ' dark-blue >body f!
+' dark-blue >body f!
 
 \ id frame
 
@@ -392,6 +390,22 @@ $0000FFFF color, sf,
 $0000FFFF color, sf,
 $0000FFFF color, sf,
 $00FFFFFF color, sf,
+
+\ more colors
+
+$88FF88FF color: my-signal
+$CCFFCCFF color: other-signal
+$CC00CCFF color: my-signal-otr
+$880088FF color: other-signal-otr
+$4444CCFF text-color: link-blue
+$44CC44FF text-color: re-green
+$CC4444FF text-color: obj-red
+$BBDDDDFF text-color: msg-bg
+$00BFFFFF text-color: light-blue
+$44FF44FF text-color: greenish
+$33883366 color: day-color
+$88333366 color: hour-color
+$FFFFFFFF text-color: realwhite
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -484,7 +498,7 @@ false Value in-group?
 
 : show-group ( last# -- )
     dup { g -- } cell+ $@ drop cell+ >o
-    {{ glue*l $CCAA44FF color, slide-frame dup .button1
+    {{ glue*l chat-bg-col# slide-frame dup .button1
 	{{
 	    {{ \large blackish
 		\regular \sans g $@ }}text 25%b
@@ -511,11 +525,11 @@ also [ifdef] android android [then]
 tex: vp-title
 
 : nicks-title ( -- )
-    {{ glue*l $000000FF color, slide-frame dup .button1
+    {{ glue*l black# slide-frame dup .button1
 	{{
 	    {{
 		{{
-		    {{ \large \bold \sans whitish
+		    {{ \large \bold \sans realwhite
 		    l" Nick+Pet" }}i18n-text 25%b glue*l }}glue }}h name-tab
 		    {{
 			{{ \script \mono \bold l" Pubkey"   }}i18n-text 20%bt glue*l }}glue }}h
@@ -564,19 +578,6 @@ previous
 
 msg-class class
 end-class wmsg-class
-
-$88FF88FF color: my-signal
-$CCFFCCFF color: other-signal
-$CC00CCFF color: my-signal-otr
-$880088FF color: other-signal-otr
-$4444CCFF text-color: link-blue
-$44CC44FF text-color: re-green
-$CC4444FF text-color: obj-red
-$BBDDDDFF text-color: msg-bg
-$00BFFFFF text-color: light-blue
-$44FF44FF text-color: greenish
-$33883366 color: day-color
-$88333366 color: hour-color
 
 Variable last-bubble-pk
 0 Value last-otr?
@@ -633,7 +634,7 @@ Variable last-bubble-pk
     [THEN]
 [THEN]
 
-: .project ( addr u -- )
+: .posting ( addr u -- )
     2dup keysize /string
     2dup printable? IF  '[' emit type '@' emit
     ELSE  ." #["  85type ." /@"  THEN
@@ -643,19 +644,19 @@ hash: chain-tags#
 
 scope{ dvcs
 dvcs-log-class class
-end-class project-log-class
+end-class posting-log-class
 
 Variable like-char
 
 :noname ( addr u -- )
     + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
     like-char off
-; project-log-class is msg:start
-:noname ( xchar -- )  like-char ! ; project-log-class is msg:like
-' 2drop project-log-class is msg:tag
-' 2drop project-log-class is msg:id
-' 2drop project-log-class is msg:text
-' 2drop project-log-class is msg:action
+; posting-log-class is msg:start
+:noname ( xchar -- )  like-char ! ; posting-log-class is msg:like
+' 2drop posting-log-class is msg:tag
+' 2drop posting-log-class is msg:id
+' 2drop posting-log-class is msg:text
+' 2drop posting-log-class is msg:action
 :noname ( addr u -- )
     like-char @ 0= IF  2drop  EXIT  THEN
     8 umin { | w^ id+like }
@@ -666,24 +667,24 @@ Variable like-char
     ELSE
 	2nip last# cell+ $+!
     THEN
-; project-log-class is msg:chain
+; posting-log-class is msg:chain
 :noname ( addr u -- )
     [: dvcs-log:id$ $. forth:type ;] dvcs-log:urls[] dup $[]# swap $[] $exec
-; project-log-class is msg:url
+; posting-log-class is msg:url
 
-: new-project-log ( -- o )
-    project-log-class new >o msg-table @ token-table ! o o> ;
+: new-posting-log ( -- o )
+    posting-log-class new >o msg-table @ token-table ! o o> ;
 }scope
 
-0 Value project-vp
+0 Value posting-vp
 
 {{
-    $FFFFFFFF color, pres-frame
+    posting-bg-col# pres-frame
     {{
 	{{
 	    glue*l $000000FF color, slide-frame dup .button1
 	    {{
-		\large whitish
+		\large realwhite
 		"⬅" }}text 40%b [: prev-slide ;] over click[]
 		!i18n l" Post" }}text' !lit 40%b
 		glue*l }}glue
@@ -693,14 +694,14 @@ Variable like-char
 	    {{
 		glue*ll }}glue
 		tex: vp-md
-	    glue*l ' vp-md }}vp dup to project-vp
-	    >o "project" to name$ font-size# dpy-w @ dpy-h @ > [IF]  dpy-w @ 25% fm* fover f- [ELSE] 0e [THEN] fdup fnegate to borderv f+ to border o o>
+	    glue*l ' vp-md }}vp dup to posting-vp
+	    >o "posting" to name$ font-size# dpy-w @ dpy-h @ > [IF]  dpy-w @ 25% fm* fover f- [ELSE] 0e [THEN] fdup fnegate to borderv f+ to border o o>
 	dup font-size# 66% f* fdup vslider }}h box[]
-	>o "project-slider" to name$ o o>
+	>o "posting-slider" to name$ o o>
     }}v box[]
-    >o "project-vbox" to name$ o o>
+    >o "posting-vbox" to name$ o o>
 }}z box[]
->o "project-zbox" to name$ o o>
+>o "posting-zbox" to name$ o o>
 to post-frame
 
 hash: buckets#
@@ -739,7 +740,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	    prj drop keysize + 8 chain-tags# #@
 	    ['] chain-string $tmp }}text 25%b
 	}}h box[]
-    }}z box[] project-vp .child+ ;
+    }}z box[] posting-vp .child+ ;
 
 : display-file { d: prj -- }
     prj display-title
@@ -747,37 +748,36 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     2dup "file:" string-prefix? IF
 	0 to v-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
-	v-box project-vp .child+
+	v-box posting-vp .child+
 	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*
 	ELSE  dpy-w @ s>f font-size# f2* f-  THEN
 	p-format
     ELSE  2drop  THEN ;
-: display-project ( addr u -- )
-    project-vp >o dispose-childs  free-thumbs  0 to active-w o>
+: display-posting ( addr u -- )
+    posting-vp >o dispose-childs  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
-    dvcs:new-project-log >o
+    dvcs:new-posting-log >o
     ?msg-log  last# msg-log@ 2dup { log u }
     bounds ?DO
 	I $@ msg:display \ this will only set the URLs
     cell +LOOP
-    glue*lll }}glue project-vp dup .act 0= IF  vp[]  THEN  .child+
+    glue*lll }}glue posting-vp dup .act 0= IF  vp[]  THEN  .child+
     log free
     dvcs-log:urls[] ['] display-file $[]map
     dvcs:dispose-dvcs-log o> ;
-: .project-log ( -- )
+: .posting-log ( -- )
     dvcs:new-dvcs >o  config>dvcs
     project:project$ $@ @/ 2drop 2dup load-msg
-    display-project
+    display-posting
     dvcs:dispose-dvcs o> ;
-: open-project { d: prj -- }
-    ." open " prj .project cr
+: open-posting { d: prj -- }
+    >dir "posts" ~net2o-cache/
+    ." open " prj .posting cr
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
-    >dir
-    "posts" ~net2o-cache/
     handle-clone
     prj keysize /string set-dir throw
-    .project-log next-slide
-    project-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
+    .posting-log next-slide
+    posting-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
 	fdrop +sync +resize ;] >animate
     dir> ;
 
@@ -826,8 +826,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 		}}z me? 0= IF  chatname-tab  THEN
 	    }}v
 	    {{
-		glue*l $000000FF $FFFFFFFF last-otr? select
-		color, slide-frame dup me? IF .rbubble ELSE .lbubble THEN
+		glue*l last-otr? IF otr-col# ELSE chat-col# THEN
+		slide-frame dup me? IF .rbubble ELSE .lbubble THEN
 		"bubble" name!
 		{{
 		    new-msg-par
@@ -879,8 +879,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	last-otr? IF  IF  my-signal-otr  ELSE  other-signal-otr  THEN
 	ELSE  IF  my-signal  ELSE  other-signal  THEN  THEN
 	x-color glue*l slide-frame dup .button1 40%b >r
-	xc to x-color
+	black# to x-color
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
+	xc to x-color
     }}z msg-box .child+
 ; wmsg-class to msg:signal
 :noname ( addr u -- )
@@ -924,9 +925,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	    msg:patch#     of  ." patch["    85type  endof
 	    msg:snapshot#  of  ." snapshot[" 85type  endof
 	    msg:message#   of  ." message["  85type  endof
-	    msg:project#   of  ." project"
-		rdrop 2dup [{: d: prj :}H prj open-project ;] >r
-		.project
+	    msg:posting#   of  ." posting"
+		rdrop 2dup [{: d: prj :}H prj open-posting ;] >r
+		.posting
 	    endof
 	endcase ." ]" r> ;] $tmp }}text
     swap ?dup-IF  0 click[]  THEN  msg-box .child+
@@ -991,12 +992,12 @@ wmsg-o >o msg-table @ token-table ! o>
 \ +db click-o( \ )
 \ +db gui( \ )
 
-{{ $80FFFFFF color, pres-frame
+{{ chat-bg-col# pres-frame
     {{
 	{{
-	    glue*l $000000FF color, slide-frame dup .button1
+	    glue*l black# slide-frame dup .button1
 	    {{
-		\large whitish
+		\large realwhite
 		"⬅" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
 		    leave-chats prev-slide ;] over click[]
 		!i18n l" " }}text' !lit 40%b
@@ -1016,7 +1017,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ glue*lll $FFFFFFFF color, font-size# 40% f* }}frame dup .button3
+	    {{ glue*lll white# font-size# 40% f* }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
@@ -1037,6 +1038,23 @@ wmsg-o >o msg-table @ token-table ! o>
 
 \ top box
 
+box-actor class
+end-class net2o-actor
+
+:noname ( ekey -- )
+    case
+	k-f5 of  color-theme 0<> IF  0.5e o
+		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		>animate  THEN   endof
+	k-f6 of  color-theme 0=  IF  0.5e o
+		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		>animate  THEN   endof
+	[ box-actor :: ekeyed ]  EXIT
+    endcase ; net2o-actor to ekeyed
+
+: net2o[] ( o -- o )
+    >o net2o-actor new !act o o> ;
+
 {{
     glue-left }}glue
     pw-frame          dup >slides
@@ -1044,7 +1062,7 @@ wmsg-o >o msg-table @ token-table ! o>
     chat-frame /flip  dup >slides
     post-frame /flip  dup >slides
     glue-right }}glue
-}}h box[]
+}}h net2o[]
 Value n2o-frame
 
 \ top widgets
@@ -1075,6 +1093,8 @@ Value n2o-frame
     nr> set-order throw ;
 
 ' net2o-gui is run-gui
+
+include gui-night.fs
 
 previous
 

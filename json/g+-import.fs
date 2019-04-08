@@ -462,7 +462,7 @@ Variable comment#
     dup 0= IF  2drop "<no text>"  THEN  ['] .project $tmp
     groups[] [: msg-group$ $! 0 .?make-group
 	[ also net2o-base ]
-	[: 2over $, msg-text 2dup $, msg:project# ulit, msg-object ;]
+	[: 2over $, msg-text 2dup $, msg:posting# ulit, msg-object ;]
 	[ previous ]
 	(send-avalanche) drop msg-group$ $. space
 	2dup d0= IF  ." <dupe>" 2drop cr  ELSE  .chat  THEN ;] $[]map

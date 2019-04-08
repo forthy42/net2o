@@ -1012,14 +1012,16 @@ previous
     dvcs:dispose-dvcs o> ;
 
 : handle-clone ( -- )
-    chat-keys [: >dir 0 chat-keys !@ >r  2dup chat-keys $+[]!
+    0 chat-keys !@ { w^ clone-keys }
+    clone-keys [: >dir  2dup chat-keys $+[]!
 	[: @/ 2swap
 	    '#' $split dup 0= IF  2drop  ELSE  2nip  THEN
 	    2dup $1FF init-dir drop 2dup set-dir throw
 	    [: type '@' emit .key-id? ;] $tmp dvcs-init
 	    handle-fetch dvcs-up ;] catch
-	chat-keys $[]free r> chat-keys !  dir>  throw
-    ;] $[]map ;
+	chat-keys $[]free  dir>  throw
+    ;] $[]map
+    clone-keys @ chat-keys ! ;
 
 \\\
 Local Variables:
