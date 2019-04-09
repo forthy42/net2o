@@ -290,11 +290,11 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    }}h
 		    pw-field ' pw-done edit[] ' entropy-colorize filter[]
 		    \normal \sans white# to x-color
-		    "" }}text blackish
+		    "" }}text blackish
 		    dup value show-pw-sign
 		    \regular
 		    : pw-show/hide ( flag -- )
-			dup IF  ""  ELSE  ""  THEN  show-pw-sign >o to text$ o>
+			dup IF  ""  ELSE  ""  THEN  show-pw-sign >o to text$ o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
 			pw-field engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
@@ -736,9 +736,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	    prj key| ['] .key-id? $tmp }}text 25%b
 	    glue*ll }}glue
 	    \small prj drop keysize + le-64@ [: .ticks space ;] $tmp }}text 25%b
-	    \normal blackish
+	    \normal
 	    prj drop keysize + 8 chain-tags# #@
-	    ['] chain-string $tmp }}text 25%b
+	    ['] chain-string $tmp }}text 25%b blackish
 	}}h box[]
     }}z box[] posting-vp .child+ ;
 
@@ -1043,10 +1043,10 @@ end-class net2o-actor
 
 :noname ( ekey -- )
     case
-	k-f5 of  color-theme 0<> IF  0.5e o
+	k-f5 of  color-theme 0<> IF  0.25e o
 		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
-	k-f6 of  color-theme 0=  IF  0.5e o
+	k-f6 of  color-theme 0=  IF  0.25e o
 		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	[ box-actor :: ekeyed ]  EXIT

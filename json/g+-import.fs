@@ -197,7 +197,7 @@ filter-out bl 1- 1 fill
 	ELSE  media:url$ .mfile  THEN
     THEN ;
 : inline-image ( -- )
-    media:contentType$ "image/*" str= IF
+    media:contentType$ "image/" string-prefix? IF
 	." ![" media:description$ .simple-text ." ](" .media-file ')' emit cr
     ELSE
 	media:url$ ." [" 2dup type ." ](" type ')' emit cr
