@@ -146,10 +146,10 @@ end-class slide-actor
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
 	k-f6      of  saturate% sf@ 0.1e f- 0e fmax saturate% sf!
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
-	k-f7 of  color-theme 0<> IF  0.25e o
+	k-f7 of  color-theme 0<> IF  anim-end 0.25e o
 		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
-	k-f8 of  color-theme 0=  IF  0.25e o
+	k-f8 of  color-theme 0=  IF  anim-end 0.25e o
 		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f1      of  top-widget ..widget  endof
@@ -246,7 +246,7 @@ $10 stack: vp-tops
 	    {{
 		{{
 		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
-		    l" CloudCalypse" /title
+		    l" CloudCalypse, was nun?" /title
 		    l" It looks like you’ve reached the end." /subtitle
 		    l" Wie man Daten nach net2o importiert" /subtitle
 		    {{
@@ -431,7 +431,7 @@ $10 stack: vp-tops
 	"https://takeout.google.com/settings/takeout" link[]
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	tex: g+takeout
-	' g+takeout "google-takeout.png" 1.333e }}image-file drop /center
+	' g+takeout "google-takeout.png" 1e }}image-file drop /center
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -502,9 +502,11 @@ $10 stack: vp-tops
         "  }" \\
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
-	    !i18n \sans \normal
-	    $202020FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ f2/ fdup vslider
+	!i18n \sans \normal
+	day-mode $DDDDDDFF color, night-mode
+	$202020FF color, fdup to slider-color to slider-fgcolor
+	day-mode
+	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -576,7 +578,6 @@ $10 stack: vp-tops
         "}" \\
 	tex: vp-google2+ glue*lll ' vp-google2+ }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -631,9 +632,13 @@ $10 stack: vp-tops
         "        }" \\
         "      ]" \\
         "    }," \\
-	        tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
+	    tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
+	    day-mode
+	    $CCCCFFFF color, fdrop
+	    night-mode
 	    $000040FF color, fdup to slider-color to slider-fgcolor
+	    day-mode
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -685,10 +690,11 @@ $10 stack: vp-tops
         "  \"in_reply_to_screen_name\" : \"marco_keule\"," \\
         "  \"in_reply_to_user_id_str\" : \"3353806857\"" \\
         "}, {" \\
-	        tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
-	    !i18n \sans \normal
-	    $202020FF color, fdup to slider-color to slider-fgcolor
-	    dup font-size# f2/ f2/ fdup vslider
+	tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
+	!i18n \sans \normal
+	day-mode $DDDDDDFF color, night-mode
+	$202020FF color, fdup to slider-color to slider-fgcolor
+	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -731,7 +737,6 @@ $10 stack: vp-tops
         "  </entry>" \\
 		tex: vp-blogger glue*lll ' vp-blogger }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    $202020FF color, fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -763,7 +768,7 @@ $10 stack: vp-tops
 	    l" Videos " l" mkv/webm" b\\
 	    l" Timeline " l" Chat log mit Links auf DVCS–Projekt" b\\
 	    l" Posting " l" DVCS–Projekt, hält Daten+Kommentare zusammen" b\\
-	    l" DVCS–projekt " l" Chat log mit Links auf patchset/snapshot" b\\
+	    l" DVCS–Projekt " l" Chat log mit Links auf patchset/snapshot" b\\
 	    l" Teilen " l" Fork+posting+log message in eigener Timeline" b\\
 	    l" Kommentar " l" Checkin von weiterem Posting" b\\
 	    l" Likes " l" Chat messages mit Emoji direkt ins DVCS–Projekt" b\\
