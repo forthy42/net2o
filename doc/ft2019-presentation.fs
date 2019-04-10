@@ -146,6 +146,12 @@ end-class slide-actor
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
 	k-f6      of  saturate% sf@ 0.1e f- 0e fmax saturate% sf!
 	    Saturate 1 saturate% opengl:glUniform1fv  +sync endof
+	k-f7 of  color-theme 0<> IF  0.25e o
+		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		>animate  THEN   endof
+	k-f8 of  color-theme 0=  IF  0.25e o
+		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		>animate  THEN   endof
 	k-f1      of  top-widget ..widget  endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase +sync +resize ; slide-actor to ekeyed
@@ -200,10 +206,18 @@ tex: 35c3-logo
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
 
-: pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    color, glue*wh slide-frame dup .button1 simple[] ;
+: pres-frame ( colorday colornight -- o1 o2 )
+    day-mode new-color, night-mode -1 +to color,# new-color, fdrop day-mode
+    glue*wh slide-frame dup .button1 simple[] ;
 
 $FFFFBBFF text-color: redish
+$00CCCCFF dup text-emoji-color: blue-emoji#
+m2c:shadow-color# @ color, FValue shadow-col#
+night-mode
+m2c:shadow-color# @ re-color shadow-col#
+$FFFFBBFF re-text-color redish
+$00CCCCFF dup re-emoji-color blue-emoji#
+day-mode
 
 $10 stack: vp-tops
 
@@ -213,10 +227,11 @@ $10 stack: vp-tops
     {{ glue-left }}glue
 	
 	\ page 0
+	' blackish >body f@  ' dark-blue >body f@
 	{{
-	    $FFFFFF00 pres-frame
+	    $FFFFFF00 dup pres-frame
 	    ' redish >body f@ ' dark-blue >body f!
-	    $00CCCCFF dup text-emoji-color, ' blackish >body f!
+	    ' blue-emoji# >body f@ ' blackish >body f!
 
 	    tex: cloudcalypse
 	    \ 1 ms
@@ -264,11 +279,11 @@ $10 stack: vp-tops
 		>o 3 vp-shadow>># lshift to box-flags o o>
 	    }}v box[] >o font-size# to border o Value title-page o o>
 	}}z box[] dup >slides
+	' dark-blue >body f!  ' blackish >body f!
 
 \ page 1
 {{
-    ' whitish >body f@ ' blackish >body f!
-    $000000FF pres-frame
+    $000000FF $FFFFFFFF pres-frame
     {{
 	l" Motivation" /title
 	glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
@@ -281,7 +296,7 @@ $10 stack: vp-tops
 
 \ page 2
 {{
-    $3F0000FF pres-frame
+    $3F0000FF $FF8888FF pres-frame
     {{
 	l" 5 Jahre nach Snowden" /title
 	l" Was hat sich getan?" \\
@@ -306,7 +321,7 @@ $10 stack: vp-tops
 
 \ page 3
 {{
-    $201010FF pres-frame
+    $201010FF $FFDDDDFF pres-frame
     {{
 	glue*ll }}glue
 	{{
@@ -338,10 +353,7 @@ $10 stack: vp-tops
 
 \ page 4
 {{
-    $222222FF pres-frame
-    ' dark-blue >body f@  ' blackish >body f@
-    $FFFF88FF text-color, ' dark-blue >body f!
-    ' whitish >body f@    ' blackish >body f!
+    $222222FF $DDDDDDFF pres-frame
     {{
 	l" Werbe–Geschäftsmodell = toxisch?" /title
 	vt{{
@@ -365,12 +377,11 @@ $10 stack: vp-tops
 	tex: duty-calls \normal \sans
 	' duty-calls "duty_calls.png" 0.95e }}image-file drop /right
     }}v box[] >bdr blackish
-    ' blackish >body f!  ' dark-blue >body f!
 }}z box[] /flip dup >slides
 
 \ page 5
 {{
-    $221100FF pres-frame
+    $221100FF $FFEEDDFF pres-frame
     {{
 	l" Zentralisiert/Föderiert/P2P?" /title
 	vt{{
@@ -395,7 +406,7 @@ $10 stack: vp-tops
 
 \ page 6
 {{
-    $000000FF pres-frame
+    $000000FF $FFFFFFFF pres-frame
     {{
 	l" Recht auf Datenübertragbarkeit" /title
 	l" Art. 20 DSGVO" /subtitle
@@ -412,7 +423,7 @@ $10 stack: vp-tops
 
 \ page 5
 {{
-    $202020FF pres-frame
+    $202020FF $DDDDDDFF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
 	\skip
@@ -427,7 +438,7 @@ $10 stack: vp-tops
     
 \ page 5
 {{
-    $202020FF pres-frame
+    $202020FF $DDDDDDFF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
 	\skip \mono \footnote !lit
@@ -500,7 +511,7 @@ $10 stack: vp-tops
 
 \ page 5b
 {{
-    $202020FF pres-frame
+    $202020FF $DDDDDDFF pres-frame
     {{
 	l" Google+ JSON Takeout" /title
 	\skip \mono \footnote !lit
@@ -573,7 +584,7 @@ $10 stack: vp-tops
 
 \ page 6
 {{
-    $000040FF pres-frame
+    $000040FF $CCCCFFFF pres-frame
     {{
 	l" Facebook JSON takeout" /title
 	\skip \mono \footnote !lit
@@ -630,7 +641,7 @@ $10 stack: vp-tops
 
 \ page 7
 {{
-    $202020FF pres-frame
+    $202020FF $DDDDDDFF pres-frame
     {{
 	l" Twitter JSON takeout" /title
 	\skip \mono \footnote !lit
@@ -684,7 +695,7 @@ $10 stack: vp-tops
 
 \ page 8
 {{
-    $202020FF pres-frame
+    $202020FF $DDDDDDFF pres-frame
     {{
 	l" Blogger Atom feed takeout" /title
 	\skip \mono \footnote !lit
@@ -728,7 +739,7 @@ $10 stack: vp-tops
 
 \ page 9
 {{
-    $101010FF pres-frame
+    $101010FF $EEEEEEFF pres-frame
     {{
 	l" Was braucht man für den Importer?" /title
 	vt{{
@@ -743,7 +754,7 @@ $10 stack: vp-tops
 
 \ page 10
 {{
-    $200020FF pres-frame
+    $200020FF $FFDDFFFF pres-frame
     {{
 	l" Aufbau eines Soziales Netzwerk in net2o" /title
 	vt{{
@@ -762,7 +773,7 @@ $10 stack: vp-tops
 
 \ page 11
 {{
-    $202000FF pres-frame
+    $202000FF $FFFFDDFF pres-frame
     {{
 	l" Status" /title
 	vt{{
@@ -780,7 +791,7 @@ $10 stack: vp-tops
 
 \ page 12
 {{
-    $000000FF pres-frame
+    $000000FF $FFFFFFFF pres-frame
     {{
 	l" Nicht–technische Probleme" /title
 	vt{{
@@ -793,7 +804,7 @@ $10 stack: vp-tops
 
 \ page 13
 {{
-    $000000FF pres-frame
+    $000000FF $FFFFFFFF pres-frame
     {{
 	l" Literatur & Links" /title \small
 	vt{{
