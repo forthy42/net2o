@@ -307,8 +307,9 @@ $10 stack: vp-tops
 	    l"   EU–Parlament führt Link–Steuer ein (stattdessen: “<right>”)" "🤦🤦" e\\
 	    l"   EU–Parlament filtert „terroristische Inhalte“" "🤦🤦🤦" e\\
 	    l"   Deutschland kopiert Chinas Cyberadministration CAC (Medienstaatsvertrag)" "🤦🤦🤦🤦" e\\
-	    l"   Backdoor–Ideen ohne Ende (“reasonable encryption”)" "🤦🤦🤦🤦🤦" e\\
+	    l"   Tor– und VPN–Verbot geplant" "🤦🤦🤦🤦🤦" e\\
 	    l"   Seehofers neues Polizeistaatgesetz: Passwörter her!" "🤦🤦🤦🤦🤦🤦" e\\
+	    l"   Deanonymisierung im österreichischen Internet" "🤦🤦🤦🤦🤦🤦🤦" e\\
 	}}v box[]
 	\skip
 	\skip
