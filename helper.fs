@@ -87,8 +87,8 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
 : dht-connect ( -- )
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
     tick-adjust 64@ 64-0= IF  +get-time  THEN
-    $8 $8 dhtnick $@ nick>pk dhtroot +dht-beacon
-    pk:connect  o to dht-connection ;
+    $8 $8 dhtnick $@ nick>pk dhtroot
+    online? IF  +dht-beacon pk:connect  o to dht-connection  THEN ;
 : dht-disconnect ( -- )
     0 addr dht-connection !@  ?dup-IF
 	>o o to connection disconnect-me o>  THEN ;
@@ -149,7 +149,7 @@ true Value connected?
 
 : announce-me ( -- )
     \ Check for disconnected state
-    dht-connect replace-me -other  announced on ;
+    dht-connect online? IF  replace-me -other  announced on  THEN ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
@@ -249,7 +249,8 @@ Variable my-beacon
 		>r 2dup c:fetch-id r> >o  REPEAT  THEN  d0<> ;
 
 : pk-query ( addr u xt -- flag ) >r
-    dht-connect  2dup r> execute  replace-loop ;
+    dht-connect online? IF  2dup r> execute  replace-loop
+    ELSE  2drop rdrop false  THEN ;
 
 : pk-lookup ( addr u -- )
     ['] pk:fetch-host  ['] pk:addme-fetch-host  announced @ select
