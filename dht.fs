@@ -440,7 +440,7 @@ in net2o : send-revoke ( addr u -- )
     net2o-code expect-reply
       connect( log .time s" Disconnect" $, type cr end-with )
       close-all ack rewind end-with disconnect
-    end-code| msg( ." disconnected" forth:cr )
+    end-code| msg( ." dht: disconnected" forth:cr )
     net2o:dispose-context msg( ." Disposed context" forth:cr ) o> ;
 
 \\\

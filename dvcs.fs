@@ -944,6 +944,7 @@ previous
     key>group ?load-msgn
     dup 0= IF  2drop "" msg-group$ $@ msg-groups #!  THEN
     2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
+    \ check for disconnected here or in pk-peek?
     2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;
 
 : dvcs-connects? ( -- flag )
@@ -988,7 +989,8 @@ previous
     msg-group$ $@ ?msg-log
     dvcs:commits @ .chat>branches-loop
     dvcs:commits @ .dvcs-needed-files
-    sync-file-list[] connection .get-needed-files ;
+    sync-file-list[] $[]# 0> connection and
+    IF    sync-file-list[] connection .get-needed-files  THEN ;
 
 : dvcs-ref-sync ( -- )
     search-last-rev id>branches
@@ -996,7 +998,8 @@ previous
     branches>dvcs
     dvcs:refs[] $[]# 0 ?DO
 	." ref: " I dvcs:refs[] $[]@ 85type cr  LOOP
-    dvcs:refs[] connection .get-needed-files
+    dvcs:refs[] $[]# 0> connection and
+    IF  dvcs:refs[] connection .get-needed-files  THEN
     dvcs:dispose-dvcs-refs o> ;
 
 : handle-fetch ( -- )  ?.net2o/objects
@@ -1008,7 +1011,9 @@ previous
     msg( ." === data sync done ===" forth:cr )
     dvcs-ref-sync
     msg( ." === ref sync done ===" forth:cr )
-    connection .data-rmap IF  msg-group$ $@ >group last# silent-leave-chat  THEN
+    connection ?dup-IF
+	.data-rmap IF  msg-group$ $@ >group last# silent-leave-chat  THEN
+    THEN
     dvcs:dispose-dvcs o> ;
 
 : handle-clone ( -- )

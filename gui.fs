@@ -400,7 +400,6 @@ $880088FF color: other-signal-otr
 $4444CCFF text-color: link-blue
 $44CC44FF text-color: re-green
 $CC4444FF text-color: obj-red
-$BBDDDDFF text-color: msg-bg
 $00BFFFFF text-color: light-blue
 $44FF44FF text-color: greenish
 $33883366 color: day-color
@@ -958,6 +957,8 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : (gui-msgs) ( gaddr u -- )
     reset-time
+    64#0 to last-tick  last-bubble-pk $free
+    0 to msg-par  0 to msg-box
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
     2dup load-msg ?msg-log
@@ -1043,11 +1044,11 @@ end-class net2o-actor
 
 :noname ( ekey -- )
     case
-	k-f5 of  color-theme 0<> IF  anim-end 0.25e o
-		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
-		>animate  THEN   endof
-	k-f6 of  color-theme 0=  IF  anim-end 0.25e o
+	k-f5 of  color-theme 0=  IF  anim-end 0.25e o
 		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		>animate  THEN   endof
+	k-f6 of  color-theme 0<> IF  anim-end 0.25e o
+		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase ; net2o-actor to ekeyed

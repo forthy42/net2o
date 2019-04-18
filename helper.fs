@@ -33,17 +33,24 @@ require dhtroot.fs
 
 : !0key ( -- )
     dest-0key< @ IF
-	ind-addr @ 0= IF  dest-0key< sec@ lastaddr# cell+ $!  THEN
+	\ check for disconnected state
+	ind-addr @ 0= lastaddr# and IF
+	    dest-0key< sec@ lastaddr# cell+ $!  THEN
 	dest-0key> @ IF  dest-0key< sec@ dest-0key> @ sec!  THEN
     THEN ;
 
+0 value online?
+
 : dhtroot ( -- )
-    dhtroot-addr@ ?dup-IF  0 swap
+    0 to lastaddr#
+    dhtroot-addr@ ?dup-IF
+	0 swap
 	[: dup ?EXIT
-	  check-addr1 IF  insert-address nip
-	  ELSE  2drop  THEN ;] addr>sock
+	    check-addr1 IF  insert-address nip
+	    ELSE  2drop  THEN ;] addr>sock
     ELSE  net2o-host $@ net2o-port insert-ip
     THEN  return-addr dup $10 erase be!
+    lastaddr# 0<> to online?
     ind-addr off  !0key ;
 
 : dhtroot-off ( --- )
@@ -141,6 +148,7 @@ true Value connected?
 \ announce and renat
 
 : announce-me ( -- )
+    \ Check for disconnected state
     dht-connect replace-me -other  announced on ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
