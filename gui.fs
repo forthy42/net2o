@@ -523,6 +523,18 @@ also [ifdef] android android [then]
 
 tex: vp-title
 
+$F110 Constant 'spinner'
+$F012 Constant 'signal'
+
+0 Value online-flag
+
+: online-symbol ( -- addr u )
+    'signal' 'spinner' online? select ['] xemit $tmp ;
+: !online-symbol ( -- )
+    online-symbol online-flag >o to text$ o> +sync ;
+:noname  true to online? ['] announce-me catch 0= to online?
+    !online-symbol ; is addr-changed
+
 : nicks-title ( -- )
     {{ glue*l black# slide-frame dup .button1
 	{{
@@ -537,7 +549,8 @@ tex: vp-title
 		    glue*lll± }}glue
 		}}h box[]
 	    vp-title glue*lll ['] vp-title }}vp vp[] dup to title-vp
-	    \large s" ❌" $444444FF color, }}button-lit [: -1 data +! ;] level# click[]
+	    \large online-symbol white# }}text dup to online-flag
+	    s" ❌" $444444FF color, }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[]
     }}z box[] ;
 
@@ -570,7 +583,8 @@ previous
 }}z box[] to id-frame
 
 : show-nicks ( -- )
-    fill-nicks fill-groups next-slide
+    fill-nicks fill-groups !online-symbol
+    next-slide
     peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
 
 \ messages
@@ -1001,7 +1015,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		\large realwhite
 		"⬅" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
 		    leave-chats prev-slide ;] over click[]
-		!i18n l" " }}text' !lit 40%b
+		!i18n l" " }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
 		{{
 		}}h box[] dup to group-members

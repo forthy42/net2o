@@ -92,11 +92,14 @@ $00d8607f5 netlink-addr nl_groups l!
 0 Value netlink-task
 Variable netlink-done?   netlink-done? on
 Variable netlink-again?  netlink-again? off
+Defer addr-changed ' noop is addr-changed
 
 event: :>netlink ( -- )
     netlink-again? @ IF
 	 netlink-done? off netlink-again? off #0. dht-beacon
     ELSE  netlink-done? on  THEN ;
+event: :>addr-changed ( -- )
+    addr-changed ;
 : renat-complete ( -- )
     <event :>netlink netlink-task event> ;
 
@@ -134,6 +137,7 @@ event: :>netlink ( -- )
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN
+	    <event :>addr-changed [ up@ ]L event>
 	THEN
     AGAIN ;
 : create-netlink-task ( -- )
