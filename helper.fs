@@ -72,8 +72,6 @@ require dhtroot.fs
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
-0 Value dht-connection
-
 Forward renat-all
 
 event: :>renat ( -- )  renat-all ;
@@ -138,8 +136,6 @@ Forward insert-addr ( o -- )
     ;] #map ;
 
 \ notification for address changes
-
-true Value connected?
 
 [IFDEF] android     require android/net.fs  [ELSE]
     [IFDEF] PF_NETLINK  require linux/net.fs    [THEN]

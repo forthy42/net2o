@@ -65,6 +65,11 @@ $12 Value max-data# \ 16MB data space
 $0C Value max-code# \ 256k code space
 $10 Value max-block# \ 64k maximum block size+alignment
 
+\ values, status
+
+true Value connected?
+0 Value dht-connection
+
 \ constants, and depending values
 
 $2A Constant overhead \ constant overhead

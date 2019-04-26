@@ -1385,7 +1385,7 @@ also net2o-base scope: /chat
 	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop
-	;] (send-avalanche) drop .chat
+	;] (send-avalanche) drop .chat save-msgs&
     ;] !wrapper ;
 
 : /bye ( addr u -- )

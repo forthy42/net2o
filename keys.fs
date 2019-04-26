@@ -455,6 +455,8 @@ Variable secret-nicks#
 
 Forward dht-nick?
 Variable keysearchs#
+hash: unknown-keys#
+
 event: :>search-key ( $addr -- )
     { w^ key } key $@ dht-nick? key $free
     1 keysearchs# +!@ drop ;
@@ -464,9 +466,13 @@ event: :>search-key ( $addr -- )
 
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
     IF  drop keysearchs# @ 1+ >r
-	<event 2dup $make elit, :>search-key ?query-task event|
-	BEGIN  keysearchs# @ r@ - 0<  WHILE  <event  query-task event|  REPEAT
-	rdrop  2dup key# #@ 0= IF  drop .unkey-id  r> to last# EXIT  THEN
+	2dup unknown-keys# #@ nip 0= dht-connection and IF
+	    <event 2dup $make elit, :>search-key ?query-task event|
+	    BEGIN  keysearchs# @ r@ - 0<  WHILE  <event  query-task event|  REPEAT
+	    rdrop  2dup key# #@ 0= IF  drop
+		"<unknown>" 2over unknown-keys# #!
+		.unkey-id  r> to last# EXIT  THEN
+	ELSE  rdrop .unkey-id  r> to last#  EXIT  THEN
     THEN
     cell+ ..nick 2drop r> to last# ;
 
