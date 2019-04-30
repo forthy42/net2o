@@ -693,8 +693,20 @@ $11 net2o: privkey ( $:string -- )
     THEN  2drop ;
 +net2o: walletkey ( $:seed -- ) !!unsigned?  $>
     ke-wallet sec! ;
-+net2o: avatar ( $:string -- ) !!signed?   8 !!>order? $> ke-avatar $! ;
-    \g key profile (hash of a resource)
++net2o: avatar ( $:string -- )
+    \g key avatar profile (hash of a resource)
+    !!signed?   8 !!>order? $> ke-avatar $! ;
+\ dummies that are retained even though we don't know what they are
++net2o: key-string1 ( $:string -- ) $> ke-[]1 $+[]! ;
++net2o: key-string2 ( $:string -- ) $> ke-[]2 $+[]! ;
++net2o: key-string3 ( $:string -- ) $> ke-[]3 $+[]! ;
++net2o: key-string4 ( $:string -- ) $> ke-[]4 $+[]! ;
++net2o: key-sec1 ( $:string -- ) $> ke-sec1 sec! ;
++net2o: key-sec2 ( $:string -- ) $> ke-sec2 sec! ;
++net2o: key-num1 ( 64n -- )  ke-#1 64! ;
++net2o: key-num2 ( 64n -- )  ke-#2 64! ;
++net2o: key-num3 ( 64n -- )  ke-#3 64! ;
++net2o: key-num4 ( 64n -- )  ke-#4 64! ;
 }scope
 
 key-entry-table $save
@@ -806,12 +818,30 @@ also net2o-base
     ?dup-IF  ulit, keymask  THEN
     ke-pets[] [: $, keypet ;] $[]map
     ke-storekey @ >storekey ! ;
+
+: pack-coresec ( o:key -- )
+    ke-sk sec@ sec$, privkey
+    ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
+    ke-wallet sec@ dup IF  sec$, walletkey  ELSE  2drop  THEN ;
+: pack-coreextra ( o:key -- )
+    ke-[]1 [: $, key-string1 ;] $[]map
+    ke-[]2 [: $, key-string2 ;] $[]map
+    ke-[]3 [: $, key-string3 ;] $[]map
+    ke-[]4 [: $, key-string4 ;] $[]map
+    ke-#1 64@ 64dup 64-0<> IF  lit, key-num1  ELSE  64drop  THEN
+    ke-#2 64@ 64dup 64-0<> IF  lit, key-num2  ELSE  64drop  THEN
+    ke-#3 64@ 64dup 64-0<> IF  lit, key-num3  ELSE  64drop  THEN
+    ke-#4 64@ 64dup 64-0<> IF  lit, key-num4  ELSE  64drop  THEN ;
+: pack-secextra ( o:key -- )
+    ke-sec1 sec@ dup IF  sec$, key-sec1  ELSE  2drop  THEN
+    ke-sec2 sec@ dup IF  sec$, key-sec2  ELSE  2drop  THEN ;
 previous
 
 : pack-pubkey ( o:key -- )
     key:code
       key-version$ $, version
       pack-corekey
+      pack-coreextra
     end:key ;
 : pack-outkey ( o:key -- )
     key:code
@@ -823,9 +853,9 @@ previous
     key:code
       key-version$ $, version
       pack-corekey
-      ke-sk sec@ sec$, privkey
-      ke-rsk sec@ dup IF  sec$, rskkey  ELSE  2drop  THEN
-      ke-wallet sec@ dup IF  sec$, walletkey  ELSE  2drop  THEN
+      pack-coresec
+      pack-coreextra
+      pack-secextra
     end:key ;
 : keynick$ ( o:key -- addr u )
     \G get the annotations with signature

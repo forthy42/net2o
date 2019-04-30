@@ -494,6 +494,17 @@ cmd-class class
     field: ke-selfsig
     field: ke-sigs[]
     field: ke-imports  \ bitmask of key import
+    field: ke-[]1
+    field: ke-[]2
+    field: ke-[]3
+    field: ke-[]4
+    field: ke-sec1
+    field: ke-sec2
+    64field: ke-#1
+    64field: ke-#2
+    64field: ke-#3
+    64field: ke-#4
+\ other fields
     field: ke-storekey \ used to encrypt on storage
     field: ke-mask     \ permission mask
     field: ke-groups   \ permission groups
