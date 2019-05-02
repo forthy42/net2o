@@ -1,0 +1,38 @@
+\ GUI night mode style
+
+\ Copyright (C) 2019   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+1 new-theme
+night-mode
+$FFFFFFFF re-text-color blackish
+$FFFFBBFF re-text-color dark-blue
+$000000FF re-text-color whitish
+$40C0FFFF $000000FF $000000FF $FFFFFFFF re-text-emoji-fade-color toggle-color
+$FF0040FF re-text-color pw-num-col#
+$cc6600FF re-text-color pw-text-col#
+$FFFFFFFF re-text-color show-sign-color#
+$550000FF $005500FF re-fade-color pw-bg-col#
+$88FF00FF re-color dark-blue#
+$00FF0020 re-color chbs-col#
+$000020FF re-color login-bg-col#
+$FF000000 $FF0000FF re-fade-color pw-err-col#
+$444444FF re-color chat-col#
+$224444FF re-color chat-bg-col#
+$222222FF re-color posting-bg-col#
+$FFFFBBFF re-text-color link-blue
+$88FF88FF re-text-color re-green
+$FF8888FF re-text-color obj-red
+night-mode
