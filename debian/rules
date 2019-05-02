@@ -26,7 +26,7 @@ override_dh_auto_install:
 	mkdir -p $(DG)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
 	mv $(DL)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/tests $(DT)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
 	mv $(DL)/usr/share/gforth $(D)/usr/share/
-	mv $(D)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/{gui.fs,qrscan.fs,doc} $(DG)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
+	mv $(D)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/{gui*.fs,qrscan.fs,doc} $(DG)/usr/share/gforth/$(GFORTH_VER)/net2o-$(NET2O_VER)/
 	mv $(DL)/usr/bin $(D)/usr/
 
 override_dh_installchangelogs:

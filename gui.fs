@@ -405,6 +405,7 @@ $44FF44FF text-color: greenish
 $33883366 color: day-color
 $88333366 color: hour-color
 $FFFFFFFF text-color: realwhite
+$FEFEFEFF color: edit-bg
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -1032,7 +1033,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ glue*lll white# font-size# 40% f* }}frame dup .button3
+	    {{ glue*lll white# edit-bg x-color font-size# 40% f* }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]

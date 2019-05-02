@@ -35,4 +35,5 @@ $222222FF re-color posting-bg-col#
 $FFFFBBFF re-text-color link-blue
 $88FF88FF re-text-color re-green
 $FF8888FF re-text-color obj-red
+$444444FF re-color edit-bg
 night-mode
