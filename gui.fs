@@ -393,19 +393,20 @@ $00FFFFFF color, sf,
 
 \ more colors
 
-$88FF88FF color: my-signal
-$CCFFCCFF color: other-signal
-$CC00CCFF color: my-signal-otr
-$880088FF color: other-signal-otr
+$88FF88FF new-color: my-signal
+$CCFFCCFF new-color: other-signal
+$CC00CCFF new-color: my-signal-otr
+$880088FF new-color: other-signal-otr
 $4444CCFF text-color: link-blue
 $44CC44FF text-color: re-green
 $CC4444FF text-color: obj-red
 $00BFFFFF text-color: light-blue
 $44FF44FF text-color: greenish
-$33883366 color: day-color
-$88333366 color: hour-color
+$33883366 new-color: day-color
+$88333366 new-color: hour-color
 $FFFFFFFF text-color: realwhite
-$FEFEFEFF color: edit-bg
+$FFFFFFFF new-color: edit-bg
+$80FF80FF new-color: send-color
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -1041,8 +1042,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	    >o act >o [: connection .chat-next-line ;] is edit-next-line o> o o>
 	    >o act >o [: connection .chat-prev-line ;] is edit-prev-line o> o o>
 	    {{
-		glue*l $80FF80FF color, font-size# 40% f* }}frame dup .button2
-		!i18n l" Send" }}text' !lit 40%b
+		glue*l send-color x-color font-size# 40% f* }}frame dup .button2
+		blackish !i18n l" Send" }}text' !lit 40%b
 		[: data >o chat-edit-enter "" to text$ o>
 		    chat-edit engage ;] chat-edit click[]
 	    }}z box[]

@@ -36,4 +36,5 @@ $FFFFBBFF re-text-color link-blue
 $88FF88FF re-text-color re-green
 $FF8888FF re-text-color obj-red
 $444444FF re-color edit-bg
+$408040FF re-color send-color
 night-mode
