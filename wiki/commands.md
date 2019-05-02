@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.8.8-20190404.
+Version 0.8.8-20190502.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -273,7 +273,17 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $1A keypet ( $:string -- )
 * $1B walletkey ( $:seed -- )
 * $1C avatar ( $:string -- )
-  key profile (hash of a resource)
+  key avatar profile (hash of a resource)
+* $1D key-string1 ( $:string -- )
+* $1E key-string2 ( $:string -- )
+* $1F key-string3 ( $:string -- )
+* $20 key-string4 ( $:string -- )
+* $21 key-sec1 ( $:string -- )
+* $22 key-sec2 ( $:string -- )
+* $23 key-num1 ( 64n -- )
+* $24 key-num2 ( 64n -- )
+* $25 key-num3 ( 64n -- )
+* $26 key-num4 ( 64n -- )
   read a nested key into sample-key
 
 ### address commands ###
