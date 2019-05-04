@@ -37,4 +37,22 @@ $88FF88FF re-text-color re-green
 $FF8888FF re-text-color obj-red
 $444444FF re-color edit-bg
 $408040FF re-color send-color
+$333333FF re-color users-color#
+
+8 0 [DO]
+    imports#rgb-bg [I] sfloats + sf@ floor f>s to color,#
+    $222222FF new-color, fdrop
+[LOOP]
+$FF0000FF
+$FF6600FF
+$FF8844FF
+$EECC55FF
+$CCEE55FF
+$55DD55FF
+$BBDD66FF
+$33EE33FF
+8 0 [DO]
+    imports#rgb-fg [I] sfloats + sf@ floor f>s to color,#
+    text-color, fdrop
+[LOOP]
 night-mode

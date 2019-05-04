@@ -373,23 +373,23 @@ new-htab tab-glue: chatname-tab
 Create ke-imports#rgb
 
 Create imports#rgb-bg
-$33EE33FF color, sf, \ myself is pretty green
-$BBDD66FF color, sf, \ manually imported is green, too
-$55DD55FF color, sf, \ scanned is more green
-$CCEE55FF color, sf, \ seen in chat is more yellow
-$EECC55FF color, sf, \ imported from DHT is pretty yellow
-$FF8844FF color, sf, \ invited is very yellow
-$FF6600FF color, sf, \ provisional is very orange
-$FF0000FF color, sf, \ untrusted is last
+$33EE33FF new-color, sf, \ myself is pretty green
+$BBDD66FF new-color, sf, \ manually imported is green, too
+$55DD55FF new-color, sf, \ scanned is more green
+$CCEE55FF new-color, sf, \ seen in chat is more yellow
+$EECC55FF new-color, sf, \ imported from DHT is pretty yellow
+$FF8844FF new-color, sf, \ invited is very yellow
+$FF6600FF new-color, sf, \ provisional is very orange
+$FF0000FF new-color, sf, \ untrusted is last
 Create imports#rgb-fg
-$003300FF color, sf,
-$000000FF color, sf,
-$000000FF color, sf,
-$000000FF color, sf,
-$0000FFFF color, sf,
-$0000FFFF color, sf,
-$0000FFFF color, sf,
-$00FFFFFF color, sf,
+$003300FF text-color, sf,
+$000000FF text-color, sf,
+$000000FF text-color, sf,
+$000000FF text-color, sf,
+$0000FFFF text-color, sf,
+$0000FFFF text-color, sf,
+$0000FFFF text-color, sf,
+$00FFFFFF text-color, sf,
 
 \ more colors
 
@@ -407,6 +407,8 @@ $88333366 new-color: hour-color
 $FFFFFFFF text-color: realwhite
 $FFFFFFFF new-color: edit-bg
 $80FF80FF new-color: send-color
+$00FF0020 new-color: pet-color
+$FFFF80FF new-color, fvalue users-color#
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -448,7 +450,8 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
-		    {{ glue*l $00FF0020 color, slide-frame dup .button3
+		    {{
+			x-color glue*l pet-color x-color slide-frame dup .button3 to x-color
 			['] .pet-base $tmp }}text 25%b
 		    }}z
 		THEN
@@ -552,13 +555,13 @@ $F012 Constant 'signal'
 		}}h box[]
 	    vp-title glue*lll ['] vp-title }}vp vp[] dup to title-vp
 	    \large online-symbol white# }}text dup to online-flag
-	    s" ❌" $444444FF color, }}button-lit [: -1 data +! ;] level# click[]
+	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[]
     }}z box[] ;
 
 previous
 
-{{ $FFFF80FF color, pres-frame
+{{ users-color# pres-frame
     {{
 	{{
 	    nicks-title
@@ -566,19 +569,19 @@ previous
 	}}h box[]
 	{{
 	    {{
-		{{ glue*l $303000FF color, bar-frame
+		{{ glue*l $303000FF new-color, bar-frame
 		{{ \script l" My key" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to mykey-box
-		{{ glue*l $300030FF color, bar-frame
+		{{ glue*l $300030FF new-color, bar-frame
 		{{ \script l" My groups" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to groups-box /vflip
-		{{ glue*l $003030FF color, bar-frame
+		{{ glue*l $003030FF new-color, bar-frame
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
 	    tex: vp-nicks vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
-	    $444444FF color, to slider-color
-	    $CCCCCCFF color, to slider-fgcolor
+	    $444444FF new-color, to slider-color
+	    $CCCCCCFF new-color, to slider-fgcolor
 	    font-size# 33% f* to slider-border
 	dup font-size# 66% f* fdup vslider }}h box[]
     }}v box[]
@@ -697,7 +700,7 @@ Variable like-char
     posting-bg-col# pres-frame
     {{
 	{{
-	    glue*l $000000FF color, slide-frame dup .button1
+	    glue*l $000000FF new-color, slide-frame dup .button1
 	    {{
 		\large realwhite
 		"⬅" }}text 40%b [: prev-slide ;] over click[]
@@ -882,7 +885,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 ; wmsg-class to msg:url
 :noname { d: string -- o }
     {{
-	glue*l $FFCCCCFF color, slide-frame dup .button1
+	glue*l $FFCCCCFF new-color, slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
 ; wmsg-class to msg:coord
