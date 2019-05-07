@@ -89,7 +89,7 @@ end-class rng-c
 \ init rng to be actually useful
 
 $Variable init-rng$
-s" ~/.initrng" init-rng$ $!
+"initrng" .net2o-config/ init-rng$ $!
 
 : random-init ( -- )
     rng-key c:key# read-rnd ;
@@ -108,7 +108,7 @@ s" ~/.initrng" init-rng$ $!
 
 $Variable check-rng$
 Variable check-old$
-s" ~/.checkrng" check-rng$ $!
+"checkrng" .net2o-config/ check-rng$ $!
 $10 cells buffer: rngstat-buf
 
 : rngstat ( addr u -- float )

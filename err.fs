@@ -16,8 +16,8 @@
 \ defined exceptions
 
 : throwcode ( addr u -- )  exception Create ,
-    [: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-compiler
-    [: ( flag -- ) @ and throw ;] set-does> ;
+    [: ( flag -- ) @ and throw ;] set-does>
+    [: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-optimizer ;
 
 \ make sure we start at user defined exeption
 \ net2o exception codes should be system-independent
