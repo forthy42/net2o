@@ -300,8 +300,8 @@ cmd-buf-c ' new static-a with-allocater code-buf^ !
 
 code-buf
 
-:noname ( -- )  cmdbuf# off  o IF
-	req? off  ['] send-cX code-reply is send-xt  THEN ; to cmdreset
+:noname ( -- )  cmdbuf# off  connection >o
+	req? off  ['] send-cX code-reply is send-xt o> ; to cmdreset
 :noname ( -- addr )   connection .code-sema ; to cmdlock
 :noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
 :noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
