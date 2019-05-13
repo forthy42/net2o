@@ -944,7 +944,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	    msg:snapshot#  of  ." snapshot[" 85type  endof
 	    msg:message#   of  ." message["  85type  endof
 	    msg:posting#   of  ." posting"
-		rdrop 2dup [{: d: prj :}H prj open-posting ;] >r
+		rdrop 2dup [d:h open-posting ;] >r
 		.posting
 	    endof
 	endcase ." ]" r> ;] $tmp }}text
