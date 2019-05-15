@@ -19,19 +19,20 @@ Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so enter:
 
-    sudo su -
+    sudo -s
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips.mipsel,all] https://net2o.de/debian testing main
+    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian testing main
     EOF
-    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
-    aptitude update
-    aptitude install net2o-gui
-    exit
 
 Remove the architectures on the list above which you don't need; on
 Debian testing, the list is not necessary, on older versions, the all
 part is not searched if you don't have that list, then Gforth fails to
 install the gforth-common part.
+
+    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
+    apt update
+    apt install net2o-gui
+    exit
 
 There are actually three repositories: stable, testing and unstable; at the
 moment, all packages are the same; when net2o matures, stable/testing/unstable
