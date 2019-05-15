@@ -1,0 +1,13 @@
+[Desktop Entry]
+Categories=Network
+Comment=net2o GUI
+Exec=n2o gui
+GenericName=net2o GUI
+Icon=net2o
+Name=net2o
+StartupNotify=true
+StartupWMClass=net2o-gui
+Terminal=false
+Type=Application
+Version=1.0
+X-MultipleArgs=false

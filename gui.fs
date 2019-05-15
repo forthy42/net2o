@@ -1092,9 +1092,15 @@ Value n2o-frame
     pw-field engage
     1e ambient% sf! set-uniforms ;
 
+[IFDEF] x11
+    x11:XClassHint buffer: net2o-wm-class
+[THEN]
+
 : net2o-gui ( -- )
     [IFDEF] x11
 	dpy win l" net2o GUI" locale@ x11:XStoreName drop
+	"net2o-gui\0" drop dup net2o-wm-class 2!
+	dpy win net2o-wm-class x11:XSetClassHint drop
     [THEN]
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
