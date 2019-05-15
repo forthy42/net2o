@@ -100,7 +100,7 @@ $Variable init-rng$
     ['] c:diffuse rng-exec  fd close-file throw ;
 
 : write-initrng ( -- )
-    init-rng$ $@ dirname $1FF init-dir drop
+    init-rng$ $@ dirname '/' -skip $1FF init-dir drop
     init-rng$ $@ r/w create-file throw >r
     rng-buffer c:key# r@ write-file throw
     r> close-file throw  rng-step ;
@@ -135,7 +135,7 @@ $10 cells buffer: rngstat-buf
 	check-rng$ $@ w/o open-file throw >r
 	r@ file-size throw r@ reposition-file throw
     ELSE
-	check-rng$ $@ dirname $1FF init-dir drop
+	check-rng$ $@ dirname '/' -skip $1FF init-dir drop
 	check-rng$ $@ w/o create-file throw >r
     THEN
     2dup check-old$ $+!

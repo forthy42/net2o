@@ -51,6 +51,25 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  json/test.json json/diaspora-schema.fs html/parser.fs xml/parser.fs \
 	  xml/blogger-atom.fs
 
+ICONS = icons/hicolor/128x128/apps/net2o.png				      \
+	icons/hicolor/16x16/apps/net2o.png				      \
+	icons/hicolor/192x192/apps/net2o.png				      \
+	icons/hicolor/22x22/apps/net2o.png icons/hicolor/24x24/apps/net2o.png \
+	icons/hicolor/256x256/apps/net2o.png				      \
+	icons/hicolor/32x32/apps/net2o.png icons/hicolor/36x36/apps/net2o.png \
+	icons/hicolor/48x48/apps/net2o.png icons/hicolor/64x64/apps/net2o.png \
+	icons/hicolor/72x72/apps/net2o.png				      \
+	icons/hicolor/scalable/apps/net2o.svg
+ICONDIRS = icons/hicolor/128x128/apps/ icons/hicolor/16x16/apps/	\
+	icons/hicolor/192x192/apps/ icons/hicolor/22x22/apps/		\
+	icons/hicolor/24x24/apps/ icons/hicolor/256x256/apps/		\
+	icons/hicolor/32x32/apps/ icons/hicolor/36x36/apps/		\
+	icons/hicolor/48x48/apps/ icons/hicolor/64x64/apps/		\
+	icons/hicolor/72x72/apps/ icons/hicolor/scalable/apps/
+
+DESKTOP = applications/net2o.desktop
+DESKTOPDIR = applications
+
 LANGS =	  lang/en lang/de lang/zh
 
 ifeq "$(FAST)" "yes"
@@ -143,6 +162,12 @@ install:	libcc-install
 	@NOVERDIR@for i in $(SCRIPTS); do \
 	@NOVERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
 	@NOVERDIR@done
+	for i in $(ICONDIRS) $(DESKTOPDIR); do \
+		$(MKDIR) -p $(datadir)/$$i; \
+	done
+	for i in $(ICONS) $(DESKTOP); do \
+		$(INSTALL_DATA) ./$$i $(datadir)/$$i; \
+	done
 
 %.dirui:
 	$(RMDIR) $(datadir)/gforth/$(GFVER)/$(@:%.dirui=%); \
