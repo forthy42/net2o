@@ -243,12 +243,12 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	{{
 	    {{
 		glue*ll }}glue
-		\large "👤" }}text \normal
+		blackish \large "👤" }}text \normal
 		{{
 		    glue*l pw-bg-col# font-size# f2/ f2/ }}frame dup .button3
 		    {{
 			nt
-			whitish \bold
+			blackish \bold
 			"nick" }}edit 25%b dup to nick-field
 			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
