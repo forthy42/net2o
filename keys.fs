@@ -876,7 +876,7 @@ previous
 : key-sign ( o:key -- o:key )
     ['] pack-core gen-cmd$
     [: type ke-pk $@ type ;] $tmp
-    now>never c:0key c:hash ['] .sig $tmp ke-selfsig $! ;
+    now>never c:0key c:hash [: 0 ..sig ;] $tmp ke-selfsig $! ;
 
 Variable cp-tmp
 

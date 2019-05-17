@@ -15,10 +15,12 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+Defer addr-changed ' noop is addr-changed
+
 also android also jni
 :noname  defers android-network
     network-info dup  IF  ]xref
-	beacons-now! !!0depth!!  true
+	beacons-now! !!0depth!!  addr-changed  true
     THEN   to connected? ;
 is android-network
 previous previous

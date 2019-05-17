@@ -278,7 +278,7 @@ scope{ n2o
     \U nick newnick
     \G nick: Change your nick to <newnick>
     ?get-me ?nextarg IF  pk@ key| key-exist? ?dup-IF
-	    >o ke-nick $! key-sign o> save-keys
+	    >o ke-nick $! key-sign o> save-keys keylist
 	ELSE  2drop  THEN  THEN ;
 
 : pet ( -- )
