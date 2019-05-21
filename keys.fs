@@ -1222,8 +1222,12 @@ Variable revtoken
 
 Variable invitations
 
-event: :>invite ( addr u -- )
+Defer do-invite
+:noname ( addr u -- )
     ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
+is do-invite
+
+event: :>invite ( addr u -- ) do-invite ;
 
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig

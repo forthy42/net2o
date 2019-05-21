@@ -554,8 +554,6 @@ $F012 Constant 'signal'
 		    glue*lll± }}glue
 		}}h box[]
 	    vp-title glue*lll ['] vp-title }}vp vp[] dup to title-vp
-	    \large online-symbol white# }}text dup to online-flag
-	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[]
     }}z box[] ;
 
@@ -566,7 +564,8 @@ previous
 	{{
 	    nicks-title
 	    glue*shrink }}glue
-	}}h box[]
+	    \Large s" ❌" $444444FF new-color, }}button-lit /hfix [: -1 data +! ;] level# click[]
+	}}h box[] /vfix
 	{{
 	    {{
 		{{ glue*l $303000FF new-color, bar-frame
@@ -1076,13 +1075,23 @@ end-class net2o-actor
     >o net2o-actor new !act o o> ;
 
 {{
-    glue-left }}glue
-    pw-frame          dup >slides
-    id-frame   /flip  dup >slides
-    chat-frame /flip  dup >slides
-    post-frame /flip  dup >slides
-    glue-right }}glue
-}}h net2o[]
+    {{
+	glue-left }}glue
+	pw-frame          dup >slides
+	id-frame   /flip  dup >slides
+	chat-frame /flip  dup >slides
+	post-frame /flip  dup >slides
+	glue-right }}glue
+    }}h box[]
+    {{
+	{{
+	    glue*lll }}glue
+	    \large online-symbol white# }}text dup to online-flag
+	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;] level# click[]
+	}}h box[] /vfix
+	glue*lll }}glue
+    }}v box[]
+}}z net2o[]
 Value n2o-frame
 
 \ top widgets
