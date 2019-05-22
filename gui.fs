@@ -530,6 +530,9 @@ tex: vp-title
 
 $F110 Constant 'spinner'
 $F012 Constant 'signal'
+$F234 Constant 'user-plus'
+$F503 Constant 'user-minus'
+$F235 Constant 'user-times'
 
 0 Value online-flag
 
@@ -1074,6 +1077,37 @@ end-class net2o-actor
 : net2o[] ( o -- o )
     >o net2o-actor new !act o o> ;
 
+0 Value invitations
+0 Value invitations-list
+0 Value invitations-notify
+Variable invitation-stack
+
+: invitations-s/h ( flag -- )
+    invitations swap  IF  /flop  ELSE  /flip  THEN  drop +resize ;
+
+: add-user ( key-o -- )
+    >o perm%default ke-mask !
+    o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
+: sub-user ( key-o -- )
+    >o perm%blocked ke-mask !
+    o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
+
+: add-invitation ( addr u -- )
+    over >r read-pk2key$ sample-key .clone >o
+    o invitation-stack >stack
+    {{
+	ke-nick $@ }}text
+	glue*ll }}glue
+	'user-plus' ['] xemit $tmp }}text
+	['] add-user o click[]
+	'user-minus' ['] xemit $tmp }}text
+	['] sub-user o click[]
+    }}h box[] 25%b invitations-list .child+
+    invitations-notify /flop drop +resize
+    o> r> free throw ;
+
+' add-invitation is do-invite
+
 {{
     {{
 	glue-left }}glue
@@ -1086,9 +1120,24 @@ end-class net2o-actor
     {{
 	{{
 	    glue*lll }}glue
-	    \large online-symbol white# }}text dup to online-flag
+	    \large
+	    {{
+		'user-plus' ' xemit $tmp white# }}text
+	    }}h ' invitations-s/h 0 toggle[] /flip dup to invitations-notify
+	    online-symbol white# }}text dup to online-flag
 	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;] level# click[]
 	}}h box[] /vfix
+	{{
+	    glue*lll }}glue
+	    {{
+		chat-bg-col# pres-frame
+		{{
+		    \normal blackish
+		    !i18n l" Invitations" }}text' /center 25%b
+		}}v box[] dup to invitations-list
+	    }}z box[]
+	}}h box[]
+	/flip dup to invitations
 	glue*lll }}glue
     }}v box[]
 }}z net2o[]
