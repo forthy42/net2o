@@ -567,7 +567,9 @@ previous
 	{{
 	    nicks-title
 	    glue*shrink }}glue
-	    \Large s" ❌" $444444FF new-color, }}button-lit /hfix [: -1 data +! ;] level# click[]
+	    \Large
+	    s" ❌" $444444FF new-color, }}button-lit /hfix [: -1 data +! ;]
+	    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
 	}}h box[] /vfix
 	{{
 	    {{
@@ -1125,7 +1127,8 @@ Variable invitation-stack
 		'user-plus' ' xemit $tmp white# }}text
 	    }}h ' invitations-s/h 0 toggle[] /flip dup to invitations-notify
 	    online-symbol white# }}text dup to online-flag
-	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;] level# click[]
+	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;]
+	    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
 	}}h box[] /vfix
 	{{
 	    glue*lll }}glue
