@@ -163,8 +163,9 @@ Variable sim-nick!
     >storekey @ ke-storekey !
     key-read-offset 64@ ke-offset 64!
     1 import-type @ lshift [ 1 import#new lshift ]L or ke-imports !
-    keypack-all# n>64 key-read-offset 64+! o cell- ke-end over -
-    2over key| key# #! o>
+    keypack-all# n>64 key-read-offset 64+!
+    o cell- ke-end over - 2over key| key# #!
+    o>
     current-key ;
 
 0 Value last-key
