@@ -803,8 +803,10 @@ scope{ /chat
 : start-n2o ( -- )
     [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug %droprate %droprate \ read in all debugging stuff
+    profile( init-timer )
     argc @ 1 > IF next-cmd ELSE n2o:help THEN
     [IFDEF] cov+ save-cov annotate-cov cov% [THEN]
+    profile( .times )
     n2o:bye ;
 
 ' start-n2o is process-args

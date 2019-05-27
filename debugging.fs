@@ -124,6 +124,8 @@ timer: +reset
 timer: +event
 timer: +calc
 timer: +cryptsu
+timer: +sig
+timer: +sigquick
 timer: +enc
 timer: +rec
 timer: +send

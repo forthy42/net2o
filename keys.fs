@@ -634,6 +634,10 @@ key-version$ evaluate Constant key-version#
 : new-pet? ( addr u -- addr u flag )
     0 ke-pets[] [: rot >r 2over str= r> or ;] $[]map 0= ;
 
+: ?sk ( addr u -- addr u )
+    over keypad sk>pk \ generate pubkey
+    keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!! ;
+
 scope{ net2o-base
 
 cmd-table $@ inherit-table key-entry-table
@@ -650,9 +654,8 @@ $11 net2o: privkey ( $:string -- )
     \ does not need to be signed, the secret key verifies itself
     !!unsigned? $40 !!>=order?
     keypack c@ $F and ke-pwlevel !
-    $> over keypad sk>pk \ generate pubkey
-    keypad ke-pk $@ drop keysize tuck str= 0= !!wrong-key!!
-    ke-sk sec! +seckey "\0" ke-groups $! 0 groups[] $[]@ drop @ ke-mask ! ;
+    $> ?sk ke-sk sec! +seckey
+    "\0" ke-groups $! 0 groups[] $[]@ drop @ ke-mask ! ;
 +net2o: keytype ( n -- )           !!signed?   1 !!>order? 64>n ke-type ! ;
     \g key type (0: anon, 1: user, 2: group)
 +net2o: keynick ( $:string -- )    !!signed?   2 !!>order? $> ke-nick $!
@@ -1024,7 +1027,7 @@ false value ?yes
     keypack-d keypack-all# 2swap
     dup $20 = IF  decrypt$  ELSE
 	keypack c@ $F and config:pw-maxlevel# @ <=
-	IF  decrypt-pw$  ELSE  2drop false  THEN
+	IF  +cmd decrypt-pw$ +cryptsu  ELSE  2drop false  THEN
     THEN ;
 
 : try-decrypt ( flag -- addr u / 0 0 ) { flag }
@@ -1082,10 +1085,11 @@ false value ?yes
     save-keys-again @ IF  save-seckeys      THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
+    true to no-ed-check?
     -1 config:pw-level#
-    [: import#new import-type !
-      ?key-pfd read-keys-loop
-      save-keys-again @ IF  save-keys  THEN ;] !wrapper ;
+    [: import#new import-type !  ?key-pfd read-keys-loop
+	save-keys-again @ IF  save-keys  THEN ;] !wrapper
+    false to no-ed-check? ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;

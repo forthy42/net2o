@@ -565,17 +565,17 @@ drop
     msg( dup IF  <err> ." sig out of date: " ticks .ticks ."  sigdate: "
     >r 2dup startdate@ .ticks 2dup enddate@ .ticks r> <default> cr  THEN ) ;
 : verify-sig ( addr u pk -- addr u flag )  >r
-    check-date dup 0= IF  drop
-	2dup + sigonlysize# - r> ed-verify 0= sig-wrong and
+    check-date dup 0= IF  drop +cmd
+	2dup + sigonlysize# - r> ed-verify 0= sig-wrong and +sig
 	EXIT  THEN
     rdrop ;
 : quick-verify-sig ( addr u pk -- addr u flag )  >r
-    check-date dup 0= IF  drop
+    check-date dup 0= IF  drop +cmd
 	2dup + sigonlysize# -
 	r@ dup last# >r search-key? r> to last#
 	dup 0= IF  nip nip rdrop  EXIT  THEN
 	swap .ke-sksig sec@ drop swap 2swap
-	ed-quick-verify 0= sig-wrong and
+	ed-quick-verify 0= sig-wrong and +sigquick
     THEN
     rdrop ;
 
@@ -607,7 +607,7 @@ drop
 : sksig@ ( -- sksig u )
     my-key? .ke-sksig sec@ ;
 : .sig ( -- )
-    sigdate +date sigdate datesize# type
+    +sig sigdate +date sigdate datesize# type
     sig-params ed-sign type keysize emit ;
 : .pk ( -- )  pk@ key| type ;
 : pk-sig ( addr u -- sig u )

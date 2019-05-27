@@ -122,10 +122,14 @@ init-ed25519
     sigbuf $20 + sct1 sc25519>32b
     clean-ed25519 sigbuf $40 ;   \ r,s
 
+UValue no-ed-check?
+0 to no-ed-check?
+
 : ed-check? { sig pk -- flag }
     \G check a message: the keccak state contains the hash of the message.
     \G The unpacked pk is in get0, so this word can be used for batch checking.
     \G sig and pk need to be aligned properly, ed-verify does that alignment
+    no-ed-check? IF  true  EXIT  THEN
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
     hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
