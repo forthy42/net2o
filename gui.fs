@@ -328,6 +328,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			minus-login /flip
 			nick-edit /vflip
 			0e nick-edit >o to baseline o>
+			pw-field engage
 		    THEN +resize +lang ;
 		\normal
 	    }}z ' id-show-hide false toggle[] dup Value id-toggler

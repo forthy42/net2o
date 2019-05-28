@@ -1085,11 +1085,10 @@ false value ?yes
     save-keys-again @ IF  save-seckeys      THEN ;
 : read-pkey-loop ( -- )
     lastkey@ drop defaultkey ! \ at least one default key available
-    true to no-ed-check?
-    -1 config:pw-level#
-    [: import#new import-type !  ?key-pfd read-keys-loop
-	save-keys-again @ IF  save-keys  THEN ;] !wrapper
-    false to no-ed-check? ;
+    true user' no-ed-check? up@ +
+    [: -1 config:pw-level#
+	[: import#new import-type !  ?key-pfd read-keys-loop
+	    save-keys-again @ IF  save-keys  THEN ;] !wrapper ;] !wrapper ;
 
 : read-keys ( -- )
     read-key-loop read-pkey-loop import#new import-type ! ;
