@@ -1090,11 +1090,11 @@ Variable invitation-stack
     invitations swap  IF  /flop  ELSE  /flip  THEN  drop +resize ;
 
 : add-user ( key-o -- )
-    data >o perm%default ke-mask !
-    o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
+    data >o perm%default ke-mask !  "peer" >group-id set-group
+    o cell- ke-end over - ke-pk $@ key| key# #! o> save-keys ;
 : sub-user ( key-o -- )
-    data >o perm%blocked ke-mask !
-    o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
+    data >o perm%blocked ke-mask !  "blocked" >group-id set-group
+    o cell- ke-end over - ke-pk $@ key| key# #! o> save-keys ;
 
 : add-invitation ( addr u -- )
     over >r read-pk2key$ sample-key .clone >o
