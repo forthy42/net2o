@@ -989,10 +989,12 @@ Variable $lastline
     line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp 
-    dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
-	2drop to addr drop to maxlen  THEN
-    tuck addr maxlen smove
+    last# cell+ $[]@ dup 0= IF  nip
+    ELSE  !date ['] msg:display textmsg-o .$tmp 
+	dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
+	    2drop to addr drop to maxlen  THEN
+	tuck addr maxlen smove
+    THEN
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ ?msg-log
