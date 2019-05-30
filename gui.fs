@@ -953,7 +953,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 		.posting
 	    endof
 	endcase ." ]" r> ;] $tmp }}text
-    swap ?dup-IF  0 click[]  THEN  msg-box .child+
+    swap ?dup-IF  0 click[]  THEN
+    "object" name! msg-box .child+
     text-color!
 ; wmsg-class is msg:object
 
@@ -1042,7 +1043,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ glue*lll white# edit-bg x-color font-size# 40% f* }}frame dup .button3
+	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
@@ -1089,10 +1090,10 @@ Variable invitation-stack
     invitations swap  IF  /flop  ELSE  /flip  THEN  drop +resize ;
 
 : add-user ( key-o -- )
-    >o perm%default ke-mask !
+    data >o perm%default ke-mask !
     o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
 : sub-user ( key-o -- )
-    >o perm%blocked ke-mask !
+    data >o perm%blocked ke-mask !
     o cell- ke-end over - ke-pk $@ key| key# #! o o> .dispose ;
 
 : add-invitation ( addr u -- )
@@ -1125,9 +1126,9 @@ Variable invitation-stack
 	    glue*lll }}glue
 	    \large
 	    {{
-		'user-plus' ' xemit $tmp white# }}text
+		'user-plus' ' xemit $tmp }}text
 	    }}h ' invitations-s/h 0 toggle[] /flip dup to invitations-notify
-	    online-symbol white# }}text dup to online-flag
+	    online-symbol }}text dup to online-flag
 	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;]
 	    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
 	}}h box[] /vfix
