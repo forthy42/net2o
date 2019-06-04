@@ -29,7 +29,7 @@ require minos2/font-style.fs
     font-size# 20% f* }}frame dup .button3 ;
 : update-size# ( -- )
     screen-pwh max s>f
-    default-diag screen-diag f/ fsqrt default-scale f* 1/f #48 fm*
+    default-diag screen-diag f/ fsqrt default-scale f* 1/f #64 fm*
     f/ fround to font-size#
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
