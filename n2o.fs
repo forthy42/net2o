@@ -206,6 +206,11 @@ scope{ n2o
     keys>search search-keys insert-keys save-pubkeys
     ?cr keylist ;
 
+: whoami ( -- )
+    \U whoami
+    \G whoami: print your own key
+    ?get-me pk@ key>o ..key-list ;
+
 : perm ( -- )
     \U perm @user1 .. @usern permissions ..
     \G perm: Change or set permissions. permission starts with

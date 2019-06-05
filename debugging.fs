@@ -82,10 +82,12 @@ debug: qr( \ qr code stuff
 debug: deprecated( \ deprecated stuff
 debug: unhandled( \ unhandled commands
 debug: syncfile( \ synchronous file operations
+debug: newvault( \ new style vault keys
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
 +db ipv4( \ ipv4 should be on by default )
+-db newvault( \ new vault disabled for now )
 +db syncfile( \ disable async file operations for now )
 
 \ key debugging task

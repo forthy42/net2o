@@ -50,7 +50,6 @@ object uclass keytmp
     keysize   uvar vpk
     keysize   uvar vsk
     tf_ctx_256 uvar tf-key
-    keysize   uvar tf-in
     keysize   uvar tf-out
     $10       uvar tf-hashout
     1 64s     uvar last-mykey
@@ -630,9 +629,9 @@ drop
 \ principle: use Threefish_256.
 \ block layout:
 \ 1. 32 byte ephemeral key -> use for DHE.
-\ 2. 16 byte IV, used for all blocks as tweak
+\ 2. 16 byte IV, used for all blocks as incrementing tweak
 \ 3. 16 byte hash, to check for success
-\ 4. 32 byte each blocks, decrypted by DHE+tweak
+\ 4. 32 byte each blocks, decrypted by DHE+tweak in ECB mode
 
 : >vdhe ( addr -- )  sk@ drop swap tf-key tf_ctx_256-key ed-dh 2drop ;
 : >viv  ( addr -- )  tf-key tf_ctx_256-tweak $10 move ;
@@ -643,7 +642,8 @@ drop
 	c:0key tf-out keysize c:hash tf-hashout $10 c:hash@
 	tf-hashout $10 chk over str= IF
 	    tf-out keysize  unloop  EXIT  THEN
-	0 to mode
+	tf-key tf_tweak256++
+	4 to mode
     keysize +LOOP  0 0 ;
 : v-dec$ ( addr u -- session-key u / 0 0 )
     over >vdhe keysize /string
@@ -653,12 +653,13 @@ drop
 : vdhe ( -- )  vsk vpk ed-keypair  vpk keysize type ;
 : viv  ( -- )  $10 rng$ 2dup type  tf-key tf_ctx_256-tweak swap move ;
 : vsessionkey ( -- )
-    keysize rng$ tf-in swap move
-    c:0key tf-in keysize c:hash tf-hashout $10 2dup c:hash@ type ;
+    keysize rng$ vkey state# move-rep
+    c:0key vkey keysize c:hash tf-hashout $10 2dup c:hash@ type ;
 : v-enc-loop ( keylist -- )
     [:  drop vsk swap tf-key tf_ctx_256-key ed-dh 2drop
-	tf-key tf-in tf-out $C tf_encrypt_256
+	tf-key vkey tf-out $C tf_encrypt_256
 	tf-out keysize type
+	tf-key tf_tweak256++
     ;] $[]map ;
 : v-enc-gen ( keylist -- )
     vdhe viv vsessionkey v-enc-loop ;

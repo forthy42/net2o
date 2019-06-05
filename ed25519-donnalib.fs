@@ -33,6 +33,7 @@ c-function nb>sc25519 expand256_modm a a n -- void ( sc char[64] n -- )
 c-function sc25519>32b contract256_modm a a -- void ( char[32] sc -- )
 c-function sc25519* mul256_modm a a a -- void ( r x y -- )
 c-function sc25519+ add256_modm a a a -- void ( r x y -- )
+c-function sc25519/ invert256_modm a a -- void ( recip s -- )
 
 c-function ge25519*base ge25519_scalarmult_base a a -- void ( ger x -- )
 c-function ge25519-pack ge25519_pack a a -- void ( r ger -- )

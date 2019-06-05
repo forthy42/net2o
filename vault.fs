@@ -91,7 +91,9 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     $> v-kstate c:key> v-kstate $40 str= 0= !!vault-auth!!
     write-decrypt \ write a chunk out
     4 c-state xor! ; \ step back to allow fault-file
-
++net2o: vault-dhe-keys ( $:dhe+keys -- )  c-state @ !!inv-order!!
+    $> v-dec$ 2dup d0= !!unknown-key!!  v-key state# move-rep
+    3 c-state or! ;
 
 vault-table $save
 ' context-table is gen-table
@@ -125,10 +127,12 @@ enc-keccak
     vkey( ." vkey key: " vkey state# 85type forth:cr )
     enc-mode @ dup ulit, vault-crypt 8 rshift $FF and >crypt
     [: [: drop vsk swap keygendh ed-dh 2>r
-	vkey vaultkey $10 + enc-mode @ $FF and $20 - move
-	vaultkey enc-mode @ $FF and 2r> encrypt$
-	vaultkey enc-mode @ $FF and forth:type ;] $[]map ;] $tmp
+	    vkey vaultkey $10 + enc-mode @ $FF and $20 - move
+	    vaultkey enc-mode @ $FF and 2r> encrypt$
+	    vaultkey enc-mode @ $FF and forth:type ;] $[]map ;] $tmp
     $, vault-keys 0 >crypt ;
+: vdhe-keys, ( key-list -- )
+    v-enc$ $, vault-dhe-keys  0 >crypt ;
 : vfile-in ( -- )
     enc-filename $@ enc-file $slurp-file ;
 : vfile-pad ( -- )
@@ -153,7 +157,9 @@ enc-keccak
 : encfile-rest ( key-list -- ) >vault >r
     code-buf$ cmdreset init-reply
     pk@ key| r@ $+[]! \ encrypt for ourself
-    "v2o" 4cc, vdhe, r> vkeys, vfile, vsig,
+    "v2o" 4cc,
+    newvault( r> vdhe-keys, )else( vdhe, r> vkeys, )
+    vfile, vsig,
     s" .v2o" enc-filename $+!
     enc-filename $@ [: >r cmd$ $@ r> write-file throw ;] new-file
     code0-buf dispose n:o> ;

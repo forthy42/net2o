@@ -34,6 +34,14 @@
 \c     ctx->tweak[1] += !++(ctx->tweak[0]);
 \c   }
 \c }
+\c void tf_tweak256_pp(struct tf_ctx_256 *ctx)
+\c {
+\c   ctx->tweak[1] += !++(ctx->tweak[0]);
+\c }
+\c void tf_tweak512_pp(struct tf_ctx_512 *ctx)
+\c {
+\c   ctx->tweak[1] += !++(ctx->tweak[0]);
+\c }
 \ -------===< structs >===--------
 \ tf_ctx_256
 begin-structure tf_ctx_256
@@ -53,3 +61,5 @@ c-function tf_encrypt_256 tf_encrypt_256 a a a n -- void
 c-function tf_decrypt_256 tf_decrypt_256 a a a n -- void
 c-function tf_encrypt_loop tf_encrypt_loop a a n n n -- void
 c-function tf_decrypt_loop tf_decrypt_loop a a n n n -- void
+c-function tf_tweak256++ tf_tweak256_pp a -- void
+c-function tf_tweak512++ tf_tweak512_pp a -- void
