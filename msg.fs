@@ -608,6 +608,19 @@ Variable group-list[]
     groups>sort[]
     group-list[] $@ bounds ?DO  I @ .chatgroup  cell +LOOP ;
 
+: ?pkgroup ( addr u -- addr u )
+    \ if no group has been selected, use the pubkey as group
+    last# 0= IF  2dup + sigpksize# - keysize >group  THEN ;
+
+: handle-msg ( addr u -- )
+    ?pkgroup >msg-log
+    2dup d0<> \ do something if it is new
+    IF  replay-mode @ 0= IF
+	    2dup show-msg
+	    2dup parent .push-msg
+	THEN
+    THEN  2drop ;
+
 \g 
 \g ### messaging commands ###
 \g 
@@ -638,30 +651,48 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
-
-: ?pkgroup ( addr u -- addr u )
-    \ if no group has been selected, use the pubkey as group
-    last# 0= IF  2dup + sigpksize# - keysize >group  THEN ;
++net2o: msg-key ( $:key -- )
+    $> v-dec$ dup IF  msg-keys[] $+[]!  ELSE  2drop  THEN ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
-	?pkgroup >msg-log
-	2dup d0<> \ do something if it is new
-	IF  replay-mode @ 0= IF
-		2dup show-msg
-		2dup parent .push-msg
-	    THEN
-	THEN  2drop
-    ELSE  replay-mode @ IF  drop 2drop
+	handle-msg
+   ELSE  replay-mode @ IF  drop 2drop
+	ELSE  !!sig!!  THEN \ balk on all wrong signatures
+    THEN ;
++net2o: msg-nestencsig ( $:enc[cmd]+sig -- ) \g decrypt, chech sig+nest
+    $> dec-nest-sig ?dup-0=-IF
+	handle-msg
+   ELSE  replay-mode @ IF  drop 2drop
 	ELSE  !!sig!!  THEN \ balk on all wrong signatures
     THEN ;
 
-:noname skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
-    ELSE  pk-sig?  THEN ;  ' message  2dup
+: msg-sig? ( addr u -- addr u' flag )
+    skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
+    ELSE  pk-sig?  THEN ;
+' msg-sig? ' message  2dup
 msging-class to start-req
 msging-class to nest-sig
 msg-class to start-req
 msg-class to nest-sig
+
+: msg-dec-sig? ( addr u -- addr' u' flag )
+    msg-sig? dup  IF  drop
+	2dup + pktmp keysize move \ move the pk to pktmp
+	get0 pktmp ge25519-unpack- 0= !!no-ed-key!!
+	msg-keys[] $@ bounds U+DO
+	    2dup I $@ crypt-key-init $>align
+	    2dup 0 c:decrypt+auth IF
+		voutkey keysize c:hash@
+		sct0 voutkey 32b>sc25519
+		get1 get0 sct0 ge25519*
+		tf-out get1 ge25519-pack
+		$80 tf-out $1F + xorc!
+		2nip true unloop  EXIT  THEN
+	    2drop
+	cell +LOOP
+	false
+    THEN ;
 
 ' context-table is gen-table
 

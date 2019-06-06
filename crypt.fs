@@ -47,8 +47,6 @@ object uclass keytmp
     state2#   uvar vkey \ maximum size for session key
     state2#   uvar voutkey \ for keydump
     keysize   uvar keygendh
-    keysize   uvar vpk
-    keysize   uvar vsk
     tf_ctx_256 uvar tf-key
     keysize   uvar tf-out
     $10       uvar tf-hashout
@@ -650,13 +648,13 @@ drop
     over >viv  $10 /string
     v-dec-loop ;
 
-: vdhe ( -- )  vsk vpk ed-keypair  vpk keysize type ;
+: vdhe ( -- )  stskc stpkc ed-keypair  stpkc keysize type ;
 : viv  ( -- )  $10 rng$ 2dup type  tf-key tf_ctx_256-tweak swap move ;
 : vsessionkey ( -- )
     keysize rng$ vkey state# move-rep
     c:0key vkey keysize c:hash tf-hashout $10 2dup c:hash@ type ;
 : v-enc-loop ( keylist -- )
-    [:  drop vsk swap tf-key tf_ctx_256-key ed-dh 2drop
+    [:  drop stskc swap tf-key tf_ctx_256-key ed-dh 2drop
 	tf-key vkey tf-out $C tf_encrypt_256
 	tf-out keysize type
 	tf-key tf_tweak256++

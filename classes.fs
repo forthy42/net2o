@@ -30,7 +30,7 @@ object class
     field: req?
     field: c-state \ state for checks whether everything is there
     method start-req
-    method nest-sig \ check sig first and then nest
+    method nest-sig     \ check sig first and then nest
 end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
 :noname ( addr u -- flag ) 2drop -1 ; cmd-class to nest-sig
@@ -130,7 +130,9 @@ end-class ack-class
 
 cmd-class class
     field: peers[]
+    field: msg-keys[]
     field: silent-last#
+    method dec-nest-sig \ check sig, decrypt and then nest
 end-class msging-class
 
 cmd-class class{ msg

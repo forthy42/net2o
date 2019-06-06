@@ -357,6 +357,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   set encryption mode and key wrap size
 * $25 vault-auth ( $:auth -- )
   block authentication, 64 byte block
+* $26 vault-dhe-keys ( $:dhe+keys -- )
 
 ### message commands ###
 
@@ -414,8 +415,11 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   rewire distribution tree
 * $25 msg-last? ( start end n -- )
 * $26 msg-last ( $:[tick0,msgs,..tickn] n -- )
+* $27 msg-key ( $:key -- )
 * $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
+* $28 msg-nestencsig ( $:enc[cmd]+sig -- )
+  decrypt, chech sig+nest
 
 ### DVCS patch commands ###
 

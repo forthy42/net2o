@@ -120,13 +120,13 @@ enc-keccak
 
 : pk-off ( -- ) key-list $[]off ;
 
-: vdhe, ( -- )   vsk vpk ed-keypair vpk keysize $, dhe ;
+: vdhe, ( -- )   stskc stpkc ed-keypair stpkc keysize $, dhe ;
 : vkeys, ( key-list -- )
     vaultkey $100 erase
     enc-mode @ $FF and $20 - rng$ vkey state# move-rep
     vkey( ." vkey key: " vkey state# 85type forth:cr )
     enc-mode @ dup ulit, vault-crypt 8 rshift $FF and >crypt
-    [: [: drop vsk swap keygendh ed-dh 2>r
+    [: [: drop stskc swap keygendh ed-dh 2>r
 	    vkey vaultkey $10 + enc-mode @ $FF and $20 - move
 	    vaultkey enc-mode @ $FF and 2r> encrypt$
 	    vaultkey enc-mode @ $FF and forth:type ;] $[]map ;] $tmp
