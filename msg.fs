@@ -500,9 +500,9 @@ msg-class is msg:object
 :noname ( -- )
     forth:cr ; msg-class is msg:end
 
-\g
+\g 
 \g ### group description commands ###
-\g
+\g 
 
 hash: group#
 

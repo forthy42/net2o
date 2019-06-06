@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.8.9-20190530.
+Version 0.9.0-20190606.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -389,7 +389,9 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   specify message URL
 * $2D msg-like ( xchar -- )
   add a like
+
 ### group description commands ###
+
 * $20 group-name ( $:name -- )
   group symbolic name
 * $21 group-id ( $:group -- )
