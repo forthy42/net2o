@@ -54,6 +54,7 @@ object class
     $40 uvar hashtmp
     $40 uvar sigtmp
     $20 uvar pktmp
+    $20 uvar sktmp
     keccak# uvar hstatetmp
     cell uvar task-id
 end-class edbuf-c
@@ -120,6 +121,7 @@ init-ed25519
     sct1 sct1 sct2 sc25519*
     sct1 sct1 sct3 sc25519+      \ s=z*sk+k
     sigbuf $20 + sct1 sc25519>32b
+    hstatetmp c:key@ c:key# move \ restore state
     clean-ed25519 sigbuf $40 ;   \ r,s
 
 UValue no-ed-check?
@@ -130,16 +132,22 @@ UValue no-ed-check?
     \G The unpacked pk is in get0, so this word can be used for batch checking.
     \G sig and pk need to be aligned properly, ed-verify does that alignment
     no-ed-check? IF  true  EXIT  THEN
+    c:key@ hstatetmp c:key# move   \ we need this to be preserved
     sig hashtmp $20 move  pk hashtmp $20 + $20 move
     hashtmp $40 c:shorthash hashtmp $40 c:hash@ \ z=hash(r+pk+message)
     sct2 hashtmp 64b>sc25519       \ sct2 is z
     sct3 sig $20 + raw>sc25519     \ sct3 is s
     get1 get0 sct2 sct3 ge25519*+  \ base*s-pk*z
     sigbuf $40 + get1 ge25519-pack \ =r
+    hstatetmp c:key@ c:key# move   \ restore state again
     sig sigbuf $40 + 32b= ;
 
-: ed-verify ( sig pk -- flag ) \ message digest is in keccak state
+: sig>align ( sig pk -- )
     pktmp $20 move  sigtmp $40 move \ align inputs
+    $0F sigtmp $3F + andc! ;
+
+: ed-verify ( sig pk -- flag ) \ message digest is in keccak state
+    sig>align
     get0 pktmp ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
     sigtmp pktmp ed-check? ;
 
@@ -165,10 +173,11 @@ UValue no-ed-check?
 	sigbuf $40 + get1 ge25519-pack \ =r
 	sig sigbuf $40 + 32b=
     THEN
+    hstatetmp c:key@ c:key# move \ restore state again
     clean-ed25519 ;
 
 : ed-quick-verify ( skh sk sig pk -- flag ) \ message digest is in keccak state
-    pktmp $20 move  sigtmp $40 move \ align inputs
+    sig>align
     get0 pktmp ge25519-unpack- 0=  IF  false EXIT  THEN \ bad pubkey
     sigtmp pktmp ed-quickcheck? ;
 

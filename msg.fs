@@ -660,39 +660,65 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
    ELSE  replay-mode @ IF  drop 2drop
 	ELSE  !!sig!!  THEN \ balk on all wrong signatures
     THEN ;
-+net2o: msg-nestencsig ( $:enc[cmd]+sig -- ) \g decrypt, chech sig+nest
-    $> dec-nest-sig ?dup-0=-IF
-	handle-msg
-   ELSE  replay-mode @ IF  drop 2drop
-	ELSE  !!sig!!  THEN \ balk on all wrong signatures
-    THEN ;
 
 : msg-sig? ( addr u -- addr u' flag )
     skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
     ELSE  pk-sig?  THEN ;
-' msg-sig? ' message  2dup
-msging-class to start-req
-msging-class to nest-sig
-msg-class to start-req
-msg-class to nest-sig
 
+\ encrypt+sign
+\ features: signature verification only when key is known
+\           identity only revealed when correctly decrypted
+
+: modkey> ( dest -- )
+    get0 over ge25519-unpack- 0= !!no-ed-key!!
+    voutkey keysize c:hash@
+    sct0 voutkey 32b>sc25519
+    get1 get0 sct0 ge25519*
+    dup get1 ge25519-pack
+    $80 swap $1F + xorc! ;
 : msg-dec-sig? ( addr u -- addr' u' flag )
-    msg-sig? dup  IF  drop
-	2dup + pktmp keysize move \ move the pk to pktmp
-	get0 pktmp ge25519-unpack- 0= !!no-ed-key!!
-	msg-keys[] $@ bounds U+DO
-	    2dup I $@ crypt-key-init $>align
-	    2dup 0 c:decrypt+auth IF
-		voutkey keysize c:hash@
-		sct0 voutkey 32b>sc25519
-		get1 get0 sct0 ge25519*
-		tf-out get1 ge25519-pack
-		$80 tf-out $1F + xorc!
-		2nip true unloop  EXIT  THEN
-	    2drop
-	cell +LOOP
-	false
-    THEN ;
+    sigpksize# -
+    msg-keys[] $@ bounds U+DO
+	2dup I $@ decrypt$  IF
+	    2over + sigpksize# over date-sig? nip nip  IF
+		2dup + >r 2swap + r> sigpksize# move
+		2dup + modkey>  sigpksize# +
+		true unloop  EXIT  THEN  THEN
+	2drop
+    cell +LOOP
+    sigpksize# +  false ;
+
+\ generate an encryt+sign packet
+
+: >modkey ( dstsk dstpk sk -- )
+    voutkey keysize c:hash@
+    sct0 voutkey 32b>sc25519
+    sct1 sct0 sc25519/
+    sct0 swap raw>sc25519
+    sct2 sct0 sct1 sc25519*
+    get0 sct2 ge25519*base
+    get0 ge25519-pack
+    sct2 sc25519>32b ;
+
+: ]encpksig ( -- )
+    +zero16 nest$ msg-keys[] dup $[]# 1- swap $[]@ encrypt$
+    sigdate +date
+    sktmp pktmp sk@ drop >modkey
+    [:  pktmp keysize forth:type  sigdate datesize# forth:type
+	sig-params 2drop sktmp pktmp ed-sign forth:type
+	keysize forth:emit ;] ']sign ;
+
+\ nest-sig for msg/msging classes
+
+:noname ( addr u -- )
+    2dup + 2 - c@ $F0 and
+    case $80 of msg-dec-sig? endof
+	drop  msg-sig?
+	0 endcase ; ' message  2dup
+msging-class is start-req
+msging-class is nest-sig
+msg-class is start-req
+msg-class is nest-sig
 
 ' context-table is gen-table
 
@@ -874,7 +900,7 @@ event: :>msg-eval ( parent $pack $addr -- )
 ; msgfs-class is fs-close
 :noname ( perm -- )
     perm%msg and 0= !!msg-perm!!
-; msgfs-class to fs-perm?
+; msgfs-class is fs-perm?
 :noname ( -- date perm )
     64#0 0 ; msgfs-class is fs-get-stat
 :noname ( date perm -- )
@@ -885,9 +911,6 @@ event: :>msg-eval ( parent $pack $addr -- )
 
 : group, ( addr u -- )
     $, msg-group ;
-: <msg ( -- )
-    \G start a msg block
-    msg-group$ $@ group, message sign[ msg-start ;
 : msg> ( -- )
     \G end a message block by adding a signature
     ]pksign ;
@@ -1279,6 +1302,7 @@ also net2o-base scope: /chat
 	away? 0= to away?
     THEN
     [: $, msg-action ;] send-avalanche ;
+synonym /back /away
 
 : /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)

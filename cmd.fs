@@ -695,7 +695,7 @@ previous
 
 : cmd>nest ( -- addr u ) cmd> 2dup mykey-encrypt$ ;
 : cmd>tmpnest ( -- addr u )
-    cmd> 2dup tmpkey@ keysize umin
+    cmd> 2dup tmpkey@ key|
     key( ." tmpnest key: " 2dup 85type forth:cr ) encrypt$ ;
 : cmd>encnest ( -- addr u )
     cmd> 2dup tmpkey@
