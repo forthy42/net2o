@@ -40,6 +40,8 @@ Variable msg-logs
 Variable otr-mode
 Variable chain-mode
 Variable redate-mode
+Variable lock-mode
+Variable msg-keys[]
 User replay-mode
 User skip-sig?
 
@@ -328,6 +330,10 @@ Forward msg:last
     LOOP
     2drop false ;
 
+: msg-key! ( addr u -- )
+    0 msg-keys[] [: rot >r 2over str= r> or ;] $[]map
+    IF  2drop  ELSE  msg-keys[] $+[]!  THEN ;
+
 \ message commands
 
 scope{ net2o-base
@@ -366,6 +372,10 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     $> msg:url ;
 +net2o: msg-like ( xchar -- ) \g add a like
     64>n msg:like ;
++net2o: msg-lock ( $:key -- ) \g lock down communciation
+    $> msg:lock ;
++net2o: msg-unlock ( -- )
+    msg:unlock ;
 
 }scope
 
@@ -413,6 +423,8 @@ scope: logstyles
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
 ' drop  msg-notify-class is msg:like
+' 2drop  msg-notify-class is msg:lock
+' noop  msg-notify-class is msg:unlock
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
@@ -429,7 +441,7 @@ scope: logstyles
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
-    key| 2dup pk@ key| str=
+    key| 2dup 0 .pk@ key| str=
     IF   <err>  THEN ." @" .key-id? <default>
     r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
@@ -447,6 +459,13 @@ scope: logstyles
     <warn> forth:type <default> ; msg-class is msg:url
 :noname ( xchar -- )
     <info> utf8emit <default> ; msg-class is msg:like
+:noname ( addr u -- )
+    0 .v-dec$ dup IF
+	msg-key!  lock-mode on
+    ELSE  2drop  THEN
+    <info> ." chat is locked" <default> ;   msg-class is msg:lock
+:noname ( -- )  lock-mode off
+    <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
 :noname ( addr u type -- )
     space <warn> case
@@ -651,8 +670,6 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
-+net2o: msg-key ( $:key -- )
-    $> v-dec$ dup IF  msg-keys[] $+[]!  ELSE  2drop  THEN ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
@@ -1444,6 +1461,18 @@ synonym /back /away
 	    2drop 2r> 2drop
 	;] (send-avalanche) drop .chat save-msgs&
     ;] !wrapper ;
+
+: /lock ( addr u -- )
+    \U lock {@nick}         lock down
+    \G lock: lock down communication to list of nicks
+    word-args ['] args>keylist execute-parsing
+    [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
+    vkey keysize msg-keys[] ~~ $+[]!
+    lock-mode on ;
+: /unlock ( addr u -- )
+    \U unlock               stop lock down
+    \G unlock: stop lock down
+    2drop lock-mode off ;
 
 : /bye ( addr u -- )
     \U bye

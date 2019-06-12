@@ -1438,6 +1438,10 @@ scope: n2o
 	throw  0
     endcase ;
 
+: args>keylist ( -- )
+    [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
+    @arg-loop ;
+
 \\\
 Local Variables:
 forth-local-words:

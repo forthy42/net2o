@@ -19,18 +19,14 @@ require net2o.fs
 
 Variable key-readin
 
-: out-nicks ( -- )
-    [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
-
 : qr-me ( -- ) pk@ qr:ownkey# .keyqr ;
 : qr-nicks ( -- )
     [: nick-key ?dup-IF  >o ke-pk $@
 	    qr:ownkey# qr:key# ke-sk sec@ nip select o>
 	    .keyqr  THEN ;] @arg-loop ;
 
-: args>keylist ( -- )
-    [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
-    @arg-loop ;
+: out-nicks ( -- )
+    [: nick-key ?dup-IF  out-key  THEN ;] @arg-loop ;
 
 $20 value hash-size#
 

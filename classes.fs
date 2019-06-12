@@ -129,10 +129,9 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
+    $value: msging-id$
     field: peers[]
-    field: msg-keys[]
     field: silent-last#
-    method dec-nest-sig \ check sig, decrypt and then nest
 end-class msging-class
 
 cmd-class class{ msg
@@ -151,6 +150,8 @@ cmd-class class{ msg
     method payment
     method url
     method like
+    method lock
+    method unlock
     method away
     method end
     method display   \ display one message
