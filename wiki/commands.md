@@ -389,6 +389,9 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   specify message URL
 * $2D msg-like ( xchar -- )
   add a like
+* $2E msg-lock ( $:key -- )
+  lock down communciation
+* $2F msg-unlock ( -- )
 
 ### group description commands ###
 
@@ -417,11 +420,8 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   rewire distribution tree
 * $25 msg-last? ( start end n -- )
 * $26 msg-last ( $:[tick0,msgs,..tickn] n -- )
-* $27 msg-key ( $:key -- )
 * $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
-* $28 msg-nestencsig ( $:enc[cmd]+sig -- )
-  decrypt, chech sig+nest
 
 ### DVCS patch commands ###
 

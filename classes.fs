@@ -129,13 +129,17 @@ cmd-class class
 end-class ack-class
 
 cmd-class class
-    $value: msging-id$
-    field: peers[]
     field: silent-last#
 end-class msging-class
 
 cmd-class class{ msg
     $value: id$
+    field: peers[]
+    field: keys[]
+    field: log[]
+    field: mode
+    \ mode bits:
+    0 5 bits: otr# chain# redate# lock# visible#
     method start
     method tag
     method chain
@@ -252,7 +256,6 @@ cmd-class class
     field: log-context
     field: ack-context
     field: msging-context
-    field: msg-context
     field: file-state    \ files
     \ rest of state
     field: codebuf#

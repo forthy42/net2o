@@ -24,7 +24,12 @@ Forward pk-peek? ( addr u0 -- flag )
 : ?hash ( addr u hash -- ) >r
     2dup r@ #@ d0= IF  "" 2swap r> #!  ELSE  2drop rdrop  THEN ;
 
-: >group ( addr u -- )  msg-groups ?hash ;
+: >group ( addr u -- )
+    2dup msg-group# #@ d0= IF
+	net2o:new-msg cell- [ msg-class >osize @ cell+ ]L
+	2over msg-group# #!
+    THEN  last# cell+ $@ drop cell+ to msg-group-o
+    msg-groups ?hash ;
 
 : avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
@@ -50,9 +55,6 @@ Sema msglog-sema
 : ?msg-context ( -- o )
     msging-context @ dup 0= IF
 	drop
-	msg-context @ 0= IF
-	    net2o:new-msg msg-context !
-	THEN
 	net2o:new-msging dup msging-context !
     THEN ;
 
@@ -156,12 +158,12 @@ event: :>load-msg ( last# -- )
 
 Sema queue-sema
 
-\ peer queue
+\ peer queue, in msg context
 
 : peer> ( -- addr / 0 )
-    [: peers[] back> ;] queue-sema c-section ;
+    [: msg:peers[] back> ;] queue-sema c-section ;
 : >peer ( addr u -- )
-    [: peers[] $+[]! ;] queue-sema c-section ;
+    [: msg:peers[] $+[]! ;] queue-sema c-section ;
 
 \ events
 
@@ -173,18 +175,18 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
     last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
 
 : do-msg-nestsig ( addr u -- )
-    2dup parent .msg-context @ .msg:display
+    2dup msg-group-o .msg:display
     msg-notify-o .msg:display ;
 
 : display-lastn ( n -- )
-    net2o:new-msg >o 0 to parent msg:redisplay dispose o> ;
+    msg-group-o >o msg:redisplay o> ;
 : display-sync-done ( -- )
-    rows  msg-context @ .msg:redisplay ;
+    rows  msg-group-o .msg:redisplay ;
 
 : display-one-msg { d: msgt -- }
-    net2o:new-msg >o 0 to parent
+    msg-group-o >o
     msgt ['] msg:display catch IF  ." invalid entry"  cr  2drop  THEN
-    dispose o> ;
+    o> ;
 
 Forward silent-join
 

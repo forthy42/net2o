@@ -417,8 +417,9 @@ $20 cells Value resend-size#
 #60.000.000.000 d>64 64Constant connect-timeout# \ 60s connect timeout
 
 Variable init-context#
-Variable msg-groups
-
+hash: msg-groups
+hash: msg-group# ( hash for group objects )
+UValue msg-group-o
 UValue connection
 
 in net2o : new-log ( -- o )
@@ -1675,7 +1676,6 @@ in net2o : dispose-context ( o:addr -- o:addr )
 	  >o timing-stat $off track-timing $off dispose o>
       THEN
       msging-context @ ?dup-IF  .dispose  THEN
-      msg-context    @ ?dup-IF  .dispose  THEN
       unlink-ctx  ungroup-ctx
       end-semas start-semas DO  I pthread_mutex_destroy drop
       1 pthread-mutexes +LOOP
@@ -1990,6 +1990,8 @@ forth-local-words:
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
      (("64field:") non-immediate (font-lock-type-face . 2)
+      "[ \t\n]" t name (font-lock-variable-name-face . 3))
+     (("hash:") non-immediate (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
      (("with") compile-only (font-lock-type-face . 2)
       "[ \t\n]" t name (font-lock-variable-name-face . 3))
