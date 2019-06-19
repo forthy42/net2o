@@ -625,6 +625,7 @@ to top-widget
 also opengl
 
 : !widgets ( -- )
+    set-fullscreen-hint 1 set-compose-hint
     top-widget .htop-resize
     1e ambient% sf! set-uniforms ;
 

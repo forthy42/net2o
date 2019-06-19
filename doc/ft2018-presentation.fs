@@ -57,9 +57,9 @@ glue ' new static-a with-allocater Constant glue-right
     [ glue-left  .hglue-c ]L df!
     [ glue-right .hglue-c ]L df! ;
 : trans-frame ( o -- )
-    >o $00000000 to frame-color o> ;
+    >o transp# to frame-color o> ;
 : solid-frame ( o -- )
-    >o $FFFFFFFF to frame-color o> ;
+    >o white# to frame-color o> ;
 : !slides ( nprev n -- )
     over >r
     n2-img m2-img $q-img
@@ -75,8 +75,8 @@ glue ' new static-a with-allocater Constant glue-right
     slides[] $[] @ /flop drop glue0 ;
 : fade-img ( r0..1 img1 img2 -- ) >r >r
     $FF fm* f>s $FFFFFF00 or dup
-    r> >o to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
-    r> >o to frame-color parent-w .parent-w /flop drop o> ;
+    r> >o color, to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
+    r> >o color, to frame-color parent-w .parent-w /flop drop o> ;
 : fade!slides ( r0..1 n -- )
     dup m/$-switch = IF
 	fdup $q-img m2-img fade-img
@@ -218,7 +218,7 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
 "($quid = Ethisches Micropayment mit effizienter BlockChain)" /subtitle
 {{ {{ glue*l }}glue
-{{ $0000007F to x-color \tiny l"  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}i18n-text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum " }}text \bold-italic "qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ 44.5% fm* dup .par-split /center
+{{ $0000007F color, to x-color \tiny l"  Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. " }}i18n-text \bold "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit," }}text \regular " sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui " }}text \italic "dolorem ipsum quia dolor sit amet," }}text \regular " consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum " }}text \bold-italic "qui dolorem eum fugiat" }}text \regular " quo voluptas nulla pariatur?" }}text glue*l }}glue }}p cbl dpy-w @ 44.5% fm* dup .par-split /center
 glue*l }}glue }}v
 glue*2 }}glue }}z  \ ) $CCDDDD3F 4e }}frame dup .button1
 "Bernd Paysan" /author
@@ -315,7 +315,7 @@ $FFBFFFFF pres-frame
 }}vt
 glue*l }}glue
 tex: vp0 glue*l ' vp0 }}vp vp[]
-$FFBFFFFF color, dup to slider-color to slider-fgcolor
+$FFBFFFFF color, fdup to slider-color to slider-fgcolor
 font-size# f2/ f2/ to slider-border
 dup font-size# f2/ fdup vslider
 }}h box[]
@@ -403,7 +403,7 @@ glue*l }}glue
 glue*l }}glue
 tex: $quid-logo-large
 ' $quid-logo-large "squid-logo.png" 0.666e }}image-file
-drop >o $FFFFFFC0 to frame-color o o>
+drop >o $FFFFFFC0 color, to frame-color o o>
 /right
 }}v box[] >bdr
 }}z box[] /flip dup >slides

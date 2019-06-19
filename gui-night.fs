@@ -27,7 +27,7 @@ $FFFFFFFF re-text-color show-sign-color#
 $550000FF $005500FF re-fade-color pw-bg-col#
 $88FF00FF re-color dark-blue#
 $00FF0020 re-color chbs-col#
-$000020FF re-color login-bg-col#
+$000020BF re-color login-bg-col#
 $FF000000 $FF0000FF re-fade-color pw-err-col#
 $444444FF re-color chat-col#
 $224444FF re-color chat-bg-col#

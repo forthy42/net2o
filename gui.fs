@@ -232,7 +232,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 
 ' dark-blue >body f@
 
-{{ login-bg-col# pres-frame
+{{  login-bg-col# pres-frame
     dark-blue# ' dark-blue >body f!
     {{
 	{{ glue*lll± }}glue }}v
@@ -1151,6 +1151,7 @@ Value n2o-frame
 \ top widgets
 
 : !widgets ( -- )
+\    1 set-compose-hint
     top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
