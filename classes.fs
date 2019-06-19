@@ -133,6 +133,7 @@ cmd-class class
 end-class msging-class
 
 cmd-class class{ msg
+    $value: name$ \ group name
     $value: id$
     field: peers[]
     field: keys[]

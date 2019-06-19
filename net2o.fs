@@ -417,7 +417,6 @@ $20 cells Value resend-size#
 #60.000.000.000 d>64 64Constant connect-timeout# \ 60s connect timeout
 
 Variable init-context#
-hash: msg-groups
 hash: msg-group# ( hash for group objects )
 UValue msg-group-o
 UValue connection
@@ -1657,7 +1656,7 @@ scope{ mapc
     BEGIN  2dup @ <> WHILE  @ dup .next-context swap 0= UNTIL
 	2drop drop EXIT  THEN  nip ! ;
 : ungroup-ctx ( -- )
-    msg-groups [: >r o r> cell+ del$cell ;] #map ;
+    msg-group# [: cell+ $@ drop cell+ .msg:peers[] o swap del$cell ;] #map ;
 
 Defer extra-dispose ' noop is extra-dispose
 

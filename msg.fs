@@ -26,21 +26,24 @@ Forward pk-peek? ( addr u0 -- flag )
 
 : >group ( addr u -- )
     2dup msg-group# #@ d0= IF
-	net2o:new-msg cell- [ msg-class >osize @ cell+ ]L
+	net2o:new-msg >o 2dup to msg:name$ o o>
+	cell- [ msg-class >osize @ cell+ ]L
 	2over msg-group# #!
     THEN  last# cell+ $@ drop cell+ to msg-group-o
-    msg-groups ?hash ;
+    2drop ;
+
+also msg
 
 : avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
     { d: msg }
-    last# cell+ $@ dup IF
-	bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
-	cell +LOOP
-    ELSE  2drop  THEN ;
+    msg-group-o .peers[] $@
+    bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
+    cell +LOOP ;
+
+previous
 
 Variable msg-group$
-Variable group-master
 Variable msg-logs
 Variable otr-mode
 Variable chain-mode
@@ -192,7 +195,7 @@ Forward silent-join
 
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
-: +unique-con ( -- ) o last# cell+ +unique$ ;
+: +unique-con ( -- ) o msg-group-o .msg:peers[] +unique$ ;
 Forward +chat-control
 
 : chat-silent-join ( -- )
@@ -664,8 +667,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     wait-task @ ?dup-IF  <hide>  THEN
     o> ;
 +net2o: msg-leave ( $:group -- ) \g leave a chat group
-    $> msg-groups #@ d0<> IF
-	parent last# cell+ del$cell  THEN ;
+    $> >group parent msg-group-o .msg:peers[] del$cell ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
     <event last-msg 2@ e$, elit, o elit, last# elit, :>chat-reconnect
@@ -1001,10 +1003,9 @@ previous
     connection .data-rmap IF  net2o-code expect-msg silent-leave, end-code|  THEN ;
 
 : [group] ( xt -- flag )
-    msg-group$ $@ msg-groups #@ IF
-	@ >o ?msg-context .execute o> true
+    msg-group-o .msg:peers[] $@len IF
+	msg-group-o .execute true
     ELSE
-	drop "" msg-group$ $@ msg-groups #!
 	0 .execute false
     THEN ;
 : .chat ( addr u -- )
@@ -1306,6 +1307,9 @@ forward avalanche-text
 
 false value away?
 
+: group#map ( xt -- )
+    msg-group# swap [{: xt: xt :}l cell+ $@ drop cell+ .xt ;] #map ;
+
 also net2o-base scope: /chat
 
 : /me ( addr u -- )
@@ -1345,11 +1349,11 @@ synonym /back /away
 : /peers ( addr u -- ) 2drop
     \U peers                list peers
     \G peers: list peers in all groups
-    msg-groups [: dup $@ .group ." : "
-      cell+ $@ bounds ?DO
-	  space I @ >o .con-id space
-	  ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
-      cell +LOOP  forth:cr ;] #map ;
+    [: msg:name$ .group ." : "
+	msg:peers[] $@ bounds ?DO
+	    space I @ >o .con-id space
+	    ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
+	cell +LOOP  forth:cr ;] group#map ;
 
 : /gps ( addr u -- ) 2drop
     \U gps                  send coordinates
@@ -1376,11 +1380,10 @@ synonym /back /away
 : /chats ( addr u -- ) 2drop ." ===== chats: "
     \U chats                list chats
     \G chats: list all chats
-    msg-groups [: >r
-      r@ $@ msg-group$ $@ str= IF ." *" THEN
-      r@ $@ .group
-      ." [" r@ cell+ $@len cell/ 0 .r ." ]#"
-      r@ $@ msg-logs #@ nip cell/ u. rdrop ;] #map
+    [:  msg:name$ msg-group$ $@ str= IF ." *" THEN
+	msg:name$ .group
+	." [" msg:peers[] $[]# 0 .r ." ]#"
+	msg:name$ msg-logs #@ nip cell/ u. ;] group#map
     ." =====" forth:cr ;
 
 : /nat ( addr u -- )  2drop
@@ -1388,11 +1391,11 @@ synonym /back /away
     \G nat: list nat traversal information of all peers in all groups
     \U renat                redo NAT traversal
     \G renat: redo nat traversal
-    msg-groups [: dup ." ===== Group: " $@ .group ."  =====" forth:cr
-      cell+ $@ bounds ?DO
-	  ." --- " I @ >o .con-id ." : " return-address .addr-path
-	  ."  ---" forth:cr .nat-addrs o>
-      cell +LOOP ;] #map ;
+    [:  ." ===== Group: " msg:name$ .group ."  =====" forth:cr
+	msg:peers[] $@ bounds ?DO
+	    ." --- " I @ >o .con-id ." : " return-address .addr-path
+	    ."  ---" forth:cr .nat-addrs o>
+	cell +LOOP ;] group#map ;
 
 : /myaddrs ( addr u -- )
     \U myaddrs              list my addresses
@@ -1429,9 +1432,8 @@ synonym /back /away
     \U sync [+date] [-date] synchronize logs
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
-    0 >o 2drop msg-group$ $@ msg-groups #@
-    IF @ >o rdrop ?msg-context ELSE o> EXIT THEN
-    o to connection
+    msg-group-o .msg:peers[] $@ 0= IF  drop  EXIT  THEN
+    @ to connection
     ." === sync ===" forth:cr
     net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
 
@@ -1550,12 +1552,7 @@ previous
 : load-msgn ( addr u n -- )
     >r 2dup load-msg ?msg-log r> display-lastn ;
 
-: +group ( -- )
-    msg-group$ $@ dup IF
-	2dup msg-groups #@ d0<> IF
-	    +unique-con 2drop
-	ELSE  o { w^ group } group cell 2swap msg-groups #!  THEN
-    ELSE  2drop  THEN ;
+: +group ( -- ) +unique-con ;
 
 : msg-timeout ( -- )
     packets2 @  connected-timeout  packets2 @ <>
@@ -1595,8 +1592,8 @@ $B $E 2Value chat-bufs#
     BEGIN  key-ctrlbit [ 1 ctrl L lshift 1 ctrl Z lshift or ]L
     and 0=  UNTIL ;
 
-: chats# ( -- n ) 0 msg-groups
-    [: dup $@len keysize < IF  drop 1  ELSE  cell+ $[]# THEN  + ;] #map ;
+: chats# ( -- n )
+    0 [: msg:peers[] $[]# 1 max + ;] group#map ;
 
 : wait-chat ( -- )
     chat-keys [: @/2 dup 0= IF  2drop  EXIT  THEN
@@ -1608,10 +1605,6 @@ $B $E 2Value chat-bufs#
 	IF  bl inskey  THEN  up@ wait-task ! ;] is do-connect
     wait-key cr [: up@ wait-task ! ;] IS do-connect ;
 
-: last-chat-peer ( -- chat )
-    msg-group$ $@ msg-groups #@ dup cell- 0 max /string
-    IF  @  ELSE  drop 0  THEN ;
-
 : search-connect ( key u -- o/0 )  key|
     0 [: drop 2dup pubkey $@ key| str= o and  dup 0= ;] search-context
     nip nip  dup to connection ;
@@ -1620,9 +1613,6 @@ $B $E 2Value chat-bufs#
     false chat-keys
     [: @/2 key| rot dup 0= IF drop search-connect
       ELSE  nip nip  THEN ;] $[]map ;
-
-: search-chat ( -- chat )
-    group-master @ IF  last-chat-peer  ELSE  search-peer  ThEN ;
 
 : key>group ( addr u -- pk u )
     @/ 2swap tuck msg-group$ $!  0=
@@ -1638,7 +1628,7 @@ $B $E 2Value chat-bufs#
       2dup search-connect ?dup-IF  >o +group greet o> 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
-: ?wait-chat ( -- ) #0. /chat:/chats
+: ?wait-chat ( -- addr u ) #0. /chat:/chats
     BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT
     msg-group$ $@ ; \ stub
 
@@ -1647,7 +1637,7 @@ scope{ /chat
     \U chat [group][@user]  switch/connect chat
     \G chat: switch to chat with user or group
     chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
-    msg-group$ $@ msg-groups #@ dup 0= IF  2drop
+    msg-group$ $@ >group msg-group-o .msg:peers[] $@ dup 0= IF  2drop
 	nip IF  chat-connects
 	ELSE  ." That chat isn't active" forth:cr  THEN
     ELSE
@@ -1674,56 +1664,54 @@ also net2o-base
 	I @ .reconnect,
     cell +LOOP ;
 
-: send-reconnects ( group o:connection -- )  o to connection
+: send-reconnects ( o:group -- )
     net2o-code expect-msg
-    [: dup  $@ ?destpk 2dup >group $, msg-leave
+    [:  msg:name$ ?destpk $, msg-leave
 	sign[ msg-start "left" $, msg-action msg-otr>
 	reconnects, ;] [msg,]
     end-code| ;
 
-: send-reconnect1 ( o o:connection -- ) o to connection
+: send-reconnect1 ( o:group -- )
     net2o-code expect-msg
-    [: last# $@ $, msg-leave
+    [:  msg:name$ ?destpk $, msg-leave
 	sign[ msg-start "left" $, msg-action msg-otr>
 	.reconnect, ;] [msg,]
     end-code| ;
 previous
 
-: send-reconnect ( group -- )
-    dup cell+ $@
+: send-reconnect ( o:group -- )
+    msg:peers[] $@
     case
 	0    of  2drop  endof
-	cell of  nip @ >o o to connection send-leave o>  endof
-	drop @ .send-reconnects
+	cell of  @ >o o to connection send-leave o>  endof
+	@ to connection  send-reconnects
     0 endcase ;
-: send-silent-reconnect ( group -- )
-    dup cell+ $@
+: send-silent-reconnect ( o:group -- )
+    msg:peers[] $@
     case
-	0    of  2drop  endof
-	cell of  nip @ >o o to connection send-silent-leave o>  endof
-	drop @ .send-reconnects
+	0    of  drop  endof
+	cell of  @ >o o to connection send-silent-leave o>  endof
+	o swap @ .send-reconnects
     0 endcase ;
-: disconnect-group ( group -- ) >r
-    r@ cell+ $@ bounds ?DO  I @  cell +LOOP
-    r> cell+ $@len 0 +DO  >o o to connection
+: disconnect-group ( o:group -- )
+    msg:peers[] get-stack 0 ?DO  >o o to connection
 	disconnect-me o>
-    cell +LOOP ;
-: disconnect-all ( group -- ) >r
-    r@ cell+ $@ bounds ?DO  I @  cell +LOOP
-    r> cell+ $@len 0 +DO  >o o to connection
+    LOOP ;
+: disconnect-all ( o:group -- )
+    msg:peers[] get-stack 0 ?DO  >o o to connection
 	send-leave  disconnect-me o>
-    cell +LOOP ;
+    LOOP ;
 
-: leave-chat ( group -- )
-    dup send-reconnect disconnect-group ;
-: silent-leave-chat ( group -- )
-    dup send-silent-reconnect disconnect-group ;
+: leave-chat ( o:group -- )
+    send-reconnect disconnect-group ;
+: silent-leave-chat ( o:group -- )
+    send-silent-reconnect disconnect-group ;
 
 : leave-chats ( -- )
-    msg-groups ['] leave-chat #map ;
+    ['] leave-chat group#map ;
 
-: split-load ( group -- )
-    cell+ >r 0
+: split-load ( o:group -- )
+    msg:peers[] >r 0
     BEGIN  dup 1+ r@ $[]# u<  WHILE
 	    dup r@ $[] 2@ .send-reconnect1
 	    1+ dup r@ $[] @ >o o to connection disconnect-me o>
@@ -1733,7 +1721,7 @@ scope{ /chat
 : /split ( addr u -- )  2drop
     \U split                split load
     \G split: reduce distribution load by reconnecting
-    msg-group$ $@ >group last# split-load ;
+    msg-group$ $@ >group msg-group-o .split-load ;
 }scope
 
 \ chat toplevel

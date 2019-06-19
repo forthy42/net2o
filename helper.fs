@@ -120,8 +120,8 @@ Variable announced
 Forward insert-addr ( o -- )
 
 : renat ( -- )
-    msg-groups [:
-      cell+ $@ bounds ?DO
+    msg-group# [:
+      cell+ $@ drop cell+ .msg:peers[] bounds ?DO
 	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase  dest-0key dest-0key> !

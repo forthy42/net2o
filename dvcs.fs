@@ -942,7 +942,6 @@ previous
 
 : dvcs-connect-key ( addr u -- )
     key>group ?load-msgn
-    dup 0= IF  2drop "" msg-group$ $@ msg-groups #!  THEN
     2dup search-connect ?dup-IF  >o +group rdrop 2drop  EXIT  THEN
     \ check for disconnected here or in pk-peek?
     2dup pk-peek?  IF  dvcs-connect  ELSE  2drop  THEN ;
