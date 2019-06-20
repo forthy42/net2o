@@ -749,7 +749,7 @@ msging-table $save
 
 : msg-reply ( tag -- )
     ." got reply " hex. pubkey $@ key>nick forth:type forth:cr ;
-: expect-msg ( --- )
+: expect-msg ( o:connection -- )
     reply( ['] msg-reply )else( ['] drop ) expect-reply-xt +chat-control ;
 
 User hashtmp$  hashtmp$ off
@@ -944,7 +944,7 @@ event: :>msg-eval ( parent $pack $addr -- )
 previous
 
 : ?destpk ( addr u -- addr' u' )
-    2dup pubkey $@ key| str= IF  2drop pk@ key|  THEN ;
+    2dup connection .pubkey $@ key| str= IF  2drop pk@ key|  THEN ;
 
 : last-signdate@ ( -- 64date )
     msg-group$ $@ msg-logs #@ dup IF
@@ -1471,7 +1471,7 @@ synonym /back /away
     \G lock: lock down communication to list of nicks
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
-    vkey keysize msg-keys[] ~~ $+[]!
+    vkey keysize msg-keys[] $+[]!
     lock-mode on ;
 : /unlock ( addr u -- )
     \U unlock               stop lock down
@@ -1659,14 +1659,14 @@ also net2o-base
     reconnect( ." send reconnect: " 2dup 2dup + 1- c@ 1+ - .addr$ forth:cr )
     $, msg-reconnect ;
 
-: reconnects, ( group -- )
-    cell+ $@ cell safe/string bounds U+DO
+: reconnects, ( o:group -- )
+    msg-group-o .msg:peers[] $@ cell safe/string bounds U+DO
 	I @ .reconnect,
     cell +LOOP ;
 
 : send-reconnects ( o:group -- )
     net2o-code expect-msg
-    [:  msg:name$ ?destpk $, msg-leave
+    [:  msg-group-o .msg:name$ ?destpk $, msg-leave
 	sign[ msg-start "left" $, msg-action msg-otr>
 	reconnects, ;] [msg,]
     end-code| ;
@@ -1679,20 +1679,19 @@ also net2o-base
     end-code| ;
 previous
 
-: send-reconnect ( o:group -- )
-    msg:peers[] $@
-    case
-	0    of  2drop  endof
-	cell of  @ >o o to connection send-leave o>  endof
-	@ to connection  send-reconnects
-    0 endcase ;
-: send-silent-reconnect ( o:group -- )
+: send-reconnect-xt ( o:group xt -- ) { xt: xt }
     msg:peers[] $@
     case
 	0    of  drop  endof
-	cell of  @ >o o to connection send-silent-leave o>  endof
-	o swap @ .send-reconnects
-    0 endcase ;
+	cell of  @ >o o to connection xt o>  endof
+	drop @ >o o to connection  send-reconnects o>
+	0
+    endcase ;
+: send-reconnect ( o:group -- )
+    ['] send-leave send-reconnect-xt ;
+: send-silent-reconnect ( o:group -- )
+    ['] send-silent-leave send-reconnect-xt ;
+
 : disconnect-group ( o:group -- )
     msg:peers[] get-stack 0 ?DO  >o o to connection
 	disconnect-me o>
