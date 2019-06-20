@@ -1552,7 +1552,7 @@ previous
 : load-msgn ( addr u n -- )
     >r 2dup load-msg ?msg-log r> display-lastn ;
 
-: +group ( -- ) +unique-con ;
+: +group ( -- ) msg-group$ $@ >group +unique-con ;
 
 : msg-timeout ( -- )
     packets2 @  connected-timeout  packets2 @ <>
