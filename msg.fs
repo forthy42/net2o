@@ -1433,7 +1433,7 @@ synonym /back /away
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
     msg-group-o .msg:peers[] $@ 0= IF  drop  EXIT  THEN
-    @ to connection
+    @ >o o to connection
     ." === sync ===" forth:cr
     net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
 
