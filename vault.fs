@@ -106,7 +106,7 @@ $400 Constant pow-align#
 : vault-aligned ( len -- len' )
     \G Align vault to minimum granularity plus relative alignment
     \G to hide the actual file-size
-    1- 0 >r  BEGIN  dup pow-align# u>  WHILE  2/ r> 1+ >r  REPEAT
+    1- 0 >r  BEGIN  dup pow-align# u>  WHILE  1 rshift r> 1+ >r  REPEAT
     1+ r> lshift  min-align# 1- + min-align# negate and ;
 
 Variable enc-mode

@@ -709,11 +709,10 @@ previous
 : cmdtmpnest ( addr u -- )
     $>align tmpkey@ key| dup IF
 	key( ." tmpnest key: " 2dup 85type forth:cr ) decrypt$
-	IF    tmp-crypt-val do-nest
-	ELSE
-	    <err> ." tmpnest failed, uncmd" <default> forth:cr
-	    net2o:see-me 2drop un-cmd  THEN
-    ELSE  2drop 2drop un-cmd  THEN ;
+	IF    tmp-crypt-val do-nest  EXIT  THEN
+	cmd( <err> ." tmpnest failed, uncmd" <default> forth:cr
+	net2o:see-me )
+    ELSE  2drop  THEN  2drop un-cmd ;
 : cmdencnest ( addr u -- )
     $>align tmpkey@ dup IF
 	key( ." encnest key: " 2dup 85type forth:cr ) decrypt$

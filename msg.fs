@@ -32,19 +32,14 @@ Forward pk-peek? ( addr u0 -- flag )
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-also msg
-
 : avalanche-msg ( msg u1 o:connect -- )
     \G forward message to all next nodes of that message group
-    { d: msg }
-    msg-group-o .peers[] $@
-    bounds ?DO  I @ o <> IF  msg I @ .avalanche-to  THEN
+    { d: msgx }
+    msg-group-o .msg:peers[] $@
+    bounds ?DO  I @ o <> IF  msgx I @ .avalanche-to  THEN
     cell +LOOP ;
 
-previous
-
 Variable msg-group$
-Variable msg-logs
 Variable otr-mode
 Variable chain-mode
 Variable redate-mode
@@ -63,11 +58,11 @@ Sema msglog-sema
 
 : >chatid ( group u -- id u )  defaultkey sec@ keyed-hash#128 ;
 
-: msg-log@ ( last# -- addr u )
-    [: cell+ $@ save-mem ;] msglog-sema c-section ;
+: msg-log@ ( -- addr u )
+    [: msg-group-o .msg:log[] $@ save-mem ;] msglog-sema c-section ;
 
 : purge-log ( -- )
-    [: last# cell+ { a[] }
+    [: msg-group-o .msg:log[] { a[] }
 	0  BEGIN  dup a[] $[]# u<  WHILE
 		dup a[] $[]@ check-date nip nip IF
 		    dup a[] $[] $free
@@ -87,12 +82,12 @@ Sema msglog-sema
 Variable saved-msg$
 64Variable saved-msg-ticks
 
-: save-msgs ( last -- )
+: save-msgs ( group-o -- ) to msg-group-o
     msg( ." Save messages" cr )
     ?.net2o/chats  net2o:new-msging >o
-    dup msg-log@ over >r  serialize-log enc-file $!buf
+    msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
-    $@ >chatid .chats/ enc-filename $!
+    msg-group-o .msg:name$ >chatid .chats/ enc-filename $!
     pk-off  key-list encfile-rest ;
 
 : save-all-msgs ( -- )
@@ -123,15 +118,15 @@ Variable saved-msg$
     ELSE  msg-eval  THEN
     replay-mode off  skip-sig? off  enc-file $free ;
 
-event: :>save-msgs ( last# -- ) saved-msg$ +unique$ ;
+event: :>save-msgs ( group-o -- ) saved-msg$ +unique$ ;
 event: :>save-all-msgs ( -- )
     save-all-msgs ;
-event: :>load-msg ( last# -- )
-    $@ load-msg ;
+event: :>load-msg ( group-o -- )
+    .msg:name$ load-msg ;
 
 : >load-group ( group u -- )
-    2dup msg-logs #@ d0= >r >group r>
-    IF  <event last# elit, :>load-msg
+    >group msg-group-o .msg:log[] $@len 0=
+    IF  <event msg-group-o elit, :>load-msg
 	parent .wait-task @
 	dup 0= IF  drop ?file-task  THEN  event>  THEN ;
 
@@ -141,23 +136,19 @@ event: :>load-msg ( last# -- )
 
 : save-msgs& ( -- )
     syncfile( last# saved-msg$ +unique$ )else(
-    <event last# elit, :>save-msgs ?file-task event> ) ;
-
-: ?msg-log ( addr u -- )  msg-logs ?hash ;
+    <event msg-group-o elit, :>save-msgs ?file-task event> ) ;
 
 0 Value log#
 2Variable last-msg
 
 : +msg-log ( addr u -- addr' u' / 0 0 )
-    last# $@ ?msg-log
-    [: last# cell+ $ins[]date  dup  dup 0< xor to log#
-	log# last# cell+ $[]@ last-msg 2!
+    [: msg-group-o .msg:log[] $ins[]date  dup  dup 0< xor to log#
+	log# msg-group-o .msg:log[] $[]@ last-msg 2!
 	0< IF  #0.  ELSE  last-msg 2@  THEN
     ;] msglog-sema c-section ;
 : ?save-msg ( addr u -- )
-    ?msg-log
-    last# otr-mode @ replay-mode @ or 0= and
-    IF  save-msgs&  THEN ;
+    >group
+    otr-mode @ replay-mode @ or 0= IF  save-msgs&  THEN ;
 
 Sema queue-sema
 
@@ -182,7 +173,7 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
     msg-notify-o .msg:display ;
 
 : display-lastn ( n -- )
-    msg-group-o >o msg:redisplay o> ;
+    msg-group-o .msg:redisplay ;
 : display-sync-done ( -- )
     rows  msg-group-o .msg:redisplay ;
 
@@ -321,15 +312,15 @@ Forward msg:last
     ELSE  do-msg-nestsig  THEN ;
 
 : date>i ( date -- i )
-    last# cell+ $search[]date last# cell+ $[]# 1- umin ;
+    msg-group-o .msg:log[] $search[]date msg-group-o .msg:log[] $[]# 1- umin ;
 : date>i' ( date -- i )
-    last# cell+ $search[]date last# cell+ $[]# umin ;
+    msg-group-o .msg:log[] $search[]date msg-group-o .msg:log[] $[]# umin ;
 : sighash? ( addr u -- flag )
     over le-64@ date>i
     dup 0< IF  drop 2drop  false  EXIT  THEN  >r
     over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
     r> r> U+DO
-	c:0key I last# cell+ $[]@ sigonly@ >hash
+	c:0key I msg-group-o .msg:log[] $[]@ sigonly@ >hash
 	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
 	ELSE  ( 2dup 85type ."  <> " hashtmp over 85type )  THEN
     LOOP
@@ -450,7 +441,7 @@ scope: logstyles
     IF   <err>  THEN ." @" .key-id? <default>
     r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
-    last# >r last# $@ ?msg-log
+    last# >r last# $@ >group
     2dup sighash? IF  <info>  ELSE  <err>  THEN
     ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
@@ -501,15 +492,15 @@ msg-class is msg:object
 
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
-	last# >r last# $@ ?msg-log
+	last# >r last# $@ >group
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
-	    I last# cell+ $[]@
+	    I msg-group-o .msg:log[] $[]@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
 		    ."  OTRify #" I u.
-		    sig u' I last# cell+ $[]@ replace-sig
+		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
 		    save-msgs&
 		ELSE
 		    ."  [OTRified] #" I u.
@@ -756,22 +747,22 @@ User hashtmp$  hashtmp$ off
 
 : last-msg@ ( -- ticks )
     last# >r
-    last# $@ ?msg-log last# cell+ $[]# ?dup-IF
-	1- last# cell+ $[]@ startdate@
+    last# $@ >group msg-group-o .msg:log[] $[]# ?dup-IF
+	1- msg-group-o .msg:log[] $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
     hashtmp$ $off
-    last# cell+ $[]# IF
-	[: U+DO  I last# cell+ $[]@ 1- dup 1 64s - safe/string forth:type
+    msg-group-o .msg:log[] $[]# IF
+	[: U+DO  I msg-group-o .msg:log[] $[]@ 1- dup 1 64s - safe/string forth:type
 	  LOOP ;] hashtmp$ $exec hashtmp$ $@
 	\ [: 2dup dump ;] stderr outfile-execute \ dump hash inputs
     ELSE  2drop s" "  THEN \ we have nothing yet
     >file-hash 1 64s umin ;
 : i.date ( i -- )
-    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
+    msg-group-o .msg:log[] $[]@ startdate@ 64#0 { 64^ x }
     x le-64! x 1 64s forth:type ;
 : i.date+1 ( i -- )
-    last# cell+ $[]@ startdate@ 64#0 { 64^ x }
+    msg-group-o .msg:log[] $[]@ startdate@ 64#0 { 64^ x }
     64#1 64+ x le-64! x 1 64s forth:type ;
 : last-msgs@ ( startdate enddate n -- addr u n' )
     \G print n intervals for messages from startdate to enddate
@@ -779,15 +770,15 @@ User hashtmp$  hashtmp$ off
     \G last one, which may contain less (rounding down).
     \G Each interval contains a 64 bit hash of the last 64 bit of
     \G each message within the interval
-    last# >r >r last# $@ ?msg-log purge-log
-    last# cell+ $[]#
+    last# >r >r last# $@ >group purge-log
+    msg-group-o .msg:log[] $[]#
     IF
 	date>i' >r date>i' r> swap
 	2dup - r> over >r 1- 1 max / 0 max 1+ -rot
 	[: over >r U+DO  I i.date
 	      dup I + I' umin I l.hashs forth:type
 	  dup +LOOP
-	  r> dup last# cell+ $[]# u< IF  i.date
+	  r> dup msg-group-o .msg:log[] $[]# u< IF  i.date
 	  ELSE  1- i.date+1  THEN
 	  drop ;] $tmp r> \ over 1 64s u> -
     ELSE  rdrop 64drop 64drop s" "  0 THEN   r> to last# ;
@@ -823,7 +814,7 @@ Variable ask-msg-files[]
     last-msgs@ >r $, r> ulit, msg-last ;
 : ?ask-msg-files ( addr u -- )
     64#-1 64#0 { 64^ startd 64^ endd } \ byte order of 0 and -1 don't matter
-    last# $@ ?msg-log
+    last# $@ >group
     $> bounds ?DO
 	I' I 64'+ u> IF
 	    I le-64@ date>i'
@@ -861,8 +852,8 @@ Variable ask-msg-files[]
 :noname ( -- 64len )
     \ poll serializes the 
     fs-outbuf $off
-    fs-path $@ 2 64s /string ?msg-log
-    last# msg-log@ over >r
+    fs-path $@ 2 64s /string >group
+    msg-log@ over >r
     fs-path $@ drop le-64@ date>i \ start index
     fs-path $@ drop 64'+ le-64@ 64#1 64+ date>i' \ end index
     over - >r
@@ -879,19 +870,19 @@ Variable ask-msg-files[]
 \ syncing done
 : chat-sync-done ( group-addr u -- )
     msg( ." chat-sync-done " 2dup forth:type forth:cr )
-    ?msg-log display-sync-done !save-all-msgs
+    >group display-sync-done !save-all-msgs
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
     ." === sync done ===" forth:cr sync-done-xt ;
 event: :>msg-eval ( parent $pack $addr -- )
     { w^ buf w^ group }
     group $@ 2 64s /string { d: gname }
-    gname ?msg-log
-    gname msg-logs #@ nip cell/ u.
+    gname >group
+    msg-group-o .msg:log[] $[]# u.
     buf $@ true replay-mode ['] msg-eval !wrapper
     buf $free gname ?save-msg
     group $@ .chat-file ."  saved "
-    gname msg-logs #@ nip cell/ u. forth:cr
+    msg-group-o .msg:log[] $[]# u. forth:cr
     >o -1 file-count +!@ 1 =
     IF  gname chat-sync-done  THEN  group $free
     o> ;
@@ -947,7 +938,7 @@ previous
     2dup connection .pubkey $@ key| str= IF  2drop pk@ key|  THEN ;
 
 : last-signdate@ ( -- 64date )
-    msg-group$ $@ msg-logs #@ dup IF
+    msg-group-o .msg:log[] $@ dup IF
 	+ cell- $@ startdate@ 64#1 64+
     ELSE  2drop 64#-1  THEN ;
 
@@ -975,7 +966,7 @@ also net2o-base
       sign[ msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
 
 : silent-join, ( -- )
-    last# $@ dup IF  message $, msg-join  end-with
+    msg-group$ $@ dup IF  message $, msg-join  end-with
     ELSE  2drop  THEN ;
 
 : leave, ( -- )
@@ -1022,7 +1013,7 @@ previous
 ' msg-tdisplay msg-notify-class is msg:display
 : msg-tredisplay ( n -- )
     reset-time  0 otr-mode
-    [:  cells >r last# msg-log@ 2dup { log u }
+    [:  cells >r msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
 	    I $@ { d: msgt }
@@ -1058,12 +1049,12 @@ Variable $lastline
 : !date ( addr u -- addr u )
     2dup + sigsize# - le-64@ line-date 64! ;
 : find-prev-chatline { maxlen addr -- max span addr span }
-    msg-group$ $@ ?msg-log
-    last# cell+ $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
+    msg-group$ $@ >group
+    msg-group-o .msg:log[] $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
     line-date 64@ date>i'
-    BEGIN  1- dup 0>= WHILE  dup last# cell+ $[]@
+    BEGIN  1- dup 0>= WHILE  dup msg-group-o .msg:log[] $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    last# cell+ $[]@ dup 0= IF  nip
+    msg-group-o .msg:log[] $[]@ dup 0= IF  nip
     ELSE  !date ['] msg:display textmsg-o .$tmp 
 	dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
 	    2drop to addr drop to maxlen  THEN
@@ -1071,13 +1062,13 @@ Variable $lastline
     THEN
     maxlen swap addr over ;
 : find-next-chatline { maxlen addr -- max span addr span }
-    msg-group$ $@ ?msg-log
+    msg-group$ $@ >group
     line-date 64@ date>i
-    BEGIN  1+ dup last# cell+ $[]# u< WHILE  dup last# cell+ $[]@
+    BEGIN  1+ dup msg-group-o .msg:log[] $[]# u< WHILE  dup msg-group-o .msg:log[] $[]@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    dup last# cell+ $[]# u>=
+    dup msg-group-o .msg:log[] $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
-    ELSE  last# cell+ $[]@ !date ['] msg:display textmsg-o .$tmp  THEN
+    ELSE  msg-group-o .msg:log[] $[]@ !date ['] msg:display textmsg-o .$tmp  THEN
     dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
 	2drop to addr drop to maxlen  THEN
     tuck addr maxlen smove
@@ -1178,10 +1169,9 @@ also net2o-base
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 
 : ?chain, ( -- )  chain-mode @ 0= ?EXIT
-    last# >r last# $@ ?msg-log
-    last# cell+ $[]# 1- dup 0< IF  drop
-    ELSE  last# cell+ $[]@ chain,
-    THEN  r> to last# ;
+    msg-group-o .msg:log[] $[]# 1- dup 0< IF  drop
+    ELSE  msg-group-o .msg:log[] $[]@ chain,
+    THEN ;
 
 : (send-avalanche) ( xt -- addr u flag )
     [: 0 >o [: sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
@@ -1220,7 +1210,7 @@ Variable chat-keys
 also net2o-base
 
 : do-otrify ( n -- ) >r
-    msg-group$ $@ ?msg-log last# cell+ $@ r> cells safe/string
+    msg-group$ $@ >group msg-group-o .msg:log[] $@ r> cells safe/string
     IF  $@ 2dup + sigpksize# - sigpksize#
 	over keysize pkc over str= IF
 	    keysize /string 2swap new-otrsig 2swap
@@ -1383,7 +1373,7 @@ synonym /back /away
     [:  msg:name$ msg-group$ $@ str= IF ." *" THEN
 	msg:name$ .group
 	." [" msg:peers[] $[]# 0 .r ." ]#"
-	msg:name$ msg-logs #@ nip cell/ u. ;] group#map
+	msg:log[] $[]# u. ;] group#map
     ." =====" forth:cr ;
 
 : /nat ( addr u -- )  2drop
@@ -1432,8 +1422,9 @@ synonym /back /away
     \U sync [+date] [-date] synchronize logs
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
-    msg-group-o .msg:peers[] $@ 0= IF  drop  EXIT  THEN
-    @ >o o to connection
+    s>unumber? IF  drop  ELSE  2drop 0  THEN  cells >r
+    msg-group-o .msg:peers[] $@ r@ u<= IF  drop rdrop  EXIT  THEN
+    r> + @ >o o to connection
     ." === sync ===" forth:cr
     net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
 
@@ -1446,7 +1437,7 @@ synonym /back /away
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
-    msg-group$ $@ ?msg-log purge-log
+    msg-group$ $@ >group purge-log
     r>  display-lastn ;
 
 : /logstyle ( addr u -- )
@@ -1550,7 +1541,7 @@ $Variable msg-recognizer
 previous
 
 : load-msgn ( addr u n -- )
-    >r 2dup load-msg ?msg-log r> display-lastn ;
+    >r load-msg r> display-lastn ;
 
 : +group ( -- ) msg-group$ $@ >group +unique-con ;
 
@@ -1619,7 +1610,7 @@ $B $E 2Value chat-bufs#
     IF  2dup key| msg-group$ $!  THEN ; \ 1:1 chat-group=key
 
 : ?load-msgn ( -- )
-    msg-group$ $@ msg-logs #@ d0= IF
+    msg-group$ $@ >group msg-group-o .msg:log[] $@len 0= IF
 	msg-group$ $@ rows load-msgn  THEN ;
 
 : chat-connects ( -- )
@@ -1740,7 +1731,7 @@ scope{ /chat
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
     o to connection
     net2o-code expect-msg message
-    last# $@ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
+    msg-group-o .msg:name$ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
     $, nestsig end-with
     end-code ;
 

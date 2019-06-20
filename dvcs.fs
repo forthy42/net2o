@@ -613,14 +613,14 @@ previous
 : .hash ( addr -- )
     [: dup $@ 85type ."  -> " cell+ $@ 85type cr ;] #map ;
 : chat>branches-loop ( o:commit -- )
-    last# msg-log@ over { log } bounds ?DO
+    msg-log@ over { log } bounds ?DO
 	re$ $free  object$ $free
 	I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw
     dvcs( ." === id>patch ===" cr id>patch# .hash
     ." === id>snap ===" cr id>snap# .hash ) ;
 : chat>branches ( o:dvcs -- )
-    project:project$ $@ @/ 2drop ?msg-log  dvcs:commits @ .chat>branches-loop ;
+    project:project$ $@ @/ 2drop >group  dvcs:commits @ .chat>branches-loop ;
 
 : >branches ( addr u -- )
     $make branches[] >back ;
@@ -675,7 +675,7 @@ scope{ dvcs
 : display-logn ( addr u n -- )
     project:branch$ $@ { d: branch }
     dvcs:new-dvcs-log >o
-    cells >r ?msg-log  last# msg-log@ 2dup { log u }
+    cells >r >group  msg-log@ 2dup { log u }
     dup r> - 0 max dup >r /string r> cell/ -rot bounds ?DO
 	dvcs:clear-log  I $@ ['] msg:display catch
 	IF  ." invalid entry" cr 2drop
@@ -862,11 +862,11 @@ previous
     dvcs:dispose-dvcs o> ;
 
 : chat>searchs-loop ( o:commit -- )
-    last# msg-log@ over { log } bounds ?DO
+    msg-log@ over { log } bounds ?DO
 	I $@ ['] msg:display catch IF  ." invalid entry" cr 2drop THEN
     cell +LOOP  log free throw ;
 : search-last-rev ( -- addr u )
-    project:project$ $@ @/ 2drop ?msg-log
+    project:project$ $@ @/ 2drop >group
     project:branch$ $@
     dvcs:searchs @ >o match:tag$ $!
     chat>searchs-loop match:id$ $@ o> ;
@@ -985,7 +985,7 @@ previous
 
 : dvcs-data-sync ( -- )
     sync-file-list[] $[]off  branches[] $[]off
-    msg-group$ $@ ?msg-log
+    msg-group$ $@ >group
     dvcs:commits @ .chat>branches-loop
     dvcs:commits @ .dvcs-needed-files
     sync-file-list[] $[]# 0> connection and
