@@ -83,7 +83,7 @@ Variable saved-msg$
 64Variable saved-msg-ticks
 
 : save-msgs ( group-o -- ) to msg-group-o
-    msg( ." Save messages" cr )
+    msg( ." Save messages in group " msg-group-o dup hex. .msg:name$ type cr )
     ?.net2o/chats  net2o:new-msging >o
     msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
@@ -135,7 +135,7 @@ event: :>load-msg ( group-o -- )
     <event :>save-all-msgs ?file-task event| ) ;
 
 : save-msgs& ( -- )
-    syncfile( last# saved-msg$ +unique$ )else(
+    syncfile( msg-group-o saved-msg$ +unique$ )else(
     <event msg-group-o elit, :>save-msgs ?file-task event> ) ;
 
 0 Value log#
@@ -146,8 +146,8 @@ event: :>load-msg ( group-o -- )
 	log# msg-group-o .msg:log[] $[]@ last-msg 2!
 	0< IF  #0.  ELSE  last-msg 2@  THEN
     ;] msglog-sema c-section ;
-: ?save-msg ( addr u -- )
-    >group
+: ?save-msg ( -- )
+    msg( ." saving messages in group " msg-group-o dup hex. .msg:name$ type cr )
     otr-mode @ replay-mode @ or 0= IF  save-msgs&  THEN ;
 
 Sema queue-sema
@@ -166,7 +166,7 @@ msg-class class end-class msg-notify-class
 msg-notify-class ' new static-a with-allocater Constant msg-notify-o
 
 : >msg-log ( addr u -- addr' u )
-    last# >r +msg-log last# ?dup-IF  $@ ?save-msg  THEN  r> to last# ;
+    +msg-log ?save-msg ;
 
 : do-msg-nestsig ( addr u -- )
     2dup msg-group-o .msg:display
@@ -880,7 +880,7 @@ event: :>msg-eval ( parent $pack $addr -- )
     gname >group
     msg-group-o .msg:log[] $[]# u.
     buf $@ true replay-mode ['] msg-eval !wrapper
-    buf $free gname ?save-msg
+    buf $free ?save-msg
     group $@ .chat-file ."  saved "
     msg-group-o .msg:log[] $[]# u. forth:cr
     >o -1 file-count +!@ 1 =
