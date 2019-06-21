@@ -227,11 +227,11 @@ User peer-buf
 
 event: :>avalanche ( addr u o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
-    to last# .avalanche-msg ;
+    to msg-group-o .avalanche-msg ;
 event: :>chat-reconnect ( addr u $chat o group -- )
-    to last# .reconnect-chat ;
+    to msg-group-o .reconnect-chat ;
 event: :>msg-nestsig ( $addr o group -- )
-    to last# >o { w^ m } m $@ do-msg-nestsig m $free o>
+    to msg-group-o >o { w^ m } m $@ do-msg-nestsig m $free o>
     ctrl L inskey ;
 
 \ coordinates
@@ -300,14 +300,14 @@ Forward msg:last
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    <event >r e$, o elit, last# elit,
+	    <event >r e$, o elit, msg-group-o elit,
 	    :>avalanche r> event>
 	ELSE  2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	>r r@ <hide> <event $make elit, o elit, last# elit, :>msg-nestsig
+	>r r@ <hide> <event $make elit, o elit, msg-group-o elit, :>msg-nestsig
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 
@@ -661,7 +661,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group parent msg-group-o .msg:peers[] del$cell ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
-    <event last-msg 2@ e$, elit, o elit, last# elit, :>chat-reconnect
+    <event last-msg 2@ e$, elit, o elit, msg-group-o elit, :>chat-reconnect
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;

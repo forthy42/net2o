@@ -501,7 +501,7 @@ false Value in-group?
 	next-slide
     ;] swap click[] ;
 
-: show-group ( last# -- )
+: show-group ( group-o -- )
     dup { g -- } cell+ $@ drop cell+ >o
     {{ glue*l chat-bg-col# slide-frame dup .button1
 	{{
@@ -780,7 +780,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     posting-vp >o dispose-childs  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
-    ?msg-log  last# msg-log@ 2dup { log u }
+    >group msg-log@ 2dup { log u }
     bounds ?DO
 	I $@ msg:display \ this will only set the URLs
     cell +LOOP
@@ -917,18 +917,17 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 ; wmsg-class to msg:id
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
-	last# >r last# $@ ?msg-log
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
-	    I last# cell+ $[]@
+	    I msg-group-o .msg:log[] $[]@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
 		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
 		    I [: ."  OTRify #" u. ;] $tmp
 		    \italic }}text 25%bv \regular light-blue text-color!
 		    "otrify" name! msg-box .child+
-		    sig u' I last# cell+ $[]@ replace-sig
+		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
 		    \ !!Schedule message saving!!
 		ELSE
 		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
@@ -938,7 +937,6 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 		2drop
 	    THEN
 	LOOP
-	r> to last#
     THEN ; wmsg-class is msg:otrify
 :noname ( addr u type -- )
     obj-red
@@ -986,8 +984,8 @@ wmsg-o >o msg-table @ token-table ! o>
     0 to msg-par  0 to msg-box
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
-    2dup load-msg ?msg-log
-    last# msg-log@ 2dup { log u }
+    2dup load-msg
+    msg-log@ 2dup { log u }
     dup gui-msgs# cells - 0 max /string bounds ?DO
 	I $@ { d: msgt }
 	msgt ['] wmsg-display wmsg-o .catch IF
