@@ -1,5 +1,6 @@
 /* General settings for the entire page */
 @font-face { font-family: 'Imprima';
+	     font-display: auto;
              src: url('/net2o/doc/trunk/doc/fonts/Imprima-Regular.woff'),
                   url('/net2o/doc/trunk/doc/fonts/Imprima-Regular.ttf') }
 html {
