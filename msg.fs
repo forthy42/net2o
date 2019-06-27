@@ -1455,7 +1455,8 @@ synonym /back /away
 : /otrify ( addr u -- )
     \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
-    msg:otr# msg-group-o .msg:mode [: now>otr
+    msg-group-o .msg:mode dup @ msg:otr# or swap
+    [: now>otr
 	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop
@@ -1558,7 +1559,7 @@ previous
 	    pubkey $@ key>nick type ." : "
 	    ack@ .timeouts @ . <default> cr )
 	    msg-group$ $@len IF
-		msg:otr# msg-group-o .msg:mode
+		msg-group-o .msg:mode dup @ msg:otr# or swap
 		[: pubkey $@ ['] left, send-avalanche ;] !wrapper
 	    THEN
 	    net2o:dispose-context
