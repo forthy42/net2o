@@ -24,9 +24,13 @@ Forward pk-peek? ( addr u0 -- flag )
 : ?hash ( addr u hash -- ) >r
     2dup r@ #@ d0= IF  "" 2swap r> #!  ELSE  2drop rdrop  THEN ;
 
+Variable otr-mode \ global otr mode
+
 : >group ( addr u -- )
     2dup msg-group# #@ d0= IF
-	net2o:new-msg >o 2dup to msg:name$ o o>
+	net2o:new-msg >o 2dup to msg:name$
+	otr-mode @ IF  msg:+otr  THEN
+	o o>
 	cell- [ msg-class >osize @ cell+ ]L
 	2over msg-group# #!
     THEN  last# cell+ $@ drop cell+ to msg-group-o
@@ -40,10 +44,6 @@ Forward pk-peek? ( addr u0 -- flag )
     cell +LOOP ;
 
 Variable msg-group$
-Variable otr-mode
-Variable chain-mode
-Variable redate-mode
-Variable lock-mode
 Variable msg-keys[]
 User replay-mode
 User skip-sig?
@@ -148,7 +148,7 @@ event: :>load-msg ( group-o -- )
     ;] msglog-sema c-section ;
 : ?save-msg ( -- )
     msg( ." saving messages in group " msg-group-o dup hex. .msg:name$ type cr )
-    otr-mode @ replay-mode @ or 0= IF  save-msgs&  THEN ;
+    msg-group-o .msg:?otr replay-mode @ or 0= IF  save-msgs&  THEN ;
 
 Sema queue-sema
 
@@ -457,10 +457,10 @@ scope: logstyles
     <info> utf8emit <default> ; msg-class is msg:like
 :noname ( addr u -- )
     0 .v-dec$ dup IF
-	msg-key!  lock-mode on
+	msg-key!  msg-group-o .msg:+lock
     ELSE  2drop  THEN
     <info> ." chat is locked" <default> ;   msg-class is msg:lock
-:noname ( -- )  lock-mode off
+:noname ( -- )  msg-group-o .msg:-lock
     <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
 :noname ( addr u type -- )
@@ -1012,7 +1012,8 @@ previous
 ' msg-tdisplay msg-class is msg:display
 ' msg-tdisplay msg-notify-class is msg:display
 : msg-tredisplay ( n -- )
-    reset-time  0 otr-mode
+    reset-time
+    msg-group-o .msg:mode dup @ msg:otr# invert and swap
     [:  cells >r msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
@@ -1158,7 +1159,7 @@ $200 Constant maxmsg#
     2dup i #40000000 um* d+ deadline  LOOP  2drop ;
 : .nobody ( -- )
     <info>
-    [: ." nobody's online" otr-mode @ 0= IF ." , saving away"  THEN ;] $tmp
+    [: ." nobody's online" msg-group-o .msg:?otr 0= IF ." , saving away"  THEN ;] $tmp
     2dup type <default>
     wait-2s-key xclear ;
 
@@ -1168,7 +1169,7 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 
-: ?chain, ( -- )  chain-mode @ 0= ?EXIT
+: ?chain, ( -- )  msg-group-o .msg:?chain 0= ?EXIT
     msg-group-o .msg:log[] $[]# 1- dup 0< IF  drop
     ELSE  msg-group-o .msg:log[] $[]@ chain,
     THEN ;
@@ -1178,7 +1179,7 @@ also net2o-base
       +last-signed msg-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )
-    otr-mode @ IF  now>otr  ELSE  now>never  THEN
+    msg-group-o .msg:?otr IF  now>otr  ELSE  now>never  THEN
     (send-avalanche)
     >r .chat r> 0= IF  .nobody  THEN ;
 
@@ -1320,18 +1321,22 @@ synonym /back /away
 : /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)
     2dup s" on" str= >r
-    2dup s" off" str= r@ or IF   2drop r> otr-mode !
-	<info> ." === " otr-mode @ IF  ." enter"  ELSE  ." leave"  THEN
+    2dup s" off" str= r@ or IF   2drop
+	msg-group-o r@ IF  .msg:+otr  ELSE  .msg:-otr  THEN
+	<info> ." === " r> IF  ." enter"  ELSE  ." leave"  THEN
 	."  otr mode ===" <default> forth:cr
     ELSE  rdrop
-	true otr-mode !@ >r  avalanche-text  r> otr-mode !
+	msg-group-o .msg:mode @ >r
+	msg-group-o .msg:+otr avalanche-text
+	r> msg-group-o .msg:mode !
     THEN ;
 
 : /chain ( addr u -- )
     \U chain on|off         turn chain mode on/off
     2dup s" on" str= >r
-    s" off" str= r@ or IF   r> chain-mode !
-	<info> ." === " chain-mode @ IF  ." enter"  ELSE  ." leave"  THEN
+    s" off" str= r@ or IF
+	msg-group-o r@ IF  .msg:+chain  ELSE  .msg:-chain  THEN
+	<info> ." === " r> IF  ." enter"  ELSE  ." leave"  THEN
 	."  chain mode ==="
     ELSE  <err> ." only 'chain on|off' are allowed" rdrop  THEN
     <default> forth:cr ;
@@ -1450,7 +1455,7 @@ synonym /back /away
 : /otrify ( addr u -- )
     \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
-    true otr-mode [: now>otr
+    msg:otr# msg-group-o .msg:mode [: now>otr
 	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop
@@ -1463,11 +1468,11 @@ synonym /back /away
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
     vkey keysize msg-keys[] $+[]!
-    lock-mode on ;
+    msg-group-o .msg:+lock ;
 : /unlock ( addr u -- )
     \U unlock               stop lock down
     \G unlock: stop lock down
-    2drop lock-mode off ;
+    2drop msg-group-o .msg:-lock ;
 
 : /bye ( addr u -- )
     \U bye
@@ -1553,7 +1558,7 @@ previous
 	    pubkey $@ key>nick type ." : "
 	    ack@ .timeouts @ . <default> cr )
 	    msg-group$ $@len IF
-		true otr-mode
+		msg:otr# msg-group-o .msg:mode
 		[: pubkey $@ ['] left, send-avalanche ;] !wrapper
 	    THEN
 	    net2o:dispose-context

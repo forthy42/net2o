@@ -132,6 +132,7 @@ cmd-class class
     field: silent-last#
 end-class msging-class
 
+
 cmd-class class{ msg
     $10 +field dummy
     $value: name$ \ group name
@@ -141,7 +142,19 @@ cmd-class class{ msg
     field: log[]
     field: mode
     \ mode bits:
-    0 5 bits: otr# chain# redate# lock# visible#
+    1 5 bits: otr# chain# redate# lock# visible#
+    : bit-ops: ( bit -- )
+        parse-name [{: d: name :}l name rot [: emit type ;] $tmp nextname ;]
+	{: xt: gen-name :}
+	'+' gen-name create dup , [: @        mode or!  ;] set-does>
+	'-' gen-name create dup , [: @ invert mode and! ;] set-does>
+	'?' gen-name create     , [: @ mode @ and 0<>   ;] set-does> ;
+    otr#     bit-ops: otr
+    chain#   bit-ops: chain
+    redate#  bit-ops: redate
+    lock#    bit-ops: lock
+    visible# bit-ops: visible
+
     method start
     method tag
     method chain

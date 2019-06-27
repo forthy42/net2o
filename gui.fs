@@ -999,7 +999,7 @@ wmsg-o >o msg-table @ token-table ! o>
     2dup msg-group$ $! (gui-msgs) ;
 
 : msg-wredisplay ( n -- )
-    drop 0 otr-mode
+    drop 0 msg-group-o .msg:mode
     [: msg-group$ $@ (gui-msgs) ;] !wrapper
     msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
     +sync +resize o>  ;
