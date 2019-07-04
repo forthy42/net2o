@@ -120,8 +120,7 @@ Variable announced
 Forward insert-addr ( o -- )
 
 : renat ( -- )
-    msg-group# [:
-      cell+ $@ drop cell+ .msg:peers[] bounds ?DO
+    [: msg:peers[] $@ bounds ?DO
 	  I @ >o o-beacon pings
 	  \ !!FIXME!! should maybe do a re-lookup?
 	  ret-addr $10 erase  dest-0key dest-0key> !
@@ -133,7 +132,7 @@ Forward insert-addr ( o -- )
 	      THEN
 	  cell +LOOP o>
       cell +LOOP
-    ;] #map ;
+    ;] group#map ;
 
 \ notification for address changes
 
@@ -158,7 +157,7 @@ Forward insert-addr ( o -- )
     beacon( ." done renat" cr ) ;
 
 scope{ /chat
-: /renat ( addr u -- ) renat-all /nat ;
+:noname ( addr u -- ) renat-all /nat ; is /renat
 }scope
 
 \ beacon handling

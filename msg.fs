@@ -1301,25 +1301,109 @@ false value away?
 : group#map ( xt -- )
     msg-group# swap [{: xt: xt :}l cell+ $@ drop cell+ .xt ;] #map ;
 
-also net2o-base scope: /chat
+uval-o chat-cmd-o
 
-: /me ( addr u -- )
+object uclass chat-cmd-o
+also net2o-base scope: /chat
+umethod /me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
-    [: $, msg-action ;] send-avalanche ;
-
-: /away ( addr u -- )
+umethod /away ( addr u -- )
     \U away [<action>]      send string or "away from keyboard" as action
     \G away: send string or "away from keyboard" as action
+synonym /back /away
+umethod /otr ( addr u -- )
+    \U otr on|off|message   turn otr mode on/off (or one-shot)
+umethod /chain ( addr u -- )
+    \U chain on|off         turn chain mode on/off
+umethod /peers ( addr u -- )
+    \U peers                list peers
+    \G peers: list peers in all groups
+umethod /gps ( addr u -- )
+    \U gps                  send coordinates
+    \G gps: send your coordinates
+synonym /here /gps
+umethod /chats ( addr u -- )
+    \U chats                list chats
+    \G chats: list all chats
+umethod /nat ( addr u -- )
+    \U nat                  list NAT info
+    \G nat: list nat traversal information of all peers in all groups
+umethod /renat ( addr u -- )
+    \U renat                redo NAT traversal
+    \G renat: redo nat traversal
+umethod /help ( addr u -- )
+    \U help                 show help
+    \G help: list help
+umethod /myaddrs ( addr u -- )
+    \U myaddrs              list my addresses
+    \G myaddrs: list my own local addresses (debugging)
+umethod /!myaddrs ( addr u -- )
+    \U !myaddrs             re-obtain my addresses
+    \G !myaddrs: if automatic detection of address changes fail,
+    \G !myaddrs: you can use this command to re-obtain your local addresses
+umethod /notify ( addr u -- )
+    \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
+    \G notify: Change notificaton settings
+umethod /beacons ( addr u -- )
+    \U beacons              list beacons
+    \G beacons: list all beacons
+umethod /n2o ( addr u -- )
+    \U n2o <cmd>            execute n2o command
+    \G n2o: Execute normal n2o command
+umethod /invitations ( addr u -- )
+    \U invitations          handle invitations
+    \G invitations: handle invitations: accept, ignore or block invitations
+umethod /sync ( addr u -- )
+    \U sync [+date] [-date] synchronize logs
+    \G sync: synchronize chat logs, starting and/or ending at specific
+    \G sync: time/date
+umethod /version ( addr u -- )
+    \U version              version string
+    \G version: print version string
+umethod /log ( addr u -- )
+    \U log [#lines]         show log
+    \G log: show the log, default is a screenful
+umethod /logstyle ( addr u -- )
+    \U logstyle [+-style]   set log style
+    \G logstyle: set log styles, the following settings exist:
+    \G logstyle: +date      a date per log line
+    \G logstyle: +num       a message number per log line
+umethod /otrify ( addr u -- )
+    \U otrify #line[s]      otrify message
+    \G otrify: turn an older message of yours into an OTR message
+umethod /lock ( addr u -- )
+    \U lock {@nick}         lock down
+    \G lock: lock down communication to list of nicks
+umethod /unlock ( addr u -- )
+    \U unlock               stop lock down
+    \G unlock: stop lock down
+umethod /bye ( addr u -- )
+    \U bye
+    \G bye: leaves the current chat
+umethod /chat ( addr u -- )
+    \U chat [group][@user]  switch/connect chat
+    \G chat: switch to chat with user or group
+umethod /split ( addr u -- )
+    \U split                split load
+    \G split: reduce distribution load by reconnecting
+end-class chat-cmds
+
+chat-cmds new Constant text-chat-cmd-o
+
+text-chat-cmd-o to chat-cmd-o
+
+:noname ( addr u -- )
+    [: $, msg-action ;] send-avalanche ; is /me
+
+:noname ( addr u -- )
     dup 0= IF  2drop
 	away? IF  "I'm back"  ELSE  "Away from keyboard"  THEN
 	away? 0= to away?
     THEN
-    [: $, msg-action ;] send-avalanche ;
-synonym /back /away
+    [: $, msg-action ;] send-avalanche ; is /away
 
-: /otr ( addr u -- )
-    \U otr on|off|message   turn otr mode on/off (or one-shot)
+:noname ( addr u -- )
     2dup s" on" str= >r
     2dup s" off" str= r@ or IF   2drop
 	msg-group-o r@ IF  .msg:+otr  ELSE  .msg:-otr  THEN
@@ -1329,156 +1413,110 @@ synonym /back /away
 	msg-group-o .msg:mode @ >r
 	msg-group-o .msg:+otr avalanche-text
 	r> msg-group-o .msg:mode !
-    THEN ;
+    THEN ; is /otr
 
-: /chain ( addr u -- )
-    \U chain on|off         turn chain mode on/off
+:noname ( addr u -- )
     2dup s" on" str= >r
     s" off" str= r@ or IF
 	msg-group-o r@ IF  .msg:+chain  ELSE  .msg:-chain  THEN
 	<info> ." === " r> IF  ." enter"  ELSE  ." leave"  THEN
 	."  chain mode ==="
     ELSE  <err> ." only 'chain on|off' are allowed" rdrop  THEN
-    <default> forth:cr ;
+    <default> forth:cr ; is /chain
 
-: /peers ( addr u -- ) 2drop
-    \U peers                list peers
-    \G peers: list peers in all groups
+:noname ( addr u -- )  2drop
     [: msg:name$ .group ." : "
 	msg:peers[] $@ bounds ?DO
 	    space I @ >o .con-id space
 	    ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
-	cell +LOOP  forth:cr ;] group#map ;
+	cell +LOOP  forth:cr ;] group#map ; is /peers
 
-: /gps ( addr u -- ) 2drop
-    \U gps                  send coordinates
-    \G gps: send your coordinates
+:noname ( addr u -- )  2drop
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
     ELSE
 	[: $, msg-coord ;] send-avalanche
-    THEN ;
+    THEN ; is /gps
 
-' /gps alias /here
-
-: /help ( addr u -- )
-    \U help                 show help
-    \G help: list help
+:noname ( addr u -- )
     bl skip '/' skip
     2dup [: ."     \U " forth:type ;] $tmp ['] .chathelp search-help
     [: ."     \G " forth:type ':' forth:emit ;] $tmp ['] .cmd search-help ;
+is /help
 
-: /invitations ( addr u -- )
-    \U invitations          handle invitations
-    \G invitations: handle invitations: accept, ignore or block invitations
-    2drop .invitations ;
+:noname ( addr u -- )
+    2drop .invitations ; is /invitations
 
-: /chats ( addr u -- ) 2drop ." ===== chats: "
-    \U chats                list chats
-    \G chats: list all chats
+:noname ( addr u -- )
+    2drop ." ===== chats: "
     [:  msg:name$ msg-group$ $@ str= IF ." *" THEN
 	msg:name$ .group
 	." [" msg:peers[] $[]# 0 .r ." ]#"
 	msg:log[] $[]# u. ;] group#map
-    ." =====" forth:cr ;
+    ." =====" forth:cr ; is /chats
 
-: /nat ( addr u -- )  2drop
-    \U nat                  list NAT info
-    \G nat: list nat traversal information of all peers in all groups
-    \U renat                redo NAT traversal
-    \G renat: redo nat traversal
+:noname ( addr u -- )  2drop
     [:  ." ===== Group: " msg:name$ .group ."  =====" forth:cr
 	msg:peers[] $@ bounds ?DO
 	    ." --- " I @ >o .con-id ." : " return-address .addr-path
 	    ."  ---" forth:cr .nat-addrs o>
-	cell +LOOP ;] group#map ;
+	cell +LOOP ;] group#map ; is /nat
 
-: /myaddrs ( addr u -- )
-    \U myaddrs              list my addresses
-    \G myaddrs: list my own local addresses (debugging)
+:noname ( addr u -- )
     2drop
     ." ===== all =====" forth:cr    .my-addr$s
     ." ===== public =====" forth:cr .pub-addr$s
-    ." ===== private =====" forth:cr .priv-addr$s ;
-: /!myaddrs ( addr u -- )
-    \U !myaddrs             re-obtain my addresses
-    \G !myaddrs: if automatic detection of address changes fail,
-    \G !myaddrs: you can use this command to re-obtain your local addresses
-    2drop !my-addr ;
+    ." ===== private =====" forth:cr .priv-addr$s ; is /myaddrs
+:noname ( addr u -- )
+    2drop !my-addr ; is /!myaddrs
 
-: /notify ( addr u -- )
-    \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
-    \G notify: Change notificaton settings
-    ['] notify-cmds evaluate-in .notify ;
+:noname ( addr u -- )
+    ['] notify-cmds evaluate-in .notify ; is /notify
 
-: /beacons ( addr u -- )
-    \U beacons              list beacons
-    \G beacons: list all beacons
+:noname ( addr u -- )
     2drop ." === beacons ===" forth:cr
     beacons# [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
 	  I 2@ ?dup-IF ..con-id space THEN .name
-      2 cells +LOOP forth:cr ;] #map ;
+      2 cells +LOOP forth:cr ;] #map ; is /beacons
 
-    \U n2o <cmd>            execute n2o command
-    \G n2o: Execute normal n2o command
-
-: /sync ( addr u -- )
-    \U sync [+date] [-date] synchronize logs
-    \G sync: synchronize chat logs, starting and/or ending at specific
-    \G sync: time/date
+:noname ( addr u -- )
     s>unumber? IF  drop  ELSE  2drop 0  THEN  cells >r
     msg-group-o .msg:peers[] $@ r@ u<= IF  drop rdrop  EXIT  THEN
     r> + @ >o o to connection
     ." === sync ===" forth:cr
-    net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ;
+    net2o-code expect-msg [: msg-group last?, ;] [msg,] end-code o> ; is /sync
 
-: /version ( addr u -- )
-    \U version              version string
-    \G version: print version string
-    2drop .n2o-version space .gforth-version forth:cr ;
+:noname ( addr u -- )
+    2drop .n2o-version space .gforth-version forth:cr ; is /version
 
-: /log ( addr u -- )
-    \U log [#lines]         show log
-    \G log: show the log, default is a screenful
+:noname ( addr u -- )
     s>unumber? IF  drop >r  ELSE  2drop rows >r  THEN
     msg-group$ $@ >group purge-log
-    r>  display-lastn ;
+    r>  display-lastn ; is /log
 
-: /logstyle ( addr u -- )
-    \U logstyle [+-style]   set log style
-    \G logstyle: set log styles, the following settings exist:
-    \G logstyle: +date      a date per log line
-    \G logstyle: +num       a message number per log line
-    ['] logstyles evaluate-in ;
+:noname ( addr u -- )
+    ['] logstyles evaluate-in ; is /logstyle
 
-: /otrify ( addr u -- )
-    \U otrify #line[s]      otrify message
-    \G otrify: turn an older message of yours into an OTR message
+:noname ( addr u -- )
     msg-group-o .msg:mode dup @ msg:otr# or swap
     [: now>otr
 	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop
 	;] (send-avalanche) drop .chat save-msgs&
-    ;] !wrapper ;
+    ;] !wrapper ; is /otrify
 
-: /lock ( addr u -- )
-    \U lock {@nick}         lock down
-    \G lock: lock down communication to list of nicks
+:noname ( addr u -- )
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
     vkey keysize msg-keys[] $+[]!
-    msg-group-o .msg:+lock ;
-: /unlock ( addr u -- )
-    \U unlock               stop lock down
-    \G unlock: stop lock down
-    2drop msg-group-o .msg:-lock ;
+    msg-group-o .msg:+lock ; is /lock
+:noname ( addr u -- )
+    2drop msg-group-o .msg:-lock ; is /unlock
 
-: /bye ( addr u -- )
-    \U bye
-    \G bye: leaves the current chat
-    2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ;
+:noname ( addr u -- )
+    2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ; is /bye
 }scope
 
 : ?slash ( addr u -- addr u flag )
@@ -1630,9 +1668,7 @@ $B $E 2Value chat-bufs#
     msg-group$ $@ ; \ stub
 
 scope{ /chat
-: /chat ( addr u -- )
-    \U chat [group][@user]  switch/connect chat
-    \G chat: switch to chat with user or group
+:noname ( addr u -- )
     chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
     msg-group$ $@ >group msg-group-o .msg:peers[] $@ dup 0= IF  2drop
 	nip IF  chat-connects
@@ -1640,7 +1676,7 @@ scope{ /chat
     ELSE
 	bounds ?DO  2dup I @ .pubkey $@ key2| str= 0= WHILE  cell +LOOP
 	    2drop chat-connects  ELSE  UNLOOP 2drop THEN
-    THEN  #0. /chats ;
+    THEN  #0. /chats ; is /chat
 }scope
 
 also net2o-base
@@ -1714,10 +1750,8 @@ previous
     REPEAT drop rdrop ;
 
 scope{ /chat
-: /split ( addr u -- )  2drop
-    \U split                split load
-    \G split: reduce distribution load by reconnecting
-    msg-group$ $@ >group msg-group-o .split-load ;
+:noname ( addr u -- )  2drop
+    msg-group$ $@ >group msg-group-o .split-load ; is /split
 }scope
 
 \ chat toplevel

@@ -795,10 +795,8 @@ n2o-history
 \ allow issuing commands during chat
 
 scope{ /chat
-
-: /n2o [: word-args ['] evaluate do-net2o-cmds ;] catch
-    ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ;
-
+:noname [: word-args ['] evaluate do-net2o-cmds ;] catch
+    ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ; is /n2o
 }scope
 
 : start-n2o ( -- )

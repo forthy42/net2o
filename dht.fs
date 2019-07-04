@@ -357,14 +357,14 @@ previous
 : -setip ['] .iperr is setip-xt ;
 
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
-    o to connection  +resend
+    dht-connection >o o to connection  +resend
     net2o-code  expect-reply
     pk@ $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
       gen-host-del $, dht-host- ;] $[]map
     end-with
     cookie+request
-    end-code| ;
+    end-code| o> ;
 
 : addme-owndht ( -- )
     pk@ >d#id >o  dht-host $[]off

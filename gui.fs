@@ -977,6 +977,7 @@ wmsg-o >o msg-table @ token-table ! o>
 
 #128 Value gui-msgs# \ display last 128 messages
 0 Value chat-edit    \ chat edit field
+0 Value chat-edit-bg \ chat edit background
 
 : (gui-msgs) ( gaddr u -- )
     reset-time
@@ -1007,8 +1008,16 @@ wmsg-o >o msg-table @ token-table ! o>
 
 [IFDEF] android also android [THEN]
 
+: ?chat-otr-status ( o:edit-w -- )
+    msg-group-o .msg:?otr
+    IF   otr-col#  [ greenish x-color ] Fliteral
+    ELSE chat-col# [ blackish x-color ] Fliteral  THEN
+    chat-edit    >o to w-color o>
+    chat-edit-bg >o to w-color o> ;
+
 : chat-edit-enter ( o:edit-w -- )
-    text$ dup IF  do-chat-cmd? 0= IF  avalanche-text  THEN
+    text$ dup IF  do-chat-cmd? 0= IF  avalanche-text
+	ELSE  ?chat-otr-status  THEN
     ELSE  2drop  THEN
     64#-1 line-date 64!  $lastline $free ;
 
@@ -1042,6 +1051,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	}}v box[]
 	{{
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
+		dup to chat-edit-bg
 		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
