@@ -1546,7 +1546,7 @@ is /help
     ELSE  2drop rectype-null  THEN ;
 : chain-rec ( addr u -- )
     over c@ '!' = IF
-	2dup 1 /string dup 0= IF  2drop rectype-null  EXIT  THEN
+	2dup 1 /string dup 0= IF  2drop 2drop rectype-null  EXIT  THEN
 	snumber?
 	case
 	    0 of  endof
