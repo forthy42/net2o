@@ -174,6 +174,7 @@ cmd-class class{ msg
     method end
     method display   \ display one message
     method redisplay \ display full set
+    method .nobody   \ show nobody is online
 }class
 
 cmd-class class{ pay

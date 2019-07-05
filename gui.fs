@@ -412,6 +412,7 @@ $00FF0020 new-color: pet-color
 $FFFF80FF new-color, fvalue users-color#
 $FFCCCCFF new-color, fvalue gps-color#
 $000077FF new-color, fvalue chain-color#
+$FF000000 $FF0000FF fade-color: show-error-color
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -812,7 +813,10 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     {{ msg-par unbox }}
     dup >r 0 ?DO  I pick box[] "unboxed" name! drop  LOOP  r>
     msg-vbox .+childs
-; wmsg-class to msg:end
+; wmsg-class is msg:end
+0 Value nobody-online-text \ nobody is online warning
+:noname 2e nobody-online-text [: f2* sin-t .fade +sync ;] >animate
+; wmsg-class is msg:.nobody
 : new-msg-par ( -- )
     {{ }}p "msg-par" name!
     dup .subbox box[] drop box[] cbl >bl
@@ -864,23 +868,23 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	}}h box[] "msgs-box" name! msgs-box .child+
 	blackish
     THEN
-; wmsg-class to msg:start
+; wmsg-class is msg:start
 :noname { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp
     ['] utf8-sanitize $tmp }}text text-color! \sans
     msg-box .child+
-; wmsg-class to msg:tag
+; wmsg-class is msg:tag
 :noname { d: string -- o }
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
-; wmsg-class to msg:text
+; wmsg-class is msg:text
 :noname { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
     "action" name! msg-box .child+
-; wmsg-class to msg:action
+; wmsg-class is msg:action
 :noname { d: string -- o }
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
@@ -889,20 +893,20 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     over click[]
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
-; wmsg-class to msg:url
+; wmsg-class is msg:url
 :noname { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
-; wmsg-class to msg:coord
+; wmsg-class is msg:coord
 :noname { d: string -- o }
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
 	string [: ." <" drop le-64@ .ticks ;] $tmp }}text 25%b
     }}z "chain" name! msg-box .child+
-; wmsg-class to msg:chain
+; wmsg-class is msg:chain
 :noname { d: pk -- o }
     {{
 	x-color { f: xc }
@@ -915,15 +919,15 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	[: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b r> swap
 	xc to x-color
     }}z msg-box .child+
-; wmsg-class to msg:signal
+; wmsg-class is msg:signal
 :noname ( addr u -- )
     re-green [: ." [" 85type ." ]→" ;] $tmp }}text msg-box .child+
     text-color!
-; wmsg-class to msg:re
+; wmsg-class is msg:re
 :noname ( addr u -- )
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
     text-color!
-; wmsg-class to msg:id
+; wmsg-class is msg:id
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
@@ -982,7 +986,7 @@ wmsg-o >o msg-table @ token-table ! o>
     msg-tdisplay
     msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
     +sync +resize o> ;
-' wmsg-display wmsg-class to msg:display
+' wmsg-display wmsg-class is msg:display
 
 #128 Value gui-msgs# \ display last 128 messages
 0 Value chat-edit    \ chat edit field
@@ -1061,7 +1065,10 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg
-		{{ \normal \regular blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
+		show-error-color \normal \regular
+		!i18n l" Nobody is online" }}text' !lit
+		dup to nobody-online-text /center
+		{{ blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
 	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[] ' size-limit filter[]

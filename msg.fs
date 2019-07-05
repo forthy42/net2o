@@ -482,6 +482,18 @@ msg-class is msg:object
     <warn> forth:type <default> ; msg-class is msg:action
 :noname ( addr u -- )
     <warn> ."  GPS: " .coords <default> ; msg-class is msg:coord
+
+: wait-2s-key ( -- )
+    ntime 50 0 DO  key? ?LEAVE
+    2dup i #40000000 um* d+ deadline  LOOP  2drop ;
+: xclear ( addr u -- ) x-width 1+ x-erase ;
+
+:noname ( -- )
+    <info>
+    [: ." nobody's online" msg-group-o .msg:?otr 0= IF ." , saving away"  THEN ;] $tmp
+    2dup type <default>
+    wait-2s-key xclear ; msg-class is msg:.nobody
+
 : replace-sig { addrsig usig addrmsg umsg -- }
     \ !!dummy!! need to verify signature!
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
@@ -1124,8 +1136,6 @@ edit-terminal edit-out !
 
 $200 Constant maxmsg#
 
-: xclear ( addr u -- ) x-width 1+ x-erase ;
-
 : get-input-line ( -- addr u )
     BEGIN  pad maxmsg# ['] accept catch
 	dup dup -56 = swap -28 = or \ quit or ^c to leave
@@ -1154,15 +1164,6 @@ $200 Constant maxmsg#
 : chat-entry ( -- )  ?.net2o/chats  word-args
     <warn> ." Type ctrl-D or '/bye' as single item to quit" <default> cr ;
 
-: wait-2s-key ( -- )
-    ntime 50 0 DO  key? ?LEAVE
-    2dup i #40000000 um* d+ deadline  LOOP  2drop ;
-: .nobody ( -- )
-    <info>
-    [: ." nobody's online" msg-group-o .msg:?otr 0= IF ." , saving away"  THEN ;] $tmp
-    2dup type <default>
-    wait-2s-key xclear ;
-
 also net2o-base
 \ chain messages to one previous message
 : chain, ( msgaddr u -- )
@@ -1176,7 +1177,7 @@ previous
 : send-avalanche ( xt -- )
     msg-group-o .msg:?otr IF  now>otr  ELSE  now>never  THEN
     (send-avalanche)
-    >r .chat r> 0= IF  .nobody  THEN ;
+    >r .chat r> 0= IF  msg-group-o .msg:.nobody  THEN ;
 
 \ chat helper words
 
