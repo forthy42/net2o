@@ -410,6 +410,8 @@ $FFFFFFFF new-color: edit-bg
 $80FF80FF new-color: send-color
 $00FF0020 new-color: pet-color
 $FFFF80FF new-color, fvalue users-color#
+$FFCCCCFF new-color, fvalue gps-color#
+$000077FF new-color, fvalue chain-color#
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -890,10 +892,17 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 ; wmsg-class to msg:url
 :noname { d: string -- o }
     {{
-	glue*l $FFCCCCFF new-color, slide-frame dup .button1
+	glue*l gps-color# slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
 ; wmsg-class to msg:coord
+:noname { d: string -- o }
+    {{
+	glue*l chain-color# slide-frame dup .button1
+	string sighash? IF  re-green  ELSE  obj-red  THEN
+	string [: ." <" drop le-64@ .ticks ;] $tmp }}text 25%b
+    }}z "chain" name! msg-box .child+
+; wmsg-class to msg:chain
 :noname { d: pk -- o }
     {{
 	x-color { f: xc }

@@ -347,7 +347,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-id ( $:id -- ) \g a hash id
     2 !!>=order? $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
-    $10 !!>=order? $> msg:chain ;
+    ( $10 !!>=order? ) $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
     $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
@@ -1169,13 +1169,8 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 
-: ?chain, ( -- )  msg-group-o .msg:?chain 0= ?EXIT
-    msg-group-o .msg:log[] $[]# 1- dup 0< IF  drop
-    ELSE  msg-group-o .msg:log[] $[]@ chain,
-    THEN ;
-
 : (send-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: sign[ msg-start execute ?chain, msg> ;] gen-cmd$ o>
+    [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )
@@ -1314,8 +1309,6 @@ umethod /away ( addr u -- )
 synonym /back /away
 umethod /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)
-umethod /chain ( addr u -- )
-    \U chain on|off         turn chain mode on/off
 umethod /peers ( addr u -- )
     \U peers                list peers
     \G peers: list peers in all groups
@@ -1414,15 +1407,6 @@ text-chat-cmd-o to chat-cmd-o
 	msg-group-o .msg:+otr avalanche-text
 	r> msg-group-o .msg:mode !
     THEN ; is /otr
-
-:noname ( addr u -- )
-    2dup s" on" str= >r
-    s" off" str= r@ or IF
-	msg-group-o r@ IF  .msg:+chain  ELSE  .msg:-chain  THEN
-	<info> ." === " r> IF  ." enter"  ELSE  ." leave"  THEN
-	."  chain mode ==="
-    ELSE  <err> ." only 'chain on|off' are allowed" rdrop  THEN
-    <default> forth:cr ; is /chain
 
 :noname ( addr u -- )  2drop
     [: msg:name$ .group ." : "
@@ -1560,6 +1544,22 @@ is /help
 	    ;] rectype-name
 	THEN
     ELSE  2drop rectype-null  THEN ;
+: chain-rec ( addr u -- )
+    over c@ '!' = IF
+	2dup 1 /string dup 0= IF  2drop rectype-null  EXIT  THEN
+	snumber?
+	case
+	    0 of  endof
+	    -1 of
+		msg-group-o .msg:log[] $[]#
+		over abs over u< IF  over 0< IF  +  ELSE  drop  THEN
+		    >r over ?flush-text + to last->in  r>
+		    [: msg-group-o .msg:log[] $[]@ chain, ;]
+		    rectype-name  EXIT  THEN
+	    endof
+	    2drop
+	endcase
+    THEN  2drop  rectype-null  ;
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
@@ -1568,7 +1568,7 @@ is /help
     ELSE  2drop rectype-null  THEN ;
 
 $Variable msg-recognizer
-' text-rec ' http-rec ' tag-rec ' pk-rec 4 msg-recognizer set-stack
+' text-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec 5 msg-recognizer set-stack
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in
