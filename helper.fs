@@ -86,10 +86,11 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk dhtroot
-    online? IF  +dht-beacon pk:connect  o to dht-connection  THEN ;
+    online? IF  +dht-beacon pk:connect  o to dht-connection
+    ELSE  2drop 2drop  THEN ;
 : dht-disconnect ( -- )
-    0 addr dht-connection !@  ?dup-IF
-	>o o to connection disconnect-me o>  THEN ;
+    0 addr dht-connection !@ ?dup-IF
+	>o o to connection disconnect-me 0 to connection o>  THEN ;
 
 Variable announced
 : subme ( -- )  announced @ IF
@@ -144,7 +145,8 @@ Forward insert-addr ( o -- )
 
 : announce-me ( -- )
     \ Check for disconnected state
-    dht-connect online? IF  replace-me -other  announced on  THEN ;
+    dht-connect online? IF
+	replace-me -other  announced on  THEN ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]

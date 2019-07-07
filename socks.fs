@@ -146,11 +146,11 @@ Variable lastn2oaddr
     THEN
     2dup routes# #key dup -1 = IF
 	drop s" " 2over routes# #!
-	last# to lastaddr#
 	routes# #key  dup lastn2oaddr !
     ELSE
 	nip nip
-    THEN ;
+    THEN
+    last# to lastaddr# ;
 
 : dns>string ( addr u port hint -- info net2o-addr u )
     >r SOCK_DGRAM >hints r> hints ai_family l!
