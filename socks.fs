@@ -136,8 +136,8 @@ $00000000 Value droprate#
     get-info dup >r info@ sendto
     r> freeaddrinfo ?ior ;
 
-0 Value lastaddr#
-Variable lastn2oaddr
+UValue lastaddr#
+User lastn2oaddr
 
 : insert-address ( addr u -- net2o-addr ) ?<ipv6
     address( ." Insert address " 2dup .address cr )
@@ -146,10 +146,11 @@ Variable lastn2oaddr
     THEN
     2dup routes# #key dup -1 = IF
 	drop s" " 2over routes# #!
-	routes# #key  dup lastn2oaddr !
+	routes# #key
     ELSE
 	nip nip
     THEN
+    dup lastn2oaddr !
     last# to lastaddr# ;
 
 : dns>string ( addr u port hint -- info net2o-addr u )
