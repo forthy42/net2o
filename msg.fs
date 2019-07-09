@@ -714,6 +714,9 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     cell +LOOP
     sigpksize# +  false ;
 
+: msg-dec?-sig? ( addr u -- addr' u' flag )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
+
 \ generate an encryt+sign packet
 
 : >modkey ( dstsk dstpk sk -- )
@@ -737,11 +740,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 
 \ nest-sig for msg/msging classes
 
-:noname ( addr u -- )
-    2dup + 2 - c@ $F0 and
-    case $80 of msg-dec-sig? endof
-	drop  msg-sig?
-	0 endcase ; ' message  2dup
+' msg-dec?-sig? ' message  2dup
 msging-class is start-req
 msging-class is nest-sig
 msg-class is start-req
@@ -1025,6 +1024,7 @@ previous
 \ chat message, text only
 
 : msg-tdisplay ( addr u -- )
+    2dup 2 - + c@ $80 and IF  net2o-base:msg-dec-sig? drop  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
