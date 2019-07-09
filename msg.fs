@@ -458,8 +458,10 @@ scope: logstyles
 :noname ( addr u -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
-    ELSE  2drop  THEN
-    <info> ." chat is locked" <default> ;   msg-class is msg:lock
+	<info> ." chat is locked" <default>
+    ELSE  2drop
+	<err> ." locked out of chat" <default>
+    THEN ;   msg-class is msg:lock
 :noname ( -- )  msg-group-o .msg:-lock
     <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
@@ -724,12 +726,13 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     get0 ge25519-pack
     sct2 sc25519>32b ;
 
-: ]encpksig ( -- )
+: ]encpksign ( -- )
     +zero16 nest$ msg-keys[] dup $[]# 1- swap $[]@ encrypt$
     sigdate +date
     sktmp pktmp sk@ drop >modkey
     [:  pktmp keysize forth:type  sigdate datesize# forth:type
-	sig-params 2drop sktmp pktmp ed-sign forth:type
+	sig-params 2drop sktmp pktmp ed-sign
+	2dup + 1- $80 swap orc! forth:type
 	keysize forth:emit ;] ']sign ;
 
 \ nest-sig for msg/msging classes
@@ -935,12 +938,15 @@ event: :>msg-eval ( parent $pack $addr -- )
 
 : group, ( addr u -- )
     $, msg-group ;
+: <msg ( -- )
+    sign[ msg-group-o .msg:?lock IF  +zero16  THEN ;
+
 : msg> ( -- )
     \G end a message block by adding a signature
-    ]pksign ;
+     msg-group-o .msg:?lock IF  ]encpksign  ELSE  ]pksign  THEN ;
 : msg-otr> ( -- )
     \G end a message block by adding a short-time signature
-    now>otr ]pksign ;
+    now>otr msg> ;
 : msg-log, ( -- addr u )
     last-signed 2@ >msg-log ;
 
@@ -975,7 +981,7 @@ also net2o-base
 
 : join, ( -- )
     [: msg-join sync-ahead?,
-      sign[ msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
+      <msg msg-start "joined" $, msg-action msg-otr> ;] [msg,] ;
 
 : silent-join, ( -- )
     msg-group$ $@ dup IF  message $, msg-join  end-with
@@ -983,7 +989,7 @@ also net2o-base
 
 : leave, ( -- )
     [: msg-leave
-      sign[ msg-start "left" $, msg-action msg-otr> ;] [msg,] ;
+      <msg msg-start "left" $, msg-action msg-otr> ;] [msg,] ;
 
 : silent-leave, ( -- )
     ['] msg-leave [msg,] ;
@@ -1171,7 +1177,7 @@ also net2o-base
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 
 : (send-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: sign[ msg-start execute msg> ;] gen-cmd$ o>
+    [: 0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
 previous
 : send-avalanche ( xt -- )
@@ -1493,10 +1499,12 @@ is /help
     ;] !wrapper ; is /otrify
 
 :noname ( addr u -- )
+    msg-group-o .msg:-lock
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
     vkey keysize msg-keys[] $+[]!
-    msg-group-o .msg:+lock ; is /lock
+    msg-group-o .msg:+lock
+; is /lock
 :noname ( addr u -- )
     2drop msg-group-o .msg:-lock ; is /unlock
 
@@ -1580,8 +1588,8 @@ $Variable msg-recognizer
     ELSE  2drop  THEN
     r> to forth-recognizer  r> to last# ;
 
-: avalanche-text ( addr u -- ) >utf8$
-    [: parse-text ;] send-avalanche ;
+: avalanche-text ( addr u -- )
+    >utf8$ ['] parse-text send-avalanche ;
 
 previous
 
@@ -1701,14 +1709,14 @@ also net2o-base
 : send-reconnects ( o:group -- )
     net2o-code expect-msg
     [:  msg-group-o .msg:name$ ?destpk $, msg-leave
-	sign[ msg-start "left" $, msg-action msg-otr>
+	<msg msg-start "left" $, msg-action msg-otr>
 	reconnects, ;] [msg,]
     end-code| ;
 
 : send-reconnect1 ( o:group -- )
     net2o-code expect-msg
     [:  msg:name$ ?destpk $, msg-leave
-	sign[ msg-start "left" $, msg-action msg-otr>
+	<msg msg-start "left" $, msg-action msg-otr>
 	.reconnect, ;] [msg,]
     end-code| ;
 previous
