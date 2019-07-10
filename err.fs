@@ -54,6 +54,7 @@ s" no signature appended"        throwcode !!no-sig!!
 s" future signature"             throwcode !!new-sig!!
 s" expired signature"            throwcode !!old-sig!!
 s" invalid signature"            throwcode !!inv-sig!!
+s" failed to open message"       throwcode !!msg-locked!!
 s" no temporary key"             throwcode !!no-tmpkey!!
 s" generic stack empty"          throwcode !!stack-empty!!
 s" String stack full"            throwcode !!string-full!!
