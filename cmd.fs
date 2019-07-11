@@ -679,11 +679,11 @@ also net2o-base
 : sign[ ( -- ) neststart# @ nest-stack >stack
     string "\x80\x00" +cmdbuf cmdbuf$ nip neststart# ! ;
 : nest[ ( -- ) sign[ +zero16 ; \ add space for IV
-: ']sign ( xt -- )
-    c:0key nest$
-\    ." sign: " 2dup xtype forth:cr
-    c:hash $tmp +cmdbuf
+: ']nestsig ( xt -- )
+    $tmp +cmdbuf
     cmd-resolve>  >r cmdbuf$ drop - r> last-signed 2!  nestsig ;
+: ']sign ( xt -- )
+    c:0key nest$ c:hash ']nestsig ;
 : ]sign ( -- ) ['] .sig ']sign ;
 : ]pksign ( -- ) [: .pk .sig ;] ']sign ;
 

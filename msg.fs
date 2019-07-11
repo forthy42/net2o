@@ -327,7 +327,7 @@ Forward msg:last
 
 : msg-key! ( addr u -- )
     0 msg-group-o .msg:keys[] [: rot >r 2over str= r> or ;] $[]map
-    IF  2drop  ELSE  ." msg-key+ " 2dup 85type forth:cr
+    IF  2drop  ELSE  \ ." msg-key+ " 2dup 85type forth:cr
 	$make msg-group-o .msg:keys[] >back  THEN ;
 
 \ message commands
@@ -695,63 +695,25 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 \ features: signature verification only when key is known
 \           identity only revealed when correctly decrypted
 
-: modkey> ( src dest -- )
-    ( over keysize 85type ."  -[" )
-    get0 rot ge25519-unpack- 0= !!no-ed-key!!
-    voutkey keysize c:hash@
-    ( voutkey keysize 85type ." ]> " )
-    sct0 voutkey 32b>sc25519
-    get1 get0 sct0 ge25519*
-    dup get1 ge25519-pack
-    $80 swap ( over ) $1F + xorc!
-    ( keysize 85type forth:cr ) ;
 : msg-dec-sig? ( addr u -- addr' u' flag )
-    sigpksize# - 2dup + -5 { pksig err }
+    sigpksize# - 2dup + { pksig }
     msg-group-o .msg:keys[] $@ bounds U+DO
-	2dup $make { w^ msg }
-	msg $@ I $@ decrypt$ IF
-	    pksig sigpksize# over date-sig? to err
-	    pksig pktmp modkey>
-	    err 0= IF
-		pksig sigpksize# keysize /string
-		pktmp keysize
-		2rot [: type type type ;] $tmp
-		2dup + 2 - $7F swap andc!
-		msg $free
-		err  unloop  EXIT  THEN  THEN
-	2drop
-	msg $free
+	I $@ 2over pksig decrypt-sig?
+	dup -5 <> IF
+	    >r 2nip r> unloop  EXIT
+	THEN  drop 2drop
     cell +LOOP
-    sigpksize# +  err ;
+    sigpksize# +  -5 ;
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
 
 \ generate an encryt+sign packet
 
-: >modkey ( dstsk dstpk sk -- )
-    \ dup pad sct0 rot raw>sc25519
-    \ get0 sct0 ge25519*base
-    \ get0 ge25519-pack pad keysize 85type ."  -["
-    voutkey keysize c:hash@
-    ( voutkey keysize 85type ." ]> " )
-    sct0 voutkey 32b>sc25519
-    sct1 sct0 sc25519/
-    sct0 swap raw>sc25519
-    sct2 sct0 sct1 sc25519*
-    get0 sct2 ge25519*base
-    ( dup ) get0 ge25519-pack
-    ( keysize 85type forth:cr )
-    sct2 sc25519>32b ;
-
 : ]encpksign ( -- )
-    +zero16 nest$ msg-group-o .msg:keys[] dup $[]# 1- swap $[]@ encrypt$
-    sigdate +date
-    sktmp pktmp sk@ drop >modkey
-    [:  pktmp keysize forth:type  sigdate datesize# forth:type
-	sig-params 2drop sktmp pktmp ed-sign
-	2dup + 1- $80 swap orc! forth:type
-	keysize forth:emit ;] ']sign ;
+    +zero16 nest$
+    0 msg-group-o .msg:keys[] $[]@ encrypt$
+    ['] .encsign ']nestsig ;
 
 \ nest-sig for msg/msging classes
 
@@ -1039,7 +1001,9 @@ previous
 \ chat message, text only
 
 : msg-tdisplay ( addr u -- )
-    2dup 2 - + c@ $80 and IF  net2o-base:msg-dec-sig? drop  THEN
+    2dup 2 - + c@ $80 and IF  net2o-base:msg-dec-sig? IF
+	    2drop <err> ." Undecryptable message" <default> cr  EXIT
+	THEN  <info>  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
@@ -1517,7 +1481,7 @@ is /help
     msg-group-o .msg:-lock
     word-args ['] args>keylist execute-parsing
     [: key-list v-enc$ $, net2o-base:msg-lock ;] send-avalanche
-    vkey keysize msg-group-o .msg:keys[] $+[]!
+    vkey keysize $make msg-group-o .msg:keys[] >back
     msg-group-o .msg:+lock
 ; is /lock
 :noname ( addr u -- )

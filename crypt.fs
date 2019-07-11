@@ -608,7 +608,7 @@ drop
 : sksig@ ( -- sksig u )
     my-key? .ke-sksig sec@ ;
 : .sig ( -- )
-    +sig sigdate +date sigdate datesize# type
+    +sig sigdate +date  sigdate datesize# type
     sig-params ed-sign type keysize emit ;
 : .pk ( -- )  pk@ key| type ;
 : pk-sig ( addr u -- sig u )
@@ -663,6 +663,55 @@ drop
     vdhe viv vsessionkey v-enc-loop ;
 : v-enc$ ( keylist -- addr u )
     ['] v-enc-gen $tmp ;
+
+\ message encryption
+
+: >modkey ( dstsk dstpk sk -- )
+    \ dup pad sct0 rot raw>sc25519
+    \ get0 sct0 ge25519*base
+    \ get0 ge25519-pack pad keysize 85type ."  -["
+    voutkey state2# c:hash@
+    ( voutkey $10 + keysize 85type ." ]> " )
+    sct0 voutkey $10 + 32b>sc25519 \ don't use first $10 bytes, used by $encrypt
+    sct1 sct0 sc25519/
+    sct0 swap raw>sc25519
+    sct2 sct0 sct1 sc25519*
+    get0 sct2 ge25519*base
+    ( dup ) get0 ge25519-pack
+    ( keysize 85type forth:cr )
+    sct2 sc25519>32b ;
+
+: modkey> ( src dest -- )
+    ( over keysize 85type ."  -[" )
+    get0 rot ge25519-unpack- 0= !!no-ed-key!!
+    voutkey state2# c:hash@
+    ( voutkey keysize 85type ." ]> " )
+    sct0 voutkey $10 + 32b>sc25519
+    get1 get0 sct0 ge25519*
+    dup get1 ge25519-pack
+    $80 swap ( over ) $1F + xorc!
+    ( keysize 85type forth:cr ) ;
+: decrypt-sig? ( key u msg u sig -- addr u sigerr )
+    { pksig } $make -5 { w^ msg err }
+    msg $@ 2swap decrypt$ IF
+	pksig sigpksize# over date-sig? to err  2drop
+	err 0= IF
+	    pksig pktmp modkey>
+	    pksig sigpksize# keysize /string
+	    pktmp keysize
+	    2rot [: type type type ;] $tmp
+	    2dup + 2 - $7F swap andc!
+	    msg $free
+	    err  EXIT  THEN  THEN
+    2drop msg $free  0 0 err ;
+
+: .encsign ( -- )
+    +sig sigdate +date
+    sktmp pktmp sk@ drop >modkey
+    pktmp keysize type  sigdate datesize# type
+    sig-params 2drop sktmp pktmp ed-sign
+    2dup + 1- $80 swap orc! type
+    keysize emit ;
 
 \\\
 Local Variables:
