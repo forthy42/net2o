@@ -300,7 +300,7 @@ in net2o : pklookup? ( pkaddr u -- flag )
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
     false id dup .dht-host ['] insert-host? $[]map drop nip nip
-    lastaddr# IF  lastaddr# cell+ $@ dest-0key $!  THEN ;
+    lastaddr# IF  lastaddr# cell+ $@ dest-0key sec!  THEN ;
 in net2o : pklookup ( pkaddr u -- )
     net2o:pklookup? 0= !!no-address!! ;
 
