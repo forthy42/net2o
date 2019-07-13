@@ -74,7 +74,7 @@ Sema msglog-sema
 : serialize-log ( addr u -- $addr )
     [: bounds ?DO
 	    I $@ check-date 0= IF  net2o-base:$, net2o-base:nestsig
-	    ELSE   2drop  THEN
+	    ELSE   msg( ." removed entry " dump )else( 2drop )  THEN
       cell +LOOP ;]
     gen-cmd ;
 
@@ -461,7 +461,7 @@ scope: logstyles
 	<info> ." chat is locked" <default>
     ELSE  2drop
 	<err> ." locked out of chat" <default>
-    THEN ;   msg-class is msg:lock
+    THEN ; msg-class is msg:lock
 :noname ( -- )  msg-group-o .msg:-lock
     <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
@@ -641,14 +641,13 @@ Variable group-list[]
     \ if no group has been selected, use the pubkey as group
     last# 0= IF  2dup + sigpksize# - keysize >group  THEN ;
 
-: handle-msg ( addr u -- )
-    ?pkgroup >msg-log
-    2dup d0<> \ do something if it is new
-    IF  replay-mode @ 0= IF
-	    2dup show-msg
-	    2dup parent .push-msg
-	THEN
-    THEN  2drop ;
+: handle-msg ( addr-o u-o addr-dec u-dec -- )
+    ?pkgroup 2swap >msg-log
+    2dup d0<> replay-mode @ 0= and \ do something if it is new
+    IF
+	2over show-msg
+	2dup parent .push-msg
+    THEN  2drop 2drop ;
 
 \g 
 \g ### messaging commands ###
@@ -681,9 +680,9 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> nest-sig ?dup-0=-IF
+    $> 2dup nest-sig ?dup-0=-IF
 	handle-msg
-   ELSE  replay-mode @ IF  drop 2drop
+    ELSE  replay-mode @ IF  drop 2drop 2drop
 	ELSE  !!sig!!  THEN \ balk on all wrong signatures
     THEN ;
 
@@ -703,7 +702,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	    >r 2nip r> unloop  EXIT
 	THEN  drop 2drop
     cell +LOOP
-    sigpksize# +  -5 ;
+    sigpksize# +  -5  replay-mode @ 0= and ;
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
@@ -1010,7 +1009,7 @@ previous
 ' msg-tdisplay msg-notify-class is msg:display
 : msg-tredisplay ( n -- )
     reset-time
-    msg-group-o .msg:mode dup @ msg:otr# invert and swap
+    msg-group-o >o msg:?otr msg:-otr o> >r
     [:  cells >r msg-log@ 2dup { log u }
 	dup r> - 0 max /string bounds ?DO
 	    I log - cell/ to log#
@@ -1018,7 +1017,8 @@ previous
 	    msgt ['] msg:display catch IF  ." invalid entry" cr
 		2drop  THEN
 	cell +LOOP
-	log free throw ;] !wrapper ;
+	log free throw ;] catch
+    r> IF  msg-group-o .msg:+otr  THEN  throw ;
 ' msg-tredisplay msg-class is msg:redisplay
 
 msg-class class
@@ -1357,6 +1357,9 @@ umethod /lock ( addr u -- )
 umethod /unlock ( addr u -- )
     \U unlock               stop lock down
     \G unlock: stop lock down
+umethod /lock? ( addr u -- )
+    \U lock?                check lock status
+    \G lock?: report lock status
 umethod /bye ( addr u -- )
     \U bye
     \G bye: leaves the current chat
@@ -1486,6 +1489,9 @@ is /help
 ; is /lock
 :noname ( addr u -- )
     2drop msg-group-o .msg:-lock ; is /unlock
+:noname ( addr u -- )
+    2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
+; is /lock?
 
 :noname ( addr u -- )
     2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ; is /bye

@@ -54,12 +54,12 @@ end-class rng-c
 
 : read-rnd ( addr u -- )
     \G read in entropy bytes from the systems entropy source
-    [ [defined] getentropy [defined] linux and [IF]
-	"getentropy" "libc.so.6" open-lib lib-sym 0<>
+    [ [defined] getrandom [defined] linux and [IF]
+	"getrandom" "libc.so.6" open-lib lib-sym 0<>
     [ELSE] false [THEN] ]
     [IF]
-	bounds U+DO \ getentropy reads $100 bytes at maximum
-	    I I' over - $100 umin getentropy
+	bounds U+DO \ getrandom reads $100 bytes at maximum
+	    I I' over - $100 umin 0 getrandom
 	    dup -1 = IF  errno #38 = IF  drop
 		    \ oops, we don't have getentropy in the kernel
 		    I I' over - $100 umin read-urnd

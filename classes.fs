@@ -137,6 +137,7 @@ cmd-class class{ msg
     $10 +field dummy
     $value: name$ \ group name
     $value: id$
+    $value: msg$  \ decrypted message
     field: peers[]
     field: keys[]
     field: log[]
