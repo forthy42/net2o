@@ -702,7 +702,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 	    >r 2nip r> unloop  EXIT
 	THEN  drop 2drop
     cell +LOOP
-    sigpksize# +  -5  replay-mode @ 0= and ;
+    sigpksize# +  -5 ;
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
@@ -716,11 +716,10 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 
 \ nest-sig for msg/msging classes
 
-' msg-dec?-sig? ' message  2dup
-msging-class is start-req
-msging-class is nest-sig
-msg-class is start-req
-msg-class is nest-sig
+' message msging-class is start-req
+:noname check-date >r 2dup r> ; msging-class is nest-sig
+' message msg-class is start-req
+' msg-dec?-sig? msg-class is nest-sig
 
 ' context-table is gen-table
 
@@ -918,7 +917,7 @@ event: :>msg-eval ( parent $pack $addr -- )
 
 : msg> ( -- )
     \G end a message block by adding a signature
-     msg-group-o .msg:?lock IF  ]encpksign  ELSE  ]pksign  THEN ;
+    msg-group-o .msg:?lock IF  ]encpksign  ELSE  ]pksign  THEN ;
 : msg-otr> ( -- )
     \G end a message block by adding a short-time signature
     now>otr msg> ;
@@ -1007,11 +1006,18 @@ previous
     nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
 ' msg-tdisplay msg-notify-class is msg:display
+: ?search-lock ( addr u -- )
+    BEGIN  dup  WHILE  cell- 2dup + $@ sigpksize# - 1- + c@ $2E = IF
+		2dup + $@ ['] msg:display catch IF  2drop  THEN
+		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
+	    THEN
+    REPEAT  2drop ;
 : msg-tredisplay ( n -- )
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
-    [:  cells >r msg-log@ 2dup { log u }
-	dup r> - 0 max /string bounds ?DO
+    [:  cells >r msg-log@
+	{ log u } u r> - 0 max { u' }  log u' ?search-lock
+	log u u' /string bounds ?DO
 	    I log - cell/ to log#
 	    I $@ { d: msgt }
 	    msgt ['] msg:display catch IF  ." invalid entry" cr
@@ -1488,7 +1494,9 @@ is /help
     msg-group-o .msg:+lock
 ; is /lock
 :noname ( addr u -- )
-    2drop msg-group-o .msg:-lock ; is /unlock
+    2drop msg-group-o .msg:-lock
+    [: net2o-base:msg-unlock ;] send-avalanche
+; is /unlock
 :noname ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?

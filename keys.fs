@@ -1297,6 +1297,7 @@ also net2o-base
     [: 0key, nest[ mypk2nick$ $, pubkey $@ key| $, invite cookie+request
       ]tmpnest end-cmd ;] is expect-reply? ;
 : qr-challenge, ( -- )
+    \ !!FIXME!! the qr-challenge should include pubkey+sig into the hash
     $10 rng$ 2dup $, qr-key $8
     msg( ." challenge: " 2over 85type space 2dup xtype forth:cr )
     c:0key >keyed-hash

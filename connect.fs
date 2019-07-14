@@ -264,6 +264,7 @@ Sema id-sema
 +net2o: tmp-secret, ( -- )
     nest[ sec-cookie, ]nest ;
 +net2o: qr-challenge ( $:challenge $:respose -- )
+    \ !!FIXME!! the qr-challenge should include pubkey+sig into the hash
     $> $> c:0key qr-key $8 >keyed-hash qr-hash $40 c:hash@
     qr-hash over $10 umax str= dup invit:qr# and ulit, <invite-result>
     \ challenge will fail if less than 16 bytes

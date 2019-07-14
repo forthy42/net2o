@@ -413,6 +413,8 @@ $FFFF80FF new-color, fvalue users-color#
 $FFCCCCFF new-color, fvalue gps-color#
 $000077FF new-color, fvalue chain-color#
 $FF000000 $FF0000FF fade-color: show-error-color
+$338833FF text-color: lock-color
+$883333FF text-color: lockout-color
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -894,6 +896,24 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
 ; wmsg-class is msg:url
+:noname ( d: string -- o )
+    0 .v-dec$ dup IF
+	msg-key!  msg-group-o .msg:+lock
+	{{
+	    glue*l lock-color x-color slide-frame dup .button1
+	    greenish l" chat is locked" }}text' 25%bv
+	}}z
+    ELSE  2drop
+	{{
+	    glue*l lockout-color x-color slide-frame dup .button1
+	    show-error-color 1e +to x-color l" locked out of chat" }}text' 25%bv
+	}}z
+    THEN "lock" name! msg-box .child+ ; wmsg-class is msg:lock
+:noname ( -- o )
+	{{
+	    glue*l lock-color x-color slide-frame dup .button1
+	    blackish l" chat is unlocked" }}text' 25%bv
+	}}z msg-box .child+ ;
 :noname { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
@@ -999,8 +1019,9 @@ wmsg-o >o msg-table @ token-table ! o>
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
     2dup load-msg
-    msg-log@ 2dup { log u }
-    dup gui-msgs# cells - 0 max /string bounds ?DO
+    gui-msgs# msg-log@
+    { log u } u r> - 0 max { u' }  log u' ?search-lock
+    log u u' /string bounds ?DO
 	I $@ { d: msgt }
 	msgt ['] wmsg-display wmsg-o .catch IF
 	    <err> ." invalid entry" <default> 2drop
