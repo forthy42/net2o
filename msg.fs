@@ -467,11 +467,13 @@ scope: logstyles
 :noname ( -- )  msg-group-o .msg:-lock
     <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
+: .perms ( n -- )
+    "👹" bounds U+DO
+	dup 1 and IF  I xc@ xemit  THEN  2/
+    I I' over - x-size  +LOOP  drop ;
 :noname { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
-    pk .key-id ." : " perm 64@ 64>n s" 👹" bounds U+DO
-	dup 1 and IF  I xc@ xemit  THEN  2/
-    I I' over - x-size  +LOOP  drop space
+    pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
 :noname ( addr u type -- )
     space <warn> case
@@ -504,13 +506,36 @@ msg-class is msg:object
     2dup type <default>
     wait-2s-key xclear ; msg-class is msg:.nobody
 
+\ encrypt+sign
+\ features: signature verification only when key is known
+\           identity only revealed when correctly decrypted
+
+: msg-dec-sig? ( addr u -- addr' u' flag )
+    sigpksize# - 2dup + { pksig }
+    msg-group-o .msg:keys[] $@ bounds U+DO
+	I $@ 2over pksig decrypt-sig?
+	dup -5 <> IF
+	    >r 2nip r> unloop  EXIT
+	THEN  drop 2drop
+    cell +LOOP
+    sigpksize# +  -5 ;
+
+: msg-sig? ( addr u -- addr u' flag )
+    skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
+    ELSE  pk-sig?  THEN ;
+
+: msg-dec?-sig? ( addr u -- addr' u' flag )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
+
 : replace-sig { addrsig usig addrmsg umsg -- }
-    \ !!dummy!! need to verify signature!
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
-    2dup pk-sig? !!sig!! 2drop addrmsg umsg smove ;
+    2dup msg-dec?-sig? !!sig!! 2drop addrmsg umsg smove ;
 : new-otrsig ( addr u -- addrsig usig )
     2dup startdate@ old>otr
-    c:0key sigpksize# - c:hash ['] .sig $tmp 1 64s /string ;
+    predate-key keccak# c:key@ c:key# smove
+    + 2 - c@ $80 and >r
+    ['] .encsign-rest ['] .sig r> select
+    $tmp 1 64s /string ;
 
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
@@ -519,6 +544,7 @@ msg-class is msg:object
 	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
 	    I msg-group-o .msg:log[] $[]@
+	    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
 		    ."  OTRify #" I u.
@@ -693,27 +719,6 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     ELSE  replay-mode @ IF  drop 2drop 2drop
 	ELSE  !!sig!!  THEN \ balk on all wrong signatures
     THEN ;
-
-: msg-sig? ( addr u -- addr u' flag )
-    skip-sig? @ IF   quicksig( pk-quick-sig? )else( pk-date? )
-    ELSE  pk-sig?  THEN ;
-
-\ encrypt+sign
-\ features: signature verification only when key is known
-\           identity only revealed when correctly decrypted
-
-: msg-dec-sig? ( addr u -- addr' u' flag )
-    sigpksize# - 2dup + { pksig }
-    msg-group-o .msg:keys[] $@ bounds U+DO
-	I $@ 2over pksig decrypt-sig?
-	dup -5 <> IF
-	    >r 2nip r> unloop  EXIT
-	THEN  drop 2drop
-    cell +LOOP
-    sigpksize# +  -5 ;
-
-: msg-dec?-sig? ( addr u -- addr' u' flag )
-    2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
 
 \ generate an encryt+sign packet
 
@@ -1007,7 +1012,7 @@ previous
 \ chat message, text only
 
 : msg-tdisplay ( addr u -- )
-    2dup 2 - + c@ $80 and IF  net2o-base:msg-dec-sig? IF
+    2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
@@ -1206,15 +1211,18 @@ Variable chat-keys
 also net2o-base
 
 : do-otrify ( n -- ) >r
-    msg-group$ $@ >group msg-group-o .msg:log[] $@ r> cells safe/string
-    IF  $@ 2dup + sigpksize# - sigpksize#
-	over keysize pkc over str= IF
+    msg-group$ $@ >group msg-group-o .msg:log[] $@
+    r> cells dup 0< IF  over + 0 max  THEN safe/string
+    IF  $@
+	2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
+	2dup + sigpksize# - sigpksize#
+	over keysize pk@ key| str= IF
 	    keysize /string 2swap new-otrsig 2swap
 	    $, $, msg-otrify
 	ELSE
 	    2drop 2drop ." not your message!" forth:cr
 	THEN
-    THEN ;
+    ELSE  drop  THEN ;
 
 previous
 
@@ -1491,7 +1499,7 @@ is /help
 :noname ( addr u -- )
     msg-group-o .msg:mode dup @ msg:otr# or swap
     [: now>otr
-	[: BEGIN  bl $split 2>r dup  WHILE  s>unumber? WHILE
+	[: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
 			drop do-otrify  2r>  REPEAT THEN
 	    2drop 2r> 2drop
 	;] (send-avalanche) drop .chat save-msgs&

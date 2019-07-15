@@ -415,6 +415,7 @@ $000077FF new-color, fvalue chain-color#
 $FF000000 $FF0000FF fade-color: show-error-color
 $338833FF text-color: lock-color
 $883333FF text-color: lockout-color
+$FFAA44FF text-color, fvalue perm-color#
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -913,13 +914,23 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	{{
 	    glue*l lock-color x-color slide-frame dup .button1
 	    blackish l" chat is unlocked" }}text' 25%bv
-	}}z msg-box .child+ ;
+	}}z msg-box .child+ ; wmsg-class is msg:unlock
 :noname { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
 	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
 ; wmsg-class is msg:coord
+:noname { 64^ perm d: pk -- }
+    perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
+    {{
+	glue*l perm-color# slide-frame dup .button1
+	{{
+	    pk [: '@' emit .key-id ;] $tmp ['] utf8-sanitize $tmp }}text 25%b
+	    perm 64@ 64>n ['] .perms $tmp }}text 25%b
+	}}h
+    }}z msg-box .child+
+; wmsg-class is msg:perms
 :noname { d: string -- o }
     {{
 	glue*l chain-color# slide-frame dup .button1

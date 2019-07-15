@@ -49,7 +49,9 @@ object uclass keytmp
     keysize   uvar keygendh
     tf_ctx_256 uvar tf-key
     keysize   uvar tf-out
+    keysize   uvar pkmod
     $10       uvar tf-hashout
+    keccak#   uvar predate-key
     1 64s     uvar last-mykey
     cell      uvar keytmp-up
 end-class keytmp-c
@@ -581,6 +583,7 @@ drop
     rdrop ;
 
 : date-sig? ( addr u pk -- addr u flag )
+    c:key@ c:key# predate-key keccak# smove
     >r >date r> verify-sig ;
 : pk-sig? ( addr u -- addr u' flag )
     dup sigpksize# u< IF  sig-unsigned  EXIT  THEN
@@ -694,24 +697,28 @@ drop
 : decrypt-sig? ( key u msg u sig -- addr u sigerr )
     { pksig } $make -5 { w^ msg err }
     msg $@ 2swap decrypt$ IF
+	pksig pkmod modkey> \ key modification without date
 	pksig sigpksize# over date-sig? to err  2drop
 	err 0= IF
-	    pksig pktmp modkey>
 	    pksig sigpksize# keysize /string
-	    pktmp keysize
+	    pkmod keysize
 	    2rot [: type type type ;] $tmp
 	    2dup + 2 - $7F swap andc!
 	    msg $free
 	    err  EXIT  THEN  THEN
     2drop msg $free  0 0 err ;
 
-: .encsign ( -- )
-    +sig sigdate +date
-    sktmp pktmp sk@ drop >modkey
-    pktmp keysize type  sigdate datesize# type
-    sig-params 2drop sktmp pktmp ed-sign
+: .encsign-rest ( -- )
+    sigdate +date
+    sigdate datesize# type
+    sig-params 2drop sktmp pkmod ed-sign
     2dup + 1- $80 swap orc! type
     keysize emit ;
+
+: .encsign ( -- )
+    +sig
+    sktmp pkmod sk@ drop >modkey
+    pkmod keysize type .encsign-rest ;
 
 \\\
 Local Variables:
