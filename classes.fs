@@ -132,7 +132,6 @@ cmd-class class
     field: silent-last#
 end-class msging-class
 
-
 cmd-class class{ msg
     $10 +field dummy
     $value: name$ \ group name
@@ -141,6 +140,7 @@ cmd-class class{ msg
     field: peers[]
     field: keys[]
     field: log[]
+    field: perms# \ pk -> permission map
     field: mode
     \ mode bits:
     1 4 bits: otr# redate# lock# visible#
@@ -154,6 +154,10 @@ cmd-class class{ msg
     redate#  bit-ops: redate
     lock#    bit-ops: lock
     visible# bit-ops: visible
+
+    1 4 bits: role-admin# key-admin# moderator# troll#
+    \ key admins can set keys, role-admins can set roles
+    \ moderators can cancel other's and trolls are muted (they don't know)
 
     method start
     method tag
@@ -172,6 +176,7 @@ cmd-class class{ msg
     method lock
     method unlock
     method away
+    method perms
     method end
     method display   \ display one message
     method redisplay \ display full set

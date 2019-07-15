@@ -120,6 +120,7 @@ s" Insufficient asset!"          throwcode !!insufficient-asset!!
 s" Transaction not balanced!"    throwcode !!not-balanced!!
 s" Sink already cleared!"        throwcode !!sink-cleared!!
 s" Sink not cleared!"            throwcode !!not-sunk!!
+s" Invalid permission!"          throwcode !!inv-perm!!
 
 next-exception !
 

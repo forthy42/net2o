@@ -1440,6 +1440,7 @@ scope: n2o
     endcase ;
 
 : args>keylist ( -- )
+    key-list $[]free
     [: nick-key ?dup-IF  >o ke-pk $@ o> keysize umin key-list $+[]!  THEN ;]
     @arg-loop ;
 

@@ -370,9 +370,10 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     64>n msg:like ;
 +net2o: msg-lock ( $:key -- ) \g lock down communciation
     $> msg:lock ;
-+net2o: msg-unlock ( -- )
++net2o: msg-unlock ( -- ) \g unlock communication
     msg:unlock ;
-
++net2o: msg-perms ( $:pk perm -- ) \g permissions
+    $> msg:perms ;
 }scope
 
 msg-table $save
@@ -421,6 +422,7 @@ scope: logstyles
 ' drop  msg-notify-class is msg:like
 ' 2drop  msg-notify-class is msg:lock
 ' noop  msg-notify-class is msg:unlock
+:noname 2drop 64drop ; msg-notify-class is msg:perms
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
@@ -465,6 +467,12 @@ scope: logstyles
 :noname ( -- )  msg-group-o .msg:-lock
     <info> ." chat is free for all" <default> ; msg-class is msg:unlock
 ' drop msg-class is msg:away
+:noname { 64^ perm d: pk -- }
+    perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
+    pk .key-id ." : " perm 64@ 64>n s" 👹" bounds U+DO
+	dup 1 and IF  I xc@ xemit  THEN  2/
+    I I' over - x-size  +LOOP  drop space
+; msg-class is msg:perms
 :noname ( addr u type -- )
     space <warn> case
 	msg:image#     of  ." img["      85type  endof
@@ -1003,7 +1011,7 @@ previous
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
-    nest-cmd-loop msg:end ;
+    nest-cmd-loop msg:end <default> ;
 ' msg-tdisplay msg-class is msg:display
 ' msg-tdisplay msg-notify-class is msg:display
 : ?search-lock ( addr u -- )
@@ -1366,6 +1374,9 @@ umethod /unlock ( addr u -- )
 umethod /lock? ( addr u -- )
     \U lock?                check lock status
     \G lock?: report lock status
+umethod /perms ( addr u -- )
+    \U perms roles {@keys}  set and change permissions of users
+    \G perms: set permissions
 umethod /bye ( addr u -- )
     \U bye
     \G bye: leaves the current chat
@@ -1500,6 +1511,23 @@ is /help
 :noname ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
+
+$100 buffer: permchar>bits
+msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!
+msg:role-admin# 'r' permchar>bits + c!
+msg:key-admin#  'k' permchar>bits + c!
+msg:moderator#  'm' permchar>bits + c!
+msg:troll#      't' permchar>bits + c!
+: >perms ( addr u -- perms )
+    0 -rot bounds ?DO  I c@ permchar>bits + c@
+	dup 0= !!inv-perm!! or  LOOP ;
+
+:noname ( addr u -- )
+    word-args [: parse-name >perms args>keylist ;] execute-parsing
+    [{: perm :}l
+	perm key-list [: key| $, dup ulit, net2o-base:msg-perms ;] $[]map drop
+    ;] send-avalanche
+; is /perms
 
 :noname ( addr u -- )
     2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ; is /bye

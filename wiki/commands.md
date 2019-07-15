@@ -392,6 +392,9 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $2E msg-lock ( $:key -- )
   lock down communciation
 * $2F msg-unlock ( -- )
+  unlock communication
+* $30 msg-perms ( $:pk perm -- )
+  permissions
 
 ### group description commands ###
 
