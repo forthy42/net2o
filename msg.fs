@@ -737,7 +737,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 ' message msging-class is start-req
 :noname check-date >r 2dup r> ; msging-class is nest-sig
 ' message msg-class is start-req
-' msg-dec?-sig? msg-class is nest-sig
+:noname 2dup msg-dec?-sig? ; msg-class is nest-sig
 
 ' context-table is gen-table
 
