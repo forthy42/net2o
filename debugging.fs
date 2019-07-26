@@ -200,7 +200,7 @@ false [IF]
     User last-exe-xt
     : .exe ( -- ) last-exe-xt @ .name ;
     : : ( "name" -- colon-sys )
-	: lastxt ]]L last-exe-xt ! [[ ;
+	: lastxt lit, ]] last-exe-xt ! [[ ;
 [ELSE]
     : .exe ;
 [THEN]
