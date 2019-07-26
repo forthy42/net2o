@@ -1030,8 +1030,8 @@ wmsg-o >o msg-table @ token-table ! o>
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
     2dup load-msg
-    gui-msgs# msg-log@
-    { log u } u r> - 0 max { u' }  log u' ?search-lock
+    msg-log@
+    { log u } u gui-msgs# cells - 0 max { u' }  log u' ?search-lock
     log u u' /string bounds ?DO
 	I $@ { d: msgt }
 	msgt ['] wmsg-display wmsg-o .catch IF

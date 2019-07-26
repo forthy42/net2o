@@ -529,13 +529,15 @@ msg-class is msg:object
 
 : replace-sig { addrsig usig addrmsg umsg -- }
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
+    2dup dump
     2dup msg-dec?-sig? !!sig!! 2drop addrmsg umsg smove ;
-: new-otrsig ( addr u -- addrsig usig )
-    2dup startdate@ old>otr
+: new-otrsig ( addr u flag -- addrsig usig )
+    >r 2dup startdate@ old>otr
     predate-key keccak# c:key@ c:key# smove
-    + 2 - c@ $80 and >r
-    ['] .encsign-rest ['] .sig r> select
-    $tmp 1 64s /string ;
+    [: sktmp pkmod sk@ drop >modkey .encsign-rest ;]
+    ['] .sig r@ select $tmp
+    2dup + 2 - r> swap orc!
+    2dup dump 1 64s /string ;
 
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
@@ -554,6 +556,9 @@ msg-class is msg:object
 		    ."  [OTRified] #" I u.
 		THEN
 	    ELSE
+		."  ID mismatch: "
+		2dup dup sigpksize# - /string key| 85type space
+		msg:id$ 85type forth:cr
 		2drop
 	    THEN
 	LOOP
@@ -714,10 +719,10 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
-    $> 2dup nest-sig ?dup-0=-IF
+    $> nest-sig ?dup-0=-IF
 	handle-msg
-    ELSE  replay-mode @ IF  drop 2drop 2drop
-	ELSE  !!sig!!  THEN \ balk on all wrong signatures
+    ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN
+	2drop 2drop \ balk on all wrong signatures
     THEN ;
 
 \ generate an encryt+sign packet
@@ -1214,13 +1219,15 @@ also net2o-base
     msg-group$ $@ >group msg-group-o .msg:log[] $@
     r> cells dup 0< IF  over + 0 max  THEN safe/string
     IF  $@
-	2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
+	2dup + 2 - c@ $80 and dup >r
+	IF  msg-dec-sig?  ELSE  pk-sig?  THEN  !!sig!!
 	2dup + sigpksize# - sigpksize#
 	over keysize pk@ key| str= IF
-	    keysize /string 2swap new-otrsig 2swap
-	    $, $, msg-otrify
+	    keysize /string $,
+	    r> new-otrsig $,
+	    msg-otrify
 	ELSE
-	    2drop 2drop ." not your message!" forth:cr
+	    rdrop 2drop 2drop ." not your message!" forth:cr
 	THEN
     ELSE  drop  THEN ;
 
@@ -1497,13 +1504,10 @@ is /help
     ['] logstyles evaluate-in ; is /logstyle
 
 :noname ( addr u -- )
-    msg-group-o .msg:mode dup @ msg:otr# or swap
-    [: now>otr
-	[: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
-			drop do-otrify  2r>  REPEAT THEN
-	    2drop 2r> 2drop
-	;] (send-avalanche) drop .chat save-msgs&
-    ;] !wrapper ; is /otrify
+    [: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
+		    drop do-otrify  2r>  REPEAT THEN
+	2drop 2r> 2drop  now>otr
+    ;] (send-avalanche) drop .chat save-msgs& ; is /otrify
 
 :noname ( addr u -- )
     msg-group-o .msg:-lock

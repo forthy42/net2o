@@ -711,7 +711,7 @@ drop
 : .encsign-rest ( -- )
     sigdate +date
     sigdate datesize# type
-    sig-params 2drop sktmp pkmod ed-sign
+    sksig@ drop sktmp pkmod ed-sign
     2dup + 1- $80 swap orc! type
     keysize emit ;
 
