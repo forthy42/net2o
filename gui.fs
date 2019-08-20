@@ -897,7 +897,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
 ; wmsg-class is msg:url
-:noname ( d: string -- o )
+:noname ( d: string -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
 	{{
@@ -1031,7 +1031,7 @@ wmsg-o >o msg-table @ token-table ! o>
     glue*lll }}glue msgs-box .child+
     2dup load-msg
     msg-log@
-    { log u } u gui-msgs# cells - 0 max { u' }  log u' ?search-lock
+    { log u } u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
     log u u' /string bounds ?DO
 	I $@ { d: msgt }
 	msgt ['] wmsg-display wmsg-o .catch IF
