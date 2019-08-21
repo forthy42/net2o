@@ -529,7 +529,6 @@ msg-class is msg:object
 
 : replace-sig { addrsig usig addrmsg umsg -- }
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
-    2dup dump
     2dup msg-dec?-sig? !!sig!! 2drop addrmsg umsg smove ;
 : new-otrsig ( addr u flag -- addrsig usig )
     >r 2dup startdate@ old>otr
@@ -537,7 +536,7 @@ msg-class is msg:object
     [: sktmp pkmod sk@ drop >modkey .encsign-rest ;]
     ['] .sig r@ select $tmp
     2dup + 2 - r> swap orc!
-    2dup dump 1 64s /string ;
+    ( 2dup dump ) 1 64s /string ;
 
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF

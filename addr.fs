@@ -129,13 +129,15 @@ User dest-0key< \ pointer to obtained dest-0key
     host:ipv4 be-ul@ sockaddr1 ipv4!
     host:route $@ !temp-addr ;
 
-: addr>sock6 { xt -- }
-    ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN ) ;
-: addr>sock4 { xt -- }
-    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN ) ;
-
 : addr>sock ( o xt -- ) { xt } >o
-    ipv64( xt addr>sock6 xt addr>sock4 )else( xt addr>sock4 xt addr>sock6 ) o> ;
+    ipv64(
+    ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
+    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
+    )else(
+    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
+    ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
+    )
+    o> ;
 
 : +my-id ( -- )
     config:prio# @ host:pri# !
