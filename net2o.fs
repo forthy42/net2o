@@ -1058,7 +1058,7 @@ scope{ mapc
     over data-map .mapc:resend#+ set-dest#
     >send  ack@ .bandwidth+  send-data-packet ;
 
-Defer addr>sock \ uses locals
+Forward addr>sock \ uses locals
 Forward punch-reply
 Forward new-addr
 

@@ -46,8 +46,8 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     $> host:key sec! ;
 +net2o: addr-revoke ( $:revoke -- ) \g revocation info
     $> host:revoke $! ;
-+net2o: addr-ekey ( $:ekey timeout -- ) \g ephemeral key
-    host:ekey-to 64! $> host:ekey $! ;
++net2o: addr-ekey ( $:ekey -- ) \g ephemeral key
+    $> host:ekey $! ;
 }scope
 
 address-table $save
@@ -88,7 +88,7 @@ also net2o-base
     THEN
     host:route $@ dup IF  $, addr-route  ELSE  2drop  THEN
     host:key sec@ dup IF  sec$, addr-key  ELSE  2drop  THEN
-    host:ekey $@ dup IF  $, host:ekey-to 64@ ulit, addr-ekey  ELSE  2drop  THEN
+    host:ekey $@ dup IF  $, addr-ekey  ELSE  2drop  THEN
     host:revoke $@ dup IF  $, addr-revoke  ELSE  2drop  THEN o> ; 
 previous
 : o>addr ( o -- addr u )
@@ -129,10 +129,13 @@ User dest-0key< \ pointer to obtained dest-0key
     host:ipv4 be-ul@ sockaddr1 ipv4!
     host:route $@ !temp-addr ;
 
-:noname ( o xt -- ) { xt } >o
-    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
-    ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
-    o> ; is addr>sock
+: addr>sock6 { xt -- }
+    ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN ) ;
+: addr>sock4 { xt -- }
+    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN ) ;
+
+: addr>sock ( o xt -- ) { xt } >o
+    ipv64( xt addr>sock6 xt addr>sock4 )else( xt addr>sock4 xt addr>sock6 ) o> ;
 
 : +my-id ( -- )
     config:prio# @ host:pri# !
@@ -164,8 +167,10 @@ User dest-0key< \ pointer to obtained dest-0key
 : !my-addr$ ( -- )
     my-key-default 0= ?EXIT
     now>never  my-addr[] [:
-      nat( ." insert into my-addr$: " dup .addr forth:cr )
-      o>addr gen-host my-addr$ $ins[]sig drop ;] $[]o-map ;
+	nat( ." insert into my-addr$: " dup .addr forth:cr )
+	dup .host:ekey-to 64@ 64dup 64-0= n>64 64+
+	sigdate 64'+ le-64!
+	o>addr gen-host my-addr$ $ins[]sig drop ;] $[]o-map ;
 
 : .my-addrs ( -- )
     my-addr[] [: .addr cr ;] $[]o-map ;
