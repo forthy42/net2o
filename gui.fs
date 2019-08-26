@@ -165,9 +165,10 @@ Variable nick$
 	1 of
 	    1 +to nick-pw
 	    over 3 pick >passphrase +key
+	    create-new-id /hflip
 	    phrase-first /hflip
 	    phrase-again /flop
-	    clear-edit invert +lang
+	    clear-edit invert +lang +resize
 	endof
 	2 of
 	    over 3 pick >passphrase lastkey@ str= IF
@@ -177,7 +178,7 @@ Variable nick$
 	    ELSE
 		1 to nick-pw
 		phrase-first /flop
-		phrase-again /hflip +lang
+		phrase-again /hflip +lang +resize
 		1 tries# ! do-shake
 	    THEN
 	endof
@@ -319,6 +320,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			[ x-baseline ] FLiteral nick-edit >o
 			fdup gap% f* to gap to baseline o>
 			"nick" nick-field engage-edit
+			1 to nick-pw
 		    ELSE
 			phrase-unlock /flop
 			create-new-id /hflip
@@ -329,6 +331,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			nick-edit /vflip
 			0e nick-edit >o to baseline o>
 			pw-field engage
+			0 to nick-pw
 		    THEN +resize +lang ;
 		\normal
 	    }}z ' id-show-hide false toggle[] dup Value id-toggler
