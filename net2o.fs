@@ -920,7 +920,7 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
     data-resend $@len 0 U+DO
 	data-resend $@ I /string drop @ 0= IF
 	    data-resend I 2 cells $del
-	    0  data-resend $@len I unloop U+DO NO-DO
+	    0  data-resend $@len I unloop U+DO NOPE
 	ELSE
 	    [ 2 cells ]L
 	THEN
@@ -1186,7 +1186,7 @@ Create chunk-adder chunks-struct allot
     [: chunks $@ bounds ?DO
 	    I chunk-context @ o = IF
 		chunks I chunks-struct del$one
-		unloop chunks next$ ?DO NO-DO 0
+		unloop chunks next$ ?DO NOPE 0
 	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-sema c-section ;
 
@@ -1352,7 +1352,7 @@ queue-class >osize @ buffer: queue-adder
 	64dup queue-timestamp 64@ 64u> IF
 	    addr queue-xt @ queue-job @ .execute o>
 	    queue I queue-struct del$one
-	    unloop queue next$ ?DO  NO-DO 0
+	    unloop queue next$ ?DO  NOPE 0
 	ELSE  o>  queue-struct  THEN
     +LOOP  64drop ;
 
@@ -1928,7 +1928,7 @@ cookie-size# buffer: tmp-cookie
 	I .cc-timeout 64@ timeout 64u< IF
 	    cookies I cookie-size# del$one
 	    cookies next$
-	    unloop  ?DO  NO-DO \ this replaces the loop variables
+	    unloop  ?DO  NOPE \ this replaces the loop variables
 	    0 \ we re-iterate over the exactly same index
 	ELSE
 	    cookie-size#

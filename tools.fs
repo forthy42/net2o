@@ -175,8 +175,8 @@ debug: dummy(
     postpone ;
     is kill-task ;
 
-[IFUNDEF] NO-DO
-    : NO-DO ( c:sys -- )
+[IFUNDEF] NOPE
+    : NOPE ( c:sys -- )
 	\G removes a control structure sys from the stack
 	drop 2drop ; immediate restrict
 [THEN]
@@ -870,7 +870,7 @@ compsem: sourcefilename postpone sliteral ['] search-help compile, ;
     string $@ bounds ?DO
 	dup I @ = IF
 	    string I cell del$one
-	    unloop string next$ ?DO NO-DO 0
+	    unloop string next$ ?DO NOPE 0
 	ELSE  cell  THEN
     +LOOP drop ;
 
