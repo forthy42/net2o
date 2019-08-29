@@ -180,6 +180,8 @@ debug: dummy(
 	\G removes a control structure sys from the stack
 	drop 2drop ; immediate restrict
 [THEN]
+: replace-loop ( end start -- )
+    ]] unloop U+DO NOPE [[ ; immediate restrict
 
 require bits.fs
 
@@ -867,10 +869,10 @@ compsem: sourcefilename postpone sliteral ['] search-help compile, ;
 : next$ ( pos string -- addre addrs )
     $@ rot /string bounds ;
 : del$cell ( addr stringaddr -- ) { string }
-    string $@ bounds ?DO
+    string $@ bounds U+DO
 	dup I @ = IF
 	    string I cell del$one
-	    unloop string next$ ?DO NOPE 0
+	    string next$ replace-loop 0
 	ELSE  cell  THEN
     +LOOP drop ;
 

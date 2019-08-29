@@ -920,7 +920,7 @@ in net2o : ack-resend ( flag -- )  resend-toggle# and to ack-resend~ ;
     data-resend $@len 0 U+DO
 	data-resend $@ I /string drop @ 0= IF
 	    data-resend I 2 cells $del
-	    0  data-resend $@len I unloop U+DO NOPE
+	    0  data-resend $@len I replace-loop
 	ELSE
 	    [ 2 cells ]L
 	THEN
@@ -1183,10 +1183,10 @@ Create chunk-adder chunks-struct allot
     ticker 64@ ack@ .ticks-init ;
 
 : o-chunks ( -- )
-    [: chunks $@ bounds ?DO
+    [: chunks $@ bounds U+DO
 	    I chunk-context @ o = IF
 		chunks I chunks-struct del$one
-		unloop chunks next$ ?DO NOPE 0
+		chunks next$ replace-loop 0
 	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-sema c-section ;
 
@@ -1348,11 +1348,11 @@ queue-class >osize @ buffer: queue-adder
 
 : eval-queue ( -- )
     queue $@len 0= ?EXIT  ticker 64@
-    queue $@ bounds ?DO  I >o
+    queue $@ bounds U+DO  I >o
 	64dup queue-timestamp 64@ 64u> IF
 	    addr queue-xt @ queue-job @ .execute o>
 	    queue I queue-struct del$one
-	    unloop queue next$ ?DO  NOPE 0
+	    queue next$ replace-loop 0
 	ELSE  o>  queue-struct  THEN
     +LOOP  64drop ;
 
@@ -1918,7 +1918,7 @@ cookie-size# buffer: tmp-cookie
 
 : do-?cookie ( cookie -- context true / false )
     ticker 64@ connect-timeout# 64- { 64: timeout }
-    cookies $@ bounds ?DO
+    cookies $@ bounds U+DO
 	64dup I .cc-timeout 64@ 64= IF \ if we have a hit, use that
 	    64drop I .cc-context @
 	    I .cc-secret [ tmp-cookie .cc-secret ]L KEYBYTES move
@@ -1928,7 +1928,7 @@ cookie-size# buffer: tmp-cookie
 	I .cc-timeout 64@ timeout 64u< IF
 	    cookies I cookie-size# del$one
 	    cookies next$
-	    unloop  ?DO  NOPE \ this replaces the loop variables
+	    replace-loop
 	    0 \ we re-iterate over the exactly same index
 	ELSE
 	    cookie-size#
