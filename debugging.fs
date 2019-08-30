@@ -84,6 +84,7 @@ debug: deprecated( \ deprecated stuff
 debug: unhandled( \ unhandled commands
 debug: syncfile( \ synchronous file operations
 debug: newvault( \ new style vault keys
+debug: flowlabel( \ experiment with flow labels
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
