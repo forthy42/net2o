@@ -121,7 +121,6 @@ User dest-0key< \ pointer to obtained dest-0key
     host:key @ dest-0key< !
     host:portv6 w@ sockaddr1 port be-w!
     host:ipv6 sockaddr1 sin6_addr ip6!
-    flowlabel( rng32 $7FFFF and sockaddr1 sin6_flowinfo be-l! )
     host:route $@ !temp-addr ;
 
 : addr>4sock ( -- )

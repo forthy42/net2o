@@ -77,7 +77,7 @@ $40 Constant min-size
 1 Value buffers#
 min-size max-size^2 lshift Value maxdata ( -- n )
 maxdata overhead + Value maxpacket
-maxpacket $F + -$10 and Value maxpacket-aligned
+maxpacket $F + -$10 and #1216 umax Value maxpacket-aligned
 max-size^2 6 + Value chunk-p2
 $10 Constant key-salt#
 $10 Constant key-cksum#
@@ -1388,7 +1388,7 @@ queue-class >osize @ buffer: queue-adder
     eval-queue  wait-send ;
 
 User try-reads
-4 Value try-read#
+0 Value try-read#
 
 : read-a-packet4/6 ( -- addr u )
     pollfds [ pollfd revents ]L + w@ POLLIN and IF  try-reads off

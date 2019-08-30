@@ -130,7 +130,7 @@ Forward .addr$
 
 : sock-rest ( sockaddr -- addr u ) >r
     AF_INET6 r@ family w!
-    flowlabel( )else( 0        r@ sin6_flowinfo l! )
+    0        r@ sin6_flowinfo l!
     0        r@ sin6_scope_id l!
     r> sockaddr_in6 ;
 
@@ -139,7 +139,7 @@ Forward .addr$
     r> sockaddr_in4 ;
 
 : my-port ( -- port )
-    ipv6( )else( sockaddr_in4 )else( sockaddr_in6 ) alen !
+    ipv6( sockaddr_in6 )else( sockaddr_in4 ) alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 

@@ -60,7 +60,7 @@ $00000000 Value rec-droprate#
 : read-a-packet ( blockage -- addr u / 0 0 )
     >r sockaddr_in alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN]
-    inbuf maxpacket r> sockaddr< alen recvfrom
+    inbuf maxpacket-aligned r> sockaddr< alen recvfrom
     dup 0< IF
 	errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	#512 + negate throw  THEN
@@ -72,7 +72,7 @@ $00000000 Value rec-droprate#
     : read-a-packet4 ( blockage -- addr u / 0 0 )
 	>r sockaddr_in alen !
 	net2o-sock nip
-	inbuf maxpacket r> sockaddr< alen recvfrom
+	inbuf maxpacket-aligned r> sockaddr< alen recvfrom
 	dup 0< IF
 	    errno dup EAGAIN =  IF  2drop #0. EXIT  THEN
 	THEN
@@ -121,7 +121,7 @@ $00000000 Value droprate#
 : info@ ( info -- addr u )
     dup ai_addr @ swap ai_addrlen l@ ;
 : info>string ( info -- addr u )
-    info@ ?>ipv6 ;
+    info@ ipv6( ?>ipv6 ) ;
 
 : -$split ( addr u char -- addr1 u1 addr2 u2 ) \ gforth-string string-split
     \G divides a string into two, with one char as separator (e.g. '?'
@@ -139,7 +139,7 @@ $00000000 Value droprate#
 UValue lastaddr#
 User lastn2oaddr
 
-: insert-address ( addr u -- net2o-addr ) ?<ipv6
+: insert-address ( addr u -- net2o-addr ) ipv6( ?<ipv6 )
     address( ." Insert address " 2dup .address cr )
     lastaddr# IF  2dup lastaddr# $@ str=
 	IF  2drop lastn2oaddr @ EXIT  THEN
