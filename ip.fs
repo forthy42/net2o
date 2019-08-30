@@ -130,7 +130,7 @@ Forward .addr$
 
 : sock-rest ( sockaddr -- addr u ) >r
     AF_INET6 r@ family w!
-    0        r@ sin6_flowinfo l!
+\   0        r@ sin6_flowinfo l!
     0        r@ sin6_scope_id l!
     r> sockaddr_in6 ;
 
