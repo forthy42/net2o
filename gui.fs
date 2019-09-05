@@ -27,17 +27,19 @@ require minos2/font-style.fs
     font-size# 70% f* }}frame ;
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
-: update-size# ( -- )
+: update-gsize# ( -- )
     screen-pwh max s>f
-    default-diag screen-diag f/ fsqrt default-scale f* 1/f #64 fm*
+    default-diag screen-diag f/
+    [ 5e fsqrt 1e f+ f2/ 1e f- ] FLiteral f**
+    default-scale f* 1/f #64 fm*
     f/ fround to font-size#
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
 
-update-size#
-
 require minos2/text-style.fs
 require minos2/md-viewer.fs
+
+update-gsize#
 
 glue new Constant glue-sleft
 glue new Constant glue-sright
