@@ -28,13 +28,7 @@ ctx 0= [IF]  window-init  [THEN]
 
 require minos2/font-style.fs
 
-: update-size# ( -- )
-    dpy-w @ s>f 42e f/ fround to font-size#
-    font-size# 16e f/ m2c:curminwidth% f!
-    dpy-h @ s>f dpy-w @ s>f f/ 45% f/ font-size# f* fround to baseline#
-    dpy-w @ s>f 1280e f/ to pixelsize# ;
-
-update-size#
+44e update-size#
 
 require minos2/text-style.fs
 
@@ -69,14 +63,15 @@ glue ' new static-a with-allocater Constant glue-right
     rot dup .parent-w .parent-w /flop drop
     rot dup .parent-w .parent-w /flip drop
     trans-frame trans-frame solid-frame
-    update-size# update-glue
+    44e update-size# update-glue
     over slide# !
     slides[] $[] @ /flip drop
     slides[] $[] @ /flop drop glue0 ;
 : fade-img ( r0..1 img1 img2 -- ) >r >r
-    $FF fm* f>s $FFFFFF00 or dup
-    r> >o color, to frame-color parent-w .parent-w /flop drop o> invert $FFFFFF00 or
-    r> >o color, to frame-color parent-w .parent-w /flop drop o> ;
+    [ whitish x-color 1e f+ ] Fliteral fover f-
+    r> >o to frame-color parent-w .parent-w /flop drop o>
+    [ whitish x-color ] Fliteral f+
+    r> >o to frame-color parent-w .parent-w /flop drop o> ;
 : fade!slides ( r0..1 n -- )
     dup m/$-switch = IF
 	fdup $q-img m2-img fade-img
@@ -205,14 +200,15 @@ tex: $quid
     to baseline# r> ;
 
 : pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
-    color, glue*wh swap slide-frame dup .button1 simple[] ;
+    day-mode new-color, night-mode -1 +to color,# new-color, fdrop day-mode
+    glue*wh slide-frame dup .button1 simple[] ;
 
 {{
 {{ glue-left }}glue
 
 \ page 0
 {{
-$FFFFFFFF pres-frame
+$FFFFFFFF dup pres-frame
 {{
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 "net2o: ΜΙΝΩΣ2 GUI, $quid “crypto”" /title
@@ -229,7 +225,7 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 1
 {{
-$FFFFFFFF pres-frame
+$FFFFFFFF dup pres-frame
 {{
 "Motivation" /title
 glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
@@ -242,7 +238,7 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 2
 {{
-$FF7F7FFF pres-frame
+$FF7F7FFF dup pres-frame
 {{
 "5 Jahre nach Snowden" /title
 "Was hat sich verändert?" \\
@@ -268,7 +264,7 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 5
 {{
-$BFBFFFFF pres-frame
+$BFBFFFFF dup pres-frame
 {{
 "ΜΙΝΩΣ2–Technologie" /title
 "ΜΙΝΩΣ2 ist unterhalb des DOM–Layers" \\
@@ -293,7 +289,7 @@ glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 
 \ page 6
 {{
-$FFBFFFFF pres-frame
+$FFBFFFFF dup pres-frame
 {{
 "ΜΙΝΩΣ2 Widgets" /title
 "Design-Prinzip ist eine Lego–artige Kombination aus vielen sehr einfachen Objekten" \\
@@ -325,7 +321,7 @@ dup font-size# f2/ fdup vslider
 
 \ page 7
 {{
-$BFFFFFFF pres-frame
+$BFFFFFFF dup pres-frame
 {{
 "ΜΙΝΩΣ2 Boxen" /title
 {{
@@ -347,7 +343,7 @@ glue*l }}glue
 
 \ page 8
 {{
-$FFFFBFFF pres-frame
+$FFFFBFFF dup pres-frame
 {{
 "ΜΙΝΩΣ2 Displays" /title
 "Rendern in verschiedene Arten von Displays" \\
@@ -362,7 +358,7 @@ glue*l }}glue
 
 \ page 9
 {{
-$BFDFFFFF pres-frame
+$BFDFFFFF dup pres-frame
 {{
 "Draw–Calls minimieren" /title
 "OpenGL möchte so wenig wie mögliche Draw–Calls pro Frame, also werden ver­schie­dene Contexte mit einem Draw–Call pro Stack gezeichnet" p\\
@@ -382,7 +378,7 @@ glue*l }}glue
 
 \ page 10
 {{
-$D4AF37FF pres-frame
+$D4AF37FF dup pres-frame
 {{
 "$quid & SwapDragonChain" /title
 "Inhalt:" /subsection
@@ -410,7 +406,7 @@ drop >o $FFFFFFC0 color, to frame-color o o>
 
 \ page 11
 {{
-$e4cF77FF pres-frame
+$e4cF77FF dup pres-frame
 {{
 "Was ist Geld?" /title
 vt{{
@@ -447,7 +443,7 @@ tex: vp1 glue*l ' vp1 }}vp vp[]
 
 \ page 12
 {{
-$f4cF57FF pres-frame
+$f4cF57FF dup pres-frame
 {{
 "BitCoins — Mängel früher “Cryptos”" /title
 vt{{
@@ -469,7 +465,7 @@ tex: bitcoin-bubble
 
 \ page 13
 {{
-$e4df67ff pres-frame
+$e4df67ff dup pres-frame
 {{
 "Reichtum & Ethik" /title
 vt{{
@@ -490,7 +486,7 @@ tex: free-market
 
 \ page 14
 {{
-$a4df87ff pres-frame
+$a4df87ff dup pres-frame
 {{
 "Proof von was?!" /title
 vt{{
@@ -513,7 +509,7 @@ glue*l }}glue
 
 \ page 15
 {{
-$a4d8f7ff pres-frame
+$a4d8f7ff dup pres-frame
 {{
 "SwapDragon BlockChain" /title
 vt{{
@@ -545,7 +541,7 @@ tex: bank-robs-you
 
 \ page 16
 {{
-$a487dfff pres-frame
+$a487dfff dup pres-frame
 {{
 "Dumb Contracts" /title
 vt{{
@@ -576,7 +572,7 @@ tex: feynman-diag
 
 \ page 17
 {{
-$df87a4ff pres-frame
+$df87a4ff dup pres-frame
 {{
 "$quid: Ethisches Mining" /title
 vt{{
@@ -599,7 +595,7 @@ glue*l }}glue
 
 \ page 17
 {{
-$FFFFFFFF pres-frame
+$FFFFFFFF dup pres-frame
 {{
 "Literatur & Links" /title
 vt{{

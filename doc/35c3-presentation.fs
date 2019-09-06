@@ -27,13 +27,7 @@ ctx 0= [IF]  window-init  [THEN]
 
 require minos2/font-style.fs
 
-: update-size# ( -- )
-    dpy-w @ s>f 44e f/ fround to font-size#
-    font-size# 16e f/ m2c:curminwidth% f!
-    dpy-h @ s>f dpy-w @ s>f f/ 45% f/ font-size# f* fround to baseline#
-    dpy-w @ s>f 1280e f/ to pixelsize# ;
-
-update-size#
+44e update-size#
 
 require minos2/text-style.fs
 
@@ -60,7 +54,7 @@ glue ' new static-a with-allocater Constant glue-right
 : solid-frame ( o -- )
     >o white# to frame-color o> ;
 : !slides ( nprev n -- )
-    update-size# update-glue
+    44e update-size# update-glue
     over slide# !
     slides[] $[] @ /flip drop
     slides[] $[] @ /flop drop glue0 ;
