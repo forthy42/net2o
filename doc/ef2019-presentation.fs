@@ -33,19 +33,11 @@ require minos2/text-style.fs
 require minos2/presentation-support.fs
 
 tex: net2o-logo
-tex: 35c3-logo
 ' net2o-logo "net2o-200.png" 0.666e }}image-file 2Constant net2o-img
 
 : logo-img ( o1 -- o o-img ) { rightimg }
     baseline# 0e to baseline#
     {{  {{ glue*ll }}glue rightimg }}h
-    glue*l }}glue
-    }}v >o font-size# f2/ to border o o>
-    to baseline# ;
-
-: logo-img2 ( o1 o2 -- o o-img ) { leftimg rightimg }
-    baseline# 0e to baseline#
-    {{  {{ leftimg glue*ll }}glue rightimg }}h
     glue*l }}glue
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
@@ -59,7 +51,8 @@ $FFFFBBFF re-text-color redish
 $00CCCCFF dup re-emoji-color blue-emoji#
 day-mode
 
-$10 stack: vp-tops
+glue new Constant glue*20l
+glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o>
 
 ' }}i18n-text is }}text'
 
@@ -77,25 +70,25 @@ $10 stack: vp-tops
 	    \ 1 ms
 	    ' cloudcalypse "cloudcalypse-16-9.jpg" 2e 3e f/ }}image-file drop /center
 	    {{
-		glue*l }}glue
-		tex: worms-wappen
-		' worms-wappen "worms-wappen-swap.png" 0.5e }}image-file
+		glue*20l }}glue
+		tex: wappen
+		' wappen "hamburg-coa.png" 0.5e }}image-file
 		Constant coa-glue /center
-\		glue*l }}glue
+		glue*l }}glue
 	    }}v box[]
 	    {{
 		{{
 		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
-		    l" CloudCalypse, was nun?" /title
+		    l" CloudCalypse" /title
 		    l" It looks like you’ve reached the end." /subtitle
-		    l" Wie man Daten nach net2o importiert" /subtitle
+		    l" How to take your data into net2o" /subtitle
 		    {{
 			{{ \tiny
 			    glue*l }}glue
 			    {{  nt
 				{{ glue*lll }}glue l" ἀποκάλυψις" }}text' }}h bx-tab
 				l"  ➡ " }}text'
-				{{ l" Offenbarung" }}text' glue*lll }}glue }}h bx-tab
+				{{ l" uncovering" }}text' glue*lll }}glue }}h bx-tab
 			    }}h /center
 			    {{
 				{{ glue*lll }}glue l" cloud[o]calypse" }}text' }}h bx-tab
@@ -104,10 +97,10 @@ $10 stack: vp-tops
 			    }}h /center
 			    glue*l }}glue
 			}}v box[]
-			glue*2 }}glue
+			glue*2 }}glue	
 		    }}z box[]
 		    l" Bernd Paysan" /author
-		    l" Forth–Tagung 2019, Worms" /location
+		    l" EuroForth 2019, Hamburg" /location
 		    {{
 			glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
 			{{
@@ -138,24 +131,24 @@ $10 stack: vp-tops
 {{
     $3F0000FF $FF8888FF pres-frame
     {{
-	l" 5 Jahre nach Snowden" /title
-	l" Was hat sich getan?" \\
+	l" 6 Years after Snowden" /title
+	l" What changed?" \\
 	\skip
-	l" Politik" /subsection
+	l" Politics" /subsection
 	{{
-	    l"   EU–Parlament möchte Upload-Filter" "🤦" e\\
-	    l"   EU–Parlament führt Link–Steuer ein (stattdessen: “<right>”)" "🤦🤦" e\\
-	    l"   EU–Parlament filtert „terroristische Inhalte“" "🤦🤦🤦" e\\
-	    l"   Deutschland kopiert Chinas Cyberadministration CAC (Medienstaatsvertrag)" "🤦🤦🤦🤦" e\\
-	    l"   Tor– und VPN–Verbot geplant" "🤦🤦🤦🤦🤦" e\\
-	    l"   Seehofers neues Polizeistaatgesetz: Passwörter her!" "🤦🤦🤦🤦🤦🤦" e\\
-	    l"   Deanonymisierung im österreichischen Internet" "🤦🤦🤦🤦🤦🤦🤦" e\\
+	    l"   EU parliament wants upload filters" "🤦" e\\
+	    l"   EU parliament taxes the link (instead: “right”)" "🤦🤦" e\\
+	    l"   EU parliament wants filtering “terrorist contents”" "🤦🤦🤦" e\\
+	    l"   Germany wants a Cyberadministration like CAC (Medienstaatsvertrag)" "🤦🤦🤦🤦" e\\
+	    l"   Tor– and VPN–ban planned" "🤦🤦🤦🤦🤦" e\\
+	    l"   Seehofer plans reveal–your–password law" "🤦🤦🤦🤦🤦🤦" e\\
+	    l"   And he wants Alexa’s “tapes”&disable E2E encryption [2]" "🤦🤦🤦🤦🤦🤦🤦" e\\
 	}}v box[]
 	\skip
 	\skip
-	l" Fortschritt" /subsection
-	l"   EGMR hat geurteilt: Massenüberwachung des GCHQs verletzt unsere Rechte" \\
-	l"   net2o wird immer benutzbarer" \\
+	l" Progress" /subsection
+	l"   The ECHR ruled that GCHQ’s dragnet surveillances violates your rights" \\
+	l"   net2o becomes more and more usable" \\
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >o o Value snowden-page font-size# to border o o>
 }}z box[] /flip dup >slides
@@ -164,6 +157,25 @@ $10 stack: vp-tops
 {{
     $201010FF $FFDDDDFF pres-frame
     {{
+	l" Cloud[o]Calypse" /title
+	l" something went terminally wrong in a cloud [3]" /subtitle
+	\skip
+	l" Clouds failing" /subsection
+	l"   Microsoft bought github (install gitlab-ee)" \\
+	l"   Dropbox dropped Linux client (except ext4 unencrypted)" \\
+	l"   Facebook: Cambridge Analytica scandal+many API holes [4]" \\
+	l"   Google+ closed due to possible leak (both users affected)" \\
+	l"   tumblr deleted all porn (remains: 1% contents)" \\
+	l"   Can't date on Tinder, dating violates Facebook’s policy" \\
+	\skip
+	l" Root causes" /subsection
+	l"   toxic ad–based revenue model" \\
+	l"   user+password authentication" \\
+	l"   your data is on someone else’s computer" \\
+	
+	glue*l }}glue
+    }}v box[] >bdr
+    {{
 	glue*ll }}glue
 	{{
 	    glue*ll }}glue
@@ -171,43 +183,24 @@ $10 stack: vp-tops
 	    ' biggest-breaches "biggest-breaches.png" 0.666e }}image-file drop
 	}}h box[]
     }}v box[] >bdr
-    {{
-	l" Cloud[o]Calypse" /title
-	l" Irgendwas ist total kaputt in der Cloud [2]" /subtitle
-	\skip
-	l" Cloud kaputt?" /subsection
-	l"   😱 Microsoft hat github gekauft (installiert gitlab–ce!)" \\
-	l"   😱 Dropbox dropt Linux–Client (außer ext4 unverschlüsselt)" \\
-	l"   😱 Facebook: Cambridge–Analytica–Scandal+viele API–Löcher [3]" \\
-	l"   😱 Google+ hat zugemacht wegen API–Löchlein (beide User betroffen)" \\
-	l"   😱 tumblr hat allen Pr0n gelöscht (übrig bleibt 1% contents)" \\
-	l"   😱 Man kann nicht mehr auf Tinder daten, verletzt Facebooks policy" \\
-	\skip
-	l" Wurzel des Übels" /subsection
-	l"   toxisches Werbe–Geschäftsmodell" \\
-	l"   user+password authentication" \\
-	l"   Deine Daten sind auf Computern anderer Leute" \\
-	
-	glue*l }}glue
-    }}v box[] >bdr
 }}z box[] /flip dup >slides
 
 \ page 4
 {{
     $222222FF $DDDDDDFF pres-frame
     {{
-	l" Werbe–Geschäftsmodell = toxisch?" /title
+	l" Ad–based business = toxic?" /title
 	vt{{
-	    l" • " l" Anreiz, dich auf einer Seite zu halten" b\\
-	    l" • " l" Beste Methode, dich zu halten: Kontroverse Diskussionen" b\\
-	    l" 👎 " l" (fehlendes Dislike zwingt dich, bei Kontroversen zu kommentieren)" b\\
-	    l" • " l" Anreiz, dich möglichst gut manipulieren zu können" b\\
-	    l" • " l" Die schlimmsten “fake news” sind die Werbung selbst" b\\
-	    l" • " l" Anreiz, viel über dich zu erfahren, um zielgerichtet zu werben" b\\
-	    l" • " l" Lässt dich intimes Zeugs posten" b\\
-	    l" • " l" Anreiz für Teilnehmer, Influencer—Marketing zu machen" b\\
+	    l" • " l" Incentive to keep you on the site" b\\
+	    l" • " l" Best way to keep you: controversial discussion" b\\
+	    l" 👎 " l" (no dislikes to force you to comment if you don't agree)" b\\
+	    l" • " l" Incentive to make you easily manipulated" b\\
+	    l" • " l" Worst “fake news” are indeed the ads themselves" b\\
+	    l" • " l" Incentive to gather all kinds of information to target ads to you" b\\
+	    l" • " l" Make you post about your private things" b\\
+	    l" • " l" Incentive for participants to do influencer marketing" b\\
 	    \skip
-	    l" Vorsicht: Gilt auch für TV und Print" \\
+	    l" Beware: applies to journals and TV, too" \\
 	}}vt
 	glue*ll }}glue
     }}v box[] >bdr
@@ -224,22 +217,22 @@ $10 stack: vp-tops
 {{
     $221100FF $FFEEDDFF pres-frame
     {{
-	l" Zentralisiert/Föderiert/P2P?" /title
+	l" Centralized/Federated/P2P?" /title
 	vt{{
-	    l" Zentralisiert" /subsection
-	    l" + " l" Gute Finanzierung, robuste Hardware und Angriffsabwehr" b\\
-	    l" – " l" Fehlende Privatsphäre, Honeypot, cative, EOL wenn der CEO will" b\\
-	    l" – " l" Allerlei globale Zensur, toxisches Geschäftsmodell" b\\
+	    l" Centralized" /subsection
+	    l" + " l" good funding, robust hardware and attack protection" b\\
+	    l" – " l" lacks privacy, honeypot, captive, EOL at whim of CEO" b\\
+	    l" – " l" diverse global censorship, possible toxic business model" b\\
 	    l" Federated" /subsection
-	    l" + " l" nicht captive, schwaches Geschäftsmodell" b\\
-	    l" ± " l" Regionale Zensur (Knoten blacklisted, z.B. Lolicon Mastodon Knoten)" b\\
-	    l" – " l" Schwache Finanzierung, schwache Hardware und Angriffsabwehr" b\\
-	    l" – " l" Fehlende Privatsphäre, EOL der Knoten, wenn der Admin will" b\\
+	    l" + " l" not captive, small business models" b\\
+	    l" ± " l" regional censorship (nodes blacklisted, e.g. Lolicon Mastodon nodes)" b\\
+	    l" – " l" poor funding, underpowered hardware/attack protection" b\\
+	    l" – " l" lacks privacy, EOL of nodes at whim of node admin" b\\
 	    l" Peer2Peer" /subsection
-	    l" + " l" Volle Kontrolle über deinen Knoten, gute Privatsphäre" b\\
-	    l" + " l" Entwicklung muss finanziert werden, Rest billig" b\\
-	    l" ± " l" Nicht—existierende Zensur (zieht Zensurflüchtlinge an)" b\\
-	    l" – " l" Volle Verantwortung über deinen Knoten" b\\
+	    l" + " l" Full control over your node, good privacy" b\\
+	    l" + " l" Development funding? Otherwise cheap" b\\
+	    l" ± " l" non–existend censorship (attracts censorship refugees)" b\\
+	    l" – " l" Full responsibility for your node" b\\
 	}}vt
 	glue*ll }}glue
     }}v box[] >bdr
@@ -249,18 +242,44 @@ $10 stack: vp-tops
 {{
     $000000FF $FFFFFFFF pres-frame
     {{
-	l" Recht auf Datenübertragbarkeit" /title
-	l" Art. 20 DSGVO" /subtitle
+	l" Right to data portability" /title
+	l" Art. 20 GDPR" /subtitle
 	\skip \footnote nt
-	l" 1. " l" Die betroffene Person hat das Recht, die sie betreffenden personenbezogenen Daten, die sie einem Verantwortlichen bereitgestellt hat, in einem strukturierten, gängigen und maschinenlesbaren Format zu erhalten, und sie hat das Recht, diese Daten einem anderen Verantwortlichen ohne Behinderung durch den Verantwortlichen, dem die personenbezogenen Daten bereitgestellt wurden, zu übermitteln, sofern" p2\\ \skip
-	l"   (a) " l" die Verarbeitung auf einer Einwilligung gemäß Artikel 6 Absatz 1 Buchstabe a oder Artikel 9 Absatz 2 Buchstabe a oder auf einem Vertrag gemäß Artikel 6 Absatz 1 Buchstabe b beruht und" p2\\
-	l"   (b) " l" die Verarbeitung mithilfe automatisierter Verfahren erfolgt." p2\\ \skip 
-	l" 2. " l" Bei der Ausübung ihres Rechts auf Datenübertragbarkeit gemäß Absatz 1 hat die betroffene Person das Recht, zu erwirken, dass die personenbezogenen Daten direkt von einem Verantwortlichen einem anderen Verantwortlichen übermittelt werden, soweit dies technisch machbar ist." p2\\ \skip
-	l" 3. " l" ¹Die Ausübung des Rechts nach Absatz 1 des vorliegenden Artikels lässt Artikel 17 unberührt. ²Dieses Recht gilt nicht für eine Verarbeitung, die für die Wahrnehmung einer Aufgabe erforderlich ist, die im öffentlichen Interesse liegt oder in Ausübung öffentlicher Gewalt erfolgt, die dem Verantwortlichen übertragen wurde." p2\\ \skip
-	l" 4. " l" Das Recht gemäß Absatz 1 darf die Rechte und Freiheiten anderer Personen nicht beeinträchtigen." p2\\
+	l" 1. " l" The data subject shall have the right to receive the personal data concerning him or her, which he or she has provided to a controller, in a structured, commonly used and machine-readable format and have the right to transmit those data to another controller without hindrance from the controller to which the personal data have been provided, where:" p2\\ \skip
+	l"   (a) " l" the processing is based on consent pursuant to point (a) of Article 6(1) or point (a) of Article 9(2) or on a contract pursuant to point (b) of Article 6(1); and" p2\\
+	l"   (b) " l" the processing is carried out by automated means." p2\\ \skip 
+	l" 2. " l" In exercising his or her right to data portability pursuant to paragraph 1, the data subject shall have the right to have the personal data transmitted directly from one controller to another, where technically feasible." p2\\ \skip
+	l" 3. " l" The exercise of the right referred to in paragraph 1 of this Article shall be without prejudice to Article 17. That right shall not apply to processing necessary for the performance of a task carried out in the public interest or in the exercise of official authority vested in the controller." p2\\ \skip
+	l" 4. " l" The right referred to in paragraph 1 shall not adversely affect the rights and freedoms of others." p2\\
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
+
+\ page 6
+{{
+    $200020FF $DDDDDDFF pres-frame
+    {{
+	l" net2o in a nutshell" /title
+	l" net2o consists of the following 6 layers (implemented bottom up):" \\
+	\skip
+	{{
+	    vt{{
+		l" 2. " b0 blackish l" Path switched packets with 2" }}text'
+		\italic l" n" }}smalltext \regular >o font-size# -0.4e f* to raise o o>
+	    l"  size writing into shared memory buffers" }}text'  glue*l }}glue }}h box[] >bl
+	    l" 3. " l" Ephemeral key exchange and signatures with Ed25519," b\\
+	    l"  " l" symmetric authenticated encryption+hash+prng with Keccak," b\\
+	    l"  " l" symmetric block encryption with Threefish" b\\
+	    l"  " l" onion routing camouflage with Threefish/Keccak" b\\
+	    l" 4. " l" Timing driven delay minimizing flow control" b\\
+	    l" 5. " l" Stack–oriented tokenized command language" b\\
+	    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
+	    l" 7. " l" Apps in a sandboxed environment for displaying content"
+	    b\\
+	}}vt
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+    }}v box[] >bdr
+}}z box[] /flip drop \ dup >slides
 
 \ page 5
 {{
@@ -272,7 +291,7 @@ $10 stack: vp-tops
 	"https://takeout.google.com/settings/takeout" link[]
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	tex: g+takeout
-	' g+takeout "google-takeout.png" 1e }}image-file drop /center
+	' g+takeout "google-takeout.png" 1.000e }}image-file drop /center
 	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -343,11 +362,11 @@ $10 stack: vp-tops
         "  }" \\
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
-	!i18n \sans \normal
-	day-mode $DDDDDDFF color, night-mode
-	$202020FF color, fdup to slider-color to slider-fgcolor
-	day-mode
-	dup font-size# f2/ f2/ fdup vslider
+	    !i18n \sans \normal
+	    night-mode $202020FF color, fdrop
+	    day-mode $DDDDDDFF color,
+	    fdup to slider-color to slider-fgcolor
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -473,13 +492,10 @@ $10 stack: vp-tops
         "        }" \\
         "      ]" \\
         "    }," \\
-	    tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
-	    !i18n \sans \normal
-	    day-mode
-	    $CCCCFFFF color, fdrop
-	    night-mode
-	    $000040FF color, fdup to slider-color to slider-fgcolor
-	    day-mode
+	        tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
+		!i18n \sans \normal
+		night-mode $000040FF color, fdrop day-mode $CCCCFFFF color,
+		fdup to slider-color to slider-fgcolor
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -531,11 +547,12 @@ $10 stack: vp-tops
         "  \"in_reply_to_screen_name\" : \"marco_keule\"," \\
         "  \"in_reply_to_user_id_str\" : \"3353806857\"" \\
         "}, {" \\
-	tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
-	!i18n \sans \normal
-	day-mode $DDDDDDFF color, night-mode
-	$202020FF color, fdup to slider-color to slider-fgcolor
-	dup font-size# f2/ f2/ fdup vslider
+	        tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
+		!i18n \sans \normal
+		night-mode $202020FF color, fdrop
+		day-mode $DDDDDDFF color,
+		fdup to slider-color to slider-fgcolor
+	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -577,8 +594,11 @@ $10 stack: vp-tops
         "    <blogger:filename>/2011/10/nach-suzhou.html</blogger:filename>" p\\
         "  </entry>" \\
 		tex: vp-blogger glue*lll ' vp-blogger }}vp vp[] dup vp-tops >stack
-	    !i18n \sans \normal
-	    dup font-size# f2/ f2/ fdup vslider
+		!i18n \sans \normal
+		night-mode $202020FF color, fdrop
+		day-mode $DDDDDDFF color,
+		fdup to slider-color to slider-fgcolor
+		dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -587,13 +607,13 @@ $10 stack: vp-tops
 {{
     $101010FF $EEEEEEFF pres-frame
     {{
-	l" Was braucht man für den Importer?" /title
+	l" Things needed for import" /title
 	vt{{
 	    l" • " l" JSON parser, XML parser, HTML parser" b\\
-	    l" • " l" JSON/XML schemas für alle Exports" b\\
-	    l" • " l" HTML nach Markdown Konverter" b\\
-	    l" • " l" Downloader für die fehlenden Teile (z.B. Avatare)" b\\
-	    l" • " l" Temporäre Secrets für alle anderen Autoren/Kommentatoren" b\\
+	    l" • " l" JSON/XML schemas for all those exports" b\\
+	    l" • " l" HTML to Markdown converter" b\\
+	    l" • " l" Downloader for missing parts (e.g. avatar photos)" b\\
+	    l" • " l" Temporary secret keys for all those other authors" b\\
 	}}vt
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -602,17 +622,17 @@ $10 stack: vp-tops
 {{
     $200020FF $FFDDFFFF pres-frame
     {{
-	l" Aufbau eines Soziales Netzwerk in net2o" /title
+	l" Social Networks in net2o" /title
 	vt{{
-	    l" Texte " l" als markdown" b\\
-	    l" Bilder " l" JPEG, PNG" b\\
-	    l" Videos " l" mkv/webm" b\\
-	    l" Timeline " l" Chat log mit Links auf DVCS–Projekt" b\\
-	    l" Posting " l" DVCS–Projekt, hält Daten+Kommentare zusammen" b\\
-	    l" DVCS–Projekt " l" Chat log mit Links auf patchset/snapshot" b\\
-	    l" Teilen " l" Fork+posting+log message in eigener Timeline" b\\
-	    l" Kommentar " l" Checkin von weiterem Posting" b\\
-	    l" Likes " l" Chat messages mit Emoji direkt ins DVCS–Projekt" b\\
+	    l" Texts " l" as markdown" b\\
+	    l" Images " l" JPEG, PNG" b\\
+	    l" Movies " l" mkv/webm" b\\
+	    l" Timeline " l" Chat log with link to DVCS project" b\\
+	    l" Posting " l" DVCS project, keeping data+comments together" b\\
+	    l" DVCS project " l" Chat log with link to patchsets/snapshots" b\\
+	    l" Reshare " l" Fork+added posting+log message in own timeline" b\\
+	    l" Comment " l" Fork+added posting+pull request" b\\
+	    l" Likes " l" Chat log messages directly in DVCS project" b\\
 	}}vt
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -623,14 +643,14 @@ $10 stack: vp-tops
     {{
 	l" Status" /title
 	vt{{
-	    l" + " l" Bulk importer für Google+" b\\
-	    l" – " l" Bulk importer für Facebook/Twitter/Blogger/etc." b\\
-	    l" + " l" Avatare, um die User–ID anzuzeigen" b\\
+	    l" + " l" Bulk importer for Google+" b\\
+	    l" – " l" Bulk importers for Facebook/Twitter/Blogger/etc." b\\
+	    l" + " l" Use avatars to display users's ID" b\\
 	    l" + " l" Markdown renderer" b\\
-	    l" – " l" Album–Betrachter" b\\
-	    l" – " l" Video–Player" b\\
-	    l" – " l" Temporäres Schlüsselpaar einem Kontakt zuweisen" b\\
-	    l" + " l" Temporäre Keys nicht vertrauenswürdig markieren" b\\
+	    l" – " l" Album viewer" b\\
+	    l" – " l" Movie player" b\\
+	    l" – " l" Key handover to contact in net2o world (temporary keypair)" b\\
+	    l" + " l" Mark imported keys as not trustworthy" b\\
 	}}vt
     }}v box[] >bdr
 }}z box[] /flip dup >slides
@@ -639,12 +659,30 @@ $10 stack: vp-tops
 {{
     $000000FF $FFFFFFFF pres-frame
     {{
-	l" Nicht–technische Probleme" /title
+	l" The non–technical problems" /title
 	vt{{
-	    l" • " l" Kontakte von net2o überzeugen" b\\
-	    l" • " l" Wie macht man ein soziales Netzwerk wohnlich?" b\\
-	    l" • " l" Finanzierung von net2o?" b\\
+	    l" • " l" Get your contacts over to net2o" b\\
+	    l" • " l" How to make a social network a nice place?" b\\
+	    l" • " l" Funding of net2o?" b\\
 	}}vt
+    }}v box[] >bdr
+}}z box[] /flip dup >slides
+
+\ page 6
+{{
+    $200020FF $DDDDDDFF pres-frame
+    {{
+	l" net2o: things to do" /title
+	l" The incomplete list of incomplete things:" \\
+	\skip
+	vt{{
+	    l" 1. " l" Shorter connection setup with NAT traversal" b\\
+	    l" 2. " l" Two–stage DHT to separate identity from queries" b\\
+	    l" 3. " l" Complete the payment system (+ add support for ticket systems)" b\\
+	    l" 4. " l" GUI–only operation must be possible" b\\
+	    l" 5. " l" Markdown to presentation converter" b\\
+	}}vt
+	glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
     }}v box[] >bdr
 }}z box[] /flip dup >slides
 
@@ -655,8 +693,9 @@ $10 stack: vp-tops
 	l" Literatur & Links" /title \small
 	vt{{
 	    l" Bernd Paysan  " l" net2o fossil repository" bi\\
-	    l" 🔗" l" https://net2o.de/" bm\\
-	    "https://net2o.de/" link[]
+	    l" 🔗" l" https://net2o.de/" bm\\ "https://net2o.de/" link[]
+	    l" Stefan Krempl  " l" Innenminister Seehofer wünscht sich digitale Wanzen im Wohnzimmer" bi\\
+	    l" 🔗" l" https://heise.de/-4449720" bm\\ "https://heise.de/-4449720" link[]
 	    l" Information  " l" World's Biggest Data Breaches & Hacks" bi\\
 	    l" is beautiful 🔗" l" https://informationisbeautiful.net/visualizations/" bm\\
 	    "https://informationisbeautiful.net/visualizations/worlds-biggest-data-breaches-hacks/" link[]
@@ -668,7 +707,7 @@ $10 stack: vp-tops
 	}}vt
 	glue*l }}glue
 	tex: qr-code
-	' qr-code "qr-code-inv.png" 12e }}image-file drop /center
+	' qr-code "qr-code.png" 12e }}image-file drop /center
 	qr-code nearest
 	glue*l }}glue
     }}v box[] >bdr
@@ -683,29 +722,10 @@ net2o-img drop  logo-img
 }}z slide[]
 to top-widget
 
-also opengl
-
-: !widgets ( -- )
-    set-fullscreen-hint 1 set-compose-hint
-    top-widget .htop-resize
-    vp-tops get-stack 0 ?DO  .vp-top  LOOP
-    1e ambient% sf! set-uniforms ;
-
 [IFDEF] writeout-en
     lsids ' .lsids s" ef2018/en" r/w create-file throw
     dup >r outfile-execute r> close-file throw
 [THEN]
-
-previous
-
-also [IFDEF] android android [THEN]
-
-: presentation ( -- )
-    1config
-    [IFDEF] hidestatus hidekb hidestatus [THEN]
-    !widgets widgets-loop ;
-
-previous
 
 script? [IF]
     next-arg s" time" str= [IF]  +db time( \ ) [THEN]
