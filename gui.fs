@@ -805,7 +805,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     display-posting
     dvcs:dispose-dvcs o> ;
 : open-posting { d: prj -- }
-    >dir "posts" ~net2o-cache/
+    >dir "posts" ~net2o-cache/  chat-keys $[]free
     ." open " prj .posting cr
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
     handle-clone
