@@ -80,8 +80,8 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
 		{{
 		    glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
 		    l" CloudCalypse" /title
-		    l" It looks like you’ve reached the end." /subtitle
-		    l" How to take your data into net2o" /subtitle
+		    l" building a social network on top of net2o," /subtitle
+		    l" and importing your existing data" /subtitle
 		    {{
 			{{ \tiny
 			    glue*l }}glue
@@ -142,7 +142,7 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
 	    l"   Germany wants a Cyberadministration like CAC (Medienstaatsvertrag)" "🤦🤦🤦🤦" e\\
 	    l"   Tor– and VPN–ban planned" "🤦🤦🤦🤦🤦" e\\
 	    l"   Seehofer plans reveal–your–password law" "🤦🤦🤦🤦🤦🤦" e\\
-	    l"   And he wants Alexa’s “tapes”&disable E2E encryption [2]" "🤦🤦🤦🤦🤦🤦🤦" e\\
+	    l"   And he wants Alexa’s “tapes” & disable E2E encryption [2]" "🤦🤦🤦🤦🤦🤦🤦" e\\
 	}}v box[]
 	\skip
 	\skip
@@ -707,7 +707,7 @@ glue*20l >o 1glue hglue-c glue! 0glue dglue-c glue! 1glue 20e f* vglue-c glue! o
 	}}vt
 	glue*l }}glue
 	tex: qr-code
-	' qr-code "qr-code.png" 12e }}image-file drop /center
+	' qr-code "qr-code.png" 8e }}image-file drop /center
 	qr-code nearest
 	glue*l }}glue
     }}v box[] >bdr
