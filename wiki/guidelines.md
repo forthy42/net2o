@@ -2,6 +2,8 @@
 
 ![Wizards](wizards.jpg)
 
+_Paul Kidby, The Faculty of Unseen University © Paul Kidby_
+
 This project adopts the Unseen University’s Wizards Guidelines of Slightly
 Posh Behavior as revised by Mustrum Ridcully as <s>Code</s> <u>Guideline</u> of
 Conduct.
