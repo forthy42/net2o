@@ -18,7 +18,8 @@ machine, make that machine do what you told it to.
 The harder part of all those spells is to make sure the wizard survives.  Only
 well debugged spells give them a chance.
 
-Wizards are depicted as old, bearded white men, but that’s just a stereotype.
+Wizards are depicted as old, bearded white men, but that’s just a
+stereotype. Some of them actually prefer to be a black, red-haired ape.
 
 ## ~~Rules~~ __Guidelines__
 
