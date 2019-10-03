@@ -1,6 +1,6 @@
 \ net2o GUI
 
-\ Copyright (C) 2018   Bernd Paysan
+\ Copyright © 2018   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -243,6 +243,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	!i18n l" net2o GUI" /title
 	!lit
 	\footnote cbl dark-blue net2o-version }}text /center
+	!i18n l" Copyright © 2010–2019 Bernd Paysan" }}text' /center !lit
 	{{
 	    {{
 		glue*ll }}glue

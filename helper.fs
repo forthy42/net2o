@@ -1,6 +1,6 @@
 \ connection setup helper
 
-\ Copyright (C) 2015   Bernd Paysan
+\ Copyright © 2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -237,7 +237,7 @@ Variable my-beacon
 : handle-beacon+hash ( addr u -- )
     dup IF  over c@ >r 1 /string r> handle-beacon  ELSE  2drop  THEN ;
 
-: replace-loop ( addr u -- flag )
+: replace-dht-loop ( addr u -- flag )
     BEGIN  key2| >d#id >o dht-host $[]# IF  0 dht-host $[]@  ELSE  #0.  THEN o>
 	2dup d0<> WHILE
 	    over c@ '!' = WHILE
@@ -246,7 +246,7 @@ Variable my-beacon
 		>r 2dup c:fetch-id r> >o  REPEAT  THEN  d0<> ;
 
 : pk-query ( addr u xt -- flag ) >r
-    dht-connect online? IF  2dup r> execute  replace-loop
+    dht-connect online? IF  2dup r> execute  replace-dht-loop
     ELSE  2drop rdrop false  THEN ;
 
 : pk-lookup ( addr u -- )

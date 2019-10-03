@@ -1,6 +1,6 @@
 \ net2o distributed version control system
 
-\ Copyright (C) 2016-2019   Bernd Paysan
+\ Copyright © 2016-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by

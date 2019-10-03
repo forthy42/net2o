@@ -1,6 +1,6 @@
 \ distributed hash table                             16oct2013py
 
-\ Copyright (C) 2013-2015   Bernd Paysan
+\ Copyright © 2013-2015   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
