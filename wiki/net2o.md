@@ -95,6 +95,8 @@ point:
     presentation (MINOΣ 2)
   * [EuroForth 2018](https://wiki.forth-ev.de/doku.php/events:ef2018:net2o)
     presentation (MINOΣ 2 + $quid)
+  * [EuroForth 2019](https://wiki.forth-ev.de/doku.php/events:ef2019:net2o)
+    presentation (Social network in net2o)
 * Chaos Communication Congress
   * [31c3](31c3.md) presentation
   * [32c3](32c3.md) presentation
