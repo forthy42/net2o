@@ -588,10 +588,7 @@ previous
 
 : end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
 
-: gen-request ( -- )
-    setup!  +resend-cmd  gen-tmpkeys  ['] connect-rest rqd?
-    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
-    ivs( ." gen request" forth:cr )
+: connect-request ( -- )
     net2o-code0
     net2o-version $, version?  0key,
     tpkc keysize $, receive-tmpkey
@@ -600,7 +597,13 @@ previous
     ind-addr @  IF  punch?  THEN
     req-codesize  req-datasize  map-request,  close-tmpnest
     ['] push-cmd IS expect-reply?
-    end-code| ;
+    end-code ;
+
+: gen-request ( -- )
+    setup!  +resend-cmd  gen-tmpkeys  ['] connect-rest rqd?
+    cmd( ind-addr @ IF  ." in" THEN ." direct connect" forth:cr )
+    ivs( ." gen request" forth:cr )
+    connect-request client-loop ;
 
 in net2o : connect ( ucode udata -- )  reqsize! gen-request ;
 

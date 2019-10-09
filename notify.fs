@@ -61,9 +61,6 @@ Sema notify-sema
 [ELSE]
     [IFDEF] linux
 	require linux/notify.fs
-	[IFUNDEF] ftime
-	    : ftime ( -- r ) ntime d>f 1e-9 f* ;
-	[THEN]
     [THEN]
     
     : show-notification ( -- )

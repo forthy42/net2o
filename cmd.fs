@@ -572,17 +572,11 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
 	buf# min-size I lshift u<= IF
 	    I outflag @ stateless# and IF  send-cX ?punch-cmds
 	    ELSE
-		send-reply >r over buf# r@ 2!
-		r> action-of send-xt ?dup-IF  execute
-		ELSE  2drop <err> ." send-xt is 0" cr <default>  THEN
+		send-reply >r over buf# r@ 2! r> send-xt
 	    THEN
 	    min-size I lshift  UNLOOP
 	    64r> dest-addr 64! EXIT  THEN
     LOOP  64r> dest-addr 64!  true !!commands!! ;
-
-[IFUNDEF] ftime
-    : ftime ( -- r ) ntime d>f 1e-9 f* ;
-[THEN]
 
 : cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest

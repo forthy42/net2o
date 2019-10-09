@@ -1075,21 +1075,21 @@ in net2o : punch ( addr u o:connection -- )
     ELSE  2drop  THEN ;
 
 : punch-wrap ( xt -- )
-    return-address $10 $make { w^ ret } catch
-    ret $@ return-address $10 smove
-    ret $free throw ;
+    return-address { ret[ $10 ] }  catch
+    ret[ return-address $10 move  throw ;
+
+: punch-loop ( xt -- )
+    [{: xt :}l punch-addrs $@ bounds ?DO
+	    I @ xt addr>sock
+	cell +LOOP ;] punch-wrap ;
 
 : pings ( o:connection -- )
     \G ping all addresses (why except the first one?)
-    [: punch-addrs $@ bounds ?DO
-	    I @ ['] ping-addr1 addr>sock
-	cell +LOOP ;] punch-wrap ;
+    ['] ping-addr1 punch-loop ;
 
 : punchs ( addr u o:connection -- )
     \G send a reply to all addresses
-    [: punch-addrs $@ bounds ?DO
-	    I @ ['] send-punch addr>sock
-	cell +LOOP ;] punch-wrap 2drop ;
+    ['] send-punch punch-loop ;
 
 \ send chunk
 
