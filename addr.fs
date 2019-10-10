@@ -64,11 +64,13 @@ in net2o : dispose-addr ( o:addr -- o:addr )
     host:id $free host:anchor $free host:route $free  host:revoke $free
     host:key sec-free  host:ekey sec-free
     dispose ;
-in net2o : dispose-punchs ( -- )
-    punch-addrs [: .net2o:dispose-addr ;] $[]o-map
-    punch-addrs $free ;
+in net2o : dispose-addrs ( addr -- )
+    dup >r [: .net2o:dispose-addr ;] $[]o-map
+    r> $free ;
 :noname ( -- )
-    net2o:dispose-punchs  defers extra-dispose ; is extra-dispose
+    dest-addrs  net2o:dispose-addrs
+    punch-addrs net2o:dispose-addrs
+    defers extra-dispose ; is extra-dispose
 
 : new-addr ( addr u -- o ) \G create a new address object from string
     net2o:new-addr n:>o nest-cmd-loop o n:o> ;

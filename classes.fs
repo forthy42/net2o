@@ -237,6 +237,7 @@ drop
 
 cmd-class class
     \ callbacks
+    defer: send0-xt      \ send out a stateless packet
     defer: timeout-xt    \ callback for timeout
     defer: setip-xt      \ callback for set-ip
     defer: ack-xt        \ callback for acknowledge
@@ -255,11 +256,12 @@ cmd-class class
     field: resend0
     field: data-resend
     field: pubkey        \ other side official pubkey
-    field: punch-addrs
     field: rqd-xts       \ callbacks for request done (array)
     field: my-error-id
     field: beacon-hash
     0 +field end-strings
+    field: dest-addrs    \ list of destinations
+    field: punch-addrs   \ list of punch destinations
     field: request-gen   \ pre-generated request number
     field: perm-mask
     \ secrets

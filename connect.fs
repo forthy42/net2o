@@ -16,7 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Forward >invitations
-in net2o Forward dispose-punchs
+in net2o Forward dispose-addrs
 Forward mynick$
 Forward invite-me
 Forward qr-invite-me
@@ -53,8 +53,9 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 +net2o: punch-load, ( $:string -- ) \g use for punch payload: nest it
     $> $, nest  o IF
 	nat( ." punch from: " return-address .addr-path forth:cr )
-	['] punchs code-reply is send-xt  THEN
-    net2o:dispose-punchs ;
+	['] punchs code-reply is send-xt
+	punch-addrs net2o:dispose-addrs \ first punch load: empty addresses
+    THEN ;
 +net2o: punch ( $:string -- ) \g punch NAT traversal hole
     $> nat( ." punch to: " 2dup .addr$ forth:cr ) net2o:punch ;
 +net2o: punch-done ( -- ) \g punch received

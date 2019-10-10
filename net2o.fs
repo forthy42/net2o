@@ -1078,18 +1078,22 @@ in net2o : punch ( addr u o:connection -- )
     return-address { ret[ $10 ] }  catch
     ret[ return-address $10 move  throw ;
 
-: punch-loop ( xt -- )
-    [{: xt :}l punch-addrs $@ bounds ?DO
+: addrs-loop ( addrs xt -- )
+    [{: addrs xt :}l addrs $@ bounds ?DO
 	    I @ xt addr>sock
 	cell +LOOP ;] punch-wrap ;
 
 : pings ( o:connection -- )
     \G ping all addresses (why except the first one?)
-    ['] ping-addr1 punch-loop ;
+    punch-addrs ['] ping-addr1 addrs-loop ;
 
 : punchs ( addr u o:connection -- )
     \G send a reply to all addresses
-    ['] send-punch punch-loop ;
+    punch-addrs ['] send-punch addrs-loop 2drop ;
+
+: dests ( addr u o:connection -- )
+    \G send a reply to all addresses
+    dest-addrs ['] send-punch addrs-loop 2drop ;
 
 \ send chunk
 

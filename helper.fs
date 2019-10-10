@@ -57,16 +57,18 @@ require dhtroot.fs
     dhtroot-addr$ $off
     dhtroot-addr @ ?dup-IF  net2o:dispose-addr  THEN ;
 
-: ins-ip ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip  ind-addr off ;
-: ins-ip4 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip4 ind-addr off ;
-: ins-ip6 ( -- net2oaddr )
-    net2o-host $@ net2o-port insert-ip6 ind-addr off ;
-
 : pk:connect ( code data key u -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
     net2o:new-context >o rdrop o to connection  setup!
+    dest-pk \ set our destination key
+    +resend-cmd net2o:connect
+    +flow-control +resend
+    connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
+
+: pk-addr:connect ( code data key u addr -- )
+    connect( [: .time ." Connect to: " dup hex. cr ;] $err )
+    net2o:new-context >o rdrop o to connection  setup!
+    ['] dests is send0-xt  dest-addrs >stack
     dest-pk \ set our destination key
     +resend-cmd net2o:connect
     +flow-control +resend
@@ -86,7 +88,9 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     dht-connection ?dup-IF  >o o to connection rdrop  EXIT  THEN
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk dhtroot
-    online? IF  +dht-beacon pk:connect  o to dht-connection
+    online? IF
+	+dht-beacon
+	dhtroot-addr@ pk-addr:connect  o to dht-connection
     ELSE  2drop 2drop  THEN ;
 : dht-disconnect ( -- )
     0 addr dht-connection !@ ?dup-IF
