@@ -459,6 +459,19 @@ defer new-msg  ' new-tmsg is new-msg
     recv-tick 64@ 64swap 64-
     rtd( ." rtdelay: " 64dup 64>f .ns cr ) rtdelay 64! ;
 
+User outflag  outflag off
+
+: set-flags ( -- )
+    0 outflag !@ outbuf hdrtags c!
+    outbuf hdrflags le-uw@ dest-flags le-w! ;
+
+: >send ( addr n -- )
+    >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
+    outbuf packet-body min-size r> lshift move ;
+
+forward send-code-packet
+: send-cX ( addr n -- ) +sendX2  >send  send-code-packet ;
+
 in net2o : new-context ( -- o )
     context-class new >o timeout( ." new context: " o hex. cr )
     my-key-default to my-key \ set default key
@@ -470,6 +483,7 @@ in net2o : new-context ( -- o )
     ['] no-timeout is timeout-xt ['] .iperr is setip-xt
     ['] noop is punch-done-xt ['] noop is sync-done-xt
     ['] noop is sync-none-xt  ['] noop is ack-xt
+    ['] send-cX is send0-xt
     -flow-control
     -1 blocksize !
     1 blockalign !
@@ -970,12 +984,6 @@ Forward sockaddr+return
 : set-dest# ( resend# -- )
     n>64 dest-addr 64+!  dest-addr 64@ outbuf mapaddr le-64! ;
 
-User outflag  outflag off
-
-: set-flags ( -- )
-    0 outflag !@ outbuf hdrtags c!
-    outbuf hdrflags le-uw@ dest-flags le-w! ;
-
 #90 Constant EMSGSIZE
 
 : ?msgsize ( ior -- )
@@ -1002,17 +1010,11 @@ User outflag  outflag off
     data-map  outbuf-encrypt
     ret-addr >dest packet-to ;
 
-: >send ( addr n -- )
-    >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
-    outbuf packet-body min-size r> lshift move ;
-
 : bandwidth+ ( -- )
     ns/burst 64@ 1 tick-init 1+ 64*/ bandwidth-tick 64+! ;
 
 : burst-end ( flag -- flag )
     ticker 64@ bandwidth-tick 64@ 64max next-tick 64! drop false ;
-
-: send-cX ( addr n -- ) +sendX2  >send  send-code-packet ;
 
 \ !!FIXME!! use ffz>, branchless with floating point
 
@@ -1067,7 +1069,7 @@ Forward new-addr
     temp-addr ret-addr $10 move
     insert-address ret-addr ins-dest
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )
-    2dup send-cX ;
+    outflag @ >r  2dup send-cX  r> outflag ! ;
 
 in net2o : punch ( addr u o:connection -- )
     o IF
@@ -1093,7 +1095,8 @@ in net2o : punch ( addr u o:connection -- )
 
 : dests ( addr u o:connection -- )
     \G send a reply to all addresses
-    dest-addrs ['] send-punch addrs-loop 2drop ;
+    dest-addrs ['] send-punch addrs-loop 2drop
+    outflag off ;
 
 \ send chunk
 

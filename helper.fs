@@ -57,19 +57,22 @@ require dhtroot.fs
     dhtroot-addr$ $off
     dhtroot-addr @ ?dup-IF  net2o:dispose-addr  THEN ;
 
+: make-context ( pk u -- )
+    ret0 net2o:new-context >o rdrop dest-pk ;
+
 : pk:connect ( code data key u -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
-    net2o:new-context >o rdrop o to connection  setup!
-    dest-pk \ set our destination key
+    make-context
+    o to connection  setup!
     +resend-cmd net2o:connect
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
 
 : pk-addr:connect ( code data key u addr -- )
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
-    net2o:new-context >o rdrop o to connection  setup!
-    ['] dests is send0-xt  dest-addrs >stack
-    dest-pk \ set our destination key
+    >r make-context  r> dest-addrs >stack
+    o to connection  setup!
+    ['] dests is send0-xt
     +resend-cmd net2o:connect
     +flow-control +resend
     connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
@@ -294,9 +297,6 @@ User hostc$ \ check for this hostname
     3 pick IF  2drop  EXIT  THEN
     check-host? IF  insert-host  ELSE  2drop false  THEN
     rot or swap ;
-
-: make-context ( pk u -- )
-    ret0 net2o:new-context >o rdrop dest-pk ;
 
 in net2o : pklookup? ( pkaddr u -- flag )
     2dup keysize2 safe/string hostc$ $! key2| 2dup pkc over str= to ?myself

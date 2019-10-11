@@ -235,7 +235,11 @@ Sema id-sema
     push-cmd ;
 
 +net2o: gen-reply ( -- ) \g generate a key request reply
-    own-crypt? IF  ['] reply-key IS expect-reply?  THEN ;
+    own-crypt? IF
+	['] reply-key IS expect-reply?
+	['] send-cX   IS send0-xt
+	return-addr return-address $10 move
+    THEN ;
 +net2o: gen-punch-reply ( -- ) ( obsolete dummy ) ;
 
 \ one-shot packets

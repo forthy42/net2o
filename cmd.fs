@@ -190,7 +190,7 @@ Defer gen-table
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
 standard:field
--5 cells 0 +field net2o.name
+-6 cells 0 +field net2o.name
 drop
 
 : >net2o-name ( addr -- addr' u )
@@ -570,7 +570,7 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
     cmd( <info> ." send: " outflag .dest-addr dup buf# net2o:see <default> cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I outflag @ stateless# and IF  send-cX ?punch-cmds
+	    I outflag @ stateless# and IF  send0-xt ?punch-cmds
 	    ELSE
 		send-reply >r over buf# r@ 2! r> send-xt
 	    THEN
