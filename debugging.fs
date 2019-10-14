@@ -66,6 +66,7 @@ debug: adjust-timer( \ adjust timer
 debug: reply( \ test replies
 debug: connect( \ connect debugging messages
 debug: reveal( \ reveal secrets
+debug: fullreveal( \ fully reveal secrets
 debug: reconnect( \ reconnect
 debug: tweak( \ tweaked key
 debug: ivs( \ IVS regen

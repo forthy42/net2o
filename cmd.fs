@@ -93,7 +93,8 @@ end-class cmd-buf-c
 \ string debugging
 
 : .black85 ( addr u -- )
-    <black> reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
+    fullreveal( <dim> )else( <black> )
+    reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
 $20 constant maxstr#
 

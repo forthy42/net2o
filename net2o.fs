@@ -1095,6 +1095,7 @@ in net2o : punch ( addr u o:connection -- )
 
 : dests ( addr u o:connection -- )
     \G send a reply to all addresses
+    stateless# outflag !
     dest-addrs ['] send-punch addrs-loop 2drop
     outflag off ;
 

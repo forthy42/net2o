@@ -18,6 +18,7 @@
 Forward avalanche-to ( addr u o:context -- )
 Forward pk-connect ( key u cmdlen datalen -- )
 Forward pk-connect? ( key u cmdlen datalen -- flag )
+Forward pk-connect-dests?
 Forward addr-connect ( key+addr u cmdlen datalen xt -- )
 Forward pk-peek? ( addr u0 -- flag )
 
@@ -1655,7 +1656,7 @@ $B $E 2Value chat-bufs#
     +resend-msg +flow-control ;
 
 : chat#-connect? ( addr u buf1 buf2 --- flag )
-    pk-connect? dup IF  connection >o rdrop +chat-control  +group  THEN ;
+    pk-connect-dests? dup IF  connection >o rdrop +chat-control  +group  THEN ;
 
 : chat-connect ( addr u -- )
     chat-bufs# chat#-connect? IF  greet  THEN ;

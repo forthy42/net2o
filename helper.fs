@@ -72,6 +72,7 @@ require dhtroot.fs
     connect( [: .time ." Connect to: " dup hex. cr ;] $err )
     >r make-context  r> dest-addrs >stack
     o to connection  setup!
+    dest-0key dest-0key> !
     ['] dests is send0-xt
     +resend-cmd net2o:connect
     +flow-control +resend
@@ -336,6 +337,11 @@ in net2o : pklookup ( pkaddr u -- )
     2>r net2o:pklookup 2r> direct-connect ;
 : pk-connect? ( addr u cmdlen datalen -- flag )
     2>r net2o:pklookup? dup IF   2r> direct-connect  ELSE  2rdrop  THEN ;
+: pk-connect-dests? ( addr u cmdlen datalen -- flag )
+    2>r net2o:pklookup>dests dup IF
+	2r> ['] dests is send0-xt
+	+resend-cmd direct-connect
+    ELSE  2rdrop  THEN ;
 
 : addr-connect ( addr+key u cmdlen datalen xt -- )
     -rot 2>r >r over + 1- dup c@ dup >r -

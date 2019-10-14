@@ -758,6 +758,7 @@ $10 Constant datesize#
 : <success> success-color attr! ;
 : <black>   [ black >fg black >bg or ]l attr! ;
 : <white>   [ white >fg white >bg or bold or ]l attr! ;
+: <dim>     [ white >fg black >bg or dim or ]l attr! ;
 
 \ Memory words
 

@@ -74,7 +74,10 @@ Variable old-order
     old-order get-stack ?dup-IF  set-order definitions  THEN ;
 
 : do-net2o-cmds ( xt -- )
-    set-net2o-cmds catch reset-net2o-cmds throw ;
+    rp0 @ >r  rp@ 3 cells + rp0 !
+    set-net2o-cmds catch
+    r> rp0 !
+    reset-net2o-cmds throw ;
 
 : (n2o-quit) ( -- )
     \ exits only through THROW etc.
