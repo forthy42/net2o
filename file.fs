@@ -68,9 +68,9 @@ event: :>file-done ( file-o -- ) \ .file-xt ;
 : id>addr? ( id -- addr )
     id>addr cell < !!fileid!! ;
 : new>file ( id -- )
-    [: fs-class new { w^ fsp } fsp cell file-state $+!
+    [: fs-table fs-class new-tok { w^ fsp } fsp cell file-state $+!
       o fsp @ >o parent! fs-id ! ['] file:done is file-xt
-      fs-table @ token-table ! 64#-1 to fs-limit o> ;]
+      64#-1 to fs-limit o> ;]
     filestate-sema c-section ;
 
 : lastfile@ ( -- fs-state ) file-state $@ + cell- @ ;

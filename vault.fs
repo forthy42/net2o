@@ -31,7 +31,7 @@ Defer write-decrypt
 Defer read-encrypt
 
 : >vault ( -- o:vault ) \ push a vault object
-    vault-class new n:>o vault-table @ token-table !
+    vault-table vault-class new-tok n:>o
     my-key-default to my-key ;
 : v-mode>crypt2 ( -- )
     v-mode $10 rshift $FF and >crypt ;

@@ -59,7 +59,7 @@ address-table $save
     addr $@ bounds ?DO  I @ xt execute  cell +LOOP ;
 
 in net2o : new-addr ( -- o )
-    address-class new >o  address-table @ token-table ! o o> ;
+    address-table address-class new-tok ;
 in net2o : dispose-addr ( o:addr -- o:addr )
     host:id $free host:anchor $free host:route $free  host:revoke $free
     host:key sec-free  host:ekey sec-free
@@ -72,7 +72,7 @@ in net2o : dispose-addrs ( addr -- )
     punch-addrs net2o:dispose-addrs
     defers extra-dispose ; is extra-dispose
 
-: new-addr ( addr u -- o ) \G create a new address object from string
+: $>addr ( addr u -- o ) \G create a new address object from string
     net2o:new-addr n:>o nest-cmd-loop o n:o> ;
 
 also net2o-base
@@ -114,7 +114,7 @@ previous
     punch-addrs $@ bounds ?DO  I @ .addr cr  cell +LOOP ;
 
 : .addr$ ( addr u -- )
-    new-addr >o o .addr net2o:dispose-addr o> ;
+    $>addr >o o .addr net2o:dispose-addr o> ;
 
 User dest-0key> \ pointer to dest-0key
 User dest-0key< \ pointer to obtained dest-0key

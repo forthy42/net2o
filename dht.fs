@@ -144,8 +144,8 @@ dht-class ' new static-a with-allocater constant dummy-dht
 : >d#id ( addr u -- o )
     [: 2dup d#public d#
       dup @ 0= IF
-	  over $40 = IF  dht-class new >o
-	      o swap !  dht-hash $!  dht-table @ token-table !  o o>
+	  over $40 = IF  dht-table dht-class new-tok >o
+	      o swap !  dht-hash $!  o o>
 	  ELSE  2drop drop dummy-dht dup .dht-off  THEN
       ELSE  @ nip nip  THEN ;] dht-sema c-section ;
 : .tag ( addr u -- ) 2dup 2>r 
@@ -329,7 +329,7 @@ false Value add-myip
     THEN  end-with
     nest[ cookie, request-gen @ #request, ]nest
     do-expect-reply ;
-: addme ( addr u -- )  new-addr { addr } now>never
+: addme ( addr u -- )  $>addr { addr } now>never
     addr .+my-id
     nat( ." addme: " addr .addr )
     addr .host:route $@len 0= IF
@@ -377,7 +377,7 @@ also net2o-base
     pk@ $, dht-id dht-host? end-with ;
 
 : my-host? ( addr u -- flag )
-    new-addr >o host:id $@ host$ $@ str= net2o:dispose-addr o> ;
+    $>addr >o host:id $@ host$ $@ str= net2o:dispose-addr o> ;
 
 : my-addrs? ( addr u -- addr u flag )
     false my-addr$ [: rot >r sigsize# - 2over str= r> or ;] $[]map ;

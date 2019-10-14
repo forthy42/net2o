@@ -422,9 +422,9 @@ UValue msg-group-o
 UValue connection
 
 in net2o : new-log ( -- o )
-    cmd-class new >o  log-table @ token-table ! o o> ;
+    log-table cmd-class new-tok ;
 in net2o : new-ack ( -- o )
-    o ack-class new >o  parent!  ack-table @ token-table !
+    o ack-table ack-class new-tok >o  parent!
     init-delay# rtdelay 64!
     flybursts# dup flybursts ! flyburst !
     ticks lastack 64! \ asking for context creation is as good as an ack
@@ -438,7 +438,7 @@ in net2o : new-ack ( -- o )
     ack-context @ ?dup-0=-IF  net2o:new-ack dup ack-context !  THEN ;
 scope{ net2o
 : new-tmsg ( -- o )
-    o msg-class new >o  parent!  msg-table @ token-table ! o o> ;
+    o msg-table msg-class new-tok >o  parent! o o> ;
 : new-msging ( -- o )
     o msging-class new >o  parent!  msging-table @ token-table ! o o> ;
 defer new-msg  ' new-tmsg is new-msg
@@ -1062,7 +1062,7 @@ scope{ mapc
 
 Forward addr>sock \ uses locals
 Forward punch-reply
-Forward new-addr
+Forward $>addr
 
 : send-punch ( addr u -- addr u )
     check-addr1 0= IF  2drop  EXIT  THEN
@@ -1073,7 +1073,7 @@ Forward new-addr
 
 in net2o : punch ( addr u o:connection -- )
     o IF
-	new-addr punch-addrs >stack
+	$>addr punch-addrs >stack
     ELSE  2drop  THEN ;
 
 : punch-wrap ( xt -- )

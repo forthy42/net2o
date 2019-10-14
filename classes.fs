@@ -35,6 +35,9 @@ end-class cmd-class \ command interpreter
 ' noop cmd-class to start-req
 :noname ( addr u -- flag ) 2drop -1 ; cmd-class to nest-sig
 
+: new-tok ( token-table class -- o )
+    new >o @ token-table ! o o> ;
+
 Variable cmd-table
 Variable reply-table
 Variable log-table

@@ -320,12 +320,12 @@ dvcs-refs is dvcs:write
 
 scope{ dvcs
 : new-dvcs ( -- o )
-    dvcs-class new >o  dvcs-table @ token-table !
-    commit-class new >o  msg-table @ token-table !  o o>  dvcs:commits !
-    search-class new >o  msg-table @ token-table !  o o>  dvcs:searchs !
+    dvcs-table dvcs-class new-tok >o
+    msg-table commit-class new-tok  dvcs:commits !
+    msg-table search-class new-tok  dvcs:searchs !
     o o> ;
 : new-dvcs-refs ( -- o )
-    dvcs-refs new >o  dvcs-table @ token-table !  o o> ;
+    dvcs-table dvcs-refs new-tok ;
 : clean-delta ( o:dvcs -- )
     in-files$ $free out-files$ $free patch$ $free ;
 : dispose-commit ( o:commit -- )
@@ -663,7 +663,7 @@ User id-check# \ check hash
 
 scope{ dvcs
 : new-dvcs-log ( -- o )
-    dvcs-log-class new >o msg-table @ token-table ! o o> ;
+    msg-table dvcs-log-class new-tok ;
 : clear-log ( -- )
     dvcs-log:sig$    $free  dvcs-log:tag$  $free  dvcs-log:id$    $free
     dvcs-log:action$ $free  dvcs-log:text$ $free  dvcs-log:chain$ $free

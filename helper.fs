@@ -27,7 +27,7 @@ require dhtroot.fs
     dhtroot-addr @ ?dup-IF  EXIT  THEN
     dhtroot-addr$ $@ dup IF
 	>host dhtnick $@ nick>pk drop date-sig? 0= IF
-	    sigsize# -  new-addr dup dhtroot-addr !
+	    sigsize# -  $>addr dup dhtroot-addr !
 	    EXIT  THEN  THEN
     2drop 0 ;
 
@@ -229,7 +229,7 @@ Variable my-beacon
 	\ !!FIXME!! accept only two: one IPv4, one IPv6.
 	\ !!FIXME!! and try merging the two into existent
 	>o sockaddr< alen @ nat( ." +punch " 2dup .address forth:cr )
-	.sockaddr new-addr punch-addrs >stack o>
+	.sockaddr $>addr punch-addrs >stack o>
     THEN ;
 
 : handle-beacon ( addr u char -- )
@@ -285,10 +285,10 @@ User hostc$ \ check for this hostname
       THEN  !0key  drop true ;] addr>sock ;
 
 : insert-addr$ ( addr u -- flag )  dest-0key dest-0key> !
-    new-addr dup insert-addr swap .net2o:dispose-addr ;
+    $>addr dup insert-addr swap .net2o:dispose-addr ;
 
 : insert-host ( addr u -- flag )  dest-0key dest-0key> !
-    new-addr  dup host=  over myhost= 0= and  IF
+    $>addr  dup host=  over myhost= 0= and  IF
 	msg( ." insert: " dup .host:id $@ type cr )
 	dup insert-addr  ELSE  false  THEN
     swap .net2o:dispose-addr ;
@@ -298,12 +298,26 @@ User hostc$ \ check for this hostname
     check-host? IF  insert-host  ELSE  2drop false  THEN
     rot or swap ;
 
-in net2o : pklookup? ( pkaddr u -- flag )
+: insert-dest ( addr u -- flag )
+    $>addr  dup myhost= 0=  IF
+	msg( ." insert dest: " dup .host:id $@ type cr )
+	dest-addrs >stack true  EXIT  THEN
+    .net2o:dispose-addr false ;
+
+: insert-dests? ( flag o addr u -- flag' o )
+    check-host? IF  insert-dest  ELSE  2drop false  THEN
+    rot or swap ;
+
+in net2o : do-pklookup? ( pkaddr u xt -- flag ) { xt }
     2dup keysize2 safe/string hostc$ $! key2| 2dup pkc over str= to ?myself
     2dup >d#id { id }
     id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
     2dup make-context
-    false id dup .dht-host ['] insert-host? $[]map drop nip nip ;
+    false id dup .dht-host xt $[]map drop nip nip ;
+in net2o : pklookup? ( pkaddr u -- flag )
+    ['] insert-host? net2o:do-pklookup? ;
+in net2o : pklookup>dests ( pkaddr u -- flag )
+    ['] insert-dests? net2o:do-pklookup? ;
 in net2o : pklookup ( pkaddr u -- )
     net2o:pklookup? 0= !!no-address!! ;
 
@@ -363,7 +377,7 @@ User pings[]
       THEN
       o> ;] $[]map ;
 
-: send-ping ( addr u -- ) sigsize# - new-addr dup >r
+: send-ping ( addr u -- ) sigsize# - $>addr dup >r
     [: ret-addr $10 erase
 	check-addr1 IF
 	    2dup .address forth:cr
