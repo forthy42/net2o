@@ -567,7 +567,8 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
     cmd( <info> ." send: " outflag .dest-addr dup buf# net2o:see <default> cr )
     max-size^2 1+ 0 DO
 	buf# min-size I lshift u<= IF
-	    I outflag @ stateless# and IF  send0-xt ?punch-cmds
+	    I outflag @ stateless# and IF
+		o IF  send0-xt ?punch-cmds  ELSE  send-cX  THEN
 	    ELSE
 		send-reply >r over buf# r@ 2! r> send-xt
 	    THEN
