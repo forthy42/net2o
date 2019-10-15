@@ -1066,6 +1066,8 @@ Forward $>addr
 
 : send-punch ( addr u -- addr u )
     check-addr1 0= IF  2drop  EXIT  THEN
+\    cmd0( ." 0key: " dest-0key< sec@ .black85 cr )
+    dest-0key< sec@ dest-0key sec!
     temp-addr ret-addr $10 move
     insert-address ret-addr ins-dest
     nat( ticks .ticks ."  send punch to: " ret-addr .addr-path cr )

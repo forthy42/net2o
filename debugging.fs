@@ -195,7 +195,9 @@ op-vector !
 
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
-\ : $err ( xt -- ) execute ;
+: .black85 ( addr u -- )
+    fullreveal( <dim> )else( <black> )
+    reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
 
 \ extra hints for last word executed
 

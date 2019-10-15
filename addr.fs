@@ -116,9 +116,6 @@ previous
 : .addr$ ( addr u -- )
     $>addr >o o .addr net2o:dispose-addr o> ;
 
-User dest-0key> \ pointer to dest-0key
-User dest-0key< \ pointer to obtained dest-0key
-
 : addr>6sock ( -- )
     host:key @ dest-0key< !
     host:portv6 w@ sockaddr1 port be-w!

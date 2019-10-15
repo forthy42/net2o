@@ -237,8 +237,10 @@ Sema id-sema
 +net2o: gen-reply ( -- ) \g generate a key request reply
     own-crypt? IF
 	['] reply-key IS expect-reply?
-	['] send-cX   IS send0-xt
-	return-addr return-address $10 move
+	o IF
+	    ['] send-cX   IS send0-xt
+	    return-addr return-address $10 move
+	THEN
     THEN ;
 +net2o: gen-punch-reply ( -- ) ( obsolete dummy ) ;
 

@@ -53,6 +53,8 @@ object uclass keytmp
     $10       uvar tf-hashout
     keccak#   uvar predate-key
     1 64s     uvar last-mykey
+    cell      uvar dest-0key> \ pointer to dest-0key
+    cell      uvar dest-0key< \ pointer to obtained dest-0key
     cell      uvar keytmp-up
 end-class keytmp-c
 
