@@ -127,7 +127,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $3E gen-ivs ( $:string -- )
   generate IVs
 * $3F addr-key! ( $:string -- )
-  set key for reply
+  set key for cmd0-reply
 * $40 punch? ( -- )
   Request punch addresses
 * $41 >time-offset ( n -- )

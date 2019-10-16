@@ -144,6 +144,8 @@ net2o-base
 
 \ crypto functions
 
+forward 0key,
+
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
@@ -154,8 +156,8 @@ net2o-base
     net2o:update-key ;
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
-+net2o: addr-key! ( $:string -- ) \g set key for reply
-    $> dup ?keysize lastaddr# cell+ $! ;
++net2o: addr-key! ( $:string -- ) \g set key for cmd0-reply
+    $> dup ?keysize lastaddr# cell+ $! 0key, ;
 
 : 0key, ( -- ) my-0key sec@ sec$, addr-key! ;
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
@@ -284,7 +286,6 @@ Sema id-sema
 +net2o: invite-result ( flag -- )
     o IF  to invite-result#  THEN ;
 ' invite-result is <invite-result>
-
 }scope
 
 setup-table $save
