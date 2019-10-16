@@ -300,7 +300,7 @@ User hostc$ \ check for this hostname
     rot or swap ;
 
 : insert-dest ( addr u -- flag )
-    $>addr  dup myhost= 0=  IF
+    $>addr  dup host=  over myhost= 0= and  IF
 	msg( ." insert dest: " dup .host:id $@ type cr )
 	dest-addrs >stack true  EXIT  THEN
     .net2o:dispose-addr false ;

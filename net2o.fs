@@ -996,9 +996,33 @@ Forward sockaddr+return
     out-route  outbuf dup packet-size
     send-a-packet ?msgsize ;
 
+: addr-v6= ( sockaddr -- sockaddr flag )
+    dup sin6_addr host:ipv6 $10 tuck str=
+    over sin6_port be-uw@  host:portv6 w@ = and ;
+: addr-v4= ( sockaddr -- sockaddr flag )
+    dup sin_addr  host:ipv4 4 tuck str=
+    over port be-uw@  host:portv4 w@ = and ;
+
+: search-cmd0key ( -- )
+    ret-addr { ra }
+    ra be@ routes# #.key dup 0= IF  2drop  EXIT  THEN  $@ drop
+    dest-addrs $@ bounds ?DO
+	I @ >o
+	dup w@ AF_INET6 =  IF  addr-v6=  ELSE  addr-v4=  THEN
+	ra $10  pathc+ 0 -skip	host:route $@ str= and
+	IF
+	    host:key sec@ o> dest-0key sec!
+	ELSE
+	    o>
+	THEN
+    cell +LOOP
+    drop ;
+
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
     outbuf hdrtags c@ stateless# and IF
+	\ search cmd0key by ret-address
+	o IF  search-cmd0key  THEN
 	outbuf0-encrypt
 	cmd0( .time ." cmd0 to: " ret-addr .addr-path cr )
     ELSE

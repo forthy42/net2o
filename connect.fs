@@ -144,8 +144,6 @@ net2o-base
 
 \ crypto functions
 
-forward 0key,
-
 +net2o: receive-tmpkey ( $:key -- ) $> \g receive emphemeral key
     net2o:receive-tmpkey ;
 +net2o: tmpkey-request ( -- ) \g request ephemeral key
@@ -157,7 +155,7 @@ forward 0key,
 +net2o: gen-ivs ( $:string -- ) \g generate IVs
     $> tmp-ivs sec! [ ivs-val receive-val or ]L validated or! ;
 +net2o: addr-key! ( $:string -- ) \g set key for cmd0-reply
-    $> dup ?keysize lastaddr# cell+ $! 0key, ;
+    $> dup ?keysize lastaddr# cell+ $! ;
 
 : 0key, ( -- ) my-0key sec@ sec$, addr-key! ;
 : gen-punch ( -- ) nat( ." gen punches" forth:cr )
