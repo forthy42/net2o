@@ -340,6 +340,7 @@ in net2o : pklookup ( pkaddr u -- )
 : pk-connect-dests? ( addr u cmdlen datalen -- flag )
     2>r net2o:pklookup>dests dup IF
 	2r> ['] dests is send0-xt
+	ind-addr on \ need NAT traversal
 	+resend-cmd direct-connect
     ELSE  2rdrop  THEN ;
 
