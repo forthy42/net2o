@@ -280,7 +280,7 @@ new-pw-diffuse
 
 : set-0key ( tweak128 keyaddr u -- )
     dup 0= IF  2drop no-key state#  THEN
-    cmd0( ." 0key: " 2dup 85type cr )
+    cmd0( ." 0key: " 2dup .black85 cr )
     c:tweakkey! ;
 
 : try-0decrypt ( addr -- flag ) >r

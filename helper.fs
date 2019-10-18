@@ -55,7 +55,7 @@ require dhtroot.fs
 
 : dhtroot-off ( --- )
     dhtroot-addr$ $off
-    dhtroot-addr @ ?dup-IF  net2o:dispose-addr  THEN ;
+    0 dhtroot-addr !@ ?dup-IF  .net2o:dispose-addr  THEN ;
 
 : make-context ( pk u -- )
     ret0 net2o:new-context >o rdrop dest-pk ;
@@ -93,12 +93,13 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
     tick-adjust 64@ 64-0= IF  +get-time  THEN
     $8 $8 dhtnick $@ nick>pk dhtroot
     online? IF
-	+dht-beacon
 	dhtroot-addr@ pk-addr:connect  o to dht-connection
+	+dht-beacon
     ELSE  2drop 2drop  THEN ;
 : dht-disconnect ( -- )
     0 addr dht-connection !@ ?dup-IF
-	>o o to connection disconnect-me 0 to connection o>  THEN ;
+	>o o to connection disconnect-me 0 to connection o>
+	dhtroot-addr off  THEN ;
 
 Variable announced
 : subme ( -- )  announced @ IF
@@ -159,9 +160,8 @@ Forward insert-addr ( o -- )
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]
 	0 .!my-addr dht-disconnect \ old DHT may be stale
-	announce-me \ if we succeed here, we can try the rest
 	beacons# #frees
-	0 >o dhtroot +dht-beacon o>
+	announce-me \ if we succeed here, we can try the rest
 	renat
     [IFDEF] renat-complete ;] catch renat-complete throw [THEN]
     beacon( ." done renat" cr ) ;
