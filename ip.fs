@@ -128,11 +128,14 @@ Forward .addr$
     0         r@ sin6_addr 4 + l!
     $0064ff9b r> sin6_addr be-l! ;
 
-: sock-rest ( sockaddr -- addr u ) >r
+: sock-id ( id sockaddr -- addr u ) >r
     AF_INET6 r@ family w!
     0        r@ sin6_flowinfo l!
-    0        r@ sin6_scope_id l!
+             r@ sin6_scope_id l!
     r> sockaddr_in6 ;
+
+: sock-rest ( sockaddr -- addr u )
+    0 swap sock-id ;
 
 : sock-rest4 ( sockaddr -- addr u ) >r
     AF_INET r@ family w!
@@ -143,9 +146,19 @@ Forward .addr$
     net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
     sockaddr1 port be-uw@ ;
 
+: ipv6/pp ( sock -- sock )
+    [IFDEF] ipv6-public
+	config:port# @ IF
+	    ipv6( dup ipv6-public )
+	ELSE
+	    ipv6( dup ipv6-private )
+	THEN
+    [THEN]
+;
+
 : sock[ ( -- )  query-sock ?EXIT
     ipv4( ipv6( new-udp-socket46 )else( new-udp-socket ) )else( new-udp-socket6 )
-    to query-sock ;
+    ipv6/pp to query-sock ;
 : ]sock ( -- )  query-sock 0= ?EXIT
     query-sock closesocket 0 to query-sock ?ior ;
 
@@ -200,12 +213,16 @@ Forward .addr$
 	;] 'sock )else( 0 ) ;
 [THEN]
 
+: be-w, here 2 allot be-w! ;
+
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
-Create dummy-ipv6 \ this is googles ipv6 address
-$2a c, $00 c, $14 c, $50 c, $40 c, $01 c, $08 c, $15 c,
-$0000 w, $0000 w, $0000 w, $00 c, $01 c,
+Create dummy-ipv6 \ this is my net2o ipv6 address
+$2a03 be-w, $4000 be-w, $001d be-w, $00bf be-w,
+$0000 be-w, $0000 be-w, $11e7 be-w, $0020 be-w,
 Create local-ipv6
-$FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c,
+$FD00 be-w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0001 be-w,
+Create link-ipv6
+$FE80 be-w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0001 be-w,
 
 0 Value my-port#
 
@@ -252,7 +269,8 @@ $FD c, $00 c, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $00 c, $01 c
 : global-ip4 ( -- ip4addr u )  dummy-ipv4 check-ip4 ;
 : global-ip6 ( -- ip6addr u )  dummy-ipv6 check-ip6 ;
 : local-ip6 ( -- ip6addr u )   local-ipv6 check-ip6
-    IF  c@ $FD =  ELSE  drop false  THEN ;
+    IF  c@ $FD =  ELSE  0  THEN ;
+: link-ip6 ( -- ip6addr u -- ) link-ipv6 check-ip6 ;
 
 \ no-hybrid stuff
 
@@ -329,7 +347,7 @@ Variable net2o-host "net2o.de" net2o-host $!
 	  )else( ['] create-udp-server6 )
 	  )else( ['] create-udp-server )
 	catch WHILE  drop 1+  REPEAT
-    [IFDEF] no-hybrid 0 [THEN] to net2o-sock
+    ipv6/pp  [IFDEF] no-hybrid 0 [THEN] to net2o-sock
     ?dup-0=-IF  my-port  THEN to my-port#
     [IFDEF] no-hybrid
 	ipv4( net2o-sock drop my-port# create-udp-server to net2o-sock )
