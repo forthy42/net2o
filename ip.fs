@@ -322,9 +322,11 @@ Forward !my-addr ( -- )
 	2drop  EXIT  THEN
     nat( ticks .ticks ."  ping: " 2dup .address cr )
     2>r net2o-sock
-    [: 64#0 { 64^ x } '>' emit code-map .mapc:dest-vaddr x le-64!
-	x 8 type punch# $10 type ;] $tmp
-    0 2r> sendto drop ;
+    [: { | x[ 8 ] } '>' emit code-map .mapc:dest-vaddr x[ le-64!
+      x[ 8 type punch# $10 type ;] $tmp
+    0 2r@ sendto
+    sendto( ." send to: " 2r@ .address space dup . cr )
+    rdrop rdrop drop ;
 
 : pathc+ ( addr u -- addr' u' )
     BEGIN  dup  WHILE  over c@ $80 < >r 1 /string r>  UNTIL  THEN ;
