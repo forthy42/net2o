@@ -21,6 +21,11 @@ keypack# key-salt# + key-cksum# + Constant keypack-all#
 key-salt# key-cksum# + Constant wrapper#
 
 Variable my-0key
+Variable old-ekey-sk \ only the old secure key is needed
+Variable my-ekey-sk
+Variable my-ekey-pk
+64Variable my-ekey-to
+
 : your-0key ( -- addr u )
     o IF  dest-0key sec@  ELSE  #0.  THEN
     dup 0= lastaddr# and  IF  2drop lastaddr# cell+ $@  THEN ;
@@ -120,6 +125,14 @@ $20 buffer: dummy-buf
 
 : init-my0key ( -- )
     no0key( EXIT ) keysize rng$ my-0key sec! ;
+
+: init-myekey ( -- )
+    my-ekey-sk sec@ dup IF  old-ekey-sk sec!  ELSE  2drop  THEN
+    keysize rng$ my-ekey-sk sec!  my-ekey-sk sec@ drop sk-mask
+    keysize my-ekey-pk $!len
+    my-ekey-sk sec@ drop my-ekey-pk $@ drop sk>pk
+    key( my-ekey-sk sec@ 85type space my-ekey-pk $@ 85type cr )
+    ntime config:ekey-timeout& 2@ d>64 64+ my-ekey-to 64! ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
@@ -721,6 +734,12 @@ drop
     +sig
     sktmp pkmod sk@ drop >modkey
     pkmod keysize type .encsign-rest ;
+
+\ cmd0 assymmetric encryption
+
+: >0dhe ( addr -- )
+    dup my-ekey-sk sec@ drop swap tf-key tf_ctx_256-key ed-dh 2drop
+    tf-key tf_ctx_256-tweak $10 move ;
 
 \\\
 Local Variables:

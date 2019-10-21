@@ -46,8 +46,8 @@ $11 net2o: addr-pri# ( n -- ) \g priority
     $> host:key sec! ;
 +net2o: addr-revoke ( $:revoke -- ) \g revocation info
     $> host:revoke $! ;
-+net2o: addr-ekey ( $:ekey -- ) \g ephemeral key
-    $> host:ekey $! ;
++net2o: addr-ekey ( $:ekey to -- ) \g ephemeral key
+    host:ekey-to 64! $> host:ekey $! ;
 }scope
 
 address-table $save
@@ -62,7 +62,7 @@ in net2o : new-addr ( -- o )
     address-table address-class new-tok ;
 in net2o : dispose-addr ( o:addr -- o:addr )
     host:id $free host:anchor $free host:route $free  host:revoke $free
-    host:key sec-free  host:ekey sec-free
+    host:key sec-free  host:ekey $free
     dispose ;
 in net2o : dispose-addrs ( addr -- )
     dup >r [: .net2o:dispose-addr ;] $[]o-map
@@ -90,7 +90,7 @@ also net2o-base
     THEN
     host:route $@ dup IF  $, addr-route  ELSE  2drop  THEN
     host:key sec@ dup IF  sec$, addr-key  ELSE  2drop  THEN
-    host:ekey $@ dup IF  $, addr-ekey  ELSE  2drop  THEN
+    host:ekey $@ dup IF  $, host:ekey-to 64@ lit, addr-ekey  ELSE  2drop  THEN
     host:revoke $@ dup IF  $, addr-revoke  ELSE  2drop  THEN o> ; 
 previous
 : o>addr ( o -- addr u )
@@ -108,6 +108,7 @@ previous
     host:portv4 w@ host:portv6 w@ = or  IF host:portv4 w@ ." :" 0 .r  THEN
     host:route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
     host:key sec@ dup IF  '$' emit .black85  ELSE  2drop  THEN
+    host:ekey $@ dup IF  '§' xemit 85type  ELSE  2drop  THEN
     o> ; 
 
 : .nat-addrs ( -- )
@@ -141,7 +142,11 @@ previous
 : +my-id ( -- )
     config:prio# @ host:pri# !
     host$ $@ host:id $!
-    my-0key @ IF  my-0key sec@ host:key sec!  THEN ;
+    my-0key @ IF  my-0key sec@ host:key sec!  THEN
+    my-ekey-pk @ IF
+	my-ekey-pk $@ host:ekey $!
+	my-ekey-to 64@ host:ekey-to 64!
+    THEN ;
 
 : +my-addrs ( port o:addr -- )
     +my-id

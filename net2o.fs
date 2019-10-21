@@ -1926,6 +1926,7 @@ in net2o : request-done ( n -- )  elit, o elit, :>request ;
 Defer init-rest
 
 :noname ( port -- )  init-mykey init-mykey \ generate two keys
+    init-myekey
     my-0key @ 0= IF  init-my0key  THEN  init-header-key
     \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
