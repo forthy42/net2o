@@ -1,6 +1,6 @@
 \ symmetric encryption and decryption
 
-\ Copyright © 2011-2015   Bernd Paysan
+\ Copyright © 2011-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -740,6 +740,36 @@ drop
 : >0dhe ( addr -- )
     dup my-ekey-sk sec@ drop swap tf-key tf_ctx_256-key ed-dh 2drop
     tf-key tf_ctx_256-tweak $10 move ;
+: >0pk ( addr -- key u )
+    tf-key swap tf-out $C tf_decrypt_256
+    tf-out ;
+: <>0key ( sk pk -- key u )
+    key-assembly ed-dh 2drop
+    tf-key tf_ctx_256-key key-assembly keysize + keysize move
+    key-assembly state# ;
+: >0key ( pk -- key u )
+    sk@ drop swap <>0key ;
+: cmd0-decrypt ( addr1 u1 -- addr2 u2 pk / 0 )
+    over >0dhe  keysize2 safe/string
+    over keysize - >0pk >0key
+    decrypt$  IF  tf-out  ELSE  2drop  0  THEN ;
+
+: <0dhe ( epk -- )
+    tskc over tf-key tf_ctx_256-key ed-dh 2drop
+    tf-key tf_ctx_256-tweak $10 move ;
+: <0pk ( addr -- )
+    tf-key pk@ drop rot $C tf_encrypt_256 ;
+: <0key ( -- key u )
+    pubkey $@ drop sk@ drop <>0key ;
+
+: cmd0-encrypt { addr1 u1 pk epk -- }
+    gen-tmpkeys
+    tpkc addr1 keysize move
+    epk <0dhe
+    addr1 keysize + <0pk
+    <0key
+    addr1 u1 keysize2 safe/string
+    2swap encrypt$ ;
 
 \\\
 Local Variables:
