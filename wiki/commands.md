@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.9.2-20191017.
+Version 0.9.2-20191024.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -310,7 +310,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   key for connection setup
 * $1B addr-revoke ( $:revoke -- )
   revocation info
-* $1C addr-ekey ( $:ekey -- )
+* $1C addr-ekey ( $:ekey to -- )
   ephemeral key
 
 ### dht commands ###
