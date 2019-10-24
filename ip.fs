@@ -354,7 +354,7 @@ Variable net2o-host "net2o.de" net2o-host $!
     [IFDEF] no-hybrid
 	ipv4( net2o-sock drop my-port# create-udp-server to net2o-sock )
     [THEN]
-    !my-addr  drop ;
+    !my-addr ;
 
 \\\
 Local Variables:
