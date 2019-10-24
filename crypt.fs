@@ -740,27 +740,27 @@ drop
 : >0dhe ( addr -- )
     dup my-ekey-sk sec@ drop swap tf-key tf_ctx_256-key ed-dh 2drop
     tf-key tf_ctx_256-tweak $10 move ;
-: >0pk ( addr -- key u )
-    tf-key swap tf-out $C tf_decrypt_256
-    tf-out ;
+: >0pk ( addr -- )
+    tf-key swap tf-out $E tf_decrypt_256 ;
 : <>0key ( sk pk -- key u )
-    key-assembly ed-dh 2drop
-    tf-key tf_ctx_256-key key-assembly keysize + keysize move
+    tf-key tf_ctx_256-key
+    dup key-assembly keysize + keysize move
+    -rot key-assembly ed-dhx 2drop
     key-assembly state# ;
-: >0key ( pk -- key u )
-    sk@ drop swap <>0key ;
+: >0key ( -- key u )
+    sk@ drop tf-out <>0key ;
 : cmd0-decrypt ( addr1 u1 -- addr2 u2 pk / 0 )
     over >0dhe  keysize2 safe/string
     over keysize - >0pk >0key
     decrypt$  IF  tf-out  ELSE  2drop  0  THEN ;
 
 : <0dhe ( epk -- )
-    tskc over tf-key tf_ctx_256-key ed-dh 2drop
-    tf-key tf_ctx_256-tweak $10 move ;
+    tskc swap tf-key tf_ctx_256-key ed-dh 2drop
+    tpkc tf-key tf_ctx_256-tweak $10 move ;
 : <0pk ( addr -- )
-    tf-key pk@ drop rot $C tf_encrypt_256 ;
+    tf-key pk@ drop rot $E tf_encrypt_256 ;
 : <0key ( -- key u )
-    pubkey $@ drop sk@ drop <>0key ;
+    sk@ drop pubkey $@ drop <>0key ;
 
 : cmd0-encrypt { addr1 u1 pk epk -- }
     gen-tmpkeys
