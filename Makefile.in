@@ -183,7 +183,7 @@ libcc:	$(FORTHLIB:%=%.libcc)
 
 %.libcc:
 	-echo "generating library $(@:%.libcc=%)"
-	-env HOSTPREFIX="$(HOST)" $(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
+	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
 	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
