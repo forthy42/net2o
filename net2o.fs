@@ -466,6 +466,7 @@ User outflag  outflag off
     outbuf hdrflags le-uw@ dest-flags le-w! ;
 
 : >send ( addr n -- )
+\   over 0= IF  2drop  rdrop EXIT  THEN
     >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
     outbuf packet-body min-size r> lshift move ;
 

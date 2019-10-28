@@ -522,7 +522,9 @@ previous
 
 \ print time
 
-: ftime ( -- r ) ntime d>f 1e-9 f* ;
+[IFUNDEF] ftime
+    : ftime ( -- r ) ntime d>f 1e-9 f* ;
+[THEN]
 
 64Variable tick-adjust
 : ticks ( -- u64 )  ntime d>64 tick-adjust 64@ 64+ ;
