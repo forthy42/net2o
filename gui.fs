@@ -29,9 +29,8 @@ require minos2/font-style.fs
     font-size# 20% f* }}frame dup .button3 ;
 : update-gsize# ( -- )
     screen-pwh max s>f
-    default-diag screen-diag f/
-    [ 5e fsqrt 1e f+ f2/ 1e f- ] FLiteral f**
-    default-scale f* 1/f #64 fm*
+    default-diag screen-diag f/ .8e f**
+    default-scale f* 1/f #56 fm*
     f/ fround to font-size#
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
@@ -818,9 +817,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 
 :noname ( -- )
     glue*ll }}glue msg-box .child+
-    dpy-w @ 90% fm* msg-par .par-split
-    {{ msg-par unbox }}
-    dup >r 0 ?DO  I pick box[] "unboxed" name! drop  LOOP  r>
+    dpy-w @ 80% fm* msg-par .par-split
+    {{ msg-par unbox }} cbl
+    dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
     msg-vbox .+childs
 ; wmsg-class is msg:end
 0 Value nobody-online-text \ nobody is online warning
