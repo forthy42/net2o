@@ -1034,8 +1034,7 @@ wmsg-o >o msg-table @ token-table ! o>
     0 to msg-par  0 to msg-box
     msgs-box .dispose-childs
     glue*lll }}glue msgs-box .child+
-    2dup load-msg
-    msg-log@
+    load-msg msg-log@
     { log u } u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
     log u u' /string bounds ?DO
 	I $@ { d: msgt }
@@ -1189,9 +1188,14 @@ Variable invitation-stack
 	    {{
 		'user-plus' ' xemit $tmp }}text
 	    }}h ' invitations-s/h 0 toggle[] /flip dup to invitations-notify
-	    online-symbol }}text dup to online-flag
-	    s" ❌" $444444FF new-color, }}button-lit [: -1 data +! ;]
-	    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
+	    {{
+		glue*l $444444FF new-color, font-size# 40% f* }}frame dup .button2
+		{{
+		    realwhite online-symbol }}text 25%b dup to online-flag
+		    s" ❌" }}text 25%b [: -1 data +! ;]
+		    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
+		}}h box[]
+	    }}z
 	}}h box[] /vfix
 	{{
 	    glue*lll }}glue
@@ -1218,14 +1222,14 @@ Value n2o-frame
     1e ambient% sf! set-uniforms ;
 
 [IFDEF] x11
-    x11:XClassHint buffer: net2o-wm-class
 [THEN]
 
 : net2o-gui ( -- )
     [IFDEF] x11
 	dpy win l" net2o GUI" locale@ x11:XStoreName drop
-	"net2o-gui\0" drop dup net2o-wm-class 2!
-	dpy win net2o-wm-class x11:XSetClassHint drop
+	{ | net2o-wm-class[ x11:XClassHint ] }
+	"net2o-gui\0" drop dup net2o-wm-class[ 2!
+	dpy win net2o-wm-class[ x11:XSetClassHint drop
     [THEN]
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
