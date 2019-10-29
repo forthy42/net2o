@@ -89,7 +89,7 @@ debug: newvault( \ new style vault keys
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
 +db ipv4( \ ipv4 should be on by default )
-+db ipv64( \ ipv6 over 4
+-db ipv64( \ ipv6 over 4
 -db newvault( \ new vault disabled for now )
 +db syncfile( \ disable async file operations for now )
 
