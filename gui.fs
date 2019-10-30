@@ -1,6 +1,6 @@
 \ net2o GUI
 
-\ Copyright © 2018   Bernd Paysan
+\ Copyright © 2018-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -1220,9 +1220,6 @@ Value n2o-frame
     top-widget .htop-resize
     pw-field engage
     1e ambient% sf! set-uniforms ;
-
-[IFDEF] x11
-[THEN]
 
 : net2o-gui ( -- )
     [IFDEF] x11
