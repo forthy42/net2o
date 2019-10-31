@@ -15,10 +15,13 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-also opengl also android
+also opengl also android also jni
 
 : scan-start ( -- )
     hidekb hidestatus >changed  screen+keep
+    "android.permission.CAMERA"
+    "android.permission.RECORD_AUDIO"
+    "android.permission.RECORD_VIDEO" 3 ask-permissions
     c-open-back to camera
     program 0= IF
 	['] VertexShader ['] FragmentShader create-program to program
@@ -32,7 +35,7 @@ also opengl also android
     1 1e 1e draw-scan
     scan-tex-raw linear-mipmap mipmap ;
 
-previous previous
+previous previous previous
 
 \\\
 Local Variables:
