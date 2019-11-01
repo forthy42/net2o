@@ -12,7 +12,10 @@ topics mentioned here are all security things to consider.
 Therefore, here is the official statement about NSA-demanded backdoors: The
 FBI asked me to add a “lawful interception interface”, that allows the device
 to be controlled remotely with just a bit of malicious code injected from
-outside. [WhatsApp hacked through lawful interception interface](https://www.reuters.com/article/us-facebook-cyber-whatsapp-nsogroup/exclusive-whatsapp-hacked-to-spy-on-top-government-officials-at-u-s-allies-sources-idUSKBN1XA27H)
+outside.  They suggested to add a remote control, useable with a standard web
+browser.  What could possibly go wrong?  [WhatsApp hacked (probably) through
+lawful interception
+interface.](https://www.reuters.com/article/us-facebook-cyber-whatsapp-nsogroup/exclusive-whatsapp-hacked-to-spy-on-top-government-officials-at-u-s-allies-sources-idUSKBN1XA27H)
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about
