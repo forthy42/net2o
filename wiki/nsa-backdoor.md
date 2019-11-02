@@ -17,6 +17,10 @@ browser.  What could possibly go wrong?  [WhatsApp hacked (probably) through
 lawful interception
 interface.](https://www.reuters.com/article/us-facebook-cyber-whatsapp-nsogroup/exclusive-whatsapp-hacked-to-spy-on-top-government-officials-at-u-s-allies-sources-idUSKBN1XA27H)
 
+Furthermore, to detect evildoers, they asked me to add “client–side scanning”:
+Whatever content is delivered, is scanned after decryption, and
+blocked+reported if detected as evil.  [EFF on client–side scanning](https://www.eff.org/deeplinks/2019/11/why-adding-client-side-scanning-breaks-end-end-encryption)
+
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about
 having official back/front/side doors, leaky roofs and tunnels regularly, but
