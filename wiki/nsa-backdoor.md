@@ -21,6 +21,34 @@ Furthermore, to detect evildoers, they asked me to add “client–side scanning
 Whatever content is delivered, is scanned after decryption, and
 blocked+reported if detected as evil.  [EFF on client–side scanning](https://www.eff.org/deeplinks/2019/11/why-adding-client-side-scanning-breaks-end-end-encryption)
 
+There are (at least) two problems with client–side scanning, as the EFF
+already noticed.  First, the client gets the algorithm to do the hashing of
+the image.  This is not a normal hash, this is usually a fingerprint of the
+image, so that trivial image editing doesn't make it a different picture.  If
+you have that algorithm on the client side, you can try several tweaks on the
+image until it doesn't create the same fingerprint anymore.  So people who
+know that they are doing evil things will evade detection anyhow.
+
+The other issue is that you don't want the client to have the list of
+“forbidden fingerprints”.  They can use it as search entry for sharing exactly
+those forbidden things.  So you need a server with the hashs, and a
+client–side query of this server to check the image.  This is not
+privacy–preserving, as all fingerprints go to that server, so you can map
+published images to queries.
+
+However, I invented a way to avoid that: Index the forbidden fingerprints, in
+a way that a reasonable small amount of fingerprints are in one index bucket.
+There are orders of magnitude more legal images with the same index.  For
+checking a fingerprint, you send {index, salt, hash(fingerprint, salt)} to the
+server.  The server hashes all the fingerprints with the same index with that
+salt, and compare to your hash(fingerprint, salt) value.  This preserves your
+privacy, unless it's a match.  Reverting that hash(fingerprint, salt) is
+expensive, even if you have access to the image fingerprints and the backlog
+of the query, because now you have to do orders of magnitude more hashes.
+
+The last problem is that client–side scanning requires cooperation from the
+clients — if they just disable their code, it's ineffective.
+
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about
 having official back/front/side doors, leaky roofs and tunnels regularly, but
