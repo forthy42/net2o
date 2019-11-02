@@ -47,7 +47,14 @@ expensive, even if you have access to the image fingerprints and the backlog
 of the query, because now you have to do orders of magnitude more hashes.
 
 The last problem is that client–side scanning requires cooperation from the
-clients — if they just disable their code, it's ineffective.
+clients — if they just disable their code, it's ineffective.  Since people
+unlikely want to be exposed for fetching forbidden images, but often want to
+not view those, it is probably better to send {\[index\]\*, salt1} to the
+server, and get { salt2, \[hash(fingerprint, salt1, salt2)\]\*} back, i.e. all
+hashes for the given index.  The client can cache these hashes, without being
+able to use them for a search, and avoid downloading or showing the forbidden
+images.  By sending not only indices it is interested in, but also others,
+tracing a client by index is not very likely a success, either.
 
 As net2o is open source, you can (in theory) verify statements about actual
 backdoors.  And keep an eye on this page, I intent to publish fnords about

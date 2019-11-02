@@ -341,13 +341,13 @@ previous
 
 : new-scantex-raw ( -- )
     scan-tex-raw 0>clear
-    cam-w cam-h GL_RGBA new-textbuffer to scan-fb-raw ;
+    cam-w cam-h GL_RGBA new-textbuffer to scan-fb-raw drop ;
 : new-scantex ( -- )
     scan-tex 0>clear
-    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb ;
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb drop ;
 : new-scantex-final ( -- )
     scan-tex-final 0>clear
-    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb-final ;
+    scan-w 2* dup GL_RGBA new-textbuffer to scan-fb-final drop ;
 : new-scantexes ( -- )
     scan-fb 0= IF
 	new-scantex-raw new-scantex new-scantex-final 0>framebuffer
@@ -451,7 +451,7 @@ previous
 
 : scan-qr ( -- )
     [IFDEF] lastscan$  lastscan$ $free  [THEN]
-    scan-start  ['] scan-loop catch  level# off
+    scan-start  ['] scan-loop catch >r  level# off
     cam-end 0>framebuffer
     [IFDEF] saturate% 1.0e saturate% sf! [THEN]
     [IFDEF] showstatus showstatus [THEN]
@@ -461,7 +461,7 @@ previous
     ELSE
 	." Scan completed" cr
     THEN
-    throw ;
+    r> throw ;
 
 previous
 

@@ -61,21 +61,28 @@ $20 value hash-size#
 
 \ commands for the command line user interface
 
-Variable old-recs
-Variable old-order
+Variable old-recs   Variable recs-backlog
+Variable old-order  Variable order-backlog
 
+: save-net2o-cmds ( -- )
+    0 old-recs  !@ recs-backlog  >stack
+    0 old-order !@ order-backlog >stack
+    get-recognizers old-recs  set-stack
+    also get-current context !
+    get-order       old-order set-stack  previous ;
 : set-net2o-cmds ( -- )
-    get-recognizers old-recs set-stack
-    get-order old-order set-stack
     ['] n2o >body 1 set-order
     ['] rec-word 1 set-recognizers ;
 : reset-net2o-cmds ( -- )
-    old-recs get-stack ?dup-IF  set-recognizers  THEN
-    old-order get-stack ?dup-IF  set-order definitions  THEN ;
+    old-recs  get-stack ?dup-IF  set-recognizers                 THEN
+    old-order get-stack ?dup-IF  set-order definitions previous  THEN
+    old-recs $free  old-order $free
+    recs-backlog  stack> old-recs  !
+    order-backlog stack> old-order ! ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
-    set-net2o-cmds catch
+    save-net2o-cmds set-net2o-cmds catch
     r> rp0 !
     reset-net2o-cmds throw ;
 
@@ -196,7 +203,8 @@ scope{ n2o
     \G keyscan: scan a key in color QR form
     ?.net2o-config
     reset-net2o-cmds
-    qrscan.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-scan-qr ;
+    qrscan.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-scan-qr
+    save-net2o-cmds set-net2o-cmds ;
 
 : keysearch ( -- )
     \U keysearch|searchkey 85string1 .. 85stringn
@@ -775,7 +783,11 @@ warnings !
     \G gui: start net2o's graphical user interface
     ?.net2o-config
     reset-net2o-cmds
-    gui.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-gui ;
+    gui.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-gui
+    save-net2o-cmds set-net2o-cmds ;
+
+: ... ( -- )
+    ... ;
 }scope
 
 \ use a different history file for net2o
