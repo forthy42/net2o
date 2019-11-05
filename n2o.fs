@@ -77,8 +77,8 @@ Variable old-order  Variable order-backlog
     old-recs  get-stack ?dup-IF  set-recognizers                 THEN
     old-order get-stack ?dup-IF  set-order definitions previous  THEN
     old-recs $free  old-order $free
-    recs-backlog  stack> old-recs  !
-    order-backlog stack> old-order ! ;
+    recs-backlog  stack# IF  recs-backlog  stack> old-recs  !  THEN
+    order-backlog stack# IF  order-backlog stack> old-order !  THEN ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
