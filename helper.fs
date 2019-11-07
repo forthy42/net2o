@@ -26,7 +26,9 @@ require dhtroot.fs
 : dhtroot-addr@ ( -- addr )
     dhtroot-addr @ ?dup-IF  EXIT  THEN
     dhtroot-addr$ $@ dup IF
-	>host dhtnick $@ nick>pk drop date-sig? 0= IF
+	>host dhtnick $@ nick>pk 0= IF
+	    drop +dhtroot dhtnick $@ nick>pk drop  THEN
+	date-sig? 0= IF
 	    sigsize# -  $>addr dup dhtroot-addr !
 	    EXIT  THEN  THEN
     2drop 0 ;

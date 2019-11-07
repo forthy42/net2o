@@ -147,7 +147,7 @@ Forward .addr$
     sockaddr1 port be-uw@ ;
 
 : ipv6/pp ( sock -- sock )
-    [IFUNDEF] darwin
+    [DEFINED] darwin [DEFINED] cygwin [ or 0= ] [IF]
 	[IFDEF] ipv6-public
 	    config:port# @ IF
 		ipv6( dup ipv6-public )
