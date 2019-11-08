@@ -20,7 +20,7 @@ Defer addr-changed ' noop is addr-changed
 also android also jni
 :noname  defers android-network
     network-info dup  IF  ]xref
-	beacons-now! !!0depth!!  addr-changed  true
+	beacons-now!  addr-changed  true
     THEN   to connected? ;
 is android-network
 previous previous

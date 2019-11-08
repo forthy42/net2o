@@ -151,7 +151,7 @@ previous
 : +my-addrs ( port o:addr -- )
     +my-id
     dup host:portv4 w!  host:portv6 w!
-    o my-addr[] $[]# my-addr[] $[] ! ;
+    o my-addr[] >stack ;
 
 : !my-addrs ( -- ) net2o:new-addr >o
     global-ip6 tuck host:ipv6 $10 smove
