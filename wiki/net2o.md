@@ -98,13 +98,13 @@ point:
   * [EuroForth 2019](https://wiki.forth-ev.de/doku.php/events:ef2019:net2o)
     presentation (Social network in net2o)
 * Chaos Communication Congress
-  * [31c3](31c3.md) presentation
-  * [32c3](32c3.md) presentation
-  * [33c3](33c3.md) presentation
-  * [34c3](34c3.md) presentation (alternative source: [Chaos West's
+  * [31c3](31c3.md) presentation (protocol stack)
+  * [32c3](32c3.md) presentation (application layer considerations)
+  * [33c3](33c3.md) presentation (progress report + onion routing plan)
+  * [34c3](34c3.md) presentation ($quid cyptocurrency) (alternative source: [Chaos West's
     capture](https://media.ccc.de/v/34c3-ChaosWest-15-net2o_gui_realtime_mixnet_and_ethical_micropayment_with_efficient_blockchain))
   * [35c3](https://media.ccc.de/v/35c3chaoswest-21-cloudcalypse-it-looks-like-you-ve-reached-the-end-how-to-take-your-data-into-net2o)
-	presentation (only Chaos West capture this time, as they did a very
+	presentation (Social network in net2o — the plan) (only Chaos West capture this time, as they did a very
 	professional job).
 
 ## Discussions ##
