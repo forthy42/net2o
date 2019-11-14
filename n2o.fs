@@ -788,6 +788,8 @@ warnings !
 
 : ... ( -- )
     ... ;
+: .s ( -- )
+    .s ;
 }scope
 
 \ use a different history file for net2o

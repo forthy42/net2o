@@ -4,7 +4,7 @@
 
 \ this computes a cryptographic somewhat secure hash over the input string
 
-User hash-state 2 64s cell- uallot
+User hash-state 2 64s cell- uallot drop
 
 : string-hash ( addr u -- )  hashinit hash-state [ 2 64s ]L move
     false hash-state hashkey2 ;
