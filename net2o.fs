@@ -1515,7 +1515,6 @@ Forward handle-beacon+hash
 #10.000.000.000 d>64 64Value timeout-max# \ 10s maximum timeout
 #100.000.000 d>64 64Value timeout-min# \ 100ms minimum timeout
 
-Sema timeout-sema
 Variable timeout-tasks
 
 : sq2** ( 64n n -- 64n' )
@@ -1534,22 +1533,21 @@ Variable timeout-tasks
 
 : o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ .name cr )
-    [: timeout-tasks $@ bounds ?DO  I @ o = IF
-	      UNLOOP  EXIT  THEN
-      cell +LOOP
-      o { w^ timeout-o }  timeout-o cell timeout-tasks $+! ;]
-    timeout-sema c-section  timeout-task wake ;
+    o timeout-tasks +unique$
+    timeout-task wake ;
 : o-timeout ( -- )
     0timeout  timeout( ." -timeout: " o hex. ." task: " task# ? cr )
-    [: o timeout-tasks del$cell ;] timeout-sema c-section ;
+    [: o timeout-tasks del$cell ;] resize-sema c-section ;
 
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
 : 64min? ( a b -- min flag )
     64over 64over 64< IF  64drop false  ELSE  64nip true  THEN ;
-: next-timeout? ( -- time context ) [: 0 { ctx } max-int64
-    timeout-tasks $@ bounds ?DO
+: (next-timeout?) ( -- time context ) 0 { ctx } max-int64
+    timeout-tasks $@ bounds U+DO
 	I @ .next-timeout 64@ 64min? IF  I @ to ctx  THEN
-    cell +LOOP  ctx ;] timeout-sema c-section ;
+    cell +LOOP  ctx ;
+: next-timeout? ( -- time context )
+    ['] (next-timeout?) resize-sema c-section ;
 : ?timeout ( -- context/0 )
     ticker 64@ next-timeout? >r 64- 64-0>= r> and ;
 

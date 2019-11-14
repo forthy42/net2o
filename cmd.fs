@@ -263,9 +263,10 @@ in net2o : see-me ( -- )
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
-    cmd@ trace( dup IF dup >see-table .net2o-name' THEN >r .s r> $.s cr ) n>cmd
-    @ ?dup-IF  execute  ELSE
-	trace( ." crashing" cr cr ) net2o-crash  THEN  buf-state 2@ ;
+    cmd@ trace( dup IF dup >see-table .net2o-name' THEN >r .s r> $.s cr )
+    n>cmd @ ?dup-IF  execute  ELSE
+	trace( ." crashing" cr cr ) net2o-crash  THEN
+    buf-state 2@ ;
 
 : >cmd ( xt u -- ) gen-table $[] ! ;
 

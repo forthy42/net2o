@@ -892,9 +892,8 @@ Sema resize-sema
     cell +LOOP  drop true ;
 
 : +unique$ ( x addr -- )
-    [: 2dup unique$cell? IF
-	  >r { w^ x } x cell r> $+!
-      ELSE  2drop  THEN ;] resize-sema c-section ;
+    [: 2dup unique$cell? IF  >stack  ELSE  2drop  THEN ;]
+    resize-sema c-section ;
 
 \ xchar tool
 
