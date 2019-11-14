@@ -1,4 +1,4 @@
-#! @GFORTH@
+#! @GFORTHFAST@
 \ -*- mode: Forth -*-
 
 warnings off \ in production mode, we don't want any warnings

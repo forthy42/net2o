@@ -586,7 +586,9 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
 also net2o-base
 
 : cmd-send? ( -- )
-    cmdbuf# @ 1 u> IF  expect-reply? cmd  THEN ;
+    cmdbuf# @ 1 u> IF
+	trace( ." expect reply " action-of expect-reply? .name cr )
+	expect-reply? cmd  THEN ;
 
 previous
 
@@ -649,7 +651,8 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     THEN
     string-stack $free  object-stack $free  nest-stack $free
     [: outflag @ >r cmdreset init-reply do-cmd-loop
-      r> outflag ! cmd-send? ;] cmdlock c-section ;
+	r> outflag ! cmd-send? ;] cmdlock c-section
+    o IF  wait-task @ ?dup-IF  event>  THEN  THEN ;
 
 \ nested commands
 

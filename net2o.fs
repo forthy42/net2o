@@ -1903,7 +1903,7 @@ in net2o : request-done ( n -- )  elit, o elit, :>request ;
 : requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ hex. THEN cr )
     BEGIN  stop
 	o IF  reqmask @ file-count @ or 0= ( reqcount @ 0= and )
-	ELSE  false  THEN
+	ELSE  false  THEN  request( ." waiting... " dup . cr )
     UNTIL
     o IF  o-timeout  THEN  request( ." wait done" cr ) ;
 

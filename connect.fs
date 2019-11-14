@@ -205,8 +205,7 @@ Variable id#
 Sema id-sema
 
 : new-error-id ( -- addr u )
-    $10 rng$ o { w^ idcon } idcon cell 2over
-    [: id# #! ;] id-sema c-section
+    [: o { w^ idcon } $10 rng$ idcon cell 2over id# #! ;] id-sema c-section
     2dup my-error-id $! ;
 : error-id>o ( addr u -- o/0 )
     $error-id $@ ?dup-IF

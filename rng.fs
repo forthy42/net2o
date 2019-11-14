@@ -198,12 +198,12 @@ User ?salt-init  ?salt-init off
     rng-pos @ 64aligned dup 64'+ rng-pos !
     rng-buffer + 64@ ;
 
-: rng$ ( u -- addr u ) >r
+: rng$ { u -- addr u }
     \G return a @i{u} bytes stream (@i{u} must be smaller than the
     \G buffer size}
     ?rng
-    rng-pos @ r@ + rng-step?
-    rng-buffer rng-pos @ + r> dup rng-pos +! ;
+    rng-pos @ u + rng-step?
+    rng-buffer rng-pos @ + u dup rng-pos +! ;
 
 : rng32 ( -- x )
     \G return a 32 bit random number
