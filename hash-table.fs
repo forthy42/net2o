@@ -40,7 +40,7 @@ uvalue last#
 $180 cells Constant table-size#
 
 : hash@ ( bucket -- addr )  >r
-    r@ @ 0= IF  table-size# allocate throw dup r> ! dup table-size# erase
+    r@ @ 0= IF  table-size# allocate throw dup table-size# erase dup r> !
     ELSE  r> @  THEN ;
 
 warnings @ warnings off \ hash-bang will be redefined
