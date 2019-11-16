@@ -168,6 +168,18 @@ Forward .addr$
 : ?fake-ip4 ( -- addr u )
     sockaddr1 sin6_addr dup $C fake-ip4 over str= IF  12 + 4  ELSE  $10   THEN ;
 
+: addr-v6= ( sockaddr -- sockaddr flag )
+    dup fake-ip4? IF
+	dup $C sin6_addr +  host:ipv4 4 tuck str=
+	over sin6_port be-uw@  host:portv4 w@ = and
+    ELSE
+	dup sin6_addr host:ipv6 $10 tuck str=
+	over sin6_port be-uw@  host:portv6 w@ = and
+    THEN ;
+: addr-v4= ( sockaddr -- sockaddr flag )
+    dup sin_addr  host:ipv4 4 tuck str=
+    over port be-uw@  host:portv4 w@ = and ;
+
 29  Constant ESPIPE
 
 : unavail? ( n -- flag )

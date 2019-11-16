@@ -998,26 +998,32 @@ Forward sockaddr+return
     send-a-packet ?msgsize ;
 
 : addr-v6= ( sockaddr -- sockaddr flag )
-    dup sin6_addr host:ipv6 $10 tuck str=
-    over sin6_port be-uw@  host:portv6 w@ = and ;
+    dup fake-ip4? IF
+	dup $C sin6_addr +  host:ipv4 4 tuck str=
+	over sin6_port be-uw@  host:portv4 w@ = and
+    ELSE
+	dup sin6_addr host:ipv6 $10 tuck str=
+	over sin6_port be-uw@  host:portv6 w@ = and
+    THEN ;
 : addr-v4= ( sockaddr -- sockaddr flag )
     dup sin_addr  host:ipv4 4 tuck str=
     over port be-uw@  host:portv4 w@ = and ;
 
 : search-cmd0key ( -- )
-    ret-addr { ra }
-    ra be@ routes# #.key dup 0= IF  2drop  EXIT  THEN  $@ drop
+    ret-addr { ra }  ra $10  pathc+ 0 -skip { d: ra$ }
+    ra be@ routes# #.key dup 0= IF  2drop  EXIT  THEN  $@
+    msg( ." search-cmd0key: " 2dup .address '|' emit ra$ xtype cr ) drop
     dest-addrs $@ bounds ?DO
 	I @ >o
 	dup w@ AF_INET6 =  IF  addr-v6=  ELSE  addr-v4=  THEN
-	ra $10  pathc+ 0 -skip	host:route $@ str= and
+	ra$ host:route $@ str= and
 	IF
-	    host:key sec@ o> dest-0key sec!
+	    host:key sec@ o> dest-0key sec!  drop UNLOOP  EXIT
 	ELSE
 	    o>
 	THEN
     cell +LOOP
-    drop ;
+    drop invalid( ." no cmd0key found" cr ) ;
 
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
