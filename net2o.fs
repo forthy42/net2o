@@ -997,18 +997,6 @@ Forward sockaddr+return
     out-route  outbuf dup packet-size
     send-a-packet ?msgsize ;
 
-: addr-v6= ( sockaddr -- sockaddr flag )
-    dup fake-ip4? IF
-	dup $C sin6_addr +  host:ipv4 4 tuck str=
-	over sin6_port be-uw@  host:portv4 w@ = and
-    ELSE
-	dup sin6_addr host:ipv6 $10 tuck str=
-	over sin6_port be-uw@  host:portv6 w@ = and
-    THEN ;
-: addr-v4= ( sockaddr -- sockaddr flag )
-    dup sin_addr  host:ipv4 4 tuck str=
-    over port be-uw@  host:portv4 w@ = and ;
-
 : search-cmd0key ( -- )
     ret-addr { ra }  ra $10  pathc+ 0 -skip { d: ra$ }
     ra be@ routes# #.key dup 0= IF  2drop  EXIT  THEN  $@
