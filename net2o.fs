@@ -1616,7 +1616,8 @@ User remote?
     $error-id $off    \ no error id so far
     stateless# outflag !  tmp-perm off
     inbuf packet-data cmd-exec
-    update-cdmap  net2o:update-key  remote? off ;
+    update-cdmap  net2o:update-key  remote? off
+    o IF  wait-task @ ?dup-IF  event>  THEN  THEN ;
 
 scope{ mapc
 

@@ -651,8 +651,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     THEN
     string-stack $free  object-stack $free  nest-stack $free
     [: outflag @ >r cmdreset init-reply do-cmd-loop
-	r> outflag ! cmd-send? ;] cmdlock c-section
-    o IF  wait-task @ ?dup-IF  event>  THEN  THEN ;
+	r> outflag ! cmd-send? ;] cmdlock c-section ;
 
 \ nested commands
 
