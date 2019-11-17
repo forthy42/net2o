@@ -1616,8 +1616,7 @@ User remote?
     $error-id $off    \ no error id so far
     stateless# outflag !  tmp-perm off
     inbuf packet-data cmd-exec
-    update-cdmap  net2o:update-key  remote? off
-    o IF  wait-task @ ?dup-IF  event>  THEN  THEN ;
+    update-cdmap  net2o:update-key  remote? off ;
 
 scope{ mapc
 
@@ -1885,7 +1884,7 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event  !!0depth!!  event-send  !!0depth!!  AGAIN ;
+    BEGIN  packet-event event-send  !!0depth!!  AGAIN ;
 
 in net2o : request-done ( n -- )  elit, o elit, :>request ;
 
