@@ -1386,8 +1386,14 @@ Variable tries#
 
 forward read-chatgroups
 
+: n2o-greeting ( -- )
+    [:  ." net2o " (c) ."  2010-2019 Bernd Paysan" cr
+	." net2o interactive shell, type 'bye' to quit" cr ;]
+    do-debug ;
+
 : get-skc ( -- )
-    secret-keys# IF  read-chatgroups  EXIT  THEN  tries# off
+    secret-keys# IF  read-chatgroups  EXIT  THEN
+    n2o-greeting  tries# off
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop

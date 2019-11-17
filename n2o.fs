@@ -120,7 +120,7 @@ scope{ n2o
 : help ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
-    ." net2o " (c) ."  2010-2019 Bernd Paysan" cr
+    n2o-greeting
     ?cr ?nextarg IF
 	BEGIN
 	    2dup over c@ '-' = IF
@@ -561,8 +561,6 @@ warnings !
 : cmd ( -- )
     \U cmd
     \G cmd: Offer a net2o command line for client stuff
-    ." net2o " (c) ."  2010-2019 Bernd Paysan" cr
-    ." net2o interactive shell, type 'bye' to quit" cr
     get-me
     0 to script? n2o-cmds ;
 
