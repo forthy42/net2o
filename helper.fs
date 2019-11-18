@@ -133,17 +133,19 @@ Forward insert-addr ( o -- )
 
 : renat ( -- )
     [: msg:peers[] $@ bounds ?DO
-	  I @ >o o-beacon pings
-	  \ !!FIXME!! should maybe do a re-lookup?
-	  ret-addr $10 erase  dest-0key dest-0key> !
-	  punch-addrs $@ bounds ?DO
-	      I @ insert-addr IF
-		  o to connection
-		  net2o-code new-request true gen-punchload gen-punch
-		  end-code
-	      THEN
-	  cell +LOOP o>
-      cell +LOOP
+	    I @ >o \ !!FIXME!! should maybe do a re-lookup?
+	    ret-addr { ret[ $10 ] } ret-addr $10 erase
+	    o-beacon pings
+	    \ dest-0key dest-0key> !
+	    punch-addrs $@ bounds ?DO
+		I @ insert-addr IF
+		    o to connection
+		    net2o-code new-request true gen-punchload gen-punch
+		    end-code
+		THEN
+	    cell +LOOP
+	    ret[ ret-addr $10 move o>
+	cell +LOOP
     ;] group#map ;
 
 \ notification for address changes
