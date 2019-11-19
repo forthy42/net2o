@@ -1127,7 +1127,7 @@ in net2o : punch ( addr u o:connection -- )
 : send-size ( u -- n )
     min-size umax maxdata umin 1-
     [ min-size 2/ 2/ s>f 1/f ] FLiteral fm*
-    { f^ <size-lb> }  <size-lb> 6 + c@ 4 rshift ;
+    { f^ <size-lb> }  <size-lb> [ 6 1 le? select ]L + c@ 4 rshift ;
 
 64Variable last-ticks
 

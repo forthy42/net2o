@@ -187,7 +187,9 @@ previous
 : .priv-addr$s ( -- )
     priv-addr$ [: sigsize# - .addr$ cr ;] $[]map ;
 
-: !my-addr ( -- ) addrs-off !my-addrs !my-addr$ ;
+: !my-addr ( -- )
+    addrs-off !my-addrs !my-addr$
+    dns64? `xlat464( >body ! ;
 
 \ merge addresses
 
@@ -222,7 +224,7 @@ also net2o-base
 		addr sin_addr be-ul@ ulit, addr-ipv4
 	    endof
 	    AF_INET6 of
-		addr sin6_addr 12 fake-ip4 over str= IF
+		addr fake-ip4? IF
 		    .ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
 		ELSE
 		    addr sin6_addr $10 $, addr-ipv6

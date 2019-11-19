@@ -55,6 +55,7 @@ debug: route( \ do routing
 debug: ipv6( \ use ipv6
 debug: ipv4( \ use ipv4
 debug: ipv64( \ prefer ipv4 over 6
+debug: xlat464( \ use xlat 464 prefix
 debug: request( \ track requests
 debug: beacon( \ debug sending beacons
 debug: invalid( \ print invalid packets
@@ -90,6 +91,7 @@ debug: newvault( \ new style vault keys
 +db ipv6( \ ipv6 should be on by default )
 +db ipv4( \ ipv4 should be on by default )
 -db ipv64( \ ipv6 over 4
+-db xlat464( \ no xlat 464 by default
 -db newvault( \ new vault disabled for now )
 +db syncfile( \ disable async file operations for now )
 

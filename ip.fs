@@ -114,19 +114,9 @@ Forward .addr$
     )else( 2drop ) ;
 
 : ipv4! ( ipv4 sockaddr -- )
-    ipv6(
-    >r    r@ sin6_addr 12 + be-l!
-    $FFFF r@ sin6_addr 8 + be-l!
-    0     r@ sin6_addr 4 + l!
-    0     r> sin6_addr l!
+    ipv6(    tuck                             sin6_addr 12 + be-l!
+    xlat464( nat64-ip4 )else( fake-ip4 ) swap sin6_addr $C move
     )else( sin_addr be-l! ) ;
-
-: ipv4!nat ( ipv4 sockaddr -- )
-    \ nat64 version...
-    >r        r@ sin6_addr 12 + be-l!
-    0         r@ sin6_addr 8 + l!
-    0         r@ sin6_addr 4 + l!
-    $0064ff9b r> sin6_addr be-l! ;
 
 : sock-id ( id sockaddr -- addr u ) >r
     AF_INET6 r@ family w!
@@ -164,9 +154,11 @@ Forward .addr$
 
 : 'sock ( xt -- )  sock[ catch ]sock throw ;
 
-: fake-ip4? ( addr -- flag ) sin6_addr $C fake-ip4 over str= ;
+: fake-ip4? ( addr -- flag ) sin6_addr
+    dup  $C fake-ip4  over str=
+    swap $C nat64-ip4 over str= or ;
 : ?fake-ip4 ( -- addr u )
-    sockaddr1 sin6_addr dup $C fake-ip4 over str= IF  12 + 4  ELSE  $10   THEN ;
+    sockaddr1 dup sin6_addr $10 rot fake-ip4? $C and /string ;
 
 : addr-v6= ( sockaddr -- sockaddr flag )
     dup fake-ip4? IF
