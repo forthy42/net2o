@@ -175,6 +175,7 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
 : dns64? ( -- flag )
     net2o-ipv4 $@ net2o-port get-info info@
     sockaddr_in6 = over family w@ AF_INET6 = and dup IF
+	[: ." xlat464 discovered" cr ;] do-debug
 	swap sin6_addr dup $C nat64-ip4 over str= IF
 	    drop \ normal nat64-ip4 prefix
 	ELSE
