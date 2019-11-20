@@ -103,9 +103,11 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
 	>o o to connection disconnect-me 0 to connection o>
 	dhtroot-addr off  THEN ;
 
-Variable announced
-: subme ( -- )  announced @ IF
-	dht-connect sub-me THEN ;
+64Variable announced \ time for next announcement
+: announced! ( -- )
+    ticks config:ekey-timeout& 2@ d>64 64+ announced 64! ;
+: announced? ( -- flag ) announced 64@ ticks 64u>= ;
+: subme ( -- )  announced? IF  dht-connect sub-me THEN ;
 
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
     disconnect-me connect( [: .packets profile( .times ) ;] $err ) ;
@@ -125,7 +127,7 @@ Variable announced
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
-    end-code| -setip net2o:send-replace  announced on ;
+    end-code| -setip net2o:send-replace  announced! ;
 
 \ NAT retraversal
 
@@ -159,7 +161,14 @@ Forward insert-addr ( o -- )
 : announce-me ( -- )
     \ Check for disconnected state
     dht-connect online? IF
-	replace-me -other  announced on  THEN ;
+	replace-me -other  announced!  THEN ;
+
+: announce? ( -- )
+    announced 64@ 64-0= ?EXIT
+    announced? 0= IF
+	init-my0key init-myekey
+	my-addr[] ['] +my-0key $[]o-map
+	announce-me  THEN ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )
     [IFDEF] renat-complete [: [THEN]

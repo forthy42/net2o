@@ -1857,6 +1857,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 [THEN]
 
 Forward save-msgs?
+Forward announce?
 Forward next-saved-msg
 
 : >next-ticks ( -- )
@@ -1873,6 +1874,7 @@ Forward next-saved-msg
 	>next-ticks     !!0depth!!
 	beacon?         !!0depth!!
 	save-msgs?      !!0depth!!
+	announce?       !!0depth!!
 	request-timeout !!0depth!!
 	event-send      !!0depth!!
 	last-packet-tos !!0depth!!

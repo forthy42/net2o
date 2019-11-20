@@ -139,14 +139,15 @@ previous
     )
     o> ;
 
-: +my-id ( -- )
-    config:prio# @ host:pri# !
-    host$ $@ host:id $!
+: +my-0key ( -- )
     my-0key @ IF  my-0key sec@ host:key sec!  THEN
     my-ekey-pk @ IF
 	my-ekey-pk $@ host:ekey $!
 	my-ekey-to 64@ host:ekey-to 64!
     THEN ;
+: +my-id ( -- )
+    config:prio# @ host:pri# !
+    host$ $@ host:id $!  +my-0key ;
 
 : +my-addrs ( port o:addr -- )
     +my-id

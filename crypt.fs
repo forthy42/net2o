@@ -20,8 +20,10 @@ $1E0 Constant keypack#
 keypack# key-salt# + key-cksum# + Constant keypack-all#
 key-salt# key-cksum# + Constant wrapper#
 
-Variable my-0key
+Variable old-0key
 Variable old-ekey-sk \ only the old secure key is needed
+
+Variable my-0key
 Variable my-ekey-sk
 Variable my-ekey-pk
 64Variable my-ekey-to
@@ -124,7 +126,9 @@ $20 buffer: dummy-buf
     header-key dummy-buf dup $C tf_encrypt_256 ( sets tweaks ) ;
 
 : init-my0key ( -- )
-    no0key( EXIT ) keysize rng$ my-0key sec! ;
+    no0key( EXIT )
+    my-0key sec@ dup IF  old-0key sec!  ELSE  2drop  THEN
+    keysize rng$ my-0key sec! ;
 
 : init-myekey ( -- )
     my-ekey-sk sec@ dup IF  old-ekey-sk sec!  ELSE  2drop  THEN

@@ -329,7 +329,8 @@ false Value add-myip
     THEN  end-with
     nest[ cookie, request-gen @ #request, ]nest
     do-expect-reply ;
-: addme ( addr u -- )  $>addr { addr } now>never
+: addme ( addr u -- )  $>addr { addr }
+    config:ekey-timeout& 2@ d>64 now+delta
     addr .+my-id
     nat( ." addme: " addr .addr )
     addr .host:route $@len 0= IF
