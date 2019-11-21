@@ -162,6 +162,7 @@ event: :>kill ( task -- )
 
 2 Constant kill-seconds#
 kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
+#5000000. 2Constant kill-wait2# \ 5ms wait for threads to terminate
 
 : net2o-kills ( -- )
     net2o-tasks get-stack kills !  net2o-tasks $free
@@ -173,7 +174,8 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 	    timeout ntime d- 1000000000 fm/mod nip
 	    dup r> <> IF  '.' emit  THEN  >r
     REPEAT
-    r> kill-seconds# <> IF  cr  THEN  2drop ;
+    r> kill-seconds# <> IF  cr  THEN  2drop
+    kill-wait2# stop-dns ;
 
 \ packet&header size
 

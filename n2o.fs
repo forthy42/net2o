@@ -143,7 +143,7 @@ scope{ n2o
 }scope
 
 : next-cmd ( -- )
-    ?nextarg 0= IF  n2o:help  EXIT  THEN
+    ?nextarg 0= IF  arg-o @ cmd-args^ = IF  n2o:help  THEN  EXIT  THEN
     2dup ['] n2o >body search-wordlist
     IF  nip nip execute  ELSE
 	[: <err> ." n2o command not found: " mark-start type mark-end
