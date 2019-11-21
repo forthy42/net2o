@@ -289,8 +289,7 @@ end-class dht-file-class
     k#size cell/ 1 DO
 	mask 1 and IF
 	    I dup cells dht-hash dht( ." access dht: " dup hex. over . forth:cr ) +
-	    [: check-date 0= IF  { k# a# u# } k# d#c, a# u# d#$, k#
-		ELSE  2drop  THEN ;] $[]map drop
+	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
 
