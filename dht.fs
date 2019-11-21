@@ -1,6 +1,6 @@
 \ distributed hash table                             16oct2013py
 
-\ Copyright © 2013-2015   Bernd Paysan
+\ Copyright © 2013-2019   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -20,15 +20,24 @@
 \ might not be saved too frequently... robustness comes from distribution
 \ This is actually a PHT, a prefix hash tree; base 256 (bytes)
 
-$200 cells Constant dht-size# \ $100 entris + $100 chains
+$200 cells Constant dht-size# \ $100 entries + $100 chains
 
 Sema dht-sema
 
-Variable d#public
+Variable d#public \ root of public dht
 
 : dht@ ( bucket -- addr )  >r
     r@ @ 0= IF  dht-size# allocate throw dup r> ! dup dht-size# erase
     ELSE  r> @  THEN ;
+
+: dht-map { dht xt: xt -- }
+    dht @ 0= ?EXIT
+    dht @ dht-size# 2/ bounds DO
+	I @ ?dup-IF  .xt  THEN
+    cell +LOOP
+    dht @ dht-size# 2/ + dht-size# 2/ bounds DO
+	I @ ?dup-IF  action-of xt recurse  THEN
+    cell +LOOP ;
 
 \ keys are enumerated small integers
 
@@ -168,6 +177,8 @@ dht-class ' new static-a with-allocater constant dummy-dht
 	    k#owner of  [: cr .owner ." , " ;] $[]map  endof
 	    nip endcase  cr
     cell +LOOP ;
+: d#.s ( -- )
+    d#public ['] d#. dht-map ;
 
 : d#owner+ ( addr u -- ) \ with sanity checks
     [: check-owner dht-owner $rep[]sig dht( d#. ) ;] dht-sema c-section ;
@@ -189,6 +200,25 @@ dht-class ' new static-a with-allocater constant dummy-dht
 : d#have- ( addr u -- ) \ with sanity checks
     [: delete-have? 0= IF  dht-have $del[]sig dht( d#. )
       ELSE  2drop  THEN ;] dht-sema c-section ;
+
+: d#cleanup ( o:dht -- )
+    k#size cell DO
+	dht-hash I + $@ bounds DO
+	    I $@ check-date IF  I $free  THEN  2drop
+	cell +LOOP  0 I del$cell
+    cell +LOOP ;
+: d#cleanups ( -- )
+    d#public [: ['] d#cleanup dht-sema c-section ;] dht-map ;
+
+64Variable last-d#cleanup
+
+: d#cleanups? ( -- )
+    last-d#cleanup 64@ ticks 64u< IF
+	d#cleanups
+	ticks config:dht-cleaninterval& 2@ d>64 64+ last-d#cleanup 64!
+    THEN ;
+    
+    
 
 \ commands for DHT
 
@@ -259,7 +289,8 @@ end-class dht-file-class
     k#size cell/ 1 DO
 	mask 1 and IF
 	    I dup cells dht-hash dht( ." access dht: " dup hex. over . forth:cr ) +
-	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
+	    [: check-date 0= IF  { k# a# u# } k# d#c, a# u# d#$, k#
+		ELSE  2drop  THEN ;] $[]map drop
 	THEN  mask 2/ to mask
     LOOP ;
 

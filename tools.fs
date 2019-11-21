@@ -394,6 +394,7 @@ $10 stack: dirstack
 
 scope{ config
 
+2Variable dht-cleaninterval&
 2Variable ekey-timeout&
 Variable timeouts#
 Variable passmode#
@@ -448,7 +449,8 @@ pad $400 get-dir rootdirs$ $!
 
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
-#3600.000.000.000. ekey-timeout& 2!
+#3600.000.000.000. ekey-timeout& 2! \ one hour ekey timeout
+#60.000.000.000. dht-cleaninterval& 2! \ one minute dht clean interval
 
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;

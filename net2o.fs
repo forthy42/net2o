@@ -175,12 +175,6 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
     REPEAT
     r> kill-seconds# <> IF  cr  THEN  2drop ;
 
-forward !save-all-msgs
-
-0 warnings !@
-: bye  !save-all-msgs net2o-kills bye ;
-warnings !
-
 \ packet&header size
 
 \ The first byte is organized in a way that works on wired-or busses,
@@ -1858,6 +1852,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 Forward save-msgs?
 Forward announce?
+Forward d#cleanups?
 Forward next-saved-msg
 
 : >next-ticks ( -- )
@@ -1875,6 +1870,7 @@ Forward next-saved-msg
 	beacon?         !!0depth!!
 	save-msgs?      !!0depth!!
 	announce?       !!0depth!!
+	d#cleanups?     !!0depth!!
 	request-timeout !!0depth!!
 	event-send      !!0depth!!
 	last-packet-tos !!0depth!!
@@ -2007,6 +2003,12 @@ require dhtroot.fs \ configuration for DHT root
 \ freeze tables
 
 context-table   $save
+
+\ modify bye
+
+0 warnings !@
+: bye  !save-all-msgs subme dht-disconnect net2o-kills bye ;
+warnings !
 
 \ show problems
 

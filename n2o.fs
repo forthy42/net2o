@@ -742,7 +742,7 @@ warnings !
 : bye ( -- )
     \U bye
     \G bye: quit command mode and terminate program
-    subme dht-disconnect bye ;
+    bye ;
 
 : -bw ( -- )
     \O -bw
