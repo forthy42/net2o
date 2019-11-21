@@ -204,7 +204,7 @@ dht-class ' new static-a with-allocater constant dummy-dht
 : d#cleanup ( o:dht -- )
     k#size cell DO
 	dht-hash I + $@ bounds DO
-	    I $@ check-date IF  I $free  THEN  2drop
+	    I @ IF  I $@ check-date IF  I $free  THEN  2drop  THEN
 	cell +LOOP  0 I del$cell
     cell +LOOP ;
 : d#cleanups ( -- )
