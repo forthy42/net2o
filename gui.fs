@@ -433,11 +433,11 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 : read-avatar ( addr u -- addr' u' )
     ?read-enc-hashed mem>thumb atlas-region ;
 : show-avatar ( addr u -- o )
-    2dup avatar# #@ nip 0= IF
-	2dup read-avatar 2swap avatar# #!
-    ELSE  2drop  THEN
-    glue*avatar last# cell+ $@ drop }}thumb
-    >r {{ r> }}v 40%b ;
+    [: 2dup avatar# #@ nip 0= IF
+	    2dup read-avatar 2swap avatar# #!
+	ELSE  2drop  THEN
+	glue*avatar last# cell+ $@ drop }}thumb
+	>r {{ r> }}v 40%b ;] catch IF  2drop  THEN ;
 
 : re-avatar ( last# -- )
     >r r@ $@ read-avatar r> cell+ $@ smove ;
