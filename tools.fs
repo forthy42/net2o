@@ -394,6 +394,8 @@ $10 stack: dirstack
 
 scope{ config
 
+2Variable beacon-ticks&
+2Variable beacon-short-ticks&
 2Variable dht-cleaninterval&
 2Variable ekey-timeout&
 Variable timeouts#
@@ -451,6 +453,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
 #3600.000.000.000. ekey-timeout& 2! \ one hour ekey timeout
 #60.000.000.000. dht-cleaninterval& 2! \ one minute dht clean interval
+#50.000.000.000. beacon-ticks& 2!
+#2.000.000.000. beacon-short-ticks& 2!
 
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;

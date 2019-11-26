@@ -1764,9 +1764,6 @@ event: :>throw ( error -- ) throw ;
 \ because that's easier to do.
 \ beacons are one-byte packets, with ASCII characters to say what they mean
 
-#50.000.000.000 d>64 64Value beacon-ticks# \ 50s beacon tick rate
-#2.000.000.000 d>64 64Value beacon-short-ticks# \ 2s short beacon tick rate
-
 hash: beacons# \ destinations to send beacons to
 Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
@@ -1777,7 +1774,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
     beacons# [: dup $@ { baddr u } cell+ $@ drop { beacon }
 	beacon 64@ ticker 64@ 64u<= IF
 	    beacon( ticks .ticks ."  send beacon to: " baddr u .address )
-	    ticker 64@ beacon-short-ticks# 64+ beacon 64!
+	    ticker 64@ config:beacon-short-ticks& 2@ d>64 64+ beacon 64!
 	    net2o-sock
 	    beacon 64'+ @ ?dup-IF
 		.beacon-hash $@ beacon( ."  hash: " 2dup 85type )
@@ -1793,7 +1790,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
     next-beacon ticker 64@ 64u<= IF  send-beacons  THEN ;
 
 : +beacon ( sockaddr len xt -- )
-    >r ticks beacon-short-ticks# 64+ o r> { 64^ dest w^ obj w^ xt }
+    >r ticks config:beacon-short-ticks& 2@ d>64 64+ o r> { 64^ dest w^ obj w^ xt }
     beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
     2dup beacons# #@ d0= IF
 	dest 1 64s cell+ cell+ 2swap beacons# #!

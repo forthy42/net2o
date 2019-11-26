@@ -432,12 +432,12 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 
 : read-avatar ( addr u -- addr' u' )
     ?read-enc-hashed mem>thumb atlas-region ;
-: show-avatar ( addr u -- o )
+: show-avatar ( addr u -- o / 0 )
     [: 2dup avatar# #@ nip 0= IF
 	    2dup read-avatar 2swap avatar# #!
 	ELSE  2drop  THEN
 	glue*avatar last# cell+ $@ drop }}thumb
-	>r {{ r> }}v 40%b ;] catch IF  2drop  THEN ;
+	>r {{ r> }}v 40%b ;] catch IF  2drop 0  THEN ;
 
 : re-avatar ( last# -- )
     >r r@ $@ read-avatar r> cell+ $@ smove ;
@@ -445,10 +445,22 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 :noname defers free-thumbs
     avatar# ['] re-avatar #map ; is free-thumbs
 
+event: :>fetch-avatar ( hash u1 pk u2 -- )
+    $8 $A pk-connect? IF  +resend +flow-control
+	net2o-code expect+slurp $10 blocksize! $A blockalign!
+	net2o:copy# end-code| net2o:close-all disconnect-me
+    ELSE  2drop  THEN ;
+
+: ?+avatars ( o:key o/0 -- o / )
+    ?dup-0=-IF
+	<event ke-avatar $@ e$, ke-pk $@ e$, :>fetch-avatar
+	?query-task event>
+    THEN ;
+
 : ?avatar ( addr u -- o / )
     key# #@ IF
 	cell+ .ke-avatar $@ dup IF
-	    show-avatar
+	    show-avatar ?dup-0=-IF  THEN
 	ELSE  2drop  THEN
     ELSE  drop  THEN ;
 
@@ -458,7 +470,8 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
     {{ glue*l imports#rgb-bg ki + sf@ slide-frame dup .button1
 	{{
 	    {{ \large imports#rgb-fg ki + sf@ to x-color
-		ke-avatar $@ dup IF  show-avatar  ELSE  2drop  THEN
+		ke-avatar $@ dup IF  show-avatar ?+avatars
+		ELSE  2drop  THEN
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
