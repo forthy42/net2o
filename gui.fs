@@ -359,6 +359,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 0 Value mykey-box
 0 Value groups-box
 0 Value nicks-box
+0 value peers-box
 0 Value msgs-box
 0 Value msg-box
 0 Value msg-par
@@ -432,12 +433,24 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 
 : read-avatar ( addr u -- addr' u' )
     ?read-enc-hashed mem>thumb atlas-region ;
+Variable user-avatar#
+Variable user.png$
+: read-user.png ( -- )
+    "doc/user.png" open-fpath-file throw 2drop
+    dup >r user.png$ $slurp r> close-file throw ;
+: user-avatar ( -- addr u )
+    user-avatar# @ 0= IF
+	read-user.png user.png$ $@ mem>thumb atlas-region
+	user-avatar# $!
+    THEN   user-avatar# $@ ;
+: avatar-thumb ( avatar -- )
+    glue*avatar swap }}thumb >r {{ r> }}v 40%b ;
+: avatar-frame ( addr u -- frame# )
+    2dup avatar# #@ nip 0= IF
+	2dup read-avatar 2swap avatar# #!
+    ELSE  2drop  THEN  last# cell+ $@ drop ;
 : show-avatar ( addr u -- o / 0 )
-    [: 2dup avatar# #@ nip 0= IF
-	    2dup read-avatar 2swap avatar# #!
-	ELSE  2drop  THEN
-	glue*avatar last# cell+ $@ drop }}thumb
-	>r {{ r> }}v 40%b ;] catch IF  2drop 0  THEN ;
+    [: avatar-frame avatar-thumb ;] catch IF  2drop 0  THEN ;
 
 : re-avatar ( last# -- )
     >r r@ $@ read-avatar r> cell+ $@ smove ;
@@ -445,15 +458,21 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
 :noname defers free-thumbs
     avatar# ['] re-avatar #map ; is free-thumbs
 
-event: :>fetch-avatar ( hash u1 pk u2 -- )
-    $8 $A pk-connect? IF  +resend +flow-control
+event: :>update-avatar ( thumb hash u1 -- )
+    avatar-frame swap .childs[] $@ drop @ >o to frame# o>
+    ['] +sync peers-box .vp-needed +sync ;
+event: :>fetch-avatar { thumb up hash u1 pk u2 -- }
+    pk u2 $8 $A pk-connect? IF  +resend +flow-control
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
-	net2o:copy# end-code| net2o:close-all disconnect-me
+	hash u1 net2o:copy# end-code| net2o:close-all disconnect-me
+	<event thumb elit, hash u1 e$, :>update-avatar up event>
     ELSE  2drop  THEN ;
 
-: ?+avatars ( o:key o/0 -- o / )
+: ?+avatars ( o:key o/0 -- o )
     ?dup-0=-IF
-	<event ke-avatar $@ e$, ke-pk $@ e$, :>fetch-avatar
+	user-avatar drop avatar-thumb
+	<event dup elit, up@ elit,
+	ke-avatar $@ e$, ke-pk $@ e$, :>fetch-avatar
 	?query-task event>
     THEN ;
 
@@ -471,7 +490,7 @@ event: :>fetch-avatar ( hash u1 pk u2 -- )
 	{{
 	    {{ \large imports#rgb-fg ki + sf@ to x-color
 		ke-avatar $@ dup IF  show-avatar ?+avatars
-		ELSE  2drop  THEN
+		ELSE  2drop user-avatar drop avatar-thumb   THEN
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
@@ -608,7 +627,7 @@ previous
 		{{ \script l" My peers" }}i18n-text 25%b glue*l }}glue }}h }}z
 		{{ }}v box[] dup to nicks-box /vflip
 		glue*lll }}glue
-	    tex: vp-nicks vp-nicks glue*lll ' vp-nicks }}vp vp[] dup value peers-box
+	    tex: vp-nicks vp-nicks glue*lll ' vp-nicks }}vp vp[] dup to peers-box
 	    $444444FF new-color, to slider-color
 	    $CCCCCCFF new-color, to slider-fgcolor
 	    font-size# 33% f* to slider-border
