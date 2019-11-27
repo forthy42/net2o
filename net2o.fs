@@ -42,6 +42,7 @@ require rng.fs
 require ed25519-donna.fs
 require hash-table.fs
 require bdelta.fs
+require minos2/jpeg-exif.fs
 
 \ random initializer for hash
 

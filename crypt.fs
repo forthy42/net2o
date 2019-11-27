@@ -578,6 +578,10 @@ drop
 : early/late? ( n64 min64 max64 -- sig-error )
     64>r 64over 64r> 64u>= sig-late and >r 64u< sig-early and r> min ;
 
+: check-exact-date ( addr u -- addr u flag )
+    2dup + 1- c@ keysize <> sig-keysize and ?dup-IF  EXIT  THEN
+    2dup enddate@ 64>r 2dup startdate@ 64>r
+    ticks 64r> 64r> early/late? ;
 : check-date ( addr u -- addr u flag )
     2dup + 1- c@ keysize <> sig-keysize and ?dup-IF  EXIT  THEN
     2dup enddate@ 64>r 2dup startdate@ 64>r

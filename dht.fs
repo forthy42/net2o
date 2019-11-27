@@ -288,8 +288,10 @@ end-class dht-file-class
 : d#values, ( addr u mask -- addr' u' ) { mask }
     k#size cell/ 1 DO
 	mask 1 and IF
-	    I dup cells dht-hash dht( ." access dht: " dup hex. over . forth:cr ) +
-	    [: { k# a# u# } k# d#c, a# u# d#$, k# ;] $[]map drop
+	    dht-hash I cells + I
+	    dht( ." access dht: " over hex. dup . forth:cr )
+	    [{: k# :}l check-exact-date
+		0= IF  k# d#c, d#$,  ELSE  2drop  THEN ;] $[]map
 	THEN  mask 2/ to mask
     LOOP ;
 

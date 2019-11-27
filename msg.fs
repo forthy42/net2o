@@ -1609,8 +1609,27 @@ msg:troll#      't' permchar>bits + c!
 	[: $, msg-url ;] rectype-name
     ELSE  2drop rectype-null  THEN ;
 
+forward hash-in
+
+: jpeg? ( addr u -- flag )
+    dup 4 - 0 max safe/string ".jpg" str= ;
+: img-rec ( addr u -- )
+    2dup "img:" string-prefix? IF
+	over ?flush-text 2dup + to last->in
+	2dup jpeg? IF
+	    2dup >thumbnail
+	    ?dup-IF  over >r hash-in r> free throw  THEN
+	ELSE  #0.  THEN
+	2swap slurp-file over >r hash-in r> free throw
+	[: type dup IF  type img-orient 1- 0 max emit  ELSE  2drop  THEN ;] $tmp
+	[: tuck $, >r msg:thumbnail# msg:image# r> $20 u> select ulit,
+	    msg-object ;] rectype-name
+    ELSE  2drop rectype-null  THEN ;
+
 $Variable msg-recognizer
-' text-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec 5 msg-recognizer set-stack
+depth >r
+' text-rec ' img-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec
+depth r> - msg-recognizer set-stack
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in
