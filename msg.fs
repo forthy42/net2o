@@ -1613,18 +1613,24 @@ forward hash-in
 
 : jpeg? ( addr u -- flag )
     dup 4 - 0 max safe/string ".jpg" str= ;
-: img-rec ( addr u -- )
+: img-rec ( addr u -- .. token )
     2dup "img:" string-prefix? IF
-	over ?flush-text 2dup + to last->in
-	2dup jpeg? IF
-	    2dup >thumbnail
-	    ?dup-IF  over >r hash-in r> free throw  THEN
-	ELSE  #0.  THEN
-	2swap slurp-file over >r hash-in r> free throw
-	[: type dup IF  type img-orient 1- 0 max emit  ELSE  2drop  THEN ;] $tmp
-	[: tuck $, >r msg:thumbnail# msg:image# r> $20 u> select ulit,
-	    msg-object ;] rectype-name
-    ELSE  2drop rectype-null  THEN ;
+	over ?flush-text
+	[:  2dup + >r
+	    4 /string save-mem over >r 2dup jpeg? IF
+		2dup >thumbnail
+		?dup-IF  over >r hash-in save-mem r> free throw  THEN
+	    ELSE  #0.  THEN
+	    2swap slurp-file over >r hash-in r> free throw
+	    [: forth:type dup IF
+		    over >r forth:type img-orient 1- 0 max forth:emit
+		    r> free throw
+		ELSE  2drop  THEN ;] $tmp r> free throw
+	    [: dup >r $, msg:thumbnail# msg:image# r> $20 u> select ulit,
+		msg-object ;]
+	    r> to last->in ;]
+	catch 0= IF  rectype-name  EXIT  THEN  THEN
+    2drop rectype-null ;
 
 $Variable msg-recognizer
 depth >r
