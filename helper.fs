@@ -167,7 +167,7 @@ Forward insert-addr ( o -- )
     announced 64@ 64-0= ?EXIT
     announced? 0= IF
 	init-my0key init-myekey
-	my-addr[] [: .+my-0key ;] $[]o-map
+	my-addr[] [: .+my-0key ;] $[]o-map !my-addr$
 	announce-me  THEN ;
 
 : renat-all ( -- ) beacon( ." remove all beacons" cr )

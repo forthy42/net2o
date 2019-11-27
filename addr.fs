@@ -172,7 +172,7 @@ previous
     priv-addr$ $[]free ;
 
 : !my-addr$ ( -- )
-    my-key-default 0= ?EXIT
+    my-key-default 0= ?EXIT  my-addr$ $[]free
     now>never  my-addr[] [:
 	nat( ." insert into my-addr$: " dup .addr forth:cr )
 	dup .host:ekey-to 64@ 64dup 64-0= n>64 64+
