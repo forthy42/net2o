@@ -430,9 +430,11 @@ Hash: avatar#
 
 glue new Constant glue*avatar
 glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
+: wh-glue! ( w h -- )
+    pixelsize# fm* 0e 0g vglue-c glue!
+    pixelsize# fm* 0e 0g hglue-c glue! ;
 : glue*thumb ( w h -- o )
-    glue new >o pixelsize# fm* 0e 0g vglue-c glue!
-    pixelsize# fm* 0e 0g hglue-c glue! 0glue dglue-c glue! o o> ;
+    glue new >o wh-glue! 0glue dglue-c glue! o o> ;
 
 : read-avatar ( addr u -- addr' u' )
     ?read-enc-hashed mem>thumb atlas-region ;
@@ -876,6 +878,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dup .subbox "msg-box" name!
     to msg-box to msg-par ;
 :noname { d: pk -- o }
+    pk key| to msg:id$
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
     pk enddate@ otr? { otr }
@@ -1035,19 +1038,24 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 
 Hash: thumbs#
 
-: thumb-frame ( addr u -- o )
+: thumb-frame ( addr u -- rect )
     keysize safe/string key|
     2dup thumbs# #@ nip 0= IF
 	2dup read-avatar 2swap thumbs# #!
     ELSE  2drop  THEN  last# cell+ $@ drop ;
 
+event: :>update-thumb { d: hash object -- }
+    hash thumb-frame object .childs[] $@ drop @ >o to frame#
+    frame# i.w frame# i.h tile-glue .wh-glue!  o>
+    [: +sync +resize ;] msgs-box vpneeded +sync +resize ;
+
 : ?thumb ( addr u -- o )
     2dup ['] thumb-frame catch 0= IF
 	>r 2drop r@ i.w r@ i.h glue*thumb r> }}thumb
 	EXIT  THEN
-    2drop
     128 128 glue*thumb dummy-thumb }}thumb >r
-    <event ['] drop elit, msg:id$ e$, e$,
+    <event r@ up@ [{: hash u1 object task :}h
+	<event hash elit, u1 elit, object elit, :>update-thumb task event> ;] elit, msg:id$ e$, e$,
     :>fetch-thumb ?query-task event> r> ;
 
 :noname ( addr u type -- )
