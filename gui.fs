@@ -1047,7 +1047,7 @@ Hash: thumbs#
 event: :>update-thumb { d: hash object -- }
     hash thumb-frame object .childs[] $@ drop @ >o to frame#
     frame# i.w frame# i.h tile-glue .wh-glue!  o>
-    [: +sync +resize ;] msgs-box vpneeded +sync +resize ;
+    [: +sync +resize ;] msgs-box vp-needed +sync +resize ;
 
 : ?thumb ( addr u -- o )
     2dup ['] thumb-frame catch 0= IF
