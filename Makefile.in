@@ -45,8 +45,8 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  threefishlib.fs startn2o.fs doc/net2o-logo.png version.fs.in	      \
 	  android/net.fs android/notify.fs linux/net.fs linux/notify.fs	      \
 	  dhtroot.fs dvcs.fs qrscan.fs android/qrscan-android.fs	      \
-	  linux/qrscan-linux.fs doc/net2o-200.png doc/net2o.png	doc/user.png  \
-	  json/parser.fs json/g+-schema.fs json/g+-import.fs		      \
+	  linux/qrscan-linux.fs doc/net2o-200.png doc/net2o.png doc/user.png  \
+	  doc/thumb.png json/parser.fs json/g+-schema.fs json/g+-import.fs    \
 	  json/fb-schema.fs json/twitter-schema.fs json/test.fs		      \
 	  json/test.json json/diaspora-schema.fs html/parser.fs xml/parser.fs \
 	  xml/blogger-atom.fs

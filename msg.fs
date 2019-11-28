@@ -476,10 +476,29 @@ scope: logstyles
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
+
+event: :>fetch-img { xt: action d: pk d: hash }
+    pk $8 $E pk-connect? IF  +resend +flow-control
+	net2o-code expect+slurp $10 blocksize! $A blockalign!
+	hash key| net2o:copy# end-code| net2o:close-all disconnect-me
+	action
+    ELSE  2drop  THEN ;
+event: :>fetch-thumb { xt: action d: pk d: hash }
+    pk $8 $E pk-connect? IF  +resend +flow-control
+	net2o-code expect+slurp $10 blocksize! $A blockalign!
+	hash keysize safe/string key| net2o:copy#
+	hash key| net2o:copy# end-code| net2o:close-all disconnect-me
+	hash keysize 2* safe/string drop c@ action
+    ELSE  2drop  THEN ;
+
 :noname ( addr u type -- )
     space <warn> case
-	msg:image#     of  ." img["      85type  endof
-	msg:thumbnail# of  ." thumb["    85type  endof
+	msg:image#     of  ." img["      2dup 85type
+	    <event ['] noop elit, msg:id$ e$, e$,
+	    :>fetch-img ?query-task event>       endof
+	msg:thumbnail# of  ." thumb["    85type ( 2dup 85type
+	    <event ['] drop elit, msg:id$ e$, e$,
+	    :>fetch-thumb ?query-task event> )   endof
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof

@@ -430,19 +430,32 @@ Hash: avatar#
 
 glue new Constant glue*avatar
 glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
+: glue*thumb ( w h -- o )
+    glue new >o pixelsize# fm* 0e 0g vglue-c glue!
+    pixelsize# fm* 0e 0g hglue-c glue! 0glue dglue-c glue! o o> ;
 
 : read-avatar ( addr u -- addr' u' )
     ?read-enc-hashed mem>thumb atlas-region ;
 Variable user-avatar#
+Variable dummy-thumb#
 Variable user.png$
+Variable thumb.png$
 : read-user.png ( -- )
     "doc/user.png" open-fpath-file throw 2drop
     dup >r user.png$ $slurp r> close-file throw ;
-: user-avatar ( -- addr u )
+: read-thumb.png ( -- )
+    "doc/thumb.png" open-fpath-file throw 2drop
+    dup >r thumb.png$ $slurp r> close-file throw ;
+: user-avatar ( -- addr )
     user-avatar# @ 0= IF
 	read-user.png user.png$ $@ mem>thumb atlas-region
 	user-avatar# $!
-    THEN   user-avatar# $@ ;
+    THEN   user-avatar# $@ drop ;
+: dummy-thumb ( -- addr )
+    dummy-thumb# @ 0= IF
+	read-thumb.png thumb.png$ $@ mem>thumb atlas-region
+	dummy-thumb# $!
+    THEN   dummy-thumb# $@ drop ;
 : avatar-thumb ( avatar -- )
     glue*avatar swap }}thumb >r {{ r> }}v 40%b ;
 : avatar-frame ( addr u -- frame# )
@@ -461,16 +474,16 @@ Variable user.png$
 event: :>update-avatar ( thumb hash u1 -- )
     avatar-frame swap .childs[] $@ drop @ >o to frame# o>
     ['] +sync peers-box .vp-needed +sync ;
-event: :>fetch-avatar { thumb up hash u1 pk u2 -- }
+event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
     pk u2 $8 $A pk-connect? IF  +resend +flow-control
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	hash u1 net2o:copy# end-code| net2o:close-all disconnect-me
-	<event thumb elit, hash u1 e$, :>update-avatar up event>
+	<event thumb elit, hash u1 e$, :>update-avatar task event>
     ELSE  2drop  THEN ;
 
 : ?+avatars ( o:key o/0 -- o )
     ?dup-0=-IF
-	user-avatar drop avatar-thumb
+	user-avatar avatar-thumb
 	<event dup elit, up@ elit,
 	ke-avatar $@ e$, ke-pk $@ e$, :>fetch-avatar
 	?query-task event>
@@ -490,7 +503,7 @@ event: :>fetch-avatar { thumb up hash u1 pk u2 -- }
 	{{
 	    {{ \large imports#rgb-fg ki + sf@ to x-color
 		ke-avatar $@ dup IF  show-avatar ?+avatars
-		ELSE  2drop user-avatar drop avatar-thumb   THEN
+		ELSE  2drop user-avatar avatar-thumb   THEN
 		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
 		['] .nick-base $tmp }}text 25%b
 		ke-pets[] $[]# IF
@@ -1019,20 +1032,43 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	    THEN
 	LOOP
     THEN ; wmsg-class is msg:otrify
+
+Hash: thumbs#
+
+: thumb-frame ( addr u -- o )
+    keysize safe/string key|
+    2dup thumbs# #@ nip 0= IF
+	2dup read-avatar 2swap thumbs# #!
+    ELSE  2drop  THEN  last# cell+ $@ drop ;
+
+: ?thumb ( addr u -- o )
+    2dup ['] thumb-frame catch 0= IF
+	>r 2drop r@ i.w r@ i.h glue*thumb r> }}thumb
+	EXIT  THEN
+    2drop
+    128 128 glue*thumb dummy-thumb }}thumb >r
+    <event ['] drop elit, msg:id$ e$, e$,
+    :>fetch-thumb ?query-task event> r> ;
+
 :noname ( addr u type -- )
     obj-red
-    [: case 0 >r
-	    msg:image#     of  ." img["      85type  endof
-	    msg:thumbnail# of  ." thumb["    85type  endof
-	    msg:patch#     of  ." patch["    85type  endof
-	    msg:snapshot#  of  ." snapshot[" 85type  endof
-	    msg:message#   of  ." message["  85type  endof
-	    msg:posting#   of  ." posting"
-		rdrop 2dup [d:h open-posting ;] >r
-		.posting
-	    endof
-	endcase ." ]" r> ;] $tmp }}text
-    swap ?dup-IF  0 click[]  THEN
+    case 0 >r
+	msg:image#     of  [: ." img["      2dup 85type ']' emit
+	    ;] $tmp }}text >r
+	    <event ['] noop elit, msg:id$ e$, e$,
+	    :>fetch-img ?query-task event> r>        endof
+	msg:thumbnail# of  ?thumb                    endof
+	msg:patch#     of  [: ." patch["    85type ']' emit
+	    ;] $tmp }}text  endof
+	msg:snapshot#  of  [: ." snapshot[" 85type ']' emit
+	    ;] $tmp }}text  endof
+	msg:message#   of  [: ." message["  85type ']' emit
+	    ;] $tmp }}text  endof
+	msg:posting#   of  ." posting"
+	    rdrop 2dup [d:h open-posting ;] >r
+	    ['] .posting $tmp }}text
+	endof
+    endcase r> ?dup-IF  0 click[]  THEN
     "object" name! msg-box .child+
     text-color!
 ; wmsg-class is msg:object
