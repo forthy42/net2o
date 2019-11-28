@@ -443,10 +443,10 @@ Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
 : read-user.png ( -- )
-    "doc/user.png" open-fpath-file throw 2drop
+    "net2o/doc/user.png" open-fpath-file throw 2drop
     dup >r user.png$ $slurp r> close-file throw ;
 : read-thumb.png ( -- )
-    "doc/thumb.png" open-fpath-file throw 2drop
+    "net2o/doc/thumb.png" open-fpath-file throw 2drop
     dup >r thumb.png$ $slurp r> close-file throw ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
