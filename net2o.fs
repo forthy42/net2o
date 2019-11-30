@@ -878,7 +878,7 @@ in net2o : set-rate ( rate deltat -- )
 
 $20 Value mask-bits#
 : >mask0 ( addr mask -- addr' mask' )
-    BEGIN  dup 1 and 0= WHILE  1 rshift >r maxdata + r>  dup 0= UNTIL  THEN ;
+    BEGIN  dup 1 and 0= WHILE  1 rshift maxdata under+  dup 0= UNTIL  THEN ;
 : >legit-back ( addr mask -- addr' mask' )
     data-map .mapc:dest-back >r
     over r@ [ maxdata $20 * ]L umax [ maxdata $20 * ]L  - u<

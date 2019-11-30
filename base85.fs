@@ -20,7 +20,7 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
     dup $FF = !!no-85-digit!! ;
 
 : base85>n ( addr u -- n )  0 1 2swap bounds +DO
-	I c@ b85digit over * rot + swap 85 *
+	I c@ b85digit over * under+ 85 *
     LOOP  drop ;
 : (base85>$) ( addr u -- addr' u' )  bounds ?DO
 	I I' over - 5 umin dup >r base85>n { | w^ x } x le-l! x r> 4 5 */ type
