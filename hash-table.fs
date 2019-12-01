@@ -35,7 +35,7 @@ uvalue last#
 : #free? ( addrkey u bucket -- true / addrkey u false )
     >r r@ @ 0= IF  rdrop false  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r> bucket-off true  EXIT  THEN
-    rdrop false ;    
+    rdrop false ;
 
 $180 cells Constant table-size#
 
@@ -60,6 +60,9 @@ warnings !
 	+ #@? IF  UNLOOP  EXIT  THEN
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop #0. ;
+
+: #+! ( addr1 u1 addr2 u2 -- )
+    2dup #@ d0= IF  #!  ELSE  2drop last# cell+ $+!  THEN ;
 
 : #free ( addrkey u hash -- )  { hash }
     2dup string-hash  hash$ bounds ?DO

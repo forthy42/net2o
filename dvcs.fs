@@ -952,8 +952,11 @@ previous
 : wait-dvcs-request ( -- )
     BEGIN  dvcs-request# @  WHILE  stop  REPEAT ;
 
+: need-hashed? ( addr u -- flag )
+    enchash>filename 2dup type cr file-status nip no-file# = ;
+
 : +needed ( addr u -- )
-    2dup enchash>filename file-status nip no-file# = IF
+    2dup need-hashed? IF
 	dvcs( ." need: " 2dup 85type cr )
 	sync-file-list[] $ins[] drop
     ELSE  dvcs( ." don't need: " 2dup 85type cr ) 2drop  THEN ;

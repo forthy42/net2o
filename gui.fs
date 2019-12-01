@@ -1039,32 +1039,28 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 Hash: thumbs#
 
 : thumb-frame ( addr u -- rect )
-    keysize safe/string key|
-    2dup thumbs# #@ nip 0= IF
+    key| 2dup thumbs# #@ nip 0= IF
 	2dup read-avatar 2swap thumbs# #!
     ELSE  2drop  THEN  last# cell+ $@ drop ;
 
-event: :>update-thumb { d: hash object -- }
+: update-thumb { d: hash object -- }
     hash thumb-frame object .childs[] $@ drop @ >o to frame#
     frame# i.w frame# i.h tile-glue .wh-glue!  o>
     [: +sync +resize ;] msgs-box vp-needed +sync +resize ;
 
-: ?thumb ( addr u -- o )
-    2dup ['] thumb-frame catch 0= IF
-	>r 2drop r@ i.w r@ i.h glue*thumb r> }}thumb
+: ?thumb { d: hash -- o }
+    hash ['] thumb-frame catch 0= IF
+	>r r@ i.w r@ i.h glue*thumb r> }}thumb
 	EXIT  THEN
     128 128 glue*thumb dummy-thumb }}thumb >r
-    <event r@ up@ [{: hash u1 object task :}h
-	<event hash elit, u1 elit, object elit, :>update-thumb task event> ;] elit, msg:id$ e$, e$,
-    :>fetch-thumb ?query-task event> r> ;
+    r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #!
+    hash key| ?fetch r> ;
 
 :noname ( addr u type -- )
     obj-red
     case 0 >r
-	msg:image#     of  [: ." img["      2dup 85type ']' emit
-	    ;] $tmp }}text >r
-	    <event ['] noop elit, msg:id$ e$, e$,
-	    :>fetch-img ?query-task event> r>        endof
+	msg:image#     of  [: ." img["      85type ']' emit
+	    ;] $tmp }}text                           endof
 	msg:thumbnail# of  ?thumb                    endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
 	    ;] $tmp }}text  endof

@@ -477,28 +477,72 @@ scope: logstyles
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
 
-event: :>fetch-img { xt: action d: pk d: hash }
+hash: fetch-queue#
+hash: fetch-finish#
+Variable queued#
+
+event: :>del-queue { d: pk d: hashs -- }
+    pk fetch-queue# #@ d0<> IF
+	hashs last# cell+ $@ string-prefix? IF
+	    last# cell+ 0 hashs nip $del
+	    last# cell+ $@len 0= IF
+		last# $free last# cell+ $free
+	    THEN
+	THEN
+    THEN  hashs drop free throw
+    -1 queued# +! ;
+event: :>hash-finished { d: hash }
+    fetch-finish# #@ IF
+	@ >r hash r@ execute r> >addr free throw
+	last# bucket-off
+    ELSE  drop  THEN ;
+
+: fetch-queue { task d: pk d: hashs -- }
     pk $8 $E pk-connect? IF  +resend +flow-control
-	net2o-code expect+slurp $10 blocksize! $A blockalign!
-	hash key| net2o:copy# end-code| net2o:close-all disconnect-me
-	action
-    ELSE  2drop  THEN ;
-event: :>fetch-thumb { xt: action d: pk d: hash }
-    pk $8 $E pk-connect? IF  +resend +flow-control
-	net2o-code expect+slurp $10 blocksize! $A blockalign!
-	hash keysize safe/string key| net2o:copy#
-	hash key| net2o:copy# end-code| net2o:close-all disconnect-me
-	hash keysize 2* safe/string drop c@ action
-    ELSE  2drop  THEN ;
+	hashs bounds U+DO
+	    net2o-code expect+slurp $10 blocksize! $A blockalign!
+	    I' I keysize $10 * + umin I U+DO
+		I keysize net2o:copy#
+		I keysize up@ [{: d: hash task :}h
+		    <event hash e$, :>hash-finished ;]
+		lastfile@ >o to file-xt o>
+	    keysize +LOOP
+	end-code| net2o:close-all
+	keysize $10 *  +LOOP
+	disconnect-me
+    ELSE
+	hashs drop 0 to hashs
+    THEN
+    <event pk e$, hashs e$, :>del-queue task event> ;
+
+event: :>fetch-queue fetch-queue ;
+
+: transmit-queue ( -- )
+    fetch-queue#
+    [:  1 queued# +! <event up@ elit, dup $@ e$, cell+ $@ save-mem e$,
+	:>fetch-queue ?query-task event> ;] #map ;
+
+Variable queue?
+event: :>queued ( -- )
+    transmit-queue  queue? off ;
+: enqueue ( -- )
+    queue? @ 0= IF  queue? on <event :>queued up@ event>  THEN ;
+
+: ?#+! ( addr1 u1 addr2 u2 hash -- ) >r
+    2dup r@ #@ d0= IF  r> #! enqueue  ELSE  2drop rdrop
+	last# cell+ $@ bounds U+DO
+	    2dup I over str= IF  2drop unloop  EXIT  THEN
+	dup +LOOP  last# cell+ $+! enqueue
+    THEN ;
+
+forward need-hashed?
+: ?fetch ( addr u -- )
+    key| 2dup need-hashed? IF  msg:id$ fetch-queue# ?#+!  ELSE  2drop  THEN ;
 
 :noname ( addr u type -- )
     space <warn> case
-	msg:image#     of  ." img["      2dup 85type
-	    <event ['] noop elit, msg:id$ e$, e$,
-	    :>fetch-img ?query-task event>       endof
-	msg:thumbnail# of  ." thumb["    85type ( 2dup 85type
-	    <event ['] drop elit, msg:id$ e$, e$,
-	    :>fetch-thumb ?query-task event> )   endof
+	msg:image#     of  ." img["      2dup 85type ?fetch  endof
+	msg:thumbnail# of  ." thumb["    2dup 85type ?fetch  endof
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof
@@ -1638,16 +1682,14 @@ forward hash-in
 	[:  2dup + >r
 	    4 /string save-mem over >r 2dup jpeg? IF
 		2dup >thumbnail
-		?dup-IF  over >r hash-in save-mem r> free throw  THEN
+		?dup-IF  over >r hash-in
+		    [: forth:type img-orient forth:emit ;] $tmp
+		    r> free throw  THEN
 	    ELSE  #0.  THEN
-	    2swap slurp-file over >r hash-in r> free throw
-	    [: forth:type dup IF
-		    over >r forth:type img-orient 1- 0 max forth:emit
-		    r> free throw
-		ELSE  2drop  THEN ;] $tmp r> free throw
-	    [: dup >r $, msg:thumbnail# msg:image# r> $20 u> select ulit,
-		msg-object ;]
-	    r> to last->in ;]
+	    2swap slurp-file over >r hash-in r> free throw  2swap
+	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
+		$, msg:image# ulit, msg-object ;]
+	    r> free throw  r> to last->in ;]
 	catch 0= IF  rectype-name  EXIT  THEN  THEN
     2drop rectype-null ;
 
