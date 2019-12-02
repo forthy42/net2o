@@ -878,7 +878,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dup .subbox "msg-box" name!
     to msg-box to msg-par ;
 :noname { d: pk -- o }
-    pk key| to msg:id$
+    pk key| to msg:id$  pk startdate@ to msg:timestamp
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
     pk enddate@ otr? { otr }
@@ -1059,6 +1059,23 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
+hash: imgs# \ hash of tables of
+
+: .imgs ( -- )
+    imgs# [: dup $. ." :" cr
+	cell+ $@ bounds ?DO
+	    I $@ over be-64@ .ticks space
+	    1 64s /string 85type cr
+	cell +LOOP ;] #map ;
+: +imgs ( addr$ -- )
+    [: { w^ string | ts[ 1 64s ] } msg:timestamp ts[ be-64!
+	ts[ 1 64s type  string $. ;] $tmp $make { w^ string }
+    msg-group$ $@ imgs# #@ d0= IF
+	string cell msg-group$ $@ imgs# #!
+    ELSE
+	string $@ last# cell+ $ins[]  string $free
+    THEN ;
+
 :noname ( addr u type -- )
     obj-red
     case 0 >r
@@ -1067,7 +1084,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
 		    [: ." display image: " addr data $@ 85type cr ;]
-		    2swap $make click[] drop  EXIT  THEN  drop  THEN
+		    2swap $make dup +imgs
+		    click[] drop  EXIT  THEN  drop  THEN
 	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof

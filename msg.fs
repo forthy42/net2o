@@ -798,7 +798,7 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 \ nest-sig for msg/msging classes
 
 ' message msging-class is start-req
-:noname quicksig( check-date )else( pk-sig? )
+:noname check-date \ quicksig( check-date )else( pk-sig? )
     >r 2dup r> ; msging-class is nest-sig
 ' message msg-class is start-req
 :noname 2dup msg-dec?-sig? ; msg-class is nest-sig

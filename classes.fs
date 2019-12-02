@@ -138,8 +138,9 @@ end-class msging-class
 cmd-class class{ msg
     $10 +field dummy
     $value: name$ \ group name
-    $value: id$
+    $value: id$   \ id of current message
     $value: msg$  \ decrypted message
+    64value: timestamp \ timestamp of message
     field: peers[]
     field: keys[]
     field: log[]
