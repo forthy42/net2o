@@ -492,7 +492,7 @@ event: :>del-queue { d: pk d: hashs -- }
     THEN  hashs drop free throw
     -1 queued# +! ;
 event: :>hash-finished { d: hash }
-    fetch-finish# #@ IF
+    hash fetch-finish# #@ IF
 	@ >r hash r@ execute r> >addr free throw
 	last# bucket-off
     ELSE  drop  THEN ;
@@ -504,7 +504,7 @@ event: :>hash-finished { d: hash }
 	    I' I keysize $10 * + umin I U+DO
 		I keysize net2o:copy#
 		I keysize up@ [{: d: hash task :}h
-		    <event hash e$, :>hash-finished ;]
+		    <event hash e$, :>hash-finished task event> ;]
 		lastfile@ >o to file-xt o>
 	    keysize +LOOP
 	end-code| net2o:close-all
@@ -541,7 +541,7 @@ forward need-hashed?
 
 :noname ( addr u type -- )
     space <warn> case
-	msg:image#     of  ." img["      2dup 85type ?fetch  endof
+	msg:image#     of  ." img["      2dup 85type  endof
 	msg:thumbnail# of  ." thumb["    2dup 85type ?fetch  endof
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
@@ -798,7 +798,8 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
 \ nest-sig for msg/msging classes
 
 ' message msging-class is start-req
-:noname check-date >r 2dup r> ; msging-class is nest-sig
+:noname quicksig( check-date )else( pk-sig? )
+    >r 2dup r> ; msging-class is nest-sig
 ' message msg-class is start-req
 :noname 2dup msg-dec?-sig? ; msg-class is nest-sig
 
@@ -1683,7 +1684,7 @@ forward hash-in
 	    4 /string save-mem over >r 2dup jpeg? IF
 		2dup >thumbnail
 		?dup-IF  over >r hash-in
-		    [: forth:type img-orient forth:emit ;] $tmp
+		    [: forth:type img-orient 1- forth:emit ;] $tmp
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
 	    2swap slurp-file over >r hash-in r> free throw  2swap

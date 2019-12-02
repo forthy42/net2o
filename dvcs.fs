@@ -897,7 +897,7 @@ hash#128 buffer: hash-save
     write-enc-hashed 2drop
     hash-save hash#128 ;
 : hash-add ( addr u -- )
-    slurp-file hash-in 2drop ;
+    slurp-file over >r hash-in 2drop r> free throw ;
 : hash-out ( addr u -- )
     base85>$ 2dup 2>r read-enc-hashed patch-in$ $@ 2r> hash-85 spit-file ;
 
@@ -953,7 +953,7 @@ previous
     BEGIN  dvcs-request# @  WHILE  stop  REPEAT ;
 
 : need-hashed? ( addr u -- flag )
-    enchash>filename 2dup type cr file-status nip no-file# = ;
+    enchash>filename file-status nip no-file# = ;
 
 : +needed ( addr u -- )
     2dup need-hashed? IF

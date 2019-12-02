@@ -461,7 +461,7 @@ Variable thumb.png$
 : avatar-thumb ( avatar -- )
     glue*avatar swap }}thumb >r {{ r> }}v 40%b ;
 : avatar-frame ( addr u -- frame# )
-    2dup avatar# #@ nip 0= IF
+    key| 2dup avatar# #@ nip 0= IF
 	2dup read-avatar 2swap avatar# #!
     ELSE  2drop  THEN  last# cell+ $@ drop ;
 : show-avatar ( addr u -- o / 0 )
@@ -1036,44 +1036,53 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	LOOP
     THEN ; wmsg-class is msg:otrify
 
-Hash: thumbs#
-
-: thumb-frame ( addr u -- rect )
-    key| 2dup thumbs# #@ nip 0= IF
-	2dup read-avatar 2swap thumbs# #!
-    ELSE  2drop  THEN  last# cell+ $@ drop ;
+: >rotate ( addr u -- )
+    keysize safe/string IF  c@ to rotate#  ELSE  drop  THEN ;
+: >swap ( w h addr u -- w h / h w )
+    keysize safe/string IF  c@ 4 and IF  swap  THEN  ELSE  drop  THEN ;
 
 : update-thumb { d: hash object -- }
-    hash thumb-frame object .childs[] $@ drop @ >o to frame#
-    frame# i.w frame# i.h tile-glue .wh-glue!  o>
-    [: +sync +resize ;] msgs-box vp-needed +sync +resize ;
+    hash avatar-frame object >o to frame# hash >rotate
+    frame# i.w 2* frame# i.h 2* tile-glue hash >swap .wh-glue!  o>
+    [: +sync +resize ;] msgs-box .vp-needed +sync +resize ;
+
+: 40%bv ( o -- o ) >o current-font-size% 40% f* fdup to border
+    fnegate f2/ to borderv o o> ;
 
 : ?thumb { d: hash -- o }
-    hash ['] thumb-frame catch 0= IF
-	>r r@ i.w r@ i.h glue*thumb r> }}thumb
-	EXIT  THEN
-    128 128 glue*thumb dummy-thumb }}thumb >r
-    r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #!
-    hash key| ?fetch r> ;
+    hash ['] avatar-frame catch 0= IF
+	>r r@ i.w 2* r@ i.h 2* hash >swap
+	glue*thumb r> }}thumb >r hash r@ .>rotate
+    ELSE
+	128 128 glue*thumb dummy-thumb }}thumb >r
+	r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #!
+	hash key| ?fetch
+    THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
 :noname ( addr u type -- )
     obj-red
     case 0 >r
-	msg:image#     of  [: ." img["      85type ']' emit
-	    ;] $tmp }}text                           endof
-	msg:thumbnail# of  ?thumb                    endof
+	msg:image#     of
+	    msg-box .childs[] $[]# ?dup-IF
+		rdrop  1- msg-box .childs[] $[] @
+		dup .name$ "thumbnail" str= IF
+		    [: ." display image: " addr data $@ 85type cr ;]
+		    2swap $make click[] drop  EXIT  THEN  drop  THEN
+	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
+	endof
+	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
-	    ;] $tmp }}text  endof
+	    ;] $tmp }}text  "patch" name!  endof
 	msg:snapshot#  of  [: ." snapshot[" 85type ']' emit
-	    ;] $tmp }}text  endof
+	    ;] $tmp }}text  "snapshot" name!  endof
 	msg:message#   of  [: ." message["  85type ']' emit
-	    ;] $tmp }}text  endof
+	    ;] $tmp }}text  "message" name!  endof
 	msg:posting#   of  ." posting"
 	    rdrop 2dup [d:h open-posting ;] >r
-	    ['] .posting $tmp }}text
+	    ['] .posting $tmp }}text  "posting" name!
 	endof
     endcase r> ?dup-IF  0 click[]  THEN
-    "object" name! msg-box .child+
+    msg-box .child+
     text-color!
 ; wmsg-class is msg:object
 
