@@ -216,6 +216,7 @@ $000000FF new-color, FValue otr-col#
 $FFFFFFFF new-color, FValue chat-col#
 $80FFFFFF new-color, FValue chat-bg-col#
 $FFFFFFFF new-color, FValue posting-bg-col#
+$FFFFFFCC new-color, FValue album-bg-col#
 
 : entropy-colorize ( -- )
     prev-text$ erase  addr prev-text$ $free
@@ -442,12 +443,13 @@ Variable user-avatar#
 Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
+: ]path ( addr u -- )
+    open-fpath-file throw rot close-file throw ]] SLiteral [[
+    ] ;
 : read-user.png ( -- )
-    "net2o/doc/user.png" open-fpath-file throw 2drop
-    dup >r user.png$ $slurp r> close-file throw ;
+    [ "doc/user.png" ]path user.png$ $slurp-file ;
 : read-thumb.png ( -- )
-    "net2o/doc/thumb.png" open-fpath-file throw 2drop
-    dup >r thumb.png$ $slurp r> close-file throw ;
+    [ "doc/thumb.png" ]path thumb.png$ $slurp-file ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
 	read-user.png user.png$ $@ mem>thumb atlas-region
@@ -1060,6 +1062,31 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
 hash: imgs# \ hash of tables of
+
+: prev-img ;
+: next-img ;
+
+: /mid ( o -- o' )
+    >r {{ glue*l }}glue r> /center glue*l }}glue }}v box[] >bl ;
+
+{{
+    glue*wh album-bg-col# slide-frame dup .button1
+    {{
+	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop /mid
+	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
+	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
+	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
+    }}h
+    {{
+	glue*ll }}glue
+	{{  \large
+	    "" }}text ' prev-img 0 click[]
+	    glue*ll }}glue
+	    "" }}text ' next-img 0 click[]
+	}}h box[]
+	glue*ll }}glue
+    }}v box[]
+}}z box[] Constant album-viewer
 
 : .imgs ( -- )
     imgs# [: dup $. ." :" cr
