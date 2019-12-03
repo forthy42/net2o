@@ -37,55 +37,11 @@ require minos2/font-style.fs
 
 require minos2/text-style.fs
 require minos2/md-viewer.fs
+require minos2/presentation-support.fs
 
 update-gsize#
 
-glue new Constant glue-sleft
-glue new Constant glue-sright
-glue ' new static-a with-allocater Constant glue-left
-glue ' new static-a with-allocater Constant glue-right
-
-: glue0 ( -- ) 0e fdup
-    [ glue-left  .hglue-c ]L df!
-    [ glue-right .hglue-c ]L df! ;
-glue0
-
-Variable slides[]
-Variable slide#
-
-: >slides ( o -- ) slides[] >stack ;
-
-: !slides ( nprev n -- )
-    over slide# !
-    slides[] $[] @ /flip drop
-    slides[] $[] @ /flop drop glue0 ;
-: anim!slides ( r0..1 n -- )
-    slides[] $[] @ /flop drop
-    fdup fnegate dpy-w @ fm* glue-left  .hglue-c df!
-    -1e f+       dpy-w @ fm* glue-right .hglue-c df! ;
-
-: prev-anim ( n r0..1 -- )
-    dup 0<= IF  drop fdrop  EXIT  THEN
-    fdup 1e f>= IF  fdrop
-	dup 1- swap !slides +sync +resize  EXIT
-    THEN
-    1e fswap f- 1- sin-t anim!slides +sync +resize ;
-
-: next-anim ( n r0..1 -- )
-    dup slides[] $[]# 1- u>= IF  drop fdrop  EXIT  THEN
-    fdup 1e f>= IF  fdrop
-	dup 1+ swap !slides +sync +resize  EXIT
-    THEN
-    1+ sin-t anim!slides +sync +resize ;
-
-0.4e FValue slide-time%
-
-: prev-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end 50% f*  THEN
-    slide# @ ['] prev-anim >animate +textures +lang ;
-: next-slide ( -- )
-    slide-time% anims[] $@len IF  anim-end 50% f*  THEN
-    slide# @ ['] next-anim >animate +textures +lang ;
+0.4e to slide-time%
 
 \ frames
 
@@ -93,6 +49,7 @@ Variable slide#
 0 Value id-frame
 0 Value chat-frame
 0 Value post-frame
+0 Value n2o-frame
 
 \ password screen
 
@@ -110,6 +67,9 @@ Variable slide#
     1e fover [ pi f2* ] Fliteral f* fcos 1e f+ f2/ f-
     2 tries# @ lshift s>f f* fdup 1e f> IF fdrop 1e ELSE +sync +resize THEN
     .fade fdrop ;
+
+glue new Constant glue-sleft
+glue new Constant glue-sright
 
 : shake-lr ( r addr -- )
     [ pi 16e f* ] FLiteral f* fsin f2/ 0.5e f+ \ 8 times shake
@@ -1063,6 +1023,15 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 
 hash: imgs# \ hash of tables of
 
+0 Value imgs-box
+0 Value n2o-frame
+
+glue ' new static-a with-allocater Constant iglue-left
+glue ' new static-a with-allocater Constant iglue-right
+
+: swap-images ( -- )
+    imgs-box .childs[] dup >r get-stack >r 2swap r> r> set-stack ;
+
 : prev-img ;
 : next-img ;
 
@@ -1072,17 +1041,20 @@ hash: imgs# \ hash of tables of
 {{
     glue*wh album-bg-col# slide-frame dup .button1
     {{
+	iglue-left }}glue
 	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop /mid
 	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
 	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
 	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
-    }}h
+	iglue-right }}glue
+    }}h dup to imgs-box
     {{
 	glue*ll }}glue
 	{{  \large
-	    "" }}text ' prev-img 0 click[]
+	    "  " }}text ' prev-img 0 click[]
 	    glue*ll }}glue
-	    "" }}text ' next-img 0 click[]
+	    "  " }}text ' next-img 0 click[]
+	    \normal
 	}}h box[]
 	glue*ll }}glue
     }}v box[]
@@ -1300,13 +1272,13 @@ Variable invitation-stack
 
 {{
     {{
-	glue-left }}glue
+	glue-left @ }}glue
 	pw-frame          dup >slides
 	id-frame   /flip  dup >slides
 	chat-frame /flip  dup >slides
 	post-frame /flip  dup >slides
-	glue-right }}glue
-    }}h box[]
+	glue-right @ }}glue
+    }}h box[] \ main slides
     {{
 	{{
 	    glue*lll }}glue
@@ -1335,9 +1307,8 @@ Variable invitation-stack
 	}}h box[]
 	/flip dup to invitations
 	glue*lll }}glue
-    }}v box[]
-}}z net2o[]
-Value n2o-frame
+    }}v box[] \ notifications
+}}z net2o[] to n2o-frame
 
 \ top widgets
 
