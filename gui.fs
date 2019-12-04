@@ -176,7 +176,7 @@ $000000FF new-color, FValue otr-col#
 $FFFFFFFF new-color, FValue chat-col#
 $80FFFFFF new-color, FValue chat-bg-col#
 $FFFFFFFF new-color, FValue posting-bg-col#
-$FFFFFFCC new-color, FValue album-bg-col#
+$000000CC new-color, FValue album-bg-col#
 
 : entropy-colorize ( -- )
     prev-text$ erase  addr prev-text$ $free
@@ -1030,22 +1030,32 @@ album-sd to slide-deck
 glue new glue-left !
 glue new glue-right !
 
+Variable imgs[]
+
+: >imgs ( o -- o ) dup imgs[] >stack ;
+
 0 Value imgs-box
 
 : swap-images ( -- )
     imgs-box .childs[] dup >r get-stack >r 2swap r> r> set-stack ;
 
-: /mid ( o -- o' )
-    >r {{ glue*l }}glue r> /center glue*l }}glue }}v box[] >bl ;
+: /mid ( o -- o' ) >r
+    {{  glue*wh }}glue
+	{{ glue*l }}glue r> /center glue*l }}glue }}v box[] >bl
+    }}z box[] ;
 
 {{
     glue*wh album-bg-col# slide-frame dup .button1
     {{
 	glue-left @ }}glue
-	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop /mid        dup >slides
-	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
-	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
-	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
+	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop >imgs
+	/mid        dup >slides
+	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop >imgs
+	/mid /hflip dup >slides
+	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop >imgs
+	/mid /hflip dup >slides
+	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop >imgs
+	/mid /hflip dup >slides
 	glue-right @ }}glue
     }}h dup to imgs-box
     {{
@@ -1069,19 +1079,15 @@ glue new glue-right !
     }}v box[]
 }}z box[] Constant album-viewer
 
-: >album-viewer ( -- )
-    album-viewer n2o-frame .childs[] >stack
-    album-sd to slide-deck
-    +sync +resize ;
-
 default-sd to slide-deck
 
-: .imgs ( -- )
-    imgs# [: dup $. ." :" cr
-	cell+ $@ bounds ?DO
+: group.imgs ( addr u -- )
+     bounds ?DO
 	    I $@ over be-64@ .ticks space
 	    1 64s /string 85type cr
-	cell +LOOP ;] #map ;
+	cell +LOOP ;
+: .imgs ( -- )
+    imgs# [: dup $. ." :" cr cell+ $@ group.imgs ;] #map ;
 : +imgs ( addr$ -- )
     [: { w^ string | ts[ 1 64s ] }
 	msg:timestamp ts[ be-64!
@@ -1092,6 +1098,40 @@ default-sd to slide-deck
 	string $@ last# cell+ $ins[] drop  string $free
     THEN ;
 
+: img>group# ( img u -- n )
+    msg-group$ $@ imgs# #@ bounds ?DO
+	2dup I $@ 1 64s /string str= IF
+	    2drop I last# cell+ $@ drop - cell/  unloop  EXIT
+	THEN
+    cell +LOOP  2drop -1 ;
+
+: >album-viewer ( img u -- )
+    img>group# dup 0< IF  drop  EXIT  THEN
+    album-sd to slide-deck
+    dup 3 and slide# ! -4 and >r
+    4 0 DO
+	I slides[] $[] @
+	I slide# @ = IF  /flop  ELSE  /flip  THEN
+	drop  LOOP
+    { | i# }  last# cell+ $@ r> cells safe/string 4 cells min bounds U+DO
+	I $@ 1 64s /string 2dup need-hashed? IF  85type ."  need" cr
+	ELSE
+	    i# imgs[] $[] @ >o image-tex
+	    ?read-enc-hashed save-mem
+	    mem-exif  [: 2dup >thumb-scan ;] catch  file-exif drop
+	    mem>texture  img-orient 1- dup to rotate#  4 and IF  swap  THEN
+	    tile-glue >o
+	    pixelsize# fm* fdup vglue-c df! dpy-h @ fm/
+	    pixelsize# fm* fdup hglue-c df! dpy-w @ fm/ fmax 1/f fdup
+	    vglue-c df@ f* vglue-c df!
+	    hglue-c df@ f* hglue-c df!
+	    o> o>
+	THEN
+	1 +to i#
+    cell +LOOP
+    album-viewer n2o-frame .childs[] >stack
+    +sync +resize ;
+
 :noname ( addr u type -- )
     obj-red
     case 0 >r
@@ -1099,9 +1139,8 @@ default-sd to slide-deck
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
-		    [:  ." display image: " addr data $@ 85type cr
-			>album-viewer ;]
-		    2swap $make dup +imgs
+		    [:  addr data $@ >album-viewer ;]
+		    2swap $make dup +imgs 64#1 +to msg:timestamp
 		    click[] drop  EXIT  THEN  drop  THEN
 	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
 	endof
