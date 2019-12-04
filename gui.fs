@@ -1023,17 +1023,17 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 
 hash: imgs# \ hash of tables of
 
-0 Value imgs-box
-0 Value n2o-frame
+slide-deck Constant default-sd
+slide-class new Constant album-sd
+album-sd to slide-deck
 
-glue ' new static-a with-allocater Constant iglue-left
-glue ' new static-a with-allocater Constant iglue-right
+glue new glue-left !
+glue new glue-right !
+
+0 Value imgs-box
 
 : swap-images ( -- )
     imgs-box .childs[] dup >r get-stack >r 2swap r> r> set-stack ;
-
-: prev-img ;
-: next-img ;
 
 : /mid ( o -- o' )
     >r {{ glue*l }}glue r> /center glue*l }}glue }}v box[] >bl ;
@@ -1041,24 +1041,40 @@ glue ' new static-a with-allocater Constant iglue-right
 {{
     glue*wh album-bg-col# slide-frame dup .button1
     {{
-	iglue-left }}glue
-	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop /mid
-	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
-	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
-	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip
-	iglue-right }}glue
+	glue-left @ }}glue
+	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop /mid        dup >slides
+	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
+	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
+	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop /mid /hflip dup >slides
+	glue-right @ }}glue
     }}h dup to imgs-box
     {{
-	glue*ll }}glue
-	{{  \large
-	    "  " }}text ' prev-img 0 click[]
+	{{
 	    glue*ll }}glue
-	    "  " }}text ' next-img 0 click[]
+	    {{
+		s" ❌" }}text 25%b
+		[:  n2o-frame .childs[] stack> drop
+		    default-sd to slide-deck
+		    +sync +resize ;] 0 click[]
+		glue*ll }}glue
+	    }}v box[]
+	}}h box[]
+	{{  \large
+	    "  " }}text ' prev-slide 0 click[]
+	    glue*ll }}glue
+	    "  " }}text ' next-slide 0 click[]
 	    \normal
 	}}h box[]
 	glue*ll }}glue
     }}v box[]
 }}z box[] Constant album-viewer
+
+: >album-viewer ( -- )
+    album-viewer n2o-frame .childs[] >stack
+    album-sd to slide-deck
+    +sync +resize ;
+
+default-sd to slide-deck
 
 : .imgs ( -- )
     imgs# [: dup $. ." :" cr
@@ -1067,12 +1083,13 @@ glue ' new static-a with-allocater Constant iglue-right
 	    1 64s /string 85type cr
 	cell +LOOP ;] #map ;
 : +imgs ( addr$ -- )
-    [: { w^ string | ts[ 1 64s ] } msg:timestamp ts[ be-64!
+    [: { w^ string | ts[ 1 64s ] }
+	msg:timestamp ts[ be-64!
 	ts[ 1 64s type  string $. ;] $tmp $make { w^ string }
     msg-group$ $@ imgs# #@ d0= IF
 	string cell msg-group$ $@ imgs# #!
     ELSE
-	string $@ last# cell+ $ins[]  string $free
+	string $@ last# cell+ $ins[] drop  string $free
     THEN ;
 
 :noname ( addr u type -- )
@@ -1082,7 +1099,8 @@ glue ' new static-a with-allocater Constant iglue-right
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
-		    [: ." display image: " addr data $@ 85type cr ;]
+		    [:  ." display image: " addr data $@ 85type cr
+			>album-viewer ;]
 		    2swap $make dup +imgs
 		    click[] drop  EXIT  THEN  drop  THEN
 	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
