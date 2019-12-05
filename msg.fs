@@ -541,8 +541,10 @@ forward need-hashed?
 
 :noname ( addr u type -- )
     space <warn> case
-	msg:image#     of  ." img["      2dup 85type  endof
-	msg:thumbnail# of  ." thumb["    2dup 85type ?fetch  endof
+	msg:image#     of  ." img["      2dup 85type ?fetch  endof
+	msg:thumbnail# of  ." thumb["    2dup key| 85type
+	    space 2dup keysize safe/string IF  c@ '0' + emit  ELSE  drop  THEN
+	    ?fetch  endof
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof

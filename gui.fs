@@ -1138,6 +1138,7 @@ default-sd to slide-deck
     obj-red
     case 0 >r
 	msg:image#     of
+	    2dup key| ?fetch
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
