@@ -1684,7 +1684,7 @@ forward hash-in
 	    4 /string save-mem over >r 2dup jpeg? IF
 		2dup >thumbnail
 		?dup-IF  over >r hash-in
-		    [: forth:type img-orient 1- forth:emit ;] $tmp
+		    [: forth:type img-orient @ 1- forth:emit ;] $tmp
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
 	    2swap slurp-file over >r hash-in r> free throw  2swap

@@ -1118,8 +1118,10 @@ default-sd to slide-deck
 	ELSE
 	    i# imgs[] $[] @ >o image-tex
 	    ?read-enc-hashed save-mem
-	    mem-exif  [: 2dup >thumb-scan ;] catch  file-exif drop
-	    mem>texture  img-orient 1- dup to rotate#  4 and IF  swap  THEN
+	    mem-exif  [: 2dup >thumb-scan ;] catch drop
+	    mem>texture  img-orient @ 1- 0 max dup to rotate#
+	    4 and IF  swap  THEN
+	    exif>
 	    tile-glue >o
 	    pixelsize# fm* fdup vglue-c df! dpy-h @ fm/
 	    pixelsize# fm* fdup hglue-c df! dpy-w @ fm/ fmax 1/f fdup
