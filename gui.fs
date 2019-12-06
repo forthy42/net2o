@@ -626,6 +626,7 @@ Variable last-bubble-pk
 0 Value last-otr?
 0 Value last-bubble
 64#0 64Value last-tick
+64#-1 64Value end-tick
 #300 #1000000000 um* d>64 64Constant delta-bubble
 
 : >bubble-border ( o me? -- )
@@ -834,11 +835,43 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 0 Value nobody-online-text \ nobody is online warning
 :noname 2e nobody-online-text [: f2* sin-t .fade +sync ;] >animate
 ; wmsg-class is msg:.nobody
+: +log#-date-token ( log-mask -- o ) >r
+    {{
+	[: '#' emit log# 0 u.r       ;] $tmp }}text /left
+	>r {{ r> }}v 25%bv "log#"  name! r@ log#num  and 0= IF  /flip  THEN
+	[: '<' emit last-tick .ticks ;] $tmp }}text /left
+	>r {{ r> }}v 25%bv
+	r@ log#perm and IF  "perm#"  ELSE  "date#"  THEN name!
+	r@ log#date and 0= IF  /flip  THEN
+	[: '>' emit end-tick  .ticks ;] $tmp }}text /left
+	>r {{ r> }}v 25%bv "end#"  name! r> log#end  and 0= IF  /flip  THEN
+    }}v box[] ;
+
+: ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
+Variable re-indent#
+: re-box-run ( -- ) recursive
+    gui( re-indent# @ spaces name$ type cr )
+    log-mask @ >r
+    name$ "log#"  str= IF  r> log#num  and ?flip  EXIT  THEN
+    name$ "date#" str= IF  r> log#date and ?flip  EXIT  THEN
+    name$ "end#"  str= IF  r> log#end  and ?flip  EXIT  THEN
+    rdrop
+    hbox vbox zbox o cell- @ tuck = >r tuck = >r = r> r> or or  IF
+	1 re-indent# +! ['] re-box-run do-childs
+	-1 re-indent# +!
+    THEN ;
+: re-log#-token ( -- )
+    ['] re-box-run msgs-box .do-childs
+    [: +resize +sync ;] msgs-box .vp-needed ;
+' re-log#-token is update-log
+
 : new-msg-par ( -- )
     {{ }}p "msg-par" name!
     dup .subbox box[] drop box[] cbl >bl
     dup .subbox "msg-box" name!
-    to msg-box to msg-par ;
+    to msg-box to msg-par
+    \script cbl re-green log-mask @ +log#-date-token msg-box .child+
+    \normal cbl ;
 :noname { d: pk -- o }
     pk key| to msg:id$  pk startdate@ to msg:timestamp
     pk [: .simple-id ." : " ;] $tmp notify-nick!
@@ -846,6 +879,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     pk enddate@ otr? { otr }
     pk key| last-bubble-pk $@ str= otr last-otr? = and
     pk startdate@ last-tick 64over to last-tick
+    pk enddate@ to end-tick
     64- delta-bubble 64< and
     IF
 	new-msg-par
@@ -950,7 +984,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
-	string [: ." <" drop le-64@ .ticks ;] $tmp }}text 25%b
+	log#date log#perm or +log#-date-token
     }}z "chain" name! msg-box .child+
 ; wmsg-class is msg:chain
 :noname { d: pk -- o }
@@ -1182,7 +1216,7 @@ wmsg-o >o msg-table @ token-table ! o>
     +sync +resize o> ;
 ' wmsg-display wmsg-class is msg:display
 
-#128 Value gui-msgs# \ display last 128 messages
+#200 Value gui-msgs# \ display last 200 messages
 0 Value chat-edit    \ chat edit field
 0 Value chat-edit-bg \ chat edit background
 
@@ -1195,6 +1229,7 @@ wmsg-o >o msg-table @ token-table ! o>
     load-msg msg-log@
     { log u } u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
     log u u' /string bounds ?DO
+	I log - cell/ to log#
 	I $@ { d: msgt }
 	msgt ['] wmsg-display wmsg-o .catch IF
 	    <err> ." invalid entry" <default> 2drop

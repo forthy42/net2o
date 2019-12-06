@@ -321,7 +321,7 @@ Forward msg:last
     over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
     r> r> U+DO
 	c:0key I msg-group-o .msg:log[] $[]@ sigonly@ >hash
-	2dup hashtmp over str= IF  2drop true  UNLOOP   EXIT
+	2dup hashtmp over str= IF  I to log#  2drop true  UNLOOP   EXIT
 	ELSE  ( 2dup 85type ."  <> " hashtmp over 85type )  THEN
     LOOP
     2drop false ;
@@ -381,11 +381,19 @@ msg-table $save
 
 ' context-table is gen-table
 
-\ Code for displaying messages
+\ Code for displaying messages: logstyle for TUI deferred-based
 
 Defer .log-num
 Defer .log-date
 Defer .log-end
+
+\ logstyle for GUI bitmask-based
+
+Defer update-log
+' noop is update-log
+
+Variable log-mask
+1 4 bits: log#num log#date log#end log#perm
 
 : .otr-info ( -- )
     <info> ." [otr] " <default> "[otr] " notify+ notify-otr? on ;
@@ -399,14 +407,21 @@ Defer .log-end
     2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 scope: logstyles
-: +num [: '#' emit log# u. ;] is .log-num ;
-: -num ['] noop is .log-num ;
-: +date [: .ticks space ;] is .log-date ;
-: -date ['] 64drop is .log-date ;
-: +end [: 64dup .ticks space .otr ;] is .log-end ;
-: -end ['] .otr is .log-end ;
+: +num [: '#' emit log# u. ;]        is .log-num
+    log#num  log-mask or! update-log ;
+: -num ['] noop                      is .log-num
+    log#num  invert log-mask and! update-log ;
+: +date [: .ticks space ;]           is .log-date
+    log#date log-mask or! update-log ;
+: -date ['] 64drop                   is .log-date
+    log#date invert log-mask and! update-log ;
+: +end [: 64dup .ticks space .otr ;] is .log-end
+    log#end  log-mask or! update-log ;
+: -end ['] .otr                      is .log-end
+    log#end  invert log-mask and! update-log ;
 
 +date -num -end
+log-mask off
 }scope
 
 :noname ( addr u -- )
@@ -1441,8 +1456,9 @@ umethod /log ( addr u -- )
 umethod /logstyle ( addr u -- )
     \U logstyle [+-style]   set log style
     \G logstyle: set log styles, the following settings exist:
-    \G logstyle: +date      a date per log line
-    \G logstyle: +num       a message number per log line
+    \G logstyle: +num       the message number per log line
+    \G logstyle: +date      the date per log line
+    \G logstyle: +end       the end date per log line 
 umethod /otrify ( addr u -- )
     \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
@@ -1567,7 +1583,9 @@ is /help
     r>  display-lastn ; is /log
 
 :noname ( addr u -- )
-    ['] logstyles evaluate-in ; is /logstyle
+    ['] logstyles ['] evaluate-in catch IF
+	2drop drop "logstyle" /help
+    THEN ; is /logstyle
 
 :noname ( addr u -- )
     [: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
@@ -1686,7 +1704,7 @@ forward hash-in
 	    4 /string save-mem over >r 2dup jpeg? IF
 		2dup >thumbnail
 		?dup-IF  over >r hash-in
-		    [: forth:type img-orient @ 1- forth:emit ;] $tmp
+		    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
 	    2swap slurp-file over >r hash-in r> free throw  2swap
