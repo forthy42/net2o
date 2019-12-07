@@ -156,15 +156,8 @@ Defer run-gui
 Defer run-scan-qr
 :noname ." scan-qur not implemented" cr ; is run-scan-qr
 
-$Variable gui.fs$
-"gui.fs" open-fpath-file 0= [IF] rot close-file throw gui.fs$ $! [THEN]
-$Variable qrscan.fs$
-"qrscan.fs" open-fpath-file 0= [IF] rot close-file throw qrscan.fs$ $! [THEN]
-$Variable parser.fs$
-"json/parser.fs" open-fpath-file 0= [IF] rot close-file throw parser.fs$ $! [THEN]
-
 scope: importer
-: g+ parser.fs$ $@ required
+: g+ [ "json/parser.fs" ]path required
     ?nextarg 0= IF  "."  THEN  "g+-import" evaluate ;
 }scope
 
@@ -203,7 +196,7 @@ scope{ n2o
     \G keyscan: scan a key in color QR form
     ?.net2o-config
     reset-net2o-cmds
-    qrscan.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-scan-qr
+    [ "qrscan.fs" ]path required  run-scan-qr
     save-net2o-cmds set-net2o-cmds ;
 
 : keysearch ( -- )
@@ -781,7 +774,7 @@ warnings !
     \G gui: start net2o's graphical user interface
     ?.net2o-config
     reset-net2o-cmds
-    gui.fs$ $@ dup IF  required  ELSE  no-file# throw  THEN  run-gui
+    [ "gui.fs" ]path required  run-gui
     save-net2o-cmds set-net2o-cmds ;
 
 : ... ( -- )

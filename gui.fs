@@ -374,6 +374,7 @@ $33883366 new-color: day-color
 $88333366 new-color: hour-color
 $FFFFFFFF text-color: realwhite
 $FFFFFFFF new-color: edit-bg
+$808080C0 new-color: log-bg
 $80FF80FF new-color: send-color
 $00FF0020 new-color: pet-color
 $FFFF80FF new-color, fvalue users-color#
@@ -835,6 +836,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 0 Value nobody-online-text \ nobody is online warning
 :noname 2e nobody-online-text [: f2* sin-t .fade +sync ;] >animate
 ; wmsg-class is msg:.nobody
+
+log-mask off \ in GUI mode, default is no marking
+
 : +log#-date-token ( log-mask -- o ) >r
     {{
 	[: '#' emit log# 0 u.r       ;] $tmp }}text /left
@@ -1241,11 +1245,13 @@ wmsg-o >o msg-table @ token-table ! o>
 : gui-msgs ( gaddr u -- )
     2dup msg-group$ $! (gui-msgs) ;
 
+: re-msg-box ( -- )
+    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
+    +sync +resize o> ;
 : msg-wredisplay ( n -- )
     drop 0 msg-group-o .msg:mode
     [: msg-group$ $@ (gui-msgs) ;] !wrapper
-    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
-    +sync +resize o>  ;
+    re-msg-box ;
 ' msg-wredisplay wmsg-class is msg:redisplay
 
 [IFDEF] android also android [THEN]
@@ -1314,6 +1320,58 @@ wmsg-o >o msg-table @ token-table ! o>
 }}z box[] to chat-frame
 
 [IFDEF] android previous [THEN]
+
+\ chat command redirection
+
+align
+here
+' (type) A,
+' (emit) A,
+' (cr) A,
+' (form) A,
+' noop A, \ page
+' 2drop A, \ at-xy
+' 2drop A, \ at-deltaxy
+' drop A, \ attr!
+A, here AConstant simple-out
+
+: simple-outfile-execute ( ... xt file-id -- ... ) \ gforth
+    \G execute @i{xt} with the output of @code{type} etc. redirected to
+    \G @i{file-id}.
+    op-vector @ outfile-id { oldout oldfid } try
+	simple-out op-vector !
+	to outfile-id execute 0
+    restore
+	oldfid to outfile-id
+	oldout op-vector !
+    endtry
+    throw ;
+
+: createfile-execute ( ... xt addr u -- ...' )
+    r/w create-file throw >r
+    r@ ['] simple-outfile-execute catch
+    r> close-file throw  throw ;
+
+Variable gui-log[]
+
+: chat-gui-exec ( xt -- )
+    "gui-cmd.log" .net2o-cache/ createfile-execute
+    "gui-cmd.log" .net2o-cache/ gui-log[] $[]slurp-file
+    {{
+	glue*lll log-bg x-color font-size# 40% f* }}frame dup .button3
+	\normal \mono blackish
+	{{
+	    gui-log[] [: }}text /left ;] $[]map
+	}}v box[] 25%b
+	{{
+	    s" ❌" $444444FF new-color, }}text 25%b /right dup { closer }
+	    glue*ll }}glue
+	}}v box[]
+    }}z box[] >r
+    closer [: data msgs-box .childs[] del$cell re-msg-box ;] r@ click[] drop
+    r> msgs-box .child+ re-msg-box ;
+
+' chat-gui-exec is chat-cmd-file-execute
 
 \ top box
 
@@ -1413,13 +1471,16 @@ Variable invitation-stack
     pw-field engage
     1e ambient% sf! set-uniforms ;
 
-: net2o-gui ( -- )
-    [IFDEF] x11
+[IFDEF] x11
+    : set-net2o-hints ( -- )
 	dpy win l" net2o GUI" locale@ x11:XStoreName drop
 	{ | net2o-wm-class[ x11:XClassHint ] }
 	"net2o-gui\0" drop dup net2o-wm-class[ 2!
-	dpy win net2o-wm-class[ x11:XSetClassHint drop
-    [THEN]
+	dpy win net2o-wm-class[ x11:XSetClassHint drop ;
+[THEN]
+
+: net2o-gui ( -- )
+    [IFDEF] set-net2o-hints  set-net2o-hints  [THEN]
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE

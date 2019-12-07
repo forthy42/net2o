@@ -383,15 +383,6 @@ msg-table $save
 
 \ Code for displaying messages: logstyle for TUI deferred-based
 
-Defer .log-num
-Defer .log-date
-Defer .log-end
-
-\ logstyle for GUI bitmask-based
-
-Defer update-log
-' noop is update-log
-
 Variable log-mask
 1 4 bits: log#num log#date log#end log#perm
 
@@ -403,25 +394,31 @@ Variable log-mask
     64dup 64#-1 64= IF  64drop  notify-otr? off  EXIT  THEN
     ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
     otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
+
+: .log-num  ( -- )
+    log-mask @ log#num  and IF '#' emit log# u.  THEN ;
+: .log-date ( 64ticks -- )
+    log-mask @ log#date and IF .ticks space  ELSE  64drop  THEN ;
+: .log-end  ( 64ticks -- )
+    log-mask @ log#end  and IF  64dup .ticks space  THEN  .otr ;
+
+\ logstyle for GUI bitmask-based
+
+Defer update-log
+' noop is update-log
+
 : .group ( addr u -- )
     2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 scope: logstyles
-: +num [: '#' emit log# u. ;]        is .log-num
-    log#num  log-mask or! update-log ;
-: -num ['] noop                      is .log-num
-    log#num  invert log-mask and! update-log ;
-: +date [: .ticks space ;]           is .log-date
-    log#date log-mask or! update-log ;
-: -date ['] 64drop                   is .log-date
-    log#date invert log-mask and! update-log ;
-: +end [: 64dup .ticks space .otr ;] is .log-end
-    log#end  log-mask or! update-log ;
-: -end ['] .otr                      is .log-end
-    log#end  invert log-mask and! update-log ;
+: +num  log#num  log-mask or! update-log ;
+: -num  log#num  invert log-mask and! update-log ;
+: +date log#date log-mask or! update-log ;
+: -date log#date invert log-mask and! update-log ;
+: +end  log#end  log-mask or! update-log ;
+: -end  log#end  invert log-mask and! update-log ;
 
 +date -num -end
-log-mask off
 }scope
 
 :noname ( addr u -- )
@@ -1632,11 +1629,15 @@ msg:troll#      't' permchar>bits + c!
 : ?slash ( addr u -- addr u flag )
     over c@ dup '/' = swap '\' = or ;
 
+Defer chat-cmd-file-execute
+' execute is chat-cmd-file-execute
+
 : do-chat-cmd? ( addr u -- t / addr u f )
     ?slash dup 0= ?EXIT  drop
-    over '/' swap c! bl $split 2swap
-    2dup ['] /chat >body find-name-in
-    ?dup-IF  nip nip name>int execute true
+    bl $split 2swap
+    2dup save-mem over >r '/' r@ c!
+    ['] /chat >body find-name-in r> free throw
+    ?dup-IF  nip nip name>int chat-cmd-file-execute true
     ELSE  drop 1- -rot + over - false
     THEN ;
 

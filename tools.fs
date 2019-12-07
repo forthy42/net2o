@@ -456,6 +456,9 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #50.000.000.000. beacon-ticks& 2!
 #2.000.000.000. beacon-short-ticks& 2!
 
+: ]path ( addr u -- )
+    open-fpath-file throw rot close-file throw ] ]] sliteral [[ ;
+
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
 : ~net2o-cache/ ( addr u -- )

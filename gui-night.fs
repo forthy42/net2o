@@ -36,6 +36,7 @@ $FFFFBBFF re-text-color link-blue
 $88FF88FF re-text-color re-green
 $FF8888FF re-text-color obj-red
 $444444FF re-color edit-bg
+$202020C0 re-color log-bg
 $408040FF re-color send-color
 $333333FF re-color users-color#
 $000000CC re-color album-bg-col#
