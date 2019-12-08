@@ -1209,15 +1209,16 @@ wmsg-class ' new static-a with-allocater Constant wmsg-o
 wmsg-o >o msg-table @ token-table ! o>
 
 : vp-softbottom ( o:viewport -- )
-    act >o o anim-del  set-startxy
-    0e           to vmotion-dx
-    vp-y fnegate to vmotion-dy
-    0.333e o ['] vp-scroll >animate o> ;
+    vp-y fnegate act >o o anim-del  set-startxy
+    0e to vmotion-dx  to vmotion-dy
+    0.25e o ['] vp-scroll >animate o> ;
+: re-msg-box ( -- )
+    msgs-box >o vp-h { f: old-h } resized
+    vp-h old-h f- vp-y f+ 0e fmax to vp-y
+    grab-move? 0= IF  vp-softbottom  THEN +sync +resize o> ;
 
 : wmsg-display ( addr u -- )
-    msg-tdisplay
-    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
-    +sync +resize o> ;
+    msg-tdisplay re-msg-box ;
 ' wmsg-display wmsg-class is msg:display
 
 #200 Value gui-msgs# \ display last 200 messages
@@ -1245,9 +1246,6 @@ wmsg-o >o msg-table @ token-table ! o>
 : gui-msgs ( gaddr u -- )
     2dup msg-group$ $! (gui-msgs) ;
 
-: re-msg-box ( -- )
-    msgs-box >o [: +sync +resize ;] vp-needed vp-bottom
-    +sync +resize o> ;
 : msg-wredisplay ( n -- )
     drop 0 msg-group-o .msg:mode
     [: msg-group$ $@ (gui-msgs) ;] !wrapper
