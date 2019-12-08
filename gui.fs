@@ -1083,7 +1083,8 @@ Variable imgs[]
     }}z box[] ;
 
 {{
-    glue*wh album-bg-col# slide-frame dup .button1
+    glue*wh album-bg-col# slide-frame dup .button1 ' noop 0 click[]
+
     {{
 	glue-left @ }}glue
 	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop >imgs
