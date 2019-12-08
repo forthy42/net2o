@@ -1084,7 +1084,6 @@ Variable imgs[]
 
 {{
     glue*wh album-bg-col# slide-frame dup .button1 ' noop 0 click[]
-
     {{
 	glue-left @ }}glue
 	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop >imgs
@@ -1237,12 +1236,11 @@ wmsg-o >o msg-table @ token-table ! o>
     log u u' /string bounds ?DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
-	msgt ['] wmsg-display wmsg-o .catch IF
-	    <err> ." invalid entry" <default> 2drop
+	msgt ['] msg-tdisplay wmsg-o .catch IF
+	    <err> ." invalid entry" cr <default> 2drop
 	THEN
     cell +LOOP
-    log free throw  msgs-box >o resized vp-bottom o>
-    chat-edit engage ;
+    log free throw  re-msg-box  chat-edit engage ;
 
 : gui-msgs ( gaddr u -- )
     2dup msg-group$ $! (gui-msgs) ;
