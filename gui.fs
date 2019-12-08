@@ -1323,53 +1323,48 @@ wmsg-o >o msg-table @ token-table ! o>
 
 \ chat command redirection
 
-align
-here
-' (type) A,
-' (emit) A,
-' (cr) A,
-' (form) A,
-' noop A, \ page
-' 2drop A, \ at-xy
-' 2drop A, \ at-deltaxy
-' drop A, \ attr!
-A, here AConstant simple-out
+User $[]exec-ptr
+User $[]exec#
 
-: simple-outfile-execute ( ... xt file-id -- ... ) \ gforth
+: $[]type ( addr u -- )  $[]exec# @ $[]exec-ptr @ $[]+! ;
+: $[]emit ( char -- )    $[]exec# @ $[]exec-ptr @ $[] c$+! ;
+: $[]cr   ( -- )         1 $[]exec# +! ;
+-1 1 rshift dup 2Constant $[]form
+
+' $[]type ' $[]emit ' $[]cr ' $[]form output: $[]-out
+
+: $[]exec ( ... xt str[] -- ... ) \ gforth
     \G execute @i{xt} with the output of @code{type} etc. redirected to
     \G @i{file-id}.
-    op-vector @ outfile-id { oldout oldfid } try
-	simple-out op-vector !
-	to outfile-id execute 0
+    dup $[]free
+    op-vector @ { oldout } try
+	$[]-out  $[]exec-ptr !  $[]exec# off  execute  0
     restore
-	oldfid to outfile-id
 	oldout op-vector !
     endtry
     throw ;
 
-: createfile-execute ( ... xt addr u -- ...' )
-    r/w create-file throw >r
-    r@ ['] simple-outfile-execute catch
-    r> close-file throw  throw ;
-
 Variable gui-log[]
 
 : chat-gui-exec ( xt -- )
-    "gui-cmd.log" .net2o-cache/ createfile-execute
-    "gui-cmd.log" .net2o-cache/ gui-log[] $[]slurp-file
-    {{
-	glue*lll log-bg x-color font-size# 40% f* }}frame dup .button3
-	\normal \mono blackish
+    gui-log[] $[]exec
+    gui-log[] $[]# IF
 	{{
-	    gui-log[] [: }}text /left ;] $[]map
-	}}v box[] 25%b
-	{{
-	    s" ❌" $444444FF new-color, }}text 25%b /right dup { closer }
-	    glue*ll }}glue
-	}}v box[]
-    }}z box[] >r
-    closer [: data msgs-box .childs[] del$cell re-msg-box ;] r@ click[] drop
-    r> msgs-box .child+ re-msg-box ;
+	    glue*lll log-bg x-color font-size# 40% f* }}frame dup .button3
+	    \normal \mono blackish
+	    {{
+		gui-log[] [: }}text /left ;] $[]map
+	    }}v box[] 25%b
+	    {{
+		s" ❌" $444444FF new-color, }}text 25%b /right dup { closer }
+		glue*ll }}glue
+	    }}v box[]
+	}}z box[] >r
+	closer [: data msgs-box .childs[] del$cell
+	    data .dispose-widget
+	    re-msg-box ;] r@ click[] drop
+	r> msgs-box .child+ re-msg-box
+    THEN ;
 
 ' chat-gui-exec is chat-cmd-file-execute
 
