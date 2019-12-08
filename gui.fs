@@ -1368,6 +1368,20 @@ Variable gui-log[]
 
 ' chat-gui-exec is chat-cmd-file-execute
 
+\ special modified chat commands for GUI
+
+scope{ /chat
+chat-cmds uclass chat-cmd-o
+end-class gui-chat-cmds
+
+gui-chat-cmds new Constant gui-chat-cmd-o
+
+gui-chat-cmd-o to chat-cmd-o
+' drop is ./otr-info
+
+text-chat-cmd-o to chat-cmd-o
+}scope
+
 \ top box
 
 box-actor class
@@ -1476,6 +1490,7 @@ Variable invitation-stack
 
 : net2o-gui ( -- )
     [IFDEF] set-net2o-hints  set-net2o-hints  [THEN]
+    /chat:gui-chat-cmd-o to chat-cmd-o
     n2o-frame to top-widget
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
@@ -1490,6 +1505,7 @@ Variable invitation-stack
     1config  !widgets
     get-order n>r ['] /chat >body 1 set-order
     ['] widgets-loop catch
+    /chat:text-chat-cmd-o to chat-cmd-o
     nr> set-order throw ;
 
 ' net2o-gui is run-gui

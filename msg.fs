@@ -1392,6 +1392,8 @@ false value away?
 uval-o chat-cmd-o
 
 object uclass chat-cmd-o
+    \ internal stuff
+    umethod ./otr-info
 also net2o-base scope: /chat
 umethod /me ( addr u -- )
     \U me <action>          send string as action
@@ -1496,12 +1498,15 @@ text-chat-cmd-o to chat-cmd-o
     THEN
     [: $, msg-action ;] send-avalanche ; is /away
 
+:noname ( flag -- )
+    <info> ." === " IF  ." enter"  ELSE  ." leave"  THEN
+    ."  otr mode ===" <default> forth:cr ; is ./otr-info
+
 :noname ( addr u -- )
-    2dup s" on" str= >r
-    2dup s" off" str= r@ or IF   2drop
+    2dup -trailing s" on" str= >r
+    2dup -trailing s" off" str= r@ or IF   2drop
 	msg-group-o r@ IF  .msg:+otr  ELSE  .msg:-otr  THEN
-	<info> ." === " r> IF  ." enter"  ELSE  ." leave"  THEN
-	."  otr mode ===" <default> forth:cr
+	r> ./otr-info
     ELSE  rdrop
 	msg-group-o .msg:mode @ >r
 	msg-group-o .msg:+otr avalanche-text
