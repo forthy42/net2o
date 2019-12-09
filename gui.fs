@@ -35,9 +35,7 @@ require minos2/font-style.fs
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
 
-require minos2/text-style.fs
 require minos2/md-viewer.fs
-require minos2/presentation-support.fs
 
 update-gsize#
 
@@ -176,7 +174,6 @@ $000000FF new-color, FValue otr-col#
 $FFFFFFFF new-color, FValue chat-col#
 $80FFFFFF new-color, FValue chat-bg-col#
 $FFFFFFFF new-color, FValue posting-bg-col#
-$000000CC new-color, FValue album-bg-col#
 
 : entropy-colorize ( -- )
     prev-text$ erase  addr prev-text$ $free
@@ -791,9 +788,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     prj display-title
     prj [ keysize $10 + ]L safe/string
     2dup "file:" string-prefix? IF
-	0 to v-box
+	0 to md-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
-	v-box posting-vp .child+
+	md-box posting-vp .child+
 	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*
 	ELSE  dpy-w @ s>f font-size# f2* f-  THEN
 	p-format
@@ -815,13 +812,19 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     project:project$ $@ @/ 2drop 2dup load-msg
     display-posting
     dvcs:dispose-dvcs o> ;
+: album>path ( -- )
+    >dir
+    album-imgs[] $@ bounds U+DO
+	"/" I 0 $ins  dir@ I 0 $ins
+    cell +LOOP
+    dir> ;
 : open-posting { d: prj -- }
     >dir "posts" ~net2o-cache/  chat-keys $[]free
     ." open " prj .posting cr
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
     handle-clone
     prj keysize /string set-dir throw
-    .posting-log next-slide
+    .posting-log next-slide album>path
     posting-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
 	fdrop +sync +resize ;] >animate
     dir> ;
@@ -1059,65 +1062,7 @@ Variable re-indent#
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
-hash: imgs# \ hash of tables of
-
-slide-deck Constant default-sd
-slide-class new Constant album-sd
-album-sd to slide-deck
-
-glue new glue-left !
-glue new glue-right !
-
-Variable imgs[]
-
-: >imgs ( o -- o ) dup imgs[] >stack ;
-
-0 Value imgs-box
-
-: swap-images ( -- )
-    imgs-box .childs[] dup >r get-stack >r 2swap r> r> set-stack ;
-
-: /mid ( o -- o' ) >r
-    {{  glue*wh }}glue
-	{{ glue*l }}glue r> /center glue*l }}glue }}v box[] >bl
-    }}z box[] ;
-
-{{
-    glue*wh album-bg-col# slide-frame dup .button1 ' noop 0 click[]
-    {{
-	glue-left @ }}glue
-	tex: img0 ' img0 "doc/thumb.png" 0.666e }}image-file drop >imgs
-	/mid        dup >slides
-	tex: img1 ' img1 "doc/thumb.png" 0.666e }}image-file drop >imgs
-	/mid /hflip dup >slides
-	tex: img2 ' img2 "doc/thumb.png" 0.666e }}image-file drop >imgs
-	/mid /hflip dup >slides
-	tex: img3 ' img3 "doc/thumb.png" 0.666e }}image-file drop >imgs
-	/mid /hflip dup >slides
-	glue-right @ }}glue
-    }}h dup to imgs-box
-    {{
-	{{
-	    glue*ll }}glue
-	    {{
-		s" ❌" }}text 25%b
-		[:  n2o-frame .childs[] stack> drop
-		    default-sd to slide-deck
-		    +sync +resize ;] 0 click[]
-		glue*ll }}glue
-	    }}v box[]
-	}}h box[]
-	{{  \large
-	    "  " }}text ' prev-slide 0 click[]
-	    glue*ll }}glue
-	    "  " }}text ' next-slide 0 click[]
-	    \normal
-	}}h box[]
-	glue*ll }}glue
-    }}v box[]
-}}z box[] Constant album-viewer
-
-default-sd to slide-deck
+hash: imgs# \ hash of images
 
 : group.imgs ( addr u -- )
      bounds ?DO
@@ -1143,32 +1088,18 @@ default-sd to slide-deck
 	THEN
     cell +LOOP  2drop -1 ;
 
-: >album-viewer ( img u -- )
+: >msg-album-viewer ( img u -- )
     img>group# dup 0< IF  drop  EXIT  THEN
-    album-sd to slide-deck
-    dup 3 and slide# ! -4 and >r
-    4 0 DO
-	I slides[] $[] @
-	I slide# @ = IF  /flop  ELSE  /flip  THEN
-	drop  LOOP
+    dup -4 and >r album-prepare
     { | i# }  last# cell+ $@ r> cells safe/string 4 cells min bounds U+DO
 	I $@ 1 64s /string 2dup need-hashed? IF  85type ."  need" cr
 	ELSE
-	    i# imgs[] $[] @ >o image-tex
 	    ?read-enc-hashed save-mem
-	    mem-exif  [: 2dup >thumb-scan ;] catch drop
-	    mem>texture  img-orient @ 1- 0 max dup to rotate#
-	    4 and IF  swap  THEN
-	    exif>
-	    tile-glue >o
-	    pixelsize# fm* fdup vglue-c df! dpy-h @ fm/
-	    pixelsize# fm* fdup hglue-c df! dpy-w @ fm/ fmax 1/f fdup
-	    vglue-c df@ f* vglue-c df!
-	    hglue-c df@ f* hglue-c df!
-	    o> o>
+	    i# album-image
 	THEN
 	1 +to i#
     cell +LOOP
+    n2o-frame album-viewer >o to parent-w o>
     album-viewer n2o-frame .childs[] >stack
     +sync +resize ;
 
@@ -1180,7 +1111,7 @@ default-sd to slide-deck
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
-		    [:  addr data $@ >album-viewer ;]
+		    [:  addr data $@ >msg-album-viewer ;]
 		    2swap $make dup +imgs 64#1 +to msg:timestamp
 		    click[] drop  EXIT  THEN  drop  THEN
 	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
@@ -1489,6 +1420,7 @@ Variable invitation-stack
     [IFDEF] set-net2o-hints  set-net2o-hints  [THEN]
     /chat:gui-chat-cmd-o to chat-cmd-o
     n2o-frame to top-widget
+    n2o-frame to md-frame
     "PASSPHRASE" getenv 2dup d0= IF  2drop
     ELSE
 	>passphrase +key  read-keys
