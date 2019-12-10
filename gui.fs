@@ -808,6 +808,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dvcs-log:urls[] ['] display-file $[]map
     dvcs:dispose-dvcs-log o> ;
 : .posting-log ( -- )
+    album-imgs[] $[]free
     dvcs:new-dvcs >o  config>dvcs
     project:project$ $@ @/ 2drop 2dup load-msg
     display-posting
