@@ -1091,17 +1091,12 @@ hash: imgs# \ hash of images
 
 : >msg-album-viewer ( img u -- )
     img>group# dup 0< IF  drop  EXIT  THEN
-    dup -4 and >r album-prepare
-    { | i# }  last# cell+ $@ r> cells safe/string 4 cells min bounds U+DO
-	I $@ 1 64s /string 2dup need-hashed? IF  85type ."  need" cr
-	ELSE
-	    ?read-enc-hashed save-mem
-	    i# album-image
-	THEN
-	1 +to i#
-    cell +LOOP
-    n2o-frame album-viewer >o to parent-w o>
-    album-viewer n2o-frame .childs[] >stack
+    last# cell+ $@ album-imgs[] $!
+    album-prepare
+    [: 1 64s /string ?read-enc-hashed save-mem ;] is load-img
+    4 album-reload
+    md-frame album-viewer >o to parent-w o>
+    album-viewer md-frame .childs[] >stack
     +sync +resize ;
 
 :noname ( addr u type -- )
