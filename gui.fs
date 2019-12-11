@@ -127,7 +127,7 @@ Variable nick$
 	    create-new-id /hflip
 	    phrase-first /hflip
 	    phrase-again /flop
-	    clear-edit invert +lang +resize
+	    clear-edit invert
 	endof
 	2 of
 	    over 3 pick >passphrase lastkey@ str= IF
@@ -137,7 +137,7 @@ Variable nick$
 	    ELSE
 		1 to nick-pw
 		phrase-first /flop
-		phrase-again /hflip +lang +resize
+		phrase-again /hflip
 		1 tries# ! do-shake
 	    THEN
 	endof
@@ -150,7 +150,7 @@ Variable nick$
 	ELSE
 	    right-phrase
 	THEN  0
-    endcase ;
+    endcase  +lang +resize ;
 
 : 20%bt ( o -- o ) >o font-size# 20% f* to bordert o o> ;
 : 25%b ( o -- o ) >o font-size# 25% f* to border o o> ;
@@ -516,7 +516,7 @@ false Value in-group?
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
 	[: chat-keys $+[]! ;] $[]map
 	gui-msgs  <event :>chat-connects ?query-task event>
-	next-slide
+	next-slide +lang +resize
     ;] swap click[] ;
 
 : show-group ( group-o -- )
@@ -612,7 +612,7 @@ previous
 
 : show-nicks ( -- )
     fill-nicks fill-groups !online-symbol
-    next-slide
+    next-slide +lang +resize  peers-box engage
     peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
 
 \ messages
@@ -825,7 +825,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
     handle-clone
     prj keysize /string set-dir throw
-    .posting-log next-slide album>path
+    .posting-log next-slide +lang +resize album>path
     posting-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
 	fdrop +sync +resize ;] >animate
     dir> ;
