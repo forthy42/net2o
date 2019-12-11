@@ -402,12 +402,11 @@ Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
 : ]path ( addr u -- )
-    open-fpath-file throw rot close-file throw ]] SLiteral [[
-    ] ;
+    file>fpath ]] SLiteral [[ ] ;
 : read-user.png ( -- )
     [ "doc/user.png" ]path user.png$ $slurp-file ;
 : read-thumb.png ( -- )
-    [ "doc/thumb.png" ]path thumb.png$ $slurp-file ;
+    [ "minos2/thumb.png" ]path thumb.png$ $slurp-file ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
 	read-user.png user.png$ $@ mem>thumb atlas-region
