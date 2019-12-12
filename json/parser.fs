@@ -88,15 +88,15 @@ $10 stack: array-stack
 0 Value previous-type
 
 : set-val ( value -- )
-    key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
+    key$ $@ find-name ?dup-IF  (to)  EXIT  THEN
     json-err ;
 
 : set-int ( value -- )
-    key$ $@ find-name ?dup-IF  (int-to)  EXIT  THEN
+    key$ $@ find-name ?dup-IF  (to)  EXIT  THEN
     '%' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
-	>r s>f r> (int-to) EXIT  THEN
+	>r s>f r> (to) EXIT  THEN
     '!' key$ $@ + 1- c!  key$ $@ find-name ?dup-IF
-	>r #1000000000 um* d>64 r> (int-to) EXIT  THEN
+	>r #1000000000 um* d>64 r> (to) EXIT  THEN
     json-err ;
 
 Defer next-element
@@ -196,12 +196,12 @@ Defer next-element
 
 : json-string! ( addr u -- )
     over >r
-    '$' key$ c$+! key$ $@ find-name ?dup-IF  (int-to) r> free throw  EXIT  THEN
+    '$' key$ c$+! key$ $@ find-name ?dup-IF  (to) r> free throw  EXIT  THEN
     \ workaround if you mean number but wrote string
     '&' key-find? ?dup-IF
-	>r s>number?  IF  r> (int-to) r> free throw  EXIT  THEN  json-err  THEN
+	>r s>number?  IF  r> (to) r> free throw  EXIT  THEN  json-err  THEN
     '#' key-find? ?dup-IF
-	>r s>number?  IF  drop r> (int-to) r> free throw  EXIT  THEN  json-err  THEN
+	>r s>number?  IF  drop r> (to) r> free throw  EXIT  THEN  json-err  THEN
     '!' key-find? ?dup-IF  drop
 	?date IF  date>ticks set-val r> free throw  EXIT  THEN  json-err  THEN
     '%' key-find? ?dup-IF  drop

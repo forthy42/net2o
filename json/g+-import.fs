@@ -350,7 +350,7 @@ also net2o-base
 2Variable post-ref
 
 : add-message ( xt -- )
-    project:project$ $@ ?msg-log
+    project:project$ $@ >group
     [: sign[ msg-start execute post-ref 2@ chain, ]pksign ;] gen-cmd$
     +last-signed last-signed 2@ >msg-log 2drop ;
 
@@ -460,7 +460,7 @@ Variable comment#
     THEN
     ['] .plain $tmp $80 umin -trailing-garbage
     dup 0= IF  2drop "<no text>"  THEN  ['] .project $tmp
-    groups[] [: msg-group$ $! 0 .?make-group
+    groups[] [: msg-group$ $! 0 .?make-group msg-group$ $@ >group
 	[ also net2o-base ]
 	[: 2over $, msg-text 2dup $, msg:posting# ulit, msg-object ;]
 	[ previous ]
@@ -492,9 +492,9 @@ Variable comment#
     dvcs-o add-reshares
     dvcs-o add-votes
     dvcs-o add-comments
-    dvcs-o .dvcs:dispose-dvcs
     create>never
     dvcs-o ['] add-collection mkey wrap-key
+    dvcs-o .dvcs:dispose-dvcs
     dir> redate-mode off
     dvcs-objects #frees ;
 
@@ -506,6 +506,7 @@ Variable comment#
 	#-21 0 at-deltaxy
 	I @ .write-out-article
 	1 +to nn
+	!save-all-msgs
     cell +LOOP
     img-req-fid close-file throw  0 to img-req-fid
     nn [: ." write "  6 .r ."  postings in " .time ;]
@@ -521,5 +522,5 @@ Variable comment#
     ." Read JSON files" cr      dir json-load-dir
     ." Write entries" cr        write-articles
     ." Get avatars" cr          get-avatars hash-in-avatars
-    !save-all-msgs save-keys
+    save-keys
     save-chatgroups .chatgroups ;

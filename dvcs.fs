@@ -709,7 +709,7 @@ true Value add-object?
     dvcs:type !
     dvcs:hash$ $@len 0= IF  #0. last-signed 2!  EXIT  THEN
     msg-group$ @ >r
-    project:project$ @ msg-group$ !
+    project:project$ @ msg-group$ ! msg-group$ $@ >group
     o [: with dvcs
 	project:chain$ $@ base85>$
 	fileref[]

@@ -1318,6 +1318,8 @@ end-class net2o-actor
 	k-f6 of  color-theme 0<> IF  anim-end 0.25e o
 		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
+	k-f7 of  >normalscreen   endof
+	k-f8 of  >fullscreen     endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase ; net2o-actor to ekeyed
 

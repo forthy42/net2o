@@ -45,6 +45,7 @@ Variable otr-mode \ global otr mode
     cell +LOOP ;
 
 Variable msg-group$
+Variable redate-mode
 User replay-mode
 User skip-sig?
 
@@ -133,7 +134,6 @@ event: :>load-msg ( group-o -- )
 : !save-all-msgs ( -- )
     syncfile( save-all-msgs )else(
     <event :>save-all-msgs ?file-task event| ) ;
-
 : save-msgs& ( -- )
     syncfile( msg-group-o saved-msg$ +unique$ )else(
     <event msg-group-o elit, :>save-msgs ?file-task event> ) ;
