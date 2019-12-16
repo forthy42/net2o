@@ -1099,21 +1099,21 @@ hash: imgs# \ hash of images
     album-viewer md-frame .childs[] >stack
     +sync +resize ;
 
-: album-view[] ( addr u o -- o xt data )
+: album-view[] ( addr u o -- o )
     [: addr data $@ >msg-album-viewer ;]
-    2swap $make dup +imgs 64#1 +to msg:timestamp ;
+    2swap $make dup +imgs 64#1 +to msg:timestamp click[] ;
 
 :noname ( addr u type -- )
     obj-red
-    case #0. 2>r
+    case
 	msg:image#     of
 	    2dup key| ?fetch
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
-		    album-view[] click[] drop  EXIT  THEN  drop  THEN
+		    album-view[] drop  EXIT  THEN  drop  THEN
 	    [: ." img[" 2dup 85type ']' emit ;] $tmp }}text  "image" name!
-	    2rdrop album-view[] 2>r
+	    2rdrop album-view[]
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
@@ -1123,10 +1123,10 @@ hash: imgs# \ hash of images
 	msg:message#   of  [: ." message["  85type ']' emit
 	    ;] $tmp }}text  "message" name!  endof
 	msg:posting#   of  ." posting"
-	    rdrop 2dup [d:h open-posting ;] 0 2>r
-	    ['] .posting $tmp }}text  "posting" name!
+	    rdrop 2dup $make [: addr data $@ open-posting ;] swap 2>r
+	    ['] .posting $tmp }}text 2r> click[]  "posting" name!
 	endof
-    endcase 2r> 2dup d0<> IF  click[]  ELSE  2drop  THEN
+    endcase
     msg-box .child+
     text-color!
 ; wmsg-class is msg:object
