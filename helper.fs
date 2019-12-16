@@ -285,7 +285,7 @@ User hostc$ \ check for this hostname
 
 : myhost= ( o -- flag )
     .host:id $@ host$ $@ str= ?myself and ;
-    
+
 : host= ( o -- flag )
     >o hostc$ $@ dup IF  host:id $@ str=  ELSE  2drop true  THEN  o> ;
 

@@ -470,7 +470,7 @@ Variable comment#
 
 : write-out-article ( o:comment -- )
     \ <info> ." write out: " comments:url$ type cr <default>
-    >dir redate-mode on  comment# off
+    >dir  comment# off
     dvcs:new-dvcs { dvcs-o }
     comments-base
     2dup [: ." posts/" type ." /.n2o" ;] $tmp ~net2o-cache/..
@@ -495,7 +495,7 @@ Variable comment#
     create>never
     dvcs-o ['] add-collection mkey wrap-key
     dvcs-o .dvcs:dispose-dvcs
-    dir> redate-mode off
+    dir>
     dvcs-objects #frees ;
 
 : write-articles ( -- ) { | nn }

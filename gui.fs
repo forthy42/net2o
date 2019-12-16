@@ -27,11 +27,11 @@ require minos2/font-style.fs
     font-size# 70% f* }}frame ;
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
+#64 Value lines/diag
 : update-gsize# ( -- )
-    screen-pwh max s>f
-    default-diag screen-diag f/ .8e f**
-    default-scale f* 1/f #56 fm*
-    f/ fround to font-size#
+    screen-pwh dup * swap dup * + s>f fsqrt
+    screen-diag default-diag f/ .5e f** lines/diag fm* f/
+    m2c:scale% f@ f* fround to font-size#
     font-size# 133% f* fround to baseline#
     font-size# 32e f/ to pixelsize# ;
 
@@ -412,10 +412,11 @@ Variable thumb.png$
 	read-user.png user.png$ $@ mem>thumb atlas-region
 	user-avatar# $!
     THEN   user-avatar# $@ drop ;
+: read-dummy ( -- addr u )
+    read-thumb.png thumb.png$ $@ mem>thumb atlas-region ;
 : dummy-thumb ( -- addr )
     dummy-thumb# @ 0= IF
-	read-thumb.png thumb.png$ $@ mem>thumb atlas-region
-	dummy-thumb# $!
+	read-dummy dummy-thumb# $!
     THEN   dummy-thumb# $@ drop ;
 : avatar-thumb ( avatar -- )
     glue*avatar swap }}thumb >r {{ r> }}v 40%b ;
@@ -428,9 +429,12 @@ Variable thumb.png$
 
 : re-avatar ( last# -- )
     >r r@ $@ read-avatar r> cell+ $@ smove ;
+: re-dummy ( -- )
+    dummy-thumb# @ 0= ?EXIT \ nobody has a dummy thumb
+    read-dummy dummy-thumb# $@ smove ;
 
 :noname defers free-thumbs
-    avatar# ['] re-avatar #map ; is free-thumbs
+    re-dummy avatar# ['] re-avatar #map ; is free-thumbs
 
 event: :>update-avatar ( thumb hash u1 -- )
     avatar-frame swap .childs[] $@ drop @ >o to frame# o>
@@ -610,6 +614,7 @@ previous
 }}z box[] to id-frame
 
 : show-nicks ( -- )
+    dummy-thumb drop
     fill-nicks fill-groups !online-symbol
     next-slide +lang +resize  peers-box engage
     peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
@@ -795,7 +800,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	p-format
     ELSE  2drop  THEN ;
 : display-posting ( addr u -- )
-    posting-vp >o dispose-childs  free-thumbs  0 to active-w o>
+    posting-vp >o dispose-childs ( free-thumbs ) 0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
     >group msg-log@ 2dup { log u }
@@ -1074,12 +1079,8 @@ hash: imgs# \ hash of images
 : +imgs ( addr$ -- )
     [: { w^ string | ts[ 1 64s ] }
 	msg:timestamp ts[ be-64!
-	ts[ 1 64s type  string $. ;] $tmp $make { w^ string }
-    msg-group$ $@ imgs# #@ d0= IF
-	string cell msg-group$ $@ imgs# #!
-    ELSE
-	string $@ last# cell+ $ins[] drop  string $free
-    THEN ;
+	ts[ 1 64s type  string $. ;] $tmp
+    msg-group$ $@ imgs# #!ins[] ;
 
 : img>group# ( img u -- n )
     msg-group$ $@ imgs# #@ bounds ?DO
@@ -1098,18 +1099,21 @@ hash: imgs# \ hash of images
     album-viewer md-frame .childs[] >stack
     +sync +resize ;
 
+: album-view[] ( addr u o -- o xt data )
+    [: addr data $@ >msg-album-viewer ;]
+    2swap $make dup +imgs 64#1 +to msg:timestamp ;
+
 :noname ( addr u type -- )
     obj-red
-    case 0 >r
+    case #0. 2>r
 	msg:image#     of
 	    2dup key| ?fetch
 	    msg-box .childs[] $[]# ?dup-IF
 		rdrop  1- msg-box .childs[] $[] @
 		dup .name$ "thumbnail" str= IF
-		    [:  addr data $@ >msg-album-viewer ;]
-		    2swap $make dup +imgs 64#1 +to msg:timestamp
-		    click[] drop  EXIT  THEN  drop  THEN
-	    [: ." img["      85type ']' emit ;] $tmp }}text  "image" name!
+		    album-view[] click[] drop  EXIT  THEN  drop  THEN
+	    [: ." img[" 2dup 85type ']' emit ;] $tmp }}text  "image" name!
+	    2rdrop album-view[] 2>r
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
@@ -1119,10 +1123,10 @@ hash: imgs# \ hash of images
 	msg:message#   of  [: ." message["  85type ']' emit
 	    ;] $tmp }}text  "message" name!  endof
 	msg:posting#   of  ." posting"
-	    rdrop 2dup [d:h open-posting ;] >r
+	    rdrop 2dup [d:h open-posting ;] 0 2>r
 	    ['] .posting $tmp }}text  "posting" name!
 	endof
-    endcase r> ?dup-IF  0 click[]  THEN
+    endcase 2r> 2dup d0<> IF  click[]  ELSE  2drop  THEN
     msg-box .child+
     text-color!
 ; wmsg-class is msg:object
@@ -1277,7 +1281,7 @@ Variable gui-log[]
 	    \normal \mono blackish
 	    {{
 		gui-log[] [: }}text /left ;] $[]map
-	    }}v box[] 25%b
+	    }}v box[] 25%b \regular
 	    {{
 		s" ❌" $444444FF new-color, }}text 25%b /right dup { closer }
 		glue*ll }}glue

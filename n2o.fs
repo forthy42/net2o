@@ -774,8 +774,9 @@ warnings !
     \G gui: start net2o's graphical user interface
     ?.net2o-config
     reset-net2o-cmds
-    [ "gui.fs" ]path required  run-gui
-    save-net2o-cmds set-net2o-cmds ;
+    [ "gui.fs" ]path required
+    save-net2o-cmds set-net2o-cmds
+    run-gui ;
 
 : ... ( -- )
     ... ;

@@ -24,6 +24,7 @@ require date.fs
 require mini-oof2.fs
 require forward.fs
 require set-compsem.fs
+require hash-table.fs
 
 \ enum
 
@@ -508,13 +509,16 @@ Variable configured?
 
 forward default-host
 
+: !wrapper ( val addr xt -- .. ) { a xt -- .. }
+    a !@ >r xt catch r> a ! throw ;
+
 : ?old-config ( addr u wid -- )
     \G check if we have an old config; then keep it.
     "~/.net2o/config" file-status nip no-file# <> IF
 	"~/.net2o" 2dup .net2o$ $! .net2o-config$ $!
 	subdir-config
 	nip nip "~/.net2o/config" rot
-	read-config default-host
+	0 addr config-throw ['] read-config !wrapper default-host
     ELSE
 	?.net2o default-host write-config
     THEN ;
@@ -522,8 +526,9 @@ forward default-host
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip ['] config >body swap
-    no-file# = IF  ?old-config  ELSE  read-config default-host  THEN
-    rootdirs>path ;
+    no-file# = IF  ?old-config  ELSE
+	0 addr config-throw ['] read-config !wrapper default-host
+    THEN  rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config fsane-init ;
 
@@ -670,6 +675,16 @@ $40 Constant #splitminute
     \G @var{pos} is the insertion offset or -1 if not inserted
 : $del[] ( addr u $array -- ) 0 $del[]# ;
     \G delete O(log(n)) from pre-sorted array
+
+\ hash with array of unique strings
+
+: #!ins[] ( addr1 u1 addr-key u-key hash -- )
+    third third third >r 2>r
+    #@ d0= IF
+	$make { w^ s } s cell 2r> r> #!
+    ELSE
+	last# cell+ $ins[] drop rdrop 2rdrop
+    THEN ;
 
 \ same with signatures; newest signature replaces older
 
@@ -1019,25 +1034,8 @@ edit-terminal edit-out !
 \ !wrapper: generic wrapper to store a value in a variable
 \ and restore it after catching the xt
 
-: !wrapper ( val addr xt -- .. ) { addr xt -- .. }
-    addr !@ >r xt catch r> addr ! throw ;
-
 \ evaluate in
 
 : evaluate-in ( addr u voc-addr -- )
     get-order n>r >body 1 set-order ['] evaluate catch
     nr> set-order throw ;
-
-\ blocking event, also available in most recent Gforth
-
-[IFUNDEF] event|
-    event: :>restart ( task -- ) restart ;
-    
-    : event| ( task -- )
-	\G send an event and block
-	dup up@ = IF \ don't block, just eval if we send to ourselves
-	    event> ?events
-	ELSE
-	    up@ elit, :>restart event> stop
-	THEN ;
-[THEN]

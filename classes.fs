@@ -144,10 +144,11 @@ cmd-class class{ msg
     field: peers[]
     field: keys[]
     field: log[]
+    field: hashs[]
     field: perms# \ pk -> permission map
     field: mode
     \ mode bits:
-    1 4 bits: otr# redate# lock# visible#
+    1 3 bits: otr# lock# visible#
     : bit-ops: ( bit -- )
         parse-name [{: d: name :}l name rot [: emit type ;] $tmp nextname ;]
 	{: xt: gen-name :}
@@ -155,7 +156,6 @@ cmd-class class{ msg
 	'-' gen-name create dup , [: @ invert mode and! ;] set-does>
 	'?' gen-name create     , [: @ mode @ and 0<>   ;] set-does> ;
     otr#     bit-ops: otr
-    redate#  bit-ops: redate
     lock#    bit-ops: lock
     visible# bit-ops: visible
 

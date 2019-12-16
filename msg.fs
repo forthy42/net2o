@@ -45,7 +45,6 @@ Variable otr-mode \ global otr mode
     cell +LOOP ;
 
 Variable msg-group$
-Variable redate-mode
 User replay-mode
 User skip-sig?
 
@@ -295,6 +294,12 @@ event: :>msg-nestsig ( $addr o group -- )
 
 Forward msg:last?
 Forward msg:last
+Forward msg:want
+
+hash: ihave#
+
+: msg:ihave ( id u1 hash u2 -- )
+    bounds U+DO  2dup I keysize ihave# #!ins[]  keysize +LOOP  2drop ;
 
 : push-msg ( addr u o:parent -- )
     up@ receiver-task <> IF
@@ -794,6 +799,8 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) 64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) 64>n msg:last ;
++net2o: msg-ihave ( $:[hash0,...,hashn] $:[id] -- ) $> $> msg:ihave ;
++net2o: msg-want ( $:[hash0,...,hashn] -- ) $> msg:want ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
@@ -890,6 +897,23 @@ in net2o : copy-msg ( filename u -- )
 
 $20 Value max-last#
 $20 Value ask-last#
+
+$8 Value max-want#
+: have>want ( hashs u want# -- ) { want# }
+    \ transform have into wants
+    bounds U+DO
+	I keysize ihave# #@ bounds U+DO
+	    J keysize I $@ want# #+!
+	cell +LOOP
+    keysize +LOOP ;
+: want, ( index -- )
+    \ compile a single want
+    over $@len over cell+ $@len + 8 + maxstring u< IF
+	dup cell+ $@ $, $@ $, msg-ihave
+    ELSE  drop  THEN ;
+: msg:want ( hashs u -- )
+    { | w^ want# } want# have>want
+    want# [: want, ;] #map want# #free ;
 
 Variable ask-msg-files[]
 
@@ -1494,8 +1518,7 @@ text-chat-cmd-o to chat-cmd-o
 :noname ( addr u -- )
     dup 0= IF  2drop
 	away? IF  "I'm back"  ELSE  "Away from keyboard"  THEN
-	away? 0= to away?
-    THEN
+    THEN  away? 0= to away?
     [: $, msg-action ;] send-avalanche ; is /away
 
 :noname ( flag -- )

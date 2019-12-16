@@ -40,7 +40,6 @@ require threefish.fs
 keccak-o crypto-o !
 require rng.fs
 require ed25519-donna.fs
-require hash-table.fs
 require bdelta.fs
 require minos2/jpeg-exif.fs
 
