@@ -212,6 +212,9 @@ User ?salt-init  ?salt-init off
     rng-pos @ rng-buffer + l@
     4 rng-pos +! ;
 
+: rng ( u -- x )
+    [IFDEF] 64bit rng64 [ELSE] rng32 [THEN] um* nip ;
+
 : rng8 ( -- c )
     \G return an 8 bit random number
     ?rng

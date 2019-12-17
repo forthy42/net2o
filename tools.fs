@@ -395,6 +395,7 @@ $10 stack: dirstack
 
 scope{ config
 
+Variable hops#
 2Variable beacon-ticks&
 2Variable beacon-short-ticks&
 2Variable dht-cleaninterval&
@@ -449,6 +450,7 @@ pad $400 get-dir rootdirs$ $!
 "Hello!" invite$ $!
 [defined] android 1 and passmode# ! \ default is all entry is masked out
 #14 timeouts# !
+#5 hops# ! \ redistribute across 5 hops
 
 $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #10.000.000.000. savedelta& 2! \ 10 seconds deltat
