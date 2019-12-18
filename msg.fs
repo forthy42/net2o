@@ -15,8 +15,7 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Forward avalanche-to ( addr u o:context -- )
-Forward avalanche-raw ( addr u o:context -- )
+Forward avalanche-to ( o:context -- )
 Forward pk-connect ( key u cmdlen datalen -- )
 Forward pk-connect? ( key u cmdlen datalen -- flag )
 Forward pk-connect-dests?
@@ -38,19 +37,16 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-: avalanche-msg ( msg u1 o:connect -- )
-    \G forward message to all next nodes of that message group
-    { d: msgx }
-    msg-group-o .msg:peers[] $@
-    bounds ?DO  I @ o <> IF  msgx I @ .avalanche-to  THEN
-    cell +LOOP ;
+Variable ihave$
+Variable mehave$
+Variable push$
 
-: msg:avalanche ( cmd u n o:connect -- )
-    \G forward raw message to all next nodes of that message group
-    { d: msgx n }
+: avalanche-msg ( o:connect -- )
+    \G forward message to all next nodes of that message group
     msg-group-o .msg:peers[] $@
-    bounds ?DO  I @ o <> IF  msgx n I @ .avalanche-raw  THEN
-    cell +LOOP ;
+    bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
+    cell +LOOP
+    ihave$ $free mehave$ $free push$ $free ;
 
 Variable msg-group$
 User replay-mode
@@ -230,7 +226,7 @@ User peer-buf
     0 >o $A $A [: reconnect( ." prepare reconnection" cr )
       ?msg-context >o silent-last# ! o>
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
-    addr-connect 2dup d0= IF  2drop  ELSE  avalanche-to  THEN o> ;
+    addr-connect 2dup d0= IF  2drop  ELSE  push$ $! avalanche-to  THEN o> ;
 
 event: :>avalanche ( addr u o group -- )
     avalanche( ." Avalanche to: " dup hex. cr )
@@ -308,20 +304,21 @@ hash: fetch-finish#
 Variable fetch-queue[]
 
 hash: ihave#
-User ihave$
 
 : msg:ihave ( id u1 hash u2 -- )
+    2dup ihave$ $!  2over mehave$ $!
+\    ." ihave:" 2over dump 2dup dump
     bounds U+DO  2dup I keysize ihave# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
     2dup ihave$ $+!
-    pk.host 2swap msg:ihave ;
+    pk.host 2dup mehave$ $! 2swap msg:ihave ;
 
-: push-msg ( addr u o:parent -- )
+: push-msg ( o:parent -- )
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    <event >r e$, o elit, msg-group-o elit,
+	    <event >r o elit, msg-group-o elit,
 	    :>avalanche r> event>
 	ELSE  2drop  THEN
     THEN ;
@@ -523,7 +520,7 @@ event: :>hash-finished { d: hash }
 		net2o-code expect+slurp $10 blocksize! $A blockalign!
 		I' I keysize $10 * + umin I U+DO
 		    I keysize net2o:copy#
-		    I keysize up@ [{: d: hash task :}h
+		    I keysize task [{: d: hash task :}h
 			<event hash e$, :>hash-finished task event> ;]
 		    lastfile@ >o to file-xt o>
 		keysize +LOOP
@@ -531,7 +528,7 @@ event: :>hash-finished { d: hash }
 	    keysize $10 *  +LOOP
 	    disconnect-me
 	THEN  rdrop ;] #map
-    want# #free ;
+    want# #frees ;
 
 event: :>fetch-queue fetch-queue ;
 
@@ -764,8 +761,7 @@ Variable group-list[]
     ?pkgroup 2swap >msg-log
     2dup d0<> replay-mode @ 0= and \ do something if it is new
     IF
-	2over show-msg
-	2dup parent .push-msg
+	2over show-msg 2dup push$ $!
     THEN  2drop 2drop ;
 
 \g 
@@ -803,8 +799,6 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> msg:want ;
 +net2o: msg-ihave ( $:[hash0,...,hashn] $:[id] -- ) \g show what objects you have
     $> $> msg:ihave enqueue ;
-+net2o: msg-avalanche ( n -- ) \g avalanche message part to n hops
-    64>n >r buf-state 2@ r> 1- dup 0> IF  msg:avalanche  ELSE  drop 2drop  THEN ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
@@ -812,6 +806,8 @@ net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN
 	2drop 2drop \ balk on all wrong signatures
     THEN ;
+net2o' end-with net2o: msg-end-with ( -- ) \g push out avalanche
+    do-req> n:o> push-msg ;
 
 \ generate an encryt+sign packet
 
@@ -1117,8 +1113,8 @@ previous
     THEN ;
 : .chat ( addr u -- )
     [: last# >r o IF  2dup do-msg-nestsig
-      ELSE  2dup display-one-msg  THEN  r> to last#
-      0 .avalanche-msg ;] [group] drop notify- ;
+	ELSE  2dup display-one-msg  THEN  push$ $!
+	r> to last# 0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only
 
@@ -1284,11 +1280,16 @@ also net2o-base
 : chain, ( msgaddr u -- )
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
+: ihave, ( -- )
+    ihave$ $@ dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop  THEN ;
+: push, ( -- )
+    push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 
 : (send-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
+    [: 0 >o [: <msg msg-start execute msg> ihave, ;] gen-cmd$ o>
       +last-signed msg-log, ;] [group] ;
 previous
+
 : send-avalanche ( xt -- )
     msg-group-o .msg:?otr IF  now>otr  ELSE  now>never  THEN
     (send-avalanche)
@@ -1741,7 +1742,7 @@ forward hash-in
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
 	    2swap slurp-file over >r hash-in r> free throw
-	    2dup >ihave 2swap dup IF   2dup >ihave  THEN
+	    2dup >ihave 2swap dup IF   2dup key| >ihave  THEN
 	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
 		$, msg:image# ulit, msg-object ;]
 	    r> free throw  r> to last->in ;]
@@ -1759,11 +1760,6 @@ depth r> - msg-recognizer set-stack
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
 	$, msg-text
-    ELSE  2drop  THEN
-    ihave$ $@ dup IF
-	config:hops# @ lit, msg-avalanche
-	$, pk.host $, msg-ihave
-	ihave$ $free
     ELSE  2drop  THEN
     r> to forth-recognizer  r> to last# ;
 
@@ -1955,20 +1951,12 @@ scope{ /chat
     REPEAT  2drop leave-chats  xchar-history
     nr> set-order ;
 
-: avalanche-to ( addr u o:context -- )
+: avalanche-to ( o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
     o to connection
     net2o-code expect-msg message
     msg-group-o .msg:name$ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
-    $, nestsig end-with
-    end-code ;
-
-: avalanche-raw ( addr u n o:context -- )
-    avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
-    o to connection
-    net2o-code expect-msg message
-    msg-group-o .msg:name$ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
-    lit, msg-avalanche +cmdbuf end-with
+    push, ihave, end-with
     end-code ;
 
 \\\
