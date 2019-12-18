@@ -305,14 +305,22 @@ Variable fetch-queue[]
 
 hash: ihave#
 
+: .ihaves ( -- )
+    ." ====== hash owend by ======" cr
+    ihave# [: dup $@ 85type ." :"
+	cell+ $@ bounds U+DO
+	    space '@' emit
+	    I $@ 2dup keysize2 safe/string type '.' emit
+	    key2| .simple-id
+	cell +LOOP cr ;] #map ;
+
 : msg:ihave ( id u1 hash u2 -- )
-    2dup ihave$ $!  2over mehave$ $!
 \    ." ihave:" 2over dump 2dup dump
+    2dup ihave$ $+!  2over mehave$ $!
     bounds U+DO  2dup I keysize ihave# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
-    2dup ihave$ $+!
-    pk.host 2dup mehave$ $! 2swap msg:ihave ;
+    pk.host 2swap  msg:ihave ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -507,43 +515,47 @@ scope: logstyles
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
 
-event: :>hash-finished { d: hash }
+event: :>hash-finished { d: hash -- }
     hash fetch-finish# #@ IF
 	@ >r hash r@ execute r> >addr free throw
 	last# bucket-off
-    ELSE  drop  THEN ;
+    ELSE  drop  THEN
+    hash >ihave  hash drop free throw ;
 
-: fetch-queue { task w^ want# -- }
-    want# [: >r
-	r@ $@ $8 $E pk-connect? IF  +resend +flow-control
-	    r@ cell+ $@ bounds U+DO
+: fetch-queue { tsk w^ want# -- }
+    want# tsk [{: tsk :}l { item }
+	item $@ $8 $E pk-connect? IF  +resend +flow-control
+	    item cell+ $@ bounds U+DO
 		net2o-code expect+slurp $10 blocksize! $A blockalign!
 		I' I keysize $10 * + umin I U+DO
 		    I keysize net2o:copy#
-		    I keysize task [{: d: hash task :}h
-			<event hash e$, :>hash-finished task event> ;]
+		    I keysize save-mem tsk [{: d: hash tsk :}h
+			<event hash e$, :>hash-finished tsk event> ;]
 		    lastfile@ >o to file-xt o>
 		keysize +LOOP
 		end-code| net2o:close-all
 	    keysize $10 *  +LOOP
 	    disconnect-me
-	THEN  rdrop ;] #map
+	THEN ;] #map
     want# #frees ;
 
 event: :>fetch-queue fetch-queue ;
 
-: transmit-queue ( -- )
-    { | w^ want# }
-    fetch-queue[] want# [{: want# :}l 2dup ihave# #@ dup IF
-	    cell/ 1- rng cells + $@ want# #+!
-	ELSE  2drop 2drop  THEN ;] $[]map 
+: transmit-queue ( queue -- )
+    { w^ queue[] | w^ want# }
+    queue[] want# [{: want# :}l 2dup ihave# #@ dup IF
+	    cell/ 1- rng cells + $@
+	    want# #+!
+	ELSE  2drop 2drop  THEN ;] $[]map
+    queue[] $[]free
     <event up@ elit, want# @ elit, :>fetch-queue ?query-task event> ;
 
 Variable queue?
-event: :>queued ( -- )
-    transmit-queue  queue? off ;
+event: :>queued ( queue -- )
+    [: 0 fetch-queue[] !@ queue? off ;] resize-sema c-section
+    transmit-queue ;
 : enqueue ( -- )
-    queue? @ 0= IF  queue? on <event :>queued up@ event>  THEN ;
+    -1 queue? !@ 0= IF  <event :>queued up@ event>  THEN ;
 
 forward need-hashed?
 : ?fetch ( addr u -- )
@@ -1511,6 +1523,9 @@ umethod /chat ( addr u -- )
 umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
+umethod /ihave ( addr u -- )
+    \U ihave                print out ihave list
+    \G ihave: print out the hashes and their providers
 end-class chat-cmds
 
 chat-cmds new Constant text-chat-cmd-o
@@ -1637,6 +1652,7 @@ is /help
 :noname ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
+' .ihaves is /ihave
 
 $100 buffer: permchar>bits
 msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!

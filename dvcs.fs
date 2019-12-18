@@ -900,6 +900,8 @@ hash#128 buffer: hash-save
     slurp-file over >r hash-in 2drop r> free throw ;
 : hash-out ( addr u -- )
     base85>$ 2dup 2>r read-enc-hashed patch-in$ $@ 2r> hash-85 spit-file ;
+: hash-rm ( addr u -- )
+    base85>$ enchash>filename delete-file drop ;
 
 \ pull and sync a database
 

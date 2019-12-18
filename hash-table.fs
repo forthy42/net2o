@@ -61,8 +61,8 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop #0. ;
 
-: #+! ( addr1 u1 addr2 u2 -- )
-    2dup #@ d0= IF  #!  ELSE  2drop last# cell+ $+!  THEN ;
+: #+! ( addr1 u1 addr2 u2 hash -- ) >r
+    2dup r@ #@ d0= IF  r> #!  ELSE  2drop rdrop last# cell+ $+!  THEN ;
 
 : #free ( addrkey u hash -- )  { hash }
     2dup string-hash  hash$ bounds ?DO

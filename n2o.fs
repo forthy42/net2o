@@ -725,6 +725,10 @@ warnings !
     \G add#: add files to hash storage
     ?get-me ['] hash-add arg-loop ;
 
+: rm# ( -- )
+    \U rm# hash1 .. hashn
+    ?get-me ['] hash-rm arg-loop ;
+
 : out# ( -- )
     \U out# hash1 .. hashn
     \G out#: get files out of hash storage in clear
