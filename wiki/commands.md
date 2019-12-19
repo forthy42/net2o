@@ -422,9 +422,17 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $24 msg-reconnect ( $:pubkey+addr -- )
   rewire distribution tree
 * $25 msg-last? ( start end n -- )
+  query messages time start:end, n subqueries
 * $26 msg-last ( $:[tick0,msgs,..tickn] n -- )
+  query result
+* $27 msg-want ( $:[hash0,...,hashn] -- )
+  request objects
+* $28 msg-ihave ( $:[hash0,...,hashn] $:[id] -- )
+  show what objects you have
 * $A msg-nestsig ( $:cmd+sig -- )
   check sig+nest
+* $5 msg-end-with ( -- )
+  push out avalanche
 
 ### DVCS patch commands ###
 
