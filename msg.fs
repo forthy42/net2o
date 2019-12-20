@@ -1526,11 +1526,16 @@ umethod /split ( addr u -- )
 umethod /ihave ( addr u -- )
     \U ihave                print out ihave list
     \G ihave: print out the hashes and their providers
+umethod /imgs ( addr u -- )
+    \U imgs                 print out img list
+    \G imgs: print out hashes for album viewer
 end-class chat-cmds
 
 chat-cmds new Constant text-chat-cmd-o
 
 text-chat-cmd-o to chat-cmd-o
+
+' 2drop is /imgs \ stub
 
 :noname ( addr u -- )
     [: $, msg-action ;] send-avalanche ; is /me

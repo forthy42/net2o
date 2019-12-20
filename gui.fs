@@ -425,7 +425,7 @@ Variable thumb.png$
 	2dup read-avatar 2swap avatar# #!
     ELSE  2drop  THEN  last# cell+ $@ drop ;
 : show-avatar ( addr u -- o / 0 )
-    [: avatar-frame avatar-thumb ;] catch IF  2drop 0  THEN ;
+    [: avatar-frame avatar-thumb ;] catch IF  2drop 0 nothrow  THEN ;
 
 : re-avatar ( last# -- )
     >r r@ $@ read-avatar r> cell+ $@ smove ;
@@ -504,7 +504,7 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
     [: chat-keys [:
 	    2dup search-connect ?dup-IF  >o +group greet o> 2drop  EXIT  THEN
 	    2dup pk-peek? IF  chat-connect true !!connected!!
-	    ELSE  2drop  THEN ;] $[]map ;] catch
+	    ELSE  2drop  THEN ;] $[]map ;] catch nothrow
     [ ' !!connected!! >body @ ]L = IF  show-connected  THEN ;
 
 event: :>!connection    to connection ;
@@ -562,7 +562,7 @@ $F235 Constant 'user-times'
     'signal' 'spinner' online? select ['] xemit $tmp ;
 : !online-symbol ( -- )
     online-symbol online-flag >o to text$ o> +sync ;
-:noname  true to online? ['] announce-me catch 0= to online?
+:noname  true to online? ['] announce-me catch nothrow 0= to online?
     !online-symbol ; is addr-changed
 
 : nicks-title ( -- )
@@ -1058,7 +1058,7 @@ Variable re-indent#
     fnegate f2/ to borderv o o> ;
 
 : ?thumb { d: hash -- o }
-    hash ['] avatar-frame catch 0= IF
+    hash ['] avatar-frame catch nothrow 0= IF
 	>r r@ i.w 2* r@ i.h 2* hash >swap
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
@@ -1069,31 +1069,32 @@ Variable re-indent#
 
 hash: imgs# \ hash of images
 
+: .img ( addr u -- )
+    over be-64@ .ticks space 1 64s /string 85type ;
 : group.imgs ( addr u -- )
-     bounds ?DO
-	    I $@ over be-64@ .ticks space
-	    1 64s /string 85type cr
-	cell +LOOP ;
+    bounds U+DO  I $@ .img cr  cell +LOOP ;
 : .imgs ( -- )
     imgs# [: dup $. ." :" cr cell+ $@ group.imgs ;] #map ;
-: +imgs ( addr$ -- )
-    [: { w^ string | ts[ 1 64s ] }
+
+: +imgs ( addr u -- $string )
+    [: { | ts[ 1 64s ] }
 	msg:timestamp ts[ be-64!
-	ts[ 1 64s type  string $. ;] $tmp
-    msg-group$ $@ imgs# #!ins[] ;
+	ts[ 1 64s type  type ;] $tmp
+    2dup msg-group$ $@ imgs# #!ins[] $make ;
 
 : img>group# ( img u -- n )
     msg-group$ $@ imgs# #@ bounds ?DO
-	2dup I $@ 1 64s /string str= IF
+	2dup I $@ str= IF
 	    2drop I last# cell+ $@ drop - cell/  unloop  EXIT
 	THEN
     cell +LOOP  2drop -1 ;
 
 : >msg-album-viewer ( img u -- )
+\    2dup .img cr
     img>group# dup 0< IF  drop  EXIT  THEN
     last# cell+ $@ album-imgs[] $!
     album-prepare
-    [: 1 64s /string ['] ?read-enc-hashed catch
+    [:  1 64s /string ['] ?read-enc-hashed catch nothrow
 	IF    2drop thumb.png$ $@
 	ELSE  save-mem  THEN ;] is load-img
     4 album-reload
@@ -1103,7 +1104,7 @@ hash: imgs# \ hash of images
 
 : album-view[] ( addr u o -- o )
     [: addr data $@ >msg-album-viewer ;]
-    2swap $make dup +imgs 64#1 +to msg:timestamp click[] ;
+    2swap +imgs 64#1 +to msg:timestamp click[] ;
 
 :noname ( addr u type -- )
     obj-red
@@ -1168,7 +1169,7 @@ wmsg-o >o msg-table @ token-table ! o>
     log u u' /string bounds ?DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
-	msgt ['] msg-tdisplay wmsg-o .catch IF
+	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
 	    <err> ." invalid entry" cr <default> 2drop
 	THEN
     cell +LOOP
@@ -1307,6 +1308,7 @@ gui-chat-cmds new Constant gui-chat-cmd-o
 
 gui-chat-cmd-o to chat-cmd-o
 ' drop is ./otr-info
+' .imgs is /imgs
 
 text-chat-cmd-o to chat-cmd-o
 }scope
