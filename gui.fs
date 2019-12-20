@@ -1095,8 +1095,7 @@ hash: imgs# \ hash of images
     last# cell+ $@ album-imgs[] $!
     album-prepare
     [:  1 64s /string ['] ?read-enc-hashed catch nothrow
-	IF    2drop thumb.png$ $@
-	ELSE  save-mem  THEN ;] is load-img
+	IF  2drop thumb.png$ $@  THEN  save-mem ;] is load-img
     4 album-reload
     md-frame album-viewer >o to parent-w o>
     album-viewer md-frame .childs[] >stack
