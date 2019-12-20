@@ -1523,9 +1523,9 @@ umethod /chat ( addr u -- )
 umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
-umethod /ihave ( addr u -- )
-    \U ihave                print out ihave list
-    \G ihave: print out the hashes and their providers
+umethod /have ( addr u -- )
+    \U have                 print out have list
+    \G have: print out the hashes and their providers
 umethod /imgs ( addr u -- )
     \U imgs                 print out img list
     \G imgs: print out hashes for album viewer
@@ -1657,7 +1657,7 @@ is /help
 :noname ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
-' .ihaves is /ihave
+' .ihaves is /have
 
 $100 buffer: permchar>bits
 msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!
@@ -1758,7 +1758,7 @@ forward hash-in
 	[:  2dup + >r
 	    4 /string save-mem over >r 2dup jpeg? IF
 		2dup >thumbnail
-		?dup-IF  over >r hash-in
+		dup IF  over >r hash-in
 		    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
