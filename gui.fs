@@ -390,8 +390,7 @@ Hash: avatar#
 glue new Constant glue*avatar
 glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glue dglue-c glue! o>
 : wh-glue! ( w h -- )
-    pixelsize# fm* 0e 0g vglue-c glue!
-    pixelsize# fm* 0e 0g hglue-c glue! ;
+    default-imgwh% 15% f* fswap 20% f* fswap wh>glue ;
 : glue*thumb ( w h -- o )
     glue new >o wh-glue! 0glue dglue-c glue! o o> ;
 
@@ -741,7 +740,9 @@ Variable like-char
 		glue*ll }}glue
 		tex: vp-md
 	    glue*l ' vp-md }}vp dup to posting-vp
-	    >o "posting" to name$ font-size# dpy-w @ dpy-h @ > [IF]  dpy-w @ 25% fm* fover f- [ELSE] 0e [THEN] fdup fnegate to borderv f+ to border o o>
+	    >o "posting" to name$
+	    font-size# dpy-w @ s>f fover maxcols# fm* f- f2/ 0e fmax fover f-
+	    fdup fnegate to borderv f+ to border o o> dup Value posting-box
 	dup font-size# 66% f* fdup vslider }}h box[]
 	>o "posting-slider" to name$ o o>
     }}v box[]
@@ -749,6 +750,11 @@ Variable like-char
 }}z box[]
 >o "posting-zbox" to name$ o o>
 to post-frame
+
+:noname defers re-config
+    posting-box >o
+    font-size# dpy-w @ s>f fover maxcols# fm* f- f2/ 0e fmax fover f-
+    fdup fnegate to borderv f+ to border o> ; is re-config
 
 hash: buckets#
 
@@ -795,12 +801,13 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	0 to md-box
 	5 /string [: ." ~+/" type ;] $tmp markdown-parse
 	md-box posting-vp .child+
-	dpy-w @ dpy-h @ > IF  dpy-w @ 50% fm*
-	ELSE  dpy-w @ s>f font-size# f2* f-  THEN
+	dpy-w @ dup s>f dpy-h @ >
+	IF    font-size# maxcols# fm* fmin
+	ELSE  font-size# f2* f-  THEN
 	p-format
     ELSE  2drop  THEN ;
 : display-posting ( addr u -- )
-    posting-vp >o dispose-childs ( free-thumbs ) 0 to active-w o>
+    posting-vp >o dispose-childs  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
     >group msg-log@ 2dup { log u }
@@ -1059,7 +1066,7 @@ Variable re-indent#
 
 : ?thumb { d: hash -- o }
     hash ['] avatar-frame catch nothrow 0= IF
-	>r r@ i.w 2* r@ i.h 2* hash >swap
+	>r r@ i.w r@ i.h hash >swap
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
 	128 128 glue*thumb dummy-thumb }}thumb >r
