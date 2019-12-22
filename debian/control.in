@@ -9,7 +9,7 @@ Package: @PACKAGE_NAME@
 Version: @PACKAGE_VERSION@
 Architecture: all
 Depends: gforth (>= @GFDEBVER@), @PACKAGE_NAME@-libcc
-Recommends: gpsd, libgps-dev, @PACKAGE_NAME@-gui
+Recommends: gpsd, libgps-dev, @PACKAGE_NAME@-gui, libnotify-bin
 Description: @PACKAGE_NAME@ protocol stack
  net2o reinvents the Internet.  Applications include file copy, chat, DHT;
  others will follow.

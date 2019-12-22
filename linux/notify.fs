@@ -30,8 +30,18 @@
 	ELSE  notify$ $@ ['] escape-<&> $tmp  THEN
     ELSE  "<i>encrypted message</i>"  THEN ;
 
-Variable notify-send
-Variable upath
+: 0string ( addr u -- cstr )
+    over 0= IF  2drop s" "  THEN
+    1+ save-mem over + 1- 0 swap c! ;
+
+0 Value content-string
+0 Value title-string
+
+10 cells buffer: notify-args
+
+$Variable notify-send
+$Variable upath
+$Variable net2o-logo
 
 : !upath ( -- )
     "PATH" getenv upath $!
@@ -45,27 +55,14 @@ Variable upath
     THEN
     upath $off ;
 
-Variable net2o-logo
-
 : !net2o-logo ( -- )
     s" ../doc/net2o-logo.png" open-fpath-file 0= IF
 	rot close-file throw
 	over c@ '/' <> IF
 	    pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!
 	THEN
-	net2o-logo $+!
+	net2o-logo $+!  0 net2o-logo c$+!
     THEN ;
-
-!upath !net2o-logo
-
-: 0string ( addr u -- cstr )
-    over 0= IF  2drop s" "  THEN
-    1+ save-mem over + 1- 0 swap c! ;
-
-0 Value content-string
-0 Value title-string
-
-10 cells buffer: notify-args
 
 : !notify-args ( -- )
     here >r notify-args dp !
@@ -76,21 +73,21 @@ Variable net2o-logo
     "im.received\0" drop ,
     net2o-logo $@len IF
 	"-i\0" drop ,
-	net2o-logo $@ 0string ,
+	net2o-logo $@ drop ,
     THEN
     here to title-string 0 ,
     here to content-string 0 ,
     0 , \ must be terminated by null pointer
     r> dp ! ;
 
-!notify-args
+!upath !net2o-logo !notify-args
 
 :noname defers 'cold
-    notify-send off upath off net2o-logo off
     !upath !net2o-logo !notify-args ; is 'cold
 
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
-    title-string 0 ?free  content-string 0 ?free
+    title-string   0 ?free
+    content-string 0 ?free
     ['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN
     notify@ dup 0= IF  2drop 2drop  EXIT  THEN
     0string content-string !
