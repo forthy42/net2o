@@ -29,7 +29,10 @@ require minos2/gl-helper.fs
 
 [IFUNDEF] qr(
     debug: qr(
+    debug: health(
+    debug: msg(
     +db qr( \ turn it on )
+    +db msg( \ turn it on )
 [THEN]
 
 [IFUNDEF] xtype
@@ -40,8 +43,57 @@ require minos2/gl-helper.fs
 [THEN]
 
 [IFUNDEF] taghash?
-    : taghash? ( addrkey u1 addrecc u2 tag -- flag )
-	drop 2drop 2drop true ;
+    : smove ( a-from u-from a-to u-to -- )
+	rot 2dup u< IF
+	    drop move -9 throw
+	ELSE
+	    nip move
+	THEN ;
+    : -skip ( addr u char -- ) >r
+	BEGIN  1- dup  0>= WHILE  2dup + c@ r@ <>  UNTIL  THEN  1+ rdrop ;
+    : throwcode ( addr u -- )  exception Create ,
+	[: ( flag -- ) @ and throw ;] set-does>
+	[: >body @ >r ]] IF [[ r> ]] literal throw THEN [[ ;] set-optimizer ;
+    s" krypto mem request too big"   throwcode !!kr-size!!
+    s" insufficiend randomness"      throwcode !!insuff-rnd!!
+    s" unhealthy RNG state"          throwcode !!bad-rng!!
+    s" unsaulted random number"      throwcode !!no-salt!!
+    : .net2o-config/ ;
+    : <default> default-color attr! ;
+    : <info>    info-color    attr! ;
+    : <err>     error-color   attr! ;
+    require mkdir.fs
+    2 Constant ENOENT
+    #-512 ENOENT - Constant no-file#
+    : init-dir ( addr u mode -- flag ) >r
+	\G create a directory with access mode,
+	\G return true if the dictionary is new, false if it already existed
+	2dup file-status nip no-file# = IF
+	    r> mkdir-parents throw  true
+	ELSE  2drop rdrop  false  THEN ;
+    require kregion.fs
+    require crypto-api.fs
+    require 64bit.fs
+    require keccak.fs
+    require rng.fs
+    32 Constant keysize \ our shared secred is only 32 bytes long
+    keysize buffer: qr-key \ key used for QR challenge (can be only one)
+    $10 buffer: sigdate
+    $10 buffer: qrecc
+    : >qr-key ( addr u -- ) qr-key keysize move-rep ;
+    : rng>qr-key ( -- )  $8 rng$ >qr-key ;
+    : date>qr-key ( -- )  sigdate $8 >qr-key ;
+    : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
+	msg( ." chal=" 2dup xtype cr
+	2over bounds U+DO  I $10 xtype cr  $10 +LOOP )
+	c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
+	qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
+	msg( ." ecc= " qrecc $10 xtype space dup hex. cr ) ;
+    : >taghash ( addr u tag -- tag )
+	qr-key $8 rot taghash-rest ;
+    : taghash? ( addr u1 ecc u2 tag -- flag )
+	>r 2tuck over $8 >qr-key
+	r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
 [THEN]
 
 \ scan matrix manipulation
@@ -386,7 +438,7 @@ Create sat%s 1.0e sf, 1.666e sf, 1.333e sf, 2.0e sf,
 does> ( n -- ) swap sfloats + sf@ ;
 
 : tex-frame ( -- )
-    program init-program set-uniforms
+    program init-program load-colors 0.5e ColorMode! set-uniforms
     unit-matrix MVPMatrix set-matrix
     unit-matrix MVMatrix set-matrix ;
 : draw-scaled ( i -- )
@@ -409,18 +461,23 @@ previous
     [THEN]
 [THEN]
 
+: debug-scan-result ( addr u tag -- )
+    >r
+    bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
+    r> ." tag: " hex. cr
+    ." ecc: " guessecc $10 xtype cr
+    [IFDEF] distdebug
+	." dist/min/max: "
+	dist0 @ s>f [ 18 18 * ]L fm/ f>s . dist0-min ? dist0-max ? space
+	dist1 @ s>f [ 18 18 * ]L fm/ f>s . dist1-min ? dist1-max ? cr
+    [THEN] ;
 [IFUNDEF] scan-result
     : scan-result ( addr u tag -- )
-	qr( >r
-	bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
-	r> ." tag: " dup hex. cr
-	." ecc: " guessecc $10 xtype cr
-	[IFDEF] distdebug
-	    ." dist/min/max: "
-	    dist0 @ s>f [ 18 18 * ]L fm/ f>s . dist0-min ? dist0-max ? space
-	    dist1 @ s>f [ 18 18 * ]L fm/ f>s . dist1-min ? dist1-max ? cr
-	[THEN]
-	) ;
+	." scan result: " hex. cr
+	bounds U+DO
+	    I $10 xtype cr
+	    $10 +LOOP ;
+    0 Value scan-once?
 [THEN]
 
 : adapt-rgb ( -- )
@@ -429,46 +486,65 @@ previous
     g over - 2 5 */  + to green-level#   \ green at 40% of total
     r over - 2/      + to red-level# ;   \ red at 50% of total
 
-: scan-it ( -- )
+0 value scanned?
+
+: scan-it ( -- flag )
     search-corners
-    ?legit IF  scan-legit? IF
-	    guessecc $10 + c@ scan-result qr( ." took: " .time cr )
+    ?legit IF
+	qr( p0 2@ . . space p1 2@ . . space p2 2@ . . space p3 2@ . . cr )
+	scan-legit? IF
+	    guessecc $10 + c@
+	    qr( dup 2over rot debug-scan-result )
+	    scan-result
+	    qr( ." took: " .time cr )
 	    qr( save-png1 1 +to scan# )
-	ELSE  2drop  THEN
-    THEN ;
+	    true to scanned?  EXIT
+	ELSE
+	    2drop
+	    qr( save-png0 save-png1 1 +to scan# )
+	THEN
+    ELSE
+	qr( ." not legit" cr )
+	qr( save-png0 1 +to scan# )
+    THEN  false ;
 
 : scan-once ( -- )
     saturate% sf@ { f: sat }
-    draw-cam qr( !time ) 3 0 DO
+    draw-cam qr( !time ) 4 0 DO
 	I draw-scaled adapt-rgb
-	7 to rgb-xor scan-it
-	0 to rgb-xor scan-it
+	7 to rgb-xor scan-it  ?LEAVE
+	0 to rgb-xor scan-it  ?LEAVE
     LOOP  sat sat-reset
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
-    1 level# +!@ >r  BEGIN  scan-once >looper level# @ r@ <= UNTIL
+    1 level# +!@ >r
+    BEGIN  scan-once >looper
+    level# @ r@ <= scanned? scan-once? and or UNTIL
     rdrop ;
 
 : scan-qr ( -- )
     [IFDEF] lastscan$  lastscan$ $free  [THEN]
-    scan-start  ['] scan-loop catch >r  level# off
+    scan-start  false to scanned?
+    ['] scan-loop catch >r  level# off
     cam-end 0>framebuffer
     [IFDEF] saturate% 1.0e saturate% sf! [THEN]
     [IFDEF] showstatus showstatus [THEN]
     [IFDEF] terminal-program terminal-program terminal-init [THEN]
-    dup IF
-	." Scan failed" cr
-    ELSE
+    scanned? IF
 	." Scan completed" cr
+    ELSE
+	." Scan failed" cr
     THEN
     r> throw ;
 
 previous
 
-:noname ( -- )
-    ?get-me init-client
-    ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
-    scan-qr ; is run-scan-qr
+[IFDEF] run-scan-qr
+    :noname ( -- )
+	?get-me init-client
+	?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
+	scan-qr ; is run-scan-qr
+[THEN]
 
 \\\
 Local Variables:

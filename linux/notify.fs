@@ -40,29 +40,26 @@
 10 cells buffer: notify-args
 
 $Variable notify-send
-$Variable upath
 $Variable net2o-logo
 
-: !upath ( -- )
+: file>abspath ( file u path -- addr u )
+    ['] file>path catch IF
+	drop 2drop #0.
+    ELSE
+	over c@ '/' <> IF
+	    [: pad $1000 get-dir type '/' emit type ;] $tmp
+	    compact-filename
+	THEN
+    THEN ;
+
+: !upath ( -- ) { | w^ upath }
     "PATH" getenv upath $!
     upath $@ bounds ?DO I c@ ':' = IF 0 I c! THEN LOOP
-    "notify-send" upath open-path-file 0= IF
-	rot close-file throw
-	over c@ '/' <> IF
-	    pad $1000 get-dir notify-send $! '/' notify-send c$+!
-	THEN
-	notify-send $+!
-    THEN
-    upath $off ;
+    "notify-send" upath file>abspath notify-send $!
+    upath $free ;
 
 : !net2o-logo ( -- )
-    s" ../doc/net2o-logo.png" open-fpath-file 0= IF
-	rot close-file throw
-	over c@ '/' <> IF
-	    pad $1000 get-dir net2o-logo $! '/' net2o-logo c$+!
-	THEN
-	net2o-logo $+!  0 net2o-logo c$+!
-    THEN ;
+    s" ../doc/net2o-logo.png" fpath file>abspath net2o-logo $! ;
 
 : !notify-args ( -- )
     here >r notify-args dp !
