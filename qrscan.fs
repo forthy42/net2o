@@ -32,7 +32,7 @@ require minos2/gl-helper.fs
     debug: health(
     debug: msg(
     +db qr( \ turn it on )
-    +db msg( \ turn it on )
+    -db msg( \ turn it on )
 [THEN]
 
 [IFUNDEF] xtype
@@ -84,8 +84,7 @@ require minos2/gl-helper.fs
     : rng>qr-key ( -- )  $8 rng$ >qr-key ;
     : date>qr-key ( -- )  sigdate $8 >qr-key ;
     : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
-	msg( ." chal=" 2dup xtype cr
-	2over bounds U+DO  I $10 xtype cr  $10 +LOOP )
+	msg( ." chal=" 2dup xtype cr 2over dump )
 	c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
 	qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
 	msg( ." ecc= " qrecc $10 xtype space dup hex. cr ) ;
@@ -114,8 +113,8 @@ inverse-default 32 sfloats bounds
 83e FValue x-scansize
 83e FValue y-scansize
 
-0e FValue y-offset
-0e FValue x-offset
+0.5e FValue y-offset
+-0.5e FValue x-offset
 
 \ matrix inversion
 
@@ -310,7 +309,9 @@ p3 2 cells + Constant px
 	    THEN
 	    rgba+
 	LOOP
-    LOOP  drop ;
+    LOOP  drop
+    qr( msg( p0 2@ . . space p1 2@ . . space p2 2@ . . space p3 2@ . . cr ) )
+;
 
 : ?legit ( -- flag )
     p0 2@ init-xy dup d<>
@@ -434,7 +435,7 @@ previous
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
 
-Create sat%s 1.0e sf, 1.666e sf, 1.333e sf, 2.0e sf,
+Create sat%s 1.0e sf, 1.666666e sf, 1.333333e sf, 2.0e sf,
 does> ( n -- ) swap sfloats + sf@ ;
 
 : tex-frame ( -- )
@@ -462,8 +463,7 @@ previous
 [THEN]
 
 : debug-scan-result ( addr u tag -- )
-    >r
-    bounds ?DO  ." qr : " I $10 xtype cr $10 +LOOP
+    >r dump
     r> ." tag: " hex. cr
     ." ecc: " guessecc $10 xtype cr
     [IFDEF] distdebug
@@ -473,7 +473,7 @@ previous
     [THEN] ;
 [IFUNDEF] scan-result
     : scan-result ( addr u tag -- )
-	." scan result: " hex. cr
+	." scan result: " hex. ." sat: " saturate% sf@ f. x-offset f. y-offset f. x-scansize f. y-scansize f. cr
 	bounds U+DO
 	    I $10 xtype cr
 	    $10 +LOOP ;
@@ -489,31 +489,46 @@ previous
 0 value scanned?
 
 : scan-it ( -- flag )
-    search-corners
     ?legit IF
-	qr( p0 2@ . . space p1 2@ . . space p2 2@ . . space p3 2@ . . cr )
 	scan-legit? IF
 	    guessecc $10 + c@
-	    qr( dup 2over rot debug-scan-result )
+	    msg( qr( dup 2over rot debug-scan-result ) )
 	    scan-result
 	    qr( ." took: " .time cr )
 	    qr( save-png1 1 +to scan# )
 	    true to scanned?  EXIT
 	ELSE
 	    2drop
-	    qr( save-png0 save-png1 1 +to scan# )
+	    \ qr( save-png0 save-png1 1 +to scan# )
 	THEN
     ELSE
-	qr( ." not legit" cr )
-	qr( save-png0 1 +to scan# )
+	msg( qr( ." not legit" cr ) )
+	\ qr( save-png0 1 +to scan# )
     THEN  false ;
+
+: scan-its ( -- )
+    84 82 DO
+	I s>f to x-scansize
+	84 82 DO
+	    I s>f to y-scansize
+	    2 -1 DO
+		I s>f f2/ to y-offset
+		2 -1 DO
+		    I s>f f2/ to x-offset
+		    scan-it IF  true
+			UNLOOP UNLOOP UNLOOP UNLOOP
+			EXIT  THEN
+		2 +LOOP
+	    2 +LOOP
+	LOOP
+    LOOP  false ;
 
 : scan-once ( -- )
     saturate% sf@ { f: sat }
     draw-cam qr( !time ) 4 0 DO
 	I draw-scaled adapt-rgb
-	7 to rgb-xor scan-it  ?LEAVE
-	0 to rgb-xor scan-it  ?LEAVE
+	7 to rgb-xor search-corners scan-its  ?LEAVE
+	0 to rgb-xor search-corners scan-its  ?LEAVE
     LOOP  sat sat-reset
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
