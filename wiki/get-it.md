@@ -55,6 +55,31 @@ When you do an `apt-key list`, the result should contain this key:
     sub   4096R/3E1896A1 2017-09-20
     sub   4096R/50C9A69B 2017-09-20
 
+Get it in a Docker Container
+----------------------------
+
+Pull the docker image from my [Dockerhub account](https://hub.docker.com/r/forthy42/net2o) with
+
+    docker pull forthy42/net2o
+
+Create a directory for the files net2o will use.  This will be mounted as
+`/net2o` in the container.  A minimal config file is needed for net2o to find
+the other data:
+
+    mkdir ~/net2o.dk
+    cat <<EOF  >~/net2o.dk/config
+	.net2o="/net2o"
+	.net2o-config="/net2o"
+	.net2o-cache="/net2o"
+	EOF
+
+optionally copy *other* existing net2o files into this directory keeping the
+directory structure intact.
+
+Create an alias to run the docker:
+
+    alias n2o="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) forthy42/net2o"
+
 Get it for Android
 ------------------
 
@@ -69,9 +94,10 @@ on any further run.
 ### Key information
 
 The [certificate](https://net2o.de/bernd@net2o.de-android.cer) has the
-SHA-1 fingerprint and the informations as follows:
+SHA-1/SHA256 fingerprint and the informations as follows:
 
-    00:44:1B:9D:F8:0B:9D:9E:2F:68:9D:0F:B9:B4:85:28:D4:10:5C:7E
+    sha-1:  00:44:1B:9D:F8:0B:9D:9E:2F:68:9D:0F:B9:B4:85:28:D4:10:5C:7E
+	sha256: 87:21:D8:3A:FF:47:8D:50:D0:02:00:C7:06:A1:00:6A:69:1C:37:47:88:52:94:45:C7:E0:DA:8A:47:99:F2:97
     CN=Bernd Paysan, OU=dev, O=net2o, L=München, ST=Deutschland, C=DE
 
 and signs with sha1rsa2048 (Google!).  If you want to verify the apk yourself,
@@ -91,16 +117,17 @@ from the latest Snapshot first.
 Then you install the current [net2o](https://net2o.de/windows/net2o.exe)
 snapshot.
 
-### Key information (new key for September 18th 2018)
+### Key information (new key for September 22th 2019)
 
 I changed my key to a Certum smartcard based rsa2048 key, this is the first
 update, and I generated a new key pair for that.
 
 These files are now signed with a [sha256rsa2048
 certificate](https://net2o.de/bernd@net2o.de-windows.crt) with the
-SHA-1 fingerprint (why are fingerprints still SHA-1?)
+SHA-1/SHA256 fingerprint
 
-	62:a8:43:a4:38:68:ab:46:db:ad:c6:c3:18:18:e5:02:12:fe:47:de
+    sha-1:  96:0b:7e:b8:cb:7f:52:f6:70:00:bf:23:5e:25:66:c9:eb:9c:d0:3c
+	sha256: 72:BE:1C:EE:D9:4E:20:94:92:7A:13:BC:C6:8F:7C:E9:3F:15:81:F6:6E:91:85:6B:F6:C5:E1:BA:15:22:01:DA
 	E = bernd@net2o.de
 	CN = Open Source Developer, Bernd Paysan
 	L = München

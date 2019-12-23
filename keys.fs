@@ -930,19 +930,19 @@ true Value scan-once?
 	level# @ 0> scan-once? and level# +!  [ previous ]
     [THEN] ;
 
-: scanned-key ( addr u -- )
-    scanned-key-in ?scan-level ;
-: scanned-hash ( addr u -- )
-    ." hash: " 85type cr ;
-: scanned-keysig ( addr u -- )
+: scanned-key ( addr u -- flag )
+    scanned-key-in ?scan-level false ;
+: scanned-hash ( addr u -- flag )
+    ." hash: " 85type cr true ;
+: scanned-keysig ( addr u -- flag )
     ." sig: " 85type cr
-    ?scan-level ;
-: scanned-secret ( addr u -- )
+    ?scan-level true ;
+: scanned-secret ( addr u -- flag )
     ." secret: " 85type cr
-    ?scan-level ;
-: scanned-payment ( addr u -- )
+    ?scan-level true ;
+: scanned-payment ( addr u -- flag )
     ." payment: " 85type cr
-    ?scan-level ;
+    ?scan-level true ;
 
 Create scanned-x
 ' noop , \ stub for ownkey
@@ -960,10 +960,11 @@ Variable lastscan$
     >r $make { w^ just$ } r> just$ c$+!
     just$ $@ lastscan$ $@ str=
     just$ @ lastscan$ $!buf ;
-: scan-result ( addr u tag -- )
-    dup 2over rot lastscan? IF drop 2drop EXIT THEN
+: scan-result ( addr u tag -- flag )
+    dup 2over rot lastscan? IF drop 2drop false EXIT THEN
     dup scanned-max# u< IF  cells scanned-x + perform
-    ELSE  ." unknown tag " hex. ." scanned " 85type cr ?scan-level  THEN ;
+    ELSE  ." unknown tag " hex. ." scanned " 85type cr ?scan-level true
+    THEN ;
 
 \ generate keys
 

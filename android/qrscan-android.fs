@@ -17,6 +17,17 @@
 
 also opengl also android also jni
 
+: draw-cam ( -- )
+    0>framebuffer
+    camera-init screen-orientation 1e 1e draw-scan sync
+    cam-w cam-h scan-fb-raw >framebuffer
+    1 1e 1e draw-scan
+    scan-tex-raw linear-mipmap mipmap ;
+
+8 Value dummy-images
+: flush-images ( -- )
+    dummy-images 0 DO  draw-cam  LOOP ;
+
 : scan-start ( -- )
     hidekb hidestatus >changed  screen+keep
     "android.permission.CAMERA"
@@ -27,13 +38,7 @@ also opengl also android also jni
 	['] VertexShader ['] FragmentShader create-program to program
     THEN
     cam-prepare  new-scantexes ;
-
-: draw-cam ( -- )
-    0>framebuffer
-    camera-init screen-orientation 1e 1e draw-scan sync
-    cam-w cam-h scan-fb-raw >framebuffer
-    1 1e 1e draw-scan
-    scan-tex-raw linear-mipmap mipmap ;
+    \ flush out images still in the buffer
 
 previous previous previous
 

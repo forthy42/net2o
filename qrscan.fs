@@ -516,10 +516,10 @@ previous
 	    scan-legit? IF
 		guessecc $10 + c@
 		msg( dup 2over rot debug-scan-result )
-		scan-result
+		scan-result dup to scanned?
 		qr( ." took: " .time cr )
 		qr( save-png1 1 +to scan# )
-		true to scanned?  UNLOOP  EXIT
+		UNLOOP  EXIT
 	    ELSE
 		2drop
 		msg( ." not legit?" cr  save-png0 save-png1 1 +to scan# )
@@ -555,7 +555,6 @@ previous
     rdrop ;
 
 : scan-qr ( -- )
-    [IFDEF] lastscan$  lastscan$ $free  [THEN]
     scan-start  false to scanned?
     ['] scan-loop catch >r  level# off
     cam-end 0>framebuffer
