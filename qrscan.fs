@@ -113,8 +113,8 @@ inverse-default 32 sfloats bounds
 83e FValue x-scansize
 83e FValue y-scansize
 
-0.5e FValue y-offset
--0.5e FValue x-offset
+0e FValue y-offset
+0e FValue x-offset
 
 \ matrix inversion
 
@@ -246,8 +246,12 @@ guessecc $10 + Constant guesstag
 
 scan-w 3 rshift Constant scan-step
 
+0 Value strip+x
+0 Value strip+y
+
 : >strip ( index --- addr )
-    2* 2* scan-w + scan-w 2* * scan-w + rgbas
+    2* 2* scan-w + strip+y + scan-w 2* *
+    scan-w + strip+x + rgbas
     scan-buf1 $@ rot safe/string drop ;
 : >strip32 ( addr -- addr' u step )
     scan-right - $100 4 ;
@@ -421,17 +425,17 @@ previous
     1e cam-w cam-h over umin      fm*/ ;
 
 : scan-legit ( -- ) \ resize a legit QR code
+    [IFDEF] distdebug
+	dist0 off dist0-max off dist0-min on
+	dist1 off dist1-max off dist1-min on
+    [THEN]
     clear init-scan' set-scan' >scan-matrix
     scan-matrix MVPMatrix set-matrix
     scan-matrix MVMatrix  set-matrix
     scan-tex-raw linear-mipmap 0 scan-xy draw-scan scan-grab1 ;
 
 : scan-legit? ( -- addr u flag )
-    [IFDEF] distdebug
-	dist0 off dist0-max off dist0-min on
-	dist1 off dist1-max off dist1-min on
-    [THEN]
-    scan-legit >guess
+    >guess
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
 
@@ -473,7 +477,8 @@ previous
     [THEN] ;
 [IFUNDEF] scan-result
     : scan-result ( addr u tag -- )
-	." scan result: " hex. ." sat: " saturate% sf@ f. x-offset f. y-offset f. x-scansize f. y-scansize f. cr
+	." scan result: " hex. ." sat: " saturate% sf@ f.
+	x-scansize f. y-scansize f. strip+x . strip+y . cr
 	bounds U+DO
 	    I $10 xtype cr
 	    $10 +LOOP ;
@@ -490,17 +495,22 @@ previous
 
 : scan-it ( -- flag )
     ?legit IF
-	scan-legit? IF
-	    guessecc $10 + c@
-	    msg( qr( dup 2over rot debug-scan-result ) )
-	    scan-result
-	    qr( ." took: " .time cr )
-	    qr( save-png1 1 +to scan# )
-	    true to scanned?  EXIT
-	ELSE
-	    2drop
-	    \ qr( save-png0 save-png1 1 +to scan# )
-	THEN
+	scan-legit
+	$10 0 DO
+	    I 3 and to strip+x
+	    I 2 rshift to strip+y
+	    scan-legit? IF
+		guessecc $10 + c@
+		msg( qr( dup 2over rot debug-scan-result ) )
+		scan-result
+		qr( ." took: " .time cr )
+		qr( save-png1 1 +to scan# )
+		true to scanned?  UNLOOP  EXIT
+	    ELSE
+		2drop
+		\ qr( save-png0 save-png1 1 +to scan# )
+	    THEN
+	LOOP
     ELSE
 	msg( qr( ." not legit" cr ) )
 	\ qr( save-png0 1 +to scan# )
@@ -511,15 +521,9 @@ previous
 	I s>f to x-scansize
 	84 82 DO
 	    I s>f to y-scansize
-	    2 -1 DO
-		I s>f f2/ to y-offset
-		2 -1 DO
-		    I s>f f2/ to x-offset
-		    scan-it IF  true
-			UNLOOP UNLOOP UNLOOP UNLOOP
-			EXIT  THEN
-		2 +LOOP
-	    2 +LOOP
+	    scan-it IF  true
+		UNLOOP UNLOOP
+		EXIT  THEN
 	LOOP
     LOOP  false ;
 
