@@ -439,7 +439,7 @@ previous
     >guessecc tag@ guesstag c!
     2dup guessecc $10 ecc-ok? ;
 
-Create sat%s 1.0e sf, 1.666666e sf, 1.333333e sf, 2.0e sf,
+Create sat%s 1.0e sf, 2.0e sf, 1.5e sf, 3.0e sf, \ 1.5 and 3 not needed
 does> ( n -- ) swap sfloats + sf@ ;
 
 : tex-frame ( -- )
@@ -485,11 +485,25 @@ previous
     0 Value scan-once?
 [THEN]
 
+#0. 2Value rminmax
+#0. 2Value gminmax
+#0. 2Value bminmax
+
 : adapt-rgb ( -- )
-    scan-buf0 $@ get-minmax-rgb { d: r d: g d: b }
-    b over - 2/ 2/   + to blue-level#    \ blue level is 1/4 of total
-    g over - 2 5 */  + to green-level#   \ green at 40% of total
-    r over - 2/      + to red-level# ;   \ red at 50% of total
+    scan-buf0 $@ get-minmax-rgb to bminmax to gminmax to rminmax
+    msg(
+    ." rminmax: " rminmax hex. hex. cr
+    ." gminmax: " gminmax hex. hex. cr
+    ." bminmax: " bminmax hex. hex. cr
+    ) ;
+: white-bg-levels ( -- )
+    bminmax over - 2/ 2/   + to blue-level#    \ blue level is 1/4 of total
+    gminmax over - 2 5 */  + to green-level#   \ green at 40% of total
+    rminmax over - 2/      + to red-level# ;   \ red at 50% of total
+: black-bg-levels ( -- )
+    bminmax over - 2/  + to blue-level#    \ blue level is 50% of total
+    gminmax over - 2/  + to green-level#   \ green at 50% of total
+    rminmax over - 2/  + to red-level# ;   \ red at 50% of total
 
 0 value scanned?
 
@@ -497,42 +511,41 @@ previous
     ?legit IF
 	scan-legit
 	$10 0 DO
-	    I 3 and to strip+x
+	    I 3 and    to strip+x
 	    I 2 rshift to strip+y
 	    scan-legit? IF
 		guessecc $10 + c@
-		msg( qr( dup 2over rot debug-scan-result ) )
+		msg( dup 2over rot debug-scan-result )
 		scan-result
 		qr( ." took: " .time cr )
 		qr( save-png1 1 +to scan# )
 		true to scanned?  UNLOOP  EXIT
 	    ELSE
 		2drop
-		\ qr( save-png0 save-png1 1 +to scan# )
+		msg( ." not legit?" cr  save-png0 save-png1 1 +to scan# )
 	    THEN
 	LOOP
     ELSE
-	msg( qr( ." not legit" cr ) )
-	\ qr( save-png0 1 +to scan# )
+	msg( ." not ?legit" cr  save-png0 1 +to scan# )
     THEN  false ;
 
 : scan-its ( -- )
-    84 82 DO
+    85 80 DO
 	I s>f to x-scansize
-	84 82 DO
+	85 80 DO
 	    I s>f to y-scansize
 	    scan-it IF  true
 		UNLOOP UNLOOP
 		EXIT  THEN
-	LOOP
-    LOOP  false ;
+	2 +LOOP
+    2 +LOOP  false ;
 
 : scan-once ( -- )
     saturate% sf@ { f: sat }
-    draw-cam qr( !time ) 4 0 DO
+    draw-cam qr( !time ) 2 0 DO
 	I draw-scaled adapt-rgb
-	7 to rgb-xor search-corners scan-its  ?LEAVE
-	0 to rgb-xor search-corners scan-its  ?LEAVE
+	black-bg-levels 7 to rgb-xor search-corners scan-its  ?LEAVE
+	white-bg-levels 0 to rgb-xor search-corners scan-its  ?LEAVE
     LOOP  sat sat-reset
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
