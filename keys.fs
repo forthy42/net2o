@@ -1352,7 +1352,7 @@ event: :>qr-invitation { task w^ pk -- }
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
     <event up@ elit, pk $10 + $make elit, :>qr-invitation ?query-task event>
-    false ;
+    true ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key

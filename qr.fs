@@ -127,7 +127,7 @@ $FFFFFFFF ,
 \ generate checksum and tag bits
 
 : >qr-key ( addr u -- ) qr-key keysize move-rep ;
-: rng>qr-key ( -- )  $8 rng$ >qr-key ;
+: rng>qr-key ( -- )  $8 rng$ >qr-key qr( qr-key 8 xtype cr ) ;
 : date>qr-key ( -- )  sigdate $8 >qr-key ;
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
     c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
@@ -137,7 +137,8 @@ $FFFFFFFF ,
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
     >r 2tuck over $8 >qr-key
-    r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
+    r> taghash-rest drop 8 /string qrecc 8 + 8 str=
+    qr( dup IF  ." ecc= " qrecc $10 xtype cr  THEN ) ;
 : >ecc ( addr u tag -- ) >taghash
     qr( ." ecc: " qrecc $10 xtype cr )
     keyqr [ keyqr# #03 *  #4 + ]L +  qrecc      >keyhline drop

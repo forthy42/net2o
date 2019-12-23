@@ -92,7 +92,8 @@ require minos2/gl-helper.fs
 	qr-key $8 rot taghash-rest ;
     : taghash? ( addr u1 ecc u2 tag -- flag )
 	>r 2tuck over $8 >qr-key
-	r> taghash-rest drop 8 /string qrecc 8 + 8 str= ;
+	r> taghash-rest drop 8 /string qrecc 8 + 8 str=
+	qr( dup IF  ." ecc= " qrecc $10 xtype cr  THEN ) ;
 [THEN]
 
 \ scan matrix manipulation
@@ -550,8 +551,7 @@ previous
     ekey? IF  ekey dup k-volup = swap bl = or  IF  save-pngs  THEN  THEN ;
 : scan-loop ( -- )
     1 level# +!@ >r
-    BEGIN  scan-once >looper
-    level# @ r@ <= scanned? scan-once? and or UNTIL
+    BEGIN  scan-once >looper level# @ r@ <= UNTIL
     rdrop ;
 
 : scan-qr ( -- )
