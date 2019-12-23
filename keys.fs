@@ -931,7 +931,7 @@ true Value scan-once?
     [THEN] ;
 
 : scanned-key ( addr u -- flag )
-    scanned-key-in ?scan-level false ;
+    scanned-key-in ?scan-level true ;
 : scanned-hash ( addr u -- flag )
     ." hash: " 85type cr true ;
 : scanned-keysig ( addr u -- flag )
@@ -954,7 +954,7 @@ Create scanned-x
 
 here scanned-x - cell/ constant scanned-max#
 
-Variable lastscan$
+$Variable lastscan$
 
 : lastscan? ( addr u tag -- flag )
     >r $make { w^ just$ } r> just$ c$+!
@@ -1351,7 +1351,8 @@ event: :>qr-invitation { task w^ pk -- }
 
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    <event up@ elit, pk $10 + $make elit, :>qr-invitation ?query-task event> ;
+    <event up@ elit, pk $10 + $make elit, :>qr-invitation ?query-task event>
+    false ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device
 \ has access to the secret key
