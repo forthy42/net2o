@@ -51,9 +51,12 @@ tex: 36c3-logo
     }}v >o font-size# f2/ to border o o>
     to baseline# ;
 
-$FFFFBBFF text-color: redish
-
 ' }}i18n-text is }}text'
+
+day-mode
+$005555FF text-color: author#
+night-mode
+$44FFFFFF re-color author#
 
 {{
     {{
@@ -62,8 +65,6 @@ $FFFFBBFF text-color: redish
 	\ page 0
 	{{
 	    $FFFFFF00 dup pres-frame
-	    ' redish >body f@ ' dark-blue >body f!
-	    $00CCCCFF dup text-emoji-color, ' blackish >body f!
 
 	    tex: cloudcalypse
 	    ' cloudcalypse "cloudcalypse-16-9.jpg" 2e 3e f/ }}image-file drop /center
@@ -78,8 +79,8 @@ $FFFFBBFF text-color: redish
 		    {{
 			glue*l }}glue
 			{{
-			    glue*l }}glue
-			    \tiny l" Photo: Ralph W. Lambrecht" }}text' /right \normal
+			    glue*l }}glue author#
+			    \tiny l" Photo: Ralph W. Lambrecht" }}text' /right \normal blackish
 			}}v box[]
 		    }}z box[]
 		tex: vp-title glue*l ' vp-title }}vp vp[] dup value title-vp
@@ -89,8 +90,7 @@ $FFFFBBFF text-color: redish
 
 	\ page 1
 	{{
-	    ' whitish >body f@ ' blackish >body f!
-	    $000000FF dup pres-frame
+	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" Motivation" /title
 		glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
@@ -100,10 +100,10 @@ $FFFFBBFF text-color: redish
 		glue*l }}glue \ ) $CCDDDD3F color, 4e }}frame dup .button1
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
-	
+
 	\ page 2
 	{{
-	    $3F0000FF dup pres-frame
+	    $3F0000FF $FFAAAAFF pres-frame
 	    {{
 		l" 6 Years after Snowden" /title
 		l" What changed?" \\
@@ -128,28 +128,52 @@ $FFFFBBFF text-color: redish
 	
 	\ page 3
 	{{
-	    $3F0000FF dup pres-frame
+	    $3F0000FF $FFAAAAFF pres-frame
+	    {{
+		glue*l }}glue
+		tex: snowden
+		' snowden "snowden.png" 0.666e }}image-file drop /right
+		glue*l }}glue
+	    }}v >o font-size# to border o o>
 	    {{
 		l" Permanent Record" /title
 		l" On social networks" /subsection
 		\italic
-		l" Few of us understood it at that time, but none of the things that we’d go on to share would belong to us anymore. The successors to the e–commerce companies that had failed because they couldn’t find anything we were interested in buing now had a new product to sell." p\\
+		l" … Few of us understood it at that time, but none of the things that we’d go on to share would belong to us anymore. The successors to the e–commerce companies that had failed because they couldn’t find anything we were interested in buying now had a new product to sell." p\\
 		\skip
-		l" That new product was Us." p\\
-		l" Our attention, our activities, our locations, our desires—everything about us that we revealed, knowingly or not, was being surveilled and sold in secret, so as to delay the inevitable feeling of violation that is, for most of us, coming only now. And this surveillance would go on to be actively encouraged, and even funded by an army of governments greedy for the vast volume of intelligence they would gain." p\\
+		l"   That new product was Us." p\\
+		l"   Our attention, our activities, our locations, our desires—everything about us that we revealed, knowingly or not, was being surveilled and sold in secret, so as to delay the inevitable feeling of violation that is, for most of us, coming only now. And this surveillance would go on to be actively encouraged, and even funded by an army of governments greedy for the vast volume of intelligence they would gain." p\\
 		\regular \skip
 		l" Edward Snowden" }}text' /right
+		\skip
+		l" Note: This is a libertarian framing; corporate vs. government power evilness" p\\
 		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	    }}v box[] >o o Value snowden-page2 font-size# to border o o>
 	}}z box[] /flip dup >slides
-	
-	
+
 	\ page 4
 	{{
-	    $200020FF dup pres-frame
+	    $5F0000FF $FF7777FF pres-frame
+	    {{
+		l" Associal Hateworks" /title
+		l" Problems with People since Eternal September" /subsection
+		vt{{
+		    l" Opinions " l" are not facts, but values people believe in" b\\
+		    l" Believes " l" are not up to discussion, but part of identity" b\\
+		    l" Identity " l" is vigurously defended and used to segregate people" b\\
+		    l" Walls "    l" are in the head, and tearing them down causes aggression" b\\
+		    \skip
+		    l" Free Speech " l" is a concept of a time where religion was strong and science weak" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 5
+	{{
+	    $200020FF $FFCCFFFF pres-frame
 	    {{
 		l" net2o in a nutshell" /title
-		l" net2o consists of the following 6 layers (implemented bottom up):" \\
+		l" net2o consists of the following 6 layers (implemented bottom up):" /subsection
 		\skip
 		{{
 		    vt{{
@@ -163,16 +187,16 @@ $FFFFBBFF text-color: redish
 		    l" 4. " l" Timing driven delay minimizing flow control" b\\
 		    l" 5. " l" Stack–oriented tokenized command language" b\\
 		    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
-		    l" 7. " l" Apps in a sandboxed environment for displaying content"
+		    l" 7. " l" Apps in a sandboxed environment for displaying content (ΜΙΝΩΣ2)"
 		    b\\
 		}}vt
 		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 	
-\ page 5
+	\ page 6
 	{{
-	    $200020FF dup pres-frame
+	    $200020FF $FFCCFFFF pres-frame
 	    {{
 		l" Social Networks in net2o" /title
 		vt{{
@@ -191,7 +215,7 @@ $FFFFBBFF text-color: redish
 
 	\ page 6
 	{{
-	    $202000FF dup pres-frame
+	    $202000FF $FFFFCCFF pres-frame
 	    {{
 		l" Last year’s things still to do" /title
 		vt{{
@@ -208,9 +232,9 @@ $FFFFBBFF text-color: redish
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
-\ page 7
+	\ page 7
 	{{
-	    $200030FF dup pres-frame
+	    $200030FF $EECCFFFF pres-frame
 	    {{
 		l" New Challenges found" /title
 		l" This endeaver is an exploration of what’s actually needed" /subsection
@@ -228,11 +252,13 @@ $FFFFBBFF text-color: redish
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
+
 	\ page 8
 	{{
-	    $200030FF dup pres-frame
+	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Protocol to provide “who has what”" /title
+		l" “Who has What”" /title
+		l" Query object origin by hash" /subsection
 		vt{{
 		    l" ❓ " l" Original plan: keep hashes in DHT" b\\
 		    l" ➡ " l" Query reveals who wants what" b\\
@@ -246,9 +272,10 @@ $FFFFBBFF text-color: redish
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
+
 	\ page 9
 	{{
-	    $200030FF dup pres-frame
+	    $200030FF $EECCFF pres-frame
 	    {{
 		l" Comfortable ID cloning" /title
 		l" solve the multi–device problem" /subsection
@@ -264,9 +291,29 @@ $FFFFBBFF text-color: redish
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
-	\ page 12
+
+	\ page 10
 	{{
-	    $000000FF dup pres-frame
+	    $200030FF $EECCFF pres-frame
+	    {{
+		l" Web–only networks" /title
+		l" Strict port filter policy, DNS+HTTP[S] only" /subsection
+		vt{{
+		    l" ❓ " l" Can not use UDP as overlay (DNS only to intern resolver)" b\\
+		    l" ➡ " l" need a transport layer over HTTPS" b\\
+		    l" ❓ " l" Web Socket API?" b\\
+		    l" ➡ " l" Adversary may test connection and drop connections if net2o tunnel is detected" b\\
+		    l" ➡ " l" Add authorization" b\\
+		    l" ➡ " l" Requires single–package auth" b\\
+		    l" ➡ " l" Change of net2o connection setup" b\\
+		    l" ➡ " l" Bonus: one RTD less for NAT traversal, too" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides	
+
+	\ page 11
+	{{
+	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" The non–technical problems" /title
 		vt{{
@@ -277,9 +324,9 @@ $FFFFBBFF text-color: redish
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 	
-	\ page 13
+	\ page 12
 	{{
-	    $000000FF dup pres-frame
+	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" Literatur & Links" /title \small
 		vt{{
@@ -320,6 +367,8 @@ also opengl
 [THEN]
 
 previous
+
+night-mode
 
 script? [IF]
     next-arg s" time" str= [IF]  +db time( \ ) [THEN]
