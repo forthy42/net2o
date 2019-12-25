@@ -1,3 +1,4 @@
+#! /usr/bin/env gforth-fast
 \ Presentation on CloudCalypse
 
 \ Copyright © 2018 Bernd Paysan
@@ -159,12 +160,14 @@ $44FFFFFF re-color author#
 		l" Problems with People since Eternal September" /subsection
 		vt{{
 		    l" Opinions " l" are not facts, but values people believe in" b\\
-		    l" Believes " l" are not up to discussion, but part of identity" b\\
+		    l" Beliefs " l" are not up to discussion, but part of identity" b\\
 		    l" Identity " l" is vigurously defended and used to segregate people" b\\
 		    l" Walls "    l" are in the head, and tearing them down causes aggression" b\\
 		    \skip
 		    l" Free Speech " l" is a concept from a time where religion" b\\
 		    l" " l" was strong and science weak" b\\
+		    l" " l" It helped coexistence of different beliefs" b\\
+		    l" " l" and scientific research against dogma" b\\
 		}}vt
 	    }}v box[] >bdr
 	    {{
@@ -177,6 +180,31 @@ $44FFFFFF re-color author#
 	}}z box[] /flip dup >slides
 
 	\ page 5
+	{{
+	    $221100FF $DDEEFFFF pres-frame
+	    {{
+		l" Centralized/Federated/P2P?" /title
+		vt{{
+		    l" Centralized" /subsection
+		    l" + " l" good funding, robust hardware and attack protection" b\\
+		    l" – " l" lacks privacy, honeypot, captive, EOL at whim of CEO" b\\
+		    l" – " l" diverse global censorship, possible toxic business model" b\\
+		    l" Federated" /subsection
+		    l" + " l" not captive, small business models" b\\
+		    l" ± " l" regional censorship (nodes blacklisted, e.g. Lolicon Mastodon nodes)" b\\
+		    l" – " l" poor funding, underpowered hardware/attack protection" b\\
+		    l" – " l" lacks privacy, EOL of nodes at whim of node admin" b\\
+		    l" Peer2Peer" /subsection
+		    l" + " l" Full control over your node, good privacy" b\\
+		    l" + " l" Development funding? Otherwise cheap" b\\
+		    l" ± " l" non–existend censorship (attracts censorship refugees)" b\\
+		    l" – " l" Full responsibility for your node" b\\
+		}}vt
+		glue*ll }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 6
 	{{
 	    $200020FF $FFCCFFFF pres-frame
 	    {{
@@ -224,7 +252,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
-	\ page 6
+	\ page 7
 	{{
 	    $202000FF $FFFFCCFF pres-frame
 	    {{
@@ -243,7 +271,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
-	\ page 7
+	\ page 8
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
@@ -264,7 +292,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
-	\ page 8
+	\ page 9
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
@@ -284,7 +312,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
 
-	\ page 9
+	\ page 10
 	{{
 	    $200030FF $EECCFF pres-frame
 	    {{
@@ -303,7 +331,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
 
-	\ page 10
+	\ page 11
 	{{
 	    $200030FF $EECCFF pres-frame
 	    {{
@@ -322,7 +350,7 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
 
-	\ page 11
+	\ page 12
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
