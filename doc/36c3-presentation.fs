@@ -146,8 +146,8 @@ $44FFFFFF re-color author#
 		\regular \skip
 		l" Edward Snowden" }}text' /right
 		\skip
-		l" Note: This is a libertarian framing; corporate vs. government power evilness" p\\
-		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+		l" Note: libertarian framing? corporate vs. government evilness" p\\
+		glue*l }}glue
 	    }}v box[] >o o Value snowden-page2 font-size# to border o o>
 	}}z box[] /flip dup >slides
 
@@ -163,9 +163,17 @@ $44FFFFFF re-color author#
 		    l" Identity " l" is vigurously defended and used to segregate people" b\\
 		    l" Walls "    l" are in the head, and tearing them down causes aggression" b\\
 		    \skip
-		    l" Free Speech " l" is a concept of a time where religion was strong and science weak" b\\
+		    l" Free Speech " l" is a concept from a time where religion" b\\
+		    l" " l" was strong and science weak" b\\
 		}}vt
 	    }}v box[] >bdr
+	    {{
+		glue*ll }}glue \tiny \mono dark-blue
+		{{ glue*ll }}glue l" 🔗" }}text' l" xkcd.com/386" }}text' _underline_ }}h
+		[: s" xdg-open https://xkcd.com/386" system ;] 0 click[]
+		tex: duty-calls \normal \sans
+		' duty-calls "duty_calls.png" 0.95e }}image-file drop /right
+	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
 	\ page 5
@@ -187,9 +195,12 @@ $44FFFFFF re-color author#
 		    l" 4. " l" Timing driven delay minimizing flow control" b\\
 		    l" 5. " l" Stack–oriented tokenized command language" b\\
 		    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
-		    l" 7. " l" Apps in a sandboxed environment for displaying content (ΜΙΝΩΣ2)"
-		    b\\
+		    l" 7. " l" Apps in a sandboxed environment for displaying content (ΜΙΝΩΣ2)" b\\
 		}}vt
+		\skip
+		l" Protocol stack details:" /subsection
+		l" 🔗" l" https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" bm\\
+		"https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" link[]
 		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -221,7 +232,7 @@ $44FFFFFF re-color author#
 		vt{{
 		    l" + " l" Finish bulk importer for Google+" b\\
 		    l" – " l" Write bulk importers for Facebook/Twitter/Blogger/etc." b\\
-		    l" + " l" Use avatars to display users's ID" b\\
+		    l" + " l" Use avatars to display users’s ID" b\\
 		    l" + " l" Markdown renderer" b\\
 		    l" + " l" Album viewer" b\\
 		    l" – " l" Movie player" b\\
