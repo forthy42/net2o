@@ -32,7 +32,7 @@ require minos2/gl-helper.fs
     debug: health(
     debug: msg(
     +db qr( \ turn it on )
-    -db msg( \ turn it on )
+    +db msg( \ turn it on )
 [THEN]
 
 [IFUNDEF] xtype

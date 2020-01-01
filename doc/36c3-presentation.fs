@@ -156,11 +156,11 @@ $44FFFFFF re-color author#
 	{{
 	    $5F0000FF $FF7777FF pres-frame
 	    {{
-		l" Associal Hateworks" /title
+		l" Antisocial Hateworks" /title
 		l" Problems with People since Eternal September" /subsection
 		vt{{
 		    l" Opinions " l" are not facts, but values people believe in" b\\
-		    l" Beliefs " l" are not up to discussion, but part of identity" b\\
+		    l" Beliefs "  l" are not up to discussion, but part of identity" b\\
 		    l" Identity " l" is vigurously defended and used to segregate people" b\\
 		    l" Walls "    l" are in the head, and tearing them down causes aggression" b\\
 		    \skip

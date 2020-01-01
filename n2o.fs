@@ -188,8 +188,16 @@ scope{ n2o
 : keyqr ( -- )
     \U keyqr|qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
-    ?get-me init-client announce-me
-    ?peekarg IF  2drop qr-nicks  ELSE  qr-me  THEN ;
+    ?get-me
+    ?peekarg
+    IF  case 
+	    2dup "-black" str= ?of  2drop black-qr ?nextarg  endof
+	    2dup "-white" str= ?of  2drop white-qr ?nextarg  endof
+	    true dup endcase
+    THEN
+    nip nip  IF  qr-nicks  ELSE
+	init-client announce-me qr-me
+    THEN ;
 
 : keyscan ( -- )
     \U keyscan|scankey|scanqr|qrscan

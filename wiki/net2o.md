@@ -106,6 +106,9 @@ point:
   * [35c3](https://media.ccc.de/v/35c3chaoswest-21-cloudcalypse-it-looks-like-you-ve-reached-the-end-how-to-take-your-data-into-net2o)
 	presentation (Social network in net2o — the plan) (only Chaos West capture this time, as they did a very
 	professional job).
+  * [36c3](https://media.ccc.de/v/36c3-oio-162-cloudcalypse-2-social-network-with-net2o-ybti-wefixthenet-session-)
+    presentation (Social network in net2o — the progress) (Open Infrastructure
+    Orbit capture)
 
 ## Discussions ##
 
