@@ -32,7 +32,7 @@ require minos2/gl-helper.fs
     debug: health(
     debug: msg(
     +db qr( \ turn it on )
-    +db msg( \ turn it on )
+    -db msg( \ turn it on )
 [THEN]
 
 [IFUNDEF] xtype
@@ -302,18 +302,27 @@ p3 2 cells + Constant px
 	r> 2!  EXIT
     THEN  2drop rdrop ;
 
+: rgb?-min ( addr x y -- addr ) 2>r
+    dup rgb? dup 4 and IF
+	over rgba+ rgb? over = IF
+	    over scan-w 3 lshift + rgb? over = IF
+		over rgba+ scan-w 3 lshift + rgb? over = IF
+		    3 and 2 xor
+		    2* cells p0 + 2r> rot min²!
+		    EXIT
+		THEN
+	    THEN
+	THEN
+    THEN
+    drop 2rdrop ;
+
 : search-corners ( -- )
     init-xy p0 !  p0 p0 cell+ 7 cells cmove \ fill all with the same contents
     scan-buf0 $@ drop
-    scan-w dup negate DO
-	scan-w dup negate DO
-	    dup rgb? dup 4 and IF  3 and 2 xor
-		2* cells p0 + I J rot min²!
-	    ELSE
-		drop
-	    THEN
-	    rgba+
-	LOOP
+    scan-w 1- dup invert DO
+	scan-w 1- dup invert DO
+	    i j rgb?-min rgba+
+	LOOP  rgba+
     LOOP  drop
     qr( msg( p0 2@ . . space p1 2@ . . space p2 2@ . . space p3 2@ . . cr ) )
 ;
@@ -531,9 +540,9 @@ previous
     THEN  false ;
 
 : scan-its ( -- )
-    85 80 DO
+    85 82 DO
 	I s>f to x-scansize
-	85 80 DO
+	85 82 DO
 	    I s>f to y-scansize
 	    scan-it IF  true
 		UNLOOP UNLOOP

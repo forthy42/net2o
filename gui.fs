@@ -640,7 +640,7 @@ Variable last-bubble-pk
 	0e to borderl fnegate f2* to bordert 0e to borderv
     THEN o o> ;
 : add-dtms ( ticks -- )
-    \small blackish
+    \sans \small blackish
     1n fm* >day { day } day last-day <> IF
 	{{
 	    x-color { f: xc }
@@ -889,7 +889,7 @@ Variable re-indent#
     dup .subbox box[] drop box[] cbl >bl
     dup .subbox "msg-box" name!
     to msg-box to msg-par
-    \script cbl re-green log-mask @ +log#-date-token msg-box .child+
+    \sans \script cbl re-green log-mask @ +log#-date-token msg-box .child+
     \normal cbl ;
 :noname { d: pk -- o }
     pk key| to msg:id$  pk startdate@ to msg:timestamp
