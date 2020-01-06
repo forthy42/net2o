@@ -1450,7 +1450,7 @@ Variable invitation-stack
 
 ' net2o-gui is run-gui
 
-include gui-night.fs
+include gui-dark.fs
 
 previous
 

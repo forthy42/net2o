@@ -54,9 +54,9 @@ tex: 36c3-logo
 
 ' }}i18n-text is }}text'
 
-day-mode
+light-gui
 $005555FF text-color: author#
-night-mode
+dark-gui
 $44FFFFFF re-color author#
 
 {{
@@ -407,7 +407,7 @@ also opengl
 
 previous
 
-night-mode
+dark-gui
 
 script? [IF]
     next-arg s" time" str= [IF]  +db time( \ ) [THEN]

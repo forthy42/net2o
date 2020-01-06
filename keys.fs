@@ -957,7 +957,7 @@ here scanned-x - cell/ constant scanned-max#
 $Variable lastscan$
 
 : lastscan? ( addr u tag -- flag )
-    >r $make { w^ just$ } r> just$ c$+!
+    >r $10 + $make { w^ just$ } r> just$ c$+!
     just$ $@ lastscan$ $@ str=
     just$ @ lastscan$ $!buf ;
 : scan-result ( addr u tag -- flag )

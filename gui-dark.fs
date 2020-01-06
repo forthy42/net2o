@@ -1,4 +1,4 @@
-\ GUI night mode style
+\ GUI dark mode style
 
 \ Copyright © 2019   Bernd Paysan
 
@@ -16,7 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 1 new-theme
-night-mode
+dark-gui
 $FFFFFFFF re-text-color blackish
 $FFFFBBFF re-text-color dark-blue
 $000000FF re-text-color whitish
@@ -57,4 +57,4 @@ $33EE33FF
     imports#rgb-fg [I] sfloats + sf@ floor f>s to color,#
     text-color, fdrop
 [LOOP]
-night-mode
+dark-gui

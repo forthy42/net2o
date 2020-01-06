@@ -524,7 +524,7 @@ previous
 	    I 3 and    to strip+x
 	    I 2 rshift to strip+y
 	    scan-legit? IF
-		guessecc $10 + c@
+		guesstag c@
 		msg( dup 2over rot debug-scan-result )
 		scan-result dup to scanned?
 		qr( ." took: " .time cr )
