@@ -76,12 +76,18 @@ Sema msglog-sema
 		THEN
 	REPEAT  drop ;] msglog-sema c-section ;
 
+forward msg-scan-hash
+forward msg-serialize-hash
+
 : serialize-log ( addr u -- $addr )
-    [: bounds ?DO
-	    I $@ check-date 0= IF  net2o-base:$, net2o-base:nestsig
-	    ELSE   msg( ." removed entry " dump )else( 2drop )  THEN
-      cell +LOOP ;]
-    gen-cmd ;
+    [: [: bounds ?DO
+		I $@ check-date 0= IF
+		    2dup msg:display
+		    net2o-base:$, net2o-base:nestsig
+		ELSE   msg( ." removed entry " dump )else( 2drop )  THEN
+	    cell +LOOP
+	    msg-serialize-hash
+	;] msg-scan-hash ;] gen-cmd ;
 
 Variable saved-msg$
 64Variable saved-msg-ticks
@@ -305,13 +311,15 @@ Variable fetch-queue[]
 
 hash: ihave#
 
+: .@host.id ( pk+host u -- )
+    '@' emit
+    2dup keysize2 safe/string type '.' emit
+    key2| .simple-id ;
 : .ihaves ( -- )
     ." ====== hash owend by ======" cr
     ihave# [: dup $@ 85type ." :"
 	cell+ $@ bounds U+DO
-	    space '@' emit
-	    I $@ 2dup keysize2 safe/string type '.' emit
-	    key2| .simple-id
+	    space I $@ .@host.id
 	cell +LOOP cr ;] #map ;
 
 : msg:ihave ( id u1 hash u2 -- )
@@ -465,8 +473,48 @@ scope: logstyles
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
+:noname drop 2drop ; msg-notify-class is msg:object
 :noname ( -- ) msg-notify ; msg-notify-class is msg:end
 :noname ( xchar -- ) ['] xemit $tmp notify+ ; msg-notify-class is msg:like
+
+\ msg scan for hashes class
+
+msg-class class
+    field: ?hashs[]
+end-class msg-?hash-class
+
+' 2drop msg-?hash-class is msg:start
+' noop  msg-?hash-class is msg:end
+' 2drop msg-?hash-class is msg:tag
+' 2drop msg-?hash-class is msg:signal
+' 2drop msg-?hash-class is msg:chain
+' 2drop msg-?hash-class is msg:id
+' 2drop msg-?hash-class is msg:re
+' 2drop msg-?hash-class is msg:text
+' 2drop msg-?hash-class is msg:url
+' drop  msg-?hash-class is msg:like
+:noname ( addr u -- )
+    0 .v-dec$ dup IF
+	msg-key!  msg-group-o .msg:+lock  THEN ; msg-?hash-class is msg:lock
+:noname ( -- )
+    msg-group-o .msg:-lock ; msg-?hash-class is msg:unlock
+' drop msg-?hash-class is msg:away
+:noname 2drop 64drop ; msg-?hash-class is msg:perms
+:noname ( addr u id -- )
+    case
+	msg:image#      of  key| ?hashs[] $+[]!  endof
+	msg:thumbnail#  of  key| ?hashs[] $+[]!  endof
+	msg:patch#      of  key| ?hashs[] $+[]!  endof
+	msg:snapshot#   of  key| ?hashs[] $+[]!  endof
+	2drop
+    endcase ; msg-?hash-class is msg:object
+
+: msg-scan-hash ( ... xt -- ... )
+    msg-?hash-class new >o
+    msg-table @ token-table !
+    execute dispose o> ;
+
+\ main message class
 
 :noname ( addr u -- )
     last# >r  2dup key| to msg:id$
@@ -563,6 +611,12 @@ forward need-hashed?
 	fetch-queue[] ['] $ins[] resize-sema c-section drop
     ELSE  2drop  THEN ;
 
+: .posting ( addr u -- )
+    2dup keysize /string
+    2dup printable? IF  '[' emit type '@' emit
+    ELSE  ." #["  85type ." /@"  THEN
+    key| .key-id? ;
+
 :noname ( addr u type -- )
     space <warn> case
 	msg:image#     of  ." img["      2dup 85type ?fetch  endof
@@ -572,6 +626,7 @@ forward need-hashed?
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof
+	msg:posting#   of  ." posting" .posting  endof
 	drop
 	2dup keysize /string
 	2dup printable? IF  '[' emit  type '@' emit
@@ -839,6 +894,29 @@ net2o' end-with net2o: msg-end-with ( -- ) \g push out avalanche
 ' context-table is gen-table
 
 also }scope
+
+\ serialize hashes
+
+: msg-serialize-hash ( -- )
+    { | w^ want# }
+    ?hashs[] want# [{: want# :}l
+	2dup ihave# #@ dup IF
+	    bounds U+DO
+		2dup I $@ want# #+!
+	    cell +LOOP  2drop
+	ELSE  2drop
+	    2dup need-hashed? IF  2drop   ELSE  
+		0 .pk.host
+		2over 2over 2swap ihave# #!ins[]
+		want# #+!
+	    THEN
+	THEN
+    ;] $[]map
+    want# [:
+	msg( dup $@ .@host.id ." : " dup cell+ $@ 85type forth:cr )
+	dup cell+ $@ $, $@ $, msg-ihave ;] #map
+    ?hashs[] $[]free
+    want# #frees ;
 
 msging-table $save
 
@@ -1136,8 +1214,13 @@ previous
 	THEN  <info>  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end <default> ;
+: msg-tdisplay-silent ( addr u -- )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig? IF  2drop  EXIT  THEN  THEN
+    sigpksize# - 2dup + sigpksize# >$  c-state off
+    nest-cmd-loop msg:end ;
 ' msg-tdisplay msg-class is msg:display
 ' msg-tdisplay msg-notify-class is msg:display
+' msg-tdisplay-silent msg-?hash-class is msg:display
 : ?search-lock ( addr u -- )
     BEGIN  dup  WHILE  cell- 2dup + $@ sigpksize# - 1- + c@ $2E = IF
 		2dup + $@ ['] msg:display catch IF  2drop  THEN

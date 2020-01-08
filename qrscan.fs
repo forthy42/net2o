@@ -424,8 +424,18 @@ previous
     s>f y-scansize f/ y-rots sf!  s>f x-scansize f/ x-scl sf!
     p0 2@ p2 2@ p- p1 2@ p3 2@ p- p+ p2/
     s>f y-scansize f/ y-scl sf!  s>f x-scansize f/ x-rots sf! ;
+: pf+ ( fx fy fx' fy' -- fx+x' fy+y' )
+    frot f+ f-rot f+ fswap ;
+: perspective { f: x f: y -- x' y' }
+    p0 2@ s>f y f- s>f x f-
+    p1 2@ s>f y f- s>f x f- fnegate fswap pf+
+    p2 2@ s>f y f- s>f x f- fnegate fswap fnegate fswap pf+
+    p3 2@ s>f y f- s>f x f- fswap fnegate pf+
+    f2/ f2/ fswap f2/ f2/  ;
 : set-scan' ( -- )
     compute-xpoint ( .. x y )
+\    fover fover .xpoint
+    fover fover perspective f. f. cr
     scale+rotate
     y-offset f+ scan-w fm/ y-spos sf!
     x-offset f+ scan-w fm/ x-spos sf! ;

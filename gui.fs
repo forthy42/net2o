@@ -679,12 +679,6 @@ Variable last-bubble-pk
     [THEN]
 [THEN]
 
-: .posting ( addr u -- )
-    2dup keysize /string
-    2dup printable? IF  '[' emit type '@' emit
-    ELSE  ." #["  85type ." /@"  THEN
-    key| .key-id? ;
-
 hash: chain-tags#
 
 scope{ dvcs
