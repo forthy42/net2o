@@ -1376,7 +1376,12 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
-    ihave$ $@ dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop  THEN ;
+    ihave$ $@ dup IF
+	maxstring 4 - mehave$ $@len - dup 0< IF  2drop  EXIT  THEN
+	keysize negate and dup >r
+	$, mehave$ $@ $, msg-ihave
+	ihave$ 0 r> $del
+    ELSE  2drop  THEN ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 
