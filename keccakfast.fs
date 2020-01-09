@@ -17,10 +17,10 @@
 
 require rec-scope.fs
 [IFDEF] android
-    s" libkeccakfast.so" c-lib:open-path-lib drop
+    s" libkeccakpfast.so" c-lib:open-path-lib drop
 [THEN]
 
 c-library keccakfast
-    s" keccakfast" add-lib
+    s" keccakpfast" add-lib
     include keccaklib.fs
 end-c-library

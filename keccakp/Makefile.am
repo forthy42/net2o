@@ -1,4 +1,4 @@
-# Automake file for keccak
+# Automake file for keccak primitives
 
 ## Place generated object files (.o) into the same directory as their source
 ## files, in order to avoid collisions when non-recursive make is used.
@@ -15,31 +15,31 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 ## language-specific options.
 AM_CPPFLAGS = $(EXAMPLE_CFLAGS)
 
-lib_LTLIBRARIES = libkeccak.la
+lib_LTLIBRARIES = libkeccakp.la
 if FAST
-lib_LTLIBRARIES += libkeccakfast.la
+lib_LTLIBRARIES += libkeccakpfast.la
 if ASM
-libkeccakfast_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
+libkeccakpfast_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
 else
-libkeccakfast_la_SOURCES = KeccakF-1600-@ws@.c
+libkeccakpfast_la_SOURCES = KeccakF-1600-@ws@.c
 endif
-libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
+libkeccakp_la_SOURCES = KeccakF-1600-@ws@.c
 else
 if ASM
-libkeccak_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
+libkeccakp_la_SOURCES = KeccakF-1600-@as@.s KeccakF-1600-@plattform@.c
 else
-libkeccak_la_SOURCES = KeccakF-1600-@ws@.c
+libkeccakp_la_SOURCES = KeccakF-1600-@ws@.c
 endif
 endif
 include_HEADERS = KeccakF-1600.h
-libkeccak_la_LIBADD = 
-libkeccak_la_LDFLAGS = -version-info ${VERSION} -no-undefined
-libkeccak_la_CFLAGS = @flags@
-libkeccak_la_CCASFLAGS = @asmflags@
-libkeccakfast_la_LIBADD = 
-libkeccakfast_la_CFLAGS = @fastflags@
-libkeccakfast_la_CCASFLAGS = @fastasmflags@
-libkeccakfast_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libkeccakp_la_LIBADD = 
+libkeccakp_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libkeccakp_la_CFLAGS = @flags@
+libkeccakp_la_CCASFLAGS = @asmflags@
+libkeccakpfast_la_LIBADD = 
+libkeccakpfast_la_CFLAGS = @fastflags@
+libkeccakpfast_la_CCASFLAGS = @fastasmflags@
+libkeccakpfast_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 
 install-exec-hook:
 	-/sbin/ldconfig $(libdir)

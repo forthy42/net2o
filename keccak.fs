@@ -22,12 +22,12 @@ fast-lib [IF]
     require keccakfast.fs false
 [ELSE]
     [IFDEF] android
-	s" libkeccak.so" c-lib:open-path-lib drop
+	s" libkeccakp.so" c-lib:open-path-lib drop
     [THEN] true
 [THEN]
 [IF]
     c-library keccak
-	s" keccak" add-lib
+	s" keccakp" add-lib
 	include keccaklib.fs
     end-c-library
 [THEN]
