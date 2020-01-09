@@ -105,7 +105,7 @@ event: :>disconnect ( addr -- )  .disconnect-me ;
 
 64Variable announced \ time for next announcement
 : announced! ( -- )
-    ticks config:ekey-timeout& 2@ d>64 dup 5 64rshift 64- 64+ announced 64! ;
+    ticks config:ekey-timeout& 2@ d>64 64dup 5 64rshift 64- 64+ announced 64! ;
 : announced? ( -- flag ) announced 64@ ticks 64u>= ;
 : subme ( -- )  announced? IF  dht-connect sub-me THEN ;
 
