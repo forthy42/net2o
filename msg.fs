@@ -1377,7 +1377,7 @@ also net2o-base
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
     ihave$ $@ dup IF
-	maxstring 4 - mehave$ $@len - dup 0< IF  2drop  EXIT  THEN
+	maxstring over 4 + - mehave$ $@len - dup 0< IF  2drop  EXIT  THEN
 	keysize negate and dup >r
 	$, mehave$ $@ $, msg-ihave
 	ihave$ 0 r> $del
