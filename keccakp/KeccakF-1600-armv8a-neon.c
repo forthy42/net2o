@@ -17,12 +17,12 @@ http://creativecommons.org/publicdomain/zero/1.0/
 #include "KeccakF-1600-opt64-settings.h"
 #include "KeccakF-1600.h"
 
-extern void KeccakP1600_Permute(void * state, int round);
+extern void KeccakP1600_Permute_Nrounds(void * state, int round);
 extern void KeccakP1600_Initialize(void * state);
 
 void KeccakF(keccak_state state, int round)
 {
-  KeccakP1600_Permute(state, round);
+  KeccakP1600_Permute_Nrounds(state, round);
 }
 
 void KeccakInitializeState(keccak_state state)
