@@ -570,30 +570,42 @@ event: :>hash-finished { d: hash -- }
     ELSE  drop  THEN
     hash >ihave  hash drop free throw ;
 
-: fetch-queue { tsk w^ want# -- }
-    want# tsk [{: tsk :}l { item }
+: fetch-queue 0 .pk.host $make { tsk w^ want# w^ pk$ -- }
+    want# tsk pk$ [{: tsk pk$ :}l { item }
 	item $@ $8 $E pk-connect? IF  +resend +flow-control
+	    { | hashs }
 	    item cell+ $@ bounds U+DO
 		net2o-code expect+slurp $10 blocksize! $A blockalign!
-		I' I keysize $10 * + umin I U+DO
-		    I keysize net2o:copy#
-		    I keysize save-mem tsk [{: d: hash tsk :}h
-			<event hash e$, :>hash-finished tsk event> ;]
-		    lastfile@ >o to file-xt o>
+		I' I U+DO
+		    I keysize ihave# $@ dup IF
+			0 -rot bounds U+DO
+			    I $@ pk$ $@ str= or
+			cell +LOOP
+		    ELSE  2drop true  THEN
+		    IF
+			I keysize net2o:copy#
+			I keysize save-mem tsk [{: d: hash tsk :}h
+			    <event hash e$, :>hash-finished tsk event> ;]
+			lastfile@ >o to file-xt o>
+			1 +to hashs
+		    THEN
+		    hashs $10 u>= ?LEAVE
 		keysize +LOOP
 		end-code| net2o:close-all
-	    keysize $10 *  +LOOP
+	    keysize hashs *  0 to hashs  +LOOP
 	    disconnect-me
 	THEN ;] #map
-    want# #frees ;
+    want# #frees
+    pk$ $free ;
 
 event: :>fetch-queue fetch-queue ;
 
 : transmit-queue ( queue -- )
     { w^ queue[] | w^ want# }
     queue[] want# [{: want# :}l 2dup ihave# #@ dup IF
-	    cell/ 1- rng cells + $@
-	    want# #+!
+	    bounds U+DO
+		2dup I $@ want# #+!
+	    cell +LOOP  2drop
 	ELSE  2drop 2drop  THEN ;] $[]map
     queue[] $[]free
     <event up@ elit, want# @ elit, :>fetch-queue ?query-task event> ;
@@ -898,25 +910,25 @@ also }scope
 \ serialize hashes
 
 : msg-serialize-hash ( -- )
-    { | w^ want# }
-    ?hashs[] want# [{: want# :}l
+    0 .pk.host $make { w^ pk$ | w^ want# }
+    ?hashs[] want# pk$ [{: want# pk$ :}l
+	2dup need-hashed? 0= IF
+	    pk$ $@ 2over ihave# #!ins[]
+	    2dup pk$ $@ want# #+!
+	THEN
 	2dup ihave# #@ dup IF
 	    bounds U+DO
 		2dup I $@ want# #+!
-	    cell +LOOP  2drop
-	ELSE  2drop
-	    2dup need-hashed? IF  2drop   ELSE  
-		0 .pk.host
-		2over 2over 2swap ihave# #!ins[]
-		want# #+!
-	    THEN
-	THEN
+	    cell +LOOP
+	ELSE  2drop  THEN
+	2drop
     ;] $[]map
     want# [:
 	msg( dup $@ .@host.id ." : " dup cell+ $@ 85type forth:cr )
 	dup cell+ $@ $, $@ $, msg-ihave ;] #map
     ?hashs[] $[]free
-    want# #frees ;
+    want# #frees
+    pk$ $free ;
 
 msging-table $save
 
