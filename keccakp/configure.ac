@@ -30,7 +30,7 @@ nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 # special optimizations for some plattforms
 case "$host" in
      aarch64*)
-	asmflags="-O3 $nomflags"
+	asmflags="-O3 `echo $nomflags | sed -e 's/-fdebug[^ ]* //g'`"
 	flags="-O3 $nomflags"
 	as="armv8a-neon-as"
 	enable_asm=yes
