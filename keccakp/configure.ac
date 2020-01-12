@@ -29,6 +29,15 @@ nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 
 # special optimizations for some plattforms
 case "$host" in
+     aarch64*)
+	asmflags="-O3 -mfpu=neon $nomflags"
+	flags="-O3 -mfpu=neon $nomflags"
+	as="armv8a-neon"
+	enable_asm=yes
+	plattform=armv8a-neon
+	CFLAGS=""
+	CCASFLAGS=""
+	;;
      arm*-*linux*)
 	flags="$CFLAGS"
 	asmflags="$CFLAGS"
