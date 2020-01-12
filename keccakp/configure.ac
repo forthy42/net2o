@@ -31,7 +31,7 @@ nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
 case "$host" in
      aarch64*)
 	asmflags="-O3 `echo $nomflags | sed -e 's/-fdebug[^ ]* //g'`"
-	flags="-O3 $nomflags"
+	flags="-O3 `echo $nomflags | sed -e 's/-fdebug[^ ]* //g'`"
 	as="armv8a-neon-as"
 	enable_asm=yes
 	plattform=armv8a-neon
