@@ -77,6 +77,7 @@ Sema msglog-sema
 	REPEAT  drop ;] msglog-sema c-section ;
 
 forward msg-scan-hash
+forward msg-add-hashs
 forward msg-serialize-hash
 
 : serialize-log ( addr u -- $addr )
@@ -88,6 +89,14 @@ forward msg-serialize-hash
 	    cell +LOOP
 	    msg-serialize-hash
 	;] msg-scan-hash ;] gen-cmd ;
+
+: scan-log-hashs ( -- )
+    msg-log@ over >r
+    [: bounds ?DO
+	    I $@ msg:display
+	cell +LOOP
+	msg-add-hashs
+    ;] msg-scan-hash r> free throw ;
 
 Variable saved-msg$
 64Variable saved-msg-ticks
@@ -309,7 +318,7 @@ Forward msg:want
 hash: fetch-finish#
 Variable fetch-queue[]
 
-hash: ihave#
+hash: have#
 
 : .@host.id ( pk+host u -- )
     '@' emit
@@ -317,7 +326,7 @@ hash: ihave#
     key2| .simple-id ;
 : .ihaves ( -- )
     ." ====== hash owend by ======" cr
-    ihave# [: dup $@ 85type ." :"
+    have# [: dup $@ 85type ." :"
 	cell+ $@ bounds U+DO
 	    space I $@ .@host.id
 	cell +LOOP cr ;] #map ;
@@ -325,7 +334,7 @@ hash: ihave#
 : msg:ihave ( id u1 hash u2 -- )
 \    ." ihave:" 2over dump 2dup dump
     2dup ihave$ $+!  2over mehave$ $!
-    bounds U+DO  2dup I keysize ihave# #!ins[]  keysize +LOOP  2drop ;
+    bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
     pk.host 2swap  msg:ihave ;
@@ -577,7 +586,7 @@ event: :>hash-finished { d: hash -- }
 	    item cell+ $@ bounds U+DO
 		net2o-code expect+slurp $10 blocksize! $A blockalign!
 		I' I U+DO
-		    I keysize ihave# $@ dup IF
+		    I keysize have# $@ dup IF
 			0 -rot bounds U+DO
 			    I $@ pk$ $@ str= or
 			cell +LOOP
@@ -602,7 +611,7 @@ event: :>fetch-queue fetch-queue ;
 
 : transmit-queue ( queue -- )
     { w^ queue[] | w^ want# }
-    queue[] want# [{: want# :}l 2dup ihave# #@ dup IF
+    queue[] want# [{: want# :}l 2dup have# #@ dup IF
 	    bounds U+DO
 		2dup I $@ want# #+!
 	    cell +LOOP  2drop
@@ -909,18 +918,34 @@ also }scope
 
 \ serialize hashes
 
+: ?ihave ( addr u pk$ want# -- ) { pk$ want# -- }
+    2dup need-hashed? 0= IF
+	pk$ $@ 2over have# #!ins[]
+	2dup pk$ $@ want# #+!
+    THEN ;
+: msg-add-hashs ( -- )
+    0 .pk.host $make { w^ pk$ }
+    ?hashs[] pk$ [{: pk$ :}l
+	2dup need-hashed? 0= IF
+	    pk$ $@ 2over have# #!ins[]
+	THEN  2drop
+    ;] $[]map
+    ?hashs[] $[]free
+    pk$ $free ;
+
 : msg-serialize-hash ( -- )
     0 .pk.host $make { w^ pk$ | w^ want# }
     ?hashs[] want# pk$ [{: want# pk$ :}l
-	2dup need-hashed? 0= IF
-	    pk$ $@ 2over ihave# #!ins[]
-	    2dup pk$ $@ want# #+!
-	THEN
-	2dup ihave# #@ dup IF
+	2dup have# #@ dup IF
+	    false { flag }
 	    bounds U+DO
 		2dup I $@ want# #+!
+		I $@ pk$ $@ str= +to flag
 	    cell +LOOP
-	ELSE  2drop  THEN
+	    flag 0= IF  pk$ want# ?ihave  THEN
+	ELSE
+	    2drop  pk$ want# ?ihave
+	THEN
 	2drop
     ;] $[]map
     want# [:
@@ -1004,7 +1029,7 @@ $8 Value max-want#
 : have>want ( hashs u want# -- ) { want# }
     \ transform have into wants
     bounds U+DO
-	I keysize ihave# #@ bounds U+DO
+	I keysize have# #@ bounds U+DO
 	    J keysize I $@ want# #+!
 	cell +LOOP
     keysize +LOOP ;
@@ -1629,6 +1654,9 @@ umethod /have ( addr u -- )
 umethod /imgs ( addr u -- )
     \U imgs                 print out img list
     \G imgs: print out hashes for album viewer
+umethod /rescan# ( addr u -- )
+    \U rescan#              rescan for hashes
+    \G rescan#: search the entire chat log for hashes and if you have them
 end-class chat-cmds
 
 chat-cmds new Constant text-chat-cmd-o
@@ -1758,6 +1786,7 @@ is /help
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
 ' .ihaves is /have
+' scan-log-hashs is /rescan#
 
 $100 buffer: permchar>bits
 msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!
