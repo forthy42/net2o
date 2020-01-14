@@ -400,8 +400,6 @@ Variable user-avatar#
 Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
-: ]path ( addr u -- )
-    file>fpath ]] SLiteral [[ ] ;
 : read-user.png ( -- )
     [ "doc/user.png" ]path user.png$ $slurp-file ;
 : read-thumb.png ( -- )
