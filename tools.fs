@@ -236,6 +236,29 @@ require bits.fs
 : ps@+ ( addr -- 64n addr' )
     p@+ >r zz>n r> ;
 
+\ compact representation of mostly power-of-two numbers
+
+: p2@+ ( addr -- 64bit addr' )
+    count >r r@ $C0 u>= IF
+	64#1 r> $3F and 64lshift n64-swap  EXIT  THEN
+    r@ $0F and u>64 r> 4 rshift 8 umin 0 ?DO
+	8 64lshift 64>r count u>64 64r> 64+
+    LOOP  n64-swap ;
+: p2$+! ( 64bit addr -- )
+    >r
+    64dup $F u>64 64u> IF
+	64dup 64dup 64#1 64- 64and 64-0= IF
+	    64>f fdup f* { | w^ ff1 }
+	    ff1 sf! ff1 [ 3 pad ! pad c@ ]L + c@ $3F - $C0 or
+	    r> c$+!  EXIT  THEN
+	THEN
+    0 >r <#
+    BEGIN   64dup $F u>64 64u>  WHILE
+	    64dup 64>n $FF and hold 8 64rshift
+	    r> $10 + >r
+    REPEAT
+    64>n r> or hold #0. #> r> $+! ;
+
 \ bit reversing
 
 : bitreverse8 ( u1 -- u2 )

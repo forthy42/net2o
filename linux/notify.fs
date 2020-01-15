@@ -22,22 +22,6 @@
 	    '&' of  ." &amp;"  endof
 	    '"' of  ." &quot;" endof
 	    emit  0 endcase  LOOP ;
-: escape-<&>-shell ( addr u -- )
-    bounds ?DO  case i c@
-	    '<' of  ." &lt;"   endof
-	    '>' of  ." &gt;"   endof
-	    '&' of  ." &amp;"  endof
-	    '"' of  ." &quot;" endof
-	    '\' of  ." \\"     endof
-	    '$' of  ." \$"     endof
-	    '!' of  ." \!"     endof
-	    emit  0 endcase  LOOP ;
-: escape-shell ( addr u -- )
-    bounds ?DO  case i c@
-	    '\' of  ." \\"     endof
-	    '$' of  ." \$"     endof
-	    '!' of  ." \!"     endof
-	    emit  0 endcase  LOOP ;
 
 : build-notification ( -- ) ;
 : notify@ ( -- addr u )
@@ -78,42 +62,53 @@ $Variable net2o-logo
 : !net2o-logo ( -- )
     s" ../doc/net2o-logo.png" fpath file>abspath net2o-logo $! ;
 
-: ?free0 ( addr -- )
-    dup 0= IF  drop  EXIT  THEN  @ free throw ;
-: !notify-args ( -- )
-    title-string   ?free0
-    content-string ?free0
-    here >r notify-args dp !
-    "notify-send\0" drop ,
-    "-a\0" drop ,
-    "net2o\0" drop ,
-    "-c\0" drop ,
-    "im.received\0" drop ,
-    net2o-logo $@len IF
-	"-i\0" drop ,
-	net2o-logo $@ drop ,
-    THEN
-    here to title-string 0 ,
-    here to content-string 0 ,
-    0 , \ must be terminated by null pointer
-    r> dp ! ;
+!upath !net2o-logo
 
-!upath !net2o-logo !notify-args
+[IFDEF] use-execve
+    : ?free0 ( addr -- )
+	dup 0= IF  drop  EXIT  THEN  @ free throw ;
+    : !notify-args ( -- )
+	title-string   ?free0
+	content-string ?free0
+	here >r notify-args dp !
+	"notify-send\0" drop ,
+	"-a\0" drop ,
+	"net2o\0" drop ,
+	"-c\0" drop ,
+	"im.received\0" drop ,
+	net2o-logo $@len IF
+	    "-i\0" drop ,
+	    net2o-logo $@ drop ,
+	THEN
+	here to title-string 0 ,
+	here to content-string 0 ,
+	0 , \ must be terminated by null pointer
+	r> dp ! ;
+
+    !notify-args
+[THEN]
 
 :noname defers 'cold
-    !upath !net2o-logo !notify-args ; is 'cold
+    !upath !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
 
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
     [IFDEF] use-execve
+	\ for now unknown reasons, notify-send doesn't like this way of
+	\ being called
 	notify@ content-string 0$!
 	['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN  title-string 0$!
 	notify-send $@ notify-args fork+exec
     [ELSE]
+	\ Use variables to avoid needing to quote stuff
+	\ Unfortunately, HTML quoting still needed
+	"TITLE" ['] notify-title $tmp ['] escape-<&> $tmp 1 setenv ?ior
+	"MESSAGE" notify@ 1 setenv ?ior
 	[: notify-send $. space
 	    ." -a net2o -c im.received "
 	    net2o-logo $@len IF
 		." -i " net2o-logo $. space  THEN
-	    ['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN
-	    '"' emit escape-<&>-shell '"' emit space
-	    '"' emit notify@ escape-shell '"' emit ;] $tmp system
+	    .\" \"$TITLE\" \"$MESSAGE\""
+	;] $tmp system
+	"TITLE" unsetenv ?ior
+	"MESSAGE" unsetenv ?ior
     [THEN] ;

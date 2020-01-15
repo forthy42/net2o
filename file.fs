@@ -364,11 +364,15 @@ in net2o : save-block ( back tail id -- delta ) { id -- delta }
     id id>addr? .fs-write
     file1( id f-wid @ = IF  dup f-wamount +!
     ELSE  f-wid @ 0>= f-wamount @ 0> and IF
-	    ." split: " f-wid @ . f-wamount @ hex. cr  THEN
+	    ." spit: " f-wid @ . f-wamount @ hex. cr  THEN
         id f-wid ! dup f-wamount !  THEN )
     >blockalign dup negate residualwrite +! ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
+
+: .spit ( -- )
+    spit#$ $@ 2dup dump
+    bounds ?DO  I c@ hex. I 1+ p2@+ >r x64. cr r> I - +LOOP ;
 
 in net2o : spit { back tail -- newback }
     back tail back u<= ?EXIT fstates 0= ?EXIT drop
@@ -385,6 +389,7 @@ in net2o : spit { back tail -- newback }
 	msg( ." Write end" cr ) +file
 	back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
     ;] file-sema c-section
+    slurp( .spit ) spit#$ $free
     slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
     write-file# ? residualwrite @ hex. forth:cr ) ;
 
@@ -435,10 +440,16 @@ scope{ net2o
 \ read in from files
 
 : slurp-block { id -- delta }
-    data-head@ id id>addr? .fs-read dup /head
+    data-head@ id id>addr? .fs-read
+    dup IF  id slurp#$ c$+! dup u>64 slurp#$ p2$+!
+	dup >blockalign over - ?dup-IF
+	    $FF slurp#$ c$+! u>64 slurp#$ p2$+!
+	THEN
+    THEN
+    dup /head
     file1( id f-rid @ = IF  dup f-ramount +!
     ELSE  f-rid @ 0>=  f-ramount @ 0> and IF
-	    ." split: " f-rid @ . f-ramount @ hex. cr  THEN
+	    ." slurp: " f-rid @ . f-ramount @ hex. cr  THEN
         id f-rid ! dup f-ramount !  THEN ) ;
 
 \ careful: must follow exactpy the same logic as net2o:spit (see above)

@@ -263,6 +263,8 @@ cmd-class class
     field: rqd-xts       \ callbacks for request done (array)
     field: my-error-id
     field: beacon-hash
+    field: slurp#$       \ slurp id+num string
+    field: spit#$        \ spit id+num string
     0 +field end-strings
     field: dest-addrs    \ list of destinations
     field: punch-addrs   \ list of punch destinations
