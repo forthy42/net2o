@@ -165,9 +165,11 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   close all files
 * $2B set-top ( utop flag -- )
   set top, flag is true when all data is sent
+* $2E slurped ( $slurped -- )
+  respond to slurped stuff
 * $2C slurp ( -- )
   slurp in tracked files
-* $2D ack-reset ( -- )
+* $2F ack-reset ( -- )
   reset ack state
 
 ### file commands ###
