@@ -407,9 +407,11 @@ scope{ net2o
 ' net2o:get-stat fs-class to fs-get-stat
 ' net2o:get-stat hashfs-class to fs-get-stat
 
+8 base !@
 : track-mod ( mod fileno -- )
     [IFDEF] android 2drop
-    [ELSE] swap fchmod ?ior [THEN] ;
+    [ELSE] swap dup 0= 644 and or 400 or fchmod ?ior [THEN] ;
+base !
 
 : set-stat ( mtime mod -- )
     fs-fid @ fileno net2o:track-mod to fs-time ;
