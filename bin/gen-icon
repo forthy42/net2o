@@ -1,0 +1,8 @@
+#!/bin/bash
+
+convert -resize 32x32 $1 res/drawable-ldpi/$2
+convert -resize 48x48 $1 res/drawable-mdpi/$2
+convert -resize 72x72 $1 res/drawable-hdpi/$2
+convert -resize 96x96 $1 res/drawable-xhdpi/$2
+convert -resize 144x144 $1 res/drawable-xxhdpi/$2
+convert -resize 192x192 $1 res/drawable-xxxhdpi/$2

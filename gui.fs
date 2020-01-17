@@ -1,6 +1,6 @@
 \ net2o GUI
 
-\ Copyright © 2018-2019   Bernd Paysan
+\ Copyright © 2018-2020   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -200,7 +200,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	!i18n l" net2o GUI" /title
 	!lit
 	\footnote cbl dark-blue net2o-version }}text /center
-	!i18n l" Copyright © 2010–2019 Bernd Paysan" }}text' /center !lit
+	!i18n l" Copyright © 2010–2020 Bernd Paysan" }}text' /center !lit
 	{{
 	    {{
 		glue*ll }}glue
@@ -1049,8 +1049,8 @@ Variable re-indent#
     keysize safe/string IF  c@ 4 and IF  swap  THEN  ELSE  drop  THEN ;
 
 : update-thumb { d: hash object -- }
-    hash avatar-frame object >o to frame# hash >rotate
-    frame# i.w 2* frame# i.h 2* tile-glue hash >swap .wh-glue!  o>
+    hash avatar-frame object >o dup $10 dump to frame# hash >rotate
+    frame# i.w frame# i.h tile-glue hash >swap .wh-glue!  o>
     [: +sync +resize ;] msgs-box .vp-needed +sync +resize ;
 
 : 40%bv ( o -- o ) >o current-font-size% 40% f* fdup to border
@@ -1284,7 +1284,8 @@ Variable gui-log[]
 		gui-log[] [: }}text /left ;] $[]map
 	    }}v box[] 25%b \regular
 	    {{
-		s" ❌" $444444FF new-color, }}text 25%b /right dup { closer }
+		{{ s" ❌" $444444FF new-color, }}text }}h 25%b
+		dup { closer } /right
 		glue*ll }}glue
 	    }}v box[]
 	}}z box[] >r

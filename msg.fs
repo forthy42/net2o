@@ -1,6 +1,6 @@
 \ messages                                           06aug2014py
 
-\ Copyright © 2014-2019   Bernd Paysan
+\ Copyright © 2014-2020   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -1931,8 +1931,9 @@ previous
 	    pubkey $@ key>nick type ." : "
 	    ack@ .timeouts @ . <default> cr )
 	    msg-group$ $@len IF
-		msg-group-o .msg:mode dup @ msg:otr# or swap
-		[: pubkey $@ ['] left, send-avalanche ;] !wrapper
+		msg-group-o ?dup-IF  .msg:mode dup @ msg:otr# or swap
+		    [: pubkey $@ ['] left, send-avalanche ;] !wrapper
+		THEN
 	    THEN
 	    net2o:dispose-context
 	    EXIT
