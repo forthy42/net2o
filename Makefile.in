@@ -39,17 +39,17 @@ FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
 SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  hash-table.fs keccak-small.fs kregion.fs n2o.fs addr.fs classes.fs  \
 	  cmd.fs connected.fs connect.fs crypt.fs dht.fs err.fs file.fs	      \
-	  gui.fs gui-dark.fs net2o.fs ip.fs helper.fs keys.fs log.fs msg.fs  \
+	  gui.fs gui-dark.fs net2o.fs ip.fs helper.fs keys.fs log.fs msg.fs   \
 	  notify.fs qr.fs socks.fs squid.fs tools.fs vault.fs rng.fs xtype.fs \
 	  $(TESTS) $(FORTHLIB) ed25519-donnalib.fs keccaklib.fs		      \
-	  threefishlib.fs startn2o.fs doc/net2o-logo.png version.fs.in	      \
-	  android/net.fs android/notify.fs linux/net.fs linux/notify.fs	      \
-	  dhtroot.fs dvcs.fs qrscan.fs android/qrscan-android.fs	      \
-	  linux/qrscan-linux.fs doc/net2o-200.png doc/net2o.png doc/user.png  \
-	  json/parser.fs json/g+-schema.fs json/g+-import.fs		      \
-	  json/fb-schema.fs json/twitter-schema.fs json/test.fs		      \
-	  json/test.json json/diaspora-schema.fs html/parser.fs xml/parser.fs \
-	  xml/blogger-atom.fs
+	  threefishlib.fs startn2o.fs startn2ogui.fs doc/net2o-logo.png	      \
+	  version.fs.in android/net.fs android/notify.fs linux/net.fs	      \
+	  linux/notify.fs dhtroot.fs dvcs.fs qrscan.fs			      \
+	  android/qrscan-android.fs linux/qrscan-linux.fs doc/net2o-200.png   \
+	  doc/net2o.png doc/user.png json/parser.fs json/g+-schema.fs	      \
+	  json/g+-import.fs json/fb-schema.fs json/twitter-schema.fs	      \
+	  json/test.fs json/test.json json/diaspora-schema.fs html/parser.fs  \
+	  xml/parser.fs xml/blogger-atom.fs
 
 ICONS = icons/hicolor/128x128/apps/net2o.png				      \
 	icons/hicolor/16x16/apps/net2o.png				      \
