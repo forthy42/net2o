@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="net2o_app_name">net2o</string>
+    <string name="net2o_app_name">net2o TUI</string>
+    <string name="net2o_gui_name">net2o GUI</string>
 </resources>

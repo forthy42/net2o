@@ -107,8 +107,8 @@ previous
     host:ipv4 be-ul@ dup IF host:ipv4 4 .ip4a 2drop  THEN
     host:portv4 w@ host:portv6 w@ = or  IF host:portv4 w@ ." :" 0 .r  THEN
     host:route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
-    host:key sec@ dup IF  '$' emit .black85  ELSE  2drop  THEN
-    host:ekey $@ dup IF  '§' xemit 85type  ELSE  2drop  THEN
+    host:ekey $@ dup IF  ':' xemit <info> 85type <default>  ELSE  2drop  THEN
+    host:key sec@ dup IF  ':' emit .black85  ELSE  2drop  THEN
     o> ; 
 
 : .nat-addrs ( -- )
@@ -172,7 +172,8 @@ previous
     priv-addr$ $[]free ;
 
 : !my-addr$ ( -- )
-    my-key-default 0= ?EXIT  my-addr$ $[]free
+    my-key-default 0= ?EXIT
+    my-addr$ $[]free  pub-addr$ $[]free  priv-addr$ $[]free
     now>never  my-addr[] [:
 	nat( ." insert into my-addr$: " dup .addr forth:cr )
 	dup .host:ekey-to 64@ 64dup 64-0= n>64 64+

@@ -355,48 +355,75 @@ Variable f-ramount
 Variable f-wid -1 f-wid !
 Variable f-wamount
 
-: fstates-free ( -- )
-     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP ;
-: fstate-free ( -- )  file-state @ 0= ?EXIT
-    [: fstates-free file-state $free ;] file-sema c-section ;
-in net2o : save-block ( back tail id -- delta ) { id -- delta }
-    data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
-    id id>addr? .fs-write
-    file1( id f-wid @ = IF  dup f-wamount +!
-    ELSE  f-wid @ 0>= f-wamount @ 0> and IF
+[IFDEF] old-spit
+    in net2o : save-block ( back tail id -- delta ) { id -- delta }
+	data-rmap with mapc fix-size raddr+ endwith residualwrite @ umin
+	id id>addr? .fs-write
+	file1( id f-wid @ = IF  dup f-wamount +!
+	ELSE  f-wid @ 0>= f-wamount @ 0> and IF
 	    ." spit: " f-wid @ . f-wamount @ hex. cr  THEN
-        id f-wid ! dup f-wamount !  THEN )
-    >blockalign dup negate residualwrite +! ;
+	id f-wid ! dup f-wamount !  THEN )
+	>blockalign dup negate residualwrite +! ;
+[THEN]
+
+in net2o : save-block ( back tail id len -- delta ) { id len -- delta }
+    slurp( ." spit: " id hex. len hex. )
+    id $FF = IF  swap - len umin \ only alignment
+    ELSE
+	data-rmap with mapc fix-size raddr+ endwith
+	len umin
+	id id>addr? .fs-write
+    THEN
+    len over - residualwrite ! ;
+
+: .spit ( -- )
+    spit#$ $@ bounds ?DO  I c@ hex. I 1+ p2@+ >r x64. cr r> I - +LOOP ;
+
+in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
+	spit#$ $@ bounds ?DO
+	    back tail I count swap p2@+ I - { +I }
+	    64>n residualwrite @ - 0 max
+	    net2o:save-block slurp( ." => " dup hex. forth:cr )
+	    dup +to back
+	    0<> residualwrite @ and IF  0 to +I  ELSE  residualwrite off  THEN
+	    +I +to spitbuf#
+	    back tail u>= ?LEAVE
+	+I +LOOP
+	spit#$ 0 spitbuf# $del
+	back ;] file-sema c-section +file ;
 
 \ careful: must follow exactly the same logic as slurp (see below)
 
-: .spit ( -- )
-    spit#$ $@ 2dup dump
-    bounds ?DO  I c@ hex. I 1+ p2@+ >r x64. cr r> I - +LOOP ;
-
-in net2o : spit { back tail -- newback }
-    back tail back u<= ?EXIT fstates 0= ?EXIT drop
-    slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-    write-file# ? residualwrite @ hex. forth:cr ) back tail
-    [: +calc fstates 0 { back tail states fails }
-	BEGIN  tail back u>  WHILE
-		back tail write-file# @ net2o:save-block dup +to back
-		IF 0 ELSE fails 1+ residualwrite off THEN to fails
-		residualwrite @ 0= IF
-		    write-file# file+ blocksize @ residualwrite !  THEN
-	    fails states u>= UNTIL
-	THEN
+[IFDEF] old-spit
+    in net2o : spit { back tail -- newback }
+	back tail back u<= ?EXIT fstates 0= ?EXIT drop
+	slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
+	write-file# ? residualwrite @ hex. forth:cr ) back tail
+	[: +calc fstates 0 { back tail states fails }
+	    BEGIN  tail back u>  WHILE
+		    back tail write-file# @ net2o:save-block dup +to back
+		    IF 0 ELSE fails 1+ residualwrite off THEN to fails
+		    residualwrite @ 0= IF
+			write-file# file+ blocksize @ residualwrite !  THEN
+		fails states u>= UNTIL
+	    THEN
 	msg( ." Write end" cr ) +file
-	back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
-    ;] file-sema c-section
-    slurp( .spit ) spit#$ $free
-    slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-    write-file# ? residualwrite @ hex. forth:cr ) ;
+	    back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
+	;] file-sema c-section
+	slurp( .spit ) spit#$ $free
+	slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
+	write-file# ? residualwrite @ hex. forth:cr ) ;
+[THEN]
 
 : save-to ( addr u n -- )  state-addr .fs-create ;
 : save-to# ( addr u n -- )  state-addr >o  1 fs-class!  fs-create o> ;
 
 \ file status stuff
+
+: fstates-free ( -- )
+     file-state $@ bounds ?DO  I @ .dispose  cell +LOOP ;
+: fstate-free ( -- )  file-state @ 0= ?EXIT
+    [: fstates-free file-state $free ;] file-sema c-section ;
 
 scope{ net2o
 
@@ -427,7 +454,8 @@ base !
     dup blocksize !
     file( ." file read: ======= " dup . forth:cr
     ." file write: ======= " dup . forth:cr )
-    dup residualread !  residualwrite ! ;
+    [IFDEF] old-spit dup [ELSE] 0 [THEN]  residualwrite !
+    residualread ! ;
 
 : close-all ( -- )
     msg( ." Closing all files" forth:cr )

@@ -301,13 +301,13 @@ $20 Value max-resend#
 : prepare-resend ( flag -- end start acks ackm taibits backbits headbits )
     data-rmap with mapc
 	ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
-	IF    dest-head addr>bytes -4 and
-	ELSE  dest-head 1- addr>bytes 1+  THEN 0 max
+	IF    dest-head dup >r addr>bytes -4 and
+	ELSE  dest-top dup >r 1- addr>bytes 1+  THEN 0 max
 	dest-tail addr>bytes -4 and \ dup data-ack# umin!
 	data-ackbits @ dest-size addr>bytes 1-
 	dest-tail addr>bits
 	dest-back dest-size + addr>bits
-	dest-head addr>bits
+	r> addr>bits
     endwith ;
 
 in net2o : do-resend ( flag -- )
@@ -524,7 +524,7 @@ in net2o : ack-code ( ackflag -- ackflag )  >r
 	net2o:gen-resend  net2o:genack
 	r@ resend-toggle# and IF
 	    ack( ." ack: do-resend" forth:cr )
-	    true net2o:do-resend
+	    ticker 64@ resend-all-to 64@ 64<> net2o:do-resend
 	THEN
 	0 data-rmap .mapc:do-slurp !@
 	?dup-IF  ulit, ack-flush
@@ -541,7 +541,7 @@ in net2o : do-ack-rest ( ackflag -- )
     dup resend-toggle# and IF
 	cmd-resend? drop
     THEN
-    acks# and data-rmap .mapc:ack-advance?
+    ( acks# and ) data-rmap .mapc:ack-advance?
     IF  net2o:ack-code  THEN  ack-timing ;
 
 in net2o : do-ack ( -- )
@@ -565,9 +565,11 @@ also net2o-base
     timeout( .keepalive )
     data-rmap dup 0= ?EXIT
     with mapc dest-req dup ack-advance? or to ack-advance? endwith
+    timeout( dup IF  ." ack-advance"  ELSE  ." saving"  THEN  forth:cr )
     dup IF
 	!ticks ticker 64@ resend-all-to 64!
-	[ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest  THEN ;
+	[ ack-toggle# resend-toggle# or ]L net2o:do-ack-rest
+    ELSE  net2o:save&done  THEN ;
 previous
 
 : cmd-timeout ( -- )  cmd-resend?

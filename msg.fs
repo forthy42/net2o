@@ -465,6 +465,7 @@ scope: logstyles
 }scope
 
 :noname ( addr u -- )
+    2dup key| 0 .pk@ key| str= IF  2drop un-cmd  EXIT  THEN
     last# >r  2dup key| to msg:id$
     [: .simple-id ." : " ;] $tmp notify-nick!
     r> to last# ; msg-notify-class is msg:start
@@ -476,14 +477,21 @@ scope: logstyles
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
 ' drop  msg-notify-class is msg:like
+' 2drop msg-notify-class is msg:chain
+' 2drop msg-notify-class is msg:re
 ' 2drop  msg-notify-class is msg:lock
 ' noop  msg-notify-class is msg:unlock
 :noname 2drop 64drop ; msg-notify-class is msg:perms
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
 :noname 2drop 2drop ; msg-notify-class is msg:otrify
-:noname drop 2drop ; msg-notify-class is msg:object
-:noname ( -- ) msg-notify ; msg-notify-class is msg:end
+:noname case
+	msg:image# of 2drop "img[] " notify+ endof
+	msg:thumbnail# of 2drop "thumb[] " notify+ endof
+	2drop
+    endcase ; msg-notify-class is msg:object
+:noname ( -- )
+    msg-notify ; msg-notify-class is msg:end
 :noname ( xchar -- ) ['] xemit $tmp notify+ ; msg-notify-class is msg:like
 
 \ msg scan for hashes class
@@ -573,14 +581,17 @@ end-class msg-?hash-class
 ; msg-class is msg:perms
 
 event: :>hash-finished { d: hash -- }
-    hash fetch-finish# #@ IF
-	@ >r hash r@ execute r> >addr free throw
+    hash fetch-finish# #@ dup IF
+	bounds U+DO
+	    I @ >r hash r@ execute r> >addr free throw
+	cell +LOOP
 	last# bucket-off
-    ELSE  drop  THEN
+    ELSE  2drop  THEN
     hash >ihave  hash drop free throw ;
 
 : fetch-queue 0 .pk.host $make { tsk w^ want# w^ pk$ -- }
     want# tsk pk$ [{: tsk pk$ :}l { item }
+	item $@ pk$ $@ str= ?EXIT
 	item $@ $8 $E pk-connect? IF  +resend +flow-control
 	    { | hashs }
 	    item cell+ $@ bounds U+DO
@@ -1250,7 +1261,7 @@ previous
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
-    nest-cmd-loop msg:end <default> ;
+    nest-cmd-loop o IF  msg:end  THEN <default> ;
 : msg-tdisplay-silent ( addr u -- )
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF  2drop  EXIT  THEN  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
@@ -1415,7 +1426,7 @@ also net2o-base
 : ihave, ( -- )
     ihave$ $@ dup IF
 	maxstring over 4 + - mehave$ $@len - dup 0< IF  2drop  EXIT  THEN
-	keysize negate and dup >r
+	drop keysize negate and dup >r
 	$, mehave$ $@ $, msg-ihave
 	ihave$ 0 r> $del
     ELSE  2drop  THEN ;

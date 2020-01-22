@@ -101,8 +101,8 @@ $Variable net2o-logo
     [ELSE]
 	\ Use variables to avoid needing to quote stuff
 	\ Unfortunately, HTML quoting still needed
-	"TITLE" ['] notify-title $tmp ['] escape-<&> $tmp 1 setenv ?ior
-	"MESSAGE" notify@ 1 setenv ?ior
+	['] notify-title $tmp ['] escape-<&> $tmp "TITLE" 2swap 1 setenv ?ior
+	notify@ "MESSAGE" 2swap 1 setenv ?ior
 	[: notify-send $. space
 	    ." -a net2o -c im.received "
 	    net2o-logo $@len IF

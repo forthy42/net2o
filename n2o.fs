@@ -575,6 +575,9 @@ warnings !
     \U sh cmd
     \G sh: evaluate rest of command as shell command
     source >in @ /string system  source nip >in ! ;
+synonym \ \ ( -- )
+synonym #! \ ( -- )
+    \ hashbang comment
 
 : debug ( -- )
     \U debug [+|-<switch>]

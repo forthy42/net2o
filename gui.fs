@@ -400,20 +400,19 @@ Variable user-avatar#
 Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
-: read-user.png ( -- )
-    [ "doc/user.png" ]path user.png$ $slurp-file ;
-: read-thumb.png ( -- )
-    [ "minos2/thumb.png" ]path thumb.png$ $slurp-file ;
+: read-user ( -- region )
+    [ "doc/user.png" ]path user.png$ $slurp-file
+    user.png$ $@ mem>thumb atlas-region ;
+: read-thumb ( -- )
+    [ "minos2/thumb.png" ]path thumb.png$ $slurp-file
+    thumb.png$ $@ mem>thumb atlas-region ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
-	read-user.png user.png$ $@ mem>thumb atlas-region
-	user-avatar# $!
+	read-user user-avatar# $!
     THEN   user-avatar# $@ drop ;
-: read-dummy ( -- addr u )
-    read-thumb.png thumb.png$ $@ mem>thumb atlas-region ;
 : dummy-thumb ( -- addr )
     dummy-thumb# @ 0= IF
-	read-dummy dummy-thumb# $!
+	read-thumb dummy-thumb# $!
     THEN   dummy-thumb# $@ drop ;
 : avatar-thumb ( avatar -- )
     glue*avatar swap }}thumb >r {{ r> }}v 40%b ;
@@ -428,10 +427,14 @@ Variable thumb.png$
     >r r@ $@ read-avatar r> cell+ $@ smove ;
 : re-dummy ( -- )
     dummy-thumb# @ 0= ?EXIT \ nobody has a dummy thumb
-    read-dummy dummy-thumb# $@ smove ;
+    read-thumb dummy-thumb# $@ smove ;
+: re-user ( -- )
+    user-avatar# @ 0= ?EXIT \ nobody has a dummy thumb
+    read-user user-avatar# $@ smove ;
 
 :noname defers free-thumbs
-    re-dummy avatar# ['] re-avatar #map ; is free-thumbs
+    re-user re-dummy avatar# ['] re-avatar #map
+    fetch-finish# #frees ; is free-thumbs
 
 event: :>update-avatar ( thumb hash u1 -- )
     avatar-frame swap .childs[] $@ drop @ >o to frame# o>
@@ -611,7 +614,7 @@ previous
 }}z box[] to id-frame
 
 : show-nicks ( -- )
-    dummy-thumb drop
+    user-avatar drop dummy-thumb drop
     fill-nicks fill-groups !online-symbol
     next-slide +lang +resize  peers-box engage
     peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
@@ -1049,8 +1052,8 @@ Variable re-indent#
     keysize safe/string IF  c@ 4 and IF  swap  THEN  ELSE  drop  THEN ;
 
 : update-thumb { d: hash object -- }
-    hash avatar-frame object >o dup $10 dump to frame# hash >rotate
-    frame# i.w frame# i.h tile-glue hash >swap .wh-glue!  o>
+    hash avatar-frame object >o to frame# hash >rotate
+    frame# i.w frame# i.h hash >swap  tile-glue .wh-glue!  o>
     [: +sync +resize ;] msgs-box .vp-needed +sync +resize ;
 
 : 40%bv ( o -- o ) >o current-font-size% 40% f* fdup to border
@@ -1062,7 +1065,7 @@ Variable re-indent#
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
 	128 128 glue*thumb dummy-thumb }}thumb >r
-	r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #!
+	r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #+!
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 

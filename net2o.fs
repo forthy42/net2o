@@ -1689,7 +1689,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
       o-timeout o-chunks extra-dispose
       data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
       end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
-      end-strings start-strings DO  I $off      cell +LOOP
+      end-strings start-strings DO  I $free     cell +LOOP
       end-secrets start-secrets DO  I sec-free  cell +LOOP
       fstate-free
       \ erase crypto keys
