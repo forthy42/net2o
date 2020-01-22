@@ -596,7 +596,7 @@ $40 Constant #splitminute
     10 6 0 f.rdp 's' emit ;
 
 : >day ( seconds -- fraction day )
-    86400 fm/ fsplit ;
+    #86400 fm/ fsplit ;
 : .day ( day -- )
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
@@ -626,7 +626,7 @@ $40 Constant #splitminute
     datehms? 1 > IF ." forever" ELSE 'f' emit THEN ;
 
 : f.ticks ( rticks -- )
-    1e-9 f* >day
+    1n f* >day
     dup today? date? #today and 0= and
     IF
 	drop .timeofday

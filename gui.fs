@@ -401,10 +401,12 @@ Variable dummy-thumb#
 Variable user.png$
 Variable thumb.png$
 : read-user ( -- region )
-    [ "doc/user.png" ]path user.png$ $slurp-file
+    user.png$ $@len 0= IF
+	[ "doc/user.png" ]path user.png$ $slurp-file  THEN
     user.png$ $@ mem>thumb atlas-region ;
 : read-thumb ( -- )
-    [ "minos2/thumb.png" ]path thumb.png$ $slurp-file
+    thumb.png$ $@len 0= IF
+	[ "minos2/thumb.png" ]path thumb.png$ $slurp-file  THEN
     thumb.png$ $@ mem>thumb atlas-region ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
@@ -1159,14 +1161,56 @@ wmsg-o >o msg-table @ token-table ! o>
 0 Value chat-edit    \ chat edit field
 0 Value chat-edit-bg \ chat edit background
 
+: >ymd ( ticks -- year month day )
+    64>f 1n f* >day fdrop unix-day0 + day2ymd ;
+: year>i ( year -- index )
+    1 1 ymd2day unix-day0 - #86400 * #1000000000 um* d>64 date>i ;
+
+: +years ( end start -- o maxyear ) { | maxyear }
+    >r 1+ >r
+    {{
+	glue*ll }}glue
+	r> r> DO
+	    I 1+ year>i I year>i - dup maxyear umax to maxyear
+	    IF  I 0 <# #s #> day-color x-color blackish }}button-lit  THEN
+	LOOP
+	glue*ll }}glue
+    }}h box[] maxyear ;
+: +months ( end start -- )
+    >r 1+ >r
+    {{
+	glue*ll }}glue
+	r> r> DO
+	    I 0 <# #s #> day-color x-color blackish }}button-lit
+	LOOP
+	glue*ll }}glue
+    }}h box[] ;
+
+: gen-calendar { log u -- o/0 }
+    u gui-msgs# cells u<= IF  0  EXIT  THEN
+    log u cell- 0 max + $@ startdate@ { 64: endd }
+    log $@ startdate@ { 64: std }
+    {{  \Large
+	endd >ymd 2drop
+	std >ymd 2drop 2dup <> IF
+	    +years gui-msgs# u> IF
+		12 1 +months
+	    THEN
+	ELSE  2drop
+	    endd >ymd drop nip
+	    std >ymd drop nip +months
+	THEN
+    }}v box[] ;
+
 : (gui-msgs) ( gaddr u -- )
     reset-time
     64#0 to last-tick  last-bubble-pk $free
     0 to msg-par  0 to msg-box
     msgs-box .dispose-childs
+    load-msg msg-log@ { log u }
+    log u gen-calendar ?dup-IF  msgs-box .child+  THEN
     glue*lll }}glue msgs-box .child+
-    load-msg msg-log@
-    { log u } u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
+    u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
     log u u' /string bounds ?DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
