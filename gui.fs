@@ -173,6 +173,7 @@ $000000FF dup text-emoji-color: black-emoji
 $000000FF new-color, FValue otr-col#
 $FFFFFFFF new-color, FValue chat-col#
 $80FFFFFF new-color, FValue chat-bg-col#
+$70eFeFFF new-color, FValue chat-hist-col#
 $FFFFFFFF new-color, FValue posting-bg-col#
 
 : entropy-colorize ( -- )
@@ -1163,25 +1164,131 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : >ymd ( ticks -- year month day )
     64>f 1n f* >day fdrop unix-day0 + day2ymd ;
+: day'>i ( day -- index )
+    #86400 * #1000000000 um* d>64 date>i ;
+: day>i ( year month day -- index )
+    ymd2day unix-day0 - day'>i ;
+: month>i ( year month -- index )
+    1 day>i ;
+: quartal>i ( quartal -- index )
+    4 /mod swap 3 * 1+ month>i ;
 : year>i ( year -- index )
-    1 1 ymd2day unix-day0 - #86400 * #1000000000 um* d>64 date>i ;
+    1 month>i ;
 
-: +years ( end start -- o maxyear ) { | maxyear }
-    >r 1+ >r
+0 Value chat-history
+
+: closer ( -- o closer )
     {{
+	\Large
+	{{ s" ❌" $444444FF new-color, }}text }}h 25%b
+	dup { closer } /right
 	glue*ll }}glue
+    }}v box[] closer ;
+: closerz ( o -- o )
+    >r {{ r>
+	closer { closer }
+    }}z box[] >r
+    closer [: data chat-history .childs[] del$cell
+      data .dispose-widget +resize +sync ;] r@ click[] drop
+    r> ;
+: }}closerh ( o1 .. on -- o )
+	s" ❌" $444444FF new-color, }}text dup { closer }
+    }}h box[] >r
+    closer [: data chat-history .childs[] del$cell
+      data .dispose-widget +resize +sync ;] r@ click[] drop
+    r> ;
+: log-data { endi starti -- }
+    msg-log@ { log u } msgs-box { box }
+    {{ }}v box[] dup to msgs-box
+    closerz chat-history .child+
+    log u starti cells safe/string endi starti - cells umin bounds U+DO
+	I log - cell/ to log#
+	I $@ { d: msgt }
+	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
+	    <err> ." invalid entry" cr <default> 2drop
+	THEN
+    cell +LOOP +resize +sync
+    box to msgs-box
+    log free throw ;
+: +days ( end start -- o )
+    >r >r
+    {{
+	\Large \sans \bold
+	glue*ll }}glue
+	i' unix-day0 + day2ymd drop <# '-' hold 0 # # 2drop '-' hold 0 #s #> }}text
 	r> r> DO
-	    I 1+ year>i I year>i - dup maxyear umax to maxyear
-	    IF  I 0 <# #s #> day-color x-color blackish }}button-lit  THEN
+	    I 1+ day'>i I day'>i - IF
+		I unix-day0 + day2ymd nip nip
+		<# 0 # # #> day-color x-color blackish }}button-lit
+		[: data 1+ day'>i data day'>i log-data ;] I click[]
+	    THEN
 	LOOP
 	glue*ll }}glue
-    }}h box[] maxyear ;
-: +months ( end start -- )
+    }}closerh ;
+: +months ( year end start -- o )
+    >r 1+ >r { year }
+    {{
+	\Large \sans \bold
+	glue*ll }}glue
+	year 0 <# '-' hold #s #> }}text
+	r> r> DO
+	    year I 1+ month>i year I month>i - IF
+		I 0 <# # # #> day-color x-color blackish }}button-lit
+		[: data #12 /mod { m y }
+		  y m 2 + month>i
+		  y m 1 + month>i -
+		  IF
+		      y m 2 + 1 ymd2day unix-day0 -
+		      y m 1 + 1 ymd2day unix-day0 - +days
+		      chat-history .child+ +resize +sync
+		  ELSE
+		      ." print chat log directly" cr
+		  THEN
+		;] I 1- year 12 * + click[]
+	    THEN
+	LOOP
+	glue*ll }}glue
+    }}closerh ;
+: +quartals ( year end start -- o )
+    >r 1+ >r { year }
+    {{
+	\Large \sans \bold
+	glue*ll }}glue
+	year 0 <# '/' hold #s #> }}text
+	r> r> DO
+	    I year 4 * + quartal>i
+	    I 1- year 4 * + quartal>i - IF
+		I 0 <# #s 'Q' hold #> day-color x-color blackish }}button-lit
+		[:
+		  data 1+ quartal>i data quartal>i -
+		  IF
+		      data 4 /mod swap dup 2* + dup 3 + swap 1+ +months
+		      chat-history .child+ +resize +sync
+		  ELSE
+		      ." print chat log directly" cr
+		  THEN
+		;] I 1- year 2* 2* + click[]
+	    THEN
+	LOOP
+	glue*ll }}glue
+    }}closerh ;
+: +years ( end start -- o ) { | lastyear }
     >r 1+ >r
     {{
+	\Large \sans \bold
 	glue*ll }}glue
 	r> r> DO
-	    I 0 <# #s #> day-color x-color blackish }}button-lit
+	    I 1+ year>i I year>i -
+	    IF  I lastyear - dup #100 u>= IF  lastyear +  THEN
+		0 <# #s #> day-color x-color blackish }}button-lit
+		[: data 1+ year>i data year>i - gui-msgs# u> IF
+		      data 4 1 +quartals chat-history .child+ +resize +sync
+		  ELSE
+		      ." print chat log directly" cr
+		  THEN
+		;] I click[]
+	    THEN
+	    I #100 / #100 * to lastyear
 	LOOP
 	glue*ll }}glue
     }}h box[] ;
@@ -1190,17 +1297,18 @@ wmsg-o >o msg-table @ token-table ! o>
     u gui-msgs# cells u<= IF  0  EXIT  THEN
     log u cell- 0 max + $@ startdate@ { 64: endd }
     log $@ startdate@ { 64: std }
-    {{  \Large
-	endd >ymd 2drop
-	std >ymd 2drop 2dup <> IF
-	    +years gui-msgs# u> IF
-		12 1 +months
+    {{
+	glue*l chat-hist-col# font-size# 40% f* }}frame dup .button3
+	{{
+	    endd >ymd 2drop
+	    std >ymd 2drop 2dup <> IF
+		+years
+	    ELSE  2drop
+		endd >ymd drop 1- 3 / 1+
+		std >ymd drop nip 1- 3 / 1+ +quartals
 	    THEN
-	ELSE  2drop
-	    endd >ymd drop nip
-	    std >ymd drop nip +months
-	THEN
-    }}v box[] ;
+	}}v box[] dup to chat-history
+    }}z box[] ;
 
 : (gui-msgs) ( gaddr u -- )
     reset-time
@@ -1330,15 +1438,10 @@ Variable gui-log[]
 	    {{
 		gui-log[] [: }}text /left ;] $[]map
 	    }}v box[] 25%b \regular
-	    {{
-		{{ s" ❌" $444444FF new-color, }}text }}h 25%b
-		dup { closer } /right
-		glue*ll }}glue
-	    }}v box[]
+	    closer { closer }
 	}}z box[] >r
 	closer [: data msgs-box .childs[] del$cell
-	    data .dispose-widget
-	    re-msg-box ;] r@ click[] drop
+	    data .dispose-widget re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
     THEN ;
 
@@ -1530,7 +1633,7 @@ forth-local-indent-words:
     (
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
      (("{{") (0 . 2) (0 . 2) immediate)
-     (("}}h" "}}v" "}}z" "}}vp" "}}p") (-2 . 0) (-2 . 0) immediate)
+     (("}}h" "}}closerh" "}}v" "}}z" "}}vp" "}}p") (-2 . 0) (-2 . 0) immediate)
     )
 End:
 [THEN]

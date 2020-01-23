@@ -278,7 +278,8 @@ Defer >throw
     cmd( true )else( remote? @ 0= ) IF
 	[: ." do-cmd-loop: " dup . .exe cr ;] $err
 	dup DoError
-	buf-state @ show-offset !  <err> cr net2o:see-me <default> show-offset on
+	buf-state @ show-offset !
+	<warnings> cr net2o:see-me <default> show-offset on
     THEN
     un-cmd >throw ;
 : do-cmd-loop ( addr u -- )  2dup buf-dump 2!

@@ -15,6 +15,7 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+color,#
 1 new-theme
 dark-gui
 $FFFFFFFF re-text-color blackish
@@ -31,6 +32,7 @@ $000020BF re-color login-bg-col#
 $FF000000 $FF0000FF re-fade-color pw-err-col#
 $444444FF re-color chat-col#
 $224444FF re-color chat-bg-col#
+$113333FF re-color chat-hist-col#
 $222222FF re-color posting-bg-col#
 $FFFFBBFF re-text-color link-blue
 $88FF88FF re-text-color re-green
@@ -40,6 +42,10 @@ $202020C0 re-color log-bg
 $408040FF re-color send-color
 $333333FF re-color users-color#
 $000000CC re-color album-bg-col#
+$88FF88FF re-color my-signal
+$CCFFCCFF re-color other-signal
+$CC00CCFF re-color my-signal-otr
+$880088FF re-color other-signal-otr
 
 8 0 [DO]
     imports#rgb-bg [I] sfloats + sf@ floor f>s to color,#
@@ -58,3 +64,4 @@ $33EE33FF
     text-color, fdrop
 [LOOP]
 dark-gui
+to color,#

@@ -1668,6 +1668,9 @@ umethod /imgs ( addr u -- )
 umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
+umethod /connections ( addr u -- )
+    \U connections          list active connections
+    \G connections: list active connections
 end-class chat-cmds
 
 chat-cmds new Constant text-chat-cmd-o
@@ -1818,6 +1821,11 @@ msg:troll#      't' permchar>bits + c!
 
 :noname ( addr u -- )
     2drop -1 [IFDEF] android android:level# [ELSE] level# [THEN] +! ; is /bye
+
+:noname ( addr u -- )
+    2drop [:
+      remote-host$ $. ." @" pubkey $@ .simple-id ." :" forth:cr
+      true ;] search-context ; is /connections
 }scope
 
 : ?slash ( addr u -- addr u flag )

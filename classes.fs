@@ -260,6 +260,8 @@ cmd-class class
     field: resend0
     field: data-resend
     field: pubkey        \ other side official pubkey
+    field: remote-host$  \ other side host name
+    field: remote-ver$   \ other side version
     field: rqd-xts       \ callbacks for request done (array)
     field: my-error-id
     field: beacon-hash
@@ -465,6 +467,7 @@ object uclass io-mem
     cell            uvar tmp-my-key
     cell            uvar tmp-perm
     cell            uvar $error-id
+    cell            uvar $remote-host
 end-class io-buffers
 
 \ reply structure

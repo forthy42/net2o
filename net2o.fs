@@ -532,6 +532,7 @@ in net2o : new-code ( addrs addrd u -- )
 	addrd >dest-map @ ?EXIT
 	net2o:new-context >o rdrop  setup!  THEN
     msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
+    $remote-host $@ remote-host$ $!
     >code-flag on
     addrd u addr code-rmap map-code-dest
     addrs u map-source to code-map ;

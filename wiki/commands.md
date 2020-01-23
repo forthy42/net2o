@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.9.7-20200116.
+Version 0.9.7-20200123.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -148,6 +148,8 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $49 tmp-secret, ( -- )
 * $4A qr-challenge ( $:challenge $:respose -- )
 * $4B invite-result ( flag -- )
+* $4C set-host ( $:host -- )
+* $4D get-host ( -- )
 
 ### connection commands ###
 
