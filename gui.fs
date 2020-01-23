@@ -1235,14 +1235,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	    year I 1+ month>i year I month>i - IF
 		I 0 <# # # #> day-color x-color blackish }}button-lit
 		[: data #12 /mod { m y }
-		  y m 2 + month>i
-		  y m 1 + month>i -
+		  y m 2 + month>i  y m 1 + month>i -
 		  IF
 		      y m 2 + 1 ymd2day unix-day0 -
 		      y m 1 + 1 ymd2day unix-day0 - +days
 		      chat-history .child+ +resize +sync
 		  ELSE
-		      ." print chat log directly" cr
+		      y m 2 + month>i  y m 1 + month>i log-data
 		  THEN
 		;] I 1- year 12 * + click[]
 	    THEN
@@ -1265,7 +1264,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		      data 4 /mod swap dup 2* + dup 3 + swap 1+ +months
 		      chat-history .child+ +resize +sync
 		  ELSE
-		      ." print chat log directly" cr
+		      data 1+ quartal>i data quartal>i log-data
 		  THEN
 		;] I 1- year 2* 2* + click[]
 	    THEN
@@ -1284,7 +1283,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		[: data 1+ year>i data year>i - gui-msgs# u> IF
 		      data 4 1 +quartals chat-history .child+ +resize +sync
 		  ELSE
-		      ." print chat log directly" cr
+		      data 1+ year>i data year>i log-data
 		  THEN
 		;] I click[]
 	    THEN
