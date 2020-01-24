@@ -184,6 +184,13 @@ $FFFFFFFF new-color, FValue posting-bg-col#
     edit-w .text$ nip #800 u> IF
 	prev-text$ edit-w >o to text$ o>
     THEN ;
+: nick-filter ( -- ) edit-w >o
+    0 >r BEGIN  text$ r@ safe/string  WHILE
+	    c@ bl = IF
+		addr text$ r@ 1 $del
+		r@ curpos u< +to curpos
+	    ELSE  r> 1+ >r  THEN  REPEAT  drop rdrop
+    o> ;
 
 glue new Constant glue*lll±
 glue*lll± >o 1Mglue fnip 1000e fswap hglue-c glue! 0glue fnip 1filll fswap dglue-c glue! 1glue vglue-c glue! o>
@@ -214,6 +221,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			"nick" }}edit 25%b dup to nick-field
 			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
+		    ' nick-filter filter[]
 		}}z box[] blackish
 		{{ \large "👤" }}text \normal }}h /phantom
 		glue*ll }}glue
