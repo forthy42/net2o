@@ -455,6 +455,8 @@ Variable secret-nicks#
     cell+ ..nick ." ' ok" cr ;
 
 Forward dht-nick?
+Forward addnick-owndht
+
 Variable keysearchs#
 hash: unknown-keys#
 
@@ -719,6 +721,7 @@ key-entry-table $save
 
 : key:nest-sig ( addr u -- addr u' flag )
     pk2-sig? dup ?EXIT drop
+    2dup addnick-owndht
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
     sim-nick! off c-state off sig-ok ;

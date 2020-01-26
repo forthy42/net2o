@@ -36,7 +36,7 @@ Variable d#public \ root of public dht
 	I @ ?dup-IF  .xt  THEN
     cell +LOOP
     dht @ dht-size# 2/ + dht-size# 2/ bounds DO
-	I @ ?dup-IF  action-of xt recurse  THEN
+	I @ IF  I action-of xt recurse  THEN
     cell +LOOP ;
 
 \ keys are enumerated small integers
@@ -162,7 +162,8 @@ dht-class ' new static-a with-allocater constant dummy-dht
 : .host ( addr u -- ) over c@ '!' = IF  .revoke  EXIT  THEN
     2dup sigsize# - .addr$
     2dup space .sigdates >host verify-host .check 2drop ;
-: .owner ( addr u -- )  2dup sigsize# - .key$
+: .owner ( addr u -- )  2dup sigsize# - ['] .key$ catch IF
+	2drop <err> ."  invalid key" cr <default>  THEN
     2dup space .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host 0= >r sigsize# - r> ;
@@ -214,11 +215,10 @@ dht-class ' new static-a with-allocater constant dummy-dht
 
 : d#cleanups? ( -- )
     last-d#cleanup 64@ ticks 64u< IF
-	d#cleanups
+	last-d#cleanup 64@ 64-0<> IF  ['] d#cleanups catch  ELSE  0  THEN
 	ticks config:dht-cleaninterval& 2@ d>64 64+ last-d#cleanup 64!
+	throw
     THEN ;
-    
-    
 
 \ commands for DHT
 
@@ -400,8 +400,12 @@ previous
     end-code| o> ;
 
 : addme-owndht ( -- )
-    pk@ >d#id >o  dht-host $[]off
-    my-addr$ [: dht-host $+[]! ;] $[]map o> ;
+    pk@ >d#id [: >o dht-host $[]off
+      my-addr$ [: dht-host $+[]! ;] $[]map o> ;] dht-sema c-section ;
+: addnick-owndht ( addr u -- )
+    2dup sigpk2size# - + keysize2 >d#id
+    [: >o [: 2dup sigpk2size# - type + sigsize# - sigsize# type ;] $tmp
+      dht-owner o> $rep[]sig ;] dht-sema c-section ;
 
 \ replace me stuff
 

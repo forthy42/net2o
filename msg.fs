@@ -1275,18 +1275,36 @@ previous
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
     REPEAT  2drop ;
+: ?scan-pks ( addr u -- )
+    bounds U+DO
+	I $@ sigpk2size# - + keysize 2dup key# #@ d0= IF
+	    msg-group-o .msg:pks[] $ins[] drop
+	THEN
+    cell +LOOP ;
+: fetch-pks ( -- )
+    msg-group-o .msg:pks[] $@len 0<>
+    msg-group-o .msg:peers[] $@len 0<> and IF
+	0 msg-group-o .msg:peers[] $[] @ >o o to connection
+	0 msg-group-o .msg:pks[] $@ bounds U+DO
+	    dup 0= IF  1+  net2o-code  expect-reply  THEN
+	    I $@ $, dht-id dht-owner? end-with
+	    dup 4 = IF  cookie+request end-code| drop 0  THEN
+	cell +LOOP o>
+	msg-group-o .msg:pks[] $[]free
+    THEN ;
 : msg-tredisplay ( n -- )
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
-    [:  cells >r msg-log@
-	{ log u } u r> - 0 max { u' }  log u' ?search-lock
-	log u u' /string bounds ?DO
-	    I log - cell/ to log#
-	    I $@ { d: msgt }
-	    msgt ['] msg:display catch IF  ." invalid entry" cr
-		2drop  THEN
-	cell +LOOP
-	log free throw ;] catch
+    [: cells >r msg-log@
+      { log u } log u ?scan-pks fetch-pks
+      u r> - 0 max { u' }  log u' ?search-lock
+      log u u' /string bounds ?DO
+	  I log - cell/ to log#
+	  I $@ { d: msgt }
+	  msgt ['] msg:display catch IF  ." invalid entry" cr
+	      2drop  THEN
+      cell +LOOP
+      log free throw ;] catch
     r> IF  msg-group-o .msg:+otr  THEN  throw ;
 ' msg-tredisplay msg-class is msg:redisplay
 

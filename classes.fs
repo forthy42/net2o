@@ -145,6 +145,7 @@ cmd-class class{ msg
     field: keys[]
     field: log[]
     field: hashs[]
+    field: pks[]
     field: perms# \ pk -> permission map
     field: mode
     \ mode bits:
