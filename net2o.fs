@@ -596,14 +596,15 @@ scope{ mapc
 : >blockalign ( n -- block )
     blockalign @ dup >r 1- + r> negate and ;
 : >maxalign ( n -- block )
-    maxdata 5 lshift dup >r 1- + r> negate and ;
+    maxdata dup >r 1- + r> negate and ;
 : 64>blockalign ( 64 -- block )
     blockalign @ dup >r 1- n>64 64+ r> negate n>64 64and ;
 : /head ( u -- )
     >blockalign dup negate residualread +!
     data-map with mapc +to dest-head endwith ;
-: max/head ( -- )
-    data-map with mapc dest-head >maxalign to dest-head endwith ;
+: max/head@ ( -- u )
+    data-map with mapc dest-head dup >maxalign dup to dest-head
+    swap - endwith ;
 : /back ( u -- )
     >blockalign dup negate residualwrite +!
     data-rmap with mapc +to dest-back endwith ;

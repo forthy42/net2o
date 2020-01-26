@@ -367,7 +367,7 @@ Variable f-wamount
 [THEN]
 
 in net2o : save-block ( back tail id len -- delta ) { id len -- delta }
-    slurp( ." spit: " id hex. len hex. )
+    slurp( ." spit: " over hex. dup hex. id hex. len hex. )
     id $FF = IF  swap - len umin \ only alignment
     ELSE
 	data-rmap with mapc fix-size raddr+ endwith
@@ -382,10 +382,11 @@ in net2o : save-block ( back tail id len -- delta ) { id len -- delta }
 in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 	spit#$ $@ bounds ?DO
 	    back tail I count swap p2@+ I - { +I }
-	    64>n residualwrite @ - 0 max
+	    64>n residualwrite @ umin
 	    net2o:save-block slurp( ." => " dup hex. forth:cr )
 	    dup +to back
-	    0<> residualwrite @ and IF  0 to +I  ELSE  residualwrite off  THEN
+	    0<> residualwrite @ and IF  0 to +I  ELSE
+		blocksize @ residualwrite !  THEN
 	    +I +to spitbuf#
 	    back tail u>= ?LEAVE
 	+I +LOOP
@@ -454,7 +455,7 @@ base !
     dup blocksize !
     file( ." file read: ======= " dup . forth:cr
     ." file write: ======= " dup . forth:cr )
-    [IFDEF] old-spit dup [ELSE] 0 [THEN]  residualwrite !
+    dup residualwrite !
     residualread ! ;
 
 : close-all ( -- )
@@ -469,12 +470,14 @@ base !
 
 \ read in from files
 
+: >slurp ( n id -- )
+    slurp#$ c$+! u>64 slurp#$ p2$+! ;
+: >salign ( n -- )
+    ?dup-IF  $FF >slurp  THEN ;
 : slurp-block { id -- delta }
     data-head@ id id>addr? .fs-read
-    dup IF  id slurp#$ c$+! dup u>64 slurp#$ p2$+!
-	dup >blockalign over - ?dup-IF
-	    $FF slurp#$ c$+! u>64 slurp#$ p2$+!
-	THEN
+    dup IF  dup id >slurp
+	dup >blockalign over - >salign
     THEN
     dup /head
     file1( id f-rid @ = IF  dup f-ramount +!
@@ -495,7 +498,8 @@ base !
 		    read-file# file+  blocksize @ residualread !  THEN
 	    fails states u>= UNTIL
 	THEN  +file
-	fails states u>= dup IF  max/head  THEN \ if all files are done, align
+	\ if all files are done, align
+	fails states u>= dup IF  max/head@ >salign  THEN
 	head@ swap
 	msg( ." Read end: " over hex. forth:cr ) ;]
     file-sema c-section
