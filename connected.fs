@@ -605,7 +605,8 @@ previous
     nest[ cookie, gen-reply request, ]nest  other
     tmpkey-request
     ind-addr @  IF  punch?  THEN
-    req-codesize  req-datasize  map-request,  close-tmpnest
+    req-codesize  req-datasize  map-request,
+    get-host push' get-host  close-tmpnest
     ['] push-cmd IS expect-reply?
     end-code ;
 

@@ -17,7 +17,6 @@
 
 Forward >invitations
 in net2o Forward dispose-addrs
-in net2o Forward exchange-hostnames
 Forward mynick$
 Forward invite-me
 Forward qr-invite-me
@@ -232,7 +231,6 @@ Sema id-sema
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
     reply-key, ( cookie+request ) time-offset! context
-    \ o IF  net2o:exchange-hostnames  THEN
     ]tmpnest
     push-cmd ;
 
@@ -291,9 +289,6 @@ Sema id-sema
 +net2o: get-host ( -- )
     host$ $@ $, set-host ;
 ' invite-result is <invite-result>
-
-in net2o : exchange-hostnames ( -- )
-    host$ $@ $, set-host ;
 }scope
 
 setup-table $save
