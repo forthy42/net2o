@@ -72,7 +72,7 @@ point:
 3. [Encryption](encryption.md)
 4. [Flow Control](flow-control.md)
 5. [Commands](commands.md)
-6. [Distributed Data](distributed-data.wiki)
+6. [Distributed Data](distributed-data.md)
 7. [Applications](applications.wiki)
 
 ## Videos & Presentations ##
