@@ -128,6 +128,7 @@ point:
 * [$quid CryptoCurrency](squid.md)
 * [Guidelines of Conduct](guidelines.md)
 * [Social network](social.md)
+* [Search](search.md)
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
