@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Creator: fig2dev Version 3.2.7b -->
-<!-- CreationDate: 2020-01-28 17:45:45 -->
-<!-- Magnification: 1.05 -->
+<!-- CreationDate: 2020-01-28 17:50:41 -->
+<!-- Magnification: 0.787 -->
 <svg	xmlns="http://www.w3.org/2000/svg"
 	xmlns:xlink="http://www.w3.org/1999/xlink"
-	width="711pt" height="328pt"
-	viewBox="888 1113 11274 5199">
+	width="576pt" height="299pt"
+	viewBox="438 438 12174 6324">
 <g fill="none">
+<!-- Line -->
+<rect x="450" y="450" width="12150" height="6300" fill="#000000"
+	stroke="#000000" stroke-width="8px"/>
 <!-- Line -->
 <defs>
 <clipPath id="cp0">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 9770,3201 9803,3251 9909,3152 9902,3141z"/>
 </clipPath>
 </defs>
@@ -22,7 +25,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp1">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10438,3178 10463,3233 10584,3153 10578,3141z"/>
 </clipPath>
 </defs>
@@ -34,7 +37,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp2">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 11111,3165 11130,3222 11259,3154 11254,3141z"/>
 </clipPath>
 </defs>
@@ -46,7 +49,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp3">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 11786,3156 11801,3214 11933,3155 11930,3142z"/>
 </clipPath>
 </defs>
@@ -58,7 +61,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp4">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8413,4528 8438,4583 8559,4503 8553,4491z"/>
 </clipPath>
 </defs>
@@ -70,7 +73,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp5">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7094,4591 7142,4627 7209,4499 7199,4491z"/>
 </clipPath>
 </defs>
@@ -82,7 +85,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp6">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6979,3289 7037,3275 6980,3142 6967,3145z"/>
 </clipPath>
 </defs>
@@ -94,7 +97,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp7">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7562,3258 7616,3285 7659,3147 7647,3141z"/>
 </clipPath>
 </defs>
@@ -106,7 +109,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp8">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8200,3212 8237,3259 8334,3151 8326,3141z"/>
 </clipPath>
 </defs>
@@ -118,7 +121,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp9">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8865,3184 8892,3238 9009,3153 9003,3141z"/>
 </clipPath>
 </defs>
@@ -175,7 +178,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp10">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3247,3251 3280,3201 3148,3141 3141,3152z"/>
 </clipPath>
 </defs>
@@ -187,7 +190,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp11">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 1920,3222 1939,3165 1796,3141 1791,3154z"/>
 </clipPath>
 </defs>
@@ -199,7 +202,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp12">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 1249,3214 1264,3156 1120,3142 1117,3155z"/>
 </clipPath>
 </defs>
@@ -211,7 +214,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp13">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2587,3233 2612,3178 2472,3141 2466,3153z"/>
 </clipPath>
 </defs>
@@ -223,7 +226,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp14">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4612,4583 4637,4528 4497,4491 4491,4503z"/>
 </clipPath>
 </defs>
@@ -235,7 +238,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp15">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5722,3995 5711,4054 5855,4058 5858,4045z"/>
 </clipPath>
 </defs>
@@ -247,7 +250,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp16">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6845,4000 6836,4059 6981,4058 6983,4044z"/>
 </clipPath>
 </defs>
@@ -259,7 +262,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp17">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8418,4004 8411,4063 8556,4058 8558,4044z"/>
 </clipPath>
 </defs>
@@ -271,7 +274,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp18">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4639,4048 4626,3990 4492,4045 4495,4058z"/>
 </clipPath>
 </defs>
@@ -283,7 +286,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp19">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5988,4032 5968,3975 5841,4046 5846,4059z"/>
 </clipPath>
 </defs>
@@ -295,7 +298,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp20">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8546,3911 8488,3925 8545,4058 8558,4055z"/>
 </clipPath>
 </defs>
@@ -307,7 +310,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp21">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7339,4054 7328,3995 7192,4045 7195,4058z"/>
 </clipPath>
 </defs>
@@ -319,7 +322,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp22">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5989,4060 5980,4000 5842,4044 5844,4058z"/>
 </clipPath>
 </defs>
@@ -331,7 +334,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp23">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4639,4063 4632,4004 4492,4044 4494,4058z"/>
 </clipPath>
 </defs>
@@ -343,7 +346,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp24">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5908,4627 5956,4591 5851,4491 5841,4499z"/>
 </clipPath>
 </defs>
@@ -355,7 +358,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp25">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6013,3275 6071,3289 6083,3145 6070,3142z"/>
 </clipPath>
 </defs>
@@ -367,7 +370,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp26">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7082,3975 7062,4032 7204,4059 7209,4046z"/>
 </clipPath>
 </defs>
@@ -379,7 +382,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp27">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8424,3990 8411,4048 8555,4058 8558,4045z"/>
 </clipPath>
 </defs>
@@ -391,7 +394,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp28">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4158,3238 4185,3184 4047,3141 4041,3153z"/>
 </clipPath>
 </defs>
@@ -403,7 +406,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp29">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4562,3925 4504,3911 4492,4055 4505,4058z"/>
 </clipPath>
 </defs>
@@ -415,7 +418,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp30">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5434,3285 5488,3258 5403,3141 5391,3147z"/>
 </clipPath>
 </defs>
@@ -427,7 +430,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp31">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4813,3259 4850,3212 4724,3141 4716,3151z"/>
 </clipPath>
 </defs>
@@ -457,7 +460,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp32">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4813,3259 4850,3212 4724,3141 4716,3151z"/>
 </clipPath>
 </defs>
@@ -477,7 +480,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp33">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5078,2337 5100,2393 5225,2320 5220,2307z"/>
 </clipPath>
 </defs>
@@ -495,7 +498,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp34">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5078,2337 5100,2393 5225,2320 5220,2307z"/>
 </clipPath>
 </defs>
@@ -511,7 +514,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp35">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 5419,2634 5452,2683 5557,2584 5550,2573z"/>
 </clipPath>
 </defs>
@@ -533,7 +536,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp36">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 11014,2156 11018,2096 10874,2110 10873,2123z"/>
 </clipPath>
 </defs>
@@ -553,7 +556,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp37">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 11014,2156 11018,2096 10874,2110 10873,2123z"/>
 </clipPath>
 </defs>
@@ -571,7 +574,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp38">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10523,2683 10556,2634 10425,2573 10418,2584z"/>
 </clipPath>
 </defs>
@@ -587,7 +590,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp39">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10523,2683 10556,2634 10425,2573 10418,2584z"/>
 </clipPath>
 </defs>
@@ -599,7 +602,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp40">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10523,2683 10556,2634 10425,2573 10418,2584z"/>
 </clipPath>
 </defs>
@@ -617,7 +620,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp41">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8917,2398 8916,2458 9060,2438 9060,2424z"/>
 </clipPath>
 </defs>
@@ -637,7 +640,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp42">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8917,2398 8916,2458 9060,2438 9060,2424z"/>
 </clipPath>
 </defs>
@@ -658,7 +661,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp43">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 8833,2199 8814,2256 8957,2279 8962,2266z"/>
 </clipPath>
 </defs>
@@ -682,7 +685,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp44">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 9473,2124 9448,2179 9588,2216 9594,2204z"/>
 </clipPath>
 </defs>
@@ -707,7 +710,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp45">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 9525,2133 9501,2188 9640,2226 9646,2214z"/>
 </clipPath>
 </defs>
@@ -732,7 +735,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp46">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 9536,2144 9511,2198 9650,2237 9656,2225z"/>
 </clipPath>
 </defs>
@@ -758,7 +761,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp47">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 9820,2271 9793,2325 9931,2368 9937,2356z"/>
 </clipPath>
 <polyline points=" 6300,2925 6750,2925" id="p0"/>
@@ -772,7 +775,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp48">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6948,1545 6948,1605 7091,1583 7091,1569z"/>
 </clipPath>
 </defs>
@@ -797,7 +800,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp49">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3539,2198 3514,2144 3394,2225 3400,2237z"/>
 </clipPath>
 </defs>
@@ -822,7 +825,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp50">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3508,2208 3483,2154 3363,2236 3369,2248z"/>
 </clipPath>
 </defs>
@@ -847,7 +850,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp51">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6645,2178 6621,2233 6762,2268 6767,2255z"/>
 </clipPath>
 </defs>
@@ -870,7 +873,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp52">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6528,2253 6506,2197 6381,2270 6386,2283z"/>
 </clipPath>
 </defs>
@@ -894,7 +897,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp53">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6497,2259 6475,2203 6350,2276 6355,2289z"/>
 </clipPath>
 </defs>
@@ -919,7 +922,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp54">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6466,2264 6443,2208 6319,2283 6324,2296z"/>
 </clipPath>
 </defs>
@@ -945,7 +948,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp55">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6434,2270 6412,2215 6288,2290 6293,2303z"/>
 </clipPath>
 </defs>
@@ -966,7 +969,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp56">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7161,2256 7142,2199 7013,2266 7018,2279z"/>
 </clipPath>
 </defs>
@@ -986,7 +989,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp57">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7161,2256 7142,2199 7013,2266 7018,2279z"/>
 </clipPath>
 </defs>
@@ -1004,7 +1007,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp58">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 7059,2413 7058,2353 6915,2379 6915,2393z"/>
 </clipPath>
 </defs>
@@ -1028,7 +1031,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp59">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3571,2189 3546,2134 3425,2214 3431,2226z"/>
 </clipPath>
 </defs>
@@ -1052,7 +1055,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp60">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6618,2171 6594,2226 6735,2261 6740,2248z"/>
 </clipPath>
 </defs>
@@ -1081,7 +1084,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp61">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2871,2234 2846,2179 2725,2259 2731,2271z"/>
 </clipPath>
 </defs>
@@ -1111,7 +1114,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp62">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2835,2247 2810,2192 2689,2272 2695,2284z"/>
 </clipPath>
 </defs>
@@ -1139,7 +1142,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp63">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2909,2222 2884,2167 2763,2247 2769,2259z"/>
 </clipPath>
 </defs>
@@ -1157,7 +1160,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp64">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2909,2222 2884,2167 2763,2247 2769,2259z"/>
 </clipPath>
 </defs>
@@ -1177,7 +1180,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp65">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4212,2303 4199,2244 4065,2299 4068,2312z"/>
 </clipPath>
 </defs>
@@ -1198,7 +1201,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp66">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2983,2199 2964,2256 3107,2279 3112,2266z"/>
 </clipPath>
 </defs>
@@ -1218,7 +1221,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp67">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2983,2199 2964,2256 3107,2279 3112,2266z"/>
 </clipPath>
 </defs>
@@ -1236,7 +1239,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp68">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3278,2357 3266,2416 3410,2422 3413,2409z"/>
 </clipPath>
 </defs>
@@ -1248,7 +1251,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp69">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 1733,2730 1778,2769 1854,2645 1843,2636z"/>
 </clipPath>
 </defs>
@@ -1265,7 +1268,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp70">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 1733,2730 1778,2769 1854,2645 1843,2636z"/>
 </clipPath>
 </defs>
@@ -1288,7 +1291,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp71">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6590,2166 6568,2222 6709,2254 6714,2241z"/>
 </clipPath>
 </defs>
@@ -1309,7 +1312,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp72">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 4236,2256 4217,2199 4088,2266 4093,2279z"/>
 </clipPath>
 </defs>
@@ -1334,7 +1337,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp73">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 6673,2184 6648,2239 6788,2276 6794,2264z"/>
 </clipPath>
 </defs>
@@ -1362,7 +1365,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp74">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10166,2167 10141,2222 10281,2259 10287,2247z"/>
 </clipPath>
 </defs>
@@ -1391,7 +1394,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp75">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10240,2192 10215,2247 10355,2284 10361,2272z"/>
 </clipPath>
 </defs>
@@ -1420,7 +1423,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp76">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10204,2179 10179,2234 10319,2271 10325,2259z"/>
 </clipPath>
 </defs>
@@ -1448,7 +1451,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp77">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 10200,2186 10176,2241 10317,2277 10322,2264z"/>
 </clipPath>
 </defs>
@@ -1471,7 +1474,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp78">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 3602,2179 3577,2124 3456,2204 3462,2216z"/>
 </clipPath>
 </defs>
@@ -1498,7 +1501,7 @@
 <!-- Line -->
 <defs>
 <clipPath id="cp79">
-	<path clip-rule="evenodd" d="M 888,1113 H 12162 V 6312 H 888 z
+	<path clip-rule="evenodd" d="M 438,438 H 12612 V 6762 H 438 z
 		M 2874,2241 2850,2186 2728,2264 2733,2277z"/>
 </clipPath>
 </defs>
