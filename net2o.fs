@@ -213,8 +213,8 @@ add-sizes 1+ c@ min-size + Constant minpacket#
 
 \ second byte constants
 
-$80 Constant broadcasting# \ special flags for switches
-$40 Constant multicasting#
+$80 Constant broadcasting# \ broadcast goes everywhere
+$40 Constant multicasting# \ path is actually a group address
 
 \ $30 Constant net2o-reserved# - should be 0
 
