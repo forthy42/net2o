@@ -201,10 +201,12 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
     o> ;
 
 Forward silent-join
+Forward fetch-pks
 
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
 : +unique-con ( -- ) o msg-group-o .msg:peers[] +unique$ ;
+
 Forward +chat-control
 
 : chat-silent-join ( -- )
@@ -1277,27 +1279,47 @@ previous
     REPEAT  2drop ;
 : ?scan-pks ( addr u -- )
     bounds U+DO
-	I $@ sigpk2size# - + keysize 2dup key# #@ d0= IF
-	    msg-group-o .msg:pks[] $ins[] drop
-	THEN
+	I $@ sigpksize# - + keysize 2dup key# #@ d0= IF
+	    "key" 2swap msg-group-o .msg:pks# #!
+	ELSE  2drop  THEN
     cell +LOOP ;
-: fetch-pks ( -- )
-    msg-group-o .msg:pks[] $@len 0<>
-    msg-group-o .msg:peers[] $@len 0<> and IF
-	0 msg-group-o .msg:peers[] $[] @ >o o to connection
-	0 msg-group-o .msg:pks[] $@ bounds U+DO
-	    dup 0= IF  1+  net2o-code  expect-reply  THEN
-	    I $@ $, dht-id dht-owner? end-with
-	    dup 4 = IF  cookie+request end-code| drop 0  THEN
-	cell +LOOP o>
-	msg-group-o .msg:pks[] $[]free
+: free-obtained-pks ( addr -- )
+    [: $@ >d#id >o dht-owner $[]# 0> IF
+	    last# $free  last# cell+ $free
+	    import#chat import-type !
+	    64#-1 key-read-offset 64!
+	    [: 0 dht-owner $[]@ 2dup sigsize# - forth:type
+		dht-hash $. dup sigsize# - safe/string forth:type ;] $tmp
+	    ['] read-pk2key$ catch IF  2drop  THEN
+	ELSE  1+  THEN o> ;] #map ;
+: fetch-pks ( o:peer-con -- )
+    0 msg-group-o .msg:pks# [: drop 1+ ;] #map 0<>  IF
+	o to connection
+	0 0 { start requests }
+	msg-group-o .msg:pks#
+	addr start addr requests [{: start requests :}l
+	    start @ 0= IF  net2o-code  expect-reply  THEN
+	    $@ $, dht-id dht-owner? end-with
+	    start @ 3 u< IF
+		1 start +!
+	    ELSE
+		start off  1 requests +!  cookie+request
+		requests @ $10 > IF  end-code|  0 to requests
+		ELSE  [ also net2o-base ]   end-code|  THEN
+	    THEN ;] #map
+	start IF  [ also net2o-base ] cookie+request end-code|  THEN
+	msg-group-o .msg:pks# free-obtained-pks
     THEN ;
+: ?fetch-pks
+    msg-group-o >o msg:peers[] $[]# 0 ?DO
+	I msg:peers[] $[] @ .fetch-pks
+    LOOP o> ;
 : msg-tredisplay ( n -- )
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
-    [: cells >r msg-log@
-      { log u } log u ?scan-pks fetch-pks
-      u r> - 0 max { u' }  log u' ?search-lock
+    [: cells >r msg-log@ { log u } u r> - 0 max { u' }
+      log u u' /string ?scan-pks  ?fetch-pks
+      log u' ?search-lock
       log u u' /string bounds ?DO
 	  I log - cell/ to log#
 	  I $@ { d: msgt }
@@ -1989,7 +2011,7 @@ $B $E 2Value chat-bufs#
     pk-connect-dests? dup IF  connection >o rdrop +chat-control  +group  THEN ;
 
 : chat-connect ( addr u -- )
-    chat-bufs# chat#-connect? IF  greet  THEN ;
+    chat-bufs# chat#-connect? IF  greet fetch-pks  THEN ;
 
 : key-ctrlbit ( -- n )
     \G return a bit mask for the control key pressed
