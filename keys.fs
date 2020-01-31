@@ -138,6 +138,15 @@ Variable sim-nick!
     ke-nick $@ nick# #@ d0= IF
 	optr cell ke-nick $@ nick# #! 0
     ELSE
+	last# cell+ $@ bounds DO
+	    ke-pk $@ I @ .ke-pk $@ str= IF
+		I @ .ke-nick# @ ke-nick# !
+		I @ .ke-offset 64@ ke-offset 64!
+		I @ .ke-selfsig $@ drop 64@ ke-selfsig $@ drop 64@ 64u<
+		IF  optr @ I !  THEN
+		UNLOOP  EXIT
+	    THEN
+	cell +LOOP
 	last# cell+ $@len cell/
 	optr cell last# cell+ $+!
     THEN  ke-nick# ! ;
@@ -161,7 +170,11 @@ Variable sim-nick!
     sample-key >o  ke-sk ke-end over - erase
     key-entry-table @ token-table !
     >storekey @ ke-storekey !
-    key-read-offset 64@ ke-offset 64!
+    2dup key| key# #@ d0= IF
+	key-read-offset
+    ELSE
+	last# cell+ $@ drop cell+ .ke-offset
+    THEN   64@ ke-offset 64!
     1 import-type @ lshift [ 1 import#new lshift ]L or ke-imports !
     keypack-all# n>64 key-read-offset 64+!
     o cell- ke-end over - 2over key| key# #!

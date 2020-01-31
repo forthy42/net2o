@@ -1318,7 +1318,7 @@ previous
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
     [: cells >r msg-log@ { log u } u r> - 0 max { u' }
-      log u u' /string ?scan-pks  ?fetch-pks
+      log u ?scan-pks  ?fetch-pks
       log u' ?search-lock
       log u u' /string bounds ?DO
 	  I log - cell/ to log#
