@@ -142,6 +142,7 @@ Variable sim-nick!
 	    ke-pk $@ I @ .ke-pk $@ str= IF
 		I @ .ke-nick# @ ke-nick# !
 		I @ .ke-offset 64@ ke-offset 64!
+		I @ .ke-sk sec@ dup IF  ke-sk sec!  ELSE  2drop  THEN
 		I @ .ke-selfsig $@ drop 64@ ke-selfsig $@ drop 64@ 64u<
 		IF  optr @ I !  THEN
 		UNLOOP  EXIT

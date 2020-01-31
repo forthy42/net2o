@@ -201,7 +201,6 @@ msg-notify-class ' new static-a with-allocater Constant msg-notify-o
     o> ;
 
 Forward silent-join
-Forward fetch-pks
 
 \ !!FIXME!! should use an asynchronous "do-when-connected" thing
 
@@ -1309,7 +1308,7 @@ previous
 	    THEN ;] #map
 	start IF  [ also net2o-base ] cookie+request end-code|  THEN
 	msg-group-o .msg:pks# free-obtained-pks
-    THEN ;
+    THEN  save-keys ;
 : ?fetch-pks
     msg-group-o >o msg:peers[] $[]# 0 ?DO
 	I msg:peers[] $[] @ .fetch-pks
