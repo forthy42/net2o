@@ -179,7 +179,7 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
 	swap sin6_addr dup $C nat64-ip4 over str= IF
 	    drop \ normal nat64-ip4 prefix
 	ELSE
-	    [: ." unusual xlat464 prefix: " dup $C .ip6a cr ;] do-debug
+	    [: ." unusual xlat464 prefix: " dup $C .ip6a 2drop cr ;] do-debug
 	    nat64-ip4 $C move \ update nat64-ip4 prefix
 	THEN
     ELSE  nip  THEN ;

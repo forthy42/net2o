@@ -85,7 +85,7 @@ User ip6:#
 : .ip6a ( addr len -- addr' len' )
     2dup fake-ip4 12 string-prefix? IF  12 /string .ip4a  EXIT  THEN
     -1 ip6:# !
-    '[' 8 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
+    '[' over 2/ 0 DO  ip6:# @ 2 < IF  emit  ELSE drop  THEN .ip6w ':'  LOOP
     drop ." ]" ;
 : .ip6 ( addr len -- )
     .ip6a .port .net2o ;
