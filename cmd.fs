@@ -244,7 +244,7 @@ Sema see-sema
 in net2o : (see) ( addr u -- )
     buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
-      dup hex. t-stack $off
+      dup hex. t-stack $free
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
       ."  end-code" cr throw  2drop ;] see-sema c-section
     2r> buf-state 2! ;
@@ -334,7 +334,7 @@ code-buf$
 
 ' cmd$lock to cmdlock
 :noname  cmd$ $@ ; to cmdbuf$
-:noname  cmd$ $off ; to cmdreset
+:noname  cmd$ $free ; to cmdreset
 ' true to maxstring \ really maxuint = -1 = true
 :noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
 :noname ( n -- )  cmd$ $@len + cmd$ $!len ; to -cmdbuf
@@ -361,7 +361,7 @@ code0-buf \ reset default
 :noname
     code0-buf^ @ .dispose
     code-buf^ @ .dispose
-    code-buf$^ @ >o cmd$ $off dispose o> ; is free-code-bufs
+    code-buf$^ @ >o cmd$ $free dispose o> ; is free-code-bufs
 
 \ stuff into code buffers
 
@@ -602,7 +602,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
 \    timeout( ." ok: " dup hex. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
-    resend0 $off
+    resend0 $free
     nat( ." ok from: " ret-addr .addr-path space dup .
     dup reply[] 2@ d0= IF ." acked"  THEN cr )
     #0. 2 pick reply[] dup >r 2!

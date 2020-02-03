@@ -594,7 +594,7 @@ previous
 
 : reqsize! ( ucode udata -- )  to req-datasize  to req-codesize ;
 : connect-rest ( n -- )
-    clean-request -timeout tskc KEYBYTES erase context! ;
+    clean-request -timeout tskc KEYBYTES erase context! resend0 $free ;
 
 : end-code| ( -- )  ]] end-code client-loop [[ ; immediate compile-only
 
