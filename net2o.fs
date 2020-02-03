@@ -514,8 +514,11 @@ Variable mapstart $1 mapstart !
     new-data-size ! new-data-d 64! new-data-s 64! newdata-val validated or! ;
 
 in net2o : new-map ( -- addr )
-    mapstart @ 1 mapstart +! reverse
-    [ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN] ;
+    BEGIN
+	mapstart @ 1 mapstart +! reverse
+	[ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN]
+	64dup >dest-map 2@ d0=
+    UNTIL ;
 in net2o : new-data ( addrs addrd u -- )
     dup max-data# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
