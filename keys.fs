@@ -143,8 +143,12 @@ Variable sim-nick!
 		I @ .ke-nick# @ ke-nick# !
 		I @ .ke-offset 64@ ke-offset 64!
 		I @ .ke-sk sec@ dup IF  ke-sk sec!  ELSE  2drop  THEN
-		I @ .ke-selfsig $@ drop 64@ ke-selfsig $@ drop 64@ 64u<
-		IF  optr @ I !  THEN
+		I @ .ke-selfsig $@ IF
+		    64@ ke-selfsig $@ IF
+			64@ 64u<
+			IF  optr @ I !  THEN
+		    ELSE  drop  64drop  THEN
+		ELSE  drop  THEN
 		UNLOOP  EXIT
 	    THEN
 	cell +LOOP
