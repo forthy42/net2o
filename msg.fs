@@ -2021,7 +2021,7 @@ $B $E 2Value chat-bufs#
     and 0=  UNTIL ;
 
 : chats# ( -- n )
-    0 [: msg:peers[] $[]# 1 max + ;] group#map ;
+    0 [: msg:peers[] $[]# 1 min + ;] group#map ;
 
 : wait-chat ( -- )
     chat-keys [: @/2 dup 0= IF  2drop  EXIT  THEN

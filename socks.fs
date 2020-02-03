@@ -103,8 +103,10 @@ $00000000 Value droprate#
     droprate# IF  rng32 droprate# u< IF
 	    resend( ." dropping packet" cr )
 	    1 packets +! 2drop 0  EXIT  THEN  THEN
+    sendto( over >r )
     2>r net2o-sock 2r> 0 sockaddr> alen @ sendto +send 1 packets +!
-    sendto( ." send to: " sockaddr> alen @ .address space dup . cr ) ;
+    sendto( ." send to: " sockaddr> alen @ .address space dup .
+    r> mapaddr 64@ x64. cr ) ;
 
 \ clients routing table
 

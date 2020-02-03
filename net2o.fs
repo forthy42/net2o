@@ -64,6 +64,7 @@ $4 Value max-size^2 \ 1k, don't fragment by default
 $12 Value max-data# \ 16MB data space
 $0C Value max-code# \ 256k code space
 $10 Value max-block# \ 64k maximum block size+alignment
+$0C Value min-block# \ 4k minimum block size
 
 \ values, status
 
