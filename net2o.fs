@@ -517,8 +517,7 @@ in net2o : new-map ( -- addr )
     BEGIN
 	mapstart @ 1 mapstart +! reverse
 	[ cell 4 = ] [IF]  0 swap  [ELSE] $FFFFFFFF00000000 and [THEN]
-	64dup >dest-map 2@ d0=
-    UNTIL ;
+	64dup >dest-map 2@ d0<> WHILE  2drop  REPEAT ;
 in net2o : new-data ( addrs addrd u -- )
     dup max-data# u> !!mapsize!! min-size swap lshift
     { 64: addrs 64: addrd u -- }
