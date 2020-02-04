@@ -905,7 +905,7 @@ Variable re-indent#
     pk key| last-bubble-pk $@ str= otr last-otr? = and
     pk startdate@ last-tick 64over to last-tick
     pk enddate@ to end-tick
-    64- delta-bubble 64< and
+    64- delta-bubble 64u< and
     IF
 	new-msg-par
     ELSE
@@ -1137,9 +1137,9 @@ hash: imgs# \ hash of images
 	    ;] $tmp }}text  "snapshot" name!  endof
 	msg:message#   of  [: ." message["  85type ']' emit
 	    ;] $tmp }}text  "message" name!  endof
-	msg:posting#   of  ." posting"
+	msg:posting#   of
 	    rdrop 2dup $make [: addr data $@ open-posting ;] swap 2>r
-	    ['] .posting $tmp }}text 2r> click[]  "posting" name!
+	    [: ." posting" .posting ;] $tmp }}text 2r> click[]  "posting" name!
 	endof
     endcase
     msg-box .child+
@@ -1205,11 +1205,11 @@ wmsg-o >o msg-table @ token-table ! o>
     closer [: data chat-history .childs[] del$cell
       data .dispose-widget +resize +sync ;] r@ click[] drop
     r> ;
-: log-data { endi starti -- }
+: log-data { endi starti -- } 64#0 to last-tick
     msg-log@ { log u } msgs-box { box }
     {{ }}v box[] dup to msgs-box
     closerz chat-history .child+
-    log u starti cells safe/string endi starti - cells umin bounds U+DO
+    log u endi cells umin starti cells safe/string bounds U+DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
 	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
@@ -1243,13 +1243,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	    year I 1+ month>i year I month>i - IF
 		I 0 <# # # #> day-color x-color blackish }}button-lit
 		[: data #12 /mod { m y }
-		  y m 2 + month>i  y m 1 + month>i -
-		  IF
+		  y m 2 + month>i  y m 1 + month>i 2dup - gui-msgs# u>
+		  IF  2drop
 		      y m 2 + 1 ymd2day unix-day0 -
 		      y m 1 + 1 ymd2day unix-day0 - +days
 		      chat-history .child+ +resize +sync
 		  ELSE
-		      y m 2 + month>i  y m 1 + month>i log-data
+		      log-data
 		  THEN
 		;] I 1- year 12 * + click[]
 	    THEN
@@ -1266,13 +1266,12 @@ wmsg-o >o msg-table @ token-table ! o>
 	    I year 4 * + quartal>i
 	    I 1- year 4 * + quartal>i - IF
 		I 0 <# #s 'Q' hold #> day-color x-color blackish }}button-lit
-		[:
-		  data 1+ quartal>i data quartal>i -
-		  IF
+		[: data 1+ quartal>i data quartal>i 2dup - gui-msgs# u>
+		  IF  2drop
 		      data 4 /mod swap dup 2* + dup 3 + swap 1+ +months
 		      chat-history .child+ +resize +sync
 		  ELSE
-		      data 1+ quartal>i data quartal>i log-data
+		      log-data
 		  THEN
 		;] I 1- year 2* 2* + click[]
 	    THEN
@@ -1288,10 +1287,10 @@ wmsg-o >o msg-table @ token-table ! o>
 	    I 1+ year>i I year>i -
 	    IF  I lastyear - dup #100 u>= IF  lastyear +  THEN
 		0 <# #s #> day-color x-color blackish }}button-lit
-		[: data 1+ year>i data year>i - gui-msgs# u> IF
+		[: data 1+ year>i data year>i 2dup - gui-msgs# u> IF  2drop
 		      data 4 1 +quartals chat-history .child+ +resize +sync
 		  ELSE
-		      data 1+ year>i data year>i log-data
+		      log-data
 		  THEN
 		;] I click[]
 	    THEN
