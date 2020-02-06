@@ -563,6 +563,7 @@ warnings !
     \U cmd
     \G cmd: Offer a net2o command line for client stuff
     get-me
+    [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" cr ;] do-debug
     0 to script? n2o-cmds ;
 
 : script ( -- )
