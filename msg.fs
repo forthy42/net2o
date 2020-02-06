@@ -2022,6 +2022,8 @@ $B $E 2Value chat-bufs#
 
 : chats# ( -- n )
     0 [: msg:peers[] $[]# 1 min + ;] group#map ;
+: chat-keys# ( -- n )
+    0 chat-keys [: @/2 nip 0<> - ;] $[]map ;
 
 : wait-chat ( -- )
     chat-keys [: @/2 dup 0= IF  2drop  EXIT  THEN
@@ -2057,7 +2059,7 @@ $B $E 2Value chat-bufs#
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
 
 : ?wait-chat ( -- addr u ) #0. /chat:/chats
-    BEGIN  chats# 0= WHILE  wait-chat chat-connects  REPEAT
+    BEGIN  chats# 0= chat-keys# 0> and WHILE  wait-chat chat-connects  REPEAT
     msg-group$ $@ ; \ stub
 
 scope{ /chat
