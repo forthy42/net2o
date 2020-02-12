@@ -1410,7 +1410,7 @@ Variable tries#
 forward read-chatgroups
 
 : n2o-greeting ( -- )
-    [:  ." net2o " (c) ."  2010-2020 Bernd Paysan" cr ;]
+    [:  ." net2o " net2o-version type space (c) ."  2010-2020 Bernd Paysan" cr ;]
     do-debug ;
 
 : get-skc ( -- )

@@ -186,8 +186,8 @@ $FFFFFFFF new-color, FValue posting-bg-col#
     THEN ;
 : nick-filter ( -- ) edit-w >o
     0 >r BEGIN  text$ r@ safe/string  WHILE
-	    c@ bl = IF
-		addr text$ r@ 1 $del
+	    c@ dup bl = over '@' = or swap '#' = or
+	    IF  addr text$ r@ 1 $del
 		r@ curpos u< +to curpos
 	    ELSE  r> 1+ >r  THEN  REPEAT  drop rdrop
     o> ;
@@ -472,6 +472,23 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 	ELSE  2drop  THEN
     ELSE  drop  THEN ;
 
+: edit-pen[] ( backframe edit-x update-xt -- xt )
+    \G create a closure for an edit pen
+    [{: backframe edit-x xt: upd :}d
+	data >o edit-x .act IF  \ push back to default, grey out
+	    edit-x >o act .dispose  0 to act o>
+	    true upd
+	    imports#rgb-fg sf@ transp#
+	ELSE                    \ engage+select all+black text
+	    edit-x o [: true ;] edit[]
+	    ['] nick-filter filter[] drop
+	    edit-x engage  false upd
+	    imports#rgb-fg sf@ imports#rgb-bg sf@
+	THEN
+	backframe >o to frame-color o> to text-color
+	o>
+	+resize +sync ;] ;
+
 : show-nick ( o:key -- )
     ke-imports @ [ 1 import#provisional lshift ]L and ?EXIT
     ke-imports @ >im-color# sfloats { ki }
@@ -480,21 +497,37 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 	    {{ \large imports#rgb-fg ki + sf@ to x-color
 		ke-avatar $@ dup IF  show-avatar ?+avatars
 		ELSE  2drop user-avatar avatar-thumb   THEN
-		ke-sk sec@ nip IF  \bold  ELSE  \regular  THEN  \sans
-		['] .nick-base $tmp }}text 25%b
+		\sans  ke-sk sec@ nip IF
+		    \bold
+		    {{
+			glue*l }}glue
+			{{
+			    glue*l transp# font-size# 40% f* }}frame dup .button3 dup { backframe }
+			    {{
+				['] .nick-base $tmp }}edit 25%b dup { edit-w }
+				dup { edit-x }
+				l" " black# }}button /hfix
+				backframe edit-x [: drop ;] edit-pen[] edit-w click[]
+			    }}h box[]
+			}}z box[]
+		    }}v box[] >o 0e to baseline 0e to gap o o>
+		ELSE
+		    \regular
+		    ['] .nick-base $tmp }}text 25%b
+		THEN
 		ke-pets[] $[]# IF
 		    {{
 			x-color glue*l pet-color x-color slide-frame dup .button3 to x-color
 			['] .pet-base $tmp }}text 25%b
 		    }}z
 		THEN
-	    glue*l }}glue }}h name-tab
+	    glue*l }}glue }}h name-tab box[]
 	    {{
 		{{ \sans \script ke-selfsig $@ ['] .sigdates $tmp }}text glue*l }}glue }}h
 		{{ \mono \script ke-pk $@ key| ['] 85type $tmp }}text 20%bt glue*l }}glue }}h swap
 	    }}v pk-tab
-	glue*lll }}glue }}h
-    }}z nick[]  \regular
+	glue*lll }}glue }}h box[]
+    }}z box[]  \regular
     mykey-box nicks-box ke-sk sec@ nip select /flop .child+ ;
 
 : fill-nicks ( -- )

@@ -1290,7 +1290,7 @@ previous
 	    [: 0 dht-owner $[]@ 2dup sigsize# - forth:type
 		dht-hash $. dup sigsize# - safe/string forth:type ;] $tmp
 	    ['] read-pk2key$ catch IF  2drop  THEN
-	ELSE  1+  THEN o> ;] #map ;
+	THEN o> ;] #map ;
 : fetch-pks ( o:peer-con -- )
     0 msg-group-o .msg:pks# [: drop 1+ ;] #map 0<>  IF
 	o to connection
@@ -1988,6 +1988,7 @@ previous
 	    timeout( <err> ." Excessive timeouts from "
 	    pubkey $@ key>nick type ." : "
 	    ack@ .timeouts @ . <default> cr )
+	    ungroup-ctx \ ungroup before sending avalanches!
 	    msg-group$ $@len IF
 		msg-group-o ?dup-IF  .msg:mode dup @ msg:otr# or swap
 		    [: pubkey $@ ['] left, send-avalanche ;] !wrapper
