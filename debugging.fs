@@ -86,6 +86,7 @@ debug: deprecated( \ deprecated stuff
 debug: unhandled( \ unhandled commands
 debug: syncfile( \ synchronous file operations
 debug: newvault( \ new style vault keys
+debug: pks( \ fetch pks
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
