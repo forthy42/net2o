@@ -480,14 +480,23 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 	    true upd
 	    imports#rgb-fg sf@ transp#
 	ELSE                    \ engage+select all+black text
-	    edit-x o [: true ;] edit[]
+	    edit-x o action-of upd [{: xt: upd :}d true upd true ;] edit[]
 	    ['] nick-filter filter[] drop
 	    edit-x engage  false upd
 	    imports#rgb-fg sf@ imports#rgb-bg sf@
 	THEN
-	backframe >o to frame-color o> to text-color
-	o>
+	backframe >o to frame-color o> to text-color o>
 	+resize +sync ;] ;
+
+: nick-upd[] ( edit-x o:key -- xt )
+    o [{: edit-x o:key :}d
+	IF  edit-x .text$ o:key >o
+	    ke-nick $@ nick# #@ nip IF
+		addr o:key last# cell+ del$cell
+	    ELSE  2drop  THEN
+	    ke-nick $! nick! key-sign
+	    o>  save-seckeys
+	THEN ;] ;
 
 : show-nick ( o:key -- )
     ke-imports @ [ 1 import#provisional lshift ]L and ?EXIT
@@ -502,12 +511,14 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 		    {{
 			glue*l }}glue
 			{{
-			    glue*l transp# font-size# 40% f* }}frame dup .button3 dup { backframe }
+			    glue*l transp# font-size# 40% f* }}frame
+			    dup .button3 dup { backframe }
 			    {{
 				['] .nick-base $tmp }}edit 25%b dup { edit-w }
 				dup { edit-x }
 				l" " black# }}button /hfix
-				backframe edit-x [: drop ;] edit-pen[] edit-w click[]
+				backframe edit-x dup nick-upd[]
+				edit-pen[] edit-w click[]
 			    }}h box[]
 			}}z box[]
 		    }}v box[] >o 0e to baseline 0e to gap o o>
