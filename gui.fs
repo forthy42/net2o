@@ -472,21 +472,32 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 	ELSE  2drop  THEN
     ELSE  drop  THEN ;
 
+: >re-color-edit ( bg-color backframe -- )
+    >o to frame-color o> +resize +sync ;
+: un-act ( edit-x engage-o -- )
+    >o act .dispose  0 to act o> 0 to inside-move? ;
+event: :>un-act ( edit engage -- ) engage un-act +sync ;
+
 : edit-pen[] ( backframe edit-x update-xt -- xt )
     \G create a closure for an edit pen
     [{: backframe edit-x xt: upd :}d
-	data >o edit-x .act IF  \ push back to default, grey out
-	    edit-x >o act .dispose  0 to act o>
-	    true upd
-	    imports#rgb-fg sf@ transp#
-	ELSE                    \ engage+select all+black text
-	    edit-x o action-of upd [{: xt: upd :}d true upd true ;] edit[]
+	data >o edit-x .act IF  \ push back to default
+	    edit-x un-act  true upd  transp#
+	ELSE                    \ engage+select
+	    edit-x o
+	    action-of upd backframe edit-x r@ .caller-w
+	    [{: xt: upd backframe edit-x click-o :}d
+		<event edit-x elit, click-o elit, :>un-act up@ event>
+		true upd
+		transp# backframe >re-color-edit
+		-1 to outselw
+		true ;] edit[]
 	    ['] nick-filter filter[] drop
 	    edit-x engage  false upd
-	    imports#rgb-fg sf@ imports#rgb-bg sf@
-	THEN
-	backframe >o to frame-color o> to text-color o>
-	+resize +sync ;] ;
+	    imports#rgb-bg sf@
+	THEN  backframe >re-color-edit o> ;] ;
+
+event: :>add-me-id  add-me-id ;
 
 : nick-upd[] ( edit-x o:key -- xt )
     o [{: edit-x o:key :}d
@@ -496,6 +507,7 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 	    ELSE  2drop  THEN
 	    ke-nick $! nick! key-sign
 	    o>  save-seckeys
+	    <event :>add-me-id ?query-task event>
 	THEN ;] ;
 
 : show-nick ( o:key -- )
@@ -514,11 +526,10 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
 			    glue*l transp# font-size# 40% f* }}frame
 			    dup .button3 dup { backframe }
 			    {{
-				['] .nick-base $tmp }}edit 25%b dup { edit-w }
-				dup { edit-x }
+				['] .nick-base $tmp }}edit 25%b	dup { edit-x }
 				l" " black# }}button /hfix
 				backframe edit-x dup nick-upd[]
-				edit-pen[] edit-w click[]
+				edit-pen[] edit-x click[]
 			    }}h box[]
 			}}z box[]
 		    }}v box[] >o 0e to baseline 0e to gap o o>

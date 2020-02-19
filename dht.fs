@@ -389,6 +389,14 @@ previous
 : +addme ['] addme  is setip-xt  next-request request-gen ! ;
 : -setip ['] .iperr is setip-xt ;
 
+: add-me-id ( -- )
+    dht-connection >o o to connection  +resend
+    net2o-code  expect-reply
+    expect-reply pk@ $, dht-id
+    mynick$ $, dht-owner+
+    end-with
+    cookie+request
+    end-code| o> ;
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
     dht-connection >o o to connection  +resend
     net2o-code  expect-reply
