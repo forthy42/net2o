@@ -1282,14 +1282,13 @@ previous
 	    "key" 2swap msg-group-o .msg:pks# #!
 	ELSE  2drop  THEN
     cell +LOOP ;
+
+forward key-from-dht
+
 : free-obtained-pks ( addr -- )
     [: $@ >d#id >o dht-owner $[]# 0> IF
+	    key-from-dht
 	    last# $free  last# cell+ $free
-	    import#chat import-type !
-	    64#-1 key-read-offset 64!
-	    [: 0 dht-owner $[]@ 2dup sigsize# - forth:type
-		dht-hash $. dup sigsize# - safe/string forth:type ;] $tmp
-	    ['] read-pk2key$ catch IF  2drop  THEN
 	THEN o> ;] #map ;
 : fetch-pks ( o:peer-con -- )
     0 msg-group-o .msg:pks# [: drop 1+ ;] #map 0<>  IF
@@ -1297,6 +1296,7 @@ previous
 	0 0 { start requests }
 	msg-group-o .msg:pks#
 	addr start addr requests [{: start requests :}l
+	    pks( ." pk@" dup $@ 85type forth:cr )
 	    start @ 0= IF  net2o-code  expect-reply  THEN
 	    $@ $, dht-id dht-owner? end-with
 	    start @ 3 u< IF
@@ -1304,7 +1304,7 @@ previous
 	    ELSE
 		start off  1 requests +!  cookie+request
 		requests @ $10 > IF  end-code|  0 to requests
-		ELSE  [ also net2o-base ]   end-code|  THEN
+		ELSE  [ also net2o-base ]   end-code  THEN
 	    THEN ;] #map
 	start IF  [ also net2o-base ] cookie+request end-code|  THEN
 	msg-group-o .msg:pks# free-obtained-pks
@@ -1317,7 +1317,7 @@ previous
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
     [: cells >r msg-log@ { log u } u r> - 0 max { u' }
-      pks( log u ?scan-pks  ?fetch-pks )
+      log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
       log u' ?search-lock
       log u u' /string bounds ?DO
 	  I log - cell/ to log#

@@ -384,18 +384,18 @@ User pings[]
     search-key[] [: $, dht-id dht-host? end-with ;] $[]map
     cookie+request end-code| ;
 
-: insert-keys ( -- )
+: key-from-dht ( o:dhtid -- )
     defaultkey @ >storekey !
     import#dht import-type !
-    search-key[] [: >d#id >o
-      0 dht-owner $[]@ nip sigsize# u> IF
-	  64#-1 key-read-offset 64!
-	  [: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
+    0 dht-owner $[]@ nip sigsize# u> IF
+	64#-1 key-read-offset 64!
+	[: 0 dht-owner $[]@ 2dup sigsize# - tuck type /string
 	    dht-hash $. type ;] $tmp
-	  key:nest-sig 0= IF  do-nestsig
-	      perm%default ke-mask ! n:o>  ELSE  2drop  THEN
-      THEN
-      o> ;] $[]map ;
+	key:nest-sig 0= IF  do-nestsig ?perm n:o>  ELSE  2drop  THEN
+    THEN ;
+
+: insert-keys ( -- )
+    search-key[] [: >d#id .key-from-dht ;] $[]map ;
 
 : send-ping ( addr u -- ) sigsize# - $>addr dup >r
     [: ret-addr $10 erase
