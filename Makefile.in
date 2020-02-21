@@ -82,7 +82,7 @@ ENGINE   = @GFORTH@
 GFORTH   = $(basename $(ENGINE))
 GFVER  = @GFVER@
 machine  = @GFARCH@
-LIBCCNAMED = lib/$(notdir $(GFORTH))/$(GFVER)/$(machine)/libcc-named
+LIBCCNAMED = lib/$(notdir $(GFORTH))/$(GFVER)/$(machine)/libcc-named/.libs
 PREFIX    = $(package)@prefix@
 INCDIR    = $(PREFIX)/include/$(GFVER)
 INSTALL	= @INSTALL@
@@ -183,7 +183,7 @@ libcc:	$(FORTHLIB:%=%.libcc)
 
 %.libcc:
 	-echo "generating library $(@:%.libcc=%)"
-	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc-path clear-path libcc-named-dir libcc-path also-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
+	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
 	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
