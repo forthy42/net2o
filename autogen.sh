@@ -19,4 +19,8 @@ git-get https://git.net2o.de/bernd ed25519-donna
 
 libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
+for i in ./*/autogen.sh
+do
+    eval $i
+done
 test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"
