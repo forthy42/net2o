@@ -15,7 +15,7 @@ function git-get {
     fi
 }
 
-git-get https://git.net2o.de/bernd ed25519-donna
+(cd $srcdir; git-get https://git.net2o.de/bernd ed25519-donna)
 
 libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
