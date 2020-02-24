@@ -30,6 +30,8 @@ override_dh_auto_install:
 	mv $(DL)/usr/share/icons $(DG)/usr/share
 	mv $(DL)/usr/share/applications $(DG)/usr/share
 	mv $(DL)/usr/bin $(D)/usr/
+	rm $(DL)/usr/lib/*/lib*.{a,la,so*}
+	rm -rf $(DL)/usr/include
 
 override_dh_installchangelogs:
 	fossil timeline --verbose --limit 200  | gzip >$(D)/usr/share/doc/net2o/changelog.gz
