@@ -157,7 +157,10 @@ install:	install-libs libcc-install
 	done
 	-@VERDIR@rm $(datadir)/gforth/$(GFVER)/net2o
 	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(GFVER)/net2o
-	for i in $(SOURCES) $(LANGS) $(GEN); do \
+	for i in $(SOURCES) $(LANGS); do \
+		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
+	done
+	for i in $(GEN); do \
 		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
@@ -172,7 +175,7 @@ install:	install-libs libcc-install
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
 	for i in $(ICONS) $(DESKTOP); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/$$i; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$$i; \
 	done
 
 %.dirui:
