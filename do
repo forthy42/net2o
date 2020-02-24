@@ -74,7 +74,7 @@ fi
 
 git-get https://github.com/forthy42 ed25519-donna
 
-./autogen
+./autogen.sh
 
 make configs
 make no-config
