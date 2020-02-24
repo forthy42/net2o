@@ -3,10 +3,10 @@ test -n "$srcdir" || srcdir=`dirname "$0"`
 test -n "$srcdir" || srcdir=.
 
 function git-get {
-    echo "=== git clone $purl/$pname.git $* ==="
     purl=$1
     pname=$2
     shift; shift
+    echo "=== git clone $purl/$pname.git $* ==="
     if [ -d $pname ]
     then
         (cd $pname; git pull -f)

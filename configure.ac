@@ -72,13 +72,23 @@ AC_PROG_INSTALL
 PRECC=${CC%gcc*}
 PRECLANG=${PRECC%clang*}
 dnl MacOS X has a libtool that does something else
-AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
+AC_CHECK_PROGS(GNU_LIBTOOL,glibtool libtool)
 
 GNU_LIBTOOL=${PRECLANG}${GNU_LIBTOOL}
 echo "Libtool: $PRECC, $PRECLANG, $GNU_LIBTOOL"
 
+AC_ARG_ENABLE(gps,
+	AC_HELP_STRING([--enable-gps],
+		       [  Enable GPS (default enabled).]),
+	,enable_gps=yes)
+
 HAS_GPSD=0
-AC_CHECK_LIB(gps, gps_open, HAS_GPSD=1)
+if test x"$enable_gps" = xyes; then
+   AC_CHECK_LIB(gps, gps_open, , enable_gps=no)
+   if test x"$enable_gps" = xyes; then
+      HAS_GPSD=1
+   fi
+fi
 AC_SUBST(HAS_GPSD)
 
 AC_SUBST(GFORTH)
