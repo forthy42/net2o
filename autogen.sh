@@ -21,6 +21,7 @@ libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
 for i in ./*/autogen.sh
 do
-    eval $i
+    echo "autogen.sh in ${i%autogen.sh}"
+    (cd ${i%autogen.sh}; ./autogen.sh)
 done
 test -n "$NOCONFIGURE" || "$srcdir/configure" "$@"

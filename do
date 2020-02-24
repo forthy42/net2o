@@ -72,8 +72,6 @@ fi
 
 # get, build, and install ed25519-donna, keccak and threefish
 
-git-get https://github.com/forthy42 ed25519-donna
-
 ./autogen.sh
 
 make configs
