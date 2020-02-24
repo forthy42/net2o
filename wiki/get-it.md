@@ -80,6 +80,26 @@ Create an alias to run the docker:
 
     alias n2o="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) forthy42/net2o"
 
+Get it in a Snap Container
+--------------------------
+
+I created a snap container.  You need to get snap for your Linux distribution
+(in Ubuntu, it's already there).
+
+<iframe src="https://snapcraft.io/net2o/embedded?button=black" frameborder="0"
+width="100%" height="300px" style="border: 1px solid #CCC; border-radius:
+2px;"></iframe>
+
+or the CLI way:
+
+    sudo snap install net2o
+
+And then set an alias
+
+    alias n2o=/snap/bin/net2o.n2o
+
+Your data is inside the container.
+
 Get it for Android
 ------------------
 
