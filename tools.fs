@@ -460,9 +460,15 @@ also config
     "XDG_CONFIG_HOME" .net2o-config$ xdg-config
     "XDG_CACHE_HOME"  .net2o-cache$  xdg-config ;
 : default-dir-config ( -- )
-    "~/.local/share/net2o" .net2o$ $!
-    "~/.config/net2o"      .net2o-config$ $!
-    "~/.cache/net2o"       .net2o-cache$ $!
+    "SNAP_USER_COMMON" getenv 2dup d0= IF  2drop
+	"~/.local/share/net2o" .net2o$ $!
+	"~/.config/net2o"      .net2o-config$ $!
+	"~/.cache/net2o"       .net2o-cache$ $!
+    ELSE
+	.net2o$ $!
+	.net2o$ $@ .net2o-config$ $!
+	[: .net2o$ $. ." /cache" ;] .net2o-cache$ $exec
+    THEN
     xdg-dir-config
     subdir-config ;
 default-dir-config
