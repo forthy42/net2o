@@ -127,6 +127,12 @@ clean:  $(LIBS:%=%.clean)
 %.clean:
 	cd $(@:%.clean=%); $(MAKE) clean
 
+distclean:  $(LIBS:%=%.distclean)
+	$(RMDIR) $(LIBCCNAMED)
+
+%.distclean:
+	cd $(@:%.distclean=%); $(MAKE) distclean
+
 configs $(CONFIGS:%.in=%):  $(LIBS:%=%.configs) $(CONFIGS)
 	./configure --host=$(HOST) --prefix=$(PREFIX) 
 
@@ -145,7 +151,7 @@ install-libs: $(LIBS:%=%.instlibs)
 
 extra-install:	install-libs install
 
-install:	libcc-install
+install:	install-libs libcc-install
 	for i in $(SRCDIRS); do \
 		$(MKDIR) -p $(datadir)/gforth/$(GFVER)/$$i; \
 	done
@@ -183,10 +189,10 @@ libcc:	$(FORTHLIB:%=%.libcc)
 
 %.libcc:
 	-echo "generating library $(@:%.libcc=%)"
-	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(@:%.libcc=%) -e bye
+	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(srcdir)/$(@:%.libcc=%) -e bye
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
-	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi n2o.fs -e 'locs[] $$free wheres $$free'
+	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi $(srcdir)/n2o.fs -e 'locs[] $$free wheres $$free'
 
 libccdest:
 	$(MKDIR) -p $(LIBCCDEST)
@@ -206,8 +212,8 @@ doc:	$(DOC)
 wiki/commands.md:	$(SOURCES)
 	gforth -e ': docgen ;' n2o.fs -e bye | sed -e 's/@VERSION@/@PACKAGE_VERSION@/g' >wiki/commands.md
 
-TAGS:	$(SOURCES) $(GEN)
-	gforth etags.fs n2o.fs -e "bye" || >TAGS
+TAGS:	$(SOURCES) $(GEN) libcc
+	gforth etags.fs $(srcdir)/n2o.fs -e "bye" || >TAGS
 	mv TAGS net2o.TAGS
 	cat `gforth -e '"TAGS" open-fpath-file throw type bye'` net2o.TAGS >TAGS
 
