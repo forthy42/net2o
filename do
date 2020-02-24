@@ -44,11 +44,11 @@ function git-get {
 }
 function build {
     pname=$1
-    (cd $pname; ./autogen.sh && ./configure $CONFOPT && make && sudo make install)
+    (cd $pname; ./autogen && ./configure $CONFOPT && make && sudo make install)
 }
 function build-clean {
     pname=$1
-    (cd $pname; ./autogen.sh $CONFOPT && ./configure $CONFOPT && make clean && make && sudo make install)
+    (cd $pname; ./autogen $CONFOPT && ./configure $CONFOPT && make clean && make && sudo make install)
 }
 
 # ask for sudo password
@@ -74,7 +74,7 @@ fi
 
 git-get https://github.com/forthy42 ed25519-donna
 
-./autogen.sh
+./autogen
 
 make configs
 make no-config
