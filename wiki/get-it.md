@@ -98,7 +98,8 @@ And then set an alias
 
     alias n2o=/snap/bin/net2o.n2o
 
-Your data is inside the container.
+Your data currently resides inside your `~/snap/net2o/current/` hierarchy, but
+that needs to change to make it more useful.
 
 Get it for Android
 ------------------
