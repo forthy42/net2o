@@ -19,7 +19,7 @@ function git-get {
 
 libtoolize --force --copy --install || glibtoolize --force --copy --install
 autoreconf --force --install --verbose "$srcdir"
-for i in ./*/autogen
+for i in ./*/autogen.sh
 do
     eval $i
 done
