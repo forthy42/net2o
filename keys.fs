@@ -304,9 +304,7 @@ Variable sim-nick!
     r> +LOOP ;
 
 : write-groups ( -- )
-    [: ." groups+" getpid 0 .r ;] $tmp .net2o/ 2dup w/o create-file throw >r
-    ['] .groups r@ outfile-execute
-    r> close-file throw '+' -scan 1- >backup ;
+    "groups" .net2o/ [: ['] .groups swap outfile-execute ;] new-file ;
 
 : group-line ( -- )
     parse-name parse-name >perm >groups ;
