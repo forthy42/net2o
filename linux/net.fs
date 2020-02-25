@@ -125,7 +125,7 @@ event: :>addr-changed ( -- )
 	netlink( 2dup address? IF  2dup .rtaddr THEN )
     address? check-preferred? or  UNTIL ;
 : netlink-loop ( -- )
-    netlink-sock 0= IF  get-netlink  THEN
+    netlink-sock 0= IF  ['] get-netlink catch -525 = ?EXIT  THEN
     BEGIN
 	wait-for-address  !!0depth!!
 	new-preferred? IF
