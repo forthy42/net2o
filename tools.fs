@@ -444,6 +444,8 @@ $Variable invite$
 
 }scope
 
+$Variable config-file$  "~/.config/net2o/config" config-file$ $!
+
 also config
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
@@ -467,7 +469,8 @@ also config
     ELSE
 	.net2o$ $!
 	.net2o$ $@ .net2o-config$ $!
-	[: .net2o$ $. ." /cache" ;] .net2o-cache$ $exec
+	[: .net2o$ $. ." /cache" ;] .net2o-cache$ dup $free $exec
+	[: .net2o-config$ $. ." /config" ;] config-file$ dup $free $exec
     THEN
     xdg-dir-config
     subdir-config ;
@@ -523,7 +526,6 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
     ?.net2o/chats   chats/.no-fat-file   ?create-file
     0= to chat-sanitize? ;
 
-$Variable config-file$  "~/.config/net2o/config" config-file$ $!
 Variable configured?
 
 :noname defers 'cold
