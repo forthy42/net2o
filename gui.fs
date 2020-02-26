@@ -1379,7 +1379,9 @@ wmsg-o >o msg-table @ token-table ! o>
     load-msg msg-log@ { log u }
     log u gen-calendar ?dup-IF  msgs-box .child+  THEN
     glue*lll }}glue msgs-box .child+
-    u gui-msgs# cells - 0 max { u' }  log u' wmsg-o .?search-lock
+    u gui-msgs# cells - 0 max { u' }
+    log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
+    log u' wmsg-o .?search-lock
     log u u' /string bounds ?DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
