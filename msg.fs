@@ -319,7 +319,8 @@ Forward msg:want
 hash: fetch-finish#
 Variable fetch-queue[]
 
-hash: have#
+hash: have#       \ list of owner ids per hash
+hash: have-group# \ list of interested groups per hash
 
 : .@host.id ( pk+host u -- )
     '@' emit
@@ -332,13 +333,20 @@ hash: have#
 	    space I $@ .@host.id
 	cell +LOOP cr ;] #map ;
 
+: >send-have ( addr u -- )
+    have-group# #@ dup IF
+	bounds ?DO
+	    I @ to msg-group-o 0 .avalanche-msg
+	cell +LOOP
+    THEN ;
+
 : msg:ihave ( id u1 hash u2 -- )
 \    ." ihave:" 2over dump 2dup dump
     2dup ihave$ $+!  2over mehave$ $!
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
-    pk.host 2swap  msg:ihave ;
+    pk.host 2over  msg:ihave  >send-have ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -639,8 +647,16 @@ event: :>queued ( queue -- )
     -1 queue? !@ 0= IF  <event :>queued up@ event>  THEN ;
 
 forward need-hashed?
+: >have-group ( addr u -- )
+    msg-group-o { w^ grp }
+    2dup have-group# #@ nip IF
+	grp last# cell+ +unique$
+    ELSE
+	grp cell 2swap have-group# #!
+    THEN ;
 : ?fetch ( addr u -- )
-    key| 2dup need-hashed? IF
+    key| 2dup >have-group
+    2dup need-hashed? IF
 	fetch-queue[] ['] $ins[] resize-sema c-section drop
     ELSE  2drop  THEN ;
 
