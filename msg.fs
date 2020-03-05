@@ -654,11 +654,12 @@ forward need-hashed?
     ELSE
 	grp cell 2swap have-group# #!
     THEN ;
-: ?fetch ( addr u -- )
-    key| 2dup >have-group
+: >fetch-queue ( addr u -- )
     2dup need-hashed? IF
 	fetch-queue[] ['] $ins[] resize-sema c-section drop
     ELSE  2drop  THEN ;
+: ?fetch ( addr u -- )
+    key| 2dup >have-group >fetch-queue ;
 
 : .posting ( addr u -- )
     2dup keysize /string
