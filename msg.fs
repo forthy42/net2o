@@ -41,12 +41,15 @@ Variable ihave$
 Variable mehave$
 Variable push$
 
-: avalanche-msg ( o:connect -- )
-    \G forward message to all next nodes of that message group
+: (avalanche-msg) ( o:connect- )
     msg-group-o .msg:peers[] $@
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
-    cell +LOOP
+    cell +LOOP ;
+: cleanup-msg ( -- )
     ihave$ $free mehave$ $free push$ $free ;
+: avalanche-msg ( o:connect -- )
+    \G forward message to all next nodes of that message group
+    (avalanche-msg) cleanup-msg ;
 
 Variable msg-group$
 User replay-mode
@@ -334,11 +337,13 @@ hash: have-group# \ list of interested groups per hash
 	cell +LOOP cr ;] #map ;
 
 : >send-have ( addr u -- )
-    have-group# #@ dup IF
-	bounds ?DO
-	    I @ to msg-group-o 0 .avalanche-msg
-	cell +LOOP
-    THEN ;
+    msg-group-o >r [:
+	have-group# #@ dup IF
+	    bounds ?DO
+		I @ to msg-group-o 0 .(avalanche-msg)
+	    cell +LOOP
+	THEN  cleanup-msg ;] catch
+    r> to msg-group-o throw ;
 
 : msg:ihave ( id u1 hash u2 -- )
 \    ." ihave:" 2over dump 2dup dump

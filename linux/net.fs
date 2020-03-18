@@ -22,7 +22,7 @@ netlink-size# buffer: netlink-buffer
 
 AF_NETLINK netlink-addr nl_family w!
 0          netlink-addr nl_pad w!
-$00d8607f5 netlink-addr nl_groups l!
+$0d8607f5  netlink-addr nl_groups l!
 
 : prep-netlink ( -- )
     epiper @ fileno POLLIN  pollfds fds!+ >r
