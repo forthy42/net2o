@@ -53,11 +53,11 @@ tex: 35c3-logo
 $FFFFBBFF text-color: redish
 $00CCCCFF dup text-emoji-color: blue-emoji#
 m2c:shadow-color# @ color, FValue shadow-col#
-night-mode
+dark-mode
 m2c:shadow-color# @ re-color shadow-col#
 $FFFFBBFF re-text-color redish
 $00CCCCFF dup re-emoji-color blue-emoji#
-day-mode
+light-mode
 
 $10 stack: vp-tops
 
@@ -344,9 +344,9 @@ $10 stack: vp-tops
         "}" \\
 	tex: vp-google+ glue*lll ' vp-google+ }}vp vp[] dup vp-tops >stack
 	!i18n \sans \normal
-	day-mode $DDDDDDFF color, night-mode
+	light-mode $DDDDDDFF color, dark-mode
 	$202020FF color, fdup to slider-color to slider-fgcolor
-	day-mode
+	light-mode
 	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -475,11 +475,11 @@ $10 stack: vp-tops
         "    }," \\
 	    tex: vp-facebook glue*lll ' vp-facebook }}vp vp[] dup vp-tops >stack
 	    !i18n \sans \normal
-	    day-mode
+	    light-mode
 	    $CCCCFFFF color, fdrop
-	    night-mode
+	    dark-mode
 	    $000040FF color, fdup to slider-color to slider-fgcolor
-	    day-mode
+	    light-mode
 	    dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
     }}v box[] >bdr
@@ -533,7 +533,7 @@ $10 stack: vp-tops
         "}, {" \\
 	tex: vp-twitter glue*lll ' vp-twitter }}vp vp[] dup vp-tops >stack
 	!i18n \sans \normal
-	day-mode $DDDDDDFF color, night-mode
+	light-mode $DDDDDDFF color, dark-mode
 	$202020FF color, fdup to slider-color to slider-fgcolor
 	dup font-size# f2/ f2/ fdup vslider
 	}}h box[]
