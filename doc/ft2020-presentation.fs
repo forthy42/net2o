@@ -106,23 +106,24 @@ $44FFFFFF re-color author#
 	{{
 	    $3F0000FF $FFAAAAFF pres-frame
 	    {{
-		l" 6 Years after Snowden" /title
-		l" What changed?" \\
+		l" 3 Monate seit COVID–19" /title
+		l" Überwachung zur Seuchenbekämpfung" \\
 		\skip
-		l" Politics" /subsection
+		l" Politik" /subsection
 		{{
-		    l"   Germany: Telemedia providers = ISPs" "🤦" e\\
-		    l"   Germany: Providers have to hand out passwords" "🤦🤦" e\\
-		    l"   Germany: online search of cloud data" "🤦🤦🤦" e\\
-		    l"   Backdoors still wanted (“reasonable encryption”)" "🤦🤦🤦🤦" e\\
-		    l"   Terrorism/Child Porn/Protection of Minors rotated as reasons" "🤦🤦🤦🤦🤦" e\\
+		    l"   China/Südkorea/Singapur: Handyortung per Smartphone zum Tracking" \\
+		    l"   China: Kontaktstatus (grün/rot)" \\
+		    l"   China: QR–Code beim Eintritt" \\
+		    l"   Singapur: Bluetooth zum Tracing" \\
+		    l"   China: Viren auf Bargeld ➡ alles bargeldlos" \\
+		    l"   Überall: Home Office, Videokonferenzen" \\
 		}}v box[]
 		\skip
-		l" Progress" /subsection
-		l"   net2o becomes more and more usable" \\
+		l" Fortschritt" /subsection
+		l"   Nichts davon gibt’s schon fertig bei net2o" \\
 		\skip
 		l" Permanent Record" /subsection
-		l"   BTW, Snowden wrote a book" \\
+		l"   BTW, Snowden hat ein Buch geschrieben" \\
 		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	    }}v box[] >o o Value snowden-page font-size# to border o o>
 	}}z box[] /flip dup >slides
@@ -138,7 +139,7 @@ $44FFFFFF re-color author#
 	    }}v >o font-size# to border o o>
 	    {{
 		l" Permanent Record" /title
-		l" On social networks" /subsection
+		l" Über soziale Netzwerke" /subsection
 		\italic
 		l" … Few of us understood it at that time, but none of the things that we’d go on to share would belong to us anymore. The successors to the e–commerce companies that had failed because they couldn’t find anything we were interested in buying now had a new product to sell." p\\
 		\skip
@@ -156,18 +157,19 @@ $44FFFFFF re-color author#
 	{{
 	    $5F0000FF $FF7777FF pres-frame
 	    {{
-		l" Antisocial Hateworks" /title
-		l" Problems with People since Eternal September" /subsection
+		l" Assoziale Hetzwerke" /title
+		l" Probleme mit Leuten seit dem Eternal September" /subsection
 		vt{{
-		    l" Opinions " l" are not facts, but values people believe in" b\\
-		    l" Beliefs "  l" are not up to discussion, but part of identity" b\\
-		    l" Identity " l" is vigurously defended and used to segregate people" b\\
-		    l" Walls "    l" are in the head, and tearing them down causes aggression" b\\
+		    l" Meinungen " l" sind nicht Fakten, sondern Werte, an die die Leute glauben" b\\
+		    l" Glauben "   l" ist nicht offen für Diskussion, sondern Teil der Identität" b\\
+		    l" Identität " l" wird heftig verteidigt und benutzt, um Menschen zu segregieren" b\\
+		    l" Mauern "    l" sind im Kopf und sie einzureißen erzeugt Aggressionen" b\\
 		    \skip
-		    l" Free Speech " l" is a concept from a time where religion" b\\
-		    l" " l" was strong and science weak" b\\
-		    l" " l" It helped coexistence of different beliefs" b\\
-		    l" " l" and scientific research against dogma" b\\
+		    l" Meinungsfreiheit " l" Ist ein Konzept aus eine Zeit, als Religion" b\\
+		    l" " l" stark und Wissenschaft schwach war" b\\
+		    l" " l" Ermöglichte Koexistenz zwischen" b\\
+		    l" " l" verschiedenen Glauben," b\\
+		    l" " l" zwischen Wissenschaft und Dogma" b\\
 		}}vt
 	    }}v box[] >bdr
 	    {{
@@ -179,95 +181,23 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
-	\ page 5
-	{{
-	    $221100FF $DDEEFFFF pres-frame
-	    {{
-		l" Centralized/Federated/P2P?" /title
-		vt{{
-		    l" Centralized" /subsection
-		    l" + " l" good funding, robust hardware and attack protection" b\\
-		    l" – " l" lacks privacy, honeypot, captive, EOL at whim of CEO" b\\
-		    l" – " l" diverse global censorship, possible toxic business model" b\\
-		    l" Federated" /subsection
-		    l" + " l" not captive, small business models" b\\
-		    l" ± " l" regional censorship (nodes blacklisted, e.g. Lolicon Mastodon nodes)" b\\
-		    l" – " l" poor funding, underpowered hardware/attack protection" b\\
-		    l" – " l" lacks privacy, EOL of nodes at whim of node admin" b\\
-		    l" Peer2Peer" /subsection
-		    l" + " l" Full control over your node, good privacy" b\\
-		    l" + " l" Development funding? Otherwise cheap" b\\
-		    l" ± " l" non–existend censorship (attracts censorship refugees)" b\\
-		    l" – " l" Full responsibility for your node" b\\
-		}}vt
-		glue*ll }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 6
-	{{
-	    $200020FF $FFCCFFFF pres-frame
-	    {{
-		l" net2o in a nutshell" /title
-		l" net2o consists of the following 6 layers (implemented bottom up):" /subsection
-		\skip
-		{{
-		    vt{{
-			l" 2. " b0 blackish l" Path switched packets with 2" }}text'
-			\italic l" n" }}smalltext \regular >o font-size# -0.4e f* to raise o o>
-		    l"  size writing into shared memory buffers" }}text'  glue*l }}glue }}h box[] >bl
-		    l" 3. " l" Ephemeral key exchange and signatures with Ed25519," b\\
-		    l"  " l" symmetric authenticated encryption+hash+prng with Keccak," b\\
-		    l"  " l" symmetric block encryption with Threefish" b\\
-		    l"  " l" onion routing camouflage with Threefish/Keccak" b\\
-		    l" 4. " l" Timing driven delay minimizing flow control" b\\
-		    l" 5. " l" Stack–oriented tokenized command language" b\\
-		    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
-		    l" 7. " l" Apps in a sandboxed environment for displaying content (ΜΙΝΩΣ2)" b\\
-		}}vt
-		\skip
-		l" Protocol stack details:" /subsection
-		l" 🔗" l" https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" bm\\
-		"https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" link[]
-		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-	
-	\ page 6
-	{{
-	    $200020FF $FFCCFFFF pres-frame
-	    {{
-		l" Social Networks in net2o" /title
-		vt{{
-		    l" Texts " l" as markdown" b\\
-		    l" Images " l" JPEG, PNG" b\\
-		    l" Movies " l" mkv/webm" b\\
-		    l" Timeline " l" Chat log with link to DVCS project" b\\
-		    l" Posting " l" DVCS project, keeping data+comments together" b\\
-		    l" DVCS project " l" Chat log with link to patchsets/snapshots" b\\
-		    l" Reshare " l" Fork+added posting+log message in own timeline" b\\
-		    l" Comment " l" Fork+added posting+pull request" b\\
-		    l" Likes " l" Chat log messages directly in DVCS project" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
 	\ page 7
 	{{
 	    $202000FF $FFFFCCFF pres-frame
 	    {{
-		l" Last year’s things still to do" /title
+		l" ToDo–Liste vom letzten Jahr" /title
 		vt{{
-		    l" + " l" Finish bulk importer for Google+" b\\
-		    l" – " l" Write bulk importers for Facebook/Twitter/Blogger/etc." b\\
-		    l" + " l" Use avatars to display users’s ID" b\\
+		    l" + " l" Den bulk importer für Google+ fertig machen" b\\
+		    l" – " l" Einen bulk importers für Facebook/Twitter/Blogger/etc." b\\
+		    l" + " l" Avatare für die User–IDs" b\\
 		    l" + " l" Markdown renderer" b\\
-		    l" + " l" Album viewer" b\\
-		    l" – " l" Movie player" b\\
-		    l" – " l" Key handover to contact in net2o world (temporary keypair)" b\\
-		    l" + " l" Mark imported keys as not trustworthy" b\\
+		    l" + " l" Album–Viewer" b\\
+		    l" – " l" Film–Abspieler" b\\
+		    l" – " l" Key handover für Kontakte in der net2o–Welt (temporare Schlüsselpaare)" b\\
+		    l" + " l" Temporäre Keys als nicht vertrauenswürdig kennzeichnen" b\\
 		}}vt
-		l" Hands on presentation" /subsection
+		glue*l }}glue
+		l" Zur Demo" /subsection
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
@@ -275,19 +205,19 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" New Challenges found" /title
-		l" This endeaver is an exploration of what’s actually needed" /subsection
+		l" Neue Herausforderungen" /title
+		l" Das hier ist Forschung, was wirklich gebraucht wird" /subsection
 		vt{{
-		    l" • " l" Hackers need a night mode (color theme) ✅" b\\
-		    l" • " l" Some JPEGs don't have thumbnails (use epeg?)" b\\
-		    l" • " l" Protocol to provide “who has what” with privacy in mind (✅½)" b\\
-		    l" • " l" Comfortable ID cloning (see IETF MEDUP task group)" b\\
-		    l" • " l" Permissions for DVCS updates/posting&comment submission" b\\
-		    l" • " l" Likes/+1s/etc.: only the last one (per user) counts" b\\
-		    l" • " l" Closed group chats ✅" b\\
-		    l" • " l" Permissions for moderators" b\\
-		    l" • " l" Shareable list of collections/groups" b\\
-		    l" • " l" What about port 53/80/443–only networks?" b\\
+		    l" • " l" Wir brauchen einen Dark Mode ✅" b\\
+		    l" • " l" Manche JPEGS haben keinen Thumbnail (epeg?)" b\\
+		    l" • " l" Nicht–öffentliches Protokoll für „Wer hat was“ (✅⅞)" b\\
+		    l" • " l" Komfortables ID–Cloning (siehe IETF MEDUP task group)" b\\
+		    l" • " l" Berechtigungen für DVCS updates/posting&comment submission" b\\
+		    l" • " l" Likes/+1s/etc.: nur der letzte zählt (pro user)" b\\
+		    l" • " l" Geschlossene Group–Chats ✅" b\\
+		    l" • " l" Berechtigung für Moderation" b\\
+		    l" • " l" Teilbare Listen für Sammlungen/Gruppen" b\\
+		    l" • " l" Was ist mit 53/80/443–only Netzwerken?" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -360,6 +290,43 @@ $44FFFFFF re-color author#
 		    l" • " l" How to make a social network a nice place?" b\\
 		    l" • " l" Funding of net2o?" b\\
 		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+	
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Datensparsames Tracking" /title
+		l" Problem" /subsection
+		vt{{
+		    l" • " l" Für das Tracking braucht man eine global sichtbare Datenbank" b\\
+		    l" • " l" Die Teilnehmer müssen informiert werden können" b\\
+		    l" • " l" Aus der Datenbank darf aber so wenig wie möglich extrahierbar sein" b\\
+		}}vt
+		l" Lösungsansatz" /subsection
+		vt{{
+		    l" • " l" Pseudonymer Eintrag mit orts&zeitabhängigem Pseudonym" b\\
+		    l" • " l" Eintrag mit Onion–Routing für die Antwort" b\\
+		    l" • " l" Exit–Node ist der Hausarzt (der kann deanonymisieren)" b\\
+		}}vt
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+	
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Videostreaming/Videokonferenzen" /title
+		vt{{
+		    l" • " l" Gestreamte Videos sind keine fertigen Dateien" b\\
+		    l" • " l" Andere Herangehensweise beim Multiplexen nötig" b\\
+		    l" • " l" Qualität ist abhängig von der erzielbaren Datenrate" b\\
+		    l" • " l" Thumbnail/Fullscreen–Streams bei Konferenzen" b\\
+		    l" • " l" Audio synchron für Filme/asynchron für Konferenzen" b\\
+		}}vt
+		glue*l }}glue
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 	
