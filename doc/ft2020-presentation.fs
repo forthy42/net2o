@@ -229,15 +229,15 @@ $44FFFFFF re-color author#
 		l" “Who has What”" /title
 		l" Query object origin by hash" /subsection
 		vt{{
-		    l" ❓ " l" Original plan: keep hashes in DHT" b\\
-		    l" ➡ " l" Query reveals who wants what" b\\
-		    l" ❓ " l" Original solution: Encrypt hashes" b\\
-		    l" ➡ " l" Query reveals who wants/has the same thing" b\\
-		    l" ❓ " l" Onion routing within DHT?" b\\
-		    l" ➡ " l" Complex, slow" b\\
+		    l" ❓ " l" Ursprünglicher Plan: Hashes im DHT (wie BitTorrent)" b\\
+		    l" ➡ " l" Anfragen verraten, wer was will" b\\
+		    l" ❓ " l" Ursprünglicher Lösungsansatz: Hashes verschlüsseln" b\\
+		    l" ➡ " l" Anfragen verraten, wer das gleiche Ding will" b\\
+		    l" ❓ " l" Onion routing innerhalb des DHTs?" b\\
+		    l" ➡ " l" Komplex, langsam" b\\
 		    \skip
-		    l" ➡ " l" Better keep “who has what” within the chat log structure" b\\
-		    l" ➡ " l" “who” is device.pubkey" b\\
+		    l" ➡ " l" Besser „wer hat was“ im Chat–Log mit abspeichern" b\\
+		    l" ➡ " l" „Wer“ ist device.pubkey" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
@@ -246,17 +246,17 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFF pres-frame
 	    {{
-		l" Comfortable ID cloning" /title
-		l" solve the multi–device problem" /subsection
+		l" Komfortables ID–cloning" /title
+		l" Löst das Mehrgeräte–Problem" /subsection
 		vt{{
-		    l" ❓ " l" Copy your secret+public keys" b\\
-		    l" ➡ " l" You need authorized remote file access" b\\
-		    l" ❓ " l" Establish authorization with net2o itself" b\\
-		    l" ➡ " l" Scan a color–QR–code" b\\
-		    l" ➡ " l" Send an invitation packet back" b\\
-		    l" ➡ " l" Get a confirmation color–QR–Signature" b\\
-		    l" ➡ " l" Do a zero–knowledge proof of “has the password”" b\\
-		    l" ➡ " l" Send the keys over via that net2o connection" b\\
+		    l" ❓ " l" Kopiere geheimen und öffentlichen Schlüssel" b\\
+		    l" ➡ " l" Autorisieren von Remote–File—Access" b\\
+		    l" ❓ " l" Kann man das nicht in net2o selbst machen?" b\\
+		    l" ➡ " l" Scan einen color–QR–code" b\\
+		    l" ➡ " l" Schicke eine Einladung zurück" b\\
+		    l" ➡ " l" Bekomme eine Bestätigung via color–QR–code" b\\
+		    l" ➡ " l" Liefere einen Zero–Knowledge–Proof “Ich kenne das Password”" b\\
+		    l" ➡ " l" Schicke die Schlüssel über die net2o–Verbindung" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
@@ -265,17 +265,16 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFF pres-frame
 	    {{
-		l" Web–only networks" /title
-		l" Strict port filter policy, DNS+HTTP[S] only" /subsection
+		l" Web–only Netzwerke" /title
+		l" Strenge Portfilter–Regeln, nur DNS+HTTP[S]" /subsection
 		vt{{
-		    l" ❓ " l" Can not use UDP as overlay (DNS only to intern resolver)" b\\
-		    l" ➡ " l" need a transport layer over HTTPS" b\\
+		    l" ❓ " l" Man kann kein UDP als Overlay verwenden (auch DNS geht nur zum internen Resolver)" b\\
+		    l" ➡ " l" braucth einen Transport–Layer über HTTPS" b\\
 		    l" ❓ " l" Web Socket API?" b\\
-		    l" ➡ " l" Adversary may test connection and drop connections if net2o tunnel is detected" b\\
-		    l" ➡ " l" Add authorization" b\\
-		    l" ➡ " l" Requires single–package auth" b\\
-		    l" ➡ " l" Change of net2o connection setup" b\\
-		    l" ➡ " l" Bonus: one RTD less for NAT traversal, too" b\\
+		    l" ➡ " l" Angreifer könnte Verbindungen testen und net2o–Tunnel gezielt unterbinden" b\\
+		    l" ➡ " l" Autorisierung im ersten Paket unterbringen" b\\
+		    l" ➡ " l" Ändert das net2o connection setup" b\\
+		    l" ➡ " l" Bonus: Ein RTD weniger für NAT traversal" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
@@ -284,11 +283,11 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" The non–technical problems" /title
+		l" Nicht–technische Probleme" /title
 		vt{{
-		    l" • " l" Get your contacts over to net2o" b\\
-		    l" • " l" How to make a social network a nice place?" b\\
-		    l" • " l" Funding of net2o?" b\\
+		    l" • " l" Kontakte von net2o überzeugen" b\\
+		    l" • " l" Wie macht man ein soziales Netzwerk wohnlich?" b\\
+		    l" • " l" Finanzierung von net2o?" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
