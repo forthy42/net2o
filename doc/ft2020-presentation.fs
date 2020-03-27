@@ -307,6 +307,7 @@ $44FFFFFF re-color author#
 		vt{{
 		    l" • " l" Pseudonymer Eintrag mit orts&zeitabhängigem Pseudonym" b\\
 		    l" • " l" Eintrag mit Onion–Routing für die Antwort" b\\
+		    l" • " l" Eintrag: Mixer-Key | Ephemeral Key | Verschlüsselte Message im gleichen Format" b\\
 		    l" • " l" Exit–Node ist der Hausarzt (der kann deanonymisieren)" b\\
 		}}vt
 		glue*l }}glue
