@@ -789,7 +789,7 @@ $13 net2o: push-$ ( $:string -- ) \g push string into answer packet
     lit, ok net2o:ok? ;
 \ Use ko instead of throw for not acknowledge (kudos to Heinz Schnitter)
 +net2o: ko ( uerror -- ) \g receive error message
-    remote? off throw ;
+    remote? off 64>n throw ;
 +net2o: nest ( $:string -- ) \g nested (self-encrypted) command
     $> cmdnest ;
 \ inspection
