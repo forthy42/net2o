@@ -868,7 +868,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	p-format
     ELSE  2drop  THEN ;
 : display-posting ( addr u -- )
-    posting-vp >o dispose-childs  free-thumbs  0 to active-w o>
+    posting-vp >o ( dispose-childs ) \ !!FIXME!!
+    childs[] $free  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
     >group msg-log@ 2dup { log u }
