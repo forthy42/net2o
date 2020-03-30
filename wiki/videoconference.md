@@ -8,6 +8,7 @@
 * Scaled up stream for talking participants
 * Two talking participants side-by-side with upscaled stream
 * Audio mixer&autolevel
+* Display FFT of audio for visualisation
 * Audio biquad filters, e.g. notch, to improve bad sound quality
 * Push to talk, hotkeys for everything
 * Templates for nice presentation recording
