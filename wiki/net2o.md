@@ -129,6 +129,7 @@ point:
 * [Guidelines of Conduct](guidelines.md)
 * [Social network](social.md)
 * [Search](search.md)
+* [Video converence](videoconfernce.md)
 
 [de](/net2o/wiki?name=net2o.de)
 [中文](net2o.zh.md)
