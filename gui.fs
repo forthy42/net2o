@@ -868,8 +868,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	p-format
     ELSE  2drop  THEN ;
 : display-posting ( addr u -- )
-    posting-vp >o ( dispose-childs ) \ !!FIXME!!
-    childs[] $free  free-thumbs  0 to active-w o>
+    posting-vp >o ( dispose-childs ) childs[] $free  \ !!FIXME!!
+    free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
     >group msg-log@ 2dup { log u }
@@ -1376,7 +1376,7 @@ wmsg-o >o msg-table @ token-table ! o>
     reset-time
     64#0 to last-tick  last-bubble-pk $free
     0 to msg-par  0 to msg-box
-    msgs-box .dispose-childs
+    ( msgs-box .dispose-childs ) msgs-box .childs[] $free \ !!FIXME!!
     load-msg msg-log@ { log u }
     log u gen-calendar ?dup-IF  msgs-box .child+  THEN
     glue*lll }}glue msgs-box .child+
