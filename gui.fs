@@ -41,6 +41,22 @@ update-gsize#
 
 0.4e to slide-time%
 
+\ check if dispose damages things
+
+[IFDEF] dispose-check
+    : pollfds-check ( -- )
+	pollfds ['] @ catch nip IF
+	    ." Dispose check failed! " up@ hex. cr
+	THEN ;
+    : net2o:dispose-check ( -- )
+	up@ >r
+	net2o-tasks $@ bounds U+DO
+	    I @ up! pollfds-check
+	cell +LOOP
+	r> up!  pollfds-check ;
+    ' net2o:dispose-check is dispose-check
+[THEN]
+
 \ frames
 
 0 Value pw-frame
@@ -868,8 +884,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
 	p-format
     ELSE  2drop  THEN ;
 : display-posting ( addr u -- )
-    posting-vp >o ( dispose-childs ) childs[] $free  \ !!FIXME!!
-    free-thumbs  0 to active-w o>
+    posting-vp >o  dispose-childs  free-thumbs  0 to active-w o>
     project:branch$ $@ { d: branch }
     dvcs:new-posting-log >o
     >group msg-log@ 2dup { log u }
@@ -1376,7 +1391,7 @@ wmsg-o >o msg-table @ token-table ! o>
     reset-time
     64#0 to last-tick  last-bubble-pk $free
     0 to msg-par  0 to msg-box
-    ( msgs-box .dispose-childs ) msgs-box .childs[] $free \ !!FIXME!!
+    msgs-box .dispose-childs
     load-msg msg-log@ { log u }
     log u gen-calendar ?dup-IF  msgs-box .child+  THEN
     glue*lll }}glue msgs-box .child+

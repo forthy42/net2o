@@ -147,10 +147,10 @@ alloc-io
 Variable net2o-tasks
 
 : net2o-pass ( params xt n task -- )
-    dup net2o-tasks >stack  pass
+    dup net2o-tasks >stack  pass  debug-out debug-vector !
     ?salt-init off  rng-o off \ make double sure no rng is active
     alloc-io prep-socks catch-loop
-    1+ ?dup-IF  free-io 1- ?dup-IF  DoError  THEN
+    1+ ?dup-IF  free-io 1- ?dup-IF  ['] DoError do-debug  THEN
     ELSE  ~~ bflush 0 (bye) ~~  THEN ;
 : net2o-task ( params xt n -- task )
     stacksize4 NewTask4 dup >r net2o-pass r> ;

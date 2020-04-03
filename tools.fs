@@ -1052,7 +1052,7 @@ edit-terminal edit-out !
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : .loop-err ( throw xt -- )
-    .name dup . cr DoError cr ;
+    [: ." Task: " .name dup . cr DoError cr ;] do-debug ;
 
 : catch-loop { xt -- flag }
     BEGIN   xt catch dup -1 = ?EXIT
