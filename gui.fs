@@ -43,7 +43,7 @@ update-gsize#
 
 \ check if dispose damages things
 
-[IFDEF] dispose-check
+[IFDEF] dispose-check-xxx
     : pollfds-check ( -- )
 	pollfds ['] @ catch nip IF
 	    ." Dispose check failed! " up@ hex. cr
@@ -1391,7 +1391,7 @@ wmsg-o >o msg-table @ token-table ! o>
     reset-time
     64#0 to last-tick  last-bubble-pk $free
     0 to msg-par  0 to msg-box
-    msgs-box .dispose-childs
+    msgs-box .childs[] $free \ ) .dispose-childs
     load-msg msg-log@ { log u }
     log u gen-calendar ?dup-IF  msgs-box .child+  THEN
     glue*lll }}glue msgs-box .child+
@@ -1508,6 +1508,9 @@ User $[]exec#
 
 Variable gui-log[]
 
+event: :>dispose-widget ( widget -- )
+    .dispose-widget ;
+
 : chat-gui-exec ( xt -- )
     gui-log[] $[]exec
     gui-log[] $[]# IF
@@ -1520,7 +1523,8 @@ Variable gui-log[]
 	    closer { closer }
 	}}z box[] >r
 	closer [: data msgs-box .childs[] del$cell
-	    data .dispose-widget re-msg-box ;] r@ click[] drop
+	    \ <event data elit, :>dispose-widget up@ event>
+	    re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
     THEN ;
 
