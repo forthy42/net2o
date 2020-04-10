@@ -1523,7 +1523,7 @@ event: :>dispose-widget ( widget -- )
 	    closer { closer }
 	}}z box[] >r
 	closer [: data msgs-box .childs[] del$cell
-	    \ <event data elit, :>dispose-widget up@ event>
+	    <event data elit, :>dispose-widget up@ event>
 	    re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
     THEN ;
