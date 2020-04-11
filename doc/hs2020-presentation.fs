@@ -76,12 +76,16 @@ $44FFFFFF re-color author#
 		    l" Social Distancing mit net2o" /subtitle
 		    glue*2 }}glue	
 		    l" Bernd Paysan" /author
-		    l" Hidden Service 2020, Internet" /location
+		    l" Hidden Service 2020. 武汉市, Bergamo, New York, Gangelt¹" /location
 		    {{
 			glue*l }}glue
 			{{
 			    glue*l }}glue author#
-			    \tiny l" Photo: Ralph W. Lambrecht" }}text' /right \normal blackish
+			    {{
+				\tiny l" ¹) Orte, an denen man die letzten Monate lieber nicht war" }}text'
+				glue*l }}glue
+				\tiny l" Photo: Ralph W. Lambrecht" }}text'
+			    }}h box[] \normal blackish
 			}}v box[]
 		    }}z box[]
 		tex: vp-title glue*l ' vp-title }}vp vp[] dup value title-vp
@@ -312,19 +316,6 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Nicht–technische Probleme" /title
-		vt{{
-		    l" • " l" Kontakte von net2o überzeugen" b\\
-		    l" • " l" Wie macht man ein soziales Netzwerk wohnlich?" b\\
-		    l" • " l" Finanzierung von net2o?" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-	
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
 		l" Datensparsames Tracking" /title
 		l" Problem" /subsection
 		vt{{
@@ -349,13 +340,68 @@ $44FFFFFF re-color author#
 	    {{
 		l" Videostreaming/Videokonferenzen" /title
 		vt{{
-		    l" • " l" Gestreamte Videos sind keine fertigen Dateien" b\\
+		    l" • " l" Gestreamte Videos sind keine fertigen (=kompletten) Dateien" b\\
 		    l" • " l" Andere Herangehensweise beim Multiplexen nötig" b\\
 		    l" • " l" Qualität ist abhängig von der erzielbaren Datenrate" b\\
 		    l" • " l" Thumbnail/Fullscreen–Streams bei Konferenzen" b\\
 		    l" • " l" Audio synchron für Filme/asynchron für Konferenzen" b\\
 		}}vt
 		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Wunschzettel 1/2" /title
+		vt{{
+		    l" • " l" Stream von der Kamera, vertikaler Crop (Portrait)" b\\
+		    l" • " l" Stream vom Desktop/Fenster" b\\
+		    l" • " l" Herunterskaliert für alle (je mehr Teilnehmer, desto kleiner)" b\\
+		    l" • " l" Hochskaliert für redende Teilnehmer" b\\
+		    l" • " l" Zwei oder drei redende Teilnehmer nebeneinander" b\\
+		    l" • " l" Audio mixer&autolevel" b\\
+		    l" • " l" FFT vom Audio anzeigen für Visualisierung" b\\
+		    l" • " l" Audio biquad filters, z.B. notch, um schlechte Audioqualität zu verbessern" b\\
+		    l" • " l" Push to talk (hotkeys für alles)" b\\
+		    l" • " l" Hotkey für cut mark + keyframe" b\\
+		    l" • " l" Lokale Aufzeichnung mit besserer Auflösung/Audio–Qualität für den Präsentator" b\\
+		    l" • " l" Mehrere Geräte (Kameras, Mics) für einen Teilnehmr (Akira Kurosawa–Setup)," b\\
+		    l"  " l" kein eigenes Audio in der Ausgabe" b\\
+		}}vt
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Wunschzettel 2/2" /title
+		vt{{
+		    l" • " l" Templates für schöne Präsentations–Aufzeichnungen" b\\
+		    l" • " l" Logo für einen Talk setzen" b\\
+		    l" • " l" Räume für kleine Seitengruppen–Gespräche" b\\
+		    l" • " l" Verschiedene Verbindungen ausprobieren, und die besten behalten" b\\
+		    l" • " l" Audio/Video getrennt an/ausschalten" b\\
+		    l" • " l" Zusätzliche Audio-Quelle zumixen (Hintergrundmusik, Desktop, Klatschen/Lacher…)" b\\
+		    l" • " l" Räumliches Audio (Gesprächspartner kommen von links oder von rechts)." b\\
+		}}vt
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Nicht–technische Probleme" /title
+		vt{{
+		    l" • " l" Kontakte von net2o überzeugen" b\\
+		    l" • " l" Wie macht man ein soziales Netzwerk wohnlich?" b\\
+		    l" • " l" Finanzierung von net2o?" b\\
+		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 	
