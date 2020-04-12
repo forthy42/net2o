@@ -19,6 +19,7 @@
 * Templates for nice presentation recording
 * Set a logo for the talk
 * Rooms for small-group side conversation
+* Moderator side channel to presenter/participants
 * Try connections to different participants and take best one
 * Mix additional audio sources (background music, desktop sounds,
   claps/laughers)

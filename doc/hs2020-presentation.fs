@@ -106,6 +106,35 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
+	\ page 6
+	{{
+	    $200020FF $FFCCFFFF pres-frame
+	    {{
+		l" net2o Kurzbeschreibung" /title
+		l" net2o besteht aus den folgenden 6 Layern (bottom up implementiert):" /subsection
+		\skip
+		{{
+		    vt{{
+			l" 2. " b0 blackish l" Path switched Pakete mit 2" }}text'
+			\italic l" n" }}smalltext \regular >o font-size# -0.4e f* to raise o o>
+		    l"  Größe in shared memory–Puffer gespeichert" }}text'  glue*l }}glue }}h box[] >bl
+		    l" 3. " l" Ephemeral key exchange und Signaturen mit Ed25519," b\\
+		    l"  " l" symmetrisch authentisierte Verschlüsselung+hash+prng mit Keccak," b\\
+		    l"  " l" symmetrische Blockverschlüsselung mit Threefish" b\\
+		    l"  " l" onion routing mit Threefish/Keccak (TBD)" b\\
+		    l" 4. " l" Timing driven delay minimizing flow control" b\\
+		    l" 5. " l" Stack–orientierte tokenisierte Kommandosprache" b\\
+		    l" 6. " l" Verteilte Daten (Dateien, Messages) und verteilte Metadaten (DHT, DVCS)" b\\
+		    l" 7. " l" Apps in einer Sandbox, um Inhalte anzuzeigen (ΜΙΝΩΣ2)" b\\
+		}}vt
+		\skip
+		l" Details zum Protokollstack:" /subsection
+		l" 🔗" l" https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" bm\\
+		"https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" link[]
+		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+	
 	\ page 2
 	{{
 	    $3F0000FF $FFAAAAFF pres-frame
@@ -185,35 +214,6 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
-	\ page 6
-	{{
-	    $200020FF $FFCCFFFF pres-frame
-	    {{
-		l" net2o Kurzbeschreibung" /title
-		l" net2o besteht aus den folgenden 6 Layern (bottom up implementiert):" /subsection
-		\skip
-		{{
-		    vt{{
-			l" 2. " b0 blackish l" Path switched Pakete mit 2" }}text'
-			\italic l" n" }}smalltext \regular >o font-size# -0.4e f* to raise o o>
-		    l"  Größe in shared memory–Puffer gespeichert" }}text'  glue*l }}glue }}h box[] >bl
-		    l" 3. " l" Ephemeral key exchange und Signaturen mit Ed25519," b\\
-		    l"  " l" symmetrisch authentisierte Verschlüsselung+hash+prng mit Keccak," b\\
-		    l"  " l" symmetrische Blockverschlüsselung mit Threefish" b\\
-		    l"  " l" onion routing mit Threefish/Keccak (TBD)" b\\
-		    l" 4. " l" Timing driven delay minimizing flow control" b\\
-		    l" 5. " l" Stack–orientierte tokenisierte Kommandosprache" b\\
-		    l" 6. " l" Verteilte Daten (Dateien, Messages) und verteilte Metadaten (DHT, DVCS)" b\\
-		    l" 7. " l" Apps in einer Sandbox, um Inhalte anzuzeigen (ΜΙΝΩΣ2)" b\\
-		}}vt
-		\skip
-		l" Details zum Protokollstack:" /subsection
-		l" 🔗" l" https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" bm\\
-		"https://fossil.net2o.de/net2o/doc/trunk/wiki/31c3.md" link[]
-		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-	
 	\ page 7
 	{{
 	    $202000FF $FFFFCCFF pres-frame
