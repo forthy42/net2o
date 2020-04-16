@@ -1330,7 +1330,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : +quartals ( year end start -- o )
     >r 1+ >r { year }
     {{
-	\Large \sans \bold
+	\Large \sans \bold blackish
 	glue*ll }}glue
 	year 0 <# '/' hold #s #> }}text
 	r> r> DO
