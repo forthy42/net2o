@@ -1155,23 +1155,25 @@ Hash: audio#
 
 require minos2/opus-codec.fs
 
+: be-l, ( l -- ) here be-l! 4 allot ;
+
 Create audio-colors
-$0000FF00 l, $0008F700 l, $0010EF00 l, $0018E700 l,
-$0020DF00 l, $0029D600 l, $0031CE00 l, $0039C600 l,
-$0041BE00 l, $004AB500 l, $0052AD00 l, $005AA500 l,
-$00629D00 l, $006A9500 l, $00738C00 l, $007B8400 l,
-$00837C00 l, $008B7400 l, $00946B00 l, $009C6300 l,
-$00A45B00 l, $00AC5300 l, $00B44B00 l, $00BD4200 l,
-$00C53A00 l, $00CD3200 l, $00D52A00 l, $00DE2100 l,
-$00E61900 l, $00EE1100 l, $00F60900 l, $00FF0000 l,
-$00FF0000 l, $08F70000 l, $10EF0000 l, $18E70000 l,
-$20DF0000 l, $29D60000 l, $31CE0000 l, $39C60000 l,
-$41BE0000 l, $4AB50000 l, $52AD0000 l, $5AA50000 l,
-$629D0000 l, $6A950000 l, $738C0000 l, $7B840000 l,
-$837C0000 l, $8B740000 l, $946B0000 l, $9C630000 l,
-$A45B0000 l, $AC530000 l, $B44B0000 l, $BD420000 l,
-$C53A0000 l, $CD320000 l, $D52A0000 l, $DE210000 l,
-$E6190000 l, $EE110000 l, $F6090000 l, $FF000000 l,
+$0000FF00 be-l, $0008F700 be-l, $0010EF00 be-l, $0018E700 be-l,
+$0020DF00 be-l, $0029D600 be-l, $0031CE00 be-l, $0039C600 be-l,
+$0041BE00 be-l, $004AB500 be-l, $0052AD00 be-l, $005AA500 be-l,
+$00629D00 be-l, $006A9500 be-l, $00738C00 be-l, $007B8400 be-l,
+$00837C00 be-l, $008B7400 be-l, $00946B00 be-l, $009C6300 be-l,
+$00A45B00 be-l, $00AC5300 be-l, $00B44B00 be-l, $00BD4200 be-l,
+$00C53A00 be-l, $00CD3200 be-l, $00D52A00 be-l, $00DE2100 be-l,
+$00E61900 be-l, $00EE1100 be-l, $00F60900 be-l, $00FF0000 be-l,
+$00FF0000 be-l, $08F70000 be-l, $10EF0000 be-l, $18E70000 be-l,
+$20DF0000 be-l, $29D60000 be-l, $31CE0000 be-l, $39C60000 be-l,
+$41BE0000 be-l, $4AB50000 be-l, $52AD0000 be-l, $5AA50000 be-l,
+$629D0000 be-l, $6A950000 be-l, $738C0000 be-l, $7B840000 be-l,
+$837C0000 be-l, $8B740000 be-l, $946B0000 be-l, $9C630000 be-l,
+$A45B0000 be-l, $AC530000 be-l, $B44B0000 be-l, $BD420000 be-l,
+$C53A0000 be-l, $CD320000 be-l, $D52A0000 be-l, $DE210000 be-l,
+$E6190000 be-l, $EE110000 be-l, $F6090000 be-l, $FF000000 be-l,
 
 also opengl also freetype-gl also soil
 
@@ -1192,14 +1194,12 @@ also opengl also freetype-gl also soil
     / 1+ { w }
     w 8 lshift alloz dup { mem ptr }
     bounds ?DO
+	audio-colors ptr $100 move
 	I idx-head + dup /second + I' umin over - bounds ?DO
 	    ptr 3 + I le-uw@ #10 rshift sfloats bounds ?DO
 		inc I c+!
 	    1 sfloats +LOOP
 	2 +LOOP
-	$100 0 DO
-	    ptr I + be-ul@ audio-colors I + c@ or  ptr I + be-l!
-	1 sfloats +LOOP
 	$100 +to ptr
     /second +LOOP
     GL_TEXTURE1 glActiveTexture
