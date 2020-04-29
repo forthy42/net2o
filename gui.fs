@@ -1151,6 +1151,56 @@ Variable re-indent#
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
+Hash: audio#
+
+require minos2/opus-codec.fs
+
+Create audio-colors
+$0000FF00 l, $0008F700 l, $0010EF00 l, $0018E700 l,
+$0020DF00 l, $0029D600 l, $0031CE00 l, $0039C600 l,
+$0041BE00 l, $004AB500 l, $0052AD00 l, $005AA500 l,
+$00629D00 l, $006A9500 l, $00738C00 l, $007B8400 l,
+$00837C00 l, $008B7400 l, $00946B00 l, $009C6300 l,
+$00A45B00 l, $00AC5300 l, $00B44B00 l, $00BD4200 l,
+$00C53A00 l, $00CD3200 l, $00D52A00 l, $00DE2100 l,
+$00E61900 l, $00EE1100 l, $00F60900 l, $00FF0000 l,
+$00FF0000 l, $08F70000 l, $10EF0000 l, $18E70000 l,
+$20DF0000 l, $29D60000 l, $31CE0000 l, $39C60000 l,
+$41BE0000 l, $4AB50000 l, $52AD0000 l, $5AA50000 l,
+$629D0000 l, $6A950000 l, $738C0000 l, $7B840000 l,
+$837C0000 l, $8B740000 l, $946B0000 l, $9C630000 l,
+$A45B0000 l, $AC530000 l, $B44B0000 l, $BD420000 l,
+$C53A0000 l, $CD320000 l, $D52A0000 l, $DE210000 l,
+$E6190000 l, $EE110000 l, $F6090000 l, $FF000000 l,
+
+: audio-idx>thumb ( addr u -- iec4-addr )
+    2dup 1- swap idx-frames c@ 2* idx-head + dup { /second }
+    $FF /second / { inc }
+    / 1+ { w }
+    w 8 lshift alloz dup { mem ptr }
+    bounds ?DO
+	I idx-head + dup /second + I' umin over - bounds ?DO
+	    ptr 3 + I le-uw@ #10 rshift sfloats bounds ?DO
+		inc I c+!
+	    1 sfloats +LOOP
+	2 +LOOP
+	$100 0 DO
+	    ptr I + be-ul@ audio-colors I + c@ or  ptr I + be-l!
+	1 sfloats +LOOP
+	$100 +to ptr
+    /second +LOOP
+    mem w 8 lshift 64 w mem>subtex ;
+: read-audio ( addr u -- addr' u' )
+    ?read-enc-hashed audio-idx>thumb atlas-region ;
+: audio-frame ( addr u -- frame# )
+    key| 2dup audio# #@ nip 0= IF
+	2dup read-audio 2swap audio# #!
+    ELSE  2drop  THEN  last# cell+ $@ drop ;
+: ?audio-idx { d: hash -- o }
+    hash ['] audio-frame catch nothrow 0= IF
+    ELSE
+    THEN  {{ "" }}text  r> }}h 40%bv box[] ;
+
 hash: imgs# \ hash of images
 
 : .img ( addr u -- )
@@ -1202,6 +1252,7 @@ hash: imgs# \ hash of images
 	    2rdrop album-view[]
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
+	msg:audio-idx# of  ?audio-idx "audio-idx" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
 	    ;] $tmp }}text  "patch" name!  endof
 	msg:snapshot#  of  [: ." snapshot[" 85type ']' emit
@@ -1212,6 +1263,7 @@ hash: imgs# \ hash of images
 	    rdrop 2dup $make [: addr data $@ open-posting ;] swap 2>r
 	    [: ." posting" .posting ;] $tmp }}text 2r> click[]  "posting" name!
 	endof
+	nip nip [: ." ???(" hex. ." )" ;] $tmp }}text 0
     endcase
     msg-box .child+
     text-color!

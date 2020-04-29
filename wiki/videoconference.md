@@ -21,6 +21,7 @@
 * Have a countdown clock for talk slots
 * Share slides directly (slides in Markdown)
 * Subtitles as option for slides (possibly multiple languages)
+* Translated audio tracks to select from (for bigger conferences)
 * Rooms for small-group side conversation
 * Moderator side channel to presenter/participants
 * Try connections to different participants and take best one

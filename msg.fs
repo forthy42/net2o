@@ -502,6 +502,8 @@ scope: logstyles
 :noname case
 	msg:image# of 2drop "img[] " notify+ endof
 	msg:thumbnail# of 2drop "thumb[] " notify+ endof
+	msg:audio# of 2drop "audio[] " notify+ endof
+	msg:video# of 2drop "video[] " notify+ endof
 	2drop
     endcase ; msg-notify-class is msg:object
 :noname ( -- )
@@ -537,6 +539,10 @@ end-class msg-?hash-class
 	msg:thumbnail#  of  key| ?hashs[] $+[]!  endof
 	msg:patch#      of  key| ?hashs[] $+[]!  endof
 	msg:snapshot#   of  key| ?hashs[] $+[]!  endof
+	msg:audio#      of  key| ?hashs[] $+[]!  endof
+	msg:audio-idx#  of  key| ?hashs[] $+[]!  endof
+	msg:video#      of  key| ?hashs[] $+[]!  endof
+	msg:video-idx#  of  key| ?hashs[] $+[]!  endof
 	2drop
     endcase ; msg-?hash-class is msg:object
 
@@ -678,6 +684,10 @@ forward need-hashed?
 	msg:thumbnail# of  ." thumb["    2dup key| 85type
 	    space 2dup keysize safe/string IF  c@ '0' + emit  ELSE  drop  THEN
 	    ?fetch  endof
+	msg:audio#     of  ." audio["    2dup 85type ?fetch  endof
+	msg:video#     of  ." video["    2dup 85type ?fetch  endof
+	msg:audio-idx# of  ." audio-idx[" 2dup 85type ?fetch  endof
+	msg:video-idx# of  ." video-idx[" 2dup 85type ?fetch  endof
 	msg:patch#     of  ." patch["    85type  endof
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof

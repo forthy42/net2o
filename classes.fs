@@ -229,6 +229,10 @@ enum files#     \ dvcs project, files
 enum chatlog#   \ chatlog of instant messages
 enum timeline#  \ chatlog of postings
 enum loggroups# \ logs of logs
+enum audio#
+enum audio-idx#
+enum video#
+enum video-idx#
 drop
 }scope
 
