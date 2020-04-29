@@ -1173,6 +1173,19 @@ $A45B0000 l, $AC530000 l, $B44B0000 l, $BD420000 l,
 $C53A0000 l, $CD320000 l, $D52A0000 l, $DE210000 l,
 $E6190000 l, $EE110000 l, $F6090000 l, $FF000000 l,
 
+also opengl also freetype-gl also soil
+
+: (rgba>style) { ptr w h atlas val -- ivec4-addr }
+    BEGIN
+	atlas w 1+ h 1+ (ar) texture_atlas_get_region
+	(ar) i.x (ar) i.y -1 -1 d= WHILE
+	    atlas val @ 2* dup >r val !
+	    r> dup texture_atlas_enlarge_texture
+    REPEAT
+    atlas (ar) i.x (ar) i.y (ar) i.w 1- (ar) i.h 1- ptr (ar) i.w 1- sfloats
+    texture_atlas_set_region
+    ptr free throw  (ar)
+    GL_TEXTURE0 glActiveTexture ;
 : audio-idx>thumb ( addr u -- iec4-addr )
     2dup 1- swap idx-frames c@ 2* idx-head + dup { /second }
     $FF /second / { inc }
@@ -1189,7 +1202,12 @@ $E6190000 l, $EE110000 l, $F6090000 l, $FF000000 l,
 	1 sfloats +LOOP
 	$100 +to ptr
     /second +LOOP
-    mem w 8 lshift 64 w mem>subtex ;
+    GL_TEXTURE1 glActiveTexture
+    mem 64 w thumb-tex-rgba thumb-rgba addr thumb-rgba# (rgba>style)
+    atlas-region ;
+
+previous previous previous
+
 : read-audio ( addr u -- addr' u' )
     ?read-enc-hashed audio-idx>thumb atlas-region ;
 : audio-frame ( addr u -- frame# )
@@ -1198,7 +1216,10 @@ $E6190000 l, $EE110000 l, $F6090000 l, $FF000000 l,
     ELSE  2drop  THEN  last# cell+ $@ drop ;
 : ?audio-idx { d: hash -- o }
     hash ['] audio-frame catch nothrow 0= IF
+	>r r@ i.w r@ i.h swap
+	glue*thumb r> }}thumb >o 3 to rotate# o o>
     ELSE
+	128 128 glue*thumb dummy-thumb }}thumb
     THEN  {{ "" }}text  r> }}h 40%bv box[] ;
 
 hash: imgs# \ hash of images
