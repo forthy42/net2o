@@ -1175,19 +1175,8 @@ $A45B0000 be-l, $AC530000 be-l, $B44B0000 be-l, $BD420000 be-l,
 $C53A0000 be-l, $CD320000 be-l, $D52A0000 be-l, $DE210000 be-l,
 $E6190000 be-l, $EE110000 be-l, $F6090000 be-l, $FF000000 be-l,
 
-also opengl also freetype-gl also soil
+also opengl
 
-: (rgba>style) { ptr w h atlas val -- ivec4-addr }
-    BEGIN
-	atlas w 1+ h 1+ (ar) texture_atlas_get_region
-	(ar) i.x (ar) i.y -1 -1 d= WHILE
-	    atlas val @ 2* dup >r val !
-	    r> dup texture_atlas_enlarge_texture
-    REPEAT
-    atlas (ar) i.x (ar) i.y (ar) i.w 1- (ar) i.h 1- ptr (ar) i.w 1- sfloats
-    texture_atlas_set_region
-    ptr free throw  (ar)
-    GL_TEXTURE0 glActiveTexture ;
 : audio-idx>thumb ( addr u -- iec4-addr )
     2dup 1- swap idx-frames c@ 2* idx-head + dup { /second }
     $FF /second / { inc }
@@ -1203,10 +1192,10 @@ also opengl also freetype-gl also soil
 	$100 +to ptr
     /second +LOOP
     GL_TEXTURE1 glActiveTexture
-    mem 64 w thumb-tex-rgba thumb-rgba addr thumb-rgba# (rgba>style)
+    mem 64 w thumb-tex-rgba thumb-rgba addr thumb-rgba#  rgba>style
     atlas-region ;
 
-previous previous previous
+previous
 
 : read-audio ( addr u -- addr' u' )
     ?read-enc-hashed audio-idx>thumb atlas-region ;
