@@ -1177,28 +1177,35 @@ $E6190000 be-l, $EE110000 be-l, $F6090000 be-l, $FF000000 be-l,
 
 also opengl
 
-: audio-idx>thumb ( addr u -- iec4-addr )
-    2dup 1- swap idx-frames c@ 2* idx-head + dup { /second }
-    $FF /second / { inc }
-    / 1+ { w }
+: audio-idx>img ( addr u -- addr w h )
+    2dup 1- swap idx-frames c@
+    $FF over / { inc } 2* dup { /second } idx-head + / 1+ { w }
     w 8 lshift alloz dup { mem ptr }
     bounds ?DO
 	audio-colors ptr $100 move
 	I idx-head + dup /second + I' umin over - bounds ?DO
-	    ptr 3 + I le-uw@ #10 rshift sfloats bounds ?DO
+	    ptr 3 + I le-uw@ #10 rshift $3F umin sfloats bounds ?DO
 		inc I c+!
 	    1 sfloats +LOOP
 	2 +LOOP
 	$100 +to ptr
-    /second +LOOP
+    /second idx-head + +LOOP
+    mem 64 w ;
+\ debugging tool
+: img>png { addr w h -- }
+    "audio.png" soil:SOIL_SAVE_TYPE_PNG w h 4 addr soil:SOIL_save_image ;
+\ example use:
+\ "audio.idx" slurp-file ~~ audio-idx>img ~~ img>png
+
+: img>thumb ( mem w h -- ivec4-addr len )
     GL_TEXTURE1 glActiveTexture
-    mem 64 w thumb-tex-rgba thumb-rgba addr thumb-rgba#  rgba>style
+    thumb-tex-rgba thumb-rgba addr thumb-rgba#  rgba>style
     atlas-region ;
 
 previous
 
 : read-audio ( addr u -- addr' u' )
-    ?read-enc-hashed audio-idx>thumb atlas-region ;
+    ?read-enc-hashed audio-idx>img img>thumb ;
 : audio-frame ( addr u -- frame# )
     key| 2dup audio# #@ nip 0= IF
 	2dup read-audio 2swap audio# #!
