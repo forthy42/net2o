@@ -342,7 +342,7 @@ hash: have-group# \ list of interested groups per hash
 	    bounds ?DO
 		I @ to msg-group-o 0 .(avalanche-msg)
 	    cell +LOOP
-	THEN  cleanup-msg ;] catch
+	ELSE  2drop  THEN  cleanup-msg ;] catch
     r> to msg-group-o throw ;
 
 : msg:ihave ( id u1 hash u2 -- )
@@ -1971,6 +1971,10 @@ forward hash-in
 
 : jpeg? ( addr u -- flag )
     dup 4 - 0 max safe/string ".jpg" str= ;
+
+: file-in ( addr u -- hash u )
+    slurp-file over >r hash-in r> free throw 2dup key| >ihave ;
+
 : img-rec ( addr u -- .. token )
     2dup "img:" string-prefix? IF
 	over ?flush-text
@@ -1981,17 +1985,29 @@ forward hash-in
 		    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
-	    2swap slurp-file over >r hash-in r> free throw
-	    2dup >ihave 2swap dup IF   2dup key| >ihave  THEN
+	    2swap file-in
+	    2swap dup IF   2dup key| >ihave  THEN
 	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
 		$, msg:image# ulit, msg-object ;]
+	    r> free throw  r> to last->in ;]
+	catch 0= IF  rectype-name  EXIT  THEN  THEN
+    2drop rectype-null ;
+: audio-rec ( addr u -- .. token )
+    2dup "audio:" string-prefix? IF
+	over ?flush-text
+	[:  2dup + >r
+	    6 /string save-mem over >r
+	    2dup [: forth:type ." .idx" ;] $tmp file-in save-mem 2>r
+	    [: forth:type ." .opus" ;] $tmp file-in save-mem 2r>
+	    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
+		over >r $, msg:audio# ulit, msg-object r> free throw ;]
 	    r> free throw  r> to last->in ;]
 	catch 0= IF  rectype-name  EXIT  THEN  THEN
     2drop rectype-null ;
 
 $Variable msg-recognizer
 depth >r
-' text-rec ' img-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec
+' text-rec ' audio-rec ' img-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec
 depth r> - msg-recognizer set-stack
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
