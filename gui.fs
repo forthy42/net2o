@@ -1210,13 +1210,18 @@ previous
     key| 2dup audio# #@ nip 0= IF
 	2dup read-audio 2swap audio# #!
     ELSE  2drop  THEN  last# cell+ $@ drop ;
+: glue*audio ( w h -- o )
+    glue new >o
+    pixelsize# fm* vglue-c df!
+    pixelsize# fm* 4e f* hglue-c df!
+    0glue dglue-c glue! o o> ;
 : ?audio-idx { d: hash -- o }
     hash ['] audio-frame catch nothrow 0= IF
 	>r r@ i.w r@ i.h swap
-	glue*thumb r> }}thumb >o 3 to rotate# o o>
+	glue*audio r> }}thumb >o 7 to rotate# o o>
     ELSE
-	128 128 glue*thumb dummy-thumb }}thumb
-    THEN  {{ "" }}text  r> }}h 40%bv box[] ;
+	drop  128 128 glue*thumb dummy-thumb }}thumb
+    THEN  >r {{ blackish "" }}text  r> }}h 40%bv box[] ;
 
 hash: imgs# \ hash of images
 
@@ -1227,11 +1232,12 @@ hash: imgs# \ hash of images
 : .imgs ( -- )
     imgs# [: dup $. ." :" cr cell+ $@ group.imgs ;] #map ;
 
-: +imgs ( addr u -- $string )
+: +things ( addr u thing -- $string )  >r
     [: { | ts[ 1 64s ] }
 	msg:timestamp ts[ be-64!
 	ts[ 1 64s type  type ;] $tmp
-    2dup msg-group$ $@ imgs# #!ins[] $make ;
+    2dup msg-group$ $@ r> #!ins[] $make ;
+: +imgs ( addr u -- $string )  imgs# +things ;
 
 : img>group# ( img u -- n )
     msg-group$ $@ imgs# #@ bounds ?DO
@@ -1256,20 +1262,33 @@ hash: imgs# \ hash of images
     [: addr data $@ >msg-album-viewer ;]
     2swap +imgs 64#1 +to msg:timestamp click[] ;
 
+: >msg-audio-player ( addr u -- ) 2drop ;
+
+: audio-play[] ( addr u o -- o )
+    [: addr data $@ >msg-audio-player ;]
+    2swap $make 64#1 +to msg:timestamp click[] ;
+
 :noname ( addr u type -- )
     obj-red
     case
 	msg:image#     of
 	    2dup key| ?fetch
 	    msg-box .childs[] $[]# ?dup-IF
-		rdrop  1- msg-box .childs[] $[] @
-		dup .name$ "thumbnail" str= IF
+		1- msg-box .childs[] $[] @ dup .name$ "thumbnail" str= IF
 		    album-view[] drop  EXIT  THEN  drop  THEN
 	    [: ." img[" 2dup 85type ']' emit ;] $tmp }}text  "image" name!
-	    2rdrop album-view[]
+	    ( 2rdrop ) album-view[]
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
-	msg:audio-idx# of  ?audio-idx "audio-idx" name!  endof
+	msg:audio#     of  2dup key| ?fetch
+	    msg-box .childs[] $[]# ?dup-IF
+		1- msg-box .childs[] $[] @ dup .name$ "audio-idx" str= IF
+		    audio-play[] drop  EXIT  THEN  drop  THEN
+	    [: ." audio[" 2dup 85type ']' emit ;] $tmp }}text  "audio" name!
+	    audio-play[]
+	endof
+	msg:audio-idx# of  2dup key| ?fetch
+		?audio-idx "audio-idx" name!  endof
 	msg:patch#     of  [: ." patch["    85type ']' emit
 	    ;] $tmp }}text  "patch" name!  endof
 	msg:snapshot#  of  [: ." snapshot[" 85type ']' emit
@@ -1277,7 +1296,7 @@ hash: imgs# \ hash of images
 	msg:message#   of  [: ." message["  85type ']' emit
 	    ;] $tmp }}text  "message" name!  endof
 	msg:posting#   of
-	    rdrop 2dup $make [: addr data $@ open-posting ;] swap 2>r
+	    ( rdrop ) 2dup $make [: addr data $@ open-posting ;] swap 2>r
 	    [: ." posting" .posting ;] $tmp }}text 2r> click[]  "posting" name!
 	endof
 	nip nip [: ." ???(" hex. ." )" ;] $tmp }}text 0
