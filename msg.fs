@@ -1997,7 +1997,7 @@ forward hash-in
 	over ?flush-text
 	[:  2dup + >r
 	    6 /string save-mem over >r
-	    2dup [: forth:type ." .idx" ;] $tmp file-in save-mem 2>r
+	    2dup [: forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
 	    [: forth:type ." .opus" ;] $tmp file-in save-mem 2r>
 	    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
 		over >r $, msg:audio# ulit, msg-object r> free throw ;]

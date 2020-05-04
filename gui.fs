@@ -1153,7 +1153,13 @@ Variable re-indent#
 
 Hash: audio#
 
-require minos2/opus-codec.fs
+[IFDEF] linux
+    also require minos2/pulse-audio.fs pulse-init
+    require minos2/opus-codec.fs
+    previous
+[ELSE]
+    require minos2/opus-codec.fs
+[THEN]
 
 : be-l, ( l -- ) here be-l! 4 allot ;
 
@@ -1195,7 +1201,7 @@ also opengl
 : img>png { addr w h -- }
     "audio.png" soil:SOIL_SAVE_TYPE_PNG w h 4 addr soil:SOIL_save_image ;
 \ example use:
-\ "audio.idx" slurp-file ~~ audio-idx>img ~~ img>png
+\ "audio.idx" slurp-file audio-idx>img img>png
 
 : img>thumb ( mem w h -- ivec4-addr len )
     GL_TEXTURE1 glActiveTexture
@@ -1215,13 +1221,15 @@ previous
     pixelsize# fm* vglue-c df!
     pixelsize# fm* 4e f* hglue-c df!
     0glue dglue-c glue! o o> ;
+Variable idx-hash
 : ?audio-idx { d: hash -- o }
     hash ['] audio-frame catch nothrow 0= IF
 	>r r@ i.w r@ i.h swap
 	glue*audio r> }}thumb >o 7 to rotate# o o>
     ELSE
 	drop  128 128 glue*thumb dummy-thumb }}thumb
-    THEN  >r {{ blackish "" }}text  r> }}h 40%bv box[] ;
+    THEN  >r {{ blackish "" }}text  r> }}h 40%bv box[]
+    hash idx-hash $! ;
 
 hash: imgs# \ hash of images
 
@@ -1262,7 +1270,10 @@ hash: imgs# \ hash of images
     [: addr data $@ >msg-album-viewer ;]
     2swap +imgs 64#1 +to msg:timestamp click[] ;
 
-: >msg-audio-player ( addr u -- ) 2drop ;
+: >msg-audio-player ( addr u -- )
+    2dup key| ?read-enc-hashed idx-block $!
+    keysize safe/string key| ?read-enc-hashed play-block $!
+    start-play ;
 
 : audio-play[] ( addr u o -- o )
     [: addr data $@ >msg-audio-player ;]
@@ -1280,7 +1291,7 @@ hash: imgs# \ hash of images
 	    ( 2rdrop ) album-view[]
 	endof
 	msg:thumbnail# of  ?thumb  "thumbnail" name!  endof
-	msg:audio#     of  2dup key| ?fetch
+	msg:audio#     of  key| 2dup ?fetch  idx-hash $+! idx-hash $@
 	    msg-box .childs[] $[]# ?dup-IF
 		1- msg-box .childs[] $[] @ dup .name$ "audio-idx" str= IF
 		    audio-play[] drop  EXIT  THEN  drop  THEN
