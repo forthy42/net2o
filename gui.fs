@@ -1222,13 +1222,17 @@ previous
     pixelsize# fm* 4e f* hglue-c df!
     0glue dglue-c glue! o o> ;
 Variable idx-hash
+Variable play$ "" play$ $!
+Variable pause$ "" pause$ $!
 : ?audio-idx { d: hash -- o }
     hash ['] audio-frame catch nothrow 0= IF
 	>r r@ i.w r@ i.h swap
 	glue*audio r> }}thumb >o 7 to rotate# o o>
     ELSE
 	drop  128 128 glue*thumb dummy-thumb }}thumb
-    THEN  >r {{ blackish "" }}text  r> }}h 40%bv box[]
+    THEN  >r {{ blackish \large
+	play$ $@ }}text \normal
+    r> }}h 25%b box[]
     hash idx-hash $! ;
 
 hash: imgs# \ hash of images
@@ -1270,13 +1274,33 @@ hash: imgs# \ hash of images
     [: addr data $@ >msg-album-viewer ;]
     2swap +imgs 64#1 +to msg:timestamp click[] ;
 
+Variable current-play$
+Variable current-player
+
 : >msg-audio-player ( addr u -- )
-    2dup key| ?read-enc-hashed idx-block $!
-    keysize safe/string key| ?read-enc-hashed play-block $!
-    start-play ;
+    2dup current-play$ $@ str= IF
+	resume-play
+    ELSE
+	2dup current-play$ $!  caller-w current-player !
+	2dup key| ?read-enc-hashed idx-block $!
+	keysize safe/string key| ?read-enc-hashed play-block $!
+	start-play
+    THEN ;
 
 : audio-play[] ( addr u o -- o )
-    [: addr data $@ >msg-audio-player ;]
+    [:  current-player @ ?dup-IF
+	    caller-w <> IF
+		play$ $@ current-player @ >o to text$ o> +sync
+	    THEN
+	THEN
+	caller-w .text$ play$ $@ str=
+	IF
+	    addr data $@ >msg-audio-player
+	    pause$ $@ caller-w >o to text$ o> +sync
+	ELSE
+	    pause-play
+	    play$ $@ caller-w >o to text$ o> +sync
+	THEN  ;]
     2swap $make 64#1 +to msg:timestamp click[] ;
 
 :noname ( addr u type -- )
@@ -1294,9 +1318,9 @@ hash: imgs# \ hash of images
 	msg:audio#     of  key| 2dup ?fetch  idx-hash $+! idx-hash $@
 	    msg-box .childs[] $[]# ?dup-IF
 		1- msg-box .childs[] $[] @ dup .name$ "audio-idx" str= IF
-		    audio-play[] drop  EXIT  THEN  drop  THEN
+		    0 swap .childs[] $[] @ audio-play[] drop  EXIT  THEN  drop  THEN
 	    [: ." audio[" 2dup 85type ']' emit ;] $tmp }}text  "audio" name!
-	    audio-play[]
+	    0 over .childs[] $[] @ audio-play[] drop
 	endof
 	msg:audio-idx# of  2dup key| ?fetch
 		?audio-idx "audio-idx" name!  endof
