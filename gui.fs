@@ -191,6 +191,8 @@ $FFFFFFFF new-color, FValue chat-col#
 $80FFFFFF new-color, FValue chat-bg-col#
 $70eFeFFF new-color, FValue chat-hist-col#
 $FFFFFFFF new-color, FValue posting-bg-col#
+$444444FF new-color, FValue close-color#
+$FF6633FF new-color, FValue recording-color#
 
 : entropy-colorize ( -- )
     prev-text$ erase  addr prev-text$ $free
@@ -1362,6 +1364,9 @@ wmsg-o >o msg-table @ token-table ! o>
 ' wmsg-display wmsg-class is msg:display
 
 #200 Value gui-msgs# \ display last 200 messages
+0 Value chat-edit-box
+0 Value chat-record-button
+0 Value chat-recording-button
 0 Value chat-edit    \ chat edit field
 0 Value chat-edit-bg \ chat edit background
 
@@ -1383,7 +1388,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : closer ( -- o closer )
     {{
 	\Large
-	{{ s" ❌" $444444FF new-color, }}text }}h 25%b
+	{{ s" ❌" close-color# }}text }}h 25%b
 	dup { closer } /right
 	glue*ll }}glue
     }}v box[] closer ;
@@ -1395,7 +1400,7 @@ wmsg-o >o msg-table @ token-table ! o>
       data .dispose-widget +resize +sync ;] r@ click[] drop
     r> ;
 : }}closerh ( o1 .. on -- o )
-	s" ❌" $444444FF new-color, }}text dup { closer }
+	s" ❌" close-color# }}text dup { closer }
     }}h box[] >r
     closer [: data chat-history .childs[] del$cell
       data .dispose-widget +resize +sync ;] r@ click[] drop
@@ -1584,6 +1589,30 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
+	    {{ blackish \normal \regular !i18n l" Mic" }}text' !lit
+	    }}h box[] 40%b
+	    [:  chat-edit-box chat-record-button data IF  swap  THEN
+		data 0= to data /flop drop /flip drop
+		chat-recording-button /flip drop +resize +sync +lang ;] 0 click[]
+	    {{
+		glue*l send-color x-color font-size# 40% f* }}frame dup .button2
+		!i18n blackish l" Record" }}text' !lit 25%b /center
+	    }}z box[] /flip dup to chat-record-button
+	    [:  chat-record-button /flip drop
+		chat-recording-button /flop drop +resize +sync +lang
+		"recording" .net2o-cache/ open-rec+
+		1 to channels  pulse:sample-rate pulse:record-mono
+	    ;] 0 click[]
+	    {{
+		glue*l recording-color# font-size# 40% f* }}frame dup .button3
+		!i18n blackish l" Recording…" }}text' !lit 25%b /center
+	    }}z box[] /flip dup to chat-recording-button
+	    [:  chat-recording-button /flip drop
+		chat-record-button /flop drop +resize +sync +lang
+		close-rec-mono
+		"recording" .net2o-cache/
+		[: ." audio:" type ;] $tmp avalanche-text
+	    ;] 0 click[]
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg
 		show-error-color \normal \regular
@@ -1592,7 +1621,9 @@ wmsg-o >o msg-table @ token-table ! o>
 		{{ blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
-	    }}z chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[] ' size-limit filter[]
+	    }}z dup to chat-edit-box
+	    chat-edit [: edit-w .chat-edit-enter drop nip 0 tuck false ;] edit[]
+	    ' size-limit filter[]
 	    >o act >o [: connection .chat-next-line ;] is edit-next-line o> o o>
 	    >o act >o [: connection .chat-prev-line ;] is edit-prev-line o> o o>
 	    {{
@@ -1738,7 +1769,7 @@ Variable invitation-stack
 		'user-plus' ' xemit $tmp }}text
 	    }}h ' invitations-s/h 0 toggle[] /flip dup to invitations-notify
 	    {{
-		glue*l $444444FF new-color, font-size# 40% f* }}frame dup .button2
+		glue*l close-color# font-size# 40% f* }}frame dup .button2
 		{{
 		    realwhite online-symbol }}text 25%b dup to online-flag
 		    s" ❌" }}text 25%b [: -1 data +! ;]

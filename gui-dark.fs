@@ -46,6 +46,7 @@ $88FF88FF re-color my-signal
 $CCFFCCFF re-color other-signal
 $CC00CCFF re-color my-signal-otr
 $880088FF re-color other-signal-otr
+$CC0000FF re-color recording-color#
 
 8 0 [DO]
     imports#rgb-bg [I] sfloats + sf@ floor f>s to color,#
