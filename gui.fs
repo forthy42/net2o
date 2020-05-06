@@ -1157,6 +1157,7 @@ Hash: audio#
     also require minos2/pulse-audio.fs pulse-init
     require minos2/opus-codec.fs
     previous
+    ' bye is net2o-bye
 [ELSE]
     require minos2/opus-codec.fs
 [THEN]

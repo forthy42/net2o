@@ -108,7 +108,7 @@ Variable old-order  Variable order-backlog
 
 : n2o-cmds ( -- )
     init-client word-args ['] n2o-quit ['] do-net2o-cmds catch
-    dup #-56 = swap #-28 = or IF  drop subme bye  ELSE  throw  THEN ;
+    dup #-56 = swap #-28 = or IF  drop subme net2o-bye  ELSE  throw  THEN ;
 
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
@@ -751,7 +751,7 @@ synonym #! \ ( -- )
 : bye ( -- )
     \U bye
     \G bye: quit command mode and terminate program
-    bye ;
+    net2o-bye ;
 
 : -bw ( -- )
     \O -bw

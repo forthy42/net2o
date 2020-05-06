@@ -2014,6 +2014,9 @@ context-table   $save
 : bye  !save-all-msgs subme dht-disconnect net2o-kills bye ;
 warnings !
 
+Defer net2o-bye
+' bye is net2o-bye
+
 \ show problems
 
 .unresolved
