@@ -1367,6 +1367,8 @@ wmsg-o >o msg-table @ token-table ! o>
 0 Value chat-edit-box
 0 Value chat-record-button
 0 Value chat-recording-button
+0 Value chat-mic-icon
+0 Value chat-keyboard-icon
 0 Value chat-edit    \ chat edit field
 0 Value chat-edit-bg \ chat edit background
 
@@ -1564,6 +1566,16 @@ wmsg-o >o msg-table @ token-table ! o>
 \ +db click-o( \ )
 \ +db gui( \ )
 
+: flip-mic/kb ( -- )
+    chat-edit-box chat-record-button data IF  swap  THEN
+    /flop drop /flip drop
+    chat-mic-icon chat-keyboard-icon data IF  swap  THEN
+    /flop drop /flip drop
+    chat-recording-button /flip drop
+    data IF  chat-edit engage  THEN
+    data 0= to data
+    +resize +sync +lang ;
+
 {{ chat-bg-col# pres-frame
     {{
 	{{
@@ -1589,13 +1601,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	    font-size# 66% f* fdup hslider
 	}}v box[]
 	{{
-	    {{ blackish \normal \regular !i18n l" Mic" }}text' !lit
-	    }}h box[] 40%b
-	    {{ blackish \normal \regular !i18n l" Keyboard" }}text' !lit
-	    }}h box[] 40%b /flip
-	    [:  chat-edit-box chat-record-button data IF  swap  THEN
-		data 0= to data /flop drop /flip drop
-		chat-recording-button /flip drop +resize +sync +lang ;] 0 click[]
+	    {{
+		{{ blackish \normal \regular !i18n l" Mic" }}text' !lit
+		}}h box[] 40%b dup to chat-mic-icon
+		{{ blackish \normal \regular !i18n l" Keyboard" }}text' !lit
+		}}h box[] 40%b /flip dup to chat-keyboard-icon
+	    }}z box[]
+	    ' flip-mic/kb 0 click[]
 	    {{
 		glue*l send-color x-color font-size# 40% f* }}frame dup .button2
 		!i18n blackish l" Record" }}text' !lit 25%b /center
