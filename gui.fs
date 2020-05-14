@@ -1591,6 +1591,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	{{
 	    {{ blackish \normal \regular !i18n l" Mic" }}text' !lit
 	    }}h box[] 40%b
+	    {{ blackish \normal \regular !i18n l" Keyboard" }}text' !lit
+	    }}h box[] 40%b /flip
 	    [:  chat-edit-box chat-record-button data IF  swap  THEN
 		data 0= to data /flop drop /flip drop
 		chat-recording-button /flip drop +resize +sync +lang ;] 0 click[]
