@@ -319,6 +319,9 @@ Forward msg:last?
 Forward msg:last
 Forward msg:want
 
+hash: want#       \ list of wanted hashs, followed by state+xts
+\ state: want, fetching, got it
+\ methods: want->fetch, fetching-progress, fetch->got it
 hash: fetch-finish#
 Variable fetch-queue[]
 

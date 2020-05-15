@@ -580,6 +580,15 @@ cmd-class class{ groups
     64value: perms#
 }class
 
+\ object fetch class
+
+object class{ fetcher
+    value: state
+    method fetch ( -- )
+    method fetching ( size total -- )
+    method got-it ( -- )
+}class
+
 \\\
 Local Variables:
 forth-local-words:
