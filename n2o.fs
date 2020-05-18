@@ -838,3 +838,11 @@ scope{ /chat
 
 ' start-n2o is process-args
 
+\\\
+Local Variables:
+forth-local-words:
+    (
+     (("\\U") immediate (font-lock-comment-face . 1)
+      "[\n]" nil comment (font-lock-comment-face . 1))
+    )
+End:

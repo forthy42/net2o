@@ -584,9 +584,15 @@ cmd-class class{ groups
 
 object class{ fetcher
     value: state
+    value: data
     method fetch ( -- )
     method fetching ( size total -- )
     method got-it ( -- )
+    0
+    enum want#
+    enum fetching#
+    enum have#
+    drop
 }class
 
 \\\

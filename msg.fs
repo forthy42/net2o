@@ -319,14 +319,19 @@ Forward msg:last?
 Forward msg:last
 Forward msg:want
 
-hash: want#       \ list of wanted hashs, followed by state+xts
+hash: have#       \ list of owner ids per hash
+hash: have-group# \ list of interested groups per hash
+hash: fetch#      \ list of wanted hashs->fetcher objects
 \ state: want, fetching, got it
 \ methods: want->fetch, fetching-progress, fetch->got it
 hash: fetch-finish#
 Variable fetch-queue[]
 
-hash: have#       \ list of owner ids per hash
-hash: have-group# \ list of interested groups per hash
+also fetcher
+:noname fetching# state ! ; fetcher-class is fetch
+' 2drop fetcher-class is fetching
+:noname have# state ! ; fetcher-class is got-it
+previous
 
 : .@host.id ( pk+host u -- )
     '@' emit
@@ -354,7 +359,7 @@ hash: have-group# \ list of interested groups per hash
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
-    pk.host 2over  msg:ihave  >send-have ;
+    0 .pk.host 2over  msg:ihave  >send-have ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -612,7 +617,8 @@ event: :>hash-finished { d: hash -- }
     ELSE  2drop  THEN
     hash >ihave  hash drop free throw ;
 
-: fetch-queue 0 .pk.host $make { tsk w^ want# w^ pk$ -- }
+: fetch-queue ( task want# -- )
+    0 .pk.host $make { tsk w^ want# w^ pk$ -- }
     want# tsk pk$ [{: tsk pk$ :}l { item }
 	item $@ pk$ $@ str= ?EXIT
 	item $@ $8 $E pk-connect? IF  +resend +flow-control
@@ -641,22 +647,35 @@ event: :>hash-finished { d: hash -- }
     want# #frees
     pk$ $free ;
 
-event: :>fetch-queue fetch-queue ;
+: fetch>want ( -- want# )
+    { | w^ want# }
+    fetch# want# [{: want# :}l
+	dup cell+ $@ drop cell+ >o fetcher:state o> 0= IF
+	    $@ 2dup have# #@ dup IF
+		bounds U+DO
+		    2dup I $@ want# #+!
+		cell +LOOP  2drop
+	    ELSE  2drop 2drop  THEN
+	ELSE  drop  THEN ;] #map
+    want# ;
+
+fetcher-class ' new static-a with-allocater Constant fetcher-prototype
+: >fetch# ( addr u -- )
+    [:  2dup fetch# #@ d0= IF
+	    fetcher-prototype cell- [ fetcher-class >osize @ cell+ ]L
+	    2over fetch# #!
+	THEN ;] resize-sema c-section  2drop ;
+
+event: :>fetch-queue ( queue[] -- )
+    { w^ queue[] } queue[] ['] >fetch# $[]map
+    fetch-queue ;
 
 : transmit-queue ( queue -- )
-    { w^ queue[] | w^ want# }
-    queue[] want# [{: want# :}l 2dup have# #@ dup IF
-	    bounds U+DO
-		2dup I $@ want# #+!
-	    cell +LOOP  2drop
-	ELSE  2drop 2drop  THEN ;] $[]map
-    queue[] $[]free
-    <event up@ elit, want# @ elit, :>fetch-queue ?query-task event> ;
+    <event up@ elit, elit, :>fetch-queue ?query-task event> ;
 
 Variable queue?
 event: :>queued ( queue -- )
-    [: 0 fetch-queue[] !@ queue? off ;] resize-sema c-section
-    transmit-queue ;
+    0 fetch-queue[] !@ queue? off transmit-queue ;
 : enqueue ( -- )
     -1 queue? !@ 0= IF  <event :>queued up@ event>  THEN ;
 
@@ -668,10 +687,11 @@ forward need-hashed?
     ELSE
 	grp cell 2swap have-group# #!
     THEN ;
+
 : >fetch-queue ( addr u -- )
     2dup need-hashed? IF
-	fetch-queue[] ['] $ins[] resize-sema c-section drop
-    ELSE  2drop  THEN ;
+	fetch-queue[] $ins[] drop
+    ELSE  >ihave  THEN ;
 : ?fetch ( addr u -- )
     key| 2dup >have-group >fetch-queue ;
 
@@ -1640,117 +1660,129 @@ false value away?
 : group#map ( xt -- )
     msg-group# swap [{: xt: xt :}l cell+ $@ drop cell+ .xt ;] #map ;
 
+$100 buffer: permchar>bits
+msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!
+msg:role-admin# 'r' permchar>bits + c!
+msg:key-admin#  'k' permchar>bits + c!
+msg:moderator#  'm' permchar>bits + c!
+msg:troll#      't' permchar>bits + c!
+: >perms ( addr u -- perms )
+    0 -rot bounds ?DO  I c@ permchar>bits + c@
+	dup 0= !!inv-perm!! or  LOOP ;
+
 uval-o chat-cmd-o
 
 object uclass chat-cmd-o
     \ internal stuff
     umethod ./otr-info
 also net2o-base scope: /chat
-umethod /me ( addr u -- )
+    umethod /me ( addr u -- )
     \U me <action>          send string as action
     \G me: send remaining string as action
-umethod /away ( addr u -- )
+    umethod /away ( addr u -- )
     \U away [<action>]      send string or "away from keyboard" as action
     \G away: send string or "away from keyboard" as action
-synonym /back /away
-umethod /otr ( addr u -- )
+    synonym /back /away
+    umethod /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)
-umethod /peers ( addr u -- )
+    umethod /peers ( addr u -- )
     \U peers                list peers
     \G peers: list peers in all groups
-umethod /gps ( addr u -- )
+    umethod /gps ( addr u -- )
     \U gps                  send coordinates
     \G gps: send your coordinates
-synonym /here /gps
-umethod /chats ( addr u -- )
+    synonym /here /gps
+    umethod /chats ( addr u -- )
     \U chats                list chats
     \G chats: list all chats
-umethod /nat ( addr u -- )
+    umethod /nat ( addr u -- )
     \U nat                  list NAT info
     \G nat: list nat traversal information of all peers in all groups
-umethod /renat ( addr u -- )
+    umethod /renat ( addr u -- )
     \U renat                redo NAT traversal
     \G renat: redo nat traversal
-umethod /help ( addr u -- )
+    umethod /help ( addr u -- )
     \U help                 show help
     \G help: list help
-umethod /myaddrs ( addr u -- )
+    umethod /myaddrs ( addr u -- )
     \U myaddrs              list my addresses
     \G myaddrs: list my own local addresses (debugging)
-umethod /!myaddrs ( addr u -- )
+    umethod /!myaddrs ( addr u -- )
     \U !myaddrs             re-obtain my addresses
     \G !myaddrs: if automatic detection of address changes fail,
     \G !myaddrs: you can use this command to re-obtain your local addresses
-umethod /notify ( addr u -- )
+    umethod /notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G notify: Change notificaton settings
-umethod /beacons ( addr u -- )
+    umethod /beacons ( addr u -- )
     \U beacons              list beacons
     \G beacons: list all beacons
-umethod /n2o ( addr u -- )
+    umethod /n2o ( addr u -- )
     \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
-umethod /invitations ( addr u -- )
+    umethod /invitations ( addr u -- )
     \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
-umethod /sync ( addr u -- )
+    umethod /sync ( addr u -- )
     \U sync [+date] [-date] synchronize logs
     \G sync: synchronize chat logs, starting and/or ending at specific
     \G sync: time/date
-umethod /version ( addr u -- )
+    umethod /version ( addr u -- )
     \U version              version string
     \G version: print version string
-umethod /log ( addr u -- )
+    umethod /log ( addr u -- )
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
-umethod /logstyle ( addr u -- )
+    umethod /logstyle ( addr u -- )
     \U logstyle [+-style]   set log style
     \G logstyle: set log styles, the following settings exist:
     \G logstyle: +num       the message number per log line
     \G logstyle: +date      the date per log line
     \G logstyle: +end       the end date per log line 
-umethod /otrify ( addr u -- )
+    umethod /otrify ( addr u -- )
     \U otrify #line[s]      otrify message
     \G otrify: turn an older message of yours into an OTR message
-umethod /lock ( addr u -- )
+    umethod /lock ( addr u -- )
     \U lock {@nick}         lock down
     \G lock: lock down communication to list of nicks
-umethod /unlock ( addr u -- )
+    umethod /unlock ( addr u -- )
     \U unlock               stop lock down
     \G unlock: stop lock down
-umethod /lock? ( addr u -- )
+    umethod /lock? ( addr u -- )
     \U lock?                check lock status
     \G lock?: report lock status
-umethod /perms ( addr u -- )
+    umethod /perms ( addr u -- )
     \U perms roles {@keys}  set and change permissions of users
     \G perms: set permissions
-umethod /bye ( addr u -- )
+    umethod /bye ( addr u -- )
     \U bye
     \G bye: leaves the current chat
-umethod /chat ( addr u -- )
+    umethod /chat ( addr u -- )
     \U chat [group][@user]  switch/connect chat
     \G chat: switch to chat with user or group
-umethod /split ( addr u -- )
+    umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
-umethod /have ( addr u -- )
+    umethod /have ( addr u -- )
     \U have                 print out have list
     \G have: print out the hashes and their providers
-umethod /imgs ( addr u -- )
+    umethod /imgs ( addr u -- )
     \U imgs                 print out img list
     \G imgs: print out hashes for album viewer
-umethod /rescan# ( addr u -- )
+    umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
-umethod /connections ( addr u -- )
+    umethod /connections ( addr u -- )
     \U connections          list active connections
     \G connections: list active connections
+    }scope
 end-class chat-cmds
 
 chat-cmds new Constant text-chat-cmd-o
 
 text-chat-cmd-o to chat-cmd-o
 
+scope{ /chat
 ' 2drop is /imgs \ stub
 
 :noname ( addr u -- )
@@ -1875,16 +1907,6 @@ is /help
 ; is /lock?
 ' .ihaves is /have
 ' scan-log-hashs is /rescan#
-
-$100 buffer: permchar>bits
-msg:role-admin# msg:key-admin# msg:moderator# or or 'a' permchar>bits + c!
-msg:role-admin# 'r' permchar>bits + c!
-msg:key-admin#  'k' permchar>bits + c!
-msg:moderator#  'm' permchar>bits + c!
-msg:troll#      't' permchar>bits + c!
-: >perms ( addr u -- perms )
-    0 -rot bounds ?DO  I c@ permchar>bits + c@
-	dup 0= !!inv-perm!! or  LOOP ;
 
 :noname ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing
@@ -2228,6 +2250,8 @@ forth-local-words:
     (
      (("net2o:" "+net2o:") definition-starter (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
+     (("\\U") immediate (font-lock-comment-face . 1)
+      "[\n]" nil comment (font-lock-comment-face . 1))
      ("[a-z\-0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
     )
@@ -2236,4 +2260,3 @@ forth-local-indent-words:
      (("net2o:" "+net2o:") (0 . 2) (0 . 2) non-immediate)
     )
 End:
-[THEN]

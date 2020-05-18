@@ -1701,18 +1701,18 @@ event: :>dispose-widget ( widget -- )
 
 \ special modified chat commands for GUI
 
-scope{ /chat
 chat-cmds uclass chat-cmd-o
 end-class gui-chat-cmds
 
 gui-chat-cmds new Constant gui-chat-cmd-o
 
 gui-chat-cmd-o to chat-cmd-o
+scope{ /chat
 ' drop is ./otr-info
 ' .imgs is /imgs
+}scope
 
 text-chat-cmd-o to chat-cmd-o
-}scope
 
 \ top box
 
@@ -1824,7 +1824,7 @@ Variable invitation-stack
 
 : net2o-gui ( -- )
     [IFDEF] set-net2o-hints  set-net2o-hints  [THEN]
-    /chat:gui-chat-cmd-o to chat-cmd-o
+    gui-chat-cmd-o to chat-cmd-o
     n2o-frame to top-widget
     n2o-frame to md-frame
     "PASSPHRASE" getenv 2dup d0= IF  2drop
@@ -1840,7 +1840,7 @@ Variable invitation-stack
     1config  !widgets
     get-order n>r ['] /chat >body 1 set-order
     ['] widgets-loop catch
-    /chat:text-chat-cmd-o to chat-cmd-o
+    text-chat-cmd-o to chat-cmd-o
     nr> set-order throw ;
 
 ' net2o-gui is run-gui
