@@ -609,6 +609,7 @@ end-class msg-?hash-class
 ; msg-class is msg:perms
 
 event: :>hash-finished { d: hash -- }
+    fetch( ." finished " 2dup 85type forth:cr )
     hash fetch# #@ IF  cell+ .fetcher:got-it  ELSE  drop  THEN
     hash fetch-finish# #@ dup IF
 	bounds U+DO
@@ -618,8 +619,17 @@ event: :>hash-finished { d: hash -- }
     ELSE  2drop  THEN
     hash >ihave  hash drop free throw ;
 
+: fetch-hash ( hashaddr u tsk -- )
+    >r save-mem
+    fetch( ." fetching " 2dup 85type forth:cr )
+    2dup fetch# #@ IF  cell+ .fetcher:fetch  ELSE  drop  THEN
+    2dup net2o:copy#
+    r> [{: d: hash tsk :}h <event hash e$, :>hash-finished tsk event> ;]
+    lastfile@ >o to file-xt o> ;
+
 : fetch-hashs ( addr u tsk pk$ -- )
     { tsk pk$ | hashs }
+    fetch( ." fetch from " pk$ $@ .@host.id forth:cr )
     bounds U+DO
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	I' I U+DO
@@ -629,10 +639,7 @@ event: :>hash-finished { d: hash -- }
 		cell +LOOP
 	    ELSE  2drop  THEN
 	    IF
-		I keysize net2o:copy#
-		I keysize save-mem tsk [{: d: hash tsk :}h
-		    <event hash e$, :>hash-finished tsk event> ;]
-		lastfile@ >o to file-xt o>
+		I keysize tsk fetch-hash
 		1 +to hashs
 	    THEN
 	    hashs $10 u>= ?LEAVE
