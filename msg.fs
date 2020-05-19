@@ -609,6 +609,7 @@ end-class msg-?hash-class
 ; msg-class is msg:perms
 
 event: :>hash-finished { d: hash -- }
+    hash fetch# #@ IF  cell+ .fetcher:got-it  ELSE  drop  THEN
     hash fetch-finish# #@ dup IF
 	bounds U+DO
 	    I @ >r hash r@ execute r> >addr free throw
@@ -617,31 +618,35 @@ event: :>hash-finished { d: hash -- }
     ELSE  2drop  THEN
     hash >ihave  hash drop free throw ;
 
+: fetch-hashs ( addr u tsk pk$ -- )
+    { tsk pk$ | hashs }
+    bounds U+DO
+	net2o-code expect+slurp $10 blocksize! $A blockalign!
+	I' I U+DO
+	    false  I keysize have# $@ dup IF
+		bounds U+DO
+		    I $@ pk$ $@ str= or
+		cell +LOOP
+	    ELSE  2drop  THEN
+	    IF
+		I keysize net2o:copy#
+		I keysize save-mem tsk [{: d: hash tsk :}h
+		    <event hash e$, :>hash-finished tsk event> ;]
+		lastfile@ >o to file-xt o>
+		1 +to hashs
+	    THEN
+	    hashs $10 u>= ?LEAVE
+	keysize +LOOP
+	end-code| net2o:close-all
+    keysize hashs *  0 to hashs  +LOOP ;
+
 : fetch-queue ( task want# -- )
     0 .pk.host $make { tsk w^ want# w^ pk$ -- }
     want# tsk pk$ [{: tsk pk$ :}l { item }
-	item $@ pk$ $@ str= ?EXIT
-	item $@ $8 $E pk-connect? IF  +resend +flow-control
-	    { | hashs }
-	    item cell+ $@ bounds U+DO
-		net2o-code expect+slurp $10 blocksize! $A blockalign!
-		I' I U+DO
-		    I keysize have# $@ dup IF
-			0 -rot bounds U+DO
-			    I $@ pk$ $@ str= or
-			cell +LOOP
-		    ELSE  2drop true  THEN
-		    IF
-			I keysize net2o:copy#
-			I keysize save-mem tsk [{: d: hash tsk :}h
-			    <event hash e$, :>hash-finished tsk event> ;]
-			lastfile@ >o to file-xt o>
-			1 +to hashs
-		    THEN
-		    hashs $10 u>= ?LEAVE
-		keysize +LOOP
-		end-code| net2o:close-all
-	    keysize hashs *  0 to hashs  +LOOP
+	item $@ pk$ $@ str= ?EXIT \ don't fetch from myself
+	item $@ $8 $E pk-connect? IF
+	    +resend +flow-control
+	    item cell+ $@ tsk item fetch-hashs
 	    disconnect-me
 	THEN ;] #map
     want# #frees
@@ -666,9 +671,9 @@ fetcher-class ' new static-a with-allocater Constant fetcher-prototype
 	    2over fetch# #!
 	THEN ;] resize-sema c-section  2drop ;
 
-event: :>fetch-queue ( queue[] -- )
+event: :>fetch-queue ( tsk queue[] -- )
     { w^ queue[] } queue[] ['] >fetch# $[]map
-    fetch-queue ;
+    fetch>want fetch-queue ;
 
 : transmit-queue ( queue -- )
     <event up@ elit, elit, :>fetch-queue ?query-task event> ;
