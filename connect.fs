@@ -227,7 +227,7 @@ Sema id-sema
         pk@ key| $, pubkey $@len 0> keypad$ nip keysize u<= and IF
 	    pubkey $@ key| $, keypair
 	    pubkey $@ drop sk@ drop key-stage2
-	ELSE  !!nokey!!  THEN
+	ELSE  true !!nokey!!  THEN
     update-key all-ivs ;
 : reply-key ( -- ) crypt( ." Reply key: " tmpkey@ .nnb forth:cr )
     reply-key, ( cookie+request ) time-offset! context
