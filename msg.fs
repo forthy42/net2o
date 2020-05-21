@@ -1539,7 +1539,11 @@ also net2o-base
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
     ihave$ $@ dup IF
-	$, mehave$ $@ $, msg-ihave
+	maxstring dup -1 = 1 rshift and
+	over 4 + - mehave$ $@len - min 0 max
+	keysize negate and  dup >r
+	dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop 2drop  THEN
+	ihave$ 0 r> $del
     ELSE  2drop  THEN ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
