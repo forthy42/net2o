@@ -354,12 +354,13 @@ previous
     r> to msg-group-o throw ;
 
 : msg:ihave ( id u1 hash u2 -- )
-\    ." ihave:" 2over dump 2dup dump
+    fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
+    forth:cr I keysize 85type keysize +LOOP forth:cr )
     2dup ihave$ $+!  2over mehave$ $!
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
-    0 .pk.host 2over  msg:ihave  >send-have ;
+    0 .pk.host 2over  msg:ihave  2drop ( >send-have ) ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -699,12 +700,13 @@ event: :>queued ( queue -- )
 
 forward need-hashed?
 : >have-group ( addr u -- )
+    last# >r
     msg-group-o { w^ grp }
     2dup have-group# #@ nip IF
-	grp last# cell+ +unique$
+	grp last# cell+ +unique$  2drop
     ELSE
 	grp cell 2swap have-group# #!
-    THEN ;
+    THEN  r> to last# ;
 
 : >fetch-queue ( addr u -- )
     2dup need-hashed? IF
@@ -1537,17 +1539,14 @@ also net2o-base
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
     ihave$ $@ dup IF
-	maxstring over 4 + - mehave$ $@len - dup 0< IF  2drop  EXIT  THEN
-	drop keysize negate and dup >r
 	$, mehave$ $@ $, msg-ihave
-	ihave$ 0 r> $del
     ELSE  2drop  THEN ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 
 : (send-avalanche) ( xt -- addr u flag )
-    [: 0 >o [: <msg msg-start execute msg> ihave, ;] gen-cmd$ o>
-      +last-signed msg-log, ;] [group] ;
+    [:  0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
+	+last-signed msg-log, ;] [group] ;
 previous
 
 : send-avalanche ( xt -- )
@@ -1951,11 +1950,18 @@ is /help
 
 :noname ( addr u -- )  2drop
     ." Want:" forth:cr
-    fetch>want { w^ want# }
-    want# [: { item }
-	." from " item $@ .@host.id ."  want " item cell+ $@ 85type forth:cr
-    ;] #map
-    want# #frees ; is /want
+    fetch# [: { item }
+	." hash: " item $@ 85type space
+	case item cell+ $@ drop cell+ .fetcher:state
+	    0 of  ." want from"
+		item $@ have# #@ bounds U+DO
+		    forth:cr I @ .@host.id
+		cell +LOOP
+	    endof
+	    1 of  ." fetching..."  endof
+	    2 of  ." got it"  endof
+	endcase forth:cr
+    ;] #map ; is /want
 }scope
 
 : ?slash ( addr u -- addr u flag )
@@ -2031,8 +2037,11 @@ forward hash-in
 : jpeg? ( addr u -- flag )
     dup 4 - 0 max safe/string ".jpg" str= ;
 
+: >have+group ( addr u -- addr u )
+    2dup key|  2dup >have-group  >ihave ;
+
 : file-in ( addr u -- hash u )
-    slurp-file over >r hash-in r> free throw 2dup key| >ihave ;
+    slurp-file over >r hash-in r> free throw >have+group ;
 
 : img-rec ( addr u -- .. token )
     2dup "img:" string-prefix? IF
@@ -2045,7 +2054,7 @@ forward hash-in
 		    r> free throw  THEN
 	    ELSE  #0.  THEN
 	    2swap file-in
-	    2swap dup IF   2dup key| >ihave  THEN
+	    2swap dup IF   >have+group  THEN
 	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
 		$, msg:image# ulit, msg-object ;]
 	    r> free throw  r> to last->in ;]

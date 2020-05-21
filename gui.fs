@@ -1298,8 +1298,9 @@ Variable current-player
 	THEN
 	caller-w .text$ play$ $@ str=
 	IF
-	    addr data $@ >msg-audio-player
-	    pause$ $@ caller-w >o to text$ o> +sync
+	    addr data $@ ['] >msg-audio-player catch 0= IF
+		pause$ $@ caller-w >o to text$ o> +sync
+	    ELSE  2drop  THEN
 	ELSE
 	    pause-play
 	    play$ $@ caller-w >o to text$ o> +sync
