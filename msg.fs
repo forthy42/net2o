@@ -328,9 +328,9 @@ hash: fetch-finish#
 Variable fetch-queue[]
 
 also fetcher
-:noname fetching# state ! ; fetcher-class is fetch
+:noname fetching# to state ; fetcher-class is fetch
 ' 2drop fetcher-class is fetching
-:noname have# state ! ; fetcher-class is got-it
+:noname have# to state ; fetcher-class is got-it
 previous
 
 : .@host.id ( pk+host u -- )
@@ -633,11 +633,9 @@ event: :>hash-finished { d: hash -- }
     bounds U+DO
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	I' I U+DO
-	    false  I keysize have# $@ dup IF
-		bounds U+DO
-		    I $@ pk$ $@ str= or
-		cell +LOOP
-	    ELSE  2drop  THEN
+	    false  I keysize have# $@  bounds U+DO
+		I $@ pk$ $@ str= or
+	    cell +LOOP
 	    IF
 		I keysize tsk fetch-hash
 		1 +to hashs
@@ -647,15 +645,25 @@ event: :>hash-finished { d: hash -- }
 	end-code| net2o:close-all
     keysize hashs *  0 to hashs  +LOOP ;
 
-: fetch-queue ( task want# -- )
-    0 .pk.host $make { tsk w^ want# w^ pk$ -- }
-    want# tsk pk$ [{: tsk pk$ :}l { item }
-	item $@ pk$ $@ str= ?EXIT \ don't fetch from myself
-	item $@ $8 $E pk-connect? IF
-	    +resend +flow-control
-	    item cell+ $@ tsk item fetch-hashs
-	    disconnect-me
-	THEN ;] #map
+: fetch-queue { tsk w^ want# -- }
+    0 .pk.host $make { w^ pk$ }
+    want# tsk pk$ [{: tsk pk$ :}l { want }
+	want $@ pk$ $@ str= IF
+	    msg( ." I really should have this myself" forth:cr )
+	    \ don't fetch from myself
+	ELSE
+	    want $@ [: $8 $E pk-connect? ;] catch 0=
+	    IF
+		IF
+		    +resend +flow-control
+		    want cell+ $@ tsk want fetch-hashs
+		    disconnect-me
+		THEN
+	    ELSE
+		fetch( ." failed, doesn't connect" forth:cr )
+		nothrow 2drop
+	    THEN
+	THEN  rdrop ;] #map
     want# #frees
     pk$ $free ;
 
@@ -663,13 +671,11 @@ event: :>hash-finished { d: hash -- }
     { | w^ want# }
     fetch# want# [{: want# :}l
 	dup cell+ $@ drop cell+ >o fetcher:state o> 0= IF
-	    $@ 2dup have# #@ dup IF
-		bounds U+DO
-		    2dup I $@ want# #+!
-		cell +LOOP  2drop
-	    ELSE  2drop 2drop  THEN
+	    $@ 2dup have# #@ bounds U+DO
+		2dup I $@ want# #+!
+	    cell +LOOP  2drop
 	ELSE  drop  THEN ;] #map
-    want# ;
+    want# @ ;
 
 fetcher-class ' new static-a with-allocater Constant fetcher-prototype
 : >fetch# ( addr u -- )
@@ -1778,6 +1784,12 @@ also net2o-base scope: /chat
     umethod /have ( addr u -- )
     \U have                 print out have list
     \G have: print out the hashes and their providers
+    umethod /want ( addr u -- )
+    \U want                 print out want list
+    \G want: print out the hashes I want
+    umethod /fetch ( addr u -- )
+    \U fetch                trigger fetching
+    \G fetch: fetch the hashes I want
     umethod /imgs ( addr u -- )
     \U imgs                 print out img list
     \G imgs: print out hashes for album viewer
@@ -1933,7 +1945,17 @@ is /help
 :noname ( addr u -- )
     2drop [:
       remote-host$ $. ." @" pubkey $@ .simple-id ." :" forth:cr
-      true ;] search-context ; is /connections
+	true ;] search-context ; is /connections
+
+:noname ( addr u -- )  2drop enqueue ; is /fetch
+
+:noname ( addr u -- )  2drop
+    ." Want:" forth:cr
+    fetch>want { w^ want# }
+    want# [: { item }
+	." from " item $@ .@host.id ."  want " item cell+ $@ 85type forth:cr
+    ;] #map
+    want# #frees ; is /want
 }scope
 
 : ?slash ( addr u -- addr u flag )
