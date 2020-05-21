@@ -165,7 +165,16 @@ event: :>kill ( task -- )
 kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 #5000000. 2Constant kill-wait2# \ 5ms wait for threads to terminate
 
+0 Value sender-task   \ asynchronous sender thread (unused)
+0 Value receiver-task \ receiver thread
+0 Value timeout-task  \ for handling timeouts
+0 Value query-task    \ for background queries initiated in other tasks
+
 : net2o-kills ( -- )
+    0 to sender-task
+    0 to receiver-task
+    0 to timeout-task
+    0 to query-task
     net2o-tasks get-stack kills !  net2o-tasks $free
     kills @ 0 ?DO  send-kill  LOOP
     ntime kill-timeout# d+ { d: timeout }
@@ -1187,10 +1196,6 @@ end-structure
 Variable chunks
 Variable chunks+
 Create chunk-adder chunks-struct allot
-0 Value sender-task   \ asynchronous sender thread (unused)
-0 Value receiver-task \ receiver thread
-0 Value timeout-task  \ for handling timeouts
-0 Value query-task    \ for background queries initiated in other tasks
 
 : .0depth ( -- ) <warn> "Stack should always be empty!" type cr <default> ;
 : !!0depth!! ( -- ) ]] depth IF  .0depth ~~bt clearstack  THEN [[ ; immediate
@@ -1529,7 +1534,7 @@ Variable timeout-tasks
 : o+timeout ( -- )  0timeout
     timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ .name cr )
     o timeout-tasks +unique$
-    timeout-task wake ;
+    timeout-task ?dup-IF  wake  THEN ;
 : o-timeout ( -- )
     0timeout  timeout( ." -timeout: " o hex. ." task: " task# ? cr )
     [: o timeout-tasks del$cell ;] resize-sema c-section ;
