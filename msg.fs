@@ -41,7 +41,7 @@ Variable ihave$
 Variable mehave$
 Variable push$
 
-: (avalanche-msg) ( o:connect- )
+: (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
     cell +LOOP ;
@@ -351,7 +351,7 @@ previous
 		I @ to msg-group-o 0 .(avalanche-msg)
 	    cell +LOOP
 	ELSE  2drop  THEN  cleanup-msg ;] catch
-    r> to msg-group-o throw ;
+    r> to msg-group-o  cleanup-msg  throw ;
 
 : msg:ihave ( id u1 hash u2 -- )
     fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
@@ -1538,13 +1538,11 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
-    ihave$ $@ dup IF
-	maxstring dup -1 = 1 rshift and
-	over 4 + - mehave$ $@len - min 0 max
-	keysize negate and  dup >r
-	dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop 2drop  THEN
-	ihave$ 0 r> $del
-    ELSE  2drop  THEN ;
+    ihave$ $@
+    \ maxstring dup -1 = 1 rshift and
+    \ over 4 + - mehave$ $@len - min 0 max
+    \ keysize negate and
+    dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop  THEN ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 
@@ -1706,6 +1704,9 @@ also net2o-base scope: /chat
     synonym /back /away
     umethod /otr ( addr u -- )
     \U otr on|off|message   turn otr mode on/off (or one-shot)
+    umethod /otrify ( addr u -- )
+    \U otrify #line[s]      otrify message
+    \G otrify: turn an older message of yours into an OTR message
     umethod /peers ( addr u -- )
     \U peers                list peers
     \G peers: list peers in all groups
@@ -1760,9 +1761,6 @@ also net2o-base scope: /chat
     \G logstyle: +num       the message number per log line
     \G logstyle: +date      the date per log line
     \G logstyle: +end       the end date per log line 
-    umethod /otrify ( addr u -- )
-    \U otrify #line[s]      otrify message
-    \G otrify: turn an older message of yours into an OTR message
     umethod /lock ( addr u -- )
     \U lock {@nick}         lock down
     \G lock: lock down communication to list of nicks
