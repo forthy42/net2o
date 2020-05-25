@@ -83,18 +83,18 @@ Each active node in a video conference creates a stream of data.  Mixing the
 data is distributed; sending it directly to one central instance will easily
 overwealm that one.
 
-* Leaf nodes send their stream upwards.
-* Branch nodes combine leaf node streams and own stream to mixed stream.
-* Root node distributes final mix.
+* Leaf nodes send their stream upwards
+* Branch nodes combine leaf node streams and own stream to mixed stream
+* Root node distributes final mix
 * Every participant has one single upstream
 * Branch nodes have multiple downstreams (asymmetric subscriber lines work
   well here)
 * Every participant handles a fair share of the central stream distribution
 * Every participant needs to encode one stream + local copies of the own
-  recording.
+  recording
 * Every participant needs to decode more than one stream
 * The instructions how to downscale and mix the incoming streams come from the
-  moderator node.
+  moderator node
 
 The own recording is available afterwards for remixing the entire conference
 with higher quality, or in case connection losses took out participants and
