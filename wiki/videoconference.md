@@ -75,7 +75,7 @@ The branch nodes send it forward to further nodes.  The leaf nodes send it
 forward to nodes from other partitions.  This makes sure that every node has
 the same load.
 
-![Avalanche tree](avalanche.svg)
+![Avalanche tree](avalanche.png)
 
 ### Collection tree and mixing ###
 
