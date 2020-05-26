@@ -83,9 +83,19 @@ Each active node in a video conference creates a stream of data.  Mixing the
 data is distributed; sending it directly to one central instance will easily
 overwealm that one.
 
-* Leaf nodes send their stream upwards
+* Leaf nodes send their stream upwards. Audio is processed by applying filter,
+  volume control and spatial audio at the leaf, video streams are truncated
+  and scaled down as necessary.
+* Participants can offer their own stream as life stream for others to join,
+  but other nodes will only select one or two life streams
 * Branch nodes combine leaf node streams and own stream to mixed stream
-* Root node distributes final mix
+  * Audio is just mixed together
+  * Video is stiched together (if possible without transcoding, see for
+    example this paper [using HEVC for stitching videos
+    together](http://iphome.hhi.de/schierl/assets/2014_Cloud-video-Mixing-HEVC.pdf)
+  * Rogue participants ignoring commands are muted either here or if the
+    entire branch is rogue, at the root
+* Root node combines final downmix, and distribute that as life stream
 * Every participant has one single upstream
 * Branch nodes have multiple downstreams (asymmetric subscriber lines work
   well here)
