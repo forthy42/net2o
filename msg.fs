@@ -37,9 +37,9 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-Variable ihave$
-Variable mehave$
-Variable push$
+User ihave$
+User mehave$
+User push$
 
 : (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@
@@ -315,6 +315,8 @@ event: :>msg-nestsig ( $addr o group -- )
     dup 5 sf[]@ fsplit 0 .r '.' emit 100e f* f>s .## ." m"
     drop ;
 
+: pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
+
 Forward msg:last?
 Forward msg:last
 Forward msg:want
@@ -327,10 +329,24 @@ hash: fetch#      \ list of wanted hashs->fetcher objects
 hash: fetch-finish#
 Variable fetch-queue[]
 
+: >send-have ( addr u -- )
+    msg-group-o >r [:
+	have-group# #@ dup IF
+	    bounds ?DO
+		fetch( ." send have to group '"
+		msg-group-o .msg:name$ forth:type
+		." ' about hash '" ihave$ $@ 85type forth:cr )
+		I @ to msg-group-o 0 .(avalanche-msg)
+	    cell +LOOP
+	ELSE  2drop  THEN  cleanup-msg ;] catch
+    r> to msg-group-o  cleanup-msg  throw ;
+
 also fetcher
 :noname fetching# to state ; fetcher-class is fetch
 ' 2drop fetcher-class is fetching
-:noname have# to state ; fetcher-class is got-it
+:noname have# to state
+    last# $@ 2dup ihave$ $! 0 .pk.host mehave$ $!
+    >send-have cleanup-msg ; fetcher-class is got-it
 previous
 
 : .@host.id ( pk+host u -- )
@@ -344,21 +360,11 @@ previous
 	    space I $@ .@host.id
 	cell +LOOP cr ;] #map ;
 
-: >send-have ( addr u -- )
-    msg-group-o >r [:
-	have-group# #@ dup IF
-	    bounds ?DO
-		I @ to msg-group-o 0 .(avalanche-msg)
-	    cell +LOOP
-	ELSE  2drop  THEN  cleanup-msg ;] catch
-    r> to msg-group-o  cleanup-msg  throw ;
-
 : msg:ihave ( id u1 hash u2 -- )
     fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
     2dup ihave$ $+!  2over mehave$ $!
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
-: pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
 : >ihave ( hash u -- )
     0 .pk.host 2over  msg:ihave  2drop ( >send-have ) ;
 
@@ -634,7 +640,7 @@ event: :>hash-finished { d: hash -- }
     bounds U+DO
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	I' I U+DO
-	    false  I keysize have# $@  bounds U+DO
+	    false  I keysize have# #@  bounds U+DO
 		I $@ pk$ $@ str= or
 	    cell +LOOP
 	    IF
@@ -664,7 +670,7 @@ event: :>hash-finished { d: hash -- }
 		fetch( ." failed, doesn't connect" forth:cr )
 		nothrow 2drop
 	    THEN
-	THEN  rdrop ;] #map
+	THEN ;] #map
     want# #frees
     pk$ $free ;
 
@@ -1695,63 +1701,47 @@ object uclass chat-cmd-o
     \ internal stuff
     umethod ./otr-info
 also net2o-base scope: /chat
-    umethod /me ( addr u -- )
-    \U me <action>          send string as action
-    \G me: send remaining string as action
     umethod /away ( addr u -- )
     \U away [<action>]      send string or "away from keyboard" as action
     \G away: send string or "away from keyboard" as action
     synonym /back /away
-    umethod /otr ( addr u -- )
-    \U otr on|off|message   turn otr mode on/off (or one-shot)
-    umethod /otrify ( addr u -- )
-    \U otrify #line[s]      otrify message
-    \G otrify: turn an older message of yours into an OTR message
-    umethod /peers ( addr u -- )
-    \U peers                list peers
-    \G peers: list peers in all groups
-    umethod /gps ( addr u -- )
-    \U gps                  send coordinates
-    \G gps: send your coordinates
-    synonym /here /gps
-    umethod /chats ( addr u -- )
-    \U chats                list chats
-    \G chats: list all chats
-    umethod /nat ( addr u -- )
-    \U nat                  list NAT info
-    \G nat: list nat traversal information of all peers in all groups
-    umethod /renat ( addr u -- )
-    \U renat                redo NAT traversal
-    \G renat: redo nat traversal
-    umethod /help ( addr u -- )
-    \U help                 show help
-    \G help: list help
-    umethod /myaddrs ( addr u -- )
-    \U myaddrs              list my addresses
-    \G myaddrs: list my own local addresses (debugging)
-    umethod /!myaddrs ( addr u -- )
-    \U !myaddrs             re-obtain my addresses
-    \G !myaddrs: if automatic detection of address changes fail,
-    \G !myaddrs: you can use this command to re-obtain your local addresses
-    umethod /notify ( addr u -- )
-    \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
-    \G notify: Change notificaton settings
     umethod /beacons ( addr u -- )
     \U beacons              list beacons
     \G beacons: list all beacons
-    umethod /n2o ( addr u -- )
-    \U n2o <cmd>            execute n2o command
-    \G n2o: Execute normal n2o command
+    umethod /bye ( addr u -- )
+    \U bye
+    \G bye: leaves the current chat
+    umethod /cancel ( addr u -- )
+    \U cancel #line[s]      cancel message
+    \G cancel local messages
+    umethod /chat ( addr u -- )
+    \U chat [group][@user]  switch/connect chat
+    \G chat: switch to chat with user or group
+    umethod /chats ( addr u -- )
+    \U chats                list chats
+    \G chats: list all chats
+    umethod /connections ( addr u -- )
+    \U connections          list active connections
+    \G connections: list active connections
+    umethod /fetch ( addr u -- )
+    \U fetch                trigger fetching
+    \G fetch: fetch the hashes I want
+    umethod /gps ( addr u -- )
+    \U gps                  send coordinates
+    \G gps: send your coordinates
+    umethod /imgs ( addr u -- )
+    \U imgs                 print out img list
+    \G imgs: print out hashes for album viewer
+    umethod /have ( addr u -- )
+    \U have                 print out have list
+    \G have: print out the hashes and their providers
+    umethod /help ( addr u -- )
+    \U help                 show help
+    \G help: list help
+    synonym /here /gps
     umethod /invitations ( addr u -- )
     \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
-    umethod /sync ( addr u -- )
-    \U sync [+date] [-date] synchronize logs
-    \G sync: synchronize chat logs, starting and/or ending at specific
-    \G sync: time/date
-    umethod /version ( addr u -- )
-    \U version              version string
-    \G version: print version string
     umethod /log ( addr u -- )
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
@@ -1764,42 +1754,61 @@ also net2o-base scope: /chat
     umethod /lock ( addr u -- )
     \U lock {@nick}         lock down
     \G lock: lock down communication to list of nicks
-    umethod /unlock ( addr u -- )
-    \U unlock               stop lock down
-    \G unlock: stop lock down
     umethod /lock? ( addr u -- )
     \U lock?                check lock status
     \G lock?: report lock status
+    umethod /me ( addr u -- )
+    \U me <action>          send string as action
+    \G me: send remaining string as action
+    umethod /myaddrs ( addr u -- )
+    \U myaddrs              list my addresses
+    \G myaddrs: list my own local addresses (debugging)
+    umethod /!myaddrs ( addr u -- )
+    \U !myaddrs             re-obtain my addresses
+    \G !myaddrs: if automatic detection of address changes fail,
+    \G !myaddrs: you can use this command to re-obtain your local addresses
+    umethod /nat ( addr u -- )
+    \U nat                  list NAT info
+    \G nat: list nat traversal information of all peers in all groups
+    umethod /n2o ( addr u -- )
+    \U n2o <cmd>            execute n2o command
+    \G n2o: Execute normal n2o command
+    umethod /notify ( addr u -- )
+    \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
+    \G notify: Change notificaton settings
+    umethod /otr ( addr u -- )
+    \U otr on|off|message   turn otr mode on/off (or one-shot)
+    umethod /otrify ( addr u -- )
+    \U otrify #line[s]      otrify message
+    \G otrify: turn an older message of yours into an OTR message
+    umethod /peers ( addr u -- )
+    \U peers                list peers
+    \G peers: list peers in all groups
     umethod /perms ( addr u -- )
     \U perms roles {@keys}  set and change permissions of users
     \G perms: set permissions
-    umethod /bye ( addr u -- )
-    \U bye
-    \G bye: leaves the current chat
-    umethod /chat ( addr u -- )
-    \U chat [group][@user]  switch/connect chat
-    \G chat: switch to chat with user or group
-    umethod /split ( addr u -- )
-    \U split                split load
-    \G split: reduce distribution load by reconnecting
-    umethod /have ( addr u -- )
-    \U have                 print out have list
-    \G have: print out the hashes and their providers
-    umethod /want ( addr u -- )
-    \U want                 print out want list
-    \G want: print out the hashes I want
-    umethod /fetch ( addr u -- )
-    \U fetch                trigger fetching
-    \G fetch: fetch the hashes I want
-    umethod /imgs ( addr u -- )
-    \U imgs                 print out img list
-    \G imgs: print out hashes for album viewer
+    umethod /renat ( addr u -- )
+    \U renat                redo NAT traversal
+    \G renat: redo nat traversal
     umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
-    umethod /connections ( addr u -- )
-    \U connections          list active connections
-    \G connections: list active connections
+    umethod /split ( addr u -- )
+    \U split                split load
+    \G split: reduce distribution load by reconnecting
+    umethod /sync ( addr u -- )
+    \U sync [+date] [-date] synchronize logs
+    \G sync: synchronize chat logs, starting and/or ending at specific
+    \G sync: time/date
+    umethod /unlock ( addr u -- )
+    \U unlock               stop lock down
+    \G unlock: stop lock down
+    umethod /version ( addr u -- )
+    \U version              version string
+    \G version: print version string
+    umethod /want ( addr u -- )
+    \U want                 print out want list
+    \G want: print out the hashes I want
     }scope
 end-class chat-cmds
 
@@ -1915,6 +1924,27 @@ is /help
 		    drop do-otrify  2r>  REPEAT THEN
 	2drop 2r> 2drop  now>otr
     ;] (send-avalanche) drop .chat save-msgs& ; is /otrify
+
+:noname ( addr u -- )
+    [: BEGIN  bl $split 2>r dup  WHILE
+		'-' $split dup 0= IF
+		    2drop s>number? IF  drop 1  ELSE  0 0  THEN
+		ELSE
+		    third 0= IF
+			2nip s>number? IF
+			    drop msg-group-o .msg:log[] $[]# swap - 0 max 1
+			ELSE  0 0  THEN
+		    ELSE  s>number? IF  drop >r s>number?
+			    IF  drop r> over - 1+
+			    ELSE  2drop rdrop  0 0  THEN
+			ELSE  2drop rdrop 0 0  THEN
+		    THEN
+		THEN
+		bounds ?DO  I msg-group-o .msg:log[] $[] $free  LOOP
+		2r>  REPEAT  2drop 2r> 2drop
+	0 msg-group-o .msg:log[] del$cell
+    ;] msglog-sema c-section save-msgs&
+; is /cancel
 
 :noname ( addr u -- )
     msg-group-o .msg:-lock
