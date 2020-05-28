@@ -37,9 +37,9 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-User ihave$
-User mehave$
-User push$
+Variable ihave$
+Variable mehave$
+Variable push$
 
 : (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@

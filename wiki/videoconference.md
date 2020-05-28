@@ -31,6 +31,13 @@
   claps/laughers)
 * Spatial audio (different participants from different directions)
 
+## Wish list ##
+
+These are “nice to have” features with some caveats.
+
+* Recognize eyes and move them upwards so that it looks like the participant
+  is looking at you (instead of downwards)
+
 ## Architecture ##
 
 While the network itself is peer to peer, the roles in a video conference have
@@ -92,7 +99,7 @@ overwealm that one.
   * Audio is just mixed together
   * Video is stiched together (if possible without transcoding, see for
     example this paper [using HEVC for stitching videos
-    together](http://iphome.hhi.de/schierl/assets/2014_Cloud-video-Mixing-HEVC.pdf)
+    together](http://iphome.hhi.de/schierl/assets/2014_Cloud-video-Mixing-HEVC.pdf))
   * Rogue participants ignoring commands are muted either here or if the
     entire branch is rogue, at the root
 * Root node combines final downmix, and distribute that as life stream
