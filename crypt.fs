@@ -136,7 +136,8 @@ $20 buffer: dummy-buf
     keysize my-ekey-pk $!len
     my-ekey-sk sec@ drop my-ekey-pk $@ drop sk>pk
     key( my-ekey-sk sec@ 85type space my-ekey-pk $@ 85type cr )
-    ticks config:ekey-timeout& 2@ d>64 64+ my-ekey-to 64! ;
+    ticks config:ekey-timeout& 2@ d>64
+    dup 64#-1 64= IF  64nip  ELSE  64+  THEN  my-ekey-to 64! ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;

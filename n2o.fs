@@ -447,8 +447,11 @@ warnings !
     perm%default to perm%unknown
     \ well known 0key of a dht root, !!FIXME!! to allow changing that
     85" 4mzuLhu{7P*8hkQlK%$h7DJC%X}$dzEru6B{BdlX" my-0key sec!
+    ['] no0key( >body on
+    #-1. config:ekey-timeout& 2! \ ekey runs forever
     need-beacon# off \ as DHT root server, we don't need beacon hashes
     ?get-me init-server addme-owndht
+    0 my-addr$ $[]@ 2dup sigsize# - .addr$ .sigdates forth:cr
     0 my-addr$ $[]@ 85type forth:cr server-loop-catch ;
 
 \ dht commands
