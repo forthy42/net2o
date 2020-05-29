@@ -130,14 +130,34 @@ $20 buffer: dummy-buf
     my-0key sec@ dup IF  old-0key sec!  ELSE  2drop  THEN
     keysize rng$ my-0key sec! ;
 
-: init-myekey ( -- )
-    my-ekey-sk sec@ dup IF  old-ekey-sk sec!  ELSE  2drop  THEN
-    keysize rng$ my-ekey-sk sec!  my-ekey-sk sec@ drop sk-mask
+: myekey>pk ( -- )
     keysize my-ekey-pk $!len
     my-ekey-sk sec@ drop my-ekey-pk $@ drop sk>pk
     key( my-ekey-sk sec@ 85type space my-ekey-pk $@ 85type cr )
     ticks config:ekey-timeout& 2@ d>64
     dup 64#-1 64= IF  64nip  ELSE  64+  THEN  my-ekey-to 64! ;
+: init-myekey ( -- )
+    no0key( EXIT )
+    my-ekey-sk sec@ dup IF  old-ekey-sk sec!  ELSE  2drop  THEN
+    keysize rng$ my-ekey-sk sec!  my-ekey-sk sec@ drop sk-mask
+    myekey>pk ;
+
+: root-my0key ( -- )
+    ?.net2o
+    0 "root0key.bin" .net2o-config/ ?fd dup { fd } slurp-fid over >r
+    dup 0= IF  2drop keysize rng$
+	2dup fd write-file throw
+    THEN  key| my-0key sec!
+    r> free throw  fd close-file throw ;
+: root-myekey ( -- )
+    ?.net2o
+    0 "rootekey.bin" .net2o-config/ ?fd dup { fd } slurp-fid over >r
+    dup 0= IF  2drop keysize rng$  over sk-mask
+	2dup fd write-file throw
+    THEN  key| my-ekey-sk sec!  myekey>pk
+    r> free throw  fd close-file throw ;
+: root-genkeys ( -- )
+    root-my0key root-myekey ;
 
 : ?new-mykey ( -- )
     last-mykey 64@ ticker 64@ 64- 64-0< IF  init-mykey  THEN ;
