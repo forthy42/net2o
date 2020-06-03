@@ -84,6 +84,23 @@ the same load.
 
 ![Avalanche tree](avalanche.png)
 
+The dangling edges that point nowhere show that it is possible to add one
+further node to this tree at any point in time.  The tree allows to have
+low–latency streaming to many participants.  The fanout here is four; in
+reality, it can be significantly bigger.
+
+For timeshift streaming alone, a much simpler relation is possible: an
+ordinary queue.  Every watcher starts by being added to the tail of the queue,
+watching the video stream right from start.  It takes that stream from the one
+next in the queue, which got it recently.  If the delay between two
+participants becomes too small for that simple queue, the real–time streaming
+tree concept can be used for them.
+
+Timeshift streaming watchers who skip over parts have to change the position
+in the queue.  Since they then don’t have the entire video, they can‘t
+distribute all of it.  Everybody still can contribute as much as he consumes,
+it is still a fair share.
+
 ### Collection tree and mixing ###
 
 Each active node in a video conference creates a stream of data.  Mixing the
