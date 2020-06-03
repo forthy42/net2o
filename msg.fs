@@ -37,9 +37,9 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-Variable ihave[]
-Variable mehave[]
-Variable push$
+User ihave[]
+User mehave[]
+User push$
 
 : (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@
@@ -247,7 +247,8 @@ User peer-buf
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
     addr-connect 2dup d0= IF  2drop  ELSE  push$ $! avalanche-to  THEN o> ;
 
-event: :>avalanche ( addr u o group -- )
+event: :>avalanche ( addr u o group push$ mehave[] ihave[] -- )
+    ihave[] !  mehave[] !  push$ !
     avalanche( ." Avalanche to: " dup hex. cr )
     to msg-group-o .avalanche-msg ;
 event: :>chat-reconnect ( addr u $chat o group -- )
@@ -379,6 +380,7 @@ previous
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
 	    <event >r o elit, msg-group-o elit,
+	    0 push$ !@ elit,  0 mehave[] !@ elit,  0 ihave[] !@ elit,
 	    :>avalanche r> event>
 	ELSE  2drop  THEN
     THEN ;
