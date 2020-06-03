@@ -37,8 +37,8 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-Variable ihave$
-Variable mehave$
+Variable ihave[]
+Variable mehave[]
 Variable push$
 
 : (avalanche-msg) ( o:connect -- )
@@ -46,7 +46,7 @@ Variable push$
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
     cell +LOOP ;
 : cleanup-msg ( -- )
-    ihave$ $free mehave$ $free push$ $free ;
+    ihave[] $[]free mehave[] $[]free push$ $free ;
 : avalanche-msg ( o:connect -- )
     \G forward message to all next nodes of that message group
     (avalanche-msg) cleanup-msg ;
@@ -335,17 +335,23 @@ Variable fetch-queue[]
 	    bounds ?DO
 		fetch( ." send have to group '"
 		msg-group-o .msg:name$ forth:type
-		." ' about hash '" ihave$ $@ 85type forth:cr )
+		." ' about hash '" 0 ihave[] $[]@ 85type forth:cr )
 		I @ to msg-group-o 0 .(avalanche-msg)
 	    cell +LOOP
 	ELSE  2drop  THEN  cleanup-msg ;] catch
     r> to msg-group-o  cleanup-msg  throw ;
 
+: >mehave ( addr u -- index )
+    mehave[] $[]# 0 ?DO
+	2dup I mehave[] $[]@ str= IF
+	    2drop I unloop  EXIT  THEN
+    LOOP   mehave[] $+[]!  mehave[] $[]# 1- ;
+
 also fetcher
 :noname fetching# to state ; fetcher-class is fetch
 ' 2drop fetcher-class is fetching
 :noname have# to state
-    last# $@ 2dup ihave$ $! 0 .pk.host mehave$ $!
+    last# $@ 2dup 0 .pk.host >mehave ihave[] $[]+!
     >send-have cleanup-msg ; fetcher-class is got-it
 previous
 
@@ -363,7 +369,7 @@ previous
 : msg:ihave ( id u1 hash u2 -- )
     fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
-    2dup ihave$ $+!  2over mehave$ $!
+    2over 2over >mehave ihave[] $[]+!
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : >ihave ( hash u -- )
     0 .pk.host 2over  msg:ihave  2drop ( >send-have ) ;
@@ -1544,11 +1550,13 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : ihave, ( -- )
-    ihave$ $@
-    maxstring dup -1 = 1 rshift and
-    over 4 + - mehave$ $@len - min 0 max
-    keysize negate and
-    dup IF  $, mehave$ $@ $, msg-ihave  ELSE  2drop  THEN ;
+    mehave[] $[]# 0 ?DO
+	I ihave[] $[]@
+	maxstring dup -1 = 1 rshift and
+	over 4 + - I mehave[] $[] $@len - min 0 max
+	keysize negate and
+	dup IF  $, I mehave[] $[]@ $, msg-ihave  ELSE  2drop  THEN
+    LOOP ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 
