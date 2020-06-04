@@ -1161,7 +1161,28 @@ Hash: audio#
     previous
     ' bye is net2o-bye
 [ELSE]
-    require minos2/opus-codec.fs
+    begin-structure idx-head
+	4 +field idx-magic
+	cfield: idx-channels
+	cfield: idx-frames
+	wfield: idx-samples
+	8 +field idx-pos
+    end-structure
+    Variable idx-block
+    Variable play-block
+    1 Value channels
+    
+    : start-play ;
+    : pause-play ;
+    : resume-play ;
+    : open-play 2drop 2drop ;
+    : open-rec+ 2drop ;
+    : close-rec-mono ;
+    : close-rec-stereo ;
+    scope: pulse
+    #48000 Value sample-rate
+    : record-mono ;
+    }scope
 [THEN]
 
 : be-l, ( l -- ) here be-l! 4 allot ;
