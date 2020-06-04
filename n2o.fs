@@ -445,11 +445,11 @@ warnings !
 : rootserver ( -- )
     \U rootserver
     perm%default to perm%unknown
-    root-genkeys
     ['] no0key( >body on
     #-1. config:ekey-timeout& 2! \ ekey runs forever
     need-beacon# off \ as DHT root server, we don't need beacon hashes
-    ?get-me init-server addme-owndht
+    ?get-me
+    root-genkeys init-server addme-owndht
     0 my-addr$ $[]@ 2dup sigsize# - .addr$ .sigdates forth:cr
     0 my-addr$ $[]@ 85type forth:cr server-loop-catch ;
 
