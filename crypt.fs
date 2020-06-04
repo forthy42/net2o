@@ -155,9 +155,9 @@ forward save-seckeys
     THEN
     o> ;
 : root-my0key ( -- )
-    ?dhtsecs keysize safe/string key| my-0key sec! ;
+    0 .?dhtsecs keysize safe/string key| my-0key sec! ;
 : root-myekey ( -- )
-    ?dhtsecs key| my-ekey-sk sec!  myekey>pk ;
+    0 .?dhtsecs key| my-ekey-sk sec!  myekey>pk ;
 : root-genkeys ( -- )
     root-my0key root-myekey ;
 
