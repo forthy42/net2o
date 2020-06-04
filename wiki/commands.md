@@ -282,7 +282,8 @@ Commands are context-sensitive in an OOP method hierarchy sense.
 * $1E key-string2 ( $:string -- )
 * $1F key-string3 ( $:string -- )
 * $20 key-string4 ( $:string -- )
-* $21 key-sec1 ( $:string -- )
+* $21 key-dhtsecs ( $:string -- )
+  persistent secrets for DHT roots, can not be changed regularly
 * $22 key-sec2 ( $:string -- )
 * $23 key-num1 ( 64n -- )
 * $24 key-num2 ( 64n -- )
