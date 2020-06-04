@@ -541,7 +541,7 @@ cmd-class class
     field: ke-[]2
     field: ke-[]3
     field: ke-[]4
-    field: ke-sec1
+    field: ke-dhtsecs
     field: ke-sec2
     64field: ke-#1
     64field: ke-#2

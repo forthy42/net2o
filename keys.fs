@@ -723,7 +723,9 @@ $11 net2o: privkey ( $:string -- )
 +net2o: key-string2 ( $:string -- ) $> ke-[]2 $+[]! ;
 +net2o: key-string3 ( $:string -- ) $> ke-[]3 $+[]! ;
 +net2o: key-string4 ( $:string -- ) $> ke-[]4 $+[]! ;
-+net2o: key-sec1 ( $:string -- ) $> ke-sec1 sec! ;
++net2o: key-dhtsecs ( $:string -- )
+    \g persistent secrets for DHT roots, can not be changed regularly
+    $> ke-dhtsecs sec! ;
 +net2o: key-sec2 ( $:string -- ) $> ke-sec2 sec! ;
 +net2o: key-num1 ( 64n -- )  ke-#1 64! ;
 +net2o: key-num2 ( 64n -- )  ke-#2 64! ;
@@ -856,7 +858,7 @@ also net2o-base
     ke-#3 64@ 64dup 64-0<> IF  lit, key-num3  ELSE  64drop  THEN
     ke-#4 64@ 64dup 64-0<> IF  lit, key-num4  ELSE  64drop  THEN ;
 : pack-secextra ( o:key -- )
-    ke-sec1 sec@ dup IF  sec$, key-sec1  ELSE  2drop  THEN
+    ke-dhtsecs sec@ dup IF  sec$, key-dhtsecs  ELSE  2drop  THEN
     ke-sec2 sec@ dup IF  sec$, key-sec2  ELSE  2drop  THEN ;
 previous
 

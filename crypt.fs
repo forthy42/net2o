@@ -142,20 +142,22 @@ $20 buffer: dummy-buf
     keysize rng$ my-ekey-sk sec!  my-ekey-sk sec@ drop sk-mask
     myekey>pk ;
 
+: my-key? ( -- o )  o IF  my-key  ELSE  my-key-default  THEN ;
+
+forward save-seckeys
+
+: ?dhtsecs ( -- addr u )
+    my-key? >o ke-dhtsecs sec@
+    dup 0= IF
+	2drop  keysize 2* rng$ over sk-mask ke-dhtsecs sec!
+	save-seckeys
+	ke-dhtsecs sec@
+    THEN
+    o> ;
 : root-my0key ( -- )
-    ?.net2o
-    0 "root0key.bin" .net2o-config/ ?fd dup { fd } slurp-fid over >r
-    dup 0= IF  2drop keysize rng$
-	2dup fd write-file throw
-    THEN  key| my-0key sec!
-    r> free throw  fd close-file throw ;
+    ?dhtsecs keysize safe/string key| my-0key sec! ;
 : root-myekey ( -- )
-    ?.net2o
-    0 "rootekey.bin" .net2o-config/ ?fd dup { fd } slurp-fid over >r
-    dup 0= IF  2drop keysize rng$  over sk-mask
-	2dup fd write-file throw
-    THEN  key| my-ekey-sk sec!  myekey>pk
-    r> free throw  fd close-file throw ;
+    ?dhtsecs key| my-ekey-sk sec!  myekey>pk ;
 : root-genkeys ( -- )
     root-my0key root-myekey ;
 
@@ -643,7 +645,6 @@ drop
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
-: my-key? ( -- o )  o IF  my-key  ELSE  my-key-default  THEN ;
 : sig-params ( -- sksig sk pk )
     my-key? ?dup-IF
 	>o ke-sksig sec@ drop ke-sk sec@ drop ke-pk $@ drop o>  EXIT
