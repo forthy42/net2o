@@ -247,8 +247,11 @@ User peer-buf
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
     addr-connect 2dup d0= IF  2drop  ELSE  push$ $! avalanche-to  THEN o> ;
 
-event: :>avalanche ( addr u o group push$ mehave[] ihave[] -- )
-    ihave[] !  mehave[] !  push$ !
+: execute+free ( closure-xt -- )
+    dup >r execute r> >addr free throw ;
+
+event: :>avalanche ( addr u o group restore-xt -- )
+    execute+free
     avalanche( ." Avalanche to: " dup hex. cr )
     to msg-group-o .avalanche-msg ;
 event: :>chat-reconnect ( addr u $chat o group -- )
@@ -375,12 +378,16 @@ previous
 : >ihave ( hash u -- )
     0 .pk.host 2over  msg:ihave  2drop ( >send-have ) ;
 
+: msg-pack ( -- xt )
+    0 push$ !@  0 mehave[] !@   0 ihave[] !@
+    [{: push mehave ihave :}h
+	push push$ !  mehave mehave[] !  ihave ihave[] ! ;] ;
+
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    <event >r o elit, msg-group-o elit,
-	    0 push$ !@ elit,  0 mehave[] !@ elit,  0 ihave[] !@ elit,
+	    <event >r o elit, msg-group-o elit, msg-pack elit,
 	    :>avalanche r> event>
 	ELSE  2drop  THEN
     THEN ;
