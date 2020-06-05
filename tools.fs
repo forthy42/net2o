@@ -500,7 +500,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
     .net2o-cache/ 2dup $1FF init-dir drop set-dir throw ;
 : ~net2o-cache/.. ( addr u -- )
     .net2o-cache/ 2dup $1FF init-dir drop dirname set-dir throw ;
-: .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] $tmp ;
+Variable keys-file$
+: .keys/  ( addr u -- addr' u' ) [: keys$   $. '/' emit type ;] keys-file$ $set keys-file$ $@ ;
 : objects/.no-fat-file ( -- addr u )
     [: objects$  $. ." /." no-fat-chars type ;] $tmp ;
 : chats/.no-fat-file ( -- addr u )
@@ -893,12 +894,12 @@ Variable tmp-file$
 	fd1 flush-file throw
     THEN  fd1 ;
 
-: save-file ( addr u xt -- )
+: save-file { d: file xt: do-save -- }
     \G save file @var{addr u} by making a copy first,
     \G applying xt ( fd -- ) on that copy, and then
     \G moving the existing file to backup ("~" appended to filename)
     \G and the copy ("+" appended to filename) to the original name.
-    >r 2dup >copy r> over >r execute r> close-file throw >backup ;
+    file >copy dup >r do-save r> close-file throw file >backup ;
 
 : new-file ( addr u xt -- )
     \G save file @var{addr u} by making an empty first,

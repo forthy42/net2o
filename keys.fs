@@ -912,12 +912,12 @@ Variable cp-tmp
 : save-pubkeys ( -- )
     key-pfd ?dup-IF  close-file throw  THEN
     "pubkeys.k2o" .keys/ [: to key-pfd
-      key# [: cell+ $@ drop cell+ >o
-	sec-key? 0= IF  pack-pubkey
-	    flush( ." saving " .nick forth:cr )
-	    key-crypt ke-offset 64@ key>pfile@pos
-	THEN o> ;] #map
-    0 to key-pfd ;] save-file  ?key-pfd drop ;
+	key# [: cell+ $@ drop cell+ >o
+	    sec-key? 0= IF  pack-pubkey
+		flush( ." saving " .nick forth:cr )
+		key-crypt ke-offset 64@ key>pfile@pos
+	    THEN o> ;] #map
+	0 to key-pfd ;] save-file  ?key-pfd drop ;
 
 : save-seckeys ( -- )
     key-sfd ?dup-IF  close-file throw  THEN
