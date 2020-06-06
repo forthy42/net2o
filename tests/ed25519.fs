@@ -22,14 +22,14 @@ Variable test$
 
 : do-fuzz ( -- )  s" A" test$ $+! gen-pairs
     gen-sig dup check-sig swap check-sig0 0= and check-dh and
-    IF ." +" ELSE ." -" THEN ;
+    IF <info> ." +" ELSE <err> ." -" THEN <default> ;
 : fuzzes ( n -- ) 0 ?DO  do-fuzz  LOOP ;
 : fuzzl ( n -- )  0 ?DO  cols I' I - umin fuzzes cols +LOOP ;
 : sigs ( n -- )   0 ?DO  gen-sig drop  LOOP ;
 : checksigs ( n -- )  gen-sig swap  0 ?DO  dup check-sig drop  LOOP  drop ;
-!time 1000 fuzzl cr .time ."  for 1000 checks" cr
-!time 1000 sigs  .time ."  for 1000 sigs" cr
-!time 1000 checksigs  .time ."  for 1000 sigs" cr
+!time 1000 fuzzl cr .time ."  for 1000 fuzzed sigs+checks" cr
+!time 1000 sigs  .time ."  for generating 1000 sigs" cr
+!time 1000 checksigs  .time ."  for checking 1000 sigs" cr
 
 \ deterministic tests
 
@@ -56,12 +56,12 @@ c:0key "Test 123" c:hash
 ." Test verify "
 dup pkc ed-verify
 >r dup pkc !time ed-verify .time drop r>
-[IF] ."  passed" [ELSE] ."  failed" [THEN] cr
+[IF] <info> ."  passed" [ELSE] <err> ."  failed" [THEN] <default> cr
 ." Test forge "
 c:0key "Test 124" c:hash dup pkc ed-verify drop
 c:0key "Test 124" c:hash
 dup pkc !time ed-verify .time
-0= [IF] ."  passed" [ELSE] ."  failed" [THEN] cr
+0= [IF] <info> ."  passed" [ELSE] <err> ."  failed" [THEN] <default> cr
 $40 xtype cr
 
 : test-eddh ( -- )
@@ -75,9 +75,10 @@ $40 xtype cr
 	I 0= IF  !time ed-dh .time  ELSE  ed-dh  THEN  2drop
 	2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2"
 	str= I 0= IF  IF ."  correct" ELSE ."  incorrect" THEN
-	ELSE  '+' '-' rot select emit  THEN
-	2dup pad $20 + over str= IF I 0= IF  ."  passed"  ELSE  '+' emit  THEN
-	ELSE ."  failed" pad over cr xtype THEN
+	ELSE  IF  <info> '+'  ELSE  <err>  '-'  THEN  emit <default>  THEN
+	2dup pad $20 + over str= IF
+	    <info> I 0= IF  ."  passed"  ELSE  '+' emit  THEN
+	ELSE <err> ."  failed" pad over cr xtype THEN  <default>
 	I 0= IF  cr xtype cr  ELSE  2drop  THEN
     LOOP cr ;
 test-eddh
@@ -89,8 +90,8 @@ test-eddh
     stskc pkc 2dup pad ed-dhv 2drop pad ed-dhv
     stskc pkc 2dup pad ed-dhv 2drop !time pad ed-dhv .time 2drop
     2dup x" B5BB3B6663A992A29A75852AD4925085109E96485A770EDF7A8A945128F42BD2" str= [IF] ."  correct" [ELSE] ."  incorrect" [THEN]
-    2dup pad $20 + over str= [IF] ."  passed"
-    [ELSE] ."  failed" pad over cr xtype [THEN] cr
+    2dup pad $20 + over str= [IF] <info> ."  passed"
+    [ELSE] <err> ."  failed" pad over cr xtype [THEN] <default> cr
     xtype cr
 [THEN]
 script? [IF] bye [THEN]
