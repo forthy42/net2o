@@ -115,10 +115,13 @@ GEN = version.fs
 
 DOC = wiki/commands.md
 
+DISTFILES = $(SOURCES) $(LANGS) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
+
 all: no-config TAGS doc
 
+
 distfiles:
-	@echo $(SOURCES) $(LANGS) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
+	@echo $(DISTFILES)
 
 no-config: libs $(GEN)
 

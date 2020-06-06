@@ -16,8 +16,9 @@ Variable test$
     c:0key test$ $@ c:hash pkc ed-verify ;
 : check-sig0 ( addr -- flag )
     c:0key test$ $@ 1- c:hash pkc ed-verify ;
+: 16aligned ( addr -- addr' ) $F + -$10 and ;
 : check-dh ( -- flag )
-    skc stpkc pad ed-dh stskc pkc pad $20 + ed-dh str= ;
+    skc stpkc pad 16aligned ed-dh stskc pkc pad $20 + 16aligned ed-dh str= ;
 
 : do-fuzz ( -- )  s" A" test$ $+! gen-pairs
     gen-sig dup check-sig swap check-sig0 0= and check-dh and
