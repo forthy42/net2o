@@ -23,6 +23,13 @@ AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
 LIBTOOL=${PRECLANG}${LIBTOOL}
 echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
 
+#android: add -static-libstdc++
+case "$host_os" in
+    *android*)
+	LDFLAGS="$LDFLAGS -static-libstdc++"
+	;;
+esac
+
 AC_SUBST(LIBTOOL)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

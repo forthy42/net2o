@@ -19,7 +19,7 @@ lib_LTLIBRARIES = libbdelta.la
 include_HEADERS = bdelta.h compatibility.h checksum.h
 libbdelta_la_SOURCES = libbdelta.cpp
 libbdelta_la_LIBADD = 
-libbdelta_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libbdelta_la_LDFLAGS = -version-info ${VERSION} -no-undefined $LDFLAGS
 libbdelta_la_CFLAGS = @flags@
 
 install-exec-hook:
