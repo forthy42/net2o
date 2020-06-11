@@ -41,8 +41,9 @@ case "$host" in
      arm*-*linux*)
 	flags="$CFLAGS"
 	asmflags="$CFLAGS"
-	fastasmflags="-O3 -mfpu=neon $nomflags"
-	fastflags="-O3 -mfpu=neon $nomflags"
+	fastflags=`echo $nomflags | sed -e 's/-march=[[^ ]]*//g' -e 's/-mfpu=[[^ ]]*//g'`
+	fastasmflags="-O3 -march=armv7-a -mfpu=neon $fastflags"
+	fastflags="-O3 -march=armv7-a -mfpu=neon $fastflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	enable_fast=yes
@@ -51,8 +52,9 @@ case "$host" in
 	CCASFLAGS=""
 	;;
      arm*)
-	asmflags="-O3 -mfpu=neon $nomflags"
-	flags="-O3 -mfpu=neon $nomflags"
+	fastflags=`echo $nomflags | sed -e 's/-march=[^ ]*//g' -e 's/-mfpu=[[^ ]]*//g'`
+	asmflags="-O3 -march=armv7-a -mfpu=neon $fastflags"
+	flags="-O3 -march=armv7-a -mfpu=neon $fastflags"
 	as="inplace-armgcc-ARMv7A-NEON"
 	enable_asm=yes
 	plattform=neon
@@ -102,7 +104,7 @@ PRECLANG=${PRECC%clang*}
 dnl MacOS X has a libtool that does something else
 AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
 
-LIBTOOL=${PRECLANG}${LIBTOOL}
+#LIBTOOL=${PRECLANG}${LIBTOOL}
 echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
 
 AC_SUBST(nomflags)
