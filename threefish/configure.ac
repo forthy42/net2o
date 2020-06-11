@@ -13,7 +13,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
 flags="$CFLAGS"
-nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g'`"
+nomflags="`echo $CFLAGS | sed -e 's/-m[0-9]* //g'`"
 
 # special optimizations for some plattforms
 case "$host" in

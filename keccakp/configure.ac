@@ -25,7 +25,7 @@ case "$ac_cv_sizeof_void_p" in
 esac
 
 flags="$CFLAGS"
-nomflags="`echo $CFLAGS | sed -e 's/-m[[^ ]]* //g' -e 's/-fdebug[[^ ]]* //g'`"
+nomflags="`echo $CFLAGS | sed -e 's/-m[0-9]* //g'`"
 
 # special optimizations for some plattforms
 case "$host" in
