@@ -137,11 +137,13 @@ Forward .addr$
     sockaddr1 port be-uw@ ;
 
 : ipv6/pp ( sock -- sock )
+    \ try to prefer public or private addresses
+    \ if this is not available (e.g. WSL 1), just ignore
     [IFDEF] ipv6-public
 	config:port# @ IF
-	    ipv6( dup ipv6-public )
+	    ipv6( [: dup ipv6-public ;] catch drop )
 	ELSE
-	    ipv6( dup ipv6-private )
+	    ipv6( [: dup ipv6-private ;] catch drop )
 	THEN
     [THEN]
 ;
