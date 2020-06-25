@@ -1161,28 +1161,35 @@ Hash: audio#
     previous
     ' bye is net2o-bye
 [ELSE]
-    begin-structure idx-head
-	4 +field idx-magic
-	cfield: idx-channels
-	cfield: idx-frames
-	wfield: idx-samples
-	8 +field idx-pos
-    end-structure
-    Variable idx-block
-    Variable play-block
-    1 Value channels
-    
-    : start-play ;
-    : pause-play ;
-    : resume-play ;
-    : open-play 2drop 2drop ;
-    : open-rec+ 2drop ;
-    : close-rec-mono ;
-    : close-rec-stereo ;
-    scope: pulse
-    #48000 Value sample-rate
-    : record-mono ;
-    }scope
+    [IFDEF] android
+	also require minos2/sles-audio.fs sles-init
+	require minos2/opus-codec.fs
+	previous
+	' bye is net2o-bye
+    [ELSE]
+	begin-structure idx-head
+	    4 +field idx-magic
+	    cfield: idx-channels
+	    cfield: idx-frames
+	    wfield: idx-samples
+	    8 +field idx-pos
+	end-structure
+	Variable idx-block
+	Variable play-block
+	1 Value channels
+	
+	: start-play ;
+	: pause-play ;
+	: resume-play ;
+	: open-play 2drop 2drop ;
+	: open-rec+ 2drop ;
+	: close-rec-mono ;
+	: close-rec-stereo ;
+	scope: pulse
+	#48000 Value sample-rate
+	: record-mono ;
+	}scope
+    [THEN]
 [THEN]
 
 : be-l, ( l -- ) here be-l! 4 allot ;
@@ -1303,7 +1310,7 @@ Variable current-player
 
 : >msg-audio-player ( addr u -- )
     2dup current-play$ $@ str= IF
-	resume-play
+	[IFDEF] android opensles:resume-play [ELSE] resume-play [THEN]
     ELSE
 	2dup current-play$ $!  caller-w current-player !
 	2dup key| ?read-enc-hashed idx-block $!
@@ -1323,7 +1330,7 @@ Variable current-player
 		pause$ $@ caller-w >o to text$ o> +sync
 	    ELSE  2drop  THEN
 	ELSE
-	    pause-play
+	    [IFDEF] android opensles:pause-play [ELSE] pause-play [THEN]
 	    play$ $@ caller-w >o to text$ o> +sync
 	THEN  ;]
     2swap $make 64#1 +to msg:timestamp click[] ;
@@ -1637,7 +1644,12 @@ wmsg-o >o msg-table @ token-table ! o>
 	    [:  chat-record-button /flip drop
 		chat-recording-button /flop drop +resize +sync +lang
 		"recording" .net2o-cache/ open-rec+
-		1 to channels  pulse:sample-rate pulse:record-mono
+		1 to channels
+		[IFDEF] android
+		    opensles:sample-rate ['] write-record opensles:record-mono
+		[ELSE]
+		    pulse:sample-rate pulse:record-mono
+		[THEN]
 	    ;] 0 click[]
 	    {{
 		glue*l recording-color# font-size# 40% f* }}frame dup .button3
