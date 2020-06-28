@@ -1755,19 +1755,21 @@ text-chat-cmd-o to chat-cmd-o
 box-actor class
 end-class net2o-actor
 
-also jni
+also [IFDEF] jni jni [THEN]
 
 :noname ( ekey -- )
     case
-	k-volup of  audio-playing IF  1 1 clazz .audioManager .adjustVolume
-	    ELSE  k-up [ box-actor :: ekeyed ]  THEN  endof
-	k-voldown of  audio-playing IF  -1 1 clazz .audioManager .adjustVolume
-	    ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
+	[IFDEF] jni
+	    k-volup of  audio-playing IF  1 1 clazz .audioManager .adjustVolume
+		ELSE  k-up [ box-actor :: ekeyed ]  THEN  endof
+	    k-voldown of  audio-playing IF  -1 1 clazz .audioManager .adjustVolume
+		ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
+	[THEN]
 	k-f5 of  color-theme 0=  IF  anim-end 0.25e o
-		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		[:             fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f6 of  color-theme 0<> IF  anim-end 0.25e o
-		[: 1e fswap f- fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
+		[: 1e fswap f- fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f7 of  >normalscreen   endof
 	k-f8 of  >fullscreen     endof
@@ -1882,7 +1884,7 @@ Variable invitation-stack
 	THEN
     THEN
     1config  !widgets
-    color-theme 0.5e f+ ColorMode! +sync
+    0.1e o [: fdrop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
     get-order n>r ['] /chat >body 1 set-order
     ['] widgets-loop catch
     text-chat-cmd-o to chat-cmd-o
