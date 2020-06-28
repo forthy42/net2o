@@ -1154,6 +1154,7 @@ Variable re-indent#
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
 Hash: audio#
+0 Value audio-playing
 
 [IFDEF] linux
     also require minos2/pulse-audio.fs pulse-init
@@ -1325,6 +1326,7 @@ Variable current-player
 	    THEN
 	THEN
 	caller-w .text$ play$ $@ str=
+	dup to audio-playing
 	IF
 	    addr data $@ ['] >msg-audio-player catch 0= IF
 		pause$ $@ caller-w >o to text$ o> +sync
@@ -1753,8 +1755,14 @@ text-chat-cmd-o to chat-cmd-o
 box-actor class
 end-class net2o-actor
 
+also jni
+
 :noname ( ekey -- )
     case
+	k-volup of  audio-playing IF  1 1 clazz .audioManager .adjustVolume
+	    ELSE  k-up [ box-actor :: ekeyed ]  THEN  endof
+	k-voldown of  audio-playing IF  -1 1 clazz .audioManager .adjustVolume
+	    ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
 	k-f5 of  color-theme 0=  IF  anim-end 0.25e o
 		[:             fdup f>s to color-theme 0.5e f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
@@ -1765,6 +1773,8 @@ end-class net2o-actor
 	k-f8 of  >fullscreen     endof
 	[ box-actor :: ekeyed ]  EXIT
     endcase ; net2o-actor to ekeyed
+
+previous
 
 : net2o[] ( o -- o )
     >o net2o-actor new !act o o> ;
@@ -1872,6 +1882,7 @@ Variable invitation-stack
 	THEN
     THEN
     1config  !widgets
+    color-theme 0.5e f+ ColorMode! +sync
     get-order n>r ['] /chat >body 1 set-order
     ['] widgets-loop catch
     text-chat-cmd-o to chat-cmd-o
