@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+utf-8 set-encoding
+
 require minos2/widgets.fs
 
 also minos

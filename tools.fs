@@ -373,7 +373,7 @@ false Value hash-sanitize?
 : utf8-sanitize ( addr u -- )
     bounds ?DO
 	I ['] xc@+ catch IF
-	    '�' xemit
+	    [ xc-vector @ fixed-width = ] [IF] '?' [ELSE] '�' [THEN] xemit
 	    drop  I I' over -
 	    ['] x-size catch IF  2drop  1  THEN
 	ELSE  xemit I -  THEN
