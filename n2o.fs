@@ -72,7 +72,7 @@ Variable old-order  Variable order-backlog
     get-order       old-order set-stack  previous ;
 : set-net2o-cmds ( -- )
     ['] n2o >body 1 set-order
-    ['] rec-word 1 set-recognizers ;
+    ['] rec-nt 1 set-recognizers ;
 : reset-net2o-cmds ( -- )
     old-recs  get-stack ?dup-IF  set-recognizers                 THEN
     old-order get-stack ?dup-IF  set-order definitions previous  THEN

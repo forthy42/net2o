@@ -2038,14 +2038,14 @@ Defer chat-cmd-file-execute
     ELSE  2drop  THEN ;
 
 : text-rec ( addr u -- )
-    2drop ['] noop rectype-name ;
+    2drop ['] noop rectype-nt ;
 : tag-rec ( addr u -- )
     over c@ '#' = IF
 	over ?flush-text 2dup + to last->in
 	[: 1 /string
 	    \ ." tag: '" forth:type ''' forth:emit forth:cr
 	    $, msg-tag
-	;] rectype-name
+	;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
 : pk-rec ( addr u -- )
     over c@ '@' = IF  2dup 1 /string ':' -skip nick>pk
@@ -2055,7 +2055,7 @@ Defer chat-cmd-file-execute
 	    [:
 		\ ." signal: '" 85type ''' forth:emit forth:cr
 		$, msg-signal
-	    ;] rectype-name
+	    ;] rectype-nt
 	THEN
     ELSE  2drop rectype-null  THEN ;
 : chain-rec ( addr u -- )
@@ -2069,7 +2069,7 @@ Defer chat-cmd-file-execute
 		over abs over u< IF  over 0< IF  +  ELSE  drop  THEN
 		    >r over ?flush-text + to last->in  r>
 		    [: msg-group-o .msg:log[] $[]@ chain, ;]
-		    rectype-name  EXIT  THEN
+		    rectype-nt  EXIT  THEN
 	    endof
 	    2drop
 	endcase
@@ -2078,7 +2078,7 @@ Defer chat-cmd-file-execute
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
 	over ?flush-text 2dup + to last->in
-	[: $, msg-url ;] rectype-name
+	[: $, msg-url ;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
 
 forward hash-in
@@ -2107,7 +2107,7 @@ forward hash-in
 	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
 		$, msg:image# ulit, msg-object ;]
 	    r> free throw  r> to last->in ;]
-	catch 0= IF  rectype-name  EXIT  THEN  THEN
+	catch 0= IF  rectype-nt  EXIT  THEN  THEN
     2drop rectype-null ;
 : audio-rec ( addr u -- .. token )
     2dup "audio:" string-prefix? IF
@@ -2119,7 +2119,7 @@ forward hash-in
 	    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
 		over >r $, msg:audio# ulit, msg-object r> free throw ;]
 	    r> free throw  r> to last->in ;]
-	catch 0= IF  rectype-name  EXIT  THEN  THEN
+	catch 0= IF  rectype-nt  EXIT  THEN  THEN
     2drop rectype-null ;
 
 $Variable msg-recognizer
