@@ -2048,6 +2048,7 @@ Defer chat-cmd-file-execute
 	;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
 : pk-rec ( addr u -- )
+    dup 3 < IF  2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
     over c@ '@' = IF  2dup 1 /string ':' -skip nick>pk
 	2dup d0= IF  2drop 2drop rectype-null
 	ELSE

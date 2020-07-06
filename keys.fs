@@ -1203,6 +1203,7 @@ $Variable dhtroot.n2o
     out-me +dhtroot save-keys ;
 
 : new-key ( nickaddr u -- )
+    dup 2 < !!short-nick!!
     +newphrase new-key, ;
 
 \ revokation

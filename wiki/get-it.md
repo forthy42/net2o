@@ -83,11 +83,11 @@ Create an alias to run the docker:
 Get it in a Snap Container
 --------------------------
 
-I created a snap container.  You need to get snap for your Linux distribution
-(in Ubuntu, it's already there).
+I created a [snap container](https://snapcraft.io/net2o).  You need to get
+snap for your Linux distribution (in Ubuntu, it's already there).
 
 <iframe src="https://snapcraft.io/net2o/embedded?button=black" frameborder="0"
-width="100%" height="300px" style="border: 1px solid #CCC; border-radius:
+width="100%" height="310px" style="border: 1px solid #CCC; border-radius:
 2px;"></iframe>
 
 or the CLI way:
