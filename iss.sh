@@ -62,8 +62,8 @@ AppPublisherURL=http://fossil.net2o.de/net2o
 SignTool=sha1
 SignTool=sha256
 ; add the following sign tools:
-; sha1=signtool sign /a /fd sha1 /tr http://timestamp.comodoca.com/?td=sha1 /td sha1 $f
-; sha256=signtool sign /a /as /fd sha256 /tr http://timestamp.comodoca.com/?td=sha256 /td sha256 $f
+; sha1=signtool sign /a /fd sha1 /tr http://timestamp.entrust.net/TSS/RFC3161sha2TS /td sha1 $f
+; sha256=signtool sign /a /as /fd sha256 /tr http://timestamp.entrust.net/TSS/RFC3161sha2TS /td sha256 $f
 SetupIconFile=net2o.ico
 UninstallDisplayIcon={app}\\net2o.ico
 ArchitecturesInstallIn64BitMode=$X64
