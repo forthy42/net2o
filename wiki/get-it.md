@@ -94,6 +94,19 @@ or the CLI way:
 
     sudo snap install net2o
 
+The net2o snap needs several manual connectors:
+
+    snap connect net2o:netlink-connector :netlink-connector
+	snap connect net2o:locale-control :locale-control
+	snap connect net2o:audio-record :audio-record
+
+The netlink connector is needed to detect changing interfaces
+
+* if interfaces change, connections to peers and DHT entries may need to
+  changes.
+* locale from the host's settings
+* audio recording
+
 And then set an alias
 
     alias n2o=/snap/bin/net2o.n2o
