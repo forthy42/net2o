@@ -42,9 +42,11 @@ Create nat64-ip4 $0064 wbe w, $ff9b wbe w, $0000 w, $0000 w, $0000 w, $0000 w,
 \ Symbolic name may start with '@'+len followed by the name
 
 Variable host$
+$40 Constant max-host# \ maximum allowed size of a hostname is 63 characters
 
 : get-host$ ( -- )
-    pad $100 gethostname drop pad cstring>sstring host$ $! ;
+    max-host# host$ $!len
+    host$ $@ gethostname drop host$ $@ drop cstring>sstring host$ $!len drop ;
 : skip.site ( -- )
     host$ $@ s" .site" string-suffix? IF
 	host$ dup $@len 5 - 5 $del

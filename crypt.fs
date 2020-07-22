@@ -645,6 +645,9 @@ drop
 : pk2-sig? ( addr u -- addr u' flag )
     dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
     2dup sigpk2size# - + >r c:0key 2dup sigsize# - c:hash r> date-sig? ;
+: pk2-date? ( addr u -- addr u' flag )
+    dup sigpk2size# u< IF  sig-unsigned  EXIT  THEN
+    check-date ;
 : sig-params ( -- sksig sk pk )
     my-key? ?dup-IF
 	>o ke-sksig sec@ drop ke-sk sec@ drop ke-pk $@ drop o>  EXIT

@@ -370,6 +370,12 @@ previous
 	    space I $@ .@host.id
 	cell +LOOP cr ;] #map ;
 
+: check-ihave ( sig u1 hash u2 -- sig u1 hash u2 )
+    c:0key 2dup c:hash 2over  dup sigpksize# u< IF  sig-unsigned !!sig!!  THEN
+    2dup sigpksize# - 2dup c:hash + date-sig? !!sig!! 2drop ;
+: gen-ihave ( hash u1 -- sig u2 )
+    c:0key c:hash host$ $@ 2dup c:hash [: type .pk .sig ;] $tmp ;
+
 : msg:ihave ( id u1 hash u2 -- )
     fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
@@ -993,6 +999,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     64>n msg:last ;
 +net2o: msg-want ( $:[hash0,...,hashn] -- ) \g request objects
     $> msg:want ;
+\ ID should be <host><pksig> instead of <pk><host>
 +net2o: msg-ihave ( $:[hash0,...,hashn] $:[id] -- ) \g show what objects you have
     $> $> msg:ihave enqueue ;
 

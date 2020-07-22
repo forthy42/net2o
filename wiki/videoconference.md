@@ -18,6 +18,8 @@
   setup), no own audio in backchannel
   - Bonus points if multiple participants in the same room can be identified
     (e.g. send a short chirp out, and check for it in other audio streams)
+  - room microphone mode — device does not receive audio or video, and can
+    send audio only in push-to-talk mode.
 * Templates for nice presentation recording
 * Set a logo for the talk
 * Have a countdown clock for talk slots

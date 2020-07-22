@@ -738,7 +738,7 @@ key-entry-table $save
 ' context-table is gen-table
 
 : key:nest-sig ( addr u -- addr u' flag )
-    pk2-sig? dup ?EXIT drop
+    no-ed-check? IF  pk2-date?  ELSE  pk2-sig?  THEN  dup ?EXIT drop
     2dup addnick-owndht
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
