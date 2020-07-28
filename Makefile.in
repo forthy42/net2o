@@ -49,7 +49,7 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  doc/net2o.png doc/user.png json/parser.fs json/g+-schema.fs	      \
 	  json/g+-import.fs json/fb-schema.fs json/twitter-schema.fs	      \
 	  json/test.fs json/test.json json/diaspora-schema.fs html/parser.fs  \
-	  xml/parser.fs xml/blogger-atom.fs
+	  xml/parser.fs xml/blogger-atom.fs n2o-completion.sh
 
 ICONS = icons/hicolor/128x128/apps/net2o.png				      \
 	icons/hicolor/16x16/apps/net2o.png				      \
@@ -180,6 +180,8 @@ install:	install-libs libcc-install
 	for i in $(ICONS) $(DESKTOP); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$$i; \
 	done
+	if [ -d /etc/bash_completion.d ]; then \
+	$(INSTALL_DATA) n2o-completion.sh /etc/bash_completion.d; fi
 
 %.dirui:
 	$(RMDIR) $(datadir)/gforth/$(GFVER)/$(@:%.dirui=%); \

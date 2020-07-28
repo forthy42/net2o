@@ -144,7 +144,7 @@ cmd-class class{ msg
     field: peers[]
     field: keys[]
     field: log[]
-    field: hashs[]
+    field: haves[] \ hashs+devices+sig sorted by date
     field: pks#
     field: perms# \ pk -> permission map
     field: mode
@@ -359,7 +359,7 @@ cmd-class class
     $10 +field ipv6
     wfield: portv4
     wfield: portv6
-    field: anchor \ net2o anchor (is a pubkey)
+    field: anchor \ net2o anchor (is a pubkey+hostname)
     field: route  \ net2o route
     field: revoke \ is a revoke path
     field: key    \ psk for connection setup
