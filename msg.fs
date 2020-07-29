@@ -167,6 +167,11 @@ event: :>load-msg ( group-o -- )
 	log# msg-group-o .msg:log[] $[]@ last-msg 2!
 	0< IF  #0.  ELSE  last-msg 2@  THEN
     ;] msglog-sema c-section ;
+: +msg-sighash ( addrhash u1 addrsig u2 -- )
+    [: msg-group-o >o msg:sigs[] $ins[]date dup >r 0>= IF
+	    $make { w^ hash }
+	    hash cell msg:haves[] r@ cells $ins
+	THEN  rdrop o> ;] msglog-sema c-section ;
 : ?save-msg ( -- )
     msg( ." saving messages in group " msg-group-o dup hex. .msg:name$ type cr )
     msg-group-o .msg:?otr replay-mode @ or 0= IF  save-msgs&  THEN ;

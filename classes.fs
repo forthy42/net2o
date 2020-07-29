@@ -144,7 +144,8 @@ cmd-class class{ msg
     field: peers[]
     field: keys[]
     field: log[]
-    field: haves[] \ hashs+devices+sig sorted by date
+    field: sigs[]  \ sigs sorte by date
+    field: haves[] \ corresponding hashs
     field: pks#
     field: perms# \ pk -> permission map
     field: mode
