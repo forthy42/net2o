@@ -442,7 +442,7 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     1 !!>order? $> msg:start ;
 +net2o: msg-tag ( $:tag -- ) \g tagging (can be anywhere)
-    $> msg:tag ;
+    2 !!>=order? $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
     2 !!>=order? $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
@@ -473,6 +473,19 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     msg:unlock ;
 +net2o: msg-perms ( $:pk perm -- ) \g permissions
     $> msg:perms ;
+
+$60 +net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
+    1 !!>order? $40 c-state !  $> msg:silent-start ;
++net2o: msg-hashs+id ( $:hashs $:id -- ) \g ihave within signed message
+    $41 !!>order?  $> $> msg:ihave ;
++net2o: msg-otrify2 ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR, silent version
+    $> $> msg:otrify ;
++net2o: msg-updates ( $:fileinfo $:hash -- ) \g Files got an update.
+    \g The fileinfo string contains fileno:len tuples in command encoding.
+    \g Each additional context is hashed to a 64 byte hash, and all the hashs
+    \g are hashed together sequentially in the same order as the fileinfo
+    \g describes.
+    $> $> msg:updates ;
 }scope
 
 msg-table $save

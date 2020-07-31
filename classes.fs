@@ -184,6 +184,11 @@ cmd-class class{ msg
     method away
     method perms
     method end
+
+    method silent-start
+    method have
+    method updates
+    
     method display   \ display one message
     method redisplay \ display full set
     method .nobody   \ show nobody is online
