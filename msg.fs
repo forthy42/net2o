@@ -167,11 +167,6 @@ event: :>load-msg ( group-o -- )
 	log# msg-group-o .msg:log[] $[]@ last-msg 2!
 	0< IF  #0.  ELSE  last-msg 2@  THEN
     ;] msglog-sema c-section ;
-: +msg-sighash ( addrhash u1 addrsig u2 -- )
-    [: msg-group-o >o msg:sigs[] $ins[]date dup >r 0>= IF
-	    $make { w^ hash }
-	    hash cell msg:haves[] r@ cells $ins
-	THEN  rdrop o> ;] msglog-sema c-section ;
 : ?save-msg ( -- )
     msg( ." saving messages in group " msg-group-o dup hex. .msg:name$ type cr )
     msg-group-o .msg:?otr replay-mode @ or 0= IF  save-msgs&  THEN ;
@@ -381,13 +376,10 @@ previous
 : gen-ihave ( hash u1 -- sig u2 )
     c:0key c:hash host$ $@ 2dup c:hash [: type .pk .sig ;] $tmp ;
 
-: msg:ihave ( id u1 hash u2 -- )
-    fetch( ." ihave:" 2over .@host.id 2dup bounds U+DO
-    forth:cr I keysize 85type keysize +LOOP forth:cr )
-    2over 2over >mehave ihave[] $[]+!
+: >ihave.id ( hash u1 pk.id u2 -- )
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : >ihave ( hash u -- )
-    0 .pk.host 2over  msg:ihave  2drop ( >send-have ) ;
+    pk@ key| [: type host$ $. ;] $tmp >ihave.id ;
 
 : msg-pack ( -- xt )
     0 push$ !@  0 mehave[] !@   0 ihave[] !@
@@ -477,15 +469,15 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 $60 +net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
 +net2o: msg-hashs+id ( $:hashs $:id -- ) \g ihave within signed message
-    $41 !!>order?  $> $> msg:ihave ;
+    $40 !!order?  $> $> msg:have ;
 +net2o: msg-otrify2 ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR, silent version
-    $> $> msg:otrify ;
+    $40 !!order?  $> $> msg:otrify ;
 +net2o: msg-updates ( $:fileinfo $:hash -- ) \g Files got an update.
     \g The fileinfo string contains fileno:len tuples in command encoding.
     \g Each additional context is hashed to a 64 byte hash, and all the hashs
     \g are hashed together sequentially in the same order as the fileinfo
     \g describes.
-    $> $> msg:updates ;
+    $40 !!order?  $> $> msg:updates ;
 }scope
 
 msg-table $save
@@ -537,6 +529,7 @@ scope: logstyles
     last# >r  2dup key| to msg:id$
     [: .simple-id ." : " ;] $tmp notify-nick!
     r> to last# ; msg-notify-class is msg:start
+' 2drop msg-notify-class is msg:silent-start
 :noname ( addr u -- ) "#" notify+ $utf8> notify+
 ; msg-notify-class is msg:tag
 :noname ( addr u -- )
@@ -552,7 +545,8 @@ scope: logstyles
 :noname 2drop 64drop ; msg-notify-class is msg:perms
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
-:noname 2drop 2drop ; msg-notify-class is msg:otrify
+:noname 2drop 2drop ; dup msg-notify-class is msg:otrify
+msg-notify-class is msg:have
 :noname case
 	msg:image# of 2drop "img[] " notify+ endof
 	msg:thumbnail# of 2drop "thumb[] " notify+ endof
@@ -614,6 +608,8 @@ end-class msg-?hash-class
     2dup enddate@ .log-end
     .key-id ." : " 
     r> to last# ; msg-class is msg:start
+:noname ( addr u -- )
+    key| to msg:id$ ; msg-class is msg:silent-start
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
@@ -653,6 +649,11 @@ end-class msg-?hash-class
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
+:noname ( id u1 hash u2 -- )
+    fetch( ." ihave:" msg:id$ .key-id 2over '.' emit type 2dup bounds U+DO
+    forth:cr I keysize 85type keysize +LOOP forth:cr )
+    2swap msg:id$ [: type type ;] $tmp 2swap  >ihave.id ;
+msg-class is msg:have
 
 event: :>hash-finished { d: hash -- }
     fetch( ." finished " 2dup 85type forth:cr )
@@ -1017,9 +1018,9 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     64>n msg:last ;
 +net2o: msg-want ( $:[hash0,...,hashn] -- ) \g request objects
     $> msg:want ;
-\ ID should be <host><pksig> instead of <pk><host>
+\ old ihave, ignore it
 +net2o: msg-ihave ( $:[hash0,...,hashn] $:[id] -- ) \g show what objects you have
-    $> $> msg:ihave enqueue ;
+    $> $> 2drop 2drop ;
 
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF

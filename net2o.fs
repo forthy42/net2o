@@ -1601,6 +1601,7 @@ Sema lp-sema
 
 Forward cmd-exec ( addr u -- )
 
+: !!order?   ( n -- )   c-state @ <>  !!inv-order!! ;
 : !!<order?   ( n -- )  dup c-state @ u>  !!inv-order!! c-state or! ;
 : !!>order?   ( n -- )  dup c-state @ u<= !!inv-order!! c-state or! ;
 : !!>=order?   ( n -- )  dup c-state @ over 1- invert and u< !!inv-order!! c-state or! ;
