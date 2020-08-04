@@ -81,17 +81,13 @@ Sema msglog-sema
 
 forward msg-scan-hash
 forward msg-add-hashs
-forward msg-serialize-hash
 
 : serialize-log ( addr u -- $addr )
-    [: [: bounds ?DO
-		I $@ check-date 0= IF
-		    2dup msg:display
-		    net2o-base:$, net2o-base:nestsig
-		ELSE   msg( ." removed entry " dump )else( 2drop )  THEN
-	    cell +LOOP
-	    msg-serialize-hash
-	;] msg-scan-hash ;] gen-cmd ;
+    [: bounds ?DO
+	    I $@ check-date 0= IF
+		net2o-base:$, net2o-base:nestsig
+	    ELSE   msg( ." removed entry " dump )else( 2drop )  THEN
+	cell +LOOP  ;] gen-cmd ;
 
 : scan-log-hashs ( -- )
     msg-log@ over >r
@@ -323,7 +319,6 @@ event: :>msg-nestsig ( $addr o group -- )
 
 Forward msg:last?
 Forward msg:last
-Forward msg:want
 
 hash: have#       \ list of owner ids per hash
 hash: have-group# \ list of interested groups per hash
@@ -1016,8 +1011,9 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) \g query result
     64>n msg:last ;
+\ old want, ignore it
 +net2o: msg-want ( $:[hash0,...,hashn] -- ) \g request objects
-    $> msg:want ;
+    $> 2drop ;
 \ old ihave, ignore it
 +net2o: msg-ihave ( $:[hash0,...,hashn] $:[id] -- ) \g show what objects you have
     $> $> 2drop 2drop ;
@@ -1052,11 +1048,6 @@ also }scope
 
 \ serialize hashes
 
-: ?ihave ( addr u pk$ want# -- ) { pk$ want# -- }
-    2dup need-hashed? 0= IF
-	pk$ $@ 2over have# #!ins[]
-	2dup pk$ $@ want# #+!
-    THEN ;
 : msg-add-hashs ( -- )
     0 .pk.host $make { w^ pk$ }
     ?hashs[] pk$ [{: pk$ :}l
@@ -1065,28 +1056,6 @@ also }scope
 	THEN  2drop
     ;] $[]map
     ?hashs[] $[]free
-    pk$ $free ;
-
-: msg-serialize-hash ( -- )
-    0 .pk.host $make { w^ pk$ | w^ want# }
-    ?hashs[] want# pk$ [{: want# pk$ :}l
-	2dup have# #@ dup IF
-	    false { flag }
-	    bounds U+DO
-		2dup I $@ want# #+!
-		I $@ pk$ $@ str= +to flag
-	    cell +LOOP
-	    flag 0= IF  pk$ want# ?ihave  THEN
-	ELSE
-	    2drop  pk$ want# ?ihave
-	THEN
-	2drop
-    ;] $[]map
-    want# [:
-	msg( dup $@ .@host.id ." : " dup cell+ $@ 85type forth:cr )
-	dup cell+ $@ $, $@ $, msg-ihave ;] #map
-    ?hashs[] $[]free
-    want# #frees
     pk$ $free ;
 
 msging-table $save
@@ -1158,23 +1127,6 @@ in net2o : copy-msg ( filename u -- )
 
 $20 Value max-last#
 $20 Value ask-last#
-
-$8 Value max-want#
-: have>want ( hashs u want# -- ) { want# }
-    \ transform have into wants
-    bounds U+DO
-	I keysize have# #@ bounds U+DO
-	    J keysize I $@ want# #+!
-	cell +LOOP
-    keysize +LOOP ;
-: want, ( index -- )
-    \ compile a single want
-    over $@len over cell+ $@len + 8 + maxstring u< IF
-	dup cell+ $@ $, $@ $, msg-ihave
-    ELSE  drop  THEN ;
-: msg:want ( hashs u -- )
-    { | w^ want# } want# have>want
-    want# [: want, ;] #map want# #free ;
 
 Variable ask-msg-files[]
 
