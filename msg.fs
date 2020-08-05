@@ -460,6 +460,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     msg:unlock ;
 +net2o: msg-perms ( $:pk perm -- ) \g permissions
     $> msg:perms ;
++net2o: msg-vote ( xchar -- ) \g add a vote tag; votes are set by likes
+    64>n msg:vote ;
 
 $60 +net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
@@ -532,7 +534,6 @@ scope: logstyles
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
-' drop  msg-notify-class is msg:like
 ' 2drop msg-notify-class is msg:chain
 ' 2drop msg-notify-class is msg:re
 ' 2drop  msg-notify-class is msg:lock
@@ -552,6 +553,7 @@ msg-notify-class is msg:have
 :noname ( -- )
     msg-notify ; msg-notify-class is msg:end
 :noname ( xchar -- ) ['] xemit $tmp notify+ ; msg-notify-class is msg:like
+:noname ( xchar -- ) [: cr ." vote: " xemit ;] $tmp notify+ ; msg-notify-class is msg:vote
 
 \ msg scan for hashes class
 
@@ -569,6 +571,7 @@ end-class msg-?hash-class
 ' 2drop msg-?hash-class is msg:text
 ' 2drop msg-?hash-class is msg:url
 ' drop  msg-?hash-class is msg:like
+' drop  msg-?hash-class is msg:vote
 :noname ( addr u -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock  THEN ; msg-?hash-class is msg:lock
@@ -626,6 +629,8 @@ end-class msg-?hash-class
     <warn> forth:type <default> ; msg-class is msg:url
 :noname ( xchar -- )
     <info> utf8emit <default> ; msg-class is msg:like
+:noname ( xchar -- )
+    <info> cr ." vote: " utf8emit <default> ; msg-class is msg:vote
 :noname ( addr u -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
@@ -1724,9 +1729,6 @@ also net2o-base scope: /chat
     umethod /gps ( addr u -- )
     \U gps                  send coordinates
     \G gps: send your coordinates
-    umethod /imgs ( addr u -- )
-    \U imgs                 print out img list
-    \G imgs: print out hashes for album viewer
     umethod /have ( addr u -- )
     \U have                 print out have list
     \G have: print out the hashes and their providers
@@ -1734,9 +1736,14 @@ also net2o-base scope: /chat
     \U help                 show help
     \G help: list help
     synonym /here /gps
+    umethod /imgs ( addr u -- )
+    \U imgs                 print out img list
+    \G imgs: print out hashes for album viewer
     umethod /invitations ( addr u -- )
     \U invitations          handle invitations
     \G invitations: handle invitations: accept, ignore or block invitations
+    umethod /like ( addr u -- )
+    \U like #line [emoji]   like message
     umethod /log ( addr u -- )
     \U log [#lines]         show log
     \G log: show the log, default is a screenful
@@ -1915,6 +1922,14 @@ is /help
     THEN ; is /logstyle
 
 :noname ( addr u -- )
+    bl $split 2swap s>unumber? 0= abort" Line number needed!" drop >r
+    IF  xc@  ELSE  drop  '👍'  THEN  r>
+    msg-group-o .msg:log[] $[]# >r
+    dup 0< IF   r@ +  THEN  r> dup 0<> - umin
+    [: msg-group-o .msg:log[] $[]@ chain,
+	ulit, msg-like ;] (send-avalanche) drop .chat save-msgs& ; is /like
+
+:noname ( addr u -- )
     [: BEGIN  bl $split 2>r dup  WHILE  s>number? WHILE
 		    drop do-otrify  2r>  REPEAT THEN
 	2drop 2r> 2drop  now>otr
@@ -2025,6 +2040,12 @@ Defer chat-cmd-file-execute
 	    $, msg-tag
 	;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
+: vote-rec ( addr u -- )
+    2dup "vote:" string-prefix? IF
+	over ?flush-text 2dup + to last->in
+	5 /string drop xc@
+	[: ulit, msg-vote ;] rectype-nt
+    ELSE  2drop rectype-null  THEN ;
 : pk-rec ( addr u -- )
     dup 3 < IF  2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
     over c@ '@' = IF  2dup 1 /string ':' -skip nick>pk
@@ -2103,7 +2124,8 @@ forward hash-in
 
 $Variable msg-recognizer
 depth >r
-' text-rec ' audio-rec ' img-rec ' http-rec ' chain-rec ' tag-rec ' pk-rec
+' text-rec  ' vote-rec  ' audio-rec ' img-rec
+' http-rec  ' chain-rec ' tag-rec   ' pk-rec
 depth r> - msg-recognizer set-stack
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r

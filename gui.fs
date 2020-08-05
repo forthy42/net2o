@@ -783,6 +783,7 @@ Variable like-char
 ' 2drop posting-log-class is msg:id
 ' 2drop posting-log-class is msg:text
 ' 2drop posting-log-class is msg:action
+' drop  posting-log-class is msg:vote \ !!FIXME!! what do we need here?
 :noname ( addr u -- )
     like-char @ 0= IF  2drop  EXIT  THEN
     8 umin { | w^ id+like }
@@ -965,11 +966,13 @@ Variable re-indent#
     [: +resize +sync ;] msgs-box .vp-needed ;
 ' re-log#-token is update-log
 
-: new-msg-par ( -- )
+: msg-start-par ( -- )
     {{ }}p "msg-par" name!
     dup .subbox box[] drop box[] cbl >bl
     dup .subbox "msg-box" name!
-    to msg-box to msg-par
+    to msg-box to msg-par ;
+: new-msg-par ( -- )
+    msg-start-par
     \sans \script cbl re-green log-mask @ +log#-date-token msg-box .child+
     \normal cbl ;
 :noname { d: pk -- o }
@@ -1031,6 +1034,20 @@ Variable re-indent#
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
 ; wmsg-class is msg:text
+:noname { xc -- }
+    text-color!
+    xc ['] xemit $tmp }}text 25%bv
+    "like" name! msg-box .child+
+; wmsg-class is msg:like
+:noname { xc -- }
+    msg:end msg-start-par
+    {{
+	glue*l send-color x-color font-size# 40% f* }}frame dup .button2
+	text-color!
+	xc [: ." vote: " xemit ;] $tmp }}text 25%b
+    }}z box[]
+    "vote" name! msg-box .child+
+; wmsg-class is msg:vote
 :noname { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular

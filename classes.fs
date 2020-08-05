@@ -181,6 +181,7 @@ cmd-class class{ msg
     method unlock
     method away
     method perms
+    method vote
     method end
 
     method silent-start
