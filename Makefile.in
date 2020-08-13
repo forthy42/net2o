@@ -24,6 +24,7 @@ datadir   = $(package)@datadir@
 srcdir    = @srcdir@
 bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
+sysconfdir = $(package)@sysconfdir@
 LIBCCDEST = $(libdir)/gforth/$(GFVER)/$(machine)/libcc-named
 libccdir = $(subst $(package),,$(LIBCCDEST))
 LIBS 	 = keccakp threefish ed25519-donna bdelta
@@ -180,8 +181,8 @@ install:	install-libs libcc-install
 	for i in $(ICONS) $(DESKTOP); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$$i; \
 	done
-	if [ -d /etc/bash_completion.d ]; then \
-	$(INSTALL_DATA) n2o-completion.sh /etc/bash_completion.d; fi
+	$(MKDIR) -p $(sysconfdir)/bash_completion.d
+	$(INSTALL_DATA) n2o-completion.sh $(sysconfdir)/bash_completion.d
 
 %.dirui:
 	$(RMDIR) $(datadir)/gforth/$(GFVER)/$(@:%.dirui=%); \
