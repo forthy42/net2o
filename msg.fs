@@ -431,9 +431,9 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     1 !!>order? $> msg:start ;
 +net2o: msg-tag ( $:tag -- ) \g tagging (can be anywhere)
-    2 !!>=order? $> msg:tag ;
+    ( 2 !!>=order? ) $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
-    2 !!>=order? $> msg:id ;
+    ( 2 !!>=order? ) $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
     ( $10 !!>=order? ) $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
