@@ -397,17 +397,19 @@ previous
     ELSE  do-msg-nestsig  THEN ;
 
 : date>i ( date -- i )
-    msg-group-o .msg:log[] $search[]date msg-group-o .msg:log[] $[]# 1- umin ;
+    msg-group-o .msg:log[] dup $[]# >r $search[]date r> 1- umin ;
 : date>i' ( date -- i )
-    msg-group-o .msg:log[] $search[]date msg-group-o .msg:log[] $[]# umin ;
+    msg-group-o .msg:log[] dup $[]# >r $search[]date r> umin ;
 : sighash? ( addr u -- flag )
     over le-64@ date>i
     dup 0< IF  drop 2drop  false  EXIT  THEN  >r
     over le-64@ 64#1 64+ date>i' >r [ 1 64s ]L /string
     r> r> U+DO
 	c:0key I msg-group-o .msg:log[] $[]@ sigonly@ >hash
-	2dup hashtmp over str= IF  I to log#  2drop true  UNLOOP   EXIT
-	ELSE  ( 2dup 85type ."  <> " hashtmp over 85type )  THEN
+	2dup hashtmp over str= IF
+	    verbose( ." match @"  i . forth:cr )
+	    I to log#  2drop true  UNLOOP   EXIT
+	ELSE  verbose( 2dup 85type ."  <> " hashtmp over 85type )  THEN
     LOOP
     2drop false ;
 
@@ -615,11 +617,10 @@ end-class msg-?hash-class
     IF   <err>  THEN ." @" .key-id? <default>
     r> to last# ; msg-class is msg:signal
 :noname ( addr u -- )
-    last# >r last# $@ >group
     2dup sighash? IF  <info>  ELSE  <err>  THEN
     ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
-    r> to last# ; msg-class is msg:chain
+; msg-class is msg:chain
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]->" <default> ; msg-class is msg:re
 :noname ( addr u -- )
