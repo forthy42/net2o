@@ -431,27 +431,27 @@ reply-table $@ inherit-table msg-table
 $20 net2o: msg-start ( $:pksig -- ) \g start message
     1 !!>order? $> msg:start ;
 +net2o: msg-tag ( $:tag -- ) \g tagging (can be anywhere)
-    ( 2 !!>=order? ) $> msg:tag ;
+    2 !!>=order? $> msg:tag ;
 +net2o: msg-id ( $:id -- ) \g a hash id
-    ( 2 !!>=order? ) $> msg:id ;
+    2 !!>=order? $> msg:id ;
 +net2o: msg-chain ( $:dates,sighash -- ) \g chained to message[s]
-    ( $10 !!>=order? ) $> msg:chain ;
+    2 !!>=order? $> msg:chain ;
 +net2o: msg-signal ( $:pubkey -- ) \g signal message to one person
-    $> msg:signal ;
+    2 !!>=order? $> msg:signal ;
 +net2o: msg-re ( $:hash ) \g relate to some object
-    4 !!>=order? $> msg:re ;
+    2 !!>=order? $> msg:re ;
 +net2o: msg-text ( $:msg -- ) \g specify message string
-    8 !!>=order? $> msg:text ;
+    2 !!>=order? $> msg:text ;
 +net2o: msg-object ( $:object type -- ) \g specify an object, e.g. an image
-    8 !!>=order? 64>n $> rot msg:object ;
+    2 !!>=order? 64>n $> rot msg:object ;
 +net2o: msg-action ( $:msg -- ) \g specify action string
-    8 !!>=order? $> msg:action ;
+    2 !!>=order? $> msg:action ;
 +net2o: msg-payment ( $:contract -- ) \g payment transaction
-    8 !!>=order? $> msg:payment ;
+    2 !!>=order? $> msg:payment ;
 +net2o: msg-otrify ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR
     $> $> msg:otrify ;
 +net2o: msg-coord ( $:gps -- ) \g GPS coordinates
-    8 !!>=order? $> msg:coord ;
+    2 !!>=order? $> msg:coord ;
 +net2o: msg-url ( $:url -- ) \g specify message URL
     $> msg:url ;
 +net2o: msg-like ( xchar -- ) \g add a like
@@ -465,7 +465,7 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 +net2o: msg-vote ( xchar -- ) \g add a vote tag; votes are set by likes
     64>n msg:vote ;
 
-$60 +net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
+$60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
 +net2o: msg-hashs+id ( $:hashs $:id -- ) \g ihave within signed message
     $40 !!order?  $> $> msg:have ;
