@@ -843,7 +843,7 @@ msg-class is msg:object
 	last# >r last# $@ >group
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks
-	    1+ msg-group-o .msg:log[9 $[]# umin swap  THEN
+	    1+ msg-group-o .msg:log[] $[]# umin swap  THEN
 	U+DO
 	    I msg-group-o .msg:log[] $[]@
 	    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
