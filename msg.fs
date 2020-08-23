@@ -842,7 +842,7 @@ msg-class is msg:object
     u' 64'+ u =  u sigsize# = and IF
 	last# >r last# $@ >group
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
-	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
+	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks 1+ swap  THEN
 	U+DO
 	    I msg-group-o .msg:log[] $[]@
 	    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
@@ -1600,7 +1600,7 @@ also net2o-base
 	over keysize pk@ key| str= IF
 	    keysize /string $,
 	    r> new-otrsig $,
-	    msg-otrify
+	    msg-otrify 2drop
 	ELSE
 	    rdrop 2drop 2drop ." not your message!" forth:cr
 	THEN
@@ -2324,7 +2324,7 @@ scope{ /chat
     chat-history  ['] /chat >body 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
-    BEGIN  get-input-line
+    BEGIN  .status get-input-line .unstatus
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats  xchar-history
