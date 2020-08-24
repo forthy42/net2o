@@ -71,7 +71,7 @@ Variable old-order  Variable order-backlog
     also get-current context !
     get-order       old-order set-stack  previous ;
 : set-net2o-cmds ( -- )
-    ['] n2o >body 1 set-order
+    ['] n2o >wordlist 1 set-order
     ['] rec-nt 1 set-recognizers ;
 : reset-net2o-cmds ( -- )
     old-recs  get-stack ?dup-IF  set-recognizers                 THEN
@@ -89,7 +89,7 @@ Variable old-order  Variable order-backlog
 : (n2o-quit) ( -- )
     \ exits only through THROW etc.
     BEGIN
-	.status cr refill  WHILE
+	cr .status refill  WHILE
 	    interpret prompt
     REPEAT  -56 throw ;
 
@@ -121,7 +121,7 @@ scope{ n2o
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
     n2o-greeting
-    ?cr ?nextarg IF
+    ?nextarg IF
 	BEGIN
 	    2dup over c@ '-' = IF
 		." === Options ===" cr
@@ -566,7 +566,7 @@ warnings !
     \U cmd
     \G cmd: Offer a net2o command line for client stuff
     get-me
-    [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" cr ;] do-debug
+    [: ." net2o interactive shell, type 'bye' to quit, 'help' for help" ;] do-debug
     0 to script? n2o-cmds ;
 
 : script ( -- )

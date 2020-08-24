@@ -2321,15 +2321,16 @@ scope{ /chat
 \ chat toplevel
 
 : do-chat ( addr u -- )
-    get-order n>r
+    status-xts get-stack n>r  get-order n>r
     chat-history  ['] /chat >wordlist 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
+    [: #0. /chat:/peers ;] ['] .stacks ['] .order 3 status-xts set-stack
     BEGIN  .status get-input-line .unstatus
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
     REPEAT  2drop leave-chats  xchar-history
-    nr> set-order ;
+    nr> set-order nr> status-xts set-stack ;
 
 : avalanche-to ( o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
