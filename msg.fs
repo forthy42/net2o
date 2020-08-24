@@ -2018,7 +2018,7 @@ Defer chat-cmd-file-execute
     ?slash dup 0= ?EXIT  drop
     bl $split 2swap
     2dup save-mem over >r '/' r@ c!
-    ['] /chat >body find-name-in r> free throw
+    ['] /chat >wordlist find-name-in r> free throw
     ?dup-IF  nip nip name>int chat-cmd-file-execute true
     ELSE  drop 1- -rot + over - false
     THEN ;
@@ -2322,7 +2322,7 @@ scope{ /chat
 
 : do-chat ( addr u -- )
     get-order n>r
-    chat-history  ['] /chat >body 1 set-order
+    chat-history  ['] /chat >wordlist 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     BEGIN  .status get-input-line .unstatus

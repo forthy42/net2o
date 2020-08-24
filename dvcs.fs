@@ -418,7 +418,7 @@ Defer hash-import ' noop is hash-import
     ['] new-files-in do-refs ;
 
 : config>dvcs ( o:dvcs -- )
-    "~+/.n2o/config" ['] project >body read-config
+    "~+/.n2o/config" ['] project >wordlist read-config
     project:revision$ $@ base85>$ dvcs:oldid$ $! ;
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
@@ -523,7 +523,7 @@ previous
 : save-project ( -- )
     dvcs( ." saving '" dvcs:id$ $@ 85type cr )
     dvcs:id$ $@ project:revision$ 85$!
-    "~+/.n2o/config" ['] project >body write-config ;
+    "~+/.n2o/config" ['] project >wordlist write-config ;
 
 \ init project
 

@@ -296,7 +296,7 @@ Variable scope<>
     class cs-scope: ;
 : }class ( methods vars -- )
     context @ }scope
-    [: body> name>string type ." -class" ;] $tmp nextname
+    [: >voc name>string type ." -class" ;] $tmp nextname
     end-class ;
 
 : struct{ ( "scope" -- vars )
@@ -559,7 +559,7 @@ forward default-host
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
-    config-file$ $@ 2dup file-status nip ['] config >body swap
+    config-file$ $@ 2dup file-status nip ['] config >wordlist swap
     no-file# = IF  ?old-config  ELSE
 	0 addr config-throw ['] read-config !wrapper default-host
     THEN  rootdirs>path ;

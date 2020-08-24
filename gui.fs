@@ -1904,7 +1904,7 @@ Variable invitation-stack
     THEN
     1config  !widgets
     0.1e o [: fdrop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
-    get-order n>r ['] /chat >body 1 set-order
+    get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch
     text-chat-cmd-o to chat-cmd-o
     nr> set-order throw ;
@@ -1930,7 +1930,7 @@ lang:zh include-locale lang/zh
 lang:en include-locale lang/en
 
 : ??lang ( addr u -- )
-    ['] lang >body find-name-in ?dup-IF  execute  THEN ;
+    ['] lang >wordlist find-name-in ?dup-IF  execute  THEN ;
 
 s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
 
