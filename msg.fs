@@ -374,7 +374,7 @@ previous
 : >ihave.id ( hash u1 pk.id u2 -- )
     bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : >ihave ( hash u -- )
-    pk@ key| [: type host$ $. ;] $tmp >ihave.id ;
+    0 .pk@ key| [: type host$ $. ;] $tmp >ihave.id ;
 
 : msg-pack ( -- xt )
     0 push$ !@  0 mehave[] !@   0 ihave[] !@
