@@ -356,8 +356,8 @@ previous
 
 : .@host.id ( pk+host u -- )
     '@' emit
-    2dup keysize2 safe/string type '.' emit
-    key2| .simple-id ;
+    sigpksize# - 2dup type '.' emit
+    + keysize .simple-id ;
 : .ihaves ( -- )
     ." ====== hash owend by ======" cr
     have# [: dup $@ 85type ." :"
@@ -372,9 +372,9 @@ previous
     c:0key c:hash host$ $@ 2dup c:hash [: type .pk .sig ;] $tmp ;
 
 : >ihave.id ( hash u1 pk.id u2 -- )
-    bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
+    2swap bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : >ihave ( hash u -- )
-    0 .pk@ key| [: type host$ $. ;] $tmp >ihave.id ;
+    2dup 0 .gen-ihave >ihave.id ;
 
 : msg-pack ( -- xt )
     0 push$ !@  0 mehave[] !@   0 ihave[] !@
