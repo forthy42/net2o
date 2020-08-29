@@ -36,6 +36,8 @@ a protocol not designed to be assisted by hardware.
 [Richard Stallman on how to fix the surveillance
 systems](https://www.theguardian.com/commentisfree/2018/apr/03/facebook-abusing-data-law-privacy-big-tech-surveillance)
 
+[Cory Doctorow on how to destroy surveillance capitalism](https://onezero.medium.com/how-to-destroy-surveillance-capitalism-8135e6744d59)
+
 ## What needs to be fixed? ##
 
 * IP: Use switch-based simple routing, don't route every packet

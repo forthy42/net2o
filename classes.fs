@@ -140,6 +140,7 @@ cmd-class class{ msg
     $value: name$ \ group name
     $value: id$   \ id of current message
     $value: msg$  \ decrypted message
+    $value: hashs$ \ state: hashs for hash+ids
     64value: timestamp \ timestamp of message
     field: peers[]
     field: keys[]
@@ -185,7 +186,8 @@ cmd-class class{ msg
     method end
 
     method silent-start
-    method have
+    method hashs
+    method hash-id
     method updates
     
     method display   \ display one message

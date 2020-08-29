@@ -369,7 +369,7 @@ previous
     c:0key 2dup c:hash 2over  dup sigpksize# u< IF  sig-unsigned !!sig!!  THEN
     2dup sigpksize# - 2dup c:hash + date-sig? !!sig!! 2drop ;
 : gen-ihave ( hash u1 -- sig u2 )
-    c:0key c:hash host$ $@ 2dup c:hash [: type .pk .sig ;] $tmp ;
+    host$ $@ [: type .pk ;] $tmp ;
 
 : >ihave.id ( hash u1 pk.id u2 -- )
     2swap bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
@@ -467,8 +467,10 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 
 $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
-+net2o: msg-hashs+id ( $:hashs $:id -- ) \g ihave within signed message
-    $40 !!order?  $> $> msg:have ;
++net2o: msg-hashs ( $:hashs -- ) \g ihave part 1 within signed message
+    $40 !!order?  $> msg:hashs ;
++net2o: msg-id ( $:id -- ) \g ihave part 2 within signed message
+    $41 !!order?  $> msg:hash-id ;
 +net2o: msg-otrify2 ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR, silent version
     $40 !!order?  $> $> msg:otrify ;
 +net2o: msg-updates ( $:fileinfo $:hash -- ) \g Files got an update.
@@ -543,8 +545,9 @@ scope: logstyles
 :noname 2drop 64drop ; msg-notify-class is msg:perms
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
-:noname 2drop 2drop ; dup msg-notify-class is msg:otrify
-msg-notify-class is msg:have
+:noname 2drop 2drop ; msg-notify-class is msg:otrify
+' 2drop msg-notify-class is msg:hashs
+' 2drop msg-notify-class is msg:hash-id
 :noname case
 	msg:image# of 2drop "img[] " notify+ endof
 	msg:thumbnail# of 2drop "thumb[] " notify+ endof
@@ -650,11 +653,15 @@ end-class msg-?hash-class
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
-:noname ( id u1 hash u2 -- )
-    fetch( ." ihave:" msg:id$ .key-id 2over '.' emit type 2dup bounds U+DO
+:noname ( hash u -- )
+    to msg:hashs$
+; msg-class is msg:hashs
+:noname ( id u -- )
+    fetch( ." ihave:" msg:id$ .key-id '.' emit 2dup type msg:hashs$ bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
-    2swap msg:id$ [: type type ;] $tmp 2swap  >ihave.id ;
-msg-class is msg:have
+    msg:id$ key| [: 2swap type type ;] $tmp
+    msg:hashs$ 2swap >ihave.id
+; msg-class is msg:hash-id
 
 event: :>hash-finished { d: hash -- }
     fetch( ." finished " 2dup 85type forth:cr )
