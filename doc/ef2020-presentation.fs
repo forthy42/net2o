@@ -165,8 +165,8 @@ $44FFFFFF re-color author#
 		\skip
 		l"   Snowden made clear that the libertarian framing is not his thing." p\\
 		\italic
-		l"    “We have legalised the abuse of the person, and entrenched a system that makes populations vulnerable for the benefit of private companies.”" p\\
-		l"    “The problem is not data protection. It is data collection. GDPR assumes the data was all collected properly in the first place. It is as if it is okay to spy on everyone, as long as the data never leaks. When it does, it is not data being exploited. It is people.”" p\\
+		l"   “We have legalised the abuse of the person, and entrenched a system that makes populations vulnerable for the benefit of private companies.”" p\\
+		l"   “The problem is not data protection. It is data collection. GDPR assumes the data was all collected properly in the first place. It is as if it is okay to spy on everyone, as long as the data never leaks. When it does, it is not data being exploited. It is people.”" p\\
 		\skip
 		l" Edward Snowden" }}text' /right
 		\skip \regular
@@ -175,6 +175,30 @@ $44FFFFFF re-color author#
 	}}z box[] /flip dup >slides
 
 	\ page 4
+	{{
+	    $5F0000FF $FF7777FF pres-frame
+	    {{
+		l" Desinformation" /title
+		l" Lessons learned during the pandemics" /subsection
+		vt{{
+		    l" First Impression " l" Facts don’t change our minds [2]" b\\
+		    l" Ikea Effect "  l" Easy to obtain things have “no value” [3]" b\\
+		    l" Worldview "  l" lets us dismiss facts that don’t fit into it" b\\
+		    l" Science "  l" needs to be prudent" b\\
+		    l" Plausibility "  l" This man has done evil things many times" b\\
+		    l" " l" It’s just that he doesn’t need to chip you" b\\
+		    l" " l" He already has everything he wants to" b\\
+		    \skip
+		}}vt
+	    }}v box[] >bdr
+	    {{
+		glue*ll }}glue
+		tex: bill-gates
+		' bill-gates "Bill_Gates.png" 1e }}image-file drop /right
+	    }}v box[] >bdr blackish
+	}}z box[] /flip dup >slides
+
+	\ page 5
 	{{
 	    $5F0000FF $FF7777FF pres-frame
 	    {{
@@ -202,126 +226,6 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
-	\ page 7
-	{{
-	    $202000FF $FFFFCCFF pres-frame
-	    {{
-		l" ToDo–Liste vom letzten Jahr" /title
-		vt{{
-		    l" + " l" Den bulk importer für Google+ fertig machen" b\\
-		    l" – " l" Einen bulk importers für Facebook/Twitter/Blogger/etc." b\\
-		    l" + " l" Avatare für die User–IDs" b\\
-		    l" + " l" Markdown renderer" b\\
-		    l" + " l" Album–Viewer" b\\
-		    l" – " l" Film–Abspieler" b\\
-		    l" – " l" Key handover für Kontakte in der net2o–Welt (temporare Schlüsselpaare)" b\\
-		    l" + " l" Temporäre Keys als nicht vertrauenswürdig kennzeichnen" b\\
-		}}vt
-		glue*l }}glue
-		l" Zur Demo" /subsection
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 8
-	{{
-	    $200030FF $EECCFFFF pres-frame
-	    {{
-		l" Neue Herausforderungen" /title
-		l" Das hier ist Forschung, was wirklich gebraucht wird" /subsection
-		vt{{
-		    l" • " l" Wir brauchen einen Dark Mode ✅" b\\
-		    l" • " l" Manche JPEGS haben keinen Thumbnail (epeg?)" b\\
-		    l" • " l" Nicht–öffentliches Protokoll für „Wer hat was“ (✅⅞)" b\\
-		    l" • " l" Komfortables ID–Cloning (siehe IETF MEDUP task group)" b\\
-		    l" • " l" Berechtigungen für DVCS updates/posting&comment submission" b\\
-		    l" • " l" Likes/+1s/etc.: nur der letzte zählt (pro user)" b\\
-		    l" • " l" Geschlossene Group–Chats ✅" b\\
-		    l" • " l" Berechtigung für Moderation" b\\
-		    l" • " l" Teilbare Listen für Sammlungen/Gruppen" b\\
-		    l" • " l" Was ist mit 53/80/443–only Netzwerken?" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 9
-	{{
-	    $200030FF $EECCFFFF pres-frame
-	    {{
-		l" “Who has What”" /title
-		l" Query object origin by hash" /subsection
-		vt{{
-		    l" ❓ " l" Ursprünglicher Plan: Hashes im DHT (wie BitTorrent)" b\\
-		    l" ➡ " l" Anfragen verraten, wer was will" b\\
-		    l" ❓ " l" Ursprünglicher Lösungsansatz: Hashes verschlüsseln" b\\
-		    l" ➡ " l" Anfragen verraten, wer das gleiche Ding will" b\\
-		    l" ❓ " l" Onion routing innerhalb des DHTs?" b\\
-		    l" ➡ " l" Komplex, langsam" b\\
-		    \skip
-		    l" ➡ " l" Besser „wer hat was“ im Chat–Log mit abspeichern" b\\
-		    l" ➡ " l" „Wer“ ist device.pubkey" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides	
-
-	\ page 10
-	{{
-	    $200030FF $EECCFF pres-frame
-	    {{
-		l" Komfortables ID–cloning" /title
-		l" Löst das Mehrgeräte–Problem" /subsection
-		vt{{
-		    l" ❓ " l" Kopiere geheimen und öffentlichen Schlüssel" b\\
-		    l" ➡ " l" Autorisieren von Remote–File—Access" b\\
-		    l" ❓ " l" Kann man das nicht in net2o selbst machen?" b\\
-		    l" ➡ " l" Scan einen color–QR–code" b\\
-		    l" ➡ " l" Schicke eine Einladung zurück" b\\
-		    l" ➡ " l" Bekomme eine Bestätigung via color–QR–code" b\\
-		    l" ➡ " l" Liefere einen Zero–Knowledge–Proof “Ich kenne das Password”" b\\
-		    l" ➡ " l" Schicke die Schlüssel über die net2o–Verbindung" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides	
-
-	\ page 11
-	{{
-	    $200030FF $EECCFF pres-frame
-	    {{
-		l" Web–only Netzwerke" /title
-		l" Strenge Portfilter–Regeln, nur DNS+HTTP[S]" /subsection
-		vt{{
-		    l" ❓ " l" Man kann kein UDP als Overlay verwenden (auch DNS geht nur zum internen Resolver)" b\\
-		    l" ➡ " l" braucth einen Transport–Layer über HTTPS" b\\
-		    l" ❓ " l" Web Socket API?" b\\
-		    l" ➡ " l" Angreifer könnte Verbindungen testen und net2o–Tunnel gezielt unterbinden" b\\
-		    l" ➡ " l" Autorisierung im ersten Paket unterbringen" b\\
-		    l" ➡ " l" Ändert das net2o connection setup" b\\
-		    l" ➡ " l" Bonus: Ein RTD weniger für NAT traversal" b\\
-		}}vt
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides	
-
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Datensparsames Tracking" /title
-		l" Problem" /subsection
-		vt{{
-		    l" • " l" Für das Tracking braucht man eine global sichtbare Datenbank" b\\
-		    l" • " l" Die Teilnehmer müssen informiert werden können" b\\
-		    l" • " l" Aus der Datenbank darf aber so wenig wie möglich extrahierbar sein" b\\
-		}}vt
-		l" Lösungsansatz" /subsection
-		vt{{
-		    l" • " l" Pseudonymer Eintrag mit orts&zeitabhängigem Pseudonym" b\\
-		    l" • " l" Eintrag mit Onion–Routing für die Antwort" b\\
-		    l" • " l" Eintrag: Mixer-Key | Ephemeral Key | Verschlüsselte Message im gleichen Format" b\\
-		    l" • " l" Exit–Node ist der Hausarzt (der kann deanonymisieren)" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-	
 	\ page 12
 	{{
 	    $000000FF $FFFFFFFF pres-frame
@@ -380,6 +284,48 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
+	\ page 9
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" “Who has What”" /title
+		l" Query object origin by hash" /subsection
+		vt{{
+		    l" ❓ " l" Ursprünglicher Plan: Hashes im DHT (wie BitTorrent)" b\\
+		    l" ➡ " l" Anfragen verraten, wer was will" b\\
+		    l" ❓ " l" Ursprünglicher Lösungsansatz: Hashes verschlüsseln" b\\
+		    l" ➡ " l" Anfragen verraten, wer das gleiche Ding will" b\\
+		    l" ❓ " l" Onion routing innerhalb des DHTs?" b\\
+		    l" ➡ " l" Komplex, langsam" b\\
+		    \skip
+		    l" ➡ " l" Besser „wer hat was“ im Chat–Log mit abspeichern" b\\
+		    l" ➡ " l" „Wer“ ist device.pubkey" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides	
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Datensparsames Tracking" /title
+		l" Problem" /subsection
+		vt{{
+		    l" • " l" Für das Tracking braucht man eine global sichtbare Datenbank" b\\
+		    l" • " l" Die Teilnehmer müssen informiert werden können" b\\
+		    l" • " l" Aus der Datenbank darf aber so wenig wie möglich extrahierbar sein" b\\
+		}}vt
+		l" Lösungsansatz" /subsection
+		vt{{
+		    l" • " l" Pseudonymer Eintrag mit orts&zeitabhängigem Pseudonym" b\\
+		    l" • " l" Eintrag mit Onion–Routing für die Antwort" b\\
+		    l" • " l" Eintrag: Mixer-Key | Ephemeral Key | Verschlüsselte Message im gleichen Format" b\\
+		    l" • " l" Exit–Node ist der Hausarzt (der kann deanonymisieren)" b\\
+		}}vt
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+	
 	\ page 12
 	{{
 	    $000000FF $FFFFFFFF pres-frame
@@ -402,19 +348,15 @@ $44FFFFFF re-color author#
 		    l" Bernd Paysan  " l" net2o fossil repository" bi\\
 		    l" 🔗" l" https://net2o.de/" bm\\
 		    "https://net2o.de/" link[]
+		    l" The New Yorker  " l" Why Facts don’t change our Mind" bi\\
+		    l" 🔗" l" https://www.newyorker.com/magazine/2017/02/27/" bm\\
+		    "https://www.newyorker.com/magazine/2017/02/27/why-facts-dont-change-our-minds" link[]
+		    l" " l" why-facts-dont-change-our-minds" bm\\
+		    "https://www.newyorker.com/magazine/2017/02/27/why-facts-dont-change-our-minds" link[]
+		    l" Sascha Lobo  " l" QAnon — Verschwörungsideologie zum Mitmachen" bi\\
+		    l" 🔗" l" https://www.spiegel.de/netzwelt/netzpolitik/qanon…" bm\\
+		    "https://www.spiegel.de/netzwelt/netzpolitik/qanon-verschwoerungsideologie-zum-mitmachen-a-8656ef8e-b2dc-4b90-a09f-8cb6e4a4db19" link[]
 		}}vt
-		glue*l }}glue
-		tex: qr-code
-		tex: qr-code-inv
-		{{
-		    glue*l }}glue
-		    ' qr-code "qr-code.png" 12e }}image-file drop
-		    qr-code nearest
-		    glue*l }}glue
-		    ' qr-code-inv "qr-code-inv.png" 12e }}image-file drop
-		    qr-code-inv nearest
-		    glue*l }}glue
-		}}h
 		glue*l }}glue
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
