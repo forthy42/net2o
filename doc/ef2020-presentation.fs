@@ -178,7 +178,12 @@ $44FFFFFF re-color author#
 	{{
 	    $5F0000FF $FF7777FF pres-frame
 	    {{
-		l" Desinformation" /title
+		glue*ll }}glue
+		tex: bill-gates
+		' bill-gates "Bill_Gates.png" 1e }}image-file drop /right
+	    }}v box[] >bdr blackish
+	    {{
+		l" Disinformation" /title
 		l" Lessons learned during the pandemics" /subsection
 		vt{{
 		    l" First Impression " l" Facts don’t change our minds [2]" b\\
@@ -189,13 +194,10 @@ $44FFFFFF re-color author#
 		    l" " l" It’s just that he doesn’t need to chip you" b\\
 		    l" " l" He already has everything he wants to" b\\
 		    \skip
+		    l" QAnon "  l" suspected origin: Wu Ming (五名, 5 names)" b\\
+		    l" " l" Wu Ming can be pronounced as 无明, Ignorance" b\\
 		}}vt
 	    }}v box[] >bdr
-	    {{
-		glue*ll }}glue
-		tex: bill-gates
-		' bill-gates "Bill_Gates.png" 1e }}image-file drop /right
-	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
 	\ page 5
