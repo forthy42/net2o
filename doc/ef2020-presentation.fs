@@ -69,13 +69,19 @@ $44FFFFFF re-color author#
 	    tex: cloudcalypse
 	    ' cloudcalypse "cloudcalypse-16-9-corona.jpg" 2e 3e f/ }}image-file drop /center
 	    {{
+		glue*l }}glue
+		tex: rome-logo
+		' rome-logo "rome-logo.png" 0.5e }}image-file drop /center
+		glue*l }}glue
+	    }}v
+	    {{
 		{{
 		    glue*l }}glue
 		    l" Social Distancing with net2o" /title
 		    l" Plans and progress on video conferencing" /subtitle
 		    glue*2 }}glue	
 		    l" Bernd Paysan" /author
-		    l" EuroForth 2020. Video Conference" /location
+		    l" EuroForth 2020. Video Conference (shoud have been Rome)" /location
 		    {{
 			glue*l }}glue
 			{{
