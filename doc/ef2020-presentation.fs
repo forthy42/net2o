@@ -232,13 +232,15 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Videostreaming/Videokonferenzen" /title
+		l" Video Streaming&Conferences" /title
 		vt{{
-		    l" • " l" Gestreamte Videos sind keine fertigen (=kompletten) Dateien" b\\
-		    l" • " l" Andere Herangehensweise beim Multiplexen nötig" b\\
-		    l" • " l" Qualität ist abhängig von der erzielbaren Datenrate" b\\
-		    l" • " l" Thumbnail/Fullscreen–Streams bei Konferenzen" b\\
-		    l" • " l" Audio synchron für Filme/asynchron für Konferenzen" b\\
+		    l" • " l" Life Streaming means sending unfinished files" b\\
+		    l" • " l" Different approach to multiplexing (metadata for chunk size)" b\\
+		    l" • " l" Split files into indexes, data, and metadata" b\\
+		    l" • " l" Quality depends on available bandwidth" b\\
+		    l" • " l" Use available hardware encoders" b\\
+		    l" • " l" Thumbnail/fullscreen Stream for conferences" b\\
+		    l" • " l" Synchrone audio for movies/async for conferences" b\\
 		}}vt
 		glue*l }}glue
 	    }}v box[] >bdr
@@ -248,21 +250,25 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Wunschzettel 1/2" /title
+		l" Avalanche Tree" /title
+		tex: avalanche-tree \normal \sans
+		' avalanche-tree "avalanche.png" 0.66e }}image-file drop /center
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Collection Tree and Mixing" /title
 		vt{{
-		    l" • " l" Stream von der Kamera, vertikaler Crop (Portrait)" b\\
-		    l" • " l" Stream vom Desktop/Fenster" b\\
-		    l" • " l" Herunterskaliert für alle (je mehr Teilnehmer, desto kleiner)" b\\
-		    l" • " l" Hochskaliert für redende Teilnehmer" b\\
-		    l" • " l" Zwei oder drei redende Teilnehmer nebeneinander" b\\
-		    l" • " l" Audio mixer&autolevel" b\\
-		    l" • " l" FFT vom Audio anzeigen für Visualisierung" b\\
-		    l" • " l" Audio biquad filters, z.B. notch, um schlechte Audioqualität zu verbessern" b\\
-		    l" • " l" Push to talk (hotkeys für alles)" b\\
-		    l" • " l" Hotkey für cut mark + keyframe" b\\
-		    l" • " l" Lokale Aufzeichnung mit besserer Auflösung/Audio–Qualität für den Präsentator" b\\
-		    l" • " l" Mehrere Geräte (Kameras, Mics) für einen Teilnehmr (Akira Kurosawa–Setup)," b\\
-		    l"  " l" kein eigenes Audio in der Ausgabe" b\\
+		    l" • " l" Leaf nodes send their stream upwards." b\\
+		    l" • " l" Participants can join leaf stream or root stream" b\\
+		    l" • " l" Branch nodes mix leaf node streams and own stream" b\\
+		    l" • " l" Root node combines final downmix, and distribute that as life stream" b\\
+		    l" • " l" Every participant upstreams once, branches downstream multiple times" b\\
+		    l" • " l" Moderator provides instructions for mix&downscale" b\\
 		}}vt
 		glue*l }}glue
 	    }}v box[] >bdr
@@ -272,15 +278,43 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Wunschzettel 2/2" /title
+		l" Wishlist 1/2" /title
 		vt{{
-		    l" • " l" Templates für schöne Präsentations–Aufzeichnungen" b\\
-		    l" • " l" Logo für einen Talk setzen" b\\
-		    l" • " l" Räume für kleine Seitengruppen–Gespräche" b\\
-		    l" • " l" Verschiedene Verbindungen ausprobieren, und die besten behalten" b\\
-		    l" • " l" Audio/Video getrennt an/ausschalten" b\\
-		    l" • " l" Zusätzliche Audio-Quelle zumixen (Hintergrundmusik, Desktop, Klatschen/Lacher…)" b\\
-		    l" • " l" Räumliches Audio (Gesprächspartner kommen von links oder von rechts)." b\\
+		    l" • " l" Stream from camera, cropped vertically (portrait)" b\\
+		    l" • " l" Stream from desktop/window" b\\
+		    l" • " l" Scaled down stream for all participants" b\\
+		    l" • " l" Scaled up stream for talking participants" b\\
+		    l" • " l" Two talking participants side-by-side with upscaled stream" b\\
+		    l" • " l" Audio mixer&autolevel (avoid leveling background noise up)" b\\
+		    l" • " l" Warn “you are muted” if you talk while being muted" b\\
+		    l" • " l" Hotkey to turn audio and video on/off" b\\
+		    l" • " l" Display FFT of audio for visualisation" b\\
+		    l" • " l" Audio biquad filters, e.g. notch, to improve bad sound quality" b\\
+		    l" • " l" Push to talk, hotkeys for everything" b\\
+		    l" • " l" Hotkey for cut mark + keyframe" b\\
+		}}vt
+		glue*l }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Wishlist 2/2" /title
+		vt{{
+		    l" • " l" Allow multiple devices (cameras, mics) for one participant" b\\
+		    l" • " l" Templates for nice presentation recording" b\\
+		    l" • " l" Set a logo for the talk" b\\
+		    l" • " l" Have a countdown clock for talk slots" b\\
+		    l" • " l" Share slides directly (slides in Markdown)" b\\
+		    l" • " l" Subtitles as option for slides (possibly multiple languages)" b\\
+		    l" • " l" Translated audio tracks to select from (for bigger conferences)" b\\
+		    l" • " l" Rooms for small-group side conversation" b\\
+		    l" • " l" Moderator side channel to presenter/participants" b\\
+		    l" • " l" Try connections to different participants and take best one" b\\
+		    l" • " l" Mix additional audio sources (background music, desktop sounds, claps/laughers)" b\\
+		    l" • " l" Spatial audio (different participants from different directions)" b\\
 		}}vt
 		glue*l }}glue
 	    }}v box[] >bdr
@@ -293,15 +327,15 @@ $44FFFFFF re-color author#
 		l" “Who has What”" /title
 		l" Query object origin by hash" /subsection
 		vt{{
-		    l" ❓ " l" Ursprünglicher Plan: Hashes im DHT (wie BitTorrent)" b\\
-		    l" ➡ " l" Anfragen verraten, wer was will" b\\
-		    l" ❓ " l" Ursprünglicher Lösungsansatz: Hashes verschlüsseln" b\\
-		    l" ➡ " l" Anfragen verraten, wer das gleiche Ding will" b\\
-		    l" ❓ " l" Onion routing innerhalb des DHTs?" b\\
-		    l" ➡ " l" Komplex, langsam" b\\
+		    l" ❓ " l" Original plan: keep hashes in DHT" b\\
+		    l" ➡ " l" Query reveals who wants what" b\\
+		    l" ❓ " l" Original solution: Encrypt hashes" b\\
+		    l" ➡ " l" Query reveals who wants/has the same thing" b\\
+		    l" ❓ " l" Onion routing within DHT?" b\\
+		    l" ➡ " l" Complex, slow" b\\
 		    \skip
-		    l" ➡ " l" Besser „wer hat was“ im Chat–Log mit abspeichern" b\\
-		    l" ➡ " l" „Wer“ ist device.pubkey" b\\
+		    l" ➡ " l" Better keep “who has what” within the chat log structure" b\\
+		    l" ➡ " l" “who” is device.pubkey" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides	
@@ -310,33 +344,11 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Datensparsames Tracking" /title
-		l" Problem" /subsection
+		l" The non–technical problems" /title
 		vt{{
-		    l" • " l" Für das Tracking braucht man eine global sichtbare Datenbank" b\\
-		    l" • " l" Die Teilnehmer müssen informiert werden können" b\\
-		    l" • " l" Aus der Datenbank darf aber so wenig wie möglich extrahierbar sein" b\\
-		}}vt
-		l" Lösungsansatz" /subsection
-		vt{{
-		    l" • " l" Pseudonymer Eintrag mit orts&zeitabhängigem Pseudonym" b\\
-		    l" • " l" Eintrag mit Onion–Routing für die Antwort" b\\
-		    l" • " l" Eintrag: Mixer-Key | Ephemeral Key | Verschlüsselte Message im gleichen Format" b\\
-		    l" • " l" Exit–Node ist der Hausarzt (der kann deanonymisieren)" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-	
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Nicht–technische Probleme" /title
-		vt{{
-		    l" • " l" Kontakte von net2o überzeugen" b\\
-		    l" • " l" Wie macht man ein soziales Netzwerk wohnlich?" b\\
-		    l" • " l" Finanzierung von net2o?" b\\
+		    l" • " l" Get your contacts over to net2o" b\\
+		    l" • " l" How to make a social network a nice place?" b\\
+		    l" • " l" Funding of net2o?" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides

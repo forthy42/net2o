@@ -8,6 +8,7 @@
 * Scaled up stream for talking participants
 * Two talking participants side-by-side with upscaled stream
 * Audio mixer&autolevel (avoid leveling background noise up)
+* Warn “you are muted” if you talk while being muted
 * Hotkey to turn audio and video on/off
 * Display FFT of audio for visualisation
 * Audio biquad filters, e.g. notch, to improve bad sound quality
