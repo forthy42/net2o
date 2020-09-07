@@ -283,14 +283,16 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 \ scoping
 
 Variable scope<>
+: >scope ( xt -- )
+    get-current scope<> >stack also execute definitions ;
 : scope{ ( "vocabulary" -- scope:addr )
-    get-current scope<> >stack also ' execute definitions ;
+    ' >scope ;
 : }scope ( scope:addr -- )
     previous scope<> stack> set-current ;
 : scope: ( "vocabulary" -- scope:addr )
-    vocabulary get-current scope<> >stack also lastxt execute definitions ;
+    vocabulary lastxt >scope ;
 : cs-scope: ( "vocabulary" -- scope:addr )
-    cs-vocabulary get-current scope<> >stack also lastxt execute definitions ;
+    cs-vocabulary lastxt >scope ;
 
 : class{ ( parent "scope" -- methods vars )
     class cs-scope: ;
