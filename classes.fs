@@ -183,6 +183,9 @@ cmd-class class{ msg
     method away
     method perms
     method vote
+    method text+format
+    0 8 enums *normal *micro *tiny *script *footnote *small *large *huge
+    $8 5 bits: #bold #italic #underline #strikethrough #mono
     method end
 
     method silent-start

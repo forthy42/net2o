@@ -464,6 +464,8 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
     $> msg:perms ;
 +net2o: msg-vote ( xchar -- ) \g add a vote tag; votes are set by likes
     64>n msg:vote ;
++net2o: msg-text+format ( $text format -- )
+    64>n >r $> r> msg:text+format ;
 
 $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
@@ -536,6 +538,7 @@ scope: logstyles
 :noname ( addr u -- )
     2dup [: ." @" .simple-id ;] $tmp notify+ ; msg-notify-class is msg:signal
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:text
+:noname ( addr u format -- ) drop $utf8> notify+ ; msg-notify-class is msg:text+format
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:url
 :noname ( addr u -- ) $utf8> notify+ ; msg-notify-class is msg:action
 ' 2drop msg-notify-class is msg:chain
@@ -574,6 +577,7 @@ end-class msg-?hash-class
 ' 2drop msg-?hash-class is msg:id
 ' 2drop msg-?hash-class is msg:re
 ' 2drop msg-?hash-class is msg:text
+:noname 2drop drop ; msg-?hash-class is msg:text+format
 ' 2drop msg-?hash-class is msg:url
 ' drop  msg-?hash-class is msg:like
 ' drop  msg-?hash-class is msg:vote
@@ -629,6 +633,15 @@ end-class msg-?hash-class
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
 :noname ( addr u -- ) $utf8> forth:type ; msg-class is msg:text
+: format>ansi ( format -- ansi )
+    0
+    over msg:#bold and 0<> Bold and or
+    over msg:#italic and 0<> Italic and or
+    over msg:#underline and 0<> Underline and or
+    swap msg:#strikethrough and 0<> Strikethrough and or ;
+:noname ( addr u format -- )
+    format>ansi attr!
+    $utf8> forth:type 0 attr! ; msg-class is msg:text+format
 :noname ( addr u -- ) $utf8>
     <warn> forth:type <default> ; msg-class is msg:url
 :noname ( xchar -- )
@@ -1420,15 +1433,26 @@ forward key-from-dht
 msg-class class
 end-class textmsg-class
 
+: .formatter ( format -- )
+    case
+	msg:#bold of  '*' emit  endof
+	msg:#italic of  '/' emit  endof
+	msg:#underline of  '_' emit  endof
+	msg:#strikethrough of  '-' emit  endof
+	msg:#mono  of  '`' emit  endof
+    endcase ;
+
 ' 2drop textmsg-class is msg:start
 :noname '#' emit type ; textmsg-class is msg:tag
 :noname '@' emit .simple-id ; textmsg-class is msg:signal
 ' 2drop textmsg-class is msg:re
 ' 2drop textmsg-class is msg:chain
 ' type textmsg-class is msg:text
-:noname drop 2drop ; textmsg-class is msg:object
+:noname
+    dup >r .formatter type r> .formatter ; textmsg-class is msg:object
 :noname ." /me " type ; textmsg-class is msg:action
 :noname ." /here " 2drop ; textmsg-class is msg:coord
+:noname ." vote:" utf8emit ; textmsg-class is msg:vote
 ' noop textmsg-class is msg:end
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
@@ -2131,15 +2155,29 @@ forward hash-in
 	catch 0= IF  rectype-nt  EXIT  THEN  THEN
     2drop rectype-null ;
 
-$Variable msg-recognizer
+$100 buffer: format-chars
+msg:#bold format-chars '*' + c!
+msg:#italic format-chars '/' + c!
+msg:#strikethrough format-chars '-' + c!
+msg:#underline format-chars '_' + c!
+msg:#mono format-chars '`' + c!
+
+: format-text-rec ( addr u -- .. token )
+    over c@ format-chars + c@ dup IF
+	>r over ?flush-text
+	drop dup c@ >r  source drop - 1+ >in !  r> parse r>
+	[: >r 2dup + 1+ to last->in $, r> ulit, msg-text+format ;] rectype-nt
+	EXIT  THEN
+    drop 2drop rectype-null ;
+
 depth >r
-' text-rec  ' vote-rec  ' audio-rec ' img-rec
+' text-rec  ' format-text-rec  ' vote-rec  ' audio-rec ' img-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - msg-recognizer set-stack
+depth r> - rec-sequence: msg-recognizer
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in
-    msg-recognizer to forth-recognizer 2dup evaluate
+    ['] msg-recognizer >body to forth-recognizer 2dup evaluate
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
 	$, msg-text

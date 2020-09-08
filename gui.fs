@@ -782,6 +782,7 @@ Variable like-char
 ' 2drop posting-log-class is msg:tag
 ' 2drop posting-log-class is msg:id
 ' 2drop posting-log-class is msg:text
+:noname 2drop drop ; posting-log-class is msg:text+format
 ' 2drop posting-log-class is msg:action
 ' drop  posting-log-class is msg:vote \ !!FIXME!! what do we need here?
 :noname ( addr u -- )
@@ -1034,6 +1035,21 @@ Variable re-indent#
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
 ; wmsg-class is msg:text
+:noname { d: string format -- o }
+    text-color!
+    case  format msg:#bold msg:#italic or and
+	msg:#bold  of  \bold  endof
+	msg:#italic  of  \italic  endof
+	msg:#bold msg:#italic or  of \bold-italic  endof
+	\regular
+    endcase
+    format msg:#mono and  IF  \mono  THEN
+    string ['] utf8-sanitize $tmp }}text 25%bv
+    format msg:#underline and IF  _underline_  THEN
+    format msg:#strikethrough and IF  -strikethrough-  THEN
+    "text" name! msg-box .child+
+    \regular \normal \sans
+; wmsg-class is msg:text+format
 :noname { xc -- }
     text-color!
     xc ['] xemit $tmp }}text 25%bv
