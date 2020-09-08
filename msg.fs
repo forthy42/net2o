@@ -2055,12 +2055,14 @@ Defer chat-cmd-file-execute
     THEN ;
 
 0 Value last->in
+0 Value current-format
 
 : ?flush-text ( addr -- )
     last->in ?dup-0=-IF  source drop  THEN
     tuck - dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
-	$, msg-text
+	current-format ?dup-IF  ulit, $, msg-text+format
+	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN ;
 
 : text-rec ( addr u -- )
@@ -2162,13 +2164,26 @@ msg:#strikethrough format-chars '-' + c!
 msg:#underline format-chars '_' + c!
 msg:#mono format-chars '`' + c!
 
+: >format-chars ( addr u -- addr' u' format-chars )
+    0 >r  BEGIN  dup  WHILE
+	over c@ format-chars + c@ ?dup WHILE
+	r> or >r 1 /string  REPEAT  THEN  r> ;
+: <format-chars ( addr u -- addr u' format-chars )
+    0 >r  BEGIN  1- dup 0>= WHILE
+	2dup + c@ format-chars + c@ ?dup WHILE
+	r> or >r  REPEAT  1+  THEN  r> ;
 : format-text-rec ( addr u -- .. token )
-    over c@ format-chars + c@ dup IF
-	>r over ?flush-text
-	drop dup c@ >r  source drop - 1+ >in !  r> parse r>
-	[: >r 2dup + 1+ to last->in $, r> ulit, msg-text+format ;] rectype-nt
-	EXIT  THEN
-    drop 2drop rectype-null ;
+    over { start } >format-chars ?dup-IF
+	>r drop >r start ?flush-text r> to last->in
+	r> current-format xor to current-format
+	last->in source drop - >in !
+	['] noop rectype-nt  EXIT  THEN
+    2dup + { end } <format-chars ?dup-IF
+	>r + ?flush-text end to last->in
+	r> current-format xor to current-format
+	last->in source drop - >in !
+	['] noop rectype-nt  EXIT  THEN
+    2drop rectype-null ;
 
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' audio-rec ' img-rec
