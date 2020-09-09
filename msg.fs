@@ -1434,26 +1434,37 @@ msg-class class
 end-class textmsg-class
 
 : .formatter ( format -- )
-    case
-	msg:#bold of  '*' emit  endof
-	msg:#italic of  '/' emit  endof
-	msg:#underline of  '_' emit  endof
-	msg:#strikethrough of  '-' emit  endof
-	msg:#mono  of  '`' emit  endof
-    endcase ;
+    dup msg:#bold and if  '*' emit  then
+    dup msg:#italic and if  '/' emit  then
+    dup msg:#underline and if  '_' emit  then
+    dup msg:#strikethrough and if  '-' emit  then
+    msg:#mono and if  '`' emit  then ;
 
 ' 2drop textmsg-class is msg:start
+' 2drop textmsg-class is msg:silent-start
+' 2drop textmsg-class is msg:hashs
+' 2drop textmsg-class is msg:hash-id
+' 2drop textmsg-class is msg:updates
 :noname '#' emit type ; textmsg-class is msg:tag
 :noname '@' emit .simple-id ; textmsg-class is msg:signal
 ' 2drop textmsg-class is msg:re
 ' 2drop textmsg-class is msg:chain
+' 2drop textmsg-class is msg:id
+' 2drop textmsg-class is msg:lock
+' noop textmsg-class is msg:unlock
+' drop textmsg-class is msg:away
 ' type textmsg-class is msg:text
+' type textmsg-class is msg:url
+:noname drop 2drop ; textmsg-class is msg:object
 :noname
-    dup >r .formatter type r> .formatter ; textmsg-class is msg:object
+    dup >r .formatter type r> .formatter ; textmsg-class is msg:text+format
 :noname ." /me " type ; textmsg-class is msg:action
 :noname ." /here " 2drop ; textmsg-class is msg:coord
 :noname ." vote:" utf8emit ; textmsg-class is msg:vote
+:noname ." /like " utf8emit ; textmsg-class is msg:like
 ' noop textmsg-class is msg:end
+:noname 2drop 2drop ; textmsg-class is msg:otrify
+' 2drop textmsg-class is msg:payment
 
 textmsg-class ' new static-a with-allocater Constant textmsg-o
 msg-notify-o >o msg-table @ token-table ! o>
@@ -2167,7 +2178,7 @@ msg:#mono format-chars '`' + c!
 : >format-chars ( addr u -- addr' u' format-chars )
     0 >r  BEGIN  dup  WHILE
 	over c@ format-chars + c@ ?dup WHILE
-	r> or >r 1 /string  REPEAT  THEN  r> ;
+	r> xor >r 1 /string  REPEAT  THEN  r> ;
 : <format-chars ( addr u -- addr u' format-chars )
     0 >r  BEGIN  1- dup 0>= WHILE
 	2dup + c@ format-chars + c@ ?dup WHILE

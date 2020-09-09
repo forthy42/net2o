@@ -616,9 +616,9 @@ forth-local-words:
        "[ \t\n]" t name (font-lock-variable-name-face . 3))
      ("[a-z0-9]+(" immediate (font-lock-comment-face . 1)
       ")" nil comment (font-lock-comment-face . 1))
-     (("class{") definition-starter (font-lock-keyword-face . 1)
+     (("class{") non-immediate (font-lock-keyword-face . 1)
       "[ \t\n]" t name (font-lock-function-name-face . 3))
-     (("}class") definition-ender (font-lock-keyword-face . 1))
+     (("}class") non-immediate (font-lock-keyword-face . 1))
     )
 forth-local-indent-words:
     (
