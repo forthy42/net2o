@@ -632,7 +632,7 @@ end-class msg-?hash-class
     space <warn> ." [" 85type ." ]->" <default> ; msg-class is msg:re
 :noname ( addr u -- )
     space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
-:noname ( addr u -- ) $utf8> forth:type ; msg-class is msg:text
+:noname ( addr u -- ) utf8-sanitize ; msg-class is msg:text
 : format>ansi ( format -- ansi )
     0
     over msg:#bold and 0<> Bold and or
@@ -641,7 +641,7 @@ end-class msg-?hash-class
     swap msg:#strikethrough and 0<> Strikethrough and or ;
 :noname ( addr u format -- )
     format>ansi attr!
-    $utf8> forth:type 0 attr! ; msg-class is msg:text+format
+    utf8-sanitize 0 attr! ; msg-class is msg:text+format
 :noname ( addr u -- ) $utf8>
     <warn> forth:type <default> ; msg-class is msg:url
 :noname ( xchar -- )
@@ -2056,7 +2056,10 @@ is /help
 Defer chat-cmd-file-execute
 ' execute is chat-cmd-file-execute
 
+Forward ```
+
 : do-chat-cmd? ( addr u -- t / addr u f )
+    2dup "```" str= IF  2drop ``` true  EXIT  THEN
     ?slash dup 0= ?EXIT  drop
     bl $split 2swap
     2dup save-mem over >r '/' r@ c!
@@ -2196,17 +2199,35 @@ msg:#mono format-chars '`' + c!
 	['] noop rectype-nt  EXIT  THEN
     2drop rectype-null ;
 
+$10 stack: msg-recognizer
+
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' audio-rec ' img-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - rec-sequence: msg-recognizer
+depth r> - rec-sequence: msg-recognizer0
+
+' msg-recognizer0 >body get-stack msg-recognizer set-stack
+
+' text-rec 1 rec-sequence: msg-text0
+
+0 Value ```-state
+
+: ``` ```-state IF
+	['] msg-recognizer0 >body get-stack msg-recognizer set-stack
+	0 to current-format
+    ELSE
+	['] msg-text0 >body get-stack msg-recognizer set-stack
+	msg:#mono to current-format
+    THEN
+    ```-state 0= to ```-state ;
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in
-    ['] msg-recognizer >body to forth-recognizer 2dup evaluate
+    msg-recognizer to forth-recognizer 2dup evaluate
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
-	$, msg-text
+	current-format ?dup-IF  ulit, $, msg-text+format
+	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN
     r> to forth-recognizer  r> to last# ;
 

@@ -378,7 +378,9 @@ false Value hash-sanitize?
 	    [ xc-vector @ fixed-width = ] [IF] '?' [ELSE] '�' [THEN] xemit
 	    drop  I I' over -
 	    ['] x-size catch IF  2drop  1  THEN
-	ELSE  xemit I -  THEN
+	ELSE
+	    dup #tab = IF  drop ."         "  ELSE  xemit  THEN
+	    I -  THEN
     +LOOP  nothrow ;
 
 \ config stuff
