@@ -2180,19 +2180,21 @@ msg:#mono format-chars '`' + c!
 
 : >format-chars ( addr u -- addr' u' format-chars )
     0 >r  BEGIN  dup  WHILE
-	over c@ format-chars + c@ ?dup WHILE
+	    over c@ format-chars + c@ current-format invert and
+	    ?dup WHILE
 	r> xor >r 1 /string  REPEAT  THEN  r> ;
 : <format-chars ( addr u -- addr u' format-chars )
     0 >r  BEGIN  1- dup 0>= WHILE
-	2dup + c@ format-chars + c@ ?dup WHILE
-	r> or >r  REPEAT  1+  THEN  r> ;
+	    2dup + c@ format-chars + c@ current-format and
+	    ?dup WHILE
+		r> or >r  REPEAT  1+  THEN  r> ;
 : format-text-rec ( addr u -- .. token )
-    over { start } >format-chars ?dup-IF
+    over { start } >format-chars over 0> and ?dup-IF
 	>r drop >r start ?flush-text r> to last->in
 	r> current-format xor to current-format
 	last->in source drop - >in !
 	['] noop rectype-nt  EXIT  THEN
-    2dup + { end } <format-chars ?dup-IF
+    2dup + { end } <format-chars over 0> and ?dup-IF
 	>r + ?flush-text end to last->in
 	r> current-format xor to current-format
 	last->in source drop - >in !
@@ -2229,7 +2231,7 @@ depth r> - rec-sequence: msg-recognizer0
 	current-format ?dup-IF  ulit, $, msg-text+format
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN
-    r> to forth-recognizer  r> to last# ;
+    r> to forth-recognizer  r> to last#  0 to current-format ;
 
 : avalanche-text ( addr u -- )
     >utf8$ ['] parse-text send-avalanche ;
