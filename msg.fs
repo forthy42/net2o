@@ -2179,24 +2179,30 @@ msg:#underline format-chars '_' + c!
 msg:#mono format-chars '`' + c!
 
 : >format-chars ( addr u -- addr' u' format-chars )
-    0 >r  BEGIN  dup  WHILE
-	    over c@ format-chars + c@ current-format invert and
+    0 >r  BEGIN  dup 0> WHILE
+	    over c@ format-chars + c@
+	    current-format invert and
 	    ?dup WHILE
-	r> xor >r 1 /string  REPEAT  THEN  r> ;
+		dup r@ and IF  r> xor $100 or  EXIT  THEN
+		r> or >r 1 /string  REPEAT
+    THEN  r> ;
 : <format-chars ( addr u -- addr u' format-chars )
-    0 >r  BEGIN  1- dup 0>= WHILE
-	    2dup + c@ format-chars + c@ current-format and
+    0 >r  BEGIN  1- dup 0> WHILE
+	    2dup + c@ format-chars + c@
+	    current-format and
 	    ?dup WHILE
-		r> or >r  REPEAT  1+  THEN  r> ;
+		dup r@ and IF  >r 1+ r> r> xor $100 or  EXIT  THEN
+		r> or >r  REPEAT
+	1+  THEN  r> ;
 : format-text-rec ( addr u -- .. token )
     over { start } >format-chars over 0> and ?dup-IF
 	>r drop >r start ?flush-text r> to last->in
-	r> current-format xor to current-format
+	r> current-format xor $FF and to current-format
 	last->in source drop - >in !
 	['] noop rectype-nt  EXIT  THEN
     2dup + { end } <format-chars over 0> and ?dup-IF
 	>r + ?flush-text end to last->in
-	r> current-format xor to current-format
+	r> current-format xor $FF and to current-format
 	last->in source drop - >in !
 	['] noop rectype-nt  EXIT  THEN
     2drop rectype-null ;
