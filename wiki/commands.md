@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.9.9-20200827.
+Version 0.9.9-20200910.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -402,13 +402,16 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   permissions
 * $31 msg-vote ( xchar -- )
   add a vote tag; votes are set by likes
+* $32 msg-text+format ( $text format -- )
 * $60 msg-silent-start ( $:pksig -- )
   silent message tag
-* $61 msg-hashs+id ( $:hashs $:id -- )
-  ihave within signed message
-* $62 msg-otrify2 ( $:date+sig $:newdate+sig -- )
+* $61 msg-hashs ( $:hashs -- )
+  ihave part 1 within signed message
+* $62 msg-id ( $:id -- )
+  ihave part 2 within signed message
+* $63 msg-otrify2 ( $:date+sig $:newdate+sig -- )
   turn a past message into OTR, silent version
-* $63 msg-updates ( $:fileinfo $:hash -- )
+* $64 msg-updates ( $:fileinfo $:hash -- )
   Files got an update.
   The fileinfo string contains fileno:len tuples in command encoding.
   Each additional context is hashed to a 64 byte hash, and all the hashs
