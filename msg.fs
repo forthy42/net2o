@@ -2195,17 +2195,19 @@ msg:#mono format-chars '`' + c!
 		r> or >r  REPEAT
 	1+  THEN  r> ;
 : format-text-rec ( addr u -- .. token )
-    over { start } >format-chars over 0> and ?dup-IF
-	>r drop >r start ?flush-text r> to last->in
+    over { start }
+    2dup + { end }
+    false { success }
+    >format-chars over 0> and ?dup-IF
+	>r over >r start ?flush-text r> to last->in
 	r> current-format xor $FF and to current-format
-	last->in source drop - >in !
-	['] noop rectype-nt  EXIT  THEN
-    2dup + { end } <format-chars over 0> and ?dup-IF
-	>r + ?flush-text end to last->in
+	true to success  THEN
+    <format-chars over 0> and ?dup-IF
+	>r 2dup + ?flush-text end to last->in
 	r> current-format xor $FF and to current-format
-	last->in source drop - >in !
-	['] noop rectype-nt  EXIT  THEN
-    2drop rectype-null ;
+	true to success  THEN
+    2drop
+    success IF  ['] noop rectype-nt  ELSE  rectype-null  THEN ;
 
 $10 stack: msg-recognizer
 
