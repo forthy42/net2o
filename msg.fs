@@ -1744,6 +1744,7 @@ uval-o chat-cmd-o
 object uclass chat-cmd-o
     \ internal stuff
     umethod ./otr-info
+    umethod ./mono-info
 also net2o-base scope: /chat
     umethod /away ( addr u -- )
     \U away [<action>]      send string or "away from keyboard" as action
@@ -1877,6 +1878,9 @@ scope{ /chat
 :noname ( flag -- )
     <info> ." === " IF  ." enter"  ELSE  ." leave"  THEN
     ."  otr mode ===" <default> forth:cr ; is ./otr-info
+:noname ( flag -- )
+    <info> ." === " IF  ." enter"  ELSE  ." leave"  THEN
+    ."  mono mode ===" <default> forth:cr ; is ./mono-info
 
 :noname ( addr u -- )
     2dup -trailing s" on" str= >r
@@ -2229,7 +2233,7 @@ depth r> - rec-sequence: msg-recognizer0
 	['] msg-text0 >body get-stack msg-recognizer set-stack
 	msg:#mono to current-format
     THEN
-    ```-state 0= to ```-state ;
+    ```-state 0= dup to ```-state ./mono-info ;
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
     0 to last->in

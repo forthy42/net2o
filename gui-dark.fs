@@ -30,6 +30,7 @@ $88FF00FF re-color dark-blue#
 $00FF0020 re-color chbs-col#
 $000020BF re-color login-bg-col#
 $FF000000 $FF0000FF re-fade-color pw-err-col#
+$AAFFAA00 $AAFFAAFF re-fade-color show-info-color
 $444444FF re-color chat-col#
 $224444FF re-color chat-bg-col#
 $113333FF re-color chat-hist-col#

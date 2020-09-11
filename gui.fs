@@ -407,6 +407,7 @@ $FFFF80FF new-color, fvalue users-color#
 $FFCCCCFF new-color, fvalue gps-color#
 $000077FF new-color, fvalue chain-color#
 $FF000000 $FF0000FF fade-color: show-error-color
+$00990000 $009900FF fade-color: show-info-color
 $338833FF text-color: lock-color
 $883333FF text-color: lockout-color
 $FFAA44FF text-color, fvalue perm-color#
@@ -932,8 +933,26 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
     msg-vbox .+childs
 ; wmsg-class is msg:end
-0 Value nobody-online-text \ nobody is online warning
-:noname 2e nobody-online-text [: f2* sin-t .fade +sync ;] >animate
+0 Value edit-infobar-text \ nobody is online warning
+l" Deactivate Verbatim"
+l" Activate Verbatim"
+l" On The Record"
+l" Off The Record"
+l" Nobody is online"
+Create edit-infos
+' show-error-color , , \ nobody
+' show-info-color  , , \ otr on
+' show-info-color  , , \ otr off
+' show-info-color  , , \ mono
+' show-info-color  , , \ normal
+: change-edit-info ( n -- )
+    2* cells edit-infos + 2@ execute
+    edit-infobar-text >o x-color to text-color
+    dup to l-text  locale@ to text$ 
+    o> +resize
+    2e edit-infobar-text [: f2* sin-t .fade +sync ;] >animate ;
+:noname ( -- )
+    0 change-edit-info
 ; wmsg-class is msg:.nobody
 
 log-mask off \ in GUI mode, default is no marking
@@ -1706,8 +1725,8 @@ wmsg-o >o msg-table @ token-table ! o>
 	    {{ glue*lll edit-bg x-color font-size# 40% f* }}frame dup .button3
 		dup to chat-edit-bg
 		show-error-color \normal \regular
-		!i18n l" Nobody is online" }}text' !lit
-		dup to nobody-online-text /center
+		!i18n edit-infos cell+ @ }}text' !lit
+		dup to edit-infobar-text /center
 		{{ blackish "" }}edit 40%b dup to chat-edit glue*l }}glue
 		    glue*lll }}glue
 		}}h box[]
@@ -1784,7 +1803,8 @@ gui-chat-cmds new Constant gui-chat-cmd-o
 
 gui-chat-cmd-o to chat-cmd-o
 scope{ /chat
-' drop is ./otr-info
+:noname ( flag -- ) 2 + change-edit-info ; is ./otr-info
+:noname ( flag -- ) 4 + change-edit-info ; is ./mono-info
 ' .imgs is /imgs
 }scope
 
