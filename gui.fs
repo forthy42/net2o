@@ -412,6 +412,7 @@ $338833FF text-color: lock-color
 $883333FF text-color: lockout-color
 $FFAA44FF text-color, fvalue perm-color#
 $553300FF text-color: mono-col
+$FFFFDDFF text-color: mono-otr-col
 
 : nick[] ( box o:nick -- box )
     [: data >o ." clicked on " ke-nick $. cr o> ;] o click[] ;
@@ -1055,6 +1056,8 @@ Variable re-indent#
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
 ; wmsg-class is msg:text
+: mono-col? ( -- )
+    msg-group-o .msg:?otr  IF  mono-otr-col  ELSE  mono-col  THEN ;
 :noname { d: string format -- o }
     text-color!
     case  format msg:#bold msg:#italic or and
@@ -1063,7 +1066,7 @@ Variable re-indent#
 	msg:#bold msg:#italic or  of \bold-italic  endof
 	\regular
     endcase
-    format msg:#mono and  IF  \mono mono-col  THEN
+    format msg:#mono and  IF  \mono mono-col?  THEN
     string ['] utf8-sanitize $tmp }}text 25%bv
     format msg:#underline and IF  _underline_  THEN
     format msg:#strikethrough and IF  -strikethrough-  THEN
@@ -1637,13 +1640,14 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : ?chat-otr-status ( o:edit-w -- )
     msg-group-o .msg:?otr
-    IF   otr-col#  [ greenish x-color ] Fliteral
-    ELSE chat-col# [ blackish x-color ] Fliteral  THEN
-    chat-edit    >o to w-color o>
+    IF   otr-col#  greenish  ELSE chat-col# blackish  THEN
+    chat-edit    >o x-color to w-color o>
     chat-edit-bg >o to w-color o> ;
 : ?chat-```-status ( o:edit-w -- )
     ```-state
-    IF  \mono mono-col  ELSE  \sans blackish  THEN  \regular \normal
+    IF  \mono mono-col?  ELSE  \sans
+	msg-group-o .msg:?otr IF  greenish  ELSE  blackish  THEN
+    THEN  \regular \normal
     chat-edit >o font@ to text-font x-color to text-color  o> ;
 
 : chat-edit-enter ( o:edit-w -- )
