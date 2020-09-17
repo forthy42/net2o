@@ -2243,7 +2243,8 @@ depth r> - rec-sequence: msg-recognizer0
 	current-format ?dup-IF  ulit, $, msg-text+format
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN
-    r> to forth-recognizer  r> to last#  0 to current-format ;
+    r> to forth-recognizer  r> to last#
+    msg:#mono ```-state and to current-format ;
 
 : avalanche-text ( addr u -- )
     >utf8$ ['] parse-text send-avalanche ;
