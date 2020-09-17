@@ -48,7 +48,7 @@ cat <<EOF
 [Setup]
 AppName=net2o
 AppVersion=$N2OVER
-AppCopyright=Copyright © 2010-2018 Bernd Paysan
+AppCopyright=Copyright © 2010-2020 Bernd Paysan
 DefaultDirName={pf}\net2o
 DefaultGroupName=net2o
 AllowNoIcons=1
@@ -59,7 +59,7 @@ ChangesEnvironment=yes
 OutputBaseFilename=net2o-$N2OVER
 AppPublisher=Bernd Paysan
 AppPublisherURL=http://fossil.net2o.de/net2o
-SignTool=sha1
+; SignTool=sha1
 SignTool=sha256
 ; add the following sign tools:
 ; sha1=signtool sign /a /fd sha1 /tr http://timestamp.entrust.net/TSS/RFC3161sha2TS /td sha1 $f
