@@ -3,7 +3,8 @@
 ## Feature Requests ##
 
 * Stream from camera, cropped vertically (portrait)
-* Stream from desktop/window
+* Stream from desktop/display/window (desktop might be multiple displays;
+  might need to share multiple windows)
 * Scaled down stream for all participants
 * Scaled up stream for talking participants
 * Two talking participants side-by-side with upscaled stream
