@@ -1377,9 +1377,12 @@ previous
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
     REPEAT  2drop ;
+: ?msg-dec-sig? ( addr u -- addr' u' )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig? drop  THEN ;
 : ?scan-pks ( addr u -- )
     bounds U+DO
-	I $@ sigpksize# - + keysize 2dup key# #@ d0= IF
+	I $@  ?msg-dec-sig?
+	sigpksize# - + keysize 2dup key# #@ d0= IF
 	    "key" 2swap msg-group-o .msg:pks# #!
 	ELSE  2drop  THEN
     cell +LOOP ;
@@ -1477,14 +1480,16 @@ Variable $lastline
 
 : !date ( addr u -- addr u )
     2dup + sigsize# - le-64@ line-date 64! ;
+: msg-log-dec@ ( n -- addr u )
+    msg-group-o .msg:log[] $[]@ ?msg-dec-sig? ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ >group
     msg-group-o .msg:log[] $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
     line-date 64@ date>i'
-    BEGIN  1- dup 0>= WHILE  dup msg-group-o .msg:log[] $[]@
+    BEGIN  1- dup 0>= WHILE  dup msg-log-dec@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    msg-group-o .msg:log[] $[]@ dup 0= IF  nip
-    ELSE  !date ['] msg:display textmsg-o .$tmp 
+    msg-log-dec@ dup 0= IF  nip
+    ELSE  !date ['] msg:display textmsg-o .$tmp
 	dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
 	    2drop to addr drop to maxlen  THEN
 	tuck addr maxlen smove
@@ -1493,11 +1498,12 @@ Variable $lastline
 : find-next-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ >group
     line-date 64@ date>i
-    BEGIN  1+ dup msg-group-o .msg:log[] $[]# u< WHILE  dup msg-group-o .msg:log[] $[]@
+    BEGIN  1+ dup msg-group-o .msg:log[] $[]# u< WHILE
+	    dup msg-log-dec@
 	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
-    dup msg-group-o .msg:log[] $[]# u>=
+    dup  msg-group-o .msg:log[] $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
-    ELSE  msg-group-o .msg:log[] $[]@ !date ['] msg:display textmsg-o .$tmp  THEN
+    ELSE  msg-log-dec@ !date ['] msg:display textmsg-o .$tmp  THEN
     dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
 	2drop to addr drop to maxlen  THEN
     tuck addr maxlen smove
@@ -1550,7 +1556,7 @@ edit-terminal edit-out !
 
 \ chat line editor
 
-$200 Constant maxmsg#
+$300 Constant maxmsg#
 
 : get-input-line ( -- addr u )
     BEGIN  pad maxmsg# ['] accept catch
