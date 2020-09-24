@@ -2199,7 +2199,7 @@ msg:#mono format-chars '`' + c!
 : <format-chars ( addr u -- addr u' format-chars )
     0 >r  BEGIN  1- dup 0> WHILE
 	    2dup + c@ format-chars + c@
-	    current-format invert and
+	    current-format and
 	    ?dup WHILE
 		dup r@ and IF  >r 1+ r> r> xor $100 or  EXIT  THEN
 		r> or >r  REPEAT
@@ -2208,17 +2208,14 @@ msg:#mono format-chars '`' + c!
     over { start }
     2dup + { end }
     false { success }
-    0 { next-format }
     >format-chars over 0> and ?dup-IF
 	>r over >r start ?flush-text r> to last->in
-	r> to next-format
+	r> current-format xor $FF and to current-format
 	true to success  THEN
     <format-chars over 0> and ?dup-IF
-	next-format current-format xor $FF and to current-format
 	>r 2dup + ?flush-text end to last->in
-	r> to next-format
+	r> current-format xor $FF and to current-format
 	true to success  THEN
-    next-format current-format xor $FF and to current-format
     2drop
     success IF  ['] noop rectype-nt  ELSE  rectype-null  THEN ;
 
