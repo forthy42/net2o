@@ -2197,25 +2197,24 @@ msg:#mono format-chars '`' + c!
 		r> or >r 1 /string  REPEAT
     THEN  r> ;
 : <format-chars ( addr u -- addr u' format-chars )
-    0 >r  BEGIN  1- dup 0> WHILE
-	    2dup + c@ format-chars + c@
+    0 >r  BEGIN  dup 0> WHILE
+	    2dup + 1- c@ format-chars + c@
 	    current-format and
 	    ?dup WHILE
-		dup r@ and IF  >r 1+ r> r> xor $100 or  EXIT  THEN
-		r> or >r  REPEAT
-	1+  THEN  r> ;
+		dup r@ and IF  r> xor $100 or  EXIT  THEN
+		r> or >r  1-  REPEAT  THEN  r> ;
+: ~current ( x -- )
+    current-format xor $FF and to current-format ;
 : format-text-rec ( addr u -- .. token )
     over { start }
     2dup + { end }
     false { success }
     >format-chars over 0> and ?dup-IF
 	>r over >r start ?flush-text r> to last->in
-	r> current-format xor $FF and to current-format
-	true to success  THEN
+	r> ~current  true to success  THEN
     <format-chars over 0> and ?dup-IF
 	>r 2dup + ?flush-text end to last->in
-	r> current-format xor $FF and to current-format
-	true to success  THEN
+	r> ~current  true to success  THEN
     2drop
     success IF  ['] noop rectype-nt  ELSE  rectype-null  THEN ;
 
