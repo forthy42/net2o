@@ -2214,11 +2214,9 @@ msg:#mono format-chars '`' + c!
 	r> to next-format
 	true to success  THEN
     <format-chars over 0> and ?dup-IF
-	current-format >r
 	next-format current-format xor $FF and to current-format
 	>r 2dup + ?flush-text end to last->in
-	r> to current-format
-	r> next-format xor to next-format
+	r> to next-format
 	true to success  THEN
     next-format current-format xor $FF and to current-format
     2drop
