@@ -1376,7 +1376,9 @@ previous
 ' msg-tdisplay-silent msg-?hash-class is msg:display
 : ?search-lock ( addr u -- )
     BEGIN  dup  WHILE
-	    cell- 2dup + $@ sigpksize# - 1- + c@ $2E $30 within IF
+	    cell- 2dup + $@ sigpksize# - 1- + c@
+	    [ also net2o-base net2o' msg-lock ]L
+	    [ net2o' msg-unlock 1+ previous ]L within IF
 		2dup + $@ ['] msg:display catch IF  2drop  THEN
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
