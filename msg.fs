@@ -490,7 +490,7 @@ msg-table $save
 \ Code for displaying messages: logstyle for TUI deferred-based
 
 Variable log-mask
-1 4 bits: log#num log#date log#end log#perm
+1 5 bits: log#num log#date log#end log#len log#perm
 
 : .otr-info ( -- )
     <info> ." [otr] " <default> "[otr] " notify+ notify-otr? on ;
@@ -523,8 +523,10 @@ scope: logstyles
 : -date log#date invert log-mask and! update-log ;
 : +end  log#end  log-mask or! update-log ;
 : -end  log#end  invert log-mask and! update-log ;
+: +len  log#len  log-mask or! update-log ;
+: -len  log#len  invert log-mask and! update-log ;
 
-+date -num -end
++date -num -end -len
 }scope
 
 :noname ( addr u -- )
@@ -1359,6 +1361,7 @@ previous
 \ chat message, text only
 
 : msg-tdisplay ( addr u -- )
+    log-mask @ log#len and IF  dup hex.  THEN
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN
@@ -1372,7 +1375,8 @@ previous
 ' msg-tdisplay msg-notify-class is msg:display
 ' msg-tdisplay-silent msg-?hash-class is msg:display
 : ?search-lock ( addr u -- )
-    BEGIN  dup  WHILE  cell- 2dup + $@ sigpksize# - 1- + c@ $2E = IF
+    BEGIN  dup  WHILE
+	    cell- 2dup + $@ sigpksize# - 1- + c@ $2E $30 within IF
 		2dup + $@ ['] msg:display catch IF  2drop  THEN
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
@@ -1803,7 +1807,8 @@ also net2o-base scope: /chat
     \G logstyle: set log styles, the following settings exist:
     \G logstyle: +num       the message number per log line
     \G logstyle: +date      the date per log line
-    \G logstyle: +end       the end date per log line 
+    \G logstyle: +end       the end date per log line
+    \G logstyle: +len       the message length per log line
     umethod /lock ( addr u -- )
     \U lock {@nick}         lock down
     \G lock: lock down communication to list of nicks
