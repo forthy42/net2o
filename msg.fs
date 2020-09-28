@@ -606,7 +606,7 @@ end-class msg-?hash-class
 : msg-scan-hash ( ... xt -- ... )
     msg-?hash-class new >o
     msg-table @ token-table !
-    execute dispose o> ;
+    catch dispose o> throw ;
 
 \ main message class
 
@@ -1428,7 +1428,7 @@ forward key-from-dht
     msg-group-o >o msg:?otr msg:-otr o> >r
     [: cells >r msg-log@ { log u } u r> - 0 max { u' }
       log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
-      log u' ?search-lock
+      log u' ['] ?search-lock msg-scan-hash
       log u u' /string bounds ?DO
 	  I log - cell/ to log#
 	  I $@ { d: msgt }
