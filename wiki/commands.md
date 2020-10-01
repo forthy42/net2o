@@ -1,6 +1,6 @@
 # Commands #
 
-Version 0.9.9-20200924.
+Version 0.9.9-20201001.
 
 net2o separates data and commands.  Data is passed through to higher
 layers, commands are interpreted when they arrive.  For connection
@@ -407,7 +407,7 @@ Commands are context-sensitive in an OOP method hierarchy sense.
   silent message tag
 * $61 msg-hashs ( $:hashs -- )
   ihave part 1 within signed message
-* $62 msg-id ( $:id -- )
+* $62 msg-hash-id ( $:id -- )
   ihave part 2 within signed message
 * $63 msg-otrify2 ( $:date+sig $:newdate+sig -- )
   turn a past message into OTR, silent version

@@ -471,7 +471,7 @@ $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
 +net2o: msg-hashs ( $:hashs -- ) \g ihave part 1 within signed message
     $40 !!order?  $> msg:hashs ;
-+net2o: msg-id ( $:id -- ) \g ihave part 2 within signed message
++net2o: msg-hash-id ( $:id -- ) \g ihave part 2 within signed message
     $41 !!order?  $> msg:hash-id ;
 +net2o: msg-otrify2 ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR, silent version
     $40 !!order?  $> $> msg:otrify ;
