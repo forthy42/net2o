@@ -411,7 +411,7 @@ $00990000 $009900FF fade-color: show-info-color
 $338833FF text-color: lock-color
 $883333FF text-color: lockout-color
 $FFAA44FF text-color, fvalue perm-color#
-$553300FF text-color: mono-col
+\ $553300FF text-color: mono-col
 $FFFFDDFF text-color: mono-otr-col
 
 : nick[] ( box o:nick -- box )

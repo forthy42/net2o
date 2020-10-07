@@ -18,6 +18,11 @@
 color,#
 1 new-theme
 dark-gui
+$333333FF re-color pre-color#
+$FFFFBBFF re-text-color link-blue
+$FFFFBBFF re-text-color heading-blue
+$FFFFBBFF re-text-color item-blue
+$FFFFDDFF re-text-color mono-col
 $FFFFFFFF re-text-color blackish
 $FFFFBBFF re-text-color dark-blue
 $000000FF re-text-color whitish
@@ -48,7 +53,7 @@ $CCFFCCFF re-color other-signal
 $CC00CCFF re-color my-signal-otr
 $880088FF re-color other-signal-otr
 $CC0000FF re-color recording-color#
-$FFFFDDFF re-text-color mono-col
+\ $FFFFDDFF re-text-color mono-col
 
 8 0 [DO]
     imports#rgb-bg [I] sfloats + sf@ floor f>s to color,#
