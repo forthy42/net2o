@@ -1950,7 +1950,7 @@ Variable invitation-stack
     1config  !widgets
     0.1e o [: fdrop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
     get-order n>r ['] /chat >wordlist 1 set-order
-    ['] widgets-loop catch
+    ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
     nr> set-order throw ;
 
