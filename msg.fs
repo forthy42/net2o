@@ -316,6 +316,7 @@ event: :>msg-nestsig ( $addr o group -- )
     drop ;
 
 : pk.host ( -- addr u ) [: pk@ type host$ $. ;] $tmp ;
+: pk1.host ( -- addr u ) [: pk@ key| type host$ $. ;] $tmp ;
 
 Forward msg:last?
 Forward msg:last
@@ -356,8 +357,8 @@ previous
 
 : .@host.id ( pk+host u -- )
     '@' emit
-    sigpksize# - 2dup type '.' emit
-    + keysize .simple-id ;
+    2dup keysize safe/string type '.' emit
+    key| .simple-id ;
 : .ihaves ( -- )
     ." ====== hash owend by ======" cr
     have# [: dup $@ 85type ." :"
@@ -1078,7 +1079,7 @@ also }scope
 \ serialize hashes
 
 : msg-add-hashs ( -- )
-    0 .pk.host $make { w^ pk$ }
+    0 .pk1.host $make { w^ pk$ }
     ?hashs[] pk$ [{: pk$ :}l
 	2dup need-hashed? 0= IF
 	    pk$ $@ 2over have# #!ins[]
@@ -2031,8 +2032,8 @@ is /help
 :noname ( addr u -- )
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
-' .ihaves is /have
-' scan-log-hashs is /rescan#
+:noname 2drop .ihaves ; is /have
+:noname 2drop scan-log-hashs ; is /rescan#
 
 :noname ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing
