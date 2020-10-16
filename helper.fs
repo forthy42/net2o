@@ -335,6 +335,19 @@ in net2o : pklookup>dests ( pkaddr u -- flag )
 in net2o : pklookup ( pkaddr u -- )
     net2o:pklookup? 0= !!no-address!! ;
 
+in net2o : do-pk1lookup? ( pkaddr u xt -- flag ) { xt }
+    2dup keysize safe/string hostc$ $! key| 2dup pkc over str= to ?myself
+    2dup >d#id { id }
+    id .dht-host $[]# 0= IF  2dup pk-lookup  2dup >d#id to id  THEN
+    2dup make-context
+    false id dup .dht-host xt $[]map drop nip nip ;
+in net2o : pk1lookup? ( pkaddr u -- flag )
+    ['] insert-host? net2o:do-pk1lookup? ;
+in net2o : pk1lookup>dests ( pkaddr u -- flag )
+    ['] insert-dests? net2o:do-pk1lookup? ;
+in net2o : pk1lookup ( pkaddr u -- )
+    net2o:pk1lookup? 0= !!no-address!! ;
+
 : ?nat-done ( n -- )
     nat( ." req done, issue nat request" forth:cr )
     connect-rest +flow-control +resend ?nat ;
@@ -356,6 +369,9 @@ in net2o : pklookup ( pkaddr u -- )
 	ind-addr on \ need NAT traversal
 	+resend-cmd direct-connect
     ELSE  2rdrop  THEN ;
+
+: pk1-connect? ( addr u cmdlen datalen -- flag )
+    2>r net2o:pk1lookup? dup IF   2r> direct-connect  ELSE  2rdrop  THEN ;
 
 : addr-connect ( addr+key u cmdlen datalen xt -- )
     -rot 2>r >r over + 1- dup c@ dup >r -

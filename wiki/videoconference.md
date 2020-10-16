@@ -16,6 +16,8 @@
 * Push to talk, hotkeys for everything
 * Hotkey for cut mark + keyframe
 * Local recording with higher res/audio quality for presenter
+* Playback of recording needs to play back chat, as well
+* Select what you want to see when you do a playback
 * Allow multiple devices (cameras, mics) for one participant (Akira Kurosawa
   setup), no own audio in backchannel
   - Bonus points if multiple participants in the same room can be identified

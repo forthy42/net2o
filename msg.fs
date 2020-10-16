@@ -16,8 +16,7 @@
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Forward avalanche-to ( o:context -- )
-Forward pk-connect ( key u cmdlen datalen -- )
-Forward pk-connect? ( key u cmdlen datalen -- flag )
+Forward pk1-connect? ( key u cmdlen datalen -- flag )
 Forward pk-connect-dests?
 Forward addr-connect ( key+addr u cmdlen datalen xt -- )
 Forward pk-peek? ( addr u0 -- flag )
@@ -717,13 +716,13 @@ event: :>hash-finished { d: hash -- }
     keysize hashs *  0 to hashs  +LOOP ;
 
 : fetch-queue { tsk w^ want# -- }
-    0 .pk.host $make { w^ pk$ }
+    0 .pk1.host $make { w^ pk$ }
     want# tsk pk$ [{: tsk pk$ :}l { want }
 	want $@ pk$ $@ str= IF
 	    msg( ." I really should have this myself" forth:cr )
 	    \ don't fetch from myself
 	ELSE
-	    want $@ [: $8 $E pk-connect? ;] catch 0=
+	    want $@ [: $8 $E pk1-connect? ;] catch 0=
 	    IF
 		IF
 		    +resend +flow-control
