@@ -1597,16 +1597,13 @@ also net2o-base
 : chain, ( msgaddr u -- )
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
-: ihave, ( -- )
-    mehave[] $[]# 0 ?DO
-	I ihave[] $[]@
-	maxstring dup -1 = 1 rshift and
-	over 4 + - I mehave[] $[] $@len - min 0 max
-	keysize negate and
-	dup IF  $, I mehave[] $[]@ $, msg-ihave  ELSE  2drop  THEN
-    LOOP ;
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
+: ihave, ( -- )
+    <msg msg-silent-start
+    ihave[] $@ [: bounds ?DO  I $@ key| type  cell +LOOP ;] $tmp $, msg-hashs
+    host $@ $, msg-hash-id
+    msg> ;
 
 : (send-avalanche) ( xt -- addr u flag )
     [:  0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
