@@ -36,8 +36,7 @@ Variable otr-mode \ global otr mode
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
 
-User ihave[]
-User mehave[]
+User ihave$
 User push$
 
 : (avalanche-msg) ( o:connect -- )
@@ -45,7 +44,7 @@ User push$
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
     cell +LOOP ;
 : cleanup-msg ( -- )
-    ihave[] $[]free mehave[] $[]free push$ $free ;
+    ihave$ $free  push$ $free ;
 : avalanche-msg ( o:connect -- )
     \G forward message to all next nodes of that message group
     (avalanche-msg) cleanup-msg ;
@@ -334,23 +333,17 @@ Variable fetch-queue[]
 	    bounds ?DO
 		fetch( ." send have to group '"
 		msg-group-o .msg:name$ forth:type
-		." ' about hash '" 0 ihave[] $[]@ 85type forth:cr )
+		." ' about hash '" ihave$ $@ 85type forth:cr )
 		I @ to msg-group-o 0 .(avalanche-msg)
 	    cell +LOOP
 	ELSE  2drop  THEN  cleanup-msg ;] catch
     r> to msg-group-o  cleanup-msg  throw ;
 
-: >mehave ( addr u -- index )
-    mehave[] $[]# 0 ?DO
-	2dup I mehave[] $[]@ str= IF
-	    2drop I unloop  EXIT  THEN
-    LOOP   mehave[] $+[]!  mehave[] $[]# 1- ;
-
 also fetcher
 :noname fetching# to state ; fetcher-class is fetch
 ' 2drop fetcher-class is fetching
 :noname have# to state
-    last# $@ 2dup 0 .pk.host >mehave ihave[] $[]+!
+    last# $@ 2dup ihave$ $+!
     >send-have cleanup-msg ; fetcher-class is got-it
 previous
 
@@ -377,9 +370,8 @@ previous
     2dup 0 .gen-ihave >ihave.id ;
 
 : msg-pack ( -- xt )
-    0 push$ !@  0 mehave[] !@   0 ihave[] !@
-    [{: push mehave ihave :}h
-	push push$ !  mehave mehave[] !  ihave ihave[] ! ;] ;
+    0 push$ !@  0 ihave$ !@
+    [{: push ihave :}h push push$ !  ihave ihave$ ! ;] ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -1081,7 +1073,8 @@ also }scope
     0 .pk1.host $make { w^ pk$ }
     ?hashs[] pk$ [{: pk$ :}l
 	2dup need-hashed? 0= IF
-	    pk$ $@ 2over have# #!ins[]
+	    pk$ $@ 2over have# #!ins[]?
+	    IF  2dup ihave$ $+!  THEN
 	THEN  2drop
     ;] $[]map
     ?hashs[] $[]free
@@ -1601,7 +1594,7 @@ also net2o-base
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 : ihave, ( -- )
     <msg msg-silent-start
-    ihave[] $@ [: bounds ?DO  I $@ key| type  cell +LOOP ;] $tmp $, msg-hashs
+    ihave$ $@ $, msg-hashs
     host $@ $, msg-hash-id
     msg> ;
 

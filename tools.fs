@@ -716,13 +716,15 @@ $40 Constant #splitminute
 
 \ hash with array of unique strings
 
-: #!ins[] ( addr1 u1 addr-key u-key hash -- )
+: #!ins[]? ( addr1 u1 addr-key u-key hash -- flag )
     third third third >r 2>r
     #@ d0= IF
-	$make { w^ s } s cell 2r> r> #!
+	$make { w^ s } s cell 2r> r> #! true
     ELSE
-	last# cell+ $ins[] drop rdrop 2rdrop
+	last# cell+ $ins[] -1 <> rdrop 2rdrop
     THEN ;
+: #!ins[] ( addr1 u1 addr-key u-key hash -- )
+    #!ins[]? drop ;
 
 \ same with signatures; newest signature replaces older
 
