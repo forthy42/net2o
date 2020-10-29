@@ -148,6 +148,7 @@ cmd-class class{ msg
     field: pks#
     field: perms# \ pk -> permission map
     field: mode
+    value: silent?
     \ mode bits:
     1 3 bits: otr# lock# visible#
     : bit-ops: ( bit -- )

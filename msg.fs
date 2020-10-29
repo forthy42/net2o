@@ -38,13 +38,15 @@ Variable otr-mode \ global otr mode
 
 User ihave$
 User push$
+$200 Constant max#have
 
 : (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
     cell +LOOP ;
 : cleanup-msg ( -- )
-    ihave$ $free  push$ $free ;
+    ihave$ $@len max#have < IF  ihave$ $free  ELSE  ihave$ 0 max#have $del  THEN
+    push$ $free ;
 : avalanche-msg ( o:connect -- )
     \G forward message to all next nodes of that message group
     (avalanche-msg) cleanup-msg ;
@@ -462,9 +464,9 @@ $20 net2o: msg-start ( $:pksig -- ) \g start message
 $60 net2o: msg-silent-start ( $:pksig -- ) \g silent message tag
     1 !!>order? $40 c-state !  $> msg:silent-start ;
 +net2o: msg-hashs ( $:hashs -- ) \g ihave part 1 within signed message
-    $40 !!order?  $> msg:hashs ;
+    ( $40 !!order? )  $> msg:hashs ;
 +net2o: msg-hash-id ( $:id -- ) \g ihave part 2 within signed message
-    $41 !!order?  $> msg:hash-id ;
+    ( $41 !!order? )  $> msg:hash-id ;
 +net2o: msg-otrify2 ( $:date+sig $:newdate+sig -- ) \g turn a past message into OTR, silent version
     $40 !!order?  $> $> msg:otrify ;
 +net2o: msg-updates ( $:fileinfo $:hash -- ) \g Files got an update.
@@ -604,13 +606,14 @@ end-class msg-?hash-class
 
 :noname ( addr u -- )
     last# >r  2dup key| to msg:id$
+    false to msg:silent?
     .log-num
     2dup startdate@ .log-date
     2dup enddate@ .log-end
     .key-id ." : " 
     r> to last# ; msg-class is msg:start
 :noname ( addr u -- )
-    key| to msg:id$ ; msg-class is msg:silent-start
+    key| to msg:id$ true to msg:silent? ; msg-class is msg:silent-start
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
@@ -666,7 +669,7 @@ end-class msg-?hash-class
 :noname ( id u -- )
     fetch( ." ihave:" msg:id$ .key-id '.' emit 2dup type msg:hashs$ bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
-    msg:id$ key| [: 2swap type type ;] $tmp
+    msg:id$ key| [: type type ;] $tmp
     msg:hashs$ 2swap >ihave.id
 ; msg-class is msg:hash-id
 
@@ -880,7 +883,7 @@ msg-class is msg:object
     THEN ; msg-class is msg:otrify
 
 :noname ( -- )
-    forth:cr ; msg-class is msg:end
+    msg:silent? 0= IF  forth:cr  THEN ; msg-class is msg:end
 
 \g 
 \g ### group description commands ###
@@ -1594,8 +1597,8 @@ also net2o-base
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 : ihave, ( -- )
     <msg msg-silent-start
-    ihave$ $@ $, msg-hashs
-    host $@ $, msg-hash-id
+    ihave$ $@ max#have umin $, msg-hashs
+    host$ $@ $, msg-hash-id
     msg> ;
 
 : (send-avalanche) ( xt -- addr u flag )
@@ -2022,7 +2025,8 @@ is /help
     2drop msg-group-o .msg:?lock 0= IF  ." un"  THEN  ." locked" forth:cr
 ; is /lock?
 :noname 2drop .ihaves ; is /have
-:noname 2drop scan-log-hashs ; is /rescan#
+:noname 2drop scan-log-hashs
+    BEGIN  ihave$ $@len  WHILE  avalanche-msg ( msg-log, )  REPEAT ; is /rescan#
 
 :noname ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing
