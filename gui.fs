@@ -779,8 +779,10 @@ Variable like-char
 
 :noname ( addr u -- )
     + sigpksize# - [ keysize $10 + ]L dvcs-log:id$ $!
-    like-char off
+    like-char off  false to msg:silent?
 ; posting-log-class is msg:start
+:noname ( addr u -- )
+    key| to msg:id$ true to msg:silent? ; posting-log-class is msg:silent-start
 :noname ( xchar -- )  like-char ! ; posting-log-class is msg:like
 ' 2drop posting-log-class is msg:tag
 ' 2drop posting-log-class is msg:id
@@ -928,6 +930,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dir> ;
 
 :noname ( -- )
+    msg:silent? IF  false to msg:silent?  EXIT  THEN
     glue*ll }}glue msg-box .child+
     dpy-w @ 80% fm* msg-par .par-split
     {{ msg-par unbox }} cbl
@@ -998,6 +1001,7 @@ Variable re-indent#
     \sans \script cbl re-green log-mask @ +log#-date-token msg-box .child+
     \normal cbl ;
 :noname { d: pk -- o }
+    false to msg:silent?
     pk key| to msg:id$  pk startdate@ to msg:timestamp
     pk [: .simple-id ." : " ;] $tmp notify-nick!
     pk key| pkc over str= { me? }
@@ -1046,6 +1050,8 @@ Variable re-indent#
 	blackish
     THEN
 ; wmsg-class is msg:start
+:noname ( addr u -- )
+    key| to msg:id$ true to msg:silent? ; wmsg-class is msg:silent-start
 :noname { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp
     ['] utf8-sanitize $tmp }}text text-color! \sans

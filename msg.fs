@@ -1596,10 +1596,12 @@ also net2o-base
 : push, ( -- )
     push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
 : ihave, ( -- )
-    <msg msg-silent-start
-    ihave$ $@ max#have umin $, msg-hashs
-    host$ $@ $, msg-hash-id
-    msg> ;
+    ihave$ $@len IF
+	<msg msg-silent-start
+	ihave$ $@ max#have umin $, msg-hashs
+	host$ $@ $, msg-hash-id
+	msg>
+    THEN ;
 
 : (send-avalanche) ( xt -- addr u flag )
     [:  0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
