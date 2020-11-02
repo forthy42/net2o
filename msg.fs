@@ -1604,11 +1604,12 @@ also net2o-base
 	[: <msg msg-silent-start
 	    $, msg-hashs
 	    host$ $@ $, msg-hash-id
-	    msg> ;] gen-cmd$ push[] $+[]!
+	    msg> ;] 0 .gen-cmd$
+	+last-signed last-signed 2@ push[] $+[]!
     max#have +LOOP  ihave$ $free ;
 
 : (send-avalanche) ( xt -- addr u flag )
-    [:  0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
+    [:  [: <msg msg-start execute msg> ;] 0 .gen-cmd$
 	+last-signed msg-log, ;] [group] ;
 previous
 
