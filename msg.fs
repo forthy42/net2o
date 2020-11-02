@@ -37,16 +37,15 @@ Variable otr-mode \ global otr mode
     2drop ;
 
 User ihave$
-User push$
-$200 Constant max#have
+User push[]
+$300 Constant max#have
 
 : (avalanche-msg) ( o:connect -- )
     msg-group-o .msg:peers[] $@
     bounds ?DO  I @ o <> IF  I @ .avalanche-to  THEN
     cell +LOOP ;
 : cleanup-msg ( -- )
-    ihave$ $@len max#have < IF  ihave$ $free  ELSE  ihave$ 0 max#have $del  THEN
-    push$ $free ;
+    push[] $[]free ;
 : avalanche-msg ( o:connect -- )
     \G forward message to all next nodes of that message group
     (avalanche-msg) cleanup-msg ;
@@ -241,7 +240,7 @@ User peer-buf
     0 >o $A $A [: reconnect( ." prepare reconnection" cr )
       ?msg-context >o silent-last# ! o>
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
-    addr-connect 2dup d0= IF  2drop  ELSE  push$ $! avalanche-to  THEN o> ;
+    addr-connect 2dup d0= IF  2drop  ELSE  push[] $+[]! avalanche-to  THEN o> ;
 
 : execute+free ( closure-xt -- )
     dup >r execute r> cell- ( >addr ) free throw ;
@@ -372,8 +371,8 @@ previous
     2dup 0 .gen-ihave >ihave.id ;
 
 : msg-pack ( -- xt )
-    0 push$ !@  0 ihave$ !@
-    [{: push ihave :}h push push$ !  ihave ihave$ ! ;] ;
+    0 push[] !@  0 ihave$ !@
+    [{: push ihave :}h push push[] !  ihave ihave$ ! ;] ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -613,7 +612,8 @@ end-class msg-?hash-class
     .key-id ." : " 
     r> to last# ; msg-class is msg:start
 :noname ( addr u -- )
-    key| to msg:id$ true to msg:silent? ; msg-class is msg:silent-start
+    key| to msg:id$ true to msg:silent?
+    silent( ." Silent: " ) ; msg-class is msg:silent-start
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
@@ -664,9 +664,11 @@ end-class msg-?hash-class
     pk .key-id ." : " perm 64@ 64>n .perms space
 ; msg-class is msg:perms
 :noname ( hash u -- )
+    silent( ." hash: " 2dup 85type forth:cr )
     to msg:hashs$
 ; msg-class is msg:hashs
 :noname ( id u -- )
+    silent( ." id: " 2dup forth:type forth:cr )
     fetch( ." ihave:" msg:id$ .key-id '.' emit 2dup type msg:hashs$ bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
     msg:id$ key| [: type type ;] $tmp
@@ -1001,7 +1003,7 @@ Variable group-list[]
     ?pkgroup 2swap >msg-log
     2dup d0<> replay-mode @ 0= and \ do something if it is new
     IF
-	2over show-msg 2dup push$ $!
+	2over show-msg 2dup push[] $+[]!
     THEN  2drop 2drop ;
 
 \g 
@@ -1351,12 +1353,13 @@ previous
     THEN ;
 : .chat ( addr u -- )
     [: last# >r o IF  2dup do-msg-nestsig
-	ELSE  2dup display-one-msg  THEN  push$ $!
+	ELSE  2dup display-one-msg  THEN  push[] $+[]!
 	r> to last# 0 .avalanche-msg ;] [group] drop notify- ;
 
 \ chat message, text only
 
 : msg-tdisplay ( addr u -- )
+    ( 2dup dump )
     log-mask @ log#len and IF  dup hex.  THEN
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
@@ -1594,14 +1597,15 @@ also net2o-base
     [: 2dup startdate@ 64#0 { 64^ sd } sd le-64!  sd 1 64s forth:type
 	c:0key sigonly@ >hash hashtmp hash#128 forth:type ;] $tmp $, msg-chain ;
 : push, ( -- )
-    push$ $@ dup IF  $, nestsig  ELSE  2drop  THEN ;
-: ihave, ( -- )
-    ihave$ $@len IF
-	<msg msg-silent-start
-	ihave$ $@ max#have umin $, msg-hashs
-	host$ $@ $, msg-hash-id
-	msg>
-    THEN ;
+    push[] [: $, nestsig ;] $[]map ;
+: ihave>push ( -- )
+    ihave$ $@ bounds U+DO
+	I I' over - max#have umin
+	[: <msg msg-silent-start
+	    $, msg-hashs
+	    host$ $@ $, msg-hash-id
+	    msg> ;] gen-cmd$ push[] $+[]!
+    max#have +LOOP  ihave$ $free ;
 
 : (send-avalanche) ( xt -- addr u flag )
     [:  0 >o [: <msg msg-start execute msg> ;] gen-cmd$ o>
@@ -1848,6 +1852,9 @@ also net2o-base scope: /chat
     umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
+    umethod /cleanup ( addr u -- )
+    \U cleanup              clean log of garbled stuff
+    \G cleanup: search the entire chat log for garbled stuff and remove it
     umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
@@ -2028,7 +2035,16 @@ is /help
 ; is /lock?
 :noname 2drop .ihaves ; is /have
 :noname 2drop scan-log-hashs
-    BEGIN  ihave$ $@len  WHILE  avalanche-msg ( msg-log, )  REPEAT ; is /rescan#
+    ihave>push push[] [: >msg-log ;] $[]map
+    avalanche-msg ; is /rescan#
+:noname 2drop
+    msg-group-o .msg:log[] $@ bounds U+DO
+	I $@ "\x60\x03\x00\x61" string-prefix? IF
+	    I $free
+	THEN
+    cell +LOOP
+    0 msg-group-o .msg:log[] del$cell
+; is /cleanup
 
 :noname ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing
@@ -2447,13 +2463,15 @@ scope{ /chat
     REPEAT  2drop leave-chats  xchar-history
     nr> set-order nr> status-xts set-stack ;
 
+: msg-name, ( -- )
+    msg-group-o .msg:name$ 2dup pubkey $@ key| str=
+    IF  2drop  ELSE  group,  THEN ;
+
 : avalanche-to ( o:context -- )
     avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
     o to connection
-    net2o-code expect-msg message
-    msg-group-o .msg:name$ 2dup pubkey $@ key| str= IF  2drop  ELSE  group,  THEN
-    push, ihave, end-with
-    end-code ;
+    push[] [: net2o-code expect-msg message msg-name, $, nestsig end-with
+	end-code ;] $[]map ;
 
 \\\
 Local Variables:
