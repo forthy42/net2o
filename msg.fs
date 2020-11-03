@@ -613,8 +613,8 @@ end-class msg-?hash-class
     .key-id ." : " 
     r> to last# ; msg-class is msg:start
 :noname ( addr u -- )
-    key| to msg:id$ true to msg:silent?
-    silent( ." Silent: " ) ; msg-class is msg:silent-start
+    silent( 2dup startdate@ .log-date 2dup .key-id ." : Silent: " )
+    key| to msg:id$ true to msg:silent? ; msg-class is msg:silent-start
 :noname ( addr u -- ) $utf8>
     <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
 :noname ( addr u -- ) last# >r
