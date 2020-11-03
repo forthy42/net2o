@@ -70,7 +70,8 @@ Sema msglog-sema
 : purge-log ( -- )
     [: msg-group-o .msg:log[] { a[] }
 	0  BEGIN  dup a[] $[]# u<  WHILE
-		dup a[] $[]@ check-date nip nip IF
+		dup a[] $[]@ check-date nip nip
+		over a[] $[]@ "\x60\x03\x00\x61" string-prefix? or  IF
 		    dup a[] $[] $free
 		    a[] over cells cell $del
 		ELSE
@@ -1853,9 +1854,6 @@ also net2o-base scope: /chat
     umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
-    umethod /cleanup ( addr u -- )
-    \U cleanup              clean log of garbled stuff
-    \G cleanup: search the entire chat log for garbled stuff and remove it
     umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
@@ -2036,16 +2034,8 @@ is /help
 ; is /lock?
 :noname 2drop .ihaves ; is /have
 :noname 2drop scan-log-hashs
-    ihave>push push[] [: >msg-log ;] $[]map
+    ihave>push push[] [: >msg-log 2drop ;] $[]map
     avalanche-msg ; is /rescan#
-:noname 2drop
-    msg-group-o .msg:log[] $@ bounds U+DO
-	I $@ "\x60\x03\x00\x61" string-prefix? IF
-	    I $free
-	THEN
-    cell +LOOP
-    0 msg-group-o .msg:log[] del$cell
-; is /cleanup
 
 :noname ( addr u -- )
     word-args [: parse-name >perms args>keylist ;] execute-parsing

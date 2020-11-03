@@ -658,7 +658,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
 
 User neststart#
 User last-signed cell uallot drop
-: +last-signed ( addr -- ) drop last-signed cell+ +! ;
+: +last-signed ( addr u -- ) drop last-signed cell+ +! ;
 
 2 Constant fwd# \ maximum 14 bits = 16kB
 
