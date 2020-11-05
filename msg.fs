@@ -1611,7 +1611,7 @@ also net2o-base
 
 : (send-avalanche) ( xt -- addr u flag )
     [:  [: <msg msg-start execute msg> ;] 0 .gen-cmd$
-	+last-signed msg-log, ;] [group] ;
+	+last-signed msg-log, ;] [group] ihave>push ;
 previous
 
 : send-avalanche ( xt -- )
@@ -2156,7 +2156,7 @@ forward hash-in
     dup 4 - 0 max safe/string ".jpg" str= ;
 
 : >have+group ( addr u -- addr u )
-    2dup key|  2dup >have-group  >ihave ;
+    2dup key|  2dup >have-group  2dup >ihave  ihave$ $+! ;
 
 : file-in ( addr u -- hash u )
     slurp-file over >r hash-in r> free throw >have+group ;
