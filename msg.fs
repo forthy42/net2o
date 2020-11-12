@@ -369,7 +369,7 @@ previous
 : >ihave.id ( hash u1 pk.id u2 -- )
     2swap bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
 : >ihave ( hash u -- )
-    2dup 0 .gen-ihave >ihave.id ;
+    0 .gen-ihave >ihave.id ;
 
 : msg-pack ( -- xt )
     0 push[] !@  0 ihave$ !@
