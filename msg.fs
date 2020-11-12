@@ -364,7 +364,7 @@ previous
     c:0key 2dup c:hash 2over  dup sigpksize# u< IF  sig-unsigned !!sig!!  THEN
     2dup sigpksize# - 2dup c:hash + date-sig? !!sig!! 2drop ;
 : gen-ihave ( hash u1 -- sig u2 )
-    host$ $@ [: type .pk ;] $tmp ;
+    host$ $@ [: .pk type ;] $tmp ;
 
 : >ihave.id ( hash u1 pk.id u2 -- )
     2swap bounds U+DO  2dup I keysize have# #!ins[]  keysize +LOOP  2drop ;
