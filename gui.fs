@@ -427,7 +427,8 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
     glue new >o wh-glue! 0glue dglue-c glue! o o> ;
 
 : read-avatar ( addr u -- addr' u' )
-    ?read-enc-hashed mem>thumb atlas-region ;
+    ?read-enc-hashed mem>thumb atlas-region
+    1 thumb-rgba freetype-gl:texture_atlas_t-modified c! ;
 Variable user-avatar#
 Variable dummy-thumb#
 Variable user.png$
