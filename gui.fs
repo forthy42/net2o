@@ -935,7 +935,7 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     dpy-w @ 80% fm* msg-par .par-split
     {{ msg-par unbox }} cbl
     dup >r 0 ?DO  I pick box[] >bl "unboxed" name! drop  LOOP  r>
-    msg-vbox .+childs
+    msg-vbox .+childs  enqueue
 ; wmsg-class is msg:end
 0 Value edit-infobar-text \ nobody is online warning
 l" Deactivate Verbatim"

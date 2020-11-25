@@ -886,7 +886,7 @@ msg-class is msg:object
     THEN ; msg-class is msg:otrify
 
 :noname ( -- )
-    msg:silent? 0= IF  forth:cr  THEN ; msg-class is msg:end
+    msg:silent? 0= IF  forth:cr  THEN  enqueue ; msg-class is msg:end
 
 \g 
 \g ### group description commands ###
