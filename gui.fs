@@ -427,8 +427,7 @@ glue*avatar >o pixelsize# 64 fm* 0e 0g glue-dup hglue-c glue! vglue-c glue! 0glu
     glue new >o wh-glue! 0glue dglue-c glue! o o> ;
 
 : read-avatar ( addr u -- addr' u' )
-    ?read-enc-hashed mem>thumb atlas-region
-    1 thumb-rgba freetype-gl:texture_atlas_t-modified c! ;
+    ?read-enc-hashed mem>thumb atlas-region +textures ;
 Variable user-avatar#
 Variable dummy-thumb#
 Variable user.png$
@@ -436,11 +435,11 @@ Variable thumb.png$
 : read-user ( -- region )
     user.png$ $@len 0= IF
 	[ "doc/user.png" ]path user.png$ $slurp-file  THEN
-    user.png$ $@ mem>thumb atlas-region ;
+    user.png$ $@ mem>thumb atlas-region +textures ;
 : read-thumb ( -- )
     thumb.png$ $@len 0= IF
 	[ "minos2/thumb.png" ]path thumb.png$ $slurp-file  THEN
-    thumb.png$ $@ mem>thumb atlas-region ;
+    thumb.png$ $@ mem>thumb atlas-region +textures ;
 : user-avatar ( -- addr )
     user-avatar# @ 0= IF
 	read-user user-avatar# $!
@@ -1203,7 +1202,7 @@ Variable re-indent#
 : update-thumb { d: hash object -- }
     hash avatar-frame object >o to frame# hash >rotate
     frame# i.w frame# i.h hash >swap  tile-glue .wh-glue!  o>
-    [: +sync +resize ;] msgs-box .vp-needed +sync +resize ;
+    [: +sync +resize +textures ;] msgs-box .vp-needed +sync +resize +textures ;
 
 : 40%bv ( o -- o ) >o current-font-size% 40% f* fdup to border
     fnegate f2/ to borderv o o> ;
