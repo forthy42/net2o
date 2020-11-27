@@ -1199,10 +1199,12 @@ Variable re-indent#
 : >swap ( w h addr u -- w h / h w )
     keysize safe/string IF  c@ 4 and IF  swap  THEN  ELSE  drop  THEN ;
 
-: update-thumb { d: hash object -- }
-    hash avatar-frame object >o to frame# hash >rotate
-    frame# i.w frame# i.h hash >swap  tile-glue .wh-glue!  o>
-    [: +sync +resize +textures ;] msgs-box .vp-needed +sync +resize +textures ;
+: update-thumb { d: hash object rotate -- }
+    last# >r
+    hash avatar-frame object >o to frame#  rotate to rotate#
+    frame# i.w frame# i.h rotate 4 and IF  swap  THEN  tile-glue .wh-glue! o>
+    [: +sync +resize +textures ;] msgs-box .vp-needed +sync +resize +textures
+    r> to last# ;
 
 : 40%bv ( o -- o ) >o current-font-size% 40% f* fdup to border
     fnegate f2/ to borderv o o> ;
@@ -1213,7 +1215,8 @@ Variable re-indent#
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
 	128 128 glue*thumb dummy-thumb }}thumb >r
-	r@ [n:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #+!
+	r@ hash keysize safe/string IF  c@  ELSE  0  THEN
+	[d:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #+!
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
