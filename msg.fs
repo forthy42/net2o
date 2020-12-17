@@ -1784,6 +1784,9 @@ also net2o-base scope: /chat
     umethod /fetch ( addr u -- )
     \U fetch                trigger fetching
     \G fetch: fetch the hashes I want
+    umethod /format ( addr u -- )
+    \U format               set format string
+    \G format: set format string to specific characters or on/off
     umethod /gps ( addr u -- )
     \U gps                  send coordinates
     \G gps: send your coordinates
@@ -2054,6 +2057,11 @@ is /help
 
 :noname ( addr u -- )  2drop enqueue ; is /fetch
 
+:noname ( addr u -- )
+    2dup s" off" str= IF  config:chat-format$ $free  2drop  EXIT  THEN
+    2dup s" on" str=  IF  2drop "*/-_`"  THEN
+    5 umin  config:chat-format$ $! ; is /format
+
 :noname ( addr u -- )  2drop
     ." Want:" forth:cr
     fetch# [: { item }
@@ -2192,11 +2200,12 @@ forward hash-in
     2drop rectype-null ;
 
 $100 buffer: format-chars
-msg:#bold format-chars '*' + c!
-msg:#italic format-chars '/' + c!
-msg:#strikethrough format-chars '-' + c!
-msg:#underline format-chars '_' + c!
-msg:#mono format-chars '`' + c!
+
+: !format-chars ( -- )
+    format-chars $100 erase
+    msg:#bold config:chat-format$ $@ bounds ?DO
+	I c@ bl <> IF  dup I c@ format-chars + c!  THEN  2*
+    LOOP  drop ;
 
 : >format-chars ( addr u -- addr' u' format-chars )
     0 >r  BEGIN  dup 0> WHILE
@@ -2251,7 +2260,7 @@ depth r> - rec-sequence: msg-recognizer0
     ```-state 0= dup to ```-state ./mono-info ;
 
 : parse-text ( addr u -- ) last# >r  forth-recognizer >r
-    0 to last->in
+    0 to last->in  !format-chars
     msg-recognizer to forth-recognizer 2dup evaluate
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr

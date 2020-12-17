@@ -445,6 +445,7 @@ $Variable .net2o$
 $Variable .net2o-config$
 $Variable .net2o-cache$
 $Variable invite$
+$Variable chat-format$
 
 }scope
 
@@ -494,6 +495,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #60.000.000.000. dht-cleaninterval& 2! \ one minute dht clean interval
 #50.000.000.000. beacon-ticks& 2!
 #2.000.000.000. beacon-short-ticks& 2!
+
+"*/-_`" chat-format$ $!
 
 : ]path ( addr u -- )
     file>fpath ]] SLiteral [[ ] ;
