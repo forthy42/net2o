@@ -144,7 +144,7 @@ UValue no-ed-check?
 
 : sig>align ( sig pk -- )
     pktmp $20 move  sigtmp $40 move \ align inputs
-    $0F sigtmp $3F + andc! ;
+    $0F sigtmp $3F + cand! ;
 
 : ed-verify ( sig pk -- flag ) \ message digest is in keccak state
     sig>align
@@ -187,7 +187,7 @@ UValue no-ed-check?
     sct2 sk raw>sc25519
     get1 get0 sct2 ge25519*
     dest get1 ge25519-pack
-    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
+    clean-ed25519 dest $20  $80 dest $1F + cxor! ;
 
 : ed-dhx { offset sk pk dest -- secret len }
     pk pktmp $20 move
@@ -198,11 +198,11 @@ UValue no-ed-check?
     sct2 sct2 sct1 sc25519*
     get1 get0 sct2 ge25519*
     dest get1 ge25519-pack
-    clean-ed25519 dest $20  $80 dest $1F + xorc! ;
+    clean-ed25519 dest $20  $80 dest $1F + cxor! ;
 
 \ : ed-dhv { sk pk dest -- secret len }
 \     get0 pk ge25519-unpack- 0= !!no-ed-key!!
 \     sct2 sk raw>sc25519
 \     get1 get0 sct2 ge25519*v
 \     dest get1 ge25519-pack
-\     clean-ed25519 dest $20  $80 dest $1F + xorc! ;
+\     clean-ed25519 dest $20  $80 dest $1F + cxor! ;

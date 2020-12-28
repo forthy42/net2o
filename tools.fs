@@ -152,13 +152,13 @@ debug: dummy(
 
 \ logic memory modifiers
 
-: or!   ( x addr -- )    >r r@ @ or   r> ! ;
-: xor!  ( x addr -- )    >r r@ @ xor  r> ! ;
-: and!  ( x addr -- )    >r r@ @ and  r> ! ;
+[IFUNDEF] or!   : or!   ( x addr -- )    >r r@ @ or   r> ! ; [THEN]
+[IFUNDEF] xor!  : xor!  ( x addr -- )    >r r@ @ xor  r> ! ; [THEN]
+[IFUNDEF] and!  : and!  ( x addr -- )    >r r@ @ and  r> ! ; [THEN]
 
-: xorc! ( x c-addr -- )  >r r@ c@ xor r> c! ;
-: andc! ( x c-addr -- )  >r r@ c@ and r> c! ;
-: orc!  ( x c-addr -- )  >r r@ c@ or  r> c! ;
+[IFUNDEF] cxor! : cxor! ( x c-addr -- )  >r r@ c@ xor r> c! ; [THEN]
+[IFUNDEF] cand! : cand! ( x c-addr -- )  >r r@ c@ and r> c! ; [THEN]
+[IFUNDEF] cor!  : cor!  ( x c-addr -- )  >r r@ c@ or  r> c! ; [THEN]
 
 : max!@ ( n addr -- )    >r r@ @ max  r> !@ ;
 : umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;

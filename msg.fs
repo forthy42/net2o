@@ -855,7 +855,7 @@ msg-class is msg:object
     predate-key keccak# c:key@ c:key# smove
     [: sktmp pkmod sk@ drop >modkey .encsign-rest ;]
     ['] .sig r@ select $tmp
-    2dup + 2 - r> swap orc!
+    2dup + 2 - r> swap cor!
     ( 2dup dump ) 1 64s /string ;
 
 :noname { sig u' addr u -- }

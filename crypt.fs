@@ -359,7 +359,7 @@ scope{ mapc
 	dest-ivsgen kalign reply( ." regen-ivs/2 " dup c:key# .nnb cr ) c:key!
 	clear-replies
 	dest-ivs$ dest-a/b c:prng ivs( ." Regen A/B IVS" cr )
-	2 addr dest-ivslastgen xorc! r> c:key! ;]
+	2 addr dest-ivslastgen cxor! r> c:key! ;]
     regen-sema c-section  ;
 
 : regen-ivs-all ( o:map -- ) [: c:key@ >r
@@ -740,7 +740,7 @@ drop
     sct0 voutkey $10 + 32b>sc25519
     get1 get0 sct0 ge25519*
     dup get1 ge25519-pack
-    $80 swap ( over ) $1F + xorc!
+    $80 swap ( over ) $1F + cxor!
     ( keysize 85type forth:cr ) ;
 : decrypt-sig? ( key u msg u sig -- addr u sigerr )
     { pksig } $make -5 { w^ msg err }
@@ -751,7 +751,7 @@ drop
 	    pksig sigpksize# keysize /string
 	    pkmod keysize
 	    2rot [: type type type ;] $tmp
-	    2dup + 2 - $7F swap andc!
+	    2dup + 2 - $7F swap cand!
 	    msg $free
 	    err  EXIT  THEN  THEN
     2drop msg $free  0 0 err ;
@@ -760,7 +760,7 @@ drop
     sigdate +date
     sigdate datesize# type
     sksig@ drop sktmp pkmod ed-sign
-    2dup + 1- $80 swap orc! type
+    2dup + 1- $80 swap cor! type
     keysize emit ;
 
 : .encsign ( -- )

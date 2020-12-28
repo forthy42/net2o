@@ -1233,7 +1233,7 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
 : chunk-count+ ( counter -- )
     dup @
     dup 0= IF
-	ack-toggle# ack-state xorc!
+	ack-toggle# ack-state cxor!
 	ack-resends#
 	ack-resend~ ack-state c@ xor resend-toggle# and 0<> +
 	0 max dup to ack-resends#
@@ -1249,7 +1249,7 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
 : send-a-chunk ( chunk -- flag )  >r
     data-b2b @ 0<= IF
 	ack@ .bandwidth? dup  IF
-	    b2b-toggle# ack-state xorc!
+	    b2b-toggle# ack-state cxor!
 	    bursts# 1- data-b2b !
 	THEN
     ELSE
