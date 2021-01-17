@@ -110,12 +110,19 @@ DOES> swap >im-color# 7 umin cells + @ attr! ;
     drop <default> ;
 
 Create import-name$
-"I myself" s, "manual" s, "scan" s, "chat" s, "dht" s, "invited" s, "provisional" s, "untrusted" s,
+"I myself" string,
+"manual" string,
+"scan" string,
+"chat" string,
+"dht" string,
+"invited" string,
+"provisional" string,
+"untrusted" string,
 
 : .import-colors ( -- )
     import-name$
     import#untrusted 1+ 0 ?DO
-	1 I lshift >im-color count 2dup type <default> space + aligned
+	1 I lshift >im-color count 2dup type <default> space +
     LOOP drop ;
 
 \ sample key
