@@ -1297,8 +1297,10 @@ also opengl
     /second idx-head + +LOOP
     mem 64 w ;
 \ debugging tool
+require unix/stb-image-write.fs
 : img>png { addr w h -- }
-    "audio.png" soil:SOIL_SAVE_TYPE_PNG w h 4 addr soil:SOIL_save_image ;
+\    "audio.png" soil:SOIL_SAVE_TYPE_PNG w h 4 addr soil:SOIL_save_image ;
+    "audio.png" w h 4 addr 0 stbi_write_png ;
 \ example use:
 \ "audio.idx" slurp-file audio-idx>img img>png
 

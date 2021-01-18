@@ -378,26 +378,28 @@ tex: scan-tex-final
 : scan-grab1 ( -- )
     scan-buf1 scan-grab-buf ;
 
-also soil
+\ also soil
+
+require unix/stb-image-write.fs
 
 0 Value scan#
 
 : save-png0 ( -- )
     [: ." scanimg0-" scan# 0 .r ." .png" ;] $tmp
-    SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf0 $@ drop SOIL_save_image ;
+    128 dup 4 scan-buf0 $@ drop 0 stbi_write_png ;
 : save-png1 ( -- )
     [: ." scanimg1-" scan# 0 .r ." .png" ;] $tmp
-    SOIL_SAVE_TYPE_PNG 128 dup 4 scan-buf1 $@ drop SOIL_save_image ;
+    128 dup 4 scan-buf1 $@ drop 0 stbi_write_png ;
 : save-png-raw ( -- )
     [: ." scanimgraw-" scan# 0 .r ." .png" ;] $tmp
-    SOIL_SAVE_TYPE_PNG cam-w cam-h 4 scan-buf-raw $@ drop SOIL_save_image ;
+    cam-w cam-h 4 scan-buf-raw $@ drop 0 stbi_write_png ;
 : save-pngs ( -- )
     scan-grab-raw save-png-raw
     save-png0 save-png1
     1 +to scan#
     0>framebuffer ;
 
-previous
+\ previous
 
 : .xpoint ( x y -- )
     p0 2@ swap . . space
