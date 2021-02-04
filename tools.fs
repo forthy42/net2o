@@ -496,7 +496,8 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 #50.000.000.000. beacon-ticks& 2!
 #2.000.000.000. beacon-short-ticks& 2!
 
-"*/-_`" chat-format$ $!
+\ "*/-_`" chat-format$ $!
+"" chat-format$ $! \ by default don't format
 
 : ]path ( addr u -- )
     file>fpath ]] SLiteral [[ ] ;
