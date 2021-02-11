@@ -337,16 +337,20 @@ Variable fetch-queue[]
 		msg-group-o .msg:name$ forth:type
 		." ' about hash '" ihave$ $@ 85type forth:cr )
 		I @ to msg-group-o 0 .(avalanche-msg)
+		push[] ['] >msg-log $[]map
 	    cell +LOOP
-	ELSE  2drop  THEN  cleanup-msg ;] catch
+	ELSE  2drop  THEN
+    ;] catch
     r> to msg-group-o  cleanup-msg  throw ;
+
+forward ihave>push
 
 also fetcher
 :noname fetching# to state ; fetcher-class is fetch
 ' 2drop fetcher-class is fetching
 :noname have# to state
-    last# $@ 2dup ihave$ $+!
-    >send-have cleanup-msg ; fetcher-class is got-it
+    last# $@ 2dup ihave$ $+! ihave>push
+    >send-have ; fetcher-class is got-it
 previous
 
 : .@host.id ( pk+host u -- )
