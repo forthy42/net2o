@@ -500,7 +500,10 @@ $1000.0000. patchlimit& 2! \ 256MB patch limit size
 "" chat-format$ $! \ by default don't format
 
 : ]path ( addr u -- )
-    file>fpath ]] SLiteral [[ ] ;
+    ['] file>fpath catch dup
+    IF    lit, ]] throw [[ 2drop
+	true warning" file not found in ]path"
+    ELSE  drop ]] SLiteral [[ THEN  ] ;
 
 : .net2o-config/ ( addr u -- addr' u' ) [: .net2o-config$ $. '/' emit type ;] $tmp ;
 : .net2o-cache/ ( addr u -- addr' u' ) [: .net2o-cache$ $. '/' emit type ;] $tmp ;
