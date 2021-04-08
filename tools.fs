@@ -826,11 +826,11 @@ $10 Constant datesize#
 
 \ colors
 
-: <default> default-color attr! ;
-: <warn>    warning-color attr! ;
-: <info>    info-color    attr! ;
-: <err>     error-color   attr! ;
-: <success> success-color attr! ;
+synonym <default> default-color
+synonym <warn>    warning-color
+synonym <info>    info-color
+synonym <err>     error-color
+synonym <success> success-color
 : <black>   [ black >fg black >bg or ]l attr! ;
 : <white>   [ white >fg white >bg or bold or ]l attr! ;
 : <dim>     [ white >fg black >bg or dim or ]l attr! ;
@@ -1028,7 +1028,7 @@ Variable *insflag
 : .*all ( span addr pos -- span addr pos )
     xedit-startpos  2dup *insflag @ IF  *type2  ELSE  *type  THEN
     setstring$ $@
-    dup IF  ['] *type1 setstring-color color-execute  ELSE  2drop  THEN
+    dup IF  setstring-color *type1 input-color  ELSE  2drop  THEN
     >edit-rest *type  edit-linew @ edit-curpos !  ;
 : .*rest ( span addr pos -- span addr pos )
     xedit-startpos

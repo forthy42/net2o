@@ -619,10 +619,11 @@ Variable keys
 : +checkphrase ( addr u -- flag ) get-passphrase lastkey@ str= ;
 : +newphrase ( -- )
     BEGIN
+	input-color
 	s" Passphrase: " +passphrase
 	s" Retype pls: " +checkphrase 0= WHILE
-	    cr ."  didn't match, try again please" cr
-    REPEAT cr ;
+	    cr error-color ."  didn't match, try again please" cr
+    REPEAT cr default-color ;
 
 : ">passphrase ( addr u -- ) >passphrase +key ;
 : >seckey ( -- addr u )
@@ -1103,8 +1104,8 @@ false value ?yes
 : migrate-key-loop ( -- )  secret-keys# >r
     old-pw-diffuse  ?key-sfd read-keys-loop  new-pw-diffuse
     secret-keys# r> u> IF
-	[: ." Migrating password hash to ECC+keccak" cr ;]
-	info-color ['] color-execute do-debug
+	[: info-color ." Migrating password hash to ECC+keccak" cr ;]
+	['] execute-theme-color do-debug
 	save-keys-again on
     THEN ;
 : read-key-loop ( -- )
@@ -1427,7 +1428,7 @@ forward read-chatgroups
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop
-	    s" Passphrase: " +passphrase   !time
+	    input-color s" Passphrase: " +passphrase default-color  !time
 	    read-keys secret-keys# dup 0= IF
 		\ fail right after the first try if PASSPHRASE is used
 		\ and give the maximum waiting penalty in that case

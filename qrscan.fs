@@ -59,9 +59,9 @@ require minos2/gl-helper.fs
     s" unhealthy RNG state"          throwcode !!bad-rng!!
     s" unsaulted random number"      throwcode !!no-salt!!
     : .net2o-config/ ;
-    : <default> default-color attr! ;
-    : <info>    info-color    attr! ;
-    : <err>     error-color   attr! ;
+    : <default> default-color ;
+    : <info>    info-color    ;
+    : <err>     error-color   ;
     require mkdir.fs
     2 Constant ENOENT
     #-512 ENOENT - Constant no-file#
