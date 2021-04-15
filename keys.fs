@@ -100,14 +100,59 @@ Variable import-type  import#new import-type !
 : >im-color# ( mask -- color# )
     8 cells 0 DO  dup 1 and IF  drop I LEAVE  THEN  2/  LOOP ;
 
-Create >im-color  $B600 , $D600 , $9600 , $C600 , $A600 , $8B01 , $8C01 , $E600 ,
-DOES> swap >im-color# 7 umin cells + @ attr! ;
+theme-color: <self>
+theme-color: <manual>
+theme-color: <scan>
+theme-color: <chat>
+theme-color: <dht>
+theme-color: <invited>
+theme-color: <provisional>
+theme-color: <untrusted>
+
+current-theme
+
+light-mode
+
+$B600 to <self>
+$D600 to <manual>
+$9600 to <scan>
+$C600 to <chat>
+$A600 to <dht>
+$8B01 to <invited>
+$8C01 to <provisional>
+$E600 to <untrusted>
+
+dark-mode
+
+$B600 to <self>
+$D600 to <manual>
+$9600 to <scan>
+$C600 to <chat>
+$A600 to <dht>
+$8B01 to <invited>
+$8C01 to <provisional>
+$E600 to <untrusted>
+
+to current-theme
+
+Create >im-color ( xt n -- )
+' <self> ,
+' <manual> ,
+' <scan> ,
+' <chat> ,
+' <dht> ,
+' <invited> ,
+' <provisional> ,
+' <untrusted> ,
+DOES> swap >im-color# 7 umin cells + [: perform execute ;] execute-theme-color ;
 
 : .imports ( mask -- )
     imports$ import#new bounds DO
-	1 I imports$ - lshift >im-color
-	dup 1 and IF  I c@ emit  THEN  2/ LOOP
-    drop <default> ;
+	dup 1 and IF
+	    I c@ ['] emit 1 I imports$ - lshift >im-color
+	THEN
+	2/ LOOP
+    drop ;
 
 Create import-name$
 "I myself" string,
@@ -122,7 +167,8 @@ Create import-name$
 : .import-colors ( -- )
     import-name$
     import#untrusted 1+ 0 ?DO
-	1 I lshift >im-color count 2dup type <default> space +
+	[: count 2dup type ;] 1 I lshift >im-color
+	space +
     LOOP drop ;
 
 \ sample key
@@ -229,13 +275,13 @@ Variable sim-nick!
 : .pet0-base ( o:key -- )
     ke-pets[] $[]# IF  0 ke-pets[] $[]@ type 0 ke-pets# $[] @ .#
     ELSE  .nick-base  THEN ;
-: .real-nick ( o:key -- )   ke-imports @ >im-color .nick-base <default> ;
+: .real-nick ( o:key -- )   ['] .nick-base ke-imports @ >im-color ;
 
 0 Value last-ki
 
-: .nick ( o:key -- )   ke-imports @ dup to last-ki >im-color .pet0-base <default> ;
+: .nick ( o:key -- )   ['] .pet0-base ke-imports @ dup to last-ki >im-color ;
 : .nick+pet ( o:key -- )
-    ke-imports @ >im-color .nick-base .pet-base <default> ;
+    [: .nick-base .pet-base ;] ke-imports @ >im-color ;
 
 : nick>pk ( nick u -- pk u )
     nick-key ?dup-IF .ke-pk $@ ELSE 0 0 THEN ;
@@ -368,7 +414,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 	I 4 85type  dup cells 85colors + @ attr! 1+
     I 4 + 4 85type <default> cr 8 +LOOP  drop ;
 : .import85 ( addr u -- )
-    ke-imports @ >im-color 85type <default> ;
+    ['] 85type ke-imports @ >im-color ;
 : .rsk ( nick u -- )
     skrev $20 .stripe85 space type ."  (keep offline copy!)" cr ;
 : .key ( addr u -- )
@@ -400,8 +446,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
 \ print invitations
 
 : .key-invite ( o:key -- o:key )
-    ke-pk $@ keysize umin
-    ke-imports @ >im-color 85type <default>
+    ke-pk $@ keysize umin .import85
     space .nick space ;
 : .key-short ( o:key -- o:key )
     ke-nick $. ke-prof $@len IF ."  profile: " ke-prof $@ 85type THEN ;

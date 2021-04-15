@@ -191,18 +191,11 @@ op-vector !
 
 \ misc
 
-[IFUNDEF] do-debug
-    : do-debug ( xt -- )
-	op-vector @ { oldout }
-	debug-vector @ op-vector !
-	catch oldout op-vector ! throw ;
-[THEN]
-
 : etype ( addr u -- ) >stderr type ;
 : $err ( xt -- )  $tmp stderr write-file throw ;
 : .black85 ( addr u -- )
-    fullreveal( <dim> )else( <black> )
-    reveal( 85type )else( nip 5 4 */ spaces ) <default> ;
+    [:  fullreveal( <dim> )else( <black> )
+	reveal( 85type )else( nip 5 4 */ spaces ) ;] execute-theme-color ;
 
 \ extra hints for last word executed
 

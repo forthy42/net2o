@@ -831,9 +831,26 @@ synonym <warn>    warning-color
 synonym <info>    info-color
 synonym <err>     error-color
 synonym <success> success-color
-: <black>   [ black >fg black >bg or ]l attr! ;
-: <white>   [ white >fg white >bg or bold or ]l attr! ;
-: <dim>     [ white >fg black >bg or dim or ]l attr! ;
+
+theme-color: <black>
+theme-color: <white>
+theme-color: <dim>
+
+current-theme
+
+light-mode
+
+<a black >fg black >bg a> to <black>
+<a white >fg white >bg bold a> to <white>
+<a white >fg black >bg dim a> to <dim>
+
+dark-mode
+
+<a black >fg black >bg a> to <black>
+<a white >fg white >bg bold a> to <white>
+<a white >fg black >bg dim a> to <dim>
+
+to current-theme
 
 \ Memory words
 

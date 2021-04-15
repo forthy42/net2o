@@ -146,8 +146,8 @@ scope{ n2o
     ?nextarg 0= IF  arg-o @ cmd-args^ = IF  n2o:help  THEN  EXIT  THEN
     2dup ['] n2o >wordlist find-name-in
     ?dup-IF  nip nip execute  ELSE
-	[: <err> ." n2o command not found: " mark-start type mark-end
-	    <default> cr ;] do-debug
+	[: [: <err> ." n2o command not found: " mark-start type mark-end
+	    ;] execute-theme-color cr ;] do-debug
 	['] 2drop arg-loop n2o:help
     THEN ;
 

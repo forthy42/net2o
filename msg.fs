@@ -2063,7 +2063,7 @@ is /help
 
 :noname ( addr u -- )
     2dup s" off" str= IF  config:chat-format$ $free  2drop  EXIT  THEN
-    2dup s" on" str=  IF  2drop "*/-_`"  THEN
+    2dup s" on" str=  IF  2drop "*/_-`"  THEN
     5 umin  config:chat-format$ $! ; is /format
 
 :noname ( addr u -- )  2drop

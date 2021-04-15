@@ -163,7 +163,7 @@ dht-class ' new static-a with-allocater constant dummy-dht
     2dup sigsize# - .addr$
     2dup space .sigdates >host verify-host .check 2drop ;
 : .owner ( addr u -- )  2dup sigsize# - ['] .key$ catch IF
-	2drop <err> ."  invalid key" cr <default>  THEN
+	2drop [: <err> ."  invalid key" cr ;] execute-theme-color  THEN
     2dup space .sigdates verify-owner .check 2drop ;
 : host>$ ( addr u -- addr u' flag )
     >host verify-host 0= >r sigsize# - r> ;
