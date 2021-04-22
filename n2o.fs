@@ -189,13 +189,14 @@ scope{ n2o
     \U keyqr|qrkey [@user1 .. @usern]
     \G keyqr: print qr of own key (default) or selected user's qr
     ?get-me
+    white? IF  white-qr  ELSE  black-qr  THEN
     ?peekarg
-    IF  case 
+    dup IF  drop case 
 	    2dup "-black" str= ?of  2drop black-qr ?nextarg  endof
 	    2dup "-white" str= ?of  2drop white-qr ?nextarg  endof
 	    true dup endcase
     THEN
-    nip nip  IF  qr-nicks  ELSE
+    IF  nip nip qr-nicks  ELSE
 	init-client announce-me qr-me
     THEN ;
 

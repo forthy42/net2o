@@ -124,13 +124,13 @@ $E600 to <untrusted>
 
 dark-mode
 
-$B600 to <self>
-$D600 to <manual>
-$9600 to <scan>
-$C600 to <chat>
-$A600 to <dht>
-$8B01 to <invited>
-$8C01 to <provisional>
+$B601 to <self>
+$D601 to <manual>
+$9601 to <scan>
+$C601 to <chat>
+$A601 to <dht>
+$8B00 to <invited>
+$8C00 to <provisional>
 $E600 to <untrusted>
 
 to current-theme
