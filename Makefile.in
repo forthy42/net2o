@@ -157,15 +157,15 @@ extra-install:	install-libs install
 
 install:	install-libs libcc-install
 	for i in $(SRCDIRS); do \
-		$(MKDIR) -p $(datadir)/gforth/$(GFVER)/$$i; \
+		$(MKDIR) -p $(datadir)/$$i; \
 	done
-	-@VERDIR@rm $(datadir)/gforth/$(GFVER)/net2o
-	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/gforth/$(GFVER)/net2o
+	-@VERDIR@rm $(datadir)/net2o
+	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/net2o
 	for i in $(SOURCES) $(LANGS); do \
-		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/net2o-@PACKAGE_VERSION@/$$i; \
 	done
 	for i in $(GEN); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/gforth/$(GFVER)/net2o/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/net2o-@PACKAGE_VERSION@/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
 	@VERDIR@for i in $(SCRIPTS); do \
