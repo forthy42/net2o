@@ -4,6 +4,9 @@
 warnings off \ in production mode, we don't want any warnings
 
 fpath+ @DATADIR@/gforth/@GFVER@/net2o-@PACKAGE_VERSION@
+also c-lib
+libcc-path path+ @LIBDIR@/net2o/@PACKAGE_VERSION@/@GFARCH@/libcc-named
+previous
 
 @HAS_GPSD@ [IF] \ gpsd
     s" unix/gps.fs" open-fpath-file

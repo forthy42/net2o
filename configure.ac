@@ -103,6 +103,10 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 DATADIR=$(eval echo $(eval echo $datadir))
 AC_SUBST(DATADIR)
 
+test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+LIBDIR=$(eval echo $(eval echo $libdir))
+AC_SUBST(LIBDIR)
+
 AC_CONFIG_SUBDIRS([keccakp threefish ed25519-donna bdelta])
 
 AC_CONFIG_FILES([Makefile n2o qrscan version.fs debian/changelog debian/control])
