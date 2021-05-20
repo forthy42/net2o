@@ -107,8 +107,9 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCDIRS = net2o-@PACKAGE_VERSION@/tests net2o-@PACKAGE_VERSION@/doc net2o-@PACKAGE_VERSION@/android net2o-@PACKAGE_VERSION@/linux net2o-@PACKAGE_VERSION@/lang net2o-@PACKAGE_VERSION@/json net2o-@PACKAGE_VERSION@/html
-@NOVERDIR@SRCDIRS = net2o/tests net2o/doc net2o/android net2o/linux net2o/lang net2o/json net2o/html
+@VERDIR@SRCPATH = net2o-@PACKAGE_VERSION@
+@NOVERDIR@SRCPATH = net2o
+SRCDIRS = $(SRCPATH)/tests $(SRCPATH)/doc $(SRCPATH)/android $(SRCPATH)/linux $(SRCPATH)/lang $(SRCPATH)/json $(SRCPATH)/html
 
 SCRIPTS = n2o
 
@@ -162,10 +163,10 @@ install:	install-libs libcc-install
 	-@VERDIR@rm $(datadir)/net2o
 	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/net2o
 	for i in $(SOURCES) $(LANGS); do \
-		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/net2o-@PACKAGE_VERSION@/$$i; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$(SRCPATH)/$$i; \
 	done
 	for i in $(GEN); do \
-		$(INSTALL_DATA) ./$$i $(datadir)/net2o-@PACKAGE_VERSION@/$$i; \
+		$(INSTALL_DATA) ./$$i $(datadir)/$(SRCPATH)/$$i; \
 	done
 	$(MKDIR) -p $(bindir)
 	@VERDIR@for i in $(SCRIPTS); do \

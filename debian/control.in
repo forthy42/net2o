@@ -17,7 +17,7 @@ Description: @PACKAGE_NAME@ protocol stack
 Package: @PACKAGE_NAME@-gui
 Version: @PACKAGE_VERSION@
 Architecture: all
-Depends: gforth-minos2 (>= @GFDEBVER@), @PACKAGE_NAME@, fonts-emoji, fonts-awesome
+Depends: gforth-minos2 (>= @GFDEBVER@), gforth-minos2audio, gforth-minos2tools, @PACKAGE_NAME@, fonts-emoji, fonts-awesome
 Description: @PACKAGE_NAME@ protocol stack
  net2o reinvents the Internet.  Applications include file copy, chat, DHT;
  others will follow.
