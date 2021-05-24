@@ -256,13 +256,13 @@ User termfile
 what's name
 op-vector @
 what's at-xy what's at-deltaxy what's page what's attr!
-[IFDEF] notrace notrace [THEN]
+[IFDEF] notrace get-recognizers n>r notrace [THEN]
 termserver-out
 IS attr! IS page IS at-deltaxy IS at-xy
 op-vector !
 is name
 ' ts-key  ' ts-key? input: termserver-in
-[IFDEF] traceall traceall [THEN]
+[IFDEF] notrace nr> set-recognizers [THEN]
 
 : >termserver-io ( -- )
     [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section ;
