@@ -27,7 +27,7 @@ update the repository data and install net2o, so enter:
 Remove the architectures on the list above which you don't need; on
 Debian testing, the list is not necessary, on older versions, the “`all`”
 part is not searched if you don't have that list, then Gforth fails to
-install the gforth-common part.
+install the “`gforth-common`” part.
 
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
     apt update
