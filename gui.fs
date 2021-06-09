@@ -116,7 +116,7 @@ Variable nick$
 
 : nick-done ( max span addr pos -- max span addr pos flag )
     over 3 pick nick$ $!
-    0e pw-field [: data .engage fdrop ;] >animate \ engage delayed
+    pw-field engage
     create-new-id /hflip
     phrase-first /flop +lang
     1 to nick-pw  true ;
@@ -329,12 +329,14 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	}}h box[] \skip >bl
 	\ Advices, context sensitive
 	{{  \small dark-blue !i18n
-	    l" Enter passphrase to unlock" }}text' /center dup to phrase-unlock
-	    l" Create new ID" }}text' /center dup to create-new-id /hflip
-	    l" Enter new passphrase" }}text' /center dup to phrase-first /hflip
-	    l" Enter new passphrase again" }}text' /center dup to phrase-again /hflip
+	    glue*l login-bg-col# font-size# f2/ f2/ }}frame dup .button1
+	    {{ l" Enter passphrase to unlock" }}text' }}h dup to phrase-unlock
+	    {{ l" Create new ID" }}text' }}h dup to create-new-id /hflip
+	    {{ l" Enter new passphrase" }}text' }}h dup to phrase-first /hflip
+	    {{ l" Enter new passphrase again" }}text' }}h dup to phrase-again /hflip
 	    !lit
-	}}z box[] /center >bl
+	}}z /center 25%b >bl
+	[: k-enter pw-frame .act .ekeyed ;] 0 click[]
 	{{ glue*lll }}glue }}v
     }}v box[]
 }}z box[] to pw-frame
@@ -1841,10 +1843,10 @@ also [IFDEF] jni jni [THEN]
 		ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
 	[THEN]
 	k-f5 of  color-theme 0=  IF  anim-end 0.25e o
-		[:             fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
+		[: drop             fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f6 of  color-theme 0<> IF  anim-end 0.25e o
-		[: 1e fswap f- fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
+		[: drop 1e fswap f- fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f7 of  >normalscreen   endof
 	k-f8 of  >fullscreen     endof
@@ -1955,11 +1957,11 @@ Variable invitation-stack
     THEN
     secret-keys# IF  show-nicks  ELSE
 	lacks-key?  IF
-	    0e 0 [: drop k-enter id-toggler .act .ekeyed ;] >animate
+	    0e 0 [: fdrop drop k-enter id-toggler .act .ekeyed ;] >animate
 	THEN
     THEN
     1config  !widgets
-    0.1e o [: fdrop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
+    0.1e o [: fdrop drop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
     get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
