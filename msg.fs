@@ -1529,7 +1529,7 @@ Variable $lastline
     clear-line find-next-chatline
     edit-update false ;
 : chat-enter ( max span addr pos1 -- max span addr pos2 true )
-    drop over edit-update true 64#-1 line-date 64! ;
+    drop over edit-update edit-curpos-off true 64#-1 line-date 64! ;
 
 edit-terminal-c class
 end-class chat-terminal-c
@@ -1547,17 +1547,17 @@ chat-terminal edit-out !
 ' chat-enter     #lf    bindkey
 ' chat-enter     #cr    bindkey
 \ :noname #tab (xins) 0 ; #tab   bindkey
-[IFDEF] ebindkey
-    keycode-limit keycode-start - cells buffer: chat-ekeys
-    std-ekeys chat-ekeys keycode-limit keycode-start - cells move
-    
-    ' chat-ekeys is ekeys
-    
-    ' chat-next-line k-down  ebindkey
-    ' chat-prev-line k-up    ebindkey
-    ' chat-next-line k-next  ebindkey
-    ' chat-prev-line k-prior ebindkey
-[THEN]
+
+keycode-limit keycode-start - cells buffer: chat-ekeys
+std-ekeys chat-ekeys keycode-limit keycode-start - cells move
+
+' chat-ekeys is ekeys
+
+' chat-next-line k-down  ebindkey
+' chat-prev-line k-up    ebindkey
+' chat-next-line k-next  ebindkey
+' chat-prev-line k-prior ebindkey
+' chat-enter     k-enter ebindkey
 
 edit-terminal edit-out !
 
@@ -2457,7 +2457,8 @@ scope{ /chat
 
 : do-chat ( addr u -- )
     status-xts get-stack n>r  get-order n>r
-    chat-history  ['] /chat >wordlist 1 set-order
+    chat-history  edit-curpos-off
+    ['] /chat >wordlist 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
     [: #0. /chat:/peers ;] ['] .stacks ['] .order 3 status-xts set-stack
