@@ -2173,34 +2173,42 @@ forward hash-in
 : file-in ( addr u -- hash u )
     slurp-file over >r hash-in r> free throw >have+group ;
 
-: img-rec ( addr u -- .. token )
-    2dup "img:" string-prefix? IF
-	over ?flush-text
-	[:  2dup + >r
-	    4 /string save-mem over >r 2dup jpeg? IF
-		2dup >thumbnail
-		dup IF  over >r hash-in
-		    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
-		    r> free throw  THEN
-	    ELSE  #0.  THEN
-	    2swap file-in
-	    2swap dup IF   >have+group  THEN
-	    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
-		$, msg:image# ulit, msg-object ;]
-	    r> free throw  r> to last->in ;]
-	catch 0= IF  rectype-nt  EXIT  THEN  THEN
-    2drop rectype-null ;
-: audio-rec ( addr u -- .. token )
-    2dup "audio:" string-prefix? IF
-	over ?flush-text
-	[:  2dup + >r
-	    6 /string save-mem over >r
-	    2dup [: forth:type ." .aidx" ;] $tmp file-in save-mem 2>r
-	    [: forth:type ." .opus" ;] $tmp file-in save-mem 2r>
-	    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
-		over >r $, msg:audio# ulit, msg-object r> free throw ;]
-	    r> free throw  r> to last->in ;]
-	catch 0= IF  rectype-nt  EXIT  THEN  THEN
+: img-file ( addr u -- )
+    2dup jpeg? IF
+	2dup >thumbnail
+	dup IF  over >r hash-in
+	    [: forth:type img-orient @ 1- 0 max forth:emit ;] $tmp
+	    r> free throw  THEN
+    ELSE  #0.  THEN
+    2swap file-in
+    2swap dup IF   >have+group  THEN
+    [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
+	$, msg:image# ulit, msg-object ;] ;
+: audio-file ( addr u -- )
+    2dup file-in save-mem 2>r
+    [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
+    [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
+	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
+: genfile-file ( addr u -- )
+    file-in save-mem
+    [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
+
+: file-rec ( addr u -- .. token )
+    2dup "file://" string-prefix? IF
+	over ?flush-text 7 /string
+	2dup + >r  save-mem over >r
+	2dup s" .jpg" string-postfix? >r
+	2dup s" .png" string-postfix? >r
+	2dup s" .jpeg" string-postfix? r> r> or or
+	IF    ['] img-file
+	ELSE  2dup s" .aidx" string-postfix?
+	    IF    ['] audio-file
+	    ELSE  ['] genfile-file
+	    THEN
+	THEN
+	catch
+	r> free throw  r> to last->in
+	0= IF  rectype-nt  EXIT  THEN  THEN
     2drop rectype-null ;
 
 $100 buffer: format-chars
@@ -2244,7 +2252,7 @@ $100 buffer: format-chars
 $10 stack: msg-recognizer
 
 depth >r
-' text-rec  ' format-text-rec  ' vote-rec  ' audio-rec ' img-rec
+' text-rec  ' format-text-rec  ' vote-rec  ' file-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
 depth r> - rec-sequence: msg-recognizer0
 

@@ -244,6 +244,7 @@ enum audio#
 enum audio-idx#
 enum video#
 enum video-idx#
+enum filename# \ annotate object with filename
 drop
 }scope
 

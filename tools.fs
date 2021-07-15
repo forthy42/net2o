@@ -130,6 +130,9 @@ word-args
     \ check if string is all zero
     0 scan nip 0= ;
 
+: string-postfix? ( addr1 u1 addr2 u2 -- )
+    tuck 2>r - + 2r> tuck str= ;
+
 \ set debugging
 
 debug: dummy(
