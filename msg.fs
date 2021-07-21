@@ -2173,7 +2173,11 @@ forward hash-in
 : file-in ( addr u -- hash u )
     slurp-file over >r hash-in r> free throw >have+group ;
 
-: img-file ( addr u -- )
+: suffix ( addr u -- addr' u' )
+    2dup '.' scan-back nip /string ;
+
+scope: file-suffixes
+: jpg ( addr u -- )
     2dup jpeg? IF
 	2dup >thumbnail
 	dup IF  over >r hash-in
@@ -2184,11 +2188,17 @@ forward hash-in
     2swap dup IF   >have+group  THEN
     [:  dup IF  $, msg:thumbnail# ulit, msg-object  ELSE  2drop  THEN
 	$, msg:image# ulit, msg-object ;] ;
-: audio-file ( addr u -- )
+synonym jpeg jpg
+synonym png jpg
+
+: opus ( addr u -- )
     2dup file-in save-mem 2>r
     [: 5 - forth:type ." .opus" ;] $tmp file-in save-mem 2r>
     [:  over >r $, msg:audio-idx# ulit, msg-object r> free throw
 	over >r $, msg:audio# ulit, msg-object r> free throw ;] ;
+synonym aidx opus
+}scope
+
 : genfile-file ( addr u -- )
     file-in save-mem
     [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
@@ -2197,15 +2207,8 @@ forward hash-in
     2dup "file://" string-prefix? IF
 	over ?flush-text 7 /string
 	2dup + >r  save-mem over >r
-	2dup s" .jpg" string-postfix? >r
-	2dup s" .png" string-postfix? >r
-	2dup s" .jpeg" string-postfix? r> r> or or
-	IF    ['] img-file
-	ELSE  2dup s" .aidx" string-postfix?
-	    IF    ['] audio-file
-	    ELSE  ['] genfile-file
-	    THEN
-	THEN
+	2dup suffix ['] file-suffixes >wordlist find-name-in
+	dup 0= IF  drop ['] genfile-file  THEN
 	catch
 	r> free throw  r> to last->in
 	0= IF  rectype-nt  EXIT  THEN  THEN
