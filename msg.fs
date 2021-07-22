@@ -2203,15 +2203,26 @@ synonym aidx opus
     file-in save-mem
     [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
 
+: expand-to-file ( addr u -- addr u' flag )
+    drop source + over -
+    BEGIN  -trailing dup  WHILE
+	    2dup 7 /string file-status nip 0= IF
+		2dup + source drop - >in !  true EXIT  THEN
+	    bl -scan  REPEAT
+    false ;
+    
 : file-rec ( addr u -- .. token )
     2dup "file://" string-prefix? IF
-	over ?flush-text 7 /string
-	2dup + >r  save-mem over >r
-	2dup suffix ['] file-suffixes >wordlist find-name-in
-	dup 0= IF  drop ['] genfile-file  THEN
-	catch
-	r> free throw  r> to last->in
-	0= IF  rectype-nt  EXIT  THEN  THEN
+	expand-to-file IF
+	    over ?flush-text 7 /string
+	    2dup + >r  save-mem over >r
+	    2dup suffix ['] file-suffixes >wordlist find-name-in
+	    dup 0= IF  drop ['] genfile-file  THEN
+	    catch
+	    r> free throw  r> to last->in
+	    0= IF  rectype-nt  EXIT  THEN
+	THEN
+    THEN
     2drop rectype-null ;
 
 $100 buffer: format-chars
