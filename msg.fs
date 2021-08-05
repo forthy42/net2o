@@ -2210,7 +2210,7 @@ synonym aidx opus
 		2dup + source drop - >in !  true EXIT  THEN
 	    bl -scan  REPEAT
     false ;
-    
+
 : file-rec ( addr u -- .. token )
     2dup "file://" string-prefix? IF
 	expand-to-file IF
