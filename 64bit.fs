@@ -194,7 +194,17 @@ cell 8 = [IF]
       does> ( Compilation: -- ) ( Run-time: -- w )
 	postpone laddr# @ lp-offset, ;
     previous definitions
-    ' dummy-dict ' dict-execute ' locals-types:64^ wrap-xt dummy-64^ 2drop
+    [IFDEF] dict-execute
+	' dummy-dict ' dict-execute ' locals-types:64^ wrap-xt dummy-64^ 2drop
+    [ELSE]
+	locals-types:64^ some-64^ 2drop
+	' here locals-headers
+	[IFUNDEF] locals-start
+	    ' free-old-local-names defer@ >body cell+ !
+	[ELSE]
+	    to locals-start
+	[THEN]
+    [THEN]
     : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
     : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;
     : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
