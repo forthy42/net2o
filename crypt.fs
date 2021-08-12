@@ -558,7 +558,7 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 
 \ signature printing
 
-#10.000.000.000 d>64 64Value otrsig-delta# \ OTR: live for 10s, then die
+#60.000.000.000 d>64 64Value otrsig-delta# \ OTR: live for 60s, then die
 
 : now>never ( -- )          ticks 64#-1 sigdate le-128! ;
 : forever ( -- )            64#0 64#-1 sigdate le-128! ;

@@ -1052,8 +1052,9 @@ $21 net2o: msg-group ( $:group -- ) \g set group
 net2o' nestsig net2o: msg-nestsig ( $:cmd+sig -- ) \g check sig+nest
     $> nest-sig ?dup-0=-IF
 	handle-msg
-    ELSE  replay-mode @ IF  drop  ELSE  !!sig!!  THEN
-	2drop 2drop \ balk on all wrong signatures
+    ELSE
+	invalid( replay-mode @ IF  drop  ELSE  !!sig!!  THEN )else( drop )
+	2drop 2drop \ balk on all wrong signatures only in invalid mode
     THEN ;
 net2o' end-with net2o: msg-end-with ( -- ) \g push out avalanche
     do-req> n:o> push-msg ;
