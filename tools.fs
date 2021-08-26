@@ -175,7 +175,7 @@ debug: dummy(
     :noname  action-of thread-init compile,
     r@ compile, postpone off postpone ;
     is thread-init
-    :noname  r> compile, postpone $off  action-of kill-task  compile,
+    :noname  r> compile, postpone $free  action-of kill-task  compile,
     postpone ;
     is kill-task ;
 
@@ -548,8 +548,8 @@ Variable configured?
     pad $400 get-dir rootdirs$ $!
 ; is 'cold
 :noname ( -- )
-    config:host$ $off
-    config:rootdirs$ $off
+    config:host$ $free
+    config:rootdirs$ $free
     defers 'image ; is 'image
 
 : rootdirs>path ( -- )
@@ -686,7 +686,7 @@ $40 Constant #splitminute
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest - $# a[] $[]@ rest - compare dup 0= IF
-		drop $# a[] $[] $off
+		drop $# a[] $[] $free
 		a[] $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
@@ -710,7 +710,7 @@ $40 Constant #splitminute
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
 	    2dup rest safe/string $# a[] $[]@ rest safe/string compare dup 0= IF
-		drop $# a[] $[] $off
+		drop $# a[] $[] $free
 		a[] $# cells cell $del
 		2drop EXIT  THEN
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
@@ -817,7 +817,7 @@ $10 Constant datesize#
 	    idx addr $[]@ xt execute IF
 		idx 1+ to idx
 	    ELSE
-		idx addr $[] $off
+		idx addr $[] $free
 		addr idx cells cell $del
 	    THEN
     REPEAT ;
@@ -923,7 +923,7 @@ Variable tmp-file$
 	throw 0 { fd0 w^ cpy }
 	#0. fd0 reposition-file throw
 	fd0 cpy $slurp fd0 close-file throw
-	cpy $@ fd1 write-file throw cpy $off
+	cpy $@ fd1 write-file throw cpy $free
 	fd1 flush-file throw
     THEN  fd1 ;
 

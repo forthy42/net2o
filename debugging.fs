@@ -168,9 +168,9 @@ event: :>hide ( -- ) ctrl Z unkey ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
 : bflush ( -- )
-    [IFUNDEF] gl-emit      b$ $@ defers type b$ $off
+    [IFUNDEF] gl-emit      b$ $@ defers type b$ $free
     [ELSE]
-	up@ main-up@ = IF  b$ $@ defers type b$ $off  EXIT  THEN
+	up@ main-up@ = IF  b$ $@ defers type b$ $free  EXIT  THEN
 	0 b$ !@ <event elit, :>type main-up@ event>
     [THEN] ;
 : bcr    #lf bemit bflush ;

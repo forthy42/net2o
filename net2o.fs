@@ -588,7 +588,7 @@ scope{ mapc
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size addr>bytes ?free
-    data-ackbits-buf $off
+    data-ackbits-buf $free
     free-code ;
 :noname ( o:data -- )
     free-resend' free-rcode ; rdata-class to free-data
@@ -717,7 +717,7 @@ reply buffer: dummy-reply
 Sema timing-sema
 
 in net2o : track-timing ( -- ) \ initialize timing records
-    timing-stat $off ;
+    timing-stat $free ;
 
 : )stats ]] THEN [[ ;
 : stats( ]] timing-stat @ IF [[ ['] )stats assert-canary ; immediate
@@ -741,7 +741,7 @@ in net2o : /timing ( n -- )
 	  I ts-grow 1u f* f.
 	  ." timing" cr
       timestats +LOOP
-      track-timing $off o> ;] timing-sema c-section ;
+      track-timing $free o> ;] timing-sema c-section ;
 
 in net2o : rec-timing ( addr u -- )
     [: track-timing $+! ;] timing-sema c-section ;
@@ -1620,7 +1620,7 @@ User remote?
     add-source  >ret-addr
     validated off     \ we have no validated encryption, only anonymous
     do-keypad sec-free \ no key exchange may have happened
-    $error-id $off    \ no error id so far
+    $error-id $free    \ no error id so far
     stateless# outflag !  tmp-perm off
     inbuf packet-data cmd-exec
     update-cdmap  net2o:update-key  remote? off ;
@@ -1637,7 +1637,7 @@ scope{ mapc
 : handle-cmd ( addr -- )  parent >o
     msg( ." Handle command to addr: " inbuf mapaddr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
-    $error-id $off    \ no error id so far
+    $error-id $free    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
     r> r> swap cmd-exec
     o IF  closing?  IF  last-packet!  THEN  o>  ELSE  rdrop  THEN
@@ -1706,7 +1706,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
       \ erase crypto keys
       log-context @ ?dup-IF  .dispose  THEN
       ack-context @ ?dup-IF
-	  >o timing-stat $off track-timing $off dispose o>
+	  >o timing-stat $free track-timing $free dispose o>
       THEN
       msging-context @ ?dup-IF  .dispose  THEN
       unlink-ctx  ungroup-ctx
@@ -1816,7 +1816,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 		bucket cell+ I over $@ drop - 2 cells $del  LEAVE  THEN
 	2 cells +LOOP
 	bucket cell+ $@len 8 = IF
-	    bucket $off bucket cell+ $off
+	    bucket $free bucket cell+ $free
 	THEN
     ;] #map ;
 

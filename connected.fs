@@ -281,7 +281,7 @@ in net2o : ack-resend# ( -- )  data-rmap { map }
 	    r> over - r> + ulit, $, ack-resend#
 	ELSE  2drop rdrop rdrop  THEN
     cell +LOOP
-    map .mapc:data-resend#-buf $[]off ;
+    map .mapc:data-resend#-buf $[]free ;
 
 \ client side acknowledge
 

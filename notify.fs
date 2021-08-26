@@ -88,7 +88,7 @@ Sema notify-sema
 	    build-notification show-notification
 	[THEN]
 	latest-notify to last-notify
-    THEN  notify$ $off ;
+    THEN  notify$ $free ;
 
 previous previous
 

@@ -30,7 +30,7 @@ uvalue last#
     2dup r@ $@ str=  IF  2drop r> dup to last# cell+ $@ true  EXIT  THEN
     rdrop false ;    
 
-: bucket-off ( bucket -- ) dup $off cell+ $off ;
+: bucket-off ( bucket -- ) dup $free cell+ $free ;
 
 : #free? ( addrkey u bucket -- true / addrkey u false )
     >r r@ @ 0= IF  rdrop false  EXIT  THEN

@@ -337,7 +337,7 @@ scope{ dvcs
 : dispose-dvcs ( o:dvcs -- )
     dvcs:branch$ $free  dvcs:message$ $free  dvcs:fileref[] $[]free
     dvcs:files# #frees  dvcs:oldfiles# #frees
-    dvcs:rmdirs[] $[]off  dvcs:outfiles[] $[]off
+    dvcs:rmdirs[] $[]free  dvcs:outfiles[] $[]free
     clean-delta  dvcs:fileentry$ $free
     dvcs:hash$ $free
     dvcs:id$ $free  dvcs:oldid$ $free
@@ -356,9 +356,9 @@ Variable new-file$
 Variable branches[]
 
 : clean-up ( -- )
-    new-files[] $[]off  ref-files[] $[]off
-    del-files[] $[]off  old-files[] $[]off
-    branches[]  $[]off  new-file$ $free ;
+    new-files[] $[]free  ref-files[] $[]free
+    del-files[] $[]free  old-files[] $[]free
+    branches[]  $[]free  new-file$ $free ;
 
 User tmp1$
 : $tmp1 ( xt -- ) tmp1$ $free  tmp1$ $exec  tmp1$ $@ ;
@@ -505,7 +505,7 @@ also net2o-base
 Variable id-files[]
 
 : dvcs-gen-id ( -- addr u )
-    id-files[] $[]off
+    id-files[] $[]free
     dvcs:files# [: dup cell+ $@ 2>r $@ 2r> [: forth:type forth:type ;] $tmp
 	id-files[] $ins[] drop ;] #map \ sort filenames
     [:  id-files[] [: drop hash#128 $, dvcs-read ;] $[]map
@@ -637,7 +637,7 @@ User id-check# \ check hash
     REPEAT  2drop ;
 : id>branches ( addr u -- )
     id-check# #frees
-    branches[] $[]off  dvcs:commits @ .id>branches-loop
+    branches[] $[]free  dvcs:commits @ .id>branches-loop
     id-check# #frees
     dvcs( ." re:" cr branches[] [: 85type cr ;] $[]map ) ;
 : branches>dvcs ( -- )
@@ -825,7 +825,7 @@ previous
     THEN ;
 
 : new->old ( -- ) dvcs( ." === remove old files ===" cr )
-    dvcs:rmdirs[] $[]off
+    dvcs:rmdirs[] $[]free
     dvcs:oldfiles# [: dup $@ dvcs:files# #@ drop 0= IF
 	    del-oldfile
 	ELSE  dup cell+ $@ last# cell+ $@ str= 0= IF
@@ -837,9 +837,9 @@ previous
 	    ." can't delete directory " I $. ." : " type <default> cr
 	THEN
     cell -LOOP
-    dvcs:rmdirs[] $[]off ;
+    dvcs:rmdirs[] $[]free ;
 : old->new ( -- ) dvcs( ." === write out new files ===" cr )
-    dvcs:outfiles[] $[]off
+    dvcs:outfiles[] $[]free
     dvcs:files# [: $@ dvcs:outfiles[] $ins[] drop ;] #map \ sort filenames
     dvcs:outfiles[] [: dvcs:files# #@ d0<> IF
 	    last# dup >r $@ dvcs:oldfiles# #@ over IF
@@ -849,7 +849,7 @@ previous
 		dvcs( ." out " r@ $. space r@ cell+ $@ 85type cr )
 		r@ cell+ $@ r@ $@ dvcs-outfile-name
 	    THEN  rdrop  THEN ;] $[]map
-    dvcs:outfiles[] $[]off ;
+    dvcs:outfiles[] $[]free ;
 
 : co-rest ( -- )
     0 dvcs:files# !@ dvcs:oldfiles# !
@@ -989,7 +989,7 @@ previous
     /sync-reqs +LOOP ;
 
 : dvcs-data-sync ( -- )
-    sync-file-list[] $[]off  branches[] $[]off
+    sync-file-list[] $[]free  branches[] $[]free
     msg-group$ $@ >group
     dvcs:commits @ .chat>branches-loop
     dvcs:commits @ .dvcs-needed-files

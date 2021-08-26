@@ -1106,7 +1106,7 @@ User hashtmp$  hashtmp$ off
 	1- msg-group-o .msg:log[] $[]@ startdate@
     ELSE  64#0  THEN   r> to last# ;
 : l.hashs ( end start -- hashaddr u )
-    hashtmp$ $off
+    hashtmp$ $free
     msg-group-o .msg:log[] $[]# IF
 	[: U+DO  I msg-group-o .msg:log[] $[]@ 1- dup 1 64s - safe/string forth:type
 	  LOOP ;] hashtmp$ $exec hashtmp$ $@
@@ -1192,7 +1192,7 @@ Variable ask-msg-files[]
 	ask-msg-files[] dup $[]# swap $[] $exec
     THEN ;
 : msg:last ( $:[tick0,tick1,...,tickn] n -- )
-    last# >r  ask-msg-files[] $[]off
+    last# >r  ask-msg-files[] $[]free
     forth:. ." Messages:" forth:cr
     ?ask-msg-files ask-msg-files[] $[]# IF
 	parent >o  expect+slurp
@@ -1206,7 +1206,7 @@ Variable ask-msg-files[]
 
 :noname ( -- 64len )
     \ poll serializes the 
-    fs-outbuf $off
+    fs-outbuf $free
     fs-path $@ 2 64s /string >group
     msg-log@ over >r
     fs-path $@ drop le-64@ date>i \ start index
@@ -2391,7 +2391,7 @@ $B $E 2Value chat-bufs#
 
 scope{ /chat
 :noname ( addr u -- )
-    chat-keys $[]off nick>chat 0 chat-keys $[]@ key>group
+    chat-keys $[]free nick>chat 0 chat-keys $[]@ key>group
     msg-group$ $@ >group msg-group-o .msg:peers[] $@ dup 0= IF  2drop
 	nip IF  chat-connects
 	ELSE  ." That chat isn't active" forth:cr  THEN

@@ -47,13 +47,13 @@ $20 value hash-size#
     key-readin $@ do-key ;
 
 : keys>search ( -- )
-    search-key[] $[]off [: dup 5 mod IF
+    search-key[] $[]free [: dup 5 mod IF
 	    ." keys in multiples of 5 base85 characters, please, ignoring '"
 	    type ." '" cr
 	ELSE  base85>$ search-key[] $+[]!  THEN ;] arg-loop ;
 
 : nicks>search ( -- )
-    search-key[] $[]off
+    search-key[] $[]free
     [: nick>pk dup 0= !!no-nick!! search-key[] $+[]! ;] @arg-loop ;
 
 : handle-chat ( -- )
@@ -242,7 +242,7 @@ scope{ n2o
     \G perm: y sYnc    - allow to sync
     \G perm: i ndirect - deny direct connection
     ?get-me
-    BEGIN  chat-keys $[]off  @nicks>chat ?nextarg WHILE  >perm
+    BEGIN  chat-keys $[]free  @nicks>chat ?nextarg WHILE  >perm
 	    chat-keys [: key| key-exist? ?dup-IF .apply-permission THEN ;]
 	    $[]map 2drop  REPEAT
     save-keys ;
@@ -251,7 +251,7 @@ scope{ n2o
     \U group @user1 .. @usern [+-]group1 .. [+-]groupn ..
     \G group: Set, add or remove a group from a set of users
     ?get-me
-    BEGIN  chat-keys $[]off  @nicks>chat
+    BEGIN  chat-keys $[]free  @nicks>chat
 	BEGIN  ?nextarg  WHILE  over c@ '@' <>  WHILE
 		    chat-keys [: key| key-exist? ?dup-IF
 			  >o 2dup apply-group o>  THEN ;]
@@ -472,7 +472,7 @@ warnings !
     \U ping
     \G ping: query DHT and send a ping to the observed addresses
     \G ping: is not ready yet
-    ?get-me init-client nicks>search search-addrs pings[] $[]off
+    ?get-me init-client nicks>search search-addrs pings[] $[]free
     search-key[] [: >d#id >o dht-host [: pings[] $+[]! ;] $[]map o> ;] $[]map
     pings[] [: send-ping ;] $[]map  receive-pings ;
 

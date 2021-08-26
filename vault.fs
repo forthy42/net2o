@@ -118,7 +118,7 @@ Variable enc-mode
 
 enc-keccak
 
-: pk-off ( -- ) key-list $[]off ;
+: pk-off ( -- ) key-list $[]free ;
 
 : vdhe, ( -- )   stskc stpkc ed-keypair stpkc keysize $, dhe ;
 : vkeys, ( key-list -- )

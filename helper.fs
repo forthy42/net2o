@@ -56,7 +56,7 @@ require dhtroot.fs
     ind-addr off  !0key ;
 
 : dhtroot-off ( --- )
-    dhtroot-addr$ $off
+    dhtroot-addr$ $free
     0 dhtroot-addr !@ ?dup-IF  .net2o:dispose-addr  THEN ;
 
 : make-context ( pk u -- )
@@ -428,7 +428,7 @@ User pings[]
 
 : dht-nick? ( pk u -- )
     dup 4 < IF  2drop  EXIT  THEN
-    search-key[] $off search-key[] $+[]!
+    search-key[] $free search-key[] $+[]!
     search-keys insert-keys save-pubkeys ;
 
 \ connect, disconnect debug

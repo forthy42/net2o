@@ -62,12 +62,12 @@ cmd-class class
 end-class dht-class
 
 : dht-off ( o:dht -- o:dht )
-    dht-hash $off
-    dht-peers $[]off
-    dht-owner $[]off
-    dht-host $[]off
-    dht-have $[]off
-    dht-tags $[]off ;
+    dht-hash $free
+    dht-peers $[]free
+    dht-owner $[]free
+    dht-host $[]free
+    dht-have $[]free
+    dht-tags $[]free ;
 
 Variable dht-table
 
@@ -338,7 +338,7 @@ dummy-dht >o dht-table @ token-table ! o>
 Variable beacon-tuple$
 
 : beacon-tuple ( o:addr -- )
-    beacon-tuple$ $off
+    beacon-tuple$ $free
     [: host:ipv4 be-ul@ 0=
       IF    host:ipv6 $10 type  host:portv6
       ELSE  host:ipv4   4 type  host:portv4  THEN
@@ -408,7 +408,7 @@ previous
     end-code| o> ;
 
 : addme-owndht ( -- )
-    pk@ >d#id [: >o dht-host $[]off
+    pk@ >d#id [: >o dht-host $[]free
       my-addr$ [: dht-host $+[]! ;] $[]map o> ;] dht-sema c-section ;
 : addnick-owndht ( addr u -- )
     2dup sigpk2size# - + keysize2 >d#id
@@ -434,7 +434,7 @@ also net2o-base
 		gen-host-del $, dht-host-
 		false  ELSE  2drop true  THEN ;] $[]filter
     ;] dht-sema c-section
-    ( host $off ) ;
+    ( host $free ) ;
 
 : fetch-id, ( id-addr u -- )
     key2| $, dht-id dht-host? end-with ;
