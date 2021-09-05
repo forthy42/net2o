@@ -261,8 +261,7 @@ $44FFFFFF re-color author#
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" Decentralized Censorship" /title
-		l" Make net2o a better place" /subtitle
-		\skip
+		l" Make net2o a better place" /subsection
 		vt{{
 		    l" • " l" Internal, not external censorship" b\\
 		    l" • " l" Disinfodemic in a peer2peer network similar to pandemic models" b\\
@@ -289,8 +288,7 @@ $44FFFFFF re-color author#
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" Disinfodemic" /title
-		l" Examples from the Covid pandemic" /subtitle
-		\skip
+		l" Examples from the Covid pandemic" /subsection
 		vt{{
 		    l" 李文亮 " l" Was gag ordered by Wuhan police when the main news (新闻联播)" b\\
 		    l"  " l" already had a report.  “Would not happen here“" b\\
@@ -315,8 +313,7 @@ $44FFFFFF re-color author#
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" How to filter?" /title
-		l" Actually the hard problem" /subtitle
-		\skip
+		l" Actually the hard problem" /subsection
 		vt{{
 		    l" Texts: " l" Bad texts (equals PCR test)" b\\
 		    l" + " l" Easy to implement" b\\
@@ -338,8 +335,7 @@ $44FFFFFF re-color author#
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		l" What kind of bad text?" /title
-		l" It’s not bad words" /subtitle
-		\skip
+		l" It’s not bad words" /subsection
 		vt{{
 		    l" • " l" Teh spellink is aweful" b\\
 		    l" • " l" SHOUTING ALL THE TIME" b\\
