@@ -267,6 +267,7 @@ $44FFFFFF re-color author#
 		    l" • " l" Internal, not external censorship" b\\
 		    l" • " l" Infodemics in a peer2peer network similar to pandemics models" b\\
 		    l" • " l" Filtering on incoming content, not your own content" b\\
+		    l" • " l" Sender does not know that content is blocked" b\\
 		    l" • " l" Different settings possible:" b\\
 		}}vt
 		vt{{
@@ -276,7 +277,8 @@ $44FFFFFF re-color author#
 		}}vt
 		vt{{
 		    l" • " l" Typical fanout of participants = R₀" b\\
-		    l" • " l" If more than 1/(1–R₀) filter, bad contents doesn’t get far" b\\
+		    l" • " l" If more than 1–1/R₀ filter, bad contents doesn’t get far" b\\
+		    l" • " l" Requires easy filter sharing" b\\
 		}}vt
 		glue*lll }}glue
 	    }}v box[] >bdr
@@ -300,7 +302,7 @@ $44FFFFFF re-color author#
 		    \skip
 		    l" Audio: " l" Speech to text" b\\
 		    l" + " l" Medium difficulty to implement" b\\
-		    l" – " l" Easy to defeat, easy to generate pre–image attacks" b\\
+		    l" – " l" Defeat is unclear, easy to generate pre–image attacks" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
