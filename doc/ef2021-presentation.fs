@@ -116,21 +116,21 @@ $44FFFFFF re-color author#
 	    {{
 		l" 1¾ years into COVID–19 pandemics" /title
 		\skip
-		l" Corporations" /subsection
+		l" Surveillance Capitalism" /subsection
 		{{
 		    l"    Apple wants to scan your pics locally for child porn" \\
 		    l"   ➡ Had to back down quickly" \\
 		    l"    Facebook &  Twitter “check for facts”" \\
-		    l"   ➡ Actually distribute a lot of disinformation" \\
+		    l"   ➡ Actually still distribute a lot of disinformation" \\
 		    l"    Telegram became tool of choice of Covidiots" \\
 		    l"   ➡ Free speech seems to be a problem" \\
+		    l"    Twitter tests “safe space” feature…" \\
+		    l"   ➡ The algorithm hides what could hurt you" \\
 		}}v box[]
 		\skip
 		l" Progress" /subsection
 		l"   Little on net2o, more on Bernd 2.0" \\
-		\skip
-		l" Pandemics" /subsection
-		l"   All politicians want Covidiot votes" \\
+		l"   TCP/IP turns 40" \\
 		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
 	    }}v box[] >o o Value snowden-page font-size# to border o o>
 	}}z box[] /flip dup >slides
@@ -189,103 +189,11 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr blackish
 	}}z box[] /flip dup >slides
 
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Video Streaming&Conferences" /title
-		vt{{
-		    l" • " l" Life Streaming means sending unfinished files" b\\
-		    l" • " l" Different approach to multiplexing (metadata for chunk size)" b\\
-		    l" • " l" Split files into indexes, data, and metadata" b\\
-		    l" • " l" Quality depends on available bandwidth" b\\
-		    l" • " l" Use available hardware encoders" b\\
-		    l" • " l" Thumbnail/fullscreen Stream for conferences" b\\
-		    l" • " l" Synchrone audio for movies/async for conferences" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Avalanche Tree" /title
-		tex: avalanche-tree \normal \sans
-		' avalanche-tree "avalanche.png" 0.66e }}image-file drop /center
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Collection Tree and Mixing" /title
-		vt{{
-		    l" • " l" Leaf nodes send their stream upwards." b\\
-		    l" • " l" Participants can join leaf stream or root stream" b\\
-		    l" • " l" Branch nodes mix leaf node streams and own stream" b\\
-		    l" • " l" Root node combines final downmix, and distribute that as life stream" b\\
-		    l" • " l" Every participant upstreams once, branches downstream multiple times" b\\
-		    l" • " l" Moderator provides instructions for mix&downscale" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Wishlist 1/2" /title
-		vt{{
-		    l" • " l" Stream from camera, cropped vertically (portrait)" b\\
-		    l" • " l" Stream from desktop/window" b\\
-		    l" • " l" Scaled down stream for all participants" b\\
-		    l" • " l" Scaled up stream for talking participants" b\\
-		    l" • " l" Two talking participants side-by-side with upscaled stream" b\\
-		    l" • " l" Audio mixer&autolevel (avoid leveling background noise up)" b\\
-		    l" • " l" Warn “you are muted” if you talk while being muted" b\\
-		    l" • " l" Hotkey to turn audio and video on/off" b\\
-		    l" • " l" Display FFT of audio for visualisation" b\\
-		    l" • " l" Audio biquad filters, e.g. notch, to improve bad sound quality" b\\
-		    l" • " l" Push to talk, hotkeys for everything" b\\
-		    l" • " l" Hotkey for cut mark + keyframe" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
-	\ page 12
-	{{
-	    $000000FF $FFFFFFFF pres-frame
-	    {{
-		l" Wishlist 2/2" /title
-		vt{{
-		    l" • " l" Allow multiple devices (cameras, mics) for one participant" b\\
-		    l" • " l" Templates for nice presentation recording" b\\
-		    l" • " l" Set a logo for the talk" b\\
-		    l" • " l" Have a countdown clock for talk slots" b\\
-		    l" • " l" Share slides directly (slides in Markdown)" b\\
-		    l" • " l" Subtitles as option for slides (possibly multiple languages)" b\\
-		    l" • " l" Translated audio tracks to select from (for bigger conferences)" b\\
-		    l" • " l" Rooms for small-group side conversation" b\\
-		    l" • " l" Moderator side channel to presenter/participants" b\\
-		    l" • " l" Try connections to different participants and take best one" b\\
-		    l" • " l" Mix additional audio sources (background music, desktop sounds, claps/laughers)" b\\
-		    l" • " l" Spatial audio (different participants from different directions)" b\\
-		}}vt
-		glue*l }}glue
-	    }}v box[] >bdr
-	}}z box[] /flip dup >slides
-
 	\ page 9
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" “Who has What”" /title
+		l" Things done: “Who has What”" /title
 		l" Query object origin by hash" /subsection
 		vt{{
 		    l" ❓ " l" Original plan: keep hashes in DHT" b\\
@@ -297,9 +205,105 @@ $44FFFFFF re-color author#
 		    \skip
 		    l" ➡ " l" Better keep “who has what” within the chat log structure" b\\
 		    l" ➡ " l" “who” is device.pubkey" b\\
+		    \skip
+		    l" ❓ " l" Missing: limit reach of ”who has what”" b\\
 		}}vt
 	    }}v box[] >bdr
-	}}z box[] /flip dup >slides	
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" In Progress: Harfbuzz (in ΜΙΝΩΣ2)" /title
+		vt{{
+		    l" • " l" Purpose: Do the more complex part of Unicode rendering" b\\
+		    l" • " l" The interface is actually not that difficult" b\\
+		    l" • " l" But requires restructuring code" b\\
+		    l" • " l" And thinking about right to left scripts" b\\
+		    l" • " l" (and top-to-bottom like Mongolian)" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" Done: Formated chat messages" /title
+		vt{{
+		    l" • " l" Inspired by Mattermost" b\\
+		    l" • " l" Format parsing different from Markdown (simpler)" b\\
+		    l" • " l" Disabled by default" b\\
+		    l" • " l" Sender parsed, so sender parser can change" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" Mostly done: Voice messages" /title
+		vt{{
+		    l" • " l" Uses Pulseaudio on Linux, OpenSLES on Android" b\\
+		    l" • " l" Encoding in Opus" b\\
+		    l" • " l" OpenSLES recording doesn’t work yet" b\\
+		    l" • " l" Android problems with callbacks into Gforth’s dynamic code" b\\
+		    l" • " l" The rest is similar to pictures" b\\
+		    l" • " l" Thumbnail is a wavefrom plot with max level/second" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Decentralized Censorship" /title
+		l" Make net2o a better place" /subtitle
+		\skip
+		vt{{
+		    l" • " l" Internal, not external censorship" b\\
+		    l" • " l" Infodemics in a peer2peer network similar to pandemics models" b\\
+		    l" • " l" Filtering on incoming content, not your own content" b\\
+		    l" • " l" Different settings possible:" b\\
+		}}vt
+		vt{{
+		    l"   1. " l" Filter hides messages" b\\
+		    l"   2. " l" Filter doesn’t transmit messages" b\\
+		    l"   3. " l" Both (“sterile immunity”)" b\\
+		}}vt
+		vt{{
+		    l" • " l" Typical fanout of participants = R₀" b\\
+		    l" • " l" If more than 1/(1–R₀) filter, bad contents doesn’t get far" b\\
+		}}vt
+		glue*lll }}glue
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+	
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" How to filter?" /title
+		l" Actually the hard problem" /subtitle
+		\skip
+		vt{{
+		    l" Texts: " l" Bad words (equals PCR test)" b\\
+		    l" + " l" Easy to implement" b\\
+		    l" – " l" Easy to defeat, easy to be false positive" b\\
+		    \skip
+		    l" Images: " l" Fingerprints" b\\
+		    l" + " l" Medium difficulty to implement" b\\
+		    l" – " l" Easy to defeat, easy to generate pre–image attacks" b\\
+		    \skip
+		    l" Audio: " l" Speech to text" b\\
+		    l" + " l" Medium difficulty to implement" b\\
+		    l" – " l" Easy to defeat, easy to generate pre–image attacks" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
 
 	\ page 12
 	{{
