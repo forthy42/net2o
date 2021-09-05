@@ -222,6 +222,9 @@ $44FFFFFF re-color author#
 		    l" • " l" But requires restructuring code" b\\
 		    l" • " l" And thinking about right to left scripts" b\\
 		    l" • " l" (and top-to-bottom like Mongolian)" b\\
+		    \skip
+		    l" • " l" Challenge: select text by font" b\\
+		    l" • " l" because combiners allow to mix them" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -300,7 +303,7 @@ $44FFFFFF re-color author#
 		    \skip
 		    l" Science? " l" Science questions everything.  But it conducts experiments to check." b\\
 		    l"  " l" Masks work.  Lockdowns work.  Wuhan lab didn’t leak.  Vaccines are safe." b\\
-		    l"  " l" Invermectin/Chloroquin/Vitamine D are no miracle cure." b\\
+		    l"  " l" Ivermectin/Chloroquin/Vitamine D are no miracle cure." b\\
 		    \skip
 		    l" Massacre " l" The failure (willful/incompetent) to contain Covid-19 is a massacre." b\\
 		    l"  " l" Democraties can do such atrocities only with massive disinformation." b\\
@@ -351,6 +354,36 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		{{
+		    l" Filter Algorithms in Real Life" /title
+		}}v box[] >bdr
+		tex: perscheid-gesperrt
+		tex: perscheid-flacherdler
+		\normal \sans
+		{{
+		    ' perscheid-gesperrt "perscheid-gesperrt.jpg" 0.62e 896 640 fm*/ }}image-file drop 
+		    {{
+			l" • " l" Algorithm based on words" b\\
+			l" • " l" Click worker paid per case" b\\
+			l" • " l" Weird rules" b\\
+			l" • " l" Want to keep the idiots" b\\
+			l"  " l" Because they click the ads" b\\
+			l"  " l" which are frauds…" b\\
+			glue*ll }}glue dark-blue \italic \serif
+			l" Martin Perscheid" }}text' /center
+			l" † 31. Juli 2021 — RIP" }}text' /center
+			\normal blackish
+		    }}v box[]
+		    glue*ll }}glue
+		    ' perscheid-flacherdler "perscheid-flacherdler-fb-sperre.jpg" 0.62e }}image-file drop 
+		}}h box[] >bl
+	    }}v box[]
+	}}z box[] /flip dup >slides
+	
 	\ page 12
 	{{
 	    $000000FF $FFFFFFFF pres-frame
