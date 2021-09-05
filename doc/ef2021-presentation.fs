@@ -265,7 +265,7 @@ $44FFFFFF re-color author#
 		\skip
 		vt{{
 		    l" • " l" Internal, not external censorship" b\\
-		    l" • " l" Infodemics in a peer2peer network similar to pandemics models" b\\
+		    l" • " l" Disinfodemic in a peer2peer network similar to pandemic models" b\\
 		    l" • " l" Filtering on incoming content, not your own content" b\\
 		    l" • " l" Sender does not know that content is blocked" b\\
 		    l" • " l" Different settings possible:" b\\
@@ -288,11 +288,37 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
+		l" Disinfodemic" /title
+		l" Examples from the Covid pandemic" /subtitle
+		\skip
+		vt{{
+		    l" 李文亮 " l" Was gag ordered by Wuhan police when the main news (新闻联播)" b\\
+		    l"  " l" already had a report.  “Would not happen here“" b\\
+		    \skip
+		    l" Here? " l" Instead, a hell lot of disinformation spread out in the free west" b\\
+		    \skip
+		    l" Evil Govt " l" Yes, the government is evil.  But also incompetent." b\\
+		    l"  " l" And its bias is pro corporations.  Evilness serves a purpose." b\\
+		    \skip
+		    l" Science? " l" Science questions everything.  But it conducts experiments to check." b\\
+		    l"  " l" Masks work.  Lockdowns work.  Wuhan lab didn’t leak.  Vaccines are safe." b\\
+		    l"  " l" Invermectin/Chloroquin/Vitamine D are no miracle cure." b\\
+		    \skip
+		    l" Massacre " l" The failure (willful/incompetent) to contain Covid-19 is a massacre." b\\
+		    l"  " l" Democraties can do such atrocities only with massive disinformation." b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
 		l" How to filter?" /title
 		l" Actually the hard problem" /subtitle
 		\skip
 		vt{{
-		    l" Texts: " l" Bad words (equals PCR test)" b\\
+		    l" Texts: " l" Bad texts (equals PCR test)" b\\
 		    l" + " l" Easy to implement" b\\
 		    l" – " l" Easy to defeat, easy to be false positive" b\\
 		    \skip
@@ -304,6 +330,28 @@ $44FFFFFF re-color author#
 		    l" + " l" Medium difficulty to implement" b\\
 		    l" – " l" Defeat is unclear, easy to generate pre–image attacks" b\\
 		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" What kind of bad text?" /title
+		l" It’s not bad words" /subtitle
+		\skip
+		vt{{
+		    l" • " l" Teh spellink is aweful" b\\
+		    l" • " l" SHOUTING ALL THE TIME" b\\
+		    l" • " l" Number (and color — needs Harfbuzz to show here) of exclamation marks!!!!!" b\\
+		    \skip
+		    l" • " l" This sounds like easy to defeat — for smart people" b\\
+		    l" • " l" Smart people are rarely the problem…" b\\
+		    \skip
+		    l" • " l" This is porn according to AI:" b\\
+		}}vt
+		tex: dunes \normal \sans
+		' dunes "sand_dunes_police_ai_porn.jpg" 0.5e }}image-file drop /right
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
