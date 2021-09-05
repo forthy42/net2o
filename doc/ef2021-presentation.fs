@@ -206,7 +206,7 @@ $44FFFFFF re-color author#
 		    l" ➡ " l" Better keep “who has what” within the chat log structure" b\\
 		    l" ➡ " l" “who” is device.pubkey" b\\
 		    \skip
-		    l" ❓ " l" Missing: limit reach of ”who has what”" b\\
+		    l" ❓ " l" Missing: limit reach of “who has what”" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
