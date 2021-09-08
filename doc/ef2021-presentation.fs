@@ -296,7 +296,7 @@ $44FFFFFF re-color author#
 		l" Examples from the Covid pandemic" /subsection
 		vt{{
 		    l" 李文亮 " l" Was gag ordered by Wuhan police when the main news (新闻联播)" b\\
-		    l"  " l" already had a report.  “Would not happen here“" b\\
+		    l"  " l" already had a report.  “Would not happen here”" b\\
 		    \skip
 		    l" Here? " l" Instead, a hell lot of disinformation spread out in the free west" b\\
 		    \skip
