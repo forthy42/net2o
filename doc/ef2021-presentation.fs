@@ -33,6 +33,8 @@ require minos2/font-style.fs
 require minos2/text-style.fs
 require minos2/presentation-support.fs
 
+0e to slide-time%
+
 tex: net2o-logo
 tex: 36c3-logo
 ' net2o-logo "net2o-200.png" 0.666e }}image-file 2Constant net2o-img
@@ -342,7 +344,7 @@ $44FFFFFF re-color author#
 		vt{{
 		    l" • " l" Teh spellink is aweful" b\\
 		    l" • " l" SHOUTING ALL THE TIME" b\\
-		    l" • " l" Number (and color — needs Harfbuzz to show here) of exclamation marks!!!!!" b\\
+		    l" • " l" Number (and color) of exclamation marks‼️‼️" b\\
 		    \skip
 		    l" • " l" This sounds like easy to defeat — for smart people" b\\
 		    l" • " l" Smart people are rarely the problem…" b\\
