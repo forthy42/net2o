@@ -317,7 +317,26 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" How to filter?" /title
+		l" Manual moderation?" /title
+		l" Too late, too little" /subsection
+		vt{{
+		    l" • " l" Delete bad content" b\\
+		    l" • " l" Leave the corrections" b\\
+		    l" • " l" Block the bad actors" b\\
+		    l" • " l" In a P2P network, people can block the moderators" b\\
+		    l" • " l" So a rough consensus is needed" b\\
+		    \skip
+		    l" • " l" Manual interaction is too slow" b\\
+		    l" • " l" People don’t read rectifications" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $000000FF $FFFFFFFF pres-frame
+	    {{
+		l" Automatic filter?" /title
 		l" Actually the hard problem" /subsection
 		vt{{
 		    l" Texts: " l" Bad texts (equals PCR test)" b\\
@@ -342,7 +361,7 @@ $44FFFFFF re-color author#
 		l" What kind of bad text?" /title
 		l" It’s not bad words" /subsection
 		vt{{
-		    l" • " l" Teh spellink is aweful" b\\
+		    l" • " l" Teh spellink is awefull" b\\
 		    l" • " l" SHOUTING ALL THE TIME" b\\
 		    l" • " l" Number (and color) of exclamation marks‼️‼️" b\\
 		    \skip
