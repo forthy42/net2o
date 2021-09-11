@@ -386,7 +386,7 @@ $44FFFFFF re-color author#
 		tex: perscheid-flacherdler
 		\normal \sans
 		{{
-		    ' perscheid-gesperrt "perscheid-gesperrt.jpg" 0.62e 896 640 fm*/ }}image-file drop 
+		    ' perscheid-gesperrt "perscheid-gesperrt.jpg" 0.60e 896 640 fm*/ }}image-file drop 
 		    {{
 			l" • " l" Algorithm based on words" b\\
 			l" • " l" Click worker paid per case" b\\
@@ -400,7 +400,7 @@ $44FFFFFF re-color author#
 			\normal blackish
 		    }}v box[]
 		    glue*ll }}glue
-		    ' perscheid-flacherdler "perscheid-flacherdler-fb-sperre.jpg" 0.62e }}image-file drop 
+		    ' perscheid-flacherdler "perscheid-flacherdler-fb-sperre.jpg" 0.60e }}image-file drop 
 		}}h box[] >bl
 	    }}v box[]
 	}}z box[] /flip dup >slides
