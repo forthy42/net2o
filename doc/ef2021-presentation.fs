@@ -112,6 +112,32 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
+	\ page 6
+	{{
+	    $200020FF $DDDDDDFF pres-frame
+	    {{
+		l" net2o in a nutshell" /title
+		l" net2o consists of the following 6 layers (implemented bottom up):" \\
+		\skip
+		{{
+		    vt{{
+			l" 2. " b0 blackish l" Path switched packets with 2" }}text'
+			\italic l" n" }}smalltext \regular >o font-size# -0.4e f* to raise o o>
+		    l"  size writing into shared memory buffers" }}text'  glue*l }}glue }}h box[] >bl
+		    l" 3. " l" Ephemeral key exchange and signatures with Ed25519," b\\
+		    l"  " l" symmetric authenticated encryption+hash+prng with Keccak," b\\
+		    l"  " l" symmetric block encryption with Threefish" b\\
+		    l"  " l" onion routing camouflage with Threefish/Keccak" b\\
+		    l" 4. " l" Timing driven delay minimizing flow control" b\\
+		    l" 5. " l" Stack–oriented tokenized command language" b\\
+		    l" 6. " l" Distributed data (files, messages) and distributed metadata (DHT, DVCS)" b\\
+		    l" 7. " l" Apps in a sandboxed environment for displaying content"
+		    b\\
+		}}vt
+		glue*l }}glue \ ) $CCDDDD3F 4e }}frame dup .button1
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
 	\ page 2
 	{{
 	    $3F0000FF $FFAAAAFF pres-frame

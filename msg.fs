@@ -2264,37 +2264,33 @@ $100 buffer: format-chars
     2drop
     success IF  ['] noop rectype-nt  ELSE  rectype-null  THEN ;
 
-$10 stack: msg-recognizer
-
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - rec-sequence: msg-recognizer0
+depth r> - rec-sequence: msg-recognize
 
-' msg-recognizer0 >body get-stack msg-recognizer set-stack
-
-' text-rec 1 rec-sequence: msg-text0
+' text-rec 1 rec-sequence: msg-text
 
 0 Value ```-state
 
 : ``` ```-state IF
-	['] msg-recognizer0 >body get-stack msg-recognizer set-stack
+	['] msg-recognize is forth-recognize
 	0 to current-format
     ELSE
-	['] msg-text0 >body get-stack msg-recognizer set-stack
+	['] msg-text is forth-recognize
 	msg:#mono to current-format
     THEN
     ```-state 0= dup to ```-state ./mono-info ;
 
-: parse-text ( addr u -- ) last# >r  forth-recognizer >r
+: parse-text ( addr u -- ) last# >r  action-of forth-recognize >r
     0 to last->in  !format-chars
-    msg-recognizer to forth-recognizer 2dup evaluate
+    ['] msg-recognize is forth-recognize 2dup evaluate
     last->in IF  + last->in tuck -  THEN  dup IF
 	\ ." text: '" forth:type ''' forth:emit forth:cr
 	current-format ?dup-IF  ulit, $, msg-text+format
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN
-    r> to forth-recognizer  r> to last#
+    r> is forth-recognize  r> to last#
     msg:#mono ```-state and to current-format ;
 
 : avalanche-text ( addr u -- )
