@@ -731,9 +731,10 @@ Variable last-bubble-pk
 	fdup f2* to border
 	0e to borderl fnegate f2* to bordert 0e to borderv
     THEN o o> ;
+
 : add-dtms ( ticks -- )
     \sans \small blackish
-    1n fm* >day { day } day last-day <> IF
+    >fticks fticks>day { day } day last-day <> IF
 	{{
 	    x-color { f: xc }
 	    glue*l day-color x-color slide-frame dup .button1
@@ -749,7 +750,8 @@ Variable last-bubble-pk
 	    glue*l hour-color x-color slide-frame dup .button1
 	    xc to x-color
 	    60 fm* fsplit minute hour
-	    [: .## ':' emit .## ':' emit .## 'Z' emit ;] $tmp }}text 25%b
+	    [: .## ':' emit .## ':' emit .##
+		date? #localtime and 0= IF  'Z' emit  THEN ;] $tmp }}text 25%b
 	}}z /center msgs-box .child+
     THEN  hour to last-hour  minute to last-minute
     fdrop \normal ;
@@ -1475,7 +1477,7 @@ wmsg-o >o msg-table @ token-table ! o>
 0 Value chat-edit-bg \ chat edit background
 
 : >ymd ( ticks -- year month day )
-    64>f 1n f* >day fdrop unix-day0 + day2ymd ;
+    >fticks fticks>day fdrop unix-day0 + day2ymd ;
 : day'>i ( day -- index )
     #86400 * #1000000000 um* d>64 date>i ;
 : day>i ( year month day -- index )

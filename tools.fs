@@ -603,6 +603,20 @@ $8 Constant #today
 $10 Constant #splitdate
 $20 Constant #splithour
 $40 Constant #splitminute
+$80 Constant #localtime
+
+: >fticks ( time -- rftime ) 64>f 1n f* ;
+: fticks ( -- rftime ) ticks >fticks ;
+: fticks>dtms-local ( rftime -- fns s m h dm y )
+    fsplit >time&date ;
+: fticks>dtms-zulu ( rftime -- fns s m h dm y )
+    fsplit #60 /mod #60 /mod #24 /mod unix-day0 + day2ymd swap rot ;
+: fticks>dtms ( rftime -- fns s m h dm y )
+    date? #localtime and IF  fticks>dtms-local  ELSE  fticks>dtms-zulu  THEN ;
+: fticks>day ( rftime -- fraction day )
+    fticks>dtms swap rot ymd2day unix-day0 - >r
+    #60 * + #60 * + s>f f+ #86400 fm/ r> ;
+
 -1 Value last-day
 -1 Value last-hour
 -1 Value last-minute
@@ -610,7 +624,7 @@ $40 Constant #splitminute
 : reset-time ( -- )
     -1 to last-day  -1 to last-hour  -1 to last-minute ;
 : today? ( day -- flag )
-    ticks 64>f 1e-9 f* 86400 fm/ floor f>s = ;
+    fticks fticks>day fdrop = ;
 
 : .ns ( r -- )  1e-9 f*
     fdup 1e-6 f< IF  1e9 f* 10 0 0 f.rdp ." ns"  EXIT  THEN
@@ -618,8 +632,6 @@ $40 Constant #splitminute
     fdup 1e   f< IF  1e3 f* 10 6 0 f.rdp ." ms"  EXIT  THEN
     10 6 0 f.rdp 's' emit ;
 
-: >day ( seconds -- fraction day )
-    #86400 fm/ fsplit ;
 : .day ( day -- )
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
@@ -636,7 +648,7 @@ $40 Constant #splitminute
 	    60 fm* datehms? 4 < IF  f>s .##
 	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
 		datehms? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
-	THEN  THEN  date? #splithour and 0= IF  'Z' emit  THEN ;
+	THEN  THEN  date? #splithour #localtime or and 0= IF  'Z' emit  THEN ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r  $B0 ( '°' ) xemit  60 fm*
@@ -649,8 +661,8 @@ $40 Constant #splitminute
     datehms? 1 > IF ." forever" ELSE 'f' emit THEN ;
 
 : f.ticks ( rticks -- )
-    1n f* >day
-    dup today? date? #today and 0= and
+    fticks>day
+    dup today? date? #today #splitdate or and 0= and
     IF
 	drop .timeofday
     ELSE
@@ -665,7 +677,7 @@ $40 Constant #splitminute
 : .ticks ( ticks -- )  date? 0= IF  64drop  EXIT  THEN
     64dup 64-0= IF  .never 64drop EXIT  THEN
     64dup -1 n>64 64= IF  .forever 64drop EXIT  THEN
-    64>f f.ticks ;
+    >fticks f.ticks ;
 
 \ insert into sorted string array, discarding n bytes at the end
 
