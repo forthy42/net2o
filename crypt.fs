@@ -567,10 +567,14 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 : now>otr ( -- )            otrsig-delta# now+delta ;
 
 e? max-xchar $100 < [IF]
-    : .check ( flag -- ) 'x' 'v' rot select xemit ;
+    'x' 'v'
 [ELSE]
-    : .check ( flag -- ) '✘' '✔' rot select xemit ;
+    '✘' '✔'
 [THEN]
+>r >r
+: .check ( flag -- )
+    [:  IF  error-color [ r> ]L  ELSE  info-color [ r> ]L  THEN
+	xemit ;] execute-theme-color ;
 : .sigdate ( tick -- )
     64dup 64#0  64= IF  64drop .forever  EXIT  THEN
     64dup 64#-1 64= IF  64drop .never    EXIT  THEN
