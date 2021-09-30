@@ -244,7 +244,7 @@ User peer-buf
     addr-connect 2dup d0= IF  2drop  ELSE  push[] $+[]! avalanche-to  THEN o> ;
 
 : execute+free ( closure-xt -- )
-    dup >r execute r> cell- cell- ( >addr ) free throw ;
+    dup >r execute r> >addr free throw ;
 
 event: :>avalanche ( addr u o group restore-xt -- )
     execute+free
