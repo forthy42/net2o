@@ -750,8 +750,7 @@ Variable last-bubble-pk
 	    glue*l hour-color x-color slide-frame dup .button1
 	    xc to x-color
 	    60 fm* fsplit minute hour
-	    [: .## ':' emit .## ':' emit .##
-		date? #localtime and 0= IF  'Z' emit  THEN ;] $tmp }}text 25%b
+	    [: .## ':' emit .## ':' emit .## .tz ;] $tmp }}text 25%b
 	}}z /center msgs-box .child+
     THEN  hour to last-hour  minute to last-minute
     fdrop \normal ;

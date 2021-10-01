@@ -604,11 +604,15 @@ $10 Constant #splitdate
 $20 Constant #splithour
 $40 Constant #splitminute
 $80 Constant #localtime
+$100 Constant #timezone
+$Variable $tz
+0 Value tz-off
+0 Value tz-flag
 
 : >fticks ( time -- rftime ) 64>f 1n f* ;
 : fticks ( -- rftime ) ticks >fticks ;
 : fticks>dtms-local ( rftime -- fns s m h dm y )
-    fsplit >time&date ;
+    fsplit >time&date&tz $tz $! to tz-off to tz-flag ;
 : fticks>dtms-zulu ( rftime -- fns s m h dm y )
     fsplit #60 /mod #60 /mod #24 /mod unix-day0 + day2ymd swap rot ;
 : fticks>dtms ( rftime -- fns s m h dm y )
@@ -635,10 +639,16 @@ $80 Constant #localtime
 : .day ( day -- )
     unix-day0 + day2ymd
     rot 0 .r '-' emit swap .## '-' emit .## 'T' emit ;
+: .tz ( -- )
+    date? #localtime and IF
+	date? #timezone and IF  $tz $.
+	ELSE  tz-flag IF  'S' emit  THEN  THEN
+    ELSE  'Z' emit  THEN ;
 : .timeofday ( fraction/day -- )
     24 fm* fsplit
     date? #splithour and IF
-	dup last-hour <> IF  ." ==== " dup .## ." Z ====" cr  THEN  to last-hour
+	dup last-hour <> IF  ." ==== " dup .## .tz
+	    ."  ====" cr  THEN  to last-hour
     ELSE  .##  THEN
     datehms? 2 < IF  fdrop  ELSE  60 fm* fsplit
     date? #splitminute and IF
@@ -648,7 +658,7 @@ $80 Constant #localtime
 	    60 fm* datehms? 4 < IF  f>s .##
 	    ELSE  fdup 10e f< IF '0' emit 2  ELSE  3  THEN
 		datehms? 1+ 7 min 3 and 3 * dup >r + r@ r> f.rdp  THEN
-	THEN  THEN  date? #splithour #localtime or and 0= IF  'Z' emit  THEN ;
+	THEN  THEN  date? #splithour and 0= IF  .tz  THEN ;
 : .deg ( degree -- )
     fdup f0< IF ." -" fnegate THEN
     fsplit 0 .r  $B0 ( '°' ) xemit  60 fm*
