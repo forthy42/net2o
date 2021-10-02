@@ -2098,7 +2098,7 @@ Forward ```
     2dup save-mem over >r '/' r@ c!
     ['] /chat >wordlist find-name-in r> free throw
     ?dup-IF  nip nip name>int chat-cmd-file-execute true
-    ELSE  drop 1- -rot + over - false
+    ELSE  drop -rot + over - false
     THEN ;
 
 0 Value last->in

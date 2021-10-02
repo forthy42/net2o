@@ -15,6 +15,6 @@
 : hex>$ ( addr u -- addr' u' )
     ['] (digits>$) $10 base-execute ;
 
-: x" ( "hexstring" -- addr u )
+: hex" ( "hexstring" -- addr u )
     '"' parse hex>$ ;
-compsem: [compile] x" postpone SLiteral ;
+compsem: '"' parse hex>$ postpone SLiteral ;

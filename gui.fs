@@ -1477,10 +1477,18 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : >ymd ( ticks -- year month day )
     >fticks fticks>day fdrop unix-day0 + day2ymd ;
-: day'>i ( day -- index )
-    #86400 * #1000000000 um* d>64 date>i ;
+: second>i ( second -- index )
+    #1000000000 um* d>64 date>i ;
+: localtime-fixup ( second -- second' )
+    date? #localtime and IF
+	dup >time&date&tz 2drop >r drop 2drop 2drop 2drop
+	dup r> - >time&date&tz 2drop >r drop 2drop 2drop 2drop r> -
+    THEN ;
+: day'>i ( day -- index ) #86400 * localtime-fixup second>i ;
+: day>second ( year month day -- seconds )
+    ymd2day unix-day0 - #86400 * localtime-fixup ;
 : day>i ( year month day -- index )
-    ymd2day unix-day0 - day'>i ;
+    day>second second>i ;
 : month>i ( year month -- index )
     1 day>i ;
 : quartal>i ( quartal -- index )
