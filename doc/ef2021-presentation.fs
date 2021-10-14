@@ -146,14 +146,14 @@ $44FFFFFF re-color author#
 		\skip
 		l" Surveillance Capitalism" /subsection
 		{{
-		    l"    Apple wants to scan your pics locally for child porn" \\
-		    l"   ➡ Had to back down quickly" \\
-		    l"    Facebook &  Twitter “check for facts”" \\
-		    l"   ➡ Actually still distribute a lot of disinformation" \\
-		    l"    Telegram became tool of choice of Covidiots" \\
-		    l"   ➡ Free speech seems to be a problem" \\
-		    l"    Twitter tests “safe space” feature…" \\
-		    l"   ➡ The algorithm hides what could hurt you" \\
+		    l"    Apple wants to scan your pics locally for child porn" \\
+		    l"   ➡ Had to back down quickly" \\
+		    l"    Facebook &  Twitter “check for facts”" \\
+		    l"   ➡ Actually still distribute a lot of disinformation" \\
+		    l"    Telegram became tool of choice of Covidiots" \\
+		    l"   ➡ Free speech seems to be a problem" \\
+		    l"    Twitter tests “safe space” feature…" \\
+		    l"   ➡ The algorithm hides what could hurt you" \\
 		}}v box[]
 		\skip
 		l" Progress" /subsection
