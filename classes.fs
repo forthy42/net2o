@@ -429,13 +429,13 @@ drop
 
 \ timestasts structure
 
-begin-structure timestats
-sfvalue: ts-delta
-sfvalue: ts-slack
-sfvalue: ts-reqrate
-sfvalue: ts-rate
-sfvalue: ts-grow
-end-structure
+struct{ timestats
+sfvalue: delta
+sfvalue: slack
+sfvalue: reqrate
+sfvalue: rate
+sfvalue: grow
+}struct
 
 \ io per-task variables
 
@@ -458,7 +458,7 @@ object uclass io-mem
     $10             uvar cmdtmp
     $10             uvar return-addr
     $10             uvar temp-addr
-    timestats       uvar stat-tuple
+    timestats-struct uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     aligned
     cell            uvar code0-buf^

@@ -730,23 +730,21 @@ in net2o : /timing ( n -- )
 : .rec-timing ( addr u -- )
     [: ack@ >o track-timing $@ \ do some dumps
       bounds ?DO
-	  I ts-delta f>64 last-time 64+!
+	  I timestats:delta f>64 last-time 64+!
 	  last-time 64@ 64>f 1n f* fdup f.
 	  time-offset 64@ 64>f 1n f* 10e fmod f+ f.
-	  \ I ts-delta f.
-	  I ts-slack 1u f* f.
+	  \ I timestat:delta f.
+	  I timestats:slack 1u f* f.
 	  tick-init 1+ maxdata * 1k fm* fdup
-	  I ts-reqrate f/ f.
-	  I ts-rate f/ f.
-	  I ts-grow 1u f* f.
+	  I timestats:reqrate f/ f.
+	  I timestats:rate f/ f.
+	  I timestats:grow 1u f* f.
 	  ." timing" cr
-      timestats +LOOP
+      timestats-struct +LOOP
       track-timing $free o> ;] timing-sema c-section ;
 
 in net2o : rec-timing ( addr u -- )
     [: track-timing $+! ;] timing-sema c-section ;
-
-: stat+ ( addr -- )  stat-tuple timestats  timing-stat $+! ;
 
 \ flow control
 
@@ -841,7 +839,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
 	msg( ." slack ignored: " 64dup u64. cr )
 	64drop 64#0 lastslack 64@ min-slack 64!
     THEN
-    64>n stats( dup s>f stat-tuple to ts-slack )
+    64>n stats( dup s>f stat-tuple to timestats:slack )
     slack-bias# - slack-min# max slack# 2* 2* min
     s>f slack# fm/ 2e fswap f** ;
 
@@ -864,24 +862,26 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64over 64-2* 64-2* 64min \ limit to 4* rate
     64dup extra-ns 64! 64+ ;
 
-: rate-stat1 ( rate deltat -- )
-    stats( recv-tick 64@ time-offset 64@ 64-
-           64dup last-time 64!@ 64- 64>f stat-tuple to ts-delta
-           64over 64>f stat-tuple to ts-reqrate ) ;
+: stat+ ( addr -- )  stat-tuple timestats-struct  timing-stat $+! ;
+
+: rate-stat1 ( rate deltat -- rate deltat )
+    recv-tick 64@ time-offset 64@ 64-
+    64dup last-time 64!@ 64- 64>f stat-tuple to timestats:delta
+    64over 64>f stat-tuple to timestats:reqrate ;
 
 : rate-stat2 ( rate -- rate )
-    stats( 64dup extra-ns 64@ 64+ 64>f stat-tuple to ts-rate
-           slackgrow 64@ 64>f stat-tuple to ts-grow
-           stat+ ) ;
+    64dup extra-ns 64@ 64+ 64>f stat-tuple to timestats:rate
+    slackgrow 64@ 64>f stat-tuple to timestats:grow
+    stat+ ;
 
 in net2o : set-rate ( rate deltat -- )
     rate( ." r/d: " 64over u64. 64dup u64. )
-    rate-stat1
+    stats( rate-stat1 )
     64>r tick-init 1+ validated @ validated# rshift 1 max 64*/
     64dup >extra-ns noens( 64drop )else( 64nip )
     64r> delta-t-grow# 64*/ 64min ( no more than 2*deltat )
     bandwidth-max n>64 64max
-    rate-limit  rate-stat2 rate( ." rate: " 64dup u64. )
+    rate-limit stats( rate-stat2 ) rate( ." rate: " 64dup u64. )
     ns/burst 64!@ bandwidth-init n>64 64= IF \ first acknowledge
 	net2o:set-flyburst
 	net2o:max-flyburst
