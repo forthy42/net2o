@@ -106,7 +106,7 @@ $00000000 Value droprate#
     sendto( over >r )
     2>r net2o-sock 2r> 0 sockaddr> alen @ sendto +send 1 packets +!
     sendto( ." send to: " sockaddr> alen @ .address space dup .
-    r> mapaddr 64@ x64. cr ) ;
+    r> net2o-header:mapaddr le-64@ x64. cr ) ;
 
 \ clients routing table
 
@@ -239,7 +239,7 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
     $11 1 DO  1- dup c@ WHILE  LOOP  $10  ELSE  I  UNLOOP  THEN ;
 
 : ins-source ( addr packet -- )
-    destination >r reverse
+    net2o-header:dest >r reverse
     dup >rpath-len { w^ rpath rplen } rpath be!
     r@ $10 + <0string
     over rplen - swap move
@@ -254,8 +254,8 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
     addr2 addr1 u2 move
     addr1 u1 u2 /string erase ;
 
-: get-dest ( packet -- addr )  destination dup be@ swap skip-dest ;
-: route? ( packet -- flag )  destination c@  ;
+: get-dest ( packet -- addr )  net2o-header:dest dup be@ swap skip-dest ;
+: route? ( packet -- flag )  net2o-header:dest c@  ;
 
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF

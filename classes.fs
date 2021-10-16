@@ -524,12 +524,12 @@ end-structure
 
 \ net2o header structure
 
-begin-structure net2o-header
-    1 +field hdrflags
-    1 +field hdrtags
-   16 +field destination
+struct{ net2o-header
+    1 +field flags
+    1 +field tags
+   16 +field dest
     8 +field mapaddr
-end-structure
+}struct
 
 \ key class
 

@@ -259,7 +259,7 @@ in net2o : see ( addr u -- )
     1+ c@ stateless# and 0= IF dest-addr 64@ x64. THEN ;
 
 in net2o : see-me ( -- )
-    ." see-me: "  inbuf hdrflags .dest-addr  buf-dump 2@ net2o:see ;
+    ." see-me: "  inbuf net2o-header:flags .dest-addr  buf-dump 2@ net2o:see ;
 
 : cmd-dispatch ( addr u -- addr' u' )
     buf-state 2!
@@ -557,7 +557,7 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
     o IF
 	punch-addrs @ IF
 	    [:
-	      outbuf destination $10 erase \ only direct packets
+	      outbuf net2o-header:dest $10 erase \ only direct packets
 	      punch-addrs $@ bounds ?DO
 		  I @ ['] punch-out addr>sock
 	      cell +LOOP  ;] punch-wrap

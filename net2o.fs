@@ -239,7 +239,7 @@ $04 Constant resend-toggle#
 : .header ( addr -- ) base @ >r hex
     dup c@ >r
     min-size r> datasize# and lshift hex. ." bytes to "
-    mapaddr le-64@ u64. cr
+    net2o-header:mapaddr le-64@ u64. cr
     r> base ! ;
 
 \ each source has multiple destination spaces
@@ -248,10 +248,10 @@ $04 Constant resend-toggle#
 User dest-flags
 
 : >ret-addr ( -- )
-    inbuf destination return-addr reverse$16 ;
+    inbuf net2o-header:dest return-addr reverse$16 ;
 : >dest-addr ( -- )
-    inbuf mapaddr le-64@ dest-addr 64!
-    inbuf hdrflags le-uw@ dest-flags le-w! ;
+    inbuf net2o-header:mapaddr le-64@ dest-addr 64!
+    inbuf net2o-header:flags le-uw@ dest-flags le-w! ;
 
 \ validation stuff
 
@@ -468,8 +468,8 @@ defer new-msg  ' new-tmsg is new-msg
 User outflag  outflag off
 
 : set-flags ( -- )
-    0 outflag !@ outbuf hdrtags c!
-    outbuf hdrflags le-uw@ dest-flags le-w! ;
+    0 outflag !@ outbuf net2o-header:tags c!
+    outbuf net2o-header:flags le-uw@ dest-flags le-w! ;
 
 : >send ( addr n -- )
 \   over 0= IF  2drop  rdrop EXIT  THEN
@@ -989,11 +989,11 @@ Forward sockaddr+return
 
 \ send blocks of memory
 
-: >dest ( addr -- ) outbuf destination $10 move ;
+: >dest ( addr -- ) outbuf net2o-header:dest $10 move ;
 : set-dest ( target -- )
-    64dup dest-addr 64!  outbuf mapaddr le-64! ;
+    64dup dest-addr 64!  outbuf net2o-header:mapaddr le-64! ;
 : set-dest# ( resend# -- )
-    n>64 dest-addr 64+!  dest-addr 64@ outbuf mapaddr le-64! ;
+    n>64 dest-addr 64+!  dest-addr 64@ outbuf net2o-header:mapaddr le-64! ;
 
 #90 Constant EMSGSIZE
 
@@ -1025,7 +1025,7 @@ Forward sockaddr+return
 
 : send-code-packet ( -- ) +sendX
     header( ." send code " outbuf .header )
-    outbuf hdrtags c@ stateless# and IF
+    outbuf net2o-header:tags c@ stateless# and IF
 	\ search cmd0key by ret-address
 	o IF  search-cmd0key  THEN
 	outbuf0-encrypt
@@ -1628,14 +1628,14 @@ User remote?
 scope{ mapc
 
 : handle-data ( addr -- ) parent >o  o to connection
-    msg( ." Handle data " inbuf hdrflags be-uw@ hex. ." to addr: " inbuf mapaddr le-64@ hex. cr )
+    msg( ." Handle data " inbuf net2o-header:flags be-uw@ hex. ." to addr: " inbuf net2o-header:mapaddr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt +ack 0timeout o> ;
 ' handle-data rdata-class to handle
 ' drop data-class to handle
 
 : handle-cmd ( addr -- )  parent >o
-    msg( ." Handle command to addr: " inbuf mapaddr le-64@ x64. cr )
+    msg( ." Handle command to addr: " inbuf net2o-header:mapaddr le-64@ x64. cr )
     outflag off  wait-task @ 0= remote? !
     $error-id $free    \ no error id so far
     maxdata negate and >r inbuf packet-data r@ swap dup >r move
@@ -1677,7 +1677,7 @@ scope{ mapc
     add-source
     inbuf >r r@ get-dest route>address IF
 	route( ." route to: " sockaddr> alen @ .address space
-	inbuf destination .addr-path cr )
+	inbuf net2o-header:dest .addr-path cr )
 	r@ dup packet-size send-a-packet 0<
 	IF  ." failed to send from: " sockaddr< dup >alen .address
 	    ."  to: " sockaddr> alen @ .address cr true ?ior  THEN

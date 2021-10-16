@@ -324,7 +324,8 @@ new-pw-diffuse
     c:tweakkey! ;
 
 : try-0decrypt ( addr -- flag ) >r
-    inbuf mapaddr le-64@ inbuf hdrflags le-uw@ addr>assembly
+    inbuf net2o-header:mapaddr le-64@
+    inbuf net2o-header:flags le-uw@ addr>assembly
     r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
@@ -335,7 +336,8 @@ new-pw-diffuse
     my-0key try-0decrypt ;
 
 : outbuf0-encrypt ( -- ) +calc
-    outbuf mapaddr le-64@ outbuf hdrflags le-uw@ addr>assembly
+    outbuf net2o-header:mapaddr le-64@
+    outbuf net2o-header:flags le-uw@ addr>assembly
     your-0key  set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;
