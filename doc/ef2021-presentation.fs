@@ -33,7 +33,7 @@ require minos2/font-style.fs
 require minos2/text-style.fs
 require minos2/presentation-support.fs
 
-0e to slide-time%
+0e m2c:animtime% f!
 
 tex: net2o-logo
 tex: 36c3-logo

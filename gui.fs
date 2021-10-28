@@ -41,8 +41,6 @@ require minos2/md-viewer.fs
 
 update-gsize#
 
-0.4e to slide-time%
-
 \ check if dispose damages things
 
 [IFDEF] dispose-check-xxx
@@ -294,8 +292,8 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	    {{
 		\large
 		"🔴" }}text \normal  >o font-size# 10% f* to raise o o>
-		"➕" }}text /center dup to plus-login
-		"➖" }}text /center dup to minus-login /vflip
+		"➕️" }}text /center dup to plus-login
+		"➖️" }}text /center dup to minus-login /vflip
 		\large
 		: id-show-hide ( flag -- )
 		    IF
@@ -681,7 +679,7 @@ previous
 	    nicks-title
 	    glue*shrink }}glue
 	    \Large
-	    s" ❌" $444444FF new-color, }}button-lit /hfix [: -1 data +! ;]
+	    s" ❌️" close-color# }}button-lit /hfix [: -1 data +! ;]
 	    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
 	}}h box[] /vfix
 	{{
@@ -821,7 +819,7 @@ Variable like-char
 	    glue*l $000000FF new-color, slide-frame dup .button1
 	    {{
 		\large realwhite
-		"⬅" }}text 40%b [: prev-slide ;] over click[]
+		"⬅️" }}text 40%b [: prev-slide ;] over click[]
 		!i18n l" Post" }}text' !lit 40%b
 		glue*l }}glue
 	    }}h box[]
@@ -1456,7 +1454,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : vp-softbottom ( o:viewport -- )
     vp-y fnegate act >o o anim-del  set-startxy
     0e to vmotion-dx  to vmotion-dy
-    0.25e o ['] vp-scroll >animate o> ;
+    m2c:animtime% f@ f2/ o ['] vp-scroll >animate o> ;
 : re-msg-box ( -- )
     msgs-box >o vp-h { f: old-h } resized
     vp-h old-h f- vp-y f+ 0e fmax to vp-y
@@ -1501,7 +1499,7 @@ wmsg-o >o msg-table @ token-table ! o>
 : closer ( -- o closer )
     {{
 	\Large
-	{{ s" ❌" close-color# }}text }}h 25%b
+	{{ s" ❌️" close-color# }}text }}h 25%b
 	dup { closer } /right
 	glue*ll }}glue
     }}v box[] closer ;
@@ -1513,7 +1511,7 @@ wmsg-o >o msg-table @ token-table ! o>
       data .dispose-widget +resize +sync ;] r@ click[] drop
     r> ;
 : }}closerh ( o1 .. on -- o )
-	s" ❌" close-color# }}text dup { closer }
+	s" ❌️" close-color# }}text dup { closer }
     }}h box[] >r
     closer [: data chat-history .childs[] del$cell
       data .dispose-widget +resize +sync ;] r@ click[] drop
@@ -1698,7 +1696,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    glue*l black# slide-frame dup .button1
 	    {{
 		\large realwhite
-		"⬅" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
+		"⬅️" }}text 40%b [: in-group? 0= ?EXIT  false to in-group?
 		    leave-chats prev-slide ;] over click[]
 		!i18n l" " }}text' !lit 40%b
 		"" }}text 40%b dup to group-name
@@ -1851,10 +1849,10 @@ also [IFDEF] jni jni [THEN]
 	    k-voldown of  audio-playing IF  -1 1 clazz .audioManager .adjustVolume
 		ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
 	[THEN]
-	k-f5 of  color-theme 0=  IF  anim-end 0.25e o
+	k-f5 of  color-theme 0=  IF  anim-end m2c:animtime% f@ f2/ o
 		[: drop             fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
-	k-f6 of  color-theme 0<> IF  anim-end 0.25e o
+	k-f6 of  color-theme 0<> IF  anim-end m2c:animtime% f@ f2/ o
 		[: drop 1e fswap f- fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
 		>animate  THEN   endof
 	k-f7 of  >normalscreen   endof
@@ -1918,7 +1916,7 @@ Variable invitation-stack
 		glue*l close-color# font-size# 40% f* }}frame dup .button2
 		{{
 		    realwhite online-symbol }}text 25%b dup to online-flag
-		    s" ❌" }}text 25%b [: -1 data +! ;]
+		    s" ❌️" }}text 25%b [: -1 data +! ;]
 		    [IFDEF] android android:level# [ELSE] level# [THEN] click[]
 		}}h box[]
 	    }}z
