@@ -194,7 +194,7 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Erledigt: “Wer hat was”" /title
+		l" “Wer hat was” ✅️" /title
 		l" Hash→Objekt–Ursprung" /subsection
 		vt{{
 		    l" ❓️ " l" Ursprünglicher Plan: Hashes in der DHT" b\\
@@ -217,12 +217,12 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Done: Formated chat messages" /title
+		l" Formatierte Chat–Messages ✅️" /title
 		vt{{
-		    l" • " l" Inspired by Mattermost" b\\
-		    l" • " l" Format parsing different from Markdown (simpler)" b\\
-		    l" • " l" Disabled by default" b\\
-		    l" • " l" Sender parsed, so sender parser can change" b\\
+		    l" • " l" Inspiriert von Mattermost" b\\
+		    l" • " l" Format–Parsing nicht wie Markdown (simpler)" b\\
+		    l" • " l" Normalerweise deaktiviert" b\\
+		    l" • " l" Wird vom Sender geparsed, Parser kann gewechselt werden" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -231,14 +231,14 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Mostly done: Voice messages" /title
+		l" Sprachnachrichten ¾✅️" /title
 		vt{{
-		    l" • " l" Uses Pulseaudio on Linux, OpenSLES on Android" b\\
-		    l" • " l" Encoding in Opus" b\\
-		    l" • " l" OpenSLES recording doesn’t work yet" b\\
-		    l" • " l" Android problems with callbacks into Gforth’s dynamic code" b\\
-		    l" • " l" The rest is similar to pictures" b\\
-		    l" • " l" Thumbnail is a wavefrom plot with max level/second" b\\
+		    l" • " l" Nutzt Pulseaudio auf Linux, OpenSLES auf Android" b\\
+		    l" • " l" Codiert mit Opus" b\\
+		    l" • " l" Aufnahme mit OpenSLES funktioniert noch nicht" b\\
+		    l" • " l" Android verweigert Aufruf von dynamisch erzeugten Code in Callbacks" b\\
+		    l" • " l" Der Rest wird so behandelt wie Bilder" b\\
+		    l" • " l" Der Thumbnail ist eine Waveform mit maximalem Pegel/Sekunde" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -247,7 +247,7 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Weitgehend erledigt: Harfbuzz (in ΜΙΝΩΣ2)" /title
+		l" Harfbuzz (in ΜΙΝΩΣ2) ¾✅️" /title
 		vt{{
 		    l" • " l" Zweck: Den komplexeren Teil des Unicode–Renderings machen" b\\
 		    l" • " l" Das Interface ist nicht sehr komplex" b\\
@@ -255,8 +255,11 @@ $44FFFFFF re-color author#
 		    l" • " l" und den Bidi–Algorithmus selbst implementeiren" b\\
 		    l" • " l" (und was ist mit vertikalen Skripts wie Mongolisch?)" b\\
 		    \skip
-		    l" • " l" Herausforderung: Text nach Fonts aufteilen" b\\
-		    l" • " l" und Varianten–Selektoren beachten" b\\
+		    l" Ablauf" /subsection
+		    l" • " l" Bidi–Algorithmus ausführen, um Text nach Laufrichtung zu separieren (in Arbeit)" b\\
+		    l" • " l" Text nach Codeblöcken in Fonts aufteilen und Varianten–Selektoren beachten" b\\
+		    l" • " l" Einzelne Text–Segmente mit Harfbuzz–Buffer abarbeiten" b\\
+		    l" • " l" Glyphen der Reihe nach rendern, ggf. spiegeln oder um 90°C nach rechts drehen" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -265,10 +268,11 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Harfbuzz–Beispiele" /title
+		l" Harfbuzz–Beispiele 1️" /title
 		l" Indien: Ein Staat, 22 Skripten, alphasyllabisch, nichtlinear (Ligaturen & Diakritika)" /subsection
 		vt{{
 		    l" Devanagari " l" देवनागरी" b\\
+		    l" Urdu " l" اُردُو" b\\
 		    l" Gurmukhi " l" ਗੁਰਮੁਖੀ" b\\
 		    l" Meetei Mayek " l" ꯃꯤꯇꯩ ꯃꯌꯦꯛ" b\\
 		    l" Bengali " l" অসমীয়া লিপি" b\\
@@ -291,7 +295,7 @@ $44FFFFFF re-color author#
 	{{
 	    $200030FF $EECCFFFF pres-frame
 	    {{
-		l" Harfbuzz–Beispiele" /title
+		l" Harfbuzz–Beispiele 2️" /title
 		vt{{
 		    l" • " l" 𓆓𓂧𓇋𓈖𓌞𓅱𓀀𓇋𓈎𓂋𓏛𓅱𓍒𓄿𓏜𓄣𓏤𓎡𓄂𓂝𓀀𓅓𓂝𓎡𓄖𓂻𓈖𓈖𓏥𓄚𓈖𓏌𓅱𓉐𓊏𓊪𓂡𓐍𓂋𓊪𓏲𓆱" b\\
 		    l" • " l" Ẑ̸͓̦͙̼̉͆͑̇͌̎̀ͅa̷̧̡̘͔͉̟͇͈̠̦̱͉͍̓͒́̆̕̚l̵͙̬̰̘͈͉͕̲̙͖̹̻̪͐́̕g̴̢̛͔̘͉̪̮̒̒̄͋́̿̅͂̕͜͠ő̴͓̻͈̪̣̤̱̜͂̋͜͜ ̴̮̳̯̖̪̬̪́T̸̮͖̭͈́ę̵̛̛̛̮̟͖͖̱̖̋̒͑̊̾̌̇̓͐x̵̯̝̝̭͎̮̥͔̞́̒͗͒̌͜t̷̢̠̗̲͇̯̜̹͇̅͋̓̓́́̀́̋͠" b\\
@@ -311,8 +315,52 @@ $44FFFFFF re-color author#
 		    l" • " l" Praktisch ungeordnet als Sack CJ–Glyphen im Unicode" b\\
 		    l" • " l" Hangul (nicht verwandt) wenigstens als ein Block" b\\
 		    \skip
-		    l" • " l" Eingebaut: Konversion SC↔TC" b\\
-		    l" • " l" Japanische Varianten fehlen teilweise" b\\
+		    l" • " l" Eingebaut: Konversion SC↔TC (Unihan–Datenbank)" b\\
+		    l" • " l" Japanische Varianten? Muss die noch suchen…" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" Rant gegen Unicode" /title
+		vt{{
+		    l" • " l" Zeichen kommen selten ohne Kontext vor" b\\
+		    l" • " l" Jedes Schrift hat nach wie vor einen eigenen Font" b\\
+		    l" • " l" Viele Schriften sind nichtlinear (Zeichen+Diakritika)" b\\
+		    l" • " l" Für Kurznachrichten starke Benachteiligung von nicht–lateinischen Schriften" b\\
+		    l"  " l" (Kompression bei Kurznachrichten nur eingeschränkt nützlich)" b\\
+		    l" • " l" Je nach Schrift andere Schreibrichtung" b\\
+		    l" • " l" Bidi Algorithmus unnötig komplex" b\\
+		    l" Vergessen" /subsection
+		    l" • " l" Trennungsregeln nach Sprache" b\\
+		    l" • " l" Vertikale Schriften" b\\
+		    l" • " l" Schriften, die horizontal und vertikal geschrieben werden können" b\\
+		}}vt
+	    }}v box[] >bdr
+	}}z box[] /flip dup >slides
+
+	\ page 12
+	{{
+	    $200030FF $EECCFFFF pres-frame
+	    {{
+		l" Verbesserungsvorschlag" /title
+		vt{{
+		    l" • " l" Kontext–Marker selektiert Codepage, Sprache & Schreibrichtung" b\\
+		    l" • " l" Stack, Kontext–Pop stellt vorherigen Zustand wieder her" b\\
+		    l" • " l" Jede Codepage kann einfach (zusammenhängend) erweitert werden" b\\
+		    l" • " l" Kompakter zu speichern, höhere Performance, weniger komplexer Code" b\\
+		    l" • " l" Also: Win, win, win, win!" b\\
+		}}vt
+		l" Vorschlag:" /subsection
+		vt{{
+		    l" • " l" Freie Bytes (in UTF–8): $F8–$FF" b\\
+		    l" $FF " l" Pop" b\\
+		    l" $FE+xc " l" Script Selector" b\\
+		    l" $FD+xc " l" Language Selector (bei Schriften mit mehreren Sprachen)" b\\
+		    l" $FC+xc " l" Variant Selector (Schreibrichtung & Stil)" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
