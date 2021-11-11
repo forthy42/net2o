@@ -36,7 +36,18 @@ require minos2/presentation-support.fs
 0e m2c:animtime% f!
 
 tex: net2o-logo
-' net2o-logo "net2o-200.png" 0.666e }}image-file 2Constant net2o-img
+tex: minos2-logo
+' net2o-logo  "net2o-200.png"    0.666e }}image-file 2Constant net2o-img
+' minos2-logo "net2o-minos2.png" 0.666e }}image-file 2Constant minos2-img
+
+0 Value n2-img
+0 Value m2-img
+
+: ft2021-slides-updated ( -- )
+    n2-img m2-img
+    slide# @ 8 14 within IF swap THEN
+    /flip drop /flop drop ;
+' ft2021-slides-updated is slides-updated
 
 : logo-img ( o1 -- o o-img ) { rightimg }
     baseline# 0e to baseline#
@@ -78,8 +89,8 @@ $44FFFFFF re-color author#
 	    {{
 		{{
 		    glue*l }}glue
-		    l" net2o Progress Report" /title
-		    l" Dezentralisierte Zensur" /subtitle
+		    l" net2o Fortschrittsbericht" /title
+		    l" Internationalisierung & Dezentralisierte Zensur" /subtitle
 		    glue*2 }}glue	
 		    l" Bernd Paysan" /author
 		    l" Forth–Tagung 2021. Video–Konferenz" /location
@@ -121,7 +132,7 @@ $44FFFFFF re-color author#
 		{{
 		    l"    Apple möchte deine Bilder lokal auf KiPo scannen" \\
 		    l"   ➡️ Musste schnell einen Rückzieher machen" \\
-		    l"    Facebook &  Twitter “checken Fakten”" \\
+		    l"    Facebook &  Twitter “checken Fakten”" \\
 		    l"   ➡️ und verteilen immer noch Unmengen Blödsinn" \\
 		    l"    Telegram wurde das Tool der Wahl der Covidioten" \\
 		    l"   ➡️ Meinungsfreiheit hat und ist ein Problem…" \\
@@ -305,6 +316,11 @@ $44FFFFFF re-color author#
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
 
+	dark-gui
+	$0000EECC new-color, fvalue button-color#
+	light-gui
+	$FFFFAAFF re-color button-color#
+	' noop  is translator
 	\ page 12
 	{{
 	    $200030FF $EECCFFFF pres-frame
@@ -319,6 +335,20 @@ $44FFFFFF re-color author#
 		    \skip
 		    l" • " l" Eingebaut: Konversion SC↔TC (Unihan–Datenbank)" b\\
 		    l" • " l" Japanische Varianten? Muss die noch suchen…" b\\
+		    \skip
+		    l" Beispiel" /subsection
+		    \skip
+		    {{
+			l" • " b0 \large
+			l" 双头龙" }}text' glue*l }}glue
+			l" 雙頭龍" }}text' glue*l }}glue \normal 
+			l" 🇨🇳 scify 🇲🇾" button-color# }}button
+			[: ['] translators:scify is translator ;] over click[] glue*l }}glue
+			l" 🇹🇼 tcify 🇭🇰" button-color# }}button
+			[: ['] translators:tcify is translator ;] over click[] glue*l }}glue
+			l" as is" button-color# }}button
+			[: ['] noop  is translator ;] over click[] glue*l }}glue  glue*l }}glue 
+		    }}h box[]
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -371,24 +401,24 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Decentralized Censorship" /title
-		l" Make net2o a better place" /subsection
+		l" Dezentralisierte Zensur" /title
+		l" net2o zu einem besseren Ort machen" /subsection
 		vt{{
-		    l" • " l" Internal, not external censorship" b\\
-		    l" • " l" Disinfodemic in a peer2peer network similar to pandemic models" b\\
-		    l" • " l" Filtering on incoming content, not your own content" b\\
-		    l" • " l" Sender does not know that content is blocked" b\\
-		    l" • " l" Different settings possible:" b\\
+		    l" • " l" Interne, nicht externe Zensur" b\\
+		    l" • " l" Desinfodemie in einem peer2peer–Network ähnelt Pandemie–Modellen" b\\
+		    l" • " l" Filtert eingehende Inhalte, nicht die eigenen" b\\
+		    l" • " l" Der Sender weiß nicht, dass seine Message nicht angekommen ist" b\\
+		    l" • " l" Verschiedene Szenarien möglich:" b\\
 		}}vt
 		vt{{
-		    l"   1. " l" Filter hides messages" b\\
-		    l"   2. " l" Filter doesn’t transmit messages" b\\
-		    l"   3. " l" Both (“sterile immunity”)" b\\
+		    l"   1. " l" Filter versteckt Messages" b\\
+		    l"   2. " l" Filter verbreitet Messages nicht" b\\
+		    l"   3. " l" Beides (“Sterile Immunität”)" b\\
 		}}vt
 		vt{{
-		    l" • " l" Typical fanout of participants = R₀" b\\
-		    l" • " l" If more than 1–1/R₀ filter, bad contents doesn’t get far" b\\
-		    l" • " l" Requires easy filter sharing" b\\
+		    l" • " l" Typischer Verteilfaktor = R₀" b\\
+		    l" • " l" Wenn mehr als 1–1/R₀ filtern, kommt Informationsmüll nicht weit" b\\
+		    l" • " l" Das Teilen von Filter–Regeln muss einfach sein" b\\
 		}}vt
 		glue*lll }}glue
 	    }}v box[] >bdr
@@ -398,23 +428,23 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Disinfodemic" /title
-		l" Examples from the Covid pandemic" /subsection
+		l" Desinfodemie" /title
+		l" Beispiele aus der Covid–Pandemie" /subsection
 		vt{{
-		    l" 李文亮 " l" Was gag ordered by Wuhan police when the main news (新闻联播)" b\\
-		    l"  " l" already had a report.  “Would not happen here”" b\\
+		    l" 李文亮 " l" Bekam Maulkorb von der Wuhan–Polizei, als die Hauptnachrichten (新闻联播)" b\\
+		    l"  " l" schon einen Bericht hatten.  „Würde hier nicht passieren“" b\\
 		    \skip
-		    l" Here? " l" Instead, a hell lot of disinformation spread out in the free west" b\\
+		    l" Hier? " l" Stattdessen wurden Unmengen Desinformations–Müll über uns gekippt" b\\
 		    \skip
-		    l" Evil Govt " l" Yes, the government is evil.  But also incompetent." b\\
-		    l"  " l" And its bias is pro corporations.  Evilness serves a purpose." b\\
+		    l" Böse Reg. " l" Ja, die Regierung ist böse. Aber auch inkompetent…" b\\
+		    l"  " l" Und sie hat einen pro–Kommerz–Bias. Die Boshaftigkeit hat einen Zweck." b\\
 		    \skip
-		    l" Science? " l" Science questions everything.  But it conducts experiments to check." b\\
-		    l"  " l" Masks work.  Lockdowns work.  Wuhan lab didn’t leak.  Vaccines are safe." b\\
-		    l"  " l" Ivermectin/Chloroquin/Vitamine D are no miracle cure." b\\
+		    l" Science " l" hinterfragt alles.  Aber sie machen Experimente." b\\
+		    l"  " l" Masken & Lockdowns funktionieren. Das Virus ist nicht aus dem Wuhan Lab." b\\
+		    l"  " l" Impfstoffe sind sicher. Ivermectin/Chloroquin/Vitamine D keine Wundermittel." b\\
 		    \skip
-		    l" Massacre " l" The failure (willful/incompetent) to contain Covid-19 is a massacre." b\\
-		    l"  " l" Democraties can do such atrocities only with massive disinformation." b\\
+		    l" Massaker " l" Das Versagen in der Covid–Pandemie ist ein Massaker." b\\
+		    l"  " l" Demokratien können solche Scheußlichkeiten nur mit Desinformation verüben." b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -423,17 +453,17 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Manual moderation?" /title
-		l" Too late, too little" /subsection
+		l" Von Hand moderieren?" /title
+		l" Zu wenig, zu spät…" /subsection
 		vt{{
-		    l" • " l" Delete bad content" b\\
-		    l" • " l" Leave the corrections" b\\
-		    l" • " l" Block the bad actors" b\\
-		    l" • " l" In a P2P network, people can block the moderators" b\\
-		    l" • " l" So a rough consensus is needed" b\\
+		    l" • " l" Lösche die Falschinfo" b\\
+		    l" • " l" Lasse die Korrekturen" b\\
+		    l" • " l" Blockiere schlechte Teilnemer" b\\
+		    l" • " l" In einem P2P–Netzwerk können Leute den Moderator blockieren…" b\\
+		    l" • " l" Also ist ein grober Konsens nötig" b\\
 		    \skip
-		    l" • " l" Manual interaction is too slow" b\\
-		    l" • " l" People don’t read rectifications" b\\
+		    l" • " l" Manuelle Intervention ist zu langsam" b\\
+		    l" • " l" Niemand liest Berichtigungen" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -442,20 +472,20 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" Automatic filter?" /title
-		l" Actually the hard problem" /subsection
+		l" Automatische Filter?" /title
+		l" Tatsächlich das schwere Problem" /subsection
 		vt{{
-		    l" Texts: " l" Bad texts (equals PCR test)" b\\
-		    l" + " l" Easy to implement" b\\
-		    l" – " l" Easy to defeat, easy to be false positive" b\\
+		    l" Texte: " l" Schlechte Texte (entspricht PCR–Test)" b\\
+		    l" + " l" Leicht zu implementieren" b\\
+		    l" – " l" Leicht zu umgehen, viele falsch–Positive" b\\
 		    \skip
-		    l" Images: " l" Fingerprints" b\\
-		    l" + " l" Medium difficulty to implement" b\\
-		    l" – " l" Easy to defeat, easy to generate pre–image attacks" b\\
+		    l" Bilder: " l" Fingerprints" b\\
+		    l" + " l" Mittelschwer zu implementieren" b\\
+		    l" – " l" Leicht zu umgehen, pre–image attacks auch einfach" b\\
 		    \skip
-		    l" Audio: " l" Speech to text" b\\
-		    l" + " l" Medium difficulty to implement" b\\
-		    l" – " l" Defeat is unclear, easy to generate pre–image attacks" b\\
+		    l" Ton: " l" Sprache zu Text" b\\
+		    l" + " l" Mittelschwer zu implementieren" b\\
+		    l" – " l" Umgehen unklar? pre–image attacks auch einfach" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides
@@ -464,17 +494,18 @@ $44FFFFFF re-color author#
 	{{
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
-		l" What kind of bad text?" /title
-		l" It’s not bad words" /subsection
+		l" Was für schlechte Texte?" /title
+		l" Es geht nicht um böse Wörter" /subsection
 		vt{{
-		    l" • " l" Teh spellink is awefull" b\\
-		    l" • " l" SHOUTING ALL THE TIME" b\\
-		    l" • " l" Number (and color) of exclamation marks‼️‼️" b\\
+		    l" • " l" Di Rächtschraipunk ist grußlick" b\\
+		    l" • " l" SIE SCHREIEN DIE GANZE ZEIT" b\\
+		    l" • " l" und wenn ,dann plenken sie richtig übel !" b\\
+		    l" • " l" Zahl (und Farbe) der Ausrufezeichen‼️‼️" b\\
 		    \skip
-		    l" • " l" This sounds like easy to defeat — for smart people" b\\
-		    l" • " l" Smart people are rarely the problem…" b\\
+		    l" • " l" Das klingt einfach zu umgehen — für kluge Leute" b\\
+		    l" • " l" Kluge Leute sind nicht das Problem…" b\\
 		    \skip
-		    l" • " l" This is porn according to AI:" b\\
+		    l" • " l" AI sagt, das ist Porn:" b\\
 		}}vt
 		tex: dunes \normal \sans
 		' dunes "sand_dunes_police_ai_porn.jpg" 0.5e }}image-file drop /right
@@ -486,7 +517,7 @@ $44FFFFFF re-color author#
 	    $000000FF $FFFFFFFF pres-frame
 	    {{
 		{{
-		    l" Filter Algorithms in Real Life" /title
+		    l" Filter–Algorithmen aus dem RL" /title
 		}}v box[] >bdr
 		tex: perscheid-gesperrt
 		tex: perscheid-flacherdler
@@ -494,12 +525,12 @@ $44FFFFFF re-color author#
 		{{
 		    ' perscheid-gesperrt "perscheid-gesperrt.jpg" 0.60e 896 640 fm*/ }}image-file drop 
 		    {{
-			l" • " l" Algorithm based on words" b\\
-			l" • " l" Click worker paid per case" b\\
-			l" • " l" Weird rules" b\\
-			l" • " l" Want to keep the idiots" b\\
-			l"  " l" Because they click the ads" b\\
-			l"  " l" which are frauds…" b\\
+			l" • " l" Wort–basiert" b\\
+			l" • " l" von billigen Click–Workern" b\\
+			l" • " l" Konfuse Regeln" b\\
+			l" • " l" Wollen die Idioten behalten" b\\
+			l"  " l" weil die die Ads klicken" b\\
+			l"  " l" die auch Betrug sind…" b\\
 			glue*ll }}glue dark-blue \italic \serif
 			l" Martin Perscheid" }}text' /center
 			l" † 31. Juli 2021 — RIP" }}text' /center
@@ -551,7 +582,13 @@ $44FFFFFF re-color author#
 	\ end
 	glue-right @ }}glue
     }}h box[]
-    net2o-img drop  logo-img
+    baseline# 0e to baseline#
+    {{
+	{{ glue*ll }}glue net2o-img drop }}h dup to n2-img
+	{{ glue*ll }}glue minos2-img drop }}h dup to m2-img /flip
+	glue*l }}glue
+    }}v >o font-size# f2/ to border o o>
+    to baseline#
 }}z slide[]
 to top-widget
 
