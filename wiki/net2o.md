@@ -62,6 +62,7 @@ net2o has been inspired by Open Network Forth from Heinz Schnitter.
 * [Threefish](https://www.schneier.com/threefish.html) as block cipher
   in ECB mode and in [Threefish AEAD mode](threefish.md) as backup for Keccak.
 * ([wurstkessel](wurstkessel.wiki) from myself — now replaced by Keccak)
+* [Gforth](https://gforth.org/) GNU Forth
 
 ## Documentation ##
 

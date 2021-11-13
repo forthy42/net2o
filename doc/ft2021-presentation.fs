@@ -413,7 +413,7 @@ $44FFFFFF re-color author#
 		vt{{
 		    l"   1. " l" Filter versteckt Messages" b\\
 		    l"   2. " l" Filter verbreitet Messages nicht" b\\
-		    l"   3. " l" Beides (“Sterile Immunität”)" b\\
+		    l"   3. " l" Beides („Sterile Immunität“)" b\\
 		}}vt
 		vt{{
 		    l" • " l" Typischer Verteilfaktor = R₀" b\\

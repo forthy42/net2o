@@ -24,10 +24,11 @@ update the repository data and install net2o, so enter:
     deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian testing main
     EOF
 
-Remove the architectures on the list above which you don't need; on
-Debian testing, the list is not necessary, on older versions, the “`all`”
-part is not searched if you don't have that list, then Gforth fails to
-install the “`gforth-common`” part.
+Remove the architectures on the list above which you don't need; change
+`testing` to `stable` or `oldstable` if you are running on older versions of
+Debian.  On Debian testing, the list of architecture is not necessary, on
+older versions, the “`all`” part is not searched if you don't have that list,
+then Gforth fails to install the “`gforth-common`” part.
 
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
     apt update
