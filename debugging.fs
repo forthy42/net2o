@@ -8,6 +8,8 @@ false [IF]
     : )else(  ]] ) ( [[ ; immediate \ )
 [THEN]
 
+:noname .time defers printdebugdata !time ; is printdebugdata
+
 : nodebug: ['] ( Alias immediate ;
 
 require xtype.fs
