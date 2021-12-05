@@ -1,0 +1,22 @@
+app-id: net.net2o.net2o
+runtime: org.freedesktop.Platform
+platform-extensions:
+  - org.freedesktop.Platform.GL.default
+  - org.gnu.gforth
+runtime-version: "21.08"
+sdk: org.freedesktop.Sdk.Extension.stb
+command: n2o
+
+modules:
+  - name: ed25519-donna
+    buildsystem: autotools
+    config-opts:
+    sources:
+      - type: git
+        url: https://git.net2o.de/bernd/ed25519-donna
+  - name: net2o
+    buildsystem: autotools
+    config-opts:
+    sources:
+      - type: git
+        url: https://git.net2o.de/bernd/net2o

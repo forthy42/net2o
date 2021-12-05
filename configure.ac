@@ -99,6 +99,9 @@ AC_SUBST(GFARCH)
 AC_SUBST(FAST)
 AC_SUBST(GNU_LIBTOOL)
 
+AC_CHECK_HEADER(ed25519-prims.h, , ED25519_DONNA=ed25519-donna)
+AC_SUBST(ED25519_DONNA)
+
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
 DATADIR=$(eval echo $(eval echo $datadir))
 AC_SUBST(DATADIR)
