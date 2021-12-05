@@ -13,11 +13,10 @@ ENV USER=root
 ENV LANG=C.UTF-8
 ENV NET2O_CONF=/net2o/config
 
-RUN apk add --no-cache build-base \
-    && apk add --no-cache --virtual .build-deps \ 
+RUN apk add --no-cache --virtual .build-deps build-base \ 
       git m4 file libtool libffi-dev libltdl g++ mesa-dev libx11-dev \
-      autoconf automake boost zlib-dev coreutils mesa-gles
-RUN cd /tmp \
+      autoconf automake boost zlib-dev coreutils mesa-gles \
+    && cd /tmp \
     && env \
     && git clone --branch "@VERSION@" https://github.com/forthy42/net2o.git \
     && cd net2o \

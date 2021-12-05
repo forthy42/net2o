@@ -4,4 +4,6 @@ eval $(n2o version | while read NVERSION GFORTHVERSION; do GFORTHVERSION=${GFORT
 sed -e "s/@VERSION@/$NVERSION/g" <Dockerfile.in >Dockerfile
 
 sudo docker build -t forthy42/net2o:latest .
+sudo docker build -f Dockerfile.gui -t forthy42/net2o-gui:latest .
 docker push forthy42/net2o:latest
+docker push forthy42/net2o-gui:latest

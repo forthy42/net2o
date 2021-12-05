@@ -292,7 +292,7 @@ $44FFFFFF re-color author#
 		    l" Kannada " l" ಕನ್ನಡ ಅಕ್ಷರಮಾಲೆ" b\\
 		    l" Tamil " l" தமிழ் அரிச்சுவடி" b\\
 		    l" Malayalam " l" മലയാളലിപി" b\\
-		    l" Tibetian " l" ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ" b\\
+		    l" Tibetan " l" ཨོཾ་མ་ཎི་པདྨེ་ཧཱུྃ" b\\
 		}}vt
 	    }}v box[] >bdr
 	    {{

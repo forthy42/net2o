@@ -1,0 +1,2 @@
+alias net2odk="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) forthy42/net2o"
+alias net2o-guidk="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) -e USER=$USER -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v /dev/dri:/dev/dri -v $XAUTHORITY:/home/gforth/.Xauthority -v ~/.fonts:/home/gforth/.fonts -v ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse forthy42/net2o-gui"

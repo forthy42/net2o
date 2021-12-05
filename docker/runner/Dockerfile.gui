@@ -1,0 +1,22 @@
+ARG MAINT=forthy42
+
+FROM $MAINT/net2o:latest
+LABEL maintainer="Bernd Paysan <bernd@net2o.de>"
+ENV LANG en_US.UTF-8
+ENV XAUTHORITY /home/gforth/.Xauthority
+
+USER root
+
+RUN apk add --no-cache mesa-gles libx11 libxrandr \
+        harfbuzz opus pulseaudio mesa-dri-gallium \
+	font-noto-all font-noto-cjk font-noto-emoji ttf-font-awesome
+
+COPY pulse-client.conf /etc/pulse/client.conf
+
+USER gforth
+
+RUN mkdir -p /home/gforth/.config
+
+USER root
+
+ENTRYPOINT ["n2o", "gui"]
