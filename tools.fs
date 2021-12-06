@@ -406,7 +406,7 @@ require config.fs
 	\G create a directory with access mode,
 	\G return true if the dictionary is new, false if it already existed
 	2dup file-status nip no-file# = IF
-	    r> mkdir-parents throw  true
+	    r> mkdir-parents drop  true
 	ELSE  2drop rdrop  false  THEN ;
 [THEN]
 
