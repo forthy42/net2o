@@ -570,7 +570,7 @@ forward default-host
 	nip nip "~/.net2o/config" rot
 	0 addr config-throw ['] read-config !wrapper default-host
     ELSE
-	?.net2o default-host write-config
+	?.net2o default-host ['] write-config catch drop
     THEN ;
 
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
