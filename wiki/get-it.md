@@ -26,9 +26,10 @@ update the repository data and install net2o, so enter:
 
 Remove the architectures on the list above which you don't need; change
 `testing` to `stable` or `oldstable` if you are running on older versions of
-Debian.  On Debian testing, the list of architecture is not necessary, on
-older versions, the “`all`” part is not searched if you don't have that list,
-then Gforth fails to install the “`gforth-common`” part.
+Debian.  On Debian `testing` (and in the meantime `stable`), the list of
+architecture is not necessary.  On older versions, the “`all`” part is not
+searched if you don't have that list, then Gforth fails to install the
+“`gforth-common`” part.
 
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
     apt update
@@ -81,11 +82,43 @@ Create an alias to run the docker:
 
     alias n2o="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) forthy42/net2o"
 
+If you want to run the GUI, you need to fetch
+
+    docker pull forthy42/net2o-gui
+
+and define your alias as:
+
+    alias n2o-gui="docker run -ti --rm -v ~/net2o.dk:/net2o --user $(id -u):$(id -g) -e USER=$USER -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix/ -v /dev/dri:/dev/dri -v /usr/share/fonts:/usr/share/fonts -v $XAUTHORITY:/home/gforth/.Xauthority -v ~/.fonts:/home/gforth/.fonts -v ${XDG_RUNTIME_DIR}/pulse:/run/user/1000/pulse forthy42/net2o-gui gui"
+
+Get it in a Flatpak Container
+-----------------------------
+
+You need flatpak for your Linux distribution.  Then add the net2o flatpak
+repository:
+
+    flatpak remote-add --if-not-exists net2o https://flathub.net2o.net/repo/net2o.flatpakrepo
+
+Now you can install the net2o container:
+
+    flatpak install net.net2o.net2o
+
+Alias for the TUI:
+
+    alias n2o="flatpak run --share=network net.net2o.net2o"
+
+Alias for the GUI:
+
+    alias n2o-gui="flatpak run --share=network --socket=x11 --device=dri --socket=pulseaudio net.net2o.net2o gui"
+
+Your app data and config is in `~/.var/app/net.net2o.net2o`
+
 Get it in a Snap Container
 --------------------------
 
 I created a [snap container](https://snapcraft.io/net2o).  You need to get
-snap for your Linux distribution (in Ubuntu, it's already there).
+snap for your Linux distribution (in Ubuntu, it's already there).  The snap
+container is currently outdated, because the build process failed to work on
+my Linux for some time.
 
 <iframe src="https://snapcraft.io/net2o/embedded?button=black" frameborder="0"
 width="100%" height="310px" style="border: 1px solid #CCC; border-radius:
