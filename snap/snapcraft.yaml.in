@@ -148,6 +148,7 @@ parts:
       - gforth-libcc-gles
       - gforth-libcc-audio
       - gforth-noto-fonts
+      - fonts-awesome
       - libgps-dev
       - libva-dev
       - libgstreamer1.0-dev
