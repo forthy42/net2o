@@ -30,6 +30,7 @@ fast-lib [IF]
     [THEN]
     c-library ed25519_donna
 	"ed25519prims" add-lib
+	s" ed25519-donna/.libs" add-libpath \ find library during build
 	include ed25519-donnalib.fs
     end-c-library
 [THEN]
