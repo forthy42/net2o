@@ -28,6 +28,7 @@ fast-lib [IF]
 [IF]
     c-library keccak
 	s" keccakp" add-lib
+\	s" keccakp/.libs" add-libpath \ find library during build
 	include keccaklib.fs
     end-c-library
 [THEN]

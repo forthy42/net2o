@@ -158,4 +158,5 @@ parts:
       - libopus0
       - libavcodec58
       - libavutil56
+      - libgps26
 EOF

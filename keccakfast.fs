@@ -22,6 +22,6 @@ require rec-scope.fs
 
 c-library keccakfast
     s" keccakpfast" add-lib
-    s" keccakp/.libs" add-libpath \ find library during build
+\    s" keccakp/.libs" add-libpath \ find library during build
     include keccaklib.fs
 end-c-library

@@ -32,6 +32,7 @@ c-library bdelta
     \c #include <stdint.h>
     \c #include <bdelta.h>
     s" bdelta" add-lib
+\    s" bdelta/.libs" add-libpath \ find library during build
 
 \ ----===< int constants ===>-----
 1	constant BDELTA_GLOBAL

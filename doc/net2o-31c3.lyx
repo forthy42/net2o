@@ -1,7 +1,9 @@
-#LyX 2.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 474
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
 \begin_document
 \begin_header
+\save_transient_properties true
+\origin unavailable
 \textclass beamer
 \begin_preamble
 %\usetheme{lankton-keynote}
@@ -24,16 +26,18 @@
 \language_package default
 \inputencoding utf8x
 \fontencoding global
-\font_roman default
-\font_sans default
-\font_typewriter default
-\font_math auto
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
 \font_default_family default
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
-\font_sf_scale 100
-\font_tt_scale 100
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
 \graphics default
 \default_output_format pdf5
 \output_sync 0
@@ -63,6 +67,7 @@
 \suppress_date false
 \justification true
 \use_refstyle 0
+\use_minted 0
 \index Index
 \shortcut idx
 \color #008000
@@ -71,7 +76,10 @@
 \tocdepth 2
 \paragraph_separation indent
 \paragraph_indentation default
-\quotes_language english
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
 \papercolumns 1
 \papersides 1
 \paperpagestyle default
@@ -204,6 +212,10 @@ Outline
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -232,6 +244,10 @@ status open
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -244,8 +260,12 @@ What happend to change the world:
 \end_layout
 
 \begin_layout Description
-Politics More spying, more cyberwar, more terrorist panic --- don't count
+Politics More spying, more cyberwar, more terrorist panic — don't count
  on them
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -257,6 +277,10 @@ Politics More spying, more cyberwar, more terrorist panic --- don't count
 \begin_layout Description
 Users 700 million users changed their behavior (that's probably 700 million
  terrorists)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -267,6 +291,10 @@ Users 700 million users changed their behavior (that's probably 700 million
 \end_deeper
 \begin_layout Description
 Software Lots of work, even WhatsApp got some crypto!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -281,7 +309,10 @@ Protocols Most of the Internet still is a complete mess with security tugged
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -296,11 +327,19 @@ The Enemies of the Internet
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Description
-Criminals malware, DDoS attacks, spam, \SpecialChar \ldots{}
+Criminals malware, DDoS attacks, spam, \SpecialChar ldots
+
+\begin_inset Separator latexpar
+\end_inset
+
 
 \end_layout
 
@@ -312,7 +351,11 @@ Criminals malware, DDoS attacks, spam, \SpecialChar \ldots{}
 \end_deeper
 \begin_layout Description
 Corporations walled gardens, censorship, big honeypots for dragnet surveillance,
- \SpecialChar \ldots{}
+ \SpecialChar ldots
+
+\begin_inset Separator latexpar
+\end_inset
+
 
 \end_layout
 
@@ -323,7 +366,11 @@ Corporations walled gardens, censorship, big honeypots for dragnet surveillance,
 
 \end_deeper
 \begin_layout Description
-Government dragnet surveillance, censorship, \SpecialChar \ldots{}
+Government dragnet surveillance, censorship, \SpecialChar ldots
+
+\begin_inset Separator latexpar
+\end_inset
+
 
 \end_layout
 
@@ -334,7 +381,11 @@ Government dragnet surveillance, censorship, \SpecialChar \ldots{}
 
 \end_deeper
 \begin_layout Description
-Users careless, uninformed, annoying, \SpecialChar \ldots{}
+Users careless, uninformed, annoying, \SpecialChar ldots
+
+\begin_inset Separator latexpar
+\end_inset
+
 
 \end_layout
 
@@ -345,12 +396,15 @@ Users careless, uninformed, annoying, \SpecialChar \ldots{}
 
 \end_deeper
 \begin_layout Description
-Software bloated, buggy, insecure, \SpecialChar \ldots{}
+Software bloated, buggy, insecure, \SpecialChar ldots
 
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -365,6 +419,10 @@ How many defects?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -374,6 +432,10 @@ How many defects?
 Dan Geer
 \noun default
 : buy all zero-days
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -385,6 +447,10 @@ Dan Geer
 \begin_layout Itemize
 Condition: The number of bugs are finite.
  Are they?
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -398,10 +464,15 @@ Bug density between 1/100LoC (CMM 1) to <1/10kLoC (Correct by Design
 \begin_inset CommandInset citation
 LatexCommand cite
 key "correctnessbyconstruction"
+literal "true"
 
 \end_inset
 
 )
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -411,7 +482,11 @@ key "correctnessbyconstruction"
 
 \end_deeper
 \begin_layout Itemize
-Networked applications and protocol stacks in orders of 1M--100MLoC
+Networked applications and protocol stacks in orders of 1M–100MLoC
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -422,6 +497,10 @@ Networked applications and protocol stacks in orders of 1M--100MLoC
 \end_deeper
 \begin_layout Itemize
 Unless we stop bloating, we are doomed
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -445,7 +524,10 @@ Keep it simple!
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -457,6 +539,10 @@ status open
 Where are the defects?
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -488,6 +574,7 @@ Bugs by phase
 \begin_inset CommandInset citation
 LatexCommand cite
 key "hse238"
+literal "true"
 
 \end_inset
 
@@ -505,7 +592,10 @@ key "hse238"
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -517,6 +607,10 @@ status open
 net2o in a nutshell
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -551,6 +645,10 @@ Path switched packets with
 \end_inset
 
  size writing into shared memory buffers
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -569,6 +667,10 @@ symmetric authenticated encryption+hash+prng with Keccak,
 \end_inset
 
 symmetric block encryption with Threefish
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -579,6 +681,10 @@ symmetric block encryption with Threefish
 \end_deeper
 \begin_layout Enumerate
 Timing driven delay minimizing flow control
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -588,7 +694,11 @@ Timing driven delay minimizing flow control
 
 \end_deeper
 \begin_layout Enumerate
-Stack--oriented tokenized command language
+Stack–oriented tokenized command language
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -599,6 +709,10 @@ Stack--oriented tokenized command language
 \end_deeper
 \begin_layout Enumerate
 Distributed data (files) and distributed metadata (prefix hash trie)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -612,7 +726,10 @@ Apps in a sandboxed environment for displaying content
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -624,6 +741,10 @@ status open
 Objectives
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -640,6 +761,10 @@ net2o's design objectives are
 
 \begin_layout Itemize
 lightweight, fast, scalable
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -650,6 +775,10 @@ lightweight, fast, scalable
 \end_deeper
 \begin_layout Itemize
 easy to implement
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -660,6 +789,10 @@ easy to implement
 \end_deeper
 \begin_layout Itemize
 secure
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -670,6 +803,10 @@ secure
 \end_deeper
 \begin_layout Itemize
 media capable
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -684,7 +821,10 @@ works as overlay on current networks (UDP/IP), but can replace the entire
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -703,11 +843,19 @@ Switching Packets, Routing Connections
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Switches are faster and easier to implement than routers
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -719,6 +867,10 @@ Switches are faster and easier to implement than routers
 \begin_layout Itemize
 Routing then is a combination of destination resolution and routing calculation
  (destination path lookup)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -738,6 +890,10 @@ Path Switching
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -747,6 +903,10 @@ Take first
 \end_inset
 
  bits of path field and select destination
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -758,6 +918,10 @@ Take first
 \begin_layout Itemize
 Shift target address by 
 \begin_inset Formula $n$
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -780,7 +944,7 @@ Insert bit-reversed source into the rear end of the path field to mark the
 \end_layout
 
 \begin_layout Itemize
-The receiver bit--flips the path field, and gets the return address
+The receiver bit–flips the path field, and gets the return address
 \end_layout
 
 \begin_layout Pause
@@ -792,7 +956,10 @@ Easy handover possible
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -807,11 +974,19 @@ Routing Algorithm
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 A node publishes ISP switch+label in the DHT
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -822,6 +997,10 @@ A node publishes ISP switch+label in the DHT
 \end_deeper
 \begin_layout Itemize
 The ISP publishs peering switch+label in the DHT
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -833,6 +1012,10 @@ The ISP publishs peering switch+label in the DHT
 \begin_layout Itemize
 Assumption is a hierarchical network, so a recursive lookup will give a
  good solution
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -846,7 +1029,10 @@ Splice the labels together, and you get a path
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -861,6 +1047,10 @@ Why Source Routing
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -872,6 +1062,10 @@ status collapsed
 Three possible schemes
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -898,6 +1092,10 @@ source routing
 \begin_layout Itemize
 Separation of network gear and computers: Fast, dumb, stateless equipment
  for routing/switching
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -916,6 +1114,10 @@ law of nature
 \end_inset
 
 : people cluster together and connect clusters
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -925,7 +1127,7 @@ law of nature
 
 \end_deeper
 \begin_layout Itemize
-Attack vector is only bandwidth--based, and this can be mitigated (see 
+Attack vector is only bandwidth–based, and this can be mitigated (see 
 \begin_inset Quotes eld
 \end_inset
 
@@ -934,6 +1136,10 @@ fair routing
 \end_inset
 
  below)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -949,7 +1155,7 @@ Routing slice is an implementation detail of each network segment (i.e.
 
 \end_deeper
 \begin_layout Subsection
-Low--Overhead Packet Format
+Low–Overhead Packet Format
 \end_layout
 
 \begin_layout Frame
@@ -963,6 +1169,10 @@ Packet Format
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -970,7 +1180,7 @@ Packet Format
 \align center
 \begin_inset Tabular
 <lyxtabular version="3" rows="6" columns="3">
-<features rotate="0" tabularvalignment="middle">
+<features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
 <column alignment="left" valignment="top" width="7cm">
@@ -1212,6 +1422,10 @@ Security: Indirect Attacks are Cheaper
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1239,6 +1453,10 @@ status open
 Key Exchange
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1277,8 +1495,8 @@ Dan Bernstein
 \end_layout
 
 \begin_layout Standard
-I use Ed25519 both for Diffie--Hellman--Exchange and signatures with the
- same key; 
+I use Ed25519 both for Diffie–Hellman–Exchange and signatures with the same
+ key; 
 \noun on
 Peter Schwabe
 \noun default
@@ -1287,7 +1505,10 @@ Peter Schwabe
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1299,6 +1520,10 @@ status open
 Ephemeral Key Exchange+Validation
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1318,7 +1543,10 @@ Ephemeral Key Exchange+Validation
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1330,6 +1558,10 @@ status open
 Key Replacement
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1352,6 +1584,10 @@ replace
 
 \begin_layout Itemize
 Only the creator of the secret key can revoke it
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1363,6 +1599,10 @@ Only the creator of the secret key can revoke it
 \begin_layout Itemize
 A thief of the secret key can't (i.e.
  further information is necessary)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1373,6 +1613,10 @@ A thief of the secret key can't (i.e.
 \end_deeper
 \begin_layout Itemize
 Revocation must present a trustworthy replacement key
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1385,6 +1629,10 @@ Revocation must present a trustworthy replacement key
 Third parties must trust both the revocation and the replacement key without
  another trustworthy instance, i.e.
  trusting only their communication partner
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1407,7 +1655,10 @@ proof of creation
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1422,6 +1673,10 @@ Proof of Creation
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1432,6 +1687,10 @@ Create two 256 bit random numbers
 
  and 
 \begin_inset Formula $s_{2}$
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1453,6 +1712,10 @@ Create pubkeys
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1471,6 +1734,10 @@ Compute
 \end_inset
 
 , the pubkey
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1498,6 +1765,10 @@ Publish
 
  as offline copy (e.g.
  on paper)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1516,6 +1787,10 @@ To revoke a key, publish
 \end_inset
 
 .
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1541,7 +1816,10 @@ To proof possession of all secrets, sign new key with
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1560,6 +1838,10 @@ Symmetric Crypto: Keccak
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1573,6 +1855,10 @@ Keccak used for the following reasons:
 
 \begin_layout Itemize
 Good cryptanalysis
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1582,8 +1868,12 @@ Good cryptanalysis
 
 \end_deeper
 \begin_layout Itemize
-Keccak in duplex mode provides perfect side--channel protected AEAD operation
+Keccak in duplex mode provides perfect side–channel protected AEAD operation
  (no constant key to snoop)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1594,6 +1884,10 @@ Keccak in duplex mode provides perfect side--channel protected AEAD operation
 \end_deeper
 \begin_layout Itemize
 Strength >256 bits: very good security margin
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1604,6 +1898,10 @@ Strength >256 bits: very good security margin
 \end_deeper
 \begin_layout Itemize
 Keccak is a universal crypto primitive (hash+encrypt+authenticate)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1613,7 +1911,7 @@ Keccak is a universal crypto primitive (hash+encrypt+authenticate)
 
 \end_deeper
 \begin_layout Itemize
-Keccak is both NIST--approved and (still) NSA--independent.
+Keccak is both NIST–approved and (still) NSA–independent.
  I use Keccak with 
 \begin_inset Formula $r=1024$
 \end_inset
@@ -1626,7 +1924,10 @@ Keccak is both NIST--approved and (still) NSA--independent.
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1641,11 +1942,15 @@ Key Usage
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout FrameSubtitle
-All keys are one--time--use only!
+All keys are one–time–use only!
 \end_layout
 
 \begin_layout Standard
@@ -1661,7 +1966,10 @@ All keys are one--time--use only!
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1673,6 +1981,10 @@ status open
 Symmetric Crypto: Threefish
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1689,8 +2001,12 @@ Keccak has one disadvantage: No ECB mode.
 \end_layout
 
 \begin_layout Itemize
-Encryption of hash values for the DHT --- to store key/value pairs in a
- pubic DHT without revealing the content.
+Encryption of hash values for the DHT — to store key/value pairs in a pubic
+ DHT without revealing the content.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1700,8 +2016,12 @@ Encryption of hash values for the DHT --- to store key/value pairs in a
 
 \end_deeper
 \begin_layout Itemize
-For net2o--in--net2o tunnels (to be used for onion--routing), no authentication
+For net2o–in–net2o tunnels (to be used for onion–routing), no authentication
  and no IV is desirable, so use an ECB mode algorithm.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1713,6 +2033,10 @@ For net2o--in--net2o tunnels (to be used for onion--routing), no authentication
 \begin_layout Itemize
 Strength >256 bits, tweaksable to make ECB mode more secure (counter as
  tweak)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1722,11 +2046,14 @@ Strength >256 bits, tweaksable to make ECB mode more secure (counter as
 
 \end_deeper
 \begin_layout Itemize
-SHA--3 finalist, so sufficiently good cryptanalysis
+SHA–3 finalist, so sufficiently good cryptanalysis
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1742,6 +2069,10 @@ status open
 Flow Control (Broken)
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1797,7 +2128,10 @@ Buffer Bloat
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1812,11 +2146,19 @@ Alternatives?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 LEDBAT tries to achieve a low, constant delay: Works, but not good on fairness
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1832,6 +2174,10 @@ CurveCP's flow control is still
 
 a lot of research
 \begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1881,7 +2227,10 @@ That's how proper flow control should look like
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1893,6 +2242,10 @@ status open
 net2o Flow Control
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1933,7 +2286,10 @@ Measure the bottleneck using a burst of packets
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -1945,6 +2301,10 @@ status open
 Client Measures, Server Sets Rate
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -1964,6 +2324,10 @@ time
 rate
 \emph default
 .
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -1988,7 +2352,10 @@ Server would simply use this rate
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2000,6 +2367,10 @@ status open
 Fairness
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2016,11 +2387,15 @@ Fairness means that concurrent connections achieve about the same data rate,
 \end_layout
 
 \begin_layout Itemize
-Ideally, a router/switch would schedule buffered packets round--robin, giving
+Ideally, a router/switch would schedule buffered packets round–robin, giving
  each connection a fair share of the bandwidth (fair queuing).
  That would change the calculated rate appropriately, and also be a big
  relief for current TCP buffer bloat symptoms, as each connection would
  have its private buffer to fill up.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2031,6 +2406,10 @@ Ideally, a router/switch would schedule buffered packets round--robin, giving
 \end_deeper
 \begin_layout Itemize
 Unfortunately, routers use a single FIFO policy for all connections
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2041,6 +2420,10 @@ Unfortunately, routers use a single FIFO policy for all connections
 \end_deeper
 \begin_layout Itemize
 Finding a sufficiently stable algorithm to provide fairness
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2057,7 +2440,10 @@ We want to adopt to new situations as fast as possible, there's no point
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2066,9 +2452,13 @@ We want to adopt to new situations as fast as possible, there's no point
 status open
 
 \begin_layout Plain Layout
-net2o Flow Control --- Fair Router
+net2o Flow Control — Fair Router
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2109,7 +2499,10 @@ Fair queuing results in correct measurement of available bandwidth
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2118,9 +2511,13 @@ Fair queuing results in correct measurement of available bandwidth
 status open
 
 \begin_layout Plain Layout
-net2o Flow Control --- FIFO Router
+net2o Flow Control — FIFO Router
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2161,7 +2558,10 @@ Unfair FIFO queuing results in twice the available bandwidth calculated
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2176,12 +2576,20 @@ Fairness I
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 To improve stability of unfair queued packets, we need to improve that P
  regulator (proportional to measured rate) to a full PID regulator
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2194,6 +2602,10 @@ To improve stability of unfair queued packets, we need to improve that P
 The integral part is the accumulated slack (in the buffer), which we want
  to keep low, and the D part is growing/reducing this slack from one measurement
  to the next
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2205,6 +2617,10 @@ The integral part is the accumulated slack (in the buffer), which we want
 \begin_layout Itemize
 We use both parts to decrease the sending rate, and thereby achieve better
  fairness
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2237,7 +2653,10 @@ s_{exp}=2^{\frac{slack}{T}}\quad\mathrm{where\,}T=\max(10ms,\max(slacks))
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2252,6 +2671,10 @@ Fairness D
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2263,6 +2686,10 @@ To measure the differential term, we measure how much the slack grows (a
 
  value) from the first to the last burst we do for one measurement cycle
  (4 bursts by default, first packet to first packet of each burst)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2275,6 +2702,10 @@ To measure the differential term, we measure how much the slack grows (a
 This is multiplied by the total packets in flight (head of the sender queue
  vs.
  acknowledged packet), divided by the packets within the measured interval
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2284,8 +2715,12 @@ This is multiplied by the total packets in flight (head of the sender queue
 
 \end_deeper
 \begin_layout Itemize
-A low--pass filter is applied to the obtained D to prevent from speeding
+A low–pass filter is applied to the obtained D to prevent from speeding
  up too fast, with one round trip delay as time constant
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2299,6 +2734,10 @@ A low--pass filter is applied to the obtained D to prevent from speeding
 \end_inset
 
  is used to determine how aggressive this algorithm is
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2321,7 +2760,10 @@ Add the obtained
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2333,6 +2775,10 @@ status open
 VDSL
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2361,7 +2807,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-One connection on a VDSL--50 line
+One connection on a VDSL–50 line
 \end_layout
 
 \end_inset
@@ -2375,7 +2821,10 @@ One connection on a VDSL--50 line
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2387,6 +2836,10 @@ status open
 VDSL, Congestion
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2415,7 +2868,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-One of four connections on a VDSL--50 line
+One of four connections on a VDSL–50 line
 \end_layout
 
 \end_inset
@@ -2429,7 +2882,10 @@ One of four connections on a VDSL--50 line
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2441,6 +2897,10 @@ status open
 Unreliable Air Cable (WLAN)
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2483,7 +2943,10 @@ Single connection using WLAN
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2495,6 +2958,10 @@ status open
 Unreliable Air Cable, Congestion
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2537,7 +3004,10 @@ One of four connections using WLAN
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2549,6 +3019,10 @@ status open
 LAN, 1GBE
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2591,7 +3065,10 @@ Single connection using 1GBE
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2603,6 +3080,10 @@ status open
 LAN 1GBE, Congestion (4 servers)
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2645,7 +3126,10 @@ One of four connections using 1GBE
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2657,6 +3141,10 @@ status open
 LAN 1GBE, Congestion (1 server)
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2714,12 +3202,20 @@ Data and Commands
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Data of several files/streams can be transferred interleaving, so a single
  connection can do multiple things in parallel
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2731,6 +3227,10 @@ Data of several files/streams can be transferred interleaving, so a single
 \begin_layout Itemize
 Commands are send in command blocks, i.e.
  there is not just one command per block, but a sequence of commands!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2743,6 +3243,10 @@ Commands are send in command blocks, i.e.
 Commands are encoded like protobuf, i.e.
  7 bits per byte, and if the MSB of the byte is 1, there's another byte
  to follow (allowing arbitrary many commands)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2761,6 +3265,10 @@ machine
 \end_inset
 
  is a stack architecture.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2772,6 +3280,10 @@ machine
 \begin_layout Itemize
 The command VM is object oriented, i.e.
  commands are messages to objects
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2785,7 +3297,10 @@ The command interpreter itself is extremely simple
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2800,6 +3315,10 @@ Example: Download three files
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2811,6 +3330,10 @@ status collapsed
 reading three files
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2847,7 +3370,10 @@ reading three files
 
 \end_deeper
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2862,6 +3388,10 @@ Reading Files: Reply
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2873,6 +3403,10 @@ status collapsed
 reading three files: replies
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -2905,7 +3439,10 @@ reading three files: replies
 
 \end_deeper
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -2920,12 +3457,20 @@ Basics
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Five data types: Integer (64 bits signed+unsigned), flag, string (generic
  byte array), IEEE double float, objects
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2945,6 +3490,10 @@ data continues
 \end_inset
 
 , most significant part first)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2955,6 +3504,10 @@ data continues
 \end_deeper
 \begin_layout Itemize
 Four stacks: integer, float, objects, strings
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2973,6 +3526,10 @@ endwith
 endcmd
 \family default
  for ending object message blocks and commands
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -2988,6 +3545,10 @@ oswap
 \family default
  to transfer the current object to the object stack, to be inserted in the
  outer object
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3006,7 +3567,10 @@ words
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3021,11 +3585,19 @@ Why binary encoding?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Faster and simpler to parse (simpler means smaller attack vector)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3037,6 +3609,10 @@ Faster and simpler to parse (simpler means smaller attack vector)
 \begin_layout Itemize
 Ability to enter commands on the fly in text form through a frontend interpreter
  still exists
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3046,7 +3622,11 @@ Ability to enter commands on the fly in text form through a frontend interpreter
 
 \end_deeper
 \begin_layout Itemize
-Debugging with a de--tokenizer is also very easy
+Debugging with a de–tokenizer is also very easy
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3056,12 +3636,15 @@ Debugging with a de--tokenizer is also very easy
 
 \end_deeper
 \begin_layout Itemize
-Object--oriented approach makes writing application--specific logic extremely
+Object–oriented approach makes writing application–specific logic extremely
  simple
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3076,6 +3659,10 @@ Why a programming language as data?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3084,12 +3671,16 @@ Lemma: every glue logic will become Turing complete
 \end_layout
 
 \begin_layout Itemize
-Implement only the things you need --- but you shouldn't have to implement
+Implement only the things you need — but you shouldn't have to implement
  more than 
 \emph on
 one
 \emph default
  generic interpreter
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3101,6 +3692,10 @@ one
 \begin_layout Itemize
 Typical idea of sending remote procedure calls: serialize the entire object
  (with subobjects), and call a function on that object
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3111,7 +3706,11 @@ Typical idea of sending remote procedure calls: serialize the entire object
 \end_deeper
 \begin_layout Itemize
 Net2o idea (derived from ONF): Keep the entire object synchronized by sending
- only the changes to it --- these changes are simple messages (setters)
+ only the changes to it — these changes are simple messages (setters)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3121,11 +3720,14 @@ Net2o idea (derived from ONF): Keep the entire object synchronized by sending
 
 \end_deeper
 \begin_layout Itemize
-This allows multi--message passing, and reduces latency
+This allows multi–message passing, and reduces latency
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3137,6 +3739,10 @@ status open
 Security
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3163,6 +3769,10 @@ status open
 Interpreter (pseudocode)
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3226,6 +3836,10 @@ Distributed Data
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3239,6 +3853,10 @@ everything is a file
 \end_inset
 
  principle, every data object is a file
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3258,6 +3876,10 @@ tags
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3268,6 +3890,10 @@ tags
 \end_deeper
 \begin_layout Itemize
 Metadata is organized as a distributed prefix hash tree
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3281,7 +3907,10 @@ Efficient distribution of data is important!
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3293,6 +3922,10 @@ status open
 Tree Distribution Network
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3320,7 +3953,7 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Avalanche distribution with quad--tree of depth 2
+Avalanche distribution with quad–tree of depth 2
 \end_layout
 
 \end_inset
@@ -3334,7 +3967,10 @@ Avalanche distribution with quad--tree of depth 2
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3349,14 +3985,22 @@ Possible Performance
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Trees with a bigger base reduce latency.
  Example: To transfer a Justin Bieber tweet to 50 million followers, a binary
- tree needs 25.5 hops on average, a quad--tree 12.8 hops, and an oct--tree
- 8.5 hops.
+ tree needs 25.5 hops on average, a quad–tree 12.8 hops, and an oct–tree 8.5
+ hops.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3367,10 +4011,14 @@ Trees with a bigger base reduce latency.
 \end_deeper
 \begin_layout Itemize
 A typical domestic (inside e.g.
- Germany) hop--to--hop time is just 20ms.
+ Germany) hop–to–hop time is just 20ms.
  International hops can be in the order of 250ms.
  Assuming there is only one international hop in the chain, the latency
- to distribute Justin Bieber's babbling is typically just 500ms in a quad--tree.
+ to distribute Justin Bieber's babbling is typically just 500ms in a quad–tree.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3386,9 +4034,13 @@ Rule of thumb:
 
 , i.e.
  if it takes 20ms from hop to hop, each node should replicate data for 20ms
- --- if we make the tree wider, the linear effort of replicating data will
- dominate transfer time, if we make the tree more narrow, the hop--to--hop
+ — if we make the tree wider, the linear effort of replicating data will
+ dominate transfer time, if we make the tree more narrow, the hop–to–hop
  time will dominate.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3398,11 +4050,14 @@ Rule of thumb:
 
 \end_deeper
 \begin_layout Itemize
-The tree--like graph greatly reduces the number of nodes to know
+The tree–like graph greatly reduces the number of nodes to know
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3417,11 +4072,19 @@ Distributed Hashes
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 Most DHT approaches have poor performance
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3432,6 +4095,10 @@ Most DHT approaches have poor performance
 \end_deeper
 \begin_layout Itemize
 Still working out what is both simple and fast
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3442,6 +4109,10 @@ Still working out what is both simple and fast
 \end_deeper
 \begin_layout Itemize
 Model: Directory servers know how stores which subset of the hashes
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3475,12 +4146,19 @@ Content or Apps?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
-The current web is defined by content --- web apps (JavaScript) are an afterthou
-gh
+The current web is defined by content — web apps (JavaScript) are an afterthough
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3491,6 +4169,10 @@ gh
 \end_deeper
 \begin_layout Itemize
 Therefore, the application logic is usually on the server side
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3501,6 +4183,10 @@ Therefore, the application logic is usually on the server side
 \end_deeper
 \begin_layout Itemize
 This doesn't work for a P2P network!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3514,7 +4200,10 @@ Content is structured text, images, videos, music, etc.
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3523,9 +4212,13 @@ Content is structured text, images, videos, music, etc.
 status open
 
 \begin_layout Plain Layout
-App--Centric World
+App–Centric World
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3541,8 +4234,12 @@ Turing creep
 \begin_inset Quotes erd
 \end_inset
 
-: Every sufficiently complex system contains a user--accessible Turing--complete
+: Every sufficiently complex system contains a user–accessible Turing–complete
  language
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3554,6 +4251,10 @@ Turing creep
 \begin_layout Itemize
 Corollary: Every efficient sufficiently complex system can execute native
  machine code
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3565,6 +4266,10 @@ Corollary: Every efficient sufficiently complex system can execute native
 \begin_layout Itemize
 The application logic is to present the data; data itself is as above: structure
 d text, images, videos, music, etc.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3579,7 +4284,10 @@ Executing (especially efficient) code from the net raises obvious questions
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3591,6 +4299,10 @@ status open
 How to securely execute code?
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3609,6 +4321,10 @@ There are several options tried; as usual, things are broken:
 Execute code in a controlled secure VM, see for example Java.
  This is broken by design, as securing something from the inside doesn't
  work.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3621,6 +4337,10 @@ Execute code in a controlled secure VM, see for example Java.
 Execute code in a sandbox.
  This has shown as more robust, depending on how complex the outside of
  the sandbox is.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3633,6 +4353,10 @@ Execute code in a sandbox.
 Public inspection of code.
  This is how the open source world works, but the underhanded C contest
  shows that inspection is tricky.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3644,6 +4368,10 @@ Public inspection of code.
 \begin_layout Enumerate
 Scan for known evil code.
  This is the security industry's approach, and it is not working.
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3653,7 +4381,7 @@ Scan for known evil code.
 
 \end_deeper
 \begin_layout Enumerate
-Code signing can work together with public inspection --- but using it for
+Code signing can work together with public inspection — but using it for
  accountability doesn't work
 \end_layout
 
@@ -3681,6 +4409,10 @@ Formats&Requirements
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3700,7 +4432,10 @@ How to display things
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3712,6 +4447,10 @@ status open
 Why OpenGL?
 \end_layout
 
+\end_inset
+
+
+\begin_inset Separator latexpar
 \end_inset
 
 
@@ -3731,7 +4470,11 @@ OpenGL renders:
 \end_layout
 
 \begin_layout Enumerate
-Triangles, lines, points --- simple components
+Triangles, lines, points — simple components
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3742,6 +4485,10 @@ Triangles, lines, points --- simple components
 \end_deeper
 \begin_layout Enumerate
 Textures and gradients
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3751,7 +4498,7 @@ Textures and gradients
 
 \end_deeper
 \begin_layout Enumerate
-and uses shader programs --- the most powerful thing in OpenGL from 2.0.
+and uses shader programs — the most powerful thing in OpenGL from 2.0.
 \end_layout
 
 \begin_layout Pause
@@ -3768,7 +4515,10 @@ data.
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3783,6 +4533,10 @@ How to connect the media?
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3792,6 +4546,10 @@ Lemma: every glue logic will become Turing complete
 
 \begin_layout Itemize
 currently used glue: HTML+CSS+JavaScript
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3801,7 +4559,11 @@ currently used glue: HTML+CSS+JavaScript
 
 \end_deeper
 \begin_layout Itemize
-containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
+containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar ldots
+
+\begin_inset Separator latexpar
+\end_inset
+
 
 \end_layout
 
@@ -3813,6 +4575,10 @@ containers with Flash, Java, ActiveX, PDF, Google's NaCl\SpecialChar \ldots{}
 \end_deeper
 \begin_layout Itemize
 conclusion: use a powerful tool right from start!
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3822,11 +4588,14 @@ conclusion: use a powerful tool right from start!
 
 \end_deeper
 \begin_layout Itemize
-browser: run--time and development tool for applications
+browser: run–time and development tool for applications
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3841,11 +4610,19 @@ Frameworks
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
 \begin_layout Itemize
 libsoil for images (PNG+JPEG loading into a texture)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3856,6 +4633,10 @@ libsoil for images (PNG+JPEG loading into a texture)
 \end_deeper
 \begin_layout Itemize
 freetype-gl for fonts (TrueType/OpenType into a texture)
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3866,6 +4647,10 @@ freetype-gl for fonts (TrueType/OpenType into a texture)
 \end_deeper
 \begin_layout Itemize
 OpenMAX on Android, gstreamer on Linux: videos into a texture
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3875,12 +4660,15 @@ OpenMAX on Android, gstreamer on Linux: videos into a texture
 
 \end_deeper
 \begin_layout Itemize
-MINOΣ2: Lightweight OpenGL--based widget library in Forth (still a lot of
+MINOΣ2: Lightweight OpenGL–based widget library in Forth (still a lot of
  work in progress)
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 
@@ -3914,6 +4702,10 @@ For Further Reading
 \end_inset
 
 
+\begin_inset Separator latexpar
+\end_inset
+
+
 \end_layout
 
 \begin_deeper
@@ -3921,6 +4713,7 @@ For Further Reading
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
 key "In20"
+literal "true"
 
 \end_inset
 
@@ -3976,6 +4769,7 @@ http://fossil.net2o.de/net2o
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
 key "hse238"
+literal "true"
 
 \end_inset
 
@@ -4031,6 +4825,7 @@ http://www.hse.gov.uk/pubns/priced/hsg238.pdf
 \begin_inset CommandInset bibitem
 LatexCommand bibitem
 key "correctnessbyconstruction"
+literal "true"
 
 \end_inset
 
@@ -4085,7 +4880,10 @@ df
 \end_layout
 
 \end_deeper
-\begin_layout Separator
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
 
 \end_layout
 

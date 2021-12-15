@@ -28,6 +28,7 @@ fast-lib [IF]
 [IF]
     c-library threefish
 	s" threefish" add-lib
+\	s" threefish/.libs" add-libpath \ find library during build
 	include threefishlib.fs
     end-c-library
 [THEN]

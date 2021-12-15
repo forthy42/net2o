@@ -22,5 +22,6 @@ require rec-scope.fs
 
 c-library threefishfast
     s" threefishfast" add-lib
+\    s" threefish/.libs" add-libpath \ find library during build
     include threefishlib.fs
 end-c-library

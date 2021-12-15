@@ -23,6 +23,6 @@ require rec-scope.fs
 
 c-library ed25519_donnafast
     "ed25519primsfast" add-lib
-    s" ed25519-donna/.libs" add-libpath \ find library during build
+\    "ed25519-donna/.libs" add-libpath \ find library during build
     include ed25519-donnalib.fs
 end-c-library
