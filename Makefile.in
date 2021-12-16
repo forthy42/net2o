@@ -119,8 +119,7 @@ DOC = wiki/commands.md
 
 DISTFILES = $(SOURCES) $(LANGS) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
 
-all: no-config TAGS doc
-
+all: no-config doc
 
 distfiles:
 	@echo $(DISTFILES)
@@ -156,7 +155,7 @@ install-libs: $(LIBS:%=%.instlibs)
 
 extra-install:	install-libs install
 
-install:	install-libs libcc-install
+install:	libcc-install
 	for i in $(SRCDIRS); do \
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
@@ -207,7 +206,7 @@ net2o.fi:	$(SOURCES) $(FORTHLIB)
 libccdest:
 	$(MKDIR) -p $(LIBCCDEST)
 
-libcc-install:	libcc libccdest
+libcc-install:	install-libs libcc libccdest
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
 		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)/libgf`basename $$i .fs`.la; \
 		done; fi
