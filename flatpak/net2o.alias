@@ -1,0 +1,2 @@
+alias n2ofp-gui="flatpak run --share=network --socket=x11 --device=dri --socket=pulseaudio net.net2o.net2o gui"
+alias n2ofp-tui="flatpak run --share=network net.net2o.net2o"
