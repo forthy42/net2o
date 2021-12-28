@@ -154,7 +154,7 @@ the [Play Store](https://play.google.com/store/apps/details?id=gnu.gforth), or
 from [net2o.de/android](https://net2o.de/android/Gforth.apk).
 
 [![Get it on Google
-Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)]()https://play.google.com/store/apps/details?id=gnu.gforth&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'
+Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=gnu.gforth&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
 
 This installs Gforth with the Gforth icons, and a ready-to-run net2o
 icon in the app drawer.  Just tap on the net2o icon to run net2o;
