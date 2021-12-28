@@ -120,9 +120,7 @@ snap for your Linux distribution (in Ubuntu, it's already there).  The snap
 container is currently outdated, because the build process failed to work on
 my Linux for some time.
 
-<iframe src="https://snapcraft.io/net2o/embedded?button=black" frameborder="0"
-width="100%" height="310px" style="border: 1px solid #CCC; border-radius:
-2px;"></iframe>
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-white.svg)](https://snapcraft.io/net2o)
 
 or the CLI way:
 

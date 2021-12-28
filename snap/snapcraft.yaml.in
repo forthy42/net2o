@@ -36,7 +36,7 @@ apps:
       LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
-      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/pulse/native
+      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
     plugs:
       - home
       - network
@@ -57,7 +57,7 @@ apps:
       LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
-      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/pulse/native
+      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
     plugs:
       - home
       - network
@@ -78,7 +78,7 @@ apps:
       LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
-      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/pulse/native
+      PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
     plugs:
       - home
       - network
