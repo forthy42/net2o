@@ -22,11 +22,12 @@ RUN apk add --no-cache --virtual .build-deps build-base \
     && cd net2o \
     && git clone https://github.com/forthy42/ed25519-donna.git \
     && ./autogen.sh --prefix=/usr \
-    && make no-config && make install-libs -i \
+    && make no-config && make install-libs \
     && make libcc \
     && make install libcc-install \
     && cd / \
     && apk del .build-deps \
+    && apk add --no-cache libstdc++ libgcc \
     && rm -rf /tmp/net2o
 
 CMD [ "n2o" ]
