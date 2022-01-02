@@ -1475,16 +1475,17 @@ wmsg-o >o msg-table @ token-table ! o>
 
 : >ymd ( ticks -- year month day )
     >fticks fticks>day fdrop unix-day0 + day2ymd ;
-: second>i ( second -- index )
-    #1000000000 um* d>64 date>i ;
-: localtime-fixup ( second -- second' )
+: second>i ( dsecond -- index )
+    >r #1000000000 um* r> #1000000000 um* drop + d>64 date>i ;
+: localtime-fixup ( dsecond -- dsecond' )
     date? #localtime and IF
-	dup >time&date&tz 2drop >r drop 2drop 2drop 2drop
-	dup r> - >time&date&tz 2drop >r drop 2drop 2drop 2drop r> -
+	2dup >time&date&tz 2drop >r drop 2drop 2drop 2drop
+	2dup r> s>d d- >time&date&tz 2drop >r drop 2drop 2drop 2drop
+	r> s>d d-
     THEN ;
-: day'>i ( day -- index ) #86400 * localtime-fixup second>i ;
-: day>second ( year month day -- seconds )
-    ymd2day unix-day0 - #86400 * localtime-fixup ;
+: day'>i ( day -- index ) #86400 m* localtime-fixup second>i ;
+: day>second ( year month day -- dseconds )
+    ymd2day unix-day0 - #86400 m* localtime-fixup ;
 : day>i ( year month day -- index )
     day>second second>i ;
 : month>i ( year month -- index )

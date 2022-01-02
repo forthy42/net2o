@@ -598,6 +598,7 @@ previous
 1970 1 1 ymd2day Constant unix-day0
 
 : fsplit ( r -- r n )  fdup floor fdup f>s f- ;
+: fsplitd ( r -- r d )  fdup floor fdup f>d f- ;
 
 : date? ( -- n )  config:date# @ ;
 : datehms? ( -- n )  config:date# @ 7 and ;
@@ -614,9 +615,10 @@ $Variable $tz
 : >fticks ( time -- rftime ) 64>f 1n f* ;
 : fticks ( -- rftime ) ticks >fticks ;
 : fticks>dtms-local ( rftime -- fns s m h dm y )
-    fsplit >time&date&tz $tz $! to tz-off to tz-flag ;
+    fsplitd >time&date&tz $tz $! to tz-off to tz-flag ;
 : fticks>dtms-zulu ( rftime -- fns s m h dm y )
-    fsplit #60 /mod #60 /mod #24 /mod unix-day0 + day2ymd swap rot ;
+    fsplitd #86400 um/mod >r
+    #60 /mod #60 /mod #24 mod r> unix-day0 + day2ymd swap rot ;
 : fticks>dtms ( rftime -- fns s m h dm y )
     date? #localtime and IF  fticks>dtms-local  ELSE  fticks>dtms-zulu  THEN ;
 : fticks>day ( rftime -- fraction day )
