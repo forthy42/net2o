@@ -31,7 +31,7 @@ Variable otr-mode \ global otr mode
 	net2o:new-msg >o 2dup to msg:name$
 	otr-mode @ IF  msg:+otr  THEN
 	o o>
-	cell- [ msg-class >osize @ cell+ ]L
+	cell- [ msg:class >osize @ cell+ ]L
 	2over msg-group# #!
     THEN  last# cell+ $@ drop cell+ to msg-group-o
     2drop ;
@@ -178,7 +178,7 @@ Sema queue-sema
 
 \ events
 
-msg-class class end-class msg-notify-class
+msg:class class end-class msg-notify-class
 
 msg-notify-class ' new static-a with-allocater Constant msg-notify-o
 
@@ -346,11 +346,11 @@ Variable fetch-queue[]
 forward ihave>push
 
 also fetcher
-:noname fetching# to state ; fetcher-class is fetch
-' 2drop fetcher-class is fetching
+:noname fetching# to state ; fetcher:class is fetch
+' 2drop fetcher:class is fetching
 :noname have# to state
     last# $@ 2dup ihave$ $+! ihave>push
-    >send-have ; fetcher-class is got-it
+    >send-have ; fetcher:class is got-it
 previous
 
 : .@host.id ( pk+host u -- )
@@ -565,7 +565,7 @@ scope: logstyles
 
 \ msg scan for hashes class
 
-msg-class class
+msg:class class
     field: ?hashs[]
 end-class msg-?hash-class
 
@@ -615,26 +615,26 @@ end-class msg-?hash-class
     2dup startdate@ .log-date
     2dup enddate@ .log-end
     .key-id ." : " 
-    r> to last# ; msg-class is msg:start
+    r> to last# ; msg:class is msg:start
 :noname ( addr u -- )
     silent( 2dup startdate@ .log-date 2dup .key-id ." : Silent: " )
-    key| to msg:id$ true to msg:silent? ; msg-class is msg:silent-start
+    key| to msg:id$ true to msg:silent? ; msg:class is msg:silent-start
 :noname ( addr u -- ) $utf8>
-    <warn> '#' forth:emit .group <default> ; msg-class is msg:tag
+    <warn> '#' forth:emit .group <default> ; msg:class is msg:tag
 :noname ( addr u -- ) last# >r
     key| 2dup 0 .pk@ key| str=
     IF   <err>  THEN ." @" .key-id? <default>
-    r> to last# ; msg-class is msg:signal
+    r> to last# ; msg:class is msg:signal
 :noname ( addr u -- )
     2dup sighash? IF  <info>  ELSE  <err>  THEN
     ."  <" over le-64@ .ticks
     verbose( dup keysize - /string ." ," 85type )else( 2drop ) <default>
-; msg-class is msg:chain
+; msg:class is msg:chain
 :noname ( addr u -- )
-    space <warn> ." [" 85type ." ]->" <default> ; msg-class is msg:re
+    space <warn> ." [" 85type ." ]->" <default> ; msg:class is msg:re
 :noname ( addr u -- )
-    space <warn> ." [" 85type ." ]:" <default> ; msg-class is msg:id
-:noname ( addr u -- ) utf8-sanitize ; msg-class is msg:text
+    space <warn> ." [" 85type ." ]:" <default> ; msg:class is msg:id
+:noname ( addr u -- ) utf8-sanitize ; msg:class is msg:text
 : format>ansi ( format -- ansi )
     0
     over msg:#bold and 0<> Bold and or
@@ -643,23 +643,23 @@ end-class msg-?hash-class
     swap msg:#strikethrough and 0<> Strikethrough and or ;
 :noname ( addr u format -- )
     format>ansi attr!
-    utf8-sanitize 0 attr! ; msg-class is msg:text+format
+    utf8-sanitize 0 attr! ; msg:class is msg:text+format
 :noname ( addr u -- ) $utf8>
-    <warn> forth:type <default> ; msg-class is msg:url
+    <warn> forth:type <default> ; msg:class is msg:url
 :noname ( xchar -- )
-    <info> utf8emit <default> ; msg-class is msg:like
+    <info> utf8emit <default> ; msg:class is msg:like
 :noname ( xchar -- )
-    <info> cr ." vote: " utf8emit <default> ; msg-class is msg:vote
+    <info> cr ." vote: " utf8emit <default> ; msg:class is msg:vote
 :noname ( addr u -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
 	<info> ." chat is locked" <default>
     ELSE  2drop
 	<err> ." locked out of chat" <default>
-    THEN ; msg-class is msg:lock
+    THEN ; msg:class is msg:lock
 :noname ( -- )  msg-group-o .msg:-lock
-    <info> ." chat is free for all" <default> ; msg-class is msg:unlock
-' drop msg-class is msg:away
+    <info> ." chat is free for all" <default> ; msg:class is msg:unlock
+' drop msg:class is msg:away
 : .perms ( n -- )
     "👹" bounds U+DO
 	dup 1 and IF  I xc@ xemit  THEN  2/
@@ -667,18 +667,18 @@ end-class msg-?hash-class
 :noname { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
-; msg-class is msg:perms
+; msg:class is msg:perms
 :noname ( hash u -- )
     silent( ." hash: " 2dup 85type forth:cr )
     to msg:hashs$
-; msg-class is msg:hashs
+; msg:class is msg:hashs
 :noname ( id u -- )
     silent( ." id: " 2dup forth:type forth:cr )
     fetch( ." ihave:" msg:id$ .key-id '.' emit 2dup type msg:hashs$ bounds U+DO
     forth:cr I keysize 85type keysize +LOOP forth:cr )
     msg:id$ key| [: type type ;] $tmp
     msg:hashs$ 2swap >ihave.id
-; msg-class is msg:hash-id
+; msg:class is msg:hash-id
 
 event: :>hash-finished { d: hash -- }
     fetch( ." finished " 2dup 85type forth:cr )
@@ -749,10 +749,10 @@ event: :>hash-finished { d: hash -- }
 	ELSE  drop  THEN ;] #map
     want# @ ;
 
-fetcher-class ' new static-a with-allocater Constant fetcher-prototype
+fetcher:class ' new static-a with-allocater Constant fetcher-prototype
 : >fetch# ( addr u -- )
     [:  2dup fetch# #@ d0= IF
-	    fetcher-prototype cell- [ fetcher-class >osize @ cell+ ]L
+	    fetcher-prototype cell- [ fetcher:class >osize @ cell+ ]L
 	    2over fetch# #!
 	THEN ;] resize-sema c-section  2drop ;
 
@@ -813,11 +813,11 @@ forward need-hashed?
 	key| .key-id
 	0
     endcase ." ]" <default> ;
-msg-class is msg:object
+msg:class is msg:object
 :noname ( addr u -- ) $utf8>
-    <warn> forth:type <default> ; msg-class is msg:action
+    <warn> forth:type <default> ; msg:class is msg:action
 :noname ( addr u -- )
-    <warn> ."  GPS: " .coords <default> ; msg-class is msg:coord
+    <warn> ."  GPS: " .coords <default> ; msg:class is msg:coord
 
 : wait-2s-key ( -- )
     ntime 50 0 DO  key? ?LEAVE
@@ -828,7 +828,7 @@ msg-class is msg:object
     <info>
     [: ." nobody's online" msg-group-o .msg:?otr 0= IF ." , saving away"  THEN ;] $tmp
     2dup type <default>
-    wait-2s-key xclear ; msg-class is msg:.nobody
+    wait-2s-key xclear ; msg:class is msg:.nobody
 
 \ encrypt+sign
 \ features: signature verification only when key is known
@@ -887,10 +887,10 @@ msg-class is msg:object
 	    THEN
 	LOOP
 	r> to last#
-    THEN ; msg-class is msg:otrify
+    THEN ; msg:class is msg:otrify
 
 :noname ( -- )
-    msg:silent? 0= IF  forth:cr  THEN  enqueue ; msg-class is msg:end
+    msg:silent? 0= IF  forth:cr  THEN  enqueue ; msg:class is msg:end
 
 \g 
 \g ### group description commands ###
@@ -900,7 +900,7 @@ hash: group#
 
 static-a to allocater
 align here
-groups-class new Constant group-o
+groups:class new Constant group-o
 dynamic-a to allocater
 here over - 2Constant sample-group$
 
@@ -1071,8 +1071,8 @@ net2o' end-with net2o: msg-end-with ( -- ) \g push out avalanche
 ' message msging-class is start-req
 :noname check-date \ quicksig( check-date )else( pk-sig? )
     >r 2dup r> ; msging-class is nest-sig
-' message msg-class is start-req
-:noname 2dup msg-dec?-sig? ; msg-class is nest-sig
+' message msg:class is start-req
+:noname 2dup msg-dec?-sig? ; msg:class is nest-sig
 
 ' context-table is gen-table
 
@@ -1376,7 +1376,7 @@ previous
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF  2drop  EXIT  THEN  THEN
     sigpksize# - 2dup + sigpksize# >$  c-state off
     nest-cmd-loop msg:end ;
-' msg-tdisplay msg-class is msg:display
+' msg-tdisplay msg:class is msg:display
 ' msg-tdisplay msg-notify-class is msg:display
 ' msg-tdisplay-silent msg-?hash-class is msg:display
 : ?search-lock ( addr u -- )
@@ -1442,9 +1442,9 @@ forward key-from-dht
       cell +LOOP
       log free throw ;] catch
     r> IF  msg-group-o .msg:+otr  THEN  throw ;
-' msg-tredisplay msg-class is msg:redisplay
+' msg-tredisplay msg:class is msg:redisplay
 
-msg-class class
+msg:class class
 end-class textmsg-class
 
 : .formatter ( format -- )

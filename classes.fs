@@ -458,7 +458,7 @@ object uclass io-mem
     $10             uvar cmdtmp
     $10             uvar return-addr
     $10             uvar temp-addr
-    timestats-struct uvar stat-tuple
+    timestats:sizeof uvar stat-tuple
     maxdata 2/ key-salt# + key-cksum# + uvar init0buf
     aligned
     cell            uvar code0-buf^

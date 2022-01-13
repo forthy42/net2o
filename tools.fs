@@ -285,31 +285,7 @@ Create reverse-table $100 0 [DO] [I] bitreverse8 c, [LOOP]
 
 \ scoping
 
-Variable scope<>
-: >scope ( xt -- )
-    get-current scope<> >stack also execute definitions ;
-: scope{ ( "vocabulary" -- scope:addr )
-    ' >scope ;
-: }scope ( scope:addr -- )
-    previous scope<> stack> set-current ;
-: scope: ( "vocabulary" -- scope:addr )
-    vocabulary lastxt >scope ;
-: cs-scope: ( "vocabulary" -- scope:addr )
-    cs-vocabulary lastxt >scope ;
-
-: class{ ( parent "scope" -- methods vars )
-    class cs-scope: ;
-: }class ( methods vars -- )
-    context @ }scope
-    [: >voc name>string type ." -class" ;] $tmp nextname
-    end-class ;
-
-: struct{ ( "scope" -- vars )
-    >in @ >r
-    parse-name [: type ." -struct" ;] $tmp nextname
-    begin-structure  r> >in !  cs-scope: ;
-: }struct ( vars -- )
-    }scope end-structure ;
+require scope.fs
 
 : with ( "vocabulary" -- )
     also ' execute postpone >o ; immediate restrict

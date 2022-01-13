@@ -710,7 +710,7 @@ previous
 
 \ messages
 
-msg-class class
+msg:class class
 end-class wmsg-class
 
 Variable last-bubble-pk

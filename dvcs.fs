@@ -85,7 +85,7 @@ end-structure
 
 }scope
 
-msg-class class
+msg:class class
     field: id>patch#  \ convert an ID to a patch+reference list
     field: id>snap#   \ convert an ID to a snapshot (starting point)
     field: id$
@@ -93,7 +93,7 @@ msg-class class
     field: object$
 end-class commit-class
 
-msg-class class
+msg:class class
     scope: match
     field: tag$
     field: flag
@@ -101,7 +101,7 @@ msg-class class
     }scope
 end-class search-class
 
-msg-class class
+msg:class class
     scope: dvcs-log
     field: sig$
     field: tag$

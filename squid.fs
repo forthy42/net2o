@@ -179,7 +179,7 @@ $10 cell+ buffer: new-asset
 	keysize /string
     THEN
     current-pk assets[] $[]!
-; pay-class is source
+; pay:class is source
 
 : ?double-transaction ( hash u pk u -- hash u )
      SwapDragonKeys'# #@ 2dup d0= IF
@@ -190,7 +190,7 @@ $10 cell+ buffer: new-asset
 
 :noname ( n -- )
     dup sources[] $[]# u>= !!inv-index!! to current-pk
-; pay-class is #source
+; pay:class is #source
 
 :noname ( n addr u -- )
     rot #source
@@ -208,7 +208,7 @@ $10 cell+ buffer: new-asset
     pk+hash key| ?double-transaction
     pk+hash key| SwapDragonKeys'# #!
     current-pk sources[] $[]free
-; pay-class is sink
+; pay:class is sink
 
 :noname ( n -- )
     dup $SwapAssets[] $[]# u>= !!inv-index!!
@@ -216,7 +216,7 @@ $10 cell+ buffer: new-asset
     current-asset balances[] $[]@ nip 0= IF
 	balance0 $10 current-asset balances[] $[]!
     THEN
-; pay-class is asset
+; pay:class is asset
 
 : 128+!? ( 128x addr -- flag )
     dup >r 128@ 128+ r> over >r 128! r> 0< ;
@@ -230,12 +230,12 @@ $10 cell+ buffer: new-asset
     dup 0< !!insufficient-asset!!
     current-asset new-asset !  new-asset cell+ 128!
     new-asset $10 cell+ current-pk assets[] $[]+!
-; pay-class is amount
+; pay:class is amount
 
 :noname ( n -- ) asset
     64#0 64dup current-asset balances[] $[]@ drop 128@ 128- \ just a 128negate
     amount
-; pay-class is balance
+; pay:class is balance
 
 :noname ( -- )  sink? invert !!not-sunk!!
     balances[] $[]# 0 ?DO
@@ -244,7 +244,7 @@ $10 cell+ buffer: new-asset
     sources[] $[]# 0 ?DO
 	I sources[] $[]@ nip !!not-sunk!!
     LOOP
-; pay-class is finalize
+; pay:class is finalize
 
 : update ( -- )
     SwapDragonKeys'#

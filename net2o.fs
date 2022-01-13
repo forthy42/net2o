@@ -444,7 +444,7 @@ in net2o : new-ack ( -- o )
     ack-context @ ?dup-0=-IF  net2o:new-ack dup ack-context !  THEN ;
 scope{ net2o
 : new-tmsg ( -- o )
-    o msg-table msg-class new-tok >o  parent! o o> ;
+    o msg-table msg:class new-tok >o  parent! o o> ;
 : new-msging ( -- o )
     o msging-class new >o  parent!  msging-table @ token-table ! o o> ;
 defer new-msg  ' new-tmsg is new-msg
@@ -740,7 +740,7 @@ in net2o : /timing ( n -- )
 	  I timestats:rate f/ f.
 	  I timestats:grow 1u f* f.
 	  ." timing" cr
-      timestats-struct +LOOP
+      timestats:sizeof +LOOP
       track-timing $free o> ;] timing-sema c-section ;
 
 in net2o : rec-timing ( addr u -- )
@@ -862,7 +862,7 @@ slack-default# 2* 2* n>64 64Constant slack-ignore# \ above 80ms is ignored
     64over 64-2* 64-2* 64min \ limit to 4* rate
     64dup extra-ns 64! 64+ ;
 
-: stat+ ( addr -- )  stat-tuple timestats-struct  timing-stat $+! ;
+: stat+ ( addr -- )  stat-tuple timestats:sizeof  timing-stat $+! ;
 
 : rate-stat1 ( rate deltat -- rate deltat )
     recv-tick 64@ time-offset 64@ 64-
