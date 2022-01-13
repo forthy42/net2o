@@ -109,8 +109,8 @@ Variable dir#
 	0 dir# [: $@ 2dup "*.metadata.csv" filename-match IF
 		get-pic-filename 1+
 	    ELSE  2drop  THEN ;] #map
-	[: ." read " . ." pics in " .time ;]
-	success-color color-execute cr ;] catch
+	[: success-color ." read " . ." pics in " .time ;]
+	execute-theme-color cr ;] catch
     fpath $free r> fpath !  dd close-dir throw  throw
     dir# #frees ;
 
@@ -501,16 +501,16 @@ Variable comment#
 : write-articles ( -- ) { | nn }
     "img-req.lst" w/o create-file throw to img-req-fid
     entries[] $@ bounds ?DO
-	nn [: ." write " 6 .r ."  postings" ;]
-	warning-color color-execute
+	nn [: warning-color ." write " 6 .r ."  postings" ;]
+	execute-theme-color
 	#-21 0 at-deltaxy
 	I @ .write-out-article
 	1 +to nn
 	!save-all-msgs
     cell +LOOP
     img-req-fid close-file throw  0 to img-req-fid
-    nn [: ." write "  6 .r ."  postings in " .time ;]
-    success-color color-execute cr ;
+    nn [: success-color ." write "  6 .r ."  postings in " .time ;]
+    execute-theme-color cr ;
 
 [IFUNDEF] json-load-dir
     forward json-load-dir

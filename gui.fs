@@ -960,7 +960,7 @@ Create edit-infos
     0 change-edit-info
 ; wmsg-class is msg:.nobody
 
-log-mask off \ in GUI mode, default is no marking
+\ logmask# off \ in GUI mode, default is no marking
 
 : +log#-date-token ( log-mask -- o ) >r
     {{
@@ -978,12 +978,13 @@ log-mask off \ in GUI mode, default is no marking
 Variable re-indent#
 : re-box-run ( -- ) recursive
     gui( re-indent# @ spaces name$ type cr )
-    log-mask @ >r
+    logmask# @ >r
     name$ "log#"  str= IF  r> log#num  and ?flip  EXIT  THEN
     name$ "date#" str= IF  r> log#date and ?flip  EXIT  THEN
     name$ "end#"  str= IF  r> log#end  and ?flip  EXIT  THEN
     rdrop
-    hbox vbox zbox o cell- @ tuck = >r tuck = >r = r> r> or or  IF
+    parbox hbox vbox zbox o cell- @ tuck = >r tuck = >r tuck = >r =
+    r> r> r> or or or  IF
 	1 re-indent# +! ['] re-box-run do-childs
 	-1 re-indent# +!
     THEN ;
@@ -999,7 +1000,7 @@ Variable re-indent#
     to msg-box to msg-par ;
 : new-msg-par ( -- )
     msg-start-par
-    \sans \script cbl re-green log-mask @ +log#-date-token msg-box .child+
+    \sans \script cbl re-green logmask# @ +log#-date-token msg-box .child+
     \normal cbl ;
 :noname { d: pk -- o }
     false to msg:silent?
@@ -1955,6 +1956,7 @@ Variable invitation-stack
 
 : net2o-gui ( -- )
     [IFDEF] set-net2o-hints  set-net2o-hints  [THEN]
+    config:logmask-gui# to logmask#
     gui-chat-cmd-o to chat-cmd-o
     n2o-frame to top-widget
     n2o-frame to md-frame

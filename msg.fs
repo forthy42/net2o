@@ -487,9 +487,6 @@ msg-table $save
 
 \ Code for displaying messages: logstyle for TUI deferred-based
 
-Variable log-mask
-1 5 bits: log#num log#date log#end log#len log#perm
-
 : .otr-info ( -- )
     <info> ." [otr] " <default> "[otr] " notify+ notify-otr? on ;
 : .otr-err ( -- )
@@ -499,12 +496,14 @@ Variable log-mask
     ticks 64- 64dup fuzzedtime# 64negate 64< IF  64drop .otr-err  EXIT  THEN
     otrsig-delta# fuzzedtime# 64+ 64< IF  .otr-info  THEN ;
 
+config:logmask-tui# Value logmask#
+
 : .log-num  ( -- )
-    log-mask @ log#num  and IF '#' emit log# u.  THEN ;
+    logmask# @ log#num  and IF '#' emit log# u.  THEN ;
 : .log-date ( 64ticks -- )
-    log-mask @ log#date and IF .ticks space  ELSE  64drop  THEN ;
+    logmask# @ log#date and IF .ticks space  ELSE  64drop  THEN ;
 : .log-end  ( 64ticks -- )
-    log-mask @ log#end  and IF  64dup .ticks space  THEN  .otr ;
+    logmask# @ log#end  and IF  64dup .ticks space  THEN  .otr ;
 
 \ logstyle for GUI bitmask-based
 
@@ -515,16 +514,16 @@ Defer update-log
     2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 scope: logstyles
-: +num  log#num  log-mask or! update-log ;
-: -num  log#num  invert log-mask and! update-log ;
-: +date log#date log-mask or! update-log ;
-: -date log#date invert log-mask and! update-log ;
-: +end  log#end  log-mask or! update-log ;
-: -end  log#end  invert log-mask and! update-log ;
-: +len  log#len  log-mask or! update-log ;
-: -len  log#len  invert log-mask and! update-log ;
-
-+date -num -end -len
+: +num  log#num  logmask# or! update-log ;
+: -num  log#num  invert logmask# and! update-log ;
+: +date log#date logmask# or! update-log ;
+: -date log#date invert logmask# and! update-log ;
+: +end  log#end  logmask# or! update-log ;
+: -end  log#end  invert logmask# and! update-log ;
+: +len  log#len  logmask# or! update-log ;
+: -len  log#len  invert logmask# and! update-log ;
+: +perm log#perm logmask# or! update-log ;
+: -perm log#perm invert logmask# and! update-log ;
 }scope
 
 :noname ( addr u -- )
@@ -1366,7 +1365,7 @@ previous
 
 : msg-tdisplay ( addr u -- )
     ( 2dup dump )
-    log-mask @ log#len and IF  dup hex.  THEN
+    logmask# @ log#len and IF  dup hex.  THEN
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN

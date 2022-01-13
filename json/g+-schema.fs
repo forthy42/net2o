@@ -45,7 +45,6 @@ object class{ comments
 }class
 
 synonym resharedPost comments
-synonym resharedPost-class comments-class
 
 object class{ author
     $value: resourceName$
@@ -65,11 +64,6 @@ synonym plusOner author
 synonym resharer author
 synonym voter author
 synonym owner author
-
-synonym plusOner-class author-class
-synonym resharer-class author-class
-synonym voter-class author-class
-synonym owner-class author-class
 
 object class{ link
     $value: title$
@@ -122,9 +116,6 @@ object class{ collection
 synonym users collection
 synonym community collection
 
-synonym users-class collection-class
-synonym community-class collection-class
-
 object class{ album
     field: media[]
 }class
@@ -174,7 +165,6 @@ object class{ collectionAttachment
 }class
 
 synonym communityAttachment collectionAttachment
-synonym communityAttachment-class collectionAttachment-class
 
 }scope
 
@@ -230,9 +220,9 @@ also g+
     THEN ;
 
 : g+-scan ( -- )  iso-date
-    ['] g+ >body to schema-scope
-    g+:comments-class to outer-class
-    ['] g+:comments >body to schema-wid
+    ['] g+ >wordlist to schema-scope
+    g+:comments:class to outer-class
+    ['] g+:comments >wordlist to schema-wid
     ['] dedup-authors is process-element ;
 
 g+-scan

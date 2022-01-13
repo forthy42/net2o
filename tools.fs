@@ -401,6 +401,8 @@ $10 stack: dirstack
 : dir@ ( -- addr u )
     dirstack $[]# 1- dirstack $[]@ ;
 
+1 5 bits: log#num log#date log#end log#len log#perm
+
 scope{ config
 
 Variable hops#
@@ -411,6 +413,8 @@ Variable hops#
 Variable timeouts#
 Variable passmode#
 Variable logsize#
+Variable logmask-tui#
+Variable logmask-gui#
 2Variable savedelta&
 2Variable patchlimit&
 Variable rootdirs$
@@ -433,6 +437,7 @@ $Variable chat-format$
 $Variable config-file$  "~/.config/net2o/config" config-file$ $!
 
 also config
+log#date logmask-tui# !
 
 : .net2o/ ( addr u -- addr' u' ) [: .net2o$ $. '/' emit type ;] $tmp ;
 : subdir-config ( -- )

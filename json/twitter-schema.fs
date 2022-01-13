@@ -89,7 +89,6 @@ object class{ entities
 }class
 
 synonym extended_entities entities
-synonym extended_entities-class entities-class
 
 object class{ user_mentions
     $value: name$
@@ -112,7 +111,6 @@ object class{ hashtags
 }class
 
 synonym symbols hashtags
-synonym symbols-class hashtags-class
 
 object class{ media
     $value: expanded_url$
@@ -149,9 +147,6 @@ object class{ thumb
 synonym small thumb
 synonym medium thumb
 synonym large thumb
-synonym small-class thumb-class
-synonym medium-class thumb-class
-synonym large-class thumb-class
 
 object class{ video_info
     field: aspect_ratio[]#
@@ -183,9 +178,9 @@ object class{ options
 }scope
 
 : twitter-scan ( -- )  twitter-date
-    ['] twitter >body to schema-scope
-    twitter:tweets-class to outer-class
-    ['] twitter:tweets >body to schema-wid
+    ['] twitter >wordlist to schema-scope
+    twitter:tweets:class to outer-class
+    ['] twitter:tweets >wordlist to schema-wid
     [: (name) 2drop (name) 2drop s" tweet" key$ $!
 	['] noop is before-line ;] is before-line ;
 

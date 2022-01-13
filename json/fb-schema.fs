@@ -30,7 +30,6 @@ object class{ status_updates
 }class
 
 synonym wall_posts_sent_to_you status_updates
-synonym wall_posts_sent_to_you-class status_updates-class
 
 object class{ attachments
     field: data[]
@@ -89,9 +88,9 @@ object class{ video_metadata
 
 : fb-scan ( -- )
     fixed-width set-encoding \ UTF-8 fuckup for \u
-    ['] fb >body to schema-scope
-    fb:timeline-class to outer-class
-    ['] fb:timeline >body to schema-wid ;
+    ['] fb >wordlist to schema-scope
+    fb:timeline:class to outer-class
+    ['] fb:timeline >wordlist to schema-wid ;
 
 \\\
 Local Variables:

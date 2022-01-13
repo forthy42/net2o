@@ -57,6 +57,7 @@ $20 value hash-size#
     [: nick>pk dup 0= !!no-nick!! search-key[] $+[]! ;] @arg-loop ;
 
 : handle-chat ( -- )
+    config:logmask-tui# to logmask#
     chat-connects ?wait-chat do-chat ;
 
 \ commands for the command line user interface

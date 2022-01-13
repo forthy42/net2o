@@ -33,7 +33,7 @@ $10 stack: o-stack
 
 : scan-vals ( wid -- ) to config-wl
     BEGIN  '=' parse bl skip dup  WHILE  2>r
-	    parse-name config-recognizer recognize 2r> eval-config
+	    parse-name config-recognize 2r> eval-config
     REPEAT  2drop ;
 
 Variable list-class$
@@ -110,7 +110,7 @@ object class{ a-params
 }class
 
 : a ( -- )
-    a-params-class new >o r> o-stack >stack
+    a-params:class new >o r> o-stack >stack
     [: ['] a-params >body scan-vals ;] execute-parsing
     a-params:class$ $@ s" ot-hashtag" string-prefix? 0= IF
 	'[' emit
@@ -140,7 +140,7 @@ object class{ img-params
 }class
 
 : img ( -- )
-    a-params-class new >o r> o-stack >stack
+    a-params:class new >o r> o-stack >stack
     '/' -skip [: ['] img-params >body scan-vals ;] execute-parsing
     ." ![" img-params:alt$ $@ type
     ." ](" img-params:src$ $@ basename type ')' emit
@@ -150,7 +150,7 @@ object class{ img-params
     THEN
     img-params:dispose o-stack stack> >r o> ;
 : span ( -- )
-    a-params-class new >o r> o-stack >stack
+    a-params:class new >o r> o-stack >stack
     [: ['] a-params >body scan-vals ;] execute-parsing ;
 : /span 2drop
     a-params:dispose o-stack stack> >r o> ;
@@ -177,7 +177,7 @@ object class{ table-params
 }class
 
 : tr ( -- )
-    table-params-class new >o r> o-stack >stack
+    table-params:class new >o r> o-stack >stack
     [: ['] table-params >body scan-vals ;] execute-parsing
 ;
 : table ( -- ) cr tr ;

@@ -55,9 +55,7 @@ object class{ others_data
 }class
 
 synonym relayables profile
-synonym relayables-class profile-class
 synonym photos profile
-synonym photos-class profile-class
 
 object class{ entity_data
     $value: author$
@@ -116,9 +114,9 @@ object class{ posts
 }scope
 
 : diaspora-scan ( -- )  iso-date
-    ['] diaspora >body to schema-scope
-    diaspora:takeout-class to outer-class
-    ['] diaspora:takeout >body to schema-wid
+    ['] diaspora >wordlist to schema-scope
+    diaspora:takeout:class to outer-class
+    ['] diaspora:takeout >wordlist to schema-wid
     ['] noop is process-element ;
 
 \\\

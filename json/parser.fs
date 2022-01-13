@@ -151,7 +151,7 @@ Defer next-element
     \ '"' emit key$ $. .\" \": {" cr
     key$ $@ schema-scope find-name-in
     ?dup-IF  name>int >body >r
-	[: key$ $. ." -class" ;] $tmp schema-scope find-name-in
+	"class" r@ >wordlist find-name-in
 	?dup-IF
 	    name>int execute new
 	    dup array-item ?dup-IF
