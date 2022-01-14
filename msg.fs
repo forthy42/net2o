@@ -499,11 +499,11 @@ msg-table $save
 config:logmask-tui# Value logmask#
 
 : .log-num  ( -- )
-    logmask# @ log#num  and IF '#' emit log# u.  THEN ;
+    logmask# @ log:num  and IF '#' emit log# u.  THEN ;
 : .log-date ( 64ticks -- )
-    logmask# @ log#date and IF .ticks space  ELSE  64drop  THEN ;
+    logmask# @ log:date and IF .ticks space  ELSE  64drop  THEN ;
 : .log-end  ( 64ticks -- )
-    logmask# @ log#end  and IF  64dup .ticks space  THEN  .otr ;
+    logmask# @ log:end  and IF  64dup .ticks space  THEN  .otr ;
 
 \ logstyle for GUI bitmask-based
 
@@ -514,16 +514,16 @@ Defer update-log
     2dup printable? IF  forth:type  ELSE  ." @" .key-id  THEN ;
 
 scope: logstyles
-: +num  log#num  logmask# or! update-log ;
-: -num  log#num  invert logmask# and! update-log ;
-: +date log#date logmask# or! update-log ;
-: -date log#date invert logmask# and! update-log ;
-: +end  log#end  logmask# or! update-log ;
-: -end  log#end  invert logmask# and! update-log ;
-: +len  log#len  logmask# or! update-log ;
-: -len  log#len  invert logmask# and! update-log ;
-: +perm log#perm logmask# or! update-log ;
-: -perm log#perm invert logmask# and! update-log ;
+: +num  log:num  logmask# or! update-log ;
+: -num  log:num  invert logmask# and! update-log ;
+: +date log:date logmask# or! update-log ;
+: -date log:date invert logmask# and! update-log ;
+: +end  log:end  logmask# or! update-log ;
+: -end  log:end  invert logmask# and! update-log ;
+: +len  log:len  logmask# or! update-log ;
+: -len  log:len  invert logmask# and! update-log ;
+: +perm log:perm logmask# or! update-log ;
+: -perm log:perm invert logmask# and! update-log ;
 }scope
 
 :noname ( addr u -- )
@@ -1365,7 +1365,7 @@ previous
 
 : msg-tdisplay ( addr u -- )
     ( 2dup dump )
-    logmask# @ log#len and IF  dup hex.  THEN
+    logmask# @ log:len and IF  dup hex.  THEN
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN

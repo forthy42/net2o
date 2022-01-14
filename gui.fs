@@ -960,31 +960,32 @@ Create edit-infos
     0 change-edit-info
 ; wmsg-class is msg:.nobody
 
-\ logmask# off \ in GUI mode, default is no marking
-
 : +log#-date-token ( log-mask -- o ) >r
     {{
 	[: '#' emit log# 0 u.r       ;] $tmp }}text /left
-	>r {{ r> }}v 25%bv "log#"  name! r@ log#num  and 0= IF  /flip  THEN
+	>r {{ r> }}v 25%bv "log:num"  name! r@ log:num  and 0= IF  /flip  THEN
 	[: '<' emit last-tick .ticks ;] $tmp }}text /left
 	>r {{ r> }}v 25%bv
-	r@ log#perm and IF  "perm#"  ELSE  "date#"  THEN name!
-	r@ log#date and 0= IF  /flip  THEN
+	r@ log:perm and IF  "log:perm"  ELSE  "log:date"  THEN name!
+	r@ log:date and 0= IF  /flip  THEN
 	[: '>' emit end-tick  .ticks ;] $tmp }}text /left
-	>r {{ r> }}v 25%bv "end#"  name! r> log#end  and 0= IF  /flip  THEN
+	>r {{ r> }}v 25%bv "log:end"  name! r> log:end  and 0= IF  /flip  THEN
     }}v box[] ;
 
 : ?flip ( flag -- ) IF  o /flop  ELSE  o /flip  THEN  drop ;
 Variable re-indent#
+Create boxes? parbox , hbox , vbox , zbox ,
+DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
+      cell +LOOP  drop false ;
+
 : re-box-run ( -- ) recursive
     gui( re-indent# @ spaces name$ type cr )
     logmask# @ >r
-    name$ "log#"  str= IF  r> log#num  and ?flip  EXIT  THEN
-    name$ "date#" str= IF  r> log#date and ?flip  EXIT  THEN
-    name$ "end#"  str= IF  r> log#end  and ?flip  EXIT  THEN
+    name$ "log:" string-prefix? IF
+	name$ 4 /string ['] log >wordlist find-name-in
+	?dup-IF  name>int execute r> and ?flip  EXIT  THEN  THEN
     rdrop
-    parbox hbox vbox zbox o cell- @ tuck = >r tuck = >r tuck = >r =
-    r> r> r> or or or  IF
+    o cell- @ boxes?  IF
 	1 re-indent# +! ['] re-box-run do-childs
 	-1 re-indent# +!
     THEN ;
@@ -1148,7 +1149,7 @@ Variable re-indent#
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
-	log#date log#perm or +log#-date-token
+	log:date log:perm or +log#-date-token
     }}z "chain" name! msg-box .child+
 ; wmsg-class is msg:chain
 :noname { d: pk -- o }
