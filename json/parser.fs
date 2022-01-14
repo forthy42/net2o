@@ -59,8 +59,8 @@ $Variable key$ \ key string
 5 stack: jsons-recognizer
 1 stack: json-recognizer
 
-' noop ' lit, dup rectype: rectype-bool
-' noop ' lit, dup rectype: rectype-nil
+' noop ' lit, dup >postponer recognized: recognized-bool
+' noop ' lit, dup >postponer recognized: recognized-nil
 
 s" JSON error" exception Value json-throw
 s" JSON key not found" exception Value json-key-throw
@@ -104,14 +104,14 @@ Defer next-element
 : next-element# ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    rectype-name   of                   endof
-	    rectype-num    of        r@ >stack  endof
-	    rectype-dnum   of  drop  r@ >stack  endof
-	    rectype-string of  s>number? 0= IF json-err THEN
+	    ['] recognized-nt     of                   endof
+	    ['] recognized-num    of        r@ >stack  endof
+	    ['] recognized-dnum   of  drop  r@ >stack  endof
+	    ['] recognized-string of  s>number? 0= IF json-err THEN
 		drop r@ >stack  endof
-	    rectype-float  of  f>s   r@ >stack  endof
-	    rectype-bool   of        r@ >stack  endof
-	    rectype-nil    of        r@ >stack  endof
+	    ['] recognized-float  of  f>s   r@ >stack  endof
+	    ['] recognized-bool   of        r@ >stack  endof
+	    ['] recognized-nil    of        r@ >stack  endof
 	endcase  rdrop
     THEN ;
 
@@ -121,27 +121,27 @@ Defer next-element
 : next-element% ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    rectype-name   of                    endof
-	    rectype-float  of        r@ f>stack  endof
-	    rectype-string of  over >r >float r> free throw
+	    ['] recognized-nt     of                    endof
+	    ['] recognized-float  of        r@ f>stack  endof
+	    ['] recognized-string of  over >r >float r> free throw
 		0= IF json-err THEN  r@ f>stack  endof
-	    rectype-num    of  s>f   r@ f>stack  endof
-	    rectype-dnum   of  d>f   r@ f>stack  endof
-	    rectype-bool   of  s>f   r@ f>stack  endof
-	    rectype-nil    of  s>f   r@ f>stack  endof
+	    ['] recognized-num    of  s>f   r@ f>stack  endof
+	    ['] recognized-dnum   of  d>f   r@ f>stack  endof
+	    ['] recognized-bool   of  s>f   r@ f>stack  endof
+	    ['] recognized-nil    of  s>f   r@ f>stack  endof
 	endcase  rdrop
     THEN ;
 
 : next-element$ ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    rectype-name   of                    endof
-	    rectype-string of  over >r $make r> free throw  r@ >stack  endof
-	    rectype-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
-	    rectype-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
-	    rectype-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
-	    rectype-bool   of  IF "true" ELSE "false" THEN $make r@ >stack  endof
-	    rectype-nil    of  r@ >stack  endof
+	    ['] recognized-nt     of                    endof
+	    ['] recognized-string of  over >r $make r> free throw  r@ >stack  endof
+	    ['] recognized-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
+	    ['] recognized-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
+	    ['] recognized-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
+	    ['] recognized-bool   of  IF "true" ELSE "false" THEN $make r@ >stack  endof
+	    ['] recognized-nil    of  r@ >stack  endof
 	endcase  rdrop
     THEN ;
 
@@ -210,13 +210,13 @@ Defer next-element
 
 : eval-json ( .. tag -- )
     case
-	rectype-name   of  name?int execute       endof
-	rectype-string of  json-string!           endof
-	rectype-num    of  '#' key$ c$+! set-int  endof
-	rectype-dnum   of  '&' key$ c$+! set-val  endof
-	rectype-float  of  '%' key$ c$+! set-val  endof
-	rectype-bool   of  '?' key$ c$+! set-val  endof
-	rectype-nil    of  drop                   endof \ default is null, anyhow
+	['] recognized-nt     of  name?int execute       endof
+	['] recognized-string of  json-string!           endof
+	['] recognized-num    of  '#' key$ c$+! set-int  endof
+	['] recognized-dnum   of  '&' key$ c$+! set-val  endof
+	['] recognized-float  of  '%' key$ c$+! set-val  endof
+	['] recognized-bool   of  '?' key$ c$+! set-val  endof
+	['] recognized-nil    of  drop                   endof \ default is null, anyhow
 	json-err
     endcase ;
 
@@ -233,9 +233,9 @@ Defer next-element
 : rec-json ( addr u -- )
     1 = IF
 	c@ cells json-tokens + @
-	dup IF  rectype-name  EXIT  THEN
+	dup IF  ['] recognized-nt  EXIT  THEN
     THEN
-    drop rectype-null ;
+    drop ['] notfound ;
 
 256 buffer: stop-chars
 bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
@@ -250,15 +250,15 @@ bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
     2dup + source drop - >in ! 2dup input-lexeme! ;
 
 cs-scope: bools
-false rectype-bool 2constant false
-true  rectype-bool 2constant true
-0     rectype-nil  2constant null
+false ' recognized-bool 2constant false
+true  ' recognized-bool 2constant true
+0     ' recognized-nil  2constant null
 }scope
 
 : rec-bool ( addr u -- ... )
     ['] bools >body find-name-in ?dup-IF
 	name>int execute
-    ELSE  rectype-null  THEN ;
+    ELSE  ['] notfound  THEN ;
 
 ' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json
 5 jsons-recognizer set-stack
@@ -287,12 +287,12 @@ true  rectype-bool 2constant true
 		pad swap 2dup "*.json" filename-match IF
 		    json-load entries[] >stack  1 +to nn
 		    nn #37 mod 0= IF
-			nn [: ." read " 6 .r ."  postings" ;]
-			warning-color color-execute
+			nn [: warning-color ." read " 6 .r ."  postings" ;]
+			execute-theme-color
 			#-20 0 at-deltaxy
 		    THEN
 		ELSE  2drop  THEN
 	REPEAT  drop
-	nn [: ." read " 6 .r ."  postings in " .time ;]
-	success-color color-execute cr ;] catch
+	nn [: success-color ." read " 6 .r ."  postings in " .time ;]
+	execute-theme-color cr ;] catch
     r> fpath $!len  dd close-dir throw  throw ;

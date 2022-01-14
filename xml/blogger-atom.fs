@@ -21,24 +21,24 @@ object class{ atom-tags
 	$value: version$
 	$value: encoding$
     }class
-    xml-class class{ ?xml
+    xml:class class{ ?xml
     }class
     value: feed{}
     object class{ feed-attrs
 	$value: xmlns$
 	$value: xmlns:blogger$
     }class
-    xml-class class{ feed
+    xml:class class{ feed
 	$value: id$
 	$value: title$
 	field: entry[]
-	xml-class class{ entry
+	xml:class class{ entry
 	    $value: id$
 	    $value: blogger:parent$
 	    $value: blogger:type$
 	    $value: blogger:status$
 	    value: author{}
-	    xml-class class{ author
+	    xml:class class{ author
 		$value: name$
 		$value: uri$
 		$value: blogger:type$
@@ -52,7 +52,7 @@ object class{ atom-tags
 	    64value: published!
 	    64value: updated!
 	    value: blogger:location{}
-	    xml-class class{ blogger:location
+	    xml:class class{ blogger:location
 		$value: blogger:name$
 		fvalue: blogger:latitude%
 		fvalue: blogger:longitude%

@@ -43,10 +43,12 @@ require blogger-atom.fs
 	    2dup input-lexeme 2! key$ $! xml-parse json-string!
     REPEAT  2drop ;
 
+: find-class ( addr u -- class )
+    find-name ?dup-IF  "class" rot >wordlist find-name-in  THEN ;
 : parse-attrs ( addr-tag u1 addr-attrs u -- )
     2swap 2dup [: type ." -attrs" ;] $tmp find-name ?dup-IF
 	also name>int execute
-	2dup [: type ." -attrs-class" ;] $tmp find-name ?dup-IF
+	"class" context @ find-name-in ?dup-IF
 	    name>int execute new >o
 	    2swap ['] xml-scan-vals execute-parsing
 	    o to attrs-o o>
@@ -63,17 +65,17 @@ $10 stack: end-tags
 $10 stack: tags-match
 
 : find-class-tag ( addr u nt xt -- ) >r
-    >r 2dup [: type ." -class" ;] $tmp find-name ?dup-IF
+    >r { d: tag } tag find-class ?dup-IF
 	name>int execute new
 	dup r> r> execute
 	>o attrs-o to xml:attrs  r> o-stack >stack
     ELSE
 	xml-throw throw
     THEN
-    find-name ?dup-IF
+    tag find-name ?dup-IF
 	    also name>int execute
     ELSE  xml-throw throw  THEN
-    [: context @ body> name>string str=
+    [: context @ >voc name>string str=
 	IF    previous  o-stack stack> >r o>
 	ELSE  xml-throw throw  THEN ;] is xml-end-tag ;
 
@@ -87,7 +89,7 @@ $10 stack: tags-match
 
 : find-tag ( addr u -- )  2dup input-lexeme 2!
     [: type ." {}" ;] $tmp 2dup find-name ?dup-IF
-	-2 under+ ['] (int-to) find-class-tag  EXIT  THEN
+	-2 under+ ['] (to) find-class-tag  EXIT  THEN
     2dup + 2 - s" []" >r swap r> move 2dup find-name ?dup-IF
 	-2 under+ [: name>int execute >stack ;] find-class-tag  EXIT  THEN
     1- xml-element$ $free
@@ -152,9 +154,9 @@ false value in-tag?
     [: BEGIN  refill  WHILE  xml-untags  REPEAT ;]
     execute-parsing-named-file ;
 
-: read-atoms ( addr u -- )
-    get-order n>r  ['] atom-tags >body 1 set-order
-    atom-tags-class new >o ['] xml-file catch
+: read-atoms ( addr u -- o )
+    get-order n>r  ['] atom-tags >wordlist 1 set-order
+    atom-tags:class new >o ['] xml-file catch
     o o> nr> set-order  swap throw ;
 
 \\\

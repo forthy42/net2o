@@ -111,7 +111,7 @@ object class{ a-params
 
 : a ( -- )
     a-params:class new >o r> o-stack >stack
-    [: ['] a-params >body scan-vals ;] execute-parsing
+    [: ['] a-params >wordlist scan-vals ;] execute-parsing
     a-params:class$ $@ s" ot-hashtag" string-prefix? 0= IF
 	'[' emit
     THEN ;
@@ -141,7 +141,7 @@ object class{ img-params
 
 : img ( -- )
     a-params:class new >o r> o-stack >stack
-    '/' -skip [: ['] img-params >body scan-vals ;] execute-parsing
+    '/' -skip [: ['] img-params >wordlist scan-vals ;] execute-parsing
     ." ![" img-params:alt$ $@ type
     ." ](" img-params:src$ $@ basename type ')' emit
     img-params:src$ $@ basename file-status nip no-file# = IF
@@ -151,7 +151,7 @@ object class{ img-params
     img-params:dispose o-stack stack> >r o> ;
 : span ( -- )
     a-params:class new >o r> o-stack >stack
-    [: ['] a-params >body scan-vals ;] execute-parsing ;
+    [: ['] a-params >wordlist scan-vals ;] execute-parsing ;
 : /span 2drop
     a-params:dispose o-stack stack> >r o> ;
 synonym div span
@@ -178,7 +178,7 @@ object class{ table-params
 
 : tr ( -- )
     table-params:class new >o r> o-stack >stack
-    [: ['] table-params >body scan-vals ;] execute-parsing
+    [: ['] table-params >wordlist scan-vals ;] execute-parsing
 ;
 : table ( -- ) cr tr ;
 : /table 2drop cr
@@ -212,7 +212,7 @@ synonym /tbody /table
 	    2dup ['] s>number? r> base-execute
 	    IF  drop emit 2drop  EXIT  THEN
 	THEN
-	2dup ['] html-chars >body find-name-in ?dup-IF
+	2dup ['] html-chars >wordlist find-name-in ?dup-IF
 	    name>int execute xemit  2drop  EXIT
 	THEN  source type cr html-char-throw throw
     ELSE  2drop  THEN ;
@@ -252,7 +252,7 @@ $100 buffer: escape-chars
     REPEAT  2drop type-nolf' ;
 
 : html-tag ( addr u -- )
-    bl $split 2swap ['] html-tags >body find-name-in ?dup-IF
+    bl $split 2swap ['] html-tags >wordlist find-name-in ?dup-IF
 	name>int execute
     ELSE  html-throw throw  THEN ;
 
