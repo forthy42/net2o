@@ -863,29 +863,24 @@ msg:class is msg:object
 
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
-	last# >r last# $@ >group
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
-	2dup = IF  ."  [otrified] "  addr u startdate@ .ticks
-	    2drop r> to last# exit  THEN
+	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
 	    I msg-group-o .msg:log[] $[]@
-	    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
-		    ."  OTRify #" I u.
+		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
+		    I [: ."  OTRify #" u. ;] $tmp forth:type forth:cr
 		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
 		    save-msgs&
 		ELSE
-		    ."  [OTRified] #" I u.
+		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
 		THEN
 	    ELSE
-		."  ID mismatch: "
-		2dup dup sigpksize# - /string key| 85type space
-		msg:id$ 85type forth:cr
+		I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug
 		2drop
 	    THEN
 	LOOP
-	r> to last#
     THEN ; msg:class is msg:otrify
 
 :noname ( -- )
@@ -1657,7 +1652,7 @@ also net2o-base
 	2dup + 2 - c@ $80 and dup >r
 	IF  msg-dec-sig?  ELSE  pk-sig?  THEN  !!sig!!
 	2dup + sigpksize# - sigpksize#
-	over keysize pk@ key| str= IF
+	over pk@ drop 32b= IF
 	    keysize /string $,
 	    r> new-otrsig $,
 	    msg-otrify 2drop
@@ -2266,17 +2261,18 @@ $100 buffer: format-chars
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - rec-sequence: msg-recognize
+depth r> - rec-sequence: msg-smart-text
 
-' text-rec 1 rec-sequence: msg-text
+Defer msg-recognize
+' msg-smart-text is msg-recognize
 
 0 Value ```-state
 
 : ``` ```-state IF
-	['] msg-recognize is forth-recognize
+	['] msg-smart-text is msg-recognize
 	0 to current-format
     ELSE
-	['] msg-text is forth-recognize
+	['] text-rec is msg-recognize
 	msg:#mono to current-format
     THEN
     ```-state 0= dup to ```-state ./mono-info ;

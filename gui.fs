@@ -1186,7 +1186,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 		    \italic }}text 25%bv \regular light-blue text-color!
 		    "otrify" name! msg-box .child+
 		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
-		    \ !!Schedule message saving!!
+		    save-msgs&
 		ELSE
 		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
 		THEN
