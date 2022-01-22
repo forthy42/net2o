@@ -1178,7 +1178,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
-	    I msg-group-o .msg:log[] $[]@
+	    I msg-log-dec@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
 		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
@@ -1976,7 +1976,7 @@ Variable invitation-stack
     get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
-    nr> set-order throw ;
+    nr> set-order DoError ;
 
 ' net2o-gui is run-gui
 

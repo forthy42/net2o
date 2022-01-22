@@ -547,7 +547,7 @@ scope: logstyles
 :noname 2drop 64drop ; msg-notify-class is msg:perms
 ' drop  msg-notify-class is msg:away
 ' 2drop msg-notify-class is msg:coord
-:noname 2drop 2drop ; msg-notify-class is msg:otrify
+:noname 2drop 2drop ." otrify " ; msg-notify-class is msg:otrify
 ' 2drop msg-notify-class is msg:hashs
 ' 2drop msg-notify-class is msg:hash-id
 :noname case
@@ -849,6 +849,9 @@ msg:class is msg:object
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
+: msg-log-dec@ ( index -- addr u )
+    msg-group-o .msg:log[] $[]@
+    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN ;
 
 : replace-sig { addrsig usig addrmsg umsg -- }
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
@@ -860,13 +863,12 @@ msg:class is msg:object
     ['] .sig r@ select $tmp
     2dup + 2 - r> swap cor!
     ( 2dup dump ) 1 64s /string ;
-
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
 	\ 2dup = IF  ."  [otrified] "  addr u startdate@ .ticks  THEN
 	U+DO
-	    I msg-group-o .msg:log[] $[]@
+	    I msg-log-dec@ 
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
 		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
