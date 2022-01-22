@@ -1173,6 +1173,9 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     obj-red [: ." [" 85type ." ]:" ;] $tmp }}text msg-box .child+
     text-color!
 ; wmsg-class is msg:id
+: +otr-box ( addr u -- )
+     light-blue \italic }}text 25%bv \regular blackish
+     "otrify" name! msg-box .child+ ;
 :noname { sig u' addr u -- }
     u' 64'+ u =  u sigsize# = and IF
 	addr u startdate@ 64dup date>i >r 64#1 64+ date>i' r>
@@ -1181,17 +1184,15 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    I msg-log-dec@
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
-		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
-		    I [: ."  OTRify #" u. ;] $tmp
-		    \italic }}text 25%bv \regular light-blue text-color!
-		    "otrify" name! msg-box .child+
+		    otrify( I [: ."  [OTRifying] #" u. forth:cr ;] do-debug )
+		    I [: ."  [OTRify] #" u. ;] $tmp +otr-box
 		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
 		    save-msgs&
 		ELSE
-		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
+		    I [: ."  [OTRified] #" u. ;] $tmp +otr-box
 		THEN
 	    ELSE
-		I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug
+		otrify( I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug )
 		2drop
 	    THEN
 	LOOP
@@ -1976,7 +1977,7 @@ Variable invitation-stack
     get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
-    nr> set-order DoError ;
+    nr> set-order ?dup-IF  DoError  THEN ;
 
 ' net2o-gui is run-gui
 

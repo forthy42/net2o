@@ -871,15 +871,15 @@ msg:class is msg:object
 	    I msg-log-dec@ 
 	    2dup dup sigpksize# - /string key| msg:id$ str= IF
 		dup u - /string addr u str= IF
-		    I [: ."  [OTRifying] #" u. forth:cr ;] do-debug
-		    I [: ."  OTRify #" u. ;] $tmp forth:type forth:cr
+		    otrify( I [: ."  [OTRifying] #" u. forth:cr ;] do-debug )
+		    I [: ."  [OTRify] #" u. ;] $tmp forth:type
 		    sig u' I msg-group-o .msg:log[] $[]@ replace-sig
 		    save-msgs&
 		ELSE
-		    I [: ."  [OTRified] #" u. forth:cr ;] do-debug
+		    ."  [OTRified] #" I u.
 		THEN
 	    ELSE
-		I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug
+		otrify( I [: ."  [OTRifignore] #" u. forth:cr ;] do-debug )
 		2drop
 	    THEN
 	LOOP

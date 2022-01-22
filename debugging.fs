@@ -91,6 +91,7 @@ debug: newvault( \ new style vault keys
 debug: pks( \ fetch pks
 debug: fetch( \ fetch hashed objects
 debug: silent( \ silent messages
+debug: otrify( \ otrify debug messages
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
