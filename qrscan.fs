@@ -591,12 +591,10 @@ previous
 
 previous
 
-[IFDEF] run-scan-qr
-    :noname ( -- )
-	?get-me init-client
-	?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
-	scan-qr ; is run-scan-qr
-[THEN]
+: run-scan-qr ( -- )
+    ?get-me init-client
+    ?nextarg IF  s" -many" str= 0=  ELSE  true  THEN  to scan-once?
+    scan-qr ;
 
 \\\
 Local Variables:

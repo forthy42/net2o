@@ -152,10 +152,8 @@ scope{ n2o
 	['] 2drop arg-loop n2o:help
     THEN ;
 
-Defer run-gui
-:noname ." gui not implemented" cr ; is run-gui
-Defer run-scan-qr
-:noname ." scan-qur not implemented" cr ; is run-scan-qr
+Forward net2o-gui
+Forward run-scan-qr
 
 scope: importer
 : g+ [ "json/parser.fs" ]path required
@@ -796,7 +794,7 @@ synonym #! \ ( -- )
     reset-net2o-cmds
     [ "gui.fs" ]path required
     save-net2o-cmds set-net2o-cmds
-    run-gui ;
+    net2o-gui ;
 
 : ... ( -- )
     ... ;

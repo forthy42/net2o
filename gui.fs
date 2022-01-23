@@ -1979,8 +1979,6 @@ Variable invitation-stack
     text-chat-cmd-o to chat-cmd-o
     nr> set-order ?dup-IF  DoError  THEN ;
 
-' net2o-gui is run-gui
-
 include gui-dark.fs
 
 previous
