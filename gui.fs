@@ -112,11 +112,13 @@ forward gui-msgs
 
 Variable nick$
 
+: >engage ( field -- )
+    0e [: fdrop engage ;] >animate ;
 : nick-done ( max span addr pos -- max span addr pos flag )
     over 3 pick nick$ $!
-    pw-field engage
-    create-new-id /hflip
-    phrase-first /flop +lang
+    pw-field >engage
+    create-new-id /hflip drop
+    phrase-first /flop drop +lang
     1 to nick-pw  true ;
 
 : clear-edit ( max span addr pos -- max 0 addr 0 true )
@@ -284,7 +286,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		    : pw-show/hide ( flag -- )
 			dup IF  ""  ELSE  ""  THEN  show-pw-sign >o to text$ o>
 			2 config:passmode# @ 1 min rot select pw-field >o to pw-mode o>
-			pw-field engage +sync ;
+			pw-field >engage +sync ;
 		    ' pw-show/hide config:passmode# @ 1 > toggle[]
 		    \normal
 		}}h box[]
@@ -317,7 +319,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			minus-login /flip
 			nick-edit /vflip
 			0e nick-edit >o to baseline o>
-			pw-field engage
+			pw-field >engage
 			0 to nick-pw
 		    THEN +resize +lang ;
 		\normal
@@ -499,7 +501,7 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
     >o to frame-color o> +resize +sync ;
 : un-act ( edit-x engage-o -- )
     >o act .dispose  0 to act o> 0 to inside-move? ;
-event: :>un-act ( edit engage -- ) engage un-act +sync ;
+event: :>un-act ( edit engage -- ) >engage un-act +sync ;
 
 : edit-pen[] ( backframe edit-x update-xt -- xt )
     \G create a closure for an edit pen
@@ -516,7 +518,7 @@ event: :>un-act ( edit engage -- ) engage un-act +sync ;
 		-1 to outselw
 		true ;] edit[]
 	    ['] nick-filter filter[] drop
-	    edit-x engage  false upd
+	    edit-x >engage  false upd
 	    imports#rgb-bg sf@
 	THEN  backframe >re-color-edit o> ;] ;
 
@@ -705,7 +707,7 @@ previous
 : show-nicks ( -- )
     user-avatar drop dummy-thumb drop
     fill-nicks fill-groups !online-symbol
-    next-slide +lang +resize  peers-box engage
+    next-slide +lang +resize  peers-box >engage
     peers-box 0.01e [: .vp-top fdrop title-vp .vp-top +sync +resize ;] >animate ;
 
 \ messages
@@ -1649,7 +1651,7 @@ wmsg-o >o msg-table @ token-table ! o>
 	    <err> ." invalid entry" cr <default> 2drop
 	THEN
     cell +LOOP
-    log free throw  re-msg-box  chat-edit engage ;
+    log free throw  re-msg-box  chat-edit >engage ;
 
 : gui-msgs ( gaddr u -- )
     2dup msg-group$ $! (gui-msgs) ;
@@ -1690,7 +1692,7 @@ wmsg-o >o msg-table @ token-table ! o>
     chat-mic-icon chat-keyboard-icon data IF  swap  THEN
     /flop drop /flip drop
     chat-recording-button /flip drop
-    data IF  chat-edit engage  THEN
+    data IF  chat-edit >engage  THEN
     data 0= to data
     +resize +sync +lang ;
 
@@ -1767,7 +1769,7 @@ wmsg-o >o msg-table @ token-table ! o>
 		glue*l send-color x-color font-size# 40% f* }}frame dup .button2
 		blackish !i18n l" Send" }}text' !lit 40%b
 		[: data >o chat-edit-enter "" to text$ o>
-		    chat-edit engage ;] chat-edit click[]
+		    chat-edit >engage ;] chat-edit click[]
 	    }}z box[]
 	}}h box[]
     }}v box[]
@@ -1945,7 +1947,7 @@ Variable invitation-stack
 : !widgets ( -- )
 \    1 set-compose-hint
     top-widget .htop-resize
-    pw-field engage
+    pw-field >engage
     1e ambient% sf! set-uniforms ;
 
 [IFDEF] x11
