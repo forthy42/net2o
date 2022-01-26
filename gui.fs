@@ -137,7 +137,7 @@ Variable nick$
 : nick-engaged ( -- )
     nick-pw IF
 	create-new-id too-short-id
-	nick$ $@ x-width min-id-len# u< IF  swap  THEN
+	nick-check? IF  swap  THEN
 	/hflip drop
 	/flop drop
     THEN
