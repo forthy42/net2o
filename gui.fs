@@ -71,6 +71,7 @@ update-gsize#
 0 Value pw-num
 0 Value phrase-unlock
 0 Value create-new-id
+0 Value too-short-id
 0 Value phrase-first
 0 Value phrase-again
 0 Value plus-login
@@ -109,17 +110,52 @@ forward gui-msgs
 0 Value nick-field
 0 Value nick-pw
 0 Value pw-back
+2 Value min-id-len#
 
 Variable nick$
 
+0.001e FConstant engage-delay#
+
 : >engage ( field -- )
-    0e [: fdrop engage ;] >animate ;
+    engage-delay# [: 1e f= IF  engage  ELSE  drop  THEN ;] >animate ;
 : nick-done ( max span addr pos -- max span addr pos flag )
     over 3 pick nick$ $!
+    nick$ $@ x-width min-id-len# u< IF
+	create-new-id /hflip drop
+	too-short-id /flop drop +lang
+	nick-field >engage
+	false  EXIT
+    THEN
     pw-field >engage
     create-new-id /hflip drop
+    too-short-id /hflip drop
     phrase-first /flop drop +lang
     1 to nick-pw  true ;
+: nick-engaged ( -- )
+    nick-pw IF
+	create-new-id too-short-id
+	nick$ $@ x-width min-id-len# u< IF  swap  THEN
+	/hflip drop
+	/flop drop
+    THEN
+    phrase-first /hflip drop
+    phrase-again /hflip drop
+    0 to nick-pw
+    +lang ;
+: pw-engaged ( -- )
+    1 to nick-pw
+    nick-field .text$ nick$ $!
+    nick$ $@ x-width min-id-len# u< IF
+	create-new-id /hflip drop
+	too-short-id /flop drop +lang
+	nick-field >engage
+	EXIT
+    THEN
+    create-new-id /hflip drop
+    too-short-id /hflip drop
+    phrase-first /flop drop
+    phrase-again /hflip drop
+    +lang ;
 
 : clear-edit ( max span addr pos -- max 0 addr 0 true )
     drop nip 0 tuck true ;
@@ -242,6 +278,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue \regular
 		    }}h bx-tab nick-field ' nick-done edit[]
 		    ' nick-filter filter[]
+		    ' nick-engaged engaged[]
 		}}z box[] blackish
 		{{ \large "👤" }}text \normal }}h /phantom
 		glue*ll }}glue
@@ -279,6 +316,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 			glue*lll }}glue
 		    }}h
 		    pw-field ' pw-done edit[] ' entropy-colorize filter[]
+		    ' pw-engaged engaged[]
 		    \normal \sans white# to x-color
 		    "" }}text blackish
 		    dup value show-pw-sign
@@ -332,6 +370,7 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 	    glue*l login-bg-col# font-size# f2/ f2/ }}frame dup .button1
 	    {{ l" Enter passphrase to unlock" }}text' }}h dup to phrase-unlock
 	    {{ l" Create new ID" }}text' }}h dup to create-new-id /hflip
+	    {{ l" ID too short!" }}text' }}h dup to too-short-id /hflip
 	    {{ l" Enter new passphrase" }}text' }}h dup to phrase-first /hflip
 	    {{ l" Enter new passphrase again" }}text' }}h dup to phrase-again /hflip
 	    !lit
@@ -1971,7 +2010,7 @@ Variable invitation-stack
     THEN
     secret-keys# IF  show-nicks  ELSE
 	lacks-key?  IF
-	    0e 0 [: fdrop drop k-enter id-toggler .act .ekeyed ;] >animate
+	    engage-delay# 0 [: fdrop drop k-enter id-toggler .act .ekeyed ;] >animate
 	THEN
     THEN
     1config  !widgets
