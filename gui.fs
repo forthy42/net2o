@@ -118,18 +118,21 @@ Variable nick$
 
 : >engage ( field -- )
     engage-delay# [: 1e f= IF  engage  ELSE  drop  THEN ;] >animate ;
-: nick-done ( max span addr pos -- max span addr pos flag )
-    over 3 pick nick$ $!
-    nick$ $@ x-width min-id-len# u< IF
-	create-new-id /hflip drop
-	too-short-id /flop drop +lang
-	nick-field >engage
-	false  EXIT
-    THEN
-    pw-field >engage
+: nick-check? ( -- flag )
+    nick$ $@ x-width min-id-len# u< ;
+: nick-too-short ( -- )
+    create-new-id /hflip drop
+    too-short-id /flop drop +lang
+    nick-field >engage ;
+: phrase-first-show ( -- )
     create-new-id /hflip drop
     too-short-id /hflip drop
     phrase-first /flop drop +lang
+    phrase-again /hflip drop ;
+: nick-done ( max span addr pos -- max span addr pos flag )
+    over 3 pick nick$ $!
+    nick-check? IF  nick-too-short  false  EXIT  THEN
+    pw-field >engage  phrase-first-show
     1 to nick-pw  true ;
 : nick-engaged ( -- )
     nick-pw IF
@@ -145,16 +148,8 @@ Variable nick$
 : pw-engaged ( -- )
     1 to nick-pw
     nick-field .text$ nick$ $!
-    nick$ $@ x-width min-id-len# u< IF
-	create-new-id /hflip drop
-	too-short-id /flop drop +lang
-	nick-field >engage
-	EXIT
-    THEN
-    create-new-id /hflip drop
-    too-short-id /hflip drop
-    phrase-first /flop drop
-    phrase-again /hflip drop
+    nick-check? IF  nick-too-short  EXIT  THEN
+    phrase-first-show
     +lang ;
 
 : clear-edit ( max span addr pos -- max 0 addr 0 true )
