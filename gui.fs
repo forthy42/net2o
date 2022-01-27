@@ -109,6 +109,7 @@ forward gui-msgs
 0 Value pw-field
 0 Value nick-field
 0 Value nick-pw
+0 Value pw-gen
 0 Value pw-back
 2 Value min-id-len#
 
@@ -146,10 +147,10 @@ Variable nick$
     0 to nick-pw
     +lang ;
 : pw-engaged ( -- )
-    1 to nick-pw
+    pw-gen to nick-pw
     nick-field .text$ nick$ $!
     nick-check? IF  nick-too-short  EXIT  THEN
-    phrase-first-show
+    pw-gen IF  phrase-first-show  THEN
     +lang ;
 
 : clear-edit ( max span addr pos -- max 0 addr 0 true )
@@ -332,27 +333,31 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 		\large
 		: id-show-hide ( flag -- )
 		    IF
-			phrase-unlock /hflip
-			create-new-id /flop
-			phrase-first /hflip
-			phrase-again /hflip
-			plus-login /flip
-			minus-login /flop
-			nick-edit /flop
+			phrase-unlock /hflip drop
+			create-new-id /flop drop
+			too-short-id /hflip drop
+			phrase-first /hflip drop
+			phrase-again /hflip drop
+			plus-login /flip drop
+			minus-login /flop drop
+			nick-edit /flop drop
 			[ x-baseline ] FLiteral nick-edit >o
 			fdup gap% f* to gap to baseline o>
 			"nick" nick-field engage-edit
+			1 to pw-gen
 			1 to nick-pw
 		    ELSE
-			phrase-unlock /flop
-			create-new-id /hflip
-			phrase-first /hflip
-			phrase-again /hflip
-			plus-login /flop
-			minus-login /flip
-			nick-edit /vflip
+			phrase-unlock /flop drop
+			create-new-id /hflip drop
+			too-short-id /hflip drop
+			phrase-first /hflip drop
+			phrase-again /hflip drop
+			plus-login /flop drop
+			minus-login /flip drop
+			nick-edit /vflip drop
 			0e nick-edit >o to baseline o>
 			pw-field >engage
+			0 to pw-gen
 			0 to nick-pw
 		    THEN +resize +lang ;
 		\normal
