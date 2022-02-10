@@ -1463,10 +1463,6 @@ Variable tries#
 
 forward read-chatgroups
 
-: n2o-greeting ( -- )
-    [:  ." net2o " net2o-version type space (c) ."  2010-2021 Bernd Paysan" cr ;]
-    do-debug ;
-
 : get-skc ( -- )
     secret-keys# IF  read-chatgroups  EXIT  THEN
     n2o-greeting  tries# off

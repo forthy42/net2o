@@ -18,6 +18,11 @@
 \ helper words
 
 require version.fs
+
+: n2o-greeting ( -- )
+    [:  ." net2o " net2o-version type space (c) ."  2010-2022 Bernd Paysan" cr ;]
+    do-debug ;
+
 require err.fs
 
 \ required tools
