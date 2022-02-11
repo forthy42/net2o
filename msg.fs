@@ -849,9 +849,10 @@ msg:class is msg:object
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
+: ?msg-dec-sig? ( addr u -- addr' u' )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig? !!sig!!  THEN ;
 : msg-log-dec@ ( index -- addr u )
-    msg-group-o .msg:log[] $[]@
-    2dup + 2 - c@ $80 and IF  msg-dec-sig? drop  THEN ;
+    msg-group-o .msg:log[] $[]@ ?msg-dec-sig? ;
 
 : replace-sig { addrsig usig addrmsg umsg -- }
     addrsig usig addrmsg umsg usig - [: type type ;] $tmp
@@ -1384,8 +1385,6 @@ previous
 		msg-group-o .msg:keys[] $[]# IF  drop 0  THEN
 	    THEN
     REPEAT  2drop ;
-: ?msg-dec-sig? ( addr u -- addr' u' )
-    2dup 2 - + c@ $80 and IF  msg-dec-sig? drop  THEN ;
 : ?scan-pks ( addr u -- )
     bounds U+DO
 	I $@  ?msg-dec-sig?
@@ -1404,9 +1403,9 @@ forward key-from-dht
 : fetch-pks ( o:peer-con -- )
     0 msg-group-o .msg:pks# [: drop 1+ ;] #map 0<>  IF
 	o to connection
-	0 0 { start requests }
+	{ | w^ start w^ requests }
 	msg-group-o .msg:pks#
-	addr start addr requests [{: start requests :}l
+	start requests [{: start requests :}l
 	    pks( ." pk@" dup $@ 85type forth:cr )
 	    start @ 0= IF  net2o-code  expect-reply  THEN
 	    $@ $, dht-id dht-owner? end-with
@@ -1417,7 +1416,7 @@ forward key-from-dht
 		requests @ $10 > IF  end-code|  0 to requests
 		ELSE  [ also net2o-base ]   end-code  THEN
 	    THEN ;] #map
-	start IF  [ also net2o-base ] cookie+request end-code|  THEN
+	start @ IF  [ also net2o-base ] cookie+request end-code|  THEN
 	msg-group-o .msg:pks# free-obtained-pks
     THEN  save-keys ;
 : ?fetch-pks
@@ -1487,8 +1486,6 @@ Variable $lastline
 
 : !date ( addr u -- addr u )
     2dup + sigsize# - le-64@ line-date 64! ;
-: msg-log-dec@ ( n -- addr u )
-    msg-group-o .msg:log[] $[]@ ?msg-dec-sig? ;
 : find-prev-chatline { maxlen addr -- max span addr span }
     msg-group$ $@ >group
     msg-group-o .msg:log[] $[]# 0= IF  maxlen 0 addr over  EXIT  THEN

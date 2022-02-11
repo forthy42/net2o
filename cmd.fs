@@ -614,7 +614,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     -1 reqcount +!@ 1 = IF
 	wait-task @ ?dup-IF  wake# 's @ 1+ elit, :>wake  THEN
     THEN
-    0 r> addr reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
+    0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
     timeout( cmd( ." expect: " cmdbuf$ net2o:see ) )
@@ -623,7 +623,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     r@ reply-tag ?dup-IF  off  0 r@ to reply-tag  tHEN
     code-vdest     r@ reply-dest 64!
     ticks          r@ reply-time 64!
-    cmd-reply-xt @ r> is reply-xt
+    cmd-reply-xt @ r> reply-xt !
     1 reqcount +!@ drop o> ;
 
 : take-ret ( -- )

@@ -545,13 +545,18 @@ forward default-host
 : !wrapper ( val addr xt -- .. ) { a xt -- .. }
     a !@ >r xt catch r> a ! throw ;
 
+: wrap-config ( addr u wid -- )
+    config-throw >r  0 to config-throw
+    ['] read-config catch  r> to config-throw  throw
+    default-host ;
+
 : ?old-config ( addr u wid -- )
     \G check if we have an old config; then keep it.
     "~/.net2o/config" file-status nip no-file# <> IF
 	"~/.net2o" 2dup .net2o$ $! .net2o-config$ $!
 	subdir-config
 	nip nip "~/.net2o/config" rot
-	0 addr config-throw ['] read-config !wrapper default-host
+	wrap-config
     ELSE
 	?.net2o default-host ['] write-config catch drop
     THEN ;
@@ -559,9 +564,7 @@ forward default-host
 : ?.net2o-config ( -- )  true configured? !@ ?EXIT
     "NET2O_CONF"  getenv ?dup-IF  config-file$ $!  ELSE  drop  THEN
     config-file$ $@ 2dup file-status nip ['] config >wordlist swap
-    no-file# = IF  ?old-config  ELSE
-	0 addr config-throw ['] read-config !wrapper default-host
-    THEN  rootdirs>path ;
+    no-file# = IF  ?old-config  ELSE  wrap-config  THEN  rootdirs>path ;
 
 : init-dirs ( -- ) ?.net2o-config fsane-init ;
 

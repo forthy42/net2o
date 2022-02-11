@@ -485,8 +485,8 @@ previous
     code-map ?dup-IF  with mapc 0  outflag off
 	dest-replies
 	dest-size addr>replies bounds endwith U+DO
-	    I cell+ @ 0<> I action-of reply-xt and  IF
-		timeout( ." resend: " I action-of reply-xt .name I 2@ net2o:see forth:cr )
+	    I cell+ @ 0<> I reply-xt @ and  IF
+		timeout( ." resend: " I reply-xt @ .name I 2@ net2o:see forth:cr )
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ net2o:see forth:cr )
 		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
 		ticks I reply-time 64!

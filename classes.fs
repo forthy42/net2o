@@ -494,7 +494,7 @@ begin-structure reply
     field: reply-offset
     64field: reply-dest
     64field: reply-time
-    defer: reply-xt  \ execute when receiving an ok
+    field: reply-xt  \ execute when receiving an ok
     defer: send-xt   \ executed to (re)send a message
     value: reply-tag \ pointer to reply tag
 \    field: reply-timeout# \ per-reply timeout counter

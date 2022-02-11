@@ -374,7 +374,7 @@ scope{ mapc
 : alloc-data ( addr u -- u )
     dup >r to dest-size to dest-vaddr r>
     dup alloc+guard to dest-raddr
-    c:key# crypt-align + alloz addr dest-ivsgen ! \ !!FIXME!! should be a kalloc
+    c:key# crypt-align + alloz to dest-ivsgen \ !!FIXME!! should be a kalloc
     >code-flag @
     IF
 	dup addr>replies  alloc+guard to dest-replies
@@ -695,7 +695,7 @@ scope{ mapc
 	dest-replies + endwith ;
 
 reply buffer: dummy-reply
-' noop dummy-reply is reply-xt
+' noop dummy-reply reply-xt !
 
 : reply[] ( index -- addr )
     code-map with mapc

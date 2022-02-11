@@ -334,11 +334,11 @@ scope{ mapc
 }scope
 
 : size! ( 64 -- )
-    64dup to fs-size  addr fs-limit 64umin! ;
+    64dup to fs-size  fs-limit 64umin to fs-limit ;
 : seek-off ( -- )
     64#0 to fs-seekto 64#0 to fs-seek ;
 : seekto! ( 64 -- )
-    fs-size 64umin addr fs-seekto 64umax! ;
+    fs-size 64umin  fs-seekto 64umax to fs-seekto ;
 : limit-min! ( 64 id -- )
     fs-size 64umin to fs-limit ;
 : init-limit! ( 64 id -- )  state-addr >o to fs-limit o> ;
