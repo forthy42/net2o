@@ -74,7 +74,6 @@ $0C Value min-block# \ 4k minimum block size
 \ values, status
 
 true Value connected?
-0 Value dht-connection
 
 \ constants, and depending values
 

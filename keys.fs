@@ -535,9 +535,11 @@ event: :>search-key ( $addr -- )
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default>
     [ 1 import#untrusted lshift ]L to last-ki ;
 
+Variable dht-connection
+
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
     IF  drop keysearchs# @ 1+ >r
-	2dup unknown-keys# #@ nip 0= dht-connection and IF
+	2dup unknown-keys# #@ nip 0= dht-connection @ and IF
 	    <event 2dup $make elit, :>search-key ?query-task event|
 	    BEGIN  keysearchs# @ r@ - 0<  WHILE  <event  query-task event|  REPEAT
 	    rdrop  2dup key# #@ 0= IF  drop

@@ -567,7 +567,7 @@ event: :>add-me-id  add-me-id ;
     o [{: edit-x o:key :}d
 	IF  edit-x .text$ o:key >o
 	    ke-nick $@ nick# #@ nip IF
-		addr o:key last# cell+ del$cell
+		o:key last# cell+ del$cell
 	    ELSE  2drop  THEN
 	    ke-nick $! nick! key-sign
 	    o>  save-seckeys
@@ -1351,7 +1351,7 @@ require unix/stb-image-write.fs
 
 : img>thumb ( mem w h -- ivec4-addr len )
     GL_TEXTURE1 glActiveTexture
-    thumb-tex-rgba thumb-rgba addr thumb-rgba#  rgba>style
+    thumb-tex-rgba thumb-rgba rgba>style
     atlas-region ;
 
 previous

@@ -390,7 +390,7 @@ previous
 : -setip ['] .iperr is setip-xt ;
 
 : add-me-id ( -- )
-    dht-connection >o o to connection  +resend
+    dht-connection @ >o o to connection  +resend
     net2o-code  expect-reply
     expect-reply pk@ $, dht-id
     mynick$ $, dht-owner+
@@ -398,7 +398,7 @@ previous
     cookie+request
     end-code| o> ;
 : sub-me ( -- ) msg( ." sub-me" forth:cr )
-    dht-connection >o o to connection  +resend
+    dht-connection @ >o o to connection  +resend
     net2o-code  expect-reply
     pk@ $, dht-id
     pub-addr$ [: sigsize# - 2dup + sigdate datesize# move
