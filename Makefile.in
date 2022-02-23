@@ -25,17 +25,21 @@ srcdir    = @srcdir@
 bindir    = $(package)@bindir@
 libdir = $(package)@libdir@
 sysconfdir = $(package)@sysconfdir@
-LIBCCDEST = $(libdir)/net2o/@PACKAGE_VERSION@/$(machine)/libcc-named
+VERSION  = @PACKAGE_VERSION@
+LIBCCDEST = $(libdir)/net2o/$(VERSION)/$(machine)/libcc-named
 libccdir = $(subst $(package),,$(LIBCCDEST))
 LIBS 	 = keccakp threefish bdelta @ED25519_DONNA@
 MKDIR	 = mkdir
 RMDIR	 = rm -rf
+TAR	 = tar cf -
 GCC	 = gcc
 LIBTOOL	 = @GNU_LIBTOOL@
 CFLAGS	 = -O3 -fomit-frame-pointer
 HOST     = 
 FAST     = @FAST@
 FORTHLIB = ed25519-donna.fs keccak.fs threefish.fs bdelta.fs
+COMPRESS=xz -9
+COMPEXT=.xz
 
 SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  hash-table.fs keccak-small.fs kregion.fs n2o.fs addr.fs classes.fs  \
@@ -50,23 +54,15 @@ SOURCES = 64bit.fs base64.fs base85.fs crypto-api.fs debugging.fs	      \
 	  doc/net2o.png doc/user.png json/parser.fs json/g+-schema.fs	      \
 	  json/g+-import.fs json/fb-schema.fs json/twitter-schema.fs	      \
 	  json/test.fs json/test.json json/diaspora-schema.fs html/parser.fs  \
-	  xml/parser.fs xml/blogger-atom.fs n2o-completion.sh
+	  xml/parser.fs xml/blogger-atom.fs n2o-completion.sh debian/rules    \
+	  debian/compat debian/net2o.postinst
 
-ICONS = icons/hicolor/128x128/apps/net2o.png				      \
-	icons/hicolor/16x16/apps/net2o.png				      \
-	icons/hicolor/192x192/apps/net2o.png				      \
-	icons/hicolor/22x22/apps/net2o.png icons/hicolor/24x24/apps/net2o.png \
-	icons/hicolor/256x256/apps/net2o.png				      \
-	icons/hicolor/32x32/apps/net2o.png icons/hicolor/36x36/apps/net2o.png \
-	icons/hicolor/48x48/apps/net2o.png icons/hicolor/64x64/apps/net2o.png \
-	icons/hicolor/72x72/apps/net2o.png				      \
+ICONSIZES = 128x128 16x16 192x192 22x22 24x24 256x256 32x32 36x36 48x48 64x64 \
+	72x72
+
+ICONS = $(patsubst %,icons/hicolor/%/apps/net2o.png,$(ICONSIZES))	\
 	icons/hicolor/scalable/apps/net2o.svg
-ICONDIRS = icons/hicolor/128x128/apps/ icons/hicolor/16x16/apps/	\
-	icons/hicolor/192x192/apps/ icons/hicolor/22x22/apps/		\
-	icons/hicolor/24x24/apps/ icons/hicolor/256x256/apps/		\
-	icons/hicolor/32x32/apps/ icons/hicolor/36x36/apps/		\
-	icons/hicolor/48x48/apps/ icons/hicolor/64x64/apps/		\
-	icons/hicolor/72x72/apps/ icons/hicolor/scalable/apps/
+ICONDIRS = $(patsubst %,icons/hicolor/%/apps,$(ICONSIZES) scalable)
 
 DESKTOP = applications/net2o.desktop
 DESKTOPDIR = applications
@@ -107,7 +103,7 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 	  tests/dvcs-test.s2o tests/dvcs-test2.s2o			\
 	  tests/termclient.fs tests/msg-test
 
-@VERDIR@SRCPATH = net2o-@PACKAGE_VERSION@
+@VERDIR@SRCPATH = net2o-$(VERSION)
 @NOVERDIR@SRCPATH = net2o
 SRCDIRS = $(SRCPATH)/tests $(SRCPATH)/doc $(SRCPATH)/android $(SRCPATH)/linux $(SRCPATH)/lang $(SRCPATH)/json $(SRCPATH)/html $(SRCPATH)/xml
 
@@ -117,7 +113,8 @@ GEN = version.fs
 
 DOC = wiki/commands.md
 
-DISTFILES = $(SOURCES) $(LANGS) $(GEN) $(SCRIPTS) $(INS) $(INS:%=%.in)
+DISTFILES = $(SOURCES) $(LANGS) $(ICONS) $(DESKTOP) $(GEN) $(SCRIPTS) $(INS) \
+	$(INS:%=%.in)
 
 all: no-config doc
 
@@ -160,7 +157,7 @@ install:	libcc-install
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
 	-@VERDIR@rm $(datadir)/net2o
-	@VERDIR@ln -fs net2o-@PACKAGE_VERSION@ $(datadir)/net2o
+	@VERDIR@ln -fs net2o-$(VERSION) $(datadir)/net2o
 	for i in $(SOURCES) $(LANGS); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$(SRCPATH)/$$i; \
 	done
@@ -169,8 +166,8 @@ install:	libcc-install
 	done
 	$(MKDIR) -p $(bindir)
 	@VERDIR@for i in $(SCRIPTS); do \
-	@VERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-@PACKAGE_VERSION@; \
-	@VERDIR@	ln -fs $$i-@PACKAGE_VERSION@ $(bindir)/$$i; \
+	@VERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i-$(VERSION); \
+	@VERDIR@	ln -fs $$i-$(VERSION) $(bindir)/$$i; \
 	@VERDIR@done
 	@NOVERDIR@for i in $(SCRIPTS); do \
 	@NOVERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
@@ -188,7 +185,7 @@ install:	libcc-install
 	$(RMDIR) $(datadir)/gforth/$(GFVER)/$(@:%.dirui=%); \
 
 %.scriptui:
-	-@VERDIR@$(RM) $(bindir)/$(@:%.scriptui=%)-@PACKAGE_VERSION@; \
+	-@VERDIR@$(RM) $(bindir)/$(@:%.scriptui=%)-$(VERSION); \
 	$(RM) $(bindir)/$(@:%.scriptui=%); \
 
 uninstall:	libcc-uninstall $(SRCDIRS:%=%.dirui) $(SCRIPTS:%=%.scriptui)
@@ -219,7 +216,7 @@ libcc-uninstall:
 doc:	$(DOC)
 
 wiki/commands.md:	$(SOURCES)
-	gforth -e ': docgen ;' n2o.fs -e bye | sed -e 's/@VERSION@/@PACKAGE_VERSION@/g' >wiki/commands.md
+	gforth -e ': docgen ;' n2o.fs -e bye | sed -e "s/@VERSION@/$(VERSION)/g" >wiki/commands.md
 
 TAGS:	$(SOURCES) $(GEN) libcc
 	gforth etags.fs $(srcdir)/n2o.fs -e "bye" || >TAGS
@@ -234,6 +231,13 @@ $(INS):	config.status $(INS:%=%.in)
 
 config.status: configure
 	./config.status --recheck
+
+dist:	$(DISTFILES)
+	-$(RMDIR) net2o-$(VERSION)
+	mkdir net2o-$(VERSION)
+	$(TAR) $(DISTFILES) | (cd net2o-$(VERSION); tar xf -)
+	$(TAR) net2o-$(VERSION)|$(COMPRESS) >net2o-$(VERSION).tar$(COMPEXT)
+	-$(RMDIR) net2o-$(VERSION)
 
 debdist:
 	PATH=/usr/bin:/bin CC="gcc -DFORCE_SYMVER=2.2.5 -Wl,--hash-style=both" dpkg-buildpackage -us -uc -d -b $(DEBARCH)
