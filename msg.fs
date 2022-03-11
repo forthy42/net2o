@@ -390,7 +390,7 @@ previous
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	>r r@ <hide> <event $make elit, o elit, msg-group-o elit, :>msg-nestsig
+	dup >r <hide> <event $make elit, o elit, msg-group-o elit, :>msg-nestsig
 	r> event>
     ELSE  do-msg-nestsig  THEN ;
 

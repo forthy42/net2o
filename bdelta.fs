@@ -198,5 +198,5 @@ Variable bdelta$
     bdelta$ $@ ;
 
 : spit-file ( addr1 u1 fileaddr2 u2 -- )
-    r/w create-file throw >r r@ write-file
+    r/w create-file throw dup >r write-file
     r> close-file throw throw ;

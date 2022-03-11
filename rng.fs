@@ -132,8 +132,8 @@ $10 cells buffer: rngstat-buf
     check-rng$ $@ file-status nip no-file# <> IF
 	check-rng$ $@ check-old$ $slurp-file
 	check-old$ $@ 2over search nip nip !!bad-rng!!
-	check-rng$ $@ w/o open-file throw >r
-	r@ file-size throw r@ reposition-file throw
+	check-rng$ $@ w/o open-file throw dup
+	>r file-size throw r@ reposition-file throw
     ELSE
 	check-rng$ $@ dirname '/' -skip $1FF init-dir drop
 	check-rng$ $@ w/o create-file throw >r

@@ -42,8 +42,8 @@
 	message state# + wurst-state state# xors
 	message wurst-source state# xors
 	state# 0 wurst-in reposition-file throw
-	s" wurstkessel.fs3" wurst-outfile roundsh# >r
-	r@ encrypt-read
+	s" wurstkessel.fs3" wurst-outfile roundsh# dup
+	>r encrypt-read
 	r@  message swap  dup $F and 8 umin 0 ?DO
 	    I 0> IF 'rounds I cells + @ execute THEN
 	    dup 'round-flags Ith and IF

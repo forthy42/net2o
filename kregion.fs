@@ -30,8 +30,8 @@ $20 Constant crypt-align
 
 : kalloc ( len -- addr )
     \G allocate a len byte block of non-swappable stuff
-    kalign >r
-    r@ /kregion u> !!kr-size!!
+    kalign dup
+    >r /kregion u> !!kr-size!!
     kregion 2@ dup r@ u< IF
 	/kregion +to /kregion#  2drop /kregion
 	\ we have to fall back to alloc+guard if we want more than 64k
@@ -57,7 +57,7 @@ $20 Constant crypt-align
 : sec-free ( addr -- ) dup @ dup  IF  kfree64 off EXIT  THEN  2drop ;
 : sec! ( addr1 u1 addr2 -- )
     over 0= IF  sec-free 2drop  EXIT  THEN
-    >r r@ kalloc64? dup r> ! $40 smove ;
+    dup >r kalloc64? dup r> ! $40 smove ;
 : sec@ ( addr -- addr1 u1 )
     @ dup IF  $40
 	over $20 + $20 zero32 over str= IF  2/
@@ -72,8 +72,8 @@ $20 Constant crypt-align
 
 : sec[]@ ( i addr -- addr u )  $[] sec@ ;
 
-: sec[]free ( addr -- ) >r
-    r@ $@ bounds ?DO
+: sec[]free ( addr -- ) dup
+    >r $@ bounds ?DO
 	I sec-free
     cell +LOOP
     r> $free ;

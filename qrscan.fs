@@ -226,7 +226,7 @@ $70 Value red-level#
 [THEN]
 
 : rgb@ ( addr -- r g b )
-    >r r@ c@ r@ 1+ c@ r> 2 + c@ ;
+    dup >r c@ r@ 1+ c@ r> 2 + c@ ;
 
 0 Value rgb-xor
 

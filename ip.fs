@@ -249,7 +249,7 @@ $FE80 be-w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0001 be-w,
     ;] 'sock )else( 0 ) ;
 
 : check-ip64 ( dummy -- ipaddr u ) ipv4(
-    >r r@ check-ip6 dup IF  rdrop  EXIT  THEN
+    dup >r check-ip6 dup IF  rdrop  EXIT  THEN
     2drop r> $10 + be-ul@ check-ip4 )else( check-ip6 ) ;
 
 : sock-connect? ( addr u -- flag ) query-sock -rot connect 0= ;

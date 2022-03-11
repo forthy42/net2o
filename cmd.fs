@@ -619,8 +619,8 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
     o 0= IF  msg( ." fail expect reply" forth:cr )  EXIT  THEN
     timeout( cmd( ." expect: " cmdbuf$ net2o:see ) )
     msg( ." Expect reply" outflag @ stateless# and IF ."  stateless" THEN forth:cr )
-    connection >o code-reply >r
-    r@ reply-tag ?dup-IF  off  0 r@ to reply-tag  tHEN
+    connection >o code-reply dup
+    >r reply-tag ?dup-IF  off  0 r@ to reply-tag  tHEN
     code-vdest     r@ reply-dest 64!
     ticks          r@ reply-time 64!
     cmd-reply-xt @ r> reply-xt !

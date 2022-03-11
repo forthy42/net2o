@@ -248,7 +248,7 @@ $10 cell+ buffer: new-asset
 
 : update ( -- )
     SwapDragonKeys'#
-    [: ( last -- ) >r r@ cell+ $@ r@ $@ SwapDragonKeys# #! ;] #map
+    [: ( last -- ) dup >r cell+ $@ r@ $@ SwapDragonKeys# #! ;] #map
     SwapDragonKeys'# #frees ;
 }scope
 

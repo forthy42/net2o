@@ -1,3 +1,20 @@
+\ hash table
+
+\ Copyright © 2010-2021   Bernd Paysan
+
+\ This program is free software: you can redistribute it and/or modify
+\ it under the terms of the GNU Affero General Public License as published by
+\ the Free Software Foundation, either version 3 of the License, or
+\ (at your option) any later version.
+
+\ This program is distributed in the hope that it will be useful,
+\ but WITHOUT ANY WARRANTY; without even the implied warranty of
+\ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+\ GNU Affero General Public License for more details.
+
+\ You should have received a copy of the GNU Affero General Public License
+\ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 \ generic hash table functions
 
 2 64s buffer: hashinit
@@ -20,27 +37,27 @@ User hash-state 2 64s cell- uallot drop
 uvalue last#
 
 : #!? ( addrval u addrkey u bucket -- true / addrval u addrkey u false )
-    >r r@ @ 0= IF  r@ $! r@ cell+ $!  r> to last#
+    dup >r @ 0= IF  r@ $! r@ cell+ $!  r> to last#
 	true  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r@ cell+ $! r> to last#  true  EXIT  THEN
     rdrop false ;
 
 : #@? ( addrkey u bucket -- addrval u true / addrkey u false )
-    >r r@ @ 0= IF  rdrop false  EXIT  THEN
+    dup >r @ 0= IF  rdrop false  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r> dup to last# cell+ $@ true  EXIT  THEN
     rdrop false ;    
 
 : bucket-off ( bucket -- ) dup $free cell+ $free ;
 
 : #free? ( addrkey u bucket -- true / addrkey u false )
-    >r r@ @ 0= IF  rdrop false  EXIT  THEN
+    dup >r @ 0= IF  rdrop false  EXIT  THEN
     2dup r@ $@ str=  IF  2drop r> bucket-off true  EXIT  THEN
     rdrop false ;
 
 $180 cells Constant table-size#
 
-: hash@ ( bucket -- addr )  >r
-    r@ @ 0= IF  table-size# allocate throw dup table-size# erase dup r> !
+: hash@ ( bucket -- addr )  dup
+    >r @ 0= IF  table-size# allocate throw dup table-size# erase dup r> !
     ELSE  r> @  THEN ;
 
 warnings @ warnings off \ hash-bang will be redefined
@@ -71,8 +88,8 @@ warnings !
 	I c@ $80 or $80 + cells hash @ + to hash
     LOOP  2drop ;
 
-: #frees ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  >r
-    r@ @             $100 cells bounds DO  I $free    cell +LOOP
+: #frees ( hash -- ) dup @ 0= IF  drop  EXIT  THEN  dup
+    >r @             $100 cells bounds DO  I $free    cell +LOOP
     r@ @ $100 cells + $80 cells bounds DO  I recurse  cell +LOOP
     r@ @ free throw  r> off ;
 

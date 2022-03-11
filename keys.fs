@@ -251,8 +251,8 @@ Variable sim-nick!
 \ search for keys - not optimized
 
 : #split ( addr u -- addr u n )
-    [: 2dup '#' -scan nip >r
-      r@ 0= IF  rdrop 0  EXIT  THEN
+    [: 2dup '#' -scan nip dup
+      >r 0= IF  rdrop 0  EXIT  THEN
       #0. 2over r@ 1+ /string >number
       0= IF  nip drop nip r> swap  ELSE
 	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
@@ -1493,7 +1493,7 @@ scope: n2o
 
 : lacks-key? ( -- flag )
     gen-keys-dir  "seckeys.k2o" .keys/ 2dup file-status nip
-    0= IF  r/o open-file throw >r r@ file-size throw d0=
+    0= IF  r/o open-file throw dup >r file-size throw d0=
 	r> close-file throw  ELSE  true  THEN ;
 
 : get-my-key ( -- xt )

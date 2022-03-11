@@ -264,8 +264,8 @@ $100 buffer: escape-chars
     2dup " +++**\n" 2 pick 6 = + string-prefix? IF
 	."  #" dup 6 <> IF  cr  THEN  7 safe/string
     ELSE
-	dup 2 u>= IF  2dup #lf skip nip over swap - >r
-	    r@ 1 = IF  '\' emit  THEN
+	dup 2 u>= IF  2dup #lf skip nip over swap - dup
+	    >r 1 = IF  '\' emit  THEN
 	    over r@ type r> safe/string  THEN
     THEN
     dup IF  over c@ emit 1 safe/string  THEN ;

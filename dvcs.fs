@@ -219,7 +219,7 @@ Variable patch-in$
     dvcs:in-files$ $+! ;
 
 : filelist-print ( filelist -- )
-    [: >r r@ cell+ $@ 85type space r> $@ type cr ;] #map ;
+    [: dup >r cell+ $@ 85type space r> $@ type cr ;] #map ;
 : filelist-out ( o:dvcs -- )
     ".n2o/files" [: >r dvcs:files# ['] filelist-print r> outfile-execute ;]
     new-file ;
@@ -431,8 +431,8 @@ Defer hash-import ' noop is hash-import
 	$-2000 and swap dup S_IFLNK = IF  drop S_IFREG  THEN
     THEN  <> r> or ;
 : dvcs?modified ( o:dvcs -- )
-    dvcs:files# [: >r
-	r@ cell+ $@ drop hash#128 + dvcs:perm le-uw@ { perm }
+    dvcs:files# [: dup
+	>r cell+ $@ drop hash#128 + dvcs:perm le-uw@ { perm }
 	r@ $@ statbuf perm $1000 and IF  stat  ELSE  lstat  THEN
 	0< IF  errno ENOENT = IF
 		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]f
@@ -540,14 +540,14 @@ previous
 : append-line ( addr u file u -- )
     2dup w/o open-file dup no-file# = IF
 	2drop w/o create-file throw  ELSE  throw nip nip  THEN
-    >r r@ file-size throw r@ reposition-file throw
+    dup >r file-size throw r@ reposition-file throw
     r@ write-line throw r> close-file throw ;
 
 \ patch stuff
 
 \ read in branches, new version
 
-: hash+type ( addr u type addr1 -- ) >r r@ $free
+: hash+type ( addr u type addr1 -- ) dup >r $free
     [: { w^ x } type x cell type ;] r> $exec ;
 
 ' 2drop commit-class is msg:tag

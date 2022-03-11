@@ -78,7 +78,7 @@ file-classes file-classes# cells bounds
 drop
 
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
-    parent .perm-mask @ >r r@ fs-perm?
+    parent .perm-mask @ dup >r fs-perm?
     64>n -2 and 4 umin dup r> ?rw-perm  >r $> r> fs-open ;
 +net2o: file-type ( n -- ) \g choose file type
     64>n fs-class! ;
@@ -437,7 +437,7 @@ scope{ mapc
 }scope
 
 : +cookie ( -- )
-    data-rmap with mapc  ack-bit# @ >r  r@ +resend#
+    data-rmap with mapc  ack-bit# @ dup  >r +resend#
     data-ackbits @ r> +bit@
     endwith negate packetr2 +! ;
 

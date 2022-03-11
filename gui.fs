@@ -499,7 +499,7 @@ Variable thumb.png$
     [: avatar-frame avatar-thumb ;] catch IF  2drop 0 nothrow  THEN ;
 
 : re-avatar ( last# -- )
-    >r r@ $@ read-avatar r> cell+ $@ smove ;
+    dup >r $@ read-avatar r> cell+ $@ smove ;
 : re-dummy ( -- )
     dummy-thumb# @ 0= ?EXIT \ nobody has a dummy thumb
     read-thumb dummy-thumb# $@ smove ;
@@ -1256,11 +1256,11 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 
 : ?thumb { d: hash -- o }
     hash ['] avatar-frame catch nothrow 0= IF
-	>r r@ i.w r@ i.h hash >swap
+	dup >r i.w r@ i.h hash >swap
 	glue*thumb r> }}thumb >r hash r@ .>rotate
     ELSE
-	128 128 glue*thumb dummy-thumb }}thumb >r
-	r@ hash keysize safe/string IF  c@  ELSE  0  THEN
+	128 128 glue*thumb dummy-thumb }}thumb dup
+	>r hash keysize safe/string IF  c@  ELSE  0  THEN
 	[d:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #+!
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
@@ -1372,7 +1372,7 @@ Variable play$ "" play$ $!
 Variable pause$ "" pause$ $!
 : ?audio-idx { d: hash -- o }
     hash ['] audio-frame catch nothrow 0= IF
-	>r r@ i.w r@ i.h swap
+	dup >r i.w r@ i.h swap
 	glue*audio r> }}thumb >o 7 to rotate# o o>
     ELSE
 	drop  128 128 glue*thumb dummy-thumb }}thumb

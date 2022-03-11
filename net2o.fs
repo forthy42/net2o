@@ -221,7 +221,7 @@ Create add-sizes     $06 c, $2a c, $FF c, $FF c,
 : packet-body ( addr -- addr )
     dup header-size + ;
 : packet-data ( addr -- addr u )
-    >r r@ header-size r@ + r> body-size ;
+    dup >r header-size r@ + r> body-size ;
 
 add-sizes 1+ c@ min-size + Constant minpacket#
 
@@ -477,7 +477,7 @@ User outflag  outflag off
 
 : >send ( addr n -- )
 \   over 0= IF  2drop  rdrop EXIT  THEN
-    >r  r@ [ 64bit# qos3# or ]L or outbuf c!  set-flags
+    dup  >r [ 64bit# qos3# or ]L or outbuf c!  set-flags
     outbuf packet-body min-size r> lshift move ;
 
 forward send-code-packet
@@ -803,8 +803,8 @@ in net2o : max-flyburst ( bursts -- )  flybursts-max# min flybursts max!@
 : >timestamp ( time addr -- time' ts-array index / time' 0 0 )
     >flyburst
     64>r time-offset 64@ 64+ 64r>
-    parent .data-map dup 0= IF  drop 0 0  EXIT  THEN  >r
-    r@ with mapc >offset  IF
+    parent .data-map dup 0= IF  drop 0 0  EXIT  THEN  dup
+    >r with mapc >offset  IF
 	dest-tail dest-size endwith  >r over - r> 1- and
 	addr>bits 1 max window-size !
 	addr>ts r> .mapc:dest-timestamps swap
@@ -1679,7 +1679,7 @@ scope{ mapc
 
 : route-packet ( -- )
     add-source
-    inbuf >r r@ get-dest route>address IF
+    inbuf dup >r get-dest route>address IF
 	route( ." route to: " sockaddr> alen @ .address space
 	inbuf net2o-header:dest .addr-path cr )
 	r@ dup packet-size send-a-packet 0<

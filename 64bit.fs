@@ -1,9 +1,9 @@
 \ portable functions for 64 bit numbers
 
-: min!  ( n addr -- )   >r r@ @ min  r> ! ;
-: max!  ( n addr -- )   >r r@ @ max  r> ! ;
-: umin! ( n addr -- )   >r r@ @ umin r> ! ;
-: umax! ( n addr -- )   >r r@ @ umax r> ! ;
+: min!  ( n addr -- )   dup >r @ min  r> ! ;
+: max!  ( n addr -- )   dup >r @ max  r> ! ;
+: umin! ( n addr -- )   dup >r @ umin r> ! ;
+: umax! ( n addr -- )   dup >r @ umax r> ! ;
 
 1 pad ! pad c@ negate constant le?
 
@@ -170,14 +170,14 @@ cell 8 = [IF]
     : 64* ( d1 d2 -- d3 ) { l1 h1 l2 h2 }
 	l1 l2 um* l1 h2 um* l2 h1 um* d+ drop + ;
     : 128@ ( addr -- x1..x4 )
-	>r
-	r@ @
+	dup
+	>r @
 	r@ cell+ @
 	r@ 2 cells + @
 	r> 3 cells + @ ;
     : 128! ( x1..x4 addr -- )
-	>r
-	r@ 3 cells + !
+	dup
+	>r 3 cells + !
 	r@ 2 cells + !
 	r@ cell+ !
 	r> ! ;
@@ -193,11 +193,11 @@ cell 8 = [IF]
     previous definitions
     : dumin ( ud1 ud2 -- ud3 )  2over 2over du> IF  2swap  THEN  2drop ;
     : dumax ( ud1 ud2 -- ud3 )  2over 2over du< IF  2swap  THEN  2drop ;
-    : 64!@ ( value addr -- old-value )   >r r@ 64@ 64swap r> 64! ;
-    : 64min! ( d addr -- )  >r r@ 64@ dmin r> 64! ;
-    : 64max! ( d addr -- )  >r r@ 64@ dmax r> 64! ;
-    : 64umin! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
-    : 64umax! ( n addr -- )   >r r@ 64@ dumin r> 64! ;
+    : 64!@ ( value addr -- old-value )   dup >r 64@ 64swap r> 64! ;
+    : 64min! ( d addr -- )  dup >r 64@ dmin r> 64! ;
+    : 64max! ( d addr -- )  dup >r 64@ dmax r> 64! ;
+    : 64umin! ( n addr -- )   dup >r 64@ dumin r> 64! ;
+    : 64umax! ( n addr -- )   dup >r 64@ dumin r> 64! ;
     synonym be@ be-ul@
     synonym be! be-l!
     : 128+ ( 128a 128b -- 128c ) \ 128 bit addition

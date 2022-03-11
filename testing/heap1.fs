@@ -29,15 +29,15 @@ end-structure
     cell dup r@ hmaxsize ! 0 r@ hsize !
     allocate throw r@ harray ! r> ;
 
-: hresize> ( heap -- ) >r
-    r@ hmaxsize @ r@ hsize @ u< IF
+: hresize> ( heap -- ) dup
+    >r hmaxsize @ r@ hsize @ u< IF
 	r@ harray @
 	r@ hmaxsize @ 2* dup r@ hmaxsize ! resize throw
 	r@ harray !
     THEN r> drop ;
 
-: hresize< ( heap -- ) >r
-    r@ hmaxsize @ 2/ r@ hsize @ u> IF
+: hresize< ( heap -- ) dup
+    >r hmaxsize @ 2/ r@ hsize @ u> IF
 	r@ harray @
 	r@ hmaxsize @ 2/ dup r@ hmaxsize ! resize throw
 	r@ harray !
@@ -72,8 +72,8 @@ end-structure
 	    dup index = swap to index
 	UNTIL  EXIT  THEN drop ;
 
-: hdelete ( heap -- ... ) >r
-    r@ hsize @ 0= abort" heap empty"
+: hdelete ( heap -- ... ) dup
+    >r hsize @ 0= abort" heap empty"
     r@ harray @ @
     cell negate r@ hsize +!
     r@ harray @ r@ hsize @ + @ r@ harray @ !

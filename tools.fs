@@ -155,16 +155,16 @@ debug: dummy(
 
 \ logic memory modifiers
 
-[IFUNDEF] or!   : or!   ( x addr -- )    >r r@ @ or   r> ! ; [THEN]
-[IFUNDEF] xor!  : xor!  ( x addr -- )    >r r@ @ xor  r> ! ; [THEN]
-[IFUNDEF] and!  : and!  ( x addr -- )    >r r@ @ and  r> ! ; [THEN]
+[IFUNDEF] or!   : or!   ( x addr -- )    dup >r @ or   r> ! ; [THEN]
+[IFUNDEF] xor!  : xor!  ( x addr -- )    dup >r @ xor  r> ! ; [THEN]
+[IFUNDEF] and!  : and!  ( x addr -- )    dup >r @ and  r> ! ; [THEN]
 
-[IFUNDEF] cxor! : cxor! ( x c-addr -- )  >r r@ c@ xor r> c! ; [THEN]
-[IFUNDEF] cand! : cand! ( x c-addr -- )  >r r@ c@ and r> c! ; [THEN]
-[IFUNDEF] cor!  : cor!  ( x c-addr -- )  >r r@ c@ or  r> c! ; [THEN]
+[IFUNDEF] cxor! : cxor! ( x c-addr -- )  dup >r c@ xor r> c! ; [THEN]
+[IFUNDEF] cand! : cand! ( x c-addr -- )  dup >r c@ and r> c! ; [THEN]
+[IFUNDEF] cor!  : cor!  ( x c-addr -- )  dup >r c@ or  r> c! ; [THEN]
 
-: max!@ ( n addr -- )    >r r@ @ max  r> !@ ;
-: umax!@ ( n addr -- )   >r r@ @ umax r> !@ ;
+: max!@ ( n addr -- )    dup >r @ max  r> !@ ;
+: umax!@ ( n addr -- )   dup >r @ umax r> !@ ;
 
 \ user stack, automatic init+dispose
 
@@ -242,7 +242,7 @@ require bits.fs
 \ compact representation of mostly power-of-two numbers
 
 : p2@+ ( addr -- 64bit addr' )
-    count >r r@ $C0 u>= IF
+    count dup >r $C0 u>= IF
 	64#1 r> $3F and 64lshift n64-swap  EXIT  THEN
     r@ $0F and u>64 r> 4 rshift 8 umin 0 ?DO
 	8 64lshift 64>r count u>64 64r> 64+
@@ -815,7 +815,7 @@ $10 Constant datesize#
 		1 -LOOP
 		64drop $#  EXIT  THEN
 	    64u< IF  left $#  ELSE  $# 1+ right  THEN
-    REPEAT  drop >r r@ a[] $[]@ ?dup-IF
+    REPEAT  drop dup >r a[] $[]@ ?dup-IF
 	startdate@ 64u> negate r> +
     ELSE  drop 64drop r>  THEN ;
 
@@ -902,8 +902,8 @@ to current-theme
     64>d r@ reposition-file throw
     r@ write-file throw r> flush-file throw ;
 
-: append-file ( addr u fd -- 64pos ) >r
-    r@ file-size throw d>64 64dup { 64: pos } r> write@pos-file pos ;
+: append-file ( addr u fd -- 64pos ) dup
+    >r file-size throw d>64 64dup { 64: pos } r> write@pos-file pos ;
 
 : touch ( addr u -- )
     w/o create-file throw close-file throw ;

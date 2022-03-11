@@ -239,8 +239,8 @@ also net2o-base
     [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;
 previous
 : >sockaddr ( -- addr len )
-    return-address be@ routes# #.key >r
-    r@ cell+ $@len 0= IF  s" ." r@ cell+ $!  THEN \ set route to known
+    return-address be@ routes# #.key dup
+    >r cell+ $@len 0= IF  s" ." r@ cell+ $!  THEN \ set route to known
     r> $@ .sockaddr ;
 
 \\\

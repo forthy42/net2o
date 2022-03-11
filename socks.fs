@@ -259,7 +259,7 @@ Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
 
 : packet-route ( orig-addr addr -- flag )
     dup route?  IF
-	>r r@ get-dest  route>address  IF  r@ ins-source  ELSE  drop  THEN
+	dup >r get-dest  route>address  IF  r@ ins-source  ELSE  drop  THEN
 	rdrop false  EXIT  THEN
     2drop true ; \ local packet
 

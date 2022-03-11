@@ -234,7 +234,7 @@ Variable my-beacon
     \G I got a reply, my address is known
     beacon( ticks .ticks ."  Got known reply: " sockaddr< alen @ .address forth:cr )
     sockaddr< alen @ beacons# #@ IF
-	>r r@ 64@ ticks 64umin config:beacon-ticks& 2@ d>64 64+ r> 64!
+	dup >r 64@ ticks 64umin config:beacon-ticks& 2@ d>64 64+ r> 64!
     ELSE  drop  THEN ;
 : >-beacon ( addr u -- )
     \G I got a punch

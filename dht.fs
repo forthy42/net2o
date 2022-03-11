@@ -26,8 +26,8 @@ Sema dht-sema
 
 Variable d#public \ root of public dht
 
-: dht@ ( bucket -- addr )  >r
-    r@ @ 0= IF  dht-size# allocate throw dup r> ! dup dht-size# erase
+: dht@ ( bucket -- addr )  dup
+    >r @ 0= IF  dht-size# allocate throw dup r> ! dup dht-size# erase
     ELSE  r> @  THEN ;
 
 : dht-map { dht xt: xt -- }
@@ -138,7 +138,7 @@ Variable dht-table
 
 : d#? ( addrkey u bucket -- addr u bucket/0 )
     dup @ 0= ?EXIT
-    >r r@ @ .dht-hash $@ 2over string-prefix? IF  r> EXIT  THEN
+    dup >r @ .dht-hash $@ 2over string-prefix? IF  r> EXIT  THEN
     rdrop false ;
 
 : d# ( addr u hash -- bucket ) { hash }
@@ -445,8 +445,8 @@ previous
 : me>d#id ( -- ) pk@ >d#id ;
 
 in net2o : send-replace ( -- )
-    me>d#id .dht-host >r
-    r@ $[]# IF  +resend
+    me>d#id .dht-host dup
+    >r $[]# IF  +resend
 	net2o-code   expect-reply
 	pk@ $, dht-id
 	r@ remove-me, end-with
