@@ -45,7 +45,7 @@ tex: minos2-logo
 
 : ft2021-slides-updated ( -- )
     n2-img m2-img
-    slide# @ 7 8 within IF swap THEN
+    slide# @ 8 9 within IF swap THEN
     /flip drop /flop drop ;
 ' ft2021-slides-updated is slides-updated
 
@@ -234,6 +234,8 @@ $44FFFFFF re-color author#
 	    {{
 		l" ToDo–Liste für ΜΙΝΩΣ2" /title
 		vt{{
+		    l" • " l" Erledigt: Bidi–Algorithmus" b\\
+		    l" • " l" Kompates Unicode–Encoding noch nicht da" b\\
 		    l" • " l" Absätze neu umbrechen, wenn sich die Breite der äußeren Box geändert hat" b\\
 		    l" • " l" Treiber für Video4Linux2 fertig stellen" b\\
 		    l" • " l" Treiber für Video Acceleration API" b\\
