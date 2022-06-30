@@ -20,8 +20,9 @@ and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o, so enter:
 
     sudo -s
+    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian testing main
+    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian testing main
     EOF
 
 Remove the architectures on the list above which you don't need; change
@@ -31,7 +32,13 @@ architecture is not necessary.  On older versions, the “`all`” part is not
 searched if you don't have that list, then Gforth fails to install the
 “`gforth-common`” part.
 
+If your Debian is too old to support `signed-by`, you can import the key the
+traditional way:
+
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
+
+And then fetch the repository and install
+
     apt update
     apt install net2o-gui
     exit
