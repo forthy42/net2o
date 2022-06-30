@@ -17,25 +17,37 @@ since I'll redirect you to https in any case:
 
 Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
-update the repository data and install net2o, so enter:
+update the repository data and install net2o.
+
+### Debian testing
 
     sudo -s
-    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
+    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
+    gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian testing main
+    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian testing main
     EOF
 
-Remove the architectures on the list above which you don't need; change
-`testing` to `stable` or `oldstable` if you are running on older versions of
-Debian.  On Debian `testing` (and in the meantime `stable`), the list of
-architecture is not necessary.  On older versions, the “`all`” part is not
-searched if you don't have that list, then Gforth fails to install the
-“`gforth-common`” part.
+### Debian stable
 
-If your Debian is too old to support `signed-by`, you can import the key the
-traditional way:
+    sudo -s
+    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
+    gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
+    cat >/etc/apt/sources.list.d/net2o.list <<EOF
+    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian stable main
+    EOF
 
+### Debian oldstable
+
+    sudo -s
+    cat >/etc/apt/sources.list.d/net2o.list <<EOF
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
+    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian oldstable main
+    EOF
+
+Remove the architectures on the list above which you don't need.
+
+### Debian all versions continue
 
 And then fetch the repository and install
 
