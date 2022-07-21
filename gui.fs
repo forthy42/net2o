@@ -21,7 +21,7 @@ require minos2/widgets.fs
 
 also minos
 
-ctx 0= [IF]  window-init  [THEN]
+gl-init
 
 require minos2/font-style.fs
 
