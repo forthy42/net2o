@@ -121,7 +121,6 @@ scope{ n2o
 : help ( -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
-    n2o-greeting
     ?nextarg IF
 	BEGIN
 	    2dup over c@ '-' = IF
@@ -829,7 +828,9 @@ scope{ /chat
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ; is /n2o
 }scope
 
+0 Value extra-args \ hide extra arguments until start-n2o is run
 : start-n2o ( -- )
+    extra-args ?dup-IF  argc !  THEN
     [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug %droprate %droprate \ read in all debugging stuff
     profile( init-timer )
@@ -838,7 +839,12 @@ scope{ /chat
     profile( .times )
     n2o:bye ;
 
-' start-n2o is process-args
+:noname ( -- )
+    n2o-greeting
+    is-color-terminal? IF  +status  ELSE  -status  THEN ;
+is bootmessage
+' start-n2o is 'quit
+load-rc? off \ do not load ~/.config/gforthrc
 
 \\\
 Local Variables:

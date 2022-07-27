@@ -1467,7 +1467,7 @@ forward read-chatgroups
 
 : get-skc ( -- )
     secret-keys# IF  read-chatgroups  EXIT  THEN
-    n2o-greeting  tries# off
+    tries# off
     debug-vector @ op-vector !@ >r <default>
     secret-keys#
     BEGIN  dup 0= tries# @ maxtries# u< and  WHILE drop

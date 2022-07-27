@@ -19,7 +19,7 @@ utf-8 set-encoding
 
 require minos2/widgets.fs
 
-also minos
+Forth definitions also minos
 
 gl-init
 

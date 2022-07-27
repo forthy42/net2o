@@ -1,4 +1,4 @@
-#! @GFORTHFAST@
+#! @GFORTHFAST@ --no-rc0
 \ -*- mode: Forth -*-
 
 warnings off \ in production mode, we don't want any warnings
@@ -21,4 +21,7 @@ previous
 
 require n2o.fs
 
-script? [IF] start-n2o [THEN]
+script? [IF]
+    argc @ to extra-args
+    argc off
+[THEN]
