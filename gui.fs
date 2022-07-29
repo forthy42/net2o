@@ -1502,13 +1502,13 @@ wmsg-o >o msg-table @ token-table ! o>
 : re-msg-box ( -- )
     msgs-box >o vp-h { f: old-h } resized
     vp-h old-h f- vp-y f+ 0e fmax to vp-y
-    grab-move? 0= IF  vp-softbottom  THEN +sync +resize o> ;
+    grab-move? 0= IF  vp-softbottom  THEN +sync +resize +resizeall o> ;
 
 : wmsg-display ( addr u -- )
     msg-tdisplay re-msg-box ;
 ' wmsg-display wmsg-class is msg:display
 
-#200 Value gui-msgs# \ display last 200 messages
+#200 Value gui-msgs# \ display last x messages by default
 0 Value chat-edit-box
 0 Value chat-record-button
 0 Value chat-recording-button
@@ -1553,13 +1553,13 @@ wmsg-o >o msg-table @ token-table ! o>
 	closer { closer }
     }}z box[] >r
     closer [: data chat-history .childs[] del$cell
-      data .dispose-widget +resize +sync ;] r@ click[] drop
+      data .dispose-widget +resize +sync +resizeall ;] r@ click[] drop
     r> ;
 : }}closerh ( o1 .. on -- o )
 	s" ❌️" close-color# }}text dup { closer }
     }}h box[] >r
     closer [: data chat-history .childs[] del$cell
-      data .dispose-widget +resize +sync ;] r@ click[] drop
+      data .dispose-widget +resize +sync +resizeall ;] r@ click[] drop
     r> ;
 : log-data { endi starti -- } 64#0 to last-tick
     msg-log@ { log u } msgs-box { box }
@@ -1855,7 +1855,7 @@ event: :>dispose-widget ( widget -- )
 	    }}v box[] 25%b \regular
 	    closer { closer }
 	}}z box[] >r
-	closer [: data msgs-box .childs[] del$cell
+	closer [: data .resize-parents data msgs-box .childs[] del$cell
 	    <event data elit, :>dispose-widget up@ event>
 	    re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
