@@ -771,6 +771,11 @@ Variable last-bubble-pk
 	0e to borderl fnegate f2* to bordert 0e to borderv
     THEN o o> ;
 
+: msgs-box+resize ( -- )
+    [ ' +resize >body @ ]L msgs-box .vp-need or! ;
+: >msgs-box ( child -- )
+    msgs-box .child+ msgs-box+resize ;
+
 : add-dtms ( ticks -- )
     \sans \small blackish
     >fticks fticks>day { day } day last-day <> IF
@@ -779,7 +784,7 @@ Variable last-bubble-pk
 	    glue*l day-color x-color slide-frame dup .button1
 	    xc to x-color
 	    \bold day ['] .day $tmp }}text 25%b \regular
-	}}z /center msgs-box .child+
+	}}z /center >msgs-box
     THEN  day to last-day
     24 fm* fsplit { hour } hour last-hour <>
     60 fm* fsplit { minute } minute 10 / last-minute 10 / <> or
@@ -790,7 +795,7 @@ Variable last-bubble-pk
 	    xc to x-color
 	    60 fm* fsplit minute hour
 	    [: .## ':' emit .## ':' emit .## .tz ;] $tmp }}text 25%b
-	}}z /center msgs-box .child+
+	}}z /center >msgs-box
     THEN  hour to last-hour  minute to last-minute
     fdrop \normal ;
 
@@ -1031,7 +1036,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	-1 re-indent# +!
     THEN ;
 : re-log#-token ( -- )
-    ['] re-box-run msgs-box .do-childs
+    ['] re-box-run msgs-box+resize msgs-box .do-childs
     [: +resize +sync ;] msgs-box .vp-needed ;
 ' re-log#-token is update-log
 
@@ -1090,7 +1095,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    }}z box[] "msg-zbox" name!
 	    glue*ll }}glue
 	    me? IF  swap rot  THEN
-	}}h box[] "msgs-box" name! msgs-box .child+
+	}}h box[] "msgs-box" name! >msgs-box
 	blackish
     THEN
 ; wmsg-class is msg:start
@@ -1500,7 +1505,7 @@ wmsg-o >o msg-table @ token-table ! o>
     0e to vmotion-dx  to vmotion-dy
     m2c:animtime% f@ f2/ o ['] vp-scroll >animate o> ;
 : re-msg-box ( -- )
-    msgs-box >o vp-h { f: old-h } resized
+    msgs-box+resize msgs-box >o vp-h { f: old-h } resized
     vp-h old-h f- vp-y f+ 0e fmax to vp-y
     grab-move? 0= IF  vp-softbottom  THEN +sync +resize +resizeall o> ;
 
@@ -1679,7 +1684,7 @@ wmsg-o >o msg-table @ token-table ! o>
     msgs-box .childs[] $free \ ) .dispose-childs
     load-msg msg-log@ { log u }
     log u gen-calendar ?dup-IF  msgs-box .child+  THEN
-    glue*lll }}glue msgs-box .child+
+    glue*lll }}glue >msgs-box
     u gui-msgs# cells - 0 max { u' }
     log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
     log u' wmsg-o .?search-lock
@@ -1859,6 +1864,7 @@ event: :>dispose-widget ( widget -- )
 	    <event data elit, :>dispose-widget up@ event>
 	    re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
+	msgs-box+resize
     THEN ;
 
 ' chat-gui-exec is chat-cmd-file-execute
