@@ -27,15 +27,7 @@ Kontakt:
 <tr><th></th>
 <td><a href="https://net2o.de/bernd@net2o.de.asc">04880DE6 ECB06FC8 EE9C3AF4 3B64AEC1 <b>E0B7BDE0</b></a></td</tr>
 <tr><th>net2o id:</th>
-<td><tt><!--
--->kQusJ<!--
--->zA;7*<!--
--->?t=uy<!--
--->@X}1G<!--
--->Wr!+0<!--
--->qqp_C<!--
--->n176t<!--
--->4(dQ*</tt></td>
+<td><tt>kQusJzA;7*?t=uy@X}1GWr!+0qqp_Cn176t4(dQ*</tt></td>
 </tr></table>
 
 Umsatzsteuer-ID:
