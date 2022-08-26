@@ -7,7 +7,7 @@ GFORTH=${GFORTH%-*}
 GFORTH=${GFORTH##*-}
 cat <<EOF >snapcraft.yaml
 name: net2o # you probably want to 'snapcraft register <name>'
-base: core20 # the base snap is the execution environment for this snap
+base: core22 # the base snap is the execution environment for this snap
 version: '$NET2O' # just for humans, typically '1.2+git' or '1.3.2'
 summary: net2o snap # 79 char long summary
 description: |
@@ -21,7 +21,7 @@ license: AGPL-3.0-or-later # SPDX 2.0 identifiers
 package-repositories:
   - type: apt
     components: [main]
-    suites: [stable]
+    suites: [testing]
     key-id: 60E71A159357533099A0AAF9CAF021DB3B7FA946
     url: https://net2o.de/debian
 
@@ -29,11 +29,11 @@ apps:
   gforth-fast:
     command: usr/bin/gforth-fast
     environment:
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
+      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
+      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
       GFORTHFONTS: \$SNAP/usr/share/fonts/
       LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
+      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/x86_64-linux-gnu:\$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
       PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
@@ -50,11 +50,11 @@ apps:
   gforth:
     command: usr/bin/gforth
     environment:
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
+      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
+      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
       GFORTHFONTS: \$SNAP/usr/share/fonts/
       LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
+      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/x86_64-linux-gnu:\$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
       PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
@@ -71,11 +71,11 @@ apps:
   n2o:
     command: usr/bin/gforth-fast \$SNAP/usr/bin/n2o
     environment:
-      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
-      GFORTHCCPATH: \$SNAP/usr/lib/x86_64-linux-gnu/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
+      GFORTHPATH: .:\$SNAP/usr/share/net2o-$NET2O:\$SNAP/usr/lib/gforth/$GFORTH:\$SNAP/usr/share/gforth/$GFORTH:\$SNAP/usr/share/gforth/site-forth:~+
+      GFORTHCCPATH: \$SNAP/usr/lib/gforth/$GFORTH/amd64/libcc-named:\$SNAP/usr/lib/net2o/$NET2O/amd64/libcc-named
       GFORTHFONTS: \$SNAP/usr/share/fonts/
       LIBGL_DRIVERS_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/dri
-      LD_LIBRARY_PATH: \$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
+      LD_LIBRARY_PATH: \$SNAP/usr/lib:\$SNAP/usr/lib/x86_64-linux-gnu:\$SNAP/usr/lib/x86_64-linux-gnu/pulseaudio
       GFORTH_GL: glx
       LOCPATH: \$SNAP/usr/lib/locale
       PULSE_SERVER: unix:\$XDG_RUNTIME_DIR/../pulse/native
@@ -105,21 +105,96 @@ parts:
       - libglib2.0-dev
     stage-packages:
       - libglib2.0-bin
+  gforth:
+    after:
+       - prepare
+       - desktop-glib-only
+    source: https://www.complang.tuwien.ac.at/forth/gforth/Snapshots/$GFORTH/gforth-$GFORTH.tar.xz
+    plugin: autotools
+    autotools-configure-parameters:
+      - ac_cv_header_ffi_h=no
+      - --prefix=/usr
+      - --with-install=swig
+      - --disable-lib
+      - --with-siteinit=":noname defers 'cold s\" /\" s\" SNAP\" getenv s\" /\" S+ repl-included-files ; is 'cold"
+    build-packages:
+      - libtool-bin
+      - libltdl-dev
+      - libx11-dev
+      - libx11-xcb-dev
+      - libxrandr-dev
+      - libgles2-mesa-dev
+      - libgl1-mesa-dev
+      - libwayland-dev
+      - libvulkan-dev
+      - libpng-dev
+      - libfreetype6-dev
+      - libharfbuzz-dev
+      - libffi-dev
+      - libgps-dev
+      - libpulse-dev
+      - libopus-dev
+      - libva-dev
+      - libavcodec-dev
+      - libavutil-dev
+      - texinfo
+      - git
+      - g++
+      - yodl
+      - bison
+      - libpcre3-dev
+      - libboost-dev
+      - libstb-dev
+    stage-packages:
+      - locales-all
+      - locales
+      - libltdl7
+      - libfreetype6
+      - libglvnd0
+      - libglx0
+      - libpng16-16
+      - libvulkan1
+      - libpulse0
+      - libopus0
+      - libavcodec58
+      - libavutil56
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libegl1-mesa
+      - libgles2-mesa
+      - libgl1
+      - libx11-6
+      - libxau6
+      - libxcb1
+      - libxdmcp6
+      - libxext6
+      - libxrandr2
+      - libxrender1
+      - libva-glx2
+      - gforth-noto-fonts
+      - fonts-awesome
+      - libgps28
+      - libdrm-intel1
+      - libdrm-radeon1
+      - libdrm-nouveau2
+      - libharfbuzz0b
   net2o:
     source: https://git.net2o.de/bernd/net2o.git
     source-tag: $NET2O
     plugin: autotools
+    build-environment:
+      - GFORTHPATH: .:/root/stage/usr/share/net2o-$NET2O:/root/stage/usr/lib/gforth/$GFORTH:/root/stage/usr/share/gforth/$GFORTH:/root/stage/usr/share/gforth/site-forth:~+
+      - GFORTHCCPATH: /root/stage/usr/lib/x86_64-linux-gnu/gforth/$GFORTH/amd64/libcc-named:/root/stage/usr/lib/net2o/$NET2O/amd64/libcc-named
     autotools-configure-parameters:
       - --prefix=/usr
     after:
-      - prepare
-      - desktop-glib-only
+      - gforth
     build-packages:
       - g++
       - libtool-bin
       - libgps-dev
       - libffi-dev
-      - gforth-minos2
     stage-packages:
       - locales
       - locales-all
@@ -142,11 +217,6 @@ parts:
       - libxext6
       - libxrandr2
       - libxrender1
-      - gforth-minos2
-      - gforth-minos2audio
-      - gforth-libcc-gl
-      - gforth-libcc-gles
-      - gforth-libcc-audio
       - gforth-noto-fonts
       - fonts-awesome
       - libgps-dev
@@ -158,5 +228,5 @@ parts:
       - libopus0
       - libavcodec58
       - libavutil56
-      - libgps26
+      - libgps28
 EOF

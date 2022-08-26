@@ -443,12 +443,15 @@ compsem: cmdsig @ IF  ')' parse 2drop  EXIT  THEN
 	." * " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
 [THEN]
 
+Variable version-warnings  1 version-warnings !
+
 : ?version ( addr u -- )
-    net2o-version 2over str< IF
+    net2o-version 2over str<  version-warnings @ 0> and IF
 	<err> ." Other side has more recent net2o version: " forth:type
 	<warn> ." , ours: " net2o-version forth:type <default> forth:cr
-    ELSE  2drop  THEN ;
-
+	-1 version-warnings +!  EXIT  THEN
+    2drop ;
+    
 \g # Commands #
 \g 
 \g Version @VERSION@.

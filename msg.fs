@@ -294,7 +294,7 @@ event: :>msg-nestsig ( $addr o group -- )
 		gps-fix { fix }
 		fix gps:gps_fix_t-latitude  df@ coord" 0 sf[]!
 		fix gps:gps_fix_t-longitude df@ coord" 1 sf[]!
-		fix gps:gps_fix_t-altitude  df@ coord" 2 sf[]!
+		fix gps:gps_fix_t-altMSL    df@ coord" 2 sf[]!
 		fix gps:gps_fix_t-speed     df@ coord" 3 sf[]!
 		fix gps:gps_fix_t-track     df@ coord" 4 sf[]!
 		fix gps:gps_fix_t-epx df@ f**2
