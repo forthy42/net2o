@@ -229,4 +229,12 @@ parts:
       - libavcodec58
       - libavutil56
       - libgps28
+  fixup:
+    plugin: nil
+    after:
+      - net2o
+      - gforth
+    override-build: |
+      pwd
+      ln -fs libc_malloc_debug.so.0 /root/stage/usr/lib/x86_64-linux-gnu/libc_malloc_debug.so
 EOF
