@@ -2019,8 +2019,7 @@ Variable invitation-stack
 	    engage-delay# 0 [: fdrop drop k-enter id-toggler .act .ekeyed ;] >animate
 	THEN
     THEN
-    1config  !widgets
-    0.1e o [: fdrop drop color-theme s>f 1/2 f+ ColorMode! +sync +vpsync ;] >animate
+    1config  !widgets  !init-animation
     get-order n>r ['] /chat >wordlist 1 set-order
     ['] widgets-loop catch  leave-chats
     text-chat-cmd-o to chat-cmd-o
