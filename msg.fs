@@ -2260,7 +2260,7 @@ $100 buffer: format-chars
 depth >r
 ' text-rec  ' format-text-rec  ' vote-rec  ' file-rec
 ' http-rec  ' chain-rec ' tag-rec   ' pk-rec
-depth r> - rec-sequence: msg-smart-text
+depth r> - recognizer-sequence: msg-smart-text
 
 Defer msg-recognize
 ' msg-smart-text is msg-recognize

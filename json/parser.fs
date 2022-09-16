@@ -56,11 +56,9 @@ Defer date>ticks
 
 $Variable key$ \ key string
 256 cells buffer: json-tokens
-5 stack: jsons-recognizer
-1 stack: json-recognizer
 
-' noop ' lit, dup >postponer recognized: recognized-bool
-' noop ' lit, dup >postponer recognized: recognized-nil
+' noop ' lit, dup >postponer translate: translate-bool
+' noop ' lit, dup >postponer translate: translate-nil
 
 s" JSON error" exception Value json-throw
 s" JSON key not found" exception Value json-key-throw
@@ -104,14 +102,14 @@ Defer next-element
 : next-element# ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    ['] recognized-nt     of                   endof
-	    ['] recognized-num    of        r@ >stack  endof
-	    ['] recognized-dnum   of  drop  r@ >stack  endof
-	    ['] recognized-string of  s>number? 0= IF json-err THEN
+	    ['] translate-nt     of                   endof
+	    ['] translate-num    of        r@ >stack  endof
+	    ['] translate-dnum   of  drop  r@ >stack  endof
+	    ['] translate-string of  s>number? 0= IF json-err THEN
 		drop r@ >stack  endof
-	    ['] recognized-float  of  f>s   r@ >stack  endof
-	    ['] recognized-bool   of        r@ >stack  endof
-	    ['] recognized-nil    of        r@ >stack  endof
+	    ['] translate-float  of  f>s   r@ >stack  endof
+	    ['] translate-bool   of        r@ >stack  endof
+	    ['] translate-nil    of        r@ >stack  endof
 	endcase  rdrop
     THEN ;
 
@@ -121,27 +119,27 @@ Defer next-element
 : next-element% ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    ['] recognized-nt     of                    endof
-	    ['] recognized-float  of        r@ f>stack  endof
-	    ['] recognized-string of  over >r >float r> free throw
+	    ['] translate-nt     of                    endof
+	    ['] translate-float  of        r@ f>stack  endof
+	    ['] translate-string of  over >r >float r> free throw
 		0= IF json-err THEN  r@ f>stack  endof
-	    ['] recognized-num    of  s>f   r@ f>stack  endof
-	    ['] recognized-dnum   of  d>f   r@ f>stack  endof
-	    ['] recognized-bool   of  s>f   r@ f>stack  endof
-	    ['] recognized-nil    of  s>f   r@ f>stack  endof
+	    ['] translate-num    of  s>f   r@ f>stack  endof
+	    ['] translate-dnum   of  d>f   r@ f>stack  endof
+	    ['] translate-bool   of  s>f   r@ f>stack  endof
+	    ['] translate-nil    of  s>f   r@ f>stack  endof
 	endcase  rdrop
     THEN ;
 
 : next-element$ ( element -- )
     array-item ?dup-IF  >r
 	case previous-type
-	    ['] recognized-nt     of                    endof
-	    ['] recognized-string of  over >r $make r> free throw  r@ >stack  endof
-	    ['] recognized-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
-	    ['] recognized-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
-	    ['] recognized-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
-	    ['] recognized-bool   of  IF "true" ELSE "false" THEN $make r@ >stack  endof
-	    ['] recognized-nil    of  r@ >stack  endof
+	    ['] translate-nt     of                    endof
+	    ['] translate-string of  over >r $make r> free throw  r@ >stack  endof
+	    ['] translate-num    of  [: 0 .r ;] $tmp $make r@ >stack  endof
+	    ['] translate-dnum   of  [: 0 d.r ;] $tmp $make r@ >stack  endof
+	    ['] translate-float  of  ['] f. $tmp -trailing $make  r@ >stack  endof
+	    ['] translate-bool   of  IF "true" ELSE "false" THEN $make r@ >stack  endof
+	    ['] translate-nil    of  r@ >stack  endof
 	endcase  rdrop
     THEN ;
 
@@ -210,18 +208,20 @@ Defer next-element
 
 : eval-json ( .. tag -- )
     case
-	['] recognized-nt     of  name?int execute       endof
-	['] recognized-string of  json-string!           endof
-	['] recognized-num    of  '#' key$ c$+! set-int  endof
-	['] recognized-dnum   of  '&' key$ c$+! set-val  endof
-	['] recognized-float  of  '%' key$ c$+! set-val  endof
-	['] recognized-bool   of  '?' key$ c$+! set-val  endof
-	['] recognized-nil    of  drop                   endof \ default is null, anyhow
+	['] translate-nt     of  name?int execute       endof
+	['] translate-string of  json-string!           endof
+	['] translate-num    of  '#' key$ c$+! set-int  endof
+	['] translate-dnum   of  '&' key$ c$+! set-val  endof
+	['] translate-float  of  '%' key$ c$+! set-val  endof
+	['] translate-bool   of  '?' key$ c$+! set-val  endof
+	['] translate-nil    of  drop                   endof \ default is null, anyhow
 	json-err
     endcase ;
 
+0 recognizer-sequence: jsons-recognize
+
 : key-value ( addr u -- ) over >r key$ $! r> free throw
-    parse-name jsons-recognizer recognize eval-json ;
+    parse-name jsons-recognize eval-json ;
 
 ' begin-element '{' cells json-tokens + !
 ' end-element   '}' cells json-tokens + !
@@ -233,7 +233,7 @@ Defer next-element
 : rec-json ( addr u -- )
     1 = IF
 	c@ cells json-tokens + @
-	dup IF  ['] recognized-nt  EXIT  THEN
+	dup IF  ['] translate-nt  EXIT  THEN
     THEN
     drop ['] notfound ;
 
@@ -250,9 +250,9 @@ bl 1+ 0 [do] 1 stop-chars [i] + c! [loop]
     2dup + source drop - >in ! 2dup input-lexeme! ;
 
 cs-scope: bools
-false ' recognized-bool 2constant false
-true  ' recognized-bool 2constant true
-0     ' recognized-nil  2constant null
+false ' translate-bool 2constant false
+true  ' translate-bool 2constant true
+0     ' translate-nil  2constant null
 }scope
 
 : rec-bool ( addr u -- ... )
@@ -260,23 +260,23 @@ true  ' recognized-bool 2constant true
 	name>int execute
     ELSE  ['] notfound  THEN ;
 
-' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json
-5 jsons-recognizer set-stack
+' rec-bool ' rec-num ' rec-float ' rec-string ' rec-json 5
+' jsons-recognize set-stack
 
 : rec-jsons ( addr u -- ... json-type )
     last-type to previous-type
-    jsons-recognizer recognize dup to last-type ;
+    jsons-recognize dup to last-type ;
 
-' rec-jsons 1 json-recognizer set-stack
+' rec-jsons 1 recognizer-sequence: json-recognize
 
 : json-load ( addr u -- o )
     outer-class new >o
     o element-stack >stack  0 key-stack >stack  0 array-stack >stack
     get-order n>r schema-wid 1 set-order
-    forth-recognizer >r  json-recognizer to forth-recognizer
+    forth-recognizer >r  json-recognize is forth-recognize
     action-of parse-name >r ['] parse-json is parse-name
     ['] included catch
-    r> is parse-name  r> to forth-recognizer  nr> set-order
+    r> is parse-name  r> is forth-recognize  nr> set-order
     throw process-element o o> ;
 
 : json-load-dir ( addr u -- )
