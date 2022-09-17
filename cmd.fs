@@ -187,7 +187,7 @@ Defer gen-table
 : cmd@ ( -- u ) buf-state 2@ over + >r p@+ r> over - buf-state 2! 64>n ;
 
 standard:field
--7 cells 0 +field net2o.name
+-6 cells 0 +field net2o.name
 drop
 
 : >net2o-name ( addr -- addr' u )
