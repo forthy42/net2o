@@ -1,4 +1,4 @@
-#! @GFORTHFAST@ --no-rc0
+#! @GFORTHFAST@ --no-0rc
 \ -*- mode: Forth -*-
 
 warnings off \ in production mode, we don't want any warnings
