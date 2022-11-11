@@ -843,7 +843,7 @@ scope{ /chat
     n2o-greeting
     is-color-terminal? IF  +status  ELSE  -status  THEN ;
 is bootmessage
-' start-n2o is 'quit
+[: ['] start-n2o bt-rp0-catch DoError forth:cr n2o:bye ;] is 'quit
 load-rc? off \ do not load ~/.config/gforthrc
 
 \\\
