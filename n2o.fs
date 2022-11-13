@@ -830,7 +830,7 @@ scope{ /chat
 
 0 Value extra-args \ hide extra arguments until start-n2o is run
 : start-n2o ( -- )
-    extra-args ?dup-IF  argc !  THEN
+    extra-args ?dup-IF  argc !  THEN  0 to extra-args
     [IFDEF] cov+ load-cov [THEN]
     cmd-args ++debug %droprate %droprate \ read in all debugging stuff
     profile( init-timer )
@@ -843,7 +843,8 @@ scope{ /chat
     n2o-greeting
     is-color-terminal? IF  +status  ELSE  -status  THEN ;
 is bootmessage
-[: ['] start-n2o bt-rp0-catch DoError forth:cr n2o:bye ;] is 'quit
+[: ['] start-n2o bt-rp0-catch
+    ?dup-IF  DoError forth:cr  THEN n2o:bye ;] is 'quit
 load-rc? off \ do not load ~/.config/gforthrc
 
 \\\
