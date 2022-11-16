@@ -2033,20 +2033,22 @@ previous
 
 cs-scope: lang
 
-locale en \ may differ from development language
-locale de \ German
-locale zh \ Chinese
-
+language en \ may differ from development language
+language de \ German
+language zh \ Chinese
+zh country zh_TW \ Chinese Taiwanese
 }scope
 
 lang:de include-locale lang/de
 lang:zh include-locale lang/zh
+lang:zh_TW include-locale lang/zh_TW
 lang:en include-locale lang/en
 
 : ??lang ( addr u -- )
     ['] lang >wordlist find-name-in ?dup-IF  execute  THEN ;
 
-s" LANG" getenv '_' $split 2swap ??lang '.' $split ??lang ??lang
+s" LANG" getenv '.' $split 2drop '_' $split 2drop ??lang
+s" LANG" getenv '.' $split 2drop ??lang
 
 \ lsids .lsids
 
