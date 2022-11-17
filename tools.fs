@@ -331,7 +331,9 @@ no-fat-chars bounds [?DO] filechars [I] c@ -bit [LOOP]
 
 \ '%' is allowed, but we use '%' to replace the others
 
-: .## ( n -- ) s>d <# # # #> type ;
+[IFUNDEF] .##
+    : .## ( u -- ) 0 <# # # #> type ;
+[THEN]
 : sane-type ( addr u -- )
     [: bounds ?DO
 	  I c@ filechars over bit@

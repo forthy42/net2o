@@ -1,18 +1,4 @@
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%month%/%day%/%year%
+%MM%/%DD%/%YYYY%
+%12h%.%mm%.%ss%%a/pm%

@@ -2,7 +2,7 @@
 
 echo "This script builds net2o from scratch"
 
-GFORTH=gforth-0.7.9_20221006
+GFORTH=gforth-0.7.9_20221103
 
 if [ "$(uname -o)" = "Cygwin" ]
 then

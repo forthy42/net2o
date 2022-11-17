@@ -1,5 +1,7 @@
 
 
+%day%.%month%.%year%
+
 net2o GUI
 Copyright © 2010–2022 Bernd Paysan
 Falsche Passphrase
@@ -15,7 +17,6 @@ Schlüsselsignaturdatum
 Meine Schlüssel
 Meine Gruppen
 Meine Freunde
-%day%.%month%.%year%
 Posting
 Deaktiviere Verbatim
 Aktiviere Verbatim
