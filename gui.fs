@@ -2044,6 +2044,7 @@ cs-scope: lang
 language en \ may differ from development language
 en country en_UK \ UK English is special
 en country en_US \ US English is special
+en country en_IN \ India English is special
 language de \ German
 de country de_AT \ Austria is special
 language zh \ Chinese
