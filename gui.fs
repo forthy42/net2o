@@ -776,6 +776,14 @@ Variable last-bubble-pk
 : >msgs-box ( child -- )
     msgs-box .child+ msgs-box+resize ;
 
+: localized.day ( day -- )
+    unix-day0 + day2ymd
+    0 ['] .r $tmp s" day" replaces
+    0 ['] .r $tmp s" month" replaces
+    dup 0 ['] .r $tmp s" year" replaces
+    #1911 - 0 ['] .r $tmp s" twyear" replaces
+    l" %year%-%month%-%day%T" locale@ .substitute drop ;
+
 : add-dtms ( ticks -- )
     \sans \small blackish
     >fticks fticks>day { day } day last-day <> IF
@@ -783,7 +791,7 @@ Variable last-bubble-pk
 	    x-color { f: xc }
 	    glue*l day-color x-color slide-frame dup .button1
 	    xc to x-color
-	    \bold day ['] .day $tmp }}text 25%b \regular
+	    \bold day ['] localized.day $tmp }}text 25%b \regular
 	}}z /center >msgs-box
     THEN  day to last-day
     24 fm* fsplit { hour } hour last-hour <>
