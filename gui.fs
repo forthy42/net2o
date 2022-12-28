@@ -2035,7 +2035,7 @@ previous
 cs-scope: lang
 
 language en \ may differ from development language
-en country en_UK \ UK English is special
+en country en_GB \ GB (UK) English is special
 en country en_US \ US English is special
 en country en_IN \ India English is special
 language de \ German
@@ -2048,7 +2048,7 @@ lang:de include-locale lang/de
 lang:zh include-locale lang/zh
 lang:zh_TW include-locale lang/zh_TW
 lang:en include-locale lang/en
-lang:en_UK include-locale lang/en_UK
+lang:en_GB include-locale lang/en_GB
 lang:en_US include-locale lang/en_US
 lang:en
 
