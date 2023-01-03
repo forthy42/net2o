@@ -1,0 +1,35 @@
+program,en,en_GB,en_US,en_IN,de,zh,zh_TW
+⚪,,,,,,,
+%YYYY%-%MM%-%DD%T,,%DD%/%MM%/%YYYY%,%MM%/%DD%/%YYYY%,%DD%-%MM%-%YYYY% ,%day%.%month%.%year% ,%year%年%month%月%day%日 ,%twyear%年%month%月%day%日 
+%hh%:%mm%:%ss%,,%12h%.%mm%.%ss%%a/pm%,%12h%.%mm%.%ss%%a/pm%,%12h%.%mm%.%ss%%a/pm%,,,
+net2o GUI,net2o GUI,,,,net2o GUI ,,net2o 圖形用戶界面 
+Copyright © 2010–2022 Bernd Paysan,Copyright © 2010–2022 Bernd Paysan,,,,Copyright © 2010–2022 Bernd Paysan ,版权 © 2010–2022 Bernd Paysan ,版權 © 2010–2022 Bernd Paysan 
+wrong passphrase!,wrong passphrase!,,,,Falsche Passphrase ,错误的密码 ,錯誤的密碼 
+Enter passphrase to unlock,Enter passphrase to unlock,,,,Zum Öffnen Passphrase eingeben ,输入密码以解锁 ,輸入密碼以解鎖 
+Create new ID,Create new ID,,,,Erzeuge neue ID ,创建新的ID ,創建新的ID 
+ID too short!,ID too short!,,,,ID zu kurz! ,ID太短 ,ID太短 
+Enter new passphrase,Enter new passphrase,,,,Neue Passphrase eingeben ,输入新的密码 ,輸入新的密碼 
+Enter new passphrase again,Enter new passphrase again,,,,Neue Passphrase nochmal eingeben ,再次输入新的密码 ,再次輸入新的密碼 
+,,,,, , , 
+Nick+Pet,Nick+Pet,,,,Spitznamen ,昵称 ,暱稱 
+Pubkey,Pubkey,,,,Öffentlicher Schlüssel ,公钥 ,公鑰 
+Key date,Key date,,,,Schlüsselsignaturdatum ,关键签名日期 ,關鍵簽名日期 
+My key,My key,,,,Meine Schlüssel ,我的钥匙 ,我的鑰匙 
+My groups,My groups,,,,Meine Gruppen ,我的集团 ,我的集團 
+My peers,My peers,,,,Meine Freunde ,我的朋友 ,我的朋友 
+Post,Post,,,,Posting ,停用逐字 ,停用逐字 
+Deactivate Verbatim,Deactivate Verbatim,,,,Deaktiviere Verbatim ,激活逐字 ,激活逐字 
+Activate Verbatim,Activate Verbatim,,,,Aktiviere Verbatim ,在记录上 ,在記錄上 
+On The Record,On The Record,,,,Archivieren ,关闭记录 ,關閉記錄 
+Off The Record,Off The Record,,,,Vertraulich ,没有人在线 ,沒有人在線 
+Nobody is online,Nobody is online,,,,Niemand ist online ,贴子 ,貼子 
+chat is locked,,,,, , , 
+locked out of chat,,,,, , , 
+chat is unlocked,,,,, , , 
+,,,,, , , 
+Mic,  ,,,,  ,  ,  
+Keyboard,  ,,,,  ,  ,  
+Record,Record,,,,Aufnahme ,记录 ,記錄 
+Recording…,Recording…,,,,Nehme auf… ,记录… ,記錄… 
+Send,,,,, ,发送 ,發送 
+Invitations,Invitations,,,,Einladungen,请帖,請帖

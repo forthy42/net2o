@@ -67,7 +67,7 @@ ICONDIRS = $(patsubst %,icons/hicolor/%/apps,$(ICONSIZES) scalable)
 DESKTOP = applications/net2o.desktop
 DESKTOPDIR = applications
 
-LANGS =	  lang/en lang/en_US lang/en_UK lang/en_IN lang/de lang/zh lang/zh_TW
+LANGS =	  net2o-lang.csv
 
 ifeq "$(FAST)" "yes"
 FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
@@ -105,7 +105,7 @@ TESTS = tests/alice2-msg.fs tests/alice-msg.fs tests/bob-msg.fs		\
 
 @VERDIR@SRCPATH = net2o-$(VERSION)
 @NOVERDIR@SRCPATH = net2o
-SRCDIRS = $(SRCPATH)/tests $(SRCPATH)/doc $(SRCPATH)/android $(SRCPATH)/linux $(SRCPATH)/lang $(SRCPATH)/json $(SRCPATH)/html $(SRCPATH)/xml
+SRCDIRS = $(SRCPATH)/tests $(SRCPATH)/doc $(SRCPATH)/android $(SRCPATH)/linux $(SRCPATH)/json $(SRCPATH)/html $(SRCPATH)/xml
 
 SCRIPTS = n2o
 

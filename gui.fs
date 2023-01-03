@@ -2032,25 +2032,7 @@ previous
 
 \ localization
 
-cs-scope: lang
-
-language en \ may differ from development language
-en country en_GB \ GB (UK) English is special
-en country en_US \ US English is special
-en country en_IN \ India English is special
-language de \ German
-de country de_AT \ Austria is special
-language zh \ Chinese
-zh country zh_TW \ Chinese Taiwanese
-}scope
-
-lang:de include-locale lang/de
-lang:zh include-locale lang/zh
-lang:zh_TW include-locale lang/zh_TW
-lang:en include-locale lang/en
-lang:en_GB include-locale lang/en_GB
-lang:en_US include-locale lang/en_US
-lang:en
+locale-csv net2o-lang.csv
 
 : ??lang ( addr u -- )
     ['] lang >wordlist find-name-in ?dup-IF  execute  THEN ;
