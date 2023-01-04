@@ -3,7 +3,7 @@
 "%YYYY%-%MM%-%DD%T","","","%DD%/%MM%/%YYYY%","%MM%/%DD%/%YYYY%","%DD%-%MM%-%YYYY% ","%day%.%month%.%year% ","%year%年%month%月%day%日 ","%twyear%年%month%月%day%日"
 "%hh%:%mm%:%ss%","","","%12h%.%mm%.%ss%%a/pm%","%12h%.%mm%.%ss%%a/pm%","%12h%.%mm%.%ss%%a/pm%","","",""
 "net2o GUI","","net2o GUI","","","","net2o GUI ","","net2o 圖形用戶界面"
-"Copyright © 2010–2022 Bernd Paysan","","Copyright © 2010–2022 Bernd Paysan","","","","Copyright © 2010–2022 Bernd Paysan ","版权 © 2010–2022 Bernd Paysan ","版權 © 2010–2022 Bernd Paysan "
+"Copyright © 2010–2023 Bernd Paysan","","Copyright © 2010–2023 Bernd Paysan","","","","Copyright © 2010–2023 Bernd Paysan ","版权 © 2010–2023 Bernd Paysan ","版權 © 2010–2023 Bernd Paysan "
 "wrong passphrase!","","wrong passphrase!","","","","Falsche Passphrase ","错误的密码","錯誤的密碼"
 "Enter passphrase to unlock","","Enter passphrase to unlock","","","","Zum Öffnen Passphrase eingeben ","输入密码以解锁","輸入密碼以解鎖"
 "Create new ID","","Create new ID","","","","Erzeuge neue ID ","创建新的ID","創建新的ID"
