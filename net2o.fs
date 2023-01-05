@@ -1,6 +1,6 @@
 \ net2o protocol stack
 
-\ Copyright © 2010-2021   Bernd Paysan
+\ Copyright © 2010-2023   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -20,7 +20,7 @@
 require version.fs
 
 : n2o-greeting ( -- )
-    [:  ." net2o " net2o-version type space (c) ."  2010-2022 Bernd Paysan" cr ;]
+    [:  ." net2o " net2o-version type space (c) ."  2010-2023 Bernd Paysan" cr ;]
     do-debug ;
 
 require err.fs
