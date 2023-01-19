@@ -80,6 +80,7 @@ $Variable net2o-logo
 	    "-i\0" drop ,
 	    net2o-logo $@ drop ,
 	THEN
+	"--\0" drop ,
 	here to title-string 0 ,
 	here to content-string 0 ,
 	0 , \ must be terminated by null pointer
