@@ -298,7 +298,7 @@ Vocabulary net2o
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $80 u>= IF
-	    I ['] u8@+ catch IF  drop 0 true
+	    I ['] u8@+ catch IF  nothrow drop 0 true
 	    ELSE  drop dup I - swap I' u>  THEN
 	ELSE  1 I c@ $7F bl within  THEN
 	IF  2drop false  LEAVE  THEN  +LOOP ;

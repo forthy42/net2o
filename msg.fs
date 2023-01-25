@@ -811,11 +811,7 @@ forward need-hashed?
 	msg:snapshot#  of  ." snapshot[" 85type  endof
 	msg:message#   of  ." message["  85type  endof
 	msg:posting#   of  ." posting" .posting  endof
-	drop
-	2dup keysize /string
-	2dup printable? IF  '[' emit  type '@' emit
-	ELSE  ." #["  85type ." /@"  THEN
-	key| .key-id
+	drop .posting
 	0
     endcase ." ]" <default> ;
 msg:class is msg:object
@@ -1861,6 +1857,9 @@ also net2o-base scope: /chat
     umethod /rescan# ( addr u -- )
     \U rescan#              rescan for hashes
     \G rescan#: search the entire chat log for hashes and if you have them
+    umethod /stats ( addr u -- )
+    \U stats                show stats
+    \G stats: show the statistics of transfers
     umethod /split ( addr u -- )
     \U split                split load
     \G split: reduce distribution load by reconnecting
@@ -1920,6 +1919,10 @@ scope{ /chat
 	    space I @ >o .con-id space
 	    ack@ .rtdelay 64@ 64>f 1n f* (.time) o>
 	cell +LOOP  forth:cr ;] group#map ; is /peers
+
+:noname ( addr u -- )  2drop
+    ." send: " packets @ 0 .r '+' forth:emit packets2 @ forth:.
+    ." recv: " packetr @ 0 .r '+' forth:emit packetr2 @ forth:. ; is /stats
 
 :noname ( addr u -- )  2drop
     coord! coord@ 2dup 0 -skip nip 0= IF  2drop
@@ -2480,7 +2483,10 @@ scope{ /chat
     ['] /chat >wordlist 1 set-order
     msg-group$ $! chat-entry \ ['] cmd( >body on
     [: up@ wait-task ! ;] IS do-connect
-    [: #0. /chat:/peers ;] ['] .stacks ['] .order 3 status-xts set-stack
+    [: #0. /chat:/peers ;]
+    [: #0. /chat:/stats ;]
+    ['] .stacks
+    ['] .order 4 status-xts set-stack
     BEGIN  .status get-input-line .unstatus
 	2dup "/bye" str= >r 2dup "\\bye" str= r> or 0= WHILE
 	    do-chat-cmd? 0= IF  avalanche-text  THEN
