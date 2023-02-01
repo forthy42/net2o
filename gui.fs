@@ -1851,7 +1851,8 @@ event: :>dispose-widget ( widget -- )
     .dispose-widget ;
 
 : chat-gui-exec ( xt -- )
-    gui-log[] $[]exec
+    gui-log[] ['] $[]exec catch
+    ?dup-IF  nip nip ['] DoError gui-log[] $[]exec  THEN
     gui-log[] $[]# IF
 	{{
 	    glue*lll log-bg x-color font-size# 40% f* }}frame dup .button3
