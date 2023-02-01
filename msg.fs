@@ -2378,11 +2378,13 @@ $B $E 2Value chat-bufs#
     msg-group$ $@ >group msg-group-o .msg:log[] $@len 0= IF
 	msg-group$ $@ rows load-msgn  THEN ;
 
-: chat-connects ( -- )
+: (chat-connects) ( -- )
     chat-keys [: key>group ?load-msgn
       dup 0= IF  2drop msg-group$ $@ >group  EXIT  THEN
       2dup search-connect ?dup-IF  >o +group greet o> 2drop EXIT  THEN
       2dup pk-peek?  IF  chat-connect  ELSE  2drop  THEN ;] $[]map ;
+: chat-connects ( -- )
+    ['] (chat-connects) catch ?dup-IF  DoError nothrow  THEN ;
 
 : ?wait-chat ( -- addr u ) #0. /chat:/chats
     BEGIN  chats# 0= chat-keys# 0> and WHILE  wait-chat chat-connects  REPEAT
