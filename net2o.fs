@@ -2022,7 +2022,8 @@ context-table   $save
 
 0 warnings !@
 : bye  !save-all-msgs subme dht-disconnect net2o-kills
-    delete-whereg .unstatus 0 (bye) ;
+    [IFDEF] delete-whereg delete-whereg [THEN]
+    .unstatus 0 (bye) ;
 warnings !
 
 Defer net2o-bye
