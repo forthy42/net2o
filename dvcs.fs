@@ -418,7 +418,9 @@ Defer hash-import ' noop is hash-import
     ['] new-files-in do-refs ;
 
 : config>dvcs ( o:dvcs -- )
-    "~+/.n2o/config" ['] project >wordlist read-config
+    config-throw >r 0 to config-throw \ don't throw on config errors
+    [: "~+/.n2o/config" ['] project >wordlist read-config ;] catch
+    r> to config-throw throw \ throw on any other problem
     project:revision$ $@ base85>$ dvcs:oldid$ $! ;
 : files>dvcs ( o:dvcs -- )
     "~+/.n2o/files" filelist-in ;
