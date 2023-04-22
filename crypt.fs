@@ -298,7 +298,7 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 	\ make sure on average one index hits one line twice
     pw-acc-increment +LOOP
     pool free throw
-;
+; \ waste time that is even more difficult to do in ASICs and GPUs
 
 Defer pw-diffuse
 
