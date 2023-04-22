@@ -267,15 +267,51 @@ keysize buffer: diffuse-sk
     drop  diffuse-ecc keysize erase  diffuse-sk keysize erase
 ; \ just to waste time in a way that is difficult to built into ASICs
 
+$10000 Value pw-diffuse-size \ 64kB minimum diffuse size
+keccak#max dup 1 64s / * 2/ Value pw-acc-increment
+2 Value pw-diffuse-rounds
+2 Value pw-diffuse-times
+\ The diffusion here does not have to be strong, because we fill up a lot
+\ of memory with garbage and diffuse random locations over and over again.
+: pw-diffuse-ecc-mem ( diffuse# -- )
+    pw-diffuse-size * dup allocate throw { size pool }
+    pool size bounds U+DO
+	2 pw-diffuse-ecc
+	I pw-diffuse-size 2dup erase
+	pw-diffuse-times 0 ?DO
+	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
+	    \ fill memory really fast, therefore only 2 rounds of Keccak
+	    \ repeat reencrypting the memory, so that it serves as state
+	    \ as a whole
+	LOOP  2drop
+    pw-diffuse-size +LOOP
+    { | diffuse[ keccak#max ] }
+    size keccak#max - { mask }
+    size 0 ?DO
+	diffuse[ c:key>
+	diffuse[ keccak#max bounds U+DO
+	    \ Use diffuse array as random 64 bit indices into memory
+	    \ Reencrypt memory block
+	    @keccak I le-64@ 64>n mask and pool + keccak#max
+	    pw-diffuse-rounds KeccakEncryptLoop  drop
+	1 64s +LOOP
+	\ make sure on average one index hits one line twice
+    pw-acc-increment +LOOP
+    pool free throw
+;
+
 Defer pw-diffuse
 
-: new-pw-diffuse ( -- )
-    ['] pw-diffuse-ecc is pw-diffuse  2 to pw-level0 ;
-
-: old-pw-diffuse ( -- )
+: pw-diffuse-0 ( -- )
     ['] pw-diffuse-keccak is pw-diffuse  $100 to pw-level0 ;
+pw-diffuse-0
 
-new-pw-diffuse
+: pw-diffuse-1 ( -- )
+    ['] pw-diffuse-ecc is pw-diffuse  2 to pw-level0 ;
+pw-diffuse-1
+
+\ : pw-diffuse-2 ( -- ) ['] pw-diffuse-ecc-mem is pw-diffuse  1 to pw-level0 ;
+\ pw-diffuse-2
 
 : pw-setup ( addr u -- diffuse# )
     \g compute between 256 and ridiculously many iterations

@@ -1149,7 +1149,10 @@ false value ?yes
 	    import-type @ import#self = try-decrypt do-key
 	REPEAT  rdrop  code0-buf ;
 : migrate-key-loop ( -- )  secret-keys# >r
-    old-pw-diffuse  ?key-sfd read-keys-loop  new-pw-diffuse
+    ?key-sfd
+    pw-diffuse-0
+    [IFDEF] pw-diffuse-1  read-keys-loop  pw-diffuse-1  [THEN]
+    [IFDEF] pw-diffuse-2  read-keys-loop  pw-diffuse-2  [THEN]
     secret-keys# r> u> IF
 	[: info-color ." Migrating password hash to ECC+keccak" cr ;]
 	['] execute-theme-color do-debug
