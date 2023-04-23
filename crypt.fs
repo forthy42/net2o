@@ -274,10 +274,10 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 \ The diffusion here does not have to be strong, because we fill up a lot
 \ of memory with garbage and diffuse random locations over and over again.
 : pw-diffuse-ecc-mem ( diffuse# -- )
-    pw-diffuse-size * dup allocate throw { size pool }
+    pw-diffuse-size * dup alloc+guard { size pool }
     pool size bounds U+DO
 	2 pw-diffuse-ecc
-	I pw-diffuse-size 2dup erase
+	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
 	    \ fill memory really fast, therefore only 2 rounds of Keccak
@@ -297,7 +297,7 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 	1 64s +LOOP
 	\ make sure on average one index hits one line twice
     pw-acc-increment +LOOP
-    pool free throw
+    pool size free+guard
 ; \ waste time that is even more difficult to do in ASICs and GPUs
 
 Defer pw-diffuse
