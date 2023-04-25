@@ -273,9 +273,8 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 2 Value pw-diffuse-times
 \ The diffusion here does not have to be strong, because we fill up a lot
 \ of memory with garbage and diffuse random locations over and over again.
-: pw-diffuse-ecc-mem ( diffuse# -- )
-    pw-diffuse-size * dup alloc+guard { size pool }
-    pool size bounds U+DO
+: pw-diffuse-mem-fill ( addr u -- )
+    bounds U+DO
 	2 pw-diffuse-ecc
 	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
@@ -284,19 +283,23 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 	    \ repeat reencrypting the memory, so that it serves as state
 	    \ as a whole
 	LOOP  2drop
-    pw-diffuse-size +LOOP
-    { | diffuse[ keccak#max ] }
-    size keccak#max - { mask }
-    size 0 ?DO
+    pw-diffuse-size +LOOP ;
+: pw-diffuse-mem-plow ( addr u -- )
+    dup keccak#max - { mask | diffuse[ keccak#max ] }
+    0 ?DO
 	diffuse[ c:key>
 	diffuse[ keccak#max bounds U+DO
 	    \ Use diffuse array as random 64 bit indices into memory
 	    \ Reencrypt memory block
-	    @keccak I le-64@ 64>n mask and pool + keccak#max
+	    @keccak over I le-64@ 64>n mask and + keccak#max
 	    pw-diffuse-rounds KeccakEncryptLoop  drop
 	1 64s +LOOP
 	\ make sure on average one index hits one line twice
-    pw-acc-increment +LOOP
+    pw-acc-increment +LOOP  drop ;
+: pw-diffuse-ecc-mem ( diffuse# -- )
+    pw-diffuse-size * dup alloc+guard { size pool }
+    pool size pw-diffuse-mem-fill
+    pool size pw-diffuse-mem-plow
     pool size free+guard
 ; \ waste time that is even more difficult to do in ASICs and GPUs
 
