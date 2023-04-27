@@ -242,48 +242,67 @@ scope{ mapc
 
 \ passphraese encryption needs to diffuse a lot after mergin in the salt
 
-2 Value pw-level0
-
 : crypt-pw-setup ( addr u1 key u2 n -- addr' u' n' ) { n }
     2>r over >r  $10 rng$ r@ swap move
-    r@ c@ n $F0 mux r> c! 2r> crypt-key-init pw-level0 n 2* lshift ;
+    r@ c@ n $F0 mux r> c! 2r> crypt-key-init  n ;
+
+\ first approach at passphrase diffusing:
+\ Just run Keccak again and again:
 
 : pw-diffuse-keccak ( diffuse# -- )
+    $100 swap 2* lshift
     -1 +DO  c:diffuse  LOOP ; \ just to waste time ;-)
 
-keysize buffer: diffuse-ecc
-keysize buffer: diffuse-sk
+\ second approach at passphrase diffusing (ASICs hash too fast):
+\ Use ECC for diffusing
 
-: pw-diffuse-ecc' ( xt -- ) >r
+: pw-diffuse-ecc' ( diffuse-sk diffuse-ecc xt -- )
+    { diffuse-sk diffuse-ecc xt: runner }
     diffuse-sk keysize  c:hash@
-    diffuse-sk dup sk-mask  diffuse-ecc  r> execute
+    diffuse-sk dup sk-mask  diffuse-ecc  runner
     diffuse-ecc keysize c:shorthash ;
 
 : pw-diffuse-ecc ( diffuse# -- )
+    { | diffuse-sk[ keysize ] diffuse-ecc[ keysize ] }
+    2 swap 2* lshift
     c:diffuse ['] sk>pk swap
     -1 +DO \ do at least 1 time even if supplied with 0
-	pw-diffuse-ecc' [: dup ed-dh 2drop ;]
+	diffuse-sk[ diffuse-ecc[ rot pw-diffuse-ecc' [: dup ed-dh 2drop ;]
     LOOP
-    drop  diffuse-ecc keysize erase  diffuse-sk keysize erase
+    drop  diffuse-ecc[ keysize erase  diffuse-sk[ keysize erase
 ; \ just to waste time in a way that is difficult to built into ASICs
 
+\ Third approach at diffusing (GPUs do ECC too fast):
+\ Fill memory
+
+require cilk.fs \ parallel stuff
+start-workers
+
 $10000 Value pw-diffuse-size \ 64kB minimum diffuse size
+4 Value pw-min-cpus \ 4 CPUs minimum
+pw-diffuse-size pw-min-cpus / Value pw-diffuse-chunk \ 16kB chunk per CPU
 keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 2 Value pw-diffuse-rounds
 2 Value pw-diffuse-times
+
+0 Value pool-addr
+0 Value pool-size
+0 Value seeds-addr
+0 Value seeds-size
+1 Value diffuse#
 \ The diffusion here does not have to be strong, because we fill up a lot
 \ of memory with garbage and diffuse random locations over and over again.
-: pw-diffuse-mem-fill ( addr u -- )
+: pw-diffuse-mem-fill ( incr addr u -- )
     bounds U+DO
 	2 pw-diffuse-ecc
-	I pw-diffuse-size
+	I pw-diffuse-chunk
 	pw-diffuse-times 0 ?DO
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
 	    \ fill memory really fast, therefore only 2 rounds of Keccak
 	    \ repeat reencrypting the memory, so that it serves as state
 	    \ as a whole
 	LOOP  2drop
-    pw-diffuse-size +LOOP ;
+    dup +LOOP  drop ;
 : pw-diffuse-mem-plow ( addr u -- )
     dup keccak#max - { mask | diffuse[ keccak#max ] }
     0 ?DO
@@ -296,29 +315,60 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 	1 64s +LOOP
 	\ make sure on average one index hits one line twice
     pw-acc-increment +LOOP  drop ;
+
+: pw-diffuse-mem-fill-1 ( n -- ) >r
+    keccak-init
+    seeds-addr r@ keccak#max * + >c:key c:diffuse
+    pw-diffuse-size diffuse# lshift
+    pool-addr pw-diffuse-chunk r@ * + pool-size
+    pw-diffuse-mem-fill
+    seeds-addr r> keccak#max * + c:key> ;
+: pw-diffuse-mem-fills ( n -- )
+    0 ?DO
+	I ['] pw-diffuse-mem-fill-1 spawn1
+    LOOP  sync ;
+
+: pw-diffuse-mem-plow-1 ( n -- ) >r
+    seeds-addr r@ keccak#max * + >c:key c:diffuse
+    pool-addr pool-size diffuse# 2 + rshift tuck r@ * + swap
+    pw-diffuse-mem-plow
+    seeds-addr r> keccak#max * + c:key> ;
+: pw-diffuse-mem-plows ( n -- )
+    0 ?DO
+	I ['] pw-diffuse-mem-plow-1 spawn1
+    LOOP  sync ;
+
 : pw-diffuse-ecc-mem ( diffuse# -- )
-    pw-diffuse-size * dup alloc+guard { size pool }
-    pool size pw-diffuse-mem-fill
-    pool size pw-diffuse-mem-plow
-    pool size free+guard
+    to diffuse#
+    1 diffuse# 2* lshift pw-diffuse-size * dup alloc+guard
+    to pool-addr to pool-size
+    keccak#max diffuse# 2 + lshift dup allocate throw
+    to seeds-addr to seeds-size
+    seeds-addr seeds-size c:prng
+    4 diffuse# lshift pw-diffuse-mem-fills
+    seeds-addr seeds-size c:encrypt
+    4 diffuse# lshift pw-diffuse-mem-plows
+    seeds-addr seeds-size c:hash
+    pool-addr pool-size free+guard
+    seeds-addr seeds-size freez
 ; \ waste time that is even more difficult to do in ASICs and GPUs
 
 Defer pw-diffuse
 
 : pw-diffuse-0 ( -- )
-    ['] pw-diffuse-keccak is pw-diffuse  $100 to pw-level0 ;
+    ['] pw-diffuse-keccak is pw-diffuse ;
 pw-diffuse-0
 
 : pw-diffuse-1 ( -- )
-    ['] pw-diffuse-ecc is pw-diffuse  2 to pw-level0 ;
+    ['] pw-diffuse-ecc is pw-diffuse ;
 pw-diffuse-1
 
-\ : pw-diffuse-2 ( -- ) ['] pw-diffuse-ecc-mem is pw-diffuse  1 to pw-level0 ;
+\ : pw-diffuse-2 ( -- ) ['] pw-diffuse-ecc-mem is pw-diffuse ;
 \ pw-diffuse-2
 
 : pw-setup ( addr u -- diffuse# )
     \g compute between 256 and ridiculously many iterations
-    drop c@ $F and 2* pw-level0 swap lshift ;
+    drop c@ $F and ;
 
 : encrypt-pw$ ( addr u1 key u2 n -- )
     crypt-pw-setup  pw-diffuse  key-cksum# - 0 c:encrypt+auth ;

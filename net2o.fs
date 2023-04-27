@@ -2020,11 +2020,20 @@ context-table   $save
 
 \ modify bye
 
-0 warnings !@
-: bye  !save-all-msgs subme dht-disconnect net2o-kills
-    [IFDEF] delete-whereg delete-whereg [THEN]
-    .unstatus 0 (bye) ;
-warnings !
+' bye defered? [IF]
+    : net2o-bye  !save-all-msgs subme dht-disconnect net2o-kills
+	[IFDEF] cilk-bye cilk-bye [THEN]
+	[IFDEF] delete-whereg delete-whereg [THEN]
+	.unstatus 0 (bye) ;
+    ' net2o-bye is bye
+[ELSE]
+    0 warnings !@
+    : bye  !save-all-msgs subme dht-disconnect net2o-kills
+	[IFDEF] cilk-bye cilk-bye [THEN]
+	[IFDEF] delete-whereg delete-whereg [THEN]
+	.unstatus 0 (bye) ;
+    warnings !
+[THEN]
 
 Defer net2o-bye
 ' bye is net2o-bye
