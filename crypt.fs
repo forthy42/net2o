@@ -322,7 +322,6 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
     pw-diffuse-mem-fill
     seeds-addr r> keccak#max * + c:key> ;
 : pw-diffuse-mem-fills ( n -- )
-    dup 1 = IF  drop 0 pw-diffuse-mem-fill-1  EXIT  THEN
     0 ?DO
 	I ['] pw-diffuse-mem-fill-1 spawn1
     LOOP  sync ;
@@ -333,7 +332,6 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
     pw-diffuse-mem-plow
     seeds-addr r> keccak#max * + c:key> ;
 : pw-diffuse-mem-plows ( n -- )
-    dup 1 = IF  drop 0 pw-diffuse-mem-plow-1  EXIT  THEN
     0 ?DO
 	I ['] pw-diffuse-mem-plow-1 spawn1
     LOOP  sync ;
