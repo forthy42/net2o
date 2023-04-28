@@ -2022,9 +2022,7 @@ context-table   $save
 
 ' bye defered? [IF]
     : net2o-bye  !save-all-msgs subme dht-disconnect net2o-kills
-	[IFDEF] cilk-bye cilk-bye [THEN]
-	[IFDEF] delete-whereg delete-whereg [THEN]
-	.unstatus 0 (bye) ;
+	defers bye ;
     ' net2o-bye is bye
 [ELSE]
     0 warnings !@
@@ -2034,9 +2032,6 @@ context-table   $save
 	.unstatus 0 (bye) ;
     warnings !
 [THEN]
-
-Defer net2o-bye
-' bye is net2o-bye
 
 \ show problems
 

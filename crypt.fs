@@ -279,8 +279,6 @@ require cilk.fs \ parallel stuff
 start-workers
 
 $10000 Value pw-diffuse-size \ 64kB minimum diffuse size
-4 Value pw-min-cpus \ 4 CPUs minimum
-pw-diffuse-size pw-min-cpus / Value pw-diffuse-chunk \ 16kB chunk per CPU
 keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 2 Value pw-diffuse-rounds
 2 Value pw-diffuse-times
@@ -294,8 +292,8 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 \ of memory with garbage and diffuse random locations over and over again.
 : pw-diffuse-mem-fill ( incr addr u -- )
     bounds U+DO
-	2 pw-diffuse-ecc
-	I pw-diffuse-chunk
+	0 pw-diffuse-ecc
+	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
 	    \ fill memory really fast, therefore only 2 rounds of Keccak
@@ -320,20 +318,22 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
     keccak-init
     seeds-addr r@ keccak#max * + >c:key c:diffuse
     pw-diffuse-size diffuse# lshift
-    pool-addr pw-diffuse-chunk r@ * + pool-size
+    pool-addr pw-diffuse-size r@ * + pool-size
     pw-diffuse-mem-fill
     seeds-addr r> keccak#max * + c:key> ;
 : pw-diffuse-mem-fills ( n -- )
+    dup 1 = IF  drop 0 pw-diffuse-mem-fill-1  EXIT  THEN
     0 ?DO
 	I ['] pw-diffuse-mem-fill-1 spawn1
     LOOP  sync ;
 
 : pw-diffuse-mem-plow-1 ( n -- ) >r
     seeds-addr r@ keccak#max * + >c:key c:diffuse
-    pool-addr pool-size diffuse# 2 + rshift tuck r@ * + swap
+    pool-addr pool-size diffuse# rshift tuck r@ * + swap
     pw-diffuse-mem-plow
     seeds-addr r> keccak#max * + c:key> ;
 : pw-diffuse-mem-plows ( n -- )
+    dup 1 = IF  drop 0 pw-diffuse-mem-plow-1  EXIT  THEN
     0 ?DO
 	I ['] pw-diffuse-mem-plow-1 spawn1
     LOOP  sync ;
@@ -342,12 +342,12 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
     to diffuse#
     1 diffuse# 2* lshift pw-diffuse-size * dup alloc+guard
     to pool-addr to pool-size
-    keccak#max diffuse# 2 + lshift dup allocate throw
+    keccak#max diffuse# lshift dup allocate throw
     to seeds-addr to seeds-size
     seeds-addr seeds-size c:prng
-    4 diffuse# lshift pw-diffuse-mem-fills
+    1 diffuse# lshift pw-diffuse-mem-fills
     seeds-addr seeds-size c:encrypt
-    4 diffuse# lshift pw-diffuse-mem-plows
+    1 diffuse# lshift pw-diffuse-mem-plows
     seeds-addr seeds-size c:hash
     pool-addr pool-size free+guard
     seeds-addr seeds-size freez
