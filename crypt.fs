@@ -279,12 +279,15 @@ require cilk.fs \ parallel stuff
 start-workers
 
 $10000 Value pw-diffuse-size \ 64kB minimum diffuse size
-keccak#max dup 1 64s / * 2/ Value pw-acc-increment
+4 Value pw-diffuse-plows
+keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
 2 Value pw-diffuse-rounds
 2 Value pw-diffuse-times
 
 0 Value pool-addr
 0 Value pool-size
+0 Value pool-this-half
+0 Value pool-other-half
 0 Value seeds-addr
 0 Value seeds-size
 1 Value diffuse#
@@ -298,43 +301,64 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
 	    \ fill memory really fast, therefore only 2 rounds of Keccak
 	    \ repeat reencrypting the memory, so that it serves as state
-	    \ as a whole
+	    \ as a whole. This part uses data-independent access patterns.
 	LOOP  2drop
     dup +LOOP  drop ;
 : pw-diffuse-mem-plow ( addr u -- )
-    dup keccak#max - { mask | diffuse[ keccak#max ] }
+    dup keccak#max -
+    pool-size 2/ keccak#max - { mask mask2 | diffuse[ keccak#max ] }
     0 ?DO
 	diffuse[ c:key>
 	diffuse[ keccak#max bounds U+DO
 	    \ Use diffuse array as random 64 bit indices into memory
-	    \ Reencrypt memory block
-	    @keccak over I le-64@ 64>n mask and + keccak#max
-	    pw-diffuse-rounds KeccakEncryptLoop  drop
+	    \ These are data dependent accesses, but their relationship
+	    \ to the original passphrase is supposed to be completely useless
+	    \ by being an intermediate hash of the memory plowed through
+	    \ Each run of data dependent accesses is a completeley new hash
+	    \ The hidden state of Keccak is not exposed
+	    @keccak I le-64@ dup 0< IF
+		\ if negative: hash in memory block from other half
+		64>n mask2 and pool-other-half + keccak#max >keccak
+		pw-diffuse-rounds KeccakF
+	    ELSE
+		\ if positive: encrypt memory block from r/w partition
+		64>n mask and third + keccak#max
+		pw-diffuse-rounds KeccakEncryptLoop  drop
+	    THEN
 	1 64s +LOOP
 	\ make sure on average one index hits one line twice
     pw-acc-increment +LOOP  drop ;
 
-: pw-diffuse-mem-fill-1 ( n -- ) >r
-    keccak-init
-    seeds-addr r@ keccak#max * + >c:key c:diffuse
+: sync+encrypt ( -- )
+    \ after collecting all results, encrypt them with the current state
+    sync seeds-addr seeds-size c:encrypt ;
+: seed-init ( n -- )
+    keccak#max * seeds-addr + c:0key >c:key c:diffuse ;
+: seed> ( n -- )
+    keccak#max * seeds-addr + c:key> ;
+
+: pw-diffuse-mem-fill-1 ( n -- )
+    keccak-init dup >r seed-init
     pw-diffuse-size diffuse# lshift
     pool-addr pw-diffuse-size r@ * + pool-size
-    pw-diffuse-mem-fill
-    seeds-addr r> keccak#max * + c:key> ;
+    pw-diffuse-mem-fill r> seed> ;
 : pw-diffuse-mem-fills ( n -- )
-    0 ?DO
-	I ['] pw-diffuse-mem-fill-1 spawn1
-    LOOP  sync ;
+    0 ?DO  I ['] pw-diffuse-mem-fill-1 spawn1  LOOP  sync+encrypt ;
 
-: pw-diffuse-mem-plow-1 ( n -- ) >r
-    seeds-addr r@ keccak#max * + >c:key c:diffuse
-    pool-addr pool-size diffuse# rshift tuck r@ * + swap
-    pw-diffuse-mem-plow
-    seeds-addr r> keccak#max * + c:key> ;
-: pw-diffuse-mem-plows ( n -- )
-    0 ?DO
-	I ['] pw-diffuse-mem-plow-1 spawn1
-    LOOP  sync ;
+: pw-diffuse-mem-plow-1 ( n -- ) dup >r seed-init
+    pool-this-half pool-size 2/
+    diffuse# 2/ rshift tuck r@ * + swap
+    pw-diffuse-mem-plow r> seed> ;
+: pw-diffuse-mem-plows ( n -- ) { n }
+    pool-addr to pool-this-half
+    pool-addr pool-size 2/ + to pool-other-half
+    pw-diffuse-plows 2* 0 ?DO
+	\ Run alternatively plow-1 for this and the other half for plows
+	\ times, so in total, on average every memory location is accessed
+	\ once and modified 1/2 of the time.
+	n 0 ?DO  I ['] pw-diffuse-mem-plow-1 spawn1  LOOP  sync+encrypt
+	pool-this-half pool-other-half to pool-this-half to pool-other-half
+    LOOP ;
 
 : pw-diffuse-ecc-mem ( diffuse# -- )
     to diffuse#
@@ -344,9 +368,7 @@ keccak#max dup 1 64s / * 2/ Value pw-acc-increment
     to seeds-addr to seeds-size
     seeds-addr seeds-size c:prng
     1 diffuse# lshift pw-diffuse-mem-fills
-    seeds-addr seeds-size c:encrypt
-    1 diffuse# lshift pw-diffuse-mem-plows
-    seeds-addr seeds-size c:hash
+    1 diffuse# 2/ lshift pw-diffuse-mem-plows
     pool-addr pool-size free+guard
     seeds-addr seeds-size freez
 ; \ waste time that is even more difficult to do in ASICs and GPUs
