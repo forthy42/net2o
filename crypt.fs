@@ -281,7 +281,7 @@ start-workers
 $10000 Value pw-diffuse-size \ 64kB minimum diffuse size
 4 Value pw-diffuse-plows
 keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
-2 Value pw-diffuse-rounds
+2 Value pw-diffuse-rounds \ the primitive does only even numbers of rounds
 2 Value pw-diffuse-times
 
 0 Value pool-addr
@@ -326,7 +326,7 @@ keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
 		pw-diffuse-rounds KeccakEncryptLoop  drop
 	    THEN
 	1 64s +LOOP
-	\ make sure on average one index hits one line twice
+	\ make sure on average one index hits one line once
     pw-acc-increment +LOOP  drop ;
 
 : sync+encrypt ( -- )
