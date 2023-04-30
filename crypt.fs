@@ -278,9 +278,9 @@ scope{ mapc
 require cilk.fs \ parallel stuff
 start-workers
 
-$10000 Value pw-diffuse-size \ 64kB minimum diffuse size
+$20000 Value pw-diffuse-size \ 128kB minimum diffuse size
 4 Value pw-diffuse-plows
-keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
+keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 2 Value pw-diffuse-rounds \ the primitive does only even numbers of rounds
 2 Value pw-diffuse-times
 
@@ -295,7 +295,11 @@ keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
 \ of memory with garbage and diffuse random locations over and over again.
 : pw-diffuse-mem-fill ( incr addr u -- )
     bounds U+DO
-	0 pw-diffuse-ecc
+	c:diffuse
+	{ | diffuse-sk[ keysize ] diffuse-ecc[ keysize ] }
+	diffuse-sk[ keysize  c:hash@
+	diffuse-sk[ dup sk-mask  diffuse-ecc[  sk>pk
+	diffuse-ecc[ keysize c:shorthash
 	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
@@ -326,7 +330,7 @@ keccak#max dup 1 64s / * pw-diffuse-plows * Value pw-acc-increment
 		pw-diffuse-rounds KeccakEncryptLoop  drop
 	    THEN
 	1 64s +LOOP
-	\ make sure on average one index hits one line once
+	\ make sure on average one index hits one line by 50% chance
     pw-acc-increment +LOOP  drop ;
 
 : sync+encrypt ( -- )
