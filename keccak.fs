@@ -70,8 +70,9 @@ User keccak-t
     [: keccak new dup crypto-o ! keccak-t ! ;] crypto-a with-allocater
     up@ crypto-up ! keccak-state to @keccak ;
 
-: keccak-free crypto-o @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
-    0 to @keccak crypto-o off ;
+: keccak-free
+    keccak-t @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
+    0 to @keccak crypto-o off  keccak-t off ;
 
 keccak-init
 

@@ -276,7 +276,6 @@ scope{ mapc
 \ Fill memory
 
 require cilk.fs \ parallel stuff
-start-workers
 
 $20000 Value pw-diffuse-size \ 128kB minimum diffuse size
 4 Value pw-diffuse-plows
@@ -348,7 +347,8 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 : pw-diffuse-mem-fills ( n -- )
     0 ?DO  I ['] pw-diffuse-mem-fill-1 spawn1  LOOP  sync+encrypt ;
 
-: pw-diffuse-mem-plow-1 ( n -- ) dup >r seed-init
+: pw-diffuse-mem-plow-1 ( n -- )
+    keccak-init dup >r seed-init
     pool-this-half pool-size 2/
     diffuse# 2/ rshift tuck r@ * + swap
     pw-diffuse-mem-plow r> seed> ;
@@ -364,7 +364,8 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
     LOOP ;
 
 : pw-diffuse-ecc-mem ( diffuse# -- )
-    to diffuse#
+    kregion 2@ { d: old-region }
+    to diffuse#  cilk-init
     1 diffuse# 2* lshift pw-diffuse-size * dup alloc+guard
     to pool-addr to pool-size
     keccak#max diffuse# lshift dup allocate throw
@@ -374,6 +375,7 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
     1 diffuse# 2/ lshift pw-diffuse-mem-plows
     pool-addr pool-size free+guard
     seeds-addr seeds-size freez
+    cilk-bye  old-region 2dup kregion 2! erase
 ; \ waste time that is even more difficult to do in ASICs and GPUs
 
 Defer pw-diffuse
