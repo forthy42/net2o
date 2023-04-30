@@ -294,12 +294,10 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 \ The diffusion here does not have to be strong, because we fill up a lot
 \ of memory with garbage and diffuse random locations over and over again.
 : pw-diffuse-mem-fill ( incr addr u -- )
+    { | diffuse-sk[ keysize ] diffuse-ecc[ keysize ] }
     bounds U+DO
 	c:diffuse
-	{ | diffuse-sk[ keysize ] diffuse-ecc[ keysize ] }
-	diffuse-sk[ keysize  c:hash@
-	diffuse-sk[ dup sk-mask  diffuse-ecc[  sk>pk
-	diffuse-ecc[ keysize c:shorthash
+	diffuse-sk[ diffuse-ecc[ ['] sk>pk pw-diffuse-ecc'
 	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
 	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
@@ -307,7 +305,8 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 	    \ repeat reencrypting the memory, so that it serves as state
 	    \ as a whole. This part uses data-independent access patterns.
 	LOOP  2drop
-    dup +LOOP  drop ;
+    dup +LOOP  drop
+    diffuse-ecc[ keysize erase  diffuse-sk[ keysize erase ;
 : pw-diffuse-mem-plow ( addr u -- )
     dup keccak#max -
     pool-size 2/ keccak#max - { mask mask2 | diffuse[ keccak#max ] }
