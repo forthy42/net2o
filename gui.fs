@@ -1278,13 +1278,11 @@ Hash: audio#
     also require minos2/pulse-audio.fs pulse-init
     require minos2/opus-codec.fs
     previous
-    ' bye is net2o-bye
 [ELSE]
     [IFDEF] android
 	also require minos2/sles-audio.fs sles-init
 	require minos2/opus-codec.fs
 	previous
-	' bye is net2o-bye
     [ELSE]
 	begin-structure idx-head
 	    4 +field idx-magic

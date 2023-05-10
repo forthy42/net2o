@@ -183,7 +183,7 @@ $44FFFFFF re-color author#
 		    l" " l" und dann der Reihe nach diese Megabytes hashen (Brute Force: Meh!)" b\\
 		    l" Fehleingaben " l" Fehleingaben merken, und in Kombination mit der aktuellen" b\\
 		    l" " l" Eingabe als Schlüssel verwenden" b\\
-		    l" Schwierigkeit " l" Nach Fehleingaben maximale Schwierigkeit um 1 erhöhen" b\\
+		    l" Schwierigkeit " l" Kombination erhöht Schwierigkeit um eins" b\\
 		}}vt
 	    }}v box[] >bdr
 	}}z box[] /flip dup >slides

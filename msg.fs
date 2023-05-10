@@ -1389,10 +1389,11 @@ previous
     REPEAT  2drop ;
 : ?scan-pks ( addr u -- )
     bounds U+DO
-	I $@  ?msg-dec-sig?
-	sigpksize# - + keysize 2dup key# #@ d0= IF
-	    "key" 2swap msg-group-o .msg:pks# #!
-	ELSE  2drop  THEN
+	I $@  msg-dec?-sig? IF  ( undecryptable )  2drop
+	ELSE  sigpksize# - + keysize 2dup key# #@ d0= IF
+		"key" 2swap msg-group-o .msg:pks# #!
+	    ELSE  2drop  THEN
+	THEN
     cell +LOOP ;
 
 forward key-from-dht

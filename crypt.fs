@@ -297,13 +297,12 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
     bounds U+DO
 	c:diffuse
 	diffuse-sk[ diffuse-ecc[ ['] sk>pk pw-diffuse-ecc'
-	I pw-diffuse-size
 	pw-diffuse-times 0 ?DO
-	    @keccak third third pw-diffuse-rounds KeccakEncryptLoop  drop
+	    @keccak J pw-diffuse-size pw-diffuse-rounds KeccakEncryptLoop  drop
 	    \ fill memory really fast, therefore only 2 rounds of Keccak
 	    \ repeat reencrypting the memory, so that it serves as state
 	    \ as a whole. This part uses data-independent access patterns.
-	LOOP  2drop
+	LOOP
     dup +LOOP  drop
     diffuse-ecc[ keysize erase  diffuse-sk[ keysize erase ;
 : pw-diffuse-mem-plow ( addr u -- )
