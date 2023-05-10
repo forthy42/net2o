@@ -851,6 +851,8 @@ msg:class is msg:object
 
 : msg-dec?-sig? ( addr u -- addr' u' flag )
     2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  msg-sig?  THEN ;
+: msg-dec?-sig?-fast ( addr u -- addr' u' flag )
+    2dup 2 - + c@ $80 and IF  msg-dec-sig?  ELSE  pk-date?  THEN ;
 : ?msg-dec-sig? ( addr u -- addr' u' )
     2dup 2 - + c@ $80 and IF  msg-dec-sig? !!sig!!  THEN ;
 : msg-log-dec@ ( index -- addr u )
@@ -1389,7 +1391,7 @@ previous
     REPEAT  2drop ;
 : ?scan-pks ( addr u -- )
     bounds U+DO
-	I $@  msg-dec?-sig? IF  ( undecryptable )  2drop
+	I $@  msg-dec?-sig?-fast IF  ( undecryptable )  2drop
 	ELSE  sigpksize# - + keysize 2dup key# #@ d0= IF
 		"key" 2swap msg-group-o .msg:pks# #!
 	    ELSE  2drop  THEN
