@@ -826,6 +826,7 @@ n2o-history
 scope{ /chat
 :noname [: word-args ['] evaluate do-net2o-cmds ;] catch
     ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ; is /n2o
+' n2o:nick is /nick
 }scope
 
 0 Value extra-args \ hide extra arguments until start-n2o is run

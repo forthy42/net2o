@@ -1432,7 +1432,7 @@ forward key-from-dht
     reset-time
     msg-group-o >o msg:?otr msg:-otr o> >r
     [: cells >r msg-log@ { log u } u r> - 0 max { u' }
-      log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
+      log u u' /string ?scan-pks  ?fetch-pks \ activate ?fetch-pks
       log u' ['] ?search-lock msg-scan-hash
       log u u' /string bounds ?DO
 	  I log - cell/ to log#
@@ -1840,6 +1840,9 @@ also net2o-base scope: /chat
     umethod /n2o ( addr u -- )
     \U n2o <cmd>            execute n2o command
     \G n2o: Execute normal n2o command
+    umethod /nick ( addr u -- )
+    \U nick <orig> <alias>  Add a new nickname
+    \G nick: Add a new nickname to an existing account
     umethod /notify ( addr u -- )
     \U notify always|on|off|led <rgb> <on-ms> <off-ms>|interval <time>[smh]|mode 0-3
     \G notify: Change notificaton settings
@@ -2133,18 +2136,26 @@ Forward ```
 	5 /string drop xc@
 	[: ulit, msg-vote ;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
-: pk-rec ( addr u -- )
-    dup 3 < IF  2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
-    over c@ '@' = IF  2dup 1 /string ':' -skip nick>pk
-	2dup d0= IF  2drop 2drop rectype-null
-	ELSE
-	    2>r over ?flush-text + to last->in  2r>
-	    [:
-		\ ." signal: '" 85type ''' forth:emit forth:cr
-		$, msg-signal
-	    ;] rectype-nt
-	THEN
-    ELSE  2drop rectype-null  THEN ;
+: x-skip1 ( addr u xc -- addr u' )
+    dup xc-size { xc size }
+    dup size u>= IF  2dup + size - xc@ xc = IF  size -  THEN  THEN ;
+: -skip-punctation ( addr u -- addr u' )
+    BEGIN  dup >r  ".,:;?!·«»‹›„“‚‘'\"" bounds
+	DO  I xc@ x-skip1  I I' over - x-size  +LOOP
+    dup r> = UNTIL ;
+: pk-rec ( addr u -- rectype )
+    over c@ '@' <> over 3 < or IF
+	2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
+    -skip-punctation  2dup 1 /string  nick>pk
+    2dup d0= IF  2drop 2drop rectype-null
+    ELSE
+	2>r over ?flush-text + to last->in
+	last->in source drop - >in !  2r>
+	[:
+	    \ ." signal: '" 85type ''' forth:emit forth:cr
+	    $, msg-signal
+	;] rectype-nt
+    THEN ;
 : chain-rec ( addr u -- )
     over c@ '!' = IF
 	2dup 1 /string dup 0= IF  2drop 2drop rectype-null  EXIT  THEN
