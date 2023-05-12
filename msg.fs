@@ -2136,11 +2136,27 @@ Forward ```
 	5 /string drop xc@
 	[: ulit, msg-vote ;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
+
+Variable punctations
+s" minos2/unicode/punctation.db" open-fpath-file
+0= [IF] 2drop dup punctations $slurp forth:close-file throw [THEN]
 : x-skip1 ( addr u xc -- addr u' )
+    \ Character is either xc or xc+emoji variant selector
     dup xc-size { xc size }
-    dup size u>= IF  2dup + size - xc@ xc = IF  size -  THEN  THEN ;
+    dup size 3 + u>= IF
+	2dup x\string- + xc@ $FE0F = IF
+	    2dup x\string- x\string- + xc@ xc = IF
+		x\string- x\string- EXIT
+	    THEN
+	THEN
+    THEN
+    dup size u>= IF
+	2dup x\string- + xc@ xc = IF
+	    x\string- EXIT
+	THEN
+    THEN ;
 : -skip-punctation ( addr u -- addr u' )
-    BEGIN  dup >r  ".,:;?!·«»‹›„“‚‘'\"" bounds
+    BEGIN  dup >r  punctations $@ bounds
 	DO  I xc@ x-skip1  I I' over - x-size  +LOOP
     dup r> = UNTIL ;
 : pk-rec ( addr u -- rectype )
