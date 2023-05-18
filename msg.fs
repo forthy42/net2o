@@ -2120,26 +2120,11 @@ Forward ```
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN ;
 
-: text-rec ( addr u -- )
-    2drop ['] noop rectype-nt ;
-: tag-rec ( addr u -- )
-    over c@ '#' = IF
-	over ?flush-text 2dup + to last->in
-	[: 1 /string
-	    \ ." tag: '" forth:type ''' forth:emit forth:cr
-	    $, msg-tag
-	;] rectype-nt
-    ELSE  2drop rectype-null  THEN ;
-: vote-rec ( addr u -- )
-    2dup "vote:" string-prefix? IF
-	over ?flush-text 2dup + to last->in
-	5 /string drop xc@
-	[: ulit, msg-vote ;] rectype-nt
-    ELSE  2drop rectype-null  THEN ;
-
 Variable punctations
 s" minos2/unicode/punctation.db" open-fpath-file
-0= [IF] 2drop dup punctations $slurp forth:close-file throw [THEN]
+0= [IF] 2drop dup punctations $slurp forth:close-file throw
+[ELSE] s" .,:;!" punctations $! [THEN]
+
 : x-skip1 ( addr u xc -- addr u' )
     \ Character is either xc or xc+emoji variant selector
     dup xc-size { xc size }
@@ -2159,6 +2144,24 @@ s" minos2/unicode/punctation.db" open-fpath-file
     BEGIN  dup >r  punctations $@ bounds
 	DO  I xc@ x-skip1  I I' over - x-size  +LOOP
     dup r> = UNTIL ;
+
+: text-rec ( addr u -- )
+    2drop ['] noop rectype-nt ;
+: tag-rec ( addr u -- )
+    over c@ '#' = IF
+	-skip-punctation
+	over ?flush-text 2dup + to last->in
+	[: 1 /string
+	    \ ." tag: '" forth:type ''' forth:emit forth:cr
+	    $, msg-tag
+	;] rectype-nt
+    ELSE  2drop rectype-null  THEN ;
+: vote-rec ( addr u -- )
+    2dup "vote:" string-prefix? IF
+	over ?flush-text 2dup + to last->in
+	5 /string drop xc@
+	[: ulit, msg-vote ;] rectype-nt
+    ELSE  2drop rectype-null  THEN ;
 : pk-rec ( addr u -- rectype )
     over c@ '@' <> over 3 < or IF
 	2drop rectype-null  EXIT  THEN \ minimum nick: 2 characters
