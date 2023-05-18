@@ -2120,10 +2120,14 @@ Forward ```
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN ;
 
-Variable punctations
+Variable punctation
 s" minos2/unicode/punctation.db" open-fpath-file
-0= [IF] 2drop dup punctations $slurp forth:close-file throw
-[ELSE] s" .,:;!" punctations $! [THEN]
+0= [IF] 2drop dup punctation $slurp forth:close-file throw
+[ELSE] s" .,:;!" punctation $! [THEN]
+Variable brackets
+s" minos2/unicode/brackets.db" open-fpath-file
+0= [IF] 2drop dup brackets $slurp forth:close-file throw
+[ELSE] s" ()[]{}" brackets $! [THEN]
 
 : x-skip1 ( addr u xc -- addr u' )
     \ Character is either xc or xc+emoji variant selector
@@ -2140,9 +2144,12 @@ s" minos2/unicode/punctation.db" open-fpath-file
 	    x\string- EXIT
 	THEN
     THEN ;
+: x-skip$ ( addr u $class -- addr u' )
+    $@ bounds  DO  I xc@ x-skip1  I I' over - x-size  +LOOP ;
 : -skip-punctation ( addr u -- addr u' )
-    BEGIN  dup >r  punctations $@ bounds
-	DO  I xc@ x-skip1  I I' over - x-size  +LOOP
+    BEGIN  dup >r
+	punctation x-skip$
+	brackets   x-skip$
     dup r> = UNTIL ;
 
 : text-rec ( addr u -- )
@@ -2177,7 +2184,8 @@ s" minos2/unicode/punctation.db" open-fpath-file
     THEN ;
 : chain-rec ( addr u -- )
     over c@ '!' = IF
-	2dup 1 /string dup 0= IF  2drop 2drop rectype-null  EXIT  THEN
+	-skip-punctation  2dup 1 /string
+	dup 0= IF  2drop 2drop rectype-null  EXIT  THEN
 	snumber?
 	case
 	    0 of  endof
@@ -2194,7 +2202,8 @@ s" minos2/unicode/punctation.db" open-fpath-file
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
-	over ?flush-text 2dup + to last->in
+	over ?flush-text
+	-skip-punctation 2dup + to last->in
 	[: $, msg-url ;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
 
