@@ -332,7 +332,7 @@ keccak#max dup 1 64s / * pw-diffuse-plows * 2* Value pw-acc-increment
 
 : sync+encrypt ( -- )
     \ after collecting all results, encrypt them with the current state
-    sync seeds-addr seeds-size c:encrypt ;
+    cilk-sync seeds-addr seeds-size c:encrypt ;
 : seed-init ( n -- )
     keccak#max * seeds-addr + c:0key >c:key c:diffuse ;
 : seed> ( n -- )
