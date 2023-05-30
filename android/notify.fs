@@ -50,7 +50,14 @@ SDK_INT 11 >= [IF]
 		ch-name$ $@ make-jstring nc .setName
 	    THEN ;
     [THEN]
-    : msg-builder ( -- ) ?nm ?ni [IFDEF] ?nc ?nc
+    : msg-builder ( -- )
+	?nm ?ni
+	[IFDEF] areNotificationsEnabled
+	    notification-manager .areNotificationsEnabled 0= IF
+		"android.permission.POST_NOTIFICATIONS" 1 ask-permissions
+	    THEN
+	[THEN]
+	[IFDEF] ?nc ?nc
 	    clazz channel$ $@ make-jstring newNotification.Builder+Id >o
 	[ELSE]
 	    clazz newNotification.Builder >o
@@ -74,6 +81,9 @@ SDK_INT 11 >= [IF]
 	[THEN]
 	.build to nf ;
     : show-notification ( -- )
+	[IFDEF] areNotificationsEnabled
+	    notification-manager .areNotificationsEnabled 0= ?EXIT
+	[THEN]
 	clazz >o 1 0 to argj0
 	nf to argnotify o>
 	['] notifyer post-it ;
