@@ -64,8 +64,10 @@ ICONS = $(patsubst %,icons/hicolor/%/apps/net2o.png,$(ICONSIZES))	\
 	icons/hicolor/scalable/apps/net2o.svg
 ICONDIRS = $(patsubst %,icons/hicolor/%/apps,$(ICONSIZES) scalable)
 
-DESKTOP = applications/net2o.desktop
 DESKTOPDIR = applications
+NOTIFYDIR = knotifications5
+DESKTOP = $(DESKTOPDIR)/net2o.desktop
+NOTIFYRC = $(NOTIFYDIR)/net2o.notifyrc
 
 LANGS =	  net2o-lang.csv
 
@@ -113,8 +115,8 @@ GEN = version.fs
 
 DOC = wiki/commands.md
 
-DISTFILES = $(SOURCES) $(LANGS) $(ICONS) $(DESKTOP) $(GEN) $(SCRIPTS) $(INS) \
-	$(INS:%=%.in)
+DISTFILES = $(SOURCES) $(LANGS) $(ICONS) $(DESKTOP) $(NOTIFYRC) $(GEN)	\
+	$(SCRIPTS) $(INS) $(INS:%=%.in)
 
 all: no-config doc
 
@@ -172,10 +174,10 @@ install:	libcc-install
 	@NOVERDIR@for i in $(SCRIPTS); do \
 	@NOVERDIR@	$(INSTALL_SCRIPT) ./$$i $(bindir)/$$i; \
 	@NOVERDIR@done
-	for i in $(ICONDIRS) $(DESKTOPDIR); do \
+	for i in $(ICONDIRS) $(DESKTOPDIR) $(NOTIFYDIR); do \
 		$(MKDIR) -p $(datadir)/$$i; \
 	done
-	for i in $(ICONS) $(DESKTOP); do \
+	for i in $(ICONS) $(DESKTOP) $(NOTIFYRC); do \
 		$(INSTALL_DATA) $(srcdir)/$$i $(datadir)/$$i; \
 	done
 	$(MKDIR) -p $(sysconfdir)/bash_completion.d

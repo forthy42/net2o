@@ -38,7 +38,7 @@
 0 Value content-string
 0 Value title-string
 
-10 cells buffer: notify-args
+20 cells buffer: notify-args
 
 $Variable notify-send
 $Variable net2o-logo
@@ -64,7 +64,7 @@ $Variable net2o-logo
 
 !upath !net2o-logo
 
-[IFDEF] use-execve
+[IFDEF] notify-args
     : ?free0 ( addr -- )
 	dup 0= IF  drop  EXIT  THEN  @ free throw ;
     : !notify-args ( -- )
@@ -74,8 +74,14 @@ $Variable net2o-logo
 	"notify-send\0" drop ,
 	"-a\0" drop ,
 	"net2o\0" drop ,
-	"-c\0" drop ,
-	"im.received\0" drop ,
+	"-u\0" drop ,
+	"normal\0" drop ,
+	"-h\0" drop dup ,
+	"string:x-kde-appname:net2o\0" drop ,
+	dup ,
+	"string:x-kde-eventId:im-message-in\0" drop ,
+	,
+	"string:desktop-entry:net2o\0" drop ,
 	net2o-logo $@len IF
 	    "-i\0" drop ,
 	    net2o-logo $@ drop ,
@@ -93,7 +99,7 @@ $Variable net2o-logo
     !upath !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
 
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
-    [IFDEF] use-execve
+    [IFDEF] notify-args
 	\ for now unknown reasons, notify-send doesn't like this way of
 	\ being called
 	notify@ content-string 0$!
@@ -105,7 +111,7 @@ $Variable net2o-logo
 	['] notify-title $tmp ['] escape-<&> $tmp "TITLE" 2swap 1 setenv ?ior
 	"MESSAGE" notify@ 2dup d0= IF  2drop "-/-"  THEN  1 setenv ?ior
 	[: notify-send $. space
-	    ." -a net2o -c im.received "
+	    ." -a net2o -u normal -h string:x-kde-appname:net2o -h string:x-kde-eventId:MessageIn -h string:desktop-entry:net2o "
 	    net2o-logo $@len IF
 		." -i " net2o-logo $. space  THEN
 	    .\" \"$TITLE\" \"$MESSAGE\""
