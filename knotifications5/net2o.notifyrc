@@ -5,14 +5,9 @@ Comment=net2o secure communication
 Version=2
 DesktopEntry=net2o
 
-[Context/message]
-Name=Message
-Comment=Used for messages
-
 [Event/im-message-in]
 Name=MessageIn
 Comment=A message arrived
-Contexts=message
 Sound=Oxygen-Im-Message-In.ogg
 Action=Sound|Popup
 IconName=net2o
@@ -21,7 +16,6 @@ Urgency=Normal
 [Event/im-message-out]
 Name=MessageOut
 Comment=A message was sent
-Contexts=message
 Sound=Oxygen-Im-Message-Out.ogg
 Action=Sound|Popup
 IconName=net2o
