@@ -251,8 +251,7 @@ Variable sim-nick!
 \ search for keys - not optimized
 
 : #split ( addr u -- addr u n )
-    [: 2dup '#' -scan nip dup
-      >r 0= IF  rdrop 0  EXIT  THEN
+    [: 2dup '#' -scan nip >r
       #0. 2over r@ 1+ /string >number
       0= IF  nip drop nip r> swap  ELSE
 	  rdrop drop 2drop 0   THEN ;] #10 base-execute ;
@@ -269,7 +268,8 @@ Variable sim-nick!
       THEN  o> ;] #map 2drop ;
 : .# ( n -- ) ?dup-IF  '#' emit 0 .r  THEN ;
 : .nick-base ( o:key -- )
-    ke-nick $.  ke-nick# @ .# ;
+    ke-nick $.  ke-nick $@len 0= IF  '#' emit ke-nick# @ 0 .r
+    ELSE  ke-nick# @ .#  THEN ;
 : .pet-base ( o:key -- )
     0 ke-pets[] [: space type dup ke-pets# $[] @ .#  1+ ;] $[]map drop ;
 : .pet0-base ( o:key -- )
