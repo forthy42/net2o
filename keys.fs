@@ -1,6 +1,6 @@
 \ net2o key storage
 
-\ Copyright © 2013-2015   Bernd Paysan
+\ Copyright © 2013-2023   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -429,6 +429,7 @@ blue >fg yellow bg| , cyan >fg red >bg or bold or ,
     ." perm:   " ke-mask @ .perm cr ;
 : .key-rest ( o:key -- o:key )
     ke-pk $@ key| .import85
+    ke-sk @ IF  ke-pwlevel @ 2 ['] .r #16 base-execute  THEN
     ke-wallet sec@ nip IF
 	wallet( space ke-wallet sec@ .black85 )else( ."  W" )
     ELSE  wallet( $15 )else( 2 ) spaces THEN
