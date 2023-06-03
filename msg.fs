@@ -1956,7 +1956,7 @@ is /help
 :noname ( addr u -- )  2drop
     [:  ." ===== Group: " msg:name$ .group ."  =====" forth:cr
 	msg:peers[] $@ bounds ?DO
-	    ." --- " I @ >o .con-id ." : " return-address .addr-path
+	    ." --- " I @ >o .con-id ." @" remote-host$ $. ." : " return-address .addr-path
 	    ."  ---" forth:cr .nat-addrs o>
 	cell +LOOP ;] group#map ; is /nat
 
@@ -2404,7 +2404,12 @@ $B $E 2Value chat-bufs#
     wait-key cr [: up@ wait-task ! ;] IS do-connect ;
 
 : search-connect ( key u -- o/0 )  key|
-    0 [: drop 2dup pubkey $@ key| str= o and  dup 0= ;] search-context
+    0 [: drop 2dup pubkey $@ key| str= o and
+      o IF
+	  context-table @ token-table @ = and
+	  code-map 0<> and
+      THEN
+      dup 0= ;] search-context
     nip nip  dup to connection ;
 
 : search-peer ( -- chat )

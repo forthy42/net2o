@@ -368,7 +368,9 @@ in net2o : pk1lookup ( pkaddr u -- )
 	2r> ['] dests is send0-xt
 	ind-addr on \ need NAT traversal
 	+resend-cmd direct-connect
-    ELSE  2rdrop  THEN ;
+    ELSE  2rdrop connect( ." Don't actually connect" cr )
+	dispose \ remove the created but unfinished context
+    THEN ;
 
 : pk1-connect? ( addr u cmdlen datalen -- flag )
     2>r net2o:pk1lookup? dup IF   2r> direct-connect  ELSE  2rdrop  THEN ;
