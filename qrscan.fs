@@ -65,10 +65,10 @@ require minos2/gl-helper.fs
     require mkdir.fs
     2 Constant ENOENT
     #-512 ENOENT - Constant no-file#
-    : init-dir ( addr u mode -- flag ) >r
+    : init-dir ( addr u mode -- flag ) \ net2o
 	\G create a directory with access mode,
 	\G return true if the dictionary is new, false if it already existed
-	2dup file-status nip no-file# = IF
+	>r 2dup file-status nip no-file# = IF
 	    r> mkdir-parents throw  true
 	ELSE  2drop rdrop  false  THEN ;
     require kregion.fs
@@ -182,7 +182,7 @@ scan-w 2* dup 3 rshift + negate Value scan-left
 
 also opengl
 
-: draw-scan ( direction xscale yscale -- )
+: draw-scan ( direction xscale yscale -- ) \ net2o
     \G draw a scan rotated/tilted by scan matrix
     fover fnegate fover fnegate 0e { f: sx f: sy f: -sx f: -sy f: z }
     vi0 >v

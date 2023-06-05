@@ -103,7 +103,7 @@ also }scope
 $80 Constant min-align#
 $400 Constant pow-align#
 
-: vault-aligned ( len -- len' )
+: vault-aligned ( len -- len' ) \ net2o
     \G Align vault to minimum granularity plus relative alignment
     \G to hide the actual file-size
     1- 0 >r  BEGIN  dup pow-align# u>  WHILE  1 rshift r> 1+ >r  REPEAT

@@ -42,17 +42,17 @@ object uclass rng-o
     cell uvar rng-task
 end-class rng-c
 
-: rng-exec ( xt -- )
+: rng-exec ( xt -- ) \ net2o
     \G run @i{xt} with activated random key
     c:key@ >r  rng-key c:key!  catch  r> c:key!  throw ;
 
-: read-urnd ( addr u -- )
+: read-urnd ( addr u -- ) \ net2o
     \G legacy version of read-rnd
     s" /dev/urandom" r/o open-file throw >r
     tuck r@ read-file r> close-file throw
     throw <> !!insuff-rnd!! ;
 
-: read-rnd ( addr u -- )
+: read-rnd ( addr u -- ) \ net2o
     \G read in entropy bytes from the systems entropy source
     [ [defined] getrandom [defined] linux and [IF]
 	"getrandom" "libc.so.6" open-lib lib-sym 0<>
@@ -76,13 +76,13 @@ end-class rng-c
     \ good randomness even with a number of backdoor possibilities
     rng-buffer rngbuf# read-rnd ;
 
-: >rng$ ( addr u -- )
+: >rng$ ( addr u -- ) \ net2o
     \G fill @i{addr u} with random data by encrypting it
     \G so whatever was there before is used as entropy
     \G for the PRNG.
     ['] c:encrypt rng-exec ;
 
-: rng-step ( -- )
+: rng-step ( -- ) \ net2o
     \G one step of random number generation 
     rng-buffer rngbuf# >rng$ rng-pos off ;
 
@@ -112,7 +112,7 @@ Variable check-old$
 "checkrng" .net2o-config/ check-rng$ $!
 $10 cells buffer: rngstat-buf
 
-: rngstat ( addr u -- float )
+: rngstat ( addr u -- float ) \ net2o
     \G produces a normalized number, gauss distributed around 0
     rngstat-buf $10 cells erase  dup 3 rshift { e }
     bounds ?DO
@@ -123,7 +123,7 @@ $10 cells buffer: rngstat-buf
     s>f e fm/ 0.0625e f* -1e fexp f**
     [ 16e 1e fexp f- 16e f/ -1e fexp f** ] FLiteral f- ;
 
-: ?check-rng ( -- )
+: ?check-rng ( -- ) \ net2o
     \G Check the RNG state for being deterministic (would be fatal).
     \G Check whenever you feel it is important enough, not limited to
     \G salt setup.
@@ -149,7 +149,7 @@ $10 cells buffer: rngstat-buf
 \ and a second one, to make sure the saved randomness
 \ does not leak anything important
 
-: .rngstat ( addr u -- )
+: .rngstat ( addr u -- ) \ net2o
     \G print a 16 bins histogram chisq test of the random data
     rngstat
     ." health - chisq normalized (|x|<0.9): "
@@ -176,7 +176,7 @@ User ?salt-init  ?salt-init off
 
 \ buffered random numbers to output 64 bit at a time
 
-: ?rng ( -- )
+: ?rng ( -- ) \ net2o
     \G alloc rng if not there
     rng-o @ 0= IF  rng-allot
     ELSE  up@ rng-task @ <> IF   rng-allot  THEN  THEN
@@ -184,28 +184,28 @@ User ?salt-init  ?salt-init off
     IF  ['] salt-init rng-sema c-section  THEN
     ?salt-init @ 0= !!no-salt!! ; \ fatal
 
-: rng-step? ( n -- )
+: rng-step? ( n -- ) \ net2o
     \G check if n bytes are available in the buffer
     \G in case the RNG is not initialized, init it.
     \G this covers forks and new threads, as the RNG key
     \G is per-thread.
     rngbuf# u> IF  rng-step  THEN ;
 
-: rng64 ( -- x64 )
+: rng64 ( -- x64 ) \ net2o
     \G return a 64 bit random number
     ?rng
     rng-pos @ 64aligned 64'+ rng-step?
     rng-pos @ 64aligned dup 64'+ rng-pos !
     rng-buffer + 64@ ;
 
-: rng$ { u -- addr u }
+: rng$ ( u -- addr u ) \ net2o
     \G return a @i{u} bytes stream (@i{u} must be smaller than the
     \G buffer size}
-    ?rng
+    { u } ?rng
     rng-pos @ u + rng-step?
     rng-buffer rng-pos @ + u dup rng-pos +! ;
 
-: rng32 ( -- x )
+: rng32 ( -- x ) \ net2o
     \G return a 32 bit random number
     ?rng
     rng-pos @ 4 + rng-step?
@@ -215,7 +215,7 @@ User ?salt-init  ?salt-init off
 : rng ( u -- x )
     [IFDEF] 64bit rng64 [ELSE] rng32 [THEN] um* nip ;
 
-: rng8 ( -- c )
+: rng8 ( -- c ) \ net2o
     \G return an 8 bit random number
     ?rng
     rng-pos @ 1+ rng-step?

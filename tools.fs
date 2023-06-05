@@ -99,7 +99,7 @@ word-args
     THEN ;
 
 [IFUNDEF] safe/string
-: safe/string ( c-addr u n -- c-addr' u' )
+: safe/string ( c-addr u n -- c-addr' u' ) \ net2o
 \G protect /string against overflows.
     dup negate >r  dup 0> IF
         /string dup r> u>= IF  + 0  THEN
@@ -109,7 +109,7 @@ word-args
 [THEN]
 
 [IFUNDEF] string-suffix?
-    : string-suffix? ( addr1 u1 addr2 u2 -- flag )
+    : string-suffix? ( addr1 u1 addr2 u2 -- flag ) \ net2o
 	\G return true if addr2 u2 is a suffix of addr1 u1
 	tuck 2>r over swap - 0 max /string 2r> str= ;
 [THEN]
@@ -168,7 +168,7 @@ debug: dummy(
 
 \ user stack, automatic init+dispose
 
-: ustack ( "name" -- )
+: ustack ( "name" -- ) \ net2o
     \G generate user stack, including initialization and free on thread
     \G start and termination
     User  latestxt >r
@@ -303,7 +303,7 @@ Vocabulary net2o
 	ELSE  1 I c@ $7F bl within  THEN
 	IF  2drop false  LEAVE  THEN  +LOOP ;
 
-: ?sane-file ( addr u -- addr u )
+: ?sane-file ( addr u -- addr u ) \ net2o
     \G check if file name is sane, and if not, fail
     dup 1- $FFF u>= !!filename!!             \ check nullstring+maxpath
     2dup printable? 0= !!filename!!          \ must be printable
@@ -380,10 +380,10 @@ require config.fs
 [THEN]
 
 [IFUNDEF] init-dir
-    : init-dir ( addr u mode -- flag ) >r
+    : init-dir ( addr u mode -- flag ) \ net2o
 	\G create a directory with access mode,
 	\G return true if the dictionary is new, false if it already existed
-	2dup file-status nip no-file# = IF
+	>r 2dup file-status nip no-file# = IF
 	    r> mkdir-parents drop  true
 	ELSE  2drop rdrop  false  THEN ;
 [THEN]
@@ -552,7 +552,7 @@ forward default-host
     ['] read-config catch  r> to config-throw  throw
     default-host ;
 
-: ?old-config ( addr u wid -- )
+: ?old-config ( addr u wid -- ) \ net2o
     \G check if we have an old config; then keep it.
     "~/.net2o/config" file-status nip no-file# <> IF
 	"~/.net2o" 2dup .net2o$ $! .net2o-config$ $!
@@ -683,7 +683,7 @@ $Variable $tz
 
 \ insert into sorted string array, discarding n bytes at the end
 
-: $ins[]# ( addr u $array[] rest -- pos )
+: $ins[]# ( addr u $array[] rest -- pos ) \ net2o
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
     \G @var{rest} is the rest of the array chopped off for comparison
@@ -695,7 +695,7 @@ $Variable $tz
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
-: $del[]# ( addr u $array[] rest -- )
+: $del[]# ( addr u $array[] rest -- ) \ net2o
     \G delete O(log(n)) from pre-sorted array
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
@@ -708,7 +708,7 @@ $Variable $tz
 
 \ insert into sorted string array, discarding n bytes at the start
 
-: $ins[]/ ( addr u $array n -- pos )
+: $ins[]/ ( addr u $array n -- pos ) \ net2o
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
     { a[] rest } 0 a[] $[]#
@@ -719,7 +719,7 @@ $Variable $tz
 	    0< IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]! r> ;
-: $del[]/ ( addr u $array offset -- )
+: $del[]/ ( addr u $array offset -- ) \ net2o
     \G delete O(log(n)) from pre-sorted array
     { a[] rest } 0 a[] $[]#
     BEGIN  2dup <  WHILE  2dup + 2/ { left right $# }
@@ -763,7 +763,7 @@ $10 Constant datesize#
 : sigonly@ ( addr u -- addr' u' ) + sigonlysize# - [ sigonlysize# 1- ]L ;
 : sigdate@ ( addr u -- addr' u' ) + sigsize# - [ sigsize# 1- ]L ;
 
-: $ins[]sig# ( addr u $array n -- pos )
+: $ins[]sig# ( addr u $array n -- pos ) \ net2o
     \G insert O(log(n)) into pre-sorted array if sigdate is newer
     \G @var{pos} is the insertion offset or -1 if not inserted
     { a[] rest } 0 a[] $[]#
@@ -791,7 +791,7 @@ $10 Constant datesize#
 
 \ list sorted by sig date
 
-: $ins[]date ( addr u $array -- pos )
+: $ins[]date ( addr u $array -- pos ) \ net2o
     \G insert O(log(n)) into pre-sorted array
     \G @var{pos} is the insertion offset or -1 if not inserted
     { a[] } 0 a[] $[]#
@@ -804,7 +804,7 @@ $10 Constant datesize#
 	    IF  left $#  ELSE  $# 1+ right  THEN
     REPEAT  drop >r
     { | w^ ins$0 } ins$0 cell a[] r@ cells $ins r@ a[] $[]!  r> ;
-: $search[]date ( ticks $array -- pos )
+: $search[]date ( ticks $array -- pos ) \ net2o
     \G search O(log(n)) in pre-sorted array
     \G @var{pos} is the first location of the item >= the requested date
     { a[] } 0 a[] $[]#
@@ -877,7 +877,7 @@ to current-theme
 
 : alloz ( size -- addr )
     dup >r allocate throw dup r> erase ;
-: freez ( addr size -- )
+: freez ( addr size -- ) \ net2o
     \G erase and then free - for secret stuff
     over swap erase free throw ;
 : ?free ( addr size -- ) >r
@@ -944,14 +944,14 @@ Variable tmp-file$
 : save-file { d: file xt: do-save -- }
     \G save file @var{addr u} by making a copy first,
     \G applying xt ( fd -- ) on that copy, and then
-    \G moving the existing file to backup ("~" appended to filename)
+    \G moving the existing file to backup ("~" appended to filename) \ net2o
     \G and the copy ("+" appended to filename) to the original name.
     file >copy dup >r do-save r> close-file throw file >backup ;
 
-: new-file ( addr u xt -- )
+: new-file ( addr u xt -- ) \ net2o
     \G save file @var{addr u} by making an empty first,
     \G applying xt ( fd -- ) on that file, and then
-    \G moving the existing file to backup ("~" appended to filename)
+    \G moving the existing file to backup ("~" appended to filename) \ net2o
     \G and the new ("+" appended to filename) to the original name.
     >r 2dup >new r> over >r execute r> close-file throw >backup ;
 
@@ -975,7 +975,7 @@ compsem: sourcefilename postpone sliteral ['] search-help compile, ;
 
 \ insert and remove single cell items
 
-: del$one ( addr1 addr2 size -- pos )
+: del$one ( addr1 addr2 size -- pos ) \ net2o
     \G @var{pos} is the deletion offset
     >r over @ cell+ - tuck r> $del ;
 : next$ ( pos string -- addre addrs )
@@ -1086,7 +1086,7 @@ end-class *edit-terminal-c
 
 edit-terminal edit-out !
 
-: accept* ( addr u -- u' )
+: accept* ( addr u -- u' ) \ net2o
     \G accept-like input, but types * instead of the character
     \G don't save into history
     get-order n>r history >r  edit-out @ >r  *edit-terminal edit-out !

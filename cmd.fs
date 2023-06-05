@@ -524,10 +524,10 @@ gen-table $@ inherit-table reply-table
 
 \ net2o assembler
 
-: cmd0! ( -- )
+: cmd0! ( -- ) \ net2o
     \G initialize a stateless command
     code0-buf  stateless# outflag ! ;
-: cmd! ( -- )
+: cmd! ( -- ) \ net2o
     \G initialize a statefull command
     code-buf  outflag off ;
 
@@ -540,12 +540,12 @@ UDefer expect-reply?
 
 previous
 
-: net2o-code ( -- )
+: net2o-code ( -- ) \ net2o
     \G start a statefull command
     cmd!  cmdlock lock
     cmdreset init-reply 1 code+ also net2o-base ;
 compsem: ['] net2o-code compile, also net2o-base ;
-: net2o-code0
+: net2o-code0 ( -- ) \ net2o
     \G start a stateless command
     cmd0!  cmdlock lock
     cmdreset init-reply also net2o-base ;
