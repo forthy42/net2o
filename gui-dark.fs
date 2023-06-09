@@ -53,6 +53,7 @@ $CCFFCCFF re-color other-signal
 $CC00CCFF re-color my-signal-otr
 $880088FF re-color other-signal-otr
 $CC0000FF re-color recording-color#
+$CC0000FF re-color gps-color#
 \ $FFFFDDFF re-text-color mono-col
 
 8 0 [DO]

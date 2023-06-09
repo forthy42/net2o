@@ -446,7 +446,7 @@ $808080C0 new-color: log-bg
 $80FF80FF new-color: send-color
 $00FF0020 new-color: pet-color
 $FFFF80FF new-color, fvalue users-color#
-$FFCCCCFF new-color, fvalue gps-color#
+$FF6666FF new-color, fvalue gps-color#
 $000077FF new-color, fvalue chain-color#
 $FF000000 $FF0000FF fade-color: show-error-color
 $00990000 $009900FF fade-color: show-info-color
@@ -1179,7 +1179,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 :noname { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
-	string [: ."  GPS: " .coords ;] $tmp }}text 25%b
+	blackish string [: ."  GPS: " .coords ;] $tmp }}text 25%b
     }}z "gps" name! msg-box .child+
 ; wmsg-class is msg:coord
 :noname { 64^ perm d: pk -- }
