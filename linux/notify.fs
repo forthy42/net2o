@@ -98,12 +98,20 @@ $Variable net2o-logo
 :noname defers 'cold
     !upath !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
 
+: dump-args ( arg -- )
+    ." Dumping arguments" cr
+    BEGIN
+	dup @  WHILE
+	    dup @ cstring>sstring dump cr
+	    cell+ REPEAT  drop ;
+
 : linux-notification ( -- )  notify-send $@len 0= ?EXIT
     [IFDEF] notify-args
 	\ for now unknown reasons, notify-send doesn't like this way of
 	\ being called
 	notify@ content-string 0$!
 	['] notify-title $tmp dup 0= IF  2drop  EXIT  THEN  title-string 0$!
+	\ notify-args dump-args
 	notify-send $@ notify-args fork+exec
     [ELSE]
 	\ Use variables to avoid needing to quote stuff

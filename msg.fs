@@ -2210,7 +2210,8 @@ s" minos2/unicode/brackets.db" open-fpath-file
 forward hash-in
 
 : jpeg? ( addr u -- flag )
-    dup 4 - 0 max safe/string ".jpg" str= ;
+    2dup dup 4 - 0 max safe/string ".jpg" capscompare 0= >r
+    dup 5 - 0 max safe/string ".jpeg" capscompare 0= r> or ;
 
 : >have+group ( addr u -- addr u )
     2dup key|  2dup >have-group  2dup >ihave  ihave$ $+! ;
