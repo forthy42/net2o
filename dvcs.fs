@@ -125,7 +125,7 @@ end-class dvcs-log-class
 : .file+hash ( addr u -- )
     over hash#128 85type space  hash#128 /string
     over dvcs:timestamp le-64@ .ticks space
-    over dvcs:perm le-uw@ .mode
+    over dvcs:perm w@ wle .mode
     0 dvcs:name /string type cr ;
 
 : +fileentry ( addr u o:dvcs -- )
@@ -160,7 +160,7 @@ S_IFMT $1000 invert and Constant S_IFMT?
 
 : dvcs-outfile-name ( hash+perm-addr u1 fname u2 -- )
     2>r 2dup key| dvcs-objects #@ 2swap hash#128 /string
-    drop dvcs:perm le-uw@ { perm } 2r>
+    drop dvcs:perm w@ wle { perm } 2r>
     perm S_IFMT? and  case
 	S_IFLNK              of  perm create-symlink-f  endof
 	S_IFREG              of  perm create-file-f     endof
@@ -378,9 +378,9 @@ Defer hash-import ' noop is hash-import
     2>r new-file$ $@ write-enc-hashed 2drop 2r> ;
 
 : hashstat-rest ( addr u -- addr' u' )
-    [: mode@ { | w^ perm } perm le-w!
+    [: mode@ { | w^ perm } wle perm w!
 	statbuf st_mtime ntime@ d>64 64#0 { 64^ timestamp } timestamp le-64!
-	perm le-uw@ S_IFMT? and  case
+	perm w@ wle S_IFMT? and  case
 	    S_IFLNK of  path-max# new-file$ $!len \ pathmax: 4k
 		2dup new-file$ $@ readlink
 		dup ?ior new-file$ $!len  endof
@@ -434,7 +434,7 @@ Defer hash-import ' noop is hash-import
     THEN  <> r> or ;
 : dvcs?modified ( o:dvcs -- )
     dvcs:files# [: dup
-	>r cell+ $@ drop hash#128 + dvcs:perm le-uw@ { perm }
+	>r cell+ $@ drop hash#128 + dvcs:perm w@ wle { perm }
 	r@ $@ statbuf perm $1000 and IF  stat  ELSE  lstat  THEN
 	0< IF  errno ENOENT = IF
 		r> [: dup cell+ $. $. ;] $tmp1 del-files[] $ins[]f
@@ -477,7 +477,7 @@ also net2o-base
 : read-old-fs ( -- ) dvcs:in-files$ $free
     old-files[] [: hash#128 umin 2dup $, dvcs-read dvcs+in ;] $[]map ;
 : read-del-fs ( -- )
-    del-files[] [: over hash#128 dvcs:perm + le-uw@
+    del-files[] [: over hash#128 dvcs:perm + w@ wle
 	S_IFMT? and S_IFDIR =  IF  /name $, dvcs-rmdir
 	ELSE 2dup [: over hash#128 forth:type /name forth:type ;] $tmp1 $,
 	    dvcs-rm hash#128 umin dvcs+in  THEN ;] $[]map ;
@@ -807,7 +807,7 @@ previous
     dvcs:new-dvcs >o  dvcs:message$ $!
     config>dvcs  files>dvcs
     dvcs:files# [:
-	dup cell+ $@ drop hash#128 + dvcs:perm le-uw@ $1000 and
+	dup cell+ $@ drop hash#128 + dvcs:perm w@ wle $1000 and
 	IF    $@  ref-hashstat ref-files[]
 	ELSE  $@ file-hashstat new-files[]  THEN
 	$ins[]f ;] #map
@@ -816,7 +816,7 @@ previous
     save-project  clean-up dvcs:dispose-dvcs o> ;
 
 : del-oldfile ( hash-entry -- )
-    dup cell+ $@ drop hash#128 dvcs:perm + le-uw@
+    dup cell+ $@ drop hash#128 dvcs:perm + w@ wle
     S_IFMT? and S_IFDIR = IF
 	$@ dvcs( ." rd " 2dup type cr ) dvcs:rmdirs[] $ins[] drop
     ELSE  dup $@ dvcs( ." rm " 2dup type cr )

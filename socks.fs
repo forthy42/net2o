@@ -114,8 +114,8 @@ $00000000 Value droprate#
 
 : ipv4>ipv6 ( addr u dest -- addr' u' )
     >r drop
-    dup port be-uw@ swap sin_addr be-ul@
-    r@ ipv4! r@ port be-w! r> sock-rest ;
+    dup port w@ wbe swap sin_addr l@ lbe
+    r@ ipv4! wbe r@ port w! r> sock-rest ;
 : ?>ipv6 ( addr u -- addr' u' )
     over family w@ AF_INET = IF  sockaddr> ipv4>ipv6  THEN ;
 : ?<ipv6 ( addr u -- addr' u' )

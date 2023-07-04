@@ -31,7 +31,7 @@ $11 net2o: addr-pri# ( n -- ) \g priority
 +net2o: addr-anchor ( $:pubkey -- ) \g anchor for routing further
     $> host:anchor $! ;
 +net2o: addr-ipv4 ( n -- ) \g ip address
-    64>n host:ipv4 be-l! ;
+    64>n lbe host:ipv4 l! ;
 +net2o: addr-ipv6 ( $:ipv6 -- ) \g ipv6 address
     $> host:ipv6 $10 smove ;
 +net2o: addr-portv4 ( n -- ) \g ipv4 port
@@ -80,7 +80,7 @@ also net2o-base
     host:pri# @ ulit, addr-pri#
     host:id $@ dup IF $, addr-id  ELSE  2drop  THEN
     host:anchor $@ dup IF $, addr-anchor  ELSE  2drop  THEN
-    host:ipv4 be-ul@ ?dup-IF ulit, addr-ipv4  THEN
+    host:ipv4 l@ lbe ?dup-IF ulit, addr-ipv4  THEN
     host:ipv6 ip6? IF  host:ipv6 $10 $, addr-ipv6  THEN
     host:portv4 w@ host:portv6 w@ = IF
 	host:portv4 w@ ulit, addr-port
@@ -104,7 +104,7 @@ previous
     host:ipv6 ip6? IF  host:ipv6 $10 .ip6a 2drop
 	host:portv4 w@ host:portv6 w@ <> IF  host:portv6 w@ ." :" 0 .r space THEN
     THEN
-    host:ipv4 be-ul@ dup IF host:ipv4 4 .ip4a 2drop  THEN
+    host:ipv4 l@ lbe dup IF host:ipv4 4 .ip4a 2drop  THEN
     host:portv4 w@ host:portv6 w@ = or  IF host:portv4 w@ ." :" 0 .r  THEN
     host:route $@ dup IF  '|' emit xtype  ELSE  2drop  THEN
     host:ekey $@ dup IF  ':' xemit <info> 85type <default>  ELSE  2drop  THEN
@@ -119,22 +119,22 @@ previous
 
 : addr>6sock ( -- )
     host:key @ dest-0key< !
-    host:portv6 w@ sockaddr1 port be-w!
+    host:portv6 w@ wbe sockaddr1 port w!
     host:ipv6 sockaddr1 sin6_addr ip6!
     host:route $@ !temp-addr ;
 
 : addr>4sock ( -- )
     host:key @ dest-0key< !
-    host:portv4 w@ sockaddr1 port be-w!
-    host:ipv4 be-ul@ sockaddr1 ipv4!
+    host:portv4 w@ wbe sockaddr1 port w!
+    host:ipv4 l@ lbe sockaddr1 ipv4!
     host:route $@ !temp-addr ;
 
 : addr>sock ( o xt -- ) { xt } >o
     ipv64(
     ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
-    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
+    ipv4( host:ipv4 l@ lbe IF  addr>4sock o o> >r xt execute  r> >o THEN )
     )else(
-    ipv4( host:ipv4 be-ul@ IF  addr>4sock o o> >r xt execute  r> >o THEN )
+    ipv4( host:ipv4 l@ lbe IF  addr>4sock o o> >r xt execute  r> >o THEN )
     ipv6( host:ipv6 ip6?   IF  addr>6sock o o> >r xt execute  r> >o THEN )
     )
     o> ;
@@ -156,7 +156,7 @@ previous
 
 : !my-addrs ( -- ) net2o:new-addr >o
     global-ip6 tuck host:ipv6 $10 smove
-    global-ip4 IF  be-ul@ host:ipv4 be-l!  ELSE  drop  THEN
+    global-ip4 IF  l@ host:ipv4 l!  ELSE  drop  THEN
     my-port# +my-addrs o>
     0= IF  ipv6( local-ip6  IF
 	    net2o:new-addr >o  host:ipv6 ip6!  my-port# +my-addrs  o>
@@ -223,17 +223,17 @@ also net2o-base
     [: { addr alen }
 	case addr family w@
 	    AF_INET of
-		addr sin_addr be-ul@ ulit, addr-ipv4
+		addr sin_addr l@ lbe ulit, addr-ipv4
 	    endof
 	    AF_INET6 of
 		addr fake-ip4? IF
-		    .ip6::0 addr sin6_addr 12 + be-ul@ ulit, addr-ipv4
+		    .ip6::0 addr sin6_addr 12 + l@ lbe ulit, addr-ipv4
 		ELSE
 		    addr sin6_addr $10 $, addr-ipv6
 		THEN
 	    endof
 	endcase
-	addr port be-uw@ ulit, addr-port
+	addr port w@ wbe ulit, addr-port
     ;] gen-cmd$ ;
 : sockaddr+return ( addr len -- addr' len' )
     [: cmd$ $! return-address $10 0 -skip $, addr-route ;] gen-cmd$ ;

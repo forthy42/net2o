@@ -73,7 +73,7 @@ word-args
     over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
 : ?word-nextarg ( -- addr u t / f )
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN
-; lastxt to ?nextarg
+; latestxt to ?nextarg
 :noname ( -- addr u t / f )  >in @ >r
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in !
 ; to ?peekarg
@@ -1100,7 +1100,7 @@ edit-terminal edit-out !
 : ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
 
 : .loop-err ( throw xt -- )
-    [: ." Task: " .name dup . cr DoError cr ;] do-debug ;
+    [: ." Task: " id. dup . cr DoError cr ;] do-debug ;
 
 : catch-loop { xt -- flag }
     BEGIN   xt catch dup -1 = ?EXIT

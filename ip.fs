@@ -71,7 +71,7 @@ Create ip6::0 here 16 dup allot erase
 Create sockaddr" 2 c, $16 allot
 
 : .port ( addr len -- addr' len' )
-    ." :" over be-uw@ 0 ['] .r #10 base-execute  2 /string ;
+    ." :" over w@ wbe 0 ['] .r #10 base-execute  2 /string ;
 : .net2o ( addr u -- ) dup IF  ." |" xtype  ELSE  2drop  THEN ;
 : .ip4b ( addr len -- addr' len' )
     over c@ 0 ['] .r #10 base-execute 1 /string ;
@@ -81,7 +81,7 @@ Create sockaddr" 2 c, $16 allot
     .ip4a .port .net2o ;
 User ip6:#
 : .ip6w ( addr len -- addr' len' )
-    over be-uw@ [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
+    over w@ wbe [: ?dup-IF 0 .r ip6:# off  ELSE  1 ip6:# +! THEN ;] $10 base-execute
     2 /string ;
 
 : .ip6a ( addr len -- addr' len' )
@@ -116,9 +116,9 @@ Forward .addr$
     )else( 2drop ) ;
 
 : ipv4! ( ipv4 sockaddr -- )
-    ipv6(    tuck                             sin6_addr 12 + be-l!
+    ipv6(    tuck                          sin6_addr 12 + swap lbe swap l!
     xlat464( nat64-ip4 )else( fake-ip4 ) swap sin6_addr $C move
-    )else( sin_addr be-l! ) ;
+    )else( sin_addr swap lbe swap l! ) ;
 
 : sock-id ( id sockaddr -- addr u ) >r
     AF_INET6 r@ family w!
@@ -136,7 +136,7 @@ Forward .addr$
 : my-port ( -- port )
     ipv6( sockaddr_in6 )else( sockaddr_in4 ) alen !
     net2o-sock [IFDEF] no-hybrid drop [THEN] sockaddr1 alen getsockname ?ior
-    sockaddr1 port be-uw@ ;
+    sockaddr1 port w@ wbe ;
 
 : ipv6/pp ( sock -- sock )
     \ try to prefer public or private addresses
@@ -167,14 +167,14 @@ Forward .addr$
 : addr-v6= ( sockaddr -- sockaddr flag )
     dup fake-ip4? IF
 	dup $C sin6_addr +  host:ipv4 4 tuck str=
-	over sin6_port be-uw@  host:portv4 w@ = and
+	over sin6_port w@ wbe  host:portv4 w@ = and
     ELSE
 	dup sin6_addr host:ipv6 $10 tuck str=
-	over sin6_port be-uw@  host:portv6 w@ = and
+	over sin6_port w@ wbe  host:portv6 w@ = and
     THEN ;
 : addr-v4= ( sockaddr -- sockaddr flag )
     dup sin_addr  host:ipv4 4 tuck str=
-    over port be-uw@  host:portv4 w@ = and ;
+    over port w@ wbe  host:portv4 w@ = and ;
 
 29  Constant ESPIPE
 
@@ -198,8 +198,8 @@ Forward .addr$
     : 'sock4 ( xt -- ) sock4[ catch ]sock4 throw ;
 
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
-	[: sockaddr_in4 alen !  53 sockaddr< port be-w!
-	  sockaddr< sin_addr be-l! query-sock
+	[: sockaddr_in4 alen !  53 wbe sockaddr< port w!
+	  lbe sockaddr< sin_addr l! query-sock
 	  sockaddr< sock-rest4 connect
 	  dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
 	  query-sock sockaddr1 alen getsockname
@@ -210,7 +210,7 @@ Forward .addr$
 [ELSE]
     : check-ip4 ( ip4addr -- my-ip4addr 4 ) ipv4(
 	[:  ipv6( sockaddr_in6 )else( sockaddr_in4 ) alen !
-	    53 sockaddr< port be-w!
+	    53 wbe sockaddr< port w!
 	    sockaddr< ipv4! query-sock
 	    sockaddr< ipv6( sock-rest )else( sock-rest4 ) connect
 	    dup unavail?  IF  drop ip6::0 4  EXIT  THEN  ?ior
@@ -221,7 +221,7 @@ Forward .addr$
 	;] 'sock )else( 0 ) ;
 [THEN]
 
-: be-w, here 2 allot be-w! ;
+: be-w, wbe here 2 allot w! ;
 
 $25DDC249 Constant dummy-ipv4 \ this is my net2o ipv4 address
 Create dummy-ipv6 \ this is my net2o ipv6 address
@@ -239,7 +239,7 @@ $FE80 be-w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0001 be-w,
 
 : check-ip6 ( dummy -- ip6addr u ) ipv6(
     \G return IPv6 address - if length is 0, not reachable with IPv6
-    [:  sockaddr_in6 alen !  53 sockaddr< port be-w!
+    [:  sockaddr_in6 alen !  53 wbe sockaddr< port w!
 	sockaddr< sin6_addr ip6!
 	query-sock sockaddr< sock-rest connect
 	dup unavail?  IF  drop ip6::0 $10  EXIT  THEN  ?ior
@@ -250,7 +250,7 @@ $FE80 be-w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0000 w, $0001 be-w,
 
 : check-ip64 ( dummy -- ipaddr u ) ipv4(
     dup >r check-ip6 dup IF  rdrop  EXIT  THEN
-    2drop r> $10 + be-ul@ check-ip4 )else( check-ip6 ) ;
+    2drop r> $10 + l@ lbe check-ip4 )else( check-ip6 ) ;
 
 : sock-connect? ( addr u -- flag ) query-sock -rot connect 0= ;
 

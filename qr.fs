@@ -121,7 +121,7 @@ $FFFFFFFF ,
 
 : qr>rgba ( -- )
     keyqr-rgba keyqr keyqr#² bounds DO
-	I c@ 2b>col xor 7 xor cells >rgba + @ over be-l! sfloat+
+	I c@ 2b>col xor 7 xor cells >rgba + @ lbe over l! sfloat+
     LOOP drop ;
 
 \ generate checksum and tag bits

@@ -25,8 +25,6 @@ gl-init
 
 require minos2/font-style.fs
 
-: slide-frame ( glue color -- o )
-    font-size# 70% f* }}frame ;
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
 #64 Value lines/diag
@@ -95,7 +93,7 @@ glue new Constant glue-sright
 
 0e 0 shake-lr
 
-: pres-frame ( color -- o1 o2 ) \ drop $FFFFFFFF
+: pres-frame# ( color# -- o1 o2 ) \ drop $FFFFFFFF
     glue*wh slide-frame dup .button1 ;
 
 : err-fade? ( -- flag ) 0 { flag }
@@ -210,7 +208,7 @@ Variable nick$
 
 \ password frame
 
-tex: net2o-logo
+tex: net2o-logo-tex
 
 $FF0040FF text-color, FValue pw-num-col#
 $666666FF text-color, FValue pw-text-col#
@@ -253,11 +251,11 @@ glue*shrink >o 0e 1filll 0e hglue-c glue! 1glue dglue-c glue! 1glue vglue-c glue
 
 ' dark-blue >body f@
 
-{{  login-bg-col# pres-frame
+{{  login-bg-col# pres-frame#
     dark-blue# ' dark-blue >body f!
     {{
 	{{ glue*lll± }}glue }}v
-	' net2o-logo "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
+	' net2o-logo-tex "doc/net2o.png" 0.666e }}image-file Constant net2o-glue /center
 	!i18n l" net2o GUI" /title
 	!lit
 	\footnote cbl dark-blue net2o-version }}text /center
@@ -715,7 +713,7 @@ $F235 Constant 'user-times'
 
 previous
 
-{{ users-color# pres-frame
+{{ users-color# pres-frame#
     {{
 	{{
 	    nicks-title
@@ -860,7 +858,7 @@ Variable like-char
 0 Value posting-vp
 
 {{
-    posting-bg-col# pres-frame
+    posting-bg-col# pres-frame#
     {{
 	{{
 	    glue*l $000000FF new-color, slide-frame dup .button1
@@ -1030,7 +1028,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     logmask# @ >r
     name$ "log:" string-prefix? IF
 	name$ 4 /string ['] log >wordlist find-name-in
-	?dup-IF  name>int execute r> and ?flip  EXIT  THEN  THEN
+	?dup-IF  name>interpret execute r> and ?flip  EXIT  THEN  THEN
     rdrop
     o cell- @ boxes?  IF
 	1 re-indent# +! ['] re-box-run do-childs
@@ -1309,7 +1307,7 @@ Hash: audio#
     [THEN]
 [THEN]
 
-: be-l, ( l -- ) here be-l! 4 allot ;
+: be-l, ( l -- ) lbe here 4 allot l! ;
 
 Create audio-colors
 $0000FF00 be-l, $0008F700 be-l, $0010EF00 be-l, $0018E700 be-l,
@@ -1338,7 +1336,7 @@ also opengl
     bounds ?DO
 	audio-colors ptr $100 move
 	I idx-head + dup /second + I' umin over - bounds ?DO
-	    ptr 3 + I le-uw@ #10 rshift $3F umin sfloats bounds ?DO
+	    ptr 3 + I w@ wle #10 rshift $3F umin sfloats bounds ?DO
 		inc I c+!
 	    1 sfloats +LOOP
 	2 +LOOP
@@ -1739,7 +1737,7 @@ wmsg-o >o msg-table @ token-table ! o>
     data 0= to data
     +resize +sync +lang ;
 
-{{ chat-bg-col# pres-frame
+{{ chat-bg-col# pres-frame#
     {{
 	{{
 	    glue*l black# slide-frame dup .button1
@@ -1975,7 +1973,7 @@ Variable invitation-stack
 	{{
 	    glue*lll }}glue
 	    {{
-		chat-bg-col# pres-frame
+		chat-bg-col# pres-frame#
 		{{
 		    \normal blackish
 		    !i18n l" Invitations" }}text' /center 25%b

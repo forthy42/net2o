@@ -596,7 +596,7 @@ synonym #! \ ( -- )
     setup-table @ see:table !
     [: 2dup s" ::" string-prefix? IF
 	    2 /string [: type ." -table" ;] $tmp find-name
-	    name>int execute @ see:table !
+	    name>interpret execute @ see:table !
 	ELSE
 	    see:table @ >r
 	    ." ===== " 2dup forth:type ."  =====" forth:cr
@@ -767,7 +767,7 @@ synonym #! \ ( -- )
 : -backtrace ( -- )
     \O -backtrace
     \G -backtrace: Provide full error reporting ;
-    [ what's DoError ]l is DoError next-cmd ;
+    [ action-of DoError ]l is DoError next-cmd ;
 
 : version #0. /chat:/version ;
     \U version
@@ -783,7 +783,7 @@ synonym #! \ ( -- )
     \U import g+|... [directory]
     ?nextarg IF
 	['] importer >body find-name-in ?dup-IF
-	    name>int execute  EXIT  THEN  THEN
+	    name>interpret execute  EXIT  THEN  THEN
     ." unknown import" ;
 
 : gui ( -- )
@@ -815,7 +815,7 @@ n2o-history
     debugging-method 0= IF
 	[: [: <err> .error-string <default> cr ;] do-debug ;] is DoError
     ELSE
-	[ what's DoError ]L is DoError
+	[ action-of DoError ]L is DoError
     THEN ;
 ?set-debug
 

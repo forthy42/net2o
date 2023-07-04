@@ -202,7 +202,7 @@ User see:table \ current token table for see only
     dup 0<> IF
 	net2o.name
 	dup 2 cells + @ ?dup-IF  @ see:table @ t-push see:table !  THEN
-	body> .name
+	body> id.
     ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
 : .net2o-name ( n -- )  cells >r
@@ -212,7 +212,7 @@ User see:table \ current token table for see only
     see:table $@ r@ u<=
     IF  drop r> .net2o-num  EXIT  THEN  r@ + @
     dup 0<> IF
-	net2o.name body> .name
+	net2o.name body> id.
     ELSE  drop r@ .net2o-num  THEN  rdrop ;
 
 : net2o-see ( cmd -- ) hex[
@@ -394,7 +394,7 @@ Defer .n-name  ' noop is .n-name
     ['] noop over >cmd \ allocate space in table
     Create  here to last-2o
     dup >r , here >r 0 , 0 , 0 , net2o-does noname :
-    lastxt dup r> ! r> >cmd ;
+    latestxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
 : >table ( table -- )  last-2o 2 cells + ! ;
 : cmdsig ( -- addr )  last-2o 3 cells + ;
@@ -591,7 +591,7 @@ also net2o-base
 
 : cmd-send? ( -- )
     cmdbuf# @ 1 u> IF
-	trace( ." expect reply " action-of expect-reply? .name cr )
+	trace( ." expect reply " action-of expect-reply? id. cr )
 	expect-reply? cmd  THEN ;
 
 previous
@@ -730,7 +730,7 @@ get-current suffix-list set-current
 set-current
 
 : 4cc>table ( addr u -- ) \ really is just 3 characters
-    suffix-list find-name-in ?dup-IF  name>int execute @
+    suffix-list find-name-in ?dup-IF  name>interpret execute @
     ELSE  see:table @  THEN ;
 : suffix>table ( addr u -- )
     2dup '.' -scan nip /string 4cc>table ;

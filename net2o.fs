@@ -255,7 +255,7 @@ User dest-flags
     inbuf net2o-header:dest return-addr reverse$16 ;
 : >dest-addr ( -- )
     inbuf net2o-header:mapaddr le-64@ dest-addr 64!
-    inbuf net2o-header:flags le-uw@ dest-flags le-w! ;
+    inbuf net2o-header:flags w@ dest-flags w! ;
 
 \ validation stuff
 
@@ -473,7 +473,7 @@ User outflag  outflag off
 
 : set-flags ( -- )
     0 outflag !@ outbuf net2o-header:tags c!
-    outbuf net2o-header:flags le-uw@ dest-flags le-w! ;
+    outbuf net2o-header:flags w@ dest-flags w! ;
 
 : >send ( addr n -- )
 \   over 0= IF  2drop  rdrop EXIT  THEN
@@ -1536,7 +1536,7 @@ Variable timeout-tasks
     ack@ .+next-timeouts next-timeout 64! ;
 
 : o+timeout ( -- )  0timeout
-    timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ .name cr )
+    timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ id. cr )
     o timeout-tasks +unique$
     timeout-task ?dup-IF  wake  THEN ;
 : o-timeout ( -- )
@@ -1632,7 +1632,7 @@ User remote?
 scope{ mapc
 
 : handle-data ( addr -- ) parent >o  o to connection
-    msg( ." Handle data " inbuf net2o-header:flags be-uw@ hex. ." to addr: " inbuf net2o-header:mapaddr le-64@ hex. cr )
+    msg( ." Handle data " inbuf net2o-header:flags w@ wbe hex. ." to addr: " inbuf net2o-header:mapaddr le-64@ hex. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt +ack 0timeout o> ;
 ' handle-data rdata-class to handle
@@ -1749,7 +1749,7 @@ event: :>dispose-context ( o -- )  .net2o:dispose-context ;
     request# @ rqd-xts $[] dup @ IF  2drop  ELSE  !  THEN ;
 
 event: :>request ( n o -- ) >o maxrequest# and
-    dup rqd@ request( ." request xt: " dup .name cr )  execute
+    dup rqd@ request( ." request xt: " dup id. cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
     ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
 event: :>timeout ( o -- )
@@ -1766,7 +1766,7 @@ event: :>throw ( error -- ) throw ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	timeout( ." do timeout: " o hex. addr timeout-xt @ .name cr )
+	timeout( ." do timeout: " o hex. addr timeout-xt @ id. cr )
 	timeout-xt
     THEN ;
 
@@ -1806,7 +1806,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 : +beacon ( sockaddr len xt -- )
     >r ticks config:beacon-short-ticks& 2@ d>64 64+ o r> { 64^ dest w^ obj w^ xt }
-    beacon( ." add beacon: " 2dup .address ."  ' " xt @ .name cr )
+    beacon( ." add beacon: " 2dup .address ."  ' " xt @ id. cr )
     2dup beacons# #@ d0= IF
 	dest 1 64s cell+ cell+ 2swap beacons# #!
     ELSE

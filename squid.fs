@@ -39,7 +39,7 @@ bp8 bp8 bp8 ge25519+ \ *8
 : search-key-prefix ( l1 mask -- )
     sk0 gen-sk  sk0 pk0 sk>pk
     pk0 pk~  pkt0 pk0 ge25519-unpack- drop
-    BEGIN  2dup pk0 be-ul@ and <> WHILE  next-key 8 u>64 sk0 64+!
+    BEGIN  2dup pk0 l@ lbe and <> WHILE  next-key 8 u>64 sk0 64+!
 	    msg( dup $FFFF and pk0 w@ = IF  '.' emit  THEN )
     REPEAT 2drop ;
 
@@ -61,7 +61,7 @@ Variable wallet[]
     sk0 KEYSIZE c:prng
     sk0 sk-mask  sk0 pk0 sk>pk ;
 : wallet-kp[]! ( -- flag )
-    pk0 be-ul@ $20 wallets# - rshift
+    pk0 l@ lbe $20 wallets# - rshift
     dup wallet[] $[]@ d0= IF  sk0 KEYSIZE2 rot wallet[] $[]! true
     ELSE  drop false  THEN ;
 

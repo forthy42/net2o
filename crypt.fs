@@ -206,7 +206,7 @@ scope{ mapc
     [ acks# invert 8 lshift ]L and n>64 ;
 
 : ivs-tweak ( 64addr keyaddr -- )
-    >r dest-flags le-uw@ addr>assembly
+    >r dest-flags w@ wle addr>assembly
     r> state# c:tweakkey!
     tweak( ." tweak key: " voutkey c:key> voutkey @ hex. voutkey state# + $10 .nnb cr ) ;
 
@@ -438,7 +438,7 @@ pw-diffuse-1
 
 : try-0decrypt ( addr -- flag ) >r
     inbuf net2o-header:mapaddr le-64@
-    inbuf net2o-header:flags le-uw@ addr>assembly
+    inbuf net2o-header:flags w@ wle addr>assembly
     r> sec@ set-0key
     inbuf packet-data tmpbuf swap 2dup 2>r $10 + move
     2r> +cryptsu
@@ -450,7 +450,7 @@ pw-diffuse-1
 
 : outbuf0-encrypt ( -- ) +calc
     outbuf net2o-header:mapaddr le-64@
-    outbuf net2o-header:flags le-uw@ addr>assembly
+    outbuf net2o-header:flags w@ wle addr>assembly
     your-0key  set-0key
     outbuf packet-data +cryptsu
     outbuf 1+ c@ c:encrypt+auth +enc ;

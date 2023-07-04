@@ -252,15 +252,15 @@ User termfile
     BEGIN  ts-key? 0=  WHILE  stop  REPEAT
     termfile @ >o fs-inbuf $@ drop c@ fs-inbuf 0 1 $del o> ;
 
-' ts-type ' ts-emit what's cr ' ts-form output: termserver-out
-what's name
+' ts-type ' ts-emit action-of cr ' ts-form output: termserver-out
+action-of parse-name
 op-vector @
-what's at-xy what's at-deltaxy what's page what's attr!
+action-of at-xy action-of at-deltaxy action-of page action-of attr!
 [IFDEF] notrace get-recognizers n>r notrace [THEN]
 termserver-out
 IS attr! IS page IS at-deltaxy IS at-xy
 op-vector !
-is name
+is parse-name
 ' ts-key  ' ts-key? input: termserver-in
 [IFDEF] notrace nr> set-recognizers [THEN]
 

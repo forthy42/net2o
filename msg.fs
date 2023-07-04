@@ -1,6 +1,6 @@
 \ messages                                           06aug2014py
 
-\ Copyright © 2014-2020   Bernd Paysan
+\ Copyright © 2014-2023   Bernd Paysan
 
 \ This program is free software: you can redistribute it and/or modify
 \ it under the terms of the GNU Affero General Public License as published by
@@ -1976,7 +1976,7 @@ is /help
     beacons# [: dup $@ .address space
       cell+ $@ over 64@ .ticks space
       1 64s safe/string bounds ?DO
-	  I 2@ ?dup-IF ..con-id space THEN .name
+	  I 2@ ?dup-IF ..con-id space THEN id.
       2 cells +LOOP forth:cr ;] #map ; is /beacons
 
 :noname ( addr u -- )
@@ -2105,7 +2105,7 @@ Forward ```
     bl $split 2swap
     2dup save-mem over >r '/' r@ c!
     ['] /chat >wordlist find-name-in r> free throw
-    ?dup-IF  nip nip name>int chat-cmd-file-execute true
+    ?dup-IF  nip nip name>interpret chat-cmd-file-execute true
     ELSE  drop -rot + over - false
     THEN ;
 
@@ -2120,14 +2120,14 @@ Forward ```
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN ;
 
-Variable punctation
+Variable punctation$
 s" minos2/unicode/punctation.db" open-fpath-file
-0= [IF] 2drop dup punctation $slurp forth:close-file throw
-[ELSE] s" .,:;!" punctation $! [THEN]
-Variable brackets
+0= [IF] 2drop dup punctation$ $slurp forth:close-file throw
+[ELSE] s" .,:;!" punctation$ $! [THEN]
+Variable brackets$
 s" minos2/unicode/brackets.db" open-fpath-file
-0= [IF] 2drop dup brackets $slurp forth:close-file throw
-[ELSE] s" ()[]{}" brackets $! [THEN]
+0= [IF] 2drop dup brackets$ $slurp forth:close-file throw
+[ELSE] s" ()[]{}" brackets$ $! [THEN]
 
 : x-skip1 ( addr u xc -- addr u' )
     \ Character is either xc or xc+emoji variant selector
@@ -2148,8 +2148,8 @@ s" minos2/unicode/brackets.db" open-fpath-file
     $@ bounds  DO  I xc@ x-skip1  I I' over - x-size  +LOOP ;
 : -skip-punctation ( addr u -- addr u' )
     BEGIN  dup >r
-	punctation x-skip$
-	brackets   x-skip$
+	punctation$ x-skip$
+	brackets$   x-skip$
     dup r> = UNTIL ;
 
 : text-rec ( addr u -- )

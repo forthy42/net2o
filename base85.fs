@@ -9,9 +9,9 @@ chars>85 $80 $FF fill
 
 : .b85 ( n -- n' ) 0 85 um/mod swap 85>chars + c@ emit ;
 : .1base85 ( addr -- ) c@ .b85 .b85 drop ;
-: .2base85 ( addr -- ) le-uw@ .b85 .b85 .b85 drop ;
-: .3base85 ( addr -- ) le-ul@ $FFFFFF and .b85 .b85 .b85 .b85 drop ;
-: .4base85 ( addr -- ) le-ul@ .b85 .b85 .b85 .b85 .b85 drop ;
+: .2base85 ( addr -- ) w@ wle .b85 .b85 .b85 drop ;
+: .3base85 ( addr -- ) l@ lle $FFFFFF and .b85 .b85 .b85 .b85 drop ;
+: .4base85 ( addr -- ) l@ lle .b85 .b85 .b85 .b85 .b85 drop ;
 Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 : 85type ( addr u -- )
     bounds ?DO  I I' over - 4 umin cells .base85s + perform  4 +LOOP ;
@@ -23,7 +23,7 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 	I c@ b85digit over * under+ 85 *
     LOOP  drop ;
 : (base85>$) ( addr u -- addr' u' )  bounds ?DO
-	I I' over - 5 umin dup >r base85>n { | w^ x } x le-l! x r> 4 5 */ type
+	I I' over - 5 umin dup >r base85>n { | w^ x } lle x l! x r> 4 5 */ type
     5 +LOOP ;
 : base85>$ ( addr u -- addr' u' ) ['] (base85>$) $tmp ;
 
