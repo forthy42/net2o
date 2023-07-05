@@ -339,7 +339,7 @@ Variable beacon-tuple$
 
 : beacon-tuple ( o:addr -- )
     beacon-tuple$ $free
-    [: host:ipv4 l@ lbe 0=
+    [: host:ipv4 l@ ( lbe ) 0=
       IF    host:ipv6 $10 type  host:portv6
       ELSE  host:ipv4   4 type  host:portv4  THEN
       w@ dup 8 rshift emit $FF and emit ;]
