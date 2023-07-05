@@ -12,10 +12,10 @@ cell 8 = [IF]
     synonym 64@ @
     synonym 64! !
     0 warnings !@
-    synonym le-64@ le-ux@ unobsolete
-    synonym le-64! le-x! unobsolete
-    synonym be-64@ be-ux@ unobsolete
-    synonym be-64! be-x! unobsolete
+    synonym le-64@ le-ux@
+    synonym le-64! le-x!
+    synonym be-64@ be-ux@
+    synonym be-64! be-x!
     warnings !
     synonym 64>< noop
     synonym n64-swap swap
@@ -97,8 +97,8 @@ cell 8 = [IF]
     synonym 64umax! umax!
     synonym 64!@ !@
     0 warnings !@
-    synonym be@ be-ux@ unobsolete
-    synonym be! be-x! unobsolete
+    synonym be@ be-ux@
+    synonym be! be-x!
     warnings !
 [ELSE]
     synonym n64-swap rot
@@ -113,10 +113,10 @@ cell 8 = [IF]
     : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
     : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
     0 warnings !@
-    synonym le-64@ le-uxd@ unobsolete
-    synonym le-64! le-xd! unobsolete
-    synonym be-64@ be-uxd@ unobsolete
-    synonym be-64! be-xd! unobsolete
+    synonym le-64@ le-uxd@
+    synonym le-64! le-xd!
+    synonym be-64@ be-uxd@
+    synonym be-64! be-xd!
     warnings !
     synonym 64+ d+
     synonym 64- d-
@@ -205,8 +205,8 @@ cell 8 = [IF]
     : 64umin! ( n addr -- )   dup >r 64@ dumin r> 64! ;
     : 64umax! ( n addr -- )   dup >r 64@ dumin r> 64! ;
     0 warnings !@
-    synonym be@ be-ul@ unobsolete
-    synonym be! be-l! unobsolete
+    synonym be@ be-ul@
+    synonym be! be-l!
     warnings !
     : 128+ ( 128a 128b -- 128c ) \ 128 bit addition
 	{ d: a1 d: a2 d: b1 d: b2 }
