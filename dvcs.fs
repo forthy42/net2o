@@ -525,7 +525,8 @@ previous
 : save-project ( -- )
     dvcs( ." saving '" dvcs:id$ $@ 85type cr )
     dvcs:id$ $@ project:revision$ 85$!
-    ".n2o/config" ['] project >wordlist write-config ;
+    ".n2o/config+" ['] project >wordlist write-config
+    ".n2o/config+" ".n2o/config" rename-file throw ;
 
 \ init project
 
