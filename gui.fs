@@ -771,7 +771,7 @@ Variable last-bubble-pk
     THEN o o> ;
 
 : msgs-box+resize ( -- )
-    [ ' +resize >body @ ]L msgs-box .vp-need or! ;
+    [ ' +resize >body @ ' +resizeall >body @ or ]L msgs-box .vp-need or! ;
 : >msgs-box ( child -- )
     msgs-box .child+ msgs-box+resize ;
 
@@ -970,9 +970,9 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     prj 2dup keysize /string [: type '@' emit key| .key-id? ;] $tmp nick>chat
     handle-clone
     prj keysize /string set-dir throw
-    .posting-log next-slide +lang +resize album>path
+    .posting-log next-slide +lang +resize +resizeall album>path
     posting-vp 0.01e [: >o vp-top box-flags box-touched# invert and to box-flags o>
-	fdrop +sync +resize ;] >animate
+	fdrop +sync +resize +resizeall ;] >animate
     dir> ;
 
 :noname ( -- )
@@ -1416,7 +1416,7 @@ hash: imgs# \ hash of images
     4 album-reload
     md-frame album-viewer >o to parent-w o>
     album-viewer md-frame .childs[] >stack
-    +sync +resize ;
+    +sync +resize +resizeall ;
 
 : album-view[] ( addr u o -- o )
     [: addr data $@ >msg-album-viewer ;]
