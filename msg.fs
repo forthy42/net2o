@@ -2082,7 +2082,7 @@ is /help
 	case item cell+ $@ drop cell+ .fetcher:state
 	    0 of  ." want from"
 		item $@ have# #@ bounds U+DO
-		    forth:cr I @ .@host.id
+		    forth:cr 4 spaces I $@ .@host.id
 		cell +LOOP
 	    endof
 	    1 of  ." fetching..."  endof
