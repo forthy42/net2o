@@ -856,6 +856,8 @@ Variable like-char
 }scope
 
 0 Value posting-vp
+: posting-box+resize ( -- )
+    [ ' +resize >body @ ' +resizeall >body @ or ]L posting-vp .vp-need or! ;
 
 {{
     posting-bg-col# pres-frame#
@@ -951,7 +953,8 @@ Variable emojis$ "👍👎🤣😍😘😛🤔😭😡😱🔃" emojis$ $! \ 
     glue*lll }}glue posting-vp dup .act 0= IF  vp[]  THEN  .child+
     log free
     dvcs-log:urls[] ['] display-file $[]map
-    dvcs:dispose-dvcs-log o> ;
+    dvcs:dispose-dvcs-log o>
+    posting-box+resize ;
 : .posting-log ( -- )
     album-imgs[] $[]free
     dvcs:new-dvcs >o  config>dvcs
@@ -1307,7 +1310,7 @@ Hash: audio#
     [THEN]
 [THEN]
 
-: be-l, ( l -- ) lbe here 4 allot l! ;
+: be-l, ( l -- ) lbe 4 small-allot l! ;
 
 Create audio-colors
 $0000FF00 be-l, $0008F700 be-l, $0010EF00 be-l, $0018E700 be-l,
@@ -1894,9 +1897,9 @@ also [IFDEF] jni jni [THEN]
     case
 	[IFDEF] jni
 	    k-volup of  audio-playing IF  1 1 clazz .audioManager .adjustVolume
-		ELSE  k-up [ box-actor :: ekeyed ]  THEN  endof
+		ELSE  k-up [ box-actor ] defers ekeyed  THEN  endof
 	    k-voldown of  audio-playing IF  -1 1 clazz .audioManager .adjustVolume
-		ELSE  k-down [ box-actor :: ekeyed ]  THEN  endof
+		ELSE  k-down [ box-actor ] defers ekeyed  THEN  endof
 	[THEN]
 	k-f5 of  color-theme 0=  IF  anim-end m2c:animtime% f@ f2/ o
 		[: drop             fdup f>s to color-theme 1/2 f+ ColorMode! +sync +vpsync ;]
@@ -1906,7 +1909,7 @@ also [IFDEF] jni jni [THEN]
 		>animate  THEN   endof
 	k-f7 of  >normalscreen   endof
 	k-f8 of  >fullscreen     endof
-	[ box-actor :: ekeyed ]  EXIT
+	[ box-actor ] defers ekeyed  EXIT
     endcase ; net2o-actor to ekeyed
 
 previous

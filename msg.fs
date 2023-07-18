@@ -1252,13 +1252,13 @@ event: :>msg-eval ( parent $pack $addr -- )
     ['] msg-file-done is file-xt
 ; msgfs-class is fs-create
 :noname ( addr u -- u )
-    [ termserver-class :: fs-read ]
+    [ termserver-class ] defers fs-read
 ; msgfs-class is fs-read
 :noname ( -- )
 	<event parent elit, 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
 	parent .wait-task @ event>
 	fs:fs-clear
-; msgfs-class is fs-flush    
+; msgfs-class is fs-flush
 :noname ( -- )
     fs-path @ 0= ?EXIT
     fs-inbuf $@len IF
