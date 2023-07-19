@@ -413,7 +413,7 @@ $55DD55FF new-color, sf, \ scanned is more green
 $CCEE55FF new-color, sf, \ seen in chat is more yellow
 $EECC55FF new-color, sf, \ imported from DHT is pretty yellow
 $FF8844FF new-color, sf, \ invited is very yellow
-$FF6600FF new-color, sf, \ provisional is very orange
+$FFFFFFFF new-color, sf, \ provisional is just white
 $FF0000FF new-color, sf, \ untrusted is last
 Create imports#rgb-fg
 $003300FF text-color, sf,
@@ -422,7 +422,7 @@ $000000FF text-color, sf,
 $000000FF text-color, sf,
 $0000FFFF text-color, sf,
 $0000FFFF text-color, sf,
-$0000FFFF text-color, sf,
+$000000FF text-color, sf, \ provisional is just white
 $00FFFFFF text-color, sf,
 
 \ more colors

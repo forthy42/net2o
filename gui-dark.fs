@@ -61,7 +61,7 @@ $CC0000FF re-color gps-color#
     $222222FF new-color, fdrop
 [LOOP]
 $FF0000FF
-$FF6600FF
+$FFFFFFFF
 $FF8844FF
 $EECC55FF
 $CCEE55FF
