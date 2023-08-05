@@ -26,6 +26,12 @@ require forward.fs
 require set-compsem.fs
 require hash-table.fs
 
+\ events API change
+
+[defined] estring, 0= [defined] e$, and [IF]
+    synonym estring, e$,
+[THEN]
+
 \ enum
 
 : enum ( n "name" -- n+1 )  dup Constant 1+ ;

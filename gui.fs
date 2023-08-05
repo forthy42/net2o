@@ -517,14 +517,14 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
     pk u2 $8 $A pk-connect? IF  +resend +flow-control
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	hash u1 net2o:copy# end-code| net2o:close-all disconnect-me
-	<event thumb elit, hash u1 e$, :>update-avatar task event>
+	<event thumb elit, hash u1 estring, :>update-avatar task event>
     ELSE  2drop  THEN ;
 
 : ?+avatars ( o:key o/0 -- o )
     ?dup-0=-IF
 	user-avatar avatar-thumb
 	<event dup elit, up@ elit,
-	ke-avatar $@ e$, ke-pk $@ e$, :>fetch-avatar
+	ke-avatar $@ estring, ke-pk $@ estring, :>fetch-avatar
 	?query-task event>
     THEN ;
 

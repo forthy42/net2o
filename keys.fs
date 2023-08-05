@@ -1352,7 +1352,7 @@ event: :>invite ( addr u -- ) do-invite ;
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem main-up@ <hide>
-	<event e$, :>invite main-up@ event|
+	<event estring, :>invite main-up@ event|
     ELSE  2drop  THEN ;
 
 forward .sigqr

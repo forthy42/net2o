@@ -701,7 +701,7 @@ event: :>hash-finished { d: hash -- }
     fetch( ." fetching " 2dup 85type forth:cr )
     2dup fetch# #@ IF  cell+ .fetcher:fetch  ELSE  drop  THEN
     2dup net2o:copy#
-    r> [{: d: hash tsk :}h <event hash e$, :>hash-finished tsk event> ;]
+    r> [{: d: hash tsk :}h <event hash estring, :>hash-finished tsk event> ;]
     lastfile@ >o to file-xt o> ;
 
 : fetch-hashs ( addr u tsk pk$ -- )
@@ -1037,7 +1037,7 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group parent msg-group-o .msg:peers[] del$cell ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
-    <event last-msg 2@ e$, elit, o elit, msg-group-o elit, :>chat-reconnect
+    <event last-msg 2@ estring, elit, o elit, msg-group-o elit, :>chat-reconnect
     parent .wait-task @ ?query-task over select event> ;
 +net2o: msg-last? ( start end n -- ) \g query messages time start:end, n subqueries
     64>n msg:last? ;
