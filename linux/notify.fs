@@ -15,6 +15,8 @@
 \ You should have received a copy of the GNU Affero General Public License
 \ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+require unix/open-url.fs
+
 : escape-<&> ( addr u -- )
     bounds ?DO  case i c@
 	    '<' of  ." &lt;"   endof
@@ -31,10 +33,6 @@
 	ELSE  notify$ $@ ['] escape-<&> $tmp  THEN
     ELSE  "<i>encrypted message</i>"  THEN ;
 
-: 0$! ( addr u cstr-addr -- )
-    >r 1+ over 0= IF  2drop "\0"  THEN
-    save-mem over + 1- 0 swap c! r> ! ;
-
 0 Value content-string
 0 Value title-string
 
@@ -43,26 +41,11 @@
 $Variable notify-send
 $Variable net2o-logo
 
-: file>abspath ( file u path -- addr u )
-    ['] file>path catch IF
-	drop 2drop #0.
-    ELSE
-	over c@ '/' <> IF
-	    [: pad $1000 get-dir type '/' emit type ;] $tmp
-	    compact-filename
-	THEN
-    THEN ;
-
-: !upath ( -- ) { | w^ upath }
-    "PATH" getenv upath $!
-    upath $@ bounds ?DO I c@ ':' = IF 0 I c! THEN LOOP
-    "notify-send" upath file>abspath notify-send $!
-    upath $free ;
-
 : !net2o-logo ( -- )
     s" ../doc/net2o-logo.png" fpath file>abspath net2o-logo $! ;
 
-!upath !net2o-logo
+"notify-send" >upath notify-send $!
+!net2o-logo
 
 [IFDEF] notify-args
     : ?free0 ( addr -- )
@@ -96,7 +79,8 @@ $Variable net2o-logo
 [THEN]
 
 :noname defers 'cold
-    !upath !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
+    "notify-send" >upath notify-send $!
+    !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
 
 : dump-args ( arg -- )
     ." Dumping arguments" cr

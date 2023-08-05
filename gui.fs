@@ -24,6 +24,7 @@ Forth definitions also minos
 gl-init
 
 require minos2/font-style.fs
+require unix/open-url.fs
 
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
@@ -801,19 +802,6 @@ Variable last-bubble-pk
 : otr? ( tick -- flag )
     64dup 64#-1 64<> ;
 : text-color! ( -- ) last-otr? IF  greenish  ELSE  blackish  THEN ;
-
-[IFDEF] android
-    also jni
-    : open-url ( addr u -- )
-	clazz >o make-jstring to args0 o>
-	['] startbrowser post-it ;
-    previous
-[ELSE]
-    [IFDEF] linux
-	: open-url ( addr u -- )
-	    [: ." xdg-open " type ;] $tmp system ;
-    [THEN]
-[THEN]
 
 hash: chain-tags#
 
