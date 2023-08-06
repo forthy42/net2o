@@ -98,7 +98,9 @@ state#  buffer: qr-hash \ hash of challenge
 
 init-keybuf
 
-:noname keytmp off keybuf off defers 'image ; is 'image
+:noname keytmp off keybuf off
+    qr-key keysize erase  qr-hash state# erase
+    defers 'image ; is 'image
 :noname defers 'cold init-keybuf ; is 'cold
 :noname defers alloc-code-bufs  new-keytmp ; is alloc-code-bufs
 \ :noname defers free-code-bufs ; is free-code-bufs

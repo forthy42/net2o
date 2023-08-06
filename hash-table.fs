@@ -19,6 +19,8 @@
 
 2 64s buffer: hashinit
 
+:noname defers 'image hashinit 2 64s erase ; is 'image
+
 \ this computes a cryptographic somewhat secure hash over the input string
 
 User hash-state 2 64s cell- uallot drop

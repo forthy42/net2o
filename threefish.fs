@@ -48,10 +48,13 @@ end-class threefish
 
 User threefish-t
 
+0 Value threefish-o
+
 : threefish-init ( -- )
     threefish-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
     [: threefish new dup crypto-o ! threefish-t ! ;] crypto-a with-allocater
-    up@ crypto-up ! threefish-state to @threefish ;
+    up@ crypto-up ! threefish-state to @threefish
+    crypto-o @ to threefish-o ;
 
 : threefish-free crypto-o @ ?dup-IF  .dispose  THEN
     0 to @threefish crypto-o off ;
@@ -68,6 +71,9 @@ User threefish-t
     threefish-state tf_ctx-tweak le-128! ;
 
 threefish-init
+
+:noname defers 'cold threefish-init ; is 'cold
+:noname defers 'image  threefish-t off  0 to threefish-o ; is 'image
 
 ' threefish-init to c:init
 ' threefish-free to c:free
@@ -149,5 +155,4 @@ threefish-init
     tf-tweak! ;
 to c:tweakkey!
 
-crypto-o @ Constant threefish-o
 

@@ -305,7 +305,9 @@ event: :>connect    ( connection -- ) .do-connect ;
 \ check for valid destination
 
 Variable dest-map s" " dest-map $!
-:noname defers 'cold alloc-io dest-map $init ; is 'cold
+
+:noname defers 'image dest-map off ; is 'image
+:noname defers 'cold hash-init-rng alloc-io ; is 'cold
 
 $100 Value dests#
 56 Value dests>>
@@ -1933,7 +1935,6 @@ Defer init-rest
 :noname ( port -- )  init-mykey init-mykey \ generate two keys
     init-myekey
     my-0key @ 0= IF  init-my0key  THEN  init-header-key
-    \ hash-init-rng
     init-timer net2o-socket init-route prep-socks
     sender( create-sender-task ) create-timeout-task ; is init-rest
 
@@ -2021,12 +2022,14 @@ context-table   $save
 \ modify bye
 
 ' bye defered? [IF]
-    : net2o-bye  !save-all-msgs subme dht-disconnect net2o-kills
+    : net2o-bye  !save-all-msgs subme dht-disconnect
+	sender-task IF  net2o-kills  THEN
 	defers bye ;
     ' net2o-bye is bye
 [ELSE]
     0 warnings !@
-    : bye  !save-all-msgs subme dht-disconnect net2o-kills
+    : bye  !save-all-msgs subme dht-disconnect
+	sender-task IF  net2o-kills  THEN
 	[IFDEF] cilk-bye cilk-bye [THEN]
 	[IFDEF] delete-whereg delete-whereg [THEN]
 	.unstatus 0 (bye) ;

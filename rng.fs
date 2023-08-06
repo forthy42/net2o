@@ -222,4 +222,5 @@ User ?salt-init  ?salt-init off
     rng-pos @ rng-buffer + c@
     1 rng-pos +! ;
 
-:noname defers 'image check-old$ $free ?salt-init off rng-o off ; is 'image
+:noname defers 'image check-old$ $free ?salt-init off rng-o off
+    rngstat-buf $10 cells erase ; is 'image

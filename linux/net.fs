@@ -124,7 +124,7 @@ event: :>addr-changed ( -- )
     BEGIN  read-netlink?
 	netlink( 2dup address? IF  2dup .rtaddr THEN )
     address? check-preferred? or  UNTIL ;
-: netlink-loop ( -- )
+: netlink-loop {: main -- }
     netlink-sock 0= IF  ['] get-netlink catch -525 = ?EXIT  THEN
     BEGIN
 	wait-for-address  !!0depth!!
@@ -137,11 +137,11 @@ event: :>addr-changed ( -- )
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN
-	    <event :>addr-changed [ up@ ]L event>
+	    <event :>addr-changed main event>
 	THEN
     AGAIN ;
 : create-netlink-task ( -- )
-    ['] netlink-loop 1 net2o-task to netlink-task ;
+    up@ [{: main :}h main netlink-loop ;] 1 net2o-task to netlink-task ;
 
 :noname defers init-rest create-netlink-task ; is init-rest
 

@@ -348,7 +348,7 @@ Forward !my-addr ( -- )
 
 4242 Value net2o-port \ fix server port
 
-Variable net2o-host "net2o.de" net2o-host $!
+$Variable net2o-host "net2o.de" net2o-host $!
 
 : net2o-socket ( port -- )
     BEGIN  dup

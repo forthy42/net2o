@@ -1885,7 +1885,7 @@ also net2o-base scope: /chat
     }scope
 end-class chat-cmds
 
-chat-cmds new Constant text-chat-cmd-o
+chat-cmds ' new static-a with-allocater Constant text-chat-cmd-o
 
 text-chat-cmd-o to chat-cmd-o
 
@@ -2120,11 +2120,11 @@ Forward ```
 	ELSE  $, msg-text  THEN
     ELSE  2drop  THEN ;
 
-Variable punctation$
+$Variable punctation$
 s" minos2/unicode/punctation.db" open-fpath-file
 0= [IF] 2drop dup punctation$ $slurp forth:close-file throw
 [ELSE] s" .,:;!" punctation$ $! [THEN]
-Variable brackets$
+$Variable brackets$
 s" minos2/unicode/brackets.db" open-fpath-file
 0= [IF] 2drop dup brackets$ $slurp forth:close-file throw
 [ELSE] s" ()[]{}" brackets$ $! [THEN]

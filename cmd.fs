@@ -388,12 +388,11 @@ Defer .n-name  ' noop is .n-name
 
 0 Value last-2o
 
-: net2o-does  DOES> net2o, ;
 : net2o: ( number "name" -- )
     .n-name
     ['] noop over >cmd \ allocate space in table
     Create  here to last-2o
-    dup >r , here >r 0 , 0 , 0 , net2o-does noname :
+    dup >r , here >r 0 , 0 , here $saved 0 , ['] net2o, set-does> noname :
     latestxt dup r> ! r> >cmd ;
 : +net2o: ( "name" -- ) gen-table $[]# net2o: ;
 : >table ( table -- )  last-2o 2 cells + ! ;

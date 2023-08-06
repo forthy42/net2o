@@ -149,7 +149,7 @@ DOES> swap >im-color# 7 umin cells + [: perform execute ;] execute-theme-color ;
 : .imports ( mask -- )
     imports$ import#new bounds DO
 	dup 1 and IF
-	    I c@ ['] emit 1 I imports$ - lshift >im-color
+	    I c@ ['] emit 1 I imports$ [ lits, ] - lshift >im-color
 	THEN
 	2/ LOOP
     drop ;

@@ -65,10 +65,13 @@ end-class keccak
 
 User keccak-t
 
+0 Value keccak-o
+
 : keccak-init ( -- )
     keccak-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
     [: keccak new dup crypto-o ! keccak-t ! ;] crypto-a with-allocater
-    up@ crypto-up ! keccak-state to @keccak ;
+    up@ crypto-up ! keccak-state to @keccak
+    crypto-o @ to keccak-o ;
 
 : keccak-free
     keccak-t @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
@@ -77,7 +80,7 @@ User keccak-t
 keccak-init
 
 :noname defers 'cold keccak-init ; is 'cold
-:noname defers 'image crypto-o off  keccak-t off ; is 'image
+:noname defers 'image crypto-o off  keccak-t off  0 to keccak-o ; is 'image
 
 ' keccak-init to c:init
 ' keccak-free to c:free
@@ -144,4 +147,3 @@ to c:hash@
     keccak0 keccak-padded keccak#max >keccak ;
 to c:tweakkey!
 
-crypto-o @ Constant keccak-o

@@ -158,6 +158,7 @@ Ustack b$
 up@ Value main-up@
 
 :noname defers 'cold up@ to main-up@ ; is 'cold
+:noname defers 'image  0 to main-up@ ; is 'image
 
 Variable edit-restart
 :noname ( span addr u -- )

@@ -36,7 +36,7 @@ require unix/open-url.fs
 0 Value content-string
 0 Value title-string
 
-20 cells buffer: notify-args
+#20 cells buffer: notify-args
 
 $Variable notify-send
 $Variable net2o-logo
@@ -81,6 +81,8 @@ $Variable net2o-logo
 :noname defers 'cold
     "notify-send" >upath notify-send $!
     !net2o-logo [IFDEF] !notify-args !notify-args [THEN] ; is 'cold
+:noname defers 'image
+    notify-args #20 cells erase ; is 'image
 
 : dump-args ( arg -- )
     ." Dumping arguments" cr

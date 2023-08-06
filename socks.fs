@@ -172,7 +172,7 @@ User lastn2oaddr
 
 \ query if we have a DNS64 environment
 
-Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
+$Variable net2o-ipv4 "ipv4.net2o.de" net2o-ipv4 $!
 
 : dns64? ( -- flag )
     net2o-ipv4 $@ net2o-port get-info info@
