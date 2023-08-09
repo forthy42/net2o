@@ -175,6 +175,7 @@ kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
 0 Value query-task    \ for background queries initiated in other tasks
 
 : net2o-kills ( -- )
+    true to terminating?
     0 to sender-task
     0 to receiver-task
     0 to timeout-task
@@ -307,7 +308,7 @@ event: :>connect    ( connection -- ) .do-connect ;
 Variable dest-map s" " dest-map $!
 
 :noname defers 'image dest-map off ; is 'image
-:noname defers 'cold hash-init-rng alloc-io ; is 'cold
+:noname defers 'cold false to terminating?  hash-init-rng alloc-io ; is 'cold
 
 $100 Value dests#
 56 Value dests>>
@@ -2023,13 +2024,13 @@ context-table   $save
 
 ' bye defered? [IF]
     : net2o-bye  !save-all-msgs subme dht-disconnect
-	sender-task IF  net2o-kills  THEN
+	query-task IF  net2o-kills  THEN
 	defers bye ;
     ' net2o-bye is bye
 [ELSE]
     0 warnings !@
     : bye  !save-all-msgs subme dht-disconnect
-	sender-task IF  net2o-kills  THEN
+	query-task IF  net2o-kills  THEN
 	[IFDEF] cilk-bye cilk-bye [THEN]
 	[IFDEF] delete-whereg delete-whereg [THEN]
 	.unstatus 0 (bye) ;

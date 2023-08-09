@@ -1103,7 +1103,10 @@ edit-terminal edit-out !
 
 \ catch loop
 
-: ?int ( throw-code -- throw-code )  dup -28 = IF  bye  THEN ;
+0 Value terminating?
+
+: ?int ( throw-code -- throw-code )  dup -28 = terminating? or
+    IF  kill-task  THEN ;
 
 : .loop-err ( throw xt -- )
     [: ." Task: " id. dup . cr DoError cr ;] do-debug ;
