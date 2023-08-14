@@ -243,11 +243,8 @@ User peer-buf
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
     addr-connect 2dup d0= IF  2drop  ELSE  push[] $+[]! avalanche-to  THEN o> ;
 
-: execute+free ( closure-xt -- )
-    dup >r execute r> >addr free throw ;
-
 event: :>avalanche ( addr u o group restore-xt -- )
-    execute+free
+    execute
     avalanche( ." Avalanche to: " dup hex. cr )
     to msg-group-o .avalanche-msg ;
 event: :>chat-reconnect ( addr u $chat o group -- )
@@ -383,7 +380,7 @@ previous
 
 : msg-pack ( -- xt )
     0 push[] !@  0 ihave$ !@
-    [{: push ihave :}h push push[] !  ihave ihave$ ! ;] ;
+    [{: push ihave :}h1 push push[] !  ihave ihave$ ! ;] ;
 
 : push-msg ( o:parent -- )
     up@ receiver-task <> IF
@@ -690,7 +687,7 @@ event: :>hash-finished { d: hash -- }
     hash fetch# #@ IF  cell+ .fetcher:got-it  ELSE  drop  THEN
     hash fetch-finish# #@ dup IF
 	bounds U+DO
-	    I @ >r hash r@ execute r> >addr free throw
+	    hash I @ execute
 	cell +LOOP
 	last# bucket-off
     ELSE  2drop  THEN

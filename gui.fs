@@ -1256,7 +1256,8 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     ELSE
 	128 128 glue*thumb dummy-thumb }}thumb dup
 	>r hash keysize safe/string IF  c@  ELSE  0  THEN
-	[d:h update-thumb ;] { w^ xt } xt cell hash key| fetch-finish# #+!
+	[{: d: x :}h1 x update-thumb ;]
+	{ w^ xt } xt cell hash key| fetch-finish# #+!
 	hash key| ?fetch
     THEN  {{ glue*ll }}glue r> }}v 40%bv box[] ;
 
