@@ -918,16 +918,16 @@ $20 /sync-files * Constant /sync-reqs
 : dvcs-sync-none ( -- )
     -1 dvcs-request# +!@ 0<= IF  dvcs-request# off  THEN ;
 
-event: :>dvcs-sync-done ( o -- ) >o
+: ev-dvcs-sync-done ( -- )
     file-reg# off  file-count off
     msg-group$ $@ >group ?save-msg  0 dvcs-request# !
-    msg( ." === metadata sync done ===" forth:cr ) o> ;
+    msg( ." === metadata sync done ===" forth:cr ) ;
 
 : dvcs-sync-done ( -- )
     msg( ." dvcs-sync-done" forth:cr )
     net2o:close-all
     msg( ." dvcs-sync-done closed" forth:cr )
-    <event o elit, :>dvcs-sync-done wait-task @ event> ;
+    o [{: xo :}h1 xo .ev-dvcs-sync-done ;] wait-task @ send-event ;
 
 : +dvcs-sync-done ( -- )
     ['] dvcs-sync-done is sync-done-xt

@@ -53,13 +53,16 @@ Variable fs-table
     <err> ." invalid file-done xt" <default> ~~bt ;
 : file:done ( -- )
     parent >o -1 file-count +!@ 1 = IF
-	wait-task @ ?dup-IF  <event
-	    wake# over 's @ 1+ elit, :>wake  event>  THEN
+	wait-task @ ?dup-IF
+	    wake# over 's @ 1+ (restart)
+	THEN
     THEN o>
     [: .time ." download done: " fs-id ? fs-path $@ type cr ;] do-debug ;
-event: :>file-done ( file-o -- ) \ .file-xt ;
-    >o action-of file-xt IF  file-xt  ELSE  file:err  THEN o> ;
-
+: parent-file-done ( -- )
+    o [{: xo :}h1
+	xo >o action-of file-xt IF  file-xt  ELSE  file:err  THEN
+	0 is file-xt o> ;]
+    parent .wait-task @ send-event ;
 \ id handling
 
 : id>addr ( id -- addr remainder )
@@ -115,8 +118,7 @@ in fs : fs-write ( addr u -- u )
     tuck fs-fid @ write-file throw
     dup n>64 +to fs-seek  fs-seek to fs-seekto
     fs-size fs-seek 64= IF
-	fs-flush
-	<event o elit, :>file-done parent .wait-task @ event>
+	fs-flush parent-file-done
     THEN
 ; ' fs:fs-write fs-class to fs-write
 in fs : fs-clear ( -- )
@@ -267,15 +269,15 @@ is parse-name
 : >termserver-io ( -- )
     [: up@ { w^ t } t cell termserver-tasks $+! ;] file-sema c-section ;
 
-event: :>termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
+: ev-termfile ( o -- ) dup termfile ! >o form term-w ! term-h ! o>
     termserver-in termserver-out ;
-event: :>termclose ( -- ) termfile off  default-in default-out ;
+: ev-termclose ( -- ) termfile off  default-in default-out ;
 
 :noname ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
-	<event o elit, :>file-done parent .wait-task @ event>
+	parent-file-done
     THEN ; termserver-class to fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
@@ -283,12 +285,12 @@ event: :>termclose ( -- ) termfile off  default-in default-out ;
 :noname ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
-	<event o elit, :>termfile event>
+	o [{: xo :}h1 xo ev-termfile ;] swap send-event
     ;] file-sema c-section
 ; dup termserver-class to fs-open  termserver-class to fs-create
 :noname ( -- )
     [: fs-termtask @ ?dup-IF
-	    <event :>termclose event>
+	    ['] ev-termclose swap send-event
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
 	THEN ;] file-sema c-section
 ; termserver-class to fs-close

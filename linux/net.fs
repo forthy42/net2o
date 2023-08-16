@@ -94,14 +94,12 @@ Variable netlink-done?   netlink-done? on
 Variable netlink-again?  netlink-again? off
 Defer addr-changed ' noop is addr-changed
 
-event: :>netlink ( -- )
+: ev-netlink ( -- )
     netlink-again? @ IF
 	 netlink-done? off netlink-again? off #0. dht-beacon
     ELSE  netlink-done? on  THEN ;
-event: :>addr-changed ( -- )
-    addr-changed ;
 : renat-complete ( -- )
-    <event :>netlink netlink-task event> ;
+    ['] ev-netlink netlink-task send-event ;
 
 \ netlink watchdog
 
@@ -137,7 +135,7 @@ event: :>addr-changed ( -- )
 	    ELSE
 		nat( ." netlink-again" cr ) netlink-again? on  !!0depth!!
 	    THEN
-	    <event :>addr-changed main event>
+	    ['] addr-changed main send-event
 	THEN
     AGAIN ;
 : create-netlink-task ( -- )

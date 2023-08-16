@@ -28,7 +28,9 @@ connect-table $@ inherit-table context-table
 \g ### connection commands ###
 \g 
 +net2o: disconnect ( -- ) \g close connection
-    o IF  o elit, :>dispose-context  true to closing?  THEN ;
+    o IF  o [{: xo :}h1 xo .net2o:dispose-context ;]
+	  wait-task @ ?query-task over select send-event
+	  true to closing?  THEN ;
 +net2o: set-ip ( $:string -- ) \g set address information
     $> setip-xt ;
 +net2o: get-ip ( -- ) \g request address information
@@ -189,7 +191,7 @@ in net2o : gen-reset ( -- )
 	    nlit, ko  THEN
     ELSE
 	error-id>o ?dup-IF
-	    >o <event elit, :>throw wait-task @ event> o>
+	    >o [{: tc :}h1 tc throw ;] wait-task @ send-event o>
 	ELSE  throw  THEN
     THEN ; IS >throw
 

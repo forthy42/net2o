@@ -82,10 +82,8 @@ require dhtroot.fs
 
 Forward renat-all
 
-event: :>renat ( -- )  renat-all ;
-event: :>disconnect ( addr -- )  .disconnect-me ;
 : dht-beacon ( addr u -- )
-    <event :>renat main-up@ event> 2drop ;
+    ['] renat-all main-up@ send-event 2drop ;
 
 : +dht-beacon ( -- )
     beacons# @ 0= IF  ret-addr be@ ['] dht-beacon 0 .add-beacon  THEN ;
@@ -185,15 +183,14 @@ scope{ /chat
 
 \ beacon handling
 
-event: :>do-beacon ( addr -- )
-    beacon( ." :>do-beacon" forth:cr )
+: ev-do-beacon ( addr -- )
+    beacon( ." ev-do-beacon" forth:cr )
     { beacon } beacon cell+ $@ 1 64s /string bounds ?DO
 	beacon $@ I 2@ .execute
     2 cells +LOOP ;
 
 : do-beacon ( addr -- )  \ sign on, and do a replace-me
-    <event elit, :>do-beacon ?query-task event> ;
-
+    [{: beacon :}h1 beacon ev-do-beacon ;] ?query-task send-event ;
 
 Variable my-beacon
 

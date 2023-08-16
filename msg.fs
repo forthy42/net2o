@@ -136,24 +136,19 @@ Variable saved-msg$
     ELSE  msg-eval  THEN
     replay-mode off  skip-sig? off  enc-file $free ;
 
-event: :>save-msgs ( group-o -- ) saved-msg$ +unique$ ;
-event: :>save-all-msgs ( -- )
-    save-all-msgs ;
-event: :>load-msg ( group-o -- )
-    .msg:name$ load-msg ;
-
 : >load-group ( group u -- )
     >group msg-group-o .msg:log[] $@len 0=
-    IF  <event msg-group-o elit, :>load-msg
+    IF  msg-group-o [{: xo :}h1 xo .msg:name$ load-msg ;]
 	parent .wait-task @
-	dup 0= IF  drop ?file-task  THEN  event>  THEN ;
+	dup 0= IF  drop ?file-task  THEN  send-event  THEN ;
 
 : !save-all-msgs ( -- )
     syncfile( save-all-msgs )else(
-    <event :>save-all-msgs ?file-task event| ) ;
+    ['] save-all-msgs ?file-task send-event ?file-task event-block ) ;
 : save-msgs& ( -- )
     syncfile( msg-group-o saved-msg$ +unique$ )else(
-    <event msg-group-o elit, :>save-msgs ?file-task event> ) ;
+    msg-group-o [{: group-o :}h1 group-o saved-msg$ +unique$ ;]
+      ?file-task send-event ) ;
 
 0 Value log#
 2Variable last-msg
@@ -242,16 +237,6 @@ User peer-buf
       ?msg-context >o silent-last# ! o>
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
     addr-connect 2dup d0= IF  2drop  ELSE  push[] $+[]! avalanche-to  THEN o> ;
-
-event: :>avalanche ( addr u o group restore-xt -- )
-    execute
-    avalanche( ." Avalanche to: " dup hex. cr )
-    to msg-group-o .avalanche-msg ;
-event: :>chat-reconnect ( addr u $chat o group -- )
-    to msg-group-o .reconnect-chat ;
-event: :>msg-nestsig ( $addr o group -- )
-    to msg-group-o >o { w^ m } m $@ do-msg-nestsig m $free o>
-    ctrl L inskey ;
 
 \ coordinates
 
@@ -386,15 +371,24 @@ previous
     up@ receiver-task <> IF
 	avalanche-msg
     ELSE wait-task @ ?dup-IF
-	    <event >r o elit, msg-group-o elit, msg-pack elit,
-	    :>avalanche r> event>
+	    >r
+	    o msg-group-o msg-pack [{: xo group-o xt: pack :}h1
+		pack
+		avalanche( ." Avalanche to: " group-o hex. cr )
+		group-o to msg-group-o xo .avalanche-msg ;]
+	    r> send-event
 	ELSE  2drop  THEN
     THEN ;
 : show-msg ( addr u -- )
     parent dup IF  .wait-task @ dup up@ <> and  THEN
     ?dup-IF
-	dup >r <hide> <event $make elit, o elit, msg-group-o elit, :>msg-nestsig
-	r> event>
+	dup >r <hide>
+	$make o msg-group-o
+	[{: w^ m xo group-o :}h1
+	    group-o to msg-group-o
+	    xo >o m $@ do-msg-nestsig m $free o>
+	    ctrl L inskey ;]
+	r> send-event
     ELSE  do-msg-nestsig  THEN ;
 
 : date>i ( date -- i )
@@ -682,7 +676,7 @@ end-class msg-?hash-class
     msg:hashs$ 2swap >ihave.id
 ; msg:class is msg:hash-id
 
-event: :>hash-finished { d: hash -- }
+: hash-finished { d: hash -- }
     fetch( ." finished " 2dup 85type forth:cr )
     hash fetch# #@ IF  cell+ .fetcher:got-it  ELSE  drop  THEN
     hash fetch-finish# #@ dup IF
@@ -698,7 +692,9 @@ event: :>hash-finished { d: hash -- }
     fetch( ." fetching " 2dup 85type forth:cr )
     2dup fetch# #@ IF  cell+ .fetcher:fetch  ELSE  drop  THEN
     2dup net2o:copy#
-    r> [{: d: hash tsk :}h <event hash estring, :>hash-finished tsk event> ;]
+    r> [{: d: hash tsk :}h1
+	hash [{: d: hash :}h1 hash hash-finished ;]
+	tsk send-event ;]
     lastfile@ >o to file-xt o> ;
 
 : fetch-hashs ( addr u tsk pk$ -- )
@@ -758,18 +754,18 @@ fetcher:class ' new static-a with-allocater Constant fetcher-prototype
 	    2over fetch# #!
 	THEN ;] resize-sema c-section  2drop ;
 
-event: :>fetch-queue ( tsk queue[] -- )
-    { w^ queue[] } queue[] ['] >fetch# $[]map
-    fetch>want fetch-queue ;
-
 : transmit-queue ( queue -- )
-    <event up@ elit, elit, :>fetch-queue ?query-task event> ;
+    up@ [{: w^ queue[] task :}h1
+	queue[] ['] >fetch# $[]map
+	task fetch>want fetch-queue ;]
+    ?query-task send-event ;
 
 Variable queue?
-event: :>queued ( queue -- )
-    0 fetch-queue[] !@ queue? off transmit-queue ;
 : enqueue ( -- )
-    -1 queue? !@ 0= IF  <event :>queued up@ event>  THEN ;
+    -1 queue? !@ 0= IF
+	[: 0 fetch-queue[] !@ queue? off transmit-queue ;]
+	up@ send-event
+    THEN ;
 
 forward need-hashed?
 : >have-group ( addr u -- )
@@ -1034,8 +1030,10 @@ $21 net2o: msg-group ( $:group -- ) \g set group
     $> >group parent msg-group-o .msg:peers[] del$cell ;
 +net2o: msg-reconnect ( $:pubkey+addr -- ) \g rewire distribution tree
     $> $make
-    <event last-msg 2@ estring, elit, o elit, msg-group-o elit, :>chat-reconnect
-    parent .wait-task @ ?query-task over select event> ;
+    [{: $chat d: last-msg xo group-o :}h1
+	group-o to msg-group-o
+	last-msg $chat xo .reconnect-chat ;]
+    parent .wait-task @ ?query-task over select send-event ;
 +net2o: msg-last? ( start end n -- ) \g query messages time start:end, n subqueries
     64>n msg:last? ;
 +net2o: msg-last ( $:[tick0,msgs,..tickn] n -- ) \g query result
@@ -1227,7 +1225,7 @@ Variable ask-msg-files[]
     net2o-code expect-msg close-all net2o:gen-reset end-code
     net2o:close-all
     ." === sync done ===" forth:cr sync-done-xt ;
-event: :>msg-eval ( parent $pack $addr -- )
+: ev-msg-eval ( parent $pack $addr -- )
     { w^ buf w^ group }
     group $@ 2 64s /string { d: gname }
     gname >group
@@ -1252,9 +1250,10 @@ event: :>msg-eval ( parent $pack $addr -- )
     [ termserver-class ] defers fs-read
 ; msgfs-class is fs-read
 :noname ( -- )
-	<event parent elit, 0 fs-inbuf !@ elit,  0 fs-path !@ elit, :>msg-eval
-	parent .wait-task @ event>
-	fs:fs-clear
+    parent 0 fs-inbuf !@ 0 fs-path !@
+    [{: px $pack $addr :}h1 px $pack $addr ev-msg-eval ;]
+    parent .wait-task @ send-event
+    fs:fs-clear
 ; msgfs-class is fs-flush
 :noname ( -- )
     fs-path @ 0= ?EXIT

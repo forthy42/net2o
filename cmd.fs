@@ -614,7 +614,7 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
 	rtd( ." rtdelay t-o: " 64dup 64>f .ns cr )  THEN
     rtdelay 64!  o>
     -1 reqcount +!@ 1 = IF
-	wait-task @ ?dup-IF  wake# 's @ 1+ elit, :>wake  THEN
+	wait-task @ ?dup-IF  wake# over 's @ 1+ (restart)  THEN
     THEN
     0 r> reply-xt !@ dup IF  execute  ELSE  2drop  THEN ; \ clear request
 : net2o:expect-reply ( -- )

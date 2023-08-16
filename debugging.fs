@@ -165,9 +165,8 @@ Variable edit-restart
     2 pick 0= IF  0 edit-restart !@ ?dup-IF  wake  THEN  THEN
     defers edit-update ; is edit-update
 
-event: :>type ( $string -- ) { w^ x } x $@ type x $free ;
-event: :>hide ( -- ) ctrl Z unkey ;
-: <hide> ( task -- ) up@ edit-restart ! <event :>hide event>
+: <hide> ( task -- ) up@ edit-restart !
+    [: ctrl Z unkey ;] swap send-event
     #30000000 stop-ns  edit-restart off ;
 : btype  b$ $+! ;
 : bemit  b$ c$+! ;
@@ -175,7 +174,7 @@ event: :>hide ( -- ) ctrl Z unkey ;
     [IFUNDEF] gl-emit      b$ $@ defers type b$ $free
     [ELSE]
 	up@ main-up@ = IF  b$ $@ defers type b$ $free  EXIT  THEN
-	0 b$ !@ <event elit, :>type main-up@ event>
+	0 b$ !@ [{: w^ x :}h1 x $@ type x $free ;] main-up@ send-event
     [THEN] ;
 : bcr    #lf bemit bflush ;
 : bat-deltaxy ( dx dy -- ) drop

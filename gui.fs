@@ -511,22 +511,23 @@ Variable thumb.png$
     re-user re-dummy avatar# ['] re-avatar #map
     fetch-finish# #frees ; is free-thumbs
 
-event: :>update-avatar ( thumb hash u1 -- )
+: ev-update-avatar ( thumb hash u1 -- )
     avatar-frame swap .childs[] $@ drop @ >o to frame# o>
     ['] +sync peers-box .vp-needed +sync ;
-event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
+: ev-fetch-avatar [{: thumb task hash u1 pk u2 :}h1
     pk u2 $8 $A pk-connect? IF  +resend +flow-control
 	net2o-code expect+slurp $10 blocksize! $A blockalign!
 	hash u1 net2o:copy# end-code| net2o:close-all disconnect-me
-	<event thumb elit, hash u1 estring, :>update-avatar task event>
-    ELSE  2drop  THEN ;
+	thumb hash u1
+	[{: thumb hash u1 :}h1 thumb hash u1 ev-update-avatar ;]
+	task send-event
+    ELSE  2drop  THEN ;] ;
 
 : ?+avatars ( o:key o/0 -- o )
     ?dup-0=-IF
 	user-avatar avatar-thumb
-	<event dup elit, up@ elit,
-	ke-avatar $@ estring, ke-pk $@ estring, :>fetch-avatar
-	?query-task event>
+	dup up@ ke-avatar $@ ke-pk $@ ev-fetch-avatar
+	?query-task send-event
     THEN ;
 
 : ?avatar ( addr u -- o / )
@@ -540,7 +541,6 @@ event: :>fetch-avatar { thumb task hash u1 pk u2 -- }
     >o to frame-color o> +resize +sync ;
 : un-act ( edit-x engage-o -- )
     >o act .dispose  0 to act o> 0 to inside-move? ;
-event: :>un-act ( edit engage -- ) >engage un-act +sync ;
 
 : edit-pen[] ( backframe edit-x update-xt -- xt )
     \G create a closure for an edit pen
@@ -551,7 +551,8 @@ event: :>un-act ( edit engage -- ) >engage un-act +sync ;
 	    edit-x o
 	    action-of upd backframe edit-x r@ .caller-w
 	    [{: xt: upd backframe edit-x click-o :}d
-		<event edit-x elit, click-o elit, :>un-act up@ event>
+		edit-x click-o [{: edit-x click-o :}h1
+		    edit-x click-o >engage un-act +sync ;] up@ send-event
 		true upd
 		transp# backframe >re-color-edit
 		-1 to outselw
@@ -561,8 +562,6 @@ event: :>un-act ( edit engage -- ) >engage un-act +sync ;
 	    imports#rgb-bg sf@
 	THEN  backframe >re-color-edit o> ;] ;
 
-event: :>add-me-id  add-me-id ;
-
 : nick-upd[] ( edit-x o:key -- xt )
     o [{: edit-x o:key :}d
 	IF  edit-x .text$ o:key >o
@@ -571,7 +570,7 @@ event: :>add-me-id  add-me-id ;
 	    ELSE  2drop  THEN
 	    ke-nick $! nick! key-sign
 	    o>  save-seckeys
-	    <event :>add-me-id ?query-task event>
+	    ['] add-me-id ?query-task send-event
 	THEN ;] ;
 
 : show-nick ( o:key -- )
@@ -637,9 +636,9 @@ event: :>add-me-id  add-me-id ;
 	    ELSE  2drop  THEN ;] $[]map ;] catch nothrow
     [ ' !!connected!! >body @ ]L = IF  show-connected  THEN ;
 
-event: :>!connection    to connection ;
-event: :>chat-connects  gui-chat-connects
-    <event connection dup elit, :>!connection .wait-task @ event> ;
+: ev-chat-connects  gui-chat-connects
+    connection dup [{: con :}h1 con to connection ;]
+    swap .wait-task @ send-event ;
 
 false Value in-group?
 
@@ -648,7 +647,7 @@ false Value in-group?
 	data $@ group-name >o to text$ o>
 	data cell+ $@ drop cell+ >o groups:id$ groups:member[] o>
 	[: chat-keys $+[]! ;] $[]map
-	gui-msgs  <event :>chat-connects ?query-task event>
+	gui-msgs  ['] ev-chat-connects ?query-task send-event
 	next-slide +lang +resize
     ;] swap click[] ;
 
@@ -1835,9 +1834,6 @@ User $[]exec#
 
 Variable gui-log[]
 
-event: :>dispose-widget ( widget -- )
-    .dispose-widget ;
-
 : chat-gui-exec ( xt -- )
     gui-log[] ['] $[]exec catch
     ?dup-IF  nip nip ['] DoError gui-log[] $[]exec  THEN
@@ -1851,7 +1847,7 @@ event: :>dispose-widget ( widget -- )
 	    closer { closer }
 	}}z box[] >r
 	closer [: data .resize-parents data msgs-box .childs[] del$cell
-	    <event data elit, :>dispose-widget up@ event>
+	    data [{: data :}h1 data .dispose-widget ;] up@ send-event
 	    re-msg-box ;] r@ click[] drop
 	r> msgs-box .child+ re-msg-box
 	msgs-box+resize

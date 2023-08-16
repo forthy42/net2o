@@ -529,10 +529,6 @@ Forward addnick-owndht
 Variable keysearchs#
 hash: unknown-keys#
 
-event: :>search-key ( $addr -- )
-    { w^ key } key $@ dht-nick? key $free
-    1 keysearchs# +!@ drop ;
-
 : .unkey-id ( addr u -- ) <err> 8 umin 85type ." (unknown)" <default>
     [ 1 import#untrusted lshift ]L to last-ki ;
 
@@ -541,8 +537,11 @@ Variable dht-connection
 : .key-id ( addr u -- )  last# >r  key| 2dup key# #@ 0=
     IF  drop keysearchs# @ 1+ >r
 	2dup unknown-keys# #@ nip 0= dht-connection @ and IF
-	    <event 2dup $make elit, :>search-key ?query-task event|
-	    BEGIN  keysearchs# @ r@ - 0<  WHILE  <event  query-task event|  REPEAT
+	    2dup $make [{: w^ key :}h1
+		key $@ dht-nick? key $free
+		1 keysearchs# +!@ drop ;] ?query-task send-event
+	    ?query-task event-block
+	    BEGIN  keysearchs# @ r@ - 0<  WHILE  query-task event-block  REPEAT
 	    rdrop  2dup key# #@ 0= IF  drop
 		"<unknown>" 2over unknown-keys# #!
 		.unkey-id  r> to last# EXIT  THEN
@@ -1313,8 +1312,6 @@ Defer do-invite
     ." invite me: " over >r .pk2key$ cr r> free throw ctrl L inskey ;
 is do-invite
 
-event: :>invite ( addr u -- ) do-invite ;
-
 : pk2key$-add ( addr u perm -- ) { perm }
     sample-key >o import#invited import-type ! cmd:nestsig
     perm ke-mask !
@@ -1352,21 +1349,21 @@ event: :>invite ( addr u -- ) do-invite ;
     2dup invitations $ins[]sig drop
     invitations $[]# r> <> IF
 	save-mem main-up@ <hide>
-	<event estring, :>invite main-up@ event|
+	[{: d: string :}h1 string do-invite ;]
+	main-up@ send-event main-up@ event-block
     ELSE  2drop  THEN ;
 
 forward .sigqr
-event: :>show-keysig ( $addr -- )
-    { w^ pk } msg( ." Sign invitation QR" forth:cr )
-    pk $@ 2dup filter-invitation? 0= IF
-	msg( ." Add invitation " 2dup 85type forth:cr )
-	2dup add-invitation  THEN
-    .sigqr pk $free ;
 
 : >invitations ( addr u -- )
     qr-crypt? IF
 	msg( ." QR invitation with signature" forth:cr )
-	<event $make elit, :>show-keysig main-up@ event>
+	$make [{: w^ pk :}h1 msg( ." Sign invitation QR" forth:cr )
+	    pk $@ 2dup filter-invitation? 0= IF
+		msg( ." Add invitation " 2dup 85type forth:cr )
+		2dup add-invitation  THEN
+	    .sigqr pk $free ;]
+	main-up@ send-event
     ELSE
 	2dup filter-invitation? IF  2drop EXIT  THEN
 	msg( ." queue invitation" forth:cr )
@@ -1421,18 +1418,17 @@ also net2o-base
 previous
 
 forward >qr-key
-event: :>?scan-level ( -- ) ?scan-level ;
-event: :>qr-invitation { task w^ pk -- }
-    pk $@ keysize2 /string >qr-key
-    pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch
-    IF    2drop ." send qr invitation, aborted" 0
-    ELSE  ." sent qr invitation, got " dup hex. THEN
-    forth:cr
-    0= IF  <event :>?scan-level task event>  THEN  pk $free ;
 
 : scanned-ownkey { d: pk -- }
     pk scanned-key-in
-    <event up@ elit, pk $10 + $make elit, :>qr-invitation ?query-task event>
+    up@ pk $10 + $make [{: task w^ pk :}h1
+	pk $@ keysize2 /string >qr-key
+	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch
+	IF    2drop ." send qr invitation, aborted" 0
+	ELSE  ." sent qr invitation, got " dup hex. THEN
+	forth:cr
+	0= IF  ['] ?scan-level task send-event  THEN  pk $free ;]
+  ?query-task send-event
     true ;
 \ the idea of scan an own key is to send a invitation,
 \ and receive a signature that proofs the scanned device

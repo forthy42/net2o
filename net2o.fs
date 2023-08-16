@@ -160,10 +160,9 @@ Variable net2o-tasks
     stacksize4 NewTask4 dup >r net2o-pass r> ;
 
 Variable kills
-event: :>killed ( -- )  -1 kills +! ;
-event: :>kill ( task -- )
-    <event :>killed event> 0 (bye) ;
-: send-kill ( task -- ) <event up@ elit, :>kill event> ;
+: send-kill ( task -- )
+    up@ [{: task :}h1 [: -1 kills +! ;] task send-event 0 (bye) ;]
+    swap send-event ;
 
 2 Constant kill-seconds#
 kill-seconds# 1+ #1000000000 um* 2constant kill-timeout# \ 3s
@@ -300,8 +299,6 @@ $10 Constant validated#
 
 Defer do-connect
 Defer do-disconnect
-
-event: :>connect    ( connection -- ) .do-connect ;
 
 \ check for valid destination
 
@@ -518,7 +515,8 @@ Variable mapstart $1 mapstart !
 : setup! ( -- )   setup-table @ token-table !  ret0 ;
 : context! ( -- )
     context-table @ token-table !
-    <event wait-task @ main-up@ over select o elit, :>connect event> ;
+    o [{: connection :}h1 connection .do-connect ;]
+    wait-task @ main-up@ over select send-event ;
 
 : new-code@ ( -- addrs addrd u -- )
     new-code-s 64@ new-code-d 64@ new-code-size @ ;
@@ -1232,10 +1230,8 @@ Create chunk-adder chunks-struct allot
 	    ELSE  chunks-struct  THEN  +LOOP ;]
     resize-sema c-section ;
 
-event: :>send-chunks ( o -- ) .do-send-chunks ;
-
 in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
-    <event o elit, :>send-chunks sender-task event> ;
+    o [{: xo :}h1 xo .do-send-chunks ;] sender-task send-event ;
 
 : chunk-count+ ( counter -- )
     dup @
@@ -1350,12 +1346,6 @@ in net2o : save { tail -- }
 
 Defer do-track-seek
 
-event: :>save ( tail o -- )  .net2o:save ;
-event: :>save&done ( tail o -- )
-    >o net2o:save sync-done-xt o> ;
-event: :>close-all ( o -- )
-    .net2o:close-all ;
-
 0 Value file-task
 
 : create-file-task ( -- )
@@ -1365,12 +1355,13 @@ event: :>close-all ( o -- )
     file-task ;
 in net2o : save& ( -- )
     syncfile( data-rmap .mapc:dest-tail net2o:save )else(
-    data-rmap .mapc:dest-tail elit,
-    o elit, :>save ?file-task event> ) ;
+    data-rmap .mapc:dest-tail
+    o [{: tail xo :}h1 tail xo .net2o:save ;] ?file-task send-event ) ;
 in net2o : save&done ( -- )
     syncfile( data-rmap .mapc:dest-tail net2o:save sync-done-xt )else(
-    data-rmap .mapc:dest-tail elit,
-    o elit, :>save&done ?file-task event| ) ;
+    data-rmap .mapc:dest-tail
+    o [{: tail xo :}h1 xo >o net2o:save tail sync-done-xt o> ;]
+    ?file-task send-event ?file-task event-block ) ;
 
 \ schedule delayed events
 
@@ -1722,8 +1713,6 @@ in net2o : dispose-context ( o:addr -- o:addr )
       dispose  0 to connection
       cmd( ." disposed" cr ) ;] file-sema c-section ;
 
-event: :>dispose-context ( o -- )  .net2o:dispose-context ;
-
 \ loops for server and client
 
 8 cells 1- Constant maxrequest#
@@ -1751,21 +1740,20 @@ event: :>dispose-context ( o -- )  .net2o:dispose-context ;
     \G store request if no better is available
     request# @ rqd-xts $[] dup @ IF  2drop  ELSE  !  THEN ;
 
-event: :>request ( n o -- ) >o maxrequest# and
+: request ( n o -- ) >o maxrequest# and
     dup rqd@ request( ." request xt: " dup id. cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
     ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
-event: :>timeout ( o -- )
+: timeout ( o -- )
     timeout( ." Request timed out" forth:cr )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
     0<> !!timeout!! ;
-event: :>throw ( error -- ) throw ;
 
 : timeout-expired? ( -- flag )
     ack@ .timeouts @ max-timeouts >= ;
 : push-timeout ( o:connection -- )
     timeout-expired? wait-task @ and  ?dup-IF
-	o elit, :>timeout event>  THEN ;
+	o [{: xo :}h1 xo timeout ;] swap send-event  THEN ;
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
@@ -1847,9 +1835,6 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
 
 \ timeout loop
 
-: event-send ( -- )
-    o IF  wait-task @ ?query-task over select event> 0 >o rdrop  THEN ;
-
 #10000000 Constant watch-timeout# \ 10ms timeout check interval
 #10.000000000 d>64 64Constant max-timeout# \ 10s sleep, no more
 
@@ -1889,7 +1874,6 @@ Forward next-saved-msg
 	announce?       !!0depth!!
 	d#cleanups?     !!0depth!!
 	request-timeout !!0depth!!
-	event-send      !!0depth!!
 	last-packet-tos !!0depth!!
     AGAIN ;
 
@@ -1899,9 +1883,10 @@ Forward next-saved-msg
 \ packet reciver task
 
 : packet-loop ( -- ) \ 1 stick-to-core
-    BEGIN  packet-event event-send  !!0depth!!  AGAIN ;
+    BEGIN  packet-event  !!0depth!!  AGAIN ;
 
-in net2o : request-done ( n -- )  elit, o elit, :>request ;
+in net2o : request-done ( n -- )
+    o [{: n xo :}h1 n xo request ;] up@ send-event ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;
