@@ -1886,8 +1886,7 @@ Forward next-saved-msg
     BEGIN  packet-event  !!0depth!!  AGAIN ;
 
 in net2o : request-done ( n -- )
-    o [{: n xo :}h1 n xo request ;]
-    wait-task @ ?query-task over select send-event ;
+    o [{: n xo :}h1 n xo request ;] up@ send-event ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;
