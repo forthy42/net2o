@@ -37,6 +37,8 @@ constant stpkc constant stskc constant keypad constant keypad2
 
 : ?ok  keypad $20 keypad2 over str= IF ." ok"  THEN ;
 
+: xorc! ( c addr -- ) dup >r c@ xor r> c! ;
+
 : ed-dhv { sk pk dest -- secret len }
     get0 pk ge25519-unpack- 0= !!no-ed-key!!
     sct2 sk raw>sc25519
