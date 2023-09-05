@@ -1090,19 +1090,19 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 ; wmsg-class is msg:start
 :noname ( addr u -- )
     key| to msg:id$ true to msg:silent? ; wmsg-class is msg:silent-start
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     link-blue \mono string [: '#' emit type ;] $tmp
     ['] utf8-sanitize $tmp }}text text-color! \sans
     msg-box .child+
 ; wmsg-class is msg:tag
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     text-color!
     string ['] utf8-sanitize $tmp }}text 25%bv
     "text" name! msg-box .child+
 ; wmsg-class is msg:text
 : mono-col? ( -- )
     msg-group-o .msg:?otr  IF  mono-otr-col  ELSE  mono-col  THEN ;
-:noname { d: string format -- o }
+:noname over 0= IF  drop 2drop EXIT  THEN { d: string format -- o }
     text-color!
     case  format msg:#bold msg:#italic or and
 	msg:#bold  of  \bold  endof
@@ -1131,13 +1131,13 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     }}z box[]
     "vote" name! msg-box .child+
 ; wmsg-class is msg:vote
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     \italic last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text 25%bv \regular
     text-color!
     "action" name! msg-box .child+
 ; wmsg-class is msg:action
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
     text-color!
@@ -1146,7 +1146,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+
 ; wmsg-class is msg:url
-:noname ( d: string -- )
+:noname dup 0= IF  2drop EXIT  THEN ( d: string -- )
     0 .v-dec$ dup IF
 	msg-key!  msg-group-o .msg:+lock
 	{{
@@ -1164,7 +1164,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	    glue*l lock-color x-color slide-frame dup .button1
 	    blackish l" chat is unlocked" }}text' 25%bv
 	}}z msg-box .child+ ; wmsg-class is msg:unlock
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l gps-color# slide-frame dup .button1
 	blackish string [: ."  GPS: " .coords ;] $tmp }}text 25%b
@@ -1180,7 +1180,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
 	}}h
     }}z msg-box .child+
 ; wmsg-class is msg:perms
-:noname { d: string -- o }
+:noname dup 0= IF  2drop EXIT  THEN { d: string -- o }
     {{
 	glue*l chain-color# slide-frame dup .button1
 	string sighash? IF  re-green  ELSE  obj-red  THEN
@@ -1554,17 +1554,22 @@ wmsg-o >o msg-table @ token-table ! o>
     closer [: data chat-history .childs[] del$cell
       data .dispose-widget +resize +sync +resizeall ;] r@ click[] drop
     r> ;
-: log-data { endi starti -- } 64#0 to last-tick
-    msg-log@ { log u } msgs-box { box }
-    {{ }}v box[] dup to msgs-box
-    closerz chat-history .child+
-    log u endi cells umin starti cells safe/string bounds U+DO
+
+: msg-tdisplay-loop ( addr u uskip log -- )
+    { log }
+    safe/string bounds U+DO
 	I log - cell/ to log#
 	I $@ { d: msgt }
 	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
 	    <err> ." invalid entry" cr <default> 2drop
 	THEN
-    cell +LOOP +resize +sync
+    cell +LOOP ;
+: log-data { endi starti -- } 64#0 to last-tick
+    msg-log@ { log u } msgs-box { box }
+    {{ }}v box[] dup to msgs-box
+    closerz chat-history .child+
+    log u endi cells umin starti cells
+    log msg-tdisplay-loop  +resize +sync
     box to msgs-box
     log free throw ;
 : +days ( end start -- o )
@@ -1676,13 +1681,7 @@ wmsg-o >o msg-table @ token-table ! o>
     u gui-msgs# cells - 0 max { u' }
     log u ?scan-pks  ?fetch-pks \ activate ?fetch-pks
     log u' wmsg-o .?search-lock
-    log u u' /string bounds ?DO
-	I log - cell/ to log#
-	I $@ { d: msgt }
-	msgt ['] msg-tdisplay wmsg-o .catch nothrow  IF
-	    <err> ." invalid entry" cr <default> 2drop
-	THEN
-    cell +LOOP
+    log u u' log msg-tdisplay-loop
     log free throw  re-msg-box  chat-edit >engage ;
 
 : gui-msgs ( gaddr u -- )

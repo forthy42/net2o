@@ -65,16 +65,16 @@ cmd-class class
     $value: dest-ivs$
     value: dest-ivsgen
     scvalue: dest-ivslastgen
-    scvalue: dest-req   \ -/-                    true if ongoing request
+    \                   sender:                receiver:
+    scvalue: dest-req   \ n/a                    true if ongoing request
     $value: dest-ivsrest$
     value: dest-timestamps
     value: dest-replies
-    \                   sender:                receiver:
-    value: dest-top   \ -/-                    sender read up to here
-    value: dest-head  \ read up to here        received some
-    value: dest-tail  \ send from here         received all
-    value: dest-back  \ flushed on destination flushed
-    field: dest-end   \ -/-                    true if last chunk
+    value: dest-top     \ n/a                    sender read up to here
+    value: dest-head    \ read up to here        received some
+    value: dest-tail    \ send from here         received all
+    value: dest-back    \ flushed on destination flushed
+    field: dest-end     \ n/a                    true if last chunk
     field: do-slurp
     method free-data
     method regen-ivs
