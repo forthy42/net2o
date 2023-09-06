@@ -113,6 +113,9 @@ Variable old-order  Variable order-backlog
 
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
+: .debug ( -- ) parse-name 2drop
+    ." ±" parse-name 1- dup >r type $F r> - spaces
+    '\' parse 2drop source >in @ /string type cr ;
 
 : ?cr ( -- ) script? 0= IF  cr  THEN ;
 
@@ -125,11 +128,9 @@ scope{ n2o
 	BEGIN
 	    2dup over c@ '+' = IF
 		." === Debugging ===" cr
-		." Debugging switches are turned on with '+' and off with '-'" cr
-		1 /string [: parse-name 2drop
-		    ." ±" parse-name 1- type #tab emit
-		    parse-name 2drop source >in @ /string type cr
-		;] search-debug
+		." Debugging switches are turned on with '+' and off with '-'."
+		cr cr
+		1 /string ['] .debug search-debug
 	    ELSE
 		2dup over c@ '-' = IF
 		    ." === Options ===" cr
@@ -143,6 +144,9 @@ scope{ n2o
 	    THEN
 	?nextarg 0= UNTIL
     ELSE
+	." === Debugging ===" cr
+	." Debugging switches are turned on with '+' and off with '-'." cr cr
+	"" ['] .debug search-debug
 	." === Options (preceed commands) ===" cr
 	s"     \O " ['] .usage search-help
 	." === Commands ===" cr
