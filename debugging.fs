@@ -99,6 +99,9 @@ debug: otrify( \ otrify debug messages
     xt [{: xt: xt :}l BEGIN  refill  WHILE
 	      source 2over string-prefix? IF  xt  THEN
       REPEAT  2drop ;] execute-parsing-named-file ;
+: .debug ( -- ) parse-name 2drop
+    ." ±" parse-name 1- dup >r type $F r> - spaces
+    '\' parse 2drop source >in @ /string type cr ;
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )

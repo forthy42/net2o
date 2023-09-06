@@ -113,9 +113,6 @@ Variable old-order  Variable order-backlog
 
 : .usage ( addr u -- addr u )
     source 7 /string type cr ;
-: .debug ( -- ) parse-name 2drop
-    ." ±" parse-name 1- dup >r type $F r> - spaces
-    '\' parse 2drop source >in @ /string type cr ;
 
 : ?cr ( -- ) script? 0= IF  cr  THEN ;
 
