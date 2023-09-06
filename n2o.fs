@@ -144,7 +144,7 @@ scope{ n2o
 	    THEN
 	?nextarg 0= UNTIL
     ELSE
-	." === Debugging ===" cr
+	." === Debugging (must be first) ===" cr
 	." Debugging switches are turned on with '+' and off with '-'." cr cr
 	"" ['] .debug search-debug
 	." === Options (preceed commands) ===" cr
