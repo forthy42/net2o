@@ -123,15 +123,24 @@ scope{ n2o
     \G help: print commands or details about specified command
     ?nextarg IF
 	BEGIN
-	    2dup over c@ '-' = IF
-		." === Options ===" cr
-		[: ."     \O " type ;]
+	    2dup over c@ '+' = IF
+		." === Debugging ===" cr
+		." Debugging switches are turned on with '+' and off with '-'" cr
+		1 /string [: parse-name 2drop
+		    ." ±" parse-name 1- type #tab emit
+		    parse-name 2drop source >in @ /string type cr
+		;] search-debug
 	    ELSE
-		." === Commands ===" cr
-		[: ."     \U " type ;]
-	    THEN  $tmp ['] .usage search-help
-	    ." === Details ===" cr
-	    [: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
+		2dup over c@ '-' = IF
+		    ." === Options ===" cr
+		    [: ."     \O " type ;]
+		ELSE
+		    ." === Commands ===" cr
+		    [: ."     \U " type ;]
+		THEN  $tmp ['] .usage search-help
+		." === Details ===" cr
+		[: ."     \G " type ':' emit ;] $tmp ['] .cmd search-help
+	    THEN
 	?nextarg 0= UNTIL
     ELSE
 	." === Options (preceed commands) ===" cr

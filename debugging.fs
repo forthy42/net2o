@@ -28,25 +28,25 @@ debug: timing(
 debug: bursts(
 debug: resend(
 debug: track(
-debug: cmd(
-debug: cmd0(
-debug: msg(
-debug: timeout(
-debug: wait(
-debug: ack(
-debug: acks(
-debug: crypt(
-debug: noens(
+debug: cmd( \ disassemble command packets
+debug: cmd0( \ disassemble command to zero (stateless) packets
+debug: msg( \ messaging
+debug: timeout( \ timeouts
+debug: wait( \ waiting for things
+debug: ack( \ acknowledge
+debug: acks( \ cummulative acknowledges
+debug: crypt( \ cryptography
+debug: noens( \ disable extra nanosecond delay
 debug: key( \ key stuff
 debug: vkey( \ vault key stuff
 debug: genkey( \ See generated keys - never let this go to a log file!
 debug: mykey( \ debug mykey things
-debug: cookie( 
-debug: tag(
-debug: flush(
-debug: address(
-debug: trace(
-debug: header(
+debug: cookie( \ debug cookies
+debug: tag( \ debug tagging
+debug: flush( \ show saving keys
+debug: address( \ debug addresses
+debug: trace( \ trace command
+debug: header( \ print header
 debug: sender( \ extra sender task
 debug: dht( \ debugging for dht functions
 debug: file( \ file read/write debugging
@@ -62,8 +62,8 @@ debug: request( \ track requests
 debug: beacon( \ debug sending beacons
 debug: invalid( \ print invalid packets
 debug: regen( \ regenerate keys
-debug: recvfrom(
-debug: sendto(
+debug: recvfrom( \ print received packets
+debug: sendto( \ print send packets
 debug: avalanche( \ distribution tree
 debug: adjust-timer( \ adjust timer
 debug: reply( \ test replies
@@ -92,6 +92,13 @@ debug: pks( \ fetch pks
 debug: fetch( \ fetch hashed objects
 debug: silent( \ silent messages
 debug: otrify( \ otrify debug messages
+
+: search-debug ( addr u xt -- ) { xt }
+    [: ." debug: " type ;] $tmp
+    [ sourcefilename ] SLiteral open-fpath-file throw
+    xt [{: xt: xt :}l BEGIN  refill  WHILE
+	      source 2over string-prefix? IF  xt  THEN
+      REPEAT  2drop ;] execute-parsing-named-file ;
 
 -db profile( \ don't profile by default )
 +db ipv6( \ ipv6 should be on by default )
