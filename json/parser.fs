@@ -105,7 +105,8 @@ Defer next-element
 	    ['] translate-nt     of                   endof
 	    ['] translate-num    of        r@ >stack  endof
 	    ['] translate-dnum   of  drop  r@ >stack  endof
-	    ['] translate-string of  s>number? 0= IF json-err THEN
+	    ['] translate-string of  over >r s>number? r> free throw
+		0= IF json-err THEN
 		drop r@ >stack  endof
 	    ['] translate-float  of  f>s   r@ >stack  endof
 	    ['] translate-bool   of        r@ >stack  endof
