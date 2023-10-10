@@ -1,0 +1,13 @@
+Source: keccak-low
+Section: programming
+Priority: optional
+Maintainer: Bernd Paysan <bernd@net2o.de>
+Build-Depends: debhelper, build-essential, gcc, autoconf, automake, libtool, libtool-bin, libc
+
+Package: keccak-low
+Version: 1.0
+Architecture: any
+Depends:  ${shlibs:Depends}
+Multi-Arch: same
+Description: keccak-low
+ keccak-low is a library that implements the primitives of SHA-3 efficiently.

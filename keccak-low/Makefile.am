@@ -35,9 +35,16 @@ libkeccak_AVX512_la_SOURCES = KeccakP-1600/AVX512/KeccakP-1600-AVX512.s
 libkeccak_AVX512_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 libkeccak_AVX512_la_CFLAGS = -O3
 libkeccak_AVX512_la_CCASFLAGS = -mavx512f -mavx512vl
-if bit64
-libkeccak_64_la_CFLAGS += -mbmi -mbmi2
+#if bit64
+#libkeccak_64_la_CFLAGS += -mbmi -mbmi2
+#endif
 endif
+if X86
+lib_LTLIBRARIES += libkeccak_XOP.la
+libkeccak_XOP_la_SOURCES = KeccakP-1600/XOP/KeccakP-1600-XOP.c
+libkeccak_XOP_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libkeccak_XOP_la_CFLAGS = -O3 -IKeccakP-1600/XOP/u6 -Icommon -IKeccakP-1600/common -msse4 -mxop
+libkeccak_XOP_la_CCASFLAGS =
 endif
 if ARM32
 lib_LTLIBRARIES += libkeccak_ARMv7A_NEON.la

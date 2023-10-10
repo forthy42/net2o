@@ -22,20 +22,30 @@ machine "amd64" str= [IF]
 	[THEN]
     [THEN]
 [ELSE]
-    machine "arm64" str= [IF]
-	c-library keccak_ARMv8A
-	    s" keccak_ARMv8A" add-lib
-    [ELSE]
-	machine "arm" str= [IF]
-	    c-library keccak_ARMv7A_NEON
-		s" keccak_ARMv7A_NEON" add-lib
+    machine "386" str= [IF]
+	cpu? xop [IF]
+	    c-library keccak_XOP
+		s" keccak_XOP" add-lib
 	[ELSE]
-	    cell 8 = [IF]
-		c-library keccak_64
-		    s" keccak_64" add-lib
+	    c-library keccak_32
+		s" keccak_32" add-lib
+	[THEN]
+    [ELSE]
+	machine "arm64" str= [IF]
+	    c-library keccak_ARMv8A
+		s" keccak_ARMv8A" add-lib
+	[ELSE]
+	    machine "arm" str= [IF]
+		c-library keccak_ARMv7A_NEON
+		    s" keccak_ARMv7A_NEON" add-lib
 	    [ELSE]
-		c-library keccak_32
-		    s" keccak_32" add-lib
+		cell 8 = [IF]
+		    c-library keccak_64
+			s" keccak_64" add-lib
+		[ELSE]
+		    c-library keccak_32
+			s" keccak_32" add-lib
+		[THEN]
 	    [THEN]
 	[THEN]
     [THEN]

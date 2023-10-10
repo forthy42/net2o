@@ -17,20 +17,8 @@ LT_INIT
 # special optimizations for some plattforms
 arm64=false
 arm32=false
-x86=false
+x32=false
 x64=false
-
-case "$host" in
-    aarch64*)
-	arm64=true
-	;;
-    arm*)
-	arm32=true
-	;;
-    x86_64*)
-	x64=true
-	;;
-esac
 
 AC_CHECK_SIZEOF(void *)
 case "$ac_cv_sizeof_void_p" in
@@ -39,6 +27,21 @@ case "$ac_cv_sizeof_void_p" in
 	;;
     8)
         bits=64
+	;;
+esac
+
+case "$host" in
+    aarch64*)
+	eval arm$bits=true
+	;;
+    arm*)
+	arm32=true
+	;;
+    x86_64*)
+        eval x$bits=true
+	;;
+    i*86*)
+	x32=true
 	;;
 esac
 
@@ -59,6 +62,15 @@ AC_ARG_ENABLE([x64],
   *) AC_MSG_ERROR([bad value ${enableval} for --enable-x64]) ;;
 esac],)
 AM_CONDITIONAL([X64], [test x$x64 = xtrue])
+
+AC_ARG_ENABLE([x86],
+[  --enable-x86    Turn on compilation for i686],
+[case "${enableval}" in
+  yes) x32=true ;;
+  no)  x32=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-x86]) ;;
+esac],)
+AM_CONDITIONAL([X86], [test x$x32 = xtrue])
 
 AC_ARG_ENABLE([arm64],
 [  --enable-arm64    Turn on compilation for arm64],
