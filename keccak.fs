@@ -56,20 +56,36 @@ UValue @keccak
 : keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
 [ELSE]
 : keccak0 ( -- ) @keccak KeccakP1600_Initialize ;
-: KeccakF KeccakP1600_Permute_Nrounds ;
+: KeccakF ( -- ) KeccakP1600_Permute_Nrounds ;
 : keccak* ( -- ) @keccak KeccakP1600_Permute_24rounds ;
 : >keccak ( addr u -- )  @keccak -rot 0 swap KeccakP1600_AddBytes ;
 : keccak> ( addr u -- )  @keccak -rot 0 swap KeccakP1600_ExtractBytes ;
 : KeccakEncrypt { state addr u -- }
     state addr 0 u KeccakP1600_AddBytes
     state addr 0 u KeccakP1600_ExtractBytes ;
-: KeccakDecrypt { state addr u | kbuf[ $80 ] -- }
+: KeccakDecrypt { state addr u | kbuf[ $88 ] -- }
     state kbuf[ 0 $80 KeccakP1600_ExtractBytes
-    kbuf[ addr u bounds ?DO
-	dup @ I @ xor over ! cell+
-    cell +LOOP drop
     state addr 0 u KeccakP1600_OverwriteBytes
-    kbuf[ addr u move ;
+    [ machine "amd64" str= machine "arm64" str= or
+    machine "386" str= or machine "arm" str= or ] [IF]
+	\ machine supports unaligned accesses
+	kbuf[ addr u xor_lanes
+    [ELSE]
+	addr cell 1 - and 0= IF \ access is aligned
+	    kbuf[ addr u xor_lanes
+	ELSE \ we do it with known unaligned accesses
+	    -1 u cell 1 - and dfloats lshift invert
+	    [ cell 8 = ] [IF] xle [ELSE] lle [THEN]
+	    kbuf[ u -1 cells and + and!
+	    kbuf[ addr u bounds ?DO
+		[ cell 8 = ] [IF]
+		    dup @ I x@ xor I x! cell+
+		[ELSE]
+		    dup @ I l@ xor I l! cell+
+		[THEN]
+	    cell +LOOP drop
+	THEN
+    [THEN] ;
 : +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
 : -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
 

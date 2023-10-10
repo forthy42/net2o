@@ -67,6 +67,56 @@ c-function KeccakP1600_Permute_12rounds KeccakP1600_Permute_12rounds a -- void	(
 c-function KeccakP1600_Permute_24rounds KeccakP1600_Permute_24rounds a -- void	( state -- )
 c-function KeccakP1600_ExtractBytes KeccakP1600_ExtractBytes a a u u -- void	( state data offset length -- )
 c-function KeccakP1600_ExtractAndAddBytes KeccakP1600_ExtractAndAddBytes a a a u u -- void	( state input output offset length -- )
+\c static inline void xor_lanes(unsigned long long* addr1, unsigned long long* addr2, Cell u) {
+\c   while(u >= 0x40) {
+\c     addr2[0] ^= addr1[0];
+\c     addr2[1] ^= addr1[1];
+\c     addr2[2] ^= addr1[2];
+\c     addr2[3] ^= addr1[3];
+\c     addr2[4] ^= addr1[4];
+\c     addr2[5] ^= addr1[5];
+\c     addr2[6] ^= addr1[6];
+\c     addr2[7] ^= addr1[7];
+\c     u -= 0x40;
+\c     addr1 += 8;
+\c     addr2 += 8;
+\c   }
+\c   if(u & 0x20) {
+\c     addr2[0] ^= addr1[0];
+\c     addr2[1] ^= addr1[1];
+\c     addr2[2] ^= addr1[2];
+\c     addr2[3] ^= addr1[3];
+\c     addr1 += 4;
+\c     addr2 += 4;
+\c   }
+\c   if(u & 0x10) {
+\c     addr2[0] ^= addr1[0];
+\c     addr2[1] ^= addr1[1];
+\c     addr1 += 2;
+\c     addr2 += 2;
+\c   }
+\c   if(u & 0x8) {
+\c     addr2[0] ^= addr1[0];
+\c     addr1 += 1;
+\c     addr2 += 1;
+\c   }
+\c   if(u & 0x4) {
+\c     *(unsigned int *)addr2 ^= *(unsigned int *)addr1;
+\c     addr1 = (unsigned long long*)(((intptr_t)addr1)+4);
+\c     addr2 = (unsigned long long*)(((intptr_t)addr2)+4);
+\c   }
+\c   if(u & 0x2) {
+\c     *(unsigned short *)addr2 ^= *(unsigned short *)addr1;
+\c     addr1 = (unsigned long long*)(((intptr_t)addr1)+2);
+\c     addr2 = (unsigned long long*)(((intptr_t)addr2)+2);
+\c   }
+\c   if(u & 0x1) {
+\c     *(unsigned char *)addr2 ^= *(unsigned char *)addr1;
+\c     addr1 = (unsigned long long*)(((intptr_t)addr1)+1);
+\c     addr2 = (unsigned long long*)(((intptr_t)addr2)+1);
+\c   }
+\c }
+c-function xor_lanes xor_lanes a a u -- void ( from to count -- )
 
 \ ----===< postfix >===-----
 end-c-library
