@@ -13,7 +13,7 @@ machine "amd64" str= [IF]
 	c-library keccak_AVX512
 	    s" keccak_AVX512" add-lib
     [ELSE]
-    cpu? avx2 0 and [IF] \ AVX2 may or may not gain something, needs benchmarking
+    cpu? avx2 cpu? svm 0= and [IF] \ AVX2 only on Intel
 	c-library keccak_AVX2
 	    s" keccak_AVX2" add-lib
 	[ELSE]

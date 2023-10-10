@@ -44,6 +44,7 @@ GFORTH=$(which $GFORTH)
 GFORTHFAST=$(which $GFORTHFAST)
 
 FAST=no
+CPUFLAGS="none"
 case "$host" in
     arm*-*linux*)
 	FAST=yes
@@ -51,7 +52,13 @@ case "$host" in
     i686-*linux*|i686-*cygwin*)
 	FAST=yes
 	;;
+    x86_64-*)
+	CPUFLAGS="none avx2 avx512"
+	;;
 esac
+
+AC_SUBST(FAST)
+AC_SUBST(CPUFLAGS)
 
 VERDIR=
 NOVERDIR='#'
@@ -96,7 +103,6 @@ AC_SUBST(GFORTHFAST)
 AC_SUBST(GFVER)
 AC_SUBST(GFDEBVER)
 AC_SUBST(GFARCH)
-AC_SUBST(FAST)
 AC_SUBST(GNU_LIBTOOL)
 
 ED25519_DONNA=
@@ -111,7 +117,7 @@ test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 LIBDIR=$(eval echo $(eval echo $libdir))
 AC_SUBST(LIBDIR)
 
-AC_CONFIG_SUBDIRS([keccakp threefish ed25519-donna bdelta])
+AC_CONFIG_SUBDIRS([keccak-low threefish ed25519-donna bdelta])
 
 AC_CONFIG_FILES([Makefile n2o qrscan version.fs debian/changelog debian/control])
 AC_CONFIG_COMMANDS([stamp-h],[[date > stamp-h

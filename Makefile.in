@@ -28,7 +28,7 @@ sysconfdir = $(package)@sysconfdir@
 VERSION  = @PACKAGE_VERSION@
 LIBCCDEST = $(libdir)/net2o/$(VERSION)/$(machine)/libcc-named
 libccdir = $(subst $(package),,$(LIBCCDEST))
-LIBS 	 = keccakp threefish bdelta @ED25519_DONNA@
+LIBS 	 = keccak-low threefish bdelta @ED25519_DONNA@
 MKDIR	 = mkdir
 RMDIR	 = rm -rf
 TAR	 = tar cf -
@@ -70,11 +70,12 @@ DESKTOP = $(DESKTOPDIR)/net2o.desktop
 NOTIFYRC = $(NOTIFYDIR)/net2o.notifyrc
 
 LANGS =	  net2o-lang.csv
+CPUFLAGS = @CPUFLAGS@
 
 ifeq "$(FAST)" "yes"
-FORTHLIB += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
+FORTHLIB += ed25519-donnafast.fs threefishfast.fs
 else
-SOURCES += ed25519-donnafast.fs keccakfast.fs threefishfast.fs
+SOURCES += ed25519-donnafast.fs threefishfast.fs
 endif
 SRC      = .
 ENGINE   = @GFORTH@
@@ -197,7 +198,7 @@ libcc:	$(FORTHLIB:%=%.libcc)
 
 %.libcc:
 	-echo "generating library $(@:%.libcc=%)"
-	-$(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous cpuflags off" $(srcdir)/$(@:%.libcc=%) -e bye
+	-for flags in $(CPUFLAGS); do $(ENGINE) unix/cpu.fs -e "also c-lib s\" $(LIBCCNAMED)/\" >libcc-named-dir libcc>named-path :noname 2drop s\" $(libccdir)/\" ; is replace-rpath previous s\" $$flags\" cpuflags \$$!" $(srcdir)/$(@:%.libcc=%) -e bye; done
 
 net2o.fi:	$(SOURCES) $(FORTHLIB)
 	GFORTH=$(GFORTH_FAST) gforthmi net2o.fi $(srcdir)/n2o.fs -e 'locs[] $$free wheres $$free'
@@ -207,7 +208,7 @@ libccdest:
 
 libcc-install:	install-libs libcc libccdest
 	if test -n "$(LIBTOOL)"; then for i in $(subst -,_,$(FORTHLIB)); do \
-		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`.la $(LIBCCDEST)/libgf`basename $$i .fs`.la; \
+		   $(LIBTOOL) --silent --mode=install $(INSTALL) $(LIBCCNAMED)/libgf`basename $$i .fs`*.la $(LIBCCDEST)/; \
 		done; fi
 
 libcc-uninstall:
