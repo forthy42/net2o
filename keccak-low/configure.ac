@@ -19,38 +19,37 @@ arm64=false
 arm32=false
 x86=false
 x64=false
-plain=true
 
 case "$host" in
     aarch64*)
 	arm64=true
-	plain=false
 	;;
     arm*)
 	arm32=true
-	plain=false
-	;;
-    i686-*)
-	x86=true
-	plain=false
 	;;
     x86_64*)
 	x64=true
-	plain=false
 	;;
 esac
 
 AC_CHECK_SIZEOF(void *)
 case "$ac_cv_sizeof_void_p" in
     4)
-	ws=${ws-opt32}
-	cvariant=32bits-inplace
+        bits=32
 	;;
     8)
-	ws=${ws-opt64}
-	cvariant=64bits
+        bits=64
 	;;
 esac
+
+AC_ARG_ENABLE([bit64],
+[  --enable-bit64    Turn on compilation for 64 bits],
+[case "${enableval}" in
+  yes) bit64=true ;;
+  no)  bit64=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-bit64]) ;;
+esac],)
+AM_CONDITIONAL([bit64], [test x$bits = x64])
 
 AC_ARG_ENABLE([x64],
 [  --enable-x64    Turn on compilation for amd64/x86_64],
@@ -61,17 +60,8 @@ AC_ARG_ENABLE([x64],
 esac],)
 AM_CONDITIONAL([X64], [test x$x64 = xtrue])
 
-AC_ARG_ENABLE([x86],
-[  --enable-x86    Turn on compilation for amd64/x86_64],
-[case "${enableval}" in
-  yes) x86=true ;;
-  no)  x86=false ;;
-  *) AC_MSG_ERROR([bad value ${enableval} for --enable-x86]) ;;
-esac],)
-AM_CONDITIONAL([X86], [test x$x86 = xtrue])
-
 AC_ARG_ENABLE([arm64],
-[  --enable-arm64    Turn on compilation for amd64/x86_64],
+[  --enable-arm64    Turn on compilation for arm64],
 [case "${enableval}" in
   yes) arm64=true ;;
   no)  arm64=false ;;
@@ -80,7 +70,7 @@ esac],)
 AM_CONDITIONAL([ARM64], [test x$arm64 = xtrue])
 
 AC_ARG_ENABLE([arm32],
-[  --enable-arm32    Turn on compilation for amd64/x86_64],
+[  --enable-arm32    Turn on compilation for arm32],
 [case "${enableval}" in
   yes) arm32=true ;;
   no)  arm32=false ;;
