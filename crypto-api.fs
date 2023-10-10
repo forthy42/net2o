@@ -37,7 +37,7 @@ require user-object.fs
 User-o crypto-o
 
 object class
-    $10 uvar crypto-up \ make sure rest is still by $10 aligned
+    $20 uvar crypto-up \ make sure @keccak is aligned by 64 bytes
     umethod c:init ( -- )
     \G initialize crypto function for a task
     umethod c:free ( -- )

@@ -46,8 +46,6 @@ UValue @keccak
 
 : keccak* ( -- ) @keccak rounds KeccakF ;
 : >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
-: +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
-: -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
 : keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
 
 : move-rep ( srcaddr u1 destaddr u2 -- )
