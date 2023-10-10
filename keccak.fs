@@ -18,19 +18,23 @@
 require rec-scope.fs
 require unix/cpu.fs
 
-fast-lib [IF]
-    require keccakfast.fs false
+[IFDEF] old-keccak
+    fast-lib [IF]
+	require keccakfast.fs false
+    [ELSE]
+	[IFDEF] android
+	    s" libkeccakp.so" c-lib:open-path-lib drop
+	[THEN] true
+    [THEN]
+    [IF]
+	c-library keccak
+	    s" keccakp" add-lib
+	    \	s" keccakp/.libs" add-libpath \ find library during build
+	    include keccaklib.fs
+	end-c-library
+    [THEN]
 [ELSE]
-    [IFDEF] android
-	s" libkeccakp.so" c-lib:open-path-lib drop
-    [THEN] true
-[THEN]
-[IF]
-    c-library keccak
-	s" keccakp" add-lib
-\	s" keccakp/.libs" add-libpath \ find library during build
-	include keccaklib.fs
-    end-c-library
+    require keccaklow.fs
 [THEN]
 
 [IFUNDEF] crypto bye [THEN] \ stop here if libcompile only
@@ -42,11 +46,46 @@ fast-lib [IF]
 UValue @keccak
 24 Value rounds
 
+[IFDEF] old-keccak
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
 : keccak* ( -- ) @keccak rounds KeccakF ;
 : >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
+: +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
+: -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
 : keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
+[ELSE]
+: keccak0 ( -- ) @keccak KeccakP1600_Initialize ;
+: KeccakF KeccakP1600_Permute_Nrounds ;
+: keccak* ( -- ) @keccak KeccakP1600_Permute_24rounds ;
+: >keccak ( addr u -- )  @keccak -rot 0 swap KeccakP1600_AddBytes ;
+: keccak> ( addr u -- )  @keccak -rot 0 swap KeccakP1600_ExtractBytes ;
+: KeccakEncrypt { state addr u -- }
+    state addr 0 u KeccakP1600_AddBytes
+    state addr 0 u KeccakP1600_ExtractBytes ;
+: KeccakDecrypt { state addr u | kbuf[ $80 ] -- }
+    state kbuf[ 0 $80 KeccakP1600_ExtractBytes
+    kbuf[ addr u bounds ?DO
+	dup @ I @ xor over ! cell+
+    cell +LOOP drop
+    state addr 0 u KeccakP1600_OverwriteBytes
+    kbuf[ addr u move ;
+: +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
+: -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
+
+: KeccakEncryptLoop ( state addr u rounds -- )
+    { rounds }
+    bounds over >r ?DO
+	dup rounds KeccakP1600_Permute_Nrounds
+	dup I I' over - $80 umin KeccakEncrypt
+    $80 +LOOP drop r> ;
+: KeccakDecryptLoop ( state addr u rounds -- )
+    { rounds }
+    bounds over >r ?DO
+	dup rounds KeccakP1600_Permute_Nrounds
+	dup I I' over - $80 umin KeccakDecrypt
+    $80 +LOOP drop r> ;
+[THEN]
 
 : move-rep ( srcaddr u1 destaddr u2 -- )
     bounds ?DO
