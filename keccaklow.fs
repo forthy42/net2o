@@ -31,7 +31,7 @@ machine "amd64" str= [IF]
 		s" keccak_32" add-lib
 	[THEN]
     [ELSE]
-	machine "arm64" str= [IF]
+	machine "arm64" str= 0 and [IF] \ GCC compiled generic code is better
 	    c-library keccak_ARMv8A
 		s" keccak_ARMv8A" add-lib
 	[ELSE]
