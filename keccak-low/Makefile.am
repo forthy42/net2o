@@ -13,7 +13,7 @@ if bit64
 lib_LTLIBRARIES = libkeccak_64.la
 libkeccak_64_la_SOURCES = KeccakP-1600/plain-64bits/KeccakP-1600-opt64.c
 libkeccak_64_la_LDFLAGS = -version-info ${VERSION} -no-undefined
-libkeccak_64_la_CFLAGS = -O3 -Icommon -IKeccakP-1600/common
+libkeccak_64_la_CFLAGS = -O3 -Icommon -IKeccakP-1600/common -IKeccakP-1600/plain-64bits/lcua
 else
 lib_LTLIBRARIES = libkeccak_32.la
 libkeccak_32_la_SOURCES = KeccakP-1600/plain-32bits-inplace/KeccakP-1600-inplace32BI.c
