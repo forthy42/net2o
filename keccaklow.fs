@@ -96,9 +96,7 @@ c-function KeccakP1600_ExtractAndAddBytes KeccakP1600_ExtractAndAddBytes a a a u
 \c     addr2 += 2;
 \c   }
 \c   if(u & 0x8) {
-\c     addr2[0] ^= addr1[0];
-\c     addr1 += 1;
-\c     addr2 += 1;
+\c     *addr2++ ^= *addr1++;
 \c   }
 \c   if(u & 0x4) {
 \c     *(unsigned int *)addr2 ^= *(unsigned int *)addr1;
