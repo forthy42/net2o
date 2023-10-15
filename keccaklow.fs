@@ -8,53 +8,40 @@
 \ insert the copyright notice of the original file here.
 
 \ ----===< prefix >===-----
+cell 8 = [IF] "64" [ELSE] "32" [THEN]
 machine "amd64" str= [IF]
     cpu? avx512 [IF]
-	c-library keccak_AVX512
-	    s" keccak_AVX512" add-lib
+	2drop "AVX512"
     [ELSE]
-    cpu? avx2 cpu? svm 0= and [IF] \ AVX2 only on Intel
-	c-library keccak_AVX2
-	    s" keccak_AVX2" add-lib
+	cpu? avx2 cpu? svm 0= and [IF] \ AVX2 only on Intel
+	    2drop "AVX2"
 	[ELSE]
-	c-library keccak_x86_64
-	    s" keccak_x86_64" add-lib
+	    2drop "x86_64"
 	[THEN]
     [THEN]
 [ELSE]
     machine "386" str= [IF]
 	cpu? xop [IF]
-	    c-library keccak_XOP
-		s" keccak_XOP" add-lib
+	    2drop "XOP"
 	[ELSE]
 	    cpu? ssse3 [IF]
-		c-library keccak_ssse3
-		    s" keccak_ssse3" add-lib
-	    [ELSE]
-		c-library keccak_32
-		    s" keccak_32" add-lib
+		2drop "ssse3"
 	    [THEN]
 	[THEN]
     [ELSE]
 	machine "arm64" str= 0 and [IF] \ GCC compiled generic code is better
-	    c-library keccak_ARMv8A
-		s" keccak_ARMv8A" add-lib
+	    2drop "ARMv8A"
 	[ELSE]
 	    machine "arm" str= [IF]
-		c-library keccak_ARMv7A_NEON
-		    s" keccak_ARMv7A_NEON" add-lib
-	    [ELSE]
-		cell 8 = [IF]
-		    c-library keccak_64
-			s" keccak_64" add-lib
-		[ELSE]
-		    c-library keccak_32
-			s" keccak_32" add-lib
+		cpu? neon [IF]
+		    2drop "ARMv7A_NEON"
 		[THEN]
 	    [THEN]
 	[THEN]
     [THEN]
 [THEN]
+"mode" replaces
+"c-library keccak_%mode% \"keccak_%mode%\" add-lib" $substitute 0 min throw evaluate
 \c #include <KeccakP-1600-SnP.h>
 
 \ ----===< int constants >===-----
