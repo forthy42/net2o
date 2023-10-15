@@ -44,7 +44,10 @@ lib_LTLIBRARIES += libkeccak_XOP.la
 libkeccak_XOP_la_SOURCES = KeccakP-1600/XOP/KeccakP-1600-XOP.c
 libkeccak_XOP_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 libkeccak_XOP_la_CFLAGS = -O3 -IKeccakP-1600/XOP/u6 -Icommon -IKeccakP-1600/common -msse4 -mxop
-libkeccak_XOP_la_CCASFLAGS =
+lib_LTLIBRARIES += libkeccak_ssse3.la
+libkeccak_ssse3_la_SOURCES = KeccakP-1600/XOP/KeccakP-1600-XOP.c
+libkeccak_ssse3_la_LDFLAGS = -version-info ${VERSION} -no-undefined
+libkeccak_ssse3_la_CFLAGS = -O3 -IKeccakP-1600/XOP/u6 -Icommon -IKeccakP-1600/common -mssse3 -DUseSSE
 endif
 if ARM32
 lib_LTLIBRARIES += libkeccak_ARMv7A_NEON.la

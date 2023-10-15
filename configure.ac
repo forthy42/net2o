@@ -50,7 +50,7 @@ case "$host" in
 	FAST=yes
 	;;
     i686-*linux*|i686-*cygwin*)
-	FAST=yes
+	CPUFLAGS="none ssse3 xop"
 	;;
     x86_64-*)
 	CPUFLAGS="none avx2 avx512"

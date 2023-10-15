@@ -27,8 +27,13 @@ machine "amd64" str= [IF]
 	    c-library keccak_XOP
 		s" keccak_XOP" add-lib
 	[ELSE]
-	    c-library keccak_32
-		s" keccak_32" add-lib
+	    cpu? ssse3 [IF]
+		c-library keccak_ssse3
+		    s" keccak_ssse3" add-lib
+	    [ELSE]
+		c-library keccak_32
+		    s" keccak_32" add-lib
+	    [THEN]
 	[THEN]
     [ELSE]
 	machine "arm64" str= 0 and [IF] \ GCC compiled generic code is better
