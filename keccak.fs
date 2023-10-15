@@ -39,25 +39,33 @@ require unix/cpu.fs
 
 [IFUNDEF] crypto bye [THEN] \ stop here if libcompile only
 
+\ crypto api integration
+
 25 8 * Constant keccak#
 128 Constant keccak#max
 128 Constant keccak#cks
 
+crypto class
+    keccak# uvar keccak-state
+    keccak#cks uvar keccak-checksums
+    keccak#max uvar keccak-padded
+    cell uvar keccak-rounds
+end-class keccak
+
 UValue @keccak
-24 Value rounds
 
 [IFDEF] old-keccak
 : keccak0 ( -- ) @keccak KeccakInitializeState ;
 
-: keccak* ( -- ) @keccak rounds KeccakF ;
+: keccak* ( -- ) @keccak keccak-rounds @ KeccakF ;
 : >keccak ( addr u -- )  @keccak -rot KeccakAbsorb ;
 : +keccak ( addr u -- )  @keccak -rot KeccakEncrypt ;
 : -keccak ( addr u -- )  @keccak -rot KeccakDecrypt ;
 : keccak> ( addr u -- )  @keccak -rot KeccakExtract ;
 [ELSE]
 : keccak0 ( -- ) @keccak KeccakP1600_Initialize ;
-: KeccakF ( -- ) KeccakP1600_Permute_Nrounds ;
-: keccak* ( -- ) @keccak KeccakP1600_Permute_24rounds ;
+: KeccakF ( state-addr rounds -- ) KeccakP1600_Permute_Nrounds ;
+: keccak* ( -- ) @keccak keccak-rounds @ KeccakP1600_Permute_Nrounds ;
 : >keccak ( addr u -- )  @keccak -rot 0 swap KeccakP1600_AddBytes ;
 : keccak> ( addr u -- )  @keccak -rot 0 swap KeccakP1600_ExtractBytes ;
 : KeccakEncrypt { state addr u -- }
@@ -108,21 +116,15 @@ UValue @keccak
 	I' I - umin 2dup I swap move
     dup +LOOP  2drop ;
 
-\ crypto api integration
-
-crypto class
-    keccak# uvar keccak-state
-    keccak#cks uvar keccak-checksums
-    keccak#max uvar keccak-padded
-end-class keccak
-
 User keccak-t
-
 0 Value keccak-o
+
+User keyak-t
+0 Value keyak-o
 
 : keccak-init ( -- )
     keccak-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
-    [: keccak new dup crypto-o ! keccak-t ! ;] crypto-a with-allocater
+    [: keccak new dup crypto-o ! #24 keccak-rounds ! keccak-t ! ;] crypto-a with-allocater
     up@ crypto-up ! keccak-state to @keccak
     crypto-o @ to keccak-o ;
 
@@ -131,9 +133,6 @@ User keccak-t
     0 to @keccak crypto-o off  keccak-t off ;
 
 keccak-init
-
-:noname defers 'cold keccak-init ; is 'cold
-:noname defers 'image crypto-o off  keccak-t off  0 to keccak-o ; is 'image
 
 ' keccak-init to c:init
 ' keccak-free to c:free
@@ -153,22 +152,22 @@ keccak-init
 \G perform a diffuse round
 :noname ( addr u -- )
     \G Encrypt message in buffer addr u
-    @keccak -rot rounds KeccakEncryptLoop  drop
+    @keccak -rot keccak-rounds @ KeccakEncryptLoop  drop
 ; to c:encrypt
 :noname ( addr u -- )
     \G Decrypt message in buffer addr u
-    @keccak -rot rounds KeccakDecryptLoop  drop
+    @keccak -rot keccak-rounds @ KeccakDecryptLoop  drop
 ; to c:decrypt ( addr u -- )
 :noname ( addr u tag -- )
     \G Encrypt message in buffer addr u with auth
-    { tag } @keccak -rot rounds KeccakEncryptLoop
+    { tag } @keccak -rot keccak-rounds @ KeccakEncryptLoop
     keccak*
     >r keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + r> $10 move
 ; to c:encrypt+auth ( addr u tag -- )
 :noname ( addr u tag -- flag )
     \G Decrypt message in buffer addr u, with auth check
-    { tag } @keccak -rot rounds KeccakDecryptLoop
+    { tag } @keccak -rot keccak-rounds @ KeccakDecryptLoop
     keccak*
     keccak-checksums keccak#cks keccak>
     keccak-checksums tag 7 and 4 lshift + $10 tuck str=
@@ -184,7 +183,7 @@ keccak-init
 ; to c:hash
 :noname ( addr u -- )
 \G Fill buffer addr u with PRNG sequence
-    2dup erase @keccak -rot rounds KeccakEncryptLoop drop
+    2dup erase @keccak -rot keccak-rounds @ KeccakEncryptLoop drop
 ; to c:prng
 :noname ( addr u -- ) >keccak keccak* ;
 \G absorb + hash for a message <= 64 bytes
@@ -200,3 +199,26 @@ to c:hash@
     keccak0 keccak-padded keccak#max >keccak ;
 to c:tweakkey!
 
+\ 12 rounds variation
+
+keccak class
+end-class keyak
+
+: keyak-init ( -- )
+    keyak-t @ dup crypto-o ! IF  crypto-up @ up@ = ?EXIT  THEN
+    [: keyak new dup crypto-o ! #12 keccak-rounds ! keyak-t ! ;] crypto-a with-allocater
+    up@ crypto-up ! keccak-state to @keccak
+    crypto-o @ to keyak-o ;
+
+: keyak-free
+    keyak-t @ ?dup-IF  [: .dispose ;] crypto-a with-allocater  THEN
+    0 to @keccak crypto-o off  keyak-t off ;
+
+keyak-init
+
+' keyak-init to c:init
+' keyak-free to c:free
+
+:noname defers 'cold keccak-init keyak-init ; is 'cold
+:noname defers 'image crypto-o off  keccak-t off  keyak-t off
+    0 to keccak-o  0 to keyak-o ; is 'image

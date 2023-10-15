@@ -342,6 +342,10 @@ synonym scanqr keyscan
     \O -keccak
     \G -keccak: use keccak encryption for vaults
     enc-keccak next-cmd ;
+: -keyak ( -- )
+    \O -keyak
+    \G -keyak: use keyak encryption for vaults
+    enc-keyak next-cmd ;
 
 : enc ( -- )
     \U enc @user1 .. @usern file1 .. filen

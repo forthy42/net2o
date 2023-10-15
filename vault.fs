@@ -113,6 +113,7 @@ Variable enc-mode
 
 : enc-keccak ( -- )        $60 enc-mode ! ; \ wrap with keccak
 : enc-threefish ( -- ) $010160 enc-mode ! ; \ wrap with threefish
+: enc-keyak ( -- )     $020260 enc-mode ! ; \ wrap with keyak
 : enc>crypt2 ( -- )
     enc-mode @ $10 rshift $FF and >crypt ;
 

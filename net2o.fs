@@ -56,7 +56,13 @@ hash-init-rng
 
 \ crypto selection
 
-Create crypt-modes ' keccak-t , ' threefish-t ,
+: n/a' ( "name" -- xt )
+    ['] ' catch IF  ['] n/a  THEN ;
+
+Create crypt-modes
+n/a' keccak-t ,
+n/a' threefish-t ,
+n/a' keyak-t ,
 here crypt-modes - cell/ Constant crypts#
 
 : >crypt ( n -- )
