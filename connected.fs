@@ -295,14 +295,14 @@ in net2o : genack ( -- )
     data-ack# @ bytes>addr
     dest-head umin dest-top umin
     dest-tail umax dup addr dest-tail !@ endwith
-    ack( ." tail: " over hex. dup hex. forth:cr )
+    ack( ." tail: " over h. dup h. forth:cr )
     u> IF  net2o:save& 64#0 burst-ticks 64!  THEN ;
 
 $20 Value max-resend#
 
 : prepare-resend ( flag -- end start acks ackm taibits backbits headbits )
     data-rmap with mapc
-	ack( ." head/tail: " dup forth:. dest-head hex. dest-tail hex. forth:cr )
+	ack( ." head/tail: " dup forth:. dest-head h. dest-tail h. forth:cr )
 	IF    dest-head dup >r addr>bytes -4 and
 	ELSE  dest-top dup >r 1- addr>bytes 1+  THEN 0 max
 	dest-tail addr>bytes -4 and \ dup data-ack# umin!
@@ -315,12 +315,12 @@ $20 Value max-resend#
 in net2o : do-resend ( flag -- )
     o 0= IF  drop EXIT  THEN  data-rmap 0= IF  drop EXIT  THEN
     0 swap  prepare-resend { acks ackm tailbits backbits headbits }
-    ack( ." ack loop: " over hex. dup hex. forth:cr )
+    ack( ." ack loop: " over h. dup h. forth:cr )
     +DO
 	acks I ackm and + l@
-	acks( ." acks[" I bytes>bits hex.
+	acks( ." acks[" I bytes>bits h.
 	I data-rmap .mapc:data-ack# @ = IF '*' emit THEN
-	." ]=" dup hex. backbits hex. forth:cr )
+	." ]=" dup h. backbits h. forth:cr )
 	I bytes>bits tailbits u< IF
 	    -1 tailbits I bytes>bits - lshift invert $FFFFFFFF and or
 	THEN  $FFFFFFFF xor
@@ -328,7 +328,7 @@ in net2o : do-resend ( flag -- )
 	    $FFFFFFFF I bytes>bits $20 + headbits - rshift and
 	THEN
 	dup IF
-	    resend( ." resend: " dup hex. over hex. forth:cr )
+	    resend( ." resend: " dup h. over h. forth:cr )
 	    I ackm and bytes>addr data-rmap .mapc:>linear
 	    ulit, ulit, resend-mask  1+
 	ELSE
@@ -392,7 +392,7 @@ UValue rec-ack-pos#
 : expected@ ( -- head top )
     o IF  data-rmap with mapc
 	o IF  dest-tail dest-top
-	    msg( ." expected: " over hex. dup hex. forth:cr )
+	    msg( ." expected: " over h. dup h. forth:cr )
 	ELSE  #0. msg( ." expected: no data-rmap" forth:cr )  THEN endwith
     ELSE  #0. msg( ." expected: no object" forth:cr )  THEN  ;
 
@@ -407,10 +407,10 @@ UValue rec-ack-pos#
     expected@ u>= IF
 	expect-reply
 	msg( ." check: " data-rmap with mapc
-	dest-back hex. dest-tail hex. dest-head hex.
-	data-ackbits @ data-ack# @ dup hex. + l@ hex.
+	dest-back h. dest-tail h. dest-head h.
+	data-ackbits @ data-ack# @ dup h. + l@ h.
 	endwith
-	forth:cr ." Block transfer done: " expected@ hex. hex. forth:cr )
+	forth:cr ." Block transfer done: " expected@ h. h. forth:cr )
 	seq#,
 	net2o:save&done  net2o:ack-resend#  rewind  rewind-transfer
 	64#0 burst-ticks 64!
@@ -475,7 +475,7 @@ previous
 	cmd0!
 	[:
 	  resend( ." resend0: " resend0 $@ net2o:see forth:cr )
-	  msg( ." resend0: " resend0 $@ swap hex. hex. forth:cr )
+	  msg( ." resend0: " resend0 $@ swap h. h. forth:cr )
 	  cmdreset init-reply resend0 $@ +cmdbuf
 	  r0-address return-addr $10 move
 	  cmdbuf$ rng64 send-cmd drop
@@ -490,10 +490,10 @@ previous
 	    I cell+ @ 0<> I reply-xt @ and  IF
 		timeout( ." resend: " I reply-xt @ id. I 2@ net2o:see forth:cr )
 		resend( ." resend: " I reply-dest 64@ x64. I 2@ net2o:see forth:cr )
-		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap hex. hex. forth:cr )
+		msg( ." resend: " I reply-dest 64@ x64. I 2@ swap h. h. forth:cr )
 		ticks I reply-time 64!
 		I 2@ I reply-dest 64@
-		avalanche( ." resend cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup hex. 64r> forth:cr )
+		avalanche( ." resend cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup h. 64r> forth:cr )
 		send-cmd drop
 		1 packets2 +! 1+
 	    THEN
@@ -510,9 +510,9 @@ previous
     timeout( 2dup d0<> IF ." resend " over . dup . ." commands 0/map" cr THEN ) + ;
 
 : .expected ( -- )
-    forth:.time ." expected/received: " recv-addr @ hex.
-    data-rmap .mapc:data-ack# @ hex.
-    expected@ hex. hex. forth:cr ;
+    forth:.time ." expected/received: " recv-addr @ h.
+    data-rmap .mapc:data-ack# @ h.
+    expected@ h. h. forth:cr ;
 
 \ acknowledge toplevel
 
@@ -520,7 +520,7 @@ in net2o : ack-code ( ackflag -- ackflag )  >r
     false dup { slurp? stats? }
     net2o-code
     expect-reply ack 1 to rec-ack-pos#
-    ack( ." ack: " r@ hex. forth:cr )
+    ack( ." ack: " r@ h. forth:cr )
     r@ ack-toggle# and IF
 	seq#,
 	net2o:gen-resend  net2o:genack
@@ -557,8 +557,8 @@ in net2o : do-ack ( -- )
 \ keepalive
 
 also net2o-base
-: .keepalive ( -- )  ." transfer keepalive e/e h t b " expected@ hex. hex.
-    data-rmap with mapc  dest-head hex. dest-tail hex. dest-back hex.
+: .keepalive ( -- )  ." transfer keepalive e/e h t b " expected@ h. h.
+    data-rmap with mapc  dest-head h. dest-tail h. dest-back h.
     data-ackbits @ dest-size addr>bytes dump
     endwith
     forth:cr ;

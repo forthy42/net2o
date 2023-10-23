@@ -165,7 +165,7 @@ S_IFMT $1000 invert and Constant S_IFMT?
 	S_IFLNK              of  perm create-symlink-f  endof
 	S_IFREG              of  perm create-file-f     endof
 	S_IFDIR              of  perm create-dir-f      endof  \ no content in directory
-	dvcs( ." unhandled type " hex. type space hex. drop cr 0 )else(
+	dvcs( ." unhandled type " h. type space h. drop cr 0 )else(
 	2drop 2drop ) \ unhandled types
     endcase ;
 

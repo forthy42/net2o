@@ -24,5 +24,6 @@ AC_CHECK_PROGS(GNU_LIBTOOL,"glibtool --tag=CC" libtool)
 echo "Libtool: $PRECC, $PRECLANG, $LIBTOOL"
 
 AC_SUBST(LIBTOOL)
+AC_SUBST(flags)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

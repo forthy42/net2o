@@ -37,7 +37,7 @@ $20 Constant crypt-align
 	\ we have to fall back to alloc+guard if we want more than 64k
 	/kregion# /kregion-max u> IF  alloc+guard  ELSE  alloc+lock  THEN
 	/kregion 2dup kregion 2!  THEN
-    over swap r> safe/string kregion 2! ( kalloc( ." kalloc: " dup hex. cr ) ;
+    over swap r> safe/string kregion 2! ( kalloc( ." kalloc: " dup h. cr ) ;
 
 :noname defers 'image  #0. kregion 2!  0 to /kregion# kfree64' off ; is 'image
 

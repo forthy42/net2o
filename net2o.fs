@@ -248,7 +248,7 @@ $04 Constant resend-toggle#
 
 : .header ( addr -- ) base @ >r hex
     dup c@ >r
-    min-size r> datasize# and lshift hex. ." bytes to "
+    min-size r> datasize# and lshift h. ." bytes to "
     net2o-header:mapaddr le-64@ u64. cr
     r> base ! ;
 
@@ -490,7 +490,7 @@ forward send-code-packet
 : send-cX ( addr n -- ) +sendX2  >send  send-code-packet ;
 
 in net2o : new-context ( -- o )
-    context-class new >o timeout( ." new context: " o hex. cr )
+    context-class new >o timeout( ." new context: " o h. cr )
     my-key-default to my-key \ set default key
     o contexts !@ next-context !
     o to connection \ current connection
@@ -544,7 +544,7 @@ in net2o : new-data ( addrs addrd u -- )
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	net2o:new-context >o rdrop  setup!  THEN
-    msg( ." data map: " addrs x64. ." own: " addrd x64. u hex. cr )
+    msg( ." data map: " addrs x64. ." own: " addrd x64. u h. cr )
     >code-flag off
     addrd u addr data-rmap map-data-dest
     addrs u map-source to data-map ;
@@ -554,7 +554,7 @@ in net2o : new-code ( addrs addrd u -- )
     o 0= IF
 	addrd >dest-map @ ?EXIT
 	net2o:new-context >o rdrop  setup!  THEN
-    msg( ." code map: " addrs x64. ." own: " addrd x64. u hex. cr )
+    msg( ." code map: " addrs x64. ." own: " addrd x64. u h. cr )
     $remote-host @ IF  $remote-host $@ remote-host$ $!  $remote-host $free  THEN
     >code-flag on
     addrd u addr code-rmap map-code-dest
@@ -1072,7 +1072,7 @@ scope{ mapc
     rng8 $3F and { r }
     addr le-64@ r 64ror 64ffz< r + $3F and to r
     64#1 r 64lshift addr le-64@ 64or
-    \ timeout( ." resend#: " addr data-resend# @ dup hex. - hex. 64dup x64. cr )
+    \ timeout( ." resend#: " addr data-resend# @ dup h. - h. 64dup x64. cr )
     addr le-64! 
     r ;
 
@@ -1087,8 +1087,8 @@ scope{ mapc
 	    \ 64over 64invert 64over 64and I le-64! \ ack only once!
 	    64and 64-0= IF \ check if had been zero already
 		timeout( ." resend# unmatch: "
-		I data-resend# @ dup hex. - hex.
-		dup c@ hex. I le-64@ x64. cr )
+		I data-resend# @ dup h. - h.
+		dup c@ h. I le-64@ x64. cr )
 		2drop 0 UNLOOP  EXIT
 	    THEN  swap 1+ swap
 	THEN  1+
@@ -1250,7 +1250,7 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
 	    ack-state c!  ack@ .flybursts @ to ack-resends#  THEN
 	-1 ack@ .flybursts +! bursts( ." bursts: " ack@ .flybursts ? ack@ .flyburst ? cr )
 	ack@ .flybursts @ 0<= IF
-	    bursts( .o ." no bursts in flight " ack@ .ns/burst ? data-tail@ swap hex. hex. cr )
+	    bursts( .o ." no bursts in flight " ack@ .ns/burst ? data-tail@ swap h. h. cr )
 	THEN
     THEN
     tick-init = IF  off  ELSE  1 swap +!  THEN ;
@@ -1273,7 +1273,7 @@ in net2o : send-chunks  sender-task 0= IF  do-send-chunks  EXIT  THEN
     .o ." slack: " min-slack 64@ u64. max-slack 64@ u64. cr
     .o ." rtdelay: " rtdelay 64@ u64. cr o>
     data-map with mapc
-    ." Data h b t: " dest-head hex. dest-back hex. dest-tail hex. cr
+    ." Data h b t: " dest-head h. dest-back h. dest-tail h. cr
     endwith ;
 
 : send-chunks-async ( -- flag )
@@ -1483,7 +1483,7 @@ Variable recvflag  recvflag off
 	!!0depth!! send-another-chunk  AGAIN ;
 
 : create-sender-task ( -- )
-    [:  \ ." created sender task " up@ hex. cr
+    [:  \ ." created sender task " up@ h. cr
 	prep-evsocks send-loop ;] 1 net2o-task to sender-task ;
 
 Forward handle-beacon
@@ -1536,11 +1536,11 @@ Variable timeout-tasks
     ack@ .+next-timeouts next-timeout 64! ;
 
 : o+timeout ( -- )  0timeout
-    timeout( ." +timeout: " o hex. ." task: " task# ? addr timeout-xt @ id. cr )
+    timeout( ." +timeout: " o h. ." task: " task# ? addr timeout-xt @ id. cr )
     o timeout-tasks +unique$
     timeout-task ?dup-IF  wake  THEN ;
 : o-timeout ( -- )
-    0timeout  timeout( ." -timeout: " o hex. ." task: " task# ? cr )
+    0timeout  timeout( ." -timeout: " o h. ." task: " task# ? cr )
     [: o timeout-tasks del$cell ;] resize-sema c-section ;
 
 : >next-timeout ( -- )  ack@ .+timeouts next-timeout 64! ;
@@ -1632,7 +1632,7 @@ User remote?
 scope{ mapc
 
 : handle-data ( addr -- ) parent >o  o to connection
-    msg( ." Handle data " inbuf net2o-header:flags w@ wbe hex. ." to addr: " inbuf net2o-header:mapaddr le-64@ hex. cr )
+    msg( ." Handle data " inbuf net2o-header:flags w@ wbe h. ." to addr: " inbuf net2o-header:mapaddr le-64@ h. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt +ack 0timeout o> ;
 ' handle-data rdata-class to handle
@@ -1652,7 +1652,7 @@ scope{ mapc
 : .inv-packet ( -- )
     ." invalid packet to "
     dest-addr 64@ o IF  dest-vaddr 64-  THEN  x64.
-    ." size " min-size inbuf c@ datasize# and lshift hex. cr ;
+    ." size " min-size inbuf c@ datasize# and lshift h. cr ;
 
 }scope
 
@@ -1699,8 +1699,8 @@ scope{ mapc
 Defer extra-dispose ' noop is extra-dispose
 
 in net2o : dispose-context ( o:addr -- o:addr )
-    [: cmd( ." Disposing context... " o hex. cr )
-      timeout( ." Disposing context... " o hex. ." task: " task# ? cr )
+    [: cmd( ." Disposing context... " o h. cr )
+      timeout( ." Disposing context... " o h. ." task: " task# ? cr )
       o-timeout o-chunks extra-dispose
       data-rmap IF  #0. data-rmap .mapc:dest-vaddr >dest-map 2!  THEN
       end-maps start-maps DO  I @ ?dup-IF .mapc:free-data THEN  cell +LOOP
@@ -1725,7 +1725,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
 
 : next-request ( -- n )
     1 dup request# +!@ maxrequest# and tuck lshift reqmask or!
-    request( ." Request added: " dup . ." o " o hex. ." task: " task# ? cr ) ;
+    request( ." Request added: " dup . ." o " o h. ." task: " task# ? cr ) ;
 
 : packet-event ( -- )
     next-packet !ticks nip 0= ?EXIT  inbuf route?
@@ -1733,7 +1733,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
 
 : clean-request ( n -- )
     1 over lshift invert reqmask and!
-    request( ." Request completed: " . ." o " o hex. ." task: " task# ? cr
+    request( ." Request completed: " . ." o " o h. ." task: " task# ? cr
     )else( drop ) ;
 
 : rqd@ ( n -- xt )
@@ -1749,7 +1749,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
 : request ( n o -- ) >o maxrequest# and
     dup rqd@ request( ." request xt: " dup id. cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
-    ELSE  request( ." Timeout remains: " reqmask @ hex. cr ) THEN  o> ;
+    ELSE  request( ." Timeout remains: " reqmask @ h. cr ) THEN  o> ;
 : timeout ( o -- )
     timeout( ." Request timed out" forth:cr )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
@@ -1763,7 +1763,7 @@ in net2o : dispose-context ( o:addr -- o:addr )
 
 : request-timeout ( -- )
     ?timeout ?dup-IF  >o rdrop
-	timeout( ." do timeout: " o hex. addr timeout-xt @ id. cr )
+	timeout( ." do timeout: " o h. addr timeout-xt @ id. cr )
 	timeout-xt
     THEN ;
 
@@ -1811,7 +1811,7 @@ Variable need-beacon# need-beacon# on \ true if needs a hash for the ? beacon
     THEN ;
 
 : o-beacon ( -- )
-    beacon( ." remove beacons: " o hex. cr )
+    beacon( ." remove beacons: " o h. cr )
     beacons# [: { bucket } bucket cell+ $@ 1 64s /string bounds ?DO
 	    I @ o = IF
 		bucket cell+ I over $@ drop - 2 cells $del  LEAVE  THEN
@@ -1900,7 +1900,7 @@ in net2o : request-done ( n -- )
 : event-loop-task ( -- )
     receiver-task 0= IF  create-receiver-task  THEN ;
 
-: requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ hex. THEN cr )
+: requests->0 ( -- ) request( ." wait reqmask=" o IF reqmask @ h. THEN cr )
     BEGIN  stop
 	o IF  reqmask @ file-count @ or 0= ( reqcount @ 0= and )
 	ELSE  false  THEN  request( ." waiting... " dup . cr )

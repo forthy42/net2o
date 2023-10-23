@@ -244,7 +244,7 @@ Sema see-sema
 in net2o : (see) ( addr u -- )
     buf-state 2@ 2>r
     [: ." net2o-code"  dest-flags 1+ c@ stateless# and IF  '0' emit  THEN
-      dup hex. t-stack $free
+      dup h. t-stack $free
       [: BEGIN  cmd-see dup 0= UNTIL ;] catch
       ."  end-code" cr throw  2drop ;] see-sema c-section
     2r> buf-state 2! ;
@@ -439,7 +439,7 @@ compsem: cmdsig @ IF  ')' parse 2drop  EXIT  THEN
     :noname ( -- )
 	>in @ >r ')' parse ."  ( " type ." )" cr r> >in ! ; is doc(gen
     :noname ( n "name" -- )
-	." * " dup hex. >in @ >r parse-name type r> >in ! ; is .n-name
+	." * " dup h. >in @ >r parse-name type r> >in ! ; is .n-name
 [THEN]
 
 Variable version-warnings  1 version-warnings !
@@ -582,7 +582,7 @@ compsem: ['] net2o-code0 compile, also net2o-base ;
 
 : cmd ( -- )  cmdbuf# @ 1 u<= ?EXIT \ don't send if cmdbuf is empty
     connection >o outflag @ >r cmdbuf$ cmddest
-    avalanche( ." send cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup hex. 64r> cr )
+    avalanche( ." send cmd: " ftime 1000e fmod (.time) 64dup x64. 64>r dup h. 64r> cr )
     msg( ." send cmd to: " 64dup x64. forth:cr ) send-cmd
     r> stateless# and 0= IF  code-update  ELSE  drop  THEN o> ;
 
@@ -597,11 +597,11 @@ previous
 
 in net2o : ok? ( -- )  o?
     tag-addr >r cmdbuf$ r@ 2!
-    tag( ." tag: " tag-addr dup hex. 2@ swap hex. hex. forth:cr )
+    tag( ." tag: " tag-addr dup h. 2@ swap h. h. forth:cr )
     code-vdest r@ reply-dest 64!
     r> code-reply dup off  to reply-tag ;
 in net2o : ok ( tag -- ) \ ." ok" forth:cr
-\    timeout( ." ok: " dup hex. forth:cr )
+\    timeout( ." ok: " dup h. forth:cr )
     o 0= IF  drop EXIT  THEN
     request( ." request acked: " dup . cr )
     resend0 $free
@@ -635,8 +635,8 @@ in net2o : ok ( tag -- ) \ ." ok" forth:cr
 : tag-addr? ( -- flag )
     tag-addr dup >r 2@
     ?dup-IF
-	cmd( dest-addr 64@ x64. ." resend canned code reply " r@ hex. forth:cr )
-	resend( ." resend canned code reply " r@ hex. forth:cr )
+	cmd( dest-addr 64@ x64. ." resend canned code reply " r@ h. forth:cr )
+	resend( ." resend canned code reply " r@ h. forth:cr )
 	take-ret
 	r> reply-dest 64@ send-cmd drop true
 	1 packets2 +!

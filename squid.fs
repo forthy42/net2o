@@ -76,7 +76,7 @@ Variable wallet[]
 
 : .wallets ( -- ) \G print the wallet pubkeys
     1 wallets# lshift 0 U+DO
-	I wallet[] $[]@ KEYSIZE /string over c@ hex. space 85type cr
+	I wallet[] $[]@ KEYSIZE /string over c@ h. space 85type cr
     LOOP ;
 
 \ payment handling

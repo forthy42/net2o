@@ -36,7 +36,7 @@ $20 net2o: request-done ( ureq -- ) 64>n \g signal request is completed
 +net2o: set-cookie ( utimestamp -- ) \g cookies and round trip delays
     own-crypt? IF  trace( ." owncrypt " )
 	64dup cookie>context?
-	IF  cookie( ." context " dup hex. forth:cr ) >o rdrop  o to connection
+	IF  cookie( ." context " dup h. forth:cr ) >o rdrop  o to connection
 	    ack@ >o ticker 64@ recv-tick 64! rtdelay! o> \ time stamp of arrival
 	    EXIT
 	ELSE \ just check if timeout didn't expire
@@ -111,7 +111,7 @@ in net2o : create-map
 
 +net2o: store-key ( $:string -- ) $> \g store key
     own-crypt? IF  true !!deprecated!!
-	key( ." store key: o=" o hex. 2dup .nnb forth:cr )
+	key( ." store key: o=" o h. 2dup .nnb forth:cr )
 	2dup do-keypad sec!
 	o IF  crypto-key sec!  ELSE  2drop  THEN
     ELSE  2drop un-cmd  THEN ;
@@ -134,7 +134,7 @@ in net2o : create-map
 	adjust-timer( ." adjust timer" forth:cr )
 	ack@ .adjust-ticks
     ELSE
-	adjust-timer( ." no object: don't adjust timer " o hex. forth:cr )
+	adjust-timer( ." no object: don't adjust timer " o h. forth:cr )
 	64drop
     THEN ;
 +net2o: get-tick ( -- ) \g request time adjust

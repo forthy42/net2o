@@ -101,7 +101,7 @@ Variable saved-msg$
 64Variable saved-msg-ticks
 
 : save-msgs ( group-o -- ) to msg-group-o
-    msg( ." Save messages in group " msg-group-o dup hex. .msg:name$ type cr )
+    msg( ." Save messages in group " msg-group-o dup h. .msg:name$ type cr )
     ?.net2o/chats  net2o:new-msging >o
     msg-log@ over >r  serialize-log enc-file $!buf
     r> free throw  dispose o>
@@ -159,7 +159,7 @@ Variable saved-msg$
 	0< IF  #0.  ELSE  last-msg 2@  THEN
     ;] msglog-sema c-section ;
 : ?save-msg ( -- )
-    msg( ." saving messages in group " msg-group-o dup hex. .msg:name$ type cr )
+    msg( ." saving messages in group " msg-group-o dup h. .msg:name$ type cr )
     msg-group-o .msg:?otr replay-mode @ or 0= IF  save-msgs&  THEN ;
 
 Sema queue-sema
@@ -203,7 +203,7 @@ Forward silent-join
 Forward +chat-control
 
 : chat-silent-join ( -- )
-    reconnect( ." silent join " o hex. connection hex. cr )
+    reconnect( ." silent join " o h. connection h. cr )
     o to connection
     ?msg-context >o silent-last# @ to last# o>
     reconnect( ." join: " last# $. cr )
@@ -232,7 +232,7 @@ User peer-buf
 : reconnect-chat ( addr u $chat -- )
     peer-buf $!buf  last# peer-buf $@
     reconnect( ." reconnect " 2dup 2dup + 1- c@ 1+ - .addr$ cr )
-    reconnect( ." in group: " last# dup hex. $. cr )
+    reconnect( ." in group: " last# dup h. $. cr )
     0 >o $A $A [: reconnect( ." prepare reconnection" cr )
       ?msg-context >o silent-last# ! o>
       ['] chat-rqd-nat ['] chat-rqd-nonat ind-addr @ select rqd! ;]
@@ -374,7 +374,7 @@ previous
 	    >r
 	    o msg-group-o msg-pack [{: xo group-o xt: pack :}h1
 		pack
-		avalanche( ." Avalanche to: " group-o hex. cr )
+		avalanche( ." Avalanche to: " group-o h. cr )
 		group-o to msg-group-o xo .avalanche-msg ;]
 	    r> send-event
 	ELSE  2drop  THEN
@@ -1090,7 +1090,7 @@ also }scope
 msging-table $save
 
 : msg-reply ( tag -- )
-    ." got reply " hex. pubkey $@ key>nick forth:type forth:cr ;
+    ." got reply " h. pubkey $@ key>nick forth:type forth:cr ;
 : expect-msg ( o:connection -- )
     reply( ['] msg-reply )else( ['] drop ) expect-reply-xt +chat-control ;
 
@@ -1363,7 +1363,7 @@ previous
 
 : msg-tdisplay ( addr u -- )
     ( 2dup dump )
-    logmask# @ log:len and IF  dup hex.  THEN
+    logmask# @ log:len and IF  dup h.  THEN
     2dup 2 - + c@ $80 and IF  msg-dec-sig? IF
 	    2drop <err> ." Undecryptable message" <default> cr  EXIT
 	THEN  <info>  THEN
@@ -1675,7 +1675,7 @@ previous
 
 : .notify ( -- )
     ." notify " config:notify?# ?
-    ." led " config:notify-rgb# @ hex. config:notify-on# ? config:notify-off# ?
+    ." led " config:notify-rgb# @ h. config:notify-on# ? config:notify-off# ?
     ." interval " config:delta-notify& 2@ 1000000 um/mod . drop
     ." mode " config:notify-mode# @ .
     config:notify-text# @
@@ -2542,7 +2542,7 @@ scope{ /chat
     IF  2drop  ELSE  group,  THEN ;
 
 : avalanche-to ( o:context -- )
-    avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over hex. cr )
+    avalanche( ." Send avalanche to: " pubkey $@ key>nick type space over h. cr )
     o to connection
     push[] [: net2o-code expect-msg message msg-name, $, nestsig end-with
 	end-code ;] $[]map ;

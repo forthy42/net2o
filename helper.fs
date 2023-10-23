@@ -63,22 +63,22 @@ require dhtroot.fs
     ret0 net2o:new-context >o rdrop dest-pk ;
 
 : pk:connect ( code data key u -- )
-    connect( [: .time ." Connect to: " dup hex. cr ;] $err )
+    connect( [: .time ." Connect to: " dup h. cr ;] $err )
     make-context
     o to connection  setup!
     +resend-cmd net2o:connect
     +flow-control +resend
-    connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
+    connect( [: .time ." Connected, o=" o h. cr ;] $err ) ;
 
 : pk-addr:connect ( code data key u addr -- )
-    connect( [: .time ." Connect to: " dup hex. cr ;] $err )
+    connect( [: .time ." Connect to: " dup h. cr ;] $err )
     >r make-context  r> dest-addrs >stack
     o to connection  setup!
     dest-0key dest-0key> !
     ['] dests is send0-xt
     +resend-cmd net2o:connect
     +flow-control +resend
-    connect( [: .time ." Connected, o=" o hex. cr ;] $err ) ;
+    connect( [: .time ." Connected, o=" o h. cr ;] $err ) ;
 
 Forward renat-all
 

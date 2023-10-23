@@ -132,7 +132,7 @@ $FFFFFFFF ,
 : taghash-rest ( addr1 u1 addrchallenge u2 tag -- tag )  >r
     c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
     qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
-    msg( ." ecc= " qrecc $10 xtype space dup hex. cr ) ;
+    msg( ." ecc= " qrecc $10 xtype space dup h. cr ) ;
 : >taghash ( addr u tag -- tag )
     qr-key $8 rot taghash-rest ;
 : taghash? ( addr u1 ecc u2 tag -- flag )
@@ -156,7 +156,7 @@ $FFFFFFFF ,
 
 : .keyqr ( addr u tag -- ) \ 64 bytes
     qr( >r 2dup bounds U+DO ." qr : " I $10 xtype cr $10 +LOOP
-    r> ." tag: " dup hex. cr )
+    r> ." tag: " dup h. cr )
     rng>qr-key .qr-rest ;
 
 : .sigqr ( addr u -- ) \ any string

@@ -172,7 +172,7 @@ Variable bdelta$
     I - +LOOP  drop ;
 
 : #type ( addr u -- )
-    nip ?dup-IF  hex.  THEN ;
+    nip ?dup-IF  h.  THEN ;
 
 : color-bpatch# ( a$ diff$ -- )
     0 0 { fp offt }

@@ -87,7 +87,7 @@ require minos2/gl-helper.fs
 	msg( ." chal=" 2dup xtype cr 2over dump )
 	c:0key $8 umin qrecc $8 smove r@ qrecc $8 + c!
 	qrecc $9 c:shorthash c:shorthash qrecc $8 + $8 c:hash@ r>
-	msg( ." ecc= " qrecc $10 xtype space dup hex. cr ) ;
+	msg( ." ecc= " qrecc $10 xtype space dup h. cr ) ;
     : >taghash ( addr u tag -- tag )
 	qr-key $8 rot taghash-rest ;
     : taghash? ( addr u1 ecc u2 tag -- flag )
@@ -490,7 +490,7 @@ previous
 
 : debug-scan-result ( addr u tag -- )
     >r dump
-    r> ." tag: " hex. cr
+    r> ." tag: " h. cr
     ." ecc: " guessecc $10 xtype cr
     [IFDEF] distdebug
 	." dist/min/max: "
@@ -499,7 +499,7 @@ previous
     [THEN] ;
 [IFUNDEF] scan-result
     : scan-result ( addr u tag -- )
-	." scan result: " hex. ." sat: " saturate% sf@ f.
+	." scan result: " h. ." sat: " saturate% sf@ f.
 	x-scansize f. y-scansize f. strip+x . strip+y . cr
 	bounds U+DO
 	    I $10 xtype cr
@@ -514,9 +514,9 @@ previous
 : adapt-rgb ( -- )
     scan-buf0 $@ get-minmax-rgb to bminmax to gminmax to rminmax
     msg(
-    ." rminmax: " rminmax hex. hex. cr
-    ." gminmax: " gminmax hex. hex. cr
-    ." bminmax: " bminmax hex. hex. cr
+    ." rminmax: " rminmax h. h. cr
+    ." gminmax: " gminmax h. h. cr
+    ." bminmax: " bminmax h. h. cr
     ) ;
 : white-bg-levels ( -- )
     bminmax over - 2/ 2/   + to blue-level#    \ blue level is 1/4 of total

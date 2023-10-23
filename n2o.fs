@@ -38,7 +38,7 @@ $20 value hash-size#
     slurp-file over { start } bounds ?DO
 	c:0key I dup $400 + I' umin over - c:hash
 	pad c:key>
-	I start - $400 / hex. pad hash-size# .85info cr
+	I start - $400 / h. pad hash-size# .85info cr
     $400 +LOOP
     start free throw ;
 

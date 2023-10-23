@@ -1039,7 +1039,7 @@ $Variable lastscan$
 : scan-result ( addr u tag -- flag )
     dup 2over rot lastscan? IF drop 2drop false EXIT THEN
     dup scanned-max# u< IF  cells scanned-x + perform
-    ELSE  ." unknown tag " hex. ." scanned " 85type cr ?scan-level true
+    ELSE  ." unknown tag " h. ." scanned " 85type cr ?scan-level true
     THEN ;
 
 \ generate keys
@@ -1425,7 +1425,7 @@ forward >qr-key
 	pk $@ keysize2 /string >qr-key
 	pk $@ keysize2 umin [: net2o:pklookup send-qr-invitation ;] catch
 	IF    2drop ." send qr invitation, aborted" 0
-	ELSE  ." sent qr invitation, got " dup hex. THEN
+	ELSE  ." sent qr invitation, got " dup h. THEN
 	forth:cr
 	0= IF  ['] ?scan-level task send-event  THEN  pk $free ;]
   ?query-task send-event

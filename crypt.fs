@@ -210,7 +210,7 @@ scope{ mapc
 : ivs-tweak ( 64addr keyaddr -- )
     >r dest-flags w@ wle addr>assembly
     r> state# c:tweakkey!
-    tweak( ." tweak key: " voutkey c:key> voutkey @ hex. voutkey state# + $10 .nnb cr ) ;
+    tweak( ." tweak key: " voutkey c:key> voutkey @ h. voutkey state# + $10 .nnb cr ) ;
 
 scope{ mapc
 
@@ -504,7 +504,7 @@ scope{ mapc
 : regen-ivs-part ( old-back new-back -- )
     [: c:key@ >r
       dest-ivsgen kalign
-      regen( ." regen-ivs-part " 2 pick hex. over hex. dup c:key# .nnb cr )
+      regen( ." regen-ivs-part " 2 pick h. over h. dup c:key# .nnb cr )
       c:key!
       swap U+DO
 	  I I' fix-size dup { len }
@@ -656,7 +656,7 @@ $1000 Value max-tmpkeys# \ no more than 256 keys in queue
 
 : net2o:update-key ( -- )
     o? do-keypad sec@ dup keysize2 = IF
-	key( ." store key, o=" o hex. 2dup .nnb cr )
+	key( ." store key, o=" o h. 2dup .nnb cr )
 	crypto-key sec! do-keypad sec-free
 	EXIT
     THEN

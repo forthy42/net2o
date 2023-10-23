@@ -363,13 +363,13 @@ Variable f-wamount
 	id id>addr? .fs-write
 	file1( id f-wid @ = IF  dup f-wamount +!
 	ELSE  f-wid @ 0>= f-wamount @ 0> and IF
-	    ." spit: " f-wid @ . f-wamount @ hex. cr  THEN
+	    ." spit: " f-wid @ . f-wamount @ h. cr  THEN
 	id f-wid ! dup f-wamount !  THEN )
 	>blockalign dup negate residualwrite +! ;
 [THEN]
 
 in net2o : save-block ( back tail id len -- delta ) { id len -- delta }
-    slurp( ." spit: " over hex. dup hex. id hex. len hex. )
+    slurp( ." spit: " over h. dup h. id h. len h. )
     id $FF = IF  swap - len umin \ only alignment
     ELSE
 	data-rmap with mapc fix-size raddr+ endwith
@@ -379,13 +379,13 @@ in net2o : save-block ( back tail id len -- delta ) { id len -- delta }
     len over - residualwrite ! ;
 
 : .spit ( -- )
-    spit#$ $@ bounds ?DO  I c@ hex. I 1+ p2@+ >r x64. cr r> I - +LOOP ;
+    spit#$ $@ bounds ?DO  I c@ h. I 1+ p2@+ >r x64. cr r> I - +LOOP ;
 
 in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 	spit#$ $@ bounds ?DO
 	    back tail I count swap p2@+ I - { +I }
 	    64>n residualwrite @ umin
-	    net2o:save-block slurp( ." => " dup hex. forth:cr )
+	    net2o:save-block slurp( ." => " dup h. forth:cr )
 	    dup +to back
 	    0<> residualwrite @ and IF  0 to +I  ELSE
 		blocksize @ residualwrite !  THEN
@@ -400,8 +400,8 @@ in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 [IFDEF] old-spit
     in net2o : spit { back tail -- newback }
 	back tail back u<= ?EXIT fstates 0= ?EXIT drop
-	slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-	write-file# ? residualwrite @ hex. forth:cr ) back tail
+	slurp( ." spit: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith h.
+	write-file# ? residualwrite @ h. forth:cr ) back tail
 	[: +calc fstates 0 { back tail states fails }
 	    BEGIN  tail back u>  WHILE
 		    back tail write-file# @ net2o:save-block dup +to back
@@ -414,8 +414,8 @@ in net2o : spit [: { back tail | spitbuf# -- newback } +calc slurp( .spit )
 	    back  fails states u>= IF  >maxalign  THEN  \ if all files are done, align
 	;] file-sema c-section
 	slurp( .spit ) spit#$ $free
-	slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith hex.
-	write-file# ? residualwrite @ hex. forth:cr ) ;
+	slurp( ."  left: " tail rdata-back@ drop data-rmap with mapc dest-raddr - endwith h.
+	write-file# ? residualwrite @ h. forth:cr ) ;
 [THEN]
 
 : save-to ( addr u n -- )  state-addr .fs-create ;
@@ -484,14 +484,14 @@ base !
     dup /head
     file1( id f-rid @ = IF  dup f-ramount +!
     ELSE  f-rid @ 0>=  f-ramount @ 0> and IF
-	    ." slurp: " f-rid @ . f-ramount @ hex. cr  THEN
+	    ." slurp: " f-rid @ . f-ramount @ h. cr  THEN
         id f-rid ! dup f-ramount !  THEN ) ;
 
 \ careful: must follow exactpy the same logic as net2o:spit (see above)
 : slurp ( -- head end-flag )
     data-head? 0= fstates 0= or  IF  head@ 0  EXIT  THEN
-    slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
-    read-file# ? residualread @ hex. forth:cr )
+    slurp( ." slurp: " data-head@ drop data-map with mapc dest-raddr - endwith h.
+    read-file# ? residualread @ h. forth:cr )
     [: +calc fstates 0 { states fails }
 	0 BEGIN  data-head?  WHILE
 		read-file# @ net2o:slurp-block
@@ -503,12 +503,12 @@ base !
 	\ if all files are done, align
 	fails states u>= dup IF  max/head@ >salign  THEN
 	head@ swap
-	msg( ." Read end: " over hex. forth:cr ) ;]
+	msg( ." Read end: " over h. forth:cr ) ;]
     file-sema c-section
-    slurp( ."  left: " data-head@ drop data-map with mapc dest-raddr - endwith hex.
-    read-file# ? residualread @ hex. forth:cr )
+    slurp( ."  left: " data-head@ drop data-map with mapc dest-raddr - endwith h.
+    read-file# ? residualread @ h. forth:cr )
 
-    file( dup IF  ." data end: " over hex. dup forth:. forth:cr  THEN ) ;
+    file( dup IF  ." data end: " over h. dup forth:. forth:cr  THEN ) ;
     
 : track-seeks ( idbits xt -- ) \ xt: ( i seeklen -- )
     [: { xt } 8 cells 0 DO

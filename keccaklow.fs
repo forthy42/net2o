@@ -33,7 +33,7 @@ machine "amd64" str= [IF]
 	    2drop "ARMv8A"
 	[ELSE]
 	    machine "arm" str= [IF]
-		cpu? neon [IF]
+		cpu? neon cpu? asimd or [IF]
 		    2drop "ARMv7A_NEON"
 		[THEN]
 	    [THEN]

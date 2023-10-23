@@ -231,7 +231,7 @@ scope{ net2o-base
 $33 net2o: dht-id ( $:string -- o:o )
     \g set DHT id for further operations on it
     perm-mask @ perm%dht and 0= !!dht-perm!!
-    $> >d#id dht( ." set dht to: " dup hex. forth:cr ) n:>o ;
+    $> >d#id dht( ." set dht to: " dup h. forth:cr ) n:>o ;
 dht-table >table
 
 reply-table $@ inherit-table dht-table
@@ -289,7 +289,7 @@ end-class dht-file-class
     k#size cell/ 1 DO
 	mask 1 and IF
 	    dht-hash I cells + I
-	    dht( ." access dht: " over hex. dup . forth:cr )
+	    dht( ." access dht: " over h. dup . forth:cr )
 	    [{: k# :}l check-exact-date
 		0= IF  k# d#c, d#$,  ELSE  2drop  THEN ;] $[]map
 	THEN  mask 2/ to mask

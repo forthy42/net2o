@@ -46,7 +46,7 @@ update-gsize#
 [IFDEF] dispose-check-xxx
     : pollfds-check ( -- )
 	pollfds ['] @ catch nip IF
-	    ." Dispose check failed! " up@ hex. cr
+	    ." Dispose check failed! " up@ h. cr
 	THEN ;
     : net2o:dispose-check ( -- )
 	up@ >r
@@ -1475,7 +1475,7 @@ Variable current-player
 	    ( rdrop ) 2dup $make [: addr data $@ open-posting ;] swap 2>r
 	    [: ." posting" .posting ;] $tmp }}text 2r> click[]  "posting" name!
 	endof
-	nip nip [: ." ???(" hex. ." )" ;] $tmp }}text 0
+	nip nip [: ." ???(" h. ." )" ;] $tmp }}text 0
     endcase
     msg-box .child+
     text-color!

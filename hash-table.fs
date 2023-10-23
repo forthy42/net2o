@@ -147,5 +147,5 @@ variable ht
     REPEAT  drop ;
 : test2 ( -- )
     context @ cell+ BEGIN  @ dup  WHILE
-	    dup name>string 2dup ht #key dup hex. cr ht #.key $@ str= 0= IF ." unequal" cr THEN
+	    dup name>string 2dup ht #key dup h. cr ht #.key $@ str= 0= IF ." unequal" cr THEN
     REPEAT  drop ;
