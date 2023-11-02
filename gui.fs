@@ -21,10 +21,10 @@ require minos2/widgets.fs
 
 Forth definitions also minos
 
-gl-init
-
 require minos2/font-style.fs
 require unix/open-url.fs
+
+gl-init
 
 : bar-frame ( glue color -- o )
     font-size# 20% f* }}frame dup .button3 ;
