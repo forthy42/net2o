@@ -2195,12 +2195,22 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	    2drop
 	endcase
     THEN  2drop  rectype-null  ;
+
+: rework-% ( addr u -- addr' u' )
+    [: [: bounds ?DO
+	    I c@ '%' = IF
+		I 1+ I' over - 2 umin s>number drop emit 3
+	    ELSE
+		I c@ emit 1
+	    THEN
+	+LOOP ;] $tmp ;] $10 base-execute ;
+
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
     2dup "http://" string-prefix? r> or IF
 	over ?flush-text
 	-skip-punctation 2dup + to last->in
-	[: $, msg-url ;] rectype-nt
+	[: rework-% $, msg-url ;] rectype-nt
     ELSE  2drop rectype-null  THEN ;
 
 forward hash-in
@@ -2244,15 +2254,6 @@ synonym aidx opus
 : genfile-file ( addr u -- )
     file-in save-mem
     [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
-
-: rework-% ( addr u -- addr' u' )
-    [: [: bounds ?DO
-	    I c@ '%' = IF
-		I 1+ I' over - 2 umin s>number drop emit 3
-	    ELSE
-		I c@ emit 1
-	    THEN
-	+LOOP ;] $tmp ;] $10 base-execute ;
 
 : expand-to-file ( addr u -- addr u' flag )
     drop source + over -
