@@ -2245,10 +2245,19 @@ synonym aidx opus
     file-in save-mem
     [:  over >r $, msg:files# ulit, msg-object r> free throw ;] ;
 
+: rework-% ( addr u -- addr' u' )
+    [: [: bounds ?DO
+	    I c@ '%' = IF
+		I 1+ I' over - 2 umin s>number drop emit 3
+	    ELSE
+		I c@ emit 1
+	    THEN
+	+LOOP ;] $tmp ;] $10 base-execute ;
+
 : expand-to-file ( addr u -- addr u' flag )
     drop source + over -
     BEGIN  -trailing dup  WHILE
-	    2dup 7 /string file-status nip 0= IF
+	    2dup 7 /string rework-% file-status nip 0= IF
 		2dup + source drop - >in !  true EXIT  THEN
 	    bl -scan  REPEAT
     false ;
@@ -2257,7 +2266,7 @@ synonym aidx opus
     2dup "file://" string-prefix? IF
 	expand-to-file IF
 	    over ?flush-text 7 /string
-	    2dup + >r  save-mem over >r
+	    2dup + >r  rework-% save-mem over >r
 	    2dup suffix ['] file-suffixes >wordlist find-name-in
 	    dup 0= IF  drop ['] genfile-file  THEN
 	    catch
