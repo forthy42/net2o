@@ -110,18 +110,18 @@ Forward renat-all
 : c:disconnect ( -- ) connect( [: ." Disconnecting..." cr ;] $err )
     disconnect-me connect( [: .packets profile( .times ) ;] $err ) ;
 
-: c:fetch-id ( pubkey u -- )
+: c:fetch-id ( pubkey u -- ) +resend
     net2o-code
       expect-reply  fetch-id,
       cookie+request
     end-code| ;
 
-: pk:fetch-host ( key u -- )
+: pk:fetch-host ( key u -- ) +resend
     net2o-code
       expect-reply get-ip fetch-id, cookie+request
     end-code| -setip ;
 
-: pk:addme-fetch-host ( key u -- ) +addme
+: pk:addme-fetch-host ( key u -- ) +addme +resend
     net2o-code
       expect-reply get-ip fetch-id, replace-me,
       cookie+request
@@ -388,13 +388,13 @@ User search-key[]
 User pings[]
 
 : search-keys ( -- )
-    dht-connect
+    dht-connect +resend
     net2o-code  expect-reply
     search-key[] [: $, dht-id dht-owner? end-with ;] $[]map
     cookie+request end-code| ;
 
 : search-addrs ( -- )
-    dht-connect
+    dht-connect +resend
     net2o-code  expect-reply
     search-key[] [: $, dht-id dht-host? end-with ;] $[]map
     cookie+request end-code| ;

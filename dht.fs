@@ -467,14 +467,14 @@ in net2o : send-revoke ( addr u -- )
     end-code| \ send revocation upstrem
     dht-hash $@ renew-key drop o> ; \ replace key in key storage
 
-: replace-me ( -- )  +addme
+: replace-me ( -- )  +addme +resend
     net2o-code   expect-reply get-ip replace-me, cookie+request
     end-code| -setip
     net2o:send-replace ;
 
 : revoke-me ( addr u -- )
     \G give it your revocation secret
-    +addme
+    +addme +resend
     net2o-code   expect-reply replace-me, cookie+request  end-code|
     -setip net2o:send-revoke ;
 
