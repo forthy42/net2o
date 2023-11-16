@@ -458,7 +458,7 @@ in net2o : send-replace ( -- )
     dht-host $ins[]sig drop ;
 
 in net2o : send-revoke ( addr u -- )
-    ?keysize me>d#id >o
+    ?keysize me>d#id >o +resend
     net2o-code  expect-reply
 	dht-hash $@ $, dht-id dht-host remove-me,
 	revoke-key 2dup set-revocation

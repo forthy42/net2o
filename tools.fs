@@ -85,7 +85,7 @@ word-args
 ; to ?peekarg
 :noname ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
-    over c@ '@' = IF  rdrop 1 /string true  EXIT  THEN
+    over xc@ '@' = IF  rdrop 1 /string true  EXIT  THEN
     r> >in ! 2drop false ; to ?@nextarg
 
 : arg-loop { xt -- }

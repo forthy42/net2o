@@ -62,30 +62,20 @@ $20 value hash-size#
 
 \ commands for the command line user interface
 
-Variable old-recs   Variable recs-backlog
-Variable old-order  Variable order-backlog
+Variable recs-backlog
 
 : save-net2o-cmds ( -- )
-    0 old-recs  !@ recs-backlog  >stack
-    0 old-order !@ order-backlog >stack
-    get-recognizers old-recs  set-stack
-    also get-current context !
-    get-order       old-order set-stack  previous ;
+    action-of forth-recognize  recs-backlog >stack ;
 : set-net2o-cmds ( -- )
-    ['] n2o >wordlist 1 set-order
-    ['] rec-nt 1 set-recognizers ;
+    ['] n2o >wordlist is forth-recognize ;
 : reset-net2o-cmds ( -- )
-    old-recs  get-stack ?dup-IF  set-recognizers                 THEN
-    old-order get-stack ?dup-IF  set-order definitions previous  THEN
-    old-recs $free  old-order $free
-    recs-backlog  stack# IF  recs-backlog  stack> old-recs  !  THEN
-    order-backlog stack# IF  order-backlog stack> old-order !  THEN ;
+    recs-backlog stack# IF  recs-backlog stack> is forth-recognize  THEN ;
 
 : do-net2o-cmds ( xt -- )
     rp0 @ >r  rp@ 3 cells + rp0 !
-    save-net2o-cmds set-net2o-cmds catch
-    r> rp0 !
-    reset-net2o-cmds throw ;
+    save-net2o-cmds set-net2o-cmds
+    catch reset-net2o-cmds
+    r> rp0 !  throw ;
 
 : (n2o-quit) ( -- )
     \ exits only through THROW etc.
@@ -839,7 +829,7 @@ n2o-history
 
 scope{ /chat
 :noname [: word-args ['] evaluate do-net2o-cmds ;] catch
-    ?dup-IF  <err> ." error: " error$ type cr <default>  THEN ; is /n2o
+    ?dup-IF  <err> ." error: " error$ type cr <default> 2drop  THEN ; is /n2o
 ' n2o:nick is /nick
 }scope
 
