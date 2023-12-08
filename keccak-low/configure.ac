@@ -63,6 +63,25 @@ AC_ARG_ENABLE([x64],
 esac],)
 AM_CONDITIONAL([X64], [test x$x64 = xtrue])
 
+if test x$x64 = xtrue
+then
+    AC_MSG_CHECKING([if $CC understands -mavx2])
+    CFLAGS_1="$CFLAGS"
+    CFLAGS="$CFLAGS -mavx2"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[avx2=yes],[avx2=no])
+    CFLAGS="$CFLAGS_1"
+    AC_MSG_RESULT($avx2)
+    AM_CONDITIONAL([avx2], [test x$avx2 = xyes])
+
+    AC_MSG_CHECKING([if $CC understands -mavx512f -mavx512vl])
+    CFLAGS_1="$CFLAGS"
+    CFLAGS="$CFLAGS -mavx512f -mavx512vl"
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[avx512=yes],[avx512=no])
+    CFLAGS="$CFLAGS_1"
+    AC_MSG_RESULT($avx512)
+    AM_CONDITIONAL([avx512], [test x$avx512 = xyes])
+fi
+
 AC_ARG_ENABLE([x86],
 [  --enable-x86    Turn on compilation for i686],
 [case "${enableval}" in
