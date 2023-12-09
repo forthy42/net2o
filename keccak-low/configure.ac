@@ -36,6 +36,7 @@ case "$host" in
 	;;
     arm*)
 	arm32=true
+	CCASFLAGS=`echo $CCASFLAGS | sed -e 's/ -mfpu=vfp / /g'`
 	;;
     x86_64*)
         eval x$bits=true

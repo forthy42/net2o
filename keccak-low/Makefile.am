@@ -60,7 +60,7 @@ lib_LTLIBRARIES += libkeccak_ARMv7A_NEON.la
 libkeccak_ARMv7A_NEON_la_SOURCES = KeccakP-1600/ARMv7A-NEON/KeccakP-1600-armv7a-le-neon-gcc.s
 libkeccak_ARMv7A_NEON_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 libkeccak_ARMv7A_NEON_la_CFLAGS = -O3
-libkeccak_ARMv7A_NEON_la_CCASFLAGS =
+libkeccak_ARMv7A_NEON_la_CCASFLAGS = -mfpu=neon
 endif
 if ARM64
 lib_LTLIBRARIES += libkeccak_ARMv8A.la
