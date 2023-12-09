@@ -50,7 +50,6 @@ machine "amd64" str= [IF]
 
 \ ------===< functions >===-------
 c-function KeccakP1600_Initialize KeccakP1600_Initialize a -- void	( state -- )
-c-function KeccakP1600_AddByte KeccakP1600_AddByte a u u -- void	( state data offset -- )
 c-function KeccakP1600_AddBytes KeccakP1600_AddBytes a a u u -- void	( state data offset length -- )
 c-function KeccakP1600_OverwriteBytes KeccakP1600_OverwriteBytes a a u u -- void	( state data offset length -- )
 c-function KeccakP1600_OverwriteWithZeroes KeccakP1600_OverwriteWithZeroes a u -- void	( state byteCount -- )

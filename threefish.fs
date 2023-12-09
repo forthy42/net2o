@@ -21,9 +21,7 @@ require unix/cpu.fs
 fast-lib [IF]
     require threefishfast.fs false
 [ELSE]
-    [IFDEF] android
-	s" libthreefish.so" c-lib:open-path-lib drop
-    [THEN] true
+    true
 [THEN]
 [IF]
     c-library threefish

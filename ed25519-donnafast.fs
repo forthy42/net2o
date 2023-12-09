@@ -17,10 +17,6 @@
 
 require rec-scope.fs
 
-[IFDEF] android
-    s" libed25519primsfast.so" c-lib:open-path-lib drop
-[THEN]
-
 c-library ed25519_donnafast
     "ed25519primsfast" add-lib
 \    "ed25519-donna/.libs" add-libpath \ find library during build

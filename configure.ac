@@ -48,6 +48,7 @@ CPUFLAGS="none"
 case "$host" in
     arm*-*linux*)
 	FAST=yes
+	CPUFLAGS="none neon"
 	;;
     i686-*linux*|i686-*cygwin*)
 	CPUFLAGS="none ssse3 xop"

@@ -25,9 +25,6 @@ require unix/cpu.fs
 fast-lib [IF]
     require ed25519-donnafast.fs
 [ELSE]
-    [IFDEF] android
-	s" libed25519prims.so" c-lib:open-path-lib drop
-    [THEN]
     c-library ed25519_donna
 	"ed25519prims" add-lib
 \	"ed25519-donna/.libs" add-libpath \ find library during build
