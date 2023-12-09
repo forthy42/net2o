@@ -233,7 +233,7 @@ $(INS):	config.status $(INS:%=%.in)
 	./config.status
 
 config.status: configure
-	./config.status --recheck
+	./configure --host=$(HOST) --prefix=$(PREFIX)
 
 dist:	$(DISTFILES)
 	-$(RMDIR) net2o-$(VERSION)
