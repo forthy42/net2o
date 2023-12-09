@@ -45,15 +45,34 @@ GFORTHFAST=$(which $GFORTHFAST)
 
 FAST=no
 CPUFLAGS="none"
-case "$host" in
+case "$build" in
     arm*-*linux*)
 	FAST=yes
 	;;
     i686-*linux*|i686-*cygwin*)
 	CPUFLAGS="none ssse3 xop"
+	FAST=yes
 	;;
     x86_64-*)
-	CPUFLAGS="none avx2 avx512"
+	AC_MSG_CHECKING([if $CC understands -mavx2])
+	CFLAGS_1="$CFLAGS"
+	CFLAGS="$CFLAGS -mavx2"
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[avx2=yes],[avx2=no])
+	CFLAGS="$CFLAGS_1"
+	AC_MSG_RESULT($avx2)
+	AC_MSG_CHECKING([if $CC understands -mavx512f -mavx512vl])
+	CFLAGS_1="$CFLAGS"
+	CFLAGS="$CFLAGS -mavx512f -mavx512vl"
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[avx512=yes],[avx512=no])
+	CFLAGS="$CFLAGS_1"
+	AC_MSG_RESULT($avx512)
+	for i in avx2 avx512
+	do
+	    if eval test x'$'$i = xyes
+	    then
+	       CPUFLAGS="$CPUFLAGS $i"
+	    fi
+	done
 	;;
 esac
 
