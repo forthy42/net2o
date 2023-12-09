@@ -45,7 +45,7 @@ GFORTHFAST=$(which $GFORTHFAST)
 
 FAST=no
 CPUFLAGS="none"
-case "$build" in
+case "$host" in
     arm*-*linux*)
 	FAST=yes
 	;;
