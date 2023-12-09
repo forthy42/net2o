@@ -57,7 +57,7 @@ libkeccak_ssse3_la_CFLAGS = -O3 -IKeccakP-1600/XOP/u6 -Icommon -IKeccakP-1600/co
 endif
 if ARM32
 lib_LTLIBRARIES += libkeccak_ARMv7A_NEON.la
-libkeccak_ARMv7A_NEON_la_SOURCES = KeccakP-1600/ARMv7A_NEON/KeccakP-1600-armv7a-le-neon-gcc.s
+libkeccak_ARMv7A_NEON_la_SOURCES = KeccakP-1600/ARMv7A-NEON/KeccakP-1600-armv7a-le-neon-gcc.s
 libkeccak_ARMv7A_NEON_la_LDFLAGS = -version-info ${VERSION} -no-undefined
 libkeccak_ARMv7A_NEON_la_CFLAGS = -O3
 libkeccak_ARMv7A_NEON_la_CCASFLAGS =
