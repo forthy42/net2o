@@ -2199,9 +2199,9 @@ s" minos2/unicode/brackets.db" open-fpath-file
 : rework-% ( addr u -- addr' u' )
     [: [: bounds ?DO
 	    I c@ '%' = IF
-		I 1+ I' over - 2 umin s>number drop emit 3
+		I 1+ I' over - 2 umin s>number drop forth:emit 3
 	    ELSE
-		I c@ emit 1
+		I c@ forth:emit 1
 	    THEN
 	+LOOP ;] $tmp ;] $10 base-execute ;
 
