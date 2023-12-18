@@ -305,15 +305,20 @@ Vocabulary net2o
 : rework-% ( addr u -- addr' u' )
     [: [: bounds ?DO
 	    I c@ '%' = I' I - 3 u>= and IF
-		#0. I 1+ I' over - 2 umin >number nip 0= IF drop emit 3
-		ELSE  2drop I c@ emit 1  THEN
+		#0. I 1+ I' over - 2 umin >number nip nip 0= IF
+		    dup bl 1+ #del within IF
+			drop I c@ emit 1
+		    ELSE
+			emit 3
+		    THEN
+		ELSE  drop I c@ emit 1  THEN
 	    ELSE
 		I c@ emit 1
 	    THEN
 	+LOOP ;] $tmp ;] $10 base-execute ;
 : encode-% ( addr u -- addr' u' )
     [: [: bounds ?DO
-		I c@ dup bl 1+ #del within over '%' <> and IF
+		I c@ dup bl 1+ #del within IF
 		    emit
 		ELSE
 		    '%' emit 0 <# # # #> type
