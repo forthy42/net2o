@@ -1141,7 +1141,7 @@ DOES>  4 cells bounds ?DO  dup I @ = IF  drop true unloop  EXIT  THEN
     last-otr? IF light-blue ELSE dark-blue THEN
     string ['] utf8-sanitize $tmp }}text _underline_ 25%bv
     text-color!
-    [: data >o text$ o> open-url ;]
+    [: data >o text$ encode-% o> open-url ;]
     over click[]
     click( ." url: " dup ..parents cr )
     "url" name! msg-box .child+

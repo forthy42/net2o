@@ -312,7 +312,7 @@ Vocabulary net2o
 	+LOOP ;] $tmp ;] $10 base-execute ;
 : encode-% ( addr u -- addr' u' )
     [: [: bounds ?DO
-		I c@ dup bl 1+ #del within IF
+		I c@ dup bl 1+ #del within over '%' = or IF
 		    emit
 		ELSE
 		    '%' emit 0 <# # # #> type
