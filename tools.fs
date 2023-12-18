@@ -304,8 +304,9 @@ Vocabulary net2o
 
 : rework-% ( addr u -- addr' u' )
     [: [: bounds ?DO
-	    I c@ '%' = IF
-		I 1+ I' over - 2 umin s>number drop emit 3
+	    I c@ '%' = I' I - 3 u>= and IF
+		#0. I 1+ I' over - 2 umin >number nip 0= IF drop emit 3
+		ELSE  2drop I c@ emit 1  THEN
 	    ELSE
 		I c@ emit 1
 	    THEN
