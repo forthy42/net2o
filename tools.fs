@@ -300,7 +300,24 @@ require scope.fs
 
 Vocabulary net2o
 
-\ file name sanitizer
+\ file name and URL sanitizer
+
+: rework-% ( addr u -- addr' u' )
+    [: [: bounds ?DO
+	    I c@ '%' = IF
+		I 1+ I' over - 2 umin s>number drop emit 3
+	    ELSE
+		I c@ emit 1
+	    THEN
+	+LOOP ;] $tmp ;] $10 base-execute ;
+: encode-% ( addr u -- addr' u' )
+    [: [: bounds ?DO
+		I c@ dup bl 1+ #del within IF
+		    emit
+		ELSE
+		    '%' emit 0 <# # # #> type
+		THEN
+	    LOOP ;] $tmp ;] $10 base-execute ;
 
 : printable? ( addr u -- flag )
     true -rot bounds ?DO  I c@ $80 u>= IF

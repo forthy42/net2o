@@ -641,7 +641,7 @@ end-class msg-?hash-class
     format>ansi attr!
     utf8-sanitize 0 attr! ; msg:class is msg:text+format
 :noname ( addr u -- ) $utf8>
-    <warn> forth:type <default> ; msg:class is msg:url
+    <warn> encode-% forth:type <default> ; msg:class is msg:url
 :noname ( xchar -- )
     <info> utf8emit <default> ; msg:class is msg:like
 :noname ( xchar -- )
@@ -2195,15 +2195,6 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	    2drop
 	endcase
     THEN  2drop  rectype-null  ;
-
-: rework-% ( addr u -- addr' u' )
-    [: [: bounds ?DO
-	    I c@ '%' = IF
-		I 1+ I' over - 2 umin s>number drop forth:emit 3
-	    ELSE
-		I c@ forth:emit 1
-	    THEN
-	+LOOP ;] $tmp ;] $10 base-execute ;
 
 : http-rec ( addr u -- )
     2dup "https://" string-prefix? >r
