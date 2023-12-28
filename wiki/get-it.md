@@ -19,49 +19,46 @@ Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o.
 
-### Debian testing
+### Debian >= Bullseye
+
+Make yourself root
 
     sudo -s
+
+Obtain the key
+
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
     gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
+
+Create a one-line file for the repo: Set version to either
+oldstable/stable/testing/unstable, whatever fits your Debian.
+
+    version=testing
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian testing main
+    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian $version main
     EOF
-
-### Debian stable
-
-    sudo -s
-    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
-    gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
-    cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian stable main
-    EOF
-
-### Debian oldstable
-
-    sudo -s
-    wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | apt-key add -
-    cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [arch=i386,amd64,armhf,armel,arm64,powerpc,mips,mipsel,all] https://net2o.de/debian oldstable main
-    EOF
-
-Remove the architectures on the list above which you don't need.
-
-### Debian all versions continue
 
 And then fetch the repository and install
 
     apt update
     apt install net2o-gui
+
+Leave root
+
     exit
 
-There are actually three repositories: stable, testing and unstable; at the
-moment, all packages are the same; when net2o matures, stable/testing/unstable
-will get different roles, just like Debian (stable=old and rusted, testing=new
-and somewhat tested, unstable=most recent).  Binaries are available for amd64,
-i386, armhf, arm64, powerpc, armel, mips, and mipsel (in order of how often
-they get updated).  More depend on availability of Debian distributions that
-run on qemu…
+There are actually four repositories: oldstable, stable, testing and
+unstable; at the moment, all packages are the same; when net2o
+matures, oldstable/stable/testing/unstable will get different roles,
+just like Debian (stable=old and rusted, testing=new and somewhat
+tested, unstable=most recent).  Binaries are available for amd64,
+arm64, i386, armhf, powerpc, armel, mips, and mipsel (in order of how
+often they get updated, essentially amd64 and arm64 are frequently
+updated, the others rarely).  More depend on availability of Debian
+distributions that run on qemu…
+
+Gforth binaries for those different Debians are different,
+corresponding to the available glibc, so
 
 ### Key information (new Key from October 18th, 2017)
 
