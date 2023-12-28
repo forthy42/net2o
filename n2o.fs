@@ -108,7 +108,7 @@ Variable recs-backlog
 
 scope{ n2o
 
-: help ( -- )
+: help ( addr u -- )
     \U help [cmd1 .. cmdn]
     \G help: print commands or details about specified command
     ?nextarg IF
@@ -138,7 +138,8 @@ scope{ n2o
 	s"     \O " ['] .usage search-help
 	." === Commands ===" cr
 	s"     \U " ['] .usage search-help
-    THEN ;
+    THEN
+    2drop ;
 
 }scope
 

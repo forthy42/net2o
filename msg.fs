@@ -1492,7 +1492,7 @@ Variable $lastline
     msg-group-o .msg:log[] $[]# 0= IF  maxlen 0 addr over  EXIT  THEN
     line-date 64@ date>i'
     BEGIN  1- dup 0>= WHILE  dup msg-log-dec@
-	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
+	dup sigpksize# - /string key| 0 .pk@ key| str=  UNTIL  THEN
     msg-log-dec@ dup 0= IF  nip
     ELSE  !date ['] msg:display textmsg-o .$tmp
 	dup maxlen u> IF  dup >r maxlen 0 addr over r> grow-tib
@@ -1505,7 +1505,7 @@ Variable $lastline
     line-date 64@ date>i
     BEGIN  1+ dup msg-group-o .msg:log[] $[]# u< WHILE
 	    dup msg-log-dec@
-	dup sigpksize# - /string key| pk@ key| str=  UNTIL  THEN
+	dup sigpksize# - /string key| 0 .pk@ key| str=  UNTIL  THEN
     dup  msg-group-o .msg:log[] $[]# u>=
     IF    drop $lastline $@  64#-1 line-date 64!
     ELSE  msg-log-dec@ !date ['] msg:display textmsg-o .$tmp  THEN

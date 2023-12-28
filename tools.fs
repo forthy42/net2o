@@ -1154,5 +1154,4 @@ edit-terminal edit-out !
 \ evaluate in
 
 : evaluate-in ( addr u voc-addr -- )
-    get-order n>r >wordlist 1 set-order ['] evaluate catch
-    nr> set-order throw ;
+    >wordlist ['] forth-recognize ['] evaluate wrap-xt ;
