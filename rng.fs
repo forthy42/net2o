@@ -152,7 +152,7 @@ $10 cells buffer: rngstat-buf
 : .rngstat ( addr u -- ) \ net2o
     \G print a 16 bins histogram chisq test of the random data
     rngstat
-    ." health - chisq normalized (|x|<0.9): "
+    ." health - χ² normalized (|x|<0.9): "
     fdup fabs .9e f<= IF  <info>  ELSE  <err>  THEN
     6 4 1 f.rdp <default> cr ;
 \    $10 0 DO  rngstat I cells + ?  LOOP cr
