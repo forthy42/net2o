@@ -40,6 +40,9 @@ And then fetch the repository and install
 
     apt update
     apt install net2o-gui
+
+Leave root
+
     exit
 
 There are actually four repositories: oldstable, stable, testing and
