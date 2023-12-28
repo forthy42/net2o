@@ -19,7 +19,7 @@ Create a debian sources.list file pointing to the net2o repository,
 and add my key to the trust db so that Debian can verify the packets,
 update the repository data and install net2o.
 
-### Debian
+### Debian >= Bullseye
 
 Make yourself root
 
@@ -30,10 +30,12 @@ Obtain the key
     wget -O - https://net2o.de/bernd@net2o.de-yubikey.pgp.asc | \
     gpg --dearmor -o /usr/share/keyrings/net2o-archive-keyring.gpg
 
-Create a one-line file for the repo
+Create a one-line file for the repo: Set version to either
+oldstable/stable/testing/unstable, whatever fits your Debian.
 
+    version=testing
     cat >/etc/apt/sources.list.d/net2o.list <<EOF
-    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian stable main
+    deb [signed-by=/usr/share/keyrings/net2o-archive-keyring.gpg] https://net2o.de/debian $version main
     EOF
 
 And then fetch the repository and install
@@ -54,6 +56,9 @@ arm64, i386, armhf, powerpc, armel, mips, and mipsel (in order of how
 often they get updated, essentially amd64 and arm64 are frequently
 updated, the others rarely).  More depend on availability of Debian
 distributions that run on qemu…
+
+Gforth binaries for those different Debians are different,
+corresponding to the available glibc, so
 
 ### Key information (new Key from October 18th, 2017)
 
