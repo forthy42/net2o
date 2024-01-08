@@ -1,7 +1,7 @@
 #! @GFORTHFAST@ --no-0rc
 \ -*- mode: Forth -*-
 
-warnings off \ in production mode, we don't want any warnings
+${NET2O_DEBUGS} "warnings" search nip nip warnings ! \ in production mode, we don't want any warnings
 
 fpath+ @DATADIR@/net2o-@PACKAGE_VERSION@
 also c-lib

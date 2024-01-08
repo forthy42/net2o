@@ -32,8 +32,8 @@ object class
     method start-req
     method nest-sig     \ check sig first and then nest
 end-class cmd-class \ command interpreter
-' noop cmd-class to start-req
-:noname ( addr u -- flag ) 2drop -1 ; cmd-class to nest-sig
+' noop cmd-class is start-req
+:noname ( addr u -- flag ) 2drop -1 ; cmd-class is nest-sig
 
 : new-tok ( token-table class -- o )
     new >o @ token-table ! o o> ;
@@ -82,9 +82,9 @@ cmd-class class
     method rewind-timestamps
     method rewind-partial
 end-class code-class
-' drop  code-class to regen-ivs
-' noop  code-class to rewind-timestamps
-' 2drop code-class to rewind-partial
+' drop  code-class is regen-ivs
+' noop  code-class is rewind-timestamps
+' 2drop code-class is rewind-partial
 
 code-class class
     field: data-resend# \ resend tokens; only for data

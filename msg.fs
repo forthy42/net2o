@@ -695,7 +695,7 @@ end-class msg-?hash-class
     r> [{: d: hash tsk :}h1
 	hash [{: d: hash :}h1 hash hash-finished ;]
 	tsk send-event ;]
-    lastfile@ >o to file-xt o> ;
+    lastfile@ >o is file-xt o> ;
 
 : fetch-hashs ( addr u tsk pk$ -- )
     { tsk pk$ | hashs }

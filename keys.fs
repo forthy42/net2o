@@ -39,8 +39,8 @@ cmd-keybuf-c ' new static-a with-allocater code-key^ !
 code-key
 cmd0lock 0 pthread_mutex_init drop
 
-:noname ( -- addr u ) keypack-buf cmdbuf# @ ; to cmdbuf$
-:noname ( -- n )  keypack# cmdbuf# @ - ; to maxstring
+:noname ( -- addr u ) keypack-buf cmdbuf# @ ; is cmdbuf$
+:noname ( -- n )  keypack# cmdbuf# @ - ; is maxstring
 
 code0-buf
 
@@ -798,7 +798,7 @@ key-entry-table $save
     2dup + sigsize# - sigsize# >$
     sigpk2size# - 2dup + keysize2 key?new n:>o $> ke-selfsig $!
     sim-nick! off c-state off sig-ok ;
-' key:nest-sig key-entry to nest-sig
+' key:nest-sig key-entry is nest-sig
 
 key-entry-table @ sample-key .token-table !
 

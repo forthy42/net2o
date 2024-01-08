@@ -109,7 +109,7 @@ in fs : fs-read ( addr u -- u )
     fs-limit fs-seekto >seek
     fs-fid @ read-file throw
     dup n>64 +to fs-seekto
-; ' fs:fs-read fs-class to fs-read
+; ' fs:fs-read fs-class is fs-read
 in fs : fs-write ( addr u -- u )
     dup 0= IF  nip  EXIT  THEN
     fs-limit fs-size 64umin
@@ -120,12 +120,12 @@ in fs : fs-write ( addr u -- u )
     fs-size fs-seek 64= IF
 	fs-flush parent-file-done
     THEN
-; ' fs:fs-write fs-class to fs-write
+; ' fs:fs-write fs-class is fs-write
 in fs : fs-clear ( -- )
     64#0
     64dup to fs-limit  64dup to fs-seekto  64dup to fs-seek
     64dup to fs-size  to fs-time  fs-path $free  fs-rename+ $free
-    ['] noop to file-xt ;
+    ['] noop is file-xt ;
 in fs : fs-flush ( -- )
     fs-fid @ flush-file throw
     \ write away all buffered stuff, so that setting the
@@ -137,17 +137,17 @@ in fs : fs-flush ( -- )
 	fs-path $@ rename-file throw
 	fs-rename+ $free
     ELSE  2drop  THEN
-; ' fs:fs-flush fs-class to fs-flush
+; ' fs:fs-flush fs-class is fs-flush
 in fs : fs-close ( -- )
     fs-fid @ 0= ?EXIT
     fs-flush
     fs-fid @ close-file throw
     fs-fid off
     fs:fs-clear
-; ' fs:fs-close fs-class to fs-close
+; ' fs:fs-close fs-class is fs-close
 :noname ( -- 64size )
     fs-fid @ file-size throw d>64
-; fs-class to fs-poll
+; fs-class is fs-poll
 :noname ( addr u mode -- ) fs-close
     msg( dup 2over ." open file: " forth:type ."  with mode " . forth:cr )
     >r ?sane-file
@@ -155,15 +155,15 @@ in fs : fs-close ( -- )
     r@ r/o <> IF  0 fs-fid !@ close-file throw
 	fs-path $@ r@ open-file throw fs-fid  !  THEN  rdrop
     fs-poll fs-size!
-; fs-class to fs-open
+; fs-class is fs-open
 :noname ( addr u -- )  fs-close
     msg( 2dup ." create file: " forth:type forth:cr )
     ?sane-file
     2dup fs-path $! >rename+ r/w create-file throw fs-fid !
-; fs-class to fs-create
+; fs-class is fs-create
 :noname ( perm -- )
     perm%filename and 0= !!filename-perm!!
-; fs-class to fs-perm?
+; fs-class is fs-perm?
 
 \ access to encrypted hash files
 
@@ -188,28 +188,28 @@ end-class hashfs-class
 
 :noname ( addr u mode -- )  fs-close
     >r hashfs>file r> open-file throw fs-fid ! fs-poll fs-size!
-; hashfs-class to fs-open
+; hashfs-class is fs-open
 :noname ( addr u -- )  fs-close
     hashfs>file >rename+ r/w create-file throw fs-fid !
-; hashfs-class to fs-create
+; hashfs-class is fs-create
 :noname ( perm -- )
     perm%filehash and 0= !!filehash-perm!!
-; hashfs-class to fs-perm?
+; hashfs-class is fs-perm?
 :noname ( addr u -- n )
     c:key@ >r
     over >r fs:fs-read
     fs-cryptkey $@ drop c:key!
     r> over c:decrypt
-    r> c:key! ; hashfs-class to fs-read
+    r> c:key! ; hashfs-class is fs-read
 :noname ( addr u -- n )
     dup 0= IF  nip  EXIT  THEN
     $make { w^ file-pad$ } file-pad$ $@
     c:key@ >r  fs-cryptkey $@ drop c:key!
     2dup c:encrypt fs:fs-write file-pad$ $free
-    r> c:key! ; hashfs-class to fs-write
+    r> c:key! ; hashfs-class is fs-write
 :noname ( -- )
     fs:fs-close
-    fs-cryptkey $free ; hashfs-class to fs-close
+    fs-cryptkey $free ; hashfs-class is fs-close
 
 \ subclassing for other sorts of files
 
@@ -219,26 +219,26 @@ end-class socket-class
 :noname ( addr u port -- ) fs-close 64>n
     msg( dup 2over ." open socket: " type ."  with port " . cr )
     open-socket fs-fid ! 64#0 fs-size! ;
-dup socket-class to fs-open  socket-class to fs-create
+dup socket-class is fs-open  socket-class is fs-create
 :noname ( -- size )
     fs-fid @ fileno check_read dup 0< IF  -512 + throw  THEN
-    n>64 fs-size 64+ ; socket-class to fs-poll
+    n>64 fs-size 64+ ; socket-class is fs-poll
 :noname ( perm -- )
     perm%socket and 0= !!socket-perm!!
-; socket-class to fs-perm?
+; socket-class is fs-perm?
 
 fs-class class
 end-class termclient-class
 
-:noname ( addr u -- u ) tuck type ; termclient-class to fs-write
+:noname ( addr u -- u ) tuck type ; termclient-class is fs-write
 :noname ( addr u -- u ) 0 -rot bounds ?DO
-	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class to fs-read
+	key? 0= ?LEAVE  key I c! 1+  LOOP ; termclient-class is fs-read
 :noname ( addr u 64n -- ) 64drop 2drop ;
-dup termclient-class to fs-open  termclient-class to fs-create
-:noname ( -- ) ; termclient-class to fs-close
+dup termclient-class is fs-open  termclient-class is fs-create
+:noname ( -- ) ; termclient-class is fs-close
 :noname ( perm -- )
     perm%terminal and 0= !!terminal-perm!!
-; termclient-class to fs-perm?
+; termclient-class is fs-perm?
 
 termclient-class class
 end-class termserver-class
@@ -278,25 +278,25 @@ is parse-name
     fs-limit 64>n fs-inbuf $@len - min  tuck fs-inbuf $+!
     fs-size fs-inbuf $@len u>64 64= fs-inbuf $@len 0<> and IF
 	parent-file-done
-    THEN ; termserver-class to fs-write
+    THEN ; termserver-class is fs-write
 :noname ( addr u -- u ) fs-outbuf $@len umin >r
     fs-outbuf $@ r@ umin rot swap move
-    fs-outbuf 0 r@ $del r> ; termserver-class to fs-read
+    fs-outbuf 0 r@ $del r> ; termserver-class is fs-read
 :noname ( addr u 64n -- )  64drop 2drop
     [: termserver-tasks $@ 0= !!no-termserver!!
 	@ termserver-tasks 0 cell $del dup fs-termtask !
 	o [{: xo :}h1 xo ev-termfile ;] swap send-event
     ;] file-sema c-section
-; dup termserver-class to fs-open  termserver-class to fs-create
+; dup termserver-class is fs-open  termserver-class is fs-create
 :noname ( -- )
     [: fs-termtask @ ?dup-IF
 	    ['] ev-termclose swap send-event
 	    fs-termtask cell termserver-tasks $+! fs-termtask off
 	THEN ;] file-sema c-section
-; termserver-class to fs-close
+; termserver-class is fs-close
 :noname ( perm -- )
     perm%termserver and 0= !!termserver-perm!!
-; termserver-class to fs-perm?
+; termserver-class is fs-perm?
 
 Create file-classes
 fs-class ,
@@ -434,8 +434,8 @@ scope{ net2o
     fs-fid @ fileno statbuf fstat ?ior
     statbuf st_mtime ntime@ d>64
     statbuf st_mode [ sizeof st_mode 2 = ] [IF] w@ [ELSE] l@ [THEN] $FFF and ;
-' net2o:get-stat fs-class to fs-get-stat
-' net2o:get-stat hashfs-class to fs-get-stat
+' net2o:get-stat fs-class is fs-get-stat
+' net2o:get-stat hashfs-class is fs-get-stat
 
 8 base !@
 : track-mod ( mod fileno -- )
@@ -445,8 +445,8 @@ base !
 
 : set-stat ( mtime mod -- )
     fs-fid @ fileno net2o:track-mod to fs-time ;
-' net2o:set-stat fs-class to fs-set-stat
-' net2o:set-stat hashfs-class to fs-set-stat
+' net2o:set-stat fs-class is fs-set-stat
+' net2o:set-stat hashfs-class is fs-set-stat
 
 \ open/close a file - this needs *way more checking*! !!FIXME!!
 

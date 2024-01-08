@@ -593,17 +593,17 @@ scope{ mapc
     addr dest-ivsgen  c:key#          ?free
     addr dest-replies r@ addr>replies ?free+guard
     rdrop dispose ;
-' free-code code-class to free-data
+' free-code code-class is free-data
 :noname ( o:data -- )
-    free-resend free-code ; data-class to free-data
+    free-resend free-code ; data-class is free-data
 
 : free-rcode ( o:data --- )
     data-ackbits dest-size addr>bytes ?free
     data-ackbits-buf $free
     free-code ;
 :noname ( o:data -- )
-    free-resend' free-rcode ; rdata-class to free-data
-' free-rcode rcode-class to free-data
+    free-resend' free-rcode ; rdata-class is free-data
+' free-rcode rcode-class is free-data
 
 }scope
 
@@ -1311,10 +1311,10 @@ scope{ mapc
 :noname ( o:map -- ) dest-size addr>ts 
     dest-timestamps over erase
     data-resend# @ swap $FF fill ;
-data-class to rewind-timestamps
+data-class is rewind-timestamps
 :noname ( o:map -- ) dest-size addr>ts
     dest-timestamps over erase ;
-rdata-class to rewind-timestamps
+rdata-class is rewind-timestamps
 
 : rewind-ts-partial ( old-back new-back addr o:map -- )
     { addr } addr>ts swap addr>ts U+DO
@@ -1324,12 +1324,12 @@ rdata-class to rewind-timestamps
     2dup data-resend# @ rewind-ts-partial
     2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
-data-class to rewind-partial
+data-class is rewind-partial
 :noname ( old-back new-back o:map -- )
     2dup ackbits-erase
     2dup dest-timestamps rewind-ts-partial
     regen-ivs-part ;
-rdata-class to rewind-partial
+rdata-class is rewind-partial
 
 }scope
 
@@ -1635,8 +1635,8 @@ scope{ mapc
     msg( ." Handle data " inbuf net2o-header:flags w@ wbe h. ." to addr: " inbuf net2o-header:mapaddr le-64@ h. cr )
     >r inbuf packet-data r> swap move
     +inmove ack-xt +ack 0timeout o> ;
-' handle-data rdata-class to handle
-' drop data-class to handle
+' handle-data rdata-class is handle
+' drop data-class is handle
 
 : handle-cmd ( addr -- )  parent >o
     msg( ." Handle command to addr: " inbuf net2o-header:mapaddr le-64@ x64. cr )
@@ -1646,8 +1646,8 @@ scope{ mapc
     r> r> swap cmd-exec
     o IF  closing?  IF  last-packet!  THEN  o>  ELSE  rdrop  THEN
     remote? off ;
-' handle-cmd rcode-class to handle
-' drop code-class to handle
+' handle-cmd rcode-class is handle
+' drop code-class is handle
 
 : .inv-packet ( -- )
     ." invalid packet to "

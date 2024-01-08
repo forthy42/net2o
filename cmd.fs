@@ -300,15 +300,15 @@ cmd-buf-c ' new static-a with-allocater code-buf^ !
 code-buf
 
 :noname ( -- )  cmdbuf# off  connection >o
-	req? off  ['] send-cX code-reply is send-xt o> ; to cmdreset
-:noname ( -- addr )   connection .code-sema ; to cmdlock
-:noname ( -- addr u ) connection .code-dest cmdbuf# @ ; to cmdbuf$
-:noname ( -- n )  maxdata cmdbuf# @ - ; to maxstring
+	req? off  ['] send-cX code-reply is send-xt o> ; is cmdreset
+:noname ( -- addr )   connection .code-sema ; is cmdlock
+:noname ( -- addr u ) connection .code-dest cmdbuf# @ ; is cmdbuf$
+:noname ( -- n )  maxdata cmdbuf# @ - ; is maxstring
 :noname ( addr u -- ) dup maxstring u> IF
 	cmdbuf$ ~~ net2o:see true !!cmdfit!!  THEN
-    tuck cmdbuf$ + swap move cmdbuf# +! ; to +cmdbuf
-:noname ( n -- )  cmdbuf# +! ; to -cmdbuf
-:noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; to cmddest
+    tuck cmdbuf$ + swap move cmdbuf# +! ; is +cmdbuf
+:noname ( n -- )  cmdbuf# +! ; is -cmdbuf
+:noname ( -- 64dest ) code-vdest 64dup 64-0= !!no-dest!! ; is cmddest
 
 Sema cmd0lock
 
@@ -332,13 +332,13 @@ cmd-buf$ ' new static-a with-allocater code-buf$^ !
 
 code-buf$
 
-' cmd$lock to cmdlock
-:noname  cmd$ $@ ; to cmdbuf$
-:noname  cmd$ $free ; to cmdreset
-' true to maxstring \ really maxuint = -1 = true
-:noname ( addr u -- ) cmd$ $+! ; to +cmdbuf
-:noname ( n -- )  cmd$ $@len + cmd$ $!len ; to -cmdbuf
-:noname ( -- 64dest ) 64#0 ; to cmddest
+' cmd$lock is cmdlock
+:noname  cmd$ $@ ; is cmdbuf$
+:noname  cmd$ $free ; is cmdreset
+' true is maxstring \ really maxuint = -1 = true
+:noname ( addr u -- ) cmd$ $+! ; is +cmdbuf
+:noname ( n -- )  cmd$ $@len + cmd$ $!len ; is -cmdbuf
+:noname ( -- 64dest ) 64#0 ; is cmddest
 
 : gen-cmd ( xt -- $addr )
     cmdbuf-o @ >r code-buf$ 0 cmd$ !@ >r cmdbuf# @ >r
@@ -349,10 +349,10 @@ code-buf$
 
 code0-buf \ reset default
 
-:noname ( -- addr u ) cmd0buf cmdbuf# @ ; to cmdbuf$
-' cmd0lock to cmdlock
-' rng64 to cmddest
-:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; to cmdreset
+:noname ( -- addr u ) cmd0buf cmdbuf# @ ; is cmdbuf$
+' cmd0lock is cmdlock
+' rng64 is cmddest
+:noname ( -- )  cmdbuf# off  o IF  req? off  THEN ; is cmdreset
 
 :noname ( -- )
     cmd-buf0 new code0-buf^ !

@@ -236,7 +236,7 @@ dht-table >table
 
 reply-table $@ inherit-table dht-table
 
-:noname dht-hash $@ $, dht-id ; dht-class to start-req
+:noname dht-hash $@ $, dht-id ; dht-class is start-req
 net2o' emit net2o: dht-host+ ( $:string -- ) $> d#host+ ;
     \g add host to DHT
 +net2o: dht-host- ( $:string -- ) $> d#host- ;
@@ -296,13 +296,13 @@ end-class dht-file-class
     LOOP ;
 
 :noname 64#-1 64dup to fs-limit to fs-size ;
-dht-file-class to fs-open
+dht-file-class is fs-open
 
 :noname ( addr u -- n )  dup >r
     dht-queries $@ bounds ?DO
 	I 1+ I c@ 2dup >d#id >o + c@ >r
 	d#id, r> d#values, o>
-    I c@ 2 + +LOOP  nip r> swap - ; dht-file-class to fs-read
+    I c@ 2 + +LOOP  nip r> swap - ; dht-file-class is fs-read
 
 : new>dht ( -- )
     [: dht-file-class new { w^ fs-ins } fs-ins cell file-state $+! drop ;]

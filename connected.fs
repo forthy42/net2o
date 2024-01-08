@@ -76,7 +76,7 @@ reply-table $@ inherit-table fs-table
 : file-start-req fs-id @ ulit, file-id ;
 ' file-start-req
 file-classes file-classes# cells bounds
-[DO] dup [I] @ to start-req cell [+LOOP]
+[DO] dup [I] @ is start-req cell [+LOOP]
 drop
 
 $20 net2o: open-file ( $:string mode -- ) \g open file with mode
@@ -122,7 +122,7 @@ $31 net2o: ack ( -- o:acko ) \g ack object
 ack-table >table
 reply-table $@ inherit-table ack-table
 
-:noname ack ; ack-class to start-req
+:noname ack ; ack-class is start-req
 $20 net2o: ack-addrtime ( utime addr -- ) \g packet at addr received at time
     net2o:ack-addrtime ;
 +net2o: ack-resend ( flag -- ) \g set resend toggle flag

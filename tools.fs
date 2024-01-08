@@ -57,13 +57,13 @@ align cmd-args-c , here constant cmd-args^
 cmd-args
 
 :noname ( -- addr u t / f )
-    argc @ 1 > IF  next-arg true  ELSE  false  THEN ; to ?nextarg
+    argc @ 1 > IF  next-arg true  ELSE  false  THEN ; is ?nextarg
 :noname ( -- addr u t / f )
-    argc @ 1 > IF  1 arg true  ELSE  false  THEN ; to ?peekarg
+    argc @ 1 > IF  1 arg true  ELSE  false  THEN ; is ?peekarg
 :noname ( -- addr u t / f )
     argc @ 1 > IF
 	1 arg drop c@ '@' = IF  next-arg 1 /string true  EXIT  THEN
-    THEN  false ; to ?@nextarg
+    THEN  false ; is ?@nextarg
 
 cmd-args-c uclass arg-o
 end-class word-args-c
@@ -79,14 +79,14 @@ word-args
     over c@ '"' = IF  2drop r@ >in ! '"' parse 2drop \"-parse  THEN  rdrop ;
 : ?word-nextarg ( -- addr u t / f )
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN
-; latestxt to ?nextarg
+; latestxt is ?nextarg
 :noname ( -- addr u t / f )  >in @ >r
     parse-name" dup 0= IF  2drop  false  ELSE  true  THEN  r> >in !
-; to ?peekarg
+; is ?peekarg
 :noname ( -- addr u t / f )
     >in @ >r ?word-nextarg 0= IF  rdrop false  EXIT  THEN
     over xc@ '@' = IF  rdrop 1 /string true  EXIT  THEN
-    r> >in ! 2drop false ; to ?@nextarg
+    r> >in ! 2drop false ; is ?@nextarg
 
 : arg-loop { xt -- }
     begin  ?nextarg  while  xt execute  repeat ;

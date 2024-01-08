@@ -83,8 +83,8 @@ storage class end-class crypto-alloc
 :noname  ( len -- addr )
     [ crypt-align cell- crypt-align 1- + ]L +
     [ crypt-align negate ]L and kalloc [ crypt-align cell- ]L +
-; crypto-alloc to :allocate
-' drop crypto-alloc to :free
+; crypto-alloc is :allocate
+' drop crypto-alloc is :free
 \ we never free these classes, they are per-task temporary storages
 
 crypto-alloc ' new static-a with-allocater Constant crypto-a

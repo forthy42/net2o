@@ -517,8 +517,8 @@ scope{ mapc
 : (regen-ivs) ( offset o:map -- )
     addr dest-ivs$ $@len 2/ 2/ / dest-ivslastgen =
     IF	tweak( ." regen-ivs/2" cr ) regen-ivs/2  THEN ;
-' (regen-ivs) code-class to regen-ivs
-' (regen-ivs) rcode-class to regen-ivs
+' (regen-ivs) code-class is regen-ivs
+' (regen-ivs) rcode-class is regen-ivs
 
 }scope
 
