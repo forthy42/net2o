@@ -1735,7 +1735,9 @@ in net2o : dispose-context ( o:addr -- o:addr )
     1 over lshift invert reqmask and!
     request( ." Request completed: " . ." o " o h. ." task: " task# ? cr
     )else( drop )
-    o IF  wait-task @ ?dup-IF  restart  THEN  THEN ;
+    o IF
+	wait-task @ ?dup-IF  wake# over 's @ 1+ (restart)  THEN
+    THEN ;
 
 : rqd@ ( n -- xt )
     0 swap rqd-xts $[] !@ ?dup-0=-IF  ['] clean-request  THEN ;
