@@ -1749,10 +1749,10 @@ in net2o : dispose-context ( o:addr -- o:addr )
     \G store request if no better is available
     request# @ rqd-xts $[] dup @ IF  2drop  ELSE  !  THEN ;
 
-: request ( n o -- ) >o maxrequest# and
+: request ( n -- ) maxrequest# and
     dup rqd@ request( ." request xt: " dup id. cr )  execute
     reqmask @ 0= IF  request( ." Remove timeout" cr ) -timeout
-    ELSE  request( ." Timeout remains: " reqmask @ h. cr ) THEN  o> ;
+    ELSE  request( ." Timeout remains: " reqmask @ h. cr ) THEN ;
 : timeout ( o -- )
     timeout( ." Request timed out" forth:cr )
     >o 0 reqmask !@ >r -timeout r> o> msg( ." Request timed out" cr )
@@ -1895,7 +1895,7 @@ Forward next-saved-msg
     BEGIN  packet-event  !!0depth!!  AGAIN ;
 
 in net2o : request-done ( n -- )
-    o [{: n xo :}h1 n xo request ;] up@ send-event ;
+    o [{: n xo :}h1 n xo .request ;] up@ send-event ;
 
 : create-receiver-task ( -- )
     ['] packet-loop 1 net2o-task to receiver-task ;
