@@ -92,6 +92,7 @@ debug: pks( \ fetch pks
 debug: fetch( \ fetch hashed objects
 debug: silent( \ silent messages
 debug: otrify( \ otrify debug messages
+debug: restart( \ restart task on clean-request
 
 : search-debug ( addr u xt -- ) { xt }
     [: ." debug: " type ;] $tmp
