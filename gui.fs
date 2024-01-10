@@ -19,6 +19,13 @@ utf-8 set-encoding
 
 require minos2/widgets.fs
 
+[IFDEF] window-title$
+    "net2o GUI" window-title$ $!
+[THEN]
+[IFDEF] window-app-id$
+    "net2o" window-app-id$ $!
+[THEN]
+
 Forth definitions also minos
 
 require minos2/font-style.fs
