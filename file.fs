@@ -323,13 +323,13 @@ scope{ mapc
 
 : dest-top! ( addr -- )
     dup dup dest-top U+DO
-	data-ackbits @ I I' fix-size dup { len }
+	data-ackbits @ I delta-I fix-range dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-erase
     len +LOOP  to dest-top ;
 
 : ackbits-erase ( oldback newback -- )
     swap U+DO
-	data-ackbits @ I I' fix-size dup { len }
+	data-ackbits @ I delta-I fix-range dup { len }
 	chunk-p2 rshift swap chunk-p2 rshift swap bit-fill
     len +LOOP ;
 

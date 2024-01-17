@@ -643,6 +643,8 @@ scope{ mapc
 
 scope{ mapc
 
+: fix-range ( addr len1 -- addr len )
+    >r dest-size 1- and r> over + dest-size umin over - ;
 : fix-size ( offset1 offset2 -- addr len )
     over - >r dest-size 1- and r> over + dest-size umin over - ;
 : fix-tssize ( offset1 offset2 -- addr len )

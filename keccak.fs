@@ -101,19 +101,19 @@ UValue @keccak
     { rounds }
     bounds over >r ?DO
 	dup rounds KeccakP1600_Permute_Nrounds
-	dup I I' over - $80 umin KeccakEncrypt
+	dup I delta-I $80 umin KeccakEncrypt
     $80 +LOOP drop r> ;
 : KeccakDecryptLoop ( state addr u rounds -- )
     { rounds }
     bounds over >r ?DO
 	dup rounds KeccakP1600_Permute_Nrounds
-	dup I I' over - $80 umin KeccakDecrypt
+	dup I delta-I $80 umin KeccakDecrypt
     $80 +LOOP drop r> ;
 [THEN]
 
 : move-rep ( srcaddr u1 destaddr u2 -- )
     bounds ?DO
-	I' I - umin 2dup I swap move
+	delta-I umin 2dup I swap move
     dup +LOOP  2drop ;
 
 User keccak-t

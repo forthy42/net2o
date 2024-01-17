@@ -13,7 +13,7 @@
     l@ lle $FFFFFF and .b64 .b64 .b64 .b64 drop ;
 Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
 : 64type ( addr u -- )
-    bounds ?DO  I I' over - 3 umin cells .base64s + perform  3 +LOOP ;
+    bounds ?DO  I delta-I 3 umin cells .base64s + perform  3 +LOOP ;
 
 : b64digit ( char -- n )
     '0' - dup #09 u<= ?EXIT
@@ -26,7 +26,7 @@ Create .base64s ' drop , ' .1base64 , ' .2base64 , ' .3base64 ,
 	I c@ b64digit over lshift rot or swap 6 +
     LOOP  drop ;
 : base64>$ ( addr u -- addr' u' ) save-mem >r dup dup r@ bounds ?DO
-	I I' over - 4 umin base64>n lle over l! 3 +
+	I delta-I 4 umin base64>n lle over l! 3 +
     4 +LOOP  drop r> 3 4 */ ;
 
 : 64" ( "base64string" -- addr u )

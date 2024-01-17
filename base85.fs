@@ -14,7 +14,7 @@ chars>85 $80 $FF fill
 : .4base85 ( addr -- ) l@ lle .b85 .b85 .b85 .b85 .b85 drop ;
 Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 : 85type ( addr u -- )
-    bounds ?DO  I I' over - 4 umin cells .base85s + perform  4 +LOOP ;
+    bounds ?DO  I delta-I 4 umin cells .base85s + perform  4 +LOOP ;
 
 : b85digit ( char -- n ) $7F umin chars>85 + c@
     dup $FF = !!no-85-digit!! ;
@@ -23,7 +23,7 @@ Create .base85s ' drop , ' .1base85 , ' .2base85 , ' .3base85 , ' .4base85 ,
 	I c@ b85digit over * under+ 85 *
     LOOP  drop ;
 : (base85>$) ( addr u -- addr' u' )  bounds ?DO
-	I I' over - 5 umin dup >r base85>n { | w^ x } lle x l! x r> 4 5 */ type
+	I delta-I 5 umin dup >r base85>n { | w^ x } lle x l! x r> 4 5 */ type
     5 +LOOP ;
 : base85>$ ( addr u -- addr' u' ) ['] (base85>$) $tmp ;
 

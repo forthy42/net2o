@@ -304,7 +304,7 @@ Vocabulary net2o
 
 : rework-% ( addr u -- addr' u' )
     [: [: bounds ?DO
-	    I c@ '%' = I' I - 3 u>= and IF
+	    I c@ '%' = delta-I 3 u>= and IF
 		#0. I 1+ I' over - 2 umin >number nip nip 0= IF
 		    dup bl 1+ #del within IF
 			drop I c@ emit 1
@@ -386,7 +386,7 @@ false Value hash-sanitize?
     bounds ?DO
 	I ['] xc@+ catch IF
 	    [ xc-vector @ fixed-width = ] [IF] '?' [ELSE] '�' [THEN] xemit
-	    drop  I I' over -
+	    drop  I delta-I
 	    ['] x-size catch IF  2drop  1  THEN
 	ELSE
 	    dup #tab = IF  drop ."         "  ELSE  xemit  THEN

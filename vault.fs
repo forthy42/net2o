@@ -52,7 +52,7 @@ net2o' emit net2o: dhe ( $:pubkey -- ) c-state @ !!inv-order!!
     \g vault keys can be opened with the dhe secret; each key is IV+session key+checksum
     v-mode dup $FF and state# umax { vk# } 8 rshift $FF and >crypt
     $> bounds ?DO
-	I' I - vk# u>= IF
+	delta-I vk# u>= IF
 	    I vaultkey vk# move
 	    vaultkey vk# v-dhe keysize decrypt$ IF
 		dup state# 1+ keysize within !!keysize!!

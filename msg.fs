@@ -659,7 +659,7 @@ end-class msg-?hash-class
 : .perms ( n -- )
     "👹" bounds U+DO
 	dup 1 and IF  I xc@ xemit  THEN  2/
-    I I' over - x-size  +LOOP  drop ;
+    I delta-I x-size  +LOOP  drop ;
 :noname { 64^ perm d: pk -- }
     perm [ 1 64s ]L pk msg-group-o .msg:perms# #!
     pk .key-id ." : " perm 64@ 64>n .perms space
@@ -1600,7 +1600,7 @@ also net2o-base
     push[] [: $, nestsig ;] $[]map ;
 : ihave>push ( -- )
     ihave$ $@ bounds U+DO
-	I I' over - max#have umin
+	I delta-I max#have umin
 	[: <msg msg-silent-start
 	    $, msg-hashs
 	    host$ $@ $, msg-hash-id
@@ -2141,7 +2141,7 @@ s" minos2/unicode/brackets.db" open-fpath-file
 	THEN
     THEN ;
 : x-skip$ ( addr u $class -- addr u' )
-    $@ bounds  DO  I xc@ x-skip1  I I' over - x-size  +LOOP ;
+    $@ bounds  DO  I xc@ x-skip1  I delta-I x-size  +LOOP ;
 : -skip-punctation ( addr u -- addr u' )
     BEGIN  dup >r
 	punctation$ x-skip$

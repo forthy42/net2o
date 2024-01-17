@@ -59,10 +59,10 @@ end-class rng-c
     [ELSE] false [THEN] ]
     [IF]
 	bounds U+DO \ getrandom reads $100 bytes at maximum
-	    I I' over - $100 umin 0 getrandom
+	    I delta-I $100 umin 0 getrandom
 	    dup -1 = IF  errno #38 = IF  drop
 		    \ oops, we don't have getentropy in the kernel
-		    I I' over - $100 umin read-urnd
+		    I delta-I $100 umin read-urnd
 		ELSE  BUT  THEN \ resolve the other IF
 		?ior  THEN
 	$100 +LOOP

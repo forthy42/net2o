@@ -507,7 +507,7 @@ scope{ mapc
       regen( ." regen-ivs-part " 2 pick h. over h. dup c:key# .nnb cr )
       c:key!
       swap U+DO
-	  I I' fix-size dup { len }
+	  I delta-I fix-range dup { len }
 	  addr>keys >r addr>keys >r dest-ivs$ r> safe/string r> umin
 	  rest-prng
       len +LOOP
