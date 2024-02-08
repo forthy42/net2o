@@ -19,7 +19,21 @@
 Variable kfree64' \ free list for 64 bytes keys
 
 $4000 Constant /kregion
-$10000 Constant /kregion-max \ the usual maximum locked memory is pathetic
+
+$10000 \ pathetic, but safe value
+[IFDEF] RLIMIT_MEMLOCK
+    RLIMIT_MEMLOCK pad getrlimit 0= [IF]
+	drop pad rlim_cur 64@ 64>n
+    [THEN]
+    [IFDEF] __info
+	pad sysinfo 0= [IF]
+	    pad totalswap @ 0= [IF]  drop 0  [THEN]
+	    \ If we have no swap at all, no need to mlock() anything
+	[THEN]
+    [THEN]
+[THEN]
+
+Value /kregion-max
 
 $20 Constant crypt-align
 

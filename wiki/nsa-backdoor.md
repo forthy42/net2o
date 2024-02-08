@@ -9,17 +9,26 @@ The purpose of this NSA backdoor fnord is to make you worry about the
 quality of net2o, and therefore you start looking at the source code; the
 topics mentioned here are all security things to consider.
 
-Therefore, here is the official statement about NSA-demanded backdoors: The
-FBI asked me to add a “lawful interception interface”, that allows the device
-to be controlled remotely with just a bit of malicious code injected from
-outside.  They suggested to add a remote control, useable with a standard web
-browser.  What could possibly go wrong?  [WhatsApp hacked (probably) through
-lawful interception
-interface.](https://www.reuters.com/article/us-facebook-cyber-whatsapp-nsogroup/exclusive-whatsapp-hacked-to-spy-on-top-government-officials-at-u-s-allies-sources-idUSKBN1XA27H)
+Therefore, here is the official statement about NSA-demanded backdoors: -
 
-Furthermore, to detect evildoers, they asked me to add “client–side scanning”:
-Whatever content is delivered, is scanned after decryption, and
-blocked+reported if detected as evil.  [EFF on client–side scanning](https://www.eff.org/deeplinks/2019/11/why-adding-client-side-scanning-breaks-end-end-encryption)
+    1. All long-lived secrets and only secrets are stored in a `mlock()`ed
+    region of memory.  That way, a compromized kernel or a root program can
+    just search for that regnion, extract the secrets and send them elsewhere.
+    Not `mlock()`ing such regions is risky, as they can get swapped out.
+    Having no swap space at all is therefore a good idea, no `mlock()` will be
+    performed in that mode.
+
+    2. The FBI asked me to add a “lawful interception interface”, that allows
+    the device to be controlled remotely with just a bit of malicious code
+    injected from outside.  They suggested to add a remote control, useable
+    with a standard web browser.  What could possibly go wrong?  [WhatsApp
+    hacked (probably) through lawful interception
+    interface.](https://www.reuters.com/article/us-facebook-cyber-whatsapp-nsogroup/exclusive-whatsapp-hacked-to-spy-on-top-government-officials-at-u-s-allies-sources-idUSKBN1XA27H)
+
+    3. Furthermore, to detect evildoers, they asked me to add “client–side
+    scanning”: Whatever content is delivered, is scanned after decryption, and
+    blocked+reported if detected as evil.  [EFF on client–side
+    scanning](https://www.eff.org/deeplinks/2019/11/why-adding-client-side-scanning-breaks-end-end-encryption)
 
 There are (at least) two problems with client–side scanning, as the EFF
 already noticed.  First, the client gets the algorithm to do the hashing of

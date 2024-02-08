@@ -17,7 +17,6 @@ cell 8 = [IF]
     synonym be-64@ be-ux@
     synonym be-64! be-x!
     warnings !
-    synonym 64>< noop
     synonym n64-swap swap
     synonym 64n-swap swap
     synonym 64dup dup
@@ -109,9 +108,13 @@ cell 8 = [IF]
     synonym 64over 2over
     synonym 64swap 2swap
     synonym 64tuck 2tuck
-    synonym 64>< swap
-    : 64@  2@ 64>< ; [IFDEF] macro macro [THEN]
-    : 64!  >r 64>< r> 2! ; [IFDEF] macro macro [THEN]
+    le? [IF]
+	: 64@  2@ swap ;
+	: 64!  >r swap r> 2! ;
+    [ELSE]
+	synonym 64@ 2@
+	synonym 64! 2!
+    [THEN]
     0 warnings !@
     synonym le-64@ le-uxd@
     synonym le-64! le-xd!
